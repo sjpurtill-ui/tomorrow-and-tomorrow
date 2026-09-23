@@ -20,7 +20,7 @@ const REFLECT_SKIP:Dictionary={
 	"ResourceSystem":["_surface_front_cache"],
 	"GameState":["resource_settlement_id"],
 	"SettlementModel":["_local_population_scope","_claim_shape_cache"],
-	"FoodSystem":["_forecast_climate_cache"],
+	"FoodSystem":["_access_cache","_lever_cache"],
 	"DiscoverySystem":["catalog","catalog_by_id","catalog_by_channel","technology_catalog","technology_limits","initialized","latest_context"],
 	# In-flight HTTP requests contain transient nodes and authorization headers.
 	# They are neither world state nor safe save-file content; the matching civic
@@ -201,9 +201,9 @@ func _validate_human_payload(payload:Dictionary,seed_value:int)->Dictionary:
 	var state:Dictionary=payload.get("reflected_GameState",{})
 	var clothing=preload("res://scripts/household_clothing.gd")
 	if not preload("res://scripts/fire_practice.gd").valid(state.get("fire_practice",preload("res://scripts/fire_practice.gd").empty_state())):return {"error":"Invalid maintained fire records."}
-	var opening=preload("res://scripts/opening_craft_practice.gd")
+	var opening=preload("res://scripts/civilian_goods.gd")
 	if not preload("res://scripts/undertaking_system.gd").valid(state.get("player_settlements",[])):return {"error":"Invalid undertaking records."}
-	if not opening.valid(state.get("opening_craft_practice",opening.empty_state())) or not opening.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid opening craft records."}
+	if not opening.valid(state.get("civilian_goods",opening.empty_state())) or not opening.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid civilian goods records."}
 	var opportunities=preload("res://scripts/opening_opportunities.gd")
 	if not opportunities.valid(state.get("opening_opportunities",opportunities.empty_state())):return {"error":"Invalid opening opportunity records."}
 	if not clothing.valid(state.get("household_clothing",clothing.empty_state())) or not clothing.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid household clothing records."}

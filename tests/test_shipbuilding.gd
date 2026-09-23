@@ -1,6 +1,5 @@
 extends GdUnitTestSuite
 const K=preload("res://scripts/shipbuilding_knowledge.gd")
-const I=preload("res://scripts/civilian_industry.gd")
 const P=preload("res://scripts/persistent_production.gd")
 const J=preload("res://scripts/joint_force_catalog.gd")
 const Planner=preload("res://scripts/joint_manufacturing_planner.gd")
@@ -24,31 +23,35 @@ func setup()->void:
 	# Isolated completed harbor fixture; build-base geography has separate coverage.
 	op.state.bases.append({"id":1,"owner":"player","city_id":String(state.player_settlements[0].id),"name":"Test shipyard","domain":"navy","position":{"x":0.0,"z":0.0},"capacity":20,"condition":1.0,"construction_work":30.0,"required_work":30.0})
 
-func test_components_reach_ship_inventory_through_planned_paid_work()->void:
+## Stocks exactly `count` batches of a ship recipe plus its launch tooling;
+## hull parts, sails and cradles are paid as raw materials and Civilian Goods.
+func stock_recipe(recipe:Dictionary,count:float)->void:
+	var stock:Dictionary=WorldSimulation.state.resource_stockpiles
+	for resource:String in recipe.materials:stock[resource]=float(recipe.materials[resource])*count
+	for resource:String in recipe.tooling:stock[resource]=float(stock.get(resource,0) if recipe.materials.has(resource) else 0.0)+float(recipe.tooling[resource])
+
+func assert_spent(recipe:Dictionary)->void:
+	for resource:String in recipe.materials:assert_float(float(WorldSimulation.state.resource_stockpiles[resource])).override_failure_message(resource).is_equal_approx(0.0,.0001)
+	for resource:String in recipe.tooling:assert_float(float(WorldSimulation.state.resource_stockpiles[resource])).override_failure_message(resource).is_equal_approx(0.0,.0001)
+
+func test_ship_reaches_inventory_through_planned_paid_work()->void:
 	WorldSimulation.scoped("shipwright",func()->void:
 		setup();var host=WorldSimulation.military;var state=WorldSimulation.state
-		var start_timber:=float(state.resource_stockpiles.Timber)
-		var finished:=false;var components:Dictionary={}
-		for step in 100:
-			var plan:=Planner.plan(host,"convoy_transport_equipment")
-			assert_dict(plan).is_not_empty()
-			if plan.is_empty():break
-			var order:Dictionary={"item":"convoy_transport_equipment","target":1} if bool(plan.ready) else plan.upstream
-			Controller.production_order("shipwright",order)
-			var progressed:=false
-			for job:Dictionary in host.equipment_queue:
-				if String(job.item)!=String(order.item):continue
-				var old:=int(job.completed)
-				P.advance(host,job,float(job.work_per_item)*float(order.target))
-				progressed=int(job.completed)>old
-				if progressed:components[String(job.item)]=true
-			assert_bool(progressed).is_true()
-			if int(host.military_inventory.get("convoy_transport_equipment",0))==1:finished=true;break
-		assert_bool(finished).is_true()
-		assert_int(components.size()).is_greater_equal(10)
-		assert_float(float(state.resource_stockpiles.Timber)).is_less(start_timber)
-		assert_float(float(state.resource_stockpiles.get("Launch Cradles",0))).is_equal(0.0)
-		assert_float(float(state.resource_stockpiles.get("Sail Sets",0))).is_equal(0.0)
+		var definition:=P.recipe(host,"convoy_transport_equipment")
+		assert_bool(definition.has("error")).is_false()
+		assert_bool(definition.materials.has("Launch Cradles") or definition.materials.has("Sail Sets") or definition.tooling.has("Launch Cradles")).is_false()
+		assert_float(float(definition.materials.get("Civilian Goods",0))).is_greater(0.0)
+		stock_recipe(definition,1.0)
+		var plan:=Planner.plan(host,"convoy_transport_equipment")
+		assert_bool(bool(plan.get("ready",false))).is_true()
+		Controller.production_order("shipwright",{"item":"convoy_transport_equipment","target":1})
+		var progressed:=false
+		for job:Dictionary in host.equipment_queue:
+			if String(job.item)!="convoy_transport_equipment":continue
+			P.advance(host,job,float(job.work_per_item));progressed=int(job.completed)>0
+		assert_bool(progressed).is_true()
+		assert_int(int(host.military_inventory.get("convoy_transport_equipment",0))).is_equal(1)
+		assert_spent(definition)
 		assert_str(P.validate_saved({"equipment_queue":host.equipment_queue})).is_empty()
 		assert_int(host.joint_operations.state.forces.size()).is_equal(0)
 		var people:=float(state.population_total)
@@ -59,15 +62,17 @@ func test_components_reach_ship_inventory_through_planned_paid_work()->void:
 		assert_float(float(state.population_total)).is_equal(people)
 	)
 
-func test_each_sailing_role_requires_components_and_paid_launch_tooling()->void:
+func test_each_sailing_role_requires_materials_and_paid_launch_tooling()->void:
 	WorldSimulation.scoped("shipwright",func()->void:
 		setup();var host=WorldSimulation.military;var state=WorldSimulation.state
 		for id:String in ["sailing_warship","sailing_frigate","ship_of_line","convoy_transport"]:
 			var unit:Dictionary=J.UNITS[id];var recipe:=P.recipe(host,unit.equipment)
+			for resource:String in recipe.materials:state.resource_stockpiles[resource]=0.0
+			for resource:String in recipe.tooling:state.resource_stockpiles[resource]=0.0
 			assert_array(P.startup_blockers(host,unit.equipment)).is_not_empty()
-			for resource:String in recipe.materials:state.resource_stockpiles[resource]=float(recipe.materials[resource])*2.0
-			state.resource_stockpiles["Launch Cradles"]=1.0
+			stock_recipe(recipe,2.0)
 			assert_bool(host.start_production_line(unit.equipment,2).get("ok",false)).is_true()
+			if host.equipment_queue.is_empty():return
 			var job:Dictionary=host.equipment_queue.back()
 			P.advance(host,job,float(recipe.work_per_item))
 			assert_int(int(host.military_inventory[unit.equipment])).is_equal(1)
@@ -76,42 +81,31 @@ func test_each_sailing_role_requires_components_and_paid_launch_tooling()->void:
 			assert_bool(Planner.plan(host,unit.equipment).get("ready",false)).is_true()
 			P.advance(host,job,float(recipe.work_per_item))
 			assert_int(int(host.military_inventory[unit.equipment])).is_equal(1)
-			for resource:String in recipe.materials:assert_float(float(state.resource_stockpiles[resource])).is_equal(0.0)
-			assert_float(float(state.resource_stockpiles["Launch Cradles"])).is_equal(0.0)
+			assert_spent(recipe)
 			host.cancel_equipment_job(int(job.id))
 	)
 
 func test_shortages_unknown_methods_and_paused_lines_prevent_orders()->void:
 	WorldSimulation.scoped("shipwright",func()->void:
 		setup();var host=WorldSimulation.military;var state=WorldSimulation.state
+		var definition:=P.recipe(host,"convoy_transport_equipment");stock_recipe(definition,1.0)
 		assert_dict(Planner.plan(host,"convoy_transport_equipment")).is_not_empty()
-		state.resource_stockpiles.Timber=0.0
+		var goods:=float(state.resource_stockpiles["Civilian Goods"])
+		state.resource_stockpiles["Civilian Goods"]=0.0
 		assert_dict(Planner.plan(host,"convoy_transport_equipment")).is_empty()
-		state.resource_stockpiles.Timber=20000.0
-		state.known_discoveries.erase("sail_seaming");state.discovery_adoption.erase("sail_seaming")
+		state.resource_stockpiles["Civilian Goods"]=goods
+		var gate:=String(J.UNITS.convoy_transport.gate)
+		state.known_discoveries.erase(gate);state.discovery_adoption.erase(gate)
 		assert_dict(Planner.plan(host,"convoy_transport_equipment")).is_empty()
-		state.known_discoveries.append("sail_seaming");state.discovery_adoption.sail_seaming=1.0
-		assert_bool(host.start_production_line("laid_rope",10).get("ok",false)).is_true()
+		state.known_discoveries.append(gate);state.discovery_adoption[gate]=1.0
+		assert_bool(host.start_production_line("convoy_transport_equipment",10).get("ok",false)).is_true()
+		if host.equipment_queue.is_empty():return
 		host.equipment_queue.back().paused=true
 		assert_dict(Planner.plan(host,"convoy_transport_equipment")).is_empty()
 	)
 
-func test_alternative_hull_methods_have_different_actual_material_costs()->void:
+func test_shipbuilding_knowledge_matches_technology_catalog()->void:
 	WorldSimulation.scoped("shipwright",func()->void:
-		setup();var host=WorldSimulation.military;var state=WorldSimulation.state
-		for item:String in ["carvel_hull_sections","clinker_hull_sections","heavy_carvel_hull_sections"]:
-			var recipe:=I.product(item)
-			for resource:String in recipe.materials:state.resource_stockpiles[resource]=float(recipe.materials[resource])+float(recipe.tooling.get(resource,0))
-			for resource:String in recipe.tooling:
-				if not recipe.materials.has(resource):state.resource_stockpiles[resource]=float(recipe.tooling[resource])
-			var target:=int(state.resource_stockpiles.get(String(recipe.output),0))+1
-			assert_bool(host.start_production_line(item,target).get("ok",false)).is_true()
-			var job:Dictionary=host.equipment_queue.back();P.advance(host,job,float(recipe.days))
-			assert_int(int(job.completed)).is_equal(1)
-			for resource:String in recipe.materials:assert_float(float(state.resource_stockpiles[resource])).is_equal(0.0)
-			host.cancel_equipment_job(int(job.id))
-		assert_float(float(state.resource_stockpiles["Hull Sections"])).is_equal(2.0)
-		assert_float(float(state.resource_stockpiles["Heavy Hull Sections"])).is_equal(1.0)
 		assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(K.entries(),WorldSimulation.discovery.technology_catalog)).is_empty()
 	)
 
@@ -119,9 +113,10 @@ func test_retained_legacy_ship_line_preserves_its_paid_recipe_and_progress()->vo
 	WorldSimulation.scoped("shipwright",func()->void:
 		setup();var host=WorldSimulation.military;var state=WorldSimulation.state
 		var definition:=P.recipe(host,"convoy_transport_equipment")
-		for resource:String in definition.materials:state.resource_stockpiles[resource]=float(definition.materials[resource])
-		state.resource_stockpiles["Launch Cradles"]=1.0
+		stock_recipe(definition,1.0)
 		assert_bool(host.start_production_line("convoy_transport_equipment",1).get("ok",false)).is_true()
+		if host.equipment_queue.is_empty():return
+		state.resource_stockpiles.Timber=20000.0;state.resource_stockpiles["Fiber Plants"]=20000.0
 		var job:Dictionary=host.equipment_queue.back()
 		job.materials={"Timber":200.0,"Fiber Plants":40.0};job.progress_days=30.0
 		var saved:Dictionary=JSON.parse_string(JSON.stringify({"equipment_queue":host.equipment_queue}))

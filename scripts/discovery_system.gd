@@ -1121,11 +1121,10 @@ func food_storage_multipliers(food_types:Array,traveling:bool)->Dictionary:
 
 
 func _discovery_effect_summary(entry:Dictionary)->String:
-	var opening:=preload("res://scripts/opening_craft_practice.gd")
+	var opening:=preload("res://scripts/civilian_goods.gd")
 	var opening_id:=String(entry.get("id",""))
-	if opening.PRODUCTS.has(opening_id):
-		var product:=String(opening.PRODUCTS[opening_id])
-		return "%s produces and maintains %s from real local inputs. Its listed benefits operate in proportion to physical stock coverage (currently %.0f%%); the knowledge remains when stocks wear out." % [String(entry.get("production_contract","This practice")),product,opening.factor(opening_id)*100.0]
+	if opening.TECHNIQUES.has(opening_id):
+		return "A household technique. Once adopted it raises how many Civilian Goods craftspeople make and how many households keep. Its listed benefits operate in proportion to Civilian Goods coverage (currently %.0f%%); the knowledge remains when goods wear out." % [opening.factor(opening_id)*100.0]
 	if opening_id=="public_stores":return "This knowledge permits a material Public Stores construction project after Storage Pits. Its listed benefits and common-reserve accounting operate only after that staffed communal store is completed."
 	if opening_id=="framed_construction":return "%s Current maintained local operating coverage is %.0f%%." % [String(entry.get("production_contract","This knowledge requires a physical framed structure.")),opening.factor(opening_id)*100.0]
 	if opening_id in ["wound_cleaning","clean_water"]:

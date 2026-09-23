@@ -442,6 +442,8 @@ func advance_preparation_day(force: Dictionary, context: Dictionary = {}) -> Dic
 	var available_equipment:=maxi(0,roundi(float(context.get("equipment_replacements",0))*(0.65+logistics*0.70)))
 	var organization_recovery:=clampf(float(context.get("organization_recovery",0.08)),0.0,0.30)
 	organization_recovery*=0.70+command*0.60
+	# Days of home preparation covered by one call (multi-day rival steps).
+	var days:=float(context.get("days",1.0))
 	var delivered:=0
 	var formations:Array=prepared.get("formations",[])
 	for index in formations.size():
@@ -455,14 +457,14 @@ func advance_preparation_day(force: Dictionary, context: Dictionary = {}) -> Dic
 		available_equipment-=transfer
 		delivered+=transfer
 	prepared["formations"]=formations
-	prepared["morale"]=move_toward(float(prepared.get("morale",1.0)),1.0,organization_recovery)
+	prepared["morale"]=move_toward(float(prepared.get("morale",1.0)),1.0,organization_recovery*days)
 	var scattered_available:=int(prepared.get("scattered_pool",0))
 	var disabled:=clampi(int(prepared.get("disabled_pool",0)),0,int(prepared.get("wounded_pool",0)))
 	var wounded_available:=int(prepared.get("wounded_pool",0))-disabled
 	var reserves_available:=int(prepared.get("reserve_manpower",0))
 	var recovery_multiplier:=clampf(float(context.get("recovery_multiplier",1.0)),0.10,1.60)
-	var scattered_progress:=float(prepared.get("scattered_recovery_accumulator",0.0))+float(scattered_available)*(0.22+logistics*0.28)
-	var wounded_progress:=float(prepared.get("wounded_recovery_accumulator",0.0))+float(wounded_available)*(0.035+logistics*0.055)*recovery_multiplier
+	var scattered_progress:=float(prepared.get("scattered_recovery_accumulator",0.0))+float(scattered_available)*(0.22+logistics*0.28)*days
+	var wounded_progress:=float(prepared.get("wounded_recovery_accumulator",0.0))+float(wounded_available)*(0.035+logistics*0.055)*recovery_multiplier*days
 	var scattered_return:=mini(scattered_available,maxi(0,floori(scattered_progress)))
 	wounded_progress+=clampf(float(context.get("medical_recovery",0)),0,float(wounded_available))
 	var wounded_return:=mini(wounded_available,maxi(0,floori(wounded_progress)))

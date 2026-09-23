@@ -132,6 +132,8 @@ static func damage_city(civ_id:String,region_id:String,amount:float)->void:
 			for plot:Dictionary in WorldSimulation.state.settlement_plots:
 				if String(plot.get("land_use","")) in ["workshop","mixed_household","storehouse"]:plot.condition=maxf(.05,float(plot.get("condition",1))-amount)
 			WorldSimulation.state.morphology_revision+=1
+			WorldSimulation.settlements.damage_city_form(amount)
+			WorldSimulation.settlements.rebuild_summary()
 		)
 		for base:Dictionary in WorldSimulation.military.joint_operations.state.bases:
 			if String(base.city_id)==city_id:base.condition=maxf(0,float(base.condition)-amount)

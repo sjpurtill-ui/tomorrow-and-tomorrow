@@ -9,7 +9,7 @@ static func _settlement_definitions() -> Array[Dictionary]:
 		{"name":"Storage Pits", "days":7.0, "requires":["Hearth Circle"], "minimum":{"Construction":4, "Logistics":4},"materials":{"Timber":4.0,"Fiber Plants":3.0},"effect":"slows spoilage and expands food storage"},
 		{"name":"Public Stores", "days":14.0, "requires":["Storage Pits"], "discovery":"public_stores", "minimum":{"Construction":5,"Logistics":6,"Administration":3},"materials":{"Timber":14.0,"Clay":8.0,"Fiber Plants":6.0},"effect":"creates counted, staffed communal reserves"},
 		{"name":"Open Work Area", "days":12.0, "requires":["Hearth Circle"], "minimum":{"Construction":6, "Crafting":4},"materials":{"Timber":12.0,"Fiber Plants":5.0},"effect":"improves tools and material work"},
-		{"name":"Framed Hall", "days":22.0, "requires":["Lean-to Shelters","Open Work Area"], "discovery":"framed_construction", "minimum":{"Construction":8,"Crafting":5,"Logistics":4},"materials":{"Joined Timber Components":6.0,"Timber":18.0,"Fiber Plants":12.0,"Clay":8.0},"effect":"demonstrates maintained load-bearing frames at settlement scale"},
+		{"name":"Framed Hall", "days":22.0, "requires":["Lean-to Shelters","Open Work Area"], "discovery":"framed_construction", "minimum":{"Construction":8,"Crafting":5,"Logistics":4},"materials":{"Civilian Goods":6.0,"Timber":18.0,"Fiber Plants":12.0,"Clay":8.0},"effect":"demonstrates maintained load-bearing frames at settlement scale"},
 		{"name":"Gathering Yard", "days":10.0, "requires":["Hearth Circle"], "minimum":{"Construction":4, "Extraction":4},"materials":{"Timber":10.0,"Fiber Plants":4.0}, "known_resource":true,"effect":"organizes extraction from known deposits"}
 	]
 
@@ -54,8 +54,8 @@ static func material_options(project:Dictionary)->Array[Dictionary]:
 		"Public Stores":options.append_array([{"cost":{"Stone":18.0,"Timber":10.0,"Fiber Plants":6.0}},{"cost":{"Clay":18.0,"Fiber Plants":9.0}}])
 		"Open Work Area":options.append({"cost":{"Clay":16.0,"Fiber Plants":8.0}})
 		"Framed Hall":options.append_array([
-			{"cost":{"Joined Timber Components":6.0,"Timber":20.0,"Fiber Plants":24.0}},
-			{"cost":{"Joined Timber Components":8.0,"Timber":16.0,"Stone":16.0,"Fiber Plants":8.0}}
+			{"cost":{"Civilian Goods":6.0,"Timber":20.0,"Fiber Plants":24.0}},
+			{"cost":{"Civilian Goods":8.0,"Timber":16.0,"Stone":16.0,"Fiber Plants":8.0}}
 		])
 		"Gathering Yard":options.append_array([{"cost":{"Stone":16.0,"Fiber Plants":4.0}}, {"cost":{"Clay":18.0,"Fiber Plants":4.0}}])
 	return options

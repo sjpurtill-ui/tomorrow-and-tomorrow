@@ -229,6 +229,7 @@ func _plan_rivals(job:DayJob,target_day:int,timings:Dictionary)->void:
 					run.skip=true;run.halt=true
 					return null
 				actors[id]["span"]=gap;span=gap
+				actors[id]["last_gap"]=gap
 				state.elapsed_days=day
 				return DayJob.from_parts(preload("res://scripts/civilization_controller.gd").order_steps(id),detail)
 			),S.step("context",detail,func()->Array:
@@ -258,6 +259,16 @@ func _span_waits(id:String,day:int)->bool:
 	if preload("res://scripts/civilization_controller.gd").review_due(id,day):return false
 	return DaySpan.calm()
 
+## Whether a rival is expected to advance on `day`, from the same schedule
+## `_span_waits` applies. A rival that stepped daily is assumed to continue.
+func _advances_on(id:String,day:int)->bool:
+	if span_limit<=1:return true
+	var actor:Dictionary=actors[id]
+	if int(actor.get("last_gap",1))==1:return true
+	if day-int(actor.last_day)>=span_limit:return true
+	if posmod(day+posmod(hash("span:"+id),span_limit),span_limit)==0:return true
+	return preload("res://scripts/civilization_controller.gd").review_due(id,day)
+
 func refresh_projections()->void:
 	for next:Dictionary in _projection_steps():next.call.call()
 
@@ -283,7 +294,12 @@ func _projection_steps(timings:Dictionary={},label:String="projections")->Array:
 		var id:=String(civ.id)
 		if not actors.has(id):continue
 		result.append(S.step(label,timings,func()->void:
-			if actors.has(id):scoped(id,func()->void:project(civ))
+			if not actors.has(id):return
+			# With multi-day rival steps a rival that has not advanced since its
+			# last projection would project the same read model again.
+			if span_limit>1 and int(actors[id].get("projected_day",-1))==int(actors[id].last_day):return
+			actors[id]["projected_day"]=int(actors[id].last_day)
+			scoped(id,func()->void:project(civ))
 		))
 	return result
 
@@ -371,7 +387,10 @@ func refresh_views()->void:
 	for next:Dictionary in _view_steps():next.call.call()
 
 ## Relations first, then one private foreign view per observer, then the human's.
-func _view_steps(timings:Dictionary={},label:String="views")->Array:
+## With `next_day`, a rival's private view is refreshed only if that rival is
+## expected to advance on `next_day` (see day_span.gd); the others keep their
+## view until the evening before their next step.
+func _view_steps(timings:Dictionary={},label:String="views",next_day:int=-1)->Array:
 	var S=preload("res://scripts/day_job.gd")
 	var shared:Dictionary={}
 	var result:Array=[S.step(label,timings,func()->void:
@@ -380,7 +399,7 @@ func _view_steps(timings:Dictionary={},label:String="views")->Array:
 	)]
 	for id:String in actors:
 		result.append(S.step(label,timings,func()->void:
-			if actors.has(id):_refresh_observer_view(id,shared.troops)
+			if actors.has(id) and (next_day<0 or _advances_on(id,next_day)):_refresh_observer_view(id,shared.troops)
 		))
 	result.append(S.step(label,timings,func()->void:
 		CivilizationSystem.foreign_formations.assign(preload("res://scripts/civilization_combat.gd").troop_views("player",shared.troops))
@@ -434,6 +453,9 @@ func submit(id:String,order:Dictionary)->Dictionary:
 	)
 
 const SNAPSHOT=preload("res://scripts/save_system.gd")
+## Saved fields of systems that no longer exist; older saves may still hold
+## them. Their contents are folded in elsewhere (see civilian_goods.gd).
+const RETIRED_FIELDS:={"GameState":["opening_craft_practice"],"FoodSystem":["_forecast_climate_cache","_environment_cache_key","_environment_cache"]}
 const CURATED:=["MilitaryCampaign","ProgressionSystem","ForeignDiplomacy","GeneralCampaign"]
 
 func capture_actor(id:String)->Dictionary:
@@ -492,6 +514,7 @@ func validate_payload(payload:Dictionary)->String:
 				if field.begins_with("rng_state:"):
 					if not instance.get(field.trim_prefix("rng_state:")) is RandomNumberGenerator or not actor.state[name][field] is int:return "Invalid civilization random generator."
 					continue
+				if field in RETIRED_FIELDS.get(name,[]):continue
 				if not property_types.has(field):return "Unknown civilization field: "+field
 				var saved_type:=typeof(actor.state[name][field]);var expected_type:=int(property_types[field])
 				if expected_type!=TYPE_NIL and saved_type!=expected_type and not (saved_type in [TYPE_INT,TYPE_FLOAT] and expected_type in [TYPE_INT,TYPE_FLOAT]):return "Invalid civilization field type: "+field
@@ -503,8 +526,8 @@ func validate_payload(payload:Dictionary)->String:
 		var nutrition:=preload("res://scripts/crop_nutrition.gd")
 		var clothing=preload("res://scripts/household_clothing.gd")
 		if not preload("res://scripts/fire_practice.gd").valid(actor.state.GameState.get("fire_practice",preload("res://scripts/fire_practice.gd").empty_state())):return "Invalid civilization maintained fire records."
-		var opening=preload("res://scripts/opening_craft_practice.gd")
-		if not opening.valid(actor.state.GameState.get("opening_craft_practice",opening.empty_state())) or not opening.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization opening craft records."
+		var opening=preload("res://scripts/civilian_goods.gd")
+		if not opening.valid(actor.state.GameState.get("civilian_goods",opening.empty_state())) or not opening.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization civilian goods records."
 		var opportunities=preload("res://scripts/opening_opportunities.gd")
 		if not opportunities.valid(actor.state.GameState.get("opening_opportunities",opportunities.empty_state())):return "Invalid civilization opening opportunity records."
 		if not clothing.valid(actor.state.GameState.get("household_clothing",clothing.empty_state())) or not clothing.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization clothing records."
@@ -616,7 +639,7 @@ func begin_day(day:int,daily_context:Dictionary,construction:Callable=Callable()
 	),
 		S.step("projections",timings,func()->Array:return _projection_steps(timings,"projections")),
 		S.step("views",timings,func()->Array:
-			var steps:=_view_steps(timings,"views")
+			var steps:=_view_steps(timings,"views",day+1)
 			steps.append(S.step("views",timings,func()->void:_views_day=day))
 			return steps
 	),

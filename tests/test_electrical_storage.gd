@@ -76,69 +76,23 @@ func test_no_same_day_bank_to_bank_recharging()->void:
 func learn(id:String)->void:
 	if id not in GameState.known_discoveries:GameState.known_discoveries.append(id)
 	GameState.discovery_adoption[id]=1.0
-func test_manufactured_bank_commissions_empty_then_charges()->void:
-	var industry=preload("res://scripts/civilian_industry.gd")
-	var production=preload("res://scripts/persistent_production.gd")
+func test_paid_bank_commissions_empty_then_charges()->void:
 	var knowledge=preload("res://scripts/electrical_storage_knowledge.gd")
 	assert_int(knowledge.entries().size()).is_equal(7)
 	assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(knowledge.entries(),DiscoverySystem.technology_catalog)).is_empty()
-	var plan:={"refined_lead":4,"lead_electrode_sheets":2,"lead_oxide":2,"battery_separators":2,"lead_acid_cell":2,"battery_bank":1}
-	var outputs:Array=[]
-	for item:String in plan:outputs.append(industry.product(item).output)
-	for item:String in plan:
-		var recipe:Dictionary=industry.product(item);learn(recipe.gate)
-		for material:String in recipe.materials:
-			if material not in outputs:GameState.resource_stockpiles[material]=50.0
-		for material:String in recipe.tooling:
-			if material not in outputs:GameState.resource_stockpiles[material]=50.0
-	for output:String in outputs:GameState.resource_stockpiles[output]=0.0
+	var spec:Dictionary=Ops.PLANTS.battery_store
+	for gate:String in [spec.gate]+spec.requires:learn(gate)
+	for item:String in spec.cost:GameState.resource_stockpiles[item]=float(spec.cost[item])
+	assert_bool(spec.cost.has("Battery Banks")).is_false()
 	ready("solar_array");var day:=0
-	for item:String in plan:
-		var recipe:Dictionary=industry.product(item)
-		assert_bool(MilitaryCampaign.start_production_line(item,int(plan[item])).get("ok",false)).is_true()
-		var job:Dictionary=MilitaryCampaign.equipment_queue.back()
-		for attempt in 40:
-			day+=1;tick(day);production.advance(MilitaryCampaign,job,1.0)
-			if int(job.completed)>=int(plan[item]):break
-		assert_int(int(job.completed)).is_equal(int(plan[item]))
-		assert_bool(MilitaryCampaign.cancel_equipment_job(int(job.id)).get("cancelled",false)).is_true()
-	near(GameState.resource_stockpiles["Battery Banks"],1)
-	learn("cable_insulation")
 	assert_bool(Ops.install("battery_store").get("ok",false)).is_true()
-	near(GameState.resource_stockpiles["Battery Banks"],0)
-	while int(Ops.data().plants.battery_store.installed)==0:
+	for item:String in spec.cost:near(GameState.resource_stockpiles[item],0)
+	while int(Ops.data().plants.battery_store.installed)==0 and day<60:
 		day+=1;tick(day)
+	assert_int(int(Ops.data().plants.battery_store.installed)).is_equal(1)
 	near(Ops.data().plants.battery_store.get("stored_energy",0),0)
 	day+=1;tick(day)
 	near(Ops.data().plants.battery_store.stored_energy,2.4)
-func test_pending_workshop_keeps_power_and_labor_while_charging()->void:
-	var industry=preload("res://scripts/civilian_industry.gd")
-	var production=preload("res://scripts/persistent_production.gd")
-	var recipe:Dictionary=industry.product("electrolytic_hydrogen");learn(recipe.gate)
-	for item:String in recipe.materials:GameState.resource_stockpiles[item]=10.0
-	for item:String in recipe.tooling:GameState.resource_stockpiles[item]=10.0
-	MilitaryCampaign.production_labor_share=.5
-	assert_bool(MilitaryCampaign.start_production_line("electrolytic_hydrogen",1).get("ok",false)).is_true()
-	ready("solar_array");ready("battery_store");tick(1)
-	near(Ops.service("electricity"),2)
-	near(Ops.data().plants.battery_store.charge_input,2)
-	assert_float(GameState.effective_workers("Crafting")).is_greater(0.0)
-	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
-	production.advance(MilitaryCampaign,job,1.0)
-	assert_float(Ops.service("electricity")).is_less(2.0)
-
-func test_battery_powered_workshop_keeps_workers_for_production()->void:
-	var industry=preload("res://scripts/civilian_industry.gd")
-	var recipe:Dictionary=industry.product("electrolytic_hydrogen");learn(recipe.gate)
-	for item:String in recipe.materials:GameState.resource_stockpiles[item]=10.0
-	for item:String in recipe.tooling:GameState.resource_stockpiles[item]=10.0
-	MilitaryCampaign.production_labor_share=.5;GameState.population_allocations.Crafting=1
-	assert_bool(MilitaryCampaign.start_production_line("electrolytic_hydrogen",1).get("ok",false)).is_true()
-	ready("battery_store",12);tick(1)
-	near(Ops.service("electricity"),1.5)
-	near(GameState.effective_workers("Crafting"),.5)
-	preload("res://scripts/persistent_production.gd").advance(MilitaryCampaign,MilitaryCampaign.equipment_queue.back(),.25)
-	assert_float(Ops.service("electricity")).is_less(1.5)
 func test_owned_bank_energy_round_trips_without_changing_player()->void:
 	WorldSimulation.create_actor("battery_owner",314)
 	WorldSimulation.scoped("battery_owner",func()->void:

@@ -1,24 +1,27 @@
 extends GdUnitTestSuite
 const K=preload("res://scripts/canning_knowledge.gd")
-const I=preload("res://scripts/civilian_industry.gd")
-const P=preload("res://scripts/persistent_production.gd")
 const Ops=preload("res://scripts/technology_operations.gd")
-const C=preload("res://scripts/canning_preservation.gd")
+const FRESH:="Fresh food"
+const STORED:="Stored food"
 func before_test()->void:WorldSimulation.clear();WorldSimulation.create_actor("canner",122)
 func after_test()->void:WorldSimulation.clear()
 func setup()->void:
 	WorldSimulation.food.initialize()
 	var state=WorldSimulation.state;state.settlement_site_committed=true;state.convoy_traveling=false
 	state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0;state.population_allocations.Crafting=20
-	state.food_stocks={"Fresh plants":1000.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":0.0,"Preserved food":0.0}
+	state.food_stocks={FRESH:1000.0,STORED:0.0}
 func learn(id:String)->void:
 	if id not in WorldSimulation.state.known_discoveries:WorldSimulation.state.known_discoveries.append(id)
 	WorldSimulation.state.discovery_adoption[id]=1.0
 func tick(day:int)->void:WorldSimulation.state.elapsed_days=day;Ops.advance(day)
+## The installed cannery's preservation service, spent by the food day.
+func can(traveling:bool=false)->float:return float(WorldSimulation.food._preserve(0.0,0.0,traveling).canned)
+func spec()->Dictionary:return Ops.PLANTS.cannery
 func prepared_plant()->void:
 	setup()
 	for gate:String in ["thermal_process_validation","food_retorts","double_seaming"]:learn(gate)
-	for resource:String in ["Food Retorts","Seaming Heads","Wrought Iron","Food Can Sets","Coal","Freshwater"]:WorldSimulation.state.resource_stockpiles[resource]=100.0
+	for resource:String in spec().cost:WorldSimulation.state.resource_stockpiles[resource]=float(spec().cost[resource])+100.0
+	for resource:String in spec().inputs:WorldSimulation.state.resource_stockpiles[resource]=float(WorldSimulation.state.resource_stockpiles.get(resource,0.0))+100.0
 	assert_bool(Ops.install("cannery").get("ok",false)).is_true()
 	for day in range(1,10):tick(day)
 func test_real_component_chain_can_commission_and_operate_a_cannery()->void:
@@ -26,40 +29,37 @@ func test_real_component_chain_can_commission_and_operate_a_cannery()->void:
 		setup();var state=WorldSimulation.state
 		assert_int(K.entries().size()).is_equal(7)
 		assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(K.entries(),WorldSimulation.discovery.technology_catalog)).is_empty()
-		var plan:={"refined_tin":1,"steel_sheet":1,"tinplate":1,"food_can_sets":1,"seaming_head":1,"food_retort":1}
-		var outputs:Array=[]
-		for item:String in plan:outputs.append(I.product(item).output)
-		for item:String in plan:
-			var recipe:=I.product(item);learn(recipe.gate)
-			for resource:String in recipe.materials:
-				if resource not in outputs:state.resource_stockpiles[resource]=100.0
-			for resource:String in recipe.tooling:
-				if resource not in outputs:state.resource_stockpiles[resource]=100.0
-		for output:String in outputs:state.resource_stockpiles[output]=0.0
-		for item:String in plan:
-			var recipe:=I.product(item)
-			assert_bool(WorldSimulation.military.start_production_line(item,1).get("ok",false)).is_true()
-			var job:Dictionary=WorldSimulation.military.equipment_queue.back();P.advance(WorldSimulation.military,job,float(recipe.days))
-			assert_int(int(job.completed)).is_equal(1);WorldSimulation.military.cancel_equipment_job(int(job.id))
-		learn("thermal_process_validation");state.resource_stockpiles["Coal"]=1.0;state.resource_stockpiles["Freshwater"]=1.0
+		# The bill names raw materials and Civilian Goods only; it is paid once.
+		assert_bool(spec().cost.has("Civilian Goods")).is_true()
+		for resource:String in spec().cost:assert_bool(preload("res://scripts/goods_bills.gd").manufactured(resource)).is_false()
+		for gate:String in ["thermal_process_validation","food_retorts","double_seaming"]:learn(gate)
+		for resource:String in spec().cost:state.resource_stockpiles[resource]=float(spec().cost[resource])
+		for resource:String in spec().inputs:state.resource_stockpiles[resource]=float(state.resource_stockpiles.get(resource,0.0))+float(spec().inputs[resource])
+		var missing:String=spec().cost.keys()[0];var held:=float(state.resource_stockpiles[missing]);state.resource_stockpiles[missing]=0.0
+		var before:Dictionary=state.resource_stockpiles.duplicate(true)
+		assert_bool(Ops.install("cannery").has("error")).is_true()
+		assert_dict(state.resource_stockpiles).is_equal(before)
+		state.resource_stockpiles[missing]=held
+		before=state.resource_stockpiles.duplicate(true)
 		assert_bool(Ops.install("cannery").get("ok",false)).is_true()
-		assert_float(float(state.resource_stockpiles["Food Retorts"])).is_equal(0.0)
+		for resource:String in spec().cost:assert_float(float(before[resource])-float(state.resource_stockpiles[resource])).is_equal_approx(float(spec().cost[resource]),.000001)
 		assert_float(Ops.service("food_preservation")).is_equal(0.0)
-		for day in range(1,10):tick(day)
-		assert_float(Ops.service("food_preservation")).is_equal(10.0)
-		assert_float(float(state.resource_stockpiles["Food Can Sets"])).is_equal_approx(.8,.000001)
-		assert_float(float(Ops.data().workers)).is_equal(2.0)
-		var converted:=C.preserve(10.0,false)
-		assert_float(float(converted["Fresh plants"])).is_equal(10.0)
-		assert_float(float(state.food_stocks["Fresh plants"])).is_equal(990.0)
-		assert_float(float(state.food_stocks["Preserved food"])).is_equal(9.0)
-		assert_dict(C.preserve(10.0,false)).is_empty()
+		for day in range(1,9):tick(day)
+		assert_float(Ops.service("food_preservation")).is_equal(0.0)
+		before=state.resource_stockpiles.duplicate(true);tick(9)
+		assert_float(Ops.service("food_preservation")).is_equal_approx(10.0,.00001)
+		for resource:String in spec().inputs:assert_float(float(before[resource])-float(state.resource_stockpiles[resource])).is_equal_approx(float(spec().inputs[resource]),.000001)
+		assert_float(float(Ops.data().workers)).is_equal_approx(2.0,.00001)
+		assert_float(can()).is_equal_approx(10.0,.00001)
+		assert_float(float(state.food_stocks[FRESH])).is_equal_approx(990.0,.00001)
+		assert_float(float(state.food_stocks[STORED])).is_equal_approx(9.0,.000001)
+		assert_float(can()).is_equal(0.0)
 		assert_bool(Ops.valid(JSON.parse_string(JSON.stringify(Ops.data())))).is_true()
 	)
 func test_lack_of_cans_fuel_or_staff_stops_daily_capacity()->void:
 	WorldSimulation.scoped("canner",func()->void:
 		prepared_plant();var state=WorldSimulation.state
-		for resource:String in ["Food Can Sets","Coal","Freshwater"]:
+		for resource:String in spec().inputs:
 			state.resource_stockpiles[resource]=0.0;tick(int(state.elapsed_days)+1)
 			assert_float(Ops.service("food_preservation")).is_equal(0.0)
 			state.resource_stockpiles[resource]=100.0
@@ -69,25 +69,22 @@ func test_lack_of_cans_fuel_or_staff_stops_daily_capacity()->void:
 func test_reserve_travel_secondary_and_stale_day_guards()->void:
 	WorldSimulation.scoped("canner",func()->void:
 		prepared_plant();var state=WorldSimulation.state
-		assert_dict(C.preserve(1000.0,false)).is_empty()
-		assert_dict(C.preserve(10.0,true)).is_empty()
-		state.resource_settlement_id="other";assert_dict(C.preserve(10.0,false)).is_empty();state.resource_settlement_id=""
-		state.elapsed_days+=1;assert_dict(C.preserve(10.0,false)).is_empty()
-		assert_float(float(state.food_stocks["Fresh plants"])).is_equal(1000.0)
+		assert_float(can(true)).is_equal(0.0)
+		state.resource_settlement_id="other";assert_float(can()).is_equal(0.0);state.resource_settlement_id=""
+		state.elapsed_days+=1;assert_float(can()).is_equal(0.0)
+		assert_float(float(state.food_stocks[FRESH])).is_equal(1000.0)
 	)
 func test_normal_food_day_reports_actual_canning()->void:
 	WorldSimulation.scoped("canner",func()->void:
-		prepared_plant();WorldSimulation.state.food_stocks["Fresh plants"]=1000000.0
+		prepared_plant();WorldSimulation.state.food_stocks[FRESH]=1000000.0
 		var report:Dictionary=WorldSimulation.food._process_local_day({"traveling":false},1.0,1.0)
-		var preserved:=0.0
-		for amount:Variant in report.food_preserved.values():preserved+=float(amount)
-		assert_float(preserved).is_equal(10.0)
+		assert_float(float(report.food_preserved.canned)).is_equal_approx(10.0,.00001)
 		assert_float(Ops.service("food_preservation")).is_equal(0.0)
 	)
 func test_owned_save_round_trip_preserves_cannery_food_and_inputs()->void:
 	var expected:Dictionary={}
 	WorldSimulation.scoped("canner",func()->void:
-		prepared_plant();C.preserve(10.0,false)
+		prepared_plant();can()
 		expected["operations"]=Ops.data().duplicate(true)
 		expected["food"]=WorldSimulation.state.food_stocks.duplicate(true)
 		expected["stocks"]=WorldSimulation.state.resource_stockpiles.duplicate(true)
@@ -102,36 +99,35 @@ func test_owned_save_round_trip_preserves_cannery_food_and_inputs()->void:
 func test_idle_cannery_preserves_supplies_and_releases_operators()->void:
 	WorldSimulation.scoped("canner",func()->void:
 		prepared_plant();var state=WorldSimulation.state
-		state.food_stocks={"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":1000.0,"Preserved food":0.0}
+		state.food_stocks={FRESH:0.0,STORED:1000.0}
 		var before:Dictionary=state.resource_stockpiles.duplicate(true)
 		tick(int(state.elapsed_days)+1)
 		assert_dict(state.resource_stockpiles).is_equal(before)
 		assert_float(float(Ops.data().workers)).is_equal(0.0)
 		assert_float(Ops.service("food_preservation")).is_equal(0.0)
 		assert_str(Ops.status("cannery")).is_equal("Waiting for surplus perishable food")
-		state.food_stocks["Fish"]=10.0;tick(int(state.elapsed_days)+1)
+		state.food_stocks[FRESH]=10.0;tick(int(state.elapsed_days)+1)
 		assert_float(Ops.service("food_preservation")).is_equal(10.0)
 		assert_float(float(Ops.data().workers)).is_equal(2.0)
 	)
 func test_partial_food_availability_scales_cans_fuel_water_and_labor()->void:
 	WorldSimulation.scoped("canner",func()->void:
 		prepared_plant();var state=WorldSimulation.state
-		state.food_stocks={"Fresh plants":3.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":1000.0,"Preserved food":0.0}
+		state.food_stocks={FRESH:3.0,STORED:1000.0}
 		var before:Dictionary=state.resource_stockpiles.duplicate(true)
 		tick(int(state.elapsed_days)+1)
 		assert_float(Ops.service("food_preservation")).is_equal(3.0)
 		assert_float(float(Ops.data().workers)).is_equal_approx(.6,.000001)
-		for resource:String in ["Food Can Sets","Coal"]:assert_float(float(before[resource])-float(state.resource_stockpiles[resource])).is_equal_approx(.06,.000001)
-		assert_float(float(before.Freshwater)-float(state.resource_stockpiles.Freshwater)).is_equal_approx(.15,.000001)
-		C.preserve(float(WorldSimulation.food._calculate_demand(false).total),false)
-		assert_float(float(state.food_stocks["Preserved food"])).is_equal_approx(2.7,.000001)
+		for resource:String in spec().inputs:assert_float(float(before[resource])-float(state.resource_stockpiles[resource])).is_equal_approx(.3*float(spec().inputs[resource]),.000001)
+		assert_float(can()).is_equal_approx(3.0,.000001)
+		assert_float(float(state.food_stocks[STORED])).is_equal_approx(1002.7,.000001)
 		assert_float(Ops.service("food_preservation")).is_equal(0.0)
 	)
 func test_food_reserve_blocks_operation_before_inputs_are_spent()->void:
 	WorldSimulation.scoped("canner",func()->void:
 		prepared_plant();var state=WorldSimulation.state
 		var need:=float(WorldSimulation.food._calculate_demand(false).total)
-		state.food_stocks={"Fresh plants":need*2.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":0.0,"Preserved food":0.0}
+		state.food_stocks={FRESH:need*2.0,STORED:0.0}
 		var before:Dictionary=state.resource_stockpiles.duplicate(true)
 		tick(int(state.elapsed_days)+1)
 		assert_float(Ops.service("food_preservation")).is_equal(0.0)

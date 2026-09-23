@@ -77,11 +77,12 @@ func test_city_supply_context_selects_its_own_materials()->void:
 	SettlementModel.with_city_resources("other",func()->void:assert_str(SettlementModel._available_household_recipe().family).is_equal("organic"))
 	assert_str(SettlementModel._available_household_recipe().family).is_equal("earth")
 
-func test_framed_hall_requires_actual_joined_timber_components()->void:
+func test_framed_hall_requires_actual_civilian_goods()->void:
 	for project:Dictionary in Construction._settlement_definitions():
 		if project.name!="Framed Hall":continue
 		assert_bool(Construction._settlement_project_material_plan(project).is_empty()).is_true()
 		GameState.resource_stockpiles["Timber"]=100.0
 		assert_bool(Construction._settlement_project_material_plan(project).is_empty()).is_true()
-		GameState.resource_stockpiles["Joined Timber Components"]=6.0
+		# Fitted frame parts are household goods now, not a named component.
+		GameState.resource_stockpiles["Civilian Goods"]=float(project.materials["Civilian Goods"])
 		assert_bool(Construction._settlement_project_material_plan(project).is_empty()).is_false()

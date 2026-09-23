@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const Craft=preload("res://scripts/opening_craft_practice.gd")
+const Goods=preload("res://scripts/civilian_goods.gd")
 const Build=preload("res://scripts/settlement_construction.gd")
 
 func before_test()->void:
@@ -11,7 +11,7 @@ func before_test()->void:
 	GameState.settlement_completed=["Hearth Circle","Storage Pits"]
 	GameState.population_allocations.merge({"Construction":20,"Logistics":20,"Administration":10,"Crafting":100},true)
 	GameState.resource_stockpiles={"Timber":50.0,"Stone":50.0,"Clay":50.0,"Fiber Plants":50.0,"Freshwater":50.0}
-	GameState.opening_craft_practice=Craft.empty_state();GameState.opening_craft_practice.initialized=true
+	GameState.civilian_goods=Goods.empty_state()
 	GameState.fire_practice={"initialized":true,"embers":.8,"last_day":-1,"source":"test","last_event":"test","fuel_today":0.0,"ignitions":0,"extinctions":0}
 
 func after_test()->void:
@@ -23,17 +23,17 @@ func know(ids:Array[String])->void:
 		if id not in GameState.known_discoveries:GameState.known_discoveries.append(id)
 		GameState.discovery_adoption[id]=1.0
 
-func test_tempered_and_sealed_vessels_require_inputs_fire_and_stock()->void:
+func test_vessel_techniques_act_only_through_made_civilian_goods()->void:
 	know(["clay_testing","clay_shaping","pit_firing","clay_tempering","sealed_vessels"])
 	DiscoverySystem.refresh_operating_effects()
+	assert_float(Goods.coverage()).is_equal(0.0)
 	assert_float(DiscoverySystem.effect("container_capacity")).is_equal(0.0)
 	assert_float(DiscoverySystem.effect("food_spoilage")).is_equal(0.0)
-	var report:=Craft.advance()
-	assert_float(Craft.stock("Tempered Clay Vessels")).is_greater(0.0)
-	assert_float(Craft.stock("Sealed Clay Vessels")).is_greater(0.0)
-	assert_float(float(report.inputs.Clay)).is_greater(0.0)
-	assert_float(float(report.inputs.Stone)).is_greater(0.0)
-	assert_float(float(report.inputs.Timber)).is_greater(0.0)
+	var report:=Goods.advance()
+	assert_float(Goods.stock()).is_greater(0.0)
+	assert_float(float(report.made)).is_greater(0.0)
+	for material:String in ["Clay","Stone","Timber","Fiber Plants"]:
+		assert_float(float(report.inputs[material])).override_failure_message(material).is_greater(0.0)
 	assert_float(DiscoverySystem.effect("container_capacity")).is_greater(0.0)
 	assert_float(DiscoverySystem.effect("food_spoilage")).is_less(0.0)
 
@@ -57,14 +57,19 @@ func test_public_store_knowledge_requires_a_material_construction_project()->voi
 	DiscoverySystem.refresh_operating_effects()
 	assert_float(DiscoverySystem.effect("state_capacity")).is_greater(0.0)
 
-func test_store_capacity_comes_from_built_stores_and_physical_vessels()->void:
+func test_store_capacity_comes_from_built_stores_and_sealed_goods()->void:
 	GameState.settlement_completed=["Hearth Circle"]
 	GameState.founding_manifest={"food_storage_rations":0.0}
-	GameState.resource_stockpiles["Sealed Clay Vessels"]=2.0
+	know(["sealed_vessels"])
+	# Enough goods for 36 rations of sealed storage.
+	GameState.resource_stockpiles[Goods.GOODS]=36.0/(Goods.SEALED_STORAGE_SHARE*Goods.RATIONS_PER_SEALED_UNIT)
 	assert_float(FoodSystem._food_storage_capacity()).is_equal_approx(36.0,.000001)
-	GameState.food_stocks={"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":0.0,"Preserved food":50.0}
+	GameState.food_stocks={FoodSystem.FRESH:0.0,FoodSystem.STORED:50.0}
 	var losses:=FoodSystem._apply_storage_capacity()
-	assert_float(float(losses["Preserved food"])).is_equal_approx(14.0,.000001)
+	assert_float(float(losses[FoodSystem.STORED])).is_equal_approx(14.0,.000001)
+	GameState.discovery_adoption.sealed_vessels=0.0
+	assert_float(FoodSystem._food_storage_capacity()).is_equal(0.0)
+	GameState.discovery_adoption.sealed_vessels=1.0
 	GameState.settlement_completed.append("Public Stores")
 	assert_float(FoodSystem._food_storage_capacity()).is_greater(14000.0)
 	GameState.population_allocations.Administration=0

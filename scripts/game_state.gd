@@ -173,11 +173,14 @@ var next_city_trade_id:int=1
 var selected_player_settlement_id:=""
 var settlement_convoy:Dictionary={}
 var settlement_network_revision:=0
+## A city's construction era (fabric tier) and overall condition; its built
+## capacities derive from these and its population (SettlementModel.city_form).
+var city_form:Dictionary={"tier":-1.0,"condition":-1.0}
 var morphology_revision:=0
 var last_morphology_day:=-1
 var resource_deposits: Array[Dictionary] = []
 var resource_stockpiles: Dictionary = {}
-var opening_craft_practice:Dictionary=preload("res://scripts/opening_craft_practice.gd").empty_state()
+var civilian_goods:Dictionary=preload("res://scripts/civilian_goods.gd").empty_state()
 var opening_opportunities:Dictionary=preload("res://scripts/opening_opportunities.gd").empty_state()
 var resource_events: Array[Dictionary] = []
 var resource_practice: Dictionary = {}
@@ -496,11 +499,12 @@ func reset_for_new_world(new_seed:int)->void:
 	selected_player_settlement_id=""
 	settlement_convoy={}
 	settlement_network_revision=0
+	city_form={"tier":-1.0,"condition":-1.0}
 	morphology_revision=0
 	last_morphology_day=-1
 	resource_deposits=[]
 	resource_stockpiles={}
-	opening_craft_practice=preload("res://scripts/opening_craft_practice.gd").empty_state()
+	civilian_goods=preload("res://scripts/civilian_goods.gd").empty_state()
 	resource_events=[]
 	resource_practice={}
 	resource_priorities={}

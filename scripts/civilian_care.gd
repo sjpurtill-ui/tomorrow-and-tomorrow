@@ -56,7 +56,8 @@ static func set_share(value:float)->void:
 static func targets()->Dictionary:
 	if not available(WorldSimulation.state) or not bool(methods(WorldSimulation.state).rounds):return {}
 	var people:=minf(maxf(1,F.outstanding(data())),staff()*2)
-	return {"Clay":people*F.RECORD_CLAY*14,"Woven Cloth":people*F.CARE_CLOTH*14}
+	# Care cloth is held as raw materials and Civilian Goods so trade can move it.
+	return preload("res://scripts/bill_stock.gd").add_scaled({"Clay":people*F.RECORD_CLAY*14},F.CLOTH_UNIT,people*14)
 static func describe()->String:
 	var report:Dictionary=data().report
 	var continuing:=0.0

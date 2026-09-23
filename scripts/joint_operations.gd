@@ -416,8 +416,10 @@ func readiness_for(record:Dictionary,region:Dictionary={})->Dictionary:
 func repair_costs(record:Dictionary,rate:float=.04)->Dictionary:
 	var costs:Dictionary={}
 	for type_id:String in record.units:
-		for material:String in C.UNITS[type_id].materials:
-			costs[material]=float(costs.get(material,0))+float(C.UNITS[type_id].materials[material])*int(record.units[type_id])*.005*(rate/.04)
+		# Hull repairs draw the same raw materials and Civilian Goods as building.
+		var bill:=preload("res://scripts/goods_bills.gd").flatten(C.UNITS[type_id].materials)
+		for material:String in bill:
+			costs[material]=float(costs.get(material,0))+float(bill[material])*int(record.units[type_id])*.005*(rate/.04)
 	return costs
 
 func repair_at_base(record:Dictionary,origin:Dictionary)->Dictionary:

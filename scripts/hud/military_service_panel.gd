@@ -255,7 +255,8 @@ func _refresh_status()->void:
 	if not quote.has("error") and int(quote.training_days)<0:commission_status.text="%d crew · initial instruction suspended by training policy" % int(quote.crew)
 	if C.UNITS.has(type_id):
 		var unit:Dictionary=C.UNITS[type_id];var materials:Array[String]=[]
-		for resource:String in unit.materials:materials.append("%.1f %s" % [unit.materials[resource],ResourceSystem.display_name(resource)])
+		var bill:=preload("res://scripts/goods_bills.gd").flatten(unit.materials)
+		for resource:String in bill:materials.append("%.1f %s" % [bill[resource],ResourceSystem.display_name(resource)])
 		recipe.text="Reserve: %d · %d crew per craft\nPer craft: %s\n%.0f work-days · %d km range" % [int(MilitaryCampaign.military_inventory.get(unit.equipment,0)),unit.crew,", ".join(materials),unit.work_days,unit.range_km]
 	else:recipe.text="No researched designs for this service yet. The Units & Equipment Map shows the full progression chain."
 	var lines:Array[String]=[]

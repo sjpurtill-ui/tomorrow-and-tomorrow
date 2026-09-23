@@ -4,8 +4,9 @@ extends RefCounted
 const LIMIT:=1000
 const WaterDrive=preload("res://scripts/water_hammer_site.gd")
 const Storage=preload("res://scripts/electrical_storage.gd")
-const PLANTS={
-	"controlled_kiln":{"name":"Maintained controlled kiln","gate":"kiln_control","requires":[],"cost":{"Stone":12.0,"Clay":6.0,"Joined Timber Components":2.0},"work":24.0,"workers":1.0,"inputs":{"Timber":0.5},"power":0.0,"services":{"kiln_heat":4.0}},
+## Plant specifications as authored; PLANTS holds them with bills flattened.
+const PLANTS_SOURCE={
+	"controlled_kiln":{"name":"Maintained controlled kiln","gate":"kiln_control","requires":[],"cost":{"Stone":12.0,"Clay":6.0,"Civilian Goods":2.0},"work":24.0,"workers":1.0,"inputs":{"Timber":0.5},"power":0.0,"services":{"kiln_heat":4.0}},
 	"sec_analytical_bench":{"name": "Aqueous size-exclusion bench", "gate": "size_exclusion_chromatography", "requires": ["electrical_measurement"], "cost": {"SEC Bench Assemblies": 1, "Steel": 2}, "work": 16, "workers": 1, "inputs": {"Freshwater": 1}, "power": 2, "services": {"sec_column_time": 1}},
 	"nmr_analytical_bench":{"name": "NMR analytical bench awaiting reference qualification", "gate": "nuclear_magnetic_resonance_spectroscopy", "requires": ["electrical_measurement"], "cost": {"Unqualified NMR Benches": 1, "Steel": 2}, "work": 24, "workers": 1, "inputs": {"Freshwater": 1, "Insulated Cable": 0.001}, "power": 8, "services": {"nmr_unqualified_time": 1}},
 	"foam_insulated_cold_store":{"name": "Foam-insulated electric cold store", "gate": "polymer_foam_cell_control", "requires": ["mechanical_refrigeration", "electric_motors"], "cost": {"Foam Cold-Store Panels": 2, "Electric Motors": 1, "Pressure Vessels": 1, "Glass": 1}, "work": 16, "workers": 1, "inputs": {"Bitumen": 0.01, "Foam Cold-Store Panels": 0.002}, "power": 2.2, "services": {"cold_storage": 200}},
@@ -35,6 +36,8 @@ const PLANTS={
 	"battery_store":{"name": "Supervised battery store", "gate": "battery_bank_wiring", "requires": ["cable_insulation"], "cost": {"Battery Banks": 1.0, "Insulated Cable": 1.0}, "work": 12.0, "workers": 1.0, "inputs": {}, "power": 0.0, "services": {}, "storage": {"capacity": 12.0, "charge_rate": 3.0, "discharge_rate": 3.0, "charge_efficiency": 0.8, "discharge_efficiency": 0.8, "self_discharge": 0.001}},
 	"regulated_battery_store":{"name": "Regulated battery store", "gate": "charge_regulation", "requires": ["battery_bank_wiring"], "cost": {"Battery Banks": 1.0, "Charge Controllers": 1.0, "Insulated Cable": 1.0}, "work": 16.0, "workers": 0.25, "inputs": {}, "power": 0.0, "services": {}, "storage": {"capacity": 12.0, "charge_rate": 6.0, "discharge_rate": 6.0, "charge_efficiency": 0.9, "discharge_efficiency": 0.9, "self_discharge": 0.0005}}
 }
+## Costs and daily inputs name raw materials and Civilian Goods only (goods_bills.gd).
+static var PLANTS:=preload("res://scripts/goods_bills.gd").flatten_table(PLANTS_SOURCE,["cost","inputs"])
 static func empty_state()->Dictionary:return {"last_day":-1,"plants":{},"services":{},"workers":0.0,"inputs":{}}
 static func data()->Dictionary:return WorldSimulation.state.technology_operations
 static func quote(id:String,count:int=1)->Dictionary:
@@ -250,7 +253,7 @@ static func forecast_service(name:String,days_ahead:int)->float:
 	return service(name)
 static func refrigeration_multiplier(capacity:float,stocks:Dictionary)->float:
 	var perishables:=0.0
-	for food:String in ["Fresh plants","Fresh meat","Fish"]:perishables+=maxf(0,float(stocks.get(food,0)))
+	for food:String in ["Fresh food","Fresh plants","Fresh meat","Fish"]:perishables+=maxf(0,float(stocks.get(food,0)))
 	if perishables<=0:return 1.0
 	return 1.0-.8*clampf(capacity/perishables,0,1)
 static func valid(value:Variant)->bool:
@@ -263,11 +266,12 @@ static func valid(value:Variant)->bool:
 	for field:String in ["last_day","workers"]:
 		if not number(value[field]) or value[field]<(-1 if field=="last_day" else 0):return false
 	if float(value.last_day)!=floorf(float(value.last_day)) or float(value.workers)>PLANTS.size()*2.0*LIMIT:return false
+	var input_names:=_input_names()
 	for field:String in ["services","inputs"]:
-		if not value[field] is Dictionary or value[field].size()>(18 if field=="services" else 17):return false
+		if not value[field] is Dictionary or value[field].size()>(18 if field=="services" else input_names.size()):return false
 		for key:Variant in value[field]:
 			if field=="services" and key not in ["kiln_heat","electricity","cold_storage","hammer_work","mechanical_work","specimen_observation","food_preservation","signal_analysis","analysis_optical","analysis_electrical","analysis_radio","analysis_digital","radio_records","polymer_reactor_work","polymer_heat_removal","polymer_stirred_work","nmr_unqualified_time","sec_column_time"]:return false
-			if field=="inputs" and key not in ["Timber","Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides","Food Can Sets","Paper","Message Tape","Rolling Bearings","Drive Chains","Drive Belts","Rope Coils","Brazed Steel Fittings","Pressure Pipe Fittings","Foam Cold-Store Panels","Insulated Cable"]:return false
+			if field=="inputs" and not input_names.has(key):return false
 			if not key is String or not number(value[field][key]) or value[field][key]<0:return false
 	for name:String in {"kiln_heat":4000.0,"electricity":23000.0,"cold_storage":400000.0,"hammer_work":8.0,"mechanical_work":30000.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0,"polymer_reactor_work":1000.0,"polymer_heat_removal":2200.0,"polymer_stirred_work":1000.0,"nmr_unqualified_time":1000.0,"sec_column_time":1000.0}:
 		if float(value.services.get(name,0))>float({"kiln_heat":4000.0,"electricity":23000.0,"cold_storage":400000.0,"hammer_work":8.0,"mechanical_work":30000.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0,"polymer_reactor_work":1000.0,"polymer_heat_removal":2200.0,"polymer_stirred_work":1000.0,"nmr_unqualified_time":1000.0,"sec_column_time":1000.0}[name])+.000001:return false
@@ -282,4 +286,14 @@ static func valid(value:Variant)->bool:
 		if id=="water_hammer" and not WaterDrive.valid(record.get("river_site")):return false
 		if record.installed!=floorf(record.installed) or record.building!=floorf(record.building) or record.installed+record.building>LIMIT or record.work>=float(PLANTS[id].work):return false
 	return true
+## Names a daily input ledger may hold: every flattened plant input, plus the
+## former part names that older saves recorded before bills were flattened.
+const LEGACY_INPUTS:=["Timber","Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides","Food Can Sets","Paper","Message Tape","Rolling Bearings","Drive Chains","Drive Belts","Rope Coils","Brazed Steel Fittings","Pressure Pipe Fittings","Foam Cold-Store Panels","Insulated Cable"]
+static var _input_name_set:Dictionary={}
+static func _input_names()->Dictionary:
+	if _input_name_set.is_empty():
+		for name:String in LEGACY_INPUTS:_input_name_set[name]=true
+		for id:String in PLANTS:
+			for name:String in PLANTS[id].get("inputs",{}):_input_name_set[name]=true
+	return _input_name_set
 static func number(value:Variant)->bool:return (value is float or value is int) and is_finite(float(value))

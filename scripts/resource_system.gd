@@ -737,9 +737,9 @@ func _ensure_deposit_fields(deposit:Dictionary)->void:
 		if not deposit.has(key): deposit[key]=DEPOSIT_FIELD_DEFAULTS[key].duplicate() if DEPOSIT_FIELD_DEFAULTS[key] is Array else DEPOSIT_FIELD_DEFAULTS[key]
 
 func _is_material_resource(resource_name:String)->bool:
-	# Household craft stocks represent maintained tools/containers in use. Their
-	# owner applies material-specific wear; raw-yard loss must not charge it again.
-	return resource_name not in ["Freshwater","Fertile Soil","Game"] and resource_name not in preload("res://scripts/opening_craft_practice.gd").DECAY
+	# Civilian Goods are maintained household things in use. CivilianGoods applies
+	# their wear; raw-yard loss must not charge it again.
+	return resource_name not in ["Freshwater","Fertile Soil","Game",preload("res://scripts/civilian_goods.gd").GOODS]
 
 const MATERIAL_PROFILES:={
 		"Timber":{"family":"organic","bulk":1.35,"store":"yard","loss":0.0012,"base_yield":0.34},
@@ -888,22 +888,10 @@ func _storage_capacities()->Dictionary:
 	if "Open Work Area" in WorldSimulation.state.settlement_completed: result.yard+=160.0; result.covered+=55.0; result.secure+=20.0
 	if "Lean-to Shelters" in WorldSimulation.state.settlement_completed: result.dry+=90.0
 	if "Storage Pits" in WorldSimulation.state.settlement_completed: result.covered+=140.0; result.sealed+=25.0
-	# Persistent storage plots are operational infrastructure, not decoration. Their
-	# condition and staffing determine how much of the nominal space can be used.
-	for plot in WorldSimulation.state.settlement_plots:
-		if String(plot.get("land_use",""))!="storage" or String(plot.get("status","")) not in ["active","stressed","damaged"]: continue
-		var staffing:=clampf(float(plot.get("worker_count",0))/maxf(1.0,float(plot.get("worker_capacity",1))),0.15,1.0)
-		var usable:=float(plot.get("storage_capacity",0.0))*clampf(float(plot.get("condition",0.0)),0.10,1.0)*staffing
-		var form:=String(plot.get("form",""))
-		if "earthen" in form or "pit" in form:
-			result.covered+=usable*0.62
-			result.sealed+=usable*0.38
-		elif "stone" in form:
-			result.covered+=usable*0.72
-			result.secure+=usable*0.28
-		else:
-			result.dry+=usable*0.58
-			result.covered+=usable*0.42
+	# Built storage is part of the city's capacities; its condition and staffing
+	# already limit how much of the nominal space can be used.
+	var built:Dictionary=WorldSimulation.settlements.city_capacities().get("storage_bulk",{})
+	for kind:String in built:result[kind]=float(result[kind])+float(built[kind])
 	result.dry*=1.0+WorldSimulation.discovery.effect("dry_storage")
 	result.covered*=1.0+WorldSimulation.discovery.effect("container_capacity")
 	result.sealed*=1.0+WorldSimulation.discovery.effect("container_capacity")

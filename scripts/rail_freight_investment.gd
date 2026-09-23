@@ -1,12 +1,14 @@
 extends RefCounted
 const Rail=preload("res://scripts/rail_freight.gd")
-const Supply=preload("res://scripts/civilian_production_planner.gd")
+const Stock=preload("res://scripts/bill_stock.gd")
+## One maintenance reserve unit: a track panel, a brake set, timber and iron,
+## held as raw materials and Civilian Goods so city trade can move it.
+static var RESERVE_UNIT:=preload("res://scripts/goods_bills.gd").flatten({"Timber Rail Panels":1.0,"Rail Brake Sets":1.0,"Timber":1.0,"Wrought Iron":1.0})
 static func maintenance_targets(city_id:String)->Dictionary:
 	var needs:Dictionary={}
 	for line:Dictionary in Rail.data().lines:
 		if String(line.source_id)!=city_id or Rail.F.building(line):continue
-		for item:String in ["Timber Rail Panels","Rail Brake Sets","Timber","Wrought Iron"]:
-			needs[item]=float(needs.get(item,0))+maxf(2,float(line.route.length_km)*.2)
+		Stock.add_scaled(needs,RESERVE_UNIT,maxf(2,float(line.route.length_km)*.2))
 	return needs
 static func candidate()->Dictionary:
 	var source:=Rail.local_city()
@@ -37,16 +39,23 @@ static func candidate()->Dictionary:
 		if not terms.has("cost"):continue
 		return {"source":source,"destination":String(destination.id),"terms":terms}
 	return {}
+## Installs a supplied line. Bills are raw materials and Civilian Goods, which
+## no production line makes to order, so this never returns a production order.
 static func recommendation()->Dictionary:
 	if not WorldSimulation.state.resource_settlement_id.is_empty():return {}
+	var option:=candidate()
+	if not option.is_empty() and bool(option.terms.get("ok",false)):Rail.install(String(option.source),String(option.destination))
+	return {}
+
+## Raw materials and Civilian Goods the local city lacks for rail upkeep and
+## its next proposed line.
+static func shortfall()->Dictionary:
 	var needs:=maintenance_targets(Rail.local_city())
 	var option:=candidate()
-	if not option.is_empty():
-		if bool(option.terms.get("ok",false)):Rail.install(String(option.source),String(option.destination))
-		else:
-			for item:String in option.terms.cost:needs[item]=float(needs.get(item,0))+float(option.terms.cost[item])
+	if not option.is_empty() and not bool(option.terms.get("ok",false)):
+		for item:String in option.terms.cost:needs[item]=float(needs.get(item,0))+float(option.terms.cost[item])
+	var result:Dictionary={}
 	for item:String in needs:
-		if float(WorldSimulation.state.resource_stockpiles.get(item,0))>=float(needs[item]):continue
-		var order:=Supply.supply(item,ceili(float(needs[item])),{})
-		if not order.is_empty():return order
-	return {}
+		var missing:=float(needs[item])-float(WorldSimulation.state.resource_stockpiles.get(item,0))
+		if missing>0:result[item]=missing
+	return result

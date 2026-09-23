@@ -273,8 +273,10 @@ func test_dispatched_paid_research_uses_operating_radio_at_actual_arrival()->voi
 			state.population_allocations.Crafting=10
 			for gate:String in ["radio_telegraphy","agreed_signal_codes"]:
 				state.known_discoveries.append(gate);state.discovery_adoption[gate]=1.0
-			state.resource_stockpiles["Radio Telegraph Sets"]=1.0
-			state.resource_stockpiles["Timber"]=2.0;state.resource_stockpiles["Paper"]=5.0
+			# The station bill and its record inputs, as raw materials and goods.
+			var spec:Dictionary=ops.PLANTS.research_radio_station
+			for item:String in spec.cost:state.resource_stockpiles[item]=float(spec.cost[item])
+			for item:String in spec.inputs:state.resource_stockpiles[item]=float(state.resource_stockpiles.get(item,0))+float(spec.inputs[item])*100.0
 			assert_bool(ops.install("research_radio_station").get("ok",false)).is_true()
 			ops.data().plants.solar_array={"installed":1,"building":0,"work":0.0,"enabled":true}
 			for day in range(arrival-10,arrival+1):state.elapsed_days=day;ops.advance(day)

@@ -1,8 +1,6 @@
 extends GdUnitTestSuite
 const C=preload("res://scripts/civilization_controller.gd")
 const P=preload("res://scripts/persistent_production.gd")
-const I=preload("res://scripts/civilian_industry.gd")
-const E=preload("res://scripts/society_exchange.gd")
 
 func before_test()->void:WorldSimulation.clear();WorldSimulation.create_actor("delivery",1031)
 
@@ -23,40 +21,25 @@ func learn(id:String)->void:
 
 func test_delivery_shortfall_allows_paid_carts_and_keeps_training_suspended()->void:
 	WorldSimulation.scoped("delivery",func()->void:
-		setup();learn("cart_running_gear")
+		setup();learn("joinery")
 		var state=WorldSimulation.state;var host=WorldSimulation.military
-		state.resource_stockpiles["Cart Assembly Kits"]=2.0
+		# Carts are built from raw materials and Civilian Goods: stock two carts.
+		var cart:Dictionary=host._transport_recipe().materials
+		for resource:String in cart:state.resource_stockpiles[resource]=float(cart[resource])*2.0
 		var plan:=C.current_plan("delivery")
 		assert_bool(plan.hungry).is_true();assert_bool(plan.food_shortage).is_false()
 		var before:=host._daily_delivery_capacity()
 		C.military_orders("delivery",plan)
 		assert_str(host.training_staff.policy("army").id).is_equal("suspended")
+		assert_array(host.equipment_queue).is_not_empty()
+		if host.equipment_queue.is_empty():return
 		var job:Dictionary=host.equipment_queue[0]
-		assert_str(String(job.item)).is_equal("assembled_transport_cart")
+		assert_str(String(job.item)).is_equal("transport_cart")
 		assert_float(float(state.resource_stockpiles.get("Transport Carts",0))).is_equal(0.0)
-		P.advance(host,job,2.0)
-		assert_float(float(state.resource_stockpiles["Cart Assembly Kits"])).is_equal(0.0)
+		P.advance(host,job,float(job.work_per_item)*2.0)
+		for resource:String in cart:assert_float(float(state.resource_stockpiles[resource])).is_equal_approx(0.0,.000001)
 		assert_float(float(state.resource_stockpiles["Transport Carts"])).is_equal(2.0)
 		assert_float(host._daily_delivery_capacity()).is_greater(before)
-	)
-
-func test_home_research_supply_can_continue_during_delivery_only_hunger()->void:
-	WorldSimulation.scoped("delivery",func()->void:
-		setup();learn("paper_making")
-		var state=WorldSimulation.state;var item:=""
-		for id:String in I.PRODUCTS:
-			if I.PRODUCTS[id].output=="Paper" and I.PRODUCTS[id].gate=="paper_making":item=id;break
-		assert_str(item).is_not_empty()
-		var spec:Dictionary=I.PRODUCTS[item]
-		for resource:String in spec.materials:state.resource_stockpiles[resource]=20.0
-		for resource:String in spec.tooling:state.resource_stockpiles[resource]=20.0
-		E.data().collections.returned={"study":0.0,"work":240.0,"returned_day":0}
-		C.civilian_orders("delivery",C.current_plan("delivery"))
-		assert_int(WorldSimulation.military.equipment_queue.size()).is_equal(1)
-		var job:Dictionary=WorldSimulation.military.equipment_queue[0]
-		assert_str(String(job.item)).is_equal(item)
-		P.advance(WorldSimulation.military,job,float(job.work_per_item))
-		assert_float(float(state.resource_stockpiles.Paper)).is_equal(1.0)
 	)
 
 func test_real_food_shortage_and_unknown_cause_still_block_production()->void:

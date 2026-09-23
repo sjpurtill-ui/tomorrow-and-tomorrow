@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const Craft=preload("res://scripts/opening_craft_practice.gd")
+const Craft=preload("res://scripts/civilian_goods.gd")
 
 func before_test()->void:
 	WorldSimulation.clear()

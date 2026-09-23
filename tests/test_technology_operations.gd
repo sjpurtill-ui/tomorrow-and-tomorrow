@@ -25,8 +25,16 @@ func prepare()->void:
 		for gate:String in [spec.gate]+spec.requires:
 			if gate not in GameState.known_discoveries:GameState.known_discoveries.append(gate)
 			GameState.discovery_adoption[gate]=1.0
-		for item:String in spec.cost:GameState.resource_stockpiles[item]=100.0
-		for item:String in spec.inputs:GameState.resource_stockpiles[item]=100.0
+		# Bills are flattened raw materials and Civilian Goods; stock enough for several installs.
+		for item:String in spec.cost:GameState.resource_stockpiles[item]=maxf(float(GameState.resource_stockpiles.get(item,0)),float(spec.cost[item])*6.0+100.0)
+	for spec:Dictionary in Ops.PLANTS.values():
+		for item:String in spec.inputs:GameState.resource_stockpiles[item]=maxf(float(GameState.resource_stockpiles.get(item,0)),100.0)
+
+func assert_paid(before:Dictionary,id:String)->void:
+	var cost:Dictionary=Ops.PLANTS[id].cost
+	assert_bool(cost.has("Civilian Goods")).is_true()
+	for item:String in cost:
+		assert_float(float(GameState.resource_stockpiles[item])).is_equal_approx(float(before[item])-float(cost[item]),.000001)
 
 func tick(day:int)->void:
 	GameState.elapsed_days=day;Ops.advance(day)
@@ -40,9 +48,9 @@ func running_cold_store()->void:
 func test_knowledge_and_stored_machines_do_not_provide_free_power()->void:
 	prepare()
 	assert_float(Ops.service("cold_storage")).is_equal(0.0)
-	var before:float=GameState.resource_stockpiles["Electrical Generators"]
+	var before:=GameState.resource_stockpiles.duplicate()
 	assert_bool(Ops.install("steam_generator").get("ok",false)).is_true()
-	assert_float(float(GameState.resource_stockpiles["Electrical Generators"])).is_equal(before-1)
+	assert_paid(before,"steam_generator")
 	assert_int(int(Ops.data().plants.steam_generator.installed)).is_equal(0)
 	tick(1)
 	assert_float(Ops.service("electricity")).is_equal(0.0)
@@ -71,10 +79,15 @@ func test_fuel_interruption_stops_refrigeration_without_forgetting_knowledge()->
 
 func test_cooling_changes_actual_spoilage_with_finite_capacity()->void:
 	running_cold_store()
-	GameState.food_stocks={"Fresh meat":400.0}
+	GameState.food_stocks={FoodSystem.FRESH:400.0}
+	var cooled:=float(FoodSystem._spoilage_rates(false)[0])
 	var losses:=FoodSystem._spoil(false)
-	assert_float(absf(float(losses["Fresh meat"])-400*.045*.6)).is_less(.000001)
-	assert_float(Ops.refrigeration_multiplier(200,{"Dry staples":400.0})).is_equal(1.0)
+	assert_float(float(losses[FoodSystem.FRESH])).is_greater(0.0)
+	Ops.data().services.cold_storage=0.0
+	var uncooled:=float(FoodSystem._spoilage_rates(false)[0])
+	# 200 cooled capacity covers half of 400 fresh food: 1-.8*.5 of the uncooled rate.
+	assert_float(absf(cooled/uncooled-.6)).is_less(.000001)
+	assert_float(Ops.refrigeration_multiplier(200,{FoodSystem.STORED:400.0})).is_equal(1.0)
 
 func test_idle_generator_does_not_burn_fuel_without_consumers()->void:
 	prepare();Ops.install("steam_generator")
@@ -145,9 +158,10 @@ func test_research_inspector_install_action_reserves_real_equipment()->void:
 	prepare()
 	var panel:VBoxContainer=auto_free(preload("res://scripts/hud/technology_operations_panel.gd").new())
 	panel.subject="mechanical_refrigeration";add_child(panel)
+	var before:=GameState.resource_stockpiles.duplicate()
 	panel.rows.cold_store.build.pressed.emit()
 	assert_int(int(Ops.data().plants.cold_store.building)).is_equal(1)
-	assert_float(float(GameState.resource_stockpiles["Electric Motors"])).is_equal(99.0)
+	assert_paid(before,"cold_store")
 
 func test_powered_workshop_improves_actual_production_without_creating_workers()->void:
 	prepare()

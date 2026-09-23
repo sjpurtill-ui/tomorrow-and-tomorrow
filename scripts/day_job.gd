@@ -11,6 +11,9 @@ var groups:Array[Dictionary]=[]
 var steps_run:=0
 var longest_step_usec:=0
 var last_step:={}
+## Steps at least this long are recorded while performance tracing is on.
+const SLOW_STEP_USEC:=40000
+static var slow_steps:Array=[]
 var result:Dictionary={}
 
 static func step(label:String,timings:Dictionary,call:Callable)->Dictionary:
@@ -65,6 +68,7 @@ func step_once()->void:
 	steps_run+=1
 	longest_step_usec=maxi(longest_step_usec,elapsed)
 	last_step={"owner":String(group.owner),"label":String(next.label),"usec":elapsed}
+	if elapsed>=SLOW_STEP_USEC and preload("res://scripts/performance_trace.gd").enabled:slow_steps.append(last_step)
 	var timings:Dictionary=next.timings
 	if not timings.is_empty():
 		var record:Dictionary=timings.get(String(next.label),{"calls":0,"microseconds":0})

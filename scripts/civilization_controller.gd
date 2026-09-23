@@ -186,14 +186,10 @@ static func production_food_blocked(plan:Dictionary)->bool:
 	return bool(plan.get("food_shortage",plan.get("hungry",false)))
 
 static func civilian_arrival_review_due(id:String,day:int)->bool:
-	if review_due(id,day):return true
-	# An empty civilian workshop must be able to use today's delivered inputs
-	# before recurring consumers spend them. Existing lines keep their targets;
-	# broader investment and retooling decisions remain on the monthly review.
-	for job:Dictionary in WorldSimulation.military.equipment_queue:
-		if String(job.get("job_type",""))=="civilian" and not bool(job.get("paused",false)):
-			return false
-	return true
+	# Plant and infrastructure investment is reviewed monthly against that day's
+	# delivered inputs. There are no civilian lines waiting to start daily:
+	# civilian manufactures are Civilian Goods made by households.
+	return review_due(id,day)
 
 static func civilian_orders(id:String,plan:Dictionary)->void:
 	preload("res://scripts/day_job.gd").run_parts(civilian_order_steps(id,func()->Dictionary:return plan))
@@ -224,9 +220,7 @@ static func production_order(id:String,recommendation:Dictionary)->void:
 		if String(job.get("item",""))==item:
 			exists=true;managed=bool(job.get("planner_managed",false));break
 	if not exists and (campaign.equipment_queue.size()>=campaign.production_line_capacity() or not campaign.PersistentProduction.startup_blockers(campaign,item,{}).is_empty()):
-		var reusable:=preload("res://scripts/civilian_production_planner.gd").finished_line(String(preload("res://scripts/civilian_industry.gd").product(item).get("output","")))
-		if reusable<0:reusable=preload("res://scripts/armor_equipment.gd").reusable_line(campaign,item)
-		if reusable<0:reusable=finished_ai_line(id,campaign)
+		var reusable:=finished_ai_line(id,campaign)
 		if reusable<0:
 			preload("res://scripts/ai_workshop_turnover.gd").request(id,campaign,item,int(recommendation.target))
 			return
@@ -234,7 +228,7 @@ static func production_order(id:String,recommendation:Dictionary)->void:
 	ensure_line(id,item,int(recommendation.target))
 	if managed:
 		for job:Dictionary in campaign.equipment_queue:
-			if String(job.get("item",""))==item and (String(job.get("job_type",""))=="civilian" or preload("res://scripts/armor_equipment.gd").KITS.has(item)) and bool(job.get("persistent",false)):
+			if String(job.get("item",""))==item and preload("res://scripts/armor_equipment.gd").KITS.has(item) and bool(job.get("persistent",false)):
 				job.planner_managed=true;break
 
 static func finished_ai_line(id:String,campaign:Node)->int:

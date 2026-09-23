@@ -5,6 +5,7 @@ const I=preload("res://scripts/civilian_industry.gd")
 const P=preload("res://scripts/persistent_production.gd")
 const C=preload("res://scripts/civilization_controller.gd")
 const Strategy=preload("res://scripts/civilization_strategy.gd")
+const Bills=preload("res://scripts/goods_bills.gd")
 const PRODUCTS=["fitted_shields","bronze_armor_plates","iron_armor_plates","padded_armor","lamellar_armor","scale_armor","mail_armor","forged_plate_armor","sheet_plate_armor"]
 func before_test()->void:WorldSimulation.clear();WorldSimulation.create_actor("armor",4986)
 func after_test()->void:
@@ -20,11 +21,17 @@ func setup()->void:
 func plan()->Dictionary:
 	var p:=Strategy.preferences({}, {"food_days":120,"food_intake_ratio":1.0,"at_war":false})
 	p.offensive=false;return p
+## Stocks a kit's flattened bill (raw materials and Civilian Goods) for a few
+## items and starts one line.
+func stock_bill(item:String,items:float=3.0)->Dictionary:
+	know(String(A.KITS[item].gate))
+	var recipe:=P.recipe(WorldSimulation.military,item)
+	assert_bool(recipe.has("error")).override_failure_message(str(recipe)).is_false()
+	for resource:String in recipe.materials:WorldSimulation.state.resource_stockpiles[resource]=maxf(100.0,float(recipe.materials[resource])*items)
+	for resource:String in recipe.get("tooling",{}):WorldSimulation.state.resource_stockpiles[resource]=maxf(100.0,float(recipe.tooling[resource])+1.0)
+	return recipe
 func provision(item:String)->Dictionary:
-	var spec:Dictionary=I.product(item) if I.PRODUCTS.has(item) else A.KITS[item]
-	know(String(spec.gate))
-	for resource:String in spec.materials:WorldSimulation.state.resource_stockpiles[resource]=100.0
-	for resource:String in spec.get("tooling",{}):WorldSimulation.state.resource_stockpiles[resource]=100.0
+	stock_bill(item)
 	var started:=WorldSimulation.military.start_production_line(item,1)
 	assert_bool(started.get("ok",false)).override_failure_message(str(started)).is_true()
 	return WorldSimulation.military.equipment_queue.back()
@@ -42,37 +49,35 @@ func test_authored_branches_retain_material_and_forming_alternatives()->void:
 		var plate:Dictionary=WorldSimulation.discovery.discovery_definition("articulated_plate_armor")
 		assert_bool(T.evaluate(plate,["hardened_edges","standard_measures","structural_load_testing"]).ready).is_true()
 		assert_bool(T.evaluate(plate,["hardened_edges","standard_measures","sheet_steel_rolling"]).ready).is_true())
-func test_all_components_pay_local_materials_and_work()->void:
+func test_armor_parts_are_not_lines_and_kits_bill_only_raw_materials_and_goods()->void:
 	WorldSimulation.scoped("armor",func()->void:
-		setup()
+		setup();var host=WorldSimulation.military
 		for item:String in PRODUCTS:
-			var spec:=I.product(item);var job:=provision(item)
-			WorldSimulation.state.resource_stockpiles[spec.output]=0.0
-			var before:Dictionary=WorldSimulation.state.resource_stockpiles.duplicate(true)
-			P.advance(WorldSimulation.military,job,float(spec.days)/2)
-			assert_float(float(WorldSimulation.state.resource_stockpiles[spec.output])).is_equal(0.0)
-			P.advance(WorldSimulation.military,job,float(spec.days)/2)
-			assert_float(float(WorldSimulation.state.resource_stockpiles[spec.output])).is_equal(1.0)
-			for resource:String in spec.materials:
-				assert_float(float(before[resource])-float(WorldSimulation.state.resource_stockpiles[resource])).override_failure_message(item+resource).is_equal_approx(float(spec.materials[resource]),.000001)
-			WorldSimulation.military.cancel_equipment_job(int(job.id)))
-func test_kits_consume_finished_armor_and_enter_matching_inventory()->void:
+			know(String(I.product(item).gate))
+			assert_str(String(P.recipe(host,item).get("error",""))).override_failure_message(item).is_equal(P.CIVILIAN_ERROR)
+			assert_bool(host.start_production_line(item,1).has("error")).override_failure_message(item).is_true()
+		for item:String in A.KITS:
+			var recipe:=stock_bill(item)
+			assert_float(float(recipe.materials.get(Bills.Goods.GOODS,0.0))).override_failure_message(item).is_greater(0.0)
+			for resource:String in recipe.materials:
+				assert_bool(Bills.manufactured(resource)).override_failure_message(item+" names part "+resource).is_false())
+func test_kits_consume_their_flattened_bill_and_enter_matching_inventory()->void:
 	WorldSimulation.scoped("armor",func()->void:
 		setup()
 		for item:String in A.KITS:
 			var spec:Dictionary=A.KITS[item];var job:=provision(item)
 			var before:Dictionary=WorldSimulation.state.resource_stockpiles.duplicate(true)
 			P.advance(WorldSimulation.military,job,float(spec.days))
-			assert_int(int(WorldSimulation.military.military_inventory[item])).is_equal(1)
-			for resource:String in spec.materials:
-				assert_float(float(before[resource])-float(WorldSimulation.state.resource_stockpiles[resource])).is_equal_approx(float(spec.materials[resource]),.000001)
+			assert_int(int(WorldSimulation.military.military_inventory[item])).override_failure_message(item).is_equal(1)
+			for resource:String in job.materials:
+				assert_float(float(before[resource])-float(WorldSimulation.state.resource_stockpiles[resource])).override_failure_message(item+" "+resource).is_equal_approx(float(job.materials[resource]),.000001)
 			WorldSimulation.military.cancel_equipment_job(int(job.id)))
-func test_missing_armor_or_unlearned_method_cannot_create_kits()->void:
+func test_missing_inputs_or_unlearned_method_cannot_create_kits()->void:
 	WorldSimulation.scoped("armor",func()->void:
 		setup();var host=WorldSimulation.military
 		assert_bool(host.start_production_line("plate_spear",1).has("error")).is_true()
 		var job:=provision("plate_spear")
-		WorldSimulation.state.resource_stockpiles["Fitted Plate Armor"]=0.0
+		WorldSimulation.state.resource_stockpiles[Bills.Goods.GOODS]=0.0
 		var before:Dictionary=WorldSimulation.state.resource_stockpiles.duplicate(true)
 		P.advance(host,job,100)
 		assert_dict(WorldSimulation.state.resource_stockpiles).is_equal(before)
@@ -124,37 +129,31 @@ func test_same_unit_selection_uses_supplied_armor_and_preserves_cheap_fallback()
 		WorldSimulation.state.known_discoveries.erase("articulated_plate_armor")
 		assert_str(A.selection(host,"spearman",p)).is_equal("spear")
 		assert_bool(host._training_gate("archer","plate_spear").has("error")).is_true())
-func test_controller_builds_upstream_armor_while_recruiting_with_ready_spears()->void:
+func test_controller_orders_armor_kits_while_recruiting_with_ready_spears()->void:
 	WorldSimulation.scoped("armor",func()->void:
-		setup();var host=WorldSimulation.military;var state=WorldSimulation.state;var p:=plan()
+		setup();var host=WorldSimulation.military;var p:=plan()
 		know("articulated_plate_armor");host.military_inventory.spear=20;host.aggregate_recruits=4
-		for r:String in ["Steel","Woven Cloth","Charcoal","Wrought Iron","Timber","Stone"]:state.resource_stockpiles[r]=100.0
-		state.resource_stockpiles["Fitted Plate Armor"]=0.0;state.resource_stockpiles["Steel"]=0.0
+		stock_bill("plate_spear",8.0)
 		var next:=A.investment(host,"spearman","spear",4,p)
-		assert_str(String(next.get("item",""))).is_equal("forged_plate_armor")
-		var stocks:Dictionary=state.resource_stockpiles.duplicate(true)
+		assert_str(String(next.get("item",""))).is_equal("plate_spear")
 		C.land_training_orders("armor","spearman","spear",4,p)
 		assert_int(host.training_queue.size()).is_equal(1)
 		assert_str(host.training_queue[0].weapon).is_equal("spear")
 		assert_int(int(host.military_inventory.get("plate_spear",0))).is_equal(0)
-		assert_int(host.equipment_queue.size()).is_greater_equal(1)
-		assert_str(host.equipment_queue[0].item).is_equal("forged_plate_armor")
-		assert_float(float(state.resource_stockpiles["Wrought Iron"])).is_less(float(stocks["Wrought Iron"]))
-		P.advance(host,host.equipment_queue[0],18)
-		var armor_job:Dictionary=host.equipment_queue[0];host.cancel_equipment_job(int(armor_job.id))
-		var kit:=host.start_production_line("plate_spear",1)
-		assert_bool(kit.get("ok",false)).override_failure_message(str(kit)).is_true()
-		P.advance(host,host.equipment_queue.back(),6)
+		var kit_lines:Array=host.equipment_queue.filter(func(job:Dictionary)->bool:return String(job.item)=="plate_spear")
+		assert_int(kit_lines.size()).is_equal(1)
+		P.advance(host,kit_lines[0],6)
+		assert_int(int(host.military_inventory.get("plate_spear",0))).is_equal(1)
 		assert_str(A.selection(host,"spearman",p)).is_equal("plate_spear"))
-func test_impossible_or_paused_upstream_chain_has_no_investment()->void:
+func test_impossible_or_paused_kit_line_has_no_investment()->void:
 	WorldSimulation.scoped("armor",func()->void:
 		setup();know("mail_armor_fabrication")
 		WorldSimulation.state.resource_stockpiles.clear()
 		assert_dict(A.upstream(WorldSimulation.military,"mail_spear",4)).is_empty()
-		var job:=provision("mail_armor");job.paused=true
-		WorldSimulation.state.resource_stockpiles["Mail Armor"]=0.0
-		WorldSimulation.state.resource_stockpiles["Timber"]=100.0;WorldSimulation.state.resource_stockpiles["Stone"]=100.0
-		assert_dict(A.upstream(WorldSimulation.military,"mail_spear",4)).is_empty())
+		var job:=provision("mail_spear");job.paused=true
+		assert_dict(A.upstream(WorldSimulation.military,"mail_spear",4)).is_empty()
+		job.paused=false
+		assert_str(String(A.upstream(WorldSimulation.military,"mail_spear",4).get("item",""))).is_equal("mail_spear"))
 func test_player_training_issues_only_matching_manufactured_kits()->void:
 	WorldSimulation.scoped("armor",func()->void:
 		setup();var host=WorldSimulation.military
@@ -171,8 +170,8 @@ func test_player_training_issues_only_matching_manufactured_kits()->void:
 func test_full_save_retains_partial_armor_job_kits_and_formation_identity()->void:
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 	WorldSimulation.scoped("armor",func()->void:
-		setup();var host=WorldSimulation.military;var job:=provision("mail_armor")
-		P.advance(host,job,6)
+		setup();var host=WorldSimulation.military;var job:=provision("mail_spear")
+		P.advance(host,job,2)
 		host.military_inventory.mail_spear=2;host.damaged_equipment.mail_spear=1
 		host.aggregate_recruits=4
 		var order:=host.start_training("spearman","mail_spear",4)
@@ -187,11 +186,11 @@ func test_full_save_retains_partial_armor_job_kits_and_formation_identity()->voi
 	if not result.get("ok",false):return
 	WorldSimulation.scoped("armor",func()->void:
 		var host=WorldSimulation.military;var job:Dictionary=host.equipment_queue.back()
-		assert_float(float(job.progress_days)).is_equal(6.0)
+		assert_float(float(job.progress_days)).is_equal(2.0)
 		assert_str(host.home_army.formations.back().weapon).is_equal("mail_spear")
 		assert_int(int(host.home_army.formations.back().equipment)).is_equal(2)
 		assert_int(int(host.damaged_equipment.mail_spear)).is_equal(1)
-		P.advance(host,job,6)
+		P.advance(host,job,2)
 		assert_int(int(job.completed)).is_equal(1)
 		assert_array(host.validate_state()).is_empty())
 func test_actual_automatic_military_orders_select_available_armor_for_infantry()->void:
@@ -206,13 +205,12 @@ func test_actual_automatic_military_orders_select_available_armor_for_infantry()
 		assert_str(String(host.training_queue.back().weapon)).is_equal("plate_spear")
 		assert_int(int(host.military_inventory.plate_spear)).is_equal(20)
 		assert_int(int(host.home_army.get("troops",0))).is_equal(0))
-func test_automatic_armor_chain_reuses_one_free_workshop_and_replenishes_after_issue()->void:
+func test_automatic_armor_kits_use_one_free_workshop_and_replenish_after_issue()->void:
 	WorldSimulation.scoped("armor",func()->void:
 		setup();know("articulated_plate_armor")
 		var host=WorldSimulation.military;var state=WorldSimulation.state
-		for r:String in ["Steel","Woven Cloth","Charcoal","Wrought Iron","Timber","Stone"]:state.resource_stockpiles[r]=200.0
-		state.resource_stockpiles["Fitted Plate Armor"]=0.0;host.military_inventory.spear=20
-		# Occupied manual slots are left alone; one slot must complete both stages.
+		stock_bill("plate_spear",12.0);host.military_inventory.spear=20
+		# Occupied manual slots are left alone; one free slot makes the kits.
 		for n:int in range(host.production_line_capacity()-1):
 			var result:=host.start_production_line("spear",50)
 			assert_bool(result.get("ok",false)).is_true()
@@ -231,14 +229,3 @@ func test_automatic_armor_chain_reuses_one_free_workshop_and_replenishes_after_i
 			if cycle==0:host.military_inventory.plate_spear=0
 		for job:Dictionary in host.equipment_queue:
 			if String(job.item)=="spear":assert_bool(job.paused).is_true())
-func test_armor_retool_advice_preserves_manual_paused_and_partially_paid_lines()->void:
-	WorldSimulation.scoped("armor",func()->void:
-		setup();var host=WorldSimulation.military;var job:=provision("plate_spear")
-		WorldSimulation.state.resource_stockpiles["Fitted Plate Armor"]=0.0
-		assert_int(A.reusable_line(host,"forged_plate_armor")).is_equal(-1)
-		job.planner_managed=true;job.paused=true
-		assert_int(A.reusable_line(host,"forged_plate_armor")).is_equal(-1)
-		job.paused=false;job.progress_days=1.0
-		assert_int(A.reusable_line(host,"forged_plate_armor")).is_equal(-1)
-		job.progress_days=0.0
-		assert_int(A.reusable_line(host,"forged_plate_armor")).is_equal(int(job.id)))

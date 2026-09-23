@@ -1,5 +1,12 @@
 extends GdUnitTestSuite
 const S=preload("res://scripts/microscopy_samples.gd")
+const Bills=preload("res://scripts/goods_bills.gd")
+## Lab supplies as the raw materials and Civilian Goods they are now drawn as.
+func goods(bill:Dictionary)->Dictionary:return Bills.flatten(bill).duplicate()
+## Asserts `stocks` equals `start` less the flattened `paid` bill.
+func assert_paid(stocks:Dictionary,start:Dictionary,paid:Dictionary)->void:
+	var flat:=Bills.flatten(paid)
+	for item:String in start:assert_float(float(stocks.get(item,0))).override_failure_message(item).is_equal_approx(float(start[item])-float(flat.get(item,0)),.000001)
 func test_isolation_transfers_finite_named_material_and_never_grants_purity()->void:
 	var ledger:=S.empty_state()
 	var source:=S.add(ledger,"starter",1,0,"home",0,.04,{"viability":.9,"contamination":.4})
@@ -31,15 +38,16 @@ func test_paid_local_lab_reserves_after_care_and_observes_real_starter_lots_once
 		state.settlement_site_committed=true;state.population_allocations.Knowledge=20
 		WorldSimulation.settlements.ensure_founded()
 		for entry:Dictionary in preload("res://scripts/microscopy_knowledge.gd").entries():state.known_discoveries.append(entry.id);state.discovery_adoption[entry.id]=1.0
-		state.known_discoveries.append_array(["precision_thermometry","clinical_observation_rounds"])
+		state.known_discoveries.append_array(["precision_thermometry","clinical_observation_rounds",preload("res://scripts/microscopy_lab.gd").BENCH_GATE])
 		state.discovery_adoption.clinical_observation_rounds=1.0
 		var lab=preload("res://scripts/microscopy_lab.gd")
 		var care=preload("res://scripts/civilian_care.gd")
 		var raw:=state.effective_workers("Knowledge",false,true)
 		var reserved:=lab.reserved(state,state.effective_workers("Knowledge",false,false,false,true))
 		assert_float(state.effective_workers("Knowledge")+care.staff()+reserved).is_equal_approx(raw,.00001)
-		state.resource_stockpiles={"Compound Microscopes":1.0,"Laboratory Glassware":20.0,"Specimen Slides":10.0,"Glass Tubes":2.0,"Copper Wire":1.0,"Glass Vessels":2.0,"Charcoal":2.0,"Freshwater":20.0,"Plant Tannin Extract":2.0,"Printed Sheets":2.0,"Clay":2.0}
-		state.food_stocks={"Dry staples":20.0}
+		state.resource_stockpiles=goods({"Compound Microscopes":1.0,"Laboratory Glassware":20.0,"Specimen Slides":10.0,"Glass Tubes":2.0,"Copper Wire":1.0,"Glass Vessels":2.0,"Charcoal":2.0,"Freshwater":20.0,"Plant Tannin Extract":2.0,"Printed Sheets":2.0,"Clay":2.0})
+		var supplied:Dictionary=state.resource_stockpiles.duplicate()
+		state.food_stocks={"Stored food":20.0}
 		var batches=preload("res://scripts/food_batches.gd")
 		batches.add_lot("starter",2,0);batches.add_lot("starter",2,0)
 		for day:int in range(1,7):
@@ -50,8 +58,9 @@ func test_paid_local_lab_reserves_after_care_and_observes_real_starter_lots_once
 			lab.advance(false)
 			assert_dict(state.resource_stockpiles).is_equal(stocks)
 			assert_dict(state.microscopy).is_equal(ledger)
-		assert_float(float(state.resource_stockpiles["Compound Microscopes"])).is_equal(0.0)
-		assert_float(float(state.food_stocks["Dry staples"])).is_less(20.0)
+		assert_bool(bool(state.microscopy.tools.bench)).is_true()
+		assert_float(float(state.resource_stockpiles["Civilian Goods"])).is_less(float(supplied["Civilian Goods"]))
+		assert_float(float(state.food_stocks["Stored food"])).is_less(20.0)
 		assert_float(float(batches.data().lots[0].amount)).is_less(2.0)
 		assert_array(state.microscopy.protocols).is_not_empty()
 		assert_bool(S.valid(state.microscopy)).is_true()
@@ -93,7 +102,8 @@ func test_failed_replication_can_retry_new_sources_and_heat_does_not_accumulate_
 	for id:int in [1,2]:
 		var sample:=S.add(ledger,"starter",id,0,"home",0,.04,{"viability":1.0 if id==1 else .2})
 		S.measure(ledger,sample,0,true,known);S.grow(sample,1,.02,true);S.measure(ledger,sample,1,true,known)
-	var stocks:={"Printed Sheets":2.0,"Charcoal":2.0,"Freshwater":2.0}
+	var stocks:=goods({"Printed Sheets":2.0,"Charcoal":2.0,"Freshwater":2.0})
+	var start:=stocks.duplicate()
 	var lab=preload("res://scripts/microscopy_lab.gd")
 	lab.interpret(ledger,stocks,known,1)
 	assert_bool(lab.protocol_ready(ledger,"starter")).is_false()
@@ -101,7 +111,7 @@ func test_failed_replication_can_retry_new_sources_and_heat_does_not_accumulate_
 	S.measure(ledger,third,0,true,known);S.grow(third,1,.02,true);S.measure(ledger,third,1,true,known)
 	lab.interpret(ledger,stocks,known,1)
 	assert_bool(lab.protocol_ready(ledger,"starter")).is_true()
-	assert_float(float(stocks["Printed Sheets"])).is_equal_approx(1.8,.00001)
+	assert_paid(stocks,start,{"Printed Sheets":.2})
 	ledger.tools={"bench":true,"thermometry":true}
 	lab.prepare_station(ledger,stocks,["instrument_sterilization","precision_thermometry"],2)
 	assert_int(int(ledger.tools.get("sterile_uses",0))).is_equal(0)
@@ -128,7 +138,7 @@ func test_real_crop_trial_rejects_recent_cellular_tissue_failure()->void:
 		for day:int in range(177,181):botany.observe(comparison,day,"home",known,1,1,1)
 		assert_bool(comparison.vouchers[-1].qualified).is_true()
 		state.field_botany=field
-		state.resource_stockpiles={"Specimen Slides":1.0,"Freshwater":1.0,"Steel Tool Bits":1.0}
+		state.resource_stockpiles=goods({"Specimen Slides":1.0,"Freshwater":1.0,"Steel Tool Bits":1.0})
 		state.microscopy.work_bank=1.0
 		botany.observe(field,177,"home",known,1,1,1)
 		lab.collect_plant(state.microscopy,state.resource_stockpiles,177)
@@ -172,7 +182,7 @@ func test_replication_requires_matching_recorded_conditions()->void:
 func test_heat_evidence_expires_and_calibration_alone_is_valid()->void:
 	var ledger:=S.empty_state();ledger.work_bank=8.0
 	ledger.tools={"bench":true,"thermometry":true}
-	var stocks:={"Freshwater":10.0,"Charcoal":10.0}
+	var stocks:=goods({"Freshwater":10.0,"Charcoal":10.0})
 	var lab=preload("res://scripts/microscopy_lab.gd")
 	lab.prepare_station(ledger,stocks,["precision_thermometry"],1)
 	assert_bool(S.valid(ledger)).is_true()
@@ -198,10 +208,11 @@ func test_histology_requires_paid_section_not_whole_sample_staining()->void:
 	assert_bool(sample.methods.has("tissue")).is_false()
 	var lab=preload("res://scripts/microscopy_lab.gd")
 	assert_bool(lab.prepare_section(ledger,sample,{},1)).is_false()
-	var stocks:={"Steel Tool Bits":1.0,"Specimen Slides":1.0,"Freshwater":1.0}
+	var stocks:=goods({"Steel Tool Bits":1.0,"Specimen Slides":1.0,"Freshwater":1.0})
+	var start:=stocks.duplicate()
 	assert_bool(lab.prepare_section(ledger,sample,stocks,1)).is_true()
 	assert_float(float(sample.amount)).is_equal_approx(.0009,.000001)
-	assert_float(float(stocks["Steel Tool Bits"])).is_equal_approx(.999,.000001)
+	assert_paid(stocks,start,{"Steel Tool Bits":.001,"Specimen Slides":.01,"Freshwater":.01})
 	S.measure(ledger,sample,1,true,known)
 	assert_bool(sample.methods.has("tissue")).is_true()
 	assert_bool(S.valid(ledger)).is_true()

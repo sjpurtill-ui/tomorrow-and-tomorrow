@@ -49,10 +49,10 @@ func _food_blocks(metrics:Dictionary)->Array:
 	for food_type in FoodSystem.FOOD_TYPES:
 		var amount:=float(stocks.get(food_type,0.0))
 		var lost:=float(spoilage_by_type.get(food_type,0.0))
-		if amount<=0.05 and lost<=0.05 and String(food_type) not in ["Fresh plants","Preserved food"]: continue
+		if amount<=0.05 and lost<=0.05 and String(food_type) not in ["Fresh food","Stored food"]: continue
 		var days_of_kind:=amount/eaten_per_day
 		var sub_text:="ample store" if days_of_kind>999.0 else "%.1f days" % days_of_kind
-		if amount<=0.05: sub_text="not yet produced" if String(food_type)=="Preserved food" else "0 days"
+		if amount<=0.05: sub_text="not yet produced" if String(food_type)=="Stored food" else "0 days"
 		stock_items.append({
 			"name":String(food_type),"sub":sub_text,
 			"value":"%d · −%.0f" % [roundi(amount),lost] if lost>0.05 else str(roundi(amount)),
@@ -268,7 +268,7 @@ func _provisions_data()->Dictionary:
 	var city:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
 	var rows:Array=[]
 	var stocks:Dictionary=metrics.get("food_stocks",GameState.food_stocks)
-	for group in [["Fresh plants"],["Fresh meat","Fish"],["Dry staples"],["Preserved food"]]:
+	for group in [["Fresh food"],["Stored food"]]:
 		var stock:=0.0;var lost:=0.0;var parts:Array[String]=[]
 		for kind:String in group:
 			var amount:=float(stocks.get(kind,0));var waste:=float(metrics.get("food_spoilage_by_type",{}).get(kind,0))

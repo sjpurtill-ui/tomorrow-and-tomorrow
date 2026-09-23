@@ -1,5 +1,19 @@
 extends RefCounted
 const Samples=preload("res://scripts/microscopy_samples.gd")
+const Bills=preload("res://scripts/goods_bills.gd")
+## Discovery that must be known before the bench's microscope is assembled from
+## goods; slides and glassware are ordinary goods once the bench exists.
+const BENCH_GATE:="compound_microscopy"
+## The bench's microscope, glassware and first slides, as authored.
+const BENCH_SOURCE:={"Compound Microscopes":1.0,"Laboratory Glassware":1.0,"Specimen Slides":.2}
+## Raw materials and Civilian Goods the bench still needs, for reports.
+static func bench_shortfall()->Dictionary:
+	var bill:=Bills.flatten(BENCH_SOURCE)
+	var result:Dictionary={}
+	for key:String in bill:
+		var missing:=float(bill[key])-float(WorldSimulation.state.resource_stockpiles.get(key,0))
+		if missing>0:result[key]=missing
+	return result
 static func available(state:Node)->bool:
 	if not state.settlement_site_committed or state.convoy_traveling or not bool(state.microscopy.enabled):return false
 	for city:Dictionary in state.player_settlements:
@@ -11,16 +25,19 @@ static func reserved(state:Node,after_care:float)->float:
 	return maxf(0,after_care)*clampf(float(state.microscopy.staff_share),0,.5)
 static func site()->String:
 	return String(WorldSimulation.state.resource_settlement_id) if not String(WorldSimulation.state.resource_settlement_id).is_empty() else "home"
+## Pays `cost` from stocks and `work` from the bench's work bank. Costs may name
+## former lab goods; they are drawn as raw materials and Civilian Goods.
 static func pay(ledger:Dictionary,stocks:Dictionary,cost:Dictionary,work:float)->bool:
 	if float(ledger.work_bank)<work:return false
-	for key:String in cost:
-		if float(stocks.get(key,0))<float(cost[key]):return false
-	for key:String in cost:stocks[key]=float(stocks[key])-float(cost[key])
+	var bill:=Bills.flatten(cost)
+	for key:String in bill:
+		if float(stocks.get(key,0))<float(bill[key]):return false
+	for key:String in bill:stocks[key]=float(stocks[key])-float(bill[key])
 	ledger.work_bank-=work
 	return true
 static func prepare_station(ledger:Dictionary,stocks:Dictionary,known:Array,day:int)->void:
-	if not bool(ledger.tools.get("bench",false)):
-		if pay(ledger,stocks,{"Compound Microscopes":1.0,"Laboratory Glassware":1.0,"Specimen Slides":.2},.5):ledger.tools.bench=true
+	if not bool(ledger.tools.get("bench",false)) and BENCH_GATE in known:
+		if pay(ledger,stocks,BENCH_SOURCE,.5):ledger.tools.bench=true
 	if "precision_thermometry" in known and not bool(ledger.tools.get("thermometry",false)):
 		# A finite comparison vessel/probe assembly. Calibration and exposure are
 		# abstract game units, not a real sterilization protocol or temperature.
@@ -103,10 +120,10 @@ static func advance(traveling:bool)->Dictionary:
 		if sample.site!=site():continue
 		var aseptic:bool="aseptic_laboratory_practice" in known and protocol_ready(ledger,String(sample.kind)) and int(ledger.tools.get("sterile_until",-1))>=day and int(ledger.tools.get("sterile_uses",0))>0
 		var can_culture:bool="cell_culture_methods" in known or (sample.kind=="starter" and "microbial_growth_measurement" in known)
-		if can_culture and day>int(sample.last_day) and float(state.food_stocks.get("Dry staples",0))>=.03:
+		if can_culture and day>int(sample.last_day) and float(state.food_stocks.get("Stored food",0))>=.03:
 			if pay(ledger,stocks,{"Freshwater":.05,"Laboratory Glassware":.002},.05):
 				if Samples.grow(sample,day,.02,aseptic):
-					state.food_stocks["Dry staples"]-=.03
+					state.food_stocks["Stored food"]-=.03
 					if aseptic:ledger.tools.sterile_uses-=1
 					Samples.record(ledger,sample,day,"culture",{"media":float(sample.media),"aseptic":aseptic,"line":int(sample.line)})
 					report.cultured+=1

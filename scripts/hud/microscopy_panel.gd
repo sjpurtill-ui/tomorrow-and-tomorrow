@@ -27,7 +27,12 @@ func refresh()->void:
 	var workers:=Lab.reserved(state,state.effective_workers("Knowledge",false,false,false,true))
 	var lines:Array[String]=["Local microscopy · %s · %.2f Knowledge workers reserved after absences and clinical care."%["operating" if Lab.available(state) else "paused or unavailable",workers],"%.2f stored work · %d/%d specimens · %d retained records."%[float(ledger.work_bank),ledger.specimens.size(),Samples.LIMIT,ledger.records.size()]]
 	if not bool(ledger.tools.get("bench",false)):
-		lines.append("Bench awaiting 1 Compound Microscope, 1 Laboratory Glassware, 0.2 Specimen Slides and 0.5 stored work. These must be supplied before observations begin.")
+		if Lab.BENCH_GATE not in state.known_discoveries:lines.append("Bench awaiting compound microscopy: the microscope cannot be assembled until it is known.")
+		else:
+			var missing:Array[String]=[]
+			var shortfall:Dictionary=Lab.bench_shortfall()
+			for item:String in shortfall:missing.append("%.1f %s"%[float(shortfall[item]),item])
+			lines.append("Bench assembly draws Civilian Goods and raw materials for the microscope, glassware and slides, plus 0.5 stored work."+(" Still missing: "+", ".join(missing)+"." if not missing.is_empty() else ""))
 	else:lines.append("Microscope bench installed. Samples, media, blank controls, preparation and records consume supplies and work; analyzed material never returns to food.")
 	var repeats:=0
 	for protocol:Dictionary in ledger.protocols:

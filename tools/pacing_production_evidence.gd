@@ -42,8 +42,8 @@ static func capture(detailed:bool=false)->Dictionary:
 				military[weapon].ammunition_carried+=int(formation.get("ammunition",0))
 				military[weapon].ammunition_required+=int(formation.get("ammunition_required",0))
 	var household:Dictionary={}
-	for product:String in preload("res://scripts/opening_craft_practice.gd").PRODUCTS.values():
-		if float(state.resource_stockpiles.get(product,0))>0:household[product]=float(state.resource_stockpiles[product])
+	var goods:=String(preload("res://scripts/civilian_goods.gd").GOODS)
+	if float(state.resource_stockpiles.get(goods,0))>0:household[goods]=float(state.resource_stockpiles[goods])
 	var recorded:Dictionary={}
 	for receipt:Dictionary in campaign.workshop.data.get("totals",{}).values():
 		var resource:=String(receipt.resource)

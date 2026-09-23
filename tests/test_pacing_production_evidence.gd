@@ -23,21 +23,22 @@ func test_government_counts_distinguish_candidates_and_dual_officeholders()->voi
 	)
 func test_real_partial_production_is_reported_without_mutating_state()->void:
 	WorldSimulation.scoped("evidence",func()->void:
-		var state=WorldSimulation.state;state.settlement_site_committed=true;state.convoy_traveling=false
+		var state=WorldSimulation.state;var host=WorldSimulation.military;state.settlement_site_committed=true;state.convoy_traveling=false
 		state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0;state.population_allocations.Crafting=10
-		state.known_discoveries.append("clay_levigation");state.discovery_adoption.clay_levigation=1.0
 		for resource:String in ["Clay","Freshwater","Timber","Stone"]:state.resource_stockpiles[resource]=100.0
-		assert_bool(WorldSimulation.military.start_production_line("prepared_clay",2).get("ok",false)).is_true()
-		var job:Dictionary=WorldSimulation.military.equipment_queue.back();P.advance(WorldSimulation.military,job,1.0)
-		var stocks:Dictionary=state.resource_stockpiles.duplicate(true);var queue:Array=WorldSimulation.military.equipment_queue.duplicate(true);var operations:Dictionary=Ops.data().duplicate(true)
+		state.resource_stockpiles["Civilian Goods"]=3.0
+		# Lines make military items only; evidence reports no civilian lines.
+		assert_bool(host.start_production_line("improvised",2).get("ok",false)).is_true()
+		var job:Dictionary=host.equipment_queue.back();P.advance(host,job,float(job.work_per_item)*.5)
+		var stocks:Dictionary=state.resource_stockpiles.duplicate(true);var queue:Array=host.equipment_queue.duplicate(true);var operations:Dictionary=Ops.data().duplicate(true)
 		var result:=Evidence.capture(true)
-		assert_int(int(result.civilian_lines)).is_equal(1)
-		assert_float(float(result.lines[0].progress_days)).is_equal(1.0)
-		assert_int(int(result.lines[0].completed_on_current_line)).is_equal(0)
-		assert_dict(state.resource_stockpiles).is_equal(stocks);assert_array(WorldSimulation.military.equipment_queue).is_equal(queue);assert_dict(Ops.data()).is_equal(operations)
-		P.advance(WorldSimulation.military,job,1.0);result=Evidence.capture(true)
-		assert_float(float(result.manufactured_stocks["Prepared Clay"])).is_equal(1.0)
-		assert_int(int(result.lines[0].completed_on_current_line)).is_equal(1)
+		assert_int(int(result.civilian_lines)).is_equal(0)
+		assert_float(float(result.household_stocks["Civilian Goods"])).is_equal(3.0)
+		assert_bool(result.military_capabilities.improvised.recipe_known).is_true()
+		assert_int(int(result.military_capabilities.improvised.stored)).is_equal(0)
+		assert_dict(state.resource_stockpiles).is_equal(stocks);assert_array(host.equipment_queue).is_equal(queue);assert_dict(Ops.data()).is_equal(operations)
+		P.advance(host,job,float(job.work_per_item)*.5);result=Evidence.capture(true)
+		assert_int(int(result.military_capabilities.improvised.stored)).is_equal(1)
 	)
 func test_stale_service_ledger_does_not_claim_current_operating_capability()->void:
 	WorldSimulation.scoped("evidence",func()->void:
@@ -59,16 +60,15 @@ func test_produced_totals_survive_line_removal_and_consumption()->void:
 		var state=WorldSimulation.state;var host=WorldSimulation.military
 		state.settlement_site_committed=true;state.convoy_traveling=false
 		state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0;state.population_allocations.Crafting=10
-		state.known_discoveries.append("clay_levigation");state.discovery_adoption.clay_levigation=1.0
 		for resource:String in ["Clay","Freshwater","Timber","Stone"]:state.resource_stockpiles[resource]=100.0
-		assert_bool(host.start_production_line("prepared_clay",1).get("ok",false)).is_true()
+		assert_bool(host.start_production_line("improvised",1).get("ok",false)).is_true()
 		var job:Dictionary=host.equipment_queue.back()
 		var before:Dictionary=host.workshop.output_stocks(job)
-		P.advance(host,job,2.0);host.workshop.record(job,before)
-		host.equipment_queue.clear();state.resource_stockpiles["Prepared Clay"]=0.0
+		P.advance(host,job,float(job.work_per_item)*2.0);host.workshop.record(job,before)
+		host.equipment_queue.clear();host.military_inventory.improvised=0
 		var result:=Evidence.capture(true)
-		assert_int(int(result.civilian_lines)).is_equal(0)
-		assert_float(float(result.recorded_output["Prepared Clay"])).is_equal(1.0)
+		assert_int(int(result.military_capabilities.improvised.stored)).is_equal(0)
+		assert_float(float(result.recorded_output.improvised)).is_equal(1.0)
 		assert_int(result.recorded_output_by_settlement.size()).is_equal(1)
 	)
 

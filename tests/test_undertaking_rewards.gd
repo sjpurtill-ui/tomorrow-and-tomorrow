@@ -14,7 +14,7 @@ func completed(id:String)->Dictionary:
 	city.undertakings.append(r)
 	return r
 func test_food_storage_and_preservation_are_real_and_do_not_create_food()->void:
-	GameState.food_stocks={"Fresh plants":100.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":0.0,"Preserved food":0.0}
+	GameState.food_stocks={FoodSystem.FRESH:100.0,FoodSystem.STORED:100.0}
 	var capacity:float=FoodSystem._food_storage_capacity()
 	var before:Dictionary=GameState.food_stocks.duplicate(true)
 	var ordinary:Dictionary=FoodSystem._spoil(false)
@@ -23,7 +23,8 @@ func test_food_storage_and_preservation_are_real_and_do_not_create_food()->void:
 	assert_float(FoodSystem._food_storage_capacity()).is_equal(capacity+18000.0)
 	assert_dict(GameState.food_stocks).is_equal(before)
 	var preserved:Dictionary=FoodSystem._spoil(false)
-	assert_float(float(preserved["Fresh plants"])).is_equal_approx(float(ordinary["Fresh plants"])*.75,.000001)
+	assert_float(float(preserved[FoodSystem.FRESH])).is_equal_approx(float(ordinary[FoodSystem.FRESH])*.75,.000001)
+	assert_float(float(preserved[FoodSystem.STORED])).is_equal_approx(float(ordinary[FoodSystem.STORED])*.75,.000001)
 	r.status="ruined"
 	assert_float(FoodSystem._food_storage_capacity()).is_equal(capacity)
 func test_crafting_research_and_attraction_change_existing_systems()->void:

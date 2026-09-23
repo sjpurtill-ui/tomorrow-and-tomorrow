@@ -136,7 +136,9 @@ func test_invalid_save_and_priority_leave_live_state_untouched()->void:
 	assert_str(Production.validate_saved({"equipment_queue":42})).is_not_empty()
 
 func test_ammunition_and_transport_feed_existing_stores()->void:
-	GameState.resource_stockpiles["Cart Assembly Kits"]=2.0
+	# Carts are built from raw materials and Civilian Goods; stock two carts' worth.
+	var cart:Dictionary=MilitaryCampaign._transport_recipe().materials
+	for resource:String in cart:GameState.resource_stockpiles[resource]=float(GameState.resource_stockpiles.get(resource,0))+float(cart[resource])*2.0
 	for item:String in ["arrows","transport_cart"]:
 		MilitaryCampaign.equipment_queue.clear()
 		for discovery:String in ["bow_craft","joinery"]:

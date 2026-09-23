@@ -1,6 +1,7 @@
 extends RefCounted
 const F=preload("res://scripts/rail_freight_fabric.gd")
 const R=preload("res://scripts/rail_route_survey.gd")
+const Stock=preload("res://scripts/bill_stock.gd")
 static func number(v:Variant,low:float,high:float,whole:bool=false)->bool:
 	return R.number(v) and float(v)>=low and float(v)<=high and (not whole or floorf(float(v))==float(v))
 static func identity(v:Variant)->bool:return v is String and not v.is_empty() and v.length()<=160
@@ -18,10 +19,9 @@ static func valid(value:Variant)->bool:
 		pairs[key]=true
 		if not number(line.get("gauge_mm"),1,2000,true) or not F.GAUGES.has(int(line.gauge_mm)) or not number(line.get("wagons"),1,F.MAX_WAGONS,true):return false
 		if not R.valid(line.get("route")):return false
-		var bill:=F.installation_bill(line.route,int(line.gauge_mm),int(line.wagons))
-		if not line.get("paid_materials") is Dictionary or line.paid_materials.size()!=bill.size():return false
-		for item:String in bill:
-			if not number(line.paid_materials.get(item),float(bill[item]),float(bill[item])):return false
+		# Lines paid before Civilian Goods recorded the named-part bill.
+		var paid:Variant=line.get("paid_materials")
+		if not Stock.same(paid,F.installation_bill(line.route,int(line.gauge_mm),int(line.wagons))) and not Stock.same(paid,F.legacy_installation_bill(line.route,int(line.gauge_mm),int(line.wagons))):return false
 		var required:=maxf(10,float(line.route.length_km)*F.CONSTRUCTION_WORK_PER_KM)
 		if not number(line.get("work_required"),required,required) or not number(line.get("work_done"),0,required):return false
 		for field:String in ["condition","wagon_condition"]:

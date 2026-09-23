@@ -22,7 +22,8 @@ const SETTLEMENT_NAME_ENDINGS:=["bank","bridge","cross","field","ford","gate","h
 
 const CITY_RESOURCE_DEFAULTS:={
 	"civilian_care":{"enabled":true,"staff_share":0.25,"episodes":[],"next_id":1,"last_day":-1,"history":[],"report":{}},
-	"household_clothing":{"tools":{},"lots":[],"bone_stock":0.0,"last_day":-1,"report":{}},
+	"household_clothing":{"last_day":-1,"report":{}},
+	"city_form":{"tier":-1.0,"condition":-1.0},
 	"water_conveyance":{"lines":[],"next_id":1,"last_day":-1,"report":{}},
 	"water_waste_works":{"works":[],"next_id":1,"last_day":-1,"report":{}},
 	"food_batches":{"tools":{},"lots":[],"next_id":1,"last_day":-1,"report":{}},
@@ -31,10 +32,10 @@ const CITY_RESOURCE_DEFAULTS:={
 	"field_botany":{"last_day":-1,"next_id":1,"lines":[],"trials":[],"vouchers":[],"applications":[],"report":{},"balance":false,"reference_seed":0.0,"reference_site":"","reference_day":-1,"reference_line":{}},
 	"cultivation_nutrients":{"nitrogen":0.0,"phosphorus":0.0},
 	"resource_stockpiles":{"Food":0.0,"Freshwater":0.0},"resource_deposits":[],
-	"opening_craft_practice":{"initialized":true,"last_day":-1,"report":{}},
+	"civilian_goods":{"initialized":true,"last_day":-1,"report":{}},
 	"resource_events":[],"resource_practice":{},"resource_priorities":{},
 	"material_metrics":{},"material_history":[],"water_metrics":{},"water_history":[],
-	"food_stocks":{"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":0.0,"Preserved food":0.0},
+	"food_stocks":{"Fresh food":0.0,"Stored food":0.0},
 	"fire_practice":{"initialized":false,"embers":0.0,"last_day":-1,"source":"none","last_event":"No maintained fire","fuel_today":0.0,"ignitions":0,"extinctions":0},
 	"food_source_health":{"Wild gathering":0.92,"Hunting":0.88,"Fishing":0.90,"Cultivation":0.94},
 	"food_history":[],"food_issue_history":[],"nutrition_reserve":0.90,"malnutrition_burden":0.0,
@@ -283,8 +284,8 @@ func process_city_resources(settlement_id:String,context:Dictionary,daily_work:C
 		stamp=_record_secondary_timing(timings,"resources",stamp)
 		with_local_population(func()->void:WorldSimulation.consequences.process_day(context),true)
 		stamp=_record_secondary_timing(timings,"consequences",stamp)
-		with_local_population(func()->void:preload("res://scripts/opening_craft_practice.gd").advance())
-		with_local_population(func()->void:preload("res://scripts/day_span.gd").each_day(func()->Array[Dictionary]:return WorldSimulation.economy.process_day(context)))
+		with_local_population(func()->void:preload("res://scripts/civilian_goods.gd").advance())
+		with_local_population(func()->void:WorldSimulation.economy.process_day(context))
 		stamp=_record_secondary_timing(timings,"economy",stamp)
 		record["resource_metrics"]=WorldSimulation.state.simulation_metrics.duplicate(true)
 		if daily_work.is_valid(): with_local_population(daily_work)
@@ -293,7 +294,8 @@ func process_city_resources(settlement_id:String,context:Dictionary,daily_work:C
 		return _record_secondary_timing(timings,"morphology",stamp)
 	)
 	_record_secondary_timing(timings,"scope_exit",last_stamp)
-	WorldSimulation.state.settlement_network_revision+=1
+	# A town's ordinary day changes no territory, marker or network structure;
+	# bumping the network revision here rebuilt the whole map network daily.
 	record["last_resource_day"]=int(WorldSimulation.state.elapsed_days)
 
 func _record_secondary_timing(timings:Dictionary,phase:String,start:int)->int:
@@ -304,7 +306,7 @@ func _record_secondary_timing(timings:Dictionary,phase:String,start:int)->int:
 	return now
 
 const MAX_CITY_SHIPMENTS:=128
-const CITY_TRADE_GOODS:=["Food","Timber","Stone","Clay","Fiber Plants","Salt","Medicinal Plants","Flint","Copper Ore","Tin Ore","Iron Ore","Coal"]
+const CITY_TRADE_GOODS:=["Food","Timber","Stone","Clay","Fiber Plants","Salt","Medicinal Plants","Flint","Copper Ore","Tin Ore","Iron Ore","Coal","Civilian Goods"]
 
 func city_trade_capacity()->Dictionary:
 	var logistics:=clampf(float(WorldSimulation.state.society_capacities.get("logistics",0.0)),0.0,1.0)
@@ -1487,8 +1489,37 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 		var choice:Dictionary=preload("res://scripts/settlement_fabric_operations.gd").choose_retrofit(WorldSimulation.state.settlement_plots,WorldSimulation.state.resource_stockpiles,WorldSimulation.state.known_discoveries,WorldSimulation.state.discovery_adoption)
 		if not choice.is_empty():start_fabric_retrofit(int(choice.plot_id),String(choice.method))
 	_bound_morphology_state()
+	_advance_city_form(month_day)
 	rebuild_summary()
 	return events
+
+## The city's construction era rises toward what its age, workers and knowledge
+## support; builders keep its condition up against monthly wear.
+func _advance_city_form(month_day:int)->void:
+	var form:=city_form()
+	var supported:=float(_supported_fabric_tier(month_day))
+	var builders:=WorldSimulation.state.effective_workers("Construction")
+	var population:=maxf(1.0,float(_primary_population()))
+	var building_share:=clampf(builders/maxf(1.0,population*0.05),0.0,1.0)
+	if supported>float(form.tier):form.tier=minf(supported,float(form.tier)+0.25*building_share)
+	form.condition=clampf(float(form.condition)+0.04*building_share-0.02,0.05,1.0)
+
+## The current city's era and condition, seeded from its buildings when absent.
+func city_form()->Dictionary:
+	var form:Dictionary=WorldSimulation.state.city_form
+	if float(form.get("tier",-1.0))<0.0 or float(form.get("condition",-1.0))<0.0:
+		var tier_total:=0.0;var condition_total:=0.0;var count:=0
+		for plot in WorldSimulation.state.settlement_plots:
+			if String(plot.get("status","")) in ["reclaimed"]:continue
+			tier_total+=float(plot.get("fabric_generation",0));condition_total+=float(plot.get("condition",0.8));count+=1
+		form["tier"]=tier_total/count if count>0 else 0.0
+		form["condition"]=clampf(condition_total/count,0.05,1.0) if count>0 else 0.9
+	return form
+
+## Structural damage to the city's built fabric (combat, bombardment, siege).
+func damage_city_form(amount:float)->void:
+	var form:=city_form()
+	form.condition=clampf(float(form.condition)-maxf(0.0,amount),0.05,1.0)
 
 func _bound_morphology_state()->void:
 	# Historical detail is summarized by current plot state; old event rows are
@@ -2994,8 +3025,10 @@ func rebuild_summary()->Dictionary:
 		"specialization":specialization,"exchange":exchange,"institutions":institutions,"connectivity":connectivity,"infrastructure":infrastructure,
 		"price_stability":clampf(1.0-absf(float(WorldSimulation.state.economy_metrics.get("inflation",0.0)))*8.0,0.0,1.0),"inequality":float(WorldSimulation.state.economy_metrics.get("inequality",0.0)),
 		"diversity":clampf(float(uses.size())/12.0,0.0,1.0),"mean_fabric_generation":mean_fabric_generation,"fabric_maturity":fabric_maturity,"morphology_eras":era_counts,"surfaced_route_share":surfaced_route_share,"food_import_share":food_import_share,"active_nuclei":_active_nuclei(),"district_count":maxi(1,_active_nuclei()),
+		"plot_count":count,
 		"usable_resident_capacity":occupied_capacity,"population_without_permanent_housing":maxi(0,population-occupied_capacity),"temporary_camp_population":temporary_camp_population,"temporary_shelter_capacity":temporary_shelter_capacity,"unsheltered_population":maxi(0,population-occupied_capacity-temporary_shelter_capacity),"limiting_factors":[]
 	}
+	summary.merge(_built_capacities(population),true)
 	var classification_result:=_classify(summary)
 	summary["classification"]=classification_result.classification
 	summary["classification_confidence"]=classification_result.confidence
@@ -3003,14 +3036,32 @@ func rebuild_summary()->Dictionary:
 	WorldSimulation.state.settlement_morphology=summary
 	return summary
 
+## Built capacity from population, construction era, condition and staffing.
+## Individual buildings are only drawn; they do not decide what a city can do.
+func _built_capacities(population:int)->Dictionary:
+	var form:=city_form()
+	var tier:=float(form.tier);var condition:=float(form.condition)
+	var people:=maxf(1.0,float(population))
+	var crafters:=WorldSimulation.state.effective_workers("Crafting")
+	var carriers:=WorldSimulation.state.effective_workers("Logistics")
+	var craft_staffing:=clampf(crafters/maxf(1.0,people*0.1),0.0,1.0)
+	var store_staffing:=clampf(carriers/maxf(1.0,people*0.1),0.15,1.0)
+	var built:=people*(0.03+0.02*tier)*condition*store_staffing
+	var storage_bulk:={"dry":built*0.58,"covered":built*0.42,"sealed":built*0.12 if tier>=2.0 else 0.0,"secure":built*0.08 if tier>=3.0 else 0.0}
+	var communal:=0
+	for work:String in ["Hearth Circle","Storage Pits","Public Stores","Gathering Yard","Open Work Area","Framed Hall"]:
+		if work in WorldSimulation.state.settlement_completed:communal+=1
+	if tier>=2.0:communal+=1
+	return {"storage_bulk":storage_bulk,"workshop_function":clampf((0.12+0.06*tier)*condition*craft_staffing,0.0,1.0),
+		"storage_function":clampf((0.28+0.12*tier)*condition*store_staffing,0.0,1.0),"workplace_condition":condition,
+		"communal_functions":communal,"fabric_tier":tier,"city_condition":condition}
+
 func _classify(summary:Dictionary)->Dictionary:
 	var limits:Array[String]=[]
 	if float(summary.permanence)<0.35: return {"classification":"founding camp","confidence":0.90,"limits":["permanent household fabric has not yet stabilized"]}
 	if float(summary.permanence)<0.50:
 		return {"classification":"hamlet","confidence":0.78,"limits":["permanence remains below village level"]}
-	var communal_functions:=0
-	for plot in WorldSimulation.state.settlement_plots:
-		if String(plot.get("land_use","")) in ["communal","storage","water","civic","sacred"] and String(plot.get("status",""))=="active": communal_functions+=1
+	var communal_functions:=int(summary.get("communal_functions",0))
 	var resident_population:=int(summary.resident_population)
 	var city_functions:=float(summary.exchange)>=0.55 and float(summary.institutions)>=0.50 and float(summary.infrastructure)>=0.50 and float(summary.food_import_share)>=0.15 and int(summary.district_count)>=3 and float(summary.service_population)>=float(summary.resident_population)*1.5
 	if resident_population>=10000000 and city_functions and float(summary.connectivity)>=0.68 and float(summary.infrastructure)>=0.75 and float(summary.specialization)>=0.55 and int(summary.district_count)>=6:
@@ -3027,6 +3078,15 @@ func _classify(summary:Dictionary)->Dictionary:
 		return {"classification":"village","confidence":0.76,"limits":limits}
 	limits.append("shared permanent functions remain insufficient")
 	return {"classification":"hamlet","confidence":0.70,"limits":limits}
+
+## Built capacity of the current city: storage by kind, workshop and storage
+## function, workplace condition and communal functions. Refreshed monthly with
+## the settlement summary and after damage; the daily simulation reads these
+## instead of individual buildings.
+func city_capacities()->Dictionary:
+	var summary:Dictionary=WorldSimulation.state.settlement_morphology
+	if not summary.has("storage_bulk") or not summary.has("fabric_tier"):summary=rebuild_summary()
+	return summary
 
 func classification()->String:
 	if WorldSimulation.state.settlement_morphology.is_empty(): rebuild_summary()
@@ -3047,6 +3107,8 @@ func apply_plot_damage(plot_id:int,severity:float,cause:String)->Dictionary:
 		_apply_damage_to_plot_record(plot,clampf(severity,0.0,1.0),cause)
 		_record_plot_damage_history(plot,cause)
 		WorldSimulation.state.morphology_revision+=1
+		# One struck building is a share of the city's fabric.
+		damage_city_form(clampf(severity,0.0,1.0)/maxf(8.0,float(WorldSimulation.state.settlement_plots.size())))
 		rebuild_summary()
 		return plot
 	return {}

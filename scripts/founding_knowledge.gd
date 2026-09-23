@@ -10,4 +10,4 @@ static func adoption()->Dictionary:
 	return result
 static func portable_supplies(population:float)->Dictionary:
 	var scale:=maxf(0,population)
-	return {"Flaked Stone Tools":scale*.03,"Cordage Bundles":scale*.04,"Hafted Tool Sets":scale*.02,"Drying Mats":scale*.025,"Flint":scale*.01,"Stone":scale*.025}
+	return {"Civilian Goods":scale*.115,"Flint":scale*.01,"Stone":scale*.025}

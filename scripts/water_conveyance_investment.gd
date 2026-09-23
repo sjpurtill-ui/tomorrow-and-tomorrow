@@ -1,6 +1,6 @@
 extends RefCounted
 const Water=preload("res://scripts/water_conveyance.gd")
-const Supply=preload("res://scripts/civilian_production_planner.gd")
+const Fabric=preload("res://scripts/water_conveyance_fabric.gd")
 
 static func local_context()->Dictionary:
 	var state=WorldSimulation.state
@@ -27,31 +27,30 @@ static func candidates()->Array[Dictionary]:
 	return result
 
 static func targets(deliverable:Dictionary={})->Dictionary:
+	# Repair reserves are raw materials and Civilian Goods, so city trade can
+	# move them: one section per active line and one rod set in total.
 	var demand:Dictionary={}
+	var rodding:=false
 	for line:Dictionary in Water.data().lines:
 		if line.status!="active":continue
-		var item:=String(preload("res://scripts/water_conveyance_fabric.gd").MATERIALS[line.material].item)
-		demand[item]=float(demand.get(item,0))+1.0
-		if Water.is_adopted("sewer_rodding_service"):demand["Conduit Rodding Sets"]=1.0
+		Fabric.Stock.add_scaled(demand,Fabric.section_unit(String(line.material)),1.0)
+		rodding=rodding or Water.is_adopted("sewer_rodding_service")
+	if rodding:Fabric.Stock.add_scaled(demand,Fabric.RODDING,1.0)
 	# A line under construction already owns its supplies; do not stock another
 	# complete route simply because delivered service has not started yet.
 	if not Water.data().lines.is_empty():return demand
 	var options:=candidates()
 	if not options.is_empty():
 		var selected:Dictionary=options[0]
-		# Prefer paid local sections, then a material we can manufacture. Imported
-		# sections remain installable even when their manufacture is unknown.
+		# Prefer a line paid locally, then one whose whole bill local and
+		# deliverable stocks cover; otherwise the first (ceramic) option.
 		for option:Dictionary in options:
 			if bool(option.terms.get("ok",false)):
 				selected=option;break
-			var item:=String(preload("res://scripts/water_conveyance_fabric.gd").MATERIALS[option.material].item)
-			if float(deliverable.get(item,0))+float(WorldSimulation.state.resource_stockpiles.get(item,0))>=float(option.terms.cost.get(item,0)):
-				selected=option;break
-			var possible:=false
-			for product:String in Supply.I.PRODUCTS:
-				if String(Supply.I.PRODUCTS[product].output)!=item:continue
-				if not Supply.P.recipe(WorldSimulation.military,product).has("error"):possible=true;break
-			if possible:selected=option;break
+			var covered:=true
+			for item:String in option.terms.cost:
+				if float(deliverable.get(item,0))+float(WorldSimulation.state.resource_stockpiles.get(item,0))<float(option.terms.cost[item]):covered=false;break
+			if covered:selected=option;break
 		demand.merge(selected.terms.cost,true)
 	return demand
 
@@ -62,24 +61,15 @@ static func install_supplied()->void:
 			Water.install(candidate.source,candidate.destination,candidate.height_at,candidate.material)
 			return
 
+## Installs supplied lines in every accessible city. Bills are raw materials
+## and Civilian Goods, which city trade moves (settlement_model reads
+## targets()); no production order is placed, so this always returns {}.
 static func recommendation()->Dictionary:
 	var state=WorldSimulation.state
 	if not state.resource_settlement_id.is_empty():return {}
 	install_supplied()
-	var required:=targets()
-	var deliverable:Dictionary=state.resource_stockpiles.duplicate()
 	for city:Dictionary in state.player_settlements:
 		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
-		var needs:Dictionary=WorldSimulation.settlements.with_city_resources(String(city.id),func()->Dictionary:
-			return WorldSimulation.settlements.with_local_population(func()->Dictionary:
-				install_supplied()
-				var result:=targets(deliverable)
-				for item:String in result:
-					result[item]=maxf(0,float(result[item])-float(state.resource_stockpiles.get(item,0))-WorldSimulation.settlements._city_incoming(String(city.id),item))
-				return result))
-		for item:String in needs:required[item]=float(required.get(item,0))+float(needs[item])
-	for item:String in required:
-		if float(state.resource_stockpiles.get(item,0))>=float(required[item]):continue
-		var order:=Supply.supply(item,ceili(float(required[item])),{})
-		if not order.is_empty():return order
+		WorldSimulation.settlements.with_city_resources(String(city.id),func()->void:
+			WorldSimulation.settlements.with_local_population(func()->void:install_supplied()))
 	return {}

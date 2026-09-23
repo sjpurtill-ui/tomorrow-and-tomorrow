@@ -66,13 +66,14 @@ func test_adoption_scales_benefit_and_staff_absence_preserves_knowledge()->void:
 func test_real_food_losses_change_only_for_the_supported_category()->void:
 	storage_setup()
 	GameState.known_discoveries.clear()
-	GameState.food_stocks={"Fresh plants":100.0,"Fresh meat":100.0}
+	GameState.food_stocks={FoodSystem.FRESH:100.0,FoodSystem.STORED:100.0}
 	var baseline:=FoodSystem._spoil(false)
 	GameState.known_discoveries.assign(["root_cellars"])
-	GameState.food_stocks={"Fresh plants":100.0,"Fresh meat":100.0}
+	GameState.food_stocks={FoodSystem.FRESH:100.0,FoodSystem.STORED:100.0}
 	var protected:=FoodSystem._spoil(false)
-	assert_float(absf(float(protected["Fresh plants"])-float(baseline["Fresh plants"])*.84)).is_less(.000001)
-	assert_float(float(protected["Fresh meat"])).is_equal(float(baseline["Fresh meat"]))
+	# Fresh food averages plants, meat and fish; cellars protect only the plant share.
+	assert_float(absf(float(protected[FoodSystem.FRESH])-float(baseline[FoodSystem.FRESH])*(.84+2.0)/3.0)).is_less(.000001)
+	assert_float(float(protected[FoodSystem.STORED])).is_equal(float(baseline[FoodSystem.STORED]))
 
 func test_contract_rejects_unknown_effect_and_invalid_food_type()->void:
 	var entry:Dictionary=preload("res://scripts/food_water_knowledge.gd").entries()[0].duplicate(true)
@@ -88,12 +89,13 @@ func test_inspector_explains_storage_limits()->void:
 
 func test_food_forecast_uses_the_same_preservation_profile()->void:
 	storage_setup()
-	GameState.food_stocks={"Fresh plants":100.0}
-	var baseline:=FoodSystem._forecast(1,{}, {},true)
-	var improved:=FoodSystem._forecast(1,{}, {},false)
-	assert_float(float(improved.spoilage)).is_less(float(baseline.spoilage))
-	assert_float(absf(float(improved.spoilage)-100.0*.022*.84)).is_less(.000001)
-	assert_float(float(GameState.food_stocks["Fresh plants"])).is_equal(100.0)
+	GameState.known_discoveries.clear()
+	GameState.food_stocks={FoodSystem.FRESH:100.0,FoodSystem.STORED:0.0}
+	var baseline:=FoodSystem._forecast({},{})
+	GameState.known_discoveries.assign(["root_cellars"])
+	var improved:=FoodSystem._forecast({},{})
+	assert_float(float(improved[30].spoilage)).is_less(float(baseline[30].spoilage))
+	assert_float(float(GameState.food_stocks[FoodSystem.FRESH])).is_equal(100.0)
 
 func test_rival_storage_uses_its_own_knowledge_and_adoption()->void:
 	storage_setup()

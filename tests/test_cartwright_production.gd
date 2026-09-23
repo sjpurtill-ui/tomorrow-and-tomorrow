@@ -1,6 +1,5 @@
 extends GdUnitTestSuite
 const K=preload("res://scripts/cartwright_knowledge.gd")
-const I=preload("res://scripts/civilian_industry.gd")
 const P=preload("res://scripts/persistent_production.gd")
 const Planner=preload("res://scripts/cart_supply_planner.gd")
 const Controller=preload("res://scripts/civilization_controller.gd")
@@ -16,20 +15,27 @@ func setup()->void:
 	state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
 	state.population_allocations.Crafting=40;state.population_allocations.Logistics=8
 	state.resource_stockpiles.clear()
-	for resource:String in ["Timber","Stone","Wrought Iron","Charcoal","Woven Cloth","Rope Coils","Treenails"]:state.resource_stockpiles[resource]=20000.0
+	# Cart parts are paid as raw materials and Civilian Goods.
+	for resource:String in host._transport_recipe().materials:state.resource_stockpiles[resource]=20000.0
+	state.resource_stockpiles.Timber=20000.0
 	for entry:Dictionary in WorldSimulation.discovery.technology_catalog:
 		if entry.id not in state.known_discoveries:state.known_discoveries.append(entry.id)
 		state.discovery_adoption[entry.id]=1.0
 	host.home_army.troops=48
 
+func cart_bill()->Dictionary:return WorldSimulation.military._transport_recipe().materials
+
+func stock_bill(bill:Dictionary,count:float)->void:
+	for resource:String in bill:WorldSimulation.state.resource_stockpiles[resource]=float(bill[resource])*count
+
 func forget(id:String)->void:
 	WorldSimulation.state.known_discoveries.erase(id);WorldSimulation.state.discovery_adoption.erase(id)
 
-func test_recursive_orders_build_carts_that_increase_staffed_delivery_capacity()->void:
+func test_orders_build_carts_that_increase_staffed_delivery_capacity()->void:
 	WorldSimulation.scoped("carter",func()->void:
 		setup();var host=WorldSimulation.military;var state=WorldSimulation.state
 		var before:=host._daily_delivery_capacity();var provision:=host._field_transport_delivery_ratio()
-		var timber:=float(state.resource_stockpiles.Timber);var made:Dictionary={}
+		var timber:=float(state.resource_stockpiles.Timber)
 		for step in 100:
 			var order:=Planner.recommendation()
 			if order.is_empty():break
@@ -40,10 +46,10 @@ func test_recursive_orders_build_carts_that_increase_staffed_delivery_capacity()
 				var prior:=int(job.completed)
 				P.advance(host,job,float(job.work_per_item)*float(order.target))
 				progressed=int(job.completed)>prior
-				if progressed:made[job.item]=true
 			assert_bool(progressed).is_true()
+			if not progressed:break
 		assert_float(float(state.resource_stockpiles.get("Transport Carts",0))).is_equal(2.0)
-		assert_int(made.size()).is_greater_equal(10)
+		assert_float(float(state.resource_stockpiles.get("Civilian Goods",0))).is_less(20000.0)
 		assert_float(float(state.resource_stockpiles.Timber)).is_less(timber)
 		assert_float(host._daily_delivery_capacity()).is_greater(before)
 		assert_float(host._field_transport_delivery_ratio()).is_greater(provision)
@@ -71,17 +77,20 @@ func test_running_gear_reconverges_after_either_wheel_method()->void:
 func test_legacy_batch_api_reserves_actual_kits_and_refunds_only_unfinished_work()->void:
 	WorldSimulation.scoped("carter",func()->void:
 		setup();var host=WorldSimulation.military;var state=WorldSimulation.state
+		var bill:=cart_bill()
+		stock_bill(bill,2.0);state.resource_stockpiles["Civilian Goods"]=float(bill["Civilian Goods"])*2.0-.5
 		assert_bool(host.transport_cart_quote(2).has("error")).is_true()
-		state.resource_stockpiles["Cart Assembly Kits"]=2.0
-		var raw_before:=float(state.resource_stockpiles.Timber)
+		stock_bill(bill,2.0)
 		var receipt:=host.queue_transport_cart_production(2)
 		assert_bool(receipt.has("queued")).is_true()
-		assert_float(float(state.resource_stockpiles["Cart Assembly Kits"])).is_equal(0.0)
-		assert_float(float(state.resource_stockpiles.Timber)).is_equal(raw_before)
+		if not receipt.has("queued"):return
+		for resource:String in bill:assert_float(float(state.resource_stockpiles[resource])).is_equal_approx(0.0,.000001)
 		var job:Dictionary=host.equipment_queue.back()
-		assert_dict(job.reserved_materials).is_equal({"Cart Assembly Kits":2.0})
+		var reserved:Dictionary={}
+		for resource:String in bill:reserved[resource]=float(bill[resource])*2.0
+		assert_dict(job.reserved_materials).is_equal(reserved)
 		assert_bool(host.cancel_equipment_job(int(job.id)).has("cancelled")).is_true()
-		assert_float(float(state.resource_stockpiles["Cart Assembly Kits"])).is_equal(2.0)
+		for resource:String in bill:assert_float(float(state.resource_stockpiles[resource])).is_equal_approx(float(bill[resource])*2.0,.000001)
 		assert_float(float(state.resource_stockpiles.get("Transport Carts",0))).is_equal(0.0)
 	)
 
@@ -92,10 +101,10 @@ func test_planner_blocks_shortages_unknown_methods_pause_and_absent_demand()->vo
 		state.resource_stockpiles.Timber=0.0
 		assert_dict(Planner.recommendation()).is_empty()
 		state.resource_stockpiles.Timber=20000.0
-		forget("cart_running_gear")
+		forget("joinery")
 		assert_dict(Planner.recommendation()).is_empty()
-		state.known_discoveries.append("cart_running_gear");state.discovery_adoption.cart_running_gear=1.0
-		assert_bool(host.start_production_line("bored_wheel_hubs",4).get("ok",false)).is_true()
+		state.known_discoveries.append("joinery");state.discovery_adoption.joinery=1.0
+		assert_bool(host.start_production_line("transport_cart",4).get("ok",false)).is_true()
 		host.equipment_queue.back().paused=true
 		assert_dict(Planner.recommendation()).is_empty()
 		host.equipment_queue.clear();host.home_army.troops=0
@@ -108,31 +117,14 @@ func test_old_cart_reservations_and_persistent_partial_work_are_preserved()->voi
 		host.equipment_queue.append({"id":1,"job_type":"transport","item":"transport_cart","count":1,"completed":0,"progress_days":0.0,"work_per_item":5.0,"required_days":5.0})
 		host._normalize_equipment_jobs()
 		assert_dict(host.equipment_queue[0].reserved_materials).is_equal({"Timber":8.0,"Fiber Plants":1.5})
-		host.equipment_queue.clear();state.resource_stockpiles["Cart Assembly Kits"]=1.0
+		host.equipment_queue.clear();var bill:=cart_bill();stock_bill(bill,1.0)
 		assert_bool(host.start_production_line("transport_cart",1).get("ok",false)).is_true()
+		if host.equipment_queue.is_empty():return
 		var job:Dictionary=host.equipment_queue.back()
 		P.advance(host,job,.5)
 		var payload:Dictionary=JSON.parse_string(JSON.stringify({"equipment_queue":host.equipment_queue}))
 		assert_str(P.validate_saved(payload)).is_empty()
 		P.advance(host,payload.equipment_queue[0],.5)
-		assert_float(float(state.resource_stockpiles["Cart Assembly Kits"])).is_equal(0.0)
+		for resource:String in bill:assert_float(float(state.resource_stockpiles[resource])).is_equal_approx(0.0,.000001)
 		assert_float(float(state.resource_stockpiles["Transport Carts"])).is_equal(1.0)
-	)
-
-func test_basic_and_sleeved_assemblies_consume_distinct_components()->void:
-	WorldSimulation.scoped("carter",func()->void:
-		setup();var state=WorldSimulation.state;var host=WorldSimulation.military
-		for item:String in ["cart_assembly_kits","sleeved_cart_kits"]:
-			var recipe:=I.product(item)
-			for resource:String in recipe.materials:state.resource_stockpiles[resource]=float(recipe.materials[resource])+float(recipe.tooling.get(resource,0))
-			for resource:String in recipe.tooling:
-				if not recipe.materials.has(resource):state.resource_stockpiles[resource]=float(recipe.tooling[resource])
-			var target:=int(state.resource_stockpiles.get("Cart Assembly Kits",0))+1
-			assert_bool(host.start_production_line(item,target).get("ok",false)).is_true()
-			var job:Dictionary=host.equipment_queue.back();P.advance(host,job,float(recipe.days))
-			assert_int(int(job.completed)).is_equal(1)
-			for resource:String in recipe.materials:assert_float(float(state.resource_stockpiles[resource])).is_equal(0.0)
-			host.cancel_equipment_job(int(job.id))
-		assert_float(float(state.resource_stockpiles["Cart Assembly Kits"])).is_equal(2.0)
-		assert_float(float(I.PRODUCTS.sleeved_cart_kits.days)).is_less(float(I.PRODUCTS.cart_assembly_kits.days))
 	)

@@ -96,11 +96,17 @@ func advance_steps(day:int)->Array:
 			if not bool(prospecting.available):data.status=String(prospecting.message);return null
 			target="rare_resources"
 		shared.merge({"searching":true,"view":view,"people":people,"spendable":spendable,"target":target},true)
+		data["search_turn"]=int(data.get("search_turn",0))+1
 		return routes
 	]]
 	# Familiar ground may need to be crossed to reach new country. Longer
 	# budgets are tried only when shorter, affordable trips are not useful.
-	for days:int in host.SCOUT_DURATIONS:
+	# Rival staff with multi-day steps (day_span.gd) plan one trip length per
+	# review, rotating through them; each plan is a costly route search.
+	var durations:Array=host.SCOUT_DURATIONS
+	if WorldSimulation.actor_id!="player" and WorldSimulation.span_limit>1:
+		durations=[host.SCOUT_DURATIONS[posmod(int(data.get("search_turn",0)),host.SCOUT_DURATIONS.size())]]
+	for days:int in durations:
 		routes.append(["scouting_route_%d" % days,func()->void:
 			if not shared.searching:return
 			var target:String=shared.target;var view:Dictionary=shared.view;var spendable:float=shared.spendable
@@ -126,7 +132,11 @@ func advance_steps(day:int)->Array:
 			data.status="%d scouts departed from %s to %s. Expected back in %d days; staff handle the next departure." % [int(party.personnel),String(party.get("origin_label","home")),purpose,int(party.duration_days)]
 		])
 	routes.append(["scouting_status",func()->void:
-		if shared.searching:data.status=shared.last_reason
+		if shared.searching:
+			data.status=shared.last_reason
+			# Rival staff with multi-day steps (day_span.gd) wait four weeks after a
+			# fruitless search instead of repeating every route plan each week.
+			if WorldSimulation.actor_id!="player" and WorldSimulation.span_limit>1:data.next_review=maxi(int(data.next_review),day+28)
 	])
 	return parts
 

@@ -17,6 +17,10 @@ static func from_totals(id:String,t:Dictionary)->Dictionary:
 			if float(t[id+"_need"])>0:
 				r.meter=clampf(float(t[id+"_eaten"])/float(t[id+"_need"]),0,1);r.meter_label="Civilization need met today"
 			if int(t[id+"_reports"])<t.cities.size():r.status+=" Some city reports are pending."
+		"goods":
+			r.merge({"title":"Civilian Goods","value":"%d%%" % roundi(float(t.goods_coverage)*100.0),"unit":"of what households expect","status":"%d cities are below half their expected goods" % int(t.goods_shortages) if int(t.goods_shortages)>0 else "Everyday tools, containers and fittings. Adopted techniques act in proportion to this coverage.","tone":"warning" if int(t.goods_shortages)>0 else "neutral","meter":float(t.goods_coverage),"meter_label":"Goods coverage"},true)
+			r.rows.append({"label":"Held","value":"%.1f of %.1f expected" % [float(t.goods_stock),float(t.goods_target)]})
+			r.rows.append({"label":"Net change","value":"%+.2f / day" % float(t.goods_net)})
 		"health":r.merge({"title":"Health & survival","value":"%.1f" % t.life,"unit":"years · life expectancy","status":"Population-weighted projection under current conditions"},true)
 		"science":r.merge({"title":"Research capacity","value":"%.1f" % t.science,"unit":"effective research capacity","status":"Sum of each city's research effort × its education"},true)
 		"gdp":r.merge({"title":"Daily economic output","value":"%.1f" % t.output,"unit":"output-equivalent units / day","status":"%.2f per person · all city output combined" % (float(t.output)/maxi(1,int(t.population)))},true)
@@ -30,5 +34,6 @@ static func from_totals(id:String,t:Dictionary)->Dictionary:
 			"health":value="%.1f years · %.0f‰ infant mortality" % [city.life,city.infant]
 			"science":value="%.1f capacity\n%.1f minds × %.0f%% education" % [city.science,city.minds,float(city.education)*100]
 			"gdp":value="%.1f output / day" % city.output
+			"goods":value="%.1f held / %.1f expected · %+.2f / day" % [city.goods_stock,city.goods_target,city.goods_net]
 		r.rows.append({"label":String(city.name),"value":value})
 	return r

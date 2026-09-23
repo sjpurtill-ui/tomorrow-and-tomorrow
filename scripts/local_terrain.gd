@@ -986,9 +986,11 @@ func _process(delta: float) -> void:
 	var calendar_days:=simulation_clock.take_days(Time.get_ticks_usec(),_speed_hours_per_second()/24.0 if game_speed>0.0 and not GeneralCampaign.active else 0.0,_camera_in_motion())
 	stamp=trace.mark("frame_camera",stamp)
 	_update_world_streaming()
+	stamp=trace.mark("frame_world_streaming",stamp)
 	_advance_terrain_patch()
+	stamp=trace.mark("frame_terrain_patch",stamp)
 	_update_scale_lod()
-	stamp=trace.mark("frame_terrain_and_lod",stamp)
+	stamp=trace.mark("frame_scale_lod",stamp)
 	_update_convoy_marker_animation()
 	# These rebuild report dictionaries, sort marker snapshots and inspect
 	# settlement morphology. Ten updates/second keep them responsive without
@@ -998,13 +1000,18 @@ func _process(delta: float) -> void:
 		map_snapshot_elapsed=fmod(map_snapshot_elapsed,0.1)
 		map_snapshot_refreshes+=1
 		_refresh_contact_encounter_markers()
+		stamp=trace.mark("frame_map_contacts",stamp)
 		_refresh_foreign_formation_markers()
+		stamp=trace.mark("frame_map_formations",stamp)
 		_refresh_player_field_army_markers()
+		stamp=trace.mark("frame_map_field_armies",stamp)
 		_refresh_player_scout_route_markers()
+		stamp=trace.mark("frame_map_scout_routes",stamp)
 	map_network_elapsed+=maxf(0.0,delta)
 	if map_network_elapsed>=0.1:
 		map_network_elapsed=fmod(map_network_elapsed,0.1)
 		_refresh_settlement_network()
+		stamp=trace.mark("frame_map_settlement_network",stamp)
 		_refresh_settlement_convoy_marker()
 	stamp=trace.mark("frame_map_snapshots",stamp)
 	if travel_council_notice and travel_council_notice.visible and Time.get_ticks_msec()>travel_council_notice_until_msec:
@@ -1030,7 +1037,9 @@ func _process(delta: float) -> void:
 		return
 	if game_speed <= 0.0:
 		return
-	if calendar_days>0.0:_schedule_world_time(calendar_days)
+	if calendar_days>0.0:
+		_schedule_world_time(calendar_days)
+		trace.mark("frame_schedule",stamp)
 
 ## Frame budget for the day in progress. Steps are atomic, so one step can
 ## exceed it; the budget bounds how many run back to back.
@@ -1069,11 +1078,15 @@ func _schedule_world_time(days_advanced:float)->void:
 	WorldSimulation.pump_day(_day_step_budget_usec())
 
 func _finish_scheduled_day(day_result:Dictionary,day:int)->void:
+	var trace=preload("res://scripts/performance_trace.gd")
+	var stamp:int=trace.start()
 	last_discovery_day=day
 	_commit_world_day(day_result)
+	stamp=trace.mark("day_commit",stamp)
 	# An attention pause during the day stops the calendar at that day.
 	GameState.elapsed_days=scheduled_world_elapsed if game_speed>0.0 else float(day)
 	_after_world_time(scheduled_world_days if game_speed>0.0 else 0.0)
+	trace.mark("day_after_world_time",stamp)
 
 ## The simulated date, including a day whose steps are still running.
 func _simulated_day()->int:
@@ -15481,7 +15494,8 @@ func _add_food_trend_chart(parent: Container) -> void:
 func _food_color(food_type: String) -> Color:
 	return {
 		"Fresh plants":Color("#7f9e67"),"Fresh meat":Color("#a75f54"),"Fish":Color("#648b98"),
-		"Dry staples":Color("#b79958"),"Preserved food":Color("#8f7661")
+		"Dry staples":Color("#b79958"),"Preserved food":Color("#8f7661"),
+		"Fresh food":Color("#7f9e67"),"Stored food":Color("#b79958")
 	}.get(food_type,Color("#888888"))
 
 func _compact_food_number(value: float) -> String:

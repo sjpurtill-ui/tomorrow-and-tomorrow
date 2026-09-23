@@ -1,7 +1,7 @@
 extends RefCounted
 ## Shared read-only stock constraint for investment, operation and conversion.
 const RESERVE_DAYS:=3.0
-const PERISHABLES:=["Fish","Fresh meat","Fresh plants"]
+const PERISHABLES:=["Fresh food","Fish","Fresh meat","Fresh plants"]
 static func available_input(stocks:Dictionary,daily_demand:float)->float:
 	var total:=0.0
 	var perishables:=0.0

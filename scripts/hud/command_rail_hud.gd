@@ -127,9 +127,11 @@ func _layout()->void:
 		var compact_top:=view.x<1280
 		(kpi_chips.get("population",{}).get("chip") as Control).visible=not compact_top
 		(kpi_chips.get("water",{}).get("chip") as Control).visible=not compact_top
-		if kpi_separators.size()>=2:
+		(kpi_chips.get("goods",{}).get("chip") as Control).visible=not compact_top
+		if kpi_separators.size()>=3:
 			kpi_separators[0].visible=not compact_top
 			kpi_separators[1].visible=not compact_top
+			kpi_separators[2].visible=not compact_top
 		kpi_strip.reset_size()
 		kpi_strip.position=Vector2(maxf(Tokens.DOCK_X,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),6)
 	if queue_root:
@@ -397,6 +399,7 @@ const KPI_DEFS:Array[Dictionary]=[
 	{"id":"population","label":"POPULATION","width":140.0,"accent":Tokens.GREEN,"section":"overview","sub":0},
 	{"id":"food","label":"FOOD","width":112.0,"accent":Tokens.AMBER,"section":"economy","sub":0},
 	{"id":"water","label":"WATER","width":112.0,"accent":Tokens.TEAL,"section":"economy","sub":0},
+	{"id":"goods","label":"GOODS","width":112.0,"accent":Tokens.AMBER,"section":"economy","sub":0},
 	{"id":"health","label":"HEALTH","width":152.0,"accent":Tokens.TEAL,"section":"health","sub":0},
 	{"id":"science","label":"SCIENCE","width":140.0,"accent":Tokens.GOLD,"section":"inquiry","sub":0},
 	{"id":"gdp","label":"REAL GDP / DAY","width":136.0,"accent":Tokens.BLUE,"section":"economy","sub":2},
@@ -889,6 +892,8 @@ func _refresh_kpis()->void:
 		var pending:bool=int(t[id+"_reports"])<t.cities.size()
 		var days:=float(t[id+"_days"])
 		_update_kpi(id,"%.1f d" % days if days>=0 else "—","%d short" % shortage if shortage>0 else ("partial" if pending else "civ total"),Tokens.RED if shortage>0 else Tokens.MUTED,"Civilization reserves and city production")
+	var goods_short:=int(t.goods_shortages)
+	_update_kpi("goods","%d%%" % roundi(float(t.goods_coverage)*100.0),"%d short" % goods_short if goods_short>0 else "%+.1f / day" % float(t.goods_net),Tokens.RED if goods_short>0 else Tokens.MUTED,"Civilian Goods held against what households expect")
 	_update_kpi("health","%.1f yr" % t.life,"IMR %.0f‰" % t.infant,Tokens.MUTED,"Population-weighted health across all cities")
 	_update_kpi("science","%.1f" % t.science,"%.0f%% edu" % (float(t.education)*100),Tokens.GOLD,"Combined research capacity; population-weighted education")
 	_update_kpi("gdp","%.1f" % t.output,"%.2f / person" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"Total city output and per-city contributions")

@@ -4,6 +4,7 @@ extends Node
 # It never creates food or materials: scarcity, transport and storage remain owned
 # by FoodSystem and WorldSimulation.resources.
 
+const SPAN:=preload("res://scripts/day_span.gd")
 const STAGE_SUBSISTENCE := "subsistence"
 const STAGE_METAL := "weighed_metal"
 const STAGE_CURRENCY := "currency"
@@ -15,7 +16,7 @@ const STAGE_NAMES := {
 const BASE_VALUES := {
 	"Food":1.0,"Timber":2.4,"Stone":1.8,"Clay":1.1,"Fiber Plants":2.0,
 	"Salt":4.0,"Medicinal Plants":5.5,"Copper Ore":8.0,"Tin Ore":11.0,
-	"Iron Ore":9.0,"Coal":3.5,"Transport Carts":24.0,"Coin":1.0
+	"Iron Ore":9.0,"Coal":3.5,"Civilian Goods":6.0,"Transport Carts":24.0,"Coin":1.0
 }
 const METAL_VALUES := {"Copper Ore":1.0,"Tin Ore":1.4,"Iron Ore":0.7,"Coin":1.0}
 const PUBLIC_SPENDING_PRIORITIES := ["balanced","civil_first","military_first"]
@@ -268,7 +269,7 @@ func _update_prices(market_access:float,trade_volume:float=1.0)->float:
 		var target:=float(BASE_VALUES[resource_name])*pow(scarcity,0.42)*monetary_pressure*(1.0+float(WorldSimulation.state.material_metrics.get("lost_today",0.0))/maxf(10.0,population)*0.08)
 		var old:=float(WorldSimulation.state.market_prices.get(resource_name,BASE_VALUES[resource_name]))
 		var damping:=0.035+market_access*0.025
-		WorldSimulation.state.market_prices[resource_name]=lerpf(old,target,damping)
+		WorldSimulation.state.market_prices[resource_name]=lerpf(old,target,SPAN.rate(damping))
 		var weight:=3.0 if resource_name=="Food" else 1.0
 		weighted+=float(WorldSimulation.state.market_prices[resource_name])/float(BASE_VALUES[resource_name])*weight
 		weights+=weight
@@ -301,6 +302,7 @@ func _desired_stock(resource_name:String,population:float)->float:
 		"Stone": return population*1.2
 		"Clay","Fiber Plants": return population*0.45
 		"Transport Carts": return maxf(1.0,population/30.0)
+		"Civilian Goods": return preload("res://scripts/civilian_goods.gd").target()
 		_: return population*0.16
 
 func _trade_volume(market_access:float,monetization:float)->float:
@@ -332,6 +334,7 @@ func _process_external_trade(market_access:float,domestic_trade:float,contract_p
 	if WorldSimulation.state.external_trade_credit>claim_limit:
 		var excess:=WorldSimulation.state.external_trade_credit-claim_limit
 		var impairment:=minf(excess,maxf(0.01,excess*0.02))
+		if WorldSimulation.span>1:impairment=minf(excess,maxf(0.01*WorldSimulation.span,excess*SPAN.rate(0.02)))
 		WorldSimulation.state.external_trade_credit-=impairment
 		WorldSimulation.state.external_trade_losses+=impairment
 		result.claim_loss=impairment
@@ -346,9 +349,10 @@ func _process_external_trade(market_access:float,domestic_trade:float,contract_p
 	match WorldSimulation.state.external_trade_policy:
 		"export_surplus": export_share=0.90; import_share=0.10
 		"relief_imports": export_share=0.20; import_share=0.80
-	var export_budget:=minf(value_capacity*export_share,maxf(0.0,claim_limit-WorldSimulation.state.external_trade_credit))
+	# A multi-day step (day_span.gd) trades `span` days of capacity.
+	var export_budget:=minf(value_capacity*export_share*WorldSimulation.span,maxf(0.0,claim_limit-WorldSimulation.state.external_trade_credit))
 	var export_candidates:Array[Dictionary]=[]
-	for resource_name in ["Food","Timber","Stone","Clay","Fiber Plants","Salt","Medicinal Plants","Coal"]:
+	for resource_name in ["Food","Timber","Stone","Clay","Fiber Plants","Salt","Medicinal Plants","Coal","Civilian Goods"]:
 		var stock:=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0)))
 		if not _resource_is_economically_known(resource_name,stock): continue
 		var desired:=_desired_stock(resource_name,maxf(1.0,WorldSimulation.state.population_exact))
@@ -373,7 +377,7 @@ func _process_external_trade(market_access:float,domestic_trade:float,contract_p
 		result.exported_goods[resource_name]=float(result.exported_goods.get(resource_name,0.0))+removed
 		export_budget-=earned
 		_ledger("external_export",earned,"material_stores","regional_trade_account","Exported %.2f %s after trade friction" % [removed,resource_name])
-	var import_budget:=minf(WorldSimulation.state.external_trade_credit,value_capacity*import_share)
+	var import_budget:=minf(WorldSimulation.state.external_trade_credit,value_capacity*import_share*WorldSimulation.span)
 	var import_candidates:Array[Dictionary]=[]
 	for resource_name_variant in BASE_VALUES:
 		var resource_name:=String(resource_name_variant)
@@ -424,9 +428,9 @@ func _receive_trade_resource(resource_name:String,requested:float)->float:
 
 func _update_food_import_dependence(food_imported:float)->void:
 	var food_need:=maxf(0.01,float(WorldSimulation.state.simulation_metrics.get("food_consumption",WorldSimulation.state.population_exact)))
-	var daily_share:=clampf(food_imported/food_need,0.0,1.0)
+	var daily_share:=clampf(food_imported/(food_need*WorldSimulation.span),0.0,1.0)
 	var prior:=clampf(float(WorldSimulation.state.simulation_metrics.get("food_import_share",0.0)),0.0,1.0)
-	WorldSimulation.state.simulation_metrics["food_import_share"]=lerpf(prior,daily_share,0.04)
+	WorldSimulation.state.simulation_metrics["food_import_share"]=lerpf(prior,daily_share,SPAN.rate(0.04))
 
 func cycle_external_trade_policy()->String:
 	var policies:=["balanced","relief_imports","export_surplus","closed"]
@@ -488,7 +492,7 @@ func _process_resource_obligations(real_accounts:Dictionary,monetization:float,r
 	var able:=maxf(1.0,float(WorldSimulation.state.able_population()))
 	var levy_adoption:=WorldSimulation.discovery.adoption("public_levies")
 	var rotations:=WorldSimulation.discovery.adoption("labor_rotations")
-	var public_stores:=WorldSimulation.discovery.adoption("public_stores")*preload("res://scripts/opening_craft_practice.gd").factor("public_stores")
+	var public_stores:=WorldSimulation.discovery.adoption("public_stores")*preload("res://scripts/civilian_goods.gd").factor("public_stores")
 	var councils:=WorldSimulation.discovery.adoption("household_councils")
 	var customary_law:=WorldSimulation.discovery.adoption("customary_law")
 	var tallies:=WorldSimulation.discovery.adoption("tallies")
@@ -507,18 +511,20 @@ func _process_resource_obligations(real_accounts:Dictionary,monetization:float,r
 	var assessed_labor_due:=gross_labor_due*assessment_reach
 	var labor_carry:=0.96 if scheduled else 0.35
 	if WorldSimulation.state.economy_stage==STAGE_CURRENCY: labor_carry=0.90
-	var carried_labor:=maxf(0.0,WorldSimulation.state.in_kind_labor_arrears)*labor_carry
-	var labor_outstanding:=carried_labor+assessed_labor_due
-	var rendered_labor:=maxf(0.0,float(real_accounts.get("collective_labor",0.0)))*clampf(0.68+rotations*0.20+levy_adoption*0.12,0.68,1.0)
+	# A multi-day step (day_span.gd) assesses and renders `span` days of dues.
+	var span:=float(WorldSimulation.span)
+	var carried_labor:=maxf(0.0,WorldSimulation.state.in_kind_labor_arrears)*pow(labor_carry,span)
+	var labor_outstanding:=carried_labor+assessed_labor_due*span
+	var rendered_labor:=maxf(0.0,float(real_accounts.get("collective_labor",0.0)))*clampf(0.68+rotations*0.20+levy_adoption*0.12,0.68,1.0)*span
 	var labor_fulfilled:=minf(labor_outstanding,rendered_labor)
 	WorldSimulation.state.in_kind_labor_arrears=maxf(0.0,labor_outstanding-labor_fulfilled)
 	var gross_material_due:=population*(0.0075+settlement_complexity*0.20)*in_kind_share
 	var assessed_material_due:=gross_material_due*assessment_reach
 	var material_carry:=0.97 if scheduled else 0.30
 	if WorldSimulation.state.economy_stage==STAGE_CURRENCY: material_carry=0.90
-	var carried_material:=maxf(0.0,WorldSimulation.state.in_kind_material_arrears)*material_carry
-	var material_outstanding:=carried_material+assessed_material_due
-	var delivered_value:=maxf(0.0,float(WorldSimulation.state.material_metrics.get("delivered_today",0.0)))*2.0
+	var carried_material:=maxf(0.0,WorldSimulation.state.in_kind_material_arrears)*pow(material_carry,span)
+	var material_outstanding:=carried_material+assessed_material_due*span
+	var delivered_value:=maxf(0.0,float(WorldSimulation.state.material_metrics.get("delivered_today",0.0)))*2.0*span
 	var common_store_share:=clampf(0.16+public_stores*0.38+levy_adoption*0.28+admin_coverage*0.10,0.16,0.92)
 	var material_fulfilled:=minf(material_outstanding,delivered_value*common_store_share)
 	WorldSimulation.state.in_kind_material_arrears=maxf(0.0,material_outstanding-material_fulfilled)
@@ -537,6 +543,9 @@ func _process_public_finance(trade_volume:float,monetization:float,military_burd
 	var admin_coverage:=clampf(WorldSimulation.state.effective_workers("Administration")/maxf(1.0,WorldSimulation.state.population_exact*0.04),0.0,1.0)
 	var tax_capacity:=_tax_capacity_for(WorldSimulation.state.tax_rate,trade_volume,monetization,WorldSimulation.state.private_currency)
 	var revenue:=float(tax_capacity.collectible)
+	# A multi-day step (day_span.gd) collects, accrues and pays `span` days.
+	var span:=float(WorldSimulation.span)
+	if span>1.0:revenue=minf(maxf(0.0,WorldSimulation.state.private_currency),revenue*span)
 	WorldSimulation.state.private_currency-=revenue
 	WorldSimulation.state.public_treasury+=revenue
 	var debt_capacity:=_public_debt_capacity(trade_volume,monetization,admin_coverage,WorldSimulation.state.tax_rate,float(tax_capacity.compliance))
@@ -545,12 +554,12 @@ func _process_public_finance(trade_volume:float,monetization:float,military_burd
 		var institutions:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.25)),0.0,1.0)
 		var utilization:=WorldSimulation.state.public_debt/maxf(1.0,debt_capacity)
 		var annual_rate:=clampf(0.025+(1.0-institutions)*0.055+utilization*0.035-WorldSimulation.discovery.adoption("public_credit")*0.015,0.012,0.14)
-		interest_accrued=WorldSimulation.state.public_debt*annual_rate/365.0
+		interest_accrued=WorldSimulation.state.public_debt*annual_rate/365.0*span
 		WorldSimulation.state.public_debt+=interest_accrued
 		WorldSimulation.state.public_interest_accrued+=interest_accrued
 	var upkeep:=_public_upkeep(military_burden)
-	var civil_obligation:=WorldSimulation.state.civil_arrears+float(upkeep.civil)
-	var military_obligation:=WorldSimulation.state.military_arrears+float(upkeep.military)
+	var civil_obligation:=WorldSimulation.state.civil_arrears+float(upkeep.civil)*span
+	var military_obligation:=WorldSimulation.state.military_arrears+float(upkeep.military)*span
 	var requested:=civil_obligation+military_obligation
 	var borrowing:=0.0
 	if WorldSimulation.state.public_treasury<requested and WorldSimulation.discovery.adoption("public_credit")>=0.25:
@@ -765,7 +774,7 @@ func _process_weighed_metal_exchange(trade_volume:float,monetization:float,relia
 	var metal_trade_share:=monetization if WorldSimulation.state.economy_stage==STAGE_METAL else clampf(0.08+(1.0-reliability)*0.05,0.05,0.16)
 	var turnover:=minf(maxf(0.0,trade_volume)*metal_trade_share,turnover_capacity)
 	var wear_rate:=clampf(0.000015+(1.0-measures)*0.000035+(1.0-reliability)*0.000025,0.00001,0.00008)
-	var wear_loss:=_remove_weighed_metal_value(turnover*wear_rate+WorldSimulation.state.weighed_metal_circulation*0.000001)
+	var wear_loss:=_remove_weighed_metal_value((turnover*wear_rate+WorldSimulation.state.weighed_metal_circulation*0.000001)*WorldSimulation.span)
 	WorldSimulation.state.weighed_metal_losses+=wear_loss
 	WorldSimulation.state.weighed_metal_circulation=_weighed_metal_value()
 	if wear_loss>=0.01: _ledger("weighed_metal_wear",wear_loss,"metal_circulation","lost","Abrasion, clipping, and assay loss")
@@ -832,11 +841,11 @@ func _process_currency_liquidity(reliability:float,market_volatility:float)->Dic
 	var hoarded_today:=0.0
 	var released_today:=0.0
 	if target>WorldSimulation.state.currency_hoards:
-		hoarded_today=minf(WorldSimulation.state.private_currency,(target-WorldSimulation.state.currency_hoards)*0.08)
+		hoarded_today=minf(WorldSimulation.state.private_currency,(target-WorldSimulation.state.currency_hoards)*SPAN.rate(0.08))
 		WorldSimulation.state.private_currency-=hoarded_today
 		WorldSimulation.state.currency_hoards+=hoarded_today
 	elif target<WorldSimulation.state.currency_hoards:
-		released_today=minf(WorldSimulation.state.currency_hoards,(WorldSimulation.state.currency_hoards-target)*0.045)
+		released_today=minf(WorldSimulation.state.currency_hoards,(WorldSimulation.state.currency_hoards-target)*SPAN.rate(0.045))
 		WorldSimulation.state.currency_hoards-=released_today
 		WorldSimulation.state.private_currency+=released_today
 	if hoarded_today>=0.01: _ledger("currency_hoarded",hoarded_today,"private","hoards","Household precautionary balances")
@@ -856,7 +865,7 @@ func _update_currency_demand(trade_volume:float,monetization:float)->void:
 	if WorldSimulation.state.economy_stage!=STAGE_CURRENCY: return
 	var target:=maxf(WorldSimulation.state.population_exact*0.42,trade_volume*28.0*monetization)
 	if WorldSimulation.state.currency_demand<=0.0: WorldSimulation.state.currency_demand=target
-	else: WorldSimulation.state.currency_demand=lerpf(WorldSimulation.state.currency_demand,target,0.025)
+	else: WorldSimulation.state.currency_demand=lerpf(WorldSimulation.state.currency_demand,target,SPAN.rate(0.025))
 
 func _process_credit(trade_volume:float,market_access:float,reliability:float,events:Array[Dictionary])->Dictionary:
 	if WorldSimulation.state.economy_stage==STAGE_SUBSISTENCE or WorldSimulation.discovery.adoption("tallies")<0.25:
@@ -869,11 +878,11 @@ func _process_credit(trade_volume:float,market_access:float,reliability:float,ev
 	var liquid_share:=clampf(WorldSimulation.state.private_currency/maxf(1.0,WorldSimulation.state.currency_supply),0.0,1.0) if WorldSimulation.state.economy_stage==STAGE_CURRENCY else 1.0
 	var credit_limit:=maxf(1.0,secured_base*(0.28+reliability*0.52+records*0.18+courts*0.12)*(0.55+WorldSimulation.discovery.adoption("tallies")*0.45)*(0.65+liquid_share*0.35))
 	var desired_creation:=trade_volume*market_access*reliability*(1.0-shortage*0.65)*0.018*(0.55+liquid_share*0.45)
-	var created:=minf(desired_creation,maxf(0.0,credit_limit-opening))
-	var repaid:=minf(opening,opening*(0.0025+reliability*0.0045))
+	var created:=minf(desired_creation*WorldSimulation.span,maxf(0.0,credit_limit-opening))
+	var repaid:=minf(opening,opening*SPAN.rate(0.0025+reliability*0.0045))
 	var exposed:=maxf(0.0,opening+created-repaid)
 	var default_rate:=clampf(0.0002+(1.0-reliability)*0.0015+shortage*0.0025,0.0,0.025)
-	var defaulted:=minf(exposed,exposed*default_rate)
+	var defaulted:=minf(exposed,exposed*SPAN.rate(default_rate))
 	WorldSimulation.state.credit_outstanding=maxf(0.0,exposed-defaulted)
 	WorldSimulation.state.credit_defaulted+=defaulted
 	if created>0.0: _ledger("credit_created",created,"creditors","debtors","Recorded trade credit")
@@ -890,12 +899,12 @@ func _process_mutual_risk_pool(trade_volume:float,defaulted_claims:float)->Dicti
 	result.active=true
 	var capacity:=maxf(WorldSimulation.state.population_exact*0.35,trade_volume*45.0)*(0.45+adoption*0.75)
 	result.capacity=capacity
-	var contribution_target:=trade_volume*0.004*adoption
+	var contribution_target:=trade_volume*0.004*adoption*WorldSimulation.span
 	var contribution:=minf(WorldSimulation.state.private_currency,minf(contribution_target,maxf(0.0,capacity-WorldSimulation.state.mutual_aid_reserve)))
 	WorldSimulation.state.private_currency-=contribution
 	WorldSimulation.state.mutual_aid_reserve+=contribution
 	var prior_coverage:=clampf(float(WorldSimulation.state.economy_metrics.get("essential_coverage",1.0)),0.0,1.0)
-	var relief_need:=maxf(0.0,defaulted_claims)*0.65*adoption+maxf(0.0,0.72-prior_coverage)*WorldSimulation.state.population_exact*0.018*adoption
+	var relief_need:=maxf(0.0,defaulted_claims)*0.65*adoption+maxf(0.0,0.72-prior_coverage)*WorldSimulation.state.population_exact*0.018*adoption*WorldSimulation.span
 	var payout:=minf(WorldSimulation.state.mutual_aid_reserve,relief_need)
 	WorldSimulation.state.mutual_aid_reserve-=payout
 	WorldSimulation.state.private_currency+=payout
@@ -912,6 +921,7 @@ func _update_wealth_distribution(monetization:float,inflation:float,default_rate
 	var labor_return:=float(real_accounts.get("labor_return_index",1.0))
 	var wage_pressure:=maxf(0.0,0.75-labor_return)*0.00010-maxf(0.0,labor_return-1.15)*0.000035
 	var concentration_delta:=clampf(shortage*0.00020+maxf(0.0,inflation)*0.0015+default_rate*0.006+monetization*0.000025+wage_pressure-revenue/maxf(1.0,WorldSimulation.state.currency_supply)*0.0008,-0.0002,0.0008)
+	if WorldSimulation.span>1:concentration_delta=clampf(shortage*0.00020+maxf(0.0,inflation)*0.0015+default_rate*0.006+monetization*0.000025+wage_pressure-revenue/WorldSimulation.span/maxf(1.0,WorldSimulation.state.currency_supply)*0.0008,-0.0002,0.0008)*WorldSimulation.span
 	WorldSimulation.state.wealth_shares[0]=maxf(0.01,WorldSimulation.state.wealth_shares[0]-concentration_delta*0.55)
 	WorldSimulation.state.wealth_shares[1]=maxf(0.03,WorldSimulation.state.wealth_shares[1]-concentration_delta*0.30)
 	WorldSimulation.state.wealth_shares[4]=minf(0.75,WorldSimulation.state.wealth_shares[4]+concentration_delta*0.85)

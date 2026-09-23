@@ -26,14 +26,15 @@ func test_storytelling_stone_and_pottery_are_distinct_without_changing_discovery
 	assert_str(DiscoverySystem.catalog_by_id.oral_epics.name).is_equal("Oral Epics")
 	assert_float(float(DiscoverySystem.catalog_by_id.oral_epics.effects.knowledge_preservation)).is_equal(.05)
 	assert_float(float(DiscoverySystem.catalog_by_id.oral_epics.effects.cohesion)).is_equal(.04)
-func test_full_image_keeps_aspect_inside_portrait_and_landscape_bounds()->void:
+func test_subject_crop_keeps_target_aspect_inside_portrait_and_landscape_images()->void:
 	var texture:=Art.for_discovery({"id":"oral_epics"})
+	var source:=Rect2(Vector2.ZERO,texture.get_size())
 	for size:Vector2 in [Vector2(708,210),Vector2(250,148),Vector2(264,70),Vector2(120,220)]:
-		var bounds:=Rect2(Vector2(17,23),size);var fitted:=Art.image_rect(texture,bounds)
-		assert_bool(bounds.grow(.01).encloses(fitted)).is_true()
-		assert_float(fitted.get_center().distance_to(bounds.get_center())).is_less_equal(.01)
-		assert_float(fitted.size.x/fitted.size.y).is_equal_approx(texture.get_size().x/texture.get_size().y,.0001)
-	assert_vector(Art.image_rect(null,Rect2(17,23,0,0)).size).is_equal(Vector2.ZERO)
+		for focus:Vector2 in [Vector2(.5,.5),Vector2(0,0),Vector2(1,1)]:
+			var crop:=Art.crop_region(texture,size,focus)
+			assert_bool(source.grow(.01).encloses(crop)).is_true()
+			assert_float(crop.size.x/crop.size.y).is_equal_approx(size.x/size.y,.0001)
+			assert_bool(is_equal_approx(crop.size.x,source.size.x) or is_equal_approx(crop.size.y,source.size.y)).is_true()
 func test_full_catalogue_browsing_bounds_cached_images_and_import_resolution()->void:
 	for item:Dictionary in DiscoverySystem.technology_catalog:
 		var texture:=Art.for_discovery(item)

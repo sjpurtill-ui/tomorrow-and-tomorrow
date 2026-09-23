@@ -1,6 +1,8 @@
 extends GdUnitTestSuite
 const Water=preload("res://scripts/water_conveyance.gd")
 const State=preload("res://scripts/water_conveyance_state.gd")
+const Fabric=preload("res://scripts/water_conveyance_fabric.gd")
+const Stock=preload("res://scripts/bill_stock.gd")
 class IntakeTerrain extends "res://scripts/local_terrain.gd":
 	func _height_at(_x:float,z:float)->float:return 1.0-z/3.0
 	func _surface_water_sources(origin:Vector3,_limit:float=INF)->Array[Dictionary]:
@@ -16,7 +18,11 @@ func prepare()->void:
 	state.settlement_founded_at=Vector3(1,1,0)
 	for id:String in ["joinery","gravity_conduit_grade_control"]:
 		state.known_discoveries.append(id);state.discovery_adoption[id]=1.0
-	state.resource_stockpiles={"Wooden Conduits":10.0,"Clay":2.0,"Freshwater":0.0}
+	state.resource_stockpiles=bill();state.resource_stockpiles.Freshwater=0.0
+## Ten timber sections as raw materials and Civilian Goods, plus their jointing clay.
+func bill()->Dictionary:return Stock.add_scaled(Stock.scaled(Fabric.section_unit("timber"),10.0),{"Clay":1.0},2.0)
+func assert_paid(stock:Dictionary,paid:Dictionary=bill())->void:
+	for item:String in paid:assert_float(float(stock.get(item,0))).override_failure_message(item).is_equal_approx(0.0,.000001)
 func install()->Dictionary:
 	return Water.install(source(),Vector3(1,1,0),height,"timber")
 func context()->Dictionary:return {"origin":Vector3(1,1,0),"water_conveyance_sources":[source()]}
@@ -25,7 +31,7 @@ func test_imported_pipe_is_paid_once_and_requires_finite_construction()->void:
 	WorldSimulation.scoped("water_builders",func()->void:
 		prepare()
 		assert_bool(install().get("ok",false)).is_true()
-		assert_float(float(WorldSimulation.state.resource_stockpiles["Wooden Conduits"])).is_equal(0.0)
+		assert_paid(WorldSimulation.state.resource_stockpiles)
 		assert_bool("wooden_log_conduits" in WorldSimulation.state.known_discoveries).is_false()
 		assert_float(Water.delivery(context(),1,100)).is_equal(0.0)
 		assert_bool(install().has("error")).is_true()
@@ -60,21 +66,24 @@ func test_actual_resource_flow_accounts_for_delivery_in_the_single_stock()->void
 
 func test_repairs_are_material_bounded_and_do_not_spend_another_actor_stock()->void:
 	WorldSimulation.create_actor("neighbor",612)
-	WorldSimulation.scoped("neighbor",func()->void:WorldSimulation.state.resource_stockpiles["Wooden Conduits"]=9.0)
+	WorldSimulation.scoped("neighbor",func()->void:WorldSimulation.state.resource_stockpiles=bill())
 	WorldSimulation.scoped("water_builders",func()->void:
 		prepare();install();Water.construction_work(100,1)
 		Water.data().lines[0].condition=.5
 		assert_float(Water.maintain(1,100)).is_equal(0.0)
-		WorldSimulation.state.resource_stockpiles["Wooden Conduits"]=.2
+		var unit:=Fabric.section_unit("timber")
+		for item:String in unit:WorldSimulation.state.resource_stockpiles[item]=float(unit[item])*.2
 		assert_float(Water.maintain(1,100)).is_equal_approx(10.0,.000001)
 		assert_float(float(Water.data().lines[0].condition)).is_equal_approx(.6,.000001)
+		assert_paid(WorldSimulation.state.resource_stockpiles,unit)
 		assert_bool(State.valid(Water.data())).is_true()
 		var broken:Dictionary=Water.data().duplicate(true);broken.lines[0].condition=INF
 		assert_bool(State.valid(broken)).is_false()
 		assert_bool(State.valid_state({"player_settlements":[{"local_resources":{"water_conveyance":broken}}]})).is_false()
 		assert_bool(State.valid_state({})).is_true()
 	)
-	WorldSimulation.scoped("neighbor",func()->void:assert_float(float(WorldSimulation.state.resource_stockpiles["Wooden Conduits"])).is_equal(9.0))
+	WorldSimulation.scoped("neighbor",func()->void:
+		for item:String in bill():assert_float(float(WorldSimulation.state.resource_stockpiles[item])).is_equal(float(bill()[item])))
 
 func test_full_save_restores_unfinished_work_and_paid_inventory()->void:
 	GameState.reset_for_new_world(611);CivilizationSystem.reset_for_new_world()
@@ -85,13 +94,14 @@ func test_full_save_restores_unfinished_work_and_paid_inventory()->void:
 	var slot:="water_conveyance_%d" % OS.get_process_id()
 	assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
 	WorldSimulation.scoped("water_builders",func()->void:
-		Water.data().lines.clear();WorldSimulation.state.resource_stockpiles["Wooden Conduits"]=99.0)
+		Water.data().lines.clear()
+		for item:String in bill():WorldSimulation.state.resource_stockpiles[item]=99.0)
 	var restored:=SaveSystem.load_game(slot)
 	DirAccess.remove_absolute(SaveSystem.slot_path(slot))
 	assert_bool(restored.get("ok",false)).override_failure_message(str(restored)).is_true()
 	WorldSimulation.scoped("water_builders",func()->void:
 		assert_float(float(Water.data().lines[0].work_done)).is_equal(12.0)
-		assert_float(float(WorldSimulation.state.resource_stockpiles["Wooden Conduits"])).is_equal(0.0)
+		assert_paid(WorldSimulation.state.resource_stockpiles)
 		assert_float(Water.construction_work(100,2)).is_equal(28.0)
 		assert_float(Water.delivery(context(),3,100)).is_greater(0.0))
 	GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
@@ -116,29 +126,6 @@ func test_secondary_city_conserves_its_own_water_and_local_drinking_demand()->vo
 		assert_int(city.local_resources.water_conveyance.lines.size()).is_equal(1)
 		assert_bool(State.valid_state({"player_settlements":state.player_settlements})).is_true())
 
-func test_clay_workshop_chain_consumes_unfired_sections_and_fuel()->void:
-	WorldSimulation.scoped("water_builders",func()->void:
-		var industry=preload("res://scripts/civilian_industry.gd")
-		var production=preload("res://scripts/persistent_production.gd")
-		var state=WorldSimulation.state
-		state.resource_stockpiles={"Prepared Clay":10.0,"Freshwater":10.0,"Timber":20.0,"Stone":20.0,"Clay":20.0,"Joined Timber Components":2.0}
-		state.settlement_site_committed=true;state.resource_settlement_id="";state.population_allocations.Crafting=20;state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
-		state.known_discoveries.append("kiln_control");state.discovery_adoption.kiln_control=1.0
-		var ops=preload("res://scripts/technology_operations.gd");assert_bool(ops.install("controlled_kiln").get("ok",false)).is_true()
-		for day:int in range(1,14):state.elapsed_days=day;ops.advance(day)
-		for item:String in ["unfired_clay_conduits","fired_clay_conduits"]:
-			var spec:Dictionary=industry.product(item)
-			state.known_discoveries.append(spec.gate);state.discovery_adoption[spec.gate]=1.0
-			var quantity:=2 if item=="unfired_clay_conduits" else 1
-			assert_bool(WorldSimulation.military.start_production_line(item,quantity).get("ok",false)).is_true()
-			var job:Dictionary=WorldSimulation.military.equipment_queue.back()
-			production.advance(WorldSimulation.military,job,float(spec.days)*quantity)
-			assert_int(int(job.completed)).is_equal(quantity)
-			WorldSimulation.military.cancel_equipment_job(int(job.id))
-		assert_float(float(state.resource_stockpiles["Fired Clay Conduits"])).is_equal(1.0)
-		assert_float(float(state.resource_stockpiles["Unfired Clay Conduits"])).is_equal(.75)
-		assert_float(float(state.resource_stockpiles["Prepared Clay"])).is_equal(6.0))
-
 func test_player_control_uses_the_same_paid_installation_action()->void:
 	WorldSimulation.scoped("water_builders",func()->void:
 		prepare()
@@ -151,7 +138,7 @@ func test_player_control_uses_the_same_paid_installation_action()->void:
 		assert_int(enabled.size()).is_equal(1)
 		if not enabled.is_empty():enabled[0].pressed.emit()
 		assert_int(Water.data().lines.size()).is_equal(1)
-		assert_float(float(WorldSimulation.state.resource_stockpiles["Wooden Conduits"])).is_equal(0.0))
+		assert_paid(WorldSimulation.state.resource_stockpiles))
 
 func test_local_source_search_finds_upstream_head_and_stays_bounded()->void:
 	var terrain:=IntakeTerrain.new();auto_free(terrain)
@@ -176,7 +163,7 @@ func test_rival_investment_uses_the_paid_installation_path()->void:
 		WorldSimulation.state.water_metrics={"intake_ratio":.5,"source_distance_km":1.0}
 		preload("res://scripts/water_conveyance_investment.gd").recommendation()
 		assert_int(Water.data().lines.size()).is_equal(1)
-		assert_float(float(WorldSimulation.state.resource_stockpiles["Wooden Conduits"])).is_equal(0.0))
+		assert_paid(WorldSimulation.state.resource_stockpiles))
 	WorldSimulation.context_provider=old_provider
 
 func test_secondary_control_callback_keeps_the_city_scope_after_panel_build()->void:
@@ -188,15 +175,15 @@ func test_secondary_control_callback_keeps_the_city_scope_after_panel_build()->v
 		var panel:=VBoxContainer.new();auto_free(panel)
 		var ctx:=context();ctx.terrain_height_at=height
 		model.with_city_resources("second",func()->void:
-			state.resource_stockpiles={"Wooden Conduits":10.0,"Clay":2.0}
+			state.resource_stockpiles=bill()
 			preload("res://scripts/hud/water_conveyance_controls.gd").build(panel,ctx,"second","Rivermeet"))
 		for child in panel.get_children():
 			if child is Button and not child.disabled:child.pressed.emit();break
 		assert_int(Water.data().lines.size()).is_equal(0)
-		assert_float(float(state.resource_stockpiles["Wooden Conduits"])).is_equal(10.0)
+		for item:String in bill():assert_float(float(state.resource_stockpiles[item])).is_equal(float(bill()[item]))
 		var city:Dictionary=model.settlement_record("second")
 		assert_int(city.local_resources.water_conveyance.lines.size()).is_equal(1)
-		assert_float(float(city.local_resources.resource_stockpiles["Wooden Conduits"])).is_equal(0.0))
+		assert_paid(city.local_resources.resource_stockpiles))
 
 func test_load_assessment_requires_paid_bedding_and_additional_completed_work()->void:
 	WorldSimulation.scoped("water_builders",func()->void:
@@ -207,9 +194,10 @@ func test_load_assessment_requires_paid_bedding_and_additional_completed_work()-
 		var bare:=Water.quote(source(),Vector3(1,1,0),height,"timber")
 		assert_bool("buried_pipe_load_assessment" in bare.applied).is_false()
 		assert_float(float(bare.work_required)).is_equal(40.0)
-		state.resource_stockpiles["Conduit Bedding"]=2.0
+		var bedding:=Stock.scaled(Fabric.BEDDING,2.0)
+		Stock.add_scaled(state.resource_stockpiles,bedding,1.0)
 		assert_bool(install().get("ok",false)).is_true()
-		assert_float(float(state.resource_stockpiles["Conduit Bedding"])).is_equal(0.0)
+		assert_paid(state.resource_stockpiles,bedding)
 		var line:Dictionary=Water.data().lines[0]
 		assert_bool("buried_pipe_load_assessment" in line.applied).is_true()
 		assert_float(float(line.decay)).is_equal_approx(.0012*.7*.85,.00000001)
@@ -218,7 +206,7 @@ func test_load_assessment_requires_paid_bedding_and_additional_completed_work()-
 		assert_float(Water.construction_work(10,2)).is_equal(10.0)
 		assert_float(Water.delivery(context(),3,100)).is_greater(0.0))
 
-func test_investment_chooses_manufacturable_timber_when_ceramic_is_unavailable()->void:
+func test_investment_chooses_suppliable_timber_when_ceramic_is_unavailable()->void:
 	var old_provider:Callable=WorldSimulation.context_provider
 	WorldSimulation.context_provider=func(_origin:Vector2)->Dictionary:
 		var ctx:=context();ctx.terrain_height_at=height;ctx.environment_profile={};return ctx
@@ -228,20 +216,20 @@ func test_investment_chooses_manufacturable_timber_when_ceramic_is_unavailable()
 		state.population_allocations.Construction=20
 		state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
 		state.water_metrics={"intake_ratio":.5,"source_distance_km":1.0}
-		state.resource_stockpiles={"Timber":100.0,"Wrought Iron":2.0,"Clay":2.0}
+		var goods:=float(bill()["Civilian Goods"])
+		state.resource_stockpiles=bill();state.resource_stockpiles.erase("Civilian Goods")
 		for id:String in ["wooden_log_conduits","clay_pipe_socket_jointing"]:
 			state.known_discoveries.append(id);state.discovery_adoption[id]=1.0
 		var planner=preload("res://scripts/water_conveyance_investment.gd")
-		assert_bool(planner.targets().has("Wooden Conduits")).is_true()
-		var order:Dictionary=planner.recommendation()
-		assert_str(String(order.get("item",""))).is_equal("wooden_conduits")
-		assert_bool(WorldSimulation.military.start_production_line(order.item,int(order.target)).get("ok",false)).is_true()
-		var job:Dictionary=WorldSimulation.military.equipment_queue.back()
-		preload("res://scripts/persistent_production.gd").advance(WorldSimulation.military,job,50)
-		assert_int(int(job.completed)).is_equal(10)
+		# Neither bill is paid locally; the goods about to arrive cover only timber.
+		assert_bool(Stock.same(planner.targets({"Civilian Goods":goods}),bill())).override_failure_message(str(planner.targets({"Civilian Goods":goods}))).is_true()
+		assert_bool(planner.recommendation().is_empty()).is_true()
+		assert_int(Water.data().lines.size()).is_equal(0)
+		state.resource_stockpiles["Civilian Goods"]=goods
 		planner.recommendation()
 		assert_int(Water.data().lines.size()).is_equal(1)
-		assert_float(float(state.resource_stockpiles["Wooden Conduits"])).is_equal(0.0))
+		assert_str(String(Water.data().lines[0].material)).is_equal("timber")
+		assert_paid(state.resource_stockpiles))
 	WorldSimulation.context_provider=old_provider
 
 func test_primary_control_button_pays_for_an_installed_line()->void:
@@ -255,5 +243,5 @@ func test_primary_control_button_pays_for_an_installed_line()->void:
 			if child is Button and not child.disabled:child.pressed.emit();pressed=true;break
 		assert_bool(pressed).is_true()
 		assert_int(Water.data().lines.size()).is_equal(1)
-		assert_float(float(WorldSimulation.state.resource_stockpiles["Wooden Conduits"])).is_equal(0.0)
+		assert_paid(WorldSimulation.state.resource_stockpiles)
 		assert_str(String(Water.data().lines[0].status)).is_equal("under_construction"))
