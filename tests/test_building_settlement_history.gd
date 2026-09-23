@@ -25,6 +25,6 @@ func test_history_filters_settlement_and_keeps_unassigned_only_in_all()->void:
 	assert_str(result.blocks[0].items[0].sub).contains("Alder")
 	ledger.settlement_id=""
 	assert_str(ledger.tab(0).kpis[0].value).is_equal("3")
-func test_buildings_exposes_settlements_and_history()->void:
+func test_construction_dock_shows_city_civic_infrastructure_and_landmarks()->void:
 	var provider=Buildings.new(null,null)
-	assert_array(provider.meta().subtabs).contains(["SETTLEMENTS","HISTORY"])
+	assert_array(provider.meta().subtabs).is_equal(["CITY","CIVIC WORKS","INFRASTRUCTURE","LANDMARKS"])

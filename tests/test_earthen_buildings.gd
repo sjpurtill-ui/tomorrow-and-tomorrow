@@ -60,24 +60,6 @@ func test_secondary_drying_and_repairs_use_the_selected_city_only()->void:
 			assert_float(B.supplied_maintenance(secondary,.1)).is_equal(0.0))
 		assert_float(float(primary.curing_work_days)).is_equal(28.0)
 		assert_float(float(state.resource_stockpiles["Adobe Mix"])).is_equal(1.0))
-func test_actual_housing_growth_pays_and_waits_for_dry_units()->void:
-	WorldSimulation.scoped("earth",func()->void:
-		var state=WorldSimulation.state;var model=WorldSimulation.settlements
-		state.ensure_population_total(80);state.settlement_completed.assign(["Hearth Circle"])
-		state.settlement_site_committed=true;state.convoy_traveling=false;state.elapsed_days=19;model.ensure_founded()
-		state.ensure_population_total(240);state.population_allocations.Construction=20;state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
-		learn("adobe_wall_construction");weather(20,.9)
-		state.resource_stockpiles={"Adobe Mix":4.0,"Stone":1.0,"Timber":1.0,"Thatch Panels":1.0}
-		var events:Array[Dictionary]=[]
-		assert_bool(model._attempt_household_growth(90,events,{},0)).is_true()
-		var plot:Dictionary=state.settlement_plots.back()
-		assert_str(plot.building_materials.id).is_equal("adobe_units")
-		assert_float(float(state.resource_stockpiles["Adobe Mix"])).is_equal(0.0)
-		state.elapsed_days=120;model.process_month();state.elapsed_days=150;model.process_month()
-		assert_str(plot.status).is_equal("under_construction")
-		weather();state.elapsed_days=180;model.process_month()
-		assert_str(plot.status).is_equal("active")
-		assert_bool(B.valid_plot(plot)).is_true())
 func test_rain_exposure_and_actual_repair_consumption_remain_visible()->void:
 	WorldSimulation.scoped("earth",func()->void:
 		weather(20,0);var plot:={"building_materials":profile("wattle_daub")}

@@ -107,13 +107,33 @@ func test_transport_progression_improves_reach_and_capacity()->void:
 	assert_float(float(late.speed_km_per_day)).is_greater(float(early.speed_km_per_day))
 	assert_float(float(late.capacity_per_worker)).is_greater(float(early.capacity_per_worker))
 
+func _local_covered_storage(city_id:String)->float:
+	return SettlementModel.with_city_resources(city_id,func()->float:
+		return SettlementModel.with_local_population(func()->float:
+			SettlementModel.rebuild_summary()
+			return float(ResourceSystem.storage_capacities().covered)))
+
 func test_local_storage_does_not_inherit_primary_warehouses()->void:
+	# Built storage is a city capacity from its own population, era, condition
+	# and carriers; a drawn warehouse plot adds nothing by itself.
 	GameState.settlement_completed.append("Storage Pits")
-	GameState.settlement_plots.append({"land_use":"storage","status":"active","worker_count":10,"worker_capacity":10,"storage_capacity":10000.0,"condition":1.0,"form":"stone warehouse"})
+	GameState.population_allocations.Logistics=maxi(int(GameState.population_allocations.get("Logistics",0)),200)
+	GameState.city_form={"tier":3.0,"condition":1.0}
+	SettlementModel.rebuild_summary()
 	var primary_capacity:=float(ResourceSystem.storage_capacities().covered)
-	var local_capacity:float=SettlementModel.with_city_resources("dawngate",func()->float: return float(ResourceSystem.storage_capacities().covered))
-	assert_float(primary_capacity).is_greater(1000.0)
-	assert_float(local_capacity).is_less(10.0)
+	GameState.settlement_plots.append({"id":9999,"land_use":"storage","status":"active","worker_count":10,"worker_capacity":10,"storage_capacity":10000.0,"condition":1.0,"form":"stone warehouse"})
+	SettlementModel.rebuild_summary()
+	assert_float(float(ResourceSystem.storage_capacities().covered)).is_equal_approx(primary_capacity,.000001)
+	var local_capacity:=_local_covered_storage("dawngate")
+	assert_float(primary_capacity).is_greater(local_capacity)
+	# Storage Pits belong to the capital, not to Dawngate.
+	assert_float(primary_capacity-local_capacity).is_greater(140.0)
+	# Raising Dawngate's own era and condition raises only its storage.
+	var city:=SettlementModel.settlement_record("dawngate")
+	city.local_resources.city_form={"tier":3.0,"condition":1.0}
+	assert_float(_local_covered_storage("dawngate")).is_greater(local_capacity)
+	SettlementModel.rebuild_summary()
+	assert_float(float(ResourceSystem.storage_capacities().covered)).is_equal_approx(primary_capacity,.000001)
 
 func test_blocked_route_cannot_teleport_goods()->void:
 	GameState.society_capacities["logistics"]=0.8
