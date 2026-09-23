@@ -39,6 +39,9 @@ func save_metadata(slot:String=DEFAULT_SLOT)->Dictionary:
 
 
 func save_game(slot:String=DEFAULT_SLOT)->Dictionary:
+	# A world day running in bounded steps commits before capture; saves never
+	# hold a partial day, so the format needs no unfinished-work records.
+	WorldSimulation.flush_day()
 	if slot==DEFAULT_SLOT and GeneralCampaign.active:slot="river_war"
 	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
 	var payload:Dictionary={
@@ -85,6 +88,8 @@ func _write_payload(path:String,payload:Dictionary)->Dictionary:
 ## the terrain scene afterwards so the rendered world rebuilds from the
 ## restored state (mirrors how _restart_world already works).
 func load_game(slot:String=DEFAULT_SLOT)->Dictionary:
+	# Finish the current world's day first; its steps must not run on loaded state.
+	WorldSimulation.flush_day()
 	var payload:=_read_payload(slot)
 	if payload.is_empty(): return {"error":"No readable save exists in that slot."}
 	if int(payload.get("version",-1))!=SAVE_VERSION: return {"error":"This save was written by an incompatible version."}

@@ -50,6 +50,10 @@ const TRIBUTARY_WATER_HALF_WIDTH_KM := 0.035
 const MAIN_RIVER_SETTLEMENT_CLEARANCE_KM := 0.25
 const TRIBUTARY_SETTLEMENT_CLEARANCE_KM := 0.10
 const SPEED_HOURS_PER_REAL_SECOND := {1:0.5,2:2.0,3:8.0,4:24.0,5:72.0}
+# Per-frame microseconds for a world day in progress (see _day_step_budget_usec).
+const DAY_STEP_BUDGET_USEC := 8000
+const DAY_STEP_BUDGET_FAST_USEC := 14000
+const DAY_STEP_BUDGET_NAVIGATING_USEC := 4000
 const SETTLEMENT_DETAIL_SCALE := 0.002
 const SETTLEMENT_FABRIC_MAX_ZOOM := 28.0
 const SETTLEMENT_DISTRICT_DETAIL_MAX_ZOOM := 2.4
@@ -340,6 +344,11 @@ var travel_days_total := 0.0
 var travel_days_elapsed := 0.0
 var game_speed := 0.0
 var simulation_clock:=preload("res://scripts/simulation_clock.gd").new()
+# Calendar target and frame advance of the day running in bounded steps.
+var scheduled_world_elapsed:=0.0
+var scheduled_world_days:=0.0
+# False restores whole days inside one frame (diagnostics and fallback).
+var scheduled_world_days_enabled:=true
 var world_menu_panel: Control
 var world_seed_input: LineEdit
 var world_seed_status: Label
@@ -399,6 +408,9 @@ var display_preferences:Node
 var quit_dialog:ConfirmationDialog
 var map_snapshot_elapsed:=0.1
 var map_snapshot_refreshes:=0
+# Settlement network rebuilds run on the same 10 Hz cadence, half a period
+# later, so its border meshes and the marker refreshes never share a frame.
+var map_network_elapsed:=0.05
 var rendered_resource_overlay_signature:=""
 var civilization_geography_cache:Dictionary={}
 var civilization_surface_cache:Dictionary={}
@@ -989,6 +1001,9 @@ func _process(delta: float) -> void:
 		_refresh_foreign_formation_markers()
 		_refresh_player_field_army_markers()
 		_refresh_player_scout_route_markers()
+	map_network_elapsed+=maxf(0.0,delta)
+	if map_network_elapsed>=0.1:
+		map_network_elapsed=fmod(map_network_elapsed,0.1)
 		_refresh_settlement_network()
 		_refresh_settlement_convoy_marker()
 	stamp=trace.mark("frame_map_snapshots",stamp)
@@ -999,6 +1014,11 @@ func _process(delta: float) -> void:
 	_arbitrate_notification_overlays()
 	_process_live_report_refresh(delta)
 	stamp=trace.mark("frame_hud",stamp)
+	# A started day always finishes, even if paused, before the century choice
+	# or campaign logic reads its results. Its work is spread across frames.
+	if WorldSimulation.day_in_progress():
+		WorldSimulation.pump_day(_day_step_budget_usec())
+		stamp=trace.mark("frame_world_day",stamp)
 	if GameState.founding_focus!="" and PeopleDirection.needs_century_choice():
 		if game_speed>0.0: _set_game_speed(0.0)
 		if not is_instance_valid(PeopleDirection.panel): PeopleDirection.open_direction()
@@ -1010,9 +1030,58 @@ func _process(delta: float) -> void:
 		return
 	if game_speed <= 0.0:
 		return
-	if calendar_days>0.0:advance_world_time(calendar_days)
+	if calendar_days>0.0:_schedule_world_time(calendar_days)
+
+## Frame budget for the day in progress. Steps are atomic, so one step can
+## exceed it; the budget bounds how many run back to back.
+func _day_step_budget_usec()->int:
+	if _camera_in_motion():return DAY_STEP_BUDGET_NAVIGATING_USEC
+	return DAY_STEP_BUDGET_FAST_USEC if _speed_hours_per_second()>=24.0 else DAY_STEP_BUDGET_USEC
+
+## The frame-loop calendar. Owned worlds run each day as bounded steps across
+## frames; legacy worlds and campaign intervals keep the synchronous path.
+func _schedule_world_time(days_advanced:float)->void:
+	if not scheduled_world_days_enabled or not WorldSimulation.enabled or GeneralCampaign.active:
+		advance_world_time(days_advanced)
+		return
+	var century:=float(PeopleDirection.next_century_day())
+	if WorldSimulation.day_in_progress():
+		# Calendar time accrues while the day computes, up to the next boundary,
+		# so computing and waiting overlap. The shown date holds at the day start.
+		var running:=WorldSimulation.day_in_progress_number()
+		var accrued:=minf(scheduled_world_elapsed+days_advanced,minf(float(running+1),century))
+		scheduled_world_days+=accrued-scheduled_world_elapsed
+		scheduled_world_elapsed=accrued
+		return
+	GameState.elapsed_days=minf(GameState.elapsed_days+days_advanced,century)
+	scheduled_world_elapsed=GameState.elapsed_days
+	if last_discovery_day>=int(floor(scheduled_world_elapsed)) or game_speed<=0.0:
+		_after_world_time(days_advanced)
+		return
+	var day:=last_discovery_day+1
+	scheduled_world_days=days_advanced
+	GameState.elapsed_days=float(day)
+	GameState.convoy_traveling=bool(GameState.founding_journey.get("active",false))
+	var daily_context:=_discovery_context()
+	for city in GameState.player_settlements:
+		if not bool(city.get("primary",false)):_initialize_city_resource_sites(String(city.id))
+	WorldSimulation.begin_day(day,daily_context,_process_local_settlement_day,_finish_scheduled_day.bind(day))
+	WorldSimulation.pump_day(_day_step_budget_usec())
+
+func _finish_scheduled_day(day_result:Dictionary,day:int)->void:
+	last_discovery_day=day
+	_commit_world_day(day_result)
+	# An attention pause during the day stops the calendar at that day.
+	GameState.elapsed_days=scheduled_world_elapsed if game_speed>0.0 else float(day)
+	_after_world_time(scheduled_world_days if game_speed>0.0 else 0.0)
+
+## The simulated date, including a day whose steps are still running.
+func _simulated_day()->int:
+	return WorldSimulation.day_in_progress_number() if WorldSimulation.day_in_progress() else last_discovery_day
 
 func advance_world_time(days_advanced:float)->void:
+	# Synchronous callers (campaign intervals, tests) first commit any day in progress.
+	WorldSimulation.flush_day()
 	# Stop at the calendar boundary; never simulate part of an unchosen century.
 	GameState.elapsed_days = minf(GameState.elapsed_days+days_advanced,float(PeopleDirection.next_century_day()))
 	var requested_world_day:=GameState.elapsed_days
@@ -1030,38 +1099,46 @@ func advance_world_time(days_advanced:float)->void:
 		for city in GameState.player_settlements:
 			if not bool(city.get("primary",false)):_initialize_city_resource_sites(String(city.id))
 		var day_result:=WorldSimulation.advance_day(last_discovery_day,daily_context,_process_local_settlement_day) if WorldSimulation.enabled else preload("res://scripts/civilization_day.gd").advance(last_discovery_day,daily_context,_process_local_settlement_day)
-		var discoveries:Array[Dictionary]=day_result.discoveries
-		if not discoveries.is_empty():preload("res://scripts/hud/research_announcements.gd").announce(self,hud,discoveries)
-		var resource_events:Array[Dictionary]=day_result.resources
-		var simulation_events:Array[Dictionary]=day_result.events
-		var progression_events:Array[Dictionary]=day_result.progression
-		if not (day_result.get("arrival",{}) as Dictionary).is_empty():_show_convoy_arrival(day_result.arrival)
-		if not discoveries.is_empty() or not resource_events.is_empty():footprint_population=-1
-		AdvisorSystem.refresh_pronouncement_statuses()
-		_refresh_population_allocations()
-		_refresh_event_report()
-		for consequence in simulation_events:
-			if String(consequence.get("severity","")) in ["danger","critical","warning"]:
-				AdvisorSystem.generate_consequence_item(consequence)
-		for resource_event in resource_events:
-			if String(resource_event.get("title","")) in ["Resource Flow Constrained","Material Losses","Resource Accessible"]:
-				AdvisorSystem.generate_consequence_item({"description":String(resource_event.get("description","")),"domain":"materials","severity":"warning" if String(resource_event.get("title",""))!="Resource Accessible" else "notice"})
-		preload("res://scripts/strategic_history.gd").sample()
-		_refresh_discovered_resource_overlays()
-		_refresh_settlement_footprint()
-		if not progression_events.is_empty() and travel_status_label:
-			travel_status_label.text="CIVILIZATION MILESTONE: %s" % String(progression_events[0].name).to_upper()
-		elif not discoveries.is_empty() and travel_status_label:
-			travel_status_label.text = "DISCOVERY: %s" % discoveries[0].name.to_upper()
-		elif not resource_events.is_empty() and travel_status_label:
-			travel_status_label.text = "%s: %s" % [resource_events[0].title.to_upper(), resource_events[0].description]
-		elif not simulation_events.is_empty() and travel_status_label:
-			travel_status_label.text = "%s: %s" % [simulation_events[0].title.to_upper(), simulation_events[0].description]
-		_evaluate_travel_survival()
+		_commit_world_day(day_result)
 	if last_discovery_day<current_discovery_day:
 		days_advanced=maxf(0.0,days_advanced-(requested_world_day-float(last_discovery_day)))
 		requested_world_day=float(last_discovery_day)
 	GameState.elapsed_days=requested_world_day
+	_after_world_time(days_advanced)
+
+## Presents one committed simulation day: reports, advisors, overlays.
+func _commit_world_day(day_result:Dictionary)->void:
+	var discoveries:Array[Dictionary]=day_result.discoveries
+	if not discoveries.is_empty():preload("res://scripts/hud/research_announcements.gd").announce(self,hud,discoveries)
+	var resource_events:Array[Dictionary]=day_result.resources
+	var simulation_events:Array[Dictionary]=day_result.events
+	var progression_events:Array[Dictionary]=day_result.progression
+	if not (day_result.get("arrival",{}) as Dictionary).is_empty():_show_convoy_arrival(day_result.arrival)
+	if not discoveries.is_empty() or not resource_events.is_empty():footprint_population=-1
+	AdvisorSystem.refresh_pronouncement_statuses()
+	_refresh_population_allocations()
+	_refresh_event_report()
+	for consequence in simulation_events:
+		if String(consequence.get("severity","")) in ["danger","critical","warning"]:
+			AdvisorSystem.generate_consequence_item(consequence)
+	for resource_event in resource_events:
+		if String(resource_event.get("title","")) in ["Resource Flow Constrained","Material Losses","Resource Accessible"]:
+			AdvisorSystem.generate_consequence_item({"description":String(resource_event.get("description","")),"domain":"materials","severity":"warning" if String(resource_event.get("title",""))!="Resource Accessible" else "notice"})
+	preload("res://scripts/strategic_history.gd").sample()
+	_refresh_discovered_resource_overlays()
+	_refresh_settlement_footprint()
+	if not progression_events.is_empty() and travel_status_label:
+		travel_status_label.text="CIVILIZATION MILESTONE: %s" % String(progression_events[0].name).to_upper()
+	elif not discoveries.is_empty() and travel_status_label:
+		travel_status_label.text = "DISCOVERY: %s" % discoveries[0].name.to_upper()
+	elif not resource_events.is_empty() and travel_status_label:
+		travel_status_label.text = "%s: %s" % [resource_events[0].title.to_upper(), resource_events[0].description]
+	elif not simulation_events.is_empty() and travel_status_label:
+		travel_status_label.text = "%s: %s" % [simulation_events[0].title.to_upper(), simulation_events[0].description]
+	_evaluate_travel_survival()
+
+## Calendar-time presentation after whole days are committed.
+func _after_world_time(days_advanced:float)->void:
 	if not GameState.founding_journey.is_empty():
 		var journey:=GameState.founding_journey
 		travel_days_elapsed=float(journey.elapsed)
@@ -4358,6 +4435,8 @@ func _refresh_settlement_network(force:=false)->void:
 	var halo_segment_count:=0
 	var ownership_triangle_count:=0
 	var visible_secondary_settlements:Array[Dictionary]=[]
+	# One exact height sample set serves fills and both border ribbons.
+	var samples:=preload("res://scripts/settlement_surface_samples.gd").new(_height_at,func(_point:Vector2)->bool:return true)
 	for settlement in network.settlements:
 		if not bool(settlement.get("primary",false)) and _settlement_marker_in_current_view(settlement): visible_secondary_settlements.append(settlement)
 		if not _settlement_boundary_in_current_view(settlement): continue
@@ -4371,11 +4450,11 @@ func _refresh_settlement_network(force:=false)->void:
 		var ownership_color:Color=color
 		# Store base opacity in geometry; the camera fade is updated live in material.
 		ownership_color.a=float(visual_profile.fill_alpha)*(1.0 if bool(settlement.get("primary",false)) else 0.72)
-		ownership_triangle_count+=_append_settlement_claim_fill(ownership_surface,boundary,ownership_color,0.0032)
+		ownership_triangle_count+=_append_settlement_claim_fill(ownership_surface,boundary,ownership_color,0.0032,samples)
 		var halo_color:=Color("#121817")
 		halo_color.a=0.32 if bool(settlement.get("primary",false)) else 0.24
-		halo_segment_count+=_append_settlement_boundary_ribbon(border_halo_surface,boundary,core_width*2.8,halo_color,0.0045)
-		segment_count+=_append_settlement_boundary_ribbon(border_surface,boundary,core_width,color,0.0065)
+		halo_segment_count+=_append_settlement_boundary_ribbon(border_halo_surface,boundary,core_width*2.8,halo_color,0.0045,samples)
+		segment_count+=_append_settlement_boundary_ribbon(border_surface,boundary,core_width,color,0.0065,samples)
 	_create_secondary_settlement_markers(visible_secondary_settlements)
 	_create_secondary_settlement_footprints(visible_secondary_settlements,force)
 	if ownership_triangle_count>0:
@@ -5086,7 +5165,8 @@ func _append_settlement_field_mosaic(surface:SurfaceTool,center:Vector3,field_of
 	return appended
 
 
-func _append_settlement_system_ribbon(surface:SurfaceTool,center:Vector3,points:PackedVector2Array,half_width:float,color:Color,lift:float,subdivision_budget:=48,damage_ratio:=0.0,damage_seed:=0)->int:
+## `samples` optionally shares exact terrain height/land results within one build.
+func _append_settlement_system_ribbon(surface:SurfaceTool,center:Vector3,points:PackedVector2Array,half_width:float,color:Color,lift:float,subdivision_budget:=48,damage_ratio:=0.0,damage_seed:=0,samples:RefCounted=null)->int:
 	if points.size()<2: return 0
 	var appended:=0
 	var total_length:=0.0
@@ -5106,13 +5186,15 @@ func _append_settlement_system_ribbon(surface:SurfaceTool,center:Vector3,points:
 			if direction.length_squared()<0.0000001: continue
 			var side:=Vector2(-direction.y,direction.x).normalized()*half_width
 			var world_middle:=Vector2(center.x,center.z)+(start+finish)*0.5
-			if not _settlement_stage_land_at(world_middle) or not _settlement_stage_land_at(world_middle+side) or not _settlement_stage_land_at(world_middle-side): continue
+			if samples:
+				if not samples.land_at(world_middle) or not samples.land_at(world_middle+side) or not samples.land_at(world_middle-side): continue
+			elif not _settlement_stage_land_at(world_middle) or not _settlement_stage_land_at(world_middle+side) or not _settlement_stage_land_at(world_middle-side): continue
 			var corners:=[start-side,finish-side,finish+side,start+side]
 			var uvs:=[Vector2(0.0,0.0),Vector2(1.0,0.0),Vector2(1.0,1.0),Vector2(0.0,1.0)]
 			for corner_index in [0,1,2,0,2,3]:
 				var local_point:Vector2=corners[corner_index]
 				var world_point:=Vector3(center.x+local_point.x,0.0,center.z+local_point.y)
-				world_point.y=_close_surface_height_at(world_point.x,world_point.z)+lift
+				world_point.y=(samples.height_at(world_point.x,world_point.z) if samples else _close_surface_height_at(world_point.x,world_point.z))+lift
 				surface.set_color(color)
 				surface.set_uv(_atlas_uv(Vector2i(3,2),uvs[corner_index]))
 				surface.set_uv2(Vector2(fposmod(direction.angle(),TAU)/TAU,0.37))
@@ -7396,7 +7478,7 @@ func _update_settlement_claim_opacity()->void:
 	if material==null: return
 	material.albedo_color=Color(1,1,1,_settlement_claim_fill_alpha(1.0))
 
-func _append_settlement_claim_fill(surface:SurfaceTool,boundary:PackedVector2Array,color:Color,lift:=0.0032)->int:
+func _append_settlement_claim_fill(surface:SurfaceTool,boundary:PackedVector2Array,color:Color,lift:=0.0032,samples:RefCounted=null)->int:
 	if boundary.size()<3: return 0
 	var center:=Vector2.ZERO
 	for point in boundary: center+=point
@@ -7404,10 +7486,10 @@ func _append_settlement_claim_fill(surface:SurfaceTool,boundary:PackedVector2Arr
 	for index in boundary.size():
 		for point in [center,boundary[index],boundary[(index+1)%boundary.size()]]:
 			surface.set_color(color)
-			surface.add_vertex(Vector3(point.x,_height_at(point.x,point.y)+lift,point.y))
+			surface.add_vertex(Vector3(point.x,(samples.height_at(point.x,point.y) if samples else _height_at(point.x,point.y))+lift,point.y))
 	return boundary.size()
 
-func _append_settlement_boundary_ribbon(surface:SurfaceTool,boundary:PackedVector2Array,half_width:float,color:Color,lift:=0.006)->int:
+func _append_settlement_boundary_ribbon(surface:SurfaceTool,boundary:PackedVector2Array,half_width:float,color:Color,lift:=0.006,samples:RefCounted=null)->int:
 	if boundary.size()<3: return 0
 	for index in boundary.size():
 		var a:=boundary[index]
@@ -7429,7 +7511,7 @@ func _append_settlement_boundary_ribbon(surface:SurfaceTool,boundary:PackedVecto
 			for corner_index in [0,1,2,0,2,3]:
 				var point:Vector2=corners[corner_index]
 				surface.set_color(color)
-				surface.add_vertex(Vector3(point.x,_height_at(point.x,point.y)+lift,point.y))
+				surface.add_vertex(Vector3(point.x,(samples.height_at(point.x,point.y) if samples else _height_at(point.x,point.y))+lift,point.y))
 	return boundary.size()
 
 func _create_secondary_settlement_markers(settlements:Array[Dictionary])->void:
@@ -12022,7 +12104,7 @@ func _pause_for_military_attention(event_id:String,title:String,body:String,trun
 	game_speed=0.0
 	# Stop a fast-forward batch at this day, not after several hidden battles.
 	# Restored notifications have no running batch: preserve the saved fraction.
-	if truncate_batch:GameState.elapsed_days=minf(GameState.elapsed_days,float(last_discovery_day))
+	if truncate_batch:GameState.elapsed_days=minf(GameState.elapsed_days,float(_simulated_day()))
 	_update_time_interface()
 	_show_military_attention.call_deferred(title,body)
 
@@ -13680,11 +13762,12 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	var amber:=Color("#e6bd58"); amber.a=0.92
 	var backing_surface:=SurfaceTool.new(); backing_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var backing_color:=Color(0.015,0.022,0.024,0.78)
-	_append_settlement_system_ribbon(backing_surface,Vector3.ZERO,route_points,route_width*1.9,backing_color,clearance,42)
+	var samples:=preload("res://scripts/settlement_surface_samples.gd").new(_close_surface_height_at,_settlement_stage_land_at)
+	_append_settlement_system_ribbon(backing_surface,Vector3.ZERO,route_points,route_width*1.9,backing_color,clearance,42,0.0,0,samples)
 	var backing:=MeshInstance3D.new(); backing.name="ScoutCorridorBacking"; backing.mesh=backing_surface.commit()
 	var backing_material:=StandardMaterial3D.new(); backing_material.vertex_color_use_as_albedo=true; backing_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; backing_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; backing_material.no_depth_test=true; backing_material.render_priority=3; backing.material_override=backing_material; root.add_child(backing)
 	var path_surface:=SurfaceTool.new(); path_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	_append_settlement_system_ribbon(path_surface,Vector3.ZERO,route_points,route_width*0.62,amber,clearance*1.1,42)
+	_append_settlement_system_ribbon(path_surface,Vector3.ZERO,route_points,route_width*0.62,amber,clearance*1.1,42,0.0,0,samples)
 	var path:=MeshInstance3D.new(); path.name="ScoutCorridor"; path.mesh=path_surface.commit()
 	var path_material:=StandardMaterial3D.new(); path_material.vertex_color_use_as_albedo=true; path_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; path_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; path_material.no_depth_test=true; path_material.render_priority=4; path.material_override=path_material; root.add_child(path)
 	# A few forward-pointing pennants make the order legible even when the route

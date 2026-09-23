@@ -73,3 +73,57 @@ Proposed acceptance budgets: ordinary map CPU under 8 ms, no recurring callback 
 Copy an explicitly chosen save to ignored `artifacts/year71_fixture.save`. Run `res://tests/year71_performance_probe.tscn` headless with `--year71-profile`; `--after` compares the complete saved outcome with the baseline. `--detail` runs only two days with deeper counters. `--map-profile` runs a paused headless frame-callback probe. Ordinary player save slots are never written. Windows process CPU comes from two hidden, noninteractive process-time reads around simulation; other platforms do not supply that measurement.
 
 The before/after reports are ignored local artifacts; compact timing data and inventory are in `YEAR71_AUDIT.json`. No private saves, images or generated import files belong in the commit. Graphical follow-up probes must use the private-desktop launcher, never the user's live game.
+
+## Follow-up: scheduled world days (codex/day-jobs)
+
+Remaining-work item 1 is partly addressed. A world day is now an ordered queue of
+steps (`scripts/day_job.gd`): rival views, each rival's 15 phases plus one step per
+secondary town, the human owner's phases, then per-civilization projections,
+per-observer views, contact and exchange. The terrain frame loop runs 8 ms of steps per
+frame (14 ms at 1+ day/s, 4 ms while the camera moves). Calendar time accrues up to the next
+boundary while a day computes. The day's HUD/advisor/history commit runs once when the last
+step finishes. `WorldSimulation.advance_day` runs the same steps synchronously.
+Saves and loads call `flush_day()` first, so no partial day is ever saved and the
+save format is unchanged. Validating another save preserves the day in progress.
+
+Year-71 fixture, eight days, one step per call: saved state identical to the
+synchronous baseline. 2,776 steps: median 2.0 ms, p95 11.3 ms, p99 21.2 ms, max
+162 ms (a one-off rival `resources` step). 57 steps exceed 16 ms, 10 exceed 33 ms.
+
+Real terrain frames at speed 5, four days: synchronous 24 frames in 5.2 s with
+day frames of 1.1–1.6 s; scheduled 295 frames in 6.2 s, median 18.9 ms, p95 31 ms, max
+130 ms, maximum while panning 39 ms. Throughput fell from about 0.77 to 0.65 days/s
+because simulation now shares frames with rendering; total daily CPU is unchanged.
+
+Limits: steps are atomic, so the slowest phases (rival `resources`, `controller`,
+`world`, `progression`, `military_and_travel`) still reach 25–160 ms. Player commands
+issued between steps take effect from the next phase rather than being queued to a
+day boundary. Rival projections refresh civilization by civilization over a few
+frames. `scheduled_world_days_enabled=false` on the terrain restores the old
+whole-day frame. Probe: `--year71-profile --stepped` and `--frame-profile [--synchronous]`.
+
+### Follow-up checkpoints on codex/day-jobs
+
+Each keeps the eight-day year-71 saved state identical to the baseline (stepped and synchronous).
+"Warm" means after the first, cold day after load. Timings vary with other load on this
+machine; another headless worker ran throughout.
+
+| Commit | Change | Measured effect |
+|---|---|---|
+| 8dc4f9d | AI order selection, each civilian investment planner and each expansion site are separate steps | slowest warm step 136 → 52 ms; p99 13.9 → 10.6 ms |
+| 08012d8 | Owned-world civilization work and weekly scout route quotes split; review/civilian/expansion/scouting follow-up steps queued only when due | warm steps per 7 days 10,332 → 4,293; slowest warm step ~40 ms |
+| 74ad73f | Charted area cached by fog revision; nation-wide territory inputs computed once per network snapshot | projection steps 806 → 301 ms per 8 days; no warm step > 33 ms |
+| e4b3504 | Exact shared terrain samples for territory fills, borders and scout corridors | paused map snapshot work 148 → 123 ms per 36 frames |
+| 2fdc67d | Settlement network refresh runs half a period after marker refreshes (both still 10 Hz) | refresh-frame peaks 26–30 → 15–19 ms |
+
+Checked and not changed: observer views (~31 ms/day; exact reuse is complicated by
+per-observer controller localization), material flow (per-deposit work, no repeated
+nation-wide inputs), progression's domain limits (cold-cache cost on the first day
+after load only). Two-day `--detail` runs include that cold day; use eight-day `--stepped`
+runs for steady-state conclusions.
+
+Still open: total daily CPU is about 1.0–1.4 s. Roughly 450–500 ms of it is secondary
+settlements (consequences/food ~190, resources ~115, economy ~70 ms), spread across many
+small subsystems per city. Pan/zoom still rebuilds border and corridor meshes by view
+bucket. Width is baked into geometry, so retained geometry needs a shader or transform
+change with graphical verification.

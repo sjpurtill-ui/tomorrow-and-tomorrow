@@ -63,51 +63,93 @@ static func research_orders(id:String,plan:Dictionary)->void:
 	if not support.is_empty():WorldSimulation.submit(id,{"kind":"research_target","id":support.id,"reason":String(support.get("reason","Investigate foundations for working "+String(support.get("resource","local materials"))))})
 
 static func choose_orders(id:String)->void:
-	if String(WorldSimulation.actors[id].controller)!="ai":return
-	var day:=int(WorldSimulation.state.elapsed_days)
-	if WorldSimulation.direction.needs_century_choice():
-		var plan:=current_plan(id)
-		WorldSimulation.submit(id,{"kind":"ambition","id":plan.ambition})
-		research_orders(id,plan)
-	if not WorldSimulation.state.settlement_site_committed:
-		if WorldSimulation.state.convoy_traveling:return
-		var founded:=WorldSimulation.submit(id,{"kind":"found"})
-		if founded.has("error"):
-			var home:=WorldSimulation.world.player_world_origin
-			for distance:float in [2,5,10,20,40]:
-				for spoke in 12:
-					var destination:=home+Vector2.from_angle(TAU*float(spoke)/12)*distance
-					if not WorldSimulation.world._position_is_revealed(destination):continue
-					var known:=preload("res://scripts/civilization_day.gd").context(destination)
-					if not bool(WorldSimulation.resources.water_access_snapshot(known).accessible):continue
-					if not WorldSimulation.submit(id,{"kind":"move","destination":destination}).has("error"):return
-		return
-	preload("res://scripts/ai_workshop_turnover.gd").advance(id,WorldSimulation.military)
-	if not review_due(id,day):return
-	var plan:=current_plan(id)
-	research_orders(id,plan)
-	military_orders(id,plan)
-	civilian_orders(id,plan)
-	foreign_orders(id,plan)
-	expansion_orders(id,plan)
+	preload("res://scripts/day_job.gd").run_parts(order_steps(id))
+
+## The daily decision as ordered [label, callable] parts; later parts run only
+## when the first finds a plan review due. Nothing else runs between parts.
+static func order_steps(id:String)->Array:
+	var shared:Dictionary={}
+	var review:Array=[]
+	var first:=[["controller",func()->Variant:
+		if String(WorldSimulation.actors[id].controller)!="ai":return null
+		var day:=int(WorldSimulation.state.elapsed_days)
+		if WorldSimulation.direction.needs_century_choice():
+			var century_plan:=current_plan(id)
+			WorldSimulation.submit(id,{"kind":"ambition","id":century_plan.ambition})
+			research_orders(id,century_plan)
+		if not WorldSimulation.state.settlement_site_committed:
+			if WorldSimulation.state.convoy_traveling:return null
+			var founded:=WorldSimulation.submit(id,{"kind":"found"})
+			if founded.has("error"):
+				var home:=WorldSimulation.world.player_world_origin
+				for distance:float in [2,5,10,20,40]:
+					for spoke in 12:
+						var destination:=home+Vector2.from_angle(TAU*float(spoke)/12)*distance
+						if not WorldSimulation.world._position_is_revealed(destination):continue
+						var known:=preload("res://scripts/civilization_day.gd").context(destination)
+						if not bool(WorldSimulation.resources.water_access_snapshot(known).accessible):continue
+						if not WorldSimulation.submit(id,{"kind":"move","destination":destination}).has("error"):return null
+			return null
+		preload("res://scripts/ai_workshop_turnover.gd").advance(id,WorldSimulation.military)
+		if not review_due(id,day):return null
+		shared.plan=current_plan(id)
+		return review
+	]]
+	var parts:Array=review
+	for kind:String in ["research","military","civilian","foreign","expansion"]:
+		if kind in ["civilian","expansion"]:
+			var kind_parts:=civilian_order_steps(id,func()->Dictionary:return shared.plan) if kind=="civilian" else expansion_order_steps(id,func()->Dictionary:return shared.plan)
+			for part:Array in kind_parts:
+				parts.append(["controller_"+String(part[0]),func()->Variant:
+					return (part[1] as Callable).call() if shared.has("plan") else null
+				])
+			continue
+		parts.append(["controller_"+kind,func()->void:
+			if not shared.has("plan"):return
+			match kind:
+				"research":research_orders(id,shared.plan)
+				"military":military_orders(id,shared.plan)
+				"foreign":foreign_orders(id,shared.plan)
+		])
+	return first
 
 static func expansion_orders(id:String,plan:Dictionary)->void:
-	if bool(plan.hungry) or bool(plan.at_war) or float(WorldSimulation.state.simulation_metrics.get("food_days",0))<float(plan.expansion_food):return
-	if bool(WorldSimulation.state.settlement_convoy.get("active",false)):return
-	if "Hearth Circle" not in WorldSimulation.state.settlement_completed:return
-	var home:=WorldSimulation.world.player_world_origin
-	# Evaluate candidates only inside returned knowledge. Duration, founders,
-	# supplies, and land/water checks belong to the same founding transaction.
-	var best:Dictionary={};var best_value:=-INF
-	for point:Vector2 in expansion_candidates(home,float(plan.settle_distance)):
-		if not bool(WorldSimulation.settlements.known_land_assessment(point).known):continue
-		var quote:=WorldSimulation.settlements.settlement_convoy_quote(point,0)
-		if not bool(quote.get("ok",false)):continue
-		var context:=preload("res://scripts/civilization_day.gd").context(point)
-		if not bool(WorldSimulation.resources.water_access_snapshot(context).accessible):continue
-		var value:=expansion_site_value(context,plan)
-		if value>best_value:best={"kind":"settle","destination":point};best_value=value
-	if not best.is_empty():WorldSimulation.submit(id,best)
+	preload("res://scripts/day_job.gd").run_parts(expansion_order_steps(id,func()->Dictionary:return plan))
+
+## expansion_orders as ordered parts: eligibility, one part per candidate site,
+## then the founding order for the best site found.
+static func expansion_order_steps(id:String,plan_source:Callable)->Array:
+	var shared:Dictionary={"best":{},"best_value":-INF}
+	var sites:Array=[]
+	var parts:Array=[["expansion_review",func()->Variant:
+		var plan:Dictionary=plan_source.call()
+		shared.plan=plan
+		shared.eligible=false
+		if bool(plan.hungry) or bool(plan.at_war) or float(WorldSimulation.state.simulation_metrics.get("food_days",0))<float(plan.expansion_food):return null
+		if bool(WorldSimulation.state.settlement_convoy.get("active",false)):return null
+		if "Hearth Circle" not in WorldSimulation.state.settlement_completed:return null
+		shared.eligible=true
+		# Evaluate candidates only inside returned knowledge. Duration, founders,
+		# supplies, and land/water checks belong to the same founding transaction.
+		shared.points=expansion_candidates(WorldSimulation.world.player_world_origin,float(plan.settle_distance))
+		return sites
+	]]
+	for index in 48:
+		sites.append(["expansion_site",func()->void:
+			if not bool(shared.get("eligible",false)) or index>=(shared.points as Array).size():return
+			var point:Vector2=shared.points[index]
+			if not bool(WorldSimulation.settlements.known_land_assessment(point).known):return
+			var quote:=WorldSimulation.settlements.settlement_convoy_quote(point,0)
+			if not bool(quote.get("ok",false)):return
+			var context:=preload("res://scripts/civilization_day.gd").context(point)
+			if not bool(WorldSimulation.resources.water_access_snapshot(context).accessible):return
+			var value:=expansion_site_value(context,shared.plan)
+			if value>float(shared.best_value):shared.best={"kind":"settle","destination":point};shared.best_value=value
+		])
+	sites.append(["expansion_order",func()->void:
+		if bool(shared.get("eligible",false)) and not (shared.best as Dictionary).is_empty():WorldSimulation.submit(id,shared.best)
+	])
+	return parts
 
 static func expansion_candidates(home:Vector2,distance:float)->Array[Vector2]:
 	var points:Array[Vector2]=[]
@@ -154,11 +196,24 @@ static func civilian_arrival_review_due(id:String,day:int)->bool:
 	return true
 
 static func civilian_orders(id:String,plan:Dictionary)->void:
-	if production_food_blocked(plan) or bool(plan.get("at_war",false)):return
-	var recommendation:=preload("res://scripts/civilian_investment_planner.gd").recommendation()
-	if String(recommendation.get("kind",""))=="plant_install":
-		WorldSimulation.submit(id,recommendation);return
-	production_order(id,recommendation)
+	preload("res://scripts/day_job.gd").run_parts(civilian_order_steps(id,func()->Dictionary:return plan))
+
+## civilian_orders as ordered parts: the plan check, each investment planner,
+## then the resulting order. `plan_source` is evaluated in the first part.
+static func civilian_order_steps(id:String,plan_source:Callable)->Array:
+	var shared:Dictionary={}
+	var planners:=preload("res://scripts/civilian_investment_planner.gd").recommendation_steps(shared)
+	var follow:Array=planners.duplicate()
+	follow.append(["civilian_order",func()->void:
+		var recommendation:Dictionary=shared.recommendation
+		if String(recommendation.get("kind",""))=="plant_install":
+			WorldSimulation.submit(id,recommendation);return
+		production_order(id,recommendation)
+	])
+	return [["civilian_review",func()->Variant:
+		var plan:Dictionary=plan_source.call()
+		return null if production_food_blocked(plan) or bool(plan.get("at_war",false)) else follow
+	]]
 
 static func production_order(id:String,recommendation:Dictionary)->void:
 	if recommendation.is_empty():return

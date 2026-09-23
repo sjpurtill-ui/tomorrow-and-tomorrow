@@ -51,53 +51,71 @@ func snapshot()->Dictionary:
 	var origin:Dictionary=host._scout_origin(String(data.get("origin_city_id","")))
 	return {"share":float(data.share),"focus":String(data.focus),"origin_city_id":String(origin.get("id","")),"origin_label":String(origin.get("label","Home settlement")),"origins":host.scout_origin_options(),"target":floori(population*float(data.share)),"away":assigned,"parties":host.scout_missions.size(),"status":String(data.status),"food_spent":float(data.food_spent),"daily_food":float(assigned)*.55,"review_in":maxi(0,int(data.next_review)-int(WorldSimulation.state.elapsed_days)),"reception":EXCHANGE.reception_snapshot() if data.focus=="recruitment" else {},"recruitment":recruitment,"prospecting":host.prospecting_status()}
 func advance(day:int)->void:
-	if day<=int(data.last_day):return
-	data.last_day=day
-	advance_city_watches(day)
-	if float(data.share)<=0:return
-	if not WorldSimulation.state.settlement_site_committed:data.status="Scouting begins after the settlement is founded.";return
-	if day<int(data.next_review):return
-	data.next_review=day+7
-	var view:=snapshot();var free:=int(view.target)-int(view.away)
-	if free<2:
-		data.status="Allocation supports %d scout; a party needs at least 2. Increase the allocation." % int(view.target) if int(view.away)==0 else "%d people away of a %d-person allocation. Staff replace returning parties." % [int(view.away),int(view.target)]
-		return
-	var slots:int=host.scout_party_capacity()-int(view.parties)
-	if slots<=0:data.status="All organized parties are away. Staff will replace them after return.";return
-	var pool:Dictionary=host.scout_origin_staffing(String(view.origin_city_id))
-	var adults:=int(pool.available)
-	if adults<2:data.status="Waiting for people: %d adults free after existing commitments and essential work; a party needs 2." % adults;return
-	var people:=mini(adults,clampi(ceili(float(free)/slots),2,mini(80,free)))
-	var civilian_reserve:=maxf(1,float(pool.population))*.9*7
-	var spendable:=maxf(0,float(pool.food)-civilian_reserve)
-	if spendable<2*30*.55:
-		data.status="Waiting for provisions: %.0f food available for travel; the smallest party needs 33. Seven days of food stay at home." % spendable
-		return
-	var targets:Array[String]=[]
-	if data.focus=="recruitment":
-		# Standing staff never choose the hostile act of recruiting inside a
-		# foreign city. That requires the player's explicit named-city order.
-		targets.append("recruit_people")
-	elif data.focus=="prospecting":
-		var prospecting:Dictionary=host.prospecting_status()
-		if not bool(prospecting.available):data.status=String(prospecting.message);return
-		targets.append("rare_resources")
-	else:targets.append("open_world")
-	var last_reason:="No connected route found within our current travel and food budget."
-	for target:String in targets:
-		var search:=target in ["open_world","recruit_people","rare_resources"]
-		# Familiar ground may need to be crossed to reach new country. Longer
-		# budgets are tried only when shorter, affordable trips are not useful.
-		for days:int in host.SCOUT_DURATIONS:
-			var party_size:=mini(people,floori(spendable/(days*.55)))
-			if party_size<2:break
+	preload("res://scripts/day_job.gd").run_parts(advance_steps(day))
+
+## The daily staff review as ordered [label, callable] parts. The weekly
+## dispatch tries one travel budget per part; later parts stop once one
+## dispatches, fails, or runs out of affordable party size.
+func advance_steps(day:int)->Array:
+	var routes:Array=[]
+	var shared:Dictionary={"active":false,"searching":false,"last_reason":"No connected route found within our current travel and food budget."}
+	var parts:Array=[["scouting_review",func()->void:
+		if day<=int(data.last_day):return
+		data.last_day=day
+		shared.active=true
+	],["scouting_city_watches",func()->void:
+		if shared.active:advance_city_watches(day)
+	],["scouting_dispatch_plan",func()->Variant:
+		if not shared.active:return null
+		if float(data.share)<=0:return null
+		if not WorldSimulation.state.settlement_site_committed:data.status="Scouting begins after the settlement is founded.";return null
+		if day<int(data.next_review):return null
+		data.next_review=day+7
+		var view:=snapshot();var free:=int(view.target)-int(view.away)
+		if free<2:
+			data.status="Allocation supports %d scout; a party needs at least 2. Increase the allocation." % int(view.target) if int(view.away)==0 else "%d people away of a %d-person allocation. Staff replace returning parties." % [int(view.away),int(view.target)]
+			return null
+		var slots:int=host.scout_party_capacity()-int(view.parties)
+		if slots<=0:data.status="All organized parties are away. Staff will replace them after return.";return null
+		var pool:Dictionary=host.scout_origin_staffing(String(view.origin_city_id))
+		var adults:=int(pool.available)
+		if adults<2:data.status="Waiting for people: %d adults free after existing commitments and essential work; a party needs 2." % adults;return null
+		var people:=mini(adults,clampi(ceili(float(free)/slots),2,mini(80,free)))
+		var civilian_reserve:=maxf(1,float(pool.population))*.9*7
+		var spendable:=maxf(0,float(pool.food)-civilian_reserve)
+		if spendable<2*30*.55:
+			data.status="Waiting for provisions: %.0f food available for travel; the smallest party needs 33. Seven days of food stay at home." % spendable
+			return null
+		var target:="open_world"
+		if data.focus=="recruitment":
+			# Standing staff never choose the hostile act of recruiting inside a
+			# foreign city. That requires the player's explicit named-city order.
+			target="recruit_people"
+		elif data.focus=="prospecting":
+			var prospecting:Dictionary=host.prospecting_status()
+			if not bool(prospecting.available):data.status=String(prospecting.message);return null
+			target="rare_resources"
+		shared.merge({"searching":true,"view":view,"people":people,"spendable":spendable,"target":target},true)
+		return routes
+	]]
+	# Familiar ground may need to be crossed to reach new country. Longer
+	# budgets are tried only when shorter, affordable trips are not useful.
+	for days:int in host.SCOUT_DURATIONS:
+		routes.append(["scouting_route_%d" % days,func()->void:
+			if not shared.searching:return
+			var target:String=shared.target;var view:Dictionary=shared.view;var spendable:float=shared.spendable
+			var search:=target in ["open_world","recruit_people","rare_resources"]
+			var party_size:=mini(int(shared.people),floori(spendable/(days*.55)))
+			if party_size<2:
+				shared.searching=false;data.status=shared.last_reason;return
 			var quote:Dictionary=host.scout_mission_quote(days,target,"",party_size,true,String(view.get("origin_city_id","")))
 			if not bool(quote.get("can_dispatch",false)):
-				last_reason=String(quote.get("blocker",quote.get("error",last_reason)));continue
+				shared.last_reason=String(quote.get("blocker",quote.get("error",shared.last_reason)));return
 			if float(quote.provisions)>spendable:
-				last_reason="Waiting for provisions: this route needs %.0f food; %.0f is available after the home reserve." % [float(quote.provisions),spendable];continue
+				shared.last_reason="Waiting for provisions: this route needs %.0f food; %.0f is available after the home reserve." % [float(quote.provisions),spendable];return
 			if search and float(quote.route_plan.get("novelty",0))<.38:
-				last_reason="No useful uncharted route found within the affordable travel budget. Staff will check again; no food was spent.";continue
+				shared.last_reason="No useful uncharted route found within the affordable travel budget. Staff will check again; no food was spent.";return
+			shared.searching=false
 			var result:Dictionary=host.dispatch_scouts(days,target,"",party_size,true,String(view.get("origin_city_id","")))
 			if result.has("error"):data.status=String(result.error);return
 			var party:Dictionary=host.scout_missions[-1];party["staff_managed"]=true;party["staff_focus"]=String(data.focus)
@@ -106,8 +124,11 @@ func advance(day:int)->void:
 			if data.focus=="recruitment":purpose="search for scarce wandering bands"
 			elif data.focus=="prospecting":purpose="survey material, mineral and fuel sources"
 			data.status="%d scouts departed from %s to %s. Expected back in %d days; staff handle the next departure." % [int(party.personnel),String(party.get("origin_label","home")),purpose,int(party.duration_days)]
-			return
-	data.status=last_reason
+		])
+	routes.append(["scouting_status",func()->void:
+		if shared.searching:data.status=shared.last_reason
+	])
+	return parts
 
 func city_watch(city_id:String)->Dictionary:
 	return (data.get("city_watches",{}) as Dictionary).get(city_id,{}).duplicate(true)

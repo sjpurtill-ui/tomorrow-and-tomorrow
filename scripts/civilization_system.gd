@@ -101,6 +101,9 @@ var captured_foreign_scouts:Dictionary={}
 var foreign_scout_reports_denied:=0
 var revealed_areas:Array[Dictionary]=[]
 var fog_revision:=0
+# Charted area for the current records. An Object, so saves never capture it;
+# keyed by fog_revision and record count, and cleared on reset and import.
+var _charted_area_cache:=RefCounted.new()
 # Derived chart geometry; objects are excluded from reflected campaign saves.
 var _revealed_chart_index:RefCounted
 var player_world_origin:=Vector2.ZERO
@@ -169,6 +172,7 @@ func reset_for_new_world()->void:
 	captured_foreign_scouts.clear()
 	foreign_scout_reports_denied=0
 	revealed_areas.clear()
+	_charted_area_cache.remove_meta("key")
 	fog_revision=0
 	player_world_origin=Vector2.ZERO
 	foreign_formations.clear()
@@ -579,14 +583,7 @@ func _initialize_relations(seed_value:int)->void:
 func advance_to_day(target_day:int)->void:
 	initialize()
 	if WorldSimulation.enabled:
-		last_processed_day=maxi(last_processed_day,target_day)
-		city_intelligence.sample_missions(target_day)
-		Exchange.sample_missions(self,target_day)
-		_complete_due_scout_missions(target_day)
-		scouting_staff.advance(target_day)
-		_process_diplomatic_mission(target_day)
-		_process_local_observation(target_day)
-		WorldSimulation.diplomacy.advance(target_day)
+		preload("res://scripts/day_job.gd").run_parts(owned_day_steps(target_day))
 		return
 	target_day=maxi(0,target_day)
 	if target_day<last_processed_day:
@@ -607,6 +604,21 @@ func advance_to_day(target_day:int)->void:
 	_process_diplomatic_mission(target_day)
 	_process_local_observation(target_day)
 	WorldSimulation.diplomacy.advance(target_day)
+
+
+## An owned world's daily civilization work as ordered [label, callable] parts.
+func owned_day_steps(target_day:int)->Array:
+	return [
+		["world_intelligence",func()->void:
+			last_processed_day=maxi(last_processed_day,target_day)
+			city_intelligence.sample_missions(target_day)],
+		["world_exchange",func()->void:Exchange.sample_missions(self,target_day)],
+		["world_scouts",func()->void:_complete_due_scout_missions(target_day)],
+	]+scouting_staff.advance_steps(target_day)+[
+		["world_diplomatic_mission",func()->void:_process_diplomatic_mission(target_day)],
+		["world_observation",func()->void:_process_local_observation(target_day)],
+		["world_diplomacy",func()->void:WorldSimulation.diplomacy.advance(target_day)],
+	]
 
 
 func _process_strategic_turn(day:int)->void:
@@ -719,6 +731,24 @@ func progression_reach_snapshot()->Dictionary:
 	# territorial systems, and settlement networks contribute separately. Four
 	# fixed ratios preserve constant runtime cost at any population.
 	var planet_area:=40075.0*20004.0
+	var charted_area:=_charted_area()
+	var charted:=clampf(charted_area/maxf(1.0,planet_area),0.0,1.0)
+	var contacts:=0
+	for civ in civilizations:
+		if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))>=2: contacts+=1
+	var contact_ratio:=clampf(float(contacts)/maxf(1.0,float(civilizations.size())),0.0,1.0)
+	var settlement_ratio:=clampf(float(WorldSimulation.state.player_settlements.size())/64.0,0.0,1.0)
+	if WorldSimulation.state.player_settlements.is_empty() and WorldSimulation.state.settlement_site_committed: settlement_ratio=1.0/64.0
+	var territory_ratio:=clampf(_player_territory()/4.0,0.0,1.0)
+	var combined:=charted*0.30+contact_ratio*0.20+settlement_ratio*0.25+territory_ratio*0.25
+	return {"combined":clampf(combined,0.0,1.0),"charted":charted,"contacts":contact_ratio,"settlements":settlement_ratio,"territory":territory_ratio,"contacted_civilizations":contacts}
+
+
+## Every runtime change to revealed_areas increments fog_revision; loads and
+## resets clear the cache explicitly.
+func _charted_area()->float:
+	var key:=[fog_revision,revealed_areas.size()]
+	if _charted_area_cache.get_meta("key",[])==key:return float(_charted_area_cache.get_meta("area"))
 	var charted_area:=0.0
 	for area_variant in revealed_areas:
 		var area:Dictionary=area_variant
@@ -732,16 +762,9 @@ func progression_reach_snapshot()->Dictionary:
 			charted_area+=trail_length*radius*2.0+PI*radius*radius
 		else:
 			charted_area+=PI*radius*radius
-	var charted:=clampf(charted_area/maxf(1.0,planet_area),0.0,1.0)
-	var contacts:=0
-	for civ in civilizations:
-		if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))>=2: contacts+=1
-	var contact_ratio:=clampf(float(contacts)/maxf(1.0,float(civilizations.size())),0.0,1.0)
-	var settlement_ratio:=clampf(float(WorldSimulation.state.player_settlements.size())/64.0,0.0,1.0)
-	if WorldSimulation.state.player_settlements.is_empty() and WorldSimulation.state.settlement_site_committed: settlement_ratio=1.0/64.0
-	var territory_ratio:=clampf(_player_territory()/4.0,0.0,1.0)
-	var combined:=charted*0.30+contact_ratio*0.20+settlement_ratio*0.25+territory_ratio*0.25
-	return {"combined":clampf(combined,0.0,1.0),"charted":charted,"contacts":contact_ratio,"settlements":settlement_ratio,"territory":territory_ratio,"contacted_civilizations":contacts}
+	_charted_area_cache.set_meta("key",key)
+	_charted_area_cache.set_meta("area",charted_area)
+	return charted_area
 
 
 func _add_revealed_area(position:Vector2,radius:float,source:String)->void:
@@ -5401,6 +5424,7 @@ func _apply_state(payload:Dictionary)->void:
 	foreign_scout_reports_denied=maxi(0,int(payload.get("foreign_scout_reports_denied",0)))
 	_revealed_chart_index=null
 	revealed_areas.assign((payload.get("revealed_areas",[]) as Array).duplicate(true))
+	_charted_area_cache.remove_meta("key")
 	fog_revision=maxi(0,int(payload.get("fog_revision",0)))
 	var origin:Dictionary=payload.get("player_world_origin",{})
 	player_world_origin=Vector2(float(origin.get("x",0.0)),float(origin.get("y",0.0)))

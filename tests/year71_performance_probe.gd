@@ -8,7 +8,8 @@ class Terrain extends "res://scripts/local_terrain.gd":
 func _ready()->void:call_deferred("run")
 func run()->void:
 	if DisplayServer.get_name()!="headless" or "--year71-profile" not in OS.get_cmdline_user_args():get_tree().quit(2);return
-	var mode:="detail" if "--detail" in OS.get_cmdline_user_args() else "after" if "--after" in OS.get_cmdline_user_args() else "before"
+	var args:=OS.get_cmdline_user_args()
+	var mode:="detail" if "--detail" in args else "stepped" if "--stepped" in args else "after" if "--after" in args else "before"
 	var saves:=Snapshot.new();add_child(saves)
 	var loaded:=saves.load_game("fixture")
 	if loaded.has("error"):print(loaded);get_tree().quit(1);return
@@ -17,6 +18,8 @@ func run()->void:
 	for id in WorldSimulation.actors:WorldSimulation.actors[id].systems.GameState.civic_api_enabled=false
 	if "--map-profile" in OS.get_cmdline_user_args():
 		await map_profile();return
+	if "--frame-profile" in OS.get_cmdline_user_args():
+		await frame_profile();return
 	var terrain:=Terrain.new();add_child(terrain)
 	terrain._configure_seamless_world();terrain._configure_shape();terrain._configure_noise()
 	WorldSimulation.context_provider=terrain._civilization_geography
@@ -47,16 +50,21 @@ func run()->void:
 	for i in (2 if mode=="detail" else 8):
 		var timings:Dictionary={"enabled":true}
 		var start:=Time.get_ticks_usec()
-		WorldSimulation.advance_day(day+i+1,terrain._discovery_context(),Callable(),timings)
-		report.samples.append({"day":day+i+1,"ms":(Time.get_ticks_usec()-start)/1000.0,"timings":timings})
+		if mode=="stepped":
+			report.samples.append({"day":day+i+1,"steps":stepped_day(day+i+1,terrain._discovery_context(),report)})
+			report.samples[-1]["ms"]=(Time.get_ticks_usec()-start)/1000.0
+		else:
+			WorldSimulation.advance_day(day+i+1,terrain._discovery_context(),Callable(),timings)
+			report.samples.append({"day":day+i+1,"ms":(Time.get_ticks_usec()-start)/1000.0,"timings":timings})
 		print("PROFILE_DAY ",day+i+1," ",report.samples[-1].ms)
 		await get_tree().process_frame
 	report["simulation_cpu_seconds"]=cpu_seconds()-cpu_start
 	report["detail"]=preload("res://scripts/performance_trace.gd").totals
+	if mode=="stepped":summarize_steps(report)
 	var saved:=saves.save_game(mode)
 	assert(saved.get("ok",false))
-	if mode=="after":
-		var before:=saves._read_payload("before");var after:=saves._read_payload("after")
+	if mode in ["after","stepped"]:
+		var before:=saves._read_payload("before");var after:=saves._read_payload(mode)
 		before.metadata.erase("saved_unix");after.metadata.erase("saved_unix")
 		var comparator=load("res://tools/campaign_performance_probe.gd").new()
 		comparator.compare(before,after,"world")
@@ -64,6 +72,76 @@ func run()->void:
 	var file:=FileAccess.open("res://artifacts/year71_"+mode+".json",FileAccess.WRITE);file.store_string(JSON.stringify(report,"  "));file.close()
 	print("PROFILE_DONE ",mode," state mismatches ",report.get("state_mismatches",[]))
 	terrain.free();WorldSimulation.clear();get_tree().quit(0 if report.get("state_mismatches",[]).is_empty() else 1)
+
+## One world day, one scheduled step per call, as the frame loop would run it.
+func stepped_day(target:int,context:Dictionary,report:Dictionary)->int:
+	var steps:Array=report.get_or_add("step_records",[])
+	WorldSimulation.begin_day(target,context)
+	var count:=0
+	while WorldSimulation.day_in_progress():
+		var job=WorldSimulation._day_job
+		WorldSimulation.pump_day(0)
+		steps.append(job.last_step.merged({"day":target}));count+=1
+	return count
+
+func summarize_steps(report:Dictionary)->void:
+	var records:Array=report.step_records
+	var first_day:=int(records[0].day)
+	var warm:Array=records.filter(func(r:Dictionary)->bool:return int(r.day)>first_day).map(func(r:Dictionary)->int:return int(r.usec))
+	warm.sort()
+	report["warm_steps"]={"count":warm.size(),"p95_ms":warm[int(warm.size()*.95)]/1000.0,"p99_ms":warm[int(warm.size()*.99)]/1000.0,"max_ms":warm[-1]/1000.0,"over_16ms":warm.filter(func(v:int)->bool:return v>16000).size(),"over_33ms":warm.filter(func(v:int)->bool:return v>33000).size()}
+	print("WARM_STEPS ",JSON.stringify(report.warm_steps))
+	var durations:Array=[]
+	var by_label:Dictionary={}
+	for record:Dictionary in records:
+		durations.append(int(record.usec))
+		var key:=String(record.label)
+		var entry:Dictionary=by_label.get_or_add(key,{"count":0,"total_ms":0.0,"max_ms":0.0})
+		entry.count+=1;entry.total_ms+=record.usec/1000.0;entry.max_ms=maxf(entry.max_ms,record.usec/1000.0)
+	durations.sort()
+	var pick:=func(q:float)->float:return durations[mini(durations.size()-1,int(q*durations.size()))]/1000.0
+	records.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.usec)>int(b.usec))
+	var over:={"4ms":0,"8ms":0,"16ms":0,"33ms":0}
+	for d:int in durations:
+		for limit in [[4000,"4ms"],[8000,"8ms"],[16000,"16ms"],[33000,"33ms"]]:
+			if d>limit[0]:over[limit[1]]+=1
+	report.erase("step_records")
+	report["steps"]={"count":durations.size(),"median_ms":pick.call(.5),"p95_ms":pick.call(.95),"p99_ms":pick.call(.99),"max_ms":durations[-1]/1000.0,"over":over,"slowest":records.slice(0,20),"by_label":by_label}
+	print("STEPS ",JSON.stringify(report.steps.duplicate().merged({"slowest":records.slice(0,8),"by_label":null},true)))
+
+## Real terrain frames at the fastest calendar speed. Days run as scheduled
+## steps inside the terrain's own _process; this records whole-frame intervals.
+func frame_profile()->void:
+	var terrain=load("res://local_terrain.tscn").instantiate();add_child(terrain)
+	for node in get_tree().root.get_children():
+		if node!=self and node!=terrain:node.set_process(false);node.set_physics_process(false)
+	await get_tree().process_frame
+	var start_day:=int(GameState.elapsed_days)
+	var target_days:=4
+	terrain.scheduled_world_days_enabled="--synchronous" not in OS.get_cmdline_user_args()
+	terrain._set_game_speed(5)
+	var frames:Array=[]
+	var navigating_frames:Array=[]
+	var last:=Time.get_ticks_usec()
+	var began:=last
+	while int(GameState.elapsed_days)<start_day+target_days and Time.get_ticks_usec()-began<120000000:
+		# Pan the camera for a stretch, as a player would while days compute.
+		var panning:=frames.size()>=60 and frames.size()<180
+		if panning:
+			terrain.camera_target+=Vector3(.01,0,.004);terrain.camera_input_msec=Time.get_ticks_msec()
+		await get_tree().process_frame
+		var now:=Time.get_ticks_usec()
+		frames.append((now-last)/1000.0)
+		if panning:navigating_frames.append((now-last)/1000.0)
+		last=now
+	terrain._set_game_speed(0)
+	WorldSimulation.flush_day()
+	var sorted:=frames.duplicate();sorted.sort()
+	var report:={"scheduled":terrain.scheduled_world_days_enabled,"days":int(GameState.elapsed_days)-start_day,"seconds":(last-began)/1000000.0,"frames":frames.size(),"median_ms":sorted[sorted.size()/2],"p95_ms":sorted[int(sorted.size()*.95)],"max_ms":sorted[-1],"over_33ms":sorted.filter(func(v:float)->bool:return v>33.0).size(),"over_100ms":sorted.filter(func(v:float)->bool:return v>100.0).size(),"navigating_max_ms":navigating_frames.max() if not navigating_frames.is_empty() else 0.0}
+	var file:=FileAccess.open("res://artifacts/year71_frames_%s.json" % ("scheduled" if report.scheduled else "synchronous"),FileAccess.WRITE)
+	file.store_string(JSON.stringify(report.merged({"frames_ms":frames}),"  "));file.close()
+	print("FRAME_PROFILE_DONE ",JSON.stringify(report))
+	terrain.queue_free();WorldSimulation.clear();await get_tree().process_frame;get_tree().quit(0 if report.days>=target_days else 1)
 
 func map_profile()->void:
 	var trace=preload("res://scripts/performance_trace.gd")
