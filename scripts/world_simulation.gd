@@ -29,48 +29,27 @@ var context_provider:Callable:
 		surface_material_provider=Callable()
 var _seed:=-2147483648
 
-var state := GameState:
-	get: return _active.get("GameState",GameState)
-var discovery := DiscoverySystem:
-	get: return _active.get("DiscoverySystem",DiscoverySystem)
-var progression := ProgressionSystem:
-	get: return _active.get("ProgressionSystem",ProgressionSystem)
-var resources := ResourceSystem:
-	get: return _active.get("ResourceSystem",ResourceSystem)
-var economy := EconomySystem:
-	get: return _active.get("EconomySystem",EconomySystem)
-var settlements := SettlementModel:
-	get: return _active.get("SettlementModel",SettlementModel)
-var government := GovernmentPeopleSystem:
-	get: return _active.get("GovernmentPeopleSystem",GovernmentPeopleSystem)
-var figures := HistoricalFigures:
-	get: return _active.get("HistoricalFigures",HistoricalFigures)
-var direction := PeopleDirection:
-	get: return _active.get("PeopleDirection",PeopleDirection)
-var communities := CommunityNetwork:
-	get: return _active.get("CommunityNetwork",CommunityNetwork)
-var diplomacy := ForeignDiplomacy:
-	get: return _active.get("ForeignDiplomacy",ForeignDiplomacy)
-var dialogue := ForeignDialogue:
-	get: return _active.get("ForeignDialogue",ForeignDialogue)
-var facts := WorldFacts:
-	get: return _active.get("WorldFacts",WorldFacts)
-var advisors := AdvisorSystem:
-	get: return _active.get("AdvisorSystem",AdvisorSystem)
-var food := FoodSystem:
-	get: return _active.get("FoodSystem",FoodSystem)
-var consequences := ConsequenceEngine:
-	get: return _active.get("ConsequenceEngine",ConsequenceEngine)
-var civics := CivicImplementationSystem:
-	get: return _active.get("CivicImplementationSystem",CivicImplementationSystem)
-var world := CivilizationSystem:
-	get: return _active.get("CivilizationSystem",CivilizationSystem)
-var military := MilitaryCampaign:
-	get: return _active.get("MilitaryCampaign",MilitaryCampaign)
-var campaign := GeneralCampaign:
-	get: return _active.get("GeneralCampaign",GeneralCampaign)
-var general_dialogue := GeneralDialogue:
-	get: return _active.get("GeneralDialogue",GeneralDialogue)
+var state := GameState
+var discovery := DiscoverySystem
+var progression := ProgressionSystem
+var resources := ResourceSystem
+var economy := EconomySystem
+var settlements := SettlementModel
+var government := GovernmentPeopleSystem
+var figures := HistoricalFigures
+var direction := PeopleDirection
+var communities := CommunityNetwork
+var diplomacy := ForeignDiplomacy
+var dialogue := ForeignDialogue
+var facts := WorldFacts
+var advisors := AdvisorSystem
+var food := FoodSystem
+var consequences := ConsequenceEngine
+var civics := CivicImplementationSystem
+var world := CivilizationSystem
+var military := MilitaryCampaign
+var campaign := GeneralCampaign
+var general_dialogue := GeneralDialogue
 
 const OWNED_SYSTEMS:=["GameState", "DiscoverySystem", "ProgressionSystem", "ResourceSystem", "EconomySystem", "SettlementModel", "GovernmentPeopleSystem", "HistoricalFigures", "PeopleDirection", "CommunityNetwork", "ForeignDiplomacy", "ForeignDialogue", "WorldFacts", "AdvisorSystem", "FoodSystem", "ConsequenceEngine", "CivicImplementationSystem", "CivilizationSystem", "MilitaryCampaign", "GeneralCampaign", "GeneralDialogue"]
 
@@ -84,10 +63,37 @@ func scoped(id:String,operation:Callable)->Variant:
 	var previous_id:=actor_id
 	actor_id=id
 	_active={} if id=="player" else actors[id].systems
+	_bind_scope()
 	var result:Variant=operation.call()
 	_active=previous
 	actor_id=previous_id
+	_bind_scope()
 	return result
+
+## The scoped system fields are plain variables rebound on every scope change;
+## hot simulation code reads them hundreds of thousands of times per day.
+func _bind_scope()->void:
+	state=_active.get("GameState",GameState)
+	discovery=_active.get("DiscoverySystem",DiscoverySystem)
+	progression=_active.get("ProgressionSystem",ProgressionSystem)
+	resources=_active.get("ResourceSystem",ResourceSystem)
+	economy=_active.get("EconomySystem",EconomySystem)
+	settlements=_active.get("SettlementModel",SettlementModel)
+	government=_active.get("GovernmentPeopleSystem",GovernmentPeopleSystem)
+	figures=_active.get("HistoricalFigures",HistoricalFigures)
+	direction=_active.get("PeopleDirection",PeopleDirection)
+	communities=_active.get("CommunityNetwork",CommunityNetwork)
+	diplomacy=_active.get("ForeignDiplomacy",ForeignDiplomacy)
+	dialogue=_active.get("ForeignDialogue",ForeignDialogue)
+	facts=_active.get("WorldFacts",WorldFacts)
+	advisors=_active.get("AdvisorSystem",AdvisorSystem)
+	food=_active.get("FoodSystem",FoodSystem)
+	consequences=_active.get("ConsequenceEngine",ConsequenceEngine)
+	civics=_active.get("CivicImplementationSystem",CivicImplementationSystem)
+	world=_active.get("CivilizationSystem",CivilizationSystem)
+	military=_active.get("MilitaryCampaign",MilitaryCampaign)
+	campaign=_active.get("GeneralCampaign",GeneralCampaign)
+	general_dialogue=_active.get("GeneralDialogue",GeneralDialogue)
 
 func clear()->void:
 	assert(_active.is_empty())

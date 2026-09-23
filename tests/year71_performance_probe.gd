@@ -47,7 +47,13 @@ func run()->void:
 	preload("res://scripts/performance_trace.gd").enabled=mode=="detail"
 	var cpu_start:=cpu_seconds()
 	var day:=int(GameState.elapsed_days)
-	for i in (2 if mode=="detail" else 8):
+	var days:=8 if mode!="detail" else 2
+	for arg in args:
+		if arg.begins_with("--days="):days=int(arg.trim_prefix("--days="))
+	for i in days:
+		# Detail totals exclude the cold first day after load; it fills
+		# save-excluded caches and misstates steady-state cost.
+		if mode=="detail" and i==1:preload("res://scripts/performance_trace.gd").totals.clear()
 		var timings:Dictionary={"enabled":true}
 		var start:=Time.get_ticks_usec()
 		if mode=="stepped":

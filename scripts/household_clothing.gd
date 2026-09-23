@@ -257,8 +257,10 @@ static func advance(workers:float,population:float,traveling:bool,hunted_rations
 	var budget:=maxf(0,workers)*.2
 	if not traveling:
 		# Same paid steward for every owner; install only usable equipment.
-		for id:String in K.METHODS:
-			if int(data().tools.get(id,0))>0:continue
+		# quote() rejects undiscovered methods and install needs a work budget;
+		# the other checks are side-effect-free reads, so skip them first.
+		for id:String in (K.METHODS if budget>0 else {}):
+			if int(data().tools.get(id,0))>0 or id not in WorldSimulation.state.known_discoveries:continue
 			if K.METHODS[id].mode=="test" and count()-population<.25:continue
 			var supplied:=true
 			var inputs:=materials(id)
