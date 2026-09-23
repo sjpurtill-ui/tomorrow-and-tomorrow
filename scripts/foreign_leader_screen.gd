@@ -42,7 +42,7 @@ func _ready()->void:
 	card.add_theme_stylebox_override("panel",style)
 	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",10);card.add_child(root)
 	var top:=HBoxContainer.new();root.add_child(top)
-	var flag:=TextureRect.new();flag.texture=preload("res://scripts/city_map_identity.gd").foreign(civ_id).texture;flag.custom_minimum_size=Vector2(48,30);flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;top.add_child(flag)
+	var flag:=TextureRect.new();flag.texture=preload("res://scripts/city_map_identity.gd").foreign(civ_id).texture;flag.custom_minimum_size=Vector2(42,42);flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;top.add_child(flag)
 	heading=label(top,23);heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	button(top,"Close ×",func():queue_free())
 	var navigation:=HBoxContainer.new();root.add_child(navigation)

@@ -1,0 +1,12 @@
+{
+  "household_councils": {
+    "asset": "res://assets/ui/research/paper/household_councils.png",
+    "source": "exec-994b68c2-66e7-49e5-ac93-e95b95a39161.png",
+    "brief": "Early agrarian household dispute resolved through gesture and clay tallies; sparse earth-pigment gouache on fibrous paper, no formal state or modern furnishings."
+  },
+  "graded_roads": {
+    "asset": "res://assets/ui/research/paper/graded_roads.png",
+    "source": "exec-514cebb3-e11d-4711-a9ba-8aa822fb661b.png",
+    "brief": "Hand-graded earth track and stone-lined drainage between early settlements; sparse earth-pigment gouache on fibrous paper, no modern paving or machinery."
+  }
+}

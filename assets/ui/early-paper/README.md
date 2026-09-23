@@ -14,7 +14,9 @@ Thirteen authored human visual families: Kilnfold, Reedwake, Windseam, Stoneweft
 - Buildings: 4x2 atlas; materials: 2x3; workshops and matching early products: 4x3.
 - Fourteen civic directions: two atlases, 4x2 and 3x2, for founding choices, cultural history and the Wealth work illustration.
 - Twelve undertaking design studies: two 3x2 atlases. Actual construction and operating status remain separate.
-- Early scouting header, 72 explicit research subject overrides and nine military unit types use the same paper aesthetic in their respective folders.
+- Early scouting header and returned stone finds, 74 explicit research subject overrides and nine military unit types use the same paper aesthetic in their respective folders. Map settlement markers and diplomatic identity use vector crests in earth pigments.
+
+The two additional research scenes are household councils and graded roads. A 234-year pacing audit still reaches industrial and electrical discoveries in the opening 300-year block; these need a simulation pacing correction and their own era-appropriate visual pass. The first 300 years are not yet an all-paper research catalogue.
 
 Native generated originals are retained without raster editing. Runtime AtlasTexture regions use contained framing. Family atlases use mipmaps and a 1536 import cap; the shared source cache remains bounded at eight textures with lazy loading.
 

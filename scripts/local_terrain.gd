@@ -3333,7 +3333,7 @@ func _place_settlers() -> void:
 	convoy_map_icon.name = "ConvoyMapIcon"
 	marker_root.add_child(convoy_map_icon)
 	convoy_banner_sprite=Sprite3D.new()
-	convoy_banner_sprite.name="FoundingBanner"
+	convoy_banner_sprite.name="FoundingCrest"
 	convoy_banner_sprite.texture=_founding_banner_texture(GameState.founding_banner_index)
 	convoy_banner_sprite.pixel_size=0.01
 	convoy_banner_sprite.billboard=BaseMaterial3D.BILLBOARD_ENABLED
@@ -3395,7 +3395,7 @@ func _ensure_settlement_convoy_marker()->void:
 	settlement_convoy_icon.name="SettlementConvoyMapIcon"
 	settlement_convoy_marker.add_child(settlement_convoy_icon)
 	var banner:=Sprite3D.new()
-	banner.name="SettlementConvoyBanner"
+	banner.name="SettlementConvoyCrest"
 	banner.texture=_founding_banner_texture(GameState.founding_banner_index)
 	banner.pixel_size=0.009
 	banner.billboard=BaseMaterial3D.BILLBOARD_ENABLED
@@ -3705,36 +3705,7 @@ func _update_settlement_lod_shader_node(node:Node,aerial_lod:float,detail_lod_al
 		_update_settlement_lod_shader_node(child,aerial_lod,detail_lod_alpha)
 
 func _founding_banner_texture(index: int) -> Texture2D:
-	var sheet_texture:=load("res://assets/ui/founding_convoy_banners.png") as Texture2D
-	if sheet_texture==null:
-		return null
-	var sheet:=sheet_texture.get_image()
-	if sheet==null or sheet.is_empty():
-		return sheet_texture
-	sheet.convert(Image.FORMAT_RGBA8)
-	var columns:=5
-	var rows:=2
-	var cell_width:=sheet.get_width()/columns
-	var cell_height:=sheet.get_height()/rows
-	var selected:=clampi(index,0,columns*rows-1)
-	var icon:=Image.create_empty(cell_width,cell_height,false,Image.FORMAT_RGBA8)
-	icon.blit_rect(sheet,Rect2i((selected%columns)*cell_width,(selected/columns)*cell_height,cell_width,cell_height),Vector2i.ZERO)
-	# The supplied reference includes a checkerboard baked into RGB. Remove only
-	# bright neutral pixels; the flags' warm cloth and dark linework remain intact.
-	for y in cell_height:
-		for x in cell_width:
-			var color:=icon.get_pixel(x,y)
-			var high:=maxf(color.r,maxf(color.g,color.b))
-			var low:=minf(color.r,minf(color.g,color.b))
-			var chroma:=high-low
-			var luminance:=color.r*0.299+color.g*0.587+color.b*0.114
-			if chroma<0.035 and luminance>0.84:
-				color.a=0.0
-			elif chroma<0.060 and luminance>0.80:
-				color.a*=clampf((chroma-0.018)/0.042+(0.88-luminance)*3.2,0.0,1.0)
-			icon.set_pixel(x,y,color)
-	icon.generate_mipmaps()
-	return ImageTexture.create_from_image(icon)
+	return preload("res://scripts/city_map_identity.gd").player_crest(index)
 
 func _update_convoy_marker_animation() -> void:
 	if convoy_map_icon==null or camera==null:
@@ -11574,17 +11545,12 @@ func _create_camp_banner(parent: Node3D) -> void:
 	pole_material.albedo_color = Color("#43392d")
 	pole.material_override = pole_material
 	parent.add_child(pole)
-	var flag := MeshInstance3D.new()
-	var flag_mesh := QuadMesh.new()
-	flag_mesh.size = Vector2(2.2, 1.15)
-	flag.mesh = flag_mesh
-	flag.position = Vector3(1.1, 4.0, 0)
-	flag.rotation.y = PI * 0.5
-	var flag_material := StandardMaterial3D.new()
-	flag_material.albedo_color = Color("#3f6d88")
-	flag_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	flag.material_override = flag_material
-	parent.add_child(flag)
+	var crest:=Sprite3D.new()
+	crest.texture=_founding_banner_texture(GameState.founding_banner_index)
+	crest.pixel_size=0.015
+	crest.billboard=BaseMaterial3D.BILLBOARD_ENABLED
+	crest.position=Vector3(0,4.0,0)
+	parent.add_child(crest)
 
 func _opening_world_position() -> Vector3:
 	# Seeded placement is only for a new campaign. A resumed settlement may

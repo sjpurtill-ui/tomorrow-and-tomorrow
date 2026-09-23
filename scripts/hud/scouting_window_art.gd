@@ -13,7 +13,11 @@ const BODY = preload("res://assets/fonts/battle/Barlow-Medium.ttf")
 const HERO = preload("res://assets/ui/scouting/ancient-expedition-v2.jpg")
 const SURFACE = preload("res://assets/ui/scouting/ancient-clay-v2.jpg")
 const STONE = preload("res://assets/ui/scouting/ancient-find-v2.jpg")
+const EARLY_STONE = preload("res://assets/ui/early-paper/stone-find-v1.png")
 static var icons: Dictionary = {}
+
+static func stone_find_texture()->Texture2D:
+	return EARLY_STONE if preload("res://scripts/hud/early_civ_art.gd").active() else STONE
 
 static func flat(bg:Color,border:Color=Color.TRANSPARENT,border_width:int=0,radius:int=0,pad:float=0.0)->StyleBoxFlat:
 	# This illustrated window owns a paired dark surface/light ink palette.

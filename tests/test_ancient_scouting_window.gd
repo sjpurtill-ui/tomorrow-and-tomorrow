@@ -67,7 +67,7 @@ func test_art_and_latest_return_follow_the_actual_subject() -> void:
 	GameState.society_exchange.collections.a=record
 	sheet.refresh()
 	assert_bool(sheet.latest_card.visible).is_true()
-	assert_object(sheet.latest_image.texture).is_same(Art.STONE)
+	assert_object(sheet.latest_image.texture).is_same(Art.stone_find_texture())
 	GameState.society_exchange.collections.b={"name":"A remembered epic","kind":"culture","discovery_id":"oral_epics","source_name":"Flintwick","returned_day":72,"study":1.0}
 	sheet.refresh()
 	assert_str(sheet.latest_name.text).is_equal("A remembered epic")

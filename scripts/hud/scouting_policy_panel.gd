@@ -307,7 +307,7 @@ func _update_latest_find() -> void:
 		if latest.is_empty() or int(item.returned_day)>int(latest.returned_day): latest=item
 	latest_name.text = String(latest.name)
 	latest_detail.text = "%s · %s" % [String(latest.source_name),"Studied" if float(latest.study)>=1 else "Being examined · %d%%" % roundi(float(latest.study)*100)]
-	latest_image.texture = Art.STONE if Art.stone_find(latest) else Art.icon("recruitment" if latest.kind=="culture" else "find" if latest.kind in ["artifact","specimen"] else "knowledge")
+	latest_image.texture = Art.stone_find_texture() if Art.stone_find(latest) else Art.icon("recruitment" if latest.kind=="culture" else "find" if latest.kind in ["artifact","specimen"] else "knowledge")
 	latest_image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED if Art.stone_find(latest) else TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 
 func _reveal(control: Control) -> void:
