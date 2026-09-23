@@ -31,22 +31,20 @@ func test_completed_forms_drive_the_progression_without_population_or_date_swaps
 	assert_str(EARLY.kind(data.plots[0])).is_equal("timber_household")
 	assert_str(before.plots[0].form).is_equal("portable_shelter_cluster")
 
-func test_actual_household_recipe_requires_delivered_resources_and_research() -> void:
-	GameState.resource_stockpiles={"Clay":100,"Stone":100,"Timber":0,"Fiber Plants":100}
+func test_actual_household_recipe_is_drawn_from_research_not_delivered_stock() -> void:
+	# Buildings are drawing records: the recipe needs no delivered stock, and
+	# earth or stone households stay unavailable without their research.
+	GameState.resource_stockpiles={}
 	GameState.known_discoveries=[]
-	assert_dict(SettlementModel._available_household_recipe()).is_empty()
-	GameState.known_discoveries=["clay_shaping"]
 	var recipe: Dictionary=SettlementModel._available_household_recipe()
-	assert_str(recipe.family).is_equal("earth")
-	var data:=fixture(String(recipe.form),String(recipe.family),"courtyard_flat")
+	assert_str(recipe.family).is_equal("organic")
+	assert_str(recipe.form).is_equal("timber_and_fibre_household")
+	assert_dict(GameState.resource_stockpiles).is_empty()
+	GameState.resource_stockpiles={"Clay":100,"Stone":100}
+	assert_str(SettlementModel._available_household_recipe().family).is_equal("organic")
+	var data:=fixture("earthen_household","earth","courtyard_flat")
 	assert_str(EARLY.kind(data.plots[0])).is_equal("earthen_household")
-	GameState.resource_stockpiles={"Stone":100,"Timber":1,"Fiber Plants":0,"Clay":0}
-	GameState.known_discoveries=[]
-	assert_dict(SettlementModel._available_household_recipe()).is_empty()
-	GameState.known_discoveries=["stone_selection"]
-	recipe=SettlementModel._available_household_recipe()
-	assert_str(recipe.family).is_equal("stone")
-	data=fixture(String(recipe.form),String(recipe.family),"rubble_slab")
+	data=fixture("dry_stone_household","stone","rubble_slab")
 	assert_str(EARLY.kind(data.plots[0])).is_equal("rubble_household")
 
 func test_actual_early_work_completion_changes_form_without_replanning_the_settlement() -> void:

@@ -76,13 +76,15 @@ func test_hud_retains_overall_and_selected_counts()->void:
 	hud._build_time_pill();hud._build_kpi_strip()
 	GameState.selected_player_settlement_id="second"
 	hud._refresh_kpis()
-	assert_str(hud.kpi_chips.population.value.text).is_equal("1000 overall")
-	assert_str(hud.kpi_chips.population.delta.text).is_equal("200 · Rivermeet")
+	# The top bar shows civilization totals and the city count, whichever city
+	# is selected (city breakdowns live in its tooltip and city cards).
+	assert_str(hud.kpi_chips.population.value.text).is_equal("1000")
+	assert_str(hud.kpi_chips.population.delta.text).is_equal("2 cities")
 	assert_int(GameState.population_total).is_equal(1000)
 	GameState.selected_player_settlement_id=String(GameState.player_settlements[0].id)
 	hud._refresh_kpis()
-	assert_str(hud.kpi_chips.population.value.text).is_equal("1000 overall")
-	assert_str(hud.kpi_chips.population.delta.text).is_equal("800 · Home")
+	assert_str(hud.kpi_chips.population.value.text).is_equal("1000")
+	assert_str(hud.kpi_chips.population.delta.text).is_equal("2 cities")
 	assert_int(GameState.population_total).is_equal(1000)
 
 func test_local_demography_changes_only_its_city_and_national_total()->void:
@@ -117,8 +119,10 @@ func test_local_monthly_work_updates_own_plots_and_ledger()->void:
 	assert_int(rooted).is_greater(0)
 	assert_array(GameState.settlement_plots).is_equal(home)
 	assert_int(GameState.next_settlement_plot_id).is_equal(next_id)
+	# Individual buildings are drawing records; the ledger keeps civic works,
+	# landmarks and infrastructure only.
 	var records:=GameState.building_ledger_summary("second")
-	assert_int(records.records.size()).is_greater(0)
+	assert_int(records.records.size()).is_equal(0)
 	assert_int(city.local_resources.last_morphology_day).is_equal(30)
 
 func test_all_map_labels_share_name_and_population_format()->void:

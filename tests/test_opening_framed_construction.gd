@@ -101,8 +101,9 @@ func test_completed_staffed_hall_activates_bounded_effects()->void:
 	assert_float(DiscoverySystem.effect("construction_rate")).is_equal_approx(0.08*coverage,0.000001)
 
 func test_hall_condition_and_builder_withdrawal_scale_or_end_operation()->void:
-	var hall:=_build_hall()
-	hall.condition=0.40
+	assert_dict(_build_hall()).is_not_empty()
+	# The hall is drawn; its operating share follows the city's condition.
+	SettlementModel.city_form().condition=0.40
 	DiscoverySystem.refresh_operating_effects()
 	assert_float(Craft.factor("framed_construction")).is_equal_approx(0.40,0.000001)
 	assert_float(DiscoverySystem.effect("disaster_resilience")).is_equal_approx(0.012,0.000001)

@@ -382,24 +382,75 @@ func test_population_alone_cannot_create_a_town()->void:
 	assert_bool(String(summary.classification) not in ["town","city","metropolis"]).is_true()
 	assert_bool((summary.limiting_factors as Array).is_empty()).is_false()
 
-func test_household_growth_requires_pressure_labor_and_delivered_materials()->void:
+func test_household_growth_requires_pressure_but_no_builders_or_materials()->void:
+	# Buildings are drawing records: household pressure draws new ones without
+	# builders or delivered materials, and they stand after one monthly pass.
 	var original_residential:=_count_use("residential_compound")
-	GameState.ensure_population_total(240)
-	GameState.population_allocations["Construction"]=8
+	GameState.population_allocations["Construction"]=0
 	GameState.resource_stockpiles={}
-	GameState.elapsed_days=60.0
+	GameState.elapsed_days=30.0
 	model.process_month()
 	assert_int(_count_use("residential_compound")).is_equal(original_residential)
-	assert_int(_count_use("temporary_encampment")).is_greater(0)
-	GameState.resource_stockpiles={"Timber":8.0,"Fiber Plants":6.0}
-	GameState.elapsed_days=90.0
-	model.process_month()
-	assert_int(_count_use("residential_compound")).is_equal(original_residential+1)
-	var growth_plot:Dictionary=GameState.settlement_plots.back()
-	assert_str(String(growth_plot.status)).is_equal("under_construction")
-	assert_str(String(growth_plot.growth_cause)).contains("materials")
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_less(8.0)
+	GameState.ensure_population_total(240)
+	GameState.population_allocations["Construction"]=0
+	var grown:=false
+	for day in [60.0,90.0,120.0]:
+		GameState.elapsed_days=day
+		model.process_month()
+		if _count_use("residential_compound")>original_residential:
+			grown=true
+			break
+	assert_bool(grown).is_true()
+	var growth_plot:Dictionary={}
+	for plot in GameState.settlement_plots:
+		if String(plot.get("land_use",""))=="residential_compound" and String(plot.get("status",""))=="under_construction":growth_plot=plot
+	assert_dict(growth_plot).is_not_empty()
+	assert_dict(GameState.resource_stockpiles).is_empty()
 	assert_int(GameState.settlement_routes.size()).is_greater(0)
+	GameState.elapsed_days+=30.0
+	model.process_month()
+	assert_str(String(growth_plot.status)).is_equal("active")
+
+func test_monthly_pass_draws_building_material_basket_and_payment_limits_condition_and_era()->void:
+	GameState.ensure_population_total(1000)
+	GameState.population_allocations["Construction"]=100
+	GameState.population_health=1.0
+	var stocks:={"Timber":1000.0,"Fiber Plants":1000.0,"Clay":1000.0,"Stone":1000.0}
+	GameState.resource_stockpiles=stocks.duplicate()
+	GameState.city_form={"tier":0.0,"condition":.5}
+	GameState.elapsed_days=30.0
+	model._advance_city_form(30)
+	var paid_form:Dictionary=GameState.city_form.duplicate()
+	assert_float(float(paid_form.materials_paid)).is_equal(1.0)
+	for item:String in stocks:
+		assert_float(float(GameState.resource_stockpiles[item])).is_less(float(stocks[item]))
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_less(float(GameState.resource_stockpiles.Stone))
+	assert_float(float(paid_form.condition)).is_greater(.5)
+	# With no building materials, builders cannot hold the city against wear
+	# and the era does not advance.
+	GameState.resource_stockpiles={}
+	GameState.city_form={"tier":0.0,"condition":.5}
+	model._advance_city_form(30)
+	assert_float(float(GameState.city_form.materials_paid)).is_equal(0.0)
+	assert_float(float(GameState.city_form.condition)).is_equal_approx(.48,.000001)
+	assert_float(float(GameState.city_form.tier)).is_equal(0.0)
+	# The era rises toward what age, workers and knowledge support only when
+	# at least half the basket is supplied.
+	GameState.settlement_completed=["Hearth Circle","Lean-to Shelters"]
+	var day:=GameState.settlement_founded_day+400
+	assert_int(model._supported_fabric_tier(day)).is_greater_equal(1)
+	model._advance_city_form(day)
+	assert_float(float(GameState.city_form.tier)).is_equal(0.0)
+	GameState.resource_stockpiles=stocks.duplicate()
+	model._advance_city_form(day)
+	assert_float(float(GameState.city_form.tier)).is_greater(0.0)
+	# The full monthly pass runs the same draw.
+	GameState.resource_stockpiles=stocks.duplicate()
+	GameState.city_form={"tier":0.0,"condition":.5}
+	GameState.elapsed_days=60.0
+	model.process_month()
+	assert_float(float(GameState.city_form.materials_paid)).is_equal(1.0)
+	assert_float(float(GameState.resource_stockpiles.Clay)).is_less(1000.0)
 
 func test_growth_plot_completes_without_moving_older_ground()->void:
 	var first_polygon:PackedVector2Array=GameState.settlement_plots[0].polygon.duplicate()
@@ -523,24 +574,26 @@ func test_field_seasons_change_visual_state_without_rewriting_geometry()->void:
 	model.call("_update_field_seasons",210)
 	assert_int(GameState.morphology_revision).is_equal(revision_before+1)
 
-func test_workshop_growth_requires_practice_craft_labor_builders_and_materials()->void:
-	var original_count:=GameState.settlement_plots.size()
-	GameState.settlement_completed.append("Open Work Area")
+func test_workshop_growth_requires_practice_and_craft_labor_not_builders_or_materials()->void:
+	# Workshops are drawn from the practice and craft pressure; builders and
+	# delivered materials serve the city's capacity, not individual buildings.
+	var original_workshops:=_count_use("workshop")
 	GameState.population_allocations["Crafting"]=12
-	GameState.population_allocations["Construction"]=8
+	GameState.population_allocations["Construction"]=0
 	GameState.resource_stockpiles={}
 	GameState.elapsed_days=60.0
 	model.process_month()
-	assert_int(GameState.settlement_plots.size()).is_equal(original_count)
-	GameState.resource_stockpiles={"Timber":7.0,"Fiber Plants":4.0}
+	assert_int(_count_use("workshop")).is_equal(original_workshops)
+	GameState.settlement_completed.append("Open Work Area")
 	GameState.elapsed_days=90.0
 	model.process_month()
-	assert_int(GameState.settlement_plots.size()).is_equal(original_count+1)
-	var workshop:Dictionary=GameState.settlement_plots.back()
-	assert_str(String(workshop.land_use)).is_equal("workshop")
+	assert_int(_count_use("workshop")).is_equal(original_workshops+1)
+	var workshop:Dictionary={}
+	for plot in GameState.settlement_plots:
+		if String(plot.get("land_use",""))=="workshop":workshop=plot
 	assert_str(String(workshop.status)).is_equal("under_construction")
 	assert_str(String(workshop.growth_cause)).contains("craft")
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_less(7.0)
+	assert_dict(GameState.resource_stockpiles).is_empty()
 
 func test_storage_growth_requires_storage_practice_and_logistics_pressure()->void:
 	var original_count:=GameState.settlement_plots.size()
@@ -616,7 +669,7 @@ func test_overflow_population_claims_temporary_ground_without_free_housing()->vo
 	assert_str(String(camp.get("status",""))).is_equal("reclaimed")
 	assert_str(String(camp.get("repair_state",""))).is_equal("ground_reclaimed")
 
-func test_resource_backed_infill_adds_capacity_without_rewriting_plot_geometry()->void:
+func test_household_infill_adds_capacity_without_rewriting_plot_geometry()->void:
 	GameState.ensure_population_total(280)
 	GameState.population_allocations["Construction"]=12
 	GameState.population_allocations["Logistics"]=6
@@ -639,7 +692,8 @@ func test_resource_backed_infill_adds_capacity_without_rewriting_plot_geometry()
 	assert_array(infilled.polygon).is_equal(inherited_geometry[plot_id])
 	assert_int(int(infilled.resident_capacity)).is_greater(int(inherited_capacity[plot_id]))
 	assert_float(float(infilled.roof_coverage)).is_greater(0.30)
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_less(30.0)
+	# Infill is drawn; the basket needs clay and stone too, so none is paid here.
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(30.0)
 	assert_array(model.validate_state()).is_empty()
 
 func test_elapsed_centuries_alone_do_not_repaint_inherited_fabric()->void:
@@ -666,6 +720,9 @@ func test_supported_fabric_evolves_in_place_and_records_route_surface()->void:
 	GameState.resource_stockpiles["Timber"]=120.0
 	GameState.resource_stockpiles["Fiber Plants"]=80.0
 	GameState.settlement_nuclei.append({"id":2,"kind":"market_crossing","position":Vector2(0.11,0.03),"pull":0.72,"active":true,"created_day":1200,"absorbed_day":-1})
+	# Drawn buildings follow the city's construction era, which builders and
+	# materials raise; here the city has reached the foothold era.
+	GameState.city_form={"tier":1.0,"condition":.9}
 	var original_polygons:Dictionary={}
 	for plot in GameState.settlement_plots:
 		original_polygons[int(plot.id)]=(plot.polygon as PackedVector2Array).duplicate()
@@ -727,7 +784,7 @@ func test_growth_rejects_submerged_ground_before_scoring_access()->void:
 	var score:float=model._growth_site_score(Vector2(1.0,1.0),0.006,"residential_compound",context)
 	assert_float(score).is_less(-9000.0)
 
-func test_later_material_transition_is_seeded_and_physically_paid()->void:
+func test_later_material_transition_is_seeded_and_drawn_without_payment()->void:
 	GameState.known_discoveries.append("stone_selection")
 	GameState.resource_stockpiles["Stone"]=50.0
 	GameState.resource_stockpiles["Timber"]=20.0
@@ -743,11 +800,12 @@ func test_later_material_transition_is_seeded_and_physically_paid()->void:
 	var events:Array[Dictionary]=[]
 	model._apply_fabric_upgrade({"plot":candidate_plot,"next_tier":7,"cost":cost},25550,events)
 	assert_str(String(candidate_plot.material_family)).is_equal("stone")
-	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(stone_before)
+	# The city's monthly material basket pays for renewal, not each drawing.
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_equal(stone_before)
 	assert_int(int(candidate_plot.fabric_generation)).is_equal(7)
 	assert_array(events).has_size(1)
 
-func test_mature_population_founds_paid_connected_quarter_beyond_inherited_core()->void:
+func test_mature_population_founds_connected_quarter_beyond_inherited_core()->void:
 	GameState.settlement_founded_day=0
 	GameState.ensure_population_total(6200)
 	GameState.population_allocations["Construction"]=80
@@ -773,7 +831,7 @@ func test_mature_population_founds_paid_connected_quarter_beyond_inherited_core(
 	assert_int(GameState.settlement_nuclei.size()).is_equal(original_nucleus_count+1)
 	assert_str(String(GameState.settlement_nuclei.back().kind)).is_equal("satellite_quarter")
 	assert_int(GameState.settlement_plots.size()).is_greater(original_plot_count)
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_less(timber_before)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(timber_before)
 	assert_array(events).has_size(1)
 	assert_int(int(events[0].plots)).is_greater_equal(3)
 	var expanded_extent:=0.0

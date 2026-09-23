@@ -90,33 +90,32 @@ func test_invalid_curing_state_is_rejected_in_secondary_cities()->void:
 		assert_bool(B.valid_plot({"curing_started_day":10})).is_false()
 	)
 
-func test_actual_household_growth_pays_for_masonry_and_completes_after_supplied_curing()->void:
+func test_actual_household_growth_is_drawn_without_payment_and_stands_after_one_month()->void:
+	# Individual buildings are drawing records: growth needs household pressure,
+	# not builders or delivered materials, and a new building stands after the
+	# next monthly pass without curing.
 	WorldSimulation.scoped("builders",func()->void:
 		var state=WorldSimulation.state;var model=WorldSimulation.settlements
 		state.ensure_population_total(80);state.settlement_completed.assign(["Hearth Circle"])
 		state.settlement_site_committed=true;state.convoy_traveling=false
 		state.elapsed_days=19;model.ensure_founded()
-		state.ensure_population_total(240);state.population_allocations.Construction=20
+		state.ensure_population_total(240);state.population_allocations.Construction=0
 		state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
 		learn("lime_mortar")
 		state.resource_stockpiles={"Stone":4.0,"Building Mortar":1.0,"Timber":.8,"Freshwater":0.0}
+		var before:Dictionary=state.resource_stockpiles.duplicate(true)
 		var events:Array[Dictionary]=[]
 		var count:int=state.settlement_plots.size()
 		assert_bool(model._attempt_household_growth(90,events,{},0)).is_true()
 		assert_int(state.settlement_plots.size()).is_equal(count+1)
 		var plot:Dictionary=state.settlement_plots.back()
-		assert_str(plot.building_materials.id).is_equal("lime_masonry")
-		assert_float(float(state.resource_stockpiles["Building Mortar"])).is_equal(0.0)
 		assert_str(plot.status).is_equal("under_construction")
+		assert_dict(state.resource_stockpiles).is_equal(before)
 		state.elapsed_days=120;model.process_month()
-		assert_str(plot.status).is_equal("under_construction")
-		assert_float(float(plot.construction_progress)).is_equal(.99)
-		state.elapsed_days=150;model.process_month()
-		assert_str(plot.status).is_equal("under_construction")
-		state.resource_stockpiles.Freshwater=.5
-		state.elapsed_days=180;model.process_month()
 		assert_str(plot.status).is_equal("active")
+		assert_float(float(plot.construction_progress)).is_equal(1.0)
 		assert_float(float(state.resource_stockpiles.Freshwater)).is_equal(0.0)
+		assert_float(float(state.resource_stockpiles["Building Mortar"])).is_equal(1.0)
 		assert_bool(B.valid_plot(plot)).is_true()
 	)
 
@@ -161,7 +160,9 @@ func test_whole_save_restores_actor_curing_and_next_supplied_interval()->void:
 	)
 	GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
 
-func test_monthly_repairs_are_bounded_by_damage_and_do_not_spend_another_owners_stock()->void:
+func test_drawn_buildings_show_city_condition_and_do_not_spend_repair_stock()->void:
+	# Per-building repairs are gone: occupied buildings mirror the city's
+	# condition, and no building draws its own repair stock (nor another owner's).
 	WorldSimulation.create_actor("neighbor",1302)
 	WorldSimulation.scoped("neighbor",func()->void:
 		WorldSimulation.state.resource_stockpiles["Building Mortar"]=17.0)
@@ -172,12 +173,14 @@ func test_monthly_repairs_are_bounded_by_damage_and_do_not_spend_another_owners_
 		var plot:Dictionary=state.settlement_plots[0]
 		plot.building_materials=B.options()[0].building_materials
 		plot.status="active";plot.condition=1.0
-		state.population_allocations.Construction=1000
+		state.city_form={"tier":0.0,"condition":.6}
+		state.population_allocations.Construction=0
 		state.resource_stockpiles["Building Mortar"]=10.0
 		state.elapsed_days=60;WorldSimulation.settlements.process_month()
-		assert_float(float(plot.condition)).is_equal(1.0)
-		assert_float(float(state.resource_stockpiles["Building Mortar"])).is_greater(9.98)
-		assert_float(float(state.resource_stockpiles["Building Mortar"])).is_less(10.0)
+		# Without builders the city wears by 0.02 a month; the building shows it.
+		assert_float(float(state.city_form.condition)).is_equal_approx(.58,.000001)
+		assert_float(float(plot.condition)).is_equal_approx(.6,.000001)
+		assert_float(float(state.resource_stockpiles["Building Mortar"])).is_equal(10.0)
 	)
 	WorldSimulation.scoped("neighbor",func()->void:
 		assert_float(float(WorldSimulation.state.resource_stockpiles["Building Mortar"])).is_equal(17.0))
