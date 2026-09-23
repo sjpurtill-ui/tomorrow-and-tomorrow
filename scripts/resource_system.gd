@@ -783,6 +783,9 @@ func deposit_exhausted(deposit:Dictionary)->bool:
 
 static var gathering_recipe_reserves:Dictionary={}
 
+# Holder object (never captured by saves) for _gathering_startup_reserves.
+var _startup_reserve_cache:=RefCounted.new()
+
 func _gathering_startup_reserves()->Dictionary:
 	# Fixed recipe metadata only. Eligibility is read from this society each time.
 	if gathering_recipe_reserves.is_empty():
@@ -793,10 +796,16 @@ func _gathering_startup_reserves()->Dictionary:
 			for resource_name:String in recipe.get("tooling",{}):amounts[resource_name]=float(amounts.get(resource_name,0))+float(recipe.tooling[resource_name])
 			for resource_name:String in amounts:
 				gathering_recipe_reserves[gate][resource_name]=maxf(float(gathering_recipe_reserves[gate].get(resource_name,0)),float(amounts[resource_name])*2.0)
+	# Depends only on the known-discovery list; reuse it while that list's
+	# content hash is unchanged. Callers only read the returned reserves.
+	var key:=WorldSimulation.state.known_discoveries.hash()
+	if _startup_reserve_cache.get_meta("key",null)==key:return _startup_reserve_cache.get_meta("value")
 	var result:Dictionary={}
 	for gate:String in WorldSimulation.state.known_discoveries:
 		for resource_name:String in gathering_recipe_reserves.get(gate,{}):
 			result[resource_name]=maxf(float(result.get(resource_name,0)),float(gathering_recipe_reserves[gate][resource_name]))
+	result.make_read_only()
+	_startup_reserve_cache.set_meta("key",key);_startup_reserve_cache.set_meta("value",result)
 	return result
 
 func _storage_gathering_priorities()->Dictionary:
