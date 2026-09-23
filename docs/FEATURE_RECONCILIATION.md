@@ -2445,3 +2445,7 @@ Fiber Grading and Hafted Tools now show their specific material tests and bindin
 ### Early river and coastal watercraft imagery
 
 River Craft and Coastal Watercraft use distinct paper illustrations for early research: shallow-river paddling versus stitched-plank hull construction. Both are present in the recorded early pacing runs. Thirteen focused tests pass; both actual research widget sizes were GPU-reviewed. Coastal framing was lifted slightly to preserve the worker at the upper edge. Forty-four explicit early research overrides are installed; no discovery gates, boat behavior or later-era assets changed.
+
+### Household and shared-care research scenes
+
+Shared Childcare and Household Space Planning now use paper scenes tied to the specific practices: supervised communal care and arranging sleeping, ventilation, storage and circulation in a modest early home. Both occur in the recorded early pacing comparison. Actual large and compact research crops were GPU-reviewed; thirteen focused tests passed without errors, failures or orphans. Forty-six explicit early overrides are installed. Simulation and later-era mappings are unchanged.

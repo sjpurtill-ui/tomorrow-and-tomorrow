@@ -1,0 +1,16 @@
+{
+  "generator": "Built-in imagegen",
+  "style_reference": "assets/ui/research/paper/oral_epics.png",
+  "assets": [
+    {
+      "file": "shared_childcare.png",
+      "source": "exec-f660ae8e-4523-4352-82b2-7e3041fcca62.png",
+      "prompt": "Landscape 4:3 research illustration SHARED CHILDCARE for an early settlement game. Reference aesthetic only: flat dry matte gouache in charcoal, muted ochre and sage on warm opaque ivory paper, restrained grain, broken vignette edges. Candid unidealized daily work, never an advertisement or posed family portrait. A rough sheltered courtyard beside an earth-and-timber dwelling. One tired older caregiver seated low watches two clothed children arranging stones on a mat; a second caregiver crouches to pass a small child a simple drinking bowl. In the background another adult is free to carry a bundle away to work. Express shared supervision as practical cooperation, not a heroic speech. Ordinary imperfect faces, different ages and individual gestures, invented simple woven garments, natural anatomy. Children age-appropriate body proportions; adults normal adult proportions. No modern daycare furniture, bright plastic toys, symbols, national costume or photorealism. Keep entire small group compact in central horizontal band, with paper margins above/below for wide card crops. Minimal setting but obvious shelter and safety. No text, border or UI."
+    },
+    {
+      "file": "household_space_planning.png",
+      "source": "exec-cb9fe01a-5de8-4ba6-822e-9ec08085b5dd.png",
+      "prompt": "Landscape 4:3 research illustration HOUSEHOLD SPACE PLANNING for an early civilization game. Match reference STYLE only: flat dry matte gouache, muted charcoal, ochre and sage on warm ivory paper, restrained grain and broken vignette edges, no photorealism. A slightly elevated three-quarter cutaway view into a modest single-room earth-and-timber home with part of roof and near wall omitted. Clearly legible practical arrangement: sleeping reed mats along the dry back wall; a small smoke hearth near a roof vent; clear walking path from doorway; water jars and food basket separated from fire; sheltered care mat near daylight. Two ordinary lean adults move a rolled sleeping mat away from smoke and gesture to the clear passage, actively arranging the home. Natural proportions, plain invented woven clothes, no glamour. Simple wood, earth, stone, reed materials; NO metal, bed frames, modern furniture, floorplan diagrams, arrows, text or numbered labels. Visual planning through where things are placed. Keep house and figures compact in center horizontal band with ample paper margin; main arrangements survive wide research card crop. No UI or border."
+    }
+  ]
+}
