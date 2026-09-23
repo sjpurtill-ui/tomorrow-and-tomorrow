@@ -23,6 +23,26 @@ static func choose(recipes:Array[Dictionary],stocks:Dictionary,known:Array,stone
 	if not best.is_empty():best["mix"]=mix_for(best.cost)
 	return best
 
+## Drawn buildings take the material family of the city's construction era:
+## organic in early settlements, earth once clay work spreads, stone in masonry
+## eras or when the city favours stone. Falls back to the best known family.
+static func choose_drawn(recipes:Array[Dictionary],known:Array,tier:float,stone_priority:float=0.0)->Dictionary:
+	var order:Array=["organic","earth","stone"]
+	if tier>=4.0 or stone_priority>0.0:order=["stone","earth","organic"]
+	elif tier>=2.0:order=["earth","stone","organic"]
+	# Later recipes in a family are its more advanced techniques.
+	for family:String in order:
+		var pick:Dictionary={}
+		for recipe:Dictionary in recipes:
+			var required:=String(recipe.get("requires",""))
+			if not required.is_empty() and required not in known:continue
+			if String(recipe.get("family","organic"))==family:pick=recipe
+		if pick.is_empty():continue
+		var best:=pick.duplicate(true)
+		best["mix"]=mix_for(best.cost)
+		return best
+	return {}
+
 static func mix_for(cost:Dictionary)->Dictionary:
 	var total:=0.0
 	for amount in cost.values():total+=float(amount)

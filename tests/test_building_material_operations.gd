@@ -184,3 +184,16 @@ func test_drawn_buildings_show_city_condition_and_do_not_spend_repair_stock()->v
 	)
 	WorldSimulation.scoped("neighbor",func()->void:
 		assert_float(float(WorldSimulation.state.resource_stockpiles["Building Mortar"])).is_equal(17.0))
+
+func test_drawn_buildings_follow_the_city_construction_era()->void:
+	var materials=preload("res://scripts/construction_materials.gd")
+	var recipes:Array[Dictionary]=[
+		{"family":"organic","form":"a","cost":{"Timber":1.0}},
+		{"family":"earth","form":"b","requires":"clay_shaping","cost":{"Clay":3.0}},
+		{"family":"stone","form":"c","requires":"stone_selection","cost":{"Stone":4.0}},
+		{"family":"stone","form":"d","requires":"masonry_buttressing","cost":{"Stone":6.0}}]
+	var known:=["clay_shaping","stone_selection","masonry_buttressing"]
+	assert_str(String(materials.choose_drawn(recipes,known,0.5).form)).is_equal("a")
+	assert_str(String(materials.choose_drawn(recipes,known,2.5).form)).is_equal("b")
+	assert_str(String(materials.choose_drawn(recipes,known,4.5).form)).is_equal("d")
+	assert_str(String(materials.choose_drawn(recipes,["clay_shaping"],4.5).form)).is_equal("b")

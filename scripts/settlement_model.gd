@@ -1490,9 +1490,12 @@ func _advance_city_form(month_day:int)->void:
 	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
 	var paid:=1.0
 	if need>0.0:
-		for item:String in basket:paid=minf(paid,maxf(0.0,float(stocks.get(item,0.0)))/(need*float(basket[item])))
+		# Each material pays its own share of the basket, so one scarce
+		# material slows upkeep without halting it.
+		paid=0.0
+		for item:String in basket:paid+=float(basket[item])*clampf(maxf(0.0,float(stocks.get(item,0.0)))/(need*float(basket[item])),0.0,1.0)
 		paid=clampf(paid,0.0,1.0)
-		for item:String in basket:stocks[item]=maxf(0.0,float(stocks.get(item,0.0))-need*float(basket[item])*paid)
+		for item:String in basket:stocks[item]=maxf(0.0,float(stocks.get(item,0.0))-need*float(basket[item]))
 	form["materials_paid"]=paid
 	if supported>float(form.tier) and paid>=0.5:form.tier=minf(supported,float(form.tier)+0.25*building_share*paid)
 	form.condition=clampf(float(form.condition)+0.04*building_share*paid-0.02,0.05,1.0)
@@ -2473,12 +2476,6 @@ func _can_pay_fabric_cost(_cost:Dictionary)->bool:
 	return true
 
 ## A stock that lets any known building recipe be drawn.
-func _drawing_stock(recipes:Array)->Dictionary:
-	var stock:Dictionary={}
-	for recipe:Dictionary in recipes:
-		for item:String in recipe.get("cost",{}):stock[item]=1e12
-	return stock
-
 func _unused_can_pay_fabric_cost(cost:Dictionary)->bool:
 	for resource_name in cost:
 		if float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))<float(cost[resource_name]): return false
@@ -2620,7 +2617,7 @@ func _available_functional_recipe(land_use:String)->Dictionary:
 			alternative.cost["Fiber Plants"]=float(fiber_costs[land_use])
 			recipes.append(alternative)
 	recipes.append_array(preload("res://scripts/building_material_operations.gd").options(land_use))
-	return preload("res://scripts/construction_materials.gd").choose(recipes,_drawing_stock(recipes),WorldSimulation.state.known_discoveries,WorldSimulation.consequences.policy_effect("stone_priority"))
+	return preload("res://scripts/construction_materials.gd").choose_drawn(recipes,WorldSimulation.state.known_discoveries,float(city_form().tier),WorldSimulation.consequences.policy_effect("stone_priority"))
 
 func _attempt_functional_growth(day:int,events:Array[Dictionary],context:Dictionary={})->void:
 	if not _can_add_plots(): return
@@ -2793,7 +2790,7 @@ func _available_household_recipe()->Dictionary:
 		{"family":"stone","form":"dry_stone_household","requires":"stone_selection","cost":{"Stone":4.2,"Timber":0.8}}
 	]
 	recipes.append_array(preload("res://scripts/building_material_operations.gd").options())
-	return preload("res://scripts/construction_materials.gd").choose(recipes,_drawing_stock(recipes),WorldSimulation.state.known_discoveries,WorldSimulation.consequences.policy_effect("stone_priority"))
+	return preload("res://scripts/construction_materials.gd").choose_drawn(recipes,WorldSimulation.state.known_discoveries,float(city_form().tier),WorldSimulation.consequences.policy_effect("stone_priority"))
 
 func _attempt_household_growth(day:int,events:Array[Dictionary],context:Dictionary={},action_index:=0)->bool:
 	if not _can_add_plots(): return false
@@ -2810,8 +2807,8 @@ func _attempt_household_growth(day:int,events:Array[Dictionary],context:Dictiona
 	if plot.is_empty(): return false
 	_create_growth_route(plot,day)
 	WorldSimulation.state.settlement_plots.append(plot)
-	WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"construction_started","new_state":"under_construction","cause":"household crowding, available labor, and delivered materials"})
-	_record_plot_building_event(plot,"started",day,(recipe.cost as Dictionary).duplicate(true),true,"Household crowding, available labor, and delivered materials.")
+	WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"construction_started","new_state":"under_construction","cause":"household crowding"})
+	_record_plot_building_event(plot,"started",day,(recipe.cost as Dictionary).duplicate(true),true,"Household crowding; the city draws a new home.")
 	WorldSimulation.state.morphology_revision+=1
 	events.append({"type":"morphology","title":"New Household Ground Claimed","plot_id":int(plot.id)})
 	return true

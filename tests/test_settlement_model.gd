@@ -692,8 +692,8 @@ func test_household_infill_adds_capacity_without_rewriting_plot_geometry()->void
 	assert_array(infilled.polygon).is_equal(inherited_geometry[plot_id])
 	assert_int(int(infilled.resident_capacity)).is_greater(int(inherited_capacity[plot_id]))
 	assert_float(float(infilled.roof_coverage)).is_greater(0.30)
-	# Infill is drawn; the basket needs clay and stone too, so none is paid here.
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(30.0)
+	# Infill is drawn free; only the city's monthly upkeep basket draws timber.
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_between(24.0,30.0)
 	assert_array(model.validate_state()).is_empty()
 
 func test_elapsed_centuries_alone_do_not_repaint_inherited_fabric()->void:
