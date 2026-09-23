@@ -100,3 +100,9 @@ func test_wonder_plates_match_catalogue_without_changing_it()->void:
 	GameState.elapsed_days=300*365
 	assert_object(art.texture("ancestor_ring")).is_null()
 	GameState.elapsed_days=saved
+
+func test_saved_family_name_prevents_recasting_when_seed_or_library_order_changes()->void:
+	var person:={"early_art_profile":"windseam","early_art_index":2,"person_id":9,"appearance_civ_id":"player","appearance_world_seed":1}
+	assert_int(Art.profile(person)).is_equal(Art.PROFILES.find("windseam"))
+	var restored:Dictionary=JSON.parse_string(JSON.stringify(person));restored.appearance_world_seed=999
+	assert_int(Art.profile(restored)).is_equal(Art.profile(person))

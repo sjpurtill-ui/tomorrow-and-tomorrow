@@ -565,7 +565,7 @@ func _person_record(person_id:int)->Dictionary:
 func person_snapshot(person_id:int)->Dictionary:
 	var person:=_person_record(person_id)
 	if person.is_empty():return {}
-	if not person.has("early_art_index"):_assign_early_art_indices()
+	if not person.has("early_art_index") or not person.has("early_art_profile"):_assign_early_art_indices()
 	var snapshot:=person.duplicate(true)
 	snapshot["age"]=age_years(person)
 	# Carry ownership out of scoped opponent queries so presentation cannot
@@ -578,6 +578,13 @@ func _assign_early_art_indices()->void:
 	# Saved appearance belongs to a person, never to their current office.
 	# Prioritize the visible cabinet when upgrading an existing save. Reuse is
 	# unavoidable beyond the four illustrated people; balance it across the cast.
+	# Keep the authored family name in save data. Growing the future art library
+	# must not change an established person's appearance through modulo changes.
+	var families:=["kilnfold","reedwake","windseam","stoneweft"]
+	var family:String=families[posmod((str(GameState.world_seed)+":"+WorldSimulation.actor_id+":visual_ancestry").hash(),families.size())]
+	for record in people:
+		if families.has(String(record.get("early_art_profile",""))):
+			family=String(record.early_art_profile);break
 	var ordered:Array[Dictionary]=[]
 	var added:Dictionary={}
 	for office in active_offices():
@@ -591,6 +598,7 @@ func _assign_early_art_indices()->void:
 	for record in ordered:
 		if record.has("early_art_index"):usage[posmod(int(record.early_art_index),4)]+=1
 	for record in ordered:
+		if not record.has("early_art_profile"):record["early_art_profile"]=family
 		if record.has("early_art_index"):continue
 		var slot:=0
 		for candidate in range(1,4):

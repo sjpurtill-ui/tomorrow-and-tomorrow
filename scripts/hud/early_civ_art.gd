@@ -9,6 +9,8 @@ static func active()->bool:
 static func owner(person:Dictionary)->String:
 	return String(person.get("appearance_civ_id",person.get("civilization_id","player")))
 static func profile(person:Dictionary)->int:
+	var saved:=PROFILES.find(String(person.get("early_art_profile","")))
+	if saved>=0:return saved
 	var seed_value:=int(person.get("appearance_world_seed",GameState.world_seed))
 	return posmod((str(seed_value)+":"+owner(person)+":visual_ancestry").hash(),PROFILES.size())
 static func source(path:String)->Texture2D:
