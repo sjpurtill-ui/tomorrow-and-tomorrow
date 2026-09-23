@@ -99,12 +99,11 @@ static func factor(id:String)->float:
 	if id=="lime_burning":
 		var lime:=_stock_of("Quicklime")+_stock_of("Slaked Lime")+_stock_of("Building Mortar")
 		return clampf(lime/maxf(.5,WorldSimulation.state.population_exact*.02),0.0,1.0)
+	# Building techniques act through the city's built fabric: its construction
+	# era must have reached masonry or framed halls, at its current condition.
 	if id=="lime_mortar":
-		var best:=0.0
-		for plot:Dictionary in WorldSimulation.state.settlement_plots:
-			if String(plot.get("form",""))!="lime_masonry_household" or String(plot.get("status","active")) in ["ruin","reclaimed","under_construction"]:continue
-			best=maxf(best,clampf(float(plot.get("condition",0.0)),0.0,1.0))
-		return best
+		var form:Dictionary=WorldSimulation.settlements.city_form()
+		return clampf(float(form.condition),0.0,1.0) if float(form.tier)>=3.0 else 0.0
 	if id in ["latrine_siting","protected_wellheads","rainwater_cisterns","water_settling_basins"]:
 		return preload("res://scripts/water_waste_works.gd").factor(id)
 	if id in ["seed_selection","animal_taming","pack_animals","domesticated_mounts","mounted_scouts"]:
@@ -123,13 +122,9 @@ static func factor(id:String)->float:
 		var logistics:=WorldSimulation.state.effective_workers("Logistics")/maxf(1.0,population*.04)
 		var administration:=WorldSimulation.state.effective_workers("Administration")/maxf(1.0,population*.02)
 		return clampf(minf(logistics,administration),0.0,1.0)
-	# framed_construction
-	var best_condition:=0.0
-	for plot:Dictionary in WorldSimulation.state.settlement_plots:
-		if String(plot.get("form",""))!="timber_frame_hall":continue
-		if String(plot.get("status","active")) in ["vacant","ruin","reclaimed","under_construction"]:continue
-		best_condition=maxf(best_condition,clampf(float(plot.get("condition",0.0)),0.0,1.0))
-	if best_condition<=0.0:return 0.0
+	# framed_construction: a Framed Hall stands and builders keep it in use.
+	if "Framed Hall" not in WorldSimulation.state.settlement_completed:return 0.0
+	var best_condition:=clampf(float(WorldSimulation.settlements.city_form().condition),0.0,1.0)
 	var population:=maxf(1.0,WorldSimulation.state.population_exact)
 	var staffing:=WorldSimulation.state.effective_workers("Construction")/maxf(1.0,population*.03)
 	return clampf(minf(best_condition,staffing),0.0,1.0)
