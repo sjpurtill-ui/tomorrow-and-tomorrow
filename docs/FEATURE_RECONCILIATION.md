@@ -2449,3 +2449,7 @@ River Craft and Coastal Watercraft use distinct paper illustrations for early re
 ### Household and shared-care research scenes
 
 Shared Childcare and Household Space Planning now use paper scenes tied to the specific practices: supervised communal care and arranging sleeping, ventilation, storage and circulation in a modest early home. Both occur in the recorded early pacing comparison. Actual large and compact research crops were GPU-reviewed; thirteen focused tests passed without errors, failures or orphans. Forty-six explicit early overrides are installed. Simulation and later-era mappings are unchanged.
+
+### Tempered clay and sealed food vessels
+
+Tempered Clay and Sealed Vessels now show additive mixing and pest-resistant closure in the early paper aesthetic. The two distinct processes remain readable in large and compact research crops, verified by an isolated GPU preview. Thirteen focused tests pass without errors, failures or orphans. Forty-eight explicit early research overrides are installed. Native sources, exact prompts and capped mipmapped imports are retained.

@@ -1,0 +1,16 @@
+{
+  "generator": "Built-in imagegen",
+  "style_reference": "assets/ui/research/paper/oral_epics.png",
+  "assets": [
+    {
+      "file": "clay_tempering.png",
+      "source": "exec-d7b878bb-da6e-4584-8dcd-ae173df86cf4.png",
+      "prompt": "Landscape 4:3 early research illustration TEMPERED CLAY. Reference aesthetic only: flat dry matte gouache in charcoal, ochre and muted sage on warm opaque ivory paper; restrained grain, broken edges, not photographic realism. Concrete close overhead material process: two weathered human hands knead a damp reddish clay mass on a rough stone slab, folding visible crushed shell and gritty sand into it. Beside the clay, distinct small piles of crushed pale shell, coarse sand and unused raw clay. One half of the mass shows dry temper sprinkled over it while the folded portion shows incorporated flecks. Clear physical difference from firing pots or testing tiles. No finished pottery, kiln, metal tools, modern workbench, labels, writing or diagrams. Plain early woven sleeve edge only, no posed portrait. Natural working hands and plausible fingers. Objects compact in center horizontal band so both hands, additives and clay remain readable in wide card crop; generous ivory margins. No border or UI."
+    },
+    {
+      "file": "sealed_vessels.png",
+      "source": "exec-8f572a29-6da2-4fc3-8699-38db1491f857.png",
+      "prompt": "Landscape 4:3 research illustration SEALED VESSELS for a dawn-of-history civilization game. Reference aesthetic only: flat dry matte gouache, charcoal, warm ochre, muted sage on opaque ivory paper, restrained grain, broken vignette edges, no photorealism. Close view of ordinary weathered hands seating a fitted plain clay lid on a stout hand-built storage jar while pressing a soft clay sealing strip around its rim. A second open jar beside it contains dry grain, clearly showing what the closure protects; a finished closed jar behind has an intact seal. This is early pest-resistant storage, no decorated luxury pottery or modern canning. Rough earthen floor, reed mat, minimal background. No metal lids, rubber gaskets, glass, writing, glyphs, padlocks, elaborate handles or modern tools. Only a simple woven sleeve enters frame, not a portrait. Plausible natural hands, lid aligns with vessel mouth. Keep all three jars and sealing hands compact in central horizontal band so wide research-card crop retains the closure action. Ivory margins, no text, border or UI."
+    }
+  ]
+}
