@@ -249,7 +249,7 @@ func outcomes()->Dictionary:
 			return {"day":int(state.elapsed_days),"population":state.population_exact,"food":food,"stock":stock,"health":state.population_health,"food_security":state.food_security,
 				"cohesion":float(m.get("cohesion",0)),"knowledge":float(m.get("knowledge",0)),"material":float(m.get("material_capacity",0)),"legitimacy":float(m.get("legitimacy",0)),
 				"discoveries":state.known_discoveries.size(),"cities":state.player_settlements.size(),"housing":state.housing_capacity,"treasury":float(state.public_treasury),
-				"troops":int(WorldSimulation.military.home_army.get("troops",0)),"projects":state.settlement_completed.size()}
+				"troops":int(WorldSimulation.military.home_army.get("troops",0)),"projects":state.settlement_completed.size(),"goods_coverage":load("res://scripts/civilian_goods.gd").coverage() if ResourceLoader.exists("res://scripts/civilian_goods.gd") else -1.0}
 		)
 	return result
 

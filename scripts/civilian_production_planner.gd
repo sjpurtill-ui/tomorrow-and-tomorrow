@@ -208,62 +208,6 @@ static func figured_clothing_recommendation(plan_power:bool=false)->Dictionary:
 	if float(state.resource_stockpiles.get("Figured Cloth",0))>=target:return {}
 	return supply("Figured Cloth",target,{},plan_power)
 
-static func clothing_recommendation(plan_power:bool=false)->Dictionary:
-	var state=WorldSimulation.state
-	if state.convoy_traveling or not state.settlement_site_committed or not state.resource_settlement_id.is_empty():return {}
-	if state.effective_workers("Logistics")<=0 or state.effective_workers("Crafting")<=0:return {}
-	var clothing=preload("res://scripts/household_clothing.gd")
-	var knowledge=preload("res://scripts/clothing_knowledge.gd")
-	var requirements=preload("res://scripts/technology_requirements.gd")
-	var population:=WorldSimulation.settlements.primary_population_exact()
-	var deficit:=maxf(0,population*1.1-clothing.count())
-	var leather_target:=int(clothing.leather_target(population))
-	if leather_target>0 and clothing.available("Flexible Leather")<leather_target:
-		var leather:=supply("Flexible Leather",leather_target,{},plan_power)
-		if not leather.is_empty():return leather
-	var figured:=figured_clothing_recommendation(plan_power)
-	if not figured.is_empty():return figured
-	var best:Dictionary={};var best_work:=INF
-	for id:String in knowledge.METHODS:
-		var spec:Dictionary=knowledge.METHODS[id]
-		if id not in state.known_discoveries or WorldSimulation.discovery.adoption(id)<.1 or not requirements.evaluate(spec,state.known_discoveries).ready:continue
-		var amount:=minf(10,deficit)
-		var quilt_repairs:=0.0
-		if spec.mode=="quilt":
-			for lot:Dictionary in clothing.data().lots:
-				if lot.kind=="quilt" and float(lot.condition)>=.15 and float(lot.condition)<.6 and int(lot.ready)<=int(state.elapsed_days):quilt_repairs=minf(10,quilt_repairs+float(lot.amount))
-		if spec.mode not in clothing.CREATION_MODES:
-			amount=0.0
-			for lot:Dictionary in clothing.data().lots:
-				if int(lot.ready)>int(state.elapsed_days) or not clothing.compatible_service(String(spec.mode),lot):continue
-				if (spec.mode in ["wash","machine_wash"] and float(lot.soil)>=.35) or (spec.mode=="wick" and not lot.wick) or (spec.mode=="repair" and float(lot.condition)>=.15 and float(lot.condition)<.6):amount+=float(lot.amount)
-			if spec.mode=="test":
-				amount=1.0 if clothing.count()-population>=.25 else 0.0
-				for trial:Dictionary in clothing.data().get("trials",{}).values():
-					if int(trial.cycles)<5:amount+=1.0
-			amount=minf(10,amount)
-		var barrier_method:=String(spec.mode) in ["rain_shell","seal_rain_seams"]
-		if not barrier_method and amount<=.000001 and quilt_repairs<=.000001:continue
-		var needed:Dictionary={}
-		var inputs:=clothing.materials(id)
-		if barrier_method:
-			needed=preload("res://scripts/textile_barriers.gd").demand(clothing,id,population,int(state.elapsed_days))
-			if needed.is_empty():continue
-		else:
-			for item:String in inputs:needed[item]=amount*float(inputs[item])
-		if quilt_repairs>0:
-			for item:String in clothing.QUILT_REPAIR_INPUTS:
-				var cost:float=clothing.QUILT_REPAIR_INPUTS[item]
-				needed[item]=float(needed.get(item,0))+quilt_repairs*cost
-		if int(clothing.data().tools.get(id,0))==0:
-			var costs:=clothing.materials(id,true)
-			for item:String in costs:needed[item]=float(needed.get(item,0))+float(costs[item])
-		var first:Dictionary={};var possible:=true;var work:=0.0
-		for item:String in needed:
-			if clothing.available(item)>=float(needed[item]):continue
-			var order:=supply(item,ceili(float(needed[item])),{},plan_power)
-			if order.is_empty():possible=false;break
-			if first.is_empty():first=order
-			work+=float(order.get("work",0))
-		if possible and not first.is_empty() and work<best_work:best=first;best_work=work
-	return best
+static func clothing_recommendation(_plan_power:bool=false)->Dictionary:
+	# Clothing is made as part of Civilian Goods; there are no garment lines.
+	return {}

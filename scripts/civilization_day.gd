@@ -78,7 +78,7 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 			run.result.events=WorldSimulation.settlements.with_local_population(func()->Array[Dictionary]:return WorldSimulation.consequences.process_day(daily_context),true)
 	),
 		S.step("civics",timings,func()->void:
-			WorldSimulation.settlements.with_local_population(func()->void:preload("res://scripts/opening_craft_practice.gd").advance())
+			WorldSimulation.settlements.with_local_population(func()->void:preload("res://scripts/civilian_goods.gd").advance())
 			run.result.events.append_array(WorldSimulation.civics.process_day(day))
 	),
 		S.step("economy",timings,func()->void:run.result.events.append_array(WorldSimulation.settlements.with_local_population(func()->Array[Dictionary]:return WorldSimulation.economy.process_day(daily_context)))),

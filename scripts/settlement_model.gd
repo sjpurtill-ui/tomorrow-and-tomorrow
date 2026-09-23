@@ -22,7 +22,7 @@ const SETTLEMENT_NAME_ENDINGS:=["bank","bridge","cross","field","ford","gate","h
 
 const CITY_RESOURCE_DEFAULTS:={
 	"civilian_care":{"enabled":true,"staff_share":0.25,"episodes":[],"next_id":1,"last_day":-1,"history":[],"report":{}},
-	"household_clothing":{"tools":{},"lots":[],"bone_stock":0.0,"last_day":-1,"report":{}},
+	"household_clothing":{"last_day":-1,"report":{}},
 	"water_conveyance":{"lines":[],"next_id":1,"last_day":-1,"report":{}},
 	"water_waste_works":{"works":[],"next_id":1,"last_day":-1,"report":{}},
 	"food_batches":{"tools":{},"lots":[],"next_id":1,"last_day":-1,"report":{}},
@@ -31,7 +31,7 @@ const CITY_RESOURCE_DEFAULTS:={
 	"field_botany":{"last_day":-1,"next_id":1,"lines":[],"trials":[],"vouchers":[],"applications":[],"report":{},"balance":false,"reference_seed":0.0,"reference_site":"","reference_day":-1,"reference_line":{}},
 	"cultivation_nutrients":{"nitrogen":0.0,"phosphorus":0.0},
 	"resource_stockpiles":{"Food":0.0,"Freshwater":0.0},"resource_deposits":[],
-	"opening_craft_practice":{"initialized":true,"last_day":-1,"report":{}},
+	"civilian_goods":{"initialized":true,"last_day":-1,"report":{}},
 	"resource_events":[],"resource_practice":{},"resource_priorities":{},
 	"material_metrics":{},"material_history":[],"water_metrics":{},"water_history":[],
 	"food_stocks":{"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":0.0,"Preserved food":0.0},
@@ -283,7 +283,7 @@ func process_city_resources(settlement_id:String,context:Dictionary,daily_work:C
 		stamp=_record_secondary_timing(timings,"resources",stamp)
 		with_local_population(func()->void:WorldSimulation.consequences.process_day(context),true)
 		stamp=_record_secondary_timing(timings,"consequences",stamp)
-		with_local_population(func()->void:preload("res://scripts/opening_craft_practice.gd").advance())
+		with_local_population(func()->void:preload("res://scripts/civilian_goods.gd").advance())
 		with_local_population(func()->void:WorldSimulation.economy.process_day(context))
 		stamp=_record_secondary_timing(timings,"economy",stamp)
 		record["resource_metrics"]=WorldSimulation.state.simulation_metrics.duplicate(true)
@@ -304,7 +304,7 @@ func _record_secondary_timing(timings:Dictionary,phase:String,start:int)->int:
 	return now
 
 const MAX_CITY_SHIPMENTS:=128
-const CITY_TRADE_GOODS:=["Food","Timber","Stone","Clay","Fiber Plants","Salt","Medicinal Plants","Flint","Copper Ore","Tin Ore","Iron Ore","Coal"]
+const CITY_TRADE_GOODS:=["Food","Timber","Stone","Clay","Fiber Plants","Salt","Medicinal Plants","Flint","Copper Ore","Tin Ore","Iron Ore","Coal","Civilian Goods"]
 
 func city_trade_capacity()->Dictionary:
 	var logistics:=clampf(float(WorldSimulation.state.society_capacities.get("logistics",0.0)),0.0,1.0)

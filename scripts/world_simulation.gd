@@ -453,6 +453,9 @@ func submit(id:String,order:Dictionary)->Dictionary:
 	)
 
 const SNAPSHOT=preload("res://scripts/save_system.gd")
+## Saved fields of systems that no longer exist; older saves may still hold
+## them. Their contents are folded in elsewhere (see civilian_goods.gd).
+const RETIRED_FIELDS:={"GameState":["opening_craft_practice"]}
 const CURATED:=["MilitaryCampaign","ProgressionSystem","ForeignDiplomacy","GeneralCampaign"]
 
 func capture_actor(id:String)->Dictionary:
@@ -511,6 +514,7 @@ func validate_payload(payload:Dictionary)->String:
 				if field.begins_with("rng_state:"):
 					if not instance.get(field.trim_prefix("rng_state:")) is RandomNumberGenerator or not actor.state[name][field] is int:return "Invalid civilization random generator."
 					continue
+				if field in RETIRED_FIELDS.get(name,[]):continue
 				if not property_types.has(field):return "Unknown civilization field: "+field
 				var saved_type:=typeof(actor.state[name][field]);var expected_type:=int(property_types[field])
 				if expected_type!=TYPE_NIL and saved_type!=expected_type and not (saved_type in [TYPE_INT,TYPE_FLOAT] and expected_type in [TYPE_INT,TYPE_FLOAT]):return "Invalid civilization field type: "+field
@@ -522,8 +526,8 @@ func validate_payload(payload:Dictionary)->String:
 		var nutrition:=preload("res://scripts/crop_nutrition.gd")
 		var clothing=preload("res://scripts/household_clothing.gd")
 		if not preload("res://scripts/fire_practice.gd").valid(actor.state.GameState.get("fire_practice",preload("res://scripts/fire_practice.gd").empty_state())):return "Invalid civilization maintained fire records."
-		var opening=preload("res://scripts/opening_craft_practice.gd")
-		if not opening.valid(actor.state.GameState.get("opening_craft_practice",opening.empty_state())) or not opening.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization opening craft records."
+		var opening=preload("res://scripts/civilian_goods.gd")
+		if not opening.valid(actor.state.GameState.get("civilian_goods",opening.empty_state())) or not opening.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization civilian goods records."
 		var opportunities=preload("res://scripts/opening_opportunities.gd")
 		if not opportunities.valid(actor.state.GameState.get("opening_opportunities",opportunities.empty_state())):return "Invalid civilization opening opportunity records."
 		if not clothing.valid(actor.state.GameState.get("household_clothing",clothing.empty_state())) or not clothing.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization clothing records."

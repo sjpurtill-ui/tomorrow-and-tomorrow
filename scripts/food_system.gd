@@ -396,7 +396,7 @@ func _preserve(logistics: float,makers: float,traveling: bool,inputs:Dictionary=
 	if traveling: return result
 	var capacity:=(logistics*0.16+makers*0.18)*(1.0+WorldSimulation.discovery.effect("food_storage"))
 	if "food_drying" in WorldSimulation.state.known_discoveries:
-		var drying_coverage:=preload("res://scripts/opening_craft_practice.gd").factor("food_drying")
+		var drying_coverage:=preload("res://scripts/civilian_goods.gd").factor("food_drying")
 		var drying_weather:=_drying_weather_factor(_environment_mix(),WorldSimulation.state.elapsed_days)
 		var plant_amount:=minf(float(WorldSimulation.state.food_stocks.get("Fresh plants",0.0)),capacity*0.55*clampf(WorldSimulation.discovery.adoption("food_drying"),0.0,1.0)*drying_coverage*drying_weather)
 		WorldSimulation.state.food_stocks["Fresh plants"]-=plant_amount
@@ -405,7 +405,7 @@ func _preserve(logistics: float,makers: float,traveling: bool,inputs:Dictionary=
 		capacity=maxf(0.0,capacity-plant_amount)
 	preload("res://scripts/fire_practice.gd").ensure_initialized()
 	if "smoking" in WorldSimulation.state.known_discoveries and preload("res://scripts/fire_practice.gd").available() and capacity>0.0:
-		var smoking_coverage:=preload("res://scripts/opening_craft_practice.gd").factor("smoking")
+		var smoking_coverage:=preload("res://scripts/civilian_goods.gd").factor("smoking")
 		for food_type in ["Fresh meat","Fish"]:
 			var amount:=minf(float(WorldSimulation.state.food_stocks.get(food_type,0.0)),capacity*0.5*clampf(WorldSimulation.discovery.adoption("smoking"),0.0,1.0)*smoking_coverage)
 			# Smoking must maintain an actual wood fire; knowledge alone supplies no heat.
@@ -472,8 +472,8 @@ func _apply_storage_capacity() -> Dictionary:
 func _food_storage_capacity()->float:
 	var capacity:=float(WorldSimulation.state.founding_manifest.get("food_storage_rations",0.0))
 	if "Storage Pits" in WorldSimulation.state.settlement_completed:capacity+=WorldSimulation.state.population_exact*84.0
-	if "Public Stores" in WorldSimulation.state.settlement_completed:capacity+=WorldSimulation.state.population_exact*120.0*preload("res://scripts/opening_craft_practice.gd").factor("public_stores")
-	capacity+=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Sealed Clay Vessels",0.0)))*18.0
+	if "Public Stores" in WorldSimulation.state.settlement_completed:capacity+=WorldSimulation.state.population_exact*120.0*preload("res://scripts/civilian_goods.gd").factor("public_stores")
+	capacity+=preload("res://scripts/civilian_goods.gd").sealed_storage_rations()
 	capacity+=preload("res://scripts/undertaking_rewards.gd").local_bonus(WorldSimulation.state,"food_capacity")
 	return capacity
 

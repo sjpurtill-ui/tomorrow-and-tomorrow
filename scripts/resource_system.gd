@@ -737,9 +737,9 @@ func _ensure_deposit_fields(deposit:Dictionary)->void:
 		if not deposit.has(key): deposit[key]=DEPOSIT_FIELD_DEFAULTS[key].duplicate() if DEPOSIT_FIELD_DEFAULTS[key] is Array else DEPOSIT_FIELD_DEFAULTS[key]
 
 func _is_material_resource(resource_name:String)->bool:
-	# Household craft stocks represent maintained tools/containers in use. Their
-	# owner applies material-specific wear; raw-yard loss must not charge it again.
-	return resource_name not in ["Freshwater","Fertile Soil","Game"] and resource_name not in preload("res://scripts/opening_craft_practice.gd").DECAY
+	# Civilian Goods are maintained household things in use. CivilianGoods applies
+	# their wear; raw-yard loss must not charge it again.
+	return resource_name not in ["Freshwater","Fertile Soil","Game",preload("res://scripts/civilian_goods.gd").GOODS]
 
 const MATERIAL_PROFILES:={
 		"Timber":{"family":"organic","bulk":1.35,"store":"yard","loss":0.0012,"base_yield":0.34},

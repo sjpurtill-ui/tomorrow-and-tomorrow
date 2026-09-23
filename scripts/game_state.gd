@@ -177,7 +177,7 @@ var morphology_revision:=0
 var last_morphology_day:=-1
 var resource_deposits: Array[Dictionary] = []
 var resource_stockpiles: Dictionary = {}
-var opening_craft_practice:Dictionary=preload("res://scripts/opening_craft_practice.gd").empty_state()
+var civilian_goods:Dictionary=preload("res://scripts/civilian_goods.gd").empty_state()
 var opening_opportunities:Dictionary=preload("res://scripts/opening_opportunities.gd").empty_state()
 var resource_events: Array[Dictionary] = []
 var resource_practice: Dictionary = {}
@@ -500,7 +500,7 @@ func reset_for_new_world(new_seed:int)->void:
 	last_morphology_day=-1
 	resource_deposits=[]
 	resource_stockpiles={}
-	opening_craft_practice=preload("res://scripts/opening_craft_practice.gd").empty_state()
+	civilian_goods=preload("res://scripts/civilian_goods.gd").empty_state()
 	resource_events=[]
 	resource_practice={}
 	resource_priorities={}

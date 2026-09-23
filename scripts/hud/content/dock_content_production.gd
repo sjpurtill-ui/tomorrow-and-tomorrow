@@ -54,30 +54,29 @@ func _household_blocks()->Array:
 	for city:Dictionary in GameState.player_settlements:
 		var rows:Array=SettlementModel.with_city_resources(String(city.id),func()->Array:
 			return SettlementModel.with_local_population(func()->Array:return _household_rows()))
-		if not rows.is_empty():blocks.append({"type":"rows","heading":"HOUSEHOLD CRAFTS · "+String(city.name).to_upper(),"note":"Actual daily output · separate from workshop lines","items":rows})
-	blocks.append({"type":"text","text":"Household crafts replenish tools, bindings and containers as people need them. Their output is now included in history; older lifetime totals were not recorded."})
+		if not rows.is_empty():blocks.append({"type":"rows","heading":"CIVILIAN GOODS · "+String(city.name).to_upper(),"note":"Everyday tools, containers and fittings · separate from workshop lines","items":rows})
+	var techniques:Array=_technique_rows()
+	if not techniques.is_empty():blocks.append({"type":"rows","heading":"HOUSEHOLD TECHNIQUES","note":"Adopted techniques raise output and act in proportion to goods coverage","items":techniques})
 	return blocks
 
 static func _household_rows()->Array:
-	var craft=preload("res://scripts/opening_craft_practice.gd")
-	var made:Dictionary=GameState.opening_craft_practice.get("report",{}).get("made",{})
-	var current:=int(GameState.opening_craft_practice.get("last_day",-1))==int(GameState.elapsed_days)
+	var goods=preload("res://scripts/civilian_goods.gd")
+	var report:Dictionary=GameState.civilian_goods.get("report",{})
+	var current:=int(GameState.civilian_goods.get("last_day",-1))==int(GameState.elapsed_days)
+	var made:=float(report.get("made",0.0)) if current else 0.0
+	var worn:=float(report.get("worn",0.0)) if current else 0.0
+	var coverage:=goods.coverage()
+	var reason:=String(report.get("reason","")) if current else ""
+	if reason.is_empty():reason="Replenishing as needed"
+	return [{"name":"Civilian Goods","value":"%+.2f today" % (made-worn),"sub":"%.1f held of %.1f wanted (%d%%) · %s" % [goods.stock(),goods.target(),roundi(coverage*100.0),reason],"accent":Tokens.GREEN if coverage>=.8 else Tokens.AMBER}]
+
+static func _technique_rows()->Array:
+	var goods=preload("res://scripts/civilian_goods.gd")
 	var rows:Array=[]
-	for id:String in craft.ORDER:
+	for id:String in goods.TECHNIQUES:
 		if id not in GameState.known_discoveries:continue
-		var product:=String(craft.PRODUCTS[id])
-		var stock:=craft.stock(product)
-		var amount:=float(made.get(product,0)) if current else 0.0
-		var reason:="Replenishing as needed"
-		if DiscoverySystem.adoption(id)<.1:reason="Practice not yet adopted"
-		elif stock>=craft.target(id)*1.19:reason="Stock target met"
-		elif GameState.convoy_traveling or not GameState.settlement_site_committed:reason="Needs a settled workplace"
-		elif GameState.effective_workers("Crafting")<=0:reason="No craftspeople assigned"
-		elif bool(craft.RECIPES[id].get("fire",false)) and not preload("res://scripts/fire_practice.gd").available():reason="Needs maintained fire"
-		else:
-			for input:String in craft.RECIPES[id].inputs:
-				if craft.stock(input)<=.000001:reason="Needs "+input;break
-		rows.append({"name":product,"value":"+%.3f today" % amount,"sub":"%.2f in stores · %s" % [stock,reason],"accent":Tokens.GREEN if amount>0 else Tokens.AMBER})
+		var adoption:=DiscoverySystem.adoption(id)
+		rows.append({"name":String(DiscoverySystem.discovery_definition(id).get("name",id.capitalize())),"value":"%d%% adopted" % roundi(adoption*100.0),"sub":"Acting at %d%% of its benefit" % roundi(adoption*goods.factor(id)*100.0),"accent":Tokens.GREEN if adoption>=.5 else Tokens.AMBER})
 	return rows
 
 func _workshop_availability(sub:int)->Array:

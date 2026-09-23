@@ -16,7 +16,7 @@ const STAGE_NAMES := {
 const BASE_VALUES := {
 	"Food":1.0,"Timber":2.4,"Stone":1.8,"Clay":1.1,"Fiber Plants":2.0,
 	"Salt":4.0,"Medicinal Plants":5.5,"Copper Ore":8.0,"Tin Ore":11.0,
-	"Iron Ore":9.0,"Coal":3.5,"Transport Carts":24.0,"Coin":1.0
+	"Iron Ore":9.0,"Coal":3.5,"Civilian Goods":6.0,"Transport Carts":24.0,"Coin":1.0
 }
 const METAL_VALUES := {"Copper Ore":1.0,"Tin Ore":1.4,"Iron Ore":0.7,"Coin":1.0}
 const PUBLIC_SPENDING_PRIORITIES := ["balanced","civil_first","military_first"]
@@ -302,6 +302,7 @@ func _desired_stock(resource_name:String,population:float)->float:
 		"Stone": return population*1.2
 		"Clay","Fiber Plants": return population*0.45
 		"Transport Carts": return maxf(1.0,population/30.0)
+		"Civilian Goods": return preload("res://scripts/civilian_goods.gd").target()
 		_: return population*0.16
 
 func _trade_volume(market_access:float,monetization:float)->float:
@@ -351,7 +352,7 @@ func _process_external_trade(market_access:float,domestic_trade:float,contract_p
 	# A multi-day step (day_span.gd) trades `span` days of capacity.
 	var export_budget:=minf(value_capacity*export_share*WorldSimulation.span,maxf(0.0,claim_limit-WorldSimulation.state.external_trade_credit))
 	var export_candidates:Array[Dictionary]=[]
-	for resource_name in ["Food","Timber","Stone","Clay","Fiber Plants","Salt","Medicinal Plants","Coal"]:
+	for resource_name in ["Food","Timber","Stone","Clay","Fiber Plants","Salt","Medicinal Plants","Coal","Civilian Goods"]:
 		var stock:=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0)))
 		if not _resource_is_economically_known(resource_name,stock): continue
 		var desired:=_desired_stock(resource_name,maxf(1.0,WorldSimulation.state.population_exact))
@@ -491,7 +492,7 @@ func _process_resource_obligations(real_accounts:Dictionary,monetization:float,r
 	var able:=maxf(1.0,float(WorldSimulation.state.able_population()))
 	var levy_adoption:=WorldSimulation.discovery.adoption("public_levies")
 	var rotations:=WorldSimulation.discovery.adoption("labor_rotations")
-	var public_stores:=WorldSimulation.discovery.adoption("public_stores")*preload("res://scripts/opening_craft_practice.gd").factor("public_stores")
+	var public_stores:=WorldSimulation.discovery.adoption("public_stores")*preload("res://scripts/civilian_goods.gd").factor("public_stores")
 	var councils:=WorldSimulation.discovery.adoption("household_councils")
 	var customary_law:=WorldSimulation.discovery.adoption("customary_law")
 	var tallies:=WorldSimulation.discovery.adoption("tallies")

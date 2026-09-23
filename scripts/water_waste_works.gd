@@ -6,8 +6,8 @@ const State=preload("res://scripts/water_waste_works_state.gd")
 const ORDER := ["latrine", "wellhead", "cistern", "settling_basin"]
 const SPECS := {
 	"latrine":{"discovery":"latrine_siting","name":"Separated Latrine Ground","work":18.0,"cost":{"Stone":4.0,"Timber":2.0}},
-	"wellhead":{"discovery":"protected_wellheads","name":"Protected Wellhead","work":24.0,"cost":{"Stone":6.0,"Joined Timber Components":1.0}},
-	"cistern":{"discovery":"rainwater_cisterns","name":"Lined Rainwater Cistern","work":36.0,"cost":{"Stone":8.0},"alternatives":{"Sealed Clay Vessels":2.0,"Lime Mortar":3.0,"Bitumen":2.0}},
+	"wellhead":{"discovery":"protected_wellheads","name":"Protected Wellhead","work":24.0,"cost":{"Stone":6.0,"Civilian Goods":1.0}},
+	"cistern":{"discovery":"rainwater_cisterns","name":"Lined Rainwater Cistern","work":36.0,"cost":{"Stone":8.0},"alternatives":{"Civilian Goods":2.0,"Lime Mortar":3.0,"Bitumen":2.0}},
 	"settling_basin":{"discovery":"water_settling_basins","name":"Water Settling Basin","work":24.0,"cost":{"Clay":5.0,"Stone":4.0}}
 }
 
@@ -30,7 +30,7 @@ static func quote(kind:String,context:Dictionary={})->Dictionary:
 	if spec.has("alternatives"):
 		for item:String in spec.alternatives:
 			if float(WorldSimulation.state.resource_stockpiles.get(item,0.0))>=float(spec.alternatives[item]):lining=item;break
-		if lining.is_empty():return {"error":"A cistern needs 2 Sealed Clay Vessels, 3 Lime Mortar, or 2 Bitumen for its lining."}
+		if lining.is_empty():return {"error":"A cistern needs 2 Civilian Goods, 3 Lime Mortar, or 2 Bitumen for its lining."}
 		cost[lining]=float(spec.alternatives[lining])
 	for item:String in cost:
 		if float(WorldSimulation.state.resource_stockpiles.get(item,0.0))<float(cost[item]):return {"error":"Insufficient %s for %s." % [item,String(spec.name)]}
