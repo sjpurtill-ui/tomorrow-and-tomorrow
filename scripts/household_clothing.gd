@@ -176,6 +176,8 @@ static func operate(id:String,workers:float,population:float,day:int,report:Dict
 	if mode=="test":test_cycles(workers,population,day,report);return
 	var washing:=mode in ["wash","machine_wash"]
 	if mode in CREATION_MODES:
+		# quota() is zero for undiscovered methods, so creation changes nothing.
+		if id not in WorldSimulation.state.known_discoveries:return
 		var spent_before:=float(report.workers)
 		if mode in ["leather","quilt"]:
 			var patches:={"Flexible Leather":.08,"Spun Yarn":.03} if mode=="leather" else QUILT_REPAIR_INPUTS
@@ -249,6 +251,8 @@ static func advance(workers:float,population:float,traveling:bool,hunted_rations
 			var share:=used/maxf(.000001,float(lot.amount))
 			var wear:=.008 if traveling else .004
 			if lot.kind=="leather":wear+=.004*clampf(float(WorldSimulation.food.current_environment_profile().get("precipitation",.5)),0,1)
+			# A multi-day step (day_span.gd) wears clothing for each covered day.
+			share*=WorldSimulation.span
 			lot.condition=maxf(0,float(lot.condition)-wear*share)
 			lot.soil=minf(1,float(lot.soil)+.025*share)
 			if FINISH_FABRICS.has(String(lot.get("fabric","plain"))):lot.finish_strength=maxf(0,float(lot.get("finish_strength",1))-(.003 if lot.fabric=="calendered" else .001)*share)
@@ -257,8 +261,10 @@ static func advance(workers:float,population:float,traveling:bool,hunted_rations
 	var budget:=maxf(0,workers)*.2
 	if not traveling:
 		# Same paid steward for every owner; install only usable equipment.
-		for id:String in K.METHODS:
-			if int(data().tools.get(id,0))>0:continue
+		# quote() rejects undiscovered methods and install needs a work budget;
+		# the other checks are side-effect-free reads, so skip them first.
+		for id:String in (K.METHODS if budget>0 else {}):
+			if int(data().tools.get(id,0))>0 or id not in WorldSimulation.state.known_discoveries:continue
 			if K.METHODS[id].mode=="test" and count()-population<.25:continue
 			var supplied:=true
 			var inputs:=materials(id)

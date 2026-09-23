@@ -58,6 +58,9 @@ const CITY_RESOURCE_DEFAULTS:={
 }
 const CITY_VITAL_COUNTERS:=["lifetime_births","lifetime_deaths","lifetime_conceptions","lifetime_pregnancy_losses","lifetime_stillbirths","lifetime_maternal_deaths","lifetime_neonatal_deaths","observed_death_age_sum"]
 var _claim_shape_cache:Dictionary={}
+# CITY_RESOURCE_DEFAULTS keys as StringNames for the per-scope field swap.
+static var _city_resource_fields:Array[StringName]=[]
+static var _city_resource_keys:Array=[]
 # Nation-wide inputs shared by every record within one network snapshot call.
 # An Object, so saves never capture it; empty outside a snapshot.
 var _network_common:=RefCounted.new()
@@ -87,7 +90,9 @@ func selected_settlement()->Dictionary:
 func _ensure_city_resources(record:Dictionary)->void:
 	if bool(record.get("primary",false)): return
 	if record.has("local_resources"):
-		for key in CITY_RESOURCE_DEFAULTS:
+		if _city_resource_keys.is_empty():_city_resource_keys=CITY_RESOURCE_DEFAULTS.keys()
+		# Usually every key is present; one native check replaces 34 lookups.
+		for key in ([] if (record.local_resources as Dictionary).has_all(_city_resource_keys) else CITY_RESOURCE_DEFAULTS.keys()):
 			if not record.local_resources.has(key):
 				var value:Variant=CITY_RESOURCE_DEFAULTS[key]
 				record.local_resources[key]=value.duplicate(true) if value is Dictionary or value is Array else value
@@ -235,13 +240,19 @@ func with_city_resources(settlement_id:String,operation:Callable)->Variant:
 	var record:=settlement_record(settlement_id)
 	if record.is_empty() or bool(record.get("primary",false)): return operation.call()
 	_ensure_city_resources(record)
-	var saved:Dictionary={}
-	for field in CITY_RESOURCE_DEFAULTS:
-		saved[field]=state.get(field)
-		var value:Variant=record.local_resources[field]
+	if _city_resource_fields.is_empty():
+		for field in CITY_RESOURCE_DEFAULTS:_city_resource_fields.append(StringName(field))
+	var local:Dictionary=record.local_resources
+	var saved:Array=[]
+	saved.resize(_city_resource_fields.size())
+	for index in _city_resource_fields.size():
+		var field:StringName=_city_resource_fields[index]
+		var current:Variant=state.get(field)
+		saved[index]=current
+		var value:Variant=local[field]
 		# Preserve typed Array fields when assigning serialized/default state.
-		if saved[field] is Array:
-			var template:Array=saved[field]
+		if current is Array:
+			var template:Array=current
 			var incoming:Array=value
 			if template.is_same_typed(incoming):
 				state.set(field,incoming)
@@ -253,9 +264,10 @@ func with_city_resources(settlement_id:String,operation:Callable)->Variant:
 	var previous_id:=state.resource_settlement_id
 	state.resource_settlement_id=settlement_id
 	var result:Variant=operation.call()
-	for field in CITY_RESOURCE_DEFAULTS:
-		record.local_resources[field]=state.get(field)
-		state.set(field,saved[field])
+	for index in _city_resource_fields.size():
+		var field:StringName=_city_resource_fields[index]
+		local[field]=state.get(field)
+		state.set(field,saved[index])
 	state.resource_settlement_id=previous_id
 	return result
 
@@ -272,7 +284,7 @@ func process_city_resources(settlement_id:String,context:Dictionary,daily_work:C
 		with_local_population(func()->void:WorldSimulation.consequences.process_day(context),true)
 		stamp=_record_secondary_timing(timings,"consequences",stamp)
 		with_local_population(func()->void:preload("res://scripts/opening_craft_practice.gd").advance())
-		with_local_population(func()->void:WorldSimulation.economy.process_day(context))
+		with_local_population(func()->void:preload("res://scripts/day_span.gd").each_day(func()->Array[Dictionary]:return WorldSimulation.economy.process_day(context)))
 		stamp=_record_secondary_timing(timings,"economy",stamp)
 		record["resource_metrics"]=WorldSimulation.state.simulation_metrics.duplicate(true)
 		if daily_work.is_valid(): with_local_population(daily_work)
@@ -400,7 +412,8 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 		var occupied:=preload("res://scripts/rail_freight.gd").reserved_workers(String(source.id))*float(capacity.capacity_per_worker)
 		for shipment in WorldSimulation.state.city_trade_shipments:
 			if shipment.get("transport_mode","")!="rail" and String(shipment.source_id)==String(source.id): occupied+=float(shipment.quantity)*float(shipment.travel_days)
-		available_transport[String(source.id)]=maxf(0.0,carriers*float(capacity.capacity_per_worker)-occupied)
+		# A multi-day step (day_span.gd) dispatches `span` days of carrying.
+		available_transport[String(source.id)]=maxf(0.0,carriers*float(capacity.capacity_per_worker)-occupied)*WorldSimulation.span
 	# One request per good per city; no citizen or merchant entities are created.
 	for destination in WorldSimulation.state.player_settlements:
 		if not String(destination.get("occupied_by","")).is_empty():continue
@@ -1055,8 +1068,9 @@ func known_land_assessment(position:Vector2)->Dictionary:
 	if civilization_system==null or not civilization_system.has_method("fog_snapshot"):
 		return {"known":false,"reason":"No returned map record is available to verify this destination."}
 	if civilization_system.has_method("initialize"): civilization_system.initialize()
-	var fog:Dictionary=civilization_system.fog_snapshot()
-	for area_variant in fog.get("areas",[]):
+	# Read the owner's charted areas in place; fog_snapshot() deep-copies every
+	# record (up to the reveal history limit) and this scan only reads them.
+	for area_variant in civilization_system.revealed_areas:
 		var area:Dictionary=area_variant
 		var radius:=maxf(0.0,float(area.get("radius",0.0)))
 		if bool(civilization_system.call("_revealed_record_contains",area,position,1.05)):
@@ -1077,7 +1091,9 @@ func known_route_assessment(origin:Vector2,destination:Vector2)->Dictionary:
 			return {"known":false,"reason":"The destination is charted, but the route crosses uncharted ground. Return a continuous scout chart before sending settlers.","first_unknown":point,"progress":float(sample_index)/float(maxi(1,samples-1))}
 	return {"known":true,"distance_km":distance,"samples":samples,"bounded":true}
 
-func settlement_convoy_quote(destination:Vector2,duration_days:float)->Dictionary:
+## `review_cache` lets one expansion review reuse the network snapshot built by
+## its first quote that reaches it; nothing a quote does changes the network.
+func settlement_convoy_quote(destination:Vector2,duration_days:float,review_cache:Dictionary={})->Dictionary:
 	_ensure_primary_settlement_record()
 	if "Hearth Circle" not in WorldSimulation.state.settlement_completed:
 		return {"ok":false,"reason":"A permanent first settlement must exist before another can be founded."}
@@ -1088,7 +1104,10 @@ func settlement_convoy_quote(destination:Vector2,duration_days:float)->Dictionar
 	var land:=known_land_assessment(destination)
 	if not bool(land.get("known",false)):
 		return {"ok":false,"reason":String(land.get("reason","That land is not part of any returned map record.")),"known_land":false}
-	var network:Dictionary=settlement_network_snapshot()
+	var network:Dictionary=review_cache.get("network",{})
+	if network.is_empty():
+		network=settlement_network_snapshot()
+		review_cache["network"]=network
 	var origin:Dictionary={}
 	var origin_distance:=INF
 	for settlement in network.settlements:
@@ -1121,7 +1140,7 @@ func settlement_convoy_quote(destination:Vector2,duration_days:float)->Dictionar
 	var founding_material_required:=maxf(10.0,float(founders)*0.135)
 	var material_plan:Dictionary=with_city_resources(String(origin.id),func()->Dictionary: return _founding_material_plan(founding_material_required))
 	var founding_materials:Dictionary=material_plan.materials
-	var food_available:=float(city_resource_snapshot(String(origin.id)).stores.get("Food",0.0))
+	var food_available:=float(city_resource_snapshot(String(origin.id),false).stores.get("Food",0.0))
 	var blockers:Array[String]=[]
 	if food_available<food_required: blockers.append("%.0f more travel rations" % (food_required-food_available))
 	if float(material_plan.missing_value)>0.001:

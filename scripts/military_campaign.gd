@@ -4222,25 +4222,28 @@ func _complete_training(training:Dictionary)->void:
 	_refresh_readiness()
 
 
+const BASE_EQUIPMENT_RECIPES:={
+	"improvised":{"materials":{"Timber":0.35},"days":0.25},
+	"spear":{"materials":{"Timber":0.65,"Stone":0.10},"days":0.55},
+	"bow":{"materials":{"Timber":0.45,"Fiber Plants":0.30},"days":0.80},
+	"sword_shield":{"materials":{"Timber":0.50,"Copper Ore":0.50,"Tin Ore":0.08},"days":1.60},
+	"lance":{"materials":{"Timber":1.10,"Iron Ore":0.20},"days":1.25},
+	"siege_kit":{"materials":{"Timber":3.20,"Fiber Plants":0.80,"Stone":0.45,"Iron Ore":0.12},"days":3.80},
+	"field_gun":{"materials":{"Iron Ore":8.0,"Timber":4.0,"Fiber Plants":0.50},"days":12.0},
+	"service_rifle":{"materials":{"Iron Ore":1.8,"Timber":0.55,"Copper Ore":0.10},"days":2.2},
+	"machine_gun":{"materials":{"Iron Ore":14.0,"Timber":1.5,"Copper Ore":0.8},"days":18.0},
+	"motorized_kit":{"materials":{"Iron Ore":18.0,"Copper Ore":2.5,"Fiber Plants":1.0},"days":26.0},
+	"armored_vehicle":{"materials":{"Iron Ore":65.0,"Copper Ore":5.0,"Tin Ore":1.0},"days":80.0},
+	"modern_field_gun":{"materials":{"Iron Ore":24.0,"Copper Ore":1.5,"Timber":2.0},"days":34.0}
+}
+
 func _equipment_recipe(item:String)->Dictionary:
 	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
 	if not joint.is_empty():return {"materials":joint.materials.duplicate(true),"days":float(joint.work_days)}
 	var extension:Dictionary=preload("res://scripts/military_equipment_extension.gd").ITEMS.get(item,{})
 	if not extension.is_empty():return {"materials":extension.materials.duplicate(true),"days":float(extension.days)}
-	return {
-		"improvised":{"materials":{"Timber":0.35},"days":0.25},
-		"spear":{"materials":{"Timber":0.65,"Stone":0.10},"days":0.55},
-		"bow":{"materials":{"Timber":0.45,"Fiber Plants":0.30},"days":0.80},
-		"sword_shield":{"materials":{"Timber":0.50,"Copper Ore":0.50,"Tin Ore":0.08},"days":1.60},
-		"lance":{"materials":{"Timber":1.10,"Iron Ore":0.20},"days":1.25},
-		"siege_kit":{"materials":{"Timber":3.20,"Fiber Plants":0.80,"Stone":0.45,"Iron Ore":0.12},"days":3.80},
-		"field_gun":{"materials":{"Iron Ore":8.0,"Timber":4.0,"Fiber Plants":0.50},"days":12.0},
-		"service_rifle":{"materials":{"Iron Ore":1.8,"Timber":0.55,"Copper Ore":0.10},"days":2.2},
-		"machine_gun":{"materials":{"Iron Ore":14.0,"Timber":1.5,"Copper Ore":0.8},"days":18.0},
-		"motorized_kit":{"materials":{"Iron Ore":18.0,"Copper Ore":2.5,"Fiber Plants":1.0},"days":26.0},
-		"armored_vehicle":{"materials":{"Iron Ore":65.0,"Copper Ore":5.0,"Tin Ore":1.0},"days":80.0},
-		"modern_field_gun":{"materials":{"Iron Ore":24.0,"Copper Ore":1.5,"Timber":2.0},"days":34.0}
-	}.get(item,{"materials":{},"days":1.0})
+	# A fresh copy, as the literal table used to provide on every call.
+	return (BASE_EQUIPMENT_RECIPES[item] as Dictionary).duplicate(true) if BASE_EQUIPMENT_RECIPES.has(item) else {"materials":{},"days":1.0}
 
 
 func _consumable_recipe(item:String)->Dictionary:

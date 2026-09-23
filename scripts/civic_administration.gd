@@ -35,7 +35,8 @@ static func credit_day(host:Node,day:int)->void:
 	if not known("jurisdiction_boundaries") and not known("petition_registers") and not known("public_office_handover"):return
 	var state=WorldSimulation.state
 	var paid:=reserved(state,state.effective_workers("Administration",false,false,true))
-	d.work=minf(30.0,float(d.work)+paid)
+	# A multi-day step (day_span.gd) credits each covered day.
+	d.work=minf(30.0,float(d.work)+paid*WorldSimulation.span)
 	d["last_reserved_work"]=paid
 static func register_jurisdiction(host:Node,place:String,subjects:Array)->Dictionary:
 	if host!=WorldSimulation.government:return {"error":"This register belongs to another government."}

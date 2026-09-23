@@ -3,6 +3,7 @@ extends Node
 ## swapped: existing rules run against independent instances of the same scripts.
 ## Scopes must never await; UI and network callbacks run in the human scope.
 
+const DaySpan=preload("res://scripts/day_span.gd")
 const DayJob=preload("res://scripts/day_job.gd")
 
 var actor_id := "player"
@@ -18,6 +19,15 @@ var advancing:=false
 # loads finish it first (flush_day), so the save format is unchanged.
 var _day_job:DayJob=null
 var _day_number:=-1
+## Day whose closing views are still current. Rival catch-up skips its opening
+## refresh when nothing has changed since then.
+var _views_day:=-1
+## Days the current owner's step covers; always 1 for the human civilization.
+## See day_span.gd. `span_limit` 1 restores strictly daily rivals.
+var span:=1
+var span_limit:=DaySpan.MAX_SPAN
+# Autoload system references for the human scope, in _bind_scope order.
+var _player_binding:Array=[]
 var last_day:=-1
 var water_provider:Callable
 var start_provider:Callable
@@ -29,48 +39,27 @@ var context_provider:Callable:
 		surface_material_provider=Callable()
 var _seed:=-2147483648
 
-var state := GameState:
-	get: return _active.get("GameState",GameState)
-var discovery := DiscoverySystem:
-	get: return _active.get("DiscoverySystem",DiscoverySystem)
-var progression := ProgressionSystem:
-	get: return _active.get("ProgressionSystem",ProgressionSystem)
-var resources := ResourceSystem:
-	get: return _active.get("ResourceSystem",ResourceSystem)
-var economy := EconomySystem:
-	get: return _active.get("EconomySystem",EconomySystem)
-var settlements := SettlementModel:
-	get: return _active.get("SettlementModel",SettlementModel)
-var government := GovernmentPeopleSystem:
-	get: return _active.get("GovernmentPeopleSystem",GovernmentPeopleSystem)
-var figures := HistoricalFigures:
-	get: return _active.get("HistoricalFigures",HistoricalFigures)
-var direction := PeopleDirection:
-	get: return _active.get("PeopleDirection",PeopleDirection)
-var communities := CommunityNetwork:
-	get: return _active.get("CommunityNetwork",CommunityNetwork)
-var diplomacy := ForeignDiplomacy:
-	get: return _active.get("ForeignDiplomacy",ForeignDiplomacy)
-var dialogue := ForeignDialogue:
-	get: return _active.get("ForeignDialogue",ForeignDialogue)
-var facts := WorldFacts:
-	get: return _active.get("WorldFacts",WorldFacts)
-var advisors := AdvisorSystem:
-	get: return _active.get("AdvisorSystem",AdvisorSystem)
-var food := FoodSystem:
-	get: return _active.get("FoodSystem",FoodSystem)
-var consequences := ConsequenceEngine:
-	get: return _active.get("ConsequenceEngine",ConsequenceEngine)
-var civics := CivicImplementationSystem:
-	get: return _active.get("CivicImplementationSystem",CivicImplementationSystem)
-var world := CivilizationSystem:
-	get: return _active.get("CivilizationSystem",CivilizationSystem)
-var military := MilitaryCampaign:
-	get: return _active.get("MilitaryCampaign",MilitaryCampaign)
-var campaign := GeneralCampaign:
-	get: return _active.get("GeneralCampaign",GeneralCampaign)
-var general_dialogue := GeneralDialogue:
-	get: return _active.get("GeneralDialogue",GeneralDialogue)
+var state := GameState
+var discovery := DiscoverySystem
+var progression := ProgressionSystem
+var resources := ResourceSystem
+var economy := EconomySystem
+var settlements := SettlementModel
+var government := GovernmentPeopleSystem
+var figures := HistoricalFigures
+var direction := PeopleDirection
+var communities := CommunityNetwork
+var diplomacy := ForeignDiplomacy
+var dialogue := ForeignDialogue
+var facts := WorldFacts
+var advisors := AdvisorSystem
+var food := FoodSystem
+var consequences := ConsequenceEngine
+var civics := CivicImplementationSystem
+var world := CivilizationSystem
+var military := MilitaryCampaign
+var campaign := GeneralCampaign
+var general_dialogue := GeneralDialogue
 
 const OWNED_SYSTEMS:=["GameState", "DiscoverySystem", "ProgressionSystem", "ResourceSystem", "EconomySystem", "SettlementModel", "GovernmentPeopleSystem", "HistoricalFigures", "PeopleDirection", "CommunityNetwork", "ForeignDiplomacy", "ForeignDialogue", "WorldFacts", "AdvisorSystem", "FoodSystem", "ConsequenceEngine", "CivicImplementationSystem", "CivilizationSystem", "MilitaryCampaign", "GeneralCampaign", "GeneralDialogue"]
 
@@ -80,14 +69,58 @@ func system(system_name:String)->Node:
 
 func scoped(id:String,operation:Callable)->Variant:
 	assert(id=="player" or actors.has(id),"Unknown civilization owner")
+	# Already in this owner's scope: nothing to switch or restore.
+	if id==actor_id and (id=="player")==_active.is_empty():return operation.call()
 	var previous:=_active
 	var previous_id:=actor_id
 	actor_id=id
 	_active={} if id=="player" else actors[id].systems
+	_bind_scope()
 	var result:Variant=operation.call()
 	_active=previous
 	actor_id=previous_id
+	_bind_scope()
 	return result
+
+## The scoped system fields are plain variables rebound on every scope change;
+## hot simulation code reads them hundreds of thousands of times per day.
+## Each owner's system references are gathered once into an array, in the
+## order below; actor instances are only created by create_actor.
+func _bind_scope()->void:
+	var b:Array
+	if _active.is_empty():
+		if _player_binding.is_empty():_player_binding=_build_binding({})
+		b=_player_binding
+		span=1
+	else:
+		var actor:Dictionary=actors[actor_id]
+		if not actor.has("binding"):actor["binding"]=_build_binding(_active)
+		b=actor.binding
+		span=int(actor.get("span",1))
+	state=b[0]
+	discovery=b[1]
+	progression=b[2]
+	resources=b[3]
+	economy=b[4]
+	settlements=b[5]
+	government=b[6]
+	figures=b[7]
+	direction=b[8]
+	communities=b[9]
+	diplomacy=b[10]
+	dialogue=b[11]
+	facts=b[12]
+	advisors=b[13]
+	food=b[14]
+	consequences=b[15]
+	civics=b[16]
+	world=b[17]
+	military=b[18]
+	campaign=b[19]
+	general_dialogue=b[20]
+
+func _build_binding(active:Dictionary)->Array:
+	return [active.get("GameState",GameState),active.get("DiscoverySystem",DiscoverySystem),active.get("ProgressionSystem",ProgressionSystem),active.get("ResourceSystem",ResourceSystem),active.get("EconomySystem",EconomySystem),active.get("SettlementModel",SettlementModel),active.get("GovernmentPeopleSystem",GovernmentPeopleSystem),active.get("HistoricalFigures",HistoricalFigures),active.get("PeopleDirection",PeopleDirection),active.get("CommunityNetwork",CommunityNetwork),active.get("ForeignDiplomacy",ForeignDiplomacy),active.get("ForeignDialogue",ForeignDialogue),active.get("WorldFacts",WorldFacts),active.get("AdvisorSystem",AdvisorSystem),active.get("FoodSystem",FoodSystem),active.get("ConsequenceEngine",ConsequenceEngine),active.get("CivicImplementationSystem",CivicImplementationSystem),active.get("CivilizationSystem",CivilizationSystem),active.get("MilitaryCampaign",MilitaryCampaign),active.get("GeneralCampaign",GeneralCampaign),active.get("GeneralDialogue",GeneralDialogue)]
 
 func clear()->void:
 	assert(_active.is_empty())
@@ -100,6 +133,7 @@ func clear()->void:
 	relation_baselines.clear()
 	enabled=false
 	last_day=-1
+	_views_day=-1
 	_day_job=null
 	advancing=false
 
@@ -178,6 +212,8 @@ func _plan_rivals(job:DayJob,target_day:int,timings:Dictionary)->void:
 	for day in range(last_day+1,target_day+1):
 		job.add_group("player",[S.step("rival_views",timings,func()->Array:
 			last_day=day
+			# Yesterday's closing views are unchanged unless an order intervened.
+			if _views_day==day-1:return []
 			return _view_steps(timings,"rival_views")
 		)])
 		var ids:=actors.keys();ids.sort()
@@ -188,6 +224,11 @@ func _plan_rivals(job:DayJob,target_day:int,timings:Dictionary)->void:
 				if int(actors[id].last_day)>=day:
 					run.skip=true;run.halt=true
 					return null
+				var gap:=maxi(1,day-int(actors[id].last_day))
+				if gap<span_limit and _span_waits(id,day):
+					run.skip=true;run.halt=true
+					return null
+				actors[id]["span"]=gap;span=gap
 				state.elapsed_days=day
 				return DayJob.from_parts(preload("res://scripts/civilization_controller.gd").order_steps(id),detail)
 			),S.step("context",detail,func()->Array:
@@ -201,10 +242,21 @@ func _plan_rivals(job:DayJob,target_day:int,timings:Dictionary)->void:
 				return DayJob.from_parts(world.owned_day_steps(day),detail)
 			)],run,func()->void:
 				if not bool(run.get("skip",false)):actors[id].last_day=day
+				actors[id]["span"]=1
+				if actor_id==id:span=1
 			)
 		job.add_group("player",[S.step("rival_projections",timings,func()->Array:return _projection_steps(timings,"rival_projections"))],{},func()->void:
 			if day==target_day:advancing=false
 		)
+
+## A calm rival waits for its own phase day, covering the gap in one step.
+## Monthly reviews keep their exact day. Runs in the rival's scope.
+func _span_waits(id:String,day:int)->bool:
+	# The id goes last: String.hash multiplies by 33, so a fixed suffix would
+	# give every owner the same phase modulo 3.
+	if posmod(day+posmod(hash("span:"+id),span_limit),span_limit)==0:return false
+	if preload("res://scripts/civilization_controller.gd").review_due(id,day):return false
+	return DaySpan.calm()
 
 func refresh_projections()->void:
 	for next:Dictionary in _projection_steps():next.call.call()
@@ -371,6 +423,7 @@ func _updated_observer_view(source:Dictionary,previous:Dictionary)->Dictionary:
 
 func submit(id:String,order:Dictionary)->Dictionary:
 	if id!="player" and not actors.has(id):return {"error":"Unknown civilization."}
+	_views_day=-1
 	return scoped(id,func()->Dictionary:
 		var result:=preload("res://scripts/civilization_orders.gd").execute(order)
 		if id!="player":
@@ -562,7 +615,11 @@ func begin_day(day:int,daily_context:Dictionary,construction:Callable=Callable()
 			return DayJob.from_parts(CivilizationSystem.owned_day_steps(day),timings)
 	),
 		S.step("projections",timings,func()->Array:return _projection_steps(timings,"projections")),
-		S.step("views",timings,func()->Array:return _view_steps(timings,"views")),
+		S.step("views",timings,func()->Array:
+			var steps:=_view_steps(timings,"views")
+			steps.append(S.step("views",timings,func()->void:_views_day=day))
+			return steps
+	),
 		S.step("joint_contact",timings,func()->void:preload("res://scripts/civilization_joint_contact.gd").advance(day)),
 		S.step("exchange",timings,func()->void:
 			preload("res://scripts/civilization_exchange.gd").settle(day)
@@ -615,6 +672,7 @@ func _stage_restore(payload:Dictionary,validate_only:bool)->Dictionary:
 	var error:=validate_payload(payload)
 	if error!="":return {"error":error}
 	if payload.is_empty():return {"ok":true,"legacy":true}
+	_views_day=-1
 	var previous:={"actors":actors,"human":human_projection,"enabled":enabled,"seed":_seed,"day":last_day,"geography":geography_stock,"relations":relation_baselines,"markets":market_orders,"job":_day_job,"advancing":advancing}
 	actors={};human_projection={};geography_stock={};relation_baselines={};market_orders={};enabled=false
 	var result:=_restore_state(payload)

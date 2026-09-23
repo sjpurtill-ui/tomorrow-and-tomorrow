@@ -69,7 +69,11 @@ static func capital_reserve()->Dictionary:
 			if item in PRODUCTS.values():reserve[item]=maxf(float(reserve.get(item,0)),float(spec.cost[item]))
 	return reserve
 
+# Ids with a special factor below; every other id without a product is 1.0.
+const FACTOR_SPECIAL:={"kiln_control":true,"lime_burning":true,"lime_mortar":true,"latrine_siting":true,"protected_wellheads":true,"rainwater_cisterns":true,"water_settling_basins":true,"seed_selection":true,"animal_taming":true,"pack_animals":true,"domesticated_mounts":true,"mounted_scouts":true,"wound_cleaning":true,"clean_water":true,"public_stores":true,"framed_construction":true}
+
 static func factor(id:String)->float:
+	if not FACTOR_SPECIAL.has(id) and not PRODUCTS.has(id):return 1.0
 	if id=="kiln_control":return clampf(preload("res://scripts/technology_operations.gd").service("kiln_heat")/4.0,0.0,1.0)
 	if id=="lime_burning":
 		var lime:=stock("Quicklime")+stock("Slaked Lime")+stock("Building Mortar")

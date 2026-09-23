@@ -153,6 +153,9 @@ static func advance(logistics:float,demand:float,traveling:bool)->Dictionary:
 	# Both player and rival use this same paid, input-aware steward.
 	if WorldSimulation.food._stock_total()>maxf(1,demand)*7:
 		for id:String in K.METHODS:
+			# Installed or undiscovered methods cannot pass the install test below;
+			# the lot scan is a pure read, so skip it for them.
+			if int(data().tools.get(id,0))!=0 or id not in WorldSimulation.state.known_discoveries:continue
 			var needed:=false;var mode:String=K.METHODS[id].mode
 			if mode=="pound":needed=float(G.data().stocks.clean)>0
 			elif mode=="form":needed=float(G.data().stocks.flour)+float(G.data().stocks.fine)>0

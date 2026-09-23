@@ -38,7 +38,7 @@ static func target_status(threat:Dictionary)->Dictionary:
 	return WorldSimulation.scoped(String(target.actor),func()->Dictionary:
 		var city_id:=String(target.get("city_id",""))
 		if city_id.is_empty():city_id=WorldSimulation.settlements._primary_settlement_id()
-		var local:=WorldSimulation.settlements.city_resource_snapshot(city_id)
+		var local:=WorldSimulation.settlements.city_resource_snapshot(city_id,false)
 		return {"population":local.get("population",0),"food_days":local.get("metrics",{}).get("food_days",0)}
 	)
 static func order(siege:Dictionary,action:String)->Dictionary:

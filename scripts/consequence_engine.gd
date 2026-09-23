@@ -1,6 +1,7 @@
 extends Node
 
 const SOCIETAL_VALUES_MODEL:=preload("res://scripts/societal_values_model.gd")
+const SPAN:=preload("res://scripts/day_span.gd")
 
 # One bounded causal model drives the early civilization. Narrative systems may
 # choose from these pressures, but only this file turns them into numbers.
@@ -625,20 +626,22 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var intake_ratio:=float(food_result.food_intake_ratio)
 	var malnutrition:=float(food_result.malnutrition_burden)
 	var water_intake:=clampf(float(WorldSimulation.state.water_metrics.get("intake_ratio",0.0)),0.0,1.0)
+	# A multi-day step (day_span.gd) covers `span` days of the same conditions.
+	var span:=float(WorldSimulation.span)
 	if intake_ratio<0.95:
-		WorldSimulation.state.consecutive_food_shortage_days+=1.0
+		WorldSimulation.state.consecutive_food_shortage_days+=span
 	else:
-		WorldSimulation.state.consecutive_food_shortage_days=maxf(0.0,WorldSimulation.state.consecutive_food_shortage_days-2.0)
+		WorldSimulation.state.consecutive_food_shortage_days=maxf(0.0,WorldSimulation.state.consecutive_food_shortage_days-2.0*span)
 	if water_intake<0.98:
-		WorldSimulation.state.consecutive_water_shortage_days+=1.0
+		WorldSimulation.state.consecutive_water_shortage_days+=span
 	else:
-		WorldSimulation.state.consecutive_water_shortage_days=maxf(0.0,WorldSimulation.state.consecutive_water_shortage_days-2.0)
+		WorldSimulation.state.consecutive_water_shortage_days=maxf(0.0,WorldSimulation.state.consecutive_water_shortage_days-2.0*span)
 	if traveling and housing_ratio<0.68:
 		WorldSimulation.state.convoy_exposure_days+=1.0-housing_ratio
 	else:
 		WorldSimulation.state.convoy_exposure_days=maxf(0.0,WorldSimulation.state.convoy_exposure_days-1.5)
 	var food_security_target := clampf(0.05+minf(1.0,food_days/45.0)*0.30+minf(1.15,production_ratio)*0.25+intake_ratio*0.18+float(food_result.food_diet_quality)*0.12+WorldSimulation.state.nutrition_reserve*0.10-malnutrition*0.24,0.02,0.98)
-	WorldSimulation.state.food_security = lerpf(WorldSimulation.state.food_security,food_security_target,0.055)
+	WorldSimulation.state.food_security = lerpf(WorldSimulation.state.food_security,food_security_target,SPAN.rate(0.055))
 
 	var clean_water_bonus := WorldSimulation.discovery.effect("health_protection")+WorldSimulation.discovery.effect("water_safety")*0.25-WorldSimulation.discovery.effect("disease_exposure")*0.18
 	var water_health_penalty:=pow(1.0-water_intake,1.35)*0.62
@@ -655,7 +658,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var health_target := clampf(-float(exchange_pressure.health_cost)+0.18+WorldSimulation.state.food_security*0.43+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")+WorldSimulation.state.founding_effect("health_target")+WorldSimulation.progression.effect("health_protection")*0.12-WorldSimulation.progression.effect("disease_exposure")*0.08-travel_health_penalty-malnutrition*0.28-process_health_cost-water_health_penalty-environmental_health_cost,0.02,0.97)
 	health_target=clampf(health_target+float(clinical.get("health_relief",0)),.02,.97)
 	WorldSimulation.state.simulation_metrics["clinical_care"]=clinical.duplicate(true)
-	WorldSimulation.state.population_health = lerpf(WorldSimulation.state.population_health,health_target,0.022)
+	WorldSimulation.state.population_health = lerpf(WorldSimulation.state.population_health,health_target,SPAN.rate(0.022))
 	WorldSimulation.state.simulation_metrics["water_intake_ratio"]=water_intake
 	WorldSimulation.state.simulation_metrics["water_days"]=float(WorldSimulation.state.water_metrics.get("days",0.0))
 
@@ -665,16 +668,16 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var cohesion_target := clampf(0.24+WorldSimulation.state.food_security*0.26+housing_ratio*0.15+admin_coverage*0.20+WorldSimulation.discovery.effect("state_capacity")*0.08+WorldSimulation.discovery.effect("cohesion")*0.10+WorldSimulation.progression.effect("cohesion")*0.10+WorldSimulation.progression.effect("legitimacy")*0.06+(1.0-work_strain)*0.08-modifier_strength("divided_camp")+policy_effect("cohesion_target")+WorldSimulation.state.founding_effect("cohesion_target")-administrative_load*0.10-policy_churn*0.16-directive_resistance*0.18+economic_social_pressure*0.55+float(foreign_effects.treaty_count)*0.006-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.12-float(foreign_effects.get("occupation_burden",0.0))*0.16+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"cohesion"),0.08,0.96)
 	cohesion_target=maxf(.08,cohesion_target-float(exchange_pressure.cohesion_cost)-float(exchange_pressure.administrative_load))
 	labor_efficiency=maxf(.25,labor_efficiency-float(exchange_pressure.labor_cost))
-	var cohesion := lerpf(prior_cohesion,cohesion_target,0.014)
+	var cohesion := lerpf(prior_cohesion,cohesion_target,SPAN.rate(0.014))
 
 	var inquiry_points := 0
 	for value in WorldSimulation.state.research_allocations.values(): inquiry_points += int(value)
 	var focus_quality := 1.0 if inquiry_points <= maxi(1,int(observers)) else clampf(observers/maxf(1.0,float(inquiry_points)),0.15,1.0)
 	var knowledge := float(previous.get("knowledge",0.18))
 	var knowledge_gain := observers*labor_efficiency*focus_quality/maxf(3000.0,population*92.0)*(1.0+WorldSimulation.discovery.effect("knowledge_rate"))*lerpf(0.55,1.45,WorldSimulation.state.combined_intelligence)
-	knowledge += knowledge_gain*(1.0+modifier_strength("curious_youth")+policy_effect("knowledge_gain")+WorldSimulation.state.founding_effect("knowledge_gain")+WorldSimulation.progression.effect("knowledge_rate")+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"knowledge"))
-	knowledge += float(foreign_effects.knowledge_exchange)/365.0
-	knowledge += float(WorldSimulation.state.known_discoveries.size())/240000.0
+	knowledge += knowledge_gain*(1.0+modifier_strength("curious_youth")+policy_effect("knowledge_gain")+WorldSimulation.state.founding_effect("knowledge_gain")+WorldSimulation.progression.effect("knowledge_rate")+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"knowledge"))*span
+	knowledge += float(foreign_effects.knowledge_exchange)/365.0*span
+	knowledge += float(WorldSimulation.state.known_discoveries.size())/240000.0*span
 	knowledge = clampf(knowledge,0.0,1.0)
 
 	var accessible_count := 0
@@ -695,20 +698,20 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var craft_coverage := clampf(makers/maxf(1.0,population*0.05),0.0,1.25)
 	var material_target := clampf(0.05+craft_coverage*0.38+minf(1.0,float(accessible_count)/4.0)*0.25+knowledge*0.18+workshop_function*0.12+WorldSimulation.discovery.effect("tool_quality")*0.30+WorldSimulation.discovery.effect("craft_output")*0.22+WorldSimulation.progression.effect("tool_quality")*0.22+WorldSimulation.progression.effect("craft_output")*0.18+modifier_strength("skilled_craftspeople")+policy_effect("material_target")+WorldSimulation.state.founding_effect("material_target"),0.02,0.96)
 	if "Open Work Area" in WorldSimulation.state.settlement_completed: material_target += 0.08
-	var material_capacity := lerpf(float(previous.get("material_capacity",0.12)),material_target,0.012)
+	var material_capacity := lerpf(float(previous.get("material_capacity",0.12)),material_target,SPAN.rate(0.012))
 	var logistics_target := clampf(0.05+carriers/maxf(1.0,population*0.08)*0.55+material_capacity*0.18+storage_function*0.10+WorldSimulation.discovery.effect("haul_capacity")*0.18+WorldSimulation.discovery.effect("route_speed")*0.12+WorldSimulation.progression.effect("haul_capacity")*0.14+WorldSimulation.progression.effect("route_speed")*0.10+policy_effect("logistics_target")+WorldSimulation.state.founding_effect("logistics_target")+float(foreign_effects.market_access_bonus)*0.24,0.03,0.95)
-	var logistics := lerpf(float(previous.get("logistics",0.16)),logistics_target,0.016)
+	var logistics := lerpf(float(previous.get("logistics",0.16)),logistics_target,SPAN.rate(0.016))
 	var security_target := clampf(0.10+guards/maxf(1.0,population*0.05)*0.42+cohesion*0.24+logistics*0.12+WorldSimulation.discovery.effect("warfare_readiness")*0.14+WorldSimulation.progression.effect("warfare_readiness")*0.12+WorldSimulation.progression.effect("security_efficiency")*0.10-modifier_strength("migratory_pressure")+policy_effect("security_target")+WorldSimulation.state.founding_effect("security_target")+float(foreign_effects.security_support)-float(foreign_effects.hostile_pressure)*0.18+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"security"),0.04,0.96)
-	var security := lerpf(float(previous.get("security",0.38)),security_target,0.016)
+	var security := lerpf(float(previous.get("security",0.38)),security_target,SPAN.rate(0.016))
 
 	var extraction_pressure := extractors/able_population
 	var foraging_pressure := maxf(0.0,food_workers/able_population-0.48)
 	var ecology_delta := 0.00010+(environmental_resilience-ecology)*0.00018+modifier_strength("sacred_land")*0.00032+policy_effect("ecology_delta")+WorldSimulation.state.founding_effect("ecology_delta")+WorldSimulation.progression.effect("ecology_recovery")*0.00040-WorldSimulation.progression.effect("ecological_pressure")*0.00024-WorldSimulation.progression.effect("pollution")*0.00018+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"ecology")*0.00040
 	ecology_delta -= extraction_pressure*0.00052+foraging_pressure*0.00105
 	ecology_delta-=(WorldSimulation.discovery.effect("pollution")+WorldSimulation.discovery.effect("water_pollution"))*industrial_activity*0.0009
-	ecology = clampf(ecology+ecology_delta,0.04,1.0)
+	ecology = clampf(ecology+ecology_delta*span,0.04,1.0)
 	var legitimacy_target := clampf(0.12+WorldSimulation.state.food_security*0.26+WorldSimulation.state.population_health*0.18+cohesion*0.20+security*0.10+admin_coverage*0.10+WorldSimulation.discovery.effect("legitimacy")*0.12+float(dynamics.get("institutions",0.25))*0.05+(council_support-0.5)*0.06+policy_effect("legitimacy_target")-administrative_load*0.12-policy_churn*0.18-directive_resistance*0.24+economic_social_pressure+float(foreign_effects.treaty_count)*0.008-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.10-float(foreign_effects.get("occupation_burden",0.0))*0.22+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"legitimacy"),0.06,0.96)
-	var legitimacy := lerpf(float(previous.get("legitimacy",0.62)),legitimacy_target,0.012)
+	var legitimacy := lerpf(float(previous.get("legitimacy",0.62)),legitimacy_target,SPAN.rate(0.012))
 
 	# Mortality is accumulated as population-level risk, while reproduction is
 	# resolved by numeric reproductive cohorts: conception, gestation, loss,
@@ -738,7 +741,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		annual_death_rate+=float(component_rate)
 	WorldSimulation.state.simulation_metrics["annual_death_rate"]=annual_death_rate
 	WorldSimulation.state.simulation_metrics["mortality_components"]=mortality_components.duplicate(true)
-	WorldSimulation.state.death_progress+=population*annual_death_rate/365.0
+	WorldSimulation.state.death_progress+=population*annual_death_rate/365.0*span
 	var deaths_today:=floori(WorldSimulation.state.death_progress)
 	WorldSimulation.state.death_progress-=deaths_today
 	if WorldSimulation.state.population_total-deaths_today<1:
@@ -750,13 +753,19 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var mortality_result:Dictionary={}
 	if deaths_today>0:
 		mortality_result=WorldSimulation.state.register_population_deaths(deaths_today,dominant_cause)
-	var reproduction:=WorldSimulation.state.process_reproduction_day({
+	var reproduction_context:={
 		"health":WorldSimulation.state.population_health,"food_security":WorldSimulation.state.food_security,
 		"housing_ratio":housing_ratio,"cohesion":cohesion,"traveling":traveling,
 		"birth_crisis":birth_crisis,"absent_adults":float(foreign_effects.get("population_absent",0))*population/maxf(1.0,float(WorldSimulation.settlements.national_population())),
 		"conception_support":WorldSimulation.discovery.effect("conception_support")+policy_effect("conception_support")+WorldSimulation.state.founding_effect("conception_support")+WorldSimulation.progression.effect("conception_support"),
 		"maternal_safety":WorldSimulation.discovery.effect("maternal_safety"),"neonatal_survival":WorldSimulation.discovery.effect("neonatal_survival")
-	})
+	}
+	var reproduction:=WorldSimulation.state.process_reproduction_day(reproduction_context)
+	# Cohorts and gestation advance one real day at a time within a span.
+	for extra in WorldSimulation.span-1:
+		var next:=WorldSimulation.state.process_reproduction_day(reproduction_context)
+		for key in ["births_count","pregnancy_losses_count","stillbirths_count","maternal_deaths_count","neonatal_deaths_count","conceptions_count"]:next[key]=int(next.get(key,0))+int(reproduction.get(key,0))
+		reproduction=next
 	var births_today:=int(reproduction.get("births_count",0))
 	var events: Array[Dictionary] = []
 	if births_today>0:

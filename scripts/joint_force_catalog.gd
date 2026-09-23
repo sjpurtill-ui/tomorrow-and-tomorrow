@@ -965,7 +965,10 @@ const UNITS:Dictionary={
 	}
 }
 
+# First unit per equipment item, in UNITS order (constant data, built once).
+static var _by_equipment:Dictionary={}
 static func by_equipment(item:String)->Dictionary:
-	for unit:Dictionary in UNITS.values():
-		if String(unit.equipment)==item:return unit
-	return {}
+	if _by_equipment.is_empty():
+		for unit:Dictionary in UNITS.values():
+			if not _by_equipment.has(String(unit.equipment)):_by_equipment[String(unit.equipment)]=unit
+	return _by_equipment.get(item,{})

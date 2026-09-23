@@ -112,18 +112,17 @@ static func reserved(target:Dictionary,include_sieges:bool=true)->bool:
 	if target.is_empty():return false
 	var ids:Array=WorldSimulation.actors.keys();ids.append("player")
 	for id:String in ids:
-		var occupied:bool=WorldSimulation.scoped(id,func()->bool:
-			var operations:Array=WorldSimulation.military.command_hierarchy.data.get("battles",[]).duplicate()
-			if not WorldSimulation.military.active_engagement.is_empty():operations.append(WorldSimulation.military.active_engagement)
-			if include_sieges and not WorldSimulation.military.active_siege.is_empty():operations.append(WorldSimulation.military.active_siege)
-			for operation:Dictionary in operations:
-				if same_force(operation.get("threat",{}).get("owned_target",{}),target):return true
-				if same_force({"actor":id,"field_id":int(operation.get("home_force_id",operation.get("army_id",0)))},target):return true
-				for member:Dictionary in operation.get("command_participants",[]):
-					if same_force({"actor":id,"field_id":int(member.army_id)},target):return true
-			return false
-		)
-		if occupied:return true
+		# Read each owner's campaign directly; entering its scope only to select
+		# this instance cost two full scope rebinds per owner per query.
+		var military:Node=MilitaryCampaign if id=="player" else WorldSimulation.actors[id].systems.MilitaryCampaign
+		var operations:Array=military.command_hierarchy.data.get("battles",[]).duplicate()
+		if not military.active_engagement.is_empty():operations.append(military.active_engagement)
+		if include_sieges and not military.active_siege.is_empty():operations.append(military.active_siege)
+		for operation:Dictionary in operations:
+			if same_force(operation.get("threat",{}).get("owned_target",{}),target):return true
+			if same_force({"actor":id,"field_id":int(operation.get("home_force_id",operation.get("army_id",0)))},target):return true
+			for member:Dictionary in operation.get("command_participants",[]):
+				if same_force({"actor":id,"field_id":int(member.army_id)},target):return true
 	return false
 static func damage_city(civ_id:String,region_id:String,amount:float)->void:
 	var target:=WorldSimulation.actor_id if civ_id=="player" else owner(civ_id)

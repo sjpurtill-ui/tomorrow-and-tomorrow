@@ -55,7 +55,8 @@ func truth(city_id:String)->Dictionary:
 	var values:Dictionary={}
 	if place.civ_id=="player":
 		var city:=WorldSimulation.settlements.settlement_record(city_id)
-		var local:=WorldSimulation.settlements.city_resource_snapshot(city_id)
+		# Deposits, water and food history are not read here.
+		var local:=WorldSimulation.settlements.city_resource_snapshot(city_id,false)
 		var metrics:Dictionary=local.get("metrics",{})
 		values={"population":float(local.get("population",0)),"production":float(metrics.get("material_capacity",0)),"logistics":float(metrics.get("logistics",0)),"supply":float(metrics.get("food_days",-1))}
 		values.merge(_civic_observation(city_id))
@@ -226,9 +227,11 @@ func migrate()->void:
 		var position:Dictionary=relation.get("rival_player_trace_center",{})
 		if valid_point(position): publish(String(civ.id),location_record({"city_id":primary,"civ_id":"player","name":"Reported player settlement","position":position},int(relation.get("rival_player_trace_day",-1)),"legacy returned direct encounter","legacy"),int(WorldSimulation.state.elapsed_days))
 
-func stage(mission:Dictionary,observer:String,position:Vector2,quality:float,day:int,reference:String)->void:
+## `places` lets one sampling pass reuse a single sites() list; staging only
+## records observations and never changes the cities that list is built from.
+func stage(mission:Dictionary,observer:String,position:Vector2,quality:float,day:int,reference:String,places:Array=[])->void:
 	if not mission.has("city_observations"): mission["city_observations"]={}
-	for place:Dictionary in sites():
+	for place:Dictionary in (places if not places.is_empty() else sites()):
 		if place.civ_id==observer: continue
 		if position.distance_to(vector(place.position))>SIGHT_RADIUS: continue
 		var prior:Dictionary=mission.city_observations.get(place.city_id,{})
@@ -262,10 +265,12 @@ func mission_position(mission:Dictionary,day:float)->Vector2:
 	return route_position(mission.get("route",[]),fraction)
 
 func sample_missions(day:int)->void:
+	var places:Array=[]
 	for mission:Dictionary in system.scout_missions:
 		var start:=int(mission.start_day); var end:=int(mission.get("actual_return_day",mission.return_day))
 		if day<start or day>=end: continue
-		stage(mission,"player",mission_position(mission,day),.45+clampf(WorldSimulation.state.combined_intelligence,0,1)*.4+(.15 if mission.get("target_kind")=="observe_city" else 0),day,"scout:%s" % str(mission.mission_id))
+		if places.is_empty():places=sites()
+		stage(mission,"player",mission_position(mission,day),.45+clampf(WorldSimulation.state.combined_intelligence,0,1)*.4+(.15 if mission.get("target_kind")=="observe_city" else 0),day,"scout:%s" % str(mission.mission_id),places)
 	for formation:Dictionary in system.foreign_formations:
 		if formation.get("kind")!="scout" or not system._foreign_scout_is_active(formation,day): continue
 		var due:=float(formation.depart_day)+float(formation.leg_days)*2
@@ -273,7 +278,8 @@ func sample_missions(day:int)->void:
 		var index:int=system._civilization_index(String(formation.civ_id))
 		if index<0: continue
 		var civ:Dictionary=system.civilizations[index]
-		stage(formation,String(civ.id),system._foreign_formation_position(formation,day),.45+float(civ.knowledge)*.4,day,"scout:%s:%s" % [String(formation.id),str(formation.depart_day)])
+		if places.is_empty():places=sites()
+		stage(formation,String(civ.id),system._foreign_formation_position(formation,day),.45+float(civ.knowledge)*.4,day,"scout:%s:%s" % [String(formation.id),str(formation.depart_day)],places)
 
 func deliver(mission:Dictionary,observer:String,day:int)->Array[Dictionary]:
 	var result:Array[Dictionary]=[]

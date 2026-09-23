@@ -6,6 +6,10 @@ const LIMIT:=8
 const METHODS=["clay_pipe_socket_jointing","buried_pipe_load_assessment","conduit_infiltration_testing","gravity_conduit_grade_control"]
 
 static func data()->Dictionary:return WorldSimulation.state.water_conveyance
+## Same test as `id in adopted()` without building the whole list.
+static func is_adopted(id:String)->bool:
+	return id in WorldSimulation.state.known_discoveries and WorldSimulation.discovery.adoption(id)>=.25
+
 static func adopted()->Array:
 	var result:Array=[]
 	for id:String in WorldSimulation.state.known_discoveries:

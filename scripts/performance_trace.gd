@@ -9,3 +9,6 @@ static func mark(name:String,stamp:int)->int:
 	var record:Dictionary=totals.get_or_add(name,{"calls":0,"microseconds":0})
 	record.calls+=1;record.microseconds+=now-stamp
 	return now
+static var counts:Dictionary={}
+static func count(name:String)->void:
+	if enabled:counts[name]=int(counts.get(name,0))+1

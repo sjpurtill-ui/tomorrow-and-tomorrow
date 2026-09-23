@@ -16,7 +16,11 @@ static func all()->Array:
 		_d("measures_house","House of Common Measures","hall","public_stores","any",160,8500,{"Timber":320,"Stone":160,"Clay":120},"Crafting",.05)]
 static func _d(id:String,title:String,form:String,discovery:String,environment:String,population:int,work:float,cost:Dictionary,role:String,bonus:float)->Dictionary:
 	return {"id":id,"title":title,"form":form,"discovery":discovery,"environment":environment,"population":population,"work":work,"cost":cost,"role":role,"bonus":bonus}
+# Definitions are constant; index them once. Returned entries are read-only.
+static var _by_id:Dictionary={}
 static func get_definition(id:String)->Dictionary:
-	for d:Dictionary in all():
-		if d.id==id:return d
-	return {}
+	if _by_id.is_empty():
+		for d:Dictionary in all():
+			(d.cost as Dictionary).make_read_only();d.make_read_only()
+			if not _by_id.has(d.id):_by_id[d.id]=d
+	return _by_id.get(id,{})

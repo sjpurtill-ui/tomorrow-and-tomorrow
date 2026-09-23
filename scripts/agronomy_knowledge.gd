@@ -26,9 +26,16 @@ static func entries()->Array[Dictionary]:
 	]
 static func _e(id:String,label:String,parents:Array,observation:String,group:String,rank:int,gain:float,protection:float,weather:float,labor:float,land:float)->Dictionary:
 	return {"id":id,"name":label,"direction":"Sustenance","day":0,"chance":.0025,"requires":parents.duplicate(),"requires_all":parents.duplicate(),"requires_any":[],"learning_routes":[{"id":"local","label":label,"requires_all":[]}],"signals":["food","nature","information"],"observation":observation,"effects":{},"resource_requirements":[{"resource":"Fertile Soil","stage":"recognized"}],"agronomy_profile":{"group":group,"rank":rank,"yield_gain":gain,"soil_protection":protection,"weather_buffer":weather,"labor_cost":labor,"land_cost":land},"production_contract":"Changes staffed, settled cultivation through the authored crop-yield, soil-protection and weather-response profile, including its labor and land costs. Only the strongest adopted practice per family operates. No food, seed or farmland is granted."}
+# Per-owner result of factors(); static, so saves never capture it.
+static var _factor_cache:Dictionary={}
 static func factors(traveling:bool=false)->Dictionary:
 	var result:={"yield":1.0,"soil_damage":1.0,"weather_buffer":0.0,"labor_cost":0.0,"land_cost":0.0}
 	if traveling or not WorldSimulation.state.settlement_site_committed or WorldSimulation.state.effective_workers("Food")<=0 or "seed_selection" not in WorldSimulation.state.known_discoveries:return result
+	# The rest depends only on this owner's known discoveries and adoption levels.
+	var owner:=WorldSimulation.discovery.get_instance_id()
+	var key:=[WorldSimulation.discovery.catalog.size(),WorldSimulation.state.known_discoveries.hash(),WorldSimulation.state.discovery_adoption.hash()]
+	var cached:Dictionary=_factor_cache.get(owner,{})
+	if cached.get("key")==key:return (cached.value as Dictionary).duplicate()
 	var selected:Dictionary={};var ranks:Dictionary={}
 	for id:String in WorldSimulation.state.known_discoveries:
 		var entry:Dictionary=WorldSimulation.discovery.discovery_definition(id)
@@ -48,6 +55,7 @@ static func factors(traveling:bool=false)->Dictionary:
 	result["yield"]=(1+minf(.3,gain))*(1-result.labor_cost)*(1-result.land_cost)
 	result.soil_damage=1-minf(.65,protection)
 	result.weather_buffer=minf(.3,result.weather_buffer)
+	_factor_cache[owner]={"key":key,"value":result.duplicate()}
 	return result
 static func weather_factor(base:float,factors:Dictionary)->float:
 	return base+maxf(0,1-base)*float(factors.weather_buffer)

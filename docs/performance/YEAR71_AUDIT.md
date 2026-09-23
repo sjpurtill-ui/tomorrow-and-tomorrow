@@ -127,3 +127,42 @@ settlements (consequences/food ~190, resources ~115, economy ~70 ms), spread acr
 small subsystems per city. Pan/zoom still rebuilds border and corridor meshes by view
 bucket. Width is baked into geometry, so retained geometry needs a shader or transform
 change with graphical verification.
+
+## Multi-day steps for calm rivals (day_span.gd)
+
+Exact optimizations stopped paying off at about 0.6 s of simulation per warm year-71 day (about 1.2 days/s at top speed). Most of that time goes to rivals: roughly 85%.
+
+Rivals that are **calm** now advance their whole calendar every third day and cover the elapsed interval in one step. Calm means:
+
+- at peace, with no active engagement;
+- stationary field armies;
+- not traveling, with no settlement convoy;
+- at least 30 days of food in the capital and in every town;
+- drinking-water intake of at least 98%.
+
+Each calm rival runs on its own phase day, so the load stays even. Monthly strategy reviews keep their exact day. The human civilization, and any rival that is not calm, still runs daily.
+
+How the daily systems handle a K-day step:
+
+- **Scaled flows:** labor and need scale by K, including extraction, hauling, survey clues, construction, carrying capacity, discovery progress and clerical work.
+- **Converted rates:** per-day smoothing and per-day chances use `1-(1-r)^K`.
+- **Food:** one pass with K days of labor and need. Stored food spoils for K days; each arriving harvest spoils for one.
+- **Kept daily inside the span:**
+  - reproduction;
+  - undertaking upkeep;
+  - the economy;
+  - military days, which are nonlinear.
+- **Unchanged:** systems already driven by elapsed dates, such as operations, craft decay, government months, civic due dates and trade arrivals.
+
+`WorldSimulation.span_limit = 1` restores strictly daily rivals. The year-71 probe uses 1 by default, and `--span=3` opts in.
+
+Validation:
+- At span 1 the saved state is identical to the pre-change baseline, and the gdUnit day-job and map suites pass.
+- Interleaved `artifacts/span_ab.ps1` runs of span 1 against span 3 used the same code, with 150 days on the year-71 fixture.
+- **CPU:** 140 s at span 1 against 76–92 s at span 3, a 35–45% reduction.
+- **Rival outcomes after 150 days (span 3 against span 1):**
+  - population, knowledge, discoveries, health and cities within 0.1%;
+  - food stores within 0.3%, except civ_08 at −2.3% (a single-city rival);
+  - one rival has 5% fewer home troops.
+
+Remaining work toward 3 days/s: the economy and military still run K times per step, and the rival views and projections still run daily.

@@ -91,7 +91,10 @@ static func valid(value:Variant)->bool:
 	return herd.get("source_id","") is String
 
 static func practice_factor(id:String)->float:
-	var programs:Dictionary=data().get("programs",{})
+	# Read-only and called per effect rebuild. Every writer keeps this record
+	# valid and loads validate it, so skip data()'s full structural check.
+	var current:Variant=WorldSimulation.state.opening_opportunities
+	var programs:Dictionary=(current if current is Dictionary else data()).get("programs",{})
 	if id=="seed_selection":
 		var seed:Dictionary=programs.get("seed",{})
 		return clampf(float(seed.get("retained",0.0))/_seed_target(),0.0,1.0)
@@ -209,7 +212,7 @@ static func _finite_range(value:Variant,minimum:float,maximum:float)->bool:
 static func _add(state:Dictionary,id:String,amount:float)->void:
 	if amount<=0.0:return
 	var evidence:Dictionary=state.evidence
-	evidence[id]=minf(float(RULES[id].goal),float(evidence.get(id,0.0))+amount)
+	evidence[id]=minf(float(RULES[id].goal),float(evidence.get(id,0.0))+amount*WorldSimulation.span)
 	state.evidence=evidence
 
 static func _workers(role:String)->float:
