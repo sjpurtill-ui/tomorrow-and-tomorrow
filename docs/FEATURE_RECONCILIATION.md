@@ -2453,3 +2453,7 @@ Shared Childcare and Household Space Planning now use paper scenes tied to the s
 ### Tempered clay and sealed food vessels
 
 Tempered Clay and Sealed Vessels now show additive mixing and pest-resistant closure in the early paper aesthetic. The two distinct processes remain readable in large and compact research crops, verified by an isolated GPU preview. Thirteen focused tests pass without errors, failures or orphans. Forty-eight explicit early research overrides are installed. Native sources, exact prompts and capped mipmapped imports are retained.
+
+### Quarry reading and timber seasoning
+
+Reading the Quarry Face and Timber Seasoning now use matching early paper imagery for seam inspection and spaced timber drying. Both actual research card sizes were reviewed in an isolated GPU preview. Thirteen focused tests passed without errors, failures or orphans. Fifty explicit early research overrides are installed, preserving later-era mappings. Native sources and exact prompts are retained.

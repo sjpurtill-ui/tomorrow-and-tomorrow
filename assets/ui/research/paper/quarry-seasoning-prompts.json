@@ -1,0 +1,16 @@
+{
+  "generator": "Built-in imagegen",
+  "style_reference": "assets/ui/research/paper/oral_epics.png",
+  "assets": [
+    {
+      "file": "quarry_reading.png",
+      "source": "exec-0cb2466b-8734-401b-8c3c-99ea1703f734.png",
+      "prompt": "Landscape 4:3 research artwork READING THE QUARRY FACE. Reference aesthetic only: dry flat matte gouache in charcoal, ochre and muted sage on opaque warm ivory paper, restrained grain, rough broken vignette edges, no photo realism. A weathered ordinary adult in plain invented early woven work clothes leans toward a low exposed stone outcrop, tracing a long natural seam with one fingertip while looking carefully along layered fractures. Three-quarter side view, main focus the finger and intersecting rock bedding planes, not strength or quarry machinery. A small loose rock sample rests in other hand. Minimal early landscape; no cut dressed blocks, explosives, metal tools, cranes, machinery, ruler or diagrams. Natural adult proportions and plausible hands, normal face, no heroic posing. Person's head, hands and useful seam fit within central horizontal band, ivory margins for wide card crops. Clear graphic rock layers, no text, borders or UI."
+    },
+    {
+      "file": "timber_seasoning.png",
+      "source": "exec-cdc425d6-1eb4-4d88-b691-6a6e15772fc1.png",
+      "prompt": "Landscape 4:3 research artwork TIMBER SEASONING. Reference style only: flat dry matte gouache, charcoal, ochre, muted sage on warm opaque ivory paper, restrained grain, broken vignette edges; not photo realistic. Show carefully spaced rough split timber boards stacked under a simple low rain shelter. Obvious small wooden spacer sticks create air gaps between layers; stack raised off damp ground on stone supports, shelter open at both ends. One ordinary lean craftsperson crouches beside it and lifts the edge of a board to inspect checking and drying, normal proportions and practical invented woven work clothes. Main subject drying and air circulation through the wood stack, not cutting or joinery. No saw, metal axe, modern lumber mill, plastic cover, neatly machine-planed identical planks, symbols, arrows or labels. Oblique side perspective shows board spacing clearly; compact scene centered in a horizontal band with ivory margins for wide research card crops. No dramatic lighting, heroic posture, border, UI or text."
+    }
+  ]
+}
