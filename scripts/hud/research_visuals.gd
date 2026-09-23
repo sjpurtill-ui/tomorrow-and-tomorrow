@@ -6,6 +6,7 @@ const Painting=preload("res://scripts/hud/subject_painting.gd")
 const ART_MANIFEST="res://assets/ui/research/subject-art-manifest.json"
 const CACHE_LIMIT:=64
 const EARLY_SUBJECTS:={
+	"pike_drill":Vector2(.50,.55),"crossbow_mechanism":Vector2(.50,.53),
 	"hide_floats":Vector2(.50,.55),"galley_navigation":Vector2(.50,.55),
 	"shield_wall":Vector2(.50,.53),"field_fortifications":Vector2(.50,.55),
 	"framed_construction":Vector2(.50,.55),"kiln_control":Vector2(.50,.56),

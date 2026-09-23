@@ -2473,3 +2473,7 @@ Shield Wall and Field Fortifications now use paper illustrations showing formati
 ### Early hide floats and coastal galley navigation
 
 Hide Floats and Galley Navigation now show separate river and coastal practices in the paper style. Imported resources resolve; thirteen focused tests pass with no failures or orphans. Fifty-eight early research subjects have explicit paper overrides.
+
+### Early pike and crossbow research images
+
+Pike Drill and Crossbow Mechanism now use specific paper scenes. Imported resources resolve; thirteen focused tests pass with no failures or orphans. Sixty early research subjects have explicit paper overrides. All legacy research images attached to discoveries in the recorded 75-year same-site comparison now have an early paper override; later mappings remain available.
