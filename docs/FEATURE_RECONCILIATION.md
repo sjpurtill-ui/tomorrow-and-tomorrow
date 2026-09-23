@@ -2363,3 +2363,8 @@ Validation: 9 early-art tests passed (report 760), zero errors/failures/orphans,
 ## September 22 — slinger and skirmisher role scenes
 
 Added separate paper action scenes for slingers preparing ammunition and bow-equipped skirmishers screening ahead. Both bind to their exact unit IDs before year 300 and use the existing contained roster framing; no unit gates or combat data changed. Native files and exact prompts are retained in assets/ui/military/paper/ranged-prompts.json. Nine early-art checks passed (report 761), including availability of every currently mapped early unit image.
+## September 22 — early river patrol illustration
+
+War canoes now use a distinct four-person patrol scene, matching the catalogue crew size. The first-300-year navy summary uses this scene and the same readable paper framing as the early army. The image remains a role illustration; actual vessels, crews and training are read from game state. Later naval art and all naval rules are unchanged.
+
+Validation: 17 early-art and military-roster checks passed (report 762), zero errors/failures/orphans. Private GPU roster probe passed; inspected the naval summary and canoe card. Native artwork, source filename and prompt are retained in assets/ui/military/paper/canoe-prompt.json. Local in-game capture review: artifacts/early-art-in-game.html (captures are intentionally not committed).

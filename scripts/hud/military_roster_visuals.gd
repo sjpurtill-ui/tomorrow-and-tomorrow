@@ -8,7 +8,8 @@ const EARLY_UNITS:={
 	"spearman":"res://assets/ui/military/paper/spearman-v1.png",
 	"archer":"res://assets/ui/military/paper/archer-v1.png",
 	"slinger":"res://assets/ui/military/paper/slinger-v1.png",
-	"skirmisher":"res://assets/ui/military/paper/skirmisher-v1.png"}
+	"skirmisher":"res://assets/ui/military/paper/skirmisher-v1.png",
+	"war_canoe":"res://assets/ui/military/paper/war-canoe-v1.png"}
 static var symbols:Dictionary={}
 const ART_MANIFEST="res://assets/ui/military/subject-art-manifest.json"
 static var assignments:Dictionary={}
@@ -18,6 +19,7 @@ static func manifest()->Dictionary:
 
 static func artwork(service:String)->Texture2D:
 	if service=="army" and Early.active():return Early.source(EARLY_UNITS.levy)
+	if service=="navy" and Early.active():return Early.source(EARLY_UNITS.war_canoe)
 	return load("res://assets/ui/military/%s-roster-v1.png" % service)
 
 static func symbol(kind:String,color:Color,pixels:int=64)->Texture2D:

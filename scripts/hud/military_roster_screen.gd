@@ -258,7 +258,7 @@ func _build_body()->void:
 	scroll.set_deferred("scroll_vertical",saved_scroll)
 
 func _hero(rows:Array[Dictionary])->void:
-	var early_paper:=service=="army" and Art.Early.active()
+	var early_paper:=service in ["army","navy"] and Art.Early.active()
 	var hero:=PanelContainer.new();hero.custom_minimum_size.y=76;hero.clip_contents=true
 	hero.add_theme_stylebox_override("panel",_skin(Color("17272d"),Color("354951"),0));body.add_child(hero)
 	if early_paper:
@@ -286,7 +286,7 @@ func _update_hero(rows:Array[Dictionary])->void:
 	hero_values.formations.text=str(rows.size());hero_values.strength.text=str(strength)+( "+" if unknown else "")
 	hero_values.strength.tooltip_text="Includes dated field reports; unreported strength is not guessed."
 	hero_values.attention.text=str(attention);hero_values.attention.add_theme_color_override("font_color",WARNING if attention else GOOD)
-	if service=="army" and Art.Early.active():hero_values.attention.add_theme_color_override("font_color",Color("874522") if attention else Color("3f6041"))
+	if service in ["army","navy"] and Art.Early.active():hero_values.attention.add_theme_color_override("font_color",Color("874522") if attention else Color("3f6041"))
 	policy_shortcut.text="Training · %s ›" % MilitaryCampaign.training_staff.policy(service).label
 
 func _training_level(drill:float)->String:
