@@ -2469,3 +2469,7 @@ Framed Construction and Kiln Control now have specific paper illustrations for t
 ### Early shield-wall and field-defense imagery
 
 Shield Wall and Field Fortifications now use paper illustrations showing formation drill and a defensible temporary camp. Imported resources resolve; thirteen focused tests pass with no failures or orphans. Fifty-six early research subjects have explicit paper overrides.
+
+### Early hide floats and coastal galley navigation
+
+Hide Floats and Galley Navigation now show separate river and coastal practices in the paper style. Imported resources resolve; thirteen focused tests pass with no failures or orphans. Fifty-eight early research subjects have explicit paper overrides.
