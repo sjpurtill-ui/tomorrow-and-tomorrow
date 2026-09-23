@@ -1,0 +1,16 @@
+{
+  "generator": "Built-in imagegen",
+  "style_reference": "assets/ui/research/paper/oral_epics.png",
+  "assets": [
+    {
+      "file": "river_craft.png",
+      "source": "exec-2a2ca895-1143-4a10-af10-6c2ac46cdd44.png",
+      "prompt": "Landscape 4:3 research artwork RIVER CRAFT for a dawn-of-history civilization game. Reference aesthetic only: flat dry matte gouache, charcoal, ochre, muted sage, warm opaque ivory paper, restrained grain, broken vignette edges, no photographic realism. Slightly elevated oblique view of one small shallow-draft wooden framed boat moving along a quiet wooded riverbank. Two ordinary lean adults actively paddle, one at bow one stern, natural anatomy and plain invented woven working garments. Visible bent ribs and low practical hull, bundles kept low in the middle; waterline plausible. Emphasize maneuvering in sheltered shallow water beside reeds and an overhanging tree; no ocean, sail, mast, gunship, metal fittings, decorative prow, national costumes or heroic pose. Boat, paddles and workers all fit inside the central horizontal half with ivory margins above and below for a wide research-card crop. Minimal two-tone water strokes and riverbank silhouette, no cinematic photoreal landscape. No text, border, UI or emblem."
+    },
+    {
+      "file": "coastal_watercraft.png",
+      "source": "exec-62b7e16d-34f7-46ba-822f-4b874be287ed.png",
+      "prompt": "Landscape 4:3 research artwork COASTAL WATERCRAFT for an early civilization game. Use reference only for the dry flat gouache aesthetic: charcoal, ochre, muted sage on warm opaque ivory paper, restrained grain and broken edges, no photorealism. Main subject: workers stitching planks of a modest boat hull on a sheltered beach. Close oblique view along the side of the unfinished small hull, clearly visible paired holes along plank seams and short plant-cord lashings pulled through them. One ordinary lean adult kneels outside pulling a cord taut, a second adult inside braces the next plank against a simple bent rib; natural practical hands, proportions and modest invented plain woven work garments. A few stone tools and loose cord near the hull, distant bay indicated by just a few blue-gray painted strokes. This should explain sewn-plank coastal construction, not a glamorous sailing ship: no mast, sail, nails, metal, modern clamps, complex shipyard or decorative prow. Composition compressed into central horizontal band; entire heads, hands and seam remain visible in wide research-card crops, ivory margin above and below. No text, UI, border or recognizable real-world national costume."
+    }
+  ]
+}

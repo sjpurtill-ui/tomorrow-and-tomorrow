@@ -2441,3 +2441,7 @@ Timber Grading and Clay Testing replace legacy realistic imagery with paper illu
 ### Fiber selection and hafting research artwork
 
 Fiber Grading and Hafted Tools now show their specific material tests and binding work in the early paper style. Both are observed early discoveries. Actual research widgets were reviewed at 490x280 and 260x112; thirteen focused checks passed with no failures or orphans. Forty-two explicit early research overrides are installed, with the existing year-300 gate, visibility rules and bounded texture cache unchanged.
+
+### Early river and coastal watercraft imagery
+
+River Craft and Coastal Watercraft use distinct paper illustrations for early research: shallow-river paddling versus stitched-plank hull construction. Both are present in the recorded early pacing runs. Thirteen focused tests pass; both actual research widget sizes were GPU-reviewed. Coastal framing was lifted slightly to preserve the worker at the upper edge. Forty-four explicit early research overrides are installed; no discovery gates, boat behavior or later-era assets changed.
