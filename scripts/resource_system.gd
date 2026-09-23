@@ -246,6 +246,9 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 	var access_inputs:Dictionary={}
 	# Known discoveries do not change inside this pass.
 	var recognizable:Dictionary={}
+	# Family literacy changes only when this pass records practice; the memo is
+	# cleared at each such point.
+	var literacy:Dictionary={}
 	for deposit in WorldSimulation.state.resource_deposits:
 		_ensure_deposit_fields(deposit)
 		var resource_name: String = deposit.resource
@@ -257,18 +260,20 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 			if not recognizable[resource_name]:continue
 			if survey_inputs.is_empty():survey_inputs=_local_survey_inputs()
 			var survey_effort := float(survey_inputs.effort) * float(method_factors.get(resource_name,{}).get("recognition",1.0))
-			deposit.clues += definition.base * (0.5 + survey_effort + float(survey_inputs.nature) + float(survey_inputs.material)) * _family_literacy(resource_name) * rng.randf_range(0.5, 1.5)
+			deposit.clues += definition.base * (0.5 + survey_effort + float(survey_inputs.nature) + float(survey_inputs.material)) * _memo_literacy(resource_name,literacy) * rng.randf_range(0.5, 1.5)
 			if deposit.clues >= 1.0:
 				deposit.stage = "recognized"
 				_gain_practice(resource_name,"recognition",0.12)
+				literacy.clear()
 				events.append(_event("Resource Indicated", "Evidence suggests %s is present. Its extent and accessibility remain unknown." % resource_name, deposit.id))
 		elif deposit.stage == "recognized":
 			if survey_inputs.is_empty():survey_inputs=_local_survey_inputs()
 			var survey_effort := float(survey_inputs.effort) * float(method_factors.get(resource_name,{}).get("survey",1.0))
-			deposit.survey += definition.base * 0.55 * survey_effort * float(survey_inputs.speed) * _family_literacy(resource_name) * rng.randf_range(0.7,1.3)
+			deposit.survey += definition.base * 0.55 * survey_effort * float(survey_inputs.speed) * _memo_literacy(resource_name,literacy) * rng.randf_range(0.7,1.3)
 			if deposit.survey >= 1.0:
 				deposit.stage = "surveyed"
 				_gain_practice(resource_name,"survey",0.18)
+				literacy.clear()
 				events.append(_event("Deposit Surveyed", "The extent and conditions of the %s occurrence are now understood." % resource_name, deposit.id))
 		elif deposit.stage == "surveyed":
 			if access_inputs.is_empty():access_inputs=_access_work_inputs()
@@ -955,6 +960,10 @@ func _gain_practice(resource_name:String,domain:String,amount:float)->void:
 	if not WorldSimulation.state.resource_practice.has(resource_name): WorldSimulation.state.resource_practice[resource_name]={}
 	var practice:Dictionary=WorldSimulation.state.resource_practice[resource_name]
 	practice[domain]=minf(10.0,float(practice.get(domain,0.0))+amount)
+
+func _memo_literacy(resource_name:String,memo:Dictionary)->float:
+	if not memo.has(resource_name):memo[resource_name]=_family_literacy(resource_name)
+	return float(memo[resource_name])
 
 func _family_literacy(resource_name:String)->float:
 	var family:=String((catalog.get(resource_name,{}) as Dictionary).get("family",""))
