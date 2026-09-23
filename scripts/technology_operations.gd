@@ -250,7 +250,7 @@ static func forecast_service(name:String,days_ahead:int)->float:
 	return service(name)
 static func refrigeration_multiplier(capacity:float,stocks:Dictionary)->float:
 	var perishables:=0.0
-	for food:String in ["Fresh plants","Fresh meat","Fish"]:perishables+=maxf(0,float(stocks.get(food,0)))
+	for food:String in ["Fresh food","Fresh plants","Fresh meat","Fish"]:perishables+=maxf(0,float(stocks.get(food,0)))
 	if perishables<=0:return 1.0
 	return 1.0-.8*clampf(capacity/perishables,0,1)
 static func valid(value:Variant)->bool:

@@ -455,7 +455,7 @@ func submit(id:String,order:Dictionary)->Dictionary:
 const SNAPSHOT=preload("res://scripts/save_system.gd")
 ## Saved fields of systems that no longer exist; older saves may still hold
 ## them. Their contents are folded in elsewhere (see civilian_goods.gd).
-const RETIRED_FIELDS:={"GameState":["opening_craft_practice"]}
+const RETIRED_FIELDS:={"GameState":["opening_craft_practice"],"FoodSystem":["_forecast_climate_cache","_environment_cache_key","_environment_cache"]}
 const CURATED:=["MilitaryCampaign","ProgressionSystem","ForeignDiplomacy","GeneralCampaign"]
 
 func capture_actor(id:String)->Dictionary:

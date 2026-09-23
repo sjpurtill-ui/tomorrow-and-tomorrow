@@ -103,10 +103,10 @@ static func advance(traveling:bool)->Dictionary:
 		if sample.site!=site():continue
 		var aseptic:bool="aseptic_laboratory_practice" in known and protocol_ready(ledger,String(sample.kind)) and int(ledger.tools.get("sterile_until",-1))>=day and int(ledger.tools.get("sterile_uses",0))>0
 		var can_culture:bool="cell_culture_methods" in known or (sample.kind=="starter" and "microbial_growth_measurement" in known)
-		if can_culture and day>int(sample.last_day) and float(state.food_stocks.get("Dry staples",0))>=.03:
+		if can_culture and day>int(sample.last_day) and float(state.food_stocks.get("Stored food",0))>=.03:
 			if pay(ledger,stocks,{"Freshwater":.05,"Laboratory Glassware":.002},.05):
 				if Samples.grow(sample,day,.02,aseptic):
-					state.food_stocks["Dry staples"]-=.03
+					state.food_stocks["Stored food"]-=.03
 					if aseptic:ledger.tools.sterile_uses-=1
 					Samples.record(ledger,sample,day,"culture",{"media":float(sample.media),"aseptic":aseptic,"line":int(sample.line)})
 					report.cultured+=1

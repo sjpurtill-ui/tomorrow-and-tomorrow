@@ -116,11 +116,11 @@ static func _advance_seed_program(state:Dictionary,context:Dictionary,day:int)->
 	if not _opening_program_active(context) or "seasonal_patterns" not in WorldSimulation.state.known_discoveries or not _recognized_resource("Fertile Soil"):return
 	var seed:Dictionary=_programs(state).seed
 	var target:=_seed_target()
-	var available:=maxf(0.0,float(WorldSimulation.state.food_stocks.get("Dry staples",0.0)))
+	var available:=maxf(0.0,float(WorldSimulation.state.food_stocks.get("Stored food",0.0)))
 	var retained:=maxf(0.0,float(seed.get("retained",0.0)))
 	var moved:=minf(minf(target-retained,available),maxf(.02,WorldSimulation.state.population_exact*.001))
 	if moved>0.0:
-		WorldSimulation.state.food_stocks["Dry staples"]=available-moved
+		WorldSimulation.state.food_stocks["Stored food"]=available-moved
 		retained+=moved
 	seed.retained=retained
 	if "seed_selection" in WorldSimulation.state.known_discoveries:return
@@ -157,14 +157,14 @@ static func _advance_herd_program(state:Dictionary,context:Dictionary,day:int)->
 	if not has_water:
 		_miss_herd_care(herd);return
 	var feed_needed:=animals*.01
-	var plants:=maxf(0.0,float(WorldSimulation.state.food_stocks.get("Fresh plants",0.0)))
+	var plants:=maxf(0.0,float(WorldSimulation.state.food_stocks.get("Fresh food",0.0)))
 	var plant_feed:=minf(plants,feed_needed)
-	WorldSimulation.state.food_stocks["Fresh plants"]=plants-plant_feed
+	WorldSimulation.state.food_stocks["Fresh food"]=plants-plant_feed
 	var staples_needed:=feed_needed-plant_feed
-	var staples:=maxf(0.0,float(WorldSimulation.state.food_stocks.get("Dry staples",0.0)))
+	var staples:=maxf(0.0,float(WorldSimulation.state.food_stocks.get("Stored food",0.0)))
 	if staples+plant_feed+.000001<feed_needed:
 		_miss_herd_care(herd);return
-	WorldSimulation.state.food_stocks["Dry staples"]=staples-staples_needed
+	WorldSimulation.state.food_stocks["Stored food"]=staples-staples_needed
 	herd.care_coverage=1.0;herd.unfed_days=0
 	herd.continuity_days=int(herd.get("continuity_days",0))+1
 	_add(state,"animal_taming",1.0)

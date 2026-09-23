@@ -28,7 +28,7 @@ static func recommendation()->Dictionary:
 	var cooling:=Ops.refrigeration_multiplier(Ops.service("cold_storage"),state.food_stocks)
 	for food:String in state.food_stocks:
 		var amount:=maxf(0,float(state.food_stocks[food]))
-		if food not in ["Fish","Fresh meat","Fresh plants"]:continue
+		if food not in ["Fresh food","Fish","Fresh meat","Fresh plants"]:continue
 		daily_loss+=amount*float(WorldSimulation.food.SPOILAGE[food])*storage*WorldSimulation.discovery.food_storage_multiplier(food,false)*cooling
 	var demand:=maxf(0,float(WorldSimulation.food._calculate_demand(false).total))
 	var capacity:=float(spec.services.food_preservation)*condition

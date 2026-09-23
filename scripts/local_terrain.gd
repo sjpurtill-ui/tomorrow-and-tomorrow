@@ -15523,7 +15523,8 @@ func _add_food_trend_chart(parent: Container) -> void:
 func _food_color(food_type: String) -> Color:
 	return {
 		"Fresh plants":Color("#7f9e67"),"Fresh meat":Color("#a75f54"),"Fish":Color("#648b98"),
-		"Dry staples":Color("#b79958"),"Preserved food":Color("#8f7661")
+		"Dry staples":Color("#b79958"),"Preserved food":Color("#8f7661"),
+		"Fresh food":Color("#7f9e67"),"Stored food":Color("#b79958")
 	}.get(food_type,Color("#888888"))
 
 func _compact_food_number(value: float) -> String:
