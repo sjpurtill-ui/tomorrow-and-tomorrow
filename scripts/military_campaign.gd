@@ -3348,7 +3348,7 @@ func _process_settlement_defense_day()->void:
 		var efficiency:=clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.15,1.25)
 		# A bounded project can use vast aggregate labor without creating per-worker
 		# tasks or completing more than 4% of a strategic stage in one simulated day.
-		var daily_work:=minf(float(project.work)*0.04,workers*efficiency*0.38)
+		var daily_work:=minf(float(project.work)*0.04,workers*efficiency*0.38)*WorldSimulation.span
 		if daily_work>0.0:
 			settlement_defense["project_work"]=minf(float(project.work),float(settlement_defense.project_work)+daily_work)
 			settlement_defense["project_progress"]=clampf(float(settlement_defense.project_work)/maxf(0.01,float(project.work)),0.0,1.0)
@@ -3366,7 +3366,7 @@ func _process_settlement_defense_day()->void:
 	if integrity<1.0 and active_engagement.is_empty():
 		var repair_workers:=maxf(0.0,float(WorldSimulation.state.population_allocations.get("Construction",0)))+maxf(0.0,float(WorldSimulation.state.population_allocations.get("Defense",0)))*0.20
 		if repair_workers>0.0:
-			settlement_defense["integrity"]=move_toward(integrity,1.0,minf(0.006,repair_workers*0.00012))
+			settlement_defense["integrity"]=move_toward(integrity,1.0,minf(0.006,repair_workers*0.00012)*WorldSimulation.span)
 			changed=true
 	if changed: settlement_defense_changed.emit(settlement_defense_snapshot())
 
@@ -3543,8 +3543,9 @@ func _process_military_day()->void:
 	_process_equipment_wear_day()
 	var supply:=float(home_army.get("supply_level",1.0))
 	var daily_delivery_capacity:=_daily_delivery_capacity()
-	var delivery_bank_cap:=maxf(10.0,daily_delivery_capacity*3.0)
-	var available_delivery_load:=minf(delivery_bank_cap,maxf(0.0,float(home_army.get("delivery_load_bank",0.0)))+daily_delivery_capacity)
+	# A multi-day step (day_span.gd) delivers `span` days of convoy capacity.
+	var delivery_bank_cap:=maxf(10.0,daily_delivery_capacity*maxf(3.0,WorldSimulation.span))
+	var available_delivery_load:=minf(delivery_bank_cap,maxf(0.0,float(home_army.get("delivery_load_bank",0.0)))+daily_delivery_capacity*WorldSimulation.span)
 	var delivered:=_deliver_inventory_replacements(available_delivery_load)
 	var equipment_load_used:=float(home_army.get("equipment_delivery_load_used",0.0))
 	var remaining_delivery_load:=maxf(0.0,available_delivery_load-equipment_load_used)
@@ -3559,7 +3560,7 @@ func _process_military_day()->void:
 	home_army["delivery_load_used_today"]=equipment_load_used+ammunition_load_used+field_load_used
 	var recovery_multiplier:=0.35+supply*0.55+_adoption("battlefield_medicine")*0.55
 	var medical:Dictionary=preload("res://scripts/field_medicine.gd").provide(home_army,supply)
-	var prepared:Dictionary=simulator.advance_preparation_day(home_army,{"medical_recovery":medical.recovery,"equipment_replacements":0,"manpower_replacements":0,"organization_recovery":(0.025+logistics*0.055)*(0.35+supply*0.65),"recovery_multiplier":recovery_multiplier,"doctrine_levels":preload("res://scripts/combined_arms_doctrine.gd").levels(),"doctrine_supply":supply})
+	var prepared:Dictionary=simulator.advance_preparation_day(home_army,{"medical_recovery":medical.recovery,"equipment_replacements":0,"manpower_replacements":0,"organization_recovery":(0.025+logistics*0.055)*(0.35+supply*0.65),"recovery_multiplier":recovery_multiplier,"doctrine_levels":preload("res://scripts/combined_arms_doctrine.gd").levels(),"doctrine_supply":supply,"days":float(WorldSimulation.span)})
 	home_army=prepared.force
 	_rejoin_recovered_population("scattered_pool",int(prepared.scattered_returned))
 	_rejoin_recovered_population("wounded_pool",int(prepared.wounded_returned))
@@ -3576,11 +3577,11 @@ func _process_prisoner_custody_day()->Dictionary:
 	if foreign_prisoners<=0:
 		prisoner_escape_accumulator=0.0
 		return {"escaped":0,"remaining":0}
-	prisoner_custody_days+=1
+	prisoner_custody_days+=WorldSimulation.span
 	var custody:=prisoner_custody_snapshot()
 	var cohesion:=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.58)),0.0,1.0)
 	var daily_escape_rate:=maxf(0.0,1.0-float(custody.guard_coverage))*0.006*(1.15-cohesion*0.35)
-	prisoner_escape_accumulator+=float(foreign_prisoners)*daily_escape_rate
+	prisoner_escape_accumulator+=float(foreign_prisoners)*daily_escape_rate*WorldSimulation.span
 	var escaped:=mini(foreign_prisoners,floori(prisoner_escape_accumulator))
 	prisoner_escape_accumulator-=float(escaped)
 	foreign_prisoners-=escaped
@@ -3610,9 +3611,9 @@ func _process_home_captives_day(return_chance_override:float=-1.0)->Dictionary:
 		home_army["captive_days"]=0
 		home_army["captive_return_accumulator"]=0.0
 		return {"returned":0}
-	var days:=maxi(0,int(home_army.get("captive_days",0)))+1
+	var days:=maxi(0,int(home_army.get("captive_days",0)))+WorldSimulation.span
 	var chance:=return_chance_override if return_chance_override>=0.0 else _home_captive_return_chance({},days)
-	var accumulator:=float(home_army.get("captive_return_accumulator",0.0))+float(captured)*clampf(chance,0.0,1.0)
+	var accumulator:=float(home_army.get("captive_return_accumulator",0.0))+float(captured)*clampf(chance,0.0,1.0)*WorldSimulation.span
 	var returned:=mini(captured,floori(accumulator))
 	accumulator-=returned
 	home_army["captured_pool"]=captured-returned+held
@@ -3658,16 +3659,16 @@ func _process_aggregate_service_strain_day()->Dictionary:
 	var combat:=int(home_army.get("recent_combat_days",0))>0
 	var hardship:=clampf(maxf(0,.70-supply)/.70+maxf(0,.50-morale)*1.5+(.55 if combat else 0),0,1)
 	var current_strain:=float(home_army.get("service_strain",0.0))
-	var average_strain:=move_toward(current_strain,hardship,.012 if hardship<current_strain else .006)
+	var average_strain:=move_toward(current_strain,hardship,(.012 if hardship<current_strain else .006)*WorldSimulation.span)
 
 	var cohesion:=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.58)),0.0,1.0)
 	var pressure:=(maxf(0.0,average_strain-0.42)*0.020*clampf(hardship*2.0,0,1)+maxf(0.0,0.42-supply)*0.024+maxf(0.0,0.32-morale)*0.018)*(1.15-discipline*0.65)*(1.10-cohesion*0.35)
-	var accumulator:=float(home_army.get("desertion_accumulator",0.0))+float(troops)*pressure; var deserted:=mini(troops,floori(accumulator)); accumulator-=deserted
+	var accumulator:=float(home_army.get("desertion_accumulator",0.0))+float(troops)*pressure*WorldSimulation.span; var deserted:=mini(troops,floori(accumulator)); accumulator-=deserted
 	if deserted>0:
 		_stand_down_aggregate(deserted); home_army["desertions_total"]=int(home_army.get("desertions_total",0))+deserted
 		home_army["morale"]=clampf(morale-minf(0.12,float(deserted)/maxf(1.0,float(troops))*0.5),0.0,1.5)
 		WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Soldiers desert","description":"%s exhausted soldiers abandon the host." % _compact_count(deserted),"domain":"security","severity":"warning"})
-	home_army["service_days"]=int(home_army.get("service_days",0))+1; home_army["service_strain"]=average_strain; home_army["discipline"]=discipline; home_army["desertion_pressure"]=pressure; home_army["desertion_accumulator"]=accumulator
+	home_army["service_days"]=int(home_army.get("service_days",0))+WorldSimulation.span; home_army["service_strain"]=average_strain; home_army["discipline"]=discipline; home_army["desertion_pressure"]=pressure; home_army["desertion_accumulator"]=accumulator
 	return {"deserted":deserted,"pressure":pressure,"discipline":discipline,"strain":average_strain}
 
 
@@ -3683,10 +3684,10 @@ func _update_supply_day()->void:
 	var delivery:=clampf(0.30+labor_coverage*0.38+commander_logistics*0.20+practice*0.20,0.0,1.0)
 	var target:=clampf(nutrition*0.74+delivery*0.26,0.0,1.0)
 	var current:=clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
-	var change:=0.07 if target>current else 0.13
+	var change:=(0.07 if target>current else 0.13)*WorldSimulation.span
 	home_army["supply_level"]=move_toward(current,target,change)
 	home_army["supply_components"]={"nutrition":nutrition,"delivery":delivery,"target":target,"logistics_workers":logistics_workers,"provisions_required":float(home_army.get("provisions_required_today",0.0)),"provisions_delivered":float(home_army.get("provisions_delivered_today",0.0))}
-	home_army["recent_combat_days"]=maxi(0,int(home_army.get("recent_combat_days",0))-1)
+	home_army["recent_combat_days"]=maxi(0,int(home_army.get("recent_combat_days",0))-WorldSimulation.span)
 
 
 func _daily_delivery_capacity()->float:
@@ -3716,7 +3717,7 @@ func _process_equipment_wear_day()->void:
 		var equipment:=int(formation.get("equipment",0))
 		if equipment<=0: continue
 		var daily_rate:=maxf(0.0002,0.0007+(0.0075 if recent_combat else 0.0)+(1.0-supply)*0.004-standardization*0.0004)
-		var accumulator:=float(formation.get("wear_accumulator",0.0))+float(equipment)*daily_rate
+		var accumulator:=float(formation.get("wear_accumulator",0.0))+float(equipment)*daily_rate*WorldSimulation.span
 		var damaged:=mini(equipment,floori(accumulator))
 		formation["wear_accumulator"]=accumulator-float(damaged)
 		if damaged>0:
@@ -3829,9 +3830,9 @@ func _rejoin_recovered_population(_pool_name:String,_count:int)->void:
 
 func _process_equipment_production_day()->void:
 	preload("res://scripts/routine_military_upkeep.gd").prepare(self)
-	var repair_work:=preload("res://scripts/field_repair.gd").prepare(self)
+	var repair_work:=preload("res://scripts/field_repair.gd").prepare(self)*WorldSimulation.span
 	if equipment_queue.is_empty(): return
-	var crafting:=_production_rate()
+	var crafting:=_production_rate()*WorldSimulation.span
 	var weight_total:=0.0
 	for job in equipment_queue:
 		if PersistentProduction.eligible(self,job): weight_total+=maxf(0.05,float(job.get("allocation",1.0)))
@@ -3857,7 +3858,7 @@ func _process_equipment_production_day()->void:
 			repair_work-=support
 		if work<=0:continue
 		job["progress_days"]=float(job.get("progress_days",0.0))+work
-		job["efficiency"]=move_toward(efficiency,1.0,0.0025*(0.65+_adoption("workshop_standards")))
+		job["efficiency"]=move_toward(efficiency,1.0,0.0025*(0.65+_adoption("workshop_standards"))*WorldSimulation.span)
 		var work_per_item:=maxf(0.01,float(job.get("work_per_item",float(job.get("required_days",1.0))/maxf(1.0,float(job.get("count",1))))))
 		var previously_completed:=int(job.get("completed",0))
 		var completed:=mini(int(job.count),floori(float(job.progress_days)/work_per_item))
@@ -3928,7 +3929,7 @@ func _process_training_program_day()->void:
 	var can_train:bool=training_staff.prepare_army_day()
 	for force in [home_army]+field_armies:
 		var decay:=0.00010 if not training_program.is_empty() and force in _exercise_forces() else 0.00045
-		force["exercise_readiness_bonus"]=move_toward(float(force.get("exercise_readiness_bonus",0.0)),0.0,decay)
+		force["exercise_readiness_bonus"]=move_toward(float(force.get("exercise_readiness_bonus",0.0)),0.0,decay*WorldSimulation.span)
 	if not can_train:
 		_refresh_readiness()
 		return
@@ -3951,7 +3952,7 @@ func _process_training_program_day()->void:
 		training_program["last_efficiency"]=0.0
 		_refresh_readiness()
 		return
-	var required_food:=float(participants)*float(definition.food_per_participant)
+	var required_food:=float(participants)*float(definition.food_per_participant)*WorldSimulation.span
 	var available_food:=training_staff.spendable_food()
 	var food_taken:=WorldSimulation.food.issue_for_obligation(minf(required_food,available_food),"military_training","%s â€¢ %d participants" % [String(definition.get("label",program_id.replace("_"," ").capitalize())),participants],1.0,participants) if required_food>0.0 else 0.0
 	var ration_coverage:=clampf(food_taken/maxf(0.001,required_food),0.0,1.0) if required_food>0.0 else 1.0
@@ -3967,6 +3968,8 @@ func _process_training_program_day()->void:
 	if efficiency<0.05:
 		_refresh_readiness()
 		return
+	# A multi-day step (day_span.gd) makes `span` days of exercise progress.
+	efficiency*=WorldSimulation.span
 	var duration:=maxf(1.0,float(definition.duration_days))
 	efficiency=minf(efficiency,maxf(0.0,duration-float(training_program.get("progress_days",0.0))))
 	var progress_fraction:=efficiency/duration
@@ -4045,10 +4048,10 @@ func _process_training_day()->void:
 		if (order.has("deployment_line") or order.has("build_batch")) and float(order.progress_days)>=float(order.required_days):continue
 		attending+=int(order.count)
 	if attending<=0:return
-	var rations:=float(attending)*.18*float(policy.intake)
+	var rations:=float(attending)*.18*float(policy.intake)*WorldSimulation.span
 	var paid:=WorldSimulation.food.issue_for_obligation(minf(rations,training_staff.instruction_food()),"military_training","Initial army instruction",1.0,attending)
 	training_staff.record_food("army",paid)
-	var training_rate:=_effective_training_rate(attending)*float(policy.intake)*clampf(paid/maxf(.001,rations),0,1)
+	var training_rate:=_effective_training_rate(attending)*float(policy.intake)*clampf(paid/maxf(.001,rations),0,1)*WorldSimulation.span
 	var training_equipment_budget:=military_inventory.duplicate(true)
 	for index in range(training_queue.size()-1,-1,-1):
 		var training:Dictionary=training_queue[index]
@@ -4063,7 +4066,7 @@ func _process_training_day()->void:
 		training_equipment_budget[weapon]=maxi(0,available_examples-examples-reserved_examples)
 		var equipment_access:=clampf(float(examples)/maxf(1.0,float(examples_required)),0.0,1.0)
 		var access_floor:=0.55 if weapon=="improvised" else 0.25
-		if training.has("personnel_condition"):training.personnel_condition=move_toward(float(training.personnel_condition),_trainee_condition(),.014)
+		if training.has("personnel_condition"):training.personnel_condition=move_toward(float(training.personnel_condition),_trainee_condition(),.014*WorldSimulation.span)
 		var progress_increment:=training_rate*(access_floor+(1.0-access_floor)*equipment_access)
 		if training.has("deployment_line"):
 			var manpower:=float(training.count)/maxi(1,int(training.get("target_count",training.count)))
@@ -4075,7 +4078,7 @@ func _process_training_day()->void:
 		training["instruction_progress_sum"]=float(training.get("instruction_progress_sum",0.0))+progress_increment
 		var intensity:=float({"levy":0.75,"line_infantry":1.0,"skirmisher":0.90,"cavalry":1.20}.get(String(training.unit),1.0))
 		var average_condition:=clampf(WorldSimulation.state.population_health*0.50+WorldSimulation.state.food_security*0.25+_population_shelter_condition()*0.25,0.0,1.0)
-		training["injury_accumulator"]=float(training.get("injury_accumulator",0.0))+float(training.count)*0.0012*intensity*(1.35-average_condition*0.55)*_training_injury_risk_multiplier()
+		training["injury_accumulator"]=float(training.get("injury_accumulator",0.0))+float(training.count)*0.0012*intensity*(1.35-average_condition*0.55)*_training_injury_risk_multiplier()*WorldSimulation.span
 		var injuries:=mini(int(training.count),floori(float(training.injury_accumulator)))
 		training["injury_accumulator"]=float(training.injury_accumulator)-float(injuries)
 		if injuries>0:
@@ -4100,7 +4103,7 @@ func _process_training_injuries_day()->void:
 		training_injury_recovery_accumulator=0.0
 		return
 	var recovery_rate:=clampf(0.045+_adoption("wound_cleaning")*0.035+_adoption("battlefield_medicine")*0.075,0.03,0.18)
-	training_injury_recovery_accumulator+=float(training_injury_pool)*recovery_rate
+	training_injury_recovery_accumulator+=float(training_injury_pool)*recovery_rate*WorldSimulation.span
 	var recovered:=mini(training_injury_pool,floori(training_injury_recovery_accumulator))
 	training_injury_recovery_accumulator-=recovered
 	training_injury_pool-=recovered

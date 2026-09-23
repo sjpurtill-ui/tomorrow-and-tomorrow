@@ -92,12 +92,9 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 	),
 		S.step("progression",timings,func()->void:run.result.progression=WorldSimulation.progression.process_day(day)),
 		S.step("military_and_travel",timings,func()->void:
-			SPAN.each_day(func()->void:
-				var current:=int(WorldSimulation.state.elapsed_days)
-				if WorldSimulation.military.last_processed_day<current:
-					WorldSimulation.military.last_processed_day=current
-					WorldSimulation.military._process_military_day()
-			)
+			if WorldSimulation.military.last_processed_day<day:
+				WorldSimulation.military.last_processed_day=day
+				WorldSimulation.military._process_military_day()
 			preload("res://scripts/civilization_travel.gd").advance(float(WorldSimulation.span))
 	),
 		S.step("convoy",timings,func()->void:

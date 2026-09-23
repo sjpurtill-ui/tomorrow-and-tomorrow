@@ -11,7 +11,7 @@ extends RefCounted
 ## Longest interval a calm rival may cover in one step.
 const MAX_SPAN:=3
 ## A step never runs a town below this much stored food.
-const MIN_FOOD_DAYS:=30.0
+const MIN_FOOD_DAYS:=15.0
 
 ## Scales a per-day smoothing rate to the current span.
 static func rate(daily:float)->float:
@@ -46,7 +46,7 @@ static func days()->int:
 static func calm()->bool:
 	if WorldSimulation.state.convoy_traveling or bool(WorldSimulation.state.settlement_convoy.get("active",false)):return false
 	var military=WorldSimulation.military
-	if not military.active_engagement.is_empty():return false
+	if not military.active_engagement.is_empty() or not military.active_threat.is_empty() or not military.active_siege.is_empty() or not military.pending_aftermath.is_empty():return false
 	for army:Dictionary in military.field_armies:
 		if String(army.get("status","stationed"))!="stationed":return false
 	if int(WorldSimulation.world.player_effects().get("war_count",0))>0:return false

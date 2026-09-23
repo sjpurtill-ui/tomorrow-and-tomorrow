@@ -51,8 +51,11 @@ static func quote(force:Dictionary,supply:float)->Dictionary:
 	return {"capacity":care_capacity,"recoverable_wounded":wounded,"cases":cases,"recovery":cases*.08,"reason":reason,"inputs":inputs}
 static func provide(force:Dictionary,supply:float)->Dictionary:
 	var result:=quote(force,supply)
+	# A multi-day step (day_span.gd) provides `span` days of care.
+	var span:=WorldSimulation.span
 	for material:String in result.inputs:
-		WorldSimulation.state.resource_stockpiles[material]=float(WorldSimulation.state.resource_stockpiles.get(material,0))-float(result.inputs[material])
+		WorldSimulation.state.resource_stockpiles[material]=float(WorldSimulation.state.resource_stockpiles.get(material,0))-float(result.inputs[material])*span
+	if span>1:result.recovery=float(result.recovery)*span
 	return result
 static func describe(report:Dictionary)->String:
 	return "Equipped care capacity: %.1f patients. Recoverable wounded: %d. Current supplies support %.1f patients. %s. Care uses local supplies during recovery at home." % [float(report.get("capacity",0)),int(report.get("recoverable_wounded",0)),float(report.get("cases",0)),String(report.get("reason",""))]
