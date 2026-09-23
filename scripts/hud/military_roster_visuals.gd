@@ -9,7 +9,9 @@ const EARLY_UNITS:={
 	"archer":"res://assets/ui/military/paper/archer-v1.png",
 	"slinger":"res://assets/ui/military/paper/slinger-v1.png",
 	"skirmisher":"res://assets/ui/military/paper/skirmisher-v1.png",
-	"war_canoe":"res://assets/ui/military/paper/war-canoe-v1.png"}
+	"war_canoe":"res://assets/ui/military/paper/war-canoe-v1.png",
+	"field_repair_company":"res://assets/ui/military/paper/field-repair-v1.png",
+	"medical_detachment":"res://assets/ui/military/paper/medical-detachment-v1.png"}
 static var symbols:Dictionary={}
 const ART_MANIFEST="res://assets/ui/military/subject-art-manifest.json"
 static var assignments:Dictionary={}

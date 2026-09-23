@@ -2397,3 +2397,7 @@ Eight additional exact IDs use their reviewed existing paper artwork in years 0�
 ### Early wound care and plant comparison
 
 Two new paper scenes bind specifically to wound_cleaning and herbal_classification for years 0–299, bringing the reviewed early override set to 38 subjects. Native sources and prompts are retained, textures are mipmapped and capped at 1024, and previous manifest art remains the later-era fallback. Eleven focused checks pass. Isolated 490×280 and 260×112 research-card crops were inspected and their focal points adjusted to keep the relevant gestures visible. No medical or research mechanics change.
+
+### Early military support artwork
+
+Repair companies and medical detachments now have specific paper role illustrations in the first 300 years. The crew scenes depict spear/shield maintenance and a carried wooden litter. They join six existing early unit illustrations; no recruitment, repair, medical or production mechanics change. Native images were reviewed for work actions and whole-body framing; imports are capped at 1024 with mipmaps. Nineteen focused early-art and military-roster checks pass, including imported paths and existing later-era behavior.

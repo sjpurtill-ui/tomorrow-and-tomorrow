@@ -1,0 +1,16 @@
+{
+  "generator": "Built-in imagegen",
+  "style_reference": "assets/ui/research/paper/oral_epics.png",
+  "assets": [
+    {
+      "file": "field-repair-v1.png",
+      "source": "exec-5cfd8f0e-714f-4b9f-8910-c992ce960334.png",
+      "prompt": "Landscape 4:3 role illustration for an early FIELD REPAIR COMPANY in a civilization game. Reference style only: FLAT dry matte gouache with charcoal silhouettes, ochre, umber and gray sage on warm opaque ivory paper; restrained grain, broken edges, no photographic realism. A modest settlement repair corner, not a battlefield. Two lean ordinary adult craftspeople with different practical hair and body shapes actively maintaining equipment: foreground older adult sits sideways on a low block and replaces the cord binding on a wooden spear shaft laid across the lap; a second younger adult leans over a small crude trestle to fit a new wooden grip to a simple hide-covered shield. A small basket holds cord, spare shafts and a plain stone blade. No metal armor, anvil, forge, finished swords, elaborate workshop, standardized uniform, modern tool roll, crosses, insignia, diagrams or writing. Their activity is maintenance, not manufacturing new weapons or fighting. Natural human anatomy, functional hands, individual gestures, modest invented woven wraps and rawhide aprons without recognizable ethnic costume. Entire people and all work fit in the frame with an ivory margin. Main scene centered with clear silhouettes readable as a small military roster card; loose paper edges rather than a rectangular painted background. No text, border, UI or glamour."
+    },
+    {
+      "file": "medical-detachment-v1.png",
+      "source": "exec-815e0437-b743-48df-b605-9d5efbc76890.png",
+      "prompt": "Landscape 4:3 role illustration of an early MEDICAL DETACHMENT, casualty carrying and care. Strict reference style: spare flat dry gouache, charcoal figures, muted ochre and sage, visible matte paper grain, warm opaque ivory surrounding the whole scene; no cinematic realism, glossy game render or detailed photographic faces. THREE ordinary lean adult helpers shown in a clear side-three-quarter view: two carry a simple litter of TWO long wooden poles joined by woven cloth, each helper visibly gripping BOTH pole ends at opposite ends. One exhausted adult patient lies safely lengthwise on the litter, fully clothed and covered to the waist by a plain woven blanket, head supported by a rolled wrap. Third helper walks beside the patient's head holding a small clay water flask and watching the patient. Correct body proportions, realistic human arms and legs, coherent litter geometry and plausible weight support, feet on a quiet dirt path. No visible wounds, blood, corpses, gore, modern bandages or red cross, white uniform, medical logo, metal stretcher or wheel. Simple invented practical early woven garments and bindings, distinct ages and haircuts, no identical posed cast. The scene is calm practical assistance behind the lines, not a charge or heroic rescue poster. Entire litter, carriers and their feet fit inside frame with generous ivory margins. Minimal background: a low shelter edge and a few grasses fading into paper. Clear silhouettes readable at military roster thumbnail size. No words, border or UI."
+    }
+  ]
+}
