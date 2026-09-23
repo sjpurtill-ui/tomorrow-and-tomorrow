@@ -280,7 +280,7 @@ func _advance_rival_discoveries(civ:Dictionary)->Dictionary:
 			momentum[domain]=minf(float(momentum[domain]),1.0)
 			continue
 		var technology:Dictionary=candidates[0]
-		var research_cost:=clampf(1.0/maxf(0.001,float(technology.get("chance",0.001))*50.0),2.0,40.0)*WorldSimulation.discovery.research_difficulty(technology,seed_value)
+		var research_cost:=clampf(1.0/maxf(0.001,float(technology.get("chance",0.001))*50.0),2.0,40.0)*WorldSimulation.discovery.research_difficulty(technology,seed_value,float(WorldSimulation.state.elapsed_days)/365.0)
 		if float(momentum[domain])<research_cost: continue
 		momentum[domain]=float(momentum[domain])-research_cost
 		var known:Array=profile.get("technologies",[])

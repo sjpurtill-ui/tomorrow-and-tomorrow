@@ -21,7 +21,7 @@ const REFLECT_SKIP:Dictionary={
 	"GameState":["resource_settlement_id"],
 	"SettlementModel":["_local_population_scope","_claim_shape_cache"],
 	"FoodSystem":["_access_cache","_lever_cache"],
-	"DiscoverySystem":["catalog","catalog_by_id","catalog_by_channel","technology_catalog","technology_limits","initialized","latest_context"],
+	"DiscoverySystem":["catalog","catalog_by_id","catalog_by_channel","technology_catalog","technology_limits","initialized","latest_context","era_by_id"],
 	# In-flight HTTP requests contain transient nodes and authorization headers.
 	# They are neither world state nor safe save-file content; the matching civic
 	# order is persisted and reopened as an interrupted conversation on load.
