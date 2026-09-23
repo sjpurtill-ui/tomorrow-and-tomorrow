@@ -126,7 +126,11 @@ func advance_steps(day:int)->Array:
 			data.status="%d scouts departed from %s to %s. Expected back in %d days; staff handle the next departure." % [int(party.personnel),String(party.get("origin_label","home")),purpose,int(party.duration_days)]
 		])
 	routes.append(["scouting_status",func()->void:
-		if shared.searching:data.status=shared.last_reason
+		if shared.searching:
+			data.status=shared.last_reason
+			# Rival staff with multi-day steps (day_span.gd) wait four weeks after a
+			# fruitless search instead of repeating every route plan each week.
+			if WorldSimulation.actor_id!="player" and WorldSimulation.span_limit>1:data.next_review=maxi(int(data.next_review),day+28)
 	])
 	return parts
 

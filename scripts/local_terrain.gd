@@ -986,9 +986,11 @@ func _process(delta: float) -> void:
 	var calendar_days:=simulation_clock.take_days(Time.get_ticks_usec(),_speed_hours_per_second()/24.0 if game_speed>0.0 and not GeneralCampaign.active else 0.0,_camera_in_motion())
 	stamp=trace.mark("frame_camera",stamp)
 	_update_world_streaming()
+	stamp=trace.mark("frame_world_streaming",stamp)
 	_advance_terrain_patch()
+	stamp=trace.mark("frame_terrain_patch",stamp)
 	_update_scale_lod()
-	stamp=trace.mark("frame_terrain_and_lod",stamp)
+	stamp=trace.mark("frame_scale_lod",stamp)
 	_update_convoy_marker_animation()
 	# These rebuild report dictionaries, sort marker snapshots and inspect
 	# settlement morphology. Ten updates/second keep them responsive without
@@ -1030,7 +1032,9 @@ func _process(delta: float) -> void:
 		return
 	if game_speed <= 0.0:
 		return
-	if calendar_days>0.0:_schedule_world_time(calendar_days)
+	if calendar_days>0.0:
+		_schedule_world_time(calendar_days)
+		trace.mark("frame_schedule",stamp)
 
 ## Frame budget for the day in progress. Steps are atomic, so one step can
 ## exceed it; the budget bounds how many run back to back.
@@ -1069,11 +1073,15 @@ func _schedule_world_time(days_advanced:float)->void:
 	WorldSimulation.pump_day(_day_step_budget_usec())
 
 func _finish_scheduled_day(day_result:Dictionary,day:int)->void:
+	var trace=preload("res://scripts/performance_trace.gd")
+	var stamp:int=trace.start()
 	last_discovery_day=day
 	_commit_world_day(day_result)
+	stamp=trace.mark("day_commit",stamp)
 	# An attention pause during the day stops the calendar at that day.
 	GameState.elapsed_days=scheduled_world_elapsed if game_speed>0.0 else float(day)
 	_after_world_time(scheduled_world_days if game_speed>0.0 else 0.0)
+	trace.mark("day_after_world_time",stamp)
 
 ## The simulated date, including a day whose steps are still running.
 func _simulated_day()->int:

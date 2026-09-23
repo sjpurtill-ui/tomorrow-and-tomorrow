@@ -129,30 +129,63 @@ func frame_profile()->void:
 	for node in get_tree().root.get_children():
 		if node!=self and node!=terrain:node.set_process(false);node.set_physics_process(false)
 	await get_tree().process_frame
+	# --settle waits for the initial terrain refinement after load, as a player
+	# watching the map would, before measuring top-speed throughput.
+	if "--settle" in OS.get_cmdline_user_args():
+		var settle_began:=Time.get_ticks_msec()
+		var idle_frames:=0
+		while idle_frames<30 and Time.get_ticks_msec()-settle_began<60000:
+			await get_tree().process_frame
+			idle_frames=idle_frames+1 if terrain.terrain_patch_job==null else 0
+		print("SETTLED_MS ",Time.get_ticks_msec()-settle_began)
+	if "--scene-detail" in OS.get_cmdline_user_args():
+		await scene_detail(terrain);return
 	var start_day:=int(GameState.elapsed_days)
 	var target_days:=4
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--days="):target_days=int(arg.trim_prefix("--days="))
+	# Warm throughput starts once the cold first day after load has finished.
+	var warm_began:=-1
 	terrain.scheduled_world_days_enabled="--synchronous" not in OS.get_cmdline_user_args()
 	terrain._set_game_speed(5)
+	var trace=preload("res://scripts/performance_trace.gd")
+	trace.enabled="--frame-trace" in OS.get_cmdline_user_args();trace.totals.clear()
 	var frames:Array=[]
 	var navigating_frames:Array=[]
 	var last:=Time.get_ticks_usec()
 	var began:=last
 	while int(GameState.elapsed_days)<start_day+target_days and Time.get_ticks_usec()-began<120000000:
 		# Pan the camera for a stretch, as a player would while days compute.
-		var panning:=frames.size()>=60 and frames.size()<180
+		var panning:=frames.size()>=60 and frames.size()<180 and "--no-pan" not in OS.get_cmdline_user_args()
 		if panning:
 			terrain.camera_target+=Vector3(.01,0,.004);terrain.camera_input_msec=Time.get_ticks_msec()
+		var before_totals:Dictionary={}
+		if trace.enabled:
+			for key:String in trace.totals:before_totals[key]=int(trace.totals[key].microseconds)
 		await get_tree().process_frame
 		var now:=Time.get_ticks_usec()
+		if trace.enabled and now-last>100000:
+			var spent:Dictionary={}
+			for key:String in trace.totals:
+				var delta:=int(trace.totals[key].microseconds)-int(before_totals.get(key,0))
+				if delta>5000:spent[key]=delta/1000
+			print("SLOW_FRAME ",(now-last)/1000," day ",int(GameState.elapsed_days)," ",JSON.stringify(spent))
+		if warm_began<0 and int(GameState.elapsed_days)>start_day:warm_began=now
 		frames.append((now-last)/1000.0)
 		if panning:navigating_frames.append((now-last)/1000.0)
 		last=now
 	terrain._set_game_speed(0)
 	WorldSimulation.flush_day()
 	var sorted:=frames.duplicate();sorted.sort()
-	var report:={"scheduled":terrain.scheduled_world_days_enabled,"days":int(GameState.elapsed_days)-start_day,"seconds":(last-began)/1000000.0,"frames":frames.size(),"median_ms":sorted[sorted.size()/2],"p95_ms":sorted[int(sorted.size()*.95)],"max_ms":sorted[-1],"over_33ms":sorted.filter(func(v:float)->bool:return v>33.0).size(),"over_100ms":sorted.filter(func(v:float)->bool:return v>100.0).size(),"navigating_max_ms":navigating_frames.max() if not navigating_frames.is_empty() else 0.0}
+	var report:={"scheduled":terrain.scheduled_world_days_enabled,"days":int(GameState.elapsed_days)-start_day,"seconds":(last-began)/1000000.0,"frames":frames.size(),"warm_days_per_second":float(int(GameState.elapsed_days)-start_day-1)/maxf(.001,(last-warm_began)/1000000.0),"median_ms":sorted[sorted.size()/2],"p95_ms":sorted[int(sorted.size()*.95)],"max_ms":sorted[-1],"over_33ms":sorted.filter(func(v:float)->bool:return v>33.0).size(),"over_100ms":sorted.filter(func(v:float)->bool:return v>100.0).size(),"navigating_max_ms":navigating_frames.max() if not navigating_frames.is_empty() else 0.0}
 	var file:=FileAccess.open("res://artifacts/year71_frames_%s.json" % ("scheduled" if report.scheduled else "synchronous"),FileAccess.WRITE)
 	file.store_string(JSON.stringify(report.merged({"frames_ms":frames}),"  "));file.close()
+	if trace.enabled:
+		var phases:Dictionary={}
+		for key:String in trace.totals:
+			phases[key]=snappedf(float(trace.totals[key].microseconds)/1000.0,.1)
+		print("FRAME_TRACE_MS ",JSON.stringify(phases))
+		print("SLOW_STEPS ",JSON.stringify(preload("res://scripts/day_job.gd").slow_steps))
 	print("FRAME_PROFILE_DONE ",JSON.stringify(report))
 	terrain.queue_free();WorldSimulation.clear();await get_tree().process_frame;get_tree().quit(0 if report.days>=target_days else 1)
 
@@ -219,3 +252,23 @@ func outcomes()->Dictionary:
 				"troops":int(WorldSimulation.military.home_army.get("troops",0)),"projects":state.settlement_completed.size()}
 		)
 	return result
+
+## Synchronous days inside the real game scene, with per-phase timings in the
+## same format as --detail, so scene-only costs (geography, local building) show.
+func scene_detail(terrain:Node)->void:
+	var days:=6
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--days="):days=int(arg.trim_prefix("--days="))
+	var report:Dictionary={"samples":[]}
+	var day:=int(GameState.elapsed_days)
+	for i in days:
+		var timings:Dictionary={"enabled":true}
+		var start:=Time.get_ticks_usec()
+		WorldSimulation.advance_day(day+i+1,terrain._discovery_context(),terrain._process_local_settlement_day,timings)
+		GameState.elapsed_days=float(day+i+1);terrain.last_discovery_day=day+i+1
+		report.samples.append({"day":day+i+1,"ms":(Time.get_ticks_usec()-start)/1000.0,"timings":timings})
+		print("SCENE_DAY ",day+i+1," ",report.samples[-1].ms)
+		await get_tree().process_frame
+	report["detail"]={}
+	var file:=FileAccess.open("res://artifacts/year71_scene_detail.json",FileAccess.WRITE);file.store_string(JSON.stringify(report,"  "));file.close()
+	terrain.queue_free();WorldSimulation.clear();await get_tree().process_frame;get_tree().quit(0)
