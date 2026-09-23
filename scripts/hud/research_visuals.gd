@@ -33,7 +33,16 @@ const EARLY_SUBJECTS:={
 	"smoking":Vector2(.58,.68),"well_siting":Vector2(.68,.72),"standard_measures":Vector2(.53,.70),"route_memory":Vector2(.42,.67),
 	"formation_drill":Vector2(.50,.77),"stone_sorting":Vector2(.64,.72),"apprentice_contracts":Vector2(.67,.74),"wayfinding_stars":Vector2(.68,.70),
 	"wound_cleaning":Vector2(.50,.67),"herbal_classification":Vector2(.50,.53),
-	"household_councils":Vector2(.50,.69),"graded_roads":Vector2(.50,.73)}
+	"household_councils":Vector2(.50,.69),"graded_roads":Vector2(.50,.73),
+	"friction_fire_ignition":Vector2(.50,.69),"percussion_fire_ignition":Vector2(.50,.69),
+	"earth_oven_cooking":Vector2(.50,.72),"food_steaming_vessels":Vector2(.50,.72),
+	"threshing_frames":Vector2(.50,.73),"winnowing_practice":Vector2(.50,.73),
+	"fuel_air_drying":Vector2(.50,.72),"hearth_roasting_control":Vector2(.50,.73),
+	"bone_needle_sewing":Vector2(.50,.59),"garment_pattern_cutting":Vector2(.50,.70),
+	"grain_moisture_testing":Vector2(.50,.73),
+	"crop_calendars":Vector2(.50,.72),"managed_fallow":Vector2(.50,.73),
+	"water_settling_basins":Vector2(.50,.73),"animal_taming":Vector2(.50,.69),
+	"pack_animals":Vector2(.50,.70),"latrine_siting":Vector2(.50,.73)}
 const EARLY_SUBJECT_FILES:={"hide_tanning":"hide-tanning-v2"}
 static var assignments:Dictionary={}
 static var textures:Dictionary={}

@@ -1,0 +1,23 @@
+{
+  "style": "Sparse dry-gouache historical scenes on warm fibrous paper; natural adult proportions, handmade early tools, no modern objects or text.",
+  "sources": {
+    "friction_fire_ignition": "exec-ac5bb5b0-5e84-472e-a19e-5e8e3c1f1e7a.png",
+    "percussion_fire_ignition": "exec-a5937aa8-e8b8-4ac9-a755-859045198849.png",
+    "hearth_heat_retention": "exec-e5ce42fc-1c37-4542-823d-82cca1cb3fe4.png",
+    "fuel_air_drying": "exec-25ee913b-81cb-46b6-980c-284a82b6db3c.png",
+    "hearth_roasting_control": "exec-55ee662f-e4de-47cb-95b1-396a9fce684d.png",
+    "earth_oven_cooking": "exec-7d7a09cb-284f-49be-99a3-4dc98197eefe.png",
+    "food_steaming_vessels": "exec-46fafe43-3c20-4819-9717-fac7eb1c933f.png",
+    "threshing_frames": "exec-70ce94f0-00fe-4441-a6d8-bd2603bdc062.png",
+    "winnowing_practice": "exec-61a3f044-82bf-4856-99e9-9ecd1a977a37.png",
+    "grain_moisture_testing": "exec-1b291650-c510-411d-be1a-57b2ebe40b01.png",
+    "bone_needle_sewing": "exec-267def78-5410-4c7e-9377-bd03ec0d31aa.png",
+    "garment_pattern_cutting": "exec-5fe46b76-e6cb-48e0-9852-244bd7e5bae5.png",
+    "crop_calendars": "exec-fcdeeb30-b367-4d15-bb77-fd2ee8dfeac3.png",
+    "managed_fallow": "exec-48e92503-5ead-4c03-a546-e722058faf44.png",
+    "water_settling_basins": "exec-b1a24b30-7316-4773-83ba-72ae9dcc3516.png",
+    "animal_taming": "exec-b8eac430-4a9f-48eb-9693-6488b8a08dcd.png",
+    "pack_animals": "exec-7d4cf12f-ef67-4f38-b9c0-7d8b241d67bc.png",
+    "latrine_siting": "exec-e2902b6b-88e6-4267-8f00-4cca95483c17.png"
+  }
+}
