@@ -12,7 +12,9 @@ const EARLY_SUBJECTS:={
 	"plain_weaving":Vector2(.65,.70),"drop_spindles":Vector2(.67,.71),"customary_law":Vector2(.52,.76),"watch_rotation":Vector2(.68,.70),
 	"acorn_leaching":Vector2(.65,.73),"edible_resource_recognition":Vector2(.65,.73),"hide_tanning":Vector2(.50,.70),"charcoal":Vector2(.58,.74),
 	"drainage":Vector2(.58,.73),"public_stores":Vector2(.60,.68),"labor_rotations":Vector2(.52,.74),"festival_calendar":Vector2(.65,.80),
-	"supply_groups":Vector2(.35,.74),"rammed_earth_construction":Vector2(.60,.66),"adobe_wall_construction":Vector2(.60,.70),"mineral_pigment_preparation":Vector2(.67,.70)}
+	"supply_groups":Vector2(.35,.74),"rammed_earth_construction":Vector2(.60,.66),"adobe_wall_construction":Vector2(.60,.70),"mineral_pigment_preparation":Vector2(.67,.70),
+	"smoking":Vector2(.58,.68),"well_siting":Vector2(.68,.72),"standard_measures":Vector2(.53,.70),"route_memory":Vector2(.42,.67),
+	"formation_drill":Vector2(.50,.77),"stone_sorting":Vector2(.64,.72),"apprentice_contracts":Vector2(.67,.74),"wayfinding_stars":Vector2(.68,.70)}
 const EARLY_SUBJECT_FILES:={"hide_tanning":"hide-tanning-v2"}
 static var assignments:Dictionary={}
 static var textures:Dictionary={}

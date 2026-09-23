@@ -2389,3 +2389,7 @@ The founding/century direction cards and national-character history now share fo
 ### Early Wealth work illustration
 
 The early Wealth panel replaces its medieval workshop-and-market crop with the shared paper timber-working scene. Currency account visibility and economic numbers are unchanged. The actual year-71 save rendered at 1500×1000 and 1024×700 without script errors; no player save was written. This reuses an imported atlas and adds no texture asset.
+
+### Early research coverage: 36 subjects
+
+Eight additional exact IDs use their reviewed existing paper artwork in years 0–299: smoking, well siting, shared measures, route memory, formation drill, stone sorting, apprenticeship, and stellar wayfinding. No new image assets were needed. Each image was reviewed against its subject and receives an individual crop focus. Existing disclosure gates, bounded texture cache, and later-era bindings are unchanged.
