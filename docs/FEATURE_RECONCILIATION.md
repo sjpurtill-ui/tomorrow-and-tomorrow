@@ -2385,3 +2385,7 @@ Known foreign leaders now receive a contained action illustration beside their r
 ### Fourteen first-300-year direction illustrations
 
 The founding/century direction cards and national-character history now share fourteen distinct paper scenes. The six later choices no longer wrap around to unrelated first-eight art during years 0–299. New atlases depict exploration, building, council, inquiry, strength, abundance, care, exchange, founding, extraction, exclusion, dynasty, coercion, and controlled speech. Cards contain the whole scene above the caption and use larger early-era artwork; disabled confirmation text has readable contrast. Eleven focused tests pass; isolated screens at 1440×1000 and 1024×700 confirm images stay clear of captions. Effects, saves, and post-300 imagery are unchanged. Two mipmapped atlases, capped at 1536, reuse the bounded cache.
+
+### Early Wealth work illustration
+
+The early Wealth panel replaces its medieval workshop-and-market crop with the shared paper timber-working scene. Currency account visibility and economic numbers are unchanged. The actual year-71 save rendered at 1500×1000 and 1024×700 without script errors; no player save was written. This reuses an imported atlas and adds no texture asset.

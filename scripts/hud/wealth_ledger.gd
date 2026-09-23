@@ -36,7 +36,12 @@ func setup(block:Dictionary)->void:
 			_rule(self)
 		if money:_composition()
 	var work:=HBoxContainer.new();work.add_theme_constant_override("separation",14);add_child(work)
-	work.add_child(Approved.picture(Rect2(105,810,520,139),310,84))
+	if preload("res://scripts/hud/early_civ_art.gd").active():
+		var activity:=TextureRect.new();activity.texture=preload("res://scripts/hud/ambition_art.gd").texture(1)
+		activity.custom_minimum_size=Vector2(150,150);activity.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+		activity.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;activity.texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		activity.mouse_filter=Control.MOUSE_FILTER_IGNORE;work.add_child(activity)
+	else:work.add_child(Approved.picture(Rect2(105,810,520,139),310,84))
 	var brief:=VBoxContainer.new();brief.size_flags_horizontal=Control.SIZE_EXPAND_FILL;brief.size_flags_vertical=Control.SIZE_SHRINK_CENTER;work.add_child(brief);brief.add_child(_serif("Work & productivity",20))
 	var formula:=T.make_label("%.1f effective worker-days × %.0f%% = %.1f output" % [float(data.economy.effective_workers),float(data.economy.productivity)*100,float(data.economy.gdp)],11,T.MUTED);formula.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;brief.add_child(formula)
 	_button(work,"⌄",data.on_work,"Economic output calculation")
