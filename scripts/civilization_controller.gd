@@ -119,7 +119,7 @@ static func expansion_orders(id:String,plan:Dictionary)->void:
 ## expansion_orders as ordered parts: eligibility, one part per candidate site,
 ## then the founding order for the best site found.
 static func expansion_order_steps(id:String,plan_source:Callable)->Array:
-	var shared:Dictionary={"best":{},"best_value":-INF}
+	var shared:Dictionary={"best":{},"best_value":-INF,"quote_cache":{}}
 	var sites:Array=[]
 	var parts:Array=[["expansion_review",func()->Variant:
 		var plan:Dictionary=plan_source.call()
@@ -139,7 +139,7 @@ static func expansion_order_steps(id:String,plan_source:Callable)->Array:
 			if not bool(shared.get("eligible",false)) or index>=(shared.points as Array).size():return
 			var point:Vector2=shared.points[index]
 			if not bool(WorldSimulation.settlements.known_land_assessment(point).known):return
-			var quote:=WorldSimulation.settlements.settlement_convoy_quote(point,0)
+			var quote:=WorldSimulation.settlements.settlement_convoy_quote(point,0,shared.quote_cache)
 			if not bool(quote.get("ok",false)):return
 			var context:=preload("res://scripts/civilization_day.gd").context(point)
 			if not bool(WorldSimulation.resources.water_access_snapshot(context).accessible):return

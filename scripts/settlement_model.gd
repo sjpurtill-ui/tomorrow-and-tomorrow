@@ -1087,7 +1087,9 @@ func known_route_assessment(origin:Vector2,destination:Vector2)->Dictionary:
 			return {"known":false,"reason":"The destination is charted, but the route crosses uncharted ground. Return a continuous scout chart before sending settlers.","first_unknown":point,"progress":float(sample_index)/float(maxi(1,samples-1))}
 	return {"known":true,"distance_km":distance,"samples":samples,"bounded":true}
 
-func settlement_convoy_quote(destination:Vector2,duration_days:float)->Dictionary:
+## `review_cache` lets one expansion review reuse the network snapshot built by
+## its first quote that reaches it; nothing a quote does changes the network.
+func settlement_convoy_quote(destination:Vector2,duration_days:float,review_cache:Dictionary={})->Dictionary:
 	_ensure_primary_settlement_record()
 	if "Hearth Circle" not in WorldSimulation.state.settlement_completed:
 		return {"ok":false,"reason":"A permanent first settlement must exist before another can be founded."}
@@ -1098,7 +1100,10 @@ func settlement_convoy_quote(destination:Vector2,duration_days:float)->Dictionar
 	var land:=known_land_assessment(destination)
 	if not bool(land.get("known",false)):
 		return {"ok":false,"reason":String(land.get("reason","That land is not part of any returned map record.")),"known_land":false}
-	var network:Dictionary=settlement_network_snapshot()
+	var network:Dictionary=review_cache.get("network",{})
+	if network.is_empty():
+		network=settlement_network_snapshot()
+		review_cache["network"]=network
 	var origin:Dictionary={}
 	var origin_distance:=INF
 	for settlement in network.settlements:
