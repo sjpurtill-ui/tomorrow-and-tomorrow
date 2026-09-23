@@ -62,6 +62,8 @@ func test_early_unit_art_is_specific_and_later_units_keep_their_assets()->void:
 	var saved:=GameState.elapsed_days;GameState.elapsed_days=71*365
 	assert_str(military.illustration_path("levy")).is_equal(military.EARLY_UNITS.levy)
 	assert_str(military.illustration_path("spearman")).is_equal(military.EARLY_UNITS.spearman)
+	for id:String in military.EARLY_UNITS:
+		assert_bool(ResourceLoader.exists(military.illustration_path(id))).is_true()
 	assert_str(military.illustration_path("rifle_infantry")).is_equal(String(military.manifest().rifle_infantry.path))
 	assert_str(military.illustration_path("unknown_legacy_type")).is_empty()
 	GameState.elapsed_days=300*365

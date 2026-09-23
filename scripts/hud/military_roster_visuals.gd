@@ -3,7 +3,12 @@ extends Node
 const COLORS:={"army":Color("d9b772"),"navy":Color("76bbce"),"air":Color("a9bbec")}
 const Painting=preload("res://scripts/hud/subject_painting.gd")
 const Early=preload("res://scripts/hud/early_civ_art.gd")
-const EARLY_UNITS:={"levy":"res://assets/ui/military/paper/levy-v1.png","spearman":"res://assets/ui/military/paper/spearman-v1.png","archer":"res://assets/ui/military/paper/archer-v1.png"}
+const EARLY_UNITS:={
+	"levy":"res://assets/ui/military/paper/levy-v1.png",
+	"spearman":"res://assets/ui/military/paper/spearman-v1.png",
+	"archer":"res://assets/ui/military/paper/archer-v1.png",
+	"slinger":"res://assets/ui/military/paper/slinger-v1.png",
+	"skirmisher":"res://assets/ui/military/paper/skirmisher-v1.png"}
 static var symbols:Dictionary={}
 const ART_MANIFEST="res://assets/ui/military/subject-art-manifest.json"
 static var assignments:Dictionary={}

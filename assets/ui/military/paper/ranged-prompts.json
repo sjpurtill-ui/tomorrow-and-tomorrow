@@ -1,0 +1,16 @@
+{
+  "generator": "Built-in imagegen",
+  "style_reference": "assets/ui/research/paper/oral_epics.png",
+  "images": [
+    {
+      "file": "slinger-v1.png",
+      "source": "exec-e534ac4e-0506-4be0-88de-3f17560c3b79.png",
+      "prompt": "A distinct early-game SLINGERS role scene, landscape 4:3. Use the reference ONLY for dry gouache, charcoal and ochre on opaque ivory paper. Do not copy any earlier cast, garment, pose or composition. On a wind-scoured stony bank, a lean adult with a long narrow face and closely cropped hair stands turned sideways, carefully placing a smooth stone into the leather pouch of a simple two-cord hand sling. Both cords hang visibly and correctly from the pouch, no staff sling or bow. A second older, wiry adult farther back bends to pick stones from a small basket. Plain worn waist wraps and short sleeveless layered wraps with an original knotted side fastening; weathered ordinary people, not polished models or a uniform army. Anatomy: normal adult long legs, small heads, accurate hands, 7.5 head-heights when standing. Calm practical preparation, not a portrait, no posing to camera. Full figures and sling fully inside frame, main action centered. A low target stake in the distance provides context. Sparse warm rocks and windblown ochre grasses, broad ivory negative space, strong readable shapes suitable for a small game unit card. No helmets, metal armor, swords, fantasy elements, lettering, border or UI. This image will be assigned specifically to the game's slinger formation."
+    },
+    {
+      "file": "skirmisher-v1.png",
+      "source": "exec-141b5853-16ac-4d3e-b19a-51b44e72b92f.png",
+      "prompt": "Create an independently composed game illustration of early SKIRMISHERS, landscape 4:3. The supplied reference is for flat dry gouache, charcoal/ochre pigment and opaque ivory paper ONLY. Two lean ordinary adult scouts with simple wooden bows are moving cautiously through a sparse stand of twisted low trees at the edge of an open slope. Foreground adult has short coarse hair, an uneven weathered face, is in three-quarter back view stepping over a fallen limb while holding their bow low, free hand lifted to signal the following person to pause. Second adult farther upslope leans behind a tree watching the exposed ground, bow and small hip quiver clearly visible. Full adult anatomy, 7.5-head proportions, correct long legs and hands; no short-legged stylization, heroic posing or smiles. Practical dusty gray wrapped garments with narrow tied strips, unadorned hide carrying bags. Original invented humans, no recognizable national costume, no armor or helmets, no guns or fantasy. Show their tactical role of screening and observing ahead, visually unlike stationary archers at practice. The figures, bows and feet must fit completely inside frame. Spare landscape shapes, gentle rough paper edges, charcoal shadows, muted warm bark and ochre ground. Readable at small card size. No text, UI, frames, insignia, collage or labels. This will bind to the actual skirmisher unit card."
+    }
+  ]
+}

@@ -2360,3 +2360,6 @@ Validation: 20 tests passed (report 759), zero errors/failures/orphans, covering
 People now retain an authored early_art_profile name as well as their individual scene index. Snapshot and government rows carry that saved name to the image resolver. Adding more visual families later can no longer change existing people merely by changing the size of a hash/modulo lookup. New people inherit their civilization's existing saved family. Appearance remains independent of civic values and gameplay statistics.
 
 Validation: 9 early-art tests passed (report 760), zero errors/failures/orphans, including saved family-name resolution after JSON round-trip and seed changes. Existing missing appearance fields are initialized additively; no save version change or new portraits generated in this checkpoint.
+## September 22 — slinger and skirmisher role scenes
+
+Added separate paper action scenes for slingers preparing ammunition and bow-equipped skirmishers screening ahead. Both bind to their exact unit IDs before year 300 and use the existing contained roster framing; no unit gates or combat data changed. Native files and exact prompts are retained in assets/ui/military/paper/ranged-prompts.json. Nine early-art checks passed (report 761), including availability of every currently mapped early unit image.
