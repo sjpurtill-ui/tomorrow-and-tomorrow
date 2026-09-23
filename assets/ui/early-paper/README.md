@@ -14,7 +14,7 @@ Thirteen authored human visual families: Kilnfold, Reedwake, Windseam, Stoneweft
 - Buildings: 4x2 atlas; materials: 2x3; workshops and matching early products: 4x3.
 - Fourteen civic directions: two atlases, 4x2 and 3x2, for founding choices, cultural history and the Wealth work illustration.
 - Twelve undertaking design studies: two 3x2 atlases. Actual construction and operating status remain separate.
-- Early scouting header, 60 explicit research subject overrides and nine military unit types use the same paper aesthetic in their respective folders.
+- Early scouting header, 62 explicit research subject overrides and nine military unit types use the same paper aesthetic in their respective folders.
 
 Native generated originals are retained without raster editing. Runtime AtlasTexture regions use contained framing. Family atlases use mipmaps and a 1536 import cap; the shared source cache remains bounded at eight textures with lazy loading.
 
@@ -31,6 +31,7 @@ Exact prompts and native source IDs are in `prompts.json` and the named subseque
 | reedwake-scenes-v1.png | Four independent action scenes, visual family 1 | exec-a339f8d1-7db3-4e71-8f67-38c19d78ad8c.png |
 | windseam-scenes-v1.png | Four independent action scenes, visual family 2 | exec-f81d102b-4362-4c38-bdc4-d9b6ec7eb70c.png |
 | civic-practices-v1.png | Culture header selected from lived values: command, council, stewardship, exchange | exec-1a3c1a7c-e4c7-44a5-8a38-864ce8133431.png |
+
 
 
 
