@@ -260,6 +260,8 @@ func scene_detail(terrain:Node)->void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--days="):days=int(arg.trim_prefix("--days="))
 	var report:Dictionary={"samples":[]}
+	var trace=preload("res://scripts/performance_trace.gd")
+	trace.enabled="--frame-trace" in OS.get_cmdline_user_args()
 	var day:=int(GameState.elapsed_days)
 	for i in days:
 		var timings:Dictionary={"enabled":true}
@@ -268,7 +270,9 @@ func scene_detail(terrain:Node)->void:
 		GameState.elapsed_days=float(day+i+1);terrain.last_discovery_day=day+i+1
 		report.samples.append({"day":day+i+1,"ms":(Time.get_ticks_usec()-start)/1000.0,"timings":timings})
 		print("SCENE_DAY ",day+i+1," ",report.samples[-1].ms)
+		# Warm totals exclude the cold first day, as --detail does.
+		if i==0:trace.totals.clear()
 		await get_tree().process_frame
-	report["detail"]={}
+	report["detail"]=trace.totals
 	var file:=FileAccess.open("res://artifacts/year71_scene_detail.json",FileAccess.WRITE);file.store_string(JSON.stringify(report,"  "));file.close()
 	terrain.queue_free();WorldSimulation.clear();await get_tree().process_frame;get_tree().quit(0)
