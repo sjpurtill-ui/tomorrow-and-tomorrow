@@ -1001,7 +1001,8 @@ func _process(delta: float) -> void:
 	# Scale visibility follows the camera every frame it moves; otherwise only
 	# state changes matter, which ten checks a second keep up with.
 	scale_lod_elapsed+=maxf(0.0,delta)
-	var lod_view:=Vector4(camera.size,camera.global_position.x,camera.global_position.y,camera.global_position.z) if camera else Vector4.ZERO
+	var lod_origin:Vector3=(camera.global_position if camera.is_inside_tree() else camera.position) if camera else Vector3.ZERO
+	var lod_view:=Vector4(camera.size if camera else 0.0,lod_origin.x,lod_origin.y,lod_origin.z)
 	if lod_view!=scale_lod_view or scale_lod_elapsed>=0.1:
 		scale_lod_elapsed=0.0;scale_lod_view=lod_view
 		_update_scale_lod()
@@ -7696,9 +7697,12 @@ func _create_secondary_city_design(settlement:Dictionary,parent:Node3D,force:=fa
 	var rebuilt:=true
 	# A city ledger changes daily. Its buildings only need new meshes when
 	# their actual appearance or the camera's detail requirements change.
+	var trace=preload("res://scripts/performance_trace.gd")
 	SettlementModel.with_city_resources(String(record.id),func()->void:
+		var stamp:int=trace.start()
 		var lod:=_settlement_morphology_lod()
 		var signature:=str([center,lod,_settlement_morphology_view_signature(lod),_settlement_morphology_visual_signature(),_settlement_architecture_signature(_settlement_architecture_profile())])
+		stamp=trace.mark("city_design_signature",stamp)
 		var fabric:Node3D=null
 		for child in parent.get_children():
 			if String(child.get_meta("city_id",""))==String(record.id):fabric=child;break
@@ -7710,8 +7714,11 @@ func _create_secondary_city_design(settlement:Dictionary,parent:Node3D,force:=fa
 		fabric.set_meta("city_id",String(record.id));fabric.set_meta("visual_signature",signature)
 		parent.add_child(fabric)
 		var plots:Array[Dictionary]=SettlementModel.plots_for_lod(lod)
+		stamp=trace.mark("city_design_plots_for_lod",stamp)
 		_create_plot_fabric(center,plots,lod,fabric)
+		stamp=trace.mark("city_design_plot_fabric",stamp)
 		_create_persistent_settlement_routes(center,GameState.settlement_routes,fabric)
+		trace.mark("city_design_routes",stamp)
 	)
 	return rebuilt
 
@@ -9715,6 +9722,8 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 	var samples:=preload("res://scripts/settlement_surface_samples.gd").new(_close_surface_height_at,func(point:Vector2)->bool:return _settlement_stage_land_at(point+Vector2(center.x,center.z)))
 	var organic_plan: Dictionary = {"buildings": [], "replaced": {}}
 	var organic_town := _organic_town_enabled()
+	var ptrace=preload("res://scripts/performance_trace.gd")
+	var pstamp:int=ptrace.start()
 	if EarlySettlementVisual.has_kit(GameState.settlement_plots):
 		# Build against the full saved fabric, never a camera-culled subset.
 		var state := var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes])
@@ -9723,9 +9732,12 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 			EarlySettlementVisual.remember_layout(organic_town_cached_plan,GameState.settlement_plots)
 			organic_town_cached_state = var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes])
 		organic_plan = organic_town_cached_plan
+		pstamp=ptrace.mark("plot_fabric_layout",pstamp)
 		EarlySettlementVisual.render(organic_plan, center, samples.height_at, parent)
+		pstamp=ptrace.mark("plot_fabric_kit_render",pstamp)
 	if organic_town:
 		EarlySettlementGround.render(organic_plan, GameState.settlement_plots, GameState.settlement_routes, center, samples.height_at, samples.land_at, parent)
+		pstamp=ptrace.mark("plot_fabric_ground_render",pstamp)
 		# Keep genuine cultivated fields and later unsupported forms, but never
 		# paint the household/service parcel polygons over the new working ground.
 		plots = plots.filter(func(plot: Dictionary) -> bool: return not EarlySettlementGround.handles(plot))
@@ -9866,6 +9878,7 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 			scar_count += 1
 	if density_count>0:
 		_commit_settlement_surface(density_surface,"PersistentSettlementDensity",parent,true)
+	pstamp=ptrace.mark("plot_fabric_plot_loop",pstamp)
 	_commit_settlement_surface(ground_surface, "PersistentPlotGround", parent, true)
 	if field_ground_count>0:
 		_commit_settlement_surface(field_ground_surface,"PersistentFieldGround",parent,true)
@@ -10038,15 +10051,43 @@ func _nearest_tributary_distance_at(position:Vector2)->float:
 		return INF
 	if world_tributary_courses.is_empty():
 		world_tributary_courses=_seeded_world_tributaries()
+	if not is_same(tributary_chunk_source,world_tributary_courses):_index_tributary_chunks()
+	# Chunks farther away than the nearest segment found so far cannot hold a
+	# closer one, so skipping them leaves the minimum exactly unchanged.
 	var nearest:=INF
-	for tributary_variant in world_tributary_courses:
-		var tributary:Array=tributary_variant
-		for point_index in tributary.size()-1:
+	for chunk:Array in tributary_chunks:
+		var bounds:Rect2=chunk[0]
+		var gap:=Vector2(maxf(0.0,maxf(bounds.position.x-position.x,position.x-bounds.end.x)),maxf(0.0,maxf(bounds.position.y-position.y,position.y-bounds.end.y)))
+		if gap.length()>=nearest:continue
+		var tributary:Array=world_tributary_courses[int(chunk[1])]
+		for point_index in range(int(chunk[2]),int(chunk[3])):
 			var start:Vector3=tributary[point_index]
 			var finish:Vector3=tributary[point_index+1]
 			var closest:=Geometry2D.get_closest_point_to_segment(position,Vector2(start.x,start.z),Vector2(finish.x,finish.z))
 			nearest=minf(nearest,position.distance_to(closest))
 	return nearest
+
+## Tributary segments grouped in runs of TRIBUTARY_CHUNK_SEGMENTS with bounds:
+## [Rect2, tributary index, first point, last segment start + 1].
+var tributary_chunks:Array=[]
+var tributary_chunk_source:Array=[]
+const TRIBUTARY_CHUNK_SEGMENTS:=16
+
+func _index_tributary_chunks()->void:
+	tributary_chunk_source=world_tributary_courses
+	tributary_chunks.clear()
+	for tributary_index in world_tributary_courses.size():
+		var tributary:Array=world_tributary_courses[tributary_index]
+		var first:=0
+		while first<tributary.size()-1:
+			var last:=mini(first+TRIBUTARY_CHUNK_SEGMENTS,tributary.size()-1)
+			var start:Vector3=tributary[first]
+			var bounds:=Rect2(Vector2(start.x,start.z),Vector2.ZERO)
+			for point_index in range(first+1,last+1):
+				var point:Vector3=tributary[point_index]
+				bounds=bounds.expand(Vector2(point.x,point.z))
+			tributary_chunks.append([bounds,tributary_index,first,last])
+			first=last
 
 
 func _settlement_surface_assessment(destination:Vector3)->Dictionary:

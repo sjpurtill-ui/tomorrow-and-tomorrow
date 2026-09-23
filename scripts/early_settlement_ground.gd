@@ -18,6 +18,13 @@ static func render(plan: Dictionary, plots: Array[Dictionary], routes: Array[Dic
 		var width := clampf(float(route.get("width_m",.8))*.0005,.00025,.0025)
 		for i in range(1,points.size()):
 			trail(ground,points[i-1],points[i],width,soil,center,height,land,counts)
+	# Footprint bounds let each footpath skip buildings it cannot cross.
+	var bounds: Array[Rect2] = []
+	for other in plan.buildings:
+		var footprint: PackedVector2Array = other.footprint
+		var rect := Rect2(footprint[0],Vector2.ZERO) if footprint.size()>0 else Rect2(Vector2.INF,Vector2.ZERO)
+		for corner in footprint: rect=rect.expand(corner)
+		bounds.append(rect)
 	for record in plan.buildings:
 		var plot: Dictionary = record.plot
 		if String(plot.get("status","active")) in ["vacant","reclaimed"]: continue
@@ -34,10 +41,14 @@ static func render(plan: Dictionary, plots: Array[Dictionary], routes: Array[Dic
 		# Worn thresholds replace full-parcel polygon mats.
 		patch(ground,door,.0016,soil,center,height,land,counts)
 		var clear := true
-		for other in plan.buildings:
+		var path := Rect2(door,Vector2.ZERO).expand(nearest)
+		for other_index in plan.buildings.size():
+			var other = plan.buildings[other_index]
 			if other.id==record.id: continue
+			if not bounds[other_index].grow(0.000001).intersects(path,true): continue
 			for i in 9:
 				if Geometry2D.is_point_in_polygon(door.lerp(nearest,float(i)/8),other.footprint): clear=false;break
+			if not clear: break
 		if clear: trail(ground,door,nearest,.00027,soil,center,height,land,counts)
 		if String(plot.get("status","active")) == "under_construction":
 			for corner in record.footprint:
