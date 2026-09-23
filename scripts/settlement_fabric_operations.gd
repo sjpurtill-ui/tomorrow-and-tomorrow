@@ -241,6 +241,9 @@ static func rain_transfer(plot:Dictionary)->float:
 static func repair_bill(plot:Dictionary,work:float)->Dictionary:
  var bill:Dictionary={}
  if not is_finite(work) or work<=0:return bill
+ # Without installed component records every method below fails valid_record.
+ var installed:Variant=plot.get("fabric_components",{})
+ if installed is Dictionary and installed.is_empty():return bill
  for method:String in COMPONENTS:
   var record:Variant=plot.get("fabric_components",{}).get(method,{})
   if not valid_record(record,int(plot.get("id",0)),true):continue
