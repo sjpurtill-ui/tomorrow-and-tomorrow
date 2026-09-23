@@ -60,6 +60,7 @@ const CITY_VITAL_COUNTERS:=["lifetime_births","lifetime_deaths","lifetime_concep
 var _claim_shape_cache:Dictionary={}
 # CITY_RESOURCE_DEFAULTS keys as StringNames for the per-scope field swap.
 static var _city_resource_fields:Array[StringName]=[]
+static var _city_resource_keys:Array=[]
 # Nation-wide inputs shared by every record within one network snapshot call.
 # An Object, so saves never capture it; empty outside a snapshot.
 var _network_common:=RefCounted.new()
@@ -89,7 +90,9 @@ func selected_settlement()->Dictionary:
 func _ensure_city_resources(record:Dictionary)->void:
 	if bool(record.get("primary",false)): return
 	if record.has("local_resources"):
-		for key in CITY_RESOURCE_DEFAULTS:
+		if _city_resource_keys.is_empty():_city_resource_keys=CITY_RESOURCE_DEFAULTS.keys()
+		# Usually every key is present; one native check replaces 34 lookups.
+		for key in ([] if (record.local_resources as Dictionary).has_all(_city_resource_keys) else CITY_RESOURCE_DEFAULTS.keys()):
 			if not record.local_resources.has(key):
 				var value:Variant=CITY_RESOURCE_DEFAULTS[key]
 				record.local_resources[key]=value.duplicate(true) if value is Dictionary or value is Array else value
