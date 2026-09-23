@@ -6,6 +6,7 @@ const Painting=preload("res://scripts/hud/subject_painting.gd")
 const ART_MANIFEST="res://assets/ui/research/subject-art-manifest.json"
 const CACHE_LIMIT:=64
 const EARLY_SUBJECTS:={
+	"ember_tending":Vector2(.50,.69),"fiber_retting":Vector2(.50,.70),
 	"caulking_fiber_preparation":Vector2(.50,.72),
 	"layered_clothing_design":Vector2(.50,.52),"rigid_pipe_bedding":Vector2(.50,.53),
 	"pike_drill":Vector2(.50,.55),"crossbow_mechanism":Vector2(.50,.53),
