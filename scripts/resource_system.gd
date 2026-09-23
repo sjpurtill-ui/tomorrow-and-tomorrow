@@ -621,16 +621,21 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var total_weight:=0.0
 	for deposit in material_deposits:
 		total_weight+=_extraction_priority(deposit,storage_priorities) if float(deposit.remaining)>0.0 else 0.0
+	# Owner-wide inputs, read once for every deposit in this pass.
+	var extraction_effect:=WorldSimulation.discovery.effect("extraction_yield")
+	var metal_effect:=WorldSimulation.discovery.effect("metal_yield")
+	var output_bonus:=1.0+WorldSimulation.state.founding_effect("resource_output")+WorldSimulation.progression.effect("extraction_yield")
+	var tool_factor:=0.55+float(context.get("tools",0.25))*0.75
 	var extracted_total:=0.0
 	for deposit in material_deposits:
 		var share:=_extraction_priority(deposit,storage_priorities)/maxf(0.001,total_weight) if float(deposit.remaining)>0.0 else 0.0
 		var assigned:=extractors*share
 		deposit.workers=roundi(assigned)
 		var profile:=_material_profile(String(deposit.resource))
-		var knowledge_multiplier:=1.0+WorldSimulation.discovery.effect("extraction_yield")+WorldSimulation.discovery.effect(String(deposit.resource).to_lower().replace(" ","_")+"_yield")
-		if String(profile.family)=="metal": knowledge_multiplier+=WorldSimulation.discovery.effect("metal_yield")
+		var knowledge_multiplier:=1.0+extraction_effect+WorldSimulation.discovery.effect(String(deposit.resource).to_lower().replace(" ","_")+"_yield")
+		if String(profile.family)=="metal": knowledge_multiplier+=metal_effect
 		var practice_multiplier:=1.0+minf(0.35,_practice(String(deposit.resource),"extraction")*0.035)
-		deposit.daily_yield=assigned*float(profile.base_yield)*float(deposit.quality)*(0.55+float(context.get("tools",0.25))*0.75)*labor_eff*knowledge_multiplier*practice_multiplier*(1.0+WorldSimulation.state.founding_effect("resource_output")+WorldSimulation.progression.effect("extraction_yield"))
+		deposit.daily_yield=assigned*float(profile.base_yield)*float(deposit.quality)*tool_factor*labor_eff*knowledge_multiplier*practice_multiplier*output_bonus
 		var extracted:=preload("res://scripts/civilization_resources.gd").withdraw(deposit,float(deposit.daily_yield)) if WorldSimulation.enabled else minf(float(deposit.remaining),float(deposit.daily_yield))
 		deposit.remaining=float(deposit.remaining)-extracted
 		deposit.stock_at_source=float(deposit.stock_at_source)+extracted
@@ -671,6 +676,9 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	stamp=trace.mark("flow_deliveries",stamp)
 	var haul_weight:=0.0
 	storage_priorities=_storage_gathering_priorities()
+	var route_speed_effect:=WorldSimulation.discovery.effect("route_speed")
+	var haul_effect:=1.0+WorldSimulation.discovery.effect("haul_capacity")
+	var travel_effect:=1.0+WorldSimulation.discovery.effect("travel_speed")
 	for deposit in material_deposits:
 		haul_weight+=float(deposit.stock_at_source)*_deposit_priority(deposit,storage_priorities)
 	for deposit in material_deposits:
@@ -679,13 +687,13 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		var share:=waiting*_deposit_priority(deposit,storage_priorities)/maxf(0.001,haul_weight)
 		var assigned_carriers:=carriers*share
 		var profile:=_material_profile(String(deposit.resource))
-		var route_factor:=0.34+float(deposit.route)*0.66+WorldSimulation.discovery.effect("route_speed")
+		var route_factor:=0.34+float(deposit.route)*0.66+route_speed_effect
 		var distance_factor:=1.0+float(deposit.distance_km)/10.0
-		var haul_capacity:=assigned_carriers*5.0/maxf(0.2,float(profile.bulk))*route_factor*labor_eff*(1.0+WorldSimulation.discovery.effect("haul_capacity"))/distance_factor
+		var haul_capacity:=assigned_carriers*5.0/maxf(0.2,float(profile.bulk))*route_factor*labor_eff*haul_effect/distance_factor
 		var dispatched:=minf(waiting,haul_capacity)
 		if dispatched>0.0:
 			deposit.stock_at_source=waiting-dispatched
-			var speed_km_day:=maxf(1.0,8.0*route_factor*(1.0+WorldSimulation.discovery.effect("travel_speed")))
+			var speed_km_day:=maxf(1.0,8.0*route_factor*travel_effect)
 			deposit.travel_days=maxi(1,ceili(float(deposit.distance_km)/speed_km_day))
 			deposit.shipments.append({"quantity":dispatched,"departure_day":int(WorldSimulation.state.elapsed_days),"arrival_day":int(WorldSimulation.state.elapsed_days)+int(deposit.travel_days)})
 		_update_deposit_bottleneck(deposit,carriers,events)
