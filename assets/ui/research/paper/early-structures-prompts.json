@@ -1,0 +1,8 @@
+{
+  "generator": "Built-in imagegen",
+  "style_reference": "assets/ui/research/paper/oral_epics.png",
+  "assets": [
+    {"file": "framed_construction.png", "source": "exec-72e175ec-e10b-45d3-81b0-67b31158f440.png", "subject": "Early timber frame with workers raising a crossmember"},
+    {"file": "kiln_control.png", "source": "exec-b9c9c01c-1039-4cf1-b103-68d9ebb54d82.png", "subject": "Early enclosed kiln with fire and air vent control"}
+  ]
+}

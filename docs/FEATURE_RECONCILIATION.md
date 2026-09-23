@@ -2461,3 +2461,7 @@ Reading the Quarry Face and Timber Seasoning now use matching early paper imager
 ### Early bow craft and weapon hafting
 
 War Bow Craft and Hafted Weapons now show their specific inspection and craft work in early paper illustrations. Both occur in recorded early pacing. Large and compact research crops were reviewed on the isolated GPU desktop; thirteen focused tests passed without errors, failures or orphans. Fifty-two explicit early research overrides are installed, preserving research gates, simulation and later-era mappings.
+
+### Early frame and kiln research art
+
+Framed Construction and Kiln Control now have specific paper illustrations for their early research cards. Imported resources resolve; thirteen focused tests pass without errors, failures or orphans. Fifty-four explicit early research overrides are installed.
