@@ -1,7 +1,7 @@
 extends RefCounted
 ## Scheduling and receipts only. Existing production owns every material and hour.
+## Lines make military equipment only; civilian investment orders install plants.
 const P=preload("res://scripts/persistent_production.gd")
-const I=preload("res://scripts/civilian_industry.gd")
 const Planner=preload("res://scripts/civilian_production_planner.gd")
 const MAX_RECEIPTS:=256
 var host:Node
@@ -164,13 +164,7 @@ func schedule(demand:Dictionary)->Dictionary:
 		if int(job.id)==int(result.get("job_id",-1)):job.planner_managed=true
 	return {"changed":true,"message":"Scheduled %s · replenish to %d in stores." % [P.product_name(item),target]}
 func output_stocks(job:Dictionary)->Dictionary:
-	var item:=String(job.item);var kind:=String(job.get("job_type","production"))
-	if kind=="civilian":
-		var spec:=I.product(item);var stocks:Dictionary={}
-		for resource:String in [String(spec.get("output",""))]+spec.get("co_products",{}).keys():
-			stocks[resource]=float(WorldSimulation.state.resource_stockpiles.get(resource,0))
-		return stocks
-	return {item:float(P.stock(host,job))}
+	return {String(job.item):float(P.stock(host,job))}
 func record(job:Dictionary,before:Dictionary)->void:
 	var day:=int(WorldSimulation.state.elapsed_days)
 	if int(data.tracking_day)<0:data.tracking_day=day

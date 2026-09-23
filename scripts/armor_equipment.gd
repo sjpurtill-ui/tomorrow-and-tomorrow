@@ -150,25 +150,10 @@ static func upstream(host:Node,item:String,target:int)->Dictionary:
 	for resource:String in materials:
 		var needed:=float(materials[resource])*fraction
 		if float(WorldSimulation.state.resource_stockpiles.get(resource,0))+.000001>=needed:continue
-		# Plan a bounded next batch through the same paid upstream factories as
-		# civilian production. Do not spend on a chain with a missing raw input.
+		# Kit bills name raw materials and Civilian Goods (armor parts are
+		# flattened), so a shortfall has no upstream line. Do not spend on a
+		# kit with a missing input.
 		var next:=Supply.supply(resource,maxi(1,ceili(float(materials[resource])*batches)),{})
 		if next.is_empty():return {}
 		if first.is_empty():first=next
 	return first if not first.is_empty() else {"item":item,"target":target}
-
-## A controller-owned, idle armor line may temporarily make its missing input.
-## Manual/paused lines and any paid partial work remain protected.
-static func reusable_line(host:Node,next_item:String)->int:
-	var I=preload("res://scripts/civilian_industry.gd")
-	var Supply=preload("res://scripts/civilian_production_planner.gd")
-	var output:=String(I.product(next_item).get("output",""))
-	if output.is_empty():return -1
-	for job:Dictionary in host.equipment_queue:
-		if not KITS.has(String(job.get("item",""))) or not bool(job.get("planner_managed",false)):continue
-		if not bool(job.get("persistent",false)) or bool(job.get("paused",false)):continue
-		if float(job.get("progress_days",0))>0 or not (job.get("reserved_materials",{}) as Dictionary).is_empty():continue
-		for input:String in job.materials:
-			if float(WorldSimulation.state.resource_stockpiles.get(input,0))>=float(job.materials[input]):continue
-			if input==output or Supply.input_depends_on(input,output,{}):return int(job.id)
-	return -1
