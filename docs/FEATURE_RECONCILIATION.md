@@ -2421,3 +2421,7 @@ Thornbank and Sunhollow add eight reviewed action illustrations with varied ordi
 ### Twelve early families and previous-world guard
 
 Greyfold and corrected Ochrestep add eight action scenes. The initial distribution covers player plus eleven rivals; saved identities are unchanged. A seed guard prevents a leftover diplomatic appearance from another world entering first assignment. Thirteen focused checks pass, including same-world preservation, different-world fallback and all twelve image regions. Native generated images and the targeted cast correction prompt are retained.
+
+### Thirteen early families for default new worlds
+
+Hollowreed completes thirteen authored human visual families with four principal action scenes each. The default new world assigns a distinct family to the player and each of twelve rivals. Thirteen focused tests pass, and an isolated GPU preview verifies all thirteen new-world assignments and character-widget framing. Existing saved families remain authoritative; larger worlds repeat families and additional officials reuse the small cast. The source cache remains bounded at eight textures. No simulation traits or player saves change.

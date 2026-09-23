@@ -1,6 +1,26 @@
-# Early civilization artwork: runtime bindings
+# First-300-year paper artwork
 
-Scope: the first 300 game years. These are illustrations, not simulated event records. Existing later-era resources remain available after the early gate. No ancestry changes gameplay statistics or civic behavior.
+Scope: years 0-299. Illustrations describe practices, not recorded events. Later-era resources remain available. Ancestry never sets gameplay statistics or political behavior.
+
+## Character identity
+
+Thirteen authored human visual families: Kilnfold, Reedwake, Windseam, Stoneweft, Ashplain, Rillmark, Flintmere, Morrowfen, Thornbank, Sunhollow, Greyfold, Ochrestep and Hollowreed. Each supplies four principal action scenes. Stoneweft uses the previously approved five-cell source, with four allocated character slots.
+
+`scripts/character_appearance.gd` distributes families without repetition across the default new world (player plus twelve rivals). Saved government and same-world diplomatic assignments take precedence. Larger worlds repeat families, and additional officials reuse the small cast. Existing saves are not recast. Assignment consumes no simulation RNG.
+
+## Runtime bindings
+
+- `early_civ_art.gd`: government, settlement leadership, known diplomatic leaders and culture practices.
+- Buildings: 4x2 atlas; materials: 2x3; workshops and matching early products: 4x3.
+- Fourteen civic directions: two atlases, 4x2 and 3x2, for founding choices, cultural history and the Wealth work illustration.
+- Twelve undertaking design studies: two 3x2 atlases. Actual construction and operating status remain separate.
+- Early scouting header, 38 explicit research subject overrides and eight military unit types use the same paper aesthetic in their respective folders.
+
+Native generated originals are retained without raster editing. Runtime AtlasTexture regions use contained framing. Family atlases use mipmaps and a 1536 import cap; the shared source cache remains bounded at eight textures with lazy loading.
+
+Exact prompts and native source IDs are in `prompts.json` and the named subsequent prompt JSON files. Ochrestep retains both its original and targeted cast-correction prompt. The rejected original is not used. Civic practice imagery responds to lived values independently of ancestry.
+
+## Initial source records
 
 | File | Runtime use | Native generation file |
 | --- | --- | --- |
@@ -12,22 +32,3 @@ Scope: the first 300 game years. These are illustrations, not simulated event re
 | windseam-scenes-v1.png | Four independent action scenes, visual family 2 | exec-f81d102b-4362-4c38-bdc4-d9b6ec7eb70c.png |
 | civic-practices-v1.png | Culture header selected from lived values: command, council, stewardship, exchange | exec-1a3c1a7c-e4c7-44a5-8a38-864ce8133431.png |
 
-The fourth visual family uses the approved `assets/portraits/paper/stoneweft-actions-v4.png`. Native originals are retained without raster cropping; AtlasTexture crops and contained aspect ratios are used at runtime. Exact available generation prompts are in prompts.json. The civic sheet is the opaque-paper repair of exec-5fc60762-c057-4b77-83f9-bb2b7a84a070.png; that defective original is not used.
-
-Civilization ID and world seed choose a consistent visual family. Person records retain early_art_index across saves and changes of office. Existing cabinets receive separate slots where capacity permits. Four illustrated individuals per family remain a coverage limitation: larger populations and additional offices reuse art. Four families also means different civilizations can share a family. Neither unique art for every official nor exclusive art for every civilization is complete.
-
-Culture pictures interpret current values, not racial temperament, actual diplomatic reputation, or a recorded event. Generic research/category scenes reuse relevant existing paper subjects; specific discovery illustrations are unchanged. Texture loading is lazy and bounded, with no new per-frame image generation or simulation work beyond assigning missing appearance indices.
-
-Direction art: directions-a-v1.png contains the first eight civic directions in 4×2 order; directions-b-v1.png contains the remaining six in 3×2 order. Both are selected by scripts/hud/ambition_art.gd for the direction cards and cultural-history illustrations. Exact prompts and native sources are in direction-prompts.json. The illustrated practices represent choices, not ancestry.
-
-Research update: 28 specific early research subjects now use reviewed paper illustrations through ResearchVisuals; discovery visibility and later-era mappings remain intact. Known foreign-leader records also use stable civilization-owned action art. The four-family coverage limitation above remains.
-
-Character library expansion: ashplain-scenes-v1.png adds a fifth family with four independently composed working scenes. ashplain-prompt.json retains its native source and exact prompt. scripts/character_appearance.gd now owns family names and first-assignment selection for both government and known diplomatic leaders. Existing saved families take precedence; the new family is available to first-time assignments/new worlds, not a retroactive recasting of established people. Five families still cannot give all 12–36 rivals exclusive ancestry artwork.
-
-Rillmark adds a sixth authored family with four distinct inspection/explanation scenes; see rillmark-prompt.json. For newly assigned worlds, the player and first five canonical rival IDs use all six families before repetition. The family choice is deterministic and independent of simulation RNG. Saved appearances retain priority. This improves distribution; it does not claim six families can cover every rival uniquely.
-
-Flintmere and Morrowfen extend the library to eight families, each with four independently composed action scenes and its own prompt/provenance file. The nonrepeating first-assignment span grows to the player plus seven rivals; established saved families are unchanged. Atlases retain 1536 caps and mipmaps, and the shared source cache remains bounded at eight textures.
-
-Thornbank and Sunhollow extend the library to ten families and add eight action compositions. Native source IDs and exact prompts are recorded in their named prompt JSON files. New first assignments cover the player plus nine rivals before repetition; saved family assignments remain unchanged.
-
-Greyfold and Ochrestep extend the library to twelve families. Ochrestep's first image repeated a similar figure; the committed native repair replaces the lower-left person with a distinct older individual, with both prompts retained. Cross-screen family reuse also checks the diplomatic world's seed so a stale previous-world record is not adopted during first assignment.
