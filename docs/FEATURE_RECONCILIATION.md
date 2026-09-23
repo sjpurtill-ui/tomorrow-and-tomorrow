@@ -2457,3 +2457,7 @@ Tempered Clay and Sealed Vessels now show additive mixing and pest-resistant clo
 ### Quarry reading and timber seasoning
 
 Reading the Quarry Face and Timber Seasoning now use matching early paper imagery for seam inspection and spaced timber drying. Both actual research card sizes were reviewed in an isolated GPU preview. Thirteen focused tests passed without errors, failures or orphans. Fifty explicit early research overrides are installed, preserving later-era mappings. Native sources and exact prompts are retained.
+
+### Early bow craft and weapon hafting
+
+War Bow Craft and Hafted Weapons now show their specific inspection and craft work in early paper illustrations. Both occur in recorded early pacing. Large and compact research crops were reviewed on the isolated GPU desktop; thirteen focused tests passed without errors, failures or orphans. Fifty-two explicit early research overrides are installed, preserving research gates, simulation and later-era mappings.

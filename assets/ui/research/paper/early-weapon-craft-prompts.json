@@ -1,0 +1,16 @@
+{
+  "generator": "Built-in imagegen",
+  "style_reference": "assets/ui/research/paper/oral_epics.png",
+  "assets": [
+    {
+      "file": "bow_craft.png",
+      "source": "exec-e50fa96c-5e65-4798-86b7-befcf3f56b44.png",
+      "prompt": "Landscape 4:3 research artwork WAR BOW CRAFT for an early civilization game. Reference aesthetic only: flat matte dry gouache, charcoal, ochre and muted sage on opaque warm ivory paper, restrained grain, irregular vignette edges, not photographic realism. An ordinary lean adult bowyer sitting sideways on a low block inspects the even curvature of a simple wooden bow held horizontally across the lap; a second older craftsperson aligns two arrow shafts on a plain timber support beside a loose fiber bowstring. Clear deliberate matching of wood, string and arrows, not firing at someone. Show functional simple self bow, no pulleys, metal fittings or modern tools. Hands practical and anatomically plausible; normal adult proportions, worn invented woven garments, no ethnic costume or glamorous warrior. Modest working corner without elaborate workshop, no carved ornament or heraldry. Entire main action and bow fit compact central horizontal band with ivory margin for wide research-card crops. No text, arrows, border, UI or diagram."
+    },
+    {
+      "file": "hafted_weapons.png",
+      "source": "exec-7269df25-0d52-4158-b6cd-34b044e88967.png",
+      "prompt": "Landscape 4:3 research artwork HAFTED WEAPONS for a dawn-of-history civilization game. Reference aesthetic only: flat dry matte gouache, charcoal, muted ochre and sage on warm opaque ivory paper, restrained grain, irregular vignette edges, no photographic realism. A practical early craft inspection scene: a kneeling ordinary adult checks the securely cord-bound stone point of a long wooden thrusting spear resting horizontally across two low supports. One hand steadies the shaft and the other tugs the binding to check it; a second plain finished spear lies parallel, a small worn practice target of bundled reeds sits well behind. Stone point aligned along shaft, lashings and resin visible; no instructions or diagram. This is developing reliable balanced hafted weapons, not combat, no injured people. Natural adult proportions and functional hands, imperfect face, simple invented woven garment. No metal, armor, swords, modern tool, heroic warrior pose, national costume or elaborate workshop. Main person, spearhead and joint fit central horizontal band; full shaft may extend sideways but not off frame; ivory margins for wide card crop. No text, border or UI."
+    }
+  ]
+}
