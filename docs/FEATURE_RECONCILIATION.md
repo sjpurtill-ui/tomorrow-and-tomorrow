@@ -2425,3 +2425,7 @@ Greyfold and corrected Ochrestep add eight action scenes. The initial distributi
 ### Thirteen early families for default new worlds
 
 Hollowreed completes thirteen authored human visual families with four principal action scenes each. The default new world assigns a distinct family to the player and each of twelve rivals. Thirteen focused tests pass, and an isolated GPU preview verifies all thirteen new-world assignments and character-widget framing. Existing saved families remain authoritative; larger worlds repeat families and additional officials reuse the small cast. The source cache remains bounded at eight textures. No simulation traits or player saves change.
+
+### World contact artwork follows discovered identity
+
+Early World overview contact cards now reuse the known diplomatic leader image and name. The existing contact-level gate must return a known leader before artwork is attached; rumors and unconfirmed encounters remain unillustrated. An isolated 1024x700 GPU fixture verifies exactly one portrait for one known contact plus an unknown lead, without touching player saves. Later-era cards retain their prior presentation. No new textures or simulation loops were added.

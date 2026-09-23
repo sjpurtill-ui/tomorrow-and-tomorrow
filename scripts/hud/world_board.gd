@@ -21,12 +21,20 @@ func setup(data:Dictionary)->void:
 		_label(column,String(section.title),15,T.GOLD)
 		for item:Dictionary in section.items:
 			var card:=_card(column)
+			var person:Dictionary=item.get("known_leader",{})
+			if not person.is_empty():
+				var identity:=HBoxContainer.new();identity.add_theme_constant_override("separation",14);card.add_child(identity)
+				identity.add_child(preload("res://scripts/hud/person_portrait.gd").picture(person,112,112))
+				var text:=VBoxContainer.new();text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;text.add_theme_constant_override("separation",8);identity.add_child(text)
+				card=text
+				_label(card,String(person.get("name","")),14,T.INK)
 			_label(card,String(item.get("tag","")),11,T.GOLD)
 			_label(card,String(item.title),19,T.INK)
 			_label(card,String(item.detail),13,T.BODY)
 			if item.has("on_press"):
 				var button:=Button.new();button.text=String(item.get("action","Open report"));button.custom_minimum_size.y=34
 				button.add_theme_color_override("font_color",T.INK)
+				button.add_theme_stylebox_override("normal",T.flat(T.BUTTON_BG,T.BORDER,1,3))
 				button.pressed.connect(item.on_press);card.add_child(button)
 	resized.connect(_layout);_layout()
 func _layout()->void:

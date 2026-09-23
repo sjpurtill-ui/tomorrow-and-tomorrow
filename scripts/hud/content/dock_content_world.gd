@@ -108,6 +108,12 @@ func _world_board(exploration:Dictionary)->Array:
 		var located:=bool(encounter.get("home_location_known",false))
 		if located:destinations+=1
 		contacts.append({"tag":"DIPLOMATIC DESTINATION" if located else "ENCOUNTER · HOME NOT LOCATED","title":String(encounter.get("name","Unknown polity")),"detail":"%s · %s" % [archive.calendar_date(int(encounter.get("day",0))),String(encounter.get("source_description","Returned encounter"))],"action":"View known record","on_press":func()->void:hud.open_detail(DetailCivReport.new(terrain,hud,id))})
+		var art=preload("res://scripts/hud/early_civ_art.gd")
+		if art.active():
+			var known_leader:=WorldSimulation.diplomacy.leader(id)
+			if not known_leader.is_empty():
+				art.bind_foreign_identity(known_leader,id,GameState.world_seed)
+				contacts.back()["known_leader"]=known_leader
 	if contacts.is_empty():
 		contacts.append({"tag":"CONTACTS","title":"Who lives beyond our borders?","detail":"No foreign society confirmed yet. Scout reports below show what your expeditions have brought home.","action":"Choose a scouting destination","on_press":func()->void:terrain._open_scout_dispatch_panel()})
 	var leads:=CivilizationSystem.rumor_network.list_leads("player",int(GameState.elapsed_days)).size()
