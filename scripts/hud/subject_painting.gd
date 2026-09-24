@@ -12,7 +12,11 @@ func _ready()->void:
 		visibility_changed.connect(refresh)
 		scroll.resized.connect(refresh)
 		scroll.get_v_scroll_bar().value_changed.connect(func(_value:float)->void:refresh())
+		# Cards reflowed into view (e.g. a second row placed after layout) move without resizing.
+		set_notify_transform(true)
 		call_deferred("refresh")
+func _notification(what:int)->void:
+	if what==NOTIFICATION_TRANSFORM_CHANGED and texture==null:refresh()
 func refresh()->void:
 	if not is_instance_valid(scroll) or not fetch.is_valid():return
 	if is_visible_in_tree() and size.y>0 and scroll.get_global_rect().intersects(get_global_rect()):

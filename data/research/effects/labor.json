@@ -1,5 +1,463 @@
 {
  "line": "labor",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "labor_rotations": {
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+  },
+  "household_task_division": {
+   "effects": {
+    "labor_efficiency": 0.0026,
+    "task_coordination": 0.0075,
+    "fatigue": -0.0042,
+    "injury_risk": -0.005
+   },
+   "observation": "Grandmothers keep the fire and the smallest children while the strong go out, and each season has its own hands for its own work."
+  },
+  "dawn_task_briefings": {
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+  },
+  "aptitude_trials": {
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+  },
+  "paired_task_assignment": {
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+  },
+  "rest_break_timing": {
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
+  },
+  "shared_work_signals": {
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+  },
+  "seasonal_work_round": {
+   "effects": {
+    "labor_efficiency": 0.0022,
+    "labor_demand": -0.015,
+    "task_coordination": 0.0075
+   },
+   "observation": "Planting, felling and building each get their own season, so no household is asked to do all three at once."
+  },
+  "task_sequencing_habits": {
+   "art": "res://assets/ui/research/subjects/work_motion_studies-v1.png"
+  },
+  "midday_heat_rest": {
+   "effects": {
+    "fatigue": -0.0105,
+    "injury_risk": -0.008,
+    "health_risk": -0.006
+   },
+   "observation": "In the hot months work stops while the sun stands highest and starts again in the long shade of afternoon."
+  },
+  "children_light_tasks": {
+   "effects": {
+    "labor_demand": -0.012,
+    "labor_efficiency": 0.0011,
+    "food_output": 0.005
+   },
+   "observation": "Children too small for the hoe run the plots with clappers to scare the birds, and glean what the reapers missed."
+  },
+  "skill_recognition": {
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+  },
+  "rotating_heavy_tasks": {
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+  },
+  "herding_rotas": {
+   "effects": {
+    "task_coordination": 0.0112,
+    "labor_demand": -0.01,
+    "cohesion": 0.0025
+   },
+   "observation": "Households take turns walking the common flock, so one boy watches forty animals instead of every family watching its own few."
+  },
+  "work_party_feasts": {
+   "effects": {
+    "labor_efficiency": 0.0044,
+    "task_coordination": 0.0188,
+    "cohesion": 0.01,
+    "construction_rate": 0.003,
+    "labor_demand": 0.005
+   },
+   "observation": "A family brews and cooks, the neighbours come to raise the roof, and everyone eats and drinks when it is done.",
+   "social_consequence": "Jobs no household could finish alone are done in a day, and the feast that repays them binds neighbours in debt and pride."
+  },
+  "festival_rest_days": {
+   "effects": {
+    "fatigue": -0.0105,
+    "cohesion": 0.005,
+    "health_risk": -0.004
+   },
+   "observation": "On the days of the great festivals no one is sent to the fields; tools are hung up and the whole village rests together."
+  },
+  "part_time_specialists": {
+   "effects": {
+    "craft_output": 0.007,
+    "labor_efficiency": 0.0033,
+    "tool_quality": 0.003
+   },
+   "observation": "The potter's family still farms, but in the slack months its kiln burns for the whole village and is paid in grain.",
+   "social_consequence": "Some households become known for pots or blades and trade that skill for food; the first differences of craft appear."
+  },
+  "slack_season_building": {
+   "effects": {
+    "construction_rate": 0.0037,
+    "labor_demand": -0.015,
+    "housing_output": 0.006
+   },
+   "observation": "Walls go up after the harvest is in, when hands are idle and the ground is dry enough to dig."
+  },
+  "household_craft_learning": {
+   "effects": {
+    "labor_efficiency": 0.0022,
+    "craft_output": 0.002,
+    "knowledge_preservation": 0.006
+   },
+   "observation": "A girl sits at her mother's loom and a boy at his father's knapping stone until the motions are their own."
+  },
+  "motion_economy_habits": {
+   "art": "res://assets/ui/research/subjects/work_motion_studies-v1.png"
+  },
+  "recovery_days_after_heavy_tasks": {
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
+  },
+  "boundary_markers_parallel_crews": {
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+  },
+  "cross_training_circuits": {
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+  },
+  "task_captains": {
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+  },
+  "hauling_chants": {
+   "effects": {
+    "labor_efficiency": 0.0022,
+    "task_coordination": 0.0112,
+    "injury_risk": -0.01,
+    "haul_capacity": 0.01
+   },
+   "observation": "A caller sings the line and the whole team heaves on the answer, so the load moves at once and no one pulls alone."
+  },
+  "paced_work_cycles": {
+   "art": "res://assets/ui/research/subjects/work_motion_studies-v1.png"
+  },
+  "great_work_parties": {
+   "effects": {
+    "construction_rate": 0.0067,
+    "task_coordination": 0.0225,
+    "labor_efficiency": 0.0033,
+    "cohesion": 0.01,
+    "disaster_resilience": 0.015,
+    "labor_demand": 0.025
+   },
+   "observation": "Hundreds come from many villages to drag a great stone or throw up a dyke, fed for the season by the ones who called them.",
+   "social_consequence": "Whole districts can now raise a monument or a flood bank together, and whoever can call them out gains a new kind of standing."
+  },
+  "mentored_task_learning": {
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+  },
+  "seasonal_labor_pooling": {
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+  },
+  "batch_sizing_by_fatigue": {
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
+  },
+  "elder_instruction_days": {
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png"
+  },
+  "household_labor_borrowing": {
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png"
+  },
+  "runner_relays_between_work_sites": {
+   "art": "res://assets/ui/research/subjects/route_memory-v1.png"
+  },
+  "full_time_specialists": {
+   "effects": {
+    "craft_output": 0.01,
+    "labor_efficiency": 0.0044,
+    "tool_quality": 0.004,
+    "labor_demand": 0.01,
+    "institutional_rigidity": 0.01
+   },
+   "observation": "Smiths and potters who no longer farm draw their bread from the common store and give their whole year to the craft.",
+   "social_consequence": "Specialists who never work the fields live off the shared store; the store and its keepers become the center of the town."
+  },
+  "load_tallies": {
+   "effects": {
+    "task_coordination": 0.015,
+    "labor_efficiency": 0.0018,
+    "state_capacity": 0.006,
+    "knowledge_preservation": 0.005
+   },
+   "observation": "The overseer cuts a notch for every basket carried up the bank, and at dusk the stick shows who worked and how much."
+  },
+  "shrine_work_obligations": {
+   "effects": {
+    "construction_rate": 0.0045,
+    "state_capacity": 0.018,
+    "task_coordination": 0.015,
+    "labor_demand": 0.02,
+    "legitimacy": 0.006,
+    "cohesion": -0.0025
+   },
+   "observation": "Each household owes the shrine so many days of digging, building or reaping, and the priests keep count of who has given them.",
+   "social_consequence": "The shrine's store is filled by owed days rather than gifts; the first labor obligation brings the first resentment of it."
+  },
+  "tool_handoff_staging": {
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+  },
+  "cross_party_scheduling": {
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+  },
+  "fixed_worker_rations": {
+   "effects": {
+    "labor_efficiency": 0.0066,
+    "fatigue": -0.0105,
+    "health_risk": -0.01,
+    "nutrition_quality": 0.01,
+    "state_capacity": 0.012
+   },
+   "observation": "Every worker on the great estate is given the same measure of barley each day, in good years and in bad.",
+   "social_consequence": "Workers are fed a fixed measure whatever the harvest, and those who hand out the grain decide who works."
+  },
+  "craft_quarters": {
+   "effects": {
+    "craft_output": 0.006,
+    "labor_efficiency": 0.0022,
+    "knowledge_rate": 0.01,
+    "pollution": 0.004
+   },
+   "observation": "Potters settle by potters and smiths by smiths, sharing clay pits, fuel yards and the secrets of the trade."
+  },
+  "specialist_rotation_ladders": {
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+  },
+  "crew_handoffs": {
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+  },
+  "capacity_ledgers": {
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png"
+  },
+  "tool_reach_zoning": {
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png"
+  },
+  "joint_crew_debriefs": {
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+  },
+  "journeyman_placement": {
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+  },
+  "age_graded_load_limits": {
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
+  },
+  "apprentice_for_keep": {
+   "effects": {
+    "labor_efficiency": 0.0026,
+    "craft_output": 0.004,
+    "knowledge_preservation": 0.01,
+    "adoption_rate": 0.01
+   },
+   "observation": "A boy lives in the smith's house and works his bellows for bread and a bed, and in return is shown the trade."
+  },
+  "workshop_layout_planning": {
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png"
+  },
+  "crew_count_scribes": {
+   "effects": {
+    "task_coordination": 0.0225,
+    "state_capacity": 0.012,
+    "labor_efficiency": 0.0018,
+    "knowledge_preservation": 0.005
+   },
+   "observation": "A scribe stands by the work with a tablet, counting each crew by name as it comes and goes."
+  },
+  "gangs_of_ten": {
+   "effects": {
+    "task_coordination": 0.0225,
+    "labor_efficiency": 0.0026,
+    "injury_risk": -0.01,
+    "institutional_rigidity": 0.01
+   },
+   "observation": "Workers are counted off in tens, and each ten answers to a foreman who answers for its work and its rations."
+  },
+  "certified_craft_competence": {
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+  },
+  "rotating_named_gangs": {
+   "effects": {
+    "task_coordination": 0.03,
+    "labor_efficiency": 0.0033,
+    "fatigue": -0.0105,
+    "construction_rate": 0.006,
+    "cohesion": 0.005
+   },
+   "observation": "Gangs with names like 'Friends of the King' work their watch on the great work, go home, and are relieved by the next gang.",
+   "social_consequence": "Named gangs compete to finish their stretch of the work; pride in the gang keeps rotating levies coming back."
+  },
+  "flood_season_great_works": {
+   "effects": {
+    "labor_demand": -0.03,
+    "construction_rate": 0.0045,
+    "task_coordination": 0.0075
+   },
+   "observation": "When the river covers the fields and farming stops, the idle hands are called up to haul stone for the great works."
+  },
+  "workers_villages": {
+   "effects": {
+    "labor_efficiency": 0.0044,
+    "fatigue": -0.0105,
+    "health_risk": -0.01,
+    "construction_rate": 0.0045,
+    "housing_output": 0.012,
+    "task_coordination": 0.015
+   },
+   "observation": "Beside the great work stands a walled village of bakeries, breweries and barracks where the builders eat, sleep and are tended.",
+   "social_consequence": "A whole village of bakers, brewers, carriers and builders lives beside the great work, fed and housed by it."
+  },
+  "shift_overlap_briefings": {
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+  },
+  "fatigue_aware_task_assignment": {
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
+  },
+  "measured_plot_allotment": {
+   "effects": {
+    "labor_efficiency": 0.0022,
+    "task_coordination": 0.0112,
+    "cultivation_yield": 0.01,
+    "state_capacity": 0.006
+   },
+   "observation": "Fields are measured in rods and each worker is given a plot of known size to plough, sow or reap."
+  },
+  "brick_quotas": {
+   "effects": {
+    "labor_efficiency": 0.0033,
+    "construction_rate": 0.0045,
+    "standardization": 0.006,
+    "fatigue": 0.0035
+   },
+   "observation": "Each moulder owes so many hundred bricks a day, and the overseer counts the drying rows at sunset."
+  },
+  "hired_harvest_hands": {
+   "effects": {
+    "labor_demand": -0.03,
+    "fatigue": -0.0052,
+    "food_output": 0.01
+   },
+   "observation": "At harvest the estates hire extra hands for the month, paid in grain, so the crop is cut before it sheds."
+  },
+  "daily_task_norms": {
+   "effects": {
+    "labor_efficiency": 0.0066,
+    "task_coordination": 0.0225,
+    "standardization": 0.012,
+    "state_capacity": 0.012,
+    "fatigue": 0.0035
+   },
+   "observation": "A day's work is now fixed: so many cubits of earth dug, so many loads carried, and every overseer uses the same figures.",
+   "social_consequence": "A day's work now has a number; whole projects are planned in man-days, and a worker who falls short is noticed."
+  },
+  "light_duty_for_infirm": {
+   "effects": {
+    "health_risk": -0.02,
+    "injury_risk": -0.012,
+    "health_protection": 0.007,
+    "cohesion": 0.005,
+    "labor_efficiency": 0.0011
+   },
+   "observation": "The sick and the old are set to lighter work and keep their ration, so no one starves for having fallen ill."
+  },
+  "man_day_accounts": {
+   "effects": {
+    "task_coordination": 0.0263,
+    "state_capacity": 0.018,
+    "labor_efficiency": 0.0033,
+    "knowledge_preservation": 0.01,
+    "institutional_rigidity": 0.01
+   },
+   "observation": "Scribes add up the days owed and the days worked for every crew, and the balance carries into the next year.",
+   "social_consequence": "Labor becomes a written account like grain or silver, and those who keep the accounts can demand what is owed."
+  },
+  "hired_labor_contracts": {
+   "effects": {
+    "labor_demand": -0.03,
+    "labor_efficiency": 0.0044,
+    "trade_capacity": 0.012,
+    "fatigue": -0.0035
+   },
+   "observation": "A sealed tablet names the worker, the days, the task and the wage in barley or silver, before witnesses.",
+   "social_consequence": "Labor can now be bought: the wealthy hire for grain or silver, and a class of people who own only their hands appears."
+  },
+  "monthly_rest_days": {
+   "effects": {
+    "fatigue": -0.0123,
+    "injury_risk": -0.01,
+    "cohesion": 0.005
+   },
+   "observation": "Every tenth day, and on the feasts of the month, the crews are stood down and go home."
+  },
+  "levy_substitutes": {
+   "effects": {
+    "labor_demand": -0.02,
+    "labor_efficiency": 0.0018,
+    "trade_capacity": 0.006,
+    "legitimacy": -0.003
+   },
+   "observation": "A man who owes the levy but can spare the grain pays another to go and dig in his place."
+  },
+  "apprentice_contracts": {
+   "effects": {
+    "craft_output": 0.07,
+    "adoption_rate": 0.045,
+    "labor_efficiency": 0.0033,
+    "knowledge_preservation": 0.01
+   },
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+  },
+  "levy_exemptions": {
+   "effects": {
+    "craft_output": 0.003,
+    "labor_efficiency": 0.0018,
+    "institutional_rigidity": 0.015,
+    "legitimacy": -0.006
+   },
+   "observation": "Temple craftsmen and the king's smiths are written off the levy lists, for their work is owed elsewhere."
+  },
+  "attendance_lists": {
+   "effects": {
+    "task_coordination": 0.015,
+    "labor_efficiency": 0.0018,
+    "state_capacity": 0.006
+   },
+   "observation": "Each morning the foreman reads the names of his crew and marks who is present, who is sick and who has run."
+  },
+  "trade_elders": {
+   "effects": {
+    "cohesion": 0.0075,
+    "craft_output": 0.002,
+    "legitimacy": 0.006,
+    "task_coordination": 0.0075,
+    "institutional_rigidity": 0.01
+   },
+   "observation": "The eldest master of each trade speaks for the workshop crews before the palace stewards."
+  },
+  "apprentice_quotas": {
+   "effects": {
+    "craft_output": 0.003,
+    "standardization": 0.006,
+    "adoption_rate": 0.01,
+    "institutional_rigidity": 0.01
+   },
+   "observation": "A master may take only so many apprentices, and each must be taught to the standard of the trade."
+  },
+  "crew_loans_between_cities": {
+   "effects": {
+    "construction_rate": 0.003,
+    "labor_efficiency": 0.0018,
+    "adoption_rate": 0.015,
+    "task_coordination": 0.0075
+   },
+   "observation": "A city famed for its masons sends a crew to raise an allied ruler's temple, and they bring their methods home."
+  }
+ }
 }

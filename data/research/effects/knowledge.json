@@ -1,5 +1,780 @@
 {
  "line": "knowledge",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "route_memory": {
+   "effects": {
+    "knowledge_preservation": 0.013,
+    "route_speed": 0.09,
+    "survey_speed": 0.04,
+    "travel_speed": 0.05
+   }
+  },
+  "relay_call_stations": {
+   "effects": {
+    "task_coordination": 0.002,
+    "travel_speed": 0.01
+   },
+   "name": "Relay Calls Between Camps",
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png"
+  },
+  "counting_words": {
+   "effects": {
+    "knowledge_preservation": 0.0064,
+    "task_coordination": 0.0042,
+    "trade_capacity": 0.0025
+   },
+   "observation": "Every hand learns the same words for one through twenty, so a count said in one camp means the same in the next.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "weather_sign_reading": {
+   "effects": {
+    "survey_speed": 0.02,
+    "task_coordination": 0.002
+   },
+   "name": "Weather-sign Reading",
+   "art": "res://assets/ui/research/subjects/seasonal_patterns-v1.png"
+  },
+  "novice_task_shadowing": {
+   "effects": {
+    "fatigue": -0.01,
+    "labor_efficiency": 0.0093
+   },
+   "name": "Novices Shadow an Experienced Hand",
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+  },
+  "tallies": {
+   "effects": {
+    "knowledge_preservation": 0.042,
+    "labor_demand": 0.012,
+    "state_capacity": 0.016,
+    "task_coordination": 0.035
+   },
+   "ability_reason": "Marks on a stick hold a count after memory fails; stores, debts and days can be checked by anyone."
+  },
+  "distance_call_signals": {
+   "effects": {
+    "survey_speed": 0.01,
+    "task_coordination": 0.0024
+   },
+   "name": "Long-carrying Call Signals",
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png"
+  },
+  "cairn_sightline_marking": {
+   "effects": {
+    "survey_speed": 0.02,
+    "travel_speed": 0.01
+   },
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png"
+  },
+  "watch_duty_rotation": {
+   "effects": {
+    "cohesion": 0.002,
+    "task_coordination": 0.0024
+   },
+   "name": "Standing Watch Duty",
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+  },
+  "moon_counting": {
+   "effects": {
+    "knowledge_preservation": 0.0048,
+    "observation_rate": 0.029,
+    "task_coordination": 0.0028
+   },
+   "observation": "Watchers count the nights from full moon to full moon and plan gatherings by the moons still to come.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "knot_tally_cross_check": {
+   "effects": {
+    "knowledge_preservation": 0.0033,
+    "task_coordination": 0.002
+   },
+   "name": "Two Households Cross-check Their Tallies",
+   "art": "res://assets/ui/research/subjects/tallies-v1.png"
+  },
+  "repeated_recitation_training": {
+   "effects": {
+    "knowledge_preservation": 0.0048,
+    "task_coordination": 0.002
+   },
+   "name": "Recitation Drills for Craft Rules",
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+  },
+  "childrens_question_circles": {
+   "effects": {
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0022
+   },
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+  },
+  "solstice_horizon_markers": {
+   "effects": {
+    "cohesion": 0.0021,
+    "knowledge_rate": 0.011,
+    "observation_rate": 0.029
+   },
+   "observation": "Stones on the ridge mark where the sun rises on the longest and shortest days, and elders gather to watch it return.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "standard_measures": {
+   "effects": {
+    "construction_rate": 0.04,
+    "craft_output": 0.05,
+    "standardization": 0.099,
+    "state_capacity": 0.0097,
+    "trade_capacity": 0.054
+   },
+   "ability_reason": "Everyone measures by the same hand, forearm and basket, so shares, trades and buildings stop turning into quarrels."
+  },
+  "mnemonic_verse_encoding": {
+   "effects": {
+    "knowledge_preservation": 0.0033,
+    "task_coordination": 0.002
+   },
+   "name": "Verse Mnemonics for Long Lists",
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+  },
+  "owner_marks": {
+   "effects": {
+    "knowledge_preservation": 0.0048,
+    "storage_loss": -0.01,
+    "trade_capacity": 0.0025
+   },
+   "observation": "Each household scratches its own sign on pots and bundles, so a stored jar is claimed without argument.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "paced_distance_counting": {
+   "effects": {
+    "labor_demand": 0.01,
+    "survey_speed": 0.03
+   },
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png"
+  },
+  "landmark_triangulation": {
+   "effects": {
+    "survey_speed": 0.03,
+    "travel_speed": 0.02
+   },
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png"
+  },
+  "clay_counting_tokens": {
+   "effects": {
+    "knowledge_preservation": 0.021,
+    "state_capacity": 0.0097,
+    "storage_loss": -0.01,
+    "task_coordination": 0.014,
+    "trade_capacity": 0.018
+   },
+   "observation": "Small shaped clay tokens stand for a jar of oil or a measure of grain, and a pile of them is a count anyone can check.",
+   "ability_reason": "Counts no longer live in one keeper's head: stores, debts and dues can be held and checked by anyone who knows the shapes.",
+   "social_consequence": "Stewards who hold the tokens gain a quiet authority over what the store is said to contain",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "specialist_task_assignment": {
+   "effects": {
+    "craft_output": 0.02,
+    "institutional_rigidity": 0.0054,
+    "task_coordination": 0.0024
+   },
+   "name": "Specialists Assigned to One Craft's Problems",
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+  },
+  "drum_relay_signals": {
+   "effects": {
+    "security_efficiency": 0.02,
+    "task_coordination": 0.0024
+   },
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png"
+  },
+  "focused_error_review": {
+   "effects": {
+    "knowledge_preservation": 0.0022,
+    "labor_efficiency": 0.0093
+   },
+   "name": "Crews Review a Spoiled Batch Together",
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+  },
+  "stamp_seals": {
+   "effects": {
+    "legitimacy": 0.002,
+    "state_capacity": 0.003,
+    "storage_loss": -0.015,
+    "trade_capacity": 0.0038
+   },
+   "observation": "A carved stone pressed into wet clay closes a jar with its keeper's mark, and a broken seal shows at once.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "material_accounting": {
+   "effects": {
+    "haul_capacity": 0.03,
+    "state_capacity": 0.006,
+    "storage_loss": -0.03
+   }
+  },
+  "paired_record_witnessing": {
+   "effects": {
+    "institutional_rigidity": 0.0054,
+    "knowledge_preservation": 0.0033
+   },
+   "name": "A Second Keeper Witnesses Each Record",
+   "art": "res://assets/ui/research/subjects/tallies-v1.png"
+  },
+  "solar_year_reckoning": {
+   "effects": {
+    "cultivation_yield": 0.012,
+    "knowledge_rate": 0.014,
+    "observation_rate": 0.039,
+    "task_coordination": 0.0042
+   },
+   "observation": "Twelve moons and the solstice stones are reconciled into one year, and sowing is set by it rather than by guesswork.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "fire_smoke_signaling": {
+   "effects": {
+    "security_efficiency": 0.02,
+    "task_coordination": 0.002
+   },
+   "name": "Fire and Smoke Signals",
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png"
+  },
+  "cross_bearing_confirmation": {
+   "effects": {
+    "survey_speed": 0.02,
+    "task_coordination": 0.002
+   },
+   "name": "Cross-bearing Confirmation",
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png"
+  },
+  "knotted_record_systems": {
+   "effects": {
+    "knowledge_preservation": 0.013,
+    "state_capacity": 0.004,
+    "task_coordination": 0.0042
+   },
+   "observation": "Knots of set kinds and spacing on hanging cords record counts and categories that trained readers can recite back."
+  },
+  "marked_storage_registers": {
+   "effects": {
+    "food_storage": 0.01,
+    "knowledge_preservation": 0.0048
+   },
+   "name": "Marked Counters on Sealed Stores",
+   "art": "res://assets/ui/research/subjects/tallies-v1.png"
+  },
+  "token_envelopes": {
+   "effects": {
+    "knowledge_preservation": 0.024,
+    "legitimacy": 0.0035,
+    "state_capacity": 0.0097,
+    "trade_capacity": 0.027
+   },
+   "observation": "Tokens for a shipment are sealed inside a clay ball and their shapes pressed on its skin, so the count cannot be changed on the road.",
+   "ability_reason": "An agreement can travel and wait: a sealed count is proof that no carrier or steward can quietly alter.",
+   "social_consequence": "Sealed counts settle disputes that once turned on whose word was stronger",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "rotating_inspection_duty": {
+   "effects": {
+    "labor_demand": 0.01,
+    "task_coordination": 0.0026
+   },
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+  },
+  "star_rise_markers": {
+   "effects": {
+    "knowledge_rate": 0.0071,
+    "observation_rate": 0.029,
+    "route_speed": 0.01
+   },
+   "observation": "The dawn rising of certain stars is watched and named, so the seasons are known even under a cloudy sun.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "standardized_gesture_code": {
+   "effects": {
+    "task_coordination": 0.0024,
+    "trade_capacity": 0.005
+   },
+   "name": "Trade Hand-sign Code",
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png"
+  },
+  "boundary_sighting_marks": {
+   "effects": {
+    "legitimacy": 0.002,
+    "survey_speed": 0.03,
+    "task_coordination": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png"
+  },
+  "problem_council_sessions": {
+   "effects": {
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0032,
+    "task_coordination": 0.0024
+   },
+   "name": "Specialists' Problem Councils",
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+  },
+  "tens_sixties_bundling": {
+   "effects": {
+    "knowledge_rate": 0.021,
+    "standardization": 0.0082,
+    "state_capacity": 0.002
+   },
+   "observation": "Counters bundle by tens and by sixties, so large stores are reckoned in a few bundles instead of endless marks.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "impressed_number_tablets": {
+   "effects": {
+    "adoption_rate": 0.013,
+    "knowledge_preservation": 0.028,
+    "knowledge_rate": 0.021,
+    "labor_demand": 0.01,
+    "state_capacity": 0.013
+   },
+   "observation": "The envelope becomes a flat tablet with numbers pressed into its face, and the tokens inside are no longer needed.",
+   "ability_reason": "Numbers now outlast their keepers on a surface anyone can read, so accounts grow longer and larger than memory could hold.",
+   "social_consequence": "Whoever keeps the marks keeps the memory; scribes gain standing while the unlettered must trust what is read back to them",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "seasonal_news_gathering": {
+   "effects": {
+    "knowledge_preservation": 0.0022,
+    "task_coordination": 0.002
+   },
+   "name": "Travelers Asked Set Questions for News",
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png"
+  },
+  "rod_and_cord_leveling": {
+   "effects": {
+    "construction_rate": 0.02,
+    "labor_demand": 0.01,
+    "survey_speed": 0.03
+   },
+   "name": "Rod-and-cord Levelling",
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png"
+  },
+  "attention_priority_signals": {
+   "effects": {
+    "labor_efficiency": 0.007,
+    "task_coordination": 0.0026
+   },
+   "name": "Work-priority Markers",
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png"
+  },
+  "pictographic_records": {
+   "effects": {
+    "adoption_rate": 0.019,
+    "knowledge_preservation": 0.035,
+    "knowledge_rate": 0.028,
+    "labor_demand": 0.015,
+    "state_capacity": 0.013,
+    "task_coordination": 0.021
+   },
+   "ability_reason": "The first true records: goods, people and obligations can be written down and read back long after the day they were counted.",
+   "social_consequence": "Whoever keeps the marks keeps the memory; scribes gain standing while the unlettered must trust what is read back to them"
+  },
+  "cylinder_seals": {
+   "effects": {
+    "legitimacy": 0.002,
+    "state_capacity": 0.004,
+    "storage_loss": -0.01,
+    "trade_capacity": 0.005
+   },
+   "observation": "A carved cylinder rolled across wet clay leaves an unbroken band of the owner's scene over the whole seal.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "clay_record_tablets": {
+   "effects": {
+    "adoption_rate": 0.011,
+    "knowledge_preservation": 0.019,
+    "labor_demand": 0.008,
+    "state_capacity": 0.006
+   },
+   "observation": "Recorders press signs into prepared clay, and the tablets worth keeping are dried and stored."
+  },
+  "standard_sign_lists": {
+   "effects": {
+    "adoption_rate": 0.021,
+    "knowledge_preservation": 0.0096,
+    "standardization": 0.0041
+   },
+   "observation": "Scribes copy agreed lists of signs in fixed order, so a sign written in one town is read the same in another.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "scribal_apprenticeship": {
+   "effects": {
+    "knowledge_preservation": 0.0048,
+    "standardization": 0.0082
+   },
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+  },
+  "agreed_signal_codes": {
+   "effects": {
+    "route_speed": 0.01,
+    "security_efficiency": 0.02,
+    "task_coordination": 0.0085
+   },
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png"
+  },
+  "archive_shelving_order": {
+   "effects": {
+    "knowledge_preservation": 0.0033,
+    "survey_speed": 0.01
+   },
+   "name": "Tablets Shelved by Subject",
+   "art": "res://assets/ui/research/subjects/tallies-v1.png"
+  },
+  "balance_beam_weights": {
+   "effects": {
+    "legitimacy": 0.002,
+    "standardization": 0.021,
+    "trade_capacity": 0.01
+   },
+   "observation": "A beam balanced on a cord weighs goods against polished stones of agreed weight.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "messenger_relay_stations": {
+   "effects": {
+    "labor_demand": 0.01,
+    "state_capacity": 0.0033,
+    "task_coordination": 0.0024
+   },
+   "name": "Messenger Relays on Fixed Stages",
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png"
+  },
+  "sealed_tablet_contracts": {
+   "effects": {
+    "knowledge_preservation": 0.0064,
+    "legitimacy": 0.002,
+    "state_capacity": 0.004,
+    "trade_capacity": 0.01
+   },
+   "observation": "A loan or sale is written on a tablet, witnessed, and rolled with both parties' seals.",
+   "social_consequence": "Written terms protect the weaker party only as well as the reader who explains them",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "dedicated_apprentice_observation": {
+   "effects": {
+    "craft_output": 0.02,
+    "labor_demand": 0.01,
+    "task_coordination": 0.0024
+   },
+   "name": "Masters Observe Apprentices at Set Hours",
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+  },
+  "phonetic_notation": {
+   "effects": {
+    "adoption_rate": 0.045,
+    "knowledge_preservation": 0.049,
+    "knowledge_rate": 0.035,
+    "labor_demand": 0.02,
+    "state_capacity": 0.016
+   },
+   "ability_reason": "Signs now stand for sounds, so names, foreign words and whole sentences can be written, not just counts and things."
+  },
+  "plumb_line_sighting": {
+   "effects": {
+    "construction_rate": 0.03,
+    "survey_speed": 0.03
+   },
+   "observation": "A weighted cord hangs true beside a sighting pole, so walls rise straight and lines run true across a field.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "star_rising_civil_year": {
+   "effects": {
+    "knowledge_preservation": 0.0032,
+    "observation_rate": 0.029,
+    "state_capacity": 0.004,
+    "task_coordination": 0.0085
+   },
+   "observation": "A civil year of 365 days, begun at a star's dawn rising, sets the dates of levies, rations and festivals.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "written_lore_tablets": {
+   "effects": {
+    "adoption_rate": 0.016,
+    "cohesion": 0.0021,
+    "knowledge_preservation": 0.019
+   },
+   "observation": "Recited lore is copied onto tablets, so a telling no longer dies with the last reciter who knew it.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "written_apprentice_instructions": {
+   "effects": {
+    "adoption_rate": 0.027,
+    "craft_output": 0.02,
+    "knowledge_preservation": 0.0096
+   },
+   "observation": "A master's working rules are written out for apprentices, who can check a step without waiting for him.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "workshop_standards": {
+   "effects": {
+    "craft_output": 0.09,
+    "knowledge_rate": 0.029,
+    "repair_capacity": 0.06,
+    "standardization": 0.033
+   }
+  },
+  "formal_archives": {
+   "effects": {
+    "institutional_rigidity": 0.014,
+    "knowledge_preservation": 0.056,
+    "knowledge_rate": 0.021,
+    "labor_demand": 0.025,
+    "state_capacity": 0.026
+   },
+   "ability_reason": "Records gain keepers, dates and a place on the shelf; what one generation learns the next can find again."
+  },
+  "cross_referenced_archives": {
+   "effects": {
+    "knowledge_preservation": 0.0065,
+    "labor_demand": 0.01,
+    "task_coordination": 0.002
+   },
+   "name": "Cross-referenced Archives",
+   "art": "res://assets/ui/research/subjects/tallies-v1.png"
+  },
+  "formal_chronicle_keeping": {
+   "effects": {
+    "knowledge_preservation": 0.0065,
+    "labor_demand": 0.01,
+    "legitimacy": 0.002
+   },
+   "name": "Year Names and Event Lists",
+   "art": "res://assets/ui/research/subjects/tallies-v1.png"
+  },
+  "public_schools": {
+   "effects": {
+    "adoption_rate": 0.083,
+    "knowledge_preservation": 0.021,
+    "knowledge_rate": 0.071,
+    "labor_demand": 0.04,
+    "state_capacity": 0.013
+   },
+   "ability_reason": "Tablet houses train scribes in numbers, not one apprentice at a time, and every trained hand spreads new methods faster."
+  },
+  "sealed_tablet_letters": {
+   "effects": {
+    "adoption_rate": 0.011,
+    "state_capacity": 0.006,
+    "task_coordination": 0.0057,
+    "trade_capacity": 0.005
+   },
+   "observation": "A letter is written, sealed in a clay envelope and carried to a distant house, where its words arrive unchanged.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "intercalated_calendar": {
+   "effects": {
+    "cultivation_yield": 0.012,
+    "observation_rate": 0.019,
+    "state_capacity": 0.004,
+    "task_coordination": 0.0085
+   },
+   "observation": "When the moons drift from the seasons, officials add a month so the calendar and the harvest stay together.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "bilingual_sign_lists": {
+   "effects": {
+    "adoption_rate": 0.021,
+    "knowledge_rate": 0.014,
+    "trade_capacity": 0.0075
+   },
+   "observation": "Sign lists give each word in two tongues, so a scribe can read what foreigners write.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "sworn_interpreters": {
+   "effects": {
+    "adoption_rate": 0.011,
+    "legitimacy": 0.002,
+    "trade_capacity": 0.0075
+   },
+   "observation": "Interpreters swear before the god to render speech faithfully between peoples who share no tongue.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "geometric_survey": {
+   "effects": {
+    "construction_rate": 0.06,
+    "state_capacity": 0.008,
+    "survey_speed": 0.12,
+    "trade_capacity": 0.005
+   }
+  },
+  "water_trough_leveling": {
+   "effects": {
+    "construction_rate": 0.03,
+    "survey_speed": 0.02,
+    "water_access": 0.02
+   },
+   "observation": "Water in a long trough shows true level, so canals and foundations fall exactly as intended.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "scribal_specialties": {
+   "effects": {
+    "knowledge_rate": 0.021,
+    "labor_demand": 0.01,
+    "state_capacity": 0.008,
+    "survey_speed": 0.02
+   },
+   "observation": "Tablet-house graduates specialize as surveyors, accountants or letter-writers, each with their own training.",
+   "social_consequence": "Specialized scribes become indispensable, and their guilds learn to bargain with rulers",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "area_volume_rules": {
+   "effects": {
+    "knowledge_rate": 0.014,
+    "standardization": 0.012,
+    "state_capacity": 0.006,
+    "survey_speed": 0.03
+   },
+   "observation": "Rules turn a field's sides into its area and a granary's measure into its grain, so dues and seed are reckoned in advance.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "sightline_corridor_marking": {
+   "effects": {
+    "ecological_pressure": 0.01,
+    "survey_speed": 0.025
+   },
+   "name": "Sightline Corridors Kept Clear",
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png"
+  },
+  "star_hour_tables": {
+   "effects": {
+    "knowledge_preservation": 0.0048,
+    "observation_rate": 0.029,
+    "security_efficiency": 0.01
+   },
+   "observation": "Tables name which stars rise through the night, so watches are changed and rites timed in the dark.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "reciprocal_tables": {
+   "effects": {
+    "knowledge_rate": 0.036,
+    "standardization": 0.0082,
+    "trade_capacity": 0.005
+   },
+   "observation": "Students copy tables of products and reciprocals, and division becomes multiplication by a looked-up number.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "tablet_colophons": {
+   "effects": {
+    "adoption_rate": 0.0053,
+    "knowledge_preservation": 0.016
+   },
+   "observation": "Each copy ends with the scribe's name, the date and the tablet it was copied from, so errors can be traced.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "scribal_copying_tests": {
+   "effects": {
+    "adoption_rate": 0.027,
+    "knowledge_preservation": 0.0096,
+    "standardization": 0.0041
+   },
+   "observation": "Students copy model tablets and teachers correct each sign, so every graduate writes to one standard.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "place_value": {
+   "effects": {
+    "adoption_rate": 0.013,
+    "construction_rate": 0.02,
+    "knowledge_rate": 0.071,
+    "standardization": 0.061,
+    "state_capacity": 0.0097,
+    "trade_capacity": 0.036
+   },
+   "ability_reason": "A sign's position gives its value; large sums, rations and surveys become quick to reckon and easy to check."
+  },
+  "fractional_quantities": {
+   "effects": {
+    "knowledge_rate": 0.021,
+    "standardization": 0.012,
+    "state_capacity": 0.004,
+    "trade_capacity": 0.0075
+   },
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "worked_problem_tablets": {
+   "effects": {
+    "adoption_rate": 0.021,
+    "knowledge_rate": 0.036
+   },
+   "observation": "Teaching tablets set a problem, work it step by step and state the answer, so a method can be learned from clay.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "regional_maps": {
+   "effects": {
+    "route_speed": 0.1,
+    "state_capacity": 0.008,
+    "survey_speed": 0.09,
+    "warfare_readiness": 0.03
+   }
+  },
+  "square_root_tables": {
+   "effects": {
+    "construction_rate": 0.02,
+    "knowledge_rate": 0.029,
+    "survey_speed": 0.02
+   },
+   "observation": "Tables of squares and roots let surveyors and builders size a field or a ramp without trial and error.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "prearranged_beacon_chains": {
+   "effects": {
+    "security_efficiency": 0.04,
+    "task_coordination": 0.0085,
+    "warfare_readiness": 0.02
+   },
+   "observation": "Beacons along the heights carry a message agreed in advance, and a raid is known in the capital before nightfall.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "consonantal_alphabet": {
+   "effects": {
+    "adoption_rate": 0.064,
+    "institutional_rigidity": -0.02,
+    "knowledge_preservation": 0.021,
+    "knowledge_rate": 0.028,
+    "trade_capacity": 0.018
+   },
+   "observation": "A few dozen signs, one for each consonant, spell any word; a merchant can learn in a season what a scribe learned in years.",
+   "ability_reason": "Writing escapes the tablet house: a small sign-set lets ordinary traders and craftsmen read and record for themselves.",
+   "social_consequence": "When many can write, the scribes' hold on memory and contracts loosens",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "dated_omen_records": {
+   "effects": {
+    "knowledge_preservation": 0.0064,
+    "legitimacy": 0.002,
+    "observation_rate": 0.039
+   },
+   "observation": "Signs in the sky are written down with their dates and what followed, and old records are consulted when they recur.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "shadow_clock": {
+   "effects": {
+    "labor_efficiency": 0.01,
+    "observation_rate": 0.019,
+    "task_coordination": 0.0085
+   },
+   "observation": "A marked bar casts its shadow across set hour-lines, so shifts and rites keep the same hours of the day.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "outflow_water_clock": {
+   "effects": {
+    "observation_rate": 0.019,
+    "security_efficiency": 0.01,
+    "task_coordination": 0.0085
+   },
+   "observation": "Water dripping from a marked vessel measures the hours of night, when no shadow falls.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  },
+  "checked_master_copies": {
+   "effects": {
+    "adoption_rate": 0.011,
+    "knowledge_preservation": 0.019,
+    "standardization": 0.0082
+   },
+   "observation": "Key tablets are kept as checked master copies, and every new copy is compared against them sign by sign.",
+   "art": "res://assets/ui/research/knowledge-v1.png"
+  }
+ }
 }

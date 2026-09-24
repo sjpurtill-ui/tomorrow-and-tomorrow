@@ -6,6 +6,8 @@ const Painting=preload("res://scripts/hud/subject_painting.gd")
 const ART_MANIFEST="res://assets/ui/research/subject-art-manifest.json"
 const FIRST300_CARDS="res://assets/ui/research/paper/first300-card-bindings.json"
 const CACHE_LIMIT:=64
+# research_600 discovery paintings (caption-free crops); these win over every other source for their ids.
+const ART_600="res://data/research/art_600.json"
 const EARLY_SUBJECTS:={
 	"hearth_heat_retention":Vector2(.50,.73),"ceramic_pipe_fit_gauges":Vector2(.50,.70),
 	"felloe_jointing":Vector2(.50,.68),"plank_spiling":Vector2(.50,.72),"hull_seam_caulking":Vector2(.50,.72),
@@ -48,6 +50,12 @@ const EARLY_SUBJECT_FILES:={"hide_tanning":"hide-tanning-v2"}
 static var assignments:Dictionary={}
 static var first300_cards:Dictionary={}
 static var textures:Dictionary={}
+static var art600:Dictionary={}
+static func art600_manifest()->Dictionary:
+	if art600.is_empty() and FileAccess.file_exists(ART_600):
+		var parsed:Variant=JSON.parse_string(FileAccess.get_file_as_string(ART_600))
+		if parsed is Dictionary:art600=parsed.get("items",{})
+	return art600
 static func manifest()->Dictionary:
 	if assignments.is_empty():assignments=JSON.parse_string(FileAccess.get_file_as_string(ART_MANIFEST))
 	return assignments
@@ -75,6 +83,7 @@ static func texture_at(path:String)->Texture2D:
 static func subject_art_key(item:Dictionary)->String:
 	if not bool(item.get("exposed",true)):return ""
 	var id:=String(item.get("id",""))
+	if art600_manifest().has(id):return String(art600_manifest()[id].get("path",""))
 	if preload("res://scripts/hud/early_civ_art.gd").active() and first300_manifest().has(id):return String(first300_manifest()[id])
 	if preload("res://scripts/hud/early_civ_art.gd").active() and EARLY_SUBJECTS.has(id):return "res://assets/ui/research/paper/%s.png" % EARLY_SUBJECT_FILES.get(id,id)
 	var path:=String(manifest().get(String(item.get("id","")),{}).get("path",""))
@@ -83,6 +92,7 @@ static func subject_art_key(item:Dictionary)->String:
 	return path
 static func focus_for(item:Dictionary)->Vector2:
 	var id:=String(item.get("id",""))
+	if art600_manifest().has(id):return Vector2(.5,.5)
 	if preload("res://scripts/hud/early_civ_art.gd").active() and first300_manifest().has(id):return Vector2(.5,.5) if String(first300_manifest()[id]).ends_with(".tres") else Vector2(.5,.72)
 	if preload("res://scripts/hud/early_civ_art.gd").active() and EARLY_SUBJECTS.has(id):return EARLY_SUBJECTS[id]
 	var point:Array=manifest().get(String(item.get("id","")),{}).get("focus",[.5,.5])

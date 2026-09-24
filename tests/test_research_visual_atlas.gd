@@ -151,7 +151,8 @@ func test_reviewed_images_resolve_their_explicit_assignments()->void:
 		var item:Dictionary={"id":id,"domain":"knowledge","exposed":true}
 		var picture:=Art.paint_discovery(parent,item,104)
 		assert_object(picture.texture).is_not_null()
-		assert_str(picture.texture.resource_path).is_equal(Art.manifest()[id].path)
+		# research_600 paintings (data/research/art_600.json) take precedence over reviewed subject art.
+		assert_str(picture.texture.resource_path).is_equal(Art.art600_manifest()[id].path if Art.art600_manifest().has(id) else Art.manifest()[id].path)
 		assert_int(Art.textures.size()).is_less_equal(Art.CACHE_LIMIT)
 		item.exposed=false
 		assert_str(Art.subject_art_key(item)).is_empty()

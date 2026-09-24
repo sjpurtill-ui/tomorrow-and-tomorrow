@@ -1,0 +1,1284 @@
+{
+ "schema": "research_art_600/1",
+ "description": "Discovery paintings cropped from art_source/discovery-art contact sheets (caption strips removed). Entries take precedence over line-default and catalog art in scripts/hud/research_visuals.gd.",
+ "size": [
+  512,
+  384
+ ],
+ "items": {
+  "agreed_signal_codes": {
+   "path": "res://assets/ui/research/discovery-600/agreed_signal_codes.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_33_18 PM.png",
+   "tile_index": 2,
+   "caption": "Agreed signal codes (Year 300)",
+   "style": "paper_gouache"
+  },
+  "ancestor_figurines": {
+   "path": "res://assets/ui/research/discovery-600/ancestor_figurines.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+   "tile_index": 1,
+   "caption": "Clay figurines of ancestors (Year 32)",
+   "style": "silhouette_ochre"
+  },
+  "archive_shelving_order": {
+   "path": "res://assets/ui/research/discovery-600/archive_shelving_order.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_33_18 PM.png",
+   "tile_index": 3,
+   "caption": "Tablets shelved by subject (Year 310)",
+   "style": "paper_gouache"
+  },
+  "area_volume_rules": {
+   "path": "res://assets/ui/research/discovery-600/area_volume_rules.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_17_54 PM.png",
+   "tile_index": 7,
+   "caption": "Field-area and grain-volume rules (Year 470)",
+   "style": "paper_gouache"
+  },
+  "attention_priority_signals": {
+   "path": "res://assets/ui/research/discovery-600/attention_priority_signals.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_35_50 PM.png",
+   "tile_index": 5,
+   "caption": "Work-priority markers (Year 245)",
+   "style": "paper_gouache"
+  },
+  "balance_beam_weights": {
+   "path": "res://assets/ui/research/discovery-600/balance_beam_weights.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_33_18 PM.png",
+   "tile_index": 4,
+   "caption": "Balance beam and standard weights (Year 320)",
+   "style": "paper_gouache"
+  },
+  "banded_procession_vessels": {
+   "path": "res://assets/ui/research/discovery-600/banded_procession_vessels.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_27_50 PM.png",
+   "tile_index": 4,
+   "caption": "Offering processions shown in bands on vessels (Year 280)",
+   "style": "silhouette_ochre"
+  },
+  "bilingual_sign_lists": {
+   "path": "res://assets/ui/research/discovery-600/bilingual_sign_lists.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_17_54 PM.png",
+   "tile_index": 2,
+   "caption": "Bilingual sign lists (Year 440)",
+   "style": "paper_gouache"
+  },
+  "board_race_games": {
+   "path": "res://assets/ui/research/discovery-600/board_race_games.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_27_50 PM.png",
+   "tile_index": 8,
+   "caption": "Race games on a marked board with throwing sticks (Year 310)",
+   "style": "silhouette_ochre"
+  },
+  "bone_flutes_drums": {
+   "path": "res://assets/ui/research/discovery-600/bone_flutes_drums.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_03_32 PM.png",
+   "tile_index": 6,
+   "caption": "Bone flutes and hand drums at gatherings (Year 7)",
+   "style": "silhouette_ochre"
+  },
+  "boundary_sighting_marks": {
+   "path": "res://assets/ui/research/discovery-600/boundary_sighting_marks.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_20_39 PM.png",
+   "tile_index": 8,
+   "caption": "Boundary sighting marks (Year 200)",
+   "style": "paper_gouache"
+  },
+  "cairn_sightline_marking": {
+   "path": "res://assets/ui/research/discovery-600/cairn_sightline_marking.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
+   "tile_index": 7,
+   "caption": "Cairn sightline marking (Year 15)",
+   "style": "paper_gouache"
+  },
+  "calendar_feast_days": {
+   "path": "res://assets/ui/research/discovery-600/calendar_feast_days.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_33_39 PM.png",
+   "tile_index": 6,
+   "caption": "Feast days fixed to the months of the god's calendar (Year 445)",
+   "style": "silhouette_ochre"
+  },
+  "chamber_tombs": {
+   "path": "res://assets/ui/research/discovery-600/chamber_tombs.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_29_51 PM.png",
+   "tile_index": 7,
+   "caption": "Chamber tombs with rich goods for leading lineages (Year 385)",
+   "style": "silhouette_ochre"
+  },
+  "checked_master_copies": {
+   "path": "res://assets/ui/research/discovery-600/checked_master_copies.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_21_50 PM.png",
+   "tile_index": 5,
+   "caption": "Checked master copies of key tablets (Year 600)",
+   "style": "paper_gouache"
+  },
+  "childrens_question_circles": {
+   "path": "res://assets/ui/research/discovery-600/childrens_question_circles.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+   "tile_index": 3,
+   "caption": "Children's question circles (Year 35)",
+   "style": "paper_gouache"
+  },
+  "circle_dances": {
+   "path": "res://assets/ui/research/discovery-600/circle_dances.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_03_32 PM.png",
+   "tile_index": 7,
+   "caption": "Circle dances at gatherings (Year 8)",
+   "style": "silhouette_ochre"
+  },
+  "city_laments": {
+   "path": "res://assets/ui/research/discovery-600/city_laments.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_35_59 PM.png",
+   "tile_index": 6,
+   "caption": "Laments for a ruined town (Year 510)",
+   "style": "silhouette_ochre"
+  },
+  "clay_counting_tokens": {
+   "path": "res://assets/ui/research/discovery-600/clay_counting_tokens.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_13 PM.png",
+   "tile_index": 1,
+   "caption": "Clay counting tokens: shaped tokens stand for goods (Year 70)",
+   "style": "paper_gouache"
+  },
+  "clay_record_tablets": {
+   "path": "res://assets/ui/research/discovery-600/clay_record_tablets.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_35_50 PM.png",
+   "tile_index": 8,
+   "caption": "Clay record tablets (Year 270)",
+   "style": "paper_gouache"
+  },
+  "coming_of_age_rites": {
+   "path": "res://assets/ui/research/discovery-600/coming_of_age_rites.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_20_23 PM.png",
+   "tile_index": 0,
+   "caption": "Coming-of-age rites for youths (Year 65)",
+   "style": "silhouette_ochre"
+  },
+  "communal_work_songs": {
+   "path": "res://assets/ui/research/discovery-600/communal_work_songs.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_03_32 PM.png",
+   "tile_index": 1,
+   "caption": "Communal work songs (Year 2)",
+   "style": "silhouette_ochre"
+  },
+  "comparative_craft_gatherings": {
+   "path": "res://assets/ui/research/discovery-600/comparative_craft_gatherings.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_33_39 PM.png",
+   "tile_index": 0,
+   "caption": "Craft specialists compare methods on market days (Year 400)",
+   "style": "silhouette_ochre"
+  },
+  "consonantal_alphabet": {
+   "path": "res://assets/ui/research/discovery-600/consonantal_alphabet.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_21_50 PM.png",
+   "tile_index": 1,
+   "caption": "Consonant sign-set (early alphabet; regional) (Year 560)",
+   "style": "paper_gouache"
+  },
+  "cooperative_harvest_gatherings": {
+   "path": "res://assets/ui/research/discovery-600/cooperative_harvest_gatherings.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_20_23 PM.png",
+   "tile_index": 1,
+   "caption": "Cooperative harvest gatherings (Year 75)",
+   "style": "silhouette_ochre"
+  },
+  "counting_words": {
+   "path": "res://assets/ui/research/discovery-600/counting_words.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
+   "tile_index": 2,
+   "caption": "Counting words and finger counts to twenty (Year 5)",
+   "style": "paper_gouache"
+  },
+  "craft_lineage_naming": {
+   "path": "res://assets/ui/research/discovery-600/craft_lineage_naming.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_27_50 PM.png",
+   "tile_index": 0,
+   "caption": "Techniques credited to the teacher who began them (Year 262)",
+   "style": "silhouette_ochre"
+  },
+  "cross_bearing_confirmation": {
+   "path": "res://assets/ui/research/discovery-600/cross_bearing_confirmation.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_20_39 PM.png",
+   "tile_index": 1,
+   "caption": "Cross-bearing confirmation (Year 140)",
+   "style": "paper_gouache"
+  },
+  "cross_craft_visiting": {
+   "path": "res://assets/ui/research/discovery-600/cross_craft_visiting.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_20_23 PM.png",
+   "tile_index": 3,
+   "caption": "Crafters spend a season watching another craft (Year 85)",
+   "style": "silhouette_ochre"
+  },
+  "cross_referenced_archives": {
+   "path": "res://assets/ui/research/discovery-600/cross_referenced_archives.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_15_55 PM.png",
+   "tile_index": 6,
+   "caption": "Cross-referenced archives",
+   "style": "paper_gouache"
+  },
+  "curious_questioning_custom": {
+   "path": "res://assets/ui/research/discovery-600/curious_questioning_custom.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_03_32 PM.png",
+   "tile_index": 5,
+   "caption": "Children praised for asking why (Year 6)",
+   "style": "silhouette_ochre"
+  },
+  "cylinder_seals": {
+   "path": "res://assets/ui/research/discovery-600/cylinder_seals.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_35_50 PM.png",
+   "tile_index": 7,
+   "caption": "Cylinder seals (Year 260)",
+   "style": "paper_gouache"
+  },
+  "dated_omen_records": {
+   "path": "res://assets/ui/research/discovery-600/dated_omen_records.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_21_50 PM.png",
+   "tile_index": 2,
+   "caption": "Dated sky-omen records (Year 570)",
+   "style": "paper_gouache"
+  },
+  "debate_poems": {
+   "path": "res://assets/ui/research/discovery-600/debate_poems.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_35_59 PM.png",
+   "tile_index": 2,
+   "caption": "Debate poems: two rivals argue in verse (Year 480)",
+   "style": "silhouette_ochre"
+  },
+  "dedicated_apprentice_observation": {
+   "path": "res://assets/ui/research/discovery-600/dedicated_apprentice_observation.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_33_18 PM.png",
+   "tile_index": 7,
+   "caption": "Masters observe apprentices at set hours (Year 350)",
+   "style": "paper_gouache"
+  },
+  "disaster_memory_markers": {
+   "path": "res://assets/ui/research/discovery-600/disaster_memory_markers.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_21_55 PM.png",
+   "tile_index": 4,
+   "caption": "Flood-mark stones and their stories (Year 145)",
+   "style": "silhouette_ochre"
+  },
+  "distance_call_signals": {
+   "path": "res://assets/ui/research/discovery-600/distance_call_signals.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
+   "tile_index": 6,
+   "caption": "Long-carrying call signals (Year 12)",
+   "style": "paper_gouache"
+  },
+  "dream_interpretation": {
+   "path": "res://assets/ui/research/discovery-600/dream_interpretation.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_35_59 PM.png",
+   "tile_index": 1,
+   "caption": "Dreams read as messages from the god (Year 470)",
+   "style": "silhouette_ochre"
+  },
+  "drum_relay_signals": {
+   "path": "res://assets/ui/research/discovery-600/drum_relay_signals.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_13 PM.png",
+   "tile_index": 3,
+   "caption": "Drum relay signals (Year 85)",
+   "style": "paper_gouache"
+  },
+  "emblem_processions": {
+   "path": "res://assets/ui/research/discovery-600/emblem_processions.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_21_55 PM.png",
+   "tile_index": 8,
+   "caption": "Processions carry the god's emblem through the fields (Year 160)",
+   "style": "silhouette_ochre"
+  },
+  "envoy_reception": {
+   "path": "res://assets/ui/research/discovery-600/envoy_reception.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_33_39 PM.png",
+   "tile_index": 5,
+   "caption": "Envoys received with a feast and gifts (Year 440)",
+   "style": "silhouette_ochre"
+  },
+  "feast_of_the_dead": {
+   "path": "res://assets/ui/research/discovery-600/feast_of_the_dead.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_40_38 PM.png",
+   "tile_index": 6,
+   "caption": "Yearly feast of the dead (Year 590)",
+   "style": "silhouette_ochre"
+  },
+  "festival_bread_sharing": {
+   "path": "res://assets/ui/research/discovery-600/festival_bread_sharing.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_40_38 PM.png",
+   "tile_index": 7,
+   "caption": "Festival bread from the god shared with every household (Year 600)",
+   "style": "silhouette_ochre"
+  },
+  "festival_calendar": {
+   "path": "res://assets/ui/research/discovery-600/festival_calendar.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
+   "tile_index": 5,
+   "caption": "Seasonal festival calendar (Year 20)",
+   "style": "silhouette_ochre"
+  },
+  "festival_dancers_acrobats": {
+   "path": "res://assets/ui/research/discovery-600/festival_dancers_acrobats.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_33_39 PM.png",
+   "tile_index": 3,
+   "caption": "Dancers and acrobats at festivals (Year 420)",
+   "style": "silhouette_ochre"
+  },
+  "festival_wrestling_races": {
+   "path": "res://assets/ui/research/discovery-600/festival_wrestling_races.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_21_55 PM.png",
+   "tile_index": 7,
+   "caption": "Wrestling and footraces at festivals (Year 155)",
+   "style": "silhouette_ochre"
+  },
+  "fire_smoke_signaling": {
+   "path": "res://assets/ui/research/discovery-600/fire_smoke_signaling.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_20_39 PM.png",
+   "tile_index": 0,
+   "caption": "Fire and smoke signals (Year 130)",
+   "style": "paper_gouache"
+  },
+  "first_fruits_offering": {
+   "path": "res://assets/ui/research/discovery-600/first_fruits_offering.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+   "tile_index": 3,
+   "caption": "First fruits offered to the god before the harvest is eaten (Year 38)",
+   "style": "silhouette_ochre"
+  },
+  "first_shrine_house": {
+   "path": "res://assets/ui/research/discovery-600/first_shrine_house.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_20_23 PM.png",
+   "tile_index": 7,
+   "caption": "A house for the god: the first shrine building (Year 110)",
+   "style": "silhouette_ochre"
+  },
+  "flood_origin_stories": {
+   "path": "res://assets/ui/research/discovery-600/flood_origin_stories.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_24_28 PM.png",
+   "tile_index": 3,
+   "caption": "Stories of the great flood and the first days (Year 200)",
+   "style": "silhouette_ochre"
+  },
+  "focused_error_review": {
+   "path": "res://assets/ui/research/discovery-600/focused_error_review.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_13 PM.png",
+   "tile_index": 4,
+   "caption": "Crews review a spoiled batch together (Year 90)",
+   "style": "paper_gouache"
+  },
+  "foreign_fashion_adoption": {
+   "path": "res://assets/ui/research/discovery-600/foreign_fashion_adoption.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_40_38 PM.png",
+   "tile_index": 4,
+   "caption": "Foreign ornament and dress adopted (Year 570)",
+   "style": "silhouette_ochre"
+  },
+  "formal_archives": {
+   "path": "res://assets/ui/research/discovery-600/formal_archives.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_15_55 PM.png",
+   "tile_index": 5,
+   "caption": "Tablet archives",
+   "style": "paper_gouache"
+  },
+  "formal_chronicle_keeping": {
+   "path": "res://assets/ui/research/discovery-600/formal_chronicle_keeping.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_15_55 PM.png",
+   "tile_index": 7,
+   "caption": "Year names and event lists (culture)",
+   "style": "paper_gouache"
+  },
+  "founder_story_recitation": {
+   "path": "res://assets/ui/research/discovery-600/founder_story_recitation.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_27_50 PM.png",
+   "tile_index": 7,
+   "caption": "The founder's story recited at the turn of the year (Year 300)",
+   "style": "silhouette_ochre"
+  },
+  "fractional_quantities": {
+   "path": "res://assets/ui/research/discovery-600/fractional_quantities.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_19_32 PM.png",
+   "tile_index": 5,
+   "caption": "Unit fractions and parts (Year 520)",
+   "style": "paper_gouache"
+  },
+  "genealogical_recitation": {
+   "path": "res://assets/ui/research/discovery-600/genealogical_recitation.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_03_32 PM.png",
+   "tile_index": 3,
+   "caption": "Elders recite each household's lineage (Year 4)",
+   "style": "silhouette_ochre"
+  },
+  "geometric_survey": {
+   "path": "res://assets/ui/research/discovery-600/geometric_survey.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_17_54 PM.png",
+   "tile_index": 4,
+   "caption": "Rope-stretcher field survey (Year 450)",
+   "style": "paper_gouache"
+  },
+  "god_boat_procession": {
+   "path": "res://assets/ui/research/discovery-600/god_boat_procession.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_35_59 PM.png",
+   "tile_index": 8,
+   "caption": "The god's boat carried in procession (Year 530)",
+   "style": "silhouette_ochre"
+  },
+  "graveside_libations": {
+   "path": "res://assets/ui/research/discovery-600/graveside_libations.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_21_55 PM.png",
+   "tile_index": 2,
+   "caption": "Libations poured for the ancestors at graves (Year 135)",
+   "style": "silhouette_ochre"
+  },
+  "grief_support_customs": {
+   "path": "res://assets/ui/research/discovery-600/grief_support_customs.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_21_55 PM.png",
+   "tile_index": 5,
+   "caption": "Grief support customs (Year 150)",
+   "style": "silhouette_ochre"
+  },
+  "guest_friendship": {
+   "path": "res://assets/ui/research/discovery-600/guest_friendship.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_27_50 PM.png",
+   "tile_index": 6,
+   "caption": "Guest-friendship between houses of different towns (Year 290)",
+   "style": "silhouette_ochre"
+  },
+  "harps_and_lyres": {
+   "path": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_29_51 PM.png",
+   "tile_index": 6,
+   "caption": "Tuned harps and lyres (Year 380)",
+   "style": "silhouette_ochre"
+  },
+  "hearth_shrine_offerings": {
+   "path": "res://assets/ui/research/discovery-600/hearth_shrine_offerings.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
+   "tile_index": 2,
+   "caption": "Offerings to the living god at the hearth-shrine (Year 14)",
+   "style": "silhouette_ochre"
+  },
+  "heroic_song_cycle": {
+   "path": "res://assets/ui/research/discovery-600/heroic_song_cycle.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_35_59 PM.png",
+   "tile_index": 3,
+   "caption": "Heroic song cycle of a great ruler (Year 490)",
+   "style": "silhouette_ochre"
+  },
+  "house_floor_burial": {
+   "path": "res://assets/ui/research/discovery-600/house_floor_burial.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_03_32 PM.png",
+   "tile_index": 8,
+   "caption": "The dead buried beneath the house floor (Year 9)",
+   "style": "silhouette_ochre"
+  },
+  "household_lineage_tokens": {
+   "path": "res://assets/ui/research/discovery-600/household_lineage_tokens.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_20_23 PM.png",
+   "tile_index": 2,
+   "caption": "Household lineage tokens (Year 80)",
+   "style": "silhouette_ochre"
+  },
+  "impressed_number_tablets": {
+   "path": "res://assets/ui/research/discovery-600/impressed_number_tablets.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_35_50 PM.png",
+   "tile_index": 2,
+   "caption": "Impressed number tablets (Year 225)",
+   "style": "paper_gouache"
+  },
+  "inlaid_mosaic_panels": {
+   "path": "res://assets/ui/research/discovery-600/inlaid_mosaic_panels.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_33_39 PM.png",
+   "tile_index": 1,
+   "caption": "Inlaid mosaic panels of feasts and processions (Year 403)",
+   "style": "silhouette_ochre"
+  },
+  "intercalated_calendar": {
+   "path": "res://assets/ui/research/discovery-600/intercalated_calendar.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_17_54 PM.png",
+   "tile_index": 1,
+   "caption": "Administrative calendar with an added month (Year 430)",
+   "style": "paper_gouache"
+  },
+  "intermarriage_visiting_customs": {
+   "path": "res://assets/ui/research/discovery-600/intermarriage_visiting_customs.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_27_50 PM.png",
+   "tile_index": 1,
+   "caption": "Visiting customs between intermarried villages (Year 265)",
+   "style": "silhouette_ochre"
+  },
+  "kin_body_ornament": {
+   "path": "res://assets/ui/research/discovery-600/kin_body_ornament.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
+   "tile_index": 1,
+   "caption": "Body paint, shell and bead ornament marking kin (Year 12)",
+   "style": "silhouette_ochre"
+  },
+  "knot_tally_cross_check": {
+   "path": "res://assets/ui/research/discovery-600/knot_tally_cross_check.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+   "tile_index": 1,
+   "caption": "Two households cross-check their tallies (Year 25)",
+   "style": "paper_gouache"
+  },
+  "knotted_record_systems": {
+   "path": "res://assets/ui/research/discovery-600/knotted_record_systems.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_20_39 PM.png",
+   "tile_index": 2,
+   "caption": "Knotted record cords (Year 145)",
+   "style": "paper_gouache"
+  },
+  "landmark_triangulation": {
+   "path": "res://assets/ui/research/discovery-600/landmark_triangulation.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_13 PM.png",
+   "tile_index": 0,
+   "caption": "Landmark alignment sighting (Year 65)",
+   "style": "paper_gouache"
+  },
+  "letters_to_the_god": {
+   "path": "res://assets/ui/research/discovery-600/letters_to_the_god.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_40_38 PM.png",
+   "tile_index": 0,
+   "caption": "Letters to the god laid before the shrine (Year 540)",
+   "style": "silhouette_ochre"
+  },
+  "love_wedding_songs": {
+   "path": "res://assets/ui/research/discovery-600/love_wedding_songs.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_35_59 PM.png",
+   "tile_index": 5,
+   "caption": "Love songs and wedding songs (Year 505)",
+   "style": "silhouette_ochre"
+  },
+  "marked_storage_registers": {
+   "path": "res://assets/ui/research/discovery-600/marked_storage_registers.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_20_39 PM.png",
+   "tile_index": 3,
+   "caption": "Marked counters on sealed stores (Year 150)",
+   "style": "paper_gouache"
+  },
+  "marriage_feasts": {
+   "path": "res://assets/ui/research/discovery-600/marriage_feasts.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_20_23 PM.png",
+   "tile_index": 5,
+   "caption": "Marriage feasts joining two lineages (Year 95)",
+   "style": "silhouette_ochre"
+  },
+  "material_accounting": {
+   "path": "res://assets/ui/research/discovery-600/material_accounting.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_13 PM.png",
+   "tile_index": 6,
+   "caption": "Store accounts by source and obligation (Year 105)",
+   "style": "paper_gouache"
+  },
+  "memorial_cairn_marking": {
+   "path": "res://assets/ui/research/discovery-600/memorial_cairn_marking.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_20_23 PM.png",
+   "tile_index": 4,
+   "caption": "Memorial cairns at the sites of notable events (Year 90)",
+   "style": "silhouette_ochre"
+  },
+  "messenger_relay_stations": {
+   "path": "res://assets/ui/research/discovery-600/messenger_relay_stations.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_33_18 PM.png",
+   "tile_index": 5,
+   "caption": "Messenger relays on fixed stages (Year 330)",
+   "style": "paper_gouache"
+  },
+  "mnemonic_verse_encoding": {
+   "path": "res://assets/ui/research/discovery-600/mnemonic_verse_encoding.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+   "tile_index": 6,
+   "caption": "Verse mnemonics for long lists (Year 50)",
+   "style": "paper_gouache"
+  },
+  "moon_counting": {
+   "path": "res://assets/ui/research/discovery-600/moon_counting.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+   "tile_index": 0,
+   "caption": "Moon counting: nights between full moons (Year 22)",
+   "style": "paper_gouache"
+  },
+  "mourning_days": {
+   "path": "res://assets/ui/research/discovery-600/mourning_days.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
+   "tile_index": 4,
+   "caption": "Mourning days of wailing and fasting (Year 18)",
+   "style": "silhouette_ochre"
+  },
+  "mutual_aid_customs": {
+   "path": "res://assets/ui/research/discovery-600/mutual_aid_customs.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_20_23 PM.png",
+   "tile_index": 6,
+   "caption": "Mutual aid customs (Year 100)",
+   "style": "silhouette_ochre"
+  },
+  "named_landmark_lore": {
+   "path": "res://assets/ui/research/discovery-600/named_landmark_lore.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_03_32 PM.png",
+   "tile_index": 4,
+   "caption": "Every notable rock and spring has a naming story (Year 5)",
+   "style": "silhouette_ochre"
+  },
+  "named_star_figures": {
+   "path": "res://assets/ui/research/discovery-600/named_star_figures.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+   "tile_index": 5,
+   "caption": "Star figures named in stories (Year 45)",
+   "style": "silhouette_ochre"
+  },
+  "naming_day_rites": {
+   "path": "res://assets/ui/research/discovery-600/naming_day_rites.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_24_28 PM.png",
+   "tile_index": 5,
+   "caption": "Naming-day rites (Year 225)",
+   "style": "silhouette_ochre"
+  },
+  "new_year_festival": {
+   "path": "res://assets/ui/research/discovery-600/new_year_festival.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_29_51 PM.png",
+   "tile_index": 0,
+   "caption": "New-year festival of the god's renewal of the land (Year 320)",
+   "style": "silhouette_ochre"
+  },
+  "novice_task_shadowing": {
+   "path": "res://assets/ui/research/discovery-600/novice_task_shadowing.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
+   "tile_index": 4,
+   "caption": "Novices shadow an experienced hand (Year 8)",
+   "style": "paper_gouache"
+  },
+  "ochre_grave_goods": {
+   "path": "res://assets/ui/research/discovery-600/ochre_grave_goods.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
+   "tile_index": 0,
+   "caption": "Red ochre and grave goods for the dead (Year 10)",
+   "style": "silhouette_ochre"
+  },
+  "offering_omens": {
+   "path": "res://assets/ui/research/discovery-600/offering_omens.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_35_59 PM.png",
+   "tile_index": 7,
+   "caption": "Omens read from offerings (Year 520)",
+   "style": "silhouette_ochre"
+  },
+  "officiant_vestments": {
+   "path": "res://assets/ui/research/discovery-600/officiant_vestments.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_33_39 PM.png",
+   "tile_index": 4,
+   "caption": "Special garments and headdress for officiants (Year 430)",
+   "style": "silhouette_ochre"
+  },
+  "oral_epics": {
+   "path": "res://assets/ui/research/discovery-600/oral_epics.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_03_32 PM.png",
+   "tile_index": 2,
+   "caption": "Oral epics: trained reciters keep long accounts (Year 3)",
+   "style": "silhouette_ochre"
+  },
+  "origin_story": {
+   "path": "res://assets/ui/research/discovery-600/origin_story.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
+   "tile_index": 8,
+   "caption": "Origin story: how the people and their god came to this land (Year 28)",
+   "style": "silhouette_ochre"
+  },
+  "outflow_water_clock": {
+   "path": "res://assets/ui/research/discovery-600/outflow_water_clock.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_21_50 PM.png",
+   "tile_index": 4,
+   "caption": "Outflow water clock (Year 590)",
+   "style": "paper_gouache"
+  },
+  "owner_marks": {
+   "path": "res://assets/ui/research/discovery-600/owner_marks.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+   "tile_index": 7,
+   "caption": "Owners' marks on pots and bundles (Year 55)",
+   "style": "paper_gouache"
+  },
+  "paced_distance_counting": {
+   "path": "res://assets/ui/research/discovery-600/paced_distance_counting.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+   "tile_index": 8,
+   "caption": "Paced distance counting (Year 60)",
+   "style": "paper_gouache"
+  },
+  "paired_record_witnessing": {
+   "path": "res://assets/ui/research/discovery-600/paired_record_witnessing.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_13 PM.png",
+   "tile_index": 7,
+   "caption": "A second keeper witnesses each record (Year 115)",
+   "style": "paper_gouache"
+  },
+  "palace_wall_painting": {
+   "path": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_40_38 PM.png",
+   "tile_index": 1,
+   "caption": "Painted walls in palace halls (Year 545)",
+   "style": "silhouette_ochre"
+  },
+  "phonetic_notation": {
+   "path": "res://assets/ui/research/discovery-600/phonetic_notation.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_33_18 PM.png",
+   "tile_index": 8,
+   "caption": "Sound-signs: rebus spelling of names and words (Year 360)",
+   "style": "paper_gouache"
+  },
+  "pictographic_records": {
+   "path": "res://assets/ui/research/discovery-600/pictographic_records.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_35_50 PM.png",
+   "tile_index": 6,
+   "caption": "Picture-sign records (proto-writing) (Year 255)",
+   "style": "paper_gouache"
+  },
+  "pilgrimage": {
+   "path": "res://assets/ui/research/discovery-600/pilgrimage.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_40_38 PM.png",
+   "tile_index": 3,
+   "caption": "Pilgrimage to the god's great house from distant towns (Year 560)",
+   "style": "silhouette_ochre"
+  },
+  "pit_pebble_game": {
+   "path": "res://assets/ui/research/discovery-600/pit_pebble_game.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+   "tile_index": 2,
+   "caption": "Pit-and-pebble counting game (Year 35)",
+   "style": "silhouette_ochre"
+  },
+  "place_value": {
+   "path": "res://assets/ui/research/discovery-600/place_value.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_19_32 PM.png",
+   "tile_index": 4,
+   "caption": "Place-value reckoning (Year 510)",
+   "style": "paper_gouache"
+  },
+  "plastered_ancestor_skulls": {
+   "path": "res://assets/ui/research/discovery-600/plastered_ancestor_skulls.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
+   "tile_index": 3,
+   "caption": "Ancestor skulls plastered and kept in the house (Year 16)",
+   "style": "silhouette_ochre"
+  },
+  "plumb_line_sighting": {
+   "path": "res://assets/ui/research/discovery-600/plumb_line_sighting.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_15_55 PM.png",
+   "tile_index": 0,
+   "caption": "Plumb line and sighting pole",
+   "style": "paper_gouache"
+  },
+  "pottery_style_identity": {
+   "path": "res://assets/ui/research/discovery-600/pottery_style_identity.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+   "tile_index": 0,
+   "caption": "Pottery motifs that mark a people (Year 30)",
+   "style": "silhouette_ochre"
+  },
+  "praise_songs": {
+   "path": "res://assets/ui/research/discovery-600/praise_songs.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_20_23 PM.png",
+   "tile_index": 8,
+   "caption": "Songs of praise sung to the god at set times (Year 115)",
+   "style": "silhouette_ochre"
+  },
+  "prearranged_beacon_chains": {
+   "path": "res://assets/ui/research/discovery-600/prearranged_beacon_chains.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_21_50 PM.png",
+   "tile_index": 0,
+   "caption": "Beacon chains by prior arrangement (Year 550)",
+   "style": "paper_gouache"
+  },
+  "problem_council_sessions": {
+   "path": "res://assets/ui/research/discovery-600/problem_council_sessions.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_35_50 PM.png",
+   "tile_index": 0,
+   "caption": "Specialists' problem councils (Year 210)",
+   "style": "paper_gouache"
+  },
+  "proverbs": {
+   "path": "res://assets/ui/research/discovery-600/proverbs.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_24_28 PM.png",
+   "tile_index": 1,
+   "caption": "Proverbs passed down as counsel (Year 180)",
+   "style": "silhouette_ochre"
+  },
+  "public_debate_custom": {
+   "path": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_24_28 PM.png",
+   "tile_index": 7,
+   "caption": "Rival explanations argued before the community (Year 250)",
+   "style": "silhouette_ochre"
+  },
+  "public_schools": {
+   "path": "res://assets/ui/research/discovery-600/public_schools.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_15_55 PM.png",
+   "tile_index": 8,
+   "caption": "Tablet houses (scribal schools)",
+   "style": "paper_gouache"
+  },
+  "puzzle_riddle_contests": {
+   "path": "res://assets/ui/research/discovery-600/puzzle_riddle_contests.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_21_55 PM.png",
+   "tile_index": 6,
+   "caption": "Riddle and puzzle contests (Year 152)",
+   "style": "silhouette_ochre"
+  },
+  "rank_dress_styles": {
+   "path": "res://assets/ui/research/discovery-600/rank_dress_styles.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_24_28 PM.png",
+   "tile_index": 8,
+   "caption": "Hair and dress styles marking age and rank (Year 255)",
+   "style": "silhouette_ochre"
+  },
+  "rank_inlay_ornament": {
+   "path": "res://assets/ui/research/discovery-600/rank_inlay_ornament.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_24_28 PM.png",
+   "tile_index": 4,
+   "caption": "Inlaid shell and stone ornament for high rank (Year 210)",
+   "style": "silhouette_ochre"
+  },
+  "rattles_drums_pipes": {
+   "path": "res://assets/ui/research/discovery-600/rattles_drums_pipes.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_21_55 PM.png",
+   "tile_index": 0,
+   "caption": "Rattles, clay drums and reed pipes (Year 120)",
+   "style": "silhouette_ochre"
+  },
+  "reciprocal_gift_exchange": {
+   "path": "res://assets/ui/research/discovery-600/reciprocal_gift_exchange.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
+   "tile_index": 7,
+   "caption": "Gifts given and returned bind households (Year 25)",
+   "style": "silhouette_ochre"
+  },
+  "reciprocal_tables": {
+   "path": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_19_32 PM.png",
+   "tile_index": 1,
+   "caption": "Multiplication and reciprocal tables (Year 485)",
+   "style": "paper_gouache"
+  },
+  "regional_maps": {
+   "path": "res://assets/ui/research/discovery-600/regional_maps.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_19_32 PM.png",
+   "tile_index": 7,
+   "caption": "Clay plans of fields and towns (Year 540)",
+   "style": "paper_gouache"
+  },
+  "relay_call_stations": {
+   "path": "res://assets/ui/research/discovery-600/relay_call_stations.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
+   "tile_index": 1,
+   "caption": "Relay calls between camps (Year 3)",
+   "style": "paper_gouache"
+  },
+  "repeated_recitation_training": {
+   "path": "res://assets/ui/research/discovery-600/repeated_recitation_training.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+   "tile_index": 2,
+   "caption": "Recitation drills for craft rules (Year 30)",
+   "style": "paper_gouache"
+  },
+  "ritual_masks_costumes": {
+   "path": "res://assets/ui/research/discovery-600/ritual_masks_costumes.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+   "tile_index": 7,
+   "caption": "Masks and costumes for rites (Year 55)",
+   "style": "silhouette_ochre"
+  },
+  "rod_and_cord_leveling": {
+   "path": "res://assets/ui/research/discovery-600/rod_and_cord_leveling.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_35_50 PM.png",
+   "tile_index": 4,
+   "caption": "Rod-and-cord levelling (Year 240)",
+   "style": "paper_gouache"
+  },
+  "rotating_inspection_duty": {
+   "path": "res://assets/ui/research/discovery-600/rotating_inspection_duty.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_20_39 PM.png",
+   "tile_index": 5,
+   "caption": "Rotating inspection duty (Year 170)",
+   "style": "paper_gouache"
+  },
+  "route_memory": {
+   "path": "res://assets/ui/research/discovery-600/route_memory.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
+   "tile_index": 0,
+   "caption": "Encoded routes: travel told as a fixed story (Year 2)",
+   "style": "paper_gouache"
+  },
+  "royal_ancestor_offerings": {
+   "path": "res://assets/ui/research/discovery-600/royal_ancestor_offerings.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_35_59 PM.png",
+   "tile_index": 4,
+   "caption": "Monthly offerings for dead rulers (Year 500)",
+   "style": "silhouette_ochre"
+  },
+  "royal_mourning": {
+   "path": "res://assets/ui/research/discovery-600/royal_mourning.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_33_39 PM.png",
+   "tile_index": 7,
+   "caption": "Public days of lament for a dead ruler (Year 450)",
+   "style": "silhouette_ochre"
+  },
+  "royal_stone_portraits": {
+   "path": "res://assets/ui/research/discovery-600/royal_stone_portraits.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_33_39 PM.png",
+   "tile_index": 8,
+   "caption": "Stone portraits of the ruler (Year 455)",
+   "style": "silhouette_ochre"
+  },
+  "royal_wrestling_matches": {
+   "path": "res://assets/ui/research/discovery-600/royal_wrestling_matches.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_35_59 PM.png",
+   "tile_index": 0,
+   "caption": "Wrestling and boxing matches before the ruler (Year 460)",
+   "style": "silhouette_ochre"
+  },
+  "sacred_places": {
+   "path": "res://assets/ui/research/discovery-600/sacred_places.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+   "tile_index": 8,
+   "caption": "Sacred places set apart: spring, grove, high rock (Year 60)",
+   "style": "silhouette_ochre"
+  },
+  "scribal_apprenticeship": {
+   "path": "res://assets/ui/research/discovery-600/scribal_apprenticeship.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_33_18 PM.png",
+   "tile_index": 1,
+   "caption": "Scribal apprenticeship (Year 290)",
+   "style": "paper_gouache"
+  },
+  "scribal_copying_tests": {
+   "path": "res://assets/ui/research/discovery-600/scribal_copying_tests.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_19_32 PM.png",
+   "tile_index": 3,
+   "caption": "Tablet-house exercises and copying tests (Year 500)",
+   "style": "paper_gouache"
+  },
+  "scribal_songs_satires": {
+   "path": "res://assets/ui/research/discovery-600/scribal_songs_satires.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_40_38 PM.png",
+   "tile_index": 2,
+   "caption": "Tablet-house songs and satires (Year 555)",
+   "style": "silhouette_ochre"
+  },
+  "scribal_specialties": {
+   "path": "res://assets/ui/research/discovery-600/scribal_specialties.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_17_54 PM.png",
+   "tile_index": 6,
+   "caption": "Scribal specialties: surveyor, accountant, letter-writer (Year 465)",
+   "style": "paper_gouache"
+  },
+  "sealed_tablet_contracts": {
+   "path": "res://assets/ui/research/discovery-600/sealed_tablet_contracts.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_33_18 PM.png",
+   "tile_index": 6,
+   "caption": "Sealed tablet receipts and contracts (Year 340)",
+   "style": "paper_gouache"
+  },
+  "sealed_tablet_letters": {
+   "path": "res://assets/ui/research/discovery-600/sealed_tablet_letters.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_17_54 PM.png",
+   "tile_index": 0,
+   "caption": "Sealed tablet letters (Year 425)",
+   "style": "paper_gouache"
+  },
+  "seasonal_commemoration_rites": {
+   "path": "res://assets/ui/research/discovery-600/seasonal_commemoration_rites.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_24_28 PM.png",
+   "tile_index": 6,
+   "caption": "A yearly rite on the date of a remembered disaster (Year 240)",
+   "style": "silhouette_ochre"
+  },
+  "seasonal_hymn_cycles": {
+   "path": "res://assets/ui/research/discovery-600/seasonal_hymn_cycles.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_29_51 PM.png",
+   "tile_index": 5,
+   "caption": "Hymn cycles for each season of the god's year (Year 375)",
+   "style": "silhouette_ochre"
+  },
+  "seasonal_news_gathering": {
+   "path": "res://assets/ui/research/discovery-600/seasonal_news_gathering.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_35_50 PM.png",
+   "tile_index": 3,
+   "caption": "Travelers asked set questions for news (Year 230)",
+   "style": "paper_gouache"
+  },
+  "shadow_clock": {
+   "path": "res://assets/ui/research/discovery-600/shadow_clock.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_21_50 PM.png",
+   "tile_index": 3,
+   "caption": "Shadow clock (Year 580)",
+   "style": "paper_gouache"
+  },
+  "shared_hearth_gatherings": {
+   "path": "res://assets/ui/research/discovery-600/shared_hearth_gatherings.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_03_32 PM.png",
+   "tile_index": 0,
+   "caption": "Shared hearth gatherings (Year 1)",
+   "style": "silhouette_ochre"
+  },
+  "shared_meal_obligations": {
+   "path": "res://assets/ui/research/discovery-600/shared_meal_obligations.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_29_51 PM.png",
+   "tile_index": 3,
+   "caption": "Shared meal obligations (Year 360)",
+   "style": "silhouette_ochre"
+  },
+  "shrine_wall_painting": {
+   "path": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+   "tile_index": 6,
+   "caption": "Painted walls in shrine rooms (Year 50)",
+   "style": "silhouette_ochre"
+  },
+  "sightline_corridor_marking": {
+   "path": "res://assets/ui/research/discovery-600/sightline_corridor_marking.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_17_54 PM.png",
+   "tile_index": 8,
+   "caption": "Sightline corridors kept clear (Year 475)",
+   "style": "paper_gouache"
+  },
+  "solar_year_reckoning": {
+   "path": "res://assets/ui/research/discovery-600/solar_year_reckoning.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_13 PM.png",
+   "tile_index": 8,
+   "caption": "Solar year reckoned by moons and solstice (Year 120)",
+   "style": "paper_gouache"
+  },
+  "solstice_horizon_markers": {
+   "path": "res://assets/ui/research/discovery-600/solstice_horizon_markers.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+   "tile_index": 4,
+   "caption": "Horizon sunrise markers for the solstices (Year 40)",
+   "style": "paper_gouache"
+  },
+  "specialist_task_assignment": {
+   "path": "res://assets/ui/research/discovery-600/specialist_task_assignment.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_13 PM.png",
+   "tile_index": 2,
+   "caption": "Specialists assigned to one craft's problems (Year 80)",
+   "style": "paper_gouache"
+  },
+  "square_root_tables": {
+   "path": "res://assets/ui/research/discovery-600/square_root_tables.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_19_32 PM.png",
+   "tile_index": 8,
+   "caption": "Square and root tables (Year 545)",
+   "style": "paper_gouache"
+  },
+  "stamp_seals": {
+   "path": "res://assets/ui/research/discovery-600/stamp_seals.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_13 PM.png",
+   "tile_index": 5,
+   "caption": "Stamp seals (Year 100)",
+   "style": "paper_gouache"
+  },
+  "standard_measures": {
+   "path": "res://assets/ui/research/discovery-600/standard_measures.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+   "tile_index": 5,
+   "caption": "Body measures: hand, forearm, pace, basket (Year 45)",
+   "style": "paper_gouache"
+  },
+  "standard_sign_lists": {
+   "path": "res://assets/ui/research/discovery-600/standard_sign_lists.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_33_18 PM.png",
+   "tile_index": 0,
+   "caption": "Standard sign lists (Year 280)",
+   "style": "paper_gouache"
+  },
+  "standardized_gesture_code": {
+   "path": "res://assets/ui/research/discovery-600/standardized_gesture_code.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_20_39 PM.png",
+   "tile_index": 7,
+   "caption": "Trade hand-sign code (Year 190)",
+   "style": "paper_gouache"
+  },
+  "star_hour_tables": {
+   "path": "res://assets/ui/research/discovery-600/star_hour_tables.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_19_32 PM.png",
+   "tile_index": 0,
+   "caption": "Star-hour tables for the night (Year 480)",
+   "style": "paper_gouache"
+  },
+  "star_rise_markers": {
+   "path": "res://assets/ui/research/discovery-600/star_rise_markers.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_20_39 PM.png",
+   "tile_index": 6,
+   "caption": "Star-rise season markers (Year 180)",
+   "style": "paper_gouache"
+  },
+  "star_rising_civil_year": {
+   "path": "res://assets/ui/research/discovery-600/star_rising_civil_year.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_15_55 PM.png",
+   "tile_index": 1,
+   "caption": "365-day civil year from star rising",
+   "style": "paper_gouache"
+  },
+  "stone_relief_carving": {
+   "path": "res://assets/ui/research/discovery-600/stone_relief_carving.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_27_50 PM.png",
+   "tile_index": 3,
+   "caption": "Relief carving on stone slabs (Year 275)",
+   "style": "silhouette_ochre"
+  },
+  "sung_divine_narrative": {
+   "path": "res://assets/ui/research/discovery-600/sung_divine_narrative.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_40_38 PM.png",
+   "tile_index": 5,
+   "caption": "Sung narrative of the god's deeds with music (Year 580)",
+   "style": "silhouette_ochre"
+  },
+  "sworn_interpreters": {
+   "path": "res://assets/ui/research/discovery-600/sworn_interpreters.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_17_54 PM.png",
+   "tile_index": 3,
+   "caption": "Sworn interpreters (Year 445)",
+   "style": "paper_gouache"
+  },
+  "tablet_colophons": {
+   "path": "res://assets/ui/research/discovery-600/tablet_colophons.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_19_32 PM.png",
+   "tile_index": 2,
+   "caption": "Colophons: scribe, date and source on each tablet (Year 490)",
+   "style": "paper_gouache"
+  },
+  "tallies": {
+   "path": "res://assets/ui/research/discovery-600/tallies.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
+   "tile_index": 5,
+   "caption": "Notched-stick tallies (Year 10)",
+   "style": "paper_gouache"
+  },
+  "temple_choirs": {
+   "path": "res://assets/ui/research/discovery-600/temple_choirs.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_29_51 PM.png",
+   "tile_index": 8,
+   "caption": "Temple choirs with drums and cymbals (Year 395)",
+   "style": "silhouette_ochre"
+  },
+  "temple_festival_meals": {
+   "path": "res://assets/ui/research/discovery-600/temple_festival_meals.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_24_28 PM.png",
+   "tile_index": 2,
+   "caption": "Festival meals shared at the god's house (Year 190)",
+   "style": "silhouette_ochre"
+  },
+  "temple_singers_lamenters": {
+   "path": "res://assets/ui/research/discovery-600/temple_singers_lamenters.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_27_50 PM.png",
+   "tile_index": 5,
+   "caption": "Singers and lamenters trained for the god's house (Year 285)",
+   "style": "silhouette_ochre"
+  },
+  "tens_sixties_bundling": {
+   "path": "res://assets/ui/research/discovery-600/tens_sixties_bundling.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_35_50 PM.png",
+   "tile_index": 1,
+   "caption": "Counting in fixed bundles of tens and sixties (Year 220)",
+   "style": "paper_gouache"
+  },
+  "theophoric_names": {
+   "path": "res://assets/ui/research/discovery-600/theophoric_names.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_29_51 PM.png",
+   "tile_index": 2,
+   "caption": "Personal names that honor the god (Year 350)",
+   "style": "silhouette_ochre"
+  },
+  "token_envelopes": {
+   "path": "res://assets/ui/research/discovery-600/token_envelopes.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_20_39 PM.png",
+   "tile_index": 4,
+   "caption": "Token envelopes: sealed clay balls holding tokens (Year 160)",
+   "style": "paper_gouache"
+  },
+  "town_identity": {
+   "path": "res://assets/ui/research/discovery-600/town_identity.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_29_51 PM.png",
+   "tile_index": 1,
+   "caption": "Town identity: its own name, emblem and patron festival (Year 330)",
+   "style": "silhouette_ochre"
+  },
+  "traveling_storyteller_exchange": {
+   "path": "res://assets/ui/research/discovery-600/traveling_storyteller_exchange.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_21_55 PM.png",
+   "tile_index": 1,
+   "caption": "Traveling storytellers trade tales for lodging (Year 130)",
+   "style": "silhouette_ochre"
+  },
+  "visiting_specialist_consultations": {
+   "path": "res://assets/ui/research/discovery-600/visiting_specialist_consultations.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_27_50 PM.png",
+   "tile_index": 2,
+   "caption": "Respected outsiders consulted on hard disputes (Year 268)",
+   "style": "silhouette_ochre"
+  },
+  "votive_figures": {
+   "path": "res://assets/ui/research/discovery-600/votive_figures.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_29_51 PM.png",
+   "tile_index": 4,
+   "caption": "Votive figures stand in prayer before the god (Year 365)",
+   "style": "silhouette_ochre"
+  },
+  "watch_duty_rotation": {
+   "path": "res://assets/ui/research/discovery-600/watch_duty_rotation.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
+   "tile_index": 8,
+   "caption": "Standing watch duty (Year 18)",
+   "style": "paper_gouache"
+  },
+  "water_trough_leveling": {
+   "path": "res://assets/ui/research/discovery-600/water_trough_leveling.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_17_54 PM.png",
+   "tile_index": 5,
+   "caption": "Water-trough levelling (Year 460)",
+   "style": "paper_gouache"
+  },
+  "weather_sign_reading": {
+   "path": "res://assets/ui/research/discovery-600/weather_sign_reading.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
+   "tile_index": 3,
+   "caption": "Weather-sign reading (Year 6)",
+   "style": "paper_gouache"
+  },
+  "winter_tale_nights": {
+   "path": "res://assets/ui/research/discovery-600/winter_tale_nights.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+   "tile_index": 4,
+   "caption": "Winter tale nights (Year 40)",
+   "style": "silhouette_ochre"
+  },
+  "wisdom_instructions": {
+   "path": "res://assets/ui/research/discovery-600/wisdom_instructions.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_33_39 PM.png",
+   "tile_index": 2,
+   "caption": "Wisdom instructions from a father to his son (Year 405)",
+   "style": "silhouette_ochre"
+  },
+  "worked_problem_tablets": {
+   "path": "res://assets/ui/research/discovery-600/worked_problem_tablets.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_19_32 PM.png",
+   "tile_index": 6,
+   "caption": "Worked-problem teaching tablets (Year 530)",
+   "style": "paper_gouache"
+  },
+  "workshop_standards": {
+   "path": "res://assets/ui/research/discovery-600/workshop_standards.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_15_55 PM.png",
+   "tile_index": 4,
+   "caption": "Workshop standards and named grades",
+   "style": "paper_gouache"
+  },
+  "written_apprentice_instructions": {
+   "path": "res://assets/ui/research/discovery-600/written_apprentice_instructions.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_15_55 PM.png",
+   "tile_index": 3,
+   "caption": "Written instructions to apprentices",
+   "style": "paper_gouache"
+  },
+  "written_lore_tablets": {
+   "path": "res://assets/ui/research/discovery-600/written_lore_tablets.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_15_55 PM.png",
+   "tile_index": 2,
+   "caption": "Recited lore copied onto tablets",
+   "style": "paper_gouache"
+  }
+ }
+}

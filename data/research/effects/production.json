@@ -1,5 +1,703 @@
 {
  "line": "production",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "raw_material_prestaging": {
+   "art": "res://assets/ui/research/stone-selection-v1.png"
+  },
+  "stone_sorting": {
+   "art": "res://assets/ui/research/stone-selection-v1.png"
+  },
+  "edge_testing_by_feel": {
+   "art": "res://assets/ui/research/subjects/controlled_flaking-v1.png"
+  },
+  "controlled_flaking": {
+   "art": "res://assets/ui/research/subjects/controlled_flaking-v1.png"
+  },
+  "edge_resharpening_rounds": {
+   "art": "res://assets/ui/research/subjects/controlled_flaking-v1.png"
+  },
+  "cordage": {
+   "art": "res://assets/ui/research/subjects/cordage-v1.png"
+  },
+  "hafted_tools": {
+   "art": "res://assets/ui/research/subjects/hafted_tools-v1.png"
+  },
+  "basketry": {
+   "art": "res://assets/ui/research/subjects/basketry-v1.png"
+  },
+  "notched_measuring_rods": {
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png"
+  },
+  "hide_smoke_curing": {
+   "effects": {
+    "craft_output": 0.003,
+    "storage_loss": -0.01,
+    "mobile_shelter": 0.02,
+    "health_protection": 0.0035
+   },
+   "observation": "Hides pegged out, scraped clean and hung in the smoke of a smouldering fire stay supple and no longer rot."
+  },
+  "batch_task_grouping": {
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png"
+  },
+  "clay_testing": {
+   "art": "res://assets/ui/research/subjects/clay_testing-v1.png"
+  },
+  "clay_shaping": {
+   "art": "res://assets/ui/research/subjects/clay_shaping-v1.png"
+  },
+  "woven_carriers": {
+   "art": "res://assets/ui/research/subjects/woven_carriers-v1.png"
+  },
+  "bone_needle_sewing": {
+   "effects": {
+    "craft_output": 0.003,
+    "health_protection": 0.007,
+    "mobile_shelter": 0.01
+   },
+   "art": "res://assets/ui/research/paper/bone_needle_sewing.png"
+  },
+  "ground_stone_axes": {
+   "effects": {
+    "tool_quality": 0.008,
+    "timber_yield": 0.04,
+    "construction_rate": 0.003,
+    "repair_capacity": 0.01
+   },
+   "observation": "An axe ground smooth on sandstone and water bites deep, rarely shatters, and can be reground for a lifetime."
+  },
+  "mineral_pigment_preparation": {
+   "effects": {
+    "craft_output": 0.002,
+    "cohesion": 0.0025
+   },
+   "art": "res://assets/ui/research/paper/mineral_pigment_preparation.png"
+  },
+  "pit_firing": {
+   "art": "res://assets/ui/research/subjects/pit_firing-v1.png"
+  },
+  "clay_tempering": {
+   "art": "res://assets/ui/research/subjects/clay_tempering-v1.png"
+  },
+  "grog_preparation": {
+   "effects": {
+    "container_capacity": 0.02,
+    "craft_output": 0.002,
+    "clay_yield": 0.01
+   },
+   "art": "res://assets/ui/research/subjects/clay_tempering-v1.png"
+  },
+  "timber_seasoning": {
+   "art": "res://assets/ui/research/subjects/timber_seasoning-v1.png"
+  },
+  "bow_drill_drive": {
+   "effects": {
+    "tool_quality": 0.004,
+    "craft_output": 0.003
+   },
+   "art": "res://assets/ui/research/paper/bow_drill_drive.png"
+  },
+  "fiber_retting": {
+   "effects": {
+    "fiber_yield": 0.05,
+    "craft_output": 0.002,
+    "water_pollution": 0.004
+   },
+   "art": "res://assets/ui/research/paper/fiber_retting.png"
+  },
+  "drop_spindles": {
+   "effects": {
+    "fiber_yield": 0.03,
+    "craft_output": 0.004
+   },
+   "art": "res://assets/ui/research/paper/drop_spindles.png"
+  },
+  "grip_wrapping_practice": {
+   "art": "res://assets/ui/research/subjects/hafted_tools-v1.png"
+  },
+  "charcoal": {
+   "art": "res://assets/ui/research/subjects/charcoal-v1.png"
+  },
+  "paired_measure_checking": {
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png"
+  },
+  "warp_weighted_looms": {
+   "effects": {
+    "craft_output": 0.008,
+    "fiber_yield": 0.02,
+    "labor_efficiency": 0.0011,
+    "health_protection": 0.007
+   },
+   "art": "res://assets/ui/research/paper/plain_weaving.png",
+   "social_consequence": "Cloth becomes a household's wealth and a woman's work of years; it is given at marriages and hoarded against hard times."
+  },
+  "plain_weaving": {
+   "effects": {
+    "craft_output": 0.006,
+    "health_protection": 0.007,
+    "trade_capacity": 0.006
+   },
+   "art": "res://assets/ui/research/paper/plain_weaving.png"
+  },
+  "burnished_slipped_wares": {
+   "effects": {
+    "container_capacity": 0.02,
+    "food_spoilage": -0.01,
+    "craft_output": 0.003,
+    "water_safety": 0.003
+   },
+   "observation": "A pot rubbed with a smooth pebble before firing, or dipped in fine slip, holds water without sweating and shines like stone."
+  },
+  "lime_burning": {
+   "art": "res://assets/ui/research/subjects/lime_burning-v1.png",
+   "production_items": [
+    "quicklime"
+   ]
+  },
+  "scrap_reclamation_habits": {
+   "art": "res://assets/ui/research/stone-selection-v1.png"
+  },
+  "workshop_space_sharing": {
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png"
+  },
+  "kiln_control": {
+   "art": "res://assets/ui/research/subjects/kiln_control-v1.png"
+  },
+  "painted_pottery": {
+   "effects": {
+    "craft_output": 0.004,
+    "trade_capacity": 0.006,
+    "cohesion": 0.0025
+   },
+   "observation": "Red and black earth paints fired onto the pot keep their colour, and each village's patterns can be told apart."
+  },
+  "native_copper_working": {
+   "effects": {
+    "tool_quality": 0.004,
+    "craft_output": 0.003,
+    "metal_yield": 0.02,
+    "trade_capacity": 0.006
+   },
+   "observation": "Lumps of red metal found in the green rock can be hammered into awls and beads, and heated again when they grow brittle."
+  },
+  "reference_vessel_sets": {
+   "art": "res://assets/ui/research/subjects/clay_shaping-v1.png"
+  },
+  "tournette": {
+   "effects": {
+    "craft_output": 0.006,
+    "standardization": 0.009,
+    "container_capacity": 0.01
+   },
+   "observation": "A slow turning disc lets the potter smooth the rim and paint bands all the way round in one steady pass."
+  },
+  "horizontal_ground_loom": {
+   "effects": {
+    "craft_output": 0.006,
+    "fiber_yield": 0.01,
+    "labor_efficiency": 0.0011
+   },
+   "observation": "Warp pegged between two beams on the ground lets two weavers work a wide cloth side by side."
+  },
+  "stone_grain_judging": {
+   "art": "res://assets/ui/research/subjects/quarry_reading-v1.png"
+  },
+  "ore_assaying": {
+   "art": "res://assets/ui/research/subjects/ore_assaying-v1.png"
+  },
+  "copper_smelting": {
+   "art": "res://assets/ui/research/subjects/copper_smelting-v2.png",
+   "social_consequence": "Metal no longer depends on lucky finds of native copper; those who know the green ores and the fire gain a new kind of wealth.",
+   "production_items": [
+    "refined_copper"
+   ]
+  },
+  "haft_fit_checking": {
+   "art": "res://assets/ui/research/subjects/hafted_tools-v1.png"
+  },
+  "hide_tanning": {
+   "effects": {
+    "craft_output": 0.004,
+    "storage_loss": -0.01,
+    "mobile_shelter": 0.02,
+    "container_capacity": 0.01,
+    "water_pollution": 0.005
+   },
+   "art": "res://assets/ui/research/paper/hide_tanning.png",
+   "production_items": [
+    "bated_vegetable_leather",
+    "rendered_leather_fat",
+    "prepared_tanning_hides",
+    "plant_tannin_extract",
+    "vegetable_tanned_leather",
+    "finished_flexible_leather"
+   ]
+  },
+  "copper_casting": {
+   "art": "res://assets/ui/research/subjects/copper_casting-v1.png"
+  },
+  "fire_setting_mining": {
+   "effects": {
+    "extraction_yield": 0.05,
+    "metal_yield": 0.03,
+    "stone_yield": 0.02,
+    "fuel_demand": 0.015,
+    "timber_pressure": 0.01,
+    "injury_risk": 0.005
+   },
+   "observation": "A fire built against the rock face, then doused, cracks the ore so stone mauls can break it loose."
+  },
+  "assistant_task_offloading": {
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png"
+  },
+  "handle_balance_testing": {
+   "art": "res://assets/ui/research/subjects/hafted_tools-v1.png"
+  },
+  "textile_dye_extraction": {
+   "effects": {
+    "craft_output": 0.003,
+    "trade_capacity": 0.009
+   },
+   "art": "res://assets/ui/research/paper/textile_dye_extraction.png"
+  },
+  "lead_smelting": {
+   "effects": {
+    "metal_yield": 0.02,
+    "extraction_yield": 0.01,
+    "pollution": 0.01,
+    "health_risk": 0.005
+   },
+   "art": "res://assets/ui/research/paper/silver_cupellation.png",
+   "production_items": [
+    "refined_lead",
+    "silver_bearing_bullion"
+   ],
+   "production_contract": "Galena, charcoal and furnace work produce refined lead and silver-bearing bullion; fumes and slag stay with the smelting site."
+  },
+  "seed_oil_pressing": {
+   "effects": {
+    "craft_output": 0.003,
+    "storage_loss": -0.005
+   },
+   "art": "res://assets/ui/research/paper/seed_oil_pressing.png",
+   "production_contract": "Seed or olive stock, a press and work produce lamp and leather oil; the press cake remains as fodder."
+  },
+  "reduction_firing": {
+   "effects": {
+    "craft_output": 0.004,
+    "fuel_efficiency": 0.01,
+    "trade_capacity": 0.006
+   },
+   "observation": "Choking the kiln with green wood at the end of the firing turns the pot black, and the potters learn to do it on purpose."
+  },
+  "standard_weight_sets": {
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png"
+  },
+  "wool_spinning": {
+   "effects": {
+    "fiber_yield": 0.05,
+    "craft_output": 0.004,
+    "health_protection": 0.007,
+    "trade_capacity": 0.006
+   },
+   "observation": "The new woolly sheep are plucked each spring, and the fleece spins into a warm, springy yarn that linen cannot match."
+  },
+  "arsenical_copper": {
+   "effects": {
+    "tool_quality": 0.012,
+    "metal_yield": 0.04,
+    "craft_output": 0.004,
+    "warfare_readiness": 0.02,
+    "health_risk": 0.01,
+    "pollution": 0.01
+   },
+   "observation": "Copper smelted from certain grey-streaked ores comes out harder and casts cleaner, though its fumes smell of garlic.",
+   "social_consequence": "Harder copper blades are prized and traded far; smiths who know the ores gain rank, and some of them sicken from the fumes."
+  },
+  "output_quality_sorting": {
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png"
+  },
+  "measure_drift_checking": {
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png"
+  },
+  "template_based_sizing": {
+   "art": "res://assets/ui/research/paper/garment_pattern_cutting.png"
+  },
+  "lost_wax_casting": {
+   "effects": {
+    "craft_output": 0.008,
+    "trade_capacity": 0.012,
+    "tool_quality": 0.002,
+    "standardization": 0.006,
+    "legitimacy": 0.006
+   },
+   "observation": "A figure modelled in beeswax, coated in clay and baked, leaves a perfect hollow for the metal to fill.",
+   "social_consequence": "Intricate cast figures, maceheads and fittings become marks of rank and gifts between rulers."
+  },
+  "comparative_tool_trials": {
+   "art": "res://assets/ui/research/subjects/hafted_tools-v1.png"
+  },
+  "sheet_copper_riveting": {
+   "effects": {
+    "craft_output": 0.004,
+    "container_capacity": 0.01,
+    "repair_capacity": 0.01
+   },
+   "observation": "Copper beaten into sheet and joined with copper rivets makes vessels and panels too large to cast."
+  },
+  "clay_feel_judging": {
+   "art": "res://assets/ui/research/subjects/clay_testing-v1.png"
+  },
+  "faience": {
+   "effects": {
+    "craft_output": 0.006,
+    "trade_capacity": 0.018,
+    "legitimacy": 0.003,
+    "fuel_demand": 0.005
+   },
+   "observation": "Crushed quartz bound with a little natron and fired forms its own blue-green glaze, bright as turquoise.",
+   "social_consequence": "Glazed beads and amulets become a sought-after trade good, and the secret of the blue is guarded."
+  },
+  "wheel_thrown_pottery": {
+   "effects": {
+    "craft_output": 0.012,
+    "standardization": 0.018,
+    "container_capacity": 0.04,
+    "labor_efficiency": 0.0022
+   },
+   "observation": "A heavy wheel spun fast lets a potter lift a pot from a lump of clay in the time it takes to say a prayer.",
+   "social_consequence": "Pots are thrown by the hundred by full-time men at the wheel; household potting fades and pottery becomes a trade."
+  },
+  "mould_made_bowls": {
+   "effects": {
+    "standardization": 0.024,
+    "craft_output": 0.006,
+    "container_capacity": 0.02,
+    "state_capacity": 0.003
+   },
+   "observation": "Coarse bowls pressed over a mould by the thousand all hold the same ration, and are thrown away when broken."
+  },
+  "tube_drilled_stone_vessels": {
+   "effects": {
+    "tool_quality": 0.004,
+    "craft_output": 0.003,
+    "trade_capacity": 0.006
+   },
+   "observation": "A reed or copper tube spun on wet sand slowly bores out a vessel from the hardest stone."
+  },
+  "silver_cupellation": {
+   "effects": {
+    "trade_capacity": 0.024,
+    "metal_yield": 0.02,
+    "state_capacity": 0.006,
+    "pollution": 0.01
+   },
+   "art": "res://assets/ui/research/paper/silver_cupellation.png",
+   "social_consequence": "Silver becomes the measure of wealth and debt; temples and rulers hoard it and weigh it out."
+  },
+  "craft_order_queuing": {
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png"
+  },
+  "bivalve_moulds": {
+   "effects": {
+    "tool_quality": 0.006,
+    "standardization": 0.012,
+    "craft_output": 0.004,
+    "warfare_readiness": 0.01
+   },
+   "observation": "Two matching stone halves bound together let the smith cast an axe with its shaft-hole already in it."
+  },
+  "meteoric_iron_working": {
+   "effects": {
+    "craft_output": 0.001,
+    "trade_capacity": 0.003,
+    "legitimacy": 0.003
+   },
+   "observation": "The black metal fallen from the sky can be cold-hammered into beads, rarer than gold and buried with the great."
+  },
+  "task_matched_tool_selection": {
+   "art": "res://assets/ui/research/subjects/hafted_tools-v1.png"
+  },
+  "standard_unit_naming": {
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png"
+  },
+  "lampblack_capture": {
+   "effects": {
+    "knowledge_preservation": 0.005,
+    "craft_output": 0.001
+   },
+   "art": "res://assets/ui/research/paper/mineral_pigment_preparation.png",
+   "production_contract": "Lamp soot collected from oil or resin flames is gathered as a black pigment for paint and ink; it needs fuel and tending."
+  },
+  "clay_levigation": {
+   "effects": {
+    "craft_output": 0.003,
+    "clay_yield": 0.02
+   },
+   "art": "res://assets/ui/research/subjects/clay_testing-v1.png"
+  },
+  "temple_workshops": {
+   "effects": {
+    "craft_output": 0.008,
+    "state_capacity": 0.012,
+    "standardization": 0.009,
+    "labor_efficiency": 0.0022
+   },
+   "observation": "Under the temple's overseer, weavers, smiths and carpenters work from its stores and deliver to its storerooms.",
+   "social_consequence": "The temple becomes the largest employer and the largest owner of goods; craftwork answers to its overseers."
+  },
+  "copper_carpentry_tools": {
+   "effects": {
+    "tool_quality": 0.01,
+    "timber_yield": 0.03,
+    "construction_rate": 0.0045,
+    "stone_yield": 0.02
+   },
+   "observation": "Copper saws fed with sand cut stone, and copper chisels cut true mortises in timber that flint could only bruise."
+  },
+  "seasonal_craft_scheduling": {
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png"
+  },
+  "tin_smelting": {
+   "effects": {
+    "metal_yield": 0.03,
+    "trade_capacity": 0.012,
+    "extraction_yield": 0.01
+   },
+   "art": "res://assets/ui/research/subjects/bronze_alloying-v1.png",
+   "production_contract": "Cassiterite, charcoal and furnace work produce refined tin; tin ore is rare, so most tin must be found far off or traded for."
+  },
+  "graded_tool_retirement": {
+   "art": "res://assets/ui/research/subjects/hafted_tools-v1.png"
+  },
+  "bronze_alloying": {
+   "art": "res://assets/ui/research/subjects/bronze_alloying-v1.png",
+   "social_consequence": "Bronze needs tin from far away; whoever controls the tin routes controls tools and weapons, and wars follow the trade."
+  },
+  "garment_pattern_cutting": {
+   "effects": {
+    "craft_output": 0.004,
+    "fiber_yield": 0.01,
+    "standardization": 0.009
+   },
+   "art": "res://assets/ui/research/paper/garment_pattern_cutting.png"
+  },
+  "cross_settlement_measure_agreement": {
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png"
+  },
+  "leather_goods_patterning": {
+   "effects": {
+    "craft_output": 0.004,
+    "haul_capacity": 0.01,
+    "standardization": 0.006
+   },
+   "art": "res://assets/ui/research/paper/leather_goods_patterning.png"
+  },
+  "closed_moulds": {
+   "effects": {
+    "standardization": 0.018,
+    "craft_output": 0.004,
+    "tool_quality": 0.002
+   },
+   "observation": "A mould closed on all sides casts both faces of a blade at once, and every casting from it is the same."
+  },
+  "wool_felting_fulling": {
+   "effects": {
+    "fiber_yield": 0.02,
+    "craft_output": 0.003,
+    "mobile_shelter": 0.02,
+    "health_protection": 0.0035
+   },
+   "observation": "Wool trodden in hot water and soap-root shrinks into dense felt for cloaks, hats and tent walls."
+  },
+  "goldsmith_filigree": {
+   "effects": {
+    "craft_output": 0.006,
+    "trade_capacity": 0.018,
+    "legitimacy": 0.012
+   },
+   "observation": "Gold drawn into thread and fine grains is soldered into patterns so delicate they seem woven.",
+   "social_consequence": "Jewellery of gold and silver marks the ruler's house and the temple; goldsmiths work for the palace alone."
+  },
+  "hard_soldering": {
+   "effects": {
+    "craft_output": 0.003,
+    "repair_capacity": 0.02
+   },
+   "observation": "A solder of gold and copper melts just before the metal it joins, so fine parts can be fixed without melting them."
+  },
+  "bronze_work_hardening": {
+   "effects": {
+    "tool_quality": 0.008,
+    "repair_capacity": 0.02,
+    "warfare_readiness": 0.01
+   },
+   "observation": "Hammering a cast bronze edge cold makes it harder and keener than the casting alone."
+  },
+  "pot_bellows": {
+   "effects": {
+    "metal_yield": 0.06,
+    "fuel_efficiency": 0.04,
+    "craft_output": 0.004
+   },
+   "observation": "Two clay pots covered with hide and worked by the feet blow a steady blast that no team of blowpipes can match.",
+   "social_consequence": "Paired bellows keep the hearth white-hot; one smelt yields more metal for less charcoal, and metal grows cheaper."
+  },
+  "fiber_combing": {
+   "effects": {
+    "fiber_yield": 0.02,
+    "craft_output": 0.003
+   },
+   "art": "res://assets/ui/research/paper/drop_spindles.png"
+  },
+  "twill_weave_structures": {
+   "effects": {
+    "craft_output": 0.004,
+    "health_protection": 0.0035,
+    "trade_capacity": 0.006
+   },
+   "art": "res://assets/ui/research/paper/plain_weaving.png"
+  },
+  "glassmaking": {
+   "effects": {
+    "craft_output": 0.004,
+    "trade_capacity": 0.018,
+    "legitimacy": 0.003,
+    "fuel_demand": 0.01
+   },
+   "art": "res://assets/ui/research/paper/core_formed_glass.png",
+   "production_items": [
+    "glass_batch"
+   ]
+  },
+  "cored_socket_casting": {
+   "effects": {
+    "tool_quality": 0.008,
+    "standardization": 0.012,
+    "warfare_readiness": 0.01,
+    "metal_yield": 0.01
+   },
+   "observation": "A clay core set in the mould leaves a socket in the casting, so a spearhead or axe fits its shaft without a hole being drilled."
+  },
+  "palace_weaving_houses": {
+   "effects": {
+    "craft_output": 0.008,
+    "fiber_yield": 0.01,
+    "state_capacity": 0.012,
+    "trade_capacity": 0.012,
+    "standardization": 0.006,
+    "institutional_rigidity": 0.01
+   },
+   "observation": "Hundreds of women and children weave in the palace workshops, drawing wool and rations by the month and delivering cloth by weight.",
+   "social_consequence": "Cloth is made for the palace on a vast scale and exported; the weavers are rationed dependants, not free households."
+  },
+  "weighed_alloy_recipes": {
+   "effects": {
+    "standardization": 0.018,
+    "metal_yield": 0.02,
+    "tool_quality": 0.002
+   },
+   "observation": "The smith weighs out copper and tin by the shekel, one part to so many, and writes the proportion down."
+  },
+  "raised_bronze_vessels": {
+   "effects": {
+    "container_capacity": 0.02,
+    "craft_output": 0.004,
+    "trade_capacity": 0.006
+   },
+   "observation": "A bronze disc hammered round and round over a stake rises into a bowl, a cauldron, a helmet."
+  },
+  "peat_drying": {
+   "art": "res://assets/ui/research/subjects/peat_drying-v1.png"
+  },
+  "standard_ingots": {
+   "effects": {
+    "trade_capacity": 0.024,
+    "standardization": 0.018,
+    "metal_yield": 0.01
+   },
+   "observation": "Copper is cast into ingots of a fixed weight and shape, so a load of metal can be counted rather than weighed."
+  },
+  "sulfur_purification": {
+   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png"
+  },
+  "shaft_furnaces": {
+   "effects": {
+    "metal_yield": 0.08,
+    "extraction_yield": 0.03,
+    "fuel_efficiency": 0.03,
+    "fuel_demand": 0.03,
+    "pollution": 0.02,
+    "timber_pressure": 0.02
+   },
+   "observation": "A tall clay shaft with blast pipes set low smelts a whole basket of ore in one firing, and the slag runs out below.",
+   "social_consequence": "Metal comes by the load instead of the handful; smelting sites become industrial, smoky places that strip the hills of wood."
+  },
+  "alum_mordant_dyeing": {
+   "effects": {
+    "craft_output": 0.004,
+    "trade_capacity": 0.012,
+    "chemical_control": 0.02
+   },
+   "observation": "Wool boiled first in alum water takes madder and weld deep and fast, and the colour no longer washes out."
+  },
+  "ceramic_glaze_formulation": {
+   "effects": {
+    "container_capacity": 0.03,
+    "food_spoilage": -0.02,
+    "water_safety": 0.006,
+    "craft_output": 0.006,
+    "trade_capacity": 0.006
+   },
+   "art": "res://assets/ui/research/paper/ceramic_glaze_formulation.png",
+   "social_consequence": "Glazed jars keep oil and wine without seeping; fine glazed wares become a mark of a well-off household."
+  },
+  "refractory_body_trials": {
+   "effects": {
+    "fuel_efficiency": 0.01,
+    "craft_output": 0.002
+   },
+   "art": "res://assets/ui/research/paper/refractory_brick_firing.png"
+  },
+  "ceramic_crucibles": {
+   "effects": {
+    "metal_yield": 0.02,
+    "craft_output": 0.002
+   },
+   "art": "res://assets/ui/research/paper/ceramic_crucibles.png"
+  },
+  "crucible_glass_melting": {
+   "effects": {
+    "craft_output": 0.003,
+    "trade_capacity": 0.006
+   },
+   "art": "res://assets/ui/research/paper/ceramic_crucibles.png"
+  },
+  "core_formed_glass": {
+   "effects": {
+    "craft_output": 0.004,
+    "trade_capacity": 0.018,
+    "container_capacity": 0.01
+   },
+   "art": "res://assets/ui/research/paper/core_formed_glass.png",
+   "social_consequence": "Glass flasks for scented oil are among the costliest things a household can own, and the palace controls their making."
+  },
+  "tapestry_weaving": {
+   "effects": {
+    "craft_output": 0.004,
+    "trade_capacity": 0.009,
+    "legitimacy": 0.003
+   },
+   "observation": "Weft of many colours beaten in patch by patch on the upright loom builds figures and scenes into the cloth."
+  },
+  "refractory_brick_firing": {
+   "effects": {
+    "fuel_efficiency": 0.02,
+    "metal_yield": 0.02,
+    "repair_capacity": 0.01
+   },
+   "art": "res://assets/ui/research/paper/refractory_brick_firing.png"
+  }
+ }
 }

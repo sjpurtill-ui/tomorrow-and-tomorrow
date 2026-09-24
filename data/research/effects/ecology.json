@@ -1,5 +1,853 @@
 {
  "line": "ecology",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "seasonal_patterns": {
+   "effects": {
+    "ecological_pressure": -0.012,
+    "foraging_yield": 0.08,
+    "observation_rate": 0.04
+   },
+   "art": "res://assets/ui/research/paper/seasonal_patterns.png"
+  },
+  "timber_grading": {
+   "effects": {
+    "construction_rate": 0.03,
+    "storage_loss": -0.02,
+    "timber_yield": 0.05
+   },
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "fiber_grading": {
+   "effects": {
+    "fiber_yield": 0.06,
+    "survey_speed": 0.02
+   },
+   "art": "res://assets/ui/research/paper/fiber_grading.png"
+  },
+  "quarry_reading": {
+   "effects": {
+    "mine_safety": 0.03,
+    "stone_yield": 0.08,
+    "survey_speed": 0.03
+   },
+   "art": "res://assets/ui/research/paper/quarry_reading.png"
+  },
+  "streambank_vegetation_watch": {
+   "effects": {
+    "ecological_pressure": -0.012,
+    "ecology_recovery": 0.0067,
+    "soil_productivity": 0.015
+   },
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png"
+  },
+  "fallow_thicket_regrowth": {
+   "effects": {
+    "ecology_recovery": 0.0202,
+    "foraging_yield": 0.015
+   },
+   "art": "res://assets/ui/research/paper/managed_fallow.png"
+  },
+  "midden_siting_away_from_water": {
+   "effects": {
+    "pollution": -0.0191,
+    "sanitation": 0.01,
+    "water_safety": 0.02
+   },
+   "art": "res://assets/ui/research/paper/latrine_siting.png"
+  },
+  "topsoil_depth_reading": {
+   "effects": {
+    "ecological_pressure": -0.009,
+    "soil_productivity": 0.02
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/soil_infiltration_trials.tres"
+  },
+  "burn_scar_regrowth_tracking": {
+   "effects": {
+    "ecology_recovery": 0.0169,
+    "foraging_yield": 0.015
+   },
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png"
+  },
+  "cookfire_smoke_venting_habit": {
+   "effects": {
+    "disease_exposure": -0.015,
+    "pollution": -0.0064
+   },
+   "art": "res://assets/ui/research/paper/ember_tending.png"
+  },
+  "browse_line_monitoring": {
+   "effects": {
+    "ecological_pressure": -0.012,
+    "hunting_yield": 0.01
+   },
+   "art": "res://assets/ui/research/paper/animal_taming.png"
+  },
+  "herd_size_limits": {
+   "effects": {
+    "ecological_pressure": -0.015,
+    "ecology_recovery": 0.0067,
+    "food_output": 0.015
+   },
+   "art": "res://assets/ui/research/paper/animal_taming.png"
+  },
+  "phenology_signs": {
+   "effects": {
+    "foraging_yield": 0.03,
+    "hunting_yield": 0.01,
+    "observation_rate": 0.01
+   },
+   "name": "Phenology Signs",
+   "observation": "When the thorn flowers and the swallows return, the old people say the fish are running and the camp should move.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "controlled_undergrowth_burning": {
+   "effects": {
+    "disaster_risk": 0.004,
+    "ecology_recovery": 0.0135,
+    "foraging_yield": 0.03,
+    "hunting_yield": 0.03,
+    "pollution": 0.004
+   },
+   "name": "Controlled Undergrowth Burning",
+   "observation": "A low fire through the undergrowth in the wet season brings up green shoots that draw game and feed gatherers.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "spawning_calendar": {
+   "effects": {
+    "ecological_pressure": -0.009,
+    "ecology_recovery": 0.0067,
+    "food_output": 0.02
+   },
+   "name": "Spawning Calendar",
+   "observation": "Fishers know the weeks each fish comes upriver to spawn, and are waiting at the pools when it does.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "firebreaks": {
+   "effects": {
+    "disaster_resilience": 0.02,
+    "disaster_risk": -0.0102,
+    "ecology_recovery": 0.0067
+   },
+   "name": "Firebreaks",
+   "observation": "A cleared and scraped strip around the camp and the fields stops a grass fire at the edge.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "indicator_plants": {
+   "effects": {
+    "observation_rate": 0.01,
+    "soil_productivity": 0.02,
+    "survey_speed": 0.01
+   },
+   "name": "Indicator Plants",
+   "observation": "Nettle and elder mark rich ground; heather and moss mark thin, sour ground not worth the clearing.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "breeding_stock_sparing": {
+   "effects": {
+    "ecological_pressure": -0.018,
+    "ecology_recovery": 0.0135,
+    "hunting_yield": 0.01
+   },
+   "name": "Breeding Stock Spared",
+   "observation": "Hunters let pregnant does and the young go by, so the herd is there again next year.",
+   "social_consequence": "A hunter who kills a pregnant doe now faces scorn at the fire.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "swidden_cycle": {
+   "effects": {
+    "cultivation_yield": 0.015,
+    "ecology_recovery": 0.0135,
+    "soil_productivity": 0.03,
+    "timber_pressure": 0.01
+   },
+   "name": "Swidden Cycle",
+   "observation": "Clear and burn a plot, crop it two or three years, then leave it to the forest and clear another.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "leaf_fodder_pollarding": {
+   "effects": {
+    "ecology_recovery": 0.0101,
+    "food_output": 0.01,
+    "timber_pressure": -0.015
+   },
+   "name": "Leaf-fodder Pollarding",
+   "observation": "Trees cut back above a browsing animal's reach sprout leafy poles that feed the herd through winter.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "hive_sparing_honey_harvest": {
+   "effects": {
+    "ecology_recovery": 0.0067,
+    "foraging_yield": 0.02,
+    "nutrition_quality": 0.01
+   },
+   "name": "Hive-sparing Honey Harvest",
+   "observation": "Smoke the bees quiet, take part of the comb, leave the rest; the same tree gives honey every year.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "drought_signs": {
+   "effects": {
+    "disaster_risk": -0.0102,
+    "observation_rate": 0.01,
+    "water_access": 0.01
+   },
+   "name": "Drought Signs",
+   "observation": "When the springs run weak and the pools dry early, elders move the camp and put food by before the dry year bites.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "transhumance": {
+   "effects": {
+    "ecological_pressure": -0.018,
+    "ecology_recovery": 0.0135,
+    "food_output": 0.015,
+    "labor_demand": 0.0057
+   },
+   "name": "Transhumance",
+   "observation": "Herds go up to the summer pastures and come down for winter, so neither ground is grazed bare.",
+   "social_consequence": "Herding households spend the summer apart in the high pastures; the village empties of young people each season.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "shellfish_bed_recovery": {
+   "effects": {
+    "ecological_pressure": -0.009,
+    "ecology_recovery": 0.0135,
+    "food_output": 0.01
+   },
+   "name": "Shellfish Beds Rested",
+   "observation": "A picked-over shellfish bed is left alone for a season, and the shells come back as thick as before.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "downwind_workshop_placement": {
+   "effects": {
+    "disease_exposure": -0.01,
+    "pollution": -0.0127
+   },
+   "art": "res://assets/ui/research/paper/kiln_control.png"
+  },
+  "slope_erosion_watch": {
+   "effects": {
+    "disaster_risk": -0.004,
+    "ecological_pressure": -0.012
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/contour_cultivation.tres"
+  },
+  "copper_outcrop_signs": {
+   "effects": {
+    "extraction_yield": 0.02,
+    "metal_yield": 0.01,
+    "survey_speed": 0.03
+   },
+   "name": "Copper Outcrop Signs",
+   "observation": "Green and blue stains on a rock face tell prospectors there is copper in the stone behind.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "spawning_ground_avoidance": {
+   "effects": {
+    "ecological_pressure": -0.012,
+    "ecology_recovery": 0.0067,
+    "foraging_yield": 0.025
+   },
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png"
+  },
+  "frost_pocket_reading": {
+   "effects": {
+    "cultivation_yield": 0.015,
+    "disaster_risk": -0.004,
+    "soil_productivity": 0.01
+   },
+   "name": "Frost Pockets and Sun Slopes",
+   "observation": "Cold air pools in the hollows; tender crops go on the warm slope that takes the morning sun.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "pest_swarm_watch": {
+   "effects": {
+    "cultivation_yield": 0.01,
+    "disaster_risk": -0.0076,
+    "observation_rate": 0.01
+   },
+   "name": "Pest-swarm Watch",
+   "observation": "Watchers note the first locust hoppers in the dry gullies and warn the fields in time to harvest early.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "sacred_grove_protection": {
+   "effects": {
+    "cohesion": 0.01,
+    "ecology_recovery": 0.0202,
+    "timber_pressure": -0.02,
+    "water_safety": 0.01
+   },
+   "name": "Sacred Groves and Springs",
+   "observation": "The grove and the spring beneath it belong to the spirits; no one cuts, herds or fouls the water there.",
+   "social_consequence": "A man who cuts in the grove is shunned, and the spring below it runs clean.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "contour_terrace_reading": {
+   "effects": {
+    "ecological_pressure": -0.015,
+    "soil_productivity": 0.02
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/contour_cultivation.tres"
+  },
+  "seasonal_hunting_closures": {
+   "effects": {
+    "ecological_pressure": -0.012,
+    "ecology_recovery": 0.0067,
+    "hunting_yield": 0.03
+   },
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png"
+  },
+  "selective_deadwood_gathering": {
+   "effects": {
+    "ecology_recovery": 0.0169,
+    "timber_pressure": -0.02
+   },
+   "art": "res://assets/ui/research/paper/fuel_air_drying.png"
+  },
+  "tannery_waste_channeling": {
+   "effects": {
+    "pollution": -0.0191,
+    "water_pollution": -0.01,
+    "water_safety": 0.02
+   },
+   "art": "res://assets/ui/research/paper/hide_tanning.png"
+  },
+  "seed_scatter_after_gathering": {
+   "effects": {
+    "ecology_recovery": 0.0202,
+    "foraging_yield": 0.02
+   },
+   "art": "res://assets/ui/research/paper/seed_selection.png"
+  },
+  "reed_bed_rotation": {
+   "effects": {
+    "ecological_pressure": -0.006,
+    "ecology_recovery": 0.0101,
+    "fiber_yield": 0.02
+   },
+   "name": "Reed Beds Cut in Rotation",
+   "observation": "Each reed bed is cut one year in three, so thatch never runs short and the marsh birds keep nesting.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "communal_catch_limits": {
+   "effects": {
+    "cohesion": 0.0058,
+    "ecological_pressure": -0.0241,
+    "ecology_recovery": 0.0202,
+    "foraging_yield": 0.02
+   },
+   "ability_reason": "Shared limits stop the fishing ground from being emptied by the hungriest family.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "refuse_pit_rotation": {
+   "effects": {
+    "pollution": -0.0159,
+    "sanitation": 0.02
+   },
+   "art": "res://assets/ui/research/paper/latrine_siting.png"
+  },
+  "windbreak_hedgerow_siting": {
+   "effects": {
+    "ecological_pressure": -0.012,
+    "soil_productivity": 0.02
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/crop_residue_cover.tres"
+  },
+  "root_stock_preservation": {
+   "effects": {
+    "ecology_recovery": 0.0169,
+    "foraging_yield": 0.015
+   },
+   "art": "res://assets/ui/research/paper/edible_resource_recognition.png"
+  },
+  "flood_silt_fields": {
+   "effects": {
+    "cultivation_yield": 0.02,
+    "disaster_risk": 0.004,
+    "soil_productivity": 0.04
+   },
+   "name": "Flood-silt Fields",
+   "observation": "The fresh silt the flood leaves behind grows the best crops, if a field is placed to catch it and not be drowned.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "wood_pasture": {
+   "effects": {
+    "ecological_pressure": -0.006,
+    "ecology_recovery": 0.0101,
+    "food_output": 0.01,
+    "timber_pressure": -0.01
+   },
+   "name": "Wood-pasture",
+   "observation": "Thinning the trees lets grass grow beneath them; the herd grazes and the wood still stands.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "coppice_regrowth_cutting": {
+   "effects": {
+    "ecology_recovery": 0.027,
+    "timber_pressure": -0.05,
+    "timber_yield": 0.03
+   },
+   "ability_reason": "Coppiced stools give straight poles every few years without clearing the wood.",
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "dye_vat_runoff_control": {
+   "effects": {
+    "pollution": -0.0191,
+    "water_pollution": -0.01,
+    "water_safety": 0.02
+   },
+   "art": "res://assets/ui/research/paper/textile_dye_extraction.png"
+  },
+  "sapling_protection_customs": {
+   "effects": {
+    "ecology_recovery": 0.0135,
+    "timber_pressure": -0.025
+   },
+   "art": "res://assets/ui/research/paper/timber_seasoning.png"
+  },
+  "grazing_ground_recovery_marking": {
+   "effects": {
+    "ecological_pressure": -0.009,
+    "ecology_recovery": 0.0202
+   },
+   "art": "res://assets/ui/research/paper/animal_taming.png"
+  },
+  "dung_cake_fuel": {
+   "effects": {
+    "fuel_demand": -0.01,
+    "pollution": 0.004,
+    "soil_productivity": -0.01,
+    "timber_pressure": -0.03
+   },
+   "name": "Dung-cake Fuel",
+   "observation": "Where trees are few, dung patted into cakes and dried on the walls fuels the hearth.",
+   "social_consequence": "The fields lose the dung the hearth now burns; the women who gather it gain a say over the fire.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "replanting_after_clearance": {
+   "effects": {
+    "ecology_recovery": 0.0202,
+    "timber_yield": 0.015
+   },
+   "art": "res://assets/ui/research/paper/timber_seasoning.png"
+  },
+  "grazing_rotation_customs": {
+   "effects": {
+    "ecological_pressure": -0.0301,
+    "ecology_recovery": 0.0202,
+    "food_output": 0.01
+   },
+   "ability_reason": "Rotated pastures carry the herds year after year instead of turning to dust.",
+   "art": "res://assets/ui/research/paper/animal_taming.png"
+  },
+  "timber_stand_reserves": {
+   "effects": {
+    "timber_pressure": -0.03,
+    "timber_yield": 0.02
+   },
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "kiln_smoke_venting_customs": {
+   "effects": {
+    "pollution": -0.0223
+   },
+   "art": "res://assets/ui/research/paper/kiln_control.png"
+  },
+  "waterlogging_recognition": {
+   "effects": {
+    "cultivation_yield": 0.01,
+    "disease_exposure": -0.005,
+    "soil_productivity": 0.02
+   },
+   "name": "Waterlogging Recognized",
+   "observation": "Yellowing plants and sour, standing puddles show a plot has been watered too much and too often.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "riparian_tree_belts": {
+   "effects": {
+    "disaster_risk": -0.0051,
+    "ecology_recovery": 0.0135,
+    "timber_yield": 0.01,
+    "water_safety": 0.01
+   },
+   "name": "Riparian Tree Belts",
+   "observation": "A belt of willow and poplar left along the banks holds them in flood and shades the water.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "fuelwood_rotation": {
+   "effects": {
+    "ecology_recovery": 0.0101,
+    "fuel_demand": -0.005,
+    "timber_pressure": -0.03
+   },
+   "name": "Fuelwood Rotation",
+   "observation": "Each year's firewood comes from a different sector around the village, and the cut sectors are left to regrow.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "spring_head_fencing": {
+   "effects": {
+    "disease_exposure": -0.01,
+    "sanitation": 0.01,
+    "water_safety": 0.03
+   },
+   "name": "Spring Heads Fenced",
+   "observation": "A fence of stakes around the spring keeps the herds from trampling and fouling the water people drink.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "named_soil_kinds": {
+   "effects": {
+    "knowledge_preservation": 0.005,
+    "soil_productivity": 0.03,
+    "survey_speed": 0.01
+   },
+   "name": "Named Soil Kinds",
+   "observation": "Heavy, light, sandy and salty ground each have a name, and each name carries its own crop and its own care.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "salinity_recognition": {
+   "effects": {
+    "ecological_pressure": -0.012,
+    "observation_rate": 0.01,
+    "soil_productivity": 0.05
+   },
+   "name": "Salt Crust Recognized",
+   "observation": "A white crust on the watered fields and a bitter taste to the soil mean the salt is rising.",
+   "ability_reason": "Irrigated fields were quietly losing yield to salt; now farmers can see it coming.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "riverbank_shift_watch": {
+   "effects": {
+    "disaster_risk": -0.0076,
+    "soil_productivity": 0.01
+   },
+   "name": "Riverbank Shift Watch",
+   "observation": "Elders watch where the river is cutting and where it is building before anyone lays out a new field.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "salt_leaching_fallow": {
+   "effects": {
+    "cultivation_yield": 0.01,
+    "labor_demand": 0.0057,
+    "soil_productivity": 0.04
+   },
+   "name": "Salted Fields Leached",
+   "observation": "Salted fields are flooded with fresh water, drained and left to rest until the crop will grow there again.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "wetland_margin_reserves": {
+   "effects": {
+    "ecological_pressure": -0.006,
+    "ecology_recovery": 0.0202,
+    "foraging_yield": 0.02,
+    "hunting_yield": 0.02
+   },
+   "name": "Wetland Margin Reserves",
+   "observation": "The marsh edges are left undrained, and they keep giving fish, fowl, eggs and reeds.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "stubble_grazing": {
+   "effects": {
+    "ecological_pressure": -0.006,
+    "food_output": 0.01,
+    "soil_productivity": 0.02
+   },
+   "name": "Stubble Grazing",
+   "observation": "Herds turned onto the stubble after harvest feed themselves and dung the field; before harvest they are kept out.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "pit_pond_reclamation": {
+   "effects": {
+    "disease_exposure": 0.005,
+    "ecology_recovery": 0.0101,
+    "food_output": 0.005,
+    "water_access": 0.01
+   },
+   "name": "Pit Ponds",
+   "observation": "Worked-out clay and stone pits fill with water and are kept as ponds for fish and watering the herds.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "recovery_zone_designation": {
+   "effects": {
+    "ecology_recovery": 0.0236,
+    "institutional_rigidity": 0.01
+   },
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "watershed_boundary_marking": {
+   "effects": {
+    "ecological_pressure": -0.015,
+    "water_access": 0.015
+   },
+   "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png"
+  },
+  "resource_use_quotas": {
+   "effects": {
+    "ecological_pressure": -0.0301,
+    "ecology_recovery": 0.0135,
+    "institutional_rigidity": 0.01,
+    "state_capacity": 0.01,
+    "timber_pressure": -0.02
+   },
+   "ability_reason": "Quotas spread what the land can give across every household and every year.",
+   "social_consequence": "Every household now has its measure of wood, game and clay; the headman's count, not need, sets the limit.",
+   "art": "res://assets/ui/research/paper/tallies.png"
+  },
+  "workshop_effluent_separation": {
+   "effects": {
+    "pollution": -0.0191,
+    "water_pollution": -0.015,
+    "water_safety": 0.02
+   },
+   "art": "res://assets/ui/research/paper/water_settling_basins.png"
+  },
+  "distant_timber_reserves": {
+   "effects": {
+    "timber_pressure": -0.02,
+    "timber_yield": 0.03,
+    "trade_capacity": 0.0067
+   },
+   "name": "Distant Timber Reserves",
+   "observation": "The long beams for great halls and boats come from known forests far upriver, not from the village woods.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "salt_tolerant_barley": {
+   "effects": {
+    "cultivation_yield": 0.03,
+    "soil_productivity": 0.01
+   },
+   "name": "Barley on Salty Ground",
+   "observation": "Where wheat fails on the salty fields, barley still stands; farmers sow it there on purpose.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "water_table_fallow": {
+   "effects": {
+    "cultivation_yield": 0.01,
+    "disease_exposure": -0.005,
+    "ecological_pressure": -0.012,
+    "soil_productivity": 0.06
+   },
+   "name": "Water-table Fallow",
+   "observation": "Fields are rested between water turns so the ground water sinks and carries the salt down with it.",
+   "ability_reason": "Resting fields stops the slow poisoning of irrigated land.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "timed_silt_clearance": {
+   "effects": {
+    "labor_efficiency": 0.005,
+    "soil_productivity": 0.02,
+    "water_access": 0.02
+   },
+   "name": "Timed Silt Clearance",
+   "observation": "Canals are cleared when the water is lowest, and the silt is piled on the banks, not dumped on the fields.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "layered_shade_gardens": {
+   "effects": {
+    "cultivation_yield": 0.02,
+    "ecology_recovery": 0.0067,
+    "nutrition_quality": 0.015
+   },
+   "name": "Layered Shade Gardens",
+   "observation": "Beneath the date palms grow fruit trees, and beneath the fruit trees vegetables, all watered from one channel.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "seasonal_herd_matching": {
+   "effects": {
+    "ecological_pressure": -0.018,
+    "ecology_recovery": 0.0067,
+    "food_output": 0.01
+   },
+   "name": "Herds Matched to Pasture",
+   "observation": "Before the dry season, herders sell or slaughter the animals the pasture cannot carry.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "dune_spread_watch": {
+   "effects": {
+    "disaster_risk": -0.0076,
+    "ecology_recovery": 0.0067,
+    "soil_productivity": 0.01
+   },
+   "name": "Dune Spread Watch",
+   "observation": "Where the sand creeps into the fields, the scrub is left standing and brush fences hold the dunes back.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "deforestation_flood_link": {
+   "effects": {
+    "disaster_risk": -0.0152,
+    "ecology_recovery": 0.0067,
+    "timber_pressure": -0.02
+   },
+   "name": "Bare Hills and Fast Floods",
+   "observation": "Elders see that since the hills were cleared, the floods come faster and carry the fields away.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "mixed_flock_balance": {
+   "effects": {
+    "ecological_pressure": -0.012,
+    "fiber_yield": 0.01,
+    "food_output": 0.01
+   },
+   "name": "Balanced Flocks",
+   "observation": "Goats go to the scrub and sheep to the grass, in numbers each ground can bear.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "sworn_fishing_closures": {
+   "effects": {
+    "cohesion": 0.005,
+    "ecological_pressure": -0.018,
+    "ecology_recovery": 0.0135,
+    "food_output": 0.005
+   },
+   "name": "Sworn Fishing Closures",
+   "observation": "Villages along the river swear together not to fish during the spawning weeks.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "fish_run_weir_opening": {
+   "effects": {
+    "cohesion": 0.005,
+    "ecology_recovery": 0.0135,
+    "food_output": 0.01
+   },
+   "name": "Weirs Opened for the Run",
+   "observation": "On set days the fish weirs are opened so the run can pass upstream to the villages above and the spawning beds.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "vermin_control_cats": {
+   "effects": {
+    "disease_exposure": -0.01,
+    "food_spoilage": -0.01,
+    "storage_loss": -0.03
+   },
+   "name": "Cats Against Vermin",
+   "observation": "Cats are fed at the granary door and left to hunt the rats and mice in the stores and fields.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "shared_woodland_boundaries": {
+   "effects": {
+    "cohesion": 0.01,
+    "legitimacy": 0.005,
+    "timber_pressure": -0.03
+   },
+   "name": "Shared Woodland Boundaries",
+   "observation": "Neighbouring villages mark where each may cut, and no one strips a wood that another village needs.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "mine_spoil_containment": {
+   "effects": {
+    "labor_demand": 0.004,
+    "pollution": -0.0127,
+    "water_pollution": -0.03
+   },
+   "name": "Mine Spoil Kept from Streams",
+   "observation": "Slag and waste rock are heaped behind banks away from the streams that water the villages below.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "timed_grass_burning": {
+   "effects": {
+    "disaster_risk": -0.0051,
+    "ecology_recovery": 0.0135,
+    "food_output": 0.005
+   },
+   "name": "Timed Grass Burning",
+   "observation": "The old grass is burned at the end of the rains, before the new shoots come, so the fire spares the young growth.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "coppiced_charcoal_woods": {
+   "effects": {
+    "ecology_recovery": 0.0067,
+    "fuel_efficiency": 0.02,
+    "timber_pressure": -0.04
+   },
+   "name": "Charcoal Coppice Woods",
+   "observation": "Woods kept for the smelters are cut in long rotation, a sector each year, so the furnaces never strip the hills.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "farmers_almanac": {
+   "effects": {
+    "cultivation_yield": 0.03,
+    "disaster_risk": -0.0102,
+    "ecological_pressure": -0.012,
+    "knowledge_preservation": 0.02,
+    "observation_rate": 0.01
+   },
+   "name": "Farmer's Almanac",
+   "observation": "Scribes write down the farming year: when to sow, when to water, which pests come when, and what to do.",
+   "ability_reason": "Written seasons let farming knowledge outlive the elders who held it.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "planted_timber_groves": {
+   "effects": {
+    "ecology_recovery": 0.0067,
+    "timber_pressure": -0.03,
+    "timber_yield": 0.04
+   },
+   "name": "Planted Timber Groves",
+   "observation": "Poplar and tamarisk planted along the canals grow into timber where no forest ever stood.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "sworn_grazing_rights": {
+   "effects": {
+    "cohesion": 0.01,
+    "ecological_pressure": -0.012,
+    "legitimacy": 0.005
+   },
+   "name": "Sworn Grazing Rights",
+   "observation": "Herders and farmers swear where and when the flocks may graze, before witnesses and the god of the place.",
+   "social_consequence": "Trampled barley is now a matter for oath and judgment, not for blood.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "protected_temple_woods": {
+   "effects": {
+    "legitimacy": 0.005,
+    "timber_pressure": -0.03,
+    "timber_yield": 0.02
+   },
+   "name": "Protected Temple Woods",
+   "observation": "Groves of great trees are reserved for the beams of temple and palace, and guarded against every other axe.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  }
+ },
+ "art_proposals": {
+  "note": "Existing paintings proposed for NEW items once the Phase 1 art test allows them; not read by the loader.",
+  "items": {
+   "phenology_signs": "res://assets/ui/research/paper/seasonal_patterns.png",
+   "spawning_calendar": "res://assets/ui/research/paper/seasonal_patterns.png",
+   "indicator_plants": "res://assets/ui/research/paper/herbal_classification.png",
+   "breeding_stock_sparing": "res://assets/ui/research/paper/habitat_observation_records.png",
+   "swidden_cycle": "res://assets/ui/research/paper/managed_fallow.png",
+   "leaf_fodder_pollarding": "res://assets/ui/research/paper/timber_grading.png",
+   "drought_signs": "res://assets/ui/research/paper/well_siting.png",
+   "transhumance": "res://assets/ui/research/paper/animal_taming.png",
+   "copper_outcrop_signs": "res://assets/ui/research/paper/first300-cards/ore_assaying.tres",
+   "frost_pocket_reading": "res://assets/ui/research/paper/crop_calendars.png",
+   "reed_bed_rotation": "res://assets/ui/research/paper/thatched_roofing.png",
+   "flood_silt_fields": "res://assets/ui/research/paper/first300-cards/mulch_water_management.tres",
+   "wood_pasture": "res://assets/ui/research/paper/animal_taming.png",
+   "dung_cake_fuel": "res://assets/ui/research/paper/first300-cards/peat_drying.tres",
+   "waterlogging_recognition": "res://assets/ui/research/paper/first300-cards/soil_infiltration_trials.tres",
+   "fuelwood_rotation": "res://assets/ui/research/paper/fuel_air_drying.png",
+   "spring_head_fencing": "res://assets/ui/research/paper/first300-cards/protected_wellheads.tres",
+   "named_soil_kinds": "res://assets/ui/research/paper/clay_testing.png",
+   "salinity_recognition": "res://assets/ui/research/paper/first300-cards/irrigation_schedules.tres",
+   "salt_leaching_fallow": "res://assets/ui/research/paper/first300-cards/mulch_water_management.tres",
+   "wetland_margin_reserves": "res://assets/ui/research/paper/habitat_observation_records.png",
+   "stubble_grazing": "res://assets/ui/research/paper/first300-cards/crop_residue_cover.tres",
+   "pit_pond_reclamation": "res://assets/ui/research/paper/water_settling_basins.png",
+   "distant_timber_reserves": "res://assets/ui/research/paper/timber_grading.png",
+   "salt_tolerant_barley": "res://assets/ui/research/paper/first300-cards/mass_seed_selection.tres",
+   "water_table_fallow": "res://assets/ui/research/paper/first300-cards/irrigation_schedules.tres",
+   "timed_silt_clearance": "res://assets/ui/research/paper/drainage.png",
+   "layered_shade_gardens": "res://assets/ui/research/paper/first300-cards/intensive_gardens.tres",
+   "seasonal_herd_matching": "res://assets/ui/research/paper/animal_taming.png",
+   "mixed_flock_balance": "res://assets/ui/research/paper/animal_taming.png",
+   "vermin_control_cats": "res://assets/ui/research/paper/first300-cards/stock_rotation.tres",
+   "shared_woodland_boundaries": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
+   "mine_spoil_containment": "res://assets/ui/research/paper/first300-cards/mine_drainage.tres",
+   "coppiced_charcoal_woods": "res://assets/ui/research/paper/charcoal.png",
+   "farmers_almanac": "res://assets/ui/research/paper/crop_calendars.png",
+   "planted_timber_groves": "res://assets/ui/research/paper/timber_seasoning.png",
+   "sworn_grazing_rights": "res://assets/ui/research/paper/customary_law.png",
+   "protected_temple_woods": "res://assets/ui/research/paper/timber_seasoning.png"
+  }
+ }
 }

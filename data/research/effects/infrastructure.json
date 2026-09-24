@@ -1,5 +1,659 @@
 {
  "line": "infrastructure",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "common_ground_marking": {
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png"
+  },
+  "hazard_landmark_memory": {
+   "art": "res://assets/ui/research/subjects/seasonal_patterns-v1.png"
+  },
+  "drainage": {
+   "effects": {
+    "health_protection": 0.04,
+    "disease_exposure": -0.05,
+    "disaster_resilience": 0.04,
+    "labor_demand": 0.01,
+    "sanitation": 0.012
+   },
+   "art": "res://assets/ui/research/subjects/drainage-v1.png"
+  },
+  "sightline_staking": {
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png"
+  },
+  "site_clearing_assessment": {
+   "art": "res://assets/ui/research/subjects/framed_construction-v1.png"
+  },
+  "joinery": {
+   "art": "res://assets/ui/research/subjects/joinery-v2.png"
+  },
+  "well_siting": {
+   "effects": {
+    "water_safety": 0.09,
+    "health_protection": 0.05,
+    "construction_rate": 0.02,
+    "labor_demand": 0.01,
+    "water_access": 0.021
+   },
+   "art": "res://assets/ui/research/subjects/well_siting-v1.png"
+  },
+  "clay_lined_storage_pits": {
+   "effects": {
+    "food_storage": 0.04,
+    "dry_storage": 0.03,
+    "storage_loss": -0.03,
+    "food_spoilage": -0.02
+   },
+   "observation": "Pits dug below the frost line and smeared with clay keep grain and nuts dry and safe from mice through the winter."
+  },
+  "flood_mark_reading": {
+   "art": "res://assets/ui/research/subjects/drainage-v1.png"
+  },
+  "adobe_wall_construction": {
+   "effects": {
+    "housing_output": 0.03,
+    "construction_rate": 0.0045,
+    "disaster_resilience": 0.0075
+   },
+   "art": "res://assets/ui/research/paper/adobe_wall_construction.png"
+  },
+  "framed_construction": {
+   "effects": {
+    "housing_output": 0.1,
+    "construction_rate": 0.08,
+    "disaster_resilience": 0.03,
+    "dry_storage": 0.02
+   },
+   "art": "res://assets/ui/research/subjects/framed_construction-v1.png",
+   "social_consequence": "Long timber houses shelter several families and their stores under one roof; the village settles for good around them."
+  },
+  "wattle_and_daub_walls": {
+   "effects": {
+    "housing_output": 0.024,
+    "construction_rate": 0.003,
+    "disaster_resilience": 0.0075
+   },
+   "art": "res://assets/ui/research/paper/wattle_and_daub_walls.png"
+  },
+  "thatched_roofing": {
+   "effects": {
+    "housing_output": 0.024,
+    "dry_storage": 0.02,
+    "disaster_risk": 0.005
+   },
+   "art": "res://assets/ui/research/paper/thatched_roofing.png"
+  },
+  "dry_stone_walls": {
+   "effects": {
+    "disaster_resilience": 0.0112,
+    "soil_productivity": 0.01,
+    "construction_rate": 0.0015,
+    "ecological_pressure": -0.005
+   },
+   "observation": "Field stones fitted without mortar make pens that hold the flock and terraces that hold the soil on the slope."
+  },
+  "lined_well_shafts": {
+   "effects": {
+    "water_access": 0.028,
+    "water_safety": 0.018,
+    "disaster_resilience": 0.0037
+   },
+   "observation": "Wattle and split timber hold back the sides of the well, so it no longer caves in or silts up after every rain."
+  },
+  "flood_house_mounds": {
+   "effects": {
+    "disaster_resilience": 0.03,
+    "housing_output": 0.006
+   },
+   "observation": "Houses built on mounds of packed earth stand dry when the river spreads over the fields."
+  },
+  "stone_wall_footings": {
+   "effects": {
+    "housing_output": 0.018,
+    "disaster_resilience": 0.015,
+    "repair_capacity": 0.01
+   },
+   "observation": "A course of fieldstone under the mud wall stops the damp creeping up and the base melting away in the rains."
+  },
+  "flat_clay_roofs": {
+   "effects": {
+    "housing_output": 0.018,
+    "dry_storage": 0.02,
+    "construction_rate": 0.0015,
+    "disaster_resilience": 0.0075
+   },
+   "observation": "Beams laid with reeds and a thick coat of packed clay make a roof that sheds the rain and can be walked on and slept on in summer."
+  },
+  "mould_made_mudbricks": {
+   "effects": {
+    "construction_rate": 0.0075,
+    "housing_output": 0.036,
+    "standardization": 0.009,
+    "disaster_resilience": 0.0112
+   },
+   "observation": "Wet mud pressed into a wooden frame and turned out to dry gives bricks all of one size, so walls rise true course by course.",
+   "social_consequence": "Houses can be laid out in straight, repeatable rooms; a family can build a larger home in one dry season."
+  },
+  "lime_plastered_floors": {
+   "effects": {
+    "sanitation": 0.012,
+    "health_protection": 0.0105,
+    "disease_exposure": -0.015,
+    "housing_output": 0.012,
+    "storage_loss": -0.01
+   },
+   "observation": "Floors and walls skimmed with burnt lime dry hard and white, easy to sweep and hard for vermin to burrow into."
+  },
+  "wedges_and_levers": {
+   "art": "res://assets/ui/research/subjects/wedges_and_levers-v1.png"
+  },
+  "bitumen_sealing": {
+   "art": "res://assets/ui/research/subjects/bitumen_sealing-v1.png"
+  },
+  "footing_soil_judging": {
+   "art": "res://assets/ui/research/subjects/soil_assays-v1.png"
+  },
+  "refuge_point_designation": {
+   "art": "res://assets/ui/research/subjects/drainage-v1.png"
+  },
+  "megalith_raising": {
+   "effects": {
+    "construction_rate": 0.0045,
+    "haul_capacity": 0.02,
+    "task_coordination": 0.0075,
+    "cohesion": 0.01,
+    "legitimacy": 0.012,
+    "labor_demand": 0.02
+   },
+   "observation": "The great stone is levered onto rollers, dragged up an earth ramp and tipped into its socket as hundreds haul on the ropes.",
+   "social_consequence": "Great stones raised by whole districts mark the dead and the seasons; the work binds villages and elevates those who direct it."
+  },
+  "seasonal_path_maintenance": {
+   "art": "res://assets/ui/research/subjects/graded_roads-v1.png"
+  },
+  "central_hall_houses": {
+   "effects": {
+    "housing_output": 0.036,
+    "dry_storage": 0.02,
+    "food_storage": 0.02,
+    "cohesion": 0.005
+   },
+   "observation": "A long central hall with a row of smaller rooms down each side gives the family a hearth room, sleeping rooms and storerooms.",
+   "social_consequence": "Extended families live under one roof around a central hall with its own stores; households grow larger, and some grow richer than others."
+  },
+  "river_supply_channels": {
+   "effects": {
+    "water_access": 0.042,
+    "cultivation_yield": 0.015,
+    "labor_demand": 0.01
+   },
+   "observation": "A channel dug from the river bank brings water to the edge of the settlement and the gardens along its way."
+  },
+  "bracing_inspection_rounds": {
+   "art": "res://assets/ui/research/paper/timber_lateral_bracing.png"
+  },
+  "communal_upkeep_scheduling": {
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+  },
+  "dwelling_site_orientation": {
+   "art": "res://assets/ui/research/paper/building_shading_design.png"
+  },
+  "storm_response_drill": {
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png"
+  },
+  "flood_levees": {
+   "effects": {
+    "disaster_resilience": 0.045,
+    "cultivation_yield": 0.01,
+    "labor_demand": 0.02,
+    "cohesion": 0.005
+   },
+   "observation": "Banks of earth thrown up along the river and mended every dry season keep the flood off the fields and houses.",
+   "social_consequence": "Whole villages turn out each year to raise and mend the dykes; the floodplain becomes safe to farm, and its keepers become powerful."
+  },
+  "shrine_terraces": {
+   "effects": {
+    "construction_rate": 0.006,
+    "legitimacy": 0.018,
+    "cohesion": 0.01,
+    "state_capacity": 0.006,
+    "labor_demand": 0.02
+   },
+   "observation": "The shrine is rebuilt again and again on the packed ruins of the old one, until it stands on a brick terrace above the town.",
+   "social_consequence": "A raised shrine can be seen from every field; its builders and keepers gain authority over the town around it."
+  },
+  "corner_squaring_method": {
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png"
+  },
+  "public_space_allocation": {
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "warning_call_relay": {
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png"
+  },
+  "courtyard_storerooms": {
+   "effects": {
+    "food_storage": 0.05,
+    "dry_storage": 0.05,
+    "storage_loss": -0.04,
+    "container_capacity": 0.02,
+    "state_capacity": 0.006
+   },
+   "observation": "Rooms with sealed doors open onto a shared court, so the stores of many households can be counted, watched and kept dry."
+  },
+  "timber_post_beam_connections": {
+   "effects": {
+    "construction_rate": 0.0045,
+    "housing_output": 0.012,
+    "repair_capacity": 0.01
+   },
+   "art": "res://assets/ui/research/paper/timber_post_beam_connections.png"
+  },
+  "niched_brick_facades": {
+   "effects": {
+    "construction_rate": 0.006,
+    "disaster_resilience": 0.0225,
+    "housing_output": 0.012,
+    "legitimacy": 0.009
+   },
+   "observation": "Walls stepped in and out with buttresses and niches stand taller and stronger, and throw bands of shadow across the brick.",
+   "social_consequence": "Buttressed brick walls rise higher and last longer; the grand façades of shrine and house announce who commands labor."
+  },
+  "rainwater_cisterns": {
+   "effects": {
+    "water_access": 0.035,
+    "water_safety": 0.012,
+    "disaster_resilience": 0.0075,
+    "labor_demand": 0.005
+   },
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "stone_lined_drains": {
+   "effects": {
+    "sanitation": 0.024,
+    "disease_exposure": -0.03,
+    "water_safety": 0.006,
+    "disaster_resilience": 0.0075
+   },
+   "observation": "A stone-lined channel down the middle of the lane carries rain and slops away instead of leaving them to stand."
+  },
+  "wedge_and_fire_quarrying": {
+   "effects": {
+    "stone_yield": 0.06,
+    "construction_rate": 0.0022,
+    "fuel_demand": 0.01,
+    "injury_risk": 0.005
+   },
+   "observation": "Wooden wedges driven into cut slots and soaked, or fire and cold water on the face, split blocks from the bedrock."
+  },
+  "clay_pipe_forming": {
+   "effects": {
+    "sanitation": 0.024,
+    "water_access": 0.014,
+    "disease_exposure": -0.02
+   },
+   "art": "res://assets/ui/research/paper/clay_pipe_forming.png"
+  },
+  "course_leveling_practice": {
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png"
+  },
+  "ground_bearing_assessment": {
+   "art": "res://assets/ui/research/subjects/soil_assays-v1.png"
+  },
+  "post_disaster_damage_survey": {
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png"
+  },
+  "runoff_grade_reading": {
+   "art": "res://assets/ui/research/paper/building_drainage_coordination.png"
+  },
+  "ceramic_pipe_firing_qualification": {
+   "effects": {
+    "sanitation": 0.009,
+    "repair_capacity": 0.01,
+    "standardization": 0.006
+   },
+   "art": "res://assets/ui/research/paper/clay_pipe_forming.png"
+  },
+  "courtyard_houses": {
+   "effects": {
+    "housing_output": 0.03,
+    "health_protection": 0.007,
+    "dry_storage": 0.01,
+    "cohesion": 0.0025
+   },
+   "observation": "Rooms built around an open court give light, air and a private yard for cooking, work and children."
+  },
+  "load_path_reading": {
+   "art": "res://assets/ui/research/paper/timber_post_beam_connections.png"
+  },
+  "shared_work_crew_rotation": {
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+  },
+  "corbelled_vaults": {
+   "effects": {
+    "construction_rate": 0.003,
+    "housing_output": 0.012,
+    "dry_storage": 0.02,
+    "disaster_resilience": 0.015
+   },
+   "observation": "Each course of stone laid a little further in than the one below closes a passage or chamber without any timber."
+  },
+  "post_storm_resource_pooling": {
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png"
+  },
+  "diversion_dams": {
+   "effects": {
+    "water_access": 0.042,
+    "cultivation_yield": 0.02,
+    "disaster_resilience": 0.015,
+    "labor_demand": 0.02,
+    "ecological_pressure": 0.01
+   },
+   "observation": "A bank of rubble across the stream turns its water into a basin that holds through the dry months."
+  },
+  "town_enclosure_walls": {
+   "effects": {
+    "security_efficiency": 0.04,
+    "disaster_resilience": 0.0225,
+    "state_capacity": 0.012,
+    "cohesion": 0.005,
+    "construction_rate": 0.0015,
+    "labor_demand": 0.02
+   },
+   "observation": "A thick mudbrick wall with gates and towers rings the whole town, and the townsfolk mend it every year.",
+   "social_consequence": "The town is now a place inside a wall; those inside and those outside become different kinds of people."
+  },
+  "herringbone_plano_convex_brick": {
+   "effects": {
+    "construction_rate": 0.0045,
+    "housing_output": 0.009,
+    "disaster_resilience": 0.0075
+   },
+   "observation": "Loaf-shaped bricks laid on edge in slanting courses, each row leaning the other way, build fast and hold well."
+  },
+  "kiln_fired_bricks": {
+   "effects": {
+    "disaster_resilience": 0.0375,
+    "housing_output": 0.024,
+    "construction_rate": 0.0045,
+    "sanitation": 0.006,
+    "fuel_demand": 0.03,
+    "timber_pressure": 0.02
+   },
+   "observation": "Bricks fired in the kiln like pots stand in water and weather where sun-dried bricks slump and melt.",
+   "social_consequence": "Fired brick stands through flood and rain where mudbrick melts, but the kilns hunger for fuel and the woods thin."
+  },
+  "gypsum_mortar": {
+   "effects": {
+    "construction_rate": 0.0045,
+    "disaster_resilience": 0.0075,
+    "housing_output": 0.006
+   },
+   "observation": "Gypsum burned at a low heat and mixed with water sets quickly between blocks and bricks."
+  },
+  "dressed_stone_masonry": {
+   "effects": {
+    "construction_rate": 0.0075,
+    "disaster_resilience": 0.0225,
+    "stone_yield": 0.02,
+    "legitimacy": 0.012,
+    "labor_demand": 0.02
+   },
+   "observation": "Blocks squared with copper chisels and stone pounders fit face to face, and walls of stone replace walls of earth.",
+   "social_consequence": "Stone building becomes the mark of kings and gods; masons become a respected and closely controlled trade."
+  },
+  "rammed_earth_construction": {
+   "effects": {
+    "construction_rate": 0.0045,
+    "housing_output": 0.018,
+    "disaster_resilience": 0.015
+   },
+   "art": "res://assets/ui/research/paper/rammed_earth_construction.png"
+  },
+  "stepped_stone_tombs": {
+   "effects": {
+    "construction_rate": 0.006,
+    "haul_capacity": 0.03,
+    "task_coordination": 0.015,
+    "state_capacity": 0.012,
+    "legitimacy": 0.018,
+    "labor_demand": 0.03
+   },
+   "observation": "Blocks dragged on sledges over wetted tracks and up long ramps rise in great steps over the royal burial.",
+   "social_consequence": "A ruler's tomb rises in stone steps; the state that can build it can also count, feed and command tens of thousands."
+  },
+  "public_works_priority_review": {
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png"
+  },
+  "structural_repair_triage": {
+   "art": "res://assets/ui/research/paper/timber_lateral_bracing.png"
+  },
+  "seasonal_hazard_calendar": {
+   "art": "res://assets/ui/research/subjects/seasonal_patterns-v1.png"
+  },
+  "lime_mortar": {
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png",
+   "production_items": [
+    "slaked_lime",
+    "building_mortar"
+   ]
+  },
+  "wedge_brick_well_lining": {
+   "effects": {
+    "water_access": 0.028,
+    "water_safety": 0.018,
+    "sanitation": 0.006
+   },
+   "observation": "Bricks shaped like wedges ring the well shaft in perfect circles, so it can go deep and stay clean for generations."
+  },
+  "wadi_dams": {
+   "effects": {
+    "water_access": 0.035,
+    "disaster_resilience": 0.0225,
+    "cultivation_yield": 0.01,
+    "labor_demand": 0.02
+   },
+   "observation": "A dam of rubble faced with stone blocks across the dry valley catches the flash floods and shields the town below."
+  },
+  "fired_roof_tiles": {
+   "effects": {
+    "housing_output": 0.024,
+    "disaster_resilience": 0.0225,
+    "dry_storage": 0.02,
+    "fuel_demand": 0.01
+   },
+   "art": "res://assets/ui/research/paper/fired_roof_tiles.png"
+  },
+  "upper_storeys": {
+   "effects": {
+    "housing_output": 0.036,
+    "construction_rate": 0.0015,
+    "disaster_risk": 0.005
+   },
+   "observation": "Timber joists set into thick walls carry a second floor, so a house can grow upward on the same plot."
+  },
+  "bitumen_bedded_brick": {
+   "effects": {
+    "sanitation": 0.018,
+    "water_safety": 0.012,
+    "disaster_resilience": 0.0075,
+    "storage_loss": -0.01
+   },
+   "observation": "Fired bricks laid in hot bitumen make floors and channels that hold water without a drop leaking through."
+  },
+  "covered_sewers": {
+   "art": "res://assets/ui/research/subjects/covered_sewers-v1.png"
+  },
+  "rigid_pipe_bedding": {
+   "effects": {
+    "sanitation": 0.012,
+    "repair_capacity": 0.015,
+    "water_access": 0.007
+   },
+   "art": "res://assets/ui/research/paper/rigid_pipe_bedding.png"
+  },
+  "standard_brick_proportions": {
+   "effects": {
+    "standardization": 0.018,
+    "construction_rate": 0.0045,
+    "housing_output": 0.006
+   },
+   "observation": "Every brick is moulded twice as long as it is wide and twice as wide as it is thick, so walls bond neatly in any direction."
+  },
+  "masonry_bond_patterns": {
+   "effects": {
+    "construction_rate": 0.0045,
+    "disaster_resilience": 0.0225
+   },
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png"
+  },
+  "urban_street_plans": {
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "building_drainage_coordination": {
+   "effects": {
+    "sanitation": 0.018,
+    "disaster_resilience": 0.015,
+    "housing_output": 0.006
+   },
+   "art": "res://assets/ui/research/paper/building_drainage_coordination.png"
+  },
+  "ventilated_granaries": {
+   "effects": {
+    "food_storage": 0.06,
+    "storage_loss": -0.05,
+    "food_spoilage": -0.03,
+    "dry_storage": 0.03
+   },
+   "observation": "Grain stored on a raised brick platform with air channels running beneath it stays dry and cool and does not sprout."
+  },
+  "pitched_brick_vaults": {
+   "effects": {
+    "construction_rate": 0.0045,
+    "housing_output": 0.012,
+    "dry_storage": 0.02,
+    "timber_pressure": -0.01
+   },
+   "observation": "Bricks leaned against an end wall in slanting rings build a barrel vault without any timber frame to hold them up."
+  },
+  "shaduf_water_lift": {
+   "effects": {
+    "water_access": 0.035,
+    "cultivation_yield": 0.02,
+    "food_output": 0.01,
+    "labor_demand": -0.01
+   },
+   "observation": "A pole with a bucket at one end and a clay weight at the other lets one man lift water from the channel all day."
+  },
+  "reed_mat_brick_layers": {
+   "effects": {
+    "construction_rate": 0.003,
+    "disaster_resilience": 0.015
+   },
+   "observation": "Layers of reed matting and reed cables laid every few courses bind a great brick mass and let it dry without cracking."
+  },
+  "stepped_temple_towers": {
+   "effects": {
+    "construction_rate": 0.006,
+    "legitimacy": 0.024,
+    "cohesion": 0.01,
+    "state_capacity": 0.012,
+    "disaster_resilience": 0.0075,
+    "labor_demand": 0.03
+   },
+   "observation": "A solid mountain of brick rises in stages to the god's house at the top, faced in fired brick set in bitumen.",
+   "social_consequence": "The temple tower dominates the city and the plain; the gods and their servants are seen to hold the highest place."
+  },
+  "brick_mass_drain_shafts": {
+   "effects": {
+    "disaster_resilience": 0.015,
+    "repair_capacity": 0.01,
+    "sanitation": 0.006
+   },
+   "observation": "Weep-holes and shafts left through the brick mass drain the rain from its heart before it can soften the core."
+  },
+  "wooden_log_conduits": {
+   "effects": {
+    "water_access": 0.021,
+    "timber_pressure": 0.01
+   },
+   "art": "res://assets/ui/research/paper/clay_pipe_forming.png"
+  },
+  "clay_pipe_socket_jointing": {
+   "effects": {
+    "water_access": 0.028,
+    "water_safety": 0.018,
+    "sanitation": 0.018
+   },
+   "art": "res://assets/ui/research/paper/clay_pipe_socket_jointing.png",
+   "social_consequence": "Clean water runs in closed pipes to the palace and the great houses; who is connected, and who is not, becomes a mark of rank."
+  },
+  "timber_splice_connections": {
+   "effects": {
+    "construction_rate": 0.003,
+    "housing_output": 0.006
+   },
+   "art": "res://assets/ui/research/paper/timber_splice_connections.png"
+  },
+  "light_wells": {
+   "effects": {
+    "housing_output": 0.018,
+    "health_protection": 0.0105,
+    "disease_exposure": -0.01
+   },
+   "observation": "An open shaft through the middle of the house lets light and air down to the rooms below."
+  },
+  "building_shading_design": {
+   "effects": {
+    "housing_output": 0.012,
+    "fatigue": -0.0035,
+    "health_protection": 0.007
+   },
+   "art": "res://assets/ui/research/paper/building_shading_design.png"
+  },
+  "ceramic_pipe_fit_gauges": {
+   "effects": {
+    "standardization": 0.012,
+    "repair_capacity": 0.01,
+    "water_access": 0.007
+   },
+   "art": "res://assets/ui/research/paper/ceramic_pipe_fit_gauges.png"
+  },
+  "ashlar_masonry": {
+   "effects": {
+    "construction_rate": 0.0045,
+    "disaster_resilience": 0.0225,
+    "legitimacy": 0.006
+   },
+   "observation": "Blocks dressed so exactly that they fit without mortar make faces smooth enough that a blade cannot slip between them."
+  },
+  "mine_shoring": {
+   "art": "res://assets/ui/research/subjects/mine_shoring-v1.png"
+  },
+  "cistern_flushed_drains": {
+   "effects": {
+    "sanitation": 0.03,
+    "disease_exposure": -0.03,
+    "water_safety": 0.012
+   },
+   "observation": "Rain caught on the palace roofs is stored and let down in a rush to flush the drains and the latrines."
+  },
+  "timber_laced_walls": {
+   "effects": {
+    "disaster_resilience": 0.0375,
+    "housing_output": 0.006
+   },
+   "observation": "Timber beams laid through the rubble walls at intervals let them flex when the ground shakes, instead of falling."
+  },
+  "colonnaded_porticoes": {
+   "effects": {
+    "construction_rate": 0.003,
+    "housing_output": 0.006,
+    "legitimacy": 0.006,
+    "trade_capacity": 0.006,
+    "cohesion": 0.005
+   },
+   "observation": "A row of timber columns on stone bases carries a shady roof along the court, where people meet, wait and trade."
+  }
+ }
 }

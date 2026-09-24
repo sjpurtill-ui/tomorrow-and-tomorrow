@@ -1,5 +1,553 @@
 {
  "line": "health",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "wound_cleaning": {
+   "ability_reason": "Washed wounds fester less; cuts and bites stop killing the strong."
+  },
+  "sickness_pattern_memory": {
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png"
+  },
+  "symptom_sharing_customs": {
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png"
+  },
+  "tool_hazard_awareness": {
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png"
+  },
+  "turbidity_judging": {
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "delousing": {
+   "effects": {
+    "disease_exposure": -0.008,
+    "health_protection": 0.006,
+    "cohesion": 0.004
+   },
+   "name": "Delousing",
+   "observation": "Kin comb each other's hair with fine bone combs and crush the lice, and the itching fevers come less often."
+  },
+  "herbal_classification": {
+   "ability_reason": "Healing plants known apart from food and poison give the sick a remedy instead of a guess."
+  },
+  "contagion_avoidance_customs": {
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png"
+  },
+  "splint_and_bracing_technique": {
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png"
+  },
+  "dietary_healing_regimens": {
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png"
+  },
+  "birth_attendants": {
+   "ability_reason": "No mother labors alone; difficult births are met by women who have seen them before."
+  },
+  "household_water_boiling": {
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "snakebite_treatment": {
+   "effects": {
+    "injury_risk": -0.008,
+    "health_protection": 0.004
+   },
+   "name": "Snakebite and Sting Care",
+   "observation": "A bitten limb is bound above the wound, cut and sucked, and the victim is kept still and watched."
+  },
+  "joint_reduction": {
+   "effects": {
+    "injury_risk": -0.008,
+    "labor_efficiency": 0.006
+   },
+   "name": "Resetting Dislocated Joints",
+   "observation": "A healer braces a foot against the body and pulls a dislocated shoulder or hip back into place with a practised twist."
+  },
+  "clean_water": {
+   "ability_reason": "Drinking upstream of washing and herds ends much of the summer sickness that kills children."
+  },
+  "wound_packing": {
+   "effects": {
+    "injury_risk": -0.01,
+    "maternal_safety": 0.005,
+    "health_protection": 0.004
+   },
+   "name": "Wound Packing",
+   "observation": "Dried moss, lint and soft leaves packed into a wound soak up blood and keep dirt out."
+  },
+  "poultices": {
+   "effects": {
+    "injury_risk": -0.006,
+    "health_protection": 0.008
+   },
+   "name": "Poultices",
+   "observation": "Crushed leaves bound with clay and fat draw heat from swellings and ease sore joints."
+  },
+  "sweat_baths": {
+   "effects": {
+    "health_protection": 0.006,
+    "disease_exposure": -0.005,
+    "cohesion": 0.006,
+    "fuel_demand": 0.006
+   },
+   "name": "Sweat Baths",
+   "observation": "Water thrown on hot stones in a closed hut fills it with steam, and people sweat out aches and grime together."
+  },
+  "purges_emetics": {
+   "effects": {
+    "health_protection": 0.006,
+    "health_risk": 0.004,
+    "disease_exposure": -0.004
+   },
+   "name": "Purges and Emetics",
+   "observation": "Bitter roots given to a poisoned or bloated person empty the gut, and sometimes the patient with it."
+  },
+  "tooth_drilling": {
+   "effects": {
+    "health_protection": 0.005,
+    "labor_efficiency": 0.003
+   },
+   "name": "Tooth Drilling",
+   "observation": "A flint point spun on a bow drill cleans out a rotten tooth, and a plug of beeswax stops the ache."
+  },
+  "boil_lancing": {
+   "effects": {
+    "injury_risk": -0.004,
+    "health_protection": 0.006,
+    "health_risk": 0.002
+   },
+   "name": "Lancing Boils",
+   "observation": "A boil opened with a sharp flake and pressed clean heals faster than one left to swell."
+  },
+  "disability_care": {
+   "effects": {
+    "cohesion": 0.012,
+    "knowledge_preservation": 0.006,
+    "labor_demand": 0.008,
+    "health_protection": 0.005
+   },
+   "name": "Care for the Lame",
+   "observation": "Kin feed and carry those who can no longer walk or hunt, and the lame live on for years.",
+   "social_consequence": "The lame and the old stay at the hearth to teach, mend and remember; losing a limb no longer means losing a life."
+  },
+  "poppy_analgesia": {
+   "effects": {
+    "fatigue": -0.008,
+    "health_protection": 0.006,
+    "health_risk": 0.004,
+    "injury_risk": -0.003
+   },
+   "name": "Poppy for Pain",
+   "observation": "Latex scraped from cut poppy heads dulls pain and brings sleep, though too much brings a sleep with no waking."
+  },
+  "refuse_removal": {
+   "effects": {
+    "sanitation": 0.03,
+    "disease_exposure": -0.015,
+    "labor_demand": 0.004
+   },
+   "name": "Refuse Out of the Dwelling",
+   "observation": "Dung, bones and ash are swept out and dumped downwind, and houses smell and sicken less."
+  },
+  "trepanation": {
+   "effects": {
+    "injury_risk": -0.015,
+    "health_protection": 0.008,
+    "health_risk": 0.006,
+    "knowledge_preservation": 0.004,
+    "legitimacy": 0.005
+   },
+   "name": "Trepanation",
+   "observation": "A healer scrapes away shattered skull bone with a flint blade, and many of those opened live on with the wound healed over.",
+   "social_consequence": "The skull healer is feared and honoured; the survivors carry their healed scars as proof of the healer's power."
+  },
+  "crutches": {
+   "effects": {
+    "labor_efficiency": 0.008,
+    "injury_risk": -0.004,
+    "fatigue": -0.004
+   },
+   "name": "Crutches and Staffs",
+   "observation": "A forked staff under the arm lets someone with a broken leg move and work while the bone knits."
+  },
+  "heatstroke_care": {
+   "effects": {
+    "fatigue": -0.012,
+    "health_protection": 0.006,
+    "labor_efficiency": 0.005
+   },
+   "name": "Care for the Heat-Struck",
+   "observation": "A worker who staggers in the midday sun is laid in shade, wetted and given water, and is back at work in a day."
+  },
+  "honey_wound_dressing": {
+   "effects": {
+    "injury_risk": -0.012,
+    "maternal_safety": 0.006,
+    "health_protection": 0.006
+   },
+   "name": "Honey Wound Dressing",
+   "observation": "Wounds spread with honey and bound stay clean and heal where others turn foul."
+  },
+  "sickroom_fumigation": {
+   "effects": {
+    "disease_exposure": -0.006,
+    "health_protection": 0.004,
+    "pollution": 0.002
+   },
+   "name": "Fumigated Sickrooms",
+   "observation": "Smouldering herbs fill the sickroom with smoke to drive out bad air, and the room is aired and swept after."
+  },
+  "shared_vessel_avoidance": {
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png"
+  },
+  "household_remedy_kits": {
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png"
+  },
+  "load_carrying_posture": {
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png"
+  },
+  "water_source_rotation": {
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "kohl_eye_paint": {
+   "effects": {
+    "health_protection": 0.004,
+    "disease_exposure": -0.005,
+    "health_risk": 0.002
+   },
+   "name": "Green Eye Paint",
+   "observation": "Ground green malachite painted round the eyes keeps off flies and glare, and eye sickness is rarer among those who wear it."
+  },
+  "bracket_fungus_vermifuge": {
+   "effects": {
+    "health_protection": 0.006,
+    "neonatal_survival": 0.004,
+    "labor_efficiency": 0.004
+   },
+   "name": "Fungus Against Gut Worms",
+   "observation": "Birch bracket fungus eaten as a remedy drives worms from the gut, and thin children fill out again."
+  },
+  "sickroom_isolation_practice": {
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png"
+  },
+  "symptom_triage_customs": {
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png"
+  },
+  "workplace_hazard_awareness": {
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png"
+  },
+  "greywater_diversion_practice": {
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "head_shaving_lice": {
+   "effects": {
+    "disease_exposure": -0.006
+   },
+   "name": "Shaved Heads Against Lice",
+   "observation": "Children and workers keep their hair cropped or shaved, and the lice have nowhere to breed."
+  },
+  "sickbed_distance_norms": {
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png"
+  },
+  "recovery_diet_customs": {
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png"
+  },
+  "fire_tending_safeguards": {
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png"
+  },
+  "water_container_cleaning_customs": {
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "skin_oiling": {
+   "effects": {
+    "health_protection": 0.003,
+    "injury_risk": -0.003,
+    "fatigue": -0.004
+   },
+   "name": "Skin Oiling",
+   "observation": "Oil rubbed into the skin keeps it from cracking in wind and burning in sun."
+  },
+  "traction_fracture_setting": {
+   "effects": {
+    "injury_risk": -0.012,
+    "labor_efficiency": 0.01
+   },
+   "name": "Traction for Fractures",
+   "observation": "Two helpers pull a broken limb straight while the healer sets the ends and binds it, and the leg heals true rather than short."
+  },
+  "castor_oil_remedies": {
+   "effects": {
+    "health_protection": 0.005,
+    "health_risk": 0.003
+   },
+   "name": "Castor Oil Remedies",
+   "observation": "Oil pressed from castor seeds purges the gut and soothes skin, but the raw seed kills."
+  },
+  "healing_chants": {
+   "effects": {
+    "cohesion": 0.012,
+    "legitimacy": 0.006,
+    "fatigue": -0.004
+   },
+   "name": "Healing Chants",
+   "observation": "Remedies are given with chants and names of power, and the sick take them with more trust and rest more calmly."
+  },
+  "river_bathing": {
+   "effects": {
+    "sanitation": 0.02,
+    "disease_exposure": -0.006
+   },
+   "name": "River Bathing",
+   "observation": "People bathe in running water below the drinking place, and skin sores and rashes grow rare."
+  },
+  "seasonal_well_flushing": {
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "outbreak_burial_protocols": {
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png"
+  },
+  "burn_treatment_protocols": {
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png"
+  },
+  "convalescent_care_rotations": {
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png"
+  },
+  "fly_protection": {
+   "effects": {
+    "disease_exposure": -0.012,
+    "neonatal_survival": 0.01,
+    "food_spoilage": -0.01,
+    "sanitation": 0.01
+   },
+   "name": "Covered Food and Fly Whisks",
+   "observation": "Food is kept under cloth and lids and flies are whisked from infants, and the summer flux takes fewer small children."
+  },
+  "apprentice_healer_rounds": {
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png"
+  },
+  "burial_ground_separation": {
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png"
+  },
+  "occupational_rest_customs": {
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png"
+  },
+  "communal_washing_rotas": {
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "wound_suturing": {
+   "effects": {
+    "injury_risk": -0.015,
+    "maternal_safety": 0.01,
+    "labor_efficiency": 0.005
+   },
+   "name": "Stitched Wounds",
+   "observation": "A gaping wound is drawn closed with thread and a bone needle, and it heals in a clean line instead of a festering gap."
+  },
+  "latrine_siting": {
+   "ability_reason": "Latrines dug downslope and away from wells keep the drinking water clean.",
+   "social_consequence": "Where people may relieve themselves becomes a rule of the settlement, enforced by neighbours."
+  },
+  "water_settling_basins": {
+   "ability_reason": "Settled water is clearer and brings less sickness.",
+   "art": "res://assets/ui/research/paper/water_settling_basins.png"
+  },
+  "isolation_practice": {
+   "ability_reason": "Setting the sick apart in an outbreak spares the rest of the household."
+  },
+  "woven_dressings": {
+   "ability_reason": "Clean woven linen for dressings keeps wounds covered and dry.",
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png"
+  },
+  "protected_wellheads": {
+   "ability_reason": "A covered wellhead keeps dung, animals and runoff out of the water.",
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "separate_clean_water_storage": {
+   "ability_reason": "Drinking water kept apart from washing water stays fit to drink.",
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "ash_fat_soap": {
+   "effects": {
+    "sanitation": 0.035,
+    "disease_exposure": -0.012,
+    "craft_output": 0.004
+   },
+   "name": "Ash-and-Fat Soap",
+   "observation": "Fat boiled with wood-ash lye makes a soap that lifts grease from skin, wool and wounds."
+  },
+  "copper_razors": {
+   "effects": {
+    "sanitation": 0.01,
+    "disease_exposure": -0.004
+   },
+   "name": "Copper Razors",
+   "observation": "Thin copper blades shave heads and bodies clean, and priests and healers keep themselves hairless for purity."
+  },
+  "healer_titles": {
+   "effects": {
+    "health_protection": 0.006,
+    "knowledge_preservation": 0.012,
+    "legitimacy": 0.008,
+    "adoption_rate": 0.01,
+    "state_capacity": 0.005
+   },
+   "name": "Healer Titles",
+   "observation": "The physician, the tooth-healer and the eye-healer are named offices, and people know whom to send for.",
+   "social_consequence": "Healing becomes a calling with rank and pay; a title is earned by long service and lost by failure."
+  },
+  "healer_specialization_customs": {
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png"
+  },
+  "protective_gear_customs": {
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png"
+  },
+  "sanitation_inspection_customs": {
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "quarantine_travel_restrictions": {
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png"
+  },
+  "embalming_anatomy": {
+   "effects": {
+    "injury_risk": -0.006,
+    "knowledge_preservation": 0.01,
+    "observation_rate": 0.008,
+    "cohesion": 0.004
+   },
+   "name": "Organs Known from the Dead",
+   "observation": "Those who prepare the dead learn where the heart, liver and lungs lie, and healers learn it from them."
+  },
+  "public_baths": {
+   "ability_reason": "Public washing places let every household wash, not only those with water at the door.",
+   "social_consequence": "The washing place becomes where neighbours meet; bathing becomes a daily custom."
+  },
+  "linen_board_splints": {
+   "effects": {
+    "injury_risk": -0.012,
+    "labor_efficiency": 0.008
+   },
+   "name": "Linen-Bound Board Splints",
+   "observation": "Shaped boards padded and bound with linen bands hold a broken limb straight for weeks."
+  },
+  "remedy_vehicles": {
+   "effects": {
+    "health_protection": 0.004,
+    "neonatal_survival": 0.004
+   },
+   "name": "Remedies in Beer, Milk and Honey",
+   "observation": "Bitter remedies are stirred into beer, milk or honey, and children and the weak take the full dose."
+  },
+  "mineral_eye_salves": {
+   "effects": {
+    "disease_exposure": -0.006,
+    "health_risk": 0.004,
+    "labor_efficiency": 0.004
+   },
+   "name": "Mineral Eye Salves",
+   "observation": "Ground copper and lead ores mixed into salves clear weeping eyes, though the lead does harm of its own."
+  },
+  "wired_teeth": {
+   "effects": {
+    "health_protection": 0.004,
+    "cohesion": 0.003
+   },
+   "name": "Wired Teeth",
+   "observation": "A loose tooth bound to its neighbours with fine gold or copper wire stays in the jaw to chew with."
+  },
+  "willow_myrtle_remedies": {
+   "effects": {
+    "fatigue": -0.008,
+    "maternal_safety": 0.004,
+    "injury_risk": -0.004,
+    "labor_efficiency": 0.006
+   },
+   "name": "Willow and Myrtle Remedies",
+   "observation": "Willow bark and myrtle leaf steeped and drunk ease pain and cool fevers, including those after childbirth."
+  },
+  "remedy_tablets": {
+   "effects": {
+    "knowledge_preservation": 0.03,
+    "adoption_rate": 0.015,
+    "health_risk": -0.004,
+    "observation_rate": 0.006
+   },
+   "name": "Remedy Tablets",
+   "observation": "Remedies are written down with their ingredients, preparation and use, so a healer far away can make the same cure.",
+   "social_consequence": "Healing knowledge no longer dies with the healer; scribes and physicians begin to work together."
+  },
+  "case_records": {
+   "ability_reason": "Remedies written beside their outcomes show which cures work and which only seem to."
+  },
+  "skin_disease_exclusion": {
+   "effects": {
+    "disease_exposure": -0.012,
+    "cohesion": -0.01,
+    "legitimacy": 0.004
+   },
+   "name": "Exclusion of Scaly-Skin Sufferers",
+   "observation": "Those with scaling, spreading skin disease are made to live outside the walls, and the sickness spreads less within.",
+   "social_consequence": "The excluded live apart on charity; fear of the disease hardens into a lasting stigma."
+  },
+  "mad_dog_liability": {
+   "effects": {
+    "injury_risk": -0.006,
+    "legitimacy": 0.006,
+    "state_capacity": 0.004
+   },
+   "name": "Liability for Mad Dogs",
+   "observation": "An owner warned that his dog is mad must pay a fine if it bites someone, so dangerous dogs are tied or killed."
+  },
+  "womens_ailment_texts": {
+   "effects": {
+    "maternal_safety": 0.012,
+    "conception_support": 0.015,
+    "knowledge_preservation": 0.01
+   },
+   "name": "Women's-Ailment Texts",
+   "observation": "Written remedies for barrenness, difficult pregnancy and bleeding after birth pass between healers and midwives."
+  },
+  "healer_fee_law": {
+   "effects": {
+    "legitimacy": 0.008,
+    "state_capacity": 0.006,
+    "institutional_rigidity": 0.006
+   },
+   "name": "Healer Fees by Law",
+   "observation": "The law sets a healer's fee by the patient's rank, and fines or maims the healer whose knife kills.",
+   "social_consequence": "Healers weigh the risk of each cure against the penalty; careful healers prosper and reckless ones flee."
+  },
+  "injury_manual": {
+   "effects": {
+    "injury_risk": -0.025,
+    "knowledge_preservation": 0.02,
+    "health_risk": -0.004
+   },
+   "name": "Injury Manual",
+   "observation": "A written manual takes each injury from head to foot: how to examine it, judge it, and treat it or leave it alone.",
+   "social_consequence": "Healers learn to refuse hopeless cases openly; judgement, not only remedy, becomes their craft."
+  },
+  "cautery": {
+   "effects": {
+    "injury_risk": -0.01,
+    "health_risk": 0.003
+   },
+   "name": "Cautery",
+   "observation": "A fire-drill heated in the coals seals a bleeding vessel or a festering wound, at the cost of a burn."
+  },
+  "pulse_taking": {
+   "effects": {
+    "observation_rate": 0.008,
+    "knowledge_preservation": 0.006,
+    "health_risk": -0.003
+   },
+   "name": "Pulse Taking",
+   "observation": "Healers feel the heartbeat at wrist and neck, and learn to tell a failing pulse from a steady one."
+  },
+  "remedy_compendia": {
+   "effects": {
+    "knowledge_preservation": 0.03,
+    "adoption_rate": 0.012,
+    "observation_rate": 0.006
+   },
+   "name": "Remedy Compendia",
+   "observation": "Great rolls gather hundreds of remedies by ailment, copied from temple to temple and consulted at the bedside."
+  }
+ }
 }
