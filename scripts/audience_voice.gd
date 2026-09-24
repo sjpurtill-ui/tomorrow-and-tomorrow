@@ -21,7 +21,7 @@ const MAX_COMPLETION_TOKENS:=1600
 const MAX_RESPONSE_BYTES:=98304
 const MAX_LINE_CHARS:=300
 const MAX_PLAYER_CHARS:=400
-const STAGE_LIMITS:={"open":9,"speak":4,"closing":3}
+const STAGE_LIMITS:={"open":9,"speak":4,"closing":3,"weigh":5}
 const META_PATTERN:="(?i)\\b(the game|this game|a game|games? (system|mechanic)s?|game ?play|gaming|game mechanics?|mechanics?|players?|buttons?|json|ai|a\\.i\\.|ai models?|artificial intelligence|language models?|llm|chatbot|as an assistant|the prompt|npcs?|click(ed|ing)?|menus?|user interface|save file|schema)\\b"
 
 const SYSTEM_PROMPT:="""You write live dialogue for a royal audience hall in a fictional history. Speak only through the characters listed; no narration, no stage directions, no explanations.
@@ -363,6 +363,11 @@ func player_speaks(audience_id:String,text:String)->void:
 func closing(audience_id:String,result:Dictionary)->void:
 	_begin(audience_id,"closing",{"result":result.duplicate(true)})
 
+## Wonder proposals: the court weighs the chosen concept at the chosen ambition
+## (assess() factors in the officials' own words). Appends a short round.
+func weigh(audience_id:String)->void:
+	_begin(audience_id,"weigh",{})
+
 # ---------------------------------------------------------------------------
 # Scene assembly
 # ---------------------------------------------------------------------------
@@ -389,7 +394,10 @@ func scene(audience_id:String)->Dictionary:
 	var civ_id:String=String(audience.get("civ_id",""))
 	var origin:String=String(audience.get("origin","foreign"))
 	var envoy_persona:Dictionary
-	if origin=="court":
+	var figure_persona:=_work_speaker_persona(audience)
+	if not figure_persona.is_empty():
+		envoy_persona=figure_persona
+	elif origin=="court":
 		var person:Dictionary={}
 		var pid:int=int(speaker.get("person_id",0))
 		if pid>0 and GovernmentPeopleSystem.has_method("person_snapshot"): person=GovernmentPeopleSystem.person_snapshot(pid)
@@ -424,6 +432,9 @@ func scene(audience_id:String)->Dictionary:
 		s["subject"]=String(report.get("subject_name",""))
 		s["scout_brief"]=_scout_call("voice_brief",audience)
 	if origin=="court": s["civ"]=String(ctx.get("player_settlement","")) if not String(ctx.get("player_settlement","")).is_empty() else "our people"
+	if String(s.kind) in WORK_KINDS:
+		s["work"]=(ctx.get("wonder_proposal",ctx.get("great_work",{})) as Dictionary).duplicate(true)
+		s["gwtok"]=_work_tokens(s)
 	return s
 
 func _scout_call(method:String,audience:Dictionary)->Variant:
@@ -631,7 +642,15 @@ func _clean_text(text:String,member:Dictionary)->String:
 func _deliver(s:Dictionary,stage:String,extra:Dictionary,lines:Array[Dictionary],mood_shift:float)->void:
 	var h:Variant=_hall()
 	if h==null: return
-	var ordered:=lines
+	# Nobody repeats a line verbatim within one audience.
+	var said:={}
+	for line in (h.find(String(s.id)) as Dictionary).get("lines",[]): said[String(line.get("text","")).strip_edges().to_lower()]=true
+	var ordered:Array[Dictionary]=[]
+	for line in lines:
+		var text:=String(line.get("text","")).strip_edges().to_lower()
+		if said.has(text): continue
+		said[text]=true
+		ordered.append(line)
 	# The visitor always speaks first when the room opens or answers the ruler.
 	if stage in ["open","speak"] and (ordered.is_empty() or String(ordered[0].key)!="envoy"):
 		var envoy_index:=-1
@@ -643,6 +662,9 @@ func _deliver(s:Dictionary,stage:String,extra:Dictionary,lines:Array[Dictionary]
 			var lead:=_offline_lines(s,stage,extra,rng)
 			if not lead.is_empty(): ordered.push_front(lead[0])
 	for line in ordered:
+		if String(line.key)=="narrator":
+			h.append_line(String(s.id),{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":String(line.text),"day":_day(),"aside":false})
+			continue
 		var member:=_member(s,String(line.key))
 		if member.is_empty(): continue
 		h.append_line(String(s.id),_line_for(member,String(line.text),bool(line.aside)))
@@ -703,6 +725,7 @@ func _tokens(s:Dictionary,member:Dictionary,rival:Dictionary)->Dictionary:
 		"rival":String(rival.get("name","")).get_slice(" ",0),"why":_grievance_words(String(s.summary)),
 		"days":_number_after(String(s.summary),"about (\\d+) days"),"homeless":_number_after(String(s.summary),"(?i)about (\\d+) people")}
 	if tokens.leader.is_empty() and s.origin!="court": tokens.leader="our chief"
+	tokens.merge(s.get("gwtok",{}),true)
 	if tokens.decree.is_empty(): tokens.erase("decree")
 	var out:={}
 	for k in tokens:
@@ -762,11 +785,23 @@ func _choose(s:Dictionary,bank:Array,tokens:Dictionary,rng:RandomNumberGenerator
 
 func _say(s:Dictionary,member:Dictionary,bank:Array,rng:RandomNumberGenerator,rival:Dictionary={},aside:bool=false)->Dictionary:
 	var tokens:=_tokens(s,member,rival)
+	# A speaker swears their oath at most once per scene.
+	var scene_memory:Dictionary=_used.get(String(s.id),{})
+	var oath_key:="~oath:"+String(member.get("key",""))
+	var oath:=String(tokens.get("oath",""))
+	if scene_memory.has(oath_key): tokens.erase("oath")
 	var raw:=_choose(s,bank,tokens,rng,_recent_lines(s,member))
+	if raw.is_empty() and scene_memory.has(oath_key):
+		var plain:Array=[]
+		for template in bank: plain.append(String(template).replace("{oath} ","").replace(" {oath}",""))
+		raw=_choose(s,plain,tokens,rng,_recent_lines(s,member))
 	if raw.is_empty(): return {}
+	if not oath.is_empty() and raw.contains(oath):
+		scene_memory[oath_key]=true
+		_used[String(s.id)]=scene_memory
 	# A line that opens on a name or title keeps it up front; no lead-in before it.
 	var lead_ok:=true
-	for k in ["address","leader","rival","petitioner","civ","envoy","oath","subject"]:
+	for k in ["address","leader","rival","petitioner","civ","envoy","oath","subject","work","name","ruin","trigger","eventtext","gatetext","forecast","civtwo","dead"]:
 		var value:String=String(tokens.get(k,""))
 		if not value.is_empty() and raw.to_lower().begins_with(value.to_lower()): lead_ok=false
 	return {"key":String(member.key),"text":CV.speak(member.persona,raw,rng,true,_flourish_memory(s,member),lead_ok),"aside":aside}
@@ -824,6 +859,11 @@ static func _recently_said(filled:String,recent:Array[String])->bool:
 	return false
 
 func _offline_lines(s:Dictionary,stage:String,extra:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
+	if String(s.kind) in WORK_KINDS:
+		match stage:
+			"open": return _work_open(s,rng)
+			"weigh": return _work_weigh(s,rng,true)
+			"closing": return _work_closing(s,extra.get("result",{}),rng)
 	match stage:
 		"open": return _offline_open(s,rng)
 		"speak": return _offline_speak(s,String(extra.get("player_text","")),rng)
@@ -908,6 +948,7 @@ func _offline_speak(s:Dictionary,player_text:String,rng:RandomNumberGenerator)->
 	var mood:=sentiment(player_text)
 	var envoy:Dictionary=s.envoy
 	var bank:Array=(PETITIONER_REPLY if s.origin=="court" else ENVOY_REPLY).get(mood,ENVOY_REPLY.neutral)
+	if String(s.kind) in WORK_KINDS and String(s.envoy.persona.get("figure_id","")).length()>0: bank=BUILDER_REPLY.get(mood,BUILDER_REPLY.neutral)
 	var rival:Dictionary=s.officials[0] if not s.officials.is_empty() else {}
 	_append_if(out,_say(s,envoy,bank,rng,rival))
 	if String(s.kind) in ["gift","request","threat"] and mood in ["warm","hostile"] and rng.randf()<0.4 and not String(s.amt).is_empty():
@@ -976,12 +1017,14 @@ func _kind_words(s:Dictionary)->String:
 			var findings:String=JSON.stringify(brief) if not brief.is_empty() else JSON.stringify(report.get("facts",[]))
 			return "The ruler's CHIEF SCOUT returns with a REPORT on %s (source: %s, observed on day %s). Debrief material, the only true findings: %s" % [String(report.get("subject_name","what they found")),String(report.get("source","scouts")),str(report.get("observed_day","?")),findings.substr(0,3200)]
 		"petition": return "A PETITION from the ruler's own official (topic: %s). The matter: %s%s" % [s.topic,s.summary," Their proposed remedy: \"%s\"." % s.decree if not String(s.decree).is_empty() else ""]
+		"wonder_proposal","great_work": return _work_scene_words(s)
 	return ""
 
 func _audience_want(s:Dictionary,member:Dictionary)->String:
 	var persona:Dictionary=member.persona
 	if String(member.key)=="envoy":
 		if String(s.kind)=="report": return "to be believed, to have the danger or the prize taken seriously, and to be sent out again"
+		if String(s.kind) in WORK_KINDS: return _work_want(s)
 		if s.origin=="court":
 			return {"food":"food for the hungry before it turns to panic","health":"the sick tended and the water clean","housing":"roofs over heads before the weather turns",
 				"security":"a watch strong enough to sleep behind","grievance":"to be acknowledged, publicly, without grovelling","ambition":"the ruler's yes, and the credit"}.get(String(s.topic),"to be heard and taken seriously")
@@ -1030,13 +1073,674 @@ func _stage_instruction(s:Dictionary,stage:String,extra:Dictionary)->String:
 	match stage:
 		"open":
 			var who:="'envoy' is the petitioning official: they make their case with feeling and a little self-interest." if s.origin=="court" else "'envoy' speaks first: a greeting with flourish and attitude, then the business in plain terms, exact amounts as given."
+			if String(s.kind) in WORK_KINDS: who=_work_open_instruction(s)
 			if String(s.kind)=="report": who="'envoy' is the Chief Scout, back from the field. Debrief in 2 to 3 lines: plain-spoken, concrete and sensory (what they saw, heard, smelled, who they met, what surprised or worried them, what they covet), opinionated, with uncertainty spoken naturally ('I'd not swear to it, but...'). Use only the findings supplied; never add numbers, places or events."
 			if bench==0: return who+" Nobody else is on the bench, so 'envoy' may add one more line. 1 to 2 lines total. mood_shift 0."
 			return who+" Then %d to %d short interjections from different officials: at least one disagrees with another official, at least one is an aside to the ruler, and at least one is funny. End on a line that hands the floor to the ruler. mood_shift 0." % [mini(2,bench),mini(4,bench)]
 		"speak":
 			return "The ruler just said: \"%s\". 'envoy' answers first, in character: bristle, bargain, bluff, tease or be charmed, but change no terms and accept nothing new. Then 0 to 2 officials react (asides welcome). 1 to 3 lines total. Set mood_shift by how the ruler's words land with 'envoy'." % String(extra.get("player_text",""))
+		"weigh":
+			return "The ruler is weighing the chosen work at the chosen ambition. Using ONLY the feasibility factors and verdict in FACTS (wonder_proposal.factors, spoken_verdict, odds_in_words), 2 to 4 officials each speak to the factor nearest their office (stores and stone: the Quartermaster; know-how and craft: the Scholar; war and safety: the Marshal; the people's mood and food: the Steward), one line each, in character, never as a number or percentage; then 'envoy' answers the doubts in one line. mood_shift 0."
 		"closing":
 			var result:Dictionary=extra.get("result",{})
 			var option_id:String=String(result.get("option_id",(s.audience as Dictionary).get("option_id","")))
 			return "The ruler has decided. WHAT ACTUALLY HAPPENED: %s (answer: %s). The visitor's reaction: %s. 'envoy' gives one parting line reacting to exactly this outcome and this reaction; no other outcome, no new promises. Then %s. mood_shift 0." % [String(result.get("outcome","")),option_id if not option_id.is_empty() else "given",String(result.get("reaction","neutral")),"one official gets the last word as an aside to the ruler. Exactly 2 lines" if bench>0 else "stop. Exactly 1 line"]
 	return ""
+
+# ---------------------------------------------------------------------------
+# Great Works: wonder pitches, master builders, outcomes, dedications.
+# Tokens (only when real): {work} {form} {purpose} {stage} {pct} {odds}
+# {verdict} {others} {trigger} {ambition} {city} {ruin} {dead} {eventtext}
+# {forecast} {civtwo} {gatetext} {style} {gift} {name}
+# ---------------------------------------------------------------------------
+
+const WORK_KINDS:=["great_work","wonder_proposal"]
+
+const PITCH_OPEN:=[
+	"{trigger} I've not slept properly since, {address}, because I keep seeing the same thing when I close my eyes.",
+	"{oath} Hear me out before anyone sighs, {address}. {trigger} A people who lives through that should leave something standing.",
+	"I've carried this in my chest for a season, {address}, and it's grown too big to keep in there. {trigger}",
+	"Let me put a picture in your head, {address}, and then try to get it out again. {trigger}",
+]
+const PITCH_CONCEPT:=[
+	"Picture it: {work}. A {form} to {purpose}, and nobody who sees it will ever mistake us for anyone else.",
+	"I'd call it {work}, {address}: a {form}, raised to {purpose}. Our grandchildren will argue about who thought of it first. It was me.",
+	"{work}, {address}. A {form} to {purpose}, built the way only our people would build it.",
+]
+const PITCH_CONCEPT_NOPURPOSE:=[
+	"Picture it: {work}, a {form} like nothing standing anywhere, and ours down to the last stone.",
+	"I'd call it {work}, {address}: a {form} our grandchildren will argue about.",
+]
+const PITCH_OTHERS:=[
+	"There's also {others}, {address}, if that frightens you. Smaller hearts, smaller stones.",
+	"I've drawn {others} too, {address}, in case the treasury feels faint.",
+]
+const PITCH_COURT:={
+	"glory":[
+		"{oath} Build it, {address}. Nobody sings about the year we kept our granaries tidy.",
+		"I can see it already, {address}, and so will every envoy who comes over that ridge.",
+		"A people that raises {work} doesn't get pushed around at the border, {address}. Stone makes an argument.",
+		"Say yes, {address}, and say it loud enough that the neighbours hear it in their sleep.",
+	],
+	"folly":[
+		"Lovely dream, {address}. Now who's going to carry it, and what are they eating while they do?",
+		"{oath} I've seen what a half-built wonder looks like, {address}: a very expensive pile of regret.",
+		"Every people that tried to touch the sky has a ruin to show for it, {address}. Ask them how it felt.",
+		"I'll say it so nobody else has to, {address}: this is folly with a pretty name.",
+	],
+}
+const WEIGH_OFFICE:={
+	"quartermaster":{"help":["I've counted the yards twice, {address}, and for once I'm not frowning: {factor}","The stores can bear it, {address}, just about: {factor}"],"hurt":["I've counted the yards twice, {address}, and the count doesn't change: {factor}","Before anyone falls in love with it, {address}: {factor}"]},
+	"scholar":{"help":["We know how, {address}, which is more than most peoples can say: {factor}","It's within our learning, {address}: {factor}"],"hurt":["Does anyone here actually know how to do this, {address}? Because {factor}","Knowledge first, then stone, {address}: {factor}"]},
+	"marshal":{"help":["The frontier's quiet enough for it, {address}: {factor}","I can spare the hands, {address}: {factor}"],"hurt":["A half-built wonder is a fine target, {address}: {factor}","Mind the frontier while you gaze at the sky, {address}: {factor}"]},
+	"steward":{"help":["The people will carry it, {address}, and gladly: {factor}","They're with you on this, {address}: {factor}"],"hurt":["Think of the people who'll haul it, {address}: {factor}","The people will ask why, {address}, and here's what they'll say: {factor}"]},
+	"any":{"help":["Here's the good news, {address}: {factor}","One thing in its favour, {address}: {factor}"],"hurt":["Here's what worries me, {address}: {factor}","Stone doesn't care about speeches, {address}: {factor}"]},
+}
+const WEIGH_VERDICT:=[
+	"Plainly, {address}? At this ambition it's {odds}. {verdict}",
+	"Put all that together and it's {odds}, {address}. {verdict}",
+	"I'll not dress it up, {address}: {odds}. {verdict}",
+]
+const ODDS_ORDER:=["folly, most likely","a long gamble","an even wager","likely, with care","as sure as stone gets"]
+const WEIGH_SHIFT:={
+	"better":["{ambition}, then? Now you're talking sense, {address}: {odds}.","That's kinder to the stone, {address}. I'd call it {odds} now.","{oath} Pull it back to {ambition} and the ground stops frowning, {address}: {odds}."],
+	"worse":["{ambition}? Then hear it plainly, {address}: {odds}, and no better.","Bolder, and the ground knows it, {address}. It's {odds} now.","{oath} {ambition} it is, {address}, and the odds slide to {odds}."],
+	"same":["{ambition} changes the bill more than the odds, {address}: still {odds}.","Same stone, same risk, {address}. It stays {odds}."],
+	"other":["{work}, then. Weighed fresh, {address}: {odds}.","A different dream, {address}, and a different wager: {work} is {odds}."],
+}
+const WEIGH_VERDICT_BARE:=[
+	"Plainly, {address}? At this ambition it's {odds}.",
+	"Put all that together and it's {odds}, {address}, and I'd still build it.",
+]
+const GATE_OPEN:={
+	"design":[
+		"The foundations of {work} are laid, {address}, and they're better than they had any right to be. Now: do we build what's sensible, or what's worth remembering?",
+		"{oath} I've drawn it twice, {address}. Once for the accountants and once for the ages. You choose which one we raise.",
+	],
+	"stores":[
+		"The walls of {work} are rising, {address}, and the crews are hungry. There's grain in the stores that could buy us a season of hands.",
+		"Feed me a larger crew, {address}, and {work} leaps a whole stage. Starve me, and it crawls.",
+	],
+	"labor":[
+		"We're near the crown of {work}, {address}, and the heaviest lifting is still ahead. Who carries it: paid backs, forced backs, or willing ones?",
+		"{oath} The last stones are the worst, {address}. I need hands, and I need to know how you mean to get them.",
+	],
+	"demand":[
+		"I'll say it once, {address}: {work} should bear my mark, and the finest stone goes to the crown, not the gutters.",
+		"A great work needs a great name on it, {address}, and I've a modest suggestion as to whose.",
+	],
+	"_":["{gatetext}","A question for you, {address}, before another stone goes up: {gatetext}"],
+}
+const GATE_COURT:={
+	"quartermaster":{"stores":["Pour the stores into that pit, {address}, and I'll be the one explaining to the children why supper's thin.","Grain spent on walls is grain not spent on winter, {address}. I'll not pretend otherwise."],"design":["A grander design is a grander bill, {address}. Somebody should say it before the ink dries.","I like sensible, {address}. Sensible has never once emptied my stores."],"_":["Every choice has a price in the yards, {address}, and I'm the one who pays it."]},
+	"marshal":{"design":["Build it bigger and it's a bigger target, {address}. I'd rather it were a stronger one.","Grand is well and good, {address}; I only ask that it can be held."],"labor":["Levy them and you'll get your crown, {address}, and a crowd with long memories on the other side of it.","Forced hands work fast and hate slow, {address}. I've seen where that ends."],"_":["Every back on that scaffold is a spear not on the wall, {address}."]},
+	"steward":{"design":["A grander design means a grander bill, {address}, and the people will want to see what they're paying for.","Sensible walls don't make songs, {address}, but they don't make widows either."],"labor":["The people will remember who carried those stones, {address}, and whether they were asked.","Pay them or ask them, {address}, but don't make them; our standing can't afford the whispers."],"demand":["Put a builder's name above the ruler's, {address}, and see what the market says by morning.","Honour them, by all means, {address}, but carve your name bigger."],"_":["Whatever you choose, {address}, choose it where people can see you choosing."]},
+	"scholar":{"design":["A grander design means methods we've barely tested, {address}. Glorious, if it holds.","The practical design we understand, {address}; the grander one we'd be learning on the way up."],"_":["I'd like the reasoning written down, {address}, whichever way this goes."]},
+	"any":{"design":["{oath} Grand or plain, {address}, it'll be ours; just don't let it be half of either.","The builder wants glory and the ledger wants mercy, {address}. You'll have to disappoint one of them."],"stores":["Feed the walls or feed the children, {address}; I'd like to hear which, out loud."],"labor":["Paid, forced or willing, {address}, the stones weigh the same; the people don't."],"_":["Whatever you choose, {address}, choose it before the mortar sets.","{oath} I've an opinion, {address}, and I'll keep it until it's useful."]},
+}
+const ODDS_SHIFT:=[
+	"As it stands, {address}, the court reckons it {odds}. {verdict}",
+	"If you want the odds in plain words, {address}: {odds}. {verdict}",
+]
+const EVENT_OPEN:={
+	"collapse":["{eventtext} I heard it go from across the yard, {address}; a sound I'll hear for the rest of my life.","{oath} Part of it came down, {address}. {eventtext} I'll not pretend it was the weather."],
+	"accident":["{eventtext} I knew their names, {address}. Every one.","A hoist failed, {address}, and people died under it. {eventtext}"],
+	"strike":["{eventtext} The crews have laid down their tools, {address}, and they're not wrong about everything.","The works are silent, {address}. {eventtext}"],
+	"fire":["{eventtext} The scaffolds went up like kindling, {address}, and nobody saw who lit them.","We woke to smoke, {address}. {eventtext}"],
+	"poaching":["{eventtext} Our master builder took their plans and their pride with them, {address}.","{oath} {eventtext} Somebody offered more than we did, {address}, and it wasn't only coin."],
+	"_":["{eventtext}"],
+}
+const OUTCOME_OPEN:={
+	"shame":["It's down, {address}. {ruin}. I drew every line of it, so I'll not hide behind the stone.","{oath} I promised you a wonder and gave you a ruin, {address}. {eventtext}","I've no speech, {address}. {ruin} fell, and I was the one who said it would stand."],
+	"defiance":["It fell, {address}. But I was right about the height and wrong about the ground, and that's a lesson, not a verdict.","{oath} Don't look at me like that, {address}. {ruin} was the boldest thing this people ever tried, and the ground failed it, not I.","Call it a folly if you like, {address}. Every wonder standing anywhere was a folly until the day it wasn't."],
+	"dead":["We lost {dead} when it came down, {address}. Say their names with me, at least.","{dead}. Those are the names, {address}. I'll carry them."],
+	"abandoned":["We've laid down the tools at {work}, {address}. The walls stay where they stopped, like a sentence nobody finished.","{oath} So it ends half-built, {address}. The wind will finish the story for us."],
+}
+const OUTCOME_COURT:=[
+	"I said it was folly, {address}. I said it in this very hall, and I'll say it again at every funeral.",
+	"Blame is cheap, {address}; the families are owed something dearer.",
+	"The neighbours will have heard by now, {address}. They'll be laughing, or they'll be taking notes.",
+	"{oath} We reached too high, {address}. The question is whether we learn or just limp.",
+	"I'd have the ruin named and fenced, {address}, before it becomes a place children dare each other to climb.",
+]
+const NEWS_OPEN:=[
+	"Word from the roads, {address}: {eventtext} I can't swear to every stone of it, but the shape is right.",
+	"{oath} {civtwo} are building something, {address}. {eventtext}",
+	"You'll want to hear this, {address}, and then you'll want to do something about it. {eventtext}",
+]
+const NEWS_COURT:=[
+	"Let them build, {address}. Let them see what we build back.",
+	"Envy's a poor architect, {address}, but a marvellous foreman.",
+	"{oath} If {civtwo} can raise a wonder, {address}, so can a people with better bread than theirs.",
+	"Good for them, {address}. Now, what are we doing about it?",
+]
+const FORECAST_OPEN:=[
+	"The steps saw it before the sky did, {address}. {forecast}",
+	"{oath} I read the light on the steps three mornings running, {address}, and it said the same thing each time. {forecast}",
+	"I'd not bring you a guess, {address}. {forecast}",
+]
+const FORECAST_COURT:=[
+	"Then we ration now, {address}, while it's a choice and not a sentence.",
+	"I'll start counting sacks tonight, {address}. Somebody bring me a lamp and a strong drink.",
+	"Better to be mocked for caution in the spring, {address}, than buried for pride in the winter.",
+]
+const BUILDER_REPLY:={
+	"warm":["{oath} Say that again, {address}, slowly, so the stonecutters can carve it.","That's the sort of thing a builder remembers when the scaffolds sway, {address}."],
+	"hostile":["Harsh, {address}, but stone has said worse to me and I built on it anyway.","I've heard that from every clerk who never lifted a block, {address}."],
+	"question":["A fair question, {address}. The honest answer is in the ground, and the ground only answers when you dig.","I'll show you on the plans, {address}; words are too soft for it."],
+	"neutral":["I'll take that as a yes and a warning, {address}. Builders live on both.","Noted, {address}. I'll carve it somewhere nobody looks."],
+}
+const CLOSING_WORK:={
+	"commission":["{oath} Then we begin at first light, {address}. Remember this day; {work} will.","You'll not regret it, {address}. Or if you do, you'll regret it magnificently."],
+	"later":["Not yet is not never, {address}. I'll keep the drawings dry.","Then I'll wait, {address}, and I'll draw it better while I do."],
+	"dismiss":["Folly, {address}? Every wonder standing anywhere was called that once.","{oath} I'll take my picture home, {address}, and hang it where someone braver can see it."],
+	"grander":["{oath} Grander it is! They'll see it from three valleys, {address}.","You won't be sorry, {address}. Well, the accountants will, but not you."],
+	"practical":["Sensible, {address}. I'll build it well, and I'll dream the other one at night.","Practical. Very well, {address}. Nobody writes songs about practical, but it does tend to stay up."],
+	"pour":["Fed crews, fast walls, {address}. The stores will remember this less fondly than I will.","{oath} Now we'll see some stone move, {address}."],
+	"protect":["The stores stay shut, then, {address}. The walls will rise slower, and so will my temper.","As you say, {address}. Hungry people build crooked, so perhaps it's for the best."],
+	"paid":["Paid hands are proud hands, {address}. You'll see it in the joints.","The crews will cheer your name tonight, {address}, and work harder for it tomorrow."],
+	"levy":["It'll be fast, {address}. I'll not pretend it'll be loved.","Forced hands, then. I'll get your crown up, {address}, and you'll carry what comes with it."],
+	"volunteers":["Willing backs, {address}. Slower, but they'll bring their children to see it.","Volunteers it is. The finest stones are the ones nobody was made to lift, {address}."],
+	"honor":["{oath} My mark on it! I'll make it worth the honour, {address}.","You won't regret it, {address}. The crown will be the finest thing I ever cut."],
+	"refuse":["No mark, then. Very well, {address}. The stone will know, even if the people don't.","{oath} Refused. I'll finish the work, {address}, but I'll remember the answer."],
+	"honor_dead":["They'll be named at the works, {address}. The crews will see that.","That matters more than you know, {address}."],
+	"press_on":["The work goes on, {address}. So will the whispering.","As you say. I'll tell the crews, {address}; you tell the widows."],
+	"meet_demands":["The hammers start again at dawn, {address}.","Paid and back at it, {address}. Wise, and cheaper than a silent season."],
+	"wait_out":["Then we wait, {address}, and the walls wait with us.","{oath} A silent yard and a stubborn court. Lovely."],
+	"careful":["Slow and sound, {address}. The ground has made its point.","We'll rebuild carefully, {address}; this time I'll check the footings with my own hands."],
+	"press":["Press it is, {address}. We'll outrun our bad luck or meet it head-on.","{oath} Then we climb faster, {address}, and pray the ground keeps up."],
+	"mourn":["They'll be remembered, {address}, and so will you for remembering them.","Thank you, {address}. The ruin will have their names on it, at least."],
+	"blame":["{oath} So it's mine to carry. I'll carry it, {address}, but I'll not carry it quietly.","Blame the builder. It's what builders are for, {address}, apparently."],
+	"defy":["{oath} Another! Now that's a ruler, {address}.","Then the ruin is a first draft, {address}, not an ending."],
+	"answer":["Then we answer them in stone, {address}. I'll start drawing tonight.","{oath} Let them look over their shoulders for once, {address}."],
+	"decree":["I'll see the word gets round before the light changes, {address}.","Proclaimed. You'll thank the steps for this in the lean days, {address}."],
+	"decree_gather":["Gatherers out by morning, {address}.","I'll send them with baskets and good boots, {address}."],
+	"noted":["Noted, {address}. I'll keep watching.","As you say, {address}. I'll bring you the next word when it comes."],
+	"acknowledge":["So be it, {address}.","As you say, {address}."],
+	"settled":["Already settled? Then I'll get back to the stone, {address}.","Good. One less question between me and the crown, {address}."],
+}
+const DEDICATE_NARRATION:={
+	"triumph":"Drums roll across {city}. The last scaffold falls away, and {work} stands in open light, greater than the drawings promised.",
+	"success":"Drums roll across {city}. The scaffolds are down; {work} stands in open light, and the crowd goes quiet.",
+	"flawed":"Drums roll across {city}. The scaffolds are down. {work} stands, a little crooked in places, and the crowd cheers anyway.",
+}
+const DEDICATE_ARCHITECT:={
+	"triumph":["{oath} I drew it, {address}, and it still surprised me. Look at the light on it.","Every crack I feared never came, {address}. It stands better than I dreamed, and I dream large."],
+	"success":["It stands, {address}. Every stone where I promised it would be, and one or two where I didn't.","I've built it, {address}. Now it belongs to everyone who'll ever stand in its shadow."],
+	"flawed":["It isn't what I drew, {address}. It's what the ground and the seasons let us build, and it's still ours.","{oath} There's a lean in the east wall I'll dream about for years, {address}. But it stands."],
+}
+const DEDICATE_OFFICIAL:=[
+	"{oath} Today nobody will ask me about the stores, {address}. Today they'll just look up.",
+	"I argued against it, {address}. Let the record show I was wrong and delighted to be.",
+	"Every people we know will hear of {work} before the season turns, {address}.",
+	"Look at their faces, {address}. That's what it was for.",
+]
+const DEDICATE_ENVOY_GIFT:=[
+	"{civ} sends {gift} to honour {work}, and my own astonishment for free, {address}.",
+	"{oath} We brought {gift}, {address}, and after seeing this I wish we'd brought more.",
+	"Accept {gift} from {civ}, {address}, and my envy, which is heavier.",
+]
+const DEDICATE_ENVOY_PLAIN:=[
+	"{civ} has nothing like it, {address}, and I'll be honest about that when I get home, mostly.",
+	"{oath} I'll need a week to describe this properly to our people, {address}, and they'll still not believe me.",
+	"We came to be polite, {address}. We'll leave having seen something.",
+]
+const NAMED_REACT:=[
+	"{name}. {oath} It fits the stone, {address}.",
+	"{name}. They'll say it in three languages by spring, {address}.",
+	"{name}. Good. Now it can't be anyone else's, {address}.",
+]
+
+func _work_speaker_persona(audience:Dictionary)->Dictionary:
+	if String(audience.get("kind","")) not in WORK_KINDS: return {}
+	var speaker:Dictionary=audience.get("speaker",{})
+	if int(speaker.get("person_id",0))>0: return {}
+	var gw:Dictionary=audience.get("great_work",{}) if audience.get("great_work") is Dictionary else {}
+	var figure_id:String=String(gw.get("architect_id",""))
+	if figure_id.is_empty() and audience.get("wonder_proposal") is Dictionary: figure_id=String((audience.wonder_proposal as Dictionary).get("figure_id",""))
+	var figure:Dictionary=HistoricalFigures.by_id(figure_id) if not figure_id.is_empty() else {}
+	if figure.is_empty(): figure={"id":"builder:"+String(speaker.get("name","")),"name":String(speaker.get("name","The master builder")),"role":"Architect"}
+	return CV.for_figure(figure,gw)
+
+## The engine's spoken verdict without its narrator frame ("X says: ...") or
+## the repeated chief worry, so a speaker can say it in their own mouth.
+static func verdict_words(spoken:String)->String:
+	var text:=spoken.strip_edges()
+	var open_quote:=text.find("\"")
+	var close_quote:=text.find("\"",open_quote+1) if open_quote>=0 else -1
+	if open_quote>=0 and close_quote>open_quote:
+		var quoted:=text.substr(open_quote+1,close_quote-open_quote-1).strip_edges()
+		var tail:=text.substr(close_quote+1)
+		var bold:=tail.find("An audacious design")
+		return quoted+(" "+tail.substr(bold).strip_edges() if bold>=0 else "")
+	return text
+
+func _work_tokens(s:Dictionary)->Dictionary:
+	var w:Dictionary=s.get("work",{})
+	var raw:={
+		"work":String(w.get("title",w.get("chosen",""))),"form":String(w.get("form","")).replace("_"," "),"purpose":_lower_initial(String(w.get("purpose",""))),
+		"stage":String(w.get("stage_words","")).to_lower(),"odds":String(w.get("odds_in_words","")),"verdict":verdict_words(String(w.get("spoken_verdict",""))),
+		"trigger":String(w.get("trigger","")),"ambition":String(w.get("ambition","")).to_lower(),"city":String(w.get("city",w.get("city_name",""))),
+		"ruin":String(w.get("ruin_name","")),"eventtext":String(w.get("text","")),"gatetext":String(w.get("text","")),"forecast":String(w.get("text","")),
+		"civtwo":String(w.get("civ_name","")),"style":String(w.get("style",""))}
+	if float(w.get("progress",0))>0: raw["pct"]="%d" % roundi(float(w.get("progress",0))*100)
+	var dead:Array=w.get("dead",[])
+	if not dead.is_empty():
+		var names:PackedStringArray=PackedStringArray()
+		for person in dead: names.append(String(person))
+		raw["dead"]=names[0] if names.size()==1 else ", ".join(names.slice(0,names.size()-1))+" and "+names[names.size()-1]
+	if String(s.kind)=="wonder_proposal":
+		var chosen:=String(w.get("chosen",""))
+		var others:PackedStringArray=PackedStringArray()
+		for concept in w.get("concepts",[]):
+			if not concept is Dictionary: continue
+			var concept_title:=String((concept as Dictionary).get("name",""))
+			if concept_title==chosen:
+				raw["form"]=String(concept.get("form","")).replace("_"," ")
+				raw["purpose"]=_lower_initial(String(concept.get("purpose","")))
+			elif not concept_title.is_empty(): others.append(concept_title)
+		if not others.is_empty(): raw["others"]=" or ".join(others)
+	var out:={}
+	for key in raw:
+		if not String(raw[key]).strip_edges().is_empty(): out[key]=String(raw[key]).strip_edges()
+	return out
+
+func _office_group(member:Dictionary)->String:
+	var office:String=(String(member.persona.get("office_key",""))+" "+String(member.persona.get("title",""))).to_lower()
+	for key in ["quartermaster","marshal","steward","scholar"]:
+		if key in office: return key
+	if "store" in office or "provision" in office or "supply" in office: return "quartermaster"
+	if "watch" in office or "war" in office or "defense" in office: return "marshal"
+	if "lore" in office or "record" in office or "inquiry" in office or "memory" in office: return "scholar"
+	return "any"
+
+const FACTOR_OFFICES:={"engineering":"scholar","materials":"quartermaster","cohesion":"steward","legitimacy":"steward","food":"quartermaster","war":"marshal","construction so far":"any"}
+
+func _factor_office(factor:Dictionary)->String:
+	var named:=String(factor.get("name","")).to_lower()
+	if FACTOR_OFFICES.has(named): return String(FACTOR_OFFICES[named])
+	var text:=(String(factor.get("name",""))+" "+String(factor.get("text",""))).to_lower()
+	var table:=[["quartermaster",["stone","timber","clay","material","ore","brick","store","grain","cost","supply"]],["scholar",["know","discover","skill","craft","technique","vault","engineer","learn","method","architect"]],["marshal",["war","peace","security","enemy","raid","threat","army","frontier"]],["steward",["cohesion","legitimacy","food","hunger","support","people","stability","morale","famine","unrest"]]]
+	for pair in table:
+		for word in pair[1]:
+			if String(word) in text: return String(pair[0])
+	return "any"
+
+func _speaker_for_office(s:Dictionary,office:String,used:Dictionary)->Dictionary:
+	for member in s.officials:
+		if _office_group(member)==office and not used.has(String(member.key)): return member
+	for member in s.officials:
+		if not used.has(String(member.key)): return member
+	return {}
+
+const ENGINEERING_WORDS:=[[.15,"our builders could raise this in their sleep, and their master knows it"],[0.0,"our builders can manage it, if the master keeps them honest"],[-.15,"this asks more of our builders than anything they have ever raised"],[-9.0,"nobody here has ever raised anything like it, and wishing won't teach them"]]
+
+static func factor_effect(factor:Dictionary)->float:
+	var effect:Variant=factor.get("effect",0.0)
+	return float(effect) if (effect is float or effect is int) else 0.0
+
+static func factor_words(factor:Dictionary)->String:
+	## An engine factor in plain in-world words (never a number).
+	var text:=String(factor.get("text","")).strip_edges()
+	if String(factor.get("name","")).to_lower()=="engineering":
+		var effect:Variant=factor.get("effect",0.0)
+		var value:=float(effect) if (effect is float or effect is int) else (.1 if bool(factor.get("helps",false)) else -.1)
+		for band in ENGINEERING_WORDS:
+			if value>=float(band[0]): return String(band[1])+"."
+	return text
+
+func _factor_line(s:Dictionary,member:Dictionary,factor:Dictionary,rng:RandomNumberGenerator)->Dictionary:
+	var text:=factor_words(factor)
+	if text.is_empty(): return {}
+	if not text.ends_with(".") and not text.ends_with("!") and not text.ends_with("?"): text+="."
+	var office:=_factor_office(factor)
+	var banks:Dictionary=WEIGH_OFFICE.get(office,WEIGH_OFFICE.any) if _office_group(member)==office else WEIGH_OFFICE.any
+	var bank:Array=banks.help if bool(factor.get("helps",false)) else banks.hurt
+	var used:Dictionary=_used.get(String(s.id),{})
+	var fresh:Array=bank.filter(func(t:Variant)->bool:return not used.has(String(t)))
+	if fresh.is_empty(): fresh=bank
+	var template:String=String(fresh[rng.randi_range(0,fresh.size()-1)])
+	used[template]=true
+	_used[String(s.id)]=used
+	var filled:=_fill(template.replace("{factor}","@@F@@"),_tokens(s,member,{})).replace("@@F@@",_lower_initial(text))
+	return {"key":String(member.key),"text":CV.speak(member.persona,filled,rng,false,_flourish_memory(s,member),false),"aside":false}
+
+## Officials voice assess() factors nearest their office; the speaker answers
+## with the odds in words. Never a number.
+func _work_weigh(s:Dictionary,rng:RandomNumberGenerator,with_narration:bool)->Array[Dictionary]:
+	var out:Array[Dictionary]=[]
+	var w:Dictionary=s.get("work",{})
+	var used:={}
+	var hurts:Array=[]
+	var helps:Array=[]
+	var said:Dictionary=(_used.get(String(s.id),{}) as Dictionary).get("~factors",{})
+	for factor in w.get("factors",[]):
+		if not factor is Dictionary: continue
+		var key:=factor_words(factor)
+		if said.has(key): continue
+		if bool((factor as Dictionary).get("helps",false)): helps.append(factor)
+		else: hurts.append(factor)
+	# The gravest doubts first.
+	hurts.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return factor_effect(a)<factor_effect(b))
+	var picks:Array=hurts.slice(0,2)
+	picks.append_array(helps.slice(0,1))
+	for factor in picks:
+		var member:=_speaker_for_office(s,_factor_office(factor),used)
+		if member.is_empty(): break
+		used[String(member.key)]=true
+		said[factor_words(factor)]=true
+		_append_if(out,_factor_line(s,member,factor,rng))
+	var scene_memory:Dictionary=_used.get(String(s.id),{})
+	scene_memory["~factors"]=said
+	_used[String(s.id)]=scene_memory
+	if not String(w.get("odds_in_words","")).is_empty():
+		var memory:Dictionary=_used.get(String(s.id),{})
+		var last:Dictionary=memory.get("~weighed",{})
+		var odds:=String(w.get("odds_in_words",""))
+		var chosen:=String(w.get("chosen",w.get("title","")))
+		if last.is_empty():
+			_append_if(out,_say(s,s.envoy,WEIGH_VERDICT if not String(w.get("spoken_verdict","")).is_empty() else WEIGH_VERDICT_BARE,rng))
+		else:
+			var bank:Array=WEIGH_SHIFT.same
+			if String(last.get("chosen",""))!=chosen: bank=WEIGH_SHIFT.other
+			elif ODDS_ORDER.find(odds)>ODDS_ORDER.find(String(last.get("odds",""))): bank=WEIGH_SHIFT.better
+			elif ODDS_ORDER.find(odds)<ODDS_ORDER.find(String(last.get("odds",""))): bank=WEIGH_SHIFT.worse
+			_append_if(out,_say(s,s.envoy,bank,rng))
+		memory["~weighed"]={"chosen":chosen,"odds":odds,"ambition":String(w.get("ambition",""))}
+		_used[String(s.id)]=memory
+	if with_narration and not out.is_empty() and String(s.kind)=="wonder_proposal":
+		out.push_front({"key":"narrator","text":"The court weighs %s at %s ambition." % [String(w.get("chosen","the work")),String(w.get("ambition","grand"))],"aside":false})
+	return out
+
+func _work_open(s:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
+	var out:Array[Dictionary]=[]
+	var w:Dictionary=s.get("work",{})
+	var envoy:Dictionary=s.envoy
+	var first:Dictionary=s.officials[0] if not s.officials.is_empty() else {}
+	var tokens:Dictionary=s.get("gwtok",{})
+	var mode:String=String(w.get("mode","")) if String(s.kind)=="great_work" else "proposal"
+	var key:=String(w.get("key",""))
+	var court_bank:Array=[]
+	match mode:
+		"proposal":
+			if tokens.has("trigger"): _append_if(out,_say(s,envoy,PITCH_OPEN,rng,first))
+			_append_if(out,_say(s,envoy,PITCH_CONCEPT if tokens.has("purpose") else PITCH_CONCEPT_NOPURPOSE,rng,first))
+			if tokens.has("others"): _append_if(out,_say(s,envoy,PITCH_OTHERS,rng))
+		"decision":
+			_append_if(out,_say(s,envoy,GATE_OPEN.get(key,GATE_OPEN._),rng,first))
+		"event":
+			_append_if(out,_say(s,envoy,EVENT_OPEN.get(key,EVENT_OPEN._),rng,first))
+		"outcome":
+			if key=="abandoned": _append_if(out,_say(s,envoy,OUTCOME_OPEN.abandoned,rng))
+			else:
+				_append_if(out,_say(s,envoy,OUTCOME_OPEN.defiance if float(w.get("ego",.5))>.6 else OUTCOME_OPEN.shame,rng,first))
+				if tokens.has("dead"): _append_if(out,_say(s,envoy,OUTCOME_OPEN.dead,rng))
+			court_bank=OUTCOME_COURT
+		"news":
+			_append_if(out,_say(s,envoy,NEWS_OPEN,rng,first))
+			court_bank=NEWS_COURT
+		"forecast":
+			_append_if(out,_say(s,envoy,FORECAST_OPEN,rng,first))
+			court_bank=FORECAST_COURT
+	if out.is_empty(): _append_if(out,{"key":"envoy","text":String(w.get("text","We must speak of the work.")),"aside":false})
+	if s.officials.is_empty() or (mode=="outcome" and key=="abandoned"): return out
+	var officials:Array=s.officials.duplicate()
+	var shuffled:Array=[]
+	while not officials.is_empty(): shuffled.append(officials.pop_at(rng.randi_range(0,officials.size()-1)))
+	var count:int=clampi(rng.randi_range(2,3),1,shuffled.size())
+	var previous:Dictionary={}
+	for i in count:
+		var member:Dictionary=shuffled[i]
+		var line:Dictionary={}
+		match mode:
+			"proposal":
+				var stance:=String(member.persona.get("stance","pragmatic"))
+				var side:="glory" if stance in ["sycophantic","diplomatic"] or (stance=="principled" and rng.randf()<.5) else "folly"
+				if i==1 and not previous.is_empty() and rng.randf()<.5: line=_say(s,member,COURT_BICKER,rng,previous)
+				else: line=_say(s,member,PITCH_COURT[side],rng,previous)
+			"decision":
+				var banks:Dictionary=GATE_COURT.get(_office_group(member),GATE_COURT.any)
+				line=_say(s,member,banks.get(key,banks.get("_",GATE_COURT.any._)),rng,previous,i==count-1 and rng.randf()<.4)
+			_:
+				line=_say(s,member,court_bank,rng,previous,i==count-1 and rng.randf()<.35)
+		if line.is_empty(): line=_say(s,member,COURT_STANCE_COURT.get(String(member.persona.get("stance","pragmatic")),COURT_STANCE_COURT.pragmatic),rng,previous)
+		_append_if(out,line)
+		previous=member
+	if mode=="proposal":
+		out.append_array(_work_weigh(s,rng,false))
+	elif mode=="decision" and tokens.has("odds"):
+		_append_if(out,_say(s,envoy,ODDS_SHIFT,rng))
+	return out
+
+func _work_closing(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
+	var out:Array[Dictionary]=[]
+	var option_id:String=String(result.get("option_id",(s.audience as Dictionary).get("option_id","")))
+	var reaction:String=String(result.get("reaction","neutral"))
+	var line:Dictionary={}
+	if CLOSING_WORK.has(option_id): line=_say(s,s.envoy,CLOSING_WORK[option_id],rng)
+	if line.is_empty(): line=_say(s,s.envoy,CLOSING_WORK.acknowledge,rng)
+	_append_if(out,line)
+	if not s.officials.is_empty():
+		var member:Dictionary=s.officials[rng.randi_range(0,s.officials.size()-1)]
+		var group:="warm" if reaction in ["delighted","pleased"] else ("hostile" if reaction in ["offended","furious"] else "neutral")
+		_append_if(out,_say(s,member,CLOSING_ASIDE[group],rng,{},true))
+	return out
+
+func _work_scene_words(s:Dictionary)->String:
+	var w:Dictionary=s.get("work",{})
+	if String(s.kind)=="wonder_proposal":
+		return "A WONDER IS PITCHED. The speaker urges the ruler to raise a great work conceived from who this people is. Why now: %s. The concepts (name, form, purpose, lore): %s. The ruler is weighing '%s' at %s ambition in %s; the court's reckoning is '%s'. Feasibility factors (use their words, never numbers): %s. %s" % [String(w.get("trigger","")),JSON.stringify(w.get("concepts",[])),String(w.get("chosen","")),String(w.get("ambition","grand")),String(w.get("city","")),String(w.get("odds_in_words","")),JSON.stringify(w.get("factors",[])),String(w.get("spoken_verdict",""))]
+	match String(w.get("mode","")):
+		"decision": return "A STAGE GATE on the great work '%s' (%s, stage %s, %s%% raised). The master builder brings the question: %s The court's reckoning of its odds now: '%s'. %s" % [String(w.get("title","")),String(w.get("form","")),String(w.get("stage_words","")),str(w.get("progress_percent",0)),String(w.get("text","")),String(w.get("odds_in_words","unknown")),String(w.get("spoken_verdict",""))]
+		"event": return "HARD NEWS from the works of '%s': %s" % [String(w.get("title","")),String(w.get("text",""))]
+		"outcome":
+			if String(w.get("key",""))=="abandoned": return "The great work '%s' has been ABANDONED: %s" % [String(w.get("title","")),String(w.get("text",""))]
+			return "The great work '%s' has COLLAPSED into a ruin now called '%s'. %s The dead (names exactly as given, possibly none): %s. The master builder faces the court: shame or defiance by their temperament; officials trade recriminations." % [String(w.get("title","")),String(w.get("ruin_name","")),String(w.get("text","")),JSON.stringify(w.get("dead",[]))]
+		"news": return "NEWS OF ANOTHER PEOPLE'S WORK (dated, uncertain): %s" % String(w.get("text",""))
+		"forecast": return "A WARNING from the Watching Sky: %s" % String(w.get("text",""))
+	return ""
+
+func _work_want(s:Dictionary)->String:
+	var w:Dictionary=s.get("work",{})
+	if String(s.kind)=="wonder_proposal": return "to have the ruler commission their vision, at the boldest ambition they can get away with"
+	match String(w.get("mode","")):
+		"decision": return "the answer that lets the work be as great as they imagine, and credit for it"
+		"outcome": return "to be forgiven, or to be proven right after all" if float(w.get("ego",.5))>.6 else "to be forgiven, and for the dead to be honoured"
+		"event": return "the ruler's help to keep the work alive"
+		"news": return "for the ruler to answer the other people's work with one of our own"
+		"forecast": return "for the warning to be heeded before it is too late"
+	return "to be heard"
+
+func _work_open_instruction(s:Dictionary)->String:
+	if String(s.kind)=="wonder_proposal":
+		return "'envoy' pitches the wonder with passion and a little vanity, in their dialect: why now, then the chosen concept by name, form and purpose, and a glance at the others. Officials argue glory against folly; then 1 to 2 officials voice the feasibility factors nearest their office, in plain in-world words and never as a number."
+	var w:Dictionary=s.get("work",{})
+	if String(w.get("mode",""))=="outcome" and String(w.get("key",""))!="abandoned": return "'envoy' is the master builder facing the ruler after the collapse: shame or defiance by temperament, naming the dead exactly as given if any. Officials trade recriminations and one proposes what to do with the ruin."
+	if String(w.get("mode",""))=="decision": return "'envoy' is the master builder: they bring the stage-gate question in their own voice. Officials argue it from their office (stores, labor levies, legitimacy), and someone says how the odds of the work are shifting, in words, never numbers."
+	return "'envoy' brings the matter in their own voice; officials react from their office."
+
+# ---------------------------------------------------------------------------
+# Dedication ceremony speeches (not an audience; the ceremony modal shows them)
+# ctx: {key, title, lore, city_name, outcome:"triumph"|"success"|"flawed",
+#       architect:{id,name,style,vision,ego,temperament}, official:{person},
+#       attendees:[{civ_id,name,gift:{resource,amount}}]}
+# Lines: {speaker, role:"narrator"|"architect"|"official"|"envoy", title,
+#         civ_id, person_id, figure_id, text}
+# ---------------------------------------------------------------------------
+
+signal ceremony_ready(key:String,lines:Array)
+
+func _ceremony_cast(ctx:Dictionary)->Array[Dictionary]:
+	var cast:Array[Dictionary]=[]
+	var architect:Dictionary=ctx.get("architect",{}) if ctx.get("architect") is Dictionary else {}
+	if not String(architect.get("name","")).is_empty():
+		var figure:Dictionary=HistoricalFigures.by_id(String(architect.get("id","")))
+		if figure.is_empty(): figure={"id":"builder:"+String(architect.name),"name":String(architect.name),"role":"Architect"}
+		var persona:=CV.for_figure(figure,architect)
+		cast.append({"key":"architect","role":"architect","name":String(persona.name),"title":"Master Builder","persona":persona,"person_id":0,"civ_id":"player","figure_id":String(figure.get("id",""))})
+	var official:Dictionary=ctx.get("official",{}) if ctx.get("official") is Dictionary else {}
+	if not official.is_empty():
+		var official_persona:=CV.for_person(official)
+		cast.append({"key":"official","role":"official","name":String(official_persona.name),"title":String(official_persona.get("title","")),"persona":official_persona,"person_id":int(official.get("person_id",0)),"civ_id":"player"})
+	var index:=0
+	for attendee in ctx.get("attendees",[]):
+		if not attendee is Dictionary: continue
+		var civ_id:=String((attendee as Dictionary).get("civ_id",""))
+		var envoy_persona:=CV.for_envoy(civ_id,"dedication:%s:%d" % [String(ctx.get("key","")),index])
+		var gift:Dictionary=attendee.get("gift",{}) if attendee.get("gift") is Dictionary else {}
+		var gift_text:=""
+		if not gift.is_empty() and float(gift.get("amount",0))>0: gift_text="%d %s" % [roundi(float(gift.get("amount",0))),String(gift.get("resource","")).to_lower()]
+		cast.append({"key":"envoy_%d" % index,"role":"envoy","name":String(envoy_persona.name),"title":"Envoy of %s" % String(attendee.get("name","")),"persona":envoy_persona,"person_id":0,"civ_id":civ_id,"civ":String(attendee.get("name","")),"gift":gift_text})
+		index+=1
+		if index>=4: break
+	return cast
+
+func _ceremony_scene(ctx:Dictionary,member:Dictionary)->Dictionary:
+	## A small scene record so the offline bank machinery (_say) can be reused.
+	var tokens:={"work":String(ctx.get("title","")),"city":String(ctx.get("city_name",""))}
+	if not String(member.get("gift","")).is_empty(): tokens["gift"]=String(member.gift)
+	if ctx.has("name"): tokens["name"]=String(ctx.name)
+	return {"id":"ceremony:"+String(ctx.get("key","")),"audience":{"lines":[]},"kind":"ceremony","origin":"court","envoy":member,"officials":[],
+		"civ":String(member.get("civ",ctx.get("city_name",""))),"leader":"","res":"","amt":"","fact":"","subject":"","summary":"","decree":"","topic":"","gwtok":tokens}
+
+func _ceremony_line(member:Dictionary,text:String)->Dictionary:
+	return {"speaker":String(member.get("name","")),"role":String(member.get("role","narrator")),"title":String(member.get("title","")),"civ_id":String(member.get("civ_id","")),"person_id":int(member.get("person_id",0)),"figure_id":String(member.get("figure_id","")),"text":text}
+
+func ceremony_offline(ctx:Dictionary)->Array[Dictionary]:
+	var out:Array[Dictionary]=[]
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=hash("%d|ceremony|%s" % [int(GameState.world_seed),String(ctx.get("key",""))])
+	var outcome:=String(ctx.get("outcome","success"))
+	if not DEDICATE_NARRATION.has(outcome): outcome="success"
+	var narration:=String(DEDICATE_NARRATION[outcome]).replace("{city}",String(ctx.get("city_name","the city"))).replace("{work}",String(ctx.get("title","the work")))
+	out.append({"speaker":"","role":"narrator","title":"","civ_id":"","person_id":0,"figure_id":"","text":narration})
+	for member in _ceremony_cast(ctx):
+		var bank:Array=[]
+		match String(member.role):
+			"architect": bank=DEDICATE_ARCHITECT[outcome]
+			"official": bank=DEDICATE_OFFICIAL
+			"envoy": bank=DEDICATE_ENVOY_GIFT if not String(member.get("gift","")).is_empty() else DEDICATE_ENVOY_PLAIN
+		var said:=_say(_ceremony_scene(ctx,member),member,bank,rng)
+		if not said.is_empty(): out.append(_ceremony_line(member,String(said.text)))
+	return out
+
+## Drops any line already spoken in this ceremony (same scene memory as _say).
+func _unrepeated(ctx:Dictionary,lines:Array[Dictionary])->Array[Dictionary]:
+	var scene_key:="ceremony:"+String(ctx.get("key",""))
+	var memory:Dictionary=_used.get(scene_key,{})
+	var said:Dictionary=memory.get("~lines",{})
+	var out:Array[Dictionary]=[]
+	for line in lines:
+		var text:=String(line.get("text","")).strip_edges().to_lower()
+		if said.has(text): continue
+		said[text]=true
+		out.append(line)
+	memory["~lines"]=said
+	_used[scene_key]=memory
+	return out
+
+func ceremony_named_offline(ctx:Dictionary,title:String)->Array[Dictionary]:
+	var out:Array[Dictionary]=[]
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=hash("%d|named|%s|%s" % [int(GameState.world_seed),String(ctx.get("key","")),title])
+	var named:=ctx.duplicate(true)
+	named["name"]=title
+	var cast:=_ceremony_cast(ctx)
+	var picks:Array=[]
+	for member in cast:
+		if String(member.role)=="architect": picks.append(member)
+	for member in cast:
+		if String(member.role)=="envoy":
+			picks.append(member)
+			break
+	if picks.is_empty() and not cast.is_empty(): picks.append(cast[0])
+	for member in picks:
+		var said:=_say(_ceremony_scene(named,member),member,NAMED_REACT,rng)
+		if not said.is_empty(): out.append(_ceremony_line(member,String(said.text)))
+	return out
+
+## Speeches for a dedication: emits ceremony_ready(ctx.key, lines). Live voice
+## when configured; offline banks otherwise or on any failure.
+func ceremony_speeches(ctx:Dictionary)->void:
+	var key:=String(ctx.get("key",""))
+	var fallback:=_unrepeated(ctx,ceremony_offline(ctx))
+	var config:=_config()
+	if config.is_empty() or _ceremony_cast(ctx).is_empty():
+		ceremony_ready.emit.call_deferred(key,fallback)
+		return
+	_ceremony_request(key,ctx,config,fallback,"Open the dedication: the master builder speaks first (what it cost, what it means), then the court official, then EACH foreign envoy in turn, in their own dialect, one or two sentences each; envoys mention their gift exactly as given if they brought one. Awe, rivalry and pride should leak through. 3 to 7 lines.")
+
+## Reactions once the ruler names the work: emits ceremony_ready(ctx.key+":named", lines).
+func ceremony_named(ctx:Dictionary,title:String)->void:
+	var key:=String(ctx.get("key",""))+":named"
+	var fallback:=_unrepeated(ctx,ceremony_named_offline(ctx,title))
+	var config:=_config()
+	if config.is_empty():
+		ceremony_ready.emit.call_deferred(key,fallback)
+		return
+	var named:=ctx.duplicate(true)
+	named["name"]=title
+	_ceremony_request(key,named,config,fallback,"The ruler has just named the work \"%s\". The master builder and one envoy react to the name, one short line each. 2 lines." % title)
+
+func _ceremony_request(key:String,ctx:Dictionary,config:Dictionary,fallback:Array[Dictionary],instruction:String)->void:
+	if send_hook.is_valid():
+		ceremony_ready.emit.call_deferred(key,fallback)
+		return
+	var cast:=_ceremony_cast(ctx)
+	var keys:Array[String]=[]
+	var cast_lines:PackedStringArray=PackedStringArray()
+	for member in cast:
+		keys.append(String(member.key))
+		cast_lines.append("- %s = %s%s" % [String(member.key),CV.brief(member.persona),(" | brings %s" % String(member.gift)) if not String(member.get("gift","")).is_empty() else ""])
+	var facts:=ctx.duplicate(true)
+	facts.erase("official")
+	facts.erase("key")
+	var prompt:="SCENE: The DEDICATION of a great work before the people and foreign envoys.\n\nFACTS YOU MAY USE (nothing else is true): %s\n\nCAST (speaker_key = character; use no one else):\n%s\n\nNOW: %s mood_shift 0." % [JSON.stringify(facts).substr(0,2400),"\n".join(cast_lines),instruction]
+	var payload:={"model":String(config.get("model","")),"max_completion_tokens":MAX_COMPLETION_TOKENS,"messages":[{"role":"system","content":SYSTEM_PROMPT.replace("royal audience hall","royal dedication ceremony")},{"role":"user","content":prompt}]}
+	if bool(config.get("structured_output",false)): payload["response_format"]=response_format(keys)
+	var headers:=PackedStringArray(["Content-Type: application/json","Authorization: Bearer %s" % String(config.get("api_key","")),"X-Client-Request-Id: ceremony-%d" % Time.get_ticks_msec()])
+	var http:=HTTPRequest.new()
+	add_child(http)
+	http.timeout=API_TIMEOUT_SECONDS
+	http.max_redirects=0
+	http.body_size_limit=MAX_RESPONSE_BYTES
+	http.request_completed.connect(_on_ceremony_response.bind(key,http,cast,ctx,fallback))
+	if http.request(String(config.get("endpoint","")),headers,HTTPClient.METHOD_POST,JSON.stringify(payload))!=OK:
+		http.queue_free()
+		ceremony_ready.emit.call_deferred(key,fallback)
+
+func _on_ceremony_response(result:int,code:int,_headers:PackedStringArray,body:PackedByteArray,key:String,http:HTTPRequest,cast:Array[Dictionary],ctx:Dictionary,fallback:Array[Dictionary])->void:
+	if is_instance_valid(http): http.queue_free()
+	var lines:Array[Dictionary]=[]
+	if result==HTTPRequest.RESULT_SUCCESS and code>=200 and code<300:
+		var parsed:=parse_body(body)
+		lines=_validate_ceremony(parsed.get("lines",[]),cast,ctx)
+	if lines.size()<2:
+		ceremony_ready.emit(key,fallback)
+		return
+	if not fallback.is_empty() and String(fallback[0].get("role",""))=="narrator": lines.push_front(fallback[0])
+	ceremony_ready.emit(key,_unrepeated(ctx,lines))
+
+func _validate_ceremony(raw:Array,cast:Array[Dictionary],ctx:Dictionary)->Array[Dictionary]:
+	var out:Array[Dictionary]=[]
+	var meta:=RegEx.new()
+	meta.compile(META_PATTERN)
+	var number:=RegEx.new()
+	number.compile("\\d+(?:\\.\\d+)?")
+	var allowed:={}
+	for m in number.search_all(JSON.stringify(ctx)): allowed[m.get_string()]=true
+	for item in raw:
+		if out.size()>=8: break
+		if not item is Dictionary: continue
+		var member:={}
+		for candidate in cast:
+			if String(candidate.key)==String((item as Dictionary).get("speaker_key","")): member=candidate
+		if member.is_empty(): continue
+		var text:=_clean_text(String((item as Dictionary).get("text","")),member)
+		if text.is_empty() or meta.search(text)!=null: continue
+		var invented:=false
+		for m in number.search_all(text):
+			if not allowed.has(m.get_string()): invented=true
+		if invented: continue
+		out.append(_ceremony_line(member,text))
+	return out

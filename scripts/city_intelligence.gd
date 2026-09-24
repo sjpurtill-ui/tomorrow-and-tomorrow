@@ -118,7 +118,11 @@ func capture(observer:String,city_id:String,quality:float,day:int,source:String,
 		var high:float=ceil((center+width)/quantum)*quantum
 		if FIELDS[key].unit=="capacity": high=minf(1,high)
 		fields[key]={"low":low,"high":high,"observed_day":day,"quality":quality,"source":source,"reference":reference,"observation_days":clampi(observation_days,1,366)}
-	return {"city_id":city_id,"civ_id":String(actual.civ_id) if quality>=.35 else "","name":String(actual.name) if quality>=.35 else "Unidentified settlement","position":actual.position.duplicate(true),"controller":String(actual.controller) if quality>=.35 else "","observed_day":day,"reported_day":day,"quality":quality,"source":source,"reference":reference,"observation_days":clampi(observation_days,1,366),"fields":fields}
+	var observation:={"city_id":city_id,"civ_id":String(actual.civ_id) if quality>=.35 else "","name":String(actual.name) if quality>=.35 else "Unidentified settlement","position":actual.position.duplicate(true),"controller":String(actual.controller) if quality>=.35 else "","observed_day":day,"reported_day":day,"quality":quality,"source":source,"reference":reference,"observation_days":clampi(observation_days,1,366),"fields":fields}
+	# Great works standing or rising here, frozen at this observation (great_works_rivalry.gd).
+	var works:=preload("res://scripts/great_works_rivalry.gd").sight(system,actual,quality,day,observer+city_id+reference)
+	if not works.is_empty():observation["works"]=works
+	return observation
 
 func location_record(place:Dictionary,day:int,source:String,reference:String)->Dictionary:
 	return {"city_id":String(place.city_id),"civ_id":String(place.get("civ_id","")),"name":String(place.get("name","Reported settlement")),"position":place.position.duplicate(true),"controller":"","observed_day":day,"reported_day":day,"quality":.15,"source":source,"reference":reference,"fields":{}}
@@ -137,6 +141,7 @@ func publish(observer:String,observation:Dictionary,day:int)->void:
 	if not previous.is_empty():
 		if int(previous.observed_day)>int(next.observed_day): return
 		if next.civ_id=="": next.civ_id=previous.civ_id; next.name=previous.name; next.controller=previous.controller
+		if not next.has("works") and previous.has("works"): next["works"]=previous.works.duplicate(true)
 		for field:String in previous.fields:
 			if not next.fields.has(field):
 				next.fields[field]=previous.fields[field].duplicate(true)
@@ -366,6 +371,7 @@ func valid_observation(value:Variant)->bool:
 	if not valid_point(value.position) or not number(value.quality) or value.quality<0 or value.quality>1 or not number(value.observed_day) or value.observed_day<-1 or not number(value.reported_day) or value.reported_day<value.observed_day: return false
 	if not value.fields is Dictionary or value.fields.size()>FIELDS.size(): return false
 	if value.has("observation_days") and (not number(value.observation_days) or value.observation_days<1 or value.observation_days>366):return false
+	if value.has("works") and not preload("res://scripts/great_works_rivalry.gd").valid_sightings(value.works):return false
 	for key in value.fields:
 		var field:Variant=value.fields[key]
 		if not FIELDS.has(key) or not field is Dictionary or not field.has_all(["low","high","observed_day","quality","source","reference"]): return false

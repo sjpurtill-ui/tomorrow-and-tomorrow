@@ -2,6 +2,7 @@ extends RefCounted
 ## Only decisions live here. All population, equipment and technology changes
 ## must be accepted and paid for by the ordinary commands and simulation.
 const STRATEGY=preload("res://scripts/civilization_strategy.gd")
+const GREAT_WORKS=preload("res://scripts/great_works_rivalry.gd")
 
 static func current_plan(id:String)->Dictionary:
 	var state:=WorldSimulation.state
@@ -97,7 +98,7 @@ static func order_steps(id:String)->Array:
 		return review
 	]]
 	var parts:Array=review
-	for kind:String in ["research","military","civilian","foreign","expansion"]:
+	for kind:String in ["research","military","civilian","foreign","great_works","expansion"]:
 		if kind in ["civilian","expansion"]:
 			var kind_parts:=civilian_order_steps(id,func()->Dictionary:return shared.plan) if kind=="civilian" else expansion_order_steps(id,func()->Dictionary:return shared.plan)
 			for part:Array in kind_parts:
@@ -111,6 +112,7 @@ static func order_steps(id:String)->Array:
 				"research":research_orders(id,shared.plan)
 				"military":military_orders(id,shared.plan)
 				"foreign":foreign_orders(id,shared.plan)
+				"great_works":great_work_orders(id,shared.plan)
 		])
 	return first
 
@@ -362,7 +364,10 @@ static func foreign_orders(id:String,plan:Dictionary={})->void:
 		if int(civ.player_relation.get("contact_level",0))<2:continue
 		var relationship:Dictionary=civ.player_relation.duplicate(true)
 		relationship.opinion=clampf(float(relationship.get("opinion",0))+preload("res://scripts/society_exchange.gd").diplomatic_value(String(civ.id),plan.personality),-1,1)
-		var action:=STRATEGY.diplomatic_action(relationship,plan,food_days)
+		var other:=GREAT_WORKS.global_owner(String(civ.id),id)
+		# Lasting grievances over seized, looted or sabotaged works; known deterrence.
+		relationship.opinion=clampf(float(relationship.opinion)-GREAT_WORKS.grievance(id,other),-1,1)
+		var action:=STRATEGY.diplomatic_action(relationship,plan,food_days,GREAT_WORKS.known_deterrence(id,other))
 		if bool(civ.player_relation.get("at_war",false)) and action!="seek_peace":
 			var urgency:=-float(civ.player_relation.get("opinion",0))
 			if urgency>campaign_urgency:campaign_urgency=urgency;campaign_enemy=String(civ.id)
@@ -386,6 +391,9 @@ static func campaign_objective(id:String,enemy:String,plan:Dictionary)->void:
 		for report:Dictionary in world.city_intelligence.known_cities("player",enemy,false):
 			var position:=world.city_intelligence.vector(report.position)
 			var score:=-position.distance_to(world.player_world_origin)
+			# A reported standing Great Work is a prize to bold rulers (a few km of reach).
+			for sighting:Dictionary in report.get("works",[]):
+				if String(sighting.get("status",""))=="functioning":score+=12.0*float(plan.personality.assertiveness)
 			if score>best:best=score;target=String(report.city_id);point=position
 		if target!="":
 			mission="occupy" if float(plan.personality.assertiveness)>.6 else "encircle"
@@ -417,3 +425,125 @@ static func service_orders(id:String,plan:Dictionary={})->void:
 			var response:=WorldSimulation.submit(id,{"kind":"service_mission","force":int(force.id),"region":created.region,"mission":mission})
 			if not response.has("error"):break
 			op.remove_region(String(created.region.id))
+
+## Monthly Great Works review. A wonder is conceived when something the people
+## live through moves this ruler (triumph, grief, a famine survived, an
+## anniversary, envy or awe at another people's work, rising wealth); the ruler
+## then chooses among the engine's concepts and ambitions by temperament against
+## assessed feasibility. Every mutation is a validated, paid order.
+static func great_work_orders(id:String,plan:Dictionary)->void:
+	var state:=WorldSimulation.state
+	var day:=int(state.elapsed_days)
+	var food_days:=float(state.simulation_metrics.get("food_days",0))
+	var active:=false
+	var last_started:=-1
+	var free_city:=""
+	for city:Dictionary in state.player_settlements:
+		if not String(city.get("occupied_by","")).is_empty():continue
+		var busy:=false
+		for r:Dictionary in city.get("undertakings",[]):
+			var status:=String(r.get("status",""))
+			last_started=maxi(last_started,int(r.get("started",-1)))
+			if status=="functioning" and float(r.get("condition",1))<.6:
+				WorldSimulation.submit(id,{"kind":"great_work_restore","city":String(city.id),"id":String(r.id)})
+			if status not in ["building","stalled"]:continue
+			busy=true
+			if STRATEGY.wonder_abandon(plan,record_feasibility(r)):
+				WorldSimulation.submit(id,{"kind":"great_work_policy","city":String(city.id),"id":String(r.id),"policy":"abandon"})
+				continue
+			active=true
+			var pace:=STRATEGY.wonder_pace(plan,food_days)
+			if String(r.get("policy",""))!=pace:WorldSimulation.submit(id,{"kind":"great_work_policy","city":String(city.id),"id":String(r.id),"policy":pace})
+		if not busy and free_city.is_empty():free_city=String(city.id)
+	# Merciful rulers give back treasures their armies carried off, once at peace.
+	if float(plan.personality.empathy)>.7:
+		for owner:String in GREAT_WORKS.owners():
+			if owner==id:continue
+			for city:Dictionary in GREAT_WORKS.cities(owner):
+				for r:Dictionary in city.get("undertakings",[]):
+					for entry:Dictionary in r.get("rivalry",{}).get("looted",[]):
+						if String(entry.by)==id and not bool(entry.returned):
+							WorldSimulation.submit(id,{"kind":"great_work_return_loot","owner":owner,"id":String(r.id)});break
+	# Envy's darker answer: rare (one review in ten at most, a two-year agent
+	# cooldown) and only for proud, callous, reckless rulers.
+	if STRATEGY.wonder_sabotage_temper(plan) and posmod(hash("%s:envy:%d" % [id,day]),10)==0:
+		for item:Dictionary in GREAT_WORKS.heard_works(id,day-GREAT_WORKS.SIGHTING_MAX_AGE,"building"):
+			if String(item.work_id).is_empty() or bool(GREAT_WORKS.relation(id,String(item.owner)).get("treaty","none")!="none"):continue
+			WorldSimulation.submit(id,{"kind":"great_work_sabotage","target":String(item.owner),"city":String(item.local_city_id),"id":String(item.work_id)})
+			break
+	if active or free_city.is_empty() or bool(plan.get("hungry",false)) or bool(plan.get("at_war",false)) or food_days<60:return
+	if last_started>=0 and day-last_started<STRATEGY.wonder_interval_days(plan):return
+	var trigger:=conception_trigger(id,plan)
+	if trigger.is_empty():return
+	var concepts:Variant=preload("res://scripts/civilization_orders.gd").great_works_call("conceive",[id,trigger])
+	if not concepts is Array:return
+	var best:={};var best_value:=-INF
+	for concept:Variant in concepts:
+		if not concept is Dictionary:continue
+		var fit:=STRATEGY.wonder_purpose_fit(String((concept as Dictionary).get("purpose","")),trigger,plan)
+		for ambition:String in STRATEGY.WONDER_AMBITIONS:
+			var retargeted:Variant=preload("res://scripts/civilization_orders.gd").great_works_call("retarget",[concept,ambition])
+			var candidate:Dictionary=(retargeted as Dictionary).duplicate(true) if retargeted is Dictionary and not (retargeted as Dictionary).has("error") else (concept as Dictionary).duplicate(true)
+			candidate["ambition"]=ambition
+			var assessment:Variant=preload("res://scripts/civilization_orders.gd").great_works_call("assess",[candidate,id])
+			if not assessment is Dictionary or (assessment as Dictionary).has("error"):continue
+			var value:=STRATEGY.wonder_ambition_value(ambition,float((assessment as Dictionary).get("score",0)),plan)*(.6+fit)
+			if value>best_value:best_value=value;best={"kind":"great_work_commission","city":free_city,"concept":candidate,"ambition":ambition,"trigger":String(trigger.kind),"feasibility":float((assessment as Dictionary).get("score",0))}
+	if not best.is_empty():WorldSimulation.submit(id,best)
+
+## Feasibility the engine last assessed for a work in progress (-1 when unknown).
+static func record_feasibility(r:Dictionary)->float:
+	var value:Variant=r.get("feasibility",-1.0)
+	if value is Dictionary:value=(value as Dictionary).get("score",-1.0)
+	if not (value is float or value is int):
+		var assessment:Variant=r.get("assessment",{})
+		value=(assessment as Dictionary).get("score",-1.0) if assessment is Dictionary else -1.0
+	return float(value) if (value is float or value is int) else -1.0
+
+## What this people is living through that could move its ruler to build,
+## strongest motive first. Only its own records and its own news are read.
+static func conception_trigger(id:String,plan:Dictionary)->Dictionary:
+	var state:=WorldSimulation.state
+	var day:=int(state.elapsed_days)
+	var found:Array[Dictionary]=[]
+	for battle:Dictionary in WorldSimulation.military.battle_history:
+		if day-int(battle.get("day",-99999))>365:continue
+		var ours:=String((battle.get(String(battle.get("home_side","attacker")),{}) as Dictionary).get("name",""))
+		if not ours.is_empty() and String(battle.get("winner",""))==ours:
+			found.append({"kind":"victory","day":int(battle.day),"text":"Victory at %s" % String(battle.get("target_region_name","the field"))});break
+	var deaths:=0;var hunger:=0
+	for entry:Dictionary in state.demographic_ledger:
+		if String(entry.get("kind",""))!="death":continue
+		var age:=day-int(entry.get("day",-99999))
+		if age<=365:deaths+=int(entry.get("count",0))
+		if age<=730 and String(entry.get("cause",""))=="Hunger":hunger+=int(entry.get("count",0))
+	for person:Dictionary in WorldSimulation.government.people:
+		if int(person.get("died_day",-1))>=0 and day-int(person.died_day)<=365 and not String(person.get("office_key","")).is_empty():
+			found.append({"kind":"death","day":int(person.died_day),"text":"The death of %s" % String(person.get("name","a leader"))});break
+	if deaths>=maxi(5,roundi(state.population_exact*.03)):found.append({"kind":"death","day":day,"text":"%d of our people died this year" % deaths})
+	if hunger>=maxi(2,roundi(state.population_exact*.005)) and float(state.simulation_metrics.get("food_days",0))>60 and not bool(plan.get("hungry",false)):
+		found.append({"kind":"famine","day":day,"text":"We came through a famine that took %d" % hunger})
+	var founded:=int(state.settlement_founded_day)
+	if founded>=0 and day>founded and posmod(day-founded,365*25)<30 and day-founded>=365*25:
+		found.append({"kind":"anniversary","day":day,"text":"%d years since our founding" % ((day-founded)/365)})
+	for item:Dictionary in GREAT_WORKS.heard_works(id,day-365):
+		found.append({"kind":"envy","day":int(item.day),"text":"News of %s built by %s" % [String(item.title),String(item.civ_name)],"source_owner":String(item.owner),"source_work":String(item.work_id),"source_form":String(item.form),"source_ambition":String(item.get("ambition",""))});break
+	var stock:=0.0
+	for material:String in ["Stone","Timber","Clay"]:stock+=float(state.resource_stockpiles.get(material,0))
+	if float(state.simulation_metrics.get("food_days",0))>150 and stock>=state.population_exact*3:
+		found.append({"kind":"plenty","day":day,"text":"Our stores overflow"})
+	var best:={};var strongest:=STRATEGY.WONDER_MOTIVE_THRESHOLD
+	for trigger:Dictionary in found:
+		var motive:=STRATEGY.wonder_motive(trigger,plan)
+		if motive>=strongest:strongest=motive;best=trigger
+	if best.is_empty():return best
+	best["motive"]=strongest
+	# Hearing of another's work: the proud answer with a work to awe them; the
+	# curious and admiring emulate its form.
+	if String(best.kind)=="envy":
+		var p:Dictionary=plan.personality
+		if float(p.assertiveness)*.7+(1-float(p.empathy))*.35>=float(p.openness)*.55+float(p.empathy)*.25:best["purpose"]="awe_rivals";best["response"]="envy"
+		else:
+			best["response"]="awe"
+			if not String(best.get("source_form","")).is_empty():best["form"]=String(best.source_form)
+	return best

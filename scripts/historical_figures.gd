@@ -4,12 +4,14 @@ extends Node
 const NAMES=preload("res://scripts/historical_name_generator.gd")
 const MAX_LIVING:=12
 const MAX_RECORDS:=512
-const ROLES:={"General":"security","Scholar":"knowledge","Physician":"health","Engineer":"infrastructure","Agronomist":"nutrition","Organizer":"institutions","Artist":"culture","Explorer":"logistics"}
-const CALLINGS:={"General":"training formations and keeping troops together","Scholar":"testing explanations and teaching apprentices","Physician":"comparing treatments and training healers","Engineer":"improving structures and teaching builders","Agronomist":"comparing harvests and preserving practical knowledge","Organizer":"improving public administration and teaching officials","Artist":"developing a shared artistic tradition","Explorer":"recording routes and teaching navigators"}
+const ROLES:={"General":"security","Scholar":"knowledge","Physician":"health","Engineer":"infrastructure","Agronomist":"nutrition","Organizer":"institutions","Artist":"culture","Explorer":"logistics","Architect":"monuments"}
+const CALLINGS:={"General":"training formations and keeping troops together","Scholar":"testing explanations and teaching apprentices","Physician":"comparing treatments and training healers","Engineer":"improving structures and teaching builders","Agronomist":"comparing harvests and preserving practical knowledge","Organizer":"improving public administration and teaching officials","Artist":"developing a shared artistic tradition","Explorer":"recording routes and teaching navigators","Architect":"designing great works and training master builders"}
 const UPBRINGINGS:=["a household of craftspeople, where mistakes had immediate costs","a farming family that kept careful accounts of good and bad years","a family of traveling traders, learning to listen before bargaining","a crowded household where sharing work mattered more than rank","a settlement on a trade route, surrounded by unfamiliar languages","a family of practical teachers who expected every claim to be demonstrated"]
-const TURNING_POINTS:={"General":["Watching a poorly organized withdrawal convinced them that preparation saves lives.","An early dispute with a superior left them determined to earn loyalty rather than assume it."],"Scholar":["Two teachers offered incompatible explanations of the same observation; they began keeping their own records.","A failed demonstration taught them to separate a pleasing explanation from a dependable one."],"Physician":["Conflicting advice during a household illness led them to compare treatments methodically.","They began by assisting an experienced healer and questioning which routines actually helped."],"Engineer":["Repeated repairs to the same structure led them to ask why it kept failing.","Their apprenticeship taught them that an elegant design is useless if nobody can maintain it."],"Agronomist":["Different harvests on neighboring plots inspired a habit of careful comparison.","A poor growing season made the preservation of practical knowledge a personal concern."],"Organizer":["A dispute over shared stores showed them how weak records can turn neighbors against one another.","They learned administration by reconciling promises with the work a community could actually perform."],"Artist":["The same story told differently by neighboring communities became a lasting source of fascination.","An exacting teacher demanded imitation; they became more interested in finding a voice of their own."],"Explorer":["An unreliable route description convinced them that knowledge must be usable by the next traveler.","Early journeys taught them to value local knowledge over confident guesses."]}
+const TURNING_POINTS:={"General":["Watching a poorly organized withdrawal convinced them that preparation saves lives.","An early dispute with a superior left them determined to earn loyalty rather than assume it."],"Scholar":["Two teachers offered incompatible explanations of the same observation; they began keeping their own records.","A failed demonstration taught them to separate a pleasing explanation from a dependable one."],"Physician":["Conflicting advice during a household illness led them to compare treatments methodically.","They began by assisting an experienced healer and questioning which routines actually helped."],"Engineer":["Repeated repairs to the same structure led them to ask why it kept failing.","Their apprenticeship taught them that an elegant design is useless if nobody can maintain it."],"Agronomist":["Different harvests on neighboring plots inspired a habit of careful comparison.","A poor growing season made the preservation of practical knowledge a personal concern."],"Organizer":["A dispute over shared stores showed them how weak records can turn neighbors against one another.","They learned administration by reconciling promises with the work a community could actually perform."],"Artist":["The same story told differently by neighboring communities became a lasting source of fascination.","An exacting teacher demanded imitation; they became more interested in finding a voice of their own."],"Explorer":["An unreliable route description convinced them that knowledge must be usable by the next traveler.","Early journeys taught them to value local knowledge over confident guesses."],"Architect":["A collapsed granary roof taught them that ambition without measurement kills.","They carried stone for a master builder who never explained anything, and swore to teach differently."]}
 const TEMPERAMENTS:=["patient and exacting","bold and impatient","generous but proud","skeptical and persistent","eloquent but restless","quiet and uncompromising","inventive and stubborn","disciplined but suspicious"]
 const MOTIVES:=["make useful knowledge available beyond a privileged few","prove that inherited methods can be improved","protect communities from the failures witnessed in youth","build a tradition that can survive its founder","earn recognition through work that others can verify","train successors capable of questioning their teacher"]
+## Roles that appear only when a society commissions them (never by emergence).
+const COMMISSIONED_ROLES:=["Architect"]
 var people:Array[Dictionary]=[]
 var used:Dictionary={}
 var assignments:Dictionary={}
@@ -25,7 +27,8 @@ func ensure()->void:
 	if initialized and seed_value==WorldSimulation.state.world_seed: return
 	reset_for_new_world()
 	initialized=true; seed_value=WorldSimulation.state.world_seed; last_day=int(WorldSimulation.state.elapsed_days); last_emergence=last_day
-	for role in ROLES: _create(String(role),last_day)
+	for role in ROLES:
+		if role not in COMMISSIONED_ROLES: _create(String(role),last_day)
 
 func reset_for_new_world()->void:
 	people.clear(); used.clear(); assignments.clear(); serial=0; initialized=false; last_day=0; last_emergence=0
@@ -84,9 +87,10 @@ func advance(day:int)->void:
 	if day-last_emergence>=365*5:
 		last_emergence=day
 		var counts:Dictionary={}
-		for role in ROLES: counts[role]=0
+		for role in ROLES:
+			if role not in COMMISSIONED_ROLES: counts[role]=0
 		for p in people:
-			if p.status!="dead": counts[p.role]+=1
+			if p.status!="dead" and counts.has(p.role): counts[p.role]+=1
 		var chosen:="General"
 		for role in counts:
 			if counts[role]<counts[chosen]: chosen=role
@@ -124,6 +128,34 @@ func record_discovery(domain:String,title:String,day:int)->void:
 	if best.is_empty(): return
 	best.renown+=8
 	_event(best,day,"Helped the community develop %s; the discovery belongs to its collective work." % title)
+
+## A master builder for a Great Work. Reuses a living, unassigned architect when
+## one exists; otherwise a new one enters public life. Falls back to a living
+## Engineer when the roster of living figures is full. Returns {} if nobody can.
+func commission_architect(day:int,slot:String)->Dictionary:
+	ensure()
+	var p:=by_id(String(assignments.get(slot,"")))
+	if not p.is_empty() and p.status=="living": return p
+	p={}
+	for candidate in people:
+		if candidate.role=="Architect" and candidate.status=="living" and not candidate.id in assignments.values(): p=candidate; break
+	if p.is_empty(): p=_create("Architect",day)
+	if p.is_empty():
+		for candidate in people:
+			if candidate.role=="Engineer" and candidate.status=="living" and not candidate.id in assignments.values(): p=candidate; break
+	if p.is_empty(): return {}
+	assignments[slot]=p.id
+	_event(p,day,"Commissioned as master builder of a great work.")
+	return p
+
+func release_assignment(slot:String)->void:
+	assignments.erase(slot)
+
+func note(id:String,day:int,text:String,renown:int=0)->void:
+	var p:=by_id(id)
+	if p.is_empty(): return
+	p.renown=maxi(0,int(p.renown)+renown)
+	_event(p,day,text)
 
 func record_death(id:String,day:int,cause:String)->void:
 	var p:=by_id(id)

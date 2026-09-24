@@ -48,16 +48,24 @@ func test_reputation_requires_carried_accounts_and_ages()->void:
 	r.strain=180;R.share_accounts(GameState,"foreign_a",9125)
 	assert_float(R.diplomatic_bonus(GameState,"foreign_a",9125)).is_equal(.05)
 	assert_float(R.diplomatic_bonus(GameState,"foreign_a",9125+365*30)).is_equal(0.0)
-func test_no_victory_exists_and_legacy_award_field_is_tolerated()->void:
-	# There is no victory in this game. Enduring landmarks known abroad award nothing.
-	completed("common_stores");completed("star_steps");completed("stone_crown")
+func test_history_records_wonders_and_never_awards_victory()->void:
+	completed("common_stores");completed("star_steps");var crown:=completed("stone_crown")
 	R.share_accounts(GameState,"foreign_a",9125);R.share_accounts(GameState,"foreign_b",9125)
+	crown.strain=180
+	var record:=R.history(GameState)
+	assert_int(int(record.attempted)).is_equal(3)
+	assert_int(int(record.standing)).is_equal(3)
+	assert_int(int(record.enduring)).is_equal(3)
+	assert_int(int(record.kinds)).is_equal(3)
+	assert_int(int(record.known_by)).is_equal(2)
+	assert_int(int(record.costly)).is_equal(1)
+	# There is no victory: nothing is ever awarded or written.
+	assert_bool(record.has("ready") or record.has("award")).is_false()
+	U.advance_all(9126)
 	assert_bool(city.has("wonder_victory")).is_false()
-	# Older saves may still carry the removed award, even malformed; it is ignored.
+	# Old saves that carry a retired award still load.
 	city.wonder_victory={"day":9125,"costly":1}
 	var saved:Array=bytes_to_var(var_to_bytes(GameState.player_settlements))
-	assert_bool(U.valid(saved)).is_true()
-	saved[0].wonder_victory="obsolete"
 	assert_bool(U.valid(saved)).is_true()
 	saved[0].undertakings[0].heard_by.foreign_a.condition=NAN
 	assert_bool(U.valid(saved)).is_false()

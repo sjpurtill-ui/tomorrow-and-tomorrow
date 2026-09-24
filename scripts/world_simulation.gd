@@ -662,6 +662,7 @@ func begin_day(day:int,daily_context:Dictionary,construction:Callable=Callable()
 		S.step("exchange",timings,func()->void:
 			preload("res://scripts/civilization_exchange.gd").settle(day)
 			preload("res://scripts/civilization_exchange.gd").occupation(day)
+			preload("res://scripts/great_works_rivalry.gd").advance_world(day)
 	),
 	],{},func()->void:
 		job.result=run.result

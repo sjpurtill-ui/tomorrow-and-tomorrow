@@ -325,6 +325,70 @@ static func for_person(person:Dictionary)->Dictionary:
 	p["sample"]=sample_line(p)
 	return p
 
+const ARCHITECT_TEMPER:={
+	"patient and exacting":"patient, exacting, measures twice and sneers at haste",
+	"bold and impatient":"bold, impatient, wants it higher and wants it yesterday",
+	"generous but proud":"generous with praise, prouder than the work deserves",
+	"skeptical and persistent":"skeptical of every promise, relentless once convinced",
+	"eloquent but restless":"eloquent, restless, sells a dream with both hands",
+	"quiet and uncompromising":"quiet, uncompromising, a single word can be a verdict",
+	"inventive and stubborn":"inventive, stubborn, falls in love with their own tricks",
+	"disciplined but suspicious":"disciplined, suspicious of every crew-master's count",
+}
+const ARCHITECT_STYLE_QUIRKS:={
+	"austere":"sweeps crumbs off any table before they will lean on it",
+	"soaring":"keeps glancing at the ceiling as if it offends them",
+	"ornate":"sketches curling vines on whatever is nearest, including sleeves",
+	"practical":"carries a knotted measuring cord and tugs it while thinking",
+	"daring":"balances a stylus on one finger while others talk",
+	"severe":"straightens anything that is crooked, including other people's collars",
+	"harmonious":"hums a single steady note when counting proportions",
+	"monumental":"paces out distances on the floor, loudly",
+}
+const ARCHITECT_SECRETS:=[
+	"has already drawn a second, grander version and hidden it under the first",
+	"lost a crew to a collapse in their youth and still dreams of it",
+	"was taught by a master whose name they now claim as their own idea",
+	"cannot actually lift the stones they make everyone else lift",
+	"wants their name carved where the ruler's should be",
+	"fears the work will outlive them and nobody will remember who drew it",
+]
+
+## A persona for a HistoricalFigures person (e.g. a Great Work's master
+## builder). `work` may carry the architect block of a site record
+## ({style,vision,ego,...}) so the voice reflects that commission.
+static func for_figure(figure:Dictionary,work:Dictionary={})->Dictionary:
+	var id:String=String(figure.get("id",work.get("id","figure")))
+	var rng:=_rng("figure:"+id)
+	var d:=DIALECTS[posmod(hash("%d|figure|%s" % [_seed(),id]),DIALECTS.size())]
+	var temperament:String=String(figure.get("temperament",work.get("temperament","")))
+	var style:String=String(work.get("style","practical"))
+	var ego:float=float(work.get("ego",.5))
+	var vision:float=float(work.get("vision",.5))
+	var role:String=String(figure.get("role","Architect"))
+	var voice:String="booming" if ego>.72 else ("velvet-soft" if ego<.3 else String(_pick(rng,VOICES)))
+	var stance:="principled"
+	if ego>.7: stance="cantankerous"
+	elif vision>.7: stance="diplomatic"
+	elif temperament.contains("patient") or temperament.contains("disciplined"): stance="pragmatic"
+	var lead_bank:Array=["Picture it with me:","Stone does not lie:","Measure first, then marvel:"] if vision>.55 else ["Counting it out plainly:","Stone does not lie:","Trust the plumb line:"]
+	var tics:Array=_pick_many(rng,lead_bank,2)
+	tics.append_array(_pick_many(rng,TICS,1))
+	var want:="a work that will still stand when every name in this hall is dust"
+	if ego>.65: want="their own name carved above the door, and the finest stone reserved for the crown"
+	elif vision<.4: want="a sound, honest work finished on time, without anyone dying for it"
+	var fear:String="the work being remembered as someone else's" if ego>.6 else String(_pick(rng,["a collapse on a crowded day","being rushed into a crack nobody sees until spring","the ruler losing nerve halfway up"]))
+	var p:={"key":"figure_"+id,"role":role.to_lower(),"person_id":0,"figure_id":id,"civ_id":"player",
+		"name":String(figure.get("name",work.get("name","The master builder"))),"title":"Master Builder","stance":stance,"voice":voice,
+		"dialect":String(d.guide),"dialect_id":String(d.id),
+		"temper":String(ARCHITECT_TEMPER.get(temperament,_pick(rng,TEMPERS)))+("; %s in design" % style),
+		"tics":tics,"want":want,"fear":fear,
+		"quirk":String(ARCHITECT_STYLE_QUIRKS.get(style,_pick(rng,QUIRKS))),"secret":String(_pick(rng,ARCHITECT_SECRETS)),
+		"motive":String(figure.get("motive","")),"turning_point":String(figure.get("turning_point","")),"style":style,"vision":vision,"ego":ego,
+		"address":String(_pick(rng,d.address)),"oath":String(_pick(rng,d.oath)),"proverb":String(_pick(rng,d.proverb))}
+	p["sample"]=sample_line(p)
+	return p
+
 static func brief(p:Dictionary)->String:
 	## One compact line per character for prompts.
 	var tics:PackedStringArray=PackedStringArray()

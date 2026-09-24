@@ -8,6 +8,9 @@ const Modal:=preload("res://scripts/hud/audience_modal.gd")
 const Voice:=preload("res://scripts/audience_voice.gd")
 const SimulationPause:=preload("res://scripts/hud/simulation_pause.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
+const Works:=preload("res://scripts/great_works_audience.gd")
+const CeremonyView:=preload("res://scripts/hud/great_work_ceremony.gd")
+const WorksAtlas:=preload("res://scripts/hud/great_works_atlas.gd")
 
 var terrain:Node
 var voice:Node
@@ -20,6 +23,9 @@ var last_day:=-1
 var pending_summon:=""
 var clock:=0.0
 var _refresh_clock:=0.0
+var ceremony:Control
+var ceremonies_offered:Dictionary={}
+var _ceremony_clock:=0.0
 
 func _ready()->void:
 	name="AudienceDirector"
@@ -54,6 +60,9 @@ func _process(delta:float)->void:
 		for step_day in range(maxi(start,day-30),day+1):
 			var arrivals:Array=Hall.daily(step_day)
 			if not arrivals.is_empty() and pending_summon.is_empty():pending_summon=String((arrivals[0] as Dictionary).get("id",""))
+		# Great works: stage gates, hard news, pitches, outcomes, forecasts.
+		var works:Array=Works.daily(day)
+		if not works.is_empty() and pending_summon.is_empty():pending_summon=String((works[0] as Dictionary).get("id",""))
 	elif day!=last_day:
 		last_day=day
 	if not pending_summon.is_empty():
@@ -62,6 +71,10 @@ func _process(delta:float)->void:
 		elif can_open():
 			var id:=pending_summon;pending_summon=""
 			open_audience(id)
+	_ceremony_clock-=delta
+	if _ceremony_clock<=0.0:
+		_ceremony_clock=.5
+		_offer_ceremony()
 	_refresh_clock-=delta
 	if _refresh_clock<=0.0:
 		_refresh_clock=.25;_refresh_badge()
@@ -76,7 +89,7 @@ func _world_ready()->bool:
 	return true
 
 func can_open()->bool:
-	if is_instance_valid(modal):return false
+	if is_instance_valid(modal) or is_instance_valid(ceremony):return false
 	if GameState.founding_focus=="":return false
 	if is_instance_valid(terrain) and SimulationPause.blocks(terrain):return false
 	if GeneralCampaign.active:return false
@@ -113,3 +126,36 @@ func _refresh_badge()->void:
 	badge.size=badge.custom_minimum_size
 	badge.pivot_offset=badge.size*.5
 	badge.position=Vector2((view.x-badge.size.x)*.5,toolbar_top-badge.size.y-12.0).round()
+
+# --- Great works ---------------------------------------------------------------
+
+func _offer_ceremony()->void:
+	## A finished work's dedication opens once by itself; the works screen and
+	## the dock can reopen it until it is dedicated.
+	if not _world_ready() or not can_open():return
+	for entry in Works.api_list("pending_ceremonies",["player"]):
+		if not entry is Dictionary:continue
+		var key:="%s/%s" % [String(entry.get("city_id","")),String(entry.get("work_id",""))]
+		if ceremonies_offered.has(key):continue
+		ceremonies_offered[key]=true
+		open_ceremony(String(entry.get("work_id","")))
+		return
+
+func open_ceremony(work_id:String)->Control:
+	for entry in Works.api_list("pending_ceremonies",["player"]):
+		if not entry is Dictionary or String(entry.get("work_id",""))!=work_id:continue
+		if is_instance_valid(ceremony):ceremony.get_parent().queue_free()
+		ceremonies_offered["%s/%s" % [String(entry.get("city_id","")),work_id]]=true
+		ceremony=CeremonyView.open(self,terrain,voice,entry)
+		ceremony.closed.connect(func(_id:String)->void:_refresh_badge.call_deferred())
+		return ceremony
+	return null
+
+func open_works(focus:String="")->Control:
+	var host:Node=terrain.hud if is_instance_valid(terrain) and "hud" in terrain and is_instance_valid(terrain.hud) else self
+	return WorksAtlas.open(host,terrain,self,focus)
+
+func open_conception()->Control:
+	var made:=Works.ruler_proposal()
+	if made.is_empty():return null
+	return open_audience(String(made.id))

@@ -1,51 +1,68 @@
-# Wonder rewards
+# Conceived wonders and their rewards
 
-Buildings → Undertakings shows each settlement's possibilities, current effects,
-maintenance history and naming controls. Opportunities remain restricted to
-the first 300 years and vary by world, settlement, environment and discoveries.
+The binding design is `docs/GREAT_WORKS_DESIGN.md` (Revision 2). There is no
+fixed list of wonders and no world-unique claim: any people may conceive and
+attempt as many works as it can sustain.
 
-There is no victory in this game. Landmarks give practical local benefits and a
-reputation carried abroad; they never count toward winning anything.
+## Conception (`scripts/wonder_concept.gd`)
 
-These are maximum effects at full condition, in addition to the catalog's local
-worker-effectiveness bonus. Ruined, abandoned and unfinished sites give no local
-reward. Construction and upkeep still require existing workers and materials.
+A wonder is composed from a bounded grammar — **form** (ring, mound, stair,
+tower, hall, cistern, granary, bridge, causeway, dam, colossus, garden,
+observatory, gate, canal, archive, amphitheatre, lighthouse) × **purpose**
+(honor the dead, bind the people, tame the waters, end hunger, watch the heavens,
+awe rivals, keep knowledge, welcome strangers, show mastery, defy the heavens,
+mark a triumph, give thanks) × **ambition** (modest, grand, audacious) ×
+**material** (earth, timber, stone, brick, iron, poured stone). Forms and
+materials are gated by known discoveries; scale and cost grow with the people's
+engineering tier. Purposes are weighted by societal values, present needs and
+fears (hunger, thirst, division) and a trigger (famine, flood, war, victory,
+death, anniversary, discovery, envy, plenty, expand). Each concept gets a unique
+name in the people's naming tradition, a lore line and a motive. Everything is
+deterministic from world seed, owner, day and trigger. The concept id encodes
+the design (`wonder:<form>:<purpose>:<ambition>:<material>:<tier>:<token>`), so
+any system can rebuild its definition. A ruler's words map onto the grammar by
+keywords; an optional model mapping is bounded to the same grammar.
 
-| Undertaking | Additional practical reward |
-| --- | --- |
-| Ancestors' Ring | Diplomatic reputation |
-| Hall of Many Hearths | Diplomatic reputation; +3 points household attraction |
-| Court of Collected Rain | 7,200 additional local water-storage units |
-| Gardens Above the Flood | 9,000 additional stored rations; 10% less food spoilage |
-| Steps of the Watching Sky | +12% Knowledge worker effectiveness |
-| Court of a Hundred Fires | +12% Crafting worker effectiveness |
-| House of the Long Song | +8% Knowledge effectiveness; +3 points attraction |
-| Granary of the Covenant | 18,000 additional stored rations; 25% less spoilage |
-| Sanctuary of Safe Passage | +8 points attraction; diplomatic reputation |
-| Orchard of Generations | 4,500 additional stored rations; 15% less spoilage |
-| Crown of the Ridge | Strong diplomatic reputation |
-| House of Common Measures | +10% Crafting effectiveness; diplomatic reputation |
+## Feasibility and outcome
 
-Capacity does not fill itself. Preservation operates on actual food. Craft and
-research bonuses flow through existing work, input and discovery requirements.
-Attraction changes existing household migration decisions; it does not spawn
-residents or bypass travel. Combined special work/attraction bonuses cap at 20%,
-food spoilage reduction at 40%, and combined catalog/special worker bonuses at 30%.
+Before and during construction, feasibility weighs engineering capability
+(tier, material quality, architect talent, crafters, builders) against the
+ambition's demand, plus social support (cohesion, legitimacy, food, war). It is
+spoken in-world by the builders, never shown as a bare percentage. Stage-gate
+decisions and construction events shift it. On completion the outcome is drawn
+deterministically: **triumph**, **success**, **flawed** (stands diminished, never
+fully recovers), or **collapse** — a named folly: materials lost, cohesion and
+legitimacy fall, people die, officials remember the shame, and the ruin carries
+its own lore (its stone can be quarried). Withdrawing support leaves an
+**abandoned** site. Audacious works fail far more often and pay far more.
 
-After a year of operation, travelers encountering another society can carry
-accounts of achievements. Diplomacy uses only that society's received accounts,
-with a combined bonus capped at 0.20 on the existing negotiation score. Accounts
-fade over thirty years without renewed contact. Recorded construction hardship
-halves the reputation benefit without erasing the accomplishment. This first
-version records pressure during shortages, not a separate slavery simulation.
+## Payoff
 
-The former **Enduring Civilization** victory has been removed along with every
-other win state. Nothing tracks landmark counts toward an award.
+Purpose maps to an effect family — civic steadiness, famine reserve (Covenant),
+forecasting (Watching Sky), memory keeping (Long Song), deterrence, traffic —
+plus practical rewards (storage, spoilage, research, crafting, attraction,
+reputation), all scaled by ambition × outcome and bounded by the existing caps.
+Successful works add allure; dedication ceremonies bring foreign envoys whose
+gifts come from their real stores. Raising a new work on an existing site
+layers it: the earlier work, its name and history are kept. Captured works
+serve their occupier.
 
-Existing saves need no migration: account fields are optional and validated. A
-city's legacy `wonder_victory` field from older saves is tolerated on load and
-ignored; it is never written. Targeted wonder tests cover lifecycle, naming,
-rewards, local scope, reputation and serialization. These checks do not establish
-300-year balance across all environments. Unique exports, visiting-scholar events,
-pilgrimage systems and final map art remain future extensions, not hidden rewards
-claimed by this implementation.
+The twelve founding definitions (Ancestors' Ring, Hall of Many Hearths, …)
+remain only so older saves keep loading and functioning with their original
+rewards.
+
+## History, not victory
+
+There is no victory in this game. A people's wonders are remembered as history
+and reputation: the panel records works attempted, how many stood, how many
+fell as follies, those standing now, those that endured twenty years, the kinds
+of purpose among them, and how many foreign peoples know of them. Older saves
+that carry a retired "wonder_victory" award still load; it is ignored and never
+written.
+
+## Saves
+
+Existing undertaking records load unchanged (legacy ids resolve through the
+founding definitions; missing fields are added lazily; gates already passed are
+not re-posed). New fields — concept, outcome, feasibility, shift, rewards,
+effect, scar, ruin lore, layers, rivalry — are optional and validated.
