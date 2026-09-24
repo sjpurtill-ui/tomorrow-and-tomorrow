@@ -3122,26 +3122,50 @@ static func divine_intent(id:String,text:String)->String:
 		if String(option.id)==action and bool(option.enabled): return action
 	return ""
 
-static func divine(id:String,action:String,words:String="")->Dictionary:
+static func divine(id:String,action:String,words:String="",target_pid:int=0,how:Dictionary={})->Dictionary:
 	## Perform an act of wrath or favour. Real, bounded effects only: bonds and
 	## memories, stores for a boon, exile or execution through the government.
+	## target_pid: another official present at court (default: the one before
+	## you). how: {"agent_name","agent_pid"} when an official carries it out by
+	## the god's command; {"quiet":true} when the caller narrates the act itself.
 	var audience:=find(id)
 	if audience.is_empty() or String(audience.get("status",""))!="waiting": return {"ok":false,"outcome":"No audience is waiting."}
+	var speaker_pid:=int((audience.get("speaker",{}) as Dictionary).get("person_id",0))
+	var done:Array=audience.get("divine",[]) if audience.get("divine") is Array else []
+	if target_pid>0 and target_pid!=speaker_pid:
+		if String(audience.origin)!="court" and not action in DIVINE.WRATH+DIVINE.FAVOR: return {"ok":false,"outcome":"That is not open to you here."}
+		var other:=_official(target_pid)
+		if other.is_empty(): return {"ok":false,"outcome":"They are not at your court."}
+		var key:="%s:%d" % [action,target_pid]
+		if key in done: return {"ok":false,"outcome":"Already done in this audience."}
+		if action=="boon" and _short(String(_boon_terms().resource),float(_boon_terms().amount))!="": return {"ok":false,"outcome":_short(String(_boon_terms().resource),float(_boon_terms().amount))}
+		var watchers:Array[Dictionary]=[]
+		for p in _officials():
+			var wid:=int(p.person_id)
+			if wid==target_pid: continue
+			if wid==speaker_pid or court(id).any(func(c:Dictionary)->bool:return int(c.person_id)==wid): watchers.append(p)
+		done.append(key)
+		audience["divine"]=done
+		return _divine_act(audience,action,other,watchers,false,how)
 	var chosen:={}
 	for option in divine_options(id):
 		if String(option.id)==action: chosen=option
 	if chosen.is_empty(): return {"ok":false,"outcome":"That is not open to you here."}
 	if not bool(chosen.enabled): return {"ok":false,"outcome":String(chosen.reason)}
-	var done:Array=audience.get("divine",[]) if audience.get("divine") is Array else []
 	done.append(action)
 	audience["divine"]=done
 	if String(audience.origin)=="foreign": return _terrify_envoy(audience,words)
 	var person:=_divine_target(audience)
+	return _divine_act(audience,action,person,court(id),true,how)   # witnesses read before any removal, so a successor is not a witness
+
+static func _divine_act(audience:Dictionary,action:String,person:Dictionary,witnesses:Array,is_speaker:bool,how:Dictionary)->Dictionary:
+	var id:=String(audience.id)
 	var pid:=int(person.person_id)
 	var name:=String(person.get("name","them"))
-	var witnesses:=court(id)   # before any removal, so a successor is not a witness
-	var terminal:=action in DIVINE.TERMINAL
-	var result:={"ok":true,"action":action,"terminal":terminal,"person_id":pid,"name":name,"reaction":"neutral"}
+	var agent:=String(how.get("agent_name",""))
+	var removal:=action in DIVINE.TERMINAL
+	var terminal:=removal and is_speaker
+	var result:={"ok":true,"action":action,"terminal":terminal,"removed":removal,"person_id":pid,"name":name,"reaction":"neutral","agent":agent,"agent_pid":int(how.get("agent_pid",0))}
 	var narration:=""
 	var outcome:=""
 	match action:
@@ -3155,7 +3179,7 @@ static func divine(id:String,action:String,words:String="")->Dictionary:
 			var gone:=GovernmentPeopleSystem.person_departs(pid,"exiled")
 			if not bool(gone.get("ok",false)): return {"ok":false,"outcome":String(gone.get("reason","They cannot be cast out now."))}
 			var heirs:Array=gone.get("successors",[])
-			narration="At your word %s is stripped of office and driven out beyond the hearths." % name
+			narration="At your word %s is stripped of office and driven out beyond the hearths%s." % [name," by "+agent if agent!="" else ""]
 			outcome="You cast %s out of the realm.%s" % [name," %s took up the work." % ", ".join(PackedStringArray(heirs)) if not heirs.is_empty() else ""]
 		"strike_down":
 			var removed:Dictionary
@@ -3163,8 +3187,13 @@ static func divine(id:String,action:String,words:String="")->Dictionary:
 			else: removed=GovernmentPeopleSystem.remove_central_officeholder(String(person.get("office_key","")),"execute")
 			if not bool(removed.get("ok",false)): return {"ok":false,"outcome":String(removed.get("reason","They cannot be put to death now."))}
 			var heir:=String((removed.get("successor",{}) as Dictionary).get("name",""))
-			narration="At your word the guards seize %s. They are taken out, and put to death." % name
-			outcome="%s was put to death at your word, before the court.%s The execution cost you legitimacy and cohesion." % [name," %s now holds the office." % heir if heir!="" else " The office stands empty."]
+			result["successor"]=heir
+			if agent!="":
+				narration="At your word %s kills %s before the court." % [agent,name]
+				outcome="%s was killed by %s at your word, before the court.%s The killing cost you legitimacy and cohesion." % [name,agent," %s now holds the office." % heir if heir!="" else " The office stands empty."]
+			else:
+				narration="At your word the guards seize %s. They are taken out, and put to death." % name
+				outcome="%s was put to death at your word, before the court.%s The execution cost you legitimacy and cohesion." % [name," %s now holds the office." % heir if heir!="" else " The office stands empty."]
 		"terrify": narration="The god's fury falls on %s before the whole court." % name
 		"penance": narration="You demand penance of %s: fasting and vigil until you are appeased." % name
 		"bless": narration="You bless %s before the whole court." % name
@@ -3172,7 +3201,8 @@ static func divine(id:String,action:String,words:String="")->Dictionary:
 	var effects:=DIVINE.apply_to_court(action,person,witnesses)
 	result["effects"]=effects
 	result["response"]=String(effects.get("response","none"))
-	append_line(id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":narration,"day":_day(),"aside":false})
+	if not bool(how.get("quiet",false)):
+		append_line(id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":narration,"day":_day(),"aside":false})
 	if outcome=="":
 		outcome=String({"terrify":"You terrified %s before the court.","penance":"You demanded penance of %s.","bless":"You blessed %s.","raise_up":"You raised %s above their peers."}.get(action,"You acted on %s.")) % name
 	var shaken:=0
@@ -3180,6 +3210,7 @@ static func divine(id:String,action:String,words:String="")->Dictionary:
 		if action in DIVINE.WRATH and String((w as Dictionary).get("response",""))=="shaken": shaken+=1
 	if action in DIVINE.WRATH and shaken>0: outcome+=" %d of your court %s shaken." % [shaken,"was" if shaken==1 else "were"]
 	result["outcome"]=outcome
+	if removal: _drop_matters_of(pid)
 	if not terminal:
 		apply_mood(id,-0.2 if action in DIVINE.WRATH else 0.2)
 		result["reaction"]=String({"cower":"offended","defy":"furious","endure":"offended","relief":"delighted","blessed":"delighted"}.get(String(result.response),"neutral"))
@@ -3190,7 +3221,6 @@ static func divine(id:String,action:String,words:String="")->Dictionary:
 	audience.option_id=action
 	_archive(audience)
 	_ledger_close(audience,action,"furious",outcome)
-	_drop_matters_of(pid)
 	return result
 
 static func _drop_matters_of(person_id:int)->void:
