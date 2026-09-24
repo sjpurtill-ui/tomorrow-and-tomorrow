@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Prehistoric art queue. Uses original PNGs from individual built-in tool calls."""
-import argparse, fcntl, json, re
+import argparse, json, re
 import catalogue as bank
+from locking import manifest_lock
 bank.DEST=bank.ROOT/'assets/ui/artifacts/prehistoric-v1'
 bank.MANIFEST=bank.ROOT/'art_source/prehistoric-art/manifest.json'
 bank.INDEX=bank.DEST/'index.json'
@@ -45,7 +46,7 @@ if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('command',choices=['build','register','audit','next']);p.add_argument('--id',type=int);p.add_argument('--source');p.add_argument('--review');p.add_argument('--complete',action='store_true');p.add_argument('--limit',type=int,default=4);a=p.parse_args()
     if a.command=='build':build()
     elif a.command=='register':
-        with open(bank.MANIFEST.with_suffix('.lock'),'w') as lock:
-            fcntl.flock(lock,fcntl.LOCK_EX);bank.register(a.id,a.source,a.review)
+        with manifest_lock(bank.MANIFEST.with_suffix('.lock')):
+            bank.register(a.id,a.source,a.review)
     elif a.command=='audit':raise SystemExit(bank.audit(a.complete))
     else:print(json.dumps([{'catalogue_id':e['catalogue_id'],'prompt':e['prompt']} for e in json.loads(bank.MANIFEST.read_text())['entries'] if e['status']=='pending'][:a.limit]))
