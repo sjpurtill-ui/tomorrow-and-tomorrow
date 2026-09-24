@@ -15,9 +15,15 @@ static func infant_mortality_per_1000(state:Node=GameState,discovery:Node=Discov
 		"traveling":bool(metrics.get("traveling",false)),
 		"neonatal_survival":discovery.effect("neonatal_survival"),
 	}
-	var risk:float=state._pregnancy_risk_multiplier(context)
-	var rate:=clampf((0.018+(risk-1.0)*0.025)*(1.0-clampf(float(context.neonatal_survival),0.0,0.60)),0.004,0.18)
-	return rate*1000.0
+	# Deaths in the whole first year per 1,000 live births: newborn deaths at
+	# delivery conditions, then the age-0 life-table hazard for the rest of the
+	# year. Both carry the early-care factors the daily simulation uses.
+	var care:Dictionary=state.early_care
+	var risk:float=state._pregnancy_risk_multiplier(context)*clampf(float(care.get("pregnancy_risk",1.0)),0.5,2.5)
+	var neonatal:=clampf((0.018+(risk-1.0)*0.025)*(1.0-clampf(float(context.neonatal_survival),0.0,0.60))*clampf(float(care.get("neonatal",1.0)),0.5,4.0),0.004,0.18)
+	var conditions:float=state._mortality_condition_factor()
+	var later:=clampf(state._baseline_mortality_hazard_at_age(0)*conditions*preload("res://scripts/early_life_conditions.gd").age_multiplier(care,0,conditions),0.0,0.9)
+	return (neonatal+(1.0-neonatal)*later)*1000.0
 
 static func health(state:Node=GameState,discovery:Node=DiscoverySystem)->Dictionary:
 	return {"life_expectancy":state.projected_life_expectancy(),"infant_mortality_per_1000":infant_mortality_per_1000(state,discovery)}

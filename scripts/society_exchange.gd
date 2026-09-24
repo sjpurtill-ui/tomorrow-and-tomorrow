@@ -237,7 +237,7 @@ static func attraction()->float:
 	var s:=WorldSimulation.state;var m:=s.simulation_metrics
 	var health:=preload("res://scripts/civilization_indicators.gd").health()
 	var longevity:=clampf((float(health.life_expectancy)-15.0)/55.0,0.0,1.0)
-	var infant_survival:=1.0-clampf((float(health.infant_mortality_per_1000)-4.0)/176.0,0.0,1.0)
+	var infant_survival:=1.0-clampf((float(health.infant_mortality_per_1000)-60.0)/240.0,0.0,1.0)
 	var health_quality:=longevity*.58+infant_survival*.42
 	return clampf(s.food_security*.28+minf(1,float(s.housing_capacity)/maxf(1,s.population_exact))*.18+health_quality*.24+float(m.get("security",.4))*.15+float(m.get("cohesion",.5))*.15+preload("res://scripts/undertaking_rewards.gd").local_bonus(s,"attraction")+preload("res://scripts/artifact_culture.gd").migration_bonus(),0,1)
 

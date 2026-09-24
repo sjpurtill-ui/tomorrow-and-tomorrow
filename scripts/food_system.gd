@@ -57,6 +57,9 @@ const TECHNIQUES:={
 	"ember_tending":{"diet":.02},"hearth_heat_retention":{"diet":.01},
 	"hearth_roasting_control":{"diet":.03},"earth_oven_cooking":{"diet":.03},"food_steaming_vessels":{"diet":.03},
 }
+## A day's wild harvest is capped near this multiple of the ground's daily
+## renewal, scaled by season, weather and the state of the stock.
+const STANDING_HARVEST:=2.3
 const LEVER_LIMITS:={"fresh_spoilage":.40,"stored_spoilage":.60,"preservation":2.0,"diet":.25,"cultivation":.60,"gathering":.30}
 
 var initialized := false
@@ -364,6 +367,11 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	var game_season:=_season_factor("Fresh meat",WorldSimulation.state.elapsed_days)
 	var fish_season:=_season_factor("Fish",WorldSimulation.state.elapsed_days)
 	var crop_season:=_season_factor("Dry staples",WorldSimulation.state.elapsed_days)
+	# Food workers drift toward whatever is returning well this season and away
+	# from game or fishing grounds they have thinned. The drift is partial: habit,
+	# skill and the need for variety keep every source in use.
+	var shifted:=_adaptive_source_weights({"Fresh plants":gathering_weight,"Fresh meat":hunting_weight,"Fish":fishing_weight},{"Fresh plants":plant_season,"Fresh meat":game_season,"Fish":fish_season})
+	gathering_weight=float(shifted["Fresh plants"]);hunting_weight=float(shifted["Fresh meat"]);fishing_weight=float(shifted["Fish"])
 	var terrain_gather:=lerpf(0.54,1.34,clampf(float(environment.get("forage",0.45)),0.0,1.0))
 	var terrain_hunt:=lerpf(0.52,1.38,clampf(float(environment.get("game",0.40)),0.0,1.0))
 	var efficiency:=lerpf(0.76,1.08,clampf(labor_efficiency,0.0,1.0))
@@ -386,7 +394,60 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	if cultivation_weight>0.0 and not traveling:
 		var agronomy:Dictionary=preload("res://scripts/agronomy_knowledge.gd").factors(traveling)
 		result["Dry staples"]=workers*cultivation_weight*5.65*crop_season*efficiency*float(WorldSimulation.state.food_source_health.get("Cultivation",0.9))*(0.68+float(environment.get("fertility",0.0))*0.38+float(access.fertile)*0.12)*(1.0+WorldSimulation.discovery.effect("soil_productivity")+WorldSimulation.discovery.effect("cultivation_yield"))*variation*float(agronomy["yield"])*preload("res://scripts/agronomy_knowledge.gd").weather_factor(_food_type_weather_multiplier("Dry staples",weather_factor),agronomy)*(1.0+technique_lever("cultivation"))
+	if not traveling:
+		# A day's wild harvest cannot exceed what the surrounding land holds in
+		# season. Hands that find nothing more to gather or hunt go to the fields
+		# when fields exist; before cultivation they are simply wasted effort.
+		var freed:=_apply_wild_ceilings(result,{"Fresh plants":[gathering_weight,plant_season],"Fresh meat":[hunting_weight,game_season],"Fish":[fishing_weight,fish_season]},weather_factor)
+		if freed>0.0 and cultivation_weight>0.0 and float(result["Dry staples"])>0.0:
+			result["Dry staples"]=float(result["Dry staples"])*(1.0+freed/cultivation_weight)
 	return result
+
+## Caps each wild source at what its ground yields in a day this season and
+## returns the share of food labor left without work (0 when nothing binds).
+func _apply_wild_ceilings(result:Dictionary,sources:Dictionary,weather_factor:float)->float:
+	var blend:=_early_rules_blend()
+	if blend<=0.0:return 0.0
+	var capacities:=wild_food_capacity()
+	var keys:={"Fresh plants":"Wild gathering","Fresh meat":"Hunting","Fish":"Fishing"}
+	var span:=float(WorldSimulation.span)
+	var freed:=0.0
+	for food_type:String in sources:
+		var raw:=float(result.get(food_type,0.0))
+		if raw<=0.0:continue
+		var source:=String(keys[food_type])
+		var ground:=float(WorldSimulation.state.food_source_health.get(source,0.9))
+		var season:=float((sources[food_type] as Array)[1])
+		var ceiling:=maxf(0.01,float((capacities[source] as Dictionary).rations)*STANDING_HARVEST*season*_food_type_weather_multiplier(food_type,weather_factor)*ground*span)
+		var taken:=ceiling*(1.0-exp(-raw/ceiling))
+		result[food_type]=lerpf(raw,taken,blend)
+		freed+=float((sources[food_type] as Array)[0])*(1.0-taken/raw)*blend
+	return freed
+
+## Rebalances wild-food labor by current return (ground health x season).
+## The total wild share is unchanged; cultivation keeps its own share.
+func _adaptive_source_weights(weights:Dictionary,seasons:Dictionary)->Dictionary:
+	var blend:=_early_rules_blend()
+	var total:=0.0
+	for source:String in weights:total+=float(weights[source])
+	if total<=0.0 or blend<=0.0:return weights
+	var scored:Dictionary={}
+	var scored_total:=0.0
+	var health_keys:={"Fresh plants":"Wild gathering","Fresh meat":"Hunting","Fish":"Fishing"}
+	for source:String in weights:
+		var ground:=float(WorldSimulation.state.food_source_health.get(health_keys[source],0.9))
+		var score:=float(weights[source])*sqrt(clampf(ground*float(seasons.get(source,1.0)),0.05,2.0))
+		scored[source]=score
+		scored_total+=score
+	var result:Dictionary={}
+	for source:String in weights:
+		var adapted:=float(scored[source])/maxf(0.0001,scored_total)*total
+		result[source]=lerpf(float(weights[source]),adapted,blend*0.8)
+	return result
+
+## Save-compatibility blend of the early-consequence rules (0 old save, 1 new).
+func _early_rules_blend()->float:
+	return clampf(float(WorldSimulation.state.early_care_blend),0.0,1.0)
 
 func _coastal_food_profile(traveling:bool)->Dictionary:
 	var empty:={"shoreline_access":0.0,"marine_opportunity":0.0,"food_output_bonus":0.0,"foraging_bonus":0.0}
@@ -549,7 +610,21 @@ func _diet_quality(consumed: Dictionary,total: float,harvest:Dictionary) -> floa
 		if float(harvest.get(source,0.0))>maxf(0.001,harvested)*0.03: categories+=1
 	if stored>total*0.03 and float(harvest.get("Dry staples",0.0))<=harvested*0.03:categories+=1
 	var diversity:=clampf(float(categories)/4.0,0.0,1.0)
-	return clampf(0.24+minf(plant_share,0.48)*0.65+minf(protein_share,0.30)*0.95+diversity*0.22+WorldSimulation.discovery.effect("nutrition_quality")+technique_lever("diet"),0.05,1.0)
+	var bonus:=WorldSimulation.discovery.effect("nutrition_quality")+technique_lever("diet")
+	var legacy:=clampf(0.24+minf(plant_share,0.48)*0.65+minf(protein_share,0.30)*0.95+diversity*0.22+bonus,0.05,1.0)
+	# Early rules: an unprocessed forager or grain diet is adequate, not ideal.
+	# Fresh food carries what dried staples lack; variety, protein and a fresh
+	# share each matter, and cooking and processing knowledge supply the rest.
+	var fresh_share:=clampf(fresh/total/0.5,0.0,1.0)
+	var staple_heavy:=maxf(0.0,float(harvest.get("Dry staples",0.0))/maxf(0.001,harvested)-0.55)
+	# Evenness of today's sources (Simpson index, 1 at four equal sources).
+	var evenness:=1.0
+	if harvested>0.001:
+		for source in SOURCES:evenness-=pow(float(harvest.get(source,0.0))/harvested,2.0)
+	else:evenness=0.0
+	evenness=clampf(evenness/0.75,0.0,1.0)
+	var early:=clampf(0.06+minf(plant_share,0.55)*0.40+minf(protein_share,0.40)*0.55+evenness*0.16+fresh_share*0.10-staple_heavy*0.20+bonus,0.05,1.0)
+	return lerpf(legacy,early,_early_rules_blend())
 
 func _update_nutrition(intake_ratio: float,diet_quality: float) -> void:
 	var reserve_delta:=((intake_ratio-0.94)*0.010+(diet_quality-0.55)*0.0018)*WorldSimulation.span
@@ -562,15 +637,46 @@ func _update_source_health(harvest: Dictionary,workers: float,traveling: bool) -
 	var pressure:=workers/able
 	var recovery:=(0.0007 if traveling else 0.00035)*(1.0+WorldSimulation.discovery.effect("ecology_recovery"))
 	var mapping:={"Wild gathering":"Fresh plants","Hunting":"Fresh meat","Fishing":"Fish","Cultivation":"Dry staples"}
+	var blend:=0.0 if traveling else _early_rules_blend()
+	var capacities:=wild_food_capacity() if blend>0.0 else {}
+	var span:=float(WorldSimulation.span)
 	for source in mapping:
 		var current:=float(WorldSimulation.state.food_source_health.get(source,0.9))
 		var used:=float(harvest.get(mapping[source],0.0))>0.01
 		var damage:=maxf(0.0,pressure-0.42)*0.0018*(1.0+WorldSimulation.discovery.effect("ecological_pressure")) if used else 0.0
-		if source=="Cultivation" and used: damage=maxf(0.0,pressure-0.55)*0.0011*float(preload("res://scripts/agronomy_knowledge.gd").factors(traveling).soil_damage)
-		WorldSimulation.state.food_source_health[source]=clampf(current+(recovery-damage)*WorldSimulation.span,0.12,1.0)
+		var change:=recovery-damage
+		if source=="Cultivation" and used:
+			damage=maxf(0.0,pressure-0.55)*0.0011*float(preload("res://scripts/agronomy_knowledge.gd").factors(traveling).soil_damage)
+			change=recovery-damage
+		elif source!="Cultivation" and blend>0.0:
+			# Wild food is a renewable stock around the settlement. Taking more than
+			# the ground renews each day thins it; resting it lets it return.
+			var capacity:Dictionary=capacities[source]
+			var take:=float(harvest.get(mapping[source],0.0))/span/maxf(0.01,float(capacity.rations))
+			var renewal:=float(capacity.renewal)*(1.0-current)
+			var overuse:=float(capacity.overuse)*maxf(0.0,take-1.0)*current*(1.0+WorldSimulation.discovery.effect("ecological_pressure"))
+			change=lerpf(change,renewal-overuse,blend)
+		WorldSimulation.state.food_source_health[source]=clampf(current+change*span,0.12,1.0)
+
+## Rations a day each wild source renews around the settlement at full health,
+## with its renewal and overuse rates. Scales with the ground a larger group can
+## reach (square root of population); local ecology sets how fast it recovers.
+func wild_food_capacity()->Dictionary:
+	var environment:=_environment_mix()
+	var ecology:=clampf(float(WorldSimulation.state.simulation_metrics.get("ecology",0.88)),0.04,1.0)
+	var reach:=sqrt(maxf(1.0,WorldSimulation.state.population_exact)/120.0)
+	var coastal:=_coastal_food_profile(false)
+	var regrowth:=lerpf(0.55,1.15,ecology)*(1.0+maxf(0.0,WorldSimulation.discovery.effect("ecology_recovery")))
+	var water:=maxf(clampf(float(environment.get("water_access",0.0)),0.0,1.0),float(coastal.marine_opportunity))
+	return {
+		"Wild gathering":{"rations":(60.0+clampf(float(environment.get("forage",0.45)),0.0,1.0)*170.0)*reach,"renewal":0.0040*regrowth,"overuse":0.0025},
+		"Hunting":{"rations":(10.0+clampf(float(environment.get("game",0.40)),0.0,1.0)*60.0)*reach,"renewal":0.0015*regrowth,"overuse":0.0040},
+		"Fishing":{"rations":(15.0+water*80.0+float(coastal.shoreline_access)*40.0)*reach,"renewal":0.0022*regrowth,"overuse":0.0030},
+	}
 
 func _source_report(harvest: Dictionary,workers: float,traveling: bool) -> Array[Dictionary]:
 	var access:=_food_resource_access()
+	var capacities:=wild_food_capacity() if not traveling and _early_rules_blend()>0.0 else {}
 	var reports:Array[Dictionary]=[]
 	for entry in [
 		["Wild gathering","Fresh plants","Ambient land","available"],
@@ -581,7 +687,11 @@ func _source_report(harvest: Dictionary,workers: float,traveling: bool) -> Array
 		var amount:=float(harvest.get(entry[1],0.0))
 		var status:=String(entry[3])
 		if entry[0]=="Cultivation" and "seed_selection" not in WorldSimulation.state.known_discoveries: status="practice not discovered"
-		reports.append({"name":entry[0],"food_type":entry[1],"produced":amount,"resource":entry[2],"access":status,"source_health":float(WorldSimulation.state.food_source_health.get(entry[0],0.9)),"travel_limited":traveling})
+		var report:={"name":entry[0],"food_type":entry[1],"produced":amount,"resource":entry[2],"access":status,"source_health":float(WorldSimulation.state.food_source_health.get(entry[0],0.9)),"travel_limited":traveling}
+		if capacities.has(entry[0]):
+			report["renewable"]=float((capacities[entry[0]] as Dictionary).rations)
+			report["overused"]=amount>float(report.renewable)
+		reports.append(report)
 	return reports
 
 ## The 30- and 90-day outlook, estimated in weekly steps from seasonal
@@ -685,6 +795,15 @@ func _weather_yield_factor(profile:Dictionary,day:float)->float:
 		factor*=1.0-severity*pulse
 	elif annual_roll>0.88:
 		factor*=1.0+annual_rng.randf_range(0.08,0.18)*pulse
+	# Some winters are hard: deep cold and late thaw where the seasons are
+	# strong. Stores decide whether a hard winter is a lean spell or a hunger.
+	var winter_year:=floori((maxf(0.0,day)+120.0)/365.0)
+	var winter_rng:=RandomNumberGenerator.new()
+	winter_rng.seed=WorldSimulation.state.world_seed^(winter_year+71)*19349663
+	var seasonality:=clampf(float(profile.get("seasonality_c",12.0))/20.0,0.0,1.3)
+	if winter_rng.randf()<0.08+seasonality*0.12:
+		var winter:=maxf(0.0,-PlanetEnvironment.season_wave(profile,day))
+		factor*=1.0-winter_rng.randf_range(0.16,0.34)*winter*_early_rules_blend()
 	return clampf(factor,0.52,1.24)
 
 
