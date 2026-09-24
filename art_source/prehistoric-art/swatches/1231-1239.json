@@ -1,0 +1,15 @@
+{
+  "source": "art_source/prehistoric-art/swatches/1231-1239.png",
+  "prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch focused on useful natural forks, ivory paper and rough matte gouache. Cells: ringlike stone among roots, ember fungus in branch fork, tactile clay route, claw loosening fiber knot, shell strainer over twigs, clay plug in branch split, flakes on forked root, stick reaching crevice, leaf bundle tucked in tree fork.",
+  "entries": [
+    {"id": 1231, "review": "Top-left: naturally ringlike stone with blind hollow seated between two rough roots."},
+    {"id": 1232, "review": "Top-middle: wild tinder fungus lodged in a tree fork and holding a small ember."},
+    {"id": 1233, "review": "Top-right: rough clay slab with a crooked finger path and three shallow thumb hollows, no writing."},
+    {"id": 1234, "review": "Middle-left: curved natural claw at a tree fork worrying loose a coarse fiber knot."},
+    {"id": 1235, "review": "Middle-middle: broken shell suspended on two forked twigs and dripping into a puddle."},
+    {"id": 1236, "review": "Middle-right: lumpy unfired clay plug with pinch nub pressed into a fallen branch split."},
+    {"id": 1237, "review": "Bottom-left: differently shaped rough stone flakes arranged along an exposed root fork."},
+    {"id": 1238, "review": "Bottom-middle: naturally crooked stick reaching into a narrow boulder crevice."},
+    {"id": 1239, "review": "Bottom-right: loose varied-leaf bundle tied and tucked into a tree fork with air gaps."}
+  ]
+}

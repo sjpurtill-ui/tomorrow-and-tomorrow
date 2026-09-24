@@ -96,8 +96,61 @@ static func control_theme()->Theme:
 	result.set_stylebox("focus","LineEdit",flat(FIELD_BG,GOLD,1,3,8))
 	result.set_stylebox("background","ProgressBar",flat(TRACK))
 	result.set_color("font_color","ProgressBar",BODY)
+	add_tooltip_style(result)
 	_control_theme=result
 	return result
+
+## Hover clues. Godot draws every tooltip as a TooltipPanel popup holding a
+## TooltipLabel, parented to the hovered control, so it inherits that control's
+## theme: a theme that colours "Label" but not "TooltipLabel" puts HUD ink on
+## Godot's default dark tooltip panel. Any theme that sets Label colours must
+## also carry these (paper and ink in light mode, dark panel and light text in
+## dark mode). The root window carries control_theme(), which covers
+## everything outside the HUD tree.
+const TOOLTIP_MAX_WIDTH:=440.0
+const TOOLTIP_FONT_SIZE:=15
+
+static func tooltip_panel_style()->StyleBoxFlat:
+	var style:=StyleBoxFlat.new()
+	style.bg_color=Color("f8f3ea") if is_light() else Color(12.0/255.0,20.0/255.0,22.0/255.0,0.98)
+	style.border_color=BORDER_2 if is_light() else Color("56686b")
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(4)
+	style.content_margin_left=12.0
+	style.content_margin_right=12.0
+	style.content_margin_top=8.0
+	style.content_margin_bottom=8.0
+	style.shadow_color=Color(0,0,0,0.22 if is_light() else 0.45)
+	style.shadow_size=6
+	style.shadow_offset=Vector2(0,2)
+	return style
+
+static func add_tooltip_style(theme:Theme)->void:
+	theme.set_type_variation("TooltipPanel","PopupPanel")
+	theme.set_type_variation("TooltipLabel","Label")
+	theme.set_stylebox("panel","TooltipPanel",tooltip_panel_style())
+	theme.set_color("font_color","TooltipLabel",INK)
+	theme.set_color("font_shadow_color","TooltipLabel",Color(0,0,0,0))
+	theme.set_color("font_outline_color","TooltipLabel",Color(0,0,0,0))
+	theme.set_constant("outline_size","TooltipLabel",0)
+	theme.set_constant("shadow_offset_x","TooltipLabel",0)
+	theme.set_constant("shadow_offset_y","TooltipLabel",0)
+	theme.set_constant("line_spacing","TooltipLabel",3)
+	theme.set_font_size("font_size","TooltipLabel",TOOLTIP_FONT_SIZE)
+
+static func shape_tooltip(label:Label)->void:
+	## Wraps a long plain tooltip at a readable width instead of one long line.
+	if label.text.is_empty(): return
+	var font:=label.get_theme_font("font")
+	var font_size:=label.get_theme_font_size("font_size")
+	if font==null: return
+	var width:=font.get_multiline_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1.0,font_size).x
+	if width<=TOOLTIP_MAX_WIDTH: return
+	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size.x=TOOLTIP_MAX_WIDTH
+
+static func tooltip_node_added(node:Node)->void:
+	if node is Label and (node as Label).theme_type_variation==&"TooltipLabel": shape_tooltip(node as Label)
 
 static func surface(dark_color:Color,light_color:Color=Color("e8dece"))->Color:
 	if not is_light():return dark_color

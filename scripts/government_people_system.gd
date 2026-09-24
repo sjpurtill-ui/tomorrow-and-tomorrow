@@ -170,6 +170,7 @@ func process_day(day:int)->Array[Dictionary]:
 	# ordinary UI initialization may reconcile an older save silently.
 	initialize(false)
 	if people.is_empty(): return []
+	_fade_bonds(day)
 	WorldSimulation.settlements.with_local_population(func()->void:preload("res://scripts/civic_administration.gd").credit_day(self,day))
 	var month:=day/MONTH_DAYS
 	# Local leaders rebalance ordinary labor every day. Mortality, succession and
@@ -659,6 +660,14 @@ func adjust_person_bonds(person_id:int,deltas:Dictionary)->Dictionary:
 		var delta:=float(deltas[key])
 		if not is_finite(delta): continue
 		sovereign[key]=clampf(float(sovereign.get(key,BOND_DEFAULTS[key]))+delta,0.0,1.0)
+	# Fading stamps (divine_regard.gd fade): a big act holds its dread for a
+	# while, and fresh resentment restarts the quiet spell before it eases.
+	var today:=int(WorldSimulation.state.elapsed_days)
+	var hold_days:=int(deltas.get("hold_days",0)) if (deltas.get("hold_days") is int or deltas.get("hold_days") is float) else 0
+	if hold_days>0:
+		var held_until:=int(float(sovereign.get("dread_hold",-1))) if (sovereign.get("dread_hold") is int or sovereign.get("dread_hold") is float) else -1
+		sovereign["dread_hold"]=maxi(held_until,today+mini(hold_days,400))
+	if float(deltas.get("resentment",0.0))>0.0: sovereign["resent_day"]=today
 	relationships["sovereign"]=sovereign
 	people[index]["relationships"]=relationships
 	for roster_index in WorldSimulation.state.advisor_roster.size():
@@ -669,6 +678,24 @@ func adjust_person_bonds(person_id:int,deltas:Dictionary)->Dictionary:
 		WorldSimulation.state.leadership_positions[office_key]["relationships"]=relationships.duplicate(true)
 	revision+=1
 	return sovereign.duplicate(true)
+
+
+func _fade_bonds(day:int)->void:
+	## Love, dread and resentment drift back toward each person's own baseline
+	## (divine_regard.gd fade). Elapsed-day based, so multi-day steps match
+	## daily ones. Office and roster copies follow the person record.
+	var divine:=preload("res://scripts/divine_regard.gd")
+	var changed:Dictionary={}
+	for person:Dictionary in people:
+		if String(person.get("status","active"))!="active": continue
+		if divine.fade(person,day): changed[int(person.get("person_id",0))]=person.relationships
+	if changed.is_empty(): return
+	for roster_index in WorldSimulation.state.advisor_roster.size():
+		var roster_id:=int(WorldSimulation.state.advisor_roster[roster_index].get("person_id",0))
+		if changed.has(roster_id): WorldSimulation.state.advisor_roster[roster_index]["relationships"]=(changed[roster_id] as Dictionary).duplicate(true)
+	for office_key in WorldSimulation.state.leadership_positions:
+		var holder_id:=int((WorldSimulation.state.leadership_positions[office_key] as Dictionary).get("person_id",0))
+		if changed.has(holder_id): WorldSimulation.state.leadership_positions[office_key]["relationships"]=(changed[holder_id] as Dictionary).duplicate(true)
 
 
 func record_person_memory(person_id:int,summary:String,kind:String="civic",importance:float=0.6,metadata:Dictionary={})->Dictionary:
