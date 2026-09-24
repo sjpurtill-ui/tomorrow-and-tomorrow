@@ -118,6 +118,10 @@ static func valid_item(item:Variant)->bool:
 			if item.maker_requirements!=EarlyArt.REQUIREMENTS[int(item.catalogue_id)%16]:return false
 		else:return false
 	if item.has("gift_receipts") and not text_list(item.gift_receipts,64):return false
+	if item.has("provenance"):
+		if not item.provenance is Array or item.provenance.size()>32 or item.kind!="artifact":return false
+		for step:Variant in item.provenance:
+			if not step is Dictionary or not number(step.get("day")) or step.day<0 or not short_text(step.get("from")) or not short_text(step.get("to")) or step.get("mode") not in ["gift","sell","trade","looted","returned"]:return false
 	for field:String in ["site_id","site_name","set_name"]:
 		if item.has(field) and not short_text(item[field]):return false
 	if item.has("set_size") and (not number(item.set_size) or item.set_size<1 or item.set_size>12):return false

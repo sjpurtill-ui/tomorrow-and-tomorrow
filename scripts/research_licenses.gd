@@ -38,6 +38,23 @@ static func quote(source:String,subject:String,payment:String)->Dictionary:
 	terms["purpose_label"]="NEGOTIATE PRODUCTION LICENSE"
 	terms["message"]="Offer %s for 365 days of licensed manufacture of %s, starting on return. Licensed throughput is 65%% of independent manufacture. Real tooling, inputs, craftspeople and power remain necessary. War, supplier withdrawal or expiry pause dependent lines. No research or adoption is granted. Travel costs %.1f Food over %d days; the supplier may refuse." % [terms.gift.label,WorldSimulation.discovery.discovery_definition(subject).name,float(terms.provisions),int(terms.total_days)]
 	return terms
+## A foreign envoy who carries the signed contract: the same licensing rules
+## (supplier support, renewal window, register) without our own mission slot.
+static func envoy_quote(source:String,subject:String)->Dictionary:
+	if not available() or subject not in subjects():return {"error":"Production licenses need workshop standards, material accounting and a supported civilian manufacturing process."}
+	if independent(subject):return {"error":"Local mastery already supports independent manufacture."}
+	var contract:Dictionary=records().get(subject,{})
+	if active(subject) and int(contract.get("expires_day",0))-int(WorldSimulation.state.elapsed_days)>90:return {"error":"This contract is not yet due for renewal; renew during its final 90 days."}
+	if not records().has(subject) and records().size()>=LIMIT:return {"error":"The production contract register is full."}
+	if not supported(E.owner_id(source),subject):return {"error":"They cannot support licensed manufacture of this."}
+	return {"ok":true,"subject_name":String(WorldSimulation.discovery.discovery_definition(subject).get("name",subject))}
+static func grant_from_envoy(source:String,subject:String)->Dictionary:
+	var quote:=envoy_quote(source,subject)
+	if quote.has("error"):return quote
+	var day:=int(WorldSimulation.state.elapsed_days)
+	if not E.data().has("production_licenses"):E.data()["production_licenses"]={}
+	E.data().production_licenses[subject]={"source":E.owner_id(source),"issued_day":day,"expires_day":day+TERM}
+	return {"ok":true,"message":"Licensed manufacture of %s is available for one year while supplier support continues. Independent knowledge is unchanged." % String(quote.subject_name)}
 static func dispatch(source:String,subject:String,payment:String)->Dictionary:
 	return WorldSimulation.world.dispatch_diplomat(source,payment,"goodwill",subject,"license")
 static func valid(value:Variant)->bool:

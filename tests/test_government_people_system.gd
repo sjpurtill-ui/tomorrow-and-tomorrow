@@ -113,6 +113,10 @@ func test_research_override_exists_but_does_not_disable_survival_safeguards()->v
 
 func test_offices_and_titles_evolve_only_after_society_becomes_more_complex()->void:
 	var initial_title:=String(GovernmentPeopleSystem.active_offices()[0].title)
+	# Titles are capped by era; a people with metal, letters and credit may
+	# carry the later titles once its government grows.
+	for discovery_id in ["bloomery_smelting","formal_archives","public_credit"]:
+		if not GameState.known_discoveries.has(discovery_id): GameState.known_discoveries.append(discovery_id)
 	GameState.ensure_population_total(12000)
 	GameState.society_capacities["institutions"]=0.74
 	GameState.elapsed_days=30.0

@@ -78,6 +78,12 @@ func _ready()->void:
 	await _test_offline_scenes()
 	_test_validator()
 	await _test_mocked_api()
+	_test_variety_across_audiences()
+	_test_indicator()
+	_test_era_prehistoric()
+	_test_voice_models()
+	_test_situations()
+	_test_house_rules()
 	await _test_real_hall_if_present()
 	if failures.is_empty():
 		print("AUDIENCE_VOICE PASS")
@@ -208,6 +214,7 @@ func _test_offline_scenes()->void:
 	_expect(float(stub.find("aud_g").mood)>0.0 and float(stub.find("aud_t").mood)<0.0,"offline speech did not nudge room mood")
 
 func _test_validator()->void:
+	voice._mem_state={}
 	var a:=_audience("aud_v","request")
 	stub.audiences["aud_v"]=a; stub.courts["aud_v"]=_court()
 	var s:Dictionary=voice.scene("aud_v")
@@ -223,7 +230,7 @@ func _test_validator()->void:
 		{"speaker_key":"official_11","text":"Our watch is systematic, boss, and our system of ditches is better still.","aside":false},
 		"not a dict",
 	]
-	var out:Array=voice.validate_lines(raw,s,"speak")
+	var out:Array=voice.validate_lines(raw,s,"open")
 	_expect(out.size()==3,"validator kept %d lines, expected 3: %s" % [out.size(),JSON.stringify(out)])
 	if out.size()==2:
 		_expect(String(out[0].text).begins_with("Forty sacks"),"speaker-name prefix not stripped")
@@ -235,7 +242,8 @@ func _mock_send(id:String,payload:Dictionary,attempt:int)->void:
 	voice._on_response.call_deferred(int(step[0]),int(step[1]),PackedStringArray(),String(step[2]).to_utf8_buffer(),id,attempt)
 
 func _envelope(content:Dictionary)->String:
-	return JSON.stringify({"id":"mock","choices":[{"message":{"role":"assistant","content":JSON.stringify(content)}}]})
+	return JSON.stringify({"id":"mock","model":"mock-model","choices":[{"finish_reason":"stop","message":{"role":"assistant","content":JSON.stringify(content)}}],
+		"usage":{"prompt_tokens":100,"completion_tokens":50,"total_tokens":150,"completion_tokens_details":{"reasoning_tokens":20}}})
 
 func _test_mocked_api()->void:
 	voice.force_offline=false
@@ -293,9 +301,396 @@ func _test_mocked_api()->void:
 	_expect(voice.last_problem.has("aud_m"),"failure reason not recorded")
 	print("--- FALLBACK CLOSING AFTER API FAILURE ---")
 	for line in (a.lines as Array).slice(before): print("  %s: %s" % [line.speaker,line.text])
+	# 4) Receipts: every HTTP attempt is recorded with its cost and fate.
+	var accepted_rows:=0
+	var failed_http:=false
+	for row in voice.usage:
+		if bool(row.accepted) and int(row.http)==200 and int(row.total_tokens)==150 and int(row.prompt_tokens)==100 and int(row.reasoning_tokens)==20: accepted_rows+=1
+		if int(row.http)==500 and not bool(row.accepted) and not String(row.reason).is_empty(): failed_http=true
+	_expect(accepted_rows>=2,"mocked successes not receipted with usage (%d)" % accepted_rows)
+	_expect(failed_http,"mocked HTTP 500 not receipted with a reason")
+	var last_row:Dictionary=voice.usage[-1]
+	_expect(bool(last_row.fallback) and not bool(last_row.accepted) and "validation" in String(last_row.reason),"final failed attempt not marked as fallback: %s" % JSON.stringify(last_row))
+	_expect(int(voice.totals.calls)==5 and int(voice.totals.accepted)==2 and int(voice.totals.total_tokens)==450,"totals wrong: %s" % JSON.stringify(voice.totals))
+	var mid:Dictionary=voice.status()
+	_expect(String(mid.label).begins_with("Live voice · mock-model") and "last line offline" in String(mid.label),"indicator should admit the last live reply fell back: %s" % mid.label)
+	_expect("5 live calls" in String(mid.tooltip) and "450 total" in String(mid.tooltip),"tooltip lacks session calls/tokens: %s" % mid.tooltip)
+	# 5) A farewell after a silent audience costs nothing.
+	var quiet:=_audience("aud_quiet","gift")
+	stub.audiences["aud_quiet"]=quiet; stub.courts["aud_quiet"]=_court()
+	mock_plan=[[HTTPRequest.RESULT_SUCCESS,200,_envelope({"lines":[{"speaker_key":"envoy","text":"Greetings and more greetings, hearth-holder.","aside":false}],"mood_shift":0})]]
+	voice.open_scene("aud_quiet")
+	for i in 6: await get_tree().process_frame
+	sent_payloads.clear()
+	quiet.option_id="accept"
+	voice.closing("aud_quiet",{"ok":true,"outcome":"You accepted 40 Food.","reaction":"pleased","option_id":"accept"})
+	for i in 4: await get_tree().process_frame
+	_expect(sent_payloads.is_empty(),"closing after a silent audience still called the model")
+	_expect(String(voice.usage[-1].reason).begins_with("closing kept offline") and int(voice.usage[-1].http)==0,"silent closing not receipted as offline")
+	_expect(not (quiet.lines as Array).is_empty() and String(quiet.lines[-1].text).length()>0,"silent closing left no farewell")
 	voice.send_hook=Callable()
 	voice.config_override={}
 	voice.force_offline=true
+
+func _resolve_stub(a:Dictionary,option_id:String,outcome:String)->void:
+	a.option_id=option_id; a.status="resolved"; a.outcome=outcome
+
+func _run_series(prefix:String,kind:String,origin:String,option_id:String,outcome:String)->void:
+	## Ten audiences in a row from the same speaker, each answered the same way.
+	var series:=StubHall.new()
+	voice.hall=series; voice._used.clear(); voice._mem_state={}   # a fresh reign
+	var by_speaker:Dictionary={}
+	var openings:Array[String]=[]
+	var remembered:=0
+	for i in 10:
+		GameState.elapsed_days=100+i*25
+		var id:="%s_%d" % [prefix,i]
+		var a:=_audience(id,kind,origin)
+		a.arrived_day=int(GameState.elapsed_days)
+		if kind=="petition": a.petition={"topic":"ambition","summary":"Tamsin Wolde wants a public council where the people can be heard.","suggested_decree":"Hold a public council to hear the people"}
+		series.audiences[id]=a; series.order.push_front(id); series.courts[id]=_court()
+		voice.open_scene(id)
+		voice.player_speaks(id,"Go on.")
+		voice.closing(id,{"ok":true,"outcome":outcome,"reaction":"neutral","option_id":option_id})
+		_resolve_stub(a,option_id,outcome)
+		_expect(not (a.lines as Array).is_empty() and String(a.lines[0].speaker)==String(a.speaker.name),"%s: visitor did not open" % id)
+		if (a.lines as Array).is_empty(): continue
+		openings.append(String(a.lines[0].text))
+		var saw_history:=false
+		for line in a.lines:
+			if String(line.role)=="ruler": continue
+			var key:=String(line.speaker)
+			var said:Dictionary=by_speaker.get(key,{})
+			var text:=String(line.text)
+			_expect(not said.has(text),"%s: %s repeated a line from %s: %s" % [id,key,String(said.get(text,"")),text])
+			said[text]=id; by_speaker[key]=said
+			if voice.remembered.get(id,"")==text: saw_history=true
+		if i==0: _expect(not saw_history,"%s: first-ever audience claimed a history" % id)
+		elif saw_history: remembered+=1
+		if i==3:
+			print("--- %s: FOURTH AUDIENCE WITH THE SAME VISITOR ---" % prefix)
+			for line in a.lines: print("  %s%s: %s" % [String(line.speaker)," (aside)" if bool(line.aside) else "",String(line.text)])
+	var distinct:={}
+	var leads:={}
+	for text in openings:
+		distinct[text]=true
+		leads[" ".join(text.to_lower().split(" ").slice(0,3))]=true
+	_expect(distinct.size()==openings.size(),"%s: openings repeat (%d distinct of %d)" % [prefix,distinct.size(),openings.size()])
+	_expect(leads.size()>=7,"%s: openings start the same way too often (%d distinct leads)" % [prefix,leads.size()])
+	_expect(remembered>=7,"%s: speaker referred to past audiences only %d of 9 times" % [prefix,remembered])
+	print("%s: %d openings, %d distinct leads, history referenced in %d/9" % [prefix,openings.size(),leads.size(),remembered])
+	voice.hall=stub; voice._used.clear()
+
+func _test_variety_across_audiences()->void:
+	voice.force_offline=true
+	_run_series("series_court","petition","court","promise","You promised Tamsin Wolde the matter of a proposal of their own would be considered. No order has been given.")
+	_run_series("series_civ","gift","foreign","accept","You accepted 40 Food from the Velmari.")
+	# The live prompt carries the history and a do-not-repeat list.
+	var series:=StubHall.new()
+	voice.hall=series; voice._used.clear()
+	var old:=_audience("aud_past","petition","court")
+	old.petition={"topic":"ambition","summary":"x","suggested_decree":"Hold a public council to hear the people"}
+	old.lines=[{"speaker":"Tamsin Wolde","role":"official","person_id":7,"civ_id":"player","text":"A word aired costs less than a grievance left to breed.","day":10,"aside":false}]
+	_resolve_stub(old,"promise","You promised Tamsin Wolde the matter would be considered.")
+	series.audiences["aud_past"]=old; series.order.push_front("aud_past")
+	var now:=_audience("aud_now","petition","court")
+	now.petition=old.petition.duplicate()
+	series.audiences["aud_now"]=now; series.courts["aud_now"]=_court()
+	GameState.elapsed_days=90
+	var prompt:String=voice.build_prompt(voice.scene("aud_now"),"open",{})
+	_expect("BEFORE TODAY" in prompt and "You promised Tamsin Wolde the matter would be considered." in prompt,"live prompt lacks the speaker's history")
+	_expect("SAID IN RECENT AUDIENCES" in prompt and "grievance left to breed" in prompt,"live prompt lacks the do-not-repeat list")
+	# The hall's own ledger rows (history_with_speaker) are understood too.
+	var entry:Dictionary=voice._history_entry({"day":40,"days_ago":50,"kind":"petition","ask":"ambition:Hold a public council to hear the people","answer":"promise","outcome":"Promised."},{})
+	_expect(String(entry.decree)=="Hold a public council to hear the people" and String(entry.option_id)=="promise" and String(entry.topic)=="ambition","ledger history row not normalized: %s" % JSON.stringify(entry))
+	voice.hall=stub; voice._used.clear()
+
+func _test_indicator()->void:
+	var probe_voice:=Voice.new(); probe_voice.hall=stub; add_child(probe_voice)
+	probe_voice.force_offline=true
+	_expect(String(probe_voice.status().label)=="Offline voice — switched to offline voices","forced offline label wrong: %s" % probe_voice.status().label)
+	probe_voice.force_offline=false
+	var was:=bool(GameState.civic_api_enabled)
+	GameState.civic_api_enabled=false
+	var st:Dictionary=probe_voice.status()
+	_expect(not bool(st.live) and String(st.label)=="Offline voice — AI is switched off","switched-off label wrong: %s" % st.label)
+	_expect("0 live calls" in String(st.tooltip) and "never cost" in String(st.tooltip),"offline tooltip wrong: %s" % st.tooltip)
+	GameState.civic_api_enabled=was
+	probe_voice.config_override={"endpoint":"https://mock.invalid/v1/chat/completions","api_key":"k","model":"mock-model","structured_output":true}
+	_expect(String(probe_voice.status().label)=="Live voice · mock-model","live label wrong: %s" % probe_voice.status().label)
+	probe_voice.queue_free()
+
+# ---------------------------------------------------------------------------
+# Era, voice models and situations
+# ---------------------------------------------------------------------------
+
+const PERSONA_FIELDS:=["name","title","address","oath","proverb","quirk","secret","want","sample","dialect","fear"]
+
+func _all_gate_ids()->Array:
+	var ids:Array=[]
+	for tag in CV.ERA_GATES: ids.append_array(CV.ERA_GATES[tag].ids)
+	return ids
+
+func _era_audience(id:String,kind:String,variant:int)->Dictionary:
+	var origin:="court" if kind=="petition" else "foreign"
+	var a:=_audience(id,kind,origin)
+	a.civ_id="civ_era_%d" % (variant%5)
+	if kind=="petition":
+		a.civ_id=""
+		var topics:=["food","health","housing","security","grievance","ambition","introduction","follow_up","war"]
+		var topic:String=topics[variant%topics.size()]
+		var decrees:={"food":"Send gatherers to find food","health":"Organize healers to care for the sick","housing":"Build shelters","security":"Raise a watch and post guards","ambition":"Hold a public council to hear the people"}
+		a.petition={"topic":topic,"summary":"About 9 days of stores remain; about 12 people have no shelter.","suggested_decree":String(decrees.get(topic,""))}
+		a.speaker={"name":"Tamsin Wolde","title":"Quartermaster","person_id":7+(variant%3),"role":"official"}
+	if kind=="proposal":
+		var types:=["accord_offer","protection_pact","peace_feeler","recruitment_protest","trade_offer","war_support"]
+		var sit_type:String=types[variant%types.size()]
+		a["situation"]={"type":sit_type,"headline":"proposes an understanding","summary":"The Velmari propose that neither people attack the other and that the frontier calm.",
+			"occasion":{"type":"relation_warm","text":"the Velmari have grown warm toward your people","day":10,"crisis":false}}
+	elif variant%3==0:
+		a["situation"]={"type":"x","headline":"","summary":"","occasion":{"type":"ambient","text":"a long silence between your peoples","day":10,"crisis":false}}
+	return a
+
+func _test_era_prehistoric()->void:
+	var founding:Array=preload("res://scripts/founding_knowledge.gd").PRACTICES.duplicate()
+	CV.knowledge_override["player"]=founding
+	var series:=StubHall.new()
+	voice.hall=series; voice._used.clear(); voice.force_offline=true
+	var kinds:=["gift","request","threat","news","petition","petition","proposal","proposal","report","petition"]
+	var hits:Array=[]
+	var samples:Array[String]=[]
+	var total:=0
+	for i in 50:
+		var kind:String=kinds[i%kinds.size()]
+		var id:="era_%d" % i
+		var a:=_era_audience(id,kind,i)
+		if kind=="report":
+			a.speaker={"name":"Wren Hollis","title":"Chief Scout","person_id":20,"role":"official"}
+			a["report"]={"facts":[{"key":"population","label":"≈340 people","text":"About 340 people live there.","confidence":0.7,"value":340}],"subject_civ_id":"civ_x","subject_name":"the Harrowfolk","source":"scouts","observed_day":6}
+		series.audiences[id]=a; series.order.push_front(id); series.courts[id]=_court()
+		GameState.elapsed_days=20+i*9
+		voice.open_scene(id)
+		voice.player_speaks(id,["Why should I trust you?","Thank you, friend.","Never. Get out.","Go on."][i%4])
+		var option:String={"gift":"accept","request":"grant_half","threat":"defy","news":"thank","petition":"promise","proposal":"decline","report":"reward"}[kind]
+		voice.closing(id,{"ok":true,"outcome":"Recorded.","reaction":["pleased","neutral","offended"][i%3],"option_id":option})
+		a.status="resolved"; a.option_id=option
+		for line in a.lines:
+			if String(line.role)=="ruler": continue
+			total+=1
+			var found:=CV.lexicon_hits(String(line.text),[])
+			if not found.is_empty(): hits.append("%s %s: %s %s" % [id,String(line.speaker),String(line.text),JSON.stringify(found)])
+			_expect(CV.imitation_ok(String(line.text)),"%s quotes or names a source: %s" % [id,line.text])
+			if samples.size()<10 and i%5==1 and String(line.text).length()>40: samples.append("%s: %s" % [String(line.speaker),String(line.text)])
+	_expect(hits.is_empty(),"prehistoric anachronisms (%d of %d lines): %s" % [hits.size(),total,JSON.stringify(hits.slice(0,6))])
+	# Personas are era-clean too, for every people and every official.
+	var persona_hits:Array=[]
+	for i in 24:
+		var people:Array=[CV.for_envoy("civ_era_%d" % i,"aud_p%d" % i),CV.for_foreign_leader("civ_era_%d" % i),CV.for_person(_person(100+i,"Test Person","Steward",["Bold"]))]
+		for p in people:
+			for field in PERSONA_FIELDS:
+				var found:=CV.lexicon_hits(String(p.get(field,"")),[])
+				if not found.is_empty(): persona_hits.append("%s.%s=%s" % [String(p.name),field,p.get(field,"")])
+			for tic in p.get("tics",[]):
+				if not CV.lexicon_hits(String(tic),[]).is_empty(): persona_hits.append("%s tic %s" % [String(p.name),tic])
+	for d in CV.DIALECTS:
+		var resolved:=CV.dialect(String(d.id),[])
+		for field in ["guide","label","open","address","oath","proverb","first","last"]:
+			if not CV.lexicon_hits(JSON.stringify(resolved[field]),[]).is_empty(): persona_hits.append("%s.%s" % [d.id,field])
+		for v in (resolved.subs as Dictionary).values():
+			if not CV.lexicon_hits(String(v),[]).is_empty(): persona_hits.append("%s sub %s" % [d.id,v])
+	_expect(persona_hits.is_empty(),"prehistoric personas carry anachronisms: %s" % JSON.stringify(persona_hits.slice(0,8)))
+	print("--- PREHISTORIC SAMPLE LINES (%d lines scanned, %d gated hits) ---" % [total,hits.size()])
+	for line in samples: print("  "+line)
+	voice.hall=stub; voice._used.clear()
+	# A later world permits what it has discovered.
+	var later:=_all_gate_ids()
+	CV.knowledge_override["player"]=later
+	var tags:=CV.era_tags("player")
+	_expect(tags.size()==CV.ERA_GATES.size() and CV.era_tier(tags)==3,"later era not recognised: %s" % JSON.stringify(tags))
+	_expect(CV.permits("A cask of beer, a bronze bell and a written ledger.",tags),"later era still forbids its own inventions")
+	_expect("Anvils and ashes!" in (CV.dialect("forge_gruff",tags).oath as Array) and String(CV.dialect("forge_gruff",tags).label)=="Gruff forge-folk","later era does not restore metal-age dialect")
+	_expect(String(CV.dialect("forge_gruff",[]).label)=="Gruff flint-knapper folk","early forge dialect not era-translated")
+	var tier_now:=int(CV.for_person(_court()[0]).era_tier)
+	_expect(tier_now==3,"persona not re-derived for the later era")
+	CV.knowledge_override["player"]=founding
+	_expect(int(CV.for_person(_court()[0]).era_tier)==0,"persona tier did not follow the world back")
+	CV.knowledge_override.erase("player")
+
+func _model_person(pid:int,person_name:String,title:String,traits:Array,axes:Dictionary,extra:Dictionary={})->Dictionary:
+	var p:=_person(pid,person_name,title,traits,extra)
+	var personality:Dictionary=(p.personality as Dictionary).duplicate()
+	for k in axes: personality[k]=axes[k]
+	p.personality=personality
+	return p
+
+func _test_voice_models()->void:
+	CV.knowledge_override["player"]=preload("res://scripts/founding_knowledge.gd").PRACTICES.duplicate()
+	var court:Array=[
+		_model_person(31,"Orrin Vale","Marshal",["Bold","Severe"],{"assertiveness":0.9,"risk_tolerance":0.85,"empathy":0.2},{"pride":0.8}),
+		_model_person(32,"Ysra Fenn","Steward",["Warm","Diplomatic"],{"empathy":0.85,"openness":0.6}),
+		_model_person(33,"Callum Brisk","Scholar",["Curious","Skeptical"],{"openness":0.9,"empathy":0.2},{"suspicion":0.8}),
+		_model_person(34,"Dagna Thorn","Quartermaster",["Frugal","Methodical"],{"discipline":0.9,"openness":0.3}),
+		_model_person(35,"Pell Moss","Envoy",["Generous"],{"discipline":0.2,"openness":0.7},{"courage":0.2,"honesty":0.4}),
+	]
+	# Deterministic for life.
+	for person in court:
+		var a:=CV.for_person(person); var b:=CV.for_person(person)
+		_expect(String(a.model)==String(b.model) and not String(a.model).is_empty(),"model assignment not deterministic for %s" % person.name)
+	# Distinct within the room.
+	var series:=StubHall.new()
+	voice.hall=series; voice._used.clear()
+	var a:=_audience("aud_models","gift")
+	series.audiences["aud_models"]=a; series.courts["aud_models"]=court
+	var s:Dictionary=voice.scene("aud_models")
+	var seen:={}
+	for member in [s.envoy]+(s.officials as Array):
+		var m:=String(member.persona.get("model",""))
+		_expect(not m.is_empty(),"%s has no voice model" % member.name)
+		_expect(not seen.has(m),"two speakers share the %s manner" % m)
+		seen[m]=true
+		var brief:=CV.brief(member.persona)
+		_expect("in the manner of" in brief and "never quoting" in brief,"brief lacks the manner instruction")
+	# Every offline bank line is original and era-safe for its own era.
+	for model_id in CV.MODEL_BANKS:
+		for key in CV.MODEL_BANKS[model_id]:
+			for line in CV.MODEL_BANKS[model_id][key]:
+				_expect(CV.imitation_ok(String(line)),"bank line quotes or names a source: %s" % line)
+				_expect(CV.lexicon_hits(String(line),[]).is_empty(),"bank line is anachronistic for the stone age: %s" % line)
+	for m in CV.VOICE_MODELS:
+		for line in m.examples: _expect(CV.imitation_ok(String(line)),"example quotes a source: %s" % line)
+	_expect(not CV.imitation_ok("Four score and seven winters ago our elders came here."),"famous-line blocklist not applied")
+	_expect(not CV.imitation_ok("As Atticus would say, be fair."),"source name blocklist not applied")
+	_expect(CV.VOICE_MODELS.size()>=20,"voice model library too small")
+	print("--- A COURT OF FIVE (with their visitor) ---")
+	var rng:=RandomNumberGenerator.new(); rng.seed=77
+	for member in [s.envoy]+(s.officials as Array):
+		var p:Dictionary=member.persona
+		var lines:PackedStringArray=PackedStringArray()
+		var keys:Array=["tail","reply"] if String(member.key)=="envoy" else ["interject","aside"]
+		var examples:Array=CV.model(String(p.get("model",""))).get("examples",[])
+		for k in keys.size():
+			var line:Dictionary=voice._say(s,member,CV.model_bank(p,String(keys[k])),rng)
+			if line.is_empty(): line={"text":String(examples[mini(k,examples.size()-1)])}
+			lines.append(String(line.text))
+		print("  %s (%s) — manner: %s\n      \"%s\"\n      \"%s\"" % [String(member.name),String(p.get("title","")),String(p.get("model_name","")),lines[0],lines[1]])
+	var leader:=CV.for_foreign_leader("civ_era_2")
+	var examples:Array=CV.model(String(leader.model)).examples
+	print("  %s (%s) — manner: %s\n      \"%s\"\n      \"%s\"" % [String(leader.name),String(leader.title),String(leader.model_name),String(examples[0]),String(examples[1])])
+	voice.hall=stub; voice._used.clear()
+	CV.knowledge_override.erase("player")
+
+func _test_situations()->void:
+	var series:=StubHall.new()
+	voice.hall=series; voice._used.clear(); voice.force_offline=true
+	# An arc: the petitioner acknowledges the unkept promise first.
+	var a:=_audience("aud_arc","petition","court")
+	a.petition={"topic":"follow_up","summary":"Tamsin Wolde asks again about a public council.","suggested_decree":"Hold a public council to hear the people"}
+	GameState.elapsed_days=400
+	a["situation"]={"type":"promise_followup","headline":"reminds you of a promise","summary":"Tamsin Wolde was promised a public council on day 250.",
+		"occasion":{"type":"promise","text":"a promise left hanging","day":400,"crisis":false},"arc":{"branch":"promise_unkept","previous":{"day":250,"decree":"Hold a public council to hear the people"}}}
+	series.audiences["aud_arc"]=a; series.order.push_front("aud_arc"); series.courts["aud_arc"]=_court()
+	voice.open_scene("aud_arc")
+	_expect(voice.remembered.has("aud_arc") and String(a.lines[0].text)==String(voice.remembered.aud_arc),"arc not acknowledged in the opening")
+	_expect("public council" in String(a.lines[0].text).to_lower() and "last year" in String(a.lines[0].text).to_lower(),"arc opening lacks the matter and when: %s" % a.lines[0].text)
+	# An occasion: the visitor opens from why they came.
+	var b:=_audience("aud_occ","proposal")
+	b["situation"]={"type":"recruitment_protest","headline":"protests your recruiters","summary":"The Velmari protest that your recruiters invited its households away (2 visits so far) and want it stopped.",
+		"occasion":{"type":"recruitment_incident","text":"your recruiters invited the Velmari's households away","day":400,"crisis":false}}
+	series.audiences["aud_occ"]=b; series.order.push_front("aud_occ"); series.courts["aud_occ"]=_court()
+	voice.open_scene("aud_occ")
+	var opening:=""
+	for line in b.lines:
+		if String(line.role)=="envoy": opening+=String(line.text)+" "
+	_expect("luring" in opening or "talked into leaving" in opening,"occasion not spoken in the opening: %s" % opening)
+	_expect("your word" in opening or "stops" in opening or "quarrel" in opening,"protest business missing: %s" % opening)
+	_expect(not "recruiters invited" in opening,"occasion recited as data: %s" % opening)
+	var prompt:String=voice.build_prompt(voice.scene("aud_occ"),"open",{})
+	_expect("WHY THEY CAME" in prompt and "WORLD AS THESE PEOPLE KNOW IT" in prompt and "NOT YET KNOWN" in prompt,"prompt lacks occasion or world line")
+	_expect("beer" in prompt.to_lower(),"world line does not name what is missing")
+	var arc_prompt:String=voice.build_prompt(voice.scene("aud_arc"),"open",{})
+	_expect("CONTINUING AN EARLIER AUDIENCE" in arc_prompt and "acknowledge" in arc_prompt,"prompt lacks the arc")
+	# New answers close truthfully.
+	voice.closing("aud_occ",{"ok":true,"outcome":"You agreed to restrain your recruiters.","reaction":"pleased","option_id":"restraint"})
+	_expect(String(b.lines[-2].role)=="envoy" or String(b.lines[-1].role)=="envoy","restraint closing missing")
+	print("--- SITUATIONS (offline) ---")
+	for line in (a.lines as Array).slice(0,3)+(b.lines as Array): print("  %s%s: %s" % [String(line.speaker)," (aside)" if bool(line.aside) else "",String(line.text)])
+	# The live validator drops anachronisms and quotations.
+	var s:Dictionary=voice.scene("aud_occ")
+	var kept:Array=voice.validate_lines([
+		{"speaker_key":"envoy","text":"Let us seal it over a cask of beer.","aside":false},
+		{"speaker_key":"envoy","text":"A house divided against itself will not stand, friend.","aside":false},
+		{"speaker_key":"envoy","text":"As Lincoln said, be fair.","aside":false},
+		{"speaker_key":"envoy","text":"Call off your people and our fires can share one smoke again.","aside":false}],s,"speak")
+	_expect(kept.size()==1 and "share one smoke" in String(kept[0].text),"validator kept anachronism/quotation: %s" % JSON.stringify(kept))
+	voice.hall=stub; voice._used.clear()
+
+func _test_house_rules()->void:
+	## Twelve audiences in one reign: one manner and one address per person for
+	## life, nothing said twice, questions answered, short scenes, no dialect
+	## flourishes on modelled speakers, era-true office titles.
+	CV.knowledge_override["player"]=preload("res://scripts/founding_knowledge.gd").PRACTICES.duplicate()
+	var series:=StubHall.new()
+	voice.hall=series; voice._used.clear(); voice._mem_state={}; voice.force_offline=true
+	var kinds:=["gift","request","threat","news","proposal","petition"]
+	var questions:=["And if we say no?","Why now?","What do you gain from this?","Tell me plainly what you need.","Who else has heard it?","How long will your need last?"]
+	var models:={}; var addresses:={}; var seen:={}
+	var asked:=0; var answered:=0; var lines_total:=0; var short:=0
+	var openers:={}
+	for d in CV.DIALECTS:
+		for o in d.open: openers[String(o)]=true
+	for i in 12:
+		var kind:String=kinds[i%kinds.size()]
+		var id:="rule_%d" % i
+		var a:=_era_audience(id,kind,i)
+		a.civ_id="civ_rule_%d" % (i%3)
+		if kind=="petition": a.speaker={"name":"Tamsin Wolde","title":"Quartermaster","person_id":7,"role":"official"}
+		series.audiences[id]=a; series.order.push_front(id); series.courts[id]=_court()
+		GameState.elapsed_days=50+i*60
+		var s:Dictionary=voice.scene(id)
+		for member in [s.envoy]+(s.officials as Array):
+			var who:=String(member.persona.get("speaker_key",member.name))
+			var held:Dictionary=models.get(who,{})
+			held[String(member.persona.get("model",""))]=true; models[who]=held
+		voice.open_scene(id)
+		var question:String=questions[i%questions.size()]
+		voice.player_speaks(id,question)
+		if not voice.answer_bank(s,question).is_empty():
+			asked+=1
+			if bool(voice.answered.get(id,false)): answered+=1
+		voice.closing(id,{"ok":true,"outcome":"Recorded.","reaction":["pleased","neutral","offended"][i%3],"option_id":{"gift":"accept","request":"refuse","threat":"defy","news":"thank","proposal":"decline","petition":"promise"}[kind]})
+		a.status="resolved"
+		var count:=0
+		for line in a.lines:
+			if String(line.role)=="ruler": continue
+			count+=1; lines_total+=1
+			var text:=String(line.text)
+			if text.split(" ",false).size()<=20: short+=1
+			var key:=Voice.norm_line(text)
+			_expect(not seen.has(key),"said twice across audiences: %s" % text)
+			seen[key]=true
+			_expect(not openers.has(text.get_slice(" ",0)) and not text.begins_with("HA!"),"modelled speaker got a dialect flourish: %s" % text)
+			var terms:Dictionary=addresses.get(String(line.speaker),{})
+			for d in CV.DIALECTS:
+				for term in d.address:
+					if String(term) in text: terms[String(term)]=true
+			addresses[String(line.speaker)]=terms
+		_expect(count<=9,"%s ran to %d lines" % [id,count])
+	for speaker in models: _expect((models[speaker] as Dictionary).size()==1,"%s changed manner: %s" % [speaker,JSON.stringify(models[speaker])])
+	for speaker in addresses: _expect((addresses[speaker] as Dictionary).size()<=1,"%s addresses the ruler several ways: %s" % [speaker,JSON.stringify(addresses[speaker])])
+	_expect(asked>0 and answered==asked,"questions answered from the facts: %d of %d" % [answered,asked])
+	_expect(float(short)/maxf(1.0,float(lines_total))>=0.85,"too many long lines: %d of %d short" % [short,lines_total])
+	_expect(float(lines_total)/12.0<=8.0,"audiences too long: %.1f lines on average" % (float(lines_total)/12.0))
+	# Stone-age office titles read like a band, not a republic.
+	var stage:=int(GovernmentPeopleSystem.government_stage)
+	GovernmentPeopleSystem.government_stage=3
+	var modern:=RegEx.new(); modern.compile("(?i)(secretary|federal|mayor|minister|convenor|delegate|councillor|prefect|chancellor|director|governor)")
+	for office in GovernmentPeopleSystem.active_offices():
+		_expect(modern.search(String(office.title))==null,"stone-age title reads modern: %s" % office.title)
+	_expect(modern.search(GovernmentPeopleSystem.settlement_leader_title())==null,"stone-age settlement title reads modern")
+	GovernmentPeopleSystem.government_stage=stage
+	print("house rules: %d lines over 12 audiences, %d short, %d/%d questions answered, %d speakers one manner each" % [lines_total,short,answered,asked,models.size()])
+	voice.hall=stub; voice._used.clear(); voice._mem_state={}
+	CV.knowledge_override.erase("player")
 
 func _test_real_hall_if_present()->void:
 	# Smoke-test against Worker A's real engine when it exists: inject an audience

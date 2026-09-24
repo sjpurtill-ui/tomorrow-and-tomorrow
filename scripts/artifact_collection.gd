@@ -231,9 +231,10 @@ static func set_held(set_id:String)->int:
 		if item.get("kind","")=="artifact" and String(item.get("site_id",""))==set_id:held+=1
 	return held
 
-static func transfer(id:String,recipient:String,mode:String,offered:String="")->Dictionary:
+## Checks an exchange from the current owner's scope without moving anything.
+## Returns {ok, value} or {error}; transfer() applies exactly these rules.
+static func check(id:String,recipient:String,mode:String,offered:String="")->Dictionary:
 	var source:=WorldSimulation.state
-	var source_id:=WorldSimulation.actor_id
 	var target:Node=GameState if recipient=="player" else WorldSimulation.actors.get(recipient,{}).get("systems",{}).get("GameState")
 	if target==null or target==source or mode not in ["gift","sell","trade"]:return {"error":"Choose another civilization and a supported exchange."}
 	var view_id:="human" if recipient=="player" else recipient
@@ -252,6 +253,44 @@ static func transfer(id:String,recipient:String,mode:String,offered:String="")->
 		var reserve:=0.0
 		for amount:float in target.monetary_reserve_metals.values():reserve+=amount
 		if reserve<value/2.5:return {"error":"The buyer lacks transferable monetary backing."}
+	return {"ok":true,"value":value}
+
+## Owner-explicit exchange between any two owners ("player" or an actor id):
+## runs transfer() in the giving owner's scope, so ownership moves between the
+## two society_exchange collections, money and metal backing are conserved,
+## provenance is recorded and site claims stay with the piece.
+static func exchange(owner:String,id:String,recipient:String,mode:String,offered:String="")->Dictionary:
+	owner="player" if owner=="human" else owner
+	if owner!="player" and not WorldSimulation.actors.has(owner):return {"error":"That owner holds no collection."}
+	return WorldSimulation.scoped(owner,func()->Dictionary:return transfer(id,recipient,mode,offered))
+
+## check() from a named owner's scope.
+static func exchange_check(owner:String,id:String,recipient:String,mode:String,offered:String="")->Dictionary:
+	owner="player" if owner=="human" else owner
+	if owner!="player" and not WorldSimulation.actors.has(owner):return {"error":"That owner holds no collection."}
+	return WorldSimulation.scoped(owner,func()->Dictionary:return check(id,recipient,mode,offered))
+
+## The collection that holds pieces for an owner ("player" or actor id).
+static func holdings(owner:String)->Dictionary:
+	owner="player" if owner=="human" else owner
+	var state:Node=GameState if owner=="player" else WorldSimulation.actors.get(owner,{}).get("systems",{}).get("GameState")
+	if state==null:return {}
+	var result:Dictionary={}
+	for key:Variant in state.society_exchange.collections:
+		var item:Dictionary=state.society_exchange.collections[key]
+		if item.get("kind","")=="artifact":result[key]=item
+	return result
+
+static func transfer(id:String,recipient:String,mode:String,offered:String="")->Dictionary:
+	var checked:=check(id,recipient,mode,offered)
+	if checked.has("error"):return checked
+	var source:=WorldSimulation.state
+	var source_id:=WorldSimulation.actor_id
+	var target:Node=GameState if recipient=="player" else WorldSimulation.actors.get(recipient,{}).get("systems",{}).get("GameState")
+	var item:Dictionary=source.society_exchange.collections.get(id,{})
+	var other:Dictionary=target.society_exchange.collections.get(offered,{})
+	var value:=float(checked.value)
+	if mode=="sell":
 		var backing:=value/2.5
 		for metal:String in target.monetary_reserve_metals:
 			var moved:=minf(backing,float(target.monetary_reserve_metals[metal]))
@@ -264,8 +303,8 @@ static func transfer(id:String,recipient:String,mode:String,offered:String="")->
 	for owner:Node in [source,target]:
 		owner.society_exchange.history.push_front({"day":int(source.elapsed_days),"text":message})
 		if owner.society_exchange.history.size()>64:owner.society_exchange.history.resize(64)
-	move(source,target,item)
-	if mode=="trade":move(target,source,other)
+	move(source,target,item,source_id,recipient,mode)
+	if mode=="trade":move(target,source,other,recipient,source_id,mode)
 	if mode=="gift" and (source_id+":"+recipient) not in item.get("gift_receipts",[]) and item.get("gift_receipts",[]).size()<64:
 		if not item.has("gift_receipts"):item.gift_receipts=[]
 		item.gift_receipts.append(source_id+":"+recipient)
@@ -277,7 +316,14 @@ static func transfer(id:String,recipient:String,mode:String,offered:String="")->
 		WorldSimulation.scoped(owner_key,func()->void:owner.society_exchange["artifact_bonuses"]=summary())
 	return {"ok":true,"value":value}
 
-static func move(source:Node,target:Node,item:Dictionary)->void:
+const PROVENANCE_LIMIT:=32
+
+static func move(source:Node,target:Node,item:Dictionary,from_id:String="",to_id:String="",mode:String="")->void:
+	if mode!="":
+		## Provenance: every change of hands, oldest first, bounded.
+		if not item.get("provenance") is Array:item["provenance"]=[]
+		(item.provenance as Array).append({"day":int(source.elapsed_days),"from":from_id,"to":to_id,"mode":mode})
+		while (item.provenance as Array).size()>PROVENANCE_LIMIT:(item.provenance as Array).pop_front()
 	source.society_exchange.collections.erase(item.id)
 	if source.society_exchange.evidence.get(item.discovery_id)==item.id:
 		source.society_exchange.evidence.erase(item.discovery_id)

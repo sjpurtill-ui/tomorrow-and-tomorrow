@@ -1,9 +1,22 @@
 extends RefCounted
 ## Audience Hall engine. The world comes to the ruler: foreign envoys bring
-## gifts, requests, tribute demands and news; officials petition about real
-## conditions, grievances and ambitions. This is the only place the hall
-## changes world state. Voice text never moves goods or relations; it may only
-## nudge the bounded room `mood`, which adds at most ±0.03 opinion at resolve.
+## gifts, requests, tribute demands, news and proposals; officials petition
+## about real conditions, grievances and ambitions. This is the only place the
+## hall changes world state. Voice text never moves goods or relations; it may
+## only nudge the bounded room `mood`, which adds at most ±0.03 opinion at
+## resolve.
+##
+## Pacing (revision 2). Audiences are occasioned, not timed: a daily watch
+## notices what CHANGED or MATTERS (first contact, a relation swing, a war
+## beginning or ending, a famine, a recruitment incident, a new official, a
+## grievance, a promise left hanging, the sequel to an earlier audience) and
+## files an occasion. An occasion becomes an audience only inside a budget:
+## about one every `FREQUENCIES[frequency]` days on average, never within
+## MIN_GAP days of another, each civilization at most every CIV_GAP days and
+## each official every PERSON_GAP days (crises and promised follow-ups may come
+## sooner), and never the same speaker twice in a row unless answering a thread.
+## A ledger remembers every (speaker, ask) for three years so nothing repeats,
+## and later audiences branch on how earlier ones ended.
 ##
 ## State lives in ForeignDiplomacy.audiences and is saved with that system.
 ## Reference with preload (no class_name; the runtime class cache is not
@@ -12,23 +25,130 @@ extends RefCounted
 const EXCHANGE:=preload("res://scripts/civilization_exchange.gd")
 const SOCIETY:=preload("res://scripts/society_exchange.gd")
 const NAMES:=preload("res://scripts/historical_name_generator.gd")
+const COMMITMENTS:=preload("res://scripts/diplomatic_commitments.gd")
+const RUMORS:=preload("res://scripts/rumor_network.gd")
+const INTEL:=preload("res://scripts/city_intelligence.gd")
+const SCHOLARS:=preload("res://scripts/scholar_visits.gd")
+const PURCHASE:=preload("res://scripts/research_purchase.gd")
+const LICENSES:=preload("res://scripts/research_licenses.gd")
+const ARTIFACTS:=preload("res://scripts/artifact_collection.gd")
+const RIVALRY:=preload("res://scripts/great_works_rivalry.gd")
 const RESOURCES:=["Food","Timber","Stone","Clay","Fiber Plants"]
-const KINDS:=["gift","request","threat","news","petition","report","great_work","wonder_proposal"]
+const KINDS:=["gift","request","threat","news","petition","report","great_work","wonder_proposal","proposal"]
 ## Kinds raised by our own people (origin "court").
 const COURT_KINDS:=["petition","report","great_work","wonder_proposal"]
 const WORK_KINDS:=["great_work","wonder_proposal"]
 const GREAT_WORKS_PATH:="res://scripts/great_works_audience.gd"
 const REPORT_SOURCES:=["scouts","envoys","expedition"]
 const REPORT_FACTS_MAX:=24
-const TOPICS:=["food","health","housing","security","grievance","ambition"]
+const TOPICS:=["food","health","housing","security","grievance","ambition","introduction","follow_up","war"]
 const REACTIONS:=["delighted","pleased","neutral","offended","furious"]
+const VERSION:=2
 const EXPIRY_DAYS:=20
 const QUEUE_MAX:=4
 const HISTORY_MAX:=30
 const LINES_MAX:=60
-const GAP_DAYS:=3
 const COURT_MAX:=4
 const MOOD_OPINION:=0.03
+
+# ---- pacing budget ----
+## Average days between audiences the hall raises itself, by setting.
+const FREQUENCIES:={"rare":150,"normal":90,"lively":60}
+## Hard minimum between any two arrivals.
+const MIN_GAP:=20
+## Kept for older callers: the global gap is now the hard minimum.
+const GAP_DAYS:=MIN_GAP
+const CIV_GAP:=180
+const CIV_CRISIS_GAP:=60
+const PERSON_GAP:=240
+const PERSON_THREAD_GAP:=120
+const PERSON_CRISIS_GAP:=90
+## No speaker repeats the same ask within this many days.
+const REPEAT_DAYS:=1095
+const LEDGER_MAX:=240
+const OCCASIONS_MAX:=48
+const SITUATION_JSON_MAX:=4000
+## Waiting audiences a legacy save keeps when it is calmed on load.
+const MIGRATION_KEEP:=2
+## Occasions that continue an earlier audience (they may follow sooner).
+const THREAD_OCCASIONS:=["sequel","promise_followup","refusal_grievance"]
+const COURT_OCCASIONS:=["condition","grievance","appointment","war_council","promise_followup","refusal_grievance","ambition"]
+
+## Every situation the hall can raise, its audience kind, and the real
+## mechanic its answers resolve through. `headline` is a short herald phrase.
+const SITUATIONS:={
+	"gift_goods":{"kind":"gift","headline":"brings a gift","mechanic":"civilization_exchange take/receive between real ledgers"},
+	"gratitude_gift":{"kind":"gift","headline":"returns kindness with a gift","mechanic":"civilization_exchange take/receive between real ledgers"},
+	"aid_request":{"kind":"request","headline":"asks for help","mechanic":"player stores debited; DiplomaticCommitments.note_food_aid"},
+	"tribute_demand":{"kind":"threat","headline":"demands tribute","mechanic":"stores debited or ForeignDiplomacy.apply_conversation_reaction"},
+	"emboldened_demand":{"kind":"threat","headline":"demands more tribute","mechanic":"stores debited or ForeignDiplomacy.apply_conversation_reaction"},
+	"test_of_resolve":{"kind":"threat","headline":"tests your resolve","mechanic":"stores debited or ForeignDiplomacy.apply_conversation_reaction"},
+	"news_report":{"kind":"news","headline":"brings news","mechanic":"third-party facts; contact_intelligence"},
+	"rumor_share":{"kind":"news","headline":"shares what travelers say","mechanic":"RumorNetwork.receive into the player's book"},
+	"intelligence_share":{"kind":"news","headline":"shares what they have seen of a city","mechanic":"CityIntelligence.publish of their dated observation"},
+	"accord_offer":{"kind":"proposal","headline":"proposes an understanding","mechanic":"ForeignDiplomacy accord (forecast blockers, SocietyExchange.accept_accord)"},
+	"protection_pact":{"kind":"proposal","headline":"proposes mutual protection","mechanic":"DiplomaticCommitments pacts (eligibility)"},
+	"league_invitation":{"kind":"proposal","headline":"speaks of a league","mechanic":"DiplomaticCommitments factions (eligibility, unanimous assessment)"},
+	"war_support":{"kind":"proposal","headline":"asks you to take a side","mechanic":"relations with both belligerents; leader memories"},
+	"peace_feeler":{"kind":"proposal","headline":"comes seeking peace","mechanic":"CivilizationSystem.conduct_player_action seek_peace"},
+	"trade_offer":{"kind":"proposal","headline":"proposes a trade compact","mechanic":"CivilizationSystem.conduct_player_action open_trade"},
+	"nonaggression_offer":{"kind":"proposal","headline":"proposes a non-aggression compact","mechanic":"CivilizationSystem.conduct_player_action non_aggression"},
+	"scholar_offer":{"kind":"proposal","headline":"offers a visiting teacher","mechanic":"ScholarVisits.envoy_quote/host_from_envoy; goods paid to their ledger"},
+	"research_sale":{"kind":"proposal","headline":"offers a validated study for sale","mechanic":"ResearchPurchase.envoy_quote/deliver_from_envoy; goods paid to their ledger"},
+	"license_offer":{"kind":"proposal","headline":"offers a production license","mechanic":"ResearchLicenses.envoy_quote/grant_from_envoy; goods paid to their ledger"},
+	"artifact_gift":{"kind":"proposal","headline":"brings a treasured object","mechanic":"ArtifactCollection.exchange gift (ownership, provenance, respect)"},
+	"artifact_purchase":{"kind":"proposal","headline":"asks for one of your treasures","mechanic":"ArtifactCollection.exchange sell (money and metal backing conserved) or trade"},
+	"artifact_return":{"kind":"proposal","headline":"demands a treasure back","mechanic":"GreatWorksRivalry.return_loot or ArtifactCollection.exchange gift"},
+	"recruitment_protest":{"kind":"proposal","headline":"protests your recruiters","mechanic":"restraint accord, goods, or apply_conversation_reaction"},
+	"crisis_petition":{"kind":"petition","headline":"raises an alarm","mechanic":"civic decree pipeline; official relationship"},
+	"grievance":{"kind":"petition","headline":"brings a grievance","mechanic":"official relationship and memory"},
+	"ambition":{"kind":"petition","headline":"brings a proposal","mechanic":"civic decree pipeline; official relationship"},
+	"promise_followup":{"kind":"petition","headline":"reminds you of a promise","mechanic":"civic decree pipeline; official relationship"},
+	"introduction":{"kind":"petition","headline":"presents themselves","mechanic":"civic decree pipeline; official relationship"},
+	"war_council":{"kind":"petition","headline":"comes about the war","mechanic":"civic decree pipeline; official relationship"},
+}
+
+## Which situations an occasion invites, with base weights.
+const OCCASION_MIX:={
+	"first_contact":{"gift_goods":1.2,"news_report":0.9,"accord_offer":0.7,"rumor_share":0.8,"intelligence_share":0.6,"trade_offer":0.6,"artifact_gift":0.6},
+	"relation_warm":{"gift_goods":0.7,"accord_offer":1.0,"protection_pact":0.8,"league_invitation":0.6,"scholar_offer":0.8,"research_sale":0.6,"license_offer":0.5,"trade_offer":0.8,"nonaggression_offer":0.4,"artifact_gift":0.7,"artifact_purchase":0.5},
+	"relation_cool":{"tribute_demand":1.0,"nonaggression_offer":0.6,"accord_offer":0.5,"news_report":0.3,"artifact_return":0.9},
+	"tension_rise":{"tribute_demand":1.2,"nonaggression_offer":0.8,"accord_offer":0.7,"artifact_return":0.6},
+	"war_end":{"gift_goods":0.6,"nonaggression_offer":1.0,"trade_offer":0.6,"accord_offer":0.6,"artifact_return":1.5},
+	"peace_possible":{"peace_feeler":1.0},
+	"their_famine":{"aid_request":1.0},
+	"recruitment_incident":{"recruitment_protest":1.0},
+	"third_war":{"war_support":1.0,"news_report":0.35},
+	"ambient":{"gift_goods":0.6,"accord_offer":0.6,"scholar_offer":0.8,"research_sale":0.6,"license_offer":0.5,"rumor_share":0.8,"intelligence_share":0.6,"news_report":0.5,"trade_offer":0.4,"league_invitation":0.4,"protection_pact":0.3,"artifact_gift":0.7,"artifact_purchase":0.6,"artifact_return":1.0},
+}
+
+## An official's evolving ambitions: each is a decree the civic interpreter
+## understands. Fulfilled or refused ambitions are not raised again for three
+## years; the next one on the list comes instead.
+const AMBITIONS:={
+	"Steward":["Improve roads and organize haulers","Build stone houses for the families","Support families and care for children","Hold a public council to hear the people"],
+	"Quartermaster":["Expand workshops and make tools","Quarry stone and prioritize stone","Improve roads and organize haulers","Conserve the land and rest the fields"],
+	"Marshal":["Post guards and patrol the frontier","Raise recruits for the frontier guard","Improve roads and organize haulers"],
+	"Scholar":["Support scholars and fund research","Organize healers to care for the sick","Conserve the land and rest the fields"],
+	"Envoy":["Hold a public council to hear the people","Send a recruiting expedition to find new people to join us","Improve roads and organize haulers"],
+	"ChiefScout":["Send a recruiting expedition to find new people to join us","Post guards and patrol the frontier","Improve roads and organize haulers"],
+	"settlement":["Build shelters and repair housing","Improve roads and organize haulers","Hold a public council to hear the people"],
+}
+const AMBITION_WORDS:={
+	"Improve roads and organize haulers":"%s wants the roads improved and hauling organized.",
+	"Build stone houses for the families":"%s wants families moved out of brush and hide into houses of stone.",
+	"Support families and care for children":"%s wants the settlement to help parents and care for its children.",
+	"Hold a public council to hear the people":"%s wants a public council where the people can be heard.",
+	"Expand workshops and make tools":"%s wants the workshops enlarged and tools made in earnest.",
+	"Quarry stone and prioritize stone":"%s wants crews sent to quarry stone before the next building season.",
+	"Conserve the land and rest the fields":"%s wants the land rested before it is worn out.",
+	"Post guards and patrol the frontier":"%s wants patrols along the frontier, commanded by them.",
+	"Raise recruits for the frontier guard":"%s wants recruits raised and trained for a standing frontier guard.",
+	"Support scholars and fund research":"%s wants more hands set to inquiry, under their eye.",
+	"Organize healers to care for the sick":"%s wants healers organized before the next sickness, not during it.",
+	"Send a recruiting expedition to find new people to join us":"%s wants an expedition sent to find people willing to join us.",
+	"Build shelters and repair housing":"%s wants shelters built and the worst houses repaired.",
+}
 
 # --------------------------------------------------------------------------
 # State
@@ -37,7 +157,7 @@ const MOOD_OPINION:=0.03
 static func state()->Dictionary:
 	ForeignDiplomacy.ensure()
 	var s:Dictionary=ForeignDiplomacy.audiences
-	if not s.has("version"): s["version"]=1
+	if not s.has("version"): s["version"]=VERSION
 	if not s.get("queue") is Array: s["queue"]=[]
 	if not s.get("history") is Array: s["history"]=[]
 	if not s.get("next_foreign") is Dictionary: s["next_foreign"]={}
@@ -45,7 +165,15 @@ static func state()->Dictionary:
 	if not s.has("last_arrival_day"): s["last_arrival_day"]=-9999
 	if not s.has("serial"): s["serial"]=0
 	if not s.has("summon_immediately"): s["summon_immediately"]=true
+	if not s.get("ledger") is Array: s["ledger"]=[]
+	if not s.get("occasions") is Array: s["occasions"]=[]
+	for key:String in ["watch","last_civ","last_person"]:
+		if not s.get(key) is Dictionary: s[key]={}
+	if not s.has("next_any"): s["next_any"]=0
+	if not s.get("last_speaker") is String: s["last_speaker"]=""
+	if not String(s.get("frequency","")) in FREQUENCIES: s["frequency"]="normal"
 	ForeignDiplomacy.audiences=s
+	if int(s.version)<VERSION: _migrate(s)
 	return s
 
 static func waiting()->Array[Dictionary]:
@@ -79,6 +207,61 @@ static func _rng(key:String,day:int)->RandomNumberGenerator:
 	return rng
 
 # --------------------------------------------------------------------------
+# Frequency setting and budget
+# --------------------------------------------------------------------------
+
+static func set_frequency(level:String)->bool:
+	## "rare" | "normal" | "lively". The next routine audience is pulled in or
+	## pushed out to fit the new rhythm; the hard minimum gap still applies.
+	if not level in FREQUENCIES: return false
+	var s:=state()
+	s.frequency=level
+	var last:=int(s.last_arrival_day)
+	var cap:=last+roundi(float(_gap())*1.3)
+	if int(s.next_any)>cap: s.next_any=maxi(cap,last+MIN_GAP)
+	return true
+
+static func frequency()->String:
+	return String(state().frequency)
+
+static func _gap()->int:
+	return int(FREQUENCIES.get(String(state().get("frequency","normal")),90))
+
+static func pacing()->Dictionary:
+	## Plain numbers for the modal footer and tests.
+	var s:=state()
+	return {"frequency":String(s.frequency),"average_gap_days":_gap(),"min_gap_days":MIN_GAP,"next_routine_day":int(s.next_any),
+		"last_arrival_day":int(s.last_arrival_day),"pending_occasions":(s.occasions as Array).size(),"civ_gap_days":CIV_GAP,"official_gap_days":PERSON_GAP}
+
+static func _budget_allows(occasion:Dictionary,day:int)->bool:
+	var s:=state()
+	var since:=day-int(s.last_arrival_day)
+	if since<MIN_GAP: return false
+	if bool(occasion.get("crisis",false)): return since>=maxi(MIN_GAP,roundi(float(_gap())*0.5))
+	return day>=int(s.next_any)
+
+static func _speaker_allows(occasion:Dictionary,day:int)->bool:
+	var s:=state()
+	var key:=_occasion_speaker(occasion)
+	if key=="": return true
+	var thread:=String(occasion.get("type","")) in THREAD_OCCASIONS
+	var crisis:=bool(occasion.get("crisis",false))
+	if key==String(s.last_speaker) and not thread: return false
+	if key.begins_with("civ:"):
+		var last:=int((s.last_civ as Dictionary).get(key.trim_prefix("civ:"),-99999))
+		return day-last>=(CIV_CRISIS_GAP if crisis else CIV_GAP)
+	var last_person:=int((s.last_person as Dictionary).get(key.trim_prefix("person:"),-99999))
+	return day-last_person>=(PERSON_CRISIS_GAP if crisis else (PERSON_THREAD_GAP if thread else PERSON_GAP))
+
+static func _occasion_speaker(occasion:Dictionary)->String:
+	var type:=String(occasion.get("type",""))
+	if type in COURT_OCCASIONS:
+		var pid:=int(occasion.get("person_id",0))
+		return "person:%d" % pid if pid>0 else ""
+	var civ_id:=String(occasion.get("civ_id",""))
+	return "civ:"+civ_id if civ_id!="" else ""
+
+# --------------------------------------------------------------------------
 # Daily arrivals and expiry
 # --------------------------------------------------------------------------
 
@@ -87,33 +270,30 @@ static func daily(day:int)->Array[Dictionary]:
 	if WorldSimulation.actor_id!="player": return arrivals
 	var s:=state()
 	_expire(day)
-	_schedule_new(day)
-	if day-int(s.last_arrival_day)<GAP_DAYS or waiting().size()>=QUEUE_MAX: return arrivals
-	# Gather everyone due, most overdue first; the first that can truthfully be
-	# generated arrives. Others stay due and arrive after the gap.
-	var due:Array=[]
-	for civ_id in s.next_foreign:
-		if int(s.next_foreign[civ_id])<=day and not _has_waiting("foreign",String(civ_id),0) and not ForeignDiplomacy.civilization(String(civ_id)).is_empty():
-			due.append({"origin":"foreign","key":String(civ_id),"due":int(s.next_foreign[civ_id])})
-	for person_key in s.next_court:
-		if int(s.next_court[person_key])<=day and not _has_waiting("court","",int(person_key)):
-			due.append({"origin":"court","key":String(person_key),"due":int(s.next_court[person_key])})
-	due.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.due)<int(b.due) or (int(a.due)==int(b.due) and String(a.key)<String(b.key)))
-	for entry:Dictionary in due:
-		var audience:Dictionary={}
-		if entry.origin=="foreign":
-			audience=_generate_foreign(String(entry.key),day,"")
-			var rng:=_rng("next:"+String(entry.key),day)
-			s.next_foreign[entry.key]=day+(_foreign_interval(String(entry.key),rng) if not audience.is_empty() else rng.randi_range(4,9))
-		else:
-			audience=_generate_petition(int(entry.key),day,"")
-			var rng2:=_rng("court_next:"+String(entry.key),day)
-			s.next_court[entry.key]=day+(rng2.randi_range(30,60) if not audience.is_empty() else rng2.randi_range(12,24))
+	_observe(day)
+	_prune_occasions(day)
+	if waiting().size()>=QUEUE_MAX or day-int(s.last_arrival_day)<MIN_GAP: return arrivals
+	var ready:Array[Dictionary]=[]
+	for occasion in s.occasions:
+		if occasion is Dictionary and int(occasion.get("not_before",0))<=day and int(occasion.get("expires",0))>day: ready.append(occasion)
+	ready.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		var pa:=_occasion_priority(a); var pb:=_occasion_priority(b)
+		# Fresh matters first: what happened last week outranks last season.
+		return pa>pb or (pa==pb and (int(a.day)>int(b.day) or (int(a.day)==int(b.day) and String(a.key)<String(b.key)))))
+	for occasion:Dictionary in ready:
+		if not _budget_allows(occasion,day) or not _speaker_allows(occasion,day): continue
+		(s.occasions as Array).erase(occasion)
+		var audience:=_generate_for(occasion,day)
 		if audience.is_empty(): continue
 		_enqueue(audience,day)
 		arrivals.append(audience)
 		break
 	return arrivals
+
+static func _occasion_priority(occasion:Dictionary)->int:
+	if bool(occasion.get("crisis",false)): return 2
+	if String(occasion.get("type","")) in THREAD_OCCASIONS: return 1
+	return 0
 
 static func _has_waiting(origin:String,civ_id:String,person_id:int)->bool:
 	for audience in state().queue:
@@ -121,30 +301,6 @@ static func _has_waiting(origin:String,civ_id:String,person_id:int)->bool:
 		if origin=="foreign" and String(audience.civ_id)==civ_id: return true
 		if origin=="court" and int(audience.speaker.get("person_id",0))==person_id: return true
 	return false
-
-static func _schedule_new(day:int)->void:
-	var s:=state()
-	for civ in WorldSimulation.world.civilizations:
-		var id:=String(civ.get("id",""))
-		if id=="" or s.next_foreign.has(id) or not bool(civ.get("alive",true)): continue
-		if ForeignDiplomacy.civilization(id).is_empty(): continue
-		var met:=int(civ.player_relation.get("met_day",-1))
-		var base:=met if met>=0 and day-met<15 else day
-		s.next_foreign[id]=base+_rng("first:"+id,base).randi_range(6,15)
-	var present:Dictionary={}
-	for person in _officials():
-		var key:=str(int(person.person_id))
-		present[key]=true
-		if not s.next_court.has(key): s.next_court[key]=day+_rng("court_first:"+key,day).randi_range(12,45)
-	for key in s.next_court.keys():
-		if not present.has(String(key)): s.next_court.erase(key)
-
-static func _foreign_interval(civ_id:String,rng:RandomNumberGenerator)->int:
-	var civ:=ForeignDiplomacy.civilization(civ_id)
-	var p:Dictionary=ForeignDiplomacy.leader(civ_id).get("personality",{})
-	var relation:Dictionary=civ.get("player_relation",{})
-	var urgency:=clampf(float(p.get("assertiveness",.5))*.35+float(relation.get("border_tension",0))*.45+maxf(0,-float(relation.get("opinion",0)))*.3+(.25 if bool(relation.get("at_war",false)) else 0.0),0,1)
-	return clampi(roundi(lerpf(40.0,18.0,urgency)+rng.randf_range(-5,5)),18,40)
 
 static func _expire(day:int)->void:
 	var s:=state()
@@ -163,18 +319,35 @@ static func _expire(day:int)->void:
 			if not leader.is_empty(): leader.trust=clampf(float(leader.trust)-0.03,-1,1)
 			ForeignDiplomacy.remember(id,"Our envoy %s waited %d days in the ruler's antechamber and was never received. They came home insulted." % [String(audience.speaker.name),int(day-int(audience.arrived_day))])
 			audience.outcome="%s waited %d days without an audience and has left, insulted. %s thinks less of you (opinion −0.04, trust −0.03)." % [String(audience.speaker.name),int(day-int(audience.arrived_day)),String(audience.civ_name)]
+			_add_sequel(audience,"ignored",day)
 		else:
 			var pid:=int(audience.speaker.person_id)
 			GovernmentPeopleSystem.adjust_person_relationship(pid,0,0,0.04)
 			var matter:String="their report on %s" % String(audience.get("report",{}).get("subject_name","what they found")) if audience.kind=="report" else _topic_words(String(audience.petition.get("topic","")))
 			GovernmentPeopleSystem.record_person_memory(pid,"Asked for an audience about %s and was left waiting until the matter went stale." % matter,"audience",0.55,{"emotion":"slighted","outcome":"expired"})
 			audience.outcome="%s gave up waiting for an audience about %s. Resentment rose (+0.04)." % [String(audience.speaker.name),matter]
+		_ledger_close(audience,"expired","offended",String(audience.outcome))
 		_archive(audience)
 
-static func _enqueue(audience:Dictionary,day:int)->void:
+static func _enqueue(audience:Dictionary,day:int,external:bool=false)->void:
 	var s:=state()
 	s.queue.append(audience)
+	_note_arrival(audience,day,external)
+
+static func _note_arrival(audience:Dictionary,day:int,external:bool)->void:
+	## Every arrival spends budget: the next routine audience waits about one
+	## average gap (half for matters raised elsewhere: reports, great works).
+	var s:=state()
 	s.last_arrival_day=day
+	var gap:=float(_gap())
+	var rng:=_rng("budget:%d" % int(s.serial),day)
+	var next:=day+(roundi(gap*0.5) if external else roundi(gap*rng.randf_range(0.75,1.3)))
+	s.next_any=maxi(int(s.next_any),next)
+	var key:=_speaker_key(audience)
+	s.last_speaker=key
+	if key.begins_with("civ:"): s.last_civ[key.trim_prefix("civ:")]=day
+	elif key.begins_with("person:"): s.last_person[key.trim_prefix("person:")]=day
+	_ledger_add(audience)
 
 static func _archive(audience:Dictionary)->void:
 	var s:=state()
@@ -188,7 +361,315 @@ static func _new_audience(origin:String,kind:String,day:int)->Dictionary:
 	return {"id":"aud_%d" % int(s.serial),"origin":origin,"kind":kind,"civ_id":"","civ_name":"",
 		"speaker":{"name":"","title":"","person_id":0,"role":"envoy" if origin=="foreign" else "official"},
 		"arrived_day":day,"expires_day":day+EXPIRY_DAYS,"status":"waiting","terms":{},"news":{},"petition":{},"report":{},
-		"lines":[],"outcome":"","option_id":"","mood":0.0}
+		"situation":{},"lines":[],"outcome":"","option_id":"","mood":0.0}
+
+# --------------------------------------------------------------------------
+# Ledger: every (speaker, ask) and how it ended
+# --------------------------------------------------------------------------
+
+static func _speaker_key(audience:Dictionary)->String:
+	if String(audience.get("origin",""))=="foreign" and String(audience.get("civ_id",""))!="": return "civ:"+String(audience.civ_id)
+	var speaker:Dictionary=audience.get("speaker",{}) if audience.get("speaker") is Dictionary else {}
+	var pid:=int(speaker.get("person_id",0)) if _num(speaker.get("person_id",0)) else 0
+	if pid>0: return "person:%d" % pid
+	return "name:"+String(speaker.get("name","")).substr(0,60)
+
+static func _ask_key(audience:Dictionary)->String:
+	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
+	if String(situation.get("ask",""))!="": return String(situation.ask)
+	var terms:Dictionary=audience.get("terms",{}) if audience.get("terms") is Dictionary else {}
+	match String(audience.get("kind","")):
+		"gift": return "gift:"+String(terms.get("resource",""))
+		"request": return "request:"+String(terms.get("resource",""))
+		"threat": return "tribute:"+String(terms.get("resource",""))
+		"news":
+			var news:Dictionary=audience.get("news",{}) if audience.get("news") is Dictionary else {}
+			return "news:%s:%s" % [String(news.get("subject_civ_id","")),String(news.get("fact_kind",""))]
+		"petition":
+			var petition:Dictionary=audience.get("petition",{}) if audience.get("petition") is Dictionary else {}
+			return "%s:%s" % [String(petition.get("topic","")),String(petition.get("suggested_decree",""))]
+		"report": return "report:"+String((audience.get("report",{}) as Dictionary).get("subject_name","")) if audience.get("report") is Dictionary else "report"
+		"great_work":
+			var gw:Dictionary=audience.get("great_work",{}) if audience.get("great_work") is Dictionary else {}
+			return "work:%s:%s:%s" % [String(gw.get("mode","")),String(gw.get("work_id","")),String(gw.get("key",""))]
+		"wonder_proposal": return "wonder:%d" % int(audience.get("arrived_day",0))
+	return String(audience.get("kind",""))
+
+static func _situation_type(audience:Dictionary)->String:
+	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
+	if String(situation.get("type",""))!="": return String(situation.type)
+	match String(audience.get("kind","")):
+		"gift": return "gift_goods"
+		"request": return "aid_request"
+		"threat": return "tribute_demand"
+		"news": return "news_report"
+		"petition":
+			var topic:=String((audience.get("petition",{}) as Dictionary).get("topic","")) if audience.get("petition") is Dictionary else ""
+			if topic in ["food","health","housing","security"]: return "crisis_petition"
+			return "grievance" if topic=="grievance" else "ambition"
+	return String(audience.get("kind",""))
+
+static func _ledger_add(audience:Dictionary)->void:
+	var s:=state()
+	var ledger:Array=s.ledger
+	for entry in ledger:
+		if entry is Dictionary and String(entry.get("audience_id",""))==String(audience.get("id","")): return
+	var speaker:Dictionary=audience.get("speaker",{}) if audience.get("speaker") is Dictionary else {}
+	ledger.push_back({"day":int(audience.get("arrived_day",_day())),"audience_id":String(audience.get("id","")),"speaker":_speaker_key(audience),
+		"civ_id":String(audience.get("civ_id","")),"person_id":int(speaker.get("person_id",0)) if _num(speaker.get("person_id",0)) else 0,
+		"kind":String(audience.get("kind","")),"situation":_situation_type(audience),"ask":_ask_key(audience),
+		"option":"","reaction":"","outcome":"","summary":_ledger_summary(audience)})
+	while ledger.size()>LEDGER_MAX: ledger.pop_front()
+
+static func _ledger_summary(audience:Dictionary)->String:
+	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
+	if String(situation.get("summary",""))!="": return String(situation.summary).substr(0,240)
+	var terms:Dictionary=audience.get("terms",{}) if audience.get("terms") is Dictionary else {}
+	if not terms.is_empty(): return ("%s %s" % [String(audience.get("kind","")),_terms_text(terms)]).substr(0,240)
+	if audience.get("petition") is Dictionary and String((audience.petition as Dictionary).get("summary",""))!="": return String(audience.petition.summary).substr(0,240)
+	if audience.get("news") is Dictionary and String((audience.news as Dictionary).get("fact",""))!="": return String(audience.news.fact).substr(0,240)
+	return String(audience.get("kind",""))
+
+static func _ledger_close(audience:Dictionary,option_id:String,reaction:String,outcome:String)->void:
+	var ledger:Array=state().ledger
+	for index in range(ledger.size()-1,-1,-1):
+		var entry:Variant=ledger[index]
+		if entry is Dictionary and String(entry.get("audience_id",""))==String(audience.get("id","")):
+			entry["option"]=option_id; entry["reaction"]=reaction; entry["outcome"]=outcome.substr(0,300)
+			entry["closed_day"]=_day()
+			return
+
+static func _used_asks(speaker:String,day:int)->Dictionary:
+	var used:Dictionary={}
+	for entry in state().ledger:
+		if entry is Dictionary and String(entry.get("speaker",""))==speaker and day-int(entry.get("day",-99999))<REPEAT_DAYS: used[String(entry.get("ask",""))]=true
+	return used
+
+static func history_with(speaker:String,limit:int=3,exclude_id:String="")->Array[Dictionary]:
+	## Last outcomes with a speaker ("civ:<id>" or "person:<id>"), newest first.
+	var result:Array[Dictionary]=[]
+	var ledger:Array=state().ledger
+	var today:=_day()
+	for index in range(ledger.size()-1,-1,-1):
+		var entry:Variant=ledger[index]
+		if not entry is Dictionary or String(entry.get("speaker",""))!=speaker or String(entry.get("audience_id",""))==exclude_id: continue
+		if String(entry.get("option",""))=="": continue
+		result.append({"day":int(entry.day),"days_ago":today-int(entry.day),"situation":String(entry.get("situation","")),"kind":String(entry.get("kind","")),
+			"ask":String(entry.get("ask","")),"summary":String(entry.get("summary","")),"answer":String(entry.get("option","")),"reaction":String(entry.get("reaction","")),"outcome":String(entry.get("outcome",""))})
+		if result.size()>=limit: break
+	return result
+
+static func ledger()->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	for entry in state().ledger:
+		if entry is Dictionary: result.append((entry as Dictionary).duplicate())
+	return result
+
+# --------------------------------------------------------------------------
+# Watch: notice what changed and file occasions
+# --------------------------------------------------------------------------
+
+static func _add_occasion(occasion:Dictionary)->void:
+	var s:=state()
+	var list:Array=s.occasions
+	for existing in list:
+		if existing is Dictionary and String(existing.get("key",""))==String(occasion.key): return
+	var day:=_day()
+	var clean:={"key":String(occasion.key).substr(0,120),"type":String(occasion.type),"civ_id":String(occasion.get("civ_id","")),"person_id":int(occasion.get("person_id",0)),
+		"day":int(occasion.get("day",day)),"not_before":int(occasion.get("not_before",day)),"expires":int(occasion.get("expires",day+120)),
+		"crisis":bool(occasion.get("crisis",false)),"data":(occasion.get("data",{}) as Dictionary).duplicate(true) if occasion.get("data") is Dictionary else {}}
+	list.append(clean)
+	while list.size()>OCCASIONS_MAX:
+		var drop:=0
+		for index in list.size():
+			if not bool(list[index].get("crisis",false)): drop=index; break
+		list.remove_at(drop)
+
+static func _prune_occasions(day:int)->void:
+	var list:Array=state().occasions
+	for occasion in list.duplicate():
+		if not occasion is Dictionary or int(occasion.get("expires",0))<=day: list.erase(occasion)
+
+static func occasions()->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	for occasion in state().occasions:
+		if occasion is Dictionary: result.append((occasion as Dictionary).duplicate(true))
+	return result
+
+static func _tension_band(value:float)->int:
+	return 2 if value>=0.7 else (1 if value>=0.45 else 0)
+
+static func _third_wars(civ:Dictionary)->Array:
+	var result:Array=[]
+	var relations:Dictionary=civ.get("relations",{}) if civ.get("relations") is Dictionary else {}
+	for other_id in relations:
+		var relation:Variant=relations[other_id]
+		if relation is Dictionary and bool(relation.get("at_war",false)) and String(other_id)!="player": result.append(String(other_id))
+	result.sort()
+	return result
+
+static func _peace_ok(civ_id:String,relation:Dictionary)->bool:
+	if not bool(relation.get("at_war",false)): return false
+	var forecast:Dictionary=CivilizationSystem.peace_forecast(civ_id)
+	return bool(forecast.get("can_accept",false))
+
+static func _observe(day:int)->void:
+	var s:=state()
+	var watch:Dictionary=s.watch
+	var baseline:=not bool(watch.get("ready",false))
+	if not watch.get("civs") is Dictionary: watch["civs"]={}
+	if not watch.get("people") is Dictionary: watch["people"]={}
+	if not watch.get("conditions") is Dictionary: watch["conditions"]={}
+	var civs:Dictionary=watch.civs
+	for civ in WorldSimulation.world.civilizations:
+		if not civ is Dictionary: continue
+		var id:=String(civ.get("id",""))
+		if id=="": continue
+		var relation:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
+		var contacted:=int(relation.get("contact_level",0))>=2 and bool(civ.get("alive",true))
+		var prev:Dictionary=civs.get(id,{}) if civs.get(id) is Dictionary else {}
+		var opinion:=float(relation.get("opinion",0.0))
+		var now:={"c":contacted,"o":float(prev.get("o",opinion)),"t":_tension_band(float(relation.get("border_tension",0.0))),"w":bool(relation.get("at_war",false)),
+			"h":_hungry(civ),"r":int(relation.get("last_recruitment_day",-1)),"p":_peace_ok(id,relation) if contacted else false,"x":_third_wars(civ)}
+		if not contacted:
+			now.o=opinion
+			civs[id]=now
+			continue
+		var name:=String(civ.get("name",id))
+		if baseline or prev.is_empty() or not bool(prev.get("c",false)):
+			now.o=opinion
+			civs[id]=now
+			if not baseline or not _speaker_in_ledger("civ:"+id):
+				_add_occasion({"key":"first_contact:"+id,"type":"first_contact","civ_id":id,"day":day,"not_before":day+(5 if not baseline else 0),"expires":day+(150 if not baseline else 240),"data":{"text":"first contact between %s and your people" % name}})
+			continue
+		# Opinion swings are measured from an anchor that moves only when a
+		# swing is noticed or an audience with them ends.
+		if absf(opinion-float(prev.get("o",opinion)))>=0.2:
+			var warmer:=opinion>float(prev.o)
+			_add_occasion({"key":"swing:%s:%d" % [id,day],"type":"relation_warm" if warmer else "relation_cool","civ_id":id,"day":day,"expires":day+120,
+				"data":{"text":"%s has grown %s toward your people" % [name,"warmer" if warmer else "colder"]}})
+			now.o=opinion
+		if int(now.t)>int(prev.get("t",0)) and not bool(now.w):
+			_add_occasion({"key":"tension:%s:%d" % [id,day],"type":"tension_rise","civ_id":id,"day":day,"expires":day+90,"crisis":int(now.t)>=2,
+				"data":{"text":"the frontier with %s has grown %s" % [name,"dangerous" if int(now.t)>=2 else "tense"]}})
+		if bool(now.w) and not bool(prev.get("w",false)):
+			_add_occasion({"key":"war_council:%s:%d" % [id,day],"type":"war_council","civ_id":id,"person_id":int(_relevant_official(["Marshal"]).get("person_id",0)),"day":day,"expires":day+45,"crisis":true,
+				"data":{"text":"war with %s has begun" % name,"enemy_name":name,"war_day":int(relation.get("war_started_day",day))}})
+		if not bool(now.w) and bool(prev.get("w",false)):
+			_add_occasion({"key":"war_end:%s:%d" % [id,day],"type":"war_end","civ_id":id,"day":day,"not_before":day+10,"expires":day+160,"data":{"text":"the war with %s has ended" % name}})
+		if bool(now.p) and not bool(prev.get("p",false)):
+			_add_occasion({"key":"peace:%s:%d" % [id,day],"type":"peace_possible","civ_id":id,"day":day,"expires":day+60,"crisis":true,"data":{"text":"%s has lost its appetite for the war" % name}})
+		if bool(now.h) and not bool(prev.get("h",false)) and not bool(now.w):
+			_add_occasion({"key":"famine:%s:%d" % [id,day],"type":"their_famine","civ_id":id,"day":day,"expires":day+60,"crisis":true,"data":{"text":"%s's granaries are failing" % name,"episode":day}})
+		if int(now.r)>int(prev.get("r",-1)) and int(now.r)>=0:
+			_add_occasion({"key":"recruit:%s:%d" % [id,int(now.r)],"type":"recruitment_incident","civ_id":id,"day":day,"expires":day+90,"crisis":true,
+				"data":{"text":"your recruiters invited %s's households away" % name,"incident_day":int(now.r)}})
+		for enemy in now.x:
+			if String(enemy) in (prev.get("x",[]) as Array): continue
+			var pair:Array=[id,String(enemy)]; pair.sort()
+			var enemy_index:=_civ_index(String(enemy))
+			var enemy_name:=String(WorldSimulation.world.civilizations[enemy_index].get("name",enemy)) if enemy_index>=0 else String(enemy)
+			_add_occasion({"key":"third_war:%s:%s:%d" % [String(pair[0]),String(pair[1]),floori(day/365.0)],"type":"third_war","civ_id":id,"day":day,"expires":day+100,
+				"data":{"text":"war has broken out between %s and %s" % [name,enemy_name],"enemy":String(enemy),"enemy_name":enemy_name}})
+		civs[id]=now
+	_observe_court(day,baseline)
+	watch["ready"]=true
+	if baseline: s.next_any=maxi(int(s.next_any),day+10)
+	_ambient(day)
+
+static func _speaker_in_ledger(speaker:String)->bool:
+	for entry in state().ledger:
+		if entry is Dictionary and String(entry.get("speaker",""))==speaker: return true
+	return false
+
+static func _condition_bands(c:Dictionary)->Dictionary:
+	var food:=2 if float(c.food_days)<10.0 or float(c.food_intake)<0.85 else (1 if float(c.food_days)<22.0 or float(c.food_intake)<0.97 else 0)
+	var health:=2 if float(c.health)<0.45 or float(c.water_intake)<0.8 else (1 if float(c.health)<0.62 or float(c.water_intake)<0.95 else 0)
+	var housing:=2 if float(c.housing_ratio)<0.8 else (1 if float(c.housing_ratio)<1.0 else 0)
+	var security:=2 if float(c.foreign_threat)>=0.75 else (1 if float(c.security)<0.36 or float(c.foreign_threat)>0.45 else 0)
+	return {"food":food,"health":health,"housing":housing,"security":security}
+
+const TOPIC_OFFICES:={"food":["Steward","Quartermaster"],"health":["Steward","Scholar"],"housing":["Steward","Quartermaster"],"security":["Marshal"]}
+
+static func _observe_court(day:int,baseline:bool)->void:
+	var watch:Dictionary=state().watch
+	var bands:=_condition_bands(conditions())
+	var stored:Dictionary=watch.conditions
+	for topic:String in bands:
+		var band:=int(bands[topic])
+		var before:=int(stored.get(topic,0))
+		if band>before and (not baseline or band>=2):
+			var person:=_relevant_official(TOPIC_OFFICES[topic])
+			if not person.is_empty():
+				_add_occasion({"key":"condition:%s:%d:%d" % [topic,band,day],"type":"condition","person_id":int(person.person_id),"day":day,"expires":day+(45 if band>=2 else 90),"crisis":band>=2,
+					"data":{"topic":topic,"band":band,"text":"%s %s" % [_topic_words(topic),"has become an emergency" if band>=2 else "has begun to worry the court"]}})
+		stored[topic]=band
+	var people:Dictionary=watch.people
+	var present:Dictionary={}
+	for person in _officials():
+		var key:=str(int(person.person_id))
+		present[key]=true
+		var rel:Dictionary=person.get("relationships",{}).get("sovereign",{})
+		var resentment:=float(rel.get("resentment",0))
+		var trust:=float(rel.get("trust",0.5))
+		var band:=2 if resentment>=0.3 or trust<0.2 else (1 if resentment>0.15 or trust<0.35 else 0)
+		var prev:Dictionary=people.get(key,{}) if people.get(key) is Dictionary else {}
+		if not baseline and prev.is_empty() and day>1:
+			_add_occasion({"key":"appointment:%s" % key,"type":"appointment","person_id":int(person.person_id),"day":day,"not_before":day+7,"expires":day+120,
+				"data":{"text":"%s has newly taken up office as %s" % [String(person.name),String(person.get("office_title","an official"))]}})
+		if band>int(prev.get("g",0 if not baseline else band)):
+			_add_occasion({"key":"grievance:%s:%d:%d" % [key,band,day],"type":"grievance","person_id":int(person.person_id),"day":day,"expires":day+120,"crisis":band>=2,
+				"data":{"band":band,"text":"%s's resentment has grown" % String(person.name)}})
+		people[key]={"g":band}
+	for key in people.keys():
+		if not present.has(String(key)): people.erase(key)
+
+static func _ambient(day:int)->void:
+	## When nothing has happened for a long while, someone with a genuine reason
+	## to come (a people not heard from in half a year, an official with an
+	## unasked ambition) asks for an audience. Still subject to the budget.
+	var s:=state()
+	var gap:=_gap()
+	if day-int(s.last_arrival_day)<roundi(float(gap)*1.2) or day<int(s.next_any): return
+	for occasion in s.occasions:
+		if occasion is Dictionary and int(occasion.get("not_before",0))<=day and _speaker_allows(occasion,day): return
+	var pool:Array[Dictionary]=[]
+	for civ in WorldSimulation.world.civilizations:
+		var id:=String(civ.get("id",""))
+		if ForeignDiplomacy.civilization(id).is_empty() or bool(civ.player_relation.get("at_war",false)): continue
+		var silent:=day-int((s.last_civ as Dictionary).get(id,-99999))
+		if silent>=CIV_GAP and "civ:"+id!=String(s.last_speaker): pool.append({"w":minf(3.0,float(silent)/365.0+0.5),"civ_id":id})
+	for person in _officials():
+		var key:=str(int(person.person_id))
+		var quiet:=day-int((s.last_person as Dictionary).get(key,-99999))
+		if quiet>=PERSON_GAP and "person:"+key!=String(s.last_speaker) and _next_ambition(person,day)!="": pool.append({"w":minf(2.0,float(quiet)/365.0+0.3),"person_id":int(person.person_id)})
+	if pool.is_empty(): return
+	var rng:=_rng("ambient",day)
+	var total:=0.0
+	for entry in pool: total+=float(entry.w)
+	var roll:=rng.randf()*total
+	var pick:Dictionary=pool[-1]
+	for entry in pool:
+		roll-=float(entry.w)
+		if roll<=0.0: pick=entry; break
+	if pick.has("civ_id"):
+		_add_occasion({"key":"ambient:%d" % day,"type":"ambient","civ_id":String(pick.civ_id),"day":day,"expires":day+45,"data":{"text":"a long silence between your peoples"}})
+	else:
+		_add_occasion({"key":"ambition:%d" % day,"type":"ambition","person_id":int(pick.person_id),"day":day,"expires":day+45,"data":{"text":"a plan they have been turning over"}})
+
+static func _add_sequel(audience:Dictionary,option_id:String,day:int)->void:
+	## The next envoy from this people remembers how this audience ended.
+	if String(audience.get("origin",""))!="foreign" or String(audience.get("civ_id",""))=="": return
+	var civ_id:=String(audience.civ_id)
+	var list:Array=state().occasions
+	for existing in list.duplicate():
+		if existing is Dictionary and String(existing.get("type",""))=="sequel" and String(existing.get("civ_id",""))==civ_id: list.erase(existing)
+	var rng:=_rng("sequel:"+civ_id,day)
+	var start:=day+CIV_GAP+rng.randi_range(0,90)
+	var terms:Dictionary=audience.get("terms",{}) if audience.get("terms") is Dictionary else {}
+	_add_occasion({"key":"sequel:%s:%d" % [civ_id,day],"type":"sequel","civ_id":civ_id,"day":day,"not_before":start,"expires":start+240,
+		"data":{"text":"what came of the last audience","previous":{"day":int(audience.get("arrived_day",day)),"situation":_situation_type(audience),"kind":String(audience.get("kind","")),
+			"option":option_id,"ask":_ask_key(audience),"resource":String(terms.get("resource","")),"amount":float(terms.get("amount",0.0)),"outcome":String(audience.get("outcome","")).substr(0,240)}}})
 
 # --------------------------------------------------------------------------
 # Stores (always read the real ledgers)
@@ -235,6 +716,10 @@ static func _civ_index(civ_id:String)->int:
 		if String(WorldSimulation.world.civilizations[index].get("id",""))==civ_id: return index
 	return -1
 
+static func _civ_name(civ_id:String)->String:
+	var index:=_civ_index(civ_id)
+	return String(WorldSimulation.world.civilizations[index].get("name",civ_id)) if index>=0 else civ_id
+
 static func _shift_relation(civ_id:String,opinion:float,tension:float,extra:Dictionary={})->void:
 	var index:=_civ_index(civ_id)
 	if index<0: return
@@ -258,58 +743,485 @@ static func _personality(civ_id:String)->Dictionary:
 static func _hungry(civ:Dictionary)->bool:
 	return float(civ.get("food_days",30.0))<22.0
 
+static func _commitments()->COMMITMENTS:
+	ForeignDiplomacy.ensure()
+	return ForeignDiplomacy.commitments as COMMITMENTS
+
 # --------------------------------------------------------------------------
 # Foreign generation
 # --------------------------------------------------------------------------
 
-static func _generate_foreign(civ_id:String,day:int,forced_kind:String)->Dictionary:
+static func _generate_for(occasion:Dictionary,day:int)->Dictionary:
+	if String(occasion.get("type","")) in COURT_OCCASIONS: return _generate_court_occasion(occasion,day)
+	return _generate_foreign_occasion(occasion,day)
+
+static func _generate_foreign_occasion(occasion:Dictionary,day:int)->Dictionary:
+	var civ_id:=String(occasion.get("civ_id",""))
 	var civ:=ForeignDiplomacy.civilization(civ_id)
 	var leader:=ForeignDiplomacy.leader(civ_id)
 	if civ.is_empty() or leader.is_empty(): return {}
-	var rng:=_rng("foreign:%s:%d" % [civ_id,int(state().serial)],day)
+	var rng:=_rng("occasion:%s:%s:%d" % [civ_id,String(occasion.get("key","")),int(state().serial)],day)
+	var used:=_used_asks("civ:"+civ_id,day)
+	var candidates:=_foreign_candidates(civ_id,occasion,rng,used,day)
+	var chosen:=_weighted(candidates,rng)
+	if chosen.is_empty(): return {}
+	return _foreign_audience(civ_id,chosen,occasion,day)
+
+static func _weighted(candidates:Array[Dictionary],rng:RandomNumberGenerator)->Dictionary:
+	var total:=0.0
+	for candidate in candidates: total+=maxf(0.0,float(candidate.w))
+	if total<=0.0: return {}
+	var roll:=rng.randf()*total
+	for candidate in candidates:
+		roll-=maxf(0.0,float(candidate.w))
+		if float(candidate.w)>0.0 and roll<=0.0: return candidate
+	return candidates[-1]
+
+static func _foreign_candidates(civ_id:String,occasion:Dictionary,rng:RandomNumberGenerator,used:Dictionary,day:int)->Array[Dictionary]:
+	var type:=String(occasion.get("type","ambient"))
+	var mix:Dictionary=OCCASION_MIX.get(type,OCCASION_MIX.ambient)
+	var branches:Dictionary={}
+	if type=="sequel":
+		var plan:=_sequel_plan(civ_id,occasion)
+		mix=plan.mix; branches=plan.branch
 	var p:=_personality(civ_id)
+	var civ:=ForeignDiplomacy.civilization(civ_id)
+	var result:Array[Dictionary]=[]
+	for situation_type:String in mix:
+		var base:=float(mix[situation_type])
+		if base<=0.0: continue
+		var candidate:=_candidate(situation_type,civ_id,occasion,rng,used,day)
+		if candidate.is_empty(): continue
+		candidate["w"]=base*_temperament_factor(situation_type,p,civ)
+		if branches.has(situation_type):
+			var previous:Dictionary=(occasion.get("data",{}) as Dictionary).get("previous",{})
+			(candidate.situation as Dictionary)["arc"]={"branch":String(branches[situation_type]),"previous":previous.duplicate(true)}
+		result.append(candidate)
+	return result
+
+static func _temperament_factor(situation_type:String,p:Dictionary,civ:Dictionary)->float:
+	var relation:Dictionary=civ.get("player_relation",{})
+	var opinion:=float(relation.get("opinion",0.0))
+	var trust:=float(ForeignDiplomacy.leader(String(civ.get("id",""))).get("trust",0.0))
+	var size_ratio:=clampf(float(civ.get("population",100))/_player_population(),0.35,1.8)
+	match situation_type:
+		"gift_goods","gratitude_gift": return maxf(0.05,0.6+float(p.empathy)*0.8+maxf(0.0,opinion))
+		"tribute_demand","emboldened_demand","test_of_resolve":
+			var hostility:=maxf(0.05,0.3+float(p.assertiveness)*1.2+float(p.risk_tolerance)*0.3-float(p.empathy)*0.4+maxf(0.0,-opinion))*size_ratio
+			return hostility*(0.3 if opinion>0.4 else 1.0)
+		"news_report","rumor_share","intelligence_share": return 0.6+float(p.openness)*0.8
+		"accord_offer","protection_pact","league_invitation","trade_offer":
+			var warmth:=0.5+maxf(0.0,opinion)*1.2+trust*0.5
+			return maxf(0.05,warmth*(0.25 if opinion<-0.1 else 1.0))
+		"nonaggression_offer": return maxf(0.1,0.5+float(p.empathy)*0.6+float(p.discipline)*0.3)
+		"scholar_offer","research_sale","license_offer": return 0.5+float(p.openness)*0.9+(0.4 if String(civ.get("strategy",""))=="inquiry" else 0.0)
+		"war_support": return 0.5+float(p.assertiveness)*0.6
+		"artifact_gift": return maxf(0.05,0.5+float(p.empathy)*0.6+float(p.openness)*0.3+maxf(0.0,opinion))
+		"artifact_purchase": return maxf(0.05,0.4+float(p.openness)*0.6+maxf(0.0,opinion)*0.8)
+		"artifact_return": return 0.8+float(p.assertiveness)*0.8
+	return 1.0
+
+static func _sequel_plan(civ_id:String,occasion:Dictionary)->Dictionary:
+	## Continuity: how the last audience ended decides who comes next.
+	var previous:Dictionary=(occasion.get("data",{}) as Dictionary).get("previous",{})
+	var situation:=String(previous.get("situation",""))
+	var option:=String(previous.get("option",""))
+	var kind:=String(previous.get("kind",""))
+	var p:=_personality(civ_id)
+	var relation:Dictionary=ForeignDiplomacy.civilization(civ_id).get("player_relation",{})
+	var assertive:=float(p.assertiveness)>0.55 or float(relation.get("border_tension",0.0))>0.4
+	var bold:=float(p.assertiveness)+float(p.risk_tolerance)>1.0
+	var refused:=option in ["refuse","rebuff","abstain","dismiss","ignored","expired","defy"]
+	if option=="decline":
+		# A polite no cools the next envoy; only a hard, pressed neighbor turns it into a demand.
+		var soft:Dictionary={"news_report":0.9,"rumor_share":0.4}
+		if assertive and float(relation.get("border_tension",0.0))>0.4: soft["tribute_demand"]=0.6
+		return {"mix":soft,"branch":{"news_report":"cooler","rumor_share":"cooler","tribute_demand":"threat_after_refusal"}}
+	if kind=="threat" and option=="pay":
+		if assertive: return {"mix":{"emboldened_demand":1.4,"news_report":0.3},"branch":{"emboldened_demand":"emboldened","news_report":"respect"}}
+		return {"mix":{"gift_goods":0.8,"news_report":0.6,"nonaggression_offer":0.5},"branch":{"gift_goods":"respect","news_report":"respect","nonaggression_offer":"respect"}}
+	if kind=="threat" and option in ["defy","counter"]:
+		if bold: return {"mix":{"test_of_resolve":1.4,"news_report":0.2},"branch":{"test_of_resolve":"test_of_resolve","news_report":"cooler"}}
+		return {"mix":{"nonaggression_offer":1.0,"accord_offer":0.6},"branch":{"nonaggression_offer":"second_thoughts","accord_offer":"second_thoughts"}}
+	if situation=="aid_request" and option in ["grant","grant_half"]:
+		return {"mix":{"gratitude_gift":1.3,"artifact_gift":0.6,"protection_pact":0.7,"accord_offer":0.6,"trade_offer":0.5},"branch":{"gratitude_gift":"gratitude","artifact_gift":"gratitude","protection_pact":"alliance_feeler","accord_offer":"alliance_feeler","trade_offer":"alliance_feeler"}}
+	if refused:
+		var mix:Dictionary={"news_report":0.8,"rumor_share":0.3}
+		if assertive: mix["tribute_demand"]=1.3
+		return {"mix":mix,"branch":{"news_report":"cooler","rumor_share":"cooler","tribute_demand":"threat_after_refusal"}}
+	if kind=="gift" and option in ["accept","accept_return"]:
+		return {"mix":{"accord_offer":0.8,"protection_pact":0.5,"trade_offer":0.6,"scholar_offer":0.5,"rumor_share":0.4},"branch":{"accord_offer":"alliance_feeler","protection_pact":"alliance_feeler","trade_offer":"alliance_feeler","scholar_offer":"warming","rumor_share":"warming"}}
+	if kind=="proposal":
+		return {"mix":{"gratitude_gift":0.6,"artifact_gift":0.4,"scholar_offer":0.5,"research_sale":0.4,"league_invitation":0.5,"protection_pact":0.5,"intelligence_share":0.4},"branch":{"gratitude_gift":"warming","artifact_gift":"warming","scholar_offer":"warming","research_sale":"warming","league_invitation":"warming","protection_pact":"warming","intelligence_share":"warming"}}
+	if kind=="news":
+		return {"mix":{"rumor_share":0.8,"intelligence_share":0.6,"gift_goods":0.5},"branch":{"rumor_share":"friendship","intelligence_share":"friendship","gift_goods":"friendship"}}
+	return {"mix":OCCASION_MIX.ambient,"branch":{}}
+
+static func _candidate(situation_type:String,civ_id:String,occasion:Dictionary,rng:RandomNumberGenerator,used:Dictionary,day:int)->Dictionary:
+	var civ:=ForeignDiplomacy.civilization(civ_id)
+	if civ.is_empty(): return {}
 	var relation:Dictionary=civ.player_relation
-	var opinion:=float(relation.get("opinion",0))
-	var tension:=float(relation.get("border_tension",0))
 	var war:=bool(relation.get("at_war",false))
-	var trust:=float(leader.get("trust",0))
-	var size_ratio:=float(civ.get("population",100))/_player_population()
-	var candidates:Dictionary={
-		"gift":_gift_terms(civ_id,civ,rng),
-		"request":_request_terms(civ,rng),
-		"threat":_threat_terms(civ,rng),
-		"news":_news_fact(civ_id,rng),
-	}
-	var weights:Dictionary={
-		"gift":0.0 if war else maxf(0.0,0.7+float(p.empathy)*1.0+float(p.openness)*0.4+maxf(0,opinion)*1.6+trust*0.8+(0.4 if String(relation.get("treaty",""))=="trade" else 0.0)-tension*0.9),
-		"request":0.0 if war else maxf(0.0,0.45+(1.5 if _hungry(civ) else 0.0)+maxf(0,opinion)*0.7+(1-float(p.discipline))*0.35+(0.3 if String(civ.get("strategy","")) in ["expansion","fortification","growth"] else 0.0)),
-		"threat":maxf(0.02,pow(float(p.assertiveness),2)*1.8+tension*2.0+maxf(0,-opinion)*1.3+float(p.risk_tolerance)*0.45+float(civ.get("aggression",0.3))*0.8-float(p.empathy)*0.9+(1.5 if war else 0.0))*clampf(size_ratio,0.35,1.8),
-		"news":0.55+float(p.openness)*0.9,
-	}
-	var chosen:=""
-	if forced_kind!="":
-		if candidates.get(forced_kind,{}).is_empty(): return {}
-		chosen=forced_kind
+	var name:=String(civ.get("name",civ_id))
+	var data:Dictionary=occasion.get("data",{}) if occasion.get("data") is Dictionary else {}
+	var previous:Dictionary=data.get("previous",{}) if data.get("previous") is Dictionary else {}
+	var kind:=String(SITUATIONS.get(situation_type,{}).get("kind",""))
+	var situation:={"type":situation_type,"headline":String(SITUATIONS.get(situation_type,{}).get("headline",""))}
+	match situation_type:
+		"gift_goods","gratitude_gift":
+			if war: return {}
+			var terms:=_gift_terms(civ_id,civ,rng,used,1.3 if situation_type=="gratitude_gift" else 1.0)
+			if terms.is_empty(): return {}
+			situation.ask="gift:"+String(terms.resource)
+			situation.summary=("%s sends %s in thanks for your help." if situation_type=="gratitude_gift" else "%s sends %s as a gift.") % [name,_terms_text(terms)]
+			return {"kind":kind,"terms":terms,"situation":situation}
+		"aid_request":
+			if war or not _hungry(civ): return {}
+			var episode:=int(data.get("episode",-1))
+			var blocked:=_request_blocked(civ_id,day,episode)
+			var request:=_request_terms(civ,rng,blocked)
+			if request.is_empty(): return {}
+			situation.ask="request:"+String(request.resource)
+			if String(request.resource)=="Food" and episode>=0: situation.ask="request:Food:famine%d" % episode
+			situation.summary="%s is short of food (about %d days of stores) and asks for %s." % [name,roundi(float(civ.get("food_days",0))),_terms_text(request)]
+			return {"kind":kind,"terms":request,"situation":situation}
+		"tribute_demand","emboldened_demand","test_of_resolve":
+			var scale:=1.4 if situation_type=="emboldened_demand" else (0.7 if situation_type=="test_of_resolve" else 1.0)
+			var avoid:=String(previous.get("resource","")) if situation_type=="emboldened_demand" else ""
+			var threat:=_threat_terms(civ,rng,used,scale,avoid)
+			if threat.is_empty(): return {}
+			situation.ask="tribute:"+String(threat.resource)
+			situation.summary="%s demands %s in tribute." % [name,_terms_text(threat)]
+			if situation_type=="emboldened_demand": situation.summary="%s, paid once, now demands %s more." % [name,_terms_text(threat)]
+			elif situation_type=="test_of_resolve": situation.summary="%s, refused before, tests whether you meant it: it demands %s." % [name,_terms_text(threat)]
+			return {"kind":kind,"terms":threat,"situation":situation}
+		"news_report":
+			var fact:=_news_fact(civ_id,rng,used,String(data.get("enemy","")))
+			if fact.is_empty(): return {}
+			situation.ask="news:%s:%s" % [String(fact.subject_civ_id),String(fact.fact_kind)]
+			situation.summary=String(fact.fact)
+			return {"kind":kind,"news":fact,"situation":situation}
+		"rumor_share":
+			return _rumor_candidate(civ_id,name,used,day,situation)
+		"intelligence_share":
+			return _intel_candidate(civ_id,name,used,day,situation)
+		"accord_offer":
+			var leader:=ForeignDiplomacy.leader(civ_id)
+			if war or not (leader.accord as Dictionary).is_empty() or int(leader.get("next_day",0))>day: return {}
+			var preferred:=String(ForeignDiplomacy.situation(civ_id).get("priority","exchange"))
+			if String(occasion.get("type","")) in ["tension_rise","relation_cool","war_end","recruitment_incident"] or float(relation.get("border_tension",0.0))>0.45: preferred="restraint"
+			var order:Array=[preferred,"exchange","routes","restraint"]
+			for accord in order:
+				if not ForeignDiplomacy.ACCORDS.has(String(accord)) or used.has("accord:"+String(accord)): continue
+				var entry:Dictionary=ForeignDiplomacy.ACCORDS[String(accord)]
+				situation.ask="accord:"+String(accord); situation.accord=String(accord); situation.accord_name=String(entry.name)
+				situation.summary="%s proposes %s: %s For two years both peoples would gain research support in %s; war would end it." % [name,String(entry.name).to_lower(),String(entry.purpose),String(entry.domain)]
+				return {"kind":kind,"situation":situation}
+			return {}
+		"protection_pact":
+			var c:=_commitments()
+			if war or used.has("pact:protection") or float(relation.get("opinion",0.0))<0.1 or c.eligibility(civ_id,c.terms("protection"))!="": return {}
+			situation.ask="pact:protection"
+			situation.summary="%s proposes mutual protection: each would answer a defensive siege against the other with feasible relief. It does not cover offensive wars." % name
+			return {"kind":kind,"situation":situation}
+		"league_invitation":
+			var c2:=_commitments()
+			if war or not c2.faction("player").is_empty(): return {}
+			var theirs:Dictionary=c2.faction(civ_id)
+			if not theirs.is_empty():
+				var ask:="league:join:"+String(theirs.id)
+				if used.has(ask) or c2.eligibility(civ_id,c2.terms("join_faction"))!="": return {}
+				situation.ask=ask; situation.mode="join"; situation.league_id=String(theirs.id); situation.league_name=String(theirs.name)
+				var members:Array=[]
+				for member in theirs.members: members.append(_civ_name(String(member)))
+				situation.summary="%s invites your people into the %s (members: %s). Membership means consultation before offensive war and relief for members under defensive siege." % [name,String(theirs.name),", ".join(members)]
+				return {"kind":kind,"situation":situation}
+			var ask2:="league:found:"+civ_id
+			if used.has(ask2) or float(relation.get("opinion",0.0))<0.25 or c2.eligibility(civ_id,c2.terms("found_faction"))!="": return {}
+			var goal:String={"commerce":"routes","inquiry":"exchange"}.get(String(civ.get("strategy","")),"defense")
+			situation.ask=ask2; situation.mode="found"; situation.goal=goal; situation.league_name="League of %s" % name
+			situation.summary="%s proposes founding a league with your people, devoted to %s. Each member keeps its own leader and army." % [name,String(COMMITMENTS.GOALS[goal]).to_lower()]
+			return {"kind":kind,"situation":situation}
+		"war_support":
+			var enemy:=String(data.get("enemy",""))
+			if war or enemy=="" or enemy=="player" or used.has("war_support:"+enemy): return {}
+			if not bool((civ.get("relations",{}) as Dictionary).get(enemy,{}).get("at_war",false)): return {}
+			var enemy_name:=_civ_name(enemy)
+			situation.ask="war_support:"+enemy; situation.enemy=enemy; situation.enemy_name=enemy_name
+			situation.summary="%s is at war with %s and asks where your people stand." % [name,enemy_name]
+			return {"kind":kind,"situation":situation}
+		"peace_feeler":
+			if not war or not _peace_ok(civ_id,relation): return {}
+			var war_key:=String(relation.get("war_id",""))
+			var ask3:="peace:%s" % (war_key if war_key!="" else "day%d" % int(relation.get("war_started_day",0)))
+			if used.has(ask3): return {}
+			situation.ask=ask3
+			situation.summary="%s sends an envoy under a sign of truce: it would end the war and keep a one-year truce along the present line." % name
+			return {"kind":kind,"situation":situation}
+		"trade_offer":
+			if used.has("treaty:trade") or float(relation.get("opinion",0.0))<0.05 or CivilizationSystem.player_action_availability(civ_id,"open_trade").has("error"): return {}
+			situation.ask="treaty:trade"
+			situation.summary="%s proposes a standing trade compact between your peoples." % name
+			return {"kind":kind,"situation":situation}
+		"nonaggression_offer":
+			if used.has("treaty:non_aggression") or CivilizationSystem.player_action_availability(civ_id,"non_aggression").has("error"): return {}
+			situation.ask="treaty:non_aggression"
+			situation.summary="%s proposes a compact of non-aggression: neither people to attack the other, and the frontier to calm." % name
+			return {"kind":kind,"situation":situation}
+		"scholar_offer","research_sale","license_offer":
+			if war: return {}
+			return _research_candidate(situation_type,civ_id,name,used,situation)
+		"artifact_gift":
+			if war: return {}
+			return _artifact_gift_candidate(civ_id,name,used,situation)
+		"artifact_purchase":
+			if war: return {}
+			return _artifact_purchase_candidate(civ_id,name,used,situation)
+		"artifact_return":
+			return _artifact_return_candidate(civ_id,name,used,situation)
+		"recruitment_protest":
+			var incident:=int(relation.get("last_recruitment_day",-1))
+			if incident<0 or used.has("protest:recruitment:%d" % incident): return {}
+			situation.ask="protest:recruitment:%d" % incident
+			situation.visits=int(relation.get("recruitment_visits",0))
+			situation.summary="%s protests that your recruiters invited its households away (%d visit%s so far) and wants it stopped." % [name,int(relation.get("recruitment_visits",0)),"" if int(relation.get("recruitment_visits",0))==1 else "s"]
+			return {"kind":kind,"situation":situation}
+	return {}
+
+static func _rumor_candidate(civ_id:String,name:String,used:Dictionary,day:int,situation:Dictionary)->Dictionary:
+	var net:=CivilizationSystem.rumor_network as RUMORS
+	if net==null: return {}
+	var mine:Dictionary=net.books.get("player",{})
+	for lead in net.list_leads(civ_id,day):
+		if not lead is Dictionary: continue
+		var subject:=String(lead.get("subject",""))
+		var lead_id:=String(lead.get("id",""))
+		if subject in ["player",civ_id,""] or mine.has(lead_id) or used.has("rumor:"+lead_id): continue
+		situation.ask="rumor:"+lead_id; situation.lead_id=lead_id
+		var confidence:="fair" if float(lead.get("confidence",0))>=.35 else ("thin" if float(lead.get("confidence",0))>=.15 else "faint")
+		situation.summary="%s's people carry an account of %s, first observed on day %d; the account is %s." % [name,String(lead.get("name","a distant people")),int(lead.get("observed_day",0)),confidence]
+		var news:={"subject_civ_id":subject,"subject_civ_name":String(lead.get("name","")),"fact_kind":"rumor","fact":String(situation.summary)}
+		return {"kind":"news","news":news,"situation":situation}
+	return {}
+
+static func _intel_candidate(civ_id:String,name:String,used:Dictionary,day:int,situation:Dictionary)->Dictionary:
+	var intel:=CivilizationSystem.city_intelligence as INTEL
+	if intel==null: return {}
+	var theirs:Dictionary=intel.records.get(civ_id,{})
+	var ids:Array=theirs.keys(); ids.sort()
+	for city_id in ids:
+		var record:Variant=theirs[city_id]
+		if not record is Dictionary: continue
+		var owner:=String(record.get("civ_id",""))
+		if owner in ["",civ_id,"player"] or ForeignDiplomacy.civilization(owner).is_empty() or used.has("intel:"+String(city_id)): continue
+		if day-int(record.get("observed_day",-9999))>365: continue
+		var mine:Dictionary=intel.known("player",String(city_id))
+		if not mine.is_empty() and int(mine.get("observed_day",-1))>=int(record.get("observed_day",0))-45: continue
+		situation.ask="intel:"+String(city_id); situation.city_id=String(city_id); situation.city_name=String(record.get("name","a city"))
+		situation.summary="%s offers what its people saw of %s, a settlement of %s, on day %d." % [name,String(record.get("name","a city")),_civ_name(owner),int(record.get("observed_day",0))]
+		var news:={"subject_civ_id":owner,"subject_civ_name":_civ_name(owner),"fact_kind":"city_intelligence","fact":String(situation.summary)}
+		return {"kind":"news","news":news,"situation":situation}
+	return {}
+
+static func _payment_option(civ_id:String)->Dictionary:
+	## The standard diplomatic gift the player can actually spare, non-Food first.
+	var options:=CivilizationSystem.diplomatic_gift_options(civ_id)
+	for option:Dictionary in options:
+		if bool(option.get("can_send",false)) and String(option.resource)!="Food": return {"resource":String(option.resource),"amount":_nice(float(option.amount))}
+	for option2:Dictionary in options:
+		if bool(option2.get("can_send",false)): return {"resource":String(option2.resource),"amount":_nice(float(option2.amount))}
+	return {}
+
+static func _research_quote(situation_type:String,civ_id:String,subject:String)->Dictionary:
+	## The envoy brings the teacher, study or contract with them, so these use
+	## each mechanic's envoy path (same rules, no mission slot of ours).
+	match situation_type:
+		"scholar_offer": return SCHOLARS.envoy_quote(civ_id,subject)
+		"research_sale": return PURCHASE.envoy_quote(civ_id,subject)
+		"license_offer": return LICENSES.envoy_quote(civ_id,subject)
+	return {"error":"Unknown offer."}
+
+static func _travel_days(civ_id:String)->int:
+	var civ:=ForeignDiplomacy.civilization(civ_id)
+	var home:Dictionary=(civ.get("player_relation",{}) as Dictionary).get("home_position",{})
+	if not home.has("x"): return 10
+	var distance:=CivilizationSystem.player_world_origin.distance_to(Vector2(float(home.x),float(home.get("z",0.0))))
+	return clampi(ceili(distance/17.0),3,120)
+
+static func _research_candidate(situation_type:String,civ_id:String,name:String,used:Dictionary,situation:Dictionary)->Dictionary:
+	var provider:=SOCIETY.owner_state(civ_id)
+	if provider==null: return {}
+	if String(provider.society_exchange.get("sharing_policy","selective"))!="open": return {}
+	var payment:=_payment_option(civ_id)
+	if payment.is_empty(): return {}
+	var known:Array=provider.known_discoveries
+	var subjects:Array[String]=[]
+	if situation_type=="license_offer":
+		for subject in LICENSES.subjects():
+			if subject in known: subjects.append(subject)
 	else:
-		var total:=0.0
-		for kind in weights:
-			if candidates[kind].is_empty(): weights[kind]=0.0
-			total+=float(weights[kind])
-		if total<=0.0: return {}
-		var roll:=rng.randf()*total
-		for kind in ["gift","request","threat","news"]:
-			roll-=float(weights[kind])
-			if float(weights[kind])>0.0 and roll<=0.0: chosen=kind; break
-		if chosen=="":
-			for kind in ["news","gift","request","threat"]:
-				if float(weights[kind])>0.0: chosen=kind; break
-	var audience:=_new_audience("foreign",chosen,day)
+		for subject in known:
+			if not String(subject) in GameState.known_discoveries: subjects.append(String(subject))
+	var prefix:String={"scholar_offer":"scholar:","research_sale":"purchase:","license_offer":"license:"}[situation_type]
+	var tried:=0
+	for subject in subjects:
+		if used.has(prefix+subject): continue
+		tried+=1
+		if tried>40: break
+		var quote:=_research_quote(situation_type,civ_id,subject)
+		if quote.has("error"): continue
+		var subject_name:=String(quote.get("subject_name",subject))
+		situation.ask=prefix+subject; situation.subject=subject; situation.subject_name=subject_name
+		situation.payment=String(payment.resource); situation.payment_amount=float(payment.amount)
+		var what:String={"scholar_offer":"a teacher of %s, who would stay sixty days","research_sale":"a validated study of %s for your researchers to reproduce","license_offer":"a one-year license to manufacture by %s"}[situation_type] % subject_name
+		situation.summary="%s offers %s, for %s." % [name,what,_terms_text({"resource":payment.resource,"amount":payment.amount})]
+		return {"kind":"proposal","situation":situation}
+	return {}
+
+# ---- artifacts ----
+
+static func _ensure_ties(civ_id:String)->void:
+	## An envoy standing in the hall means the two peoples have met in person;
+	## record the acquaintance on both sides so objects can change hands.
+	if SOCIETY.owner_state(civ_id)==null: return
+	SOCIETY.connection(civ_id)
+	WorldSimulation.scoped(SOCIETY.owner_id(civ_id),func()->void:SOCIETY.connection("player"))
+
+static func _artifact_label(item:Dictionary)->String:
+	return "%s (%s)" % [String(item.get("name","an object")),String(ARTIFACTS.TIERS[clampi(int(item.get("rarity",0)),0,4)]).to_lower()]
+
+static func _artifact_ids_by_price(holdings:Dictionary,ascending:bool)->Array:
+	var ids:Array=holdings.keys()
+	ids.sort_custom(func(a:Variant,b:Variant)->bool:
+		var pa:=ARTIFACTS.price(holdings[a]); var pb:=ARTIFACTS.price(holdings[b])
+		return (pa<pb if ascending else pa>pb) or (pa==pb and String(a)<String(b)))
+	return ids
+
+static func _artifact_gift_candidate(civ_id:String,name:String,used:Dictionary,situation:Dictionary)->Dictionary:
+	_ensure_ties(civ_id)
+	var theirs:=ARTIFACTS.holdings(civ_id)
+	if theirs.is_empty(): return {}
+	# A piece of our own people's making comes home first; otherwise a modest piece.
+	var ids:=_artifact_ids_by_price(theirs,true)
+	var ours:Array=[]
+	for id in ids:
+		if String((theirs[id] as Dictionary).get("source_id",""))=="player": ours.append(id)
+	for id in ours+ids:
+		if used.has("artifact_gift:"+String(id)) or ARTIFACTS.exchange_check(civ_id,String(id),"player","gift").has("error"): continue
+		var item:Dictionary=theirs[id]
+		var homecoming:=String(item.get("source_id",""))=="player"
+		situation.ask="artifact_gift:"+String(id); situation.artifact_id=String(id); situation.artifact_name=String(item.get("name","")); situation.value=ARTIFACTS.price(item)
+		situation.summary="%s offers %s as a gift%s." % [name,_artifact_label(item)," — a piece made by your own people, coming home" if homecoming else ""]
+		return {"kind":"proposal","situation":situation}
+	return {}
+
+static func _artifact_purchase_candidate(civ_id:String,name:String,used:Dictionary,situation:Dictionary)->Dictionary:
+	_ensure_ties(civ_id)
+	var ours:=ARTIFACTS.holdings("player")
+	if ours.is_empty(): return {}
+	var theirs:=ARTIFACTS.holdings(civ_id)
+	for id in _artifact_ids_by_price(ours,false):
+		var item:Dictionary=ours[id]
+		if used.has("artifact_buy:"+String(id)) or String(item.get("source_id",""))==civ_id: continue
+		var can_sell:=not ARTIFACTS.exchange_check("player",String(id),civ_id,"sell").has("error")
+		var offered:=""
+		for other_id in _artifact_ids_by_price(theirs,false):
+			if ARTIFACTS.price(theirs[other_id])<=ARTIFACTS.price(item) and not ARTIFACTS.exchange_check("player",String(id),civ_id,"trade",String(other_id)).has("error"):
+				offered=String(other_id); break
+		if not can_sell and offered=="": continue
+		situation.ask="artifact_buy:"+String(id); situation.artifact_id=String(id); situation.artifact_name=String(item.get("name","")); situation.value=ARTIFACTS.price(item)
+		situation.offered_id=offered
+		situation.offered_name=String((theirs.get(offered,{}) as Dictionary).get("name","")) if offered!="" else ""
+		var terms:="for %.0f in coin" % ARTIFACTS.price(item) if can_sell else ""
+		if offered!="": terms+=(" or " if terms!="" else "")+"in exchange for %s" % _artifact_label(theirs[offered])
+		situation.summary="%s has heard of your %s and asks for it, %s." % [name,_artifact_label(item),terms]
+		return {"kind":"proposal","situation":situation}
+	return {}
+
+static func _looted_from(civ_id:String)->Array[Dictionary]:
+	## Treasures our people carried off from their great works and still hold.
+	var result:Array[Dictionary]=[]
+	var ours:=ARTIFACTS.holdings("player")
+	for city in RIVALRY.cities(civ_id):
+		if not city is Dictionary: continue
+		for r in (city as Dictionary).get("undertakings",[]):
+			if not r is Dictionary: continue
+			var rivalry:Dictionary=(r as Dictionary).get("rivalry",{}) if (r as Dictionary).get("rivalry") is Dictionary else {}
+			for entry in rivalry.get("looted",[]):
+				if entry is Dictionary and String(entry.get("by",""))=="player" and not bool(entry.get("returned",false)) and ours.has(String(entry.get("id",""))):
+					result.append({"item_id":String(entry.id),"work_id":String((r as Dictionary).get("id","")),"day":int(entry.get("day",0))})
+	return result
+
+static func _artifact_return_candidate(civ_id:String,name:String,used:Dictionary,situation:Dictionary)->Dictionary:
+	var ours:=ARTIFACTS.holdings("player")
+	for looted in _looted_from(civ_id):
+		if used.has("artifact_return:"+String(looted.item_id)): continue
+		var item:Dictionary=ours[String(looted.item_id)]
+		situation.ask="artifact_return:"+String(looted.item_id); situation.artifact_id=String(looted.item_id); situation.artifact_name=String(item.get("name",""))
+		situation.mode="looted"; situation.work_id=String(looted.work_id); situation.value=ARTIFACTS.price(item)
+		situation.summary="%s demands the return of %s, carried off by your soldiers from one of its great works on day %d." % [name,_artifact_label(item),int(looted.day)]
+		return {"kind":"proposal","situation":situation}
+	_ensure_ties(civ_id)
+	for id in _artifact_ids_by_price(ours,false):
+		var piece:Dictionary=ours[id]
+		if String(piece.get("source_id",""))!=civ_id or used.has("artifact_return:"+String(id)): continue
+		if ARTIFACTS.exchange_check("player",String(id),civ_id,"gift").has("error"): continue
+		situation.ask="artifact_return:"+String(id); situation.artifact_id=String(id); situation.artifact_name=String(piece.get("name",""))
+		situation.mode="origin"; situation.value=ARTIFACTS.price(piece)
+		situation.summary="%s asks for %s back: it was made by their people and they want it home." % [name,_artifact_label(piece)]
+		return {"kind":"proposal","situation":situation}
+	return {}
+
+static func _request_blocked(civ_id:String,day:int,episode:int)->Dictionary:
+	## Resources this people may not ask for again yet: never within a year; a
+	## Food request for a distinct famine episode may return after that.
+	var blocked:Dictionary={}
+	for entry in state().ledger:
+		if not entry is Dictionary or String(entry.get("speaker",""))!="civ:"+civ_id: continue
+		var ask:=String(entry.get("ask",""))
+		if not ask.begins_with("request:"): continue
+		var parts:=ask.split(":")
+		var resource:=String(parts[1]) if parts.size()>1 else ""
+		var age:=day-int(entry.get("day",-99999))
+		if age<365: blocked["request:"+resource]=true
+		elif age<REPEAT_DAYS:
+			var new_episode:=resource=="Food" and episode>=0 and ask!="request:Food:famine%d" % episode
+			if not new_episode: blocked["request:"+resource]=true
+	return blocked
+
+static func _foreign_audience(civ_id:String,chosen:Dictionary,occasion:Dictionary,day:int)->Dictionary:
+	var civ:=ForeignDiplomacy.civilization(civ_id)
+	var leader:=ForeignDiplomacy.leader(civ_id)
+	var kind:=String(chosen.kind)
+	var audience:=_new_audience("foreign",kind,day)
 	audience.civ_id=civ_id
 	audience.civ_name=String(civ.get("name",civ_id))
-	audience.speaker=_envoy(civ_id,String(audience.id),chosen,leader)
-	if chosen=="news": audience.news=candidates.news
-	else: audience.terms=candidates[chosen]
+	audience.speaker=_envoy(civ_id,String(audience.id),kind,leader)
+	if chosen.get("terms") is Dictionary: audience.terms=(chosen.terms as Dictionary).duplicate()
+	if chosen.get("news") is Dictionary: audience.news=(chosen.news as Dictionary).duplicate()
+	var situation:Dictionary=(chosen.get("situation",{}) as Dictionary).duplicate(true)
+	situation["occasion"]={"type":String(occasion.get("type","")),"text":String((occasion.get("data",{}) as Dictionary).get("text","")),"day":int(occasion.get("day",day)),"crisis":bool(occasion.get("crisis",false))}
+	audience.situation=situation
 	return audience
+
+static func _generate_foreign(civ_id:String,day:int,forced_kind:String)->Dictionary:
+	## Forced generation (tests, captures): any situation of that kind that the
+	## world can truthfully back, ignoring the ledger and the budget.
+	var civ:=ForeignDiplomacy.civilization(civ_id)
+	if civ.is_empty() or ForeignDiplomacy.leader(civ_id).is_empty(): return {}
+	var rng:=_rng("forced:%s:%s:%d" % [civ_id,forced_kind,int(state().serial)],day)
+	var occasion:={"type":"debug","key":"debug","civ_id":civ_id,"data":{"text":"a summons from the ruler"}}
+	var order:Array=[]
+	for situation_type:String in SITUATIONS:
+		if String(SITUATIONS[situation_type].kind)==forced_kind and not situation_type in ["gratitude_gift","emboldened_demand","test_of_resolve"]: order.append(situation_type)
+	if forced_kind=="proposal":
+		for index in order.size():
+			var swap:=rng.randi_range(index,order.size()-1)
+			var t:Variant=order[index]; order[index]=order[swap]; order[swap]=t
+	for situation_type in order:
+		var candidate:=_candidate(String(situation_type),civ_id,occasion,rng,{},day)
+		if not candidate.is_empty(): return _foreign_audience(civ_id,candidate,occasion,day)
+	return {}
 
 static func _envoy(civ_id:String,audience_id:String,kind:String,leader:Dictionary)->Dictionary:
 	var serial:=posmod(hash(civ_id),10000)
@@ -323,26 +1235,29 @@ static func _envoy(civ_id:String,audience_id:String,kind:String,leader:Dictionar
 		"request":["Petitioner for %s","Voice of %s","Messenger of %s"],
 		"threat":["Herald of %s","Spear-speaker of %s","Envoy of %s"],
 		"news":["Road-walker for %s","Listener of %s","Messenger of %s"],
+		"proposal":["Envoy of %s","Speaker for %s","Emissary of %s"],
 	}
 	var options:Array=titles.get(kind,titles.news)
 	return {"name":String(identity.get("name","A traveling envoy")),"title":String(options[envoy_serial%options.size()]) % leader_name,"person_id":0,"role":"envoy"}
 
-static func _gift_terms(civ_id:String,civ:Dictionary,rng:RandomNumberGenerator)->Dictionary:
+static func _gift_terms(civ_id:String,civ:Dictionary,rng:RandomNumberGenerator,used:Dictionary={},scale:float=1.0)->Dictionary:
 	var p:=_personality(civ_id)
 	var best:={}
 	var best_score:=0.0
+	var recent:=_recent_resources("gift:")
 	for resource in RESOURCES:
+		if used.has("gift:"+String(resource)): continue
 		var stock:=foreign_stock(civ_id,resource)
 		if stock<=0.0: continue
 		if resource=="Food" and _hungry(civ): continue
-		var cap:=_player_population()*(1.6 if resource=="Food" else 0.35)*(0.6+float(p.empathy)*0.8)
-		var amount:=_nice(minf(stock*rng.randf_range(0.05,0.12),cap*rng.randf_range(0.7,1.2)))
+		var cap:=_player_population()*(1.6 if resource=="Food" else 0.35)*(0.6+float(p.empathy)*0.8)*scale
+		var amount:=_nice(minf(stock*rng.randf_range(0.05,0.12)*scale,cap*rng.randf_range(0.7,1.2)))
 		if amount<5.0 or amount>stock: continue
-		var score:=amount/maxf(1.0,cap)*rng.randf_range(0.6,1.4)
+		var score:=amount/maxf(1.0,cap)*rng.randf_range(0.6,1.4)*pow(0.4,float(recent.get(String(resource),0)))
 		if score>best_score: best_score=score; best={"resource":resource,"amount":amount}
 	return best
 
-static func _request_terms(civ:Dictionary,rng:RandomNumberGenerator)->Dictionary:
+static func _request_terms(civ:Dictionary,rng:RandomNumberGenerator,used:Dictionary={})->Dictionary:
 	var wants:Array=[]
 	if _hungry(civ): wants.append("Food")
 	match String(civ.get("strategy","")):
@@ -357,27 +1272,52 @@ static func _request_terms(civ:Dictionary,rng:RandomNumberGenerator)->Dictionary
 		var t:Variant=others[index]; others[index]=others[swap]; others[swap]=t
 	for resource in others:
 		if resource not in wants: wants.append(resource)
+	# What others asked for lately goes to the back, unless hunger makes Food the point.
+	var recent:=_recent_resources("request:")
+	var fresh:Array=[]; var stale:Array=[]
+	for resource in wants:
+		if recent.has(String(resource)) and not (String(resource)=="Food" and _hungry(civ)): stale.append(resource)
+		else: fresh.append(resource)
+	wants=fresh+stale
 	var their_pop:=maxf(20.0,float(civ.get("population",100)))
 	for resource:String in wants:
+		if used.has("request:"+resource): continue
 		var stock:=player_stock(resource)
 		var want:=their_pop*(0.6 if resource=="Food" else 0.12)*rng.randf_range(0.7,1.3)
 		var amount:=_nice(minf(want,stock*0.3))
 		if amount>=5.0 and amount<=stock: return {"resource":resource,"amount":amount}
 	return {}
 
-static func _threat_terms(civ:Dictionary,rng:RandomNumberGenerator)->Dictionary:
+static func _recent_resources(prefix:String,days:int=365)->Dictionary:
+	## Resources anyone has recently asked for or given under this ask prefix,
+	## so the hall does not hear "Food, Food, Food" from every neighbor.
+	var recent:Dictionary={}
+	var today:=_day()
+	for entry in state().ledger:
+		if entry is Dictionary and String(entry.get("ask","")).begins_with(prefix) and today-int(entry.get("day",-99999))<days:
+			var resource:=String(String(entry.ask).trim_prefix(prefix).split(":")[0])
+			recent[resource]=int(recent.get(resource,0))+1
+	return recent
+
+const STRATEGY_WANTS:={"fortification":["Stone","Timber"],"expansion":["Timber","Fiber Plants"],"growth":["Food","Timber"],"commerce":["Clay","Fiber Plants"],"inquiry":["Clay"],"sustenance":["Food"]}
+
+static func _threat_terms(civ:Dictionary,rng:RandomNumberGenerator,used:Dictionary={},scale:float=1.0,avoid:String="")->Dictionary:
 	var best:={}
 	var best_value:=0.0
 	var their_pop:=maxf(20.0,float(civ.get("population",100)))
+	var recent:=_recent_resources("tribute:")
+	var wants:Array=STRATEGY_WANTS.get(String(civ.get("strategy","")),[])
 	for resource in RESOURCES:
+		if used.has("tribute:"+String(resource)) or String(resource)==avoid: continue
 		var stock:=player_stock(resource)
-		var demand:=_nice(minf(stock*rng.randf_range(0.25,0.45),their_pop*(1.2 if resource=="Food" else 0.3)))
+		var demand:=_nice(minf(stock*rng.randf_range(0.25,0.45)*scale,their_pop*(1.2 if resource=="Food" else 0.3)*scale))
 		if demand<8.0 or demand>stock: continue
-		var value:=demand*(0.6 if resource=="Food" else 1.0)*rng.randf_range(0.8,1.2)
+		var value:=demand/maxf(1.0,their_pop*(1.2 if resource=="Food" else 0.3)*scale)*rng.randf_range(0.7,1.3)
+		value*=(1.6 if resource in wants else 1.0)*pow(0.4,float(recent.get(String(resource),0)))
 		if value>best_value: best_value=value; best={"resource":resource,"amount":demand}
 	return best
 
-static func _news_fact(civ_id:String,rng:RandomNumberGenerator)->Dictionary:
+static func _news_fact(civ_id:String,rng:RandomNumberGenerator,used:Dictionary={},focus:String="")->Dictionary:
 	## Real facts about third civilizations only.
 	var facts:Array=[]
 	var civs:Array=WorldSimulation.world.civilizations
@@ -386,6 +1326,7 @@ static func _news_fact(civ_id:String,rng:RandomNumberGenerator)->Dictionary:
 		var first_id:=String(first.get("id",""))
 		if first_id==civ_id or not bool(first.get("alive",true)): continue
 		var name:=String(first.get("name",first_id))
+		var focus_boost:=3.0 if focus!="" and first_id==focus else 1.0
 		for other_id in (first.get("relations",{}) as Dictionary):
 			if String(other_id)<=first_id and String(other_id)!=civ_id: continue
 			var relation:Dictionary=first.relations[other_id]
@@ -394,7 +1335,7 @@ static func _news_fact(civ_id:String,rng:RandomNumberGenerator)->Dictionary:
 			var other_name:=String(civs[other_index].get("name",other_id))
 			if bool(relation.get("at_war",false)):
 				var text:String="%s and %s are at war." % [name,other_name] if String(other_id)!=civ_id else "%s is at war with %s, the people who sent this envoy." % [name,other_name]
-				facts.append({"w":3.0,"f":{"subject_civ_id":first_id,"subject_civ_name":name,"fact_kind":"war","fact":text}})
+				facts.append({"w":3.0*focus_boost,"f":{"subject_civ_id":first_id,"subject_civ_name":name,"fact_kind":"war","fact":text}})
 			elif float(relation.get("border_tension",0))>0.6 and String(other_id)!=civ_id:
 				facts.append({"w":1.4,"f":{"subject_civ_id":first_id,"subject_civ_name":name,"fact_kind":"border_tension","fact":"The border between %s and %s is tense; each watches the other." % [name,other_name]}})
 		if bool(first.player_relation.get("at_war",false)):
@@ -414,14 +1355,18 @@ static func _news_fact(civ_id:String,rng:RandomNumberGenerator)->Dictionary:
 			var comparison:="about as many as yours" if ratio>0.8 and ratio<1.25 else ("more than twice your number" if ratio>=2.0 else ("more than yours" if ratio>=1.25 else ("fewer than half yours" if ratio<=0.5 else "fewer than yours")))
 			var rounded:=maxi(10,roundi(pop/10.0)*10) if pop<500 else roundi(pop/50.0)*50
 			facts.append({"w":0.7,"f":{"subject_civ_id":first_id,"subject_civ_name":name,"fact_kind":"size","fact":"%s numbers roughly %d people, %s." % [name,rounded,comparison]}})
-	if facts.is_empty(): return {}
-	var total:=0.0
-	for entry in facts: total+=float(entry.w)
-	var roll:=rng.randf()*total
+	var open:Array=[]
 	for entry in facts:
+		var f:Dictionary=entry.f
+		if not used.has("news:%s:%s" % [String(f.subject_civ_id),String(f.fact_kind)]): open.append(entry)
+	if open.is_empty(): return {}
+	var total:=0.0
+	for entry in open: total+=float(entry.w)
+	var roll:=rng.randf()*total
+	for entry in open:
 		roll-=float(entry.w)
 		if roll<=0.0: return (entry.f as Dictionary).duplicate()
-	return (facts[-1].f as Dictionary).duplicate()
+	return (open[-1].f as Dictionary).duplicate()
 
 # --------------------------------------------------------------------------
 # Court petitions
@@ -454,6 +1399,15 @@ static func _official(person_id:int)->Dictionary:
 		if int(person.person_id)==person_id: return person
 	return {}
 
+static func _relevant_official(offices:Array)->Dictionary:
+	var officials:=_officials()
+	for office in offices:
+		for person in officials:
+			if String(person.get("office_key",""))==String(office): return person
+	for person in officials:
+		if String(person.get("office_key",""))=="settlement": return person
+	return officials[0] if not officials.is_empty() else {}
+
 static func conditions()->Dictionary:
 	var metrics:Dictionary=GameState.simulation_metrics
 	var pop:=_player_population()
@@ -471,73 +1425,140 @@ static func conditions()->Dictionary:
 		"housing_ratio":housing,"water_intake":float(water.get("intake_ratio",1.0)) if bool(water.get("source_accessible",true)) or float(water.get("required_today",0))>0 else 1.0,
 		"foreign_threat":threat,"threat_name":threat_name,"population":pop}
 
-static func _generate_petition(person_id:int,day:int,forced_topic:String)->Dictionary:
-	var person:=_official(person_id)
-	if person.is_empty(): return {}
-	var rng:=_rng("petition:%d:%d" % [person_id,int(state().serial)],day)
-	var c:=conditions()
+static func _ambition_ladder(person:Dictionary)->Array:
 	var office:=String(person.get("office_key",""))
-	var rel:Dictionary=person.get("relationships",{}).get("sovereign",{})
+	var ladder:Array=(AMBITIONS.get(office,AMBITIONS.settlement) as Array).duplicate()
 	var traits:Array=person.get("traits",[])
-	var open_topics:Dictionary={}
-	for audience in state().queue:
-		if String(audience.status)=="waiting" and audience.origin=="court": open_topics[String(audience.petition.get("topic",""))]=true
-	var relevance:=func(offices:Array)->float:return 1.0 if office in offices else (0.7 if office=="settlement" else 0.35)
-	var choices:Dictionary={}
-	var food_severity:=clampf((22.0-float(c.food_days))/22.0,0,1)+clampf((0.97-float(c.food_intake))*4.0,0,1)
-	if food_severity>0.05:
-		var decree:="Ration food for thirty days" if float(c.food_days)<10.0 else "Send gatherers to find food"
-		choices["food"]={"w":food_severity*2.2*relevance.call(["Steward","Quartermaster"]),"summary":"Food stores would last about %d days; people are %s." % [maxi(0,roundi(float(c.food_days))),"already eating less than they need" if float(c.food_intake)<0.97 else "counting portions"],"decree":decree}
-	var water_gap:=clampf((0.95-float(c.water_intake))*3.0,0,1)
-	var health_gap:=clampf((0.62-float(c.health))*3.0,0,1)
-	if water_gap>0.05 or health_gap>0.05:
-		var water_first:=water_gap>health_gap
-		choices["health"]={"w":maxf(water_gap,health_gap)*2.0*relevance.call(["Steward","Scholar"]),
-			"summary":"People are not getting enough clean water; the sick are multiplying." if water_first else "Illness is spreading; health across the settlements has fallen to about %d%%." % roundi(float(c.health)*100),
-			"decree":"Secure water and dig wells" if water_first else "Organize healers to care for the sick"}
-	var housing_gap:=clampf((1.0-float(c.housing_ratio))*2.5,0,1)
-	if housing_gap>0.05:
-		var homeless:=maxi(1,roundi(float(c.population)-float(GameState.housing_capacity)))
-		choices["housing"]={"w":housing_gap*1.8*relevance.call(["Steward","Quartermaster"]),"summary":"About %d people have no proper shelter." % homeless,"decree":"Build shelters"}
-	var security_gap:=clampf((0.36-float(c.security))*2.5,0,1)+clampf((float(c.foreign_threat)-0.45)*1.6,0,1)
-	if security_gap>0.05:
-		var summary:String="The watch is thin; the settlements feel unsafe." if String(c.threat_name)=="" or float(c.foreign_threat)<0.45 else "%s presses on the frontier and the watch is too thin to answer it." % String(c.threat_name)
-		choices["security"]={"w":security_gap*2.0*relevance.call(["Marshal"]),"summary":summary,"decree":"Raise a watch and post guards"}
-	var resentment:=float(rel.get("resentment",0))
-	var trust:=float(rel.get("trust",0.5))
-	if resentment>0.15 or trust<0.35:
-		var why:="feels their counsel has been ignored" if trust<0.35 else "nurses a grudge from past slights"
-		if float(person.get("pride",0.5))>0.65: why="feels their standing has been insulted"
-		choices["grievance"]={"w":(resentment*3.0+maxf(0,0.4-trust)*2.5)*(0.7+float(person.get("pride",0.5))*0.6),"summary":"%s %s." % [String(person.name),why],"decree":""}
-	var ambitious:=0.25+(0.6 if "Ambitious" in traits else 0.0)+(0.3 if "Bold" in traits or "Inventive" in traits or "Curious" in traits else 0.0)+(0.25 if String(person.get("doctrine",""))=="directive" else 0.0)
-	var ambition_decree:String=String({"Scholar":"Support scholars and fund research","Quartermaster":"Expand workshops and make tools","Marshal":"Post guards and patrol the frontier","Envoy":"Hold a public council to hear the people","Steward":"Improve roads and organize haulers"}.get(office,"Hold a public council to hear the people"))
-	if String(person.get("doctrine",""))=="representative": ambition_decree="Hold a public council to hear the people"
-	elif "Curious" in traits or "Inventive" in traits: ambition_decree="Support scholars and fund research"
-	var ambition_summary:String=String({"Support scholars and fund research":"%s wants more hands set to inquiry, under their eye.","Expand workshops and make tools":"%s wants the workshops enlarged and tools made in earnest.","Post guards and patrol the frontier":"%s wants patrols along the frontier, commanded by them.","Hold a public council to hear the people":"%s wants a public council where the people can be heard.","Improve roads and organize haulers":"%s wants the roads improved and hauling organized."}.get(ambition_decree,"%s has a plan.")) % String(person.name)
-	choices["ambition"]={"w":ambitious,"summary":ambition_summary,"decree":ambition_decree}
-	var topic:=""
-	if forced_topic!="":
-		if not choices.has(forced_topic): return {}
-		topic=forced_topic
-	else:
-		var total:=0.0
-		for key in choices:
-			if open_topics.has(key): choices[key].w=float(choices[key].w)*0.15
-			total+=float(choices[key].w)
-		if total<0.3 and rng.randf()>total/0.3: return {}
-		var roll:=rng.randf()*total
-		for key in TOPICS:
-			if not choices.has(key): continue
-			roll-=float(choices[key].w)
-			if roll<=0.0: topic=key; break
-		if topic=="": topic="ambition"
+	var first:=""
+	if String(person.get("doctrine",""))=="representative": first="Hold a public council to hear the people"
+	elif "Curious" in traits or "Inventive" in traits: first="Support scholars and fund research"
+	if first!="":
+		ladder.erase(first)
+		ladder.push_front(first)
+	return ladder
+
+static func _next_ambition(person:Dictionary,day:int)->String:
+	var used:=_used_asks("person:%d" % int(person.get("person_id",0)),day)
+	for decree in _ambition_ladder(person):
+		if not used.has("ambition:"+String(decree)): return String(decree)
+	return ""
+
+static func _condition_petition(topic:String,band:int,c:Dictionary)->Dictionary:
+	match topic:
+		"food":
+			var decree:="Ration food for thirty days" if float(c.food_days)<10.0 or band>=2 else "Send gatherers to find food"
+			return {"summary":"Food stores would last about %d days; people are %s." % [maxi(0,roundi(float(c.food_days))),"already eating less than they need" if float(c.food_intake)<0.97 else "counting portions"],"decree":decree}
+		"health":
+			var water_first:=float(c.water_intake)<0.95 and (0.95-float(c.water_intake))*3.0>(0.62-float(c.health))*3.0
+			return {"summary":"People are not getting enough clean water; the sick are multiplying." if water_first else "Illness is spreading; health across the settlements has fallen to about %d%%." % roundi(float(c.health)*100),
+				"decree":"Secure water and dig wells" if water_first else "Organize healers to care for the sick"}
+		"housing":
+			var homeless:=maxi(1,roundi(float(c.population)-float(GameState.housing_capacity)))
+			return {"summary":"About %d people have no proper shelter." % homeless,"decree":"Build shelters"}
+		"security":
+			var summary:String="The watch is thin; the settlements feel unsafe." if String(c.threat_name)=="" or float(c.foreign_threat)<0.45 else "%s presses on the frontier and the watch is too thin to answer it." % String(c.threat_name)
+			return {"summary":summary,"decree":"Raise a watch and post guards"}
+	return {}
+
+static func _grievance_words(person:Dictionary,refused_decree:String)->String:
+	var rel:Dictionary=person.get("relationships",{}).get("sovereign",{})
+	if refused_decree!="": return "%s has not forgotten that you dismissed their proposal to %s." % [String(person.name),refused_decree.to_lower()]
+	var why:="feels their counsel has been ignored" if float(rel.get("trust",0.5))<0.35 else "nurses a grudge from past slights"
+	if float(person.get("pride",0.5))>0.65: why="feels their standing has been insulted"
+	return "%s %s." % [String(person.name),why]
+
+static func _generate_court_occasion(occasion:Dictionary,day:int)->Dictionary:
+	var type:=String(occasion.get("type",""))
+	var data:Dictionary=occasion.get("data",{}) if occasion.get("data") is Dictionary else {}
+	var person:=_official(int(occasion.get("person_id",0)))
+	if person.is_empty() and type in ["condition","war_council"]:
+		person=_relevant_official(TOPIC_OFFICES.get(String(data.get("topic","security")),["Marshal"]))
+	if person.is_empty(): return {}
+	var used:=_used_asks("person:%d" % int(person.person_id),day)
+	var built:=_court_petition(type,person,data,day)
+	if built.is_empty() or used.has(String(built.ask)): return {}
+	return _court_audience(person,built,occasion,day)
+
+static func _court_petition(type:String,person:Dictionary,data:Dictionary,day:int)->Dictionary:
+	## {topic, summary, decree, ask, situation_type} or {} when not truthful now.
+	var c:=conditions()
+	match type:
+		"condition":
+			var topic:=String(data.get("topic",""))
+			var band:=int(_condition_bands(c).get(topic,0))
+			if band<1: return {}
+			var words:=_condition_petition(topic,band,c)
+			if words.is_empty(): return {}
+			return {"topic":topic,"summary":String(words.summary),"decree":String(words.decree),"ask":"%s:band%d" % [topic,band],"situation_type":"crisis_petition"}
+		"war_council":
+			var enemy:=String(data.get("enemy_name","the enemy"))
+			return {"topic":"war","summary":"War with %s has begun. %s wants the frontier watched and the settlements guarded before the first raid." % [enemy,String(person.name)],
+				"decree":"Post guards and patrol the frontier","ask":"war:%s:%d" % [enemy,int(data.get("war_day",day))],"situation_type":"war_council"}
+		"grievance","refusal_grievance":
+			var rel:Dictionary=person.get("relationships",{}).get("sovereign",{})
+			var decree:=String(data.get("decree",""))
+			if type=="grievance" and float(rel.get("resentment",0))<=0.15 and float(rel.get("trust",0.5))>=0.35: return {}
+			var band:=int(data.get("band",1))
+			return {"topic":"grievance","summary":_grievance_words(person,decree),"decree":"","ask":"grievance:refused:"+decree if decree!="" else "grievance:band%d" % band,"situation_type":"grievance"}
+		"appointment":
+			var first:=_next_ambition(person,day)
+			return {"topic":"introduction","summary":"%s has taken up office as %s and asks what the ruler expects of them.%s" % [String(person.name),String(person.get("office_title","an official")),(" They would begin with this: %s." % first.to_lower()) if first!="" else ""],
+				"decree":first,"ask":"introduction:"+String(person.get("office_key","")),"situation_type":"introduction"}
+		"promise_followup":
+			var promised:=String(data.get("decree",""))
+			if promised=="": return {}
+			return {"topic":"follow_up","summary":"%d days ago you promised %s you would consider this: \"%s\". Nothing has been ordered since." % [day-int(data.get("promised_day",day)),String(person.name),promised],
+				"decree":promised,"ask":"follow_up:"+promised,"situation_type":"promise_followup"}
+		"ambition":
+			var next:=_next_ambition(person,day)
+			if next=="": return {}
+			return {"topic":"ambition","summary":String(AMBITION_WORDS.get(next,"%s has a plan.")) % String(person.name),"decree":next,"ask":"ambition:"+next,"situation_type":"ambition"}
+	return {}
+
+static func _court_audience(person:Dictionary,built:Dictionary,occasion:Dictionary,day:int)->Dictionary:
 	var audience:=_new_audience("court","petition",day)
-	audience.speaker={"name":String(person.name),"title":String(person.get("office_title","Official")),"person_id":person_id,"role":"official"}
-	audience.petition={"topic":topic,"summary":String(choices[topic].summary),"suggested_decree":String(choices[topic].decree)}
+	audience.speaker={"name":String(person.name),"title":String(person.get("office_title","Official")),"person_id":int(person.person_id),"role":"official"}
+	audience.petition={"topic":String(built.topic),"summary":String(built.summary),"suggested_decree":String(built.decree)}
+	var situation_type:=String(built.situation_type)
+	var occasion_data:Dictionary=occasion.get("data",{}) if occasion.get("data") is Dictionary else {}
+	audience.situation={"type":situation_type,"ask":String(built.ask),"headline":String(SITUATIONS.get(situation_type,{}).get("headline","")),"summary":String(built.summary),
+		"occasion":{"type":String(occasion.get("type","")),"text":String(occasion_data.get("text","")),"day":int(occasion.get("day",day)),"crisis":bool(occasion.get("crisis",false))}}
+	if occasion_data.has("promised_day"): (audience.situation as Dictionary)["arc"]={"branch":"promise_unkept","previous":{"day":int(occasion_data.promised_day),"decree":String(occasion_data.get("decree",""))}}
+	if String(occasion.get("type",""))=="refusal_grievance": (audience.situation as Dictionary)["arc"]={"branch":"refused_ambition","previous":{"day":int(occasion_data.get("refused_day",day)),"decree":String(occasion_data.get("decree",""))}}
 	return audience
 
+static func _generate_petition(person_id:int,day:int,forced_topic:String)->Dictionary:
+	## Forced petition (tests, captures): a truthful petition on that topic, or
+	## the most pressing one; ignores the ledger and the budget.
+	var person:=_official(person_id)
+	if person.is_empty(): return {}
+	var c:=conditions()
+	var bands:=_condition_bands(c)
+	var occasion:={"type":"debug","key":"debug","data":{"text":"a summons from the ruler"}}
+	var topic:=forced_topic
+	if topic=="":
+		var worst:=0
+		for key:String in bands:
+			if int(bands[key])>worst: worst=int(bands[key]); topic=key
+		if topic=="": topic="ambition"
+	var built:={}
+	match topic:
+		"food","health","housing","security": built=_court_petition("condition",person,{"topic":topic},day)
+		"grievance": built=_court_petition("grievance",person,{},day)
+		"introduction": built=_court_petition("appointment",person,{},day)
+		"war": built=_court_petition("war_council",person,{"enemy_name":"the enemy"},day)
+		"follow_up": built=_court_petition("promise_followup",person,{"decree":_ambition_ladder(person)[0],"promised_day":maxi(0,day-150)},day)
+		"ambition":
+			var ladder:=_ambition_ladder(person)
+			var decree:=_next_ambition(person,day)
+			if decree=="": decree=String(ladder[0])
+			built={"topic":"ambition","summary":String(AMBITION_WORDS.get(decree,"%s has a plan.")) % String(person.name),"decree":decree,"ask":"ambition:"+decree,"situation_type":"ambition"}
+	if built.is_empty(): return {}
+	return _court_audience(person,built,occasion,day)
+
 static func _topic_words(topic:String)->String:
-	return {"food":"the food stores","health":"the sick and the water","housing":"shelter for the people","security":"the watch","grievance":"a personal grievance","ambition":"a proposal of their own"}.get(topic,"a matter of state")
+	return {"food":"the food stores","health":"the sick and the water","housing":"shelter for the people","security":"the watch","grievance":"a personal grievance","ambition":"a proposal of their own",
+		"introduction":"their new office","follow_up":"a promise you made","war":"the war"}.get(topic,"a matter of state")
 
 # --------------------------------------------------------------------------
 # Court bench
@@ -587,6 +1608,9 @@ static func _short(resource:String,amount:float)->String:
 	if have+0.0001>=amount: return ""
 	return "Your stores hold only %d %s." % [floori(have),resource]
 
+static func _situation(audience:Dictionary)->Dictionary:
+	return audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
+
 static func options(id:String)->Array[Dictionary]:
 	var audience:=find(id)
 	var result:Array[Dictionary]=[]
@@ -615,8 +1639,13 @@ static func options(id:String)->Array[Dictionary]:
 		"news":
 			var reward:=_reward_terms()
 			var short_reward:=_short(String(reward.resource),float(reward.amount))
-			result.append(_option("thank","Thank the messenger","Courteous thanks; the news is noted.","warm"))
-			result.append(_option("reward","Reward the messenger","Send %s home with them." % _terms_text(reward),"warm",short_reward=="",short_reward))
+			var what:=String({"rumor_share":"Take the account into your people's record of rumors.","intelligence_share":"Add their observation of %s to what you know." % String(_situation(audience).get("city_name","the city"))}.get(_situation_type(audience),"Courteous thanks; the news is noted."))
+			var reward_sub:="Send %s home with them." % _terms_text(reward)
+			if _situation_type(audience)!="news_report": reward_sub=what+" "+reward_sub
+			result.append(_option("thank","Thank the messenger",what,"warm"))
+			result.append(_option("reward","Reward the messenger",reward_sub,"warm",short_reward=="",short_reward))
+		"proposal":
+			result=_proposal_options(audience)
 		"great_work","wonder_proposal":
 			var gwa:=_great_works()
 			if gwa!=null:
@@ -633,14 +1662,126 @@ static func options(id:String)->Array[Dictionary]:
 			result.append(_option("dismiss","Dismiss","Thank them briefly and move on.","hostile"))
 		"petition":
 			var petition:Dictionary=audience.petition
-			if String(petition.get("topic",""))=="grievance":
-				result.append(_option("apologise","Acknowledge the wrong","Admit the slight and make amends in words.","warm"))
-				result.append(_option("rebuke","Rebuke them","Remind them whom they serve.","hostile"))
-			else:
-				var decree:=String(petition.get("suggested_decree",""))
-				result.append(_option("decree","Issue their decree","\"%s\"" % decree,"warm",decree!="","They have no decree to propose."))
-				result.append(_option("promise","Promise to consider it","Warm words, no order yet.","neutral"))
-				result.append(_option("dismiss","Dismiss the petition","Send them away. They will resent it.","hostile"))
+			var decree:=String(petition.get("suggested_decree",""))
+			match String(petition.get("topic","")):
+				"grievance":
+					result.append(_option("apologise","Acknowledge the wrong","Admit the slight and make amends in words.","warm"))
+					result.append(_option("rebuke","Rebuke them","Remind them whom they serve.","hostile"))
+				"introduction":
+					result.append(_option("decree","Charge them with their first task","\"%s\"" % decree,"warm",decree!="","They have no task to propose."))
+					result.append(_option("welcome","Welcome them warmly","Words of confidence; no order yet.","warm"))
+					result.append(_option("rebuke","Remind them of their place","Make plain that the office serves the ruler.","hostile"))
+				"follow_up":
+					result.append(_option("decree","Issue it now","\"%s\"" % decree,"warm",decree!="","Nothing was promised."))
+					result.append(_option("patience","Ask for patience","Admit it waits; promise nothing new.","neutral"))
+					result.append(_option("dismiss","Refuse it outright","Tell them it will not be done.","hostile"))
+				_:
+					result.append(_option("decree","Issue their decree","\"%s\"" % decree,"warm",decree!="","They have no decree to propose."))
+					result.append(_option("promise","Promise to consider it","Warm words, no order yet. They will remember the promise.","neutral"))
+					result.append(_option("dismiss","Dismiss the petition","Send them away. They will resent it.","hostile"))
+	return result
+
+static func _accord_blocker(civ_id:String,accord:String)->String:
+	var forecast:=ForeignDiplomacy.forecast(civ_id,accord,"equals",false)
+	if forecast.has("error"): return String(forecast.error)
+	return String(forecast.get("blocker",""))
+
+static func _league_blocker(civ_id:String,situation:Dictionary)->String:
+	var c:=_commitments()
+	var mode:=String(situation.get("mode","join"))
+	var why:=c.eligibility(civ_id,c.terms("join_faction" if mode=="join" else "found_faction"))
+	if why!="": return why
+	if mode=="join":
+		var assessment:=c.assessment(civ_id,c.terms("join_faction"))
+		if not bool(assessment.get("accepted",false)):
+			var against:Array=[]
+			for member in (assessment.get("votes",{}) as Dictionary):
+				if not bool(assessment.votes[member].get("accept",false)): against.append(_civ_name(String(member)))
+			return "Not every member consents%s." % (": "+", ".join(against)+" would vote against" if not against.is_empty() else "")
+	return ""
+
+static func _availability(civ_id:String,action:String)->String:
+	var check:=CivilizationSystem.player_action_availability(civ_id,action)
+	return String(check.get("error","")) if check.has("error") else ""
+
+static func _proposal_options(audience:Dictionary)->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	var situation:=_situation(audience)
+	var civ_id:=String(audience.civ_id)
+	var name:=String(audience.civ_name)
+	match String(situation.get("type","")):
+		"accord_offer":
+			var blocker:=_accord_blocker(civ_id,String(situation.get("accord","exchange")))
+			result.append(_option("accept","Agree to %s" % String(situation.get("accord_name","the understanding")).to_lower(),"Two years of shared research support; war ends it.","warm",blocker=="",blocker))
+			result.append(_option("decline","Decline politely","Thank them; not now.","neutral"))
+			result.append(_option("rebuff","Rebuff them","Tell them your people need nothing from theirs.","hostile"))
+		"protection_pact":
+			var c:=_commitments()
+			var why:=c.eligibility(civ_id,c.terms("protection"))
+			result.append(_option("accept","Ratify mutual protection","Answer each other's defensive sieges with feasible relief; no offensive wars.","warm",why=="",why))
+			result.append(_option("decline","Decline politely","Keep your hands free.","neutral"))
+			result.append(_option("rebuff","Rebuff them","Tell them your people defend themselves.","hostile"))
+		"league_invitation":
+			var blocker2:=_league_blocker(civ_id,situation)
+			var joining:=String(situation.get("mode","join"))=="join"
+			result.append(_option("accept","Join the %s" % String(situation.get("league_name","league")) if joining else "Found the %s" % String(situation.get("league_name","league")),"Consult before offensive war; relieve members under defensive siege.","warm",blocker2=="",blocker2))
+			result.append(_option("decline","Decline","Stay outside any league for now.","neutral"))
+		"war_support":
+			var enemy_name:=String(situation.get("enemy_name","their enemy"))
+			result.append(_option("stand","Stand with %s" % name,"Warmer with %s; %s will count you an enemy's friend." % [name,enemy_name],"warm"))
+			result.append(_option("counsel_peace","Counsel peace","Urge both sides to stop; neither will thank you much.","neutral"))
+			result.append(_option("abstain","Stay out of it","Tell them it is not your war.","hostile"))
+		"peace_feeler":
+			var why2:=_availability(civ_id,"seek_peace")
+			result.append(_option("accept","Make peace","End the war; a one-year truce holds the present line.","warm",why2=="",why2))
+			result.append(_option("refuse","Fight on","Send the envoy home; the war continues.","hostile"))
+		"trade_offer":
+			var why3:=_availability(civ_id,"open_trade")
+			result.append(_option("accept","Open a trade compact","Standing, value-conserved exchange with %s." % name,"warm",why3=="",why3))
+			result.append(_option("decline","Decline","Not now.","neutral"))
+		"nonaggression_offer":
+			var why4:=_availability(civ_id,"non_aggression")
+			result.append(_option("accept","Agree to non-aggression","Neither people attacks the other; the frontier calms.","warm",why4=="",why4))
+			result.append(_option("decline","Decline politely","Keep every option open.","neutral"))
+			result.append(_option("rebuff","Rebuff them","Tell them your people make no such promises.","hostile"))
+		"scholar_offer","research_sale","license_offer":
+			var quote:=_research_quote(String(situation.type),civ_id,String(situation.get("subject","")))
+			var price_terms:={"resource":String(situation.get("payment","Timber")),"amount":float(situation.get("payment_amount",0.0))}
+			var reason:=String(quote.get("error","")) if quote.has("error") else _short(String(price_terms.resource),float(price_terms.amount))
+			var label:String={"scholar_offer":"Welcome the teacher","research_sale":"Buy the study","license_offer":"Take the license"}[String(situation.type)]
+			result.append(_option("accept",label,"Pay %s into their stores." % _terms_text(price_terms),"warm",reason=="",reason))
+			result.append(_option("decline","Decline","Thank them for the offer.","neutral"))
+		"artifact_gift":
+			var gift_check:=ARTIFACTS.exchange_check(civ_id,String(situation.get("artifact_id","")),"player","gift")
+			result.append(_option("accept","Accept %s" % String(situation.get("artifact_name","the object")),"It joins your collection; its history goes with it.","warm",not gift_check.has("error"),String(gift_check.get("error",""))))
+			result.append(_option("decline","Decline it graciously","Let them keep their treasure.","neutral"))
+			result.append(_option("rebuff","Rebuff them","Tell them you have no need of their trinkets.","hostile"))
+		"artifact_purchase":
+			var piece:=String(situation.get("artifact_id",""))
+			var sell_check:=ARTIFACTS.exchange_check("player",piece,civ_id,"sell")
+			result.append(_option("sell","Sell it","For %.0f in coin, paid from their treasury with metal backing." % float(situation.get("value",0.0)),"neutral",not sell_check.has("error"),String(sell_check.get("error",""))))
+			var offered:=String(situation.get("offered_id",""))
+			if offered!="":
+				var trade_check:=ARTIFACTS.exchange_check("player",piece,civ_id,"trade",offered)
+				result.append(_option("trade","Trade it","Take %s in exchange." % String(situation.get("offered_name","their piece")),"warm",not trade_check.has("error"),String(trade_check.get("error",""))))
+			result.append(_option("decline","Keep it","Politely: it stays here.","neutral"))
+			result.append(_option("rebuff","Rebuff them","Tell them it is not for sale at any price.","hostile"))
+		"artifact_return":
+			var give_back:={}
+			if String(situation.get("mode",""))=="origin": give_back=ARTIFACTS.exchange_check("player",String(situation.get("artifact_id","")),civ_id,"gift")
+			elif bool(ForeignDiplomacy.civilization(civ_id).get("player_relation",{}).get("at_war",false)): give_back={"error":"Nothing can be returned while at war."}
+			var reward2:=_reward_terms()
+			var short2:=_short(String(reward2.resource),float(reward2.amount))
+			result.append(_option("return","Return it","Give %s back to %s." % [String(situation.get("artifact_name","it")),name],"warm",not give_back.has("error"),String(give_back.get("error",""))))
+			result.append(_option("compensate","Keep it, but compensate them","Send %s instead." % _terms_text(reward2),"neutral",short2=="",short2))
+			result.append(_option("refuse","Refuse","It stays where it is.","hostile"))
+		"recruitment_protest":
+			var blocker3:=_accord_blocker(civ_id,"restraint")
+			var reward:=_reward_terms()
+			var short:=_short(String(reward.resource),float(reward.amount))
+			result.append(_option("restraint","Offer a border understanding","Pause recruitment visits both ways for two years and quiet the frontier.","warm",blocker3=="",blocker3))
+			result.append(_option("compensate","Compensate them","Send %s for the trouble." % _terms_text(reward),"neutral",short=="",short))
+			result.append(_option("defy","Reject the protest","People may go where they are welcome.","hostile"))
 	return result
 
 static func resolve(id:String,option_id:String)->Dictionary:
@@ -657,15 +1798,46 @@ static func resolve(id:String,option_id:String)->Dictionary:
 		if gwa==null: return {"ok":false,"outcome":"The master builder has left.","reaction":"neutral"}
 		result=gwa.call("resolve",audience,option_id)
 		if not bool(result.get("ok",false)): return {"ok":false,"outcome":String(result.get("outcome","That cannot be done now.")),"reaction":"neutral"}
+	elif audience.kind=="proposal": result=_resolve_proposal(audience,option_id)
 	elif audience.origin=="foreign": result=_resolve_foreign(audience,option_id)
 	elif audience.kind=="report": result=_resolve_report(audience,option_id)
 	else: result=_resolve_petition(audience,option_id)
+	if result.has("error"): return {"ok":false,"outcome":String(result.error),"reaction":"neutral"}
 	audience.status="resolved"
 	audience.outcome=String(result.outcome)
 	audience.option_id=option_id
 	_archive(audience)
+	_after_resolve(audience,option_id,String(result.get("reaction","neutral")))
 	result["ok"]=true
 	return result
+
+static func _after_resolve(audience:Dictionary,option_id:String,reaction:String)->void:
+	var day:=_day()
+	_ledger_close(audience,option_id,reaction,String(audience.outcome))
+	if String(audience.origin)=="foreign":
+		# Re-anchor the watch so the hall's own consequences are not mistaken
+		# for fresh news about this people.
+		var civ_id:=String(audience.civ_id)
+		var civs:Dictionary=(state().watch as Dictionary).get("civs",{})
+		var civ:=ForeignDiplomacy.civilization(civ_id)
+		if civs.get(civ_id) is Dictionary and not civ.is_empty():
+			civs[civ_id]["o"]=float(civ.player_relation.get("opinion",0.0))
+			civs[civ_id]["t"]=_tension_band(float(civ.player_relation.get("border_tension",0.0)))
+		_add_sequel(audience,option_id,day)
+		return
+	if String(audience.kind)!="petition": return
+	var pid:=int(audience.speaker.get("person_id",0))
+	var petition:Dictionary=audience.petition
+	var topic:=String(petition.get("topic",""))
+	var decree:=String(petition.get("suggested_decree",""))
+	var person:=_official(pid)
+	if option_id=="promise" and decree!="":
+		_add_occasion({"key":"promise:%d:%s" % [pid,decree],"type":"promise_followup","person_id":pid,"day":day,"not_before":day+150,"expires":day+420,"data":{"decree":decree,"promised_day":day,"text":"a promise left hanging"}})
+	elif option_id=="dismiss" and topic in ["ambition","follow_up","introduction"] and decree!="" and float(person.get("pride",0.5))>0.55:
+		_add_occasion({"key":"refused:%d:%s" % [pid,decree],"type":"refusal_grievance","person_id":pid,"day":day,"not_before":day+150,"expires":day+400,"data":{"decree":decree,"refused_day":day,"text":"a proposal the ruler dismissed"}})
+	if option_id=="decree" or topic=="follow_up":
+		for occasion in (state().occasions as Array).duplicate():
+			if occasion is Dictionary and String(occasion.get("type",""))=="promise_followup" and int(occasion.get("person_id",0))==pid and String((occasion.get("data",{}) as Dictionary).get("decree",""))==decree: (state().occasions as Array).erase(occasion)
 
 static func _mood_opinion(audience:Dictionary)->float:
 	return clampf(float(audience.get("mood",0.0)),-1.0,1.0)*MOOD_OPINION
@@ -714,6 +1886,7 @@ static func _resolve_foreign(audience:Dictionary,option_id:String)->Dictionary:
 			var give:=amount if option_id=="grant" else _nice(amount*0.5)
 			var sent:=_debit_player(resource,give)
 			_credit_civ(civ_id,resource,sent)
+			if resource=="Food" and sent>0.0: _commitments().note_food_aid(civ_id,sent,_day())
 			var need_bonus:=0.03 if resource=="Food" and _hungry(civ) else 0.0
 			if option_id=="grant":
 				_shift_relation(civ_id,0.06+need_bonus+mood,-0.05)
@@ -768,16 +1941,7 @@ static func _resolve_foreign(audience:Dictionary,option_id:String)->Dictionary:
 			memory="The ruler answered our demand with threats."
 		"news:thank":
 			_shift_relation(civ_id,0.015+mood,0.0)
-			var subject_id:=String(audience.news.get("subject_civ_id",""))
-			var learned:=""
-			var subject_index:=_civ_index(subject_id)
-			if subject_index>=0 and not ForeignDiplomacy.civilization(subject_id).is_empty():
-				var subject:Dictionary=WorldSimulation.world.civilizations[subject_index]
-				var relation:Dictionary=subject.player_relation
-				relation["contact_intelligence"]=clampf(float(relation.get("contact_intelligence",0))+0.05,0.0,1.0)
-				subject["player_relation"]=relation
-				WorldSimulation.world.civilizations[subject_index]=subject
-				learned=" What you know of %s grew a little." % String(subject.get("name",subject_id))
+			var learned:=_take_news(audience)
 			reaction="pleased"
 			outcome="You thanked %s's messenger for news of %s.%s" % [audience.civ_name,String(audience.news.get("subject_civ_name","a neighbor")),learned]
 			memory="Our messenger brought the ruler news and was thanked."
@@ -787,10 +1951,239 @@ static func _resolve_foreign(audience:Dictionary,option_id:String)->Dictionary:
 			_credit_civ(civ_id,String(reward.resource),sent2)
 			_shift_relation(civ_id,0.04+mood,0.0)
 			_leader_trust(civ_id,0.03)
+			var learned2:=_take_news(audience) if _situation_type(audience)!="news_report" else ""
 			reaction="delighted"
-			outcome="You rewarded %s's messenger with %d %s." % [audience.civ_name,roundi(sent2),String(reward.resource)]
+			outcome="You rewarded %s's messenger with %d %s.%s" % [audience.civ_name,roundi(sent2),String(reward.resource),learned2]
 			memory="Our messenger came home with %d %s from the ruler's hand." % [roundi(sent2),String(reward.resource)]
 	if memory!="": ForeignDiplomacy.remember(civ_id,memory)
+	return {"outcome":outcome,"reaction":reaction}
+
+static func _take_news(audience:Dictionary)->String:
+	## What the ruler actually learns from a messenger, through the real ledgers.
+	var situation:=_situation(audience)
+	var civ_id:=String(audience.civ_id)
+	var day:=_day()
+	match String(situation.get("type","")):
+		"rumor_share":
+			var net:=CivilizationSystem.rumor_network as RUMORS
+			var lead_id:=String(situation.get("lead_id",""))
+			var lead:Dictionary=net.books.get(civ_id,{}).get(lead_id,{}) if net!=null else {}
+			if lead.is_empty(): return " The account had grown too muddled to keep."
+			if net.receive("player",net.packet(lead,civ_id),day): return " The account of %s is now in your people's record of rumors." % String(lead.get("name","them"))
+			return " Your people already held that account."
+		"intelligence_share":
+			var intel:=CivilizationSystem.city_intelligence as INTEL
+			var city_id:=String(situation.get("city_id",""))
+			var record:Dictionary=intel.records.get(civ_id,{}).get(city_id,{}) if intel!=null else {}
+			if record.is_empty(): return " Their record of the city could not be found."
+			var copy:=record.duplicate(true)
+			copy["source"]="shared by %s" % String(audience.civ_name)
+			intel.publish("player",copy,day)
+			return " Their observation of %s (day %d) is now in your city reports." % [String(record.get("name","the city")),int(record.get("observed_day",0))]
+	var subject_id:=String(audience.news.get("subject_civ_id",""))
+	var subject_index:=_civ_index(subject_id)
+	if subject_index>=0 and not ForeignDiplomacy.civilization(subject_id).is_empty():
+		var subject:Dictionary=WorldSimulation.world.civilizations[subject_index]
+		var relation:Dictionary=subject.player_relation
+		relation["contact_intelligence"]=clampf(float(relation.get("contact_intelligence",0))+0.05,0.0,1.0)
+		subject["player_relation"]=relation
+		WorldSimulation.world.civilizations[subject_index]=subject
+		return " What you know of %s grew a little." % String(subject.get("name",subject_id))
+	return ""
+
+static func _ratify_accord(civ_id:String,accord:String)->Dictionary:
+	## The envoy carries the proposal here, so no delegation needs to travel;
+	## the same blockers, bonus and two-year term as a returned proposal apply.
+	var blocker:=_accord_blocker(civ_id,accord)
+	if blocker!="": return {"error":blocker}
+	var leader:=ForeignDiplomacy.leader(civ_id)
+	var day:=_day()
+	var entry:Dictionary=ForeignDiplomacy.ACCORDS[accord]
+	leader.counter={}
+	leader.accord={"kind":accord,"until":day+730,"bonus":0.12}
+	leader["audience_day"]=day
+	leader.trust=clampf(float(leader.trust)+0.12,-1.0,1.0)
+	_shift_relation(civ_id,0.06,-0.25 if accord=="restraint" else 0.0)
+	SOCIETY.accept_accord(civ_id,accord,String(entry.domain),0.12,day+730)
+	var message:="You agreed to %s with %s. Both peoples gain 12%% support for %s research for two years; war ends it." % [String(entry.name).to_lower(),_civ_name(civ_id),String(entry.domain)]
+	if accord=="restraint": message+=" Recruitment visits pause both ways and the frontier quiets."
+	ForeignDiplomacy.remember(civ_id,message)
+	return {"ok":true,"message":message}
+
+static func _resolve_proposal(audience:Dictionary,option_id:String)->Dictionary:
+	var situation:=_situation(audience)
+	var civ_id:=String(audience.civ_id)
+	var name:=String(audience.civ_name)
+	var mood:=_mood_opinion(audience)
+	var p:=_personality(civ_id)
+	var outcome:=""
+	var reaction:="neutral"
+	var memory:=""
+	var type:=String(situation.get("type",""))
+	if option_id=="decline":
+		_shift_relation(civ_id,-0.02+mood,0.0)
+		reaction="neutral" if float(p.empathy)>0.5 else "offended"
+		outcome="You declined %s's proposal. They noted it." % name
+		memory="The ruler declined our proposal (%s)." % String(SITUATIONS.get(type,{}).get("headline","a proposal"))
+	elif option_id=="rebuff":
+		_shift_relation(civ_id,-0.06+mood,0.03)
+		_leader_trust(civ_id,-0.05)
+		reaction="furious" if float(p.assertiveness)>0.6 else "offended"
+		outcome="You rebuffed %s's proposal before the court. They are %s." % [name,"angry" if reaction=="furious" else "offended"]
+		memory="The ruler rebuffed our proposal in front of their court."
+	else:
+		match "%s:%s" % [type,option_id]:
+			"accord_offer:accept","recruitment_protest:restraint":
+				var ratified:=_ratify_accord(civ_id,"restraint" if option_id=="restraint" else String(situation.get("accord","exchange")))
+				if ratified.has("error"): return ratified
+				if mood!=0.0: _shift_relation(civ_id,mood,0.0)
+				reaction="delighted"
+				outcome=String(ratified.message)
+			"protection_pact:accept":
+				var c:=_commitments()
+				var why:=c.eligibility(civ_id,c.terms("protection"))
+				if why!="": return {"error":why}
+				c.state.pacts[civ_id]={"since":_day(),"trigger":"defensive_siege","obligation":COMMITMENTS.OBLIGATION}
+				outcome="Mutual protection with %s is ratified. It covers defensive sieges beginning after today, subject to real forces, provisions and access; it does not authorize offensive wars." % name
+				c.record(outcome)
+				_shift_relation(civ_id,0.05+mood,-0.03)
+				_leader_trust(civ_id,0.08)
+				reaction="delighted"
+				memory=outcome
+			"league_invitation:accept":
+				var blocker:=_league_blocker(civ_id,situation)
+				if blocker!="": return {"error":blocker}
+				var c2:=_commitments()
+				var day:=_day()
+				if String(situation.get("mode","join"))=="join":
+					var league:Dictionary=c2.faction(civ_id)
+					var assessment:=c2.assessment(civ_id,c2.terms("join_faction"))
+					(league.members as Array).append("player")
+					league.joined["player"]=day
+					league.votes=assessment.votes
+					outcome="The members consent: your people join the %s." % String(league.name)
+				else:
+					var goal:=String(situation.get("goal","defense"))
+					(c2.state.factions as Array).append({"id":"league_hall_%d" % _serial_of(audience),"name":"League of %s" % name,"members":["player",civ_id],"joined":{"player":day,civ_id:day},"goal":goal,"since":day,"votes":{},"obligation":COMMITMENTS.OBLIGATION})
+					outcome="The League of %s is founded with your people, devoted to %s. Each member keeps its leader, people and army." % [name,String(COMMITMENTS.GOALS[goal]).to_lower()]
+				c2.record(outcome)
+				_shift_relation(civ_id,0.05+mood,-0.02)
+				_leader_trust(civ_id,0.06)
+				reaction="delighted"
+				memory=outcome
+			"war_support:stand":
+				var enemy:=String(situation.get("enemy",""))
+				_shift_relation(civ_id,0.08+mood,-0.03)
+				_leader_trust(civ_id,0.05)
+				if not ForeignDiplomacy.civilization(enemy).is_empty():
+					_shift_relation(enemy,-0.07,0.07)
+					ForeignDiplomacy.remember(enemy,"The ruler declared for %s in its war against us." % name)
+				reaction="delighted"
+				outcome="You declared for %s in its war with %s. %s warms to you; %s will not forget it. No troops were promised." % [name,String(situation.get("enemy_name","its enemy")),name,String(situation.get("enemy_name","its enemy"))]
+				memory="The ruler stood with us against %s." % String(situation.get("enemy_name","our enemy"))
+			"war_support:counsel_peace":
+				var enemy2:=String(situation.get("enemy",""))
+				_shift_relation(civ_id,-0.01+mood,0.0)
+				if not ForeignDiplomacy.civilization(enemy2).is_empty(): _shift_relation(enemy2,0.02,0.0)
+				reaction="neutral"
+				outcome="You urged %s and %s to make peace. Neither side has moved." % [name,String(situation.get("enemy_name","its enemy"))]
+				memory="The ruler told us to make peace rather than choose a side."
+			"war_support:abstain":
+				_shift_relation(civ_id,-0.03+mood,0.0)
+				reaction="offended" if float(p.assertiveness)>0.5 else "neutral"
+				outcome="You told %s its war with %s is not yours." % [name,String(situation.get("enemy_name","its enemy"))]
+				memory="The ruler would not stand with us against %s." % String(situation.get("enemy_name","our enemy"))
+			"peace_feeler:accept","trade_offer:accept","nonaggression_offer:accept":
+				var action:String={"peace_feeler":"seek_peace","trade_offer":"open_trade","nonaggression_offer":"non_aggression"}[type]
+				var done:=CivilizationSystem.conduct_player_action(civ_id,action,true)
+				if done.has("error"): return {"error":String(done.error)}
+				if mood!=0.0: _shift_relation(civ_id,mood,0.0)
+				reaction="delighted" if type=="peace_feeler" else "pleased"
+				outcome=String(done.get("message","It is agreed."))
+				memory=outcome
+			"peace_feeler:refuse":
+				var posture:=ForeignDiplomacy.apply_conversation_reaction(civ_id,"warn","We will not make peace on these terms.","The ruler turned our peace envoy away.")
+				_shift_relation(civ_id,-0.03+mood,0.0)
+				reaction="offended"
+				outcome="You sent %s's peace envoy home. The war goes on. %s" % [name,_posture_words(String(posture.get("actual","unchanged")),name)]
+				memory="The ruler refused our offer of peace."
+			"scholar_offer:accept","research_sale:accept","license_offer:accept":
+				var subject:=String(situation.get("subject",""))
+				var payment:=String(situation.get("payment",""))
+				var amount:=float(situation.get("payment_amount",0.0))
+				var short_pay:=_short(payment,amount)
+				if short_pay!="": return {"error":short_pay}
+				var price_text:=_terms_text({"resource":payment,"amount":amount})
+				var sent:Dictionary
+				match type:
+					"scholar_offer": sent=SCHOLARS.host_from_envoy(civ_id,subject,_travel_days(civ_id))
+					"research_sale": sent=PURCHASE.deliver_from_envoy(civ_id,name,subject,price_text)
+					_: sent=LICENSES.grant_from_envoy(civ_id,subject)
+				if sent.has("error"): return {"error":String(sent.error)}
+				var paid_goods:=_debit_player(payment,amount)
+				_credit_civ(civ_id,payment,paid_goods)
+				_shift_relation(civ_id,0.03+mood,0.0)
+				reaction="pleased"
+				outcome="You paid %d %s to %s. %s" % [roundi(paid_goods),payment,name,String(sent.get("message",""))]
+				memory="The ruler paid %s for our offer concerning %s." % [price_text,String(situation.get("subject_name",subject))]
+			"artifact_gift:accept":
+				var got:=ARTIFACTS.exchange(civ_id,String(situation.get("artifact_id","")),"player","gift")
+				if got.has("error"): return {"error":String(got.error)}
+				_shift_relation(civ_id,0.05+mood,-0.02)
+				_leader_trust(civ_id,0.05)
+				reaction="delighted"
+				outcome="You accepted %s from %s; it is now in your collection." % [String(situation.get("artifact_name","the object")),name]
+				memory="The ruler accepted %s from our hands." % String(situation.get("artifact_name","our gift"))
+			"artifact_purchase:sell","artifact_purchase:trade":
+				var piece:=String(situation.get("artifact_id",""))
+				var done:=ARTIFACTS.exchange("player",piece,civ_id,option_id,String(situation.get("offered_id","")) if option_id=="trade" else "")
+				if done.has("error"): return {"error":String(done.error)}
+				_shift_relation(civ_id,0.04+mood,0.0)
+				reaction="pleased"
+				outcome=("You sold %s to %s for %.0f in coin." % [String(situation.get("artifact_name","the piece")),name,float(done.get("value",0.0))]) if option_id=="sell" else ("You traded %s to %s for %s." % [String(situation.get("artifact_name","the piece")),name,String(situation.get("offered_name","their piece"))])
+				memory="The ruler let us have %s." % String(situation.get("artifact_name","the piece"))
+			"artifact_return:return":
+				var returned:Dictionary
+				if String(situation.get("mode",""))=="looted": returned=RIVALRY.return_loot(civ_id,String(situation.get("work_id","")))
+				else: returned=ARTIFACTS.exchange("player",String(situation.get("artifact_id","")),civ_id,"gift")
+				if returned.has("error"): return {"error":String(returned.error)}
+				_shift_relation(civ_id,0.06+mood,-0.04)
+				_leader_trust(civ_id,0.06)
+				reaction="delighted"
+				outcome="You returned %s to %s.%s" % [String(situation.get("artifact_name","the piece")),name,(" "+String(returned.get("message",""))) if returned.has("message") else ""]
+				memory="The ruler returned %s to us." % String(situation.get("artifact_name","our treasure"))
+			"artifact_return:compensate":
+				var reward3:=_reward_terms()
+				var paid3:=_debit_player(String(reward3.resource),float(reward3.amount))
+				_credit_civ(civ_id,String(reward3.resource),paid3)
+				_shift_relation(civ_id,-0.01+mood,0.0)
+				reaction="offended" if float(p.assertiveness)>0.6 else "neutral"
+				outcome="You kept %s and sent %d %s to %s instead." % [String(situation.get("artifact_name","the piece")),roundi(paid3),String(reward3.resource),name]
+				memory="The ruler kept %s and paid us off with %d %s." % [String(situation.get("artifact_name","our treasure")),roundi(paid3),String(reward3.resource)]
+			"artifact_return:refuse":
+				var posture3:=ForeignDiplomacy.apply_conversation_reaction(civ_id,"warn","It stays with us.","The ruler refused to return %s." % String(situation.get("artifact_name","our treasure")))
+				_shift_relation(civ_id,-0.06+mood,0.04)
+				_leader_trust(civ_id,-0.05)
+				reaction="furious" if String(situation.get("mode",""))=="looted" else "offended"
+				outcome="You refused to return %s to %s. %s" % [String(situation.get("artifact_name","the piece")),name,_posture_words(String(posture3.get("actual","unchanged")),name)]
+				memory="The ruler refused to return %s." % String(situation.get("artifact_name","our treasure"))
+			"recruitment_protest:compensate":
+				var reward:=_reward_terms()
+				var paid:=_debit_player(String(reward.resource),float(reward.amount))
+				_credit_civ(civ_id,String(reward.resource),paid)
+				_shift_relation(civ_id,0.04+mood,-0.03)
+				reaction="neutral"
+				outcome="You sent %d %s to %s for the trouble your recruiters caused." % [roundi(paid),String(reward.resource),name]
+				memory="The ruler paid %d %s for luring our households; the practice has not been renounced." % [roundi(paid),String(reward.resource)]
+			"recruitment_protest:defy":
+				var posture2:=ForeignDiplomacy.apply_conversation_reaction(civ_id,"warn","People may go where they are welcome.","The ruler rejected our protest over their recruiters.")
+				_shift_relation(civ_id,-0.04+mood,0.04)
+				reaction="furious" if float(p.assertiveness)>0.6 else "offended"
+				outcome="You rejected %s's protest. %s" % [name,_posture_words(String(posture2.get("actual","unchanged")),name)]
+				memory="The ruler rejected our protest over their recruiters."
+			_:
+				return {"error":"That answer is not open to you here."}
+	if memory!="" and not type in ["accord_offer"]: ForeignDiplomacy.remember(civ_id,memory)
 	return {"outcome":outcome,"reaction":reaction}
 
 static func _posture_words(actual:String,name:String)->String:
@@ -814,22 +2207,34 @@ static func _resolve_petition(audience:Dictionary,option_id:String)->Dictionary:
 	var reaction:="neutral"
 	var memory:=""
 	var emotion:="duty"
+	var topic:=String(petition.get("topic",""))
 	match option_id:
 		"decree":
 			GovernmentPeopleSystem.adjust_person_relationship(pid,0.06+mood,0.03,-0.03)
 			reaction="delighted"; emotion="vindicated"
 			outcome="You took up %s's petition and ordered: \"%s\"." % [name,String(petition.suggested_decree)]
-			memory="Petitioned about %s; the ruler issued my decree: %s." % [_topic_words(String(petition.topic)),String(petition.suggested_decree)]
+			memory="Petitioned about %s; the ruler issued my decree: %s." % [_topic_words(topic),String(petition.suggested_decree)]
+			if topic=="follow_up": memory="The ruler kept a promise to me at last and ordered: %s." % String(petition.suggested_decree)
 		"promise":
 			GovernmentPeopleSystem.adjust_person_relationship(pid,0.02+mood,0.0,-0.01)
 			reaction="neutral" if suspicion>0.6 else "pleased"; emotion="hope"
-			outcome="You promised %s the matter of %s would be considered. No order has been given." % [name,_topic_words(String(petition.topic))]
-			memory="Petitioned about %s; the ruler promised to consider it." % _topic_words(String(petition.topic))
+			outcome="You promised %s the matter of %s would be considered. No order has been given." % [name,_topic_words(topic)]
+			memory="Petitioned about %s; the ruler promised to consider it." % _topic_words(topic)
 		"dismiss":
-			GovernmentPeopleSystem.adjust_person_relationship(pid,-0.03+mood,0.0,0.05)
-			reaction="furious" if pride>0.7 else "offended"; emotion="slighted"
-			outcome="You dismissed %s's petition. Their resentment rose." % name
-			memory="Petitioned about %s and was dismissed." % _topic_words(String(petition.topic))
+			GovernmentPeopleSystem.adjust_person_relationship(pid,-0.03+mood,0.0,0.05 if topic!="follow_up" else 0.08)
+			reaction="furious" if pride>0.7 or topic=="follow_up" else "offended"; emotion="slighted"
+			outcome="You dismissed %s's petition. Their resentment rose." % name if topic!="follow_up" else "You told %s the promised matter will not be done. They feel deceived." % name
+			memory="Petitioned about %s and was dismissed." % _topic_words(topic) if topic!="follow_up" else "The ruler broke a promise to me: %s will not be done." % String(petition.suggested_decree)
+		"patience":
+			GovernmentPeopleSystem.adjust_person_relationship(pid,-0.01+mood,0.0,0.02)
+			reaction="offended" if pride>0.65 else "neutral"; emotion="doubt"
+			outcome="You asked %s for patience. The promise still stands, unkept." % name
+			memory="Reminded the ruler of a promise and was asked for patience."
+		"welcome":
+			GovernmentPeopleSystem.adjust_person_relationship(pid,0.04+mood,0.02,-0.02)
+			reaction="pleased"; emotion="hope"
+			outcome="You welcomed %s to their office with words of confidence." % name
+			memory="Presented myself to the ruler and was welcomed."
 		"apologise":
 			GovernmentPeopleSystem.adjust_person_relationship(pid,0.05+mood,0.0,-0.08)
 			reaction="pleased"; emotion="relief"
@@ -839,7 +2244,7 @@ static func _resolve_petition(audience:Dictionary,option_id:String)->Dictionary:
 			GovernmentPeopleSystem.adjust_person_relationship(pid,-0.05+mood,0.02,0.06)
 			reaction="furious" if pride>0.65 else "offended"; emotion="anger"
 			outcome="You rebuked %s before the court. They will remember it." % name
-			memory="Brought a grievance before the ruler and was rebuked in front of the court."
+			memory="Brought a grievance before the ruler and was rebuked in front of the court." if topic=="grievance" else "Presented myself to the ruler and was put in my place."
 	if memory!="": GovernmentPeopleSystem.record_person_memory(pid,memory,"audience",0.6,{"emotion":emotion,"outcome":option_id})
 	return {"outcome":outcome,"reaction":reaction}
 
@@ -881,9 +2286,10 @@ static func _resolve_report(audience:Dictionary,option_id:String)->Dictionary:
 	return {"outcome":outcome,"reaction":reaction}
 
 static func enqueue(record:Dictionary)->Dictionary:
-	## Accept a prebuilt audience (used for Chief Scout "report"). The hall assigns
-	## id, dates and status. Reports are never refused for a full antechamber; the
-	## oldest waiting petition is set aside (without penalty) to make room.
+	## Accept a prebuilt audience (used for Chief Scout "report" and great works).
+	## The hall assigns id, dates and status, records it in the ledger and counts
+	## it against the budget. Reports are never refused for a full antechamber;
+	## the oldest waiting petition is set aside (without penalty) to make room.
 	## Returns the stored audience, or {} when the record is invalid.
 	var kind:=String(record.get("kind","report"))
 	if kind not in KINDS: return {}
@@ -917,7 +2323,7 @@ static func enqueue(record:Dictionary)->Dictionary:
 		# A stage gate waits as long as the council does; other matters keep the usual patience.
 		if _num(record.get("expires_day",null)) and int(record.expires_day)>day: audience.expires_day=mini(int(record.expires_day),day+120)
 	else:
-		for key in ["terms","news","petition"]:
+		for key in ["terms","news","petition","situation"]:
 			if record.get(key,{}) is Dictionary: audience[key]=(record.get(key,{}) as Dictionary).duplicate(true)
 	var lines:Array=[]
 	if record.get("lines") is Array:
@@ -929,11 +2335,23 @@ static func enqueue(record:Dictionary)->Dictionary:
 			if old.kind=="petition":
 				old.status="expired"
 				old.outcome="Set aside so %s could be heard; %s may ask again." % ["a great work" if kind in WORK_KINDS else "the scouts' report",String(old.speaker.name)]
+				_ledger_close(old,"set_aside","neutral",String(old.outcome))
 				_archive(old)
 				break
-	_enqueue(audience,day)
+	_enqueue(audience,day,true)
 	for line in lines: append_line(String(audience.id),line)
 	return audience
+
+static func room_for(category:String="routine")->bool:
+	## Pacing hook for matters raised outside the hall (great works news,
+	## forecasts, pitches). "urgent" needs only the hard minimum gap and a free
+	## seat; "routine" also waits for the budget.
+	if WorldSimulation.actor_id!="player": return false
+	var s:=state()
+	var day:=_day()
+	if waiting().size()>=QUEUE_MAX or day-int(s.last_arrival_day)<MIN_GAP: return false
+	if category=="urgent": return true
+	return day>=int(s.next_any)
 
 static func _valid_report(report:Variant)->bool:
 	if not report is Dictionary: return false
@@ -1007,13 +2425,17 @@ static func voice_context(id:String)->Dictionary:
 		"audience_id":id,"origin":audience.origin,"kind":audience.kind,"status":audience.status,
 		"speaker":(audience.speaker as Dictionary).duplicate(),"terms":(audience.terms as Dictionary).duplicate(),"terms_text":_terms_text(audience.terms),
 		"news":(audience.news as Dictionary).duplicate(),"petition":(audience.petition as Dictionary).duplicate(),"report":(audience.get("report",{}) as Dictionary).duplicate(true),
+		"situation":_situation(audience).duplicate(true),"situation_type":_situation_type(audience),
 		"days_waiting":_day()-int(audience.arrived_day),"days_until_leaving":int(audience.expires_day)-_day(),"mood":float(audience.mood),
 		"player_settlement":String(GameState.settlement_name),"player_population":roundi(float(c.population)),
 		"food_situation":_words(float(c.food_days),[[7,"the stores are nearly empty"],[16,"food is short"],[35,"food is adequate but not generous"],[1e9,"the stores are well stocked"]]),
 		"health_situation":_words(float(c.health),[[0.45,"sickness is widespread"],[0.62,"many are unwell"],[1e9,"people are mostly healthy"]]),
 		"housing_situation":"some people lack shelter" if float(c.housing_ratio)<1.0 else "everyone has a roof",
 		"court":[],
+		"history_with_speaker":history_with(_speaker_key(audience),3,id),
+		"history_with_civ":[],
 	}
+	if String(audience.civ_id)!="": context["history_with_civ"]=history_with("civ:"+String(audience.civ_id),3,id)
 	if not audience.terms.is_empty():
 		context["player_stock_of_terms"]=floori(player_stock(String(audience.terms.resource)))
 	for person in court(id):
@@ -1050,8 +2472,8 @@ static func voice_context(id:String)->Dictionary:
 	return context
 
 static func debug_force(kind:String,civ_id:String="")->Dictionary:
-	## Test/capture helper: create one audience now, bypassing pacing but never
-	## the truth rules (no audience if the stores cannot back it).
+	## Test/capture helper: create one audience now, bypassing pacing and the
+	## ledger but never the truth rules (no audience if the stores cannot back it).
 	if kind not in KINDS: return {}
 	var day:=_day()
 	var audience:={}
@@ -1092,6 +2514,39 @@ static func debug_force(kind:String,civ_id:String="")->Dictionary:
 	_enqueue(audience,day)
 	return audience
 
+static func debug_situation(situation_type:String,target:String="",data:Dictionary={})->Dictionary:
+	## Test/capture helper: raise one specific situation now (foreign target is
+	## a civ id; court target is a person id), bypassing pacing and the ledger.
+	if not SITUATIONS.has(situation_type): return {}
+	var day:=_day()
+	var kind:=String(SITUATIONS[situation_type].kind)
+	var audience:={}
+	if kind=="petition":
+		var court_type:String={"crisis_petition":"condition","grievance":"grievance","ambition":"ambition","promise_followup":"promise_followup","introduction":"appointment","war_council":"war_council"}[situation_type]
+		var people:Array[Dictionary]=_officials()
+		if target.is_valid_int() and not _official(int(target)).is_empty(): people=[_official(int(target))]
+		for person in people:
+			var payload:=data.duplicate(true)
+			if court_type=="promise_followup" and not payload.has("decree"): payload["decree"]=String(_ambition_ladder(person)[0]); payload["promised_day"]=maxi(0,day-150)
+			var built:=_court_petition(court_type,person,payload,day)
+			if built.is_empty(): continue
+			audience=_court_audience(person,built,{"type":court_type,"key":"debug","data":payload},day)
+			break
+	else:
+		var ids:Array=[target] if target!="" else []
+		if ids.is_empty():
+			for civ in WorldSimulation.world.civilizations: ids.append(String(civ.get("id","")))
+		for id in ids:
+			if ForeignDiplomacy.civilization(String(id)).is_empty(): continue
+			var occasion:={"type":"debug","key":"debug","civ_id":String(id),"data":data.duplicate(true)}
+			var candidate:=_candidate(situation_type,String(id),occasion,_rng("debug:"+situation_type,day),{},day)
+			if candidate.is_empty(): continue
+			audience=_foreign_audience(String(id),candidate,occasion,day)
+			break
+	if audience.is_empty(): return {}
+	_enqueue(audience,day)
+	return audience
+
 static func _debug_report(civ_id:String)->Dictionary:
 	## Build a report from real facts about a contacted civilization.
 	var civ:={}
@@ -1113,6 +2568,66 @@ static func _debug_report(civ_id:String)->Dictionary:
 		"report":{"facts":facts,"subject_civ_id":String(civ.id),"subject_name":String(civ.get("name","")),"source":"scouts","observed_day":maxi(0,_day()-4)}})
 
 # --------------------------------------------------------------------------
+# Legacy saves: calm a stuffed antechamber
+# --------------------------------------------------------------------------
+
+static func _migrate(s:Dictionary)->void:
+	## Version-1 halls scheduled an envoy per civilization every few weeks and a
+	## petition per official every month or two. On load: rebuild the ledger from
+	## history, keep at most MIGRATION_KEEP distinct waiting audiences (others
+	## withdraw quietly, without penalty), drop the old timers and give the
+	## ruler a breathing space before the next routine audience.
+	s["version"]=VERSION
+	var day:=_day()
+	var ledger:Array=s.ledger
+	var old_history:Array=(s.history as Array).duplicate()
+	old_history.reverse()
+	for audience in old_history:
+		if audience is Dictionary:
+			_ledger_add(audience)
+			_ledger_close(audience,String(audience.get("option_id","")) if String(audience.get("option_id",""))!="" else String(audience.get("status","resolved")),"",String(audience.get("outcome","")))
+	var queue:Array=(s.queue as Array).duplicate()
+	queue.sort_custom(func(a:Variant,b:Variant)->bool:return a is Dictionary and b is Dictionary and int(a.get("arrived_day",0))<int(b.get("arrived_day",0)))
+	var seen:Dictionary={}
+	var kept:=0
+	for audience in queue:
+		if not audience is Dictionary or String(audience.get("status",""))!="waiting": continue
+		var kind:=String(audience.get("kind",""))
+		if kind in WORK_KINDS or kind=="report":
+			_ledger_add(audience)
+			continue
+		var speaker:=_speaker_key(audience)
+		var key:=speaker+"|"+_ask_key(audience)
+		if seen.has(key) or seen.has(speaker) or kept>=MIGRATION_KEEP:
+			audience["status"]="expired"
+			audience["option_id"]="withdrawn"
+			audience["outcome"]="%s withdrew quietly after a long wait; no offence was taken, and the matter will return if it still matters." % String((audience.get("speaker",{}) as Dictionary).get("name","The visitor"))
+			_ledger_add(audience)
+			_ledger_close(audience,"withdrawn","neutral",String(audience.outcome))
+			(s.queue as Array).erase(audience)
+			(s.history as Array).push_front(audience)
+			continue
+		seen[key]=true; seen[speaker]=true; kept+=1
+		audience["expires_day"]=maxi(int(audience.get("expires_day",day)),day+EXPIRY_DAYS)
+		_ledger_add(audience)
+	if (s.history as Array).size()>HISTORY_MAX: (s.history as Array).resize(HISTORY_MAX)
+	s["next_foreign"]={}
+	s["next_court"]={}
+	var last_civ:Dictionary={}
+	var last_person:Dictionary={}
+	for entry in ledger:
+		if not entry is Dictionary: continue
+		var speaker2:=String(entry.get("speaker",""))
+		if speaker2.begins_with("civ:"): last_civ[speaker2.trim_prefix("civ:")]=maxi(int(last_civ.get(speaker2.trim_prefix("civ:"),-99999)),int(entry.day))
+		elif speaker2.begins_with("person:"): last_person[speaker2.trim_prefix("person:")]=maxi(int(last_person.get(speaker2.trim_prefix("person:"),-99999)),int(entry.day))
+	s["last_civ"]=last_civ
+	s["last_person"]=last_person
+	s["occasions"]=[]
+	s["watch"]={}
+	s["last_arrival_day"]=maxi(int(s.get("last_arrival_day",-9999)),day)
+	s["next_any"]=day+roundi(float(FREQUENCIES.get(String(s.get("frequency","normal")),90))*0.6)
+
+# --------------------------------------------------------------------------
 # Save validation
 # --------------------------------------------------------------------------
 
@@ -1126,13 +2641,22 @@ static func validate_state(data:Variant)->bool:
 		if not data.get(key,[]) is Array or (data.get(key,[]) as Array).size()>(QUEUE_MAX*4 if key=="queue" else HISTORY_MAX): return false
 		for audience in data.get(key,[]):
 			if not _valid_audience(audience): return false
-	for key in ["next_foreign","next_court"]:
-		if not data.get(key,{}) is Dictionary or (data.get(key,{}) as Dictionary).size()>256: return false
+	for key in ["next_foreign","next_court","last_civ","last_person"]:
+		if not data.get(key,{}) is Dictionary or (data.get(key,{}) as Dictionary).size()>512: return false
 		for entry in data.get(key,{}):
 			if not entry is String or not _num(data[key][entry]): return false
-	for key in ["last_arrival_day","serial"]:
+	for key in ["last_arrival_day","serial","next_any","version"]:
 		if data.has(key) and not _num(data[key]): return false
 	if data.has("summon_immediately") and not data.summon_immediately is bool: return false
+	if data.has("frequency") and not String(data.frequency) in FREQUENCIES: return false
+	if data.has("last_speaker") and (not data.last_speaker is String or String(data.last_speaker).length()>120): return false
+	if not data.get("ledger",[]) is Array or (data.get("ledger",[]) as Array).size()>LEDGER_MAX: return false
+	for entry in data.get("ledger",[]):
+		if not entry is Dictionary or not _num(entry.get("day")) or not entry.get("speaker","") is String or not entry.get("ask","") is String or JSON.stringify(entry).length()>2000: return false
+	if not data.get("occasions",[]) is Array or (data.get("occasions",[]) as Array).size()>OCCASIONS_MAX: return false
+	for occasion in data.get("occasions",[]):
+		if not occasion is Dictionary or not occasion.get("key","") is String or not occasion.get("type","") is String or not _num(occasion.get("expires")) or not _num(occasion.get("not_before",0)) or JSON.stringify(occasion).length()>3000: return false
+	if not data.get("watch",{}) is Dictionary or JSON.stringify(data.get("watch",{})).length()>100000: return false
 	return true
 
 static func _valid_audience(a:Variant)->bool:
@@ -1148,6 +2672,10 @@ static func _valid_audience(a:Variant)->bool:
 	if not terms is Dictionary: return false
 	if not (terms as Dictionary).is_empty() and (terms.get("resource","") not in RESOURCES or not _num(terms.get("amount")) or float(terms.amount)<0): return false
 	if not a.get("news",{}) is Dictionary or not a.get("petition",{}) is Dictionary: return false
+	var situation:Variant=a.get("situation",{})
+	if not situation is Dictionary or JSON.stringify(situation).length()>SITUATION_JSON_MAX: return false
+	if not (situation as Dictionary).is_empty() and not SITUATIONS.has(String(situation.get("type",""))): return false
+	if a.kind=="proposal" and (situation as Dictionary).is_empty(): return false
 	var topic:=String((a.get("petition",{}) as Dictionary).get("topic",""))
 	if a.kind=="petition" and topic not in TOPICS: return false
 	if a.kind=="report" and not _valid_report(a.get("report",{})): return false

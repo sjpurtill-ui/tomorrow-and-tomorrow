@@ -259,6 +259,12 @@ static func _has_waiting(mode:String,work_id:String,key:String)->bool:
 		if String(gw.get("mode",""))==mode and String(gw.get("work_id",""))==work_id and (key.is_empty() or String(gw.get("key",""))==key):return true
 	return false
 
+static func _hall_room(category:String)->bool:
+	## The hall's pacing budget (AudienceHall.room_for).
+	var hall:=_hall()
+	if hall==null:return false
+	return bool(hall.call("room_for",category))
+
 static func _room()->bool:
 	return (_hall().call("waiting") as Array).size()<int(_hall().get_script_constant_map().get("QUEUE_MAX",4))
 
@@ -502,9 +508,14 @@ static func daily(day:int)->Array[Dictionary]:
 		if before.is_empty() or before==status or status not in ABANDONED_STATUSES:continue
 		var made_outcome:=outcome_audience(work)
 		if not made_outcome.is_empty():arrivals.append(made_outcome)
+	# Pacing: stage gates, accidents and outcomes are consequences and always come;
+	# forecasts, word of foreign works and engine pitches wait for the hall's
+	# budget (AudienceHall.room_for) and are only marked seen once raised.
 	for item in api_list("forecast",["player"]):
 		if not item is Dictionary:continue
 		if String(item.get("kind",""))=="lean_season" and float(item.get("severity",0))<.12:continue
+		var urgent:=String(item.get("kind",""))=="famine" or float(item.get("severity",0))>=.25
+		if not _hall_room("urgent" if urgent else "routine"):break
 		if not _mark("forecast:%s:%d" % [String(item.get("kind","")),floori(float(item.get("start_day",day))/30.0)],day):continue
 		var made_forecast:=forecast_audience(item)
 		if not made_forecast.is_empty():arrivals.append(made_forecast)
@@ -512,10 +523,14 @@ static func daily(day:int)->Array[Dictionary]:
 	for item in api_list("known_foreign_works",["player"]):
 		if not item is Dictionary:continue
 		if day-int(item.get("day",item.get("as_of",-9999)))>FRESH_DAYS:continue
+		if _seen().has("news:%s:%s:%s" % [String(item.get("owner","")),String(item.get("work_id",item.get("id",item.get("name","")))),String(item.get("status",""))]):continue
+		if not _hall_room("routine"):break
 		if not _mark("news:%s:%s:%s" % [String(item.get("owner","")),String(item.get("work_id",item.get("id",item.get("name","")))),String(item.get("status",""))],day):continue
 		var made_news:=news_audience(item)
 		if not made_news.is_empty():arrivals.append(made_news)
 		break
+	# Reading pending proposals consumes them, so only read when a pitch can be heard.
+	if not _hall_room("routine"):return arrivals
 	for trigger in api_list("pending_proposals",["player"]):
 		if not trigger is Dictionary:continue
 		var made_pitch:=proposal_audience(trigger)

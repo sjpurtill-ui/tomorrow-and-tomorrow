@@ -46,6 +46,8 @@ func _ready()->void:
 			await _exercise_kind(director,terrain,"request",mode)
 			await _exercise_kind(director,terrain,"news",mode)
 	await _exercise_defer(director,terrain)
+	await _exercise_footer_controls(director)
+	await _exercise_situations(director)
 	if failures.is_empty():
 		print("AUDIENCE_MODAL PASS")
 		get_tree().quit(0)
@@ -190,6 +192,96 @@ func _exercise_defer(director:Node,terrain:TerrainDouble)->void:
 	else:
 		director.modal.make_them_wait();await _frames(2)
 	print("AUDIENCE_MODAL defer/queue/badge ok waiting=%d" % Hall.waiting().size())
+
+func _hall_api()->Object:
+	## The hall script as an object, for optional (duck-typed) engine calls.
+	return load("res://scripts/audience_hall.gd")
+
+func _exercise_footer_controls(director:Node)->void:
+	## The footer says which voice speaks (and why not live), and sets pacing.
+	var audience:=Hall.debug_force("gift")
+	if audience.is_empty():_fail("footer setup failed");return
+	var modal:Control=director.open_audience(String(audience.id))
+	await _frames(3)
+	var indicator:=modal.find_child("VoiceIndicator",true,false) as Label
+	if indicator==null:_fail("voice indicator missing");return
+	if not indicator.text.begins_with("Offline voice — "):_fail("indicator should say offline, got '%s'" % indicator.text)
+	if not "offline scene" in indicator.tooltip_text:_fail("indicator tooltip lacks the session tally: %s" % indicator.tooltip_text)
+	# With no forced-offline flag, the reason is the missing/disabled connection.
+	var voice:Node=director.voice
+	voice.force_offline=false
+	GameState.civic_api_enabled=false
+	modal._refresh_footer()
+	if indicator.text!="Offline voice — AI is switched off":_fail("indicator lacks the offline reason, got '%s'" % indicator.text)
+	voice.force_offline=true
+	var pick:=modal.find_child("AudienceFrequency",true,false) as OptionButton
+	if pick==null:_fail("frequency control missing")
+	elif _hall_api().has_method("set_frequency"):
+		var before:=String(_hall_api().call("frequency")) if _hall_api().has_method("frequency") else "normal"
+		pick.select(2);pick.item_selected.emit(2)
+		if _hall_api().has_method("frequency") and String(_hall_api().call("frequency"))!="lively":_fail("frequency control did not reach the hall")
+		_hall_api().call("set_frequency",before)
+	if modal.card.size.y>modal.DESIGN_SIZE.y+1.0:_fail("footer controls grew the card: %s" % modal.card.size)
+	if not get_viewport().get_visible_rect().encloses(modal.card.get_global_rect()):_fail("footer controls push the card off screen")
+	print("AUDIENCE_MODAL footer indicator='%s' frequency=%s" % [indicator.text,pick.get_item_text(pick.selected) if pick else "-"])
+	modal.make_them_wait();await _frames(2)
+
+func _mock_live(id:String,payload:Dictionary,attempt:int,voice:Node)->void:
+	## Mocked live model: answers in character, and slips in one anachronism and
+	## one famous quotation that the validator must drop.
+	var keys:Array=payload.response_format.json_schema.schema.properties.lines.items.properties.speaker_key.enum if payload.has("response_format") else ["envoy"]
+	var lines:Array=[{"speaker_key":"envoy","text":"We have watched your smoke through a hard season, and we would rather share a fire than fight over one.","aside":false},
+		{"speaker_key":"envoy","text":"Let us seal it over a cask of beer.","aside":false}]
+	if keys.size()>1:
+		lines.append({"speaker_key":String(keys[1]),"text":"A house divided against itself cannot stand, and neither can a frontier.","aside":false})
+		lines.append({"speaker_key":String(keys[1]),"text":"Their smiles are warm. I would still count their spears.","aside":true})
+	var body:=JSON.stringify({"model":"mock-model","choices":[{"finish_reason":"stop","message":{"content":JSON.stringify({"lines":lines,"mood_shift":0.0})}}],"usage":{"prompt_tokens":900,"completion_tokens":120,"total_tokens":1020}})
+	voice._on_response.call_deferred(HTTPRequest.RESULT_SUCCESS,200,PackedStringArray(),body.to_utf8_buffer(),id,attempt)
+
+func _exercise_situations(director:Node)->void:
+	## AV1's situation records rendered through the hall: herald headline,
+	## occasion-led openings, offline and mocked-live voice, no anachronisms.
+	var relation_b:Dictionary=CivilizationSystem.civilizations[1].player_relation
+	relation_b["at_war"]=true;relation_b["war_started_day"]=0;relation_b["war_score"]=40.0;relation_b["rival_war_exhaustion"]=0.9
+	CivilizationSystem.civilizations[1]["diplomacy"]=0.8
+	var relation_c:Dictionary=CivilizationSystem.civilizations[2].player_relation
+	relation_c["last_recruitment_day"]=1;relation_c["recruitment_visits"]=2
+	var targets:={"accord_offer":"rival_a","protection_pact":"rival_a","peace_feeler":"rival_b","recruitment_protest":"rival_c"}
+	var voice:Node=director.voice
+	var rendered:=0
+	var live_done:=false
+	for sit_type in targets:
+		var audience:Dictionary=Hall.debug_situation(String(sit_type),String(targets[sit_type]))
+		if audience.is_empty():
+			print("AUDIENCE_MODAL situation %s: not available in this test world" % sit_type)
+			continue
+		rendered+=1
+		var id:=String(audience.id)
+		var live:=not live_done
+		if live:
+			voice.force_offline=false
+			voice.config_override={"endpoint":"https://mock.invalid/v1/chat/completions","api_key":"k","model":"mock-model","structured_output":true}
+			voice.send_hook=_mock_live.bind(voice)
+		var modal:Control=director.open_audience(id)
+		await _wait_scene(modal,id,1)
+		var herald:=modal.find_child("HeraldTitle",true,false) as Label
+		var headline:=String((audience.get("situation",{}) as Dictionary).get("headline",""))
+		if herald==null or (not headline.is_empty() and not headline.to_upper() in herald.text):_fail("%s herald ignores the headline: %s" % [sit_type,herald.text if herald else "-"])
+		var lines:Array=Hall.find(id).get("lines",[])
+		if lines.is_empty():_fail("%s produced no lines" % sit_type)
+		print("--- SITUATION %s (%s) — herald: %s ---" % [sit_type,"mocked live" if live else "offline",herald.text if herald else ""])
+		for line in lines:
+			var text:=String(line.get("text",""))
+			print("  %s%s: %s" % [String(line.get("speaker",""))," (aside)" if bool(line.get("aside",false)) else "",text])
+			if "beer" in text.to_lower() or "house divided" in text.to_lower():_fail("%s: validator let through '%s'" % [sit_type,text])
+		if live:
+			var joined:=""
+			for line in lines: joined+=String(line.get("text",""))+" "
+			if not "share a fire" in joined:_fail("mocked live line missing from %s" % sit_type)
+			voice.send_hook=Callable();voice.config_override={};voice.force_offline=true
+			live_done=true
+		modal.make_them_wait();await _frames(2)
+	if rendered<2:_fail("only %d proposal situations could be raised" % rendered)
 
 func _capture(label:String)->void:
 	await _frames(4)
