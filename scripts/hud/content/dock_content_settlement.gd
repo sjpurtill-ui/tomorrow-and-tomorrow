@@ -82,7 +82,7 @@ func _people_blocks(productive:int,local_population:int,local_share:float,settle
 		{"type":"segments","heading":"AGE STRUCTURE","note":"dependency %.2f" % dependency,"items":segment_items,"legend":"Green = productive-age • warm/grey = dependent • life expectancy is not a maximum age"},
 		{"type":"alloc","heading":"DELEGATED LOCAL LABOR","note":"about %d of %d productive" % [assigned,productive],"items":alloc_items},
 		{"type":"actions","items":[
-			{"label":"LOCAL LEADER","sub":"view, dismiss, or execute","primary":true,"on_press":jump("civ",1),"tip":"Local leaders are appointed automatically. Open Civics to speak with or remove the current leader."},
+			{"label":"LOCAL LEADER","sub":"speak, order, dismiss · in the court","primary":true,"on_press":court({"settlement_id":settlement_id}),"tip":"Local leaders are appointed automatically. Summon the current leader to the court to speak with, direct or remove them."},
 			{"label":"RENAME SETTLEMENT","sub":"change its map name","on_press":terrain._open_settlement_naming_panel.bind(settlement_id),"tip":"Give this place the name used on the map and in history."},
 		]},
 	]
@@ -179,7 +179,7 @@ func _overview_blocks(settlement:Dictionary)->Array:
 			{"kind":"building","art":1,"title":"Homes & shelter","show_art":shelter.built,"empty_label":shelter.empty_label,"detail":shelter.detail,"action":"View buildings","on_press":jump("construction",0)},
 			{"kind":"food","art":0,"title":"Food & water","detail":food,"action":"View provisions","on_press":jump("economy",0)},
 			{"kind":"building","art":3,"title":"Work & production","detail":"Local workshops and active production","action":"View production","on_press":jump("production",0)}],
-		"on_leader":jump("civ",1),"on_priority":focused_action("Local priority","",_people_report.bind("priority")).on_press,
+		"on_leader":court({"settlement_id":String(id)}),"on_priority":focused_action("Local priority","",_people_report.bind("priority")).on_press,
 		"on_population":focused_action("Population","",_people_report.bind("population")).on_press,"on_work":focused_action("Daily work","",_people_report.bind("work")).on_press,
 		"on_rename":terrain._open_settlement_naming_panel.bind(id)}]
 

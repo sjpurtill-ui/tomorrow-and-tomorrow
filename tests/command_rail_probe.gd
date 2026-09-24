@@ -116,25 +116,38 @@ func _ready()->void:
 		hud.set_active_section("")
 		_expect(open_x>closed_x,"toolbar did not shift right for the open dock")
 
-	# Council dock: a conversational reply field is wired to the pronouncement
-	# pipeline and the answer appears without leaving and reopening the tab.
-	terrain._on_hud_section_requested("civ",2)
-	await get_tree().process_frame
-	var order_input:=hud.find_child("CivicConversationInput",true,false) as LineEdit
-	_expect(order_input!=null,"council dock did not expose the conversation reply input")
-	if order_input:
-		var orders_before:int=GameState.sovereign_orders.size()
-		# This checks immediate UI updates using the local interpreter, not network latency.
-		GameState.civic_always_use_ai=false
-		GameState.civic_api_enabled=false
-		order_input.text="Ration the stores for the cold season"
-		terrain._issue_freeform_order(order_input)
-		_expect(GameState.sovereign_orders.size()==orders_before+1,"dock order input did not record a pronouncement")
+	# The court: every conversation happens there. The rail's Court entry opens
+	# it; the local leader is summoned in place and an order given there reaches
+	# the pronouncement pipeline, the leader's answer appearing in the room.
+	var court_button:=hud.find_child("RailCourt",true,false) as Button
+	_expect(court_button!=null,"the rail has no Court entry")
+	var director:Node=get_tree().get_first_node_in_group("court_director")
+	_expect(director!=null,"no court director")
+	if court_button and director:
+		court_button.pressed.emit()
 		await get_tree().process_frame
-		await get_tree().process_frame
-		await get_tree().process_frame
-		var visible_turns:=hud.find_children("CivicMessageText","Label",true,false)
-		_expect(visible_turns.size()>=2,"leader response did not appear live in the open conversation")
+		var court:Control=director.modal
+		_expect(is_instance_valid(court) and String(court.mode)=="rest","the Court entry did not open the court at rest")
+		var settlement_id:=String(SettlementModel.selected_settlement_snapshot().get("id",""))
+		if is_instance_valid(court) and settlement_id!="":
+			if "force_offline" in director.voice: director.voice.force_offline=true
+			court.focus({"settlement_id":settlement_id})
+			await get_tree().process_frame
+			_expect(String(court.mode)=="audience" and String(court.civic_settlement)==settlement_id,"the local leader was not summoned into the court")
+			GameState.civic_always_use_ai=false
+			GameState.civic_api_enabled=false
+			var orders_before:int=GameState.sovereign_orders.size()
+			var lines_before:int=(load("res://scripts/audience_hall.gd").find(String(court.audience_id)).lines as Array).size()
+			court.speech_input.text="Ration the stores for the cold season"
+			court._speak()
+			_expect(GameState.sovereign_orders.size()==orders_before+1,"a court order did not record a pronouncement")
+			var waited:=0.0
+			while waited<3.0:
+				await get_tree().process_frame;waited+=get_process_delta_time()
+				if (load("res://scripts/audience_hall.gd").find(String(court.audience_id)).lines as Array).size()>=lines_before+2: break
+			_expect((load("res://scripts/audience_hall.gd").find(String(court.audience_id)).lines as Array).size()>=lines_before+2,"the leader's answer did not appear live in the court")
+			court._close()
+			await get_tree().process_frame
 	terrain._on_hud_section_requested("",0)
 	await get_tree().process_frame
 
