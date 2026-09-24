@@ -2,6 +2,8 @@ extends RefCounted
 ## Only decisions live here. All population, equipment and technology changes
 ## must be accepted and paid for by the ordinary commands and simulation.
 const STRATEGY=preload("res://scripts/civilization_strategy.gd")
+const GREAT_WORKS=preload("res://scripts/great_works_rivalry.gd")
+const UNDERTAKINGS=preload("res://scripts/undertaking_system.gd")
 
 static func current_plan(id:String)->Dictionary:
 	var state:=WorldSimulation.state
@@ -96,7 +98,7 @@ static func order_steps(id:String)->Array:
 		return review
 	]]
 	var parts:Array=review
-	for kind:String in ["research","military","civilian","foreign","expansion"]:
+	for kind:String in ["research","military","civilian","foreign","great_works","expansion"]:
 		if kind in ["civilian","expansion"]:
 			var kind_parts:=civilian_order_steps(id,func()->Dictionary:return shared.plan) if kind=="civilian" else expansion_order_steps(id,func()->Dictionary:return shared.plan)
 			for part:Array in kind_parts:
@@ -110,6 +112,7 @@ static func order_steps(id:String)->Array:
 				"research":research_orders(id,shared.plan)
 				"military":military_orders(id,shared.plan)
 				"foreign":foreign_orders(id,shared.plan)
+				"great_works":great_work_orders(id,shared.plan)
 		])
 	return first
 
@@ -361,7 +364,10 @@ static func foreign_orders(id:String,plan:Dictionary={})->void:
 		if int(civ.player_relation.get("contact_level",0))<2:continue
 		var relationship:Dictionary=civ.player_relation.duplicate(true)
 		relationship.opinion=clampf(float(relationship.get("opinion",0))+preload("res://scripts/society_exchange.gd").diplomatic_value(String(civ.id),plan.personality),-1,1)
-		var action:=STRATEGY.diplomatic_action(relationship,plan,food_days)
+		var other:=GREAT_WORKS.global_owner(String(civ.id),id)
+		# Lasting grievances over seized, looted or sabotaged works; known deterrence.
+		relationship.opinion=clampf(float(relationship.opinion)-GREAT_WORKS.grievance(id,other),-1,1)
+		var action:=STRATEGY.diplomatic_action(relationship,plan,food_days,GREAT_WORKS.known_deterrence(id,other))
 		if bool(civ.player_relation.get("at_war",false)) and action!="seek_peace":
 			var urgency:=-float(civ.player_relation.get("opinion",0))
 			if urgency>campaign_urgency:campaign_urgency=urgency;campaign_enemy=String(civ.id)
@@ -385,6 +391,9 @@ static func campaign_objective(id:String,enemy:String,plan:Dictionary)->void:
 		for report:Dictionary in world.city_intelligence.known_cities("player",enemy,false):
 			var position:=world.city_intelligence.vector(report.position)
 			var score:=-position.distance_to(world.player_world_origin)
+			# A reported standing Great Work is a prize to bold rulers (a few km of reach).
+			for sighting:Dictionary in report.get("works",[]):
+				if String(sighting.get("status",""))=="functioning":score+=12.0*float(plan.personality.assertiveness)
 			if score>best:best=score;target=String(report.city_id);point=position
 		if target!="":
 			mission="occupy" if float(plan.personality.assertiveness)>.6 else "encircle"
@@ -416,3 +425,61 @@ static func service_orders(id:String,plan:Dictionary={})->void:
 			var response:=WorldSimulation.submit(id,{"kind":"service_mission","force":int(force.id),"region":created.region,"mission":mission})
 			if not response.has("error"):break
 			op.remove_region(String(created.region.id))
+
+## Monthly Great Works review: pace, race reactions (press, sabotage, abandon),
+## restoration, returning loot, and choosing a new work. Every mutation is a
+## validated order paid by the ordinary undertaking and rivalry rules.
+static func great_work_orders(id:String,plan:Dictionary)->void:
+	var state:=WorldSimulation.state
+	var food_days:=float(state.simulation_metrics.get("food_days",0))
+	var news:=GREAT_WORKS.rival_news_for(id)
+	var active:=false
+	for city:Dictionary in state.player_settlements:
+		if not String(city.get("occupied_by","")).is_empty():continue
+		for r:Dictionary in city.get("undertakings",[]):
+			var status:=String(r.get("status",""))
+			if status=="functioning" and float(r.get("condition",1))<.6:
+				WorldSimulation.submit(id,{"kind":"great_work_restore","city":String(city.id),"id":String(r.id)})
+			# A lost race: disciplined rulers reclaim the stone, others keep a lesser monument.
+			if status=="rival":
+				WorldSimulation.submit(id,{"kind":"great_work_quarry" if float(plan.personality.discipline)>.55 or bool(plan.get("hungry",false)) else "great_work_repurpose","city":String(city.id),"id":String(r.id)})
+			if status not in ["building","stalled"]:continue
+			active=true
+			var race:=GREAT_WORKS.race_for(id,String(r.id),GREAT_WORKS.fraction(r),news)
+			var ready:=not race.is_empty() and int(state.elapsed_days)>=int(preload("res://scripts/society_exchange.gd").known_relation(String(race.owner)).get("great_work_sabotage_day",-GREAT_WORKS.SABOTAGE_COOLDOWN))+GREAT_WORKS.SABOTAGE_COOLDOWN
+			var reaction:=STRATEGY.great_work_reaction(plan,race,GREAT_WORKS.fraction(r),food_days,ready)
+			if reaction=="sabotage":
+				# The attempt is paid and risky whether or not it succeeds; the work goes on.
+				WorldSimulation.submit(id,{"kind":"great_work_sabotage","target":String(race.owner),"city":String(race.local_city_id),"id":String(r.id)})
+				reaction="press" if food_days>45 else "careful"
+			if reaction=="abandon" or String(r.get("policy",""))!=reaction:
+				WorldSimulation.submit(id,{"kind":"great_work_policy","city":String(city.id),"id":String(r.id),"policy":reaction})
+			if reaction=="abandon":active=false
+	# Merciful rulers give back treasures their armies carried off, once at peace.
+	if float(plan.personality.empathy)>.7:
+		for owner:String in GREAT_WORKS.owners():
+			if owner==id:continue
+			for city:Dictionary in GREAT_WORKS.cities(owner):
+				for r:Dictionary in city.get("undertakings",[]):
+					for entry:Dictionary in r.get("rivalry",{}).get("looted",[]):
+						if String(entry.by)==id and not bool(entry.returned):
+							WorldSimulation.submit(id,{"kind":"great_work_return_loot","owner":owner,"id":String(r.id)});break
+	if active or bool(plan.get("hungry",false)) or bool(plan.get("at_war",false)) or food_days<60:return
+	var best:={};var best_value:=-INF
+	for city:Dictionary in state.player_settlements:
+		if not String(city.get("occupied_by","")).is_empty():continue
+		var choices:Array=WorldSimulation.settlements.with_city_resources(String(city.id),func()->Array:
+			var found:Array=[]
+			for d:Dictionary in UNDERTAKINGS.possibilities(city):
+				var coverage:=1.0
+				for material:String in d.get("cost",{}):coverage=minf(coverage,float(WorldSimulation.state.resource_stockpiles.get(material,0))/maxf(1,float(d.cost[material])))
+				found.append([d,coverage])
+			return found)
+		for pair:Array in choices:
+			var d:Dictionary=pair[0]
+			# Real stores must cover a first stage; ambition does not conjure stone.
+			if float(pair[1])<.2:continue
+			var race:=GREAT_WORKS.race_for(id,String(d.id),0.0,news)
+			var value:=STRATEGY.great_work_score(d,plan,{"coverage":pair[1],"claimed":bool(race.get("claimed",false)),"rival_ahead":bool(race.get("rival_ahead",false))})
+			if value>best_value:best_value=value;best={"kind":"great_work_start","city":String(city.id),"id":String(d.id)}
+	if not best.is_empty():WorldSimulation.submit(id,best)

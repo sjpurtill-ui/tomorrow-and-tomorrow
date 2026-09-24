@@ -17,6 +17,9 @@ static func take(id:String,resource:String,quantity:float,city_id:String="")->fl
 		return WorldSimulation.settlements.with_city_resources(city_id,debit) if city_id!="" else debit.call()
 	)
 static func quote(access:float,domestic:float)->Dictionary:
+	# A held route-drawing Great Work (Sanctuary, Harbor Lamp, Terminus...) brings
+	# foreign traders to this market; goods must still exist on both sides.
+	access=minf(1.0,access+preload("res://scripts/great_works_rivalry.gd").trade_routing(WorldSimulation.actor_id)) if access>0 else access
 	var s:=WorldSimulation.state
 	var economy:=WorldSimulation.economy
 	var partners:Array[String]=[]

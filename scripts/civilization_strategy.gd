@@ -77,10 +77,47 @@ static func preferred_mission(service:String,available:Array,plan:Dictionary)->S
 		if mission in available:return mission
 	return "hold"
 
-static func diplomatic_action(relation:Dictionary,plan:Dictionary,food_days:float)->String:
+## A known deterring Great Work (e.g. Crown of the Ridge) lowers the opinion at
+## which this ruler would start a war against its holder; it never forbids war.
+static func diplomatic_action(relation:Dictionary,plan:Dictionary,food_days:float,deterrence:float=0.0)->String:
 	if bool(relation.get("at_war",false)):
 		return "seek_peace" if food_days<float(plan.peace_food) else ""
 	var opinion:=float(relation.get("opinion",0))
-	if opinion<float(plan.war_opinion) and food_days>float(plan.war_food) and bool(plan.offensive):return "declare_war"
+	if opinion<float(plan.war_opinion)-clampf(deterrence,0,.3) and food_days>float(plan.war_food) and bool(plan.offensive):return "declare_war"
 	if opinion>float(plan.trade_opinion) and String(relation.get("treaty","none"))=="none":return "open_trade"
 	return "goodwill" if opinion>-.5 and float(plan.personality.empathy)>.65 else ""
+
+# ---------------------------------------------------------------- Great Works
+## Which Great Work a ruler would pursue, and how it reacts to a rival race.
+## Preferences only; the undertaking rules still demand real labor and stores.
+const GREAT_WORK_ROLES:={"Knowledge":"learning","Administration":"security","Food":"care","Logistics":"exchange","Crafting":"growth"}
+## The goal each transformative effect serves; works without one fall back to role.
+const GREAT_WORK_EFFECT_GOALS:={"deterrence":"security","traffic":"exchange","watching_sky":"care","covenant":"care","long_song":"learning"}
+
+static func great_work_score(definition:Dictionary,plan:Dictionary,context:Dictionary={})->float:
+	if definition.is_empty() or bool(context.get("claimed",false)):return -INF
+	var p:Dictionary=plan.personality
+	var open:=float(p.openness);var discipline:=float(p.discipline);var empathy:=float(p.empathy)
+	var assertive:=float(p.assertiveness);var risk:=float(p.risk_tolerance)
+	var role:=String(definition.get("role",""))
+	var value:float={"Knowledge":open*1.2+(1-risk)*.2,"Administration":assertive*.8+discipline*.5,"Food":empathy*.9+(1-risk)*.4,"Logistics":discipline*.5+empathy*.4+open*.3,"Crafting":discipline*.7+open*.4}.get(role,.5)*2.0
+	var aims:Array=[GREAT_WORK_ROLES.get(role,""),GREAT_WORK_EFFECT_GOALS.get(String(definition.get("effect","")),"")]
+	var goals:Array=plan.get("goals",[])
+	for index in goals.size():
+		if String(goals[index].get("id","")) in aims:value+=[1.2,.6,.3][mini(index,2)]
+	# Grand designs appeal to bold rulers; cautious rulers prefer what they can finish.
+	value+=(risk-.5)*log(maxf(1,float(definition.get("work",5000)))/5000.0+1.0)*2.0
+	value+=clampf(float(context.get("coverage",0)),0,1)*1.5
+	if bool(context.get("rival_ahead",false)):value-=1.5*(1.2-risk)
+	return value
+
+static func great_work_reaction(plan:Dictionary,race:Dictionary,own_fraction:float,food_days:float,sabotage_ready:bool=true)->String:
+	var p:Dictionary=plan.personality
+	if bool(plan.get("food_shortage",plan.get("hungry",false))):return "careful"
+	if race.is_empty() or not bool(race.get("rival_ahead",false)):
+		return "press" if float(p.discipline)>.6 and food_days>90 else "careful"
+	if bool(race.get("claimed",false)):return "abandon"
+	var gap:=float(race.rival_mid)-own_fraction
+	if own_fraction<.25 and gap>.35 and float(p.risk_tolerance)<.55:return "abandon"
+	if sabotage_ready and not bool(race.get("allied",false)) and float(p.assertiveness)>.6 and float(p.risk_tolerance)>.55 and float(p.empathy)<.5:return "sabotage"
+	return "press" if food_days>45 else "careful"

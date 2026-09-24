@@ -39,10 +39,12 @@ func test_catalog_varies_by_world_and_records_roundtrip()->void:
 	GameState.population_total=500
 	GameState.known_discoveries=["clay_shaping","seed_selection","public_stores","framed_construction"]
 	var a:=U.possibilities(city);assert_array(U.possibilities(city)).is_equal(a)
-	var variants:Array=[]
-	for seed in range(10):
-		GameState.world_seed=seed;variants.append(hash(U.possibilities(city)))
-	assert_bool(variants.any(func(v):return v!=variants[0])).is_true()
+	# Great Works: availability follows discoveries and world claims, not dice.
+	var ids:Array=a.map(func(d):return d.id)
+	assert_bool("ancestor_ring" in ids).is_true()
+	GameState.known_discoveries=[]
+	assert_bool(U.possibilities(city).map(func(d):return d.id).has("kiln_court")).is_false()
+	GameState.known_discoveries=["clay_shaping","seed_selection","public_stores","framed_construction"]
 	var r:=record();var saved:Array=bytes_to_var(var_to_bytes([city]))
 	assert_bool(U.valid(saved)).is_true();assert_dict(saved[0].undertakings[0]).is_equal(r)
 	saved[0].undertakings[0].progress=NAN;assert_bool(U.valid(saved)).is_false()

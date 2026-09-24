@@ -57,4 +57,23 @@ static func execute(order:Dictionary)->Dictionary:
 		"base":return WorldSimulation.military.joint_operations.build_base(String(order.get("city","")),String(order.get("service","")))
 		"service_mission":return WorldSimulation.military.joint_operations.assign(int(order.get("force",0)),order.get("region",{}),String(order.get("mission","")))
 		"commission":return WorldSimulation.military.joint_operations.commission(int(order.get("base",0)),String(order.get("unit","")),int(order.get("count",0)),String(order.get("name","")))
+		# Great Works: the same undertaking functions the player's dock uses.
+		"great_work_start":return preload("res://scripts/undertaking_system.gd").start(String(order.get("city","")),String(order.get("id","")))
+		"great_work_policy":return great_work_policy(String(order.get("city","")),String(order.get("id","")),String(order.get("policy","")))
+		"great_work_repurpose":return preload("res://scripts/undertaking_system.gd").repurpose(String(order.get("city","")),String(order.get("id","")))
+		"great_work_quarry":return preload("res://scripts/undertaking_system.gd").quarry(String(order.get("city","")),String(order.get("id","")))
+		"great_work_sabotage":return preload("res://scripts/great_works_rivalry.gd").sabotage(String(order.get("target","")),String(order.get("city","")),String(order.get("id","")))
+		"great_work_restore":return preload("res://scripts/great_works_rivalry.gd").restore(String(order.get("city","")),String(order.get("id","")))
+		"great_work_loot":return preload("res://scripts/great_works_rivalry.gd").loot(String(order.get("owner","")),String(order.get("city","")),String(order.get("id","")))
+		"great_work_return_loot":return preload("res://scripts/great_works_rivalry.gd").return_loot(String(order.get("owner","")),String(order.get("id","")))
 	return {"error":"Unknown civilization order."}
+
+static func great_work_policy(city_id:String,id:String,policy:String)->Dictionary:
+	if policy not in ["careful","press","abandon"]:return {"error":"Choose careful work, pressing on, or abandonment."}
+	var city:=WorldSimulation.settlements.settlement_record(city_id)
+	if city.is_empty() or not String(city.get("occupied_by","")).is_empty():return {"error":"Choose a settlement you control."}
+	for record:Dictionary in city.get("undertakings",[]):
+		if String(record.id)==id and String(record.get("status","")) in ["building","stalled"]:
+			preload("res://scripts/undertaking_system.gd").direct(city_id,id,policy)
+			return {"ok":true}
+	return {"error":"No active undertaking of that kind here."}
