@@ -67,7 +67,10 @@ def build():
 
 def write_document(path,data):
     temporary=path.with_name(path.name+f'.{os.getpid()}.tmp')
-    temporary.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
+    existing=path.read_bytes() if path.exists() else b''
+    ending=b'\r\r\n' if b'\r\r\n' in existing else b'\r\n' if b'\r\n' in existing else b'\n'
+    payload=(json.dumps(data,indent=2,ensure_ascii=False)+'\n').encode('utf-8')
+    temporary.write_bytes(payload.replace(b'\n',ending))
     temporary.replace(path)
 
 def write_index(manifest):
