@@ -57,4 +57,38 @@ static func execute(order:Dictionary)->Dictionary:
 		"base":return WorldSimulation.military.joint_operations.build_base(String(order.get("city","")),String(order.get("service","")))
 		"service_mission":return WorldSimulation.military.joint_operations.assign(int(order.get("force",0)),order.get("region",{}),String(order.get("mission","")))
 		"commission":return WorldSimulation.military.joint_operations.commission(int(order.get("base",0)),String(order.get("unit","")),int(order.get("count",0)),String(order.get("name","")))
+		# Great Works: the same undertaking functions the player's dock uses.
+		"great_work_commission":
+			if not order.get("concept") is Dictionary:return {"error":"Describe the work to be commissioned."}
+			return great_works_call("commission",[String(order.get("city","")),order.concept,String(order.get("ambition","modest")),WorldSimulation.actor_id])
+		"great_work_policy":return great_work_policy(String(order.get("city","")),String(order.get("id","")),String(order.get("policy","")))
+		"great_work_sabotage":return preload("res://scripts/great_works_rivalry.gd").sabotage(String(order.get("target","")),String(order.get("city","")),String(order.get("id","")))
+		"great_work_restore":return preload("res://scripts/great_works_rivalry.gd").restore(String(order.get("city","")),String(order.get("id","")))
+		"great_work_loot":return preload("res://scripts/great_works_rivalry.gd").loot(String(order.get("owner","")),String(order.get("city","")),String(order.get("id","")))
+		"great_work_return_loot":return preload("res://scripts/great_works_rivalry.gd").return_loot(String(order.get("owner","")),String(order.get("id","")))
 	return {"error":"Unknown civilization order."}
+
+static func great_work_policy(city_id:String,id:String,policy:String)->Dictionary:
+	if policy not in ["careful","press","abandon"]:return {"error":"Choose careful work, pressing on, or abandonment."}
+	var city:=WorldSimulation.settlements.settlement_record(city_id)
+	if city.is_empty() or not String(city.get("occupied_by","")).is_empty():return {"error":"Choose a settlement you control."}
+	for record:Dictionary in city.get("undertakings",[]):
+		if String(record.id)==id and String(record.get("status","")) in ["building","stalled"]:
+			var directed:Variant=great_works_call("direct",[city_id,id,policy])
+			return directed if directed is Dictionary and (directed as Dictionary).has("error") else {"ok":true}
+	return {"error":"No active undertaking of that kind here."}
+
+## The Great Works engine is evolving; reach it by method name so a renamed
+## helper returns an error instead of breaking every civilization order.
+static var works_engine_override:Object=null ## test seam; never set by the game
+static func great_works_call(method:String,args:Array)->Variant:
+	if works_engine_override!=null:
+		return works_engine_override.callv(method,args) if works_engine_override.has_method(method) else {"error":"The works engine does not support %s." % method}
+	for path:String in ["res://scripts/great_works.gd","res://scripts/undertaking_system.gd"]:
+		if not ResourceLoader.exists(path):continue
+		var script:=load(path) as GDScript
+		if script==null:continue
+		for info:Dictionary in script.get_script_method_list():
+			if String(info.get("name",""))==method and int((info.get("args",[]) as Array).size())>=args.size():
+				return script.callv(method,args)
+	return {"error":"The works engine does not support %s." % method}

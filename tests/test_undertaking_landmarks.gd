@@ -23,7 +23,7 @@ func test_every_landmark_batches_geometry_and_stays_human_scale()->void:
 	var before:Dictionary=city.duplicate(true)
 	var parent:=Node3D.new();add_child(parent)
 	Visual.render([city],parent,func(_x:float,_z:float)->float:return .15)
-	assert_int(parent.get_child_count()).is_equal(12)
+	assert_int(parent.get_child_count()).is_equal(Catalog.all().size())
 	for root:Node3D in parent.get_children():
 		assert_int(root.get_child_count()).is_equal(2)
 		var mesh:MeshInstance3D=root.get_node("Landmark")

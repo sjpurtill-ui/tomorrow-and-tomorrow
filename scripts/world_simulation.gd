@@ -470,7 +470,7 @@ func submit(id:String,order:Dictionary)->Dictionary:
 const SNAPSHOT=preload("res://scripts/save_system.gd")
 ## Saved fields of systems that no longer exist; older saves may still hold
 ## them. Their contents are folded in elsewhere (see civilian_goods.gd).
-const RETIRED_FIELDS:={"GameState":["opening_craft_practice"],"FoodSystem":["_forecast_climate_cache","_environment_cache_key","_environment_cache"]}
+const RETIRED_FIELDS:={"GameState":["opening_craft_practice"],"FoodSystem":["_forecast_climate_cache","_environment_cache_key","_environment_cache"],"CivilizationSystem":["dominance_turns","contender_dominance_turns","competition_outcome","competition_winner_id"]}
 const CURATED:=["MilitaryCampaign","ProgressionSystem","ForeignDiplomacy","GeneralCampaign"]
 
 func capture_actor(id:String)->Dictionary:
@@ -662,6 +662,7 @@ func begin_day(day:int,daily_context:Dictionary,construction:Callable=Callable()
 		S.step("exchange",timings,func()->void:
 			preload("res://scripts/civilization_exchange.gd").settle(day)
 			preload("res://scripts/civilization_exchange.gd").occupation(day)
+			preload("res://scripts/great_works_rivalry.gd").advance_world(day)
 	),
 	],{},func()->void:
 		job.result=run.result

@@ -14,11 +14,13 @@ Thirteen authored human visual families: Kilnfold, Reedwake, Windseam, Stoneweft
 - Buildings: 4x2 atlas; materials: 2x3; workshops and matching early products: 4x3.
 - Fourteen civic directions: two atlases, 4x2 and 3x2, for founding choices, cultural history and the Wealth work illustration.
 - Twelve undertaking design studies: two 3x2 atlases. Actual construction and operating status remain separate.
-- Early scouting header and returned stone finds, 91 explicit research subject overrides and nine military unit types use the same paper aesthetic in their respective folders. Map settlement markers and diplomatic identity use vector crests in earth pigments.
+- Early scouting header and returned stone finds, 91 explicit research subject overrides, 108 reviewed first-300-year technology cells, 34 reused paper technology scenes, and nine military unit types use the same paper aesthetic in their respective folders. Map settlement markers and diplomatic identity use vector crests in earth pigments.
 
 The two additional research scenes are household councils and graded roads. A 234-year pacing audit still reaches industrial and electrical discoveries in the opening 300-year block; these need a simulation pacing correction and their own era-appropriate visual pass. The first 300 years are not yet an all-paper research catalogue.
 
 Native generated originals are retained without raster editing. Runtime AtlasTexture regions use contained framing. Family atlases use mipmaps and a 1536 import cap; the shared source cache remains bounded at eight textures with lazy loading.
+
+The new research cells share twelve 3×3 texture sheets. `assets/ui/research/paper/first300-atlas-provenance.json` records the exact technology-to-cell order and source image IDs; `first300-existing-subjects.json` lists reviewed single-image scenes. Research binds these only before year 300. The broader technology catalogue includes industrial and later discoveries, which are deliberately absent from this early-art binding list; catalogue availability dates are not used as historical art classifications.
 
 Exact prompts and native source IDs are in `prompts.json` and the named subsequent prompt JSON files. Ochrestep retains both its original and targeted cast-correction prompt. The rejected original is not used. Civic practice imagery responds to lived values independently of ancestry.
 

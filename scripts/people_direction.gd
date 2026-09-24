@@ -173,8 +173,8 @@ func _recommendation(role:String,known:Array)->Dictionary:
 	for record in known:
 		if bool(record.get("at_war",false)) and war=="": war=String(record.name)
 		if bool(record.get("trade",false)) and trading=="": trading=String(record.name)
-	var focus:=String({"Steward":"gathering","Quartermaster":"makers","Marshal":"military","Scholar":"inquiry","Envoy":"horizons"}.get(role,"gathering"))
-	var why:=String({"Steward":"A shared civic life helps our settlements work together.","Quartermaster":"Durable tools and infrastructure make our existing labor more useful.","Marshal":"Reliable military organization and supply give us more options without committing us to war.","Scholar":"Sustained inquiry builds our capacity to test claims rather than rely on hearsay.","Envoy":"Returned journeys and direct contact can give future decisions a firmer basis."}.get(role,"Our institutions need a durable common purpose."))
+	var focus:=String({"Steward":"gathering","Quartermaster":"makers","Marshal":"military","Scholar":"inquiry","Envoy":"horizons","ChiefScout":"horizons"}.get(role,"gathering"))
+	var why:=String({"Steward":"A shared civic life helps our settlements work together.","Quartermaster":"Durable tools and infrastructure make our existing labor more useful.","Marshal":"Reliable military organization and supply give us more options without committing us to war.","Scholar":"Sustained inquiry builds our capacity to test claims rather than rely on hearsay.","Envoy":"Returned journeys and direct contact can give future decisions a firmer basis.","ChiefScout":"What my scouts carry home is only as good as how far they can go; I would push our horizons outward."}.get(role,"Our institutions need a durable common purpose."))
 	if role in ["Steward","Quartermaster"] and float(WorldSimulation.state.simulation_metrics.get("food_days",30.0))<15.0:
 		focus="sustenance"; why="Our reported food reserve is low; I would put dependable food systems ahead of other ambitions."
 	elif role=="Steward" and WorldSimulation.state.population_health<0.65:

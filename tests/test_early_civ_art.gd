@@ -133,13 +133,39 @@ func test_early_research_keeps_subject_identity_visibility_and_later_mapping()->
 	assert_str(research.subject_art_key({"id":"oral_epics"})).is_equal(String(research.manifest().oral_epics.path))
 	GameState.elapsed_days=saved
 
+func test_first300_research_cards_are_distinct_and_era_scoped()->void:
+	var research=preload("res://scripts/hud/research_visuals.gd")
+	var saved:=GameState.elapsed_days;GameState.elapsed_days=71*365
+	var seen:Dictionary={}
+	var bindings:Dictionary=research.first300_manifest()
+	assert_bool(bindings.size()>=36).is_true()
+	for id:String in bindings:
+		var path:=research.subject_art_key({"id":id,"exposed":true})
+		assert_str(path).is_equal(String(bindings[id]))
+		assert_bool(ResourceLoader.exists(path)).is_true()
+		var texture:=research.for_discovery({"id":id,"exposed":true})
+		assert_object(texture).is_not_null()
+		var cell_key:=path
+		if texture is AtlasTexture:
+			var card:=texture as AtlasTexture
+			assert_bool(card.region.position.x>=0 and card.region.position.y>=0).is_true()
+			assert_bool(card.region.end.x<=card.atlas.get_width() and card.region.end.y<=card.atlas.get_height()).is_true()
+			cell_key=str(card.atlas.resource_path)+str(card.region)
+		assert_bool(seen.has(cell_key)).is_false();seen[cell_key]=true
+	for modern_id in ["teleprinter_mechanisms","mechanical_washing_machines","rolling_element_bearings","jet_propulsion"]:
+		assert_bool(bindings.has(modern_id)).is_false()
+	GameState.elapsed_days=300*365
+	assert_bool(research.subject_art_key({"id":"grain_malting"}).ends_with(".tres")).is_false()
+	GameState.elapsed_days=saved
+
 func test_wonder_plates_match_catalogue_without_changing_it()->void:
 	var art=preload("res://scripts/hud/undertaking_art.gd")
 	var catalog=preload("res://scripts/undertaking_catalog.gd")
 	var saved:=GameState.elapsed_days;GameState.elapsed_days=71*365
 	var regions:Dictionary={}
-	assert_int(art.IDS.size()).is_equal(catalog.all().size())
-	for definition:Dictionary in catalog.all():
+	# Plates cover the founding-era works; later Great Works have none yet.
+	for id:String in art.IDS:assert_dict(catalog.get_definition(id)).is_not_empty()
+	for definition:Dictionary in catalog.all().filter(func(d):return d.id in art.IDS):
 		var plate:=art.texture(String(definition.id)) as AtlasTexture
 		assert_object(plate).is_not_null()
 		assert_bool(Rect2(Vector2.ZERO,plate.atlas.get_size()).grow(.1).encloses(plate.region)).is_true()

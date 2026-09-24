@@ -124,15 +124,10 @@ static func _city_steps(build:Callable,secondary_timings:Dictionary,timings:Dict
 		))
 	return result
 
+## The expansion caravan's leader marches, camps and founds (caravan_system.gd).
 static func advance_convoy()->Dictionary:
-	var convoy:=WorldSimulation.state.settlement_convoy
-	if not bool(convoy.get("active",false)):return {}
-	var origin:Vector2=convoy.origin
-	var destination:Vector2=convoy.destination
-	var progress:=clampf((WorldSimulation.state.elapsed_days-float(convoy.depart_day))/maxf(.5,float(convoy.duration_days)),0,1)
-	WorldSimulation.settlements.update_settlement_convoy(origin.lerp(destination,progress),progress)
-	if progress<1:return {}
-	return WorldSimulation.settlements.complete_settlement_convoy(destination)
+	if not bool(WorldSimulation.state.settlement_convoy.get("active",false)):return {}
+	return preload("res://scripts/caravan_system.gd").advance(float(WorldSimulation.span))
 
 static func record_timing(timings:Dictionary,phase:String,start:int)->int:
 	if timings.is_empty():return 0

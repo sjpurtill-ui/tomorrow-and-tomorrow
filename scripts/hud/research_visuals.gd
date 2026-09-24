@@ -4,6 +4,7 @@ const NAMES:={"demography":"People & homes","nutrition":"Food & farming","health
 const COLORS:={"demography":Color("cf9c78"),"nutrition":Color("adbb77"),"health":Color("92c1ab"),"labor":Color("d5b57d"),"knowledge":Color("9db9d7"),"production":Color("d6a36d"),"infrastructure":Color("90bccc"),"logistics":Color("b7af83"),"ecology":Color("84b895"),"institutions":Color("baa2cd"),"security":Color("d28c7c"),"culture":Color("c29cb0")}
 const Painting=preload("res://scripts/hud/subject_painting.gd")
 const ART_MANIFEST="res://assets/ui/research/subject-art-manifest.json"
+const FIRST300_CARDS="res://assets/ui/research/paper/first300-card-bindings.json"
 const CACHE_LIMIT:=64
 const EARLY_SUBJECTS:={
 	"hearth_heat_retention":Vector2(.50,.73),"ceramic_pipe_fit_gauges":Vector2(.50,.70),
@@ -45,10 +46,14 @@ const EARLY_SUBJECTS:={
 	"pack_animals":Vector2(.50,.70),"latrine_siting":Vector2(.50,.73)}
 const EARLY_SUBJECT_FILES:={"hide_tanning":"hide-tanning-v2"}
 static var assignments:Dictionary={}
+static var first300_cards:Dictionary={}
 static var textures:Dictionary={}
 static func manifest()->Dictionary:
 	if assignments.is_empty():assignments=JSON.parse_string(FileAccess.get_file_as_string(ART_MANIFEST))
 	return assignments
+static func first300_manifest()->Dictionary:
+	if first300_cards.is_empty():first300_cards=JSON.parse_string(FileAccess.get_file_as_string(FIRST300_CARDS))
+	return first300_cards
 static func art(domain:String)->Texture2D:
 	# Field art is used only for a field overview, never as a discovery fallback.
 	if preload("res://scripts/hud/early_civ_art.gd").active():
@@ -70,10 +75,12 @@ static func texture_at(path:String)->Texture2D:
 static func subject_art_key(item:Dictionary)->String:
 	if not bool(item.get("exposed",true)):return ""
 	var id:=String(item.get("id",""))
+	if preload("res://scripts/hud/early_civ_art.gd").active() and first300_manifest().has(id):return String(first300_manifest()[id])
 	if preload("res://scripts/hud/early_civ_art.gd").active() and EARLY_SUBJECTS.has(id):return "res://assets/ui/research/paper/%s.png" % EARLY_SUBJECT_FILES.get(id,id)
 	return String(manifest().get(String(item.get("id","")),{}).get("path",""))
 static func focus_for(item:Dictionary)->Vector2:
 	var id:=String(item.get("id",""))
+	if preload("res://scripts/hud/early_civ_art.gd").active() and first300_manifest().has(id):return Vector2(.5,.5) if String(first300_manifest()[id]).ends_with(".tres") else Vector2(.5,.72)
 	if preload("res://scripts/hud/early_civ_art.gd").active() and EARLY_SUBJECTS.has(id):return EARLY_SUBJECTS[id]
 	var point:Array=manifest().get(String(item.get("id","")),{}).get("focus",[.5,.5])
 	return Vector2(float(point[0]),float(point[1]))

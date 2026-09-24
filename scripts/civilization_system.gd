@@ -31,10 +31,6 @@ const REGION_STRATEGIC_WEIGHTS:=[0.08,0.12,0.15,0.17,0.24]
 const WAR_GOALS:=["none","limited","break_power","liberation","defend"]
 const WAR_GOAL_LABELS:={"none":"NO OBJECTIVE","limited":"LIMITED WAR","break_power":"BREAK THEIR POWER","liberation":"LIBERATE A REGION","defend":"DEFEND THE REALM"}
 const SCORE_DOMAINS:=["population","knowledge","production","logistics","military","resilience","territory"]
-const VICTORY_FOOD_DAYS:=45.0
-const VICTORY_HEALTH:=0.50
-const VICTORY_COHESION:=0.45
-const VICTORY_INSTITUTIONS:=0.35
 const SCOUT_DURATIONS:=[30,90,180,365]
 const REVEAL_HISTORY_LIMIT:=1024
 const SCOUT_REPORT_LIMIT:=256
@@ -82,11 +78,9 @@ var last_world_seed:=-2147483648
 var last_processed_day:=0
 var last_turn_day:=0
 var turn_index:=0
-var dominance_turns:=0
+# There is no victory or defeat in this game. Comparative standing is
+# intelligence about known peoples; collapse_turns only records distress.
 var collapse_turns:=0
-var competition_outcome:="ongoing"
-var competition_winner_id:=""
-var contender_dominance_turns:Dictionary={}
 var player_territory_balance:=0.0
 var scout_missions:Array[Dictionary]=[]
 const Exchange=preload("res://scripts/society_exchange.gd")
@@ -155,11 +149,7 @@ func reset_for_new_world()->void:
 	last_processed_day=int(floor(WorldSimulation.state.elapsed_days))
 	last_turn_day=(last_processed_day/STRATEGIC_TURN_DAYS)*STRATEGIC_TURN_DAYS
 	turn_index=0
-	dominance_turns=0
 	collapse_turns=0
-	competition_outcome="ongoing"
-	competition_winner_id=""
-	contender_dominance_turns={"player":0}
 	player_territory_balance=0.0
 	scout_missions.clear()
 	scouting_staff.reset()
@@ -243,7 +233,6 @@ func reset_for_new_world()->void:
 		civ=_apply_rival_founding_focus_start(civ)
 		civ["strategic_regions"]=_create_strategic_regions(civ_id,name,population,territory,rng,identity.cities)
 		civilizations.append(civ)
-		contender_dominance_turns[civ_id]=0
 	_initialize_relations(seed_value)
 	_initialize_foreign_formations(seed_value)
 	_rebuild_competition()
@@ -1652,7 +1641,8 @@ func _process_diplomatic_mission(day:int)->void:
 		civ=civilizations[index]
 		relation=_relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
 		var diplomatic_report:=_diplomatic_return_report(civ,relation,diplomatic_mission,day)
-		for find:Dictionary in Exchange.returned(diplomatic_mission,day):
+		var envoy_finds:=Exchange.returned(diplomatic_mission,day)
+		for find:Dictionary in envoy_finds:
 			diplomatic_report.observations.append("Brought home: "+String(find.title)+". "+String(find.consequence))
 		relation["contact_intelligence"]=clampf(float(relation.get("contact_intelligence",0.0))+float(diplomatic_report.get("intelligence_gain",0.0)),0.0,0.95)
 		relation["last_observed_day"]=day
@@ -1672,6 +1662,7 @@ func _process_diplomatic_mission(day:int)->void:
 		WorldSimulation.state.simulation_events.push_front({"day":day,"title":"DIPLOMATS RETURN","description":message,"domain":"diplomacy","severity":"major"})
 		diplomatic_mission.clear()
 		_record_world_event("Diplomatic mission returns",message,"diplomacy",day,{"kind":"diplomatic_return","civ_id":civ_id,"outcome":outcome})
+		_chief_scout_report({"day":day,"civ_id":civ_id,"civ_name":String(civ.name),"purpose":purpose,"accepted":accepted,"outcome":outcome,"city_observations":diplomatic_report.get("city_observations",[]),"brought_home":envoy_finds},"envoys")
 	civ["player_relation"]=relation
 	civilizations[index]=civ
 
@@ -2633,9 +2624,20 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	last_scout_outcome={"mission_id":int(mission.get("mission_id",0)),"day":day,"status":"returned","personnel":int(report.personnel),"message":message}
 	_record_world_event("City reconnaissance returns" if String(mission.get("target_kind",""))=="observe_city" else "Recruitment party returns" if is_recruitment else "Scout party returns",message,"diplomacy",day)
 	scout_report_returned.emit(report.duplicate(true))
+	# The Chief Scout asks for an audience to tell the court what the party saw.
+	_chief_scout_report(report,"scouts")
 	if ScoutArchive.should_notify(report):
 		WorldSimulation.state.simulation_events.push_front({"day":day,"title":"CITY RECONNAISSANCE" if String(mission.get("target_kind",""))=="observe_city" else "RECRUITMENT PARTY RETURNS" if is_recruitment else "SCOUTS RETURN","description":message,"domain":"diplomacy","severity":"major"})
 	_erase_scout_mission(mission)
+
+
+func _chief_scout_report(event:Dictionary,source:String)->void:
+	# Loaded, not preloaded: the court debrief is optional and must never stop
+	# the world simulation from compiling or a party from coming home.
+	if not ResourceLoader.exists("res://scripts/chief_scout.gd"): return
+	var script:=load("res://scripts/chief_scout.gd") as Script
+	if script==null or not script.can_instantiate(): return
+	script.call("report_returned",event,source)
 
 
 func _compose_scout_journal(mission:Dictionary,route:Array)->Array[String]:
@@ -4576,6 +4578,9 @@ func player_effects()->Dictionary:
 	return {"active_trade_partners":active_trade,"trade_volume":trade_volume,"market_access_bonus":clampf(float(active_trade)*0.055+minf(0.08,trade_volume/maxf(1.0,WorldSimulation.state.population_exact)*0.08)+integrated_market_bonus,0.0,0.34),"knowledge_exchange":clampf(float(active_trade)*0.012,0.0,0.10),"treaty_count":treaty_count,"war_count":war_count,"war_exhaustion":war_exhaustion,"hostile_pressure":clampf(hostile_pressure/maxf(1.0,float(civilizations.size()))+occupation_burden*0.22+war_exhaustion*0.16,0.0,1.0),"security_support":clampf(float(treaty_count)*0.012,0.0,0.08),"occupied_regions":occupied_regions,"occupied_population":occupied_population,"occupation_burden":occupation_burden,"occupation_relief_demand":occupation_relief_demand,"occupation_food_transfer":occupation_food_transfer,"occupied_production_bonus":occupied_production_bonus,"scout_personnel":scout_personnel,"scout_labor_absence":scout_labor_absence,"population_commitments":commitments,"population_absent":int(commitments.total_absent),"mobilization_labor_displacement":mobilization_excess,"labor_unavailable":labor_unavailable,"labor_absence":clampf(float(labor_unavailable)/maxf(1.0,float(WorldSimulation.state.able_population())),0.0,1.0)}
 
 
+const STANDING_NOTE:="Comparative standing is intelligence about known peoples, not a race. There is no victory and no defeat: strength, setbacks and recoveries all become part of a history that continues."
+
+
 func competition_snapshot()->Dictionary:
 	initialize()
 	var contenders:Array[Dictionary]=[]
@@ -4597,20 +4602,14 @@ func competition_snapshot()->Dictionary:
 		var profile:Dictionary=contenders[index]
 		var domains_led:=_domains_led_by(String(profile.id),domains)
 		var margin:=_lead_margin_for(String(profile.id),contenders)
-		var requirements:=_victory_requirements(profile,int(profile.rank),domains_led,margin)
 		profile["domains_led"]=domains_led
 		profile["lead_margin"]=margin
-		profile["victory_requirements"]=requirements
-		profile["dominance_turns"]=int(contender_dominance_turns.get(String(profile.id),0))
 		contenders[index]=profile
 		if String(profile.id)=="player": player=profile
 	leader=contenders[0] if not contenders.is_empty() else player
 	var player_domains:=int(player.get("domains_led",0))
 	var lead_margin:=float(player.get("lead_margin",0.0))
-	var basics:Dictionary=(player.get("victory_requirements",{}) as Dictionary).get("sustainability",{})
-	var basics_fraction:=float(basics.get("met_count",0))/maxf(1.0,float(basics.get("total_count",4)))
-	var progress:=clampf(float(player_domains)/4.0*0.48+(1.0/float(player_rank))*0.19+clampf((lead_margin-0.75)/0.35,0.0,1.0)*0.13+basics_fraction*0.20,0.0,1.0)
-	return {"day":int(WorldSimulation.state.elapsed_days),"player_rank":player_rank,"contender_count":contenders.size(),"leader":leader,"leaders":contenders,"domain_leaders":domains,"player_domains_led":player_domains,"lead_margin":lead_margin,"victory_progress":progress,"dominance_turns":dominance_turns,"collapse_turns":collapse_turns,"outcome":competition_outcome,"winner_id":competition_winner_id,"victory_rule":"Comparative leadership records a period of influence, not the end of history. Review the society’s long legacy after 2,500 years; the wider world continues.","defeat_rule":"Losing a war or comparative standing is a setback. Recovery remains possible while a viable community survives."}
+	return {"day":int(WorldSimulation.state.elapsed_days),"player_rank":player_rank,"contender_count":contenders.size(),"leader":leader,"leaders":contenders,"domain_leaders":domains,"player_domains_led":player_domains,"lead_margin":lead_margin,"collapse_turns":collapse_turns,"standing_note":STANDING_NOTE}
 
 
 func strategic_knowledge_snapshot()->Dictionary:
@@ -4636,11 +4635,11 @@ func strategic_knowledge_snapshot()->Dictionary:
 		"THE BALANCE OF POWER CAN BE ESTIMATED"
 	][stage])
 	var summary:=String([
-		"Your people know immediate conditions, but possess no general theory of civilizational power. No domains, score, rank, or global victory rule are known.",
+		"Your people know immediate conditions, but possess no general theory of civilizational power. No domains, scores, or ranks are known.",
 		"Tallies preserve quantities, but they do not yet establish which capacities define power or how different societies should be compared.",
 		"Shared measures reveal several recurring capacities. They are observations so far—not a complete list of domains and not a global ranking.",
-		"Census records and repeated foreign contact support a seven-part model of civilizational power. Exact scores and victory thresholds remain unproven.",
-		"Statistical comparison and broad contact now support estimated scores, known-world ranks, and the formal long-term victory conditions."
+		"Census records and repeated foreign contact support a seven-part model of civilizational power. Exact scores and ranks remain unproven.",
+		"Statistical comparison and broad contact now support estimated scores and known-world standing. These are intelligence about other peoples, not a contest to be won."
 	][stage])
 	var next_step:=String([
 		"Repeated material tallies may make quantities comparable over time.",
@@ -4649,7 +4648,7 @@ func strategic_knowledge_snapshot()->Dictionary:
 		"Broader contact and statistical inference may turn the framework into a defensible comparison.",
 		"No further scoring knowledge is currently hidden; unknown civilizations can still change every estimate."
 	][stage])
-	return {"stage":stage,"title":stage_title,"summary":summary,"next_step":next_step,"known_domains":known_domains,"framework_known":stage>=3,"total_domains":SCORE_DOMAINS.size() if stage>=3 else -1,"exact_scoring_known":stage>=4,"victory_structure_known":stage>=3,"victory_thresholds_known":stage>=4,"contacted_count":contacted_count,"adoption":adoption}
+	return {"stage":stage,"title":stage_title,"summary":summary,"next_step":next_step,"known_domains":known_domains,"framework_known":stage>=3,"total_domains":SCORE_DOMAINS.size() if stage>=3 else -1,"exact_scoring_known":stage>=4,"contacted_count":contacted_count,"adoption":adoption}
 
 
 func known_competition_snapshot()->Dictionary:
@@ -4659,7 +4658,7 @@ func known_competition_snapshot()->Dictionary:
 	for contender:Dictionary in full.leaders:
 		if String(contender.id)=="player":
 			var own:=contender.duplicate(true)
-			for key in ["rank","known_rank","domains_led","lead_margin","victory_requirements","dominance_turns"]: own.erase(key)
+			for key in ["rank","known_rank","domains_led","lead_margin"]: own.erase(key)
 			if not bool(strategic_knowledge.exact_scoring_known):
 				own.erase("score"); own.erase("score_breakdown")
 			visible.append(own)
@@ -4671,13 +4670,13 @@ func known_competition_snapshot()->Dictionary:
 	var public_domains:Dictionary={}
 	if bool(strategic_knowledge.framework_known):
 		for domain in strategic_knowledge.known_domains: public_domains[String(domain)]=""
-	return {"day":int(full.day),"player_rank":-1,"contender_count":visible.size(),"contacted_count":maxi(0,visible.size()-1),"leader":{},"leaders":visible,"domain_leaders":public_domains,"player_domains_led":-1,"victory_progress":-1.0,"dominance_turns":-1,"collapse_turns":collapse_turns,"outcome":competition_outcome,"winner_id":competition_winner_id if competition_outcome!="ongoing" else "","victory_rule":String(full.victory_rule) if bool(strategic_knowledge.victory_thresholds_known) else "No formal global victory condition has been established by your civilization.","defeat_rule":String(full.defeat_rule) if bool(strategic_knowledge.victory_thresholds_known) else "Distant paths to supremacy or collapse remain unknown.","global_rank_hidden":true,"strategic_knowledge":strategic_knowledge,"exploration":exploration_status()}
+	return {"day":int(full.day),"player_rank":-1,"contender_count":visible.size(),"contacted_count":maxi(0,visible.size()-1),"leader":{},"leaders":visible,"domain_leaders":public_domains,"player_domains_led":-1,"collapse_turns":collapse_turns,"standing_note":STANDING_NOTE,"global_rank_hidden":true,"strategic_knowledge":strategic_knowledge,"exploration":exploration_status()}
 
 
 func _redact_known_foreign_profile(profile:Dictionary)->Dictionary:
 	var visible:=profile.duplicate(true)
 	var cities:Array[Dictionary]=city_intelligence.known_cities("player",String(profile.id))
-	for key in ["population","controlled_population","occupied_population","foreign_controlled_population","cohorts","births_last_turn","deaths_last_turn","population_estimate_low","population_estimate_high","military_population","military_estimate_low","military_estimate_high","score","score_breakdown","rank","known_rank","domains_led","lead_margin","victory_requirements","dominance_turns","societal_identity","research_profile","progression_tiers","wars","trade_total","war_opponents"]: visible.erase(key)
+	for key in ["population","controlled_population","occupied_population","foreign_controlled_population","cohorts","births_last_turn","deaths_last_turn","population_estimate_low","population_estimate_high","military_population","military_estimate_low","military_estimate_high","score","score_breakdown","rank","known_rank","domains_led","lead_margin","societal_identity","research_profile","progression_tiers","wars","trade_total","war_opponents"]: visible.erase(key)
 	for key in ["health","cohesion","knowledge","production","logistics","institutions","ecology","military_readiness","command_readiness","food_days","territory","home_control","relative_military_power","military_replacement_coverage","world_reach"]: visible[key]=-1.0
 	for key in ["military_era_tier","military_production_lines","training_cycles","home_regions_controlled","home_regions_total","diplomatic_partners","diplomatic_rivals"]: visible[key]=-1
 	visible["training_focus"]="unknown"; visible["military_era"]="unknown"; visible["strategic_status"]="PARTIALLY OBSERVED"
@@ -4708,22 +4707,17 @@ func _rebuild_competition(advance_outcome:bool=false,evaluation_day:int=-1)->voi
 		if score_index>=0:
 			civilizations[score_index]["score"]=float(contender.score)
 			civilizations[score_index]["rank"]=int(contender.rank)
-	if advance_outcome and competition_outcome=="ongoing":
+	if advance_outcome:
 		var outcome_day:=evaluation_day if evaluation_day>=0 else int(WorldSimulation.state.elapsed_days)
-		for contender_variant in snapshot_data.leaders:
-			var contender:Dictionary=contender_variant
-			var requirements:Dictionary=contender.get("victory_requirements",{})
-			var qualifying:=bool(requirements.get("currently_qualifies",false))
-			var contender_id:=String(contender.id)
-			contender_dominance_turns[contender_id]=int(contender_dominance_turns.get(contender_id,0))+1 if qualifying else 0
-		dominance_turns=int(contender_dominance_turns.get("player",0))
+		# Comparative strength is a chronicle observation only; nothing is won.
+		var strong:=int(snapshot_data.player_rank)==1 and int(snapshot_data.player_domains_led)>=4 and float(snapshot_data.lead_margin)>=1.10
 		var effects:=player_effects()
 		var collapsing:=WorldSimulation.state.population_health<0.12 and WorldSimulation.state.food_security<0.12 and float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.62))<0.12 and float(effects.hostile_pressure)>0.35
 		collapse_turns=collapse_turns+1 if collapsing and not WorldSimulation.military.recovery.has_active_occupation() and WorldSimulation.military.recovery.data.remnant.is_empty() else 0
-		# Dominance and distress are historical episodes, not terminal global races.
-		chronicle.observe(outcome_day,_chronicle_facts(collapsing))
+		# Strength and distress are historical episodes; the game has no end state.
+		chronicle.observe(outcome_day,_chronicle_facts(collapsing,strong))
 
-func _chronicle_facts(crisis:bool=false)->Dictionary:
+func _chronicle_facts(crisis:bool=false,strong:bool=false)->Dictionary:
 	var contacts:=0;var trading:=false
 	for civ:Dictionary in civilizations:
 		if int(civ.player_relation.get("contact_level",0))>=2:contacts+=1
@@ -4731,7 +4725,7 @@ func _chronicle_facts(crisis:bool=false)->Dictionary:
 	var discoveries:=0
 	for value in WorldSimulation.state.discovery_adoption.values():
 		if float(value)>=.5:discoveries+=1
-	return {"population":int(WorldSimulation.state.population_exact),"contacts":contacts,"discoveries":discoveries,"crisis":crisis,"healthy":WorldSimulation.state.population_health>=.65 and WorldSimulation.state.food_security>=.7,"dominant":dominance_turns>=12,"settlement":not WorldSimulation.state.settlement_completed.is_empty(),"exchange":trading,"learning":discoveries>=12,"institutions":float(WorldSimulation.state.society_capacities.get("institutions",0))>=.6,"communities":WorldSimulation.state.settlement_nuclei.size()>1}
+	return {"population":int(WorldSimulation.state.population_exact),"contacts":contacts,"discoveries":discoveries,"crisis":crisis,"healthy":WorldSimulation.state.population_health>=.65 and WorldSimulation.state.food_security>=.7,"dominant":strong,"settlement":not WorldSimulation.state.settlement_completed.is_empty(),"exchange":trading,"learning":discoveries>=12,"institutions":float(WorldSimulation.state.society_capacities.get("institutions",0))>=.6,"communities":WorldSimulation.state.settlement_nuclei.size()>1}
 
 
 
@@ -4848,23 +4842,6 @@ func _lead_margin_for(contender_id:String,contenders:Array[Dictionary])->float:
 		if String(contender.id)==contender_id: own_score=float(contender.score)
 		else: strongest_other=maxf(strongest_other,float(contender.score))
 	return own_score/maxf(0.001,strongest_other)
-
-
-func _victory_requirements(profile:Dictionary,rank:int,domains_led:int,lead_margin:float)->Dictionary:
-	var checks:Dictionary={
-		"food":{"label":"Food reserve","value":float(profile.get("food_days",0.0)),"required":VICTORY_FOOD_DAYS,"unit":"days"},
-		"health":{"label":"Health","value":float(profile.get("health",0.0)),"required":VICTORY_HEALTH,"unit":"ratio"},
-		"cohesion":{"label":"Cohesion","value":float(profile.get("cohesion",0.0)),"required":VICTORY_COHESION,"unit":"ratio"},
-		"institutions":{"label":"Institutions","value":float(profile.get("institutions",0.0)),"required":VICTORY_INSTITUTIONS,"unit":"ratio"}
-	}
-	var met:=0
-	for key in checks:
-		var check:Dictionary=checks[key]
-		check["met"]=float(check.value)>=float(check.required)
-		if bool(check.met): met+=1
-		checks[key]=check
-	var sustainable:=met==checks.size()
-	return {"sustainability":{"checks":checks,"met_count":met,"total_count":checks.size(),"met":sustainable},"rank":{"value":rank,"required":1,"met":rank==1},"domains":{"value":domains_led,"required":4,"met":domains_led>=4},"lead_margin":{"value":lead_margin,"required":1.10,"met":lead_margin>=1.10},"currently_qualifies":sustainable and rank==1 and domains_led>=4 and lead_margin>=1.10}
 
 
 func _score_for_civilization(civ:Dictionary)->float:
@@ -5061,7 +5038,7 @@ func export_state()->Dictionary:
 		for point_key in ["point_a","point_b"]:
 			var point:Variant=exported_formations[index].get(point_key,Vector2.ZERO)
 			if point is Vector2: exported_formations[index][point_key]={"x":point.x,"y":point.y}
-	return {"version":SAVE_VERSION,"neighborhood_generated":neighborhood_generated,"chronicle":chronicle.data.duplicate(true),"world_seed":last_world_seed,"last_processed_day":last_processed_day,"last_turn_day":last_turn_day,"turn_index":turn_index,"dominance_turns":dominance_turns,"contender_dominance_turns":contender_dominance_turns.duplicate(true),"collapse_turns":collapse_turns,"competition_outcome":competition_outcome,"competition_winner_id":competition_winner_id,"player_territory_balance":player_territory_balance,"scouting_staff":scouting_staff.data.duplicate(true),"scout_missions":scout_missions.duplicate(true),"next_scout_mission_id":next_scout_mission_id,"nomad_sightings":nomad_sightings.duplicate(true),"next_nomad_sighting_id":next_nomad_sighting_id,"scout_reports":scout_reports.duplicate(true),"last_scout_outcome":last_scout_outcome.duplicate(true),"diplomatic_mission":diplomatic_mission.duplicate(true),"diplomatic_history":diplomatic_history.duplicate(true),"captured_player_scouts":captured_player_scouts.duplicate(true),"captured_foreign_scouts":captured_foreign_scouts.duplicate(true),"foreign_scout_reports_denied":foreign_scout_reports_denied,"revealed_areas":revealed_areas.duplicate(true),"fog_revision":fog_revision,"player_world_origin":{"x":player_world_origin.x,"y":player_world_origin.y},"city_intelligence":city_intelligence.records.duplicate(true),"rumor_leads":rumor_network.books.duplicate(true),"civilizations":exported_civilizations,"world_events":world_events.duplicate(true),"pending_player_incidents":pending_player_incidents.duplicate(true),"foreign_formations":exported_formations,"foreign_sightings":foreign_sightings.duplicate(true),"observation_revision":observation_revision,"last_observation_day":last_observation_day,"war_history":war_history.duplicate(true),"next_war_id":next_war_id}
+	return {"version":SAVE_VERSION,"neighborhood_generated":neighborhood_generated,"chronicle":chronicle.data.duplicate(true),"world_seed":last_world_seed,"last_processed_day":last_processed_day,"last_turn_day":last_turn_day,"turn_index":turn_index,"collapse_turns":collapse_turns,"player_territory_balance":player_territory_balance,"scouting_staff":scouting_staff.data.duplicate(true),"scout_missions":scout_missions.duplicate(true),"next_scout_mission_id":next_scout_mission_id,"nomad_sightings":nomad_sightings.duplicate(true),"next_nomad_sighting_id":next_nomad_sighting_id,"scout_reports":scout_reports.duplicate(true),"last_scout_outcome":last_scout_outcome.duplicate(true),"diplomatic_mission":diplomatic_mission.duplicate(true),"diplomatic_history":diplomatic_history.duplicate(true),"captured_player_scouts":captured_player_scouts.duplicate(true),"captured_foreign_scouts":captured_foreign_scouts.duplicate(true),"foreign_scout_reports_denied":foreign_scout_reports_denied,"revealed_areas":revealed_areas.duplicate(true),"fog_revision":fog_revision,"player_world_origin":{"x":player_world_origin.x,"y":player_world_origin.y},"city_intelligence":city_intelligence.records.duplicate(true),"rumor_leads":rumor_network.books.duplicate(true),"civilizations":exported_civilizations,"world_events":world_events.duplicate(true),"pending_player_incidents":pending_player_incidents.duplicate(true),"foreign_formations":exported_formations,"foreign_sightings":foreign_sightings.duplicate(true),"observation_revision":observation_revision,"last_observation_day":last_observation_day,"war_history":war_history.duplicate(true),"next_war_id":next_war_id}
 
 
 func import_state(payload:Dictionary)->Dictionary:
@@ -5149,10 +5126,6 @@ func _migrate_legacy_state(payload:Dictionary)->Dictionary:
 		civ["player_relation"]=_relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
 		incoming_civilizations[index]=civ
 	migrated["civilizations"]=incoming_civilizations
-	var streaks:Dictionary={"player":maxi(0,int(migrated.get("dominance_turns",0)))}
-	for civ in incoming_civilizations: streaks[String((civ as Dictionary).get("id",""))]=0
-	migrated["contender_dominance_turns"]=streaks
-	migrated["competition_winner_id"]="player" if String(migrated.get("competition_outcome","ongoing"))=="victory" else ""
 	migrated["scout_missions"]=[]
 	migrated["next_scout_mission_id"]=1
 	migrated["scout_reports"]=[]
@@ -5329,7 +5302,7 @@ func _migrate_v9_state(payload:Dictionary)->Dictionary:
 func _payload_shape_error(payload:Dictionary)->String:
 	for key in ["civilizations","world_events","pending_player_incidents","scout_reports","diplomatic_history","revealed_areas","foreign_formations","foreign_sightings","war_history"]:
 		if not payload.get(key,[]) is Array: return "Civilization save field '%s' must be an array." % key
-	for key in ["contender_dominance_turns","last_scout_outcome","diplomatic_mission","captured_player_scouts","captured_foreign_scouts","player_world_origin"]:
+	for key in ["last_scout_outcome","diplomatic_mission","captured_player_scouts","captured_foreign_scouts","player_world_origin"]:
 		if not payload.get(key,{}) is Dictionary: return "Civilization save field '%s' must be a dictionary." % key
 	for entry in (payload.get("civilizations",[]) as Array):
 		if not entry is Dictionary: return "Civilization save contains a non-dictionary polity record."
@@ -5372,15 +5345,13 @@ func _apply_state(payload:Dictionary)->void:
 	last_processed_day=maxi(0,int(payload.get("last_processed_day",0)))
 	last_turn_day=maxi(0,int(payload.get("last_turn_day",0)))
 	turn_index=maxi(0,int(payload.get("turn_index",0)))
-	dominance_turns=maxi(0,int(payload.get("dominance_turns",0)))
-	contender_dominance_turns=(payload.get("contender_dominance_turns",{"player":dominance_turns}) as Dictionary).duplicate(true)
 	collapse_turns=maxi(0,int(payload.get("collapse_turns",0)))
-	competition_outcome=String(payload.get("competition_outcome","ongoing"))
-	competition_winner_id=String(payload.get("competition_winner_id",""))
-	if not payload.has("chronicle"):
-		# Retain the old result as history rather than a premature terminal verdict.
-		if competition_outcome!="ongoing":chronicle._event(last_processed_day,"Earlier verdict","An earlier ruleset recorded "+competition_outcome+". The society can continue its history.")
-		competition_outcome="ongoing";competition_winner_id=""
+	# Older saves may carry dominance_turns, contender_dominance_turns,
+	# competition_outcome and competition_winner_id from a removed victory
+	# system. They are accepted and dropped; the game has no victory or defeat.
+	var legacy_outcome:=String(payload.get("competition_outcome","ongoing"))
+	if not payload.has("chronicle") and legacy_outcome in ["victory","defeat"]:
+		chronicle._event(last_processed_day,"Earlier verdict","An earlier ruleset recorded a %s. There is no victory or defeat; the history continues." % legacy_outcome)
 	player_territory_balance=float(payload.get("player_territory_balance",0.0))
 	scout_missions.assign((payload.get("scout_missions",[]) as Array).duplicate(true))
 	# Older saves carried one scout_mission dictionary; wrap it into the list.
@@ -5502,9 +5473,7 @@ func validate_state()->Array[String]:
 				if int(participant_losses.get(field,-1))<0: errors.append("War casualty totals cannot be negative.")
 	if civilizations.is_empty() or civilizations.size()>MAX_RIVAL_CIVILIZATIONS: errors.append("World must contain between 1 and %d bounded rival civilization records." % MAX_RIVAL_CIVILIZATIONS)
 	if last_processed_day<0 or last_turn_day<0 or last_turn_day>last_processed_day: errors.append("Civilization strategic clock is invalid.")
-	if turn_index<0 or dominance_turns<0 or collapse_turns<0: errors.append("Civilization strategic counters cannot be negative.")
-	if competition_outcome not in ["ongoing","victory","defeat"]: errors.append("Civilization competition outcome is invalid.")
-	if competition_winner_id!="" and competition_winner_id not in ["player","collapse"] and not competition_winner_id.begins_with("civ_"): errors.append("Civilization competition winner is invalid.")
+	if turn_index<0 or collapse_turns<0: errors.append("Civilization strategic counters cannot be negative.")
 	if not is_finite(player_territory_balance): errors.append("Player territorial balance must be finite.")
 	if not is_finite(player_world_origin.x) or not is_finite(player_world_origin.y): errors.append("Player world origin must be finite.")
 	var ids:Dictionary={}
@@ -5660,9 +5629,6 @@ func validate_state()->Array[String]:
 		if not is_finite(float(diplomatic_mission.get("gift_amount",0.0))) or float(diplomatic_mission.get("gift_amount",0.0))<0.0: errors.append("Diplomatic mission gift cannot be negative or non-finite.")
 		if diplomatic_purpose=="goodwill" and float(diplomatic_mission.get("gift_amount",0.0))<=0.0: errors.append("A goodwill mission must carry a physical gift.")
 		if not is_finite(float(diplomatic_mission.get("provisions",0.0))) or float(diplomatic_mission.get("provisions",0.0))<=0.0: errors.append("Diplomatic mission must carry positive travel provisions.")
-	if contender_dominance_turns.size()!=civilizations.size()+1: errors.append("Every contender must have exactly one victory-streak counter.")
-	for contender_id in contender_dominance_turns:
-		if int(contender_dominance_turns[contender_id])<0: errors.append("Contender victory streaks cannot be negative.")
 	var incident_sources:Dictionary={}
 	for incident in pending_player_incidents:
 		var source_id:=String(incident.get("source_civ_id",""))

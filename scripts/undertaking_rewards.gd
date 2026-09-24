@@ -15,13 +15,29 @@ const REWARDS={
 	"stone_crown":{"path":"Influence","reputation":.10},
 	"measures_house":{"path":"Mastery","craft":.10,"reputation":.03},
 }
+## The kind of achievement each conceived purpose represents (for history).
+const PURPOSE_PATH:={"honor_dead":"Memory","bind_tribes":"Influence","tame_flood":"Abundance","feed_people":"Abundance","give_thanks":"Abundance","watch_heavens":"Knowledge","remember_knowledge":"Knowledge","awe_rivals":"Influence","mark_triumph":"Influence","defy_gods":"Aspiration","master_craft":"Mastery","welcome_strangers":"Attraction"}
+## Lesser monuments and follies give no rewards; only standing works do.
+static func rewarding(r:Dictionary)->bool:
+	return r.status=="functioning" and not bool(r.get("lesser",false)) and String(r.get("outcome",""))!="collapse"
+## Practical rewards: a conceived work stores what its outcome earned; legacy
+## founding works use the fixed table.
+static func reward_table(r:Dictionary)->Dictionary:
+	if r.get("rewards") is Dictionary:return r.rewards
+	return REWARDS.get(String(r.id),{})
+static func path_of(r:Dictionary)->String:
+	if REWARDS.has(String(r.id)):return String(REWARDS[String(r.id)].get("path",""))
+	return String(PURPOSE_PATH.get(String(Catalog.get_definition(String(r.id)).get("purpose","")),""))
+static func _finished(r:Dictionary)->bool:
+	var d:=Catalog.get_definition(String(r.id))
+	return not bool(r.get("lesser",false)) and String(r.get("status","")) in ["functioning","ruined"] and float(r.get("progress",0))+.00001>=float(d.get("work",1))*float(r.get("work_scale",1.0))
 static func local_bonus(state:Node,key:String)->float:
 	var value:=0.0
 	for city:Dictionary in state.player_settlements:
 		if not (String(city.id)==String(state.resource_settlement_id) or (state.resource_settlement_id.is_empty() and bool(city.get("primary",false)))):continue
 		if String(city.get("occupied_by","")) not in ["","player"]:continue
 		for r:Dictionary in city.get("undertakings",[]):
-			if r.status=="functioning":value+=float(REWARDS.get(r.id,{}).get(key,0))*float(r.condition)
+			if rewarding(r):value+=float(reward_table(r).get(key,0))*float(r.condition)
 	return minf(.4,value) if key=="spoilage" else (minf(.20,value) if key in ["craft","research","attraction"] else value)
 
 static func share_accounts(state:Node,listener:String,day:int)->void:
@@ -30,7 +46,7 @@ static func share_accounts(state:Node,listener:String,day:int)->void:
 	for city:Dictionary in state.player_settlements:
 		if String(city.get("occupied_by","")) not in ["","player"]:continue
 		for r:Dictionary in city.get("undertakings",[]):
-			if r.status!="functioning" or int(r.operating_days)<365:continue
+			if not rewarding(r) or int(r.operating_days)<365:continue
 			if not r.has("heard_by"):r.heard_by={}
 			r.heard_by[listener]={"day":day,"condition":float(r.condition),"strain":int(r.strain)}
 
@@ -40,48 +56,46 @@ static func diplomatic_bonus(state:Node,listener:String,day:int)->float:
 		if String(city.get("occupied_by","")) not in ["","player"]:continue
 		for r:Dictionary in city.get("undertakings",[]):
 			var account:Dictionary=r.get("heard_by",{}).get(listener,{})
-			if account.is_empty():continue
+			if account.is_empty() or bool(r.get("lesser",false)) or String(r.get("outcome",""))=="collapse":continue
 			var freshness:=clampf(1.0-float(maxi(0,day-int(account.day)))/(365.0*30.0),0,1)
 			# Human cost complicates recognition without erasing accomplishment.
-			total+=float(REWARDS.get(r.id,{}).get("reputation",.015))*float(account.condition)*freshness*(.5 if int(account.strain)>=180 else 1.0)
+			total+=maxf(.015,float(reward_table(r).get("reputation",.015)))*float(account.condition)*freshness*(.5 if int(account.strain)>=180 else 1.0)
 	return minf(.20,total)
 
-static func legacy(state:Node)->Dictionary:
-	var sites:=0;var paths:Array=[];var contacts:Array=[];var award:Dictionary={};var costly:=0
+## A people's record of wonders — history, never a win condition. Counts every
+## work attempted (including earlier layers of a site), how many stood and how
+## many fell, those still standing, those that endured twenty years, the kinds
+## of purpose among the enduring ones, and how many foreign peoples know them.
+static func history(state:Node)->Dictionary:
+	var attempted:=0;var succeeded:=0;var follies:=0;var standing:=0;var enduring:=0;var costly:=0
+	var kinds:Array=[];var known_by:Array=[]
 	for city:Dictionary in state.player_settlements:
-		if bool(city.get("primary",false)):award=city.get("wonder_victory",{})
-		if String(city.get("occupied_by","")) not in ["","player"]:continue
 		for r:Dictionary in city.get("undertakings",[]):
-			if r.status!="functioning" or float(r.condition)<.6 or int(r.operating_days)<365*20:continue
-			sites+=1
-			if int(r.strain)>=180:costly+=1
-			var path:String=REWARDS.get(r.id,{}).get("path","")
-			if path not in paths:paths.append(path)
+			attempted+=1+r.get("layers",[]).size()
+			for layer in r.get("layers",[]):
+				if layer is Dictionary and String(layer.get("outcome","success")) in ["success","triumph"]:succeeded+=1
+				elif layer is Dictionary and String(layer.get("outcome",""))=="collapse":follies+=1
+			var outcome:=String(r.get("outcome",""))
+			if outcome=="collapse":follies+=1
+			elif _finished(r) and outcome in ["","success","triumph"]:succeeded+=1
+			if String(city.get("occupied_by","")) not in ["","player"] or not rewarding(r):continue
+			standing+=1
+			if int(r.operating_days)>=365*20 and float(r.condition)>=.6:
+				enduring+=1
+				if int(r.strain)>=180:costly+=1
+				var kind:=path_of(r)
+				if kind not in kinds:kinds.append(kind)
 			for contact:String in r.get("heard_by",{}):
 				var account:Dictionary=r.heard_by[contact]
-				if int(state.elapsed_days)-int(account.day)<=365*30 and contact not in contacts:contacts.append(contact)
-	return {"sites":sites,"paths":paths.size(),"contacts":contacts.size(),"ready":sites>=3 and paths.size()>=3 and contacts.size()>=2,"award":award,"costly":costly}
-
-static func record_victory(state:Node,day:int)->void:
-	var progress:=legacy(state)
-	if not progress.ready or not progress.award.is_empty():return
-	for city:Dictionary in state.player_settlements:
-		if bool(city.get("primary",false)):
-			city.wonder_victory={"day":day,"costly":int(progress.costly)}
-			state.settlement_network_revision+=1
-			return
-
-static func victory_block(state:Node)->Dictionary:
-	var p:=legacy(state)
-	if not p.award.is_empty():
-		return {"type":"text","heading":"VICTORY · ENDURING CIVILIZATION","text":"Earned in Year %d. Three kinds of achievement served your people for twenty years and became known abroad. Continue shaping what follows.%s" % [int(p.award.day)/365+1," Its history also records hardship imposed during construction." if int(p.award.costly)>0 else ""]}
-	return {"type":"rows","heading":"ENDURING CIVILIZATION · VICTORY PATH","items":[
-		{"name":"%d / 3 enduring landmarks" % p.sites,"detail":"Each: twenty years of maintained operation, condition at least 60%."},
-		{"name":"%d / 3 kinds of achievement" % p.paths,"detail":"Abundance, mastery, knowledge, influence or attraction."},
-		{"name":"%d / 2 foreign societies reached" % p.contacts,"detail":"Travelers must share accounts of these landmarks; accounts remain current for thirty years."}]}
+				if int(state.elapsed_days)-int(account.day)<=365*30 and contact not in known_by:known_by.append(contact)
+	return {"attempted":attempted,"succeeded":succeeded,"follies":follies,"standing":standing,"enduring":enduring,"kinds":kinds.size(),"known_by":known_by.size(),"costly":costly}
 
 static func description(id:String,condition:float=1.0)->String:
 	var d:Dictionary=REWARDS.get(id,{})
+	var definition:=Catalog.get_definition(id)
+	if bool(definition.get("concept",false)):
+		d=load("res://scripts/wonder_concept.gd").rewards_for(String(definition.purpose),String(definition.ambition),"success")
+		d["path"]=String(PURPOSE_PATH.get(String(definition.purpose),"Legacy"))
 	var parts:Array[String]=[]
 	if d.has("food_capacity"):parts.append("+%s rations of local storage" % str(roundi(float(d.food_capacity)*condition)))
 	if d.has("water_capacity"):parts.append("+%s water units of local storage" % str(roundi(float(d.water_capacity)*condition)))
@@ -90,9 +104,12 @@ static func description(id:String,condition:float=1.0)->String:
 	if d.has("research"):parts.append("+%.0f%% research effectiveness" % (float(d.research)*condition*100))
 	if d.has("attraction"):parts.append("+%.0f points household attraction; arrivals still require a journey" % (float(d.attraction)*condition*100))
 	if d.has("reputation"):parts.append("Stronger diplomatic reception once travelers share its reputation")
+	var special:String=load("res://scripts/undertaking_effects.gd").describe(id,condition)
+	if not special.is_empty() and not String(definition.get("effect","")).is_empty():parts.append(special.trim_suffix("."))
 	return String(d.get("path","Legacy"))+" · "+"; ".join(parts)+"."
 
 static func valid(city:Dictionary)->bool:
+	# Older saves may carry a retired victory award; tolerate it, never write it.
 	var award=city.get("wonder_victory",{})
 	if not award is Dictionary:return false
 	if not award.is_empty():
