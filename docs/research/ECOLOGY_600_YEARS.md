@@ -26,88 +26,88 @@
 | 12 (5–19) | Browse-line watching | 2 y | 12 min | browse_line_monitoring (era) | — |
 | 13 (6–20) | Burn-scar regrowth tracked | 2 y | 12 min | burn_scar_regrowth_tracking (era) | — |
 | 14 (7–21) | Cookfire smoke vented | 1.5 y | 9 min | cookfire_smoke_venting_habit (era) | — |
-| 18 (10–26) | Flowering and bird-return signs for seasonal moves | 2 y | 12 min | NEW | — |
-| 20 (11–29) | Controlled burning of undergrowth for forage and game | 3 y | 18 min | NEW | — |
-| 24 (14–34) | Fish-run and spawning season calendar | 3 y | 18 min | NEW | — |
-| 28 (17–39) | Firebreaks cleared around camps and fields | 3 y | 18 min | NEW | — |
-| 30 (18–42) | Indicator plants for good and poor ground | 3 y | 18 min | NEW | — |
-| 35 (21–49) | Breeding females and young spared in the hunt | 3 y | 18 min | NEW | — |
-| 40 (25–55) | Swidden cycle: clear, crop, leave to regrow | 4 y | 24 min | NEW | — |
-| 45 (29–61) | Pollarded trees cut for leaf fodder | 4 y | 24 min | NEW | — |
-| 50 (30–70) | Wild-hive honey taken without killing the colony | 3 y | 18 min | NEW | — |
-| 55 (35–75) | Drought signs: failing springs and early-drying pools | 3 y | 18 min | NEW | — |
-| 60 (40–80) | Transhumance: herds moved to summer pasture | 5 y | 30 min | NEW | — |
-| 65 (45–85) | Shellfish beds left to recover | 3 y | 18 min | NEW | — |
+| 18 (10–26) | Flowering and bird-return signs for seasonal moves | 2 y | 12 min | NEW · phenology_signs | — |
+| 20 (11–29) | Controlled burning of undergrowth for forage and game | 3 y | 18 min | NEW · controlled_undergrowth_burning | — |
+| 24 (14–34) | Fish-run and spawning season calendar | 3 y | 18 min | NEW · spawning_calendar | — |
+| 28 (17–39) | Firebreaks cleared around camps and fields | 3 y | 18 min | NEW · firebreaks | — |
+| 30 (18–42) | Indicator plants for good and poor ground | 3 y | 18 min | NEW · indicator_plants | — |
+| 35 (21–49) | Breeding females and young spared in the hunt | 3 y | 18 min | NEW · breeding_stock_sparing | — |
+| 40 (25–55) | Swidden cycle: clear, crop, leave to regrow | 4 y | 24 min | NEW · swidden_cycle | — |
+| 45 (29–61) | Pollarded trees cut for leaf fodder | 4 y | 24 min | NEW · leaf_fodder_pollarding | — |
+| 50 (30–70) | Wild-hive honey taken without killing the colony | 3 y | 18 min | NEW · hive_sparing_honey_harvest | — |
+| 55 (35–75) | Drought signs: failing springs and early-drying pools | 3 y | 18 min | NEW · drought_signs | — |
+| 60 (40–80) | Transhumance: herds moved to summer pasture | 5 y | 30 min | NEW · transhumance | — |
+| 65 (45–85) | Shellfish beds left to recover | 3 y | 18 min | NEW · shellfish_bed_recovery | — |
 | 75 (50–100) | Workshops placed downwind | 3 y | 18 min | downwind_workshop_placement (era) | — |
 | 78 (50–105) | Gullies on cleared slopes watched and avoided | 3 y | 18 min | slope_erosion_watch (era) | — |
 | 80 (55–105) | Spawning grounds avoided | 3 y | 18 min | spawning_ground_avoidance (era) | — |
-| 85 (55–115) | Frost pockets and sun slopes read | 3 y | 18 min | NEW | — |
-| 90 (60–120) | Locust and pest-swarm watch | 4 y | 24 min | NEW | — |
-| 100 (65–135) | Sacred groves and springs left uncut (shared: culture) | 4 y | 24 min | NEW | — |
+| 85 (55–115) | Frost pockets and sun slopes read | 3 y | 18 min | NEW · frost_pocket_reading | — |
+| 90 (60–120) | Locust and pest-swarm watch | 4 y | 24 min | NEW · pest_swarm_watch | — |
+| 100 (65–135) | Sacred groves and springs left uncut (shared: culture) | 4 y | 24 min | NEW · sacred_grove_protection | — |
 | 105 (70–140) | Terraces laid along the contour | 5 y | 30 min | contour_terrace_reading (era) | — |
 | 108 (75–145) | Seasonal hunting closures | 4 y | 24 min | seasonal_hunting_closures (era) | — |
 | 110 (75–145) | Only deadwood gathered for fuel | 3 y | 18 min | selective_deadwood_gathering (era) | — |
 | 112 (75–150) | Tannery waste channeled away | 4 y | 24 min | tannery_waste_channeling (era) | — |
 | 120 (80–160) | Seed scattered back after gathering | 3 y | 18 min | seed_scatter_after_gathering (era) | — |
-| 130 (90–170) | Reed beds cut in rotation | 4 y | 24 min | NEW | — |
-| 140 (100–180) | Green-stained rock as a sign of copper (shared: production) | 5 y | 30 min | NEW | — |
+| 130 (90–170) | Reed beds cut in rotation | 4 y | 24 min | NEW · reed_bed_rotation | — |
+| 140 (100–180) | Green-stained rock as a sign of copper (shared: production) | 5 y | 30 min | NEW · copper_outcrop_signs | — |
 | **150 (110–190)** | **Communal catch limits** | 5 y | 30 min | communal_catch_limits (era) | — |
 | 152 (110–190) | Refuse pits used in rotation | 3 y | 18 min | refuse_pit_rotation (era) | — |
 | 155 (115–195) | Windbreak hedgerows left standing | 4 y | 24 min | windbreak_hedgerow_siting (era) | — |
 | 158 (120–200) | Root stock left in the ground | 3 y | 18 min | root_stock_preservation (era) | — |
-| 170 (130–210) | Flood-silt ground chosen for fields | 5 y | 30 min | NEW | — |
-| 180 (140–220) | Wood-pasture: grazing under thinned trees | 5 y | 30 min | NEW | — |
+| 170 (130–210) | Flood-silt ground chosen for fields | 5 y | 30 min | NEW · flood_silt_fields | — |
+| 180 (140–220) | Wood-pasture: grazing under thinned trees | 5 y | 30 min | NEW · wood_pasture | — |
 | **195 (155–235)** | **Coppice cut for straight regrowth** | 8 y | 49 min | coppice_regrowth_cutting (era) | — |
 | 198 (160–240) | Dye-vat runoff kept from streams | 4 y | 24 min | dye_vat_runoff_control (era) | — |
 | 200 (160–240) | Saplings protected from browsing | 4 y | 24 min | sapling_protection_customs (era) | — |
 | 210 (170–250) | Trampled pasture marked for recovery | 4 y | 24 min | grazing_ground_recovery_marking (era) | — |
-| 220 (180–260) | Dung-cake fuel where wood grows scarce (shared: production) | 4 y | 24 min | NEW | — |
+| 220 (180–260) | Dung-cake fuel where wood grows scarce (shared: production) | 4 y | 24 min | NEW · dung_cake_fuel | — |
 | 225 (185–265) | Replanting after clearance | 6 y | 37 min | replanting_after_clearance (era) | — |
 | **228 (190–270)** | **Grazing rotation customs** | 6 y | 37 min | grazing_rotation_customs (era) | — |
 | 232 (190–270) | Timber stands held in reserve | 6 y | 37 min | timber_stand_reserves (era) | — |
 | 238 (200–280) | Kiln smoke vented away from homes | 4 y | 24 min | kiln_smoke_venting_customs (era) | — |
-| 250 (210–290) | Waterlogged ground recognized on over-watered plots | 5 y | 30 min | NEW | — |
-| 265 (225–305) | Tree belts along stream and canal banks | 6 y | 37 min | NEW | — |
-| 275 (235–315) | Fuelwood gathered in rotation around the settlement | 5 y | 30 min | NEW | — |
-| 280 (240–320) | Spring heads fenced from trampling herds | 4 y | 24 min | NEW | — |
-| 290 (250–330) | Named soil kinds: heavy, light, sandy, salty | 6 y | 37 min | NEW | — |
+| 250 (210–290) | Waterlogged ground recognized on over-watered plots | 5 y | 30 min | NEW · waterlogging_recognition | — |
+| 265 (225–305) | Tree belts along stream and canal banks | 6 y | 37 min | NEW · riparian_tree_belts | — |
+| 275 (235–315) | Fuelwood gathered in rotation around the settlement | 5 y | 30 min | NEW · fuelwood_rotation | — |
+| 280 (240–320) | Spring heads fenced from trampling herds | 4 y | 24 min | NEW · spring_head_fencing | — |
+| 290 (250–330) | Named soil kinds: heavy, light, sandy, salty | 6 y | 37 min | NEW · named_soil_kinds | — |
 
 ## Years 300–600 (≈ 3000–1500 BC)
 
 | Year (band) | Discovery | Research | Real time | Id | Today |
 |---|---|---|---|---|---|
-| **305 (265–345)** | **Salt crust recognized on irrigated fields** | 8 y | 49 min | NEW | — |
-| 312 (270–350) | Shifting riverbanks watched before siting fields | 5 y | 30 min | NEW | — |
-| 320 (280–360) | Salted fields leached with fresh water and rested | 10 y | 61 min | NEW | — |
-| 330 (290–370) | Wetland edges kept for fish, fowl and reeds | 5 y | 30 min | NEW | — |
-| 340 (300–380) | Stubble grazed after harvest, herds kept off before (shared: nutrition) | 5 y | 30 min | NEW | — |
-| 350 (310–390) | Spent clay and stone pits turned into ponds | 4 y | 24 min | NEW | — |
+| **305 (265–345)** | **Salt crust recognized on irrigated fields** | 8 y | 49 min | NEW · salinity_recognition | — |
+| 312 (270–350) | Shifting riverbanks watched before siting fields | 5 y | 30 min | NEW · riverbank_shift_watch | — |
+| 320 (280–360) | Salted fields leached with fresh water and rested | 10 y | 61 min | NEW · salt_leaching_fallow | — |
+| 330 (290–370) | Wetland edges kept for fish, fowl and reeds | 5 y | 30 min | NEW · wetland_margin_reserves | — |
+| 340 (300–380) | Stubble grazed after harvest, herds kept off before (shared: nutrition) | 5 y | 30 min | NEW · stubble_grazing | — |
+| 350 (310–390) | Spent clay and stone pits turned into ponds | 4 y | 24 min | NEW · pit_pond_reclamation | — |
 | 360 (320–400) | Recovery zones set aside | 6 y | 37 min | recovery_zone_designation (era) | — |
 | 362 (320–400) | Watershed boundaries marked | 6 y | 37 min | watershed_boundary_marking (era) | — |
 | **365 (325–405)** | **Resource-use quotas** | 8 y | 49 min | resource_use_quotas (era) | — |
 | 368 (330–410) | Workshop effluent kept separate | 5 y | 30 min | workshop_effluent_separation (era) | — |
-| 385 (345–425) | Distant forests known as reserves of long timber | 6 y | 37 min | NEW | — |
-| 395 (355–435) | Fish ponds stocked in canals and basins | 6 y | 37 min | NEW | — |
-| 415 (375–455) | Barley favored on saltier ground (shared: nutrition) | 6 y | 37 min | NEW | — |
-| 420 (380–460) | Hive keeping in clay-pipe hives (shared: nutrition) | 6 y | 37 min | NEW | — |
-| **430 (390–470)** | **Fields rested between water turns to lower the water table** | 10 y | 61 min | NEW | — |
-| 440 (400–480) | Silt clearance timed to low water, spoil kept off fields (shared: infrastructure) | 6 y | 37 min | NEW | — |
-| 450 (410–490) | Layered shade gardens under palms and fruit trees (shared: nutrition) | 8 y | 49 min | NEW | — |
-| 460 (420–500) | Herd counts matched to pasture by season | 6 y | 37 min | NEW | — |
-| 470 (430–510) | Blown sand and dune spread watched at the desert edge | 5 y | 30 min | NEW | — |
-| 480 (440–520) | Bare hills recognized as a cause of fast floods | 8 y | 49 min | NEW | — |
-| 490 (450–530) | Goat and sheep mix matched to browse and grass | 5 y | 30 min | NEW | — |
-| 500 (460–540) | Fishing-season closures sworn between villages | 6 y | 37 min | NEW | — |
-| 510 (470–550) | Weirs opened on set days for the fish run | 5 y | 30 min | NEW | — |
-| 515 (475–555) | Cats encouraged around stores and fields against vermin | 5 y | 30 min | NEW | — |
-| 520 (480–560) | Woodland boundaries shared between villages (shared: institutions) | 6 y | 37 min | NEW | — |
-| 530 (490–570) | Mine and smelting spoil kept from streams (shared: production) | 6 y | 37 min | NEW | — |
-| 540 (500–580) | Grass burning timed to spare young growth | 5 y | 30 min | NEW | — |
-| 550 (510–590) | Charcoal woods cut in long rotation for smelting | 8 y | 49 min | NEW | — |
-| **560 (520–600)** | **Written farmer's almanac of seasons and pests (shared: knowledge)** | 10 y | 61 min | NEW | — |
-| 575 (535–615) | Planted poplar and tamarisk groves for timber | 8 y | 49 min | NEW | — |
-| 590 (550–630) | Grazing rights sworn between herders and farmers | 6 y | 37 min | NEW | — |
-| 600 (560–640) | Protected woods for temple and palace building timber | 8 y | 49 min | NEW | — |
+| 385 (345–425) | Distant forests known as reserves of long timber | 6 y | 37 min | NEW · distant_timber_reserves | — |
+| 395 (355–435) | Fish ponds stocked in canals and basins | 6 y | 37 min | NEW · stocked_fish_ponds (dup) | — |
+| 415 (375–455) | Barley favored on saltier ground (shared: nutrition) | 6 y | 37 min | NEW · salt_tolerant_barley | — |
+| 420 (380–460) | Hive keeping in clay-pipe hives (shared: nutrition) | 6 y | 37 min | NEW · hive_beekeeping (dup) | — |
+| **430 (390–470)** | **Fields rested between water turns to lower the water table** | 10 y | 61 min | NEW · water_table_fallow | — |
+| 440 (400–480) | Silt clearance timed to low water, spoil kept off fields (shared: infrastructure) | 6 y | 37 min | NEW · timed_silt_clearance | — |
+| 450 (410–490) | Layered shade gardens under palms and fruit trees (shared: nutrition) | 8 y | 49 min | NEW · layered_shade_gardens | — |
+| 460 (420–500) | Herd counts matched to pasture by season | 6 y | 37 min | NEW · seasonal_herd_matching | — |
+| 470 (430–510) | Blown sand and dune spread watched at the desert edge | 5 y | 30 min | NEW · dune_spread_watch | — |
+| 480 (440–520) | Bare hills recognized as a cause of fast floods | 8 y | 49 min | NEW · deforestation_flood_link | — |
+| 490 (450–530) | Goat and sheep mix matched to browse and grass | 5 y | 30 min | NEW · mixed_flock_balance | — |
+| 500 (460–540) | Fishing-season closures sworn between villages | 6 y | 37 min | NEW · sworn_fishing_closures | — |
+| 510 (470–550) | Weirs opened on set days for the fish run | 5 y | 30 min | NEW · fish_run_weir_opening | — |
+| 515 (475–555) | Cats encouraged around stores and fields against vermin | 5 y | 30 min | NEW · vermin_control_cats | — |
+| 520 (480–560) | Woodland boundaries shared between villages (shared: institutions) | 6 y | 37 min | NEW · shared_woodland_boundaries | — |
+| 530 (490–570) | Mine and smelting spoil kept from streams (shared: production) | 6 y | 37 min | NEW · mine_spoil_containment | — |
+| 540 (500–580) | Grass burning timed to spare young growth | 5 y | 30 min | NEW · timed_grass_burning | — |
+| 550 (510–590) | Charcoal woods cut in long rotation for smelting | 8 y | 49 min | NEW · coppiced_charcoal_woods | — |
+| **560 (520–600)** | **Written farmer's almanac of seasons and pests (shared: knowledge)** | 10 y | 61 min | NEW · farmers_almanac | — |
+| 575 (535–615) | Planted poplar and tamarisk groves for timber | 8 y | 49 min | NEW · planted_timber_groves | — |
+| 590 (550–630) | Grazing rights sworn between herders and farmers | 6 y | 37 min | NEW · sworn_grazing_rights | — |
+| 600 (560–640) | Protected woods for temple and palace building timber | 8 y | 49 min | NEW · protected_temple_woods | — |
 
 ## Pacing
 

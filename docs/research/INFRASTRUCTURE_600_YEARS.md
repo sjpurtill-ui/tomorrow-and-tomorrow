@@ -23,100 +23,100 @@
 | 8 (2–12) | Site-clearing judgment | 1.5 y | 9 min | site_clearing_assessment (era) | — |
 | 10 (3–15) | Lashed and notched pole joints | 2 y | 12 min | joinery | 8 |
 | 12 (4–18) | Wells sited by seepage and plants | 3 y | 18 min | well_siting | 10 |
-| 14 (5–20) | Clay-lined storage pits (shared: nutrition) | 2 y | 12 min | NEW | — |
+| 14 (5–20) | Clay-lined storage pits (shared: nutrition) | 2 y | 12 min | NEW · clay_lined_storage_pits | — |
 | 15 (6–22) | High-water marks read from banks | 1.5 y | 9 min | flood_mark_reading (era) | — |
 | 18 (6–25) | Hand-formed mud lumps and adobe walls | 3 y | 18 min | adobe_wall_construction | ≈20 |
 | **20 (8–28)** | **Earth-fast post-and-beam longhouse** | 5 y | 30 min | framed_construction | 57 |
 | 24 (10–32) | Wattle-and-daub walls | 3 y | 18 min | wattle_and_daub_walls | ≈60 |
 | 26 (10–35) | Reed and straw thatch | 3 y | 18 min | thatched_roofing | ≈60 |
-| 28 (12–38) | Dry-stone walls for pens and terraces | 3 y | 18 min | NEW | — |
-| 32 (15–42) | Timber- and wattle-lined well shafts | 4 y | 24 min | NEW | — |
-| 36 (18–45) | House mounds raised above flood | 3 y | 18 min | NEW | — |
-| 40 (20–50) | Stone footings under earthen walls | 3 y | 18 min | NEW | — |
-| 44 (22–55) | Flat roofs of beams, reeds and packed clay | 3 y | 18 min | NEW | — |
-| **48 (25–65)** | **Mould-made mudbricks** | 6 y | 37 min | NEW | — |
-| 52 (28–70) | Lime-plastered floors and walls | 4 y | 24 min | NEW | — |
+| 28 (12–38) | Dry-stone walls for pens and terraces | 3 y | 18 min | NEW · dry_stone_walls | — |
+| 32 (15–42) | Timber- and wattle-lined well shafts | 4 y | 24 min | NEW · lined_well_shafts | — |
+| 36 (18–45) | House mounds raised above flood | 3 y | 18 min | NEW · flood_house_mounds | — |
+| 40 (20–50) | Stone footings under earthen walls | 3 y | 18 min | NEW · stone_wall_footings | — |
+| 44 (22–55) | Flat roofs of beams, reeds and packed clay | 3 y | 18 min | NEW · flat_clay_roofs | — |
+| **48 (25–65)** | **Mould-made mudbricks** | 6 y | 37 min | NEW · mould_made_mudbricks | — |
+| 52 (28–70) | Lime-plastered floors and walls | 4 y | 24 min | NEW · lime_plastered_floors | — |
 | 55 (30–75) | Wedges, levers and rollers for heavy stones | 3 y | 18 min | wedges_and_levers | 49 |
 | 58 (32–80) | Bitumen waterproofing for floors and sills | 4 y | 24 min | bitumen_sealing | 54 |
-| 65 (40–90) | Raised timber floors in storehouses (shared: nutrition) | 3 y | 18 min | NEW | — |
+| 65 (40–90) | Raised timber floors in storehouses (shared: nutrition) | 3 y | 18 min | NEW · raised_granaries (dup) | — |
 | 72 (45–100) | Footing soil judged before building | 2 y | 12 min | footing_soil_judging (era) | — |
 | 75 (48–105) | Refuge points agreed before floods | 2 y | 12 min | refuge_point_designation (era) | — |
-| **80 (50–115)** | **Megaliths raised with earth ramps, levers and ropes** | 8 y | 49 min | NEW | — |
+| **80 (50–115)** | **Megaliths raised with earth ramps, levers and ropes** | 8 y | 49 min | NEW · megalith_raising | — |
 | 88 (55–120) | Paths repaired each season (shared: logistics) | 2 y | 12 min | seasonal_path_maintenance (era) | — |
-| **95 (60–130)** | **Tripartite central-hall house** | 6 y | 37 min | NEW | — |
-| 105 (70–140) | Supply channels dug from river to settlement (shared: nutrition) | 6 y | 37 min | NEW | — |
+| **95 (60–130)** | **Tripartite central-hall house** | 6 y | 37 min | NEW · central_hall_houses | — |
+| 105 (70–140) | Supply channels dug from river to settlement (shared: nutrition) | 6 y | 37 min | NEW · river_supply_channels | — |
 | 115 (80–150) | Bracing inspection rounds | 2 y | 12 min | bracing_inspection_rounds (era) | — |
 | 120 (85–155) | Communal upkeep scheduling | 2 y | 12 min | communal_upkeep_scheduling (era) | — |
 | 122 (85–160) | Dwellings oriented to sun and wind | 3 y | 18 min | dwelling_site_orientation (era) | — |
 | 125 (90–160) | Storm response drill | 2 y | 12 min | storm_response_drill (era) | — |
-| **135 (95–175)** | **Earthen dykes and levees against floods** | 8 y | 49 min | NEW | — |
-| **150 (110–190)** | **Shrine terrace of packed earth and brick** | 10 y | 61 min | NEW | — |
+| **135 (95–175)** | **Earthen dykes and levees against floods** | 8 y | 49 min | NEW · flood_levees | — |
+| **150 (110–190)** | **Shrine terrace of packed earth and brick** | 10 y | 61 min | NEW · shrine_terraces | — |
 | 155 (115–195) | Corners squared with a cord triangle | 2 y | 12 min | corner_squaring_method (era) | — |
 | 158 (118–198) | Public space allocated | 2 y | 12 min | public_space_allocation (era) | — |
 | 160 (120–200) | Warning calls relayed (shared: security) | 2 y | 12 min | warning_call_relay (era) | — |
-| 170 (130–210) | Storerooms with sealed doors around a court (shared: nutrition) | 5 y | 30 min | NEW | — |
+| 170 (130–210) | Storerooms with sealed doors around a court (shared: nutrition) | 5 y | 30 min | NEW · courtyard_storerooms | — |
 | 180 (140–220) | Mortised post-and-beam frames cut with copper chisels | 5 y | 30 min | timber_post_beam_connections | 22 |
-| **190 (150–230)** | **Buttressed and niched mudbrick façades** | 8 y | 49 min | NEW | — |
+| **190 (150–230)** | **Buttressed and niched mudbrick façades** | 8 y | 49 min | NEW · niched_brick_facades | — |
 | 200 (160–240) | Lime-plastered rainwater cisterns | 6 y | 37 min | rainwater_cisterns | 49 |
-| 210 (170–250) | Stone-lined lane drains | 5 y | 30 min | NEW | — |
-| 220 (180–260) | Quarrying with wedges, pounders and fire | 5 y | 30 min | NEW | — |
+| 210 (170–250) | Stone-lined lane drains | 5 y | 30 min | NEW · stone_lined_drains | — |
+| 220 (180–260) | Quarrying with wedges, pounders and fire | 5 y | 30 min | NEW · wedge_and_fire_quarrying | — |
 | **235 (195–275)** | **Fired clay drain pipes** | 10 y | 61 min | clay_pipe_forming | ≈35 |
 | 240 (200–280) | Courses levelled as walls rise | 2 y | 12 min | course_leveling_practice (era) | — |
 | 242 (200–280) | Ground bearing assessment | 3 y | 18 min | ground_bearing_assessment (era) | — |
 | 245 (205–285) | Damage surveyed after a disaster | 2 y | 12 min | post_disaster_damage_survey (era) | — |
 | 248 (205–290) | Runoff grade reading | 3 y | 18 min | runoff_grade_reading (era) | — |
 | 255 (215–295) | Pipe sections fired to a tested standard | 6 y | 37 min | ceramic_pipe_firing_qualification | ≈45 |
-| 260 (220–300) | Multi-room courtyard houses | 5 y | 30 min | NEW | — |
+| 260 (220–300) | Multi-room courtyard houses | 5 y | 30 min | NEW · courtyard_houses | — |
 | 268 (228–305) | Load path reading | 3 y | 18 min | load_path_reading (era) | — |
 | 270 (230–310) | Shared work crew rotation (shared: labor) | 2 y | 12 min | shared_work_crew_rotation (era) | — |
-| 275 (235–315) | Corbelled stone vaults and passages | 8 y | 49 min | NEW | — |
+| 275 (235–315) | Corbelled stone vaults and passages | 8 y | 49 min | NEW · corbelled_vaults | — |
 | 285 (245–325) | Resources pooled after a storm | 2 y | 12 min | post_storm_resource_pooling (era) | — |
-| 290 (250–330) | Rubble diversion dams and reservoirs | 8 y | 49 min | NEW | — |
-| **300 (260–340)** | **Mudbrick town enclosure wall (shared: security)** | 12 y | 73 min | NEW | — |
+| 290 (250–330) | Rubble diversion dams and reservoirs | 8 y | 49 min | NEW · diversion_dams | — |
+| **300 (260–340)** | **Mudbrick town enclosure wall (shared: security)** | 12 y | 73 min | NEW · town_enclosure_walls | — |
 
 ## Years 300–600 (≈ 3000–1500 BC)
 
 | Year (band) | Discovery | Research | Real time | Id | Today |
 |---|---|---|---|---|---|
-| 315 (285–345) | Plano-convex brick laid in herringbone courses | 4 y | 24 min | NEW | — |
-| **330 (290–370)** | **Kiln-fired bricks for wet courses** | 8 y | 49 min | NEW | — |
-| 340 (300–380) | Gypsum mortar for stone and brick | 5 y | 30 min | NEW | — |
-| **350 (310–390)** | **Dressed-stone masonry with copper tools** | 12 y | 73 min | NEW | — |
+| 315 (285–345) | Plano-convex brick laid in herringbone courses | 4 y | 24 min | NEW · herringbone_plano_convex_brick | — |
+| **330 (290–370)** | **Kiln-fired bricks for wet courses** | 8 y | 49 min | NEW · kiln_fired_bricks | — |
+| 340 (300–380) | Gypsum mortar for stone and brick | 5 y | 30 min | NEW · gypsum_mortar | — |
+| **350 (310–390)** | **Dressed-stone masonry with copper tools** | 12 y | 73 min | NEW · dressed_stone_masonry | — |
 | 360 (320–400) | Pounded-earth walls in board forms | 6 y | 37 min | rammed_earth_construction | — |
-| **370 (330–410)** | **Stepped stone tomb: ramps, sledges and wetted tracks** | 15 y | 91 min | NEW | — |
+| **370 (330–410)** | **Stepped stone tomb: ramps, sledges and wetted tracks** | 15 y | 91 min | NEW · stepped_stone_tombs | — |
 | 378 (340–415) | Public works priority review | 2 y | 12 min | public_works_priority_review (era) | — |
 | 380 (340–420) | Structural repair triage | 2 y | 12 min | structural_repair_triage (era) | — |
 | 382 (345–420) | Seasonal hazard calendar | 2 y | 12 min | seasonal_hazard_calendar (era) | — |
 | **385 (345–425)** | **Lime mortar for stone and brick courses** | 8 y | 49 min | lime_mortar | 62 |
-| 390 (350–430) | Well shafts lined with wedge-shaped bricks | 5 y | 30 min | NEW | — |
-| 395 (355–435) | Stone-faced dam across a wadi | 10 y | 61 min | NEW | — |
+| 390 (350–430) | Well shafts lined with wedge-shaped bricks | 5 y | 30 min | NEW · wedge_brick_well_lining | — |
+| 395 (355–435) | Stone-faced dam across a wadi | 10 y | 61 min | NEW · wadi_dams | — |
 | 400 (360–440) | Fired roof tiles | 6 y | 37 min | fired_roof_tiles | ≈60 |
-| 405 (365–445) | Upper storeys on timber joists | 5 y | 30 min | NEW | — |
-| 410 (370–450) | Bitumen-bedded brick for baths and drains | 4 y | 24 min | NEW | — |
+| 405 (365–445) | Upper storeys on timber joists | 5 y | 30 min | NEW · upper_storeys | — |
+| 410 (370–450) | Bitumen-bedded brick for baths and drains | 4 y | 24 min | NEW · bitumen_bedded_brick | — |
 | 415 (375–455) | Brick bathing platforms and a great tank (shared: health) | 8 y | 49 min | public_baths | ≈60 |
 | **420 (380–460)** | **Brick-covered street drains** | 10 y | 61 min | covered_sewers | ≈150 |
 | 425 (385–465) | Pipes laid in bedded, graded trenches | 5 y | 30 min | rigid_pipe_bedding | 18 |
-| 430 (390–470) | Standard brick proportions (1:2:4) | 4 y | 24 min | NEW | — |
+| 430 (390–470) | Standard brick proportions (1:2:4) | 4 y | 24 min | NEW · standard_brick_proportions | — |
 | 435 (395–475) | Header-and-stretcher brick bonds | 4 y | 24 min | masonry_bond_patterns | ≈65 |
 | **440 (400–480)** | **Planned street grid with house blocks** | 12 y | 73 min | urban_street_plans | ≈140 |
 | 445 (405–485) | Roof runoff led into drains | 4 y | 24 min | building_drainage_coordination | ≈100 |
-| 450 (410–490) | Raised granary with air channels (shared: nutrition) | 6 y | 37 min | NEW | — |
-| 455 (415–495) | Pitched-brick barrel vaults without centering | 8 y | 49 min | NEW | — |
-| 460 (420–500) | Shaduf water lift (shared: nutrition) | 4 y | 24 min | NEW | — |
-| 470 (430–510) | Reed-mat and cable layers in mass brick | 5 y | 30 min | NEW | — |
-| **480 (440–520)** | **Stepped temple tower of solid brick** | 20 y | 2 h | NEW | — |
-| 490 (450–530) | Drain shafts through a brick mass | 4 y | 24 min | NEW | — |
+| 450 (410–490) | Raised granary with air channels (shared: nutrition) | 6 y | 37 min | NEW · ventilated_granaries | — |
+| 455 (415–495) | Pitched-brick barrel vaults without centering | 8 y | 49 min | NEW · pitched_brick_vaults | — |
+| 460 (420–500) | Shaduf water lift (shared: nutrition) | 4 y | 24 min | NEW · shaduf_water_lift | — |
+| 470 (430–510) | Reed-mat and cable layers in mass brick | 5 y | 30 min | NEW · reed_mat_brick_layers | — |
+| **480 (440–520)** | **Stepped temple tower of solid brick** | 20 y | 2 h | NEW · stepped_temple_towers | — |
+| 490 (450–530) | Drain shafts through a brick mass | 4 y | 24 min | NEW · brick_mass_drain_shafts | — |
 | 500 (460–540) | Hollowed-log water channels | 3 y | 18 min | wooden_log_conduits | ≈12 |
 | **510 (470–550)** | **Tapered, socketed terracotta pipes** | 8 y | 49 min | clay_pipe_socket_jointing | ≈25 |
 | 520 (480–560) | Scarf joints for long timber beams | 4 y | 24 min | timber_splice_connections | ≈15 |
-| 530 (490–570) | Light wells and ventilated rooms | 4 y | 24 min | NEW | — |
+| 530 (490–570) | Light wells and ventilated rooms | 4 y | 24 min | NEW · light_wells | — |
 | 540 (500–580) | Eaves and screens shading walls | 4 y | 24 min | building_shading_design | ≈85 |
 | 550 (510–590) | Gauges for pipe socket fit | 4 y | 24 min | ceramic_pipe_fit_gauges | ≈25 |
-| 560 (520–600) | Ashlar courses fitted without mortar | 8 y | 49 min | NEW | — |
+| 560 (520–600) | Ashlar courses fitted without mortar | 8 y | 49 min | NEW · ashlar_masonry | — |
 | 570 (530–610) | Mine galleries propped with timber (shared: production) | 6 y | 37 min | mine_shoring | 131 |
-| 580 (540–620) | Palace drains flushed from roof cisterns | 6 y | 37 min | NEW | — |
-| 590 (550–630) | Rubble walls laced with timber against earthquakes | 6 y | 37 min | NEW | — |
-| 600 (560–640) | Colonnaded porticoes on stone bases | 6 y | 37 min | NEW | — |
+| 580 (540–620) | Palace drains flushed from roof cisterns | 6 y | 37 min | NEW · cistern_flushed_drains | — |
+| 590 (550–630) | Rubble walls laced with timber against earthquakes | 6 y | 37 min | NEW · timber_laced_walls | — |
+| 600 (560–640) | Colonnaded porticoes on stone bases | 6 y | 37 min | NEW · colonnaded_porticoes | — |
 
 ## Pacing
 

@@ -15,7 +15,7 @@
 | Year (band) | Discovery | Research | Real time | Id | Today |
 |---|---|---|---|---|---|
 | 2 (0–7) | Nursing delays the next pregnancy | 1.5 y | 9 min | lactational_spacing_awareness (era) | — |
-| 3 (0–8) | Named descent lines | 1.5 y | 9 min | NEW | — |
+| 3 (0–8) | Named descent lines | 1.5 y | 9 min | NEW · named_descent_lines | — |
 | 3 (0–8) | Birth positions that ease labor (shared: health) | 1.5 y | 9 min | labor_position_customs (era) | — |
 | 4 (1–9) | Night watch over feverish infants (shared: health) | 1.5 y | 9 min | fever_watch_customs (era) | — |
 | 4 (1–9) | Sleeping places rotated near the hearth | 1.5 y | 9 min | sleeping_area_rotation (era) | — |
@@ -23,53 +23,53 @@
 | 6 (3–11) | Births spaced by weaning and custom | 2 y | 12 min | birth_spacing_customs (era) | — |
 | 7 (4–12) | Quiet rest after birth | 2 y | 12 min | postpartum_seclusion_care (era) | — |
 | 8 (5–13) | Lineages recited at gatherings (culture) | 2 y | 12 min | genealogical_recitation (era) | — |
-| 10 (5–20) | Carrying slings and cradleboards | 1.5 y | 9 min | NEW | — |
+| 10 (5–20) | Carrying slings and cradleboards | 1.5 y | 9 min | NEW · infant_carrying_slings | — |
 | 12 (7–22) | Shared childcare between households | 2 y | 12 min | shared_childcare | 12 |
 | 14 (9–24) | Growing homes divided into sleeping areas | 2 y | 12 min | extended_family_room_division (era) | — |
-| 16 (11–26) | Marriage outside one's own line | 2 y | 12 min | NEW | — |
-| 20 (10–30) | Mouths counted against the store | 2 y | 12 min | NEW | — |
-| 24 (14–34) | Bride joins her husband's kin | 2 y | 12 min | NEW | — |
-| 28 (18–43) | Widows and orphans taken in by kin | 2 y | 12 min | NEW | — |
-| 32 (22–47) | Children given graded tasks by age (shared: labor) | 2 y | 12 min | NEW | — |
+| 16 (11–26) | Marriage outside one's own line | 2 y | 12 min | NEW · lineage_exogamy | — |
+| 20 (10–30) | Mouths counted against the store | 2 y | 12 min | NEW · mouths_against_store | — |
+| 24 (14–34) | Bride joins her husband's kin | 2 y | 12 min | NEW · patrilocal_residence | — |
+| 28 (18–43) | Widows and orphans taken in by kin | 2 y | 12 min | NEW · kin_care_widows_orphans | — |
+| 32 (22–47) | Children given graded tasks by age (shared: labor) | 2 y | 12 min | NEW · children_light_tasks (dup) | — |
 | 37 (27–52) | Food and lighter work after childbirth | 3 y | 18 min | maternal_recovery | 37 |
 | 42 (27–62) | Household space planned for sleep, air and care | 3 y | 18 min | household_space_planning | 95 |
-| 46 (31–66) | Coming-of-age rites mark adulthood (shared: culture) | 2 y | 12 min | NEW | — |
-| 50 (35–70) | Marriage alliances between villages | 3 y | 18 min | NEW | — |
-| 55 (40–75) | Elders fed and housed by grown children | 2 y | 12 min | NEW | — |
-| 60 (40–85) | Herders' camps rejoin the village for winter | 3 y | 18 min | NEW | — |
-| 65 (45–90) | Bride gifts of livestock and goods | 3 y | 18 min | NEW | — |
-| 70 (50–95) | Captives and strays adopted into a lineage | 3 y | 18 min | NEW | — |
+| 46 (31–66) | Coming-of-age rites mark adulthood (shared: culture) | 2 y | 12 min | NEW · coming_of_age_rites (dup) | — |
+| 50 (35–70) | Marriage alliances between villages | 3 y | 18 min | NEW · village_marriage_alliances | — |
+| 55 (40–75) | Elders fed and housed by grown children | 2 y | 12 min | NEW · elder_care_by_children | — |
+| 60 (40–85) | Herders' camps rejoin the village for winter | 3 y | 18 min | NEW · winter_herder_return | — |
+| 65 (45–90) | Bride gifts of livestock and goods | 3 y | 18 min | NEW · bride_wealth_gifts | — |
+| 70 (50–95) | Captives and strays adopted into a lineage | 3 y | 18 min | NEW · captive_adoption | — |
 | 76 (56–106) | Household lineage tokens (culture) | 3 y | 18 min | household_lineage_tokens (era) | — |
-| **82 (57–112)** | **A crowded village buds a daughter hamlet** | 5 y | 30 min | NEW | — |
-| 88 (63–118) | Lean-year dispersal to kin elsewhere | 3 y | 18 min | NEW | — |
+| **82 (57–112)** | **A crowded village buds a daughter hamlet** | 5 y | 30 min | NEW · daughter_hamlets | — |
+| 88 (63–118) | Lean-year dispersal to kin elsewhere | 3 y | 18 min | NEW · lean_year_dispersal | — |
 | 90 (65–120) | Infant feeding schedules | 3 y | 18 min | infant_feeding_schedules (era) | — |
 | 91 (66–121) | Conception timed to full stores | 3 y | 18 min | seasonal_conception_timing (era) | — |
 | 92 (67–127) | Cord tied and afterbirth handled by set steps | 3 y | 18 min | cord_afterbirth_handling (era) | — |
 | 93 (68–128) | Sleeping space divided by household size | 3 y | 18 min | room_allocation_by_size (era) | — |
-| 100 (70–135) | Headcount at the harvest gathering | 3 y | 18 min | NEW | — |
-| 104 (74–139) | House plots granted to new households | 4 y | 24 min | NEW | — |
-| 112 (82–152) | Newcomers work a season under a host household | 3 y | 18 min | NEW | — |
+| 100 (70–135) | Headcount at the harvest gathering | 3 y | 18 min | NEW · harvest_headcount | — |
+| 104 (74–139) | House plots granted to new households | 4 y | 24 min | NEW · new_household_plots | — |
+| 112 (82–152) | Newcomers work a season under a host household | 3 y | 18 min | NEW · newcomer_host_season | — |
 | 118 (88–158) | Soft first foods for weaning | 3 y | 18 min | weaning_food_softening (era) | — |
 | 120 (85–160) | Weaning intervals stretched with gruel | 3 y | 18 min | interval_weaning_practice (era) | — |
 | 122 (87–162) | Turning a breech infant before labor | 4 y | 24 min | breech_repositioning_technique (era) | — |
 | 124 (89–164) | Sleeping places moved with the seasons | 3 y | 18 min | seasonal_sleeping_arrangements (era) | — |
-| 132 (97–172) | Newcomers wed into local households | 3 y | 18 min | NEW | — |
-| 140 (100–180) | Satellite hamlets around a central village | 5 y | 30 min | NEW | — |
+| 132 (97–172) | Newcomers wed into local households | 3 y | 18 min | NEW · newcomer_intermarriage | — |
+| 140 (100–180) | Satellite hamlets around a central village | 5 y | 30 min | NEW · satellite_hamlets | — |
 | 148 (108–188) | Toddlers kept from hearths and hot pots | 3 y | 18 min | hearth_hazard_proofing (era) | — |
 | 150 (110–190) | Customary gap between siblings | 3 y | 18 min | sibling_age_gap_norms (era) | — |
 | 152 (112–192) | Signs of a stalled labor | 4 y | 24 min | obstructed_labor_recognition (era) | — |
 | 154 (114–194) | Stores and sleeping mats swapped by season | 3 y | 18 min | seasonal_storage_sleeping_swap (era) | — |
-| 162 (122–202) | Famine refugees taken in by host villages | 4 y | 24 min | NEW | — |
-| 170 (130–210) | Households counted by hearth | 4 y | 24 min | NEW | — |
-| 182 (142–222) | Seeing when the land can feed no more mouths | 5 y | 30 min | NEW | — |
-| 200 (160–240) | Kin wards within a growing village | 5 y | 30 min | NEW | — |
+| 162 (122–202) | Famine refugees taken in by host villages | 4 y | 24 min | NEW · famine_refugee_hosting | — |
+| 170 (130–210) | Households counted by hearth | 4 y | 24 min | NEW · hearth_counts | — |
+| 182 (142–222) | Seeing when the land can feed no more mouths | 5 y | 30 min | NEW · carrying_capacity_awareness | — |
+| 200 (160–240) | Kin wards within a growing village | 5 y | 30 min | NEW · kin_wards | — |
 | 222 (182–262) | Dangerous childhood fevers and rashes recognised (shared: health) | 4 y | 24 min | childhood_illness_recognition (era) | — |
 | 224 (184–264) | Weaned children fostered with kin in lean years | 4 y | 24 min | kin_fostering_networks (era) | — |
 | 226 (186–266) | Herbs to slow bleeding after birth (shared: health) | 4 y | 24 min | hemorrhage_control_herbs (era) | — |
 | 228 (188–268) | Three generations under one roof by rule | 4 y | 24 min | multigenerational_household_norms (era) | — |
-| **235 (195–275)** | **Daughter settlements planted along trade routes (shared: logistics)** | 10 y | 61 min | NEW | — |
-| 250 (210–290) | Protective amulets for mother and child (shared: culture) | 2 y | 12 min | NEW | — |
-| **262 (222–302)** | **Towns draw in villagers from the countryside** | 8 y | 49 min | NEW | — |
+| **235 (195–275)** | **Daughter settlements planted along trade routes (shared: logistics)** | 10 y | 61 min | NEW · trade_colonies (dup) | — |
+| 250 (210–290) | Protective amulets for mother and child (shared: culture) | 2 y | 12 min | NEW · protective_birth_amulets | — |
+| **262 (222–302)** | **Towns draw in villagers from the countryside** | 8 y | 49 min | NEW · rural_urban_migration | — |
 | 268 (228–308) | Children checked against growth milestones | 4 y | 24 min | childhood_growth_milestones (era) | — |
 | 270 (230–310) | Grandmothers counsel birth timing | 3 y | 18 min | grandmaternal_birth_counsel (era) | — |
 | 272 (232–312) | Difficult births referred to the best attendant | 4 y | 24 min | trained_midwife_referral (era) | — |
@@ -81,33 +81,33 @@
 
 | Year (band) | Discovery | Research | Real time | Id | Today |
 |---|---|---|---|---|---|
-| 310 (270–350) | Ration lists naming each worker (shared: institutions) | 6 y | 37 min | NEW | — |
+| 310 (270–350) | Ration lists naming each worker (shared: institutions) | 6 y | 37 min | NEW · worker_ration_lists (dup) | — |
 | **330 (290–370)** | **Household census rolls by name (shared: institutions)** | 12 y | 73 min | census_rolls | 54 |
-| 345 (305–385) | Periodic counts of people and herds | 8 y | 49 min | NEW | — |
-| 355 (315–395) | Outsiders under a patron's protection | 5 y | 30 min | NEW | — |
+| 345 (305–385) | Periodic counts of people and herds | 8 y | 49 min | NEW · people_herd_counts | — |
+| 355 (315–395) | Outsiders under a patron's protection | 5 y | 30 min | NEW · patron_protection | — |
 | 362 (322–402) | Settlements exchange household counts (shared: institutions) | 6 y | 37 min | cross_settlement_registries (era) | — |
 | 378 (338–418) | Child-watch rotas between neighbours | 4 y | 24 min | communal_child_supervision_rotas (era) | — |
 | 380 (340–420) | Customary marriage ages | 5 y | 30 min | marriage_age_norms (era) | — |
 | 382 (342–422) | Crowded households split by agreed rule | 5 y | 30 min | household_partition_customs (era) | — |
 | **400 (360–440)** | **Midwives train successors over seasons (shared: health)** | 8 y | 49 min | midwife_apprenticeship_lines (era) | — |
-| 420 (380–460) | Betrothal gifts and dowry recorded | 5 y | 30 min | NEW | — |
-| 440 (400–480) | Births and deaths noted in household lists | 6 y | 37 min | NEW | — |
-| 452 (412–492) | Birth stool and birth bricks | 4 y | 24 min | NEW | — |
-| 462 (422–502) | Residents listed by ward | 6 y | 37 min | NEW | — |
-| 472 (432–512) | Inheritance shares among children | 6 y | 37 min | NEW | — |
-| 480 (440–520) | Ages reckoned by named years | 5 y | 30 min | NEW | — |
-| 490 (450–530) | Brothers hold the father's estate jointly | 5 y | 30 min | NEW | — |
-| **500 (460–540)** | **Sealed marriage contracts on tablets** | 8 y | 49 min | NEW | — |
-| 510 (470–550) | Adoption contracts | 6 y | 37 min | NEW | — |
-| 520 (480–560) | Resident traders' quarter in a foreign town (shared: logistics) | 8 y | 49 min | NEW | — |
-| 530 (490–570) | Oath of belonging for settled outsiders | 6 y | 37 min | NEW | — |
-| 540 (500–580) | Wet-nurse contracts with fixed pay (shared: institutions) | 5 y | 30 min | NEW | — |
-| 548 (508–588) | Divorce terms and return of dowry | 5 y | 30 min | NEW | — |
-| 556 (516–596) | Widow's portion secured by law | 5 y | 30 min | NEW | — |
-| 562 (522–602) | Honey-and-acacia pessaries to delay pregnancy (shared: health) | 6 y | 37 min | NEW | — |
-| 568 (528–608) | Customary three-year nursing | 3 y | 18 min | NEW | — |
-| 578 (538–618) | Widow wed to her husband's brother (regional) | 4 y | 24 min | NEW | — |
-| **590 (550–630)** | **Settlers granted land for service on the frontier** | 10 y | 61 min | NEW | — |
+| 420 (380–460) | Betrothal gifts and dowry recorded | 5 y | 30 min | NEW · recorded_dowry | — |
+| 440 (400–480) | Births and deaths noted in household lists | 6 y | 37 min | NEW · household_vital_lists | — |
+| 452 (412–492) | Birth stool and birth bricks | 4 y | 24 min | NEW · birth_stool_bricks | — |
+| 462 (422–502) | Residents listed by ward | 6 y | 37 min | NEW · ward_residence_lists | — |
+| 472 (432–512) | Inheritance shares among children | 6 y | 37 min | NEW · partible_inheritance | — |
+| 480 (440–520) | Ages reckoned by named years | 5 y | 30 min | NEW · named_year_ages | — |
+| 490 (450–530) | Brothers hold the father's estate jointly | 5 y | 30 min | NEW · fraternal_joint_estates | — |
+| **500 (460–540)** | **Sealed marriage contracts on tablets** | 8 y | 49 min | NEW · sealed_family_contracts (dup) | — |
+| 510 (470–550) | Adoption contracts | 6 y | 37 min | NEW · sealed_family_contracts (dup) | — |
+| 520 (480–560) | Resident traders' quarter in a foreign town (shared: logistics) | 8 y | 49 min | NEW · merchant_quarters_abroad (dup) | — |
+| 530 (490–570) | Oath of belonging for settled outsiders | 6 y | 37 min | NEW · belonging_oaths | — |
+| 540 (500–580) | Wet-nurse contracts with fixed pay (shared: institutions) | 5 y | 30 min | NEW · wet_nurse_contracts | — |
+| 548 (508–588) | Divorce terms and return of dowry | 5 y | 30 min | NEW · divorce_settlements | — |
+| 556 (516–596) | Widow's portion secured by law | 5 y | 30 min | NEW · widow_portion_law | — |
+| 562 (522–602) | Honey-and-acacia pessaries to delay pregnancy (shared: health) | 6 y | 37 min | NEW · contraceptive_pessaries | — |
+| 568 (528–608) | Customary three-year nursing | 3 y | 18 min | NEW · three_year_nursing | — |
+| 578 (538–618) | Widow wed to her husband's brother (regional) | 4 y | 24 min | NEW · levirate_marriage | — |
+| **590 (550–630)** | **Settlers granted land for service on the frontier** | 10 y | 61 min | NEW · frontier_settler_grants | — |
 
 ## Pacing
 

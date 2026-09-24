@@ -1,0 +1,1102 @@
+id,line,name,target_year,band_low,band_high,research_years,status,shared_with,key_threshold,aliases,source_file
+route_memory,knowledge,Encoded routes: travel told as a fixed story,2,0,5,1.5,catalog,,,,docs/research/KNOWLEDGE_600_YEARS.md
+relay_call_stations,knowledge,Relay calls between camps,3,0,8,1.5,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+counting_words,knowledge,Counting words and finger counts to twenty,5,2,10,2,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+weather_sign_reading,knowledge,Weather-sign reading,6,3,12,2,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+novice_task_shadowing,knowledge,Novices shadow an experienced hand,8,4,15,2,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+tallies,knowledge,Notched-stick tallies,10,5,20,3,catalog,,,,docs/research/KNOWLEDGE_600_YEARS.md
+distance_call_signals,knowledge,Long-carrying call signals,12,6,20,2,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+cairn_sightline_marking,knowledge,Cairn sightline marking,15,8,25,3,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+watch_duty_rotation,knowledge,Standing watch duty,18,10,30,3,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+moon_counting,knowledge,Moon counting: nights between full moons,22,12,35,4,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+knot_tally_cross_check,knowledge,Two households cross-check their tallies,25,15,40,3,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+repeated_recitation_training,knowledge,Recitation drills for craft rules,30,18,45,4,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+childrens_question_circles,knowledge,Children's question circles,35,20,50,3,era,culture,,,docs/research/KNOWLEDGE_600_YEARS.md
+solstice_horizon_markers,knowledge,Horizon sunrise markers for the solstices,40,25,60,6,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+standard_measures,knowledge,"Body measures: hand, forearm, pace, basket",45,30,65,5,catalog,,,,docs/research/KNOWLEDGE_600_YEARS.md
+mnemonic_verse_encoding,knowledge,Verse mnemonics for long lists,50,35,70,4,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+owner_marks,knowledge,Owners' marks on pots and bundles,55,40,75,4,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+paced_distance_counting,knowledge,Paced distance counting,60,45,85,4,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+landmark_triangulation,knowledge,Landmark alignment sighting,65,45,90,5,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+clay_counting_tokens,knowledge,Clay counting tokens: shaped tokens stand for goods,70,50,100,8,new,,yes,,docs/research/KNOWLEDGE_600_YEARS.md
+specialist_task_assignment,knowledge,Specialists assigned to one craft's problems,80,60,110,5,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+drum_relay_signals,knowledge,Drum relay signals,85,60,115,4,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+focused_error_review,knowledge,Crews review a spoiled batch together,90,65,120,4,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+stamp_seals,knowledge,Stamp seals,100,75,130,6,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+material_accounting,knowledge,Store accounts by source and obligation,105,80,140,8,catalog,,,,docs/research/KNOWLEDGE_600_YEARS.md
+paired_record_witnessing,knowledge,A second keeper witnesses each record,115,90,150,4,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+solar_year_reckoning,knowledge,Solar year reckoned by moons and solstice,120,90,155,10,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+fire_smoke_signaling,knowledge,Fire and smoke signals,130,100,165,4,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+cross_bearing_confirmation,knowledge,Cross-bearing confirmation,140,110,175,5,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+knotted_record_systems,knowledge,Knotted record cords,145,110,180,8,catalog,,,,docs/research/KNOWLEDGE_600_YEARS.md
+marked_storage_registers,knowledge,Marked counters on sealed stores,150,115,185,6,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+token_envelopes,knowledge,Token envelopes: sealed clay balls holding tokens,160,125,200,10,new,,yes,,docs/research/KNOWLEDGE_600_YEARS.md
+rotating_inspection_duty,knowledge,Rotating inspection duty,170,135,210,4,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+star_rise_markers,knowledge,Star-rise season markers,180,140,220,8,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+standardized_gesture_code,knowledge,Trade hand-sign code,190,150,230,5,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+boundary_sighting_marks,knowledge,Boundary sighting marks,200,160,240,5,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+problem_council_sessions,knowledge,Specialists' problem councils,210,170,250,5,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+tens_sixties_bundling,knowledge,Counting in fixed bundles of tens and sixties,220,180,255,8,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+impressed_number_tablets,knowledge,Impressed number tablets,225,185,260,10,new,,yes,,docs/research/KNOWLEDGE_600_YEARS.md
+seasonal_news_gathering,knowledge,Travelers asked set questions for news,230,190,265,4,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+rod_and_cord_leveling,knowledge,Rod-and-cord levelling,240,200,275,6,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+attention_priority_signals,knowledge,Work-priority markers,245,205,280,4,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+pictographic_records,knowledge,Picture-sign records (proto-writing),255,215,290,20,catalog,,yes,,docs/research/KNOWLEDGE_600_YEARS.md
+cylinder_seals,knowledge,Cylinder seals,260,220,295,6,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+clay_record_tablets,knowledge,Clay record tablets,270,230,300,8,catalog,,,,docs/research/KNOWLEDGE_600_YEARS.md
+standard_sign_lists,knowledge,Standard sign lists,280,240,310,10,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+scribal_apprenticeship,knowledge,Scribal apprenticeship,290,250,320,8,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+agreed_signal_codes,knowledge,Agreed signal codes,300,260,330,6,catalog,,,,docs/research/KNOWLEDGE_600_YEARS.md
+archive_shelving_order,knowledge,Tablets shelved by subject,310,280,340,5,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+balance_beam_weights,knowledge,Balance beam and standard weights,320,290,350,10,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+messenger_relay_stations,knowledge,Messenger relays on fixed stages,330,300,360,6,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+sealed_tablet_contracts,knowledge,Sealed tablet receipts and contracts,340,310,370,8,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+dedicated_apprentice_observation,knowledge,Masters observe apprentices at set hours,350,320,380,5,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+phonetic_notation,knowledge,Sound-signs: rebus spelling of names and words,360,320,400,20,catalog,,yes,,docs/research/KNOWLEDGE_600_YEARS.md
+plumb_line_sighting,knowledge,Plumb line and sighting pole,370,340,400,6,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+star_rising_civil_year,knowledge,365-day civil year from star rising,380,350,410,12,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+written_lore_tablets,knowledge,Recited lore copied onto tablets,390,360,420,10,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+written_apprentice_instructions,knowledge,Written instructions to apprentices,395,360,425,6,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+workshop_standards,knowledge,Workshop standards and named grades,400,360,430,8,catalog,,,,docs/research/KNOWLEDGE_600_YEARS.md
+formal_archives,knowledge,Tablet archives,405,370,440,12,catalog,,yes,,docs/research/KNOWLEDGE_600_YEARS.md
+cross_referenced_archives,knowledge,Cross-referenced archives,410,380,445,6,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+formal_chronicle_keeping,knowledge,Year names and event lists,415,380,450,8,era,culture,,,docs/research/KNOWLEDGE_600_YEARS.md
+public_schools,knowledge,Tablet houses (scribal schools),420,385,460,15,catalog,,yes,,docs/research/KNOWLEDGE_600_YEARS.md
+sealed_tablet_letters,knowledge,Sealed tablet letters,425,390,460,6,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+intercalated_calendar,knowledge,Administrative calendar with an added month,430,395,470,10,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+bilingual_sign_lists,knowledge,Bilingual sign lists,440,400,480,8,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+sworn_interpreters,knowledge,Sworn interpreters,445,405,480,5,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+geometric_survey,knowledge,Rope-stretcher field survey,450,410,490,10,catalog,,,,docs/research/KNOWLEDGE_600_YEARS.md
+water_trough_leveling,knowledge,Water-trough levelling,460,420,500,6,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+scribal_specialties,knowledge,"Scribal specialties: surveyor, accountant, letter-writer",465,425,500,6,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+area_volume_rules,knowledge,Field-area and grain-volume rules,470,430,510,10,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+sightline_corridor_marking,knowledge,Sightline corridors kept clear,475,435,510,4,era,,,,docs/research/KNOWLEDGE_600_YEARS.md
+star_hour_tables,knowledge,Star-hour tables for the night,480,440,520,10,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+reciprocal_tables,knowledge,Multiplication and reciprocal tables,485,445,520,12,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+tablet_colophons,knowledge,"Colophons: scribe, date and source on each tablet",490,450,530,5,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+scribal_copying_tests,knowledge,Tablet-house exercises and copying tests,500,460,540,6,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+place_value,knowledge,Place-value reckoning,510,470,550,20,catalog,,yes,,docs/research/KNOWLEDGE_600_YEARS.md
+fractional_quantities,knowledge,Unit fractions and parts,520,480,560,10,catalog,,,,docs/research/KNOWLEDGE_600_YEARS.md
+worked_problem_tablets,knowledge,Worked-problem teaching tablets,530,490,570,8,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+regional_maps,knowledge,Clay plans of fields and towns,540,500,580,10,catalog,,,,docs/research/KNOWLEDGE_600_YEARS.md
+square_root_tables,knowledge,Square and root tables,545,505,585,10,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+prearranged_beacon_chains,knowledge,Beacon chains by prior arrangement,550,510,590,6,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+consonantal_alphabet,knowledge,Consonant sign-set (early alphabet; regional),560,520,620,20,new,,yes,,docs/research/KNOWLEDGE_600_YEARS.md
+dated_omen_records,knowledge,Dated sky-omen records,570,530,610,10,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+shadow_clock,knowledge,Shadow clock,580,540,620,8,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+outflow_water_clock,knowledge,Outflow water clock,590,550,630,10,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+checked_master_copies,knowledge,Checked master copies of key tablets,600,560,640,6,new,,,,docs/research/KNOWLEDGE_600_YEARS.md
+seasonal_duty_rosters,institutions,Seasonal duty rosters,2,0,5,1.5,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+council_messenger_duty,institutions,Council messengers call households to a gathering,3,0,6,1.5,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+dissenting_voice_custom,institutions,Any adult may speak against a proposal,4,0,8,1.5,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+leader_gift_redistribution,institutions,The headman gives back what is brought to him,5,1,10,2,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+household_task_ledgers,institutions,Household task tallies,6,2,10,2,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+witnessed_agreement_customs,institutions,Agreements bind only when spoken before witnesses,7,2,12,2,era,culture,,,docs/research/INSTITUTIONS_600_YEARS.md
+elder_consultation_rites,institutions,Elders consulted before a hard decision,8,3,14,2,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+household_councils,institutions,Household councils: one recognized speaker per household,10,4,16,3,catalog,,,,docs/research/INSTITUTIONS_600_YEARS.md
+elder_council_assent,institutions,Elders must assent before a decision binds,12,5,20,3,era,culture,,,docs/research/INSTITUTIONS_600_YEARS.md
+seasonal_tribute_counts,institutions,Seasonal counts of what each household brought,14,6,22,3,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+consensus_amendment_custom,institutions,A custom changes only by open agreement,16,8,25,2,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+lineage_land_tenure,institutions,Fields and pastures held by lineage,18,8,28,3,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+blood_price,institutions,Injury paid for in goods (blood-price),20,10,30,3,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+seasonal_crisis_leader,institutions,A leader chosen for a season of need,24,12,35,3,new,security,,security@170: War leader chosen for one fighting season,docs/research/INSTITUTIONS_600_YEARS.md
+petition_speakers,institutions,Speakers carry household petitions to the living god,28,15,40,3,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+banishment_sentence,institutions,Casting out as the gravest sentence,30,18,45,3,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+customary_law,institutions,Customary law: remembered judgments bind later ones,35,20,50,5,catalog,,,,docs/research/INSTITUTIONS_600_YEARS.md
+public_stores,institutions,Common store kept under watch,40,25,55,4,catalog,nutrition,,,docs/research/INSTITUTIONS_600_YEARS.md
+household_mediators,institutions,Go-betweens mediate quarrels between households,45,30,60,3,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+exculpatory_oath,institutions,Oath before the god to settle an unwitnessed claim,55,40,75,4,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+customary_inheritance_shares,institutions,Inheritance shares divided among heirs by custom,60,45,80,4,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+field_boundary_markers,institutions,Field edges marked with stones and ditches,65,45,85,4,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+labor_debt_tallies,institutions,Labor-debt tallies: who owes whom a day's work,70,50,90,4,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+leader_feast_obligations,institutions,Feasts owed by leaders to their followers,75,55,95,4,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+public_grain_weighing,institutions,Grain for the store weighed in public,80,60,100,3,era,culture,,,docs/research/INSTITUTIONS_600_YEARS.md
+harvest_offering_shares,institutions,Set shares of the harvest offered to the god,85,60,110,5,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+public_praise_assemblies,institutions,Public praise of faithful service,90,65,115,3,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+trial_custom_periods,institutions,New customs tried for a season first,95,70,120,3,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+boundary_oath_rituals,institutions,Boundary oaths sworn at the marker stones,100,75,125,4,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+rotating_stewardship,institutions,Stewardship of the store passes in turn,105,80,130,4,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+probationary_appointment_custom,institutions,New officeholders serve a trial term,110,85,135,3,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+temple_common_storehouse,institutions,The god's house as common storehouse: offerings kept and reissued,115,85,150,8,new,,yes,,docs/research/INSTITUTIONS_600_YEARS.md
+boundary_marker_surveys,institutions,Boundary marker surveys,120,90,150,4,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+public_dispute_airing,institutions,Grievances aired before the assembled settlement,125,95,155,3,era,culture,,,docs/research/INSTITUTIONS_600_YEARS.md
+offering_keepers,institutions,Keepers appointed over the god's offerings,130,100,160,5,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+intervillage_tribute_reconciliation,institutions,Villages reconcile their tribute counts,135,105,165,5,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+paramount_chiefdom,institutions,Paramount chief over several villages,140,100,185,10,new,,yes,,docs/research/INSTITUTIONS_600_YEARS.md
+mediated_restitution_custom,institutions,Restitution settled through a mediator,145,110,175,4,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+shared_labor_registers,institutions,Shared-labor registers,150,115,180,4,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+sunset_rule_custom,institutions,Rules that lapse unless renewed each season,152,115,185,3,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+rotating_speaker_order,institutions,Council speakers take turns in a set order,154,115,190,2,era,culture,,,docs/research/INSTITUTIONS_600_YEARS.md
+standing_arbiter_appointment,institutions,A standing arbiter appointed,157,120,190,5,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+seal_breaking_rights,institutions,Only named keepers may break a store seal,165,125,200,4,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+temple_ration_issue,institutions,The god's house issues rations to its workers,170,130,205,6,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+work_gang_overseers,institutions,Overseers of work gangs for canals and building,180,140,215,6,new,labor,,,docs/research/INSTITUTIONS_600_YEARS.md
+hereditary_chiefly_rank,institutions,Chiefly lineages: rank passes by birth,190,150,230,8,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+free_adult_assembly,institutions,Assembly of all free adults for grave matters,200,160,240,5,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+grain_levy_accounting,institutions,Grain levy accounting,210,170,245,6,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+tributary_villages,institutions,Subject villages bring tribute at set seasons,215,175,250,6,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+public_grievance_hearings,institutions,Standing grievance hearings,225,185,260,4,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+regional_arbitration_circuits,institutions,Arbiters travel a circuit of villages,240,200,275,6,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+formal_oath_taking,institutions,Formal oath-taking at the god's house,245,205,280,4,era,culture,,,docs/research/INSTITUTIONS_600_YEARS.md
+council_reformation_practice,institutions,Councils reform their own procedure,255,215,290,5,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+temple_high_steward,institutions,High steward of the god's house leads the town,260,215,305,12,new,,yes,,docs/research/INSTITUTIONS_600_YEARS.md
+cross_household_grain_audits,institutions,Households audit each other's grain,265,225,300,5,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+oath_witness_registers,institutions,Registers of who witnessed each oath,268,225,305,5,era,culture,,,docs/research/INSTITUTIONS_600_YEARS.md
+regional_levy_coordination,institutions,Levies coordinated across a district,272,230,310,6,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+worker_ration_lists,institutions,Ration lists by worker and month,280,240,315,6,new,knowledge;labor;demography,,labor@290: Named ration lists of dependent workers ; demography@310: Ration lists naming each worker,docs/research/INSTITUTIONS_600_YEARS.md
+appeal_reopening_custom,institutions,A settled case may be reopened on appeal,285,245,320,4,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+succession_naming_rites,institutions,Heir named in public before the elders,288,245,325,5,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+census_rolls,institutions,Household census rolls,295,250,335,8,catalog,demography,,demography@330: Household census rolls by name,docs/research/INSTITUTIONS_600_YEARS.md
+public_levies,institutions,Scheduled public levies of labor and goods,300,255,340,8,catalog,labor,,labor@330: Seasonal corvée levy for canals and walls,docs/research/INSTITUTIONS_600_YEARS.md
+titled_estate_overseers,institutions,"Titled overseers of fields, granary and works",310,280,345,6,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+witnessed_land_sales,institutions,Fields sold before witnesses with their bounds recited,320,285,355,6,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+fixed_interest_loans,institutions,Loans of grain and silver at fixed interest,330,295,365,8,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+separate_temple_palace_stores,institutions,Temple and palace households keep separate stores,345,310,380,8,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+cross_settlement_registries,institutions,Registers shared between settlements,355,320,390,6,era,demography,,demography@362: Settlements exchange household counts,docs/research/INSTITUTIONS_600_YEARS.md
+kingship,institutions,Kingship: the war-leader rules for life,365,320,410,15,new,,yes,,docs/research/INSTITUTIONS_600_YEARS.md
+ceremonial_investiture,institutions,Officials invested before the god,375,340,410,5,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+assembly_petition_rights,institutions,Right to petition the assembly,378,340,415,5,era,culture,,,docs/research/INSTITUTIONS_600_YEARS.md
+provincial_governors,institutions,Governors over subject towns,385,350,420,10,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+public_heralds,institutions,Heralds proclaim decisions in the square,390,355,425,4,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+codified_tribute_schedules,institutions,Tribute schedules fixed by amount and date,400,360,440,8,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+specialized_courts,institutions,Specialized courts: judges by kind of dispute,405,365,445,10,catalog,,,,docs/research/INSTITUTIONS_600_YEARS.md
+boundary_treaties,institutions,Boundary treaty between towns sworn before the gods,410,370,450,8,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+dynastic_succession,institutions,Rule passes to a named heir of the ruling house,415,375,455,8,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+precedent_review_councils,institutions,Councils review past judgments as precedent,420,380,460,6,era,,,,docs/research/INSTITUTIONS_600_YEARS.md
+proclaimed_standard_weights,institutions,Standard weights proclaimed and checked by officials,425,385,465,6,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+debt_release_edicts,institutions,Debt-release proclamations,430,390,470,8,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+foreign_treaties,institutions,Sworn treaty with a foreign ruler on trade and peace,440,400,480,8,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+sealed_travel_passes,institutions,Ruler's messengers carry sealed passes and road rations,445,405,485,6,new,logistics,,,docs/research/INSTITUTIONS_600_YEARS.md
+temple_estates,institutions,Estates of the god's house worked by tenants and dependents,455,415,495,8,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+area_harvest_assessment,institutions,Harvest dues assessed by field area,460,420,500,8,new,nutrition,,,docs/research/INSTITUTIONS_600_YEARS.md
+royal_inscriptions,institutions,Inscriptions declare the ruler's works and justice,465,425,505,6,new,culture,,,docs/research/INSTITUTIONS_600_YEARS.md
+written_law_code,institutions,Written law collection with set penalties by case,480,435,525,15,new,,yes,,docs/research/INSTITUTIONS_600_YEARS.md
+sworn_judges,institutions,Judges sworn to the god on taking office,485,445,525,5,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+sworn_trial_testimony,institutions,Sworn witnesses and written testimony at trial,490,450,530,6,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+provincial_accounts,institutions,Provinces send yearly accounts to the capital,500,460,540,8,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+sealed_family_contracts,institutions,"Adoption, marriage and inheritance by sealed contract",510,470,550,6,new,demography,,demography@500: Sealed marriage contracts on tablets ; demography@510: Adoption contracts,docs/research/INSTITUTIONS_600_YEARS.md
+caravan_tolls,institutions,Tolls on caravans at frontier posts,515,475,555,6,new,logistics,,,docs/research/INSTITUTIONS_600_YEARS.md
+property_registers,institutions,Property registers,525,485,565,10,catalog,,,,docs/research/INSTITUTIONS_600_YEARS.md
+town_mayors,institutions,Town mayors and elders answer to the governor,530,490,570,6,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+royal_appeal_court,institutions,Appeal from local judges to the ruler's court,535,495,575,6,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+price_wage_schedules,institutions,Price and wage schedules proclaimed,540,500,580,8,new,labor,,labor@530: Hire rates set by trade and skill,docs/research/INSTITUTIONS_600_YEARS.md
+licensed_merchant_houses,institutions,Merchant houses licensed to trade abroad,545,505,585,8,new,logistics,,,docs/research/INSTITUTIONS_600_YEARS.md
+public_law_stele,institutions,Law set up in stone in a public place,550,505,595,10,new,,yes,,docs/research/INSTITUTIONS_600_YEARS.md
+service_land_grants,institutions,Land granted in return for service,555,515,595,10,new,security,,,docs/research/INSTITUTIONS_600_YEARS.md
+jurisdiction_boundaries,institutions,Jurisdiction boundaries: which court and governor rules each district,560,520,600,10,catalog,,,,docs/research/INSTITUTIONS_600_YEARS.md
+workshop_quotas,institutions,Palace and temple workshops given quotas,570,530,610,8,new,production,,,docs/research/INSTITUTIONS_600_YEARS.md
+circuit_inspectors,institutions,Inspectors ride circuit over the governors,580,540,620,6,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+standard_royal_letters,institutions,Ruler's letters to governors answered in a set form,590,550,630,6,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+service_land_registers,institutions,Service-land registers checked against census rolls,600,560,640,8,new,,,,docs/research/INSTITUTIONS_600_YEARS.md
+shared_hearth_gatherings,culture,Shared hearth gatherings,1,0,3,1,era,,,,docs/research/CULTURE_600_YEARS.md
+communal_work_songs,culture,Communal work songs,2,0,5,1.5,era,labor,,labor@20: Communal work songs,docs/research/CULTURE_600_YEARS.md
+oral_epics,culture,Oral epics: trained reciters keep long accounts,3,0,6,2,catalog,,,,docs/research/CULTURE_600_YEARS.md
+genealogical_recitation,culture,Elders recite each household's lineage,4,0,8,2,era,demography,,demography@8: Lineages recited at gatherings,docs/research/CULTURE_600_YEARS.md
+named_landmark_lore,culture,Every notable rock and spring has a naming story,5,0,10,1.5,era,,,,docs/research/CULTURE_600_YEARS.md
+curious_questioning_custom,culture,Children praised for asking why,6,1,12,2,era,,,,docs/research/CULTURE_600_YEARS.md
+bone_flutes_drums,culture,Bone flutes and hand drums at gatherings,7,2,12,2,new,,,,docs/research/CULTURE_600_YEARS.md
+circle_dances,culture,Circle dances at gatherings,8,2,14,2,new,,,,docs/research/CULTURE_600_YEARS.md
+house_floor_burial,culture,The dead buried beneath the house floor,9,3,15,2,new,,,,docs/research/CULTURE_600_YEARS.md
+ochre_grave_goods,culture,Red ochre and grave goods for the dead,10,3,16,2,new,,,,docs/research/CULTURE_600_YEARS.md
+kin_body_ornament,culture,"Body paint, shell and bead ornament marking kin",12,4,20,2,new,,,,docs/research/CULTURE_600_YEARS.md
+hearth_shrine_offerings,culture,Offerings to the living god at the hearth-shrine,14,5,22,2,new,,,,docs/research/CULTURE_600_YEARS.md
+plastered_ancestor_skulls,culture,Ancestor skulls plastered and kept in the house,16,6,25,3,new,,,,docs/research/CULTURE_600_YEARS.md
+mourning_days,culture,Mourning days of wailing and fasting,18,8,28,2,new,,,,docs/research/CULTURE_600_YEARS.md
+festival_calendar,culture,Seasonal festival calendar,20,8,30,3,catalog,,,,docs/research/CULTURE_600_YEARS.md
+reciprocal_gift_exchange,culture,Gifts given and returned bind households,25,12,35,2,new,,,,docs/research/CULTURE_600_YEARS.md
+origin_story,culture,Origin story: how the people and their god came to this land,28,14,40,4,new,,,,docs/research/CULTURE_600_YEARS.md
+pottery_style_identity,culture,Pottery motifs that mark a people,30,16,45,3,new,production,,,docs/research/CULTURE_600_YEARS.md
+ancestor_figurines,culture,Clay figurines of ancestors,32,18,48,3,new,,,,docs/research/CULTURE_600_YEARS.md
+pit_pebble_game,culture,Pit-and-pebble counting game,35,20,50,2,new,,,,docs/research/CULTURE_600_YEARS.md
+first_fruits_offering,culture,First fruits offered to the god before the harvest is eaten,38,22,55,2,new,,,,docs/research/CULTURE_600_YEARS.md
+winter_tale_nights,culture,Winter tale nights,40,25,60,2,new,,,,docs/research/CULTURE_600_YEARS.md
+named_star_figures,culture,Star figures named in stories,45,28,65,3,new,,,,docs/research/CULTURE_600_YEARS.md
+shrine_wall_painting,culture,Painted walls in shrine rooms,50,32,70,4,new,,,,docs/research/CULTURE_600_YEARS.md
+ritual_masks_costumes,culture,Masks and costumes for rites,55,35,75,3,new,,,,docs/research/CULTURE_600_YEARS.md
+sacred_places,culture,"Sacred places set apart: spring, grove, high rock",60,40,80,3,new,,,,docs/research/CULTURE_600_YEARS.md
+coming_of_age_rites,culture,Coming-of-age rites for youths,65,45,85,3,new,demography,,demography@46: Coming-of-age rites mark adulthood,docs/research/CULTURE_600_YEARS.md
+cooperative_harvest_gatherings,culture,Cooperative harvest gatherings,75,50,95,3,era,labor,,labor@45: Harvests brought in by households in turn,docs/research/CULTURE_600_YEARS.md
+household_lineage_tokens,culture,Household lineage tokens,80,55,100,3,era,demography,,demography@76: Household lineage tokens,docs/research/CULTURE_600_YEARS.md
+cross_craft_visiting,culture,Crafters spend a season watching another craft,85,60,105,3,era,,,,docs/research/CULTURE_600_YEARS.md
+memorial_cairn_marking,culture,Memorial cairns at the sites of notable events,90,65,110,3,era,,,,docs/research/CULTURE_600_YEARS.md
+marriage_feasts,culture,Marriage feasts joining two lineages,95,70,115,3,new,,,,docs/research/CULTURE_600_YEARS.md
+mutual_aid_customs,culture,Mutual aid customs,100,75,125,3,era,labor,,labor@72: Neighbours rebuild for a family in need,docs/research/CULTURE_600_YEARS.md
+first_shrine_house,culture,A house for the god: the first shrine building,110,80,145,8,new,institutions,yes,,docs/research/CULTURE_600_YEARS.md
+praise_songs,culture,Songs of praise sung to the god at set times,115,85,145,4,new,,,,docs/research/CULTURE_600_YEARS.md
+rattles_drums_pipes,culture,"Rattles, clay drums and reed pipes",120,90,150,3,new,,,,docs/research/CULTURE_600_YEARS.md
+traveling_storyteller_exchange,culture,Traveling storytellers trade tales for lodging,130,100,160,4,era,,,,docs/research/CULTURE_600_YEARS.md
+graveside_libations,culture,Libations poured for the ancestors at graves,135,105,165,3,new,,,,docs/research/CULTURE_600_YEARS.md
+disaster_memory_markers,culture,Flood-mark stones and their stories,145,110,180,3,era,,,,docs/research/CULTURE_600_YEARS.md
+grief_support_customs,culture,Grief support customs,150,115,185,3,era,,,,docs/research/CULTURE_600_YEARS.md
+puzzle_riddle_contests,culture,Riddle and puzzle contests,152,115,190,2,era,,,,docs/research/CULTURE_600_YEARS.md
+festival_wrestling_races,culture,Wrestling and footraces at festivals,155,120,190,3,new,,,,docs/research/CULTURE_600_YEARS.md
+emblem_processions,culture,Processions carry the god's emblem through the fields,160,125,195,4,new,,,,docs/research/CULTURE_600_YEARS.md
+proverbs,culture,Proverbs passed down as counsel,180,140,220,3,new,,,,docs/research/CULTURE_600_YEARS.md
+temple_festival_meals,culture,Festival meals shared at the god's house,190,150,230,4,new,,,,docs/research/CULTURE_600_YEARS.md
+flood_origin_stories,culture,Stories of the great flood and the first days,200,160,240,5,new,,,,docs/research/CULTURE_600_YEARS.md
+rank_inlay_ornament,culture,Inlaid shell and stone ornament for high rank,210,170,250,4,new,production,,,docs/research/CULTURE_600_YEARS.md
+naming_day_rites,culture,Naming-day rites,225,185,265,3,era,demography,,demography@290: Naming-day rites,docs/research/CULTURE_600_YEARS.md
+seasonal_commemoration_rites,culture,A yearly rite on the date of a remembered disaster,240,200,280,4,era,,,,docs/research/CULTURE_600_YEARS.md
+public_debate_custom,culture,Rival explanations argued before the community,250,210,285,4,era,,,,docs/research/CULTURE_600_YEARS.md
+rank_dress_styles,culture,Hair and dress styles marking age and rank,255,215,290,3,new,,,,docs/research/CULTURE_600_YEARS.md
+craft_lineage_naming,culture,Techniques credited to the teacher who began them,262,220,295,3,era,,,,docs/research/CULTURE_600_YEARS.md
+intermarriage_visiting_customs,culture,Visiting customs between intermarried villages,265,225,300,4,era,demography,,demography@276: In-married kin visit their birth homes,docs/research/CULTURE_600_YEARS.md
+visiting_specialist_consultations,culture,Respected outsiders consulted on hard disputes,268,225,305,3,era,,,,docs/research/CULTURE_600_YEARS.md
+stone_relief_carving,culture,Relief carving on stone slabs,275,230,315,6,new,,,,docs/research/CULTURE_600_YEARS.md
+banded_procession_vessels,culture,Offering processions shown in bands on vessels,280,240,320,6,new,,,,docs/research/CULTURE_600_YEARS.md
+temple_singers_lamenters,culture,Singers and lamenters trained for the god's house,285,245,325,6,new,,,,docs/research/CULTURE_600_YEARS.md
+guest_friendship,culture,Guest-friendship between houses of different towns,290,250,330,4,new,,,,docs/research/CULTURE_600_YEARS.md
+founder_story_recitation,culture,The founder's story recited at the turn of the year,300,255,345,6,new,,,,docs/research/CULTURE_600_YEARS.md
+board_race_games,culture,Race games on a marked board with throwing sticks,310,275,345,4,new,,,,docs/research/CULTURE_600_YEARS.md
+new_year_festival,culture,New-year festival of the god's renewal of the land,320,280,370,10,new,,yes,,docs/research/CULTURE_600_YEARS.md
+town_identity,culture,"Town identity: its own name, emblem and patron festival",330,295,365,6,new,,,,docs/research/CULTURE_600_YEARS.md
+theophoric_names,culture,Personal names that honor the god,350,315,385,3,new,,,,docs/research/CULTURE_600_YEARS.md
+shared_meal_obligations,culture,Shared meal obligations,360,320,395,4,era,,,,docs/research/CULTURE_600_YEARS.md
+votive_figures,culture,Votive figures stand in prayer before the god,365,325,400,6,new,,,,docs/research/CULTURE_600_YEARS.md
+seasonal_hymn_cycles,culture,Hymn cycles for each season of the god's year,375,335,410,6,new,,,,docs/research/CULTURE_600_YEARS.md
+harps_and_lyres,culture,Tuned harps and lyres,380,340,420,8,new,,,,docs/research/CULTURE_600_YEARS.md
+chamber_tombs,culture,Chamber tombs with rich goods for leading lineages,385,345,425,8,new,,,,docs/research/CULTURE_600_YEARS.md
+temple_choirs,culture,Temple choirs with drums and cymbals,395,355,430,6,new,,,,docs/research/CULTURE_600_YEARS.md
+comparative_craft_gatherings,culture,Craft specialists compare methods on market days,400,360,440,6,era,,,,docs/research/CULTURE_600_YEARS.md
+inlaid_mosaic_panels,culture,Inlaid mosaic panels of feasts and processions,403,360,445,6,new,,,,docs/research/CULTURE_600_YEARS.md
+wisdom_instructions,culture,Wisdom instructions from a father to his son,405,365,445,6,new,,,,docs/research/CULTURE_600_YEARS.md
+festival_dancers_acrobats,culture,Dancers and acrobats at festivals,420,380,460,4,new,,,,docs/research/CULTURE_600_YEARS.md
+officiant_vestments,culture,Special garments and headdress for officiants,430,390,470,4,new,,,,docs/research/CULTURE_600_YEARS.md
+envoy_reception,culture,Envoys received with a feast and gifts,440,400,480,5,new,,,,docs/research/CULTURE_600_YEARS.md
+calendar_feast_days,culture,Feast days fixed to the months of the god's calendar,445,405,485,5,new,,,,docs/research/CULTURE_600_YEARS.md
+royal_mourning,culture,Public days of lament for a dead ruler,450,410,490,4,new,,,,docs/research/CULTURE_600_YEARS.md
+royal_stone_portraits,culture,Stone portraits of the ruler,455,415,495,8,new,,,,docs/research/CULTURE_600_YEARS.md
+royal_wrestling_matches,culture,Wrestling and boxing matches before the ruler,460,420,500,4,new,,,,docs/research/CULTURE_600_YEARS.md
+dream_interpretation,culture,Dreams read as messages from the god,470,430,510,5,new,,,,docs/research/CULTURE_600_YEARS.md
+debate_poems,culture,Debate poems: two rivals argue in verse,480,440,520,6,new,,,,docs/research/CULTURE_600_YEARS.md
+heroic_song_cycle,culture,Heroic song cycle of a great ruler,490,445,535,10,new,,yes,,docs/research/CULTURE_600_YEARS.md
+royal_ancestor_offerings,culture,Monthly offerings for dead rulers,500,460,540,5,new,,,,docs/research/CULTURE_600_YEARS.md
+love_wedding_songs,culture,Love songs and wedding songs,505,465,545,4,new,,,,docs/research/CULTURE_600_YEARS.md
+city_laments,culture,Laments for a ruined town,510,470,550,6,new,,,,docs/research/CULTURE_600_YEARS.md
+offering_omens,culture,Omens read from offerings,520,480,560,6,new,knowledge,,,docs/research/CULTURE_600_YEARS.md
+god_boat_procession,culture,The god's boat carried in procession,530,490,570,8,new,,,,docs/research/CULTURE_600_YEARS.md
+letters_to_the_god,culture,Letters to the god laid before the shrine,540,500,580,4,new,,,,docs/research/CULTURE_600_YEARS.md
+palace_wall_painting,culture,Painted walls in palace halls,545,505,585,6,new,,,,docs/research/CULTURE_600_YEARS.md
+scribal_songs_satires,culture,Tablet-house songs and satires,555,515,595,5,new,,,,docs/research/CULTURE_600_YEARS.md
+pilgrimage,culture,Pilgrimage to the god's great house from distant towns,560,520,600,6,new,,,,docs/research/CULTURE_600_YEARS.md
+foreign_fashion_adoption,culture,Foreign ornament and dress adopted,570,530,610,4,new,,,,docs/research/CULTURE_600_YEARS.md
+sung_divine_narrative,culture,Sung narrative of the god's deeds with music,580,540,620,8,new,,,,docs/research/CULTURE_600_YEARS.md
+feast_of_the_dead,culture,Yearly feast of the dead,590,550,630,5,new,,,,docs/research/CULTURE_600_YEARS.md
+festival_bread_sharing,culture,Festival bread from the god shared with every household,600,560,640,4,new,,,,docs/research/CULTURE_600_YEARS.md
+labor_rotations,labor,Shared work taken in turns,1,0,3,1.5,catalog,institutions,,institutions@1: Labor rotations: households take turns at shared work,docs/research/LABOR_600_YEARS.md
+household_task_division,labor,Household tasks divided by age and season,2,0,4,1,new,,,,docs/research/LABOR_600_YEARS.md
+dawn_task_briefings,labor,Tasks assigned at dawn,3,0,5,1,era,,,,docs/research/LABOR_600_YEARS.md
+aptitude_trials,labor,Aptitude trials for new hands,4,0,6,1,era,,,,docs/research/LABOR_600_YEARS.md
+paired_task_assignment,labor,Hard tasks done in pairs,5,0,8,1,era,,,,docs/research/LABOR_600_YEARS.md
+rest_break_timing,labor,Rest breaks timed by the sun,6,1,10,1,era,,,,docs/research/LABOR_600_YEARS.md
+shared_work_signals,labor,Shared work signals: calls and claps,8,2,12,1.5,era,,,,docs/research/LABOR_600_YEARS.md
+seasonal_work_round,labor,"Seasonal round: set times to plant, fell and build",10,3,15,2,new,,,,docs/research/LABOR_600_YEARS.md
+task_sequencing_habits,labor,Task sequencing habits,12,4,18,1.5,era,,,,docs/research/LABOR_600_YEARS.md
+midday_heat_rest,labor,Midday rest in the hot season,14,5,20,1.5,new,,,,docs/research/LABOR_600_YEARS.md
+children_light_tasks,labor,Children's light tasks: bird-scaring and gleaning,16,6,22,1.5,new,demography,,demography@32: Children given graded tasks by age,docs/research/LABOR_600_YEARS.md
+skill_recognition,labor,Skilled hands recognized by name,18,6,25,2,era,,,,docs/research/LABOR_600_YEARS.md
+rotating_heavy_tasks,labor,Heavy tasks rotated among the able,22,10,30,2,era,,,,docs/research/LABOR_600_YEARS.md
+herding_rotas,labor,Herding rotas for common flocks,25,10,35,2,new,nutrition,,,docs/research/LABOR_600_YEARS.md
+work_party_feasts,labor,Neighbour work party repaid with a feast,28,12,38,3,new,,yes,,docs/research/LABOR_600_YEARS.md
+festival_rest_days,labor,Festival rest days,32,15,42,2,new,culture,,,docs/research/LABOR_600_YEARS.md
+part_time_specialists,labor,Part-time craft specialists within households,36,18,48,4,new,,yes,,docs/research/LABOR_600_YEARS.md
+slack_season_building,labor,Building work kept for the slack season,40,20,52,3,new,,,,docs/research/LABOR_600_YEARS.md
+household_craft_learning,labor,Children learn a craft beside a parent,50,28,65,3,new,,,,docs/research/LABOR_600_YEARS.md
+motion_economy_habits,labor,Economical movement habits,55,30,70,2,era,,,,docs/research/LABOR_600_YEARS.md
+recovery_days_after_heavy_tasks,labor,Recovery days after heavy tasks,58,32,75,2,era,,,,docs/research/LABOR_600_YEARS.md
+boundary_markers_parallel_crews,labor,Boundary markers for parallel crews,62,35,80,2,era,,,,docs/research/LABOR_600_YEARS.md
+cross_training_circuits,labor,Cross-training circuits,66,38,85,2,era,,,,docs/research/LABOR_600_YEARS.md
+task_captains,labor,Task captains,80,48,105,3,era,,,,docs/research/LABOR_600_YEARS.md
+hauling_chants,labor,Hauling chants to time a pull,88,55,115,2,new,,,,docs/research/LABOR_600_YEARS.md
+paced_work_cycles,labor,Paced work cycles,95,60,125,2,era,,,,docs/research/LABOR_600_YEARS.md
+great_work_parties,labor,Great work parties for megaliths and dykes,100,65,135,8,new,,yes,,docs/research/LABOR_600_YEARS.md
+mentored_task_learning,labor,Mentored task learning,110,70,145,3,era,,,,docs/research/LABOR_600_YEARS.md
+seasonal_labor_pooling,labor,Seasonal labor pooling,120,80,155,3,era,,,,docs/research/LABOR_600_YEARS.md
+batch_sizing_by_fatigue,labor,Batch size set by fatigue,130,90,165,2,era,,,,docs/research/LABOR_600_YEARS.md
+elder_instruction_days,labor,Elder instruction days,135,95,170,2,era,,,,docs/research/LABOR_600_YEARS.md
+household_labor_borrowing,labor,Labor borrowed between households,140,100,175,2,era,,,,docs/research/LABOR_600_YEARS.md
+runner_relays_between_work_sites,labor,Runner relays between work sites,145,105,180,2,era,logistics,,,docs/research/LABOR_600_YEARS.md
+full_time_specialists,labor,Full-time specialists fed from shared stores,155,115,195,10,new,,yes,,docs/research/LABOR_600_YEARS.md
+load_tallies,labor,Overseer's tally of loads carried,165,125,205,3,new,knowledge,,,docs/research/LABOR_600_YEARS.md
+shrine_work_obligations,labor,Owed work days for the shrine store,180,140,220,8,new,institutions,yes,,docs/research/LABOR_600_YEARS.md
+tool_handoff_staging,labor,Tools staged for handoff,195,155,235,2,era,,,,docs/research/LABOR_600_YEARS.md
+cross_party_scheduling,labor,Scheduling across work parties,205,165,245,3,era,,,,docs/research/LABOR_600_YEARS.md
+fixed_worker_rations,labor,Fixed grain rations per worker,215,175,255,10,new,institutions;nutrition,yes,nutrition@224: Standard ration bowls for workers,docs/research/LABOR_600_YEARS.md
+craft_quarters,labor,Craft quarters: specialists cluster by trade,225,185,265,5,new,,,,docs/research/LABOR_600_YEARS.md
+specialist_rotation_ladders,labor,Specialist rotation ladders,235,195,275,3,era,,,,docs/research/LABOR_600_YEARS.md
+crew_handoffs,labor,Crews hand over unfinished work by tally,240,200,280,3,catalog,,,,docs/research/LABOR_600_YEARS.md
+capacity_ledgers,labor,Capacity ledgers,248,208,288,3,era,knowledge,,,docs/research/LABOR_600_YEARS.md
+tool_reach_zoning,labor,Tool reach zoning,252,212,292,2,era,,,,docs/research/LABOR_600_YEARS.md
+joint_crew_debriefs,labor,Joint crew debriefs,262,222,302,2,era,,,,docs/research/LABOR_600_YEARS.md
+journeyman_placement,labor,Skilled helpers placed with masters,268,228,308,3,era,,,,docs/research/LABOR_600_YEARS.md
+age_graded_load_limits,labor,Age-graded load limits,280,240,320,3,era,,,,docs/research/LABOR_600_YEARS.md
+apprentice_for_keep,labor,Apprentice works for keep while learning,310,280,340,4,new,,,,docs/research/LABOR_600_YEARS.md
+workshop_layout_planning,labor,Workshop layout planning,345,305,385,3,era,,,,docs/research/LABOR_600_YEARS.md
+crew_count_scribes,labor,Scribes assigned to count crews,350,310,390,5,new,knowledge,,,docs/research/LABOR_600_YEARS.md
+gangs_of_ten,labor,Gangs of ten under a foreman,355,315,395,5,new,,,,docs/research/LABOR_600_YEARS.md
+certified_craft_competence,labor,Recognized master craftworkers,365,325,405,4,era,,,,docs/research/LABOR_600_YEARS.md
+rotating_named_gangs,labor,Named gangs in rotating watches for great works,380,340,420,10,new,,yes,,docs/research/LABOR_600_YEARS.md
+flood_season_great_works,labor,Great works scheduled for the flood season,385,345,425,5,new,,,,docs/research/LABOR_600_YEARS.md
+workers_villages,labor,Workers' village beside a great work,390,350,430,8,new,,yes,,docs/research/LABOR_600_YEARS.md
+shift_overlap_briefings,labor,Shift overlap briefings,400,360,440,2,era,,,,docs/research/LABOR_600_YEARS.md
+fatigue_aware_task_assignment,labor,Fatigue-aware task assignment,420,380,460,3,era,,,,docs/research/LABOR_600_YEARS.md
+measured_plot_allotment,labor,Field work allotted by measured plots,425,385,465,4,new,knowledge,,,docs/research/LABOR_600_YEARS.md
+brick_quotas,labor,Daily brick quota per moulder,430,390,470,5,new,,,,docs/research/LABOR_600_YEARS.md
+hired_harvest_hands,labor,Harvest hands hired for the season,440,400,480,5,new,,,,docs/research/LABOR_600_YEARS.md
+daily_task_norms,labor,Standard daily task norms for digging and carrying,450,410,490,10,new,,yes,,docs/research/LABOR_600_YEARS.md
+light_duty_for_infirm,labor,Lighter tasks and rations for sick and aged workers,470,430,510,5,new,health,,,docs/research/LABOR_600_YEARS.md
+man_day_accounts,labor,Man-day accounts of labor owed and done,480,440,520,10,new,knowledge,yes,,docs/research/LABOR_600_YEARS.md
+monthly_rest_days,labor,Fixed rest days in the working month,490,450,530,4,new,,,,docs/research/LABOR_600_YEARS.md
+levy_substitutes,labor,Substitutes hired to serve another's levy,500,460,540,5,new,,,,docs/research/LABOR_600_YEARS.md
+hired_labor_contracts,labor,Labor hired for silver or grain by sealed agreement,520,480,560,10,new,,yes,,docs/research/LABOR_600_YEARS.md
+apprentice_contracts,labor,Apprentice contracts with a set term,540,500,580,8,catalog,,yes,,docs/research/LABOR_600_YEARS.md
+levy_exemptions,labor,Exemption from levy for temple or craft service,555,515,595,5,new,institutions,,,docs/research/LABOR_600_YEARS.md
+attendance_lists,labor,Foremen's daily attendance lists,570,530,610,5,new,,,,docs/research/LABOR_600_YEARS.md
+trade_elders,labor,Trade elders speak for workshop crews,580,540,620,5,new,,,,docs/research/LABOR_600_YEARS.md
+apprentice_quotas,labor,Masters train a set number of apprentices,590,550,630,4,new,,,,docs/research/LABOR_600_YEARS.md
+crew_loans_between_cities,labor,Skilled crews lent between cities,600,560,640,5,new,,,,docs/research/LABOR_600_YEARS.md
+raw_material_prestaging,production,Raw stock set out before a work session,1,0,4,1,era,,,,docs/research/PRODUCTION_600_YEARS.md
+stone_sorting,production,"Stone chosen by fracture, grain and ring",2,0,5,1.5,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+edge_testing_by_feel,production,Edges tested by feel,3,0,6,1,era,,,,docs/research/PRODUCTION_600_YEARS.md
+controlled_flaking,production,Pressure-flaked blades and points,4,0,8,2,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+edge_resharpening_rounds,production,Resharpening rounds for blades and scrapers,5,1,10,1.5,era,,,,docs/research/PRODUCTION_600_YEARS.md
+cordage,production,Two-ply twisted cordage,6,2,10,2,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+hafted_tools,production,"Hafting with sinew, pitch and cord",7,2,12,2,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+basketry,production,Coiled and twined basketry,8,3,12,2,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+notched_measuring_rods,production,Notched measuring rods,9,3,14,1.5,era,knowledge,,,docs/research/PRODUCTION_600_YEARS.md
+hide_smoke_curing,production,"Hides scraped, stretched and smoke-cured",10,4,15,2,new,,,,docs/research/PRODUCTION_600_YEARS.md
+batch_task_grouping,production,Craft tasks grouped into batches,11,4,16,1.5,era,,,,docs/research/PRODUCTION_600_YEARS.md
+clay_testing,production,"Clay tested by wetting, rolling and drying",12,5,18,2,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+clay_shaping,production,"Hand-built pots: coil, pinch and slab",13,5,20,3,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+woven_carriers,production,"Woven carriers, mats and fish traps",14,6,20,2,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+bone_needle_sewing,production,Bone awls and eyed needles for sewn hides,15,6,22,2,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+ground_stone_axes,production,Ground and polished stone axes and adzes,16,6,22,3,new,,,,docs/research/PRODUCTION_600_YEARS.md
+mineral_pigment_preparation,production,Ochre and mineral pigments ground and bound,18,8,25,2,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+pit_firing,production,Open pit and bonfire firing of pots,20,10,28,3,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+clay_tempering,production,"Sand, shell and chaff tempering",22,12,30,3,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+grog_preparation,production,Crushed-sherd grog,24,12,32,2,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+timber_seasoning,production,"Timber barked, stacked and seasoned",26,14,35,3,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+bow_drill_drive,production,"Bow drill for beads, wood and stone",28,15,38,3,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+fiber_retting,production,Flax retted in ponds,30,16,40,3,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+drop_spindles,production,Spliced fiber spun on whorled spindles,32,18,42,3,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+grip_wrapping_practice,production,Grips wrapped on tool handles,34,18,45,1.5,era,,,,docs/research/PRODUCTION_600_YEARS.md
+charcoal,production,Charcoal burned in covered stacks,36,20,48,4,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+paired_measure_checking,production,Two keepers check each measure,38,20,50,1.5,era,knowledge,,,docs/research/PRODUCTION_600_YEARS.md
+warp_weighted_looms,production,Warp-weighted loom,40,22,55,5,catalog,,yes,,docs/research/PRODUCTION_600_YEARS.md
+plain_weaving,production,Plain-weave linen cloth,44,25,60,4,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+burnished_slipped_wares,production,Burnished and slip-coated wares,48,28,65,3,new,,,,docs/research/PRODUCTION_600_YEARS.md
+lime_burning,production,Lime burned for plaster and whitewash,50,30,70,5,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+scrap_reclamation_habits,production,Offcuts and broken tools reclaimed,53,32,75,2,era,,,,docs/research/PRODUCTION_600_YEARS.md
+workshop_space_sharing,production,Work floors shared between households,56,35,80,2,era,,,,docs/research/PRODUCTION_600_YEARS.md
+kiln_control,production,Two-chamber updraft kiln,60,38,85,8,catalog,,yes,,docs/research/PRODUCTION_600_YEARS.md
+painted_pottery,production,Painted wares with fired mineral paints,64,40,90,4,new,,,,docs/research/PRODUCTION_600_YEARS.md
+native_copper_working,production,Native copper cold-hammered and annealed,68,45,95,5,new,,,,docs/research/PRODUCTION_600_YEARS.md
+reference_vessel_sets,production,Reference vessel sets,72,48,100,2,era,knowledge,,,docs/research/PRODUCTION_600_YEARS.md
+tournette,production,Tournette: slow turntable for finishing pots,75,50,105,5,new,,,,docs/research/PRODUCTION_600_YEARS.md
+horizontal_ground_loom,production,Horizontal ground loom,78,52,108,4,new,,,,docs/research/PRODUCTION_600_YEARS.md
+stone_grain_judging,production,Stone judged by grain before quarrying,80,55,110,2,era,,,,docs/research/PRODUCTION_600_YEARS.md
+ore_assaying,production,Ore trials: roasting and colour tests on green stones,85,58,115,6,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+copper_smelting,production,Copper smelted in crucibles with blowpipes,90,60,125,12,catalog,,yes,,docs/research/PRODUCTION_600_YEARS.md
+haft_fit_checking,production,Haft fit checked before use,95,65,130,2,era,,,,docs/research/PRODUCTION_600_YEARS.md
+hide_tanning,production,Hides tanned with oak bark and galls,100,70,135,5,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+copper_casting,production,Open-mould casting of flat axes,105,75,140,10,catalog,,yes,,docs/research/PRODUCTION_600_YEARS.md
+fire_setting_mining,production,Fire-setting and stone mauls at copper workings,115,80,150,5,new,,,,docs/research/PRODUCTION_600_YEARS.md
+assistant_task_offloading,production,Assistants take over simple craft steps,120,85,155,2,era,,,,docs/research/PRODUCTION_600_YEARS.md
+handle_balance_testing,production,Handle balance testing,125,90,160,2,era,,,,docs/research/PRODUCTION_600_YEARS.md
+textile_dye_extraction,production,"Plant dyes for yarn: madder, weld, woad",130,95,165,4,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+lead_smelting,production,Lead smelted from galena,140,100,175,6,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+seed_oil_pressing,production,Seed and olive oil pressed for lamps and leather,150,110,185,4,catalog,nutrition,,,docs/research/PRODUCTION_600_YEARS.md
+reduction_firing,production,Controlled reduction firing: black-topped wares,160,120,195,5,new,,,,docs/research/PRODUCTION_600_YEARS.md
+standard_weight_sets,production,Matched weighing stones,165,125,200,3,era,knowledge,,,docs/research/PRODUCTION_600_YEARS.md
+wool_spinning,production,Wool spun from wool-bearing sheep,170,130,205,5,new,,,,docs/research/PRODUCTION_600_YEARS.md
+arsenical_copper,production,Arsenical copper from mixed ores,175,135,215,10,new,,yes,,docs/research/PRODUCTION_600_YEARS.md
+output_quality_sorting,production,Output sorted by quality grade,180,140,215,2,era,,,,docs/research/PRODUCTION_600_YEARS.md
+measure_drift_checking,production,Measures checked for drift,183,145,220,2,era,,,,docs/research/PRODUCTION_600_YEARS.md
+template_based_sizing,production,Template-based sizing,188,150,225,3,era,,,,docs/research/PRODUCTION_600_YEARS.md
+lost_wax_casting,production,Lost-wax casting,195,155,235,10,new,,yes,,docs/research/PRODUCTION_600_YEARS.md
+comparative_tool_trials,production,Comparative tool trials,198,160,235,2,era,,,,docs/research/PRODUCTION_600_YEARS.md
+sheet_copper_riveting,production,Sheet copper hammered and riveted,205,165,245,4,new,,,,docs/research/PRODUCTION_600_YEARS.md
+clay_feel_judging,production,Clay judged by feel,210,170,250,2,era,,,,docs/research/PRODUCTION_600_YEARS.md
+faience,production,Faience: glazed quartz paste,225,185,260,10,new,,yes,,docs/research/PRODUCTION_600_YEARS.md
+wheel_thrown_pottery,production,Fast wheel-thrown pottery,230,190,270,12,new,,yes,,docs/research/PRODUCTION_600_YEARS.md
+mould_made_bowls,production,Mould-made ration bowls in mass batches,235,195,275,5,new,,,,docs/research/PRODUCTION_600_YEARS.md
+tube_drilled_stone_vessels,production,Stone vessels bored with tube drill and sand,245,205,285,6,new,,,,docs/research/PRODUCTION_600_YEARS.md
+silver_cupellation,production,Silver parted from lead by cupellation,250,210,290,8,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+craft_order_queuing,production,Craft orders queued by due date,255,215,295,2,era,,,,docs/research/PRODUCTION_600_YEARS.md
+bivalve_moulds,production,Two-piece moulds for shaft-hole axes,260,220,300,6,new,,,,docs/research/PRODUCTION_600_YEARS.md
+meteoric_iron_working,production,Meteoric iron cold-worked into beads,265,225,305,4,new,,,,docs/research/PRODUCTION_600_YEARS.md
+task_matched_tool_selection,production,Tool matched to task,270,230,310,2,era,,,,docs/research/PRODUCTION_600_YEARS.md
+standard_unit_naming,production,Standard unit names,275,235,315,3,era,knowledge,,,docs/research/PRODUCTION_600_YEARS.md
+lampblack_capture,production,Lampblack gathered for ink and paint,285,245,325,3,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+clay_levigation,production,Fine clays settled in water tanks,295,255,335,4,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+temple_workshops,production,Temple workshops under an overseer,310,280,340,6,new,labor,,,docs/research/PRODUCTION_600_YEARS.md
+seasonal_craft_scheduling,production,Craft work scheduled by season,320,290,350,3,era,,,,docs/research/PRODUCTION_600_YEARS.md
+tin_smelting,production,Tin smelted from cassiterite,330,300,360,8,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+graded_tool_retirement,production,Tools retired by wear grade,340,310,370,2,era,,,,docs/research/PRODUCTION_600_YEARS.md
+copper_carpentry_tools,production,"Copper saws, chisels and drills for stone and wood",350,320,380,6,new,,,,docs/research/PRODUCTION_600_YEARS.md
+bronze_alloying,production,Tin bronze by set proportion,360,320,400,15,catalog,,yes,,docs/research/PRODUCTION_600_YEARS.md
+garment_pattern_cutting,production,Garments and hides cut to templates,365,325,405,5,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+cross_settlement_measure_agreement,production,Measures agreed between settlements,370,330,410,4,era,knowledge,,,docs/research/PRODUCTION_600_YEARS.md
+leather_goods_patterning,production,"Leather goods cut to pattern: bags, straps, sandals",375,335,415,4,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+closed_moulds,production,Closed stone and clay moulds,380,340,420,6,new,,,,docs/research/PRODUCTION_600_YEARS.md
+wool_felting_fulling,production,Wool felted and fulled,390,350,430,4,new,,,,docs/research/PRODUCTION_600_YEARS.md
+goldsmith_filigree,production,"Gold and silver sheet, filigree and granulation",400,360,440,8,new,,yes,,docs/research/PRODUCTION_600_YEARS.md
+bronze_work_hardening,production,Bronze edges work-hardened by hammering,410,370,450,4,new,,,,docs/research/PRODUCTION_600_YEARS.md
+pot_bellows,production,Pot bellows at the smelting hearth,420,380,460,8,new,,yes,,docs/research/PRODUCTION_600_YEARS.md
+fiber_combing,production,Wool combed for even yarn,425,385,465,4,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+twill_weave_structures,production,Twill weaves,430,390,470,6,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+glassmaking,production,Glass beads from fritted sand and plant ash,440,400,480,12,catalog,,yes,,docs/research/PRODUCTION_600_YEARS.md
+hard_soldering,production,Hard solders: gold-copper and silver-copper,450,410,490,5,new,,,,docs/research/PRODUCTION_600_YEARS.md
+palace_weaving_houses,production,Palace weaving houses with rationed weavers,460,420,500,6,new,labor,,labor@460: Weaving teams on rations,docs/research/PRODUCTION_600_YEARS.md
+weighed_alloy_recipes,production,Alloy recipes by weighed parts,470,430,510,5,new,knowledge,,,docs/research/PRODUCTION_600_YEARS.md
+raised_bronze_vessels,production,Bronze vessels raised from sheet,480,440,520,5,new,,,,docs/research/PRODUCTION_600_YEARS.md
+peat_drying,production,Peat cut and dried as fuel,490,450,530,3,catalog,ecology,,,docs/research/PRODUCTION_600_YEARS.md
+standard_ingots,production,Standard ingots for exchange,500,460,540,5,new,logistics,,logistics@570: Oxhide-shaped copper ingots as standard cargo,docs/research/PRODUCTION_600_YEARS.md
+sulfur_purification,production,Sulfur gathered and purified,510,470,550,5,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+shaft_furnaces,production,Shaft furnaces with clay tuyères,520,480,560,10,new,,yes,,docs/research/PRODUCTION_600_YEARS.md
+alum_mordant_dyeing,production,Mordant dyeing with alum,530,490,570,8,new,,,,docs/research/PRODUCTION_600_YEARS.md
+cored_socket_casting,production,Cored castings for socketed tools,540,500,580,6,new,,,,docs/research/PRODUCTION_600_YEARS.md
+ceramic_glaze_formulation,production,Glazed pottery,555,515,595,8,catalog,,yes,,docs/research/PRODUCTION_600_YEARS.md
+refractory_body_trials,production,Refractory clay bodies tested,565,525,605,5,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+ceramic_crucibles,production,Refractory crucibles,570,530,610,6,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+crucible_glass_melting,production,Glass melted in crucibles,580,540,620,8,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+core_formed_glass,production,Core-formed glass vessels,590,550,640,12,catalog,,yes,,docs/research/PRODUCTION_600_YEARS.md
+tapestry_weaving,production,Tapestry weave on the upright loom,595,555,640,6,new,,,,docs/research/PRODUCTION_600_YEARS.md
+refractory_brick_firing,production,Fired refractory bricks for furnace linings,600,560,640,6,catalog,,,,docs/research/PRODUCTION_600_YEARS.md
+common_ground_marking,infrastructure,Common ground marked out for building,2,0,5,1,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+hazard_landmark_memory,infrastructure,Hazard landmark memory,3,0,6,1.5,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+drainage,infrastructure,Surface water led away from sleeping places,4,0,8,2,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+sightline_staking,infrastructure,House plots staked by sightline,6,1,10,1.5,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+site_clearing_assessment,infrastructure,Site-clearing judgment,8,2,12,1.5,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+joinery,infrastructure,Lashed and notched pole joints,10,3,15,2,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+well_siting,infrastructure,Wells sited by seepage and plants,12,4,18,3,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+clay_lined_storage_pits,infrastructure,Clay-lined storage pits,14,5,20,2,new,nutrition,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+flood_mark_reading,infrastructure,High-water marks read from banks,15,6,22,1.5,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+adobe_wall_construction,infrastructure,Hand-formed mud lumps and adobe walls,18,6,25,3,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+framed_construction,infrastructure,Earth-fast post-and-beam longhouse,20,8,28,5,catalog,,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+wattle_and_daub_walls,infrastructure,Wattle-and-daub walls,24,10,32,3,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+thatched_roofing,infrastructure,Reed and straw thatch,26,10,35,3,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+dry_stone_walls,infrastructure,Dry-stone walls for pens and terraces,28,12,38,3,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+lined_well_shafts,infrastructure,Timber- and wattle-lined well shafts,32,15,42,4,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+flood_house_mounds,infrastructure,House mounds raised above flood,36,18,45,3,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+stone_wall_footings,infrastructure,Stone footings under earthen walls,40,20,50,3,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+flat_clay_roofs,infrastructure,"Flat roofs of beams, reeds and packed clay",44,22,55,3,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+mould_made_mudbricks,infrastructure,Mould-made mudbricks,48,25,65,6,new,,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+lime_plastered_floors,infrastructure,Lime-plastered floors and walls,52,28,70,4,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+wedges_and_levers,infrastructure,"Wedges, levers and rollers for heavy stones",55,30,75,3,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+bitumen_sealing,infrastructure,Bitumen waterproofing for floors and sills,58,32,80,4,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+footing_soil_judging,infrastructure,Footing soil judged before building,72,45,100,2,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+refuge_point_designation,infrastructure,Refuge points agreed before floods,75,48,105,2,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+megalith_raising,infrastructure,"Megaliths raised with earth ramps, levers and ropes",80,50,115,8,new,,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+seasonal_path_maintenance,infrastructure,Paths repaired each season,88,55,120,2,era,logistics,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+central_hall_houses,infrastructure,Tripartite central-hall house,95,60,130,6,new,,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+river_supply_channels,infrastructure,Supply channels dug from river to settlement,105,70,140,6,new,nutrition,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+bracing_inspection_rounds,infrastructure,Bracing inspection rounds,115,80,150,2,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+communal_upkeep_scheduling,infrastructure,Communal upkeep scheduling,120,85,155,2,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+dwelling_site_orientation,infrastructure,Dwellings oriented to sun and wind,122,85,160,3,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+storm_response_drill,infrastructure,Storm response drill,125,90,160,2,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+flood_levees,infrastructure,Earthen dykes and levees against floods,135,95,175,8,new,,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+shrine_terraces,infrastructure,Shrine terrace of packed earth and brick,150,110,190,10,new,culture,yes,culture@170: The god's house raised on a platform above the town,docs/research/INFRASTRUCTURE_600_YEARS.md
+corner_squaring_method,infrastructure,Corners squared with a cord triangle,155,115,195,2,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+public_space_allocation,infrastructure,Public space allocated,158,118,198,2,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+warning_call_relay,infrastructure,Warning calls relayed,160,120,200,2,era,security,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+courtyard_storerooms,infrastructure,Storerooms with sealed doors around a court,170,130,210,5,new,nutrition,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+timber_post_beam_connections,infrastructure,Mortised post-and-beam frames cut with copper chisels,180,140,220,5,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+niched_brick_facades,infrastructure,Buttressed and niched mudbrick façades,190,150,230,8,new,,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+rainwater_cisterns,infrastructure,Lime-plastered rainwater cisterns,200,160,240,6,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+stone_lined_drains,infrastructure,Stone-lined lane drains,210,170,250,5,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+wedge_and_fire_quarrying,infrastructure,"Quarrying with wedges, pounders and fire",220,180,260,5,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+clay_pipe_forming,infrastructure,Fired clay drain pipes,235,195,275,10,catalog,,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+course_leveling_practice,infrastructure,Courses levelled as walls rise,240,200,280,2,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+ground_bearing_assessment,infrastructure,Ground bearing assessment,242,200,280,3,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+post_disaster_damage_survey,infrastructure,Damage surveyed after a disaster,245,205,285,2,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+runoff_grade_reading,infrastructure,Runoff grade reading,248,205,290,3,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+ceramic_pipe_firing_qualification,infrastructure,Pipe sections fired to a tested standard,255,215,295,6,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+courtyard_houses,infrastructure,Multi-room courtyard houses,260,220,300,5,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+load_path_reading,infrastructure,Load path reading,268,228,305,3,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+shared_work_crew_rotation,infrastructure,Shared work crew rotation,270,230,310,2,era,labor,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+corbelled_vaults,infrastructure,Corbelled stone vaults and passages,275,235,315,8,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+post_storm_resource_pooling,infrastructure,Resources pooled after a storm,285,245,325,2,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+diversion_dams,infrastructure,Rubble diversion dams and reservoirs,290,250,330,8,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+town_enclosure_walls,infrastructure,Mudbrick town enclosure wall,300,260,340,12,new,security,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+herringbone_plano_convex_brick,infrastructure,Plano-convex brick laid in herringbone courses,315,285,345,4,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+kiln_fired_bricks,infrastructure,Kiln-fired bricks for wet courses,330,290,370,8,new,,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+gypsum_mortar,infrastructure,Gypsum mortar for stone and brick,340,300,380,5,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+dressed_stone_masonry,infrastructure,Dressed-stone masonry with copper tools,350,310,390,12,new,,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+rammed_earth_construction,infrastructure,Pounded-earth walls in board forms,360,320,400,6,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+stepped_stone_tombs,infrastructure,"Stepped stone tomb: ramps, sledges and wetted tracks",370,330,410,15,new,,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+public_works_priority_review,infrastructure,Public works priority review,378,340,415,2,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+structural_repair_triage,infrastructure,Structural repair triage,380,340,420,2,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+seasonal_hazard_calendar,infrastructure,Seasonal hazard calendar,382,345,420,2,era,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+lime_mortar,infrastructure,Lime mortar for stone and brick courses,385,345,425,8,catalog,,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+wedge_brick_well_lining,infrastructure,Well shafts lined with wedge-shaped bricks,390,350,430,5,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+wadi_dams,infrastructure,Stone-faced dam across a wadi,395,355,435,10,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+fired_roof_tiles,infrastructure,Fired roof tiles,400,360,440,6,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+upper_storeys,infrastructure,Upper storeys on timber joists,405,365,445,5,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+bitumen_bedded_brick,infrastructure,Bitumen-bedded brick for baths and drains,410,370,450,4,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+covered_sewers,infrastructure,Brick-covered street drains,420,380,460,10,catalog,,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+rigid_pipe_bedding,infrastructure,"Pipes laid in bedded, graded trenches",425,385,465,5,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+standard_brick_proportions,infrastructure,Standard brick proportions (1:2:4),430,390,470,4,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+masonry_bond_patterns,infrastructure,Header-and-stretcher brick bonds,435,395,475,4,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+urban_street_plans,infrastructure,Planned street grid with house blocks,440,400,480,12,catalog,,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+building_drainage_coordination,infrastructure,Roof runoff led into drains,445,405,485,4,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+ventilated_granaries,infrastructure,Raised granary with air channels,450,410,490,6,new,nutrition,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+pitched_brick_vaults,infrastructure,Pitched-brick barrel vaults without centering,455,415,495,8,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+shaduf_water_lift,infrastructure,Shaduf water lift,460,420,500,4,new,nutrition,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+reed_mat_brick_layers,infrastructure,Reed-mat and cable layers in mass brick,470,430,510,5,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+stepped_temple_towers,infrastructure,Stepped temple tower of solid brick,480,440,520,20,new,,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+brick_mass_drain_shafts,infrastructure,Drain shafts through a brick mass,490,450,530,4,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+wooden_log_conduits,infrastructure,Hollowed-log water channels,500,460,540,3,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+clay_pipe_socket_jointing,infrastructure,"Tapered, socketed terracotta pipes",510,470,550,8,catalog,,yes,,docs/research/INFRASTRUCTURE_600_YEARS.md
+timber_splice_connections,infrastructure,Scarf joints for long timber beams,520,480,560,4,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+light_wells,infrastructure,Light wells and ventilated rooms,530,490,570,4,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+building_shading_design,infrastructure,Eaves and screens shading walls,540,500,580,4,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+ceramic_pipe_fit_gauges,infrastructure,Gauges for pipe socket fit,550,510,590,4,catalog,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+ashlar_masonry,infrastructure,Ashlar courses fitted without mortar,560,520,600,8,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+mine_shoring,infrastructure,Mine galleries propped with timber,570,530,610,6,catalog,production,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+cistern_flushed_drains,infrastructure,Palace drains flushed from roof cisterns,580,540,620,6,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+timber_laced_walls,infrastructure,Rubble walls laced with timber against earthquakes,590,550,630,6,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+colonnaded_porticoes,infrastructure,Colonnaded porticoes on stone bases,600,560,640,6,new,,,,docs/research/INFRASTRUCTURE_600_YEARS.md
+edible_resource_recognition,nutrition,"Edible plants, roots and seeds known by season",2,0,7,1.5,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+ember_tending,nutrition,Ember tending: carrying and banking fire,3,0,8,1.5,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+hearth_heat_retention,nutrition,Hearth heat held with stones and banked ash,4,1,9,1.5,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+food_pounding_mortars,nutrition,Pounding food in stone mortars,5,2,10,1.5,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+nut_kernel_shelling,nutrition,Cracking and shelling nuts,5,2,10,1.5,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+food_drying,nutrition,"Sun and wind drying of fish, meat and fruit",6,3,11,2,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+seed_selection,nutrition,Sowing kept seed from the best plants,7,4,12,2,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+friction_fire_ignition,nutrition,Fire by drilling wood,8,5,13,2,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+hearth_roasting_control,nutrition,"Hearth roasting on coals, spits and hot stones",8,5,13,2,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+seasonal_protein_sourcing,nutrition,"Seasonal protein: fish runs, fowl moults, calving",9,6,14,2,era,,,,docs/research/NUTRITION_600_YEARS.md
+percussion_fire_ignition,nutrition,Fire by striking stone,10,5,20,2,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+varied_forage_rotation,nutrition,Varied forage rounds through the year,10,5,20,2,era,,,,docs/research/NUTRITION_600_YEARS.md
+smoking,nutrition,Smoke-curing fish and meat,11,6,21,2.5,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+root_grating_dewatering,nutrition,Grating and squeezing starchy roots,12,7,22,2,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+pest_deterrent_storage_herbs,nutrition,Pest-repelling herbs laid in stores,13,8,23,2,era,,,,docs/research/NUTRITION_600_YEARS.md
+fruit_pulp_screening,nutrition,Screening fruit pulp from skins and stones,15,10,25,2,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+animal_taming,nutrition,"Penned herds: sheep, goats, cattle, pigs",16,11,26,3,catalog,ecology,,,docs/research/NUTRITION_600_YEARS.md
+soil_exhaustion_recognition,nutrition,Tired ground noticed: yields fall on one plot,17,12,27,2,era,ecology,,,docs/research/NUTRITION_600_YEARS.md
+plot_yield_memory,nutrition,Remembered yields for each plot,18,8,28,2,era,,,,docs/research/NUTRITION_600_YEARS.md
+acorn_leaching,nutrition,Leaching bitterness from acorns,19,9,29,3,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+pulse_splitting,nutrition,"Splitting pulses: lentil, pea, chickpea",20,10,30,2,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+earth_oven_cooking,nutrition,Earth-oven cooking in pits,22,12,32,3,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+fish_weirs_and_traps,nutrition,"Fish weirs, basket traps and sinker nets for fish and fowl",23,13,33,3,new,,,,docs/research/NUTRITION_600_YEARS.md
+grain_moisture_watch,nutrition,Grain dried and turned against damp,24,14,34,2,era,,,,docs/research/NUTRITION_600_YEARS.md
+milking,nutrition,"Milking goats, sheep and cows",25,15,35,3,new,,yes,,docs/research/NUTRITION_600_YEARS.md
+indirect_solar_food_drying,nutrition,Shaded drying racks,26,16,41,2,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+crop_calendars,nutrition,Crop calendar for sowing and harvest,27,17,42,3,catalog,ecology,,,docs/research/NUTRITION_600_YEARS.md
+threshing_frames,nutrition,Threshing on beaten floors,28,18,43,3,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+winnowing_practice,nutrition,Winnowing chaff in the wind,30,20,45,2,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+saddle_quern_grinding,nutrition,Grinding grain on saddle querns,32,22,47,3,new,,,,docs/research/NUTRITION_600_YEARS.md
+cereal_dehulling,nutrition,Hulling emmer and barley in mortars,34,24,49,2,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+hand_dough_forming,nutrition,Kneading dough by hand,35,25,50,2,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+deliberate_milk_souring,nutrition,Soured milk kept as a thick curd,36,26,51,2,era,,,,docs/research/NUTRITION_600_YEARS.md
+food_steaming_vessels,nutrition,Steaming food over boiling pots,40,25,55,3,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+controlled_baking,nutrition,Flatbread baked on hot stones and griddles,42,27,62,3,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+seed_cleaning,nutrition,Seed cleaning with sieves and hand sorting,46,31,66,3,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+drive_hunts,nutrition,"Drive hunts with fences, funnels and pits",48,33,68,4,new,,,,docs/research/NUTRITION_600_YEARS.md
+seed_reserves,nutrition,Seed stock kept apart from eating grain,52,37,72,4,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+hermetic_grain_storage,nutrition,Grain sealed in pots and plastered pits,55,40,75,5,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+wild_honey_smoking,nutrition,Honey taken from wild hives with smoke,58,38,78,2,new,,,,docs/research/NUTRITION_600_YEARS.md
+grain_malting,nutrition,"Sprouted, dried grain (malt)",60,40,85,4,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+starch_washing_separation,nutrition,Washing starch from pounded roots and grain,62,42,87,3,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+resin_sealed_wine,nutrition,Wine from grapes kept in resin-sealed jars,65,45,90,5,new,,,,docs/research/NUTRITION_600_YEARS.md
+pressed_cheese,nutrition,Cheese from curd pressed in pierced strainers,70,50,95,5,new,,yes,,docs/research/NUTRITION_600_YEARS.md
+managed_fallow,nutrition,Resting a field for a season,72,52,97,4,catalog,ecology,,,docs/research/NUTRITION_600_YEARS.md
+batch_labeling_by_harvest,nutrition,Harvest batches marked by season,75,55,105,3,era,,,,docs/research/NUTRITION_600_YEARS.md
+root_cellars,nutrition,Root cellars,80,55,110,4,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+raised_granaries,nutrition,Raised granaries on posts,85,60,115,5,catalog,infrastructure,,infrastructure@65: Raised timber floors in storehouses,docs/research/NUTRITION_600_YEARS.md
+leafy_green_incorporation,nutrition,Leafy greens gathered and grown for the pot,90,65,120,2,era,,,,docs/research/NUTRITION_600_YEARS.md
+cutting_propagation,nutrition,"Planting from cuttings: fig, olive and vine",95,70,130,6,new,,,,docs/research/NUTRITION_600_YEARS.md
+mixed_grain_legume_meals,nutrition,Grain eaten with pulses,100,70,135,3,era,,,,docs/research/NUTRITION_600_YEARS.md
+manure_field_spreading,nutrition,Manure from penned stock spread on fields,104,74,139,4,era,ecology,,,docs/research/NUTRITION_600_YEARS.md
+reserve_allocation_priority,nutrition,"Reserve order: seed first, then children",106,76,141,3,era,,,,docs/research/NUTRITION_600_YEARS.md
+flour_sifting,nutrition,Sifting flour through reed and cloth sieves,110,80,150,3,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+offshoot_date_planting,nutrition,Date palms planted from offshoots,112,82,152,5,new,,,,docs/research/NUTRITION_600_YEARS.md
+fermentation_control,nutrition,Fermenting grain and fruit in vessels,116,86,156,8,catalog,,yes,,docs/research/NUTRITION_600_YEARS.md
+staggered_meal_timing,nutrition,Staggered meal times,120,85,160,2,era,,,,docs/research/NUTRITION_600_YEARS.md
+ash_field_amendment,nutrition,Ash spread on fields,122,87,162,3,era,ecology,,,docs/research/NUTRITION_600_YEARS.md
+irrigation_schedules,nutrition,Irrigation turns between households,126,91,166,6,catalog,infrastructure,,,docs/research/NUTRITION_600_YEARS.md
+communal_meal_variety_rules,nutrition,Varied meals from the common pot,135,100,175,3,era,,,,docs/research/NUTRITION_600_YEARS.md
+ox_drawn_ard,nutrition,Ox teams yoked to the ard,145,105,185,8,new,production,yes,,docs/research/NUTRITION_600_YEARS.md
+reserve_moisture_barrier_layering,nutrition,Stores layered against damp,150,110,190,3,era,,,,docs/research/NUTRITION_600_YEARS.md
+salting_fish_meat,nutrition,Salting fish and meat,155,115,195,4,new,,,,docs/research/NUTRITION_600_YEARS.md
+planting_density_adjustment,nutrition,Planting density matched to ground,158,118,198,3,era,,,,docs/research/NUTRITION_600_YEARS.md
+butter_churning,nutrition,Butter churned from milk,172,132,212,4,new,,,,docs/research/NUTRITION_600_YEARS.md
+winter_fodder,nutrition,Winter fodder cut and stored for stock,180,140,220,5,new,,,,docs/research/NUTRITION_600_YEARS.md
+intercrop_pairing_lore,nutrition,Paired crops in one field,195,155,235,4,era,,,,docs/research/NUTRITION_600_YEARS.md
+clay_dome_ovens,nutrition,Clay dome ovens for bread,200,160,240,6,new,,,,docs/research/NUTRITION_600_YEARS.md
+portion_allotment_customs,nutrition,Portions allotted by household,208,168,248,3,era,,,,docs/research/NUTRITION_600_YEARS.md
+shared_reserve_access_rules,nutrition,Rules for drawing on the shared reserve,212,172,252,3,era,,,,docs/research/NUTRITION_600_YEARS.md
+barley_beer,nutrition,Barley beer brewed from malt and bread,220,180,260,8,new,,yes,,docs/research/NUTRITION_600_YEARS.md
+seasonal_diet_diversification,nutrition,Seasonal diet planned against lean months,226,186,266,4,era,,,,docs/research/NUTRITION_600_YEARS.md
+layered_pit_storage,nutrition,Layered storage pits,228,188,268,4,era,,,,docs/research/NUTRITION_600_YEARS.md
+field_rest_scheduling,nutrition,Field-rest schedule,232,192,272,5,era,ecology,,,docs/research/NUTRITION_600_YEARS.md
+dried_fruit_cakes,nutrition,"Dried-fruit cakes: figs, dates and raisins",245,205,285,3,new,,,,docs/research/NUTRITION_600_YEARS.md
+kitchen_gardens,nutrition,"Kitchen gardens: onion, garlic, leek, lettuce",260,220,300,5,new,,,,docs/research/NUTRITION_600_YEARS.md
+grain_parboiling,nutrition,Parboiling grain before drying,290,250,330,4,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+stock_rotation,nutrition,"Stores rotated by date, oldest used first",305,265,345,4,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+brine_fermentation,nutrition,Vegetables and fish fermented in brine,315,275,355,6,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+spoilage_inspection,nutrition,Store keepers inspect jars and cull spoilage,325,285,365,4,new,,,,docs/research/NUTRITION_600_YEARS.md
+regional_granaries,nutrition,Inspected regional granaries,335,295,375,12,catalog,institutions,yes,,docs/research/NUTRITION_600_YEARS.md
+ghee,nutrition,Ghee: butter clarified for keeping,345,305,385,4,new,,,,docs/research/NUTRITION_600_YEARS.md
+legume_field_interplanting,nutrition,Legumes interplanted in grain fields,355,315,395,6,era,ecology,,,docs/research/NUTRITION_600_YEARS.md
+reserve_rotation_ledgers,nutrition,Reserve rotation ledgers,360,320,400,5,era,,,,docs/research/NUTRITION_600_YEARS.md
+weaning_food_customs,nutrition,Soft weaning foods customary,365,325,405,3,era,,,,docs/research/NUTRITION_600_YEARS.md
+named_beers,nutrition,Named beers by grain and strength,375,335,415,6,new,,,,docs/research/NUTRITION_600_YEARS.md
+marked_wine_jars,nutrition,Wine jars sealed and marked by estate and year,385,345,425,5,new,,,,docs/research/NUTRITION_600_YEARS.md
+fattened_geese_ducks,nutrition,Geese and ducks penned and fattened on grain,395,355,435,6,new,,,,docs/research/NUTRITION_600_YEARS.md
+work_gang_bakeries,nutrition,Bakeries and breweries feeding work gangs,400,360,440,8,new,labor,,"labor@410: Water carriers, cooks and bakers assigned to crews",docs/research/NUTRITION_600_YEARS.md
+stocked_fish_ponds,nutrition,Fish ponds stocked from the river,405,365,445,8,new,ecology,yes,ecology@395: Fish ponds stocked in canals and basins,docs/research/NUTRITION_600_YEARS.md
+hive_beekeeping,nutrition,Bees kept in clay and reed hives,415,375,455,10,new,ecology,yes,ecology@420: Hive keeping in clay-pipe hives,docs/research/NUTRITION_600_YEARS.md
+sesame_oil,nutrition,Sesame grown for oil,425,385,465,6,new,,,,docs/research/NUTRITION_600_YEARS.md
+stall_fattened_cattle,nutrition,Stall-fattened cattle for feasts,430,390,470,5,new,,,,docs/research/NUTRITION_600_YEARS.md
+jarred_salt_fish,nutrition,Salted fish packed in jars for exchange,438,398,478,5,new,,,,docs/research/NUTRITION_600_YEARS.md
+fodder_barley,nutrition,Fodder barley grown for draught oxen and asses,445,405,485,6,new,,,,docs/research/NUTRITION_600_YEARS.md
+graded_rations,nutrition,"Rations scaled by age, sex and work",465,425,505,8,new,institutions,yes,,docs/research/NUTRITION_600_YEARS.md
+beam_olive_press,nutrition,Beam-and-weight olive press,475,435,515,10,new,production,,,docs/research/NUTRITION_600_YEARS.md
+flavouring_herbs,nutrition,"Flavouring herbs grown: coriander, cumin, mustard",485,445,525,5,new,,,,docs/research/NUTRITION_600_YEARS.md
+named_breads,nutrition,"Many named breads, sweetened with dates and honey",495,455,535,6,new,,,,docs/research/NUTRITION_600_YEARS.md
+vinegar_pickling,nutrition,Vinegar from soured wine and beer; pickling,505,465,545,8,catalog,,,,docs/research/NUTRITION_600_YEARS.md
+date_palm_pollination,nutrition,Hand-pollinating date palms,515,475,555,8,new,,,,docs/research/NUTRITION_600_YEARS.md
+date_syrup_preserves,nutrition,Date syrup and honey preserves,525,485,565,5,new,,,,docs/research/NUTRITION_600_YEARS.md
+famine_reserves,nutrition,Famine reserve held across two harvests,540,500,580,12,new,institutions,yes,,docs/research/NUTRITION_600_YEARS.md
+dried_salted_cheese,nutrition,"Salted, dried cheeses kept for months",560,520,600,5,new,,,,docs/research/NUTRITION_600_YEARS.md
+separate_grain_lines,nutrition,Separate grain lines kept for bread and for beer,572,532,612,6,new,,,,docs/research/NUTRITION_600_YEARS.md
+fruit_tree_grafting,nutrition,Grafting fruit trees (regional),585,545,625,12,new,,yes,,docs/research/NUTRITION_600_YEARS.md
+wound_cleaning,health,Washing wounds with clean water,2,0,7,1.5,catalog,,,,docs/research/HEALTH_600_YEARS.md
+sickness_pattern_memory,health,Sickness patterns remembered from past seasons,3,0,8,1.5,era,,,,docs/research/HEALTH_600_YEARS.md
+symptom_sharing_customs,health,Symptoms told openly to kin and healer,4,1,9,1.5,era,,,,docs/research/HEALTH_600_YEARS.md
+tool_hazard_awareness,health,Cutting-tool hazards taught to the young,4,1,9,1.5,era,,,,docs/research/HEALTH_600_YEARS.md
+turbidity_judging,health,Cloudy water judged unfit to drink,5,2,10,1.5,era,,,,docs/research/HEALTH_600_YEARS.md
+delousing,health,Lice combing and delousing,6,3,11,1.5,new,,,,docs/research/HEALTH_600_YEARS.md
+herbal_classification,health,Healing plants sorted from food and poison,8,5,13,2,catalog,,,,docs/research/HEALTH_600_YEARS.md
+contagion_avoidance_customs,health,Keeping away from the visibly sick,9,6,14,2,era,,,,docs/research/HEALTH_600_YEARS.md
+splint_and_bracing_technique,health,Splints and binding for broken limbs,10,5,20,2,era,,,,docs/research/HEALTH_600_YEARS.md
+dietary_healing_regimens,health,Special foods for the sick,11,6,21,2,era,,,,docs/research/HEALTH_600_YEARS.md
+birth_attendants,health,Experienced women attend births,12,7,22,2.5,catalog,demography,,,docs/research/HEALTH_600_YEARS.md
+household_water_boiling,health,Drinking water left to settle,13,8,23,2,era,,,,docs/research/HEALTH_600_YEARS.md
+snakebite_treatment,health,"Snakebite and sting: cut, suck and bind",14,9,24,2,new,,,,docs/research/HEALTH_600_YEARS.md
+joint_reduction,health,Resetting dislocated joints,16,11,26,2,new,,,,docs/research/HEALTH_600_YEARS.md
+clean_water,health,Drinking upstream of washing and herds,18,8,28,3,catalog,,,,docs/research/HEALTH_600_YEARS.md
+wound_packing,health,"Moss, lint and leaves to pack wounds",20,10,30,2,new,,,,docs/research/HEALTH_600_YEARS.md
+poultices,health,"Poultices of crushed leaves, clay and fat",22,12,32,2,new,,,,docs/research/HEALTH_600_YEARS.md
+sweat_baths,health,Sweat baths in heated huts,25,15,35,3,new,,,,docs/research/HEALTH_600_YEARS.md
+purges_emetics,health,Purges and emetics from bitter plants,28,18,43,3,new,,,,docs/research/HEALTH_600_YEARS.md
+tooth_drilling,health,Tooth drilling and beeswax fillings,31,21,46,3,new,,,,docs/research/HEALTH_600_YEARS.md
+boil_lancing,health,Lancing boils with sharp flint,34,24,49,2,new,,,,docs/research/HEALTH_600_YEARS.md
+disability_care,health,Lifelong care for the lame and disabled,38,28,53,3,new,,,,docs/research/HEALTH_600_YEARS.md
+poppy_analgesia,health,Poppy latex to ease pain,45,30,65,3,new,,,,docs/research/HEALTH_600_YEARS.md
+refuse_removal,health,Refuse and dung carried out of the dwelling,50,35,70,2,new,,,,docs/research/HEALTH_600_YEARS.md
+trepanation,health,Skull scraping for head injury (trepanation),55,40,75,6,new,,yes,,docs/research/HEALTH_600_YEARS.md
+crutches,health,Crutches and staffs for the injured,62,42,87,2,new,,,,docs/research/HEALTH_600_YEARS.md
+heatstroke_care,health,"Shade, water and rest for heat-struck workers",66,46,91,2,new,,,,docs/research/HEALTH_600_YEARS.md
+honey_wound_dressing,health,Honey laid on wounds,72,52,97,3,new,,,,docs/research/HEALTH_600_YEARS.md
+sickroom_fumigation,health,Sickrooms fumigated with smoke and herbs,80,55,110,3,new,,,,docs/research/HEALTH_600_YEARS.md
+shared_vessel_avoidance,health,No shared cups with the sick,88,63,118,3,era,,,,docs/research/HEALTH_600_YEARS.md
+household_remedy_kits,health,Household remedy kits,91,66,121,3,era,,,,docs/research/HEALTH_600_YEARS.md
+load_carrying_posture,health,Carrying loads on head and back without injury,94,69,129,3,era,,,,docs/research/HEALTH_600_YEARS.md
+water_source_rotation,health,Rotating between water sources,97,72,132,3,era,,,,docs/research/HEALTH_600_YEARS.md
+kohl_eye_paint,health,Green eye paint against flies and glare,102,72,137,3,new,,,,docs/research/HEALTH_600_YEARS.md
+bracket_fungus_vermifuge,health,Bracket fungus against gut worms,110,80,150,3,new,,,,docs/research/HEALTH_600_YEARS.md
+sickroom_isolation_practice,health,The sick kept in a separate room,117,87,157,3,era,,,,docs/research/HEALTH_600_YEARS.md
+symptom_triage_customs,health,Triage: who is seen first,120,85,160,3,era,,,,docs/research/HEALTH_600_YEARS.md
+workplace_hazard_awareness,health,"Hazards of kiln, pit and field taught",123,88,163,3,era,,,,docs/research/HEALTH_600_YEARS.md
+greywater_diversion_practice,health,Waste water led away from houses,126,91,166,3,era,,,,docs/research/HEALTH_600_YEARS.md
+head_shaving_lice,health,Heads shaved and hair cut against lice,135,100,175,2,new,,,,docs/research/HEALTH_600_YEARS.md
+sickbed_distance_norms,health,Distance kept at the sickbed,147,107,187,3,era,,,,docs/research/HEALTH_600_YEARS.md
+recovery_diet_customs,health,Recovery diets for the convalescent,150,110,190,3,era,,,,docs/research/HEALTH_600_YEARS.md
+fire_tending_safeguards,health,Safeguards around open fires,153,113,193,3,era,,,,docs/research/HEALTH_600_YEARS.md
+water_container_cleaning_customs,health,Water jars scrubbed and covered,156,116,196,3,era,,,,docs/research/HEALTH_600_YEARS.md
+skin_oiling,health,Oil rubbed on skin against sun and cracking,165,125,205,2,new,,,,docs/research/HEALTH_600_YEARS.md
+traction_fracture_setting,health,Fractures set under traction,175,135,215,4,new,,,,docs/research/HEALTH_600_YEARS.md
+castor_oil_remedies,health,Castor oil as purge and salve,182,142,222,3,new,,,,docs/research/HEALTH_600_YEARS.md
+healing_chants,health,Healing chants alongside remedies,190,150,230,2,new,culture,,,docs/research/HEALTH_600_YEARS.md
+river_bathing,health,Regular bathing in running water,198,158,238,2,new,,,,docs/research/HEALTH_600_YEARS.md
+seasonal_well_flushing,health,Wells cleaned out each season,210,170,250,4,era,,,,docs/research/HEALTH_600_YEARS.md
+outbreak_burial_protocols,health,Burial rules during outbreaks,222,182,262,4,era,,,,docs/research/HEALTH_600_YEARS.md
+burn_treatment_protocols,health,Burns cooled and dressed with fat,226,186,266,3,era,,,,docs/research/HEALTH_600_YEARS.md
+convalescent_care_rotations,health,Rotas to nurse the convalescent,229,189,269,3,era,,,,docs/research/HEALTH_600_YEARS.md
+fly_protection,health,Covered food and fly whisks,245,205,285,2,new,,,,docs/research/HEALTH_600_YEARS.md
+apprentice_healer_rounds,health,Healers take apprentices on rounds,268,228,308,4,era,,,,docs/research/HEALTH_600_YEARS.md
+burial_ground_separation,health,Burial grounds apart from houses and water,272,232,312,4,era,culture,,culture@140: Cemeteries set apart from the village,docs/research/HEALTH_600_YEARS.md
+occupational_rest_customs,health,Rest days for heavy trades,275,235,315,3,era,labor,,,docs/research/HEALTH_600_YEARS.md
+communal_washing_rotas,health,Rotas for communal washing places,278,238,318,3,era,,,,docs/research/HEALTH_600_YEARS.md
+wound_suturing,health,Stitching wounds with thread,292,252,332,5,new,,,,docs/research/HEALTH_600_YEARS.md
+latrine_siting,health,Latrine pits sited by slope and water,302,262,342,5,catalog,,yes,,docs/research/HEALTH_600_YEARS.md
+water_settling_basins,health,Settling basins for drinking water,308,268,348,6,catalog,infrastructure,,,docs/research/HEALTH_600_YEARS.md
+isolation_practice,health,The ill set apart during outbreaks,313,273,353,6,catalog,,,,docs/research/HEALTH_600_YEARS.md
+woven_dressings,health,Woven linen dressings,318,278,358,4,catalog,production,,,docs/research/HEALTH_600_YEARS.md
+protected_wellheads,health,Covered wellheads,325,285,365,5,catalog,infrastructure,,,docs/research/HEALTH_600_YEARS.md
+separate_clean_water_storage,health,Drinking water stored apart from washing water,335,295,375,5,catalog,,,,docs/research/HEALTH_600_YEARS.md
+ash_fat_soap,health,Soap from ash and fat,345,305,385,5,new,,,,docs/research/HEALTH_600_YEARS.md
+copper_razors,health,Shaving and plucking with copper blades,355,315,395,3,new,,,,docs/research/HEALTH_600_YEARS.md
+healer_titles,health,"Healer titles: physician, tooth-healer, eye-healer",368,328,408,10,new,,yes,,docs/research/HEALTH_600_YEARS.md
+healer_specialization_customs,health,Healers specialise by ailment,378,338,418,6,era,,,,docs/research/HEALTH_600_YEARS.md
+protective_gear_customs,health,"Aprons, wraps and eye guards for hot and sharp work",381,341,421,4,era,,,,docs/research/HEALTH_600_YEARS.md
+sanitation_inspection_customs,health,"Elders inspect wells, drains and refuse pits",384,344,424,4,era,,,,docs/research/HEALTH_600_YEARS.md
+quarantine_travel_restrictions,health,Afflicted places avoided by travelers,387,347,427,4,era,,,,docs/research/HEALTH_600_YEARS.md
+embalming_anatomy,health,Organs known from preparing the dead,400,360,440,8,new,culture,,,docs/research/HEALTH_600_YEARS.md
+public_baths,health,Public washing places,410,370,450,10,catalog,infrastructure,yes,infrastructure@415: Brick bathing platforms and a great tank,docs/research/HEALTH_600_YEARS.md
+linen_board_splints,health,Board splints bound with linen,420,380,460,5,new,,,,docs/research/HEALTH_600_YEARS.md
+remedy_vehicles,health,"Remedies given in beer, milk and honey",428,388,468,3,new,,,,docs/research/HEALTH_600_YEARS.md
+mineral_eye_salves,health,Eye salves of copper and lead ores,438,398,478,5,new,,,,docs/research/HEALTH_600_YEARS.md
+wired_teeth,health,Loose teeth bound with wire,446,406,486,4,new,,,,docs/research/HEALTH_600_YEARS.md
+willow_myrtle_remedies,health,Willow and myrtle leaf against pain and fever,470,430,510,4,new,,,,docs/research/HEALTH_600_YEARS.md
+remedy_tablets,health,"Remedy tablets: ingredient, preparation, use",482,442,522,12,new,knowledge,yes,,docs/research/HEALTH_600_YEARS.md
+case_records,health,Remedy and outcome written together,495,455,535,10,catalog,,,,docs/research/HEALTH_600_YEARS.md
+skin_disease_exclusion,health,Scaly-skin sufferers kept outside the town,515,475,555,5,new,,,,docs/research/HEALTH_600_YEARS.md
+mad_dog_liability,health,Owner liable for a known mad dog,530,490,570,4,new,institutions,,,docs/research/HEALTH_600_YEARS.md
+womens_ailment_texts,health,Women's-ailment texts,540,500,580,8,new,demography,,,docs/research/HEALTH_600_YEARS.md
+healer_fee_law,health,Healer fees and penalties set by law,550,510,590,5,new,institutions,,,docs/research/HEALTH_600_YEARS.md
+injury_manual,health,"Injury manual: examine, judge, treat or leave alone",565,525,605,15,new,,yes,,docs/research/HEALTH_600_YEARS.md
+cautery,health,Cautery with a heated fire-drill,576,536,616,5,new,,,,docs/research/HEALTH_600_YEARS.md
+pulse_taking,health,Heartbeat felt at wrist and neck,585,545,625,6,new,,,,docs/research/HEALTH_600_YEARS.md
+remedy_compendia,health,Great remedy compendia of hundreds of recipes,595,555,635,12,new,,,,docs/research/HEALTH_600_YEARS.md
+lactational_spacing_awareness,demography,Nursing delays the next pregnancy,2,0,7,1.5,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+labor_position_customs,demography,Birth positions that ease labor,3,0,8,1.5,era,health,,,docs/research/DEMOGRAPHY_600_YEARS.md
+named_descent_lines,demography,Named descent lines,3,0,8,1.5,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+fever_watch_customs,demography,Night watch over feverish infants,4,1,9,1.5,era,health,,,docs/research/DEMOGRAPHY_600_YEARS.md
+sleeping_area_rotation,demography,Sleeping places rotated near the hearth,4,1,9,1.5,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+infant_swaddling_practice,demography,Infants swaddled against cold,5,2,10,1.5,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+birth_spacing_customs,demography,Births spaced by weaning and custom,6,3,11,2,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+postpartum_seclusion_care,demography,Quiet rest after birth,7,4,12,2,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+infant_carrying_slings,demography,Carrying slings and cradleboards,10,5,20,1.5,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+shared_childcare,demography,Shared childcare between households,12,7,22,2,catalog,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+extended_family_room_division,demography,Growing homes divided into sleeping areas,14,9,24,2,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+lineage_exogamy,demography,Marriage outside one's own line,16,11,26,2,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+mouths_against_store,demography,Mouths counted against the store,20,10,30,2,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+patrilocal_residence,demography,Bride joins her husband's kin,24,14,34,2,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+kin_care_widows_orphans,demography,Widows and orphans taken in by kin,28,18,43,2,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+maternal_recovery,demography,Food and lighter work after childbirth,37,27,52,3,catalog,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+household_space_planning,demography,"Household space planned for sleep, air and care",42,27,62,3,catalog,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+village_marriage_alliances,demography,Marriage alliances between villages,50,35,70,3,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+elder_care_by_children,demography,Elders fed and housed by grown children,55,40,75,2,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+winter_herder_return,demography,Herders' camps rejoin the village for winter,60,40,85,3,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+bride_wealth_gifts,demography,Bride gifts of livestock and goods,65,45,90,3,new,institutions,,institutions@50: Bride-wealth agreements between lineages,docs/research/DEMOGRAPHY_600_YEARS.md
+captive_adoption,demography,Captives and strays adopted into a lineage,70,50,95,3,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+daughter_hamlets,demography,A crowded village buds a daughter hamlet,82,57,112,5,new,,yes,,docs/research/DEMOGRAPHY_600_YEARS.md
+lean_year_dispersal,demography,Lean-year dispersal to kin elsewhere,88,63,118,3,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+infant_feeding_schedules,demography,Infant feeding schedules,90,65,120,3,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+seasonal_conception_timing,demography,Conception timed to full stores,91,66,121,3,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+cord_afterbirth_handling,demography,Cord tied and afterbirth handled by set steps,92,67,127,3,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+room_allocation_by_size,demography,Sleeping space divided by household size,93,68,128,3,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+harvest_headcount,demography,Headcount at the harvest gathering,100,70,135,3,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+new_household_plots,demography,House plots granted to new households,104,74,139,4,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+newcomer_host_season,demography,Newcomers work a season under a host household,112,82,152,3,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+weaning_food_softening,demography,Soft first foods for weaning,118,88,158,3,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+interval_weaning_practice,demography,Weaning intervals stretched with gruel,120,85,160,3,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+breech_repositioning_technique,demography,Turning a breech infant before labor,122,87,162,4,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+seasonal_sleeping_arrangements,demography,Sleeping places moved with the seasons,124,89,164,3,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+newcomer_intermarriage,demography,Newcomers wed into local households,132,97,172,3,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+satellite_hamlets,demography,Satellite hamlets around a central village,140,100,180,5,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+hearth_hazard_proofing,demography,Toddlers kept from hearths and hot pots,148,108,188,3,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+sibling_age_gap_norms,demography,Customary gap between siblings,150,110,190,3,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+obstructed_labor_recognition,demography,Signs of a stalled labor,152,112,192,4,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+seasonal_storage_sleeping_swap,demography,Stores and sleeping mats swapped by season,154,114,194,3,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+famine_refugee_hosting,demography,Famine refugees taken in by host villages,162,122,202,4,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+hearth_counts,demography,Households counted by hearth,170,130,210,4,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+carrying_capacity_awareness,demography,Seeing when the land can feed no more mouths,182,142,222,5,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+kin_wards,demography,Kin wards within a growing village,200,160,240,5,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+childhood_illness_recognition,demography,Dangerous childhood fevers and rashes recognised,222,182,262,4,era,health,,,docs/research/DEMOGRAPHY_600_YEARS.md
+kin_fostering_networks,demography,Weaned children fostered with kin in lean years,224,184,264,4,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+hemorrhage_control_herbs,demography,Herbs to slow bleeding after birth,226,186,266,4,era,health,,,docs/research/DEMOGRAPHY_600_YEARS.md
+multigenerational_household_norms,demography,Three generations under one roof by rule,228,188,268,4,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+protective_birth_amulets,demography,Protective amulets for mother and child,250,210,290,2,new,culture,,,docs/research/DEMOGRAPHY_600_YEARS.md
+rural_urban_migration,demography,Towns draw in villagers from the countryside,262,222,302,8,new,,yes,,docs/research/DEMOGRAPHY_600_YEARS.md
+childhood_growth_milestones,demography,Children checked against growth milestones,268,228,308,4,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+grandmaternal_birth_counsel,demography,Grandmothers counsel birth timing,270,230,310,3,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+trained_midwife_referral,demography,Difficult births referred to the best attendant,272,232,312,4,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+elder_quarters_customs,demography,Warmest place kept for elders,274,234,314,3,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+people_herd_counts,demography,Periodic counts of people and herds,345,305,385,8,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+patron_protection,demography,Outsiders under a patron's protection,355,315,395,5,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+communal_child_supervision_rotas,demography,Child-watch rotas between neighbours,378,338,418,4,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+marriage_age_norms,demography,Customary marriage ages,380,340,420,5,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+household_partition_customs,demography,Crowded households split by agreed rule,382,342,422,5,era,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+midwife_apprenticeship_lines,demography,Midwives train successors over seasons,400,360,440,8,era,health,yes,,docs/research/DEMOGRAPHY_600_YEARS.md
+recorded_dowry,demography,Betrothal gifts and dowry recorded,420,380,460,5,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+household_vital_lists,demography,Births and deaths noted in household lists,440,400,480,6,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+birth_stool_bricks,demography,Birth stool and birth bricks,452,412,492,4,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+ward_residence_lists,demography,Residents listed by ward,462,422,502,6,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+partible_inheritance,demography,Inheritance shares among children,472,432,512,6,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+named_year_ages,demography,Ages reckoned by named years,480,440,520,5,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+fraternal_joint_estates,demography,Brothers hold the father's estate jointly,490,450,530,5,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+belonging_oaths,demography,Oath of belonging for settled outsiders,530,490,570,6,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+wet_nurse_contracts,demography,Wet-nurse contracts with fixed pay,540,500,580,5,new,institutions,,,docs/research/DEMOGRAPHY_600_YEARS.md
+divorce_settlements,demography,Divorce terms and return of dowry,548,508,588,5,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+widow_portion_law,demography,Widow's portion secured by law,556,516,596,5,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+contraceptive_pessaries,demography,Honey-and-acacia pessaries to delay pregnancy,562,522,602,6,new,health,,,docs/research/DEMOGRAPHY_600_YEARS.md
+three_year_nursing,demography,Customary three-year nursing,568,528,608,3,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+levirate_marriage,demography,Widow wed to her husband's brother (regional),578,538,618,4,new,,,,docs/research/DEMOGRAPHY_600_YEARS.md
+frontier_settler_grants,demography,Settlers granted land for service on the frontier,590,550,630,10,new,,yes,,docs/research/DEMOGRAPHY_600_YEARS.md
+carried_load_balancing,logistics,Carried loads balanced on tumpline and back,2,0,6,1.5,era,,,,docs/research/LOGISTICS_600_YEARS.md
+landmark_route_naming,logistics,Landmark route names,3,0,7,1.5,era,,,,docs/research/LOGISTICS_600_YEARS.md
+paired_carrier_balancing,logistics,Two carriers share one heavy load,4,0,8,1.5,era,,,,docs/research/LOGISTICS_600_YEARS.md
+guest_host_reciprocity,logistics,Guest-host welcome for travelers,5,1,9,1.5,era,culture,,culture@22: Guest-right: a stranger fed and protected for three days,docs/research/LOGISTICS_600_YEARS.md
+vermin_deterrent_placement,logistics,Vermin-deterrent placement in stores,6,1,11,2,era,,,,docs/research/LOGISTICS_600_YEARS.md
+hide_floats,logistics,Hide floats and lashed log rafts,7,2,12,2,catalog,,,,docs/research/LOGISTICS_600_YEARS.md
+dry_cache_siting,logistics,Dry cache siting,8,3,13,2,era,,,,docs/research/LOGISTICS_600_YEARS.md
+carrying_poles,logistics,Carrying pole for two-ended loads,10,4,16,2,new,,,,docs/research/LOGISTICS_600_YEARS.md
+trail_waymarking,logistics,Trail waymarking: blazes and stacked stones,12,5,19,2,era,,,,docs/research/LOGISTICS_600_YEARS.md
+river_craft,logistics,Dugout canoes and paddles,14,7,21,3,catalog,,,,docs/research/LOGISTICS_600_YEARS.md
+trade_partner_tokens,logistics,Gift tokens between trade partners,16,8,24,2,era,,,,docs/research/LOGISTICS_600_YEARS.md
+sledges_travois,logistics,Hand-drawn sledges and travois,18,10,26,3,new,,,,docs/research/LOGISTICS_600_YEARS.md
+down_the_line_exchange,logistics,"Down-the-line exchange of flint, obsidian and shell",20,11,29,3,new,,,,docs/research/LOGISTICS_600_YEARS.md
+load_lashing_knots,logistics,Load-lashing knots and hitches,22,12,32,2,new,,,,docs/research/LOGISTICS_600_YEARS.md
+route_food_caches,logistics,Food caches along regular travel routes,25,15,35,3,new,,,,docs/research/LOGISTICS_600_YEARS.md
+portage_paths,logistics,Portage paths between waterways,28,17,39,3,new,,,,docs/research/LOGISTICS_600_YEARS.md
+skis_snowshoes,logistics,Skis and snowshoes for winter travel (regional),32,19,45,3,new,,,,docs/research/LOGISTICS_600_YEARS.md
+reed_bundle_boats,logistics,Reed-bundle boats sealed with bitumen (regional),36,22,50,4,new,,,,docs/research/LOGISTICS_600_YEARS.md
+brushwood_trackways,logistics,Brushwood mats laid over soft ground,40,25,55,3,new,,,,docs/research/LOGISTICS_600_YEARS.md
+load_backframes,logistics,Backframes for bulky loads,45,29,61,3,new,,,,docs/research/LOGISTICS_600_YEARS.md
+boundary_exchange_sites,logistics,Exchange partners meet at fixed boundary places,50,30,70,4,new,,,,docs/research/LOGISTICS_600_YEARS.md
+wayfinding_stars,logistics,Night travel steered by the stars,60,40,80,4,catalog,,,,docs/research/LOGISTICS_600_YEARS.md
+rollers_and_runners,logistics,Rollers and runners for heavy logs and stones,65,45,85,5,new,,,,docs/research/LOGISTICS_600_YEARS.md
+seasonal_ford_timing,logistics,Seasonal ford timing,75,50,100,3,era,,,,docs/research/LOGISTICS_600_YEARS.md
+relay_carrying_shifts,logistics,Relay carrying shifts on long hauls,78,50,105,4,era,,,,docs/research/LOGISTICS_600_YEARS.md
+oldest_first_marking,logistics,Oldest-first stock marking,80,55,105,3,era,,,,docs/research/LOGISTICS_600_YEARS.md
+trade_partner_memory,logistics,Remembered trade partners and their wants,85,55,115,3,era,,,,docs/research/LOGISTICS_600_YEARS.md
+salt_shell_routes,logistics,Salt and shell exchange routes,90,60,120,5,new,,,,docs/research/LOGISTICS_600_YEARS.md
+river_landings,logistics,Boat landings cleared and marked on rivers,100,65,135,4,new,,,,docs/research/LOGISTICS_600_YEARS.md
+hide_covered_boats,logistics,Hide-covered boats on wicker frames,110,75,145,5,new,,,,docs/research/LOGISTICS_600_YEARS.md
+stock_layering_method,logistics,Stock layering in stores,115,75,155,3,era,,,,docs/research/LOGISTICS_600_YEARS.md
+seasonal_route_assessment,logistics,Seasonal route assessment,120,80,160,4,era,,,,docs/research/LOGISTICS_600_YEARS.md
+barter_equivalence_custom,logistics,Customary barter equivalences,125,85,165,5,era,,,,docs/research/LOGISTICS_600_YEARS.md
+ox_drawn_sledges,logistics,Oxen trained to draw sledges,135,95,175,8,new,,,,docs/research/LOGISTICS_600_YEARS.md
+long_distance_axe_trade,logistics,Polished stone axes carried over long distances,140,100,180,5,new,,,,docs/research/LOGISTICS_600_YEARS.md
+pack_animals,logistics,Donkeys as pack animals,150,110,190,12,catalog,,yes,,docs/research/LOGISTICS_600_YEARS.md
+load_bundling_by_weight,logistics,Loads bundled by weight,152,110,190,3,era,,,,docs/research/LOGISTICS_600_YEARS.md
+rest_stop_spacing_custom,logistics,Customary rest-stop spacing,155,115,195,3,era,,,,docs/research/LOGISTICS_600_YEARS.md
+pest_barrier_maintenance,logistics,Pest barriers kept in repair,160,120,200,3,era,,,,docs/research/LOGISTICS_600_YEARS.md
+shared_trade_escort,logistics,Shared escort for trade parties,165,125,205,4,era,,,,docs/research/LOGISTICS_600_YEARS.md
+pack_load_balancing,logistics,Pack loads balanced side to side,170,130,210,3,era,,,,docs/research/LOGISTICS_600_YEARS.md
+pack_saddles,logistics,Wooden pack saddles,175,135,215,5,new,,,,docs/research/LOGISTICS_600_YEARS.md
+plank_trackways,logistics,Plank trackways across wetland,180,140,220,8,new,infrastructure,,,docs/research/LOGISTICS_600_YEARS.md
+paired_ox_yoke,logistics,Paired-ox yoke,185,145,225,6,new,,,,docs/research/LOGISTICS_600_YEARS.md
+sealed_store_doors,logistics,Store doors sealed with clay and seal,190,150,230,5,new,knowledge,,,docs/research/LOGISTICS_600_YEARS.md
+plank_extended_dugouts,logistics,Dugouts raised with sewn side planks,200,160,240,8,new,,,,docs/research/LOGISTICS_600_YEARS.md
+solid_wheel_assembly,logistics,Solid wheels of joined planks,225,185,265,15,catalog,infrastructure,yes,,docs/research/LOGISTICS_600_YEARS.md
+wooden_axle_shaping,logistics,Axles shaped and fitted,228,190,270,5,catalog,,,,docs/research/LOGISTICS_600_YEARS.md
+linchpin_retention,logistics,Linchpins keep wheels on the axle,232,190,270,4,catalog,,,,docs/research/LOGISTICS_600_YEARS.md
+trade_colonies,logistics,Trade outposts in distant river towns,235,195,275,10,new,demography,,demography@235: Daughter settlements planted along trade routes,docs/research/LOGISTICS_600_YEARS.md
+cart_bed_framing,logistics,Ox-drawn solid-wheel carts,240,200,280,10,catalog,,yes,,docs/research/LOGISTICS_600_YEARS.md
+cargo_stowage_sequencing,logistics,Cargo stowage order,242,200,280,4,era,,,,docs/research/LOGISTICS_600_YEARS.md
+storage_humidity_judging,logistics,Storage humidity judged by hand and smell,245,205,285,4,era,,,,docs/research/LOGISTICS_600_YEARS.md
+market_timing_knowledge,logistics,Market timing knowledge,248,210,290,4,era,,,,docs/research/LOGISTICS_600_YEARS.md
+crossing_point_survey,logistics,Crossing points surveyed,252,210,290,5,era,,,,docs/research/LOGISTICS_600_YEARS.md
+four_wheeled_wagons,logistics,Four-wheeled wagons,260,220,300,10,new,,,,docs/research/LOGISTICS_600_YEARS.md
+sail_panel_cutting,logistics,Square sail on river boats,272,230,310,12,catalog,,yes,,docs/research/LOGISTICS_600_YEARS.md
+waypoint_cargo_transfer,logistics,Cargo transferred at waypoints,278,240,320,4,era,,,,docs/research/LOGISTICS_600_YEARS.md
+alternate_route_scouting,logistics,Alternate routes scouted,282,240,320,4,era,,,,docs/research/LOGISTICS_600_YEARS.md
+cache_capacity_accounting,logistics,Cache capacity accounted,285,245,325,5,era,,,,docs/research/LOGISTICS_600_YEARS.md
+seasonal_trade_gathering,logistics,Seasonal trade gatherings,288,250,330,5,era,,,,docs/research/LOGISTICS_600_YEARS.md
+supply_groups,logistics,Organized supply parties,292,250,330,6,catalog,security,,,docs/research/LOGISTICS_600_YEARS.md
+cargo_seals,logistics,Cargo seals checked at dispatch and arrival,295,255,335,6,catalog,,,,docs/research/LOGISTICS_600_YEARS.md
+haul_harness_weaving,logistics,Woven haul harness and drawbar,298,260,340,5,catalog,,,,docs/research/LOGISTICS_600_YEARS.md
+graded_roads,logistics,Graded roads,300,260,340,15,catalog,infrastructure,yes,,docs/research/LOGISTICS_600_YEARS.md
+cart_running_gear,logistics,Cart running gear matched to loads,305,265,345,6,catalog,,,,docs/research/LOGISTICS_600_YEARS.md
+coastal_watercraft,logistics,Sewn-plank river and coastal boats,310,270,350,15,catalog,,yes,,docs/research/LOGISTICS_600_YEARS.md
+timber_bridges,logistics,Timber footbridges,315,275,355,8,catalog,infrastructure,,,docs/research/LOGISTICS_600_YEARS.md
+rope_laying,logistics,Laid rope for towing and rigging,320,280,360,5,catalog,,,,docs/research/LOGISTICS_600_YEARS.md
+caulking_fiber_preparation,logistics,Caulking fiber prepared with pitch,325,285,365,4,catalog,,,,docs/research/LOGISTICS_600_YEARS.md
+hull_seam_caulking,logistics,Hull seams caulked and pitched,330,290,370,5,catalog,,,,docs/research/LOGISTICS_600_YEARS.md
+treenail_fastening,logistics,Tenon and treenail plank joints,335,295,375,6,catalog,,,,docs/research/LOGISTICS_600_YEARS.md
+towpaths,logistics,Towpaths: boats hauled upstream by rope,340,300,380,5,new,,,,docs/research/LOGISTICS_600_YEARS.md
+mast_making,logistics,Stepped mast and yard,345,305,385,6,catalog,,,,docs/research/LOGISTICS_600_YEARS.md
+ferry_crossings,logistics,Fixed ferry crossings,350,310,390,5,new,,,,docs/research/LOGISTICS_600_YEARS.md
+plank_spiling,logistics,Planks shaped to the hull curve,355,315,395,6,catalog,,,,docs/research/LOGISTICS_600_YEARS.md
+central_storehouses,logistics,Central storehouses with sealed rooms and issue days,360,320,400,10,new,institutions,,,docs/research/LOGISTICS_600_YEARS.md
+convoy_load_distribution,logistics,Loads spread across a convoy,370,330,410,5,era,,,,docs/research/LOGISTICS_600_YEARS.md
+store_airflow_arrangement,logistics,Store airflow arrangement,375,335,415,5,era,,,,docs/research/LOGISTICS_600_YEARS.md
+trade_route_risk_assessment,logistics,Trade route risk assessment,380,340,420,5,era,,,,docs/research/LOGISTICS_600_YEARS.md
+waystation_spacing_judgment,logistics,Waystation spacing,385,345,425,5,era,,,,docs/research/LOGISTICS_600_YEARS.md
+onager_hybrid_teams,logistics,Onager-hybrid teams for four-wheeled wagons,390,350,430,10,new,,,,docs/research/LOGISTICS_600_YEARS.md
+paved_haul_roads,logistics,Stone-paved haul roads from quarries,395,355,435,10,new,infrastructure,,,docs/research/LOGISTICS_600_YEARS.md
+stone_jetty_harbors,logistics,Sheltered harbor with a stone jetty,400,360,440,12,new,,yes,,docs/research/LOGISTICS_600_YEARS.md
+wetted_track_sledging,logistics,Heavy sledges on wetted timber tracks,405,365,445,6,new,,,,docs/research/LOGISTICS_600_YEARS.md
+navigation_canals,logistics,Canal cuts for boat traffic,410,370,450,12,new,infrastructure,,,docs/research/LOGISTICS_600_YEARS.md
+hogging_truss_hulls,logistics,Seagoing hulls stiffened with a hogging truss,415,375,455,10,new,,,,docs/research/LOGISTICS_600_YEARS.md
+grain_barge_fleets,logistics,Grain barges moved in fleets on canals,425,385,465,6,new,,,,docs/research/LOGISTICS_600_YEARS.md
+donkey_caravans,logistics,Donkey caravans on fixed seasonal routes,435,395,475,10,new,,yes,,docs/research/LOGISTICS_600_YEARS.md
+standard_transport_jars,logistics,Standard-size transport jars,445,405,485,6,new,,,,docs/research/LOGISTICS_600_YEARS.md
+road_stations,logistics,Road stations with wells and lodging,455,415,495,8,new,,,,docs/research/LOGISTICS_600_YEARS.md
+domesticated_mounts,logistics,Horses broken to draft and riding,475,435,515,15,catalog,,yes,,docs/research/LOGISTICS_600_YEARS.md
+hired_carriers,logistics,Hired carriers and boatmen by contract,485,445,525,5,new,institutions,,,docs/research/LOGISTICS_600_YEARS.md
+spoke_tenon_cutting,logistics,Spokes tenoned into hub and felloe rim,490,450,530,8,catalog,,,,docs/research/LOGISTICS_600_YEARS.md
+spoked_wheel_assembly,logistics,Light spoked wheels,500,460,540,12,catalog,,yes,,docs/research/LOGISTICS_600_YEARS.md
+island_hopping_sailing,logistics,Island-hopping sea crossings under sail,510,470,550,15,new,,yes,,docs/research/LOGISTICS_600_YEARS.md
+mountain_pack_trains,logistics,Pack trains of tin and cloth over mountain passes,518,480,560,8,new,,,,docs/research/LOGISTICS_600_YEARS.md
+merchant_quarters_abroad,logistics,Resident merchant quarters in foreign towns,525,485,565,8,new,demography,,demography@520: Resident traders' quarter in a foreign town,docs/research/LOGISTICS_600_YEARS.md
+pilots_sea_lanes,logistics,Pilots and known sea lanes between harbors,540,500,580,6,new,,,,docs/research/LOGISTICS_600_YEARS.md
+sailing_calendar,logistics,Seasonal sailing calendar for sea trade,550,510,590,6,new,,,,docs/research/LOGISTICS_600_YEARS.md
+harbor_warehouses,logistics,Harbor warehouse districts,560,520,600,10,new,,,,docs/research/LOGISTICS_600_YEARS.md
+consignment_lists,logistics,Sealed consignment lists travel with cargo,590,550,630,5,new,knowledge,,,docs/research/LOGISTICS_600_YEARS.md
+relay_team_stations,logistics,Fresh-team stations on main roads,600,560,640,8,new,,,,docs/research/LOGISTICS_600_YEARS.md
+seasonal_patterns,ecology,Seasonal round: plants and animals return on cycles,2,0,6,1.5,catalog,,,,docs/research/ECOLOGY_600_YEARS.md
+timber_grading,ecology,"Timber grading: which woods split, bend or last",3,0,7,1.5,catalog,,,,docs/research/ECOLOGY_600_YEARS.md
+fiber_grading,ecology,Fiber grading,4,0,8,1.5,catalog,,,,docs/research/ECOLOGY_600_YEARS.md
+quarry_reading,ecology,Reading the quarry face,5,1,9,2,catalog,,,,docs/research/ECOLOGY_600_YEARS.md
+streambank_vegetation_watch,ecology,Bare streambanks wash away,6,1,11,1.5,era,,,,docs/research/ECOLOGY_600_YEARS.md
+herd_size_limits,ecology,Herd size kept within the browse,8,3,13,2,era,,,,docs/research/ECOLOGY_600_YEARS.md
+fallow_thicket_regrowth,ecology,Fallow thickets regrow,9,3,15,1.5,era,,,,docs/research/ECOLOGY_600_YEARS.md
+midden_siting_away_from_water,ecology,Middens kept away from water,10,4,16,1.5,era,,,,docs/research/ECOLOGY_600_YEARS.md
+topsoil_depth_reading,ecology,Topsoil depth read with a digging stick,11,5,17,2,era,,,,docs/research/ECOLOGY_600_YEARS.md
+browse_line_monitoring,ecology,Browse-line watching,12,5,19,2,era,,,,docs/research/ECOLOGY_600_YEARS.md
+burn_scar_regrowth_tracking,ecology,Burn-scar regrowth tracked,13,6,20,2,era,,,,docs/research/ECOLOGY_600_YEARS.md
+cookfire_smoke_venting_habit,ecology,Cookfire smoke vented,14,7,21,1.5,era,,,,docs/research/ECOLOGY_600_YEARS.md
+phenology_signs,ecology,Flowering and bird-return signs for seasonal moves,18,10,26,2,new,,,,docs/research/ECOLOGY_600_YEARS.md
+controlled_undergrowth_burning,ecology,Controlled burning of undergrowth for forage and game,20,11,29,3,new,,,,docs/research/ECOLOGY_600_YEARS.md
+spawning_calendar,ecology,Fish-run and spawning season calendar,24,14,34,3,new,,,,docs/research/ECOLOGY_600_YEARS.md
+firebreaks,ecology,Firebreaks cleared around camps and fields,28,17,39,3,new,,,,docs/research/ECOLOGY_600_YEARS.md
+indicator_plants,ecology,Indicator plants for good and poor ground,30,18,42,3,new,,,,docs/research/ECOLOGY_600_YEARS.md
+breeding_stock_sparing,ecology,Breeding females and young spared in the hunt,35,21,49,3,new,,,,docs/research/ECOLOGY_600_YEARS.md
+swidden_cycle,ecology,"Swidden cycle: clear, crop, leave to regrow",40,25,55,4,new,,,,docs/research/ECOLOGY_600_YEARS.md
+leaf_fodder_pollarding,ecology,Pollarded trees cut for leaf fodder,45,29,61,4,new,,,,docs/research/ECOLOGY_600_YEARS.md
+hive_sparing_honey_harvest,ecology,Wild-hive honey taken without killing the colony,50,30,70,3,new,,,,docs/research/ECOLOGY_600_YEARS.md
+drought_signs,ecology,Drought signs: failing springs and early-drying pools,55,35,75,3,new,,,,docs/research/ECOLOGY_600_YEARS.md
+transhumance,ecology,Transhumance: herds moved to summer pasture,60,40,80,5,new,,,,docs/research/ECOLOGY_600_YEARS.md
+shellfish_bed_recovery,ecology,Shellfish beds left to recover,65,45,85,3,new,,,,docs/research/ECOLOGY_600_YEARS.md
+downwind_workshop_placement,ecology,Workshops placed downwind,75,50,100,3,era,,,,docs/research/ECOLOGY_600_YEARS.md
+slope_erosion_watch,ecology,Gullies on cleared slopes watched and avoided,78,50,105,3,era,,,,docs/research/ECOLOGY_600_YEARS.md
+spawning_ground_avoidance,ecology,Spawning grounds avoided,80,55,105,3,era,,,,docs/research/ECOLOGY_600_YEARS.md
+frost_pocket_reading,ecology,Frost pockets and sun slopes read,85,55,115,3,new,,,,docs/research/ECOLOGY_600_YEARS.md
+pest_swarm_watch,ecology,Locust and pest-swarm watch,90,60,120,4,new,,,,docs/research/ECOLOGY_600_YEARS.md
+sacred_grove_protection,ecology,Sacred groves and springs left uncut,100,65,135,4,new,culture,,,docs/research/ECOLOGY_600_YEARS.md
+contour_terrace_reading,ecology,Terraces laid along the contour,105,70,140,5,era,,,,docs/research/ECOLOGY_600_YEARS.md
+seasonal_hunting_closures,ecology,Seasonal hunting closures,108,75,145,4,era,,,,docs/research/ECOLOGY_600_YEARS.md
+selective_deadwood_gathering,ecology,Only deadwood gathered for fuel,110,75,145,3,era,,,,docs/research/ECOLOGY_600_YEARS.md
+tannery_waste_channeling,ecology,Tannery waste channeled away,112,75,150,4,era,,,,docs/research/ECOLOGY_600_YEARS.md
+seed_scatter_after_gathering,ecology,Seed scattered back after gathering,120,80,160,3,era,,,,docs/research/ECOLOGY_600_YEARS.md
+reed_bed_rotation,ecology,Reed beds cut in rotation,130,90,170,4,new,,,,docs/research/ECOLOGY_600_YEARS.md
+copper_outcrop_signs,ecology,Green-stained rock as a sign of copper,140,100,180,5,new,production,,,docs/research/ECOLOGY_600_YEARS.md
+communal_catch_limits,ecology,Communal catch limits,150,110,190,5,era,,yes,,docs/research/ECOLOGY_600_YEARS.md
+refuse_pit_rotation,ecology,Refuse pits used in rotation,152,110,190,3,era,,,,docs/research/ECOLOGY_600_YEARS.md
+windbreak_hedgerow_siting,ecology,Windbreak hedgerows left standing,155,115,195,4,era,,,,docs/research/ECOLOGY_600_YEARS.md
+root_stock_preservation,ecology,Root stock left in the ground,158,120,200,3,era,,,,docs/research/ECOLOGY_600_YEARS.md
+flood_silt_fields,ecology,Flood-silt ground chosen for fields,170,130,210,5,new,,,,docs/research/ECOLOGY_600_YEARS.md
+wood_pasture,ecology,Wood-pasture: grazing under thinned trees,180,140,220,5,new,,,,docs/research/ECOLOGY_600_YEARS.md
+coppice_regrowth_cutting,ecology,Coppice cut for straight regrowth,195,155,235,8,era,,yes,,docs/research/ECOLOGY_600_YEARS.md
+dye_vat_runoff_control,ecology,Dye-vat runoff kept from streams,198,160,240,4,era,,,,docs/research/ECOLOGY_600_YEARS.md
+sapling_protection_customs,ecology,Saplings protected from browsing,200,160,240,4,era,,,,docs/research/ECOLOGY_600_YEARS.md
+grazing_ground_recovery_marking,ecology,Trampled pasture marked for recovery,210,170,250,4,era,,,,docs/research/ECOLOGY_600_YEARS.md
+dung_cake_fuel,ecology,Dung-cake fuel where wood grows scarce,220,180,260,4,new,production,,,docs/research/ECOLOGY_600_YEARS.md
+replanting_after_clearance,ecology,Replanting after clearance,225,185,265,6,era,,,,docs/research/ECOLOGY_600_YEARS.md
+grazing_rotation_customs,ecology,Grazing rotation customs,228,190,270,6,era,,yes,,docs/research/ECOLOGY_600_YEARS.md
+timber_stand_reserves,ecology,Timber stands held in reserve,232,190,270,6,era,,,,docs/research/ECOLOGY_600_YEARS.md
+kiln_smoke_venting_customs,ecology,Kiln smoke vented away from homes,238,200,280,4,era,,,,docs/research/ECOLOGY_600_YEARS.md
+waterlogging_recognition,ecology,Waterlogged ground recognized on over-watered plots,250,210,290,5,new,,,,docs/research/ECOLOGY_600_YEARS.md
+riparian_tree_belts,ecology,Tree belts along stream and canal banks,265,225,305,6,new,,,,docs/research/ECOLOGY_600_YEARS.md
+fuelwood_rotation,ecology,Fuelwood gathered in rotation around the settlement,275,235,315,5,new,,,,docs/research/ECOLOGY_600_YEARS.md
+spring_head_fencing,ecology,Spring heads fenced from trampling herds,280,240,320,4,new,,,,docs/research/ECOLOGY_600_YEARS.md
+named_soil_kinds,ecology,"Named soil kinds: heavy, light, sandy, salty",290,250,330,6,new,,,,docs/research/ECOLOGY_600_YEARS.md
+salinity_recognition,ecology,Salt crust recognized on irrigated fields,305,265,345,8,new,,yes,,docs/research/ECOLOGY_600_YEARS.md
+riverbank_shift_watch,ecology,Shifting riverbanks watched before siting fields,312,270,350,5,new,,,,docs/research/ECOLOGY_600_YEARS.md
+salt_leaching_fallow,ecology,Salted fields leached with fresh water and rested,320,280,360,10,new,,,,docs/research/ECOLOGY_600_YEARS.md
+wetland_margin_reserves,ecology,"Wetland edges kept for fish, fowl and reeds",330,290,370,5,new,,,,docs/research/ECOLOGY_600_YEARS.md
+stubble_grazing,ecology,"Stubble grazed after harvest, herds kept off before",340,300,380,5,new,nutrition,,,docs/research/ECOLOGY_600_YEARS.md
+pit_pond_reclamation,ecology,Spent clay and stone pits turned into ponds,350,310,390,4,new,,,,docs/research/ECOLOGY_600_YEARS.md
+recovery_zone_designation,ecology,Recovery zones set aside,360,320,400,6,era,,,,docs/research/ECOLOGY_600_YEARS.md
+watershed_boundary_marking,ecology,Watershed boundaries marked,362,320,400,6,era,,,,docs/research/ECOLOGY_600_YEARS.md
+resource_use_quotas,ecology,Resource-use quotas,365,325,405,8,era,,yes,,docs/research/ECOLOGY_600_YEARS.md
+workshop_effluent_separation,ecology,Workshop effluent kept separate,368,330,410,5,era,,,,docs/research/ECOLOGY_600_YEARS.md
+distant_timber_reserves,ecology,Distant forests known as reserves of long timber,385,345,425,6,new,,,,docs/research/ECOLOGY_600_YEARS.md
+salt_tolerant_barley,ecology,Barley favored on saltier ground,415,375,455,6,new,nutrition,,,docs/research/ECOLOGY_600_YEARS.md
+water_table_fallow,ecology,Fields rested between water turns to lower the water table,430,390,470,10,new,,yes,,docs/research/ECOLOGY_600_YEARS.md
+timed_silt_clearance,ecology,"Silt clearance timed to low water, spoil kept off fields",440,400,480,6,new,infrastructure,,,docs/research/ECOLOGY_600_YEARS.md
+layered_shade_gardens,ecology,Layered shade gardens under palms and fruit trees,450,410,490,8,new,nutrition,,,docs/research/ECOLOGY_600_YEARS.md
+seasonal_herd_matching,ecology,Herd counts matched to pasture by season,460,420,500,6,new,,,,docs/research/ECOLOGY_600_YEARS.md
+dune_spread_watch,ecology,Blown sand and dune spread watched at the desert edge,470,430,510,5,new,,,,docs/research/ECOLOGY_600_YEARS.md
+deforestation_flood_link,ecology,Bare hills recognized as a cause of fast floods,480,440,520,8,new,,,,docs/research/ECOLOGY_600_YEARS.md
+mixed_flock_balance,ecology,Goat and sheep mix matched to browse and grass,490,450,530,5,new,,,,docs/research/ECOLOGY_600_YEARS.md
+sworn_fishing_closures,ecology,Fishing-season closures sworn between villages,500,460,540,6,new,,,,docs/research/ECOLOGY_600_YEARS.md
+fish_run_weir_opening,ecology,Weirs opened on set days for the fish run,510,470,550,5,new,,,,docs/research/ECOLOGY_600_YEARS.md
+vermin_control_cats,ecology,Cats encouraged around stores and fields against vermin,515,475,555,5,new,,,,docs/research/ECOLOGY_600_YEARS.md
+shared_woodland_boundaries,ecology,Woodland boundaries shared between villages,520,480,560,6,new,institutions,,,docs/research/ECOLOGY_600_YEARS.md
+mine_spoil_containment,ecology,Mine and smelting spoil kept from streams,530,490,570,6,new,production,,,docs/research/ECOLOGY_600_YEARS.md
+timed_grass_burning,ecology,Grass burning timed to spare young growth,540,500,580,5,new,,,,docs/research/ECOLOGY_600_YEARS.md
+coppiced_charcoal_woods,ecology,Charcoal woods cut in long rotation for smelting,550,510,590,8,new,,,,docs/research/ECOLOGY_600_YEARS.md
+farmers_almanac,ecology,Written farmer's almanac of seasons and pests,560,520,600,10,new,knowledge,yes,,docs/research/ECOLOGY_600_YEARS.md
+planted_timber_groves,ecology,Planted poplar and tamarisk groves for timber,575,535,615,8,new,,,,docs/research/ECOLOGY_600_YEARS.md
+sworn_grazing_rights,ecology,Grazing rights sworn between herders and farmers,590,550,630,6,new,,,,docs/research/ECOLOGY_600_YEARS.md
+protected_temple_woods,ecology,Protected woods for temple and palace building timber,600,560,640,8,new,,,,docs/research/ECOLOGY_600_YEARS.md
+watch_rotation,security,Organized night watch,2,0,6,1.5,catalog,,,,docs/research/SECURITY_600_YEARS.md
+alarm_relay_signals,security,Alarm calls relayed between huts,3,0,7,1.5,era,,,,docs/research/SECURITY_600_YEARS.md
+dawn_readiness_drill,security,Dawn readiness: arms at hand at first light,4,0,8,1.5,era,,,,docs/research/SECURITY_600_YEARS.md
+emergency_food_caching,security,Emergency food caches for bad times,5,1,9,1.5,era,,,,docs/research/SECURITY_600_YEARS.md
+refuge_point_marking,security,Refuge points marked,6,1,11,1.5,era,,,,docs/research/SECURITY_600_YEARS.md
+hafted_weapons,security,Thrusting spear with a hafted stone point,7,2,12,2,catalog,,,,docs/research/SECURITY_600_YEARS.md
+hazard_memory_recitation,security,Hazards remembered in recited lore,8,3,13,1.5,era,,,,docs/research/SECURITY_600_YEARS.md
+bow_craft,security,Self bow and fletched arrows,9,3,15,2,catalog,,,,docs/research/SECURITY_600_YEARS.md
+sparring_customs,security,Sparring customs,10,4,16,2,era,,,,docs/research/SECURITY_600_YEARS.md
+war_slings,security,War sling with chosen stones,12,5,19,2,new,,,,docs/research/SECURITY_600_YEARS.md
+hide_wicker_shields,security,Hide and wicker shields,15,7,23,3,new,,,,docs/research/SECURITY_600_YEARS.md
+throwing_spears,security,Light throwing spears,18,10,26,2,new,,,,docs/research/SECURITY_600_YEARS.md
+stone_maceheads,security,Stone mace heads,20,11,29,3,new,,,,docs/research/SECURITY_600_YEARS.md
+ambush_raids,security,Ambush and dawn-raid practice,22,12,32,3,new,,,,docs/research/SECURITY_600_YEARS.md
+herd_recovery_pursuit,security,Pursuit to recover raided herds,25,15,35,3,new,,,,docs/research/SECURITY_600_YEARS.md
+clay_sling_bullets,security,Fired-clay sling bullets,35,21,49,3,new,,,,docs/research/SECURITY_600_YEARS.md
+raid_scouting,security,Scouts sent ahead of a raiding party,40,25,55,3,new,,,,docs/research/SECURITY_600_YEARS.md
+thorn_barriers,security,Thorn and brush barriers around camps,45,29,61,3,new,,,,docs/research/SECURITY_600_YEARS.md
+weapon_free_gatherings,security,Weapons laid aside at shared gatherings,50,30,70,3,new,,,,docs/research/SECURITY_600_YEARS.md
+hostage_exchange,security,Hostage exchange to seal a peace,55,35,75,4,new,,,,docs/research/SECURITY_600_YEARS.md
+defensive_ditch_siting,security,Defensive ditches sited on the approaches,70,45,95,6,era,,yes,,docs/research/SECURITY_600_YEARS.md
+disaster_recovery_roles,security,Disaster recovery roles,78,50,105,3,era,,,,docs/research/SECURITY_600_YEARS.md
+truce_sanctuary,security,Truce seasons and sanctuary places,85,55,115,4,new,,,,docs/research/SECURITY_600_YEARS.md
+ditch_palisades,security,Timber palisade on the ditch bank,90,60,120,6,new,,,,docs/research/SECURITY_600_YEARS.md
+perimeter_patrol_customs,security,Perimeter patrol customs,95,65,125,3,era,,,,docs/research/SECURITY_600_YEARS.md
+barred_palisade_gates,security,Gated palisade entrances barred at night,100,65,135,4,new,,,,docs/research/SECURITY_600_YEARS.md
+post_disaster_headcount_custom,security,Headcount after a disaster,105,70,140,3,era,,,,docs/research/SECURITY_600_YEARS.md
+hilltop_refuges,security,Stone-walled hilltop refuges,110,75,145,6,new,infrastructure,,,docs/research/SECURITY_600_YEARS.md
+joint_hamlet_defense_pacts,security,Joint defense pacts between hamlets,120,80,160,5,era,,,,docs/research/SECURITY_600_YEARS.md
+signal_command_drill,security,Signal commands in a fight,125,85,165,4,era,,,,docs/research/SECURITY_600_YEARS.md
+paired_veteran_mentoring,security,Veterans paired with young fighters,135,95,175,4,era,,,,docs/research/SECURITY_600_YEARS.md
+cast_copper_weapons,security,Cast copper points and blades,145,105,185,8,new,production,,,docs/research/SECURITY_600_YEARS.md
+neighbor_shelter_pledges,security,Neighbors pledge shelter,150,110,190,4,era,,,,docs/research/SECURITY_600_YEARS.md
+rotating_watch_captaincy,security,Rotating watch captaincy,152,110,190,4,era,,,,docs/research/SECURITY_600_YEARS.md
+fallback_route_marking,security,Fallback routes marked,158,120,200,4,era,,,,docs/research/SECURITY_600_YEARS.md
+market_peacekeepers,security,Armed peacekeepers at markets and festivals,180,140,220,4,new,,,,docs/research/SECURITY_600_YEARS.md
+copper_maceheads,security,Copper mace heads,190,150,230,5,new,,,,docs/research/SECURITY_600_YEARS.md
+mutual_aid_pacts,security,Mutual aid pacts,195,155,235,5,era,,,,docs/research/SECURITY_600_YEARS.md
+copper_daggers,security,Copper daggers,200,160,240,6,new,,,,docs/research/SECURITY_600_YEARS.md
+rotating_command_practice,security,Command passed in rotation,210,170,250,4,era,,,,docs/research/SECURITY_600_YEARS.md
+coordinated_retreat_drill,security,Coordinated retreat drill,225,185,265,5,era,,,,docs/research/SECURITY_600_YEARS.md
+gate_watchtowers,security,Watchtowers beside the gate,230,190,270,6,new,,,,docs/research/SECURITY_600_YEARS.md
+alarm_relay_customs,security,Alarm relay customs,240,200,280,4,era,,,,docs/research/SECURITY_600_YEARS.md
+night_gate_challenge,security,Night gate closing and challenge of strangers,250,210,290,4,new,,,,docs/research/SECURITY_600_YEARS.md
+common_armory,security,Common weapon store and issue,260,220,300,5,new,,,,docs/research/SECURITY_600_YEARS.md
+multi_post_command_relay,security,Commands relayed across several posts,270,230,310,5,era,,,,docs/research/SECURITY_600_YEARS.md
+rotating_relief_wardens,security,Rotating relief wardens,272,230,310,4,era,,,,docs/research/SECURITY_600_YEARS.md
+combined_drill_musters,security,Combined-drill musters,285,245,325,5,era,,,,docs/research/SECURITY_600_YEARS.md
+household_muster,security,Household muster of able fighters,290,250,330,6,new,institutions,,,docs/research/SECURITY_600_YEARS.md
+formation_drill,security,Fighting in ranks on command,295,255,335,8,catalog,,,,docs/research/SECURITY_600_YEARS.md
+field_fortifications,security,Field ramparts and ditches on campaign,300,260,340,8,catalog,,,,docs/research/SECURITY_600_YEARS.md
+fortified_stores,security,Fortified storehouses,305,265,345,8,catalog,,,,docs/research/SECURITY_600_YEARS.md
+shield_wall,security,Shield-wall discipline,310,270,350,10,catalog,,yes,,docs/research/SECURITY_600_YEARS.md
+wall_missile_posts,security,Archers and slingers posted along the town wall,330,290,370,6,new,,yes,,docs/research/SECURITY_600_YEARS.md
+flanked_gate_complex,security,Gate complex with flanking towers,340,300,380,8,new,,,,docs/research/SECURITY_600_YEARS.md
+copper_battle_axes,security,Cast copper battle-axes,350,310,390,6,new,,,,docs/research/SECURITY_600_YEARS.md
+layered_defense_coordination,security,Layered defense coordination,360,320,400,6,era,,,,docs/research/SECURITY_600_YEARS.md
+palace_guard,security,Palace guard of household retainers,370,330,410,6,new,,,,docs/research/SECURITY_600_YEARS.md
+massed_formation_training,security,Massed formation training,380,340,420,8,era,,,,docs/research/SECURITY_600_YEARS.md
+battle_wagons,security,Four-wheeled battle wagons drawn by onager hybrids,390,350,430,10,new,logistics,,,docs/research/SECURITY_600_YEARS.md
+standing_relief_stores,security,Standing relief stores,395,355,435,6,era,,,,docs/research/SECURITY_600_YEARS.md
+bronze_weaponry,security,Standardized bronze arms,400,360,440,15,catalog,,yes,,docs/research/SECURITY_600_YEARS.md
+copper_helmets,security,Copper helmets and studded cloaks,405,365,445,6,new,,,,docs/research/SECURITY_600_YEARS.md
+deep_phalanx,security,Deep phalanx with long spears and large shields,415,375,455,10,new,,,,docs/research/SECURITY_600_YEARS.md
+scaling_ladders_rams,security,Scaling ladders and battering beams against walls,420,380,460,8,new,,,,docs/research/SECURITY_600_YEARS.md
+standing_paid_company,security,Standing paid company kept by the ruler,440,400,480,10,new,,yes,,docs/research/SECURITY_600_YEARS.md
+socketed_spearheads,security,Socketed bronze spearheads,450,410,490,6,new,,,,docs/research/SECURITY_600_YEARS.md
+composite_bow,security,Composite bow,460,420,500,12,new,,yes,,docs/research/SECURITY_600_YEARS.md
+sentry_watchwords,security,Watchwords for sentries and messengers,470,430,510,4,new,,,,docs/research/SECURITY_600_YEARS.md
+siege_ramps_mining,security,Siege ramps and mining under walls,480,440,520,8,new,,,,docs/research/SECURITY_600_YEARS.md
+war_chariots,security,Light war chariots,500,460,540,15,catalog,,yes,,docs/research/SECURITY_600_YEARS.md
+shield_equipment_fitting,security,Shields fitted for chariot and foot,505,465,545,5,catalog,,,,docs/research/SECURITY_600_YEARS.md
+border_fortress_chains,security,Border fortress chain with signal posts,520,480,560,10,new,,,,docs/research/SECURITY_600_YEARS.md
+sickle_sword,security,Bronze sickle-sword,525,485,565,6,new,,,,docs/research/SECURITY_600_YEARS.md
+chariot_crews,security,Chariot crews: driver and archer trained together,530,490,570,6,new,,,,docs/research/SECURITY_600_YEARS.md
+glacis_ramparts,security,Glacis rampart before the walls,540,500,580,8,new,,,,docs/research/SECURITY_600_YEARS.md
+written_patrol_reports,security,Border patrols send written reports,545,505,585,5,new,,,,docs/research/SECURITY_600_YEARS.md
+allied_contingents,security,Allied and hired contingents in the field,550,510,590,6,new,institutions,,,docs/research/SECURITY_600_YEARS.md
+casemate_walls,security,Casemate walls,560,520,600,8,new,,,,docs/research/SECURITY_600_YEARS.md
+bronze_rapiers,security,Bronze rapiers and long daggers,575,535,615,6,new,,,,docs/research/SECURITY_600_YEARS.md
+scale_armor_attachment,security,Bronze scale armor for chariot crews,590,550,630,8,catalog,,,,docs/research/SECURITY_600_YEARS.md
+field_armorer_teams,security,Field armorer teams mend arms on campaign,600,560,640,6,catalog,,,,docs/research/SECURITY_600_YEARS.md

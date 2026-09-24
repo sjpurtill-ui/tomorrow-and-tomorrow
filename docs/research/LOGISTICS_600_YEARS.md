@@ -21,55 +21,55 @@
 | 6 (1–11) | Vermin-deterrent placement in stores | 2 y | 12 min | vermin_deterrent_placement (era) | — |
 | 7 (2–12) | Hide floats and lashed log rafts | 2 y | 12 min | hide_floats | 6 |
 | 8 (3–13) | Dry cache siting | 2 y | 12 min | dry_cache_siting (era) | — |
-| 10 (4–16) | Carrying pole for two-ended loads | 2 y | 12 min | NEW | — |
+| 10 (4–16) | Carrying pole for two-ended loads | 2 y | 12 min | NEW · carrying_poles | — |
 | 12 (5–19) | Trail waymarking: blazes and stacked stones | 2 y | 12 min | trail_waymarking (era) | — |
 | 14 (7–21) | Dugout canoes and paddles | 3 y | 18 min | river_craft | 13 |
 | 16 (8–24) | Gift tokens between trade partners | 2 y | 12 min | trade_partner_tokens (era) | — |
-| 18 (10–26) | Hand-drawn sledges and travois | 3 y | 18 min | NEW | — |
-| 20 (11–29) | Down-the-line exchange of flint, obsidian and shell | 3 y | 18 min | NEW | — |
-| 22 (12–32) | Load-lashing knots and hitches | 2 y | 12 min | NEW | — |
-| 25 (15–35) | Food caches along regular travel routes | 3 y | 18 min | NEW | — |
-| 28 (17–39) | Portage paths between waterways | 3 y | 18 min | NEW | — |
-| 32 (19–45) | Skis and snowshoes for winter travel (regional) | 3 y | 18 min | NEW | — |
-| 36 (22–50) | Reed-bundle boats sealed with bitumen (regional) | 4 y | 24 min | NEW | — |
-| 40 (25–55) | Brushwood mats laid over soft ground | 3 y | 18 min | NEW | — |
-| 45 (29–61) | Backframes for bulky loads | 3 y | 18 min | NEW | — |
-| 50 (30–70) | Exchange partners meet at fixed boundary places | 4 y | 24 min | NEW | — |
+| 18 (10–26) | Hand-drawn sledges and travois | 3 y | 18 min | NEW · sledges_travois | — |
+| 20 (11–29) | Down-the-line exchange of flint, obsidian and shell | 3 y | 18 min | NEW · down_the_line_exchange | — |
+| 22 (12–32) | Load-lashing knots and hitches | 2 y | 12 min | NEW · load_lashing_knots | — |
+| 25 (15–35) | Food caches along regular travel routes | 3 y | 18 min | NEW · route_food_caches | — |
+| 28 (17–39) | Portage paths between waterways | 3 y | 18 min | NEW · portage_paths | — |
+| 32 (19–45) | Skis and snowshoes for winter travel (regional) | 3 y | 18 min | NEW · skis_snowshoes | — |
+| 36 (22–50) | Reed-bundle boats sealed with bitumen (regional) | 4 y | 24 min | NEW · reed_bundle_boats | — |
+| 40 (25–55) | Brushwood mats laid over soft ground | 3 y | 18 min | NEW · brushwood_trackways | — |
+| 45 (29–61) | Backframes for bulky loads | 3 y | 18 min | NEW · load_backframes | — |
+| 50 (30–70) | Exchange partners meet at fixed boundary places | 4 y | 24 min | NEW · boundary_exchange_sites | — |
 | 60 (40–80) | Night travel steered by the stars | 4 y | 24 min | wayfinding_stars | 22 |
-| 65 (45–85) | Rollers and runners for heavy logs and stones | 5 y | 30 min | NEW | — |
+| 65 (45–85) | Rollers and runners for heavy logs and stones | 5 y | 30 min | NEW · rollers_and_runners | — |
 | 75 (50–100) | Seasonal ford timing | 3 y | 18 min | seasonal_ford_timing (era) | — |
 | 78 (50–105) | Relay carrying shifts on long hauls | 4 y | 24 min | relay_carrying_shifts (era) | — |
 | 80 (55–105) | Oldest-first stock marking | 3 y | 18 min | oldest_first_marking (era) | — |
 | 85 (55–115) | Remembered trade partners and their wants | 3 y | 18 min | trade_partner_memory (era) | — |
-| 90 (60–120) | Salt and shell exchange routes | 5 y | 30 min | NEW | — |
-| 100 (65–135) | Boat landings cleared and marked on rivers | 4 y | 24 min | NEW | — |
-| 110 (75–145) | Hide-covered boats on wicker frames | 5 y | 30 min | NEW | — |
+| 90 (60–120) | Salt and shell exchange routes | 5 y | 30 min | NEW · salt_shell_routes | — |
+| 100 (65–135) | Boat landings cleared and marked on rivers | 4 y | 24 min | NEW · river_landings | — |
+| 110 (75–145) | Hide-covered boats on wicker frames | 5 y | 30 min | NEW · hide_covered_boats | — |
 | 115 (75–155) | Stock layering in stores | 3 y | 18 min | stock_layering_method (era) | — |
 | 120 (80–160) | Seasonal route assessment | 4 y | 24 min | seasonal_route_assessment (era) | — |
 | 125 (85–165) | Customary barter equivalences | 5 y | 30 min | barter_equivalence_custom (era) | — |
-| 135 (95–175) | Oxen trained to draw sledges | 8 y | 49 min | NEW | — |
-| 140 (100–180) | Polished stone axes carried over long distances | 5 y | 30 min | NEW | — |
+| 135 (95–175) | Oxen trained to draw sledges | 8 y | 49 min | NEW · ox_drawn_sledges | — |
+| 140 (100–180) | Polished stone axes carried over long distances | 5 y | 30 min | NEW · long_distance_axe_trade | — |
 | **150 (110–190)** | **Donkeys as pack animals** | 12 y | 73 min | pack_animals | 35 |
 | 152 (110–190) | Loads bundled by weight | 3 y | 18 min | load_bundling_by_weight (era) | — |
 | 155 (115–195) | Customary rest-stop spacing | 3 y | 18 min | rest_stop_spacing_custom (era) | — |
 | 160 (120–200) | Pest barriers kept in repair | 3 y | 18 min | pest_barrier_maintenance (era) | — |
 | 165 (125–205) | Shared escort for trade parties | 4 y | 24 min | shared_trade_escort (era) | — |
 | 170 (130–210) | Pack loads balanced side to side | 3 y | 18 min | pack_load_balancing (era) | — |
-| 175 (135–215) | Wooden pack saddles | 5 y | 30 min | NEW | — |
-| 180 (140–220) | Plank trackways across wetland (shared: infrastructure) | 8 y | 49 min | NEW | — |
-| 185 (145–225) | Paired-ox yoke | 6 y | 37 min | NEW | — |
-| 190 (150–230) | Store doors sealed with clay and seal (shared: knowledge) | 5 y | 30 min | NEW | — |
-| 200 (160–240) | Dugouts raised with sewn side planks | 8 y | 49 min | NEW | — |
+| 175 (135–215) | Wooden pack saddles | 5 y | 30 min | NEW · pack_saddles | — |
+| 180 (140–220) | Plank trackways across wetland (shared: infrastructure) | 8 y | 49 min | NEW · plank_trackways | — |
+| 185 (145–225) | Paired-ox yoke | 6 y | 37 min | NEW · paired_ox_yoke | — |
+| 190 (150–230) | Store doors sealed with clay and seal (shared: knowledge) | 5 y | 30 min | NEW · sealed_store_doors | — |
+| 200 (160–240) | Dugouts raised with sewn side planks | 8 y | 49 min | NEW · plank_extended_dugouts | — |
 | **225 (185–265)** | **Solid wheels of joined planks (shared: infrastructure)** | 15 y | 91 min | solid_wheel_assembly | n/s |
 | 228 (190–270) | Axles shaped and fitted | 5 y | 30 min | wooden_axle_shaping | n/s |
 | 232 (190–270) | Linchpins keep wheels on the axle | 4 y | 24 min | linchpin_retention | n/s |
-| 235 (195–275) | Trade outposts in distant river towns | 10 y | 61 min | NEW | — |
+| 235 (195–275) | Trade outposts in distant river towns | 10 y | 61 min | NEW · trade_colonies | — |
 | **240 (200–280)** | **Ox-drawn solid-wheel carts** | 10 y | 61 min | cart_bed_framing | n/s |
 | 242 (200–280) | Cargo stowage order | 4 y | 24 min | cargo_stowage_sequencing (era) | — |
 | 245 (205–285) | Storage humidity judged by hand and smell | 4 y | 24 min | storage_humidity_judging (era) | — |
 | 248 (210–290) | Market timing knowledge | 4 y | 24 min | market_timing_knowledge (era) | — |
 | 252 (210–290) | Crossing points surveyed | 5 y | 30 min | crossing_point_survey (era) | — |
-| 260 (220–300) | Four-wheeled wagons | 10 y | 61 min | NEW | — |
+| 260 (220–300) | Four-wheeled wagons | 10 y | 61 min | NEW · four_wheeled_wagons | — |
 | **272 (230–310)** | **Square sail on river boats** | 12 y | 73 min | sail_panel_cutting | n/s |
 | 278 (240–320) | Cargo transferred at waypoints | 4 y | 24 min | waypoint_cargo_transfer (era) | — |
 | 282 (240–320) | Alternate routes scouted | 4 y | 24 min | alternate_route_scouting (era) | — |
@@ -91,38 +91,38 @@
 | 325 (285–365) | Caulking fiber prepared with pitch | 4 y | 24 min | caulking_fiber_preparation | 21 |
 | 330 (290–370) | Hull seams caulked and pitched | 5 y | 30 min | hull_seam_caulking | n/s |
 | 335 (295–375) | Tenon and treenail plank joints | 6 y | 37 min | treenail_fastening | n/s |
-| 340 (300–380) | Towpaths: boats hauled upstream by rope | 5 y | 30 min | NEW | — |
+| 340 (300–380) | Towpaths: boats hauled upstream by rope | 5 y | 30 min | NEW · towpaths | — |
 | 345 (305–385) | Stepped mast and yard | 6 y | 37 min | mast_making | n/s |
-| 350 (310–390) | Fixed ferry crossings | 5 y | 30 min | NEW | — |
+| 350 (310–390) | Fixed ferry crossings | 5 y | 30 min | NEW · ferry_crossings | — |
 | 355 (315–395) | Planks shaped to the hull curve | 6 y | 37 min | plank_spiling | n/s |
-| 360 (320–400) | Central storehouses with sealed rooms and issue days (shared: institutions) | 10 y | 61 min | NEW | — |
+| 360 (320–400) | Central storehouses with sealed rooms and issue days (shared: institutions) | 10 y | 61 min | NEW · central_storehouses | — |
 | 370 (330–410) | Loads spread across a convoy | 5 y | 30 min | convoy_load_distribution (era) | — |
 | 375 (335–415) | Store airflow arrangement | 5 y | 30 min | store_airflow_arrangement (era) | — |
 | 380 (340–420) | Trade route risk assessment | 5 y | 30 min | trade_route_risk_assessment (era) | — |
 | 385 (345–425) | Waystation spacing | 5 y | 30 min | waystation_spacing_judgment (era) | — |
-| 390 (350–430) | Onager-hybrid teams for four-wheeled wagons | 10 y | 61 min | NEW | — |
-| 395 (355–435) | Stone-paved haul roads from quarries (shared: infrastructure) | 10 y | 61 min | NEW | — |
-| **400 (360–440)** | **Sheltered harbor with a stone jetty** | 12 y | 73 min | NEW | — |
-| 405 (365–445) | Heavy sledges on wetted timber tracks | 6 y | 37 min | NEW | — |
-| 410 (370–450) | Canal cuts for boat traffic (shared: infrastructure) | 12 y | 73 min | NEW | — |
-| 415 (375–455) | Seagoing hulls stiffened with a hogging truss | 10 y | 61 min | NEW | — |
-| 425 (385–465) | Grain barges moved in fleets on canals | 6 y | 37 min | NEW | — |
-| **435 (395–475)** | **Donkey caravans on fixed seasonal routes** | 10 y | 61 min | NEW | — |
-| 445 (405–485) | Standard-size transport jars | 6 y | 37 min | NEW | — |
-| 455 (415–495) | Road stations with wells and lodging | 8 y | 49 min | NEW | — |
+| 390 (350–430) | Onager-hybrid teams for four-wheeled wagons | 10 y | 61 min | NEW · onager_hybrid_teams | — |
+| 395 (355–435) | Stone-paved haul roads from quarries (shared: infrastructure) | 10 y | 61 min | NEW · paved_haul_roads | — |
+| **400 (360–440)** | **Sheltered harbor with a stone jetty** | 12 y | 73 min | NEW · stone_jetty_harbors | — |
+| 405 (365–445) | Heavy sledges on wetted timber tracks | 6 y | 37 min | NEW · wetted_track_sledging | — |
+| 410 (370–450) | Canal cuts for boat traffic (shared: infrastructure) | 12 y | 73 min | NEW · navigation_canals | — |
+| 415 (375–455) | Seagoing hulls stiffened with a hogging truss | 10 y | 61 min | NEW · hogging_truss_hulls | — |
+| 425 (385–465) | Grain barges moved in fleets on canals | 6 y | 37 min | NEW · grain_barge_fleets | — |
+| **435 (395–475)** | **Donkey caravans on fixed seasonal routes** | 10 y | 61 min | NEW · donkey_caravans | — |
+| 445 (405–485) | Standard-size transport jars | 6 y | 37 min | NEW · standard_transport_jars | — |
+| 455 (415–495) | Road stations with wells and lodging | 8 y | 49 min | NEW · road_stations | — |
 | **475 (435–515)** | **Horses broken to draft and riding** | 15 y | 91 min | domesticated_mounts | 40 |
-| 485 (445–525) | Hired carriers and boatmen by contract (shared: institutions) | 5 y | 30 min | NEW | — |
+| 485 (445–525) | Hired carriers and boatmen by contract (shared: institutions) | 5 y | 30 min | NEW · hired_carriers | — |
 | 490 (450–530) | Spokes tenoned into hub and felloe rim | 8 y | 49 min | spoke_tenon_cutting | n/s |
 | **500 (460–540)** | **Light spoked wheels** | 12 y | 73 min | spoked_wheel_assembly | n/s |
-| **510 (470–550)** | **Island-hopping sea crossings under sail** | 15 y | 91 min | NEW | — |
-| 518 (480–560) | Pack trains of tin and cloth over mountain passes | 8 y | 49 min | NEW | — |
-| 525 (485–565) | Resident merchant quarters in foreign towns | 8 y | 49 min | NEW | — |
-| 540 (500–580) | Pilots and known sea lanes between harbors | 6 y | 37 min | NEW | — |
-| 550 (510–590) | Seasonal sailing calendar for sea trade | 6 y | 37 min | NEW | — |
-| 560 (520–600) | Harbor warehouse districts | 10 y | 61 min | NEW | — |
-| 570 (530–610) | Oxhide-shaped copper ingots as standard cargo | 6 y | 37 min | NEW | — |
-| 590 (550–630) | Sealed consignment lists travel with cargo (shared: knowledge) | 5 y | 30 min | NEW | — |
-| 600 (560–640) | Fresh-team stations on main roads | 8 y | 49 min | NEW | — |
+| **510 (470–550)** | **Island-hopping sea crossings under sail** | 15 y | 91 min | NEW · island_hopping_sailing | — |
+| 518 (480–560) | Pack trains of tin and cloth over mountain passes | 8 y | 49 min | NEW · mountain_pack_trains | — |
+| 525 (485–565) | Resident merchant quarters in foreign towns | 8 y | 49 min | NEW · merchant_quarters_abroad | — |
+| 540 (500–580) | Pilots and known sea lanes between harbors | 6 y | 37 min | NEW · pilots_sea_lanes | — |
+| 550 (510–590) | Seasonal sailing calendar for sea trade | 6 y | 37 min | NEW · sailing_calendar | — |
+| 560 (520–600) | Harbor warehouse districts | 10 y | 61 min | NEW · harbor_warehouses | — |
+| 570 (530–610) | Oxhide-shaped copper ingots as standard cargo | 6 y | 37 min | NEW · standard_ingots (dup) | — |
+| 590 (550–630) | Sealed consignment lists travel with cargo (shared: knowledge) | 5 y | 30 min | NEW · consignment_lists | — |
+| 600 (560–640) | Fresh-team stations on main roads | 8 y | 49 min | NEW · relay_team_stations | — |
 
 ## Pacing
 
