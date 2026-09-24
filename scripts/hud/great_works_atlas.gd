@@ -128,7 +128,7 @@ func _build_header(root:VBoxContainer)->void:
 		builders+=1
 		var target:Dictionary=(entry.get("target",{}) as Dictionary).duplicate()
 		var held:=int(entry.get("matters",0))
-		var call:=Kit.action_button(actions,"Summon %s%s" % [String(entry.get("name","the master builder")),(" · %d" % held) if held>0 else ""],func()->void:_summon(target),false,"Call them into the audience hall now")
+		var call:=Kit.action_button(actions,"Summon %s%s" % [String(entry.get("name","the master builder")),(" · %d" % held) if held>0 else ""],func()->void:_summon(target),false,"Call them before you in the court now")
 		call.name="SummonBuilder%d" % builders;call.custom_minimum_size=Vector2(230,36)
 	var close_button:=Kit.action_button(actions,"Close",close,false,"Close · Escape")
 	close_button.name="CloseWorks"
@@ -265,7 +265,7 @@ func _detail_ours(item:Dictionary)->void:
 	var figure_id:=String(arch.get("id",""))
 	if not figure_id.is_empty() and not architect.is_empty():
 		var held:=int(Hall.matter_counts().get("figure:"+figure_id,0))
-		var summon_button:=Kit.action_button(words,"Summon %s to the hall%s" % [architect,(" · %d matter%s" % [held,"" if held==1 else "s"]) if held>0 else ""],func()->void:_summon({"figure_id":figure_id,"name":architect}),false,"Call the master builder in now")
+		var summon_button:=Kit.action_button(words,"Summon %s to the court%s" % [architect,(" · %d matter%s" % [held,"" if held==1 else "s"]) if held>0 else ""],func()->void:_summon({"figure_id":figure_id,"name":architect}),false,"Call the master builder in now")
 		summon_button.name="SummonArchitect"
 	var status_key:=String(item.get("status",""))
 	if status_key in ["building","stalled"]:

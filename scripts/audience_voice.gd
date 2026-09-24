@@ -1031,6 +1031,9 @@ func _on_response(result:int,response_code:int,_headers:PackedStringArray,body:P
 				_finish_receipt(receipt,true,false,"")
 				last_problem.erase(audience_id)
 				_deliver(s,String(request.stage),request.extra,lines,float(parsed.get("mood_shift",0.0)))
+				# --- interaction database capture (single call; audience UI owned by codex/court) ---
+				if String(request.stage)=="speak": preload("res://scripts/interaction_capture.gd").capture_chat_body("summon" if String(s.get("origin",""))=="summoned" or String(s.get("kind","")).begins_with("summon") else "audience",String(request.extra.get("player_text","")),body,parsed)
+				# --- end capture ---
 				var heard:=String(parsed.get("divine","none"))
 				if String(request.stage)=="speak" and heard in DIVINE_SPOKEN and heard in _divine_allowed(s): divine_intent.emit.call_deferred(audience_id,heard)
 				return

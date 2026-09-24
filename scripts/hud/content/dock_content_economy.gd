@@ -235,7 +235,7 @@ func _food_overview()->Array:
 			focused_action("CITY DELIVERIES","Routes, shipments and requirements",_economy_report.bind("trade"))]},
 		{"type":"actions","heading":"GIVE DIRECTION","items":[
 			{"label":"LOCAL PRIORITY","sub":"Review the leader’s direction","on_press":jump("settlement",0)},
-			{"label":"DISCUSS FOOD POLICY","sub":"Give an instruction to your council","on_press":jump("civ",1)}]}]
+			{"label":"DISCUSS FOOD POLICY","sub":"Give your local leader an instruction, in the court","on_press":court({"settlement_id":String(SettlementModel.selected_settlement_snapshot().get("id",""))})}]}]
 
 func _economy_report(kind:String)->Dictionary:
 	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:

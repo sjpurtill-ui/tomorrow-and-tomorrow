@@ -27,8 +27,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				note.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 				heading_row.add_child(note)
 		match String(block.get("type","text")):
-			"world_board":
-				var board:=preload("res://scripts/hud/world_board.gd").new();section.add_child(board);board.setup(block)
+			"known_world":
+				var board:=preload("res://scripts/hud/known_world_board.gd").new();section.add_child(board);board.setup(block)
 			"culture":
 				var panel:=preload("res://scripts/hud/culture_panel.gd").new();section.add_child(panel);panel.setup(block)
 			"settlement_overview":
@@ -608,6 +608,14 @@ static func _render_conversation_turn(parent:VBoxContainer,turn:Dictionary)->voi
 	body.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	body.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	column.add_child(body)
+	var receipt:=String(turn.get("receipt",""))
+	if not receipt.is_empty():
+		var receipt_label:=Tokens.make_label(receipt,9,Tokens.DISABLED)
+		receipt_label.name="CivicMessageReceipt"
+		receipt_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		receipt_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		receipt_label.tooltip_text="What the engine changed, after feasibility and implementation."
+		column.add_child(receipt_label)
 
 
 static func _render_conversation_composer(parent:VBoxContainer,block:Dictionary)->void:

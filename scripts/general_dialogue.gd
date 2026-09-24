@@ -79,6 +79,9 @@ func _completed(result:int,code:int,_headers:PackedStringArray,body:PackedByteAr
 				value=JSON.parse_string(PronouncementInterpreter._content_text(choices[0].get("message",{}).get("content","")).trim_prefix("```json").trim_suffix("```").strip_edges())
 	if id=="player":
 		row.accepted=_accept(value)
+		# --- interaction database capture (single call) ---
+		if envelope is Dictionary: preload("res://scripts/interaction_capture.gd").capture_chat_envelope("general",String(WorldSimulation.campaign.state.messages.filter(func(m:Dictionary)->bool: return String(m.get("role",""))=="user").back().get("content","")) if WorldSimulation.campaign.state.messages.any(func(m:Dictionary)->bool: return String(m.get("role",""))=="user") else "",envelope,value,{"accepted":row.accepted})
+		# --- end capture ---
 		if not row.accepted:status="No usable reply arrived. Your message remains; send it again to retry. No objective changed."
 	else:
 		var r:=WorldSimulation.campaign.rival(id)

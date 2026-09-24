@@ -22,6 +22,12 @@ func tab(_sub:int)->Dictionary:
 func jump(section:String,sub:int)->Callable:
 	return func()->void: hud.section_requested.emit(section,sub)
 
+## Opens the court, where every conversation with your people and with
+## foreign rulers happens, focused on someone ({settlement_id}, {person_id},
+## {civ_id}...) or at rest ({}).
+func court(focus:Dictionary={})->Callable:
+	return func()->void: load("res://scripts/audience_director.gd").open_court_for(focus)
+
 func focused_action(title:String,description:String,reader:Callable)->Dictionary:
 	return {"label":title,"sub":description,"tip":description,"on_press":func()->void:
 		hud.open_detail(preload("res://scripts/hud/content/focused_report.gd").new(terrain,hud,title,String(meta().get("title","")),reader,signature))}

@@ -11,6 +11,8 @@ const DYNAMIC_ORDER:Array[String]=["demography","nutrition","health","labor","kn
 const ValuesModel:=preload("res://scripts/societal_values_model.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
+const Civic:=preload("res://scripts/hud/court_civic.gd")
+const CourtDirector:=preload("res://scripts/audience_director.gd")
 
 func meta()->Dictionary:
 	return {
@@ -39,7 +41,7 @@ func _society_blocks(capacities:Dictionary)->Array:
 func _government_brief(governance:Dictionary)->Dictionary:
 	var support:=clampf(float(governance.get("council_support",0.6)),0.0,1.0)
 	if ConsequenceEngine.active_policies().is_empty():
-		return {"tone":"info","title":"No standing policy is in force","why":"Talk with your local leader in CIVICS. Advice, proposals and accepted work have distinct outcomes.","action_label":"OPEN COUNCIL","on_action":jump("civ",1)}
+		return {"tone":"info","title":"No standing policy is in force","why":"Talk with your local leader in the court. Advice, proposals and accepted work have distinct outcomes.","action_label":"OPEN THE COURT","on_action":_open_court.bind({"settlement_id":String(_civic_settlement().get("id",""))})}
 	if support<0.45:
 		return {"tone":"warn","title":"Council support is low","why":"Institutions execute reluctantly at %d%% support. Fewer, better-aligned policies recover it." % roundi(support*100.0)}
 	return {"tone":"info","title":"Government is executing","why":"Standing policies are within administrative capacity."}
@@ -82,7 +84,7 @@ func _government_blocks(governance:Dictionary)->Array:
 	if int(government.stage)==0:
 		blocks.insert(1,{"type":"text","heading":"NEXT OFFICE · QUARTERMASTER","text":"A separate supply office opens at 220 residents or a second settlement, reviewed with the monthly government report. Until then, your steward manages the shared workshops."})
 	if policy_items.is_empty():
-		blocks.append({"type":"text","heading":"STANDING POLICY","text":"No standing policy is in force. Talk with your local leader in CIVICS. Advice, proposals and accepted work have distinct outcomes."})
+		blocks.append({"type":"text","heading":"STANDING POLICY","text":"No standing policy is in force. Talk with your local leader in the court. Advice, proposals and accepted work have distinct outcomes."})
 	else:
 		blocks.append({"type":"rows","heading":"STANDING POLICY","note":"execution","items":policy_items})
 	return blocks
@@ -130,29 +132,20 @@ func _council_all_blocks()->Array:
 	var latest_order:=_latest_civic_order(settlement_id,int(leader.get("person_id",0)))
 	var latest_state:=_directive_state(latest_order)
 	if not leader.is_empty():
-		var dialogue_turns:Array=[]
+		# The conversation itself happens in the court; here, a quiet summary.
+		var last_words:=""
 		for turn in history:
-			var is_player:=String(turn.get("speaker",""))=="player"
-			var dialogue_text:=String(turn.get("text",""))
-			if "\n\nSTATE ·" in dialogue_text: dialogue_text=dialogue_text.split("\n\nSTATE ·")[0]
-			dialogue_turns.append({
-				"speaker":"player" if is_player else "leader",
-				"name":"YOU" if is_player else String(turn.get("speaker_name",leader.get("name","LEADER"))),
-				"text":dialogue_text,"day":int(turn.get("day",0)),
-			})
-		var leadership_actions:Array=[
-			{"label":"DISMISS","on_press":_remove_civic_leader.bind(settlement_id,"dismiss"),"tip":"Fire this leader. A successor takes office automatically."},
-			{"label":"EXECUTE","color":Tokens.RED,"on_press":_remove_civic_leader.bind(settlement_id,"execute"),"tip":"Kill this leader by decree. A successor takes office automatically, with severe political cost."},
-		]
-		blocks.append({
-			"type":"conversation","leader":leader,"leader_name":String(leader.get("name","the appointed leader")),
-			"leader_title":String(leader.get("title","local leader")),"disposition":String(disposition.get("label","pragmatic")).to_lower(),
-			"state":latest_state,"state_color":_directive_state_color(latest_state),"items":dialogue_turns,
-			"empty_text":"Speak plainly. %s will answer according to their character and what %s can actually do." % [String(leader.get("name","The leader")),String(settlement.get("name","this settlement"))],
-			"status":_pronouncement_status_text(settlement_id,int(leader.get("person_id",0))),
-			"actions":leadership_actions,"on_submit":func(field:LineEdit)->void: terrain._issue_freeform_order(field),
-			"placeholder":"Reply to %s…" % String(leader.get("name","the leader")),"disabled":latest_state=="INTERPRETING",
-		})
+			if String(turn.get("speaker",""))=="player": continue
+			last_words=String(turn.get("text",""))
+			if "\n\nSTATE ·" in last_words: last_words=last_words.split("\n\nSTATE ·")[0]
+		var status_text:=_pronouncement_status_text(settlement_id,int(leader.get("person_id",0)))
+		blocks.append({"type":"rows","heading":"YOUR LOCAL LEADER","note":"speak with them in the court","items":[{
+			"name":"%s · %s" % [String(leader.get("name","the appointed leader")),String(leader.get("title","local leader"))],
+			"sub":status_text if not status_text.is_empty() else "%s, %s. No directive is open." % [String(settlement.get("name","this settlement")),String(disposition.get("label","pragmatic")).to_lower()],
+			"detail":("Last said: “%s”" % last_words.substr(0,220)) if not last_words.is_empty() else "",
+			"value":"IN COURT","value_color":Tokens.GOLD_BRIGHT,"accent":_directive_state_color(latest_state),
+			"on_click":_open_court.bind({"settlement_id":settlement_id}),"tip":"Summon them to the court: talk, order, confirm, insist, withdraw or dismiss.",
+		}]})
 	if leader.is_empty():
 		blocks.append({"type":"text","heading":"SUCCESSION PENDING","text":"No eligible living person is available. Government will fill this office automatically when one becomes available."})
 	var combat_reports:Array=[]
@@ -170,7 +163,6 @@ func _council_all_blocks()->Array:
 		if String(item.get("status","unread"))!="unread": continue
 		if shown>=3: break
 		shown+=1
-		var item_id:=String(item.get("id",""))
 		blocks.append({"type":"rows","heading":"DECISION · %s" % String(item.get("office","Council")).to_upper(),"note":"Day %d" % int(item.get("day",0)),"items":[{
 			"name":String(item.get("text","Council item")).split("\n")[0],
 			"sub":String(item.get("advisor","")),
@@ -192,11 +184,13 @@ func _council_all_blocks()->Array:
 			response_items.append({
 				"label":label.to_upper(),"sub":ripple,
 				"primary":effect_id!="",
-				"on_press":AdvisorSystem.respond_to_council_item.bind(item_id,label),
-				"tip":"%s\n%s" % [ripple,enacts] if ripple!="" else enacts,
+					"tip":"%s\n%s" % [ripple,enacts] if ripple!="" else enacts,
 			})
+		# Decisions are answered in the court; the dock only lists them.
 		if not response_items.is_empty():
-			blocks.append({"type":"actions","items":response_items})
+			var choices:PackedStringArray=PackedStringArray()
+			for response_item:Dictionary in response_items:choices.append(String(response_item.label).capitalize())
+			blocks.append({"type":"actions","items":[{"label":"ANSWER IN COURT","sub":" · ".join(choices),"primary":true,"on_press":_open_court.bind({}),"tip":"Your council awaits your word in the court."}]})
 	var pending_orders:Array=[]
 	for order_variant in GameState.sovereign_orders:
 		var order:Dictionary=order_variant
@@ -311,20 +305,7 @@ func _restore_deferred(item_id:String)->void:
 		hud.live_refresh_dock()
 
 func _pronouncement_status_text(settlement_id:String,leader_person_id:int)->String:
-	var order:=_latest_civic_order(settlement_id,leader_person_id)
-	var state:=_directive_state(order)
-	match state:
-		"INTERPRETING": return "NOT YET UNDERWAY · The leader is interpreting the instruction; no policy has been applied."
-		"NEEDS YOUR DECISION": return "NEEDS YOUR DECISION · Discussion only; no policy has been applied."
-		"PROPOSAL RECORDED": return "PROPOSAL RECORDED · The leader has answered; no event or spending has been scheduled."
-		"DISCUSSION": return "DISCUSSION · Advice only; no order was given and no policy has been applied."
-		"REFUSED": return "REFUSED · No policy was applied. Revise the directive or change the leadership."
-		"BLOCKED": return "BLOCKED · No policy was applied; the instruction exceeded present means or was not concrete enough."
-		"WITHDRAWN": return "WITHDRAWN · The unresolved instruction was closed and no policy was applied."
-		"UNDERWAY": return "UNDERWAY · The leader committed; the outcome report will arrive later."
-		"REPORTED": return "REPORTED · The leader's outcome report is in this conversation."
-		"OBSERVING EFFECTS": return "ACTION COMPLETE · The counted result is recorded; wider effects are being reviewed."
-	return ""
+	return Civic.status_text(_directive_state(_latest_civic_order(settlement_id,leader_person_id)))
 
 func signature()->Array:
 	var ids:Array=[]
@@ -352,16 +333,7 @@ func _open_civic_leadership(settlement_id:String)->void:
 
 
 func _latest_civic_order(settlement_id:String,leader_person_id:int)->Dictionary:
-	var inherited_pending:Dictionary={}
-	for order_variant in GameState.sovereign_orders:
-		var order:Dictionary=order_variant
-		if String(order.get("type",""))!="pronouncement": continue
-		if String(order.get("settlement_id",""))!=settlement_id: continue
-		if leader_person_id<=0 or int(order.get("leader_person_id",0))==leader_person_id: return order
-		if inherited_pending.is_empty() and String(order.get("status","")) in ["awaiting_confirmation","awaiting_clarification","leader_refused"]:
-			inherited_pending=order
-	return inherited_pending
-
+	return Civic.latest_order(settlement_id,leader_person_id)
 
 func _civic_order_by_id(order_id:String)->Dictionary:
 	if order_id.is_empty(): return {}
@@ -372,47 +344,10 @@ func _civic_order_by_id(order_id:String)->Dictionary:
 
 
 func _directive_state(order:Dictionary)->String:
-	if order.is_empty(): return ""
-	if String(order.get("implementation_followup",{}).get("state",""))=="reported": return "REPORTED"
-	var status:=String(order.get("status",""))
-	var stance:=String(order.get("leader_stance",""))
-	var policies:Array=order.get("parameters",{}).get("interpretation",{}).get("policies",[])
-	if not policies.is_empty() and policies.all(func(policy:Dictionary)->bool: return bool(policy.get("applied",false)) and bool(policy.get("directive_parameters",{}).get("one_time",false))): return "OBSERVING EFFECTS"
-	var applied:=false
-	var discussion_pending:=false
-	var refused:=false
-	var physically_blocked:=false
-	for policy_variant in policies:
-		var policy:Dictionary=policy_variant
-		applied=applied or bool(policy.get("applied",false)) or bool(policy.get("repealed_active_policy",false))
-		discussion_pending=discussion_pending or bool(policy.get("_conversation_deferred",false))
-		refused=refused or bool(policy.get("_conversation_refused",false))
-		physically_blocked=physically_blocked or bool(policy.get("_conversation_blocked",false))
-	# Actual application outranks a qualified discussion: mixed directives may
-	# put one feasible part underway while declining another part.
-	if applied or status in ["active","partially_active","executed","interpreted"]: return "UNDERWAY"
-	if status=="proposal": return "PROPOSAL RECORDED"
-	if stance=="advises" or status=="discussion": return "DISCUSSION"
-	if refused or stance in ["refuses","refused"] or status in ["leader_refused","refused"]: return "REFUSED"
-	if discussion_pending or stance in ["objects","clarify"] or status in ["awaiting_confirmation","awaiting_clarification"]: return "NEEDS YOUR DECISION"
-	if status=="interpreting": return "INTERPRETING"
-	if stance=="withdrawn" or status=="withdrawn": return "WITHDRAWN"
-	if physically_blocked or status in ["blocked","leader_unavailable","recorded_unresolved","no_effect","stale","closed","expired","repealed","superseded"]: return "BLOCKED"
-	return ""
-
+	return Civic.state(order)
 
 func _directive_state_color(state:String)->Color:
-	match state:
-		"UNDERWAY": return Tokens.GREEN
-		"REPORTED": return Tokens.GREEN
-		"OBSERVING EFFECTS": return Tokens.GREEN
-		"INTERPRETING": return Tokens.BLUE
-		"DISCUSSION","PROPOSAL RECORDED": return Tokens.BLUE
-		"WITHDRAWN": return Tokens.BODY_2
-		"REFUSED","BLOCKED": return Tokens.RED
-		"NEEDS YOUR DECISION": return Tokens.AMBER
-	return Tokens.BODY_2
-
+	return Civic.state_color(state)
 
 func _remove_civic_leader(settlement_id:String,action:String)->void:
 	terrain._perform_civic_leader_removal(settlement_id,action)
@@ -458,12 +393,13 @@ func _artifact_signature()->Array:
 	return [summary.get("collection_count",0),summary.get("studied_count",0),summary.get("in_study_count",0),summary.get("exhibited_count",0),snappedf(float(summary.get("allure",0)),.01),summary.get("study_role",{}).get("workers",0)]
 
 func _government_overview()->Array:
-	return [{"type":"actions","heading":"GOVERNING TOGETHER","items":[{"label":"OPEN GOVERNMENT","sub":"Officeholders, removals and policy","on_press":jump("government",0)},{"label":"TALK TO OUR LEADER","sub":"Discuss and direct local work","on_press":jump("civ",1)}]}]
+	return [{"type":"actions","heading":"GOVERNING TOGETHER","items":[{"label":"OPEN GOVERNMENT","sub":"Officeholders, removals and policy","on_press":jump("government",0)},{"label":"TALK TO OUR LEADER","sub":"Discuss and direct local work, in the court","on_press":_open_court.bind({"settlement_id":String(_civic_settlement().get("id",""))})}]}]
 func _council_blocks()->Array:
 	var all:=_council_all_blocks();var blocks:Array=[]
 	for item:Dictionary in all:
-		if item.get("type","")=="conversation":blocks.append(item)
-	if blocks.is_empty():
+		if String(item.get("heading",""))=="YOUR LOCAL LEADER":blocks.append(item)
+	blocks.push_front({"type":"actions","items":[{"label":"OPEN THE COURT","sub":"Every conversation with your people and with foreign rulers happens there · F12","primary":true,"on_press":_open_court.bind({}),"tip":"Summon anyone, receive envoys, send word abroad."}]})
+	if blocks.size()==1:
 		blocks.append({"type":"text","text":"Succession is pending. Civic conversation resumes when an eligible leader takes office."})
 	blocks.append(_summon_block())
 	blocks.append({"type":"actions","items":[focused_action("COUNCIL DECISIONS","Review pending choices and consequences",_civic_report.bind("decisions")),focused_action("WORK & REPORTS","Pending orders and returned reports",_civic_report.bind("reports")),focused_action("MILITARY REPORTS","Threats and battle outcomes",_civic_report.bind("military")),focused_action("CONVERSATION SETTINGS","AI routing and local interpretation",func()->Dictionary:return {"blocks":[_interpreter_status_block()]})]})
@@ -495,21 +431,26 @@ func _summon_block()->Dictionary:
 		var count:=int(entry.get("matters",0))
 		var sub:="%d matter%s to raise" % [count,"" if count==1 else "s"] if count>0 else "nothing pending; they will ask what you want"
 		var item:={"name":"%s · %s" % [String(entry.get("title","")),String(entry.get("name",""))],"sub":sub,"value":"SUMMON","value_color":Tokens.GOLD_BRIGHT,"accent":Tokens.VIOLET,
-			"on_click":_summon.bind((entry.get("target",{}) as Dictionary).duplicate()),"tip":"Call them into the audience hall now."}
+			"on_click":_summon.bind((entry.get("target",{}) as Dictionary).duplicate()),"tip":"Call them before you in the court now."}
 		var pid:=int((entry.get("target",{}) as Dictionary).get("person_id",0))
 		var person:Dictionary=GovernmentPeopleSystem.person_snapshot(pid) if pid>0 else {}
 		if not person.is_empty():
 			var regard:=Divine.regard(person)
 			item["icon"]=Divine.meter_texture(float(regard.love),float(regard.dread))
 			item["sub"]="%s · %s" % [String(regard.read),sub]
-			item["tip"]="Call them into the audience hall now. %s (%s)." % [_first_upper(String(regard.read)),Divine.meter_words(float(regard.love),float(regard.dread))]
+			item["tip"]="Call them before you in the court now. %s (%s)." % [_first_upper(String(regard.read)),Divine.meter_words(float(regard.love),float(regard.dread))]
 		items.append(item)
 	if items.is_empty():items.append({"name":"No one to summon yet","sub":"Officials appear as your government grows.","value":"","accent":Tokens.BORDER_SOFT})
-	return {"type":"rows","heading":"SUMMON TO THE HALL","note":"officials, scouts and master builders","items":items}
+	return {"type":"rows","heading":"SUMMON TO THE COURT","note":"officials, scouts and master builders","items":items}
 
 static func _first_upper(text:String)->String:
 	return text.substr(0,1).to_upper()+text.substr(1)
 
 func _summon(target:Dictionary)->void:
+	_open_court(target)
+
+## Every talk, order and decision opens the court, focused on that person.
+func _open_court(focus:Dictionary)->void:
+	if CourtDirector.open_court_for(focus): return
 	var director:Node=terrain.find_child("AudienceDirector",true,false) if is_instance_valid(terrain) else null
-	if director!=null and director.has_method("summon"):director.call("summon",target)
+	if director!=null and director.has_method("open_court"):director.call("open_court",focus)

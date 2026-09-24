@@ -1,0 +1,15 @@
+{
+  "source": "art_source/prehistoric-art/swatches/1304-1312.png",
+  "prompt": "Built-in imagegen: nine crude prehistoric finds braced at weak points, square 3x3 ivory-paper matte-gouache swatch. Cells: shell scraping raw hide, forked antler pressing stone edge, water-holding moss, pebble crushing wild husk, roots binding snapped splint, scraper renewed by breaking, hide catching ochre dust, pebble inside loose hide rattle, rib spreading root paste.",
+  "entries": [
+    {"id": 1304, "review": "Top-left: jagged shell rim scrapes untreated hide while a small root props the shell's weak side."},
+    {"id": 1305, "issue": "The supposed antler reads as a wooden branch rather than recognizable animal antler."},
+    {"id": 1306, "review": "Top-right: green damp moss squeezed between rocks, holding visible water droplets."},
+    {"id": 1307, "review": "Middle-left: small hard pebble compresses a wild seed husk against rock with fragments scattered."},
+    {"id": 1308, "review": "Middle-middle: two roots bound around the fragile center of a snapped natural wood splint."},
+    {"id": 1309, "review": "Middle-right: crude flint scraper with a new rough broken edge and its detached flake nearby."},
+    {"id": 1310, "review": "Bottom-left: irregular raw hide stretched in branch fork, capturing fine ochre dust."},
+    {"id": 1311, "review": "Bottom-middle: natural pebble held inside loosely tied untanned hide pouch for a rattle."},
+    {"id": 1312, "review": "Bottom-right: curved animal rib spreads root paste on rough stone, weak end supported by a thumb."}
+  ]
+}

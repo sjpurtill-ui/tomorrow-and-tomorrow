@@ -11,6 +11,7 @@ const MIN_REVIEW_DAYS:=7
 const MAX_REVIEW_DAYS:=60
 const MAX_INBOX_ITEMS:=80
 const MAX_EVENTS:=80
+const CUSTOM:=preload("res://scripts/custom_directive.gd")
 
 
 func reset_for_new_world()->void:
@@ -74,6 +75,14 @@ func schedule_order(order:Dictionary,day:int=-1)->Dictionary:
 			"operation_kind":operation_kind,"mission_id":mission_id,
 		})
 	var delay:=clampi(roundi(shortest_duration*0.20),MIN_REVIEW_DAYS,MAX_REVIEW_DAYS)
+	var custom_only:=not snapshots.is_empty() and snapshots.all(func(snapshot:Dictionary)->bool: return String(snapshot.get("id",""))==CUSTOM.ID)
+	if custom_only:
+		# Custom orders ripple slowly (conceptions, feuds, sickness); the leader
+		# waits long enough to have something true to say. A future-dated order
+		# is reviewed after it begins.
+		var future_delay:=0
+		for snapshot in snapshots: future_delay=maxi(future_delay,int(snapshot.get("directive_parameters",{}).get("custom_plan",{}).get("future_delay",0)))
+		delay=clampi(roundi(shortest_duration*0.5),30,120)+future_delay
 	var followup:Dictionary={
 		"state":"pending","scheduled_day":current_day,"due_day":current_day+delay,
 		"leader_person_id":int(order.get("leader_person_id",0)),
@@ -250,6 +259,8 @@ func _evaluate_policy(order_id:String,snapshot:Dictionary,current_day:int,schedu
 		return {"id":policy_id,"label":"the counted action","outcome":"success" if actual==requested and requested>0 else "failure","delivery_score":1.0 if actual==requested and requested>0 else 0.0,"qualitative_evidence":DecreeStatistics.receipt(effects)+" This verifies the action only; intimidation and productivity are not guaranteed.","limitations":[],"bounded":true}
 	if String(snapshot.get("operation_kind",""))!="":
 		return _evaluate_operation(snapshot)
+	if policy_id==CUSTOM.ID:
+		return CUSTOM.evaluate(order_id,snapshot,current_day)
 	var modifier:=_modifier_for(order_id,policy_id)
 	var direct_receipt:Dictionary=snapshot.get("direct_effects",{})
 	if policy_id=="mass_repression" and direct_receipt.has("population_deaths") and int(direct_receipt.population_deaths)==0:
@@ -332,8 +343,8 @@ func _evidence_score(metrics:Array)->float:
 func _qualitative_evidence(metrics:Array)->String:
 	var measured:Array[String]=[]
 	for metric in metrics:
-		measured.append("%s %.3f to %.3f (change %+.3f)" % [String(metric.get("label","condition")),float(metric.get("baseline",0)),float(metric.get("current",0)),float(metric.get("delta",0))])
-	return "; ".join(measured)+(". These are observed changes during the period; other events also affect them." if not measured.is_empty() else "")
+		measured.append("%s %.3f to %.3f" % [String(metric.get("label","condition")),float(metric.get("baseline",0)),float(metric.get("current",0))])
+	return " · ".join(measured)
 
 
 func _qualitative_limitation(raw:String)->String:
@@ -391,35 +402,50 @@ func _reporting_leader(followup:Dictionary)->Dictionary:
 
 
 func _report_text(order:Dictionary,results:Array[Dictionary],outcome:String,leader:Dictionary,followup:Dictionary)->String:
+	## The leader speaks the outcome in character; the measured numbers follow as
+	## one compact RECEIPT line that the conversation shows small, never as speech.
 	var names:Array[String]=[]
-	var observation_lines:Array[String]=[]
+	var receipts:Array[String]=[]
 	var limitations:Array[String]=[]
+	var custom_speech:Array[String]=[]
 	var operation_only:=not results.is_empty()
 	for result in results:
+		if result.has("custom_speech"):
+			operation_only=false
+			custom_speech.append(String(result.custom_speech))
+			if not String(result.get("custom_receipt","")).is_empty(): receipts.append(String(result.custom_receipt))
+			continue
 		names.append(String(result.get("label","the instruction")))
 		if String(result.get("operation_kind",""))=="": operation_only=false
-		var observation:=String(result.get("qualitative_evidence",""))
-		if not observation.is_empty() and observation not in observation_lines: observation_lines.append(observation)
+		var observation:=String(result.get("qualitative_evidence","")).strip_edges()
+		if not observation.is_empty() and observation not in receipts: receipts.append(observation)
 		for limitation_variant in result.get("limitations",[]):
 			var limitation:=_qualitative_limitation(String(limitation_variant))
 			if not limitation.is_empty() and not limitations.has(limitation): limitations.append(limitation)
-	var opening:="I can report that %s took hold." % _natural_list(names)
-	var detail:=" The settlement carried the main work through with the hands, stores, and authority available."
-	if operation_only:
-		opening="The recruitment party is back, and people it met have chosen to join us." if outcome=="success" else ("The recruitment party is back, but it found no one willing to settle here." if outcome=="partial" else "The recruitment party did not return. I have no recruits or reliable field account to report.")
-		detail=""
-	elif outcome=="partial":
-		opening="I have mixed results to report on %s." % _natural_list(names)
-		detail=" Some parts took hold, but the work remained uneven or incomplete."
-	elif outcome=="failure":
-		opening="I must report that %s did not take hold." % _natural_list(names)
-		detail=" The available people, stores, or local cooperation were not enough to make the instruction real."
+	var speech:=""
+	if not names.is_empty():
+		var opening:="I can report that %s took hold." % _natural_list(names)
+		var detail:=" The settlement carried the main work through with the hands, stores, and authority available."
+		if operation_only:
+			opening="The recruitment party is back, and people it met have chosen to join us." if outcome=="success" else ("The recruitment party is back, but it found no one willing to settle here." if outcome=="partial" else "The recruitment party did not return. I have no recruits or reliable field account to report.")
+			detail=""
+		elif outcome=="partial":
+			opening="I have mixed results to report on %s." % _natural_list(names)
+			detail=" Some parts took hold, but the work remained uneven or incomplete."
+		elif outcome=="failure":
+			opening="I must report that %s did not take hold." % _natural_list(names)
+			detail=" The available people, stores, or local cooperation were not enough to make the instruction real."
+		speech=opening+detail
+		if not limitations.is_empty(): speech+=" The main constraint was %s." % "; ".join(limitations).substr(0,260)
+	for line in custom_speech: speech=(speech+" "+line).strip_edges()
 	var original_leader_id:=int(followup.get("leader_person_id",0))
 	if not leader.is_empty() and int(leader.get("person_id",0))!=original_leader_id:
-		opening="I reviewed %s's unfinished directive. %s" % [String(followup.get("leader_name","my predecessor")),opening]
-	var evidence:=" What we can see: %s" % " ".join(observation_lines).substr(0,420) if not observation_lines.is_empty() else ""
-	var constraint:=" The main constraint was %s." % "; ".join(limitations).substr(0,260) if not limitations.is_empty() else ""
-	return (opening+detail+evidence+constraint).substr(0,900)
+		speech="I reviewed %s's unfinished directive. %s" % [String(followup.get("leader_name","my predecessor")),speech]
+	if not custom_speech.is_empty() and not leader.is_empty():
+		speech=CUSTOM.voiced(leader,speech,String(order.get("id",""))+"|report")
+	var text:=speech.substr(0,640)
+	if not receipts.is_empty() and not operation_only: text+="\n\nRECEIPT · "+" · ".join(receipts).substr(0,240)
+	return text
 
 
 func _natural_list(items:Array[String])->String:

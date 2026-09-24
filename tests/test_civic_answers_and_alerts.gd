@@ -21,12 +21,17 @@ func test_anniversary_request_gets_a_specific_answer_without_an_immediate_policy
 	var interpreted:=PronouncementInterpreter._local_interpretation(REQUEST)
 	var order:=AdvisorSystem.begin_civic_directive(REQUEST,city_id,leader)
 	var resolved:=AdvisorSystem.resolve_civic_directive(REQUEST,interpreted,order,city_id,int(leader.person_id))
-	assert_str(String(resolved.status)).is_equal("proposal")
+	# A future festival is booked, not merely recorded: its effects wait for the day.
+	assert_str(String(resolved.status)).is_not_equal("proposal")
 	assert_str(String(resolved.leader_reply)).contains("bonfire")
 	assert_str(String(resolved.leader_reply)).contains("75th")
 	assert_str(String(resolved.leader_reply)).contains("ten years")
 	assert_bool("what you have not made clear" in String(resolved.leader_reply)).is_false()
 	assert_array(ConsequenceEngine.active_policies()).is_empty()
+	var scheduled:=GameState.active_modifiers.filter(func(record:Dictionary)->bool: return String(record.get("id",""))=="custom_directive")
+	assert_bool(scheduled.is_empty()).is_false()
+	for record in scheduled: assert_float(float(record.get("started_day",0.0))).is_greater_equal(3650.0)
+	assert_float(ConsequenceEngine.policy_effect("cohesion_target")).is_equal(0.0)
 
 func test_api_answer_survives_question_guard_without_executing_a_policy()->void:
 	var response:={"summary":"An anniversary gathering","answer":"A bonfire could bring the town together. Keep its fuel separate from winter reserves.","policies":[],"unresolved":""}

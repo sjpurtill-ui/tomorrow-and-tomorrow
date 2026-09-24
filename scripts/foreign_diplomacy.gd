@@ -355,6 +355,11 @@ func open_relief(siege_id:String)->void:
 
 func open(id:String)->void:
 	if leader(id).is_empty(): return
+	# Every conversation with a foreign ruler happens inside the court.
+	var court:Node=get_tree().get_first_node_in_group("court_director") if is_inside_tree() else null
+	if court!=null and court.has_method("open_foreign"):
+		court.call("open_foreign",id)
+		return
 	if is_instance_valid(panel): panel.queue_free()
 	if not is_instance_valid(layer): layer=CanvasLayer.new(); layer.layer=84; add_child(layer)
 	panel=preload("res://scripts/foreign_leader_screen.gd").new(); panel.civ_id=id; layer.add_child(panel)

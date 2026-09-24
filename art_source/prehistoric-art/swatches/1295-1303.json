@@ -1,0 +1,15 @@
+{
+  "source": "art_source/prehistoric-art/swatches/1295-1303.png",
+  "prompt": "Built-in imagegen: nine early prehistoric finds braced at weak points in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: scraper with soft grip, contrasting stone path with branch brace, tied root join, animal-like natural rock, hand-rolled drill branch, braced reed pouring water, stone smoothing groove, bark supporting hide fold, bound twig lifting ember.",
+  "entries": [
+    {"id": 1295, "review": "Top-left: sharp irregular flint scraper protected by rough soft hide at its thin middle."},
+    {"id": 1296, "review": "Top-middle: bare path indicated by contrasting loose stones and a rough branch bridging weak ground."},
+    {"id": 1297, "review": "Top-right: two unlike roots joined by a single short coarse fiber tie at the weak point."},
+    {"id": 1298, "review": "Middle-left: natural cracked rock vaguely suggests a crouching animal, with fractured corner propped by a stone."},
+    {"id": 1299, "review": "Middle-middle: hands rolling a plain branch into a shallow wood hollow, no bow drill."},
+    {"id": 1300, "review": "Middle-right: hollow reed pours a narrow stream into cracked stone basin with a second reed bracing it."},
+    {"id": 1301, "review": "Bottom-left: handstone rubbing a shallow groove in sandstone while another pebble supports its edge."},
+    {"id": 1302, "review": "Bottom-middle: curved bark supports a folded raw-hide scrap, secured only by a crude fiber tie."},
+    {"id": 1303, "review": "Bottom-right: forked twig carrying a tiny ember away from the hand, weak split tied with grass."}
+  ]
+}

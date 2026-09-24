@@ -4846,6 +4846,182 @@
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1221.png",
       "sha256": "8529b468d54a7dcc244b9036b56e3c6dcfed8eef3478fd827c6a869d51715315"
     },
+    "1222": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1222.png",
+      "sha256": "a90629143efb9bbac1d6e6d9ee0b91aee66c3b94d83681c4b1f47ec18bd4d3fc"
+    },
+    "1223": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1223.png",
+      "sha256": "bc725983bfa7a02a8e59ab068f75117bb8e08a9369614af45d65c64c28f96a70"
+    },
+    "1224": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1224.png",
+      "sha256": "2c90ebb8f9415623c95a74eaeebc42c2102514025eea859be8b0f0844fa8faf5"
+    },
+    "1225": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1225.png",
+      "sha256": "809cd11e2d6ae1f08ecd27761f8e32330c86fd48db16f33a67001b503dbe0777"
+    },
+    "1226": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1226.png",
+      "sha256": "e706d2caa0051fee8572178e28da9bd7b50af6cfcc1eaacd25cf5df3e4712e95"
+    },
+    "1227": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1227.png",
+      "sha256": "f939055a96f9d7de16dc843b4a6004dbcd96c4383649dee4b8eb104f5ed0539d"
+    },
+    "1228": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1228.png",
+      "sha256": "dc8b93280940b4c10f6b17537bb0baf337b95fa20fa6b428dc0fb36de1a36d6b"
+    },
+    "1229": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1229.png",
+      "sha256": "749c85821f356e243ceefc4d7bfb875e69b5fd367a52ac3fe7faaafcf7a07adc"
+    },
+    "1230": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1230.png",
+      "sha256": "f2de05cfff6a4452dbd02ee6a96014a7c183c5aad6c6bcd23cec586a0cc6653b"
+    },
+    "1231": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1231.png",
+      "sha256": "55cb7911adf9a941144e361e670928d33fc41f9b1c70551e823e47095039084e"
+    },
+    "1232": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1232.png",
+      "sha256": "0613c54fd8088bfaf6acf89b8e36ffb4bd5e2728572e6b48bfe875849bc428ff"
+    },
+    "1233": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1233.png",
+      "sha256": "dd500cc663901cb29feb316d25f1c9e2e62408a7aecb73f78f1725576c0b5ef1"
+    },
+    "1234": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1234.png",
+      "sha256": "4b21acb04322bdf240dd522f8aa581ddf3dd9e01fc5d734b967b88b314bad5eb"
+    },
+    "1235": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1235.png",
+      "sha256": "17229c9ea585f649b65be5754a2d67101af866e6dd6a7233dbba86d5c535fc1f"
+    },
+    "1236": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1236.png",
+      "sha256": "c6e4578f0829d7d4e7dc53f195279ddab3ce77e28ef1ba88405ab78642758dd6"
+    },
+    "1237": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1237.png",
+      "sha256": "8906e19cf549328d358d51785afac3017e38e14e0c9c3741af82326f3841e25e"
+    },
+    "1238": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1238.png",
+      "sha256": "6c8cdd1fd4a17a079d2c26487b66dc2f2a4749f10d41e75d323fa26af7e25def"
+    },
+    "1239": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1239.png",
+      "sha256": "9e442a3ac75148df464d1b944ed79cebc9de6ef15cd92e83f3daff397fa95c0b"
+    },
+    "1240": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1240.png",
+      "sha256": "f9767bcac1835e2b49e86047561e5eda0a4c16cf00a776efc2eefd1339c7aa3b"
+    },
+    "1241": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1241.png",
+      "sha256": "103355ae4e5a8b0ee0197c36163cc187f8fb1cc2be11f1b0338954b7ac757cc2"
+    },
+    "1242": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1242.png",
+      "sha256": "0d2961dedbc0bf05fb55df0c6402c3c9b09588d79afae93d1c901323a3d4d375"
+    },
+    "1243": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1243.png",
+      "sha256": "694106189285e060b6296cdbfc760bb6821d85b5c19def37ec48c937c4be4db5"
+    },
+    "1244": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1244.png",
+      "sha256": "00798baab4f1fcceed932ef7e54765dfd580789b6e5317425f9bba944029ffa2"
+    },
+    "1245": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1245.png",
+      "sha256": "873a3ec13416d26ed9f33e84ed18d151d098e936c6dcab0340756f42b0b9e039"
+    },
+    "1246": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1246.png",
+      "sha256": "e0a403425233f21d1accee0a059aaa150cde6e7d547f04a314dfbaa2becec724"
+    },
+    "1247": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1247.png",
+      "sha256": "a24259617147a7f94a76bf42e71a0e4a926c64e469c17834e939fe1fa571d939"
+    },
+    "1248": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1248.png",
+      "sha256": "148d3bafe255b4057e112bbda1542c2af98c5bb2a7944e695e30fe19c6b39ab4"
+    },
+    "1249": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1249.png",
+      "sha256": "cde83e089387d3c126a38f181d18ad8275cfa708931fce7d160fe96d424acc2c"
+    },
+    "1250": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1250.png",
+      "sha256": "096b9d2a4d0fb4fa3979bd5efc53d3d53084340039348df0642bb3474abe734e"
+    },
+    "1251": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1251.png",
+      "sha256": "f6298715339994170b7eb12b75e04205d6f6929cb66c4921ae7c7f68e753a120"
+    },
+    "1253": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1253.png",
+      "sha256": "c0bff9a9f5358f28c286702553ffb2bfdb8f50301bc2234ae92cdcf35d5f5f69"
+    },
+    "1254": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1254.png",
+      "sha256": "1ed236d07d4e2b61e83f82c5be3185a28fc08b9f0723ffddc438ab97d449e7e1"
+    },
+    "1255": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1255.png",
+      "sha256": "2df26dcccab1f2a43161d6d0e7e0bcd098a03eb47a9fc23e95846ee83a36374d"
+    },
+    "1256": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1256.png",
+      "sha256": "6977c90256d88ebdb98bddbcd04149084baba17cdf2a54e83f63e0fab4494005"
+    },
+    "1257": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1257.png",
+      "sha256": "225e79965b050ed2322cb2bedc9fd8fe3710bea4c2092d0a17f2f82a3954f302"
+    },
+    "1258": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1258.png",
+      "sha256": "4a8682e98019c068447a7bb8460cad2f979f9cdb41253af4db1833a903afe4b3"
+    },
+    "1259": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1259.png",
+      "sha256": "656ed2fbe402323a5962b7fc9413eac5ee8a23db5db28e911e278406c3b18504"
+    },
+    "1260": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1260.png",
+      "sha256": "1463890df20e30099f109f4f39a5fdd82038e9e14c0597989cd8a5bc42efaf8b"
+    },
+    "1261": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1261.png",
+      "sha256": "99cbe2c174ea49d6191f159dbb57d9121896034ec2a49b30fca4b018240972a9"
+    },
+    "1262": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1262.png",
+      "sha256": "382b74c05e305b06e56d7592e774312fb9e509715fe98eb5cd431f5f9274b3a4"
+    },
+    "1263": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1263.png",
+      "sha256": "e3c8b4001cc6860777edd33fe9648a3ff4ecf3eeca5648537190fb15ee4d74c6"
+    },
+    "1264": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1264.png",
+      "sha256": "f5b5058ca04991c36379df1323ae3f1d0c81375ae37318edf24ba5515a47f9f7"
+    },
+    "1265": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1265.png",
+      "sha256": "b4e1dac0fe0b5c9224900c1e40d1f4434ea20342d0ef0ab26e223020c50d9f0b"
+    },
+    "1266": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1266.png",
+      "sha256": "4a3d63fab0ba8c633d526771cfab2fa780055e68d0777ec54d423b587de60263"
+    },
     "1267": {
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1267.png",
       "sha256": "f813c6397d69704e25039b3c1da0c9eb73ac76521593b093c56c71bb60e1817a"
@@ -4949,6 +5125,74 @@
     "1294": {
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1294.png",
       "sha256": "4e10e3b08b288695bb4e00c0b81881afa80750db2730859a8e1f366a040998c1"
+    },
+    "1295": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1295.png",
+      "sha256": "8752f533f2718cefc8010a63318b72c2fb0b9cdbf66a813f0b1b53be485ba13d"
+    },
+    "1296": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1296.png",
+      "sha256": "ea136bb6570a1cf35d6750b7ba222daad54f0cb4ec9bdca976a552dd0311012d"
+    },
+    "1297": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1297.png",
+      "sha256": "fcd6ae3e1c3c1a3c4d201805fcd6470e6fccf4d5f2149f60de9ba23b1b710b13"
+    },
+    "1298": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1298.png",
+      "sha256": "db84fd99368cd9a7f9119e34be571f446fc25c98c01d3452e633fe8203a29910"
+    },
+    "1299": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1299.png",
+      "sha256": "7b7b4dfdd75fedce5db64fddca683423530efa14a2c6c4d2dda8d896fa695db3"
+    },
+    "1300": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1300.png",
+      "sha256": "6d26a551dd92a8a74d5c2992079242b809319884608537936caf6a94c009aabc"
+    },
+    "1301": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1301.png",
+      "sha256": "598be1e29511f334222f849b5a1fb94a5b024670a30245eebfcc1f1cb1915edd"
+    },
+    "1302": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1302.png",
+      "sha256": "8ffd836193e67cbc26682e011f7cb3382ffdab4d735973de46fa9c6f6a68436f"
+    },
+    "1303": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1303.png",
+      "sha256": "4f4c503eb0effa518651ca51cb6e9f0d8c87f29295768948455c92e90b2e4712"
+    },
+    "1304": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1304.png",
+      "sha256": "e8595f96215d55a686971fba47c3fe7a6b6e5b27371a50f6fc39f38f5f95f62c"
+    },
+    "1306": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1306.png",
+      "sha256": "6a4390502b3d93a6b6283025b6167a4b64c6ac325db1cde9a63db9ec8d3c98eb"
+    },
+    "1307": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1307.png",
+      "sha256": "87e0cc23b01d144be8ca0beeab1634cc8f4a206e60203563ce7282dd8cafa651"
+    },
+    "1308": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1308.png",
+      "sha256": "85b87f7245bbdf448411449fb64f8137ce5ff14268dae531d79c7e743ae06bd9"
+    },
+    "1309": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1309.png",
+      "sha256": "302410c8a08a97ffcabf25dc6a6b0623db889a0236aae9c5a3c0c656dff412e0"
+    },
+    "1310": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1310.png",
+      "sha256": "a39bdd791d1477c6484fc37c9745719df48a6a730306a7fb7c1015abf794af80"
+    },
+    "1311": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1311.png",
+      "sha256": "da25075440f19b3d4e9084e802161dfe7e183ad22b43972270416cd83e9d4038"
+    },
+    "1312": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1312.png",
+      "sha256": "3eac2bfa62e4ba6e67aa6f0829d2d3560957b9d691dc78e6205c8d53b33c72d0"
     },
     "1390": {
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1390.png",

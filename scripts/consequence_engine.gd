@@ -3,6 +3,7 @@ extends Node
 const SOCIETAL_VALUES_MODEL:=preload("res://scripts/societal_values_model.gd")
 const SPAN:=preload("res://scripts/day_span.gd")
 const EARLY_CARE:=preload("res://scripts/early_life_conditions.gd")
+const CUSTOM:=preload("res://scripts/custom_directive.gd")
 
 # One bounded causal model drives the early civilization. Narrative systems may
 # choose from these pressures, but only this file turns them into numbers.
@@ -27,6 +28,9 @@ func initialize() -> void:
 
 func directive_assessment(effect_id:String,requested_magnitude:float,duration_days:float,office_execution:float=1.0,directive_parameters:Dictionary={})->Dictionary:
 	initialize()
+	if effect_id==CUSTOM.ID:
+		# Any explicit order outside the catalog: bounded custom effects, never a refusal.
+		return CUSTOM.assessment(directive_parameters.get("custom_plan",{}),duration_days,office_execution)
 	if not GovernmentPolicyCatalog.has_policy(effect_id):
 		return {"can_apply":false,"blocker":"No simulated institution recognizes this directive.","id":effect_id}
 	var contract:=GovernmentPolicyCatalog.directive_contract(effect_id)
@@ -174,6 +178,9 @@ func apply_directive(effect_id:String,requested_magnitude:float,duration_days:fl
 			if String(prior.get("source_order_id",""))==source_id and String(prior.get("id",""))==effect_id:
 				return {"applied":false,"stale":true,"error":"This order already has an execution record."}
 	var directive_parameters:Dictionary=metadata.get("directive_parameters",{})
+	if effect_id==CUSTOM.ID:
+		initialize()
+		return CUSTOM.apply(directive_parameters.get("custom_plan",{}),duration_days,source,metadata,office_execution)
 	var assessment:=directive_assessment(effect_id,requested_magnitude,duration_days,office_execution,directive_parameters)
 	assessment["source_order_id"]=String(metadata.get("source_order_id",""))
 	if not bool(assessment.get("can_apply",false)):
@@ -435,6 +442,7 @@ func modifier_strength(effect_id: String) -> float:
 			continue
 		if WorldSimulation.state.elapsed_days > float(modifier.get("until_day",INF)):
 			continue
+		if float(modifier.get("started_day",-INF))>WorldSimulation.state.elapsed_days: continue
 		result += clampf(float(modifier.get("magnitude",0.0)),-0.35,0.35)
 	return clampf(result,-0.50,0.50)
 
@@ -443,6 +451,8 @@ func policy_effect(channel:String)->float:
 	for modifier_variant in WorldSimulation.state.active_modifiers:
 		var modifier:Dictionary=modifier_variant
 		if String(modifier.get("kind",""))!="policy" or WorldSimulation.state.elapsed_days>float(modifier.get("until_day",-INF)): continue
+		# Delayed consequences of an order act only once they begin.
+		if float(modifier.get("started_day",-INF))>WorldSimulation.state.elapsed_days: continue
 		var effects:Dictionary=modifier.get("effects",{})
 		if effects.is_empty() and GovernmentPolicyCatalog.has_policy(String(modifier.get("id",""))): effects=GovernmentPolicyCatalog.definition(String(modifier.id)).get("effects",{})
 		if not effects.has(channel): continue
@@ -521,6 +531,10 @@ func active_policies()->Array[Dictionary]:
 		var modifier:Dictionary=modifier_variant
 		if String(modifier.get("kind",""))!="policy": continue
 		if WorldSimulation.state.elapsed_days>float(modifier.get("until_day",-INF)): continue
+		if float(modifier.get("started_day",-INF))>WorldSimulation.state.elapsed_days: continue
+		# Unforeseen side effects of custom orders act on the engine but are not
+		# standing orders anyone chose; they stay out of the policy list.
+		if String(modifier.get("custom_role",""))=="side_effect": continue
 		var policy:=modifier.duplicate(true)
 		if (policy.get("effects",{}) as Dictionary).is_empty() and GovernmentPolicyCatalog.has_policy(String(policy.get("id",""))): policy["effects"]=GovernmentPolicyCatalog.definition(String(policy.id)).get("effects",{})
 		policy["remaining_days"]=maxf(0.0,float(policy.get("until_day",WorldSimulation.state.elapsed_days))-WorldSimulation.state.elapsed_days)
@@ -656,7 +670,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var environmental_health_cost:=disease_pressure*maxf(0.18,1.0-WorldSimulation.discovery.effect("sanitation"))*0.045+(cold_pressure*0.024*(1.0-float(clothing.get("cold",0)))+heat_pressure*0.018)*maxf(0.0,0.92-housing_ratio)
 	var exchange_pressure:Dictionary=preload("res://scripts/society_exchange.gd").pressure()
 	var clinical:=preload("res://scripts/civilian_care.gd").process_day(clampf((1.0-prior_health)*.6+disease_pressure*.25+malnutrition*.15,0,1))
-	var health_target := clampf(-float(exchange_pressure.health_cost)+0.18+WorldSimulation.state.food_security*0.43+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")+WorldSimulation.state.founding_effect("health_target")+WorldSimulation.progression.effect("health_protection")*0.12-WorldSimulation.progression.effect("disease_exposure")*0.08-travel_health_penalty-malnutrition*0.28-process_health_cost-water_health_penalty-environmental_health_cost,0.02,0.97)
+	var health_target := clampf(-float(exchange_pressure.health_cost)+0.18+WorldSimulation.state.food_security*0.43+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")-policy_effect("disease_risk")*0.40+WorldSimulation.state.founding_effect("health_target")+WorldSimulation.progression.effect("health_protection")*0.12-WorldSimulation.progression.effect("disease_exposure")*0.08-travel_health_penalty-malnutrition*0.28-process_health_cost-water_health_penalty-environmental_health_cost,0.02,0.97)
 	health_target=clampf(health_target+float(clinical.get("health_relief",0)),.02,.97)
 	WorldSimulation.state.simulation_metrics["clinical_care"]=clinical.duplicate(true)
 	WorldSimulation.state.population_health = lerpf(WorldSimulation.state.population_health,health_target,SPAN.rate(0.022))
@@ -666,7 +680,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var admin_coverage := clampf(stewards/maxf(1.0,population*0.035),0.0,1.25)
 	var work_strain := clampf((food_workers+extractors+builders)/able_population,0.0,1.0)
 	var economic_social_pressure:=float(WorldSimulation.state.economy_metrics.get("social_pressure",0.0))
-	var cohesion_target := clampf(0.24+WorldSimulation.state.food_security*0.26+housing_ratio*0.15+admin_coverage*0.20+WorldSimulation.discovery.effect("state_capacity")*0.08+WorldSimulation.discovery.effect("cohesion")*0.10+WorldSimulation.progression.effect("cohesion")*0.10+WorldSimulation.progression.effect("legitimacy")*0.06+(1.0-work_strain)*0.08-modifier_strength("divided_camp")+policy_effect("cohesion_target")+WorldSimulation.state.founding_effect("cohesion_target")-administrative_load*0.10-policy_churn*0.16-directive_resistance*0.18+economic_social_pressure*0.55+float(foreign_effects.treaty_count)*0.006-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.12-float(foreign_effects.get("occupation_burden",0.0))*0.16+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"cohesion"),0.08,0.96)
+	var cohesion_target := clampf(0.24+WorldSimulation.state.food_security*0.26+housing_ratio*0.15+admin_coverage*0.20+WorldSimulation.discovery.effect("state_capacity")*0.08+WorldSimulation.discovery.effect("cohesion")*0.10+WorldSimulation.progression.effect("cohesion")*0.10+WorldSimulation.progression.effect("legitimacy")*0.06+(1.0-work_strain)*0.08-modifier_strength("divided_camp")+policy_effect("cohesion_target")-maxf(0.0,policy_effect("violence"))*0.30+WorldSimulation.state.founding_effect("cohesion_target")-administrative_load*0.10-policy_churn*0.16-directive_resistance*0.18+economic_social_pressure*0.55+float(foreign_effects.treaty_count)*0.006-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.12-float(foreign_effects.get("occupation_burden",0.0))*0.16+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"cohesion"),0.08,0.96)
 	cohesion_target=maxf(.08,cohesion_target-float(exchange_pressure.cohesion_cost)-float(exchange_pressure.administrative_load))
 	labor_efficiency=maxf(.25,labor_efficiency-float(exchange_pressure.labor_cost))
 	var cohesion := lerpf(prior_cohesion,cohesion_target,SPAN.rate(0.014))
@@ -693,7 +707,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var material_capacity := lerpf(float(previous.get("material_capacity",0.12)),material_target,SPAN.rate(0.012))
 	var logistics_target := clampf(0.05+carriers/maxf(1.0,population*0.08)*0.55+material_capacity*0.18+storage_function*0.10+WorldSimulation.discovery.effect("haul_capacity")*0.18+WorldSimulation.discovery.effect("route_speed")*0.12+WorldSimulation.progression.effect("haul_capacity")*0.14+WorldSimulation.progression.effect("route_speed")*0.10+policy_effect("logistics_target")+WorldSimulation.state.founding_effect("logistics_target")+float(foreign_effects.market_access_bonus)*0.24,0.03,0.95)
 	var logistics := lerpf(float(previous.get("logistics",0.16)),logistics_target,SPAN.rate(0.016))
-	var security_target := clampf(0.10+guards/maxf(1.0,population*0.05)*0.42+cohesion*0.24+logistics*0.12+WorldSimulation.discovery.effect("warfare_readiness")*0.14+WorldSimulation.progression.effect("warfare_readiness")*0.12+WorldSimulation.progression.effect("security_efficiency")*0.10-modifier_strength("migratory_pressure")+policy_effect("security_target")+WorldSimulation.state.founding_effect("security_target")+float(foreign_effects.security_support)-float(foreign_effects.hostile_pressure)*0.18+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"security"),0.04,0.96)
+	var security_target := clampf(0.10+guards/maxf(1.0,population*0.05)*0.42+cohesion*0.24+logistics*0.12+WorldSimulation.discovery.effect("warfare_readiness")*0.14+WorldSimulation.progression.effect("warfare_readiness")*0.12+WorldSimulation.progression.effect("security_efficiency")*0.10-modifier_strength("migratory_pressure")+policy_effect("security_target")-policy_effect("violence")*0.45+WorldSimulation.state.founding_effect("security_target")+float(foreign_effects.security_support)-float(foreign_effects.hostile_pressure)*0.18+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"security"),0.04,0.96)
 	var security := lerpf(float(previous.get("security",0.38)),security_target,SPAN.rate(0.016))
 
 	var extraction_pressure := extractors/able_population
@@ -724,8 +738,10 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		"Illness":maxf(0.0,0.50-WorldSimulation.state.population_health)*0.055*maxf(0.35,1.0+WorldSimulation.discovery.effect("disease_exposure")-WorldSimulation.discovery.effect("sanitation"))+disease_pressure*maxf(0.10,1.0-WorldSimulation.discovery.effect("sanitation"))*0.005,
 		"Exposure":maxf(0.0,0.68-housing_ratio)*(0.24 if traveling else 0.040)+(cold_pressure*0.018*(1.0-float(clothing.get("cold",0)))+heat_pressure*0.012+storm_pressure*0.006*(1.0-float(clothing.get("storm",0))))*maxf(0.0,0.92-housing_ratio),
 		"Travel exhaustion":0.0,
-		"Insecurity":maxf(0.0,0.30-security)*0.025
+		"Insecurity":maxf(0.0,0.30-security)*0.025+maxf(0.0,policy_effect("violence"))*0.020
 	}
+	# Orders that spread or check sickness shift the illness burden directly.
+	mortality_components["Illness"]=maxf(0.0,float(mortality_components["Illness"])+policy_effect("disease_risk")*0.030)
 	mortality_components["Dehydration"]=_dehydration_mortality_rate(water_intake,WorldSimulation.state.consecutive_water_shortage_days)
 	mortality_components["Work accidents"]=(0.002+extraction_pressure*0.025)*industrial_activity*maxf(0.15,1.0+WorldSimulation.discovery.effect("disaster_risk")-WorldSimulation.discovery.effect("mine_safety"))
 	if intake_ratio<0.98 or malnutrition>0.05:
@@ -756,7 +772,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		"housing_ratio":housing_ratio,"cohesion":cohesion,"traveling":traveling,
 		"birth_crisis":birth_crisis,"absent_adults":float(foreign_effects.get("population_absent",0))*population/maxf(1.0,float(WorldSimulation.settlements.national_population())),
 		"conception_support":WorldSimulation.discovery.effect("conception_support")+policy_effect("conception_support")+WorldSimulation.state.founding_effect("conception_support")+WorldSimulation.progression.effect("conception_support"),
-		"maternal_safety":WorldSimulation.discovery.effect("maternal_safety"),"neonatal_survival":WorldSimulation.discovery.effect("neonatal_survival"),
+		"maternal_safety":WorldSimulation.discovery.effect("maternal_safety"),"neonatal_survival":WorldSimulation.discovery.effect("neonatal_survival")+policy_effect("neonatal_survival"),
 		"conception_care":float(care.get("conception",1.0)),"pregnancy_care":float(care.get("pregnancy_risk",1.0)),
 		"neonatal_care":float(care.get("neonatal",1.0)),"maternal_care":float(care.get("maternal",1.0))
 	}
@@ -767,6 +783,8 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		for key in ["births_count","pregnancy_losses_count","stillbirths_count","maternal_deaths_count","neonatal_deaths_count","conceptions_count"]:next[key]=int(next.get(key,0))+int(reproduction.get(key,0))
 		reproduction=next
 	var births_today:=int(reproduction.get("births_count",0))
+	_process_directive_migration(population,span)
+	CUSTOM.process_day()
 	var events: Array[Dictionary] = []
 	if births_today>0:
 		var birth_cause:="Birth during migration" if traveling else "Births"
@@ -839,6 +857,24 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	if legitimacy < 0.42: _threshold_event(events,"authority_strain","Directives Meet Resistance","Hardship and weak administration are eroding compliance with sovereign priorities.","legitimacy","warning",60)
 	return events
 
+
+func _process_directive_migration(population:float,span:float)->void:
+	## Orders that draw people in or drive them away move whole people, through
+	## the same arrival/departure entry points as every other population change.
+	var pull:=policy_effect("migration_pull")
+	var progress:=float(WorldSimulation.state.simulation_metrics.get("directive_migration_progress",0.0))
+	if is_zero_approx(pull) and is_zero_approx(progress): return
+	progress+=population*pull/365.0*span
+	if progress>=1.0:
+		var arrivals:=floori(progress)
+		progress-=float(arrivals)
+		WorldSimulation.state.register_population_arrivals(arrivals,"drawn by decree")
+	elif progress<=-1.0:
+		var departures:=floori(-progress)
+		progress+=float(departures)
+		WorldSimulation.state.register_population_departures(departures,"Left because of a decree")
+	if is_zero_approx(pull): progress=0.0
+	WorldSimulation.state.simulation_metrics["directive_migration_progress"]=progress
 
 func _dehydration_mortality_rate(water_intake:float,shortage_days:float)->float:
 	## A small collection miss is a warning and lost resilience, not mass death.
