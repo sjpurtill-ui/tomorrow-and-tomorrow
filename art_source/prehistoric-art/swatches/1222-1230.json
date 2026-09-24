@@ -1,0 +1,15 @@
+{
+  "source": "art_source/prehistoric-art/swatches/1222-1230.png",
+  "prompt": "Built-in imagegen: nine distinct prehistoric finds in a square 3x3 warm ivory paper and matte gouache swatch. Cells: tooth root tied with resin and fiber, muddy reflection in stone pool, fingertip testing on cave rock, seed pod in fork, two contrasting root fibers, pebble in forked branch grip, shells knocking in stone hollow, charred branch among stones, reed bundle floating in water.",
+  "entries": [
+    {"id": 1222, "review": "Top-left: mottled animal tooth with broken root crudely secured by dark resin and coarse fiber."},
+    {"id": 1223, "review": "Top-middle: dark muddy water held in an irregular stone hollow with a faint distorted reflection."},
+    {"id": 1224, "review": "Top-right: rough cave-rock flake with uneven exploratory red fingertip smears, no symbols."},
+    {"id": 1225, "review": "Middle-left: split woody seed pod holding loose seeds within a naturally forked stem."},
+    {"id": 1226, "review": "Middle-middle: pale and dark root fibers loosely twisted and caught in a branch fork."},
+    {"id": 1227, "review": "Middle-right: unworked rounded pebble seated in a rough wooden V as an improvised grip."},
+    {"id": 1228, "review": "Bottom-left: unlike freshwater shells resting loosely in an irregular stone hollow."},
+    {"id": 1229, "review": "Bottom-middle: scorched broken branch end wedged between two natural stones."},
+    {"id": 1230, "review": "Bottom-right: coarse reed bundle loosely tied and partly floating at a shallow waterline."}
+  ]
+}

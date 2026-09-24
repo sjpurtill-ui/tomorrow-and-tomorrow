@@ -162,6 +162,10 @@ func _close_modal(modal:Control)->void:
 	if dismiss!=null:dismiss.pressed.emit()
 	else:modal.make_them_wait()
 	await _frames(2)
+	# Someone summoned from the court returns you to the court; leave it.
+	if is_instance_valid(modal) and String(modal.get("mode"))=="rest":
+		modal._close()
+		await _frames(2)
 
 # ---------------------------------------------------------------- pitch → commission
 

@@ -200,8 +200,9 @@ func _build_rail()->void:
 	var column:=VBoxContainer.new()
 	column.add_theme_constant_override("separation",3)
 	rail_panel.add_child(column)
-	var header:=ApprovedArt.symbol(Rect2(15,7,46,47),45,46)
-	column.add_child(header)
+	# The crest heads the rail and opens the court: every conversation with
+	# your people and with foreign rulers happens there.
+	column.add_child(_make_court_button())
 	var header_rule:=ColorRect.new()
 	header_rule.color=Tokens.BORDER
 	header_rule.custom_minimum_size=Vector2(0,1)
@@ -267,6 +268,47 @@ func _make_rail_button(section:Dictionary)->Button:
 	rail_badges[id]=badge
 
 	return button
+
+func _make_court_button()->Button:
+	var button:=Button.new()
+	button.name="RailCourt"
+	button.custom_minimum_size=Vector2(0,46)
+	button.tooltip_text="Your court: summon anyone, receive envoys, send word abroad · F12"
+	var gold:=Tokens.flat(Color(.79,.64,.29,.16),Color("c9a24a"),1,3)
+	var gold_hover:=Tokens.flat(Color(.79,.64,.29,.28),Color("e8c35a"),1,3)
+	button.add_theme_stylebox_override("normal",gold)
+	button.add_theme_stylebox_override("hover",gold_hover)
+	button.add_theme_stylebox_override("pressed",gold_hover)
+	button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	button.pressed.connect(open_court)
+	var content:=VBoxContainer.new()
+	content.set_anchors_preset(Control.PRESET_FULL_RECT)
+	content.alignment=BoxContainer.ALIGNMENT_CENTER
+	content.add_theme_constant_override("separation",0)
+	content.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	button.add_child(content)
+	var symbol:=ApprovedArt.symbol(Rect2(15,7,46,47),30,30)
+	symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
+	symbol.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	content.add_child(symbol)
+	var label:=Tokens.make_label("Court",10,Color("f3dfa2"));label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
+	var badge:=Label.new()
+	badge.visible=false
+	badge.custom_minimum_size=Vector2(16,16)
+	badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	badge.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+	badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	badge.add_theme_font_size_override("font_size",9)
+	badge.add_theme_color_override("font_color",Tokens.DARK_INK)
+	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-8.0,2.0)
+	button.add_child(badge)
+	rail_badges["court"]=badge
+	return button
+
+## Opens (or closes) the court: the one place for every conversation.
+func open_court()->void:
+	var director:Node=get_tree().get_first_node_in_group("court_director") if is_inside_tree() else null
+	if director!=null and director.has_method("toggle_court"):director.call("toggle_court")
 
 func toggle_section(id:String)->void:
 	if active_section==id:
@@ -579,8 +621,8 @@ func _make_queue_card(item:Dictionary)->PanelContainer:
 	decide.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
 	decide.add_theme_stylebox_override("hover",Tokens.gold_outline_style())
 	decide.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
-	decide.tooltip_text="Open the decision in the council."
-	decide.pressed.connect(func()->void: section_requested.emit("civ",1))
+	decide.tooltip_text="Answer it in the court."
+	decide.pressed.connect(func()->void: open_court())
 	actions.add_child(decide)
 	var dismiss:=Button.new()
 	dismiss.text="×"
@@ -811,6 +853,9 @@ func _unhandled_key_input(event:InputEvent)->void:
 	if key.keycode in [KEY_F5,KEY_F6] and key.shift_pressed:
 		MilitaryCampaign.joint_operations.open_service("navy" if key.keycode==KEY_F5 else "air")
 		get_viewport().set_input_as_handled();return
+	if key.keycode==KEY_F12:
+		open_court()
+		get_viewport().set_input_as_handled();return
 	var keys:={KEY_F1:"overview",KEY_F2:"economy",KEY_F3:"government",KEY_F4:"civ",KEY_F5:"inquiry",KEY_F6:"world",KEY_F8:"military",KEY_F7:"construction",KEY_F9:"production"}
 	if keys.has(key.keycode):
 		toggle_section(String(keys[key.keycode]))
@@ -906,9 +951,14 @@ func _refresh_badges()->void:
 	var visible_foreign:=int(observation.get("visible_count",0))
 	var metrics:Dictionary=GameState.simulation_metrics
 	var danger:=_economy_danger_active(metrics,GameState.water_metrics)
-	var signature:="%d|%d|%s" % [decisions,visible_foreign,danger]
+	# Envoys waiting in the antechamber: the only visitors who come unbidden.
+	var envoys:=0
+	for audience:Dictionary in load("res://scripts/audience_hall.gd").waiting():
+		if String(audience.get("origin",""))=="foreign": envoys+=1
+	var signature:="%d|%d|%s|%d" % [decisions,visible_foreign,danger,envoys]
 	if signature==_badge_signature: return
 	_badge_signature=signature
+	_set_badge("court",str(envoys) if envoys>0 else "",Tokens.GOLD)
 	_set_badge("civ",str(decisions) if decisions>0 else "",Tokens.RED)
 	_set_badge("world",str(visible_foreign) if visible_foreign>0 else "",Tokens.AMBER)
 	_set_badge("economy","!" if danger else "",Tokens.RED)

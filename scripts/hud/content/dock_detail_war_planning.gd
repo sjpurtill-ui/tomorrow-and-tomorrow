@@ -154,7 +154,7 @@ func _siege_blocks(siege:Dictionary)->Array:
 	var blocks:Array=[{"type":"rows","heading":"SIEGE · "+String(siege.target_name),"items":rows},{"type":"actions","items":[
 		{"label":"WATCH SIEGE","sub":"city, forces and live decisions","on_press":func()->void: preload("res://scripts/hud/siege_screen.gd").open(identity)},
 		{"label":"CONTINUE","sub":"hold current orders","on_press":func()->void: _siege_notice(MilitaryCampaign.siege_order(identity,"continue"))},
-		{"label":"NEGOTIATE","sub":"seek terms through envoys","on_press":func()->void: ForeignDiplomacy.open(rival)},
+		{"label":"NEGOTIATE","sub":"seek terms through envoys, in the court","on_press":court({"civ_id":rival})},
 		{"label":"RELIEF & ALLIES","sub":"review real commitments and ability","on_press":func()->void: _open_siege_relief(identity)},
 		{"label":"ASSAULT" if String(siege.mode)=="offensive" else "SORTIE","sub":"fight from current conditions","on_press":func()->void: _siege_notice(MilitaryCampaign.siege_order(identity,"assault"))},
 		{"label":"WITHDRAW","sub":"lift siege / yield ground","on_press":func()->void: _siege_notice(MilitaryCampaign.siege_order(identity,"withdraw"))},

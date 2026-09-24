@@ -605,7 +605,10 @@ static func _summoned_speaker(target:Dictionary)->Dictionary:
 	if figure!="":
 		var found:Dictionary=HistoricalFigures.by_id(figure)
 		var name:=String(found.get("name",target.get("name","The master builder")))
-		return {"name":name.substr(0,100),"title":"%s, master builder" % String(found.get("role","Architect")).capitalize(),"person_id":0,"role":"official"}
+		var figure_role:=String(found.get("role","Architect"))
+		# War leaders answer the court by their calling, not as builders.
+		var figure_title:="War leader" if figure_role=="General" else "%s, master builder" % figure_role.capitalize()
+		return {"name":name.substr(0,100),"title":figure_title,"person_id":0,"role":"official"}
 	return {}
 
 static func _other_matters(audience:Dictionary)->Array[Dictionary]:
@@ -2731,6 +2734,17 @@ static func defer(id:String)->void:
 	var audience:=find(id)
 	if audience.is_empty() or String(audience.status)!="waiting": return
 	audience["deferred_day"]=_day()
+
+static func conclude(id:String,outcome:String,option_id:String="concluded")->void:
+	## Close a waiting audience whose business ended outside the option cards
+	## (e.g. the ruler dismissed a settlement leader from office in court).
+	var audience:=find(id)
+	if audience.is_empty() or String(audience.status)!="waiting": return
+	audience.status="resolved"
+	audience.outcome=outcome.substr(0,600)
+	audience.option_id=option_id.substr(0,40)
+	_archive(audience)
+	_ledger_close(audience,audience.option_id,"neutral",audience.outcome)
 
 # --------------------------------------------------------------------------
 # Scene support

@@ -70,6 +70,7 @@ func _ready()->void:
 	await _test_free_text()
 	await _test_live_classifier()
 	await _test_envoy()
+	_test_fading()
 	_test_saves()
 	_finish()
 
@@ -442,6 +443,113 @@ func _test_envoy()->void:
 	_record(id,"TERRIFYING A FOREIGN ENVOY")
 	modal.make_them_wait()
 	await _frames(2)
+
+func _fading_person(fear:float,love:float,resentment:float,day:int)->Dictionary:
+	return {"person_id":0,"courage":0.5,"suspicion":0.4,"pride":0.5,"traits":[],"personality":{"empathy":0.5},
+		"relationships":{"sovereign":{"trust":0.55,"respect":0.55,"fear":fear,"love":love,"resentment":resentment,"obligation":0.45,"fade_day":day}}}
+
+func _faded(person:Dictionary,key:String)->float:
+	return float(Divine.sovereign(person).get(key,0.0))
+
+func _test_fading()->void:
+	var day0:=1000
+	var base_person:=_fading_person(0.8,0.9,0.0,day0)
+	var dread_base:=Divine.dread_baseline(base_person)
+	var love_base:=Divine.love_baseline(base_person)
+	_check(dread_base>0.05 and dread_base<0.3,"dread baseline is not a small personal awe: %.3f" % dread_base)
+	_check(love_base>0.3 and love_base<0.75,"love baseline is not a personal warmth: %.3f" % love_base)
+	var timid:=base_person.duplicate(true); timid["courage"]=0.1
+	var brave:=base_person.duplicate(true); brave["courage"]=0.95
+	_check(Divine.dread_baseline(timid)>Divine.dread_baseline(brave),"the timid do not carry more ordinary dread than the brave")
+	# Terror decays toward the baseline at the expected rate (courage 0.5: half-life 24*1.1 days).
+	var p:=base_person.duplicate(true)
+	Divine.fade(p,day0+60)
+	var expected:=dread_base+(0.8-dread_base)*pow(0.5,60.0/(Divine.DREAD_HALF_LIFE*1.1))
+	_check(absf(_faded(p,"fear")-expected)<0.001,"dread after 60 days %.4f, expected %.4f" % [_faded(p,"fear"),expected])
+	Divine.fade(p,day0+400)
+	_check(absf(_faded(p,"fear")-dread_base)<0.01,"dread did not settle at the baseline after 400 days: %.3f vs %.3f" % [_faded(p,"fear"),dread_base])
+	_check(_faded(p,"fear")>0.02,"dread faded to nothing instead of to the baseline")
+	var low:=_fading_person(0.0,love_base,0.0,day0)
+	Divine.fade(low,day0+200)
+	_check(_faded(low,"fear")>dread_base*0.9,"dread below the baseline does not return to ordinary awe")
+	# A witnessed execution lingers a season or two; a scolding fades in weeks.
+	var witness:=_fading_person(dread_base+0.2,love_base,0.0,day0)
+	(witness.relationships.sovereign as Dictionary)["dread_hold"]=day0+int(Divine.WITNESS_HOLD.strike_down)
+	var scolded:=_fading_person(dread_base+0.2,love_base,0.0,day0)
+	(scolded.relationships.sovereign as Dictionary)["dread_hold"]=day0+int(Divine.TARGET_HOLD.terrify)
+	var timeline:Array[String]=[]
+	for d:int in [7,21,42,90,150,240]:
+		Divine.fade(witness,day0+d); Divine.fade(scolded,day0+d)
+		timeline.append("day %d: execution-witness excess %.3f, scolded excess %.3f" % [d,_faded(witness,"fear")-dread_base,_faded(scolded,"fear")-dread_base])
+		if d==42: _check(_faded(scolded,"fear")-dread_base<0.2*0.4,"a scolding has not mostly faded after six weeks")
+		if d==90:
+			_check(_faded(witness,"fear")-dread_base>0.2*0.6,"a witnessed execution does not linger through a season")
+			_check(_faded(scolded,"fear")-dread_base<0.2*0.15,"a scolding still lingers after a season")
+		if d==240: _check(_faded(witness,"fear")-dread_base<0.2*0.15,"a witnessed execution never fades")
+	transcripts.append("DREAD FADING (excess over baseline %.3f)\n  %s" % [dread_base,"\n  ".join(timeline)])
+	# Love persists longer than dread.
+	var both:=_fading_person(dread_base+0.3,love_base+0.3,0.0,day0)
+	Divine.fade(both,day0+60)
+	var love_left:=(_faded(both,"love")-love_base)/0.3
+	var dread_left:=(_faded(both,"fear")-dread_base)/0.3
+	_check(love_left>dread_left+0.3,"love does not outlast dread (%.2f vs %.2f left)" % [love_left,dread_left])
+	# Resentment: none fades while re-provoked; slowly after a quiet spell.
+	var sore:=_fading_person(dread_base,love_base,0.5,day0)
+	(sore.relationships.sovereign as Dictionary)["resent_day"]=day0
+	Divine.fade(sore,day0+Divine.RESENT_QUIET_DAYS)
+	_check(absf(_faded(sore,"resentment")-0.5)<0.0001,"resentment faded during the quiet spell after a provocation")
+	Divine.fade(sore,day0+Divine.RESENT_QUIET_DAYS+120)
+	var eased:=_faded(sore,"resentment")
+	_check(eased<0.5 and eased>0.35,"resentment does not ease slowly after a quiet spell: %.3f" % eased)
+	# Memories remain: fading touches only the feelings.
+	var remembered:=_fading_person(0.7,0.7,0.3,day0); remembered["memories"]=[{"summary":"I watched it.","kind":"divine"}]
+	Divine.fade(remembered,day0+300)
+	_check((remembered.memories as Array).size()==1,"fading removed a memory")
+	# One multi-day step equals the same days taken one at a time (holds and quiet spells included).
+	var stepped:=_fading_person(0.85,0.2,0.6,day0)
+	(stepped.relationships.sovereign as Dictionary)["dread_hold"]=day0+37
+	(stepped.relationships.sovereign as Dictionary)["resent_day"]=day0-10
+	var daily:=stepped.duplicate(true); var threes:=stepped.duplicate(true)
+	Divine.fade(stepped,day0+180)
+	for d in range(1,181): Divine.fade(daily,day0+d)
+	for d in range(3,181,3): Divine.fade(threes,day0+d)
+	for key:String in ["fear","love","resentment"]:
+		_check(absf(_faded(stepped,key)-_faded(daily,key))<0.000001 and absf(_faded(stepped,key)-_faded(threes,key))<0.000001,"%s: one 180-day step %.6f, daily %.6f, three-day %.6f" % [key,_faded(stepped,key),_faded(daily,key),_faded(threes,key)])
+	# Save round trip: stamps survive JSON (as floats) and fading continues identically.
+	var saved:Dictionary=JSON.parse_string(JSON.stringify(witness))
+	Divine.fade(saved,day0+300); Divine.fade(witness,day0+300)
+	_check(absf(_faded(saved,"fear")-_faded(witness,"fear"))<0.000001,"fading after a save round trip differs")
+	var legacy:=_fading_person(0.6,0.6,0.2,day0)
+	(legacy.relationships.sovereign as Dictionary).erase("fade_day")
+	_check(Divine.fade(legacy,day0) and absf(_faded(legacy,"fear")-0.6)<0.0001 and int(_faded(legacy,"fade_day"))==day0,"a legacy record without stamps is not simply stamped on its first day")
+	# In the government: acts stamp holds, the daily process fades the whole cast and its copies.
+	var officials:=Hall._officials()
+	var pid:=int((officials[0] as Dictionary).person_id)
+	var today:=int(GameState.elapsed_days)
+	GovernmentPeopleSystem._fade_bonds(today)
+	_set_bonds(pid,{"fear":0.9,"resentment":0.7,"love":0.2,"obligation":0.2})
+	GovernmentPeopleSystem.adjust_person_bonds(pid,{"fear":0.0,"hold_days":7})
+	var rel:=Divine.sovereign(GovernmentPeopleSystem.person_snapshot(pid))
+	_check(int(float(rel.get("dread_hold",-1)))==today+7 and int(float(rel.get("resent_day",-1)))==today,"acts do not stamp the dread hold and the provocation day")
+	today+=1; GameState.elapsed_days=today
+	Hall.daily(today)
+	_check(Divine.warned(pid),"a terrified, resentful official was not telegraphed before fading")
+	# The consequence logic reads the faded values: after months of quiet, they calm.
+	for step in 12:
+		today+=15; GameState.elapsed_days=today
+		GovernmentPeopleSystem._fade_bonds(today)
+		Hall.daily(today)
+	var faded_person:=GovernmentPeopleSystem.person_snapshot(pid)
+	_check(Divine.dread_of(faded_person)<0.4,"an official's dread did not fade in the daily process: %.3f" % Divine.dread_of(faded_person))
+	_check(Divine.flight_risk(faded_person)<Divine.CALM_BELOW and not Divine.warned(pid),"a faded official is still thinking of flight")
+	_check(String(faded_person.get("status",""))=="active","the faded official fled")
+	for roster:Dictionary in WorldSimulation.state.advisor_roster:
+		if int(roster.get("person_id",0))==pid: _check(absf(float(roster.relationships.sovereign.fear)-Divine.dread_of(faded_person))<0.0001,"the advisor roster copy did not follow the fade")
+	# Foreign peoples' remembered terror fades too.
+	var civ_before:=Divine.civ_dread("rival_c")
+	GameState.elapsed_days=today+int(Divine.CIV_DREAD_HALF_LIFE)
+	_check(civ_before>0.0 and absf(Divine.civ_dread("rival_c")-civ_before*0.5)<0.01,"a foreign people's terror does not fade (%.3f then %.3f)" % [civ_before,Divine.civ_dread("rival_c")])
+	GameState.elapsed_days=today
 
 func _test_saves()->void:
 	var state:Dictionary=ForeignDiplomacy.audiences

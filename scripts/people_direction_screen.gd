@@ -27,6 +27,7 @@ func _ready()->void:
 	theme=Theme.new()
 	theme.default_font=load("res://assets/fonts/battle/Barlow-Medium.ttf")
 	theme.set_color("font_color","Label",Color("343d34"))
+	preload("res://scripts/hud/hud_tokens.gd").add_tooltip_style(theme)
 	opening=WorldSimulation.state.founding_focus==""
 	if not WorldSimulation.direction.needs_century_choice():selected_focus=WorldSimulation.direction.ambition;reviewing=true
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

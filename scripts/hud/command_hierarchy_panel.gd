@@ -128,6 +128,7 @@ func _install_command_theme()->void:
 	for state:String in ["title_button_normal","title_button_hover","title_button_pressed"]:theme.set_stylebox(state,"Tree",T.flat(T.TILE_BG,T.BORDER_SOFT,1,2,6))
 	theme.set_stylebox("panel","PopupMenu",T.flat(T.DOCK_BG,T.BORDER,1,4,8))
 	theme.set_stylebox("hover","PopupMenu",T.flat(T.HOVER_BG))
+	T.add_tooltip_style(theme)
 	panel.theme=theme
 
 func _row(parent:Node)->HBoxContainer:
