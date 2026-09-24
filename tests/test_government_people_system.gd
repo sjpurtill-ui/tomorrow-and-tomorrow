@@ -17,9 +17,12 @@ func before_test()->void:
 
 func test_founding_government_is_one_office_held_by_a_real_mortal_person()->void:
 	var offices:=GovernmentPeopleSystem.active_offices()
-	assert_int(offices.size()).is_equal(1)
+	# The founding council is the Steward plus the Chief Scout, who reports
+	# what returning parties saw.
+	assert_int(offices.size()).is_equal(2)
 	assert_str(String(offices[0].key)).is_equal("Steward")
-	assert_int(GovernmentPeopleSystem.living_people().size()).is_equal(6)
+	assert_str(String(offices[1].key)).is_equal("ChiefScout")
+	assert_int(GovernmentPeopleSystem.living_people().size()).is_equal(7)
 	var holder:=GovernmentPeopleSystem.officeholder("Steward")
 	assert_bool(holder.is_empty()).is_false()
 	assert_str(String(holder.get("name",""))).is_not_empty()
@@ -114,7 +117,7 @@ func test_offices_and_titles_evolve_only_after_society_becomes_more_complex()->v
 	GameState.society_capacities["institutions"]=0.74
 	GameState.elapsed_days=30.0
 	var events:=GovernmentPeopleSystem.process_day(30)
-	assert_int(GovernmentPeopleSystem.active_offices().size()).is_equal(5)
+	assert_int(GovernmentPeopleSystem.active_offices().size()).is_equal(6)
 	assert_str(String(GovernmentPeopleSystem.active_offices()[0].title)).is_not_equal(initial_title)
 	assert_bool(events.any(func(event:Dictionary)->bool: return String(event.get("title",""))=="Government Expanded")).is_true()
 	assert_int(GovernmentPeopleSystem.living_people().size()).is_less_equal(GovernmentPeopleSystem.MAX_GOVERNMENT_PEOPLE)
@@ -131,7 +134,7 @@ func test_high_institutional_capacity_cannot_create_a_large_cabinet_for_120_peop
 	var structure:=GovernmentPeopleSystem.structure_snapshot()
 	assert_int(int(structure.stage)).is_equal(0)
 	assert_str(String(structure.scope)).is_equal("founding council")
-	assert_int((structure.active_offices as Array).size()).is_equal(1)
+	assert_int((structure.active_offices as Array).size()).is_equal(2)
 	assert_bool(GameState.leadership_positions.has("Envoy")).is_false()
 	assert_str(String(GovernmentPeopleSystem.person_snapshot(int(obsolete_holder.person_id)).get("office_key",""))).is_empty()
 
@@ -141,19 +144,19 @@ func test_specialist_offices_require_real_civic_scale_as_well_as_capacity()->voi
 	GameState.ensure_population_total(250)
 	GameState.elapsed_days=30.0
 	GovernmentPeopleSystem.process_day(30)
-	assert_int(GovernmentPeopleSystem.active_offices().size()).is_equal(2)
+	assert_int(GovernmentPeopleSystem.active_offices().size()).is_equal(3)
 	GameState.ensure_population_total(800)
 	GameState.elapsed_days=60.0
 	GovernmentPeopleSystem.process_day(60)
-	assert_int(GovernmentPeopleSystem.active_offices().size()).is_equal(3)
+	assert_int(GovernmentPeopleSystem.active_offices().size()).is_equal(4)
 	GameState.ensure_population_total(3000)
 	GameState.elapsed_days=90.0
 	GovernmentPeopleSystem.process_day(90)
-	assert_int(GovernmentPeopleSystem.active_offices().size()).is_equal(4)
+	assert_int(GovernmentPeopleSystem.active_offices().size()).is_equal(5)
 	GameState.ensure_population_total(12000)
 	GameState.elapsed_days=120.0
 	GovernmentPeopleSystem.process_day(120)
-	assert_int(GovernmentPeopleSystem.active_offices().size()).is_equal(5)
+	assert_int(GovernmentPeopleSystem.active_offices().size()).is_equal(6)
 
 
 func test_death_vacates_a_person_and_automatically_produces_local_succession()->void:
