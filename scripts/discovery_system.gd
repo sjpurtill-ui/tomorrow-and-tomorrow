@@ -884,7 +884,8 @@ func research_emphasis_total()->int:
 	var total:=0
 	for dynamic_id in WorldSimulation.state.research_subcategory_allocations:
 		for value in (WorldSimulation.state.research_subcategory_allocations[dynamic_id] as Dictionary).values(): total+=maxi(0,int(value))
-	return total
+	# Artifact study is a research-team role drawing on the same observers.
+	return total+int(preload("res://scripts/artifact_collection.gd").study_role().weight)
 
 
 func research_program_summary()->Dictionary:

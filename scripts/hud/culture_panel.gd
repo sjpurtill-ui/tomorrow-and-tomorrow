@@ -24,6 +24,9 @@ func setup(block:Dictionary)->void:
 	_button(direction,"Review direction",data.on_direction,"Review your chosen ambition and its consequences")
 	(direction.get_child(direction.get_child_count()-1) as Control).size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	_rule(self)
+	if data.has("artifacts"):
+		add_child(preload("res://scripts/hud/artifact_gallery.gd").showcase(data.artifacts))
+		_rule(self)
 	add_child(T.make_label("VALUES IN EVERYDAY LIFE",11,T.GOLD))
 	values_grid=GridContainer.new();values_grid.columns=3;values_grid.add_theme_constant_override("h_separation",18);values_grid.add_theme_constant_override("v_separation",18);add_child(values_grid)
 	for value:Dictionary in data.values:

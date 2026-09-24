@@ -11,6 +11,8 @@ const DOMAIN_COLORS:Dictionary={
 
 const ResourceIcons:=preload("res://scripts/resource_icons.gd")
 const Indicators:=preload("res://scripts/civilization_indicators.gd")
+const ArtifactCulture:=preload("res://scripts/artifact_culture.gd")
+const ARTIFACT_COLOR:=Color("#b98a5e")
 
 ## What each domain's research actually improves — the end goal a player is
 ## buying when they raise its weight. Aligned with the frontier catalog's
@@ -68,14 +70,14 @@ func tab(sub:int)->Dictionary:
 	match sub:
 		1: return {"kpis":kpis,"brief":brief,"blocks":_technology_blocks()}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_established_blocks()}
-	return {"kpis":[kpis[0],kpis[1],kpis[3]],"blocks":[_discovery_board()]}
+	return {"kpis":[kpis[0],kpis[1],kpis[3]],"blocks":[_discovery_board(),_artifact_study_block()]}
 
 func _attention_blocks()->Array:
 	var latest:=_latest_discovery_block()
 	var items:Array=[]
 	var allocations:Dictionary=GameState.research_allocations
 	var observers:=maxi(0,int(GameState.population_allocations.get("Knowledge",0)))
-	var total_weight:=0
+	var total_weight:=ArtifactCulture.study_weight()
 	for value in allocations.values(): total_weight+=maxi(0,int(value))
 	var domains:Array=allocations.keys()
 	domains.sort_custom(func(a,b)->bool: return int(allocations[b])<int(allocations[a]))
@@ -91,6 +93,7 @@ func _attention_blocks()->Array:
 			"on_minus":terrain._change_research_domain_allocation.bind(id,-1),
 			"on_plus":terrain._change_research_domain_allocation.bind(id,1),
 		})
+	items.append(_artifact_study_item(total_weight,observers))
 	var blocks:Array=[]
 	if not latest.is_empty(): blocks.append(latest)
 	blocks.append_array([
@@ -226,7 +229,7 @@ func _established_effect_text(event:Dictionary)->String:
 	return " · ".join(parts)
 
 func signature()->Array:
-	return [tree_domain,GameState.research_targets.duplicate(),GameState.discovery_progress.duplicate(),GameState.research_allocations.duplicate(),GameState.active_investigations.duplicate(),GameState.discovery_log.size(),int(GameState.population_allocations.get("Knowledge",0)),expanded_discoveries.duplicate(),expanded_domains.duplicate(),GovernmentPeopleSystem.revision]
+	return [tree_domain,GameState.research_targets.duplicate(),GameState.discovery_progress.duplicate(),GameState.research_allocations.duplicate(),ArtifactCulture.study_weight(),GameState.society_exchange.collections.size(),GameState.active_investigations.duplicate(),GameState.discovery_log.size(),int(GameState.population_allocations.get("Knowledge",0)),expanded_discoveries.duplicate(),expanded_domains.duplicate(),GovernmentPeopleSystem.revision]
 
 func _technology_blocks()->Array:
 	var blocks:Array=[]
@@ -290,7 +293,7 @@ func _domain_group(domains:Array)->Dictionary:
 	for id:String in domains:items.append({"label":id.capitalize(),"sub":String(DOMAIN_GOALS[id]).trim_prefix("Aims at "),"on_press":open_domain.bind(id)})
 	return {"blocks":[{"type":"actions","heading":"CHOOSE A DIRECTION","items":items}]}
 func _domain_report(id:String)->Dictionary:
-	var weight:=int(GameState.research_allocations.get(id,0));var total:=0
+	var weight:=int(GameState.research_allocations.get(id,0));var total:=ArtifactCulture.study_weight()
 	for amount in GameState.research_allocations.values():total+=maxi(0,int(amount))
 	var share:=float(weight)/maxf(1,total)
 	var observers:=int(GameState.population_allocations.get("Knowledge",0))
@@ -303,7 +306,7 @@ func _research_work_report()->Dictionary:
 
 func _discovery_board()->Dictionary:
 	var fields:Array=[]
-	var total:=0
+	var total:=ArtifactCulture.study_weight()
 	for amount in GameState.research_allocations.values():total+=maxi(0,int(amount))
 	var investigations:=DiscoverySystem.active_investigation_records()
 	for id:String in DOMAIN_COLORS:
@@ -313,3 +316,27 @@ func _discovery_board()->Dictionary:
 			if String(record.get("dynamic",""))==id:count+=1
 		fields.append({"id":id,"goal":String(DOMAIN_GOALS[id]).trim_prefix("Aims at "),"weight":weight,"share":float(weight)/maxf(1,total),"active":count,"on_open":open_domain.bind(id),"on_more":terrain._change_research_domain_allocation.bind(id,1),"on_less":terrain._change_research_domain_allocation.bind(id,-1)})
 	return {"type":"inquiry_board","fields":fields,"investigations":investigations,"on_tree":func():open_expanded_tab(1),"on_work":func():_open_report("RESEARCH WORK",_research_work_report),"on_domain":open_domain}
+
+## Artifact study is a research-team role inside the same attention budget.
+func _artifact_study_item(total_weight:int,observers:int)->Dictionary:
+	var weight:=ArtifactCulture.study_weight()
+	var share:=float(weight)/maxf(1.0,float(total_weight))
+	var capacity:Dictionary=ArtifactCulture.A.study_capacity()
+	var rate_text:="No researchers are assigned; recovered artifacts wait unstudied." if float(capacity.researchers)<=0 else "About %.1f researchers, %.1f study-work per day (a common piece needs 20, a legendary one 160)." % [float(capacity.researchers),float(capacity.rate)]
+	return {
+		"name":"Artifact study","count":weight,"pct":"%d%%" % roundi(share*100.0),"color":ARTIFACT_COLOR,
+		"tip":"Scholars examine held artifacts so they yield culture, research and appraisal value. Weight %d of %d — about %.1f of %d observers.\n%s" % [weight,total_weight,share*float(observers),observers,rate_text],
+		"on_minus":_change_artifact_study.bind(-1),"on_plus":_change_artifact_study.bind(1),
+	}
+
+func _artifact_study_block()->Dictionary:
+	var observers:=maxi(0,int(GameState.population_allocations.get("Knowledge",0)))
+	var total:=ArtifactCulture.study_weight()
+	for amount in GameState.research_allocations.values():total+=maxi(0,int(amount))
+	var summary:=ArtifactCulture.summary()
+	var note:="%d waiting · %d in study · %d studied" % [int(summary.unstudied_count),int(summary.in_study_count),int(summary.studied_count)]
+	return {"type":"alloc","heading":"RESEARCH TEAM ROLE","note":note,"items":[_artifact_study_item(total,observers)]}
+
+func _change_artifact_study(delta:int)->void:
+	ArtifactCulture.change_study_weight(delta)
+	hud.request_immediate_dock_refresh()

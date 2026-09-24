@@ -84,6 +84,9 @@ func forecast(id:String,accord:String,tone:String,generous:bool=false)->Dictiona
 	var wonder_reputation:=preload("res://scripts/undertaking_rewards.gd").diplomatic_bonus(WorldSimulation.state,preload("res://scripts/society_exchange.gd").owner_id(id),int(WorldSimulation.state.elapsed_days))
 	score+=wonder_reputation
 	if wonder_reputation>.005:reasons.append("Travelers have brought accounts of your civilization's achievements.")
+	var allure_bonus:=preload("res://scripts/artifact_culture.gd").diplomatic_bonus(p.personality)
+	score+=allure_bonus
+	if allure_bonus>.02:reasons.append("Your people's culture and treasured heritage lend your envoys standing.")
 	var ties:Dictionary=preload("res://scripts/society_exchange.gd").known_relation(id)
 	if float(ties.get("respect",0))>.02:reasons.append("Useful knowledge and cultural exchange give this relationship weight.")
 	if float(ties.get("resentment",0))>.02:reasons.append("The movement of households has created political friction.")
@@ -97,7 +100,7 @@ func forecast(id:String,accord:String,tone:String,generous:bool=false)->Dictiona
 	elif int(WorldSimulation.state.elapsed_days)<int(p.next_day): blocker="Let the last exchange settle: %d days before another proposal." % (int(p.next_day)-int(WorldSimulation.state.elapsed_days))
 	var binding:=not (p.counter as Dictionary).is_empty() and String(p.counter.accord)==accord and generous
 	var outcome:="accept" if score>=.25 or binding else ("counter" if score>=-.1 and not generous else "refuse")
-	return {"outcome":outcome,"label":{"accept":"Receptive","counter":"Likely to ask for more","refuse":"Unconvinced"}[outcome],"reasons":" ".join(reasons),"blocker":blocker,"cost":12 if generous else 4,"bonus":.08 if generous else .12,"domain":ACCORDS[accord].domain,"binding":binding}
+	return {"outcome":outcome,"label":{"accept":"Receptive","counter":"Likely to ask for more","refuse":"Unconvinced"}[outcome],"reasons":" ".join(reasons),"blocker":blocker,"cost":12 if generous else 4,"bonus":.08 if generous else .12,"domain":ACCORDS[accord].domain,"binding":binding,"score":score,"allure_bonus":allure_bonus}
 
 func send(id:String,accord:String,tone:String,generous:bool=false)->Dictionary:
 	var f:=forecast(id,accord,tone,generous)

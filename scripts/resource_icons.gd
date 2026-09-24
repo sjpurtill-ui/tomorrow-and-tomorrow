@@ -242,4 +242,5 @@ static func _domain_glyph(domain_id:String,c:Color)->Array:
 		]
 		"security": return [_rr(28,24,10,8,3,c),_t(18,31,38,31,28,45,c)]
 		"culture": return [_s(21,12,21,45,2,hi),_t(21,14,41,20,21,27,c)]
+		"wealth": return [_rr(28,39,11,3.2,2.5,c),_rr(28,32,11,3.2,2.5,hi),_rr(28,25,11,3.2,2.5,c),_ring(28,16,6.5,2.2,hi)]
 	return [_c(28,28,10,c)]
