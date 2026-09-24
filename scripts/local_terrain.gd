@@ -127,6 +127,8 @@ var terrain_patch_last_commit_usec:int=0
 var terrain_visual_sample_position:=Vector3(INF,INF,INF)
 var terrain_visual_sample_climate:Dictionary={}
 const TERRAIN_PATCH_BUILDER:=preload("res://scripts/terrain_patch_builder.gd")
+const TERRAIN_MACRO_RENDER:=preload("res://scripts/terrain_macro_render.gd") # codex/terrain-bake
+var macro_render:=TERRAIN_MACRO_RENDER.new() # codex/terrain-bake: visual-only planet rasters
 const SURFACE_PRECISION:=preload("res://scripts/surface_precision.gd")
 const TERRAIN_LOD:=preload("res://scripts/terrain_lod.gd")
 const TERRAIN_PATCH_MOVING_BUDGET_USEC:=1400
@@ -488,6 +490,7 @@ func _ready() -> void:
 	_configure_shape()
 	_configure_noise()
 	_prepare_river_course()
+	macro_render.bind(self,SEAMLESS_WORLD) # codex/terrain-bake
 	CivilizationSystem.set_scout_geography_authority(Callable(self,"_scout_land_at"))
 	CivilizationSystem.set_ground_survey_authority(Callable(self,"_survey_ground_at"))
 	MilitaryCampaign.recovery.surface_assessor=Callable(self,"_settlement_surface_assessment")
@@ -541,6 +544,9 @@ func _ready() -> void:
 	_trace_load("settlement and interface")
 	GeneralCampaign.bind_world.call_deferred(self)
 	_capture_preview_if_requested.call_deferred()
+
+func _exit_tree()->void:
+	macro_render.cancel() # codex/terrain-bake: no raster band may outlive this node
 
 func _trace_load(stage: String) -> void:
 	if "--trace-load" in OS.get_cmdline_user_args():
@@ -1008,6 +1014,7 @@ func _process(delta: float) -> void:
 	stamp=trace.mark("frame_camera",stamp)
 	_update_world_streaming()
 	stamp=trace.mark("frame_world_streaming",stamp)
+	macro_render.tick(delta) # codex/terrain-bake: start/assemble off-thread rasters
 	_advance_terrain_patch()
 	stamp=trace.mark("frame_terrain_patch",stamp)
 	# Scale visibility follows the camera every frame it moves; otherwise only
@@ -1922,6 +1929,8 @@ func _rebuild_regional_terrain_patch(center:Vector2,span:float)->void:
 		next_resolution=resolution
 	var prior:=_overlapping_terrain_samples(snapped,span,next_resolution)
 	terrain_patch_job=TERRAIN_PATCH_BUILDER.new(next_resolution,span,snapped,_height_at,_terrain_color_at,_terrain_surface_fields_at,_terrain_seasonality_at,prior)
+	# codex/terrain-bake: planet-scale patches read the per-seed raster (null = noise).
+	terrain_patch_job.macro_raster=macro_render.raster_for(snapped,span,next_resolution)
 
 func _regional_patch_covers_camera()->bool:
 	if camera==null or regional_terrain_patch==null:return false
@@ -10079,10 +10088,33 @@ func _create_land_patch(center: Vector3, radius: float, color: Color, segments: 
 	parent.add_child(patch)
 
 func _river_distance_at(x: float, z: float) -> float:
-	var nearest:=INF
-	for source:Dictionary in _surface_water_sources(Vector3(x,0,z)):
-		nearest=minf(nearest,float(source.distance_km))
-	return nearest
+	# codex/terrain-bake: exactly min(distance_km) over _surface_water_sources(origin)
+	# with no limit, without building every source record. A source only counts
+	# when its nearest channel point is above sea level, so each candidate is
+	# height-checked in turn; tributary courses whose chunk bounds are no closer
+	# than the best valid source are skipped (identical minimum).
+	if world_tributary_courses.is_empty():world_tributary_courses=_seeded_world_tributaries()
+	if not is_same(tributary_chunk_source,world_tributary_courses):_index_tributary_chunks()
+	# Same float32 origin the source records were measured from.
+	var origin:=Vector3(x,0,z)
+	var point:=Vector2(origin.x,origin.z)
+	var best:=INF
+	var river_x:=_world_river_x(origin.z)
+	if is_finite(river_x) and _height_at(river_x,origin.z)>SEA_LEVEL:best=absf(origin.x-river_x)
+	var drainage_distance:=_local_drainage_distance_at(origin.x,origin.z)
+	if is_finite(drainage_distance) and drainage_distance<best:
+		var phase:=float(posmod(GameState.world_seed,10007))/10007.0
+		var channel_x:=_local_drainage_channel_x(roundi((origin.x-(phase-.5)*2.4)/2.4),origin.z)
+		if _height_at(channel_x,origin.z)>SEA_LEVEL:best=drainage_distance
+	var order:Array[Vector2]=[]
+	for course_index in tributary_course_chunk_ranges.size():
+		order.append(Vector2(_tributary_bounds_gap(tributary_course_bounds[course_index],point),course_index))
+	order.sort()
+	for entry in order:
+		if entry.x>best+TRIBUTARY_CULL_EPSILON_KM:break
+		var nearest:=_nearest_point_on_tributary(int(entry.y),point,best)
+		if nearest.z<best and _height_at(nearest.x,nearest.y)>SEA_LEVEL:best=nearest.z
+	return best
 
 
 func _main_river_distance_at(x:float,z:float)->float:
@@ -10120,13 +10152,23 @@ func _nearest_tributary_distance_at(position:Vector2)->float:
 var tributary_chunks:Array=[]
 var tributary_chunk_source:Array=[]
 const TRIBUTARY_CHUNK_SEGMENTS:=16
+## codex/terrain-bake: per-course [first chunk, end chunk) and whole-course bounds,
+## so per-course water queries use the same chunk index. Culling keeps a 10 m
+## allowance for float32 bounds, so skipped chunks can never hold a closer point.
+var tributary_course_chunk_ranges:Array[Vector2i]=[]
+var tributary_course_bounds:Array[Rect2]=[]
+const TRIBUTARY_CULL_EPSILON_KM:=0.01
 
 func _index_tributary_chunks()->void:
 	tributary_chunk_source=world_tributary_courses
 	tributary_chunks.clear()
+	tributary_course_chunk_ranges.clear()
+	tributary_course_bounds.clear()
 	for tributary_index in world_tributary_courses.size():
 		var tributary:Array=world_tributary_courses[tributary_index]
 		var first:=0
+		var first_chunk:=tributary_chunks.size()
+		var course_bounds:=Rect2()
 		while first<tributary.size()-1:
 			var last:=mini(first+TRIBUTARY_CHUNK_SEGMENTS,tributary.size()-1)
 			var start:Vector3=tributary[first]
@@ -10134,8 +10176,33 @@ func _index_tributary_chunks()->void:
 			for point_index in range(first+1,last+1):
 				var point:Vector3=tributary[point_index]
 				bounds=bounds.expand(Vector2(point.x,point.z))
+			course_bounds=bounds if tributary_chunks.size()==first_chunk else course_bounds.merge(bounds)
 			tributary_chunks.append([bounds,tributary_index,first,last])
 			first=last
+		tributary_course_chunk_ranges.append(Vector2i(first_chunk,tributary_chunks.size()))
+		tributary_course_bounds.append(course_bounds)
+
+func _tributary_bounds_gap(bounds:Rect2,position:Vector2)->float:
+	return Vector2(maxf(0.0,maxf(bounds.position.x-position.x,position.x-bounds.end.x)),maxf(0.0,maxf(bounds.position.y-position.y,position.y-bounds.end.y))).length()
+
+func _nearest_point_on_tributary(course_index:int,point:Vector2,bound:float)->Vector3:
+	## First segment point (in course order) strictly closer than every earlier one
+	## and than `bound`, as the former full scan chose it: (x, z, distance), or
+	## INF distance when none is closer than `bound`.
+	var course:Array=world_tributary_courses[course_index]
+	var chunk_range:=tributary_course_chunk_ranges[course_index]
+	var nearest:=Vector2.INF
+	var distance:=INF
+	for chunk_index in range(chunk_range.x,chunk_range.y):
+		var chunk:Array=tributary_chunks[chunk_index]
+		if _tributary_bounds_gap(chunk[0],point)>minf(distance,bound)+TRIBUTARY_CULL_EPSILON_KM:continue
+		for i in range(int(chunk[2]),int(chunk[3])):
+			var start:Vector3=course[i];var finish:Vector3=course[i+1]
+			var sample:=Geometry2D.get_closest_point_to_segment(point,Vector2(start.x,start.z),Vector2(finish.x,finish.z))
+			var candidate_distance:=point.distance_to(sample)
+			if candidate_distance<minf(distance,bound):
+				distance=candidate_distance;nearest=sample
+	return Vector3(nearest.x,nearest.y,distance)
 
 
 func _settlement_surface_assessment(destination:Vector3)->Dictionary:
@@ -10175,16 +10242,13 @@ func _surface_water_sources(origin:Vector3,limit:float=INF)->Array[Dictionary]:
 		var height:=_height_at(river_x,origin.z)
 		if height>SEA_LEVEL:sources.append({"position":Vector3(river_x,height,origin.z),"distance_km":absf(origin.x-river_x),"kind":"River"})
 	if world_tributary_courses.is_empty():world_tributary_courses=_seeded_world_tributaries()
+	if not is_same(tributary_chunk_source,world_tributary_courses):_index_tributary_chunks()
 	var point:=Vector2(origin.x,origin.z)
-	for course:Array in world_tributary_courses:
-		var nearest:=Vector2.INF
-		var distance:=INF
-		for i:int in course.size()-1:
-			var start:Vector3=course[i];var finish:Vector3=course[i+1]
-			var sample:=Geometry2D.get_closest_point_to_segment(point,Vector2(start.x,start.z),Vector2(finish.x,finish.z))
-			var candidate_distance:=point.distance_to(sample)
-			if candidate_distance<minf(distance,limit+.001):
-				distance=candidate_distance;nearest=sample
+	for course_index in world_tributary_courses.size():
+		# codex/terrain-bake: chunk-culled scan; same point and distance as before.
+		var found:=_nearest_point_on_tributary(course_index,point,limit+.001)
+		var nearest:=Vector2(found.x,found.y)
+		var distance:=found.z
 		if is_finite(distance) and distance<=limit:
 			var height:=_height_at(nearest.x,nearest.y)
 			if height>SEA_LEVEL:sources.append({"position":Vector3(nearest.x,height,nearest.y),"distance_km":distance,"kind":"Tributary"})
