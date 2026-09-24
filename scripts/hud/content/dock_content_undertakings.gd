@@ -35,5 +35,4 @@ func _local(id:String)->Dictionary:
 		actions.append({"label":String(d.title),"texture":Art.texture(String(d.id)),"tip":"Proposed design, not a completed landmark. Authorize this undertaking to begin work.","sub":"PROPOSED · %s · %.0f crew-days\n%s" % [", ".join(bill),float(d.work),Rewards.description(String(d.id))],"on_press":func():terrain._report_military_action(U.start(id,String(d.id),func(p:Vector2)->float:return terrain._close_surface_height_at(p.x,p.y),terrain._settlement_stage_land_at));hud.request_immediate_dock_refresh()})
 	if not actions.is_empty():blocks.append({"type":"actions","heading":"POSSIBILITIES HERE","items":actions})
 	else:blocks.append({"type":"text","text":"No new undertaking is available here yet. Local population, discoveries, environment and this world's opportunities determine what can be proposed during the first 300 years."})
-	blocks.append(Rewards.victory_block(GameState))
 	return {"blocks":blocks}

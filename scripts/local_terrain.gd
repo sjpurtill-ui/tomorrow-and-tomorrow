@@ -17993,16 +17993,15 @@ func _populate_civilization_full_report(profile:Dictionary,competition:Dictionar
 		meters.add_child(metric_label)
 	var rival_score_rule:=Label.new()
 	if knowledge_stage<3:
-		rival_score_rule.text="NO GENERAL SCORE EXISTS IN YOUR CIVILIZATION'S KNOWLEDGE. These observations are reports, not universal domains or victory points."
+		rival_score_rule.text="NO GENERAL SCORE EXISTS IN YOUR CIVILIZATION'S KNOWLEDGE. These observations are reports about another people, not universal domains."
 	elif knowledge_stage==3:
-		rival_score_rule.text="A SEVEN-DOMAIN COMPARATIVE MODEL HAS EMERGED, but your methods cannot yet defend exact scores, ranks, or victory thresholds."
+		rival_score_rule.text="A SEVEN-DOMAIN COMPARATIVE MODEL HAS EMERGED, but your methods cannot yet defend exact scores or ranks."
 	elif intel>=0.70 and profile.has("score_breakdown"):
 		var domain_parts:Array[String]=[]
 		for domain in CivilizationSystem.SCORE_DOMAINS:
 			domain_parts.append("%s %d" % [String(domain).to_upper(),roundi(float((profile.get("score_breakdown",{}) as Dictionary).get(domain,0.0)))])
-		var victory:Dictionary=profile.get("victory_requirements",{})
-		var sustainable:Dictionary=victory.get("sustainability",{})
-		rival_score_rule.text="SAME SCORE PILLARS  •  %s\nSAME VICTORY CHECK  BASICS %d/4  •  KNOWN DOMAINS %d/4  •  STREAK %d/12" % ["  ·  ".join(domain_parts),int(sustainable.get("met_count",0)),int(profile.get("domains_led",0)),int(profile.get("dominance_turns",0))]
+		# No victory exists: the breakdown is comparative intelligence only.
+		rival_score_rule.text="ESTIMATED CAPACITIES  •  %s\nIntelligence about this people, not a contest to be won." % "  ·  ".join(domain_parts)
 	else:
 		rival_score_rule.text="THE FORMAL COMPARISON METHOD IS KNOWN, but this civilization's breakdown remains too poorly observed for a defensible estimate."
 	rival_score_rule.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
