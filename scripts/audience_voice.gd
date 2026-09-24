@@ -39,7 +39,7 @@ Manner: each speaker is given a MANNER modelled on a figure from classic literat
 
 The world: people know only what the WORLD line lists. Anything not listed does not exist yet and must never appear, not even as a metaphor, oath, nickname or joke: no beer or ale before brewing, no metal before smelting, no coin, writing, ledgers, scrolls, wheels, carts, ships, sails, temples, priests, glass, bread or ploughs unless listed. Reach instead for weather, beasts, hunting, fire, stone, bone, rivers, ancestors, seasons, stars, hearths and kin.
 
-Truth: use only the facts supplied. Never invent amounts, goods, agreements, promises, battles, deaths, alliances or events; say amounts exactly as given or not at all. Nobody announces or assumes what the ruler will decide. Nobody agrees to new terms. Never mention games, systems, mechanics, buttons, menus, AI or data formats.
+Truth: use only the facts supplied. Never invent amounts, goods, agreements, promises, battles, deaths, alliances or events; say amounts exactly as given or not at all. Nobody announces or assumes what the ruler will decide. Nobody talks down to the ruler: never "child", "dearie", "boy", "girl", "pet" or any diminutive. Nobody agrees to new terms. Never mention games, systems, mechanics, buttons, menus, AI or data formats.
 
 Reply with JSON only: {"lines":[{"speaker_key":"<a listed key>","text":"...","aside":false}],"mood_shift":0.0}. aside=true means murmured to the ruler alone. mood_shift (-0.25 to 0.25) is how this moment changed the warmth between the ruler and the visitor."""
 
@@ -309,7 +309,53 @@ const COURT_REACT:={
 	"neutral":["Neither here nor there, {address}, which is sometimes exactly where you want to be.","Keep them guessing, {address}; it suits you."],
 }
 
+## Called in by the ruler with nothing of their own to raise: short, plain,
+## and handing the floor back. Kept free of later-era idiom.
+const SUMMONS_OPEN:=[
+	"You sent for me, {address}. What do you need?",
+	"I came as soon as I heard. What is it?",
+	"Here I am. Say what you want of me.",
+	"You called? I was in the middle of something, but it can wait.",
+	"I'm listening, {address}. What's on your mind?",
+	"Nothing pressing on my side. What's on yours?",
+	"You wanted me? Then ask.",
+	"I left the work to the others. What do you need me for?",
+	"Well, I'm here. Tell me what this is about.",
+	"My hands are free for the moment. Use them.",
+	"Ask your question; I'll answer it straight.",
+	"I had nothing to bring you today. Have you something for me?",
+]
+## A summoned official hears a plain order: they take it, briefly.
+const ORDER_ACK:=[
+	"It'll be done. I'll take it to the council myself.",
+	"Understood. I'll see it started today.",
+	"Then that's the order. I'll pass it on.",
+	"As you say. The council will have it by nightfall.",
+	"Done, or as good as. I'll tell you how it goes.",
+	"Plain enough. I'll get people moving.",
+	"I'll carry it out. Expect grumbling.",
+	"Right. I'll put it in hand.",
+]
+## Asked something a summoned official has no facts for: honest and short.
+const SUMMONS_REPLY:=[
+	"I'd have to ask around before I answered that.",
+	"I don't know enough to say, and I won't guess.",
+	"Not my part of the work. I can find out.",
+	"I've heard talk, nothing I'd swear to. Give me a few days.",
+	"Nobody's brought that to me. I'll ask.",
+	"I can tell you what I've seen, and it isn't much on that.",
+]
+const SUMMONS_CLOSING:=[
+	"Then I'll get back to it.",
+	"Understood. Send for me again when you need me.",
+	"As you say. I'll be where I always am.",
+	"Good. I'll be off, then.",
+	"I'll go. Call if anything changes.",
+	"Then that's settled. Back to work.",
+]
+
 const CLOSING_OPTION:={
+	"dismiss_summons":SUMMONS_CLOSING,
 	"accept":["{oath} Good! {leader} will be glad the {res} found a proper home, {address}.","Received and appreciated, {address}? Then my feet can finally stop aching with purpose."],
 	"accept_return":["A gift back, {address}? Now I owe you a gift for the gift for the gift. This will never end, and I love it.","{oath} A courteous court! {leader} will hear you sent something home with me, and I'll tell it well."],
 	"refuse":["Refused, {address}? Then I carry {amt} {res} home again, and the story with it.","You send it back, {address}. {leader} doesn't often hear 'no, thank you', so let's see how {leader} takes it."],
@@ -1642,6 +1688,8 @@ func _history_entry(item:Dictionary,by_id:Dictionary)->Dictionary:
 	var ask:=String(item.get("ask",""))
 	if topic.is_empty() and decree.is_empty() and String(item.get("kind",""))=="petition" and ":" in ask:
 		topic=ask.get_slice(":",0);decree=ask.substr(ask.find(":")+1)
+		# Only a spoken decree is a matter in words; keys like "band2" or "Varrow:380" are not.
+		if not decree.contains(" "): decree=""
 	var option:=String(item.get("option_id",item.get("option",item.get("answer",record.get("option_id","")))))
 	var status:=String(item.get("status",record.get("status","expired" if option in ["expired","left","ignored"] else "resolved")))
 	var day:=int(item.get("day",item.get("resolved_day",item.get("arrived_day",record.get("arrived_day",0)))))
@@ -1835,6 +1883,8 @@ func _offline_open(s:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
 			# A protest is not an offer: it keeps its own words.
 			var own_terms:Array=PROPOSAL_OPEN.recruitment_protest if protest else CV.model_bank(envoy.persona,"proposal")
 			_append_if(out,_say(s,envoy,own_terms if not own_terms.is_empty() else generic,rng,first_official,false,generic))
+		"summons":
+			_append_if(out,_say(s,envoy,SUMMONS_OPEN,rng,{},false,SUMMONS_OPEN))
 		"petition":
 			var topic:String=String(s.topic)
 			var topic_bank:Array=ENVOY_OPEN.petition_grievance if topic=="grievance" else (ENVOY_OPEN.petition_ambition if topic=="ambition" else PETITION_PLEA.get(topic,PETITION_PLEA_MORE.get(topic,[])))
@@ -1937,8 +1987,20 @@ func _offline_speak(s:Dictionary,player_text:String,rng:RandomNumberGenerator)->
 	var generic:Array=(PETITIONER_REPLY if s.origin=="court" else ENVOY_REPLY).get(mood,ENVOY_REPLY.neutral)
 	if String(s.kind) in WORK_KINDS and String(s.envoy.persona.get("figure_id","")).length()>0: generic=BUILDER_REPLY.get(mood,BUILDER_REPLY.neutral)
 	var line:Dictionary={}
-	var answers:=answer_bank(s,player_text)
+	var h:Variant=_hall()
+	var directive:=false
+	if String(s.origin)=="court":
+		if h is GDScript: directive=bool((h as GDScript).call("is_directive",player_text))
+		elif h is Object and (h as Object).has_method("is_directive"): directive=bool((h as Object).call("is_directive",player_text))
+	if directive:
+		line=_say(s,envoy,ORDER_ACK,rng,{},false)
+	if line.is_empty():
+		var counted:=fact_answer(s,player_text)
+		if not counted.is_empty(): line=_say(s,envoy,counted,rng,{},false,counted)
+	var answers:=answer_bank(s,player_text) if line.is_empty() else []
 	if not answers.is_empty(): line=_say(s,envoy,answers,rng,{},false)
+	if line.is_empty() and String(s.kind)=="summons" and "?" in player_text:
+		line=_say(s,envoy,SUMMONS_REPLY,rng,{},false)
 	answered[String(s.id)]=not line.is_empty()
 	if line.is_empty(): line=_say(s,envoy,CV.model_bank(envoy.persona,"reply"),rng,{},false,generic)
 	_append_if(out,line)
@@ -1955,6 +2017,40 @@ static func question_type(text:String)->String:
 		var re:=RegEx.new(); re.compile(String(pair[1]))
 		if re.search(text)!=null: return String(pair[0])
 	return ""
+
+## Questions about things the state has counted, answered with the count.
+## [topic, pattern, number key(s) in voice_context.numbers, answer templates].
+const FACT_TOPICS:=[
+	["water","(?i)\\b(water|drink|wells?)\\b",["water_days"],["About {n} days of water stored.","Water for about {n} days, as things stand."]],
+	["food","(?i)(stores?|food|grain|granar|eat|last\\b|hungry|ration)",["food_days"],["About {n} days, if nobody wastes a mouthful.","The stores hold about {n} days of food.","Roughly {n} days. After that, bark and prayers."]],
+	["soldiers","(?i)(soldiers?|warriors?|fighters?|spears?|under arms|garrison|troops|guards?)",["soldiers_seen"],["We counted about {n} under arms.","About {n} fighters, by our count."]],
+	["since","(?i)(how long ago|since you (saw|were)|when did you (see|leave)|how old is)",["days_since_seen"],["{n} days ago, no more.","We saw it {n} days back."]],
+	["stay","(?i)(how long (will|can) you (stay|wait)|until you leave|when (will|must) you (go|leave))",["days_until_leaving"],["{n} more days, then I must go home.","I can wait {n} days, no longer."]],
+	["homeless","(?i)(homeless|shelter|roof|sleep(ing)? outside)",["homeless"],["About {n} people without a proper roof.","Near {n} sleep with no real shelter."]],
+	["their_people","(?i)\\b(they|their|them|those people)\\b.*\\b(many|number|people|souls|strong)\\b|how many (are|of) (they|them)",["their_population"],["About {n} of them, near enough.","They number about {n}."]],
+	["our_people","(?i)how many (are )?(we|of us|people|souls|mouths)",["population"],["We number about {n}.","About {n} souls, counting the babes."]],
+]
+const DONT_KNOW:=["I don't know that. Nobody has counted it.","That I can't tell you; no one has a count.","I don't know, and I won't guess at it."]
+
+func fact_answer(s:Dictionary,player_text:String)->Array:
+	## Real numbers for how-long/how-many/how-much questions. Empty when the
+	## question is not about a counted thing; DONT_KNOW when it is but the
+	## figure is absent.
+	var lower:=player_text.to_lower()
+	if not "?" in player_text: return []
+	var re_q:=RegEx.new(); re_q.compile("(?i)\\b(how long|how many|how much|how big|how old|when did|until|number)\\b")
+	if re_q.search(lower)==null: return []
+	var numbers:Dictionary=(s.get("ctx",{}) as Dictionary).get("numbers",{}) if (s.get("ctx",{}) as Dictionary).get("numbers") is Dictionary else {}
+	for topic in FACT_TOPICS:
+		var re:=RegEx.new(); re.compile(String(topic[1]))
+		if re.search(lower)==null: continue
+		for key in topic[2]:
+			if numbers.has(String(key)):
+				var out:Array=[]
+				for template in topic[3]: out.append(String(template).replace("{n}",str(int(numbers[String(key)]))))
+				return out
+		return DONT_KNOW.duplicate()
+	return []
 
 func answer_bank(s:Dictionary,player_text:String)->Array:
 	var q:=question_type(player_text)

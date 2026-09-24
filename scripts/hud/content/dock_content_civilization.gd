@@ -9,6 +9,7 @@ const ArtifactGallery:=preload("res://scripts/hud/artifact_gallery.gd")
 
 const DYNAMIC_ORDER:Array[String]=["demography","nutrition","health","labor","knowledge","production","infrastructure","logistics","ecology","institutions","security","culture"]
 const ValuesModel:=preload("res://scripts/societal_values_model.gd")
+const Hall:=preload("res://scripts/audience_hall.gd")
 
 func meta()->Dictionary:
 	return {
@@ -463,6 +464,7 @@ func _council_blocks()->Array:
 		if item.get("type","")=="conversation":blocks.append(item)
 	if blocks.is_empty():
 		blocks.append({"type":"text","text":"Succession is pending. Civic conversation resumes when an eligible leader takes office."})
+	blocks.append(_summon_block())
 	blocks.append({"type":"actions","items":[focused_action("COUNCIL DECISIONS","Review pending choices and consequences",_civic_report.bind("decisions")),focused_action("WORK & REPORTS","Pending orders and returned reports",_civic_report.bind("reports")),focused_action("MILITARY REPORTS","Threats and battle outcomes",_civic_report.bind("military")),focused_action("CONVERSATION SETTINGS","AI routing and local interpretation",func()->Dictionary:return {"blocks":[_interpreter_status_block()]})]})
 	return blocks
 func _civic_report(kind:String)->Dictionary:
@@ -476,3 +478,19 @@ func _civic_report(kind:String)->Dictionary:
 		if section==kind:chosen.append(block)
 	if chosen.is_empty():chosen.append({"type":"text","text":"No pending decisions here." if kind=="decisions" else "No reports are waiting here."})
 	return {"blocks":chosen}
+
+## The court comes only when called: one row per person the ruler may summon,
+## with a quiet count of what they hold. No badges, no pop-ups.
+func _summon_block()->Dictionary:
+	var items:Array=[]
+	for entry:Dictionary in Hall.summonable():
+		var count:=int(entry.get("matters",0))
+		var sub:="%d matter%s to raise" % [count,"" if count==1 else "s"] if count>0 else "nothing pending; they will ask what you want"
+		items.append({"name":"%s · %s" % [String(entry.get("title","")),String(entry.get("name",""))],"sub":sub,"value":"SUMMON","value_color":Tokens.GOLD_BRIGHT,"accent":Tokens.VIOLET,
+			"on_click":_summon.bind((entry.get("target",{}) as Dictionary).duplicate()),"tip":"Call them into the audience hall now."})
+	if items.is_empty():items.append({"name":"No one to summon yet","sub":"Officials appear as your government grows.","value":"","accent":Tokens.BORDER_SOFT})
+	return {"type":"rows","heading":"SUMMON TO THE HALL","note":"officials, scouts and master builders","items":items}
+
+func _summon(target:Dictionary)->void:
+	var director:Node=terrain.find_child("AudienceDirector",true,false) if is_instance_valid(terrain) else null
+	if director!=null and director.has_method("summon"):director.call("summon",target)

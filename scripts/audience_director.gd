@@ -155,6 +155,13 @@ func open_works(focus:String="")->Control:
 	var host:Node=terrain.hud if is_instance_valid(terrain) and "hud" in terrain and is_instance_valid(terrain.hud) else self
 	return WorksAtlas.open(host,terrain,self,focus)
 
+## The ruler calls someone into the hall: {person_id} for an official, {figure_id}
+## for an architect, {role:"chief_scout"} for the scouts.
+func summon(target:Dictionary)->Control:
+	var made:=Hall.summon(target)
+	if made.is_empty():return null
+	return open_audience(String(made.id))
+
 func open_conception()->Control:
 	var made:=Works.ruler_proposal()
 	if made.is_empty():return null

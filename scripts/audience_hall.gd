@@ -34,14 +34,14 @@ const LICENSES:=preload("res://scripts/research_licenses.gd")
 const ARTIFACTS:=preload("res://scripts/artifact_collection.gd")
 const RIVALRY:=preload("res://scripts/great_works_rivalry.gd")
 const RESOURCES:=["Food","Timber","Stone","Clay","Fiber Plants"]
-const KINDS:=["gift","request","threat","news","petition","report","great_work","wonder_proposal","proposal"]
+const KINDS:=["gift","request","threat","news","petition","report","great_work","wonder_proposal","proposal","summons"]
 ## Kinds raised by our own people (origin "court").
-const COURT_KINDS:=["petition","report","great_work","wonder_proposal"]
+const COURT_KINDS:=["petition","report","great_work","wonder_proposal","summons"]
 const WORK_KINDS:=["great_work","wonder_proposal"]
 const GREAT_WORKS_PATH:="res://scripts/great_works_audience.gd"
 const REPORT_SOURCES:=["scouts","envoys","expedition"]
 const REPORT_FACTS_MAX:=24
-const TOPICS:=["food","health","housing","security","grievance","ambition","introduction","follow_up","war"]
+const TOPICS:=["food","health","housing","security","grievance","ambition","introduction","follow_up","war","summons"]
 const REACTIONS:=["delighted","pleased","neutral","offended","furious"]
 const VERSION:=3
 const EXPIRY_DAYS:=20
@@ -114,6 +114,7 @@ const SITUATIONS:={
 	"promise_followup":{"kind":"petition","headline":"reminds you of a promise","mechanic":"civic decree pipeline; official relationship"},
 	"introduction":{"kind":"petition","headline":"presents themselves","mechanic":"civic decree pipeline; official relationship"},
 	"war_council":{"kind":"petition","headline":"comes about the war","mechanic":"civic decree pipeline; official relationship"},
+	"summons":{"kind":"summons","headline":"answers your summons","mechanic":"the ruler's own call; spoken orders go to the civic pipeline"},
 }
 
 ## Which situations an occasion invites, with base weights.
@@ -377,6 +378,7 @@ static func _matter_holder(audience:Dictionary)->Dictionary:
 	elif pid>0: key="person:%d" % pid
 	elif role=="chief_scout": key="role:chief_scout"
 	else: key="name:"+String(speaker.get("name","")).substr(0,60)
+	if String(audience.get("holder_key",""))!="": key=String(audience.holder_key)
 	return {"key":key,"role":role,"person_id":pid,"figure_id":figure,"name":String(speaker.get("name","")),"title":String(speaker.get("title",""))}
 
 static func _matter_urgency(audience:Dictionary)->float:
@@ -497,12 +499,137 @@ static func open_matter(matter_id:String)->Dictionary:
 		stored["expires_day"]=maxi(int(stored.get("expires_day",0)),day+EXPIRY_DAYS)
 		stored["status"]="waiting"; stored["lines"]=[]; stored["mood"]=0.0; stored["outcome"]=""; stored["option_id"]=""
 		stored["summoned"]=true
+		stored["holder_key"]=String(m.get("holder_key",""))
 		if not _valid_audience(stored): return {}
 		_enqueue(stored,day)
-		for line in m.get("lines",[]):
-			if line is Dictionary: append_line(String(stored.id),line)
+		# A debrief keeps to its first few lines: the ruler can ask for the rest.
+		var prefilled:Array=m.get("lines",[])
+		for index in mini(prefilled.size(),4):
+			if prefilled[index] is Dictionary: append_line(String(stored.id),prefilled[index])
 		return stored
 	return {}
+
+
+# --------------------------------------------------------------------------
+# Summons: the ruler calls someone into the hall
+# --------------------------------------------------------------------------
+
+static func summon_keys(target:Dictionary)->Array[String]:
+	## Holder keys whose matters this person carries. target: {person_id} for an
+	## official, {figure_id} for an architect, {role:"chief_scout"} for the scouts.
+	var keys:Array[String]=[]
+	var pid:=int(target.get("person_id",0)) if _num(target.get("person_id",0)) else 0
+	var figure:=String(target.get("figure_id",""))
+	var chief:Dictionary=GovernmentPeopleSystem.officeholder("ChiefScout")
+	if String(target.get("role",""))=="chief_scout":
+		if not chief.is_empty(): keys.append("person:%d" % int(chief.person_id))
+		keys.append("role:chief_scout")
+	if pid>0 and not "person:%d" % pid in keys:
+		keys.append("person:%d" % pid)
+		if not chief.is_empty() and int(chief.person_id)==pid: keys.append("role:chief_scout")
+	if figure!="": keys.append("figure:"+figure)
+	var direct:=String(target.get("holder_key",""))
+	if direct!="" and not direct in keys: keys.append(direct)
+	return keys
+
+static func summonable()->Array[Dictionary]:
+	## Everyone the ruler may call in, with how many matters each holds:
+	## officials, the Chief Scout (or the scouts when the office is vacant) and
+	## architects who hold matters.
+	var counts:=matter_counts()
+	var result:Array[Dictionary]=[]
+	var chief:Dictionary=GovernmentPeopleSystem.officeholder("ChiefScout")
+	for person in _officials():
+		var target:={"person_id":int(person.person_id)}
+		var held:=0
+		for key in summon_keys(target): held+=int(counts.get(key,0))
+		result.append({"target":target,"name":String(person.name),"title":String(person.get("office_title","Official")),"role":"chief_scout" if not chief.is_empty() and int(chief.person_id)==int(person.person_id) else "official","matters":held})
+	if chief.is_empty() and int(counts.get("role:chief_scout",0))>0:
+		result.append({"target":{"role":"chief_scout"},"name":"The returning scouts","title":"Scouts","role":"chief_scout","matters":int(counts.get("role:chief_scout",0))})
+	var seen:Dictionary={}
+	for m in matters():
+		var holder:Dictionary=m.get("holder",{})
+		if String(holder.get("role",""))!="architect": continue
+		var key:=String(m.get("holder_key",""))
+		if seen.has(key) or key.begins_with("person:"): continue
+		seen[key]=true
+		var figure:=String(holder.get("figure_id",""))
+		var target:Dictionary={"figure_id":figure,"name":String(holder.get("name",""))} if figure!="" else {"holder_key":key,"name":String(holder.get("name",""))}
+		result.append({"target":target,"name":String(holder.get("name","A master builder")),"title":String(holder.get("title","Master builder")),"role":"architect","matters":int(counts.get(key,0))})
+	return result
+
+static func summon(target:Dictionary)->Dictionary:
+	## Call someone into the hall now. They open with their most pressing
+	## matter; with nothing to raise they simply answer the summons.
+	var keys:=summon_keys(target)
+	if keys.is_empty(): return {}
+	for audience in waiting():
+		if String(audience.get("origin",""))=="court" and String(_matter_holder(audience).key) in keys: return audience
+	var pending:Array[Dictionary]=[]
+	for key in keys: pending.append_array(matters(key))
+	pending.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.urgency)>float(b.urgency) or (float(a.urgency)==float(b.urgency) and int(a.day)>int(b.day)))
+	for m in pending:
+		var opened:=open_matter(String(m.id))
+		if not opened.is_empty(): return opened
+	var speaker:=_summoned_speaker(target)
+	if speaker.is_empty(): return {}
+	var day:=_day()
+	var audience:=_new_audience("court","summons",day)
+	audience.speaker=speaker
+	var name:=String(speaker.name)
+	audience.petition={"topic":"summons","summary":"%s answers your summons with nothing of their own to raise." % name,"suggested_decree":""}
+	audience.situation={"type":"summons","ask":"summons:%d" % day,"headline":"answers your summons","summary":"%s answers your summons." % name,"occasion":{"type":"summons","text":"the ruler sent for them","day":day,"crisis":false}}
+	audience["summoned"]=true
+	audience["holder_key"]=keys[0]
+	if not _valid_audience(audience): return {}
+	_enqueue(audience,day)
+	return audience
+
+static func _summoned_speaker(target:Dictionary)->Dictionary:
+	var pid:=int(target.get("person_id",0)) if _num(target.get("person_id",0)) else 0
+	if String(target.get("role",""))=="chief_scout" and pid==0:
+		var chief:Dictionary=GovernmentPeopleSystem.officeholder("ChiefScout")
+		if not chief.is_empty(): pid=int(chief.person_id)
+		else: return {"name":"Your lead scout","title":"Lead Scout","person_id":0,"role":"official"}
+	if pid>0:
+		var person:=_official(pid)
+		if person.is_empty(): person=GovernmentPeopleSystem.person_snapshot(pid)
+		if person.is_empty(): return {}
+		return {"name":String(person.get("name","")).substr(0,100),"title":String(person.get("office_title",person.get("title","Official"))).substr(0,100),"person_id":pid,"role":"official"}
+	var figure:=String(target.get("figure_id",""))
+	if figure=="" and String(target.get("name",""))!="":
+		return {"name":String(target.name).substr(0,100),"title":"Master builder","person_id":0,"role":"official"}
+	if figure!="":
+		var found:Dictionary=HistoricalFigures.by_id(figure)
+		var name:=String(found.get("name",target.get("name","The master builder")))
+		return {"name":name.substr(0,100),"title":"%s, master builder" % String(found.get("role","Architect")).capitalize(),"person_id":0,"role":"official"}
+	return {}
+
+static func _other_matters(audience:Dictionary)->Array[Dictionary]:
+	## What else the summoned person could raise (at most two).
+	var result:Array[Dictionary]=[]
+	if not bool(audience.get("summoned",false)): return result
+	var holder:=String(_matter_holder(audience).key)
+	var keys:Array[String]=[holder]
+	var speaker:Dictionary=audience.get("speaker",{}) if audience.get("speaker") is Dictionary else {}
+	if int(speaker.get("person_id",0))>0: keys=summon_keys({"person_id":int(speaker.person_id)})
+	for key in keys:
+		for m in matters(key):
+			if result.size()<2: result.append(m)
+	return result
+
+static func is_directive(text:String)->bool:
+	## True when the ruler's words to a summoned official are an order the civic
+	## council can carry out (an imperative verb and a recognised policy).
+	var clean:=text.strip_edges().to_lower()
+	for lead in ["i order that ","i order ","i command that ","i command ","i want you to ","you will ","we will ","let us ","please "]:
+		if clean.begins_with(lead): clean=clean.trim_prefix(lead)
+	if clean.is_empty() or clean.ends_with("?"): return false
+	var first:=String(clean.split(" ",false)[0]).trim_suffix(",").trim_suffix(".")
+	if not first in PronouncementInterpreter.DIRECTIVE_VERBS: return false
+	for policy in PronouncementInterpreter.POLICY_TERMS:
+		if PronouncementInterpreter._policy_has_term_in_text(String(policy),clean): return true
+	return false
 
 static func _migrate_court(s:Dictionary)->void:
 	## Version 3: the court no longer comes uninvited. Waiting court audiences
@@ -633,7 +760,7 @@ static func history_with(speaker:String,limit:int=3,exclude_id:String="")->Array
 	for index in range(ledger.size()-1,-1,-1):
 		var entry:Variant=ledger[index]
 		if not entry is Dictionary or String(entry.get("speaker",""))!=speaker or String(entry.get("audience_id",""))==exclude_id: continue
-		if String(entry.get("option",""))=="": continue
+		if String(entry.get("option",""))=="" or String(entry.get("option","")) in ["set_aside","withdrawn"]: continue
 		result.append({"day":int(entry.day),"days_ago":today-int(entry.day),"situation":String(entry.get("situation","")),"kind":String(entry.get("kind","")),
 			"ask":String(entry.get("ask","")),"summary":String(entry.get("summary","")),"answer":String(entry.get("option","")),"reaction":String(entry.get("reaction","")),"outcome":String(entry.get("outcome",""))})
 		if result.size()>=limit: break
@@ -789,6 +916,8 @@ static func _observe_court(day:int,baseline:bool)->void:
 	for person in _officials():
 		var key:=str(int(person.person_id))
 		present[key]=true
+		# A newly seen official has only just arrived; their own plans come later.
+		if not (state().last_person as Dictionary).has(key): state().last_person[key]=day
 		var rel:Dictionary=person.get("relationships",{}).get("sovereign",{})
 		var resentment:=float(rel.get("resentment",0))
 		var trust:=float(rel.get("trust",0.5))
@@ -1737,7 +1866,7 @@ static func _generate_petition(person_id:int,day:int,forced_topic:String)->Dicti
 
 static func _topic_words(topic:String)->String:
 	return {"food":"the food stores","health":"the sick and the water","housing":"shelter for the people","security":"the watch","grievance":"a personal grievance","ambition":"a proposal of their own",
-		"introduction":"their new office","follow_up":"a promise you made","war":"the war"}.get(topic,"a matter of state")
+		"introduction":"their new office","follow_up":"a promise you made","war":"the war","summons":"your summons"}.get(topic,"a matter of state")
 
 # --------------------------------------------------------------------------
 # Court bench
@@ -1858,6 +1987,12 @@ static func options(id:String)->Array[Dictionary]:
 					result.append(_option("decree","Issue their decree","\"%s\"" % decree,"warm",decree!="","They have no decree to propose."))
 					result.append(_option("promise","Promise to consider it","Warm words, no order yet. They will remember the promise.","neutral"))
 					result.append(_option("dismiss","Dismiss the petition","Send them away. They will resent it.","hostile"))
+		"summons":
+			result.append(_option("dismiss_summons","That will be all","Send them back to their work.","neutral"))
+	# A summoned person may raise one of their other matters instead.
+	if String(audience.get("origin",""))=="court":
+		for other in _other_matters(audience):
+			result.append(_option("hear:"+String(other.id),"Hear their other matter",String(other.get("summary","")),"neutral"))
 	return result
 
 static func _accord_blocker(civ_id:String,accord:String)->String:
@@ -1971,7 +2106,15 @@ static func resolve(id:String,option_id:String)->Dictionary:
 		if String(option.id)==option_id: chosen=option
 	if chosen.is_empty(): return {"ok":false,"outcome":"That answer is not open to you here.","reaction":"neutral"}
 	if not bool(chosen.enabled): return {"ok":false,"outcome":String(chosen.reason),"reaction":"neutral"}
+	if option_id.begins_with("hear:"): return _hear_other(audience,option_id.trim_prefix("hear:"))
 	var result:Dictionary
+	if String(audience.kind)=="summons":
+		result={"outcome":"%s went back to their work." % String(audience.speaker.name),"reaction":"neutral"}
+		audience.status="resolved"; audience.outcome=String(result.outcome); audience.option_id=option_id
+		_archive(audience)
+		_ledger_close(audience,option_id,"neutral",String(result.outcome))
+		result["ok"]=true
+		return result
 	if audience.kind in WORK_KINDS:
 		var gwa:=_great_works()
 		if gwa==null: return {"ok":false,"outcome":"The master builder has left.","reaction":"neutral"}
@@ -2017,6 +2160,19 @@ static func _after_resolve(audience:Dictionary,option_id:String,reaction:String)
 	if option_id=="decree" or topic=="follow_up":
 		for occasion in (state().occasions as Array).duplicate():
 			if occasion is Dictionary and String(occasion.get("type",""))=="promise_followup" and int(occasion.get("person_id",0))==pid and String((occasion.get("data",{}) as Dictionary).get("decree",""))==decree: (state().occasions as Array).erase(occasion)
+
+static func _hear_other(audience:Dictionary,matter_id:String)->Dictionary:
+	## Set the present business aside (it waits again as a matter) and hear the
+	## same person's other matter instead.
+	var next:=open_matter(matter_id)
+	if next.is_empty(): return {"ok":false,"outcome":"That matter has already been settled.","reaction":"neutral"}
+	if String(audience.kind)!="summons": _file_matter(audience,[])
+	audience.status="resolved"
+	audience.outcome="%s set that aside to raise another matter." % String(audience.speaker.name)
+	audience.option_id="hear"
+	_archive(audience)
+	_ledger_close(audience,"set_aside","neutral",String(audience.outcome))
+	return {"ok":true,"outcome":String(audience.outcome),"reaction":"neutral","next_audience_id":String(next.id)}
 
 static func _mood_opinion(audience:Dictionary)->float:
 	return clampf(float(audience.get("mood",0.0)),-1.0,1.0)*MOOD_OPINION
@@ -2605,6 +2761,32 @@ static func _words(value:float,bands:Array)->String:
 		if value<=float(band[0]): return String(band[1])
 	return String(bands[-1][1])
 
+static func _known_numbers(audience:Dictionary,c:Dictionary)->Dictionary:
+	## Exact figures the speakers may state when the ruler asks. A figure the
+	## state does not know is simply absent, so the speaker says so.
+	var numbers:={"food_days":maxi(0,roundi(float(c.food_days))),"population":roundi(float(c.population)),
+		"days_waiting":maxi(0,_day()-int(audience.get("arrived_day",_day()))),"days_until_leaving":maxi(0,int(audience.get("expires_day",_day()))-_day())}
+	var water:Dictionary=GameState.water_metrics
+	if float(water.get("required_today",0.0))>0.0 and _num(water.get("stored",null)): numbers["water_days"]=maxi(0,floori(float(water.stored)/float(water.required_today)))
+	var housing:=float(GameState.housing_capacity)
+	if housing>0.0 and float(c.population)>housing: numbers["homeless"]=roundi(float(c.population)-housing)
+	if String(audience.get("origin",""))=="foreign":
+		var civ:=ForeignDiplomacy.civilization(String(audience.civ_id))
+		if not civ.is_empty():
+			numbers["their_population"]=roundi(float(civ.get("population",0)))
+			numbers["their_food_days"]=maxi(0,roundi(float(civ.get("food_days",0))))
+	var report:Dictionary=audience.get("report",{}) if audience.get("report") is Dictionary else {}
+	if not report.is_empty():
+		if _num(report.get("observed_day",null)): numbers["days_since_seen"]=maxi(0,_day()-int(report.observed_day))
+		for fact in report.get("facts",[]):
+			if not fact is Dictionary: continue
+			var key:=String(fact.get("key",fact.get("kind","")))
+			var value:Variant=fact.get("value",null)
+			if not _num(value): continue
+			if key=="population": numbers["their_population"]=roundi(float(value))
+			elif key in ["garrison","troops","soldiers"]: numbers["soldiers_seen"]=roundi(float(value))
+	return numbers
+
 static func voice_context(id:String)->Dictionary:
 	var audience:=find(id)
 	if audience.is_empty(): return {}
@@ -2624,6 +2806,7 @@ static func voice_context(id:String)->Dictionary:
 		"history_with_civ":[],
 	}
 	if String(audience.civ_id)!="": context["history_with_civ"]=history_with("civ:"+String(audience.civ_id),3,id)
+	context["numbers"]=_known_numbers(audience,c)
 	if not audience.terms.is_empty():
 		context["player_stock_of_terms"]=floori(player_stock(String(audience.terms.resource)))
 	for person in court(id):

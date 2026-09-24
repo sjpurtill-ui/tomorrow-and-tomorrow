@@ -240,10 +240,19 @@ func _stage_decision_matches_decide()->void:
 	if (r.get("decision",{}) as Dictionary).is_empty():_fail("the design gate was not posed");return
 	var snapshot:=r.duplicate(true)
 	var metrics:=GameState.simulation_metrics.duplicate(true)
-	var audience:=Hall.debug_force("great_work",String(r.id))
-	if audience.is_empty():_fail("no great_work audience for the stage gate");return
-	var id:=String(audience.id)
-	var modal:Control=director.open_audience(id)
+	# The stage gate waits on the master builder until the ruler summons them.
+	if not Works.daily(int(GameState.elapsed_days)).is_empty():_fail("the stage gate came in uninvited")
+	var held:={}
+	for matter:Dictionary in Hall.matters():
+		if String(((matter.audience as Dictionary).get("great_work",{}) as Dictionary).get("work_id",""))==String(r.id):held=matter
+	if held.is_empty():_fail("the stage gate left no matter with the master builder");return
+	var holder:Dictionary=held.holder
+	var target:={"figure_id":String(holder.figure_id)} if not String(holder.get("figure_id","")).is_empty() else {"holder_key":String(held.holder_key)}
+	var modal:Control=director.summon(target)
+	if modal==null:_fail("summoning the master builder opened nothing");return
+	var id:=String(modal.audience_id)
+	var audience:=Hall.find(id)
+	if String(audience.get("kind",""))!="great_work":_fail("the summoned master builder did not open with the stage gate");return
 	await _frames(2)
 	var herald:=modal.find_child("HeraldTitle",true,false) as Label
 	if herald==null or not herald.text.begins_with("MASTER BUILDER"):_fail("architect herald wrong: %s" % (herald.text if herald else "none"))

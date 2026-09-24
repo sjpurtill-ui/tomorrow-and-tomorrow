@@ -10,6 +10,7 @@ extends Control
 signal conceive_requested
 
 const Bridge:=preload("res://scripts/great_works_audience.gd")
+const Hall:=preload("res://scripts/audience_hall.gd")
 const Plate:=preload("res://scripts/hud/great_work_plate.gd")
 const Kit:=preload("res://scripts/hud/artifact_gallery.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
@@ -120,6 +121,15 @@ func _build_header(root:VBoxContainer)->void:
 	var actions:=VBoxContainer.new();actions.add_theme_constant_override("separation",8);header.add_child(actions)
 	var conceive:=Kit.action_button(actions,"Conceive a great work",conceive_work,true,"Call the court: pitch a wonder worthy of our people")
 	conceive.name="ConceiveButton";conceive.custom_minimum_size=Vector2(230,42)
+	# Master builders holding matters of their own (pitches, news, forecasts) can be called in.
+	var builders:=0
+	for entry:Dictionary in Hall.summonable():
+		if String(entry.get("role",""))!="architect" or builders>=2:continue
+		builders+=1
+		var target:Dictionary=(entry.get("target",{}) as Dictionary).duplicate()
+		var held:=int(entry.get("matters",0))
+		var call:=Kit.action_button(actions,"Summon %s%s" % [String(entry.get("name","the master builder")),(" · %d" % held) if held>0 else ""],func()->void:_summon(target),false,"Call them into the audience hall now")
+		call.name="SummonBuilder%d" % builders;call.custom_minimum_size=Vector2(230,36)
 	var close_button:=Kit.action_button(actions,"Close",close,false,"Close · Escape")
 	close_button.name="CloseWorks"
 
@@ -252,6 +262,11 @@ func _detail_ours(item:Dictionary)->void:
 	var architect:=String(item.get("architect",""))
 	var arch:Dictionary=site.get("architect",{}) if site.get("architect") is Dictionary else {}
 	if not architect.is_empty():Kit.label(words,"Master builder: %s%s" % [architect,(" — %s in style" % String(arch.get("style",""))) if not String(arch.get("style","")).is_empty() else ""],13,T.BODY)
+	var figure_id:=String(arch.get("id",""))
+	if not figure_id.is_empty() and not architect.is_empty():
+		var held:=int(Hall.matter_counts().get("figure:"+figure_id,0))
+		var summon_button:=Kit.action_button(words,"Summon %s to the hall%s" % [architect,(" · %d matter%s" % [held,"" if held==1 else "s"]) if held>0 else ""],func()->void:_summon({"figure_id":figure_id,"name":architect}),false,"Call the master builder in now")
+		summon_button.name="SummonArchitect"
 	var status_key:=String(item.get("status",""))
 	if status_key in ["building","stalled"]:
 		_section("THE WORKS")
@@ -453,6 +468,11 @@ func _proclaim(label_text:String,text:String)->void:
 		terrain.issue_civic_directive_text("%s: %s" % [label_text,text])
 		message="Proclaimed: %s." % label_text
 		refresh()
+
+func _summon(target:Dictionary)->void:
+	if not is_instance_valid(director) or not director.has_method("summon"):return
+	close()
+	director.summon(target)
 
 func _hear_decision(work_id:String,city_id:String)->void:
 	var made:=Bridge.decision_audience(work_id,city_id,true)

@@ -28,6 +28,7 @@ const KINDS:={
 	"report":{"herald":"%s RETURNS FROM THE FIELD","eyebrow":"A REPORT FROM BEYOND THE BORDERS"},
 	"great_work":{"herald":"%s SEEKS YOUR JUDGMENT","eyebrow":"A GREAT WORK"},
 	"wonder_proposal":{"herald":"%s WOULD RAISE A WONDER","eyebrow":"A GREAT WORK IS PROPOSED"},
+	"summons":{"herald":"%s ANSWERS YOUR SUMMONS","eyebrow":"YOU SENT FOR THEM"},
 }
 const REACTION_WORDS:={"delighted":"DELIGHTED","pleased":"PLEASED","neutral":"UNMOVED","offended":"OFFENDED","furious":"FURIOUS"}
 
@@ -166,7 +167,7 @@ func _build_herald(audience:Dictionary)->Control:
 	var work_info:=_work_herald(audience) if kind in WORK_KINDS else {}
 	var eyebrow:=Tokens.make_label("THE HERALD ANNOUNCES · "+String(work_info.get("eyebrow",KINDS.get(kind,KINDS.news).eyebrow)),12,cream_dim,.12);words.add_child(eyebrow)
 	var subject:=String(audience.get("civ_name","A foreign people")).to_upper()
-	if kind=="petition":subject=("%s %s" % [String(speaker.get("title","")),String(speaker.get("name","An official"))]).strip_edges().to_upper()
+	if kind in ["petition","summons"]:subject=("%s %s" % [String(speaker.get("title","")),String(speaker.get("name","An official"))]).strip_edges().to_upper()
 	var herald_text:=String(KINDS.get(kind,KINDS.news).herald) % subject
 	if kind=="report":herald_text=_report_herald(speaker)
 	# The hall's own short herald phrase says what this visit is about.
@@ -526,6 +527,11 @@ func _speak()->void:
 	speech_input.clear()
 	var before:=(Hall.find(audience_id).get("lines",[]) as Array).size()
 	if _voice_ok():voice.player_speaks(audience_id,text)
+	# An order given to a summoned official goes to the civic council as a directive.
+	var here:=Hall.find(audience_id)
+	if String(here.get("origin",""))=="court" and Hall.is_directive(text) and is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"):
+		terrain.issue_civic_directive_text(text)
+		Hall.append_line(audience_id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":"Your words go out to the council as an order.","day":int(GameState.elapsed_days),"aside":false})
 	# The ruler's own words always appear, even if the voice defers them.
 	var lines:Array=Hall.find(audience_id).get("lines",[])
 	var echoed:=false
@@ -542,6 +548,10 @@ func choose(option_id:String)->Dictionary:
 	if not bool(result.get("ok",false)):
 		_show_toast(String(result.get("outcome",result.get("error","That cannot be done."))))
 		_build_options();return result
+	if not String(result.get("next_audience_id","")).is_empty():
+		# They set the first matter aside and raise the other one.
+		show_audience(String(result.next_audience_id))
+		return result
 	var routed:=String(result.get("decree",""))
 	if not routed.is_empty() and is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"):
 		terrain.issue_civic_directive_text(routed)

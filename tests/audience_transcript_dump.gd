@@ -172,6 +172,8 @@ func _play(audience:Dictionary)->void:
 	if samples.size()<3 and audiences in [2,6,11]: samples.append(block)
 
 func _check_line(speaker:String,manner:String,text:String,day:int)->void:
+	var down:=RegEx.new(); down.compile("(?i)(\\b(dearie|kiddo|sonny|youngster|little one|my boy|my girl|my pet)\\b|[,:]\\s*child\\b|\\bchild\\s*[,:!?.]*\\s*$|^\\s*child\\b)")
+	if down.search(text)!=null: failures.append("day %d %s talked down to the ruler: %s" % [day,speaker,text])
 	var key:=Voice.norm_line(text)
 	if seen_text.has(key):
 		duplicates+=1
