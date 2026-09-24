@@ -207,26 +207,33 @@ func _enqueue_check()->void:
 	var holder:=GovernmentPeopleSystem.officeholder("ChiefScout")
 	check(not holder.is_empty(),"no ChiefScout for enqueue")
 	var before:=HALL.waiting().size()
+	var held_before:=HALL.matters().size()
 	var event:Dictionary=_scenarios()[1].event
-	var stored:Dictionary=SCOUT.report_returned(event,"scouts")
+	var matter:Dictionary=SCOUT.report_returned(event,"scouts")
+	# The Chief Scout never comes uninvited: the report waits as a matter.
+	var stored:Dictionary=matter.get("audience",{}) if matter.get("audience") is Dictionary else {}
 	var hall_ready:=false
 	for method in (HALL as Script).get_script_method_list():
 		if String(method.name)=="enqueue": hall_ready=true
 	if hall_ready:
-		check(not stored.is_empty(),"report_returned did not enqueue")
-		check(HALL.waiting().size()==before+1,"hall queue did not grow")
+		check(not stored.is_empty(),"report_returned did not file a matter")
+		check(HALL.waiting().size()==before,"the Chief Scout came in uninvited")
+		check(HALL.matters().size()==held_before+1 and String(matter.get("holder_key",""))=="person:%d" % int(holder.get("person_id",0)),"report matter not held by the Chief Scout")
 		check(int(stored.get("speaker",{}).get("person_id",0))==int(holder.get("person_id",0)),"speaker is not the ChiefScout")
 		check(String(stored.get("kind",""))=="report" and String(stored.get("origin",""))=="court","wrong kind/origin")
-		check((stored.get("lines",[]) as Array).size()>=3,"prefilled lines missing")
+		check((matter.get("lines",[]) as Array).size()>=3,"prefilled lines missing")
 		check(String(stored.get("report",{}).get("source",""))=="scouts","report source wrong")
 		var duplicate:Dictionary=SCOUT.report_returned(event,"scouts")
 		check(duplicate.is_empty(),"duplicate report for same subject enqueued")
 		var routine:Dictionary=SCOUT.report_returned(_report({"journal":["The outward road: 2 days across open grassland."]}),"scouts")
 		check(routine.is_empty(),"routine survey requested an audience")
+		# Summoned, the Chief Scout delivers the debrief with its prefilled lines.
+		var opened:Dictionary=HALL.open_matter(String(matter.get("id","")))
+		check(not opened.is_empty() and String(opened.kind)=="report" and (HALL.find(String(opened.id)).lines as Array).size()>=3,"summoned Chief Scout did not deliver the report")
 	# The simulation hook (guarded load, not preload) reaches the hall too.
-	var hook_before:=HALL.waiting().size()
+	var hook_before:=HALL.matters().size()
 	CivilizationSystem._chief_scout_report(_scenarios()[2].event,"scouts")
-	if hall_ready: check(HALL.waiting().size()==hook_before+1,"CivilizationSystem hook did not enqueue")
+	if hall_ready: check(HALL.matters().size()==hook_before+1,"CivilizationSystem hook did not file a matter")
 	print("\n  enqueue: %s (hall supports enqueue: %s)" % ["ok" if not stored.is_empty() else "none",str(hall_ready)])
 	# Vacant office: the party lead speaks.
 	var speaker:Dictionary=SCOUT.fallback_speaker(_report({}))
@@ -246,8 +253,10 @@ func _live_return_check()->void:
 		GameState.elapsed_days=float(day)
 		CivilizationSystem.advance_to_day(day)
 	check(CivilizationSystem.scout_reports.size()>before or CivilizationSystem.scout_missions.is_empty(),"live party never returned")
-	var reports:=HALL.waiting().filter(func(a:Dictionary)->bool:return String(a.kind)=="report")
-	print("  live return: %d scout reports archived, %d report audiences waiting" % [CivilizationSystem.scout_reports.size(),reports.size()])
+	var reports:Array=HALL.matters().filter(func(m:Dictionary)->bool:return String(m.kind)=="report").map(func(m:Dictionary)->Dictionary:
+		var copy:Dictionary=(m.audience as Dictionary).duplicate(true); copy["lines"]=m.lines; return copy)
+	check(HALL.waiting().filter(func(a:Dictionary)->bool:return String(a.kind)=="report").is_empty(),"a live report came in uninvited")
+	print("  live return: %d scout reports archived, %d report matters held" % [CivilizationSystem.scout_reports.size(),reports.size()])
 	for audience in reports:
 		if int(audience.arrived_day)>start:
 			print("  live debrief on %s:" % String(audience.report.subject_name))

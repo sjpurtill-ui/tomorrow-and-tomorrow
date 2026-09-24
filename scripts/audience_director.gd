@@ -74,7 +74,7 @@ func _process(delta:float)->void:
 	_ceremony_clock-=delta
 	if _ceremony_clock<=0.0:
 		_ceremony_clock=.5
-		_offer_ceremony()
+		# Ceremonies wait on the works screen; unattended ones dedicate themselves.
 	_refresh_clock-=delta
 	if _refresh_clock<=0.0:
 		_refresh_clock=.25;_refresh_badge()

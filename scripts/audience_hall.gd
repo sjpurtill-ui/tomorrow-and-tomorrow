@@ -43,7 +43,7 @@ const REPORT_SOURCES:=["scouts","envoys","expedition"]
 const REPORT_FACTS_MAX:=24
 const TOPICS:=["food","health","housing","security","grievance","ambition","introduction","follow_up","war"]
 const REACTIONS:=["delighted","pleased","neutral","offended","furious"]
-const VERSION:=2
+const VERSION:=3
 const EXPIRY_DAYS:=20
 const QUEUE_MAX:=4
 const HISTORY_MAX:=30
@@ -70,6 +70,14 @@ const OCCASIONS_MAX:=48
 const SITUATION_JSON_MAX:=4000
 ## Waiting audiences a legacy save keeps when it is calmed on load.
 const MIGRATION_KEEP:=2
+## Matters: what the court would raise if summoned. Only foreign envoys come
+## to the hall on their own; officials, the Chief Scout and architects keep
+## their business as dated matters until the ruler calls them in.
+const MATTERS_MAX:=40
+const MATTERS_PER_HOLDER:=5
+const MATTER_DAYS:=150
+## Set while a test, capture or the ruler's own call raises a court audience directly.
+static var _court_direct:=false
 ## Occasions that continue an earlier audience (they may follow sooner).
 const THREAD_OCCASIONS:=["sequel","promise_followup","refusal_grievance"]
 const COURT_OCCASIONS:=["condition","grievance","appointment","war_council","promise_followup","refusal_grievance","ambition"]
@@ -167,13 +175,15 @@ static func state()->Dictionary:
 	if not s.has("summon_immediately"): s["summon_immediately"]=true
 	if not s.get("ledger") is Array: s["ledger"]=[]
 	if not s.get("occasions") is Array: s["occasions"]=[]
+	if not s.get("matters") is Array: s["matters"]=[]
 	for key:String in ["watch","last_civ","last_person"]:
 		if not s.get(key) is Dictionary: s[key]={}
 	if not s.has("next_any"): s["next_any"]=0
 	if not s.get("last_speaker") is String: s["last_speaker"]=""
 	if not String(s.get("frequency","")) in FREQUENCIES: s["frequency"]="normal"
 	ForeignDiplomacy.audiences=s
-	if int(s.version)<VERSION: _migrate(s)
+	if int(s.version)<2: _migrate(s)
+	if int(s.version)<3: _migrate_court(s)
 	return s
 
 static func waiting()->Array[Dictionary]:
@@ -272,10 +282,19 @@ static func daily(day:int)->Array[Dictionary]:
 	_expire(day)
 	_observe(day)
 	_prune_occasions(day)
+	_prune_matters(day)
+	# The court never comes on its own: its occasions become matters, held by
+	# the official until the ruler summons them.
+	for occasion in (s.occasions as Array).duplicate():
+		if not occasion is Dictionary or not String(occasion.get("type","")) in COURT_OCCASIONS: continue
+		if int(occasion.get("not_before",0))>day: continue
+		(s.occasions as Array).erase(occasion)
+		var petition:=_generate_court_occasion(occasion,day)
+		if not petition.is_empty(): _file_matter(petition,[])
 	if waiting().size()>=QUEUE_MAX or day-int(s.last_arrival_day)<MIN_GAP: return arrivals
 	var ready:Array[Dictionary]=[]
 	for occasion in s.occasions:
-		if occasion is Dictionary and int(occasion.get("not_before",0))<=day and int(occasion.get("expires",0))>day: ready.append(occasion)
+		if occasion is Dictionary and int(occasion.get("not_before",0))<=day and int(occasion.get("expires",0))>day and not String(occasion.get("type","")) in COURT_OCCASIONS: ready.append(occasion)
 	ready.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
 		var pa:=_occasion_priority(a); var pb:=_occasion_priority(b)
 		# Fresh matters first: what happened last week outranks last season.
@@ -321,18 +340,179 @@ static func _expire(day:int)->void:
 			audience.outcome="%s waited %d days without an audience and has left, insulted. %s thinks less of you (opinion −0.04, trust −0.03)." % [String(audience.speaker.name),int(day-int(audience.arrived_day)),String(audience.civ_name)]
 			_add_sequel(audience,"ignored",day)
 		else:
-			var pid:=int(audience.speaker.person_id)
-			GovernmentPeopleSystem.adjust_person_relationship(pid,0,0,0.04)
+			# The ruler called them in; if the ruler never saw them, no one is slighted.
 			var matter:String="their report on %s" % String(audience.get("report",{}).get("subject_name","what they found")) if audience.kind=="report" else _topic_words(String(audience.petition.get("topic","")))
-			GovernmentPeopleSystem.record_person_memory(pid,"Asked for an audience about %s and was left waiting until the matter went stale." % matter,"audience",0.55,{"emotion":"slighted","outcome":"expired"})
-			audience.outcome="%s gave up waiting for an audience about %s. Resentment rose (+0.04)." % [String(audience.speaker.name),matter]
-		_ledger_close(audience,"expired","offended",String(audience.outcome))
+			audience.outcome="%s went back to their work; the matter of %s was set aside." % [String(audience.speaker.name),matter]
+		_ledger_close(audience,"expired","offended" if audience.origin=="foreign" else "neutral",String(audience.outcome))
 		_archive(audience)
 
 static func _enqueue(audience:Dictionary,day:int,external:bool=false)->void:
 	var s:=state()
 	s.queue.append(audience)
+	if String(audience.get("origin",""))=="court":
+		# Called in by the ruler: no envoy budget is spent.
+		var key:=_speaker_key(audience)
+		if key.begins_with("person:"): s.last_person[key.trim_prefix("person:")]=day
+		_ledger_add(audience)
+		return
 	_note_arrival(audience,day,external)
+
+# --------------------------------------------------------------------------
+# Matters: court business held until the ruler summons someone
+# --------------------------------------------------------------------------
+
+static func _matter_holder(audience:Dictionary)->Dictionary:
+	## Who carries this matter: an official, the Chief Scout or an architect.
+	var speaker:Dictionary=audience.get("speaker",{}) if audience.get("speaker") is Dictionary else {}
+	var pid:=int(speaker.get("person_id",0)) if _num(speaker.get("person_id",0)) else 0
+	var kind:=String(audience.get("kind",""))
+	var figure:=""
+	if kind=="great_work" and audience.get("great_work") is Dictionary: figure=String((audience.great_work as Dictionary).get("architect_id",""))
+	elif kind=="wonder_proposal" and audience.get("wonder_proposal") is Dictionary: figure=String((audience.wonder_proposal as Dictionary).get("figure_id",""))
+	var role:="official"
+	if kind=="report": role="chief_scout"
+	elif kind in WORK_KINDS and (figure!="" or pid==0): role="architect"
+	var key:=""
+	if figure!="": key="figure:"+figure
+	elif pid>0: key="person:%d" % pid
+	elif role=="chief_scout": key="role:chief_scout"
+	else: key="name:"+String(speaker.get("name","")).substr(0,60)
+	return {"key":key,"role":role,"person_id":pid,"figure_id":figure,"name":String(speaker.get("name","")),"title":String(speaker.get("title",""))}
+
+static func _matter_urgency(audience:Dictionary)->float:
+	var situation:=_situation(audience)
+	match String(audience.get("kind","")):
+		"report": return 0.6
+		"wonder_proposal": return 0.4
+		"great_work":
+			var mode:=String((audience.great_work as Dictionary).get("mode","")) if audience.get("great_work") is Dictionary else ""
+			return float({"decision":0.85,"outcome":0.8,"event":0.7,"forecast":0.7,"news":0.3}.get(mode,0.5))
+	var occasion:Dictionary=situation.get("occasion",{}) if situation.get("occasion") is Dictionary else {}
+	if bool(occasion.get("crisis",false)): return 0.9
+	return float({"crisis_petition":0.6,"war_council":0.9,"grievance":0.5,"promise_followup":0.5,"introduction":0.3,"ambition":0.2}.get(_situation_type(audience),0.3))
+
+static func _matter_summary(audience:Dictionary)->String:
+	match String(audience.get("kind","")):
+		"report":
+			var report:Dictionary=audience.get("report",{}) if audience.get("report") is Dictionary else {}
+			return "A report on %s." % String(report.get("subject_name","what the scouts found"))
+		"great_work":
+			var gw:Dictionary=audience.get("great_work",{}) if audience.get("great_work") is Dictionary else {}
+			var text:=String(gw.get("text",""))
+			return (text if text!="" else "%s: %s" % [String(gw.get("title","A great work")),String(gw.get("mode",""))]).substr(0,240)
+		"wonder_proposal":
+			var pitch:Dictionary=audience.get("wonder_proposal",{}) if audience.get("wonder_proposal") is Dictionary else {}
+			var trigger:Dictionary=pitch.get("trigger",{}) if pitch.get("trigger") is Dictionary else {}
+			return String(trigger.get("text","A great work they would build.")).substr(0,240)
+	return _ledger_summary(audience)
+
+static func _matter_key(audience:Dictionary,holder:Dictionary)->String:
+	var ask:=_ask_key(audience)
+	if String(audience.get("kind",""))=="wonder_proposal":
+		var pitch:Dictionary=audience.get("wonder_proposal",{}) if audience.get("wonder_proposal") is Dictionary else {}
+		var trigger:Dictionary=pitch.get("trigger",{}) if pitch.get("trigger") is Dictionary else {}
+		ask="wonder:"+String(trigger.get("kind",""))
+	return (String(holder.key)+"|"+ask).substr(0,200)
+
+static func _file_matter(audience:Dictionary,lines:Array)->Dictionary:
+	## Keep court business as a dated matter on its holder. A newer matter with
+	## the same key refreshes the old one; the least pressing go quietly.
+	var s:=state()
+	var day:=_day()
+	var holder:=_matter_holder(audience)
+	var key:=_matter_key(audience,holder)
+	var expires:=day+MATTER_DAYS
+	if String(audience.get("kind",""))=="great_work" and _num(audience.get("expires_day",null)) and int(audience.expires_day)>day: expires=int(audience.expires_day)
+	var list:Array=s.matters
+	var entry:Dictionary={}
+	for existing in list:
+		if existing is Dictionary and String(existing.get("key",""))==key: entry=existing; break
+	var clean_lines:Array=[]
+	for line in lines:
+		if line is Dictionary and clean_lines.size()<12: clean_lines.append((line as Dictionary).duplicate())
+	var stored:=audience.duplicate(true)
+	stored["lines"]=[]
+	if entry.is_empty():
+		s.serial=int(s.serial)+1
+		entry={"id":"matter_%d" % int(s.serial),"key":key}
+		list.append(entry)
+	entry.merge({"holder":holder,"holder_key":String(holder.key),"kind":String(audience.get("kind","")),"situation_type":_situation_type(audience),
+		"summary":_matter_summary(audience),"day":day,"expires":expires,"urgency":_matter_urgency(audience),"audience":stored,"lines":clean_lines},true)
+	if int(holder.person_id)>0: s.last_person[str(int(holder.person_id))]=day
+	# Bounds: a few per holder, a few dozen in all.
+	var mine:Array=list.filter(func(m:Variant)->bool:return m is Dictionary and String(m.get("holder_key",""))==String(holder.key))
+	while mine.size()>MATTERS_PER_HOLDER:
+		var drop:=_least_pressing(mine)
+		mine.erase(drop); list.erase(drop)
+	while list.size()>MATTERS_MAX:
+		list.erase(_least_pressing(list))
+	return entry
+
+static func _least_pressing(list:Array)->Dictionary:
+	var worst:Dictionary={}
+	for m in list:
+		if not m is Dictionary: continue
+		if worst.is_empty() or float(m.get("urgency",0))<float(worst.get("urgency",0)) or (float(m.get("urgency",0))==float(worst.get("urgency",0)) and int(m.get("day",0))<int(worst.get("day",0))): worst=m
+	return worst
+
+static func _prune_matters(day:int)->void:
+	## Matters lapse quietly: no one is slighted by what the ruler never heard.
+	var list:Array=state().matters
+	var gwa:=_great_works()
+	for m in list.duplicate():
+		if not m is Dictionary or int(m.get("expires",0))<=day: list.erase(m); continue
+		var audience:Dictionary=m.get("audience",{}) if m.get("audience") is Dictionary else {}
+		if String(audience.get("kind",""))=="great_work" and gwa!=null and bool(gwa.call("stale",audience)): list.erase(m)
+		elif String(audience.get("kind",""))=="petition" and _official(int((m.get("holder",{}) as Dictionary).get("person_id",0))).is_empty(): list.erase(m)
+
+static func matters(holder_key:String="")->Array[Dictionary]:
+	## Pending matters, most pressing first. Pass a holder key ("person:<id>",
+	## "figure:<id>", "role:chief_scout") to see one person's.
+	var result:Array[Dictionary]=[]
+	for m in state().matters:
+		if m is Dictionary and (holder_key=="" or String(m.get("holder_key",""))==holder_key): result.append(m)
+	result.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.urgency)>float(b.urgency) or (float(a.urgency)==float(b.urgency) and int(a.day)>int(b.day)))
+	return result
+
+static func matter_counts()->Dictionary:
+	## holder_key -> number of pending matters (for small counts in the UI).
+	var counts:Dictionary={}
+	for m in state().matters:
+		if m is Dictionary: counts[String(m.get("holder_key",""))]=int(counts.get(String(m.get("holder_key","")),0))+1
+	return counts
+
+static func open_matter(matter_id:String)->Dictionary:
+	## The ruler takes up a matter: its holder is called into the hall now.
+	var s:=state()
+	for m in (s.matters as Array).duplicate():
+		if not m is Dictionary or String(m.get("id",""))!=matter_id: continue
+		(s.matters as Array).erase(m)
+		var stored:Dictionary=(m.get("audience",{}) as Dictionary).duplicate(true)
+		var gwa:=_great_works()
+		if String(stored.get("kind",""))=="great_work" and gwa!=null and bool(gwa.call("stale",stored)): return {}
+		var day:=_day()
+		s.serial=int(s.serial)+1
+		stored["id"]="aud_%d" % int(s.serial)
+		stored["arrived_day"]=day
+		stored["expires_day"]=maxi(int(stored.get("expires_day",0)),day+EXPIRY_DAYS)
+		stored["status"]="waiting"; stored["lines"]=[]; stored["mood"]=0.0; stored["outcome"]=""; stored["option_id"]=""
+		stored["summoned"]=true
+		if not _valid_audience(stored): return {}
+		_enqueue(stored,day)
+		for line in m.get("lines",[]):
+			if line is Dictionary: append_line(String(stored.id),line)
+		return stored
+	return {}
+
+static func _migrate_court(s:Dictionary)->void:
+	## Version 3: the court no longer comes uninvited. Waiting court audiences
+	## step out of the antechamber and become matters on their holders.
+	s["version"]=3
+	for audience in (s.queue as Array).duplicate():
+		if not audience is Dictionary or String(audience.get("status",""))!="waiting" or String(audience.get("origin",""))!="court": continue
+		(s.queue as Array).erase(audience)
+		var lines:Array=(audience.get("lines",[]) as Array).duplicate() if audience.get("lines") is Array else []
+		_file_matter(audience,lines if String(audience.get("kind",""))=="report" else [])
 
 static func _note_arrival(audience:Dictionary,day:int,external:bool)->void:
 	## Every arrival spends budget: the next routine audience waits about one
@@ -621,13 +801,16 @@ static func _observe_court(day:int,baseline:bool)->void:
 			_add_occasion({"key":"grievance:%s:%d:%d" % [key,band,day],"type":"grievance","person_id":int(person.person_id),"day":day,"expires":day+120,"crisis":band>=2,
 				"data":{"band":band,"text":"%s's resentment has grown" % String(person.name)}})
 		people[key]={"g":band}
+		# A quiet official turns over a plan of their own; it waits as a matter.
+		if not baseline and day-int((state().last_person as Dictionary).get(key,-99999))>=PERSON_GAP and matters("person:"+key).is_empty() and _next_ambition(person,day)!="":
+			_add_occasion({"key":"ambition:%s:%d" % [key,day],"type":"ambition","person_id":int(person.person_id),"day":day,"expires":day+45,"data":{"text":"a plan they have been turning over"}})
 	for key in people.keys():
 		if not present.has(String(key)): people.erase(key)
 
 static func _ambient(day:int)->void:
-	## When nothing has happened for a long while, someone with a genuine reason
-	## to come (a people not heard from in half a year, an official with an
-	## unasked ambition) asks for an audience. Still subject to the budget.
+	## When nothing has happened for a long while, a people not heard from in
+	## half a year sends an envoy. Still subject to the budget. (The court never
+	## comes uninvited; see _observe_court for officials' own plans.)
 	var s:=state()
 	var gap:=_gap()
 	if day-int(s.last_arrival_day)<roundi(float(gap)*1.2) or day<int(s.next_any): return
@@ -639,10 +822,6 @@ static func _ambient(day:int)->void:
 		if ForeignDiplomacy.civilization(id).is_empty() or bool(civ.player_relation.get("at_war",false)): continue
 		var silent:=day-int((s.last_civ as Dictionary).get(id,-99999))
 		if silent>=CIV_GAP and "civ:"+id!=String(s.last_speaker): pool.append({"w":minf(3.0,float(silent)/365.0+0.5),"civ_id":id})
-	for person in _officials():
-		var key:=str(int(person.person_id))
-		var quiet:=day-int((s.last_person as Dictionary).get(key,-99999))
-		if quiet>=PERSON_GAP and "person:"+key!=String(s.last_speaker) and _next_ambition(person,day)!="": pool.append({"w":minf(2.0,float(quiet)/365.0+0.3),"person_id":int(person.person_id)})
 	if pool.is_empty(): return
 	var rng:=_rng("ambient",day)
 	var total:=0.0
@@ -2330,6 +2509,16 @@ static func enqueue(record:Dictionary)->Dictionary:
 		for line in record.lines:
 			if line is Dictionary: lines.append(line)
 	if not _valid_audience(audience): return {}
+	if origin=="court" and not bool(record.get("summoned",false)) and not _court_direct:
+		# Only envoys come uninvited. Court business waits as a matter on its
+		# holder until the ruler summons them; nothing is enqueued.
+		_file_matter(audience,lines)
+		return {}
+	if origin=="court":
+		# Heard now at the ruler's call: the same matter no longer waits.
+		var matter_key:=_matter_key(audience,_matter_holder(audience))
+		for m in (state().matters as Array).duplicate():
+			if m is Dictionary and String(m.get("key",""))==matter_key: (state().matters as Array).erase(m)
 	if waiting().size()>=QUEUE_MAX:
 		for old in waiting():
 			if old.kind=="petition":
@@ -2343,9 +2532,8 @@ static func enqueue(record:Dictionary)->Dictionary:
 	return audience
 
 static func room_for(category:String="routine")->bool:
-	## Pacing hook for matters raised outside the hall (great works news,
-	## forecasts, pitches). "urgent" needs only the hard minimum gap and a free
-	## seat; "routine" also waits for the budget.
+	## Pacing hook kept for older callers. Court business now becomes matters,
+	## which need no budget; this only reports whether an envoy could arrive.
 	if WorldSimulation.actor_id!="player": return false
 	var s:=state()
 	var day:=_day()
@@ -2482,7 +2670,9 @@ static func debug_force(kind:String,civ_id:String="")->Dictionary:
 	if kind=="wonder_proposal":
 		var gwp:=_great_works()
 		if gwp==null: return {}
+		_court_direct=true
 		var pitched:Dictionary=gwp.call("proposal_audience",{"trigger":{"kind":"debug","text":"A test of the court's imagination."}})
+		_court_direct=false
 		if pitched.is_empty(): pitched=gwp.call("ruler_proposal")
 		return pitched
 	if kind=="great_work":
@@ -2492,7 +2682,9 @@ static func debug_force(kind:String,civ_id:String="")->Dictionary:
 		for pending in gwa.call("api_list","pending_decisions"):
 			if not pending is Dictionary: continue
 			if civ_id!="" and String(pending.get("work_id",""))!=civ_id: continue
+			_court_direct=true
 			var made:Dictionary=gwa.call("decision_audience",String(pending.get("work_id","")),String(pending.get("city_id","")))
+			_court_direct=false
 			if not made.is_empty(): return made
 			for waiting_audience in waiting():
 				if String(waiting_audience.kind)=="great_work" and String((waiting_audience.get("great_work",{}) as Dictionary).get("work_id",""))==String(pending.get("work_id","")): return waiting_audience
@@ -2564,7 +2756,7 @@ static func _debug_report(civ_id:String)->Dictionary:
 		{"kind":"strategy","text":String(civ.get("strategy","")),"certainty":0.5},
 		{"kind":"food","text":"granaries low" if float(civ.get("food_days",30))<22 else "granaries full","certainty":0.5},
 	]
-	return enqueue({"kind":"report","origin":"court","speaker":{"name":String(speaker.name),"title":String(speaker.get("office_title","Chief Scout")),"person_id":int(speaker.get("person_id",0))},
+	return enqueue({"kind":"report","origin":"court","summoned":true,"speaker":{"name":String(speaker.name),"title":String(speaker.get("office_title","Chief Scout")),"person_id":int(speaker.get("person_id",0))},
 		"report":{"facts":facts,"subject_civ_id":String(civ.id),"subject_name":String(civ.get("name","")),"source":"scouts","observed_day":maxi(0,_day()-4)}})
 
 # --------------------------------------------------------------------------
@@ -2577,7 +2769,7 @@ static func _migrate(s:Dictionary)->void:
 	## history, keep at most MIGRATION_KEEP distinct waiting audiences (others
 	## withdraw quietly, without penalty), drop the old timers and give the
 	## ruler a breathing space before the next routine audience.
-	s["version"]=VERSION
+	s["version"]=2
 	var day:=_day()
 	var ledger:Array=s.ledger
 	var old_history:Array=(s.history as Array).duplicate()
@@ -2657,6 +2849,11 @@ static func validate_state(data:Variant)->bool:
 	for occasion in data.get("occasions",[]):
 		if not occasion is Dictionary or not occasion.get("key","") is String or not occasion.get("type","") is String or not _num(occasion.get("expires")) or not _num(occasion.get("not_before",0)) or JSON.stringify(occasion).length()>3000: return false
 	if not data.get("watch",{}) is Dictionary or JSON.stringify(data.get("watch",{})).length()>100000: return false
+	if not data.get("matters",[]) is Array or (data.get("matters",[]) as Array).size()>MATTERS_MAX: return false
+	for m in data.get("matters",[]):
+		if not m is Dictionary or not m.get("id","") is String or not m.get("key","") is String or not m.get("holder_key","") is String or not m.get("holder",{}) is Dictionary: return false
+		if not _num(m.get("day")) or not _num(m.get("expires")) or not _num(m.get("urgency",0)) or not m.get("lines",[]) is Array or (m.get("lines",[]) as Array).size()>12: return false
+		if JSON.stringify(m).length()>30000 or not _valid_audience(m.get("audience",{})) or String((m.get("audience",{}) as Dictionary).get("origin",""))!="court": return false
 	return true
 
 static func _valid_audience(a:Variant)->bool:

@@ -116,6 +116,8 @@ func _ready()->void:
 	_setup_world()
 	_test_famine_episodes()
 	_setup_world()
+	_test_court_matters()
+	_setup_world()
 	_test_legacy_calm()
 	_setup()
 	check(not ForeignDiplomacy.civilization("rival_a").is_empty(),"Contacted civilization not visible")
@@ -206,13 +208,17 @@ func _test_three_years(level:String,full:bool)->int:
 	var continuity:Array[String]=[]
 	var sample:Array[String]=[]
 	var history_seen:=false
+	var court_arrivals:=0
+	var matter_types:Dictionary={}
 	for day in range(1,YEARS*365+1):
 		GameState.elapsed_days=day
 		_refill()
 		_world_events(day,ids,rng)
 		var made:=HALL.daily(day)
 		check(made.size()<=1,"More than one arrival in a day")
+		for m in HALL.matters(): matter_types[String(m.get("situation_type",m.get("kind","")))]=true
 		for audience in made:
+			if String(audience.origin)=="court": court_arrivals+=1
 			arrivals.append(audience)
 			var situation:Dictionary=audience.get("situation",{})
 			var type:=String(situation.get("type",audience.kind))
@@ -238,6 +244,9 @@ func _test_three_years(level:String,full:bool)->int:
 	var total:=arrivals.size()
 	var per_year:=float(total)/float(YEARS)
 	print("AUDIENCE_HALL 3-year sim (%s): %d audiences (%.1f/year, one per %.0f days) across %d civs and %d officials" % [level,total,per_year,float(YEARS*365)/maxf(1.0,float(total)),ids.size(),HALL._officials().size()])
+	print("AUDIENCE_HALL court audiences that arrived on their own (%s): %d; matters held meanwhile: %s" % [level,court_arrivals,str(matter_types.keys())])
+	check(court_arrivals==0,"The court arrived uninvited %d times (%s)" % [court_arrivals,level])
+	check(HALL.waiting().filter(func(a:Dictionary)->bool:return String(a.origin)=="court").is_empty(),"A court audience is waiting uninvited")
 	if not full:
 		for index in range(1,total): check(int(arrivals[index].arrived_day)-int(arrivals[index-1].arrived_day)>=HALL.MIN_GAP,"Two %s audiences closer than %d days" % [level,HALL.MIN_GAP])
 		return total
@@ -269,6 +278,7 @@ func _test_three_years(level:String,full:bool)->int:
 		seen[key]=day
 		check(String(occasion.get("type",""))!="","Audience without an occasion: %s" % key)
 	check(situations.size()>=8,"Too little variety: %d situation types %s" % [situations.size(),str(situations.keys())])
+	check(matter_types.size()>=3,"The court held too few kinds of matters: %s" % str(matter_types.keys()))
 	var cooler:=int(branches.get("cooler",0))+int(branches.get("threat_after_refusal",0))
 	check(cooler>=1,"No envoy came back cooler or threatening after a refusal: %s" % str(branches))
 	check(branches.size()>=2,"Too few continuity arcs: %s" % str(branches))
@@ -515,6 +525,50 @@ func _test_famine_episodes()->void:
 	var same:=HALL._generate_foreign_occasion({"type":"their_famine","key":"f4","civ_id":hungry,"day":520,"data":{"episode":100}},520)
 	check(same.is_empty() or String(same.terms.get("resource",""))!="Food","The same famine episode asked for Food twice")
 
+# ------------------------------------------------------------------ court matters
+
+func _test_court_matters()->void:
+	## The court never arrives on its own: its business waits as matters.
+	GameState.elapsed_days=5
+	for day in range(5,12): HALL.daily(day)
+	GameState.simulation_metrics["food_days"]=6.0; GameState.simulation_metrics["food_intake_ratio"]=0.8
+	var arrivals:Array=[]
+	for day in range(12,40):
+		GameState.elapsed_days=day
+		arrivals.append_array(HALL.daily(day))
+	check(arrivals.filter(func(a:Dictionary)->bool:return String(a.origin)=="court").is_empty(),"A famine brought an official in uninvited")
+	var food:=HALL.matters().filter(func(m:Dictionary)->bool:return String(m.situation_type)=="crisis_petition")
+	check(not food.is_empty(),"The famine left no matter with the court")
+	if food.is_empty(): return
+	var matter:Dictionary=food[0]
+	var holder:=String(matter.holder_key)
+	check(int(HALL.matter_counts().get(holder,0))>=1,"Matter counts do not show the holder")
+	var pid:=int(matter.holder.person_id)
+	var resent:=float(GovernmentPeopleSystem.person_snapshot(pid).relationships.sovereign.resentment)
+	var opened:=HALL.open_matter(String(matter.id))
+	check(not opened.is_empty() and String(opened.status)=="waiting" and String(opened.origin)=="court","Opening a matter did not call the official in")
+	check(HALL.matters(holder).filter(func(m:Dictionary)->bool:return String(m.id)==String(matter.id)).is_empty(),"An opened matter stayed pending")
+	if not opened.is_empty(): check(HALL.resolve(String(opened.id),"decree").get("ok",false),"The summoned official's decree failed")
+	# Matters lapse quietly.
+	var quiet:=HALL._generate_petition(pid,40,"ambition")
+	HALL._file_matter(quiet,[])
+	var before:=HALL.matters("person:%d" % pid).size()
+	GameState.simulation_metrics["food_days"]=60.0; GameState.simulation_metrics["food_intake_ratio"]=1.0
+	GameState.elapsed_days=40+HALL.MATTER_DAYS+1
+	HALL.daily(40+HALL.MATTER_DAYS+1)
+	check(HALL.matters("person:%d" % pid).size()<before,"Old matters never lapsed")
+	check(is_equal_approx(float(GovernmentPeopleSystem.person_snapshot(pid).relationships.sovereign.resentment),resent),"A lapsed matter cost the official's goodwill")
+	# A version-2 save with a court audience waiting in the antechamber.
+	var petition:=HALL._generate_petition(pid,int(GameState.elapsed_days),"ambition")
+	var saved:=ForeignDiplomacy.export_state()
+	var old:Dictionary=JSON.parse_string(JSON.stringify(saved))
+	old.audiences["version"]=2
+	(old.audiences.queue as Array).append(JSON.parse_string(JSON.stringify(petition)))
+	(old.audiences as Dictionary).erase("matters")
+	check(ForeignDiplomacy.import_state(old).get("ok",false),"Version-2 hall state failed to load")
+	check(HALL.waiting().filter(func(a:Dictionary)->bool:return String(a.origin)=="court").is_empty(),"A saved court audience still waits after loading")
+	check(not HALL.matters("person:%d" % pid).is_empty() and int(HALL.state().version)==HALL.VERSION,"A saved court audience did not become a matter")
+	check(HALL.validate_state(JSON.parse_string(JSON.stringify(HALL.state()))),"Hall state with matters failed validation")
 # ------------------------------------------------------------------ legacy
 
 func _legacy_audience(id:int,kind:String,civ_id:String,civ_name:String,day:int,terms:Dictionary,petition:Dictionary,person_id:int)->Dictionary:
@@ -562,7 +616,9 @@ func _test_legacy_calm()->void:
 	var withdrawn:=0
 	for audience in HALL.state().history:
 		if String(audience.get("option_id",""))=="withdrawn": withdrawn+=1
-	check(withdrawn>=4,"Withdrawn legacy audiences not archived (%d)" % withdrawn)
+	check(withdrawn>=2,"Withdrawn legacy audiences not archived (%d)" % withdrawn)
+	check(HALL.waiting().filter(func(a:Dictionary)->bool:return String(a.origin)=="court").is_empty(),"Legacy court audiences still wait in the antechamber")
+	check(not HALL.matters("person:%d" % pid).is_empty(),"Legacy court audience did not become a matter")
 	var arrivals:=0
 	for step in range(day,day+45):
 		GameState.elapsed_days=step
@@ -729,7 +785,9 @@ func _test_reports()->void:
 		var p:=HALL._generate_petition(int(officials[petitions.size()%officials.size()].person_id),int(GameState.elapsed_days),topic)
 		if not p.is_empty(): HALL._enqueue(p,int(GameState.elapsed_days)); petitions.append(p)
 	check(HALL.waiting().size()>=4,"Could not fill the antechamber")
-	var full_report:=HALL.enqueue({"kind":"report","origin":"court","speaker":{"name":"Tamsin Reed","title":"Pathfinder","person_id":0},"report":{"facts":["smoke from many hearths","a stone wall"],"subject_civ_id":"rival_a","subject_name":"Kel Adun","source":"scouts","observed_day":1}})
+	var uninvited:=HALL.enqueue({"kind":"report","origin":"court","speaker":{"name":"Tamsin Reed","title":"Pathfinder","person_id":0},"report":{"facts":["a far camp"],"subject_civ_id":"rival_b","subject_name":"Varrow","source":"scouts","observed_day":1}})
+	check(uninvited.is_empty() and not HALL.matters("role:chief_scout").is_empty(),"A scout report came in uninvited instead of waiting as a matter")
+	var full_report:=HALL.enqueue({"kind":"report","origin":"court","summoned":true,"speaker":{"name":"Tamsin Reed","title":"Pathfinder","person_id":0},"report":{"facts":["smoke from many hearths","a stone wall"],"subject_civ_id":"rival_a","subject_name":"Kel Adun","source":"scouts","observed_day":1}})
 	check(not full_report.is_empty() and HALL.find(petitions[0].id).status=="expired","Report did not displace the oldest petition")
 	check(HALL.waiting().size()<=4,"Antechamber overflowed")
 	check(not HALL.room_for("routine") and not HALL.room_for("urgent"),"A full antechamber still offered room")
@@ -753,7 +811,7 @@ func _test_expiry()->void:
 	check(HALL.find(news.id).status=="expired" and HALL.find(petition.id).status=="expired","Audiences did not expire")
 	check(is_equal_approx(opinion-_opinion("rival_a"),0.04),"Expired envoy did not cost opinion")
 	check(is_equal_approx(trust-float(ForeignDiplomacy.leader("rival_a").trust),0.03),"Expired envoy did not cost trust")
-	check(is_equal_approx(float(GovernmentPeopleSystem.person_snapshot(pid).relationships.sovereign.resentment)-resent,0.04),"Expired petition did not cause resentment")
+	check(is_equal_approx(float(GovernmentPeopleSystem.person_snapshot(pid).relationships.sovereign.resentment),resent),"A summoned official left unheard was penalized")
 	check(String(ForeignDiplomacy.leader("rival_a").memories[0].text).contains("antechamber"),"Leader did not remember being ignored")
 	var sequel:=HALL.occasions().filter(func(o:Dictionary)->bool:return String(o.type)=="sequel" and String(o.civ_id)=="rival_a")
 	check(not sequel.is_empty() and String(sequel[0].data.previous.option)=="ignored","An ignored envoy left no sequel for its people")

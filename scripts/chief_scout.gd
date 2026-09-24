@@ -1121,14 +1121,26 @@ static func report_returned(event:Dictionary,source:String="")->Dictionary:
 	var hall:=_hall()
 	if hall==null: return {}
 	# One report per subject waits at a time; a newer return replaces nothing.
+	# The Chief Scout never comes uninvited: the report waits as a matter until
+	# the ruler summons them. Returns that matter ({} when nothing new).
+	var pending:Array=[]
 	var waiting:Variant=hall.call("waiting")
-	if waiting is Array:
-		for audience in waiting:
-			if audience is Dictionary and String(audience.get("kind",""))=="report" and String((audience.get("report",{}) as Dictionary).get("subject_name",""))==String(found.subject_name):
-				return {}
+	if waiting is Array: pending.append_array(waiting)
+	var held:Variant=hall.call("matters","")
+	if held is Array:
+		for matter in held:
+			if matter is Dictionary and matter.get("audience") is Dictionary: pending.append(matter.audience)
+	for audience in pending:
+		if audience is Dictionary and String(audience.get("kind",""))=="report" and String((audience.get("report",{}) as Dictionary).get("subject_name",""))==String(found.subject_name):
+			return {}
 	var record:=report_record(enriched,found)
 	var stored:Variant=hall.call("enqueue",record)
-	return stored if stored is Dictionary else {}
+	if stored is Dictionary and not (stored as Dictionary).is_empty(): return stored
+	held=hall.call("matters","")
+	if held is Array:
+		for matter in held:
+			if matter is Dictionary and String(matter.get("kind",""))=="report" and String(((matter.get("audience",{}) as Dictionary).get("report",{}) as Dictionary).get("subject_name",""))==String(found.subject_name): return matter
+	return {}
 
 
 static func _hall()->Script:

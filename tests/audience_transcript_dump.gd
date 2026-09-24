@@ -44,6 +44,7 @@ var questions:=0
 var answered:=0
 var words_total:=0
 var words_short:=0
+var court_arrivals:=0
 
 func _ready()->void:
 	probe=HallProbe.new()
@@ -82,6 +83,8 @@ func _ready()->void:
 	_score()
 	out.append("")
 	out.append("TOTAL: %d audiences (%d in section 1, %d in section 2), %d spoken lines." % [audiences,first_section,audiences-first_section,spoken_lines])
+	out.append("Court audiences that arrived uninvited: %d. Matters held by the court: %d." % [court_arrivals,HALL.matters().size()])
+	print("AUDIENCE_TRANSCRIPT court arrivals=%d matters held=%d" % [court_arrivals,HALL.matters().size()])
 	out.append("Lines per audience (without the ruler): %s" % ", ".join(PackedStringArray(per_audience.map(func(n:int)->String: return str(n)))))
 	out.append("Duplicate lines: %d. Questions answered from the facts: %d of %d. Lines of 20 words or fewer: %d of %d." % [duplicates,answered,questions,words_short,words_total])
 	for failure in failures: out.append("RULE BROKEN: "+failure)
@@ -119,6 +122,9 @@ func _play(audience:Dictionary)->void:
 	var kind:=String(audience.kind)
 	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
 	audiences+=1
+	if String(audience.get("origin",""))=="court":
+		court_arrivals+=1
+		failures.append("day %d: %s came in uninvited; only envoys may" % [int(audience.arrived_day),String((audience.get("speaker",{}) as Dictionary).get("name",""))])
 	var s:Dictionary=voice.scene(id)
 	var models:={}
 	for member in [s.envoy]+(s.officials as Array): models[String(member.name)]=String(member.persona.get("model_name",""))

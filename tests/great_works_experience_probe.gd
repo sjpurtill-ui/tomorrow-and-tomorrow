@@ -166,7 +166,10 @@ func _close_modal(modal:Control)->void:
 # ---------------------------------------------------------------- pitch → commission
 
 func _proposal_to_commission()->void:
-	var audience:=Works.proposal_audience({"trigger":{"kind":"victory","text":"We held the river crossing against Qingshan, and the people want it remembered."}})
+	# Engine pitches never come uninvited: they wait as a matter until the ruler summons the architect.
+	var pitched:=Works.proposal_audience({"trigger":{"kind":"victory","text":"We held the river crossing against Qingshan, and the people want it remembered."}})
+	if not pitched.is_empty():_fail("a wonder pitch came in uninvited")
+	var audience:=_open_matter_of("wonder_proposal","")
 	if audience.is_empty():_fail("no wonder proposal could be raised");return
 	var id:=String(audience.id)
 	var concepts:Array=(audience.get("wonder_proposal",{}) as Dictionary).get("concepts",[])
@@ -282,14 +285,21 @@ func _add_work(form:String,purpose:String,ambition:String,token:String,fraction:
 	city.undertakings.append(r)
 	return r
 
+func _open_matter_of(kind:String,mode:String)->Dictionary:
+	## The ruler summons whoever holds the newest matter of this kind.
+	for matter:Dictionary in Hall.matters():
+		if String(matter.kind)!=kind:continue
+		if mode!="" and String(((matter.audience as Dictionary).get("great_work",{}) as Dictionary).get("mode",""))!=mode:continue
+		return Hall.open_matter(String(matter.id))
+	return {}
+
 func _collapse_scene()->void:
 	var r:=_add_work("tower","defy_gods","audacious","fall1",.9999,"The Weeping Stair of Ashmere")
 	var food_before:=FoodSystem.total_stored()
 	U.apply_outcome(GameState,r,city,int(GameState.elapsed_days),"collapse")
 	var arrivals:=Works.daily(int(GameState.elapsed_days))
-	var audience:={}
-	for made in arrivals:
-		if String((made.get("great_work",{}) as Dictionary).get("mode",""))=="outcome":audience=made
+	if not arrivals.is_empty():_fail("the collapse brought the architect in uninvited")
+	var audience:=_open_matter_of("great_work","outcome")
 	if audience.is_empty():_fail("the collapse raised no audience");return
 	var id:=String(audience.id)
 	var dead:Array=(audience.great_work as Dictionary).get("dead",[])

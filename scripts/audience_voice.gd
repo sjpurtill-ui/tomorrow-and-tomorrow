@@ -1866,7 +1866,7 @@ func _offline_open(s:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
 		var aside:bool=i==1
 		var manner:Array=CV.model_bank(member.persona,"aside" if aside else "interject")
 		var line:Dictionary={}
-		if rng.randf()<0.85: line=_say(s,member,manner,rng,previous,aside,generic_court)
+		if rng.randf()<0.92: line=_say(s,member,manner,rng,previous,aside,generic_court)
 		else: line=_say(s,member,generic_court,rng,previous,aside,manner)
 		_append_if(out,line)
 		if not line.is_empty(): previous=member
@@ -1995,7 +1995,7 @@ func _offline_closing(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)-
 		var member:Dictionary=s.officials[rng.randi_range(0,s.officials.size()-1)]
 		var generic:Array=(CLOSING_ASIDE[group] as Array)+(CLOSING_ASIDE_MORE[group] as Array)
 		var manner:Array=CV.model_bank(member.persona,"closing_aside")
-		_append_if(out,_say(s,member,manner if rng.randf()<0.85 else generic,rng,{},true,generic+manner))
+		_append_if(out,_say(s,member,manner if rng.randf()<0.92 else generic,rng,{},true,generic+manner))
 	return out
 
 # ---------------------------------------------------------------------------

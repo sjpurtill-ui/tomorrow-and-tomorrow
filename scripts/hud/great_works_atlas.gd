@@ -455,7 +455,7 @@ func _proclaim(label_text:String,text:String)->void:
 		refresh()
 
 func _hear_decision(work_id:String,city_id:String)->void:
-	var made:=Bridge.decision_audience(work_id,city_id)
+	var made:=Bridge.decision_audience(work_id,city_id,true)
 	var id:=String(made.get("id",""))
 	if id.is_empty():
 		for audience:Dictionary in Bridge._waiting_of("great_work"):

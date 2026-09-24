@@ -24,7 +24,7 @@ func _conceive()->void:
 	if director!=null and director.has_method("open_conception"):director.call("open_conception")
 
 func _hear(work_id:String,city_id:String)->void:
-	var made:=Works.decision_audience(work_id,city_id)
+	var made:=Works.decision_audience(work_id,city_id,true)
 	var audience_id:=String(made.get("id",""))
 	if audience_id.is_empty():
 		for audience:Dictionary in Works._waiting_of("great_work"):

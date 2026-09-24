@@ -259,14 +259,13 @@ static func _has_waiting(mode:String,work_id:String,key:String)->bool:
 		if String(gw.get("mode",""))==mode and String(gw.get("work_id",""))==work_id and (key.is_empty() or String(gw.get("key",""))==key):return true
 	return false
 
-static func _hall_room(category:String)->bool:
-	## The hall's pacing budget (AudienceHall.room_for).
-	var hall:=_hall()
-	if hall==null:return false
-	return bool(hall.call("room_for",category))
+static func _hall_room(_category:String)->bool:
+	## Court business no longer arrives on its own: the hall files it as a matter
+	## on the architect or official, so it never needs room in the antechamber.
+	return _hall()!=null
 
 static func _room()->bool:
-	return (_hall().call("waiting") as Array).size()<int(_hall().get_script_constant_map().get("QUEUE_MAX",4))
+	return _hall()!=null
 
 # ---------------------------------------------------------------- conception
 
@@ -310,7 +309,7 @@ static func proposal_audience(payload:Dictionary={})->Dictionary:
 	if speaker.is_empty():return {}
 	var proposal_record:={"trigger":{"kind":String(trigger.get("kind","ruler" if ruler else "")),"text":String(trigger.get("text","The ruler calls for a great work." if ruler else ""))},
 		"concepts":concepts,"chosen":0,"ambition":first_ambition if first_ambition in AMBITIONS else "grand","city_id":default_city_id(),"origin":"ruler" if ruler else "engine","figure_id":figure_id}
-	return _hall().call("enqueue",{"kind":"wonder_proposal","origin":"court","speaker":speaker,"wonder_proposal":proposal_record})
+	return _hall().call("enqueue",{"kind":"wonder_proposal","origin":"court","summoned":ruler,"speaker":speaker,"wonder_proposal":proposal_record})
 
 ## Opened from the works screen: the ruler calls for a great work.
 static func ruler_proposal()->Dictionary:
@@ -376,7 +375,9 @@ static func assessment(audience:Dictionary)->Dictionary:
 
 # ---------------------------------------------------------------- work audiences
 
-static func decision_audience(work_id:String,city_id:String="")->Dictionary:
+## summoned: the ruler asked to hear it now (works screen, dock); otherwise the
+## stage gate waits as a matter on the architect until the ruler calls them.
+static func decision_audience(work_id:String,city_id:String="",summoned:bool=false)->Dictionary:
 	var city:=_player_city(city_id) if not city_id.is_empty() else _city_of(work_id)
 	if city.is_empty():return {}
 	var r:=find_work(city,work_id)
@@ -388,7 +389,7 @@ static func decision_audience(work_id:String,city_id:String="")->Dictionary:
 	facts.merge({"mode":"decision","key":key,"text":String(decision.get("prompt","")),"posed_day":int(decision.get("day",GameState.elapsed_days))},true)
 	var patience:=90
 	if ResourceLoader.exists(U_PATH):patience=int((load(U_PATH) as GDScript).get_script_constant_map().get("PLAYER_DECISION_DAYS",90))
-	return _hall().call("enqueue",{"kind":"great_work","origin":"court","speaker":_architect_speaker(facts),"great_work":facts,
+	return _hall().call("enqueue",{"kind":"great_work","origin":"court","summoned":summoned,"speaker":_architect_speaker(facts),"great_work":facts,
 		"expires_day":int(decision.get("day",GameState.elapsed_days))+patience})
 
 static func event_audience(work_id:String,kind:String,text:String,day:int)->Dictionary:
