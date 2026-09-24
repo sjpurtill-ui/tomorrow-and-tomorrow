@@ -1,0 +1,1280 @@
+[
+ {
+  "id": "seasonal_duty_rosters",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "labor_rotations"
+  ],
+  "note": "Starting knowledge: seasonal turns remembered."
+ },
+ {
+  "id": "council_messenger_duty",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "relay_call_stations"
+  ],
+  "note": "Starting knowledge: runners summon households."
+ },
+ {
+  "id": "dissenting_voice_custom",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "shared_hearth_gatherings"
+  ],
+  "note": "Starting knowledge: open speech at gatherings."
+ },
+ {
+  "id": "leader_gift_redistribution",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Starting knowledge: headman pools and returns gifts."
+ },
+ {
+  "id": "household_task_ledgers",
+  "requires_all": [
+   "household_task_division"
+  ],
+  "requires_any": [
+   [
+    "counting_words"
+   ]
+  ],
+  "precedents": [
+   "tallies"
+  ],
+  "note": "Household tasks counted; tallies soon after."
+ },
+ {
+  "id": "witnessed_agreement_customs",
+  "requires_all": [
+   "shared_hearth_gatherings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "council_messenger_duty"
+  ],
+  "note": "Gatherings provide witnesses."
+ },
+ {
+  "id": "elder_consultation_rites",
+  "requires_all": [
+   "shared_hearth_gatherings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "genealogical_recitation",
+   "oral_epics"
+  ],
+  "note": "Elders as keepers of memory."
+ },
+ {
+  "id": "household_councils",
+  "requires_all": [
+   "council_messenger_duty",
+   "elder_consultation_rites"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dissenting_voice_custom"
+  ],
+  "note": "Summoned households meet with elders."
+ },
+ {
+  "id": "elder_council_assent",
+  "requires_all": [
+   "household_councils"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dissenting_voice_custom"
+  ],
+  "note": "Council decisions need elder assent."
+ },
+ {
+  "id": "seasonal_tribute_counts",
+  "requires_all": [
+   "leader_gift_redistribution",
+   "counting_words"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "household_task_ledgers",
+   "tallies"
+  ],
+  "note": "Gifts to the headman counted."
+ },
+ {
+  "id": "consensus_amendment_custom",
+  "requires_all": [
+   "elder_council_assent"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dissenting_voice_custom"
+  ],
+  "note": "Council assent governs changing custom."
+ },
+ {
+  "id": "lineage_land_tenure",
+  "requires_all": [
+   "named_descent_lines",
+   "common_ground_marking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "genealogical_recitation"
+  ],
+  "note": "Marked ground held by descent line."
+ },
+ {
+  "id": "blood_price",
+  "requires_all": [
+   "witnessed_agreement_customs",
+   "elder_council_assent"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reciprocal_gift_exchange"
+  ],
+  "note": "Witnessed goods settle injury before elders."
+ },
+ {
+  "id": "seasonal_crisis_leader",
+  "requires_all": [
+   "household_councils"
+  ],
+  "requires_any": [
+   [
+    "emergency_food_caching",
+    "raid_scouting"
+   ]
+  ],
+  "precedents": [
+   "elder_council_assent"
+  ],
+  "note": "Councils name a leader for a crisis."
+ },
+ {
+  "id": "petition_speakers",
+  "requires_all": [
+   "hearth_shrine_offerings",
+   "household_councils"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Household speakers address the god."
+ },
+ {
+  "id": "banishment_sentence",
+  "requires_all": [
+   "elder_council_assent"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "blood_price"
+  ],
+  "note": "Elders' gravest sanction."
+ },
+ {
+  "id": "customary_law",
+  "requires_all": [
+   "blood_price"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "banishment_sentence",
+   "mnemonic_verse_encoding",
+   "genealogical_recitation"
+  ],
+  "note": "Remembered settlements become binding."
+ },
+ {
+  "id": "public_stores",
+  "requires_all": [
+   "clay_lined_storage_pits",
+   "leader_gift_redistribution"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "watch_rotation",
+   "seasonal_tribute_counts"
+  ],
+  "note": "Pooled goods kept in guarded pits."
+ },
+ {
+  "id": "household_mediators",
+  "requires_all": [
+   "customary_law"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Go-betweens apply remembered judgments."
+ },
+ {
+  "id": "exculpatory_oath",
+  "requires_all": [
+   "hearth_shrine_offerings",
+   "customary_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "witnessed_agreement_customs"
+  ],
+  "note": "The god witnesses where people cannot."
+ },
+ {
+  "id": "customary_inheritance_shares",
+  "requires_all": [
+   "lineage_land_tenure",
+   "customary_law"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Custom divides lineage holdings."
+ },
+ {
+  "id": "field_boundary_markers",
+  "requires_all": [
+   "lineage_land_tenure"
+  ],
+  "requires_any": [
+   [
+    "dry_stone_walls",
+    "drainage"
+   ]
+  ],
+  "precedents": [
+   "common_ground_marking"
+  ],
+  "note": "Held fields marked with stones and ditches."
+ },
+ {
+  "id": "labor_debt_tallies",
+  "requires_all": [
+   "tallies"
+  ],
+  "requires_any": [
+   [
+    "work_party_feasts",
+    "household_task_ledgers"
+   ]
+  ],
+  "precedents": [],
+  "note": "Work owed recorded on tallies."
+ },
+ {
+  "id": "leader_feast_obligations",
+  "requires_all": [
+   "leader_gift_redistribution",
+   "public_stores"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "work_party_feasts"
+  ],
+  "note": "Stores fund the leader's feasts."
+ },
+ {
+  "id": "public_grain_weighing",
+  "requires_all": [
+   "public_stores"
+  ],
+  "requires_any": [
+   [
+    "standard_measures",
+    "reference_vessel_sets"
+   ]
+  ],
+  "precedents": [],
+  "note": "Store intake measured openly; see flags."
+ },
+ {
+  "id": "harvest_offering_shares",
+  "requires_all": [
+   "first_fruits_offering"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_tribute_counts"
+  ],
+  "note": "First fruits fixed as set shares."
+ },
+ {
+  "id": "public_praise_assemblies",
+  "requires_all": [
+   "household_councils"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "skill_recognition"
+  ],
+  "note": "Councils honor faithful service."
+ },
+ {
+  "id": "trial_custom_periods",
+  "requires_all": [
+   "consensus_amendment_custom"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "moon_counting"
+  ],
+  "note": "Amendments tested for a season."
+ },
+ {
+  "id": "boundary_oath_rituals",
+  "requires_all": [
+   "field_boundary_markers",
+   "exculpatory_oath"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Oaths sworn at the marker stones."
+ },
+ {
+  "id": "rotating_stewardship",
+  "requires_all": [
+   "public_stores",
+   "seasonal_duty_rosters"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Store keeping rotated by roster."
+ },
+ {
+  "id": "probationary_appointment_custom",
+  "requires_all": [
+   "trial_custom_periods"
+  ],
+  "requires_any": [
+   [
+    "rotating_stewardship",
+    "seasonal_crisis_leader"
+   ]
+  ],
+  "precedents": [],
+  "note": "Trial seasons applied to officeholders."
+ },
+ {
+  "id": "temple_common_storehouse",
+  "requires_all": [
+   "first_shrine_house",
+   "public_stores"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harvest_offering_shares"
+  ],
+  "conditions": {
+   "institutions_min": 0.2
+  },
+  "note": "Common store moved into the god's house."
+ },
+ {
+  "id": "boundary_marker_surveys",
+  "requires_all": [
+   "field_boundary_markers",
+   "paced_distance_counting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "boundary_oath_rituals"
+  ],
+  "note": "Markers checked by paced measure."
+ },
+ {
+  "id": "public_dispute_airing",
+  "requires_all": [
+   "household_mediators"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_praise_assemblies"
+  ],
+  "note": "Mediation moves before the assembly."
+ },
+ {
+  "id": "offering_keepers",
+  "requires_all": [
+   "temple_common_storehouse"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rotating_stewardship"
+  ],
+  "note": "Temple store needs appointed keepers."
+ },
+ {
+  "id": "intervillage_tribute_reconciliation",
+  "requires_all": [
+   "seasonal_tribute_counts",
+   "knot_tally_cross_check"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "daughter_hamlets"
+  ],
+  "conditions": {
+   "min_settlements": 2
+  },
+  "note": "Villages cross-check tribute tallies."
+ },
+ {
+  "id": "paramount_chiefdom",
+  "requires_all": [
+   "seasonal_crisis_leader",
+   "leader_feast_obligations"
+  ],
+  "requires_any": [
+   [
+    "daughter_hamlets",
+    "joint_hamlet_defense_pacts"
+   ]
+  ],
+  "precedents": [],
+  "conditions": {
+   "min_settlements": 3
+  },
+  "note": "A feasting leader rules allied villages."
+ },
+ {
+  "id": "mediated_restitution_custom",
+  "requires_all": [
+   "household_mediators"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_dispute_airing"
+  ],
+  "note": "Mediators set restitution."
+ },
+ {
+  "id": "shared_labor_registers",
+  "requires_all": [
+   "labor_debt_tallies"
+  ],
+  "requires_any": [
+   [
+    "material_accounting",
+    "knotted_record_systems"
+   ]
+  ],
+  "precedents": [],
+  "note": "Labor debts kept in shared records."
+ },
+ {
+  "id": "sunset_rule_custom",
+  "requires_all": [
+   "trial_custom_periods"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Trial periods made the default."
+ },
+ {
+  "id": "rotating_speaker_order",
+  "requires_all": [
+   "elder_council_assent"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dissenting_voice_custom",
+   "public_dispute_airing"
+  ],
+  "note": "Council speech given a fixed order."
+ },
+ {
+  "id": "standing_arbiter_appointment",
+  "requires_all": [
+   "mediated_restitution_custom",
+   "probationary_appointment_custom"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Mediator made a standing office."
+ },
+ {
+  "id": "seal_breaking_rights",
+  "requires_all": [
+   "stamp_seals",
+   "rotating_stewardship"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "marked_storage_registers",
+   "offering_keepers"
+  ],
+  "note": "Seals reserved to named keepers."
+ },
+ {
+  "id": "temple_ration_issue",
+  "requires_all": [
+   "offering_keepers"
+  ],
+  "requires_any": [
+   [
+    "standard_measures",
+    "reference_vessel_sets"
+   ]
+  ],
+  "precedents": [
+   "shrine_work_obligations"
+  ],
+  "note": "Offerings reissued as measured rations."
+ },
+ {
+  "id": "work_gang_overseers",
+  "requires_all": [
+   "task_captains",
+   "great_work_parties"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paramount_chiefdom"
+  ],
+  "note": "Captains placed over large work parties."
+ },
+ {
+  "id": "hereditary_chiefly_rank",
+  "requires_all": [
+   "paramount_chiefdom"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "genealogical_recitation",
+   "customary_inheritance_shares"
+  ],
+  "note": "Paramount office inherited."
+ },
+ {
+  "id": "free_adult_assembly",
+  "requires_all": [
+   "household_councils",
+   "public_dispute_airing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rotating_speaker_order"
+  ],
+  "note": "Assembly widened beyond household heads."
+ },
+ {
+  "id": "grain_levy_accounting",
+  "requires_all": [
+   "material_accounting"
+  ],
+  "requires_any": [
+   [
+    "temple_common_storehouse",
+    "paramount_chiefdom"
+   ]
+  ],
+  "precedents": [
+   "marked_storage_registers"
+  ],
+  "note": "Store accounts applied to levied grain."
+ },
+ {
+  "id": "tributary_villages",
+  "requires_all": [
+   "paramount_chiefdom",
+   "intervillage_tribute_reconciliation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "min_settlements": 3
+  },
+  "note": "Reconciled tribute becomes subjection."
+ },
+ {
+  "id": "public_grievance_hearings",
+  "requires_all": [
+   "public_dispute_airing",
+   "standing_arbiter_appointment"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Arbiter hears grievances on a schedule."
+ },
+ {
+  "id": "regional_arbitration_circuits",
+  "requires_all": [
+   "standing_arbiter_appointment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tributary_villages"
+  ],
+  "conditions": {
+   "min_settlements": 3
+  },
+  "note": "Arbiters travel between villages."
+ },
+ {
+  "id": "formal_oath_taking",
+  "requires_all": [
+   "exculpatory_oath",
+   "first_shrine_house"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Oaths moved into the god's house."
+ },
+ {
+  "id": "council_reformation_practice",
+  "requires_all": [
+   "consensus_amendment_custom",
+   "sunset_rule_custom"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "free_adult_assembly"
+  ],
+  "note": "Amendment customs turned on procedure."
+ },
+ {
+  "id": "temple_high_steward",
+  "requires_all": [
+   "offering_keepers",
+   "grain_levy_accounting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "work_gang_overseers"
+  ],
+  "conditions": {
+   "institutions_min": 0.3
+  },
+  "note": "Chief keeper runs temple, levy and town."
+ },
+ {
+  "id": "cross_household_grain_audits",
+  "requires_all": [
+   "knot_tally_cross_check",
+   "grain_levy_accounting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Cross-checks applied to levy grain."
+ },
+ {
+  "id": "oath_witness_registers",
+  "requires_all": [
+   "formal_oath_taking",
+   "paired_record_witnessing"
+  ],
+  "requires_any": [
+   [
+    "impressed_number_tablets",
+    "knotted_record_systems"
+   ]
+  ],
+  "precedents": [],
+  "note": "Oath witnesses recorded."
+ },
+ {
+  "id": "regional_levy_coordination",
+  "requires_all": [
+   "grain_levy_accounting",
+   "tributary_villages"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Levy accounts span subject villages."
+ },
+ {
+  "id": "worker_ration_lists",
+  "requires_all": [
+   "temple_ration_issue"
+  ],
+  "requires_any": [
+   [
+    "clay_record_tablets",
+    "impressed_number_tablets"
+   ]
+  ],
+  "precedents": [
+   "fixed_worker_rations"
+  ],
+  "note": "Rations recorded per worker per month."
+ },
+ {
+  "id": "appeal_reopening_custom",
+  "requires_all": [
+   "public_grievance_hearings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "regional_arbitration_circuits"
+  ],
+  "note": "Hearings allow reopening."
+ },
+ {
+  "id": "succession_naming_rites",
+  "requires_all": [
+   "hereditary_chiefly_rank"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "genealogical_recitation"
+  ],
+  "note": "Heir publicly fixed."
+ },
+ {
+  "id": "census_rolls",
+  "requires_all": [
+   "clay_record_tablets",
+   "hearth_counts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harvest_headcount"
+  ],
+  "note": "Hearth counts written as rolls."
+ },
+ {
+  "id": "public_levies",
+  "requires_all": [
+   "regional_levy_coordination"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "work_gang_overseers"
+  ],
+  "note": "Levies scheduled across the district."
+ },
+ {
+  "id": "titled_estate_overseers",
+  "requires_all": [
+   "temple_high_steward",
+   "work_gang_overseers"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Steward's overseers given titles."
+ },
+ {
+  "id": "witnessed_land_sales",
+  "requires_all": [
+   "boundary_marker_surveys",
+   "witnessed_agreement_customs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sealed_tablet_contracts",
+   "customary_inheritance_shares"
+  ],
+  "note": "Surveyed bounds recited at witnessed sale."
+ },
+ {
+  "id": "fixed_interest_loans",
+  "requires_all": [
+   "clay_record_tablets"
+  ],
+  "requires_any": [
+   [
+    "balance_beam_weights",
+    "silver_cupellation"
+   ]
+  ],
+  "precedents": [
+   "temple_common_storehouse",
+   "labor_debt_tallies"
+  ],
+  "note": "Written debts with weighed silver or grain."
+ },
+ {
+  "id": "separate_temple_palace_stores",
+  "requires_all": [
+   "temple_high_steward",
+   "hereditary_chiefly_rank"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Chiefly house splits from temple store."
+ },
+ {
+  "id": "cross_settlement_registries",
+  "requires_all": [
+   "census_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "messenger_relay_stations",
+   "archive_shelving_order"
+  ],
+  "conditions": {
+   "min_settlements": 3
+  },
+  "note": "Census rolls exchanged between towns."
+ },
+ {
+  "id": "kingship",
+  "requires_all": [
+   "hereditary_chiefly_rank"
+  ],
+  "requires_any": [
+   [
+    "household_muster",
+    "combined_drill_musters"
+   ]
+  ],
+  "precedents": [
+   "separate_temple_palace_stores",
+   "seasonal_crisis_leader"
+  ],
+  "conditions": {
+   "min_settlements": 4,
+   "institutions_min": 0.4
+  },
+  "note": "Hereditary chief keeps war command for life."
+ },
+ {
+  "id": "ceremonial_investiture",
+  "requires_all": [
+   "formal_oath_taking",
+   "titled_estate_overseers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "kingship"
+  ],
+  "note": "Titled officials sworn before the god."
+ },
+ {
+  "id": "assembly_petition_rights",
+  "requires_all": [
+   "free_adult_assembly",
+   "petition_speakers"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Petition custom turned toward the assembly."
+ },
+ {
+  "id": "provincial_governors",
+  "requires_all": [
+   "kingship",
+   "tributary_villages"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "King's men placed over subject towns."
+ },
+ {
+  "id": "public_heralds",
+  "requires_all": [
+   "council_messenger_duty"
+  ],
+  "requires_any": [
+   [
+    "kingship",
+    "free_adult_assembly"
+   ]
+  ],
+  "precedents": [
+   "town_identity"
+  ],
+  "note": "Messengers proclaim rulings publicly."
+ },
+ {
+  "id": "codified_tribute_schedules",
+  "requires_all": [
+   "tributary_villages",
+   "clay_record_tablets"
+  ],
+  "requires_any": [
+   [
+    "solar_year_reckoning",
+    "star_rising_civil_year"
+   ]
+  ],
+  "precedents": [
+   "intercalated_calendar"
+  ],
+  "note": "Tribute written by amount and calendar date."
+ },
+ {
+  "id": "specialized_courts",
+  "requires_all": [
+   "public_grievance_hearings",
+   "appeal_reopening_custom"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "regional_arbitration_circuits"
+  ],
+  "conditions": {
+   "institutions_min": 0.5
+  },
+  "note": "Hearings split by kind of case."
+ },
+ {
+  "id": "boundary_treaties",
+  "requires_all": [
+   "boundary_oath_rituals",
+   "formal_oath_taking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "boundary_marker_surveys"
+  ],
+  "conditions": {
+   "min_settlements": 2
+  },
+  "note": "Boundary oaths sworn between towns."
+ },
+ {
+  "id": "dynastic_succession",
+  "requires_all": [
+   "kingship",
+   "succession_naming_rites"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Heir-naming applied to kingship."
+ },
+ {
+  "id": "precedent_review_councils",
+  "requires_all": [
+   "customary_law",
+   "formal_archives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "specialized_courts"
+  ],
+  "note": "Archived judgments reviewed as precedent."
+ },
+ {
+  "id": "proclaimed_standard_weights",
+  "requires_all": [
+   "balance_beam_weights",
+   "public_heralds"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Heralds proclaim official weights."
+ },
+ {
+  "id": "debt_release_edicts",
+  "requires_all": [
+   "fixed_interest_loans",
+   "kingship"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_heralds"
+  ],
+  "note": "Kings cancel accumulated debts."
+ },
+ {
+  "id": "foreign_treaties",
+  "requires_all": [
+   "boundary_treaties",
+   "kingship"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sworn_interpreters",
+   "envoy_reception",
+   "sealed_tablet_letters"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Boundary treaty extended to foreign rulers."
+ },
+ {
+  "id": "sealed_travel_passes",
+  "requires_all": [
+   "cylinder_seals",
+   "messenger_relay_stations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sealed_tablet_letters",
+   "road_stations"
+  ],
+  "note": "Sealed authority for relay messengers."
+ },
+ {
+  "id": "temple_estates",
+  "requires_all": [
+   "temple_high_steward",
+   "titled_estate_overseers"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Temple lands run by titled overseers."
+ },
+ {
+  "id": "area_harvest_assessment",
+  "requires_all": [
+   "geometric_survey",
+   "grain_levy_accounting"
+  ],
+  "requires_any": [
+   [
+    "area_volume_rules"
+   ]
+  ],
+  "precedents": [],
+  "note": "Surveyed area sets harvest dues; see flags."
+ },
+ {
+  "id": "royal_inscriptions",
+  "requires_all": [
+   "kingship",
+   "phonetic_notation"
+  ],
+  "requires_any": [
+   [
+    "stone_relief_carving",
+    "dressed_stone_masonry"
+   ]
+  ],
+  "precedents": [],
+  "note": "Kings' deeds spelled in stone."
+ },
+ {
+  "id": "written_law_code",
+  "requires_all": [
+   "precedent_review_councils",
+   "kingship",
+   "phonetic_notation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "debt_release_edicts",
+   "specialized_courts"
+  ],
+  "conditions": {
+   "institutions_min": 0.5
+  },
+  "note": "Royal authority writes down precedent."
+ },
+ {
+  "id": "sworn_judges",
+  "requires_all": [
+   "specialized_courts",
+   "ceremonial_investiture"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Court officers invested by oath."
+ },
+ {
+  "id": "sworn_trial_testimony",
+  "requires_all": [
+   "specialized_courts",
+   "oath_witness_registers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "written_law_code"
+  ],
+  "note": "Registered oaths used as trial evidence."
+ },
+ {
+  "id": "provincial_accounts",
+  "requires_all": [
+   "provincial_governors",
+   "formal_archives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "messenger_relay_stations"
+  ],
+  "note": "Governors report to royal archives."
+ },
+ {
+  "id": "sealed_family_contracts",
+  "requires_all": [
+   "sealed_tablet_contracts",
+   "customary_inheritance_shares"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "recorded_dowry",
+   "captive_adoption"
+  ],
+  "note": "Family law moved onto sealed tablets."
+ },
+ {
+  "id": "caravan_tolls",
+  "requires_all": [
+   "donkey_caravans",
+   "codified_tribute_schedules"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "border_fortress_chains"
+  ],
+  "note": "Tribute schedules applied to caravans."
+ },
+ {
+  "id": "property_registers",
+  "requires_all": [
+   "witnessed_land_sales",
+   "formal_archives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "geometric_survey",
+   "regional_maps"
+  ],
+  "note": "Recorded sales archived by property."
+ },
+ {
+  "id": "town_mayors",
+  "requires_all": [
+   "provincial_governors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "elder_council_assent",
+   "town_identity"
+  ],
+  "note": "Town elders answer upward."
+ },
+ {
+  "id": "royal_appeal_court",
+  "requires_all": [
+   "specialized_courts",
+   "provincial_governors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "appeal_reopening_custom"
+  ],
+  "note": "Appeal runs from province to king."
+ },
+ {
+  "id": "price_wage_schedules",
+  "requires_all": [
+   "proclaimed_standard_weights",
+   "hired_labor_contracts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "written_law_code"
+  ],
+  "note": "Proclaimed weights set prices and hire."
+ },
+ {
+  "id": "licensed_merchant_houses",
+  "requires_all": [
+   "sealed_travel_passes",
+   "foreign_treaties"
+  ],
+  "requires_any": [
+   [
+    "merchant_quarters_abroad",
+    "trade_colonies"
+   ]
+  ],
+  "precedents": [],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Treaty trade licensed to houses."
+ },
+ {
+  "id": "public_law_stele",
+  "requires_all": [
+   "written_law_code",
+   "royal_inscriptions"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Law code inscribed as monument."
+ },
+ {
+  "id": "service_land_grants",
+  "requires_all": [
+   "property_registers"
+  ],
+  "requires_any": [
+   [
+    "standing_paid_company",
+    "palace_guard"
+   ]
+  ],
+  "precedents": [
+   "titled_estate_overseers"
+  ],
+  "note": "Registered land pays standing retainers."
+ },
+ {
+  "id": "jurisdiction_boundaries",
+  "requires_all": [
+   "provincial_governors",
+   "specialized_courts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "regional_maps",
+   "boundary_treaties"
+  ],
+  "note": "Courts and governors assigned districts."
+ },
+ {
+  "id": "workshop_quotas",
+  "requires_all": [
+   "temple_workshops",
+   "workshop_standards"
+  ],
+  "requires_any": [
+   [
+    "daily_task_norms",
+    "brick_quotas"
+   ]
+  ],
+  "precedents": [
+   "provincial_accounts"
+  ],
+  "note": "Graded output set as quotas."
+ },
+ {
+  "id": "circuit_inspectors",
+  "requires_all": [
+   "provincial_accounts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rotating_inspection_duty",
+   "regional_arbitration_circuits"
+  ],
+  "note": "Inspectors check provincial accounts."
+ },
+ {
+  "id": "standard_royal_letters",
+  "requires_all": [
+   "sealed_tablet_letters",
+   "provincial_governors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "scribal_specialties"
+  ],
+  "note": "Royal correspondence given fixed form."
+ },
+ {
+  "id": "service_land_registers",
+  "requires_all": [
+   "service_land_grants",
+   "census_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cross_settlement_registries"
+  ],
+  "note": "Grants reconciled with census."
+ }
+]

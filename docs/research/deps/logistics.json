@@ -1,0 +1,1301 @@
+[
+ {
+  "id": "carried_load_balancing",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "landmark_route_naming",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "route_memory"
+  ],
+  "note": "Starting knowledge; names fix remembered routes."
+ },
+ {
+  "id": "paired_carrier_balancing",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "carried_load_balancing"
+  ],
+  "note": "Extends single-carrier balancing."
+ },
+ {
+  "id": "guest_host_reciprocity",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "shared_hearth_gatherings"
+  ],
+  "note": "Hearth hospitality extended to travelers."
+ },
+ {
+  "id": "vermin_deterrent_placement",
+  "requires_all": [
+   "edible_resource_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pest_deterrent_storage_herbs"
+  ],
+  "note": "Needs something worth storing."
+ },
+ {
+  "id": "hide_floats",
+  "requires_all": [
+   "cordage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timber_grading"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Lashing needs cord."
+ },
+ {
+  "id": "dry_cache_siting",
+  "requires_all": [
+   "food_drying"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_patterns"
+  ],
+  "note": "Dried food makes caching worthwhile."
+ },
+ {
+  "id": "carrying_poles",
+  "requires_all": [
+   "paired_carrier_balancing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cordage"
+  ],
+  "note": "Pole formalizes paired carrying."
+ },
+ {
+  "id": "trail_waymarking",
+  "requires_all": [
+   "landmark_route_naming"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "route_memory"
+  ],
+  "note": "Marks encode named routes."
+ },
+ {
+  "id": "river_craft",
+  "requires_all": [
+   "hafted_tools",
+   "timber_grading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hide_floats",
+   "ground_stone_axes"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Adze and fire hollow a chosen log."
+ },
+ {
+  "id": "trade_partner_tokens",
+  "requires_all": [
+   "guest_host_reciprocity"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "kin_body_ornament"
+  ],
+  "note": "Tokens formalize host bonds."
+ },
+ {
+  "id": "sledges_travois",
+  "requires_all": [
+   "cordage",
+   "carrying_poles"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timber_grading"
+  ],
+  "note": "Poles and lashings dragged."
+ },
+ {
+  "id": "down_the_line_exchange",
+  "requires_all": [
+   "trade_partner_tokens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stone_sorting"
+  ],
+  "note": "Partner chains pass goods onward."
+ },
+ {
+  "id": "load_lashing_knots",
+  "requires_all": [
+   "cordage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "carrying_poles"
+  ],
+  "note": ""
+ },
+ {
+  "id": "route_food_caches",
+  "requires_all": [
+   "dry_cache_siting",
+   "trail_waymarking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Caches placed on marked routes."
+ },
+ {
+  "id": "portage_paths",
+  "requires_all": [
+   "river_craft",
+   "trail_waymarking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "skis_snowshoes",
+  "requires_all": [
+   "cordage",
+   "timber_grading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timber_seasoning",
+   "bone_needle_sewing"
+  ],
+  "note": "Regional: snowy climates only."
+ },
+ {
+  "id": "reed_bundle_boats",
+  "requires_all": [
+   "hide_floats",
+   "basketry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "river_craft",
+   "bitumen_sealing"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Bitumen sealing where seeps known."
+ },
+ {
+  "id": "brushwood_trackways",
+  "requires_all": [
+   "trail_waymarking",
+   "hafted_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "basketry"
+  ],
+  "note": "Wetland ground regionally."
+ },
+ {
+  "id": "load_backframes",
+  "requires_all": [
+   "load_lashing_knots",
+   "joinery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "woven_carriers"
+  ],
+  "note": ""
+ },
+ {
+  "id": "boundary_exchange_sites",
+  "requires_all": [
+   "down_the_line_exchange"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "common_ground_marking"
+  ],
+  "note": ""
+ },
+ {
+  "id": "wayfinding_stars",
+  "requires_all": [
+   "named_star_figures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "route_memory"
+  ],
+  "note": ""
+ },
+ {
+  "id": "rollers_and_runners",
+  "requires_all": [
+   "sledges_travois"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wedges_and_levers"
+  ],
+  "note": ""
+ },
+ {
+  "id": "seasonal_ford_timing",
+  "requires_all": [
+   "seasonal_patterns",
+   "route_memory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "flood_mark_reading"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "relay_carrying_shifts",
+  "requires_all": [
+   "carrying_poles",
+   "labor_rotations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "route_food_caches"
+  ],
+  "note": ""
+ },
+ {
+  "id": "oldest_first_marking",
+  "requires_all": [
+   "owner_marks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dry_cache_siting",
+   "tallies"
+  ],
+  "note": ""
+ },
+ {
+  "id": "trade_partner_memory",
+  "requires_all": [
+   "boundary_exchange_sites"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "counting_words"
+  ],
+  "note": ""
+ },
+ {
+  "id": "salt_shell_routes",
+  "requires_all": [
+   "down_the_line_exchange",
+   "trail_waymarking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "boundary_exchange_sites"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Needs contacted coastal or salt peoples."
+ },
+ {
+  "id": "river_landings",
+  "requires_all": [
+   "river_craft"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "portage_paths",
+   "site_clearing_assessment"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "hide_covered_boats",
+  "requires_all": [
+   "hide_tanning",
+   "basketry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "river_craft"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "stock_layering_method",
+  "requires_all": [
+   "oldest_first_marking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clay_lined_storage_pits"
+  ],
+  "note": ""
+ },
+ {
+  "id": "seasonal_route_assessment",
+  "requires_all": [
+   "seasonal_ford_timing",
+   "trail_waymarking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weather_sign_reading"
+  ],
+  "note": ""
+ },
+ {
+  "id": "barter_equivalence_custom",
+  "requires_all": [
+   "trade_partner_memory",
+   "tallies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standard_measures"
+  ],
+  "note": ""
+ },
+ {
+  "id": "ox_drawn_sledges",
+  "requires_all": [
+   "rollers_and_runners",
+   "animal_taming"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "herding_rotas"
+  ],
+  "note": "Cattle trained to pull."
+ },
+ {
+  "id": "long_distance_axe_trade",
+  "requires_all": [
+   "ground_stone_axes",
+   "down_the_line_exchange"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "salt_shell_routes"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": ""
+ },
+ {
+  "id": "pack_animals",
+  "requires_all": [
+   "animal_taming",
+   "load_lashing_knots"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ox_drawn_sledges"
+  ],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": "Donkey native to dry lands; else borrowed."
+ },
+ {
+  "id": "load_bundling_by_weight",
+  "requires_all": [
+   "load_backframes",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "rest_stop_spacing_custom",
+  "requires_all": [
+   "relay_carrying_shifts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "route_food_caches",
+   "paced_distance_counting"
+  ],
+  "note": ""
+ },
+ {
+  "id": "pest_barrier_maintenance",
+  "requires_all": [
+   "vermin_deterrent_placement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "communal_upkeep_scheduling"
+  ],
+  "note": ""
+ },
+ {
+  "id": "shared_trade_escort",
+  "requires_all": [
+   "salt_shell_routes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "joint_hamlet_defense_pacts"
+  ],
+  "note": ""
+ },
+ {
+  "id": "pack_load_balancing",
+  "requires_all": [
+   "pack_animals",
+   "carried_load_balancing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "pack_saddles",
+  "requires_all": [
+   "pack_animals",
+   "joinery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "plank_trackways",
+  "requires_all": [
+   "brushwood_trackways",
+   "wedges_and_levers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "joinery"
+  ],
+  "note": "Split planks replace brushwood."
+ },
+ {
+  "id": "paired_ox_yoke",
+  "requires_all": [
+   "ox_drawn_sledges",
+   "joinery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "sealed_store_doors",
+  "requires_all": [
+   "stamp_seals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "marked_storage_registers",
+   "courtyard_storerooms"
+  ],
+  "note": ""
+ },
+ {
+  "id": "plank_extended_dugouts",
+  "requires_all": [
+   "river_craft",
+   "wedges_and_levers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cordage",
+   "bow_drill_drive"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Sewn planks need split boards and holes."
+ },
+ {
+  "id": "solid_wheel_assembly",
+  "requires_all": [
+   "joinery",
+   "timber_post_beam_connections"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rollers_and_runners",
+   "tournette"
+  ],
+  "note": "Carpentry plus rolling-load experience."
+ },
+ {
+  "id": "wooden_axle_shaping",
+  "requires_all": [
+   "solid_wheel_assembly",
+   "timber_seasoning"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "linchpin_retention",
+  "requires_all": [
+   "wooden_axle_shaping"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "trade_colonies",
+  "requires_all": [
+   "long_distance_axe_trade",
+   "satellite_hamlets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "river_landings"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": ""
+ },
+ {
+  "id": "cart_bed_framing",
+  "requires_all": [
+   "linchpin_retention",
+   "paired_ox_yoke"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Wheels plus yoked draft oxen."
+ },
+ {
+  "id": "cargo_stowage_sequencing",
+  "requires_all": [
+   "load_bundling_by_weight"
+  ],
+  "requires_any": [
+   [
+    "cart_bed_framing",
+    "plank_extended_dugouts",
+    "pack_saddles"
+   ]
+  ],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "storage_humidity_judging",
+  "requires_all": [
+   "stock_layering_method",
+   "grain_moisture_watch"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "market_timing_knowledge",
+  "requires_all": [
+   "barter_equivalence_custom",
+   "seasonal_patterns"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "festival_calendar"
+  ],
+  "note": ""
+ },
+ {
+  "id": "crossing_point_survey",
+  "requires_all": [
+   "seasonal_route_assessment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "landmark_triangulation",
+   "sightline_staking"
+  ],
+  "note": ""
+ },
+ {
+  "id": "four_wheeled_wagons",
+  "requires_all": [
+   "cart_bed_framing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timber_post_beam_connections"
+  ],
+  "note": ""
+ },
+ {
+  "id": "sail_panel_cutting",
+  "requires_all": [
+   "plain_weaving",
+   "plank_extended_dugouts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cordage"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "waypoint_cargo_transfer",
+  "requires_all": [
+   "cargo_stowage_sequencing",
+   "river_landings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "portage_paths"
+  ],
+  "note": ""
+ },
+ {
+  "id": "alternate_route_scouting",
+  "requires_all": [
+   "crossing_point_survey"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "raid_scouting"
+  ],
+  "note": ""
+ },
+ {
+  "id": "cache_capacity_accounting",
+  "requires_all": [
+   "route_food_caches",
+   "material_accounting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "capacity_ledgers"
+  ],
+  "note": ""
+ },
+ {
+  "id": "seasonal_trade_gathering",
+  "requires_all": [
+   "boundary_exchange_sites",
+   "market_timing_knowledge"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "festival_calendar"
+  ],
+  "conditions": {
+   "min_settlements": 2
+  },
+  "note": ""
+ },
+ {
+  "id": "supply_groups",
+  "requires_all": [
+   "cache_capacity_accounting",
+   "task_captains"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pack_animals",
+   "shared_trade_escort"
+  ],
+  "note": ""
+ },
+ {
+  "id": "cargo_seals",
+  "requires_all": [
+   "sealed_store_doors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cylinder_seals"
+  ],
+  "note": ""
+ },
+ {
+  "id": "haul_harness_weaving",
+  "requires_all": [
+   "paired_ox_yoke",
+   "cart_bed_framing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cordage",
+   "plain_weaving"
+  ],
+  "note": ""
+ },
+ {
+  "id": "graded_roads",
+  "requires_all": [
+   "great_work_parties",
+   "rod_and_cord_leveling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cart_bed_framing",
+   "sightline_staking"
+  ],
+  "conditions": {
+   "institutions_min": 0.3
+  },
+  "note": ""
+ },
+ {
+  "id": "cart_running_gear",
+  "requires_all": [
+   "four_wheeled_wagons",
+   "load_bundling_by_weight"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "coastal_watercraft",
+  "requires_all": [
+   "plank_extended_dugouts",
+   "sail_panel_cutting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "coast"
+  },
+  "note": ""
+ },
+ {
+  "id": "timber_bridges",
+  "requires_all": [
+   "timber_post_beam_connections",
+   "crossing_point_survey"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plank_trackways"
+  ],
+  "note": ""
+ },
+ {
+  "id": "rope_laying",
+  "requires_all": [
+   "cordage",
+   "fiber_retting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wool_spinning"
+  ],
+  "note": ""
+ },
+ {
+  "id": "caulking_fiber_preparation",
+  "requires_all": [
+   "fiber_retting"
+  ],
+  "requires_any": [
+   [
+    "bitumen_sealing",
+    "charcoal"
+   ]
+  ],
+  "precedents": [
+   "plank_extended_dugouts"
+  ],
+  "note": "Pitch from bitumen or wood tar."
+ },
+ {
+  "id": "hull_seam_caulking",
+  "requires_all": [
+   "caulking_fiber_preparation",
+   "coastal_watercraft"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "treenail_fastening",
+  "requires_all": [
+   "joinery",
+   "coastal_watercraft"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bow_drill_drive",
+   "copper_carpentry_tools"
+  ],
+  "note": ""
+ },
+ {
+  "id": "towpaths",
+  "requires_all": [
+   "rope_laying",
+   "river_landings"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "mast_making",
+  "requires_all": [
+   "sail_panel_cutting",
+   "rope_laying"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "treenail_fastening"
+  ],
+  "note": ""
+ },
+ {
+  "id": "ferry_crossings",
+  "requires_all": [
+   "crossing_point_survey",
+   "plank_extended_dugouts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rope_laying"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "plank_spiling",
+  "requires_all": [
+   "treenail_fastening"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "copper_carpentry_tools"
+  ],
+  "note": ""
+ },
+ {
+  "id": "central_storehouses",
+  "requires_all": [
+   "sealed_store_doors",
+   "public_stores"
+  ],
+  "requires_any": [
+   [
+    "marked_storage_registers",
+    "clay_record_tablets"
+   ]
+  ],
+  "precedents": [
+   "courtyard_storerooms",
+   "temple_common_storehouse"
+  ],
+  "conditions": {
+   "institutions_min": 0.4
+  },
+  "note": ""
+ },
+ {
+  "id": "convoy_load_distribution",
+  "requires_all": [
+   "supply_groups"
+  ],
+  "requires_any": [
+   [
+    "cart_running_gear",
+    "pack_saddles"
+   ]
+  ],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "store_airflow_arrangement",
+  "requires_all": [
+   "storage_humidity_judging"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "raised_granaries"
+  ],
+  "note": ""
+ },
+ {
+  "id": "trade_route_risk_assessment",
+  "requires_all": [
+   "alternate_route_scouting",
+   "shared_trade_escort"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "waystation_spacing_judgment",
+  "requires_all": [
+   "rest_stop_spacing_custom",
+   "cache_capacity_accounting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paced_distance_counting"
+  ],
+  "note": ""
+ },
+ {
+  "id": "onager_hybrid_teams",
+  "requires_all": [
+   "four_wheeled_wagons",
+   "haul_harness_weaving"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pack_animals"
+  ],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": "Wild onagers in dry steppe."
+ },
+ {
+  "id": "paved_haul_roads",
+  "requires_all": [
+   "graded_roads",
+   "dressed_stone_masonry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wedge_and_fire_quarrying"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Stone"
+   ]
+  },
+  "note": ""
+ },
+ {
+  "id": "stone_jetty_harbors",
+  "requires_all": [
+   "coastal_watercraft",
+   "dry_stone_walls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "river_landings",
+   "great_work_parties"
+  ],
+  "conditions": {
+   "environment": "coast"
+  },
+  "note": ""
+ },
+ {
+  "id": "wetted_track_sledging",
+  "requires_all": [
+   "ox_drawn_sledges",
+   "plank_trackways"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "megalith_raising",
+   "great_work_parties"
+  ],
+  "note": ""
+ },
+ {
+  "id": "navigation_canals",
+  "requires_all": [
+   "river_supply_channels",
+   "rod_and_cord_leveling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "towpaths",
+   "flood_levees"
+  ],
+  "conditions": {
+   "environment": "river",
+   "institutions_min": 0.5
+  },
+  "note": ""
+ },
+ {
+  "id": "hogging_truss_hulls",
+  "requires_all": [
+   "plank_spiling",
+   "rope_laying"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mast_making"
+  ],
+  "conditions": {
+   "environment": "coast"
+  },
+  "note": ""
+ },
+ {
+  "id": "grain_barge_fleets",
+  "requires_all": [
+   "navigation_canals",
+   "central_storehouses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "convoy_load_distribution"
+  ],
+  "note": ""
+ },
+ {
+  "id": "donkey_caravans",
+  "requires_all": [
+   "pack_saddles",
+   "seasonal_trade_gathering"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "waystation_spacing_judgment",
+   "trade_route_risk_assessment"
+  ],
+  "note": ""
+ },
+ {
+  "id": "standard_transport_jars",
+  "requires_all": [
+   "wheel_thrown_pottery",
+   "cross_settlement_measure_agreement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reference_vessel_sets"
+  ],
+  "note": ""
+ },
+ {
+  "id": "road_stations",
+  "requires_all": [
+   "waystation_spacing_judgment",
+   "lined_well_shafts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "graded_roads",
+   "guest_host_reciprocity"
+  ],
+  "conditions": {
+   "institutions_min": 0.5
+  },
+  "note": ""
+ },
+ {
+  "id": "domesticated_mounts",
+  "requires_all": [
+   "animal_taming",
+   "haul_harness_weaving"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "onager_hybrid_teams"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Horses usually arrive from steppe peoples."
+ },
+ {
+  "id": "hired_carriers",
+  "requires_all": [
+   "sealed_tablet_contracts",
+   "relay_carrying_shifts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hired_harvest_hands",
+   "hired_labor_contracts"
+  ],
+  "note": ""
+ },
+ {
+  "id": "spoke_tenon_cutting",
+  "requires_all": [
+   "solid_wheel_assembly",
+   "copper_carpentry_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bow_drill_drive",
+   "bronze_alloying"
+  ],
+  "note": ""
+ },
+ {
+  "id": "spoked_wheel_assembly",
+  "requires_all": [
+   "spoke_tenon_cutting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "domesticated_mounts",
+   "hide_tanning"
+  ],
+  "note": "Light wheels for fast horse draft."
+ },
+ {
+  "id": "island_hopping_sailing",
+  "requires_all": [
+   "hull_seam_caulking",
+   "mast_making"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wayfinding_stars"
+  ],
+  "conditions": {
+   "environment": "coast"
+  },
+  "note": ""
+ },
+ {
+  "id": "mountain_pack_trains",
+  "requires_all": [
+   "donkey_caravans"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tin_smelting"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": ""
+ },
+ {
+  "id": "merchant_quarters_abroad",
+  "requires_all": [
+   "trade_colonies",
+   "foreign_treaties"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sworn_interpreters"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": ""
+ },
+ {
+  "id": "pilots_sea_lanes",
+  "requires_all": [
+   "island_hopping_sailing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "landmark_triangulation"
+  ],
+  "conditions": {
+   "environment": "coast"
+  },
+  "note": ""
+ },
+ {
+  "id": "sailing_calendar",
+  "requires_all": [
+   "pilots_sea_lanes",
+   "solar_year_reckoning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weather_sign_reading"
+  ],
+  "conditions": {
+   "environment": "coast"
+  },
+  "note": ""
+ },
+ {
+  "id": "harbor_warehouses",
+  "requires_all": [
+   "stone_jetty_harbors",
+   "central_storehouses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "merchant_quarters_abroad"
+  ],
+  "conditions": {
+   "environment": "coast"
+  },
+  "note": ""
+ },
+ {
+  "id": "consignment_lists",
+  "requires_all": [
+   "cargo_seals",
+   "sealed_tablet_letters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standard_royal_letters"
+  ],
+  "note": ""
+ },
+ {
+  "id": "relay_team_stations",
+  "requires_all": [
+   "road_stations",
+   "domesticated_mounts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "messenger_relay_stations"
+  ],
+  "note": ""
+ }
+]

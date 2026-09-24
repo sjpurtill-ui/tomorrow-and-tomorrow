@@ -1,0 +1,1192 @@
+[
+ {
+  "id": "shared_hearth_gatherings",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "ember_tending"
+  ],
+  "note": "Starting knowledge: people gather at the fire."
+ },
+ {
+  "id": "communal_work_songs",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Starting knowledge: shared rhythm for work."
+ },
+ {
+  "id": "oral_epics",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "shared_hearth_gatherings"
+  ],
+  "note": "Starting knowledge: trained memory at the hearth."
+ },
+ {
+  "id": "genealogical_recitation",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "oral_epics"
+  ],
+  "note": "Starting knowledge: lineage kept in recitation."
+ },
+ {
+  "id": "named_landmark_lore",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "route_memory"
+  ],
+  "note": "Starting knowledge: places carry stories."
+ },
+ {
+  "id": "curious_questioning_custom",
+  "requires_all": [
+   "shared_hearth_gatherings"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Children heard at the hearth."
+ },
+ {
+  "id": "bone_flutes_drums",
+  "requires_all": [
+   "shared_hearth_gatherings",
+   "controlled_flaking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Flaked tools cut bone pipes."
+ },
+ {
+  "id": "circle_dances",
+  "requires_all": [
+   "shared_hearth_gatherings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "communal_work_songs",
+   "bone_flutes_drums"
+  ],
+  "note": "Gathering rhythm becomes dance."
+ },
+ {
+  "id": "house_floor_burial",
+  "requires_all": [
+   "genealogical_recitation"
+  ],
+  "requires_any": [
+   [
+    "adobe_wall_construction",
+    "framed_construction"
+   ]
+  ],
+  "precedents": [],
+  "note": "Durable houses keep the lineage dead; see flags."
+ },
+ {
+  "id": "ochre_grave_goods",
+  "requires_all": [
+   "house_floor_burial"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Raw ochre and goods laid with burials."
+ },
+ {
+  "id": "kin_body_ornament",
+  "requires_all": [
+   "named_descent_lines"
+  ],
+  "requires_any": [
+   [
+    "mineral_pigment_preparation",
+    "bone_needle_sewing",
+    "cordage"
+   ]
+  ],
+  "precedents": [],
+  "note": "Descent shown with paint or strung beads."
+ },
+ {
+  "id": "hearth_shrine_offerings",
+  "requires_all": [
+   "shared_hearth_gatherings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "house_floor_burial",
+   "oral_epics"
+  ],
+  "note": "Offerings given at the shared hearth."
+ },
+ {
+  "id": "plastered_ancestor_skulls",
+  "requires_all": [
+   "house_floor_burial",
+   "clay_shaping"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Buried dead recovered and modeled; see flags."
+ },
+ {
+  "id": "mourning_days",
+  "requires_all": [],
+  "requires_any": [
+   [
+    "house_floor_burial",
+    "ochre_grave_goods"
+   ]
+  ],
+  "precedents": [
+   "genealogical_recitation"
+  ],
+  "note": "Burial rites extended into set days."
+ },
+ {
+  "id": "festival_calendar",
+  "requires_all": [
+   "seasonal_patterns"
+  ],
+  "requires_any": [
+   [
+    "moon_counting",
+    "phenology_signs"
+   ]
+  ],
+  "precedents": [
+   "crop_calendars"
+  ],
+  "note": "Nature signs or moons time the festivals."
+ },
+ {
+  "id": "reciprocal_gift_exchange",
+  "requires_all": [
+   "guest_host_reciprocity"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "trade_partner_tokens",
+   "shared_hearth_gatherings"
+  ],
+  "note": "Hospitality obligations become gift cycles."
+ },
+ {
+  "id": "origin_story",
+  "requires_all": [
+   "oral_epics",
+   "hearth_shrine_offerings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "named_landmark_lore"
+  ],
+  "note": "Epic memory tied to the god."
+ },
+ {
+  "id": "pottery_style_identity",
+  "requires_all": [
+   "pit_firing",
+   "kin_body_ornament"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Kin marks carried onto fired pots."
+ },
+ {
+  "id": "ancestor_figurines",
+  "requires_all": [
+   "clay_shaping"
+  ],
+  "requires_any": [
+   [
+    "plastered_ancestor_skulls",
+    "house_floor_burial"
+   ]
+  ],
+  "precedents": [
+   "pit_firing"
+  ],
+  "note": "Ancestor cult modeled in clay."
+ },
+ {
+  "id": "pit_pebble_game",
+  "requires_all": [
+   "counting_words"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "shared_hearth_gatherings"
+  ],
+  "note": "Counting played as a game."
+ },
+ {
+  "id": "first_fruits_offering",
+  "requires_all": [
+   "hearth_shrine_offerings",
+   "seed_selection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "festival_calendar"
+  ],
+  "note": "Selected harvest offered first."
+ },
+ {
+  "id": "winter_tale_nights",
+  "requires_all": [
+   "oral_epics",
+   "festival_calendar"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Recitation set to the winter season."
+ },
+ {
+  "id": "named_star_figures",
+  "requires_all": [
+   "oral_epics"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "moon_counting",
+   "weather_sign_reading"
+  ],
+  "note": "Night sky woven into stories."
+ },
+ {
+  "id": "shrine_wall_painting",
+  "requires_all": [
+   "mineral_pigment_preparation",
+   "hearth_shrine_offerings"
+  ],
+  "requires_any": [
+   [
+    "adobe_wall_construction",
+    "wattle_and_daub_walls"
+   ]
+  ],
+  "precedents": [
+   "lime_burning"
+  ],
+  "note": "Prepared pigments on walls of shrine rooms."
+ },
+ {
+  "id": "ritual_masks_costumes",
+  "requires_all": [
+   "circle_dances",
+   "hearth_shrine_offerings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "kin_body_ornament",
+   "hide_smoke_curing"
+  ],
+  "note": "Dancers dressed for the god."
+ },
+ {
+  "id": "sacred_places",
+  "requires_all": [
+   "named_landmark_lore",
+   "hearth_shrine_offerings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "origin_story"
+  ],
+  "note": "Storied places given offerings."
+ },
+ {
+  "id": "coming_of_age_rites",
+  "requires_all": [
+   "kin_body_ornament",
+   "festival_calendar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "circle_dances"
+  ],
+  "note": "Ornament conferred at seasonal rite."
+ },
+ {
+  "id": "cooperative_harvest_gatherings",
+  "requires_all": [
+   "crop_calendars"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "work_party_feasts",
+   "communal_work_songs"
+  ],
+  "note": "Harvest timing gathers households."
+ },
+ {
+  "id": "household_lineage_tokens",
+  "requires_all": [
+   "genealogical_recitation",
+   "owner_marks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clay_counting_tokens"
+  ],
+  "note": "Owner marks stand for a lineage."
+ },
+ {
+  "id": "cross_craft_visiting",
+  "requires_all": [
+   "part_time_specialists"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reciprocal_gift_exchange",
+   "guest_host_reciprocity"
+  ],
+  "note": "Specialists hosted by other crafts."
+ },
+ {
+  "id": "memorial_cairn_marking",
+  "requires_all": [
+   "cairn_sightline_marking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "named_landmark_lore"
+  ],
+  "note": "Cairns mark remembered events."
+ },
+ {
+  "id": "marriage_feasts",
+  "requires_all": [
+   "village_marriage_alliances",
+   "reciprocal_gift_exchange"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bride_wealth_gifts"
+  ],
+  "note": "Alliance sealed with feast gifts."
+ },
+ {
+  "id": "mutual_aid_customs",
+  "requires_all": [
+   "reciprocal_gift_exchange"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "kin_care_widows_orphans",
+   "work_party_feasts"
+  ],
+  "note": "Gift reciprocity extended to hardship."
+ },
+ {
+  "id": "first_shrine_house",
+  "requires_all": [
+   "sacred_places"
+  ],
+  "requires_any": [
+   [
+    "central_hall_houses",
+    "adobe_wall_construction",
+    "mould_made_mudbricks"
+   ]
+  ],
+  "precedents": [
+   "petition_speakers",
+   "leader_feast_obligations"
+  ],
+  "note": "Sacred place given a built house."
+ },
+ {
+  "id": "praise_songs",
+  "requires_all": [
+   "first_shrine_house"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "communal_work_songs",
+   "oral_epics"
+  ],
+  "note": "Shrine house sets times for song."
+ },
+ {
+  "id": "rattles_drums_pipes",
+  "requires_all": [
+   "bone_flutes_drums",
+   "pit_firing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Fired clay extends instruments."
+ },
+ {
+  "id": "traveling_storyteller_exchange",
+  "requires_all": [
+   "oral_epics",
+   "guest_host_reciprocity"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "min_settlements": 2
+  },
+  "note": "Hosted reciters trade tales."
+ },
+ {
+  "id": "graveside_libations",
+  "requires_all": [
+   "mourning_days"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ancestor_figurines"
+  ],
+  "note": "Mourning rites continued at graves."
+ },
+ {
+  "id": "disaster_memory_markers",
+  "requires_all": [
+   "memorial_cairn_marking",
+   "flood_mark_reading"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Memorial stones placed at flood lines."
+ },
+ {
+  "id": "grief_support_customs",
+  "requires_all": [
+   "mourning_days",
+   "mutual_aid_customs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Mutual aid given to mourners."
+ },
+ {
+  "id": "puzzle_riddle_contests",
+  "requires_all": [
+   "childrens_question_circles"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pit_pebble_game",
+   "festival_wrestling_races"
+  ],
+  "note": "Question circles become contests."
+ },
+ {
+  "id": "festival_wrestling_races",
+  "requires_all": [
+   "festival_calendar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sparring_customs"
+  ],
+  "note": "Festivals host athletic contests."
+ },
+ {
+  "id": "emblem_processions",
+  "requires_all": [
+   "first_shrine_house",
+   "festival_calendar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "first_fruits_offering"
+  ],
+  "note": "God's emblem carried at festivals."
+ },
+ {
+  "id": "proverbs",
+  "requires_all": [
+   "mnemonic_verse_encoding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "repeated_recitation_training"
+  ],
+  "note": "Verse memory holds short counsel."
+ },
+ {
+  "id": "temple_festival_meals",
+  "requires_all": [
+   "temple_common_storehouse",
+   "festival_calendar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "leader_feast_obligations"
+  ],
+  "note": "Temple stores feed festivals."
+ },
+ {
+  "id": "flood_origin_stories",
+  "requires_all": [
+   "origin_story",
+   "disaster_memory_markers"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Flood memory joins origin story."
+ },
+ {
+  "id": "rank_inlay_ornament",
+  "requires_all": [
+   "hereditary_chiefly_rank",
+   "kin_body_ornament"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bitumen_sealing",
+   "bow_drill_drive"
+  ],
+  "note": "Inherited rank shown in inlay."
+ },
+ {
+  "id": "naming_day_rites",
+  "requires_all": [
+   "genealogical_recitation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coming_of_age_rites",
+   "hearth_shrine_offerings"
+  ],
+  "note": "Newborns enter the recited lineage."
+ },
+ {
+  "id": "seasonal_commemoration_rites",
+  "requires_all": [
+   "disaster_memory_markers",
+   "solar_year_reckoning"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Disaster remembered on a reckoned date."
+ },
+ {
+  "id": "public_debate_custom",
+  "requires_all": [
+   "free_adult_assembly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "problem_council_sessions",
+   "childrens_question_circles"
+  ],
+  "note": "Assembly hears rival explanations."
+ },
+ {
+  "id": "rank_dress_styles",
+  "requires_all": [
+   "hereditary_chiefly_rank"
+  ],
+  "requires_any": [
+   [
+    "plain_weaving",
+    "bone_needle_sewing"
+   ]
+  ],
+  "precedents": [
+   "rank_inlay_ornament"
+  ],
+  "note": "Inherited rank shown in dress."
+ },
+ {
+  "id": "craft_lineage_naming",
+  "requires_all": [
+   "full_time_specialists",
+   "genealogical_recitation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Craft teachers remembered like ancestors."
+ },
+ {
+  "id": "intermarriage_visiting_customs",
+  "requires_all": [
+   "village_marriage_alliances",
+   "guest_host_reciprocity"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "min_settlements": 2
+  },
+  "note": "Allied villages host each other."
+ },
+ {
+  "id": "visiting_specialist_consultations",
+  "requires_all": [
+   "standing_arbiter_appointment",
+   "guest_host_reciprocity"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "traveling_storyteller_exchange"
+  ],
+  "note": "Outside arbiters hosted for hard cases."
+ },
+ {
+  "id": "stone_relief_carving",
+  "requires_all": [
+   "shrine_wall_painting"
+  ],
+  "requires_any": [
+   [
+    "copper_casting",
+    "ground_stone_axes"
+   ]
+  ],
+  "precedents": [
+   "stamp_seals"
+  ],
+  "note": "Painted scenes cut into stone."
+ },
+ {
+  "id": "banded_procession_vessels",
+  "requires_all": [
+   "emblem_processions"
+  ],
+  "requires_any": [
+   [
+    "tube_drilled_stone_vessels",
+    "painted_pottery"
+   ]
+  ],
+  "precedents": [
+   "stone_relief_carving"
+  ],
+  "note": "Processions depicted in registers."
+ },
+ {
+  "id": "temple_singers_lamenters",
+  "requires_all": [
+   "praise_songs",
+   "temple_high_steward"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mourning_days"
+  ],
+  "note": "Temple staff trained for song."
+ },
+ {
+  "id": "guest_friendship",
+  "requires_all": [
+   "guest_host_reciprocity",
+   "reciprocal_gift_exchange"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "trade_colonies"
+  ],
+  "conditions": {
+   "min_settlements": 2
+  },
+  "note": "Hosting made hereditary between houses."
+ },
+ {
+  "id": "founder_story_recitation",
+  "requires_all": [
+   "origin_story",
+   "solar_year_reckoning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "genealogical_recitation"
+  ],
+  "note": "Origin story recited at year's turn."
+ },
+ {
+  "id": "board_race_games",
+  "requires_all": [
+   "pit_pebble_game"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "festival_wrestling_races"
+  ],
+  "note": "Counting game moved to a board."
+ },
+ {
+  "id": "new_year_festival",
+  "requires_all": [
+   "festival_calendar",
+   "solar_year_reckoning",
+   "temple_high_steward"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "founder_story_recitation",
+   "emblem_processions"
+  ],
+  "note": "Temple marks the reckoned year's turn."
+ },
+ {
+  "id": "town_identity",
+  "requires_all": [
+   "emblem_processions",
+   "town_enclosure_walls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "new_year_festival"
+  ],
+  "conditions": {
+   "min_settlements": 2
+  },
+  "note": "Walled town adopts its own emblem."
+ },
+ {
+  "id": "theophoric_names",
+  "requires_all": [
+   "naming_day_rites"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "temple_singers_lamenters",
+   "praise_songs"
+  ],
+  "note": "Naming rites invoke the god."
+ },
+ {
+  "id": "shared_meal_obligations",
+  "requires_all": [
+   "temple_festival_meals",
+   "mutual_aid_customs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Festival meals become duties."
+ },
+ {
+  "id": "votive_figures",
+  "requires_all": [
+   "ancestor_figurines",
+   "first_shrine_house"
+  ],
+  "requires_any": [
+   [
+    "stone_relief_carving",
+    "copper_casting"
+   ]
+  ],
+  "precedents": [],
+  "note": "Figurines placed in the shrine."
+ },
+ {
+  "id": "seasonal_hymn_cycles",
+  "requires_all": [
+   "praise_songs",
+   "solar_year_reckoning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "temple_singers_lamenters",
+   "new_year_festival"
+  ],
+  "note": "Praise songs assigned to the year."
+ },
+ {
+  "id": "harps_and_lyres",
+  "requires_all": [
+   "rattles_drums_pipes",
+   "joinery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "temple_singers_lamenters",
+   "cordage"
+  ],
+  "note": "Joined frames hold tuned strings."
+ },
+ {
+  "id": "chamber_tombs",
+  "requires_all": [
+   "hereditary_chiefly_rank"
+  ],
+  "requires_any": [
+   [
+    "corbelled_vaults",
+    "dressed_stone_masonry",
+    "mould_made_mudbricks"
+   ]
+  ],
+  "precedents": [
+   "ochre_grave_goods",
+   "graveside_libations"
+  ],
+  "note": "Ranked lineages build tombs."
+ },
+ {
+  "id": "temple_choirs",
+  "requires_all": [
+   "temple_singers_lamenters",
+   "rattles_drums_pipes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harps_and_lyres",
+   "bronze_alloying"
+  ],
+  "note": "Temple singers joined with instruments."
+ },
+ {
+  "id": "comparative_craft_gatherings",
+  "requires_all": [
+   "cross_craft_visiting",
+   "full_time_specialists"
+  ],
+  "requires_any": [
+   [
+    "seasonal_trade_gathering",
+    "market_timing_knowledge"
+   ]
+  ],
+  "precedents": [],
+  "note": "Specialists meet at markets."
+ },
+ {
+  "id": "inlaid_mosaic_panels",
+  "requires_all": [
+   "rank_inlay_ornament",
+   "bitumen_sealing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "banded_procession_vessels"
+  ],
+  "note": "Inlay extended to scenes."
+ },
+ {
+  "id": "wisdom_instructions",
+  "requires_all": [
+   "proverbs"
+  ],
+  "requires_any": [
+   [
+    "written_lore_tablets",
+    "mnemonic_verse_encoding"
+   ]
+  ],
+  "precedents": [],
+  "note": "Proverbs gathered as instruction."
+ },
+ {
+  "id": "festival_dancers_acrobats",
+  "requires_all": [
+   "festival_wrestling_races",
+   "new_year_festival"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "circle_dances"
+  ],
+  "note": "Great festivals host trained performers."
+ },
+ {
+  "id": "officiant_vestments",
+  "requires_all": [
+   "ritual_masks_costumes",
+   "plain_weaving"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ceremonial_investiture",
+   "temple_high_steward"
+  ],
+  "note": "Rite costume becomes office dress."
+ },
+ {
+  "id": "envoy_reception",
+  "requires_all": [
+   "guest_friendship",
+   "kingship"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Guest-friendship at the royal level."
+ },
+ {
+  "id": "calendar_feast_days",
+  "requires_all": [
+   "temple_festival_meals"
+  ],
+  "requires_any": [
+   [
+    "intercalated_calendar",
+    "star_rising_civil_year"
+   ]
+  ],
+  "precedents": [],
+  "note": "Feasts fixed to the civil calendar."
+ },
+ {
+  "id": "royal_mourning",
+  "requires_all": [
+   "kingship",
+   "mourning_days"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "temple_singers_lamenters"
+  ],
+  "note": "Mourning extended to the ruler."
+ },
+ {
+  "id": "royal_stone_portraits",
+  "requires_all": [
+   "stone_relief_carving",
+   "kingship"
+  ],
+  "requires_any": [
+   [
+    "copper_carpentry_tools",
+    "dressed_stone_masonry"
+   ]
+  ],
+  "precedents": [],
+  "note": "Relief carvers portray the king."
+ },
+ {
+  "id": "royal_wrestling_matches",
+  "requires_all": [
+   "festival_wrestling_races",
+   "kingship"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Festival contests staged for the ruler."
+ },
+ {
+  "id": "dream_interpretation",
+  "requires_all": [
+   "temple_high_steward"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "written_lore_tablets",
+   "proverbs"
+  ],
+  "note": "Temple experts read dreams; see flags."
+ },
+ {
+  "id": "debate_poems",
+  "requires_all": [
+   "public_debate_custom",
+   "written_lore_tablets"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Debate custom written as verse."
+ },
+ {
+  "id": "heroic_song_cycle",
+  "requires_all": [
+   "oral_epics",
+   "kingship",
+   "written_lore_tablets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harps_and_lyres"
+  ],
+  "note": "Epic craft applied to a king."
+ },
+ {
+  "id": "royal_ancestor_offerings",
+  "requires_all": [
+   "dynastic_succession",
+   "graveside_libations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "royal_mourning",
+   "moon_counting"
+  ],
+  "note": "Grave offerings kept for the dynasty."
+ },
+ {
+  "id": "love_wedding_songs",
+  "requires_all": [
+   "marriage_feasts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harps_and_lyres",
+   "written_lore_tablets"
+  ],
+  "note": "Marriage feast songs kept."
+ },
+ {
+  "id": "city_laments",
+  "requires_all": [
+   "temple_singers_lamenters",
+   "written_lore_tablets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_identity",
+   "scaling_ladders_rams"
+  ],
+  "note": "Lamenters mourn a fallen town."
+ },
+ {
+  "id": "offering_omens",
+  "requires_all": [
+   "temple_high_steward",
+   "written_lore_tablets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dream_interpretation",
+   "harvest_offering_shares"
+  ],
+  "note": "Temple writes down sacrifice signs."
+ },
+ {
+  "id": "god_boat_procession",
+  "requires_all": [
+   "emblem_processions"
+  ],
+  "requires_any": [
+   [
+    "river_craft",
+    "hide_covered_boats",
+    "plank_extended_dugouts"
+   ]
+  ],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Procession taken onto the river."
+ },
+ {
+  "id": "letters_to_the_god",
+  "requires_all": [
+   "sealed_tablet_letters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "petition_speakers"
+  ],
+  "note": "Petitions sent as letters."
+ },
+ {
+  "id": "palace_wall_painting",
+  "requires_all": [
+   "shrine_wall_painting",
+   "kingship"
+  ],
+  "requires_any": [
+   [
+    "lime_plastered_floors",
+    "gypsum_mortar"
+   ]
+  ],
+  "precedents": [],
+  "note": "Shrine painting moves to palaces."
+ },
+ {
+  "id": "scribal_songs_satires",
+  "requires_all": [
+   "public_schools",
+   "scribal_copying_tests"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "debate_poems"
+  ],
+  "note": "Tablet-house life mocked in verse."
+ },
+ {
+  "id": "pilgrimage",
+  "requires_all": [
+   "new_year_festival"
+  ],
+  "requires_any": [
+   [
+    "road_stations",
+    "guest_friendship",
+    "donkey_caravans"
+   ]
+  ],
+  "precedents": [
+   "stepped_temple_towers",
+   "sacred_places"
+  ],
+  "conditions": {
+   "min_settlements": 4
+  },
+  "note": "Great festival draws distant towns."
+ },
+ {
+  "id": "foreign_fashion_adoption",
+  "requires_all": [
+   "rank_dress_styles"
+  ],
+  "requires_any": [
+   [
+    "envoy_reception",
+    "merchant_quarters_abroad",
+    "trade_colonies"
+   ]
+  ],
+  "precedents": [],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Contact brings foreign dress."
+ },
+ {
+  "id": "sung_divine_narrative",
+  "requires_all": [
+   "seasonal_hymn_cycles",
+   "heroic_song_cycle"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harps_and_lyres"
+  ],
+  "note": "Epic form applied to hymns."
+ },
+ {
+  "id": "feast_of_the_dead",
+  "requires_all": [
+   "graveside_libations",
+   "calendar_feast_days"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "royal_ancestor_offerings"
+  ],
+  "note": "Grave rites fixed to a feast day."
+ },
+ {
+  "id": "festival_bread_sharing",
+  "requires_all": [
+   "calendar_feast_days",
+   "work_gang_bakeries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "temple_festival_meals",
+   "named_breads"
+  ],
+  "note": "Temple bakeries feed a feast day."
+ }
+]

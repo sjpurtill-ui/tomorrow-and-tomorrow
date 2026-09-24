@@ -1,0 +1,943 @@
+[
+ {
+  "id": "watch_rotation",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Starting knowledge; root of watch_duty_rotation."
+ },
+ {
+  "id": "alarm_relay_signals",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "relay_call_stations"
+  ],
+  "note": "Starting knowledge; root of alarm relay chain."
+ },
+ {
+  "id": "dawn_readiness_drill",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "watch_rotation"
+  ],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "emergency_food_caching",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "edible_resource_recognition"
+  ],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "refuge_point_marking",
+  "requires_all": [
+   "hazard_landmark_memory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "alarm_relay_signals"
+  ],
+  "note": "Precedes refuge_point_designation."
+ },
+ {
+  "id": "hafted_weapons",
+  "requires_all": [
+   "hafted_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "controlled_flaking"
+  ],
+  "note": ""
+ },
+ {
+  "id": "hazard_memory_recitation",
+  "requires_all": [
+   "hazard_landmark_memory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "oral_epics"
+  ],
+  "note": ""
+ },
+ {
+  "id": "bow_craft",
+  "requires_all": [
+   "timber_grading",
+   "cordage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "controlled_flaking"
+  ],
+  "note": ""
+ },
+ {
+  "id": "sparring_customs",
+  "requires_all": [
+   "hafted_weapons"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "war_slings",
+  "requires_all": [
+   "cordage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stone_sorting"
+  ],
+  "note": ""
+ },
+ {
+  "id": "hide_wicker_shields",
+  "requires_all": [
+   "basketry",
+   "hide_smoke_curing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "throwing_spears",
+  "requires_all": [
+   "hafted_weapons"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "stone_maceheads",
+  "requires_all": [
+   "hafted_tools",
+   "ground_stone_axes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bow_drill_drive"
+  ],
+  "note": "Perforation eased by drilling."
+ },
+ {
+  "id": "ambush_raids",
+  "requires_all": [
+   "sparring_customs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dawn_readiness_drill"
+  ],
+  "note": ""
+ },
+ {
+  "id": "herd_recovery_pursuit",
+  "requires_all": [
+   "animal_taming"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ambush_raids"
+  ],
+  "note": ""
+ },
+ {
+  "id": "clay_sling_bullets",
+  "requires_all": [
+   "war_slings",
+   "pit_firing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "raid_scouting",
+  "requires_all": [
+   "ambush_raids"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "distance_call_signals"
+  ],
+  "note": ""
+ },
+ {
+  "id": "thorn_barriers",
+  "requires_all": [
+   "hafted_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "watch_rotation",
+   "refuge_point_marking"
+  ],
+  "note": ""
+ },
+ {
+  "id": "weapon_free_gatherings",
+  "requires_all": [
+   "guest_host_reciprocity"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reciprocal_gift_exchange"
+  ],
+  "note": ""
+ },
+ {
+  "id": "hostage_exchange",
+  "requires_all": [
+   "weapon_free_gatherings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "village_marriage_alliances"
+  ],
+  "note": ""
+ },
+ {
+  "id": "defensive_ditch_siting",
+  "requires_all": [
+   "thorn_barriers",
+   "sightline_staking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "slack_season_building"
+  ],
+  "note": ""
+ },
+ {
+  "id": "disaster_recovery_roles",
+  "requires_all": [
+   "refuge_point_marking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_crisis_leader",
+   "hazard_memory_recitation"
+  ],
+  "note": ""
+ },
+ {
+  "id": "truce_sanctuary",
+  "requires_all": [
+   "weapon_free_gatherings",
+   "sacred_places"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "ditch_palisades",
+  "requires_all": [
+   "defensive_ditch_siting",
+   "framed_construction"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "slack_season_building"
+  ],
+  "conditions": {
+   "environment": "woodland"
+  },
+  "note": "Timber supply needed."
+ },
+ {
+  "id": "perimeter_patrol_customs",
+  "requires_all": [
+   "watch_rotation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ditch_palisades",
+   "watch_duty_rotation"
+  ],
+  "note": ""
+ },
+ {
+  "id": "barred_palisade_gates",
+  "requires_all": [
+   "ditch_palisades",
+   "joinery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "post_disaster_headcount_custom",
+  "requires_all": [
+   "disaster_recovery_roles",
+   "counting_words"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "hilltop_refuges",
+  "requires_all": [
+   "dry_stone_walls",
+   "refuge_point_marking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "great_work_parties"
+  ],
+  "note": ""
+ },
+ {
+  "id": "joint_hamlet_defense_pacts",
+  "requires_all": [
+   "hostage_exchange"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "village_marriage_alliances",
+   "witnessed_agreement_customs"
+  ],
+  "conditions": {
+   "min_settlements": 2
+  },
+  "note": ""
+ },
+ {
+  "id": "signal_command_drill",
+  "requires_all": [
+   "ambush_raids",
+   "distance_call_signals"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "paired_veteran_mentoring",
+  "requires_all": [
+   "sparring_customs",
+   "mentored_task_learning"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "cast_copper_weapons",
+  "requires_all": [
+   "copper_casting",
+   "hafted_weapons"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": [
+    "Copper"
+   ]
+  },
+  "note": ""
+ },
+ {
+  "id": "neighbor_shelter_pledges",
+  "requires_all": [
+   "joint_hamlet_defense_pacts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mutual_aid_customs"
+  ],
+  "note": ""
+ },
+ {
+  "id": "rotating_watch_captaincy",
+  "requires_all": [
+   "watch_duty_rotation",
+   "task_captains"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "watch_rotation > watch_duty_rotation > captaincy."
+ },
+ {
+  "id": "fallback_route_marking",
+  "requires_all": [
+   "refuge_point_designation",
+   "trail_waymarking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "market_peacekeepers",
+  "requires_all": [
+   "truce_sanctuary",
+   "perimeter_patrol_customs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "boundary_exchange_sites"
+  ],
+  "note": ""
+ },
+ {
+  "id": "copper_maceheads",
+  "requires_all": [
+   "cast_copper_weapons"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stone_maceheads"
+  ],
+  "note": ""
+ },
+ {
+  "id": "mutual_aid_pacts",
+  "requires_all": [
+   "neighbor_shelter_pledges",
+   "mutual_aid_customs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "copper_daggers",
+  "requires_all": [
+   "cast_copper_weapons"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sheet_copper_riveting"
+  ],
+  "note": ""
+ },
+ {
+  "id": "rotating_command_practice",
+  "requires_all": [
+   "rotating_watch_captaincy",
+   "signal_command_drill"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "coordinated_retreat_drill",
+  "requires_all": [
+   "signal_command_drill",
+   "fallback_route_marking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "gate_watchtowers",
+  "requires_all": [
+   "barred_palisade_gates",
+   "timber_post_beam_connections"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "alarm_relay_customs",
+  "requires_all": [
+   "alarm_relay_signals",
+   "warning_call_relay"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "drum_relay_signals"
+  ],
+  "note": "Formalizes signals and warning-call relay."
+ },
+ {
+  "id": "night_gate_challenge",
+  "requires_all": [
+   "barred_palisade_gates",
+   "perimeter_patrol_customs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "guest_host_reciprocity"
+  ],
+  "note": ""
+ },
+ {
+  "id": "common_armory",
+  "requires_all": [
+   "cast_copper_weapons",
+   "public_stores"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "marked_storage_registers"
+  ],
+  "note": ""
+ },
+ {
+  "id": "multi_post_command_relay",
+  "requires_all": [
+   "alarm_relay_customs",
+   "rotating_command_practice"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "rotating_relief_wardens",
+  "requires_all": [
+   "rotating_watch_captaincy",
+   "gate_watchtowers"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "combined_drill_musters",
+  "requires_all": [
+   "paired_veteran_mentoring",
+   "joint_hamlet_defense_pacts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "regional_levy_coordination"
+  ],
+  "note": ""
+ },
+ {
+  "id": "household_muster",
+  "requires_all": [
+   "hearth_counts",
+   "combined_drill_musters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "census_rolls"
+  ],
+  "conditions": {
+   "institutions_min": 0.3
+  },
+  "note": ""
+ },
+ {
+  "id": "formation_drill",
+  "requires_all": [
+   "signal_command_drill",
+   "combined_drill_musters"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "field_fortifications",
+  "requires_all": [
+   "defensive_ditch_siting",
+   "supply_groups"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "fortified_stores",
+  "requires_all": [
+   "courtyard_storerooms"
+  ],
+  "requires_any": [
+   [
+    "town_enclosure_walls",
+    "ditch_palisades"
+   ]
+  ],
+  "precedents": [
+   "sealed_store_doors"
+  ],
+  "note": ""
+ },
+ {
+  "id": "shield_wall",
+  "requires_all": [
+   "formation_drill",
+   "hide_wicker_shields"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "wall_missile_posts",
+  "requires_all": [
+   "town_enclosure_walls"
+  ],
+  "requires_any": [
+   [
+    "bow_craft",
+    "clay_sling_bullets"
+   ]
+  ],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "flanked_gate_complex",
+  "requires_all": [
+   "town_enclosure_walls",
+   "gate_watchtowers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "kiln_fired_bricks"
+  ],
+  "note": ""
+ },
+ {
+  "id": "copper_battle_axes",
+  "requires_all": [
+   "cast_copper_weapons",
+   "bivalve_moulds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "arsenical_copper"
+  ],
+  "note": ""
+ },
+ {
+  "id": "layered_defense_coordination",
+  "requires_all": [
+   "multi_post_command_relay",
+   "flanked_gate_complex"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "palace_guard",
+  "requires_all": [
+   "kingship"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rotating_relief_wardens"
+  ],
+  "conditions": {
+   "institutions_min": 0.6
+  },
+  "note": ""
+ },
+ {
+  "id": "massed_formation_training",
+  "requires_all": [
+   "formation_drill",
+   "household_muster"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "battle_wagons",
+  "requires_all": [
+   "onager_hybrid_teams"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "throwing_spears"
+  ],
+  "note": ""
+ },
+ {
+  "id": "standing_relief_stores",
+  "requires_all": [
+   "emergency_food_caching",
+   "central_storehouses"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "bronze_weaponry",
+  "requires_all": [
+   "bronze_alloying",
+   "common_armory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "closed_moulds"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Copper",
+    "Tin"
+   ]
+  },
+  "note": "Tin usually traded in."
+ },
+ {
+  "id": "copper_helmets",
+  "requires_all": [
+   "sheet_copper_riveting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bronze_weaponry",
+   "leather_goods_patterning"
+  ],
+  "note": ""
+ },
+ {
+  "id": "deep_phalanx",
+  "requires_all": [
+   "massed_formation_training",
+   "shield_wall"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bronze_weaponry"
+  ],
+  "note": ""
+ },
+ {
+  "id": "scaling_ladders_rams",
+  "requires_all": [
+   "town_enclosure_walls",
+   "timber_post_beam_connections"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "massed_formation_training"
+  ],
+  "note": ""
+ },
+ {
+  "id": "standing_paid_company",
+  "requires_all": [
+   "palace_guard",
+   "fixed_worker_rations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "codified_tribute_schedules"
+  ],
+  "conditions": {
+   "institutions_min": 0.6
+  },
+  "note": ""
+ },
+ {
+  "id": "socketed_spearheads",
+  "requires_all": [
+   "bronze_weaponry",
+   "closed_moulds"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Needs cored casting; see flags."
+ },
+ {
+  "id": "composite_bow",
+  "requires_all": [
+   "bow_craft",
+   "hide_tanning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timber_seasoning"
+  ],
+  "note": "Horn, sinew and hide glue."
+ },
+ {
+  "id": "sentry_watchwords",
+  "requires_all": [
+   "night_gate_challenge",
+   "agreed_signal_codes"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "siege_ramps_mining",
+  "requires_all": [
+   "scaling_ladders_rams",
+   "great_work_parties"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fire_setting_mining"
+  ],
+  "note": ""
+ },
+ {
+  "id": "war_chariots",
+  "requires_all": [
+   "spoked_wheel_assembly",
+   "domesticated_mounts",
+   "bronze_weaponry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "battle_wagons"
+  ],
+  "note": "Spoked wheels, horses, bronze fittings."
+ },
+ {
+  "id": "shield_equipment_fitting",
+  "requires_all": [
+   "war_chariots",
+   "hide_wicker_shields"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "leather_goods_patterning"
+  ],
+  "note": ""
+ },
+ {
+  "id": "border_fortress_chains",
+  "requires_all": [
+   "flanked_gate_complex",
+   "alarm_relay_customs"
+  ],
+  "requires_any": [
+   [
+    "fire_smoke_signaling",
+    "drum_relay_signals"
+   ]
+  ],
+  "precedents": [
+   "provincial_governors"
+  ],
+  "note": ""
+ },
+ {
+  "id": "sickle_sword",
+  "requires_all": [
+   "bronze_work_hardening",
+   "closed_moulds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "copper_daggers"
+  ],
+  "note": ""
+ },
+ {
+  "id": "chariot_crews",
+  "requires_all": [
+   "war_chariots",
+   "composite_bow"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paired_veteran_mentoring"
+  ],
+  "note": ""
+ },
+ {
+  "id": "glacis_ramparts",
+  "requires_all": [
+   "town_enclosure_walls",
+   "siege_ramps_mining"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lime_mortar"
+  ],
+  "note": "Answer to rams and mining."
+ },
+ {
+  "id": "written_patrol_reports",
+  "requires_all": [
+   "border_fortress_chains",
+   "sealed_tablet_letters"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "allied_contingents",
+  "requires_all": [
+   "foreign_treaties",
+   "standing_paid_company"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": ""
+ },
+ {
+  "id": "casemate_walls",
+  "requires_all": [
+   "town_enclosure_walls",
+   "dressed_stone_masonry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "flanked_gate_complex",
+   "glacis_ramparts"
+  ],
+  "note": ""
+ },
+ {
+  "id": "bronze_rapiers",
+  "requires_all": [
+   "bronze_work_hardening",
+   "closed_moulds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "copper_daggers",
+   "sickle_sword"
+  ],
+  "note": ""
+ },
+ {
+  "id": "scale_armor_attachment",
+  "requires_all": [
+   "chariot_crews",
+   "bronze_work_hardening",
+   "leather_goods_patterning"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "field_armorer_teams",
+  "requires_all": [
+   "bronze_weaponry",
+   "supply_groups"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pot_bellows",
+   "full_time_specialists"
+  ],
+  "note": ""
+ }
+]

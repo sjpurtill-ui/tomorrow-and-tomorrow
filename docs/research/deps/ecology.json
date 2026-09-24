@@ -1,0 +1,1013 @@
+[
+ {
+  "id": "seasonal_patterns",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "timber_grading",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "fiber_grading",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "edible_resource_recognition"
+  ],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "quarry_reading",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "stone_sorting"
+  ],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "streambank_vegetation_watch",
+  "requires_all": [
+   "seasonal_patterns"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "herd_size_limits",
+  "requires_all": [
+   "seasonal_patterns"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "animal_taming"
+  ],
+  "note": "Year precedes taming; see flags."
+ },
+ {
+  "id": "fallow_thicket_regrowth",
+  "requires_all": [
+   "seasonal_patterns"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "midden_siting_away_from_water",
+  "requires_all": [
+   "turbidity_judging"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sickness_pattern_memory"
+  ],
+  "note": ""
+ },
+ {
+  "id": "topsoil_depth_reading",
+  "requires_all": [
+   "edible_resource_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_patterns"
+  ],
+  "note": ""
+ },
+ {
+  "id": "browse_line_monitoring",
+  "requires_all": [
+   "herd_size_limits"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "burn_scar_regrowth_tracking",
+  "requires_all": [
+   "fallow_thicket_regrowth"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ember_tending"
+  ],
+  "note": ""
+ },
+ {
+  "id": "cookfire_smoke_venting_habit",
+  "requires_all": [
+   "ember_tending"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hearth_heat_retention"
+  ],
+  "note": ""
+ },
+ {
+  "id": "phenology_signs",
+  "requires_all": [
+   "seasonal_patterns"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weather_sign_reading"
+  ],
+  "note": ""
+ },
+ {
+  "id": "controlled_undergrowth_burning",
+  "requires_all": [
+   "burn_scar_regrowth_tracking",
+   "friction_fire_ignition"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "spawning_calendar",
+  "requires_all": [
+   "phenology_signs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fish_weirs_and_traps"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "firebreaks",
+  "requires_all": [
+   "controlled_undergrowth_burning"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "indicator_plants",
+  "requires_all": [
+   "topsoil_depth_reading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "herbal_classification"
+  ],
+  "note": ""
+ },
+ {
+  "id": "breeding_stock_sparing",
+  "requires_all": [
+   "seasonal_protein_sourcing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "phenology_signs"
+  ],
+  "note": ""
+ },
+ {
+  "id": "swidden_cycle",
+  "requires_all": [
+   "fallow_thicket_regrowth",
+   "controlled_undergrowth_burning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seed_selection",
+   "ground_stone_axes"
+  ],
+  "conditions": {
+   "environment": "woodland"
+  },
+  "note": ""
+ },
+ {
+  "id": "leaf_fodder_pollarding",
+  "requires_all": [
+   "animal_taming",
+   "hafted_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fallow_thicket_regrowth"
+  ],
+  "conditions": {
+   "environment": "woodland"
+  },
+  "note": ""
+ },
+ {
+  "id": "hive_sparing_honey_harvest",
+  "requires_all": [
+   "breeding_stock_sparing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wild_honey_smoking"
+  ],
+  "note": "Smoking listed later; see flags."
+ },
+ {
+  "id": "drought_signs",
+  "requires_all": [
+   "weather_sign_reading",
+   "phenology_signs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "transhumance",
+  "requires_all": [
+   "animal_taming",
+   "herding_rotas"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "phenology_signs"
+  ],
+  "note": ""
+ },
+ {
+  "id": "shellfish_bed_recovery",
+  "requires_all": [
+   "breeding_stock_sparing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "coast"
+  },
+  "note": ""
+ },
+ {
+  "id": "downwind_workshop_placement",
+  "requires_all": [
+   "cookfire_smoke_venting_habit"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hide_smoke_curing",
+   "pit_firing"
+  ],
+  "note": ""
+ },
+ {
+  "id": "slope_erosion_watch",
+  "requires_all": [
+   "streambank_vegetation_watch",
+   "swidden_cycle"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "spawning_ground_avoidance",
+  "requires_all": [
+   "spawning_calendar",
+   "breeding_stock_sparing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "frost_pocket_reading",
+  "requires_all": [
+   "crop_calendars"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weather_sign_reading"
+  ],
+  "note": ""
+ },
+ {
+  "id": "pest_swarm_watch",
+  "requires_all": [
+   "crop_calendars"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weather_sign_reading"
+  ],
+  "note": ""
+ },
+ {
+  "id": "sacred_grove_protection",
+  "requires_all": [
+   "sacred_places"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "selective_deadwood_gathering"
+  ],
+  "note": ""
+ },
+ {
+  "id": "contour_terrace_reading",
+  "requires_all": [
+   "slope_erosion_watch",
+   "dry_stone_walls"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "seasonal_hunting_closures",
+  "requires_all": [
+   "breeding_stock_sparing",
+   "customary_law"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "selective_deadwood_gathering",
+  "requires_all": [
+   "timber_grading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fallow_thicket_regrowth"
+  ],
+  "note": ""
+ },
+ {
+  "id": "tannery_waste_channeling",
+  "requires_all": [
+   "hide_tanning",
+   "drainage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "midden_siting_away_from_water"
+  ],
+  "note": ""
+ },
+ {
+  "id": "seed_scatter_after_gathering",
+  "requires_all": [
+   "seed_selection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "breeding_stock_sparing"
+  ],
+  "note": ""
+ },
+ {
+  "id": "reed_bed_rotation",
+  "requires_all": [
+   "fallow_thicket_regrowth"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "basketry"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "copper_outcrop_signs",
+  "requires_all": [
+   "quarry_reading",
+   "mineral_pigment_preparation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "native_copper_working"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Copper"
+   ]
+  },
+  "note": "Year too late; see flags."
+ },
+ {
+  "id": "communal_catch_limits",
+  "requires_all": [
+   "spawning_ground_avoidance",
+   "customary_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "elder_council_assent"
+  ],
+  "note": ""
+ },
+ {
+  "id": "refuse_pit_rotation",
+  "requires_all": [
+   "refuse_removal",
+   "midden_siting_away_from_water"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "windbreak_hedgerow_siting",
+  "requires_all": [
+   "field_boundary_markers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "thorn_barriers"
+  ],
+  "note": ""
+ },
+ {
+  "id": "root_stock_preservation",
+  "requires_all": [
+   "seed_scatter_after_gathering"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cutting_propagation"
+  ],
+  "note": ""
+ },
+ {
+  "id": "flood_silt_fields",
+  "requires_all": [
+   "flood_mark_reading",
+   "indicator_plants"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "wood_pasture",
+  "requires_all": [
+   "leaf_fodder_pollarding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "browse_line_monitoring",
+   "selective_deadwood_gathering"
+  ],
+  "conditions": {
+   "environment": "woodland"
+  },
+  "note": ""
+ },
+ {
+  "id": "coppice_regrowth_cutting",
+  "requires_all": [
+   "leaf_fodder_pollarding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fallow_thicket_regrowth"
+  ],
+  "conditions": {
+   "environment": "woodland"
+  },
+  "note": ""
+ },
+ {
+  "id": "dye_vat_runoff_control",
+  "requires_all": [
+   "textile_dye_extraction",
+   "tannery_waste_channeling"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "sapling_protection_customs",
+  "requires_all": [
+   "browse_line_monitoring",
+   "thorn_barriers"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "grazing_ground_recovery_marking",
+  "requires_all": [
+   "browse_line_monitoring",
+   "common_ground_marking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "dung_cake_fuel",
+  "requires_all": [
+   "animal_taming"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "selective_deadwood_gathering"
+  ],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": ""
+ },
+ {
+  "id": "replanting_after_clearance",
+  "requires_all": [
+   "cutting_propagation",
+   "sapling_protection_customs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "grazing_rotation_customs",
+  "requires_all": [
+   "grazing_ground_recovery_marking",
+   "herding_rotas"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "timber_stand_reserves",
+  "requires_all": [
+   "coppice_regrowth_cutting",
+   "customary_law"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "woodland"
+  },
+  "note": ""
+ },
+ {
+  "id": "kiln_smoke_venting_customs",
+  "requires_all": [
+   "kiln_control",
+   "downwind_workshop_placement"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "waterlogging_recognition",
+  "requires_all": [
+   "irrigation_schedules"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "indicator_plants"
+  ],
+  "note": ""
+ },
+ {
+  "id": "riparian_tree_belts",
+  "requires_all": [
+   "streambank_vegetation_watch",
+   "replanting_after_clearance"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "river_supply_channels"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "fuelwood_rotation",
+  "requires_all": [
+   "selective_deadwood_gathering",
+   "coppice_regrowth_cutting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "spring_head_fencing",
+  "requires_all": [
+   "clean_water",
+   "thorn_barriers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grazing_ground_recovery_marking"
+  ],
+  "note": ""
+ },
+ {
+  "id": "named_soil_kinds",
+  "requires_all": [
+   "indicator_plants",
+   "flood_silt_fields"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standard_sign_lists"
+  ],
+  "note": ""
+ },
+ {
+  "id": "salinity_recognition",
+  "requires_all": [
+   "waterlogging_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": ""
+ },
+ {
+  "id": "riverbank_shift_watch",
+  "requires_all": [
+   "flood_silt_fields",
+   "streambank_vegetation_watch"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "salt_leaching_fallow",
+  "requires_all": [
+   "salinity_recognition",
+   "field_rest_scheduling"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": ""
+ },
+ {
+  "id": "wetland_margin_reserves",
+  "requires_all": [
+   "reed_bed_rotation",
+   "communal_catch_limits"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "stubble_grazing",
+  "requires_all": [
+   "grazing_rotation_customs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "manure_field_spreading"
+  ],
+  "note": ""
+ },
+ {
+  "id": "pit_pond_reclamation",
+  "requires_all": [],
+  "requires_any": [
+   [
+    "mould_made_mudbricks",
+    "wedge_and_fire_quarrying"
+   ]
+  ],
+  "precedents": [
+   "rainwater_cisterns",
+   "fish_weirs_and_traps"
+  ],
+  "note": "Needs spent clay or stone pits."
+ },
+ {
+  "id": "recovery_zone_designation",
+  "requires_all": [
+   "grazing_ground_recovery_marking",
+   "seasonal_hunting_closures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timber_stand_reserves"
+  ],
+  "conditions": {
+   "institutions_min": 0.3
+  },
+  "note": ""
+ },
+ {
+  "id": "watershed_boundary_marking",
+  "requires_all": [
+   "boundary_marker_surveys",
+   "river_supply_channels"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "resource_use_quotas",
+  "requires_all": [
+   "recovery_zone_designation",
+   "material_accounting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "institutions_min": 0.4
+  },
+  "note": ""
+ },
+ {
+  "id": "workshop_effluent_separation",
+  "requires_all": [
+   "dye_vat_runoff_control",
+   "stone_lined_drains"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "distant_timber_reserves",
+  "requires_all": [
+   "timber_stand_reserves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "trade_colonies",
+   "river_landings"
+  ],
+  "note": ""
+ },
+ {
+  "id": "salt_tolerant_barley",
+  "requires_all": [
+   "salinity_recognition",
+   "seed_selection"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": ""
+ },
+ {
+  "id": "water_table_fallow",
+  "requires_all": [
+   "salt_leaching_fallow",
+   "irrigation_schedules"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": ""
+ },
+ {
+  "id": "timed_silt_clearance",
+  "requires_all": [
+   "river_supply_channels",
+   "riverbank_shift_watch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_levies"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "layered_shade_gardens",
+  "requires_all": [
+   "offshoot_date_planting",
+   "kitchen_gardens"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": ""
+ },
+ {
+  "id": "seasonal_herd_matching",
+  "requires_all": [
+   "grazing_rotation_customs",
+   "people_herd_counts"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "dune_spread_watch",
+  "requires_all": [
+   "windbreak_hedgerow_siting",
+   "drought_signs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": ""
+ },
+ {
+  "id": "deforestation_flood_link",
+  "requires_all": [
+   "slope_erosion_watch",
+   "riparian_tree_belts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "flood_origin_stories"
+  ],
+  "note": ""
+ },
+ {
+  "id": "mixed_flock_balance",
+  "requires_all": [
+   "seasonal_herd_matching"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "sworn_fishing_closures",
+  "requires_all": [
+   "communal_catch_limits",
+   "formal_oath_taking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "boundary_treaties"
+  ],
+  "note": ""
+ },
+ {
+  "id": "fish_run_weir_opening",
+  "requires_all": [
+   "sworn_fishing_closures",
+   "fish_weirs_and_traps"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": ""
+ },
+ {
+  "id": "vermin_control_cats",
+  "requires_all": [
+   "pest_barrier_maintenance"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "animal_taming"
+  ],
+  "note": ""
+ },
+ {
+  "id": "shared_woodland_boundaries",
+  "requires_all": [
+   "timber_stand_reserves",
+   "boundary_treaties"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "mine_spoil_containment",
+  "requires_all": [
+   "fire_setting_mining",
+   "workshop_effluent_separation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "timed_grass_burning",
+  "requires_all": [
+   "controlled_undergrowth_burning",
+   "grazing_rotation_customs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": ""
+ },
+ {
+  "id": "coppiced_charcoal_woods",
+  "requires_all": [
+   "fuelwood_rotation",
+   "charcoal"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "shaft_furnaces",
+   "timber_stand_reserves"
+  ],
+  "conditions": {
+   "environment": "woodland"
+  },
+  "note": ""
+ },
+ {
+  "id": "farmers_almanac",
+  "requires_all": [
+   "crop_calendars",
+   "written_lore_tablets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "intercalated_calendar",
+   "pest_swarm_watch"
+  ],
+  "note": ""
+ },
+ {
+  "id": "planted_timber_groves",
+  "requires_all": [
+   "replanting_after_clearance",
+   "distant_timber_reserves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cutting_propagation"
+  ],
+  "note": ""
+ },
+ {
+  "id": "sworn_grazing_rights",
+  "requires_all": [
+   "grazing_rotation_customs",
+   "sealed_tablet_contracts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stubble_grazing"
+  ],
+  "note": ""
+ },
+ {
+  "id": "protected_temple_woods",
+  "requires_all": [
+   "sacred_grove_protection",
+   "timber_stand_reserves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "temple_estates"
+  ],
+  "note": ""
+ }
+]

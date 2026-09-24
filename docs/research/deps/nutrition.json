@@ -1,0 +1,1231 @@
+[
+ {
+  "id": "edible_resource_recognition",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Starting forager knowledge"
+ },
+ {
+  "id": "ember_tending",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Starting fire knowledge"
+ },
+ {
+  "id": "hearth_heat_retention",
+  "requires_all": [
+   "ember_tending"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Banked fire precedes heat-holding hearths"
+ },
+ {
+  "id": "food_pounding_mortars",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "stone_sorting"
+  ],
+  "note": "Starting processing knowledge"
+ },
+ {
+  "id": "nut_kernel_shelling",
+  "requires_all": [
+   "edible_resource_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Knowing edible nuts"
+ },
+ {
+  "id": "food_drying",
+  "requires_all": [
+   "edible_resource_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weather_sign_reading"
+  ],
+  "note": "Sun and wind drying of known foods"
+ },
+ {
+  "id": "seed_selection",
+  "requires_all": [
+   "edible_resource_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_patterns"
+  ],
+  "note": "Seed gathering leads to deliberate sowing"
+ },
+ {
+  "id": "friction_fire_ignition",
+  "requires_all": [
+   "ember_tending"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Fire kept before fire made"
+ },
+ {
+  "id": "hearth_roasting_control",
+  "requires_all": [
+   "ember_tending",
+   "hearth_heat_retention"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Controlled coals and hot stones"
+ },
+ {
+  "id": "seasonal_protein_sourcing",
+  "requires_all": [
+   "edible_resource_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_patterns"
+  ],
+  "note": "Seasonal round of game and fish"
+ },
+ {
+  "id": "percussion_fire_ignition",
+  "requires_all": [
+   "ember_tending"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stone_sorting",
+   "friction_fire_ignition"
+  ],
+  "note": "Striking pyrite on flint"
+ },
+ {
+  "id": "varied_forage_rotation",
+  "requires_all": [
+   "seasonal_protein_sourcing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "route_memory"
+  ],
+  "note": "Planned yearly foraging round"
+ },
+ {
+  "id": "smoking",
+  "requires_all": [
+   "food_drying",
+   "ember_tending"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hide_smoke_curing"
+  ],
+  "note": "Drying plus smoke"
+ },
+ {
+  "id": "root_grating_dewatering",
+  "requires_all": [
+   "food_pounding_mortars"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "basketry"
+  ],
+  "note": "Grated roots squeezed in fibre"
+ },
+ {
+  "id": "pest_deterrent_storage_herbs",
+  "requires_all": [
+   "food_drying",
+   "herbal_classification"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dry_cache_siting"
+  ],
+  "note": "Known repellent plants in stores"
+ },
+ {
+  "id": "fruit_pulp_screening",
+  "requires_all": [
+   "edible_resource_recognition",
+   "basketry"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Sieving through baskets"
+ },
+ {
+  "id": "animal_taming",
+  "requires_all": [
+   "seasonal_protein_sourcing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "herd_size_limits",
+   "cordage"
+  ],
+  "note": "Herding requires close knowledge of prey"
+ },
+ {
+  "id": "soil_exhaustion_recognition",
+  "requires_all": [
+   "seed_selection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "topsoil_depth_reading"
+  ],
+  "note": "Repeated sowing reveals declining plots"
+ },
+ {
+  "id": "plot_yield_memory",
+  "requires_all": [
+   "seed_selection",
+   "counting_words"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Sown plots compared by count"
+ },
+ {
+  "id": "acorn_leaching",
+  "requires_all": [
+   "nut_kernel_shelling",
+   "food_pounding_mortars"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "basketry"
+  ],
+  "conditions": {
+   "environment": "woodland"
+  },
+  "note": "Pounded meal leached in water"
+ },
+ {
+  "id": "pulse_splitting",
+  "requires_all": [
+   "seed_selection",
+   "food_pounding_mortars"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Gathered pulses cracked in mortars"
+ },
+ {
+  "id": "earth_oven_cooking",
+  "requires_all": [
+   "hearth_roasting_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hearth_heat_retention"
+  ],
+  "note": "Hot stones buried in pits"
+ },
+ {
+  "id": "fish_weirs_and_traps",
+  "requires_all": [
+   "seasonal_protein_sourcing",
+   "basketry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cordage",
+   "spawning_calendar"
+  ],
+  "conditions": {
+   "environment": [
+    "river",
+    "coast"
+   ]
+  },
+  "note": "Basketry and fish-run knowledge"
+ },
+ {
+  "id": "grain_moisture_watch",
+  "requires_all": [
+   "seed_selection",
+   "food_drying"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Drying knowledge applied to grain"
+ },
+ {
+  "id": "milking",
+  "requires_all": [
+   "animal_taming"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Needs tame dairy stock"
+ },
+ {
+  "id": "indirect_solar_food_drying",
+  "requires_all": [
+   "food_drying"
+  ],
+  "requires_any": [
+   [
+    "framed_construction",
+    "basketry"
+   ]
+  ],
+  "precedents": [],
+  "note": "Shaded racks improve sun drying"
+ },
+ {
+  "id": "crop_calendars",
+  "requires_all": [
+   "seed_selection",
+   "moon_counting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "phenology_signs"
+  ],
+  "note": "Sowing tied to counted months"
+ },
+ {
+  "id": "threshing_frames",
+  "requires_all": [
+   "seed_selection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grain_moisture_watch",
+   "site_clearing_assessment"
+  ],
+  "note": "Beaten floors for harvested grain"
+ },
+ {
+  "id": "winnowing_practice",
+  "requires_all": [
+   "threshing_frames",
+   "basketry"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Threshed grain tossed from baskets"
+ },
+ {
+  "id": "saddle_quern_grinding",
+  "requires_all": [
+   "winnowing_practice",
+   "food_pounding_mortars"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ground_stone_axes"
+  ],
+  "note": "Clean grain ground on stone"
+ },
+ {
+  "id": "cereal_dehulling",
+  "requires_all": [
+   "threshing_frames",
+   "food_pounding_mortars"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hulled wheats pounded free"
+ },
+ {
+  "id": "hand_dough_forming",
+  "requires_all": [
+   "saddle_quern_grinding"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Needs flour"
+ },
+ {
+  "id": "deliberate_milk_souring",
+  "requires_all": [
+   "milking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pit_firing"
+  ],
+  "note": "Milk kept in skins or pots"
+ },
+ {
+  "id": "food_steaming_vessels",
+  "requires_all": [
+   "pit_firing",
+   "clay_tempering"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "earth_oven_cooking"
+  ],
+  "note": "Fire-resistant pots for boiling"
+ },
+ {
+  "id": "controlled_baking",
+  "requires_all": [
+   "hand_dough_forming",
+   "hearth_roasting_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Dough on hot stones"
+ },
+ {
+  "id": "seed_cleaning",
+  "requires_all": [
+   "winnowing_practice",
+   "seed_selection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "basketry"
+  ],
+  "note": "Sieved seed for sowing"
+ },
+ {
+  "id": "drive_hunts",
+  "requires_all": [
+   "seasonal_protein_sourcing"
+  ],
+  "requires_any": [
+   [
+    "throwing_spears",
+    "bow_craft"
+   ]
+  ],
+  "precedents": [
+   "labor_rotations"
+  ],
+  "note": "Coordinated hunters with missile weapons"
+ },
+ {
+  "id": "seed_reserves",
+  "requires_all": [
+   "seed_selection",
+   "grain_moisture_watch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_stores"
+  ],
+  "note": "Dry seed set aside"
+ },
+ {
+  "id": "hermetic_grain_storage",
+  "requires_all": [
+   "grain_moisture_watch",
+   "clay_lined_storage_pits"
+  ],
+  "requires_any": [
+   [
+    "pit_firing",
+    "lime_plastered_floors"
+   ]
+  ],
+  "precedents": [],
+  "note": "Sealed pots or plastered pits"
+ },
+ {
+  "id": "wild_honey_smoking",
+  "requires_all": [
+   "smoking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Smoke calms bees"
+ },
+ {
+  "id": "grain_malting",
+  "requires_all": [
+   "grain_moisture_watch",
+   "threshing_frames"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "saddle_quern_grinding"
+  ],
+  "note": "Controlled sprouting then drying"
+ },
+ {
+  "id": "starch_washing_separation",
+  "requires_all": [
+   "root_grating_dewatering",
+   "pit_firing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plain_weaving"
+  ],
+  "note": "Settling starch in vessels"
+ },
+ {
+  "id": "resin_sealed_wine",
+  "requires_all": [
+   "pit_firing",
+   "fruit_pulp_screening"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deliberate_milk_souring",
+   "bitumen_sealing"
+  ],
+  "note": "Jars plus pressed fruit; see flags"
+ },
+ {
+  "id": "pressed_cheese",
+  "requires_all": [
+   "deliberate_milk_souring",
+   "pit_firing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Curd drained in pierced pots"
+ },
+ {
+  "id": "managed_fallow",
+  "requires_all": [
+   "soil_exhaustion_recognition",
+   "plot_yield_memory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fallow_thicket_regrowth"
+  ],
+  "note": "Rest answers tired ground"
+ },
+ {
+  "id": "batch_labeling_by_harvest",
+  "requires_all": [
+   "seed_reserves",
+   "owner_marks"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Marks applied to stored batches"
+ },
+ {
+  "id": "root_cellars",
+  "requires_all": [
+   "grain_moisture_watch"
+  ],
+  "requires_any": [
+   [
+    "clay_lined_storage_pits",
+    "dry_stone_walls"
+   ]
+  ],
+  "precedents": [
+   "frost_pocket_reading"
+  ],
+  "note": "Cool lined pits for roots"
+ },
+ {
+  "id": "raised_granaries",
+  "requires_all": [
+   "grain_moisture_watch",
+   "framed_construction"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "vermin_deterrent_placement"
+  ],
+  "note": "Post frames lift grain off damp"
+ },
+ {
+  "id": "leafy_green_incorporation",
+  "requires_all": [
+   "edible_resource_recognition",
+   "seed_selection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "food_steaming_vessels"
+  ],
+  "note": "Gathered greens brought into cultivation"
+ },
+ {
+  "id": "cutting_propagation",
+  "requires_all": [
+   "seed_selection",
+   "plot_yield_memory"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Vegetative planting after seed sowing"
+ },
+ {
+  "id": "mixed_grain_legume_meals",
+  "requires_all": [
+   "pulse_splitting",
+   "cereal_dehulling"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Both staples processed"
+ },
+ {
+  "id": "manure_field_spreading",
+  "requires_all": [
+   "animal_taming",
+   "managed_fallow"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Penned dung plus soil care"
+ },
+ {
+  "id": "reserve_allocation_priority",
+  "requires_all": [
+   "seed_reserves",
+   "mouths_against_store"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Seed and mouths weighed against stores"
+ },
+ {
+  "id": "flour_sifting",
+  "requires_all": [
+   "saddle_quern_grinding",
+   "seed_cleaning"
+  ],
+  "requires_any": [
+   [
+    "basketry",
+    "plain_weaving"
+   ]
+  ],
+  "precedents": [],
+  "note": "Sieves applied to flour"
+ },
+ {
+  "id": "offshoot_date_planting",
+  "requires_all": [
+   "cutting_propagation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": "Vegetative propagation of palms"
+ },
+ {
+  "id": "fermentation_control",
+  "requires_all": [
+   "grain_malting",
+   "deliberate_milk_souring"
+  ],
+  "requires_any": [
+   [
+    "pit_firing"
+   ]
+  ],
+  "precedents": [
+   "resin_sealed_wine"
+  ],
+  "note": "Containers plus grain surplus"
+ },
+ {
+  "id": "staggered_meal_timing",
+  "requires_all": [
+   "mouths_against_store"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_work_round"
+  ],
+  "note": "Meals spread across work shifts"
+ },
+ {
+  "id": "ash_field_amendment",
+  "requires_all": [
+   "managed_fallow"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "controlled_undergrowth_burning",
+   "swidden_cycle"
+  ],
+  "note": "Burn lore applied to fields"
+ },
+ {
+  "id": "irrigation_schedules",
+  "requires_all": [
+   "river_supply_channels",
+   "crop_calendars"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Channels shared by turn"
+ },
+ {
+  "id": "communal_meal_variety_rules",
+  "requires_all": [
+   "mixed_grain_legume_meals",
+   "leafy_green_incorporation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "shared_hearth_gatherings"
+  ],
+  "note": "Several foods to rotate"
+ },
+ {
+  "id": "ox_drawn_ard",
+  "requires_all": [
+   "animal_taming",
+   "hafted_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ox_drawn_sledges",
+   "manure_field_spreading"
+  ],
+  "note": "Trained oxen pull a hafted share; see flags"
+ },
+ {
+  "id": "reserve_moisture_barrier_layering",
+  "requires_all": [
+   "hermetic_grain_storage",
+   "root_cellars"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stock_layering_method"
+  ],
+  "note": "Sealing lore layered in stores"
+ },
+ {
+  "id": "salting_fish_meat",
+  "requires_all": [
+   "food_drying"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "salt_shell_routes",
+   "smoking"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Salt"
+   ]
+  },
+  "note": "Needs salt supply"
+ },
+ {
+  "id": "planting_density_adjustment",
+  "requires_all": [
+   "plot_yield_memory",
+   "seed_cleaning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "topsoil_depth_reading"
+  ],
+  "note": "Yield memory by plot"
+ },
+ {
+  "id": "butter_churning",
+  "requires_all": [
+   "deliberate_milk_souring"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pit_firing"
+  ],
+  "note": "Churned soured milk"
+ },
+ {
+  "id": "winter_fodder",
+  "requires_all": [
+   "animal_taming",
+   "hafted_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "leaf_fodder_pollarding",
+   "transhumance"
+  ],
+  "note": "Cut and stored feed"
+ },
+ {
+  "id": "intercrop_pairing_lore",
+  "requires_all": [
+   "planting_density_adjustment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "managed_fallow",
+   "mixed_grain_legume_meals"
+  ],
+  "note": "Density lore extended to pairs"
+ },
+ {
+  "id": "clay_dome_ovens",
+  "requires_all": [
+   "controlled_baking",
+   "kiln_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Kiln-fired clay domes for bread"
+ },
+ {
+  "id": "portion_allotment_customs",
+  "requires_all": [
+   "reserve_allocation_priority"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "leader_gift_redistribution"
+  ],
+  "note": "Household shares of the store"
+ },
+ {
+  "id": "shared_reserve_access_rules",
+  "requires_all": [
+   "reserve_allocation_priority",
+   "public_stores"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "customary_law"
+  ],
+  "note": "Rules over a common store"
+ },
+ {
+  "id": "barley_beer",
+  "requires_all": [
+   "grain_malting",
+   "fermentation_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "controlled_baking"
+  ],
+  "note": "Malt and bread fermented"
+ },
+ {
+  "id": "seasonal_diet_diversification",
+  "requires_all": [
+   "communal_meal_variety_rules",
+   "crop_calendars"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Lean months planned for"
+ },
+ {
+  "id": "layered_pit_storage",
+  "requires_all": [
+   "reserve_moisture_barrier_layering"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clay_lined_storage_pits"
+  ],
+  "note": "Layering lore in pits"
+ },
+ {
+  "id": "field_rest_scheduling",
+  "requires_all": [
+   "managed_fallow",
+   "crop_calendars"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "solar_year_reckoning"
+  ],
+  "note": "Fallow set on calendar"
+ },
+ {
+  "id": "dried_fruit_cakes",
+  "requires_all": [
+   "food_drying",
+   "cutting_propagation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "offshoot_date_planting"
+  ],
+  "note": "Orchard fruit dried and pressed"
+ },
+ {
+  "id": "kitchen_gardens",
+  "requires_all": [
+   "leafy_green_incorporation",
+   "manure_field_spreading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "irrigation_schedules"
+  ],
+  "note": "Manured plots near the house"
+ },
+ {
+  "id": "grain_parboiling",
+  "requires_all": [
+   "food_steaming_vessels",
+   "grain_moisture_watch"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Boiling then drying grain"
+ },
+ {
+  "id": "stock_rotation",
+  "requires_all": [
+   "batch_labeling_by_harvest",
+   "oldest_first_marking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "marked_storage_registers"
+  ],
+  "note": "Dated batches used in order"
+ },
+ {
+  "id": "brine_fermentation",
+  "requires_all": [
+   "salting_fish_meat",
+   "fermentation_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Salt plus controlled fermentation"
+ },
+ {
+  "id": "spoilage_inspection",
+  "requires_all": [
+   "stock_rotation",
+   "rotating_inspection_duty"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Keepers inspect rotated stores"
+ },
+ {
+  "id": "regional_granaries",
+  "requires_all": [
+   "raised_granaries",
+   "marked_storage_registers",
+   "tributary_villages"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Stores gathered from several villages"
+ },
+ {
+  "id": "ghee",
+  "requires_all": [
+   "butter_churning"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Butter clarified by heat"
+ },
+ {
+  "id": "legume_field_interplanting",
+  "requires_all": [
+   "intercrop_pairing_lore"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "field_rest_scheduling"
+  ],
+  "note": "Pairing lore applied to pulses"
+ },
+ {
+  "id": "reserve_rotation_ledgers",
+  "requires_all": [
+   "stock_rotation",
+   "clay_record_tablets"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Rotation written down"
+ },
+ {
+  "id": "weaning_food_customs",
+  "requires_all": [
+   "weaning_food_softening",
+   "interval_weaning_practice"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Weaning foods made customary; see flags"
+ },
+ {
+  "id": "named_beers",
+  "requires_all": [
+   "barley_beer"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standard_measures"
+  ],
+  "note": "Beer varieties distinguished"
+ },
+ {
+  "id": "marked_wine_jars",
+  "requires_all": [
+   "resin_sealed_wine"
+  ],
+  "requires_any": [
+   [
+    "stamp_seals",
+    "cylinder_seals"
+   ]
+  ],
+  "precedents": [],
+  "note": "Sealed and marked jars"
+ },
+ {
+  "id": "fattened_geese_ducks",
+  "requires_all": [
+   "animal_taming",
+   "raised_granaries"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Grain surplus fed to fowl"
+ },
+ {
+  "id": "work_gang_bakeries",
+  "requires_all": [
+   "clay_dome_ovens",
+   "barley_beer",
+   "fixed_worker_rations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "work_gang_overseers"
+  ],
+  "note": "Ovens and brewing for crews"
+ },
+ {
+  "id": "stocked_fish_ponds",
+  "requires_all": [
+   "fish_weirs_and_traps",
+   "river_supply_channels"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Live catch kept in channels"
+ },
+ {
+  "id": "hive_beekeeping",
+  "requires_all": [
+   "wild_honey_smoking",
+   "hive_sparing_honey_harvest"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pit_firing"
+  ],
+  "note": "Wild hives moved into pots"
+ },
+ {
+  "id": "sesame_oil",
+  "requires_all": [
+   "seed_oil_pressing",
+   "irrigation_schedules"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Oil crop introduced by contact"
+ },
+ {
+  "id": "stall_fattened_cattle",
+  "requires_all": [
+   "winter_fodder"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "leader_feast_obligations",
+   "fodder_barley"
+  ],
+  "note": "Stored fodder fed in stalls"
+ },
+ {
+  "id": "jarred_salt_fish",
+  "requires_all": [
+   "salting_fish_meat"
+  ],
+  "requires_any": [
+   [
+    "river_landings",
+    "trade_colonies"
+   ]
+  ],
+  "precedents": [
+   "standard_transport_jars"
+  ],
+  "conditions": {
+   "environment": [
+    "river",
+    "coast"
+   ]
+  },
+  "note": "Salted catch packed for exchange"
+ },
+ {
+  "id": "fodder_barley",
+  "requires_all": [
+   "winter_fodder",
+   "ox_drawn_ard"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Ploughed fields sown for stock"
+ },
+ {
+  "id": "graded_rations",
+  "requires_all": [
+   "fixed_worker_rations",
+   "worker_ration_lists"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Written ration lists graded"
+ },
+ {
+  "id": "beam_olive_press",
+  "requires_all": [
+   "seed_oil_pressing",
+   "cutting_propagation",
+   "wedges_and_levers"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Lever press for orchard oil"
+ },
+ {
+  "id": "flavouring_herbs",
+  "requires_all": [
+   "kitchen_gardens",
+   "herbal_classification"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Herbs brought into gardens"
+ },
+ {
+  "id": "named_breads",
+  "requires_all": [
+   "clay_dome_ovens",
+   "flour_sifting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hive_beekeeping",
+   "dried_fruit_cakes"
+  ],
+  "note": "Oven bread varieties sweetened"
+ },
+ {
+  "id": "vinegar_pickling",
+  "requires_all": [
+   "brine_fermentation"
+  ],
+  "requires_any": [
+   [
+    "resin_sealed_wine",
+    "barley_beer"
+   ]
+  ],
+  "precedents": [],
+  "note": "Soured wine or beer used"
+ },
+ {
+  "id": "date_palm_pollination",
+  "requires_all": [
+   "offshoot_date_planting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": "Palm sexes known from offshoots"
+ },
+ {
+  "id": "date_syrup_preserves",
+  "requires_all": [
+   "dried_fruit_cakes",
+   "offshoot_date_planting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hive_beekeeping"
+  ],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": "Dates boiled down"
+ },
+ {
+  "id": "famine_reserves",
+  "requires_all": [
+   "regional_granaries",
+   "reserve_rotation_ledgers"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Large stores rotated two years"
+ },
+ {
+  "id": "dried_salted_cheese",
+  "requires_all": [
+   "pressed_cheese",
+   "salting_fish_meat"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Salt applied to cheese"
+ },
+ {
+  "id": "separate_grain_lines",
+  "requires_all": [
+   "named_beers",
+   "named_breads"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Distinct grains for each use"
+ },
+ {
+  "id": "fruit_tree_grafting",
+  "requires_all": [
+   "cutting_propagation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "copper_carpentry_tools",
+   "date_palm_pollination"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Regional; borrowed orchard skill"
+ }
+]

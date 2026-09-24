@@ -1,0 +1,976 @@
+[
+ {
+  "id": "wound_cleaning",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Starting care knowledge"
+ },
+ {
+  "id": "sickness_pattern_memory",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_patterns"
+  ],
+  "note": "Starting knowledge"
+ },
+ {
+  "id": "symptom_sharing_customs",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "shared_hearth_gatherings"
+  ],
+  "note": "Starting knowledge"
+ },
+ {
+  "id": "tool_hazard_awareness",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "controlled_flaking"
+  ],
+  "note": "Sharp tools teach care"
+ },
+ {
+  "id": "turbidity_judging",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Starting water knowledge"
+ },
+ {
+  "id": "delousing",
+  "requires_all": [
+   "controlled_flaking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Cut bone or wood combs"
+ },
+ {
+  "id": "herbal_classification",
+  "requires_all": [
+   "edible_resource_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Plant knowledge split by use"
+ },
+ {
+  "id": "contagion_avoidance_customs",
+  "requires_all": [
+   "sickness_pattern_memory",
+   "symptom_sharing_customs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Observed spread of sickness"
+ },
+ {
+  "id": "splint_and_bracing_technique",
+  "requires_all": [
+   "cordage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wound_cleaning"
+  ],
+  "note": "Binding cord for splints"
+ },
+ {
+  "id": "dietary_healing_regimens",
+  "requires_all": [
+   "herbal_classification"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Food and plant lore for the sick"
+ },
+ {
+  "id": "birth_attendants",
+  "requires_all": [
+   "labor_position_customs",
+   "postpartum_seclusion_care"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Experienced women hold birth lore"
+ },
+ {
+  "id": "household_water_boiling",
+  "requires_all": [
+   "turbidity_judging"
+  ],
+  "requires_any": [
+   [
+    "basketry",
+    "clay_shaping"
+   ]
+  ],
+  "precedents": [],
+  "note": "Settling in vessels; see flags"
+ },
+ {
+  "id": "snakebite_treatment",
+  "requires_all": [
+   "wound_cleaning",
+   "herbal_classification"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cordage"
+  ],
+  "note": "Wound care plus binding"
+ },
+ {
+  "id": "joint_reduction",
+  "requires_all": [
+   "splint_and_bracing_technique"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Limb handling from splinting"
+ },
+ {
+  "id": "clean_water",
+  "requires_all": [
+   "turbidity_judging"
+  ],
+  "requires_any": [
+   [
+    "well_siting",
+    "household_water_boiling"
+   ]
+  ],
+  "precedents": [
+   "animal_taming"
+  ],
+  "note": "Water knowledge or wells"
+ },
+ {
+  "id": "wound_packing",
+  "requires_all": [
+   "wound_cleaning",
+   "herbal_classification"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Plant materials in cleaned wounds"
+ },
+ {
+  "id": "poultices",
+  "requires_all": [
+   "herbal_classification",
+   "food_pounding_mortars"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Crushed plants applied"
+ },
+ {
+  "id": "sweat_baths",
+  "requires_all": [
+   "hearth_heat_retention",
+   "framed_construction"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Heated stones in huts"
+ },
+ {
+  "id": "purges_emetics",
+  "requires_all": [
+   "herbal_classification",
+   "dietary_healing_regimens"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Bitter plants given deliberately"
+ },
+ {
+  "id": "tooth_drilling",
+  "requires_all": [
+   "bow_drill_drive"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wild_honey_smoking"
+  ],
+  "note": "Bow drill used on teeth"
+ },
+ {
+  "id": "boil_lancing",
+  "requires_all": [
+   "controlled_flaking",
+   "wound_cleaning"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Sharp flint on abscesses"
+ },
+ {
+  "id": "disability_care",
+  "requires_all": [
+   "kin_care_widows_orphans"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "splint_and_bracing_technique"
+  ],
+  "note": "Kin obligations extended"
+ },
+ {
+  "id": "poppy_analgesia",
+  "requires_all": [
+   "herbal_classification"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seed_selection"
+  ],
+  "note": "Poppy among healing plants"
+ },
+ {
+  "id": "refuse_removal",
+  "requires_all": [
+   "midden_siting_away_from_water"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sickness_pattern_memory",
+   "drainage"
+  ],
+  "note": "Middens kept away"
+ },
+ {
+  "id": "trepanation",
+  "requires_all": [
+   "boil_lancing",
+   "wound_packing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Cutting and packing skills"
+ },
+ {
+  "id": "crutches",
+  "requires_all": [
+   "disability_care",
+   "splint_and_bracing_technique"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Aids for injured"
+ },
+ {
+  "id": "heatstroke_care",
+  "requires_all": [
+   "midday_heat_rest",
+   "dietary_healing_regimens"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Rest and water for workers"
+ },
+ {
+  "id": "honey_wound_dressing",
+  "requires_all": [
+   "wild_honey_smoking",
+   "wound_packing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Gathered honey in dressings"
+ },
+ {
+  "id": "sickroom_fumigation",
+  "requires_all": [
+   "contagion_avoidance_customs",
+   "herbal_classification"
+  ],
+  "requires_any": [
+   [
+    "smoking",
+    "sweat_baths"
+   ]
+  ],
+  "precedents": [],
+  "note": "Smoke use applied to sickrooms"
+ },
+ {
+  "id": "shared_vessel_avoidance",
+  "requires_all": [
+   "contagion_avoidance_customs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pit_firing"
+  ],
+  "note": "Separate cups for the sick"
+ },
+ {
+  "id": "household_remedy_kits",
+  "requires_all": [
+   "poultices",
+   "purges_emetics"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pit_firing"
+  ],
+  "note": "Remedies kept ready"
+ },
+ {
+  "id": "load_carrying_posture",
+  "requires_all": [
+   "load_backframes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "carried_load_balancing",
+   "rotating_heavy_tasks"
+  ],
+  "note": "Carrying methods refined"
+ },
+ {
+  "id": "water_source_rotation",
+  "requires_all": [
+   "clean_water",
+   "well_siting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Several known sources used in turn"
+ },
+ {
+  "id": "kohl_eye_paint",
+  "requires_all": [
+   "mineral_pigment_preparation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ore_assaying"
+  ],
+  "note": "Ground mineral pigment applied"
+ },
+ {
+  "id": "bracket_fungus_vermifuge",
+  "requires_all": [
+   "herbal_classification",
+   "purges_emetics"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Purge lore for worms"
+ },
+ {
+  "id": "sickroom_isolation_practice",
+  "requires_all": [
+   "sickroom_fumigation",
+   "household_space_planning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "central_hall_houses"
+  ],
+  "note": "Divided houses allow a sickroom"
+ },
+ {
+  "id": "symptom_triage_customs",
+  "requires_all": [
+   "symptom_sharing_customs",
+   "household_remedy_kits"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Healers rank reported cases"
+ },
+ {
+  "id": "workplace_hazard_awareness",
+  "requires_all": [
+   "tool_hazard_awareness",
+   "kiln_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Craft hazards taught"
+ },
+ {
+  "id": "greywater_diversion_practice",
+  "requires_all": [
+   "drainage",
+   "refuse_removal"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Drain lore for waste water"
+ },
+ {
+  "id": "head_shaving_lice",
+  "requires_all": [
+   "delousing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "native_copper_working"
+  ],
+  "note": "Blades used against lice"
+ },
+ {
+  "id": "sickbed_distance_norms",
+  "requires_all": [
+   "sickroom_isolation_practice"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Sickroom norms extended"
+ },
+ {
+  "id": "recovery_diet_customs",
+  "requires_all": [
+   "dietary_healing_regimens",
+   "mixed_grain_legume_meals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "maternal_recovery"
+  ],
+  "note": "Staple diets adapted for convalescents"
+ },
+ {
+  "id": "fire_tending_safeguards",
+  "requires_all": [
+   "ember_tending",
+   "hearth_hazard_proofing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hearth dangers generalised"
+ },
+ {
+  "id": "water_container_cleaning_customs",
+  "requires_all": [
+   "clean_water",
+   "pit_firing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "shared_vessel_avoidance"
+  ],
+  "note": "Jars kept clean and covered"
+ },
+ {
+  "id": "skin_oiling",
+  "requires_all": [
+   "seed_oil_pressing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Pressed oil on skin"
+ },
+ {
+  "id": "traction_fracture_setting",
+  "requires_all": [
+   "splint_and_bracing_technique",
+   "joint_reduction"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cordage"
+  ],
+  "note": "Pulling before splinting"
+ },
+ {
+  "id": "castor_oil_remedies",
+  "requires_all": [
+   "seed_oil_pressing",
+   "purges_emetics"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Pressed oil as purge"
+ },
+ {
+  "id": "healing_chants",
+  "requires_all": [
+   "household_remedy_kits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "praise_songs",
+   "mnemonic_verse_encoding"
+  ],
+  "note": "Chant paired with remedy"
+ },
+ {
+  "id": "river_bathing",
+  "requires_all": [
+   "clean_water"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Running water for washing"
+ },
+ {
+  "id": "seasonal_well_flushing",
+  "requires_all": [
+   "lined_well_shafts",
+   "water_source_rotation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Wells cleaned in turn"
+ },
+ {
+  "id": "outbreak_burial_protocols",
+  "requires_all": [
+   "contagion_avoidance_customs",
+   "sickbed_distance_norms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mourning_days"
+  ],
+  "note": "Contagion rules at burials"
+ },
+ {
+  "id": "burn_treatment_protocols",
+  "requires_all": [
+   "fire_tending_safeguards",
+   "poultices"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Fat dressings for burns"
+ },
+ {
+  "id": "convalescent_care_rotations",
+  "requires_all": [
+   "recovery_diet_customs",
+   "labor_rotations"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Rotas applied to nursing"
+ },
+ {
+  "id": "fly_protection",
+  "requires_all": [
+   "water_container_cleaning_customs",
+   "refuse_removal"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "kohl_eye_paint"
+  ],
+  "note": "Covered food against flies"
+ },
+ {
+  "id": "apprentice_healer_rounds",
+  "requires_all": [
+   "symptom_triage_customs",
+   "mentored_task_learning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "part_time_specialists"
+  ],
+  "note": "Mentoring applied to healers"
+ },
+ {
+  "id": "burial_ground_separation",
+  "requires_all": [
+   "outbreak_burial_protocols"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "memorial_cairn_marking",
+   "house_floor_burial"
+  ],
+  "note": "Outbreak rules made permanent; see flags"
+ },
+ {
+  "id": "occupational_rest_customs",
+  "requires_all": [
+   "workplace_hazard_awareness",
+   "recovery_days_after_heavy_tasks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "festival_rest_days"
+  ],
+  "note": "Rest customs for hazardous trades"
+ },
+ {
+  "id": "communal_washing_rotas",
+  "requires_all": [
+   "river_bathing",
+   "labor_rotations"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Turns at shared washing places"
+ },
+ {
+  "id": "wound_suturing",
+  "requires_all": [
+   "bone_needle_sewing",
+   "wound_packing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "drop_spindles"
+  ],
+  "note": "Sewing applied to wounds"
+ },
+ {
+  "id": "latrine_siting",
+  "requires_all": [
+   "greywater_diversion_practice",
+   "refuse_pit_rotation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "runoff_grade_reading"
+  ],
+  "note": "Waste pits sited by slope"
+ },
+ {
+  "id": "water_settling_basins",
+  "requires_all": [
+   "household_water_boiling"
+  ],
+  "requires_any": [
+   [
+    "mould_made_mudbricks",
+    "lime_plastered_floors",
+    "bitumen_sealing"
+   ]
+  ],
+  "precedents": [],
+  "note": "Settling scaled to lined basins"
+ },
+ {
+  "id": "isolation_practice",
+  "requires_all": [
+   "sickroom_isolation_practice",
+   "outbreak_burial_protocols"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Isolation extended to outbreaks"
+ },
+ {
+  "id": "woven_dressings",
+  "requires_all": [
+   "plain_weaving",
+   "wound_packing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fiber_retting"
+  ],
+  "note": "Linen replaces moss packing"
+ },
+ {
+  "id": "protected_wellheads",
+  "requires_all": [
+   "lined_well_shafts",
+   "seasonal_well_flushing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Well care plus covers"
+ },
+ {
+  "id": "separate_clean_water_storage",
+  "requires_all": [
+   "water_container_cleaning_customs",
+   "water_settling_basins"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Settled water stored apart"
+ },
+ {
+  "id": "ash_fat_soap",
+  "requires_all": [
+   "skin_oiling",
+   "communal_washing_rotas"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lime_burning"
+  ],
+  "note": "Ash lye with fat; see flags"
+ },
+ {
+  "id": "copper_razors",
+  "requires_all": [
+   "head_shaving_lice"
+  ],
+  "requires_any": [
+   [
+    "copper_casting",
+    "native_copper_working"
+   ]
+  ],
+  "precedents": [],
+  "note": "Copper blades for shaving"
+ },
+ {
+  "id": "healer_titles",
+  "requires_all": [
+   "apprentice_healer_rounds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "healer_specialization_customs",
+   "full_time_specialists"
+  ],
+  "note": "Named healer roles; see flags"
+ },
+ {
+  "id": "healer_specialization_customs",
+  "requires_all": [
+   "apprentice_healer_rounds",
+   "full_time_specialists"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Full-time healers narrow focus"
+ },
+ {
+  "id": "protective_gear_customs",
+  "requires_all": [
+   "workplace_hazard_awareness"
+  ],
+  "requires_any": [
+   [
+    "hide_tanning",
+    "plain_weaving"
+   ]
+  ],
+  "precedents": [],
+  "note": "Leather or cloth guards"
+ },
+ {
+  "id": "sanitation_inspection_customs",
+  "requires_all": [
+   "latrine_siting",
+   "protected_wellheads",
+   "rotating_inspection_duty"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Inspection duty for sanitation"
+ },
+ {
+  "id": "quarantine_travel_restrictions",
+  "requires_all": [
+   "isolation_practice"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_news_gathering"
+  ],
+  "note": "News of outbreaks steers travel"
+ },
+ {
+  "id": "embalming_anatomy",
+  "requires_all": [
+   "chamber_tombs",
+   "salting_fish_meat"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "trepanation"
+  ],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": "Salt drying applied to the dead"
+ },
+ {
+  "id": "public_baths",
+  "requires_all": [
+   "river_bathing",
+   "stone_lined_drains"
+  ],
+  "requires_any": [
+   [
+    "kiln_fired_bricks",
+    "bitumen_sealing"
+   ]
+  ],
+  "precedents": [],
+  "note": "Drained brick bathing places"
+ },
+ {
+  "id": "linen_board_splints",
+  "requires_all": [
+   "splint_and_bracing_technique",
+   "woven_dressings"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Linen bandaging for splints"
+ },
+ {
+  "id": "remedy_vehicles",
+  "requires_all": [
+   "household_remedy_kits",
+   "barley_beer"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hive_beekeeping"
+  ],
+  "note": "Remedies mixed into drinks"
+ },
+ {
+  "id": "mineral_eye_salves",
+  "requires_all": [
+   "kohl_eye_paint"
+  ],
+  "requires_any": [
+   [
+    "copper_smelting",
+    "lead_smelting"
+   ]
+  ],
+  "precedents": [],
+  "note": "Ore processing for salves"
+ },
+ {
+  "id": "wired_teeth",
+  "requires_all": [
+   "tooth_drilling",
+   "goldsmith_filigree"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Fine wire for teeth"
+ },
+ {
+  "id": "willow_myrtle_remedies",
+  "requires_all": [
+   "household_remedy_kits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "healer_specialization_customs"
+  ],
+  "note": "Specific pain and fever plants"
+ },
+ {
+  "id": "remedy_tablets",
+  "requires_all": [
+   "written_lore_tablets",
+   "healer_titles"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Healer lore written down"
+ },
+ {
+  "id": "case_records",
+  "requires_all": [
+   "remedy_tablets"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Outcomes added to recipes"
+ },
+ {
+  "id": "skin_disease_exclusion",
+  "requires_all": [
+   "isolation_practice"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "written_law_code"
+  ],
+  "note": "Exclusion as town rule"
+ },
+ {
+  "id": "mad_dog_liability",
+  "requires_all": [
+   "written_law_code"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "blood_price"
+  ],
+  "note": "Liability clause in written law"
+ },
+ {
+  "id": "womens_ailment_texts",
+  "requires_all": [
+   "remedy_tablets",
+   "midwife_apprenticeship_lines"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Midwife lore written"
+ },
+ {
+  "id": "healer_fee_law",
+  "requires_all": [
+   "written_law_code",
+   "healer_titles"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Law regulates named healers"
+ },
+ {
+  "id": "injury_manual",
+  "requires_all": [
+   "case_records",
+   "traction_fracture_setting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Recorded outcomes organise injury care"
+ },
+ {
+  "id": "cautery",
+  "requires_all": [
+   "bow_drill_drive",
+   "boil_lancing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "injury_manual"
+  ],
+  "note": "Heated drill on wounds"
+ },
+ {
+  "id": "pulse_taking",
+  "requires_all": [
+   "case_records"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "embalming_anatomy"
+  ],
+  "note": "Systematic examination recorded"
+ },
+ {
+  "id": "remedy_compendia",
+  "requires_all": [
+   "remedy_tablets",
+   "case_records",
+   "formal_archives"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Archived tablets compiled"
+ }
+]

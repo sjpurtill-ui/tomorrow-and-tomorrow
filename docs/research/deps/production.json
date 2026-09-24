@@ -1,0 +1,1239 @@
+[
+ {
+  "id": "raw_material_prestaging",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "stone_sorting",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "quarry_reading"
+  ],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "edge_testing_by_feel",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "stone_sorting"
+  ],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "controlled_flaking",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "stone_sorting",
+   "edge_testing_by_feel"
+  ],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "edge_resharpening_rounds",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "controlled_flaking"
+  ],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "cordage",
+  "requires_all": [
+   "fiber_grading"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Graded fibers twisted into ply."
+ },
+ {
+  "id": "hafted_tools",
+  "requires_all": [
+   "controlled_flaking",
+   "cordage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hafted_weapons"
+  ],
+  "note": "Flaked heads bound with cord and pitch."
+ },
+ {
+  "id": "basketry",
+  "requires_all": [
+   "fiber_grading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cordage"
+  ],
+  "note": "Graded fibers coiled and twined."
+ },
+ {
+  "id": "notched_measuring_rods",
+  "requires_all": [
+   "counting_words"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tallies"
+  ],
+  "note": "Counts cut as notches on rods."
+ },
+ {
+  "id": "hide_smoke_curing",
+  "requires_all": [
+   "controlled_flaking"
+  ],
+  "requires_any": [
+   [
+    "smoking",
+    "ember_tending"
+   ]
+  ],
+  "precedents": [],
+  "note": "Scrapers plus smoke fire cure hides."
+ },
+ {
+  "id": "batch_task_grouping",
+  "requires_all": [
+   "raw_material_prestaging"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "task_sequencing_habits"
+  ],
+  "note": "Prestaged stock worked in batches."
+ },
+ {
+  "id": "clay_testing",
+  "requires_all": [
+   "stone_sorting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": "Clay"
+  },
+  "note": "Material-judging habit extended to clay."
+ },
+ {
+  "id": "clay_shaping",
+  "requires_all": [
+   "clay_testing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": "Clay"
+  },
+  "note": "Tested clay built into pots."
+ },
+ {
+  "id": "woven_carriers",
+  "requires_all": [
+   "basketry"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Basketry scaled to mats and traps."
+ },
+ {
+  "id": "bone_needle_sewing",
+  "requires_all": [
+   "hide_smoke_curing",
+   "cordage"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Cured hides joined with thread."
+ },
+ {
+  "id": "ground_stone_axes",
+  "requires_all": [
+   "stone_sorting",
+   "hafted_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "food_pounding_mortars"
+  ],
+  "note": "Grinding plus hafting yields axes."
+ },
+ {
+  "id": "mineral_pigment_preparation",
+  "requires_all": [
+   "food_pounding_mortars"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ochre_grave_goods"
+  ],
+  "note": "Pounding tools grind ochre."
+ },
+ {
+  "id": "pit_firing",
+  "requires_all": [
+   "clay_shaping",
+   "hearth_heat_retention"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ember_tending",
+   "hearth_roasting_control"
+  ],
+  "note": "Controlled fire hardens shaped clay."
+ },
+ {
+  "id": "clay_tempering",
+  "requires_all": [
+   "clay_testing",
+   "pit_firing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Firing cracks drive temper trials."
+ },
+ {
+  "id": "grog_preparation",
+  "requires_all": [
+   "clay_tempering"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Broken sherds reused as temper."
+ },
+ {
+  "id": "timber_seasoning",
+  "requires_all": [
+   "timber_grading",
+   "ground_stone_axes"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Felled graded timber stacked to dry."
+ },
+ {
+  "id": "bow_drill_drive",
+  "requires_all": [
+   "cordage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "friction_fire_ignition",
+   "controlled_flaking"
+  ],
+  "note": "Cord-driven rotation from fire drill."
+ },
+ {
+  "id": "fiber_retting",
+  "requires_all": [
+   "fiber_grading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cordage",
+   "seed_selection"
+  ],
+  "note": "Soaking frees bast fibers."
+ },
+ {
+  "id": "drop_spindles",
+  "requires_all": [
+   "cordage",
+   "fiber_retting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bow_drill_drive"
+  ],
+  "note": "Twisting mechanised with a weighted whorl."
+ },
+ {
+  "id": "grip_wrapping_practice",
+  "requires_all": [
+   "hafted_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hide_smoke_curing"
+  ],
+  "note": "Hafted handles wrapped for grip."
+ },
+ {
+  "id": "charcoal",
+  "requires_all": [
+   "earth_oven_cooking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pit_firing"
+  ],
+  "note": "Covered smouldering learned from earth ovens."
+ },
+ {
+  "id": "paired_measure_checking",
+  "requires_all": [
+   "notched_measuring_rods"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "witnessed_agreement_customs",
+   "knot_tally_cross_check"
+  ],
+  "note": "Rod measures witnessed by a second keeper."
+ },
+ {
+  "id": "warp_weighted_looms",
+  "requires_all": [
+   "drop_spindles",
+   "framed_construction"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clay_shaping"
+  ],
+  "note": "Spun yarn hung on a post frame."
+ },
+ {
+  "id": "plain_weaving",
+  "requires_all": [
+   "warp_weighted_looms",
+   "fiber_retting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Loom plus flax yields linen."
+ },
+ {
+  "id": "burnished_slipped_wares",
+  "requires_all": [
+   "pit_firing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mineral_pigment_preparation"
+  ],
+  "note": "Fired wares finished with slip."
+ },
+ {
+  "id": "lime_burning",
+  "requires_all": [
+   "pit_firing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "charcoal"
+  ],
+  "conditions": {
+   "resources_known": "Limestone"
+  },
+  "note": "Sustained fire calcines limestone."
+ },
+ {
+  "id": "scrap_reclamation_habits",
+  "requires_all": [
+   "edge_resharpening_rounds",
+   "batch_task_grouping"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Resharpening extended to offcut reuse."
+ },
+ {
+  "id": "workshop_space_sharing",
+  "requires_all": [
+   "batch_task_grouping",
+   "part_time_specialists"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Specialist households share floors."
+ },
+ {
+  "id": "kiln_control",
+  "requires_all": [
+   "pit_firing",
+   "adobe_wall_construction"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "charcoal",
+   "lime_burning"
+  ],
+  "note": "Walled chamber contains pit-firing heat."
+ },
+ {
+  "id": "painted_pottery",
+  "requires_all": [
+   "kiln_control",
+   "mineral_pigment_preparation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Kiln heat fixes mineral paints."
+ },
+ {
+  "id": "native_copper_working",
+  "requires_all": [
+   "hearth_heat_retention",
+   "ground_stone_axes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mineral_pigment_preparation"
+  ],
+  "conditions": {
+   "resources_known": "Copper"
+  },
+  "note": "Hammering plus annealing heat."
+ },
+ {
+  "id": "reference_vessel_sets",
+  "requires_all": [
+   "standard_measures",
+   "kiln_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paired_measure_checking"
+  ],
+  "note": "Fired vessels hold standard volumes."
+ },
+ {
+  "id": "tournette",
+  "requires_all": [
+   "clay_shaping",
+   "kiln_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bow_drill_drive"
+  ],
+  "note": "Rotation applied to finishing pots."
+ },
+ {
+  "id": "horizontal_ground_loom",
+  "requires_all": [
+   "plain_weaving"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Weaving moved to a staked ground frame."
+ },
+ {
+  "id": "stone_grain_judging",
+  "requires_all": [
+   "stone_sorting",
+   "quarry_reading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ground_stone_axes"
+  ],
+  "note": "Sorting skill applied at the outcrop."
+ },
+ {
+  "id": "ore_assaying",
+  "requires_all": [
+   "native_copper_working",
+   "kiln_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mineral_pigment_preparation",
+   "copper_outcrop_signs"
+  ],
+  "note": "Kiln roasting tests green stones."
+ },
+ {
+  "id": "copper_smelting",
+  "requires_all": [
+   "ore_assaying",
+   "kiln_control",
+   "charcoal"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": "Copper"
+  },
+  "note": "High-temperature kiln, charcoal and known ore."
+ },
+ {
+  "id": "haft_fit_checking",
+  "requires_all": [
+   "hafted_tools",
+   "timber_seasoning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "edge_testing_by_feel"
+  ],
+  "note": "Seasoned hafts checked for fit."
+ },
+ {
+  "id": "hide_tanning",
+  "requires_all": [
+   "hide_smoke_curing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tannery_waste_channeling"
+  ],
+  "conditions": {
+   "environment": "woodland"
+  },
+  "note": "Bark tannins replace smoke curing."
+ },
+ {
+  "id": "copper_casting",
+  "requires_all": [
+   "copper_smelting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clay_shaping"
+  ],
+  "conditions": {
+   "resources_known": "Copper"
+  },
+  "note": "Molten copper poured into open moulds."
+ },
+ {
+  "id": "fire_setting_mining",
+  "requires_all": [
+   "ore_assaying",
+   "ground_stone_axes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "copper_outcrop_signs"
+  ],
+  "note": "Fire and mauls break ore bodies."
+ },
+ {
+  "id": "assistant_task_offloading",
+  "requires_all": [
+   "batch_task_grouping",
+   "household_craft_learning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "part_time_specialists"
+  ],
+  "note": "Learners take simple batch steps."
+ },
+ {
+  "id": "handle_balance_testing",
+  "requires_all": [
+   "haft_fit_checking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Fit checking extended to balance."
+ },
+ {
+  "id": "textile_dye_extraction",
+  "requires_all": [
+   "plain_weaving",
+   "pit_firing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mineral_pigment_preparation",
+   "herbal_classification"
+  ],
+  "note": "Plant dyes boiled in fired pots."
+ },
+ {
+  "id": "lead_smelting",
+  "requires_all": [
+   "ore_assaying",
+   "kiln_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "copper_smelting"
+  ],
+  "conditions": {
+   "resources_known": "Lead"
+  },
+  "note": "Low-temperature smelt of roasted galena."
+ },
+ {
+  "id": "seed_oil_pressing",
+  "requires_all": [
+   "food_pounding_mortars"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fruit_pulp_screening",
+   "woven_carriers"
+  ],
+  "note": "Pounded seeds pressed in bags."
+ },
+ {
+  "id": "reduction_firing",
+  "requires_all": [
+   "kiln_control",
+   "burnished_slipped_wares"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Kiln air starved to blacken wares."
+ },
+ {
+  "id": "standard_weight_sets",
+  "requires_all": [
+   "standard_measures",
+   "public_grain_weighing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stone_sorting"
+  ],
+  "note": "Grain weighing needs matched stones."
+ },
+ {
+  "id": "wool_spinning",
+  "requires_all": [
+   "drop_spindles",
+   "animal_taming"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "breeding_stock_sparing"
+  ],
+  "note": "Spindles applied to bred wool sheep."
+ },
+ {
+  "id": "arsenical_copper",
+  "requires_all": [
+   "copper_smelting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "copper_casting"
+  ],
+  "conditions": {
+   "resources_known": "Copper"
+  },
+  "note": "Mixed ores smelted give harder copper."
+ },
+ {
+  "id": "output_quality_sorting",
+  "requires_all": [
+   "batch_task_grouping",
+   "full_time_specialists"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Specialist volume makes grading worthwhile."
+ },
+ {
+  "id": "measure_drift_checking",
+  "requires_all": [
+   "paired_measure_checking",
+   "standard_weight_sets"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Standards compared over time."
+ },
+ {
+  "id": "template_based_sizing",
+  "requires_all": [
+   "notched_measuring_rods",
+   "reference_vessel_sets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "output_quality_sorting"
+  ],
+  "note": "Reference pieces used as templates."
+ },
+ {
+  "id": "lost_wax_casting",
+  "requires_all": [
+   "copper_casting",
+   "wild_honey_smoking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clay_tempering"
+  ],
+  "note": "Wax model invested in clay."
+ },
+ {
+  "id": "comparative_tool_trials",
+  "requires_all": [
+   "handle_balance_testing",
+   "output_quality_sorting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Tools graded against each other."
+ },
+ {
+  "id": "sheet_copper_riveting",
+  "requires_all": [
+   "copper_smelting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bow_drill_drive",
+   "native_copper_working"
+  ],
+  "note": "Smelted copper hammered thin and pierced."
+ },
+ {
+  "id": "clay_feel_judging",
+  "requires_all": [
+   "clay_testing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mentored_task_learning"
+  ],
+  "note": "Tacit clay judgment passed by mentors."
+ },
+ {
+  "id": "faience",
+  "requires_all": [
+   "kiln_control",
+   "copper_smelting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lime_burning"
+  ],
+  "note": "Copper colourant fused on quartz in kiln."
+ },
+ {
+  "id": "wheel_thrown_pottery",
+  "requires_all": [
+   "tournette",
+   "full_time_specialists"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clay_levigation"
+  ],
+  "note": "Fast wheel needs full-time potters."
+ },
+ {
+  "id": "mould_made_bowls",
+  "requires_all": [
+   "kiln_control",
+   "fixed_worker_rations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clay_shaping"
+  ],
+  "note": "Ration demand drives mass-moulded bowls."
+ },
+ {
+  "id": "tube_drilled_stone_vessels",
+  "requires_all": [
+   "bow_drill_drive",
+   "stone_grain_judging"
+  ],
+  "requires_any": [
+   [
+    "sheet_copper_riveting",
+    "copper_casting"
+   ]
+  ],
+  "precedents": [],
+  "note": "Copper tube and sand abrasive drilled."
+ },
+ {
+  "id": "silver_cupellation",
+  "requires_all": [
+   "lead_smelting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ore_assaying"
+  ],
+  "conditions": {
+   "resources_known": "Lead"
+  },
+  "note": "Silver parted from smelted lead."
+ },
+ {
+  "id": "craft_order_queuing",
+  "requires_all": [
+   "full_time_specialists"
+  ],
+  "requires_any": [
+   [
+    "knotted_record_systems",
+    "clay_counting_tokens",
+    "token_envelopes"
+   ]
+  ],
+  "precedents": [],
+  "note": "Recorded orders queued by specialists."
+ },
+ {
+  "id": "bivalve_moulds",
+  "requires_all": [
+   "copper_casting",
+   "stone_grain_judging"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lost_wax_casting"
+  ],
+  "note": "Two carved stone halves close a mould."
+ },
+ {
+  "id": "meteoric_iron_working",
+  "requires_all": [
+   "native_copper_working"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sheet_copper_riveting"
+  ],
+  "conditions": {
+   "resources_known": "Meteoric iron"
+  },
+  "note": "Cold-working skills applied to meteoric iron."
+ },
+ {
+  "id": "task_matched_tool_selection",
+  "requires_all": [
+   "comparative_tool_trials"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Trial results match tool to task."
+ },
+ {
+  "id": "standard_unit_naming",
+  "requires_all": [
+   "standard_weight_sets",
+   "reference_vessel_sets"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Standard weights and volumes named."
+ },
+ {
+  "id": "lampblack_capture",
+  "requires_all": [
+   "seed_oil_pressing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mineral_pigment_preparation"
+  ],
+  "note": "Oil lamps give soot for pigment."
+ },
+ {
+  "id": "clay_levigation",
+  "requires_all": [
+   "clay_feel_judging"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lime_plastered_floors"
+  ],
+  "note": "Water settling refines judged clay."
+ },
+ {
+  "id": "temple_workshops",
+  "requires_all": [
+   "full_time_specialists",
+   "temple_common_storehouse"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "craft_quarters",
+   "temple_high_steward"
+  ],
+  "note": "Temple stores support supervised craft."
+ },
+ {
+  "id": "seasonal_craft_scheduling",
+  "requires_all": [
+   "seasonal_work_round",
+   "craft_order_queuing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Order queues fitted to seasons."
+ },
+ {
+  "id": "tin_smelting",
+  "requires_all": [
+   "copper_smelting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": "Tin"
+  },
+  "note": "Copper smelting methods applied to cassiterite."
+ },
+ {
+  "id": "graded_tool_retirement",
+  "requires_all": [
+   "scrap_reclamation_habits",
+   "comparative_tool_trials"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Wear grades decide tool scrapping."
+ },
+ {
+  "id": "copper_carpentry_tools",
+  "requires_all": [
+   "copper_casting",
+   "arsenical_copper"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sheet_copper_riveting"
+  ],
+  "note": "Harder copper keeps a working edge."
+ },
+ {
+  "id": "bronze_alloying",
+  "requires_all": [
+   "tin_smelting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "arsenical_copper"
+  ],
+  "note": "Tin added to copper in set proportion."
+ },
+ {
+  "id": "garment_pattern_cutting",
+  "requires_all": [
+   "template_based_sizing",
+   "plain_weaving"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bone_needle_sewing"
+  ],
+  "note": "Templates applied to cloth and hide."
+ },
+ {
+  "id": "cross_settlement_measure_agreement",
+  "requires_all": [
+   "standard_unit_naming"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "intervillage_tribute_reconciliation",
+   "proclaimed_standard_weights"
+  ],
+  "conditions": {
+   "min_settlements": 2
+  },
+  "note": "Named units agreed between settlements."
+ },
+ {
+  "id": "leather_goods_patterning",
+  "requires_all": [
+   "hide_tanning",
+   "garment_pattern_cutting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Pattern cutting applied to tanned leather."
+ },
+ {
+  "id": "closed_moulds",
+  "requires_all": [
+   "bivalve_moulds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lost_wax_casting"
+  ],
+  "note": "Bivalve moulds fully enclosed."
+ },
+ {
+  "id": "wool_felting_fulling",
+  "requires_all": [
+   "wool_spinning",
+   "plain_weaving"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Woven wool shrunk and felted."
+ },
+ {
+  "id": "goldsmith_filigree",
+  "requires_all": [
+   "sheet_copper_riveting",
+   "silver_cupellation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hard_soldering"
+  ],
+  "conditions": {
+   "resources_known": "Gold"
+  },
+  "note": "Sheet-metal skills applied to precious metals."
+ },
+ {
+  "id": "bronze_work_hardening",
+  "requires_all": [
+   "bronze_alloying"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hammering hardens bronze edges."
+ },
+ {
+  "id": "pot_bellows",
+  "requires_all": [
+   "copper_smelting",
+   "hide_tanning"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Leather bags replace blowpipes."
+ },
+ {
+  "id": "fiber_combing",
+  "requires_all": [
+   "wool_spinning"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Wool combed before spinning."
+ },
+ {
+  "id": "twill_weave_structures",
+  "requires_all": [
+   "plain_weaving"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fiber_combing",
+   "horizontal_ground_loom"
+  ],
+  "note": "Plain weave shed order varied."
+ },
+ {
+  "id": "glassmaking",
+  "requires_all": [
+   "faience"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lime_burning",
+   "pot_bellows"
+  ],
+  "note": "Faience glaze melted as free glass."
+ },
+ {
+  "id": "hard_soldering",
+  "requires_all": [
+   "goldsmith_filigree"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pot_bellows"
+  ],
+  "note": "Precious-metal work needs joining alloys."
+ },
+ {
+  "id": "palace_weaving_houses",
+  "requires_all": [
+   "temple_workshops",
+   "fixed_worker_rations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "twill_weave_structures"
+  ],
+  "conditions": {
+   "institutions_min": 0.6
+  },
+  "note": "Institutional workshops staffed by rationed weavers."
+ },
+ {
+  "id": "weighed_alloy_recipes",
+  "requires_all": [
+   "bronze_alloying",
+   "balance_beam_weights"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Balance beams fix alloy parts."
+ },
+ {
+  "id": "raised_bronze_vessels",
+  "requires_all": [
+   "bronze_work_hardening"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sheet_copper_riveting"
+  ],
+  "note": "Hammer-raising work-hardened bronze sheet."
+ },
+ {
+  "id": "peat_drying",
+  "requires_all": [
+   "fuelwood_rotation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dung_cake_fuel"
+  ],
+  "note": "Fuel pressure turns to cut peat."
+ },
+ {
+  "id": "standard_ingots",
+  "requires_all": [
+   "copper_casting",
+   "standard_weight_sets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weighed_alloy_recipes",
+   "down_the_line_exchange"
+  ],
+  "note": "Cast metal made to standard weights."
+ },
+ {
+  "id": "sulfur_purification",
+  "requires_all": [
+   "ore_assaying"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sickroom_fumigation"
+  ],
+  "conditions": {
+   "resources_known": "Sulfur"
+  },
+  "note": "Roasting knowledge applied to native sulfur."
+ },
+ {
+  "id": "shaft_furnaces",
+  "requires_all": [
+   "pot_bellows"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "refractory_body_trials"
+  ],
+  "note": "Bellows-fed tall furnaces with tuyeres."
+ },
+ {
+  "id": "alum_mordant_dyeing",
+  "requires_all": [
+   "textile_dye_extraction"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": "Alum"
+  },
+  "note": "Alum fixes plant dyes."
+ },
+ {
+  "id": "cored_socket_casting",
+  "requires_all": [
+   "closed_moulds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "socketed_spearheads"
+  ],
+  "note": "Clay core placed in closed mould."
+ },
+ {
+  "id": "ceramic_glaze_formulation",
+  "requires_all": [
+   "glassmaking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "faience",
+   "wheel_thrown_pottery"
+  ],
+  "note": "Glass chemistry applied to pottery."
+ },
+ {
+  "id": "refractory_body_trials",
+  "requires_all": [
+   "clay_levigation",
+   "shaft_furnaces"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Furnace heat demands tested clays."
+ },
+ {
+  "id": "ceramic_crucibles",
+  "requires_all": [
+   "refractory_body_trials"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Refractory bodies made into crucibles."
+ },
+ {
+  "id": "crucible_glass_melting",
+  "requires_all": [
+   "ceramic_crucibles",
+   "glassmaking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Glass melted in refractory crucibles."
+ },
+ {
+  "id": "core_formed_glass",
+  "requires_all": [
+   "crucible_glass_melting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Molten glass wound on a core."
+ },
+ {
+  "id": "tapestry_weaving",
+  "requires_all": [
+   "plain_weaving",
+   "textile_dye_extraction"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "twill_weave_structures",
+   "alum_mordant_dyeing"
+  ],
+  "note": "Dyed wefts packed on upright loom."
+ },
+ {
+  "id": "refractory_brick_firing",
+  "requires_all": [
+   "refractory_body_trials",
+   "kiln_fired_bricks"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Refractory clays fired as brick."
+ }
+]

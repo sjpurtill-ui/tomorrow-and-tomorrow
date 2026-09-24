@@ -1,0 +1,1117 @@
+[
+ {
+  "id": "common_ground_marking",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "named_landmark_lore"
+  ],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "hazard_landmark_memory",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "route_memory"
+  ],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "drainage",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "common_ground_marking",
+   "weather_sign_reading"
+  ],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "sightline_staking",
+  "requires_all": [
+   "common_ground_marking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Marked ground staked by sighting."
+ },
+ {
+  "id": "site_clearing_assessment",
+  "requires_all": [
+   "common_ground_marking",
+   "hazard_landmark_memory"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hazard memory guides site choice."
+ },
+ {
+  "id": "joinery",
+  "requires_all": [
+   "cordage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hafted_tools"
+  ],
+  "note": "Cord lashes notched poles."
+ },
+ {
+  "id": "well_siting",
+  "requires_all": [
+   "streambank_vegetation_watch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "turbidity_judging",
+   "drainage"
+  ],
+  "note": "Water-loving plants mark seepage."
+ },
+ {
+  "id": "clay_lined_storage_pits",
+  "requires_all": [
+   "clay_testing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "drainage"
+  ],
+  "conditions": {
+   "resources_known": "Clay"
+  },
+  "note": "Tested clay seals pits."
+ },
+ {
+  "id": "flood_mark_reading",
+  "requires_all": [
+   "hazard_landmark_memory"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Bank marks remembered as hazard."
+ },
+ {
+  "id": "adobe_wall_construction",
+  "requires_all": [
+   "clay_shaping"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "joinery",
+   "clay_lined_storage_pits"
+  ],
+  "conditions": {
+   "resources_known": "Clay"
+  },
+  "note": "Hand-shaped clay stacked as walls."
+ },
+ {
+  "id": "framed_construction",
+  "requires_all": [
+   "joinery",
+   "ground_stone_axes"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "woodland"
+  },
+  "note": "Axes fell posts; joints frame them."
+ },
+ {
+  "id": "wattle_and_daub_walls",
+  "requires_all": [
+   "framed_construction",
+   "basketry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "adobe_wall_construction"
+  ],
+  "note": "Woven panels infill the frame."
+ },
+ {
+  "id": "thatched_roofing",
+  "requires_all": [
+   "framed_construction",
+   "cordage"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Bundled reeds tied onto frames."
+ },
+ {
+  "id": "dry_stone_walls",
+  "requires_all": [
+   "stone_sorting",
+   "sightline_staking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Sorted stones laid along staked lines."
+ },
+ {
+  "id": "lined_well_shafts",
+  "requires_all": [
+   "well_siting"
+  ],
+  "requires_any": [
+   [
+    "wattle_and_daub_walls",
+    "framed_construction"
+   ]
+  ],
+  "precedents": [],
+  "note": "Sited wells lined against collapse."
+ },
+ {
+  "id": "flood_house_mounds",
+  "requires_all": [
+   "flood_mark_reading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "adobe_wall_construction"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Known flood heights set mound height."
+ },
+ {
+  "id": "stone_wall_footings",
+  "requires_all": [
+   "dry_stone_walls"
+  ],
+  "requires_any": [
+   [
+    "adobe_wall_construction",
+    "wattle_and_daub_walls"
+   ]
+  ],
+  "precedents": [],
+  "note": "Stone courses protect earthen walls."
+ },
+ {
+  "id": "flat_clay_roofs",
+  "requires_all": [
+   "framed_construction",
+   "adobe_wall_construction"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": "Beams carry packed clay."
+ },
+ {
+  "id": "mould_made_mudbricks",
+  "requires_all": [
+   "adobe_wall_construction",
+   "clay_tempering"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "notched_measuring_rods"
+  ],
+  "conditions": {
+   "resources_known": "Clay"
+  },
+  "note": "Chaff-tempered clay formed in moulds."
+ },
+ {
+  "id": "lime_plastered_floors",
+  "requires_all": [
+   "lime_burning"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Burnt lime spread as plaster."
+ },
+ {
+  "id": "wedges_and_levers",
+  "requires_all": [
+   "dry_stone_walls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rollers_and_runners",
+   "timber_seasoning"
+  ],
+  "note": "Heavy stone work needs leverage."
+ },
+ {
+  "id": "bitumen_sealing",
+  "requires_all": [
+   "mould_made_mudbricks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lime_plastered_floors"
+  ],
+  "conditions": {
+   "resources_known": "Bitumen"
+  },
+  "note": "Brick floors sealed with bitumen."
+ },
+ {
+  "id": "footing_soil_judging",
+  "requires_all": [
+   "stone_wall_footings",
+   "topsoil_depth_reading"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Soil depth read before footings."
+ },
+ {
+  "id": "refuge_point_designation",
+  "requires_all": [
+   "refuge_point_marking",
+   "flood_mark_reading"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Flood marks fix refuge points."
+ },
+ {
+  "id": "megalith_raising",
+  "requires_all": [
+   "wedges_and_levers",
+   "work_party_feasts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rollers_and_runners",
+   "hauling_chants"
+  ],
+  "conditions": {
+   "min_population": 100
+  },
+  "note": "Levers plus feast-paid crews raise stones."
+ },
+ {
+  "id": "seasonal_path_maintenance",
+  "requires_all": [
+   "trail_waymarking",
+   "seasonal_work_round"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Marked trails repaired on the round."
+ },
+ {
+  "id": "central_hall_houses",
+  "requires_all": [
+   "mould_made_mudbricks",
+   "flat_clay_roofs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Bricks and roofs allow multi-room plans."
+ },
+ {
+  "id": "river_supply_channels",
+  "requires_all": [
+   "drainage",
+   "flood_mark_reading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "task_captains"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Drainage reversed to bring river water."
+ },
+ {
+  "id": "bracing_inspection_rounds",
+  "requires_all": [
+   "framed_construction",
+   "task_captains"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rotating_inspection_duty"
+  ],
+  "note": "Captains inspect frames on rounds."
+ },
+ {
+  "id": "communal_upkeep_scheduling",
+  "requires_all": [
+   "seasonal_path_maintenance",
+   "slack_season_building"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Repairs assigned to slack seasons."
+ },
+ {
+  "id": "dwelling_site_orientation",
+  "requires_all": [
+   "sightline_staking",
+   "solstice_horizon_markers"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Solar sightings orient houses."
+ },
+ {
+  "id": "storm_response_drill",
+  "requires_all": [
+   "dawn_readiness_drill",
+   "hazard_landmark_memory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weather_sign_reading"
+  ],
+  "note": "Readiness drills adapted to storms."
+ },
+ {
+  "id": "flood_levees",
+  "requires_all": [
+   "flood_house_mounds",
+   "great_work_parties"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Mound building scaled by great parties."
+ },
+ {
+  "id": "shrine_terraces",
+  "requires_all": [
+   "mould_made_mudbricks",
+   "first_shrine_house"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "central_hall_houses"
+  ],
+  "note": "Shrines raised on brick terraces."
+ },
+ {
+  "id": "corner_squaring_method",
+  "requires_all": [
+   "sightline_staking",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cordage"
+  ],
+  "note": "Measured cord triangle squares corners."
+ },
+ {
+  "id": "public_space_allocation",
+  "requires_all": [
+   "common_ground_marking",
+   "public_stores"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "min_population": 150
+  },
+  "note": "Shared stores need reserved ground."
+ },
+ {
+  "id": "warning_call_relay",
+  "requires_all": [
+   "alarm_relay_signals",
+   "storm_response_drill"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Alarm relays used for storms."
+ },
+ {
+  "id": "courtyard_storerooms",
+  "requires_all": [
+   "central_hall_houses",
+   "stamp_seals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sealed_store_doors"
+  ],
+  "note": "Sealed rooms ranged round a court."
+ },
+ {
+  "id": "timber_post_beam_connections",
+  "requires_all": [
+   "framed_construction",
+   "copper_casting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timber_seasoning"
+  ],
+  "note": "Copper chisels cut mortises."
+ },
+ {
+  "id": "niched_brick_facades",
+  "requires_all": [
+   "mould_made_mudbricks",
+   "shrine_terraces"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Brick shrines given buttressed faces."
+ },
+ {
+  "id": "rainwater_cisterns",
+  "requires_all": [
+   "lime_plastered_floors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clay_lined_storage_pits",
+   "drainage"
+  ],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": "Lime plaster waterproofs stored rain."
+ },
+ {
+  "id": "stone_lined_drains",
+  "requires_all": [
+   "drainage",
+   "dry_stone_walls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_space_allocation"
+  ],
+  "note": "Drain ditches lined with stone."
+ },
+ {
+  "id": "wedge_and_fire_quarrying",
+  "requires_all": [
+   "wedges_and_levers",
+   "stone_grain_judging"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fire_setting_mining"
+  ],
+  "note": "Wedges split judged stone."
+ },
+ {
+  "id": "clay_pipe_forming",
+  "requires_all": [
+   "kiln_control",
+   "stone_lined_drains"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wheel_thrown_pottery",
+   "tournette"
+  ],
+  "note": "Kiln-fired clay replaces stone drain lining."
+ },
+ {
+  "id": "course_leveling_practice",
+  "requires_all": [
+   "rod_and_cord_leveling",
+   "mould_made_mudbricks"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Level rods keep brick courses true."
+ },
+ {
+  "id": "ground_bearing_assessment",
+  "requires_all": [
+   "footing_soil_judging"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "course_leveling_practice"
+  ],
+  "note": "Soil judging extended to loads."
+ },
+ {
+  "id": "post_disaster_damage_survey",
+  "requires_all": [
+   "bracing_inspection_rounds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "disaster_recovery_roles",
+   "storm_response_drill"
+  ],
+  "note": "Inspection rounds applied after disasters."
+ },
+ {
+  "id": "runoff_grade_reading",
+  "requires_all": [
+   "stone_lined_drains",
+   "rod_and_cord_leveling"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Levelling gives drains a set fall."
+ },
+ {
+  "id": "ceramic_pipe_firing_qualification",
+  "requires_all": [
+   "clay_pipe_forming",
+   "output_quality_sorting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Pipes graded after firing."
+ },
+ {
+  "id": "courtyard_houses",
+  "requires_all": [
+   "courtyard_storerooms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "corner_squaring_method"
+  ],
+  "note": "Storeroom plan adopted for houses."
+ },
+ {
+  "id": "load_path_reading",
+  "requires_all": [
+   "timber_post_beam_connections",
+   "ground_bearing_assessment"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Frame joints and soil read together."
+ },
+ {
+  "id": "shared_work_crew_rotation",
+  "requires_all": [
+   "labor_rotations",
+   "communal_upkeep_scheduling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rotating_heavy_tasks"
+  ],
+  "note": "Upkeep crews rotated in turns."
+ },
+ {
+  "id": "corbelled_vaults",
+  "requires_all": [
+   "dry_stone_walls",
+   "megalith_raising"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "load_path_reading"
+  ],
+  "note": "Stepped stones and heavy lifting span chambers."
+ },
+ {
+  "id": "post_storm_resource_pooling",
+  "requires_all": [
+   "storm_response_drill",
+   "public_stores"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mutual_aid_customs"
+  ],
+  "note": "Public stores opened after storms."
+ },
+ {
+  "id": "diversion_dams",
+  "requires_all": [
+   "river_supply_channels",
+   "flood_levees"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "runoff_grade_reading"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Channel and levee skills combined."
+ },
+ {
+  "id": "town_enclosure_walls",
+  "requires_all": [
+   "mould_made_mudbricks",
+   "great_work_parties"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ditch_palisades"
+  ],
+  "conditions": {
+   "min_population": 500
+  },
+  "note": "Mass brick laid by great parties."
+ },
+ {
+  "id": "herringbone_plano_convex_brick",
+  "requires_all": [
+   "mould_made_mudbricks",
+   "course_leveling_practice"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Levelled courses laid in herringbone."
+ },
+ {
+  "id": "kiln_fired_bricks",
+  "requires_all": [
+   "mould_made_mudbricks",
+   "kiln_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clay_pipe_forming",
+   "charcoal"
+  ],
+  "note": "Moulded bricks fired in kilns."
+ },
+ {
+  "id": "gypsum_mortar",
+  "requires_all": [
+   "lime_burning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lime_plastered_floors"
+  ],
+  "conditions": {
+   "resources_known": "Gypsum"
+  },
+  "note": "Calcining skill applied to gypsum."
+ },
+ {
+  "id": "dressed_stone_masonry",
+  "requires_all": [
+   "wedge_and_fire_quarrying",
+   "copper_carpentry_tools",
+   "corner_squaring_method"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Copper tools dress quarried squared blocks."
+ },
+ {
+  "id": "rammed_earth_construction",
+  "requires_all": [
+   "timber_seasoning",
+   "course_leveling_practice"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "adobe_wall_construction"
+  ],
+  "note": "Board forms rammed in level lifts."
+ },
+ {
+  "id": "stepped_stone_tombs",
+  "requires_all": [
+   "dressed_stone_masonry",
+   "great_work_parties"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wetted_track_sledging",
+   "chamber_tombs"
+  ],
+  "conditions": {
+   "institutions_min": 0.6
+  },
+  "note": "Dressed stone raised by organized crews."
+ },
+ {
+  "id": "public_works_priority_review",
+  "requires_all": [
+   "communal_upkeep_scheduling",
+   "problem_council_sessions"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Councils rank upkeep tasks."
+ },
+ {
+  "id": "structural_repair_triage",
+  "requires_all": [
+   "post_disaster_damage_survey",
+   "load_path_reading"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Damage ranked by load path."
+ },
+ {
+  "id": "seasonal_hazard_calendar",
+  "requires_all": [
+   "storm_response_drill",
+   "solar_year_reckoning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "flood_mark_reading"
+  ],
+  "note": "Hazards placed on the solar year."
+ },
+ {
+  "id": "lime_mortar",
+  "requires_all": [
+   "lime_burning",
+   "course_leveling_practice"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "gypsum_mortar"
+  ],
+  "note": "Lime bedded between levelled courses."
+ },
+ {
+  "id": "wedge_brick_well_lining",
+  "requires_all": [
+   "lined_well_shafts",
+   "kiln_fired_bricks"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Fired wedge bricks line shafts."
+ },
+ {
+  "id": "wadi_dams",
+  "requires_all": [
+   "diversion_dams",
+   "dressed_stone_masonry"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "dry"
+  },
+  "note": "Dressed stone faces a dam."
+ },
+ {
+  "id": "fired_roof_tiles",
+  "requires_all": [
+   "kiln_fired_bricks",
+   "timber_post_beam_connections"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Fired clay on pitched frames."
+ },
+ {
+  "id": "upper_storeys",
+  "requires_all": [
+   "timber_post_beam_connections",
+   "load_path_reading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "courtyard_houses"
+  ],
+  "note": "Joists carry storeys when loads understood."
+ },
+ {
+  "id": "bitumen_bedded_brick",
+  "requires_all": [
+   "bitumen_sealing",
+   "kiln_fired_bricks"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Fired brick set in bitumen."
+ },
+ {
+  "id": "covered_sewers",
+  "requires_all": [
+   "stone_lined_drains",
+   "kiln_fired_bricks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "urban_street_plans"
+  ],
+  "note": "Fired brick roofs lane drains."
+ },
+ {
+  "id": "rigid_pipe_bedding",
+  "requires_all": [
+   "ceramic_pipe_firing_qualification",
+   "runoff_grade_reading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "covered_sewers",
+   "water_trough_leveling"
+  ],
+  "note": "Tested pipes bedded to a levelled fall."
+ },
+ {
+  "id": "standard_brick_proportions",
+  "requires_all": [
+   "mould_made_mudbricks",
+   "standard_unit_naming"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "brick_quotas"
+  ],
+  "note": "Named units fix brick moulds."
+ },
+ {
+  "id": "masonry_bond_patterns",
+  "requires_all": [
+   "standard_brick_proportions",
+   "course_leveling_practice"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Proportioned bricks interlock in bonds."
+ },
+ {
+  "id": "urban_street_plans",
+  "requires_all": [
+   "public_space_allocation",
+   "corner_squaring_method"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "geometric_survey"
+  ],
+  "conditions": {
+   "min_population": 1000
+  },
+  "note": "Squared blocks laid out as a grid."
+ },
+ {
+  "id": "building_drainage_coordination",
+  "requires_all": [
+   "covered_sewers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "runoff_grade_reading",
+   "flat_clay_roofs"
+  ],
+  "note": "Roof water fed into sewers."
+ },
+ {
+  "id": "ventilated_granaries",
+  "requires_all": [
+   "raised_granaries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "store_airflow_arrangement",
+   "kiln_fired_bricks"
+  ],
+  "note": "Raised stores given air channels."
+ },
+ {
+  "id": "pitched_brick_vaults",
+  "requires_all": [
+   "masonry_bond_patterns",
+   "load_path_reading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "corbelled_vaults",
+   "gypsum_mortar"
+  ],
+  "note": "Leaning brick rings need bond and loads."
+ },
+ {
+  "id": "shaduf_water_lift",
+  "requires_all": [
+   "wedges_and_levers",
+   "irrigation_schedules"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "river_supply_channels"
+  ],
+  "note": "Lever lifts water for scheduled irrigation."
+ },
+ {
+  "id": "reed_mat_brick_layers",
+  "requires_all": [
+   "mould_made_mudbricks",
+   "woven_carriers",
+   "rope_laying"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stepped_temple_towers"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Mats and cables stabilize brick mass."
+ },
+ {
+  "id": "stepped_temple_towers",
+  "requires_all": [
+   "shrine_terraces",
+   "reed_mat_brick_layers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "kiln_fired_bricks",
+   "bitumen_bedded_brick"
+  ],
+  "conditions": {
+   "institutions_min": 0.6
+  },
+  "note": "Terraces stacked high with reinforced brick."
+ },
+ {
+  "id": "brick_mass_drain_shafts",
+  "requires_all": [
+   "stepped_temple_towers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "building_drainage_coordination"
+  ],
+  "note": "Towers drained through their core."
+ },
+ {
+  "id": "wooden_log_conduits",
+  "requires_all": [
+   "river_supply_channels",
+   "timber_seasoning"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": "woodland"
+  },
+  "note": "Hollowed logs carry channel water."
+ },
+ {
+  "id": "clay_pipe_socket_jointing",
+  "requires_all": [
+   "rigid_pipe_bedding",
+   "wheel_thrown_pottery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Wheel-formed sockets join bedded pipes."
+ },
+ {
+  "id": "timber_splice_connections",
+  "requires_all": [
+   "timber_post_beam_connections",
+   "copper_carpentry_tools"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Copper saws cut scarf joints."
+ },
+ {
+  "id": "light_wells",
+  "requires_all": [
+   "upper_storeys",
+   "courtyard_houses"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Tall houses need light shafts."
+ },
+ {
+  "id": "building_shading_design",
+  "requires_all": [
+   "dwelling_site_orientation",
+   "timber_post_beam_connections"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Oriented frames given eaves."
+ },
+ {
+  "id": "ceramic_pipe_fit_gauges",
+  "requires_all": [
+   "clay_pipe_socket_jointing",
+   "template_based_sizing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Templates gauge socket fit."
+ },
+ {
+  "id": "ashlar_masonry",
+  "requires_all": [
+   "dressed_stone_masonry",
+   "bronze_work_hardening"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plumb_line_sighting"
+  ],
+  "note": "Hard bronze tools fit mortarless courses."
+ },
+ {
+  "id": "mine_shoring",
+  "requires_all": [
+   "fire_setting_mining",
+   "timber_post_beam_connections"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Framing props deep galleries."
+ },
+ {
+  "id": "cistern_flushed_drains",
+  "requires_all": [
+   "rainwater_cisterns",
+   "building_drainage_coordination"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Cisterns flush coordinated drains."
+ },
+ {
+  "id": "timber_laced_walls",
+  "requires_all": [
+   "stone_wall_footings",
+   "timber_post_beam_connections"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timber_splice_connections",
+   "post_disaster_damage_survey"
+  ],
+  "note": "Timber ties rubble after quake damage."
+ },
+ {
+  "id": "colonnaded_porticoes",
+  "requires_all": [
+   "dressed_stone_masonry",
+   "timber_post_beam_connections"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ashlar_masonry",
+   "urban_street_plans"
+  ],
+  "note": "Stone bases carry timber colonnades."
+ }
+]

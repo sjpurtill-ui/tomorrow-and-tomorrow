@@ -1,0 +1,1131 @@
+[
+ {
+  "id": "route_memory",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Starting knowledge: routes kept as spoken story."
+ },
+ {
+  "id": "relay_call_stations",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "watch_rotation"
+  ],
+  "note": "Starting knowledge: calls passed camp to camp."
+ },
+ {
+  "id": "counting_words",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "route_memory"
+  ],
+  "note": "Starting knowledge: fingers and number words."
+ },
+ {
+  "id": "weather_sign_reading",
+  "requires_all": [
+   "seasonal_patterns"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Seasonal observation sharpened into sky signs."
+ },
+ {
+  "id": "novice_task_shadowing",
+  "requires_all": [],
+  "requires_any": [
+   [
+    "paired_task_assignment",
+    "household_task_division"
+   ]
+  ],
+  "precedents": [],
+  "note": "Learning by working beside an assigned elder."
+ },
+ {
+  "id": "tallies",
+  "requires_all": [
+   "counting_words"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Counted numbers cut as notches."
+ },
+ {
+  "id": "distance_call_signals",
+  "requires_all": [
+   "relay_call_stations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "alarm_relay_signals"
+  ],
+  "note": "Relay calls given fixed carrying tones."
+ },
+ {
+  "id": "cairn_sightline_marking",
+  "requires_all": [
+   "route_memory"
+  ],
+  "requires_any": [
+   [
+    "sightline_staking",
+    "trail_waymarking"
+   ]
+  ],
+  "precedents": [
+   "landmark_route_naming"
+  ],
+  "note": "Remembered routes fixed with stacked stones."
+ },
+ {
+  "id": "watch_duty_rotation",
+  "requires_all": [
+   "watch_rotation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "labor_rotations"
+  ],
+  "note": "Informal watch becomes standing duty."
+ },
+ {
+  "id": "moon_counting",
+  "requires_all": [
+   "counting_words",
+   "tallies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weather_sign_reading"
+  ],
+  "note": "Nights tallied between full moons."
+ },
+ {
+  "id": "knot_tally_cross_check",
+  "requires_all": [
+   "tallies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "witnessed_agreement_customs",
+   "household_councils"
+  ],
+  "note": "Tallies compared between households."
+ },
+ {
+  "id": "repeated_recitation_training",
+  "requires_all": [
+   "novice_task_shadowing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "oral_epics"
+  ],
+  "note": "Shadowed craft rules drilled aloud."
+ },
+ {
+  "id": "childrens_question_circles",
+  "requires_all": [
+   "curious_questioning_custom"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "shared_hearth_gatherings"
+  ],
+  "note": "Praised questioning becomes a gathering habit."
+ },
+ {
+  "id": "solstice_horizon_markers",
+  "requires_all": [
+   "moon_counting"
+  ],
+  "requires_any": [
+   [
+    "cairn_sightline_marking",
+    "sightline_staking"
+   ]
+  ],
+  "precedents": [
+   "seasonal_patterns"
+  ],
+  "note": "Moon counts pinned to horizon sunrise points."
+ },
+ {
+  "id": "standard_measures",
+  "requires_all": [
+   "counting_words"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "notched_measuring_rods",
+   "paired_measure_checking"
+  ],
+  "note": "Body units counted and agreed."
+ },
+ {
+  "id": "mnemonic_verse_encoding",
+  "requires_all": [
+   "repeated_recitation_training"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "oral_epics",
+   "genealogical_recitation"
+  ],
+  "note": "Recitation drills set to verse."
+ },
+ {
+  "id": "owner_marks",
+  "requires_all": [],
+  "requires_any": [
+   [
+    "clay_shaping",
+    "woven_carriers"
+   ]
+  ],
+  "precedents": [
+   "kin_body_ornament",
+   "trade_partner_tokens",
+   "lineage_land_tenure"
+  ],
+  "note": "Kin marks moved onto pots and bundles."
+ },
+ {
+  "id": "paced_distance_counting",
+  "requires_all": [
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "route_memory",
+   "tallies"
+  ],
+  "note": "Paces counted as a standard distance."
+ },
+ {
+  "id": "landmark_triangulation",
+  "requires_all": [
+   "cairn_sightline_marking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "solstice_horizon_markers"
+  ],
+  "note": "Two marked sightlines aligned."
+ },
+ {
+  "id": "clay_counting_tokens",
+  "requires_all": [
+   "tallies",
+   "clay_shaping"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pit_firing",
+   "owner_marks",
+   "seasonal_tribute_counts"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Clay"
+   ]
+  },
+  "note": "Tallies turned into shaped clay tokens for goods."
+ },
+ {
+  "id": "specialist_task_assignment",
+  "requires_all": [
+   "part_time_specialists"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "skill_recognition"
+  ],
+  "note": "Recognized specialists given one craft's problems."
+ },
+ {
+  "id": "drum_relay_signals",
+  "requires_all": [
+   "distance_call_signals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bone_flutes_drums"
+  ],
+  "note": "Drums carry relay calls farther."
+ },
+ {
+  "id": "focused_error_review",
+  "requires_all": [
+   "specialist_task_assignment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "kiln_control",
+   "scrap_reclamation_habits"
+  ],
+  "note": "Specialists examine failed batches together."
+ },
+ {
+  "id": "stamp_seals",
+  "requires_all": [
+   "owner_marks"
+  ],
+  "requires_any": [
+   [
+    "ground_stone_axes",
+    "bow_drill_drive"
+   ]
+  ],
+  "precedents": [
+   "clay_counting_tokens"
+  ],
+  "note": "Owner marks carved for pressing into clay."
+ },
+ {
+  "id": "material_accounting",
+  "requires_all": [
+   "clay_counting_tokens",
+   "public_stores"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_tribute_counts"
+  ],
+  "note": "Tokens applied to common store accounts."
+ },
+ {
+  "id": "paired_record_witnessing",
+  "requires_all": [
+   "material_accounting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "knot_tally_cross_check",
+   "witnessed_agreement_customs"
+  ],
+  "note": "Witness custom applied to store records."
+ },
+ {
+  "id": "solar_year_reckoning",
+  "requires_all": [
+   "moon_counting",
+   "solstice_horizon_markers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crop_calendars"
+  ],
+  "note": "Moons fitted between solstice markers."
+ },
+ {
+  "id": "fire_smoke_signaling",
+  "requires_all": [
+   "distance_call_signals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cairn_sightline_marking",
+   "hilltop_refuges",
+   "drum_relay_signals"
+  ],
+  "note": "Signals carried by sight over longer spans."
+ },
+ {
+  "id": "cross_bearing_confirmation",
+  "requires_all": [
+   "landmark_triangulation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paced_distance_counting"
+  ],
+  "note": "Second sightline confirms a position."
+ },
+ {
+  "id": "knotted_record_systems",
+  "requires_all": [
+   "tallies",
+   "cordage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "knot_tally_cross_check",
+   "mnemonic_verse_encoding"
+  ],
+  "note": "Tallies tied into cords."
+ },
+ {
+  "id": "marked_storage_registers",
+  "requires_all": [
+   "material_accounting",
+   "stamp_seals"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Sealed stores tagged with counters."
+ },
+ {
+  "id": "token_envelopes",
+  "requires_all": [
+   "clay_counting_tokens",
+   "stamp_seals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paired_record_witnessing",
+   "pit_firing"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Clay"
+   ]
+  },
+  "note": "Tokens sealed inside clay balls to prevent tampering."
+ },
+ {
+  "id": "rotating_inspection_duty",
+  "requires_all": [
+   "watch_duty_rotation"
+  ],
+  "requires_any": [
+   [
+    "marked_storage_registers",
+    "rotating_stewardship"
+   ]
+  ],
+  "precedents": [],
+  "note": "Watch rotation applied to stores."
+ },
+ {
+  "id": "star_rise_markers",
+  "requires_all": [
+   "solar_year_reckoning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "named_star_figures",
+   "wayfinding_stars"
+  ],
+  "note": "Star risings mark points in the solar year."
+ },
+ {
+  "id": "standardized_gesture_code",
+  "requires_all": [
+   "boundary_exchange_sites"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "counting_words",
+   "barter_equivalence_custom"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Hand signs bridge languages at exchange sites."
+ },
+ {
+  "id": "boundary_sighting_marks",
+  "requires_all": [
+   "cross_bearing_confirmation",
+   "field_boundary_markers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "boundary_marker_surveys"
+  ],
+  "note": "Boundary stones fixed by sightlines."
+ },
+ {
+  "id": "problem_council_sessions",
+  "requires_all": [
+   "focused_error_review"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "elder_consultation_rites",
+   "full_time_specialists"
+  ],
+  "note": "Error reviews become standing councils."
+ },
+ {
+  "id": "tens_sixties_bundling",
+  "requires_all": [
+   "clay_counting_tokens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "knotted_record_systems",
+   "standard_measures",
+   "material_accounting"
+  ],
+  "note": "Token counts grouped into fixed bundles."
+ },
+ {
+  "id": "impressed_number_tablets",
+  "requires_all": [
+   "token_envelopes",
+   "tens_sixties_bundling"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": [
+    "Clay"
+   ]
+  },
+  "note": "Envelope impressions replace the tokens inside."
+ },
+ {
+  "id": "seasonal_news_gathering",
+  "requires_all": [],
+  "requires_any": [
+   [
+    "traveling_storyteller_exchange",
+    "trade_partner_memory",
+    "down_the_line_exchange"
+   ]
+  ],
+  "precedents": [
+   "mnemonic_verse_encoding",
+   "council_messenger_duty"
+  ],
+  "note": "Travelers questioned on a fixed list."
+ },
+ {
+  "id": "rod_and_cord_leveling",
+  "requires_all": [
+   "standard_measures",
+   "cordage"
+  ],
+  "requires_any": [
+   [
+    "flood_levees",
+    "river_supply_channels"
+   ]
+  ],
+  "precedents": [
+   "notched_measuring_rods",
+   "corner_squaring_method"
+  ],
+  "note": "Earthworks demand measured levels."
+ },
+ {
+  "id": "attention_priority_signals",
+  "requires_all": [
+   "task_captains"
+  ],
+  "requires_any": [
+   [
+    "owner_marks",
+    "shared_work_signals"
+   ]
+  ],
+  "precedents": [
+   "craft_order_queuing"
+  ],
+  "note": "Captains mark which work comes first."
+ },
+ {
+  "id": "pictographic_records",
+  "requires_all": [
+   "impressed_number_tablets"
+  ],
+  "requires_any": [
+   [
+    "temple_common_storehouse",
+    "grain_levy_accounting"
+   ]
+  ],
+  "precedents": [
+   "owner_marks",
+   "stamp_seals",
+   "shrine_wall_painting"
+  ],
+  "conditions": {
+   "institutions_min": 0.3
+  },
+  "note": "Store administration adds picture-signs to number tablets."
+ },
+ {
+  "id": "cylinder_seals",
+  "requires_all": [
+   "stamp_seals"
+  ],
+  "requires_any": [
+   [
+    "bow_drill_drive",
+    "tube_drilled_stone_vessels"
+   ]
+  ],
+  "precedents": [
+   "pictographic_records"
+  ],
+  "note": "Stamp seal drilled and rolled."
+ },
+ {
+  "id": "clay_record_tablets",
+  "requires_all": [
+   "pictographic_records"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clay_levigation"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Clay"
+   ]
+  },
+  "note": "Picture-signs written on flat tablets."
+ },
+ {
+  "id": "standard_sign_lists",
+  "requires_all": [
+   "clay_record_tablets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "repeated_recitation_training"
+  ],
+  "note": "Signs fixed by copied lists."
+ },
+ {
+  "id": "scribal_apprenticeship",
+  "requires_all": [
+   "standard_sign_lists"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mentored_task_learning"
+  ],
+  "note": "Sign lists taught master to pupil."
+ },
+ {
+  "id": "agreed_signal_codes",
+  "requires_all": [],
+  "requires_any": [
+   [
+    "fire_smoke_signaling",
+    "drum_relay_signals"
+   ]
+  ],
+  "precedents": [
+   "standardized_gesture_code",
+   "signal_command_drill"
+  ],
+  "note": "Signal meanings fixed in advance."
+ },
+ {
+  "id": "archive_shelving_order",
+  "requires_all": [
+   "clay_record_tablets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standard_sign_lists",
+   "courtyard_storerooms",
+   "marked_storage_registers"
+  ],
+  "note": "Accumulated tablets sorted by subject."
+ },
+ {
+  "id": "balance_beam_weights",
+  "requires_all": [
+   "standard_weight_sets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standard_measures",
+   "public_grain_weighing"
+  ],
+  "note": "Weight sets checked on a beam balance."
+ },
+ {
+  "id": "messenger_relay_stations",
+  "requires_all": [
+   "runner_relays_between_work_sites"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "graded_roads",
+   "paramount_chiefdom"
+  ],
+  "conditions": {
+   "min_settlements": 3
+  },
+  "note": "Runner relays fixed at staged posts."
+ },
+ {
+  "id": "sealed_tablet_contracts",
+  "requires_all": [
+   "clay_record_tablets",
+   "cylinder_seals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "witnessed_agreement_customs",
+   "formal_oath_taking"
+  ],
+  "note": "Witnessed agreements written and sealed."
+ },
+ {
+  "id": "dedicated_apprentice_observation",
+  "requires_all": [
+   "mentored_task_learning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "scribal_apprenticeship",
+   "journeyman_placement"
+  ],
+  "note": "Mentoring given scheduled observation."
+ },
+ {
+  "id": "phonetic_notation",
+  "requires_all": [
+   "standard_sign_lists"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "genealogical_recitation",
+   "theophoric_names"
+  ],
+  "note": "Fixed signs reused for sounds to spell names."
+ },
+ {
+  "id": "plumb_line_sighting",
+  "requires_all": [
+   "rod_and_cord_leveling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "corner_squaring_method",
+   "dressed_stone_masonry"
+  ],
+  "note": "Levelling cord hung as a vertical."
+ },
+ {
+  "id": "star_rising_civil_year",
+  "requires_all": [
+   "star_rise_markers",
+   "clay_record_tablets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "flood_mark_reading"
+  ],
+  "note": "Star-rise year counted in written days."
+ },
+ {
+  "id": "written_lore_tablets",
+  "requires_all": [
+   "phonetic_notation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "oral_epics",
+   "mnemonic_verse_encoding"
+  ],
+  "note": "Sound-signs let recited lore be written."
+ },
+ {
+  "id": "written_apprentice_instructions",
+  "requires_all": [
+   "phonetic_notation",
+   "dedicated_apprentice_observation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Observed lessons written down."
+ },
+ {
+  "id": "workshop_standards",
+  "requires_all": [
+   "output_quality_sorting"
+  ],
+  "requires_any": [
+   [
+    "clay_record_tablets",
+    "stamp_seals"
+   ]
+  ],
+  "precedents": [
+   "temple_workshops",
+   "template_based_sizing",
+   "focused_error_review"
+  ],
+  "note": "Quality sorting given named, recorded grades."
+ },
+ {
+  "id": "formal_archives",
+  "requires_all": [
+   "archive_shelving_order"
+  ],
+  "requires_any": [
+   [
+    "temple_high_steward",
+    "kingship"
+   ]
+  ],
+  "precedents": [],
+  "conditions": {
+   "institutions_min": 0.4
+  },
+  "note": "Shelved tablets kept by an institution."
+ },
+ {
+  "id": "cross_referenced_archives",
+  "requires_all": [
+   "formal_archives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standard_sign_lists"
+  ],
+  "note": "Archives linked by subject and name."
+ },
+ {
+  "id": "formal_chronicle_keeping",
+  "requires_all": [
+   "phonetic_notation"
+  ],
+  "requires_any": [
+   [
+    "kingship",
+    "temple_high_steward"
+   ]
+  ],
+  "precedents": [
+   "disaster_memory_markers",
+   "genealogical_recitation",
+   "solar_year_reckoning"
+  ],
+  "note": "Years named after events and written."
+ },
+ {
+  "id": "public_schools",
+  "requires_all": [
+   "scribal_apprenticeship",
+   "formal_archives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "repeated_recitation_training"
+  ],
+  "conditions": {
+   "institutions_min": 0.4
+  },
+  "note": "Apprenticeship gathered into tablet houses."
+ },
+ {
+  "id": "sealed_tablet_letters",
+  "requires_all": [
+   "sealed_tablet_contracts",
+   "phonetic_notation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "messenger_relay_stations"
+  ],
+  "note": "Sealed tablets carry spelled messages."
+ },
+ {
+  "id": "intercalated_calendar",
+  "requires_all": [
+   "solar_year_reckoning",
+   "clay_record_tablets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "star_rising_civil_year",
+   "grain_levy_accounting"
+  ],
+  "note": "Written moon year corrected by an added month."
+ },
+ {
+  "id": "bilingual_sign_lists",
+  "requires_all": [
+   "standard_sign_lists",
+   "phonetic_notation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "trade_colonies"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Sign lists paired with a foreign tongue."
+ },
+ {
+  "id": "sworn_interpreters",
+  "requires_all": [
+   "formal_oath_taking"
+  ],
+  "requires_any": [
+   [
+    "bilingual_sign_lists",
+    "trade_colonies"
+   ]
+  ],
+  "precedents": [],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Interpreters bound by oath."
+ },
+ {
+  "id": "geometric_survey",
+  "requires_all": [
+   "rod_and_cord_leveling",
+   "boundary_marker_surveys"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "corner_squaring_method"
+  ],
+  "note": "Measured cords applied to field bounds."
+ },
+ {
+  "id": "water_trough_leveling",
+  "requires_all": [
+   "rod_and_cord_leveling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plumb_line_sighting"
+  ],
+  "note": "Water surface used as the level."
+ },
+ {
+  "id": "scribal_specialties",
+  "requires_all": [
+   "public_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "geometric_survey",
+   "sealed_tablet_letters",
+   "grain_levy_accounting"
+  ],
+  "note": "Schooled scribes split by task."
+ },
+ {
+  "id": "area_volume_rules",
+  "requires_all": [
+   "geometric_survey",
+   "tens_sixties_bundling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grain_levy_accounting"
+  ],
+  "note": "Survey numbers turned into area and volume rules."
+ },
+ {
+  "id": "sightline_corridor_marking",
+  "requires_all": [
+   "boundary_sighting_marks"
+  ],
+  "requires_any": [
+   [
+    "fire_smoke_signaling",
+    "gate_watchtowers"
+   ]
+  ],
+  "precedents": [
+   "agreed_signal_codes"
+  ],
+  "note": "Signal sightlines kept clear."
+ },
+ {
+  "id": "star_hour_tables",
+  "requires_all": [
+   "star_rising_civil_year"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "watch_duty_rotation",
+   "formal_archives"
+  ],
+  "note": "Star risings divide the night."
+ },
+ {
+  "id": "reciprocal_tables",
+  "requires_all": [
+   "tens_sixties_bundling",
+   "public_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "area_volume_rules"
+  ],
+  "note": "School computation of bundled numbers."
+ },
+ {
+  "id": "tablet_colophons",
+  "requires_all": [
+   "formal_archives",
+   "phonetic_notation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "formal_chronicle_keeping"
+  ],
+  "note": "Archived tablets signed and dated."
+ },
+ {
+  "id": "scribal_copying_tests",
+  "requires_all": [
+   "public_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "workshop_standards",
+   "written_apprentice_instructions"
+  ],
+  "note": "Schools examine copying."
+ },
+ {
+  "id": "place_value",
+  "requires_all": [
+   "reciprocal_tables"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "area_volume_rules"
+  ],
+  "note": "Tables expose positional sixties."
+ },
+ {
+  "id": "fractional_quantities",
+  "requires_all": [
+   "reciprocal_tables"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "balance_beam_weights",
+   "area_volume_rules"
+  ],
+  "note": "Reciprocals give unit fractions."
+ },
+ {
+  "id": "worked_problem_tablets",
+  "requires_all": [
+   "area_volume_rules",
+   "scribal_copying_tests"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "place_value"
+  ],
+  "note": "Rules taught through worked examples."
+ },
+ {
+  "id": "regional_maps",
+  "requires_all": [
+   "geometric_survey",
+   "clay_record_tablets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cross_bearing_confirmation",
+   "boundary_sighting_marks",
+   "urban_street_plans"
+  ],
+  "note": "Survey drawn to scale on clay."
+ },
+ {
+  "id": "square_root_tables",
+  "requires_all": [
+   "place_value"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "area_volume_rules"
+  ],
+  "note": "Place value lets squares be tabulated."
+ },
+ {
+  "id": "prearranged_beacon_chains",
+  "requires_all": [
+   "agreed_signal_codes",
+   "sightline_corridor_marking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "border_fortress_chains"
+  ],
+  "note": "Coded beacons on cleared corridors."
+ },
+ {
+  "id": "consonantal_alphabet",
+  "requires_all": [
+   "phonetic_notation"
+  ],
+  "requires_any": [
+   [
+    "bilingual_sign_lists",
+    "sworn_interpreters"
+   ]
+  ],
+  "precedents": [],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Borrowed sound-signs reduced to consonants."
+ },
+ {
+  "id": "dated_omen_records",
+  "requires_all": [
+   "formal_chronicle_keeping"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "offering_omens",
+   "star_hour_tables",
+   "named_star_figures"
+  ],
+  "note": "Sky omens logged by year name."
+ },
+ {
+  "id": "shadow_clock",
+  "requires_all": [
+   "solar_year_reckoning",
+   "plumb_line_sighting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "star_hour_tables"
+  ],
+  "note": "Plumb gnomon divides the day."
+ },
+ {
+  "id": "outflow_water_clock",
+  "requires_all": [
+   "star_hour_tables",
+   "fractional_quantities"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "shadow_clock",
+   "wheel_thrown_pottery"
+  ],
+  "note": "Measured outflow keeps night hours."
+ },
+ {
+  "id": "checked_master_copies",
+  "requires_all": [
+   "tablet_colophons",
+   "scribal_copying_tests"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Colophons and copy tests certify key texts."
+ }
+]

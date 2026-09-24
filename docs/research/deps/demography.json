@@ -1,0 +1,828 @@
+[
+ {
+  "id": "lactational_spacing_awareness",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Starting knowledge"
+ },
+ {
+  "id": "labor_position_customs",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Starting knowledge"
+ },
+ {
+  "id": "named_descent_lines",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "genealogical_recitation"
+  ],
+  "note": "Starting kin knowledge"
+ },
+ {
+  "id": "fever_watch_customs",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "sickness_pattern_memory"
+  ],
+  "note": "Starting infant care"
+ },
+ {
+  "id": "sleeping_area_rotation",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "hearth_heat_retention"
+  ],
+  "note": "Starting household knowledge"
+ },
+ {
+  "id": "infant_swaddling_practice",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "cordage"
+  ],
+  "note": "Starting infant care"
+ },
+ {
+  "id": "birth_spacing_customs",
+  "requires_all": [
+   "lactational_spacing_awareness"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Nursing knowledge becomes custom"
+ },
+ {
+  "id": "postpartum_seclusion_care",
+  "requires_all": [
+   "labor_position_customs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Birth customs extended"
+ },
+ {
+  "id": "infant_carrying_slings",
+  "requires_all": [
+   "cordage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "infant_swaddling_practice"
+  ],
+  "note": "Cord and hide carriers"
+ },
+ {
+  "id": "shared_childcare",
+  "requires_all": [
+   "household_task_division"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "shared_hearth_gatherings"
+  ],
+  "note": "Tasks shared across households"
+ },
+ {
+  "id": "extended_family_room_division",
+  "requires_all": [
+   "sleeping_area_rotation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "framed_construction"
+  ],
+  "note": "Sleeping places formalised"
+ },
+ {
+  "id": "lineage_exogamy",
+  "requires_all": [
+   "named_descent_lines"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Lines must be named first"
+ },
+ {
+  "id": "mouths_against_store",
+  "requires_all": [
+   "tallies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "food_drying",
+   "counting_words"
+  ],
+  "note": "Counting applied to stores"
+ },
+ {
+  "id": "patrilocal_residence",
+  "requires_all": [
+   "lineage_exogamy"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Out-marriage sets residence rule"
+ },
+ {
+  "id": "kin_care_widows_orphans",
+  "requires_all": [
+   "named_descent_lines",
+   "shared_childcare"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Kin obligations"
+ },
+ {
+  "id": "maternal_recovery",
+  "requires_all": [
+   "postpartum_seclusion_care",
+   "dietary_healing_regimens"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Rest plus special foods"
+ },
+ {
+  "id": "household_space_planning",
+  "requires_all": [
+   "extended_family_room_division"
+  ],
+  "requires_any": [
+   [
+    "adobe_wall_construction",
+    "framed_construction"
+   ]
+  ],
+  "precedents": [],
+  "note": "Built houses allow planned space"
+ },
+ {
+  "id": "village_marriage_alliances",
+  "requires_all": [
+   "lineage_exogamy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reciprocal_gift_exchange"
+  ],
+  "conditions": {
+   "min_settlements": 2
+  },
+  "note": "Needs another village"
+ },
+ {
+  "id": "elder_care_by_children",
+  "requires_all": [
+   "kin_care_widows_orphans",
+   "patrilocal_residence"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Residence rule fixes carers"
+ },
+ {
+  "id": "winter_herder_return",
+  "requires_all": [
+   "animal_taming"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "transhumance"
+  ],
+  "note": "Herds move seasonally"
+ },
+ {
+  "id": "bride_wealth_gifts",
+  "requires_all": [
+   "village_marriage_alliances",
+   "animal_taming"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Livestock as marriage gifts"
+ },
+ {
+  "id": "captive_adoption",
+  "requires_all": [
+   "named_descent_lines",
+   "kin_care_widows_orphans"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ambush_raids"
+  ],
+  "note": "Lineage absorbs outsiders"
+ },
+ {
+  "id": "daughter_hamlets",
+  "requires_all": [
+   "mouths_against_store",
+   "lineage_land_tenure"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Crowding judged against land"
+ },
+ {
+  "id": "lean_year_dispersal",
+  "requires_all": [
+   "village_marriage_alliances"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mouths_against_store"
+  ],
+  "note": "Kin elsewhere absorb mouths"
+ },
+ {
+  "id": "infant_feeding_schedules",
+  "requires_all": [
+   "birth_spacing_customs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Nursing customs regularised"
+ },
+ {
+  "id": "seasonal_conception_timing",
+  "requires_all": [
+   "birth_spacing_customs",
+   "crop_calendars"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mouths_against_store"
+  ],
+  "note": "Births timed to harvest"
+ },
+ {
+  "id": "cord_afterbirth_handling",
+  "requires_all": [
+   "birth_attendants"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cordage"
+  ],
+  "note": "Attendants fix birth steps"
+ },
+ {
+  "id": "room_allocation_by_size",
+  "requires_all": [
+   "household_space_planning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harvest_headcount"
+  ],
+  "note": "Space divided by headcount"
+ },
+ {
+  "id": "harvest_headcount",
+  "requires_all": [
+   "mouths_against_store",
+   "cooperative_harvest_gatherings"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "People counted when gathered"
+ },
+ {
+  "id": "new_household_plots",
+  "requires_all": [
+   "lineage_land_tenure",
+   "field_boundary_markers"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Marked land granted"
+ },
+ {
+  "id": "newcomer_host_season",
+  "requires_all": [
+   "captive_adoption",
+   "guest_host_reciprocity"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hosting customs for incomers"
+ },
+ {
+  "id": "weaning_food_softening",
+  "requires_all": [
+   "infant_feeding_schedules",
+   "food_pounding_mortars"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pulse_splitting"
+  ],
+  "note": "Pounded soft foods for infants"
+ },
+ {
+  "id": "interval_weaning_practice",
+  "requires_all": [
+   "weaning_food_softening"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cereal_dehulling",
+   "food_steaming_vessels"
+  ],
+  "note": "Gruel stretches weaning"
+ },
+ {
+  "id": "breech_repositioning_technique",
+  "requires_all": [
+   "cord_afterbirth_handling"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Attendant skill deepens"
+ },
+ {
+  "id": "seasonal_sleeping_arrangements",
+  "requires_all": [
+   "room_allocation_by_size"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sleeping_area_rotation"
+  ],
+  "note": "Allocated rooms shift seasonally"
+ },
+ {
+  "id": "newcomer_intermarriage",
+  "requires_all": [
+   "newcomer_host_season",
+   "lineage_exogamy"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hosted incomers marry in"
+ },
+ {
+  "id": "satellite_hamlets",
+  "requires_all": [
+   "daughter_hamlets",
+   "new_household_plots"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "min_settlements": 3
+  },
+  "note": "Repeated budding around centre"
+ },
+ {
+  "id": "hearth_hazard_proofing",
+  "requires_all": [
+   "shared_childcare"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tool_hazard_awareness"
+  ],
+  "note": "Watched toddlers kept from fire"
+ },
+ {
+  "id": "sibling_age_gap_norms",
+  "requires_all": [
+   "birth_spacing_customs",
+   "interval_weaning_practice"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Weaning sets the gap"
+ },
+ {
+  "id": "obstructed_labor_recognition",
+  "requires_all": [
+   "breech_repositioning_technique"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Attendant experience accumulates"
+ },
+ {
+  "id": "seasonal_storage_sleeping_swap",
+  "requires_all": [
+   "seasonal_sleeping_arrangements"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "root_cellars"
+  ],
+  "note": "Stores and beds share rooms"
+ },
+ {
+  "id": "famine_refugee_hosting",
+  "requires_all": [
+   "lean_year_dispersal",
+   "newcomer_host_season"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "min_settlements": 2
+  },
+  "note": "Hosting scaled to whole villages"
+ },
+ {
+  "id": "hearth_counts",
+  "requires_all": [
+   "harvest_headcount"
+  ],
+  "requires_any": [
+   [
+    "clay_counting_tokens",
+    "knotted_record_systems"
+   ]
+  ],
+  "precedents": [],
+  "note": "Counting needs a record medium"
+ },
+ {
+  "id": "carrying_capacity_awareness",
+  "requires_all": [
+   "hearth_counts",
+   "soil_exhaustion_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plot_yield_memory"
+  ],
+  "note": "Counts compared with yields"
+ },
+ {
+  "id": "kin_wards",
+  "requires_all": [
+   "named_descent_lines",
+   "new_household_plots"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_space_allocation"
+  ],
+  "note": "Plots grouped by lineage"
+ },
+ {
+  "id": "childhood_illness_recognition",
+  "requires_all": [
+   "fever_watch_customs",
+   "symptom_triage_customs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sickness_pattern_memory"
+  ],
+  "note": "Triage applied to children"
+ },
+ {
+  "id": "kin_fostering_networks",
+  "requires_all": [
+   "lean_year_dispersal",
+   "interval_weaning_practice"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "kin_care_widows_orphans"
+  ],
+  "note": "Weaned children sent to kin"
+ },
+ {
+  "id": "hemorrhage_control_herbs",
+  "requires_all": [
+   "herbal_classification",
+   "obstructed_labor_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Healing plants in birth care"
+ },
+ {
+  "id": "multigenerational_household_norms",
+  "requires_all": [
+   "elder_care_by_children",
+   "room_allocation_by_size"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Elders housed by rule"
+ },
+ {
+  "id": "protective_birth_amulets",
+  "requires_all": [
+   "birth_attendants",
+   "ancestor_figurines"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stamp_seals"
+  ],
+  "note": "Carved charms for birth"
+ },
+ {
+  "id": "rural_urban_migration",
+  "requires_all": [
+   "satellite_hamlets",
+   "tributary_villages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "full_time_specialists",
+   "craft_quarters"
+  ],
+  "conditions": {
+   "min_settlements": 3
+  },
+  "note": "Central place draws villagers"
+ },
+ {
+  "id": "childhood_growth_milestones",
+  "requires_all": [
+   "childhood_illness_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "solar_year_reckoning"
+  ],
+  "note": "Children judged by age"
+ },
+ {
+  "id": "grandmaternal_birth_counsel",
+  "requires_all": [
+   "seasonal_conception_timing",
+   "multigenerational_household_norms"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Resident elders advise births"
+ },
+ {
+  "id": "trained_midwife_referral",
+  "requires_all": [
+   "obstructed_labor_recognition",
+   "hemorrhage_control_herbs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "apprentice_healer_rounds"
+  ],
+  "note": "Midwifery needs recognised specialists"
+ },
+ {
+  "id": "elder_quarters_customs",
+  "requires_all": [
+   "multigenerational_household_norms"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Elders housed by rule"
+ },
+ {
+  "id": "people_herd_counts",
+  "requires_all": [
+   "census_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harvest_headcount"
+  ],
+  "note": "Census made periodic"
+ },
+ {
+  "id": "patron_protection",
+  "requires_all": [
+   "newcomer_host_season",
+   "hereditary_chiefly_rank"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "famine_refugee_hosting"
+  ],
+  "note": "Ranked hosts protect outsiders"
+ },
+ {
+  "id": "communal_child_supervision_rotas",
+  "requires_all": [
+   "shared_childcare",
+   "kin_wards"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "labor_rotations"
+  ],
+  "note": "Ward neighbours share watch"
+ },
+ {
+  "id": "marriage_age_norms",
+  "requires_all": [
+   "coming_of_age_rites",
+   "sibling_age_gap_norms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "solar_year_reckoning"
+  ],
+  "note": "Age reckoning fixes marriage"
+ },
+ {
+  "id": "household_partition_customs",
+  "requires_all": [
+   "multigenerational_household_norms",
+   "customary_inheritance_shares"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Inheritance governs splits"
+ },
+ {
+  "id": "midwife_apprenticeship_lines",
+  "requires_all": [
+   "trained_midwife_referral",
+   "mentored_task_learning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "apprentice_healer_rounds"
+  ],
+  "note": "Recognised midwives train successors"
+ },
+ {
+  "id": "recorded_dowry",
+  "requires_all": [
+   "bride_wealth_gifts",
+   "clay_record_tablets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sealed_tablet_contracts"
+  ],
+  "note": "Marriage gifts written"
+ },
+ {
+  "id": "household_vital_lists",
+  "requires_all": [
+   "census_rolls",
+   "clay_record_tablets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "people_herd_counts"
+  ],
+  "note": "Census extended to births and deaths"
+ },
+ {
+  "id": "birth_stool_bricks",
+  "requires_all": [
+   "midwife_apprenticeship_lines",
+   "mould_made_mudbricks"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Midwives adopt brick supports"
+ },
+ {
+  "id": "ward_residence_lists",
+  "requires_all": [
+   "kin_wards",
+   "household_vital_lists"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Lists organised by ward"
+ },
+ {
+  "id": "partible_inheritance",
+  "requires_all": [
+   "customary_inheritance_shares",
+   "household_partition_customs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "witnessed_land_sales"
+  ],
+  "note": "Shares formalised per child"
+ },
+ {
+  "id": "named_year_ages",
+  "requires_all": [
+   "household_vital_lists",
+   "formal_chronicle_keeping"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Named years give ages"
+ },
+ {
+  "id": "fraternal_joint_estates",
+  "requires_all": [
+   "partible_inheritance"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Brothers pool inherited shares"
+ },
+ {
+  "id": "belonging_oaths",
+  "requires_all": [
+   "patron_protection",
+   "formal_oath_taking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Oaths settle outsiders"
+ },
+ {
+  "id": "wet_nurse_contracts",
+  "requires_all": [
+   "sealed_tablet_contracts",
+   "infant_feeding_schedules"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sealed_family_contracts"
+  ],
+  "note": "Nursing paid by contract"
+ },
+ {
+  "id": "divorce_settlements",
+  "requires_all": [
+   "recorded_dowry",
+   "sealed_family_contracts"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Dowry records govern return"
+ },
+ {
+  "id": "widow_portion_law",
+  "requires_all": [
+   "partible_inheritance",
+   "written_law_code"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "divorce_settlements"
+  ],
+  "note": "Law secures widow share"
+ },
+ {
+  "id": "contraceptive_pessaries",
+  "requires_all": [
+   "birth_spacing_customs",
+   "hive_beekeeping",
+   "midwife_apprenticeship_lines"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "womens_ailment_texts"
+  ],
+  "note": "Honey and midwife lore"
+ },
+ {
+  "id": "three_year_nursing",
+  "requires_all": [
+   "sibling_age_gap_norms",
+   "interval_weaning_practice"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wet_nurse_contracts"
+  ],
+  "note": "Nursing term fixed by custom"
+ },
+ {
+  "id": "levirate_marriage",
+  "requires_all": [
+   "patrilocal_residence",
+   "partible_inheritance"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "widow_portion_law"
+  ],
+  "note": "Regional; keeps estate in line"
+ },
+ {
+  "id": "frontier_settler_grants",
+  "requires_all": [
+   "service_land_grants",
+   "new_household_plots"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "border_fortress_chains"
+  ],
+  "note": "Service grants extended to settlers"
+ }
+]

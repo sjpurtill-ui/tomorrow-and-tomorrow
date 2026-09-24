@@ -1,0 +1,881 @@
+[
+ {
+  "id": "labor_rotations",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Starting knowledge: turn-taking at shared work."
+ },
+ {
+  "id": "household_task_division",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "labor_rotations"
+  ],
+  "note": "Starting knowledge: age and season roles."
+ },
+ {
+  "id": "dawn_task_briefings",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "labor_rotations",
+   "household_task_division"
+  ],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "aptitude_trials",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "household_task_division"
+  ],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "paired_task_assignment",
+  "requires_all": [],
+  "requires_any": [],
+  "precedents": [
+   "labor_rotations"
+  ],
+  "note": "Starting knowledge."
+ },
+ {
+  "id": "rest_break_timing",
+  "requires_all": [
+   "labor_rotations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_patterns",
+   "weather_sign_reading"
+  ],
+  "note": "Sun position read to pace shared work."
+ },
+ {
+  "id": "shared_work_signals",
+  "requires_all": [
+   "labor_rotations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "communal_work_songs",
+   "distance_call_signals"
+  ],
+  "note": "Calls coordinate crews already taking turns."
+ },
+ {
+  "id": "seasonal_work_round",
+  "requires_all": [
+   "household_task_division",
+   "seasonal_patterns"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weather_sign_reading"
+  ],
+  "note": "Seasonal cues fix when tasks happen."
+ },
+ {
+  "id": "task_sequencing_habits",
+  "requires_all": [
+   "dawn_task_briefings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "raw_material_prestaging"
+  ],
+  "note": "Daily assignment grows into ordered steps."
+ },
+ {
+  "id": "midday_heat_rest",
+  "requires_all": [
+   "rest_break_timing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_work_round"
+  ],
+  "note": "Sun-timed breaks extended in hot season."
+ },
+ {
+  "id": "children_light_tasks",
+  "requires_all": [
+   "household_task_division"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_work_round"
+  ],
+  "note": "Age-based roles give children field chores."
+ },
+ {
+  "id": "skill_recognition",
+  "requires_all": [
+   "aptitude_trials"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "novice_task_shadowing"
+  ],
+  "note": "Trials reveal lasting individual skill."
+ },
+ {
+  "id": "rotating_heavy_tasks",
+  "requires_all": [
+   "labor_rotations",
+   "paired_task_assignment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "aptitude_trials"
+  ],
+  "note": "Turn-taking applied to the hardest work."
+ },
+ {
+  "id": "herding_rotas",
+  "requires_all": [
+   "labor_rotations",
+   "animal_taming"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "herd_size_limits"
+  ],
+  "note": "Needs tamed flocks to share."
+ },
+ {
+  "id": "work_party_feasts",
+  "requires_all": [
+   "labor_rotations",
+   "reciprocal_gift_exchange"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "communal_work_songs",
+   "shared_hearth_gatherings"
+  ],
+  "note": "Reciprocity repays neighbours' labor with food."
+ },
+ {
+  "id": "festival_rest_days",
+  "requires_all": [
+   "festival_calendar",
+   "rest_break_timing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Festival calendar fixes whole days of rest."
+ },
+ {
+  "id": "part_time_specialists",
+  "requires_all": [
+   "skill_recognition",
+   "seasonal_work_round"
+  ],
+  "requires_any": [
+   [
+    "food_drying",
+    "smoking"
+   ]
+  ],
+  "precedents": [],
+  "conditions": {
+   "min_population": 30
+  },
+  "note": "Stored food frees slack time for craft."
+ },
+ {
+  "id": "slack_season_building",
+  "requires_all": [
+   "seasonal_work_round",
+   "framed_construction"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Seasonal round leaves building to slack months."
+ },
+ {
+  "id": "household_craft_learning",
+  "requires_all": [
+   "part_time_specialists",
+   "novice_task_shadowing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Specialist parents teach by shadowing."
+ },
+ {
+  "id": "motion_economy_habits",
+  "requires_all": [
+   "task_sequencing_habits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rotating_heavy_tasks"
+  ],
+  "note": "Ordered steps refined to save effort."
+ },
+ {
+  "id": "recovery_days_after_heavy_tasks",
+  "requires_all": [
+   "rotating_heavy_tasks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "festival_rest_days"
+  ],
+  "note": "Heavy-task rotation shows need for recovery."
+ },
+ {
+  "id": "boundary_markers_parallel_crews",
+  "requires_all": [
+   "common_ground_marking",
+   "work_party_feasts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "field_boundary_markers"
+  ],
+  "note": "Marked ground splits large parties into crews."
+ },
+ {
+  "id": "cross_training_circuits",
+  "requires_all": [
+   "household_craft_learning",
+   "rotating_heavy_tasks"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Craft learning rotated across tasks."
+ },
+ {
+  "id": "task_captains",
+  "requires_all": [
+   "boundary_markers_parallel_crews",
+   "skill_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "elder_council_assent"
+  ],
+  "conditions": {
+   "min_population": 60
+  },
+  "note": "Parallel crews need a recognized lead hand."
+ },
+ {
+  "id": "hauling_chants",
+  "requires_all": [
+   "shared_work_signals",
+   "communal_work_songs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wedges_and_levers",
+   "rollers_and_runners"
+  ],
+  "note": "Work songs timed to heavy pulls."
+ },
+ {
+  "id": "paced_work_cycles",
+  "requires_all": [
+   "motion_economy_habits",
+   "recovery_days_after_heavy_tasks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hauling_chants"
+  ],
+  "note": "Effort and recovery combined into rhythm."
+ },
+ {
+  "id": "great_work_parties",
+  "requires_all": [
+   "task_captains",
+   "work_party_feasts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hauling_chants",
+   "wedges_and_levers"
+  ],
+  "conditions": {
+   "min_population": 120
+  },
+  "note": "Captained feast-parties scale to monuments."
+ },
+ {
+  "id": "mentored_task_learning",
+  "requires_all": [
+   "household_craft_learning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "novice_task_shadowing",
+   "repeated_recitation_training"
+  ],
+  "note": "Household teaching extended beyond kin."
+ },
+ {
+  "id": "seasonal_labor_pooling",
+  "requires_all": [
+   "seasonal_work_round",
+   "great_work_parties"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "shared_labor_registers"
+  ],
+  "note": "Great-work crews pooled by season."
+ },
+ {
+  "id": "batch_sizing_by_fatigue",
+  "requires_all": [
+   "paced_work_cycles",
+   "batch_task_grouping"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Pacing knowledge sets craft batch size."
+ },
+ {
+  "id": "elder_instruction_days",
+  "requires_all": [
+   "mentored_task_learning",
+   "elder_consultation_rites"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Elders given set teaching days."
+ },
+ {
+  "id": "household_labor_borrowing",
+  "requires_all": [
+   "work_party_feasts",
+   "labor_debt_tallies"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Tallied debts allow labor loans."
+ },
+ {
+  "id": "runner_relays_between_work_sites",
+  "requires_all": [
+   "task_captains"
+  ],
+  "requires_any": [
+   [
+    "relay_call_stations",
+    "relay_carrying_shifts"
+   ]
+  ],
+  "precedents": [
+   "route_memory"
+  ],
+  "note": "Captains link sites by relayed runners."
+ },
+ {
+  "id": "full_time_specialists",
+  "requires_all": [
+   "part_time_specialists",
+   "public_stores"
+  ],
+  "requires_any": [
+   [
+    "raised_granaries",
+    "hermetic_grain_storage"
+   ]
+  ],
+  "precedents": [
+   "temple_common_storehouse"
+  ],
+  "conditions": {
+   "min_population": 200
+  },
+  "note": "Needs stored surplus and enough people."
+ },
+ {
+  "id": "load_tallies",
+  "requires_all": [
+   "tallies",
+   "task_captains"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clay_counting_tokens",
+   "knotted_record_systems"
+  ],
+  "note": "Captains count loads with tally marks."
+ },
+ {
+  "id": "shrine_work_obligations",
+  "requires_all": [
+   "first_shrine_house",
+   "seasonal_labor_pooling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "temple_common_storehouse",
+   "labor_debt_tallies"
+  ],
+  "note": "Pooled labor owed to the shrine."
+ },
+ {
+  "id": "tool_handoff_staging",
+  "requires_all": [
+   "raw_material_prestaging",
+   "task_captains"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "load_tallies"
+  ],
+  "note": "Prestaging scaled to crew handoffs."
+ },
+ {
+  "id": "cross_party_scheduling",
+  "requires_all": [
+   "seasonal_labor_pooling",
+   "runner_relays_between_work_sites"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "solar_year_reckoning"
+  ],
+  "note": "Relays let parties coordinate timing."
+ },
+ {
+  "id": "fixed_worker_rations",
+  "requires_all": [
+   "full_time_specialists",
+   "public_grain_weighing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "temple_ration_issue",
+   "standard_measures"
+  ],
+  "note": "Weighed grain paid to fed specialists."
+ },
+ {
+  "id": "craft_quarters",
+  "requires_all": [
+   "full_time_specialists"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "downwind_workshop_placement",
+   "workshop_space_sharing"
+  ],
+  "conditions": {
+   "min_population": 400
+  },
+  "note": "Enough specialists to cluster by trade."
+ },
+ {
+  "id": "specialist_rotation_ladders",
+  "requires_all": [
+   "full_time_specialists",
+   "cross_training_circuits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mentored_task_learning"
+  ],
+  "note": "Rotation circuits formalized among specialists."
+ },
+ {
+  "id": "crew_handoffs",
+  "requires_all": [
+   "load_tallies",
+   "cross_party_scheduling"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Tallied work passed between scheduled crews."
+ },
+ {
+  "id": "capacity_ledgers",
+  "requires_all": [
+   "load_tallies"
+  ],
+  "requires_any": [
+   [
+    "impressed_number_tablets",
+    "knotted_record_systems",
+    "marked_storage_registers"
+   ]
+  ],
+  "precedents": [
+   "shared_labor_registers"
+  ],
+  "note": "Load counts recorded as capacity."
+ },
+ {
+  "id": "tool_reach_zoning",
+  "requires_all": [
+   "motion_economy_habits",
+   "workshop_space_sharing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "craft_quarters"
+  ],
+  "note": "Motion economy applied to workshop layout."
+ },
+ {
+  "id": "joint_crew_debriefs",
+  "requires_all": [
+   "crew_handoffs",
+   "focused_error_review"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "problem_council_sessions"
+  ],
+  "note": "Handoffs reviewed together for errors."
+ },
+ {
+  "id": "journeyman_placement",
+  "requires_all": [
+   "mentored_task_learning",
+   "craft_quarters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "specialist_rotation_ladders"
+  ],
+  "note": "Clustered masters take outside helpers."
+ },
+ {
+  "id": "age_graded_load_limits",
+  "requires_all": [
+   "rotating_heavy_tasks",
+   "load_tallies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "load_carrying_posture",
+   "coming_of_age_rites"
+  ],
+  "note": "Tallied loads capped by age grade."
+ },
+ {
+  "id": "apprentice_for_keep",
+  "requires_all": [
+   "journeyman_placement",
+   "fixed_worker_rations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "scribal_apprenticeship"
+  ],
+  "note": "Masters feed learners from rations."
+ },
+ {
+  "id": "workshop_layout_planning",
+  "requires_all": [
+   "tool_reach_zoning",
+   "craft_quarters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "temple_workshops"
+  ],
+  "note": "Reach zoning planned for whole workshops."
+ },
+ {
+  "id": "crew_count_scribes",
+  "requires_all": [
+   "capacity_ledgers",
+   "scribal_apprenticeship"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clay_record_tablets"
+  ],
+  "note": "Trained scribes take over crew counts."
+ },
+ {
+  "id": "gangs_of_ten",
+  "requires_all": [
+   "work_gang_overseers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tens_sixties_bundling",
+   "task_captains"
+  ],
+  "note": "Overseers split levies into decimal gangs."
+ },
+ {
+  "id": "certified_craft_competence",
+  "requires_all": [
+   "journeyman_placement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "craft_lineage_naming",
+   "workshop_standards"
+  ],
+  "note": "Placement system produces recognized masters."
+ },
+ {
+  "id": "rotating_named_gangs",
+  "requires_all": [
+   "gangs_of_ten"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "shared_work_crew_rotation",
+   "watch_duty_rotation"
+  ],
+  "note": "Gangs named and rotated in watches."
+ },
+ {
+  "id": "flood_season_great_works",
+  "requires_all": [
+   "great_work_parties",
+   "cross_party_scheduling"
+  ],
+  "requires_any": [
+   [
+    "star_rise_markers",
+    "solar_year_reckoning"
+   ]
+  ],
+  "precedents": [
+   "flood_levees"
+  ],
+  "conditions": {
+   "environment": "river"
+  },
+  "note": "Idle flood months predicted and filled with works."
+ },
+ {
+  "id": "workers_villages",
+  "requires_all": [
+   "fixed_worker_rations",
+   "rotating_named_gangs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "work_gang_bakeries"
+  ],
+  "conditions": {
+   "min_population": 800
+  },
+  "note": "Rotating gangs housed and fed on site."
+ },
+ {
+  "id": "shift_overlap_briefings",
+  "requires_all": [
+   "crew_handoffs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "joint_crew_debriefs",
+   "dawn_task_briefings"
+  ],
+  "note": "Handoffs overlap with spoken briefing."
+ },
+ {
+  "id": "fatigue_aware_task_assignment",
+  "requires_all": [
+   "batch_sizing_by_fatigue",
+   "age_graded_load_limits"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Fatigue and age limits guide assignment."
+ },
+ {
+  "id": "measured_plot_allotment",
+  "requires_all": [
+   "standard_measures",
+   "field_boundary_markers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "boundary_marker_surveys",
+   "geometric_survey"
+  ],
+  "note": "Measured units allot field work."
+ },
+ {
+  "id": "brick_quotas",
+  "requires_all": [
+   "mould_made_mudbricks",
+   "capacity_ledgers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standard_brick_proportions"
+  ],
+  "note": "Uniform bricks make output countable."
+ },
+ {
+  "id": "hired_harvest_hands",
+  "requires_all": [
+   "seasonal_labor_pooling",
+   "fixed_worker_rations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "barter_equivalence_custom"
+  ],
+  "note": "Ration payment lets seasonal hands be hired."
+ },
+ {
+  "id": "daily_task_norms",
+  "requires_all": [
+   "brick_quotas",
+   "crew_count_scribes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "area_volume_rules"
+  ],
+  "note": "Quotas generalized to digging and carrying."
+ },
+ {
+  "id": "light_duty_for_infirm",
+  "requires_all": [
+   "fatigue_aware_task_assignment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "disability_care",
+   "graded_rations"
+  ],
+  "note": "Fatigue assignment extended to sick and aged."
+ },
+ {
+  "id": "man_day_accounts",
+  "requires_all": [
+   "daily_task_norms",
+   "crew_count_scribes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "labor_debt_tallies"
+  ],
+  "note": "Norms and scribes yield man-day balances."
+ },
+ {
+  "id": "monthly_rest_days",
+  "requires_all": [
+   "festival_rest_days",
+   "moon_counting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "calendar_feast_days"
+  ],
+  "note": "Lunar count fixes regular rest days."
+ },
+ {
+  "id": "levy_substitutes",
+  "requires_all": [
+   "public_levies",
+   "hired_harvest_hands"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hired labor can stand in for levy."
+ },
+ {
+  "id": "hired_labor_contracts",
+  "requires_all": [
+   "hired_harvest_hands",
+   "sealed_tablet_contracts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "price_wage_schedules"
+  ],
+  "note": "Sealed tablets bind hire terms."
+ },
+ {
+  "id": "apprentice_contracts",
+  "requires_all": [
+   "apprentice_for_keep",
+   "sealed_tablet_contracts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hired_labor_contracts"
+  ],
+  "note": "Keep arrangements written with set terms."
+ },
+ {
+  "id": "levy_exemptions",
+  "requires_all": [
+   "public_levies",
+   "certified_craft_competence"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "temple_estates",
+   "written_law_code"
+  ],
+  "note": "Recognized craft service excused from levy."
+ },
+ {
+  "id": "attendance_lists",
+  "requires_all": [
+   "man_day_accounts"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Man-day accounts kept as daily lists."
+ },
+ {
+  "id": "trade_elders",
+  "requires_all": [
+   "certified_craft_competence",
+   "craft_quarters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "free_adult_assembly",
+   "petition_speakers"
+  ],
+  "note": "Master crafts choose speakers."
+ },
+ {
+  "id": "apprentice_quotas",
+  "requires_all": [
+   "apprentice_contracts",
+   "trade_elders"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "workshop_quotas"
+  ],
+  "note": "Trade elders regulate apprentice numbers."
+ },
+ {
+  "id": "crew_loans_between_cities",
+  "requires_all": [
+   "rotating_named_gangs",
+   "certified_craft_competence"
+  ],
+  "requires_any": [
+   [
+    "foreign_treaties",
+    "boundary_treaties",
+    "sealed_travel_passes"
+   ]
+  ],
+  "precedents": [],
+  "conditions": {
+   "min_settlements": 3
+  },
+  "note": "Needs cities, skilled crews and agreements."
+ }
+]
