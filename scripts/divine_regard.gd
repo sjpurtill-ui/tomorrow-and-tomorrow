@@ -200,6 +200,95 @@ static func sabotage(person:Dictionary)->float:
 	return clampf((dread-0.5)*0.25+(resentment-0.35)*0.3,0.0,SABOTAGE_MAX)
 
 # --------------------------------------------------------------------------
+# Fading: feelings drift back toward who the person is; memories stay
+# --------------------------------------------------------------------------
+## Dread fades in weeks, love over seasons, resentment slowly and only once it
+## has gone unprovoked. A big act "holds" dread: while held it fades at the
+## slow rate (an execution witnessed lingers a season or two; a scolding is
+## gone in weeks). Every rate is a closed-form exponential over elapsed days,
+## so one multi-day step equals the same days taken one at a time.
+## Optional per-person stamps on relationships.sovereign (absent in older
+## saves): fade_day (last day faded), dread_hold (day the hold ends),
+## resent_day (last day resentment rose).
+const DREAD_HALF_LIFE:=24.0
+const DREAD_HELD_HALF_LIFE:=240.0
+const LOVE_HALF_LIFE:=150.0
+const RESENT_HALF_LIFE:=300.0
+const RESENT_QUIET_DAYS:=40
+## Days an act holds the dread it caused, on its target and on the watchers.
+const TARGET_HOLD:={"terrify":7,"penance":5}
+const WITNESS_HOLD:={"terrify":3,"penance":2,"cast_out":45,"strike_down":110}
+
+static func dread_baseline(person:Dictionary)->float:
+	## Ordinary awe of the god: the timid and suspicious carry more of it.
+	var courage:=clampf(float(person.get("courage",0.5)),0.0,1.0)
+	var suspicion:=clampf(float(person.get("suspicion",0.5)),0.0,1.0)
+	var traits:Array=person.get("traits",[]) if person.get("traits") is Array else []
+	var base:=0.04+0.20*(1.0-courage)+0.05*suspicion
+	if "Cautious" in traits: base+=0.04
+	if "Humble" in traits: base+=0.03
+	if "Bold" in traits: base-=0.03
+	return clampf(base,0.02,0.32)
+
+static func love_baseline(person:Dictionary)->float:
+	## Standing warmth: how they stand with the ruler (trust, respect,
+	## obligation; resentment sours love separately) and their own warmth.
+	var rel:=sovereign(person)
+	var standing:=derived_love({"trust":rel.get("trust",0.5),"respect":rel.get("respect",0.5),"obligation":rel.get("obligation",0.4),"resentment":0.0})
+	var personality:Dictionary=person.get("personality",{}) if person.get("personality") is Dictionary else {}
+	var warmth:=0.3+0.4*clampf(float(personality.get("empathy",0.5)),0.0,1.0)
+	var traits:Array=person.get("traits",[]) if person.get("traits") is Array else []
+	var base:=standing*0.75+warmth*0.25
+	if "Warm" in traits or "Generous" in traits: base+=0.03
+	if "Skeptical" in traits or "Severe" in traits: base-=0.03
+	return clampf(base,0.05,0.9)
+
+static func resentment_floor(person:Dictionary)->float:
+	## The proud keep a sliver of every grievance.
+	return 0.04*clampf(float(person.get("pride",0.5)),0.0,1.0)
+
+static func _stamp(rel:Dictionary,key:String,fallback:int)->int:
+	return int(float(rel[key])) if _num(rel.get(key,null)) else fallback
+
+static func _toward(value:float,base:float,exponent:float)->float:
+	return clampf(base+(value-base)*exp(-exponent),0.0,1.0)
+
+static func _split(from:int,to:int,until:int)->Vector2:
+	## Days of [from,to) before `until` (x) and after it (y).
+	var held:=clampi(until-from,0,to-from)
+	return Vector2(held,to-from-held)
+
+static func fade(person:Dictionary,day:int)->bool:
+	## Moves the person's sovereign feelings toward their baselines for the
+	## days since they last faded. Mutates person in place; true if changed.
+	if not person.get("relationships") is Dictionary: return false
+	var rels:Dictionary=person.relationships
+	if not rels.get("sovereign") is Dictionary: return false
+	var rel:Dictionary=rels.sovereign
+	var from:=_stamp(rel,"fade_day",-1)
+	if from==day: return false
+	rel["fade_day"]=day
+	if from<0 or from>day: return true
+	var courage:=clampf(float(person.get("courage",0.5)),0.0,1.0)
+	var ln2:=log(2.0)
+	# Dread: the timid take longer to stop shaking.
+	var dread_scale:=0.8+0.6*(1.0-courage)
+	var dread_days:=_split(from,day,_stamp(rel,"dread_hold",-1))
+	var dread_exp:=dread_days.x*ln2/(DREAD_HELD_HALF_LIFE*dread_scale)+dread_days.y*ln2/(DREAD_HALF_LIFE*dread_scale)
+	rel["fear"]=_toward(float(rel.get("fear",0.0)),dread_baseline(person),dread_exp)
+	# Love, once the god has moved it, drifts back slowly toward their warmth.
+	if _num(rel.get("love",null)):
+		rel["love"]=_toward(float(rel.love),love_baseline(person),float(day-from)*ln2/LOVE_HALF_LIFE)
+	# Resentment only eases after a quiet spell, and never below its floor.
+	var resentment:=float(rel.get("resentment",0.0))
+	var floor_value:=resentment_floor(person)
+	if resentment>floor_value:
+		var quiet:=_split(from,day,_stamp(rel,"resent_day",-100000)+RESENT_QUIET_DAYS)
+		var pride:=clampf(float(person.get("pride",0.5)),0.0,1.0)
+		rel["resentment"]=_toward(resentment,floor_value,quiet.y*ln2/(RESENT_HALF_LIFE*(0.7+0.6*pride)))
+	return true
+
+# --------------------------------------------------------------------------
 # The people as a whole and foreign peoples
 # --------------------------------------------------------------------------
 
@@ -215,8 +304,10 @@ static func people_regard(officials:Array)->Dictionary:
 	var love:=(love_sum/n*0.55+standing*0.45) if n>0 else standing
 	var echo:=0.0
 	for e in store().events:
-		if not e is Dictionary or _day()-int(e.get("day",0))>365: continue
-		echo+=float({"strike_down":0.08,"cast_out":0.05,"terrify":0.02,"penance":0.01}.get(String(e.get("action","")),0.0))
+		var age:=_day()-int(e.get("day",0)) if e is Dictionary else 9999
+		if age>365: continue
+		# The memory of wrath fades from the people's talk over a few months.
+		echo+=float({"strike_down":0.08,"cast_out":0.05,"terrify":0.02,"penance":0.01}.get(String(e.get("action","")),0.0))*pow(0.5,maxf(0.0,float(age))/90.0)
 	var dread:=clampf((dread_sum/n if n>0 else 0.1)*0.75+minf(0.3,echo),0.0,1.0)
 	var resentment:=res_sum/n if n>0 else 0.0
 	var out:=read(clampf(love,0.0,1.0),dread,resentment)
@@ -339,7 +430,9 @@ static func apply_to_court(action:String,target:Dictionary,witnesses:Array)->Dic
 	var result:={"action":action,"person_id":pid,"response":response_to(action,target),"witnesses":{}}
 	if pid>0 and not action in TERMINAL:
 		var deltas:=target_deltas(action,target)
-		result["after"]=GovernmentPeopleSystem.adjust_person_bonds(pid,deltas)
+		var applied:=deltas.duplicate()
+		if TARGET_HOLD.has(action): applied["hold_days"]=int(TARGET_HOLD[action])
+		result["after"]=GovernmentPeopleSystem.adjust_person_bonds(pid,applied)
 		var bank:Array=TARGET_MEMORY.get(action,[])
 		if not bank.is_empty():
 			var index:=0
@@ -351,7 +444,9 @@ static func apply_to_court(action:String,target:Dictionary,witnesses:Array)->Dic
 		var wid:=int(witness.get("person_id",0))
 		if wid<=0 or wid==pid: continue
 		var wd:=witness_deltas(action,witness)
-		var after:=GovernmentPeopleSystem.adjust_person_bonds(wid,wd)
+		var witnessed:=wd.duplicate()
+		if WITNESS_HOLD.has(action): witnessed["hold_days"]=int(WITNESS_HOLD[action])
+		var after:=GovernmentPeopleSystem.adjust_person_bonds(wid,witnessed)
 		(result.witnesses as Dictionary)[wid]={"deltas":wd,"after":after,"response":witness_response(action,witness)}
 		if action in ["strike_down","cast_out","terrify","raise_up"] or float(wd.get("resentment",0.0))>0.0:
 			GovernmentPeopleSystem.record_person_memory(wid,String(WITNESS_MEMORY.get(action,"I watched the god act on %s.")) % name,"divine",0.8 if action in TERMINAL else 0.5,{"emotion":"dread" if action in WRATH else ("envy" if float(wd.get("resentment",0.0))>0.0 else "awe"),"outcome":action})

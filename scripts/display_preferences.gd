@@ -30,6 +30,8 @@ func _ready()->void:
 			map_scroll_speed=clampf(float(saved_speed),MIN_MAP_SCROLL_SPEED,MAX_MAP_SCROLL_SPEED)
 		if frame_limit not in [30,60,120]:frame_limit=60
 	get_tree().node_added.connect(_theme_boundary)
+	# Long hover clues wrap at a readable width.
+	if not get_tree().node_added.is_connected(Tokens.tooltip_node_added):get_tree().node_added.connect(Tokens.tooltip_node_added)
 	get_window().size_changed.connect(apply)
 	Tokens.set_color_mode(color_theme)
 	apply()
