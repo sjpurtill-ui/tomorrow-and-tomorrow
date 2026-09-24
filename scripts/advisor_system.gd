@@ -1,6 +1,8 @@
 extends Node
 
 const DivineRegard:=preload("res://scripts/divine_regard.gd")
+const CustomDirective:=preload("res://scripts/custom_directive.gd")
+const VillageNotables:=preload("res://scripts/village_notables.gd")
 const ADVICE_ACTS := ["report", "recommend", "warn", "object", "request", "correct", "evade", "conceal", "confess", "bargain", "challenge", "remain_silent"]
 const MAX_CIVIC_DIALOGUE_PER_SETTLEMENT:=24
 const MAX_SOVEREIGN_ORDER_RECORDS:=100
@@ -789,9 +791,22 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 	var future_delay:=_civic_future_delay(text)
 	if future_delay>0:
 		# A future celebration is not authorization to enact an assembly today.
+		# It is booked as a custom order whose effects begin on the day.
 		policies=[]
 		result["policies"]=[]
 		result["future_start_days"]=future_delay
+	# Every explicit order ripples. Catalog policies stay the precise path; any
+	# order (or part of one) they do not cover becomes a bounded custom directive.
+	if not bool(result.get("non_directive",false)) and String(result.get("contextual_prior_order_id","")).is_empty() and not result.has("rejected_prior_order_id"):
+		var custom_policy:=_custom_directive_policy(text,result,policies,future_delay)
+		if not custom_policy.is_empty():
+			policies=policies.duplicate()
+			policies.append(custom_policy)
+			result["policies"]=policies
+			result["unresolved"]=""
+		elif policies.is_empty():
+			# Not an order at all (a remark, a greeting): answer it as conversation.
+			result["non_directive"]=true
 	if not prior_context.is_empty() and (not policies.is_empty() or result.has("rejected_prior_order_id")) and String(result.get("contextual_prior_order_id","" )).is_empty():
 		_close_civic_context(prior_context,"superseded",String(order.get("id","")))
 		order["supersedes_order_id"]=String(prior_context.get("id",""))
@@ -804,9 +819,29 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 			var discussion_topics:Array=result.get("discussion_policy_ids",[])
 			var discussion_reference:=_civic_discussion_reference(settlement_id,String(order.get("id","")),prior_context,discussion_topics)
 			var discussion_text:=String(result.get("answer","")).strip_edges()
+			# The leader never steps outside the world to talk about records or systems.
+			if CustomDirective.breaks_frame(discussion_text): discussion_text=""
+			var model_answered:=not discussion_text.is_empty()
+			if VillageNotables.is_person_query(text):
+				# Ask about a person, get a person — the same one if asked again.
+				var notable:=VillageNotables.resolve(settlement_id,text)
+				order["notable_id"]=String(notable.get("id",""))
+				if discussion_text.is_empty() or String(notable.get("given","")) not in discussion_text:
+					discussion_text=CustomDirective.notable_answer(leader,notable,String(order.get("id","")))
+				model_answered=true
+			else:
+				var named:=VillageNotables.find_named(settlement_id,text)
+				if not named.is_empty() and discussion_text.is_empty():
+					discussion_text=CustomDirective.voiced(leader,VillageNotables.status_line(named),String(order.get("id","")))
+					model_answered=true
+			# Remembered exchanges answer follow-ups about them ("why?", "when will
+			# you report?"), not every new subject the god raises.
+			var normalized_question:=text.to_lower().strip_edges()
+			var follows_up:=not discussion_topics.is_empty() or text.split(" ",false).size()<=3 or _question_is_about_report(normalized_question) or _question_is_about_meaning(normalized_question) or _question_is_about_risk(normalized_question) or _question_is_about_reason(normalized_question)
+			if not follows_up: discussion_reference={}
 			if discussion_text.is_empty(): discussion_text=_leader_discussion_reply(leader,discussion_topics,text)
 			var discussion_state:="DISCUSSION — NO ORDER GIVEN"
-			if not discussion_reference.is_empty() and String(result.get("answer","")).strip_edges().is_empty():
+			if not discussion_reference.is_empty() and not model_answered:
 				discussion_text=_leader_contextual_discussion_reply(leader,discussion_reference,discussion_topics,text)
 				discussion_state="DISCUSSION — NO NEW ORDER"
 				order["discussion_reference_order_id"]=String(discussion_reference.get("id",""))
@@ -817,9 +852,11 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 			order["parameters"]={"text":text,"interpretation":result}
 			_append_leader_reply(settlement_id,leader,discussion,order,"advises")
 			return order
+		# Unreachable for explicit orders (they become custom directives above);
+		# kept for legacy records that reach here with neither.
 		var answer:=String(result.get("answer","")).strip_edges()
-		if answer.is_empty(): answer=_civic_unmapped_answer(text,result)
-		var proposal:=_with_civic_state(answer+"\n\nI have recorded this proposal. No event has been scheduled and no people or stores have been committed.","PROPOSAL RECORDED")
+		if answer.is_empty() or CustomDirective.breaks_frame(answer): answer=_civic_unmapped_answer(text,result)
+		var proposal:=_with_civic_state(answer,"PROPOSAL RECORDED")
 		order["status"]="proposal"
 		order["leader_stance"]="advises"
 		order["leader_reply"]=proposal
@@ -851,6 +888,14 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 		order["policy_ids"]=_policy_ids(policies)
 		_append_leader_reply(settlement_id,leader,focused_question,order,"clarify")
 		return order
+	# When every catalog reading is out of reach (missing practice, empty stores,
+	# no administration), people still make the attempt: effort is spent and the
+	# settlement feels the result, instead of nothing happening at all.
+	var attempt:=_custom_attempt_policy(text,policies)
+	if not attempt.is_empty():
+		policies=policies.duplicate()
+		policies.append(attempt)
+		result["policies"]=policies
 	var insistence:=_is_civic_insistence(text)
 	var prepared:Array[Dictionary]=[]
 	var committed:=0
@@ -940,12 +985,15 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 	if blocked>0 or deferred>0 or refused>0 or (committed>0 and implementation_total/float(committed)<0.74): stance="qualified"
 	if committed==0: stance="unable" if blocked>0 else "refused"
 	var reply_state:="UNDERWAY" if committed>0 else ("BLOCKED" if blocked>0 else "REFUSED")
-	var reply_text:=_civic_commitment_reply(leader,resolved_policies,stance,committed,blocked+deferred+refused,implementation_total,limitation_texts)
+	var reply_text:=_civic_commitment_reply(leader,resolved_policies,stance,committed,blocked+deferred+refused,implementation_total,limitation_texts,String(result.get("answer","")),String(order.get("id","")))
 	if committed>0 and not followup.is_empty(): reply_text+=" "+_implementation_report_promise(followup)
 	var inherited_from:=String(result.get("context_inherited_from",""))
 	if not inherited_from.is_empty(): reply_text="I have the recorded exchange with %s and will answer the directive now.\n\n%s" % [inherited_from,reply_text]
 	var accepted_meaning:=String(order.get("accepted_meaning",""))
 	if not accepted_meaning.is_empty(): reply_text="Accepted meaning: %s\n\n%s" % [accepted_meaning,reply_text]
+	# The numbers are a receipt beneath the speech, never part of it.
+	var receipt_line:=_civic_commitment_receipt(resolved_policies)
+	if not receipt_line.is_empty(): reply_text+="\n\nRECEIPT · "+receipt_line
 	var reply:=_with_civic_state(reply_text,reply_state)
 	resolved["leader_stance"]=stance
 	resolved["leader_reply"]=reply
@@ -1251,11 +1299,8 @@ func _civic_unmapped_answer(text:String,result:Dictionary)->String:
 	if "bonfire" in normalized or "anniversary" in normalized or "celebrat" in normalized or "festival" in normalized:
 		var timing:="in ten years" if int(result.get("future_start_days",0))==3650 else "at the proposed time"
 		var occasion:="our 75th anniversary" if "75th" in normalized else "the anniversary" if "anniversary" in normalized else "the celebration"
-		return "A public celebration %s would give people something to look forward to. For %s, I would favor a communal bonfire with an open gathering place, supervised fires, and fuel from surplus timber rather than shelter or winter supplies. Planning ahead gives us time to prepare; the size should depend on the stores and conditions nearer the date. The civic calendar cannot yet schedule a future festival, so I can discuss the plan but cannot promise it is booked." % [timing,occasion]
-	var summary:=String(result.get("summary","")).strip_edges()
-	if summary.is_empty() or summary.begins_with("The council identified"):
-		summary="I understand the request: “%s”." % text.strip_edges().substr(0,300)
-	return summary+" This action is outside the civic work the settlement can currently execute. That is a limit of our available orders, not a failure to understand your words."
+		return "A public celebration %s would give people something to look forward to. For %s, I would favor a communal bonfire with an open gathering place, supervised fires, and fuel from surplus timber rather than shelter or winter supplies. Planning ahead gives us time to prepare; the size should depend on the stores and conditions nearer the date." % [timing,occasion]
+	return "I hear you: “%s”. Tell me plainly what you would have done, and it will be done." % text.strip_edges().substr(0,300)
 
 func _leader_clarification_reply(leader:Dictionary,unresolved:String)->String:
 	var player_reason:=_player_clarification_reason(unresolved)
@@ -1271,11 +1316,11 @@ func _leader_clarification_reply(leader:Dictionary,unresolved:String)->String:
 func _leader_discussion_reply(leader:Dictionary,topic_ids:Array,text:String)->String:
 	## Questions should feel like a conversation without asking the API to roleplay
 	## or letting an opinion mutate state. The exact feasibility numbers stay hidden.
-	if topic_ids.is_empty():
-		return "Ask me about a concrete concern—food, water, shelter, work, research, roads, security, families, or an expedition—and I will give you my judgment. Nothing changes until you give an order."
+	if topic_ids.is_empty() or not GovernmentPolicyCatalog.has_policy(String(topic_ids[0])):
+		# Stay in the world: reason from what the leader knows, never from what
+		# the game can or cannot represent.
+		return CustomDirective.voiced(leader,CustomDirective.discussion_body(text),text)
 	var topic_id:=String(topic_ids[0])
-	if not GovernmentPolicyCatalog.has_policy(topic_id):
-		return "I hear the concern, but I cannot judge it without knowing what part of the settlement you mean. Nothing changes until you give an order."
 	var definition:=GovernmentPolicyCatalog.definition(topic_id)
 	var execution:=execution_modifier_for_advisor(leader,"SettlementLeader",definition.get("skills",[]))
 	var assessment:=WorldSimulation.consequences.directive_assessment(topic_id,float(definition.get("magnitude",0.12)),float(definition.get("days",90.0)),execution,{})
@@ -1526,20 +1571,42 @@ func _join_limitations(limitations:Array[String])->String:
 	return "; ".join(limitations).trim_suffix(".")+"."
 
 
-func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance:String,committed:int,uncommitted:int,implementation_total:float,limitations:Array[String])->String:
+func _civic_commitment_receipt(policies:Array[Dictionary])->String:
+	## Compact numbers for what the engine actually changed. Shown small beneath
+	## the leader's words; never spoken.
 	var receipts:Array[String]=[]
 	for policy in policies:
 		if not bool(policy.get("applied",false)): continue
+		if String(policy.get("id",""))==CustomDirective.ID:
+			receipts.append(DecreeStatistics.custom_receipt(policy.get("custom_realized",[]),policy.get("direct_effects",{}),policy.get("directive_costs",{}),float(policy.get("days",CustomDirective.DEFAULT_DAYS))))
+			continue
 		var receipt:=DecreeStatistics.receipt(policy.get("direct_effects",{}))
-		var estimates:=DecreeStatistics.validate(policy.get("directive_parameters",{}).get("statistical_effects",[]))
-		for estimate in estimates:
-			receipt+=" Estimate before capacity adjustment: %s %+.2f ± %.2f percentage points. %s" % [String(estimate.metric),float(estimate.delta)*100.0,float(estimate.uncertainty)*100.0,String(estimate.reason)]
-		if not receipt.is_empty(): receipts.append(receipt)
-	if not receipts.is_empty():
-		return "Recorded result: %s Further effects on work, food and public order will develop through the simulation; these immediate changes do not prove that the wider aim succeeded." % " ".join(receipts)
+		var parts:Array[String]=[]
+		if not receipt.is_empty(): parts.append(receipt)
+		# Standing catalog effects, after implementation: channel value per day.
+		var effects:Dictionary=policy.get("effects",{})
+		var magnitude:=float(policy.get("magnitude",0.0))
+		for channel in effects:
+			var value:=float(effects[channel])*magnitude
+			if absf(value)<0.0005 or not GovernmentPolicyCatalog.EFFECT_LABELS.has(channel): continue
+			parts.append("%s %+.3f" % [String(GovernmentPolicyCatalog.EFFECT_LABELS[channel]),value])
+		if not (effects.is_empty() or bool(policy.get("directive_parameters",{}).get("one_time",false))): parts.append("%d days" % roundi(float(policy.get("days",30.0))))
+		for estimate in DecreeStatistics.validate(policy.get("directive_parameters",{}).get("statistical_effects",[])):
+			parts.append("%s est %+.1f ±%.1f pts" % [String(estimate.metric),float(estimate.delta)*100.0,float(estimate.uncertainty)*100.0])
+		if not parts.is_empty(): receipts.append(" · ".join(parts))
+	return " · ".join(receipts)
+
+
+func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance:String,committed:int,uncommitted:int,implementation_total:float,limitations:Array[String],model_answer:String="",salt:String="")->String:
 	var actions:Array[String]=[]
+	var custom_plans:Array[Dictionary]=[]
+	var counted_deaths:=-1
 	for policy in policies:
 		if bool(policy.get("_conversation_blocked",false)) or bool(policy.get("_conversation_deferred",false)) or bool(policy.get("_conversation_refused",false)): continue
+		if String(policy.get("id",""))==CustomDirective.ID:
+			if bool(policy.get("applied",false)): custom_plans.append(policy.get("directive_parameters",{}).get("custom_plan",{}))
+			continue
+		if bool(policy.get("applied",false)) and bool(policy.get("directive_parameters",{}).get("one_time",false)) and (policy.get("direct_effects",{}) as Dictionary).has("population_deaths"): counted_deaths=int(policy.direct_effects.population_deaths)
 		actions.append(GovernmentPolicyCatalog.display_name(String(policy.get("id","directive"))))
 	if committed<=0:
 		var reasons:=_join_limitations(limitations)
@@ -1551,8 +1618,12 @@ func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance
 			"diplomatic": return "We need more hands, stores, or local support before I can make this workable. %s" % reasons
 			_: return "I cannot carry this out with the means now available. %s" % reasons
 	var capacity_phrase:=_leader_capacity_phrase(leader,implementation_total/float(committed))
+	# The model already answered in this leader's voice; use it when it stays in
+	# the world. Otherwise the leader speaks from their own lifelong manner.
+	var answer:=model_answer.strip_edges()
+	if not answer.is_empty() and not CustomDirective.breaks_frame(answer):
+		return answer
 	var memory_phrase:=_relevant_civic_memory_phrase(leader,policies)
-	var action_text:=", ".join(actions)
 	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
 	var opening:="I understand."
 	match disposition_id:
@@ -1560,9 +1631,97 @@ func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance
 		"cantankerous": opening="I have heard you."
 		"principled": opening="I will answer plainly."
 		"diplomatic": opening="I believe I can make this workable."
-	if stance=="accepted": return "%s I will put %s into effect. %s%s" % [opening,action_text,capacity_phrase,memory_phrase]
-	var omission:=" Some parts cannot be attempted." if uncommitted>0 else ""
-	return "%s I will do what can be done toward %s. %s%s%s %s" % [opening,action_text,capacity_phrase,memory_phrase,omission,_join_limitations(limitations)]
+	var speech:=""
+	if counted_deaths>=0:
+		if counted_deaths==1: speech="It is done. One life was taken, as you ordered."
+		elif counted_deaths>1: speech="It is done. %d lives were taken, as you ordered." % counted_deaths
+		else: speech="It could not be done; no one was taken."
+	elif not actions.is_empty():
+		var action_text:=", ".join(actions)
+		if stance=="accepted": speech="%s I will put %s into effect. %s%s" % [opening,action_text,capacity_phrase if custom_plans.is_empty() else "",memory_phrase]
+		else:
+			var omission:=" Some parts cannot be attempted." if uncommitted>0 else ""
+			var reasons:=_join_limitations(limitations)
+			speech="%s I will do what can be done toward %s. %s%s%s %s" % [opening,action_text,capacity_phrase,memory_phrase,omission,reasons.substr(0,1).to_upper()+reasons.substr(1)]
+	for plan in custom_plans:
+		var body:=CustomDirective.acceptance_body(plan,capacity_phrase if actions.is_empty() else "")
+		if float(plan.get("future_delay",0))>0.0:
+			body="It is set for %s from now: “%s.” %s" % [_future_words(int(plan.future_delay)),String(plan.get("summary","")).trim_suffix("."),body]
+		if actions.is_empty() and uncommitted>0 and not limitations.is_empty(): body+=" The trouble is that %s" % _lower_first_letter(_join_limitations(limitations))
+		if speech.is_empty(): speech=CustomDirective.voiced(leader,body if stance=="accepted" else "%s %s" % [opening,body],salt)
+		else: speech+=" "+body
+	return speech.strip_edges()
+
+
+func _custom_attempt_policy(text:String,policies:Array)->Dictionary:
+	if policies.is_empty(): return {}
+	for policy_variant in policies:
+		var policy:Dictionary=policy_variant
+		var policy_id:=String(policy.get("id",""))
+		if policy_id==CustomDirective.ID or String(policy.get("action","enact"))!="enact": return {}
+		var assessment:=WorldSimulation.consequences.directive_assessment(policy_id,float(policy.get("magnitude",0.0)),float(policy.get("days",30.0)),1.0,policy.get("directive_parameters",{}))
+		if bool(assessment.get("can_apply",false)): return {}
+		# A counted execution that cannot be carried out stays exactly zero.
+		if (policy.get("directive_parameters",{}) as Dictionary).has("demographic_target") and bool(policy.get("directive_parameters",{}).get("one_time",false)): return {}
+	return CustomDirective.policy_from_plan(CustomDirective.attempt_plan(text))
+
+
+func _lower_first_letter(text:String)->String:
+	return text.substr(0,1).to_lower()+text.substr(1) if not text.is_empty() else text
+
+
+func _future_words(days:int)->String:
+	if days%365==0: return "%s year%s" % [VillageNotables._number_word(days/365),"" if days==365 else "s"]
+	if days%30==0: return "%s month%s" % [VillageNotables._number_word(days/30),"" if days==30 else "s"]
+	if days%7==0: return "%s week%s" % [VillageNotables._number_word(days/7),"" if days==7 else "s"]
+	return "%s day%s" % [VillageNotables._number_word(days),"" if days==1 else "s"]
+
+
+func _custom_directive_policy(text:String,result:Dictionary,policies:Array,future_delay:int)->Dictionary:
+	## The universal fallback: an explicit order (or the part of one no catalog
+	## policy covers) becomes a bounded custom directive. Model plans are used
+	## when present and valid; the offline lexicon otherwise.
+	var catalog_ids:Array=[]
+	var catalog_channels:Dictionary={}
+	for policy_variant in policies:
+		var policy:Dictionary=policy_variant
+		var policy_id:=String(policy.get("id",""))
+		if policy_id==CustomDirective.ID: return {}
+		# A repeal is complete on its own ("stop rationing", "no more executions").
+		if String(policy.get("action","enact"))=="repeal": return {}
+		catalog_ids.append(policy_id)
+		var effects:Dictionary=policy.get("effects",{})
+		if effects.is_empty(): effects=GovernmentPolicyCatalog.definition(policy_id).get("effects",{})
+		for channel in effects: catalog_channels[String(channel)]=true
+	var speech_act:=String(result.get("speech_act",""))
+	if speech_act.is_empty() or speech_act=="ambiguous": speech_act=PronouncementInterpreter._speech_act(text)
+	var model_raw:Variant=result.get("custom_directive",{})
+	var model_applies:=model_raw is Dictionary and bool((model_raw as Dictionary).get("applies",false))
+	if policies.is_empty() and not model_applies and not CustomDirective.looks_like_order(text,speech_act): return {}
+	var plan:Dictionary={}
+	if model_applies:
+		plan=CustomDirective.validate_model_plan(model_raw,text,future_delay,catalog_ids)
+		if not plan.is_empty() and not catalog_ids.is_empty():
+			# The catalog already moves these channels; do not count them twice.
+			var kept:Array[Dictionary]=[]
+			for effect in plan.get("effects",[]):
+				var channel:=String((DecreeStatistics.PARAMETERS.get(String(effect.get("parameter","")),{}) as Dictionary).get("channel",""))
+				if not catalog_channels.has(channel): kept.append(effect)
+			plan["effects"]=kept
+			if kept.is_empty(): plan={}
+	if plan.is_empty() and not (result.get("offline_effects",[]) as Array).is_empty():
+		# Answered by the offline interaction database (Hybrid/Offline modes).
+		plan=CustomDirective.plan_from_offline(result,text,future_delay,catalog_ids)
+		if not plan.is_empty() and not catalog_ids.is_empty():
+			var kept_offline:Array[Dictionary]=[]
+			for effect in plan.get("effects",[]):
+				var channel:=String((DecreeStatistics.PARAMETERS.get(String(effect.get("parameter","")),{}) as Dictionary).get("channel",""))
+				if not catalog_channels.has(channel): kept_offline.append(effect)
+			plan["effects"]=kept_offline
+			if kept_offline.is_empty(): plan={}
+	if plan.is_empty(): plan=CustomDirective.offline_plan(text,future_delay,catalog_ids)
+	if plan.is_empty(): return {}
+	return CustomDirective.policy_from_plan(plan)
 
 
 func _implementation_report_promise(followup:Dictionary)->String:
@@ -1695,6 +1854,7 @@ func execute_pronouncement(text:String,interpretation:Dictionary,existing_order:
 			policy["compliance"]=float(assessment.get("compliance",0.0))
 			policy["resistance"]=float(assessment.get("resistance",0.0))
 			policy["direct_effects"]=(directive_result.get("direct_effects",{}) as Dictionary).duplicate(true)
+			if directive_result.has("custom_realized"): policy["custom_realized"]=(directive_result.custom_realized as Array).duplicate(true)
 			var operation_result:Dictionary=directive_result.get("operation_result",assessment.get("operation_result",{}))
 			if not operation_result.is_empty(): policy["operation_result"]=operation_result.duplicate(true)
 			policy["second_order_consequence"]=String(assessment.get("second_order_consequence",policy.get("ripple","")))

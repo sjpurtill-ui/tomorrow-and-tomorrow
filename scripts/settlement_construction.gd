@@ -104,7 +104,7 @@ static func process_day()->Array[Dictionary]:
 	var builders:=float(WorldSimulation.state.effective_workers("Construction"))
 	var carriers:=float(WorldSimulation.state.population_allocations.get("Logistics",0))
 	var makers:=float(WorldSimulation.state.population_allocations.get("Crafting",0))
-	var work:=(builders/8.0)*(.82+carriers/30.0+makers/50.0)*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))*(1.0+WorldSimulation.discovery.effect("construction_rate")+WorldSimulation.progression.effect("construction_rate"))
+	var work:=(builders/8.0)*(.82+carriers/30.0+makers/50.0)*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))*(1.0+WorldSimulation.discovery.effect("construction_rate")+WorldSimulation.progression.effect("construction_rate")+WorldSimulation.consequences.policy_effect("construction_rate"))
 	var title:=String(project.name)
 	WorldSimulation.state.settlement_projects[title]=float(WorldSimulation.state.settlement_projects.get(title,0))+work*WorldSimulation.span
 	if float(WorldSimulation.state.settlement_projects[title])<float(project.days):return events

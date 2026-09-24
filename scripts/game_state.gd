@@ -1098,7 +1098,7 @@ func process_reproduction_day(context:Dictionary) -> Dictionary:
 	var stillbirth_rate:=clampf(0.018+(risk-1.0)*0.018,0.010,0.14)
 	var stillbirths_exact:=deliveries*stillbirth_rate
 	var live_births_exact:=maxf(0.0,deliveries-stillbirths_exact)
-	var neonatal_rate:=clampf((0.018+(risk-1.0)*0.025)*(1.0-clampf(float(context.get("neonatal_survival",0.0)),0.0,0.60)),0.004,0.18)
+	var neonatal_rate:=clampf((0.018+(risk-1.0)*0.025)*(1.0-clampf(float(context.get("neonatal_survival",0.0)),-0.50,0.60)),0.004,0.18)
 	var neonatal_deaths_exact:=live_births_exact*neonatal_rate
 	var maternal_rate:=clampf((0.0045+(risk-1.0)*0.0065)*(1.0-clampf(float(context.get("maternal_safety",0.0)),0.0,0.65)),0.0008,0.055)
 	var maternal_deaths_exact:=deliveries*maternal_rate

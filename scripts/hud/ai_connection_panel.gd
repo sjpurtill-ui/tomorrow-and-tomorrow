@@ -31,6 +31,19 @@ func _ready()->void:
 	var use:=Button.new();use.text="Use connection";use.custom_minimum_size.y=40;actions.add_child(use);use.pressed.connect(_apply)
 	var off:=Button.new();off.text="Turn AI off";actions.add_child(off);off.pressed.connect(func():PronouncementInterpreter.set_api_enabled(false);status.text=PronouncementInterpreter.connection_problem())
 	var close:=Button.new();close.text="Close";actions.add_child(close);close.pressed.connect(func():queue_free())
+	# Conversation mode and the local interaction record (never uploaded).
+	var mode_label:=Label.new();mode_label.text="Conversation mode";root.add_child(mode_label)
+	var mode_row:=HBoxContainer.new();mode_row.add_theme_constant_override("separation",8);root.add_child(mode_row)
+	var modes:=OptionButton.new();modes.name="AiModeSelector";modes.size_flags_horizontal=Control.SIZE_EXPAND_FILL;mode_row.add_child(modes)
+	var ai_mode:=preload("res://scripts/ai_mode.gd")
+	for index in ai_mode.MODES.size():
+		modes.add_item(String(ai_mode.LABELS[ai_mode.MODES[index]]),index)
+		if ai_mode.MODES[index]==ai_mode.mode():modes.select(index)
+	modes.item_selected.connect(func(index:int):ai_mode.set_mode(ai_mode.MODES[index]);status.text="Conversation mode: %s" % ai_mode.label())
+	var export_button:=Button.new();export_button.name="ExportInteractions";export_button.text="Export interactions";mode_row.add_child(export_button)
+	export_button.pressed.connect(func():
+		var exported:Dictionary=preload("res://scripts/interaction_store.gd").export_bundle()
+		status.text="Exported %d interactions to %s" % [int(exported.get("count",0)),ProjectSettings.globalize_path(String(exported.get("path","")))] if bool(exported.get("ok",false)) else "Could not export interactions.";_fit.call_deferred())
 	var forget:=Button.new();forget.text="Forget saved connection…";root.add_child(forget)
 	forget.pressed.connect(func():
 		var confirmation:=ConfirmationDialog.new();confirmation.theme=preload("res://scripts/hud/hud_tokens.gd").control_theme();confirmation.dialog_text="Remove this game's saved AI connection from Keychain and clear it from this session?";add_child(confirmation)

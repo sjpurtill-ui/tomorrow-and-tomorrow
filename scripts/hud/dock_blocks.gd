@@ -608,6 +608,14 @@ static func _render_conversation_turn(parent:VBoxContainer,turn:Dictionary)->voi
 	body.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	body.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	column.add_child(body)
+	var receipt:=String(turn.get("receipt",""))
+	if not receipt.is_empty():
+		var receipt_label:=Tokens.make_label(receipt,9,Tokens.DISABLED)
+		receipt_label.name="CivicMessageReceipt"
+		receipt_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		receipt_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		receipt_label.tooltip_text="What the engine changed, after feasibility and implementation."
+		column.add_child(receipt_label)
 
 
 static func _render_conversation_composer(parent:VBoxContainer,block:Dictionary)->void:

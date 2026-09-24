@@ -181,6 +181,9 @@ func _response(result:int,code:int,_headers:PackedStringArray,body:PackedByteArr
 					var parser:=JSON.new()
 					if parser.parse(content.trim_prefix("```json").trim_suffix("```").strip_edges())==OK:value=parser.data
 					var response_valid:=_valid_response(value,traveling,String(thread(id).private_brief))
+					# --- interaction database capture (single call) ---
+					if response_valid: preload("res://scripts/interaction_capture.gd").capture_chat_body("envoy",String((thread(id).messages as Array).filter(func(m:Dictionary)->bool: return String(m.get("role",""))=="user").back().get("content","") if (thread(id).messages as Array).any(func(m:Dictionary)->bool: return String(m.get("role",""))=="user") else ""),body,value)
+					# --- end capture ---
 					if not response_valid and not repairing:
 						_request(id,CHARACTER_REPAIR_PROMPT+"\nREJECTED DRAFT: "+JSON.stringify(value),true,traveling)
 						return

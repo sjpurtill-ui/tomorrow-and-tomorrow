@@ -308,7 +308,8 @@ func test_parser_diagnostics_never_leak_into_the_leaders_voice()->void:
 	var resolved:=AdvisorSystem.resolve_civic_directive(text,internal_result,order,settlement_id,int(leader.person_id))
 	var reply:=String(resolved.get("leader_reply",""))
 	assert_str(reply).contains("Make the old arrangement happen somehow")
-	assert_str(String(resolved.status)).is_equal("proposal")
+	# A vague but explicit order is still carried out as a bounded custom directive.
+	assert_str(String(resolved.status)).is_not_equal("proposal")
 	assert_bool("what you have not made clear" in reply).is_false()
 	for forbidden in ["provider","mapping","confidence","JSON","current simulation"]:
 		assert_bool(String(forbidden).to_lower() not in reply.to_lower()).is_true()

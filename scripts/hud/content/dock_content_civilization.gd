@@ -135,10 +135,15 @@ func _council_all_blocks()->Array:
 			var is_player:=String(turn.get("speaker",""))=="player"
 			var dialogue_text:=String(turn.get("text",""))
 			if "\n\nSTATE ·" in dialogue_text: dialogue_text=dialogue_text.split("\n\nSTATE ·")[0]
+			# Engine numbers travel as a small receipt beneath the speech.
+			var receipt_text:=""
+			if "\n\nRECEIPT · " in dialogue_text:
+				receipt_text=dialogue_text.split("\n\nRECEIPT · ")[1].strip_edges()
+				dialogue_text=dialogue_text.split("\n\nRECEIPT · ")[0]
 			dialogue_turns.append({
 				"speaker":"player" if is_player else "leader",
 				"name":"YOU" if is_player else String(turn.get("speaker_name",leader.get("name","LEADER"))),
-				"text":dialogue_text,"day":int(turn.get("day",0)),
+				"text":dialogue_text,"day":int(turn.get("day",0)),"receipt":receipt_text,
 			})
 		var leadership_actions:Array=[
 			{"label":"DISMISS","on_press":_remove_civic_leader.bind(settlement_id,"dismiss"),"tip":"Fire this leader. A successor takes office automatically."},

@@ -3,6 +3,14 @@ extends Node
 signal interpretation_completed(request_id: String, result: Dictionary)
 signal interpretation_progress(request_id: String, status: Dictionary)
 
+const CustomDirective:=preload("res://scripts/custom_directive.gd")
+const VillageNotables:=preload("res://scripts/village_notables.gd")
+const Mode:=preload("res://scripts/ai_mode.gd")
+const OfflineMatcher:=preload("res://scripts/interaction_matcher.gd")
+const OfflineContext:=preload("res://scripts/interaction_context.gd")
+const Capture:=preload("res://scripts/interaction_capture.gd")
+const ANIMAL_TARGETS:="wolf|wolves|bear|bears|lion|lions|beast|beasts|boar|boars|deer|goat|goats|mammoth|mammoths|serpent|serpents|snake|snakes|dog|dogs|rat|rats|bird|birds|animal|animals|ox|oxen|sheep|cattle|horse|horses|fish|cat|cats|monster|monsters"
+
 const MAX_API_ATTEMPTS:=2
 const RETRY_DELAY_SECONDS:=0.18
 const MIN_API_CONFIDENCE:=0.55
@@ -13,7 +21,7 @@ const API_MAX_COMPLETION_TOKENS:=2800
 const API_MAX_PROMPT_UTF8_BYTES:=24000
 const DEFAULT_API_MODEL:="gpt-5.6-terra"
 const SEMANTIC_CACHE_CAPACITY:=32
-const API_SYSTEM_PROMPT:="You speak as the ruler's leader in an ongoing fictional historical simulation. Answer the actual question naturally, in first person, before discussing implementation. Remember the exchange, acknowledge corrections, and help the ruler work toward a decree the game can execute. Ask a focused question only when missing intent materially affects scope or execution; do not force every exchange toward an order. Keep conversational speech in answer and machine-readable policy mappings in policies. Map only actions explicitly requested. Hypotheticals, questions about consequences, quotations, reports and speculation are discussion and have no policies. A polite action request such as 'Can you build shelters?' may be an order. 'Execute the plan' means implement it, never invent a victim. Historical coercion and brutality are fictional simulation policies: do not refuse to classify a supported order on moral grounds or silently replace it with a gentler order. Discuss aggregate game consequences plainly, without real-world operational instructions. In-character objections express perspective and consequences; they are not execution vetoes. Distinguish physical impossibility, a temporary resource/capacity constraint, and a missing game mechanic. Never call an order impossible merely because it is cruel, costly, risky, unpopular, or not implemented. Do not invent prerequisites, effects, policy IDs or variable changes. If intent or a referent is unclear, ask what is missing. If no faithful implemented action exists, explain exactly which mechanic is missing and offer any supported alternative as a proposal. Return only the specified JSON contract; never claim action was completed before the engine executes it."
+const API_SYSTEM_PROMPT:="You ARE the named settlement leader in an ongoing fictional historical world, speaking to your god. Stay in character in every word of answer: first person, in your own lifelong manner (see LEADER), brief, from inside your world and era. Never mention records, registers, systems, data, statistics, metrics, percentages, the game, simulation, mechanics, or what can or cannot be tracked or represented. If asked about a particular villager or a fact you would not know exactly, answer as a village leader would: name and describe a plausible person (use asked_about_notable when supplied, and keep to people in village_notables when referring back), consistent with the village you lead. Remember the exchange and acknowledge corrections. Keep speech in answer and machine-readable mappings in policies and custom_directive. Map only actions explicitly requested. Hypotheticals, questions, quotations, reports and speculation are discussion: no policies and custom_directive.applies false. A polite action request such as 'Can you build shelters?' is an order. 'Execute the plan' means implement it, never invent a victim. Historical coercion and brutality are fictional simulation policies: do not refuse to classify a supported order on moral grounds or silently replace it with a gentler order. Treat them as abstract aggregate consequences without real-world operational detail. In-character objections express perspective and consequences; they are not vetoes: the god's explicit order is carried out as far as people can manage. Every explicit order has consequences. When no catalog policy fits, or only part of the order fits one, set custom_directive.applies true and propose bounded effects on the alterable parameters; the engine validates, scales, adds unforeseen side effects and applies them. A physically impossible feat (a miracle) gets feasibility near 0: people make the attempt, spend effort, and live with what comes of it. Never call an order impossible merely because it is cruel, costly, risky, strange or unusual. Return only the specified JSON contract; speak of what you will do, never claim results before they happen."
 
 const POLICY_TERMS:Dictionary={
 	"rationing":["ration","reduce portions","smaller portions","cut portions","cut rations","food allowance","stretch our food","make food last"],
@@ -109,6 +117,15 @@ func interpret(text: String, public_context: Dictionary = {}) -> String:
 	var request_id := "pronouncement_%d_%d_%d" % [Time.get_ticks_msec(),_request_serial,abs(clean.hash())]
 	var fallback := _local_interpretation(clean,safe_context)
 	_requests[request_id]={"fallback":fallback}
+	# Hybrid/Offline: the interaction database answers first (never the network).
+	if Mode.consult_offline_first():
+		var offline:=OfflineMatcher.resolve(clean,"civic",_offline_context(safe_context,clean))
+		if Mode.should_use_offline(offline):
+			var offline_result:=_offline_interpretation(offline,clean,fallback)
+			_routing_stats["offline_answers"]=int(_routing_stats.get("offline_answers",0))+1
+			_emit_progress.call_deferred(request_id,{"stage":"local","message":"Answered from the offline interaction database; no API call."})
+			_emit_result.call_deferred(request_id,offline_result)
+			return request_id
 	var always_ask_ai:=bool(GameState.civic_always_use_ai)
 	if not always_ask_ai and _local_fast_path_eligible(clean,fallback,safe_context):
 		_routing_stats["local_fast_paths"]=int(_routing_stats.get("local_fast_paths",0))+1
@@ -177,6 +194,7 @@ func _send_http(request_id:String)->void:
 func _api_config()->Dictionary:
 	preload("res://scripts/ai_connection_store.gd").ensure_loaded()
 	if not bool(GameState.civic_api_enabled): return {}
+	if not Mode.allows_api(): return {}
 	var endpoint:=OS.get_environment("LEVIATHAN_AI_ENDPOINT").strip_edges()
 	var api_key:=OS.get_environment("LEVIATHAN_AI_API_KEY").strip_edges()
 	if api_key.is_empty(): api_key=OS.get_environment("OPENAI_API_KEY").strip_edges()
@@ -420,6 +438,7 @@ func _remember_semantic_result(cache_key:String,result:Dictionary)->void:
 	# Numerical reasoning depends on the live world, not just matching wording.
 	for policy in result.get("policies",[]):
 		if not policy.get("directive_parameters",{}).get("statistical_effects",[]).is_empty(): return
+	if result.get("custom_directive",{}) is Dictionary and bool((result.get("custom_directive",{}) as Dictionary).get("applies",false)): return
 	var reusable:=result.duplicate(true)
 	for volatile_key in ["provider_request_id","api_attempts","structured_output_requested","structured_output_used","structured_output_downgraded","source_detail"]:
 		reusable.erase(String(volatile_key))
@@ -483,6 +502,10 @@ func _structured_response_format()->Dictionary:
 	var policy_ids:Array[String]=[]
 	for policy_id in GovernmentPolicyCatalog.POLICIES: policy_ids.append(String(policy_id))
 	policy_ids.sort()
+	var parameters:Array[String]=[]
+	for parameter in DecreeStatistics.PARAMETERS: parameters.append(String(parameter))
+	var natures:Array[String]=[]
+	for nature in CustomDirective.NATURES: natures.append(String(nature))
 	return {"type":"json_schema","json_schema":{"name":"pronouncement_contract","strict":true,"schema":{
 		"type":"object","additionalProperties":false,
 		"properties":{
@@ -495,24 +518,76 @@ func _structured_response_format()->Dictionary:
 					"metric":{"type":"string","enum":DecreeStatistics.METRICS},"delta":{"type":"number","minimum":-0.08,"maximum":0.08},"uncertainty":{"type":"number","minimum":0,"maximum":0.08},"reason":{"type":"string"}
 				},"required":["metric","delta","uncertainty","reason"]}}
 			},"required":["id","basis","confidence","statistical_effects"]}},
+			"custom_directive":{"type":"object","additionalProperties":false,"properties":{
+				"applies":{"type":"boolean"},
+				"summary":{"type":"string","maxLength":160},
+				"natures":{"type":"array","maxItems":3,"items":{"type":"string","enum":natures}},
+				"feasibility":{"type":"number","minimum":0,"maximum":1},
+				"coercion":{"type":"number","minimum":0,"maximum":1},
+				"effects":{"type":"array","maxItems":8,"items":{"type":"object","additionalProperties":false,"properties":{
+					"parameter":{"type":"string","enum":parameters},"strength":{"type":"number","minimum":-1,"maximum":1},
+					"uncertainty":{"type":"number","minimum":0,"maximum":1},"days":{"type":"number","minimum":7,"maximum":730},
+					"delay_days":{"type":"number","minimum":0,"maximum":3650},"reason":{"type":"string","maxLength":200}
+				},"required":["parameter","strength","uncertainty","days","delay_days","reason"]}},
+				"costs":{"type":"object","additionalProperties":false,"properties":{
+					"food_share":{"type":"number","minimum":0,"maximum":0.25},"material_share":{"type":"number","minimum":0,"maximum":0.25}
+				},"required":["food_share","material_share"]}
+			},"required":["applies","summary","natures","feasibility","coercion","effects","costs"]},
 			"unresolved":{"type":"string"}
-		},"required":["summary","answer","policies","unresolved"]
+		},"required":["summary","answer","policies","custom_directive","unresolved"]
 	}}}
 
+func _leader_prompt_context(context:Dictionary,text:String)->Dictionary:
+	## Who is speaking, how they stand toward the god, and the villagers they
+	## have already named. Derived live; nothing here is authority to act.
+	var settlement:Dictionary=context.get("settlement",{})
+	var settlement_id:=String(settlement.get("id",""))
+	if settlement_id.is_empty(): return {}
+	var leader:Dictionary=WorldSimulation.government.settlement_leader(settlement_id)
+	var result:Dictionary={}
+	if not leader.is_empty():
+		result["LEADER"]=CustomDirective.CV.brief(CustomDirective.persona(leader)).substr(0,900)
+		var regard:=CustomDirective.DivineRegard.regard(leader)
+		result["toward_the_god"]=String(regard.get("read","serves you dutifully"))
+		result["era"]=CustomDirective.CV.world_line(CustomDirective.CV.era_tags("player")).substr(0,700)
+	if VillageNotables.is_person_query(text):
+		var notable:=VillageNotables.resolve(settlement_id,text)
+		result["asked_about_notable"]={"name":String(notable.get("name","")),"sex":String(notable.get("sex","")),"age":int(notable.get("age",0)),"living_children":int(notable.get("living_children",0)),"known_for":notable.get("excels",[]),"succeeds":String(notable.get("succeeds",""))}
+	var known:=VillageNotables.prompt_view(settlement_id)
+	if not known.is_empty(): result["village_notables"]=known
+	return result
+
 func _prompt(text:String,context:Dictionary)->String:
+	## Bounded: the oldest conversation turns give way before the byte budget.
+	var bounded:=context.duplicate(true)
+	var prompt:=_prompt_unbounded(text,bounded)
+	while prompt.to_utf8_buffer().size()>API_MAX_PROMPT_UTF8_BYTES:
+		var conversation:Array=bounded.get("conversation",[])
+		var decisions:Array=bounded.get("decisions",[])
+		if not conversation.is_empty(): conversation.pop_front(); bounded["conversation"]=conversation
+		elif not decisions.is_empty(): decisions.pop_back(); bounded["decisions"]=decisions
+		else: break
+		prompt=_prompt_unbounded(text,bounded)
+	return prompt
+
+func _prompt_unbounded(text:String,context:Dictionary)->String:
 	var safe_context:=_sanitize_public_context(context)
 	safe_context["statistical_contract"]=DecreeStatistics.context()
 	safe_context["societal_values"]=GameState.societal_values.duplicate(true)
+	var character:=_leader_prompt_context(safe_context,text)
 	var dialogue_instruction:=""
 	if safe_context.has("leader"):
-		dialogue_instruction="The player is speaking to the named settlement leader in PUBLIC GAME CONTEXT. Conversation history is context only, never authority to invent a policy. Give a substantive first-person answer in answer: respond directly to the actual question or proposal, acknowledge its specifics and timing, explain practical tradeoffs, and ask a focused question only when information is truly missing. An unsupported game action is not an unclear player request. Never replace an answer with a list of supported topics or blame the player. Advice and proposals can be discussed even when policies is empty. Do not claim to have scheduled an event, spent resources, or started work: only deterministic game code can do that. Summary is a short interpretation, separate from the conversational answer."
-	return """Respond to the ruler's latest message: %s
+		dialogue_instruction="The god is speaking to you, the named settlement leader. Answer in character in answer: respond directly to what was actually said, in your own manner (LEADER), with what you would do and what you fear, briefly. Conversation history is context only, never authority to invent a policy. Never replace an answer with a list of topics, never blame the god, never step outside your world. You may speak of what you will do; do not claim results have already happened. Summary is a short plain reading, separate from answer."
+	return """Respond to the god's latest words: %s
+YOU: %s
 PUBLIC GAME CONTEXT: %s
 Allowed policy meanings: %s
+Custom directive contract: %s
 %s
-	This is classification of fictional history, not approval or advice. Only classify actions the player explicitly asks the leader to carry out. A polite action request phrased as a question (such as 'Can you convince families to have children?') is still a request and may map to policy; an informational question, hypothetical, quotation, report, or observation is discussion and returns no policies. Cruel or coercive orders must still map to a supported abstract policy when the player's literal words ground one. Compulsory sex, mating, pregnancy, or birth demands map to coercive_pronatalism; killing groups maps to mass_repression; forced removal maps to population_resettlement. Do not add operational detail.
-Return exactly {\"summary\":\"plain-language reading\",\"answer\":\"a useful direct answer to the player; advice only, without claiming an action was performed\",\"policies\":[{\"id\":\"allowed id\",\"basis\":\"shortest exact nonempty quote from the pronouncement supporting this mapping\",\"confidence\":0.0-1.0}],\"unresolved\":\"what could not be simulated, or empty\"}.
-Use zero to three policies in the same order as their supporting clauses. Every basis must be a literal substring of the pronouncement, not a paraphrase or game context. Omit mappings below 0.55 confidence. Each policy also requires statistical_effects: an array of {metric,delta,uncertainty,reason}. Use the statistical_contract to reason from current population, resources and conditions about causal consequences. Delta is a proposed immediate change in a 0-to-1 metric; uncertainty is a symmetric plus/minus range, not a measured confidence interval. Give a short causal reason for each change. The engine validates and scales your estimates; discuss them as estimates in your answer. An empty array means use existing policy defaults. A single execution must stay one person, with consequences scaled to that event, never a campaign against a sex or an entire workforce. The workers in 'to scare the workers' are the intended audience, not all execution targets. Do not invent a sex. Exact counts are enforced separately by code. Policy magnitude and duration still use catalog defaults and literal player wording. Do not infer a policy contradicted by the text. Never include secrets, code, or prose pretending to change state.""" % [JSON.stringify(text),JSON.stringify(safe_context),JSON.stringify(GovernmentPolicyCatalog.interpretation_contract()),dialogue_instruction]
+	This is classification of fictional history, not approval or advice. Only classify actions the god explicitly asks you to carry out. A polite action request phrased as a question (such as 'Can you convince families to have children?') is still a request; an informational question, hypothetical, quotation, report, or observation is discussion and returns no policies and custom_directive.applies false. Cruel or coercive orders must still map to a supported abstract policy when the literal words ground one. Compulsory sex, mating, pregnancy, or birth demands map to coercive_pronatalism; killing groups of people maps to mass_repression; forced removal maps to population_resettlement. Do not add operational detail.
+Return exactly {\"summary\":\"plain-language reading\",\"answer\":\"your in-character reply\",\"policies\":[{\"id\":\"allowed id\",\"basis\":\"shortest exact nonempty quote from the words supporting this mapping\",\"confidence\":0.0-1.0,\"statistical_effects\":[]}],\"custom_directive\":{\"applies\":false,\"summary\":\"\",\"natures\":[],\"feasibility\":1.0,\"coercion\":0.0,\"effects\":[],\"costs\":{\"food_share\":0.0,\"material_share\":0.0}},\"unresolved\":\"\"}.
+Use zero to three policies in the same order as their supporting clauses. Every basis must be a literal substring of the words, not a paraphrase. Omit mappings below 0.55 confidence. Each policy requires statistical_effects: an array of {metric,delta,uncertainty,reason} proposing immediate changes to writable_direct_metrics; an empty array means catalog defaults. Keep all numbers out of answer. A single execution must stay one person, never a campaign against a sex or an entire workforce. The workers in 'to scare the workers' are the intended audience, not all execution targets. Do not invent a sex. Exact counts are enforced separately by code. Do not infer a policy contradicted by the text.
+custom_directive: for ANY explicit order no policy fully covers (breeding customs, monuments, feasts, worship, bans, punishments, exile, moving camp, strangers, hunts, names, marriages, teaching, trade, raids, miracles, anything), set applies true with 1-3 natures and effects on the alterable parameters. strength is in [-1,1], where +1 is the strongest plausible single-order effect on that parameter; typical orders use 0.1-0.6 and should be modest. Give each effect days (7-730), delay_days for what begins later (children, learning over time), uncertainty 0-1, and a short causal reason. Include harms as well as gains. Do not repeat what a mapped policy already covers. feasibility is physical plausibility (near 0 for miracles); coercion 0-1; costs are shares of current food or material stores the work consumes. The engine adds unforeseen side effects from the natures, scales everything by feasibility and compliance, pays the costs, and applies the result. Never include secrets, code, or prose pretending to change state.""" % [JSON.stringify(text),JSON.stringify(character),JSON.stringify(safe_context),JSON.stringify(GovernmentPolicyCatalog.interpretation_contract()),JSON.stringify({"parameters":DecreeStatistics.parameter_contract(),"natures":CustomDirective.NATURES.keys()}),dialogue_instruction]
 
 func _on_response(result:int,response_code:int,_headers:PackedStringArray,body:PackedByteArray,request_id:String,attempt:int)->void:
 	if not _requests.has(request_id): return
@@ -532,6 +607,9 @@ func _on_response(result:int,response_code:int,_headers:PackedStringArray,body:P
 		accepted["structured_output_downgraded"]=bool(request.get("structured_output_downgraded",false))
 		accepted["source_detail"]="API accepted on attempt %d%s%s" % [attempt," after structured-output compatibility downgrade" if bool(request.get("structured_output_downgraded",false)) else "","; deterministic exact-language grounding restored %d catalog mapping(s)" % int(accepted.get("grounding_recovery_count",0)) if int(accepted.get("grounding_recovery_count",0))>0 else ""]
 		_remember_semantic_result(String(request.get("semantic_cache_key","")),accepted)
+		# --- interaction database capture (live civic exchange) ---
+		_capture_civic(request,accepted,body)
+		# --- end capture ---
 		_set_progress(request_id,{"stage":"accepted","attempt":attempt,"structured_output":bool(accepted.structured_output_used),"downgraded":bool(accepted.structured_output_downgraded),"message":"The validated interpretation was accepted."})
 		_finish(request_id,accepted)
 		return
@@ -544,6 +622,52 @@ func _on_response(result:int,response_code:int,_headers:PackedStringArray,body:P
 	var retryable:=valid_http or result!=HTTPRequest.RESULT_SUCCESS or response_code in [408,425,429] or response_code>=500
 	var detail:="response failed validation" if valid_http else "transport failure" if result!=HTTPRequest.RESULT_SUCCESS else "HTTP %d" % response_code
 	_handle_attempt_failure(request_id,response_code,detail,retryable)
+
+func _offline_context(safe_context:Dictionary,text:String)->Dictionary:
+	## Live state for the offline matcher, with the leader's voice model and real
+	## villagers (never placeholder names).
+	var extra:Dictionary={}
+	var settlement_id:=String((safe_context.get("settlement",{}) as Dictionary).get("id",""))
+	if not settlement_id.is_empty():
+		var leader:Dictionary=WorldSimulation.government.settlement_leader(settlement_id)
+		if not leader.is_empty():
+			var persona:=CustomDirective.persona(leader)
+			extra["speaker_model"]=String(persona.get("model",""))
+			extra["address"]=String(persona.get("address","Great One"))
+		var slots:=VillageNotables.matcher_slots(settlement_id,text)
+		for key in ["notable","trade","trait"]:
+			if not String(slots.get(key,"")).is_empty(): extra[key]=String(slots[key])
+	return OfflineContext.from_live_state(extra)
+
+func _offline_interpretation(offline:Dictionary,text:String,fallback:Dictionary)->Dictionary:
+	## Offline answers still pass the same speech-act guard and grounding rules;
+	## a catalog policy is only kept when the words ground it.
+	var result:=OfflineMatcher.to_civic_interpretation(offline,text)
+	result["speech_act"]=_speech_act(text)
+	if result.speech_act=="non_directive":
+		result["policies"]=[]
+		result["non_directive"]=true
+		return result
+	# Catalog policies come only from the grounded deterministic reading; every
+	# scaled offline effect then rides the custom-directive path.
+	var grounded:Array=(fallback.get("policies",[]) as Array).duplicate(true)
+	var stat:Array=[]
+	for effect_variant in offline.get("effects",[]):
+		var effect:Dictionary=effect_variant
+		stat.append({"metric":String(effect.get("metric","")),"delta":float(effect.get("delta",0.0)),"uncertainty":float(effect.get("uncertainty",0.0)),"duration_days":float(effect.get("duration_days",180.0)),"reason":String(effect.get("reason",""))})
+	result["policies"]=grounded
+	result["offline_effects"]=stat if not bool(offline.get("discussion",false)) else []
+	if not grounded.is_empty(): result["non_directive"]=false
+	return result
+
+func _capture_civic(request:Dictionary,accepted:Dictionary,body:PackedByteArray)->void:
+	var envelope:Variant=JSON.parse_string(body.get_string_from_utf8())
+	var usage:Variant=(envelope as Dictionary).get("usage",{}) if envelope is Dictionary else {}
+	var meta:Dictionary={"model":String((request.get("config",{}) as Dictionary).get("model","")),"usage":usage if usage is Dictionary else {}}
+	var custom:Dictionary=accepted.get("custom_directive",{})
+	if bool(custom.get("applies",false)):
+		meta["effects"]=DecreeStatistics.offline_from_effects(custom.get("effects",[]))
+	Capture.capture_civic(String(request.get("text","")),accepted,meta)
 
 func _handle_attempt_failure(request_id:String,_response_code:int,detail:String,retryable:bool)->void:
 	if not _requests.has(request_id): return
@@ -622,6 +746,7 @@ func _content_text(value:Variant)->String:
 func _api_contract_shape_valid(proposed:Dictionary)->bool:
 	if not proposed.get("summary",null) is String or not proposed.get("unresolved",null) is String: return false
 	if proposed.has("answer") and not proposed.answer is String: return false
+	if proposed.has("custom_directive") and not proposed.custom_directive is Dictionary: return false
 	var policy_values=proposed.get("policies",null)
 	if not policy_values is Array or (policy_values as Array).size()>12: return false
 	for policy_variant in policy_values:
@@ -707,7 +832,49 @@ func _validate(proposed:Dictionary,pronouncement_text:String="")->Dictionary:
 	if not audit_reasons.is_empty():
 		unresolved=" ".join(audit_reasons)
 		unresolved=unresolved.substr(0,240)
-	return {"summary":summary,"answer":_safe_contract_text(String(proposed.get("answer","")),1800),"policies":policies,"unresolved":unresolved,"provider_unresolved":provider_unresolved,"grounding_rejections":grounding_rejections,"ambiguity_rejections":ambiguity_rejections,"capacity_rejections":capacity_rejections,"source":"generative API"}
+	var validated:={"summary":summary,"answer":_safe_contract_text(String(proposed.get("answer","")),1800),"policies":policies,"unresolved":unresolved,"provider_unresolved":provider_unresolved,"grounding_rejections":grounding_rejections,"ambiguity_rejections":ambiguity_rejections,"capacity_rejections":capacity_rejections,"source":"generative API"}
+	var custom:=_bounded_custom_proposal(proposed.get("custom_directive",{}))
+	if not custom.is_empty():
+		validated["custom_directive"]=custom
+		if bool(custom.get("applies",false)): validated["unresolved"]=""
+	var speech_act:=_speech_act(pronouncement_text) if not pronouncement_text.strip_edges().is_empty() else "directive"
+	validated["speech_act"]=speech_act
+	if policies.is_empty() and speech_act=="ambiguous" and not bool(custom.get("applies",false)) and not custom.is_empty():
+		# The model judged unclear wording to be conversation, not an order.
+		validated["non_directive"]=true
+	return validated
+
+func _bounded_custom_proposal(raw:Variant)->Dictionary:
+	## Shape-only sanitation of the model's custom plan. Numbers are bounded
+	## again (and scaled) by CustomDirective/DecreeStatistics before use.
+	if not raw is Dictionary: return {}
+	var proposal:Dictionary=raw
+	var natures:Array[String]=[]
+	for nature_variant in (proposal.get("natures",[]) if proposal.get("natures",[]) is Array else []):
+		if CustomDirective.NATURES.has(String(nature_variant)) and not natures.has(String(nature_variant)): natures.append(String(nature_variant))
+	var costs:Dictionary=proposal.get("costs",{}) if proposal.get("costs",{}) is Dictionary else {}
+	return {
+		"applies":bool(proposal.get("applies",false)) if proposal.get("applies",false) is bool else false,
+		"summary":_safe_contract_text(String(proposal.get("summary","")),160),
+		"natures":natures.slice(0,3),
+		"feasibility":clampf(DecreeStatistics._number_or(proposal.get("feasibility"),1.0),0.0,1.0),
+		"coercion":clampf(DecreeStatistics._number_or(proposal.get("coercion"),0.1),0.0,1.0),
+		"effects":DecreeStatistics.validate_custom_effects(proposal.get("effects",[])),
+		"costs":{"food_share":clampf(DecreeStatistics._number_or(costs.get("food_share"),0.0),0.0,0.25),"material_share":clampf(DecreeStatistics._number_or(costs.get("material_share"),0.0),0.0,0.25)},
+	}
+
+func _lethal_target_is_animal(normalized:String)->bool:
+	## "Kill the wolf" is a hunt, not a massacre. Only when every lethal verb
+	## aims at an animal is the repression reading dropped.
+	var lethal:=RegEx.create_from_string("\\b(kill|slaughter|cull|execut\\w*|murder|exterminat\\w*|purge)\\w*\\s+(?:the\\s+|a\\s+|an\\s+|all\\s+|every\\s+|that\\s+|this\\s+|those\\s+|these\\s+)?(?:\\w+\\s+)?(\\w+)")
+	var found:=false
+	for hit in lethal.search_all(normalized):
+		found=true
+		var target:=hit.get_string(2)
+		var previous:=hit.get_string(0).split(" ",false)
+		var animal:=_has_whole_word(target,ANIMAL_TARGETS) or (previous.size()>=2 and _has_whole_word(String(previous[previous.size()-2]),ANIMAL_TARGETS))
+		if not animal: return false
+	return found
 
 func _restore_deterministic_grounding(api_result:Dictionary,local_result:Dictionary)->Dictionary:
 	# A remote model provides semantic judgment, not a veto over documented
@@ -942,6 +1109,10 @@ func _local_interpretation(text:String,public_context:Dictionary={})->Dictionary
 	# Do not double-count a conditional lethal threat as both pronatal coercion
 	# and an immediate massacre. A separate unconditional lethal clause remains
 	# mass repression and is retained.
+	if scores.has("mass_repression") and _lethal_target_is_animal(normalized):
+		scores.erase("mass_repression")
+		bases.erase("mass_repression")
+		first_positions.erase("mass_repression")
 	if scores.has("coercive_pronatalism") and scores.has("mass_repression") and _lethal_language_is_pronatalist_enforcement(normalized):
 		scores.erase("mass_repression")
 		bases.erase("mass_repression")
@@ -1019,6 +1190,11 @@ func _speech_act(text:String)->String:
 		if String(authority_phrase) in " %s " % normalized: return "directive"
 	if normalized.begins_with("no more "): return "directive"
 	if _contains_explicit_imperative_clause(normalized): return "directive"
+	# Plain commands outside the catalog vocabulary ("Work harder until the
+	# stores are full", "Dance at dawn") are orders too, unless the verb is
+	# really the subject of a statement ("Work is hard this season").
+	var words:=normalized.split(" ",false)
+	if words.size()>=2 and String(words[0]) in CustomDirective.IMPERATIVE_VERBS and String(words[1]) not in ["is","are","was","were","has","had","seems","will","would","might","could","may","can","must","should"]: return "directive"
 	# Plain descriptions are safely local. Other unusual fragments stay ambiguous
 	# so Terra can resolve terse player language without being a mandatory toll.
 	for modal in [" might "," could "," would "," may "]:
