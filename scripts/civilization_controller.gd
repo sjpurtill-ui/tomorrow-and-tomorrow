@@ -79,7 +79,8 @@ static func order_steps(id:String)->Array:
 			WorldSimulation.submit(id,{"kind":"ambition","id":century_plan.ambition})
 			research_orders(id,century_plan)
 		if not WorldSimulation.state.settlement_site_committed:
-			if WorldSimulation.state.convoy_traveling:return null
+			# A caravan leader's own camp is part of the journey, not a stop to re-plan.
+			if WorldSimulation.state.convoy_traveling or preload("res://scripts/civilization_travel.gd").underway():return null
 			var founded:=WorldSimulation.submit(id,{"kind":"found"})
 			if founded.has("error"):
 				var home:=WorldSimulation.world.player_world_origin

@@ -97,8 +97,6 @@ func start_scenario()->Dictionary:
 		force["commander"]={"name":["Sera Venn","Oren Hale"][i],"command":.6,"tactics":.6,"logistics":.6,"resolve":.6}
 		state.rivals.append({"id":String(civ.id),"name":String(civ.name),"leader":["Sera Venn","Oren Hale"][i],"home":home,"cell":home,"force":force,"food":160.0*8*RATION,"reserve_food":160.0*12*RATION,"plan":"hold","goal":["Keep the crossing and its tolls","Keep the coalition alive without losing the council's army"][i],"memory":[],"seen":{},"adaptations":0,"last_signature":"","model_events":0,"fortification":1.5,"control":"rival"})
 		state.seen[String(civ.id)]={"name":civ.name,"home":home,"cell":home,"troops":160,"day":WorldSimulation.state.elapsed_days}
-	WorldSimulation.world.contender_dominance_turns={"player":0}
-	for civ:Dictionary in WorldSimulation.world.civilizations:WorldSimulation.world.contender_dominance_turns[String(civ.id)]=0
 	WorldSimulation.world._initialize_foreign_formations(551188)
 	# The standard bounded patrol slots remain in reserve while these same
 	# polities' forces are committed to the authored command campaign.
