@@ -1652,7 +1652,8 @@ func _process_diplomatic_mission(day:int)->void:
 		civ=civilizations[index]
 		relation=_relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
 		var diplomatic_report:=_diplomatic_return_report(civ,relation,diplomatic_mission,day)
-		for find:Dictionary in Exchange.returned(diplomatic_mission,day):
+		var envoy_finds:=Exchange.returned(diplomatic_mission,day)
+		for find:Dictionary in envoy_finds:
 			diplomatic_report.observations.append("Brought home: "+String(find.title)+". "+String(find.consequence))
 		relation["contact_intelligence"]=clampf(float(relation.get("contact_intelligence",0.0))+float(diplomatic_report.get("intelligence_gain",0.0)),0.0,0.95)
 		relation["last_observed_day"]=day
@@ -1672,6 +1673,7 @@ func _process_diplomatic_mission(day:int)->void:
 		WorldSimulation.state.simulation_events.push_front({"day":day,"title":"DIPLOMATS RETURN","description":message,"domain":"diplomacy","severity":"major"})
 		diplomatic_mission.clear()
 		_record_world_event("Diplomatic mission returns",message,"diplomacy",day,{"kind":"diplomatic_return","civ_id":civ_id,"outcome":outcome})
+		_chief_scout_report({"day":day,"civ_id":civ_id,"civ_name":String(civ.name),"purpose":purpose,"accepted":accepted,"outcome":outcome,"city_observations":diplomatic_report.get("city_observations",[]),"brought_home":envoy_finds},"envoys")
 	civ["player_relation"]=relation
 	civilizations[index]=civ
 
@@ -2633,9 +2635,20 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	last_scout_outcome={"mission_id":int(mission.get("mission_id",0)),"day":day,"status":"returned","personnel":int(report.personnel),"message":message}
 	_record_world_event("City reconnaissance returns" if String(mission.get("target_kind",""))=="observe_city" else "Recruitment party returns" if is_recruitment else "Scout party returns",message,"diplomacy",day)
 	scout_report_returned.emit(report.duplicate(true))
+	# The Chief Scout asks for an audience to tell the court what the party saw.
+	_chief_scout_report(report,"scouts")
 	if ScoutArchive.should_notify(report):
 		WorldSimulation.state.simulation_events.push_front({"day":day,"title":"CITY RECONNAISSANCE" if String(mission.get("target_kind",""))=="observe_city" else "RECRUITMENT PARTY RETURNS" if is_recruitment else "SCOUTS RETURN","description":message,"domain":"diplomacy","severity":"major"})
 	_erase_scout_mission(mission)
+
+
+func _chief_scout_report(event:Dictionary,source:String)->void:
+	# Loaded, not preloaded: the court debrief is optional and must never stop
+	# the world simulation from compiling or a party from coming home.
+	if not ResourceLoader.exists("res://scripts/chief_scout.gd"): return
+	var script:=load("res://scripts/chief_scout.gd") as Script
+	if script==null or not script.can_instantiate(): return
+	script.call("report_returned",event,source)
 
 
 func _compose_scout_journal(mission:Dictionary,route:Array)->Array[String]:
