@@ -267,8 +267,8 @@
       "domain": "logistics",
       "id": "domesticated_mounts",
       "name": "Domesticated Mounts",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/domesticated_mounts.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/domesticated_mounts.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Domesticated Mounts. Depict this exact practice: Selected bloodlines accept riders. A mounted person moves like weather, not like walking. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -277,8 +277,8 @@
       "domain": "logistics",
       "id": "mounted_scouts",
       "name": "Mounted Scouting",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/mounted_scouts.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/mounted_scouts.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Mounted Scouting. Depict this exact practice: Riders range in days across country that costs walkers weeks, and return fresh enough to tell it. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -387,8 +387,8 @@
       "domain": "production",
       "id": "woven_carriers",
       "name": "Woven Carriers",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/woven_carriers.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/woven_carriers.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Woven Carriers. Depict this exact practice: Fitted baskets and slings let one carrier move more while keeping both hands free. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -397,8 +397,8 @@
       "domain": "infrastructure",
       "id": "rope_rigging",
       "name": "Rope Rigging",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/rope_rigging.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/rope_rigging.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Rope Rigging. Depict this exact practice: Standard ropes, blocks, and lifting teams make heavy loads controllable. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -457,8 +457,8 @@
       "domain": "infrastructure",
       "id": "wedges_and_levers",
       "name": "Wedges and Levers",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/wedges_and_levers.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/wedges_and_levers.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Wedges and Levers. Depict this exact practice: Coordinated wedges and levers turn human effort into controlled movement of heavy stone. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -467,8 +467,8 @@
       "domain": "production",
       "id": "lime_burning",
       "name": "Lime Burning",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/lime_burning.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/lime_burning.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Lime Burning. Depict this exact practice: Burned limestone becomes a reactive powder that binds, coats, disinfects, and alters soil. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -477,8 +477,8 @@
       "domain": "infrastructure",
       "id": "lime_mortar",
       "name": "Lime Mortar",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/lime_mortar.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/lime_mortar.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Lime Mortar. Depict this exact practice: Measured lime, sand, and water produce joints that harden into enduring masonry. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -487,8 +487,8 @@
       "domain": "nutrition",
       "id": "salt_working",
       "name": "Salt Working",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/salt_working.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/salt_working.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Salt Working. Depict this exact practice: Evaporation and scraping turn saline earth or water into a dependable preservative. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -507,8 +507,8 @@
       "domain": "production",
       "id": "peat_drying",
       "name": "Peat Drying",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/peat_drying.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/peat_drying.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Peat Drying. Depict this exact practice: Cut peat stacked above wet ground becomes a compact, transportable fuel. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -517,8 +517,8 @@
       "domain": "production",
       "id": "ore_assaying",
       "name": "Comparative Ore Assay",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/ore_assaying.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/ore_assaying.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Comparative Ore Assay. Depict this exact practice: Crushed samples, controlled heat, and recorded outcomes distinguish promising ore from colorful stone. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -527,8 +527,8 @@
       "domain": "production",
       "id": "copper_smelting",
       "name": "Copper Smelting",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/copper_smelting.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/copper_smelting.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Copper Smelting. Depict this exact practice: Hot charcoal and carefully selected ore yield beads of workable metal. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -537,8 +537,8 @@
       "domain": "production",
       "id": "copper_casting",
       "name": "Reusable Casting",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/copper_casting.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/copper_casting.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Reusable Casting. Depict this exact practice: Prepared molds make metal forms repeatable, divisible, and repairable. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -547,8 +547,8 @@
       "domain": "production",
       "id": "bronze_alloying",
       "name": "Bronze Alloying",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/bronze_alloying.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/bronze_alloying.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Bronze Alloying. Depict this exact practice: Copper and tin in controlled proportions produce a harder, more reliable material. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -557,8 +557,8 @@
       "domain": "infrastructure",
       "id": "mine_shoring",
       "name": "Timbered Mine Shoring",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/mine_shoring.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/mine_shoring.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Timbered Mine Shoring. Depict this exact practice: Regular supports and inspection practices let workings extend beyond self-supporting ground. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -567,8 +567,8 @@
       "domain": "infrastructure",
       "id": "mine_drainage",
       "name": "Mine Drainage",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/mine_drainage.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/mine_drainage.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Mine Drainage. Depict this exact practice: Sumps, channels, and lifting chains keep deeper workings usable. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -577,8 +577,8 @@
       "domain": "infrastructure",
       "id": "bitumen_sealing",
       "name": "Bitumen Sealing",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/bitumen_sealing.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/bitumen_sealing.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Bitumen Sealing. Depict this exact practice: Heated bitumen seals roofs, containers, hulls, and vulnerable road surfaces. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -727,8 +727,8 @@
       "domain": "knowledge",
       "id": "material_accounting",
       "name": "Material Accounting",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/material_accounting.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/material_accounting.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Material Accounting. Depict this exact practice: Stores are recorded by source, quality, loss, obligation, and intended use rather than as a single heap. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -737,8 +737,8 @@
       "domain": "knowledge",
       "id": "workshop_standards",
       "name": "Workshop Standards",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/workshop_standards.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/workshop_standards.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Workshop Standards. Depict this exact practice: Patterns, tolerances, and named grades let knowledge survive individual makers. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -767,8 +767,8 @@
       "domain": "nutrition",
       "id": "seed_reserves",
       "name": "Protected Seed Reserves",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/seed_reserves.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/seed_reserves.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Protected Seed Reserves. Depict this exact practice: The best seed is separated from ordinary food stores and protected through lean seasons. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -777,8 +777,8 @@
       "domain": "nutrition",
       "id": "irrigation_schedules",
       "name": "Irrigation Schedules",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/irrigation_schedules.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/irrigation_schedules.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Irrigation Schedules. Depict this exact practice: Households coordinate water turns so upstream use no longer destroys downstream crops. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -787,8 +787,8 @@
       "domain": "nutrition",
       "id": "crop_rotation",
       "name": "Crop Rotation",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/crop_rotation.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/crop_rotation.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Crop Rotation. Depict this exact practice: Different crops are sequenced to preserve soil and disrupt recurring pests. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -797,8 +797,8 @@
       "domain": "nutrition",
       "id": "grain_milling",
       "name": "Rotary Grain Milling",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/grain_milling.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/grain_milling.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Rotary Grain Milling. Depict this exact practice: Rotary stones convert stored grain into digestible flour with less labor. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -807,8 +807,8 @@
       "domain": "nutrition",
       "id": "fermentation_control",
       "name": "Controlled Fermentation",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/fermentation_control.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/fermentation_control.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Controlled Fermentation. Depict this exact practice: Temperature, vessels, and starter cultures are managed to reproduce fermentation. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -817,8 +817,8 @@
       "domain": "nutrition",
       "id": "regional_granaries",
       "name": "Regional Granaries",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/regional_granaries.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/regional_granaries.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Regional Granaries. Depict this exact practice: Surplus is distributed among measured, inspected stores rather than concentrated in one vulnerable reserve. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -837,8 +837,8 @@
       "domain": "nutrition",
       "id": "intensive_gardens",
       "name": "Intensive Market Gardens",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/intensive_gardens.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/intensive_gardens.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Intensive Market Gardens. Depict this exact practice: Highly tended plots near settlements produce diverse perishables for dense populations. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -847,8 +847,8 @@
       "domain": "health",
       "id": "birth_attendants",
       "name": "Experienced Birth Attendants",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/birth_attendants.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/birth_attendants.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Experienced Birth Attendants. Depict this exact practice: Birth attendants preserve positioning, cleanliness, warning signs, and methods of assisting difficult labor. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -867,8 +867,8 @@
       "domain": "health",
       "id": "isolation_practice",
       "name": "Isolation Practice",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/isolation_practice.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/isolation_practice.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Isolation Practice. Depict this exact practice: Repeated outbreaks reveal that separating the visibly ill can interrupt some chains of sickness. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -877,8 +877,8 @@
       "domain": "health",
       "id": "case_records",
       "name": "Medical Case Records",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/case_records.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/case_records.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Medical Case Records. Depict this exact practice: Treatments and outcomes are recorded together, exposing remedies that fail as well as those that help. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -887,8 +887,8 @@
       "domain": "health",
       "id": "trained_midwives",
       "name": "Trained Midwives",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/trained_midwives.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/trained_midwives.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Trained Midwives. Depict this exact practice: Birth knowledge is taught deliberately and evaluated through recorded outcomes. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -947,8 +947,8 @@
       "domain": "knowledge",
       "id": "pictographic_records",
       "name": "Pictographic Records",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/pictographic_records.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/pictographic_records.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Pictographic Records. Depict this exact practice: Marks begin preserving categories, events, and obligations rather than quantities alone. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -987,8 +987,8 @@
       "domain": "knowledge",
       "id": "geometric_survey",
       "name": "Geometric Survey",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/geometric_survey.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/geometric_survey.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Geometric Survey. Depict this exact practice: Angles, baselines, and repeatable procedures turn land measurement into geometry. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -1067,8 +1067,8 @@
       "domain": "institutions",
       "id": "census_rolls",
       "name": "Household Census Rolls",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/census_rolls.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/census_rolls.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Household Census Rolls. Depict this exact practice: Households, ages, dependents, occupations, and obligations are counted by name. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -1077,8 +1077,8 @@
       "domain": "institutions",
       "id": "public_levies",
       "name": "Scheduled Public Levies",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/public_levies.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/public_levies.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Scheduled Public Levies. Depict this exact practice: Public labor and material obligations become scheduled, recorded, and appealable. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -1157,8 +1157,8 @@
       "domain": "infrastructure",
       "id": "timber_bridges",
       "name": "Timber Bridges",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/timber_bridges.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/timber_bridges.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Timber Bridges. Depict this exact practice: Standard trusses carry roads across water and unstable ground. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -1257,8 +1257,8 @@
       "domain": "security",
       "id": "fortified_stores",
       "name": "Fortified Stores",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/fortified_stores.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/fortified_stores.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Fortified Stores. Depict this exact practice: Critical reserves are separated, guarded, fire-protected, and designed to resist seizure. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -1267,8 +1267,8 @@
       "domain": "security",
       "id": "siege_engineering",
       "name": "Siege Engineering",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/siege_engineering.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/siege_engineering.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Siege Engineering. Depict this exact practice: Measured frames, counterweights, protective works, and supply schedules organize attacks on fortifications. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -1287,8 +1287,8 @@
       "domain": "security",
       "id": "professional_corps",
       "name": "Professional Military Corps",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/professional_corps.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/professional_corps.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Professional Military Corps. Depict this exact practice: A permanent body trains, records equipment, maintains readiness, and preserves doctrine. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -1307,8 +1307,8 @@
       "domain": "security",
       "id": "battlefield_medicine",
       "name": "Battlefield Medicine",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/battlefield_medicine.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/battlefield_medicine.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Battlefield Medicine. Depict this exact practice: Triage, evacuation, clean instruments, and organized convalescence reduce deaths after injury. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -1387,8 +1387,8 @@
       "domain": "security",
       "id": "war_chariots",
       "name": "Military Chariots",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/war_chariots.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/war_chariots.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Military Chariots. Depict this exact practice: Develop and demonstrate military chariots through trained crews, reliable equipment and repeatable supply. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -1397,8 +1397,8 @@
       "domain": "security",
       "id": "armored_riding",
       "name": "Armored Riding",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/armored_riding.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/armored_riding.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Armored Riding. Depict this exact practice: Develop and demonstrate armored riding through trained crews, reliable equipment and repeatable supply. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -1407,8 +1407,8 @@
       "domain": "security",
       "id": "elephant_training",
       "name": "Working Elephant Training",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/elephant_training.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/elephant_training.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Working Elephant Training. Depict this exact practice: Develop and demonstrate working elephant training through trained crews, reliable equipment and repeatable supply. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -1857,8 +1857,8 @@
       "domain": "labor",
       "id": "crew_handoffs",
       "name": "Crew Handoffs",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/crew_handoffs.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/crew_handoffs.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Crew Handoffs. Depict this exact practice: Checked tallies let the next crew continue unfinished work without duplicating the previous shift. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -1967,8 +1967,8 @@
       "domain": "logistics",
       "id": "cargo_seals",
       "name": "Cargo Seals",
-      "status": "queued",
-      "asset": "res://assets/ui/research/paper/cargo_seals.png",
+      "status": "verified",
+      "asset": "res://assets/ui/research/paper/first300-cards/cargo_seals.tres",
       "prompt": "Use case: historical-scene. Create ONE square finished technology-tree illustration for Tomorrow and Tomorrow. The attached approved Apprentice Contracts image is the binding STYLE reference, not a subject template. Match its spare gouache and dry-brush print illustration, flat simplified color masses, almost featureless faces, matte pigments, fibrous warm ivory paper, distressed grain, irregular brushed edges, no outlines. Restrained palette of ochre, muted terracotta, charcoal, dark olive and optional slate blue. Asymmetrical and contemplative composition; clear subject in the lower half and generous untouched paper above; ground and background dissolve into paper. Make each scene distinct and specific to its technology, not always two seated artisans. Clothing, tools and setting must fit the actual historical stage of THIS technology, including appropriate industrial equipment for later discoveries. Communicate the practice through readable silhouettes and human gestures. No text, labels, borders, UI, watermark, flags, photorealism, glossy 3D, or cinematic lighting. Specific technology: Cargo Seals. Depict this exact practice: Marked seals allow comparison of dispatched and received cargo to identify losses along a route. Focus on the distinctive materials, action or mechanism, not another invention. One coherent scene, no montage."
     },
     {
@@ -2053,21 +2053,21 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/flour_sifting.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/flour_sifting.tres",
       "description": "Meshes separate fine flour from edible bran. Both fractions remain in the food ledger; a small handling loss is recorded.",
       "domain": "nutrition",
       "id": "flour_sifting",
       "name": "Flour Sifting",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/grain_malting.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/grain_malting.tres",
       "description": "A portion of suitable grain is steeped, germinated and dried over four days. It is unavailable while in process and returns with less stored food energy.",
       "domain": "nutrition",
       "id": "grain_malting",
       "name": "Grain Malting",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -2116,93 +2116,93 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/grain_parboiling.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/grain_parboiling.tres",
       "description": "Heat and moisten a suitable cereal share, then dry and dehull it in a later paid handling step. Water, fuel, vessels and finite shared handlers limit throughput; damp grain remains unavailable until finished.",
       "domain": "nutrition",
       "id": "grain_parboiling",
       "name": "Grain Parboiling",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/indirect_solar_food_drying.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/indirect_solar_food_drying.tres",
       "description": "A paid collector, air path and screened trays dry suitable plant lots using ambient warmth. Weather limits throughput; retained wet lots need later handling and cannot be issued as finished food.",
       "domain": "nutrition",
       "id": "indirect_solar_food_drying",
       "name": "Indirect Solar Food Drying",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/food_pounding_mortars.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/food_pounding_mortars.tres",
       "description": "Break or separate suitable food material through controlled impact in a fitted receptacle. Compatible pounding tools, actual food and labor.",
       "domain": "nutrition",
       "id": "food_pounding_mortars",
       "name": "Food Pounding Mortars",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/hand_dough_forming.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/hand_dough_forming.tres",
       "description": "Shape a prepared dough through repeated hand or simple-tool work. Suitable ingredients, working surface and skilled labor.",
       "domain": "nutrition",
       "id": "hand_dough_forming",
       "name": "Hand Dough Forming",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/dough_leavening.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/dough_leavening.tres",
       "description": "Retain fermentation gases within a prepared dough structure. Flour, water, a maintained ferment and suitable conditions.",
       "domain": "nutrition",
       "id": "dough_leavening",
       "name": "Dough Leavening",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/controlled_baking.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/controlled_baking.tres",
       "description": "Apply a repeatable heating schedule to prepared food. Oven, fuel, monitoring and trained operators.",
       "domain": "nutrition",
       "id": "controlled_baking",
       "name": "Controlled Baking",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/fermentation_starter_cultures.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/fermentation_starter_cultures.tres",
       "description": "Maintain and use characterized cultures for a specified food fermentation. Qualified cultures, suitable substrate, hygiene and controlled process conditions.",
       "domain": "nutrition",
       "id": "fermentation_starter_cultures",
       "name": "Fermentation Starter Cultures",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/cereal_dehulling.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/cereal_dehulling.tres",
       "description": "Separate protective grain coverings while limiting loss of edible material. Suitable grain, mechanical tools and practiced separation.",
       "domain": "nutrition",
       "id": "cereal_dehulling",
       "name": "Cereal Dehulling",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/starch_washing_separation.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/starch_washing_separation.tres",
       "description": "Separate suitable starch-rich fractions by controlled washing and settling. Recognized feedstock, suitable water, vessels and labor.",
       "domain": "nutrition",
       "id": "starch_washing_separation",
       "name": "Starch Washing Separation",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/postharvest_loss_measurement.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/postharvest_loss_measurement.tres",
       "description": "Measure quantity and quality losses across defined handling stages with explicit boundaries. Representative observation, scales, condition assessment and records.",
       "domain": "nutrition",
       "id": "postharvest_loss_measurement",
       "name": "Postharvest Loss Measurement",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -2503,75 +2503,75 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/root_cellars.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/root_cellars.tres",
       "description": "Below-ground stores buffer temperature swings while drainage keeps stored roots away from standing water.",
       "domain": "nutrition",
       "id": "root_cellars",
       "name": "Root Cellars",
-      "status": "queued",
+      "status": "verified",
       "day": 700
     },
     {
-      "asset": "res://assets/ui/research/paper/raised_granaries.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/raised_granaries.tres",
       "description": "Raised floors and separated supports keep grain away from damp ground and make animal access harder.",
       "domain": "nutrition",
       "id": "raised_granaries",
       "name": "Raised Granaries",
-      "status": "queued",
+      "status": "verified",
       "day": 950
     },
     {
-      "asset": "res://assets/ui/research/paper/hermetic_grain_storage.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/hermetic_grain_storage.tres",
       "description": "Dry grain is enclosed in carefully sealed containers instead of repeatedly exposing the whole reserve.",
       "domain": "nutrition",
       "id": "hermetic_grain_storage",
       "name": "Hermetic Grain Storage",
-      "status": "queued",
+      "status": "verified",
       "day": 2300
     },
     {
-      "asset": "res://assets/ui/research/paper/brine_fermentation.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/brine_fermentation.tres",
       "description": "Repeated batches compare salt concentration, vessel care and keeping time for fermented vegetables.",
       "domain": "nutrition",
       "id": "brine_fermentation",
       "name": "Brine Fermentation",
-      "status": "queued",
+      "status": "verified",
       "day": 3100
     },
     {
-      "asset": "res://assets/ui/research/paper/vinegar_pickling.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/vinegar_pickling.tres",
       "description": "Soured fermented liquids are reused in measured batches to keep plant foods longer.",
       "domain": "nutrition",
       "id": "vinegar_pickling",
       "name": "Vinegar Pickling",
-      "status": "queued",
+      "status": "verified",
       "day": 6000
     },
     {
-      "asset": "res://assets/ui/research/paper/stock_rotation.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/stock_rotation.tres",
       "description": "Storekeepers mark incoming batches and issue older usable stock before new deliveries.",
       "domain": "nutrition",
       "id": "stock_rotation",
       "name": "Dated Stock Rotation",
-      "status": "queued",
+      "status": "verified",
       "day": 4500
     },
     {
-      "asset": "res://assets/ui/research/paper/protected_wellheads.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/protected_wellheads.tres",
       "description": "Raised well rims, covers and drainage carry dirty surface water away from the opening.",
       "domain": "health",
       "id": "protected_wellheads",
       "name": "Protected Wellheads",
-      "status": "queued",
+      "status": "verified",
       "day": 1300
     },
     {
-      "asset": "res://assets/ui/research/paper/rainwater_cisterns.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/rainwater_cisterns.tres",
       "description": "Catchment surfaces feed lined reserves that retain water between rainfalls.",
       "domain": "infrastructure",
       "id": "rainwater_cisterns",
       "name": "Rainwater Cisterns",
-      "status": "queued",
+      "status": "verified",
       "day": 2200
     },
     {
@@ -2584,12 +2584,12 @@
       "day": 3500
     },
     {
-      "asset": "res://assets/ui/research/paper/slow_sand_filtration.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/slow_sand_filtration.tres",
       "description": "Operators compare water passed slowly through maintained sand beds and clean the beds without abandoning their working layer.",
       "domain": "health",
       "id": "slow_sand_filtration",
       "name": "Slow Sand Filtration",
-      "status": "queued",
+      "status": "verified",
       "day": 24000
     },
     {
@@ -2602,21 +2602,21 @@
       "day": 13000
     },
     {
-      "asset": "res://assets/ui/research/paper/separate_clean_water_storage.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/separate_clean_water_storage.tres",
       "description": "Dedicated covered vessels and separate dipping tools prevent cleaned water from being mixed with untreated supplies.",
       "domain": "health",
       "id": "separate_clean_water_storage",
       "name": "Separate Clean-Water Storage",
-      "status": "queued",
+      "status": "verified",
       "day": 5500
     },
     {
-      "asset": "res://assets/ui/research/paper/skirmish_pair_drill.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/skirmish_pair_drill.tres",
       "description": "Partners practice alternating observation and movement so a dispersed screen can remain mutually supporting.",
       "domain": "security",
       "id": "skirmish_pair_drill",
       "name": "Skirmish Pair Drill",
-      "status": "queued",
+      "status": "verified",
       "day": 650
     },
     {
@@ -2629,30 +2629,30 @@
       "day": 2200
     },
     {
-      "asset": "res://assets/ui/research/paper/siege_crew_rehearsals.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/siege_crew_rehearsals.tres",
       "description": "Crews rehearse assembly, safe loading and coordinated operation before transporting engines into a siege.",
       "domain": "security",
       "id": "siege_crew_rehearsals",
       "name": "Siege Crew Rehearsals",
-      "status": "queued",
+      "status": "verified",
       "day": 4600
     },
     {
-      "asset": "res://assets/ui/research/paper/mountain_field_school.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/mountain_field_school.tres",
       "description": "Instructors teach route selection, load distribution and group movement over steep broken ground.",
       "domain": "security",
       "id": "mountain_field_school",
       "name": "Mountain Field School",
-      "status": "queued",
+      "status": "verified",
       "day": 9200
     },
     {
-      "asset": "res://assets/ui/research/paper/range_estimation_drill.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/range_estimation_drill.tres",
       "description": "Measured ranges and repeated observation teach shooters to estimate distance and correct their aim.",
       "domain": "security",
       "id": "range_estimation_drill",
       "name": "Range Estimation Drill",
-      "status": "queued",
+      "status": "verified",
       "day": 18000
     },
     {
@@ -3763,12 +3763,12 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/casualty_collection_posts.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/casualty_collection_posts.tres",
       "description": "Marked collection points let bearers find waiting casualties instead of searching the whole camp repeatedly.",
       "domain": "security",
       "id": "casualty_collection_posts",
       "name": "Casualty Collection Posts",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -3781,21 +3781,21 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/evacuation_relays.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/evacuation_relays.tres",
       "description": "Successive carrying teams exchange patients at agreed points rather than exhausting one team on the entire journey.",
       "domain": "security",
       "id": "evacuation_relays",
       "name": "Casualty Evacuation Relays",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/field_aid_stations.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/field_aid_stations.tres",
       "description": "Organized sheltered care concentrates trained personnel and expendable supplies behind the fighting force.",
       "domain": "security",
       "id": "field_aid_stations",
       "name": "Field Aid Stations",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -3808,12 +3808,12 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/medical_resupply_packing.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/medical_resupply_packing.tres",
       "description": "Standard care bundles make shortages visible before a receiving station exhausts its dressings and supplies.",
       "domain": "security",
       "id": "medical_resupply_packing",
       "name": "Medical Resupply Packing",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -3826,12 +3826,12 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/field_armorer_teams.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/field_armorer_teams.tres",
       "description": "Trained crews inspect damaged equipment and organize tools and repair work before returning serviceable items to stores.",
       "domain": "security",
       "id": "field_armorer_teams",
       "name": "Field Armorer Teams",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -3853,39 +3853,39 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/sowing_depth_trials.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/sowing_depth_trials.tres",
       "description": "Comparable seed is planted at measured depths to find which placements emerge reliably in the local soil.",
       "domain": "nutrition",
       "id": "sowing_depth_trials",
       "name": "Sowing Depth Trials",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/row_spacing_trials.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/row_spacing_trials.tres",
       "description": "Parallel planted strips compare crowding, access and harvest without confusing spacing with seed quality.",
       "domain": "nutrition",
       "id": "row_spacing_trials",
       "name": "Row Spacing Trials",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/seedbed_firming.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/seedbed_firming.tres",
       "description": "Farmers compare seed contact and emergence after carefully pressing rather than merely loosening a seedbed.",
       "domain": "nutrition",
       "id": "seedbed_firming",
       "name": "Seedbed Firming",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/mass_seed_selection.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/mass_seed_selection.tres",
       "description": "Seed from many desirable plants is pooled across harvests while retaining enough plants to avoid a narrow accidental lineage.",
       "domain": "nutrition",
       "id": "mass_seed_selection",
       "name": "Mass Seed Selection",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -3925,21 +3925,21 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/crop_residue_cover.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/crop_residue_cover.tres",
       "description": "Harvest residue is retained over soil instead of leaving the surface entirely exposed between crops.",
       "domain": "nutrition",
       "id": "crop_residue_cover",
       "name": "Crop Residue Cover",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/green_manure_crops.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/green_manure_crops.tres",
       "description": "A deliberately grown crop is returned to the soil rather than harvested for food, exchanging immediate output for land condition.",
       "domain": "nutrition",
       "id": "green_manure_crops",
       "name": "Green Manure Crops",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -3952,12 +3952,12 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/contour_cultivation.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/contour_cultivation.tres",
       "description": "Cultivation follows measured contours so disturbed soil and runoff are less directly connected down a slope.",
       "domain": "nutrition",
       "id": "contour_cultivation",
       "name": "Contour Cultivation",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -3979,21 +3979,21 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/soil_infiltration_trials.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/soil_infiltration_trials.tres",
       "description": "Measured additions of water reveal differences in infiltration and surface sealing that visual soil descriptions miss.",
       "domain": "nutrition",
       "id": "soil_infiltration_trials",
       "name": "Soil Infiltration Trials",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/mulch_water_management.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/mulch_water_management.tres",
       "description": "Cover depth and placement are compared against water retention and emergence instead of applying the same mulch everywhere.",
       "domain": "nutrition",
       "id": "mulch_water_management",
       "name": "Mulch Water Management",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -4285,21 +4285,21 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/clay_levigation.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/clay_levigation.tres",
       "description": "Settling suspended clay separates coarse debris and produces a more repeatable working body.",
       "domain": "production",
       "id": "clay_levigation",
       "name": "Clay Levigation",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/grog_preparation.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/grog_preparation.tres",
       "description": "Crushed fired clay can temper a fresh body, reducing the proportion that shrinks during drying and firing.",
       "domain": "production",
       "id": "grog_preparation",
       "name": "Grog Preparation",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -4438,12 +4438,12 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/sail_panel_cutting.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/sail_panel_cutting.tres",
       "description": "Measured cloth panels preserve the intended outline and distribute the seams of a sail.",
       "domain": "logistics",
       "id": "sail_panel_cutting",
       "name": "Sail Panel Cutting",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -4519,12 +4519,12 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/treenail_fastening.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/treenail_fastening.tres",
       "description": "Close-fitting wooden pins fasten planking to its supporting frames, providing a fastening route without a supply of metal nails.",
       "domain": "logistics",
       "id": "treenail_fastening",
       "name": "Treenail Fastening",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -4573,12 +4573,12 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/wheel_blank_jointing.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/wheel_blank_jointing.tres",
       "description": "Joined and secured timber pieces form a broad blank from which a solid wheel can be cut.",
       "domain": "infrastructure",
       "id": "wheel_blank_jointing",
       "name": "Wheel Blank Jointing",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -4609,12 +4609,12 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/solid_wheel_assembly.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/solid_wheel_assembly.tres",
       "description": "A matched pair of solid wheels joins broad wooden discs to bored hubs for a load-carrying cart.",
       "domain": "infrastructure",
       "id": "solid_wheel_assembly",
       "name": "Solid Wheel Assembly",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -4636,12 +4636,12 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/wooden_axle_shaping.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/wooden_axle_shaping.tres",
       "description": "A straight axle is shaped with shoulders and wheel seats to carry the load while maintaining the spacing of its wheels.",
       "domain": "infrastructure",
       "id": "wooden_axle_shaping",
       "name": "Wooden Axle Shaping",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -4672,12 +4672,12 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/cart_bed_framing.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/cart_bed_framing.tres",
       "description": "A braced load bed transfers cargo weight to its running gear without depending on a loose pile of boards.",
       "domain": "infrastructure",
       "id": "cart_bed_framing",
       "name": "Cart Bed Framing",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -4690,21 +4690,21 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/haul_harness_weaving.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/haul_harness_weaving.tres",
       "description": "Broad woven pulling straps and joined ropes distribute a hauling load across a workable harness.",
       "domain": "infrastructure",
       "id": "haul_harness_weaving",
       "name": "Haul Harness Weaving",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/cart_running_gear.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/cart_running_gear.tres",
       "description": "Matched wheels, axle fittings, a braced bed and hauling connections become a fitted cart assembly ready for final commissioning.",
       "domain": "infrastructure",
       "id": "cart_running_gear",
       "name": "Cart Running Gear",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -5842,30 +5842,30 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/voussoir_arch_assembly.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/voussoir_arch_assembly.tres",
       "description": "Assemble shaped masonry units over temporary support so compression reaches suitable abutments",
       "domain": "infrastructure",
       "id": "voussoir_arch_assembly",
       "name": "Voussoir Arch Assembly",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/masonry_arch_centering.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/masonry_arch_centering.tres",
       "description": "Support unfinished arch masonry with qualified removable temporary works",
       "domain": "infrastructure",
       "id": "masonry_arch_centering",
       "name": "Masonry Arch Centering",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/masonry_bond_patterns.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/masonry_bond_patterns.tres",
       "description": "Arrange masonry units and joints to distribute loads through evaluated wall bonds",
       "domain": "infrastructure",
       "id": "masonry_bond_patterns",
       "name": "Masonry Bond Patterns",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -5959,12 +5959,12 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/shallow_foundation_assessment.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/shallow_foundation_assessment.tres",
       "description": "Compare near-surface ground behavior with a structure's expected load",
       "domain": "infrastructure",
       "id": "shallow_foundation_assessment",
       "name": "Shallow-Foundation Assessment",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -5977,21 +5977,21 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/timber_roof_trusses.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/timber_roof_trusses.tres",
       "description": "Carry roof loads through connected timber members with defined support paths",
       "domain": "infrastructure",
       "id": "timber_roof_trusses",
       "name": "Timber Roof Trusses",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/masonry_buttressing.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/masonry_buttressing.tres",
       "description": "Provide external or integrated support against masonry thrust and instability",
       "domain": "infrastructure",
       "id": "masonry_buttressing",
       "name": "Masonry Buttressing",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -6067,12 +6067,12 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/ceramic_pipe_firing_qualification.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/ceramic_pipe_firing_qualification.tres",
       "description": "Compare fired conduit batches for warping, absorption and fracture under declared service conditions.",
       "domain": "infrastructure",
       "id": "ceramic_pipe_firing_qualification",
       "name": "Ceramic Pipe Firing Qualification",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -6121,21 +6121,21 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/wooden_log_conduits.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/wooden_log_conduits.tres",
       "description": "Bore timber lengths and fit adjoining ends into a continuous water passage.",
       "domain": "infrastructure",
       "id": "wooden_log_conduits",
       "name": "Wooden Log Conduits",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/gravity_conduit_grade_control.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/gravity_conduit_grade_control.tres",
       "description": "Set and check an installed conduit invert against an intended downhill alignment.",
       "domain": "infrastructure",
       "id": "gravity_conduit_grade_control",
       "name": "Gravity Conduit Grade Control",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -6247,12 +6247,12 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/fiber_combing.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/fiber_combing.tres",
       "description": "Repeated combing aligns long fibers and separates short tangled material from a spinnable bundle.",
       "domain": "production",
       "id": "fiber_combing",
       "name": "Fiber Combing",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -6265,12 +6265,12 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/warp_weighted_looms.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/warp_weighted_looms.tres",
       "description": "Clay weights tension hanging warp threads while a supporting frame keeps the weaving accessible.",
       "domain": "production",
       "id": "warp_weighted_looms",
       "name": "Warp-Weighted Looms",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -6283,12 +6283,12 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/woven_dressings.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/woven_dressings.tres",
       "description": "Cloth is cleaned, cut and packed into consistent care supplies before it is needed.",
       "domain": "production",
       "id": "woven_dressings",
       "name": "Woven Dressings",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -6976,21 +6976,21 @@
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/clay_record_tablets.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/clay_record_tablets.tres",
       "description": "Impress or inscribe records on prepared clay and preserve selected tablets. Suitable clay, marking tools, skilled recorders and storage.",
       "domain": "knowledge",
       "id": "clay_record_tablets",
       "name": "Clay Record Tablets",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
-      "asset": "res://assets/ui/research/paper/knotted_record_systems.png",
+      "asset": "res://assets/ui/research/paper/first300-cards/knotted_record_systems.tres",
       "description": "Encode agreed quantities or categories through structured knots and cord arrangements. Suitable cords, trained interpreters and shared conventions.",
       "domain": "knowledge",
       "id": "knotted_record_systems",
       "name": "Knotted Record Systems",
-      "status": "queued",
+      "status": "verified",
       "day": 0
     },
     {
@@ -8151,16 +8151,16 @@
       "description": "Riders practice keeping a seat while drawing, releasing and replenishing arrows on the move.",
       "day": 650,
       "domain": "security",
-      "asset": "res://assets/ui/research/paper/mounted_archery.png",
-      "status": "queued"
+      "asset": "res://assets/ui/research/paper/first300-cards/mounted_archery.tres",
+      "status": "verified"
     }
   ],
   "live_art_complete": false,
   "live_count": 884,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 512,
+  "queued_count": 404,
   "schema": 1.0,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000.0,
-  "verified_count": 372
+  "verified_count": 480
 }

@@ -29,8 +29,9 @@ func run()->void:
 		var item:Dictionary=live_by_id[id]
 		var entry:Dictionary=previous_by_id.get(id,{}).duplicate(true)
 		var file_name:=String(visuals.EARLY_SUBJECT_FILES.get(id,id))
-		var path:="res://assets/ui/research/paper/%s.png" % file_name
+		var default_path:="res://assets/ui/research/paper/%s.png" % file_name
 		var reviewed:bool=String(entry.get("status",""))=="verified" or visuals.EARLY_SUBJECTS.has(id)
+		var path:=String(entry.get("asset",default_path)) if reviewed else default_path
 		if reviewed and not FileAccess.file_exists(path):errors.append("Missing reviewed image: "+path)
 		entry["id"]=id
 		entry["name"]=String(item.name)

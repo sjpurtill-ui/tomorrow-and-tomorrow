@@ -1,0 +1,86 @@
+[
+  {
+    "file": "food-hand-practices-v1.png",
+    "source_id": "exec-1c722300-b53f-4ef4-ab61-7b700a5bc1ad.png",
+    "columns": 3,
+    "rows": 3,
+    "technologies": ["grain_malting", "grain_parboiling", "food_pounding_mortars", "hand_dough_forming", "dough_leavening", "controlled_baking", "cereal_dehulling", "starch_washing_separation", "postharvest_loss_measurement"]
+  },
+  {
+    "file": "early-carrying-and-records-v1.png",
+    "source_id": "exec-8ed948c0-2669-4873-b196-9c8597e1efa5.png",
+    "columns": 3,
+    "rows": 3,
+    "technologies": ["woven_carriers", "rope_rigging", "wedges_and_levers", "salt_working", "peat_drying", "seed_reserves", "irrigation_schedules", "birth_attendants", "pictographic_records"]
+  },
+  {
+    "file": "early-storage-and-water-v1.png",
+    "source_id": "exec-ed939ef3-b470-48f0-8a1b-5ba38119b533.png",
+    "columns": 3,
+    "rows": 3,
+    "technologies": ["root_cellars", "raised_granaries", "brine_fermentation", "vinegar_pickling", "stock_rotation", "protected_wellheads", "rainwater_cisterns", "separate_clean_water_storage", "slow_sand_filtration"]
+  },
+  {
+    "file": "early-soil-practices-v1.png",
+    "source_id": "exec-d183250a-c61a-4f65-92bc-168e4e9d8732.png",
+    "columns": 3,
+    "rows": 3,
+    "technologies": ["sowing_depth_trials", "row_spacing_trials", "seedbed_firming", "mass_seed_selection", "crop_residue_cover", "green_manure_crops", "contour_cultivation", "mulch_water_management", "soil_infiltration_trials"]
+  },
+  {
+    "file": "early-metallurgy-and-lime-v1.png",
+    "source_id": "exec-95f8c3d8-e065-48dd-a2d4-e74027a17762.png",
+    "columns": 3,
+    "rows": 3,
+    "technologies": ["ore_assaying", "copper_smelting", "copper_casting", "bronze_alloying", "mine_shoring", "mine_drainage", "bitumen_sealing", "lime_burning", "lime_mortar"]
+  },
+  {
+    "file": "early-civic-institutions-v1.png",
+    "source_id": "exec-8822f665-da77-467e-a041-99bd48125d06.png",
+    "columns": 3,
+    "rows": 3,
+    "technologies": ["material_accounting", "regional_granaries", "census_rolls", "public_levies", "fortified_stores", "timber_bridges", "geometric_survey", "cargo_seals", "crew_handoffs"]
+  },
+  {
+    "file": "early-field-care-v1.png",
+    "source_id": "exec-53abe93a-02cc-4d46-9ff2-3a12662d6c5b.png",
+    "columns": 3,
+    "rows": 3,
+    "technologies": ["isolation_practice", "trained_midwives", "case_records", "casualty_collection_posts", "evacuation_relays", "field_aid_stations", "medical_resupply_packing", "field_armorer_teams", "skirmish_pair_drill"]
+  },
+  {
+    "file": "early-handcraft-and-records-v1.png",
+    "source_id": "exec-c1dc7b4e-abf1-468d-8bd1-f3baf4cddca4.png",
+    "columns": 3,
+    "rows": 3,
+    "technologies": ["clay_levigation", "grog_preparation", "fiber_combing", "warp_weighted_looms", "woven_dressings", "clay_record_tablets", "knotted_record_systems", "sail_panel_cutting", "treenail_fastening"]
+  },
+  {
+    "file": "early-mounts-and-carts-v1.png",
+    "source_id": "exec-87fc5b06-012c-4003-aa81-4b5620f2a004.png",
+    "columns": 3,
+    "rows": 3,
+    "technologies": ["domesticated_mounts", "mounted_scouts", "mounted_archery", "haul_harness_weaving", "wheel_blank_jointing", "solid_wheel_assembly", "wooden_axle_shaping", "cart_bed_framing", "cart_running_gear"]
+  },
+  {
+    "file": "early-food-specialization-v1.png",
+    "source_id": "exec-5cc7a123-2032-44a2-b5e8-1cd6b272aef1.png",
+    "columns": 3,
+    "rows": 3,
+    "technologies": ["grain_milling", "fermentation_control", "crop_rotation", "intensive_gardens", "flour_sifting", "fermentation_starter_cultures", "indirect_solar_food_drying", "hermetic_grain_storage", "workshop_standards"]
+  },
+  {
+    "file": "early-public-works-v1.png",
+    "source_id": "exec-a29fa102-add5-42b4-9e53-1ab819c9a5c9.png",
+    "columns": 3,
+    "rows": 3,
+    "technologies": ["masonry_bond_patterns", "shallow_foundation_assessment", "timber_roof_trusses", "masonry_buttressing", "ceramic_pipe_firing_qualification", "wooden_log_conduits", "gravity_conduit_grade_control", "masonry_arch_centering", "voussoir_arch_assembly"]
+  },
+  {
+    "file": "early-military-methods-v1.png",
+    "source_id": "exec-ee7c16a2-4519-45a9-9cb6-73ac8dc203f8.png",
+    "columns": 3,
+    "rows": 3,
+    "technologies": ["siege_engineering", "siege_crew_rehearsals", "range_estimation_drill", "mountain_field_school", "war_chariots", "armored_riding", "elephant_training", "professional_corps", "battlefield_medicine"]
+  }
+]
