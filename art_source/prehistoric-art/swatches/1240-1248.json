@@ -1,0 +1,15 @@
+{
+  "source": "art_source/prehistoric-art/swatches/1240-1248.png",
+  "prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch centered on useful natural forks, ivory paper and matte gouache. Cells: twice-used natural hollow, resin-sealed bark seam, flexed rib among root prongs, moved pebble line, worn rope bend on branch, grease nutshell in tree fork, draft feather in split branch, water-stained forked branch, charcoal fragment held by raw clay.",
+  "entries": [
+    {"id": 1240, "review": "Top-left: natural rock hollow showing pale seed dust over an older soot-dark residue layer."},
+    {"id": 1241, "review": "Top-middle: ragged bark strips overlapping in a branch fork with raw amber resin on the seam."},
+    {"id": 1242, "review": "Top-right: curved animal rib flexed between rough natural root prongs, no string or weapon."},
+    {"id": 1243, "review": "Middle-left: four unlike natural pebbles by root fingers with one moved onto an upright root."},
+    {"id": 1244, "review": "Middle-middle: rough fiber rope turning around a branch fork, frayed except at the rubbed bend."},
+    {"id": 1245, "review": "Middle-right: small cracked nutshell with pale grease protected inside a tree fork."},
+    {"id": 1246, "review": "Bottom-left: loose feather trapped in a branch split, its soft strands lifted by moving air."},
+    {"id": 1247, "review": "Bottom-middle: forked branch partly submerged, bark visibly darkened to an older waterline."},
+    {"id": 1248, "review": "Bottom-right: lump of raw unfired clay holding a charcoal fragment in a branch crotch."}
+  ]
+}

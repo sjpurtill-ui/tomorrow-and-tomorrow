@@ -25642,10 +25642,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1222.png",
       "prompt": "Use case: historical-scene. Artifact 1222: The tooth with a repaired root · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A split animal tooth root held together by a rough resin lump and a few fiber turns, no carved ornament. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Joining broken parts can preserve an object that would otherwise be discarded. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Joining broken parts can preserve an object that would otherwise be discarded. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "a90629143efb9bbac1d6e6d9ee0b91aee66c3b94d83681c4b1f47ec18bd4d3fc",
+      "source": "art_source/prehistoric-art/swatches/1222-1230.png",
+      "atlas_cell": 0,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine distinct prehistoric finds in a square 3x3 warm ivory paper and matte gouache swatch. Cells: tooth root tied with resin and fiber, muddy reflection in stone pool, fingertip testing on cave rock, seed pod in fork, two contrasting root fibers, pebble in forked branch grip, shells knocking in stone hollow, charred branch among stones, reed bundle floating in water.",
+      "review": "Top-left: mottled animal tooth with broken root crudely secured by dark resin and coarse fiber."
     },
     {
       "catalogue_id": 1223,
@@ -25658,10 +25665,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1223.png",
       "prompt": "Use case: historical-scene. Artifact 1223: The stone that reflected a face poorly · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A naturally flat dark stone with a thin puddle reflecting only a vague patch of sky, no person or mirror frame. Distinct experiment for this specimen (takes precedence over the base arrangement): The trace uses a natural branching crack as part of its shape or grouping, with uneven pigment or impressions continuing around it. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A wet surface changes the way light returns to the observer. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A wet surface changes the way light returns to the observer. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "bc725983bfa7a02a8e59ab068f75117bb8e08a9369614af45d65c64c28f96a70",
+      "source": "art_source/prehistoric-art/swatches/1222-1230.png",
+      "atlas_cell": 1,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine distinct prehistoric finds in a square 3x3 warm ivory paper and matte gouache swatch. Cells: tooth root tied with resin and fiber, muddy reflection in stone pool, fingertip testing on cave rock, seed pod in fork, two contrasting root fibers, pebble in forked branch grip, shells knocking in stone hollow, charred branch among stones, reed bundle floating in water.",
+      "review": "Top-middle: dark muddy water held in an irregular stone hollow with a faint distorted reflection."
     },
     {
       "catalogue_id": 1224,
@@ -25674,10 +25688,17 @@
       "discovery_id": "clay_shaping",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1224.png",
       "prompt": "Use case: historical-scene. Artifact 1224: The cave wall tested with fingertips · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: An irregular stone face with a thin soft clay coating bearing five separate fingertip grooves of different pressure. Distinct experiment for this specimen (takes precedence over the base arrangement): The trace uses a natural branching crack as part of its shape or grouping, with uneven pigment or impressions continuing around it. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Repeated small trials reveal how a material responds to force. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Repeated small trials reveal how a material responds to force. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "2c90ebb8f9415623c95a74eaeebc42c2102514025eea859be8b0f0844fa8faf5",
+      "source": "art_source/prehistoric-art/swatches/1222-1230.png",
+      "atlas_cell": 2,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine distinct prehistoric finds in a square 3x3 warm ivory paper and matte gouache swatch. Cells: tooth root tied with resin and fiber, muddy reflection in stone pool, fingertip testing on cave rock, seed pod in fork, two contrasting root fibers, pebble in forked branch grip, shells knocking in stone hollow, charred branch among stones, reed bundle floating in water.",
+      "review": "Top-right: rough cave-rock flake with uneven exploratory red fingertip smears, no symbols."
     },
     {
       "catalogue_id": 1225,
@@ -25690,10 +25711,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1225.png",
       "prompt": "Use case: historical-scene. Artifact 1225: The seed pod used as a scoop · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: Half of a large naturally split dry seed pod holding a few pale mineral grains, no manufactured handle. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A discarded natural shell can become a useful collecting surface. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A discarded natural shell can become a useful collecting surface. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "809cd11e2d6ae1f08ecd27761f8e32330c86fd48db16f33a67001b503dbe0777",
+      "source": "art_source/prehistoric-art/swatches/1222-1230.png",
+      "atlas_cell": 3,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine distinct prehistoric finds in a square 3x3 warm ivory paper and matte gouache swatch. Cells: tooth root tied with resin and fiber, muddy reflection in stone pool, fingertip testing on cave rock, seed pod in fork, two contrasting root fibers, pebble in forked branch grip, shells knocking in stone hollow, charred branch among stones, reed bundle floating in water.",
+      "review": "Middle-left: split woody seed pod holding loose seeds within a naturally forked stem."
     },
     {
       "catalogue_id": 1226,
@@ -25706,10 +25734,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1226.png",
       "prompt": "Use case: historical-scene. Artifact 1226: The root fiber twisted twice · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: Two uneven root-fiber strands first loose and then twisted together into one stronger-looking short cord, frayed ends visible. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Combining strands changes how a flexible material holds together. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Combining strands changes how a flexible material holds together. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "e706d2caa0051fee8572178e28da9bd7b50af6cfcc1eaacd25cf5df3e4712e95",
+      "source": "art_source/prehistoric-art/swatches/1222-1230.png",
+      "atlas_cell": 4,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine distinct prehistoric finds in a square 3x3 warm ivory paper and matte gouache swatch. Cells: tooth root tied with resin and fiber, muddy reflection in stone pool, fingertip testing on cave rock, seed pod in fork, two contrasting root fibers, pebble in forked branch grip, shells knocking in stone hollow, charred branch among stones, reed bundle floating in water.",
+      "review": "Middle-middle: pale and dark root fibers loosely twisted and caught in a branch fork."
     },
     {
       "catalogue_id": 1227,
@@ -25722,10 +25757,17 @@
       "discovery_id": "clay_shaping",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1227.png",
       "prompt": "Use case: historical-scene. Artifact 1227: The hand sized hammer grip · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A rounded pounding pebble with a crude dried-clay patch bearing finger hollows around its blunt side. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Adding a shaped grip changes control without changing the striking material. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Adding a shaped grip changes control without changing the striking material. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "f939055a96f9d7de16dc843b4a6004dbcd96c4383649dee4b8eb104f5ed0539d",
+      "source": "art_source/prehistoric-art/swatches/1222-1230.png",
+      "atlas_cell": 5,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine distinct prehistoric finds in a square 3x3 warm ivory paper and matte gouache swatch. Cells: tooth root tied with resin and fiber, muddy reflection in stone pool, fingertip testing on cave rock, seed pod in fork, two contrasting root fibers, pebble in forked branch grip, shells knocking in stone hollow, charred branch among stones, reed bundle floating in water.",
+      "review": "Middle-right: unworked rounded pebble seated in a rough wooden V as an improvised grip."
     },
     {
       "catalogue_id": 1228,
@@ -25738,10 +25780,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1228.png",
       "prompt": "Use case: historical-scene. Artifact 1228: The shell stack that clicked · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: Three unmatched unpolished shells loosely caught on coarse fiber through natural openings, tangled rather than a finished necklace. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Contact between suspended hard pieces makes a portable sound. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Contact between suspended hard pieces makes a portable sound. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "dc8b93280940b4c10f6b17537bb0baf337b95fa20fa6b428dc0fb36de1a36d6b",
+      "source": "art_source/prehistoric-art/swatches/1222-1230.png",
+      "atlas_cell": 6,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine distinct prehistoric finds in a square 3x3 warm ivory paper and matte gouache swatch. Cells: tooth root tied with resin and fiber, muddy reflection in stone pool, fingertip testing on cave rock, seed pod in fork, two contrasting root fibers, pebble in forked branch grip, shells knocking in stone hollow, charred branch among stones, reed bundle floating in water.",
+      "review": "Bottom-left: unlike freshwater shells resting loosely in an irregular stone hollow."
     },
     {
       "catalogue_id": 1229,
@@ -25754,10 +25803,17 @@
       "discovery_id": "charcoal",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1229.png",
       "prompt": "Use case: historical-scene. Artifact 1229: The charred end that hardened · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A short crooked stick with a scorched rubbed point and a broken pale end beside ashes, no finished spear. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Heat changes a material before it is completely consumed. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Heat changes a material before it is completely consumed. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "749c85821f356e243ceefc4d7bfb875e69b5fd367a52ac3fe7faaafcf7a07adc",
+      "source": "art_source/prehistoric-art/swatches/1222-1230.png",
+      "atlas_cell": 7,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine distinct prehistoric finds in a square 3x3 warm ivory paper and matte gouache swatch. Cells: tooth root tied with resin and fiber, muddy reflection in stone pool, fingertip testing on cave rock, seed pod in fork, two contrasting root fibers, pebble in forked branch grip, shells knocking in stone hollow, charred branch among stones, reed bundle floating in water.",
+      "review": "Bottom-middle: scorched broken branch end wedged between two natural stones."
     },
     {
       "catalogue_id": 1230,
@@ -25770,10 +25826,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1230.png",
       "prompt": "Use case: historical-scene. Artifact 1230: The reed bundle that floated · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A small broken bundle of hollow reed lengths loosely bound twice with roots at the edge of shallow water; no boat or sail. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Combining light hollow pieces changes how a load meets water. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Combining light hollow pieces changes how a load meets water. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "f2de05cfff6a4452dbd02ee6a96014a7c183c5aad6c6bcd23cec586a0cc6653b",
+      "source": "art_source/prehistoric-art/swatches/1222-1230.png",
+      "atlas_cell": 8,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine distinct prehistoric finds in a square 3x3 warm ivory paper and matte gouache swatch. Cells: tooth root tied with resin and fiber, muddy reflection in stone pool, fingertip testing on cave rock, seed pod in fork, two contrasting root fibers, pebble in forked branch grip, shells knocking in stone hollow, charred branch among stones, reed bundle floating in water.",
+      "review": "Bottom-right: coarse reed bundle loosely tied and partly floating at a shallow waterline."
     },
     {
       "catalogue_id": 1231,
@@ -25786,10 +25849,17 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1231.png",
       "prompt": "Use case: historical-scene. Artifact 1231: The stone ring without a hole · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A cord follows a shallow irregular groove pecked around a natural cobble, binding intact, no drilled aperture. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): An external channel can hold a fastening without penetrating the object. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "An external channel can hold a fastening without penetrating the object. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "55cb7911adf9a941144e361e670928d33fc41f9b1c70551e823e47095039084e",
+      "source": "art_source/prehistoric-art/swatches/1231-1239.png",
+      "atlas_cell": 0,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch focused on useful natural forks, ivory paper and rough matte gouache. Cells: ringlike stone among roots, ember fungus in branch fork, tactile clay route, claw loosening fiber knot, shell strainer over twigs, clay plug in branch split, flakes on forked root, stick reaching crevice, leaf bundle tucked in tree fork.",
+      "review": "Top-left: naturally ringlike stone with blind hollow seated between two rough roots."
     },
     {
       "catalogue_id": 1232,
@@ -25802,10 +25872,17 @@
       "discovery_id": "charcoal",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1232.png",
       "prompt": "Use case: historical-scene. Artifact 1232: The fungus that took a spark · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A torn dry bracket-fungus fragment with a tiny charred patch beside a rough chipped stone and dark mineral chunk. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): The same heat affects loose porous material differently from solid rock. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "The same heat affects loose porous material differently from solid rock. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "0613c54fd8088bfaf6acf89b8e36ffb4bd5e2728572e6b48bfe875849bc428ff",
+      "source": "art_source/prehistoric-art/swatches/1231-1239.png",
+      "atlas_cell": 1,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch focused on useful natural forks, ivory paper and rough matte gouache. Cells: ringlike stone among roots, ember fungus in branch fork, tactile clay route, claw loosening fiber knot, shell strainer over twigs, clay plug in branch split, flakes on forked root, stick reaching crevice, leaf bundle tucked in tree fork.",
+      "review": "Top-middle: wild tinder fungus lodged in a tree fork and holding a small ember."
     },
     {
       "catalogue_id": 1233,
@@ -25818,10 +25895,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1233.png",
       "prompt": "Use case: historical-scene. Artifact 1233: A shelter map made by touch · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A tiny preserved patch of dried sand with one finger-drawn hollow and three natural pebbles marking an opening, no formal cartography. Distinct experiment for this specimen (takes precedence over the base arrangement): The trace uses a natural branching crack as part of its shape or grouping, with uneven pigment or impressions continuing around it. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A small arrangement can help someone describe a larger place. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A small arrangement can help someone describe a larger place. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "dd500cc663901cb29feb316d25f1c9e2e62408a7aecb73f78f1725576c0b5ef1",
+      "source": "art_source/prehistoric-art/swatches/1231-1239.png",
+      "atlas_cell": 2,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch focused on useful natural forks, ivory paper and rough matte gouache. Cells: ringlike stone among roots, ember fungus in branch fork, tactile clay route, claw loosening fiber knot, shell strainer over twigs, clay plug in branch split, flakes on forked root, stick reaching crevice, leaf bundle tucked in tree fork.",
+      "review": "Top-right: rough clay slab with a crooked finger path and three shallow thumb hollows, no writing."
     },
     {
       "catalogue_id": 1234,
@@ -25834,10 +25918,17 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1234.png",
       "prompt": "Use case: historical-scene. Artifact 1234: The claw that teased a knot · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A loose curved animal claw hooked beneath one strand of a tangled coarse fiber knot. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A curved point reaches under material that a straight point cannot easily lift. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A curved point reaches under material that a straight point cannot easily lift. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "4b21acb04322bdf240dd522f8aa581ddf3dd9e01fc5d734b967b88b314bad5eb",
+      "source": "art_source/prehistoric-art/swatches/1231-1239.png",
+      "atlas_cell": 3,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch focused on useful natural forks, ivory paper and rough matte gouache. Cells: ringlike stone among roots, ember fungus in branch fork, tactile clay route, claw loosening fiber knot, shell strainer over twigs, clay plug in branch split, flakes on forked root, stick reaching crevice, leaf bundle tucked in tree fork.",
+      "review": "Middle-left: curved natural claw at a tree fork worrying loose a coarse fiber knot."
     },
     {
       "catalogue_id": 1235,
@@ -25850,10 +25941,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1235.png",
       "prompt": "Use case: historical-scene. Artifact 1235: The shell that strained a mixture · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A naturally pitted shell with two irregular openings holding coarse wet plant pulp, a few drops underneath. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): An opening passes liquid while holding back larger pieces. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "An opening passes liquid while holding back larger pieces. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "17229c9ea585f649b65be5754a2d67101af866e6dd6a7233dbba86d5c535fc1f",
+      "source": "art_source/prehistoric-art/swatches/1231-1239.png",
+      "atlas_cell": 4,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch focused on useful natural forks, ivory paper and rough matte gouache. Cells: ringlike stone among roots, ember fungus in branch fork, tactile clay route, claw loosening fiber knot, shell strainer over twigs, clay plug in branch split, flakes on forked root, stick reaching crevice, leaf bundle tucked in tree fork.",
+      "review": "Middle-middle: broken shell suspended on two forked twigs and dripping into a puddle."
     },
     {
       "catalogue_id": 1236,
@@ -25866,10 +25964,17 @@
       "discovery_id": "clay_shaping",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1236.png",
       "prompt": "Use case: historical-scene. Artifact 1236: The clay plug with a pull tab · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: An irregular clay plug in a hollow branch end with a short grass loop trapped in its center. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A small projecting loop gives a way to remove a tightly fitted stopper. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A small projecting loop gives a way to remove a tightly fitted stopper. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "c6e4578f0829d7d4e7dc53f195279ddab3ce77e28ef1ba88405ab78642758dd6",
+      "source": "art_source/prehistoric-art/swatches/1231-1239.png",
+      "atlas_cell": 5,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch focused on useful natural forks, ivory paper and rough matte gouache. Cells: ringlike stone among roots, ember fungus in branch fork, tactile clay route, claw loosening fiber knot, shell strainer over twigs, clay plug in branch split, flakes on forked root, stick reaching crevice, leaf bundle tucked in tree fork.",
+      "review": "Middle-right: lumpy unfired clay plug with pinch nub pressed into a fallen branch split."
     },
     {
       "catalogue_id": 1237,
@@ -25882,10 +25987,17 @@
       "discovery_id": "controlled_flaking",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1237.png",
       "prompt": "Use case: historical-scene. Artifact 1237: The stone flakes sorted by feel · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: Three distinctly different crude flakes placed apart: thick blunt, thin sharp, pointed; no neat tray or labels. Distinct experiment for this specimen (takes precedence over the base arrangement): The trace uses a natural branching crack as part of its shape or grouping, with uneven pigment or impressions continuing around it. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Comparing edges makes selection purposeful instead of accidental. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Comparing edges makes selection purposeful instead of accidental. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "8906e19cf549328d358d51785afac3017e38e14e0c9c3741af82326f3841e25e",
+      "source": "art_source/prehistoric-art/swatches/1231-1239.png",
+      "atlas_cell": 6,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch focused on useful natural forks, ivory paper and rough matte gouache. Cells: ringlike stone among roots, ember fungus in branch fork, tactile clay route, claw loosening fiber knot, shell strainer over twigs, clay plug in branch split, flakes on forked root, stick reaching crevice, leaf bundle tucked in tree fork.",
+      "review": "Bottom-left: differently shaped rough stone flakes arranged along an exposed root fork."
     },
     {
       "catalogue_id": 1238,
@@ -25898,10 +26010,17 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1238.png",
       "prompt": "Use case: historical-scene. Artifact 1238: The stick that reached a crevice · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A thin twig with sticky resin on its tip holding a tiny pale pebble near a narrow rock crack. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Adhesion extends reach into places a hand cannot enter. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Adhesion extends reach into places a hand cannot enter. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "6c8cdd1fd4a17a079d2c26487b66dc2f2a4749f10d41e75d323fa26af7e25def",
+      "source": "art_source/prehistoric-art/swatches/1231-1239.png",
+      "atlas_cell": 7,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch focused on useful natural forks, ivory paper and rough matte gouache. Cells: ringlike stone among roots, ember fungus in branch fork, tactile clay route, claw loosening fiber knot, shell strainer over twigs, clay plug in branch split, flakes on forked root, stick reaching crevice, leaf bundle tucked in tree fork.",
+      "review": "Bottom-middle: naturally crooked stick reaching into a narrow boulder crevice."
     },
     {
       "catalogue_id": 1239,
@@ -25914,10 +26033,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1239.png",
       "prompt": "Use case: historical-scene. Artifact 1239: The leaf bundle bound to breathe · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A loose bundle of broad dried leaves tied only at the base, leaving separated overlapping tips open around dry herbs. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A covering can shelter material while leaving gaps for air. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A covering can shelter material while leaving gaps for air. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "9e442a3ac75148df464d1b944ed79cebc9de6ef15cd92e83f3daff397fa95c0b",
+      "source": "art_source/prehistoric-art/swatches/1231-1239.png",
+      "atlas_cell": 8,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch focused on useful natural forks, ivory paper and rough matte gouache. Cells: ringlike stone among roots, ember fungus in branch fork, tactile clay route, claw loosening fiber knot, shell strainer over twigs, clay plug in branch split, flakes on forked root, stick reaching crevice, leaf bundle tucked in tree fork.",
+      "review": "Bottom-right: loose varied-leaf bundle tied and tucked into a tree fork with air gaps."
     },
     {
       "catalogue_id": 1240,
@@ -25930,10 +26056,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1240.png",
       "prompt": "Use case: historical-scene. Artifact 1240: The hollow used twice · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A crude natural stone hollow with old soot below a fresh-looking ochre grinding smear, two uses visible without symbols. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A useful shape can serve a different purpose after its original use ends. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A useful shape can serve a different purpose after its original use ends. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "f9767bcac1835e2b49e86047561e5eda0a4c16cf00a776efc2eefd1339c7aa3b",
+      "source": "art_source/prehistoric-art/swatches/1240-1248.png",
+      "atlas_cell": 0,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch centered on useful natural forks, ivory paper and matte gouache. Cells: twice-used natural hollow, resin-sealed bark seam, flexed rib among root prongs, moved pebble line, worn rope bend on branch, grease nutshell in tree fork, draft feather in split branch, water-stained forked branch, charcoal fragment held by raw clay.",
+      "review": "Top-left: natural rock hollow showing pale seed dust over an older soot-dark residue layer."
     },
     {
       "catalogue_id": 1241,
@@ -25946,10 +26079,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1241.png",
       "prompt": "Use case: historical-scene. Artifact 1241: The bark seam sealed with resin · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: Two overlapping bark scraps joined by a rough black resin seam with trapped plant fibers, no finished canoe. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Overlapping surfaces and filling their gap changes how they hold together. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Overlapping surfaces and filling their gap changes how they hold together. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "103355ae4e5a8b0ee0197c36163cc187f8fb1cc2be11f1b0338954b7ac757cc2",
+      "source": "art_source/prehistoric-art/swatches/1240-1248.png",
+      "atlas_cell": 1,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch centered on useful natural forks, ivory paper and matte gouache. Cells: twice-used natural hollow, resin-sealed bark seam, flexed rib among root prongs, moved pebble line, worn rope bend on branch, grease nutshell in tree fork, draft feather in split branch, water-stained forked branch, charcoal fragment held by raw clay.",
+      "review": "Top-middle: ragged bark strips overlapping in a branch fork with raw amber resin on the seam."
     },
     {
       "catalogue_id": 1242,
@@ -25962,10 +26102,17 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1242.png",
       "prompt": "Use case: historical-scene. Artifact 1242: The rib used as a spring · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A thin curved animal rib held in a slightly tighter arc by a rough fiber tie, one end broken. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A naturally curved flexible part can retain a small amount of force. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A naturally curved flexible part can retain a small amount of force. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "0d2961dedbc0bf05fb55df0c6402c3c9b09588d79afae93d1c901323a3d4d375",
+      "source": "art_source/prehistoric-art/swatches/1240-1248.png",
+      "atlas_cell": 2,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch centered on useful natural forks, ivory paper and matte gouache. Cells: twice-used natural hollow, resin-sealed bark seam, flexed rib among root prongs, moved pebble line, worn rope bend on branch, grease nutshell in tree fork, draft feather in split branch, water-stained forked branch, charcoal fragment held by raw clay.",
+      "review": "Top-right: curved animal rib flexed between rough natural root prongs, no string or weapon."
     },
     {
       "catalogue_id": 1243,
@@ -25978,10 +26125,17 @@
       "discovery_id": "tallies",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1243.png",
       "prompt": "Use case: historical-scene. Artifact 1243: The pebble line counted by moving · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A ragged shallow finger groove holds five mixed pebbles with two moved to one side, no engraved board. Distinct experiment for this specimen (takes precedence over the base arrangement): The trace uses a natural branching crack as part of its shape or grouping, with uneven pigment or impressions continuing around it. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Moving objects between groups preserves a count without written numerals. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Moving objects between groups preserves a count without written numerals. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "694106189285e060b6296cdbfc760bb6821d85b5c19def37ec48c937c4be4db5",
+      "source": "art_source/prehistoric-art/swatches/1240-1248.png",
+      "atlas_cell": 3,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch centered on useful natural forks, ivory paper and matte gouache. Cells: twice-used natural hollow, resin-sealed bark seam, flexed rib among root prongs, moved pebble line, worn rope bend on branch, grease nutshell in tree fork, draft feather in split branch, water-stained forked branch, charcoal fragment held by raw clay.",
+      "review": "Middle-left: four unlike natural pebbles by root fingers with one moved onto an upright root."
     },
     {
       "catalogue_id": 1244,
@@ -25994,10 +26148,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1244.png",
       "prompt": "Use case: historical-scene. Artifact 1244: The rope worn smooth at a bend · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A coarse cord looped over a natural smooth branch bend, one section visibly rubbed flat by repeated pulling. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A rounded contact changes how a pulling strand moves and wears. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A rounded contact changes how a pulling strand moves and wears. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "00798baab4f1fcceed932ef7e54765dfd580789b6e5317425f9bba944029ffa2",
+      "source": "art_source/prehistoric-art/swatches/1240-1248.png",
+      "atlas_cell": 4,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch centered on useful natural forks, ivory paper and matte gouache. Cells: twice-used natural hollow, resin-sealed bark seam, flexed rib among root prongs, moved pebble line, worn rope bend on branch, grease nutshell in tree fork, draft feather in split branch, water-stained forked branch, charcoal fragment held by raw clay.",
+      "review": "Middle-middle: rough fiber rope turning around a branch fork, frayed except at the rubbed bend."
     },
     {
       "catalogue_id": 1245,
@@ -26010,10 +26171,17 @@
       "discovery_id": "charcoal",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1245.png",
       "prompt": "Use case: historical-scene. Artifact 1245: The nutshell that kept grease · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A broken thick nutshell holding a small dull white fat residue, blackened edge and loose grass nearby. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A tiny natural container makes a useful substance easier to carry and apply. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A tiny natural container makes a useful substance easier to carry and apply. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "873a3ec13416d26ed9f33e84ed18d151d098e936c6dcab0340756f42b0b9e039",
+      "source": "art_source/prehistoric-art/swatches/1240-1248.png",
+      "atlas_cell": 5,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch centered on useful natural forks, ivory paper and matte gouache. Cells: twice-used natural hollow, resin-sealed bark seam, flexed rib among root prongs, moved pebble line, worn rope bend on branch, grease nutshell in tree fork, draft feather in split branch, water-stained forked branch, charcoal fragment held by raw clay.",
+      "review": "Middle-right: small cracked nutshell with pale grease protected inside a tree fork."
     },
     {
       "catalogue_id": 1246,
@@ -26026,10 +26194,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1246.png",
       "prompt": "Use case: historical-scene. Artifact 1246: The feather that showed a draft · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A ragged feather hanging on a short coarse fiber beside a cave-rock edge, bent gently to one side. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A light suspended object makes invisible air movement noticeable. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A light suspended object makes invisible air movement noticeable. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "e0a403425233f21d1accee0a059aaa150cde6e7d547f04a314dfbaa2becec724",
+      "source": "art_source/prehistoric-art/swatches/1240-1248.png",
+      "atlas_cell": 6,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch centered on useful natural forks, ivory paper and matte gouache. Cells: twice-used natural hollow, resin-sealed bark seam, flexed rib among root prongs, moved pebble line, worn rope bend on branch, grease nutshell in tree fork, draft feather in split branch, water-stained forked branch, charcoal fragment held by raw clay.",
+      "review": "Bottom-left: loose feather trapped in a branch split, its soft strands lifted by moving air."
     },
     {
       "catalogue_id": 1247,
@@ -26042,10 +26217,17 @@
       "discovery_id": "tallies",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1247.png",
       "prompt": "Use case: historical-scene. Artifact 1247: The branch with a depth stain · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A rough twig darkened up to one irregular horizontal stain line, laid beside a shallow muddy hollow; no scale or numerals. Distinct experiment for this specimen (takes precedence over the base arrangement): The trace uses a natural branching crack as part of its shape or grouping, with uneven pigment or impressions continuing around it. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A repeated boundary on an object can preserve a comparison of depth. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A repeated boundary on an object can preserve a comparison of depth. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "a24259617147a7f94a76bf42e71a0e4a926c64e469c17834e939fe1fa571d939",
+      "source": "art_source/prehistoric-art/swatches/1240-1248.png",
+      "atlas_cell": 7,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch centered on useful natural forks, ivory paper and matte gouache. Cells: twice-used natural hollow, resin-sealed bark seam, flexed rib among root prongs, moved pebble line, worn rope bend on branch, grease nutshell in tree fork, draft feather in split branch, water-stained forked branch, charcoal fragment held by raw clay.",
+      "review": "Bottom-middle: forked branch partly submerged, bark visibly darkened to an older waterline."
     },
     {
       "catalogue_id": 1248,
@@ -26058,10 +26240,17 @@
       "discovery_id": "clay_shaping",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1248.png",
       "prompt": "Use case: historical-scene. Artifact 1248: The clay that held a charcoal point · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A short crumbly charcoal piece pinched into an uneven clay grip, black smears on the exposed tip. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A holder makes a fragile marking material easier to control. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A holder makes a fragile marking material easier to control. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "148d3bafe255b4057e112bbda1542c2af98c5bb2a7944e695e30fe19c6b39ab4",
+      "source": "art_source/prehistoric-art/swatches/1240-1248.png",
+      "atlas_cell": 8,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: square 3x3 prehistoric artifact swatch centered on useful natural forks, ivory paper and matte gouache. Cells: twice-used natural hollow, resin-sealed bark seam, flexed rib among root prongs, moved pebble line, worn rope bend on branch, grease nutshell in tree fork, draft feather in split branch, water-stained forked branch, charcoal fragment held by raw clay.",
+      "review": "Bottom-right: lump of raw unfired clay holding a charcoal fragment in a branch crotch."
     },
     {
       "catalogue_id": 1249,
@@ -26074,10 +26263,17 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1249.png",
       "prompt": "Use case: historical-scene. Artifact 1249: The thorn comb of a broken stem · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A naturally thorny stem with a small clump of loose fur caught between uneven thorns; no carved comb. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Many projecting points can catch and separate fibers at once. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Many projecting points can catch and separate fibers at once. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "cde83e089387d3c126a38f181d18ad8275cfa708931fce7d160fe96d424acc2c",
+      "source": "art_source/prehistoric-art/swatches/1249-1257.png",
+      "atlas_cell": 0,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds in square 3x3 ivory-paper matte-gouache swatch. Cells: thorny stem in branch fork, ember-shading stone, hide draped over shoulder-shaped branch, snapped point fitted backward, scorched unfired clay ball, unpierced stone tied outside with fiber, curled bark tray, leaf-guarded stone flake, shell held in split branch.",
+      "review": "Top-left: uneven natural thorn stem resting in a rough branch fork, no manufactured comb."
     },
     {
       "catalogue_id": 1250,
@@ -26090,10 +26286,17 @@
       "discovery_id": "charcoal",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1250.png",
       "prompt": "Use case: historical-scene. Artifact 1250: The stone that shaded an ember · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A thin natural stone flake leaned over a charcoal crumb in ash, a sheltered dark pocket beneath. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A small cover changes exposure and helps keep a fragile process going. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A small cover changes exposure and helps keep a fragile process going. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "096b9d2a4d0fb4fa3979bd5efc53d3d53084340039348df0642bb3474abe734e",
+      "source": "art_source/prehistoric-art/swatches/1249-1257.png",
+      "atlas_cell": 1,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds in square 3x3 ivory-paper matte-gouache swatch. Cells: thorny stem in branch fork, ember-shading stone, hide draped over shoulder-shaped branch, snapped point fitted backward, scorched unfired clay ball, unpierced stone tied outside with fiber, curled bark tray, leaf-guarded stone flake, shell held in split branch.",
+      "review": "Top-middle: rough stone held by a root fork to shade a tiny open ember."
     },
     {
       "catalogue_id": 1251,
@@ -26106,10 +26309,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1251.png",
       "prompt": "Use case: historical-scene. Artifact 1251: The hide strap widened at the shoulder · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A ragged hide carrying strip with a naturally broad center and narrow twisted ends, stretched beside a small stone load. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Spreading contact over a wider area changes how a load is borne. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Spreading contact over a wider area changes how a load is borne. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "f6298715339994170b7eb12b75e04205d6f6929cb66c4921ae7c7f68e753a120",
+      "source": "art_source/prehistoric-art/swatches/1249-1257.png",
+      "atlas_cell": 2,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds in square 3x3 ivory-paper matte-gouache swatch. Cells: thorny stem in branch fork, ember-shading stone, hide draped over shoulder-shaped branch, snapped point fitted backward, scorched unfired clay ball, unpierced stone tied outside with fiber, curled bark tray, leaf-guarded stone flake, shell held in split branch.",
+      "review": "Top-right: ragged raw hide widened where it drapes over two shoulder-like branches, no tailoring."
     },
     {
       "catalogue_id": 1252,
@@ -26122,10 +26332,17 @@
       "discovery_id": "controlled_flaking",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1252.png",
       "prompt": "Use case: historical-scene. Artifact 1252: A snapped point fitted backward · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A broken pointed flint reversed in a split twig so its fresh broken edge becomes a scraper, rough resin holds it. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Failure can reveal a different useful edge instead of ending an object's life. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "generated",
       "art_collection": "prehistoric-v1",
       "insight": "Failure can reveal a different useful edge instead of ending an object's life. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "858c62c14273ace76db6650cf9d917f9a1f3c429a1f5692b44d0e02b19aa9d1e",
+      "source": "art_source/prehistoric-art/swatches/1249-1257.png",
+      "atlas_cell": 3,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds in square 3x3 ivory-paper matte-gouache swatch. Cells: thorny stem in branch fork, ember-shading stone, hide draped over shoulder-shaped branch, snapped point fitted backward, scorched unfired clay ball, unpierced stone tied outside with fiber, curled bark tray, leaf-guarded stone flake, shell held in split branch.",
+      "quality_issue": "The generated image shows a sharp point facing outward like a functional spear, not a broken point fitted backward."
     },
     {
       "catalogue_id": 1253,
@@ -26138,10 +26355,17 @@
       "discovery_id": "clay_shaping",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1253.png",
       "prompt": "Use case: historical-scene. Artifact 1253: The clay ball that tested a fire · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: Two irregular thumb-rolled clay pellets, one cracked and darkened after lying at a hearth edge, one pale and intact. Distinct experiment for this specimen (takes precedence over the base arrangement): The trace uses a natural branching crack as part of its shape or grouping, with uneven pigment or impressions continuing around it. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Comparing exposed and unexposed pieces reveals a material change. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Comparing exposed and unexposed pieces reveals a material change. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "c0bff9a9f5358f28c286702553ffb2bfdb8f50301bc2234ae92cdcf35d5f5f69",
+      "source": "art_source/prehistoric-art/swatches/1249-1257.png",
+      "atlas_cell": 4,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds in square 3x3 ivory-paper matte-gouache swatch. Cells: thorny stem in branch fork, ember-shading stone, hide draped over shoulder-shaped branch, snapped point fitted backward, scorched unfired clay ball, unpierced stone tied outside with fiber, curled bark tray, leaf-guarded stone flake, shell held in split branch.",
+      "review": "Middle-middle: lumpy cracked unfired clay ball with soot mark and raw interior between roots."
     },
     {
       "catalogue_id": 1254,
@@ -26154,10 +26378,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1254.png",
       "prompt": "Use case: historical-scene. Artifact 1254: The sound stone hung on a root · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A thin natural stone chip suspended in a loose root cradle above bare ground, a small striker nearby; no drilled gong. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Freeing a surface from the ground changes its vibration. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Freeing a surface from the ground changes its vibration. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "1ed236d07d4e2b61e83f82c5be3185a28fc08b9f0723ffddc438ab97d449e7e1",
+      "source": "art_source/prehistoric-art/swatches/1249-1257.png",
+      "atlas_cell": 5,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds in square 3x3 ivory-paper matte-gouache swatch. Cells: thorny stem in branch fork, ember-shading stone, hide draped over shoulder-shaped branch, snapped point fitted backward, scorched unfired clay ball, unpierced stone tied outside with fiber, curled bark tray, leaf-guarded stone flake, shell held in split branch.",
+      "review": "Middle-right: solid unpierced stone suspended by coarse fiber wrapped around its outside beneath a root."
     },
     {
       "catalogue_id": 1255,
@@ -26170,10 +26401,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1255.png",
       "prompt": "Use case: historical-scene. Artifact 1255: The bark tray with a raised corner · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A curved bark scrap propped at one corner by a twig, tiny seeds gathered at the lower edge. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A slope can sort the movement of loose things without touching each one. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A slope can sort the movement of loose things without touching each one. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "2df26dcccab1f2a43161d6d0e7e0bcd098a03eb47a9fc23e95846ee83a36374d",
+      "source": "art_source/prehistoric-art/swatches/1249-1257.png",
+      "atlas_cell": 6,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds in square 3x3 ivory-paper matte-gouache swatch. Cells: thorny stem in branch fork, ember-shading stone, hide draped over shoulder-shaped branch, snapped point fitted backward, scorched unfired clay ball, unpierced stone tied outside with fiber, curled bark tray, leaf-guarded stone flake, shell held in split branch.",
+      "review": "Bottom-left: naturally curled ragged bark tray caught in a branch fork with one raised corner."
     },
     {
       "catalogue_id": 1256,
@@ -26186,10 +26424,17 @@
       "discovery_id": "controlled_flaking",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1256.png",
       "prompt": "Use case: historical-scene. Artifact 1256: The sharp edge guarded by a fold · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A rough flint edge tucked inside a folded hide scrap tied loosely with grass, one corner exposed. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A cover preserves an edge and separates it from other carried objects. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A cover preserves an edge and separates it from other carried objects. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "6977c90256d88ebdb98bddbcd04149084baba17cdf2a54e83f63e0fab4494005",
+      "source": "art_source/prehistoric-art/swatches/1249-1257.png",
+      "atlas_cell": 7,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds in square 3x3 ivory-paper matte-gouache swatch. Cells: thorny stem in branch fork, ember-shading stone, hide draped over shoulder-shaped branch, snapped point fitted backward, scorched unfired clay ball, unpierced stone tied outside with fiber, curled bark tray, leaf-guarded stone flake, shell held in split branch.",
+      "review": "Bottom-middle: sharp found flake loosely covered by a broad leaf within a tree fork."
     },
     {
       "catalogue_id": 1257,
@@ -26202,10 +26447,17 @@
       "discovery_id": "clay_shaping",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1257.png",
       "prompt": "Use case: historical-scene. Artifact 1257: The shell pressed into a grip · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A jagged shell fragment embedded in a crude thumb-molded clay lump with its scraping edge exposed. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Different materials can divide the jobs of holding and cutting. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Different materials can divide the jobs of holding and cutting. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "225e79965b050ed2322cb2bedc9fd8fe3710bea4c2092d0a17f2f82a3954f302",
+      "source": "art_source/prehistoric-art/swatches/1249-1257.png",
+      "atlas_cell": 8,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds in square 3x3 ivory-paper matte-gouache swatch. Cells: thorny stem in branch fork, ember-shading stone, hide draped over shoulder-shaped branch, snapped point fitted backward, scorched unfired clay ball, unpierced stone tied outside with fiber, curled bark tray, leaf-guarded stone flake, shell held in split branch.",
+      "review": "Bottom-right: broken shell held awkwardly in a naturally split branch without a fitting."
     },
     {
       "catalogue_id": 1258,
@@ -26218,10 +26470,17 @@
       "discovery_id": "tallies",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1258.png",
       "prompt": "Use case: historical-scene. Artifact 1258: The twig gauge of an opening · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A forked twig whose two tips fit the opposite sides of a rough rock opening, no standardized measure. Distinct experiment for this specimen (takes precedence over the base arrangement): The trace uses a natural branching crack as part of its shape or grouping, with uneven pigment or impressions continuing around it. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): One object's span can preserve a comparison for use somewhere else. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "One object's span can preserve a comparison for use somewhere else. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "4a8682e98019c068447a7bb8460cad2f979f9cdb41253af4db1833a903afe4b3",
+      "source": "art_source/prehistoric-art/swatches/1258-1266.png",
+      "atlas_cell": 0,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine natural-fork prehistoric finds in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: twig spanning root opening, leaf soot impression on split rock, loose root nest in fallen tree fork, stones at soft earth anvil, quick-release knot at branch crotch, charcoal smudge on cave rock, chip repairing shell rim, wood curl saved beside charcoal, ochre-thumbprint handstone passed between hands.",
+      "review": "Top-left: thin unmarked twig caught across the natural opening between two roots."
     },
     {
       "catalogue_id": 1259,
@@ -26234,10 +26493,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1259.png",
       "prompt": "Use case: historical-scene. Artifact 1259: The soot print of a leaf · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A pale leaf-shaped negative surrounded by uneven soot on a cave-rock fragment, a dry leaf lying nearby. Distinct experiment for this specimen (takes precedence over the base arrangement): The trace uses a natural branching crack as part of its shape or grouping, with uneven pigment or impressions continuing around it. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Covering part of a surface makes an image by leaving material absent. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Covering part of a surface makes an image by leaving material absent. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "656ed2fbe402323a5962b7fc9413eac5ee8a23db5db28e911e278406c3b18504",
+      "source": "art_source/prehistoric-art/swatches/1258-1266.png",
+      "atlas_cell": 1,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine natural-fork prehistoric finds in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: twig spanning root opening, leaf soot impression on split rock, loose root nest in fallen tree fork, stones at soft earth anvil, quick-release knot at branch crotch, charcoal smudge on cave rock, chip repairing shell rim, wood curl saved beside charcoal, ochre-thumbprint handstone passed between hands.",
+      "review": "Top-middle: black leaf-shaped soot impression on split stone with decaying leaf beside it."
     },
     {
       "catalogue_id": 1260,
@@ -26250,10 +26516,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1260.png",
       "prompt": "Use case: historical-scene. Artifact 1260: The root basket before weaving · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: Three rough bent roots loosely crossed and tied around a handful of dry moss, large irregular openings and no regular weave. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Crossing flexible supports begins to make a space that can hold something. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Crossing flexible supports begins to make a space that can hold something. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "1463890df20e30099f109f4f39a5fdd82038e9e14c0597989cd8a5bc42efaf8b",
+      "source": "art_source/prehistoric-art/swatches/1258-1266.png",
+      "atlas_cell": 2,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine natural-fork prehistoric finds in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: twig spanning root opening, leaf soot impression on split rock, loose root nest in fallen tree fork, stones at soft earth anvil, quick-release knot at branch crotch, charcoal smudge on cave rock, chip repairing shell rim, wood curl saved beside charcoal, ochre-thumbprint handstone passed between hands.",
+      "review": "Top-right: loose free-ended roots gathered as a shallow nest in a fallen-tree fork, before weaving."
     },
     {
       "catalogue_id": 1261,
@@ -26266,10 +26539,17 @@
       "discovery_id": "controlled_flaking",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1261.png",
       "prompt": "Use case: historical-scene. Artifact 1261: The stone and the soft anvil · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A rough flint core rests on a dented short wood fragment with chipped debris nearby. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): The supporting surface changes how an impact affects the object above it. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "The supporting surface changes how an impact affects the object above it. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "99cbe2c174ea49d6191f159dbb57d9121896034ec2a49b30fca4b018240972a9",
+      "source": "art_source/prehistoric-art/swatches/1258-1266.png",
+      "atlas_cell": 3,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine natural-fork prehistoric finds in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: twig spanning root opening, leaf soot impression on split rock, loose root nest in fallen tree fork, stones at soft earth anvil, quick-release knot at branch crotch, charcoal smudge on cave rock, chip repairing shell rim, wood curl saved beside charcoal, ochre-thumbprint handstone passed between hands.",
+      "review": "Middle-left: hard handstone and a softer battered clay-and-earth anvil together in a root hollow."
     },
     {
       "catalogue_id": 1262,
@@ -26282,10 +26562,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1262.png",
       "prompt": "Use case: historical-scene. Artifact 1262: The knot with a quick release · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A coarse loose knot secured by one short twig pushed through its loop, fraying ends visible. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A removable crosspiece makes a binding easier to undo. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A removable crosspiece makes a binding easier to undo. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "382b74c05e305b06e56d7592e774312fb9e509715fe98eb5cd431f5f9274b3a4",
+      "source": "art_source/prehistoric-art/swatches/1258-1266.png",
+      "atlas_cell": 4,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine natural-fork prehistoric finds in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: twig spanning root opening, leaf soot impression on split rock, loose root nest in fallen tree fork, stones at soft earth anvil, quick-release knot at branch crotch, charcoal smudge on cave rock, chip repairing shell rim, wood curl saved beside charcoal, ochre-thumbprint handstone passed between hands.",
+      "review": "Middle-middle: rough fiber quick-release knot around a branch crotch with a long loose pull tail."
     },
     {
       "catalogue_id": 1263,
@@ -26298,10 +26585,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1263.png",
       "prompt": "Use case: historical-scene. Artifact 1263: The charcoal smudge that matched a shadow · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A rough rock face bearing one charcoal contour beside a natural protrusion whose shadow roughly matches it, no sundial. Distinct experiment for this specimen (takes precedence over the base arrangement): The trace uses a natural branching crack as part of its shape or grouping, with uneven pigment or impressions continuing around it. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A changing shadow can be compared with a mark that stays in place. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A changing shadow can be compared with a mark that stays in place. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "e3c8b4001cc6860777edd33fe9648a3ff4ecf3eeca5648537190fb15ee4d74c6",
+      "source": "art_source/prehistoric-art/swatches/1258-1266.png",
+      "atlas_cell": 5,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine natural-fork prehistoric finds in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: twig spanning root opening, leaf soot impression on split rock, loose root nest in fallen tree fork, stones at soft earth anvil, quick-release knot at branch crotch, charcoal smudge on cave rock, chip repairing shell rim, wood curl saved beside charcoal, ochre-thumbprint handstone passed between hands.",
+      "review": "Middle-right: amorphous charcoal mark matching a natural shadow on rough cave rock, without symbols."
     },
     {
       "catalogue_id": 1264,
@@ -26314,10 +26608,17 @@
       "discovery_id": "controlled_flaking",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1264.png",
       "prompt": "Use case: historical-scene. Artifact 1264: The shell edge repaired with a chip · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A broken shell scraping edge patched crudely with one small flint chip held in a lumpy resin dab. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A damaged object can acquire a new working surface from another material. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A damaged object can acquire a new working surface from another material. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "f5b5058ca04991c36379df1323ae3f1d0c81375ae37318edf24ba5515a47f9f7",
+      "source": "art_source/prehistoric-art/swatches/1258-1266.png",
+      "atlas_cell": 6,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine natural-fork prehistoric finds in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: twig spanning root opening, leaf soot impression on split rock, loose root nest in fallen tree fork, stones at soft earth anvil, quick-release knot at branch crotch, charcoal smudge on cave rock, chip repairing shell rim, wood curl saved beside charcoal, ochre-thumbprint handstone passed between hands.",
+      "review": "Bottom-left: damaged shell with a single jagged stone chip wedged at its broken rim."
     },
     {
       "catalogue_id": 1265,
@@ -26330,10 +26631,17 @@
       "discovery_id": "charcoal",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1265.png",
       "prompt": "Use case: historical-scene. Artifact 1265: The wood curl saved for a flame · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A short ragged cluster of thin wood curls tied loosely to a thicker twig, ends scorched, no metal-cut shavings. Distinct experiment for this specimen (takes precedence over the base arrangement): The active part is wedged into the crotch of an unworked forked branch; show the fork doing the holding with minimal loose fiber. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Thin exposed pieces catch heat differently from a solid branch. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Thin exposed pieces catch heat differently from a solid branch. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "b4e1dac0fe0b5c9224900c1e40d1f4434ea20342d0ef0ab26e223020c50d9f0b",
+      "source": "art_source/prehistoric-art/swatches/1258-1266.png",
+      "atlas_cell": 7,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine natural-fork prehistoric finds in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: twig spanning root opening, leaf soot impression on split rock, loose root nest in fallen tree fork, stones at soft earth anvil, quick-release knot at branch crotch, charcoal smudge on cave rock, chip repairing shell rim, wood curl saved beside charcoal, ochre-thumbprint handstone passed between hands.",
+      "review": "Bottom-middle: pale raw wood curl protected in a bark split beside charcoal crumbs."
     },
     {
       "catalogue_id": 1266,
@@ -26346,10 +26654,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1266.png",
       "prompt": "Use case: historical-scene. Artifact 1266: The ochre thumbprint on a shared tool · a useful natural fork.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A battered pounding stone with two different-sized ochre thumb smears on its blunt side, no carved ownership symbol. Distinct experiment for this specimen (takes precedence over the base arrangement): The trace uses a natural branching crack as part of its shape or grouping, with uneven pigment or impressions continuing around it. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A personal trace can connect a useful object with the people who handle it. An existing shape can do part of the work before anything is deliberately made.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A personal trace can connect a useful object with the people who handle it. An existing shape can do part of the work before anything is deliberately made.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "4a3d63fab0ba8c633d526771cfab2fa780055e68d0777ec54d423b587de60263",
+      "source": "art_source/prehistoric-art/swatches/1258-1266.png",
+      "atlas_cell": 8,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine natural-fork prehistoric finds in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: twig spanning root opening, leaf soot impression on split rock, loose root nest in fallen tree fork, stones at soft earth anvil, quick-release knot at branch crotch, charcoal smudge on cave rock, chip repairing shell rim, wood curl saved beside charcoal, ochre-thumbprint handstone passed between hands.",
+      "review": "Bottom-right: rough handstone being passed between working hands, marked by one ochre thumb smear."
     },
     {
       "catalogue_id": 1267,
@@ -26948,10 +27263,17 @@
       "discovery_id": "controlled_flaking",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1295.png",
       "prompt": "Use case: historical-scene. Artifact 1295: The scraper with a soft grip · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A stubby rough flint scraper whose blunt end is wrapped in a single torn hide strip, the edge exposed. Side view; crude frayed wrap without standardized handle. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Protecting the hand allows a sharp edge to be used with greater control. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Protecting the hand allows a sharp edge to be used with greater control. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "8752f533f2718cefc8010a63318b72c2fb0b9cdbf66a813f0b1b53be485ba13d",
+      "source": "art_source/prehistoric-art/swatches/1295-1303.png",
+      "atlas_cell": 0,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine early prehistoric finds braced at weak points in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: scraper with soft grip, contrasting stone path with branch brace, tied root join, animal-like natural rock, hand-rolled drill branch, braced reed pouring water, stone smoothing groove, bark supporting hide fold, bound twig lifting ember.",
+      "review": "Top-left: sharp irregular flint scraper protected by rough soft hide at its thin middle."
     },
     {
       "catalogue_id": 1296,
@@ -26964,10 +27286,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1296.png",
       "prompt": "Use case: historical-scene. Artifact 1296: A path made of contrasts · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A compact surviving patch of earth with three pale pebbles set against dark gravel leading toward one larger upright natural rock. Oblique close view, no road or carved symbols. Distinct experiment for this specimen (takes precedence over the base arrangement): Show a trace interrupted by a ridge and resumed on a small adjacent surface, using the natural division to organize it. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Objects placed where they contrast with their surroundings can help someone find a way. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Objects placed where they contrast with their surroundings can help someone find a way. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "ea136bb6570a1cf35d6750b7ba222daad54f0cb4ec9bdca976a552dd0311012d",
+      "source": "art_source/prehistoric-art/swatches/1295-1303.png",
+      "atlas_cell": 1,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine early prehistoric finds braced at weak points in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: scraper with soft grip, contrasting stone path with branch brace, tied root join, animal-like natural rock, hand-rolled drill branch, braced reed pouring water, stone smoothing groove, bark supporting hide fold, bound twig lifting ember.",
+      "review": "Top-middle: bare path indicated by contrasting loose stones and a rough branch bridging weak ground."
     },
     {
       "catalogue_id": 1297,
@@ -26980,10 +27309,17 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1297.png",
       "prompt": "Use case: historical-scene. Artifact 1297: The twisted root join · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: Two crooked branch fragments lashed at an awkward angle with a single flexible root, root fibers fraying under tension. Close view of a practical unstable joint, no frame, nails or finished carpentry. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Wrapping a joint distributes strain and joins materials without shaping matching surfaces. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Wrapping a joint distributes strain and joins materials without shaping matching surfaces. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "fcd6ae3e1c3c1a3c4d201805fcd6470e6fccf4d5f2149f60de9ba23b1b710b13",
+      "source": "art_source/prehistoric-art/swatches/1295-1303.png",
+      "atlas_cell": 2,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine early prehistoric finds braced at weak points in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: scraper with soft grip, contrasting stone path with branch brace, tied root join, animal-like natural rock, hand-rolled drill branch, braced reed pouring water, stone smoothing groove, bark supporting hide fold, bound twig lifting ember.",
+      "review": "Top-right: two unlike roots joined by a single short coarse fiber tie at the weak point."
     },
     {
       "catalogue_id": 1298,
@@ -26996,10 +27332,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1298.png",
       "prompt": "Use case: historical-scene. Artifact 1298: An animal hiding in the rock · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A bulging irregular limestone fragment whose natural ridge becomes the back of a rough red-ochre horse; only a few strokes add head and legs. Partial figure crosses a crack. No repeated bovine-and-hand motif. Distinct experiment for this specimen (takes precedence over the base arrangement): Show a trace interrupted by a ridge and resumed on a small adjacent surface, using the natural division to organize it. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): An existing shape can become part of an image, turning observation into representation. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "An existing shape can become part of an image, turning observation into representation. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "db84fd99368cd9a7f9119e34be571f446fc25c98c01d3452e633fe8203a29910",
+      "source": "art_source/prehistoric-art/swatches/1295-1303.png",
+      "atlas_cell": 3,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine early prehistoric finds braced at weak points in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: scraper with soft grip, contrasting stone path with branch brace, tied root join, animal-like natural rock, hand-rolled drill branch, braced reed pouring water, stone smoothing groove, bark supporting hide fold, bound twig lifting ember.",
+      "review": "Middle-left: natural cracked rock vaguely suggests a crouching animal, with fractured corner propped by a stone."
     },
     {
       "catalogue_id": 1299,
@@ -27012,10 +27355,17 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1299.png",
       "prompt": "Use case: historical-scene. Artifact 1299: The branch that drilled by rolling · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A crooked slender twig with a grit-blackened tip rests in a shallow unfinished hole in soft stone, loose abrasive sand around it; no drill frame. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Rolling a point with grit wears a hollow without striking it. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Rolling a point with grit wears a hollow without striking it. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "7b7b4dfdd75fedce5db64fddca683423530efa14a2c6c4d2dda8d896fa695db3",
+      "source": "art_source/prehistoric-art/swatches/1295-1303.png",
+      "atlas_cell": 4,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine early prehistoric finds braced at weak points in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: scraper with soft grip, contrasting stone path with branch brace, tied root join, animal-like natural rock, hand-rolled drill branch, braced reed pouring water, stone smoothing groove, bark supporting hide fold, bound twig lifting ember.",
+      "review": "Middle-middle: hands rolling a plain branch into a shallow wood hollow, no bow drill."
     },
     {
       "catalogue_id": 1300,
@@ -27028,10 +27378,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1300.png",
       "prompt": "Use case: historical-scene. Artifact 1300: The reed that poured without spilling · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A broken hollow reed wedged through a natural crack in a rough gourd fragment, hardened clay packed unevenly around the join. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A narrow passage can guide a liquid out of a larger hollow. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A narrow passage can guide a liquid out of a larger hollow. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "6d26a551dd92a8a74d5c2992079242b809319884608537936caf6a94c009aabc",
+      "source": "art_source/prehistoric-art/swatches/1295-1303.png",
+      "atlas_cell": 5,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine early prehistoric finds braced at weak points in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: scraper with soft grip, contrasting stone path with branch brace, tied root join, animal-like natural rock, hand-rolled drill branch, braced reed pouring water, stone smoothing groove, bark supporting hide fold, bound twig lifting ember.",
+      "review": "Middle-right: hollow reed pours a narrow stream into cracked stone basin with a second reed bracing it."
     },
     {
       "catalogue_id": 1301,
@@ -27044,10 +27401,17 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1301.png",
       "prompt": "Use case: historical-scene. Artifact 1301: The stone that smoothed a groove · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A rough sandstone fragment with one deep irregular rubbing groove, an uneven bone sliver laid beside it. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A fixed abrasive channel guides repeated shaping. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A fixed abrasive channel guides repeated shaping. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "598be1e29511f334222f849b5a1fb94a5b024670a30245eebfcc1f1cb1915edd",
+      "source": "art_source/prehistoric-art/swatches/1295-1303.png",
+      "atlas_cell": 6,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine early prehistoric finds braced at weak points in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: scraper with soft grip, contrasting stone path with branch brace, tied root join, animal-like natural rock, hand-rolled drill branch, braced reed pouring water, stone smoothing groove, bark supporting hide fold, bound twig lifting ember.",
+      "review": "Bottom-left: handstone rubbing a shallow groove in sandstone while another pebble supports its edge."
     },
     {
       "catalogue_id": 1302,
@@ -27060,10 +27424,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1302.png",
       "prompt": "Use case: historical-scene. Artifact 1302: The bark that held a fold · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A small bark sheet folded into an angular scoop, one side tied with a root through ragged natural splits. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A sheet can acquire useful depth through folding. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A sheet can acquire useful depth through folding. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "8ffd836193e67cbc26682e011f7cb3382ffdab4d735973de46fa9c6f6a68436f",
+      "source": "art_source/prehistoric-art/swatches/1295-1303.png",
+      "atlas_cell": 7,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine early prehistoric finds braced at weak points in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: scraper with soft grip, contrasting stone path with branch brace, tied root join, animal-like natural rock, hand-rolled drill branch, braced reed pouring water, stone smoothing groove, bark supporting hide fold, bound twig lifting ember.",
+      "review": "Bottom-middle: curved bark supports a folded raw-hide scrap, secured only by a crude fiber tie."
     },
     {
       "catalogue_id": 1303,
@@ -27076,10 +27447,17 @@
       "discovery_id": "charcoal",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1303.png",
       "prompt": "Use case: historical-scene. Artifact 1303: The fork that lifted an ember · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A charred forked twig grips a small cold charcoal lump between springy prongs. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A fork separates fingers from a dangerous contact surface. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A fork separates fingers from a dangerous contact surface. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "4f4c503eb0effa518651ca51cb6e9f0d8c87f29295768948455c92e90b2e4712",
+      "source": "art_source/prehistoric-art/swatches/1295-1303.png",
+      "atlas_cell": 8,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine early prehistoric finds braced at weak points in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: scraper with soft grip, contrasting stone path with branch brace, tied root join, animal-like natural rock, hand-rolled drill branch, braced reed pouring water, stone smoothing groove, bark supporting hide fold, bound twig lifting ember.",
+      "review": "Bottom-right: forked twig carrying a tiny ember away from the hand, weak split tied with grass."
     },
     {
       "catalogue_id": 1304,
@@ -27092,10 +27470,17 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1304.png",
       "prompt": "Use case: historical-scene. Artifact 1304: The shell that scraped a skin · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A jagged shell edge resting against the scraped pale area of an unfinished hide fragment, flakes of residue nearby. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A curved natural edge can remove material while preserving what lies underneath. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A curved natural edge can remove material while preserving what lies underneath. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "e8595f96215d55a686971fba47c3fe7a6b6e5b27371a50f6fc39f38f5f95f62c",
+      "source": "art_source/prehistoric-art/swatches/1304-1312.png",
+      "atlas_cell": 0,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds braced at weak points, square 3x3 ivory-paper matte-gouache swatch. Cells: shell scraping raw hide, forked antler pressing stone edge, water-holding moss, pebble crushing wild husk, roots binding snapped splint, scraper renewed by breaking, hide catching ochre dust, pebble inside loose hide rattle, rib spreading root paste.",
+      "review": "Top-left: jagged shell rim scrapes untreated hide while a small root props the shell's weak side."
     },
     {
       "catalogue_id": 1305,
@@ -27108,10 +27493,17 @@
       "discovery_id": "controlled_flaking",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1305.png",
       "prompt": "Use case: historical-scene. Artifact 1305: The antler that pressed an edge · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A blunt worn antler tip touches the edge of a thick flint flake beside two very small detached chips. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Concentrated pressure can refine an edge more gently than a blow. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "generated",
       "art_collection": "prehistoric-v1",
       "insight": "Concentrated pressure can refine an edge more gently than a blow. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "b0696e6ab74e0fed26da7f4068746703ac8fb73c1ff1c48e2661ab47ffa99a96",
+      "source": "art_source/prehistoric-art/swatches/1304-1312.png",
+      "atlas_cell": 1,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds braced at weak points, square 3x3 ivory-paper matte-gouache swatch. Cells: shell scraping raw hide, forked antler pressing stone edge, water-holding moss, pebble crushing wild husk, roots binding snapped splint, scraper renewed by breaking, hide catching ochre dust, pebble inside loose hide rattle, rib spreading root paste.",
+      "quality_issue": "The supposed antler reads as a wooden branch rather than recognizable animal antler."
     },
     {
       "catalogue_id": 1306,
@@ -27124,10 +27516,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1306.png",
       "prompt": "Use case: historical-scene. Artifact 1306: The moss that held water · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A compressed pad of moss in a cupped natural bark fragment, several dark droplets at its edge. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A porous bundle can temporarily hold and transfer liquid. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A porous bundle can temporarily hold and transfer liquid. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "6a4390502b3d93a6b6283025b6167a4b64c6ac325db1cde9a63db9ec8d3c98eb",
+      "source": "art_source/prehistoric-art/swatches/1304-1312.png",
+      "atlas_cell": 2,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds braced at weak points, square 3x3 ivory-paper matte-gouache swatch. Cells: shell scraping raw hide, forked antler pressing stone edge, water-holding moss, pebble crushing wild husk, roots binding snapped splint, scraper renewed by breaking, hide catching ochre dust, pebble inside loose hide rattle, rib spreading root paste.",
+      "review": "Top-right: green damp moss squeezed between rocks, holding visible water droplets."
     },
     {
       "catalogue_id": 1307,
@@ -27140,10 +27539,17 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1307.png",
       "prompt": "Use case: historical-scene. Artifact 1307: The pebble that crushed a husk · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A pitted pebble with one worn face beside broken wild seed husks in a shallow natural rock hollow. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Breaking a protective shell exposes food inside. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Breaking a protective shell exposes food inside. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "87e0cc23b01d144be8ca0beeab1634cc8f4a206e60203563ce7282dd8cafa651",
+      "source": "art_source/prehistoric-art/swatches/1304-1312.png",
+      "atlas_cell": 3,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds braced at weak points, square 3x3 ivory-paper matte-gouache swatch. Cells: shell scraping raw hide, forked antler pressing stone edge, water-holding moss, pebble crushing wild husk, roots binding snapped splint, scraper renewed by breaking, hide catching ochre dust, pebble inside loose hide rattle, rib spreading root paste.",
+      "review": "Middle-left: small hard pebble compresses a wild seed husk against rock with fragments scattered."
     },
     {
       "catalogue_id": 1308,
@@ -27156,10 +27562,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1308.png",
       "prompt": "Use case: historical-scene. Artifact 1308: The root that bound a splint · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: Two rough little twigs bound alongside a cracked branch with irregular root wraps; no injured person. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A weak piece can be supported by parallel pieces tied around it. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A weak piece can be supported by parallel pieces tied around it. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "85b87f7245bbdf448411449fb64f8137ce5ff14268dae531d79c7e743ae06bd9",
+      "source": "art_source/prehistoric-art/swatches/1304-1312.png",
+      "atlas_cell": 4,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds braced at weak points, square 3x3 ivory-paper matte-gouache swatch. Cells: shell scraping raw hide, forked antler pressing stone edge, water-holding moss, pebble crushing wild husk, roots binding snapped splint, scraper renewed by breaking, hide catching ochre dust, pebble inside loose hide rattle, rib spreading root paste.",
+      "review": "Middle-middle: two roots bound around the fragile center of a snapped natural wood splint."
     },
     {
       "catalogue_id": 1309,
@@ -27172,10 +27585,17 @@
       "discovery_id": "controlled_flaking",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1309.png",
       "prompt": "Use case: historical-scene. Artifact 1309: A scraper renewed by breaking · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A blunt used flint scraper with a fresh snapped corner revealing a small sharp edge; detached corner close by. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Breaking a worn object can expose a new useful surface. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Breaking a worn object can expose a new useful surface. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "302410c8a08a97ffcabf25dc6a6b0623db889a0236aae9c5a3c0c656dff412e0",
+      "source": "art_source/prehistoric-art/swatches/1304-1312.png",
+      "atlas_cell": 5,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds braced at weak points, square 3x3 ivory-paper matte-gouache swatch. Cells: shell scraping raw hide, forked antler pressing stone edge, water-holding moss, pebble crushing wild husk, roots binding snapped splint, scraper renewed by breaking, hide catching ochre dust, pebble inside loose hide rattle, rib spreading root paste.",
+      "review": "Middle-right: crude flint scraper with a new rough broken edge and its detached flake nearby."
     },
     {
       "catalogue_id": 1310,
@@ -27188,10 +27608,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1310.png",
       "prompt": "Use case: historical-scene. Artifact 1310: The hide that caught fine dust · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A ragged hide offcut bent into a trough under an ochre-crushing pebble, fine red powder pooled in its fold. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A flexible surface can catch and gather scattered fine material. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A flexible surface can catch and gather scattered fine material. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "a39bdd791d1477c6484fc37c9745719df48a6a730306a7fb7c1015abf794af80",
+      "source": "art_source/prehistoric-art/swatches/1304-1312.png",
+      "atlas_cell": 6,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds braced at weak points, square 3x3 ivory-paper matte-gouache swatch. Cells: shell scraping raw hide, forked antler pressing stone edge, water-holding moss, pebble crushing wild husk, roots binding snapped splint, scraper renewed by breaking, hide catching ochre dust, pebble inside loose hide rattle, rib spreading root paste.",
+      "review": "Bottom-left: irregular raw hide stretched in branch fork, capturing fine ochre dust."
     },
     {
       "catalogue_id": 1311,
@@ -27204,10 +27631,17 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1311.png",
       "prompt": "Use case: historical-scene. Artifact 1311: The pebble inside a skin rattle · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: An intact opaque rawhide pocket tightly gathered and tied completely shut at its neck, containing unseen loose pebbles. Show two comparison pebbles outside beside it. No torn openings, cutaways, exposed contents or decorative handle. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): An enclosed loose object turns shaking into a repeatable sound. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "An enclosed loose object turns shaking into a repeatable sound. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "da25075440f19b3d4e9084e802161dfe7e183ad22b43972270416cd83e9d4038",
+      "source": "art_source/prehistoric-art/swatches/1304-1312.png",
+      "atlas_cell": 7,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds braced at weak points, square 3x3 ivory-paper matte-gouache swatch. Cells: shell scraping raw hide, forked antler pressing stone edge, water-holding moss, pebble crushing wild husk, roots binding snapped splint, scraper renewed by breaking, hide catching ochre dust, pebble inside loose hide rattle, rib spreading root paste.",
+      "review": "Bottom-middle: natural pebble held inside loosely tied untanned hide pouch for a rattle."
     },
     {
       "catalogue_id": 1312,
@@ -27220,10 +27654,17 @@
       "discovery_id": "clay_shaping",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1312.png",
       "prompt": "Use case: historical-scene. Artifact 1312: The rib that spread a paste · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A broad broken rib with wet-clay residue on its curved edge beside a rough smeared clay patch. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A broad curved edge distributes a soft material over a surface. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A broad curved edge distributes a soft material over a surface. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "3eac2bfa62e4ba6e67aa6f0829d2d3560957b9d691dc78e6205c8d53b33c72d0",
+      "source": "art_source/prehistoric-art/swatches/1304-1312.png",
+      "atlas_cell": 8,
+      "width": 418,
+      "height": 418,
+      "generation_prompt": "Built-in imagegen: nine crude prehistoric finds braced at weak points, square 3x3 ivory-paper matte-gouache swatch. Cells: shell scraping raw hide, forked antler pressing stone edge, water-holding moss, pebble crushing wild husk, roots binding snapped splint, scraper renewed by breaking, hide catching ochre dust, pebble inside loose hide rattle, rib spreading root paste.",
+      "review": "Bottom-right: curved animal rib spreads root paste on rough stone, weak end supported by a thumb."
     },
     {
       "catalogue_id": 1313,
