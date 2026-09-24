@@ -12,12 +12,32 @@ extends RefCounted
 ##   traffic_bonus(owner) - 0..0.40 extra envoy/trader/refugee routing weight
 const Catalog=preload("res://scripts/undertaking_catalog.gd")
 const FoodScript=preload("res://scripts/food_system.gd")
-const DETERRENCE:={"stone_crown":.15,"returning_arch":.08,"assembly_dome":.12}
-const TRAFFIC:={"safe_passage":.20,"harbor_lamp":.12,"joining_water":.12,"grand_terminus":.15,"sky_harbor":.20}
-const FORECAST_DAYS:={"star_steps":120,"watching_tower":365}
-const COVENANT_CAP:={"common_stores":6000.0,"covenant_vaults":24000.0}
-const MEMORY_CAP:={"long_song":12,"chronicle_house":24}
-const RESTORE_PER_YEAR:={"long_song":1,"chronicle_house":3}
+## Legacy founding works keep fixed magnitudes; conceived works scale by their
+## stored strength (ambition × outcome, 0.25..3.4), always bounded.
+const DETERRENCE:={"stone_crown":.15}
+const TRAFFIC:={"safe_passage":.20}
+const FORECAST_DAYS:={"star_steps":120}
+const COVENANT_CAP:={"common_stores":6000.0}
+const MEMORY_CAP:={"long_song":12}
+const RESTORE_PER_YEAR:={"long_song":1}
+const CIVIC_DAILY:=.00004
+const CIVIC_CEILING:=.85
+
+## Effect family of a record: stored for conceived works, catalog for legacy.
+static func family(r:Dictionary)->String:
+	var effect:Variant=r.get("effect")
+	if effect is Dictionary and not (effect as Dictionary).is_empty():return String(effect.get("family",""))
+	return String(Catalog.get_definition(String(r.id)).get("effect",""))
+static func strength(r:Dictionary)->float:
+	var effect:Variant=r.get("effect")
+	if effect is Dictionary and (effect as Dictionary).has("strength"):return clampf(float(effect.strength),0,4)
+	return 1.0
+static func deterrence_of(r:Dictionary)->float:return float(DETERRENCE[String(r.id)]) if DETERRENCE.has(String(r.id)) else minf(.25,.10*strength(r))
+static func traffic_of(r:Dictionary)->float:return float(TRAFFIC[String(r.id)]) if TRAFFIC.has(String(r.id)) else minf(.40,.12*strength(r))
+static func forecast_days(r:Dictionary)->int:return int(FORECAST_DAYS[String(r.id)]) if FORECAST_DAYS.has(String(r.id)) else mini(365,roundi(120*strength(r)))
+static func covenant_cap(r:Dictionary)->float:return float(COVENANT_CAP[String(r.id)]) if COVENANT_CAP.has(String(r.id)) else minf(24000.0,6000.0*strength(r))
+static func memory_cap(r:Dictionary)->int:return int(MEMORY_CAP[String(r.id)]) if MEMORY_CAP.has(String(r.id)) else (24 if strength(r)>=1.5 else 12)
+static func restore_rate(r:Dictionary)->int:return int(RESTORE_PER_YEAR[String(r.id)]) if RESTORE_PER_YEAR.has(String(r.id)) else (3 if strength(r)>=1.5 else 1)
 const MAX_ARCHIVED_DISCOVERIES:=4096
 
 static func _system()->GDScript:return load("res://scripts/undertaking_system.gd")
@@ -49,7 +69,7 @@ static func held_works(owner:String,effect:String="")->Array:
 		var r:Dictionary=entry.record
 		if not U.held(r):continue
 		var d:=Catalog.get_definition(String(r.id))
-		if effect.is_empty() or String(d.effect)==effect:
+		if effect.is_empty() or family(r)==effect:
 			var item:Dictionary=entry.duplicate()
 			item.definition=d
 			result.append(item)
@@ -57,12 +77,12 @@ static func held_works(owner:String,effect:String="")->Array:
 
 static func deterrence(owner:String)->float:
 	var total:=0.0
-	for item:Dictionary in held_works(owner,"deterrence"):total+=float(DETERRENCE.get(String(item.record.id),.05))*float(item.record.condition)
+	for item:Dictionary in held_works(owner,"deterrence"):total+=deterrence_of(item.record)*float(item.record.condition)
 	return minf(.25,total)
 
 static func traffic_bonus(owner:String)->float:
 	var total:=0.0
-	for item:Dictionary in held_works(owner,"traffic"):total+=float(TRAFFIC.get(String(item.record.id),.05))*float(item.record.condition)
+	for item:Dictionary in held_works(owner,"traffic"):total+=traffic_of(item.record)*float(item.record.condition)
 	return minf(.40,total)
 
 ## One unique decree per held work (text only; integration may add dialogue).
@@ -75,14 +95,19 @@ static func decree_options(owner:String)->Array:
 	return result
 
 ## Human-readable summary of what a work does beyond its catalog bonus.
-static func describe(id:String,condition:float=1.0)->String:
+static func describe(id:String,condition:float=1.0,record:Dictionary={})->String:
 	var d:=Catalog.get_definition(id)
-	match String(d.get("effect","")):
-		"watching_sky":return "Warns of lean seasons and famine up to %d days ahead." % roundi(float(FORECAST_DAYS.get(id,120))*maxf(.25,condition))
-		"covenant":return "Seals up to %d rations of real surplus against famine; released when people go hungry." % roundi(float(COVENANT_CAP.get(id,6000))*condition)
-		"long_song":return "Keeps up to %d leaders' memories for successors and restores up to %d lost discoveries a year." % [int(MEMORY_CAP.get(id,12)),int(RESTORE_PER_YEAR.get(id,1))]
-		"deterrence":return "Rivals' willingness to make war on you falls by up to %d%%." % roundi(float(DETERRENCE.get(id,.05))*condition*100)
-		"traffic":return "Envoys, traders and refugees are %d%% more likely to route toward you." % roundi(float(TRAFFIC.get(id,.05))*condition*100)
+	var r:Dictionary=record if not record.is_empty() else {"id":id}
+	if record.is_empty() and bool(d.get("concept",false)):
+		# Before completion: describe a successful outcome at the design's ambition.
+		r={"id":id,"effect":{"family":String(d.effect),"strength":load("res://scripts/wonder_concept.gd").pay(String(d.ambition),"success")}}
+	match family(r):
+		"watching_sky":return "Warns of lean seasons and famine up to %d days ahead." % roundi(float(forecast_days(r))*maxf(.25,condition))
+		"covenant":return "Seals up to %d rations of real surplus against famine; released when people go hungry." % roundi(covenant_cap(r)*condition)
+		"long_song":return "Keeps up to %d leaders' memories for successors and restores up to %d lost discoveries a year." % [memory_cap(r),restore_rate(r)]
+		"deterrence":return "Rivals' willingness to make war on you falls by up to %d%%." % roundi(deterrence_of(r)*condition*100)
+		"traffic":return "Envoys, traders and refugees are %d%% more likely to route toward you." % roundi(traffic_of(r)*condition*100)
+		"civic":return "Steadies cohesion and legitimacy while it stands."
 	return String(d.get("effect_text",""))
 
 # --- Daily effects (called from advance_all inside the owner's scope) ---------
@@ -90,8 +115,9 @@ static func advance_city(state:Node,city:Dictionary,day:int,days:int)->void:
 	var U:=_system()
 	for r:Dictionary in city.get("undertakings",[]):
 		if not U.held(r):continue
-		match String(Catalog.get_definition(String(r.id)).effect):
+		match family(r):
 			"covenant":_covenant(state,r,days)
+			"civic":_civic(state,r,days)
 			"long_song":
 				# Monthly review keeps the cost trivial.
 				if posmod(day,30)<maxi(1,days):_long_song(state,r,day)
@@ -99,7 +125,7 @@ static func advance_city(state:Node,city:Dictionary,day:int,days:int)->void:
 ## The covenant moves food, never creates it: sealed rations leave stored food
 ## and return to it exactly. Sealing only draws on comfortable surplus.
 static func _covenant(state:Node,r:Dictionary,days:int)->void:
-	var cap:=float(COVENANT_CAP.get(String(r.id),6000.0))*float(r.condition)
+	var cap:=covenant_cap(r)*float(r.condition)
 	var reserve:=float(r.get("covenant",0.0))
 	var stocks:Dictionary=state.food_stocks
 	var stored:=float(stocks.get(FoodScript.STORED,0.0))
@@ -119,6 +145,15 @@ static func _covenant(state:Node,r:Dictionary,days:int)->void:
 	if moved<0 and (reserve+moved)<=.0001:
 		preload("res://scripts/undertaking_system.gd").record_event(r,int(state.elapsed_days),"The Covenant's last sealed rations were given out","covenant")
 
+## A standing work of shared purpose slowly steadies cohesion and legitimacy,
+## never above a ceiling and never faster than CIVIC_DAILY × strength per day.
+static func _civic(state:Node,r:Dictionary,days:int)->void:
+	var m:Dictionary=state.simulation_metrics
+	var step:=CIVIC_DAILY*strength(r)*float(r.condition)*days
+	for key in ["cohesion","legitimacy"]:
+		var value:=float(m.get(key,.5))
+		if value<CIVIC_CEILING:m[key]=minf(CIVIC_CEILING,value+step)
+
 static func famine_reserve(owner:String)->float:
 	var total:=0.0
 	for item:Dictionary in held_works(owner,"covenant"):total+=float(item.record.get("covenant",0.0))
@@ -130,7 +165,7 @@ static func _long_song(state:Node,r:Dictionary,day:int)->void:
 	if not r.has("archive"):r.archive={"memories":[],"discoveries":[],"restored_year":-1,"restored":0}
 	var archive:Dictionary=r.archive
 	var memories:Array=archive.memories
-	var cap:=int(MEMORY_CAP.get(id,12))
+	var cap:=memory_cap(r)
 	var government=WorldSimulation.government
 	var holders:Array=[]
 	for office_key in state.leadership_positions:
@@ -166,7 +201,7 @@ static func _long_song(state:Node,r:Dictionary,day:int)->void:
 	var year:=day/365
 	if int(archive.restored_year)!=year:archive.restored_year=year;archive.restored=0
 	for discovery in sung:
-		if int(archive.restored)>=int(RESTORE_PER_YEAR.get(id,1)):break
+		if int(archive.restored)>=restore_rate(r):break
 		if String(discovery) in state.known_discoveries:continue
 		state.known_discoveries.append(String(discovery))
 		archive.restored=int(archive.restored)+1
@@ -197,7 +232,7 @@ static func forecast(owner:String="player")->Array:
 	var horizon:=0
 	var source:=""
 	for item:Dictionary in works:
-		var reach:=roundi(float(FORECAST_DAYS.get(String(item.record.id),120))*maxf(.25,float(item.record.condition)))
+		var reach:=roundi(float(forecast_days(item.record))*maxf(.25,float(item.record.condition)))
 		if reach>horizon:horizon=reach;source=String(item.definition.title)
 	return WorldSimulation.scoped(owner,func()->Array:
 		var result:Array=[]

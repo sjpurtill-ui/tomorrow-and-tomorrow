@@ -1,8 +1,9 @@
 extends RefCounted
-## Great Works between rival owners: what each owner has actually observed of
-## other owners' works, sabotage with real costs and risks, and what war does
-## to works (capture follows the existing occupation, siege damage, looting of
-## enshrined artifacts, restoration, and lasting grievances).
+## Great Works between peoples: news of each other's works learned only through
+## real reports (dated, uncertain), envy-driven sabotage that is rare and costly,
+## and what war does to works (capture follows the existing occupation, siege
+## damage, looting of enshrined artifacts, restoration, lasting grievances).
+## Wonders are conceived, not drawn from a list: there are no claims or races.
 ##
 ## Owner ids are global: "player" is the human civilization and every other id
 ## is a WorldSimulation actor. Inside an owner's scope the same people appear as
@@ -22,16 +23,18 @@ const SIGHT_QUALITY:=.35         # a large construction site is visible at all
 const IDENTIFY_QUALITY:=.55      # which named work it is can be judged
 const NEWS_LIMIT:=40
 const NEWS_MAX_AGE:=365*12       # older sightings are history, not news
-const RACE_MAX_AGE:=365          # rulers only race against recent evidence
-const SABOTAGE_AGENTS:=3
-const SABOTAGE_COOLDOWN:=180
+const SIGHTING_MAX_AGE:=365      # agents act only on recent evidence of where a work stands
+const SABOTAGE_AGENTS:=5
+const SABOTAGE_COOLDOWN:=720
 const SABOTAGE_SETBACK:=.04      # share of a work's total effort undone
 const SIEGE_DAILY_WEAR:=.0015
 const SIEGE_FLOOR:=.2            # sieges scar; only neglect finishes a ruin
 const EVENT_LIMIT:=12
 const GRIEVANCE_LIMIT:=12
 const LOOT_LIMIT:=64
-const FORM_WORDS:={"ring":"a great ring of standing stones","hall":"a great hall","basin":"a great walled basin","terrace":"great stepped terraces","kilns":"a great court of kilns","granary":"a great granary","orchard":"a great planted orchard","mound":"a great earthen mound"}
+## How an unidentified work of each form looks from afar.
+const FORM_WORDS:={"ring":"a great ring of standing stones","mound":"a great earthen mound","stair":"a great stair","terrace":"great stepped terraces","tower":"a great tower","hall":"a great hall","basin":"a great walled basin","cistern":"a great cistern","granary":"a great granary","bridge":"a great bridge","causeway":"a great causeway","dam":"a great dam","colossus":"a colossal figure","statue":"a colossal statue","garden":"a great garden","observatory":"a great observatory","gate":"a great gate","arch":"a great arch","canal":"a great canal","library":"a great house of records","archive":"a great house of records","amphitheatre":"a great amphitheatre","lighthouse":"a great lighthouse","kilns":"a great court of kilns","orchard":"a great planted orchard"}
+const SCALE_WORDS:={"modest":"of modest scale","grand":"of grand scale","audacious":"of audacious scale"}
 
 # ---------------------------------------------------------------- identities
 
@@ -136,8 +139,23 @@ static func personality(owner:String)->Dictionary:
 	if owner=="player" or state==null:return {"openness":.5,"discipline":.5,"empathy":.5,"assertiveness":.5,"risk_tolerance":.5}
 	return PERSONALITY.foreign(int(state.world_seed),owner)
 
+## Name, form, purpose, ambition and outcome of a conceived work (or a legacy
+## catalog record), whichever fields the record carries.
+static func work_info(record:Dictionary)->Dictionary:
+	var d:=definition(String(record.get("id","")))
+	var concept:Dictionary=record.get("concept",{}) if record.get("concept") is Dictionary else {}
+	var name:=String(record.get("custom_name",record.get("name",concept.get("name",d.get("title","a great work")))))
+	return {"name":name,"form":String(record.get("form",concept.get("form",d.get("form","")))),"purpose":String(record.get("purpose",concept.get("purpose",""))),
+		"ambition":String(record.get("ambition",concept.get("ambition",""))),"outcome":String(record.get("outcome",""))}
+
+## Materials the finished work embodied: a conceived work's own bill, else its legacy definition.
+static func work_cost(record:Dictionary)->Dictionary:
+	for source:Variant in [record.get("cost"),(record.get("concept",{}) as Dictionary).get("cost") if record.get("concept") is Dictionary else null,definition(String(record.get("id",""))).get("cost")]:
+		if source is Dictionary and not (source as Dictionary).is_empty():return source
+	return {}
+
 static func _title(record:Dictionary)->String:
-	return String(record.get("custom_name",definition(String(record.get("id",""))).get("title","great work")))
+	return String(work_info(record).name)
 
 # ---------------------------------------------------------------- observation
 
@@ -155,13 +173,17 @@ static func sight(system:Object,actual:Dictionary,quality:float,day:int,key:Stri
 	if local.is_empty() or owner_state(owner)==null:return []
 	var result:Array=[]
 	for r:Dictionary in city_record(owner,local).get("undertakings",[]):
-		var d:=definition(String(r.get("id","")))
-		if d.is_empty():continue
-		var rng:=RandomNumberGenerator.new();rng.seed=hash(key+":"+String(r.id))^day
+		var info:=work_info(r)
+		var rng:=RandomNumberGenerator.new();rng.seed=hash(key+":"+String(r.get("id","")))^day
 		var error:=lerpf(.30,.06,clampf((quality-SIGHT_QUALITY)/(.9-SIGHT_QUALITY),0,1))
 		var center:=fraction(r)+rng.randf_range(-.5,.5)*error
-		var sighting:={"owner":owner,"local_city_id":local,"work_id":String(r.id) if quality>=IDENTIFY_QUALITY else "","form":String(d.get("form","")),"status":String(r.get("status","")),
+		var sighting:={"owner":owner,"local_city_id":local,"work_id":String(r.id) if quality>=IDENTIFY_QUALITY else "","form":String(info.form),"status":String(r.get("status","")),
 			"progress_low":snappedf(clampf(center-error,0,1),.05),"progress_high":snappedf(clampf(center+error,0,1),.05),"quality":snappedf(quality,.01),"observed_day":day}
+		# Scale is visible to anyone; a name and a purpose need a closer look.
+		if not String(info.ambition).is_empty():sighting["ambition"]=String(info.ambition)
+		if quality>=IDENTIFY_QUALITY:sighting["name"]=String(info.name).left(120)
+		if quality>=.6 and not String(info.purpose).is_empty():sighting["purpose"]=String(info.purpose)
+		if not String(info.outcome).is_empty():sighting["outcome"]=String(info.outcome)
 		if float(sighting.progress_high)<float(sighting.progress_low):sighting.progress_high=sighting.progress_low
 		if sighting.status=="functioning":
 			var c:=float(r.get("condition",1))+rng.randf_range(-.5,.5)*error
@@ -179,6 +201,8 @@ static func valid_sightings(value:Variant)->bool:
 		for key:String in ["progress_low","progress_high","quality"]:
 			if not Exchange.number(s[key]) or float(s[key])<0 or float(s[key])>1:return false
 		if not Exchange.number(s.observed_day) or float(s.observed_day)<0 or float(s.progress_high)<float(s.progress_low):return false
+		for key:String in ["name","purpose","ambition","outcome","pace"]:
+			if s.has(key) and (not s[key] is String or s[key].length()>120):return false
 	return true
 
 static func _intel_book(observer:String)->Dictionary:
@@ -227,8 +251,10 @@ static func rival_news_for(observer:String)->Array[Dictionary]:
 	return items
 
 static func _describe_work(s:Dictionary)->String:
+	if not String(s.get("name","")).is_empty():return String(s.name)
 	if not String(s.work_id).is_empty():return String(definition(String(s.work_id)).get("title","a great work"))
-	return String(FORM_WORDS.get(String(s.form),"a great work"))
+	var look:=String(FORM_WORDS.get(String(s.form),"a great work"))
+	return look+(" "+String(SCALE_WORDS.get(String(s.get("ambition","")),"")) if SCALE_WORDS.has(String(s.get("ambition",""))) else "")
 
 static func _sighting_item(observer:String,report:Dictionary,s:Dictionary,today:int)->Dictionary:
 	var owner:=String(s.owner)
@@ -237,17 +263,21 @@ static func _sighting_item(observer:String,report:Dictionary,s:Dictionary,today:
 	var place:=String(report.get("name","an unnamed settlement"))
 	var what:=_describe_work(s)
 	var low:=roundi(float(s.progress_low)*100);var high:=roundi(float(s.progress_high)*100)
-	var state_text:String={"building":"raising %s — perhaps %d–%d%% complete" % [what,low,high],"stalled":"%s, apparently idle — perhaps %d–%d%% complete" % [what,low,high],"functioning":"%s standing complete and in use" % what,"abandoned":"the unfinished remains of %s" % what,"ruined":"%s fallen into ruin" % what,"rival":"%s left unfinished as a rival monument" % what,"quarried":"the quarried footings of %s" % what}.get(String(s.status),what)
+	var state_text:String={"building":"raising %s — perhaps %d–%d%% complete" % [what,low,high],"stalled":"%s, apparently idle — perhaps %d–%d%% complete" % [what,low,high],"functioning":"%s standing complete and in use" % what,"abandoned":"the unfinished remains of %s" % what,"ruined":"%s fallen into ruin" % what,"collapsed":"the collapsed wreck of %s" % what,"folly":"%s, a ruined folly" % what,"quarried":"the quarried footings of %s" % what}.get(String(s.status),"%s (%s)" % [what,String(s.status)])
+	if String(s.status)=="ruined" and String(s.get("outcome",""))=="collapse":state_text="the collapsed ruin of %s — a folly its builders could not raise" % what
+	elif String(s.status)=="functioning" and String(s.get("outcome",""))=="flawed":state_text+=", though visibly flawed"
+	elif String(s.status)=="functioning" and String(s.get("outcome",""))=="triumph":state_text+=" — beyond what its builders promised"
+	if s.has("purpose"):state_text+="; said to be meant to %s" % String(s.purpose).replace("_"," ")
 	if s.has("pace"):state_text+="; crews worked at a %s pace" % String(s.pace)
 	var source:=String(report.get("source","a report"))
 	var text:="%s, day %d (%s): %s at %s — %s. Confidence %s." % [source.left(1).to_upper()+source.substr(1),int(s.observed_day),"today" if age<=0 else "%d days old" % age,who.left(1).to_upper()+who.substr(1),place,state_text,_confidence_word(float(s.quality))]
-	return {"kind":"sighting","day":int(s.observed_day),"reported_day":int(report.get("reported_day",s.observed_day)),"age_days":age,"stale":age>180,"owner":owner,"civ_name":who,"city_id":String(report.get("city_id","")),"local_city_id":String(s.local_city_id),"city_name":place,"work_id":String(s.work_id),"title":what,"form":String(s.form),"status":String(s.status),"progress_low":float(s.progress_low),"progress_high":float(s.progress_high),"confidence":float(s.quality),"source":String(report.get("source","")),"text":text}
+	return {"kind":"sighting","day":int(s.observed_day),"reported_day":int(report.get("reported_day",s.observed_day)),"age_days":age,"stale":age>180,"owner":owner,"civ_name":who,"city_id":String(report.get("city_id","")),"local_city_id":String(s.local_city_id),"city_name":place,"work_id":String(s.work_id),"title":what,"form":String(s.form),"ambition":String(s.get("ambition","")),"purpose":String(s.get("purpose","")),"outcome":String(s.get("outcome","")),"status":String(s.status),"progress_low":float(s.progress_low),"progress_high":float(s.progress_high),"confidence":float(s.quality),"source":String(report.get("source","")),"text":text}
 
 static func _account_item(observer:String,owner:String,city:Dictionary,r:Dictionary,account:Dictionary,today:int)->Dictionary:
 	var who:=civ_name(observer,owner)
 	var age:=today-int(account.day)
 	var title:=_title(r)
-	return {"kind":"account","day":int(account.day),"reported_day":int(account.day),"age_days":age,"stale":age>365*5,"owner":owner,"civ_name":who,"city_id":"","local_city_id":String(city.id),"city_name":String(city.get("name","")) if in_contact(observer,owner) else "an undisclosed city","work_id":String(r.id),"title":title,"form":String(definition(String(r.id)).get("form","")),"status":"functioning","progress_low":1.0,"progress_high":1.0,"confidence":.5,"source":"travelers' accounts",
+	return {"kind":"account","day":int(account.day),"reported_day":int(account.day),"age_days":age,"stale":age>365*5,"owner":owner,"civ_name":who,"city_id":"","local_city_id":String(city.id),"city_name":String(city.get("name","")) if in_contact(observer,owner) else "an undisclosed city","work_id":String(r.id),"title":title,"form":String(work_info(r).form),"ambition":String(work_info(r).ambition),"purpose":String(work_info(r).purpose),"outcome":String(work_info(r).outcome),"status":"functioning","progress_low":1.0,"progress_high":1.0,"confidence":.5,"source":"travelers' accounts",
 		"text":"Travelers from %s spoke of %s, standing and in use%s. Heard on day %d (%d days ago); accounts are secondhand." % [who,title," though raised at great human cost" if int(account.get("strain",0))>=180 else "",int(account.day),age]}
 
 static func _event_item(observer:String,owner:String,city:Dictionary,r:Dictionary,event:Dictionary,today:int)->Dictionary:
@@ -273,32 +303,29 @@ static func _treasures(count:int,noun:String)->String:
 static func _confidence_word(q:float)->String:
 	return "high" if q>=.75 else ("fair" if q>=.55 else "low")
 
-# ---------------------------------------------------------------- races
+# ---------------------------------------------------------------- hearing of works
 
-static func race_for(observer:String,work_id:String,own_fraction:float,news:Array=[])->Dictionary:
-	## The best recent evidence of a rival pursuing the same world-unique work.
-	if news.is_empty():news=rival_news_for(observer)
-	var result:Dictionary={}
-	for item:Dictionary in news:
-		if String(item.get("work_id",""))!=work_id or String(item.owner)==observer:continue
-		if String(item.kind) not in ["sighting","account"]:continue
-		if String(item.status)=="functioning":
-			return {"owner":item.owner,"claimed":true,"rival_ahead":true,"rival_mid":1.0,"day":int(item.day),"local_city_id":String(item.local_city_id),"allied":_allied(observer,String(item.owner))}
-		if String(item.status) not in ["building","stalled"] or int(item.age_days)>RACE_MAX_AGE:continue
-		# Assume the rival kept working since the report; the estimate stays uncertain.
-		var mid:=(float(item.progress_low)+float(item.progress_high))*.5
-		if result.is_empty() or mid>float(result.rival_mid):
-			result={"owner":String(item.owner),"claimed":false,"rival_mid":mid,"rival_high":float(item.progress_high),"day":int(item.day),"age_days":int(item.age_days),"local_city_id":String(item.local_city_id),"city_id":String(item.city_id),"confidence":float(item.confidence),"allied":_allied(observer,String(item.owner))}
-	if not result.is_empty():result["rival_ahead"]=float(result.rival_mid)>own_fraction
+static func heard_works(observer:String,since_day:int=-1,status:String="functioning")->Array[Dictionary]:
+	## Foreign works this owner has learned of (sightings and accounts), newest
+	## first. Awe, envy and emulation respond only to these.
+	var result:Array[Dictionary]=[]
+	for item:Dictionary in rival_news_for(observer):
+		if String(item.kind) not in ["sighting","account"] or String(item.owner)==observer:continue
+		if not status.is_empty() and String(item.get("status",""))!=status:continue
+		if since_day>=0 and int(item.day)<since_day:continue
+		result.append(item)
 	return result
 
-static func _allied(observer:String,other:String)->bool:
-	return String(relation(observer,other).get("treaty","none")) not in ["","none"]
+## Retired with world-unique races (design revision 2). Kept only so callers
+## from the previous engine receive "no race" instead of a missing method.
+static func race_for(_observer:String,_work_id:String,_own_fraction:float,_news:Array=[])->Dictionary:
+	return {}
 
 # ---------------------------------------------------------------- sabotage
 
 static func sabotage(target:String,city_id:String,work_id:String)->Dictionary:
-	## Runs in the saboteur's scope. Paid provisions, real agents, real risk.
+	## Runs in the saboteur's scope. Envy, not a race: rare (two-year cooldown),
+	## paid in provisions for five agents, and those agents die if caught.
 	var source:=WorldSimulation.actor_id
 	var state:=WorldSimulation.state
 	var day:=int(state.elapsed_days)
@@ -306,7 +333,7 @@ static func sabotage(target:String,city_id:String,work_id:String)->Dictionary:
 	var sighting:Dictionary={}
 	for report:Dictionary in _intel_book(source).values():
 		for s:Dictionary in report.get("works",[]):
-			if String(s.owner)==target and String(s.local_city_id)==city_id and String(s.work_id)==work_id and day-int(s.observed_day)<=RACE_MAX_AGE:
+			if String(s.owner)==target and String(s.local_city_id)==city_id and String(s.work_id)==work_id and day-int(s.observed_day)<=SIGHTING_MAX_AGE:
 				sighting=s.duplicate();sighting["position"]=report.get("position",{})
 	if sighting.is_empty():return {"error":"No recent report identifies that work and where it stands."}
 	if not in_contact(source,target):return {"error":"Agents need known routes to that people."}
@@ -502,12 +529,13 @@ static func restore(city_id:String,work_id:String)->Dictionary:
 	if r.is_empty() or String(r.get("status",""))!="functioning":return {"error":"Only a standing, functioning work can be restored."}
 	var amount:=minf(.3,1.0-float(r.condition))
 	if amount<.02:return {"error":"The work needs no restoration."}
-	var d:=definition(work_id)
+	var cost:=work_cost(r)
+	if cost.is_empty():return {"error":"No record of this work's materials survives to guide a restoration."}
 	return WorldSimulation.settlements.with_city_resources(city_id,func()->Dictionary:
 		var stores:Dictionary=WorldSimulation.state.resource_stockpiles
 		var bill:Dictionary={}
-		for material:String in d.get("cost",{}):
-			bill[material]=float(d.cost[material])*amount*.4
+		for material:String in cost:
+			bill[material]=float(cost[material])*amount*.4
 			if float(stores.get(material,0))<float(bill[material]):return {"error":"Restoration needs %.0f %s from local stores." % [float(bill[material]),material]}
 		for material:String in bill:stores[material]=float(stores[material])-float(bill[material])
 		r.condition=minf(1.0,float(r.condition)+amount)

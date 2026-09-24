@@ -88,36 +88,67 @@ static func diplomatic_action(relation:Dictionary,plan:Dictionary,food_days:floa
 	return "goodwill" if opinion>-.5 and float(plan.personality.empathy)>.65 else ""
 
 # ---------------------------------------------------------------- Great Works
-## Which Great Work a ruler would pursue, and how it reacts to a rival race.
-## Preferences only; the undertaking rules still demand real labor and stores.
-const GREAT_WORK_ROLES:={"Knowledge":"learning","Administration":"security","Food":"care","Logistics":"exchange","Crafting":"growth"}
-## The goal each transformative effect serves; works without one fall back to role.
-const GREAT_WORK_EFFECT_GOALS:={"deterrence":"security","traffic":"exchange","watching_sky":"care","covenant":"care","long_song":"learning"}
+## Why and how boldly a ruler conceives a wonder. Preferences only: concepts,
+## feasibility, costs and outcomes belong to the Great Works engine.
+const WONDER_AMBITIONS:=["modest","grand","audacious"]
+const WONDER_PAYOFF:={"modest":1.0,"grand":1.8,"audacious":3.0}
+const WONDER_MOTIVE_THRESHOLD:=.7
+## Purpose words -> [personality axis, trigger that makes the purpose apt].
+## Trigger kinds are the Great Works engine's: victory, death, famine,
+## anniversary, envy, plenty (see great_works.gd conceive()).
+const WONDER_PURPOSE_CUES:=[[["dead","mourn","grief","ancestor"],"empathy","death"],[["bind","unite","tribe","assembly","law"],"discipline","anniversary"],[["flood","water","feed","hunger","famine","harvest","granary","rain"],"empathy","famine"],[["heaven","sky","star","watch","season"],"openness",""],[["awe","rival","might","power","glory"],"assertiveness","envy"],[["knowledge","remember","memory","learn","record","song"],"openness","anniversary"],[["thank","triumph","victory","celebrate"],"assertiveness","victory"],[["defy","god"],"risk_tolerance",""],[["welcome","stranger","trade","market"],"openness","plenty"],[["craft","master"],"discipline","plenty"]]
 
-static func great_work_score(definition:Dictionary,plan:Dictionary,context:Dictionary={})->float:
-	if definition.is_empty() or bool(context.get("claimed",false)):return -INF
+## How strongly this ruler is moved to build by what its people are living through.
+static func wonder_motive(trigger:Dictionary,plan:Dictionary)->float:
 	var p:Dictionary=plan.personality
 	var open:=float(p.openness);var discipline:=float(p.discipline);var empathy:=float(p.empathy)
 	var assertive:=float(p.assertiveness);var risk:=float(p.risk_tolerance)
-	var role:=String(definition.get("role",""))
-	var value:float={"Knowledge":open*1.2+(1-risk)*.2,"Administration":assertive*.8+discipline*.5,"Food":empathy*.9+(1-risk)*.4,"Logistics":discipline*.5+empathy*.4+open*.3,"Crafting":discipline*.7+open*.4}.get(role,.5)*2.0
-	var aims:Array=[GREAT_WORK_ROLES.get(role,""),GREAT_WORK_EFFECT_GOALS.get(String(definition.get("effect","")),"")]
-	var goals:Array=plan.get("goals",[])
-	for index in goals.size():
-		if String(goals[index].get("id","")) in aims:value+=[1.2,.6,.3][mini(index,2)]
-	# Grand designs appeal to bold rulers; cautious rulers prefer what they can finish.
-	value+=(risk-.5)*log(maxf(1,float(definition.get("work",5000)))/5000.0+1.0)*2.0
-	value+=clampf(float(context.get("coverage",0)),0,1)*1.5
-	if bool(context.get("rival_ahead",false)):value-=1.5*(1.2-risk)
-	return value
+	match String(trigger.get("kind","")):
+		"victory":return assertive*.6+risk*.2+.3
+		"death":return empathy*.7+.3
+		"famine":return empathy*.5+(1-risk)*.3+.3
+		"anniversary":return discipline*.5+open*.2+.3
+		# Hearing of another people's work: envy for the proud, awe for the curious.
+		"envy":return maxf(assertive*.7+(1-empathy)*.35,open*.55+empathy*.25)
+		"plenty":return open*.3+assertive*.3+risk*.3+.15
+	return 0.0
 
-static func great_work_reaction(plan:Dictionary,race:Dictionary,own_fraction:float,food_days:float,sabotage_ready:bool=true)->String:
+static func wonder_purpose_fit(purpose:String,trigger:Dictionary,plan:Dictionary)->float:
+	var p:Dictionary=plan.personality
+	var text:=purpose.to_lower()
+	for cue:Array in WONDER_PURPOSE_CUES:
+		for word:String in cue[0]:
+			if text.contains(word):
+				return float(p.get(String(cue[1]),.5))+(.6 if String(cue[2])==String(trigger.get("kind","")) else 0.0)
+	return .5
+
+## Value of one ambition at an assessed feasibility (0..1). Bold rulers weigh
+## the payoff heavily and discount risk: they overreach and sometimes fail.
+static func wonder_ambition_value(ambition:String,feasibility:float,plan:Dictionary)->float:
+	var p:Dictionary=plan.personality
+	var risk:=float(p.risk_tolerance);var assertive:=float(p.assertiveness)
+	var f:=clampf(feasibility,0,1)
+	if f<.45-.4*risk:return -INF
+	return pow(float(WONDER_PAYOFF.get(ambition,1.0)),assertive*.5+risk*.5+.2)*pow(maxf(.001,f),1.4-risk)
+
+## Years a ruler lets pass after beginning one work before conceiving another.
+static func wonder_interval_days(plan:Dictionary)->int:
+	var p:Dictionary=plan.personality
+	return roundi(365.0*(12.0-8.0*(float(p.assertiveness)*.5+float(p.risk_tolerance)*.5)))
+
+static func wonder_pace(plan:Dictionary,food_days:float)->String:
 	var p:Dictionary=plan.personality
 	if bool(plan.get("food_shortage",plan.get("hungry",false))):return "careful"
-	if race.is_empty() or not bool(race.get("rival_ahead",false)):
-		return "press" if float(p.discipline)>.6 and food_days>90 else "careful"
-	if bool(race.get("claimed",false)):return "abandon"
-	var gap:=float(race.rival_mid)-own_fraction
-	if own_fraction<.25 and gap>.35 and float(p.risk_tolerance)<.55:return "abandon"
-	if sabotage_ready and not bool(race.get("allied",false)) and float(p.assertiveness)>.6 and float(p.risk_tolerance)>.55 and float(p.empathy)<.5:return "sabotage"
-	return "press" if food_days>45 else "careful"
+	if float(p.discipline)>.6 and food_days>90:return "press"
+	if float(p.risk_tolerance)>.75 and food_days>60:return "press"
+	return "careful"
+
+## Prudent rulers cut their losses on a work their builders no longer believe in;
+## reckless ones carry on toward triumph or collapse.
+static func wonder_abandon(plan:Dictionary,feasibility:float)->bool:
+	return feasibility>=0 and feasibility<.15 and float(plan.personality.risk_tolerance)<.4
+
+## Envy-driven sabotage: only a proud, callous, reckless ruler even considers it.
+static func wonder_sabotage_temper(plan:Dictionary)->bool:
+	var p:Dictionary=plan.personality
+	return float(p.assertiveness)>.75 and float(p.empathy)<.3 and float(p.risk_tolerance)>.6

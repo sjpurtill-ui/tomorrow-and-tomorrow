@@ -16,7 +16,7 @@ Wonders ("undertakings") are private per-city buildings with small % buffs, no r
 5. **Allure & artifacts.** Great Works are the largest allure source; artifacts may be **enshrined** in suitable works (bounded exhibit bonus, pilgrims). The artifact branch (`codex/artifact-culture`, `scripts/artifact_culture.gd`) is separate: expose hooks here, integration wires them.
 6. **All eras, layered sites.** Catalog spans all eras (~36 works over founding → classical → medieval → industrial → modern; gated by discoveries/era, not a 300-year cap). Some works **upgrade in place** (Ancestors' Ring → Temple of the Ring → Cathedral of the Ring), keeping the site's accumulated history, events and name.
 7. **War.** Works in captured cities change owner (existing occupation), can be damaged in sieges, looted (enshrined artifacts taken, reputation hit to looter among observers), and restored. Losing one creates a lasting grievance/memory for the former owner.
-8. **Victory** — rework "Enduring Civilization" to count Great Works claimed/held, and surface it proudly.
+8. ~~**Victory**~~ — withdrawn: there is no victory in this game (user directive). Wonders are expressed only as history, legacy, reputation and chronicle.
 
 ## Hooks for the Experience worker (later, after Audience Hall integrates)
 
@@ -36,3 +36,36 @@ static func enshrine(city_id:String,work_id:String,artifact_id:String)->Dictiona
 static func forecast()->Array[Dictionary]                     # e.g. Watching Sky season/famine warnings if owned
 ```
 If `preload("res://scripts/audience_hall.gd")` exists and `has_method("enqueue")`, decisions/ceremonies/rival news may also be enqueued as audiences (guarded; harmless when absent).
+
+## REVISION 2 — Conceived wonders (supersedes the fixed catalog, world-uniqueness and races)
+
+User direction: "Too much like Civ. No limited wonders. A civilization should be able to come up with a wonder and try it. It should be a reflection of their civilization, with a unique name, and it could fail or succeed based on the conditions of the civilization. Keep much of our work, but no fixed list."
+
+### Motivation — why a people builds
+A wonder is conceived from **who this people is and what it is going through**: societal values (hierarchy, collective obligation, experimentation, pluralism, stewardship…), dominant needs and fears (famine, floods, war, a death, a triumph, a founding anniversary), environment (river, ridge, coast, desert), the ruler's and officials' personalities, and known discoveries/materials. Each conceived wonder has a **purpose/aspiration** (e.g. honor the dead, bind the tribes, tame the flood, watch the heavens, awe rivals, remember knowledge, give thanks for a harvest, defy the gods) — purpose drives payoff.
+
+### Conception — no list, a grammar
+`scripts/wonder_concept.gd` generates concepts deterministically from seed + civ state + day + trigger: **form** (from a bounded set: ring, mound, stair/terrace, tower, hall, basin/cistern, granary, bridge, causeway, dam, colossus/statue, garden, observatory, gate/arch, canal, library/archive, amphitheatre, lighthouse… gated by materials and discoveries), **purpose**, **ambition** (modest / grand / audacious — chosen by the ruler), **materials & labor** (derived from form × scale × known techniques), **unique name** in the civ's naming tradition ("The Weeping Stair of Varrow", "Hearth-that-Never-Sleeps", "Ossuary of the Ninety Winters") and a short lore line. Concepts arise from (a) officials/architects proposing in the Audience Hall when a trigger fires, (b) the ruler describing one in words (AI interpretation maps free text into form/purpose/ambition within the grammar; offline keyword mapping), (c) AI civilizations conceiving their own under identical rules. Unlimited in number; many civs may raise towers — each is its own.
+
+### Risk — it can fail
+Before and during construction a **feasibility** is computed and spoken of in-world (never as a bare %): engineering capability vs ambition (relevant discoveries, material quality, architect skill, skilled crafters), social support (cohesion, legitimacy, food security, war), and duration of stability. Stage-gate decisions and events shift it. Outcomes: **triumph** (exceeds vision), **success**, **flawed** (functions, reduced payoff, maybe later decay), **collapse/folly** (resources lost, legitimacy/cohesion hit, deaths possible, becomes a named ruin with lore), **abandoned** (support withdrawn). Overreach is the drama: audacious works pay far more and fail far more.
+
+### Payoff — reflects purpose and outcome
+Purpose maps to existing effect families (forecast, famine reserve, memory persistence, deterrence, traffic/attraction, research, craft, cohesion/legitimacy, water/food capacity) scaled by ambition × outcome quality, bounded. Every success adds **allure** and identity (cohesion, collective memory); failures add lore and a scar (memory in officials, grievances if forced labor). Ceremony on completion as before. Upgrading/expanding an existing work is a new conception layered on the site (history preserved).
+
+### Keep / change / remove
+- KEEP: architects (HistoricalFigures), stages + decisions + events, dedication ceremony, effects module (bounded), enshrinement, allure contribution, war capture/damage/loot/restore/grievance, rival **news** (dated, uncertain), AI parity via validated orders, save compatibility. (Victory removed by user directive: no victory conditions; wonders are history, legacy, reputation and chronicle only.)
+- REMOVE: fixed 36-work catalog as the source of wonders (keep existing 12 founding definitions only as legacy mapping for old saves), world-uniqueness claims, races, "Unfinished X" rival monuments from losing races (a failed/abandoned work still becomes a ruin/folly), sabotage framed as race tactic (envy-driven sabotage may remain, rare).
+- Rival news becomes "news of their works": rivals hear of your wonder (awe, envy, emulation — an AI may conceive a rival work in response).
+
+### Facade changes (`scripts/great_works.gd`)
+Replace catalog/world_status/claims/candidates with:
+```
+static func conceive(owner:String="player", trigger:Dictionary={})->Array[Dictionary]   # 1–3 fresh concepts
+static func concept_from_words(text:String, owner:String="player")->Dictionary          # ruler-described
+static func assess(concept:Dictionary, owner:String="player")->Dictionary                # feasibility: {score, factors:[{name,effect,text}], spoken:String, costs, duration_estimate}
+static func commission(city_id:String, concept:Dictionary, ambition:String, owner:String="player")->Dictionary
+static func works(owner:String="player")->Array[Dictionary]      # all of this owner's works incl. ruins/follies
+static func known_foreign_works(observer:String="player")->Array[Dictionary]
+```
+Keep site/pending_decisions/decide/pending_ceremonies/dedicate/recent_events/allure_contribution/enshrine/forecast/decree_options.

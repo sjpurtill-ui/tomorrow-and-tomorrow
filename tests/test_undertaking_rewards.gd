@@ -48,24 +48,24 @@ func test_reputation_requires_carried_accounts_and_ages()->void:
 	r.strain=180;R.share_accounts(GameState,"foreign_a",9125)
 	assert_float(R.diplomatic_bonus(GameState,"foreign_a",9125)).is_equal(.05)
 	assert_float(R.diplomatic_bonus(GameState,"foreign_a",9125+365*30)).is_equal(0.0)
-func test_victory_requires_diverse_maintained_sites_and_foreign_accounts()->void:
-	completed("common_stores");completed("rain_court");completed("living_orchard")
-	R.share_accounts(GameState,"foreign_a",9125);R.share_accounts(GameState,"foreign_b",9125)
-	assert_bool(R.legacy(GameState).ready).is_false()
-	city.undertakings=[]
+func test_history_records_wonders_and_never_awards_victory()->void:
 	completed("common_stores");completed("star_steps");var crown:=completed("stone_crown")
-	assert_bool(R.legacy(GameState).ready).is_false()
 	R.share_accounts(GameState,"foreign_a",9125);R.share_accounts(GameState,"foreign_b",9125)
-	crown.operating_days=365*20-1
-	assert_bool(R.legacy(GameState).ready).is_false()
-	crown.operating_days+=1;crown.condition=.59
-	assert_bool(R.legacy(GameState).ready).is_false()
-	crown.condition=.8;crown.strain=180
-	R.record_victory(GameState,9125)
-	assert_int(city.wonder_victory.day).is_equal(9125)
-	assert_int(city.wonder_victory.costly).is_equal(1)
-	crown.status="ruined";R.record_victory(GameState,9126)
-	assert_int(city.wonder_victory.day).is_equal(9125)
+	crown.strain=180
+	var record:=R.history(GameState)
+	assert_int(int(record.attempted)).is_equal(3)
+	assert_int(int(record.standing)).is_equal(3)
+	assert_int(int(record.enduring)).is_equal(3)
+	assert_int(int(record.kinds)).is_equal(3)
+	assert_int(int(record.known_by)).is_equal(2)
+	assert_int(int(record.costly)).is_equal(1)
+	# There is no victory: nothing is ever awarded or written.
+	assert_bool(record.has("ready") or record.has("award")).is_false()
+	U.advance_all(9126)
+	assert_bool(city.has("wonder_victory")).is_false()
+	assert_dict(R.victory_block(GameState)).is_empty()
+	# Old saves that carry a retired award still load.
+	city.wonder_victory={"day":9125,"costly":1}
 	var saved:Array=bytes_to_var(var_to_bytes(GameState.player_settlements))
 	assert_bool(U.valid(saved)).is_true()
 	saved[0].undertakings[0].heard_by.foreign_a.condition=NAN

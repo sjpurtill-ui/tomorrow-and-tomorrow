@@ -13,7 +13,11 @@ const EXCHANGE:=preload("res://scripts/civilization_exchange.gd")
 const SOCIETY:=preload("res://scripts/society_exchange.gd")
 const NAMES:=preload("res://scripts/historical_name_generator.gd")
 const RESOURCES:=["Food","Timber","Stone","Clay","Fiber Plants"]
-const KINDS:=["gift","request","threat","news","petition","report"]
+const KINDS:=["gift","request","threat","news","petition","report","great_work","wonder_proposal"]
+## Kinds raised by our own people (origin "court").
+const COURT_KINDS:=["petition","report","great_work","wonder_proposal"]
+const WORK_KINDS:=["great_work","wonder_proposal"]
+const GREAT_WORKS_PATH:="res://scripts/great_works_audience.gd"
 const REPORT_SOURCES:=["scouts","envoys","expedition"]
 const REPORT_FACTS_MAX:=24
 const TOPICS:=["food","health","housing","security","grievance","ambition"]
@@ -63,6 +67,11 @@ static func _serial_of(audience:Dictionary)->int:
 
 static func _day()->int:
 	return int(GameState.elapsed_days)
+
+static func _great_works()->GDScript:
+	## Great Works audiences (architects, rival races, forecasts); loaded lazily
+	## because that module reaches back into this one.
+	return load(GREAT_WORKS_PATH) as GDScript if ResourceLoader.exists(GREAT_WORKS_PATH) else null
 
 static func _rng(key:String,day:int)->RandomNumberGenerator:
 	var rng:=RandomNumberGenerator.new()
@@ -142,7 +151,12 @@ static func _expire(day:int)->void:
 	for audience in s.queue.duplicate():
 		if String(audience.status)!="waiting" or day<int(audience.expires_day): continue
 		audience.status="expired"
-		if audience.origin=="foreign":
+		if audience.kind=="wonder_proposal":
+			audience.outcome="%s gave up waiting to pitch their great work; the idea is shelved." % String(audience.speaker.name)
+		elif audience.kind=="great_work":
+			# Works never deadlock: the council answers stage gates after its own delay.
+			audience.outcome="%s could wait no longer; the matter of %s passed to the council." % [String(audience.speaker.name),String((audience.get("great_work",{}) as Dictionary).get("title","the work"))]
+		elif audience.origin=="foreign":
 			var id:=String(audience.civ_id)
 			_shift_relation(id,-0.04,0.0)
 			var leader:=ForeignDiplomacy.leader(id)
@@ -603,6 +617,10 @@ static func options(id:String)->Array[Dictionary]:
 			var short_reward:=_short(String(reward.resource),float(reward.amount))
 			result.append(_option("thank","Thank the messenger","Courteous thanks; the news is noted.","warm"))
 			result.append(_option("reward","Reward the messenger","Send %s home with them." % _terms_text(reward),"warm",short_reward=="",short_reward))
+		"great_work","wonder_proposal":
+			var gwa:=_great_works()
+			if gwa!=null:
+				for option:Dictionary in gwa.call("options",audience): result.append(option)
 		"report":
 			var reward_food:=_scout_reward()
 			var short_food:=_short("Food",reward_food)
@@ -634,7 +652,12 @@ static func resolve(id:String,option_id:String)->Dictionary:
 	if chosen.is_empty(): return {"ok":false,"outcome":"That answer is not open to you here.","reaction":"neutral"}
 	if not bool(chosen.enabled): return {"ok":false,"outcome":String(chosen.reason),"reaction":"neutral"}
 	var result:Dictionary
-	if audience.origin=="foreign": result=_resolve_foreign(audience,option_id)
+	if audience.kind in WORK_KINDS:
+		var gwa:=_great_works()
+		if gwa==null: return {"ok":false,"outcome":"The master builder has left.","reaction":"neutral"}
+		result=gwa.call("resolve",audience,option_id)
+		if not bool(result.get("ok",false)): return {"ok":false,"outcome":String(result.get("outcome","That cannot be done now.")),"reaction":"neutral"}
+	elif audience.origin=="foreign": result=_resolve_foreign(audience,option_id)
 	elif audience.kind=="report": result=_resolve_report(audience,option_id)
 	else: result=_resolve_petition(audience,option_id)
 	audience.status="resolved"
@@ -864,8 +887,8 @@ static func enqueue(record:Dictionary)->Dictionary:
 	## Returns the stored audience, or {} when the record is invalid.
 	var kind:=String(record.get("kind","report"))
 	if kind not in KINDS: return {}
-	var origin:=String(record.get("origin","court" if kind in ["petition","report"] else "foreign"))
-	if origin not in ["foreign","court"] or (origin=="court")!=(kind in ["petition","report"]): return {}
+	var origin:=String(record.get("origin","court" if kind in COURT_KINDS else "foreign"))
+	if origin not in ["foreign","court"] or (origin=="court")!=(kind in COURT_KINDS): return {}
 	var speaker:Variant=record.get("speaker",{})
 	if not speaker is Dictionary or String(speaker.get("name","")).strip_edges()=="": return {}
 	var day:=_day()
@@ -880,6 +903,19 @@ static func enqueue(record:Dictionary)->Dictionary:
 		audience.report=(report as Dictionary).duplicate(true)
 		if audience.civ_id=="": audience.civ_id=String(report.get("subject_civ_id",""))
 		if audience.civ_name=="": audience.civ_name=String(report.get("subject_name",""))
+	elif kind=="wonder_proposal":
+		var gwp:=_great_works()
+		var pitch:Variant=record.get("wonder_proposal",{})
+		if gwp==null or not bool(gwp.call("valid_proposal",pitch)): return {}
+		audience["wonder_proposal"]=(pitch as Dictionary).duplicate(true)
+	elif kind=="great_work":
+		var gwa:=_great_works()
+		var facts:Variant=record.get("great_work",{})
+		if gwa==null or not bool(gwa.call("valid",facts)): return {}
+		audience["great_work"]=(facts as Dictionary).duplicate(true)
+		if record.get("petition",{}) is Dictionary: audience.petition=(record.get("petition",{}) as Dictionary).duplicate(true)
+		# A stage gate waits as long as the council does; other matters keep the usual patience.
+		if _num(record.get("expires_day",null)) and int(record.expires_day)>day: audience.expires_day=mini(int(record.expires_day),day+120)
 	else:
 		for key in ["terms","news","petition"]:
 			if record.get(key,{}) is Dictionary: audience[key]=(record.get(key,{}) as Dictionary).duplicate(true)
@@ -892,7 +928,7 @@ static func enqueue(record:Dictionary)->Dictionary:
 		for old in waiting():
 			if old.kind=="petition":
 				old.status="expired"
-				old.outcome="Set aside so the scouts' report could be heard; %s may ask again." % String(old.speaker.name)
+				old.outcome="Set aside so %s could be heard; %s may ask again." % ["a great work" if kind in WORK_KINDS else "the scouts' report",String(old.speaker.name)]
 				_archive(old)
 				break
 	_enqueue(audience,day)
@@ -912,6 +948,19 @@ static func _valid_report(report:Variant)->bool:
 	if report.has("source") and report.source not in REPORT_SOURCES: return false
 	if report.has("observed_day") and not _num(report.observed_day): return false
 	return true
+
+## Wonder proposals: the ruler's current pick and a vision described in words.
+static func proposal_choice(id:String,choice:Dictionary)->Dictionary:
+	var audience:=find(id)
+	var gwp:=_great_works()
+	if audience.is_empty() or String(audience.status)!="waiting" or audience.kind!="wonder_proposal" or gwp==null: return {"error":"No proposal is before you."}
+	return gwp.call("set_choice",audience,choice)
+
+static func proposal_describe(id:String,text:String,mapping:Dictionary={})->Dictionary:
+	var audience:=find(id)
+	var gwp:=_great_works()
+	if audience.is_empty() or String(audience.status)!="waiting" or audience.kind!="wonder_proposal" or gwp==null: return {"error":"No proposal is before you."}
+	return gwp.call("describe",audience,text,mapping)
 
 static func defer(id:String)->void:
 	var audience:=find(id)
@@ -989,6 +1038,9 @@ static func voice_context(id:String)->Dictionary:
 		context["leader"]={"name":String(leader.get("name","")),"temperament":String(leader.get("temperament","")),"bio":String(leader.get("bio","")),"goals":goals.slice(0,3),
 			"trust":_words(float(leader.get("trust",0)),[[-0.3,"distrustful"],[0.1,"undecided"],[1e9,"trusting"]])}
 	else:
+		if audience.kind in WORK_KINDS:
+			var gwa:=_great_works()
+			if gwa!=null: context["wonder_proposal" if audience.kind=="wonder_proposal" else "great_work"]=gwa.call("voice_facts",audience)
 		var person:=_official(int(audience.speaker.person_id))
 		if not person.is_empty():
 			var rel:Dictionary=person.get("relationships",{}).get("sovereign",{})
@@ -1005,6 +1057,24 @@ static func debug_force(kind:String,civ_id:String="")->Dictionary:
 	var audience:={}
 	if kind=="report":
 		return _debug_report(civ_id)
+	if kind=="wonder_proposal":
+		var gwp:=_great_works()
+		if gwp==null: return {}
+		var pitched:Dictionary=gwp.call("proposal_audience",{"trigger":{"kind":"debug","text":"A test of the court's imagination."}})
+		if pitched.is_empty(): pitched=gwp.call("ruler_proposal")
+		return pitched
+	if kind=="great_work":
+		## civ_id may name a work id; the first pending stage gate otherwise.
+		var gwa:=_great_works()
+		if gwa==null: return {}
+		for pending in gwa.call("api_list","pending_decisions"):
+			if not pending is Dictionary: continue
+			if civ_id!="" and String(pending.get("work_id",""))!=civ_id: continue
+			var made:Dictionary=gwa.call("decision_audience",String(pending.get("work_id","")),String(pending.get("city_id","")))
+			if not made.is_empty(): return made
+			for waiting_audience in waiting():
+				if String(waiting_audience.kind)=="great_work" and String((waiting_audience.get("great_work",{}) as Dictionary).get("work_id",""))==String(pending.get("work_id","")): return waiting_audience
+		return {}
 	if kind=="petition":
 		var topic:=civ_id if civ_id in TOPICS else ""
 		for person in _officials():
@@ -1081,4 +1151,10 @@ static func _valid_audience(a:Variant)->bool:
 	var topic:=String((a.get("petition",{}) as Dictionary).get("topic",""))
 	if a.kind=="petition" and topic not in TOPICS: return false
 	if a.kind=="report" and not _valid_report(a.get("report",{})): return false
+	if a.kind=="great_work":
+		var gwa:=_great_works()
+		if gwa==null or not bool(gwa.call("valid",a.get("great_work",{}))): return false
+	if a.kind=="wonder_proposal":
+		var gwp:=_great_works()
+		if gwp==null or not bool(gwp.call("valid_proposal",a.get("wonder_proposal",{}))): return false
 	return true

@@ -3,6 +3,7 @@ extends RefCounted
 ## Every function takes an optional owner/observer (default "player") and runs
 ## under that owner's scope, so AI civilizations use exactly the same rules.
 const U=preload("res://scripts/undertaking_system.gd")
+const Concept=preload("res://scripts/wonder_concept.gd")
 const Catalog=preload("res://scripts/undertaking_catalog.gd")
 const Effects=preload("res://scripts/undertaking_effects.gd")
 const Rewards=preload("res://scripts/undertaking_rewards.gd")
@@ -14,39 +15,76 @@ const RIVAL_ALLURE:=.5
 const SPIKE_YEARS:=5.0
 const MAX_ENSHRINED_ALLURE:=12.0
 
-# --- Catalog and world view -----------------------------------------------------
-## Rival progress as the observer has actually learned it (sightings, travelers'
-## accounts, war news) from the rivalry module; never the world's true state.
-static func _news_by_work(observer:String)->Dictionary:
-	var result:={}
-	for item:Dictionary in rival_news_for(observer):
-		var id:=String(item.get("work_id",""))
-		if id.is_empty():continue
-		if not result.has(id):result[id]=[]
-		result[id].append(item)
+# --- Conception -------------------------------------------------------------------
+## 1–3 fresh concepts in the owner's own image. trigger: {kind:"famine"|"flood"|
+## "war"|"victory"|"death"|"anniversary"|"discovery"|"envy"|"plenty"|"expand",
+## purpose?, form?, city_id?, work_id? (raise a new work on that site)}.
+static func conceive(owner:String="player",trigger:Dictionary={})->Array[Dictionary]:
+	return Concept.conceive(owner,trigger)
+
+## A wonder the ruler describes in words, mapped offline onto the grammar.
+static func concept_from_words(text:String,owner:String="player")->Dictionary:
+	return Concept.concept_from_words(text,owner)
+## Optional model mapping: `mapping_request` is {} unless the player enabled the
+## civic AI connection; pass the model's JSON reply to `concept_from_mapping`.
+static func mapping_request(text:String)->Dictionary:return Concept.mapping_request(text)
+static func concept_from_mapping(mapping:Dictionary,text:String,owner:String="player")->Dictionary:
+	return Concept.concept_from_mapping(mapping,text,owner)
+## The same concept at another ambition.
+static func retarget(concept:Dictionary,ambition:String)->Dictionary:return Concept.retarget(concept,ambition)
+
+## Wonder pitches waiting to be raised in the Audience Hall:
+## [{id, day, trigger:{kind,text,day}, concepts:[1–3], proposer:{person_id}|{figure_id}}].
+## Reading consumes a pitch (the hall enqueues what it is given); concepts are
+## re-conceived deterministically for the pitch's own day and trigger.
+static func pending_proposals(owner:String="player")->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	var s:=U.owner_state(owner)
+	if s==null:return result
+	for pitch:Dictionary in U.take_proposals(s):
+		var concepts:Array=[]
+		for concept:Dictionary in Concept.conceive(owner,pitch.trigger):concepts.append(concept)
+		if concepts.is_empty():continue
+		pitch.concepts=concepts
+		result.append(pitch)
 	return result
 
-static func _claimant_known(observer:String,claim:Dictionary,news:Array)->bool:
-	if String(claim.owner)==observer or String(claim.get("holder",""))==observer:return true
-	for item:Dictionary in news:
-		if String(item.owner)==String(claim.owner) and String(item.get("status","")) in ["functioning","ruined"]:return true
-	return false
+## Feasibility spoken in-world: {score, factors:[{name,effect,text}], spoken,
+## costs, duration_estimate, odds}. `score`/`odds` are for UI shading and AI; the
+## player-facing text is `spoken`.
+static func assess(concept:Dictionary,owner:String="player")->Dictionary:
+	return Concept.assess(concept,owner)
 
-## All works: era, form, upgrade chain, lore, effect text, decree, claimed_by as
-## the observer knows it ("" unclaimed, "unknown" if the claimant is unheard of).
-## That a work is claimed is public: nobody else may begin it.
-static func catalog(observer:String="player")->Array[Dictionary]:
-	var claims:=U.claims()
-	var news:=_news_by_work(observer)
+## Commission a concept at the ruler's chosen ambition in a settlement.
+static func commission(city_id:String,concept:Dictionary,ambition:String,owner:String="player",site_height:Callable=Callable(),site_land:Callable=Callable())->Dictionary:
+	return WorldSimulation.scoped(owner,func()->Dictionary:return U.commission(city_id,concept,ambition,site_height,site_land))
+
+## Every work of this owner, including follies, ruins and abandoned sites.
+static func works(owner:String="player")->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
-	for d:Dictionary in Catalog.all():
-		var entry:=d.duplicate(true)
-		entry.era_title=String(Catalog.ERA_TITLES.get(d.era,"")).to_upper()
-		entry.upgrades_to=Catalog.upgrades_of(String(d.id))
-		entry.effect_text=Effects.describe(String(d.id)) if not String(d.effect).is_empty() else String(d.effect_text)
-		var claim:Dictionary=claims.get(d.id,{})
-		entry.claimed_by="" if claim.is_empty() else (String(claim.owner) if _claimant_known(observer,claim,news.get(d.id,[])) else "unknown")
-		result.append(entry)
+	var s:=U.owner_state(owner)
+	if s==null:return result
+	for city:Dictionary in s.player_settlements:
+		for r:Dictionary in city.get("undertakings",[]):result.append(_summary(city,r))
+	return result
+static func _summary(city:Dictionary,r:Dictionary)->Dictionary:
+	var d:=Catalog.get_definition(String(r.id))
+	var concept:Dictionary=r.get("concept",{})
+	return {"work_id":String(r.id),"city_id":String(city.get("id","")),"city_name":String(city.get("name","")),"name":U.display_name(r),"lore":String(concept.get("lore",d.get("lore",""))),"ruin_lore":String(r.get("ruin_lore","")),
+		"purpose":String(d.get("purpose","")),"form":String(d.get("shape",d.get("form",""))),"visual":String(d.get("form","")),"ambition":String(d.get("ambition","grand")),"era":String(d.get("era","")),
+		"status":String(r.status),"outcome":String(r.get("outcome","")),"stage":U.stage_of(r),"progress":U.fraction(r),"condition":float(r.get("condition",1.0)),
+		"architect":String(r.get("architect",{}).get("name","")),"layers":(r.get("layers",[]) as Array).size(),"legacy":String(r.get("legacy","")),"occupied_by":String(city.get("occupied_by",""))}
+
+## Foreign works the observer has actually heard of (rivalry news: sightings,
+## travelers' accounts, war news). Dated and uncertain; never the true state.
+static func known_foreign_works(observer:String="player")->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	var seen:Dictionary={}
+	for item:Dictionary in rival_news_for(observer):
+		var key:=String(item.get("owner",""))+"/"+String(item.get("local_city_id",""))+"/"+String(item.get("work_id",item.get("form","")))
+		if seen.has(key):continue
+		seen[key]=true
+		result.append(item)
 	return result
 
 ## Contact test used by dialogue: same people, a returned journey, or a meeting.
@@ -62,36 +100,14 @@ static func knows(observer:String,owner:String)->bool:
 			return int(relation.get("contact_level",0))>0 or int(relation.get("met_day",-1))>=0
 		return false)
 
-## Per work: {id,title,era,status,claimant,claimant_name,claim_day,known_sites,
-## your_site}. `known_sites` come from rivalry news (dated, uncertain ranges);
-## "in_progress" means you build it or have heard of someone building it.
-static func world_status(observer:String="player")->Array[Dictionary]:
-	var claims:=U.claims()
-	var news:=_news_by_work(observer)
-	var s:=U.owner_state(observer)
+## Deprecated (fixed catalog removed): the twelve legacy founding definitions.
+static func catalog(_observer:String="player")->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
 	for d:Dictionary in Catalog.all():
-		var id:=String(d.id)
-		var entry:={"id":id,"title":String(d.title),"era":String(d.era),"status":"unclaimed","claimant":"","claimant_name":"","claim_day":-1,"known_sites":[],"your_site":{}}
-		var items:Array=news.get(id,[])
-		var claim:Dictionary=claims.get(id,{})
-		if not claim.is_empty():
-			entry.status="claimed"
-			if _claimant_known(observer,claim,items):
-				entry.claimant=String(claim.owner);entry.claimant_name=U.owner_name(String(claim.owner));entry.claim_day=int(claim.day);entry.name=String(claim.name)
-			else:entry.claimant="unknown";entry.claimant_name="an unknown people"
-		for item:Dictionary in items:
-			if String(item.get("status","")) not in ["building","stalled"]:continue
-			entry.known_sites.append({"owner":String(item.owner),"name":String(item.get("civ_name","")),"city_name":String(item.get("city_name","")),"progress_low":float(item.get("progress_low",0)),"progress_high":float(item.get("progress_high",1)),"as_of":int(item.day),"confidence":float(item.get("confidence",0)),"source":String(item.get("source","")),"text":String(item.get("text",""))})
-			if entry.status=="unclaimed":entry.status="in_progress"
-		if s!=null:
-			for city:Dictionary in s.player_settlements:
-				var r:=U.find(city,id)
-				if r.is_empty():continue
-				entry.your_site={"owner":observer,"city_id":String(city.id),"city_name":String(city.get("name","")),"status":String(r.status),"progress":U.fraction(r),"stage":U.stage_of(r)}
-				if entry.status=="unclaimed" and r.status in ["building","stalled"]:entry.status="in_progress"
-		result.append(entry)
+		var entry:=d.duplicate(true);entry.claimed_by="";result.append(entry)
 	return result
+## Deprecated: this owner's works (see `works`).
+static func world_status(observer:String="player")->Array[Dictionary]:return works(observer)
 
 ## Full record of one site: stage, architect, events, decisions, condition,
 ## history layers, enshrined artifact ids and any pending decision/ceremony.
@@ -101,7 +117,7 @@ static func site(city_id:String,id:String,owner:String="player")->Dictionary:
 		var r:=U.find(city,id)
 		if r.is_empty():return {}
 		var result:=r.duplicate(true)
-		result.merge({"city_id":city_id,"city_name":String(city.get("name","")),"title":String(Catalog.get_definition(id).title),"display_name":U.display_name(r),"stage":U.stage_of(r),"fraction":U.fraction(r),"total_work":U.total_work(r),"claimed":U.completed(r),"effect_text":Effects.describe(id,float(r.condition)),"reward_text":Rewards.description(id,float(r.condition))},true)
+		result.merge({"city_id":city_id,"city_name":String(city.get("name","")),"title":String(Catalog.get_definition(id).title),"display_name":U.display_name(r),"stage":U.stage_of(r),"fraction":U.fraction(r),"total_work":U.total_work(r),"claimed":U.completed(r),"effect_text":Effects.describe(id,float(r.condition),r),"assessment":U.assess_record(r,owner) if r.status in ["building","stalled"] else {},"reward_text":Rewards.description(id,float(r.condition))},true)
 		if not r.get("decision",{}).is_empty():
 			result.options=WorldSimulation.settlements.with_city_resources(city_id,func()->Array:return U.decision_options(WorldSimulation.state,r))
 		return result)
@@ -171,16 +187,18 @@ static func _has_static(script:GDScript,method:String)->bool:
 		if String(info.get("name",""))==method:return true
 	return false
 
-## Optional Audience Hall hand-off; harmless when that branch is absent.
+## Audience Hall hand-off: stage gates and notable construction events become
+## audiences (scripts/great_works_audience.gd). Dedications are held in their
+## own ceremony, opened by the audience director. Harmless when absent.
+const AUDIENCE_BRIDGE_PATH:="res://scripts/great_works_audience.gd"
 static func notify_audience(kind:String,payload:Dictionary)->void:
-	if not ResourceLoader.exists(AUDIENCE_PATH):return
-	var script:=load(AUDIENCE_PATH) as GDScript
-	if script==null:return
-	for info:Dictionary in script.get_script_method_list():
-		if String(info.get("name",""))=="enqueue" and (info.get("args",[]) as Array).size()==1:
-			var item:=payload.duplicate(true);item.kind="great_work_"+kind
-			script.call("enqueue",item)
-			return
+	if WorldSimulation.actor_id!="player" or not ResourceLoader.exists(AUDIENCE_PATH) or not ResourceLoader.exists(AUDIENCE_BRIDGE_PATH):return
+	var bridge:=load(AUDIENCE_BRIDGE_PATH) as GDScript
+	if bridge==null:return
+	match kind:
+		"decision":bridge.call("decision_audience",String(payload.get("work_id","")),String(payload.get("city_id","")))
+		"event":bridge.call("event_audience",String(payload.get("work_id","")),String(payload.get("kind","")),String(payload.get("text","")),int(payload.get("day",0)))
+		"proposal":bridge.call("proposal_audience",payload)
 
 # --- Allure, artifacts and effects ------------------------------------------------
 ## Great Works are the largest allure source. {value,breakdown:[{source,value,text}]}
@@ -260,18 +278,20 @@ static func decree_options(owner:String="player")->Array:return Effects.decree_o
 static func famine_reserve(owner:String="player")->float:return Effects.famine_reserve(owner)
 
 # --- Pursuit helpers (AI and player alike) ----------------------------------------
-## Works the owner could begin now: [{city_id,city_name,work_id,title,era,upgrade}].
+## Deprecated: concepts per idle settlement [{city_id,city_name,work_id,title,name,...}].
 static func candidates(owner:String="player")->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
-	WorldSimulation.scoped(owner,func()->void:
-		for city:Dictionary in WorldSimulation.state.player_settlements:
-			if not U.controlled(city):continue
-			var busy:=false
-			for r:Dictionary in city.get("undertakings",[]):
-				if r.status in ["building","stalled"]:busy=true
-			if busy:continue
-			for d:Dictionary in WorldSimulation.settlements.with_city_resources(String(city.id),func()->Array:return U.possibilities(city)):
-				result.append({"city_id":String(city.id),"city_name":String(city.get("name","")),"work_id":String(d.id),"title":String(d.title),"era":String(d.era),"upgrade":not String(d.upgrade_from).is_empty()}))
+	var s:=U.owner_state(owner)
+	if s==null:return result
+	var concepts:=Concept.conceive(owner)
+	for city:Dictionary in s.player_settlements:
+		if String(city.get("occupied_by","")) not in ["",owner]:continue
+		var busy:=false
+		for r:Dictionary in city.get("undertakings",[]):
+			if r.status in ["building","stalled"]:busy=true
+		if busy:continue
+		for concept:Dictionary in concepts:
+			result.append({"city_id":String(city.id),"city_name":String(city.get("name","")),"work_id":String(concept.id),"title":String(concept.title),"name":String(concept.name),"era":String(concept.era),"concept":concept})
 	return result
 
 static func start(city_id:String,work_id:String,owner:String="player",site_height:Callable=Callable(),site_land:Callable=Callable())->Dictionary:
@@ -283,4 +303,5 @@ static func repurpose(city_id:String,work_id:String,owner:String="player")->Dict
 static func quarry(city_id:String,work_id:String,owner:String="player")->Dictionary:
 	return WorldSimulation.scoped(owner,func()->Dictionary:return U.quarry(city_id,work_id))
 
-static func claims()->Dictionary:return U.claims()
+## Deprecated: wonders are no longer world-unique.
+static func claims()->Dictionary:return {}

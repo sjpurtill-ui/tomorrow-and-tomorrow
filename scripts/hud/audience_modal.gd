@@ -12,6 +12,10 @@ const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const EarlyArt:=preload("res://scripts/hud/early_civ_art.gd")
+const Works:=preload("res://scripts/great_works_audience.gd")
+const WorkPlate:=preload("res://scripts/hud/great_work_plate.gd")
+const WORK_KINDS:=["great_work","wonder_proposal"]
+const AMBITION_TIPS:={"modest":"A modest work: cheaper, surer, pays little.","grand":"A grand work: promise and risk in balance.","audacious":"An audacious work: pays greatly, fails often."}
 
 const DESIGN_SIZE:=Vector2(1280,820)
 const KINDS:={
@@ -21,6 +25,8 @@ const KINDS:={
 	"news":{"herald":"NEWS FROM %s","eyebrow":"AN ENVOY BRINGS WORD"},
 	"petition":{"herald":"%s REQUESTS AN AUDIENCE","eyebrow":"A PETITION FROM YOUR COURT"},
 	"report":{"herald":"%s RETURNS FROM THE FIELD","eyebrow":"A REPORT FROM BEYOND THE BORDERS"},
+	"great_work":{"herald":"%s SEEKS YOUR JUDGMENT","eyebrow":"A GREAT WORK"},
+	"wonder_proposal":{"herald":"%s WOULD RAISE A WONDER","eyebrow":"A GREAT WORK IS PROPOSED"},
 }
 const REACTION_WORDS:={"delighted":"DELIGHTED","pleased":"PLEASED","neutral":"UNMOVED","offended":"OFFENDED","furious":"FURIOUS"}
 
@@ -57,6 +63,9 @@ var resolved_result:Dictionary={}
 var clock:=0.0
 var _italic:FontVariation
 var _bold:FontVariation
+var proposal_box:VBoxContainer
+var weigh_clock:=-1.0
+var conceive_next:=false
 
 func _ready()->void:
 	name="AudienceModal"
@@ -112,6 +121,12 @@ func show_audience(id:String)->void:
 	body.add_child(inner)
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",12);inner.add_child(column)
 	column.add_child(_build_stage(audience))
+	proposal_box=null
+	conceive_next=false
+	if kind=="wonder_proposal" and String(audience.get("status",""))=="waiting":
+		proposal_box=VBoxContainer.new();proposal_box.name="Proposal";proposal_box.add_theme_constant_override("separation",8)
+		column.add_child(proposal_box)
+		_build_proposal()
 	column.add_child(_build_speech_row())
 	options_row=HBoxContainer.new();options_row.name="Options";options_row.add_theme_constant_override("separation",10);column.add_child(options_row)
 	outcome_box=VBoxContainer.new();outcome_box.name="Outcome";outcome_box.add_theme_constant_override("separation",8);outcome_box.visible=false;column.add_child(outcome_box)
@@ -145,11 +160,13 @@ func _build_herald(audience:Dictionary)->Control:
 		flag.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(flag)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",1);row.add_child(words)
 	var cream:=Color("f6ecd6");var cream_dim:=Color("e2d3b4")
-	var eyebrow:=Tokens.make_label("THE HERALD ANNOUNCES · "+String(KINDS.get(kind,KINDS.news).eyebrow),12,cream_dim,.12);words.add_child(eyebrow)
+	var work_info:=_work_herald(audience) if kind in WORK_KINDS else {}
+	var eyebrow:=Tokens.make_label("THE HERALD ANNOUNCES · "+String(work_info.get("eyebrow",KINDS.get(kind,KINDS.news).eyebrow)),12,cream_dim,.12);words.add_child(eyebrow)
 	var subject:=String(audience.get("civ_name","A foreign people")).to_upper()
 	if kind=="petition":subject=("%s %s" % [String(speaker.get("title","")),String(speaker.get("name","An official"))]).strip_edges().to_upper()
 	var herald_text:=String(KINDS.get(kind,KINDS.news).herald) % subject
 	if kind=="report":herald_text=_report_herald(speaker)
+	if kind in WORK_KINDS:herald_text=String(work_info.get("herald",herald_text))
 	var title:=Tokens.make_label(herald_text,30,cream);title.name="HeraldTitle"
 	title.add_theme_font_override("font",_bold);title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(title)
 	var day:=int(GameState.elapsed_days);var arrived:=int(audience.get("arrived_day",day))
@@ -160,12 +177,21 @@ func _build_herald(audience:Dictionary)->Control:
 		byline="%s, %s" % [String(speaker.get("name","Your scout")),String(speaker.get("title","scout"))]
 		var observed:=int(report.get("observed_day",-1))
 		if observed>=0:byline+="  ·  seen day %d" % observed
+	if kind in WORK_KINDS:byline=String(work_info.get("byline",byline))
 	var timing:="arrived today" if waited<=0 else "has waited %d day%s" % [waited,"" if waited==1 else "s"]
 	var expires:=int(audience.get("expires_day",0))
 	if expires>0 and String(audience.get("status",""))=="waiting":timing+=" · will leave after day %d" % expires
 	var sub:=Tokens.make_label(byline+"  ·  "+timing,14,cream_dim);sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(sub)
 	var terms:Dictionary=audience.get("terms",{})
-	if not terms.is_empty() and float(terms.get("amount",0))>0:
+	if kind in WORK_KINDS:
+		if work_info.has("plate"):
+			var art:=PanelContainer.new();art.name="WorkArt";art.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+			art.add_theme_stylebox_override("panel",Tokens.flat(Color("f6ecd6"),accent.lightened(.2),2,6,2))
+			var picture:=WorkPlate.make(work_info.plate,58);picture.custom_minimum_size=Vector2(88,58);art.add_child(picture)
+			row.add_child(art)
+		if work_info.has("chip"):
+			var chip:=_chip_box(null,String(work_info.chip[0]),String(work_info.chip[1]));chip.name="WorkChip";row.add_child(chip)
+	elif not terms.is_empty() and float(terms.get("amount",0))>0:
 		row.add_child(_terms_chip(kind,terms))
 	elif kind=="news":
 		var news:Dictionary=audience.get("news",{})
@@ -301,6 +327,8 @@ func _build_dossier(audience:Dictionary)->Control:
 		rows.append(["Their larder",String(civ.get("food","unknown")),Tokens.BODY])
 		if int(civ.get("population",0))>0:rows.append(["Their people","about %d" % int(civ.population),Tokens.BODY])
 		if not String(leader.get("name","")).is_empty():rows.append(["Their ruler","%s, %s" % [String(leader.name),String(leader.get("trust","undecided"))],Tokens.BODY])
+	elif String(audience.get("kind","")) in WORK_KINDS:
+		rows.append_array(_work_dossier(audience))
 	else:
 		var petitioner:Dictionary=context.get("petitioner",{}) if context.get("petitioner") is Dictionary else {}
 		if not petitioner.is_empty():
@@ -463,6 +491,10 @@ func choose(option_id:String)->Dictionary:
 	if not bool(result.get("ok",false)):
 		_show_toast(String(result.get("outcome",result.get("error","That cannot be done."))))
 		_build_options();return result
+	var routed:=String(result.get("decree",""))
+	if not routed.is_empty() and is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"):
+		terrain.issue_civic_directive_text(routed)
+	conceive_next=bool(result.get("conceive",false))
 	if String(audience.get("kind",""))=="petition" and option_id.contains("decree"):
 		var decree:=String((audience.get("petition",{}) as Dictionary).get("suggested_decree",""))
 		if not decree.is_empty() and is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"):
@@ -484,12 +516,17 @@ func _show_outcome(result:Dictionary)->void:
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",2);row.add_child(words)
 	var audience:=Hall.find(audience_id)
 	var who:="THE ENVOY IS " if String(audience.get("origin",""))=="foreign" else "%s IS " % String((audience.get("speaker",{}) as Dictionary).get("name","YOUR OFFICIAL")).to_upper()
+	if String(audience.get("kind",""))=="wonder_proposal" and not String(result.get("work_id","")).is_empty():who="THE WORK IS COMMISSIONED · "+who
 	var colour:=Tokens.RED if tone=="danger" else (Tokens.TEAL if tone=="info" else Tokens.AMBER)
 	var head:=Tokens.make_label("THE AUDIENCE IS CONCLUDED · "+who+String(REACTION_WORDS.get(reaction,"UNMOVED")),13,colour,.08);head.name="ReceiptHead";words.add_child(head)
 	var outcome:=Tokens.make_label(String(result.get("outcome","")),15,Tokens.BODY);outcome.name="ReceiptText";outcome.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(outcome)
 	var dismiss:=Button.new();dismiss.name="Dismiss";dismiss.text="Dismiss the court";dismiss.custom_minimum_size=Vector2(190,46)
 	dismiss.add_theme_font_size_override("font_size",16);dismiss.add_theme_stylebox_override("normal",Tokens.gold_outline_style());dismiss.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	dismiss.pressed.connect(_close);row.add_child(dismiss)
+	if conceive_next:
+		var visions:=Button.new();visions.name="HearVisions";visions.text="Hear the court's visions ›";visions.custom_minimum_size=Vector2(220,46)
+		visions.add_theme_font_size_override("font_size",16);visions.add_theme_stylebox_override("normal",Tokens.gold_outline_style());visions.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		visions.pressed.connect(open_conception);row.add_child(visions)
 	outcome_box.add_child(receipt)
 	_refresh_footer()
 
@@ -567,6 +604,9 @@ func _process(delta:float)->void:
 		transcript_scroll.scroll_vertical=int(transcript_scroll.get_v_scroll_bar().max_value)
 	if int(clock*4)!=int((clock-delta)*4):
 		_update_mood(Hall.find(audience_id));_refresh_footer()
+	if weigh_clock>=0.0:
+		weigh_clock-=delta
+		if weigh_clock<0.0 and _voice_ok() and not voice.busy(audience_id) and voice.has_method("weigh") and resolved_result.is_empty():voice.weigh(audience_id)
 
 func _pump()->void:
 	if revealing or not is_instance_valid(transcript):return
@@ -636,6 +676,8 @@ func _avatar(line:Dictionary)->Control:
 	var person_id:=int(line.get("person_id",0))
 	if role=="official" and person_id>0:
 		frame.add_child(Portrait.picture(GovernmentPeopleSystem.person_snapshot(person_id),44,52))
+	elif role=="official" and speaker_person_id==0 and String(line.get("speaker",""))==String((Hall.find(audience_id).get("speaker",{}) as Dictionary).get("name","")):
+		frame.add_child(Portrait.picture(_speaker_person(Hall.find(audience_id)),44,52))
 	elif role=="envoy":
 		frame.add_child(Portrait.picture(_speaker_person(Hall.find(audience_id)),44,52))
 	else:
@@ -668,6 +710,207 @@ func _update_mood(audience:Dictionary)->void:
 	mood_meter.value=mood;mood_meter.queue_redraw()
 	mood_label.text="Frosty" if mood<=-.5 else ("Tense" if mood<=-.15 else ("Cordial" if mood<.15 else ("Warm" if mood<.5 else "Glowing")))
 
+# --- Great works ------------------------------------------------------------
+
+func _work_herald(audience:Dictionary)->Dictionary:
+	var speaker:Dictionary=audience.get("speaker",{})
+	var who:=String(speaker.get("name","The master builder")).to_upper()
+	if String(audience.get("kind",""))=="wonder_proposal":
+		var p:=Works.proposal(audience)
+		var concepts:Array=p.get("concepts",[])
+		var herald:="%s WOULD RAISE A WONDER" % who if int(speaker.get("person_id",0))==0 else "%s %s PROPOSES A GREAT WORK" % [String(speaker.get("title","")).to_upper(),who]
+		if String(p.get("origin",""))=="ruler":herald="YOU CALL FOR A GREAT WORK"
+		var info:={"eyebrow":"A GREAT WORK IS PROPOSED","herald":herald,"byline":String((p.get("trigger",{}) as Dictionary).get("text","")),
+			"chip":["VISIONS","%d to weigh" % concepts.size() if concepts.size()!=1 else "one vision"]}
+		var chosen:=Works.chosen_concept(audience)
+		if not chosen.is_empty():info["plate"]=chosen
+		return info
+	var gw:Dictionary=audience.get("great_work",{}) if audience.get("great_work") is Dictionary else {}
+	var title:=String(gw.get("title","the work"))
+	var stage:=String(Works.STAGE_WORDS.get(String(gw.get("stage","")),""))
+	var progress:=roundi(float(gw.get("progress",0))*100)
+	var plate:={"work_id":String(gw.get("work_id","")),"shape":String(gw.get("form","")),"status":"building","progress":float(gw.get("progress",0))}
+	match String(gw.get("mode","")):
+		"decision":
+			var master:=who if int(speaker.get("person_id",0))==0 else String(speaker.get("title","")).to_upper()+" "+who
+			return {"eyebrow":"A STAGE GATE AT %s" % title.to_upper(),"herald":"MASTER BUILDER %s SEEKS YOUR JUDGMENT" % who if int(speaker.get("person_id",0))==0 else "%s SEEKS YOUR JUDGMENT" % master,
+				"byline":String(gw.get("text","")),"chip":["THE WORK","%s · %d%%" % [stage if not stage.is_empty() else "Rising",progress]],"plate":plate}
+		"event":
+			return {"eyebrow":"HARD NEWS FROM THE WORKS","herald":"%s: %s" % [title.to_upper(),{"collapse":"A COLLAPSE","accident":"DEATH ON THE SCAFFOLDS","strike":"THE CREWS STRIKE","fire":"FIRE IN THE NIGHT","poaching":"OUR BUILDER IS LURED AWAY"}.get(String(gw.get("key","")),"TROUBLE")],
+				"byline":String(gw.get("text","")),"chip":["THE WORK","%s · %d%%" % [stage if not stage.is_empty() else "Rising",progress]],"plate":plate}
+		"outcome":
+			plate["status"]="abandoned" if String(gw.get("key",""))=="abandoned" else "ruined"
+			if String(gw.get("key",""))=="abandoned":
+				return {"eyebrow":"A WORK LAID DOWN","herald":"THE WORK AT %s IS ABANDONED" % title.to_upper(),"byline":String(gw.get("text","")),"chip":["LEFT AT","%d%% raised" % progress],"plate":plate}
+			var dead:Array=gw.get("dead",[])
+			return {"eyebrow":"A GREAT WORK HAS FALLEN","herald":"%s HAS FALLEN" % String(gw.get("ruin_name",title)).to_upper(),"byline":String(gw.get("text","")),
+				"chip":["THE DEAD","%d named" % dead.size() if not dead.is_empty() else "none named"],"plate":plate}
+		"news":
+			plate["status"]=String(gw.get("key","building"))
+			return {"eyebrow":"WORD OF ANOTHER PEOPLE'S WONDER","herald":"%s RAISE A WONDER" % String(gw.get("civ_name","A NEIGHBOR")).to_upper(),"byline":String(gw.get("text","")),"chip":["AS OF","day %d" % int(gw.get("as_of",0))],"plate":plate}
+		"forecast":
+			return {"eyebrow":"THE WATCHING SKY","herald":"THE SKY-WATCHERS WARN OF LEAN DAYS","byline":String(gw.get("text","")),"chip":["COMING IN","about %d days" % int(gw.get("in_days",0))]}
+	return {}
+
+func _work_dossier(audience:Dictionary)->Array:
+	var rows:Array=[]
+	if String(audience.get("kind",""))=="wonder_proposal":
+		var assess:=Works.assessment(audience)
+		var chosen:=Works.chosen_concept(audience)
+		if not chosen.is_empty():rows.append(["Weighing",Works.concept_name(chosen),Tokens.BODY])
+		if not assess.is_empty():
+			rows.append(["The odds",Works.odds_words(float(assess.get("score",.5))),Tokens.RED if float(assess.get("score",.5))<.4 else Tokens.BODY])
+			var time:=Works.duration_words(assess.get("duration_estimate",""))
+			if not time.is_empty():rows.append(["Would take",time,Tokens.BODY])
+		return rows
+	var gw:Dictionary=audience.get("great_work",{}) if audience.get("great_work") is Dictionary else {}
+	if not String(gw.get("architect_name","")).is_empty():
+		rows.append(["Master builder",String(gw.get("architect_name","")),Tokens.BODY])
+		if not String(gw.get("style","")).is_empty():rows.append(["Their style",String(gw.get("style","")),Tokens.BODY])
+		rows.append(["Their pride","towering" if float(gw.get("ego",.5))>.7 else ("prickly" if float(gw.get("ego",.5))>.5 else "modest"),Tokens.RED if float(gw.get("ego",.5))>.7 else Tokens.BODY])
+	if String(gw.get("mode",""))=="decision":
+		var feasible:=Works.site_feasibility(String(gw.get("city_id","")),String(gw.get("work_id","")))
+		if not feasible.is_empty():rows.append(["The odds",Works.odds_words(float(feasible.get("score",.5))),Tokens.RED if float(feasible.get("score",.5))<.4 else Tokens.BODY])
+	return rows
+
+func _build_proposal()->void:
+	if not is_instance_valid(proposal_box):return
+	for child in proposal_box.get_children():child.queue_free()
+	var audience:=Hall.find(audience_id)
+	var p:=Works.proposal(audience)
+	var concepts:Array=p.get("concepts",[])
+	var chosen:=int(p.get("chosen",0))
+	var cards:=HBoxContainer.new();cards.name="Concepts";cards.add_theme_constant_override("separation",10);proposal_box.add_child(cards)
+	for index in concepts.size():
+		if concepts[index] is Dictionary:cards.add_child(_concept_card(concepts[index],index,index==chosen))
+	var controls:=HBoxContainer.new();controls.name="ProposalControls";controls.add_theme_constant_override("separation",8);proposal_box.add_child(controls)
+	var ambition_label:=Tokens.make_label("AMBITION",11,Tokens.TEXT_DIM,.12);ambition_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;controls.add_child(ambition_label)
+	var current:=String(p.get("ambition","grand"))
+	for level:String in Works.AMBITIONS:
+		var button:=Button.new();button.name="Ambition_"+level;button.text=String(Works.AMBITION_WORDS[level]);button.toggle_mode=true;button.button_pressed=level==current
+		button.custom_minimum_size=Vector2(104,36);button.focus_mode=Control.FOCUS_NONE;button.tooltip_text=String(AMBITION_TIPS.get(level,""))
+		var on:=level==current
+		button.add_theme_stylebox_override("normal",Tokens.flat(Tokens.GOLD_WASH if on else Tokens.BUTTON_BG,Tokens.GOLD if on else Tokens.BORDER_SOFT,2 if on else 1,4,0))
+		button.add_theme_stylebox_override("pressed",Tokens.flat(Tokens.GOLD_WASH,Tokens.GOLD,2,4,0))
+		button.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT if on else Tokens.BODY)
+		var pick:=level
+		button.pressed.connect(func()->void:choose_proposal({"ambition":pick}))
+		controls.add_child(button)
+	if GameState.player_settlements.size()>1:
+		var cities:=OptionButton.new();cities.name="ProposalCity";cities.custom_minimum_size=Vector2(170,36)
+		var index:=0
+		for city:Dictionary in GameState.player_settlements:
+			cities.add_item(String(city.get("name","")))
+			cities.set_item_metadata(index,String(city.get("id","")))
+			if String(city.get("id",""))==String(p.get("city_id","")):cities.select(index)
+			index+=1
+		cities.item_selected.connect(func(item:int)->void:choose_proposal({"city_id":String(cities.get_item_metadata(item))}))
+		controls.add_child(cities)
+	var assess:=Works.assessment(audience)
+	var gauge:=OddsGauge.new();gauge.name="OddsGauge";gauge.custom_minimum_size=Vector2(150,36);gauge.score=float(assess.get("score",.5));gauge.known=not assess.is_empty();controls.add_child(gauge)
+	var reckoning:=Tokens.make_label(Works.odds_words(gauge.score).capitalize() if gauge.known else "The court cannot yet say",14,Tokens.INK);reckoning.name="OddsWords"
+	reckoning.add_theme_font_override("font",_bold);reckoning.size_flags_vertical=Control.SIZE_SHRINK_CENTER;controls.add_child(reckoning)
+	var detail:=PackedStringArray()
+	var costs:=Works.costs_words(assess.get("costs",{}))
+	if not costs.is_empty():detail.append("needs "+costs)
+	var time:=Works.duration_words(assess.get("duration_estimate",""))
+	if not time.is_empty():detail.append(time)
+	var bill:=Tokens.make_label(" · ".join(detail),12,Tokens.TEXT_SOFT);bill.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bill.clip_text=true;bill.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	bill.size_flags_vertical=Control.SIZE_SHRINK_CENTER;bill.tooltip_text=bill.text;bill.mouse_filter=Control.MOUSE_FILTER_PASS;controls.add_child(bill)
+	var describe:=LineEdit.new();describe.name="DescribeVision";describe.placeholder_text="Describe your own vision…";describe.custom_minimum_size=Vector2(250,36);describe.max_length=400
+	describe.text_submitted.connect(func(text:String)->void:describe_vision(text))
+	controls.add_child(describe)
+	var ask:=Button.new();ask.name="AskBuilders";ask.text="Ask the builders";ask.custom_minimum_size=Vector2(130,36);ask.focus_mode=Control.FOCUS_NONE
+	ask.pressed.connect(func()->void:describe_vision(describe.text))
+	controls.add_child(ask)
+
+func _concept_card(concept:Dictionary,index:int,active:bool)->Control:
+	var card:=PanelContainer.new();card.name="Concept_%d" % index;card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
+	var style:=Tokens.flat(Tokens.ACTIVE_BG if active else Tokens.TILE_BG,Tokens.GOLD if active else Tokens.BORDER_SOFT,2 if active else 1,8,0)
+	style.content_margin_left=8;style.content_margin_right=10;style.content_margin_top=6;style.content_margin_bottom=6
+	card.add_theme_stylebox_override("panel",style)
+	card.tooltip_text=Works.concept_lore(concept)
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);row.mouse_filter=Control.MOUSE_FILTER_IGNORE;card.add_child(row)
+	var art:=WorkPlate.make(concept,70);art.custom_minimum_size=Vector2(104,70);row.add_child(art)
+	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",0);words.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(words)
+	var title:=Tokens.make_label(Works.concept_name(concept),16,Tokens.GOLD_BRIGHT if active else Tokens.INK);title.add_theme_font_override("font",_bold);title.clip_text=true;title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;title.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(title)
+	var purpose:=Works.concept_purpose(concept)
+	var what:=Tokens.make_label("A %s%s%s" % [Works.concept_form(concept).replace("_"," "),(" to "+purpose) if not purpose.is_empty() else "",("  · your own vision" if bool(concept.get("described_by_ruler",false)) else "")],12,Tokens.TEXT_SOFT);what.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(what)
+	var lore:=Tokens.make_label(Works.concept_lore(concept),12,Tokens.BODY_2);lore.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;lore.max_lines_visible=2;lore.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;lore.add_theme_font_override("font",_italic);lore.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(lore)
+	card.gui_input.connect(func(event:InputEvent)->void:
+		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:choose_proposal({"chosen":index}))
+	return card
+
+## The ruler's pick in a wonder proposal (concept, ambition, city). The court
+## weighs the new pick a moment later.
+func choose_proposal(choice:Dictionary)->Dictionary:
+	var answer:=Hall.proposal_choice(audience_id,choice)
+	if answer.has("error"):_show_toast(String(answer.error));return answer
+	_build_proposal()
+	_build_options()
+	weigh_clock=.6
+	return answer
+
+## The ruler's own vision. With a configured model connection the words are
+## mapped by the model (bounded by the grammar); otherwise, or on any failure,
+## the offline keyword mapping answers at once.
+func describe_vision(text:String)->Dictionary:
+	if text.strip_edges().is_empty():return {"error":"Describe the work you imagine."}
+	Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text.strip_edges().substr(0,400),"day":int(GameState.elapsed_days),"aside":false})
+	var offline:=_voice_ok() and "force_offline" in voice and bool(voice.force_offline)
+	var request:={} if offline else Works.api_dict("mapping_request",[text])
+	if not request.is_empty() and request.get("config") is Dictionary and not (request.config as Dictionary).is_empty():
+		_request_mapping(audience_id,text,request)
+		return {"ok":true,"pending":true}
+	return _apply_vision(audience_id,text,{})
+
+func _apply_vision(id:String,text:String,mapping:Dictionary)->Dictionary:
+	if id!=audience_id:return {"error":"The audience has moved on."}
+	var answer:=Hall.proposal_describe(id,text,mapping)
+	if answer.has("error"):_show_toast(String(answer.error));return answer
+	_build_proposal()
+	_build_options()
+	weigh_clock=.3
+	return answer
+
+func _request_mapping(id:String,text:String,request:Dictionary)->void:
+	var config:Dictionary=request.config
+	var payload:={"model":String(config.get("model","")),"max_completion_tokens":200,"messages":request.get("messages",[])}
+	var http:=HTTPRequest.new();http.timeout=20.0;http.max_redirects=0;http.body_size_limit=16384;add_child(http)
+	_show_toast("The builders are sketching your vision…")
+	http.request_completed.connect(func(result:int,code:int,_headers:PackedStringArray,body:PackedByteArray)->void:
+		http.queue_free()
+		var mapping:={}
+		if result==HTTPRequest.RESULT_SUCCESS and code>=200 and code<300:mapping=_mapping_from(body)
+		_apply_vision(id,text,mapping))
+	var headers:=PackedStringArray(["Content-Type: application/json","Authorization: Bearer %s" % String(config.get("api_key",""))])
+	if http.request(String(config.get("endpoint","")),headers,HTTPClient.METHOD_POST,JSON.stringify(payload))!=OK:
+		http.queue_free()
+		_apply_vision(id,text,{})
+
+static func _mapping_from(body:PackedByteArray)->Dictionary:
+	var envelope:Variant=JSON.parse_string(body.get_string_from_utf8())
+	if not envelope is Dictionary:return {}
+	var content:=""
+	var choices:Variant=(envelope as Dictionary).get("choices",[])
+	if choices is Array and not (choices as Array).is_empty() and choices[0] is Dictionary:
+		var message:Variant=(choices[0] as Dictionary).get("message",{})
+		if message is Dictionary:content=PronouncementInterpreter._content_text((message as Dictionary).get("content",""))
+	var first:=content.find("{");var last:=content.rfind("}")
+	if first<0 or last<=first:return {}
+	var mapping:Variant=JSON.parse_string(content.substr(first,last-first+1))
+	if not mapping is Dictionary:return {}
+	var clean:={}
+	for key in ["form","purpose","ambition"]:
+		if (mapping as Dictionary).get(key) is String:clean[key]=String(mapping[key]).substr(0,40)
+	return clean
+
+## Opens (or reopens) a wonder proposal: the court is asked for a new work.
+func open_conception()->void:
+	var made:=Works.ruler_proposal()
+	if made.is_empty():_show_toast("Nobody at court can carry a proposal just now.");return
+	show_audience(String(made.id))
+
 # --- Colour helpers ---------------------------------------------------------
 
 func _kind_color(kind:String)->Color:
@@ -678,6 +921,16 @@ func _kind_color(kind:String)->Color:
 		"news":return Tokens.BLUE
 		"petition":return Tokens.VIOLET
 		"report":return Tokens.TEAL
+		"wonder_proposal":return Tokens.GOLD
+		"great_work":
+			var found:=Hall.find(audience_id)
+			var gw:Dictionary=found.get("great_work",{}) if found.get("great_work") is Dictionary else {}
+			match String(gw.get("mode","")):
+				"outcome":return Tokens.RED if String(gw.get("key",""))!="abandoned" else Tokens.MUTED
+				"event":return Tokens.AMBER
+				"news":return Tokens.BLUE
+				"forecast":return Tokens.TEAL
+			return Tokens.GOLD
 	return Tokens.GOLD
 
 func _tone_color(tone:String)->Color:
@@ -739,6 +992,15 @@ class Seal extends Control:
 				draw_arc(c,s*1.05,0,TAU,32,ink,3,true)
 				draw_colored_polygon(PackedVector2Array([c+Vector2(0,-s*.95),c+Vector2(s*.28,0),c+Vector2(0,s*.95),c+Vector2(-s*.28,0)]),ink)
 				draw_circle(c,s*.16,tint.darkened(.3))
+			"great_work":
+				draw_rect(Rect2(c+Vector2(-s*1.05,s*.72),Vector2(s*2.1,s*.3)),ink)
+				for i in 3:draw_rect(Rect2(c+Vector2(-s*.85+s*.7*i,-s*.55),Vector2(s*.28,s*1.3)),ink)
+				draw_colored_polygon(PackedVector2Array([c+Vector2(-s*1.15,-s*.55),c+Vector2(s*1.15,-s*.55),c+Vector2(0,-s*1.15)]),ink)
+			"wonder_proposal":
+				for i in 8:
+					var a:=TAU*float(i)/8.0
+					draw_line(c,c+Vector2(cos(a),sin(a))*s*(1.1 if i%2==0 else .7),ink,3)
+				draw_circle(c,s*.34,tint.darkened(.3));draw_circle(c,s*.22,ink)
 			"news":
 				draw_rect(Rect2(c+Vector2(-s*.85,-s),Vector2(s*1.7,s*2)),ink)
 				for i in 3:draw_line(c+Vector2(-s*.55,-s*.5+i*s*.45),c+Vector2(s*.55,-s*.5+i*s*.45),tint.darkened(.3),2)
@@ -746,6 +1008,23 @@ class Seal extends Control:
 				draw_line(c+Vector2(-s*.8,s),c+Vector2(s*.8,-s),ink,4)
 				draw_colored_polygon(PackedVector2Array([c+Vector2(s*.8,-s),c+Vector2(s*.1,-s*.65),c+Vector2(s*.45,-s*.15)]),ink)
 				draw_line(c+Vector2(-s,s),c+Vector2(s*.2,s),ink,2)
+
+class OddsGauge extends Control:
+	## The court's reckoning as a shaded bar — never a number.
+	var score:=.5
+	var known:=true
+	func _draw()->void:
+		var bar:=Rect2(Vector2(0,size.y*.38),Vector2(size.x,size.y*.24))
+		var steps:=30
+		for i in steps:
+			var t:=float(i)/float(steps-1)
+			var colour:=HudTokens.RED.lerp(HudTokens.AMBER,t*2.0) if t<.5 else HudTokens.AMBER.lerp(HudTokens.GREEN,(t-.5)*2.0)
+			colour.a=.8 if known else .25
+			draw_rect(Rect2(bar.position+Vector2(bar.size.x*i/steps,0),Vector2(bar.size.x/steps+.5,bar.size.y)),colour)
+		if known:
+			var x:=clampf(score,0,1)*size.x
+			draw_colored_polygon(PackedVector2Array([Vector2(x-6,0),Vector2(x+6,0),Vector2(x,bar.position.y)]),HudTokens.INK)
+			draw_rect(Rect2(Vector2(clampf(x-2,0,size.x-4),bar.position.y-2),Vector2(4,bar.size.y+4)),HudTokens.INK)
 
 class MoodMeter extends Control:
 	var value:=0.0
