@@ -129,6 +129,8 @@ var research_notification_mode:="milestones"
 var discovery_log: Array[Dictionary] = []
 var active_observations: Array[String] = []
 var research_targets:Dictionary={}
+## Accumulated scholarship in game-year equivalents; -1 until established.
+var scholarship_level:=-1.0
 var active_investigations:Dictionary={}
 var discovery_progress:Dictionary={}
 var population_allocations := {"Food": 30, "Survey": 6, "Extraction": 8, "Construction": 8, "Crafting": 5, "Logistics": 5, "Knowledge": 4, "Administration": 3, "Defense": 3}
@@ -468,6 +470,7 @@ func reset_for_new_world(new_seed:int)->void:
 	discovery_log=[]
 	active_observations=[]
 	research_targets={}
+	scholarship_level=-1.0
 	active_investigations={}
 	discovery_progress={}
 	population_allocations={"Food":30,"Survey":6,"Extraction":8,"Construction":8,"Crafting":5,"Logistics":5,"Knowledge":4,"Administration":3,"Defense":3}

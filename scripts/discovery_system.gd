@@ -7,6 +7,7 @@ const ResourceKnowledgeCatalog = preload("res://scripts/resource_knowledge_catal
 const SocietyKnowledgeCatalog = preload("res://scripts/society_knowledge_catalog.gd")
 const DiscoveryFrontierCatalog = preload("res://scripts/discovery_frontier_catalog.gd")
 const SocietyModelScript = preload("res://scripts/society_model.gd")
+const TechnologyEras=preload("res://scripts/technology_eras.gd")
 var society_model = SocietyModelScript.new()
 
 var rng := RandomNumberGenerator.new()
@@ -19,6 +20,7 @@ var _candidate_index=preload("res://scripts/research_candidate_index.gd").new()
 var latest_context:Dictionary={}
 var established_threads_cache:Array[Dictionary]=[]
 var established_threads_signature:=""
+var era_by_id:Dictionary={}
 const BASE_DISCOVERY_COUNT:=31
 const FRONTIER_PATH_AVAILABILITY:=7200
 const EFFECT_DISPLAY_NAMES:Dictionary={
@@ -37,6 +39,7 @@ func reset_for_new_world()->void:
 	technology_limits.clear()
 	catalog_by_id.clear()
 	catalog_by_channel.clear()
+	era_by_id.clear()
 	_candidate_index=preload("res://scripts/research_candidate_index.gd").new()
 	latest_context.clear()
 	established_threads_cache.clear()
@@ -90,6 +93,7 @@ func initialize() -> void:
 		return
 	catalog_by_id.clear()
 	catalog_by_channel.clear()
+	era_by_id.clear()
 	_candidate_index=preload("res://scripts/research_candidate_index.gd").new()
 	rng.seed = WorldSimulation.state.world_seed ^ 0x6c8e9cf5
 	catalog.append_array(ResourceKnowledgeCatalog.entries())
@@ -166,6 +170,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/machine_process_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/metallurgy_process_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/settlement_fabric_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/early_practice_knowledge.gd").entries())
 	catalog.append_array(DiscoveryFrontierCatalog.entries())
 	for i in catalog.size():
 		catalog[i]=_classify_discovery(catalog[i])
@@ -211,6 +216,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	society_model.process_day(catalog,effective_context)
 	var results: Array[Dictionary] = []
 	var current_day := int(floor(WorldSimulation.state.elapsed_days))
+	WorldSimulation.state.scholarship_level=scholarship_level()+scholarship_rate()*float(WorldSimulation.span)/365.0
 	_refresh_active_investigations()
 	for channel_variant in WorldSimulation.state.active_investigations.keys().duplicate():
 		var channel:=String(channel_variant)
@@ -373,6 +379,7 @@ func _investigation_bottleneck(discovery:Dictionary,allocation:int,leader_factor
 	var research_workforce:=float(research_capacity.get("researchers",0.0))
 	if research_workforce<1.0: return "RESEARCH WORKFORCE — this emphasis receives less than one full-time-equivalent researcher"
 	if material_evidence<0.78: return "MATERIAL BASIS — survey or work the required resource"
+	if era_cost_multiplier(discovery)>=2.0: return "AHEAD OF ITS AGE — broader scholarship must mature before this question can be answered quickly"
 	if leader_factor<0.72: return "LEADERSHIP — the responsible office is weak or vacant"
 	if float(research_capacity.get("support_multiplier",1.0))<0.82: return "RESEARCH SUPPORT — food, tools, records, or administration are constraining the program"
 	if progress<0.25: return "EARLY EVIDENCE — more repeated cases are required"
@@ -557,6 +564,8 @@ func _candidate_score(discovery:Dictionary)->float:
 	# Once a society has invested in a viable tradition, its deeper methods have
 	# a modest continuity advantage, but other routes can still overtake it.
 	score+=float(discovery.get("stage_index",0))*3.5
+	# Work far beyond current scholarship is slow; lines prefer questions of their age.
+	score-=log(era_cost_multiplier(discovery))/log(2.0)*20.0
 	score+=Pathways.need(discovery)+(35.0 if not Pathways.evidence(id).is_empty() else 0.0)
 	return score
 
@@ -1010,8 +1019,59 @@ func select_research_target(discovery_id:String)->Dictionary:
 
 ## A stable seeded draw: saves/reloads never reroll the same technology.
 ## Bounded variance changes pace without bypassing any causal eligibility gate.
-func research_difficulty(discovery:Dictionary,civilization_seed:int)->float:
-	return 0.85+_research_draw(String(discovery.id),civilization_seed,"cost")*0.30
+func research_difficulty(discovery:Dictionary,civilization_seed:int,level:float=NAN)->float:
+	return (0.85+_research_draw(String(discovery.id),civilization_seed,"cost")*0.30)*era_cost_multiplier(discovery,level)
+
+
+## Game-year equivalent of a discovery's historical period (TechnologyEras).
+## Undated entries inherit the latest era among their required foundations.
+func discovery_era(id:String,visiting:Dictionary={})->float:
+	if era_by_id.has(id): return float(era_by_id[id])
+	var era:=0.0
+	if TechnologyEras.HISTORICAL_YEAR.has(id):
+		era=TechnologyEras.game_year_for(float(TechnologyEras.HISTORICAL_YEAR[id]))
+	else:
+		var entry:Dictionary=catalog_by_id.get(id,{})
+		if entry.is_empty() or visiting.has(id): return 0.0
+		var path:=visiting.duplicate()
+		path[id]=true
+		for parent in entry.get("requires_all",entry.get("requires",[])): era=maxf(era,discovery_era(String(parent),path))
+	era_by_id[id]=era
+	return era
+
+
+## Inquiry beyond the society's accumulated scholarship costs exponentially
+## more. Nothing is granted by age: knowledge still needs its foundations,
+## evidence and researchers. `level` defaults to the acting society's own.
+func era_cost_multiplier(discovery:Dictionary,level:float=NAN)->float:
+	if is_nan(level): level=scholarship_level()
+	return TechnologyEras.cost_multiplier(discovery_era(String(discovery.get("id",""))),level)
+
+
+## Accumulated scholarship, in game-year equivalents on the pacing curve.
+## Saves from before this field existed start from the breadth of what the
+## society already knows, never beyond the time it has actually lived.
+func scholarship_level()->float:
+	var level:=float(WorldSimulation.state.scholarship_level)
+	if level>=0.0: return level
+	var eras:Array[float]=[]
+	for id in WorldSimulation.state.known_discoveries: eras.append(discovery_era(String(id)))
+	eras.sort()
+	var breadth:=eras[int(eras.size()*0.5)] if not eras.is_empty() else 0.0
+	level=minf(breadth,float(WorldSimulation.state.elapsed_days)/365.0)
+	WorldSimulation.state.scholarship_level=level
+	return level
+
+
+## Scholarship-years gained per year. A staffed, fed, literate research
+## program advances about one year per year; oral tradition alone about half.
+func scholarship_rate()->float:
+	var researchers:=maxf(0.0,float(WorldSimulation.state.effective_workers("Knowledge")))
+	var population:=maxf(1.0,float(WorldSimulation.state.population_total))
+	var staffing:=clampf(minf(researchers/6.0,researchers/population/0.03),0.0,1.0)
+	var education:=preload("res://scripts/civilization_indicators.gd").education_index(WorldSimulation.state)
+	var food:=clampf(float(WorldSimulation.state.food_security),0.0,1.0)
+	return (0.45+0.55*staffing)*lerpf(0.85,1.2,education)*lerpf(0.7,1.0,food)
 
 func research_affinity(discovery:Dictionary,civilization_seed:int,environment:Dictionary)->float:
 	var score:=_research_draw(String(discovery.id),civilization_seed,"affinity")*100.0
