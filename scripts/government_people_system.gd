@@ -36,6 +36,9 @@ const OFFICE_SKILL_WEIGHTS:Dictionary={
 	"Marshal":{"Defense":0.50,"Administration":0.18,"Logistics":0.17,"Knowledge":0.15},
 	"Scholar":{"Knowledge":0.62,"Administration":0.18,"Diplomacy":0.12,"Logistics":0.08},
 	"Envoy":{"Diplomacy":0.54,"Logistics":0.22,"Knowledge":0.14,"Administration":0.10},
+	# Reading country, keeping a party fed on the road, noticing what matters and
+	# coming home alive to say it plainly.
+	"ChiefScout":{"Logistics":0.36,"Knowledge":0.30,"Defense":0.20,"Diplomacy":0.14},
 	"SettlementLeader":{"Administration":0.32,"Provisioning":0.23,"Construction":0.18,"Logistics":0.15,"Diplomacy":0.12},
 }
 const DYNAMIC_SKILL_WEIGHTS:Dictionary={
@@ -260,6 +263,9 @@ func active_offices()->Array[Dictionary]:
 		{"key":"Quartermaster","unlock":1,"titles":{"centralized":["Keeper of Stores","Chief Provisioner","Supply Prefect","Minister of Stores","Supply Minister"],"federated":["Storekeeper","Provisioning Delegate","Supply Councillor","Provisioning Secretary","Federal Quartermaster"],"localist":["Stores Keeper","Market Steward","Provisioning Convenor","Supply Delegate","Commons Provisioner"]}},
 		{"key":"Marshal","unlock":2,"titles":{"centralized":["Watch Captain","War Leader","Security Prefect","Marshal","Defense Minister"],"federated":["Watch Speaker","Defense Delegate","Defense Councillor","Federal Marshal","Defense Secretary"],"localist":["Watch Keeper","Shield Speaker","Defense Convenor","Militia Delegate","Commons Marshal"]}},
 		{"key":"Scholar","unlock":3,"titles":{"centralized":["Lore Keeper","Keeper of Records","Chief Examiner","Chancellor of Inquiry","Knowledge Minister"],"federated":["Memory Keeper","Inquiry Delegate","Learned Councillor","Research Secretary","Federal Chancellor"],"localist":["Story Keeper","Learning Speaker","Inquiry Convenor","Scholars' Delegate","Commons Chancellor"]}},
+		# Every band already sends people over the next ridge. The Chief Scout gathers
+		# what they saw and says it plainly, from the founding council onward.
+		{"key":"ChiefScout","unlock":0,"titles":{"centralized":["Pathfinder","Chief of Scouts","Master of Outriders","Director of Reconnaissance","Intelligence Director"],"federated":["Trail Speaker","Scouting Delegate","Outriders' Councillor","Reconnaissance Secretary","Federal Intelligence Secretary"],"localist":["Trail Keeper","Far-Walker","Wayfinders' Convenor","Scouts' Delegate","Commons Pathfinder"]}},
 		{"key":"Envoy","unlock":4,"titles":{"centralized":["Messenger","Chief Emissary","Treaty Prefect","Foreign Secretary","Foreign Minister"],"federated":["Peace Messenger","Emissary Delegate","Treaty Councillor","Federal Envoy","External Secretary"],"localist":["Road Messenger","Guest Speaker","Treaty Convenor","Foreign Delegate","Commons Envoy"]}},
 	]
 	var result:Array[Dictionary]=[]
@@ -472,6 +478,10 @@ func _personality_fit(person:Dictionary,office_key:String)->float:
 		"Marshal": return discipline*0.30+assertiveness*0.25+risk*0.25+openness*0.10+empathy*0.10
 		"Scholar": return openness*0.45+discipline*0.35+empathy*0.10+(1.0-assertiveness)*0.10
 		"Envoy": return empathy*0.38+openness*0.28+assertiveness*0.20+discipline*0.14
+		"ChiefScout":
+			# Curiosity to look, nerve to go close, and enough discipline to count.
+			var courage:=clampf(float(person.get("courage",0.5)),0.0,1.0)
+			return openness*0.32+courage*0.22+risk*0.20+discipline*0.18+empathy*0.08
 		_: return discipline*0.30+empathy*0.25+assertiveness*0.20+openness*0.15+(1.0-risk)*0.10
 
 
@@ -514,14 +524,14 @@ func appointment_assessment(person:Dictionary,office_key:String)->Dictionary:
 		if int(record.value)<int(weakest.value): weakest=record
 	var best_office:=office_key
 	var best_fit:=office_competency(person,office_key)
-	for possible in ["Steward","Quartermaster","Marshal","Scholar","Envoy","SettlementLeader"]:
+	for possible in ["Steward","Quartermaster","Marshal","Scholar","Envoy","ChiefScout","SettlementLeader"]:
 		var possible_fit:=office_competency(person,possible)
 		if possible_fit>best_fit:
 			best_fit=possible_fit
 			best_office=possible
 	var weakness_text:="%s %d limits this portfolio" % [String(weakest.skill),int(weakest.value)]
 	if best_office!=office_key and best_fit-office_competency(person,office_key)>=0.08:
-		weakness_text="Better suited to %s; appointing here forgoes that advantage" % ("local leadership" if best_office=="SettlementLeader" else best_office)
+		weakness_text="Better suited to %s; appointing here forgoes that advantage" % ("local leadership" if best_office=="SettlementLeader" else ("scouting" if best_office=="ChiefScout" else best_office))
 	var current_duty:=String(person.get("office_key",""))
 	if current_duty=="" and String(person.get("local_leader_of",""))!="": current_duty="Settlement leader"
 	var known_days:=maxi(0,int(WorldSimulation.state.elapsed_days)-int(person.get("known_since_day",int(WorldSimulation.state.elapsed_days))))
@@ -533,7 +543,7 @@ func appointment_assessment(person:Dictionary,office_key:String)->Dictionary:
 	var standing:="DIVIDED REPUTATION" if support<40 else ("BROADLY REGARDED" if support>=68 else "MIXED STANDING")
 	var public_concern:=String(PUBLIC_DOUBTS.get(String(weakest.skill),"Their limits are not yet well understood"))
 	if best_office!=office_key and best_fit-office_competency(person,office_key)>=0.08:
-		public_concern="Some expect their abilities would be better used in %s" % ("local leadership" if best_office=="SettlementLeader" else String(best_office).to_lower())
+		public_concern="Some expect their abilities would be better used in %s" % ("local leadership" if best_office=="SettlementLeader" else ("scouting" if best_office=="ChiefScout" else String(best_office).to_lower()))
 	return {
 		"fit":office_competency(person,office_key),"strongest_skill":String(strongest.skill),"strongest_value":int(strongest.value),
 		"weakest_skill":String(weakest.skill),"weakest_value":int(weakest.value),

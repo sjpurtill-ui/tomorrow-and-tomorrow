@@ -39,6 +39,10 @@ static func valid(value:Variant)->bool:
 		for amount:Variant in value.artifact_bonuses.values():
 			if not number(amount) or amount<0:return false
 	if value.has("museum_revenue") and (not number(value.museum_revenue) or value.museum_revenue<0):return false
+	if value.has("artifact_study"):
+		var role:Variant=value.artifact_study
+		if not role is Dictionary or not number(role.get("weight")) or role.weight<0 or role.weight>12 or not short_text(role.get("focus")):return false
+	if value.has("artifact_rumors") and not preload("res://scripts/artifact_sites.gd").valid_rumors(value.artifact_rumors):return false
 	if value.migration_policy not in ["balanced","welcome","consolidate"] or value.sharing_policy not in ["open","selective","guarded"]:return false
 	if not number(value.last_day) or not number(value.exposure) or value.exposure<0 or value.exposure>1:return false
 	if not value.integration is Array or value.integration.size()>128 or not value.history is Array or value.history.size()>64:return false
@@ -114,6 +118,9 @@ static func valid_item(item:Variant)->bool:
 			if item.maker_requirements!=EarlyArt.REQUIREMENTS[int(item.catalogue_id)%16]:return false
 		else:return false
 	if item.has("gift_receipts") and not text_list(item.gift_receipts,64):return false
+	for field:String in ["site_id","site_name","set_name"]:
+		if item.has(field) and not short_text(item[field]):return false
+	if item.has("set_size") and (not number(item.set_size) or item.set_size<1 or item.set_size>12):return false
 	if item.has("exhibited") and not item.exhibited is bool:return false
 	return item.study<=1 and item.work>=1 and item.work<=100000 and item.position is Dictionary and number(item.position.get("x")) and number(item.position.get("z")) and text_list(item.signals,30)
 static func valid_mission(mission:Dictionary)->bool:
@@ -228,7 +235,7 @@ static func attraction()->float:
 	var longevity:=clampf((float(health.life_expectancy)-15.0)/55.0,0.0,1.0)
 	var infant_survival:=1.0-clampf((float(health.infant_mortality_per_1000)-4.0)/176.0,0.0,1.0)
 	var health_quality:=longevity*.58+infant_survival*.42
-	return clampf(s.food_security*.28+minf(1,float(s.housing_capacity)/maxf(1,s.population_exact))*.18+health_quality*.24+float(m.get("security",.4))*.15+float(m.get("cohesion",.5))*.15+preload("res://scripts/undertaking_rewards.gd").local_bonus(s,"attraction"),0,1)
+	return clampf(s.food_security*.28+minf(1,float(s.housing_capacity)/maxf(1,s.population_exact))*.18+health_quality*.24+float(m.get("security",.4))*.15+float(m.get("cohesion",.5))*.15+preload("res://scripts/undertaking_rewards.gd").local_bonus(s,"attraction")+preload("res://scripts/artifact_culture.gd").migration_bonus(),0,1)
 
 static func connection(id:String)->Dictionary:
 	id=owner_id(id)
@@ -266,10 +273,13 @@ static func sample_missions(system:Node,day:int)->void:
 				if String(actual.get("controller",id))!=id:continue
 			mission.encountered_societies.append(id)
 			encounter(mission,id,String(system.civilizations[index].name),site.position,day)
-		if mission.get("target_kind","") in ["explore","recruit_people","recruit_nomads","prospect_resources"] and day%7==int(mission.get("mission_id",0))%7:sample_ground(system,mission,position,day)
+		if mission.get("target_kind","") in ["explore","recruit_people","recruit_nomads","prospect_resources"]:
+			preload("res://scripts/artifact_sites.gd").dig_rumored(system,mission,position,day)
+			if day%7==int(mission.get("mission_id",0))%7:sample_ground(system,mission,position,day)
 
 static func encounter(mission:Dictionary,source:String,source_name:String,position:Dictionary,day:int)->void:
 	if not mission.has("carried_collections"):mission.carried_collections=[]
+	preload("res://scripts/artifact_sites.gd").hear_from_society(source,source_name,Vector2(float(position.get("x",0)),float(position.get("z",0))),day)
 	var recipient:=WorldSimulation.actor_id
 	var source_state:=owner_state(source)
 	if source_state==null or owner_id(source)==recipient:return
@@ -446,15 +456,22 @@ static func studied_resource_sample(resource:String)->bool:
 
 static func sample_ground(system:Node,mission:Dictionary,position:Vector2,day:int)->void:
 	if not system.ground_survey_authority.is_valid() or mission.carried_collections.size()>=maxi(1,int(mission.personnel)/2):return
-	if system._position_is_revealed(position):return
+	var Sites:=preload("res://scripts/artifact_sites.gd")
+	var revealed:bool=system._position_is_revealed(position)
+	# Familiar ground is not re-searched at random, but a remembered tale can
+	# still send people to dig at a specific place. Each site holds finite pieces.
+	if revealed:
+		Sites.hear_local_tales(system,mission,position,day)
+		return
 	var ground:Dictionary=system.ground_survey_authority.call(position)
 	if ground.get("biome","")=="water":return
-	var artifact:=Artifacts.find_at(WorldSimulation.state.world_seed,position,day)
+	var artifact:Dictionary=Sites.discover(system,position,day,false)
 	var seen:Dictionary=data().get("artifact_sites",{})
-	if not Artifacts.site_claimed(artifact.id) and seen.size()<COLLECTION_LIMIT:
+	if not artifact.is_empty() and not Artifacts.site_claimed(artifact.id) and seen.size()<COLLECTION_LIMIT:
 		seen[artifact.id]=true;data()["artifact_sites"]=seen
 		mission.carried_collections.append(artifact)
 		if mission.carried_collections.size()>=maxi(1,int(mission.personnel)/2):return
+	Sites.hear_local_tales(system,mission,position,day)
 	var potentials:Dictionary=ground.get("resource_potentials",{})
 	if potentials.is_empty():potentials=preload("res://scripts/civilization_day.gd").context(position).get("environment_profile",{}).get("resource_potentials",{})
 	var choices:={
@@ -557,29 +574,33 @@ static func advance(day:int)->void:
 		var used:=minf(work,float(group.remaining));group.remaining-=used;work-=used
 		if group.remaining<=.001:data().integration.erase(group)
 	# Study competes within the existing Knowledge workforce, not a free team.
+	# Recovered artifacts are studied only by the artifact-study role.
 	var study_work:=WorldSimulation.state.effective_workers("Knowledge")*.15*elapsed*food
 	for item:Dictionary in data().collections.values():
 		if study_work<=0:break
-		if float(item.study)>=1 or day<int(item.returned_day):continue
+		if float(item.study)>=1 or day<int(item.returned_day) or Artifacts.role_studied(item):continue
 		var supplies:=preload("res://scripts/paper_study.gd").use(study_work,(1-float(item.study))*float(item.work),item)
 		supplies.progress+=preload("res://scripts/microscope_observation.gd").use(item,float(supplies.progress),(1-float(item.study))*float(item.work))
 		supplies.progress+=preload("res://scripts/communications_analysis.gd").use(item,float(supplies.progress),(1-float(item.study))*float(item.work))
 		item.study=minf(1,float(item.study)+float(supplies.progress)/float(item.work));study_work-=float(supplies.work)
-		if item.study>=1:
-			if item.get("partnership_protocol",false):
-				log_event("Completed %s. Send a delegation to exchange findings with the partner." % String(item.name))
-				continue
-			var prior:Dictionary=data().collections.get(String(data().evidence.get(String(item.discovery_id),"")),{})
-			if evidence_strength(item)>=evidence_strength(prior):data().evidence[String(item.discovery_id)]=String(item.id)
-			var signals:Dictionary={}
-			for signal_name:String in item.signals:signals[signal_name]=.65
-			WorldSimulation.state.register_field_observations(signals,day+180)
-			if item.source_id!="":
-				var ties:=connection(String(item.source_id))
-				if item.discovery_id not in ties.learned:ties.learned.append(item.discovery_id)
-				ties.familiarity=minf(1,float(ties.familiarity)+.08)
-				ties.respect=minf(.3,float(ties.respect)+(.05 if item.kind=="culture" else .03))
-			log_event("Examined %s. Its evidence now supports the related investigation." % String(item.name))
+		if item.study>=1:finish_study(item,day)
+
+static func finish_study(item:Dictionary,day:int)->void:
+	if item.get("partnership_protocol",false):
+		log_event("Completed %s. Send a delegation to exchange findings with the partner." % String(item.name))
+		return
+	var prior:Dictionary=data().collections.get(String(data().evidence.get(String(item.discovery_id),"")),{})
+	if evidence_strength(item)>=evidence_strength(prior):data().evidence[String(item.discovery_id)]=String(item.id)
+	var signals:Dictionary={}
+	for signal_name:String in item.signals:signals[signal_name]=.65
+	WorldSimulation.state.register_field_observations(signals,day+180)
+	if item.source_id!="":
+		var ties:=connection(String(item.source_id))
+		if item.discovery_id not in ties.learned:ties.learned.append(item.discovery_id)
+		ties.familiarity=minf(1,float(ties.familiarity)+.08)
+		ties.respect=minf(.3,float(ties.respect)+(.05 if item.kind=="culture" else .03))
+	if Artifacts.culture_piece(item):log_event("Scholars finished studying %s. It now lends culture, research and appraisal value." % String(item.name))
+	else:log_event("Examined %s. Its evidence now supports the related investigation." % String(item.name))
 
 static func evidence_strength(item:Dictionary)->float:
 	if item.get("reverse_engineered",false):return 1.35
@@ -590,7 +611,7 @@ static func evidence_strength(item:Dictionary)->float:
 
 static func studying()->bool:
 	for item:Dictionary in data().collections.values():
-		if float(item.study)<1 and int(item.returned_day)<=int(WorldSimulation.state.elapsed_days):return true
+		if float(item.study)<1 and int(item.returned_day)<=int(WorldSimulation.state.elapsed_days) and not Artifacts.role_studied(item):return true
 	return false
 
 static func known_relation(id:String)->Dictionary:

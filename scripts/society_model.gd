@@ -13,7 +13,8 @@ const OFFICE_DYNAMICS:Dictionary={
 	"Quartermaster":["nutrition","production","logistics","ecology"],
 	"Scholar":["knowledge","culture","institutions","ecology"],
 	"Marshal":["security","logistics","labor","institutions"],
-	"Envoy":["culture","institutions","logistics","knowledge"]
+	"Envoy":["culture","institutions","logistics","knowledge"],
+	"ChiefScout":["security","knowledge","logistics"]
 }
 
 # A practice cannot be imagined into existence merely because enough days pass.

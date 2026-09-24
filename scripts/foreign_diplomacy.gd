@@ -12,12 +12,15 @@ const ACCORDS={
 const ESCALATING_REACTIONS:=["warn","harden_border","mobilize","call_bluff"]
 var seed_value:=-999999
 var leaders:Dictionary={}
+## Audience Hall state (arrivals, antechamber queue, history). Owned and
+## validated by res://scripts/audience_hall.gd; saved alongside leaders.
+var audiences:Dictionary={}
 var layer:CanvasLayer
 var panel:Control
 var commitments=preload("res://scripts/diplomatic_commitments.gd").new()
 
 func reset_for_new_world()->void:
-	seed_value=-999999; leaders.clear()
+	seed_value=-999999; leaders.clear(); audiences={}
 	commitments=preload("res://scripts/diplomatic_commitments.gd").new()
 	if is_instance_valid(panel): panel.queue_free()
 	WorldSimulation.dialogue.reset()
@@ -81,6 +84,9 @@ func forecast(id:String,accord:String,tone:String,generous:bool=false)->Dictiona
 	var wonder_reputation:=preload("res://scripts/undertaking_rewards.gd").diplomatic_bonus(WorldSimulation.state,preload("res://scripts/society_exchange.gd").owner_id(id),int(WorldSimulation.state.elapsed_days))
 	score+=wonder_reputation
 	if wonder_reputation>.005:reasons.append("Travelers have brought accounts of your civilization's achievements.")
+	var allure_bonus:=preload("res://scripts/artifact_culture.gd").diplomatic_bonus(p.personality)
+	score+=allure_bonus
+	if allure_bonus>.02:reasons.append("Your people's culture and treasured heritage lend your envoys standing.")
 	var ties:Dictionary=preload("res://scripts/society_exchange.gd").known_relation(id)
 	if float(ties.get("respect",0))>.02:reasons.append("Useful knowledge and cultural exchange give this relationship weight.")
 	if float(ties.get("resentment",0))>.02:reasons.append("The movement of households has created political friction.")
@@ -94,7 +100,7 @@ func forecast(id:String,accord:String,tone:String,generous:bool=false)->Dictiona
 	elif int(WorldSimulation.state.elapsed_days)<int(p.next_day): blocker="Let the last exchange settle: %d days before another proposal." % (int(p.next_day)-int(WorldSimulation.state.elapsed_days))
 	var binding:=not (p.counter as Dictionary).is_empty() and String(p.counter.accord)==accord and generous
 	var outcome:="accept" if score>=.25 or binding else ("counter" if score>=-.1 and not generous else "refuse")
-	return {"outcome":outcome,"label":{"accept":"Receptive","counter":"Likely to ask for more","refuse":"Unconvinced"}[outcome],"reasons":" ".join(reasons),"blocker":blocker,"cost":12 if generous else 4,"bonus":.08 if generous else .12,"domain":ACCORDS[accord].domain,"binding":binding}
+	return {"outcome":outcome,"label":{"accept":"Receptive","counter":"Likely to ask for more","refuse":"Unconvinced"}[outcome],"reasons":" ".join(reasons),"blocker":blocker,"cost":12 if generous else 4,"bonus":.08 if generous else .12,"domain":ACCORDS[accord].domain,"binding":binding,"score":score,"allure_bonus":allure_bonus}
 
 func send(id:String,accord:String,tone:String,generous:bool=false)->Dictionary:
 	var f:=forecast(id,accord,tone,generous)
@@ -305,12 +311,13 @@ func valid_terms(t:Dictionary)->bool:
 	return t.has_all(["accord","tone","generous","cost","serial"]) and ACCORDS.has(t.accord) and TONES.has(t.tone) and t.generous is bool and t.cost==(12 if t.generous else 4) and (t.serial is int or t.serial is float) and float(t.serial)>=1
 
 func export_state()->Dictionary:
-	ensure(); return {"seed":seed_value,"leaders":leaders.duplicate(true),"dialogue":WorldSimulation.dialogue.export_state(),"commitments":commitments.state.duplicate(true)}
+	ensure(); return {"seed":seed_value,"leaders":leaders.duplicate(true),"dialogue":WorldSimulation.dialogue.export_state(),"commitments":commitments.state.duplicate(true),"audiences":audiences.duplicate(true)}
 
 func import_state(data:Dictionary)->Dictionary:
 	if data.get("seed")!=WorldSimulation.state.world_seed or not data.get("leaders") is Dictionary or data.leaders.size()>64: return {"error":"Invalid foreign leader state."}
 	if data.has("commitments") and not commitments.validate(data.commitments): return {"error":"Invalid protection or league commitments."}
 	if not WorldSimulation.dialogue.validate_state(data.get("dialogue",{})): return {"error":"Invalid foreign discussion history."}
+	if data.has("audiences") and not preload("res://scripts/audience_hall.gd").validate_state(data.audiences): return {"error":"Invalid audience hall state."}
 	for id in data.get("dialogue",{}):
 		if not data.leaders.has(id): return {"error":"Discussion references an unknown leader."}
 	for id in data.leaders:
@@ -331,6 +338,7 @@ func import_state(data:Dictionary)->Dictionary:
 	leaders=data.leaders.duplicate(true); seed_value=WorldSimulation.state.world_seed; WorldSimulation.dialogue.import_state(data.get("dialogue",{}))
 	commitments=preload("res://scripts/diplomatic_commitments.gd").new()
 	if data.has("commitments"): commitments.state=data.commitments.duplicate(true)
+	audiences=(data.audiences as Dictionary).duplicate(true) if data.get("audiences") is Dictionary else {}
 	return {"ok":true}
 
 func notify_defensive_siege(attacker_id:String,defender_id:String,siege_id:String,day:int)->void:

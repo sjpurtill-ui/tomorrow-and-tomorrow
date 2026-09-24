@@ -3,6 +3,9 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 ## first-class rail destination.
 
 var culture_view_state:Dictionary={"roots_open":false}
+## Tests may point the showcase at a stand-in facade; play uses artifact_culture.gd.
+var artifact_source:Variant=null
+const ArtifactGallery:=preload("res://scripts/hud/artifact_gallery.gd")
 
 const DYNAMIC_ORDER:Array[String]=["demography","nutrition","health","labor","knowledge","production","infrastructure","logistics","ecology","institutions","security","culture"]
 const ValuesModel:=preload("res://scripts/societal_values_model.gd")
@@ -332,7 +335,7 @@ func signature()->Array:
 	var leader:=GovernmentPeopleSystem.settlement_leader(String(settlement.get("id","")))
 	var latest_order:=_latest_civic_order(String(settlement.get("id","")),int(leader.get("person_id",0)))
 	var interpreter_config:=PronouncementInterpreter.configuration_status()
-	return [GameState.elapsed_days,WorldSimulation.direction.auto_scouting,MilitaryCampaign.war_reputation_snapshot(),GameState.societal_values.get("lived",{}).duplicate(),WorldSimulation.direction.ambition,WorldSimulation.direction.cultural_memory.get("events",[]).size(),GameState.society_capacities.duplicate(),ids,GameState.sovereign_orders.size(),ConsequenceEngine.active_policies().size(),GovernmentPeopleSystem.revision,GameState.player_settlements.size(),history.size(),latest_dialogue_status,String(latest_order.get("status","")),bool(interpreter_config.get("enabled",GameState.civic_api_enabled)),bool(interpreter_config.get("configured",false)),String(interpreter_config.get("model","")),bool(interpreter_config.get("structured_output",false)),GameState.civic_always_use_ai]
+	return [GameState.elapsed_days,WorldSimulation.direction.auto_scouting,MilitaryCampaign.war_reputation_snapshot(),GameState.societal_values.get("lived",{}).duplicate(),WorldSimulation.direction.ambition,WorldSimulation.direction.cultural_memory.get("events",[]).size(),GameState.society_capacities.duplicate(),ids,GameState.sovereign_orders.size(),ConsequenceEngine.active_policies().size(),GovernmentPeopleSystem.revision,GameState.player_settlements.size(),history.size(),latest_dialogue_status,String(latest_order.get("status","")),bool(interpreter_config.get("enabled",GameState.civic_api_enabled)),bool(interpreter_config.get("configured",false)),String(interpreter_config.get("model","")),bool(interpreter_config.get("structured_output",false)),GameState.civic_always_use_ai,_artifact_signature()]
 
 
 func _civic_settlement()->Dictionary:
@@ -430,7 +433,27 @@ func _society_overview()->Array:
 	var effects:=presenter.effects(WorldSimulation.direction.cultural_memory,int(GameState.elapsed_days),research,WorldSimulation.direction.auto_scouting,float(GameState.simulation_metrics.get("food_intake_ratio",1)))
 	return [{"type":"culture","lived_values":GameState.societal_values.get("lived",{}).duplicate(),"view_state":culture_view_state,"effects":effects,"reputation":presenter.reputation(MilitaryCampaign.war_reputation_snapshot()),"identity":identity,"values":values,"memories":memories,"direction":PeopleDirection.AMBITIONS.get(WorldSimulation.direction.ambition,{}),
 		"on_direction":func():PeopleDirection.open_direction(),"on_council":jump("civ",1),"on_government":jump("government",0),
-		"on_capacities":focused_action("Society’s strengths & needs","",func()->Dictionary:return {"blocks":_society_blocks(GameState.society_capacities)}).on_press}]
+		"on_capacities":focused_action("Society’s strengths & needs","",func()->Dictionary:return {"blocks":_society_blocks(GameState.society_capacities)}).on_press}.merged(_artifact_showcase())]
+
+func _artifact_facade()->Variant:
+	return artifact_source if artifact_source!=null else ArtifactGallery.facade()
+
+func _artifact_showcase()->Dictionary:
+	## Entry point to Artifacts & Allure inside the Culture tab.
+	var facade:Variant=_artifact_facade()
+	if facade==null:return {}
+	var summary:Dictionary=facade.summary()
+	var finest:Dictionary=facade.artifacts({"status":"all","sort":"prestige","search":"","page":0,"page_size":4})
+	var source:Variant=artifact_source
+	return {"artifacts":{"summary":summary,"highlights":finest.get("items",[]),
+		"on_open":func(id:String="")->void:ArtifactGallery.open(hud,terrain,id,source),
+		"on_study":jump("inquiry",0)}}
+
+func _artifact_signature()->Array:
+	var facade:Variant=_artifact_facade()
+	if facade==null:return []
+	var summary:Dictionary=facade.summary()
+	return [summary.get("collection_count",0),summary.get("studied_count",0),summary.get("in_study_count",0),summary.get("exhibited_count",0),snappedf(float(summary.get("allure",0)),.01),summary.get("study_role",{}).get("workers",0)]
 
 func _government_overview()->Array:
 	return [{"type":"actions","heading":"GOVERNING TOGETHER","items":[{"label":"OPEN GOVERNMENT","sub":"Officeholders, removals and policy","on_press":jump("government",0)},{"label":"TALK TO OUR LEADER","sub":"Discuss and direct local work","on_press":jump("civ",1)}]}]

@@ -74,6 +74,8 @@ func test_gift_earns_recipient_respect_and_sites_cannot_be_reissued()->void:
 
 func test_held_artifact_unlocks_early_question_without_free_completion()->void:
 	var record:=held();record.discovery_id="oral_epics";record.work=1
+	# Artifacts are studied only by researchers assigned to the artifact-study role.
+	preload("res://scripts/artifact_culture.gd").set_study_weight(1)
 	GameState.elapsed_days=1;E.advance(1)
 	assert_bool(P.ready(DiscoverySystem.discovery_definition("oral_epics"),1)).is_true()
 	assert_bool("oral_epics" in GameState.known_discoveries).is_false()

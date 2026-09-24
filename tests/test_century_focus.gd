@@ -72,9 +72,11 @@ func test_advice_only_uses_filled_current_offices_and_cannot_choose()->void:
 	SettlementModel.ensure_founded()
 	GovernmentPeopleSystem.initialize()
 	var first:=PeopleDirection.advisor_recommendations()
-	assert_int(first.size()).is_equal(1)
+	# The founding council is the Steward and the Chief Scout.
+	assert_int(first.size()).is_equal(2)
 	if first.is_empty(): return
 	assert_str(String(first[0].name)).is_equal(String(GovernmentPeopleSystem.officeholder("Steward").name))
+	assert_str(String(first[1].name)).is_equal(String(GovernmentPeopleSystem.officeholder("ChiefScout").name))
 	assert_str(PeopleDirection.ambition).is_empty()
 	assert_bool(PeopleDirection.needs_century_choice()).is_true()
 
@@ -112,7 +114,7 @@ func test_advice_roster_expands_with_real_government_offices()->void:
 	SettlementModel.ensure_founded()
 	GovernmentPeopleSystem.initialize()
 	var advice:=PeopleDirection.advisor_recommendations()
-	assert_int(advice.size()).is_equal(5) # Established offices receive real automatic appointments.
+	assert_int(advice.size()).is_equal(6) # Established offices (incl. Chief Scout) receive real automatic appointments.
 	for office in GovernmentPeopleSystem.active_offices():
 		if String(office.key)=="Steward": continue
 		var candidates:=GovernmentPeopleSystem.candidates_for_office(String(office.key),"",96).filter(func(person:Dictionary)->bool: return String(person.get("office_key",""))=="")
@@ -121,7 +123,7 @@ func test_advice_roster_expands_with_real_government_offices()->void:
 		var holder:=GovernmentPeopleSystem.mark_central_appointment(int(candidates[0].person_id),String(office.key))
 		GameState.leadership_positions[String(office.key)]=holder
 	advice=PeopleDirection.advisor_recommendations()
-	assert_int(advice.size()).is_equal(5)
+	assert_int(advice.size()).is_equal(6)
 	for entry in advice:
 		assert_int(int(entry.person_id)).is_greater(0)
 	assert_str(PeopleDirection.ambition).is_empty()
