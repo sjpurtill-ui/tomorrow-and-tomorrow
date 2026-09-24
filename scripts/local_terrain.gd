@@ -12372,6 +12372,7 @@ func _build_command_rail_hud(layer:CanvasLayer)->void:
 	hud.register_provider("inquiry",preload("res://scripts/hud/content/dock_content_inquiry.gd").new(self,hud))
 	hud.register_provider("world",preload("res://scripts/hud/content/dock_content_world.gd").new(self,hud))
 	hud.register_provider("military",preload("res://scripts/hud/content/dock_content_military.gd").new(self,hud))
+	var audience_director:=preload("res://scripts/audience_director.gd").new();audience_director.terrain=self;layer.add_child(audience_director)
 	_update_scale_bar()
 
 
@@ -17013,6 +17014,13 @@ func _perform_civic_leader_removal(settlement_id:String,action:String,player_tex
 		hud.request_immediate_dock_refresh()
 	return result
 
+
+## Issues a civic directive from text (e.g. a petitioner's suggested decree
+## accepted in the Audience Hall) through the ordinary freeform pipeline.
+func issue_civic_directive_text(text:String)->void:
+	var input:=LineEdit.new();input.text=text
+	_issue_freeform_order(input)
+	input.free()
 
 func _issue_freeform_order(input: LineEdit) -> void:
 	if not input.editable: return

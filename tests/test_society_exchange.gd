@@ -303,7 +303,7 @@ func test_malformed_evidence_and_carried_records_are_rejected()->void:
 
 func test_ground_samples_require_actual_unexplored_ground_and_do_not_reward_retracing()->void:
 	GameState.known_discoveries.append("clay_testing")
-	CivilizationSystem.ground_survey_authority=func(_point:Vector2)->Dictionary:return {"biome":"grassland","label":"Exposed clay bank","resource_potentials":{"Clay":.8}}
+	CivilizationSystem.ground_survey_authority=func(_point:Vector2)->Dictionary:return {"biome":"grassland","label":"Exposed clay bank","resource_potentials":{"Clay":.8},"river_distance_km":1.0,"fertility":.8}
 	var trip:=mission();var point:=Vector2(7000,7000)
 	E.sample_ground(CivilizationSystem,trip,point,10)
 	assert_int(trip.carried_collections.size()).is_equal(2)

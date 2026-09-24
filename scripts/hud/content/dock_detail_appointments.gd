@@ -68,7 +68,7 @@ func tab(_sub:int)->Dictionary:
 func _commission(person_id:int)->void:
 	var result:=AdvisorSystem.appoint_person(person_id,office)
 	if bool(result.get("ok",false)):
-		var topics:Dictionary={"Steward":"population","Quartermaster":"food","Scholar":"knowledge","Marshal":"security","Envoy":"resources"}
+		var topics:Dictionary={"Steward":"population","Quartermaster":"food","Scholar":"knowledge","Marshal":"security","Envoy":"resources","ChiefScout":"security"}
 		AdvisorSystem.generate_council_item(office,String(topics.get(office,"construction")),0.58)
 	terrain._report_military_action(result)
 	hud.request_immediate_dock_refresh()
