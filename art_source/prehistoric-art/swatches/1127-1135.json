@@ -1,0 +1,15 @@
+{
+  "source": "art_source/prehistoric-art/swatches/1127-1135.png",
+  "prompt": "Built-in imagegen: square 3x3 swatch of crude prehistoric finds on warm ivory paper, matte gouache and dry brush. Cells in order: ember-shading stone, widened hide strip, backward snapped point, scorched clay ball, root-hung sound stone, raised bark tray, leaf-guarded stone flake, shell in branch grip, twig across opening.",
+  "entries": [
+    {"id": 1127, "review": "Top-left: rough flat stone shading a small ember over dust, with no constructed hearth."},
+    {"id": 1128, "review": "Top-middle: ragged untanned hide strip broadening at one end, with crude natural-fiber tie."},
+    {"id": 1129, "issue": "The point appears conventionally hafted and effective rather than snapped and fitted backward."},
+    {"id": 1130, "review": "Middle-left: cracked fire-scorched clay ball with raw inner clay exposed; no fired vessel."},
+    {"id": 1131, "issue": "The hanging stone appears pierced, suggesting a manufactured fitting absent from the find."},
+    {"id": 1132, "review": "Middle-right: folded ragged bark makes a rough tray with a naturally raised corner."},
+    {"id": 1133, "review": "Bottom-left: chipped stone flake protected by a loose fold of broad leaves."},
+    {"id": 1134, "review": "Bottom-middle: large jagged shell pressed against a naturally forked branch as a crude grip."},
+    {"id": 1135, "review": "Bottom-right: unmarked thin twig laid across a narrow gap between rough stones."}
+  ]
+}

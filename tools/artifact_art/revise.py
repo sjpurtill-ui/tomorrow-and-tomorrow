@@ -8,7 +8,7 @@ import prehistoric as p
 from creative import STYLE
 
 def revise(identifier, reason, subject):
-    manifest=json.loads(p.bank.MANIFEST.read_text())
+    manifest=json.loads(p.bank.MANIFEST.read_text(encoding='utf-8'))
     row=manifest['entries'][identifier]
     assert row['status'] in ('generated','approved')
     source=p.bank.ROOT/row['path'].removeprefix('res://')

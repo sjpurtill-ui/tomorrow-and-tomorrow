@@ -1,0 +1,15 @@
+{
+  "source": "art_source/prehistoric-art/swatches/1109-1117.png",
+  "prompt": "Built-in imagegen: square 3x3 swatch of distinct crude prehistoric finds on warm ivory paper, matte gouache and dry brush, no text or modern materials. Cells in order: tinder fungus, fingertip shelter memory in clay, claw with plant-fiber knot, shell strainer, unfired clay plug, stone flakes, crevice stick, loosely bound leaves, reused stone hollow.",
+  "entries": [
+    {"id": 1109, "review": "Top-left: wild tinder fungus with charred spark-catching patch; no manufactured vessel."},
+    {"id": 1110, "review": "Top-middle: rough fingertip depressions and wandering grooves in raw clay, with no writing or geometry."},
+    {"id": 1111, "review": "Top-right: curved animal claw beside a large crude plant-fiber knot; no jewelry or metal."},
+    {"id": 1112, "review": "Middle-left: broken shell with small natural-looking openings and sediment, clearly usable as a strainer."},
+    {"id": 1113, "review": "Middle-middle: lumpy cracked unfired clay plug with an irregular hand-pinched tab."},
+    {"id": 1114, "review": "Middle-right: several differently shaped rough stone flakes scattered on dust, unworked and unsorted by size."},
+    {"id": 1115, "review": "Bottom-left: crooked natural stick reaching into a narrow stone crevice, with no worked tip."},
+    {"id": 1116, "review": "Bottom-middle: broad damaged leaves held by a single loose plant-fiber tie, not woven."},
+    {"id": 1117, "review": "Bottom-right: naturally irregular stone hollow with two visibly distinct dark and ochre residue areas."}
+  ]
+}

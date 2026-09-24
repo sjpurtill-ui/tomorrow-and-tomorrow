@@ -29,7 +29,7 @@ GUIDE=('The four supplied reference images define ONLY the painting aesthetic: w
 def build():
     source=(bank.ROOT/'scripts/prehistoric_artifacts.gd').read_text()
     c={k:json.loads(re.search(r'const '+k+r' := (\[[^\n]+\])',source)[1]) for k in ['FORMS','VARIANTS','TRACES','MATERIALS','SUBJECTS']}
-    prior=json.loads(bank.MANIFEST.read_text()) if bank.MANIFEST.exists() else {'entries':[]};old={e['catalogue_id']:e for e in prior['entries']};rows=[]
+    prior=json.loads(bank.MANIFEST.read_text(encoding='utf-8')) if bank.MANIFEST.exists() else {'entries':[]};old={e['catalogue_id']:e for e in prior['entries']};rows=[]
     for i in range(4096):
         if old.get(i,{}).get('creative_direction'):
             rows.append(old[i]);continue
@@ -49,4 +49,4 @@ if __name__=='__main__':
         with manifest_lock(bank.MANIFEST.with_suffix('.lock')):
             bank.register(a.id,a.source,a.review)
     elif a.command=='audit':raise SystemExit(bank.audit(a.complete))
-    else:print(json.dumps([{'catalogue_id':e['catalogue_id'],'prompt':e['prompt']} for e in json.loads(bank.MANIFEST.read_text())['entries'] if e['status']=='pending'][:a.limit]))
+    else:print(json.dumps([{'catalogue_id':e['catalogue_id'],'prompt':e['prompt']} for e in json.loads(bank.MANIFEST.read_text(encoding='utf-8'))['entries'] if e['status']=='pending'][:a.limit]))

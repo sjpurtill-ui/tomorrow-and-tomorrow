@@ -1,0 +1,15 @@
+{
+  "source": "art_source/prehistoric-art/swatches/1136-1181.png",
+  "prompt": "Built-in imagegen: square 3x3 swatch of crude prehistoric finds on warm ivory paper, matte gouache and dry brush. Cells in order: soot leaf print, loose root nest, handstone and soft anvil, quick-release plant-fiber knot, charcoal shadow smudge, shell repaired with chip, wood curl and tinder, ochre thumbprint on stone tool, shell scraping raw hide.",
+  "entries": [
+    {"id": 1136, "review": "Top-left: blackened leaf-shaped soot impression on rough stone with crumbled leaf beside it."},
+    {"id": 1137, "review": "Top-middle: loose tangled roots forming a shallow open nest, with visible free ends rather than finished basket sides."},
+    {"id": 1138, "review": "Top-right: hard rounded handstone on a softer battered earth-and-clay anvil with irregular impact scars."},
+    {"id": 1139, "review": "Middle-left: frayed plant-fiber loop and knot with one long free pull end."},
+    {"id": 1140, "review": "Middle-middle: amorphous charcoal smudge following a rough natural rock contour, with no legible symbols."},
+    {"id": 1141, "review": "Middle-right: large broken shell with a jagged stone chip lodged awkwardly at its rim."},
+    {"id": 1142, "review": "Bottom-left: thin curled raw wood shaving beside black tinder crumbs, no carved ornament."},
+    {"id": 1143, "review": "Bottom-middle: plain chipped handstone bearing a single uneven red ochre grip smear."},
+    {"id": 1181, "review": "Bottom-right: natural shell edge against rough untanned hide with a newly scraped pale patch."}
+  ]
+}

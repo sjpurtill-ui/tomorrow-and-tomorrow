@@ -51,7 +51,7 @@ def constants():
     source=(ROOT/'scripts/artifact_collection.gd').read_text()
     return {key:json.loads(re.search(r'const '+key+r' := (\[[^\n]+\])',source)[1]) for key in ['FORMS','STYLES','FORM_MATERIALS','MOTIFS','SUBJECTS']}
 def build():
-    c=constants();old=json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {'entries':[]}
+    c=constants();old=json.loads(MANIFEST.read_text(encoding='utf-8')) if MANIFEST.exists() else {'entries':[]}
     prior={e['catalogue_id']:e for e in old['entries']};entries=[]
     for i in range(4096):
         f=i%16;s=(i//16)%16;m=(i//256)%16
@@ -67,7 +67,7 @@ def build():
 
 def write_document(path,data):
     temporary=path.with_name(path.name+f'.{os.getpid()}.tmp')
-    temporary.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n')
+    temporary.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
     temporary.replace(path)
 
 def write_index(manifest):
@@ -75,18 +75,21 @@ def write_index(manifest):
     write_document(INDEX,{'version':1,'expected_count':4096,'approved':approved})
 
 def import_settings(path):
-    resource='res://'+str(path.relative_to(ROOT))
+    # Godot resource paths always use forward slashes; a Windows path string
+    # would write backslashes that Godot's importer parses as escapes.
+    resource='res://'+path.relative_to(ROOT).as_posix()
     imported='res://.godot/imported/'+path.name+'-'+hashlib.md5(resource.encode()).hexdigest()+'.ctex'
     config=path.with_suffix(path.suffix+'.import')
     if config.exists():
         text=config.read_text()
         text=re.sub(r'process/size_limit=\d+', 'process/size_limit=512',text)
+        text=re.sub(r'source_file="res://[^"]*"', lambda m:m.group(0).replace(chr(92),'/'),text)
         config.write_text(text)
     else:
         config.write_text('[remap]\nimporter="texture"\ntype="CompressedTexture2D"\npath="'+imported+'"\nmetadata={"vram_texture": false}\n\n[deps]\nsource_file="'+resource+'"\ndest_files=["'+imported+'"]\n\n[params]\ncompress/mode=0\nmipmaps/generate=false\nprocess/size_limit=512\n')
 
 def register(i,source,review=None):
-    manifest=json.loads(MANIFEST.read_text());row=manifest['entries'][i];src=Path(source).resolve()
+    manifest=json.loads(MANIFEST.read_text(encoding='utf-8'));row=manifest['entries'][i];src=Path(source).resolve()
     raw=src.read_bytes()
     if raw[:8]!=b'\x89PNG\r\n\x1a\n':raise ValueError('Expected original generated PNG')
     width,height=struct.unpack('>II',raw[16:24])
@@ -104,7 +107,7 @@ def register(i,source,review=None):
     print(json.dumps({'id':i,'status':row['status'],'path':str(dest)}))
 
 def audit(require_complete=False):
-    data=json.loads(MANIFEST.read_text());errors=[];seen=set();counts={}
+    data=json.loads(MANIFEST.read_text(encoding='utf-8'));errors=[];seen=set();counts={}
     if [e['catalogue_id'] for e in data['entries']]!=list(range(4096)):errors.append('Catalogue IDs are not exactly 0–4095')
     for row in data['entries']:
         status=row['status'];counts[status]=counts.get(status,0)+1
@@ -126,4 +129,4 @@ if __name__=='__main__':
         with manifest_lock(MANIFEST.with_suffix('.lock')):
             register(a.id,a.source,a.review)
     elif a.command=='audit':raise SystemExit(audit(a.complete))
-    else:print(json.dumps([{'catalogue_id':e['catalogue_id'],'prompt':e['prompt']} for e in json.loads(MANIFEST.read_text())['entries'] if e['status']=='pending'][:a.limit]))
+    else:print(json.dumps([{'catalogue_id':e['catalogue_id'],'prompt':e['prompt']} for e in json.loads(MANIFEST.read_text(encoding='utf-8'))['entries'] if e['status']=='pending'][:a.limit]))

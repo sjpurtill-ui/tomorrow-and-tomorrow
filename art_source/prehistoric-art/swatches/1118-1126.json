@@ -1,0 +1,15 @@
+{
+  "source": "art_source/prehistoric-art/swatches/1118-1126.png",
+  "prompt": "Built-in imagegen: square 3x3 swatch of distinct crude prehistoric finds on warm ivory paper, matte gouache and dry brush, no text or modern materials. Cells in order: resin-sealed bark, springy animal rib, moved pebbles, worn plant-fiber rope, grease-filled nutshell, draft-sensing feather, water-stained branch, charcoal held in clay, thorny stem.",
+  "entries": [
+    {"id": 1118, "review": "Top-left: two ragged bark pieces joined by a visible irregular line of raw resin."},
+    {"id": 1119, "review": "Top-middle: curved broken animal rib resting over a rough stone, showing natural flex."},
+    {"id": 1120, "review": "Top-right: four distinct natural pebbles in a loose row, one displaced from the line."},
+    {"id": 1121, "review": "Middle-left: coarse frayed twisted plant-fiber rope loop, visibly worn on its bend."},
+    {"id": 1122, "review": "Middle-middle: broken nutshell retaining a pale dab of grease, no crafted vessel."},
+    {"id": 1123, "review": "Middle-right: loose feather with lifted down beside a rough crack in rock."},
+    {"id": 1124, "review": "Bottom-left: bark-covered branch with a dark waterline stain at shallow water."},
+    {"id": 1125, "review": "Bottom-middle: crude soft clay lump gripping a black charcoal fragment."},
+    {"id": 1126, "review": "Bottom-right: naturally broken thorny plant stem with uneven intact thorns."}
+  ]
+}

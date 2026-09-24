@@ -46,7 +46,7 @@ STYLE = ('The supplied references guide painting medium ONLY: ivory fibrous pape
 def extend():
     path=p.bank.ROOT/'data/artifacts/prehistoric_experiments.json'
     authored=json.loads(path.read_text()) if path.exists() else {}
-    manifest=json.loads(p.bank.MANIFEST.read_text())
+    manifest=json.loads(p.bank.MANIFEST.read_text(encoding='utf-8'))
     families=BRIEFS+MORE_BRIEFS
     assert len(families)==123
     for offset in range(3936):
