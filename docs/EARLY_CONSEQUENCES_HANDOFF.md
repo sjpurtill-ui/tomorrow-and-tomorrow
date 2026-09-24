@@ -144,3 +144,8 @@ gdUnit, run sequentially against the worktree:
   - `game_state.gd`: two fields, cohort hazard helper, reproduction multipliers.
   - `consequence_engine.gd`: one delimited block plus four context keys.
   - No edits to `discovery_system.gd` or `local_terrain.gd`.
+
+## Post-merge note (after merging main 4d5c5e36)
+
+- The fertility check in `tests/responsive_decree_probe.gd` ("fertility rose in only 3 of 4 seeds") was not the new conception rules hiding the order: the early-care conception factor multiplies alongside the order's `conception_support`. The probe runs only the consequence engine, so nothing reassigns labor. In that world, the new wild-food limits leave a fixed 25% of 600 people on dry ground short of food within about 150 days. The resulting birth crisis cut conceptions to about 1 a year in both arms, leaving the comparison to integer noise. The probe now holds food steady, as it already held water steady: it keeps its full ration store in reach. The order again raises conceptions and births in all four seeds (+4 to +4.5% net surviving births).
+- `test_civilization_system` passes 69/69 in two sequential runs on the merged tree. The reported failure at lines 823–828 did not reproduce. That test needs at least four civilizations at contact level 2, which these changes do not touch. It may be sensitive to shared global state when suites run concurrently.
