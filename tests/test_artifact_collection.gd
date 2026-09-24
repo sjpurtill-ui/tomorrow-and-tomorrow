@@ -133,3 +133,22 @@ func test_gift_return_cannot_farm_the_same_recipient_respect()->void:
 		assert_bool(A.transfer(record.id,"player","gift").has("ok")).is_true())
 	assert_bool(A.transfer(record.id,"neighbor","gift").has("ok")).is_true()
 	assert_float(float(E.owner_state("neighbor").society_exchange.connections.player.respect)).is_equal(respect)
+
+func test_owner_explicit_exchange_moves_between_owners_with_provenance()->void:
+	var record:=held();E.connection("neighbor")
+	# check() never moves anything; exchange() runs the giver's own transfer rules.
+	assert_bool(A.exchange_check("player",record.id,"neighbor","gift").has("ok")).is_true()
+	assert_bool(E.data().collections.has(record.id)).is_true()
+	assert_bool(A.exchange("player",record.id,"neighbor","gift").has("ok")).is_true()
+	assert_bool(A.holdings("neighbor").has(record.id)).is_true()
+	assert_bool(A.holdings("player").has(record.id)).is_false()
+	WorldSimulation.scoped("neighbor",func()->void:
+		E.connection("player")
+		WorldSimulation.world.civilizations.append({"id":"human","name":"Home","player_relation":{"at_war":false}}))
+	assert_bool(A.exchange("neighbor",record.id,"player","gift").has("ok")).is_true()
+	var moved:Dictionary=E.data().collections[record.id]
+	assert_int((moved.provenance as Array).size()).is_equal(2)
+	assert_str(String(moved.provenance[0].from)).is_equal("player")
+	assert_str(String(moved.provenance[1].from)).is_equal("neighbor")
+	assert_bool(E.valid(E.data())).is_true()
+	assert_bool(A.exchange("nobody",record.id,"player","gift").has("error")).is_true()

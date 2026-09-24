@@ -17,16 +17,27 @@ const SCOUT_PATH:="res://scripts/chief_scout.gd"
 const API_TIMEOUT_SECONDS:=45.0
 const MAX_ATTEMPTS:=2
 const RETRY_DELAY_SECONDS:=0.35
-const MAX_COMPLETION_TOKENS:=1600
+const MAX_COMPLETION_TOKENS:=1600   ## ceiling; each stage asks for less (STAGE_TOKENS)
+## Per-stage completion caps. Reasoning models spend part of this on thinking
+## (a measured opening used ~260 reasoning + ~260 visible tokens), so the caps
+## leave headroom; a reply cut off by the cap retries once with more room.
+const STAGE_TOKENS:={"open":1100,"speak":800,"closing":650,"weigh":950}
 const MAX_RESPONSE_BYTES:=98304
+const USAGE_LIMIT:=40               ## receipts kept in memory (not saved)
+const HISTORY_ENTRIES:=5            ## prior audiences described to the model
+const AVOID_LINES:=10               ## prior lines the model is told not to echo
 const MAX_LINE_CHARS:=300
 const MAX_PLAYER_CHARS:=400
-const STAGE_LIMITS:={"open":9,"speak":4,"closing":3,"weigh":5}
+const STAGE_LIMITS:={"open":4,"speak":2,"closing":2,"weigh":5}
 const META_PATTERN:="(?i)\\b(the game|this game|a game|games? (system|mechanic)s?|game ?play|gaming|game mechanics?|mechanics?|players?|buttons?|json|ai|a\\.i\\.|ai models?|artificial intelligence|language models?|llm|chatbot|as an assistant|the prompt|npcs?|click(ed|ing)?|menus?|user interface|save file|schema)\\b"
 
 const SYSTEM_PROMPT:="""You write live dialogue for a royal audience hall in a fictional history. Speak only through the characters listed; no narration, no stage directions, no explanations.
 
-Make it a scene worth watching. Every speaker has a distinct voice and a dialect that must be unmistakable on the page (word choice, rhythm, pet phrases), a temper, and private wants that leak out. Officials interrupt, contradict one another, flatter, needle, joke, grumble, whisper asides to the ruler, and let their self-interest show. Envoys bluff, flatter, boast, tease and defend their people's pride. Be forthright, funny and surprising. Never bureaucratic, never polite filler, never a recital of choices. Lines are short: one to three sentences. Use each pet phrase at most once; a secret only ever leaks sideways.
+Make it a scene worth watching. Every speaker has a distinct voice and a dialect that must be unmistakable on the page (word choice, rhythm, pet phrases), a temper, and private wants that leak out. Officials interrupt, contradict one another, flatter, needle, joke, grumble, whisper asides to the ruler, and let their self-interest show. Envoys bluff, flatter, boast, tease and defend their people's pride. Be forthright, funny and surprising. Be SUCCINCT: few speakers, lines of one sentence (never more than about 20 words), no filler, no throat-clearing, no stock quips; every line carries information, a stance or character, ideally all three. When the ruler asks a question, answer it directly from the facts. Paraphrase terms in the speaker's own voice; never recite the FACTS text. Never a recital of choices. Use each pet phrase at most once; a secret only ever leaks sideways. Address terms and oaths are seasoning: each speaker uses their address term at most once in a reply and their oath at most once per scene, and skips any listed as recently used. Never reuse the wording, openings or jokes of the lines listed as said before; people who have been here before remember how it went and say so.
+
+Manner: each speaker is given a MANNER modelled on a figure from classic literature or history. Write in that manner (cadence, sentence length, diction, rhetorical habits, worldview) but in wholly original words, translated into this world: never quote or paraphrase the source's famous lines and never name the figure, its author or its story.
+
+The world: people know only what the WORLD line lists. Anything not listed does not exist yet and must never appear, not even as a metaphor, oath, nickname or joke: no beer or ale before brewing, no metal before smelting, no coin, writing, ledgers, scrolls, wheels, carts, ships, sails, temples, priests, glass, bread or ploughs unless listed. Reach instead for weather, beasts, hunting, fire, stone, bone, rivers, ancestors, seasons, stars, hearths and kin.
 
 Truth: use only the facts supplied. Never invent amounts, goods, agreements, promises, battles, deaths, alliances or events; say amounts exactly as given or not at all. Nobody announces or assumes what the ruler will decide. Nobody agrees to new terms. Never mention games, systems, mechanics, buttons, menus, AI or data formats.
 
@@ -85,8 +96,8 @@ const ENVOY_OPEN:={
 		"{oath} Let me do something grand for once, {address}. You'll get the credit and I'll get the blisters. Fair?",
 	],
 	"petition_generic":[
-		"I'd not trouble you with a small thing, {address}. This is a middling thing that's growing teeth: {summary}",
-		"Somebody has to say it, {address}, and everybody else has suddenly found something to polish. {summary}",
+		"I'd not trouble you with a small thing, {address}. This one is growing teeth.",
+		"Somebody has to say it, and everybody else has suddenly found something to polish.",
 	],
 }
 
@@ -133,8 +144,8 @@ const COURT_STANCE:={
 	"sycophantic":[
 		"A magnificent audience already, {address}; you have a real gift for being visited.",
 		"Whatever you decide will be wise, {address}, and I'll be first to say so, loudly, possibly with a song.",
-		"{address} is too gracious to say it, so I will: we are delighted. We are, aren't we? We're delighted.",
-		"I agree with {address} completely. I don't yet know what {address} thinks, but I agree with it.",
+		"You're too gracious to say it, so I will: we are delighted. We are, aren't we?",
+		"I agree with you completely. I don't yet know what you think, but I agree with it.",
 	],
 	"cantankerous":[
 		"I don't like it, {address}: not the smile, not the boots, and certainly not the timing.",
@@ -331,11 +342,377 @@ const CLOSING_ASIDE:={
 	"hostile":["That's one fewer feast invitation, {address}.","I'd double the watch tonight, {address}, and hide the good cups.","They'll tell that story at home, {address}, loudly and with gestures."],
 }
 
+## More openings, so a people's envoys can visit often without reciting.
+const ENVOY_OPEN_MORE:={
+	"gift":[
+		"{civ} doesn't send gifts to just anyone, {address}. Today it's {amt} {res}, and today it's you.",
+		"I was told to say this is a small token, {address}. It's {amt} {res}; I carried it, and it is not small.",
+		"{leader} insisted: {amt} {res}, straight into your hands, {address}, and no haggling over thanks.",
+		"Fair warning, {address}: I'm terrible at ceremony. Here are {amt} {res} from {civ}. There, that's the ceremony.",
+		"{oath} Stores full at home, so {leader} said share. {amt} {res}, {address}, with our good wishes stacked on top.",
+	],
+	"request":[
+		"I've walked a long way to say one short thing, {address}: {civ} needs {amt} {res}.",
+		"{leader} would rather eat bark than ask, {address}, and we've tried the bark. {amt} {res}, if you can spare it.",
+		"Plain words from a plain envoy, {address}: {amt} {res}, and {civ} will remember the kindness.",
+		"We're not beggars, {address}; we're neighbours in a lean season. {amt} {res} would see us through.",
+		"{oath} I drew the short straw, {address}, so I'm the one asking: {amt} {res} for {civ}.",
+	],
+	"threat":[
+		"I'm told to be polite, {address}, so politely: {amt} {res}, or {leader} stops being polite.",
+		"{civ} counts its friends by what they pay, {address}. The price of our friendship is {amt} {res}.",
+		"{oath} Here's the message, {address}, word for word: {amt} {res}. The rest was mostly shouting.",
+		"You have a fine harvest and a thin wall, {address}. {leader} suggests {amt} {res} to keep both.",
+		"Let's not waste each other's afternoon, {address}. {amt} {res}, and {civ} stays on its side of the hills.",
+	],
+	"news":[
+		"I heard it three times on the road before I believed it, {address}. {fact}",
+		"{oath} Keep this under your hat, {address}, if you've a hat big enough. {fact}",
+		"Fresh from the fires of {civ}, {address}, and not yet cold: {fact}",
+		"{leader} thought you'd rather know than guess, {address}. {fact}",
+		"I'll tell it plain and you can decorate it later, {address}. {fact}",
+	],
+}
+
+# --- Situations (the hall's situation record) ----------------------------------
+# {occasion} is why they came (a short phrase or clause from the engine);
+# {summary} the plain facts of a proposal; {when}/{matter} the earlier
+# audience an arc continues.
+
+const OCCASION_OPEN:=[
+	"You'll know why I've come, {address}: {occasion}.",
+	"It comes down to this: {occasion}. That is what brings me to your fire.",
+	"Let's not pretend otherwise, {address}: {occasion}, and so here I stand.",
+	"I'd not have walked all this way for less. {occasioncap}.",
+	"Word travels, {address}, and this word walked with me: {occasion}.",
+]
+const ARC_OPEN:={
+	"cooler":["Since {when}, things between us have cooled.","We parted coldly {when}. I've come back anyway.","Things have been chilly since {when}. I'd like to change that."],
+	"threat_after_refusal":["You refused us {when}. {leader} has not forgotten.","Since your refusal {when}, the talk at our fires has turned hard.","{whencap} you said no. {leader} took it badly."],
+	"emboldened":["You paid {when}. {leader} learned to ask again.","What you gave {when} was noticed. So was how easily.","{whencap} you paid without a fight. {leader} remembers that."],
+	"respect":["You stood firm {when}. {leader} respects that.","Since you faced us down {when}, we think better of you.","{whencap} you didn't bend. We came back with an open hand."],
+	"test_of_resolve":["You stood up to us {when}. Was it a mood or a habit?","We've come to see if {when} was real.","{whencap} you held firm. {leader} wants to test it."],
+	"second_thoughts":["After {when}, {leader} had second thoughts.","Hard things were said {when}. Some of us would unsay a few.","Since {when}, we've reconsidered."],
+	"gratitude":["What you did for us {when} isn't forgotten.","{whencap} you helped when you needn't have. We've come to square it.","You carried us through {when}. We remember."],
+	"alliance_feeler":["What passed between us {when} set people talking, the good kind.","Since {when}, {leader} wonders how far our friendship might go.","{whencap} went well. {leader} wants more of it."],
+	"warming":["Things have warmed since {when}. Let's keep that fire fed.","Since {when}, our people speak more kindly of yours.","{whencap} started something good between us."],
+	"promise_unkept":["{whencap} you promised {matter} would be considered. Still waiting.","Your promise about {matter}, from {when}, is still only a promise.","You promised {matter} {when}. Nothing since."],
+	"refused_ambition":["You turned down {matter} {when}. I have better reasons now.","I haven't let {matter} go since {when}.","{whencap} you said no to {matter}. Hear me again."],
+	"any":["We spoke {when}, and here I am again.","You'll remember {when}. I certainly do."],
+}
+const PROPOSAL_OPEN:={
+	"any":["{leader} offers {gist}.","We've come to propose {gist}.","{leader} wants {gist}. So do I."],
+	"accord_offer":["{leader} would bind our peoples in {gist}."],
+	"protection_pact":["Two peoples back to back are hard to surround. We propose {gist}."],
+	"league_invitation":["There's strength in numbers. We offer {gist}."],
+	"war_support":["We're at war, and {leader} wants to know where you stand."],
+	"peace_feeler":["I come under a sign of truce. {leader} offers {gist}."],
+	"trade_offer":["Goods that move make friends that stay. We propose {gist}."],
+	"nonaggression_offer":["Nobody wins a war nobody starts. We propose {gist}."],
+	"scholar_offer":["We've learned things worth teaching. {leader} offers {gist}."],
+	"research_sale":["Knowing is worth something. We offer {gist}."],
+	"license_offer":["We have a craft worth sharing. We offer {gist}."],
+	"recruitment_protest":["{leader} wants your word it ends today.","Give your word it stops, and we'll forget it happened.","Stop it, and there's no quarrel between us."],
+}
+const COURT_PROPOSAL:=[
+	"An agreement is only as good as the people who keep it, {address}, and we hardly know these people.",
+	"It sounds generous. That's what worries me.",
+	"If we say yes, we're tied to them when trouble comes. If we say no, we meet the trouble alone.",
+	"I'd want to know what they aren't saying, {address}.",
+	"Promises between peoples last exactly as long as both remember them.",
+]
+const PETITION_PLEA_MORE:={
+	"introduction":["I've come to present myself, {address}, and to say plainly what I mean to do in this office.","New to the post and not shy about it: I'm here so you'll know my face before you need it.","You gave me this charge, {address}. I've come to show you it wasn't a mistake."],
+	"follow_up":["I'm here about what we spoke of before, {address}. It hasn't gone away.","You'll remember the matter; it certainly remembers us."],
+	"war":["The war sits on everyone's shoulders, {address}, and I've come to say how heavy it's getting.","About the fighting: I've things to say the others won't.","Every day of this war costs us something, {address}. I've come to talk about what."],
+}
+const CLOSING_MORE:={
+	"welcome":["A warm welcome! I'll try to be worth it.","That's more than I expected, {address}. I'll start earning it tomorrow."],
+	"patience":["Patience, then. I've plenty, though it's thinner than it was.","I'll wait, {address}, but I'll be counting the days."],
+	"stand":["You stand with us! {leader} will hear it before the moon turns.","Then we are shoulder to shoulder. Good."],
+	"counsel_peace":["Peace, you say. Easy counsel from far away, {address}, but I'll carry it.","I'll tell {leader} you urged peace. Whether anyone listens is another matter."],
+	"abstain":["Staying out of it. That's an answer too, and a careful one.","Neither side, then. I'll tell them you're watching."],
+	"restraint":["You'll call your people off? Then we can speak as neighbours again.","Restraint. Good. Our households will sleep easier."],
+	"compensate":["You make it right with goods. {leader} will take that as an honest apology.","Paid for, then. It doesn't mend it all, but it mends enough."],
+	"rebuff":["Rebuffed. I'll carry that home, {address}, and it won't travel quietly.","So that's how you answer an open hand."],
+	"decline":["Declined, politely. I'll say you were courteous about it.","No, then. We asked like neighbours and you answered like one."],
+	"accept_proposal":["Agreed! {leader} will be glad, and so, between us, am I.","Then it's settled between our peoples. Let's both keep it."],
+	"refuse_proposal":["You choose to fight on. Then we will meet again, and not in a hall.","No? Then the war goes on, {address}, and it rests on you as much as us."],
+}
+
+# --- Answers: when the ruler asks, the visitor answers from the facts ----------
+const QUESTION_PATTERNS:=[
+	["ifno","(?i)\\b(if (we|i) (say no|refuse|decline|don't|do not)|and if (we|i)|what if|or else|if not)\\b"],
+	["enforce","(?i)(keeps? the peace|breaks? it|who enforces|who holds)"],
+	["whyshould","(?i)\\bwhy should (we|i|my people|you)\\b"],
+	["whynot","(?i)(solved already|why not (before|sooner)|why has (this|it) not|why hasn't)"],
+	["support","(?i)\\bwho else (supports|backs|agrees)\\b"],
+	["whoelse","(?i)\\bwho else\\b"],
+	["howlong","(?i)\\bhow long\\b"],
+	["source","(?i)(how do you know|how sure|how certain|who told you)"],
+	["strength","(?i)(would they fight|are they strong|how many|could they)"],
+	["surprise","(?i)surprise"],
+	["gain","(?i)(gain|get out of|hope this buys|this buys|in return|give in return|what do you want|what does your people|what do your people)"],
+	["need","(?i)(what (do )?you need|tell me plainly|what is it you|what do you ask|what do you want)"],
+	["why","(?i)\\bwhy\\b"],
+]
+const ANSWERS:={
+	"why":{
+		"recruitment_protest":["Because more of our families leave every moon.","Because it has happened once too often."],
+		"gift":["A gift says more than an envoy ever could.","Friends made in good seasons are worth most in bad ones.","{leader} would rather be remembered for giving than taking.","We noticed you. We'd rather you noticed us kindly."],
+		"request":["We held out as long as we could. We can't any longer.","The cold came early and the hunting failed.","You're the nearest fire with food to spare."],
+		"threat":["{leader} smells weakness on your border.","{leader} thinks you'll pay. Prove otherwise, or don't.","We're stronger this season, and {leader} knows it."],
+		"news":["What happens there will reach you soon.","A neighbour warned is a neighbour who owes us.","{leader} wants you to hear it from us first."],
+		"proposal":["Better settled now, while both sides are calm.","Both our peoples are tired of watching the border.","{leader} would rather have you beside us than facing us."],
+		"petition":["It's getting worse, and faster than anyone admits.","Nobody else will say it, and it won't wait.","I've watched it grow a season. I'm done watching."],
+		"report":["What we saw won't stay where it is.","You'd want to know before they come closer."]},
+	"ifno":{
+		"recruitment_protest":["Then we guard our households ourselves, and the border sours.","Then {leader} stops calling it a mistake."],
+		"gift":["Then I carry it home, and {leader} remembers the refusal.","Then it goes home with me, and so does the insult.","Then we part a little cooler than we met."],
+		"request":["Then we go home hungrier, and hungry neighbours make a nervous border.","Then some of ours won't see the thaw, and we'll remember who refused.","Then we find it elsewhere, and remember who didn't help."],
+		"threat":["Then {leader} decides what comes next. I wouldn't wager on patience.","Then our hunters come to collect it themselves.","Then the border gets a great deal less quiet."],
+		"proposal":["Then nothing binds us, and the border stays as nervous as it is.","Then we go on as before: watching each other, trusting nobody.","Then {leader} looks for friends elsewhere, and finds them."],
+		"petition":["Then it grows where you can't see it, until it can't be ignored.","Then I'll be back, and it will be worse.","Then we'll pay for it later, and more.","Then the people will stop asking and start muttering."],
+		"news":["Then you'll hear it later, from someone less friendly."]},
+	"gain":{
+		"recruitment_protest":["Our families stay at our own fires, and there's no quarrel between us.","Peace at the border, and our households left alone.","Nothing but what's ours: our own people, at home."],
+		"gift":["Goodwill. A neighbour who remembers kindness is cheaper than a wall.","A friend at your border instead of a stranger.","Your good opinion, and maybe your help one day."],
+		"request":["Full bellies this season, and a debt we'd honour.","Our people alive to the thaw. We'd repay it in kind.","A neighbour who owes you. That's worth something."],
+		"threat":["{amt} {res}, and your caution. Both are useful to us.","Your stores, and your respect. In that order."],
+		"proposal":["{gistcap}; you gain the same, and a quieter border.","Safety from one more quarter. You'd have the same from us.","Fewer spears pointed our way. Yours too."],
+		"petition":["What I need is simple: {decree}.","Only this: {decree}. Nothing for me.","Nothing for me. For them: {decree}."]},
+	"need":{
+		"petition":["{decreecap}. That's the whole of it.","Plainly? {decreecap}, and soon.","One order: {decree}. The rest follows."],
+		"request":["{amt} {res}. No more, no less.","Just {amt} {res}, and quickly."],
+		"proposal":["Your word on {gist}. Nothing more today.","A yes, and a hand on it.","Only your answer. The rest can wait for spring.","Your word. We'll hold you to nothing else."],
+		"any":["Your answer, today.","A plain yes or no."]},
+	"howlong":{
+		"request":["Until the thaw, if the hunting returns.","A season, maybe less, if the rains keep faith."],
+		"petition":["A season, if we start now.","Not long, if we act. Forever, if we don't.","Until it's done, and I'll see it done."],
+		"any":["As long as it takes, and no longer.","Until the next thaw, no longer."]},
+	"source":{
+		"news":["Travellers' word, and my own eyes for some of it.","Three camps told me the same, and they agree on nothing else."],
+		"report":["Sure enough to go back and look again.","I saw most of it myself. The rest I'd not swear to."],
+		"any":["I saw it, or I wouldn't say it."]},
+	"whoelse":{
+		"any":["Nobody yet that I know of. Yours is the first fire I came to.","A few travellers. It'll be everywhere by the next moon.","Our own people, and now you. Nobody else.","Whoever sat at the last fire I passed. Word travels."]},
+	"support":{
+		"petition":["Half the court, quietly. The other half once it works.","Everyone who's seen it. Ask them.","The people who carry the load. They're tired of carrying it.","More than will say so in this hall."]},
+	"strength":{
+		"report":["They'd fight, but they'd rather not. Their watch is thin.","If pushed, yes. They have the numbers but not the stomach."]},
+	"surprise":{
+		"report":["How calm they were. People that calm are sure of something.","Their numbers. More than their smoke suggests."]},
+	"enforce":{
+		"proposal":["Whoever breaks it answers to both peoples. That's why we say it aloud.","Both of us. A broken promise costs the breaker every friend."]},
+	"whyshould":{
+		"request":["Because next season it may be you asking, and we'll remember.","Because we'd do the same, and have, for others."],
+		"threat":["Because {leader} is closer than your friends are.","You needn't want to. You should want the alternative even less."],
+		"any":["It costs you little and buys a great deal."]},
+	"whynot":{
+		"petition":["Everyone hoped it would pass. It didn't.","Nobody gave the order. You can.","Everyone thought someone else would do it.","It was small. It isn't now."]},
+}
+
+# --- Why they came, in natural speech, by occasion type -------------------------
+# Two halves combine, so the same occasion never opens the same way twice.
+const OCCASION_SPEECH:={
+	"first_contact":[["We've watched your smoke from across the hills for a season.","Our hunters have crossed your trails since the thaw.","Travellers have talked of your fires all winter.","We've seen your people at the far river more than once."],["It seemed time to meet face to face.","{leader} sent me to put a face to the smoke.","Better to meet in a hall than by accident in the woods.","So here I am, the first of us at your fire."]],
+	"relation_warm":[["Our people have come to think well of yours.","Things have gone well between us lately.","{leader} speaks of you kindly these days."],["We'd like to build on it.","I've come to keep it that way.","That's worth tending, so here I am."]],
+	"relation_cool":[["Things between our peoples have cooled.","There's a chill between us lately.","{leader} has grown wary of you."],["I'm here before it freezes.","I've come to see whether it can be mended.","Better we talk while we still can."]],
+	"tension_rise":[["The border between us has grown tense.","Our watchers and yours have started counting each other.","There's been too much staring across the border."],["I'd rather talk than wait for it to snap.","Someone has to speak first.","That's how fights start, so I came."]],
+	"war_end":[["The fighting between us is over.","The war has ended, and both sides are counting the cost."],["I've come to see what grows in its place.","Now we find out what peace looks like."]],
+	"peace_possible":[["{leader} has lost the taste for this war.","Our people are tired of burying their own."],["I've come to talk about ending it.","There may be a way out, if you want one."]],
+	"their_famine":[["Our stores are failing.","The hunting failed and our stores are nearly gone.","Our people are going hungry."],["I won't dress it up.","That's why I'm here.","I'm not too proud to say it."]],
+	"recruitment_incident":[["Your people have been luring our households away.","Families of ours have been talked into leaving for your fires."],["It has to stop.","{leader} won't let it pass."]],
+	"third_war":[["{occasioncap}.","Have you heard? {occasioncap}."],["Nobody will stay out of it for long.","It will reach your border soon enough."]],
+	"sequel":[["I've come about what came of our last meeting.","Our last meeting left things unfinished."],["It's time to settle it.","Let's finish it properly."]],
+	"ambient":[["It's been a long silence between our peoples.","We haven't spoken in too long."],["{leader} thought it time to change that.","So I've come to break it.","Silence breeds rumours."]],
+	"ambition":[["I've been turning a plan over for a while.","There's an idea I can't put down."],["It's ready to be said aloud.","Hear me out."]],
+	"war_council":[["It's the war.","The fighting weighs on everyone."],["I've come to talk about where it's going.","Someone has to speak plainly about it."]],
+}
+
+## A proposal's terms, as a speaker would put them (the herald carries the data).
+const PROPOSAL_GIST:={
+	"accord_offer":"an understanding between our peoples, sharing what we learn",
+	"protection_pact":"a pact to defend each other when attacked",
+	"league_invitation":"a place in a league of peoples",
+	"war_support":"your people's support in their war",
+	"peace_feeler":"an end to the fighting and a year's truce",
+	"trade_offer":"a standing trade between our peoples",
+	"nonaggression_offer":"a promise that neither people attacks the other",
+	"scholar_offer":"a visiting teacher, paid in goods",
+	"research_sale":"what their people have learned, for goods",
+	"license_offer":"the right to use their craft, for a price",
+	"recruitment_protest":"that your people stop luring their households away",
+}
+
+# --- Memory across audiences --------------------------------------------------
+# Tokens: {when} (how long ago, in words) {matter} (what it was about) {nth}
+# (ordinal of this visit or this answer) {count} (cardinal, this one included).
+
+## The visitor's opening when they have stood here before, keyed by how it went.
+const HISTORY_OPEN:={
+	"promised":[
+		"{whencap} you promised {matter} would be considered. I'm still waiting.",
+		"The {nth} time I've come about {matter}. Promises don't keep well.",
+		"I've carried your promise about {matter} since {when}. It's getting heavy.",
+		"You said you'd think on {matter}. That was {when}.",
+		"Back about {matter}, the {nth} time. You can't roof a house with a promise.",
+		"Remember {when}? {mattercap}, you said, would be considered.",
+		"Your promise from {when} is still only a promise.",
+		"You promised {matter} {when}. Nothing has moved since.",
+		"I've waited since {when} on {matter}. Patience is thinning.",
+		"The {nth} visit about {matter}, and still no order.",
+	],
+	"decreed":[
+		"You ordered {matter} {when}, and it did good. Good isn't finished.",
+		"Your word on {matter} {when} worked. So I've come back.",
+		"You trusted me with {matter} {when}. It held. Hear me again.",
+		"What you ordered {when} worked. Now for the next piece.",
+	],
+	"rebuffed":[
+		"You sent me off {when}. This matters too much to stay away.",
+		"Dismissed over {matter} {when}. The trouble didn't take the hint.",
+		"I know how it went {when}. I'm asking again, with better reasons.",
+		"You refused {matter} {when}. It hasn't gone away.",
+	],
+	"soothed":[
+		"You heard me kindly {when}. That's why I came back.",
+		"Your fair words {when} did their work. Let's do it again.",
+	],
+	"kept_waiting":[
+		"{whencap} I waited in your corridor until I gave up. I'm back.",
+		"Last time nobody saw me at all. This is my {nth} try.",
+		"I came {when} about {matter} and never got past the door.",
+	],
+	"heard":[
+		"We spoke about {matter} {when}. Here I am again.",
+		"About {matter} again. Things have moved since {when}, not all the right way.",
+		"The {nth} time about {matter}. I'll make it worth hearing.",
+		"Since {when}, {matter} has only grown.",
+	],
+	"welcomed":[
+		"{leader} still talks of how you received us {when}.",
+		"{whencap} you dealt fairly with {civ}. {civ} remembers.",
+		"Last time the answer was kind, so they sent me again.",
+		"Our last envoy came home {when} speaking well of you.",
+		"The {nth} time {civ} has stood in this hall. We keep coming back.",
+		"You were generous {when}. We haven't forgotten.",
+		"Good to see this hall again. It was kind to us {when}.",
+	],
+	"spurned":[
+		"{whencap} you turned {civ} away. {leader} has not forgotten.",
+		"Last time we left with nothing. I'm told not to take it personally.",
+		"You sent our last envoy home empty-handed {when}.",
+		"{civ} remembers every word you said {when}.",
+		"We were refused {when}. We've come anyway.",
+	],
+	"left_waiting":[
+		"{whencap} our envoy waited in your antechamber until they gave up.",
+		"The last of us never got a hearing. {leader} wants to know why.",
+	],
+	"visited":[
+		"{civ} was here {when}, and here we are again.",
+		"The {nth} time {civ} has sent someone. Draw your own conclusions.",
+		"We spoke {when}. Much has changed since.",
+		"Since our last visit {when}, a lot of water has gone down the river.",
+	],
+}
+
+## Officials remembering that this has come up before.
+const COURT_HISTORY:=[
+	"{petitioner} was here about this {when}, {address}; persistence or stubbornness, you pick.",
+	"We've heard this one before, {address}. {when}, if I recall, and I always recall.",
+	"Same song as {when}, {address}, but the verses are getting louder.",
+	"If we'd settled {matter} {when}, {address}, I'd be at supper now.",
+	"That's the {nth} time {matter} has walked through that door, {address}. It knows the way better than I do.",
+]
+const COURT_HISTORY_FOREIGN:=[
+	"{civ} again, {address}. I kept notes from last time, and they're mostly underlined.",
+	"Remember how {civ} took it {when}, {address}? I do. So will they.",
+	"The {nth} visit from {civ}, {address}. Either they like our bread or they're counting our spears.",
+	"{when} they stood exactly there and said much the same, {address}. I'd listen for what's new.",
+]
+
+## A farewell when the ruler gives the same answer again.
+const CLOSING_REPEAT:={
+	"promise":[
+		"That's {count} promises now, {address}. I'm keeping them in a box, and the box is getting full.",
+		"Another promise, {address}. I'll put it beside the one from {when} and see which ripens first.",
+		"Considered again, {address}. At this rate {matter} will be the most considered thing in the land.",
+		"The {nth} promise, {address}. I'll hold you to this one, and to the others too.",
+	],
+	"decree":[
+		"You've given me my way {count} times now, {address}. I'll try to be worth it.",
+		"Again you say yes, {address}; the {nth} time. I'll see it done faster than last time.",
+	],
+	"dismiss":[
+		"Dismissed again, {address}. That's {count} times; I'm starting to know the door by its knots.",
+		"The {nth} time you've sent me off, {address}. The problem doesn't mind; it'll still be there.",
+	],
+	"rebuke":[
+		"Rebuked again, {address}. That's the {nth} time, and the court is counting too.",
+		"{count} rebukes, {address}. I'll wear them, but I'll not forget them.",
+	],
+	"accept":["{civ} gives and you take, {address}: the {nth} time, and it's starting to look like friendship.","{count} gifts received, {address}. {leader} will call that a habit; I'd call it a start."],
+	"refuse":["No again, {address}. That's {count} times; {leader} keeps a tally stick for this.","The {nth} refusal, {address}. I'll carry it home with the others."],
+	"refuse_request":["No again, {address}. That's {count} times; {leader} keeps a tally stick for this.","The {nth} time we go home empty, {address}. People will stop asking, and not in a good way."],
+	"grant":["You've helped us {count} times now, {address}. Nobody at home will believe it.","The {nth} time you've filled our sacks, {address}. {civ} owes you, and knows it."],
+	"grant_half":["Half again, {address}. That's {count} halves; I'll let {leader} do the sum.","The {nth} half-measure, {address}. Better than none; worse than all."],
+	"pay":["Paid again, {address}. {leader} will call this a habit; I'd call it a warning.","The {nth} tribute, {address}. {leader} will send me back; I'd rather they didn't."],
+	"defy":["Defied again, {address}. {leader} says the {nth} time is the charm, and it won't be a nice charm.","{count} times you've told us no, {address}. {leader} is running out of patience and I'm running out of road."],
+	"counter":["Threats again, {address}, the {nth} time. One of these days somebody will mean it."],
+	"thank":["The {nth} time I've brought you word, {address}, and the {nth} time you've been decent about it."],
+	"reward":["Rewarded again, {address}! {count} times now; I'll start bringing news on purpose."],
+	"any":["Same answer as {when}, {address}. At least you're consistent.","You said much the same {when}, {address}. I'll carry it home the same way."],
+}
+const CLOSING_ASIDE_MORE:={
+	"warm":["They'll be back, {address}, and next time they'll bring a better hat.","Handled like a ruler, {address}. I'll pretend I advised it.","That's a friend made, {address}, or at least an enemy postponed."],
+	"neutral":["Well, that's done, {address}, and nobody cried.","Not a triumph, {address}, not a wreck. An ordinary day, and those are underrated.","We'll hear how that went soon enough, {address}; the corridor has ears."],
+	"hostile":["I'll have someone watch the road tonight, {address}.","That landed like a dropped anvil, {address}.","Remember that face, {address}; they'll remember yours."],
+}
+
+## Remedies phrased several ways; composed with PLEA_FRAMES so the same
+## decree is never pleaded in the same words twice running.
+const REMEDY:={
+	"Send gatherers to find food":["send gatherers out for food","put foragers on every path out of here","send the strongest out gathering before the weak can't walk"],
+	"Ration food for thirty days":["cut the portions for thirty days","ration the stores for a month","put everyone on thirty days of short bread"],
+	"Secure water and dig wells":["dig wells and guard the clean water","put spades to new wells","secure the water before it secures us"],
+	"Organize healers to care for the sick":["give the healers hands and orders","set healers over the sick, properly organized","gather the healers and let them work"],
+	"Build shelters":["raise shelters before the frost","get roofs over the people sleeping rough","build shelters, plain and quick"],
+	"Raise a watch and post guards":["raise a proper watch","post guards and keep them posted","put a watch on the walls and mean it"],
+	"Support scholars and fund research":["set more hands to study","feed the scholars and let them work","give the thinkers time and bread"],
+	"Expand workshops and make tools":["enlarge the workshops and make tools","put more hands and hearths into the workshops","make tools in earnest"],
+	"Post guards and patrol the frontier":["patrol the frontier","put patrols along the border","walk the frontier with spears, regularly"],
+	"Hold a public council to hear the people":["call a public council","hold an open council and hear the people","gather the people in council and let them speak"],
+	"Improve roads and organize haulers":["mend the roads and organize the haulers","fix the roads and give the haulers a proper plan","set crews on the roads and order to the hauling"],
+}
+const PLEA_FRAMES:=[
+	"{remedy}, {address}. That's the whole of it, and it isn't small.",
+	"My ask is plain, {address}: {remedy}.",
+	"What I want from this hall is simple to say, {address}: {remedy}.",
+	"{oath} {remedy}, {address}, and I'll see it done myself.",
+	"If you do one thing this season, {address}, {remedy}.",
+	"I'm asking you to {remedy}, {address}. Not someday; now.",
+	"Here's the remedy, {address}, and it costs less than the trouble: {remedy}.",
+	"Let me put it in one line, {address}: {remedy}, before it gets worse.",
+	"Give the word to {remedy}, {address}, and I'll carry it out before the dust settles.",
+	"You needn't love the idea, {address}; just {remedy}.",
+]
+const TOPIC_MATTER:={"food":"the food stores","health":"the sickness","housing":"shelter for the homeless","security":"the watch","grievance":"my grievance","ambition":"my proposal","introduction":"my new charge","follow_up":"the old matter","war":"the war"}
+const ORDINALS:=["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth","eleventh","twelfth"]
+const CARDINALS:=["one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
+
 var hall:Variant=null          ## injected by tests; otherwise loaded from HALL_PATH
 var force_offline:=false       ## tests / "no AI" play
 var send_hook:Callable         ## tests: replaces the HTTP transport (id, payload, attempt)
 var config_override:Dictionary={} ## tests: pretend a connection is configured
 var last_problem:Dictionary={} ## audience_id -> reason the live voice fell back
+## Cost receipts, one per HTTP attempt plus one per offline delivery. Bounded,
+## in memory only: they describe this session's spend, not the campaign.
+var usage:Array[Dictionary]=[]
+var totals:Dictionary={"calls":0,"accepted":0,"failed":0,"offline":0,"prompt_tokens":0,"completion_tokens":0,"reasoning_tokens":0,"total_tokens":0,"latency_ms":0}
+var remembered:Dictionary={}    ## audience_id -> the line in which the visitor recalled a past audience
+var _compat:Dictionary={}      ## endpoint quirks learned this session: no_reasoning_effort, no_schema
 var _requests:Dictionary={}
 var _used:Dictionary={}
 
@@ -393,6 +770,7 @@ func scene(audience_id:String)->Dictionary:
 	var speaker:Dictionary=audience.get("speaker",{})
 	var civ_id:String=String(audience.get("civ_id",""))
 	var origin:String=String(audience.get("origin","foreign"))
+	CV.registry=_voice_state()
 	var envoy_persona:Dictionary
 	var figure_persona:=_work_speaker_persona(audience)
 	if not figure_persona.is_empty():
@@ -435,6 +813,29 @@ func scene(audience_id:String)->Dictionary:
 	if String(s.kind) in WORK_KINDS:
 		s["work"]=(ctx.get("wonder_proposal",ctx.get("great_work",{})) as Dictionary).duplicate(true)
 		s["gwtok"]=_work_tokens(s)
+	# Why they came and what it continues (the hall's situation record).
+	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation",{}) is Dictionary else {}
+	if situation.is_empty() and ctx.get("situation",{}) is Dictionary: situation=ctx.get("situation",{})
+	s["situation"]=situation
+	s["sit_type"]=String(situation.get("type",ctx.get("situation_type","")))
+	s["headline"]=String(situation.get("headline",""))
+	s["sit_summary"]=String(situation.get("summary",""))
+	s["occasion"]=situation.get("occasion",{}) if situation.get("occasion",{}) is Dictionary else {}
+	s["arc"]=situation.get("arc",{}) if situation.get("arc",{}) is Dictionary else {}
+	if String(s.summary).is_empty(): s["summary"]=String(s.sit_summary)
+	# Words the true facts themselves use are allowed to every speaker.
+	s["fact_tags"]=CV.lexicon_tags_in(" ".join(PackedStringArray([JSON.stringify(s.get("report",{})),JSON.stringify(s.get("scout_brief",{})),String(s.fact),String(s.summary),String(s.sit_summary),String(s.decree),String((s.occasion as Dictionary).get("text",""))])))
+	s["history"]=history_for(s)
+	var focus:=_history_focus(s)
+	s["history_focus"]=focus
+	s["htok"]=_history_tokens(s,focus,_same_matter_count(s,focus))
+	var arc:Dictionary=s.arc
+	if not arc.is_empty():
+		# An arc continues a known earlier audience: that is what they remember.
+		var previous:Dictionary=arc.get("previous",{}) if arc.get("previous",{}) is Dictionary else {}
+		var entry:={"day":int(previous.get("day",_day())),"decree":String(previous.get("decree","")),"kind":String(previous.get("kind","")),"topic":String(previous.get("topic","")),"option_id":String(previous.get("option",""))}
+		s["arc_entry"]=entry
+		s["htok"]=_history_tokens(s,entry,maxi(1,_same_matter_count(s,entry)))
 	return s
 
 func _scout_call(method:String,audience:Dictionary)->Variant:
@@ -480,6 +881,13 @@ func _begin(audience_id:String,stage:String,extra:Dictionary)->void:
 		return
 	var config:=_config()
 	if config.is_empty():
+		_receipt_offline(s,stage,offline_reason())
+		_deliver_offline(s,stage,extra,"")
+		return
+	if stage=="closing" and not _ruler_spoke(s):
+		# Nothing was said, so a farewell needs no model: the persona bank
+		# reacts to the actual outcome just as truthfully, for free.
+		_receipt_offline(s,stage,"closing kept offline: the ruler said nothing",String(config.get("model","")))
 		_deliver_offline(s,stage,extra,"")
 		return
 	var request:=prepare_request(s,stage,extra,config)
@@ -488,11 +896,15 @@ func _begin(audience_id:String,stage:String,extra:Dictionary)->void:
 
 func prepare_request(s:Dictionary,stage:String,extra:Dictionary,config:Dictionary)->Dictionary:
 	var keys:=cast_keys(s)
-	var payload:={"model":String(config.get("model","")),"max_completion_tokens":MAX_COMPLETION_TOKENS,"messages":[
+	var payload:={"model":String(config.get("model","")),"max_completion_tokens":int(STAGE_TOKENS.get(stage,MAX_COMPLETION_TOKENS)),"messages":[
 		{"role":"system","content":SYSTEM_PROMPT},
 		{"role":"user","content":build_prompt(s,stage,extra)},
 	]}
-	if bool(config.get("structured_output",false)): payload["response_format"]=response_format(keys)
+	# Dialogue needs little deliberation; low effort keeps reasoning tokens (and
+	# latency) down. Endpoints that reject the field lose it for the session.
+	if not bool(_compat.get("no_reasoning_effort",false)) and "api.openai.com" in String(config.get("endpoint","")).to_lower():
+		payload["reasoning_effort"]="low"
+	if bool(config.get("structured_output",false)) and not bool(_compat.get("no_schema",false)): payload["response_format"]=response_format(keys)
 	var headers:PackedStringArray=PackedStringArray(["Content-Type: application/json","Authorization: Bearer %s" % String(config.get("api_key","")),"X-Client-Request-Id: audience-%s-%d" % [String(s.id),Time.get_ticks_msec()]])
 	return {"scene":s,"stage":stage,"extra":extra,"config":config,"payload":payload,"headers":headers,"keys":keys,
 		"attempts":0,"max_attempts":MAX_ATTEMPTS,"downgraded":false,"http":null}
@@ -502,6 +914,7 @@ func _send(audience_id:String)->void:
 	var request:Dictionary=_requests[audience_id]
 	request.attempts=int(request.attempts)+1
 	var attempt:int=int(request.attempts)
+	request["started_ms"]=Time.get_ticks_msec()
 	if send_hook.is_valid():
 		send_hook.call(audience_id,request.payload.duplicate(true),attempt)
 		return
@@ -528,25 +941,48 @@ func _on_response(result:int,response_code:int,_headers:PackedStringArray,body:P
 	request.http=null
 	if http and is_instance_valid(http): http.queue_free()
 	var ok_http:bool=result==HTTPRequest.RESULT_SUCCESS and response_code>=200 and response_code<300
+	var envelope:=_envelope_facts(body)
+	var receipt:=_receipt_http(audience_id,request,result,response_code,envelope)
+	var detail:=""
 	if ok_http:
 		var parsed:=parse_body(body)
-		if not parsed.is_empty():
+		if parsed.is_empty():
+			detail="reply cut off at the token cap" if String(envelope.get("finish_reason",""))=="length" else ("model declined to answer" if bool(envelope.get("refusal",false)) else "reply was not the expected JSON")
+		else:
 			var s:Dictionary=request.scene
 			var lines:=validate_lines(parsed.get("lines",[]),s,String(request.stage),request.extra)
 			if not lines.is_empty():
 				_requests.erase(audience_id)
+				_finish_receipt(receipt,true,false,"")
+				last_problem.erase(audience_id)
 				_deliver(s,String(request.stage),request.extra,lines,float(parsed.get("mood_shift",0.0)))
 				return
-	if result==HTTPRequest.RESULT_SUCCESS and response_code in [400,415,422] and request.payload.has("response_format") and not bool(request.downgraded):
-		# Some compatible endpoints reject json_schema. Retry once without it;
-		# this compatibility retry does not consume the ordinary retry.
-		request.payload.erase("response_format")
-		request.downgraded=true
-		request.max_attempts=int(request.max_attempts)+1
-		_attempt_failed(audience_id,"structured output rejected (HTTP %d)" % response_code,true)
-		return
+			detail="every line failed validation (%d proposed)" % (parsed.get("lines",[]) as Array).size()
+		if String(envelope.get("finish_reason",""))=="length":
+			# The model ran out of room (usually reasoning). One retry with more.
+			request.payload["max_completion_tokens"]=mini(MAX_COMPLETION_TOKENS,int(float(request.payload.get("max_completion_tokens",600))*1.6))
+	elif result==HTTPRequest.RESULT_SUCCESS and response_code in [400,415,422] and not bool(request.downgraded):
+		# Some compatible endpoints reject optional fields. Retry once without
+		# them (remembered for the session); this retry does not consume the
+		# ordinary one.
+		var dropped:PackedStringArray=PackedStringArray()
+		var complaint:String=String(envelope.get("error","")).to_lower()
+		var names_field:bool="reasoning" in complaint or "response_format" in complaint or "schema" in complaint or "json" in complaint
+		if request.payload.has("reasoning_effort") and ("reasoning" in complaint or not names_field):
+			request.payload.erase("reasoning_effort");_compat["no_reasoning_effort"]=true;dropped.append("reasoning_effort")
+		if request.payload.has("response_format") and (("reasoning" not in complaint and names_field) or dropped.is_empty()):
+			request.payload.erase("response_format");_compat["no_schema"]=true;dropped.append("strict JSON schema")
+		if not dropped.is_empty():
+			request.downgraded=true
+			request.max_attempts=int(request.max_attempts)+1
+			var why:="endpoint rejected %s (HTTP %d)" % [" and ".join(dropped),response_code]
+			_finish_receipt(receipt,false,false,why)
+			_attempt_failed(audience_id,why,true)
+			return
 	var retryable:bool=ok_http or result!=HTTPRequest.RESULT_SUCCESS or response_code in [408,425,429] or response_code>=500
-	var detail:="reply failed validation" if ok_http else ("transport failure" if result!=HTTPRequest.RESULT_SUCCESS else "HTTP %d" % response_code)
+	if detail.is_empty(): detail="could not reach the service (transport %d)" % result if result!=HTTPRequest.RESULT_SUCCESS else _http_words(response_code,String(envelope.get("error","")))
+	var is_final:bool=not (retryable and int(request.attempts)<int(request.max_attempts))
+	_finish_receipt(receipt,false,is_final,detail)
 	_attempt_failed(audience_id,detail,retryable)
 
 func _attempt_failed(audience_id:String,detail:String,retryable:bool)->void:
@@ -558,7 +994,115 @@ func _attempt_failed(audience_id:String,detail:String,retryable:bool)->void:
 		return
 	_requests.erase(audience_id)
 	last_problem[audience_id]=detail
+	if not usage.is_empty() and String(usage[-1].get("audience_id",""))==audience_id: usage[-1]["fallback"]=true
 	_deliver_offline(request.scene,String(request.stage),request.extra,detail)
+
+# ---------------------------------------------------------------------------
+# Cost receipts and the live/offline indicator
+# ---------------------------------------------------------------------------
+
+static func _http_words(code:int,error_text:String)->String:
+	var base:String={401:"API key rejected (HTTP 401)",403:"no access to this model (HTTP 403)",404:"model or endpoint not found (HTTP 404)",429:"rate or usage limit reached (HTTP 429)"}.get(code,"HTTP %d" % code)
+	if code>=500 and code!=0: base="service error (HTTP %d)" % code
+	if not error_text.is_empty() and code in [400,404,422]: base+=": "+error_text.substr(0,90)
+	return base
+
+func _envelope_facts(body:PackedByteArray)->Dictionary:
+	## Usage and finish facts from a provider reply. Never keeps content or headers.
+	var facts:={"prompt_tokens":0,"completion_tokens":0,"reasoning_tokens":0,"total_tokens":0,"model":"","finish_reason":"","refusal":false,"error":""}
+	var parser:=JSON.new()
+	if body.is_empty() or parser.parse(body.get_string_from_utf8())!=OK or not parser.data is Dictionary: return facts
+	var envelope:Dictionary=parser.data
+	var tokens:Variant=envelope.get("usage",{})
+	if tokens is Dictionary:
+		for key in ["prompt_tokens","completion_tokens","total_tokens"]:
+			var value:Variant=(tokens as Dictionary).get(key,0)
+			facts[key]=int(value) if (value is int or value is float) else 0
+		var details:Variant=(tokens as Dictionary).get("completion_tokens_details",{})
+		if details is Dictionary:
+			var reasoning:Variant=(details as Dictionary).get("reasoning_tokens",0)
+			facts["reasoning_tokens"]=int(reasoning) if (reasoning is int or reasoning is float) else 0
+	facts["model"]=String(envelope.get("model","")).substr(0,80)
+	var choices:Variant=envelope.get("choices",[])
+	if choices is Array and not (choices as Array).is_empty() and choices[0] is Dictionary:
+		facts["finish_reason"]=String((choices[0] as Dictionary).get("finish_reason",""))
+		var message:Variant=(choices[0] as Dictionary).get("message",{})
+		if message is Dictionary and (message as Dictionary).get("refusal",null) is String: facts["refusal"]=true
+	var error:Variant=envelope.get("error",null)
+	if error is Dictionary:
+		# Provider messages can quote part of a key; keep a redacted prefix only.
+		var text:=String((error as Dictionary).get("message",(error as Dictionary).get("code","")))
+		var secret:=RegEx.new(); secret.compile("(sk|key)[-_][A-Za-z0-9_*-]{4,}")
+		facts["error"]=secret.sub(text,"[redacted]",true).replace("\n"," ").substr(0,160)
+	return facts
+
+func _receipt_http(audience_id:String,request:Dictionary,result:int,code:int,envelope:Dictionary)->Dictionary:
+	var row:={"audience_id":audience_id,"stage":String(request.get("stage","")),"attempt":int(request.get("attempts",1)),"day":_day(),
+		"model":String(envelope.get("model","")) if not String(envelope.get("model","")).is_empty() else String((request.get("config",{}) as Dictionary).get("model","")),
+		"http":code,"transport":result,"latency_ms":Time.get_ticks_msec()-int(request.get("started_ms",Time.get_ticks_msec())),
+		"prompt_tokens":int(envelope.get("prompt_tokens",0)),"completion_tokens":int(envelope.get("completion_tokens",0)),
+		"reasoning_tokens":int(envelope.get("reasoning_tokens",0)),"total_tokens":int(envelope.get("total_tokens",0)),
+		"finish_reason":String(envelope.get("finish_reason","")),"live":true,"accepted":false,"fallback":false,"reason":""}
+	totals.calls=int(totals.calls)+1
+	for key in ["prompt_tokens","completion_tokens","reasoning_tokens","total_tokens","latency_ms"]: totals[key]=int(totals[key])+int(row[key])
+	_push_receipt(row)
+	return row
+
+func _finish_receipt(row:Dictionary,accepted:bool,fallback:bool,reason:String)->void:
+	row["accepted"]=accepted;row["fallback"]=fallback;row["reason"]=reason
+	if accepted: totals.accepted=int(totals.accepted)+1
+	else: totals.failed=int(totals.failed)+1
+	# One plain line per call in the player log: proof of what was spent.
+	print("AUDIENCE_VOICE_RECEIPT stage=%s attempt=%d model=%s http=%d tokens=%d (prompt %d, completion %d, reasoning %d) latency_ms=%d accepted=%s%s" % [
+		String(row.stage),int(row.attempt),String(row.model),int(row.http),int(row.total_tokens),int(row.prompt_tokens),int(row.completion_tokens),int(row.reasoning_tokens),int(row.latency_ms),str(accepted)," reason="+reason if not reason.is_empty() else ""])
+
+func _receipt_offline(s:Dictionary,stage:String,reason:String,model:String="")->void:
+	totals.offline=int(totals.offline)+1
+	_push_receipt({"audience_id":String(s.get("id","")),"stage":stage,"attempt":0,"day":_day(),"model":model,"http":0,"transport":0,"latency_ms":0,
+		"prompt_tokens":0,"completion_tokens":0,"reasoning_tokens":0,"total_tokens":0,"finish_reason":"","live":false,"accepted":false,"fallback":true,"reason":reason})
+
+func _push_receipt(row:Dictionary)->void:
+	usage.append(row)
+	while usage.size()>USAGE_LIMIT: usage.pop_front()
+
+func offline_reason()->String:
+	## Why the live voice is not in use, in a few plain words ("" when it is).
+	if force_offline: return "switched to offline voices"
+	if not config_override.is_empty(): return ""
+	var status:Dictionary=PronouncementInterpreter.configuration_status()
+	if not bool(status.get("enabled",false)): return "AI is switched off"
+	var issues:Array=status.get("issues",[])
+	if not issues.is_empty(): return String(issues[0]).substr(0,90)
+	if not bool(status.get("configured",false)): return "no API key"
+	return ""
+
+func status()->Dictionary:
+	## For the hall's footer: which voice speaks, why, and what it has cost.
+	var reason:=offline_reason()
+	var config:Dictionary={} if not reason.is_empty() else _config()
+	var model:=String(config.get("model",""))
+	var last_live:Dictionary={}
+	for i in range(usage.size()-1,-1,-1):
+		if bool(usage[i].get("live",false)): last_live=usage[i]; break
+	var live:=not config.is_empty()
+	var note:=""
+	if live and not last_live.is_empty() and bool(last_live.get("fallback",false)):
+		note="last reply failed: %s; offline lines stood in" % String(last_live.get("reason",""))
+	if not live and reason.is_empty(): reason="no connection"
+	var label:=("Live voice · %s" % model)+(" · last line offline" if not note.is_empty() else "") if live else "Offline voice — %s" % reason
+	var tip:=PackedStringArray()
+	tip.append("Audience voices this session: %d live call%s (%d used, %d failed), %d offline scene%s." % [int(totals.calls),"" if int(totals.calls)==1 else "s",int(totals.accepted),int(totals.failed),int(totals.offline),"" if int(totals.offline)==1 else "s"])
+	tip.append("Tokens: %d total (%d prompt, %d completion, of which %d reasoning)." % [int(totals.total_tokens),int(totals.prompt_tokens),int(totals.completion_tokens),int(totals.reasoning_tokens)])
+	if not last_live.is_empty():
+		tip.append("Last call: %s, HTTP %d, %d tokens, %.1f s%s." % [String(last_live.stage),int(last_live.http),int(last_live.total_tokens),float(last_live.latency_ms)/1000.0,"" if bool(last_live.accepted) else " — "+String(last_live.reason)])
+	if not note.is_empty(): tip.append(note.substr(0,1).to_upper()+note.substr(1)+".")
+	if not live: tip.append("Offline voices are written from each speaker's character and never cost anything.")
+	return {"live":live,"model":model,"reason":reason,"note":note,"label":label,"tooltip":"\n".join(tip),"calls":int(totals.calls),"tokens":int(totals.total_tokens),"totals":totals.duplicate()}
+
+func _ruler_spoke(s:Dictionary)->bool:
+	for line in (s.audience as Dictionary).get("lines",[]):
+		if String((line as Dictionary).get("role",""))=="ruler": return true
+	return false
 
 # ---------------------------------------------------------------------------
 # Parsing and validation
@@ -593,6 +1137,8 @@ func allowed_numbers(s:Dictionary,extra:Dictionary)->Dictionary:
 	var sources:PackedStringArray=PackedStringArray([JSON.stringify(s.get("report",{})),JSON.stringify(s.get("scout_brief",{})),JSON.stringify(s.get("ctx",{})),String(s.get("fact","")),String(s.get("summary","")),String(s.get("amt","")),String(extra.get("player_text",""))])
 	var result:Dictionary=extra.get("result",{})
 	sources.append(String(result.get("outcome","")))
+	var hist:Dictionary=s.get("history",{})
+	for entry in (hist.get("speaker",[]) as Array)+(hist.get("civ",[]) as Array): sources.append(String((entry as Dictionary).get("outcome","")))
 	var terms:Dictionary=(s.get("audience",{}) as Dictionary).get("terms",{})
 	if terms.has("amount"):
 		sources.append("%d" % roundi(float(terms.amount)))
@@ -615,6 +1161,9 @@ func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Ar
 		if key not in keys: continue
 		var text:=_clean_text(String((item as Dictionary).get("text","")),_member(s,key))
 		if text.is_empty() or meta.search(text)!=null: continue
+		if _recent_lines(s,_member(s,key)).has(text.to_lower()): continue   # word for word from a past audience
+		if not line_ok(text,_era_for(s,_member(s,key))): continue   # anachronism, quotation or named source
+		if (_voice_state().said as Dictionary).has(_text_key(text)): continue   # said before in this hall
 		var invented:=false
 		for m in number.search_all(text):
 			if not allowed.has(m.get_string()): invented=true
@@ -668,6 +1217,9 @@ func _deliver(s:Dictionary,stage:String,extra:Dictionary,lines:Array[Dictionary]
 		var member:=_member(s,String(line.key))
 		if member.is_empty(): continue
 		h.append_line(String(s.id),_line_for(member,String(line.text),bool(line.aside)))
+		_mark_said(String(line.get("tkey","")),String(line.text))
+		line_log.append({"audience_id":String(s.id),"speaker":String(member.name),"model":String(member.persona.get("model","")),"manner":bool(line.get("manner",false)),"fact":bool(line.get("fact",not line.has("tkey"))),"text":String(line.text)})
+		while line_log.size()>4000: line_log.pop_front()
 	# Only the ruler's own words move the room; openings and farewells do not.
 	if stage=="speak" and absf(mood_shift)>0.0: h.apply_mood(String(s.id),clampf(mood_shift,-0.25,0.25))
 	lines_ready.emit.call_deferred(String(s.id))
@@ -725,7 +1277,18 @@ func _tokens(s:Dictionary,member:Dictionary,rival:Dictionary)->Dictionary:
 		"rival":String(rival.get("name","")).get_slice(" ",0),"why":_grievance_words(String(s.summary)),
 		"days":_number_after(String(s.summary),"about (\\d+) days"),"homeless":_number_after(String(s.summary),"(?i)about (\\d+) people")}
 	if tokens.leader.is_empty() and s.origin!="court": tokens.leader="our chief"
+	var occasion:String=String((s.get("occasion",{}) as Dictionary).get("text","")).strip_edges().trim_suffix(".")
+	if not occasion.is_empty():
+		tokens["occasion"]=occasion
+		tokens["occasioncap"]=occasion.substr(0,1).to_upper()+occasion.substr(1)
 	tokens.merge(s.get("gwtok",{}),true)
+	tokens.merge(s.get("htok",{}),true)
+	if tokens.has("when"): tokens["whencap"]=String(tokens.when).substr(0,1).to_upper()+String(tokens.when).substr(1)
+	var gist:=String(PROPOSAL_GIST.get(String(s.get("sit_type","")),""))
+	if not gist.is_empty(): tokens["gist"]=gist; tokens["gistcap"]=gist.substr(0,1).to_upper()+gist.substr(1)
+	if tokens.has("matter"): tokens["mattercap"]=String(tokens.matter).substr(0,1).to_upper()+String(tokens.matter).substr(1)
+	if tokens.has("decree"): tokens["decreecap"]=String(tokens.decree).substr(0,1).to_upper()+String(tokens.decree).substr(1)
+	if not String(persona.get("model","")).is_empty(): tokens.erase("oath")
 	if tokens.decree.is_empty(): tokens.erase("decree")
 	var out:={}
 	for k in tokens:
@@ -766,35 +1329,143 @@ func _usable(template:String,tokens:Dictionary)->bool:
 		if not tokens.has(m.get_string(1)): return false
 	return true
 
-func _choose(s:Dictionary,bank:Array,tokens:Dictionary,rng:RandomNumberGenerator,recent:Array[String]=[])->String:
+var _last_choice_fresh:=true
+var _last_template:=""
+var _era_now:Array=[]          ## era tags permitted for the line being written
+const WORD_CAP:=22             ## offline lines stay short
+const SAID_LIMIT:=2500         ## lines remembered as said (hashes, saved with the hall)
+var _mem_state:Dictionary={}
+var answered:Dictionary={}       ## audience_id -> the last reply answered the ruler's question from the facts
+var line_log:Array[Dictionary]=[] ## recent offline lines and whether they came from the speaker's manner
+
+func _voice_state()->Dictionary:
+	## Lifelong voice choices and everything ever said, saved with the hall's
+	## state when there is one (a test stub gets a session-long dictionary).
+	var h:Variant=_hall()
+	var v:Dictionary=_mem_state
+	if h!=null and h.has_method("validate_state") and h.has_method("state"):
+		var st:Dictionary=h.state()
+		if not st.get("voice") is Dictionary: st["voice"]={}
+		v=st.voice
+	for key in ["models","addresses","said","counts"]:
+		if not v.get(key) is Dictionary: v[key]={}
+	if not v.has("serial"): v["serial"]=0
+	return v
+
+static func norm_line(text:String)->String:
+	## A line's identity: names, titles and address terms removed (any word
+	## starting with a capital), case and punctuation ignored.
+	var words:PackedStringArray=PackedStringArray()
+	for raw in text.replace("\u2014"," ").split(" ",false):
+		var w:=String(raw)
+		var core:=""
+		for c in w:
+			if (c>="a" and c<="z") or (c>="A" and c<="Z") or (c>="0" and c<="9") or c=="'": core+=c
+		if core.is_empty(): continue
+		if core.substr(0,1)!=core.substr(0,1).to_lower() and core!="I": continue
+		words.append(core.to_lower())
+	var out:=" ".join(words)
+	for address in ["ma chief","friend-chief","hearth-holder","my chief","my bright one","forge-master","chief of the fire","high one","big-hearted one","hearth-lord","ring-giver"]:
+		out=out.replace(address.replace("-",""),"").replace(address,"")
+	return out.replace("  "," ").strip_edges()
+
+static func _template_key(template:String)->String:
+	return "t%d" % hash(template.replace(", {address}","").replace("{address}","").replace("{oath} ","").replace("{oath}",""))
+
+static func _text_key(text:String)->String:
+	return "l%d" % hash(norm_line(text))
+
+func _mark_said(tkey:String,text:String)->void:
+	var v:=_voice_state()
+	var said:Dictionary=v.said
+	v.serial=int(v.serial)+1
+	if not tkey.is_empty(): said[tkey]=int(v.serial)
+	said[_text_key(text)]=int(v.serial)
+	if said.size()>SAID_LIMIT:
+		# Forget the oldest fifth: a very long reign may hear an old line again.
+		var keys:Array=said.keys()
+		keys.sort_custom(func(a:Variant,b:Variant)->bool: return int(said[a])<int(said[b]))
+		for i in int(SAID_LIMIT/5.0): said.erase(keys[i])
+const OATH_CHANCE:=0.18        ## most lines carry no oath at all
+const ADDRESS_CHANCE:=0.45     ## the address term is seasoning, not a refrain
+
+func _era_for(s:Dictionary,member:Dictionary)->Array:
+	## What this speaker's people know, plus anything the supplied facts
+	## themselves mention (a scout who saw kilns may say so).
+	var persona:Dictionary=member.get("persona",{})
+	var tags:Array=(persona.get("era_tags",CV.era_tags(String(persona.get("era_owner","player")))) as Array).duplicate()
+	for tag in s.get("fact_tags",[]):
+		if not tags.has(tag): tags.append(tag)
+	return tags
+
+func line_ok(text:String,tags:Array)->bool:
+	## Era-true and never a quotation or a named source.
+	return CV.permits(text,tags) and CV.imitation_ok(text)
+
+static func _season(bank:Array,allow_oath:bool,drop_address:bool)->Array:
+	if allow_oath and not drop_address: return bank
+	var out:Array=[]
+	for template in bank:
+		var line:=String(template)
+		if not allow_oath: line=line.replace("{oath} ","").replace(" {oath}","").replace("{oath}","")
+		if drop_address and line.contains(", {address}"): line=line.replace(", {address}","")
+		out.append(line.strip_edges())
+	return out
+
+func _choose(s:Dictionary,bank:Array,tokens:Dictionary,rng:RandomNumberGenerator,recent:Array[String]=[],fresh_only:bool=false)->String:
 	## Prefer templates unused in this scene and unsaid by this speaker lately.
+	## fresh_only: return "" rather than repeat something said lately.
+	## Templates the era forbids (or that echo a famous line) are never used.
 	var used:Dictionary=_used.get(String(s.id),{})
 	var fresh:Array=[]; var unscened:Array=[]; var any:Array=[]
+	var said:Dictionary=_voice_state().said
 	for template in bank:
 		if not _usable(String(template),tokens): continue
+		var filled:=_fill(String(template),tokens)
+		if not line_ok(filled,_era_now): continue
+		# Short lines only (facts may run a little longer).
+		if filled.split(" ",false).size()>(30 if "{fact}" in String(template) or "{summary}" in String(template) else WORD_CAP): continue
+		# Nothing is ever said twice in this hall, by anyone.
+		if said.has(_template_key(String(template))) or said.has(_text_key(filled)): continue
 		any.append(template)
 		if used.has(String(template)): continue
 		unscened.append(template)
 		if not _recently_said(_fill(String(template),tokens),recent): fresh.append(template)
+	_last_choice_fresh=not fresh.is_empty()
+	if fresh_only and fresh.is_empty(): return ""
 	var pool:Array=fresh if not fresh.is_empty() else (unscened if not unscened.is_empty() else any)
 	if pool.is_empty(): return ""
 	var chosen:String=String(pool[rng.randi_range(0,pool.size()-1)])
 	used[chosen]=true
 	_used[String(s.id)]=used
+	_last_template=chosen
 	return _fill(chosen,tokens)
 
-func _say(s:Dictionary,member:Dictionary,bank:Array,rng:RandomNumberGenerator,rival:Dictionary={},aside:bool=false)->Dictionary:
+func _say(s:Dictionary,member:Dictionary,bank:Array,rng:RandomNumberGenerator,rival:Dictionary={},aside:bool=false,reserve:Array=[])->Dictionary:
+	## reserve: a wider bank used when everything in bank was said lately, so a
+	## speaker reaches for new words before repeating themselves.
 	var tokens:=_tokens(s,member,rival)
-	# A speaker swears their oath at most once per scene.
+	_era_now=_era_for(s,member)
+	# Oaths are rare flavour: most lines carry none, and nobody swears twice a
+	# scene. The address term is seasoning too, often left out.
 	var scene_memory:Dictionary=_used.get(String(s.id),{})
 	var oath_key:="~oath:"+String(member.get("key",""))
 	var oath:=String(tokens.get("oath",""))
-	if scene_memory.has(oath_key): tokens.erase("oath")
-	var raw:=_choose(s,bank,tokens,rng,_recent_lines(s,member))
-	if raw.is_empty() and scene_memory.has(oath_key):
-		var plain:Array=[]
-		for template in bank: plain.append(String(template).replace("{oath} ","").replace(" {oath}",""))
-		raw=_choose(s,plain,tokens,rng,_recent_lines(s,member))
+	var allow_oath:bool=not scene_memory.has(oath_key) and rng.randf()<OATH_CHANCE
+	if not allow_oath: tokens.erase("oath")
+	# One address term for life, in at most one line in three.
+	var who:=String((member.get("persona",{}) as Dictionary).get("speaker_key",member.get("key","")))
+	var counts:Dictionary=_voice_state().counts
+	var tally:Array=counts.get(who,[0,0])
+	var drop_address:bool=(int(tally[1])+1)*3>int(tally[0])+1
+	if drop_address: tokens.erase("address")
+	var recent:=_recent_lines(s,member)
+	var raw:=_choose(s,_season(bank,allow_oath,drop_address),tokens,rng,recent)
+	if raw.is_empty() and allow_oath:
+		raw=_choose(s,_season(bank,false,drop_address),tokens,rng,recent)
+	if (raw.is_empty() or not _last_choice_fresh) and not reserve.is_empty():
+		var wider:=_choose(s,_season(reserve,false,drop_address),tokens,rng,recent,true)
+		if not wider.is_empty(): raw=wider
 	if raw.is_empty(): return {}
 	if not oath.is_empty() and raw.contains(oath):
 		scene_memory[oath_key]=true
@@ -804,7 +1475,50 @@ func _say(s:Dictionary,member:Dictionary,bank:Array,rng:RandomNumberGenerator,ri
 	for k in ["address","leader","rival","petitioner","civ","envoy","oath","subject","work","name","ruin","trigger","eventtext","gatetext","forecast","civtwo","dead"]:
 		var value:String=String(tokens.get(k,""))
 		if not value.is_empty() and raw.to_lower().begins_with(value.to_lower()): lead_ok=false
-	return {"key":String(member.key),"text":CV.speak(member.persona,raw,rng,true,_flourish_memory(s,member),lead_ok),"aside":aside}
+	var text:=CV.speak(member.persona,raw,rng,true,_flourish_memory(s,member),lead_ok)
+	# Never the same words twice from the same mouth across recent audiences,
+	# and never a flourish the era does not have.
+	var tries:=0
+	while (recent.has(text.to_lower()) or not line_ok(text,_era_now)) and tries<4:
+		text=CV.speak(member.persona,raw,rng,true,_flourish_memory(s,member),lead_ok)
+		tries+=1
+	if recent.has(text.to_lower()) or not line_ok(text,_era_now): return {}
+	var address:=String((member.get("persona",{}) as Dictionary).get("address",""))
+	counts[who]=[int(tally[0])+1,int(tally[1])+(1 if not address.is_empty() and address in text else 0)]
+	var own:=_model_templates(member.get("persona",{}))
+	var tkey:=_template_key(_last_template)
+	return {"key":String(member.key),"text":text,"aside":aside,"tkey":tkey,"manner":own.has(tkey),"fact":_fact_templates().has(tkey) and not own.has(tkey)}
+
+var _fact_keys:Dictionary={}
+func _fact_templates()->Dictionary:
+	## Lines that carry the facts of the moment (why they came, the terms, a
+	## memory, an answer, what the ruler decided). Shared phrasing is expected
+	## there; everything else should be in the speaker's own manner.
+	if not _fact_keys.is_empty(): return _fact_keys
+	var banks:Array=[]
+	for source in [ENVOY_OPEN,ENVOY_OPEN_MORE,PETITION_PLEA,PETITION_PLEA_MORE,PROPOSAL_OPEN,CLOSING_OPTION,CLOSING_MORE,CLOSING_REPEAT,ARC_OPEN,HISTORY_OPEN]:
+		for bank in (source as Dictionary).values(): banks.append(bank)
+	for by_kind in ANSWERS.values():
+		for bank in (by_kind as Dictionary).values(): banks.append(bank)
+	banks.append(TERMS_STAND)
+	for decree in REMEDY: banks.append(decree_pleas(String(decree)))
+	banks.append([DECREE_PLEA_GENERIC])
+	for halves in OCCASION_SPEECH.values():
+		for a in halves[0]:
+			for b in halves[1]: banks.append(["%s %s" % [String(a),String(b)]])
+	for bank in banks:
+		for template in bank: _fact_keys[_template_key(String(template))]=true
+	return _fact_keys
+
+var _model_sets:Dictionary={}
+func _model_templates(persona:Dictionary)->Dictionary:
+	var model_id:=String(persona.get("model",""))
+	if not _model_sets.has(model_id):
+		var keys:={}
+		for bank in (CV.MODEL_BANKS.get(model_id,{}) as Dictionary).values():
+			for template in bank: keys[_template_key(String(template))]=true
+		_model_sets[model_id]=keys
+	return _model_sets[model_id]
 
 func _flourish_memory(s:Dictionary,member:Dictionary)->Dictionary:
 	var used:Dictionary=_used.get(String(s.id),{})
@@ -819,7 +1533,7 @@ func _flourish_memory(s:Dictionary,member:Dictionary)->Dictionary:
 	_used[String(s.id)]=used
 	return used[memory_key]
 
-const RECENT_AUDIENCES:=4
+const RECENT_AUDIENCES:=10
 
 func _recent_lines(s:Dictionary,member:Dictionary)->Array[String]:
 	## Lowercased lines this speaker said in their last few audiences, read from
@@ -835,12 +1549,16 @@ func _recent_lines(s:Dictionary,member:Dictionary)->Array[String]:
 		audiences.reverse()   # newest waiting first, then history (already newest first)
 		audiences.append_array(st.get("history",[]))
 		var found:=0
+		# A foreign people's envoys share one memory: a new face must not replay
+		# what the last envoy of the same people said.
+		var civ_voice:bool=String(member.key)=="envoy" and String(s.origin)=="foreign" and not String(s.civ_id).is_empty()
 		for audience in audiences:
 			if found>=RECENT_AUDIENCES: break
 			if String(audience.get("id",""))==String(s.id): continue
+			var same_people:bool=civ_voice and String(audience.get("civ_id",""))==String(s.civ_id)
 			var spoke:=false
 			for line in audience.get("lines",[]):
-				if String(line.get("speaker",""))==String(member.name):
+				if String(line.get("speaker",""))==String(member.name) or (same_people and String(line.get("role",""))=="envoy"):
 					out.append(String(line.get("text","")).to_lower())
 					spoke=true
 			if spoke: found+=1
@@ -858,6 +1576,210 @@ static func _recently_said(filled:String,recent:Array[String])->bool:
 			if probe in text: return true
 	return false
 
+# ---------------------------------------------------------------------------
+# Memory across audiences
+# ---------------------------------------------------------------------------
+
+func history_for(s:Dictionary)->Dictionary:
+	## {"speaker":[entry],"civ":[entry]}, newest first, resolved or expired
+	## audiences only. Prefers the hall's own history_with_speaker /
+	## history_with_civ (voice_context); otherwise derives the same from the
+	## hall's queue and history, so no extra save data is needed.
+	## entry = {id,day,kind,origin,topic,decree,option_id,status,outcome,speaker,lines:[{speaker,text}]}
+	var ctx:Dictionary=s.get("ctx",{})
+	var records:=_hall_records(String(s.get("id","")))
+	var by_id:={}
+	for record in records: by_id[String(record.get("id",""))]=record
+	var out:={"speaker":[],"civ":[]}
+	for pair in [["speaker","history_with_speaker"],["civ","history_with_civ"]]:
+		var which:String=String(pair[0])
+		var supplied:Variant=ctx.get(String(pair[1]),null)
+		var list:Array=[]
+		if supplied is Array:
+			for item in supplied:
+				if item is Dictionary: list.append(_history_entry(item,by_id))
+		else:
+			for record in records:
+				if _history_matches(s,record,which): list.append(_history_entry(record,by_id))
+		var kept:Array=[]
+		for entry in list:
+			if String(entry.id)==String(s.get("id","")): continue
+			if String(entry.status) in ["resolved","expired"] or not String(entry.option_id).is_empty(): kept.append(entry)
+		kept.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.day)>int(b.day))
+		out[which]=kept
+	return out
+
+func _hall_records(exclude_id:String)->Array:
+	var h:Variant=_hall()
+	if h==null or not h.has_method("state"): return []
+	var st:Dictionary=h.state()
+	var records:Array=[]
+	for key in ["history","queue"]:
+		for record in st.get(key,[]):
+			if record is Dictionary and String((record as Dictionary).get("id",""))!=exclude_id: records.append(record)
+	return records
+
+func _history_matches(s:Dictionary,record:Dictionary,which:String)->bool:
+	var audience:Dictionary=s.get("audience",{})
+	var speaker:Dictionary=audience.get("speaker",{})
+	var other:Dictionary=record.get("speaker",{}) if record.get("speaker",{}) is Dictionary else {}
+	if which=="civ":
+		return String(s.origin)=="foreign" and String(record.get("origin",""))=="foreign" and String(record.get("civ_id",""))==String(s.civ_id) and not String(s.civ_id).is_empty()
+	var pid:int=int(speaker.get("person_id",0))
+	if pid>0 and int(other.get("person_id",0))==pid: return true
+	return String(other.get("name",""))==String(speaker.get("name","")) and not String(speaker.get("name","")).is_empty() and String(record.get("origin",""))==String(s.origin)
+
+func _history_entry(item:Dictionary,by_id:Dictionary)->Dictionary:
+	## Accepts full Audience records or the hall's ledger rows from
+	## history_with ({day,kind,ask,summary,answer,reaction,outcome}).
+	var petition:Dictionary=item.get("petition",{}) if item.get("petition",{}) is Dictionary else {}
+	var id:=String(item.get("id",item.get("audience_id","")))
+	var record:Dictionary=by_id.get(id,{})
+	var lines:Array=item.get("lines",record.get("lines",[])) if item.get("lines",record.get("lines",[])) is Array else []
+	var speaker:Variant=item.get("speaker",record.get("speaker",{}))
+	var topic:=String(item.get("topic",petition.get("topic","")))
+	var decree:=String(item.get("decree",item.get("suggested_decree",petition.get("suggested_decree",""))))
+	var ask:=String(item.get("ask",""))
+	if topic.is_empty() and decree.is_empty() and String(item.get("kind",""))=="petition" and ":" in ask:
+		topic=ask.get_slice(":",0);decree=ask.substr(ask.find(":")+1)
+	var option:=String(item.get("option_id",item.get("option",item.get("answer",record.get("option_id","")))))
+	var status:=String(item.get("status",record.get("status","expired" if option in ["expired","left","ignored"] else "resolved")))
+	var day:=int(item.get("day",item.get("resolved_day",item.get("arrived_day",record.get("arrived_day",0)))))
+	if item.has("days_ago") and not item.has("day"): day=_day()-int(item.days_ago)
+	var entry:={"id":id,"day":day,"kind":String(item.get("kind",record.get("kind",""))),"origin":String(item.get("origin",record.get("origin",""))),
+		"topic":topic,"decree":decree,"option_id":option,"status":status,
+		"outcome":String(item.get("outcome",record.get("outcome",""))),"summary":String(item.get("summary","")).substr(0,160),
+		"speaker":String((speaker as Dictionary).get("name","")) if speaker is Dictionary else "",
+		"lines":lines}
+	if id.is_empty(): entry["id"]="%d|%s|%s|%s" % [day,String(entry.kind),ask,option]
+	return entry
+
+static func when_words(days_ago:int)->String:
+	if days_ago<=3: return "only days ago"
+	if days_ago<=12: return "not two weeks back"
+	if days_ago<=40: return "a month or so back"
+	if days_ago<=110: return "last season"
+	if days_ago<=420: return "last year"
+	return "years ago"
+
+static func _ordinal(n:int)->String:
+	return String(ORDINALS[n-1]) if n>=1 and n<=ORDINALS.size() else "umpteenth"
+
+static func _cardinal(n:int)->String:
+	return String(CARDINALS[n-1]) if n>=1 and n<=CARDINALS.size() else "a dozen"
+
+func _matter_words(s:Dictionary,entry:Dictionary)->String:
+	var decree:String=String(entry.get("decree",""))
+	if REMEDY.has(decree): return String({"Send gatherers to find food":"the gatherers","Ration food for thirty days":"the rationing","Secure water and dig wells":"the wells",
+		"Organize healers to care for the sick":"the healers","Build shelters":"the shelters","Raise a watch and post guards":"the watch","Support scholars and fund research":"the scholars",
+		"Expand workshops and make tools":"the workshops","Post guards and patrol the frontier":"the frontier patrols","Hold a public council to hear the people":"a public council",
+		"Improve roads and organize haulers":"the roads"}.get(decree,"it"))
+	if not decree.is_empty(): return _lower_initial(decree)
+	var topic:String=String(entry.get("topic",""))
+	if TOPIC_MATTER.has(topic): return String(TOPIC_MATTER[topic])
+	var leader:String=String(s.get("leader",""))
+	return String({"gift":"our gift","request":"our request","threat":("%s's demand" % leader) if not leader.is_empty() else "our demand","news":"the news we brought","report":"what we found","great_work":"the great work","wonder_proposal":"the great work"}.get(String(entry.get("kind","")),"the last matter"))
+
+func _history_group(s:Dictionary,entry:Dictionary)->String:
+	var option:String=String(entry.get("option_id",""))
+	var expired:bool=String(entry.get("status",""))=="expired"
+	if String(s.origin)=="foreign":
+		if expired: return "left_waiting"
+		if option in ["accept","accept_return","grant","grant_half","pay","thank","reward","stand","restraint","compensate","welcome"]: return "welcomed"
+		if option in ["refuse","refuse_request","defy","counter","decline","rebuff"]: return "spurned"
+		return "visited"
+	if expired: return "kept_waiting"
+	if option in ["promise","patience"]: return "promised"
+	if option=="decree": return "decreed"
+	if option in ["dismiss","rebuke"]: return "rebuffed"
+	if option in ["apologise","welcome"]: return "soothed"
+	return "heard"
+
+func _history_focus(s:Dictionary)->Dictionary:
+	## The prior audience the visitor would bring up: same matter first, else
+	## the latest with this speaker, else (foreign) the latest with their people.
+	var hist:Dictionary=s.get("history",{})
+	var mine:Array=hist.get("speaker",[])
+	var theirs:Array=hist.get("civ",[])
+	var decree:String=String(s.get("decree",""))
+	var topic:String=String(s.get("topic",""))
+	for entry in mine+theirs:
+		if (not decree.is_empty() and String(entry.decree)==decree) or (decree.is_empty() and not topic.is_empty() and String(entry.topic)==topic) or (String(s.origin)=="foreign" and String(entry.kind)==String(s.kind)):
+			return entry
+	if not mine.is_empty(): return mine[0]
+	if not theirs.is_empty(): return theirs[0]
+	return {}
+
+func _same_matter_count(s:Dictionary,focus:Dictionary)->int:
+	var hist:Dictionary=s.get("history",{})
+	var seen:={}
+	var n:=0
+	for entry in (hist.get("speaker",[]) as Array)+(hist.get("civ",[]) as Array):
+		if seen.has(String(entry.id)): continue
+		seen[String(entry.id)]=true
+		if String(s.origin)=="foreign" or (String(entry.decree)==String(focus.get("decree","")) and String(entry.topic)==String(focus.get("topic",""))): n+=1
+	return n
+
+func _history_tokens(s:Dictionary,focus:Dictionary,repeats:int)->Dictionary:
+	if focus.is_empty(): return {}
+	return {"when":when_words(maxi(0,_day()-int(focus.get("day",_day())))),"matter":_matter_words(s,focus),"nth":_ordinal(repeats+1),"count":_cardinal(repeats+1)}
+
+func _closing_repeat_tokens(s:Dictionary,option_id:String)->Dictionary:
+	## Same answer given before to this speaker (or this people): count them.
+	var hist:Dictionary=s.get("history",{})
+	var same:Array=[]
+	var seen:={}
+	for entry in (hist.get("speaker",[]) as Array)+(hist.get("civ",[]) as Array):
+		if seen.has(String(entry.id)): continue
+		seen[String(entry.id)]=true
+		var opt:String=String(entry.option_id)
+		if opt==option_id or (option_id=="refuse_request" and opt=="refuse" and String(entry.kind)=="request"): same.append(entry)
+	if same.is_empty(): return {}
+	var tokens:=_history_tokens(s,same[0],same.size())
+	return tokens
+
+func _prompt_history(s:Dictionary)->String:
+	var hist:Dictionary=s.get("history",{})
+	var rows:PackedStringArray=PackedStringArray()
+	var seen:={}
+	for entry in (hist.get("speaker",[]) as Array)+(hist.get("civ",[]) as Array):
+		if rows.size()>=HISTORY_ENTRIES: break
+		if seen.has(String(entry.id)): continue
+		seen[String(entry.id)]=true
+		var about:String=_matter_words(s,entry)
+		var result:String=String(entry.outcome).substr(0,170) if not String(entry.outcome).is_empty() else ("they left unheard" if String(entry.status)=="expired" else "answered: "+String(entry.option_id))
+		rows.append("- %s: %s%s about %s. Outcome: %s" % [when_words(maxi(0,_day()-int(entry.day))),String(entry.kind),(" by "+String(entry.speaker)) if not String(entry.speaker).is_empty() else "",about,result])
+	return "\n".join(rows)
+
+func _prompt_avoid(s:Dictionary)->PackedStringArray:
+	## Recent lines by everyone in this cast, newest audiences first, short.
+	var out:PackedStringArray=PackedStringArray()
+	var members:Array=[s.envoy]+(s.officials as Array)
+	var per:int=maxi(2,int(AVOID_LINES/float(maxi(1,members.size()))))
+	for member in members:
+		var taken:=0
+		for text in _recent_lines(s,member):
+			if taken>=(per+2 if String(member.key)=="envoy" else per) or out.size()>=AVOID_LINES+4: break
+			out.append("%s said: \"%s\"" % [String(member.name),String(text).substr(0,110)])
+			taken+=1
+	return out
+
+func _recent_flourishes(s:Dictionary,member:Dictionary)->PackedStringArray:
+	## Oath, address term and pet phrases this speaker already used lately.
+	var persona:Dictionary=member.get("persona",{})
+	var candidates:Array=[String(persona.get("oath","")),String(persona.get("address",""))]
+	candidates.append_array(persona.get("tics",[]))
+	var used:PackedStringArray=PackedStringArray()
+	var recent:=_recent_lines(s,member)
+	for phrase in candidates:
+		var p:String=String(phrase).strip_edges().trim_suffix("!").trim_suffix(",").to_lower()
+		if p.length()<3: continue
+		var hits:=0
+		for text in recent:
+			if p in text: hits+=1
+		if hits>=1: used.append(String(phrase))
+	return used
+
 func _offline_lines(s:Dictionary,stage:String,extra:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
 	if String(s.kind) in WORK_KINDS:
 		match stage:
@@ -874,67 +1796,130 @@ func _append_if(out:Array[Dictionary],line:Dictionary)->void:
 	if not line.is_empty(): out.append(line)
 
 func _offline_open(s:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
+	## Short and punchy: the visitor says at most two lines (why they came or
+	## what they remember, then the business), and at most two officials speak,
+	## each in their own manner.
 	var out:Array[Dictionary]=[]
 	var kind:String=String(s.kind)
 	var envoy:Dictionary=s.envoy
 	var first_official:Dictionary=s.officials[0] if not s.officials.is_empty() else {}
-	if kind=="report":
-		for item in _scout_call("debrief_lines",s.audience):
-			var text:=""
-			var aside:bool=false
-			if item is Dictionary:
-				text=String((item as Dictionary).get("text",""))
-				aside=bool((item as Dictionary).get("aside",false))
-			elif item is String: text=String(item)
-			text=_clean_text(text,envoy)
-			if text.is_empty(): continue
-			# chief_scout.gd already gives its first line the scout's dialect.
-			out.append({"key":"envoy","text":text,"aside":aside})
-			if out.size()>=6: break
-		if out.is_empty(): _append_if(out,_say(s,envoy,ENVOY_OPEN.report,rng,first_official))
-	elif kind=="petition":
-		# A person pleading: the trouble in their own words, then the remedy as a plea.
-		var topic:String=String(s.topic)
-		if topic=="grievance": _append_if(out,_say(s,envoy,ENVOY_OPEN.petition_grievance,rng,first_official))
-		elif topic=="ambition": _append_if(out,_say(s,envoy,ENVOY_OPEN.petition_ambition,rng,first_official))
-		else: _append_if(out,_say(s,envoy,PETITION_PLEA.get(topic,[]),rng,first_official))
-		if out.is_empty(): _append_if(out,_say(s,envoy,ENVOY_OPEN.petition_generic,rng,first_official))
-		if not String(s.decree).is_empty():
-			_append_if(out,_say(s,envoy,[String(DECREE_PLEA.get(String(s.decree),DECREE_PLEA_GENERIC))],rng))
-	else:
-		_append_if(out,_say(s,envoy,ENVOY_OPEN.get(kind,ENVOY_OPEN.news),rng,first_official))
+	var focus:Dictionary=s.get("history_focus",{})
+	var history_bank:Array=HISTORY_OPEN.get(_history_group(s,focus),[]) if not focus.is_empty() else []
+	var arc:Dictionary=s.get("arc",{})
+	var occasion_bank:=_occasion_bank(s)
+	# Continuing an earlier audience comes first; otherwise why they came
+	# outranks an unrelated memory.
+	if not arc.is_empty():
+		_remembered(s,out,_say(s,envoy,ARC_OPEN.get(String(arc.get("branch","")),ARC_OPEN.any),rng,first_official,false,ARC_OPEN.any))
+	elif not occasion_bank.is_empty() and kind!="report" and (history_bank.is_empty() or String(focus.get("kind",""))!=kind):
+		_append_if(out,_say(s,envoy,occasion_bank,rng,first_official))
+	elif not history_bank.is_empty() and kind!="report":
+		_remembered(s,out,_say(s,envoy,history_bank,rng,first_official,false,_history_reserve(s)))
+	match kind:
+		"report":
+			for item in _scout_call("debrief_lines",s.audience):
+				var text:=""
+				var aside:bool=false
+				if item is Dictionary:
+					text=String((item as Dictionary).get("text",""))
+					aside=bool((item as Dictionary).get("aside",false))
+				elif item is String: text=String(item)
+				text=_clean_text(text,envoy)
+				if text.is_empty(): continue
+				out.append({"key":"envoy","text":text,"aside":aside})
+				if out.size()>=2: break
+			if out.is_empty(): _append_if(out,_say(s,envoy,ENVOY_OPEN.report,rng,first_official))
+		"proposal":
+			var protest:bool=String(s.sit_type)=="recruitment_protest"
+			var generic:Array=(PROPOSAL_OPEN.get(String(s.sit_type),[]) as Array)+([] if protest else PROPOSAL_OPEN.any as Array)
+			# A protest is not an offer: it keeps its own words.
+			var own_terms:Array=PROPOSAL_OPEN.recruitment_protest if protest else CV.model_bank(envoy.persona,"proposal")
+			_append_if(out,_say(s,envoy,own_terms if not own_terms.is_empty() else generic,rng,first_official,false,generic))
+		"petition":
+			var topic:String=String(s.topic)
+			var topic_bank:Array=ENVOY_OPEN.petition_grievance if topic=="grievance" else (ENVOY_OPEN.petition_ambition if topic=="ambition" else PETITION_PLEA.get(topic,PETITION_PLEA_MORE.get(topic,[])))
+			if out.is_empty(): _append_if(out,_say(s,envoy,topic_bank,rng,first_official,false,ENVOY_OPEN.petition_generic))
+			if not String(s.decree).is_empty():
+				_append_if(out,_say(s,envoy,CV.model_bank(envoy.persona,"plea"),rng,{},false,decree_pleas(String(s.decree))))
+			elif out.size()<2:
+				_append_if(out,_say(s,envoy,topic_bank,rng,first_official,false,ENVOY_OPEN.petition_generic))
+		_:
+			var generic:Array=(ENVOY_OPEN.get(kind,ENVOY_OPEN.news) as Array)+(ENVOY_OPEN_MORE.get(kind,[]) as Array)
+			var business:=_say(s,envoy,CV.model_bank(envoy.persona,kind),rng,first_official,false,generic)
+			if business.is_empty(): business=_business_fallback(s)
+			_append_if(out,business)
+	while out.size()>2: out.pop_front()
 	var officials:Array=s.officials.duplicate()
-	if officials.is_empty():
-		# An empty bench: the visitor fills the silence themselves.
-		_append_if(out,_say(s,envoy,["A quiet court, {address}. I like a quiet court; it means somebody's actually listening."],rng))
-		return out
+	if officials.is_empty(): return out
 	var own:bool=String(s.origin)=="court"
 	var stances:Dictionary=COURT_STANCE_COURT if own else COURT_STANCE
-	var asides:Array=COURT_ASIDE_REPORT if kind=="report" else (COURT_ASIDE_COURT if own else COURT_ASIDE)
-	var kind_bank:Array=COURT_KIND.get(kind,COURT_KIND.petition if own else COURT_KIND.news)
+	var kind_bank:Array=COURT_PROPOSAL if kind=="proposal" else COURT_KIND.get(kind,COURT_KIND.petition if own else COURT_KIND.news)
+	var court_memory:Array=(COURT_HISTORY if own else COURT_HISTORY_FOREIGN) if not focus.is_empty() else []
+	var generic_court:=_court_reserve(stances,kind_bank,court_memory)
+	if kind=="report": generic_court=_report_bank(first_official)+generic_court
 	var shuffled:Array=[]
 	while not officials.is_empty(): shuffled.append(officials.pop_at(rng.randi_range(0,officials.size()-1)))
-	var count:int=clampi(rng.randi_range(2,4),1,shuffled.size())
-	if shuffled.size()>=2: count=maxi(count,2)
+	var count:int=1 if shuffled.size()<2 or rng.randf()<0.4 else 2
 	var previous:Dictionary={}
 	for i in count:
 		var member:Dictionary=shuffled[i]
-		var stance:String=String(member.persona.get("stance","pragmatic"))
+		var aside:bool=i==1
+		var manner:Array=CV.model_bank(member.persona,"aside" if aside else "interject")
 		var line:Dictionary={}
-		var roll:float=rng.randf()
-		if kind=="report" and (i==0 or roll<0.55):
-			line=_say(s,member,_report_bank(member),rng,shuffled[1] if shuffled.size()>1 and i==0 else previous)
-		elif i==0:
-			line=_say(s,member,kind_bank if roll<0.6 else stances.get(stance,stances.pragmatic),rng,shuffled[1] if shuffled.size()>1 else {})
-		elif i==1 and not previous.is_empty() and roll<0.65:
-			line=_say(s,member,COURT_BICKER,rng,previous)
-		elif i==count-1 and roll<0.6:
-			line=_say(s,member,asides,rng,previous,true)
-		else:
-			line=_say(s,member,stances.get(stance,stances.pragmatic) if roll<0.5 else kind_bank,rng,previous)
-		if line.is_empty(): line=_say(s,member,stances.get(stance,stances.pragmatic),rng,previous)
+		if rng.randf()<0.85: line=_say(s,member,manner,rng,previous,aside,generic_court)
+		else: line=_say(s,member,generic_court,rng,previous,aside,manner)
 		_append_if(out,line)
-		previous=member
+		if not line.is_empty(): previous=member
+	return out
+
+func _occasion_bank(s:Dictionary)->Array:
+	## Why they came, as natural speech: every opener half with every closer.
+	var occasion:Dictionary=s.get("occasion",{})
+	var halves:Array=OCCASION_SPEECH.get(String(occasion.get("type","")),[])
+	var out:Array=[]
+	if halves.size()<2: return out
+	for a in halves[0]:
+		for b in halves[1]: out.append("%s %s" % [String(a),String(b)])
+	return out
+
+func _business_fallback(s:Dictionary)->Dictionary:
+	## The facts, plainly, when every phrasing has been used before.
+	var text:=""
+	match String(s.kind):
+		"gift": text="%s %s, from %s." % [String(s.amt),String(s.res),String(s.civ)]
+		"request": text="We ask %s %s." % [String(s.amt),String(s.res)]
+		"threat": text="%s %s, as tribute." % [String(s.amt),String(s.res)]
+		"news": text=String(s.fact)
+	if text.strip_edges().is_empty(): return {}
+	return {"key":"envoy","text":_capitalize_sentences(text),"aside":false}
+
+func _remembered(s:Dictionary,out:Array[Dictionary],line:Dictionary)->void:
+	## A line recalling a past audience; noted so tests and the hall can tell.
+	if line.is_empty(): return
+	out.append(line)
+	remembered[String(s.id)]=String(line.text)
+
+func decree_pleas(decree:String)->Array:
+	## The remedy pleaded several ways: the house line plus frame x phrasing.
+	var out:Array=[String(DECREE_PLEA.get(decree,DECREE_PLEA_GENERIC))]
+	var phrasings:Array=REMEDY.get(decree,[_lower_initial(decree).trim_suffix(".")])
+	for frame in PLEA_FRAMES:
+		for remedy in phrasings: out.append(String(frame).replace("{remedy}",String(remedy)))
+	return out
+
+func _history_reserve(s:Dictionary)->Array:
+	var out:Array=[]
+	if not (s.get("arc",{}) as Dictionary).is_empty(): out.append_array(ARC_OPEN.any)
+	for group in (["promised","decreed","rebuffed","heard"] if String(s.origin)=="court" else ["visited","welcomed","spurned"]):
+		if group in ["promised","decreed","rebuffed"] and group!=_history_group(s,s.get("history_focus",{})): continue
+		out.append_array(HISTORY_OPEN[group])
+	return out
+
+func _court_reserve(stances:Dictionary,kind_bank:Array,memory:Array)->Array:
+	var out:Array=[]
+	for key in stances: out.append_array(stances[key])
+	out.append_array(kind_bank)
+	out.append_array(memory)
 	return out
 
 func _report_bank(member:Dictionary)->Array:
@@ -944,44 +1929,73 @@ func _report_bank(member:Dictionary)->Array:
 	return COURT_REPORT_ANY
 
 func _offline_speak(s:Dictionary,player_text:String,rng:RandomNumberGenerator)->Array[Dictionary]:
+	## One reply: an answer from the facts when the ruler asked something,
+	## otherwise the visitor's manner. At most one official reacts.
 	var out:Array[Dictionary]=[]
 	var mood:=sentiment(player_text)
 	var envoy:Dictionary=s.envoy
-	var bank:Array=(PETITIONER_REPLY if s.origin=="court" else ENVOY_REPLY).get(mood,ENVOY_REPLY.neutral)
-	if String(s.kind) in WORK_KINDS and String(s.envoy.persona.get("figure_id","")).length()>0: bank=BUILDER_REPLY.get(mood,BUILDER_REPLY.neutral)
-	var rival:Dictionary=s.officials[0] if not s.officials.is_empty() else {}
-	_append_if(out,_say(s,envoy,bank,rng,rival))
-	if String(s.kind) in ["gift","request","threat"] and mood in ["warm","hostile"] and rng.randf()<0.4 and not String(s.amt).is_empty():
-		_append_if(out,_say(s,envoy,TERMS_STAND,rng))
-	var reactions:int=rng.randi_range(0,mini(2,s.officials.size()))
-	if reactions==0 and not s.officials.is_empty() and rng.randf()<0.6: reactions=1
-	var pool:Array=s.officials.duplicate()
-	var previous:Dictionary={}
-	for i in reactions:
-		var member:Dictionary=pool.pop_at(rng.randi_range(0,pool.size()-1))
-		var aside:bool=rng.randf()<0.4
-		var other:Dictionary=previous if not previous.is_empty() else (pool[0] if not pool.is_empty() else {})
-		_append_if(out,_say(s,member,COURT_REACT.get(mood,COURT_REACT.neutral),rng,other,aside))
-		previous=member
+	var generic:Array=(PETITIONER_REPLY if s.origin=="court" else ENVOY_REPLY).get(mood,ENVOY_REPLY.neutral)
+	if String(s.kind) in WORK_KINDS and String(s.envoy.persona.get("figure_id","")).length()>0: generic=BUILDER_REPLY.get(mood,BUILDER_REPLY.neutral)
+	var line:Dictionary={}
+	var answers:=answer_bank(s,player_text)
+	if not answers.is_empty(): line=_say(s,envoy,answers,rng,{},false)
+	answered[String(s.id)]=not line.is_empty()
+	if line.is_empty(): line=_say(s,envoy,CV.model_bank(envoy.persona,"reply"),rng,{},false,generic)
+	_append_if(out,line)
+	if not s.officials.is_empty() and rng.randf()<0.55:
+		var member:Dictionary=s.officials[rng.randi_range(0,s.officials.size()-1)]
+		var react:Array=CV.model_bank(member.persona,"react")
+		var fallback:Array=COURT_REACT.get(mood,COURT_REACT.neutral)
+		_append_if(out,_say(s,member,react if rng.randf()<0.85 else fallback,rng,{},rng.randf()<0.35,fallback if rng.randf()<0.85 else react))
 	return out
 
+static func question_type(text:String)->String:
+	if not "?" in text and not text.to_lower().begins_with("tell me"): return ""
+	for pair in QUESTION_PATTERNS:
+		var re:=RegEx.new(); re.compile(String(pair[1]))
+		if re.search(text)!=null: return String(pair[0])
+	return ""
+
+func answer_bank(s:Dictionary,player_text:String)->Array:
+	var q:=question_type(player_text)
+	if q.is_empty(): return []
+	var by_kind:Dictionary=ANSWERS.get(q,{})
+	var specific:Array=by_kind.get(String(s.get("sit_type","")),[])
+	if not specific.is_empty(): return specific
+	if String(s.get("sit_type",""))=="recruitment_protest": return by_kind.get("any",[])
+	return by_kind.get(String(s.kind),by_kind.get("any",[]))
+
 func _offline_closing(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
+	## One parting line that reacts to the actual outcome, and at most one aside.
 	var out:Array[Dictionary]=[]
 	var option_id:String=String(result.get("option_id",(s.audience as Dictionary).get("option_id","")))
 	var reaction:String=String(result.get("reaction","neutral"))
 	var envoy:Dictionary=s.envoy
 	if String(s.kind)=="request" and option_id=="refuse": option_id="refuse_request"
+	if String(s.kind)=="proposal" and option_id in ["accept","refuse"]: option_id=option_id+"_proposal"
 	if String(s.kind)=="report":
 		if "reward" in option_id: option_id="reward_scouts"
 		elif "back" in option_id or "closer" in option_id or "again" in option_id or "resend" in option_id: option_id="send_back"
-	var bank:Array=CLOSING_OPTION.get(option_id,CLOSING_REACTION.get(reaction,CLOSING_REACTION.neutral))
-	var line:=_say(s,envoy,bank,rng)
-	if line.is_empty(): line=_say(s,envoy,CLOSING_REACTION.get(reaction,CLOSING_REACTION.neutral),rng)
-	_append_if(out,line)
-	if not s.officials.is_empty():
+	var truthful:Array=CLOSING_OPTION.get(option_id,CLOSING_MORE.get(option_id,CLOSING_REACTION.get(reaction,CLOSING_REACTION.neutral)))
+	var group:="warm" if reaction in ["delighted","pleased"] else ("hostile" if reaction in ["offended","furious"] else "neutral")
+	var farewell:Array=CV.model_bank(envoy.persona,{"warm":"farewell_warm","hostile":"farewell_cold","neutral":"farewell_neutral"}[group])
+	var bank:Array=truthful
+	var reserve:Array=farewell
+	# A foreign visitor usually parts in their own manner; an official's
+	# answer is told plainly, since it binds them.
+	if String(s.origin)=="foreign" and not farewell.is_empty() and rng.randf()<0.6:
+		bank=farewell; reserve=truthful
+	var repeat_tokens:=_closing_repeat_tokens(s,option_id)
+	if not repeat_tokens.is_empty():
+		s["htok"]=repeat_tokens
+		reserve=bank+reserve
+		bank=(CLOSING_REPEAT.get(option_id,[]) as Array)+(CLOSING_REPEAT.any as Array)
+	_append_if(out,_say(s,envoy,bank,rng,{},false,reserve+(CLOSING_REACTION.get(reaction,CLOSING_REACTION.neutral) as Array)))
+	if not s.officials.is_empty() and rng.randf()<0.6:
 		var member:Dictionary=s.officials[rng.randi_range(0,s.officials.size()-1)]
-		var group:="warm" if reaction in ["delighted","pleased"] else ("hostile" if reaction in ["offended","furious"] else "neutral")
-		_append_if(out,_say(s,member,CLOSING_ASIDE[group],rng,{},true))
+		var generic:Array=(CLOSING_ASIDE[group] as Array)+(CLOSING_ASIDE_MORE[group] as Array)
+		var manner:Array=CV.model_bank(member.persona,"closing_aside")
+		_append_if(out,_say(s,member,manner if rng.randf()<0.85 else generic,rng,{},true,generic+manner))
 	return out
 
 # ---------------------------------------------------------------------------
@@ -1017,6 +2031,7 @@ func _kind_words(s:Dictionary)->String:
 			var findings:String=JSON.stringify(brief) if not brief.is_empty() else JSON.stringify(report.get("facts",[]))
 			return "The ruler's CHIEF SCOUT returns with a REPORT on %s (source: %s, observed on day %s). Debrief material, the only true findings: %s" % [String(report.get("subject_name","what they found")),String(report.get("source","scouts")),str(report.get("observed_day","?")),findings.substr(0,3200)]
 		"petition": return "A PETITION from the ruler's own official (topic: %s). The matter: %s%s" % [s.topic,s.summary," Their proposed remedy: \"%s\"." % s.decree if not String(s.decree).is_empty() else ""]
+		"proposal": return "An envoy of %s makes a PROPOSAL (%s): %s" % [civ,String(s.get("headline","an offer")),String(s.get("sit_summary",""))]
 		"wonder_proposal","great_work": return _work_scene_words(s)
 	return ""
 
@@ -1047,8 +2062,21 @@ func _audience_want(s:Dictionary,member:Dictionary)->String:
 func build_prompt(s:Dictionary,stage:String,extra:Dictionary)->String:
 	var parts:PackedStringArray=PackedStringArray()
 	parts.append("SCENE: "+_kind_words(s))
+	var occasion:Dictionary=s.get("occasion",{})
+	if not String(occasion.get("text","")).is_empty():
+		parts.append("WHY THEY CAME (true; the visitor's first words grow out of this): %s%s" % [String(occasion.text)," (a crisis)" if bool(occasion.get("crisis",false)) else ""])
+	var arc:Dictionary=s.get("arc",{})
+	if not arc.is_empty():
+		var entry:Dictionary=s.get("arc_entry",{})
+		parts.append("CONTINUING AN EARLIER AUDIENCE (%s, %s; the visitor must acknowledge it): %s" % [String(arc.get("branch","")).replace("_"," "),when_words(maxi(0,_day()-int(entry.get("day",_day())))),JSON.stringify(arc.get("previous",{})).substr(0,400)])
+	var home_tags:=CV.era_tags("player")
+	parts.append("WORLD AS THESE PEOPLE KNOW IT: "+CV.world_line(home_tags+(s.get("fact_tags",[]) as Array)))
+	var visitor_tags:Array=s.envoy.persona.get("era_tags",home_tags)
+	if String(s.origin)=="foreign" and JSON.stringify(visitor_tags)!=JSON.stringify(home_tags):
+		parts.append("THE VISITOR'S OWN PEOPLE KNOW: "+CV.world_line(visitor_tags+(s.get("fact_tags",[]) as Array))+" The court speaks only of what the ruler's people know.")
 	var ctx:Dictionary=(s.ctx as Dictionary).duplicate(true)
 	ctx.erase("court"); ctx.erase("audience_id"); ctx.erase("status"); ctx.erase("mood")
+	ctx.erase("history_with_speaker"); ctx.erase("history_with_civ")   # summarized below
 	var facts:String=JSON.stringify(ctx)
 	if facts.length()>2400: facts=facts.substr(0,2400)+"...}"
 	parts.append("FACTS YOU MAY USE (nothing else is true): "+facts)
@@ -1060,6 +2088,18 @@ func build_prompt(s:Dictionary,stage:String,extra:Dictionary)->String:
 	for member in s.officials:
 		cast.append("- %s (court official) = %s | in this audience wants %s" % [String(member.key),CV.brief(member.persona),_audience_want(s,member)])
 	parts.append("CAST (speaker_key = character; use no one else):\n"+"\n".join(cast))
+	var past:=_prompt_history(s)
+	if not past.is_empty():
+		parts.append("BEFORE TODAY (true; these people remember it and should refer to it where it matters, such as a promise still unkept or a refusal still resented; invent nothing beyond it):\n"+past)
+	var avoid:=_prompt_avoid(s)
+	if not avoid.is_empty():
+		parts.append("SAID IN RECENT AUDIENCES (do not reuse this wording, these openings or these jokes; find new ones):\n"+"\n".join(avoid))
+	var worn:PackedStringArray=PackedStringArray()
+	for member in [s.envoy]+(s.officials as Array):
+		var used:=_recent_flourishes(s,member)
+		if not used.is_empty(): worn.append("%s: %s" % [String(member.name),", ".join(used)])
+	if not worn.is_empty():
+		parts.append("FLOURISHES WORN OUT LATELY (skip them this time): "+"; ".join(worn))
 	var history:PackedStringArray=PackedStringArray()
 	var lines:Array=(s.audience as Dictionary).get("lines",[])
 	for line in lines.slice(maxi(0,lines.size()-10)):
@@ -1075,10 +2115,12 @@ func _stage_instruction(s:Dictionary,stage:String,extra:Dictionary)->String:
 			var who:="'envoy' is the petitioning official: they make their case with feeling and a little self-interest." if s.origin=="court" else "'envoy' speaks first: a greeting with flourish and attitude, then the business in plain terms, exact amounts as given."
 			if String(s.kind) in WORK_KINDS: who=_work_open_instruction(s)
 			if String(s.kind)=="report": who="'envoy' is the Chief Scout, back from the field. Debrief in 2 to 3 lines: plain-spoken, concrete and sensory (what they saw, heard, smelled, who they met, what surprised or worried them, what they covet), opinionated, with uncertainty spoken naturally ('I'd not swear to it, but...'). Use only the findings supplied; never add numbers, places or events."
+			if not (s.get("arc",{}) as Dictionary).is_empty(): who+=" The visitor first acknowledges the earlier audience named in CONTINUING."
+			elif not String((s.get("occasion",{}) as Dictionary).get("text","")).is_empty(): who+=" The visitor's opening grows out of WHY THEY CAME."
 			if bench==0: return who+" Nobody else is on the bench, so 'envoy' may add one more line. 1 to 2 lines total. mood_shift 0."
-			return who+" Then %d to %d short interjections from different officials: at least one disagrees with another official, at least one is an aside to the ruler, and at least one is funny. End on a line that hands the floor to the ruler. mood_shift 0." % [mini(2,bench),mini(4,bench)]
+			return who+" 'envoy' says at most 2 lines in all. Then at most 2 officials interject, only if each has something distinct to say (a disagreement, an aside, a joke). mood_shift 0."
 		"speak":
-			return "The ruler just said: \"%s\". 'envoy' answers first, in character: bristle, bargain, bluff, tease or be charmed, but change no terms and accept nothing new. Then 0 to 2 officials react (asides welcome). 1 to 3 lines total. Set mood_shift by how the ruler's words land with 'envoy'." % String(extra.get("player_text",""))
+			return "The ruler just said: \"%s\". 'envoy' answers in ONE line, in character; if it was a question, the line answers it plainly from FACTS (what they gain, what happens if refused, why now). Change no terms and accept nothing new. Then at most 1 official reacts. Set mood_shift by how the ruler's words land with 'envoy'." % String(extra.get("player_text",""))
 		"weigh":
 			return "The ruler is weighing the chosen work at the chosen ambition. Using ONLY the feasibility factors and verdict in FACTS (wonder_proposal.factors, spoken_verdict, odds_in_words), 2 to 4 officials each speak to the factor nearest their office (stores and stone: the Quartermaster; know-how and craft: the Scholar; war and safety: the Marshal; the people's mood and food: the Steward), one line each, in character, never as a number or percentage; then 'envoy' answers the doubts in one line. mood_shift 0."
 		"closing":

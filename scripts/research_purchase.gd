@@ -35,6 +35,30 @@ static func dispatch(source:String,subject:String,resource:String)->Dictionary:
 	result["message"]=terms.message
 	return result
 
+## A foreign envoy who carries the validated study with them: the same buyer
+## and supplier rules as a returned mission, without our own mission slot.
+static func envoy_quote(source:String,subject:String)->Dictionary:
+	if not available():return {"error":"Research purchasing needs experimental controls and public schools to assess and reproduce a study."}
+	var entry:=WorldSimulation.discovery.discovery_definition(subject)
+	if entry.is_empty() or subject in WorldSimulation.state.known_discoveries or not Pathways.ready(entry,int(WorldSimulation.state.elapsed_days)):
+		return {"error":"Choose an unresolved question your researchers can investigate."}
+	if Exchange.data().collections.has(key(source,subject)):return {"error":"This study has already been brought home."}
+	if Exchange.data().collections.size()>=Exchange.COLLECTION_LIMIT:return {"error":"The collection has no room for another study."}
+	var provider:=Exchange.owner_state(source)
+	if provider==null or not subject in provider.known_discoveries or provider.society_exchange.sharing_policy!="open":return {"error":"They cannot supply this study."}
+	var able:=bool(WorldSimulation.scoped(Exchange.owner_id(source),func()->bool:return WorldSimulation.discovery.adoption(subject)>=.35 and WorldSimulation.state.effective_workers("Knowledge")>=1))
+	if not able:return {"error":"They cannot supply this study."}
+	return {"ok":true,"subject_name":String(entry.name)}
+
+static func deliver_from_envoy(source:String,source_name:String,subject:String,payment_label:String)->Dictionary:
+	var quote:=envoy_quote(source,subject)
+	if quote.has("error"):return quote
+	var entry:=WorldSimulation.discovery.discovery_definition(subject)
+	var day:=int(WorldSimulation.state.elapsed_days)
+	var origin:Vector2=CivilizationSystem.player_world_origin
+	Exchange.data().collections[key(source,subject)]={"id":key(source,subject),"kind":"knowledge","name":"Purchased study: "+String(entry.name),"source_id":Exchange.owner_id(source),"source_name":source_name,"position":{"x":origin.x,"z":origin.y},"observed_day":day,"returned_day":day,"discovery_id":subject,"study":0.0,"work":STUDY_WORK,"signals":entry.get("signals",[]).duplicate(),"research_purchase":true,"acquisition":"Validated research bought from a visiting envoy for %s" % payment_label}
+	return {"ok":true,"message":"The study of %s is in your collection; your researchers must examine and reproduce it." % String(entry.name)}
+
 static func key(source:String,subject:String)->String:
 	return "purchase:"+Exchange.owner_id(source)+":"+subject
 

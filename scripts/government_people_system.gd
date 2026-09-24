@@ -270,12 +270,25 @@ func active_offices()->Array[Dictionary]:
 	]
 	var result:Array[Dictionary]=[]
 	var form:=government_form()
+	var cap:=_title_era_cap()
 	for definition in definitions:
 		if government_stage<int(definition.unlock): continue
 		var titles:Array=definition.titles.get(form,definition.titles.federated)
-		var title:=String(titles[clampi(government_stage,0,titles.size()-1)])
+		var title:=String(titles[clampi(mini(government_stage,cap),0,titles.size()-1)])
+		if cap==0: title=String(STONE_AGE_TITLES.get(String(definition.key),title))
 		result.append({"key":String(definition.key),"title":title,"unlock_stage":int(definition.unlock)})
 	return result
+
+
+## Office titles follow what the people know, not only how large the state
+## has grown: a stone-age band has no "Secretaries". Keys never change.
+const STONE_AGE_TITLES:={"Steward":"Hearth Chief","Quartermaster":"Keeper of Stores","Marshal":"War Leader","Scholar":"Lore Keeper","ChiefScout":"Pathfinder","Envoy":"Messenger","Settlement":"Hearth Elder"}
+
+func _title_era_cap()->int:
+	## Highest title rank the era supports: stone age 0, first villages 1,
+	## first metal or marks 2, iron and letters 4.
+	var voice:=preload("res://scripts/character_voice.gd")
+	return [0,1,2,4][clampi(voice.era_tier(voice.era_tags("player")),0,3)]
 
 
 func office_definition(office_key:String)->Dictionary:
@@ -292,7 +305,9 @@ func settlement_leader_title()->String:
 		"localist":["Hearth Elder","Local Speaker","Town Convenor","Mayor","Commons Delegate"],
 	}
 	var options:Array=titles.get(form,titles.federated)
-	return String(options[clampi(government_stage,0,options.size()-1)])
+	var cap:=_title_era_cap()
+	if cap==0: return String(STONE_AGE_TITLES.Settlement)
+	return String(options[clampi(mini(government_stage,cap),0,options.size()-1)])
 
 
 func leader_disposition(person:Dictionary)->Dictionary:

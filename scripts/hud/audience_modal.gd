@@ -23,6 +23,7 @@ const KINDS:={
 	"request":{"herald":"A PLEA FROM %s","eyebrow":"AN ENVOY ASKS YOUR AID"},
 	"threat":{"herald":"AN ULTIMATUM FROM %s","eyebrow":"AN ENVOY DEMANDS TRIBUTE"},
 	"news":{"herald":"NEWS FROM %s","eyebrow":"AN ENVOY BRINGS WORD"},
+	"proposal":{"herald":"A PROPOSAL FROM %s","eyebrow":"AN ENVOY BRINGS AN OFFER"},
 	"petition":{"herald":"%s REQUESTS AN AUDIENCE","eyebrow":"A PETITION FROM YOUR COURT"},
 	"report":{"herald":"%s RETURNS FROM THE FIELD","eyebrow":"A REPORT FROM BEYOND THE BORDERS"},
 	"great_work":{"herald":"%s SEEKS YOUR JUDGMENT","eyebrow":"A GREAT WORK"},
@@ -47,6 +48,8 @@ var outcome_box:VBoxContainer
 var wait_button:Button
 var summon_check:CheckBox
 var queue_label:Label
+var voice_label:Label
+var frequency_pick:OptionButton
 var next_button:Button
 var mood_meter:Control
 var mood_label:Label
@@ -166,6 +169,11 @@ func _build_herald(audience:Dictionary)->Control:
 	if kind=="petition":subject=("%s %s" % [String(speaker.get("title","")),String(speaker.get("name","An official"))]).strip_edges().to_upper()
 	var herald_text:=String(KINDS.get(kind,KINDS.news).herald) % subject
 	if kind=="report":herald_text=_report_herald(speaker)
+	# The hall's own short herald phrase says what this visit is about.
+	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation",{}) is Dictionary else {}
+	var headline:=String(situation.get("headline","")).strip_edges()
+	if not headline.is_empty() and kind!="report" and not kind in WORK_KINDS:
+		herald_text=("%s %s" % [subject,headline]).to_upper()
 	if kind in WORK_KINDS:herald_text=String(work_info.get("herald",herald_text))
 	var title:=Tokens.make_label(herald_text,30,cream);title.name="HeraldTitle"
 	title.add_theme_font_override("font",_bold);title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(title)
@@ -452,10 +460,53 @@ func _build_footer()->Control:
 	summon_check.toggled.connect(func(on:bool):Hall.state()["summon_immediately"]=on)
 	row.add_child(summon_check)
 	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(spacer)
+	# Which voice is speaking and what it has cost; the tooltip carries the receipts.
+	voice_label=Tokens.make_label("",12,Tokens.MUTED);voice_label.name="VoiceIndicator"
+	voice_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;voice_label.custom_minimum_size=Vector2(150,0)
+	voice_label.clip_text=true;voice_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	voice_label.mouse_filter=Control.MOUSE_FILTER_PASS
+	row.add_child(voice_label)
+	frequency_pick=OptionButton.new();frequency_pick.name="AudienceFrequency";frequency_pick.focus_mode=Control.FOCUS_NONE
+	frequency_pick.add_theme_font_size_override("font_size",13)
+	for level in FREQUENCY_LEVELS:frequency_pick.add_item(String(FREQUENCY_WORDS[level]))
+	frequency_pick.tooltip_text="How often envoys and petitioners ask to be received."
+	frequency_pick.select(maxi(0,FREQUENCY_LEVELS.find(_frequency())))
+	frequency_pick.item_selected.connect(_on_frequency_selected)
+	frequency_pick.disabled=not _hall_api().has_method("set_frequency")
+	row.add_child(frequency_pick)
 	queue_label=Tokens.make_label("",13,Tokens.TEXT_SOFT);queue_label.name="QueueLabel";queue_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(queue_label)
 	next_button=Button.new();next_button.name="NextAudience";next_button.text="Receive the next ›";next_button.custom_minimum_size=Vector2(150,34)
 	next_button.pressed.connect(receive_next);row.add_child(next_button)
 	return bar
+
+func _hall_api()->Object:
+	## The hall script as an object, for optional (duck-typed) engine calls.
+	return load("res://scripts/audience_hall.gd")
+
+const FREQUENCY_LEVELS:=["rare","normal","lively"]
+const FREQUENCY_WORDS:={"rare":"Visitors: rare","normal":"Visitors: normal","lively":"Visitors: lively"}
+
+func _frequency()->String:
+	## The hall's pacing level; "normal" until the engine exposes one.
+	if _hall_api().has_method("frequency"):return String(_hall_api().call("frequency"))
+	var level:=String(Hall.state().get("frequency","normal"))
+	return level if level in FREQUENCY_LEVELS else "normal"
+
+func _on_frequency_selected(index:int)->void:
+	if index<0 or index>=FREQUENCY_LEVELS.size():return
+	if _hall_api().has_method("set_frequency"):_hall_api().call("set_frequency",String(FREQUENCY_LEVELS[index]))
+
+func voice_status()->Dictionary:
+	if _voice_ok() and voice.has_method("status"):return voice.status()
+	return {"live":false,"label":"Offline voice — no voice attached","tooltip":""}
+
+func _refresh_voice_indicator()->void:
+	if not is_instance_valid(voice_label):return
+	var status:=voice_status()
+	var text:=String(status.get("label",""))
+	if voice_label.text!=text:voice_label.text=text
+	voice_label.tooltip_text=String(status.get("tooltip",""))
+	voice_label.add_theme_color_override("font_color",Tokens.MUTED if bool(status.get("live",false)) else Tokens.TEXT_DIM)
 
 # --- Behaviour --------------------------------------------------------------
 
@@ -563,6 +614,7 @@ func _refresh_footer()->void:
 		speech_input.editable=open
 		if not open:speech_input.placeholder_text="The audience is concluded. They are taking their leave."
 	speak_button.disabled=not open or (_voice_ok() and voice.busy(audience_id))
+	_refresh_voice_indicator()
 
 func _show_toast(text:String)->void:
 	var note:=Tokens.make_label(text,13,Tokens.RED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -918,7 +970,7 @@ func _kind_color(kind:String)->Color:
 		"gift":return Tokens.GREEN
 		"request":return Tokens.AMBER
 		"threat":return Tokens.RED
-		"news":return Tokens.BLUE
+		"news","proposal":return Tokens.BLUE
 		"petition":return Tokens.VIOLET
 		"report":return Tokens.TEAL
 		"wonder_proposal":return Tokens.GOLD
@@ -984,6 +1036,12 @@ class Seal extends Control:
 			"threat":
 				draw_line(c+Vector2(-s,-s),c+Vector2(s,s),ink,4);draw_line(c+Vector2(s,-s),c+Vector2(-s,s),ink,4)
 				draw_line(c+Vector2(-s*.9,s*.35),c+Vector2(-s*.35,s*.9),ink,3);draw_line(c+Vector2(s*.9,s*.35),c+Vector2(s*.35,s*.9),ink,3)
+			"proposal":
+				# Two hands meeting: an offer between peoples.
+				draw_line(c+Vector2(-s*1.1,s*.35),c+Vector2(-s*.15,-s*.1),ink,4)
+				draw_line(c+Vector2(s*1.1,s*.35),c+Vector2(s*.15,-s*.1),ink,4)
+				draw_circle(c+Vector2(0,-s*.1),s*.34,ink)
+				draw_arc(c,s*1.05,PI*1.15,PI*1.85,16,ink,2,true)
 			"request":
 				draw_arc(c+Vector2(0,-s*.1),s,0,PI,24,ink,4,true)
 				draw_line(c+Vector2(-s*1.15,-s*.1),c+Vector2(s*1.15,-s*.1),ink,3)

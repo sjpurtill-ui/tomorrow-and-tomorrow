@@ -470,7 +470,7 @@ static func loot(owner:String,city_id:String,work_id:String)->Dictionary:
 	for id:String in enshrined_ids(r):
 		var item:Dictionary=source.society_exchange.collections.get(id,{})
 		if item.get("kind","")!="artifact" or target.society_exchange.collections.has(id):continue
-		Artifacts.move(source,target,item);moved.append(id)
+		Artifacts.move(source,target,item,owner,looter,"looted");moved.append(id)
 	if moved.is_empty():return {"error":"Nothing enshrined remains to take."}
 	_clear_enshrined(r,moved)
 	var day:=int(WorldSimulation.state.elapsed_days)
@@ -508,7 +508,7 @@ static func return_loot(owner:String,work_id:String)->Dictionary:
 				if String(entry.by)!=looter or bool(entry.returned):continue
 				var item:Dictionary=source.society_exchange.collections.get(String(entry.id),{})
 				if item.is_empty() or target.society_exchange.collections.has(String(entry.id)):continue
-				Artifacts.move(source,target,item);entry.returned=true;count+=1
+				Artifacts.move(source,target,item,looter,owner,"returned");entry.returned=true;count+=1
 			if count>0:
 				title=_title(r)
 				_push(rv.events,{"day":day,"kind":"returned","by":looter,"count":count},EVENT_LIMIT)
