@@ -10,8 +10,9 @@ extends RefCounted
 ## surface fields quantized to the RGBA8 the vertex format stores anyway).
 ##
 ## Level 0 covers the planet on a 1921x961 lattice (~20.9 km cells; every fourth
-## node is a 481x241 global-mesh vertex). Level 1 is a 4x finer window around
-## the settled region, re-centred if the camera goes elsewhere. Bakes run one at
+## node is a 481x241 global-mesh vertex). Level 1 is a 3x finer (~7 km) window,
+## ~8,000 km wide so a continental (4,988 km) patch can pan ~1,500 km around
+## the settled region before it re-centres off-thread. Bakes run one at
 ## a time on a single background thread (level 0, then the planet land mask, then
 ## level 1) and are cached in user:// by seed and generator fingerprint.
 
@@ -20,15 +21,19 @@ const PLANET_WIDTH_KM:=40075.0
 const PLANET_DEPTH_KM:=20004.0
 const LEVEL0_COLUMNS:=1921
 const LEVEL0_ROWS:=961
-const LEVEL1_NODES:=1025
-const LEVEL1_DIVISOR:=4
-const RENDER_VERSION:=1
+const LEVEL1_NODES:=1153
+const LEVEL1_DIVISOR:=3
+const RENDER_VERSION:=2
 const CACHE_DIR:="user://terrain_macro"
 ## Patch sampling convention: the builder lifts every sample by this much and
 ## derives colour/fields/seasonality at the lifted height.
 const PATCH_LIFT:=0.0006
 const START_DELAY_SEC:=1.5
 const RECENTER_MIN_INTERVAL_MSEC:=8000
+## Window centres snap to this grid so revisited regions reuse cached windows;
+## a 4,988 km patch still fits within +/-1,500 km of an 8,000 km window centre.
+const LEVEL1_FOCUS_GRID_KM:=2000.0
+const LEVEL1_CACHE_KEEP:=6
 const WORLD_SCRIPT_PATH:="res://scripts/local_terrain.gd"
 
 var terrain:Node
@@ -119,7 +124,21 @@ func poll()->void:
 		raster.colors=bake.channels[2]
 		raster.fields=bake.channels[3]
 		levels[index]=raster
+		_upgrade_running_job()
 	_advance_chain()
+
+
+func _upgrade_running_job()->void:
+	## A continental patch still sampling procedurally when a fitting raster lands
+	## restarts on the raster (a few hundred ms instead of seconds more of noise).
+	var job:RefCounted=terrain.get("terrain_patch_job")
+	if job==null or job.get("macro_raster")!=null or int(job.get("phase"))>=2:return
+	var raster:=raster_for(job.get("center"),float(job.get("span")),int(job.get("resolution")))
+	if raster==null:return
+	job.set("macro_raster",raster)
+	job.set("_raster_bound",false)
+	job.set("cursor",0)
+	job.set("phase",0)
 
 
 func _busy()->bool:
@@ -135,6 +154,8 @@ func _advance_chain()->void:
 		if PlanetEnvironment.macro_bake_running():return
 	if levels[1]==null:pending[1]=_start_level(1,_focus);return
 	if _recenter_focus!=Vector2.INF:
+		if (levels[1] as Raster).origin==_level1_origin(_recenter_focus):
+			_recenter_focus=Vector2.INF;return
 		pending[1]=_start_level(1,_recenter_focus)
 		_recenter_focus=Vector2.INF
 		level1_recenters+=1
@@ -179,6 +200,8 @@ func _maybe_recenter(center:Vector2,span:float)->void:
 	if span>minf(window.x,window.y)*0.9:return
 	_last_recenter_msec=Time.get_ticks_msec()
 	_recenter_focus=center
+	var current:Raster=levels[1]
+	if current!=null and current.origin==_level1_origin(center):_recenter_focus=Vector2.INF;return
 	_advance_chain()
 
 
@@ -188,6 +211,17 @@ static func level0_cell()->Vector2:
 
 func _level1_cell()->Vector2:
 	return level0_cell()/float(LEVEL1_DIVISOR)
+
+
+func _level1_origin(focus:Vector2)->Vector2:
+	## Grid-snapped centre, then snapped to the level-1 lattice and kept on the planet.
+	var planet_origin:=Vector2(-PLANET_WIDTH_KM*0.5,-PLANET_DEPTH_KM*0.5)
+	var cell:=_level1_cell()
+	var size:=cell*float(LEVEL1_NODES-1)
+	var desired:=(focus/LEVEL1_FOCUS_GRID_KM).round()*LEVEL1_FOCUS_GRID_KM-size*0.5
+	desired.x=clampf(desired.x,planet_origin.x,planet_origin.x+PLANET_WIDTH_KM-size.x)
+	desired.y=clampf(desired.y,planet_origin.y,planet_origin.y+PLANET_DEPTH_KM-size.y)
+	return planet_origin+((desired-planet_origin)/cell).floor()*cell
 
 
 func _start_level(index:int,focus:Vector2)->Raster:
@@ -204,18 +238,13 @@ func _start_level(index:int,focus:Vector2)->Raster:
 		raster.cell=_level1_cell()
 		raster.columns=LEVEL1_NODES
 		raster.rows=LEVEL1_NODES
-		var size:=raster.cell*float(LEVEL1_NODES-1)
-		# Snap to the level-1 lattice and keep the window on the planet.
-		var desired:=focus-size*0.5
-		desired.x=clampf(desired.x,planet_origin.x,planet_origin.x+PLANET_WIDTH_KM-size.x)
-		desired.y=clampf(desired.y,planet_origin.y,planet_origin.y+PLANET_DEPTH_KM-size.y)
-		raster.origin=planet_origin+((desired-planet_origin)/raster.cell).floor()*raster.cell
+		raster.origin=_level1_origin(focus)
 	PlanetEnvironment.prepare_macro_sampling()
 	var bake:=BAKE.new()
 	raster.bake=bake
 	var sampler:=func(first:int,count:int)->Array:return _sample_band(raster,first,count)
 	var nodes:=raster.columns*raster.rows
-	bake.start(raster.rows,8,sampler,_cache_path(raster),PackedInt32Array([nodes,nodes,nodes,nodes]),2)
+	bake.start(raster.rows,8,sampler,_cache_path(raster),PackedInt32Array([nodes,nodes,nodes,nodes]),2 if index==0 else LEVEL1_CACHE_KEEP)
 	return raster
 
 

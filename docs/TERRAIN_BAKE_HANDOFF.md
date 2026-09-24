@@ -42,12 +42,14 @@ instrumentation is included; the harness here times the real functions.
   profile value is bit-identical and independent of when the bake finished.
 - Render rasters (`scripts/terrain_macro_render.gd`, owned by LocalTerrain):
   level 0 covers the planet on 1921×961 nodes (20.9 km); level 1 is a
-  1025×1025 window at 5.2 km around the settlement/start site, re-centred when a
-  continental patch falls outside it. Each node stores the patch builder's exact
+  1153×1153 window at 7.0 km (~8,000 km wide) centred on a 2,000 km grid near the
+  settlement/start site, re-centred (and cached, six windows kept) when a
+  continental patch falls outside it. A continental job still sampling noise when
+  a fitting raster lands restarts on the raster. Each node stores the patch builder's exact
   sample (height f32, seasonality f32, colour and surface fields as the RGBA8 the
   vertex format keeps). `TerrainPatchBuilder` filters bilinearly from the finest
   ready level whose cell is no larger than the patch's vertex spacing and which
-  contains the whole patch. Region scale and closer (≤1478 km spans at 385
+  contains the whole patch. Region scale and closer (≤2,217 km spans at 385
   vertices) always use the procedural sampler, so close terrain is unchanged.
   Raster samples are tagged and never reused as exact samples.
 - LocalTerrain edits are marked `codex/terrain-bake`: one member, bind in
@@ -66,6 +68,20 @@ was tried, produced identical meshes, and gave no speedup, so it was removed.
 A GDScript bilinear lookup costs about as much as one FastNoiseLite call, so
 rasterizing individual climate/geology channels in `profile_at` would not be
 faster and would make gameplay values depend on bake timing.
+
+## Visual QA (merged tree, RTX 4090 via tools/run_isolated_gpu_probe.ps1)
+
+`tests/terrain_bake_capture.tscn` (fog lifted for QA), same camera, raster vs noise,
+PNGs in `reports/terrain-bake/` (not committed). Continent view at the start and over a
+coast: 0.4–0.6% of pixels differ by more than 24/255 (mean 0.6–0.7/255), all along
+shorelines: the raster coast is slightly smoother, some one-vertex islets and inlet
+steps are missing. No seams inside patches. 2,217 km and 50,000 ft views are
+pixel-identical (procedural in both). Zoom-out popping (83 km global mesh →
+detailed patch) is pre-existing and shorter with rasters (~110 frames vs ~500).
+Cold bake during idle play: 48,708 frames, p99 1.6 ms, max 3.5 ms, none >33 ms;
+after bake p99 1.6 ms, max 4.0 ms: no visible hitch. The level-1 window was widened
+and grid-snapped after QA showed the old 5,343 km window re-baking on every
+continental pan; figures below predate that (2,217 km finals are now procedural).
 
 ## Before / after (paired runs, same host minutes apart)
 
