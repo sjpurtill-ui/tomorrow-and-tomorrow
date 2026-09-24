@@ -2517,3 +2517,7 @@ Fast-forwarded `codex/fear-love` (c05f20bd). Officials carry love and dread of t
 ### Love/dread fading and tooltip contrast (main)
 
 Fast-forwarded `codex/fade-and-tooltips` (5e55ffb8). Love, dread and resentment drift toward per-person baselines (dread half-life ~3–4 weeks unless held by grave acts; executions linger a season or two; love ~150 days; resentment only after a quiet spell); memories remain; multi-day steps match daily. Tooltips get a themed panel/text in light and dark modes everywhere (measured contrast 14.4:1 light, 15.0:1 dark). fear_love, tooltip_contrast, audience_summon and audience_hall probes pass.
+
+### The Court (main)
+
+Fast-forwarded `codex/court`. A Court button (F12) opens one modal holding every leader interaction: the court at rest (era-drawn backdrop from an open-air log-and-hide ring to stone halls, seated officials with love/dread and matter counts), the antechamber of envoys and pending decisions, foreign peoples reached through the envoy channel with terms and pacts, and in-place summons. The settlement-leader civic flow (confirm, insist, withdraw, recall, dismiss) moved into the court; every old talk/negotiate entry point opens the court on that person. court, audience_modal, audience_summon, fear_love, audience_hall, tooltip_contrast, great_works_experience and chief_scout probes pass on the merged tree.
