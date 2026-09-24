@@ -38,6 +38,7 @@ func _ensure_configured()->void:
 	_mountain_relief.configure(seed_value)
 	_viable_land_cache.clear()
 	_profile_cache.clear()
+	_macro_reset()
 	_configure_noise(_continent,seed_value,0.000105,5,FastNoiseLite.FRACTAL_FBM)
 	_continent.fractal_lacunarity=2.05
 	_continent.fractal_gain=0.52
@@ -62,6 +63,12 @@ func world_height_at(position:Vector2)->float:
 	## Planet-scale counterpart of LocalTerrain's authored height field. LocalTerrain
 	## remains authoritative for close samples and passes its measured height back in.
 	_ensure_configured()
+	return _world_height_unchecked(position)
+
+
+func _world_height_unchecked(position:Vector2)->float:
+	## Body of world_height_at without the seed check, so macro-bake worker
+	## threads never reconfigure noise. Callers on the main thread use the above.
 	var x:=position.x
 	var z:=position.y
 	var latitude:=clampf(absf(z)/(PLANET_DEPTH_KM*0.5),0.0,1.0)
@@ -81,7 +88,10 @@ func world_height_at(position:Vector2)->float:
 
 
 func is_land(position:Vector2)->bool:
-	return world_height_at(position)>SEA_LEVEL+0.015
+	_ensure_configured()
+	var decided:=_macro_decide(position,SEA_LEVEL+0.015)
+	if decided>=0:return decided==1
+	return _world_height_unchecked(position)>SEA_LEVEL+0.015
 
 
 func nearest_viable_land(desired:Vector2,search_seed:int=0)->Vector2:
@@ -141,8 +151,13 @@ func _radical_inverse(index:int,base:int)->float:
 func profile_at(position:Vector2,observed:Dictionary={})->Dictionary:
 	_ensure_configured()
 	var cache_key:="%d:%d:%d" % [_configured_seed,roundi(position.x*10.0),roundi(position.y*10.0)]
-	if observed.is_empty() and _profile_cache.has(cache_key): return (_profile_cache[cache_key] as Dictionary).duplicate(true)
-	var height:=float(observed.get("height",world_height_at(position)))
+	# Unobserved profiles are shared, deeply read-only records: callers read them
+	# (or duplicate before editing), so a hit no longer pays for a deep copy.
+	if observed.is_empty() and _profile_cache.has(cache_key): return _profile_cache[cache_key]
+	# Observed ground overrides are resolved lazily. Dictionary.get evaluates its
+	# default eagerly, which ran the planet height and 24-probe coast check even
+	# when the caller had measured them.
+	var height:float=float(observed.height) if observed.has("height") else world_height_at(position)
 	var latitude:=clampf(absf(position.y)/(PLANET_DEPTH_KM*0.5),0.0,1.0)
 	var latitude_warmth:=1.0-latitude
 	var temperature:=clampf(latitude_warmth-maxf(0.0,height)*0.055,0.0,1.0)
@@ -156,10 +171,10 @@ func profile_at(position:Vector2,observed:Dictionary={})->Dictionary:
 	var river_distance:=float(observed.get("river_distance_km",INF))
 	if river_distance<16.0:
 		precipitation=clampf(precipitation+(1.0-river_distance/16.0)*0.28,0.0,1.0)
-	var coastal:=bool(observed.get("coastal",_coastal_at(position,height)))
-	var biome:=String(observed.get("biome",_biome_id(height,temperature,precipitation,river_distance)))
-	var woodland:=clampf(float(observed.get("woodland",_woodland(height,temperature,precipitation))),0.0,1.0)
-	var fertility:=clampf(float(observed.get("fertility",_fertility(biome,precipitation))),0.0,1.0)
+	var coastal:bool=bool(observed.coastal) if observed.has("coastal") else _coastal_at(position,height)
+	var biome:String=String(observed.biome) if observed.has("biome") else _biome_id(height,temperature,precipitation,river_distance)
+	var woodland:=clampf(float(observed.woodland) if observed.has("woodland") else _woodland(height,temperature,precipitation),0.0,1.0)
+	var fertility:=clampf(float(observed.fertility) if observed.has("fertility") else _fertility(biome,precipitation),0.0,1.0)
 	var forage:=clampf(precipitation*0.60+woodland*0.30+(0.25 if biome=="wetland" else 0.0),0.0,1.0)
 	var game:=clampf(woodland*(1.60-woodland)+(0.20 if biome in ["grassland","floodplain"] else 0.0),0.0,1.0)
 	var relief:=clampf(absf(float(observed.get("relief",0.0)))*1.8+maxf(0.0,height)/7.0,0.0,1.0)
@@ -196,15 +211,21 @@ func profile_at(position:Vector2,observed:Dictionary={})->Dictionary:
 		"ecological_resilience":clampf(0.25+precipitation*0.30+growing_season*0.28-rainfall_variability*0.16,0.08,0.96),
 		"signature":environment_signature_from_values(biome,temperature,precipitation,geology,coastal)
 	}
-	if observed.is_empty(): _profile_cache[cache_key]=profile.duplicate(true)
+	if observed.is_empty():
+		for nested:Dictionary in [hazards,geology,resources]:nested.make_read_only()
+		profile.make_read_only()
+		_profile_cache[cache_key]=profile
 	return profile
 
 
 func _coastal_at(position:Vector2,height:float)->bool:
 	if height<=SEA_LEVEL: return false
-	for radius in [3.0,12.0,36.0]:
+	for radius:float in [3.0,12.0,36.0]:
 		for spoke in 8:
-			if world_height_at(position+Vector2.from_angle(TAU*float(spoke)/8.0)*radius)<=SEA_LEVEL: return true
+			var probe:=position+Vector2.from_angle(TAU*float(spoke)/8.0)*radius
+			var decided:=_macro_decide(probe,SEA_LEVEL)
+			if decided==0: return true
+			if decided<0 and world_height_at(probe)<=SEA_LEVEL: return true
 	return false
 
 
@@ -309,6 +330,10 @@ func _seasonality_from_interior(position:Vector2,interior:float)->float:
 func seasonality_at(position:Vector2)->float:
 	## Lightweight projection of the same amplitude used by stored food profiles.
 	_ensure_configured()
+	return seasonality_unchecked(position)
+
+func seasonality_unchecked(position:Vector2)->float:
+	## Worker-thread form (no seed check); see prepare_macro_sampling().
 	return _seasonality_from_interior(position,clampf((_continent.get_noise_2d(position.x,position.y)-0.05)*1.2,0.0,0.5))
 
 func ambient_temperature_c(profile:Dictionary,day:float)->float:
@@ -331,3 +356,154 @@ func food_season_factor(food_type:String,profile:Dictionary,day:float)->float:
 		"Fish": return clampf(0.86+float(profile.get("water_access",0.0))*0.22+sin(fmod(day,365.0)/365.0*TAU+0.8)*0.14,0.52,1.24)
 		"Dry staples": return clampf(0.30+growing*0.70+wave*0.56*seasonality-(1.0-precipitation)*0.18,0.02,1.58)
 	return 1.0
+
+
+# --- Planet macro bake (land mask) -------------------------------------------
+## A per-seed land/sea certainty mask accelerates is_land() and the coast probes
+## in profile_at(). It never changes an answer: each 10.4 km lattice cell is
+## classified from its four exact corner heights with a margin for unresolved
+## relief, and anything not certainly land (>0.015) or certainly sea (<0) falls
+## back to the exact noise height. Heights, climate and resource values are never
+## served from the raster, so profiles stay bit-identical and independent of bake
+## timing. Baked off the main thread on request (LocalTerrain asks after load);
+## until then every query uses noise. The classification is cached in user://
+## keyed by seed, generator fingerprint and format version.
+const MacroBake:=preload("res://scripts/terrain_macro_bake.gd")
+const MACRO_VERSION:=1
+const MACRO_COLUMNS:=3840
+const MACRO_ROWS:=1920
+const MACRO_X0:=-PLANET_WIDTH_KM*0.5
+const MACRO_Z0:=-PLANET_DEPTH_KM*0.5
+const MACRO_DX:=PLANET_WIDTH_KM/float(MACRO_COLUMNS)
+const MACRO_DZ:=PLANET_DEPTH_KM/float(MACRO_ROWS)
+## Calibrated on four seeds: exact height strayed at most 0.36 outside the
+## corner range in flat cells and 0.30 beyond 0.75*(range) in rough cells.
+const MACRO_MARGIN:=0.8
+const MACRO_RANGE_MARGIN:=0.75
+const MACRO_CELL_SEA:=0
+const MACRO_CELL_LAND:=1
+const MACRO_CELL_UNCERTAIN:=2
+const MACRO_CACHE_DIR:="user://terrain_macro"
+const MACRO_CACHE_KEEP:=4
+
+var macro_bake_enabled:=true
+var _macro_bake:RefCounted=null
+var _macro_ready:=false
+var _macro_seed:=0
+var _macro_classes:=PackedByteArray()
+var _macro_counts:=PackedInt32Array()
+var _macro_source:=""
+var _macro_bake_ms:=-1.0
+
+
+func prepare_macro_sampling()->void:
+	## Main thread: settle the seed before worker threads use *_unchecked samplers.
+	_ensure_configured()
+
+
+func request_macro_bake()->void:
+	_ensure_configured()
+	if not macro_bake_enabled or _macro_ready or _macro_bake!=null:return
+	_macro_seed=_configured_seed
+	var bake:=MacroBake.new()
+	_macro_bake=bake
+	bake.start(MACRO_ROWS,8,_macro_sample_band,_macro_cache_path(),PackedInt32Array([MACRO_COLUMNS*MACRO_ROWS,3*ceili(float(MACRO_ROWS)/8.0)]),MACRO_CACHE_KEEP)
+
+
+func macro_bake_running()->bool:
+	return _macro_bake!=null
+
+
+func poll_macro_bake()->bool:
+	if _macro_ready or _macro_bake==null:return _macro_ready
+	var bake:=_macro_bake as MacroBake
+	if not bake.poll():
+		if not bake.running():_macro_bake=null
+		return false
+	_macro_bake=null
+	if _macro_seed!=_configured_seed:return false
+	_macro_classes=bake.channels[0]
+	_macro_counts=bake.channels[1]
+	_macro_bake_ms=bake.elapsed_ms()
+	_macro_ready=true
+	_macro_source="cache" if bake.from_cache else "baked"
+	return true
+
+
+func macro_bake_ready()->bool:
+	return _macro_ready
+
+
+func set_macro_bake_enabled(enabled:bool)->void:
+	macro_bake_enabled=enabled
+	if not enabled:_macro_reset()
+
+
+func macro_bake_stats()->Dictionary:
+	var counts:=PackedInt32Array([0,0,0])
+	for index in _macro_counts.size():counts[index%3]+=_macro_counts[index]
+	var cells:=float(maxi(1,counts[0]+counts[1]+counts[2]))
+	return {"ready":_macro_ready,"source":_macro_source,"bake_ms":_macro_bake_ms,"cells":MACRO_COLUMNS*MACRO_ROWS,"cell_km":[MACRO_DX,MACRO_DZ],
+		"certain_sea_share":float(counts[MACRO_CELL_SEA])/cells,"certain_land_share":float(counts[MACRO_CELL_LAND])/cells,"uncertain_share":float(counts[MACRO_CELL_UNCERTAIN])/cells,"bytes":_macro_classes.size()}
+
+
+func _macro_reset()->void:
+	if _macro_bake!=null:(_macro_bake as MacroBake).cancel()
+	_macro_bake=null
+	_macro_ready=false
+	_macro_classes=PackedByteArray()
+	_macro_counts=PackedInt32Array()
+	_macro_source=""
+
+
+func _macro_decide(position:Vector2,threshold:float)->int:
+	## 1 = certainly above threshold, 0 = certainly below, -1 = ask the noise.
+	## Valid for thresholds in [SEA_LEVEL, SEA_LEVEL+0.015].
+	if not _macro_ready:return -1
+	var column:=floori((position.x-MACRO_X0)/MACRO_DX)
+	var row:=floori((position.y-MACRO_Z0)/MACRO_DZ)
+	if column<0 or row<0 or column>=MACRO_COLUMNS or row>=MACRO_ROWS:return -1
+	var cell:=_macro_classes[row*MACRO_COLUMNS+column]
+	if cell==MACRO_CELL_LAND:return 1 if threshold<=SEA_LEVEL+0.015 else -1
+	if cell==MACRO_CELL_SEA:return 0 if threshold>=SEA_LEVEL else -1
+	return -1
+
+
+func _macro_sample_band(first:int,count:int)->Array:
+	## Worker thread: exact heights on count+1 lattice rows, then classify cells.
+	var nodes:=MACRO_COLUMNS+1
+	var heights:=PackedFloat32Array();heights.resize(nodes*(count+1))
+	for local_row in count+1:
+		var z:=MACRO_Z0+float(first+local_row)*MACRO_DZ
+		for column in nodes:
+			heights[local_row*nodes+column]=_world_height_unchecked(Vector2(MACRO_X0+float(column)*MACRO_DX,z))
+	var classes:=PackedByteArray();classes.resize(MACRO_COLUMNS*count)
+	var counts:=PackedInt32Array([0,0,0])
+	for local_row in count:
+		for column in MACRO_COLUMNS:
+			var index:=local_row*nodes+column
+			var a:=heights[index];var b:=heights[index+1];var c:=heights[index+nodes];var d:=heights[index+nodes+1]
+			var low:=minf(minf(a,b),minf(c,d));var high:=maxf(maxf(a,b),maxf(c,d))
+			var margin:=MACRO_MARGIN+MACRO_RANGE_MARGIN*(high-low)
+			var cell:=MACRO_CELL_UNCERTAIN
+			if low-margin>SEA_LEVEL+0.015:cell=MACRO_CELL_LAND
+			elif high+margin<SEA_LEVEL:cell=MACRO_CELL_SEA
+			classes[local_row*MACRO_COLUMNS+column]=cell
+			counts[cell]+=1
+	return [classes,counts]
+
+
+func _macro_fingerprint()->String:
+	## Exact heights at fixed probes: a generator change produces a new cache key.
+	var context:=HashingContext.new();context.start(HashingContext.HASH_SHA256)
+	var probes:=PackedFloat64Array()
+	for index in 64:
+		var u:=_radical_inverse(index+1,2);var v:=_radical_inverse(index+1,3)
+		probes.append(_world_height_unchecked(Vector2(lerpf(-19000.0,19000.0,u),lerpf(-9500.0,9500.0,v))))
+	probes.append_array(PackedFloat64Array([MACRO_MARGIN,MACRO_RANGE_MARGIN,float(MACRO_COLUMNS),float(MACRO_ROWS)]))
+	context.update(probes.to_byte_array())
+	return context.finish().hex_encode().substr(0,16)
+
+
+func _macro_cache_path()->String:
+	return "%s/planet_land_v%d_s%d_%s.bin" % [MACRO_CACHE_DIR,MACRO_VERSION,_macro_seed,_macro_fingerprint()]

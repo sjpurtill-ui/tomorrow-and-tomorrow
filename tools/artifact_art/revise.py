@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Preserve an unsuitable original and queue a specifically corrected subject."""
 import argparse
-import fcntl
+from locking import manifest_lock
 import json
 import shutil
 import prehistoric as p
@@ -34,6 +34,5 @@ if __name__=='__main__':
     parser.add_argument('--reason',required=True)
     parser.add_argument('--subject',required=True)
     args=parser.parse_args()
-    with open(p.bank.MANIFEST.with_suffix('.lock'),'w') as lock:
-        fcntl.flock(lock,fcntl.LOCK_EX)
+    with manifest_lock(p.bank.MANIFEST.with_suffix('.lock')):
         revise(args.id,args.reason,args.subject)

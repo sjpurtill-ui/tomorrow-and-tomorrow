@@ -55,7 +55,8 @@ func test_planet_contains_materially_different_climates_and_resource_endowments(
 
 
 func test_seasons_reverse_between_hemispheres()->void:
-	var north:=PlanetEnvironment.profile_at(PlanetEnvironment.nearest_viable_land(Vector2(1200.0,4200.0),23))
+	# Cached profiles are shared read-only records; edit a private copy.
+	var north:=PlanetEnvironment.profile_at(PlanetEnvironment.nearest_viable_land(Vector2(1200.0,4200.0),23)).duplicate(true)
 	var south:=north.duplicate(true)
 	north["position"]=Vector2(1200.0,4200.0)
 	south["position"]=Vector2(1200.0,-4200.0)

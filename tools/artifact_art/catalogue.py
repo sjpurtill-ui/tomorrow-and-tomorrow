@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Build a resumable, one-image-per-artifact art catalogue. No image generation API."""
-import argparse, fcntl, hashlib, json, os, re, shutil, struct
+import argparse, hashlib, json, os, re, shutil, struct
+from locking import manifest_lock
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 DEST=ROOT/'assets/ui/artifacts/early-civ-v1'
@@ -122,7 +123,7 @@ if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('command',choices=['build','register','audit','next']);p.add_argument('--id',type=int);p.add_argument('--source');p.add_argument('--review');p.add_argument('--complete',action='store_true');p.add_argument('--limit',type=int,default=8);a=p.parse_args()
     if a.command=='build':build();print('Built 4096 distinct artifact prompts')
     elif a.command=='register':
-        with open(MANIFEST.with_suffix('.lock'),'w') as lock:
-            fcntl.flock(lock,fcntl.LOCK_EX);register(a.id,a.source,a.review)
+        with manifest_lock(MANIFEST.with_suffix('.lock')):
+            register(a.id,a.source,a.review)
     elif a.command=='audit':raise SystemExit(audit(a.complete))
     else:print(json.dumps([{'catalogue_id':e['catalogue_id'],'prompt':e['prompt']} for e in json.loads(MANIFEST.read_text())['entries'] if e['status']=='pending'][:a.limit]))

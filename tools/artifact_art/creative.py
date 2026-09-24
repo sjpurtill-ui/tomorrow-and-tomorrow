@@ -3,7 +3,7 @@
 These are fictional finds inspired by human ingenuity, not archaeological claims.
 """
 import json
-import fcntl
+from locking import manifest_lock
 import prehistoric as p
 from catalogue import write_document
 from experiment_families import BRIEFS as MORE_BRIEFS
@@ -72,6 +72,5 @@ def extend():
     write_document(path,authored);write_document(p.bank.MANIFEST,manifest)
     print(f'{len(authored)} authored experiments ready')
 if __name__=='__main__':
-    with open(p.bank.MANIFEST.with_suffix('.lock'),'w') as lock:
-        fcntl.flock(lock,fcntl.LOCK_EX)
+    with manifest_lock(p.bank.MANIFEST.with_suffix('.lock')):
         extend()

@@ -1,0 +1,14 @@
+[remap]
+importer="texture"
+type="CompressedTexture2D"
+path="res://.godot/imported/artifact-1104.png-25f7c9f2e015e7b9ae7af4a06d4861bc.ctex"
+metadata={"vram_texture": false}
+
+[deps]
+source_file="res://assets\ui\artifacts\prehistoric-v1\artifact-1104.png"
+dest_files=["res://.godot/imported/artifact-1104.png-25f7c9f2e015e7b9ae7af4a06d4861bc.ctex"]
+
+[params]
+compress/mode=0
+mipmaps/generate=false
+process/size_limit=512
