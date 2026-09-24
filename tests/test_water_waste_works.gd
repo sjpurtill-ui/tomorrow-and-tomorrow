@@ -76,7 +76,10 @@ func test_settling_basin_is_staff_and_volume_bounded_not_sterilization()->void:
 	know(["water_settling_basins"]);finish("settling_basin")
 	Works.advance({},1,100.0);DiscoverySystem.refresh_operating_effects()
 	assert_float(Works.factor("water_settling_basins")).is_between(.5,.56)
-	assert_float(DiscoverySystem.effect("water_safety")).is_between(.01,.012)
+	# research_600 balance: the rebalanced basin effect, scaled by its staffed share.
+	var basin:=float((DiscoverySystem.discovery_definition("water_settling_basins").get("effects",{}) as Dictionary).get("water_safety",0.0))
+	assert_float(DiscoverySystem.effect("water_safety")).is_equal_approx(minf(basin*Works.factor("water_settling_basins"),DiscoverySystem.society_model.era_ceiling("water_safety").y),.0001)
+	assert_float(DiscoverySystem.effect("water_safety")).is_greater(0.0)
 	GameState.population_allocations.Logistics=0;Works.advance({},2,100.0);DiscoverySystem.refresh_operating_effects()
 	assert_float(DiscoverySystem.effect("water_safety")).is_equal(0.0)
 

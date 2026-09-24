@@ -74,11 +74,13 @@ const GOOD_CONDITIONS:=0.55
 ## only through its era-capped effect channels (SocietyModel.era_ceiling_for),
 ## so it lifts little before the modern era. Missing practices add their excess
 ## on top, weighted by EXCESS_WEIGHT. Old saves blend in with early_care_blend.
-const ERA_BURDEN:={"under5":2.7,"child":2.4,"adult":2.3,"elder":1.6,"neonatal":1.3,"maternal":1.2}
-const EXCESS_WEIGHT:={"under5":0.3,"child":0.7,"adult":1.0}
+const ERA_BURDEN:={"under5":3.6,"child":4.5,"adult":4.0,"elder":2.1,"neonatal":1.3,"maternal":1.0}
+const EXCESS_WEIGHT:={"under5":0.15,"child":0.35,"adult":0.5}
 ## Channel totals that relieve the burden, each over its modern limit.
 const RELIEF_CHANNELS:={"health_protection":0.55,"sanitation":0.65,"water_safety":0.60,"disease_exposure":-0.55}
-const RELIEF_POWER:=1.5
+const RELIEF_POWER:=2.5
+## Hunger and sickness absorb at most this share of the burden (see age_multiplier).
+const BURDEN_OVERLAP_FLOOR:=0.5
 
 ## Share (0..1) of the pre-modern burden lifted by general health knowledge.
 static func burden_relief(discovery:Node)->float:
@@ -197,11 +199,15 @@ static func age_multiplier(care:Dictionary,age:int,condition_factor:float=GOOD_C
 	if age<5:band="under5"
 	elif age<15:band="child"
 	var raw:=float(care.get(band,1.0))
-	var excess:=raw if raw<=1.0 else 1.0+(raw-1.0)*clampf(pow(GOOD_CONDITIONS/maxf(0.01,condition_factor),1.5),0.4,1.0)
+	var overlap:=clampf(pow(GOOD_CONDITIONS/maxf(0.01,condition_factor),1.5),0.4,1.0)
+	var excess:=raw if raw<=1.0 else 1.0+(raw-1.0)*overlap
 	var burden:Dictionary=care.get("burden",{})
 	if burden.is_empty():return excess
 	var weight:=float((care.get("excess_weight",{}) as Dictionary).get(band,1.0))
-	return float(burden.get("elder" if age>=45 else band,1.0))*(1.0+(excess-1.0)*weight)
+	# Hunger, exposure and sickness in the condition factor are largely the same
+	# endemic killers, so the burden overlaps them just as missing practices do.
+	var era_burden:=1.0+(float(burden.get("elder" if age>=45 else band,1.0))-1.0)*maxf(BURDEN_OVERLAP_FLOOR,overlap)
+	return era_burden*(1.0+(excess-1.0)*weight)
 
 ## Newborn and maternal death multipliers including the pre-modern burden.
 static func neonatal_factor(care:Dictionary)->float:

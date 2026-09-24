@@ -111,6 +111,22 @@ Sources:
 - Most items are small practices. Only a handful per century are historically major. That handful is tracked through the milestone ids in `benchmarks_600.json`.
 - A milestone passes when it lands inside its design band.
 
+## Allowed lead over history
+
+The user allows play to run ahead of history "within a reasonable deviation", as long as every lead costs something elsewhere. The allowed deviation is:
+
+- **Milestones.** A milestone may land up to about 20% before its design year, but never before its band's low edge. The era gate (`earliest_year` = band low) enforces the floor in the engine. For writing (`pictographic_records`, year 255) that is year 215. For bronze (360) it is 320, and for place value (510) it is 470.
+  - The band low is about 12–25% before the design year, so "one band early" and "20% early" coincide.
+  - Landing after the band's high edge is a pacing failure too.
+- **Outcome facets.** Good play should sit between typical and high. A facet may exceed the era's high value by at most 15% of the gap between typical and high. For example, at year 300 life expectancy may reach 33 + 0.15 × (33 − 27) ≈ 34.
+  - The 15% margin absorbs single-seed noise and the aggregate model's coarseness. Anything beyond it counts as superhuman, and the min/max plausibility bounds still apply.
+  - Why 15%: the documented spread between typical and best societies of an era is itself the historical record of how far a well-run society led its neighbours. A lead of more than about a sixth of that spread again has no documented precedent.
+- **Trade-offs.** No strategy may lead on every facet. The price of each lead is set out below:
+  - **Research.** Heavy research moves workers into Knowledge and out of food, craft and building, which slows growth and food security.
+  - **One line.** Maximizing one line leaves the other lines unlearned.
+  - **Early bonuses.** Early care or military emphasis comes at the expense of stores or tools.
+  - The line-maximization matrix and the mixed-allocation sweep (`docs/research/LINE_MAX_MATRIX.md`) check this.
+
 ## What the game must never show before year 600
 
 These are the "superhuman" signals the harness checks for:

@@ -2,6 +2,13 @@ extends GdUnitTestSuite
 
 const Craft=preload("res://scripts/civilian_goods.gd")
 
+## research_600 balance: magnitudes come from the rebalanced catalog entries,
+## weighted by their operating factor and held under the era ceiling.
+func expected_effect(key:String,ids:Array[String],factor:float=-1.0)->float:
+	var total:=0.0
+	for id:String in ids:total+=float((DiscoverySystem.discovery_definition(id).get("effects",{}) as Dictionary).get(key,0.0))*(Craft.factor(id) if factor<0.0 else factor)
+	return minf(total,DiscoverySystem.society_model.era_ceiling(key).y)
+
 func before_test()->void:
 	WorldSimulation.clear()
 	GameState.reset_for_new_world(6413);DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
@@ -47,8 +54,9 @@ func test_local_water_is_spent_and_enables_bounded_practice_coverage()->void:
 	assert_float(float(metrics.wound_cleaning_coverage)).is_equal(1.0)
 	assert_float(float(metrics.clean_water_coverage)).is_equal(1.0)
 	assert_float(float(metrics.collected_today)).is_equal_approx(float(metrics.consumed_today)+float(metrics.stored),.000001)
-	assert_float(DiscoverySystem.effect("health_protection")).is_equal_approx(.05,.000001)
-	assert_float(DiscoverySystem.effect("water_safety")).is_equal_approx(.16,.000001)
+	assert_float(DiscoverySystem.effect("health_protection")).is_equal_approx(expected_effect("health_protection",["wound_cleaning","clean_water"]),.000001)
+	assert_float(DiscoverySystem.effect("water_safety")).is_equal_approx(expected_effect("water_safety",["wound_cleaning","clean_water"]),.000001)
+	assert_float(DiscoverySystem.effect("water_safety")).is_greater(0.0)
 
 func test_drinking_is_served_before_health_practices_during_shortage()->void:
 	know(["wound_cleaning","clean_water"])

@@ -98,7 +98,9 @@ func test_studied_pieces_yield_culture_research_and_economic_value()->void:
 	assert_int(int(summary.studied_count)).is_equal(1)
 	assert_float(float(summary.value_totals.research)).is_greater(0.0)
 	assert_float(A.bonus("culture")).is_greater(culture_before)
-	assert_float(A.bonus(A.family_of(String(record.discovery_id)))).is_greater(float(A.summary().science)-.0001)
+	# research_600 balance: the whole collection bonus is held under the era's cap.
+	assert_float(A.bonus(A.family_of(String(record.discovery_id)))).is_greater(minf(float(A.summary().science),A.era_bonus_cap())-.0001)
+	assert_float(A.bonus(A.family_of(String(record.discovery_id)))).is_less_equal(A.era_bonus_cap()+.0001)
 	assert_float(A.bonus(A.family_of(String(record.discovery_id)))).is_less(.5)
 	var lean:=A.channels(record)
 	assert_float(float(lean.culture)+float(lean.research)+float(lean.economic)).is_equal_approx(1.0,.0001)

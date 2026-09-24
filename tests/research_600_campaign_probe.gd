@@ -5,7 +5,7 @@ extends Node
 ##
 ## Usage:
 ##   Godot --headless --path <worktree> res://tests/research_600_campaign_probe.tscn -- \
-##     [--years=600] [--seeds=74119,5021] [--scenarios=sensible,poor,research,ai] [--every=25]
+##     [--years=600] [--seeds=74119,5021] [--scenarios=sensible,poor,research,ai,balanced,max_health] [--every=25]
 ##
 ## Prints one RC_ROW JSON line per checkpoint and one RC_SUMMARY line per run
 ## (milestone years, discoveries per 50 years, effect-over-ceiling violations).
@@ -35,7 +35,20 @@ func _scenarios()->Dictionary:
 		"research":{"site":"good","focus":"research","policies":[],"research":{"demography":3,"nutrition":4,"health":4,"labor":3,"knowledge":6,"production":4,"infrastructure":3,"logistics":3,"ecology":2,"institutions":3,"security":2,"culture":2}},
 		# (d) The ordinary rival controller chooses research and orders.
 		"ai":{"site":"good","focus":"","policies":[],"ai":true,"research":{}},
+		# Line-maximization matrix (docs/research/LINE_MAX_MATRIX.md): the same
+		# good-site play with 2 on every line, or 12 on one line and 0 elsewhere.
+		"balanced":{"site":"good","focus":"","policies":[],"research":_uniform(2)},
 	}
+
+func _uniform(weight:int,line:String="")->Dictionary:
+	var result:Dictionary={}
+	for domain:String in DOMAINS:result[domain]=weight if line=="" else (12 if domain==line else 0)
+	return result
+
+func _scenario(scenario_name:String)->Dictionary:
+	if scenario_name.begins_with("max_") and scenario_name.substr(4) in DOMAINS:
+		return {"site":"good","focus":"","policies":[],"research":_uniform(0,scenario_name.substr(4))}
+	return _scenarios().get(scenario_name,{})
 
 func _site_profile(origin:Vector2,site:String)->Dictionary:
 	var profile:Dictionary=PlanetEnvironment.profile_at(origin).duplicate(true)
@@ -56,10 +69,13 @@ func _ready()->void:
 	var seeds:Array[int]=[]
 	for part in _arg("seeds","74119").split(","):seeds.append(int(part))
 	var wanted:=_arg("scenarios","sensible,poor,research,ai").split(",")
-	var scenarios:=_scenarios()
 	for scenario_name in wanted:
+		var scenario:=_scenario(scenario_name)
+		if scenario.is_empty():
+			failures.append("unknown scenario "+scenario_name)
+			continue
 		for seed_value in seeds:
-			await _run(scenario_name,scenarios[scenario_name],seed_value,years,every)
+			await _run(scenario_name,scenario,seed_value,years,every)
 	WorldSimulation.clear()
 	print("RC_FAILURES ",failures)
 	get_tree().quit(0 if failures.is_empty() else 1)
@@ -189,5 +205,6 @@ func _checkpoint(scenario_name:String,seed_value:int,year:int,tally:Dictionary)-
 		"housing":state.housing_capacity,"works":state.settlement_completed.size(),"last_works":state.settlement_completed.slice(maxi(0,state.settlement_completed.size()-3)),
 		"discoveries":state.known_discoveries.size(),"mean_adoption":snappedf(adoption_sum/maxf(1.0,float(state.known_discoveries.size())),0.001),
 		"effects":effects,"ceilings":ceilings,"care":{"under5":snappedf(float(state.early_care.get("under5",1.0)),0.01),"neonatal":snappedf(float(state.early_care.get("neonatal",1.0)),0.01),"adult":snappedf(float(state.early_care.get("adult",1.0)),0.01)},
+		"milestones":(tally.milestones as Dictionary).duplicate(),
 		"seconds":(Time.get_ticks_msec()-int(tally.start))/1000
 	}))

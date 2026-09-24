@@ -37,6 +37,11 @@ const PRECEDENT_CAP:=1.30
 ## Research years convert to the catalog's daily chance at full attention:
 ## DiscoverySystem progress per day = chance * 0.12 * (attention factors).
 const DAILY_SCALE:=0.12
+## Phase 3 pacing: a design research year is what a line achieves with the
+## partial staffing a real society gives it (about 0.4 of a full-time team per
+## line in a sensible early village), not with a fully staffed team; calibrated
+## so milestones land inside their design bands (docs/research/BENCHMARKS_600.md).
+const PACE:=2.5
 ## Keys the design governs; Phase 2 effect files cannot override them.
 const PROTECTED_KEYS:=["id","dynamic","direction","requires","requires_all","requires_any","learning_routes","day","chance","research_600","earliest_year","design_year","precedents","conditions"]
 ## Safe minimal consequence per line for NEW entries until Phase 2 authors them.
@@ -120,7 +125,7 @@ static func effect_row(id:String)->Dictionary:
 
 
 static func chance_for(research_years:float)->float:
-	return 1.0/(DAILY_SCALE*365.0*maxf(0.25,research_years))
+	return PACE/(DAILY_SCALE*365.0*maxf(0.25,research_years))
 
 
 ## Registry entries that the authored catalog does not already define, in the

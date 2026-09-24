@@ -20,6 +20,13 @@ func after_test()->void:
 func know(ids:Array[String])->void:
 	for id:String in ids:GameState.known_discoveries.append(id);GameState.discovery_adoption[id]=1.0
 
+## research_600 balance: magnitudes come from the rebalanced catalog entries,
+## weighted by their operating factor and held under the era ceiling.
+func expected_effect(key:String,ids:Array[String])->float:
+	var total:=0.0
+	for id:String in ids:total+=float((DiscoverySystem.discovery_definition(id).get("effects",{}) as Dictionary).get(key,0.0))*Craft.factor(id)
+	return minf(total,DiscoverySystem.society_model.era_ceiling(key).y)
+
 func install_kiln()->void:
 	know(["kiln_control"]);assert_bool(Ops.install("controlled_kiln").get("ok",false)).is_true()
 	for day:int in range(1,14):GameState.elapsed_days=day;Ops.advance(day)
@@ -36,7 +43,8 @@ func test_kiln_consumes_capital_work_fuel_and_provides_bounded_heat()->void:
 	assert_float(float(GameState.resource_stockpiles.Stone)).is_equal(8.0)
 	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(3.5)
 	assert_float(Ops.service("kiln_heat")).is_equal(4.0)
-	DiscoverySystem.refresh_operating_effects();assert_float(DiscoverySystem.effect("craft_output")).is_equal_approx(.09,.00001)
+	DiscoverySystem.refresh_operating_effects();assert_float(DiscoverySystem.effect("craft_output")).is_equal_approx(expected_effect("craft_output",["kiln_control"]),.00001)
+	assert_float(DiscoverySystem.effect("craft_output")).is_greater(0.0)
 	GameState.resource_stockpiles.Timber=0.0;GameState.elapsed_days=14;Ops.advance(14);DiscoverySystem.refresh_operating_effects()
 	assert_float(Ops.service("kiln_heat")).is_equal(0.0);assert_float(DiscoverySystem.effect("craft_output")).is_equal(0.0)
 
@@ -61,7 +69,9 @@ func test_lime_effects_follow_physical_stock_and_installed_masonry()->void:
 	assert_float(DiscoverySystem.effect("construction_rate")).is_equal(0.0)
 	GameState.resource_stockpiles["Quicklime"]=2.0;DiscoverySystem.refresh_operating_effects()
 	assert_float(Craft.factor("lime_burning")).is_equal(1.0)
-	assert_float(DiscoverySystem.effect("construction_rate")).is_equal_approx(.08,.00001)
+	assert_float(DiscoverySystem.effect("construction_rate")).is_equal_approx(expected_effect("construction_rate",["lime_burning","lime_mortar"]),.00001)
+	assert_float(DiscoverySystem.effect("construction_rate")).is_greater(0.0)
 	GameState.settlement_plots=[{"form":"lime_masonry_household","status":"active","condition":.5}];DiscoverySystem.refresh_operating_effects()
 	assert_float(Craft.factor("lime_mortar")).is_equal(.5)
-	assert_float(DiscoverySystem.effect("housing_output")).is_equal_approx(.06,.00001)
+	assert_float(DiscoverySystem.effect("housing_output")).is_equal_approx(expected_effect("housing_output",["lime_burning","lime_mortar"]),.00001)
+	assert_float(DiscoverySystem.effect("housing_output")).is_greater(0.0)
