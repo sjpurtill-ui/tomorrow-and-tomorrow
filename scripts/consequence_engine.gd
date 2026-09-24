@@ -2,6 +2,7 @@ extends Node
 
 const SOCIETAL_VALUES_MODEL:=preload("res://scripts/societal_values_model.gd")
 const SPAN:=preload("res://scripts/day_span.gd")
+const EARLY_CARE:=preload("res://scripts/early_life_conditions.gd")
 
 # One bounded causal model drives the early civilization. Narrative systems may
 # choose from these pressures, but only this file turns them into numbers.
@@ -708,6 +709,12 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	# resolved by numeric reproductive cohorts: conception, gestation, loss,
 	# delivery, parentage, postpartum recovery, and maternal/neonatal outcomes.
 	var birth_crisis:=intake_ratio<0.82 or malnutrition>0.38
+	# --- Early care (early_life_conditions.gd): missing practices, diet and
+	# overwork set infant, child, adult, birth and conception factors today.
+	var heavy_share:=clampf((food_workers+extractors+builders)/able_population,0.0,1.2)
+	var overwork:=clampf(clampf((heavy_share-0.74)/0.22,0.0,1.0)*0.7+clampf(policy_effect("labor_multiplier")/0.03,0.0,1.0)*0.5,0.0,1.0)
+	var care:=EARLY_CARE.refresh(WorldSimulation.state,WorldSimulation.discovery,{"overwork":overwork,"infant_loss":float(WorldSimulation.state.early_care.get("infant_loss_estimate",0.0))})
+	# --- end early care
 	var mortality_components := {
 		# Natural mortality is derived from the same age-specific life table shown
 		# to the player. An older population therefore produces more deaths than a
@@ -749,7 +756,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		"housing_ratio":housing_ratio,"cohesion":cohesion,"traveling":traveling,
 		"birth_crisis":birth_crisis,"absent_adults":float(foreign_effects.get("population_absent",0))*population/maxf(1.0,float(WorldSimulation.settlements.national_population())),
 		"conception_support":WorldSimulation.discovery.effect("conception_support")+policy_effect("conception_support")+WorldSimulation.state.founding_effect("conception_support")+WorldSimulation.progression.effect("conception_support"),
-		"maternal_safety":WorldSimulation.discovery.effect("maternal_safety"),"neonatal_survival":WorldSimulation.discovery.effect("neonatal_survival")
+		"maternal_safety":WorldSimulation.discovery.effect("maternal_safety"),"neonatal_survival":WorldSimulation.discovery.effect("neonatal_survival"),
+		"conception_care":float(care.get("conception",1.0)),"pregnancy_care":float(care.get("pregnancy_risk",1.0)),
+		"neonatal_care":float(care.get("neonatal",1.0)),"maternal_care":float(care.get("maternal",1.0))
 	}
 	var reproduction:=WorldSimulation.state.process_reproduction_day(reproduction_context)
 	# Cohorts and gestation advance one real day at a time within a span.

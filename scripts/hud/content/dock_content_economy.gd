@@ -64,13 +64,17 @@ func _food_blocks(metrics:Dictionary)->Array:
 	for source_variant in (metrics.get("food_sources",[]) as Array):
 		var source:Dictionary=source_variant
 		var amount:=float(source.get("produced",0.0))
+		var sub:=String(source.get("access","unknown"))
+		var ground:=float(source.get("source_health",1.0))
+		if source.has("renewable") and ground<0.95:sub+=" · grounds at %d%%" % roundi(ground*100.0)
+		if bool(source.get("overused",false)):sub+=" · taking more than renews"
 		source_items.append({
 			"name":String(source.get("name","Source")).capitalize(),
-			"sub":String(source.get("access","unknown")),
+			"sub":sub,
 			"value":"%+.0f" % amount if amount>0.05 else "0",
-			"value_color":Tokens.GREEN if amount>0.05 else Tokens.MUTED,
+			"value_color":(Tokens.AMBER if bool(source.get("overused",false)) else Tokens.GREEN) if amount>0.05 else Tokens.MUTED,
 			"accent":Tokens.GREEN if amount>0.05 else Color(0,0,0,0),
-			"tip":"Today's production and current access for this source",
+			"tip":"Today's production and current access for this source" if not source.has("renewable") else "Today's production. The land around the settlement renews about %.0f rations a day of this at full health; taking more thins game, fish or plants until they are rested." % float(source.renewable),
 		})
 	var blocks:Array=[Charts.reserves(GameState.selected_player_settlement_id),Charts.food_flow(GameState.selected_player_settlement_id),{"type":"bars","heading":"TODAY'S FLOW","note":"rations · weather %d%%" % weather,"items":flow_items}]
 	var preparation:Dictionary=metrics.get("food_preparation",{})

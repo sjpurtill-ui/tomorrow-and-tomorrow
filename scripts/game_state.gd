@@ -3,6 +3,7 @@ extends Node
 var civilian_injuries:Dictionary={"limited":0.0,"severe":0.0}
 
 const SOCIETAL_VALUES_MODEL:=preload("res://scripts/societal_values_model.gd")
+const EARLY_CARE:=preload("res://scripts/early_life_conditions.gd")
 
 const POPULATION_ROLES := ["Food","Survey","Extraction","Construction","Crafting","Logistics","Knowledge","Administration","Defense"]
 const PRODUCTIVE_POPULATION_ROLES := ["Food","Survey","Extraction","Construction","Crafting","Logistics"]
@@ -407,6 +408,13 @@ var population_cohorts: Dictionary = {}
 var pregnancy_cohorts:Dictionary={"first_trimester":0.0,"second_trimester":0.0,"third_trimester":0.0,"postpartum":0.0}
 var demographic_remainders:Dictionary={"conceptions":0.0,"births":0.0,"pregnancy_losses":0.0,"stillbirths":0.0,"maternal_deaths":0.0,"neonatal_deaths":0.0}
 var mortality_by_age_cohort:Dictionary={}
+# --- Early care and living conditions (early_life_conditions.gd) ---
+## Excess infant, child, adult, birth and conception factors from missing early
+## practices, diet and overwork. Refreshed daily by ConsequenceEngine.
+var early_care:Dictionary={}
+## 0 for a save written before these rules; rises to 1 over two game years.
+var early_care_blend:=0.0
+# --- end early care ---
 var last_population_removal_by_cohort:Dictionary={}
 var observed_death_age_sum:=0.0
 var lifetime_conceptions := 0
@@ -593,6 +601,8 @@ func reset_for_new_world(new_seed:int)->void:
 	pregnancy_cohorts={"first_trimester":0.0,"second_trimester":0.0,"third_trimester":0.0,"postpartum":0.0}
 	demographic_remainders={"conceptions":0.0,"births":0.0,"pregnancy_losses":0.0,"stillbirths":0.0,"maternal_deaths":0.0,"neonatal_deaths":0.0}
 	mortality_by_age_cohort={}
+	early_care={}
+	early_care_blend=0.0
 	last_population_removal_by_cohort={}
 	observed_death_age_sum=0.0
 	lifetime_conceptions=0
@@ -824,7 +834,10 @@ func _mortality_weights_for(cause:String) -> Dictionary:
 		# current_natural_mortality_rate(). Previously the total was nearly flat
 		# and this ratio was too shallow, allowing the 60+ cohort to accumulate
 		# while projected life expectancy remained low.
-		"Natural causes": return {"children":1.0,"youth":0.36,"early_adults":0.50,"established_adults":0.75,"mature_adults":2.20,"elders":10.0}
+		"Natural causes":
+			# Early care changes which ages die: follow the current life table.
+			if early_care_blend>0.0 and not early_care.is_empty(): return _natural_cohort_hazards()
+			return {"children":1.0,"youth":0.36,"early_adults":0.50,"established_adults":0.75,"mature_adults":2.20,"elders":10.0}
 		"Hunger": return {"children":2.2,"youth":0.8,"early_adults":0.7,"established_adults":0.8,"mature_adults":1.2,"elders":2.0}
 		"Illness","Dehydration","Exposure": return {"children":1.8,"youth":0.7,"early_adults":0.7,"established_adults":0.9,"mature_adults":1.4,"elders":2.6}
 		"Travel exhaustion": return {"children":1.3,"youth":1.1,"early_adults":1.2,"established_adults":1.2,"mature_adults":1.5,"elders":2.1}
@@ -1083,9 +1096,9 @@ func process_reproduction_day(context:Dictionary) -> Dictionary:
 	var eligible:=maxf(0.0,reproductive_population-active-postpartum*0.55-absent_adults)
 	var baseline_annual:=float(population_cohorts.get("youth",0.0))*0.45*0.23+float(population_cohorts.get("early_adults",0.0))*0.50*0.285+float(population_cohorts.get("established_adults",0.0))*0.45*0.18+float(population_cohorts.get("mature_adults",0.0))*0.16*0.040
 	var availability:=clampf(eligible/maxf(1.0,reproductive_population),0.0,1.0)
-	var annual_conceptions:=baseline_annual*_conception_condition_factor(context)*availability
+	var annual_conceptions:=baseline_annual*_conception_condition_factor(context)*availability*clampf(float(context.get("conception_care",1.0)),0.3,2.0)
 	var conceptions_exact:=annual_conceptions/365.0
-	var risk:=_pregnancy_risk_multiplier(context)
+	var risk:=_pregnancy_risk_multiplier(context)*clampf(float(context.get("pregnancy_care",1.0)),0.5,2.5)
 	var first:=float(pregnancy_cohorts.get("first_trimester",0.0))
 	var second:=float(pregnancy_cohorts.get("second_trimester",0.0))
 	var third:=float(pregnancy_cohorts.get("third_trimester",0.0))
@@ -1098,9 +1111,9 @@ func process_reproduction_day(context:Dictionary) -> Dictionary:
 	var stillbirth_rate:=clampf(0.018+(risk-1.0)*0.018,0.010,0.14)
 	var stillbirths_exact:=deliveries*stillbirth_rate
 	var live_births_exact:=maxf(0.0,deliveries-stillbirths_exact)
-	var neonatal_rate:=clampf((0.018+(risk-1.0)*0.025)*(1.0-clampf(float(context.get("neonatal_survival",0.0)),0.0,0.60)),0.004,0.18)
+	var neonatal_rate:=clampf((0.018+(risk-1.0)*0.025)*(1.0-clampf(float(context.get("neonatal_survival",0.0)),0.0,0.60))*clampf(float(context.get("neonatal_care",1.0)),0.5,4.0),0.004,0.18)
 	var neonatal_deaths_exact:=live_births_exact*neonatal_rate
-	var maternal_rate:=clampf((0.0045+(risk-1.0)*0.0065)*(1.0-clampf(float(context.get("maternal_safety",0.0)),0.0,0.65)),0.0008,0.055)
+	var maternal_rate:=clampf((0.0045+(risk-1.0)*0.0065)*(1.0-clampf(float(context.get("maternal_safety",0.0)),0.0,0.65))*clampf(float(context.get("maternal_care",1.0)),0.5,4.0),0.0008,0.055)
 	var maternal_deaths_exact:=deliveries*maternal_rate
 	pregnancy_cohorts["first_trimester"]=maxf(0.0,first+conceptions_exact-first_losses-to_second)
 	pregnancy_cohorts["second_trimester"]=maxf(0.0,second+to_second-second_losses-to_third)
@@ -1286,9 +1299,6 @@ func _mortality_condition_factor(housing_ratio:float=-1.0)->float:
 	return health_factor*food_factor*shelter_factor
 
 # _baseline_mortality_hazard_at_age for ages 0-109, for the 110-year projection.
-# Mean of _baseline_mortality_hazard_at_age over each POPULATION_COHORT_AGE_RANGES
-# band, computed once by the original age-ordered loop (static: never saved).
-static var _average_hazard_by_cohort:Dictionary={}
 const BASELINE_HAZARD_BY_AGE:Array[float]=[0.090,0.025,0.025,0.025,0.025,0.004,0.004,0.004,0.004,0.004,0.004,0.004,0.004,0.004,0.004,0.006,0.006,0.006,0.006,0.006,0.006,0.006,0.006,0.006,0.006,0.008,0.008,0.008,0.008,0.008,0.008,0.008,0.008,0.008,0.008,0.012,0.012,0.012,0.012,0.012,0.012,0.012,0.012,0.012,0.012,0.025,0.025,0.025,0.025,0.025,0.025,0.025,0.025,0.025,0.025,0.055,0.055,0.055,0.055,0.055,0.055,0.055,0.055,0.055,0.055,0.120,0.120,0.120,0.120,0.120,0.120,0.120,0.120,0.120,0.120,0.230,0.230,0.230,0.230,0.230,0.230,0.230,0.230,0.230,0.230,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380]
 
 func _baseline_mortality_hazard_at_age(age:int)->float:
@@ -1310,18 +1320,25 @@ func current_natural_mortality_rate(housing_ratio:float=-1.0)->float:
 	var deaths_per_year:=0.0
 	# Average the same life-table hazards used by projected life expectancy over
 	# each fixed age band. This stays O(1) at every population scale.
-	if _average_hazard_by_cohort.is_empty():
-		for key in POPULATION_AGE_COHORTS:
-			var age_range:Vector2=POPULATION_COHORT_AGE_RANGES[key]
-			var hazard_sum:=0.0
-			var years:=maxi(1,roundi(age_range.y-age_range.x))
-			for age in range(roundi(age_range.x),roundi(age_range.y)):
-				hazard_sum+=_baseline_mortality_hazard_at_age(age)
-			_average_hazard_by_cohort[key]=hazard_sum/float(years)
+	var cohort_hazards:=_natural_cohort_hazards(condition_factor)
 	for key in POPULATION_AGE_COHORTS:
-		var average_hazard:float=_average_hazard_by_cohort[key]
+		var average_hazard:float=cohort_hazards[key]
 		deaths_per_year+=float(population_cohorts.get(key,0.0))*clampf(average_hazard*condition_factor,0.0001,0.98)
 	return deaths_per_year/maxf(1.0,population_exact)
+
+## Mean baseline hazard of each cohort's ages, scaled by the early-care age
+## multipliers. O(110) and independent of population.
+func _natural_cohort_hazards(condition_factor:float=-1.0)->Dictionary:
+	var result:Dictionary={}
+	var conditions:=_mortality_condition_factor() if condition_factor<0.0 else condition_factor
+	for key in POPULATION_AGE_COHORTS:
+		var age_range:Vector2=POPULATION_COHORT_AGE_RANGES[key]
+		var hazard_sum:=0.0
+		var years:=maxi(1,roundi(age_range.y-age_range.x))
+		for age in range(roundi(age_range.x),roundi(age_range.y)):
+			hazard_sum+=BASELINE_HAZARD_BY_AGE[age]*EARLY_CARE.age_multiplier(early_care,age,conditions)
+		result[key]=hazard_sum/float(years)
+	return result
 
 func _current_exceptional_mortality_rate()->float:
 	var components:Dictionary=simulation_metrics.get("mortality_components",{})
@@ -1338,7 +1355,7 @@ func projected_life_expectancy() -> float:
 	var survival:=1.0
 	var expected_years:=0.0
 	for age in 110:
-		var baseline_hazard:=BASELINE_HAZARD_BY_AGE[age]
+		var baseline_hazard:=BASELINE_HAZARD_BY_AGE[age]*EARLY_CARE.age_multiplier(early_care,age,condition_factor)
 		var annual_hazard:=clampf(baseline_hazard*condition_factor+exceptional_hazard,0.0001,0.98)
 		expected_years+=survival
 		survival*=1.0-annual_hazard
