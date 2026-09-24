@@ -1,0 +1,15 @@
+{
+  "source": "art_source/prehistoric-art/swatches/1194-1203.png",
+  "prompt": "Built-in imagegen: nine distinct crude prehistoric finds in a 3x3 warm ivory paper and matte gouache swatch. Cells: bone securing cord, bent branch holding tension, hide cushioning stone, wild grain in rock crack, shelter-edge anchor stone, digging antler, bark shielding ember, cord-cinched hide pouch, hollow stone with tapping pebble.",
+  "entries": [
+    {"id": 1194, "review": "Top-left: rough split animal bone with a frayed cord end secured at the split, no drilled hole."},
+    {"id": 1195, "review": "Top-middle: flexible leafy branch bowed by an uneven vine tie, no shaped weapon."},
+    {"id": 1197, "review": "Top-right: untreated hide folded under a heavy rough stone to soften contact."},
+    {"id": 1198, "review": "Middle-left: several wild grains lodged in an irregular natural rock crack."},
+    {"id": 1199, "review": "Middle-middle: rough stone holding down the irregular edge of a simple hide shelter."},
+    {"id": 1200, "review": "Middle-right: naturally forked broken antler tip with damp earth clinging to its point."},
+    {"id": 1201, "review": "Bottom-left: curved bark shielding a small smoldering fiber ember from open air."},
+    {"id": 1202, "review": "Bottom-middle: rough untanned hide pouch gathered at its mouth by a crude fiber cord."},
+    {"id": 1203, "review": "Bottom-right: irregular natural stone hollow and a separate small tapping pebble."}
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "source": "art_source/prehistoric-art/swatches/1213-1221.png",
+  "prompt": "Built-in imagegen: nine distinct crude prehistoric finds in a square 3x3 warm ivory paper and matte gouache swatch. Cells: wet clay sealing leak, pebble smoothing raw hide, reed blowing ochre, feather caught in split branch, seed-scooping bark curl, two finger-rest impressions in clay, sliding fiber loop, root paste cooling on flat stone, bough dragging hide bundle.",
+  "entries": [
+    {"id": 1213, "review": "Top-left: irregular wet clay pressed into a natural gap between rocks with water seeping beneath."},
+    {"id": 1214, "review": "Top-middle: small smooth pebble resting on a visibly rubbed patch of raw hide."},
+    {"id": 1215, "review": "Top-right: pigment-stained reed directed at an ochre cloud on rough rock, without writing or brush."},
+    {"id": 1216, "review": "Middle-left: loose feather held upright in a naturally split branch, no quill or fitting."},
+    {"id": 1217, "review": "Middle-middle: rough tree-bark curl holding a few loose wild seeds."},
+    {"id": 1218, "review": "Middle-right: lumpy unfired clay with two coarse finger-rest hollows, no vessel walls."},
+    {"id": 1219, "review": "Bottom-left: coarse fiber sliding loop around a rough branch, with a free pull tail."},
+    {"id": 1220, "review": "Bottom-middle: irregular flat stone bearing a cooling smear of pale root paste."},
+    {"id": 1221, "review": "Bottom-right: leafy bough carrying a rough hide bundle along scraped earth, no cart or runners."}
+  ]
+}
