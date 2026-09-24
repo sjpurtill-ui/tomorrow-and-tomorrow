@@ -54,6 +54,9 @@ var frequency_pick:OptionButton
 var next_button:Button
 var mood_meter:Control
 var mood_label:Label
+var regard_meter:Control
+var regard_label:Label
+var divine_row:HBoxContainer
 var speaker_frame:PanelContainer
 var bench_cards:Dictionary={}      # person_id -> PanelContainer
 var envoy_color:=Color.WHITE
@@ -303,7 +306,9 @@ func _build_speaker(audience:Dictionary)->Control:
 	if origin=="foreign":
 		var flag:=TextureRect.new();flag.texture=Identity.foreign(String(audience.get("civ_id",""))).texture
 		flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;flag.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		flag.position=Vector2(160,134);flag.size=Vector2(56,56);holder.add_child(flag)
+		flag.position=Vector2(166,6);flag.size=Vector2(50,50);holder.add_child(flag)
+	# Love and dread sit on the portrait itself, so the stage keeps its height.
+	holder.add_child(_build_regard(audience))
 	var plate:=PanelContainer.new();var plate_style:=Tokens.flat(Tokens.TILE_BG,Color(0,0,0,0),0,6,0)
 	plate_style.border_color=envoy_color;plate_style.border_width_left=4;plate_style.content_margin_left=12;plate_style.content_margin_right=8;plate_style.content_margin_top=7;plate_style.content_margin_bottom=8
 	plate.add_theme_stylebox_override("panel",plate_style);column.add_child(plate)
@@ -322,6 +327,39 @@ func _build_speaker(audience:Dictionary)->Control:
 	var dossier:=_build_dossier(audience)
 	if dossier:column.add_child(dossier)
 	return column
+
+func _build_regard(audience:Dictionary)->Control:
+	## Love and dread: how the summoned person holds their god, or how the
+	## envoy's people regard you. Two gauges and one plain line.
+	var strip:=PanelContainer.new();strip.name="Regard";strip.mouse_filter=Control.MOUSE_FILTER_PASS
+	var strip_style:=StyleBoxFlat.new();strip_style.bg_color=Color(.06,.05,.04,.8)   # dark in both themes: it sits on the picture
+	strip_style.content_margin_left=8;strip_style.content_margin_right=8;strip_style.content_margin_top=4;strip_style.content_margin_bottom=4
+	strip.add_theme_stylebox_override("panel",strip_style)
+	strip.position=Vector2(0,196-52);strip.size=Vector2(222,52)
+	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",1);box.mouse_filter=Control.MOUSE_FILTER_IGNORE;strip.add_child(box)
+	regard_meter=RegardMeter.new();regard_meter.name="RegardMeter";regard_meter.custom_minimum_size=Vector2(206,24);regard_meter.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(regard_meter)
+	regard_label=Tokens.make_label("",12,Color("f6ecd6"));regard_label.name="RegardRead";regard_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	regard_label.clip_text=true;regard_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;box.add_child(regard_label)
+	_refresh_regard()
+	strip.visible=not Hall.regard_of(String(audience.get("id",""))).is_empty()
+	return strip
+
+func _refresh_regard()->void:
+	if not is_instance_valid(regard_meter):return
+	var regard:=Hall.regard_of(audience_id)
+	if regard.is_empty():return
+	var audience:=Hall.find(audience_id)
+	var foreign:=String(audience.get("origin",""))=="foreign"
+	regard_meter.love=float(regard.get("love",0.0));regard_meter.dread=float(regard.get("dread",0.0))
+	regard_meter.love_word="REVERENCE" if foreign else "LOVE"
+	regard_meter.queue_redraw()
+	var who:=String(regard.get("name","")) if foreign else String((audience.get("speaker",{}) as Dictionary).get("name","")).get_slice(" ",0)
+	regard_label.text=("%s %s" % [who,String(regard.get("read",""))]).strip_edges()
+	var risky:=String(regard.get("id","")) in ["hates_dread","terror","fear","war"]
+	regard_label.add_theme_color_override("font_color",Color("f0a08e") if risky else Color("f6ecd6"))
+	var strip:=regard_label.get_parent().get_parent() as Control
+	strip.tooltip_text=regard_label.text+". "
+	strip.tooltip_text+="From their opinion of you, their ruler's trust, border tension and remembered terror." if foreign else "Dread buys obedience and costs honesty; love buys candour. Dread soured by resentment shows first in their words, then in their work, and at last in flight."
 
 func _build_dossier(audience:Dictionary)->Control:
 	## Plain facts beside the performance: what the ruler actually knows.
@@ -405,6 +443,7 @@ func _build_speech_row()->Control:
 	speak_button=Button.new();speak_button.name="Speak";speak_button.text="SPEAK";speak_button.custom_minimum_size=Vector2(110,42)
 	speak_button.add_theme_font_size_override("font_size",15);speak_button.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
 	speak_button.pressed.connect(_speak);row.add_child(speak_button)
+	divine_row=HBoxContainer.new();divine_row.name="DivineRow";divine_row.add_theme_constant_override("separation",6);row.add_child(divine_row)
 	return row
 
 func _build_options()->void:
@@ -412,6 +451,71 @@ func _build_options()->void:
 	options_row.visible=true;outcome_box.visible=false
 	for option:Dictionary in Hall.options(audience_id):
 		options_row.add_child(_option_card(option))
+	_build_divine_row()
+
+func _build_divine_row()->void:
+	## The god's wrath and favour live beside SPEAK: two menus for a summoned
+	## official, one TERRIFY for an envoy. They add no height to the stage.
+	if not is_instance_valid(divine_row):return
+	for child in divine_row.get_children():child.queue_free()
+	var acts:=Hall.divine_options(audience_id)
+	divine_row.visible=not acts.is_empty() and resolved_result.is_empty()
+	if acts.is_empty():return
+	if String(Hall.find(audience_id).get("origin",""))=="foreign":
+		var act:Dictionary=acts[0]
+		var button:=Button.new();button.name="Divine_terrify";button.text="TERRIFY"
+		_divine_style(button,Tokens.RED)
+		button.disabled=not bool(act.get("enabled",true))
+		button.tooltip_text=String(act.get("sub","")) if not button.disabled else String(act.get("reason",""))
+		button.pressed.connect(func():divine("terrify"))
+		divine_row.add_child(button)
+		return
+	for tone in ["wrath","favor"]:
+		var menu:=MenuButton.new();menu.name="Divine_"+tone;menu.text="WRATH ▾" if tone=="wrath" else "FAVOUR ▾"
+		menu.flat=false
+		_divine_style(menu,Tokens.RED if tone=="wrath" else Tokens.GOLD)
+		menu.tooltip_text="Your anger: terror, penance, exile, death." if tone=="wrath" else "Your favour: blessing, a gift from the stores, honour."
+		var popup:=menu.get_popup()
+		var ids:Array[String]=[]
+		for act:Dictionary in acts:
+			if String(act.get("tone",""))!=tone:continue
+			popup.add_item(String(act.label),ids.size())
+			var index:=popup.get_item_index(ids.size())
+			popup.set_item_disabled(index,not bool(act.get("enabled",true)))
+			popup.set_item_tooltip(index,String(act.get("sub","")) if bool(act.get("enabled",true)) else String(act.get("reason","")))
+			ids.append(String(act.id))
+		menu.set_meta("actions",ids)
+		popup.id_pressed.connect(func(item:int):divine(String(ids[item])))
+		divine_row.add_child(menu)
+
+func _divine_style(button:Button,ink:Color)->void:
+	button.custom_minimum_size=Vector2(104,42);button.add_theme_font_size_override("font_size",14);button.focus_mode=Control.FOCUS_ALL
+	var style:=Tokens.flat(ink.lerp(Tokens.PANEL_BG_SOLID,.84),ink,1,6,0);style.content_margin_left=10;style.content_margin_right=10
+	var hover:=style.duplicate() as StyleBoxFlat;hover.bg_color=ink.lerp(Tokens.PANEL_BG_SOLID,.68)
+	for state in ["normal","focus"]:button.add_theme_stylebox_override(state,style)
+	button.add_theme_stylebox_override("hover",hover);button.add_theme_stylebox_override("pressed",hover)
+	button.add_theme_stylebox_override("disabled",Tokens.flat(Tokens.TILE_BG,Tokens.BORDER_SOFT,1,6,0))
+	button.add_theme_color_override("font_color",ink.lightened(.15) if not Tokens.is_light() else ink.darkened(.2))
+
+func divine(action:String,words:String="",voice_reacts:bool=true)->Dictionary:
+	## Wrath or favour, validated and applied by the hall; the room reacts.
+	if not resolved_result.is_empty():return resolved_result
+	var result:=Hall.divine(audience_id,action,words)
+	if not bool(result.get("ok",false)):
+		_show_toast(String(result.get("outcome","That cannot be done.")))
+		return result
+	if voice_reacts and _voice_ok() and voice.has_method("divine_reaction"):voice.divine_reaction(audience_id,result)
+	_refresh_regard()
+	_update_mood(Hall.find(audience_id))
+	if bool(result.get("terminal",false)):_show_outcome(result)
+	else:_build_options()
+	_pump()
+	return result
+
+func _on_divine_intent(id:String,action:String)->void:
+	## The live voice heard a spoken act of wrath or favour; the hall decides.
+	if id!=audience_id or not resolved_result.is_empty():return
+	divine(action,"",false)
 
 func _option_card(option:Dictionary)->Button:
 	var tone:=String(option.get("tone","neutral"))
@@ -517,6 +621,7 @@ func _voice_ok()->bool:
 func _connect_voice()->void:
 	if not _voice_ok():return
 	if voice.has_signal("lines_ready") and not voice.lines_ready.is_connected(_on_lines_ready):voice.lines_ready.connect(_on_lines_ready)
+	if voice.has_signal("divine_intent") and not voice.divine_intent.is_connected(_on_divine_intent):voice.divine_intent.connect(_on_divine_intent)
 
 func _on_lines_ready(id:String)->void:
 	if id==audience_id:_pump()
@@ -525,6 +630,13 @@ func _speak()->void:
 	var text:=speech_input.text.strip_edges()
 	if text.is_empty() or speak_button.disabled:return
 	speech_input.clear()
+	# Words that are themselves an act of the god (terror, penance, blessing,
+	# exaltation) are carried out; the room reacts to the act.
+	var spoken_act:=Hall.divine_intent(audience_id,text)
+	if not spoken_act.is_empty():
+		Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":int(GameState.elapsed_days),"aside":false})
+		divine(spoken_act,text)
+		return
 	var before:=(Hall.find(audience_id).get("lines",[]) as Array).size()
 	if _voice_ok():voice.player_speaks(audience_id,text)
 	# An order given to a summoned official goes to the civic council as a directive.
@@ -568,6 +680,7 @@ func _show_outcome(result:Dictionary)->void:
 	resolved_result=result
 	for child in options_row.get_children():child.queue_free()
 	options_row.visible=false
+	if is_instance_valid(divine_row):divine_row.visible=false
 	for child in outcome_box.get_children():child.queue_free()
 	outcome_box.visible=true
 	var reaction:=String(result.get("reaction","neutral"))
@@ -579,7 +692,9 @@ func _show_outcome(result:Dictionary)->void:
 	var who:="THE ENVOY IS " if String(audience.get("origin",""))=="foreign" else "%s IS " % String((audience.get("speaker",{}) as Dictionary).get("name","YOUR OFFICIAL")).to_upper()
 	if String(audience.get("kind",""))=="wonder_proposal" and not String(result.get("work_id","")).is_empty():who="THE WORK IS COMMISSIONED · "+who
 	var colour:=Tokens.RED if tone=="danger" else (Tokens.TEAL if tone=="info" else Tokens.AMBER)
-	var head:=Tokens.make_label("THE AUDIENCE IS CONCLUDED · "+who+String(REACTION_WORDS.get(reaction,"UNMOVED")),13,colour,.08);head.name="ReceiptHead";words.add_child(head)
+	var head_text:="THE AUDIENCE IS CONCLUDED · "+who+String(REACTION_WORDS.get(reaction,"UNMOVED"))
+	if bool(result.get("terminal",false)):head_text="THE AUDIENCE IS CONCLUDED · BY YOUR DECREE"
+	var head:=Tokens.make_label(head_text,13,colour,.08);head.name="ReceiptHead";words.add_child(head)
 	var outcome:=Tokens.make_label(String(result.get("outcome","")),15,Tokens.BODY);outcome.name="ReceiptText";outcome.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(outcome)
 	var dismiss:=Button.new();dismiss.name="Dismiss";dismiss.text="Dismiss the court";dismiss.custom_minimum_size=Vector2(190,46)
 	dismiss.add_theme_font_size_override("font_size",16);dismiss.add_theme_stylebox_override("normal",Tokens.gold_outline_style());dismiss.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -1093,6 +1208,24 @@ class OddsGauge extends Control:
 			var x:=clampf(score,0,1)*size.x
 			draw_colored_polygon(PackedVector2Array([Vector2(x-6,0),Vector2(x+6,0),Vector2(x,bar.position.y)]),HudTokens.INK)
 			draw_rect(Rect2(Vector2(clampf(x-2,0,size.x-4),bar.position.y-2),Vector2(4,bar.size.y+4)),HudTokens.INK)
+
+class RegardMeter extends Control:
+	## Two gauges: love (or reverence) in gold above, dread in red below.
+	var love:=.5
+	var dread:=0.0
+	var love_word:="LOVE"
+	func _draw()->void:
+		var font:=ThemeDB.fallback_font
+		var label_w:=70.0
+		var h:=size.y*.34
+		for row in 2:
+			var y:=row*size.y*.5+size.y*.08
+			var value:=clampf(love if row==0 else dread,0,1)
+			var colour:=Color("d9a93a") if row==0 else Color("c2453a")
+			draw_string(font,Vector2(0,y+h),love_word if row==0 else "DREAD",HORIZONTAL_ALIGNMENT_LEFT,label_w,10,Color("e2d3b4"))
+			var track:=Rect2(Vector2(label_w,y),Vector2(size.x-label_w,h))
+			draw_rect(track,Color(colour,.18))
+			draw_rect(Rect2(track.position,Vector2(track.size.x*value,h)),colour)
 
 class MoodMeter extends Control:
 	var value:=0.0

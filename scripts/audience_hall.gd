@@ -33,6 +33,7 @@ const PURCHASE:=preload("res://scripts/research_purchase.gd")
 const LICENSES:=preload("res://scripts/research_licenses.gd")
 const ARTIFACTS:=preload("res://scripts/artifact_collection.gd")
 const RIVALRY:=preload("res://scripts/great_works_rivalry.gd")
+const DIVINE:=preload("res://scripts/divine_regard.gd")
 const RESOURCES:=["Food","Timber","Stone","Clay","Fiber Plants"]
 const KINDS:=["gift","request","threat","news","petition","report","great_work","wonder_proposal","proposal","summons"]
 ## Kinds raised by our own people (origin "court").
@@ -280,6 +281,8 @@ static func daily(day:int)->Array[Dictionary]:
 	var arrivals:Array[Dictionary]=[]
 	if WorldSimulation.actor_id!="player": return arrivals
 	var s:=state()
+	# Dread curdled with resentment shows first in speech, then in flight.
+	for gone in DIVINE.daily(day,_officials()): _drop_matters_of(int(gone.get("person_id",0)))
 	_expire(day)
 	_observe(day)
 	_prune_occasions(day)
@@ -2810,7 +2813,8 @@ static func voice_context(id:String)->Dictionary:
 	if not audience.terms.is_empty():
 		context["player_stock_of_terms"]=floori(player_stock(String(audience.terms.resource)))
 	for person in court(id):
-		context.court.append({"name":String(person.name),"title":String(person.get("office_title","")),"person_id":int(person.person_id),"disposition":String(GovernmentPeopleSystem.leader_disposition(person).get("id","pragmatic")),"traits":(person.get("traits",[]) as Array).duplicate()})
+		context.court.append({"name":String(person.name),"title":String(person.get("office_title","")),"person_id":int(person.person_id),"disposition":String(GovernmentPeopleSystem.leader_disposition(person).get("id","pragmatic")),"traits":(person.get("traits",[]) as Array).duplicate(),"regard":_regard_words(DIVINE.regard(person))})
+	context["recent_acts_of_the_god"]=_divine_history()
 	if audience.origin=="foreign":
 		var civ:=ForeignDiplomacy.civilization(String(audience.civ_id))
 		var leader:=ForeignDiplomacy.leader(String(audience.civ_id))
@@ -2830,6 +2834,8 @@ static func voice_context(id:String)->Dictionary:
 			"food":_words(float(civ.get("food_days",30)),[[12,"going hungry"],[22,"short of food"],[60,"fed"],[1e9,"well provisioned"]])}
 		context["leader"]={"name":String(leader.get("name","")),"temperament":String(leader.get("temperament","")),"bio":String(leader.get("bio","")),"goals":goals.slice(0,3),
 			"trust":_words(float(leader.get("trust",0)),[[-0.3,"distrustful"],[0.1,"undecided"],[1e9,"trusting"]])}
+		var regard:=DIVINE.foreign_regard(String(audience.civ_id))
+		if not regard.is_empty(): context["their_regard"]={"reads":"they "+String(regard.read),"reverence":_band_word(float(regard.love)),"dread":_band_word(float(regard.dread))}
 	else:
 		if audience.kind in WORK_KINDS:
 			var gwa:=_great_works()
@@ -2839,7 +2845,8 @@ static func voice_context(id:String)->Dictionary:
 			var rel:Dictionary=person.get("relationships",{}).get("sovereign",{})
 			context["petitioner"]={"name":String(person.name),"title":String(person.get("office_title","")),"traits":(person.get("traits",[]) as Array).duplicate(),"background":String(person.get("background","")),"doctrine":String(person.get("doctrine","")),
 				"disposition":String(GovernmentPeopleSystem.leader_disposition(person).get("id","pragmatic")),
-				"trust":_words(float(rel.get("trust",0.5)),[[0.35,"low"],[0.65,"moderate"],[1e9,"high"]]),"resentment":_words(float(rel.get("resentment",0)),[[0.1,"none"],[0.3,"some"],[1e9,"deep"]])}
+				"trust":_words(float(rel.get("trust",0.5)),[[0.35,"low"],[0.65,"moderate"],[1e9,"high"]]),"resentment":_words(float(rel.get("resentment",0)),[[0.1,"none"],[0.3,"some"],[1e9,"deep"]]),
+				"regard":_regard_words(DIVINE.regard(person))}
 	return context
 
 static func debug_force(kind:String,civ_id:String="")->Dictionary:
@@ -3003,6 +3010,209 @@ static func _migrate(s:Dictionary)->void:
 	s["next_any"]=day+roundi(float(FREQUENCIES.get(String(s.get("frequency","normal")),90))*0.6)
 
 # --------------------------------------------------------------------------
+# The god's wrath and favour (see divine_regard.gd)
+# --------------------------------------------------------------------------
+
+static func _band_word(value:float)->String:
+	return _words(value,[[0.15,"none"],[0.35,"little"],[0.55,"some"],[0.75,"high"],[1e9,"overwhelming"]])
+
+static func _regard_words(regard:Dictionary)->Dictionary:
+	## Plain words for the voice: how this person holds the god right now.
+	if regard.is_empty(): return {}
+	var out:={"reads":String(regard.get("read","")),"love":_band_word(float(regard.get("love",0.5))),"dread":_band_word(float(regard.get("dread",0.0))),
+		"candor":_words(float(regard.get("candor",0.5)),[[0.35,"evasive: softens bad news, flatters, overpromises"],[0.6,"guarded"],[1e9,"frank: tells hard truths unasked"]])}
+	if bool(regard.get("warned",false)): out["thinking_of_flight"]="lets slip, sideways, that they have thought of slipping away beyond the hills"
+	return out
+
+const DIVINE_HISTORY_WORDS:={"terrify":"the god raged at %s before the court","penance":"the god demanded penance of %s","cast_out":"the god cast %s out of the realm",
+	"strike_down":"the god had %s put to death before the court","bless":"the god blessed %s","boon":"the god gave %s a gift from the stores",
+	"raise_up":"the god raised %s above their peers","terrify_envoy":"the god terrified %s, an envoy","flight":"%s fled beyond the hills in fear"}
+
+static func _divine_history()->Array:
+	var out:Array=[]
+	for e in DIVINE.events(4):
+		var words:=String(DIVINE_HISTORY_WORDS.get(String(e.get("action","")),"the god acted on %s")) % String(e.get("name","someone"))
+		out.append("%s: %s" % [_when(int(e.get("day",_day()))),words])
+	return out
+
+static func _when(day:int)->String:
+	var ago:=_day()-day
+	if ago<=0: return "today"
+	if ago<=2: return "days ago"
+	if ago<=40: return "this month"
+	if ago<=400: return "this year"
+	return "years ago"
+
+static func _divine_target(audience:Dictionary)->Dictionary:
+	## The summoned official the god may act on: a current officeholder.
+	if String(audience.get("origin",""))!="court": return {}
+	var pid:=int((audience.get("speaker",{}) as Dictionary).get("person_id",0))
+	if pid<=0: return {}
+	return _official(pid)
+
+static func _boon_terms()->Dictionary:
+	var best:="";var best_stock:=0.0
+	for resource in RESOURCES:
+		var stock:=player_stock(resource)
+		if stock>best_stock: best_stock=stock; best=resource
+	if best=="": best="Food"
+	return {"resource":best,"amount":_nice(clampf(_player_population()*(0.05 if best=="Food" else 0.02),3.0,25.0))}
+
+static func regard_of(id:String)->Dictionary:
+	## For the modal's meter: the summoned person's love and dread, or how the
+	## envoy's people regard the ruler.
+	var audience:=find(id)
+	if audience.is_empty(): return {}
+	if String(audience.get("origin",""))=="foreign": return DIVINE.foreign_regard(String(audience.get("civ_id","")))
+	var pid:=int((audience.get("speaker",{}) as Dictionary).get("person_id",0))
+	if pid<=0: return {}
+	var person:=_official(pid)
+	if person.is_empty(): person=GovernmentPeopleSystem.person_snapshot(pid)
+	return DIVINE.regard(person)
+
+static func people_regard()->Dictionary:
+	return DIVINE.people_regard(_officials())
+
+static func divine_options(id:String)->Array[Dictionary]:
+	## The god's wrath and favour open in this audience. Each act at most once
+	## per audience; a boon needs stores that can pay it.
+	var audience:=find(id)
+	var result:Array[Dictionary]=[]
+	if audience.is_empty() or String(audience.get("status",""))!="waiting": return result
+	var done:Array=audience.get("divine",[]) if audience.get("divine") is Array else []
+	if String(audience.get("origin",""))=="foreign":
+		if ForeignDiplomacy.civilization(String(audience.get("civ_id",""))).is_empty(): return result
+		var free:=not "terrify" in done
+		result.append({"id":"terrify","label":"Terrify the envoy","sub":"Send your fury home with them. Their ruler decides what to make of it.","tone":"wrath","enabled":free,"reason":"" if free else "They are already grey to the lips."})
+		return result
+	if _divine_target(audience).is_empty(): return result
+	for action:String in DIVINE.WRATH+DIVINE.FAVOR:
+		var definition:Dictionary=DIVINE.ACTIONS[action]
+		var enabled:=not action in done
+		var reason:="" if enabled else "Already done in this audience."
+		var sub:=String(definition.sub)
+		if action=="boon":
+			var boon:=_boon_terms()
+			sub="Give them %s from the stores." % _terms_text(boon)
+			var short:=_short(String(boon.resource),float(boon.amount))
+			if enabled and short!="":
+				enabled=false; reason=short
+		result.append({"id":action,"label":String(definition.label),"sub":sub,"tone":String(definition.tone),"enabled":enabled,"reason":reason})
+	return result
+
+static func divine_intent(id:String,text:String)->String:
+	## The ruler's words, read for a spoken act the god may perform here.
+	var action:=DIVINE.intent(text)
+	if action.is_empty(): return ""
+	for option in divine_options(id):
+		if String(option.id)==action and bool(option.enabled): return action
+	return ""
+
+static func divine(id:String,action:String,words:String="")->Dictionary:
+	## Perform an act of wrath or favour. Real, bounded effects only: bonds and
+	## memories, stores for a boon, exile or execution through the government.
+	var audience:=find(id)
+	if audience.is_empty() or String(audience.get("status",""))!="waiting": return {"ok":false,"outcome":"No audience is waiting."}
+	var chosen:={}
+	for option in divine_options(id):
+		if String(option.id)==action: chosen=option
+	if chosen.is_empty(): return {"ok":false,"outcome":"That is not open to you here."}
+	if not bool(chosen.enabled): return {"ok":false,"outcome":String(chosen.reason)}
+	var done:Array=audience.get("divine",[]) if audience.get("divine") is Array else []
+	done.append(action)
+	audience["divine"]=done
+	if String(audience.origin)=="foreign": return _terrify_envoy(audience,words)
+	var person:=_divine_target(audience)
+	var pid:=int(person.person_id)
+	var name:=String(person.get("name","them"))
+	var witnesses:=court(id)   # before any removal, so a successor is not a witness
+	var terminal:=action in DIVINE.TERMINAL
+	var result:={"ok":true,"action":action,"terminal":terminal,"person_id":pid,"name":name,"reaction":"neutral"}
+	var narration:=""
+	var outcome:=""
+	match action:
+		"boon":
+			var boon:=_boon_terms()
+			var paid:=_debit_player(String(boon.resource),float(boon.amount))
+			result["terms"]={"resource":String(boon.resource),"amount":paid}
+			narration="You give %s %d %s from the stores." % [name,roundi(paid),String(boon.resource)]
+			outcome="You gave %s %d %s from the stores." % [name,roundi(paid),String(boon.resource)]
+		"cast_out":
+			var gone:=GovernmentPeopleSystem.person_departs(pid,"exiled")
+			if not bool(gone.get("ok",false)): return {"ok":false,"outcome":String(gone.get("reason","They cannot be cast out now."))}
+			var heirs:Array=gone.get("successors",[])
+			narration="At your word %s is stripped of office and driven out beyond the hearths." % name
+			outcome="You cast %s out of the realm.%s" % [name," %s took up the work." % ", ".join(PackedStringArray(heirs)) if not heirs.is_empty() else ""]
+		"strike_down":
+			var removed:Dictionary
+			if String(person.get("office_key",""))=="settlement": removed=GovernmentPeopleSystem.remove_settlement_leader(String(person.get("settlement_id","")),"execute")
+			else: removed=GovernmentPeopleSystem.remove_central_officeholder(String(person.get("office_key","")),"execute")
+			if not bool(removed.get("ok",false)): return {"ok":false,"outcome":String(removed.get("reason","They cannot be put to death now."))}
+			var heir:=String((removed.get("successor",{}) as Dictionary).get("name",""))
+			narration="At your word the guards seize %s. They are taken out, and put to death." % name
+			outcome="%s was put to death at your word, before the court.%s The execution cost you legitimacy and cohesion." % [name," %s now holds the office." % heir if heir!="" else " The office stands empty."]
+		"terrify": narration="The god's fury falls on %s before the whole court." % name
+		"penance": narration="You demand penance of %s: fasting and vigil until you are appeased." % name
+		"bless": narration="You bless %s before the whole court." % name
+		"raise_up": narration="You raise %s above their peers before the whole court." % name
+	var effects:=DIVINE.apply_to_court(action,person,witnesses)
+	result["effects"]=effects
+	result["response"]=String(effects.get("response","none"))
+	append_line(id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":narration,"day":_day(),"aside":false})
+	if outcome=="":
+		outcome=String({"terrify":"You terrified %s before the court.","penance":"You demanded penance of %s.","bless":"You blessed %s.","raise_up":"You raised %s above their peers."}.get(action,"You acted on %s.")) % name
+	var shaken:=0
+	for w in (effects.witnesses as Dictionary).values():
+		if action in DIVINE.WRATH and String((w as Dictionary).get("response",""))=="shaken": shaken+=1
+	if action in DIVINE.WRATH and shaken>0: outcome+=" %d of your court %s shaken." % [shaken,"was" if shaken==1 else "were"]
+	result["outcome"]=outcome
+	if not terminal:
+		apply_mood(id,-0.2 if action in DIVINE.WRATH else 0.2)
+		result["reaction"]=String({"cower":"offended","defy":"furious","endure":"offended","relief":"delighted","blessed":"delighted"}.get(String(result.response),"neutral"))
+		return result
+	result["reaction"]="furious"
+	audience.status="resolved"
+	audience.outcome=outcome
+	audience.option_id=action
+	_archive(audience)
+	_ledger_close(audience,action,"furious",outcome)
+	_drop_matters_of(pid)
+	return result
+
+static func _drop_matters_of(person_id:int)->void:
+	## Matters held by someone who is gone leave with them.
+	if person_id<=0: return
+	var key:="person:%d" % person_id
+	for m in (state().matters as Array).duplicate():
+		if m is Dictionary and String(m.get("holder_key",""))==key: (state().matters as Array).erase(m)
+
+static func _terrify_envoy(audience:Dictionary,words:String)->Dictionary:
+	## An envoy can be terrified too. It is intimidation between peoples: the
+	## engine reads the threat and the foreign ruler's temperament decides the
+	## real posture; that people's dread of you rises.
+	var civ_id:=String(audience.civ_id)
+	var name:=String((audience.speaker as Dictionary).get("name","the envoy"))
+	var leader:=ForeignDiplomacy.leader(civ_id)
+	var p:Dictionary=leader.get("personality",{}) if leader.get("personality") is Dictionary else {}
+	var assertive:=float(p.get("assertiveness",0.5))
+	var risk:=float(p.get("risk_tolerance",0.5))
+	var requested:="call_bluff" if assertive>0.62 and risk>0.55 else ("harden_border" if assertive>0.5 else "conciliate")
+	var spoken:=words.strip_edges().substr(0,400)
+	if spoken.is_empty(): spoken="Kneel, and carry this home: cross me and I will destroy you."
+	var engine_words:=spoken if "destroy you" in spoken.to_lower() else spoken+" (the ruler's fury: destroy you)"
+	var posture:=ForeignDiplomacy.apply_conversation_reaction(civ_id,requested,engine_words,"The ruler raged at our envoy like a storm.")
+	var actual:=String(posture.get("actual","unchanged"))
+	var gain:=0.10+0.12*(1.0-assertive)
+	DIVINE.record_envoy_terror(civ_id,String(audience.civ_name),name,gain)
+	append_line(String(audience.id),{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":"Your fury falls on %s, envoy of %s, before the whole court." % [name,String(audience.civ_name)],"day":_day(),"aside":false})
+	apply_mood(String(audience.id),-0.25)
+	append_line(String(audience.id),{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":"Word of it reaches their ruler: "+_posture_words(actual,String(audience.civ_name)),"day":_day(),"aside":false})
+	var response:="defy" if assertive>0.62 else "cower"
+	return {"ok":true,"action":"terrify","terminal":false,"person_id":0,"name":name,"response":response,"posture":actual,"civ_dread":DIVINE.civ_dread(civ_id),
+		"reaction":"furious" if response=="defy" else "offended",
+		"outcome":"You terrified %s's envoy. %s" % [String(audience.civ_name),_posture_words(actual,String(audience.civ_name))]}
+
+# --------------------------------------------------------------------------
 # Save validation
 # --------------------------------------------------------------------------
 
@@ -3025,6 +3235,7 @@ static func validate_state(data:Variant)->bool:
 	if data.has("summon_immediately") and not data.summon_immediately is bool: return false
 	if data.has("frequency") and not String(data.frequency) in FREQUENCIES: return false
 	if data.has("last_speaker") and (not data.last_speaker is String or String(data.last_speaker).length()>120): return false
+	if data.has("divine") and not DIVINE.valid_state(data.divine): return false
 	if not data.get("ledger",[]) is Array or (data.get("ledger",[]) as Array).size()>LEDGER_MAX: return false
 	for entry in data.get("ledger",[]):
 		if not entry is Dictionary or not _num(entry.get("day")) or not entry.get("speaker","") is String or not entry.get("ask","") is String or JSON.stringify(entry).length()>2000: return false

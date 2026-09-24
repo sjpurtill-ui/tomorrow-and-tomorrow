@@ -10,6 +10,7 @@ const ArtifactGallery:=preload("res://scripts/hud/artifact_gallery.gd")
 const DYNAMIC_ORDER:Array[String]=["demography","nutrition","health","labor","knowledge","production","infrastructure","logistics","ecology","institutions","security","culture"]
 const ValuesModel:=preload("res://scripts/societal_values_model.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
+const Divine:=preload("res://scripts/divine_regard.gd")
 
 func meta()->Dictionary:
 	return {
@@ -483,13 +484,31 @@ func _civic_report(kind:String)->Dictionary:
 ## with a quiet count of what they hold. No badges, no pop-ups.
 func _summon_block()->Dictionary:
 	var items:Array=[]
+	# The people as a whole: love and dread, from the officials who speak for
+	# them and the realm's legitimacy and cohesion.
+	var people:=Hall.people_regard()
+	if not people.is_empty():
+		items.append({"name":_first_upper(String(people.get("read",""))),"sub":Divine.meter_words(float(people.love),float(people.dread)),
+			"icon":Divine.meter_texture(float(people.love),float(people.dread)),"accent":Tokens.BORDER_SOFT,
+			"tip":"How your people hold their god: love from your officials' regard, legitimacy and cohesion; dread from your officials and your recent wrath."})
 	for entry:Dictionary in Hall.summonable():
 		var count:=int(entry.get("matters",0))
 		var sub:="%d matter%s to raise" % [count,"" if count==1 else "s"] if count>0 else "nothing pending; they will ask what you want"
-		items.append({"name":"%s · %s" % [String(entry.get("title","")),String(entry.get("name",""))],"sub":sub,"value":"SUMMON","value_color":Tokens.GOLD_BRIGHT,"accent":Tokens.VIOLET,
-			"on_click":_summon.bind((entry.get("target",{}) as Dictionary).duplicate()),"tip":"Call them into the audience hall now."})
+		var item:={"name":"%s · %s" % [String(entry.get("title","")),String(entry.get("name",""))],"sub":sub,"value":"SUMMON","value_color":Tokens.GOLD_BRIGHT,"accent":Tokens.VIOLET,
+			"on_click":_summon.bind((entry.get("target",{}) as Dictionary).duplicate()),"tip":"Call them into the audience hall now."}
+		var pid:=int((entry.get("target",{}) as Dictionary).get("person_id",0))
+		var person:Dictionary=GovernmentPeopleSystem.person_snapshot(pid) if pid>0 else {}
+		if not person.is_empty():
+			var regard:=Divine.regard(person)
+			item["icon"]=Divine.meter_texture(float(regard.love),float(regard.dread))
+			item["sub"]="%s · %s" % [String(regard.read),sub]
+			item["tip"]="Call them into the audience hall now. %s (%s)." % [_first_upper(String(regard.read)),Divine.meter_words(float(regard.love),float(regard.dread))]
+		items.append(item)
 	if items.is_empty():items.append({"name":"No one to summon yet","sub":"Officials appear as your government grows.","value":"","accent":Tokens.BORDER_SOFT})
 	return {"type":"rows","heading":"SUMMON TO THE HALL","note":"officials, scouts and master builders","items":items}
+
+static func _first_upper(text:String)->String:
+	return text.substr(0,1).to_upper()+text.substr(1)
 
 func _summon(target:Dictionary)->void:
 	var director:Node=terrain.find_child("AudienceDirector",true,false) if is_instance_valid(terrain) else null

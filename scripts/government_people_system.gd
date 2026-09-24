@@ -324,6 +324,13 @@ func leader_disposition(person:Dictionary)->Dictionary:
 	var suspicion:=float(person.get("suspicion",0.5))
 	var fear:=float(relationship.get("fear",0.0))
 	var trust:=float(relationship.get("trust",0.5))
+	# Dread of the god bends all but the proudest and bravest into flattery;
+	# a love the god has openly kindled, without dread, makes people frank.
+	if fear>=0.6 and not (pride>0.75 and courage>0.7):
+		return {"id":"sycophantic","label":"EAGERLY DEFERENTIAL","description":"Frightened of your anger: quick to praise and agree, slow to bring bad news."}
+	var love:Variant=relationship.get("love",null)
+	if (love is float or love is int) and float(love)>=0.72 and fear<0.3 and honesty>=0.35:
+		return {"id":"principled","label":"PLAIN-SPOKEN","description":"Loves you enough to tell you the truth, unasked."}
 	if (courage<0.38 and fear>0.22) or (honesty<0.40 and float(personality.get("assertiveness",0.5))<0.48):
 		return {"id":"sycophantic","label":"EAGERLY DEFERENTIAL","description":"Quick to praise and agree; apparent enthusiasm is not proof of sound execution."}
 	if suspicion>0.66 or (pride>0.68 and trust<0.48) or "Skeptical" in traits or "Severe" in traits:
@@ -631,13 +638,27 @@ func adjust_person_relationship(person_id:int,trust_delta:float=0.0,respect_delt
 	## Dialogue changes the same durable relationship used by later execution.
 	## Keep the bounded government cast, advisor roster, and office snapshots in
 	## sync so opening a different panel cannot silently revert the exchange.
+	return adjust_person_bonds(person_id,{"trust":trust_delta,"respect":respect_delta,"resentment":resentment_delta})
+
+
+const BOND_KEYS:=["trust","respect","fear","resentment","obligation","love"]
+const BOND_DEFAULTS:={"trust":0.5,"respect":0.5,"fear":0.0,"resentment":0.0,"obligation":0.4,"love":0.5}
+
+func adjust_person_bonds(person_id:int,deltas:Dictionary)->Dictionary:
+	## Any of the sovereign bonds, each clamped to 0..1. "love" is optional on
+	## older records: it is first set from how the person already stands (see
+	## divine_regard.gd) and then moved, so every change is relative.
 	var index:=_find_person_index(person_id)
 	if index<0: return {}
 	var relationships:Dictionary=people[index].get("relationships",{})
 	var sovereign:Dictionary=relationships.get("sovereign",{"trust":0.5,"respect":0.5,"fear":0.0,"resentment":0.0,"obligation":0.4})
-	sovereign["trust"]=clampf(float(sovereign.get("trust",0.5))+trust_delta,0.0,1.0)
-	sovereign["respect"]=clampf(float(sovereign.get("respect",0.5))+respect_delta,0.0,1.0)
-	sovereign["resentment"]=clampf(float(sovereign.get("resentment",0.0))+resentment_delta,0.0,1.0)
+	if deltas.has("love") and not (sovereign.get("love") is float or sovereign.get("love") is int):
+		sovereign["love"]=preload("res://scripts/divine_regard.gd").derived_love(sovereign)
+	for key:String in BOND_KEYS:
+		if not deltas.has(key): continue
+		var delta:=float(deltas[key])
+		if not is_finite(delta): continue
+		sovereign[key]=clampf(float(sovereign.get(key,BOND_DEFAULTS[key]))+delta,0.0,1.0)
 	relationships["sovereign"]=sovereign
 	people[index]["relationships"]=relationships
 	for roster_index in WorldSimulation.state.advisor_roster.size():
@@ -978,6 +999,67 @@ func remove_settlement_leader(settlement_id:String,action:String="dismiss")->Dic
 	]
 	if execute:WorldSimulation.direction.record_cultural_action("execution:%s" % str(previous.get("person_id",previous.get("id",0))),"retribution",2.0)
 	return {"ok":true,"action":action,"former":previous,"successor":successor_record,"event":event,"legitimacy_cost":legitimacy_cost,"cohesion_cost":cohesion_cost,"message":message}
+
+
+func person_departs(person_id:int,reason:String="fled")->Dictionary:
+	## An official leaves the ruler's service alive: cast out by decree
+	## ("exiled") or slipped away in fear ("fled"). Their offices pass through
+	## the ordinary succession machinery; they leave the active roster but keep
+	## their identity and history.
+	initialize()
+	var index:=_find_person_index(person_id)
+	if index<0 or String(people[index].get("status",""))!="active": return {"ok":false,"reason":"That person is not available."}
+	var normalized:="exiled" if reason=="exiled" else "fled"
+	var name:=String(people[index].get("name","An official"))
+	var offices:Array[String]=[]
+	for office_key in WorldSimulation.state.leadership_positions.keys():
+		if int((WorldSimulation.state.leadership_positions[office_key] as Dictionary).get("person_id",0))==person_id: offices.append(String(office_key))
+	var local_id:=String(people[index].get("local_leader_of",""))
+	var successors:Array[String]=[]
+	var combined_founding_office:=government_stage==0 and WorldSimulation.state.player_settlements.size()==1 and local_id!=""
+	var before_events:=WorldSimulation.state.simulation_events.size()
+	if combined_founding_office:
+		var removed:=remove_settlement_leader(local_id,"dismiss")
+		if bool(removed.get("ok",false)) and not (removed.get("successor",{}) as Dictionary).is_empty(): successors.append(String(removed.successor.get("name","")))
+	else:
+		for office_key in offices:
+			var removed_office:=remove_central_officeholder(office_key,"dismiss")
+			if bool(removed_office.get("ok",false)) and not (removed_office.get("successor",{}) as Dictionary).is_empty(): successors.append(String(removed_office.successor.get("name","")))
+		index=_find_person_index(person_id)
+		if index>=0 and String(people[index].get("local_leader_of",""))!="":
+			var removed_local:=remove_settlement_leader(String(people[index].local_leader_of),"dismiss")
+			if bool(removed_local.get("ok",false)) and not (removed_local.get("successor",{}) as Dictionary).is_empty(): successors.append(String(removed_local.successor.get("name","")))
+	# The ordinary removal notices are replaced by one that says what happened.
+	var added:=maxi(0,WorldSimulation.state.simulation_events.size()-before_events)
+	if WorldSimulation.state.simulation_events.size()>=80: added=mini(offices.size()+1,WorldSimulation.state.simulation_events.size())
+	for i in range(mini(added,WorldSimulation.state.simulation_events.size())-1,-1,-1):
+		var existing:Dictionary=WorldSimulation.state.simulation_events[i]
+		if String(existing.get("title","")) in ["Officeholder Dismissed","Leader Dismissed"] and String(existing.get("description","")).begins_with(name): WorldSimulation.state.simulation_events.remove_at(i)
+	index=_find_person_index(person_id)
+	if index<0: return {"ok":false,"reason":"That person is no longer available."}
+	people[index]["status"]=normalized
+	people[index]["office_key"]=""
+	people[index]["office_title"]=""
+	people[index]["local_leader_of"]=""
+	people[index]["removed_day"]=int(WorldSimulation.state.elapsed_days)
+	people[index]["removal_reason"]=normalized
+	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
+	if normalized=="fled":
+		metrics["cohesion"]=clampf(float(metrics.get("cohesion",0.5))-0.01,0.01,0.99)
+	else:
+		metrics["legitimacy"]=clampf(float(metrics.get("legitimacy",0.5))-0.01,0.01,0.99)
+		metrics["cohesion"]=clampf(float(metrics.get("cohesion",0.5))-0.005,0.01,0.99)
+	_ensure_pool()
+	_ensure_local_leaders()
+	var successor_text:=" %s took up the work." % " and ".join(PackedStringArray(successors)) if not successors.is_empty() else ""
+	var event:={"day":int(WorldSimulation.state.elapsed_days),"title":"Official Fled" if normalized=="fled" else "Official Cast Out",
+		"description":("%s fled in the night, beyond the hills and out of reach of the ruler's anger.%s" if normalized=="fled" else "%s was cast out of the realm by the ruler's decree.%s") % [name,successor_text],
+		"domain":"institutions","severity":"major" if normalized=="fled" else "notice"}
+	WorldSimulation.state.simulation_events.push_front(event)
+	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
+	revision+=1
+	_sync_advisor_roster()
+	return {"ok":true,"status":normalized,"person_id":person_id,"name":name,"offices":offices,"successors":successors,"event":event,"message":event.description}
 
 
 func settlement_leader(settlement_id:String)->Dictionary:

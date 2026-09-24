@@ -1,5 +1,6 @@
 extends Node
 
+const DivineRegard:=preload("res://scripts/divine_regard.gd")
 const ADVICE_ACTS := ["report", "recommend", "warn", "object", "request", "correct", "evade", "conceal", "confess", "bargain", "challenge", "remain_silent"]
 const MAX_CIVIC_DIALOGUE_PER_SETTLEMENT:=24
 const MAX_SOVEREIGN_ORDER_RECORDS:=100
@@ -1186,6 +1187,9 @@ func _leader_willingness(leader:Dictionary,policy_id:String,assessment:Dictionar
 		"cantankerous": willingness-=0.12
 		"principled": willingness-=coercion*0.16
 		"diplomatic": willingness+=0.04-coercion*0.07
+	# The god's people: dread compels, love inclines, dread soured by
+	# resentment makes the compliance brittle.
+	willingness+=DivineRegard.willingness_shift(leader)
 	return clampf(willingness,0.0,1.0)
 
 
@@ -1607,6 +1611,10 @@ func _leader_forecast_score(leader:Dictionary,implementation_rate:float)->float:
 		"cantankerous": bias=-lerpf(0.09,0.025,honesty)
 		"diplomatic": bias=0.015
 		"principled": error_span*=0.55
+	# Dread of the god makes a forecast rosier than the evidence (the honest
+	# less so); love makes it straighter.
+	bias=bias*DivineRegard.forecast_bias_scale(leader)+DivineRegard.forecast_bias(leader)
+	error_span*=DivineRegard.forecast_error_scale(leader)
 	return clampf(implementation_rate+sin(float(person_id)*17.41+float(WorldSimulation.state.elapsed_days)*0.013)*error_span+bias,0.0,1.0)
 
 
@@ -1858,7 +1866,10 @@ func execution_modifier_for_advisor(advisor:Dictionary,office:String,relevant_sk
 	var doctrine:=String(advisor.get("doctrine",""))
 	if doctrine!="" and WorldSimulation.discovery.society_model!=null:
 		structural_adjustment=WorldSimulation.discovery.society_model.doctrine_execution_strength(doctrine)*0.22
-	return clampf(0.36+competence*0.46+float(relationship.get("trust",0.5))*0.055+float(relationship.get("respect",0.5))*0.035+institutional_capacity*0.16+structural_adjustment-burden*0.42,0.35,1.12)
+	# A frightened, resentful official who has already let it show drags their
+	# feet: bounded quiet sabotage of the work (see divine_regard.gd).
+	var sabotage:=DivineRegard.sabotage(advisor)
+	return clampf(0.36+competence*0.46+float(relationship.get("trust",0.5))*0.055+float(relationship.get("respect",0.5))*0.035+institutional_capacity*0.16+structural_adjustment-burden*0.42-sabotage,0.35,1.12)
 
 func respond_to_council_item(item_id: String, response: String) -> void:
 	for item in WorldSimulation.state.council_inbox:
