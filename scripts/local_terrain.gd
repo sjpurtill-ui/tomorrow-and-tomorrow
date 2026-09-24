@@ -46,6 +46,10 @@ const SEA_LEVEL := 0.0
 const KM_PER_WORLD_UNIT := 1.0
 const SURFACE_STONE_RADIUS_KM:=Vector2(0.0015,0.0045)
 const CONVOY_KM_PER_DAY := 16.0
+const CaravanLeader:=preload("res://scripts/caravan_leader.gd")
+const CaravanSystem:=preload("res://scripts/caravan_system.gd")
+const CivilizationTravel:=preload("res://scripts/civilization_travel.gd")
+const CaravanPanel:=preload("res://scripts/hud/caravan_panel.gd")
 const MAIN_RIVER_WATER_HALF_WIDTH_KM := 0.125
 const TRIBUTARY_WATER_HALF_WIDTH_KM := 0.035
 const MAIN_RIVER_SETTLEMENT_CLEARANCE_KM := 0.25
@@ -263,6 +267,9 @@ var settlement_convoy_pending_destination:=Vector3.ZERO
 var settlement_convoy_pending_route:Dictionary={}
 var settlement_convoy_pending_quote:Dictionary={}
 var settlement_convoy_confirmation_previous_speed:=0.0
+var caravan_formation:Dictionary={}
+var caravan_formation_controls:Dictionary={}
+var caravan_formation_card:Control
 var settlement_fabric_shader:Shader
 var settlement_wall_shader:Shader
 var vegetation_surface_shader:Shader
@@ -498,6 +505,8 @@ func _ready() -> void:
 	WorldSimulation.surface_material_provider=Callable(self,"_civilization_surface_materials")
 	WorldSimulation.start_provider=Callable(self,"_civilization_start")
 	WorldSimulation.route_provider=Callable(self,"_analyze_convoy_route")
+	CaravanLeader.geography_provider=Callable(self,"_caravan_geography_at")
+	CaravanLeader.forage_provider=Callable(self,"_caravan_forage_at")
 	WorldSimulation.start_world()
 	_refresh_discovery_mask(true)
 	_trace_load("world configured start=%s river_x=%.1f height=%.2f" % [world_start_position,_world_river_x(world_start_position.z),world_start_position.y])
@@ -1188,20 +1197,24 @@ func _commit_world_day(day_result:Dictionary)->void:
 func _after_world_time(days_advanced:float)->void:
 	if not GameState.founding_journey.is_empty():
 		var journey:=GameState.founding_journey
-		travel_days_elapsed=float(journey.elapsed)
-		travel_days_total=float(journey.duration_days)
+		travel_days_elapsed=float(journey.get("elapsed",0.0))
+		travel_days_total=maxf(0.001,float(journey.get("duration_days",0.001)))
 		var progress:=clampf(travel_days_elapsed/travel_days_total,0,1)
-		var point:Vector2=journey.origin.lerp(journey.destination,progress)
+		var point:=CivilizationTravel.journey_position(journey)
 		settler_marker.position=Vector3(point.x,_height_at(point.x,point.y)+.002,point.y)
 		var was_traveling:=travel_active
-		travel_active=bool(journey.active)
-		_check_travel_milestone_reports(progress)
+		travel_active=bool(journey.get("active",false))
+		var led:=not (journey.get("caravan",{}) as Dictionary).is_empty()
+		if not led:_check_travel_milestone_reports(progress)
 		if was_traveling and not travel_active:
 			travel_reported_milestones.erase("forage_ready")
-			if route_mesh:route_mesh.visible=false
 			_update_resource_proximity()
-			_issue_travel_council_report("arrival" if progress>=1 else "halt",progress,GameState.convoy_emergency_halt_reason)
+			# A caravan leader explains its own camps and arrival (below).
+			if not led:
+				if route_mesh:route_mesh.visible=false
+				_issue_travel_council_report("arrival" if progress>=1 else "halt",progress,GameState.convoy_emergency_halt_reason)
 	_process_settlement_convoy()
+	_present_caravan_reports()
 	for project in construction_projects:
 		if project.complete:
 			continue
@@ -3484,7 +3497,7 @@ func _refresh_settlement_convoy_marker()->void:
 		position_2d=Vector2(float(position_value.get("x",0.0)),float(position_value.get("z",position_value.get("y",0.0))))
 	settlement_convoy_marker.position=Vector3(position_2d.x,_height_at(position_2d.x,position_2d.y)+0.002,position_2d.y)
 	if settlement_convoy_label:
-		settlement_convoy_label.text="SETTLEMENT CONVOY  •  %s  •  %d%%" % [_compact_population(int(convoy.get("population",0))),roundi(float(convoy.get("progress",0.0))*100.0)]
+		settlement_convoy_label.text="SETTLER CARAVAN  •  %s  •  %d%%" % [_compact_population(int(convoy.get("population",0))),roundi(float(convoy.get("progress",0.0))*100.0)]
 
 func _update_scale_lod() -> void:
 	if camera == null:
@@ -10837,18 +10850,19 @@ func _move_settlers_to(destination:Vector3)->void:
 	var accepted:=WorldSimulation.submit("player",{"kind":"move","destination":Vector2(destination.x,destination.z)})
 	if accepted.has("error"):
 		if travel_status_label:travel_status_label.text=String(accepted.error)
+		if bool(accepted.get("refused",false)):_show_caravan_notice({"leader":String(accepted.get("leader","The caravan leader")),"title":"The caravan leader advises against this","text":String(accepted.error).trim_prefix(String(accepted.get("leader",""))+": "),"severity":"warning"})
 		return
 	travel_start=settler_marker.position
 	travel_target=destination
 	travel_days_total=float(accepted.duration_days)
 	travel_days_elapsed=0.0
-	travel_active=true
+	travel_active=bool(GameState.founding_journey.get("active",true))
 	travel_reported_milestones.clear()
-	_draw_route(travel_start, travel_target)
+	_draw_route(travel_start, travel_target, accepted.get("path",[]))
 	settler_panel.visible = false
 	_inspect_location(destination)
+	_present_caravan_reports()
 	_update_time_interface()
-	_issue_travel_council_report("departure",0.0)
 
 func _halt_founding_convoy_to_forage()->void:
 	var result:Dictionary=preload("res://scripts/civilization_travel.gd").camp_to_forage()
@@ -10865,8 +10879,86 @@ func _halt_founding_convoy_to_forage()->void:
 	var event:={"id":"convoy_forage_%d" % int(GameState.elapsed_days*24.0),"day":int(GameState.elapsed_days),"title":"Founding Convoy Camps to Forage","description":String(result.message),"domain":"food","severity":"notice"}
 	GameState.simulation_events.push_front(event)
 	if GameState.simulation_events.size()>80:GameState.simulation_events.resize(80)
-	_issue_travel_council_report("halt",float(result.get("progress",0.0)),"the convoy deliberately camped to forage")
+	if (GameState.founding_journey.get("caravan",{}) as Dictionary).is_empty():_issue_travel_council_report("halt",float(result.get("progress",0.0)),"the convoy deliberately camped to forage")
+	_present_caravan_reports()
 	_update_time_interface()
+
+## Caravan overrides from the status card. The leader runs the march; these
+## only halt, resume, recall or focus it.
+func _on_caravan_override(id:String,action:String)->void:
+	var result:Dictionary={}
+	if id=="founding":
+		match action:
+			"focus":
+				var point:=CivilizationTravel.journey_position(GameState.founding_journey)
+				_set_camera_target(Vector3(point.x,_height_at(point.x,point.y),point.y))
+				return
+			"hold":
+				_halt_founding_convoy_to_forage()
+				return
+			"resume":
+				result=CivilizationTravel.resume()
+				if not result.has("error"):
+					travel_active=bool(GameState.founding_journey.get("active",false))
+					var caravan:Dictionary=GameState.founding_journey.get("caravan",{})
+					_draw_route(settler_marker.position,travel_target,caravan.get("path",[]))
+	else:
+		match action:
+			"focus":
+				var position_2d:=CaravanSystem._vector(GameState.settlement_convoy.get("position",Vector2.ZERO))
+				_set_camera_target(Vector3(position_2d.x,_height_at(position_2d.x,position_2d.y),position_2d.y))
+				return
+			"hold":result=CaravanSystem.hold_expansion()
+			"resume":result=CaravanSystem.resume_expansion()
+			"recall":result=CaravanSystem.recall_expansion()
+		var record:Dictionary=GameState.settlement_convoy.get("caravan",{})
+		if not record.is_empty() and action in ["resume","recall"]:
+			var path:Array=record.get("path",[])
+			if path.size()>=2:
+				var from:Vector2=path[0]
+				var to:Vector2=path[-1]
+				_draw_route(Vector3(from.x,0,from.y),Vector3(to.x,0,to.y),path)
+	if result.has("error") and travel_status_label:travel_status_label.text=String(result.error)
+	_present_caravan_reports()
+	_update_time_interface()
+
+## Leader reports reach the ruler as a Travel Council notice and an event; the
+## major ones also go to the audience hall when that system is installed.
+func _present_caravan_reports()->void:
+	for entry_variant:Variant in CaravanSystem.drain_reports():
+		var entry:Dictionary=entry_variant
+		var event:={"id":"caravan_%s_%d_%d" % [String(entry.get("kind","report")),int(entry.get("day",0)),GameState.simulation_events.size()],"day":int(entry.get("day",GameState.elapsed_days)),"title":"%s: %s" % [String(entry.get("leader","Caravan leader")),String(entry.get("title",""))],"description":String(entry.get("text","")),"domain":"settlement","severity":"critical" if String(entry.get("severity",""))=="danger" else ("major" if bool(entry.get("major",false)) else "notice")}
+		GameState.simulation_events.push_front(event)
+		if GameState.simulation_events.size()>80:GameState.simulation_events.resize(80)
+		if String(entry.get("severity",""))=="danger":AdvisorSystem.generate_consequence_item({"description":String(entry.get("text","")),"domain":"food","severity":"warning"})
+		if bool(entry.get("major",false)):CaravanSystem.forward_to_audience(entry)
+		_show_caravan_notice(entry)
+		if String(entry.get("kind",""))=="arrival" and String(entry.get("caravan",""))=="founding" and route_mesh:route_mesh.visible=false
+
+func _show_caravan_notice(entry:Dictionary)->void:
+	if travel_council_notice==null:return
+	var danger:=String(entry.get("severity",""))=="danger" or String(entry.get("severity",""))=="warning"
+	var accent:=Color("#b46452") if danger else Color("#b59b5d")
+	travel_council_notice.text="CARAVAN LEADER  •  %s\n%s — %s\nOPEN COUNCIL" % [String(entry.get("leader","")),String(entry.get("title","")),String(entry.get("text",""))]
+	travel_council_notice.add_theme_stylebox_override("normal",_population_report_style(accent))
+	travel_council_notice.add_theme_stylebox_override("hover",_population_report_style(accent,true))
+	travel_council_notice.add_theme_stylebox_override("pressed",_population_report_style(accent,true))
+	travel_council_notice.visible=true
+	travel_council_notice_until_msec=Time.get_ticks_msec()+(13000 if danger else 9000)
+
+## Cheap geography for caravan route planning: the same authored surface water
+## the daily water ledger uses, and dry-land height.
+func _caravan_geography_at(point:Vector2)->Dictionary:
+	var main:=_main_river_distance_at(point.x,point.y)
+	var tributary:=_nearest_tributary_distance_at(point)
+	var drainage:=_local_drainage_distance_at(point.x,point.y)
+	var water_km:=minf(main,minf(tributary,drainage))*KM_PER_WORLD_UNIT
+	var kind:="river" if main<=minf(tributary,drainage) else ("stream" if tributary<=drainage else "creek")
+	return {"water_km":water_km if is_finite(water_km) else 9999.0,"water_kind":kind,"land":_height_at(point.x,point.y)>SEA_LEVEL+0.012}
+
+func _caravan_forage_at(point:Vector2)->Dictionary:
+	var profile:=PlanetEnvironment.profile_at(point)
+	return {"forage":float(profile.get("forage",0.4)),"game":float(profile.get("game",0.3))}
 
 func _on_settlement_action_pressed()->void:
 	if not GameState.settlement_site_committed:
@@ -10880,7 +10972,29 @@ func _on_settlement_action_pressed()->void:
 	if settlement_convoy_targeting:
 		_cancel_settlement_convoy_targeting()
 	else:
+		_open_caravan_formation()
+
+## Form the settler caravan in the source settlement, then pick its destination.
+func _open_caravan_formation()->void:
+	if is_instance_valid(caravan_formation_card):return
+	var origin:Dictionary=_settlement_model().selected_settlement_snapshot()
+	if origin.is_empty():
+		var settlements:Array=_settlement_model().settlement_network_snapshot().get("settlements",[])
+		if not settlements.is_empty():origin=settlements[0]
+	var available:=float(origin.get("population",GameState.population_total))
+	var limits:=CaravanSystem.formation(Vector2.ZERO,Vector2.ZERO,available,caravan_formation)
+	limits["advice"]="Once you choose the ground, the leader plans the route between water, judges the rations and tells you plainly if the journey is unsafe."
+	var candidates:=CaravanLeader.candidates(6)
+	if interface_layer==null:
 		_enter_settlement_convoy_targeting()
+		return
+	caravan_formation_card=CaravanPanel.open_formation_card(interface_layer,String(origin.get("name",_settlement_display_name())).capitalize(),limits,candidates,caravan_formation,func(chosen:Dictionary)->void:
+		caravan_formation=chosen
+		caravan_formation_card=null
+		_enter_settlement_convoy_targeting()
+	,func()->void:
+		caravan_formation_card=null
+	)
 
 func _toggle_actions_menu()->void:
 	if actions_menu_panel==null:
@@ -11145,7 +11259,17 @@ func _begin_settlement_convoy(destination:Vector3)->void:
 		if settlement_convoy_preview_material: settlement_convoy_preview_material.albedo_color=Color(0.92,0.30,0.23,0.55)
 		return
 	var duration:=maxf(0.5,float(route.distance_km)/(CONVOY_KM_PER_DAY*float(route.terrain_modifier)))
-	var quote:Dictionary=_settlement_model().settlement_convoy_quote(destination_2d,duration)
+	# The caravan leader plans the march over water before the quote is shown.
+	var formation:=CaravanSystem.formation(origin_2d,destination_2d,float(origin.get("population",GameState.population_total)),caravan_formation)
+	if bool(formation.get("ok",false)):duration=maxf(duration,float(formation.travel_days))
+	var party:=caravan_formation.duplicate()
+	if not party.has("food"):party["food"]=float(formation.suggested_food)
+	party["population"]=int(formation.founders)
+	var quote:Dictionary=_settlement_model().settlement_convoy_quote(destination_2d,duration,{},party)
+	quote["caravan_formation"]=formation
+	if not bool(formation.get("ok",false)):
+		quote["ok"]=false
+		quote["reason"]="%s refuses: %s" % [String((formation.leader as Dictionary).get("name","The caravan leader")),String(formation.advice)]
 	_open_settlement_convoy_confirmation(destination,route,quote)
 
 func _founding_material_summary(materials:Dictionary)->String:
@@ -11185,7 +11309,7 @@ func _open_settlement_convoy_confirmation(destination:Vector3,route:Dictionary,q
 	root.add_theme_constant_override("separation",10)
 	modal.add_child(root)
 	var eyebrow:=Label.new()
-	eyebrow.text="NEW SETTLEMENT • CONVOY QUOTE"
+	eyebrow.text="NEW SETTLEMENT • SETTLER CARAVAN"
 	eyebrow.add_theme_font_size_override("font_size",11)
 	eyebrow.add_theme_color_override("font_color",Color("#c8af6c"))
 	root.add_child(eyebrow)
@@ -11219,6 +11343,18 @@ func _open_settlement_convoy_confirmation(destination:Vector3,route:Dictionary,q
 	settlement_convoy_name_input.custom_minimum_size=Vector2(0,40)
 	settlement_convoy_name_input.tooltip_text="This is the permanent map and history name. It can be changed later from the selected settlement."
 	body.add_child(settlement_convoy_name_input)
+	var formation:Dictionary=quote.get("caravan_formation",{})
+	if not formation.is_empty():
+		var origin_stores:Dictionary=_settlement_model().city_resource_snapshot(String(quote.get("origin_id","")),false).get("stores",{}) if String(quote.get("origin_id",""))!="" else {}
+		var limits:=formation.duplicate()
+		limits["show_food"]=true
+		limits["food_available"]=float(origin_stores.get("Food",GameState.resource_stockpiles.get("Food",0.0)))
+		var values:=caravan_formation.duplicate()
+		values["population"]=int(quote.get("population",formation.founders))
+		values["food"]=float(quote.get("food",formation.suggested_food))
+		values["leader_person_id"]=int((formation.leader as Dictionary).get("person_id",0))
+		limits["advice"]=CaravanSystem.rations_comment(formation,int(values.population),float(values.food))
+		caravan_formation_controls=CaravanPanel.build_formation(body,limits,CaravanLeader.candidates(6),values,modal.size.x-64.0,_on_caravan_formation_changed,{"text":Color("#ded5c0"),"muted":Color("#aeb4ae"),"accent":Color("#c8af6c")})
 	body.add_child(HSeparator.new())
 	var origin_name:=String(quote.get("origin_name","NEAREST SETTLEMENT")).to_upper()
 	var distance_km:=float(route.get("distance_km",quote.get("distance_km",0.0)))
@@ -11255,13 +11391,40 @@ func _open_settlement_convoy_confirmation(destination:Vector3,route:Dictionary,q
 	choose_again.pressed.connect(_dismiss_settlement_convoy_confirmation)
 	footer.add_child(choose_again)
 	settlement_convoy_confirm_button=Button.new()
-	settlement_convoy_confirm_button.text="SEND FOUNDING CONVOY"
+	settlement_convoy_confirm_button.text="SEND THE CARAVAN"
 	settlement_convoy_confirm_button.custom_minimum_size=Vector2(210,42)
 	settlement_convoy_confirm_button.disabled=not ready
 	settlement_convoy_confirm_button.pressed.connect(_confirm_settlement_convoy)
 	footer.add_child(settlement_convoy_confirm_button)
 
+## Party size, rations or leader changed in the review: the quote is repriced
+## from real stores and the leader re-plans before anything is spent.
+func _on_caravan_formation_changed(values:Dictionary)->void:
+	var previous_leader:=int(caravan_formation.get("leader_person_id",0))
+	caravan_formation.merge(values,true)
+	var quote:=settlement_convoy_pending_quote
+	var formation:Dictionary=quote.get("caravan_formation",{})
+	var destination_2d:=Vector2(settlement_convoy_pending_destination.x,settlement_convoy_pending_destination.z)
+	var origin_value:Variant=quote.get("origin",destination_2d)
+	var origin_2d:Vector2=origin_value if origin_value is Vector2 else destination_2d
+	if formation.is_empty() or int(caravan_formation.get("leader_person_id",0))!=previous_leader:
+		formation=CaravanSystem.formation(origin_2d,destination_2d,float(formation.get("max_founders",40))+float(CaravanSystem.REMAIN_AT_ORIGIN),caravan_formation)
+	var repriced:Dictionary=_settlement_model().settlement_convoy_quote(destination_2d,maxf(float(quote.get("duration_days",0.5)),float(formation.get("travel_days",0.5))),{},caravan_formation)
+	repriced["caravan_formation"]=formation
+	if not bool(formation.get("ok",false)):
+		repriced["ok"]=false
+		repriced["reason"]="%s refuses: %s" % [String((formation.get("leader",{}) as Dictionary).get("name","The caravan leader")),String(formation.get("advice",""))]
+	settlement_convoy_pending_quote=repriced
+	var advice:Label=caravan_formation_controls.get("advice")
+	if is_instance_valid(advice):advice.text=CaravanSystem.rations_comment(formation,int(repriced.get("population",0)),float(repriced.get("food",0.0)))
+	var ready:=bool(repriced.get("ok",false))
+	if settlement_convoy_confirm_status:
+		settlement_convoy_confirm_status.text="READY  •  %s people, %.0f rations" % [_compact_population(int(repriced.get("population",0))),float(repriced.get("food",0.0))] if ready else "CANNOT SEND  •  %s" % String(repriced.get("reason","requirements are not met"))
+		settlement_convoy_confirm_status.add_theme_color_override("font_color",Color("#8fc59a") if ready else Color("#e08b77"))
+	if settlement_convoy_confirm_button:settlement_convoy_confirm_button.disabled=not ready
+
 func _dismiss_settlement_convoy_confirmation()->void:
+	caravan_formation_controls={}
 	if settlement_convoy_confirm_panel and is_instance_valid(settlement_convoy_confirm_panel): settlement_convoy_confirm_panel.queue_free()
 	settlement_convoy_confirm_panel=null
 	settlement_convoy_confirm_status=null
@@ -11284,7 +11447,11 @@ func _confirm_settlement_convoy()->void:
 		return
 	var quote:=settlement_convoy_pending_quote.duplicate(true)
 	var chosen_name:=settlement_convoy_name_input.text.strip_edges() if settlement_convoy_name_input else String(quote.get("suggested_name",""))
-	var started:Dictionary=_settlement_model().begin_settlement_convoy(Vector2(destination.x,destination.z),float(quote.get("duration_days",0.5)),chosen_name)
+	var party:=caravan_formation.duplicate()
+	if not caravan_formation_controls.is_empty():party.merge(CaravanPanel.formation_values(caravan_formation_controls),true)
+	var formation:Dictionary=quote.get("caravan_formation",{})
+	if not formation.is_empty() and int(party.get("leader_person_id",0))==int((formation.leader as Dictionary).get("person_id",-1)):party["plan"]=formation.plan
+	var started:Dictionary=_settlement_model().begin_settlement_convoy(Vector2(destination.x,destination.z),float(quote.get("duration_days",0.5)),chosen_name,false,party)
 	if not bool(started.get("ok",false)):
 		if settlement_convoy_confirm_status:
 			settlement_convoy_confirm_status.text="CANNOT SEND  •  %s" % String(started.get("reason","the available provisions changed"))
@@ -11302,7 +11469,10 @@ func _confirm_settlement_convoy()->void:
 		settlement_convoy_preview=null
 	settlement_convoy_preview_material=null
 	if settlement_convoy_instruction_panel: settlement_convoy_instruction_panel.visible=false
-	_draw_route(origin_3d,destination)
+	_draw_route(origin_3d,destination,started.get("path",[]))
+	caravan_formation={}
+	caravan_formation_controls={}
+	_present_caravan_reports()
 	var event:={
 		"id":"settlement_convoy_%d" % int(GameState.elapsed_days*24.0),"day":int(GameState.elapsed_days),
 		"title":"New Settlement Convoy Departed",
@@ -11317,23 +11487,20 @@ func _confirm_settlement_convoy()->void:
 
 func _process_settlement_convoy()->void:
 	if not bool(GameState.settlement_convoy.get("active",false)): return
-	var convoy:Dictionary=GameState.settlement_convoy
-	# The route origin remains fixed while the aggregate convoy position advances.
-	var origin:Vector2=convoy.get("origin",convoy.get("position",Vector2.ZERO))
-	var destination:Vector2=convoy.get("destination",origin)
-	var duration:=maxf(0.5,float(convoy.get("duration_days",0.5)))
-	var progress:=clampf((GameState.elapsed_days-float(convoy.get("depart_day",GameState.elapsed_days)))/duration,0.0,1.0)
-	var position:=origin.lerp(destination,progress)
-	_settlement_model().update_settlement_convoy(position,progress)
+	# The caravan leader marches in the calendar's convoy step
+	# (civilization_day.advance_convoy -> caravan_system.gd); an older save's
+	# convoy gains its leader here. The map marker follows the real position.
+	CaravanSystem.ensure(GameState.settlement_convoy)
 	_refresh_settlement_convoy_marker()
-	if progress<1.0: return
-	var trace=preload("res://scripts/performance_trace.gd")
-	var stamp:int=trace.start()
-	var completed:Dictionary=_settlement_model().complete_settlement_convoy(destination)
-	trace.mark("found_complete_convoy",stamp)
-	_show_convoy_arrival(completed)
 
 func _show_convoy_arrival(completed:Dictionary)->void:
+	_present_caravan_reports()
+	if bool(completed.get("returned",false)):
+		if route_mesh: route_mesh.visible=false
+		_refresh_settlement_convoy_marker()
+		_refresh_settlement_network(true)
+		_update_time_interface()
+		return
 	var destination:Vector2=completed.get("settlement",{}).get("position",Vector2.ZERO)
 	var trace=preload("res://scripts/performance_trace.gd")
 	var stamp:int=trace.start()
@@ -11475,6 +11642,9 @@ func _estimated_convoy_endurance_days() -> float:
 	return maxf(2.0,food_days/maxf(0.08,1.0-moving_ratio)*0.92)
 
 func _evaluate_travel_survival() -> void:
+	# A caravan leader owns stopping and going (caravan_leader.gd): it camps only
+	# at water, turns aside for water, and reports trouble itself.
+	if not (GameState.founding_journey.get("caravan",{}) as Dictionary).is_empty():return
 	if not travel_active:
 		if not GameState.settlement_site_committed and bool(GameState.founding_journey.get("camped_foraging",false)):
 			var camp_advice:Dictionary=preload("res://scripts/civilization_travel.gd").advice()
@@ -11678,16 +11848,26 @@ func _dismiss_active_foreign_alert()->void:
 	_finish_active_foreign_alert()
 
 
-func _draw_route(from: Vector3, to: Vector3) -> void:
+func _draw_route(from: Vector3, to: Vector3, path:Array=[]) -> void:
 	if route_mesh:
 		route_mesh.queue_free()
 	var immediate := ImmediateMesh.new()
 	immediate.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
-	for i in 25:
-		var progress := float(i) / 24.0
-		var point := from.lerp(to, progress)
-		point.y = _height_at(point.x, point.z) + 0.012
-		immediate.surface_add_vertex(point)
+	if path.size()>=2:
+		for index in path.size()-1:
+			var a:Vector2=path[index]
+			var b:Vector2=path[index+1]
+			var pieces:=clampi(ceili(a.distance_to(b)/1.5),1,48)
+			for piece in pieces:
+				var along:=a.lerp(b,float(piece)/float(pieces))
+				if index==0 and piece==0:immediate.surface_add_vertex(Vector3(a.x,_height_at(a.x,a.y)+0.012,a.y))
+				immediate.surface_add_vertex(Vector3(along.x,_height_at(along.x,along.y)+0.012,along.y))
+	else:
+		for i in 25:
+			var progress := float(i) / 24.0
+			var point := from.lerp(to, progress)
+			point.y = _height_at(point.x, point.z) + 0.012
+			immediate.surface_add_vertex(point)
 	immediate.surface_end()
 	route_mesh = MeshInstance3D.new()
 	route_mesh.mesh = immediate
@@ -18968,6 +19148,7 @@ func _update_time_interface() -> void:
 		time_interface_day=sim_day;time_interface_msec=now_msec
 		if hud:
 			hud.refresh()
+			CaravanPanel.sync(self,hud)
 	if interface_layer == null:
 		return
 	if date_label:
@@ -19033,13 +19214,18 @@ func _update_time_interface() -> void:
 		var remaining := maxf(0.0, travel_days_total - travel_days_elapsed)
 		var speed_factor:=roundi(float(GameState.simulation_metrics.get("travel_speed_factor",1.0))*100.0)
 		var moving_advice:Dictionary=preload("res://scripts/civilization_travel.gd").advice()
-		travel_status_label.text = "ADVISOR: %s  •  %s remaining  •  pace %d%%  •  food %.1f days  •  water %.1f days" % [String(moving_advice.get("status","CONTINUE")),_format_game_duration(remaining),speed_factor,float(GameState.simulation_metrics.get("food_days",0.0)),float(GameState.water_metrics.get("days",0.0))]
+		var leader_intent:=String(moving_advice.get("intent",""))
+		travel_status_label.text = ("%s: %s" % [String(moving_advice.get("leader","CARAVAN LEADER")).to_upper(),leader_intent.to_upper()] if leader_intent!="" else "ADVISOR: %s" % String(moving_advice.get("status","CONTINUE")))+"  •  %s remaining  •  pace %d%%  •  food %.1f days  •  water %.1f days" % [_format_game_duration(remaining),speed_factor,float(GameState.simulation_metrics.get("food_days",0.0)),float(GameState.water_metrics.get("days",0.0))]
 	elif bool(GameState.settlement_convoy.get("active",false)):
 		var colony_convoy:Dictionary=GameState.settlement_convoy
 		var colony_remaining:=maxf(0.0,float(colony_convoy.get("arrival_day",GameState.elapsed_days))-GameState.elapsed_days)
-		travel_status_label.text="SETTLEMENT CONVOY EN ROUTE  •  %s people  •  %s remaining  •  %d%% complete" % [_compact_population(int(colony_convoy.get("population",0))),_format_game_duration(colony_remaining),roundi(float(colony_convoy.get("progress",0.0))*100.0)]
+		var colony_intent:=String((colony_convoy.get("caravan",{}) as Dictionary).get("intent",""))
+		travel_status_label.text="SETTLER CARAVAN  •  %s people  •  %s  •  about %s remaining  •  %d%% complete" % [_compact_population(int(colony_convoy.get("population",0))),colony_intent.to_upper() if colony_intent!="" else "EN ROUTE",_format_game_duration(colony_remaining),roundi(float(colony_convoy.get("progress",0.0))*100.0)]
 	elif GameState.convoy_emergency_halt_reason!="":
 		travel_status_label.text="CONVOY HALTED  •  %s  •  PAUSED" % GameState.convoy_emergency_halt_reason
+	elif not GameState.settlement_site_committed and bool(GameState.founding_journey.get("camped_foraging",false)) and String(preload("res://scripts/civilization_travel.gd").advice().get("intent",""))!="":
+		var led_camp:Dictionary=preload("res://scripts/civilization_travel.gd").advice()
+		travel_status_label.text="%s: %s  •  FOOD %+.1f TODAY  •  WATER %.1f DAYS" % [String(led_camp.get("leader","CARAVAN LEADER")).to_upper(),String(led_camp.get("intent","")).to_upper(),float(GameState.simulation_metrics.get("food_net",0.0)),float(GameState.water_metrics.get("days",0.0))]
 	elif not GameState.settlement_site_committed and bool(GameState.founding_journey.get("camped_foraging",false)):
 		var camp_advice:Dictionary=preload("res://scripts/civilization_travel.gd").advice()
 		travel_status_label.text="ADVISOR: %s  •  FORAGING IN PLACE  •  ~%.0f KM NEXT-LEG REACH  •  FOOD %+.1f TODAY" % [String(camp_advice.get("status","KEEP FORAGING")),float(camp_advice.get("approximate_reach_km",0.0)),float(GameState.simulation_metrics.get("food_net",0.0))]

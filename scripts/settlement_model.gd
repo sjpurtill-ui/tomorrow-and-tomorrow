@@ -1098,7 +1098,9 @@ func known_route_assessment(origin:Vector2,destination:Vector2)->Dictionary:
 
 ## `review_cache` lets one expansion review reuse the network snapshot built by
 ## its first quote that reaches it; nothing a quote does changes the network.
-func settlement_convoy_quote(destination:Vector2,duration_days:float,review_cache:Dictionary={})->Dictionary:
+## `party` (optional) is the ruler's caravan formation: population, food and
+## leader_person_id; omitted fields keep the established defaults.
+func settlement_convoy_quote(destination:Vector2,duration_days:float,review_cache:Dictionary={},party:Dictionary={})->Dictionary:
 	_ensure_primary_settlement_record()
 	if "Hearth Circle" not in WorldSimulation.state.settlement_completed:
 		return {"ok":false,"reason":"A permanent first settlement must exist before another can be founded."}
@@ -1133,11 +1135,13 @@ func settlement_convoy_quote(destination:Vector2,duration_days:float,review_cach
 			return {"ok":false,"reason":"The destination lies inside %s's existing settlement territory." % String(settlement.get("name","an existing settlement"))}
 	var available_primary:=_settlement_population(origin)
 	var founders:=maxi(40,roundi(available_primary*0.02))
+	if party.has("population"):founders=maxi(40,int(party.population))
 	founders=mini(founders,maxi(0,roundi(available_primary)-80))
 	if founders<40:
 		return {"ok":false,"reason":"At least 80 people must remain at the source settlement after a 40-person founding party is organized."}
 	var duration:=maxf(0.5,maxf(duration_days,origin_distance/SETTLEMENT_CONVOY_KM_PER_DAY))
 	var food_required:=float(founders)*(duration+45.0)
+	if party.has("food"):food_required=maxf(0.0,float(party.food))
 	# Settlers need portable shelter/tool supplies, not one botanically specific
 	# resource. Timber and plant fiber are efficient; clay and stone can substitute
 	# at a transport penalty. Local materials still matter without becoming a
@@ -1166,10 +1170,23 @@ func settlement_convoy_quote(destination:Vector2,duration_days:float,review_cach
 		"timber":float(founding_materials.get("Timber",0.0)),"fiber":float(founding_materials.get("Fiber Plants",0.0))
 	}
 
-func begin_settlement_convoy(destination:Vector2,duration_days:float,settlement_name:String="",delegated:bool=false)->Dictionary:
-	var quote:=settlement_convoy_quote(destination,duration_days)
+func begin_settlement_convoy(destination:Vector2,duration_days:float,settlement_name:String="",delegated:bool=false,party:Dictionary={})->Dictionary:
+	var quote:=settlement_convoy_quote(destination,duration_days,{},party)
 	if not bool(quote.get("ok",false)): return quote
+	# The caravan leader plans the march before anyone leaves; a refusal spends nothing.
+	var caravans:=preload("res://scripts/caravan_system.gd")
+	var prepared:Dictionary=caravans.prepare(quote,party)
+	if not bool(prepared.get("ok",false)): return {"ok":false,"reason":String(prepared.get("reason","The caravan leader refused the journey.")),"alternative":prepared.get("alternative")}
+	var planned_days:=float((prepared.plan as Dictionary).get("days",quote.duration_days))
+	if planned_days>float(quote.duration_days)+0.01:
+		quote=settlement_convoy_quote(destination,planned_days,{},party)
+		if not bool(quote.get("ok",false)): return quote
 	var result:Dictionary=with_city_resources(String(quote.origin_id),func()->Dictionary: return _depart_local_convoy(destination,quote,settlement_name))
+	if bool(result.get("ok",false)):
+		caravans.attach(WorldSimulation.state.settlement_convoy,prepared.leader,prepared.plan)
+		result["leader"]=String((prepared.leader as Dictionary).get("name",""))
+		result["plan"]=String((prepared.plan as Dictionary).get("summary",""))
+		result["path"]=((prepared.plan as Dictionary).get("path",[]) as Array).duplicate()
 	if bool(result.get("ok",false)) and not delegated and WorldSimulation.actor_id=="player":WorldSimulation.direction.auto_settlement=false
 	return result
 
@@ -1232,8 +1249,12 @@ func complete_settlement_convoy(destination:Vector2)->Dictionary:
 	WorldSimulation.state.next_player_settlement_id+=1
 	WorldSimulation.state.player_settlements.append(record)
 	_ensure_city_resources(record)
+	# A led caravan carries its actual remaining rations; older convoys used a
+	# fixed person-day ledger.
+	var caravan:Dictionary=convoy.get("caravan",{})
+	var arriving_food:=float(caravan.get("food",0.0)) if not caravan.is_empty() else maxf(0.0,float(convoy.get("food_committed",0.0))-float(convoy.get("population",0))*float(convoy.get("duration_days",0.0)))
 	with_city_resources(String(record.id),func()->void:
-		WorldSimulation.food.receive_external_food(maxf(0.0,float(convoy.get("food_committed",0.0))-float(convoy.get("population",0))*float(convoy.get("duration_days",0.0))))
+		WorldSimulation.food.receive_external_food(arriving_food)
 	)
 	WorldSimulation.state.record_building_event({
 		"day":int(floor(WorldSimulation.state.elapsed_days)),
