@@ -27,8 +27,11 @@ var ceremony:Control
 var ceremonies_offered:Dictionary={}
 var _ceremony_clock:=0.0
 
+const GROUP:="court_director"
+
 func _ready()->void:
 	name="AudienceDirector"
+	add_to_group(GROUP)
 	voice=Voice.new();voice.name="AudienceVoice";add_child(voice)
 	modal_layer=CanvasLayer.new();modal_layer.name="AudienceHallLayer";modal_layer.layer=85;add_child(modal_layer)
 	badge_layer=CanvasLayer.new();badge_layer.name="AntechamberLayer";badge_layer.layer=4;add_child(badge_layer)
@@ -155,12 +158,52 @@ func open_works(focus:String="")->Control:
 	var host:Node=terrain.hud if is_instance_valid(terrain) and "hud" in terrain and is_instance_valid(terrain.hud) else self
 	return WorksAtlas.open(host,terrain,self,focus)
 
-## The ruler calls someone into the hall: {person_id} for an official, {figure_id}
-## for an architect, {role:"chief_scout"} for the scouts.
+## The ruler calls someone into the court: {person_id} for an official,
+## {figure_id} for a master builder or war leader, {role:"chief_scout"} for the
+## scouts. They are summoned in place, inside the court.
 func summon(target:Dictionary)->Control:
-	var made:=Hall.summon(target)
-	if made.is_empty():return null
-	return open_audience(String(made.id))
+	var court:=open_court()
+	if court==null or not court.summon(target):return null
+	return court
+
+# --- The court: the one place for every dealing with your people and others ----
+
+## Opens the court (at rest, or focused: see AudienceModal.focus). If it is
+## already open, it turns to that person in place.
+func open_court(focus:Dictionary={})->Control:
+	if is_instance_valid(modal):
+		if not focus.is_empty():modal.focus(focus)
+		return modal
+	modal=Modal.new()
+	modal.terrain=terrain;modal.voice=voice;modal.start_focus=focus.duplicate()
+	modal.from_court=true
+	modal.closed.connect(func(_id:String):_refresh_badge.call_deferred())
+	modal_layer.add_child(modal)
+	_refresh_badge()
+	return modal
+
+func toggle_court()->void:
+	if is_instance_valid(modal):modal._close()
+	else:open_court()
+
+## Word to a foreign ruler, through your envoys, inside the court.
+func open_foreign(civ_id:String)->Control:
+	return open_court({"civ_id":civ_id})
+
+func court_open()->bool:
+	return is_instance_valid(modal)
+
+static func court_node()->Node:
+	## The running court director, if the world has one.
+	var tree:=Engine.get_main_loop() as SceneTree
+	return tree.get_first_node_in_group(GROUP) if tree!=null else null
+
+static func open_court_for(focus:Dictionary)->bool:
+	## Old screens call this to hand a conversation to the court.
+	var director:=court_node()
+	if director==null or not director.has_method("open_court"):return false
+	director.call("open_court",focus)
+	return true
 
 func open_conception()->Control:
 	var made:=Works.ruler_proposal()

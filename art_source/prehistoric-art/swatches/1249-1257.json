@@ -1,0 +1,15 @@
+{
+  "source": "art_source/prehistoric-art/swatches/1249-1257.png",
+  "prompt": "Built-in imagegen: nine crude prehistoric finds in square 3x3 ivory-paper matte-gouache swatch. Cells: thorny stem in branch fork, ember-shading stone, hide draped over shoulder-shaped branch, snapped point fitted backward, scorched unfired clay ball, unpierced stone tied outside with fiber, curled bark tray, leaf-guarded stone flake, shell held in split branch.",
+  "entries": [
+    {"id": 1249, "review": "Top-left: uneven natural thorn stem resting in a rough branch fork, no manufactured comb."},
+    {"id": 1250, "review": "Top-middle: rough stone held by a root fork to shade a tiny open ember."},
+    {"id": 1251, "review": "Top-right: ragged raw hide widened where it drapes over two shoulder-like branches, no tailoring."},
+    {"id": 1252, "issue": "The generated image shows a sharp point facing outward like a functional spear, not a broken point fitted backward."},
+    {"id": 1253, "review": "Middle-middle: lumpy cracked unfired clay ball with soot mark and raw interior between roots."},
+    {"id": 1254, "review": "Middle-right: solid unpierced stone suspended by coarse fiber wrapped around its outside beneath a root."},
+    {"id": 1255, "review": "Bottom-left: naturally curled ragged bark tray caught in a branch fork with one raised corner."},
+    {"id": 1256, "review": "Bottom-middle: sharp found flake loosely covered by a broad leaf within a tree fork."},
+    {"id": 1257, "review": "Bottom-right: broken shell held awkwardly in a naturally split branch without a fitting."}
+  ]
+}

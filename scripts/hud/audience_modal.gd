@@ -1,10 +1,21 @@
 extends Control
-## The Audience Hall: a theatrical, pausing modal in which envoys and
-## petitioners speak, the court chimes in, and the ruler answers.
-## World state changes only through AudienceHall (engine); this file only
-## presents lines, collects speech and routes the chosen option.
+## The Court: the one pausing screen for every dealing with the people who
+## serve the god and the peoples beyond. At rest it shows the gathered court
+## in its era's setting (fire circle, longhouse, hall), the antechamber of
+## waiting envoys, and the foreign peoples one may send word to. Clicking a
+## person summons them in place; envoys and petitioners speak, the court
+## chimes in, and the ruler answers. Settlement leaders carry the civic
+## directive conversation here, and foreign rulers are reached through the
+## envoy channel (ForeignDialogue) in the same view.
+## World state changes only through AudienceHall (engine), the civic pipeline
+## and ForeignDialogue/ForeignDiplomacy; this file presents and routes.
 
 signal closed(audience_id:String)
+
+const Backdrop:=preload("res://scripts/hud/court_backdrop.gd")
+const Roster:=preload("res://scripts/hud/court_roster.gd")
+const Civic:=preload("res://scripts/hud/court_civic.gd")
+const Divine:=preload("res://scripts/divine_regard.gd")
 
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
@@ -74,6 +85,37 @@ var proposal_box:VBoxContainer
 var weigh_clock:=-1.0
 var conceive_next:=false
 
+## "rest" (the court at rest), "audience" (someone stands before you) or
+## "foreign" (word to a foreign ruler through your envoys).
+var mode:="rest"
+## Set before adding to the tree to open focused on someone (see focus()).
+var start_focus:Dictionary={}
+## True when the ruler brought this person in from the court: concluding
+## returns to the court instead of closing it.
+var from_court:=false
+var backdrop:Control
+var court_tier:=0
+var return_button:Button
+# Court at rest.
+var scene_area:Control
+var rest_seats:Dictionary={}      # roster key -> seat Control
+var rest_signature:=[]
+var _rest_clock:=0.0
+# A settlement leader's civic conversation inside their audience.
+var civic_settlement:=""
+var civic_seen:Dictionary={}
+var civic_strip:PanelContainer
+var civic_state_label:Label
+var civic_status_label:Label
+var civic_replies:HBoxContainer
+var civic_signature:=""
+var _civic_clock:=0.0
+# The envoy channel to a foreign ruler.
+var foreign_civ:=""
+var foreign_refs:Dictionary={}
+var foreign_count:=-1
+var _foreign_clock:=0.0
+
 func _ready()->void:
 	name="AudienceModal"
 	set_meta("responsive_scroll_layout",true)
@@ -89,7 +131,10 @@ func _ready()->void:
 	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(backdrop)
 	card=PanelContainer.new();card.name="AudienceCard";add_child(card)
 	get_viewport().size_changed.connect(_fit)
+	court_tier=Backdrop.current_tier()
 	if not audience_id.is_empty():show_audience(audience_id)
+	elif not start_focus.is_empty():focus(start_focus)
+	else:show_court()
 
 func _exit_tree()->void:
 	pause.release()
@@ -106,13 +151,58 @@ func _fit()->void:
 
 # --- Building ---------------------------------------------------------------
 
-func show_audience(id:String)->void:
-	audience_id=id
+func _reset_card(next_mode:String)->void:
+	## Clear the stage for another view of the court.
 	for tween in reveal_tweens:if tween and tween.is_valid():tween.kill()
 	reveal_tweens.clear();revealing=false;rendered_lines=0;resolved_result={};bench_cards.clear()
+	rest_seats.clear();foreign_refs.clear();rest_signature=[];foreign_count=-1
+	civic_settlement="";civic_seen.clear();civic_signature=""
+	civic_strip=null;civic_state_label=null;civic_status_label=null;civic_replies=null
+	transcript=null;transcript_scroll=null;thinking=null;options_row=null;outcome_box=null;proposal_box=null
+	speech_input=null;speak_button=null;wait_button=null;next_button=null;queue_label=null;return_button=null
+	mood_meter=null;regard_meter=null;regard_label=null;divine_row=null;speaker_frame=null;scene_area=null
+	weigh_clock=-1.0
+	mode=next_mode
+	if next_mode!="audience":audience_id=""
+	if next_mode!="foreign":foreign_civ=""
 	for child in card.get_children():card.remove_child(child);child.queue_free()
+	court_tier=Backdrop.current_tier()
+
+func _add_backdrop(parent:Control)->Control:
+	## The era's setting, drawn behind everything; subtle behind the veil.
+	var scene:=Backdrop.new();scene.name="CourtScene"
+	scene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	parent.add_child(scene)
+	scene.configure(court_tier,not Tokens.is_light())
+	backdrop=scene
+	return scene
+
+static func _plate(bg:Color,radius:int=0,pad:float=0.0)->StyleBoxFlat:
+	## A raw box (no light-mode translation): dark plates must stay dark where
+	## they sit on the painting.
+	var style:=StyleBoxFlat.new();style.bg_color=bg;style.set_corner_radius_all(radius);style.set_content_margin_all(pad)
+	return style
+
+func _compact()->bool:
+	## Smaller screens: shorter portraits, smaller heralds, no dossier column.
+	return is_inside_tree() and get_viewport().get_visible_rect().size.y<860.0
+
+func _portrait_height()->float:
+	return 150.0 if _compact() else 196.0
+
+func _veil_style()->StyleBoxFlat:
+	## The paper wash over the scene: enough to keep every word legible.
+	var wash:=Tokens.PANEL_BG_SOLID;wash.a=.90 if Tokens.is_light() else .92
+	return _plate(wash)
+
+func show_audience(id:String)->void:
 	var audience:=Hall.find(id)
-	if audience.is_empty():_close();return
+	if audience.is_empty():
+		if from_court and is_inside_tree():show_court()
+		else:_close()
+		return
+	_reset_card("audience")
+	audience_id=id
 	var kind:=String(audience.get("kind","news"))
 	accent=_kind_color(kind)
 	speaker_person_id=int((audience.get("speaker",{}) as Dictionary).get("person_id",0))
@@ -120,12 +210,16 @@ func show_audience(id:String)->void:
 	var style:=Tokens.flat(Tokens.PANEL_BG_SOLID,accent.darkened(.1),2,10,0)
 	style.shadow_color=Color(0,0,0,.45);style.shadow_size=28
 	card.add_theme_stylebox_override("panel",style)
+	_add_backdrop(card)
+	_civic_begin(audience)
 	body=VBoxContainer.new();body.add_theme_constant_override("separation",0);card.add_child(body)
 	body.add_child(_build_herald(audience))
+	var veil:=PanelContainer.new();veil.name="Veil";veil.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	veil.add_theme_stylebox_override("panel",_veil_style());body.add_child(veil)
 	var inner:=MarginContainer.new();inner.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	for side in ["left","right"]:inner.add_theme_constant_override("margin_"+side,20)
 	inner.add_theme_constant_override("margin_top",14);inner.add_theme_constant_override("margin_bottom",12)
-	body.add_child(inner)
+	veil.add_child(inner)
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",12);inner.add_child(column)
 	column.add_child(_build_stage(audience))
 	proposal_box=null
@@ -153,13 +247,12 @@ func _build_herald(audience:Dictionary)->Control:
 	var origin:=String(audience.get("origin","foreign"))
 	var speaker:Dictionary=audience.get("speaker",{})
 	var banner:=PanelContainer.new();banner.name="Herald"
-	var banner_style:=Tokens.flat(accent.darkened(.35) if Tokens.is_light() else accent.darkened(.62),Color(0,0,0,0),0,0,0)
-	banner_style.corner_radius_top_left=9;banner_style.corner_radius_top_right=9
-	banner_style.border_color=accent.lightened(.25);banner_style.border_width_bottom=3
-	banner_style.content_margin_left=20;banner_style.content_margin_right=20;banner_style.content_margin_top=14;banner_style.content_margin_bottom=14
-	banner.add_theme_stylebox_override("panel",banner_style)
+	banner.add_theme_stylebox_override("panel",_herald_style())
 	var layers:=VBoxContainer.new();layers.add_theme_constant_override("separation",10);banner.add_child(layers)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",16);layers.add_child(row)
+	# The court sits in the scene at the right of the herald band, watching.
+	var seats:=_build_seats(audience)
+	banner.set_meta("seats",seats)
 	var seal:=Seal.new();seal.kind=kind;seal.tint=accent.lightened(.15);seal.custom_minimum_size=Vector2(58,58);row.add_child(seal)
 	if origin=="foreign":
 		var flag:=TextureRect.new();flag.name="Flag";flag.texture=Identity.foreign(String(audience.get("civ_id",""))).texture
@@ -179,7 +272,7 @@ func _build_herald(audience:Dictionary)->Control:
 	if not headline.is_empty() and kind!="report" and not kind in WORK_KINDS:
 		herald_text=("%s %s" % [subject,headline]).to_upper()
 	if kind in WORK_KINDS:herald_text=String(work_info.get("herald",herald_text))
-	var title:=Tokens.make_label(herald_text,30,cream);title.name="HeraldTitle"
+	var title:=Tokens.make_label(herald_text,24 if _compact() else 30,cream);title.name="HeraldTitle"
 	title.add_theme_font_override("font",_bold);title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(title)
 	var day:=int(GameState.elapsed_days);var arrived:=int(audience.get("arrived_day",day))
 	var waited:=day-arrived
@@ -223,7 +316,19 @@ func _build_herald(audience:Dictionary)->Control:
 			var lead:=Tokens.make_label("FINDINGS",11,cream_dim,.14);lead.size_flags_vertical=Control.SIZE_SHRINK_CENTER;strip.add_child(lead)
 			for finding in findings:strip.add_child(_finding_pill(finding))
 			layers.add_child(strip)
+	row.add_child(seats)
 	return banner
+
+func _herald_style()->StyleBoxFlat:
+	## The herald band is a dark wash over the scene: the setting shows through,
+	## the cream lettering stays legible in both themes.
+	var shade:=accent.darkened(.55) if Tokens.is_light() else accent.darkened(.72)
+	shade.a=.76
+	var style:=_plate(shade)
+	style.corner_radius_top_left=9;style.corner_radius_top_right=9
+	style.border_color=accent.lightened(.25);style.border_width_bottom=3
+	style.content_margin_left=20;style.content_margin_right=20;style.content_margin_top=14;style.content_margin_bottom=12
+	return style
 
 func _report_herald(speaker:Dictionary)->String:
 	var person_id:=int(speaker.get("person_id",0))
@@ -279,6 +384,7 @@ func _build_stage(audience:Dictionary)->Control:
 	var stage:=HBoxContainer.new();stage.name="Stage";stage.size_flags_vertical=Control.SIZE_EXPAND_FILL;stage.add_theme_constant_override("separation",16)
 	stage.add_child(_build_speaker(audience))
 	var center:=VBoxContainer.new();center.size_flags_horizontal=Control.SIZE_EXPAND_FILL;center.add_theme_constant_override("separation",6);stage.add_child(center)
+	if not civic_settlement.is_empty():center.add_child(_build_civic_strip())
 	var hall_panel:=PanelContainer.new();hall_panel.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	var hall_style:=Tokens.flat(Tokens.FIELD_BG if Tokens.is_light() else Color("0a1316"),Tokens.BORDER_SOFT,1,8,0)
 	hall_style.content_margin_left=14;hall_style.content_margin_right=10;hall_style.content_margin_top=12;hall_style.content_margin_bottom=10
@@ -290,7 +396,7 @@ func _build_stage(audience:Dictionary)->Control:
 	transcript=VBoxContainer.new();transcript.size_flags_horizontal=Control.SIZE_EXPAND_FILL;transcript.add_theme_constant_override("separation",10)
 	transcript_scroll.add_child(transcript)
 	thinking=Tokens.make_label("",14,Tokens.TEXT_DIM);thinking.name="Thinking";thinking.add_theme_font_override("font",_italic);thinking.visible=false;stack.add_child(thinking)
-	stage.add_child(_build_bench(audience))
+	if not civic_settlement.is_empty():_add_civic_record()
 	return stage
 
 func _build_speaker(audience:Dictionary)->Control:
@@ -300,9 +406,9 @@ func _build_speaker(audience:Dictionary)->Control:
 	speaker_frame=PanelContainer.new();speaker_frame.name="SpeakerFrame"
 	var frame_style:=Tokens.flat(Color("eee7d8"),envoy_color,2,8,6)
 	speaker_frame.add_theme_stylebox_override("panel",frame_style);column.add_child(speaker_frame)
-	var holder:=Control.new();holder.custom_minimum_size=Vector2(222,196);holder.clip_contents=true;speaker_frame.add_child(holder)
+	var holder:=Control.new();holder.custom_minimum_size=Vector2(222,_portrait_height());holder.clip_contents=true;speaker_frame.add_child(holder)
 	var person:=_speaker_person(audience)
-	var portrait:=Portrait.picture(person,222,196);portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);holder.add_child(portrait)
+	var portrait:=Portrait.picture(person,222,_portrait_height());portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);holder.add_child(portrait)
 	if origin=="foreign":
 		var flag:=TextureRect.new();flag.texture=Identity.foreign(String(audience.get("civ_id",""))).texture
 		flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;flag.mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -324,7 +430,7 @@ func _build_speaker(audience:Dictionary)->Control:
 	mood_label=Tokens.make_label("",13,Tokens.BODY_2);mood_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;mood_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;mood_head.add_child(mood_label)
 	mood_meter=MoodMeter.new();mood_meter.custom_minimum_size=Vector2(222,10);room.add_child(mood_meter)
 	_update_mood(audience)
-	var dossier:=_build_dossier(audience)
+	var dossier:=_build_dossier(audience) if not _compact() else null
 	if dossier:column.add_child(dossier)
 	return column
 
@@ -335,7 +441,7 @@ func _build_regard(audience:Dictionary)->Control:
 	var strip_style:=StyleBoxFlat.new();strip_style.bg_color=Color(.06,.05,.04,.8)   # dark in both themes: it sits on the picture
 	strip_style.content_margin_left=8;strip_style.content_margin_right=8;strip_style.content_margin_top=4;strip_style.content_margin_bottom=4
 	strip.add_theme_stylebox_override("panel",strip_style)
-	strip.position=Vector2(0,196-52);strip.size=Vector2(222,52)
+	strip.position=Vector2(0,_portrait_height()-52);strip.size=Vector2(222,52)
 	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",1);box.mouse_filter=Control.MOUSE_FILTER_IGNORE;strip.add_child(box)
 	regard_meter=RegardMeter.new();regard_meter.name="RegardMeter";regard_meter.custom_minimum_size=Vector2(206,24);regard_meter.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(regard_meter)
 	regard_label=Tokens.make_label("",12,Color("f6ecd6"));regard_label.name="RegardRead";regard_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -404,31 +510,36 @@ func _speaker_person(audience:Dictionary)->Dictionary:
 	if not civ_id.is_empty():EarlyArt.bind_foreign_identity(envoy,civ_id,int(GameState.world_seed))
 	return envoy
 
-func _build_bench(audience:Dictionary)->Control:
-	var column:=VBoxContainer.new();column.name="CourtBench";column.custom_minimum_size.x=212;column.add_theme_constant_override("separation",7)
-	column.add_child(Tokens.make_label("YOUR COURT LOOKS ON",11,Tokens.TEXT_DIM,.1))
+func _build_seats(audience:Dictionary)->Control:
+	## The court seated in the scene: small portraits on the herald band, the
+	## one who speaks lit in gold. They keep the room's witnesses in view
+	## without taking width from the conversation.
+	var column:=VBoxContainer.new();column.name="CourtBench";column.add_theme_constant_override("separation",4);column.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	column.tooltip_text="Your court looks on.";column.mouse_filter=Control.MOUSE_FILTER_PASS
+	var benches:=HBoxContainer.new();benches.add_theme_constant_override("separation",6);column.add_child(benches)
 	var court:Array=Hall.court(String(audience.get("id","")))
 	if court.is_empty():
-		var alone:=Tokens.make_label("No officials attend. You receive them alone.",13,Tokens.MUTED);alone.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;alone.add_theme_font_override("font",_italic);column.add_child(alone)
+		var alone:=Tokens.make_label("No officials attend.\nYou receive them alone.",12,Color("e2d3b4"));alone.add_theme_font_override("font",_italic);benches.add_child(alone)
 	for person:Dictionary in court:
 		var person_id:=int(person.get("person_id",0))
 		var seat:=PanelContainer.new();seat.name="Seat%d" % person_id
 		seat.add_theme_stylebox_override("panel",_seat_style(person_id,false))
-		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",9);seat.add_child(row)
-		var face_frame:=PanelContainer.new();face_frame.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),Color(0,0,0,0),0,4,2));row.add_child(face_frame)
-		face_frame.add_child(Portrait.picture(person,52,62))
-		var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",0);row.add_child(words)
-		var who:=Tokens.make_label(String(person.get("name","Official")),14,_person_color(person_id));who.add_theme_font_override("font",_bold);who.clip_text=true;who.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;words.add_child(who)
-		var office:=Tokens.make_label(String(person.get("office_title",person.get("title",""))),12,Tokens.TEXT_SOFT);office.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;office.max_lines_visible=2;words.add_child(office)
+		seat.mouse_filter=Control.MOUSE_FILTER_PASS
+		var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",2);stack.mouse_filter=Control.MOUSE_FILTER_IGNORE;seat.add_child(stack)
+		var face_frame:=PanelContainer.new();face_frame.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),Color(0,0,0,0),0,3,1));face_frame.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_child(face_frame)
+		face_frame.add_child(Portrait.picture(person,48,52))
+		var first:=String(person.get("name","Official")).get_slice(" ",0)
+		var who:=Tokens.make_label(first,11,Color("f6ecd6"));who.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;who.clip_text=true;who.custom_minimum_size.x=50;who.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_child(who)
 		seat.tooltip_text="%s · %s" % [String(person.get("name","")),String(person.get("office_title",""))]
-		column.add_child(seat);bench_cards[person_id]=seat
+		benches.add_child(seat);bench_cards[person_id]=seat
 	return column
 
 func _seat_style(person_id:int,speaking:bool)->StyleBoxFlat:
-	var style:=Tokens.flat(Tokens.ACTIVE_BG if speaking else Tokens.TILE_BG,Tokens.GOLD if speaking else Color(0,0,0,0),2 if speaking else 0,6,0)
-	style.border_color=Tokens.GOLD if speaking else _person_color(person_id)
-	style.border_width_left=4
-	style.content_margin_left=8;style.content_margin_right=8;style.content_margin_top=6;style.content_margin_bottom=6
+	var style:=_plate(Color(.95,.78,.36,.30) if speaking else Color(0,0,0,.22),4,0)
+	style.border_color=Color("e8c35a") if speaking else _person_color(person_id).lightened(.25)
+	style.border_width_bottom=3
+	if speaking:style.set_border_width_all(2);style.border_width_bottom=3
+	style.content_margin_left=3;style.content_margin_right=3;style.content_margin_top=3;style.content_margin_bottom=3
 	return style
 
 func _build_speech_row()->Control:
@@ -437,6 +548,8 @@ func _build_speech_row()->Control:
 	speech_input.custom_minimum_size.y=42;speech_input.max_length=400;speech_input.add_theme_font_size_override("font_size",16)
 	var audience:=Hall.find(audience_id)
 	speech_input.placeholder_text="Speak to the envoy…" if String(audience.get("origin",""))=="foreign" else "Speak to %s…" % String((audience.get("speaker",{}) as Dictionary).get("name","them"))
+	if not civic_settlement.is_empty():
+		speech_input.placeholder_text="Speak to %s: ask a question, or give an order for %s…" % [String((audience.get("speaker",{}) as Dictionary).get("name","them")).get_slice(" ",0),Civic.settlement_name(civic_settlement)]
 	speech_input.add_theme_stylebox_override("read_only",Tokens.flat(Tokens.TILE_BG,Tokens.BORDER_SOFT,1,3,8))
 	speech_input.text_submitted.connect(func(_t:String):_speak())
 	row.add_child(speech_input)
@@ -556,29 +669,11 @@ func _build_footer()->Control:
 	bar_style.content_margin_left=20;bar_style.content_margin_right=20;bar_style.content_margin_top=8;bar_style.content_margin_bottom=8
 	bar.add_theme_stylebox_override("panel",bar_style)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);bar.add_child(row)
+	row.add_child(_build_return_button())
 	wait_button=Button.new();wait_button.name="MakeThemWait";wait_button.text="Make them wait";wait_button.custom_minimum_size=Vector2(150,34)
 	wait_button.tooltip_text="Send them to the antechamber. Guests kept waiting too long leave insulted."
 	wait_button.pressed.connect(make_them_wait);row.add_child(wait_button)
-	summon_check=CheckBox.new();summon_check.name="SummonImmediately";summon_check.text="Summon me at once when envoys arrive"
-	summon_check.add_theme_font_size_override("font_size",13)
-	summon_check.button_pressed=bool(Hall.state().get("summon_immediately",true))
-	summon_check.toggled.connect(func(on:bool):Hall.state()["summon_immediately"]=on)
-	row.add_child(summon_check)
-	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(spacer)
-	# Which voice is speaking and what it has cost; the tooltip carries the receipts.
-	voice_label=Tokens.make_label("",12,Tokens.MUTED);voice_label.name="VoiceIndicator"
-	voice_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;voice_label.custom_minimum_size=Vector2(150,0)
-	voice_label.clip_text=true;voice_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	voice_label.mouse_filter=Control.MOUSE_FILTER_PASS
-	row.add_child(voice_label)
-	frequency_pick=OptionButton.new();frequency_pick.name="AudienceFrequency";frequency_pick.focus_mode=Control.FOCUS_NONE
-	frequency_pick.add_theme_font_size_override("font_size",13)
-	for level in FREQUENCY_LEVELS:frequency_pick.add_item(String(FREQUENCY_WORDS[level]))
-	frequency_pick.tooltip_text="How often envoys and petitioners ask to be received."
-	frequency_pick.select(maxi(0,FREQUENCY_LEVELS.find(_frequency())))
-	frequency_pick.item_selected.connect(_on_frequency_selected)
-	frequency_pick.disabled=not _hall_api().has_method("set_frequency")
-	row.add_child(frequency_pick)
+	_add_court_controls(row,"Receive envoys at once")
 	queue_label=Tokens.make_label("",13,Tokens.TEXT_SOFT);queue_label.name="QueueLabel";queue_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(queue_label)
 	next_button=Button.new();next_button.name="NextAudience";next_button.text="Receive the next ›";next_button.custom_minimum_size=Vector2(150,34)
 	next_button.pressed.connect(receive_next);row.add_child(next_button)
@@ -627,9 +722,22 @@ func _on_lines_ready(id:String)->void:
 	if id==audience_id:_pump()
 
 func _speak()->void:
+	if not is_instance_valid(speech_input):return
 	var text:=speech_input.text.strip_edges()
-	if text.is_empty() or speak_button.disabled:return
+	if text.is_empty() or (is_instance_valid(speak_button) and speak_button.disabled):return
+	if mode=="rest":
+		speech_input.clear()
+		speak_to_court(text)
+		return
+	if mode=="foreign":
+		send_envoy_brief(text)
+		return
 	speech_input.clear()
+	# A settlement leader's civic conversation: plain words (not questions)
+	# go through the civic pipeline, which answers, objects or refuses.
+	if not civic_settlement.is_empty() and resolved_result.is_empty() and not text.ends_with("?") and Hall.divine_intent(audience_id,text).is_empty():
+		_civic_say(text)
+		return
 	# Words that are themselves an act of the god (terror, penance, blessing,
 	# exaltation) are carried out; the room reacts to the act.
 	var spoken_act:=Hall.divine_intent(audience_id,text)
@@ -696,9 +804,12 @@ func _show_outcome(result:Dictionary)->void:
 	if bool(result.get("terminal",false)):head_text="THE AUDIENCE IS CONCLUDED · BY YOUR DECREE"
 	var head:=Tokens.make_label(head_text,13,colour,.08);head.name="ReceiptHead";words.add_child(head)
 	var outcome:=Tokens.make_label(String(result.get("outcome","")),15,Tokens.BODY);outcome.name="ReceiptText";outcome.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(outcome)
-	var dismiss:=Button.new();dismiss.name="Dismiss";dismiss.text="Dismiss the court";dismiss.custom_minimum_size=Vector2(190,46)
+	var dismiss:=Button.new();dismiss.name="Dismiss";dismiss.text="Return to the court" if from_court else "Dismiss the court";dismiss.custom_minimum_size=Vector2(190,46)
 	dismiss.add_theme_font_size_override("font_size",16);dismiss.add_theme_stylebox_override("normal",Tokens.gold_outline_style());dismiss.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	dismiss.pressed.connect(_close);row.add_child(dismiss)
+	dismiss.pressed.connect(func()->void:
+		if from_court:show_court()
+		else:_close())
+	row.add_child(dismiss)
 	if conceive_next:
 		var visions:=Button.new();visions.name="HearVisions";visions.text="Hear the court's visions ›";visions.custom_minimum_size=Vector2(220,46)
 		visions.add_theme_font_size_override("font_size",16);visions.add_theme_stylebox_override("normal",Tokens.gold_outline_style());visions.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -707,8 +818,22 @@ func _show_outcome(result:Dictionary)->void:
 	_refresh_footer()
 
 func make_them_wait()->void:
-	if resolved_result.is_empty():Hall.defer(audience_id)
-	_close()
+	if mode=="audience" and resolved_result.is_empty():Hall.defer(audience_id)
+	if from_court and mode!="rest":show_court()
+	else:_close()
+
+func return_to_court()->void:
+	## Back to the court at rest; an unconcluded audience waits its turn.
+	if mode=="audience" and resolved_result.is_empty():Hall.defer(audience_id)
+	from_court=true
+	show_court()
+
+func _build_return_button()->Button:
+	return_button=Button.new();return_button.name="ReturnToCourt";return_button.text="‹ The court"
+	return_button.custom_minimum_size=Vector2(118,34);return_button.focus_mode=Control.FOCUS_NONE
+	return_button.tooltip_text="Back to the whole court. Anyone you leave standing waits their turn."
+	return_button.pressed.connect(return_to_court)
+	return return_button
 
 func receive_next()->void:
 	var next_id:=_next_waiting_id()
@@ -727,11 +852,15 @@ func _close()->void:
 	queue_free()
 
 func _refresh_footer()->void:
+	if mode!="audience":
+		_refresh_voice_indicator()
+		return
 	if not is_instance_valid(queue_label):return
 	var others:=0
 	for audience:Dictionary in Hall.waiting():
 		if String(audience.get("id",""))!=audience_id:others+=1
-	queue_label.text="" if others==0 else ("1 more awaits in the antechamber" if others==1 else "%d more await in the antechamber" % others)
+	queue_label.text="" if others==0 else ("1 more waits" if others==1 else "%d more wait" % others)
+	queue_label.tooltip_text="" if others==0 else "Waiting in the antechamber."
 	next_button.visible=others>0
 	wait_button.visible=resolved_result.is_empty()
 	var open:=resolved_result.is_empty()
@@ -742,13 +871,20 @@ func _refresh_footer()->void:
 	_refresh_voice_indicator()
 
 func _show_toast(text:String)->void:
+	if not is_instance_valid(transcript):
+		_court_note(text);return
 	var note:=Tokens.make_label(text,13,Tokens.RED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	transcript.add_child(note)
 
 func _unhandled_input(event:InputEvent)->void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_ESCAPE:
 		get_viewport().set_input_as_handled()
-		if resolved_result.is_empty():make_them_wait()
+		if mode=="rest":_close()
+		elif mode=="foreign":
+			if from_court:show_court()
+			else:_close()
+		elif resolved_result.is_empty():make_them_wait()
+		elif from_court:show_court()
 		else:_close()
 
 func _on_transcript_input(event:InputEvent)->void:
@@ -766,8 +902,27 @@ func skip_reveal()->void:
 func _process(delta:float)->void:
 	clock+=delta
 	_fit()
+	if mode=="rest":
+		_rest_clock-=delta
+		if _rest_clock<=0.0:
+			_rest_clock=.5
+			if _rest_state()!=rest_signature:show_court()
+			else:_refresh_voice_indicator()
+		return
+	if mode=="foreign":
+		_foreign_clock-=delta
+		if _foreign_clock<=0.0:
+			_foreign_clock=.5
+			_refresh_foreign()
+		return
 	if audience_id.is_empty():return
+	_civic_clock-=delta
+	if _civic_clock<=0.0 and not civic_settlement.is_empty():
+		_civic_clock=.25
+		_sync_civic()
 	_pump()
+	if not pending_words.is_empty():_deliver_pending_words()
+	if mode!="audience":return
 	var busy:bool=_voice_ok() and voice.busy(audience_id)
 	if is_instance_valid(thinking):
 		thinking.visible=busy
@@ -1087,6 +1242,936 @@ func open_conception()->void:
 	var made:=Works.ruler_proposal()
 	if made.is_empty():_show_toast("Nobody at court can carry a proposal just now.");return
 	show_audience(String(made.id))
+
+# --- Footer controls shared by every view -----------------------------------
+
+func _add_court_controls(row:HBoxContainer,summon_words:String="Summon me at once when envoys arrive")->void:
+	summon_check=CheckBox.new();summon_check.name="SummonImmediately";summon_check.text=summon_words
+	summon_check.add_theme_font_size_override("font_size",13)
+	summon_check.tooltip_text="When an envoy arrives, open the court at once. Otherwise they wait in the antechamber."
+	summon_check.button_pressed=bool(Hall.state().get("summon_immediately",true))
+	summon_check.toggled.connect(func(on:bool):Hall.state()["summon_immediately"]=on)
+	row.add_child(summon_check)
+	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(spacer)
+	# Which voice is speaking and what it has cost; the tooltip carries the receipts.
+	voice_label=Tokens.make_label("",12,Tokens.MUTED);voice_label.name="VoiceIndicator"
+	voice_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;voice_label.custom_minimum_size=Vector2(150,0)
+	voice_label.clip_text=true;voice_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	voice_label.mouse_filter=Control.MOUSE_FILTER_PASS
+	row.add_child(voice_label)
+	frequency_pick=OptionButton.new();frequency_pick.name="AudienceFrequency";frequency_pick.focus_mode=Control.FOCUS_NONE
+	frequency_pick.add_theme_font_size_override("font_size",13)
+	for level in FREQUENCY_LEVELS:frequency_pick.add_item(String(FREQUENCY_WORDS[level]))
+	frequency_pick.tooltip_text="How often envoys and petitioners ask to be received."
+	frequency_pick.select(maxi(0,FREQUENCY_LEVELS.find(_frequency())))
+	frequency_pick.item_selected.connect(_on_frequency_selected)
+	frequency_pick.disabled=not _hall_api().has_method("set_frequency")
+	row.add_child(frequency_pick)
+
+func _footer_bar()->PanelContainer:
+	var bar:=PanelContainer.new();bar.name="Footer"
+	var bar_style:=Tokens.flat(Tokens.TILE_BG,Color(0,0,0,0),0,0,0)
+	bar_style.corner_radius_bottom_left=9;bar_style.corner_radius_bottom_right=9;bar_style.border_color=Tokens.BORDER_SOFT;bar_style.border_width_top=1
+	bar_style.content_margin_left=20;bar_style.content_margin_right=20;bar_style.content_margin_top=8;bar_style.content_margin_bottom=8
+	bar.add_theme_stylebox_override("panel",bar_style)
+	return bar
+
+# --- The court: focus and summons ---------------------------------------------
+
+## Opens the court on someone. {person_id} / {figure_id} / {role:"chief_scout"}
+## summon them; {settlement_id} summons that settlement's leader; {civ_id}
+## opens word to that people's ruler; {audience_id} receives a waiting visitor.
+func focus(target:Dictionary)->bool:
+	if target.is_empty():
+		show_court();return true
+	if target.has("audience_id"):
+		if receive(String(target.audience_id)):return true
+		show_court();return false
+	if target.has("civ_id"):return show_foreign(String(target.civ_id))
+	if target.has("settlement_id"):
+		var leader:=GovernmentPeopleSystem.settlement_leader(String(target.settlement_id))
+		if leader.is_empty():
+			show_court();_court_note("No one leads that settlement just now; government will appoint someone.")
+			return false
+		return summon({"person_id":int(leader.person_id)})
+	return summon(target)
+
+## Calls someone before you, here and now.
+func summon(target:Dictionary)->bool:
+	if mode=="audience" and resolved_result.is_empty() and not audience_id.is_empty():Hall.defer(audience_id)
+	var made:=Hall.summon(target)
+	if made.is_empty():
+		if mode!="rest":show_court()
+		_court_note("They cannot be brought before you now.")
+		return false
+	from_court=true
+	show_audience(String(made.id))
+	return true
+
+## Receives someone already waiting (an envoy, or a person set aside).
+func receive(id:String)->bool:
+	var audience:=Hall.find(id)
+	if audience.is_empty() or String(audience.get("status",""))!="waiting":return false
+	if mode=="audience" and resolved_result.is_empty() and not audience_id.is_empty() and audience_id!=id:Hall.defer(audience_id)
+	from_court=true
+	show_audience(id)
+	return true
+
+func _court_note(text:String)->void:
+	var note:=find_child("CourtNote",true,false) as Label
+	if note!=null:note.text=text
+
+# --- The court at rest ---------------------------------------------------------
+
+const ROSTER_ORDER:={"council":0,"settlement":1,"scouts":2,"builders":3,"generals":4}
+const MAX_SEATED:=7
+var pending_words:=""
+
+func show_court()->void:
+	## The whole court gathered in its setting, nobody yet before you.
+	_reset_card("rest")
+	from_court=true
+	accent=Tokens.GOLD
+	var style:=Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.GOLD.darkened(.1),2,10,0)
+	style.shadow_color=Color(0,0,0,.45);style.shadow_size=28
+	card.add_theme_stylebox_override("panel",style)
+	body=VBoxContainer.new();body.name="CourtAtRest";body.add_theme_constant_override("separation",0);card.add_child(body)
+	var roster:=Roster.people()
+	body.add_child(_build_rest_scene(roster))
+	var lower:=MarginContainer.new();lower.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	for side in ["left","right"]:lower.add_theme_constant_override("margin_"+side,18)
+	lower.add_theme_constant_override("margin_top",12);lower.add_theme_constant_override("margin_bottom",10)
+	body.add_child(lower)
+	var columns:=HBoxContainer.new();columns.add_theme_constant_override("separation",16);lower.add_child(columns)
+	columns.add_child(_rest_column("CourtRoster","THE COURT","Send for anyone; they come at once.",_build_roster_list(roster),1.45))
+	columns.add_child(_rest_column("Antechamber","THE ANTECHAMBER","Only foreign envoys come unbidden.",_build_antechamber(),1.0))
+	columns.add_child(_rest_column("ForeignPeoples","SEND WORD ABROAD","Your envoys carry your brief to their rulers.",_build_foreign_list(),1.0))
+	body.add_child(_build_rest_footer())
+	rest_signature=_rest_state()
+	_fit()
+	_layout_rest_seats.call_deferred()
+
+func _rest_state()->Array:
+	## What the court at rest shows; it redraws only when this changes.
+	return [Hall.waiting().size(),Hall.matter_counts().hash(),Roster.people().size(),Roster.foreign_peoples().size(),int(GameState.elapsed_days),
+		GovernmentPeopleSystem.revision,AdvisorSystem.council_decision_items(3,false).size(),Tokens.color_mode,ForeignDialogue.pending.size(),Backdrop.current_tier()]
+
+func _rest_scene_height()->float:
+	var view:=get_viewport().get_visible_rect().size if is_inside_tree() else Vector2(1920,1080)
+	var card_h:=minf(DESIGN_SIZE.y,view.y-40)
+	return clampf(card_h*.44,200.0,370.0)
+
+func _build_rest_scene(roster:Array[Dictionary])->Control:
+	scene_area=Control.new();scene_area.name="CourtSceneArea";scene_area.clip_contents=true
+	scene_area.custom_minimum_size=Vector2(0,_rest_scene_height())
+	_add_backdrop(scene_area)
+	# The header sits on a dark wash across the top of the painting.
+	var head:=PanelContainer.new();head.name="CourtHeader"
+	var head_style:=_plate(Color(.06,.045,.03,.66),0,0)
+	head_style.corner_radius_top_left=9;head_style.corner_radius_top_right=9
+	head_style.content_margin_left=20;head_style.content_margin_right=16;head_style.content_margin_top=10;head_style.content_margin_bottom=10
+	head.add_theme_stylebox_override("panel",head_style)
+	head.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	scene_area.add_child(head);scene_area.set_meta("header",head)
+	head.resized.connect(_layout_rest_seats)
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",18);head.add_child(row)
+	var seal:=Seal.new();seal.kind="petition";seal.tint=Color("b98a2e");seal.custom_minimum_size=Vector2(46,46);seal.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(seal)
+	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",0);row.add_child(words)
+	var day:=int(GameState.elapsed_days)
+	words.add_child(Tokens.make_label("YOUR COURT · YEAR %d, DAY %d" % [day/365+1,day%365+1],11,Color("e2d3b4"),.12))
+	var title:=Tokens.make_label(Backdrop.place_name(court_tier),28,Color("f6ecd6"));title.name="CourtTitle";title.add_theme_font_override("font",_bold);words.add_child(title)
+	var line:=Tokens.make_label(Backdrop.place_line(court_tier).capitalize().substr(0,1)+Backdrop.place_line(court_tier).substr(1),13,Color("e2d3b4"));line.add_theme_font_override("font",_italic);words.add_child(line)
+	var people:=Hall.people_regard()
+	if not people.is_empty():
+		var regard_box:=VBoxContainer.new();regard_box.name="PeopleRegard";regard_box.add_theme_constant_override("separation",2);regard_box.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		regard_box.tooltip_text="How your people hold their god: love from your officials' regard, legitimacy and cohesion; dread from your officials and your recent wrath."
+		regard_box.mouse_filter=Control.MOUSE_FILTER_PASS
+		var meter:=RegardMeter.new();meter.custom_minimum_size=Vector2(200,24);meter.love=float(people.love);meter.dread=float(people.dread);meter.mouse_filter=Control.MOUSE_FILTER_IGNORE;regard_box.add_child(meter)
+		var read:=Tokens.make_label(_first_upper(String(people.get("read",""))),12,Color("f6ecd6"));read.mouse_filter=Control.MOUSE_FILTER_IGNORE;regard_box.add_child(read)
+		row.add_child(regard_box)
+	var close:=Button.new();close.name="CloseCourt";close.text="Leave the court ×";close.focus_mode=Control.FOCUS_NONE
+	close.size_flags_vertical=Control.SIZE_SHRINK_CENTER;close.custom_minimum_size=Vector2(150,34);close.tooltip_text="Close the court and return to your lands. Esc."
+	close.pressed.connect(_close);row.add_child(close)
+	# The court seated in the scene, the most pressing nearest the fire.
+	var seated:=roster.duplicate()
+	seated.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		if int(a.matters)!=int(b.matters):return int(a.matters)>int(b.matters)
+		return int(ROSTER_ORDER.get(String(a.group),9))<int(ROSTER_ORDER.get(String(b.group),9)))
+	for index in mini(seated.size(),MAX_SEATED):
+		var entry:Dictionary=seated[index]
+		var seat:=_rest_seat(entry)
+		scene_area.add_child(seat);rest_seats[String(entry.key)]=seat
+	# Envoys stand at the threshold, at the edge of the firelight.
+	var envoys:=Roster.envoys()
+	if not envoys.is_empty():
+		var threshold:=VBoxContainer.new();threshold.name="Threshold";threshold.add_theme_constant_override("separation",4)
+		threshold.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		threshold.grow_horizontal=Control.GROW_DIRECTION_BEGIN;threshold.grow_vertical=Control.GROW_DIRECTION_BEGIN
+		threshold.offset_right=-14;threshold.offset_bottom=-10
+		var caption:=PanelContainer.new();caption.add_theme_stylebox_override("panel",_plate(Color(.06,.045,.03,.62),4,4))
+		caption.add_child(Tokens.make_label("AT THE THRESHOLD",10,Color("e2d3b4"),.12));threshold.add_child(caption)
+		for index in mini(envoys.size(),3):threshold.add_child(_threshold_chip(envoys[index]))
+		scene_area.add_child(threshold)
+	scene_area.resized.connect(_layout_rest_seats)
+	return scene_area
+
+func _rest_seat(entry:Dictionary)->Control:
+	## One seated member of the court: a portrait on the logs or benches, their
+	## name, a love/dread gauge and how many matters they hold. Click to summon.
+	var holder:=Control.new();holder.name="Seat_"+_node_key(String(entry.key))
+	holder.custom_minimum_size=Vector2(100,124);holder.size=holder.custom_minimum_size
+	holder.mouse_filter=Control.MOUSE_FILTER_STOP;holder.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
+	var regard:Dictionary=entry.get("regard",{})
+	var matters:=int(entry.get("matters",0))
+	holder.tooltip_text="%s · %s%s\n%s" % [String(entry.name),String(entry.title),(" · "+String(regard.get("read",""))) if not regard.is_empty() else "",
+		("%d matter%s to raise. Click to summon." % [matters,"" if matters==1 else "s"]) if matters>0 else "Nothing pending. Click to summon them anyway."]
+	var panel:=PanelContainer.new();panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);panel.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	var plate:=_plate(Color(.06,.045,.03,.58),6,4)
+	plate.border_color=_person_color(int((entry.get("target",{}) as Dictionary).get("person_id",0))).lightened(.2) if int((entry.get("target",{}) as Dictionary).get("person_id",0))>0 else Color("c9a24a")
+	plate.border_width_bottom=3
+	panel.add_theme_stylebox_override("panel",plate);holder.add_child(panel)
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",2);stack.mouse_filter=Control.MOUSE_FILTER_IGNORE;panel.add_child(stack)
+	var frame:=PanelContainer.new();frame.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),Color(0,0,0,0),0,3,1));frame.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_child(frame)
+	frame.add_child(Portrait.picture(entry.get("person",{}) as Dictionary,86,72))
+	var who:=Tokens.make_label(String(entry.name).get_slice(" ",0),12,Color("f6ecd6"));who.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;who.clip_text=true;who.add_theme_font_override("font",_bold);who.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_child(who)
+	var under:=HBoxContainer.new();under.add_theme_constant_override("separation",3);under.alignment=BoxContainer.ALIGNMENT_CENTER;under.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_child(under)
+	if not regard.is_empty():
+		var gauge:=TextureRect.new();gauge.texture=Divine.meter_texture(float(regard.love),float(regard.dread),18);gauge.custom_minimum_size=Vector2(18,18);gauge.mouse_filter=Control.MOUSE_FILTER_IGNORE;under.add_child(gauge)
+	var office:=Tokens.make_label(_short_title(String(entry.title)),10,Color("e2d3b4"));office.clip_text=true;office.custom_minimum_size.x=66;office.mouse_filter=Control.MOUSE_FILTER_IGNORE;under.add_child(office)
+	if matters>0:
+		var badge:=Label.new();badge.name="Matters";badge.text=str(matters);badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;badge.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+		badge.add_theme_font_size_override("font_size",12);badge.add_theme_color_override("font_color",Color("2a2217"))
+		badge.add_theme_stylebox_override("normal",_plate(Color("e8c35a"),10,0));badge.size=Vector2(20,20);badge.position=Vector2(100-16,-6);badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		holder.add_child(badge)
+	var target:Dictionary=(entry.get("target",{}) as Dictionary).duplicate()
+	holder.gui_input.connect(func(event:InputEvent)->void:
+		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:summon(target))
+	holder.mouse_entered.connect(func()->void:holder.modulate=Color(1.12,1.08,.96))
+	holder.mouse_exited.connect(func()->void:holder.modulate=Color.WHITE)
+	return holder
+
+func _layout_rest_seats()->void:
+	if not is_instance_valid(scene_area) or not is_instance_valid(backdrop):return
+	# Compose the scene below the header that lies across its top.
+	var head:Control=scene_area.get_meta("header") as Control if scene_area.has_meta("header") else null
+	var top:=head.size.y*.8 if is_instance_valid(head) else 0.0
+	if absf(float(backdrop.content_top)-top)>.5:
+		backdrop.content_top=top;backdrop.queue_redraw()
+	if rest_seats.is_empty():return
+	# With envoys at the threshold, the court sits a little to the left.
+	var points:Array[Vector2]=backdrop.seat_points(rest_seats.size(),.44 if scene_area.find_child("Threshold",false,false)!=null else .5)
+	var shrink:=clampf((scene_area.size.y-top)/250.0,.62,1.0)
+	var min_y:=INF;var max_y:=-INF
+	for p in points:min_y=minf(min_y,p.y);max_y=maxf(max_y,p.y)
+	var index:=0
+	for key in rest_seats:
+		var seat:=rest_seats[key] as Control
+		if not is_instance_valid(seat) or index>=points.size():continue
+		var p:=points[index];index+=1
+		var depth:=0.0 if max_y-min_y<1.0 else (p.y-min_y)/(max_y-min_y)
+		var s:=shrink*lerpf(.88,1.0,depth)
+		seat.pivot_offset=Vector2(seat.size.x*.5,seat.size.y)
+		seat.scale=Vector2.ONE*s
+		seat.position=(p-Vector2(seat.size.x*.5,seat.size.y)).round()
+
+func _threshold_chip(audience:Dictionary)->Control:
+	var chip:=Button.new();chip.name="Threshold_"+String(audience.get("id",""))
+	chip.focus_mode=Control.FOCUS_NONE;chip.custom_minimum_size=Vector2(0,40)
+	var style:=_plate(Color(.06,.045,.03,.72),6,0);style.border_color=Color("c9a24a");style.border_width_left=3
+	style.content_margin_left=8;style.content_margin_right=12
+	var hover:=style.duplicate() as StyleBoxFlat;hover.bg_color=Color(.18,.13,.07,.82);hover.border_color=Color("e8c35a")
+	chip.add_theme_stylebox_override("normal",style);chip.add_theme_stylebox_override("hover",hover);chip.add_theme_stylebox_override("pressed",hover)
+	chip.icon=Identity.foreign(String(audience.get("civ_id",""))).texture
+	chip.add_theme_constant_override("icon_max_width",26);chip.add_theme_constant_override("h_separation",8)
+	chip.add_theme_color_override("font_color",Color("f6ecd6"));chip.add_theme_color_override("font_hover_color",Color("fff6e2"))
+	chip.add_theme_font_size_override("font_size",13)
+	var waited:=int(GameState.elapsed_days)-int(audience.get("arrived_day",GameState.elapsed_days))
+	chip.text="Envoy of %s · %s" % [String(audience.get("civ_name","")),"arrived today" if waited<=0 else "waits %d d" % waited]
+	chip.tooltip_text="Receive the envoy of %s." % String(audience.get("civ_name",""))
+	var id:=String(audience.get("id",""))
+	chip.pressed.connect(func()->void:receive(id))
+	return chip
+
+func _rest_column(node_name:String,heading:String,sub:String,content:Control,ratio:float)->Control:
+	var column:=VBoxContainer.new();column.name=node_name;column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.size_flags_stretch_ratio=ratio
+	column.add_theme_constant_override("separation",4)
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);column.add_child(head)
+	head.add_child(Tokens.make_label(heading,12,Tokens.GOLD_BRIGHT,.12))
+	var note:=Tokens.make_label(sub,12,Tokens.TEXT_DIM);note.add_theme_font_override("font",_italic);note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;note.clip_text=true;note.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;head.add_child(note)
+	var rule:=ColorRect.new();rule.color=Tokens.BORDER_SOFT;rule.custom_minimum_size=Vector2(0,1);column.add_child(rule)
+	var scroll:=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
+	content.size_flags_horizontal=Control.SIZE_EXPAND_FILL;scroll.add_child(content)
+	return column
+
+func _build_roster_list(roster:Array[Dictionary])->Control:
+	var list:=VBoxContainer.new();list.name="RosterList";list.add_theme_constant_override("separation",5)
+	var groups:Dictionary={}
+	for entry in roster:
+		if not groups.has(String(entry.group)):groups[String(entry.group)]=[]
+		(groups[String(entry.group)] as Array).append(entry)
+	for group in Roster.GROUPS:
+		if not groups.has(group):continue
+		var label:=Tokens.make_label(String(Roster.GROUP_WORDS.get(group,group.to_upper())),10,Tokens.TEXT_DIM,.12)
+		list.add_child(label)
+		for entry:Dictionary in groups[group]:list.add_child(_roster_row(entry))
+	if roster.is_empty():
+		var empty:=Tokens.make_label("No one holds office yet. Officials appear as your government grows.",13,Tokens.MUTED);empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;list.add_child(empty)
+	return list
+
+func _roster_row(entry:Dictionary)->Control:
+	var pid:=int((entry.get("target",{}) as Dictionary).get("person_id",0))
+	var row:=PanelContainer.new();row.name="Row_"+_node_key(String(entry.key))
+	row.add_theme_stylebox_override("panel",Tokens.row_style(_person_color(pid) if pid>0 else Tokens.GOLD))
+	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",10);row.add_child(line)
+	var frame:=PanelContainer.new();frame.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),Color(0,0,0,0),0,3,1));frame.size_flags_vertical=Control.SIZE_SHRINK_CENTER;line.add_child(frame)
+	frame.add_child(Portrait.picture(entry.get("person",{}) as Dictionary,34,40))
+	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",0);line.add_child(words)
+	var who:=Tokens.make_label(String(entry.name),14,Tokens.INK);who.add_theme_font_override("font",_bold);who.clip_text=true;who.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;words.add_child(who)
+	var regard:Dictionary=entry.get("regard",{})
+	var sub_text:=String(entry.title)
+	if not regard.is_empty():sub_text+=" · "+String(regard.get("read",""))
+	var sub:=Tokens.make_label(sub_text,12,Tokens.TEXT_SOFT);sub.clip_text=true;sub.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;words.add_child(sub)
+	if not regard.is_empty():
+		var gauge:=TextureRect.new();gauge.texture=Divine.meter_texture(float(regard.love),float(regard.dread),22);gauge.custom_minimum_size=Vector2(22,22);gauge.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		gauge.tooltip_text=Divine.meter_words(float(regard.love),float(regard.dread));line.add_child(gauge)
+	var matters:=int(entry.get("matters",0))
+	var count:=Tokens.make_label(("%d matter%s" % [matters,"" if matters==1 else "s"]) if matters>0 else "",12,Tokens.GOLD_BRIGHT);count.size_flags_vertical=Control.SIZE_SHRINK_CENTER;count.custom_minimum_size.x=64;line.add_child(count)
+	var button:=Button.new();button.name="Summon_"+_node_key(String(entry.key));button.text="Summon";button.custom_minimum_size=Vector2(88,30);button.focus_mode=Control.FOCUS_NONE
+	button.size_flags_vertical=Control.SIZE_SHRINK_CENTER;button.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
+	button.tooltip_text="Call %s before you now." % String(entry.name)
+	var target:Dictionary=(entry.get("target",{}) as Dictionary).duplicate()
+	button.pressed.connect(func()->void:summon(target))
+	line.add_child(button)
+	return row
+
+func _build_antechamber()->Control:
+	var list:=VBoxContainer.new();list.name="AntechamberList";list.add_theme_constant_override("separation",5)
+	var envoys:=Roster.envoys()
+	if envoys.is_empty():
+		var empty:=Tokens.make_label("No envoy waits.",13,Tokens.MUTED);empty.add_theme_font_override("font",_italic);list.add_child(empty)
+	for audience in envoys:list.add_child(_envoy_row(audience))
+	var set_aside:=Roster.court_waiting()
+	if not set_aside.is_empty():
+		list.add_child(Tokens.make_label("STILL BEFORE YOU",10,Tokens.TEXT_DIM,.12))
+		for audience in set_aside:
+			var speaker:Dictionary=audience.get("speaker",{})
+			var row:=_simple_row("Resume_"+String(audience.id),String(speaker.get("name","")),"%s · you left them waiting" % String(speaker.get("title","")),"Resume",Tokens.VIOLET)
+			var id:=String(audience.id)
+			(row.get_meta("button") as Button).pressed.connect(func()->void:receive(id))
+			list.add_child(row)
+	var decisions:Array[Dictionary]=[]
+	for item in AdvisorSystem.council_decision_items(6,false):
+		if String(item.get("status","unread"))=="unread" and not (item.get("responses",[]) as Array).is_empty():decisions.append(item)
+		if decisions.size()>=3:break
+	if not decisions.is_empty():
+		list.add_child(Tokens.make_label("AWAITING YOUR WORD",10,Tokens.TEXT_DIM,.12))
+		for item in decisions:list.add_child(_decision_row(item))
+	return list
+
+func _envoy_row(audience:Dictionary)->Control:
+	var id:=String(audience.get("id",""))
+	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
+	var headline:=String(situation.get("headline","")).strip_edges()
+	if headline.is_empty():headline=String((KINDS.get(String(audience.get("kind","news")),KINDS.news) as Dictionary).eyebrow).to_lower()
+	var waited:=int(GameState.elapsed_days)-int(audience.get("arrived_day",GameState.elapsed_days))
+	var leaves:=int(audience.get("expires_day",0))
+	var sub:="%s · %s%s" % [headline,"arrived today" if waited<=0 else "waited %d day%s" % [waited,"" if waited==1 else "s"]," · leaves after day %d" % leaves if leaves>0 else ""]
+	var row:=_simple_row("Receive_"+id,"Envoy of %s" % String(audience.get("civ_name","")),sub,"Receive",_ink(Identity.banner_color(Identity.foreign(String(audience.get("civ_id",""))).texture)),Identity.foreign(String(audience.get("civ_id",""))).texture)
+	(row.get_meta("button") as Button).pressed.connect(func()->void:receive(id))
+	return row
+
+func _simple_row(button_name:String,title:String,sub:String,action:String,colour:Color,icon:Texture2D=null)->PanelContainer:
+	var row:=PanelContainer.new();row.add_theme_stylebox_override("panel",Tokens.row_style(colour))
+	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",9);row.add_child(line)
+	if icon!=null:
+		var picture:=TextureRect.new();picture.texture=icon;picture.custom_minimum_size=Vector2(28,34);picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;line.add_child(picture)
+	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",0);line.add_child(words)
+	var head:=Tokens.make_label(title,14,Tokens.INK);head.add_theme_font_override("font",_bold);head.clip_text=true;head.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;words.add_child(head)
+	var detail:=Tokens.make_label(sub,12,Tokens.TEXT_SOFT);detail.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;detail.max_lines_visible=2;words.add_child(detail)
+	var button:=Button.new();button.name=button_name;button.text=action;button.custom_minimum_size=Vector2(84,30);button.focus_mode=Control.FOCUS_NONE
+	button.size_flags_vertical=Control.SIZE_SHRINK_CENTER;button.add_theme_stylebox_override("normal",Tokens.gold_outline_style());line.add_child(button)
+	row.set_meta("button",button)
+	return row
+
+func _decision_row(item:Dictionary)->Control:
+	var row:=PanelContainer.new();row.name="Decision_"+_node_key(String(item.get("id","")))
+	row.add_theme_stylebox_override("panel",Tokens.row_style(Tokens.RED if String(item.get("severity","warning")) in ["danger","critical"] else Tokens.AMBER))
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",4);row.add_child(stack)
+	var text:=Tokens.make_label(String(item.get("text","")).split("\n")[0],13,Tokens.BODY);text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;text.max_lines_visible=2;stack.add_child(text)
+	var who:=Tokens.make_label("%s · %s" % [String(item.get("advisor","")),String(item.get("office","Council"))],11,Tokens.TEXT_DIM);stack.add_child(who)
+	var answers:=HFlowContainer.new();answers.add_theme_constant_override("h_separation",6);answers.add_theme_constant_override("v_separation",4);stack.add_child(answers)
+	var item_id:=String(item.get("id",""))
+	for response in item.get("responses",[]):
+		var label:=String((response as Dictionary).get("label",""))
+		if label.is_empty():continue
+		var answer:=Button.new();answer.text=label;answer.focus_mode=Control.FOCUS_NONE;answer.custom_minimum_size.y=28
+		answer.tooltip_text=String((response as Dictionary).get("ripple",(response as Dictionary).get("hint","")))
+		answer.pressed.connect(func()->void:
+			AdvisorSystem.respond_to_council_item(item_id,label)
+			show_court())
+		answers.add_child(answer)
+	return row
+
+func _build_foreign_list()->Control:
+	var list:=VBoxContainer.new();list.name="ForeignList";list.add_theme_constant_override("separation",5)
+	var peoples:=Roster.foreign_peoples()
+	if peoples.is_empty():
+		var empty:=Tokens.make_label("You know no foreign ruler yet. Scouts and delegates must find them first.",13,Tokens.MUTED);empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;empty.add_theme_font_override("font",_italic);list.add_child(empty)
+	for entry in peoples:
+		var civ_id:=String(entry.civ_id)
+		var regard:Dictionary=entry.get("regard",{})
+		var state:="at war with you" if bool(entry.at_war) else ("your envoys know the way" if bool(entry.access) else "no audience yet: send delegates first")
+		if bool(entry.waiting):state="their envoy waits in your antechamber"
+		var sub:="%s · they %s · %s" % [String(entry.leader),String(regard.get("read","are undecided about you")),state]
+		var row:=_simple_row("Foreign_"+civ_id,String(entry.name),sub,"Send word",_ink(Identity.banner_color(Identity.foreign(civ_id).texture)),Identity.foreign(civ_id).texture)
+		(row.get_meta("button") as Button).pressed.connect(func()->void:show_foreign(civ_id))
+		list.add_child(row)
+	return list
+
+func _build_rest_footer()->Control:
+	var bar:=_footer_bar()
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",4);bar.add_child(stack)
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);stack.add_child(row)
+	speech_input=LineEdit.new();speech_input.name="SpeechInput";speech_input.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	speech_input.custom_minimum_size=Vector2(360,38);speech_input.max_length=400;speech_input.add_theme_font_size_override("font_size",15)
+	speech_input.placeholder_text="Speak to your court…"
+	speech_input.tooltip_text="Name whom you address (by name or office), or speak plainly and your local leader answers. Name a foreign people to brief an envoy."
+	speech_input.text_submitted.connect(func(_t:String):_speak())
+	row.add_child(speech_input)
+	speak_button=Button.new();speak_button.name="Speak";speak_button.text="SPEAK";speak_button.custom_minimum_size=Vector2(96,38)
+	speak_button.add_theme_stylebox_override("normal",Tokens.gold_outline_style());speak_button.pressed.connect(_speak);row.add_child(speak_button)
+	_add_court_controls(row,"Receive envoys at once")
+	var note:=Tokens.make_label("",12,Tokens.TEXT_DIM);note.name="CourtNote";note.add_theme_font_override("font",_italic);stack.add_child(note)
+	return bar
+
+func speak_to_court(text:String)->void:
+	## Words spoken to the court as a whole reach whoever they name, or the
+	## local leader; a foreign ruler's name sets them down as an envoy's brief.
+	var named:=Roster.find_by_words(text)
+	var foreign:=Roster.find_foreign_by_words(text)
+	if named.is_empty() and not foreign.is_empty():
+		if show_foreign(String(foreign.civ_id)) and is_instance_valid(speech_input):
+			speech_input.text=text
+			ForeignDialogue.thread(String(foreign.civ_id))["next_brief"]=text
+		return
+	var entry:=named if not named.is_empty() else Roster.default_speaker()
+	if entry.is_empty():
+		_court_note("No one is at court to hear you yet.")
+		return
+	if summon(entry.get("target",{}) as Dictionary):pending_words=text
+
+func _deliver_pending_words()->void:
+	## Words spoken before the summoned person arrived are said once they stand
+	## before you and the room has settled.
+	if pending_words.is_empty() or mode!="audience" or revealing:return
+	if _voice_ok() and voice.busy(audience_id):return
+	if not is_instance_valid(speech_input) or not resolved_result.is_empty():pending_words="";return
+	var lines:Array=Hall.find(audience_id).get("lines",[])
+	if rendered_lines<lines.size():return
+	speech_input.text=pending_words;pending_words=""
+	if is_instance_valid(speak_button):speak_button.disabled=false
+	_speak()
+
+static func _short_title(title:String)->String:
+	var words:=title.split(" ",false)
+	return title if words.size()<=2 else "%s %s" % [words[0],words[1]]
+
+static func _first_upper(text:String)->String:
+	return text.substr(0,1).to_upper()+text.substr(1)
+
+static func _node_key(key:String)->String:
+	return key.replace(":","_").replace("/","_").replace(" ","_").replace(".","_").replace("@","_")
+
+# --- A settlement leader's civic conversation ---------------------------------
+
+func _civic_begin(audience:Dictionary)->void:
+	## A summoned settlement leader carries the civic directive conversation:
+	## orders, objections, refusals, confirmation and withdrawal, all here.
+	civic_settlement="";civic_seen.clear();civic_signature=""
+	if String(audience.get("origin",""))!="court" or speaker_person_id<=0:return
+	if not is_instance_valid(terrain) or not terrain.has_method("_issue_freeform_order") or not terrain.has_method("issue_civic_directive_text"):return
+	var sid:=Civic.leader_settlement(speaker_person_id)
+	if sid.is_empty():return
+	civic_settlement=sid
+	for turn in Civic.history(sid,24):civic_seen[Civic.turn_key(turn)]=true
+
+func _speaker_name()->String:
+	return String((Hall.find(audience_id).get("speaker",{}) as Dictionary).get("name","The leader"))
+
+func _build_civic_strip()->Control:
+	civic_strip=PanelContainer.new();civic_strip.name="CivicStrip"
+	civic_strip.add_theme_stylebox_override("panel",Tokens.brief_style("info"))
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",3);civic_strip.add_child(stack)
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);stack.add_child(row)
+	civic_state_label=Tokens.make_label("",13,Tokens.BODY,.04);civic_state_label.name="CivicState";civic_state_label.add_theme_font_override("font",_bold)
+	civic_state_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;civic_state_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	civic_state_label.clip_text=true;civic_state_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;row.add_child(civic_state_label)
+	civic_replies=HBoxContainer.new();civic_replies.name="CivicReplies";civic_replies.add_theme_constant_override("separation",6);row.add_child(civic_replies)
+	var dismiss:=Button.new();dismiss.name="DismissFromOffice";dismiss.text="Dismiss from office";dismiss.focus_mode=Control.FOCUS_NONE;dismiss.custom_minimum_size=Vector2(0,28)
+	dismiss.tooltip_text="Take their office from them. A successor takes it up at once; the dismissed keep their lives."
+	dismiss.add_theme_color_override("font_color",Tokens.RED);dismiss.pressed.connect(dismiss_leader);row.add_child(dismiss)
+	civic_status_label=Tokens.make_label("",12,Tokens.TEXT_SOFT);civic_status_label.name="CivicStatus";civic_status_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;civic_status_label.max_lines_visible=2
+	stack.add_child(civic_status_label)
+	_refresh_civic_strip(true)
+	return civic_strip
+
+func civic_state()->String:
+	if civic_settlement.is_empty():return ""
+	return Civic.state(Civic.latest_order(civic_settlement,speaker_person_id))
+
+func _refresh_civic_strip(force:bool=false)->void:
+	if not is_instance_valid(civic_state_label) or civic_settlement.is_empty():return
+	var order:=Civic.latest_order(civic_settlement,speaker_person_id)
+	var state:=Civic.state(order)
+	var signature:="%s|%s|%s" % [state,String(order.get("id","")),String(order.get("status",""))]
+	if signature==civic_signature and not force:return
+	civic_signature=signature
+	var who:=_speaker_name().get_slice(" ",0)
+	var place:=Civic.settlement_name(civic_settlement)
+	if state.is_empty():
+		civic_state_label.text="THE WORK OF %s" % (place.to_upper() if not place.is_empty() else "THE SETTLEMENT")
+		civic_state_label.add_theme_color_override("font_color",Tokens.TEAL)
+		civic_status_label.text="%s leads %s. Ask, and they answer at once; speak an order, and they weigh whether it can be done." % [who,place if not place.is_empty() else "your settlement"]
+	else:
+		civic_state_label.text=Civic.headline(state,who)
+		civic_state_label.add_theme_color_override("font_color",Civic.state_color(state))
+		civic_status_label.text=Civic.status_text(state).get_slice(" · ",1) if " · " in Civic.status_text(state) else Civic.status_text(state)
+	civic_state_label.tooltip_text=Civic.status_text(state)
+	civic_strip.add_theme_stylebox_override("panel",Tokens.brief_style("warn" if state in ["NEEDS YOUR DECISION","REFUSED","BLOCKED"] else "info"))
+	for child in civic_replies.get_children():child.queue_free()
+	for reply in Civic.quick_replies(state):
+		var button:=Button.new();button.name="Civic_"+String(reply.id);button.text=String(reply.label);button.tooltip_text=String(reply.tip)
+		button.focus_mode=Control.FOCUS_NONE;button.custom_minimum_size=Vector2(0,28);button.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
+		var words:=String(reply.text)
+		button.pressed.connect(func()->void:civic_reply(words))
+		civic_replies.add_child(button)
+	if state=="INTERPRETING" and terrain.has_method("_cancel_pending_pronouncement"):
+		var cancel:=Button.new();cancel.name="Civic_cancel";cancel.text="Call it back";cancel.focus_mode=Control.FOCUS_NONE;cancel.custom_minimum_size=Vector2(0,28)
+		cancel.tooltip_text="Withdraw the instruction before they finish weighing it."
+		var order_id:=String(order.get("id",""));var request_id:=String(order.get("request_id",""))
+		cancel.pressed.connect(func()->void:
+			terrain._cancel_pending_pronouncement(order_id,request_id)
+			_refresh_civic_strip(true))
+		civic_replies.add_child(cancel)
+
+## A one-word answer to the leader (confirm, insist, withdraw): ordinary
+## speech, carried by the civic pipeline like anything else you say.
+func civic_reply(words:String)->void:
+	if civic_settlement.is_empty() or not resolved_result.is_empty():return
+	_civic_say(words)
+
+func _civic_say(text:String)->void:
+	Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":int(GameState.elapsed_days),"aside":false})
+	SettlementModel.select_settlement(civic_settlement)
+	terrain.issue_civic_directive_text(text)
+	_sync_civic()
+	_refresh_civic_strip(true)
+	_pump()
+
+func _sync_civic()->void:
+	## Mirror the leader's civic answers into this audience as they arrive.
+	if civic_settlement.is_empty() or audience_id.is_empty():return
+	var holder:=int(GovernmentPeopleSystem.settlement_leader(civic_settlement).get("person_id",0))
+	var who:=_speaker_name()
+	for turn in Civic.history(civic_settlement,12):
+		var key:=Civic.turn_key(turn)
+		if civic_seen.has(key):continue
+		civic_seen[key]=true
+		if String(turn.speaker)!="leader" or String(turn.text).is_empty():continue
+		# The council's own record (a leadership change) is narration; everything
+		# else is the leader answering you.
+		if String(turn.name)=="COUNCIL RECORD":
+			Hall.append_line(audience_id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":String(turn.text),"day":int(turn.day),"aside":false})
+			continue
+		Hall.append_line(audience_id,{"speaker":who,"role":"official","person_id":speaker_person_id,"civ_id":"","text":String(turn.text),"day":int(turn.day),"aside":false})
+		if not String(turn.get("receipt","")).is_empty():
+			Hall.append_line(audience_id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":"RECEIPT · "+String(turn.receipt),"day":int(turn.day),"aside":false})
+	if holder!=speaker_person_id and resolved_result.is_empty():
+		# They no longer lead the settlement (dismissed, arrested, or gone).
+		var place:=Civic.settlement_name(civic_settlement)
+		var outcome:="%s no longer leads %s." % [who,place if not place.is_empty() else "the settlement"]
+		Hall.append_line(audience_id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":outcome,"day":int(GameState.elapsed_days),"aside":false})
+		Hall.conclude(audience_id,outcome,"removed_from_office")
+		civic_settlement=""
+		_show_outcome({"ok":true,"outcome":outcome,"reaction":"offended","terminal":true})
+		return
+	_refresh_civic_strip()
+
+## Takes the settlement from its leader, through the ordinary civic removal.
+func dismiss_leader()->Dictionary:
+	if civic_settlement.is_empty() or not terrain.has_method("_perform_civic_leader_removal"):return {"ok":false}
+	var who:=_speaker_name()
+	var result:Variant=terrain._perform_civic_leader_removal(civic_settlement,"dismiss","You are dismissed from your office, %s." % who.get_slice(" ",0))
+	var answer:Dictionary=result if result is Dictionary else {}
+	if not bool(answer.get("ok",false)):
+		_show_toast(String(answer.get("reason",answer.get("message","Leadership did not change."))))
+		return answer
+	Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":"You are dismissed from your office, %s." % who.get_slice(" ",0),"day":int(GameState.elapsed_days),"aside":false})
+	_sync_civic()
+	_pump()
+	return answer
+
+func _add_civic_record()->void:
+	## What passed between you before this audience, quietly at the top.
+	var turns:=Civic.history(civic_settlement,4)
+	if turns.is_empty() or not is_instance_valid(transcript):return
+	var box:=VBoxContainer.new();box.name="CivicRecord";box.add_theme_constant_override("separation",3)
+	box.add_child(Tokens.make_label("EARLIER WITH %s" % _speaker_name().to_upper(),10,Tokens.TEXT_DIM,.12))
+	for turn in turns:
+		var who:="You" if String(turn.speaker)=="player" else (String(turn.name) if not String(turn.name).is_empty() else _speaker_name())
+		var text:=Tokens.make_label("Day %d · %s: %s" % [int(turn.day)+1,who,String(turn.text)],13,Tokens.TEXT_SOFT)
+		text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;text.max_lines_visible=3;text.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+		box.add_child(text)
+	var rule:=ColorRect.new();rule.color=Tokens.BORDER_SOFT;rule.custom_minimum_size=Vector2(0,1);box.add_child(rule)
+	transcript.add_child(box)
+
+# --- Word to a foreign ruler (the envoy channel) --------------------------------
+
+func show_foreign(civ_id:String)->bool:
+	var leader:=ForeignDiplomacy.leader(civ_id)
+	if leader.is_empty():
+		if mode!="rest":show_court()
+		_court_note("You have no way to reach that people's ruler yet.")
+		return false
+	if mode=="audience" and resolved_result.is_empty() and not audience_id.is_empty():Hall.defer(audience_id)
+	_reset_card("foreign")
+	foreign_civ=civ_id;from_court=true
+	var civ:=ForeignDiplomacy.civilization(civ_id)
+	accent=Tokens.BLUE
+	envoy_color=_ink(Identity.banner_color(Identity.foreign(civ_id).texture))
+	var style:=Tokens.flat(Tokens.PANEL_BG_SOLID,accent.darkened(.1),2,10,0)
+	style.shadow_color=Color(0,0,0,.45);style.shadow_size=28
+	card.add_theme_stylebox_override("panel",style)
+	_add_backdrop(card)
+	body=VBoxContainer.new();body.name="ForeignView";body.add_theme_constant_override("separation",0);card.add_child(body)
+	body.add_child(_build_foreign_herald(civ_id,civ,leader))
+	var veil:=PanelContainer.new();veil.name="Veil";veil.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	veil.add_theme_stylebox_override("panel",_veil_style());body.add_child(veil)
+	var inner:=MarginContainer.new();inner.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	for side in ["left","right"]:inner.add_theme_constant_override("margin_"+side,20)
+	inner.add_theme_constant_override("margin_top",14);inner.add_theme_constant_override("margin_bottom",12)
+	veil.add_child(inner)
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",10);inner.add_child(column)
+	var stage:=HBoxContainer.new();stage.name="Stage";stage.size_flags_vertical=Control.SIZE_EXPAND_FILL;stage.add_theme_constant_override("separation",16);column.add_child(stage)
+	stage.add_child(_build_foreign_speaker(civ_id,civ,leader))
+	var center:=VBoxContainer.new();center.size_flags_horizontal=Control.SIZE_EXPAND_FILL;center.add_theme_constant_override("separation",6);stage.add_child(center)
+	var status:=Tokens.make_label("",13,Tokens.TEXT_SOFT);status.name="ForeignStatus";status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;status.max_lines_visible=3
+	center.add_child(status);foreign_refs["status"]=status
+	var hall_panel:=PanelContainer.new();hall_panel.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	var hall_style:=Tokens.flat(Tokens.FIELD_BG if Tokens.is_light() else Color("0a1316"),Tokens.BORDER_SOFT,1,8,0)
+	hall_style.content_margin_left=14;hall_style.content_margin_right=10;hall_style.content_margin_top=12;hall_style.content_margin_bottom=10
+	hall_panel.add_theme_stylebox_override("panel",hall_style);center.add_child(hall_panel)
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",6);hall_panel.add_child(stack)
+	transcript_scroll=ScrollContainer.new();transcript_scroll.name="Transcript";transcript_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	transcript_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;stack.add_child(transcript_scroll)
+	transcript=VBoxContainer.new();transcript.size_flags_horizontal=Control.SIZE_EXPAND_FILL;transcript.add_theme_constant_override("separation",10)
+	transcript_scroll.add_child(transcript)
+	thinking=Tokens.make_label("",14,Tokens.TEXT_DIM);thinking.name="Thinking";thinking.add_theme_font_override("font",_italic);thinking.visible=false;stack.add_child(thinking)
+	column.add_child(_build_brief_row(civ_id))
+	column.add_child(_build_terms_row(civ_id))
+	body.add_child(_build_foreign_footer())
+	if not ForeignDialogue.changed.is_connected(_on_foreign_changed):ForeignDialogue.changed.connect(_on_foreign_changed)
+	_fit()
+	_refresh_foreign()
+	return true
+
+func _on_foreign_changed(id:String)->void:
+	if mode=="foreign" and id==foreign_civ:_refresh_foreign()
+
+func _build_foreign_herald(civ_id:String,civ:Dictionary,leader:Dictionary)->Control:
+	var banner:=PanelContainer.new();banner.name="Herald"
+	banner.add_theme_stylebox_override("panel",_herald_style())
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",16);banner.add_child(row)
+	var seal:=Seal.new();seal.kind="proposal";seal.tint=accent.lightened(.15);seal.custom_minimum_size=Vector2(58,58);row.add_child(seal)
+	var flag:=TextureRect.new();flag.name="Flag";flag.texture=Identity.foreign(civ_id).texture
+	flag.custom_minimum_size=Vector2(50,58);flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;flag.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(flag)
+	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",1);row.add_child(words)
+	words.add_child(Tokens.make_label("THE ENVOY CHANNEL · YOU SEND WORD ABROAD",12,Color("e2d3b4"),.12))
+	var title:=Tokens.make_label(("WORD TO %s OF %s" % [String(leader.get("name","their ruler")),String(civ.get("name",civ_id))]).to_upper(),24 if _compact() else 30,Color("f6ecd6"))
+	title.name="HeraldTitle";title.add_theme_font_override("font",_bold);title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(title)
+	var sub:=Tokens.make_label("You set the brief; your envoy chooses the words and carries them there and back.",14,Color("e2d3b4"));sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(sub)
+	# The court looks on from the scene here too.
+	var officials:Array=Hall._officials()
+	var seats:=VBoxContainer.new();seats.name="CourtBench";seats.add_theme_constant_override("separation",4);seats.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	seats.tooltip_text="Your court looks on.";seats.mouse_filter=Control.MOUSE_FILTER_PASS
+	var benches:=HBoxContainer.new();benches.add_theme_constant_override("separation",6);seats.add_child(benches)
+	for index in mini(officials.size(),4):
+		var person:Dictionary=officials[index]
+		var seat:=PanelContainer.new();seat.add_theme_stylebox_override("panel",_seat_style(int(person.get("person_id",0)),false))
+		seat.tooltip_text="%s · %s" % [String(person.get("name","")),String(person.get("office_title",""))]
+		var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",2);stack.mouse_filter=Control.MOUSE_FILTER_IGNORE;seat.add_child(stack)
+		var face:=PanelContainer.new();face.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),Color(0,0,0,0),0,3,1));face.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_child(face)
+		face.add_child(Portrait.picture(person,48,52))
+		var who:=Tokens.make_label(String(person.get("name","")).get_slice(" ",0),11,Color("f6ecd6"));who.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;who.clip_text=true;who.custom_minimum_size.x=50;stack.add_child(who)
+		benches.add_child(seat)
+	if not officials.is_empty():row.add_child(seats)
+	return banner
+
+func _foreign_leader_person(civ_id:String,leader:Dictionary)->Dictionary:
+	var person:={"name":String(leader.get("name","")),"person_id":0}
+	EarlyArt.bind_foreign_identity(person,civ_id,int(GameState.world_seed))
+	return person
+
+func _build_foreign_speaker(civ_id:String,civ:Dictionary,leader:Dictionary)->Control:
+	var column:=VBoxContainer.new();column.name="Speaker";column.custom_minimum_size.x=236;column.add_theme_constant_override("separation",8)
+	speaker_frame=PanelContainer.new();speaker_frame.name="SpeakerFrame"
+	speaker_frame.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),envoy_color,2,8,6));column.add_child(speaker_frame)
+	var holder:=Control.new();holder.custom_minimum_size=Vector2(222,_portrait_height());holder.clip_contents=true;speaker_frame.add_child(holder)
+	var portrait:=Portrait.picture(_foreign_leader_person(civ_id,leader),222,_portrait_height());portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);holder.add_child(portrait)
+	var flag:=TextureRect.new();flag.texture=Identity.foreign(civ_id).texture;flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	flag.mouse_filter=Control.MOUSE_FILTER_IGNORE;flag.position=Vector2(166,6);flag.size=Vector2(50,50);holder.add_child(flag)
+	var regard:=Divine.foreign_regard(civ_id)
+	if not regard.is_empty():
+		var strip:=PanelContainer.new();strip.name="Regard";strip.mouse_filter=Control.MOUSE_FILTER_PASS
+		var strip_style:=_plate(Color(.06,.05,.04,.8),0,0);strip_style.content_margin_left=8;strip_style.content_margin_right=8;strip_style.content_margin_top=4;strip_style.content_margin_bottom=4
+		strip.add_theme_stylebox_override("panel",strip_style);strip.position=Vector2(0,_portrait_height()-52);strip.size=Vector2(222,52)
+		var box:=VBoxContainer.new();box.add_theme_constant_override("separation",1);box.mouse_filter=Control.MOUSE_FILTER_IGNORE;strip.add_child(box)
+		var meter:=RegardMeter.new();meter.name="RegardMeter";meter.custom_minimum_size=Vector2(206,24);meter.love=float(regard.love);meter.dread=float(regard.dread);meter.love_word="REVERENCE";meter.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(meter)
+		var read:=Tokens.make_label("%s %s" % [String(regard.get("name","")),String(regard.get("read",""))],12,Color("f6ecd6"));read.name="RegardRead";read.clip_text=true;read.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;read.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(read)
+		strip.tooltip_text=read.text+". From their opinion of you, their ruler's trust, border tension and remembered terror."
+		holder.add_child(strip)
+	var plate:=PanelContainer.new();var plate_style:=Tokens.flat(Tokens.TILE_BG,Color(0,0,0,0),0,6,0)
+	plate_style.border_color=envoy_color;plate_style.border_width_left=4;plate_style.content_margin_left=12;plate_style.content_margin_right=8;plate_style.content_margin_top=7;plate_style.content_margin_bottom=8
+	plate.add_theme_stylebox_override("panel",plate_style);column.add_child(plate)
+	var names:=VBoxContainer.new();names.add_theme_constant_override("separation",0);plate.add_child(names)
+	var name_label:=Tokens.make_label(String(leader.get("name","")),19,envoy_color);name_label.add_theme_font_override("font",_bold);name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;names.add_child(name_label)
+	var title_label:=Tokens.make_label("ruler of %s" % String(civ.get("name",civ_id)),13,Tokens.TEXT_SOFT);title_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;names.add_child(title_label)
+	var rows:Array=[]
+	rows.append(["Temper",String(leader.get("temperament","")),Tokens.BODY])
+	var trust:=float(leader.get("trust",0.0))
+	rows.append(["Their trust","earned" if trust>.1 else ("damaged" if trust<-.1 else "untested"),Tokens.RED if trust<-.1 else Tokens.BODY])
+	var accord:Dictionary=leader.get("accord",{}) if leader.get("accord") is Dictionary else {}
+	if not accord.is_empty() and ForeignDiplomacy.ACCORDS.has(String(accord.get("kind",""))):
+		rows.append(["Understanding","%s · %d days" % [String(ForeignDiplomacy.ACCORDS[String(accord.kind)].name),maxi(0,int(accord.get("until",0))-int(GameState.elapsed_days))],Tokens.GREEN])
+	var goals:Array=leader.get("goals",[]) if leader.get("goals") is Array else []
+	for index in mini(goals.size(),2):
+		if goals[index] is Dictionary:rows.append(["They want",String((goals[index] as Dictionary).get("title","")),Tokens.BODY])
+	var box:=VBoxContainer.new();box.name="Dossier";box.add_theme_constant_override("separation",3);column.add_child(box)
+	box.visible=not _compact()
+	box.add_child(Tokens.make_label("WHAT YOU KNOW",11,Tokens.TEXT_DIM,.1))
+	for row:Array in rows:
+		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",6);box.add_child(line)
+		var key:=Tokens.make_label(String(row[0]),12,Tokens.MUTED);key.custom_minimum_size.x=96;line.add_child(key)
+		var value:=Tokens.make_label(String(row[1]),13,row[2]);value.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		value.clip_text=true;value.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;value.tooltip_text=String(row[1]);value.mouse_filter=Control.MOUSE_FILTER_PASS;line.add_child(value)
+	return column
+
+func _build_brief_row(civ_id:String)->Control:
+	var row:=HBoxContainer.new();row.name="SpeechRow";row.add_theme_constant_override("separation",8)
+	speech_input=LineEdit.new();speech_input.name="SpeechInput";speech_input.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	speech_input.custom_minimum_size.y=42;speech_input.max_length=1500;speech_input.add_theme_font_size_override("font_size",16)
+	speech_input.placeholder_text="Brief your envoy: what you want, what you will not give, how much they may bend…"
+	speech_input.text=String(ForeignDialogue.thread(civ_id).get("next_brief",""))
+	speech_input.text_changed.connect(func(value:String)->void:ForeignDialogue.thread(civ_id)["next_brief"]=value)
+	speech_input.text_submitted.connect(func(_t:String):_speak())
+	row.add_child(speech_input)
+	speak_button=Button.new();speak_button.name="Speak";speak_button.text="SEND ENVOY";speak_button.custom_minimum_size=Vector2(130,42)
+	speak_button.add_theme_font_size_override("font_size",15);speak_button.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
+	speak_button.pressed.connect(_speak);row.add_child(speak_button)
+	var delegates:=Button.new();delegates.name="SendDelegates";delegates.text="SEND DELEGATES";delegates.custom_minimum_size=Vector2(150,42)
+	delegates.tooltip_text="A first journey to establish an audience. No agreement is proposed."
+	delegates.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
+	delegates.pressed.connect(func()->void:
+		var result:=WorldSimulation.diplomacy.send_audience(civ_id)
+		foreign_refs["message"]=String(result.get("error","Delegates depart to establish an audience."))
+		_refresh_foreign())
+	row.add_child(delegates);foreign_refs["delegates"]=delegates
+	var retry:=Button.new();retry.name="RetryReply";retry.text="Retry reply";retry.custom_minimum_size=Vector2(0,42)
+	retry.pressed.connect(func()->void:ForeignDialogue.retry(civ_id);_refresh_foreign())
+	row.add_child(retry);foreign_refs["retry"]=retry
+	var set_aside:=Button.new();set_aside.name="SetAsideReply";set_aside.text="Set aside";set_aside.custom_minimum_size=Vector2(0,42)
+	set_aside.tooltip_text="Set the unanswered exchange aside. No agreement was made."
+	set_aside.pressed.connect(func()->void:ForeignDialogue.set_aside_reply(civ_id);_refresh_foreign())
+	row.add_child(set_aside);foreign_refs["set_aside"]=set_aside
+	return row
+
+func _build_terms_row(civ_id:String)->Control:
+	## Terms the envoys can carry, with the council's reading of their reception.
+	var row:=HBoxContainer.new();row.name="TermsRow";row.add_theme_constant_override("separation",8)
+	var lead:=Tokens.make_label("TERMS",11,Tokens.TEXT_DIM,.12);lead.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(lead)
+	var accord:=OptionButton.new();accord.name="Accord";accord.focus_mode=Control.FOCUS_NONE
+	for definition:Dictionary in ForeignDiplomacy.ACCORDS.values():accord.add_item(String(definition.name))
+	accord.select(maxi(0,ForeignDiplomacy.ACCORDS.keys().find(String(WorldSimulation.diplomacy.situation(civ_id).get("priority","")))))
+	row.add_child(accord);foreign_refs["accord"]=accord
+	var tone:=OptionButton.new();tone.name="Tone";tone.focus_mode=Control.FOCUS_NONE
+	for text in ForeignDiplomacy.TONES.values():tone.add_item(String(text))
+	row.add_child(tone);foreign_refs["tone"]=tone
+	var generous:=CheckBox.new();generous.name="Generous";generous.text="Larger offer";generous.tooltip_text="12 Timber instead of 4: better reception, smaller research benefit for you."
+	row.add_child(generous);foreign_refs["generous"]=generous
+	for choice:OptionButton in [accord,tone]:choice.item_selected.connect(func(_i:int)->void:_refresh_foreign())
+	generous.toggled.connect(func(_on:bool)->void:_refresh_foreign())
+	var forecast:=Tokens.make_label("",13,Tokens.BODY_2);forecast.name="Forecast";forecast.size_flags_horizontal=Control.SIZE_EXPAND_FILL;forecast.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	forecast.clip_text=true;forecast.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;forecast.mouse_filter=Control.MOUSE_FILTER_PASS
+	row.add_child(forecast);foreign_refs["forecast"]=forecast
+	var send:=Button.new();send.name="SendTerms";send.text="Send these terms";send.custom_minimum_size=Vector2(0,34);send.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
+	send.pressed.connect(func()->void:
+		var result:Dictionary=WorldSimulation.diplomacy.send(civ_id,_selected_accord(),_selected_tone(),generous.button_pressed)
+		foreign_refs["message"]=String(result.get("error","Proposal sent. Envoys must return with an answer before an agreement takes effect."))
+		_refresh_foreign())
+	row.add_child(send);foreign_refs["send"]=send
+	var draft:=Button.new();draft.name="ReviewDraft";draft.text="Their draft";draft.custom_minimum_size=Vector2(0,34)
+	draft.tooltip_text="Take up the terms drafted in your last exchange."
+	draft.pressed.connect(func()->void:
+		var proposed:Dictionary=ForeignDialogue.thread(civ_id).get("draft",{})
+		if proposed.is_empty():return
+		if proposed.has("commitment"):_open_commitments(civ_id,proposed.commitment as Dictionary);return
+		accord.select(maxi(0,ForeignDiplomacy.ACCORDS.keys().find(String(proposed.get("accord","")))))
+		tone.select(maxi(0,ForeignDiplomacy.TONES.keys().find(String(proposed.get("tone","")))))
+		generous.set_pressed_no_signal(bool(proposed.get("generous",false)))
+		_refresh_foreign())
+	row.add_child(draft);foreign_refs["draft"]=draft
+	var treaties:=Button.new();treaties.name="Treaties";treaties.text="Pacts & leagues";treaties.custom_minimum_size=Vector2(0,34)
+	treaties.tooltip_text="Protection, leagues and relief: the promises between peoples."
+	treaties.pressed.connect(func()->void:_open_commitments(civ_id,{}))
+	row.add_child(treaties)
+	return row
+
+func _open_commitments(civ_id:String,draft:Dictionary)->void:
+	var council:Control=preload("res://scripts/commitment_screen.gd").new()
+	council.set("civ_id",civ_id);council.set("draft",draft.duplicate(true))
+	add_child(council)
+
+func _selected_accord()->String:
+	var pick:=foreign_refs.get("accord") as OptionButton
+	return String(ForeignDiplomacy.ACCORDS.keys()[maxi(0,pick.selected)]) if pick!=null else String(ForeignDiplomacy.ACCORDS.keys()[0])
+
+func _selected_tone()->String:
+	var pick:=foreign_refs.get("tone") as OptionButton
+	return String(ForeignDiplomacy.TONES.keys()[maxi(0,pick.selected)]) if pick!=null else String(ForeignDiplomacy.TONES.keys()[0])
+
+func _build_foreign_footer()->Control:
+	var bar:=_footer_bar()
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);bar.add_child(row)
+	row.add_child(_build_return_button())
+	var connection:=Button.new();connection.name="AIConnection";connection.text="Connection settings…";connection.focus_mode=Control.FOCUS_NONE;connection.custom_minimum_size=Vector2(0,34)
+	connection.pressed.connect(func()->void:PronouncementInterpreter.open_connection_settings())
+	row.add_child(connection);foreign_refs["connection"]=connection
+	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(spacer)
+	var note:=Tokens.make_label("",12,Tokens.TEXT_DIM);note.name="CourtNote";note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(note)
+	var close:=Button.new();close.name="CloseCourt";close.text="Leave the court ×";close.focus_mode=Control.FOCUS_NONE;close.custom_minimum_size=Vector2(150,34)
+	close.pressed.connect(_close);row.add_child(close)
+	return bar
+
+## Sends the envoy with your brief (a real journey with provisions).
+func send_envoy_brief(text:String)->bool:
+	if mode!="foreign" or foreign_civ.is_empty():return false
+	var sent:=ForeignDialogue.ask(foreign_civ,text)
+	if sent:
+		if is_instance_valid(speech_input):speech_input.clear()
+		foreign_refs["message"]="Your envoy sets out with your brief. The answer comes back with them."
+	else:
+		foreign_refs["message"]=String(ForeignDialogue.thread(foreign_civ).get("status",""))
+	_refresh_foreign()
+	return sent
+
+func _refresh_foreign()->void:
+	if mode!="foreign" or foreign_civ.is_empty():return
+	var id:=foreign_civ
+	WorldSimulation.diplomacy.advance(int(WorldSimulation.state.elapsed_days))
+	var leader:=ForeignDiplomacy.leader(id)
+	if leader.is_empty():show_court();return
+	var thread:Dictionary=ForeignDialogue.thread(id)
+	var gate:=ForeignDialogue.access(id)
+	var connection_issue:=PronouncementInterpreter.connection_problem()
+	# The exchange so far.
+	var messages:Array=thread.get("messages",[])
+	if messages.size()!=foreign_count and is_instance_valid(transcript):
+		foreign_count=messages.size()
+		for child in transcript.get_children():child.queue_free()
+		var person:=_foreign_leader_person(id,leader)
+		if messages.is_empty():
+			var empty:=Tokens.make_label("No word has passed between you yet. Write your envoy's brief below." if bool(gate.ok) else "Send delegates to establish an audience. You can prepare your brief now.",14,Tokens.TEXT_DIM)
+			empty.add_theme_font_override("font",_italic);empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;empty.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;transcript.add_child(empty)
+		for turn in messages:
+			if turn is Dictionary:transcript.add_child(_foreign_line(turn as Dictionary,String(leader.get("name","")),person))
+		follow_scroll=.6
+	var mission:Dictionary=WorldSimulation.world.diplomatic_mission
+	var away:=bool(thread.get("in_transit",false)) or not mission.is_empty()
+	var status_lines:PackedStringArray=PackedStringArray()
+	var message:=String(foreign_refs.get("message",""))
+	if not message.is_empty():status_lines.append(message)
+	if not connection_issue.is_empty():status_lines.append("Your envoys cannot yet carry words: "+connection_issue)
+	elif bool(thread.get("retryable",false)):status_lines.append(String(thread.get("status","")))
+	elif not bool(gate.ok):status_lines.append(String(gate.reason))
+	if bool(thread.get("returned_home",false)) and bool(thread.get("in_transit",false)):
+		status_lines.append("Your envoys are home; the reply is being set down." if not bool(thread.get("retryable",false)) else "Your envoys are home, but the reply was lost. Retry it, or set it aside.")
+	elif bool(thread.get("in_transit",false)):
+		var mission_status:=WorldSimulation.world.diplomatic_mission_status()
+		status_lines.append("Your envoy is on the road · %s · home about day %d." % [String(mission_status.get("phase","travelling")).to_lower(),int(mission_status.get("return_day",0))])
+	else:
+		var quote:Dictionary=WorldSimulation.world.diplomatic_mission_quote(id,"","leader_parley")
+		if quote.has("error"):status_lines.append(String(quote.error))
+		else:status_lines.append("%s: %d delegates, %.1f food rations at departure, %d days there and back." % ["The journey to establish an audience" if not bool(gate.ok) else "The next exchange",int(quote.personnel),float(quote.provisions),int(quote.total_days)])
+	var status:=foreign_refs.get("status") as Label
+	if status!=null:
+		var joined:=" ".join(status_lines)
+		if status.text!=joined:status.text=joined
+	if is_instance_valid(thinking):
+		thinking.visible=ForeignDialogue.pending.has(id) or bool(thread.get("in_transit",false))
+		thinking.text="Your envoy is away with your brief…" if bool(thread.get("in_transit",false)) else "The reply is being set down…"
+	if is_instance_valid(speak_button):
+		speak_button.visible=bool(gate.ok)
+		speak_button.disabled=not connection_issue.is_empty() or ForeignDialogue.pending.has(id) or not bool(gate.ok) or away
+		speak_button.tooltip_text="Envoys must return before another party departs." if away else ("Your envoys need a working connection to carry words." if not connection_issue.is_empty() else "Send your envoy with this brief.")
+	var delegates:=foreign_refs.get("delegates") as Button
+	if delegates!=null:
+		delegates.visible=not bool(gate.ok)
+		var quote_error:=WorldSimulation.world.diplomatic_mission_quote(id,"","leader_parley").has("error")
+		delegates.disabled=not mission.is_empty() or quote_error
+	var retry:=foreign_refs.get("retry") as Button
+	if retry!=null:
+		retry.visible=bool(thread.get("retryable",false))
+		retry.disabled=not connection_issue.is_empty() or ForeignDialogue.pending.has(id) or not bool(gate.ok)
+	var set_aside:=foreign_refs.get("set_aside") as Button
+	if set_aside!=null:set_aside.visible=bool(thread.get("returned_home",false)) and bool(thread.get("in_transit",false))
+	var draft:=foreign_refs.get("draft") as Button
+	if draft!=null:draft.visible=not (thread.get("draft",{}) as Dictionary).is_empty()
+	var connection:=foreign_refs.get("connection") as Button
+	if connection!=null:connection.text="Connect AI…" if not connection_issue.is_empty() else "Connection settings…"
+	# Terms and their likely reception.
+	var generous:=foreign_refs.get("generous") as CheckBox
+	var forecast:Dictionary=WorldSimulation.diplomacy.forecast(id,_selected_accord(),_selected_tone(),generous.button_pressed if generous!=null else false)
+	var forecast_label:=foreign_refs.get("forecast") as Label
+	if forecast_label!=null and not forecast.is_empty():
+		forecast_label.text="%s · %s" % [String(forecast.get("label","")),String(forecast.get("reasons",""))]
+		forecast_label.tooltip_text=forecast_label.text+"\nCosts %d Timber, reserved and refunded if declined. The answer is settled when the envoys return." % int(forecast.get("cost",4))
+	var send:=foreign_refs.get("send") as Button
+	if send!=null:
+		var blocker:=String(forecast.get("blocker",""))
+		var quote2:Dictionary=WorldSimulation.world.diplomatic_mission_quote(id,"","leader_parley")
+		if blocker.is_empty() and quote2.has("error"):blocker=String(quote2.error)
+		if blocker.is_empty() and float(WorldSimulation.state.resource_stockpiles.get("Timber",0))<float(forecast.get("cost",4)):blocker="Not enough Timber for these terms."
+		send.disabled=not blocker.is_empty()
+		send.tooltip_text=blocker if not blocker.is_empty() else "Envoys carry these terms; nothing binds until they return with an answer."
+
+func _foreign_line(turn:Dictionary,leader_name:String,leader_person:Dictionary)->Control:
+	var role:=String(turn.get("role",""))
+	var ruler:=role=="user"
+	var colour:=_ink(Tokens.GOLD) if ruler else (_ink(Tokens.VIOLET) if role=="envoy" else envoy_color)
+	var line_row:=HBoxContainer.new();line_row.add_theme_constant_override("separation",10)
+	if ruler:
+		var indent:=Control.new();indent.custom_minimum_size.x=110;line_row.add_child(indent)
+	else:
+		var frame:=PanelContainer.new();frame.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+		frame.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),colour,1,6,2))
+		frame.add_child(Portrait.picture(leader_person if role!="envoy" else {"name":"Your envoy","person_id":0},44,52))
+		line_row.add_child(frame)
+	var bubble:=PanelContainer.new();bubble.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var bubble_style:=Tokens.flat(colour.lerp(Tokens.PANEL_BG_SOLID,.90 if Tokens.is_light() else .86),colour,1,10,0)
+	if ruler:bubble_style.border_width_right=4;bubble_style.corner_radius_top_right=2
+	else:bubble_style.border_width_left=4;bubble_style.corner_radius_top_left=2
+	bubble_style.content_margin_left=14;bubble_style.content_margin_right=14;bubble_style.content_margin_top=8;bubble_style.content_margin_bottom=10
+	bubble.add_theme_stylebox_override("panel",bubble_style);line_row.add_child(bubble)
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",2);bubble.add_child(stack)
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);stack.add_child(head)
+	var who:="You · your brief" if ruler else ("Your envoy" if role=="envoy" else leader_name)
+	var name_label:=Tokens.make_label(who,14,colour);name_label.add_theme_font_override("font",_bold);head.add_child(name_label)
+	var day:=int(turn.get("day",-1))
+	head.add_child(Tokens.make_label("earlier" if day<0 else "day %d" % (day+1),12,Tokens.TEXT_DIM))
+	var text:=Tokens.make_label(String(turn.get("content","")),16,Tokens.BODY);text.name="LineText";text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	if ruler:text.add_theme_font_override("font",_italic)
+	stack.add_child(text)
+	return line_row
 
 # --- Colour helpers ---------------------------------------------------------
 

@@ -1,0 +1,15 @@
+{
+  "source": "art_source/prehistoric-art/swatches/1258-1266.png",
+  "prompt": "Built-in imagegen: nine natural-fork prehistoric finds in a square 3x3 warm-ivory paper and matte-gouache swatch. Cells: twig spanning root opening, leaf soot impression on split rock, loose root nest in fallen tree fork, stones at soft earth anvil, quick-release knot at branch crotch, charcoal smudge on cave rock, chip repairing shell rim, wood curl saved beside charcoal, ochre-thumbprint handstone passed between hands.",
+  "entries": [
+    {"id": 1258, "review": "Top-left: thin unmarked twig caught across the natural opening between two roots."},
+    {"id": 1259, "review": "Top-middle: black leaf-shaped soot impression on split stone with decaying leaf beside it."},
+    {"id": 1260, "review": "Top-right: loose free-ended roots gathered as a shallow nest in a fallen-tree fork, before weaving."},
+    {"id": 1261, "review": "Middle-left: hard handstone and a softer battered clay-and-earth anvil together in a root hollow."},
+    {"id": 1262, "review": "Middle-middle: rough fiber quick-release knot around a branch crotch with a long loose pull tail."},
+    {"id": 1263, "review": "Middle-right: amorphous charcoal mark matching a natural shadow on rough cave rock, without symbols."},
+    {"id": 1264, "review": "Bottom-left: damaged shell with a single jagged stone chip wedged at its broken rim."},
+    {"id": 1265, "review": "Bottom-middle: pale raw wood curl protected in a bark split beside charcoal crumbs."},
+    {"id": 1266, "review": "Bottom-right: rough handstone being passed between working hands, marked by one ochre thumb smear."}
+  ]
+}

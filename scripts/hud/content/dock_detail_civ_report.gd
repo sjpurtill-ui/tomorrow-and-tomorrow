@@ -59,7 +59,7 @@ func tab(_sub:int)->Dictionary:
 	var diplomatic_status:Dictionary=CivilizationSystem.diplomatic_mission_status()
 	var mission_active:=bool(diplomatic_status.get("active",false))
 	blocks.append({"type":"actions","items":[
-		{"label":"SPEAK WITH THEIR LEADER","sub":"Establish an audience, then discuss objectives","primary":true,"on_press":func():terrain._set_game_speed(0);ForeignDiplomacy.open(civ_id)},
+		{"label":"SPEAK WITH THEIR LEADER","sub":"Establish an audience, then discuss objectives","primary":true,"on_press":court({"civ_id":civ_id})},
 		{"label":"SHOW HOME ON MAP","sub":"focus the reported settlement and its name",
 		"disabled":not bool(relation.get("home_location_known",false)),
 		"on_press":func()->void:
