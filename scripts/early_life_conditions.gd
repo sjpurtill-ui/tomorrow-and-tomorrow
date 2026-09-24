@@ -1,0 +1,185 @@
+extends RefCounted
+## Early care practices and living conditions that decide how much avoidable
+## death a young society carries.
+##
+## A band without clean-water habits, wound washing, known remedies, experienced
+## birth attendants, shared child care, cooked weaning food or lean-season stores
+## loses far more infants, children, mothers and adults than the baseline life
+## table. Each practice removes part of that excess in proportion to its
+## adoption. Later knowledge counts through the general effect channels, so a
+## mature civilization that reached the same protections another way is never
+## penalized. The excess never pushes mortality below the baseline table: this
+## is an early-game model of what is not yet known, not a late-game bonus.
+##
+## Diet and hunger act separately and continuously. A monotonous or lean diet
+## raises child mortality and lowers conception; an overworked population
+## conceives less and loses more pregnancies. Infant deaths shorten the next
+## birth interval (weaning ends early), so high child loss is partly replaced
+## by births, as in pre-modern demography, without cancelling the loss.
+##
+## All results are aggregate factors for one numeric population; the profile is
+## O(practices) and independent of population size.
+
+## Each category removes the listed excess once fully covered. Coverage comes
+## from the best of the listed practices (weights sum, capped at 1) and the
+## general effect channels (value / scale, summed, capped at 1).
+const CATEGORIES:Array[Dictionary]=[
+	{"id":"water","label":"Clean water and waste","under5":0.80,"child":0.40,"adult":0.06,"neonatal":0.20,"maternal":0.0,
+		"practices":{"clean_water":0.60,"well_siting":0.25,"drainage":0.20,"latrine_siting":0.30},
+		"channels":{"water_safety":0.22,"sanitation":0.20},
+		"missing":"Children die of fouled water and summer fevers."},
+	{"id":"wounds","label":"Wound and injury care","under5":0.08,"child":0.12,"adult":0.14,"neonatal":0.0,"maternal":0.25,
+		"practices":{"wound_cleaning":0.75,"labor_rotations":0.15,"splint_and_bracing_technique":0.25},
+		"channels":{"injury_risk":-0.14},
+		"missing":"Cuts, bites and falls fester; childbed fever goes untreated."},
+	{"id":"remedies","label":"Remedies and care of the sick","under5":0.40,"child":0.28,"adult":0.10,"neonatal":0.0,"maternal":0.0,
+		"practices":{"herbal_classification":0.65,"isolation_practice":0.35,"case_records":0.20,"dietary_healing_regimens":0.25},
+		"channels":{"health_protection":0.22},
+		"missing":"Fevers and coughs run their course with no known remedy."},
+	{"id":"birth","label":"Birth care","under5":0.0,"child":0.0,"adult":0.0,"neonatal":1.10,"maternal":1.25,
+		"practices":{"birth_attendants":0.70,"maternal_recovery":0.30,"trained_midwives":0.50,"labor_position_customs":0.20,"cord_afterbirth_handling":0.25},
+		"channels":{"maternal_safety":0.20},
+		"missing":"Mothers labor alone; difficult births and newborns are often lost."},
+	{"id":"childcare","label":"Child care and weaning food","under5":0.56,"child":0.12,"adult":0.0,"neonatal":0.25,"maternal":0.0,
+		"practices":{"shared_childcare":0.55,"food_pounding_mortars":0.20,"pulse_splitting":0.10,"food_steaming_vessels":0.15,"infant_swaddling_practice":0.15,"weaning_food_softening":0.20},
+		"channels":{"neonatal_survival":0.18},
+		"missing":"Toddlers are weaned onto hard food and left unwatched during work."},
+	{"id":"cooking","label":"Cooked and sorted food","under5":0.26,"child":0.10,"adult":0.04,"neonatal":0.0,"maternal":0.0,
+		"practices":{"edible_resource_recognition":0.35,"hearth_roasting_control":0.35,"earth_oven_cooking":0.15,"food_steaming_vessels":0.15,"ember_tending":0.10},
+		"channels":{"nutrition_quality":0.20},
+		"missing":"Raw or spoiled food and mistaken plants sicken the young."},
+	{"id":"stores","label":"Lean-season stores","under5":0.30,"child":0.14,"adult":0.06,"neonatal":0.0,"maternal":0.0,
+		"practices":{"food_drying":0.35,"smoking":0.30,"public_stores":0.20,"sealed_vessels":0.20},
+		"channels":{"food_storage":0.30},
+		"missing":"Nothing is put by, so each winter and failed season falls on the children."},
+]
+## Storage Pits count toward lean-season stores once built.
+const STORAGE_WORKS:={"Storage Pits":0.30,"Public Stores":0.20}
+## Days of food history averaged into the diet a child actually lives on.
+const DIET_WINDOW_DAYS:=120
+## New worlds apply the rules at once; older saves reach them over two years.
+const BLEND_DAYS:=730.0
+## First-year loss with every early protection in place; only loss above it
+## shortens birth intervals, so an established society's fertility is unchanged.
+const REFERENCE_INFANT_LOSS:=0.10
+## Mortality condition factor of a healthy, fed and housed settlement.
+const GOOD_CONDITIONS:=0.55
+
+## Measurement hook: probes set this to replay the rules before this change
+## (blend held at 0) for before/after comparisons. Never set by the game.
+static var legacy_comparison:=false
+
+## Advances the save-compatibility blend and returns the current profile.
+static func refresh(state:Node,discovery:Node,context:Dictionary={})->Dictionary:
+	var blend:=clampf(float(state.early_care_blend),0.0,1.0)
+	if legacy_comparison:
+		state.early_care_blend=0.0
+	elif blend<1.0:
+		# A world still in its first month began under these rules. An older save
+		# moves to them gradually instead of losing people on the day it loads.
+		blend=1.0 if float(state.elapsed_days)<30.0 else minf(1.0,blend+float(WorldSimulation.span)/BLEND_DAYS)
+		state.early_care_blend=blend
+	var result:=profile(state,discovery,context)
+	state.early_care=result
+	# Tomorrow's conception uses today's first-year loss (weaning cut short).
+	result["infant_loss_estimate"]=CivilizationIndicators.infant_mortality_per_1000(state,discovery)/1000.0
+	return result
+
+## Mutation-free profile for the given state. `context` may carry
+## "overwork" (0..1) and "infant_loss" (first-year loss 0..1) from the day.
+static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary:
+	var known:Array=state.known_discoveries
+	var completed:Array=state.settlement_completed
+	var blend:=clampf(float(state.early_care_blend),0.0,1.0)
+	var excess:={"under5":0.0,"child":0.0,"adult":0.0,"neonatal":0.0,"maternal":0.0}
+	var categories:Array[Dictionary]=[]
+	for category:Dictionary in CATEGORIES:
+		var practice_cover:=0.0
+		var named:Array[String]=[]
+		var missing_names:Array[String]=[]
+		var practices:Dictionary=category.practices
+		for id:String in practices:
+			if id in known:
+				practice_cover+=float(practices[id])*clampf(discovery.adoption(id),0.0,1.0)
+				named.append(_name(discovery,id))
+			else:
+				var entry:Dictionary=discovery.discovery_definition(id)
+				if not entry.is_empty() and missing_names.size()<2:missing_names.append(String(entry.get("name",id)))
+		if String(category.id)=="stores":
+			for work:String in STORAGE_WORKS:
+				if work in completed:
+					practice_cover+=float(STORAGE_WORKS[work])
+					named.append(work)
+		var channel_cover:=0.0
+		var channels:Dictionary=category.channels
+		for channel:String in channels:
+			var scale:=float(channels[channel])
+			channel_cover+=maxf(0.0,discovery.effect(channel)/scale)
+		var coverage:=clampf(maxf(practice_cover,channel_cover),0.0,1.0)
+		for key:String in excess:
+			var amount:=float(category.get(key,0.0))
+			excess[key]=float(excess[key])+amount*(1.0-coverage)
+		categories.append({"id":category.id,"label":category.label,"coverage":coverage,"known":named,"next":missing_names,"missing":String(category.missing)})
+	var diet:=diet_window(state)
+	var malnutrition:=clampf(float(state.malnutrition_burden),0.0,1.0)
+	# Children feel a thin, monotonous diet long before adults starve.
+	var nutrition:=clampf(1.0+malnutrition*1.1+maxf(0.0,0.66-diet)*2.2-maxf(0.0,diet-0.76)*0.45,0.85,2.2)
+	var overwork:=clampf(float(context.get("overwork",(state.early_care as Dictionary).get("overwork",0.0))),0.0,1.0)
+	var raw:={
+		"under5":(1.0+float(excess.under5))*nutrition,
+		"child":(1.0+float(excess.child))*(1.0+(nutrition-1.0)*0.5),
+		"adult":1.0+float(excess.adult)+malnutrition*0.15,
+		"neonatal":(1.0+float(excess.neonatal))*(1.0+maxf(0.0,0.58-diet)*0.9+malnutrition*0.5),
+		"maternal":(1.0+float(excess.maternal))*(1.0+malnutrition*0.6+overwork*0.20),
+	}
+	# Conception: a well-fed mother conceives sooner; heavy labor delays it; an
+	# infant's death ends nursing and shortens the next interval.
+	var infant_loss:=clampf(float(context.get("infant_loss",(state.early_care as Dictionary).get("infant_loss",0.0))),0.0,0.6)
+	var conception:=lerpf(0.80,1.05,clampf((diet-0.35)/0.45,0.0,1.0))*(1.0-overwork*0.16)*(1.0+maxf(0.0,infant_loss-REFERENCE_INFANT_LOSS)*2.6)
+	var result:={"blend":blend,"diet":diet,"nutrition_factor":nutrition,"overwork":overwork,"infant_loss":infant_loss,"categories":categories}
+	for key:String in raw:result[key]=lerpf(1.0,float(raw[key]),blend)
+	result["conception"]=lerpf(1.0,conception,blend)
+	result["pregnancy_risk"]=lerpf(1.0,1.0+overwork*0.35+maxf(0.0,0.5-diet)*0.6,blend)
+	return result
+
+static func _name(discovery:Node,id:String)->String:
+	var entry:Dictionary=discovery.discovery_definition(id)
+	return String(entry.get("name",id.capitalize()))
+
+## Mean diet quality over recent food history; seasonal lean spells count.
+static func diet_window(state:Node)->float:
+	var history:Array=state.food_history
+	if history.is_empty():return 0.62
+	var total:=0.0
+	var count:=0
+	for index in range(history.size()-1,maxi(-1,history.size()-1-DIET_WINDOW_DAYS),-1):
+		total+=float((history[index] as Dictionary).get("diet_quality",0.62))
+		count+=1
+	return clampf(total/maxf(1.0,float(count)),0.0,1.0)
+
+## Life-table multiplier for one year of age under the current profile.
+## `condition_factor` is GameState._mortality_condition_factor(): where hunger,
+## exposure and sickness already raise every death rate, missing practices add
+## proportionally less, so the same deaths are not counted twice.
+static func age_multiplier(care:Dictionary,age:int,condition_factor:float=GOOD_CONDITIONS)->float:
+	if care.is_empty():return 1.0
+	var raw:=float(care.get("adult",1.0))
+	if age<5:raw=float(care.get("under5",1.0))
+	elif age<15:raw=float(care.get("child",1.0))
+	if raw<=1.0:return raw
+	return 1.0+(raw-1.0)*clampf(pow(GOOD_CONDITIONS/maxf(0.01,condition_factor),1.5),0.4,1.0)
+
+## Player-facing lines for the health view: what protects life, what is missing.
+static func explanation(care:Dictionary)->Array[Dictionary]:
+	var rows:Array[Dictionary]=[]
+	for category:Dictionary in care.get("categories",[]):
+		var coverage:=float(category.get("coverage",0.0))
+		var known:=", ".join(PackedStringArray(category.get("known",[])))
+		var next:=", ".join(PackedStringArray(category.get("next",[])))
+		var status:="Established" if coverage>=0.95 else ("Not yet practiced" if coverage<=0.02 else "Partly practiced")
+		var detail:=""
+		if coverage>=0.95:detail="In practice: %s." % known if known!="" else "Covered by later knowledge."
+		elif known=="":detail=String(category.get("missing",""))+(" To learn: %s." % next if next!="" else "")
+		else:detail="In practice: %s.%s" % [known," To learn: %s." % next if next!="" else ""]
+		rows.append({"name":String(category.get("label","")),"coverage":coverage,"status":status,"detail":detail})
+	return rows

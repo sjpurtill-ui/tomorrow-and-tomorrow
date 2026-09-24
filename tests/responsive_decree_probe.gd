@@ -59,6 +59,12 @@ func _world(seed_value:int)->String:
 	# Only the consequence engine runs here; hold drinking water steady so the
 	# experiment isolates the order (ResourceSystem is not stepped).
 	GameState.water_metrics={"intake_ratio":1.0,"days":30.0,"stored":float(POPULATION)*6.0}
+	# Hold food steady the same way. Nothing reassigns labor here, and under the
+	# early wild-food limits a fixed quarter of 600 people on dry ground outruns
+	# what the land renews within half a year; the resulting hunger (a birth
+	# crisis) would swamp the order in both arms. Keep the full store in reach.
+	GameState.founding_manifest["food_storage_rations"]=float(POPULATION)*400.0
+	FoodSystem.receive_external_food(maxf(0.0,float(POPULATION)*400.0-FoodSystem.total_stored()))
 	return String(GameState.player_settlements[0].id)
 
 func _say(settlement_id:String,text:String)->Dictionary:
