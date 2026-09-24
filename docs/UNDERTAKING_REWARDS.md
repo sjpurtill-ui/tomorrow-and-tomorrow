@@ -1,9 +1,11 @@
-# Wonder rewards and an enduring civilization
+# Wonder rewards
 
 Buildings → Undertakings shows each settlement's possibilities, current effects,
-maintenance history, naming controls and the civilization's victory progress.
-World → Standing also shows victory progress. Opportunities remain restricted to
+maintenance history and naming controls. Opportunities remain restricted to
 the first 300 years and vary by world, settlement, environment and discoveries.
+
+There is no victory in this game. Landmarks give practical local benefits and a
+reputation carried abroad; they never count toward winning anything.
 
 These are maximum effects at full condition, in addition to the catalog's local
 worker-effectiveness bonus. Ruined, abandoned and unfinished sites give no local
@@ -37,15 +39,13 @@ fade over thirty years without renewed contact. Recorded construction hardship
 halves the reputation benefit without erasing the accomplishment. This first
 version records pressure during shortages, not a separate slavery simulation.
 
-The **Enduring Civilization** victory requires three functioning landmarks at
-60% condition or better, each with twenty years of maintained operation; three
-different achievement categories; and current accounts reaching two foreign
-societies. It records the year and whether qualifying construction imposed
-hardship. The award persists through later decline and does not end play.
+The former **Enduring Civilization** victory has been removed along with every
+other win state. Nothing tracks landmark counts toward an award.
 
-Existing saves need no migration: new account and victory fields are optional and
-validated. Twelve targeted wonder tests cover lifecycle, naming, rewards, local
-scope, reputation, victory gates and serialization. These checks do not establish
+Existing saves need no migration: account fields are optional and validated. A
+city's legacy `wonder_victory` field from older saves is tolerated on load and
+ignored; it is never written. Targeted wonder tests cover lifecycle, naming,
+rewards, local scope, reputation and serialization. These checks do not establish
 300-year balance across all environments. Unique exports, visiting-scholar events,
 pilgrimage systems and final map art remain future extensions, not hidden rewards
 claimed by this implementation.

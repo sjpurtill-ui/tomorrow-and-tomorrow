@@ -22,7 +22,7 @@ func observe(day:int,facts:Dictionary)->void:
 	data.in_crisis=crisis
 	var dominant:=bool(facts.get("dominant",false))
 	if dominant and not bool(data.dominant):
-		data.dominance_episodes+=1;_event(day,"Influence", "A sustained period of comparative strength began. It does not end the civilization's history.")
+		data.dominance_episodes+=1;_event(day,"Influence", "A period of comparative strength among known peoples began. Nothing is won; the history continues.")
 	data.dominant=dominant
 	for key in ["settlement","exchange","learning","institutions","communities"]:
 		if bool(facts.get(key,false)) and not data.milestones.has(key):

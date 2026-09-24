@@ -771,12 +771,13 @@ func test_captured_scouts_support_questioning_coercion_and_unreliable_torture()-
 	assert_array(system.validate_state()).is_empty()
 
 
-func test_every_contender_uses_the_same_score_pillars_and_victory_gates()->void:
+func test_every_contender_uses_the_same_score_pillars_without_victory_gates()->void:
 	var snapshot:Dictionary=system.competition_snapshot()
 	for contender_variant in snapshot.leaders:
 		var contender:Dictionary=contender_variant
 		assert_int((contender.score_breakdown as Dictionary).size()).is_equal(system.SCORE_DOMAINS.size())
-		assert_dict(contender.victory_requirements).contains_keys(["sustainability","rank","domains","lead_margin","currently_qualifies"])
+		assert_bool(contender.has("victory_requirements")).is_false()
+		assert_bool(contender.has("dominance_turns")).is_false()
 	var player:Dictionary=(snapshot.leaders as Array).filter(func(entry:Dictionary)->bool: return String(entry.id)=="player")[0]
 	var rival:Dictionary=(snapshot.leaders as Array).filter(func(entry:Dictionary)->bool: return String(entry.id)!="player")[0]
 	for field in ["controlled_population","knowledge","production","logistics","health","cohesion","institutions","territory","military_population","military_readiness","food_days"]:
@@ -794,7 +795,7 @@ func test_contacts_do_not_reveal_the_scoring_ontology_without_social_knowledge()
 	assert_int(int(known.player_rank)).is_equal(-1)
 	assert_dict(known.leader).is_empty()
 	assert_dict(known.domain_leaders).is_empty()
-	assert_str(String(known.victory_rule)).not_contains("seven")
+	assert_str(String(known.standing_note)).not_contains("seven")
 	for profile_variant in known.leaders:
 		var profile:Dictionary=profile_variant
 		assert_bool(profile.has("score")).is_false()
@@ -825,7 +826,8 @@ func test_records_contact_and_inference_progressively_reveal_strategic_compariso
 	assert_int(int(known.player_rank)).is_equal(-1)
 	var own:Dictionary=(known.leaders as Array).filter(func(profile:Dictionary)->bool: return profile.id=="player")[0]
 	assert_bool(own.has("score")).is_true()
-	assert_str(String(known.victory_rule)).contains("period of influence")
+	assert_str(String(known.standing_note)).contains("no victory")
+	assert_str(String(formal.summary)).not_contains("victory conditions")
 
 
 func test_world_uses_fixed_aggregate_civilization_records()->void:
@@ -1104,17 +1106,6 @@ func test_peace_removes_queued_incidents_and_stale_incidents_are_never_consumed(
 	assert_bool(system.conduct_player_action(String(civ.id),"declare_war",true).has("error")).is_true()
 
 
-func test_non_turn_updates_cannot_advance_victory_and_terminal_outcomes_do_not_revert()->void:
-	var civ_id:=String(system.civilizations[0].id)
-	system.civilizations[0].player_relation["opinion"]=0.40
-	system.dominance_turns=5
-	assert_bool(bool(system.conduct_player_action(civ_id,"open_trade",true).get("ok",false))).is_true()
-	assert_int(system.dominance_turns).is_equal(5)
-	system.competition_outcome="victory"
-	system.advance_to_day(30)
-	assert_str(system.competition_outcome).is_equal("victory")
-
-
 func test_rival_battle_accounting_uses_the_actual_enemy_side_and_enemy_prisoners_only()->void:
 	var civ:Dictionary=system.civilizations[0]
 	var before_population:=float(civ.population)
@@ -1295,7 +1286,7 @@ func test_age_cohorts_change_over_time_and_continue_to_conserve_population()->vo
 	assert_array(system.validate_state()).is_empty()
 
 
-func test_dominance_records_influence_without_ending_history()->void:
+func test_comparative_strength_is_only_chronicled_without_ending_history()->void:
 	GameState.ensure_population_total(1_000_000_000_000)
 	GameState.population_health=0.99
 	GameState.food_security=1.0
@@ -1304,8 +1295,10 @@ func test_dominance_records_influence_without_ending_history()->void:
 	GameState.society_capacities["institutions"]=1.0
 	MilitaryCampaign.aggregate_recruits=300_000_000_000
 	system.advance_to_day(20*365+12*30)
-	assert_str(system.competition_outcome).is_equal("ongoing")
-	assert_int(system.dominance_turns).is_greater_equal(12)
+	assert_int(int(system.chronicle.data.dominance_episodes)).is_greater_equal(1)
+	var saved:Dictionary=system.export_state()
+	for key in ["dominance_turns","contender_dominance_turns","competition_outcome","competition_winner_id"]:
+		assert_bool(saved.has(key)).is_false()
 
 
 func test_rival_dominance_does_not_end_player_history()->void:
@@ -1325,9 +1318,10 @@ func test_rival_dominance_does_not_end_player_history()->void:
 	system.civilizations[0]=rival
 	for turn in 12:
 		system._rebuild_competition(true,20*365+(turn+1)*30)
-	assert_str(system.competition_outcome).is_equal("ongoing")
-	assert_str(system.competition_winner_id).is_equal("")
-	assert_int(int(system.contender_dominance_turns.get(String(rival.id),0))).is_equal(12)
+	var snapshot:Dictionary=system.competition_snapshot()
+	assert_bool(snapshot.has("outcome")).is_false()
+	assert_bool(snapshot.has("winner_id")).is_false()
+	assert_array(system.validate_state()).is_empty()
 
 
 func test_distress_remains_recoverable_after_twelve_turns()->void:
@@ -1339,8 +1333,8 @@ func test_distress_remains_recoverable_after_twelve_turns()->void:
 		system.civilizations[index].player_relation["treaty"]="war"
 		system.civilizations[index].player_relation["border_tension"]=1.0
 	system.advance_to_day(12*30)
-	assert_str(system.competition_outcome).is_equal("ongoing")
 	assert_int(system.collapse_turns).is_equal(12)
+	assert_array(system.validate_state()).is_empty()
 
 
 func test_rivals_trade_and_fight_each_other_without_player_scripts()->void:
@@ -1358,12 +1352,36 @@ func test_rivals_trade_and_fight_each_other_without_player_scripts()->void:
 	assert_int(wars_recorded).is_greater(0)
 
 
-func test_competition_includes_player_and_every_rival_with_explicit_victory_state()->void:
+func test_competition_includes_player_and_every_rival_without_any_victory_state()->void:
 	var snapshot:Dictionary=system.competition_snapshot()
 	assert_int((snapshot.leaders as Array).size()).is_equal(system.civilizations.size()+1)
 	assert_int(int(snapshot.player_rank)).is_between(1,system.civilizations.size()+1)
-	assert_bool(["ongoing","victory","defeat"].has(String(snapshot.outcome))).is_true()
-	assert_str(String(snapshot.victory_rule)).contains("2,500 years")
+	for key in ["outcome","winner_id","victory_rule","defeat_rule","victory_progress","dominance_turns"]:
+		assert_bool(snapshot.has(key)).is_false()
+	assert_str(String(snapshot.standing_note)).contains("no victory")
+
+
+func test_legacy_save_with_removed_victory_fields_still_loads()->void:
+	var payload:Dictionary=system.export_state()
+	payload["dominance_turns"]=7
+	payload["contender_dominance_turns"]={"player":7,"civ_bogus":3}
+	payload["competition_outcome"]="victory"
+	payload["competition_winner_id"]="player"
+	var result:Dictionary=system.import_state(payload)
+	assert_bool(bool(result.get("ok",false))).is_true()
+	assert_array(system.validate_state()).is_empty()
+	var resaved:Dictionary=system.export_state()
+	for key in ["dominance_turns","contender_dominance_turns","competition_outcome","competition_winner_id"]:
+		assert_bool(resaved.has(key)).is_false()
+	# A pre-chronicle save keeps an old verdict only as history.
+	var old:Dictionary=payload.duplicate(true)
+	old.erase("chronicle")
+	old["competition_outcome"]="defeat"
+	old["competition_winner_id"]="civ_01"
+	assert_bool(bool(system.import_state(old).get("ok",false))).is_true()
+	var verdicts:Array=(system.chronicle.data.chapters as Array).filter(func(entry:Dictionary)->bool: return String(entry.kind)=="Earlier verdict")
+	assert_int(verdicts.size()).is_equal(1)
+	assert_str(String((verdicts[0] as Dictionary).text)).contains("no victory or defeat")
 
 
 func test_billion_scale_does_not_change_record_count_or_save_size_class()->void:

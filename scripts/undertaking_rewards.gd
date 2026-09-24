@@ -46,40 +46,6 @@ static func diplomatic_bonus(state:Node,listener:String,day:int)->float:
 			total+=float(REWARDS.get(r.id,{}).get("reputation",.015))*float(account.condition)*freshness*(.5 if int(account.strain)>=180 else 1.0)
 	return minf(.20,total)
 
-static func legacy(state:Node)->Dictionary:
-	var sites:=0;var paths:Array=[];var contacts:Array=[];var award:Dictionary={};var costly:=0
-	for city:Dictionary in state.player_settlements:
-		if bool(city.get("primary",false)):award=city.get("wonder_victory",{})
-		if String(city.get("occupied_by","")) not in ["","player"]:continue
-		for r:Dictionary in city.get("undertakings",[]):
-			if r.status!="functioning" or float(r.condition)<.6 or int(r.operating_days)<365*20:continue
-			sites+=1
-			if int(r.strain)>=180:costly+=1
-			var path:String=REWARDS.get(r.id,{}).get("path","")
-			if path not in paths:paths.append(path)
-			for contact:String in r.get("heard_by",{}):
-				var account:Dictionary=r.heard_by[contact]
-				if int(state.elapsed_days)-int(account.day)<=365*30 and contact not in contacts:contacts.append(contact)
-	return {"sites":sites,"paths":paths.size(),"contacts":contacts.size(),"ready":sites>=3 and paths.size()>=3 and contacts.size()>=2,"award":award,"costly":costly}
-
-static func record_victory(state:Node,day:int)->void:
-	var progress:=legacy(state)
-	if not progress.ready or not progress.award.is_empty():return
-	for city:Dictionary in state.player_settlements:
-		if bool(city.get("primary",false)):
-			city.wonder_victory={"day":day,"costly":int(progress.costly)}
-			state.settlement_network_revision+=1
-			return
-
-static func victory_block(state:Node)->Dictionary:
-	var p:=legacy(state)
-	if not p.award.is_empty():
-		return {"type":"text","heading":"VICTORY · ENDURING CIVILIZATION","text":"Earned in Year %d. Three kinds of achievement served your people for twenty years and became known abroad. Continue shaping what follows.%s" % [int(p.award.day)/365+1," Its history also records hardship imposed during construction." if int(p.award.costly)>0 else ""]}
-	return {"type":"rows","heading":"ENDURING CIVILIZATION · VICTORY PATH","items":[
-		{"name":"%d / 3 enduring landmarks" % p.sites,"detail":"Each: twenty years of maintained operation, condition at least 60%."},
-		{"name":"%d / 3 kinds of achievement" % p.paths,"detail":"Abundance, mastery, knowledge, influence or attraction."},
-		{"name":"%d / 2 foreign societies reached" % p.contacts,"detail":"Travelers must share accounts of these landmarks; accounts remain current for thirty years."}]}
-
 static func description(id:String,condition:float=1.0)->String:
 	var d:Dictionary=REWARDS.get(id,{})
 	var parts:Array[String]=[]
@@ -93,11 +59,8 @@ static func description(id:String,condition:float=1.0)->String:
 	return String(d.get("path","Legacy"))+" · "+"; ".join(parts)+"."
 
 static func valid(city:Dictionary)->bool:
-	var award=city.get("wonder_victory",{})
-	if not award is Dictionary:return false
-	if not award.is_empty():
-		for key in ["day","costly"]:
-			if not award.get(key) is int or award[key]<0:return false
+	# There is no victory in this game. A "wonder_victory" field in older saves
+	# is tolerated and ignored; nothing reads or writes it any longer.
 	for r:Dictionary in city.get("undertakings",[]):
 		var accounts=r.get("heard_by",{})
 		if not accounts is Dictionary:return false

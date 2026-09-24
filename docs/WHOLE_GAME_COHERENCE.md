@@ -14,6 +14,8 @@ Integrator worktree: C:/Users/sjpur/tt-campaign-coherence, codex/campaign-cohere
 
 ## Standing constraints
 
+There is no victory in this game. It is an open-ended civilization chronicle: no win or defeat condition, victory path, dominance streak, or game-over state exists for the player or any rival. Comparative standing is intelligence; battles, wars, conquest, and collapse are history that continues.
+
 Generals execute in every era. No direct cohort-control revival. No visible era unlock ladder or fixed imitation of Earth history. Keep travel, partial knowledge, gradual adoption, resource conservation and challenge. Hidden motives coexist with strategically competent opposition. Human conversations are not quota-limited by default; AI opponents use bounded event requests and engine policies. Development-test save preservation is not the headline or a reason to defer gameplay, but this does not authorize unrelated data destruction.
 
 ## Evidence log
@@ -34,7 +36,7 @@ Generals execute in every era. No direct cohort-control revival. No visible era 
 | Proactive actionable reports | Civic/scouting/general reports integrated; unified event priority pending |
 | Physical terrain/grid, observed battles and statistics | Integrated terrain/forces; hidden general grid in .14; reachable settlement generation pending |
 | Pause for deliberation, simultaneous world action | General slice integrated; ordinary speed/calendar pacing changes pending |
-| Long civilization lifecycle | Chronicle and nonterminal dominance implemented in worktree, not integrated |
+| Long civilization lifecycle | Chronicle implemented; all victory/defeat win states removed (codex/no-victory) |
 | Reachable early contact and information fairness | Geographic placement and natural return journey pending |
 | Durable culture, institutions and leader history | Existing people/values integrated; exhausted visions replacement pending |
 | Event-driven rivals, reusable policies and difficulty | .14 bounded opponents verified; whole-game challenge adaptation pending |

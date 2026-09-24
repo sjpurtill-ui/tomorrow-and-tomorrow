@@ -18,7 +18,7 @@ Each rival also owns exactly five strategic urban-region records: frontier, gran
 
 ```text
 Player aggregate state ──┐
-                         ├── competitive ranking and domain leaders
+                         ├── comparative standing and domain leaders
 8 rival aggregate states ┘
        │
        ├── monthly demographic/economic/strategy update
@@ -66,11 +66,15 @@ player occupation → garrison coverage + supply + institutions
 
 Competition state is JSON-safe and validated before import. Invalid, incomplete, non-finite, asymmetric, or contradictory relation state is rejected without partially mutating the live simulation.
 
-## Competitive outcome
+## Comparative standing — there is no victory
 
-Every contender is scored by the same seven equally weighted 0–100 pillars: controlled population, knowledge, production, logistics, military power (numeric manpower adjusted by readiness and capacity), resilience (health, cohesion, institutions, and food reserve), and territory. The UI exposes this breakdown rather than an unexplained weighted total.
+There is no victory in this game and no defeat. It is an open-ended civilization chronicle: no contender, player or rival, can win or lose the world, and no condition ends play.
 
-After Year 20, any contender—not only the player—must simultaneously maintain at least 45 food-days, 50% health, 45% cohesion, and 35% institutions; rank first overall by at least 10%; lead at least four of the seven strategic domains; and hold those conditions for twelve consecutive strategic turns. Each contender has one bounded streak counter. The player wins by satisfying the rule first and loses if a rival satisfies the identical rule first. Systemic player collapse under sustained hostile pressure for twelve turns remains an additional defeat path. These counters advance only on monthly strategic turns; opening the UI, negotiating, or resolving a battle cannot accelerate them. A terminal outcome cannot later revert. Unknown rivals continue to compete internally without leaking their standing through the known-world UI.
+Every contender is still measured by the same seven equally weighted 0–100 pillars: controlled population, knowledge, production, logistics, military power (numeric manpower adjusted by readiness and capacity), resilience (health, cohesion, institutions, and food reserve), and territory. This comparison is intelligence about known peoples, gated by the civilization's own statistical knowledge and contact, not a race. The UI presents it as estimated capacities and standing and never as victory progress, thresholds, or streaks.
+
+Comparative strength and distress are recorded only as history. When the player ranks first overall by at least 10% and leads at least four of the seven domains at a monthly strategic turn, the campaign chronicle notes a period of comparative strength; sustained systemic distress is counted in `collapse_turns` and chronicled as crisis and recovery. Losing a war, a region, or standing is a setback within a history that continues. The legacy review offered after 2,500 years is an optional closing account, not a verdict.
+
+Save compatibility: earlier saves may contain `dominance_turns`, `contender_dominance_turns`, `competition_outcome`, and `competition_winner_id` from the removed victory system. They are accepted on import and dropped; a pre-chronicle save that recorded a victory or defeat keeps it only as an "Earlier verdict" chronicle entry. New saves no longer write these fields.
 
 ## Trade-offs and growth path
 
