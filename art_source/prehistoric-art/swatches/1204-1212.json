@@ -1,0 +1,15 @@
+{
+  "source": "art_source/prehistoric-art/swatches/1204-1212.png",
+  "prompt": "Built-in imagegen: nine crude prehistoric finds in a square 3x3 warm ivory paper and matte gouache swatch. Cells: dragged ochre handprint, shell separating fibers, stone bruising roots, twig mixing earth pigments, knot caught in bark slit, small stone levering a larger one, bark-wrapped charcoal, tooth piercing leaf, hide over stone hollow.",
+  "entries": [
+    {"id": 1204, "review": "Top-left: broad red ochre palm smear with motion streak on an irregular cave-rock fragment."},
+    {"id": 1205, "review": "Top-middle: jagged natural shell separating two coarse tufts of plant fibers, no manufactured comb."},
+    {"id": 1206, "review": "Top-right: blunt handstone bearing down on flattened pale roots on bare earth."},
+    {"id": 1207, "review": "Middle-left: crooked twig stirring pale and red earth pigment in an uneven rock hollow."},
+    {"id": 1208, "review": "Middle-middle: coarse plant-fiber tie caught along a narrow natural slit in tree bark."},
+    {"id": 1209, "review": "Middle-right: small wedge stone lifting one end of a much larger rough stone."},
+    {"id": 1210, "review": "Bottom-left: black charcoal stub loosely enclosed by a ragged bark curl."},
+    {"id": 1211, "review": "Bottom-middle: loose animal tooth tip driven through the surface of a broad leaf."},
+    {"id": 1212, "review": "Bottom-right: raw hide stretched over a natural rock hollow and held by two pebbles."}
+  ]
+}
