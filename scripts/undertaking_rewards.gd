@@ -90,11 +90,6 @@ static func history(state:Node)->Dictionary:
 				if int(state.elapsed_days)-int(account.day)<=365*30 and contact not in known_by:known_by.append(contact)
 	return {"attempted":attempted,"succeeded":succeeded,"follies":follies,"standing":standing,"enduring":enduring,"kinds":kinds.size(),"known_by":known_by.size(),"costly":costly}
 
-## Deprecated: there is no victory in this game. Kept only so callers owned by
-## other workers compile until they are removed; returns an empty block.
-static func victory_block(_state:Node)->Dictionary:
-	return {}
-
 static func description(id:String,condition:float=1.0)->String:
 	var d:Dictionary=REWARDS.get(id,{})
 	var definition:=Catalog.get_definition(id)

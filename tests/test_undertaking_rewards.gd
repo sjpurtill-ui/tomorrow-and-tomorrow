@@ -63,7 +63,6 @@ func test_history_records_wonders_and_never_awards_victory()->void:
 	assert_bool(record.has("ready") or record.has("award")).is_false()
 	U.advance_all(9126)
 	assert_bool(city.has("wonder_victory")).is_false()
-	assert_dict(R.victory_block(GameState)).is_empty()
 	# Old saves that carry a retired award still load.
 	city.wonder_victory={"day":9125,"costly":1}
 	var saved:Array=bytes_to_var(var_to_bytes(GameState.player_settlements))
