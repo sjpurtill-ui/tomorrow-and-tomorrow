@@ -20,6 +20,8 @@ var _geology_b:=FastNoiseLite.new()
 var _geology_c:=FastNoiseLite.new()
 var _viable_land_cache:Dictionary={}
 var _profile_cache:Dictionary={}
+## TEMP INSTRUMENTATION (terrain-cost-profile): see scripts/terrain_cost_counters.gd
+const TC:=preload("res://scripts/terrain_cost_counters.gd")
 
 
 func _ready()->void:
@@ -59,6 +61,13 @@ func _configure_noise(noise:FastNoiseLite,seed_value:int,frequency:float,octaves
 
 
 func world_height_at(position:Vector2)->float:
+	var _tc:=TC.enter()
+	var _r:=_world_height_impl(position)
+	TC.leave("PE.world_height_at",_tc)
+	return _r
+
+
+func _world_height_impl(position:Vector2)->float:
 	## Planet-scale counterpart of LocalTerrain's authored height field. LocalTerrain
 	## remains authoritative for close samples and passes its measured height back in.
 	_ensure_configured()
@@ -85,6 +94,13 @@ func is_land(position:Vector2)->bool:
 
 
 func nearest_viable_land(desired:Vector2,search_seed:int=0)->Vector2:
+	var _tc:=TC.enter()
+	var _r:=_nearest_viable_land_impl(desired,search_seed)
+	TC.leave("PE.nearest_viable_land",_tc)
+	return _r
+
+
+func _nearest_viable_land_impl(desired:Vector2,search_seed:int=0)->Vector2:
 	## Rival origins use actual land instead of being dropped on the nearest point of
 	## an abstract ellipse. The search is fixed-size and deterministic. The global
 	## fallback is important: an ocean basin can be wider than a regional search,
@@ -139,9 +155,18 @@ func _radical_inverse(index:int,base:int)->float:
 
 
 func profile_at(position:Vector2,observed:Dictionary={})->Dictionary:
+	var _tc:=TC.enter()
+	var _r:=_profile_impl(position,observed)
+	TC.leave("PE.profile_at",_tc)
+	return _r
+
+
+func _profile_impl(position:Vector2,observed:Dictionary={})->Dictionary:
 	_ensure_configured()
 	var cache_key:="%d:%d:%d" % [_configured_seed,roundi(position.x*10.0),roundi(position.y*10.0)]
-	if observed.is_empty() and _profile_cache.has(cache_key): return (_profile_cache[cache_key] as Dictionary).duplicate(true)
+	if observed.is_empty() and _profile_cache.has(cache_key):
+		TC.count("PE.profile_at.cache_hit")
+		return (_profile_cache[cache_key] as Dictionary).duplicate(true)
 	var height:=float(observed.get("height",world_height_at(position)))
 	var latitude:=clampf(absf(position.y)/(PLANET_DEPTH_KM*0.5),0.0,1.0)
 	var latitude_warmth:=1.0-latitude
@@ -237,6 +262,12 @@ func _fertility(biome:String,precipitation:float)->float:
 
 
 func surface_geology_at(position:Vector2,height:float)->Dictionary:
+	var _tc:=TC.enter()
+	var _r:=_surface_geology_impl(position,height)
+	TC.leave("PE.surface_geology_at",_tc)
+	return _r
+
+func _surface_geology_impl(position:Vector2,height:float)->Dictionary:
 	## Read-only rendering projection of the same geology used by resource profiles.
 	_ensure_configured()
 	return _geology(position,height)
@@ -307,6 +338,12 @@ func _seasonality_from_interior(position:Vector2,interior:float)->float:
 	return lerpf(5.0,22.0,latitude)*lerpf(0.78,1.20,continentality)
 
 func seasonality_at(position:Vector2)->float:
+	var _tc:=TC.enter()
+	var _r:=_seasonality_impl(position)
+	TC.leave("PE.seasonality_at",_tc)
+	return _r
+
+func _seasonality_impl(position:Vector2)->float:
 	## Lightweight projection of the same amplitude used by stored food profiles.
 	_ensure_configured()
 	return _seasonality_from_interior(position,clampf((_continent.get_noise_2d(position.x,position.y)-0.05)*1.2,0.0,0.5))

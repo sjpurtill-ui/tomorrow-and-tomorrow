@@ -123,6 +123,8 @@ var terrain_patch_last_commit_usec:int=0
 var terrain_visual_sample_position:=Vector3(INF,INF,INF)
 var terrain_visual_sample_climate:Dictionary={}
 const TERRAIN_PATCH_BUILDER:=preload("res://scripts/terrain_patch_builder.gd")
+## TEMP INSTRUMENTATION (terrain-cost-profile): see scripts/terrain_cost_counters.gd
+const TERRAIN_COST:=preload("res://scripts/terrain_cost_counters.gd")
 const SURFACE_PRECISION:=preload("res://scripts/surface_precision.gd")
 const TERRAIN_LOD:=preload("res://scripts/terrain_lod.gd")
 const TERRAIN_PATCH_MOVING_BUDGET_USEC:=1400
@@ -535,7 +537,7 @@ func _ready() -> void:
 
 func _trace_load(stage: String) -> void:
 	if "--trace-load" in OS.get_cmdline_user_args():
-		print("LOAD STAGE ",stage)
+		print("LOAD STAGE ",Time.get_ticks_msec()," ",stage) # TEMP INSTRUMENTATION (terrain-cost-profile): timestamp
 
 func _configure_seamless_world() -> void:
 	for argument in OS.get_cmdline_user_args():
@@ -1495,7 +1497,13 @@ func _cached_civilization_surface_materials(origin:Vector2)->Dictionary:
 func _civilization_surface_materials(origin:Vector2)->Dictionary:
 	return _cached_civilization_surface_materials(origin).duplicate(true)
 
-func _sample_civilization_geography(origin:Vector2)->Dictionary:
+func _sample_civilization_geography(origin:Vector2) -> Dictionary:
+	var _tc:=TERRAIN_COST.enter_c()
+	var _r:Dictionary=_sample_civilization_geography_tcimpl(origin)
+	TERRAIN_COST.leave_c("LT._sample_civilization_geography",_tc)
+	return _r
+
+func _sample_civilization_geography_tcimpl(origin:Vector2)->Dictionary:
 	var ground:=_survey_ground_at(origin)
 	var water_distance:=_river_distance_at(origin.x,origin.y)*KM_PER_WORLD_UNIT
 	var catchments:=_cached_civilization_surface_materials(origin)
@@ -1522,7 +1530,13 @@ func _settlement_spatial_context(base:Dictionary={}) -> Dictionary:
 	context["settlement_origin"]=GameState.settlement_founded_at
 	return context
 
-func _land_moisture_at(x:float,z:float)->float:
+func _land_moisture_at(x:float,z:float) -> float:
+	var _tc:=TERRAIN_COST.enter()
+	var _r:float=_land_moisture_at_tcimpl(x, z)
+	TERRAIN_COST.leave("LT._land_moisture_at",_tc)
+	return _r
+
+func _land_moisture_at_tcimpl(x:float,z:float)->float:
 	return moisture_noise.get_noise_2d(x,z)
 
 func _configure_shape() -> void:
@@ -1581,6 +1595,12 @@ func _configure_noise() -> void:
 	detail_noise.fractal_octaves = 3
 
 func _height_at(x: float, z: float) -> float:
+	var _tc:=TERRAIN_COST.enter()
+	var _r:float=_height_at_tcimpl(x, z)
+	TERRAIN_COST.leave("LT._height_at",_tc)
+	return _r
+
+func _height_at_tcimpl(x: float, z: float) -> float:
 	if SEAMLESS_WORLD:
 		return _world_height_at(x,z)
 	var broad := terrain_noise.get_noise_2d(x, z)
@@ -1626,6 +1646,12 @@ func _scout_land_at(position:Vector2)->bool:
 	return _height_at(position.x,position.y)>SEA_LEVEL+0.015
 
 func _close_surface_height_at(x: float, z: float) -> float:
+	var _tc:=TERRAIN_COST.enter()
+	var _r:float=_close_surface_height_at_tcimpl(x, z)
+	TERRAIN_COST.leave("LT._close_surface_height_at",_tc)
+	return _r
+
+func _close_surface_height_at_tcimpl(x: float, z: float) -> float:
 	# World units are kilometres. These two terms add roughly metre-scale undulation
 	# only to the close terrain skin; they never deform the authoritative planet.
 	var broad_micro := detail_noise.get_noise_2d(x * 720.0 + 117.0, z * 720.0 - 83.0) * 0.00072
@@ -2547,7 +2573,13 @@ func _vegetation_climate(position:Vector3)->Color:
 	if not biome.has("temperature"):return Color(0,0,0,0)
 	return Color(float(biome.temperature),float(biome.precipitation),_terrain_seasonality_at(position.x,position.z,position.y),0.0)
 
-func _terrain_surface_fields_at(x:float,z:float,height:float)->Vector4:
+func _terrain_surface_fields_at(x:float,z:float,height:float) -> Vector4:
+	var _tc:=TERRAIN_COST.enter()
+	var _r:Vector4=_terrain_surface_fields_at_tcimpl(x, z, height)
+	TERRAIN_COST.leave("LT._terrain_surface_fields_at",_tc)
+	return _r
+
+func _terrain_surface_fields_at_tcimpl(x:float,z:float,height:float)->Vector4:
 	if not SEAMLESS_WORLD:return Vector4.ZERO
 	# Patch construction asks for colour immediately before these fields. Reuse
 	# that exact climate sample: a 513-square refinement previously evaluated the
@@ -2566,7 +2598,13 @@ func _terrain_surface_fields_at(x:float,z:float,height:float)->Vector4:
 	# keep their existing appearance. COLOR alpha remains woodland density.
 	return Vector4(1.0+clampf(float(climate.precipitation),0,1),clampf(float(climate.temperature),0,1),float(geology.sedimentary)/total,float(geology.igneous)/total)
 
-func _climate_at(x:float,z:float,height:float)->Dictionary:
+func _climate_at(x:float,z:float,height:float) -> Dictionary:
+	var _tc:=TERRAIN_COST.enter()
+	var _r:Dictionary=_climate_at_tcimpl(x, z, height)
+	TERRAIN_COST.leave("LT._climate_at",_tc)
+	return _r
+
+func _climate_at_tcimpl(x:float,z:float,height:float)->Dictionary:
 	## Earth-logic climate: latitude and altitude set temperature; the moisture
 	## field, continental interior dryness, and the river corridor's humidity
 	## set precipitation. Every biome below EMERGES from these two numbers.
@@ -2599,7 +2637,13 @@ func site_temperature_c(day:float=-1.0)->float:
 	return PlanetEnvironment.ambient_temperature_c({"position":Vector2(anchor.x,anchor.z),"mean_temperature_c":lerpf(-6.0,28.0,float(climate.temperature)),"seasonality_c":_terrain_seasonality_at(anchor.x,anchor.z,anchor.y)},day)
 
 
-func _biome_at(x:float,z:float,height:float=NAN)->Dictionary:
+func _biome_at(x:float,z:float,height:float=NAN) -> Dictionary:
+	var _tc:=TERRAIN_COST.enter()
+	var _r:Dictionary=_biome_at_tcimpl(x, z, height)
+	TERRAIN_COST.leave("LT._biome_at",_tc)
+	return _r
+
+func _biome_at_tcimpl(x:float,z:float,height:float=NAN)->Dictionary:
 	## The single authority for what the land IS. Renderer, resource placement,
 	## scouting reports, and woodland density all read this one field.
 	if is_nan(height): height=_height_at(x,z)
@@ -2657,6 +2701,12 @@ func _biome_from_climate(x:float,z:float,height:float,climate:Dictionary)->Dicti
 
 
 func _terrain_color_at(x: float, z: float, height: float) -> Color:
+	var _tc:=TERRAIN_COST.enter()
+	var _r:Color=_terrain_color_at_tcimpl(x, z, height)
+	TERRAIN_COST.leave("LT._terrain_color_at",_tc)
+	return _r
+
+func _terrain_color_at_tcimpl(x: float, z: float, height: float) -> Color:
 	if SEAMLESS_WORLD:
 		var biome:Dictionary
 		if height<SEA_LEVEL:
@@ -3093,7 +3143,13 @@ func _scatter_landscape_vegetation() -> void:
 	forest.material_override = _vegetation_surface_material(0)
 	add_child(forest)
 
-func _survey_ground_at(position:Vector2)->Dictionary:
+func _survey_ground_at(position:Vector2) -> Dictionary:
+	var _tc:=TERRAIN_COST.enter_c()
+	var _r:Dictionary=_survey_ground_at_tcimpl(position)
+	TERRAIN_COST.leave_c("LT._survey_ground_at",_tc)
+	return _r
+
+func _survey_ground_at_tcimpl(position:Vector2)->Dictionary:
 	## Ground truth handed to the civilization layer so returned scout reports
 	## describe the terrain the renderer actually draws at that point. Slope,
 	## relief, and coastal adjacency let landmark naming derive from what the
@@ -10066,6 +10122,12 @@ func _create_land_patch(center: Vector3, radius: float, color: Color, segments: 
 	parent.add_child(patch)
 
 func _river_distance_at(x: float, z: float) -> float:
+	var _tc:=TERRAIN_COST.enter()
+	var _r:float=_river_distance_at_tcimpl(x, z)
+	TERRAIN_COST.leave("LT._river_distance_at",_tc)
+	return _r
+
+func _river_distance_at_tcimpl(x: float, z: float) -> float:
 	var nearest:=INF
 	for source:Dictionary in _surface_water_sources(Vector3(x,0,z)):
 		nearest=minf(nearest,float(source.distance_km))
@@ -10081,7 +10143,13 @@ func _main_river_distance_at(x:float,z:float)->float:
 	return INF if river_u<0.0 else absf(x-(river_u-0.5)*world_width)
 
 
-func _nearest_tributary_distance_at(position:Vector2)->float:
+func _nearest_tributary_distance_at(position:Vector2) -> float:
+	var _tc:=TERRAIN_COST.enter()
+	var _r:float=_nearest_tributary_distance_at_tcimpl(position)
+	TERRAIN_COST.leave("LT._nearest_tributary_distance_at",_tc)
+	return _r
+
+func _nearest_tributary_distance_at_tcimpl(position:Vector2)->float:
 	if not SEAMLESS_WORLD:
 		return INF
 	if world_tributary_courses.is_empty():
@@ -10153,7 +10221,13 @@ func _founding_site_advice(position:Vector3,fresh:bool=false)->Dictionary:
 func _founding_water_sources(origin:Vector3)->Array[Dictionary]:
 	return _surface_water_sources(origin,6.0)
 
-func _surface_water_sources(origin:Vector3,limit:float=INF)->Array[Dictionary]:
+func _surface_water_sources(origin:Vector3,limit:float=INF) -> Array[Dictionary]:
+	var _tc:=TERRAIN_COST.enter_c()
+	var _r:Array[Dictionary]=_surface_water_sources_tcimpl(origin, limit)
+	TERRAIN_COST.leave_c("LT._surface_water_sources",_tc)
+	return _r
+
+func _surface_water_sources_tcimpl(origin:Vector3,limit:float=INF)->Array[Dictionary]:
 	# Project onto the same authored sources used by daily water collection.
 	# No point deposits, sea water, hidden wells or invented rivers are substituted.
 	var sources:Array[Dictionary]=[]
@@ -10185,7 +10259,13 @@ func _surface_water_sources(origin:Vector3,limit:float=INF)->Array[Dictionary]:
 			sources.append({"position":Vector3(channel_x,height,origin.z),"distance_km":drainage_distance,"kind":"Surface drainage"})
 	return sources
 
-func _water_conveyance_sources(origin:Vector3)->Array[Dictionary]:
+func _water_conveyance_sources(origin:Vector3) -> Array[Dictionary]:
+	var _tc:=TERRAIN_COST.enter_c()
+	var _r:Array[Dictionary]=_water_conveyance_sources_tcimpl(origin)
+	TERRAIN_COST.leave_c("LT._water_conveyance_sources",_tc)
+	return _r
+
+func _water_conveyance_sources_tcimpl(origin:Vector3)->Array[Dictionary]:
 	# Consider upstream intakes on the SAME authored local waterways; the nearest
 	# riverbank is often below the town. The local six-kilometre observation bound
 	# remains unchanged, and no groundwater/deposit is exposed by this sampling.
@@ -11433,6 +11513,12 @@ func _retire_founding_expedition_visuals()->void:
 	if settler_map_ring: settler_map_ring.visible=false
 
 func _analyze_convoy_route(from: Vector3,to: Vector3) -> Dictionary:
+	var _tc:=TERRAIN_COST.enter_c()
+	var _r:Dictionary=_analyze_convoy_route_tcimpl(from, to)
+	TERRAIN_COST.leave_c("LT._analyze_convoy_route",_tc)
+	return _r
+
+func _analyze_convoy_route_tcimpl(from: Vector3,to: Vector3) -> Dictionary:
 	var distance_km:=Vector2(from.x,from.z).distance_to(Vector2(to.x,to.z))*KM_PER_WORLD_UNIT
 	if distance_km<0.25:
 		return {"valid":false,"reason":"DESTINATION TOO CLOSE  •  choose a point at least 250 m away"}
@@ -12853,7 +12939,13 @@ func _surface_material_density(biome:Dictionary,resource:String)->float:
 		"Fiber Plants": return clampf(float(biome.forage)*0.55+float(biome.woodland)*0.35+(0.25 if String(biome.id)=="wetland" else 0.0),0.0,1.0)
 	return 0.0
 
-func _surface_material_catchments(origin:Vector3)->Dictionary:
+func _surface_material_catchments(origin:Vector3) -> Dictionary:
+	var _tc:=TERRAIN_COST.enter_c()
+	var _r:Dictionary=_surface_material_catchments_tcimpl(origin)
+	TERRAIN_COST.leave_c("LT._surface_material_catchments",_tc)
+	return _r
+
+func _surface_material_catchments_tcimpl(origin:Vector3)->Dictionary:
 	var totals:={"Timber":0.0,"Stone":0.0,"Fiber Plants":0.0}
 	var positions:={"Timber":Vector2.ZERO,"Stone":Vector2.ZERO,"Fiber Plants":Vector2.ZERO}
 	for z in [-1.0,0.0,1.0]:

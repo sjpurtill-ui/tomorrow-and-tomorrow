@@ -1,0 +1,2994 @@
+{
+ "machine": "Intel i9-14900KF, 64 GB, RTX 4090 (OpenGL 3.3 Compatibility, driver 610.60), Windows 11, Godot 4.7 stable mono; shared host with other headless probes running",
+ "micro_run1": {
+  "LT._biome_at(incl height)": 12991.1,
+  "LT._climate_at": 1940.1,
+  "LT._close_surface_height_at": 6909.0,
+  "LT._height_at(land)": 6498.05,
+  "LT._height_at(planet-wide mix)": 2665.95,
+  "LT._local_drainage_distance_at": 795.8,
+  "LT._nearest_tributary_distance_at (chunk index)": 29776.0,
+  "LT._river_distance_at (all sources)": 151073.5,
+  "LT._sample_civilization_geography (cache miss)": 1817725.0,
+  "LT._surface_water_sources": 143395.5,
+  "LT._survey_ground_at": 245210.0,
+  "LT._terrain_color_at": 7126.25,
+  "LT.color+surface_fields(shared climate, per vertex)": 11439.2,
+  "LT.tributary_setup_once_ms": 4.2,
+  "PE._coastal_at (<=24 height probes)": 82399.25,
+  "PE.is_land(land)": 3583.05,
+  "PE.profile_at(cached hit, incl duplicate(true))": 13140.75,
+  "PE.profile_at(cold, miss)": 121447.25,
+  "PE.profile_at(with observed ground)": 123032.0,
+  "PE.seasonality_at": 995.95,
+  "PE.surface_geology_at": 2069.1,
+  "PE.world_height_at(land)": 2720.8,
+  "PE.world_height_at(land, instrumented wrapper off)": 3354.6,
+  "PE.world_height_at(planet-wide mix)": 1818.85,
+  "bake.height_512sq_total_ms": 1648.044,
+  "baked.height bilinear Image.get_pixel x4 (GDScript)": 648.85,
+  "baked.height bilinear PackedFloat32Array (GDScript)": 344.95,
+  "baked.height nearest PackedFloat32Array (GDScript)": 98.9,
+  "baked.native Image.get_region+resize 385sq (per sample)": 5.0801146905043,
+  "baked.profile read-only dictionary lookup": 461.7,
+  "mix_ocean_fraction": 0.7002,
+  "ref.FastNoiseLite_1oct_get_noise_2d": 64.95,
+  "ref.FastNoiseLite_5oct_get_noise_2d": 165.05,
+  "ref.callable_call_trivial": 157.65,
+  "ref.empty_loop": 18.65,
+  "ref.profile duplicate(true)": 9020.0
+ },
+ "micro_run2": {
+  "LT._biome_at(incl height)": 14096.8,
+  "LT._climate_at": 2186.05,
+  "LT._close_surface_height_at": 7070.05,
+  "LT._height_at(land)": 5809.55,
+  "LT._height_at(planet-wide mix)": 2874.9,
+  "LT._local_drainage_distance_at": 1086.0,
+  "LT._nearest_tributary_distance_at (chunk index)": 34617.5,
+  "LT._river_distance_at (all sources)": 162751.5,
+  "LT._sample_civilization_geography (cache miss)": 1861600.0,
+  "LT._surface_water_sources": 155032.5,
+  "LT._survey_ground_at": 268305.0,
+  "LT._terrain_color_at": 7378.55,
+  "LT.color+surface_fields(shared climate, per vertex)": 12215.45,
+  "LT.tributary_setup_once_ms": 3.314,
+  "PE._coastal_at (<=24 height probes)": 79423.5,
+  "PE.is_land(land)": 3809.35,
+  "PE.profile_at(cached hit, incl duplicate(true))": 13949.75,
+  "PE.profile_at(cold, miss)": 138325.25,
+  "PE.profile_at(with observed ground)": 122810.25,
+  "PE.seasonality_at": 972.0,
+  "PE.surface_geology_at": 2791.35,
+  "PE.world_height_at(land)": 2925.45,
+  "PE.world_height_at(land, instrumented wrapper off)": 3896.3,
+  "PE.world_height_at(planet-wide mix)": 2091.55,
+  "bake.height_512sq_total_ms": 1527.827,
+  "baked.height bilinear Image.get_pixel x4 (GDScript)": 754.7,
+  "baked.height bilinear PackedFloat32Array (GDScript)": 547.95,
+  "baked.height nearest PackedFloat32Array (GDScript)": 137.0,
+  "baked.native Image.get_region+resize 385sq (per sample)": 5.74127171529769,
+  "baked.profile read-only dictionary lookup": 599.2,
+  "mix_ocean_fraction": 0.7002,
+  "ref.FastNoiseLite_1oct_get_noise_2d": 68.35,
+  "ref.FastNoiseLite_5oct_get_noise_2d": 150.4,
+  "ref.callable_call_trivial": 178.25,
+  "ref.empty_loop": 19.35,
+  "ref.profile duplicate(true)": 10630.0
+ },
+ "patch_run1": [
+  {
+   "baked_gdscript_build_ms": 63.463,
+   "calls": {
+    "LT._climate_at": 16641,
+    "LT._height_at": 16641,
+    "LT._terrain_color_at": 16641,
+    "LT._terrain_surface_fields_at": 16641,
+    "PE.seasonality_at": 16641,
+    "PE.surface_geology_at": 16641
+   },
+   "constant_sampler_build_ms": 27.129,
+   "frames_at_moving_budget_1p4ms": 201,
+   "frames_at_moving_budget_baked": 46,
+   "instrumented_build_ms": 428.274,
+   "label": "10,000 ft preview",
+   "native_resample_ms": 0.089,
+   "noise_primitive_ms_instrumented": 326.167,
+   "real_build_ms": 280.831,
+   "real_commit_ms": 1.029,
+   "resolution": 129,
+   "sampling_share_real": 0.903397416951832,
+   "span_km": 5.0625,
+   "usec_by_fn": {
+    "LT._climate_at": 34237,
+    "LT._height_at": 97271,
+    "LT._terrain_color_at": 126075,
+    "LT._terrain_surface_fields_at": 82613,
+    "PE.seasonality_at": 20208,
+    "PE.surface_geology_at": 38808
+   },
+   "vertices": 16641
+  },
+  {
+   "baked_gdscript_build_ms": 990.43,
+   "calls": {
+    "LT._climate_at": 148225,
+    "LT._height_at": 148225,
+    "LT._terrain_color_at": 148225,
+    "LT._terrain_surface_fields_at": 148225,
+    "PE.seasonality_at": 148225,
+    "PE.surface_geology_at": 148225
+   },
+   "constant_sampler_build_ms": 408.256,
+   "frames_at_moving_budget_1p4ms": 2914,
+   "frames_at_moving_budget_baked": 708,
+   "instrumented_build_ms": 5679.643,
+   "label": "10,000 ft final",
+   "native_resample_ms": 1.478,
+   "noise_primitive_ms_instrumented": 4286.11,
+   "real_build_ms": 4078.385,
+   "real_commit_ms": 10.984,
+   "resolution": 385,
+   "sampling_share_real": 0.899897631047584,
+   "span_km": 5.0625,
+   "usec_by_fn": {
+    "LT._climate_at": 458208,
+    "LT._height_at": 1256743,
+    "LT._terrain_color_at": 1662432,
+    "LT._terrain_surface_fields_at": 1097798,
+    "PE.seasonality_at": 269137,
+    "PE.surface_geology_at": 494691
+   },
+   "vertices": 148225
+  },
+  {
+   "baked_gdscript_build_ms": 99.265,
+   "calls": {
+    "LT._climate_at": 16641,
+    "LT._height_at": 16641,
+    "LT._terrain_color_at": 16641,
+    "LT._terrain_surface_fields_at": 16641,
+    "PE.seasonality_at": 16641,
+    "PE.surface_geology_at": 16641
+   },
+   "constant_sampler_build_ms": 37.555,
+   "frames_at_moving_budget_1p4ms": 324,
+   "frames_at_moving_budget_baked": 71,
+   "instrumented_build_ms": 685.564,
+   "label": "50,000 ft preview",
+   "native_resample_ms": 0.353,
+   "noise_primitive_ms_instrumented": 517.464,
+   "real_build_ms": 452.89,
+   "real_commit_ms": 1.444,
+   "resolution": 129,
+   "sampling_share_real": 0.917076994413655,
+   "span_km": 25.62890625,
+   "usec_by_fn": {
+    "LT._climate_at": 52004,
+    "LT._height_at": 156644,
+    "LT._terrain_color_at": 204825,
+    "LT._terrain_surface_fields_at": 125491,
+    "PE.seasonality_at": 30504,
+    "PE.surface_geology_at": 62950
+   },
+   "vertices": 16641
+  },
+  {
+   "baked_gdscript_build_ms": 421.68,
+   "calls": {
+    "LT._climate_at": 66049,
+    "LT._height_at": 66049,
+    "LT._terrain_color_at": 66049,
+    "LT._terrain_surface_fields_at": 66049,
+    "PE.seasonality_at": 66049,
+    "PE.surface_geology_at": 66049
+   },
+   "constant_sampler_build_ms": 171.217,
+   "frames_at_moving_budget_1p4ms": 1429,
+   "frames_at_moving_budget_baked": 302,
+   "instrumented_build_ms": 2696.474,
+   "label": "50,000 ft final",
+   "native_resample_ms": 0.532,
+   "noise_primitive_ms_instrumented": 2048.427,
+   "real_build_ms": 2000.024,
+   "real_commit_ms": 4.807,
+   "resolution": 257,
+   "sampling_share_real": 0.914392527289672,
+   "span_km": 25.62890625,
+   "usec_by_fn": {
+    "LT._climate_at": 234379,
+    "LT._height_at": 608568,
+    "LT._terrain_color_at": 796168,
+    "LT._terrain_surface_fields_at": 511944,
+    "PE.seasonality_at": 131747,
+    "PE.surface_geology_at": 242602
+   },
+   "vertices": 66049
+  },
+  {
+   "baked_gdscript_build_ms": 105.403,
+   "calls": {
+    "LT._climate_at": 16641,
+    "LT._height_at": 16641,
+    "LT._terrain_color_at": 16641,
+    "LT._terrain_surface_fields_at": 16641,
+    "PE.seasonality_at": 16641,
+    "PE.surface_geology_at": 16641
+   },
+   "constant_sampler_build_ms": 41.477,
+   "frames_at_moving_budget_1p4ms": 327,
+   "frames_at_moving_budget_baked": 76,
+   "instrumented_build_ms": 623.363,
+   "label": "Region preview",
+   "native_resample_ms": 0.152,
+   "noise_primitive_ms_instrumented": 473.597,
+   "real_build_ms": 457.604,
+   "real_commit_ms": 1.089,
+   "resolution": 129,
+   "sampling_share_real": 0.909360495100567,
+   "span_km": 291.929260253906,
+   "usec_by_fn": {
+    "LT._climate_at": 48541,
+    "LT._height_at": 139627,
+    "LT._terrain_color_at": 184495,
+    "LT._terrain_surface_fields_at": 121212,
+    "PE.seasonality_at": 28263,
+    "PE.surface_geology_at": 55816
+   },
+   "vertices": 16641
+  },
+  {
+   "baked_gdscript_build_ms": 774.213,
+   "calls": {
+    "LT._climate_at": 148225,
+    "LT._height_at": 148225,
+    "LT._terrain_color_at": 148225,
+    "LT._terrain_surface_fields_at": 148225,
+    "PE.seasonality_at": 148225,
+    "PE.surface_geology_at": 148225
+   },
+   "constant_sampler_build_ms": 301.407,
+   "frames_at_moving_budget_1p4ms": 2331,
+   "frames_at_moving_budget_baked": 554,
+   "instrumented_build_ms": 4940.637,
+   "label": "Region final",
+   "native_resample_ms": 0.954,
+   "noise_primitive_ms_instrumented": 3749.12,
+   "real_build_ms": 3262.585,
+   "real_commit_ms": 9.116,
+   "resolution": 385,
+   "sampling_share_real": 0.907617119553973,
+   "span_km": 291.929260253906,
+   "usec_by_fn": {
+    "LT._climate_at": 405637,
+    "LT._height_at": 1125641,
+    "LT._terrain_color_at": 1449563,
+    "LT._terrain_surface_fields_at": 945693,
+    "PE.seasonality_at": 228223,
+    "PE.surface_geology_at": 450352
+   },
+   "vertices": 148225
+  },
+  {
+   "baked_gdscript_build_ms": 96.605,
+   "calls": {
+    "LT._biome_at": 5703,
+    "LT._climate_at": 16641,
+    "LT._height_at": 16641,
+    "LT._terrain_color_at": 16641,
+    "LT._terrain_surface_fields_at": 16641,
+    "PE.seasonality_at": 16641,
+    "PE.surface_geology_at": 16641
+   },
+   "constant_sampler_build_ms": 43.113,
+   "frames_at_moving_budget_1p4ms": 256,
+   "frames_at_moving_budget_baked": 70,
+   "instrumented_build_ms": 504.616,
+   "label": "Continent preview",
+   "native_resample_ms": 0.293,
+   "noise_primitive_ms_instrumented": 378.106,
+   "real_build_ms": 357.542,
+   "real_commit_ms": 1.009,
+   "resolution": 129,
+   "sampling_share_real": 0.879418362038586,
+   "span_km": 4987.88509511948,
+   "usec_by_fn": {
+    "LT._biome_at": 9014,
+    "LT._climate_at": 42099,
+    "LT._height_at": 98629,
+    "LT._terrain_color_at": 129307,
+    "LT._terrain_surface_fields_at": 123822,
+    "PE.seasonality_at": 26348,
+    "PE.surface_geology_at": 51402
+   },
+   "vertices": 16641
+  },
+  {
+   "baked_gdscript_build_ms": 802.971,
+   "calls": {
+    "LT._biome_at": 50440,
+    "LT._climate_at": 148225,
+    "LT._height_at": 148225,
+    "LT._terrain_color_at": 148225,
+    "LT._terrain_surface_fields_at": 148225,
+    "PE.seasonality_at": 148225,
+    "PE.surface_geology_at": 148225
+   },
+   "constant_sampler_build_ms": 340.957,
+   "frames_at_moving_budget_1p4ms": 2090,
+   "frames_at_moving_budget_baked": 574,
+   "instrumented_build_ms": 4128.853,
+   "label": "Continent final",
+   "native_resample_ms": 0.941,
+   "noise_primitive_ms_instrumented": 3066.762,
+   "real_build_ms": 2925.497,
+   "real_commit_ms": 9.147,
+   "resolution": 385,
+   "sampling_share_real": 0.883453307250016,
+   "span_km": 4987.88509511948,
+   "usec_by_fn": {
+    "LT._biome_at": 75036,
+    "LT._climate_at": 332744,
+    "LT._height_at": 783426,
+    "LT._terrain_color_at": 1057195,
+    "LT._terrain_surface_fields_at": 1015455,
+    "PE.seasonality_at": 210686,
+    "PE.surface_geology_at": 409606
+   },
+   "vertices": 148225
+  },
+  {
+   "constant_sampler_build_ms": 16.222,
+   "label": "close detail job 112sq/0.42km",
+   "real_build_ms": 570.875,
+   "real_commit_ms": 2.212,
+   "vertices": 12544
+  },
+  {
+   "calls": {
+    "LT._biome_at": 94898,
+    "LT._climate_at": 115921,
+    "LT._height_at": 115921,
+    "LT._terrain_color_at": 115921,
+    "LT._terrain_surface_fields_at": 115921,
+    "PE.seasonality_at": 115921,
+    "PE.surface_geology_at": 115921
+   },
+   "label": "global planet mesh 481x241 (_build_terrain, instrumented)",
+   "noise_primitive_ms_instrumented": 1918.46,
+   "real_build_ms": 2933.761,
+   "vertices": 115921
+  }
+ ],
+ "patch_run2": [
+  {
+   "baked_gdscript_build_ms": 88.573,
+   "calls": {
+    "LT._climate_at": 16641,
+    "LT._height_at": 16641,
+    "LT._terrain_color_at": 16641,
+    "LT._terrain_surface_fields_at": 16641,
+    "PE.seasonality_at": 16641,
+    "PE.surface_geology_at": 16641
+   },
+   "constant_sampler_build_ms": 37.133,
+   "frames_at_moving_budget_1p4ms": 288,
+   "frames_at_moving_budget_baked": 64,
+   "instrumented_build_ms": 596.007,
+   "label": "10,000 ft preview",
+   "native_resample_ms": 0.093,
+   "noise_primitive_ms_instrumented": 448.699,
+   "real_build_ms": 402.08,
+   "real_commit_ms": 1.148,
+   "resolution": 129,
+   "sampling_share_real": 0.907647731794668,
+   "span_km": 5.0625,
+   "usec_by_fn": {
+    "LT._climate_at": 49364,
+    "LT._height_at": 136758,
+    "LT._terrain_color_at": 169812,
+    "LT._terrain_surface_fields_at": 115539,
+    "PE.seasonality_at": 26590,
+    "PE.surface_geology_at": 53824
+   },
+   "vertices": 16641
+  },
+  {
+   "baked_gdscript_build_ms": 790.868,
+   "calls": {
+    "LT._climate_at": 148225,
+    "LT._height_at": 148225,
+    "LT._terrain_color_at": 148225,
+    "LT._terrain_surface_fields_at": 148225,
+    "PE.seasonality_at": 148225,
+    "PE.surface_geology_at": 148225
+   },
+   "constant_sampler_build_ms": 344.695,
+   "frames_at_moving_budget_1p4ms": 2543,
+   "frames_at_moving_budget_baked": 565,
+   "instrumented_build_ms": 5176.58,
+   "label": "10,000 ft final",
+   "native_resample_ms": 1.102,
+   "noise_primitive_ms_instrumented": 3894.592,
+   "real_build_ms": 3558.989,
+   "real_commit_ms": 9.764,
+   "resolution": 385,
+   "sampling_share_real": 0.903148056934146,
+   "span_km": 5.0625,
+   "usec_by_fn": {
+    "LT._climate_at": 409614,
+    "LT._height_at": 1158889,
+    "LT._terrain_color_at": 1510774,
+    "LT._terrain_surface_fields_at": 979265,
+    "PE.seasonality_at": 245664,
+    "PE.surface_geology_at": 458802
+   },
+   "vertices": 148225
+  },
+  {
+   "baked_gdscript_build_ms": 93.687,
+   "calls": {
+    "LT._climate_at": 16641,
+    "LT._height_at": 16641,
+    "LT._terrain_color_at": 16641,
+    "LT._terrain_surface_fields_at": 16641,
+    "PE.seasonality_at": 16641,
+    "PE.surface_geology_at": 16641
+   },
+   "constant_sampler_build_ms": 36.04,
+   "frames_at_moving_budget_1p4ms": 268,
+   "frames_at_moving_budget_baked": 67,
+   "instrumented_build_ms": 479.413,
+   "label": "50,000 ft preview",
+   "native_resample_ms": 0.197,
+   "noise_primitive_ms_instrumented": 359.981,
+   "real_build_ms": 374.31,
+   "real_commit_ms": 1.092,
+   "resolution": 129,
+   "sampling_share_real": 0.903716171088136,
+   "span_km": 25.62890625,
+   "usec_by_fn": {
+    "LT._climate_at": 37049,
+    "LT._height_at": 109100,
+    "LT._terrain_color_at": 138803,
+    "LT._terrain_surface_fields_at": 90062,
+    "PE.seasonality_at": 22016,
+    "PE.surface_geology_at": 42008
+   },
+   "vertices": 16641
+  },
+  {
+   "baked_gdscript_build_ms": 392.757,
+   "calls": {
+    "LT._climate_at": 66049,
+    "LT._height_at": 66049,
+    "LT._terrain_color_at": 66049,
+    "LT._terrain_surface_fields_at": 66049,
+    "PE.seasonality_at": 66049,
+    "PE.surface_geology_at": 66049
+   },
+   "constant_sampler_build_ms": 142.375,
+   "frames_at_moving_budget_1p4ms": 1136,
+   "frames_at_moving_budget_baked": 281,
+   "instrumented_build_ms": 2252.12,
+   "label": "50,000 ft final",
+   "native_resample_ms": 0.569,
+   "noise_primitive_ms_instrumented": 1687.068,
+   "real_build_ms": 1590.083,
+   "real_commit_ms": 4.42,
+   "resolution": 257,
+   "sampling_share_real": 0.910460648909522,
+   "span_km": 25.62890625,
+   "usec_by_fn": {
+    "LT._climate_at": 173917,
+    "LT._height_at": 505147,
+    "LT._terrain_color_at": 653185,
+    "LT._terrain_surface_fields_at": 424674,
+    "PE.seasonality_at": 104062,
+    "PE.surface_geology_at": 199619
+   },
+   "vertices": 66049
+  },
+  {
+   "baked_gdscript_build_ms": 92.672,
+   "calls": {
+    "LT._climate_at": 16641,
+    "LT._height_at": 16641,
+    "LT._terrain_color_at": 16641,
+    "LT._terrain_surface_fields_at": 16641,
+    "PE.seasonality_at": 16641,
+    "PE.surface_geology_at": 16641
+   },
+   "constant_sampler_build_ms": 38.651,
+   "frames_at_moving_budget_1p4ms": 275,
+   "frames_at_moving_budget_baked": 67,
+   "instrumented_build_ms": 578.035,
+   "label": "Region preview",
+   "native_resample_ms": 0.212,
+   "noise_primitive_ms_instrumented": 434.77,
+   "real_build_ms": 383.609,
+   "real_commit_ms": 1.045,
+   "resolution": 129,
+   "sampling_share_real": 0.899243761225623,
+   "span_km": 291.929260253906,
+   "usec_by_fn": {
+    "LT._climate_at": 45304,
+    "LT._height_at": 131549,
+    "LT._terrain_color_at": 167226,
+    "LT._terrain_surface_fields_at": 109034,
+    "PE.seasonality_at": 26961,
+    "PE.surface_geology_at": 51184
+   },
+   "vertices": 16641
+  },
+  {
+   "baked_gdscript_build_ms": 558.857,
+   "calls": {
+    "LT._climate_at": 148225,
+    "LT._height_at": 148225,
+    "LT._terrain_color_at": 148225,
+    "LT._terrain_surface_fields_at": 148225,
+    "PE.seasonality_at": 148225,
+    "PE.surface_geology_at": 148225
+   },
+   "constant_sampler_build_ms": 226.075,
+   "frames_at_moving_budget_1p4ms": 2702,
+   "frames_at_moving_budget_baked": 400,
+   "instrumented_build_ms": 5108.182,
+   "label": "Region final",
+   "native_resample_ms": 0.871,
+   "noise_primitive_ms_instrumented": 3836.505,
+   "real_build_ms": 3782.23,
+   "real_commit_ms": 10.739,
+   "resolution": 385,
+   "sampling_share_real": 0.94022706181274,
+   "span_km": 291.929260253906,
+   "usec_by_fn": {
+    "LT._climate_at": 398868,
+    "LT._height_at": 1158344,
+    "LT._terrain_color_at": 1474966,
+    "LT._terrain_surface_fields_at": 963586,
+    "PE.seasonality_at": 239609,
+    "PE.surface_geology_at": 447606
+   },
+   "vertices": 148225
+  },
+  {
+   "baked_gdscript_build_ms": 55.251,
+   "calls": {
+    "LT._biome_at": 5703,
+    "LT._climate_at": 16641,
+    "LT._height_at": 16641,
+    "LT._terrain_color_at": 16641,
+    "LT._terrain_surface_fields_at": 16641,
+    "PE.seasonality_at": 16641,
+    "PE.surface_geology_at": 16641
+   },
+   "constant_sampler_build_ms": 27.149,
+   "frames_at_moving_budget_1p4ms": 218,
+   "frames_at_moving_budget_baked": 40,
+   "instrumented_build_ms": 371.892,
+   "label": "Continent preview",
+   "native_resample_ms": 0.235,
+   "noise_primitive_ms_instrumented": 277.881,
+   "real_build_ms": 305.039,
+   "real_commit_ms": 1.321,
+   "resolution": 129,
+   "sampling_share_real": 0.910998265795521,
+   "span_km": 4987.88509511948,
+   "usec_by_fn": {
+    "LT._biome_at": 6060,
+    "LT._climate_at": 29490,
+    "LT._height_at": 72548,
+    "LT._terrain_color_at": 95414,
+    "LT._terrain_surface_fields_at": 91034,
+    "PE.seasonality_at": 18885,
+    "PE.surface_geology_at": 37347
+   },
+   "vertices": 16641
+  },
+  {
+   "baked_gdscript_build_ms": 507.745,
+   "calls": {
+    "LT._biome_at": 50440,
+    "LT._climate_at": 148225,
+    "LT._height_at": 148225,
+    "LT._terrain_color_at": 148225,
+    "LT._terrain_surface_fields_at": 148225,
+    "PE.seasonality_at": 148225,
+    "PE.surface_geology_at": 148225
+   },
+   "constant_sampler_build_ms": 208.685,
+   "frames_at_moving_budget_1p4ms": 1384,
+   "frames_at_moving_budget_baked": 363,
+   "instrumented_build_ms": 2920.604,
+   "label": "Continent final",
+   "native_resample_ms": 0.87,
+   "noise_primitive_ms_instrumented": 2175.235,
+   "real_build_ms": 1936.699,
+   "real_commit_ms": 8.75,
+   "resolution": 385,
+   "sampling_share_real": 0.892247065754668,
+   "span_km": 4987.88509511948,
+   "usec_by_fn": {
+    "LT._biome_at": 48452,
+    "LT._climate_at": 231088,
+    "LT._height_at": 562119,
+    "LT._terrain_color_at": 760126,
+    "LT._terrain_surface_fields_at": 707241,
+    "PE.seasonality_at": 145749,
+    "PE.surface_geology_at": 285104
+   },
+   "vertices": 148225
+  },
+  {
+   "constant_sampler_build_ms": 8.567,
+   "label": "close detail job 112sq/0.42km",
+   "real_build_ms": 401.096,
+   "real_commit_ms": 1.816,
+   "vertices": 12544
+  },
+  {
+   "calls": {
+    "LT._biome_at": 94898,
+    "LT._climate_at": 115921,
+    "LT._height_at": 115921,
+    "LT._terrain_color_at": 115921,
+    "LT._terrain_surface_fields_at": 115921,
+    "PE.seasonality_at": 115921,
+    "PE.surface_geology_at": 115921
+   },
+   "label": "global planet mesh 481x241 (_build_terrain, instrumented)",
+   "noise_primitive_ms_instrumented": 1342.239,
+   "real_build_ms": 2128.062,
+   "vertices": 115921
+  }
+ ],
+ "pan_headless_instrumented": {
+  "fn_usec_total": {
+   "LT._biome_at": 207714,
+   "LT._climate_at": 2326001,
+   "LT._height_at": 6774724,
+   "LT._terrain_color_at": 8885027,
+   "LT._terrain_surface_fields_at": 6828023,
+   "PE.seasonality_at": 1611192,
+   "PE.surface_geology_at": 3073585
+  },
+  "levels": {
+   "10,000 ft": {
+    "calls_after_pan_and_idle": {
+     "LT._climate_at": 55156,
+     "LT._height_at": 55248,
+     "LT._terrain_color_at": 55128,
+     "LT._terrain_surface_fields_at": 55128,
+     "PE.seasonality_at": 55156,
+     "PE.surface_geology_at": 55128
+    },
+    "calls_pan_180_frames": {
+     "LT._climate_at": 336,
+     "LT._height_at": 696,
+     "LT._terrain_color_at": 328,
+     "LT._terrain_surface_fields_at": 328,
+     "PE.seasonality_at": 336,
+     "PE.surface_geology_at": 328
+    },
+    "calls_zoom_and_settle": {
+     "LT._climate_at": 148291,
+     "LT._height_at": 149200,
+     "LT._terrain_color_at": 148225,
+     "LT._terrain_surface_fields_at": 148225,
+     "PE.seasonality_at": 148291,
+     "PE.surface_geology_at": 148225
+    },
+    "camera_size": 2.84261155128479,
+    "idle": {
+     "frames": 60,
+     "max_ms": 3.024,
+     "mean_ms": 0.4192,
+     "noise_ms_per_frame": 0.0142,
+     "noise_share": 0.0338740458015267,
+     "p50_ms": 0.208,
+     "p95_ms": 0.923,
+     "terrain_patch_ms_per_frame": 0.00378333333333334
+    },
+    "pan": {
+     "frames": 180,
+     "max_ms": 5.29,
+     "mean_ms": 0.829088888888888,
+     "noise_ms_per_frame": 0.0493666666666666,
+     "noise_share": 0.0595432737409204,
+     "p50_ms": 0.722,
+     "p95_ms": 1.48,
+     "terrain_patch_ms_per_frame": 0.0592666666666667
+    },
+    "pan_settle": {
+     "frames": 586,
+     "max_ms": 13.719,
+     "mean_ms": 3.38841979522184,
+     "noise_ms_per_frame": 1.98403412969283,
+     "noise_share": 0.58553374422219,
+     "p50_ms": 3.231,
+     "p95_ms": 3.934,
+     "terrain_patch_ms_per_frame": 3.04636860068259
+    },
+    "pan_settle_frames": 586,
+    "patch_reused_vertices_last": 92769,
+    "patch_sampled_vertices_last": 55456,
+    "settle": {
+     "frames": 1394,
+     "max_ms": 15.66,
+     "mean_ms": 3.39822094691535,
+     "noise_ms_per_frame": 2.28507604017217,
+     "noise_share": 0.672433039483907,
+     "p50_ms": 3.22,
+     "p95_ms": 3.942,
+     "terrain_patch_ms_per_frame": 3.04988952654232
+    },
+    "settle_frames": 1394,
+    "zoom": {
+     "frames": 71,
+     "max_ms": 5.178,
+     "mean_ms": 2.51776056338028,
+     "noise_ms_per_frame": 1.22915492957746,
+     "noise_share": 0.488193733532482,
+     "p50_ms": 2.345,
+     "p95_ms": 4.561,
+     "terrain_patch_ms_per_frame": 1.46238028169014
+    },
+    "zoom_frames": 71
+   },
+   "50,000 ft": {
+    "calls_after_pan_and_idle": {
+     "LT._climate_at": 244337,
+     "LT._height_at": 244694,
+     "LT._terrain_color_at": 244225,
+     "LT._terrain_surface_fields_at": 244225,
+     "PE.seasonality_at": 244337,
+     "PE.surface_geology_at": 244225
+    },
+    "calls_pan_180_frames": {
+     "LT._climate_at": 350,
+     "LT._height_at": 710,
+     "LT._terrain_color_at": 342,
+     "LT._terrain_surface_fields_at": 342,
+     "PE.seasonality_at": 350,
+     "PE.surface_geology_at": 342
+    },
+    "calls_zoom_and_settle": {
+     "LT._climate_at": 263283,
+     "LT._height_at": 264509,
+     "LT._terrain_color_at": 263169,
+     "LT._terrain_surface_fields_at": 263169,
+     "PE.seasonality_at": 263283,
+     "PE.surface_geology_at": 263169
+    },
+    "camera_size": 14.2130575180054,
+    "idle": {
+     "frames": 60,
+     "max_ms": 1.371,
+     "mean_ms": 0.347833333333333,
+     "noise_ms_per_frame": 0.00281666666666667,
+     "noise_share": 0.00809774796358409,
+     "p50_ms": 0.199,
+     "p95_ms": 0.938,
+     "terrain_patch_ms_per_frame": 0.00356666666666667
+    },
+    "pan": {
+     "frames": 180,
+     "max_ms": 6.906,
+     "mean_ms": 0.867227777777778,
+     "noise_ms_per_frame": 0.061,
+     "noise_share": 0.0703390753422464,
+     "p50_ms": 0.73,
+     "p95_ms": 1.64,
+     "terrain_patch_ms_per_frame": 0.0678944444444445
+    },
+    "pan_settle": {
+     "frames": 2444,
+     "max_ms": 23.843,
+     "mean_ms": 3.38613379705402,
+     "noise_ms_per_frame": 2.22001963993454,
+     "noise_share": 0.655620767810765,
+     "p50_ms": 3.222,
+     "p95_ms": 3.96,
+     "terrain_patch_ms_per_frame": 3.04959738134207
+    },
+    "pan_settle_frames": 2444,
+    "patch_reused_vertices_last": 18602,
+    "patch_sampled_vertices_last": 244567,
+    "settle": {
+     "frames": 2498,
+     "max_ms": 20.274,
+     "mean_ms": 3.39582706164932,
+     "noise_ms_per_frame": 2.29374779823858,
+     "noise_share": 0.675460721820307,
+     "p50_ms": 3.219,
+     "p95_ms": 3.945,
+     "terrain_patch_ms_per_frame": 3.05078102481986
+    },
+    "settle_frames": 2498,
+    "zoom": {
+     "frames": 87,
+     "max_ms": 5.988,
+     "mean_ms": 2.13787356321839,
+     "noise_ms_per_frame": 1.17655172413793,
+     "noise_share": 0.550337374660609,
+     "p50_ms": 1.991,
+     "p95_ms": 2.435,
+     "terrain_patch_ms_per_frame": 1.44032183908046
+    },
+    "zoom_frames": 87
+   },
+   "Continent": {
+    "calls_after_pan_and_idle": {
+     "LT._biome_at": 84277,
+     "LT._climate_at": 115471,
+     "LT._height_at": 115568,
+     "LT._terrain_color_at": 115441,
+     "LT._terrain_surface_fields_at": 115441,
+     "PE.seasonality_at": 115471,
+     "PE.surface_geology_at": 115441
+    },
+    "calls_pan_180_frames": {
+     "LT._biome_at": 628,
+     "LT._climate_at": 692,
+     "LT._height_at": 1052,
+     "LT._terrain_color_at": 684,
+     "LT._terrain_surface_fields_at": 684,
+     "PE.seasonality_at": 692,
+     "PE.surface_geology_at": 684
+    },
+    "calls_zoom_and_settle": {
+     "LT._biome_at": 138964,
+     "LT._climate_at": 197687,
+     "LT._height_at": 199689,
+     "LT._terrain_color_at": 197633,
+     "LT._terrain_surface_fields_at": 197633,
+     "PE.seasonality_at": 197687,
+     "PE.surface_geology_at": 197633
+    },
+    "camera_size": 3000.0,
+    "idle": {
+     "frames": 60,
+     "max_ms": 1.011,
+     "mean_ms": 0.25945,
+     "noise_ms_per_frame": 0.00226666666666667,
+     "noise_share": 0.00873642962677459,
+     "p50_ms": 0.135,
+     "p95_ms": 0.593,
+     "terrain_patch_ms_per_frame": 0.00248333333333334
+    },
+    "pan": {
+     "frames": 180,
+     "max_ms": 4.325,
+     "mean_ms": 0.681838888888889,
+     "noise_ms_per_frame": 0.0452555555555556,
+     "noise_share": 0.0663727990483252,
+     "p50_ms": 0.509,
+     "p95_ms": 1.563,
+     "terrain_patch_ms_per_frame": 0.0578333333333333
+    },
+    "pan_settle": {
+     "frames": 622,
+     "max_ms": 11.585,
+     "mean_ms": 3.26929903536978,
+     "noise_ms_per_frame": 2.09568649517685,
+     "noise_share": 0.641020130769352,
+     "p50_ms": 3.148,
+     "p95_ms": 3.605,
+     "terrain_patch_ms_per_frame": 3.02373151125402
+    },
+    "pan_settle_frames": 622,
+    "patch_reused_vertices_last": 32100,
+    "patch_sampled_vertices_last": 116125,
+    "settle": {
+     "frames": 994,
+     "max_ms": 12.215,
+     "mean_ms": 3.29821327967807,
+     "noise_ms_per_frame": 2.12805835010061,
+     "noise_share": 0.645215505987024,
+     "p50_ms": 3.155,
+     "p95_ms": 3.767,
+     "terrain_patch_ms_per_frame": 3.0344185110664
+    },
+    "settle_frames": 994,
+    "zoom": {
+     "frames": 186,
+     "max_ms": 4.259,
+     "mean_ms": 2.08518817204301,
+     "noise_ms_per_frame": 1.14238172043011,
+     "noise_share": 0.547855457721512,
+     "p50_ms": 1.981,
+     "p95_ms": 2.433,
+     "terrain_patch_ms_per_frame": 1.42986021505376
+    },
+    "zoom_frames": 186
+   },
+   "Region": {
+    "calls_after_pan_and_idle": {
+     "LT._biome_at": 592,
+     "LT._climate_at": 141426,
+     "LT._height_at": 141583,
+     "LT._terrain_color_at": 141376,
+     "LT._terrain_surface_fields_at": 141376,
+     "PE.seasonality_at": 141426,
+     "PE.surface_geology_at": 141376
+    },
+    "calls_pan_180_frames": {
+     "LT._climate_at": 6986,
+     "LT._height_at": 7346,
+     "LT._terrain_color_at": 6978,
+     "LT._terrain_surface_fields_at": 6978,
+     "PE.seasonality_at": 6986,
+     "PE.surface_geology_at": 6978
+    },
+    "calls_zoom_and_settle": {
+     "LT._biome_at": 1497,
+     "LT._climate_at": 148265,
+     "LT._height_at": 149393,
+     "LT._terrain_color_at": 148225,
+     "LT._terrain_surface_fields_at": 148225,
+     "PE.seasonality_at": 148265,
+     "PE.surface_geology_at": 148225
+    },
+    "camera_size": 150.0,
+    "idle": {
+     "frames": 60,
+     "max_ms": 0.943,
+     "mean_ms": 0.2578,
+     "noise_ms_per_frame": 0.0023,
+     "noise_share": 0.00892164468580295,
+     "p50_ms": 0.132,
+     "p95_ms": 0.584,
+     "terrain_patch_ms_per_frame": 0.00251666666666667
+    },
+    "pan": {
+     "frames": 180,
+     "max_ms": 4.42,
+     "mean_ms": 1.30023333333333,
+     "noise_ms_per_frame": 0.549644444444444,
+     "noise_share": 0.422727544628742,
+     "p50_ms": 1.841,
+     "p95_ms": 2.261,
+     "terrain_patch_ms_per_frame": 0.727705555555556
+    },
+    "pan_settle": {
+     "frames": 1042,
+     "max_ms": 10.569,
+     "mean_ms": 3.30923224568138,
+     "noise_ms_per_frame": 2.23511804222649,
+     "noise_share": 0.67541891178637,
+     "p50_ms": 3.177,
+     "p95_ms": 3.869,
+     "terrain_patch_ms_per_frame": 3.03193378119001
+    },
+    "pan_settle_frames": 1042,
+    "patch_reused_vertices_last": 6153,
+    "patch_sampled_vertices_last": 142072,
+    "settle": {
+     "frames": 829,
+     "max_ms": 10.854,
+     "mean_ms": 3.28477683956574,
+     "noise_ms_per_frame": 2.2945548854041,
+     "noise_share": 0.698542092042835,
+     "p50_ms": 3.153,
+     "p95_ms": 3.621,
+     "terrain_patch_ms_per_frame": 3.03551266586248
+    },
+    "settle_frames": 829,
+    "zoom": {
+     "frames": 101,
+     "max_ms": 4.113,
+     "mean_ms": 2.08282178217822,
+     "noise_ms_per_frame": 1.17832673267327,
+     "noise_share": 0.565735745014618,
+     "p50_ms": 1.974,
+     "p95_ms": 2.52,
+     "terrain_patch_ms_per_frame": 1.43686138613861
+    },
+    "zoom_frames": 101
+   }
+  },
+  "mode": "pan",
+  "trace_totals": {
+   "frame_camera": {
+    "calls": 11934,
+    "microseconds": 259657
+   },
+   "frame_hud": {
+    "calls": 11934,
+    "microseconds": 290458
+   },
+   "frame_map_contacts": {
+    "calls": 1989,
+    "microseconds": 46106
+   },
+   "frame_map_field_armies": {
+    "calls": 1989,
+    "microseconds": 913770
+   },
+   "frame_map_formations": {
+    "calls": 1989,
+    "microseconds": 151514
+   },
+   "frame_map_scout_routes": {
+    "calls": 1989,
+    "microseconds": 10156
+   },
+   "frame_map_settlement_network": {
+    "calls": 1989,
+    "microseconds": 40207
+   },
+   "frame_map_snapshots": {
+    "calls": 11934,
+    "microseconds": 95465
+   },
+   "frame_masks_and_vegetation": {
+    "calls": 11934,
+    "microseconds": 672101
+   },
+   "frame_scale_lod": {
+    "calls": 11934,
+    "microseconds": 1313006
+   },
+   "frame_terrain_patch": {
+    "calls": 11934,
+    "microseconds": 32858185
+   },
+   "frame_world_streaming": {
+    "calls": 11934,
+    "microseconds": 244538
+   }
+  },
+  "viewport": "(640.0, 640.0)"
+ },
+ "day_mature_instrumented": {
+  "days": [
+   {
+    "calls": {
+     "LT._biome_at": 102,
+     "LT._climate_at": 102,
+     "LT._height_at": 394,
+     "LT._river_distance_at": 6,
+     "LT._sample_civilization_geography": 3,
+     "LT._surface_material_catchments": 11,
+     "LT._surface_water_sources": 27,
+     "LT._survey_ground_at": 3,
+     "LT._water_conveyance_sources": 3,
+     "PE.profile_at": 14,
+     "PE.profile_at.cache_hit": 11,
+     "PE.world_height_at": 63
+    },
+    "day": 1562,
+    "ms": 165.618,
+    "noise_primitive_ms": 2.806,
+    "terrain_query_union_ms": 4.358,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 30,
+     "LT._climate_at": 30,
+     "LT._height_at": 1207,
+     "LT._river_distance_at": 6,
+     "LT._sample_civilization_geography": 3,
+     "LT._surface_material_catchments": 3,
+     "LT._surface_water_sources": 27,
+     "LT._survey_ground_at": 3,
+     "LT._water_conveyance_sources": 3,
+     "PE.profile_at": 33,
+     "PE.profile_at.cache_hit": 29,
+     "PE.world_height_at": 40
+    },
+    "day": 1563,
+    "ms": 82.382,
+    "noise_primitive_ms": 5.093,
+    "terrain_query_union_ms": 6.511,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 0,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 0,
+     "PE.profile_at.cache_hit": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 1564,
+    "ms": 32.809,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 21,
+     "LT._climate_at": 21,
+     "LT._height_at": 395,
+     "LT._river_distance_at": 13,
+     "LT._sample_civilization_geography": 1,
+     "LT._surface_material_catchments": 1,
+     "LT._surface_water_sources": 20,
+     "LT._survey_ground_at": 12,
+     "LT._water_conveyance_sources": 1,
+     "PE.profile_at": 20,
+     "PE.profile_at.cache_hit": 19,
+     "PE.world_height_at": 21
+    },
+    "day": 1565,
+    "ms": 67.652,
+    "noise_primitive_ms": 2.627,
+    "terrain_query_union_ms": 3.269,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 10,
+     "LT._climate_at": 10,
+     "LT._height_at": 136,
+     "LT._river_distance_at": 2,
+     "LT._sample_civilization_geography": 1,
+     "LT._surface_material_catchments": 1,
+     "LT._surface_water_sources": 9,
+     "LT._survey_ground_at": 1,
+     "LT._water_conveyance_sources": 1,
+     "PE.profile_at": 11,
+     "PE.profile_at.cache_hit": 10,
+     "PE.world_height_at": 12
+    },
+    "day": 1566,
+    "ms": 47.594,
+    "noise_primitive_ms": 0.846,
+    "terrain_query_union_ms": 1.338,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 20,
+     "LT._climate_at": 20,
+     "LT._height_at": 218,
+     "LT._river_distance_at": 4,
+     "LT._sample_civilization_geography": 2,
+     "LT._surface_material_catchments": 2,
+     "LT._surface_water_sources": 18,
+     "LT._survey_ground_at": 2,
+     "LT._water_conveyance_sources": 2,
+     "PE.profile_at": 22,
+     "PE.profile_at.cache_hit": 20,
+     "PE.world_height_at": 35
+    },
+    "day": 1567,
+    "ms": 67.802,
+    "noise_primitive_ms": 1.505,
+    "terrain_query_union_ms": 2.449,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 21,
+     "LT._climate_at": 21,
+     "LT._height_at": 975,
+     "LT._river_distance_at": 13,
+     "LT._sample_civilization_geography": 1,
+     "LT._surface_material_catchments": 1,
+     "LT._surface_water_sources": 20,
+     "LT._survey_ground_at": 12,
+     "LT._water_conveyance_sources": 1,
+     "PE.profile_at": 11,
+     "PE.profile_at.cache_hit": 10,
+     "PE.world_height_at": 20
+    },
+    "day": 1568,
+    "ms": 53.114,
+    "noise_primitive_ms": 4.62,
+    "terrain_query_union_ms": 5.291,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 123,
+     "LT._climate_at": 123,
+     "LT._height_at": 2446,
+     "LT._river_distance_at": 27,
+     "LT._sample_civilization_geography": 3,
+     "LT._surface_material_catchments": 11,
+     "LT._surface_water_sources": 48,
+     "LT._survey_ground_at": 24,
+     "LT._water_conveyance_sources": 3,
+     "PE.profile_at": 35,
+     "PE.profile_at.cache_hit": 31,
+     "PE.world_height_at": 86
+    },
+    "day": 1569,
+    "ms": 88.713,
+    "noise_primitive_ms": 11.34,
+    "terrain_query_union_ms": 13.304,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 30,
+     "LT._climate_at": 29,
+     "LT._height_at": 1023,
+     "LT._river_distance_at": 6,
+     "LT._sample_civilization_geography": 3,
+     "LT._surface_material_catchments": 3,
+     "LT._surface_water_sources": 27,
+     "LT._survey_ground_at": 3,
+     "LT._water_conveyance_sources": 3,
+     "PE.profile_at": 33,
+     "PE.profile_at.cache_hit": 29,
+     "PE.world_height_at": 32
+    },
+    "day": 1570,
+    "ms": 66.392,
+    "noise_primitive_ms": 4.65,
+    "terrain_query_union_ms": 6.018,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 761,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 19,
+     "PE.profile_at.cache_hit": 19,
+     "PE.world_height_at": 0
+    },
+    "day": 1571,
+    "ms": 55.61,
+    "noise_primitive_ms": 3.146,
+    "terrain_query_union_ms": 3.146,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 2,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 20,
+     "PE.profile_at.cache_hit": 20,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 1572,
+    "ms": 45.866,
+    "noise_primitive_ms": 0.215,
+    "terrain_query_union_ms": 0.215,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 2,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 20,
+     "PE.profile_at.cache_hit": 20,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 1573,
+    "ms": 52.548,
+    "noise_primitive_ms": 0.213,
+    "terrain_query_union_ms": 0.213,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 2,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 10,
+     "PE.profile_at.cache_hit": 10,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 1574,
+    "ms": 42.152,
+    "noise_primitive_ms": 0.122,
+    "terrain_query_union_ms": 0.122,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 0,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 10,
+     "PE.profile_at.cache_hit": 10,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 1575,
+    "ms": 33.998,
+    "noise_primitive_ms": 0.097,
+    "terrain_query_union_ms": 0.097,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 2,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 10,
+     "PE.profile_at.cache_hit": 10,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 1576,
+    "ms": 37.706,
+    "noise_primitive_ms": 0.139,
+    "terrain_query_union_ms": 0.139,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 19,
+     "LT._climate_at": 19,
+     "LT._height_at": 1088,
+     "LT._river_distance_at": 19,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 19,
+     "LT._survey_ground_at": 19,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 10,
+     "PE.profile_at.cache_hit": 10,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 1577,
+    "ms": 48.218,
+    "noise_primitive_ms": 5.122,
+    "terrain_query_union_ms": 5.443,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 10,
+     "LT._climate_at": 10,
+     "LT._height_at": 126,
+     "LT._river_distance_at": 2,
+     "LT._sample_civilization_geography": 1,
+     "LT._surface_material_catchments": 1,
+     "LT._surface_water_sources": 9,
+     "LT._survey_ground_at": 1,
+     "LT._water_conveyance_sources": 1,
+     "PE.profile_at": 31,
+     "PE.profile_at.cache_hit": 29,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 36
+    },
+    "day": 1578,
+    "ms": 54.748,
+    "noise_primitive_ms": 1.11,
+    "terrain_query_union_ms": 1.575,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 82,
+     "LT._climate_at": 25,
+     "LT._height_at": 199,
+     "LT._river_distance_at": 2,
+     "LT._sample_civilization_geography": 1,
+     "LT._surface_material_catchments": 9,
+     "LT._surface_water_sources": 9,
+     "LT._survey_ground_at": 1,
+     "LT._water_conveyance_sources": 1,
+     "PE.profile_at": 41,
+     "PE.profile_at.cache_hit": 39,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 4
+    },
+    "day": 1579,
+    "ms": 60.137,
+    "noise_primitive_ms": 1.559,
+    "terrain_query_union_ms": 2.269,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 0,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 39,
+     "PE.profile_at.cache_hit": 39,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 1580,
+    "ms": 69.845,
+    "noise_primitive_ms": 0.389,
+    "terrain_query_union_ms": 0.389,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 2,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 20,
+     "PE.profile_at.cache_hit": 20,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 1581,
+    "ms": 47.157,
+    "noise_primitive_ms": 0.211,
+    "terrain_query_union_ms": 0.211,
+    "timings": {}
+   }
+  ],
+  "fn_counts_total": {
+   "LT._biome_at": 468,
+   "LT._climate_at": 412,
+   "LT._height_at": 8980,
+   "LT._river_distance_at": 100,
+   "LT._sample_civilization_geography": 19,
+   "LT._surface_material_catchments": 43,
+   "LT._surface_water_sources": 233,
+   "LT._survey_ground_at": 81,
+   "LT._water_conveyance_sources": 19,
+   "PE.profile_at": 409,
+   "PE.profile_at.cache_hit": 385,
+   "PE.seasonality_at": 2,
+   "PE.world_height_at": 349
+  },
+  "fn_usec_total": {
+   "LT._biome_at": 4683,
+   "LT._climate_at": 620,
+   "LT._height_at": 31950,
+   "LT._river_distance_at": 9704,
+   "LT._sample_civilization_geography": 21491,
+   "LT._surface_material_catchments": 5140,
+   "LT._surface_water_sources": 14625,
+   "LT._survey_ground_at": 14283,
+   "LT._water_conveyance_sources": 11552,
+   "PE.profile_at": 5547,
+   "PE.seasonality_at": 6,
+   "PE.world_height_at": 661
+  },
+  "instrumented": true,
+  "mode": "day",
+  "opponents": 12,
+  "settled": true,
+  "start_day": 1561
+ },
+ "day_mature_uninstrumented": {
+  "days": [
+   {
+    "calls": {},
+    "day": 1562,
+    "ms": 169.335,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1563,
+    "ms": 84.163,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1564,
+    "ms": 32.458,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1565,
+    "ms": 72.969,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1566,
+    "ms": 46.952,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1567,
+    "ms": 74.009,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1568,
+    "ms": 53.68,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1569,
+    "ms": 91.194,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1570,
+    "ms": 65.254,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1571,
+    "ms": 53.473,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1572,
+    "ms": 45.774,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1573,
+    "ms": 50.286,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1574,
+    "ms": 49.565,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1575,
+    "ms": 40.391,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1576,
+    "ms": 35.724,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1577,
+    "ms": 46.636,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1578,
+    "ms": 52.982,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1579,
+    "ms": 60.095,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1580,
+    "ms": 69.109,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 1581,
+    "ms": 46.911,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   }
+  ],
+  "fn_counts_total": {},
+  "fn_usec_total": {},
+  "instrumented": false,
+  "mode": "day",
+  "opponents": 12,
+  "settled": true,
+  "start_day": 1561
+ },
+ "day_fresh_instrumented": {
+  "days": [
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 1,
+     "LT._biome_at": 1200,
+     "LT._climate_at": 989,
+     "LT._height_at": 24744,
+     "LT._river_distance_at": 306,
+     "LT._sample_civilization_geography": 120,
+     "LT._surface_material_catchments": 120,
+     "LT._surface_water_sources": 1146,
+     "LT._survey_ground_at": 120,
+     "LT._water_conveyance_sources": 120,
+     "PE.profile_at": 476,
+     "PE.profile_at.cache_hit": 344,
+     "PE.world_height_at": 2136
+    },
+    "day": 1,
+    "ms": 982.895,
+    "noise_primitive_ms": 128.988,
+    "terrain_query_union_ms": 185.649,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 0,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 26,
+     "PE.profile_at.cache_hit": 26,
+     "PE.world_height_at": 0
+    },
+    "day": 2,
+    "ms": 51.361,
+    "noise_primitive_ms": 0.242,
+    "terrain_query_union_ms": 0.242,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 0,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 38,
+     "PE.profile_at.cache_hit": 38,
+     "PE.world_height_at": 0
+    },
+    "day": 3,
+    "ms": 56.774,
+    "noise_primitive_ms": 0.342,
+    "terrain_query_union_ms": 0.342,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 0,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 9,
+     "PE.profile_at.cache_hit": 9,
+     "PE.world_height_at": 0
+    },
+    "day": 4,
+    "ms": 21.483,
+    "noise_primitive_ms": 0.08,
+    "terrain_query_union_ms": 0.08,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 0,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 31,
+     "PE.profile_at.cache_hit": 31,
+     "PE.world_height_at": 0
+    },
+    "day": 5,
+    "ms": 56.884,
+    "noise_primitive_ms": 0.308,
+    "terrain_query_union_ms": 0.308,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 1,
+     "LT._biome_at": 20,
+     "LT._climate_at": 6,
+     "LT._height_at": 171,
+     "LT._river_distance_at": 4,
+     "LT._sample_civilization_geography": 2,
+     "LT._surface_material_catchments": 2,
+     "LT._surface_water_sources": 18,
+     "LT._survey_ground_at": 2,
+     "LT._water_conveyance_sources": 2,
+     "PE.profile_at": 20,
+     "PE.profile_at.cache_hit": 18,
+     "PE.world_height_at": 2
+    },
+    "day": 6,
+    "ms": 28.086,
+    "noise_primitive_ms": 1.042,
+    "terrain_query_union_ms": 1.96,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 0,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 37,
+     "PE.profile_at.cache_hit": 37,
+     "PE.world_height_at": 0
+    },
+    "day": 7,
+    "ms": 57.779,
+    "noise_primitive_ms": 0.354,
+    "terrain_query_union_ms": 0.354,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 1,
+     "LT._climate_at": 1,
+     "LT._height_at": 23,
+     "LT._river_distance_at": 1,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 1,
+     "LT._survey_ground_at": 1,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 20,
+     "PE.profile_at.cache_hit": 20,
+     "PE.world_height_at": 0
+    },
+    "day": 8,
+    "ms": 27.018,
+    "noise_primitive_ms": 0.396,
+    "terrain_query_union_ms": 0.422,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 1673,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 29,
+     "PE.profile_at.cache_hit": 29,
+     "PE.world_height_at": 0
+    },
+    "day": 9,
+    "ms": 44.351,
+    "noise_primitive_ms": 6.152,
+    "terrain_query_union_ms": 6.152,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 2359,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 29,
+     "PE.profile_at.cache_hit": 29,
+     "PE.world_height_at": 0
+    },
+    "day": 10,
+    "ms": 48.333,
+    "noise_primitive_ms": 8.643,
+    "terrain_query_union_ms": 8.643,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 0,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 29,
+     "PE.profile_at.cache_hit": 29,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 11,
+    "ms": 31.322,
+    "noise_primitive_ms": 0.267,
+    "terrain_query_union_ms": 0.267,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 0,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 19,
+     "PE.profile_at.cache_hit": 19,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 12,
+    "ms": 23.551,
+    "noise_primitive_ms": 0.191,
+    "terrain_query_union_ms": 0.191,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 0,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 25,
+     "PE.profile_at.cache_hit": 25,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 13,
+    "ms": 45.131,
+    "noise_primitive_ms": 0.243,
+    "terrain_query_union_ms": 0.243,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 1,
+     "LT._biome_at": 10,
+     "LT._climate_at": 0,
+     "LT._height_at": 91,
+     "LT._river_distance_at": 2,
+     "LT._sample_civilization_geography": 1,
+     "LT._surface_material_catchments": 1,
+     "LT._surface_water_sources": 9,
+     "LT._survey_ground_at": 1,
+     "LT._water_conveyance_sources": 1,
+     "PE.profile_at": 19,
+     "PE.profile_at.cache_hit": 18,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 1
+    },
+    "day": 14,
+    "ms": 21.155,
+    "noise_primitive_ms": 0.52,
+    "terrain_query_union_ms": 0.978,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 1,
+     "LT._climate_at": 1,
+     "LT._height_at": 24,
+     "LT._river_distance_at": 1,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 1,
+     "LT._survey_ground_at": 1,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 20,
+     "PE.profile_at.cache_hit": 20,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 15,
+    "ms": 24.023,
+    "noise_primitive_ms": 0.364,
+    "terrain_query_union_ms": 0.386,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 1,
+     "LT._biome_at": 10,
+     "LT._climate_at": 0,
+     "LT._height_at": 58,
+     "LT._river_distance_at": 2,
+     "LT._sample_civilization_geography": 1,
+     "LT._surface_material_catchments": 1,
+     "LT._surface_water_sources": 9,
+     "LT._survey_ground_at": 1,
+     "LT._water_conveyance_sources": 1,
+     "PE.profile_at": 19,
+     "PE.profile_at.cache_hit": 18,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 1
+    },
+    "day": 16,
+    "ms": 21.883,
+    "noise_primitive_ms": 0.484,
+    "terrain_query_union_ms": 0.909,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 0,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 19,
+     "PE.profile_at.cache_hit": 19,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 17,
+    "ms": 23.339,
+    "noise_primitive_ms": 0.183,
+    "terrain_query_union_ms": 0.183,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 0,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 19,
+     "PE.profile_at.cache_hit": 19,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 18,
+    "ms": 24.35,
+    "noise_primitive_ms": 0.184,
+    "terrain_query_union_ms": 0.184,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 0,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 29,
+     "PE.profile_at.cache_hit": 29,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 19,
+    "ms": 33.923,
+    "noise_primitive_ms": 0.282,
+    "terrain_query_union_ms": 0.282,
+    "timings": {}
+   },
+   {
+    "calls": {
+     "LT._analyze_convoy_route": 0,
+     "LT._biome_at": 0,
+     "LT._climate_at": 0,
+     "LT._height_at": 0,
+     "LT._river_distance_at": 0,
+     "LT._sample_civilization_geography": 0,
+     "LT._surface_material_catchments": 0,
+     "LT._surface_water_sources": 0,
+     "LT._survey_ground_at": 0,
+     "LT._water_conveyance_sources": 0,
+     "PE.profile_at": 56,
+     "PE.profile_at.cache_hit": 56,
+     "PE.seasonality_at": 0,
+     "PE.world_height_at": 0
+    },
+    "day": 20,
+    "ms": 65.831,
+    "noise_primitive_ms": 0.515,
+    "terrain_query_union_ms": 0.515,
+    "timings": {}
+   }
+  ],
+  "fn_counts_total": {
+   "LT._analyze_convoy_route": 4,
+   "LT._biome_at": 1242,
+   "LT._climate_at": 999,
+   "LT._height_at": 29145,
+   "LT._river_distance_at": 316,
+   "LT._sample_civilization_geography": 124,
+   "LT._surface_material_catchments": 124,
+   "LT._surface_water_sources": 1184,
+   "LT._survey_ground_at": 126,
+   "LT._water_conveyance_sources": 124,
+   "PE.profile_at": 969,
+   "PE.profile_at.cache_hit": 833,
+   "PE.seasonality_at": 2,
+   "PE.world_height_at": 2140
+  },
+  "fn_usec_total": {
+   "LT._analyze_convoy_route": 153,
+   "LT._biome_at": 11421,
+   "LT._climate_at": 1440,
+   "LT._height_at": 106312,
+   "LT._river_distance_at": 32027,
+   "LT._sample_civilization_geography": 137613,
+   "LT._surface_material_catchments": 15328,
+   "LT._surface_water_sources": 67282,
+   "LT._survey_ground_at": 22410,
+   "LT._water_conveyance_sources": 74475,
+   "PE.profile_at": 18252,
+   "PE.seasonality_at": 5,
+   "PE.world_height_at": 4210
+  },
+  "instrumented": true,
+  "mode": "dayfresh",
+  "opponents": 12,
+  "settled": false,
+  "start_day": 0
+ },
+ "day_fresh_uninstrumented": {
+  "days": [
+   {
+    "calls": {},
+    "day": 1,
+    "ms": 896.887,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 2,
+    "ms": 51.678,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 3,
+    "ms": 56.019,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 4,
+    "ms": 21.836,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 5,
+    "ms": 58.042,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 6,
+    "ms": 27.054,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 7,
+    "ms": 56.888,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 8,
+    "ms": 25.774,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 9,
+    "ms": 42.579,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 10,
+    "ms": 50.044,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 11,
+    "ms": 30.92,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 12,
+    "ms": 23.373,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 13,
+    "ms": 44.622,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 14,
+    "ms": 20.62,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 15,
+    "ms": 22.899,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 16,
+    "ms": 20.829,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 17,
+    "ms": 22.706,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 18,
+    "ms": 23.839,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 19,
+    "ms": 33.4,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   },
+   {
+    "calls": {},
+    "day": 20,
+    "ms": 65.899,
+    "noise_primitive_ms": 0.0,
+    "terrain_query_union_ms": 0.0,
+    "timings": {}
+   }
+  ],
+  "fn_counts_total": {},
+  "fn_usec_total": {},
+  "instrumented": false,
+  "mode": "dayfresh",
+  "opponents": 12,
+  "settled": false,
+  "start_day": 0
+ },
+ "newworld_instrumented": {
+  "instrumented": true,
+  "mode": "newworld",
+  "newworld": {
+   "calls": {
+    "LT._biome_at": 115181,
+    "LT._climate_at": 151527,
+    "LT._height_at": 369154,
+    "LT._nearest_tributary_distance_at": 2189,
+    "LT._river_distance_at": 2969,
+    "LT._sample_civilization_geography": 21,
+    "LT._surface_material_catchments": 1179,
+    "LT._surface_water_sources": 3117,
+    "LT._survey_ground_at": 2946,
+    "LT._terrain_color_at": 132562,
+    "LT._terrain_surface_fields_at": 132562,
+    "LT._water_conveyance_sources": 21,
+    "PE.nearest_viable_land": 74,
+    "PE.profile_at": 3122,
+    "PE.profile_at.cache_hit": 101,
+    "PE.seasonality_at": 134099,
+    "PE.surface_geology_at": 132562,
+    "PE.world_height_at": 63084
+   },
+   "first_patch_cpu_ms": 329.053,
+   "first_patch_frames": 101,
+   "first_patch_noise_ms": 224.63,
+   "instantiate_ms": 0.791,
+   "ready_ms": 9179.445,
+   "ready_noise_primitive_ms": 3078.258,
+   "ready_terrain_query_union_ms": 3226.697,
+   "reset_ms": 45.434,
+   "total_noise_primitive_ms": 3304.074,
+   "total_terrain_query_union_ms": 3451.353,
+   "usec": {
+    "LT._biome_at": 310854,
+    "LT._climate_at": 214306,
+    "LT._height_at": 1286679,
+    "LT._nearest_tributary_distance_at": 54815,
+    "LT._river_distance_at": 435374,
+    "LT._sample_civilization_geography": 33237,
+    "LT._surface_material_catchments": 232575,
+    "LT._surface_water_sources": 430591,
+    "LT._survey_ground_at": 699396,
+    "LT._terrain_color_at": 435351,
+    "LT._terrain_surface_fields_at": 671317,
+    "LT._water_conveyance_sources": 19622,
+    "PE.nearest_viable_land": 79098,
+    "PE.profile_at": 260765,
+    "PE.seasonality_at": 115729,
+    "PE.surface_geology_at": 227204,
+    "PE.world_height_at": 151253
+   }
+  }
+ },
+ "newworld_uninstrumented": {
+  "instrumented": false,
+  "mode": "newworld",
+  "newworld": {
+   "calls": {},
+   "first_patch_cpu_ms": 377.856,
+   "first_patch_frames": 109,
+   "first_patch_noise_ms": 0.0,
+   "instantiate_ms": 0.587,
+   "ready_ms": 8583.574,
+   "ready_noise_primitive_ms": 0.0,
+   "ready_terrain_query_union_ms": 0.0,
+   "reset_ms": 24.152,
+   "total_noise_primitive_ms": 0.0,
+   "total_terrain_query_union_ms": 0.0,
+   "usec": {}
+  }
+ },
+ "render_windowed_instrumented": {
+  "Continent": {
+   "pan": {
+    "draw_calls": {
+     "max": 135.0,
+     "mean": 128.061111111111,
+     "p50": 125.0,
+     "p95": 135.0
+    },
+    "frames": 180,
+    "interval_ms": {
+     "max": 7.925,
+     "mean": 2.92197222222222,
+     "p50": 2.864,
+     "p95": 3.866
+    },
+    "noise_ms": {
+     "max": 1.225,
+     "mean": 0.938344444444445,
+     "p50": 1.084,
+     "p95": 1.124
+    },
+    "primitives": {
+     "max": 776722.0,
+     "mean": 712131.533333333,
+     "p50": 668294.0,
+     "p95": 776722.0
+    },
+    "process_ms": {
+     "max": 22.153,
+     "mean": 22.1529999999999,
+     "p50": 22.153,
+     "p95": 22.153
+    },
+    "render_cpu_ms": {
+     "max": 1.19000005722046,
+     "mean": 0.691644447710779,
+     "p50": 0.665000021457672,
+     "p95": 1.03199994564056
+    },
+    "render_gpu_ms": {
+     "max": 1.02999997138977,
+     "mean": 0.562355556918515,
+     "p50": 0.547999978065491,
+     "p95": 0.860000014305115
+    }
+   },
+   "static": {
+    "draw_calls": {
+     "max": 135.0,
+     "mean": 135.0,
+     "p50": 135.0,
+     "p95": 135.0
+    },
+    "frames": 90,
+    "interval_ms": {
+     "max": 11.048,
+     "mean": 2.08854444444444,
+     "p50": 1.472,
+     "p95": 8.109
+    },
+    "noise_ms": {
+     "max": 0.056,
+     "mean": 0.00102222222222222,
+     "p50": 0.0,
+     "p95": 0.0
+    },
+    "primitives": {
+     "max": 776722.0,
+     "mean": 776722.0,
+     "p50": 776722.0,
+     "p95": 776722.0
+    },
+    "process_ms": {
+     "max": 22.153,
+     "mean": 19.2299777777778,
+     "p50": 22.153,
+     "p95": 22.153
+    },
+    "render_cpu_ms": {
+     "max": 1.78299999237061,
+     "mean": 0.779955555995305,
+     "p50": 0.66100001335144,
+     "p95": 1.16400003433228
+    },
+    "render_gpu_ms": {
+     "max": 10.5579996109009,
+     "mean": 1.88181112276183,
+     "p50": 1.27499997615814,
+     "p95": 8.22200012207031
+    }
+   },
+   "zoom+refine": {
+    "draw_calls": {
+     "max": 150.0,
+     "mean": 135.03825136612,
+     "p50": 135.0,
+     "p95": 135.0
+    },
+    "frames": 1647,
+    "interval_ms": {
+     "max": 186.595,
+     "mean": 4.15711900425015,
+     "p50": 4.063,
+     "p95": 4.985
+    },
+    "noise_ms": {
+     "max": 2.4,
+     "mean": 1.60855555555556,
+     "p50": 1.2,
+     "p95": 2.314
+    },
+    "primitives": {
+     "max": 776722.0,
+     "mean": 507545.572556163,
+     "p50": 514578.0,
+     "p95": 514578.0
+    },
+    "process_ms": {
+     "max": 186.595,
+     "mean": 44.0609823922291,
+     "p50": 5.711,
+     "p95": 186.595
+    },
+    "render_cpu_ms": {
+     "max": 184.074996948242,
+     "mean": 0.982780204734154,
+     "p50": 0.853999972343445,
+     "p95": 1.21399998664856
+    },
+    "render_gpu_ms": {
+     "max": 7.0939998626709,
+     "mean": 1.00989617507749,
+     "p50": 0.737999975681305,
+     "p95": 2.71000003814697
+    }
+   },
+   "zoom_refine_frames": 1647
+  },
+  "Region": {
+   "pan": {
+    "draw_calls": {
+     "max": 125.0,
+     "mean": 125.0,
+     "p50": 125.0,
+     "p95": 125.0
+    },
+    "frames": 180,
+    "interval_ms": {
+     "max": 8.489,
+     "mean": 2.96414444444444,
+     "p50": 3.205,
+     "p95": 3.995
+    },
+    "noise_ms": {
+     "max": 1.158,
+     "mean": 0.785161111111111,
+     "p50": 1.065,
+     "p95": 1.112
+    },
+    "primitives": {
+     "max": 668286.0,
+     "mean": 668286.0,
+     "p50": 668286.0,
+     "p95": 668286.0
+    },
+    "process_ms": {
+     "max": 18.079,
+     "mean": 11.7755666666666,
+     "p50": 9.145,
+     "p95": 18.079
+    },
+    "render_cpu_ms": {
+     "max": 1.30400002002716,
+     "mean": 0.790100000633134,
+     "p50": 0.779999971389771,
+     "p95": 1.15600001811981
+    },
+    "render_gpu_ms": {
+     "max": 1.29999995231628,
+     "mean": 0.649599999686082,
+     "p50": 0.629999995231628,
+     "p95": 0.98199999332428
+    }
+   },
+   "static": {
+    "draw_calls": {
+     "max": 125.0,
+     "mean": 125.0,
+     "p50": 125.0,
+     "p95": 125.0
+    },
+    "frames": 90,
+    "interval_ms": {
+     "max": 1.702,
+     "mean": 1.01616666666667,
+     "p50": 0.994,
+     "p95": 1.509
+    },
+    "noise_ms": {
+     "max": 0.051,
+     "mean": 0.000777777777777778,
+     "p50": 0.0,
+     "p95": 0.0
+    },
+    "primitives": {
+     "max": 668286.0,
+     "mean": 668286.0,
+     "p50": 668286.0,
+     "p95": 668286.0
+    },
+    "process_ms": {
+     "max": 9.145,
+     "mean": 9.14499999999999,
+     "p50": 9.145,
+     "p95": 9.145
+    },
+    "render_cpu_ms": {
+     "max": 1.1360000371933,
+     "mean": 0.668044444256359,
+     "p50": 0.646000027656555,
+     "p95": 1.01600003242493
+    },
+    "render_gpu_ms": {
+     "max": 0.995999991893768,
+     "mean": 0.59516666829586,
+     "p50": 0.572000026702881,
+     "p95": 0.916000008583069
+    }
+   },
+   "zoom+refine": {
+    "draw_calls": {
+     "max": 125.0,
+     "mean": 125.0,
+     "p50": 125.0,
+     "p95": 125.0
+    },
+    "frames": 1694,
+    "interval_ms": {
+     "max": 18.111,
+     "mean": 4.06892975206611,
+     "p50": 4.283,
+     "p95": 5.021
+    },
+    "noise_ms": {
+     "max": 2.73,
+     "mean": 1.89787603305786,
+     "p50": 2.329,
+     "p95": 2.389
+    },
+    "primitives": {
+     "max": 668294.0,
+     "mean": 668286.491145218,
+     "p50": 668286.0,
+     "p95": 668294.0
+    },
+    "process_ms": {
+     "max": 22.153,
+     "mean": 8.19090791027156,
+     "p50": 6.664,
+     "p95": 22.153
+    },
+    "render_cpu_ms": {
+     "max": 3.00399994850159,
+     "mean": 0.812554309278762,
+     "p50": 0.788999974727631,
+     "p95": 1.15799999237061
+    },
+    "render_gpu_ms": {
+     "max": 7.94399976730347,
+     "mean": 0.793538370214781,
+     "p50": 0.541000008583069,
+     "p95": 2.20099997520447
+    }
+   },
+   "zoom_refine_frames": 1694
+  },
+  "50,000 ft": {
+   "pan": {
+    "draw_calls": {
+     "max": 125.0,
+     "mean": 125.0,
+     "p50": 125.0,
+     "p95": 125.0
+    },
+    "frames": 180,
+    "interval_ms": {
+     "max": 5.08,
+     "mean": 2.8116,
+     "p50": 3.096,
+     "p95": 3.92
+    },
+    "noise_ms": {
+     "max": 1.145,
+     "mean": 0.826922222222222,
+     "p50": 1.07,
+     "p95": 1.113
+    },
+    "primitives": {
+     "max": 504456.0,
+     "mean": 504456.0,
+     "p50": 504456.0,
+     "p95": 504456.0
+    },
+    "process_ms": {
+     "max": 7.866,
+     "mean": 7.21915555555555,
+     "p50": 7.866,
+     "p95": 7.866
+    },
+    "render_cpu_ms": {
+     "max": 1.36800003051758,
+     "mean": 0.734155555897289,
+     "p50": 0.735000014305115,
+     "p95": 1.02400004863739
+    },
+    "render_gpu_ms": {
+     "max": 4.45499992370605,
+     "mean": 0.650977777275774,
+     "p50": 0.397000014781952,
+     "p95": 1.94400000572205
+    }
+   },
+   "static": {
+    "draw_calls": {
+     "max": 125.0,
+     "mean": 125.0,
+     "p50": 125.0,
+     "p95": 125.0
+    },
+    "frames": 90,
+    "interval_ms": {
+     "max": 5.163,
+     "mean": 1.11462222222222,
+     "p50": 0.969,
+     "p95": 1.738
+    },
+    "noise_ms": {
+     "max": 0.019,
+     "mean": 0.000211111111111111,
+     "p50": 0.0,
+     "p95": 0.0
+    },
+    "primitives": {
+     "max": 504456.0,
+     "mean": 504456.0,
+     "p50": 504456.0,
+     "p95": 504456.0
+    },
+    "process_ms": {
+     "max": 6.334,
+     "mean": 6.334,
+     "p50": 6.334,
+     "p95": 6.334
+    },
+    "render_cpu_ms": {
+     "max": 1.15699994564056,
+     "mean": 0.659322221080462,
+     "p50": 0.629999995231628,
+     "p95": 0.922999978065491
+    },
+    "render_gpu_ms": {
+     "max": 3.01200008392334,
+     "mean": 0.784855555163489,
+     "p50": 0.476000010967255,
+     "p95": 2.37599992752075
+    }
+   },
+   "zoom+refine": {
+    "draw_calls": {
+     "max": 125.0,
+     "mean": 125.0,
+     "p50": 125.0,
+     "p95": 125.0
+    },
+    "frames": 867,
+    "interval_ms": {
+     "max": 17.947,
+     "mean": 4.08411534025375,
+     "p50": 4.132,
+     "p95": 5.274
+    },
+    "noise_ms": {
+     "max": 3.155,
+     "mean": 1.75080738177624,
+     "p50": 2.201,
+     "p95": 2.398
+    },
+    "primitives": {
+     "max": 668296.0,
+     "mean": 668102.15916955,
+     "p50": 668296.0,
+     "p95": 668296.0
+    },
+    "process_ms": {
+     "max": 18.079,
+     "mean": 11.9326412918112,
+     "p50": 14.939,
+     "p95": 18.079
+    },
+    "render_cpu_ms": {
+     "max": 2.95600008964539,
+     "mean": 0.870645904829758,
+     "p50": 0.829999983310699,
+     "p95": 1.27699995040894
+    },
+    "render_gpu_ms": {
+     "max": 3.61500000953674,
+     "mean": 0.698475202783994,
+     "p50": 0.462000012397766,
+     "p95": 1.97800004482269
+    }
+   },
+   "zoom_refine_frames": 867
+  },
+  "10,000 ft": {
+   "pan": {
+    "draw_calls": {
+     "max": 125.0,
+     "mean": 125.0,
+     "p50": 125.0,
+     "p95": 125.0
+    },
+    "frames": 180,
+    "interval_ms": {
+     "max": 6.461,
+     "mean": 2.58135555555555,
+     "p50": 2.603,
+     "p95": 3.663
+    },
+    "noise_ms": {
+     "max": 1.146,
+     "mean": 0.840027777777777,
+     "p50": 0.977,
+     "p95": 1.098
+    },
+    "primitives": {
+     "max": 668294.0,
+     "mean": 668294.0,
+     "p50": 668294.0,
+     "p95": 668294.0
+    },
+    "process_ms": {
+     "max": 19.527,
+     "mean": 19.527,
+     "p50": 19.527,
+     "p95": 19.527
+    },
+    "render_cpu_ms": {
+     "max": 1.22300004959106,
+     "mean": 0.535261111127006,
+     "p50": 0.517000019550323,
+     "p95": 0.842999994754791
+    },
+    "render_gpu_ms": {
+     "max": 5.81500005722046,
+     "mean": 0.505799999833107,
+     "p50": 0.428999990224838,
+     "p95": 0.797999978065491
+    }
+   },
+   "static": {
+    "draw_calls": {
+     "max": 125.0,
+     "mean": 125.0,
+     "p50": 125.0,
+     "p95": 125.0
+    },
+    "frames": 90,
+    "interval_ms": {
+     "max": 7.525,
+     "mean": 1.08633333333333,
+     "p50": 0.677,
+     "p95": 5.154
+    },
+    "noise_ms": {
+     "max": 0.016,
+     "mean": 0.000177777777777778,
+     "p50": 0.0,
+     "p95": 0.0
+    },
+    "primitives": {
+     "max": 668294.0,
+     "mean": 668294.0,
+     "p50": 668294.0,
+     "p95": 668294.0
+    },
+    "process_ms": {
+     "max": 19.527,
+     "mean": 19.527,
+     "p50": 19.527,
+     "p95": 19.527
+    },
+    "render_cpu_ms": {
+     "max": 0.98199999332428,
+     "mean": 0.445700001385477,
+     "p50": 0.409000009298325,
+     "p95": 0.58899998664856
+    },
+    "render_gpu_ms": {
+     "max": 7.28000020980835,
+     "mean": 0.86342222723696,
+     "p50": 0.535000026226044,
+     "p95": 2.03900003433228
+    }
+   },
+   "zoom+refine": {
+    "draw_calls": {
+     "max": 125.0,
+     "mean": 125.0,
+     "p50": 125.0,
+     "p95": 125.0
+    },
+    "frames": 1288,
+    "interval_ms": {
+     "max": 19.544,
+     "mean": 4.54359937888198,
+     "p50": 4.097,
+     "p95": 7.721
+    },
+    "noise_ms": {
+     "max": 5.403,
+     "mean": 2.31933618012422,
+     "p50": 2.34,
+     "p95": 4.551
+    },
+    "primitives": {
+     "max": 668294.0,
+     "mean": 504581.301242236,
+     "p50": 504454.0,
+     "p95": 504454.0
+    },
+    "process_ms": {
+     "max": 19.527,
+     "mean": 9.57484782608683,
+     "p50": 9.424,
+     "p95": 11.678
+    },
+    "render_cpu_ms": {
+     "max": 4.72599983215332,
+     "mean": 0.747310559409931,
+     "p50": 0.644999980926514,
+     "p95": 1.22599995136261
+    },
+    "render_gpu_ms": {
+     "max": 17.3379993438721,
+     "mean": 0.665169253413166,
+     "p50": 0.391999989748001,
+     "p95": 1.98800003528595
+    }
+   },
+   "zoom_refine_frames": 1288
+  }
+ },
+ "load_stage_timestamps_ms": {
+  "uninstrumented": [
+   "LOAD STAGE 8994 ready",
+   "LOAD STAGE 13662 world configured start=(-340.9378, 0.389978, 2780.614) river_x=inf height=0.39",
+   "LOAD STAGE 16070 global terrain",
+   "LOAD STAGE 16072 regional terrain",
+   "LOAD STAGE 16115 river points=6081 from=(-11.98387, 0.219768, -760.0) to=(13.80838, 0.348376, 760.0)",
+   "LOAD STAGE 17277 water and rivers",
+   "LOAD STAGE 17463 landscape and resources",
+   "LOAD STAGE 17565 settlement and interface"
+  ],
+  "instrumented": [
+   "LOAD STAGE 12804 ready",
+   "LOAD STAGE 18953 world configured start=(-340.9378, 0.389978, 2780.614) river_x=inf height=0.39",
+   "LOAD STAGE 20959 global terrain",
+   "LOAD STAGE 20961 regional terrain",
+   "LOAD STAGE 20996 river points=6081 from=(-11.98387, 0.219768, -760.0) to=(13.80838, 0.348376, 760.0)",
+   "LOAD STAGE 21763 water and rivers",
+   "LOAD STAGE 21898 landscape and resources",
+   "LOAD STAGE 21964 settlement and interface"
+  ]
+ }
+}
