@@ -5,7 +5,7 @@ path="res://.godot/imported/artifact-1103.png-ce60f56e6115ca84464fd4297a47f56a.c
 metadata={"vram_texture": false}
 
 [deps]
-source_file="res://assets\ui\artifacts\prehistoric-v1\artifact-1103.png"
+source_file="res://assets/ui/artifacts/prehistoric-v1/artifact-1103.png"
 dest_files=["res://.godot/imported/artifact-1103.png-ce60f56e6115ca84464fd4297a47f56a.ctex"]
 
 [params]
