@@ -31,6 +31,19 @@ var reuse_colors:=PackedColorArray()
 var reuse_climate:=PackedVector2Array()
 var reuse_geology:=PackedVector2Array()
 var reuse_seasons:=PackedFloat32Array()
+## Optional per-seed planet raster (terrain_macro_render.gd Raster). When set,
+## every vertex is bilinearly filtered from it instead of calling the samplers;
+## the owner only assigns one whose cell is no larger than this grid's spacing.
+var macro_raster:RefCounted
+var _raster_bound:=false
+var _raster_heights:=PackedFloat32Array()
+var _raster_seasons:=PackedFloat32Array()
+var _raster_colors:=PackedInt32Array()
+var _raster_fields:=PackedInt32Array()
+var _raster_origin:=Vector2.ZERO
+var _raster_inverse_cell:=Vector2.ONE
+var _raster_columns:=0
+var _raster_rows:=0
 
 func _init(grid_resolution:int,patch_span:float,patch_center:Vector2,height_fn:Callable,color_fn:Callable,surface_fn:Callable=Callable(),season_fn:Callable=Callable(),prior_samples:Dictionary={})->void:
 	resolution=grid_resolution; span=patch_span; center=patch_center
@@ -46,6 +59,8 @@ func _init(grid_resolution:int,patch_span:float,patch_center:Vector2,height_fn:C
 	_configure_reuse(prior_samples)
 
 func _configure_reuse(source:Dictionary)->void:
+	# Raster-filtered samples are not authoritative observations.
+	if int(source.get("macro_level",-1))>=0:return
 	var count:=int(source.get("resolution",0))
 	if count<2 or float(source.get("span",0.0))<=0.0:return
 	var size:=count*count
@@ -83,7 +98,37 @@ func completed_samples()->Dictionary:
 	assert(phase==2)
 	# Packed arrays share immutable storage until a writer detaches them. The
 	# owner retains only its bounded mesh cache plus the currently visible patch.
-	return {"center":center,"span":span,"resolution":resolution,"vertices":vertices,"colors":colors,"climate":climate_uv,"geology":geology_uv,"seasons":seasonal_amplitudes}
+	return {"center":center,"span":span,"resolution":resolution,"vertices":vertices,"colors":colors,"climate":climate_uv,"geology":geology_uv,"seasons":seasonal_amplitudes,"macro_level":int(macro_raster.get("level")) if macro_raster!=null else -1}
+
+func _bind_raster()->void:
+	_raster_bound=true
+	if macro_raster==null:return
+	# Filtered raster samples are never mixed with exact ones in either direction.
+	reuse_resolution=0
+	_raster_heights=macro_raster.get("heights");_raster_seasons=macro_raster.get("seasons")
+	_raster_colors=macro_raster.get("colors");_raster_fields=macro_raster.get("fields")
+	_raster_origin=macro_raster.get("origin")
+	var cell:Vector2=macro_raster.get("cell")
+	_raster_inverse_cell=Vector2(1.0/cell.x,1.0/cell.y)
+	_raster_columns=int(macro_raster.get("columns"));_raster_rows=int(macro_raster.get("rows"))
+
+func _sample_raster(x:float,z:float)->void:
+	var u:=(x-_raster_origin.x)*_raster_inverse_cell.x
+	var v:=(z-_raster_origin.y)*_raster_inverse_cell.y
+	var column:=clampi(floori(u),0,_raster_columns-2)
+	var row:=clampi(floori(v),0,_raster_rows-2)
+	var fx:=clampf(u-float(column),0.0,1.0);var fy:=clampf(v-float(row),0.0,1.0)
+	var a:=row*_raster_columns+column;var b:=a+1;var c:=a+_raster_columns;var d:=c+1
+	var height:=lerpf(lerpf(_raster_heights[a],_raster_heights[b],fx),lerpf(_raster_heights[c],_raster_heights[d],fx),fy)+0.0006
+	vertices[cursor]=Vector3(x,height,z)
+	heights[cursor]=height
+	colors[cursor]=Color.hex(_raster_colors[a]).lerp(Color.hex(_raster_colors[b]),fx).lerp(Color.hex(_raster_colors[c]).lerp(Color.hex(_raster_colors[d]),fx),fy)
+	if sample_surface.is_valid():
+		var f:=Color.hex(_raster_fields[a]).lerp(Color.hex(_raster_fields[b]),fx).lerp(Color.hex(_raster_fields[c]).lerp(Color.hex(_raster_fields[d]),fx),fy)
+		climate_uv[cursor]=Vector2(1.0+f.r,f.g);geology_uv[cursor]=Vector2(f.b,f.a)
+	if season_sampler.is_valid():
+		seasonal_amplitudes[cursor]=lerpf(lerpf(_raster_seasons[a],_raster_seasons[b],fx),lerpf(_raster_seasons[c],_raster_seasons[d],fx),fy)
+	sampled_vertices+=1
 
 func advance(budget_usec:int=2500)->bool:
 	var started:=Time.get_ticks_usec()
@@ -93,6 +138,7 @@ func advance(budget_usec:int=2500)->bool:
 	# two cells so undersampled ridges do not become alternating bright/dark facets.
 	# Geometry and authoritative heights are unchanged.
 	var normal_radius:=maxi(1,ceili(maxf(0.02,spacing*2.0*smoothstep(0.01,0.15,spacing))/spacing))
+	if not _raster_bound:_bind_raster()
 	while phase<2:
 		var x_index:=cursor%resolution
 		var z_index:=cursor/resolution
@@ -104,6 +150,12 @@ func advance(budget_usec:int=2500)->bool:
 			var x:=float(point.x);var z:=float(point.y)
 			# A coarse preview shares only every third/fourth fine-grid node.
 			# Skip the impossible lookups before touching its packed sample arrays.
+			if macro_raster!=null:
+				_sample_raster(x,z)
+				cursor+=1
+				if cursor>=total: phase+=1; cursor=0
+				if cursor%8==0 and Time.get_ticks_usec()-started>=budget_usec: break
+				continue
 			var shared_node:=reuse_resolution>0 and (reuse_stride==1 or ((x_index-reuse_offset.x)%reuse_stride==0 and (z_index-reuse_offset.y)%reuse_stride==0))
 			if not shared_node or not _copy_shared_sample(x,z):
 				var height:float=sample_height.call(x,z)+0.0006
