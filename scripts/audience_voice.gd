@@ -16,6 +16,7 @@ signal divine_intent(audience_id:String,action:String)
 
 const CV:=preload("res://scripts/character_voice.gd")
 const DV:=preload("res://scripts/divine_voice.gd")
+const CC:=preload("res://scripts/court_commands.gd")
 const DIVINE_SPOKEN:=["terrify","penance","bless","raise_up"]
 const HALL_PATH:="res://scripts/audience_hall.gd"
 const SCOUT_PATH:="res://scripts/chief_scout.gd"
@@ -26,14 +27,18 @@ const MAX_COMPLETION_TOKENS:=1600   ## ceiling; each stage asks for less (STAGE_
 ## Per-stage completion caps. Reasoning models spend part of this on thinking
 ## (a measured opening used ~260 reasoning + ~260 visible tokens), so the caps
 ## leave headroom; a reply cut off by the cap retries once with more room.
-const STAGE_TOKENS:={"open":1100,"speak":800,"closing":650,"weigh":950,"divine":700}
+const STAGE_TOKENS:={"open":1100,"speak":900,"closing":650,"weigh":950,"divine":700,"command":900}
 const MAX_RESPONSE_BYTES:=98304
 const USAGE_LIMIT:=40               ## receipts kept in memory (not saved)
 const HISTORY_ENTRIES:=5            ## prior audiences described to the model
 const AVOID_LINES:=10               ## prior lines the model is told not to echo
 const MAX_LINE_CHARS:=300
 const MAX_PLAYER_CHARS:=400
-const STAGE_LIMITS:={"open":4,"speak":2,"closing":2,"weigh":5,"divine":3}
+const STAGE_LIMITS:={"open":4,"speak":2,"closing":2,"weigh":5,"divine":3,"command":4}
+## A proverb or riddle standing in for a thought: no one speaks in it (no I,
+## you, we), no one is named, nothing is counted.
+const FILLER_OPENING:="(?i)^(a|an|no|every|each|even a|never|the \\w+ that|what the|when the|where the)\\b"
+const STANCE_WORDS:="(?i)\\b(i|i'm|i'll|i've|me|my|mine|we|us|our|you|your|yours|let|do|give|send|kill|strike)\\b"
 const META_PATTERN:="(?i)\\b(the game|this game|a game|games? (system|mechanic)s?|game ?play|gaming|game mechanics?|mechanics?|players?|buttons?|json|ai|a\\.i\\.|ai models?|artificial intelligence|language models?|llm|chatbot|as an assistant|the prompt|npcs?|click(ed|ing)?|menus?|user interface|save file|schema)\\b"
 
 const SYSTEM_PROMPT:="""You write live dialogue for a royal audience hall in a fictional history. Speak only through the characters listed; no narration, no stage directions, no explanations.
@@ -44,7 +49,7 @@ Manner: each speaker is given a MANNER modelled on a figure from classic literat
 
 The world: people know only what the WORLD line lists. Anything not listed does not exist yet and must never appear, not even as a metaphor, oath, nickname or joke: no beer or ale before brewing, no metal before smelting, no coin, writing, ledgers, scrolls, wheels, carts, ships, sails, temples, priests, glass, bread or ploughs unless listed. Reach instead for weather, beasts, hunting, fire, stone, bone, rivers, ancestors, seasons, stars, hearths and kin.
 
-The ruler is a living god to their own people. Officials address and treat the ruler as divine, each in the way their REGARD line says: the loving are frank and warm, the frightened flatter, soften bad news and overpromise, the resentful let it leak sideways, the proud stand straight even under wrath. Foreign envoys regard the ruler as their people do. The god's wrath is presence, words and real decrees carried out by people; never invent miracles, omens, curses that come true or any supernatural event.
+The ruler is the living god of their own people, and the god's command is law. Officials never flatly refuse an order: they may fear, plead or protest briefly in their own manner, but whether an order is obeyed is decided before you write, and you are told; write only what was decided. When the ruler gives an order you are not told the outcome of, answer briefly and do not refuse. No filler: never a proverb, riddle or stock saying that carries no information, stance or character of its own; say plain things plainly. Officials address and treat the ruler as divine, each in the way their REGARD line says: the loving are frank and warm, the frightened flatter, soften bad news and overpromise, the resentful let it leak sideways, the proud stand straight even under wrath. Foreign envoys regard the ruler as their people do. The god's wrath is presence, words and real decrees carried out by people; never invent miracles, omens, curses that come true or any supernatural event.
 
 Truth: use only the facts supplied. Never invent amounts, goods, agreements, promises, battles, deaths, alliances or events; say amounts exactly as given or not at all. Nobody announces or assumes what the ruler will decide. Nobody talks down to the ruler: never "child", "dearie", "boy", "girl", "pet" or any diminutive. Nobody agrees to new terms. Never mention games, systems, mechanics, buttons, menus, AI or data formats.
 
@@ -760,6 +765,11 @@ var force_offline:=false       ## tests / "no AI" play
 var send_hook:Callable         ## tests: replaces the HTTP transport (id, payload, attempt)
 var config_override:Dictionary={} ## tests: pretend a connection is configured
 var last_problem:Dictionary={} ## audience_id -> reason the live voice fell back
+## func(audience_id:String, player_text:String, command:Dictionary)->bool: the
+## court's command engine (set by the modal). The live classifier read the
+## ruler's words as an order; true means the engine carried it out, and the
+## model's provisional lines are dropped (they did not know the outcome).
+var command_router:Callable=Callable()
 ## Cost receipts, one per HTTP attempt plus one per offline delivery. Bounded,
 ## in memory only: they describe this session's spend, not the campaign.
 var usage:Array[Dictionary]=[]
@@ -779,7 +789,14 @@ func busy(audience_id:String)->bool:
 func open_scene(audience_id:String)->void:
 	_begin(audience_id,"open",{})
 
-func player_speaks(audience_id:String,text:String)->void:
+## True when a live model is configured (the court may let it read orders).
+func is_live()->bool:
+	return not _config().is_empty()
+
+## offline_order: the offline reading found only a general order; the live
+## classifier may read it more exactly, and if it does not, the general order
+## still goes to the court's command engine (never lost).
+func player_speaks(audience_id:String,text:String,offline_order:bool=false)->void:
 	var clean:String=text.strip_edges().replace("\n"," ").substr(0,MAX_PLAYER_CHARS)
 	if clean.is_empty(): return
 	var h:Variant=_hall()
@@ -788,7 +805,7 @@ func player_speaks(audience_id:String,text:String)->void:
 		return
 	# The ruler's words land in the transcript immediately, before any reply.
 	h.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":clean,"day":_day(),"aside":false})
-	_begin(audience_id,"speak",{"player_text":clean})
+	_begin(audience_id,"speak",{"player_text":clean,"offline_order":offline_order})
 
 func closing(audience_id:String,result:Dictionary)->void:
 	_begin(audience_id,"closing",{"result":result.duplicate(true)})
@@ -801,6 +818,20 @@ func weigh(audience_id:String)->void:
 ## The god has acted (AudienceHall.divine result): the target reacts in their
 ## manner (unless removed) and the watching court murmurs. Only those who
 ## actually witnessed it speak.
+## The engine carried out (or the actor hesitated at, or refused) a command
+## (court_commands.gd). A bracketed stage direction shows what happened, the
+## one who acted answers as the engine decided, a witness murmurs, and the
+## factual outcome closes it.
+func command_reaction(audience_id:String,result:Dictionary)->void:
+	var seen:Array=(result.get("witness_ids",[]) as Array).duplicate()
+	var actor:Dictionary=result.get("actor",{}) if result.get("actor") is Dictionary else {}
+	var target:Dictionary=result.get("target",{}) if result.get("target") is Dictionary else {}
+	if int(actor.get("person_id",0))>0 and not int(actor.person_id) in seen: seen.append(int(actor.person_id))
+	if int(target.get("person_id",0))>0 and not bool(result.get("removed",false)) and not int(target.person_id) in seen: seen.append(int(target.person_id))
+	if bool(result.get("removed",false)): seen.erase(int(target.get("person_id",0)))
+	if String(result.get("stage",""))=="refuse_flee": seen.erase(int(actor.get("person_id",0)))
+	_begin(audience_id,"command",{"result":result.duplicate(true),"witness_ids":seen})
+
 func divine_reaction(audience_id:String,result:Dictionary)->void:
 	var witnesses:Array=[]
 	var effects:Dictionary=result.get("effects",{}) if result.get("effects") is Dictionary else {}
@@ -949,7 +980,7 @@ func _begin(audience_id:String,stage:String,extra:Dictionary)->void:
 	if s.is_empty():
 		failed.emit(audience_id,"No audience is waiting.")
 		return
-	if stage=="divine" and String(s.origin)=="court":
+	if stage in ["divine","command"] and String(s.origin)=="court":
 		# Only those who saw it may speak of it (a successor was not there).
 		var seen:Array=extra.get("witness_ids",[])
 		s["officials"]=(s.officials as Array).filter(func(m:Dictionary)->bool:return int(m.person_id) in seen)
@@ -979,7 +1010,8 @@ func prepare_request(s:Dictionary,stage:String,extra:Dictionary,config:Dictionar
 	if not bool(_compat.get("no_reasoning_effort",false)) and "api.openai.com" in String(config.get("endpoint","")).to_lower():
 		payload["reasoning_effort"]="low"
 	var divine:Array=_divine_allowed(s) if stage=="speak" else []
-	if bool(config.get("structured_output",false)) and not bool(_compat.get("no_schema",false)): payload["response_format"]=response_format(keys,divine)
+	if stage=="command": keys.append("narrator")
+	if bool(config.get("structured_output",false)) and not bool(_compat.get("no_schema",false)): payload["response_format"]=response_format(keys,divine,stage=="speak")
 	var headers:PackedStringArray=PackedStringArray(["Content-Type: application/json","Authorization: Bearer %s" % String(config.get("api_key","")),"X-Client-Request-Id: audience-%s-%d" % [String(s.id),Time.get_ticks_msec()]])
 	return {"scene":s,"stage":stage,"extra":extra,"config":config,"payload":payload,"headers":headers,"keys":keys,
 		"attempts":0,"max_attempts":MAX_ATTEMPTS,"downgraded":false,"http":null}
@@ -1025,6 +1057,18 @@ func _on_response(result:int,response_code:int,_headers:PackedStringArray,body:P
 			detail="reply cut off at the token cap" if String(envelope.get("finish_reason",""))=="length" else ("model declined to answer" if bool(envelope.get("refusal",false)) else "reply was not the expected JSON")
 		else:
 			var s:Dictionary=request.scene
+			var heard_command:Dictionary=parsed.get("command",{})
+			if not (String(heard_command.get("act",""))=="command" and String(heard_command.get("verb","none"))!="none" and float(heard_command.get("confidence",0.0))>=CC.LIVE_CONFIDENCE):
+				heard_command=GENERAL_ORDER if bool((request.extra as Dictionary).get("offline_order",false)) else {}
+			if String(request.stage)=="speak" and command_router.is_valid() and not heard_command.is_empty():
+				# An order: the engine decides and acts first; these lines were
+				# written before anyone knew the outcome, so they are dropped.
+				_requests.erase(audience_id)
+				if bool(command_router.call(audience_id,String((request.extra as Dictionary).get("player_text","")),heard_command)):
+					_finish_receipt(receipt,true,false,"")
+					last_problem.erase(audience_id)
+					return
+				_requests[audience_id]=request
 			var lines:=validate_lines(parsed.get("lines",[]),s,String(request.stage),request.extra)
 			if not lines.is_empty():
 				_requests.erase(audience_id)
@@ -1211,7 +1255,13 @@ func parse_body(body:PackedByteArray)->Dictionary:
 	var mood:Variant=(proposed as Dictionary).get("mood_shift",0.0)
 	var mood_value:float=float(mood) if (mood is float or mood is int) and is_finite(float(mood)) else 0.0
 	var divine:Variant=(proposed as Dictionary).get("divine","none")
-	return {"lines":(proposed as Dictionary).lines,"mood_shift":clampf(mood_value,-0.25,0.25),"divine":String(divine).substr(0,24) if divine is String else "none"}
+	var command:Variant=(proposed as Dictionary).get("command",{})
+	var heard:Dictionary={}
+	if command is Dictionary:
+		for key in ["act","verb","actor_ref","target_ref","object"]: heard[key]=String((command as Dictionary).get(key,"")).substr(0,120)
+		var confidence:Variant=(command as Dictionary).get("confidence",0.0)
+		heard["confidence"]=clampf(float(confidence),0.0,1.0) if (confidence is float or confidence is int) and is_finite(float(confidence)) else 0.0
+	return {"lines":(proposed as Dictionary).lines,"mood_shift":clampf(mood_value,-0.25,0.25),"divine":String(divine).substr(0,24) if divine is String else "none","command":heard}
 
 func allowed_numbers(s:Dictionary,extra:Dictionary)->Dictionary:
 	var allowed:={}
@@ -1230,6 +1280,13 @@ func allowed_numbers(s:Dictionary,extra:Dictionary)->Dictionary:
 
 func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Array[Dictionary]:
 	var keys:=cast_keys(s)
+	if stage=="command": keys.append("narrator")
+	var refusal:=RegEx.new(); refusal.compile(CC.REFUSAL_PATTERN)
+	var result:Dictionary=extra.get("result",{}) if extra.get("result") is Dictionary else {}
+	var obeyed:=stage=="command" and String((result.get("obedience",{}) as Dictionary).get("id","obey")) in ["obey","reluctant"]
+	var ordered:=stage=="speak" and String(CC.classify(String(extra.get("player_text",""))).get("act",""))=="command"
+	var names:=_cast_names(s)
+	var staged:=false
 	var meta:=RegEx.new(); meta.compile(META_PATTERN)
 	var number:=RegEx.new(); number.compile("\\d+(?:\\.\\d+)?")
 	var allowed:=allowed_numbers(s,extra)
@@ -1241,7 +1298,18 @@ func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Ar
 		var key:String=String((item as Dictionary).get("speaker_key",""))
 		if key not in keys: continue
 		if stage=="divine" and key=="envoy" and bool((extra.get("result",{}) as Dictionary).get("terminal",false)): continue   # the removed do not speak
+		if stage=="command" and key=="envoy" and not _envoy_may_speak(s,result): continue
+		if key=="narrator":
+			if staged: continue
+			var stage_text:=stage_direction(String((item as Dictionary).get("text","")))
+			if stage_text.is_empty() or not line_ok(stage_text,CV.era_tags("player")+(s.get("fact_tags",[]) as Array)) or meta.search(stage_text)!=null or (_voice_state().said as Dictionary).has(_text_key(stage_text)): continue
+			staged=true
+			out.push_front({"key":"narrator","text":stage_text,"aside":false})
+			continue
 		var text:=_clean_text(String((item as Dictionary).get("text","")),_member(s,key))
+		text=without_filler(text,names)
+		if text.is_empty(): continue
+		if (obeyed or ordered) and refusal.search(text)!=null: continue   # the engine, not the model, decides obedience
 		if text.is_empty() or meta.search(text)!=null: continue
 		if _recent_lines(s,_member(s,key)).has(text.to_lower()): continue   # word for word from a past audience
 		if not line_ok(text,_era_for(s,_member(s,key))): continue   # anachronism, quotation or named source
@@ -1252,6 +1320,64 @@ func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Ar
 		if invented: continue
 		out.append({"key":key,"text":text,"aside":bool((item as Dictionary).get("aside",false))})
 	return out
+
+func _cast_names(s:Dictionary)->Array[String]:
+	var names:Array[String]=[]
+	for member in [s.envoy]+(s.officials as Array):
+		for part in String((member as Dictionary).get("name","")).split(" ",false):
+			if String(part).length()>=3: names.append(String(part).to_lower())
+	return names
+
+static func filler(text:String,names:Array)->bool:
+	## True for a line that is only a proverb or riddle: it opens like a saying,
+	## nobody speaks in it, nobody is named and nothing is counted.
+	var t:=text.strip_edges()
+	if t.is_empty(): return true
+	var opening:=RegEx.new(); opening.compile(FILLER_OPENING)
+	if opening.search(t)==null: return false
+	var stance:=RegEx.new(); stance.compile(STANCE_WORDS)
+	if stance.search(t)!=null: return false
+	var digits:=RegEx.new(); digits.compile("\\d")
+	if digits.search(t)!=null: return false
+	var lower:=t.to_lower()
+	for n in names:
+		if String(n)!="" and String(n) in lower: return false
+	return true
+
+static func without_filler(text:String,names:Array)->String:
+	## Drops a leading stock saying ("A goose may hiss at the fire...; I will...")
+	## and rejects a line that is nothing but one.
+	var t:=text.strip_edges()
+	var cut:=t.find("; ")
+	if cut>0 and filler(t.substr(0,cut),names):
+		var rest:=t.substr(cut+2).strip_edges()
+		t=rest.substr(0,1).to_upper()+rest.substr(1) if not rest.is_empty() else ""
+		# What follows a stock saying must stand on its own: someone speaking.
+		var stance:=RegEx.new(); stance.compile(STANCE_WORDS)
+		if stance.search(t)==null: return ""
+	if filler(t,names): return ""
+	return t
+
+static func stage_direction(text:String)->String:
+	## A bracketed stage direction: one or two sentences, never a speech.
+	var t:=text.replace("\n"," ").strip_edges().trim_prefix("[").trim_suffix("]").strip_edges()
+	if t.is_empty() or "\"" in t: return ""
+	var words:=t.split(" ",false).size()
+	if words<4 or words>60: return ""
+	var stops:=0
+	for i in range(t.length()-1):
+		if t[i] in ".!?" and t[i+1]==" ": stops+=1
+	if stops>1: return ""
+	return "["+t+"]"
+
+func _envoy_may_speak(s:Dictionary,result:Dictionary)->bool:
+	## The one before the god speaks unless they were removed (dead, cast out,
+	## bound, fled).
+	var target:Dictionary=result.get("target",{}) if result.get("target") is Dictionary else {}
+	var actor:Dictionary=result.get("actor",{}) if result.get("actor") is Dictionary else {}
+	if bool(target.get("speaker",false)) and bool(result.get("removed",false)): return false
+	if bool(actor.get("speaker",false)) and String(result.get("stage",""))=="refuse_flee": return false
+	return not s.is_empty()
 
 func _clean_text(text:String,member:Dictionary)->String:
 	var t:String=text.replace("\r"," ").replace("\n"," ").replace("\t"," ").strip_edges()
@@ -1292,9 +1418,17 @@ func _deliver(s:Dictionary,stage:String,extra:Dictionary,lines:Array[Dictionary]
 			var rng:=_scene_rng(s,stage+":lead")
 			var lead:=_offline_lines(s,stage,extra,rng)
 			if not lead.is_empty(): ordered.push_front(lead[0])
+	if stage=="command":
+		var has_stage:=false
+		for line in ordered:
+			if String(line.key)=="narrator": has_stage=true
+		if not has_stage:
+			var staged:=_stage_line(s,extra.get("result",{}),_scene_rng(s,"command:stage"))
+			if not staged.is_empty(): ordered.push_front(staged)
 	for line in ordered:
 		if String(line.key)=="narrator":
 			h.append_line(String(s.id),{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":String(line.text),"day":_day(),"aside":false})
+			if String(line.text).begins_with("["): _mark_said(String(line.get("tkey","")),String(line.text))
 			continue
 		var member:=_member(s,String(line.key))
 		if member.is_empty(): continue
@@ -1302,11 +1436,18 @@ func _deliver(s:Dictionary,stage:String,extra:Dictionary,lines:Array[Dictionary]
 		_mark_said(String(line.get("tkey","")),String(line.text))
 		line_log.append({"audience_id":String(s.id),"speaker":String(member.name),"model":String(member.persona.get("model","")),"manner":bool(line.get("manner",false)),"fact":bool(line.get("fact",not line.has("tkey"))),"text":String(line.text)})
 		while line_log.size()>4000: line_log.pop_front()
+	if stage=="command":
+		var outcome:=String((extra.get("result",{}) as Dictionary).get("outcome",""))
+		if not outcome.is_empty(): h.append_line(String(s.id),{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":outcome,"day":_day(),"aside":false})
 	# Only the ruler's own words move the room; openings and farewells do not.
 	if stage=="speak" and absf(mood_shift)>0.0: h.apply_mood(String(s.id),clampf(mood_shift,-0.25,0.25))
 	lines_ready.emit.call_deferred(String(s.id))
 
+const GENERAL_ORDER:={"act":"command","verb":"order","actor_ref":"","target_ref":"","object":"","confidence":1.0}
+
 func _deliver_offline(s:Dictionary,stage:String,extra:Dictionary,_problem:String)->void:
+	if stage=="speak" and bool(extra.get("offline_order",false)) and command_router.is_valid():
+		if bool(command_router.call(String(s.id),String(extra.get("player_text","")),GENERAL_ORDER)): return
 	var rng:=_scene_rng(s,stage)
 	var lines:=_offline_lines(s,stage,extra,rng)
 	var mood:=0.0
@@ -1874,6 +2015,7 @@ func _offline_lines(s:Dictionary,stage:String,extra:Dictionary,rng:RandomNumberG
 		"open": return _offline_open(s,rng)
 		"speak": return _offline_speak(s,String(extra.get("player_text","")),rng)
 		"divine": return _offline_divine(s,extra.get("result",{}),rng)
+		"command": return _offline_command(s,extra.get("result",{}),rng)
 		"closing": return _offline_closing(s,extra.get("result",{}),rng)
 	return []
 
@@ -2190,6 +2332,95 @@ func _offline_divine(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)->
 		_append_if(out,_say(s,member,bank,rng,{},aside,generic2+manner))
 	return out
 
+func _member_for(s:Dictionary,entry:Dictionary)->Dictionary:
+	if entry.is_empty(): return {}
+	if bool(entry.get("speaker",false)): return s.envoy
+	var pid:=int(entry.get("person_id",0))
+	for member in s.officials:
+		if pid>0 and int(member.person_id)==pid: return member
+	return {}
+
+func _stage_line(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)->Dictionary:
+	## The bracketed stage direction for what the engine decided, era-true and
+	## never said before in this hall.
+	var bank:=CC.stage_bank(result)
+	if bank.is_empty(): return {}
+	var tags:Array=CV.era_tags("player")
+	var tokens:=CC.stage_tokens(result,tags,rng)
+	var said:Dictionary=_voice_state().said
+	var fresh:Array=[]; var unsaid:Array=[]
+	for template in bank:
+		if not _usable(String(template),tokens): continue
+		var filled:=_fill(String(template),tokens)
+		if not line_ok(filled,tags) or said.has(_text_key(filled)): continue
+		unsaid.append(template)
+		if not said.has(_template_key(String(template))): fresh.append(template)
+	var pool:Array=fresh if not fresh.is_empty() else unsaid
+	if pool.is_empty():
+		# Every wording is spent: the plain fact, staged.
+		var plain:=stage_direction(String(result.get("outcome","")).get_slice(". ",0))
+		return {"key":"narrator","text":plain,"tkey":""} if not plain.is_empty() and not said.has(_text_key(plain)) else {}
+	var chosen:=String(pool[rng.randi_range(0,pool.size()-1)])
+	return {"key":"narrator","text":_fill(chosen,tokens),"tkey":_template_key(chosen)}
+
+const COMMAND_WITNESS:={"kill":"witness_execution","exile":"witness_exile","detain":"witness_exile","terrify":"witness_shaken","penance":"witness_shaken",
+	"hesitate":"witness_shaken","refuse_flee":"witness_shaken","refuse_seized":"witness_shaken","prostrate":"witness_shaken","demote":"witness_shaken",
+	"bless":"witness_glad","raise":"witness_envy","appoint":"witness_envy","boon":"witness_glad","give":"witness_glad"}
+
+func _offline_command(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
+	## Stage direction, the actor's answer as decided, the target's if they are
+	## still here, one witness. The factual outcome is appended on delivery.
+	var out:Array[Dictionary]=[]
+	_append_if(out,_stage_line(s,result,rng))
+	var stage:=String(result.get("stage",""))
+	var actor_entry:Dictionary=result.get("actor",{}) if result.get("actor") is Dictionary else {}
+	var target_entry:Dictionary=result.get("target",{}) if result.get("target") is Dictionary else {}
+	var actor:=_member_for(s,actor_entry)
+	if String(actor.get("key",""))=="envoy" and not _envoy_may_speak(s,result): actor={}
+	var spoke:Dictionary={}
+	var key:=CC.actor_reaction_key(result)
+	if not actor.is_empty() and key!="":
+		var bank:=CC.reaction_bank(key)
+		var regard:Dictionary=s.get("regard",{})
+		if key=="obey_task" and stage=="order":
+			# An ordinary order: the same acknowledgement the council has always given.
+			bank=DV.generic("order_dread") if float(regard.get("dread",0.0))>=0.55 and String(actor.key)=="envoy" else ORDER_ACK
+		_append_if(out,_say(s,actor,bank,rng,{},false,bank))
+		spoke[String(actor.key)]=true
+	var target:=_member_for(s,target_entry)
+	if not bool(result.get("removed",false)) and not target.is_empty() and not spoke.has(String(target.key)) and not (String(target.key)=="envoy" and not _envoy_may_speak(s,result)):
+		var tbank:Array=[]
+		if stage in ["give","boon"]: tbank=CC.reaction_bank("receive")
+		elif stage in ["penance","terrify","demote"]: tbank=DV.generic("cower")
+		elif stage in ["bless","raise","appoint"]: tbank=DV.generic("blessed")
+		if not tbank.is_empty() and bool(result.get("executed",false)):
+			_append_if(out,_say(s,target,tbank,rng,{},false,tbank))
+			spoke[String(target.key)]=true
+	var wkey:=String(COMMAND_WITNESS.get(stage,""))
+	if wkey!="":
+		var pool:Array=[]
+		for member in s.officials:
+			if not spoke.has(String(member.key)): pool.append(member)
+		if not pool.is_empty():
+			var witness:Dictionary=pool[rng.randi_range(0,pool.size()-1)]
+			var generic:Array=DV.generic(wkey)
+			var manner:Array=DV.model_bank(witness.persona,"witness_favor" if wkey in ["witness_glad","witness_envy"] else "witness_dread")
+			_append_if(out,_say(s,witness,manner if not manner.is_empty() and rng.randf()<0.5 else generic,rng,{},true,generic+manner))
+	return out
+
+func _command_instruction(s:Dictionary,extra:Dictionary)->String:
+	var result:Dictionary=extra.get("result",{})
+	var tools:=CC.weapons(CV.era_tags("player"))
+	var actor:=_member_for(s,result.get("actor",{}) if result.get("actor") is Dictionary else {})
+	var ob:=String((result.get("obedience",{}) as Dictionary).get("id","obey"))
+	var parts:PackedStringArray=PackedStringArray([CC.decided_words(result)])
+	parts.append("First 'narrator' writes ONE stage direction in square brackets, one or two sentences, vivid, concrete and physical (graphic is fine), showing exactly what was decided and how the watchers take it. Weapons and tools only from: %s, cord, or bare hands; nothing the WORLD line lacks. Name people as given." % ", ".join(tools))
+	if not actor.is_empty():
+		var manner:String=String({"obey":"answers in ONE short line: it is done, or they go at once, in their own manner","reluctant":"answers in ONE short line: it cost them, but they did it","hesitate":"pleads in ONE short line not to have to do it; they have not done it","refuse":"says in ONE short line why they would not; they have not done it"}.get(ob,"answers in ONE line"))
+		parts.append("'%s' %s." % [String(actor.key),manner])
+	parts.append("Then at most 1 other official reacts as an aside. Nobody refuses or undoes anything unless REFUSED is written above. The dead and the removed never speak. No miracles. mood_shift 0.")
+	return " ".join(parts)
+
 func _divine_classify_words(s:Dictionary)->String:
 	var allowed:=_divine_allowed(s)
 	if allowed.is_empty(): return ""
@@ -2265,7 +2496,9 @@ func _divine_instruction(s:Dictionary,extra:Dictionary)->String:
 # Prompt craft
 # ---------------------------------------------------------------------------
 
-static func response_format(keys:Array[String],divine:Array=[])->Dictionary:
+const COMMAND_CLASSIFY:=" Also fill command, reading the ruler's words: act is question, statement, command (an order for someone to do something, however phrased), threat or blessing; verb is the kind of order (kill, exile, detain, penance, terrify, bless, boon, raise, demote, appoint, give, take, send, or order for anything else) or none; actor_ref is who is told to do it exactly as the ruler referred to them ('Ansel', 'you', 'the guards') or ''; target_ref is who it is done to as referred to ('him', 'the war leader', 'Zuri') or ''; object is goods with amount, an office, a place or the task, or ''; confidence 0 to 1. If it is an order, keep the lines short and never refuse: the god's word is law and the court reacts once it is done."
+
+static func response_format(keys:Array[String],divine:Array=[],command:bool=false)->Dictionary:
 	var format:={"type":"json_schema","json_schema":{"name":"audience_lines","strict":true,"schema":{
 		"type":"object","additionalProperties":false,"required":["lines","mood_shift"],
 		"properties":{
@@ -2277,6 +2510,13 @@ static func response_format(keys:Array[String],divine:Array=[])->Dictionary:
 		var schema:Dictionary=format.json_schema.schema
 		schema.properties["divine"]={"type":"string","enum":["none"]+divine}
 		(schema.required as Array).append("divine")
+	if command:
+		# A bounded reading of the ruler's words as a speech act; the court's
+		# command engine resolves who is meant and decides what happens.
+		var schema2:Dictionary=format.json_schema.schema
+		schema2.properties["command"]={"type":"object","additionalProperties":false,"required":["act","verb","actor_ref","target_ref","object","confidence"],
+			"properties":{"act":{"type":"string","enum":CC.ACTS},"verb":{"type":"string","enum":["none"]+CC.VERBS},"actor_ref":{"type":"string"},"target_ref":{"type":"string"},"object":{"type":"string"},"confidence":{"type":"number"}}}
+		(schema2.required as Array).append("command")
 	return format
 
 static func _mood_words(value:float)->String:
@@ -2391,9 +2631,11 @@ func _stage_instruction(s:Dictionary,stage:String,extra:Dictionary)->String:
 			if bench==0: return who+" Nobody else is on the bench, so 'envoy' may add one more line. 1 to 2 lines total. mood_shift 0."
 			return who+" 'envoy' says at most 2 lines in all. Then at most 2 officials interject, only if each has something distinct to say (a disagreement, an aside, a joke). mood_shift 0."
 		"speak":
-			return "The ruler just said: \"%s\". 'envoy' answers in ONE line, in character; if it was a question, the line answers it plainly from FACTS (what they gain, what happens if refused, why now). Change no terms and accept nothing new. Then at most 1 official reacts. Set mood_shift by how the ruler's words land with 'envoy'.%s" % [String(extra.get("player_text","")),_divine_classify_words(s)]
+			return "The ruler just said: \"%s\". 'envoy' answers in ONE line, in character; if it was a question, the line answers it plainly from FACTS (what they gain, what happens if refused, why now). Change no terms and accept nothing new. Then at most 1 official reacts. Set mood_shift by how the ruler's words land with 'envoy'.%s%s" % [String(extra.get("player_text","")),_divine_classify_words(s),COMMAND_CLASSIFY]
 		"divine":
 			return _divine_instruction(s,extra)
+		"command":
+			return _command_instruction(s,extra)
 		"weigh":
 			return "The ruler is weighing the chosen work at the chosen ambition. Using ONLY the feasibility factors and verdict in FACTS (wonder_proposal.factors, spoken_verdict, odds_in_words), 2 to 4 officials each speak to the factor nearest their office (stores and stone: the Quartermaster; know-how and craft: the Scholar; war and safety: the Marshal; the people's mood and food: the Steward), one line each, in character, never as a number or percentage; then 'envoy' answers the doubts in one line. mood_shift 0."
 		"closing":

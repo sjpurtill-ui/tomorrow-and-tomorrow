@@ -26,8 +26,9 @@ extends RefCounted
 const WRATH:=["terrify","penance","cast_out","strike_down"]
 const FAVOR:=["bless","boon","raise_up"]
 const TERMINAL:=["cast_out","strike_down"]
-## Acts the ruler may perform by speech alone (typed words or the live
-## voice's classifier). Removal and gifts need the explicit decree.
+## Acts the live voice's `divine` field may report on the one before the god.
+## Every other spoken order (death, exile, gifts, ...) is read and carried out
+## by court_commands.gd.
 const SPOKEN:=["terrify","penance","bless","raise_up"]
 const ACTIONS:={
 	"terrify":{"label":"Terrify them","sub":"Let your fury fill the hall. Dread rises; so may resentment.","tone":"wrath"},

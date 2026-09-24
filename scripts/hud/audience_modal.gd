@@ -16,6 +16,7 @@ const Backdrop:=preload("res://scripts/hud/court_backdrop.gd")
 const Roster:=preload("res://scripts/hud/court_roster.gd")
 const Civic:=preload("res://scripts/hud/court_civic.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
+const Commands:=preload("res://scripts/court_commands.gd")
 
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
@@ -717,6 +718,7 @@ func _connect_voice()->void:
 	if not _voice_ok():return
 	if voice.has_signal("lines_ready") and not voice.lines_ready.is_connected(_on_lines_ready):voice.lines_ready.connect(_on_lines_ready)
 	if voice.has_signal("divine_intent") and not voice.divine_intent.is_connected(_on_divine_intent):voice.divine_intent.connect(_on_divine_intent)
+	if "command_router" in voice:voice.command_router=_route_live_command
 
 func _on_lines_ready(id:String)->void:
 	if id==audience_id:_pump()
@@ -733,6 +735,20 @@ func _speak()->void:
 		send_envoy_brief(text)
 		return
 	speech_input.clear()
+	# The god's word is law: an order (to the one before you, to anyone at
+	# court, or to the guards) is decided and carried out by the engine first;
+	# the court then reacts to what actually happened.
+	var live_reads:=false
+	if resolved_result.is_empty():
+		# A general order with a live voice: let the live classifier read it
+		# more exactly first ("see that she never draws breath again").
+		var reading:=Commands.classify(text)
+		live_reads=String(reading.get("verb",""))=="order" and _voice_ok() and voice.has_method("is_live") and bool(voice.is_live()) and "command_router" in voice and civic_settlement.is_empty()
+	if resolved_result.is_empty() and not live_reads:
+		var heard:=Commands.hear(audience_id,text,{"terrain":terrain,"civic_settlement":civic_settlement})
+		if bool(heard.get("handled",false)):
+			_after_command(heard)
+			return
 	# A settlement leader's civic conversation: plain words (not questions)
 	# go through the civic pipeline, which answers, objects or refuses.
 	if not civic_settlement.is_empty() and resolved_result.is_empty() and not text.ends_with("?") and Hall.divine_intent(audience_id,text).is_empty():
@@ -746,6 +762,10 @@ func _speak()->void:
 		divine(spoken_act,text)
 		return
 	var before:=(Hall.find(audience_id).get("lines",[]) as Array).size()
+	if live_reads:
+		voice.player_speaks(audience_id,text,true)
+		_pump()
+		return
 	if _voice_ok():voice.player_speaks(audience_id,text)
 	# An order given to a summoned official goes to the civic council as a directive.
 	var here:=Hall.find(audience_id)
@@ -759,6 +779,33 @@ func _speak()->void:
 		if String((lines[index] as Dictionary).get("role",""))=="ruler":echoed=true
 	if not echoed:
 		Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":int(GameState.elapsed_days),"aside":false})
+	_pump()
+
+## The live voice read the ruler's words as an order the offline reading
+## missed; the engine decides and acts, and the voice reacts to that.
+func _route_live_command(id:String,text:String,command:Dictionary)->bool:
+	if id!=audience_id or not resolved_result.is_empty():return false
+	var heard:=Commands.hear(id,text,{"terrain":terrain,"civic_settlement":civic_settlement,"live":command,"echoed":true})
+	if not bool(heard.get("handled",false)):return false
+	_after_command(heard)
+	return true
+
+## Shows a command's result: the voice stages it (a bracketed direction, the
+## actor's answer as decided, a witness), then the outcome line and receipt.
+func _after_command(result:Dictionary)->void:
+	if _voice_ok() and voice.has_method("command_reaction"):voice.command_reaction(audience_id,result)
+	elif not String(result.get("outcome","")).is_empty():
+		Hall.append_line(audience_id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":String(result.outcome),"day":int(GameState.elapsed_days),"aside":false})
+	_refresh_regard()
+	var audience:=Hall.find(audience_id)
+	_update_mood(audience)
+	if bool(result.get("terminal",false)) or String(audience.get("status","waiting"))!="waiting":
+		var shown:=result.duplicate()
+		shown["terminal"]=true
+		_show_outcome(shown)
+	else:
+		_build_options()
+		if not String(result.get("outcome","")).is_empty():_show_toast(String(result.outcome))
 	_pump()
 
 func choose(option_id:String)->Dictionary:
@@ -954,6 +1001,16 @@ func _add_line(line:Dictionary,animate:bool)->void:
 	var aside:=bool(line.get("aside",false))
 	var person_id:=int(line.get("person_id",0))
 	var row:Control
+	if role=="narrator" and String(line.get("text","")).begins_with("["):
+		# A stage direction: what physically happens in the hall, set apart.
+		var stage_box:=PanelContainer.new();stage_box.name="StageLine"
+		var stage_style:=Tokens.flat(Tokens.TILE_BG,Tokens.RED.lerp(Tokens.BORDER_SOFT,.35),0,4,0);stage_style.border_width_left=3
+		stage_style.content_margin_left=14;stage_style.content_margin_right=14;stage_style.content_margin_top=6;stage_style.content_margin_bottom=6
+		stage_box.add_theme_stylebox_override("panel",stage_style)
+		var staged:=Tokens.make_label(String(line.get("text","")),15,Tokens.BODY);staged.add_theme_font_override("font",_italic)
+		staged.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;staged.name="StageText";stage_box.add_child(staged)
+		transcript.add_child(stage_box)
+		_reveal(stage_box,staged,animate);return
 	if role=="narrator":
 		var narration:=Tokens.make_label(String(line.get("text","")),14,Tokens.TEXT_DIM);narration.add_theme_font_override("font",_italic)
 		narration.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;narration.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER

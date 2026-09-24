@@ -1030,13 +1030,14 @@ func remove_settlement_leader(settlement_id:String,action:String="dismiss")->Dic
 
 func person_departs(person_id:int,reason:String="fled")->Dictionary:
 	## An official leaves the ruler's service alive: cast out by decree
-	## ("exiled") or slipped away in fear ("fled"). Their offices pass through
+	## ("exiled"), bound and kept under guard ("detained") or slipped away in
+	## fear ("fled"). Their offices pass through
 	## the ordinary succession machinery; they leave the active roster but keep
 	## their identity and history.
 	initialize()
 	var index:=_find_person_index(person_id)
 	if index<0 or String(people[index].get("status",""))!="active": return {"ok":false,"reason":"That person is not available."}
-	var normalized:="exiled" if reason=="exiled" else "fled"
+	var normalized:=reason if reason in ["exiled","detained"] else "fled"
 	var name:=String(people[index].get("name","An official"))
 	var offices:Array[String]=[]
 	for office_key in WorldSimulation.state.leadership_positions.keys():
@@ -1079,8 +1080,8 @@ func person_departs(person_id:int,reason:String="fled")->Dictionary:
 	_ensure_pool()
 	_ensure_local_leaders()
 	var successor_text:=" %s took up the work." % " and ".join(PackedStringArray(successors)) if not successors.is_empty() else ""
-	var event:={"day":int(WorldSimulation.state.elapsed_days),"title":"Official Fled" if normalized=="fled" else "Official Cast Out",
-		"description":("%s fled in the night, beyond the hills and out of reach of the ruler's anger.%s" if normalized=="fled" else "%s was cast out of the realm by the ruler's decree.%s") % [name,successor_text],
+	var event:={"day":int(WorldSimulation.state.elapsed_days),"title":String({"fled":"Official Fled","detained":"Official Imprisoned"}.get(normalized,"Official Cast Out")),
+		"description":String({"fled":"%s fled in the night, beyond the hills and out of reach of the ruler's anger.%s","detained":"%s was bound and put under guard by the ruler's decree.%s"}.get(normalized,"%s was cast out of the realm by the ruler's decree.%s")) % [name,successor_text],
 		"domain":"institutions","severity":"major" if normalized=="fled" else "notice"}
 	WorldSimulation.state.simulation_events.push_front(event)
 	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
