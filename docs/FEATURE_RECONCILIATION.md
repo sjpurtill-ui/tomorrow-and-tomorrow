@@ -2521,3 +2521,7 @@ Fast-forwarded `codex/fade-and-tooltips` (5e55ffb8). Love, dread and resentment 
 ### The Court (main)
 
 Fast-forwarded `codex/court`. A Court button (F12) opens one modal holding every leader interaction: the court at rest (era-drawn backdrop from an open-air log-and-hide ring to stone halls, seated officials with love/dread and matter counts), the antechamber of envoys and pending decisions, foreign peoples reached through the envoy channel with terms and pacts, and in-place summons. The settlement-leader civic flow (confirm, insist, withdraw, recall, dismiss) moved into the court; every old talk/negotiate entry point opens the court on that person. court, audience_modal, audience_summon, fear_love, audience_hall, tooltip_contrast, great_works_experience and chief_scout probes pass on the merged tree.
+
+### The Known World redrawn (main)
+
+Fast-forwarded `codex/known-world`. World → The Known World is an explorer's chart built only from routes that came home (hide-and-charcoal story map early, inked map after writing), with the home fire, walked trails, named finds, rumored peoples, walking parties with days to return, contacted peoples as medallions with their regard for the god and Send word to the court, and recent finds as artifact thumbnails with a summon-the-Chief-Scout action. known_world_probe, court_probe and test_world_board pass on the merged tree.
