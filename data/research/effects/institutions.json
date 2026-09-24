@@ -4,8 +4,8 @@
  "items": {
   "seasonal_duty_rosters": {
    "effects": {
-    "cohesion": 0.002,
-    "task_coordination": 0.002
+    "cohesion": 0.0011,
+    "task_coordination": 0.001
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png"
   },
@@ -19,7 +19,7 @@
   },
   "dissenting_voice_custom": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0011,
     "legitimacy": 0.002
    },
    "name": "Any Adult May Speak Against a Proposal",
@@ -27,7 +27,7 @@
   },
   "leader_gift_redistribution": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0011,
     "legitimacy": 0.002
    },
    "name": "The Headman Gives Back What Is Brought to Him",
@@ -35,15 +35,15 @@
   },
   "household_task_ledgers": {
    "effects": {
-    "labor_efficiency": 0.013,
-    "task_coordination": 0.0024
+    "labor_efficiency": 0.0064,
+    "task_coordination": 0.0012
    },
    "name": "Household Task Tallies",
    "art": "res://assets/ui/research/subjects/public_levies-v1.png"
   },
   "witnessed_agreement_customs": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0011,
     "legitimacy": 0.002
    },
    "name": "Agreements Bind Only When Spoken Before Witnesses",
@@ -51,7 +51,7 @@
   },
   "elder_consultation_rites": {
    "effects": {
-    "cohesion": 0.0026,
+    "cohesion": 0.0014,
     "legitimacy": 0.0023
    },
    "name": "Elders Consulted Before a Hard Decision",
@@ -59,7 +59,7 @@
   },
   "household_councils": {
    "effects": {
-    "cohesion": 0.037,
+    "cohesion": 0.0197,
     "labor_demand": 0.015,
     "legitimacy": 0.014,
     "state_capacity": 0.0097
@@ -68,7 +68,7 @@
   },
   "elder_council_assent": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0011,
     "legitimacy": 0.0023
    },
    "name": "Elders Must Assent Before a Decision Binds",
@@ -77,49 +77,49 @@
   "seasonal_tribute_counts": {
    "effects": {
     "state_capacity": 0.0049,
-    "task_coordination": 0.002
+    "task_coordination": 0.001
    },
    "name": "Seasonal Counts of What Each Household Brought",
    "art": "res://assets/ui/research/subjects/public_levies-v1.png"
   },
   "consensus_amendment_custom": {
    "effects": {
-    "cohesion": 0.004,
-    "task_coordination": 0.002
+    "cohesion": 0.0021,
+    "task_coordination": 0.001
    },
    "name": "A Custom Changes Only by Open Agreement",
    "art": "res://assets/ui/research/subjects/household_councils-v1.png"
   },
   "lineage_land_tenure": {
    "effects": {
-    "cohesion": 0.0039,
+    "cohesion": 0.0021,
     "legitimacy": 0.002,
-    "soil_productivity": 0.01
+    "soil_productivity": 0.0071
    },
    "observation": "Each lineage holds its own fields and pastures, and tends land that its grandchildren will farm.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "blood_price": {
    "effects": {
-    "cohesion": 0.0052,
+    "cohesion": 0.0028,
     "legitimacy": 0.002,
-    "security_efficiency": 0.01
+    "security_efficiency": 0.0086
    },
    "observation": "An injury or a killing is paid for in goods set by the elders, and the feud ends there.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "seasonal_crisis_leader": {
    "effects": {
-    "disaster_resilience": 0.015,
+    "disaster_resilience": 0.0076,
     "state_capacity": 0.004,
-    "task_coordination": 0.0057
+    "task_coordination": 0.0028
    },
    "observation": "In a flood or a hungry season the households choose one leader to command until the danger passes.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "petition_speakers": {
    "effects": {
-    "cohesion": 0.0026,
+    "cohesion": 0.0014,
     "legitimacy": 0.0025
    },
    "observation": "Chosen speakers carry each household's petitions to the living god, and the people wait for the answer.",
@@ -127,10 +127,10 @@
   },
   "banishment_sentence": {
    "effects": {
-    "cohesion": 0.0026,
+    "cohesion": 0.0014,
     "institutional_rigidity": 0.0027,
     "legitimacy": 0.002,
-    "security_efficiency": 0.015
+    "security_efficiency": 0.0128
    },
    "observation": "The gravest wrongdoer is cast out; no hearth will take him in, and everyone knows why.",
    "social_consequence": "Fear of exile keeps order, and those cast out take their grievances to neighboring peoples",
@@ -138,7 +138,7 @@
   },
   "customary_law": {
    "effects": {
-    "cohesion": 0.026,
+    "cohesion": 0.0139,
     "institutional_rigidity": 0.021,
     "legitimacy": 0.025,
     "state_capacity": 0.019
@@ -147,16 +147,16 @@
   },
   "public_stores": {
    "effects": {
-    "cohesion": 0.0079,
-    "container_capacity": 0.06,
-    "food_storage": 0.13,
+    "cohesion": 0.0042,
+    "container_capacity": 0.0248,
+    "food_storage": 0.0547,
     "labor_demand": 0.02,
     "state_capacity": 0.014
    }
   },
   "household_mediators": {
    "effects": {
-    "cohesion": 0.0052,
+    "cohesion": 0.0028,
     "legitimacy": 0.002
    },
    "observation": "A respected go-between carries offers between quarreling households until both can accept.",
@@ -164,7 +164,7 @@
   },
   "exculpatory_oath": {
    "effects": {
-    "cohesion": 0.0026,
+    "cohesion": 0.0005,
     "legitimacy": 0.002
    },
    "observation": "When no witness saw the deed, the accused swears before the god, and the oath settles the claim.",
@@ -172,7 +172,7 @@
   },
   "customary_inheritance_shares": {
    "effects": {
-    "cohesion": 0.0039,
+    "cohesion": 0.0007,
     "institutional_rigidity": 0.0027,
     "legitimacy": 0.002
    },
@@ -181,8 +181,8 @@
   },
   "field_boundary_markers": {
    "effects": {
-    "cohesion": 0.0026,
-    "soil_productivity": 0.01,
+    "cohesion": 0.0005,
+    "soil_productivity": 0.0017,
     "state_capacity": 0.002
    },
    "observation": "Stones and ditches mark each field's edge, so plowing stops where the neighbor's land begins.",
@@ -191,15 +191,15 @@
   "labor_debt_tallies": {
    "effects": {
     "institutional_rigidity": 0.0054,
-    "labor_efficiency": 0.007,
-    "task_coordination": 0.002
+    "labor_efficiency": 0.001,
+    "task_coordination": 0.0004
    },
    "name": "Labor-debt Tallies",
    "art": "res://assets/ui/research/subjects/public_levies-v1.png"
   },
   "leader_feast_obligations": {
    "effects": {
-    "cohesion": 0.0039,
+    "cohesion": 0.0007,
     "food_storage": -0.01,
     "legitimacy": 0.0025
    },
@@ -210,7 +210,7 @@
   "public_grain_weighing": {
    "effects": {
     "legitimacy": 0.002,
-    "task_coordination": 0.002
+    "task_coordination": 0.0004
    },
    "name": "Grain for the Store Weighed in Public",
    "art": "res://assets/ui/research/subjects/public_levies-v1.png"
@@ -226,7 +226,7 @@
   },
   "public_praise_assemblies": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0003,
     "legitimacy": 0.002
    },
    "name": "Public Praise of Faithful Service",
@@ -236,14 +236,14 @@
    "effects": {
     "labor_demand": 0.008,
     "legitimacy": 0.002,
-    "task_coordination": 0.0024
+    "task_coordination": 0.0005
    },
    "name": "New Customs Tried for a Season First",
    "art": "res://assets/ui/research/subjects/household_councils-v1.png"
   },
   "boundary_oath_rituals": {
    "effects": {
-    "cohesion": 0.0026,
+    "cohesion": 0.0004,
     "institutional_rigidity": 0.0054,
     "legitimacy": 0.0023
    },
@@ -253,8 +253,8 @@
   "rotating_stewardship": {
    "effects": {
     "labor_demand": 0.008,
-    "state_capacity": 0.0033,
-    "task_coordination": 0.0024
+    "state_capacity": 0.0015,
+    "task_coordination": 0.0004
    },
    "name": "Stewardship of the Store Passes in Turn",
    "art": "res://assets/ui/research/subjects/public_levies-v1.png"
@@ -262,18 +262,18 @@
   "probationary_appointment_custom": {
    "effects": {
     "legitimacy": 0.002,
-    "state_capacity": 0.0025
+    "state_capacity": 0.0011
    },
    "name": "New Officeholders Serve a Trial Term",
    "art": "res://assets/ui/research/paper/public_office_handover.png"
   },
   "temple_common_storehouse": {
    "effects": {
-    "cohesion": 0.0052,
-    "food_storage": 0.06,
+    "cohesion": 0.0009,
+    "food_storage": 0.015,
     "legitimacy": 0.011,
-    "state_capacity": 0.016,
-    "storage_loss": -0.02
+    "state_capacity": 0.0073,
+    "storage_loss": -0.0032
    },
    "observation": "Offerings are stored in the god's house and given out again in hunger, so the shrine becomes the settlement's granary.",
    "ability_reason": "The god's house becomes the common store: surplus gathers in one guarded place and returns to the people in lean seasons.",
@@ -284,13 +284,13 @@
    "effects": {
     "labor_demand": 0.008,
     "legitimacy": 0.002,
-    "state_capacity": 0.0049
+    "state_capacity": 0.0022
    },
    "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png"
   },
   "public_dispute_airing": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0003,
     "institutional_rigidity": 0.0054,
     "legitimacy": 0.0023
    },
@@ -299,17 +299,17 @@
   },
   "offering_keepers": {
    "effects": {
-    "knowledge_preservation": 0.0032,
-    "state_capacity": 0.004,
-    "storage_loss": -0.015
+    "knowledge_preservation": 0.0019,
+    "state_capacity": 0.0018,
+    "storage_loss": -0.0024
    },
    "observation": "Named keepers count the god's offerings in and out, and answer for any shortfall.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "intervillage_tribute_reconciliation": {
    "effects": {
-    "state_capacity": 0.0034,
-    "task_coordination": 0.002
+    "state_capacity": 0.0016,
+    "task_coordination": 0.0003
    },
    "name": "Villages Reconcile Their Tribute Counts",
    "art": "res://assets/ui/research/subjects/public_levies-v1.png"
@@ -318,9 +318,9 @@
    "effects": {
     "cohesion": -0.01,
     "legitimacy": 0.011,
-    "state_capacity": 0.019,
-    "task_coordination": 0.021,
-    "warfare_readiness": 0.02
+    "state_capacity": 0.0087,
+    "task_coordination": 0.0034,
+    "warfare_readiness": 0.0089
    },
    "observation": "One chief now speaks for several villages, settling their quarrels and leading them together in war.",
    "ability_reason": "Authority reaches past one village: several settlements can raise labor, stores and fighters under one leader.",
@@ -329,7 +329,7 @@
   },
   "mediated_restitution_custom": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0003,
     "institutional_rigidity": 0.0054,
     "legitimacy": 0.002
    },
@@ -339,23 +339,23 @@
   "shared_labor_registers": {
    "effects": {
     "labor_demand": 0.01,
-    "state_capacity": 0.0034
+    "state_capacity": 0.0009
    },
    "name": "Shared-labor Registers",
    "art": "res://assets/ui/research/subjects/public_levies-v1.png"
   },
   "sunset_rule_custom": {
    "effects": {
-    "legitimacy": 0.002,
-    "task_coordination": 0.002
+    "legitimacy": 0.0017,
+    "task_coordination": 0.0005
    },
    "name": "Rules That Lapse Unless Renewed Each Season",
    "art": "res://assets/ui/research/subjects/household_councils-v1.png"
   },
   "rotating_speaker_order": {
    "effects": {
-    "cohesion": 0.002,
-    "legitimacy": 0.002
+    "cohesion": 0.0004,
+    "legitimacy": 0.0017
    },
    "name": "Council Speakers Take Turns in a Set Order",
    "art": "res://assets/ui/research/subjects/household_councils-v1.png"
@@ -363,26 +363,26 @@
   "standing_arbiter_appointment": {
    "effects": {
     "institutional_rigidity": 0.0054,
-    "legitimacy": 0.002,
-    "state_capacity": 0.0034
+    "legitimacy": 0.0017,
+    "state_capacity": 0.0009
    },
    "name": "A Standing Arbiter Appointed",
    "art": "res://assets/ui/research/paper/public_office_handover.png"
   },
   "seal_breaking_rights": {
    "effects": {
-    "legitimacy": 0.002,
-    "state_capacity": 0.003,
-    "storage_loss": -0.02
+    "legitimacy": 0.0017,
+    "state_capacity": 0.0008,
+    "storage_loss": -0.0025
    },
    "observation": "Only the named keeper may break the seal on the store, and a broken seal without him is theft.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "temple_ration_issue": {
    "effects": {
-    "labor_efficiency": 0.015,
-    "state_capacity": 0.006,
-    "task_coordination": 0.0042
+    "labor_efficiency": 0.0023,
+    "state_capacity": 0.0016,
+    "task_coordination": 0.001
    },
    "observation": "Workers of the god's house draw fixed rations of grain, oil and beer, and work for the god rather than their own fields.",
    "art": "res://assets/ui/research/institutions-v1.png"
@@ -390,10 +390,10 @@
   "work_gang_overseers": {
    "effects": {
     "cohesion": -0.005,
-    "construction_rate": 0.03,
+    "construction_rate": 0.0092,
     "fatigue": 0.01,
-    "labor_efficiency": 0.02,
-    "task_coordination": 0.011
+    "labor_efficiency": 0.003,
+    "task_coordination": 0.0027
    },
    "observation": "Overseers lead gangs of levied workers on canals and walls, counting heads each morning.",
    "social_consequence": "Great works get done, and the gangs feel the overseer's rod",
@@ -403,8 +403,8 @@
    "effects": {
     "cohesion": -0.015,
     "institutional_rigidity": 0.016,
-    "legitimacy": 0.0037,
-    "state_capacity": 0.006
+    "legitimacy": 0.0031,
+    "state_capacity": 0.0016
    },
    "observation": "The chief's rank passes to his kin, and a chiefly lineage stands above the others by birth.",
    "social_consequence": "Authority hardens into rank; order and reach improve, but households outside the ruling line lose their voice",
@@ -412,10 +412,10 @@
   },
   "free_adult_assembly": {
    "effects": {
-    "cohesion": 0.0052,
+    "cohesion": 0.0011,
     "institutional_rigidity": -0.01,
-    "legitimacy": 0.0037,
-    "state_capacity": 0.002
+    "legitimacy": 0.0026,
+    "state_capacity": 0.0008
    },
    "observation": "For war, famine or a new chief, every free adult gathers to hear the matter and give voice.",
    "art": "res://assets/ui/research/institutions-v1.png"
@@ -423,17 +423,17 @@
   "grain_levy_accounting": {
    "effects": {
     "institutional_rigidity": 0.0054,
-    "state_capacity": 0.0049,
-    "task_coordination": 0.002
+    "state_capacity": 0.0018,
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png"
   },
   "tributary_villages": {
    "effects": {
     "cohesion": -0.01,
-    "food_storage": 0.02,
-    "legitimacy": 0.002,
-    "state_capacity": 0.008
+    "food_storage": 0.0041,
+    "legitimacy": 0.0014,
+    "state_capacity": 0.003
    },
    "observation": "Subject villages bring grain and animals at set seasons to the leading town.",
    "social_consequence": "The leading town grows fat while the subject villages count what they give away",
@@ -441,33 +441,33 @@
   },
   "public_grievance_hearings": {
    "effects": {
-    "cohesion": 0.0026,
-    "legitimacy": 0.003
+    "cohesion": 0.0006,
+    "legitimacy": 0.0021
    },
    "name": "Standing Grievance Hearings",
    "art": "res://assets/ui/research/paper/petition_registers.png"
   },
   "regional_arbitration_circuits": {
    "effects": {
-    "cohesion": 0.0026,
+    "cohesion": 0.0006,
     "labor_demand": 0.01,
-    "state_capacity": 0.0066
+    "state_capacity": 0.0025
    },
    "name": "Arbiters Travel a Circuit of Villages",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "formal_oath_taking": {
    "effects": {
-    "legitimacy": 0.003,
-    "state_capacity": 0.002
+    "legitimacy": 0.0021,
+    "state_capacity": 0.0008
    },
    "name": "Formal Oath-taking at the God's House",
    "art": "res://assets/ui/research/paper/public_office_handover.png"
   },
   "council_reformation_practice": {
    "effects": {
-    "cohesion": 0.0026,
-    "state_capacity": 0.0049
+    "cohesion": 0.0009,
+    "state_capacity": 0.0008
    },
    "name": "Councils Reform Their Own Procedure",
    "art": "res://assets/ui/research/subjects/household_councils-v1.png"
@@ -475,10 +475,10 @@
   "temple_high_steward": {
    "effects": {
     "institutional_rigidity": 0.014,
-    "knowledge_preservation": 0.0035,
-    "legitimacy": 0.014,
-    "state_capacity": 0.023,
-    "task_coordination": 0.021
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0062,
+    "state_capacity": 0.0038,
+    "task_coordination": 0.0026
    },
    "observation": "The high steward of the god's house directs its lands, stores and workers, and the town looks to him as its head.",
    "ability_reason": "The god's steward governs the town: stores, labor and rites answer to one office with records to match.",
@@ -487,8 +487,8 @@
   },
   "cross_household_grain_audits": {
    "effects": {
-    "food_storage": 0.015,
-    "state_capacity": 0.0034
+    "food_storage": 0.0049,
+    "state_capacity": 0.0006
    },
    "name": "Households Audit Each Other's Grain",
    "art": "res://assets/ui/research/subjects/public_levies-v1.png"
@@ -496,41 +496,41 @@
   "oath_witness_registers": {
    "effects": {
     "institutional_rigidity": 0.0054,
-    "legitimacy": 0.002
+    "legitimacy": 0.0009
    },
    "name": "Registers of Who Witnessed Each Oath",
    "art": "res://assets/ui/research/paper/public_office_handover.png"
   },
   "regional_levy_coordination": {
    "effects": {
-    "state_capacity": 0.0051,
-    "task_coordination": 0.002
+    "state_capacity": 0.0009,
+    "task_coordination": 0.0003
    },
    "name": "Levies Coordinated Across a District",
    "art": "res://assets/ui/research/subjects/public_levies-v1.png"
   },
   "worker_ration_lists": {
    "effects": {
-    "knowledge_preservation": 0.0032,
-    "labor_efficiency": 0.015,
-    "state_capacity": 0.006,
-    "task_coordination": 0.0028
+    "knowledge_preservation": 0.0006,
+    "labor_efficiency": 0.0021,
+    "state_capacity": 0.001,
+    "task_coordination": 0.0004
    },
    "observation": "Lists record each worker's ration month by month, so no one is fed twice and no one is forgotten.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "appeal_reopening_custom": {
    "effects": {
-    "cohesion": 0.002,
-    "legitimacy": 0.002
+    "cohesion": 0.0007,
+    "legitimacy": 0.0009
    },
    "name": "A Settled Case May Be Reopened on Appeal",
    "art": "res://assets/ui/research/paper/petition_registers.png"
   },
   "succession_naming_rites": {
    "effects": {
-    "cohesion": 0.002,
-    "legitimacy": 0.002
+    "cohesion": 0.0007,
+    "legitimacy": 0.0009
    },
    "name": "Heir Named in Public Before the Elders",
    "art": "res://assets/ui/research/paper/public_office_handover.png"
@@ -538,20 +538,20 @@
   "census_rolls": {
    "effects": {
     "institutional_rigidity": 0.011,
-    "knowledge_preservation": 0.01,
+    "knowledge_preservation": 0.0017,
     "labor_demand": 0.025,
-    "state_capacity": 0.032,
-    "task_coordination": 0.035
+    "state_capacity": 0.0053,
+    "task_coordination": 0.0044
    },
    "ability_reason": "Every household is counted by name, age and duty, so levies, rations and musters rest on known numbers."
   },
   "public_levies": {
    "effects": {
     "cohesion": -0.01,
-    "construction_rate": 0.05,
+    "construction_rate": 0.0108,
     "labor_demand": 0.035,
-    "legitimacy": 0.007,
-    "state_capacity": 0.035
+    "legitimacy": 0.0029,
+    "state_capacity": 0.0058
    },
    "ability_reason": "Labor and goods are levied on a schedule, so great works can be planned rather than begged for."
   },
@@ -559,18 +559,18 @@
    "effects": {
     "cultivation_yield": 0.02,
     "institutional_rigidity": 0.0054,
-    "state_capacity": 0.008,
-    "task_coordination": 0.0085
+    "state_capacity": 0.0013,
+    "task_coordination": 0.0027
    },
    "observation": "Titled overseers answer for the fields, the granary and the works, each with his own staff and tallies.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "witnessed_land_sales": {
    "effects": {
-    "cohesion": 0.002,
-    "legitimacy": 0.002,
-    "state_capacity": 0.002,
-    "trade_capacity": 0.0075
+    "cohesion": 0.0005,
+    "legitimacy": 0.0008,
+    "state_capacity": 0.0003,
+    "trade_capacity": 0.0025
    },
    "observation": "A field changes hands only before witnesses who hear its boundaries recited aloud.",
    "art": "res://assets/ui/research/institutions-v1.png"
@@ -578,9 +578,9 @@
   "fixed_interest_loans": {
    "effects": {
     "cohesion": -0.02,
-    "craft_output": 0.01,
+    "craft_output": 0.0039,
     "legitimacy": -0.005,
-    "trade_capacity": 0.013
+    "trade_capacity": 0.0043
    },
    "observation": "Grain and silver are lent at a fixed rate of interest, written down and sealed.",
    "social_consequence": "Credit lets households borrow through a bad year, and binds the unlucky to their lenders",
@@ -588,10 +588,10 @@
   },
   "separate_temple_palace_stores": {
    "effects": {
-    "food_storage": 0.02,
+    "food_storage": 0.0016,
     "institutional_rigidity": 0.0054,
-    "legitimacy": 0.002,
-    "state_capacity": 0.006
+    "legitimacy": 0.0008,
+    "state_capacity": 0.001
    },
    "observation": "The palace keeps its own stores apart from the god's house, and each has its own stewards and records.",
    "art": "res://assets/ui/research/institutions-v1.png"
@@ -599,8 +599,8 @@
   "cross_settlement_registries": {
    "effects": {
     "institutional_rigidity": 0.0054,
-    "legitimacy": 0.002,
-    "state_capacity": 0.0049
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0007
    },
    "name": "Registers Shared Between Settlements",
    "art": "res://assets/ui/research/subjects/public_levies-v1.png"
@@ -609,10 +609,10 @@
    "effects": {
     "cohesion": -0.01,
     "institutional_rigidity": 0.021,
-    "legitimacy": 0.018,
-    "state_capacity": 0.026,
-    "task_coordination": 0.021,
-    "warfare_readiness": 0.04
+    "legitimacy": 0.0034,
+    "state_capacity": 0.0038,
+    "task_coordination": 0.0029,
+    "warfare_readiness": 0.0062
    },
    "observation": "The war-leader no longer lays down his command when the danger passes; he rules for life from his own great house.",
    "ability_reason": "A king commands for life: orders reach further and are carried out more surely, while his house becomes a power of its own.",
@@ -622,8 +622,8 @@
   "ceremonial_investiture": {
    "effects": {
     "institutional_rigidity": 0.0054,
-    "legitimacy": 0.003,
-    "state_capacity": 0.0033
+    "legitimacy": 0.0006,
+    "state_capacity": 0.0005
    },
    "name": "Officials Invested Before the God",
    "art": "res://assets/ui/research/paper/public_office_handover.png"
@@ -631,8 +631,8 @@
   "assembly_petition_rights": {
    "effects": {
     "labor_demand": 0.01,
-    "legitimacy": 0.0023,
-    "state_capacity": 0.0033
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0005
    },
    "name": "Right to Petition the Assembly",
    "art": "res://assets/ui/research/paper/petition_registers.png"
@@ -640,19 +640,19 @@
   "provincial_governors": {
    "effects": {
     "institutional_rigidity": 0.0054,
-    "security_efficiency": 0.02,
-    "state_capacity": 0.012,
-    "task_coordination": 0.0057
+    "security_efficiency": 0.0084,
+    "state_capacity": 0.0018,
+    "task_coordination": 0.0008
    },
    "observation": "Governors appointed by the king rule subject towns in his name and send their tribute on.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "public_heralds": {
    "effects": {
-    "adoption_rate": 0.011,
-    "legitimacy": 0.0025,
-    "state_capacity": 0.003,
-    "task_coordination": 0.0057
+    "adoption_rate": 0.0097,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0004,
+    "task_coordination": 0.0008
    },
    "observation": "Heralds proclaim each decision in the square, so no household can say it never heard the order.",
    "art": "res://assets/ui/research/institutions-v1.png"
@@ -660,8 +660,8 @@
   "codified_tribute_schedules": {
    "effects": {
     "institutional_rigidity": 0.008,
-    "legitimacy": 0.002,
-    "state_capacity": 0.0066
+    "legitimacy": 0.0004,
+    "state_capacity": 0.001
    },
    "name": "Tribute Schedules Fixed by Amount and Date",
    "art": "res://assets/ui/research/subjects/public_levies-v1.png"
@@ -670,28 +670,28 @@
    "effects": {
     "institutional_rigidity": 0.018,
     "labor_demand": 0.025,
-    "legitimacy": 0.028,
-    "state_capacity": 0.026,
-    "trade_capacity": 0.036
+    "legitimacy": 0.006,
+    "state_capacity": 0.0038,
+    "trade_capacity": 0.0036
    },
    "ability_reason": "Disputes of each kind go to judges who know them, and rulings become faster and more consistent."
   },
   "boundary_treaties": {
    "effects": {
-    "cohesion": 0.0026,
-    "legitimacy": 0.002,
-    "security_efficiency": 0.03,
-    "trade_capacity": 0.0025
+    "cohesion": 0.001,
+    "legitimacy": 0.0004,
+    "security_efficiency": 0.0081,
+    "trade_capacity": 0.0002
    },
    "observation": "Neighboring towns swear a boundary before their gods and set up a stone where the land divides.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "dynastic_succession": {
    "effects": {
-    "cohesion": 0.0026,
+    "cohesion": 0.001,
     "institutional_rigidity": 0.016,
-    "legitimacy": 0.005,
-    "state_capacity": 0.006
+    "legitimacy": 0.0011,
+    "state_capacity": 0.0009
    },
    "observation": "The ruler names an heir of his own house, and rule passes without a contest among the great men.",
    "social_consequence": "Succession wars grow rare, and a poor heir is as hard to remove as a good one",
@@ -700,26 +700,26 @@
   "precedent_review_councils": {
    "effects": {
     "institutional_rigidity": 0.0054,
-    "legitimacy": 0.0023,
-    "state_capacity": 0.0033
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0005
    },
    "name": "Councils Review Past Judgments as Precedent",
    "art": "res://assets/ui/research/paper/petition_registers.png"
   },
   "proclaimed_standard_weights": {
    "effects": {
-    "legitimacy": 0.002,
-    "standardization": 0.021,
-    "state_capacity": 0.003,
-    "trade_capacity": 0.0075
+    "legitimacy": 0.0004,
+    "standardization": 0.0038,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0007
    },
    "observation": "Officials proclaim the standard weights and check the merchants' stones against them.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "debt_release_edicts": {
    "effects": {
-    "cohesion": 0.01,
-    "legitimacy": 0.005,
+    "cohesion": 0.0037,
+    "legitimacy": 0.0011,
     "trade_capacity": -0.02
    },
    "observation": "A new ruler proclaims debts forgiven and bondsmen freed, and the land is set right again.",
@@ -728,19 +728,19 @@
   },
   "foreign_treaties": {
    "effects": {
-    "legitimacy": 0.002,
-    "security_efficiency": 0.02,
-    "trade_capacity": 0.013
+    "legitimacy": 0.0004,
+    "security_efficiency": 0.0054,
+    "trade_capacity": 0.0013
    },
    "observation": "The ruler swears a treaty with a foreign king, fixing trade, peace and the return of runaways.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "sealed_travel_passes": {
    "effects": {
-    "logistics_endurance": 0.02,
-    "route_speed": 0.03,
-    "state_capacity": 0.004,
-    "trade_capacity": 0.005
+    "logistics_endurance": 0.0057,
+    "route_speed": 0.0062,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.0005
    },
    "observation": "The ruler's messengers carry sealed passes that draw rations and lodging at every station on the road.",
    "art": "res://assets/ui/research/institutions-v1.png"
@@ -748,10 +748,10 @@
   "temple_estates": {
    "effects": {
     "cohesion": -0.01,
-    "cultivation_yield": 0.03,
-    "food_storage": 0.02,
+    "cultivation_yield": 0.0157,
+    "food_storage": 0.0042,
     "institutional_rigidity": 0.0054,
-    "state_capacity": 0.006
+    "state_capacity": 0.0011
    },
    "observation": "Tenants and dependents work the god's estates for a share, and the harvest fills the temple stores.",
    "social_consequence": "Temple estates feed the town, and the tenants who work them own nothing of it",
@@ -759,30 +759,30 @@
   },
   "area_harvest_assessment": {
    "effects": {
-    "food_storage": 0.01,
-    "legitimacy": 0.002,
-    "state_capacity": 0.008
+    "food_storage": 0.0021,
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0015
    },
    "observation": "Harvest dues are set by the measured area of each field, not by the steward's guess.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "royal_inscriptions": {
    "effects": {
-    "cohesion": 0.0026,
-    "knowledge_preservation": 0.0032,
-    "legitimacy": 0.005
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0007,
+    "legitimacy": 0.0009
    },
    "observation": "Inscriptions on stone proclaim the ruler's works and justice for every passerby who can read, and many who cannot.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "written_law_code": {
    "effects": {
-    "cohesion": 0.016,
+    "cohesion": 0.0029,
     "institutional_rigidity": 0.028,
-    "knowledge_preservation": 0.007,
-    "legitimacy": 0.025,
-    "security_efficiency": 0.03,
-    "state_capacity": 0.019
+    "knowledge_preservation": 0.0016,
+    "legitimacy": 0.0046,
+    "security_efficiency": 0.0127,
+    "state_capacity": 0.0036
    },
    "observation": "Judgments are collected into a written law: if a man does this, this is his penalty.",
    "ability_reason": "Law is written down case by case: judges rule alike, penalties are known in advance, and orders carry the weight of the code.",
@@ -791,37 +791,37 @@
   },
   "sworn_judges": {
    "effects": {
-    "cohesion": 0.0026,
-    "legitimacy": 0.0037,
-    "state_capacity": 0.004
+    "cohesion": 0.0005,
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0008
    },
    "observation": "A judge swears before the god on taking office, and a corrupt judgment becomes a sin as well as a crime.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "sworn_trial_testimony": {
    "effects": {
-    "knowledge_preservation": 0.0032,
-    "legitimacy": 0.0037,
-    "security_efficiency": 0.015
+    "knowledge_preservation": 0.0007,
+    "legitimacy": 0.0007,
+    "security_efficiency": 0.0063
    },
    "observation": "Witnesses swear their testimony, and scribes write it down for the judges to weigh.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "provincial_accounts": {
    "effects": {
-    "knowledge_preservation": 0.0048,
+    "knowledge_preservation": 0.0036,
     "labor_demand": 0.01,
-    "state_capacity": 0.012,
-    "task_coordination": 0.0057
+    "state_capacity": 0.0033,
+    "task_coordination": 0.004
    },
    "observation": "Each province sends its yearly accounts to the capital, where they are checked against the last.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "sealed_family_contracts": {
    "effects": {
-    "cohesion": 0.0052,
-    "legitimacy": 0.002,
-    "trade_capacity": 0.0025
+    "cohesion": 0.0013,
+    "legitimacy": 0.0004,
+    "trade_capacity": 0.0003
    },
    "observation": "Adoptions, marriages and inheritances are written and sealed, and a disinherited son finds the tablet against him.",
    "art": "res://assets/ui/research/institutions-v1.png"
@@ -829,8 +829,8 @@
   "caravan_tolls": {
    "effects": {
     "route_speed": -0.01,
-    "state_capacity": 0.006,
-    "trade_capacity": 0.005
+    "state_capacity": 0.0017,
+    "trade_capacity": 0.0006
    },
    "observation": "Frontier posts stop caravans and take a toll on their goods before they pass.",
    "art": "res://assets/ui/research/institutions-v1.png"
@@ -839,36 +839,36 @@
    "effects": {
     "cohesion": -0.015,
     "institutional_rigidity": 0.013,
-    "legitimacy": 0.0037,
-    "state_capacity": 0.016,
-    "trade_capacity": 0.023
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0044,
+    "trade_capacity": 0.0029
    }
   },
   "town_mayors": {
    "effects": {
-    "legitimacy": 0.0025,
-    "state_capacity": 0.008,
-    "task_coordination": 0.0057
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0022,
+    "task_coordination": 0.004
    },
    "observation": "Each town has a mayor and elders who answer to the governor for its dues and its peace.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "royal_appeal_court": {
    "effects": {
-    "cohesion": 0.0026,
-    "legitimacy": 0.005,
-    "state_capacity": 0.004
+    "cohesion": 0.0007,
+    "legitimacy": 0.0009,
+    "state_capacity": 0.0011
    },
    "observation": "A household wronged by a local judge may carry its case to the ruler's own court.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "price_wage_schedules": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0005,
     "institutional_rigidity": 0.011,
-    "legitimacy": 0.002,
-    "standardization": 0.012,
-    "trade_capacity": 0.005
+    "legitimacy": 0.0004,
+    "standardization": 0.0033,
+    "trade_capacity": 0.0006
    },
    "observation": "The ruler proclaims what a day's hire, an ox or a measure of grain should cost.",
    "social_consequence": "Fixed prices protect the poor in good years and empty the market in bad ones",
@@ -877,19 +877,19 @@
   "licensed_merchant_houses": {
    "effects": {
     "institutional_rigidity": 0.0054,
-    "state_capacity": 0.003,
-    "trade_capacity": 0.015
+    "state_capacity": 0.0008,
+    "trade_capacity": 0.0019
    },
    "observation": "Merchant houses licensed by the palace trade abroad on its behalf and their own.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "public_law_stele": {
    "effects": {
-    "adoption_rate": 0.013,
-    "cohesion": 0.016,
+    "adoption_rate": 0.0019,
+    "cohesion": 0.003,
     "institutional_rigidity": 0.014,
-    "legitimacy": 0.021,
-    "state_capacity": 0.0097
+    "legitimacy": 0.0038,
+    "state_capacity": 0.0033
    },
    "observation": "The law is carved on a great stone in the public square, so any wronged man may have it read to him.",
    "ability_reason": "The law stands in public for all to consult; people know what the ruler has promised and what he demands.",
@@ -899,58 +899,588 @@
   "service_land_grants": {
    "effects": {
     "cohesion": -0.005,
-    "cultivation_yield": 0.01,
-    "state_capacity": 0.006,
-    "warfare_readiness": 0.03
+    "cultivation_yield": 0.0051,
+    "state_capacity": 0.002,
+    "warfare_readiness": 0.0069
    },
    "observation": "Soldiers and officials hold land in return for service, and lose it if the service stops.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "jurisdiction_boundaries": {
    "effects": {
-    "cohesion": 0.0026,
+    "cohesion": 0.0005,
     "institutional_rigidity": 0.0054,
-    "legitimacy": 0.0037,
-    "state_capacity": 0.01
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0034
    },
    "observation": "Each district knows which court and which governor rules it, and cases no longer bounce between them."
   },
   "workshop_quotas": {
    "effects": {
-    "craft_output": 0.04,
+    "craft_output": 0.0191,
     "fatigue": 0.01,
-    "standardization": 0.0082,
-    "state_capacity": 0.004
+    "standardization": 0.0057,
+    "state_capacity": 0.0014
    },
    "observation": "Palace and temple workshops are set yearly quotas of cloth, pots and tools, checked against their rations.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "circuit_inspectors": {
    "effects": {
-    "legitimacy": 0.0025,
-    "state_capacity": 0.01,
-    "storage_loss": -0.01
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0034,
+    "storage_loss": -0.0023
    },
    "observation": "Inspectors ride from province to province to check the governors' stores, accounts and justice.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "standard_royal_letters": {
    "effects": {
-    "adoption_rate": 0.0053,
-    "state_capacity": 0.008,
-    "task_coordination": 0.0085
+    "adoption_rate": 0.0008,
+    "state_capacity": 0.0027,
+    "task_coordination": 0.0028
    },
    "observation": "Governors answer the ruler's letters in a set form, point by point, and his orders are carried out to the letter.",
    "art": "res://assets/ui/research/institutions-v1.png"
   },
   "service_land_registers": {
    "effects": {
-    "legitimacy": 0.002,
-    "state_capacity": 0.008,
-    "warfare_readiness": 0.01
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0027,
+    "warfare_readiness": 0.0023
    },
    "observation": "Registers of service land are checked against the census, so no holder escapes his duty.",
    "art": "res://assets/ui/research/institutions-v1.png"
+  }
+ },
+ "balance_600": {
+  "schema": "research_600_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_600.py; the loader reads only 'items'.",
+  "source": {
+   "customary_law": {
+    "cohesion": 0.026,
+    "institutional_rigidity": 0.021,
+    "legitimacy": 0.025,
+    "state_capacity": 0.019
+   },
+   "public_stores": {
+    "cohesion": 0.0079,
+    "container_capacity": 0.06,
+    "food_storage": 0.13,
+    "labor_demand": 0.02,
+    "state_capacity": 0.014
+   },
+   "household_councils": {
+    "cohesion": 0.037,
+    "labor_demand": 0.015,
+    "legitimacy": 0.014,
+    "state_capacity": 0.0097
+   },
+   "census_rolls": {
+    "institutional_rigidity": 0.011,
+    "knowledge_preservation": 0.01,
+    "labor_demand": 0.025,
+    "state_capacity": 0.032,
+    "task_coordination": 0.035
+   },
+   "public_levies": {
+    "cohesion": -0.01,
+    "construction_rate": 0.05,
+    "labor_demand": 0.035,
+    "legitimacy": 0.007,
+    "state_capacity": 0.035
+   },
+   "specialized_courts": {
+    "institutional_rigidity": 0.018,
+    "labor_demand": 0.025,
+    "legitimacy": 0.028,
+    "state_capacity": 0.026,
+    "trade_capacity": 0.036
+   },
+   "property_registers": {
+    "cohesion": -0.015,
+    "institutional_rigidity": 0.013,
+    "legitimacy": 0.0037,
+    "state_capacity": 0.016,
+    "trade_capacity": 0.023
+   },
+   "jurisdiction_boundaries": {
+    "cohesion": 0.0026,
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.0037,
+    "state_capacity": 0.01
+   },
+   "witnessed_agreement_customs": {
+    "cohesion": 0.002,
+    "legitimacy": 0.002
+   },
+   "elder_council_assent": {
+    "cohesion": 0.002,
+    "legitimacy": 0.0023
+   },
+   "public_grain_weighing": {
+    "legitimacy": 0.002,
+    "task_coordination": 0.002
+   },
+   "public_dispute_airing": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.0023
+   },
+   "rotating_speaker_order": {
+    "cohesion": 0.002,
+    "legitimacy": 0.002
+   },
+   "formal_oath_taking": {
+    "legitimacy": 0.003,
+    "state_capacity": 0.002
+   },
+   "oath_witness_registers": {
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.002
+   },
+   "assembly_petition_rights": {
+    "labor_demand": 0.01,
+    "legitimacy": 0.0023,
+    "state_capacity": 0.0033
+   },
+   "seasonal_duty_rosters": {
+    "cohesion": 0.002,
+    "task_coordination": 0.002
+   },
+   "household_task_ledgers": {
+    "labor_efficiency": 0.013,
+    "task_coordination": 0.0024
+   },
+   "labor_debt_tallies": {
+    "institutional_rigidity": 0.0054,
+    "labor_efficiency": 0.007,
+    "task_coordination": 0.002
+   },
+   "rotating_stewardship": {
+    "labor_demand": 0.008,
+    "state_capacity": 0.0033,
+    "task_coordination": 0.0024
+   },
+   "shared_labor_registers": {
+    "labor_demand": 0.01,
+    "state_capacity": 0.0034
+   },
+   "grain_levy_accounting": {
+    "institutional_rigidity": 0.0054,
+    "state_capacity": 0.0049,
+    "task_coordination": 0.002
+   },
+   "cross_household_grain_audits": {
+    "food_storage": 0.015,
+    "state_capacity": 0.0034
+   },
+   "cross_settlement_registries": {
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.002,
+    "state_capacity": 0.0049
+   },
+   "dissenting_voice_custom": {
+    "cohesion": 0.002,
+    "legitimacy": 0.002
+   },
+   "consensus_amendment_custom": {
+    "cohesion": 0.004,
+    "task_coordination": 0.002
+   },
+   "trial_custom_periods": {
+    "labor_demand": 0.008,
+    "legitimacy": 0.002,
+    "task_coordination": 0.0024
+   },
+   "probationary_appointment_custom": {
+    "legitimacy": 0.002,
+    "state_capacity": 0.0025
+   },
+   "sunset_rule_custom": {
+    "legitimacy": 0.002,
+    "task_coordination": 0.002
+   },
+   "council_reformation_practice": {
+    "cohesion": 0.0026,
+    "state_capacity": 0.0049
+   },
+   "appeal_reopening_custom": {
+    "cohesion": 0.002,
+    "legitimacy": 0.002
+   },
+   "precedent_review_councils": {
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.0023,
+    "state_capacity": 0.0033
+   },
+   "leader_gift_redistribution": {
+    "cohesion": 0.002,
+    "legitimacy": 0.002
+   },
+   "elder_consultation_rites": {
+    "cohesion": 0.0026,
+    "legitimacy": 0.0023
+   },
+   "public_praise_assemblies": {
+    "cohesion": 0.002,
+    "legitimacy": 0.002
+   },
+   "boundary_oath_rituals": {
+    "cohesion": 0.0026,
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.0023
+   },
+   "mediated_restitution_custom": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.002
+   },
+   "public_grievance_hearings": {
+    "cohesion": 0.0026,
+    "legitimacy": 0.003
+   },
+   "succession_naming_rites": {
+    "cohesion": 0.002,
+    "legitimacy": 0.002
+   },
+   "ceremonial_investiture": {
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.003,
+    "state_capacity": 0.0033
+   },
+   "seasonal_tribute_counts": {
+    "state_capacity": 0.0049,
+    "task_coordination": 0.002
+   },
+   "boundary_marker_surveys": {
+    "labor_demand": 0.008,
+    "legitimacy": 0.002,
+    "state_capacity": 0.0049
+   },
+   "intervillage_tribute_reconciliation": {
+    "state_capacity": 0.0034,
+    "task_coordination": 0.002
+   },
+   "standing_arbiter_appointment": {
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.002,
+    "state_capacity": 0.0034
+   },
+   "regional_arbitration_circuits": {
+    "cohesion": 0.0026,
+    "labor_demand": 0.01,
+    "state_capacity": 0.0066
+   },
+   "regional_levy_coordination": {
+    "state_capacity": 0.0051,
+    "task_coordination": 0.002
+   },
+   "codified_tribute_schedules": {
+    "institutional_rigidity": 0.008,
+    "legitimacy": 0.002,
+    "state_capacity": 0.0066
+   },
+   "lineage_land_tenure": {
+    "cohesion": 0.0039,
+    "legitimacy": 0.002,
+    "soil_productivity": 0.01
+   },
+   "blood_price": {
+    "cohesion": 0.0052,
+    "legitimacy": 0.002,
+    "security_efficiency": 0.01
+   },
+   "seasonal_crisis_leader": {
+    "disaster_resilience": 0.015,
+    "state_capacity": 0.004,
+    "task_coordination": 0.0057
+   },
+   "petition_speakers": {
+    "cohesion": 0.0026,
+    "legitimacy": 0.0025
+   },
+   "banishment_sentence": {
+    "cohesion": 0.0026,
+    "institutional_rigidity": 0.0027,
+    "legitimacy": 0.002,
+    "security_efficiency": 0.015
+   },
+   "household_mediators": {
+    "cohesion": 0.0052,
+    "legitimacy": 0.002
+   },
+   "exculpatory_oath": {
+    "cohesion": 0.0026,
+    "legitimacy": 0.002
+   },
+   "customary_inheritance_shares": {
+    "cohesion": 0.0039,
+    "institutional_rigidity": 0.0027,
+    "legitimacy": 0.002
+   },
+   "field_boundary_markers": {
+    "cohesion": 0.0026,
+    "soil_productivity": 0.01,
+    "state_capacity": 0.002
+   },
+   "leader_feast_obligations": {
+    "cohesion": 0.0039,
+    "food_storage": -0.01,
+    "legitimacy": 0.0025
+   },
+   "temple_common_storehouse": {
+    "cohesion": 0.0052,
+    "food_storage": 0.06,
+    "legitimacy": 0.011,
+    "state_capacity": 0.016,
+    "storage_loss": -0.02
+   },
+   "offering_keepers": {
+    "knowledge_preservation": 0.0032,
+    "state_capacity": 0.004,
+    "storage_loss": -0.015
+   },
+   "paramount_chiefdom": {
+    "cohesion": -0.01,
+    "legitimacy": 0.011,
+    "state_capacity": 0.019,
+    "task_coordination": 0.021,
+    "warfare_readiness": 0.02
+   },
+   "seal_breaking_rights": {
+    "legitimacy": 0.002,
+    "state_capacity": 0.003,
+    "storage_loss": -0.02
+   },
+   "temple_ration_issue": {
+    "labor_efficiency": 0.015,
+    "state_capacity": 0.006,
+    "task_coordination": 0.0042
+   },
+   "work_gang_overseers": {
+    "cohesion": -0.005,
+    "construction_rate": 0.03,
+    "fatigue": 0.01,
+    "labor_efficiency": 0.02,
+    "task_coordination": 0.011
+   },
+   "hereditary_chiefly_rank": {
+    "cohesion": -0.015,
+    "institutional_rigidity": 0.016,
+    "legitimacy": 0.0037,
+    "state_capacity": 0.006
+   },
+   "free_adult_assembly": {
+    "cohesion": 0.0052,
+    "institutional_rigidity": -0.01,
+    "legitimacy": 0.0037,
+    "state_capacity": 0.002
+   },
+   "tributary_villages": {
+    "cohesion": -0.01,
+    "food_storage": 0.02,
+    "legitimacy": 0.002,
+    "state_capacity": 0.008
+   },
+   "temple_high_steward": {
+    "institutional_rigidity": 0.014,
+    "knowledge_preservation": 0.0035,
+    "legitimacy": 0.014,
+    "state_capacity": 0.023,
+    "task_coordination": 0.021
+   },
+   "worker_ration_lists": {
+    "knowledge_preservation": 0.0032,
+    "labor_efficiency": 0.015,
+    "state_capacity": 0.006,
+    "task_coordination": 0.0028
+   },
+   "titled_estate_overseers": {
+    "cultivation_yield": 0.02,
+    "institutional_rigidity": 0.0054,
+    "state_capacity": 0.008,
+    "task_coordination": 0.0085
+   },
+   "witnessed_land_sales": {
+    "cohesion": 0.002,
+    "legitimacy": 0.002,
+    "state_capacity": 0.002,
+    "trade_capacity": 0.0075
+   },
+   "fixed_interest_loans": {
+    "cohesion": -0.02,
+    "craft_output": 0.01,
+    "legitimacy": -0.005,
+    "trade_capacity": 0.013
+   },
+   "separate_temple_palace_stores": {
+    "food_storage": 0.02,
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.002,
+    "state_capacity": 0.006
+   },
+   "kingship": {
+    "cohesion": -0.01,
+    "institutional_rigidity": 0.021,
+    "legitimacy": 0.018,
+    "state_capacity": 0.026,
+    "task_coordination": 0.021,
+    "warfare_readiness": 0.04
+   },
+   "provincial_governors": {
+    "institutional_rigidity": 0.0054,
+    "security_efficiency": 0.02,
+    "state_capacity": 0.012,
+    "task_coordination": 0.0057
+   },
+   "public_heralds": {
+    "adoption_rate": 0.011,
+    "legitimacy": 0.0025,
+    "state_capacity": 0.003,
+    "task_coordination": 0.0057
+   },
+   "boundary_treaties": {
+    "cohesion": 0.0026,
+    "legitimacy": 0.002,
+    "security_efficiency": 0.03,
+    "trade_capacity": 0.0025
+   },
+   "dynastic_succession": {
+    "cohesion": 0.0026,
+    "institutional_rigidity": 0.016,
+    "legitimacy": 0.005,
+    "state_capacity": 0.006
+   },
+   "proclaimed_standard_weights": {
+    "legitimacy": 0.002,
+    "standardization": 0.021,
+    "state_capacity": 0.003,
+    "trade_capacity": 0.0075
+   },
+   "debt_release_edicts": {
+    "cohesion": 0.01,
+    "legitimacy": 0.005,
+    "trade_capacity": -0.02
+   },
+   "foreign_treaties": {
+    "legitimacy": 0.002,
+    "security_efficiency": 0.02,
+    "trade_capacity": 0.013
+   },
+   "sealed_travel_passes": {
+    "logistics_endurance": 0.02,
+    "route_speed": 0.03,
+    "state_capacity": 0.004,
+    "trade_capacity": 0.005
+   },
+   "temple_estates": {
+    "cohesion": -0.01,
+    "cultivation_yield": 0.03,
+    "food_storage": 0.02,
+    "institutional_rigidity": 0.0054,
+    "state_capacity": 0.006
+   },
+   "royal_inscriptions": {
+    "cohesion": 0.0026,
+    "knowledge_preservation": 0.0032,
+    "legitimacy": 0.005
+   },
+   "area_harvest_assessment": {
+    "food_storage": 0.01,
+    "legitimacy": 0.002,
+    "state_capacity": 0.008
+   },
+   "written_law_code": {
+    "cohesion": 0.016,
+    "institutional_rigidity": 0.028,
+    "knowledge_preservation": 0.007,
+    "legitimacy": 0.025,
+    "security_efficiency": 0.03,
+    "state_capacity": 0.019
+   },
+   "sworn_judges": {
+    "cohesion": 0.0026,
+    "legitimacy": 0.0037,
+    "state_capacity": 0.004
+   },
+   "sworn_trial_testimony": {
+    "knowledge_preservation": 0.0032,
+    "legitimacy": 0.0037,
+    "security_efficiency": 0.015
+   },
+   "provincial_accounts": {
+    "knowledge_preservation": 0.0048,
+    "labor_demand": 0.01,
+    "state_capacity": 0.012,
+    "task_coordination": 0.0057
+   },
+   "sealed_family_contracts": {
+    "cohesion": 0.0052,
+    "legitimacy": 0.002,
+    "trade_capacity": 0.0025
+   },
+   "caravan_tolls": {
+    "route_speed": -0.01,
+    "state_capacity": 0.006,
+    "trade_capacity": 0.005
+   },
+   "town_mayors": {
+    "legitimacy": 0.0025,
+    "state_capacity": 0.008,
+    "task_coordination": 0.0057
+   },
+   "royal_appeal_court": {
+    "cohesion": 0.0026,
+    "legitimacy": 0.005,
+    "state_capacity": 0.004
+   },
+   "price_wage_schedules": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.011,
+    "legitimacy": 0.002,
+    "standardization": 0.012,
+    "trade_capacity": 0.005
+   },
+   "licensed_merchant_houses": {
+    "institutional_rigidity": 0.0054,
+    "state_capacity": 0.003,
+    "trade_capacity": 0.015
+   },
+   "public_law_stele": {
+    "adoption_rate": 0.013,
+    "cohesion": 0.016,
+    "institutional_rigidity": 0.014,
+    "legitimacy": 0.021,
+    "state_capacity": 0.0097
+   },
+   "service_land_grants": {
+    "cohesion": -0.005,
+    "cultivation_yield": 0.01,
+    "state_capacity": 0.006,
+    "warfare_readiness": 0.03
+   },
+   "workshop_quotas": {
+    "craft_output": 0.04,
+    "fatigue": 0.01,
+    "standardization": 0.0082,
+    "state_capacity": 0.004
+   },
+   "circuit_inspectors": {
+    "legitimacy": 0.0025,
+    "state_capacity": 0.01,
+    "storage_loss": -0.01
+   },
+   "standard_royal_letters": {
+    "adoption_rate": 0.0053,
+    "state_capacity": 0.008,
+    "task_coordination": 0.0085
+   },
+   "service_land_registers": {
+    "legitimacy": 0.002,
+    "state_capacity": 0.008,
+    "warfare_readiness": 0.01
+   }
   }
  }
 }

@@ -83,6 +83,14 @@
    "caption": "Boundary sighting marks (Year 200)",
    "style": "paper_gouache"
   },
+  "burial_ground_separation": {
+   "path": "res://assets/ui/research/discovery-600/burial_ground_separation.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_21_55 PM.png",
+   "tile_index": 3,
+   "caption": "Cemeteries set apart from the village (Year 140)",
+   "style": "silhouette_ochre",
+   "match": "alias"
+  },
   "cairn_sightline_marking": {
    "path": "res://assets/ui/research/discovery-600/cairn_sightline_marking.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
@@ -96,6 +104,22 @@
    "tile_index": 6,
    "caption": "Feast days fixed to the months of the god's calendar (Year 445)",
    "style": "silhouette_ochre"
+  },
+  "cart_bed_framing": {
+   "path": "res://assets/ui/research/discovery-600/cart_bed_framing.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_08_26 PM.png",
+   "tile_index": 3,
+   "caption": "Wheeled transport (Year 290)",
+   "style": "paper_gouache",
+   "match": "milestone"
+  },
+  "central_storehouses": {
+   "path": "res://assets/ui/research/discovery-600/central_storehouses.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_08_26 PM.png",
+   "tile_index": 4,
+   "caption": "Large-scale food storage (Year 300)",
+   "style": "paper_gouache",
+   "match": "milestone"
   },
   "chamber_tombs": {
    "path": "res://assets/ui/research/discovery-600/chamber_tombs.png",
@@ -419,6 +443,14 @@
    "caption": "The god's boat carried in procession (Year 530)",
    "style": "silhouette_ochre"
   },
+  "grain_levy_accounting": {
+   "path": "res://assets/ui/research/discovery-600/grain_levy_accounting.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_08_26 PM.png",
+   "tile_index": 8,
+   "caption": "Permanent administration and tax collection (Year 340)",
+   "style": "paper_gouache",
+   "match": "milestone"
+  },
   "graveside_libations": {
    "path": "res://assets/ui/research/discovery-600/graveside_libations.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 03_21_55 PM.png",
@@ -439,6 +471,14 @@
    "tile_index": 6,
    "caption": "Guest-friendship between houses of different towns (Year 290)",
    "style": "silhouette_ochre"
+  },
+  "guest_host_reciprocity": {
+   "path": "res://assets/ui/research/discovery-600/guest_host_reciprocity.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
+   "tile_index": 6,
+   "caption": "Guest-right: a stranger fed and protected for three days (Year 22)",
+   "style": "silhouette_ochre",
+   "match": "alias"
   },
   "harps_and_lyres": {
    "path": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
@@ -594,6 +634,14 @@
    "caption": "Moon counting: nights between full moons (Year 22)",
    "style": "paper_gouache"
   },
+  "mould_made_mudbricks": {
+   "path": "res://assets/ui/research/discovery-600/mould_made_mudbricks.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_08_26 PM.png",
+   "tile_index": 6,
+   "caption": "Standardized mud bricks (Year 320)",
+   "style": "paper_gouache",
+   "match": "milestone"
+  },
   "mourning_days": {
    "path": "res://assets/ui/research/discovery-600/mourning_days.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
@@ -692,6 +740,14 @@
    "caption": "Owners' marks on pots and bundles (Year 55)",
    "style": "paper_gouache"
   },
+  "ox_drawn_ard": {
+   "path": "res://assets/ui/research/discovery-600/ox_drawn_ard.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_08_26 PM.png",
+   "tile_index": 2,
+   "caption": "Animal traction and the plow (Year 285)",
+   "style": "paper_gouache",
+   "match": "milestone"
+  },
   "paced_distance_counting": {
    "path": "res://assets/ui/research/discovery-600/paced_distance_counting.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
@@ -733,6 +789,14 @@
    "tile_index": 3,
    "caption": "Pilgrimage to the god's great house from distant towns (Year 560)",
    "style": "silhouette_ochre"
+  },
+  "pilots_sea_lanes": {
+   "path": "res://assets/ui/research/discovery-600/pilots_sea_lanes.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_08_26 PM.png",
+   "tile_index": 0,
+   "caption": "Seafaring navigation by coastline and stars (Year 275)",
+   "style": "paper_gouache",
+   "match": "milestone"
   },
   "pit_pebble_game": {
    "path": "res://assets/ui/research/discovery-600/pit_pebble_game.png",
@@ -881,6 +945,14 @@
    "caption": "Masks and costumes for rites (Year 55)",
    "style": "silhouette_ochre"
   },
+  "river_supply_channels": {
+   "path": "res://assets/ui/research/discovery-600/river_supply_channels.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_08_26 PM.png",
+   "tile_index": 1,
+   "caption": "Irrigation canals and controlled water flow (Year 280)",
+   "style": "paper_gouache",
+   "match": "milestone"
+  },
   "rod_and_cord_leveling": {
    "path": "res://assets/ui/research/discovery-600/rod_and_cord_leveling.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 01_35_50 PM.png",
@@ -1021,6 +1093,14 @@
    "caption": "Shared meal obligations (Year 360)",
    "style": "silhouette_ochre"
   },
+  "shrine_terraces": {
+   "path": "res://assets/ui/research/discovery-600/shrine_terraces.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_24_28 PM.png",
+   "tile_index": 0,
+   "caption": "The god's house raised on a platform above the town (Year 170)",
+   "style": "silhouette_ochre",
+   "match": "alias"
+  },
   "shrine_wall_painting": {
    "path": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
@@ -1083,6 +1163,14 @@
    "tile_index": 0,
    "caption": "Standard sign lists (Year 280)",
    "style": "paper_gouache"
+  },
+  "standard_weight_sets": {
+   "path": "res://assets/ui/research/discovery-600/standard_weight_sets.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_08_26 PM.png",
+   "tile_index": 7,
+   "caption": "Standardized weights and measures (Year 330)",
+   "style": "paper_gouache",
+   "match": "milestone"
   },
   "standardized_gesture_code": {
    "path": "res://assets/ui/research/discovery-600/standardized_gesture_code.png",
@@ -1216,6 +1304,14 @@
    "tile_index": 4,
    "caption": "Votive figures stand in prayer before the god (Year 365)",
    "style": "silhouette_ochre"
+  },
+  "warp_weighted_looms": {
+   "path": "res://assets/ui/research/discovery-600/warp_weighted_looms.png",
+   "source_sheet": "ChatGPT Image Sep 24, 2026, 02_08_26 PM.png",
+   "tile_index": 5,
+   "caption": "Woven textiles (Year 310)",
+   "style": "paper_gouache",
+   "match": "milestone"
   },
   "watch_duty_rotation": {
    "path": "res://assets/ui/research/discovery-600/watch_duty_rotation.png",

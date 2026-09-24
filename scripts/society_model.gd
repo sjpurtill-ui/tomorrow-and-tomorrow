@@ -145,9 +145,11 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 			for signal_name in discovery.get("signals",[]): relevant_activity+=float(context.get(signal_name,0.0))
 			var practice:=minf(0.012,relevant_activity*0.0014)
 			var directed:=minf(0.006,attention*0.0012)
-			var spread:=(0.00035+teaching+practice+directed)*adoption_factor
+			# research_600 balance: ADOPTION_PACE spreads a practice over years to
+			# decades instead of weeks (see ERA CEILINGS below).
+			var spread:=(0.00035+teaching+practice+directed)*adoption_factor*ADOPTION_PACE
 			spread*=1.0-adoption_level
-			var retention_loss:=maxf(0.0,0.00018-preserved*0.00015) if relevant_activity<=0.05 else 0.0
+			var retention_loss:=maxf(0.0,0.00018-preserved*0.00015)*ADOPTION_PACE if relevant_activity<=0.05 else 0.0
 			adoption_level=clampf(adoption_level+(spread-retention_loss)*adoption_days,0.015,1.0)
 			WorldSimulation.state.discovery_adoption[id]=adoption_level
 		_rebuild_effect_totals(catalog)
@@ -225,8 +227,11 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 		for i in names.size():
 			var effect_name=names[i]
 			effect_totals[effect_name]=float(effect_totals.get(effect_name,0.0))+values[i]*adoption_level
+	# research_600 balance: totals are held under the society's era ceiling,
+	# never the flat modern limit alone.
+	ceiling_era=society_era()
 	for effect_name in effect_totals:
-		var limit:Vector2=EFFECT_LIMITS.get(String(effect_name),Vector2(-0.50,0.80))
+		var limit:=era_ceiling_for(String(effect_name),ceiling_era)
 		effect_totals[effect_name]=clampf(float(effect_totals[effect_name]),limit.x,limit.y)
 
 func effect(effect_id:String)->float:
@@ -495,3 +500,104 @@ func _visit_catalog_dependency(discovery_id:String,definitions:Dictionary,visit_
 	for requirement in (definitions[discovery_id] as Dictionary).get("requires",[]):
 		if definitions.has(String(requirement)): _visit_catalog_dependency(String(requirement),definitions,visit_state,next_path,errors)
 	visit_state[discovery_id]=2
+
+
+# --- research_600 era ceilings (begin) ----------------------------------------
+# Phase 3 balance. A society's discoveries fill what its age allowed and no more:
+# every effect total is clamped to an era-anchored ceiling on its beneficial side
+# (the harmful side keeps the flat EFFECT_LIMITS bound, so costs always bite).
+# The ceiling rises with the society's era, the more conservative of the elapsed
+# calendar and the frontier of what it actually knows, and reaches the modern
+# EFFECT_LIMITS only at MODERN_ERA. Player, owned AI seats and projected rivals
+# (ProgressionSystem.rival_effect) use the same era_ceiling_for().
+# Benchmarks: docs/research/BENCHMARKS_600.md.
+
+## Practices spread through a society over years to decades (0.12: a practice
+## people actively use reaches ~90% of households in about three years; one
+## nobody works with drifts over decades), not within a season.
+const ADOPTION_PACE:=0.12
+## Game year of the modern limits (TechnologyEras: 2800 is 1950 CE).
+const MODERN_ERA:=2800.0
+## Beneficial-side magnitude of each total at game year 600 (1500 BCE): what the
+## best-documented Late Bronze Age societies achieved relative to having nothing.
+## Keys not listed use half of their modern limit.
+const ERA_CEILING_600:Dictionary={
+	"conception_support":0.25,"maternal_safety":0.22,"neonatal_survival":0.22,
+	"food_output":0.35,"foraging_yield":0.35,"hunting_yield":0.30,"cultivation_yield":0.50,
+	"food_storage":0.55,"food_spoilage":0.40,"nutrition_quality":0.25,"soil_productivity":0.40,
+	"health_protection":0.22,"water_safety":0.28,"disease_exposure":0.20,"injury_risk":0.22,"health_risk":0.08,
+	"labor_efficiency":0.25,"labor_demand":0.10,"fatigue":0.15,"task_coordination":0.35,
+	"knowledge_rate":0.30,"observation_rate":0.30,"knowledge_preservation":0.45,"adoption_rate":0.30,
+	"survey_speed":0.40,"water_access":0.40,"tool_quality":0.40,"craft_output":0.45,"extraction_yield":0.40,"metal_yield":0.45,
+	"fuel_efficiency":0.35,"repair_capacity":0.30,"standardization":0.40,"construction_rate":0.45,"housing_output":0.45,
+	"disaster_resilience":0.35,"haul_capacity":0.45,"route_speed":0.35,"travel_speed":0.30,"storage_loss":0.35,
+	"dry_storage":0.45,"container_capacity":0.55,"logistics_endurance":0.35,"trade_capacity":0.45,
+	"state_capacity":0.45,"legitimacy":0.40,"cohesion":0.40,"warfare_readiness":0.45,"security_efficiency":0.40,
+	"naval_capacity":0.35,"ecology_recovery":0.35,"ecological_pressure":0.25,"timber_pressure":0.25,
+	"pollution":0.08,"water_pollution":0.08,"fuel_demand":0.15,"disaster_risk":0.12,"sanitation":0.22
+}
+## Keys whose beneficial direction is negative (a lower total is better).
+const LOWER_IS_BETTER:Array[String]=["disease_exposure","injury_risk","health_risk","labor_demand","fatigue","food_spoilage","storage_loss",
+	"institutional_rigidity","ecological_pressure","timber_pressure","pollution","water_pollution","fuel_demand","disaster_risk"]
+## Share of the year-600 ceiling open at each era (game year, share).
+const ERA_RISE:Array=[[0.0,0.45],[50.0,0.50],[100.0,0.56],[200.0,0.66],[300.0,0.75],[450.0,0.88],[600.0,1.0]]
+## Technical and organizational capacities (metals, wheels, writing, states)
+## grew most within the window, so less of their year-600 level was open at 5000 BCE.
+const TECH_KEYS:Array[String]=["tool_quality","craft_output","extraction_yield","metal_yield","fuel_efficiency","repair_capacity","standardization",
+	"construction_rate","housing_output","haul_capacity","route_speed","travel_speed","trade_capacity","naval_capacity","logistics_endurance",
+	"container_capacity","dry_storage","state_capacity","knowledge_rate","knowledge_preservation","adoption_rate","observation_rate","survey_speed",
+	"warfare_readiness","security_efficiency","task_coordination","cultivation_yield","soil_productivity","water_access","mining_output","mine_safety","disaster_resilience"]
+const TECH_RISE:Array=[[0.0,0.25],[50.0,0.30],[100.0,0.36],[200.0,0.47],[300.0,0.58],[450.0,0.78],[600.0,1.0]]
+## Forager knowledge, kinship and shelter-on-the-move were mature long before 5000 BCE.
+const EARLY_MATURE:Array[String]=["foraging_yield","hunting_yield","mobile_shelter","conception_support"]
+const EARLY_MATURE_RISE:Array=[[0.0,0.85],[600.0,1.0]]
+## Beyond 600 the ceiling closes on the modern limit (share of the remaining gap).
+const LATER_RISE:Array=[[600.0,0.0],[1500.0,0.40],[2400.0,0.75],[2800.0,1.0]]
+## Share of the known discoveries' eras that defines the knowledge frontier.
+const FRONTIER_PERCENTILE:=0.95
+
+## Society era used for the most recent effect totals.
+var ceiling_era:=0.0
+
+static func _rise(curve:Array,era:float)->float:
+	if era<=float(curve[0][0]): return float(curve[0][1])
+	for index in range(1,curve.size()):
+		if era<=float(curve[index][0]):
+			var low:Array=curve[index-1]
+			var high:Array=curve[index]
+			return lerpf(float(low[1]),float(high[1]),(era-float(low[0]))/maxf(0.001,float(high[0])-float(low[0])))
+	return float(curve[curve.size()-1][1])
+
+## Allowed [lower, upper] range of an effect total at game-year `era`.
+static func era_ceiling_for(effect_id:String,era:float)->Vector2:
+	var limit:Vector2=EFFECT_LIMITS.get(effect_id,Vector2(-0.50,0.80))
+	var lower:=effect_id in LOWER_IS_BETTER
+	var modern:=absf(limit.x) if lower else limit.y
+	var anchor:=minf(modern,float(ERA_CEILING_600.get(effect_id,modern*0.5)))
+	var curve:Array=ERA_RISE
+	if effect_id in EARLY_MATURE: curve=EARLY_MATURE_RISE
+	elif effect_id in TECH_KEYS: curve=TECH_RISE
+	var bound:=anchor*_rise(curve,era)
+	if era>600.0: bound=anchor+(modern-anchor)*_rise(LATER_RISE,era)
+	return Vector2(-bound,limit.y) if lower else Vector2(limit.x,bound)
+
+## Allowed range of `effect_id` for this society as of its latest effect totals.
+func era_ceiling(effect_id:String)->Vector2:
+	return era_ceiling_for(effect_id,ceiling_era)
+
+## The society's age for effect ceilings: the elapsed calendar or its knowledge
+## frontier (FRONTIER_PERCENTILE of its known discoveries' eras), whichever is
+## earlier. Registry items carry their design year; other entries' era gates
+## are 0.9 x their dated era (Research600.ERA_BAND_FRACTION).
+func society_era()->float:
+	var elapsed:=float(WorldSimulation.state.elapsed_days)/365.0
+	var eras:=PackedFloat64Array()
+	for id:Variant in WorldSimulation.state.known_discoveries:
+		var definition:Dictionary=definitions_by_id.get(id,{})
+		if definition.is_empty(): continue
+		if definition.has("design_year"): eras.append(float(definition.design_year))
+		else: eras.append(float(definition.get("earliest_year",0.0))/0.9)
+	if eras.is_empty(): return 0.0
+	eras.sort()
+	return clampf(minf(elapsed,eras[int(float(eras.size()-1)*FRONTIER_PERCENTILE)]),0.0,MODERN_ERA)
+# --- research_600 era ceilings (end) ------------------------------------------

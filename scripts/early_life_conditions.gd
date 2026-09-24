@@ -65,6 +65,28 @@ const REFERENCE_INFANT_LOSS:=0.10
 ## Mortality condition factor of a healthy, fed and housed settlement.
 const GOOD_CONDITIONS:=0.55
 
+## --- research_600 pre-modern burden (Phase 3 balance) ---
+## The baseline life table is close to a modern one in good conditions. Before
+## germ theory, endemic infection, parasites, accidents and violence kept every
+## age band far above it however well a society practiced what it knew, so
+## life expectancy at birth stayed near 20-35 (docs/research/BENCHMARKS_600.md).
+## ERA_BURDEN multiplies each band's hazard; general health knowledge lifts it
+## only through its era-capped effect channels (SocietyModel.era_ceiling_for),
+## so it lifts little before the modern era. Missing practices add their excess
+## on top, weighted by EXCESS_WEIGHT. Old saves blend in with early_care_blend.
+const ERA_BURDEN:={"under5":2.7,"child":2.4,"adult":2.3,"elder":1.6,"neonatal":1.3,"maternal":1.2}
+const EXCESS_WEIGHT:={"under5":0.3,"child":0.7,"adult":1.0}
+## Channel totals that relieve the burden, each over its modern limit.
+const RELIEF_CHANNELS:={"health_protection":0.55,"sanitation":0.65,"water_safety":0.60,"disease_exposure":-0.55}
+const RELIEF_POWER:=1.5
+
+## Share (0..1) of the pre-modern burden lifted by general health knowledge.
+static func burden_relief(discovery:Node)->float:
+	var total:=0.0
+	for channel:String in RELIEF_CHANNELS:
+		total+=clampf(discovery.effect(channel)/float(RELIEF_CHANNELS[channel]),0.0,1.0)
+	return pow(total/float(RELIEF_CHANNELS.size()),RELIEF_POWER)
+
 ## Measurement hook: probes set this to replay the rules before this change
 ## (blend held at 0) for before/after comparisons. Never set by the game.
 static var legacy_comparison:=false
@@ -139,6 +161,14 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 	var result:={"blend":blend,"diet":diet,"nutrition_factor":nutrition,"overwork":overwork,"infant_loss":infant_loss,"categories":categories}
 	for key:String in raw:result[key]=lerpf(1.0,float(raw[key]),blend)
 	result["conception"]=lerpf(1.0,conception,blend)
+	var relief:=burden_relief(discovery)
+	var burden:Dictionary={}
+	for key:String in ERA_BURDEN:burden[key]=lerpf(1.0,1.0+(float(ERA_BURDEN[key])-1.0)*(1.0-relief),blend)
+	var weights:Dictionary={}
+	for key:String in EXCESS_WEIGHT:weights[key]=lerpf(1.0,float(EXCESS_WEIGHT[key]),blend)
+	result["burden"]=burden
+	result["excess_weight"]=weights
+	result["burden_relief"]=relief
 	result["pregnancy_risk"]=lerpf(1.0,1.0+overwork*0.35+maxf(0.0,0.5-diet)*0.6,blend)
 	return result
 
@@ -163,11 +193,22 @@ static func diet_window(state:Node)->float:
 ## proportionally less, so the same deaths are not counted twice.
 static func age_multiplier(care:Dictionary,age:int,condition_factor:float=GOOD_CONDITIONS)->float:
 	if care.is_empty():return 1.0
-	var raw:=float(care.get("adult",1.0))
-	if age<5:raw=float(care.get("under5",1.0))
-	elif age<15:raw=float(care.get("child",1.0))
-	if raw<=1.0:return raw
-	return 1.0+(raw-1.0)*clampf(pow(GOOD_CONDITIONS/maxf(0.01,condition_factor),1.5),0.4,1.0)
+	var band:="adult"
+	if age<5:band="under5"
+	elif age<15:band="child"
+	var raw:=float(care.get(band,1.0))
+	var excess:=raw if raw<=1.0 else 1.0+(raw-1.0)*clampf(pow(GOOD_CONDITIONS/maxf(0.01,condition_factor),1.5),0.4,1.0)
+	var burden:Dictionary=care.get("burden",{})
+	if burden.is_empty():return excess
+	var weight:=float((care.get("excess_weight",{}) as Dictionary).get(band,1.0))
+	return float(burden.get("elder" if age>=45 else band,1.0))*(1.0+(excess-1.0)*weight)
+
+## Newborn and maternal death multipliers including the pre-modern burden.
+static func neonatal_factor(care:Dictionary)->float:
+	return float(care.get("neonatal",1.0))*float((care.get("burden",{}) as Dictionary).get("neonatal",1.0))
+
+static func maternal_factor(care:Dictionary)->float:
+	return float(care.get("maternal",1.0))*float((care.get("burden",{}) as Dictionary).get("maternal",1.0))
 
 ## Player-facing lines for the health view: what protects life, what is missing.
 static func explanation(care:Dictionary)->Array[Dictionary]:

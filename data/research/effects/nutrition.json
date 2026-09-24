@@ -4,8 +4,8 @@
  "items": {
   "edible_resource_recognition": {
    "effects": {
-    "foraging_yield": 0.05,
-    "nutrition_quality": 0.01
+    "foraging_yield": 0.0457,
+    "nutrition_quality": 0.0055
    },
    "ability_reason": "Knowing which roots, seeds and greens are safe in each season widens the gathering round and ends most poisonings of the young."
   },
@@ -19,25 +19,36 @@
   },
   "food_pounding_mortars": {
    "effects": {
-    "nutrition_quality": 0.008,
-    "neonatal_survival": 0.008,
-    "labor_demand": 0.004
+    "labor_demand": 0.004,
+    "neonatal_survival": 0.0028,
+    "nutrition_quality": 0.0044
    },
    "ability_reason": "Pounded mash is the first food a weaning child can swallow safely.",
    "art": "res://assets/ui/research/paper/edible_resource_recognition.png"
   },
   "nut_kernel_shelling": {
    "effects": {
-    "foraging_yield": 0.02,
-    "nutrition_quality": 0.005
+    "foraging_yield": 0.0183,
+    "nutrition_quality": 0.0027
    },
    "ability_reason": "Shelled nuts turn an autumn glut into rich food that keeps."
   },
   "food_drying": {
-   "ability_reason": "Dried fish, meat and fruit carry the band through the lean months."
+   "ability_reason": "Dried fish, meat and fruit carry the band through the lean months.",
+   "effects": {
+    "food_spoilage": -0.0571,
+    "food_storage": 0.042,
+    "labor_demand": 0.01
+   }
   },
   "seed_selection": {
-   "ability_reason": "Seed from the best plants gives a better harvest every year it is kept up."
+   "ability_reason": "Seed from the best plants gives a better harvest every year it is kept up.",
+   "effects": {
+    "cultivation_yield": 0.0762,
+    "labor_demand": 0.02,
+    "nutrition_quality": 0.011,
+    "soil_productivity": 0.0212
+   }
   },
   "friction_fire_ignition": {
    "ability_reason": "Fire can be made again wherever dry wood is found, so no camp goes without cooked food.",
@@ -45,18 +56,18 @@
   },
   "hearth_roasting_control": {
    "effects": {
-    "nutrition_quality": 0.015,
-    "disease_exposure": -0.01,
-    "fuel_demand": 0.01
+    "disease_exposure": -0.0029,
+    "fuel_demand": 0.01,
+    "nutrition_quality": 0.0082
    },
    "ability_reason": "Meat and roots roasted through on coals sicken fewer children than half-raw food.",
    "art": "res://assets/ui/research/paper/hearth_roasting_control.png"
   },
   "seasonal_protein_sourcing": {
    "effects": {
+    "hunting_yield": 0.03,
     "labor_demand": 0.008,
-    "nutrition_quality": 0.03,
-    "hunting_yield": 0.03
+    "nutrition_quality": 0.0164
    },
    "art": "res://assets/ui/research/paper/pulse_splitting.png"
   },
@@ -66,74 +77,93 @@
   },
   "varied_forage_rotation": {
    "effects": {
-    "foraging_yield": 0.02,
-    "nutrition_quality": 0.03,
-    "ecological_pressure": -0.01
+    "ecological_pressure": -0.01,
+    "foraging_yield": 0.0183,
+    "nutrition_quality": 0.0164
    },
    "art": "res://assets/ui/research/paper/pulse_splitting.png"
   },
   "smoking": {
-   "ability_reason": "Smoke-cured meat and fish keep for months and travel well."
+   "ability_reason": "Smoke-cured meat and fish keep for months and travel well.",
+   "effects": {
+    "food_spoilage": -0.0686,
+    "food_storage": 0.0505,
+    "fuel_demand": 0.04,
+    "logistics_endurance": 0.03,
+    "pollution": 0.008
+   }
   },
   "root_grating_dewatering": {
    "effects": {
-    "foraging_yield": 0.015,
-    "nutrition_quality": 0.004
+    "foraging_yield": 0.0137,
+    "nutrition_quality": 0.0022
    },
    "ability_reason": "Grated and squeezed roots lose their bitterness and become a staple rather than a risk."
   },
   "pest_deterrent_storage_herbs": {
-   "art": "res://assets/ui/research/subjects/public_stores-v1.png"
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "effects": {
+    "food_storage": 0.0084,
+    "storage_loss": -0.0182
+   }
   },
   "fruit_pulp_screening": {
    "effects": {
-    "nutrition_quality": 0.004,
-    "food_spoilage": -0.005
+    "food_spoilage": -0.0029,
+    "nutrition_quality": 0.0022
    },
    "ability_reason": "Clean pulp dries into cakes that keep, instead of rotting around the stones."
   },
   "animal_taming": {
    "effects": {
-    "food_output": 0.026,
     "disease_exposure": 0.008,
-    "labor_demand": 0.01,
-    "ecological_pressure": 0.01
+    "ecological_pressure": 0.01,
+    "food_output": 0.0241,
+    "labor_demand": 0.01
    },
    "ability_reason": "A penned herd is meat on the hoof: food that does not have to be hunted.",
    "social_consequence": "Families that keep animals gain a store of wealth that can be counted, lent and lost."
   },
   "soil_exhaustion_recognition": {
-   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png"
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "effects": {
+    "cultivation_yield": 0.0071,
+    "soil_productivity": 0.0141
+   }
   },
   "plot_yield_memory": {
-   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png"
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "effects": {
+    "cultivation_yield": 0.0119,
+    "soil_productivity": 0.0106
+   }
   },
   "acorn_leaching": {
    "effects": {
-    "foraging_yield": 0.025,
-    "food_storage": 0.01
+    "food_storage": 0.0042,
+    "foraging_yield": 0.0229
    },
    "ability_reason": "Leached acorn meal turns the oak woods into a store that lasts the winter."
   },
   "pulse_splitting": {
    "effects": {
-    "nutrition_quality": 0.008,
-    "food_storage": 0.008
+    "food_storage": 0.0034,
+    "nutrition_quality": 0.0044
    },
    "ability_reason": "Split lentils and peas cook soft enough for weaning bowls and keep dry in store."
   },
   "earth_oven_cooking": {
    "effects": {
-    "nutrition_quality": 0.01,
-    "food_output": 0.008
+    "food_output": 0.0074,
+    "nutrition_quality": 0.0055
    },
    "ability_reason": "Slow pit cooking makes tough roots and old meat worth eating, so less of the catch is wasted.",
    "art": "res://assets/ui/research/paper/earth_oven_cooking.png"
   },
   "fish_weirs_and_traps": {
    "effects": {
-    "food_output": 0.04,
-    "foraging_yield": 0.015,
+    "food_output": 0.037,
+    "foraging_yield": 0.0137,
     "labor_demand": 0.006
    },
    "name": "Fish Weirs and Traps",
@@ -141,15 +171,19 @@
    "social_consequence": "Good fishing places become family property, passed down with the knowledge of when the fish come."
   },
   "grain_moisture_watch": {
-   "art": "res://assets/ui/research/subjects/public_stores-v1.png"
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "effects": {
+    "food_spoilage": -0.0114,
+    "storage_loss": -0.0182
+   }
   },
   "milking": {
    "effects": {
-    "food_output": 0.045,
-    "nutrition_quality": 0.008,
-    "neonatal_survival": 0.01,
     "disease_exposure": 0.008,
-    "labor_demand": 0.01
+    "food_output": 0.0417,
+    "labor_demand": 0.01,
+    "neonatal_survival": 0.0034,
+    "nutrition_quality": 0.0044
    },
    "name": "Milking the Herd",
    "observation": "Ewes and nannies that stand for the hand give milk all season, so the herd feeds people without being slaughtered.",
@@ -157,36 +191,41 @@
   },
   "indirect_solar_food_drying": {
    "effects": {
-    "food_storage": 0.02,
-    "food_spoilage": -0.015
+    "food_spoilage": -0.0086,
+    "food_storage": 0.0084
    },
    "ability_reason": "Shaded racks dry food without scorching it, so more of the summer surplus is put by.",
    "art": "res://assets/ui/research/paper/edible_resource_recognition.png"
   },
   "crop_calendars": {
-   "ability_reason": "Sowing and reaping at the right moon loses fewer seedlings to frost and fewer ears to rain."
+   "ability_reason": "Sowing and reaping at the right moon loses fewer seedlings to frost and fewer ears to rain.",
+   "effects": {
+    "cultivation_yield": 0.0381,
+    "knowledge_preservation": 0.0131,
+    "task_coordination": 0.0149
+   }
   },
   "threshing_frames": {
    "effects": {
-    "storage_loss": -0.015,
-    "labor_efficiency": 0.008
+    "labor_efficiency": 0.004,
+    "storage_loss": -0.0091
    },
    "ability_reason": "Grain beaten out on a hard floor is cleaner, quicker to store and less prone to rot.",
    "art": "res://assets/ui/research/paper/threshing_frames.png"
   },
   "winnowing_practice": {
    "effects": {
-    "food_spoilage": -0.01,
-    "storage_loss": -0.01
+    "food_spoilage": -0.0057,
+    "storage_loss": -0.0061
    },
    "ability_reason": "Chaff-free grain keeps longer in the pit and the pot.",
    "art": "res://assets/ui/research/paper/winnowing_practice.png"
   },
   "saddle_quern_grinding": {
    "effects": {
-    "nutrition_quality": 0.006,
     "fatigue": 0.012,
-    "labor_demand": 0.008
+    "labor_demand": 0.008,
+    "nutrition_quality": 0.0033
    },
    "name": "Saddle Quern Grinding",
    "observation": "Grain rubbed between a long stone and a hand stone becomes meal for porridge and bread, at the cost of hours on bent knees each day.",
@@ -194,7 +233,7 @@
   },
   "cereal_dehulling": {
    "effects": {
-    "storage_loss": -0.005
+    "storage_loss": -0.003
    },
    "ability_reason": "Hulled grain cooks faster and feeds better.",
    "art": "res://assets/ui/research/paper/edible_resource_recognition.png"
@@ -208,90 +247,95 @@
   },
   "deliberate_milk_souring": {
    "effects": {
-    "neonatal_survival": 0.02,
-    "nutrition_quality": 0.03,
-    "food_storage": 0.01
+    "food_storage": 0.0042,
+    "neonatal_survival": 0.0069,
+    "nutrition_quality": 0.0164
    },
    "art": "res://assets/ui/research/paper/pulse_splitting.png"
   },
   "food_steaming_vessels": {
    "effects": {
-    "nutrition_quality": 0.01,
-    "neonatal_survival": 0.006
+    "neonatal_survival": 0.0021,
+    "nutrition_quality": 0.0055
    },
    "ability_reason": "Steamed food is soft and clean enough for infants, the sick and the toothless old.",
    "art": "res://assets/ui/research/paper/food_steaming_vessels.png"
   },
   "controlled_baking": {
    "effects": {
-    "nutrition_quality": 0.005,
-    "food_storage": 0.008
+    "food_storage": 0.0034,
+    "nutrition_quality": 0.0027
    },
    "ability_reason": "Flatbread baked hard keeps for days and feeds workers far from the hearth.",
    "art": "res://assets/ui/research/paper/edible_resource_recognition.png"
   },
   "seed_cleaning": {
    "effects": {
-    "cultivation_yield": 0.02
+    "cultivation_yield": 0.0095
    },
    "ability_reason": "Seed sorted from weed seed and chaff comes up evenly and chokes less."
   },
   "drive_hunts": {
    "effects": {
-    "hunting_yield": 0.08,
-    "food_storage": 0.01,
     "ecological_pressure": 0.02,
+    "food_storage": 0.0042,
+    "hunting_yield": 0.08,
     "injury_risk": 0.005,
-    "task_coordination": 0.01
+    "task_coordination": 0.005
    },
    "name": "Drive Hunts",
    "observation": "Lines of beaters, brush fences and dug pits funnel a whole herd to waiting spears, and a single day's kill is dried for a season.",
    "social_consequence": "The drive needs every able hand and one leader; the share of the kill becomes a matter of rank."
   },
   "seed_reserves": {
-   "ability_reason": "Seed kept apart from eating grain means a failed year does not also take next year's sowing."
+   "ability_reason": "Seed kept apart from eating grain means a failed year does not also take next year's sowing.",
+   "effects": {
+    "cultivation_yield": 0.0183,
+    "food_storage": 0.0036,
+    "state_capacity": 0.02
+   }
   },
   "hermetic_grain_storage": {
    "effects": {
-    "container_capacity": 0.02,
-    "food_storage": 0.04,
-    "storage_loss": -0.03,
-    "food_spoilage": -0.02
+    "container_capacity": 0.006,
+    "food_spoilage": -0.002,
+    "food_storage": 0.0036,
+    "storage_loss": -0.0057
    },
    "ability_reason": "Grain sealed in pots and plastered pits stays dry and out of reach of mice through the lean months.",
    "art": "res://assets/ui/research/paper/edible_resource_recognition.png"
   },
   "wild_honey_smoking": {
    "effects": {
-    "foraging_yield": 0.015,
-    "nutrition_quality": 0.005,
-    "injury_risk": 0.003
+    "foraging_yield": 0.0137,
+    "injury_risk": 0.003,
+    "nutrition_quality": 0.0027
    },
    "name": "Smoking Out Wild Honey",
    "observation": "A smouldering bundle held under a hollow tree quiets the bees long enough to cut out comb and honey."
   },
   "grain_malting": {
    "effects": {
-    "nutrition_quality": 0.005,
-    "food_storage": 0.006
+    "food_storage": 0.0005,
+    "nutrition_quality": 0.0006
    },
    "ability_reason": "Sprouted, dried grain is sweeter, softer and the start of beer.",
    "art": "res://assets/ui/research/subjects/public_stores-v1.png"
   },
   "starch_washing_separation": {
    "effects": {
-    "nutrition_quality": 0.004,
-    "foraging_yield": 0.008
+    "foraging_yield": 0.0007,
+    "nutrition_quality": 0.0005
    },
    "ability_reason": "Washed starch makes food of roots too coarse to eat whole.",
    "art": "res://assets/ui/research/paper/edible_resource_recognition.png"
   },
   "resin_sealed_wine": {
    "effects": {
-    "food_storage": 0.015,
-    "cohesion": 0.006,
-    "trade_capacity": 0.01,
-    "health_risk": 0.003
+    "cohesion": 0.001,
+    "food_storage": 0.0014,
+    "health_risk": 0.003,
+    "trade_capacity": 0.0014
    },
    "name": "Resin-Sealed Wine",
    "observation": "Crushed grapes left in jars sealed with pine resin turn to wine that keeps past the vintage.",
@@ -299,137 +343,191 @@
   },
   "pressed_cheese": {
    "effects": {
-    "food_storage": 0.04,
-    "food_output": 0.02,
-    "nutrition_quality": 0.006,
-    "food_spoilage": -0.015
+    "food_output": 0.0065,
+    "food_spoilage": -0.0015,
+    "food_storage": 0.0036,
+    "nutrition_quality": 0.0008
    },
    "name": "Pressed Cheese",
    "observation": "Curd pressed in pierced clay strainers sheds its whey and hardens into cheese that keeps the summer's milk for winter.",
    "social_consequence": "Cheese carries the herd's wealth into the cold months and can be traded far from the pasture."
   },
   "managed_fallow": {
-   "ability_reason": "A rested field comes back stronger than one worked every year."
+   "ability_reason": "A rested field comes back stronger than one worked every year.",
+   "effects": {
+    "ecology_recovery": 0.0406,
+    "food_output": 0.0065,
+    "soil_productivity": 0.0149
+   }
   },
   "batch_labeling_by_harvest": {
-   "art": "res://assets/ui/research/subjects/public_stores-v1.png"
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "effects": {
+    "food_storage": 0.0023,
+    "task_coordination": 0.0012
+   }
   },
   "root_cellars": {
    "effects": {
-    "food_storage": 0.025,
-    "food_spoilage": -0.02
+    "food_spoilage": -0.002,
+    "food_storage": 0.0023
    },
    "ability_reason": "Cool, dark pits hold roots and fruit well past the season.",
    "art": "res://assets/ui/research/subjects/public_stores-v1.png"
   },
   "raised_granaries": {
    "effects": {
-    "food_storage": 0.035,
-    "storage_loss": -0.03
+    "food_storage": 0.0032,
+    "storage_loss": -0.0057
    },
    "ability_reason": "Grain lifted on posts stays dry and beyond the reach of rats.",
    "art": "res://assets/ui/research/paper/edible_resource_recognition.png"
   },
   "leafy_green_incorporation": {
-   "art": "res://assets/ui/research/paper/pulse_splitting.png"
+   "art": "res://assets/ui/research/paper/pulse_splitting.png",
+   "effects": {
+    "disease_exposure": -0.0012,
+    "nutrition_quality": 0.0032
+   }
   },
   "cutting_propagation": {
    "effects": {
-    "cultivation_yield": 0.02,
-    "nutrition_quality": 0.004,
-    "soil_productivity": 0.005
+    "cultivation_yield": 0.0052,
+    "nutrition_quality": 0.0005,
+    "soil_productivity": 0.0008
    },
    "name": "Planting from Cuttings",
    "observation": "A fig branch, an olive twig or a vine cane pushed into moist ground takes root and fruits true to its parent.",
    "social_consequence": "Orchards and vineyards take years to bear; the families that plant them stay put to harvest."
   },
   "mixed_grain_legume_meals": {
-   "art": "res://assets/ui/research/paper/pulse_splitting.png"
+   "art": "res://assets/ui/research/paper/pulse_splitting.png",
+   "effects": {
+    "food_output": 0.01,
+    "nutrition_quality": 0.0042
+   }
   },
   "manure_field_spreading": {
-   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png"
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "effects": {
+    "labor_demand": 0.01,
+    "soil_productivity": 0.0055
+   }
   },
   "reserve_allocation_priority": {
    "effects": {
-    "food_storage": 0.03,
+    "food_storage": 0.0075,
     "institutional_rigidity": 0.01,
-    "neonatal_survival": 0.006
+    "neonatal_survival": 0.0006
    },
    "art": "res://assets/ui/research/subjects/public_stores-v1.png"
   },
   "flour_sifting": {
    "effects": {
-    "food_spoilage": -0.006,
-    "standardization": 0.004
+    "food_spoilage": -0.0046,
+    "standardization": 0.002
    },
    "ability_reason": "Sifted flour carries less grit, so bread wears the teeth less.",
    "art": "res://assets/ui/research/paper/edible_resource_recognition.png"
   },
   "offshoot_date_planting": {
    "effects": {
-    "cultivation_yield": 0.02,
-    "food_storage": 0.01
+    "cultivation_yield": 0.002,
+    "food_storage": 0.0025
    },
    "name": "Date Palm Offshoots",
    "observation": "Suckers cut from the foot of a good date palm grow into trees that bear the same sweet fruit."
   },
   "fermentation_control": {
    "ability_reason": "Fermented food and drink keep longer and sicken fewer people than fouled water.",
-   "social_consequence": "Brewing and fermenting become household skills handed down with their own vessels and customs."
+   "social_consequence": "Brewing and fermenting become household skills handed down with their own vessels and customs.",
+   "effects": {
+    "food_spoilage": -0.0069,
+    "health_risk": 0.005,
+    "nutrition_quality": 0.005,
+    "water_safety": 0.0092
+   }
   },
   "staggered_meal_timing": {
-   "art": "res://assets/ui/research/paper/edible_resource_recognition.png"
+   "art": "res://assets/ui/research/paper/edible_resource_recognition.png",
+   "effects": {
+    "fatigue": -0.0014,
+    "task_coordination": 0.0011
+   }
   },
   "ash_field_amendment": {
-   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png"
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "effects": {
+    "cultivation_yield": 0.002,
+    "soil_productivity": 0.0055
+   }
   },
   "irrigation_schedules": {
-   "ability_reason": "Water turned onto each field in its turn lets dry land bear grain every year."
+   "ability_reason": "Water turned onto each field in its turn lets dry land bear grain every year.",
+   "effects": {
+    "cultivation_yield": 0.0117,
+    "disease_exposure": 0.015,
+    "labor_demand": 0.03,
+    "soil_productivity": 0.0073,
+    "state_capacity": 0.0184
+   }
   },
   "communal_meal_variety_rules": {
-   "art": "res://assets/ui/research/paper/pulse_splitting.png"
+   "art": "res://assets/ui/research/paper/pulse_splitting.png",
+   "effects": {
+    "cohesion": 0.0007,
+    "nutrition_quality": 0.0036
+   }
   },
   "ox_drawn_ard": {
    "effects": {
-    "cultivation_yield": 0.07,
-    "labor_efficiency": 0.02,
+    "cultivation_yield": 0.0068,
+    "ecological_pressure": 0.015,
     "labor_demand": -0.01,
-    "soil_productivity": -0.01,
-    "ecological_pressure": 0.015
+    "labor_efficiency": 0.0019,
+    "soil_productivity": -0.01
    },
    "name": "Ox-Drawn Ard",
    "observation": "A yoked pair of oxen drags a pointed ard through ground that took a whole family days to hoe.",
    "social_consequence": "Households with a team plow far more land than those without; oxen become the measure of a family's standing."
   },
   "reserve_moisture_barrier_layering": {
-   "art": "res://assets/ui/research/subjects/public_stores-v1.png"
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "effects": {
+    "food_spoilage": -0.0015,
+    "storage_loss": -0.0031
+   }
   },
   "salting_fish_meat": {
    "effects": {
-    "food_storage": 0.04,
-    "food_spoilage": -0.04,
-    "logistics_endurance": 0.02,
-    "trade_capacity": 0.01
+    "food_spoilage": -0.0031,
+    "food_storage": 0.0045,
+    "logistics_endurance": 0.0074,
+    "trade_capacity": 0.0013
    },
    "name": "Salting Fish and Meat",
    "observation": "Fish and meat packed in salt dry hard and keep through the lean months and on long journeys.",
    "social_consequence": "Salt becomes worth trading for; the people who hold salt springs gain friends and rivals."
   },
   "planting_density_adjustment": {
-   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png"
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "effects": {
+    "cultivation_yield": 0.0092,
+    "labor_demand": 0.008
+   }
   },
   "butter_churning": {
    "effects": {
-    "food_output": 0.012,
-    "food_storage": 0.01
+    "food_output": 0.0058,
+    "food_storage": 0.0011
    },
    "name": "Butter Churning",
    "observation": "Milk rocked in a skin bag or clay churn gathers into butter, rich food that keeps longer than the milk."
   },
   "winter_fodder": {
    "effects": {
-    "food_output": 0.03,
-    "food_storage": 0.02,
+    "food_output": 0.0144,
+    "food_storage": 0.0022,
     "labor_demand": 0.015
    },
    "name": "Winter Fodder",
@@ -437,56 +535,81 @@
    "social_consequence": "Haymaking fills the late summer; the whole household cuts, turns and stacks before the rains."
   },
   "intercrop_pairing_lore": {
-   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png"
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "effects": {
+    "cultivation_yield": 0.011,
+    "soil_productivity": 0.0055
+   }
   },
   "clay_dome_ovens": {
    "effects": {
-    "food_storage": 0.01,
+    "food_storage": 0.0021,
     "fuel_efficiency": 0.02,
-    "labor_efficiency": 0.006
+    "labor_efficiency": 0.0008
    },
    "name": "Clay Dome Ovens",
    "observation": "A domed clay oven holds its heat, and loaf after loaf bakes on one firing.",
    "social_consequence": "The oven becomes a meeting place where neighbours bake in turn and share news."
   },
   "portion_allotment_customs": {
-   "art": "res://assets/ui/research/paper/edible_resource_recognition.png"
+   "art": "res://assets/ui/research/paper/edible_resource_recognition.png",
+   "effects": {
+    "food_storage": 0.0041,
+    "nutrition_quality": 0.0043
+   }
   },
   "shared_reserve_access_rules": {
-   "art": "res://assets/ui/research/subjects/public_stores-v1.png"
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "effects": {
+    "cohesion": 0.0012,
+    "food_storage": 0.0041,
+    "institutional_rigidity": 0.01
+   }
   },
   "barley_beer": {
    "effects": {
-    "water_safety": 0.015,
-    "food_storage": 0.015,
-    "cohesion": 0.012,
+    "cohesion": 0.0026,
+    "food_storage": 0.0031,
     "health_risk": 0.004,
-    "labor_demand": 0.008
+    "labor_demand": 0.008,
+    "water_safety": 0.003
    },
    "name": "Barley Beer",
    "observation": "Malt and half-baked bread soaked and left to work become a thick, sour beer that people drink more safely than standing water.",
    "social_consequence": "Beer is food, wage and offering at once; work parties and feasts are measured in jars."
   },
   "seasonal_diet_diversification": {
-   "art": "res://assets/ui/research/paper/pulse_splitting.png"
+   "art": "res://assets/ui/research/paper/pulse_splitting.png",
+   "effects": {
+    "food_storage": 0.0031,
+    "nutrition_quality": 0.0052
+   }
   },
   "layered_pit_storage": {
-   "art": "res://assets/ui/research/subjects/public_stores-v1.png"
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "effects": {
+    "dry_storage": 0.02,
+    "storage_loss": -0.0063
+   }
   },
   "field_rest_scheduling": {
-   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png"
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "effects": {
+    "cultivation_yield": 0.02,
+    "soil_productivity": 0.022
+   }
   },
   "dried_fruit_cakes": {
    "effects": {
-    "food_storage": 0.02,
-    "logistics_endurance": 0.01
+    "food_storage": 0.0041,
+    "logistics_endurance": 0.0048
    },
    "name": "Dried-Fruit Cakes",
    "observation": "Figs, dates and raisins pressed into cakes and dried keep sweet for a year and travel in a satchel."
   },
   "kitchen_gardens": {
    "effects": {
-    "cultivation_yield": 0.015,
+    "cultivation_yield": 0.0117,
     "food_output": 0.015
    },
    "name": "Kitchen Gardens",
@@ -496,34 +619,34 @@
   "grain_parboiling": {
    "effects": {
     "food_spoilage": -0.01,
-    "storage_loss": -0.005
+    "storage_loss": -0.001
    },
    "ability_reason": "Grain boiled then dried keeps better and cooks faster.",
    "art": "res://assets/ui/research/paper/edible_resource_recognition.png"
   },
   "stock_rotation": {
    "effects": {
-    "storage_loss": -0.015,
-    "food_spoilage": -0.02
+    "food_spoilage": -0.0042,
+    "storage_loss": -0.0046
    },
    "ability_reason": "Oldest stores used first means little is left to rot at the back.",
    "art": "res://assets/ui/research/subjects/public_stores-v1.png"
   },
   "brine_fermentation": {
    "effects": {
-    "nutrition_quality": 0.015,
-    "food_storage": 0.025,
-    "food_spoilage": -0.02
+    "food_spoilage": -0.0042,
+    "food_storage": 0.002,
+    "nutrition_quality": 0.015
    },
    "ability_reason": "Vegetables and fish in brine keep for months and sharpen a plain diet.",
    "art": "res://assets/ui/research/paper/edible_resource_recognition.png"
   },
   "spoilage_inspection": {
    "effects": {
-    "storage_loss": -0.03,
-    "food_spoilage": -0.02,
+    "food_spoilage": -0.0042,
     "health_risk": -0.004,
-    "labor_demand": 0.005
+    "labor_demand": 0.005,
+    "storage_loss": -0.0091
    },
    "name": "Spoilage Inspection",
    "observation": "Store keepers open, smell and tap every jar in turn and cull the spoiled before it taints the rest.",
@@ -531,57 +654,76 @@
   },
   "regional_granaries": {
    "ability_reason": "Grain gathered from many villages evens out a bad harvest in one valley.",
-   "social_consequence": "Whoever controls the granary controls the lean year; granary keepers become officials."
+   "social_consequence": "Whoever controls the granary controls the lean year; granary keepers become officials.",
+   "effects": {
+    "cohesion": 0.005,
+    "food_spoilage": -0.0127,
+    "food_storage": 0.0142,
+    "labor_demand": 0.02,
+    "state_capacity": 0.0082
+   }
   },
   "ghee": {
    "effects": {
-    "food_storage": 0.02,
-    "trade_capacity": 0.008
+    "food_storage": 0.0016,
+    "trade_capacity": 0.0027
    },
    "name": "Ghee",
    "observation": "Butter simmered until clear and poured off its solids keeps for months even in the heat."
   },
   "legume_field_interplanting": {
-   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png"
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "effects": {
+    "cultivation_yield": 0.02,
+    "soil_productivity": 0.0267
+   }
   },
   "reserve_rotation_ledgers": {
-   "art": "res://assets/ui/research/subjects/public_stores-v1.png"
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "effects": {
+    "food_storage": 0.0063,
+    "storage_loss": -0.0032
+   }
   },
   "weaning_food_customs": {
-   "art": "res://assets/ui/research/paper/pulse_splitting.png"
+   "art": "res://assets/ui/research/paper/pulse_splitting.png",
+   "effects": {
+    "neonatal_survival": 0.0083,
+    "nutrition_quality": 0.0179
+   }
   },
   "named_beers": {
    "effects": {
-    "standardization": 0.01,
-    "trade_capacity": 0.01,
-    "cohesion": 0.006
+    "cohesion": 0.002,
+    "standardization": 0.0037,
+    "trade_capacity": 0.002
    },
    "name": "Named Beers",
    "observation": "Brewers name their beers by grain and strength, and a jar of 'strong dark' means the same in every house."
   },
   "marked_wine_jars": {
    "effects": {
-    "trade_capacity": 0.015,
-    "storage_loss": -0.01,
-    "knowledge_preservation": 0.004
+    "knowledge_preservation": 0.0012,
+    "storage_loss": -0.0016,
+    "trade_capacity": 0.003
    },
    "name": "Marked Wine Jars",
    "observation": "Sealed jars stamped with the estate and the year of the vintage can be stored, counted and sent as tribute."
   },
   "fattened_geese_ducks": {
    "effects": {
-    "food_output": 0.025,
-    "disease_exposure": 0.005
+    "disease_exposure": 0.005,
+    "food_output": 0.014
    },
    "name": "Fattened Geese and Ducks",
    "observation": "Geese and ducks penned by the water and fed on grain grow fat for the table and lay through the season."
   },
   "work_gang_bakeries": {
    "effects": {
-    "labor_efficiency": 0.02,
-    "fatigue": -0.015,
-    "state_capacity": 0.01,
-    "fuel_demand": 0.01
+    "fatigue": -0.0015,
+    "fuel_demand": 0.01,
+    "labor_efficiency": 0.0028,
+    "state_capacity": 0.0015
    },
    "name": "Work-Gang Bakeries",
    "observation": "Great ovens and brewing vats beside the works turn out bread and beer by the hundred for the gangs.",
@@ -589,8 +731,8 @@
   },
   "stocked_fish_ponds": {
    "effects": {
-    "food_output": 0.06,
-    "food_storage": 0.01,
+    "food_output": 0.0079,
+    "food_storage": 0.0048,
     "labor_demand": 0.008
    },
    "name": "Stocked Fish Ponds",
@@ -599,9 +741,9 @@
   },
   "hive_beekeeping": {
    "effects": {
-    "food_output": 0.015,
-    "cultivation_yield": 0.01,
-    "trade_capacity": 0.01
+    "cultivation_yield": 0.0043,
+    "food_output": 0.002,
+    "trade_capacity": 0.001
    },
    "name": "Hive Beekeeping",
    "observation": "Bees housed in stacked clay pipes and reed hives give honey and wax every year without felling a tree.",
@@ -609,19 +751,19 @@
   },
   "sesame_oil": {
    "effects": {
-    "cultivation_yield": 0.01,
-    "trade_capacity": 0.01,
-    "food_output": 0.01
+    "cultivation_yield": 0.0043,
+    "food_output": 0.0013,
+    "trade_capacity": 0.001
    },
    "name": "Sesame for Oil",
    "observation": "Sesame sown in the hot season is threshed and pressed for an oil that cooks, lights lamps and anoints the skin."
   },
   "stall_fattened_cattle": {
    "effects": {
-    "food_output": 0.02,
-    "cohesion": 0.008,
-    "labor_demand": 0.012,
-    "ecological_pressure": 0.01
+    "cohesion": 0.003,
+    "ecological_pressure": 0.01,
+    "food_output": 0.0026,
+    "labor_demand": 0.012
    },
    "name": "Stall-Fattened Cattle",
    "observation": "Oxen kept in stalls and fed on grain and fodder grow heavy for the great feasts.",
@@ -629,29 +771,29 @@
   },
   "jarred_salt_fish": {
    "effects": {
-    "trade_capacity": 0.02,
-    "food_storage": 0.02,
-    "logistics_endurance": 0.015
+    "food_storage": 0.0095,
+    "logistics_endurance": 0.0043,
+    "trade_capacity": 0.002
    },
    "name": "Jarred Salt Fish",
    "observation": "Salted fish packed in sealed jars travels upriver and inland and is traded for grain and cloth."
   },
   "fodder_barley": {
    "effects": {
-    "haul_capacity": 0.015,
-    "cultivation_yield": 0.01,
-    "labor_efficiency": 0.01
+    "cultivation_yield": 0.0043,
+    "haul_capacity": 0.0047,
+    "labor_efficiency": 0.0014
    },
    "name": "Fodder Barley",
    "observation": "A barley field sown only for the oxen and asses keeps the draught teams strong through the heavy season."
   },
   "graded_rations": {
    "effects": {
-    "labor_efficiency": 0.025,
-    "neonatal_survival": 0.006,
-    "state_capacity": 0.02,
-    "food_storage": 0.015,
-    "institutional_rigidity": 0.01
+    "food_storage": 0.0031,
+    "institutional_rigidity": 0.01,
+    "labor_efficiency": 0.0038,
+    "neonatal_survival": 0.0038,
+    "state_capacity": 0.0038
    },
    "name": "Graded Rations",
    "observation": "Ration lists give men, women, children and nursing mothers each a set measure of grain and oil by their work and need.",
@@ -659,9 +801,9 @@
   },
   "beam_olive_press": {
    "effects": {
-    "craft_output": 0.015,
-    "trade_capacity": 0.015,
-    "food_output": 0.01
+    "craft_output": 0.0134,
+    "food_output": 0.0035,
+    "trade_capacity": 0.0068
    },
    "name": "Beam Olive Press",
    "observation": "A long beam weighted with stones squeezes baskets of crushed olives, and oil runs in quantities no hand press could give.",
@@ -669,26 +811,26 @@
   },
   "flavouring_herbs": {
    "effects": {
-    "food_spoilage": -0.008,
-    "trade_capacity": 0.005
+    "food_spoilage": -0.007,
+    "trade_capacity": 0.0023
    },
    "name": "Flavouring Herbs",
    "observation": "Coriander, cumin and mustard grown in garden rows flavour plain porridge and help preserve pickles."
   },
   "named_breads": {
    "effects": {
-    "cohesion": 0.006,
-    "standardization": 0.006,
-    "labor_efficiency": 0.004
+    "cohesion": 0.0011,
+    "labor_efficiency": 0.0006,
+    "standardization": 0.0024
    },
    "name": "Named Breads",
    "observation": "Bakers make dozens of named loaves, from plain ration bread to festival rings sweetened with dates and honey."
   },
   "vinegar_pickling": {
    "effects": {
-    "nutrition_quality": 0.01,
-    "food_storage": 0.03,
-    "food_spoilage": -0.03
+    "food_spoilage": -0.012,
+    "food_storage": 0.0047,
+    "nutrition_quality": 0.01
    },
    "ability_reason": "Vinegar keeps vegetables, fish and fruit edible for a year.",
    "art": "res://assets/ui/research/paper/edible_resource_recognition.png"
@@ -696,27 +838,27 @@
   "date_palm_pollination": {
    "effects": {
     "cultivation_yield": 0.03,
-    "food_storage": 0.01
+    "food_storage": 0.0016
    },
    "name": "Hand-Pollinated Date Palms",
    "observation": "Climbers carry flowering strands from the male palm to the female trees, and the groves bear far more fruit."
   },
   "date_syrup_preserves": {
    "effects": {
-    "food_storage": 0.02,
-    "trade_capacity": 0.008
+    "food_storage": 0.0031,
+    "trade_capacity": 0.001
    },
    "name": "Date Syrup and Honey Preserves",
    "observation": "Fruit boiled down with date syrup or honey and sealed in jars stays sweet and sound through the year."
   },
   "famine_reserves": {
    "effects": {
-    "food_storage": 0.08,
-    "storage_loss": -0.02,
-    "state_capacity": 0.02,
-    "legitimacy": 0.015,
+    "food_storage": 0.0126,
     "labor_demand": 0.01,
-    "neonatal_survival": 0.006
+    "legitimacy": 0.0028,
+    "neonatal_survival": 0.0029,
+    "state_capacity": 0.0056,
+    "storage_loss": -0.0056
    },
    "name": "Famine Reserves",
    "observation": "Enough grain is sealed away to carry the land through two failed harvests, and it is opened only by order.",
@@ -724,30 +866,554 @@
   },
   "dried_salted_cheese": {
    "effects": {
-    "food_storage": 0.025,
-    "logistics_endurance": 0.015,
-    "trade_capacity": 0.008
+    "food_storage": 0.01,
+    "logistics_endurance": 0.0086,
+    "trade_capacity": 0.0019
    },
    "name": "Dried Salted Cheese",
    "observation": "Cheese salted and dried hard on reed mats keeps for months on campaign and on the road."
   },
   "separate_grain_lines": {
    "effects": {
-    "cultivation_yield": 0.015,
-    "standardization": 0.008
+    "cultivation_yield": 0.0076,
+    "standardization": 0.0055
    },
    "name": "Separate Grain Lines",
    "observation": "Bread wheat and brewing barley are sown, threshed and stored apart, each kept true from its own seed."
   },
   "fruit_tree_grafting": {
    "effects": {
-    "cultivation_yield": 0.03,
-    "food_storage": 0.01,
-    "knowledge_preservation": 0.005
+    "cultivation_yield": 0.0153,
+    "food_storage": 0.004,
+    "knowledge_preservation": 0.0011
    },
    "name": "Fruit Tree Grafting",
    "observation": "A shoot from a good tree bound into the cut stock of a wild one bears the good tree's fruit within a few years.",
    "social_consequence": "Grafters guard their knowledge; named fruit trees become heirlooms passed with the land."
+  },
+  "sealed_vessels": {
+   "effects": {
+    "food_spoilage": -0.0078,
+    "food_storage": 0.009,
+    "health_protection": 0.0031,
+    "trade_capacity": 0.0041
+   }
+  },
+  "salt_working": {
+   "effects": {
+    "food_spoilage": -0.0062,
+    "health_protection": 0.0026,
+    "trade_capacity": 0.0075
+   }
+  },
+  "curing_regimens": {
+   "effects": {
+    "food_spoilage": -0.0092,
+    "food_storage": 0.0079,
+    "logistics_endurance": 0.0223
+   }
+  }
+ },
+ "balance_600": {
+  "schema": "research_600_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_600.py; the loader reads only 'items'.",
+  "source": {
+   "seed_selection": {
+    "cultivation_yield": 0.16,
+    "labor_demand": 0.02,
+    "nutrition_quality": 0.02,
+    "soil_productivity": 0.03
+   },
+   "food_drying": {
+    "food_spoilage": -0.1,
+    "food_storage": 0.1,
+    "labor_demand": 0.01
+   },
+   "smoking": {
+    "food_spoilage": -0.12,
+    "food_storage": 0.12,
+    "fuel_demand": 0.04,
+    "logistics_endurance": 0.03,
+    "pollution": 0.008
+   },
+   "animal_taming": {
+    "disease_exposure": 0.008,
+    "ecological_pressure": 0.01,
+    "food_output": 0.026,
+    "labor_demand": 0.01
+   },
+   "sealed_vessels": {
+    "food_spoilage": -0.08,
+    "food_storage": 0.1,
+    "health_protection": 0.03,
+    "trade_capacity": 0.03
+   },
+   "salt_working": {
+    "food_spoilage": -0.08,
+    "health_protection": 0.01,
+    "trade_capacity": 0.06
+   },
+   "curing_regimens": {
+    "food_spoilage": -0.12,
+    "food_storage": 0.07,
+    "logistics_endurance": 0.06
+   },
+   "crop_calendars": {
+    "cultivation_yield": 0.08,
+    "knowledge_preservation": 0.02,
+    "task_coordination": 0.03
+   },
+   "managed_fallow": {
+    "ecology_recovery": 0.05,
+    "food_output": 0.02,
+    "soil_productivity": 0.09
+   },
+   "seed_reserves": {
+    "cultivation_yield": 0.07,
+    "food_storage": 0.04,
+    "state_capacity": 0.02
+   },
+   "irrigation_schedules": {
+    "cultivation_yield": 0.12,
+    "disease_exposure": 0.015,
+    "labor_demand": 0.03,
+    "soil_productivity": 0.04,
+    "state_capacity": 0.04
+   },
+   "fermentation_control": {
+    "food_spoilage": -0.07,
+    "health_risk": 0.005,
+    "nutrition_quality": 0.04,
+    "water_safety": 0.03
+   },
+   "regional_granaries": {
+    "cohesion": 0.02,
+    "food_spoilage": -0.06,
+    "food_storage": 0.18,
+    "labor_demand": 0.02,
+    "state_capacity": 0.05
+   },
+   "hearth_roasting_control": {
+    "disease_exposure": -0.01,
+    "fuel_demand": 0.01,
+    "nutrition_quality": 0.015
+   },
+   "earth_oven_cooking": {
+    "food_output": 0.008,
+    "nutrition_quality": 0.01
+   },
+   "food_steaming_vessels": {
+    "neonatal_survival": 0.006,
+    "nutrition_quality": 0.01
+   },
+   "threshing_frames": {
+    "labor_efficiency": 0.008,
+    "storage_loss": -0.015
+   },
+   "winnowing_practice": {
+    "food_spoilage": -0.01,
+    "storage_loss": -0.01
+   },
+   "flour_sifting": {
+    "food_spoilage": -0.006,
+    "standardization": 0.004
+   },
+   "grain_malting": {
+    "food_storage": 0.006,
+    "nutrition_quality": 0.005
+   },
+   "nut_kernel_shelling": {
+    "foraging_yield": 0.02,
+    "nutrition_quality": 0.005
+   },
+   "acorn_leaching": {
+    "food_storage": 0.01,
+    "foraging_yield": 0.025
+   },
+   "root_grating_dewatering": {
+    "foraging_yield": 0.015,
+    "nutrition_quality": 0.004
+   },
+   "pulse_splitting": {
+    "food_storage": 0.008,
+    "nutrition_quality": 0.008
+   },
+   "fruit_pulp_screening": {
+    "food_spoilage": -0.005,
+    "nutrition_quality": 0.004
+   },
+   "grain_parboiling": {
+    "food_spoilage": -0.01,
+    "storage_loss": -0.005
+   },
+   "indirect_solar_food_drying": {
+    "food_spoilage": -0.015,
+    "food_storage": 0.02
+   },
+   "food_pounding_mortars": {
+    "labor_demand": 0.004,
+    "neonatal_survival": 0.008,
+    "nutrition_quality": 0.008
+   },
+   "controlled_baking": {
+    "food_storage": 0.008,
+    "nutrition_quality": 0.005
+   },
+   "cereal_dehulling": {
+    "storage_loss": -0.005
+   },
+   "starch_washing_separation": {
+    "foraging_yield": 0.008,
+    "nutrition_quality": 0.004
+   },
+   "root_cellars": {
+    "food_spoilage": -0.02,
+    "food_storage": 0.025
+   },
+   "raised_granaries": {
+    "food_storage": 0.035,
+    "storage_loss": -0.03
+   },
+   "hermetic_grain_storage": {
+    "container_capacity": 0.02,
+    "food_spoilage": -0.02,
+    "food_storage": 0.04,
+    "storage_loss": -0.03
+   },
+   "brine_fermentation": {
+    "food_spoilage": -0.02,
+    "food_storage": 0.025,
+    "nutrition_quality": 0.015
+   },
+   "vinegar_pickling": {
+    "food_spoilage": -0.03,
+    "food_storage": 0.03,
+    "nutrition_quality": 0.01
+   },
+   "stock_rotation": {
+    "food_spoilage": -0.02,
+    "storage_loss": -0.015
+   },
+   "seed_cleaning": {
+    "cultivation_yield": 0.02
+   },
+   "edible_resource_recognition": {
+    "foraging_yield": 0.05,
+    "nutrition_quality": 0.01
+   },
+   "staggered_meal_timing": {
+    "fatigue": -0.015,
+    "task_coordination": 0.007
+   },
+   "portion_allotment_customs": {
+    "food_storage": 0.02,
+    "nutrition_quality": 0.025
+   },
+   "seasonal_protein_sourcing": {
+    "hunting_yield": 0.03,
+    "labor_demand": 0.008,
+    "nutrition_quality": 0.03
+   },
+   "varied_forage_rotation": {
+    "ecological_pressure": -0.01,
+    "foraging_yield": 0.02,
+    "nutrition_quality": 0.03
+   },
+   "leafy_green_incorporation": {
+    "disease_exposure": -0.01,
+    "nutrition_quality": 0.025
+   },
+   "mixed_grain_legume_meals": {
+    "food_output": 0.01,
+    "nutrition_quality": 0.035
+   },
+   "communal_meal_variety_rules": {
+    "cohesion": 0.0039,
+    "nutrition_quality": 0.03
+   },
+   "deliberate_milk_souring": {
+    "food_storage": 0.01,
+    "neonatal_survival": 0.02,
+    "nutrition_quality": 0.03
+   },
+   "seasonal_diet_diversification": {
+    "food_storage": 0.015,
+    "nutrition_quality": 0.03
+   },
+   "weaning_food_customs": {
+    "neonatal_survival": 0.02,
+    "nutrition_quality": 0.03
+   },
+   "soil_exhaustion_recognition": {
+    "cultivation_yield": 0.015,
+    "soil_productivity": 0.02
+   },
+   "plot_yield_memory": {
+    "cultivation_yield": 0.025,
+    "soil_productivity": 0.015
+   },
+   "manure_field_spreading": {
+    "labor_demand": 0.01,
+    "soil_productivity": 0.03
+   },
+   "ash_field_amendment": {
+    "cultivation_yield": 0.02,
+    "soil_productivity": 0.03
+   },
+   "planting_density_adjustment": {
+    "cultivation_yield": 0.025,
+    "labor_demand": 0.008
+   },
+   "intercrop_pairing_lore": {
+    "cultivation_yield": 0.03,
+    "soil_productivity": 0.02
+   },
+   "field_rest_scheduling": {
+    "cultivation_yield": 0.02,
+    "soil_productivity": 0.03
+   },
+   "legume_field_interplanting": {
+    "cultivation_yield": 0.02,
+    "soil_productivity": 0.035
+   },
+   "pest_deterrent_storage_herbs": {
+    "food_storage": 0.02,
+    "storage_loss": -0.03
+   },
+   "grain_moisture_watch": {
+    "food_spoilage": -0.02,
+    "storage_loss": -0.03
+   },
+   "batch_labeling_by_harvest": {
+    "food_storage": 0.025,
+    "task_coordination": 0.0061
+   },
+   "reserve_allocation_priority": {
+    "food_storage": 0.03,
+    "institutional_rigidity": 0.01,
+    "neonatal_survival": 0.006
+   },
+   "reserve_moisture_barrier_layering": {
+    "food_spoilage": -0.02,
+    "storage_loss": -0.025
+   },
+   "shared_reserve_access_rules": {
+    "cohesion": 0.0058,
+    "food_storage": 0.02,
+    "institutional_rigidity": 0.01
+   },
+   "layered_pit_storage": {
+    "dry_storage": 0.02,
+    "storage_loss": -0.03
+   },
+   "reserve_rotation_ledgers": {
+    "food_storage": 0.025,
+    "storage_loss": -0.02
+   },
+   "fish_weirs_and_traps": {
+    "food_output": 0.04,
+    "foraging_yield": 0.015,
+    "labor_demand": 0.006
+   },
+   "milking": {
+    "disease_exposure": 0.008,
+    "food_output": 0.045,
+    "labor_demand": 0.01,
+    "neonatal_survival": 0.01,
+    "nutrition_quality": 0.008
+   },
+   "wild_honey_smoking": {
+    "foraging_yield": 0.015,
+    "injury_risk": 0.003,
+    "nutrition_quality": 0.005
+   },
+   "saddle_quern_grinding": {
+    "fatigue": 0.012,
+    "labor_demand": 0.008,
+    "nutrition_quality": 0.006
+   },
+   "drive_hunts": {
+    "ecological_pressure": 0.02,
+    "food_storage": 0.01,
+    "hunting_yield": 0.08,
+    "injury_risk": 0.005,
+    "task_coordination": 0.01
+   },
+   "resin_sealed_wine": {
+    "cohesion": 0.006,
+    "food_storage": 0.015,
+    "health_risk": 0.003,
+    "trade_capacity": 0.01
+   },
+   "pressed_cheese": {
+    "food_output": 0.02,
+    "food_spoilage": -0.015,
+    "food_storage": 0.04,
+    "nutrition_quality": 0.006
+   },
+   "cutting_propagation": {
+    "cultivation_yield": 0.02,
+    "nutrition_quality": 0.004,
+    "soil_productivity": 0.005
+   },
+   "offshoot_date_planting": {
+    "cultivation_yield": 0.02,
+    "food_storage": 0.01
+   },
+   "ox_drawn_ard": {
+    "cultivation_yield": 0.07,
+    "ecological_pressure": 0.015,
+    "labor_demand": -0.01,
+    "labor_efficiency": 0.02,
+    "soil_productivity": -0.01
+   },
+   "salting_fish_meat": {
+    "food_spoilage": -0.04,
+    "food_storage": 0.04,
+    "logistics_endurance": 0.02,
+    "trade_capacity": 0.01
+   },
+   "butter_churning": {
+    "food_output": 0.012,
+    "food_storage": 0.01
+   },
+   "winter_fodder": {
+    "food_output": 0.03,
+    "food_storage": 0.02,
+    "labor_demand": 0.015
+   },
+   "clay_dome_ovens": {
+    "food_storage": 0.01,
+    "fuel_efficiency": 0.02,
+    "labor_efficiency": 0.006
+   },
+   "barley_beer": {
+    "cohesion": 0.012,
+    "food_storage": 0.015,
+    "health_risk": 0.004,
+    "labor_demand": 0.008,
+    "water_safety": 0.015
+   },
+   "dried_fruit_cakes": {
+    "food_storage": 0.02,
+    "logistics_endurance": 0.01
+   },
+   "kitchen_gardens": {
+    "cultivation_yield": 0.015,
+    "food_output": 0.015
+   },
+   "spoilage_inspection": {
+    "food_spoilage": -0.02,
+    "health_risk": -0.004,
+    "labor_demand": 0.005,
+    "storage_loss": -0.03
+   },
+   "ghee": {
+    "food_storage": 0.02,
+    "trade_capacity": 0.008
+   },
+   "named_beers": {
+    "cohesion": 0.006,
+    "standardization": 0.01,
+    "trade_capacity": 0.01
+   },
+   "marked_wine_jars": {
+    "knowledge_preservation": 0.004,
+    "storage_loss": -0.01,
+    "trade_capacity": 0.015
+   },
+   "fattened_geese_ducks": {
+    "disease_exposure": 0.005,
+    "food_output": 0.025
+   },
+   "work_gang_bakeries": {
+    "fatigue": -0.015,
+    "fuel_demand": 0.01,
+    "labor_efficiency": 0.02,
+    "state_capacity": 0.01
+   },
+   "stocked_fish_ponds": {
+    "food_output": 0.06,
+    "food_storage": 0.01,
+    "labor_demand": 0.008
+   },
+   "hive_beekeeping": {
+    "cultivation_yield": 0.01,
+    "food_output": 0.015,
+    "trade_capacity": 0.01
+   },
+   "sesame_oil": {
+    "cultivation_yield": 0.01,
+    "food_output": 0.01,
+    "trade_capacity": 0.01
+   },
+   "stall_fattened_cattle": {
+    "cohesion": 0.008,
+    "ecological_pressure": 0.01,
+    "food_output": 0.02,
+    "labor_demand": 0.012
+   },
+   "jarred_salt_fish": {
+    "food_storage": 0.02,
+    "logistics_endurance": 0.015,
+    "trade_capacity": 0.02
+   },
+   "fodder_barley": {
+    "cultivation_yield": 0.01,
+    "haul_capacity": 0.015,
+    "labor_efficiency": 0.01
+   },
+   "graded_rations": {
+    "food_storage": 0.015,
+    "institutional_rigidity": 0.01,
+    "labor_efficiency": 0.025,
+    "neonatal_survival": 0.006,
+    "state_capacity": 0.02
+   },
+   "beam_olive_press": {
+    "craft_output": 0.015,
+    "food_output": 0.01,
+    "trade_capacity": 0.015
+   },
+   "flavouring_herbs": {
+    "food_spoilage": -0.008,
+    "trade_capacity": 0.005
+   },
+   "named_breads": {
+    "cohesion": 0.006,
+    "labor_efficiency": 0.004,
+    "standardization": 0.006
+   },
+   "date_palm_pollination": {
+    "cultivation_yield": 0.03,
+    "food_storage": 0.01
+   },
+   "date_syrup_preserves": {
+    "food_storage": 0.02,
+    "trade_capacity": 0.008
+   },
+   "famine_reserves": {
+    "food_storage": 0.08,
+    "labor_demand": 0.01,
+    "legitimacy": 0.015,
+    "neonatal_survival": 0.006,
+    "state_capacity": 0.02,
+    "storage_loss": -0.02
+   },
+   "dried_salted_cheese": {
+    "food_storage": 0.025,
+    "logistics_endurance": 0.015,
+    "trade_capacity": 0.008
+   },
+   "separate_grain_lines": {
+    "cultivation_yield": 0.015,
+    "standardization": 0.008
+   },
+   "fruit_tree_grafting": {
+    "cultivation_yield": 0.03,
+    "food_storage": 0.01,
+    "knowledge_preservation": 0.005
+   }
   }
  }
 }

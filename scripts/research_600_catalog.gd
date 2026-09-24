@@ -53,19 +53,23 @@ static var _items:Dictionary={}
 static var _ids:Array[String]=[]
 static var _effects:Dictionary={}
 static var _meta:Dictionary={}
+## Phase 3 amendments: earliest years of live entries left outside the registry.
+static var _redates:Dictionary={}
 static var _loaded:=false
 
 
 static func ensure_loaded()->void:
 	if _loaded: return
 	_loaded=true
-	_items.clear();_ids.clear();_effects.clear();_meta.clear()
+	_items.clear();_ids.clear();_effects.clear();_meta.clear();_redates.clear()
 	var text:=FileAccess.get_file_as_string(DATA_PATH)
 	var parsed:Variant=JSON.parse_string(text)
 	if not parsed is Dictionary:
 		push_error("Research600: cannot read "+DATA_PATH)
 		return
 	_meta=(parsed as Dictionary).get("meta",{})
+	var redates:Variant=(parsed as Dictionary).get("redates",{})
+	if redates is Dictionary: _redates=(redates as Dictionary).duplicate()
 	for row:Variant in (parsed as Dictionary).get("items",[]):
 		if not row is Dictionary: continue
 		var item:Dictionary=row
@@ -202,8 +206,17 @@ static func apply(entry:Dictionary)->Dictionary:
 static func earliest_year(entry:Dictionary,era:float,dated:bool)->float:
 	var id:=String(entry.get("id",""))
 	if has(id): return float(item(id).get("min_year",0.0))
-	if dated: return era*ERA_BAND_FRACTION
+	if _redates.has(id): return float(_redates[id])
+	# An entry dated after the window never opens inside it (the 0.9 margin
+	# alone let year-660 iron open at 594).
+	if dated: return era*ERA_BAND_FRACTION if era<=WINDOW_END_YEAR else maxf(WINDOW_END_YEAR,era*ERA_BAND_FRACTION)
 	return maxf(WINDOW_END_YEAR,era*ERA_BAND_FRACTION)
+
+
+## Phase 3 re-dated earliest year of a live entry outside the registry, or -1.
+static func redate(id:String)->float:
+	ensure_loaded()
+	return float(_redates.get(id,-1.0))
 
 
 static func has_conditions(id:String)->bool:

@@ -21,7 +21,13 @@ func run()->void:
 			"row_effects":(catalog.effect_row(id) as Dictionary).has("effects"),
 			"requires_all":entry.get("requires_all",entry.get("requires",[]))})
 	var file:=FileAccess.open(output,FileAccess.WRITE)
-	file.store_string(JSON.stringify({"limits":_limits(),"rows":rows}))
+	var society:Script=load("res://scripts/society_model.gd")
+	var ceilings:Dictionary={}
+	for key:String in _limits():
+		var curve:Dictionary={}
+		for era in range(0,601,25):curve[str(era)]=[society.era_ceiling_for(key,float(era)).x,society.era_ceiling_for(key,float(era)).y]
+		ceilings[key]=curve
+	file.store_string(JSON.stringify({"limits":_limits(),"ceilings":ceilings,"lower_is_better":society.get_script_constant_map().get("LOWER_IS_BETTER",[]),"rows":rows}))
 	file.close()
 	print("dumped %d entries to %s" % [rows.size(),output])
 	quit(0)

@@ -9,6 +9,8 @@ const DiscoveryFrontierCatalog = preload("res://scripts/discovery_frontier_catal
 const SocietyModelScript = preload("res://scripts/society_model.gd")
 const TechnologyEras=preload("res://scripts/technology_eras.gd")
 const Research600=preload("res://scripts/research_600_catalog.gd")
+## research_600: last day waiting observers were returned to reopened lines.
+var _research_600_return_day:=-100000
 var society_model = SocietyModelScript.new()
 
 var rng := RandomNumberGenerator.new()
@@ -408,6 +410,7 @@ func _refresh_active_investigations()->void:
 	# redirect prefers the same broad domain, then the civilization's seeded focus,
 	# actual activity, leadership and material evidence decide the specific line.
 	_redistribute_stranded_attention(current_day)
+	_research_600_return_waiting_attention(current_day) # research_600: staffed lines come back when they reopen
 	for channel_data in _allocated_channels():
 		var dynamic_id:=String(channel_data.dynamic)
 		var subcategory:=String(channel_data.subcategory)
@@ -1351,4 +1354,30 @@ func research_600_rival_society(civ:Dictionary)->Dictionary:
 		if float(relation.get("trade",0.0))>0.0 or bool(relation.get("at_war",false)) or String(relation.get("treaty","none"))!="none": contact=true;break
 	return {"year":float(WorldSimulation.state.elapsed_days)/365.0,"population":float(civ.get("population",0.0)),"settlements":maxi(1,int(civ.get("settlement_count",1))),
 		"resources":resources,"environment":Research600.environment_tags(profile,{}),"institutions":float(civ.get("institutions",0.0)),"contact":contact}
+
+
+## Observers leave a line whose questions are all answered or not yet open
+## (_redistribute_stranded_attention) and previously never came back when a new
+## question opened there. Once a month, a line of a staffed domain that has
+## open work but nobody on it takes one observer back from the domain's most
+## crowded line (only from a line with two or more, so no running line stops).
+func _research_600_return_waiting_attention(current_day:int)->void:
+	if current_day<_research_600_return_day+30 and current_day>=_research_600_return_day: return
+	_research_600_return_day=current_day
+	var moved:=false
+	for dynamic_variant in WorldSimulation.state.research_subcategory_allocations:
+		var dynamic_id:=String(dynamic_variant)
+		var subcategories:Dictionary=WorldSimulation.state.research_subcategory_allocations[dynamic_variant]
+		for subcategory_variant in subcategories.keys():
+			if int(subcategories[subcategory_variant])>0: continue
+			var donor:Variant=null
+			for other_variant in subcategories:
+				if int(subcategories[other_variant])>=2 and (donor==null or int(subcategories[other_variant])>int(subcategories[donor])): donor=other_variant
+			if donor==null: break
+			if not _channel_has_candidate(_channel_key(dynamic_id,String(subcategory_variant)),current_day): continue
+			subcategories[donor]=int(subcategories[donor])-1
+			subcategories[subcategory_variant]=1
+			moved=true
+		WorldSimulation.state.research_subcategory_allocations[dynamic_variant]=subcategories
+	if moved: _rebuild_research_domain_totals()
 # --- research_600 (end) -------------------------------------------------------

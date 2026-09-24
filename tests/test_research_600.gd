@@ -27,8 +27,11 @@ func _society(year:float)->Dictionary:
 	return society
 
 func test_loader_registers_all_1101_design_discoveries()->void:
-	assert_int(Catalog.ids().size()).is_equal(1101)
-	assert_int(int(Catalog.meta().get("node_count",0))).is_equal(1101)
+	# The approved design has 1,101 items; Phase 3 adopts the in-window catalog
+	# entries it never listed (tools/research/design_amendments_600.json).
+	assert_int(int(Catalog.meta().get("design_node_count",0))).is_equal(1101)
+	assert_int(Catalog.ids().size()).is_equal(1101+int(Catalog.meta().get("adopted_count",0)))
+	assert_int(int(Catalog.meta().get("node_count",0))).is_equal(Catalog.ids().size())
 	var live:Dictionary={}
 	for entry:Dictionary in DiscoverySystem.technology_catalog:live[String(entry.id)]=true
 	var missing:Array[String]=[]
@@ -115,12 +118,21 @@ func test_items_outside_the_registry_hold_to_their_era_or_the_window_end()->void
 		if Catalog.has(id):continue
 		var earliest:=DiscoverySystem.research_600_earliest_year(entry)
 		var era:=DiscoverySystem.discovery_era(id)
-		if preload("res://scripts/technology_eras.gd").HISTORICAL_YEAR.has(id):
-			assert_float(earliest).override_failure_message(id).is_equal_approx(era*Catalog.ERA_BAND_FRACTION,0.001)
+		if Catalog.redate(id)>=0.0:
+			# Phase 3 re-dates (tools/research/design_amendments_600.json).
+			assert_float(earliest).override_failure_message(id).is_equal(Catalog.redate(id))
+		elif preload("res://scripts/technology_eras.gd").HISTORICAL_YEAR.has(id):
+			var expected:=era*Catalog.ERA_BAND_FRACTION
+			# Entries dated after the window never open inside it.
+			if era>Catalog.WINDOW_END_YEAR:expected=maxf(Catalog.WINDOW_END_YEAR,expected)
+			assert_float(earliest).override_failure_message(id).is_equal_approx(expected,0.001)
 		else:
 			assert_float(earliest).override_failure_message(id).is_greater_equal(Catalog.WINDOW_END_YEAR)
-	for id:String in ["differential_calculus","integral_calculus","bloomery_smelting","iron_assaying","public_libraries"]:
+	for id:String in ["differential_calculus","integral_calculus","public_libraries"]:
 		assert_float(DiscoverySystem.research_600_earliest_year(_entry(id))).override_failure_message(id).is_greater(500.0)
+	# Iron must not open before about year 660 (1000 BCE).
+	for id:String in ["bloomery_smelting","iron_assaying","forge_welding","bloomery_charge_control"]:
+		assert_float(DiscoverySystem.research_600_earliest_year(_entry(id))).override_failure_message(id).is_greater_equal(660.0)
 
 func test_conditions_gate_availability_for_any_society()->void:
 	var cases:={"part_time_specialists":["population",29.0,30.0],"village_marriage_alliances":["settlements",1,2],

@@ -6,7 +6,10 @@
 "registry_source": "origin/codex/research-plausibility:docs/research/registry.json",
 "source_commit": "2ffd5b734a2f9a69ce9c7025ffc429ccb660fbd9",
 "year_adjustments": "applied (proposed_year; band shifted by the same amount)",
-"node_count": 1101
+"node_count": 1123,
+"design_node_count": 1101,
+"amendments": "tools/research/design_amendments_600.json",
+"adopted_count": 22
 },
 "lines": [
 "knowledge",
@@ -1120,6 +1123,30 @@
 "shared_with": []
 },
 {
+"id": "common_path_alignment",
+"line": "logistics",
+"status": "adopted",
+"name": "Common Path Alignment",
+"one_liner": "Common Path Alignment",
+"observation": "Common Path Alignment.",
+"key_threshold": false,
+"target_year": 5,
+"proposed_year": 5,
+"band_low": 2.0,
+"band_high": 12.0,
+"min_year": 2.0,
+"research_years": 1.5,
+"requires_all": [
+"route_memory"
+],
+"requires_any": [],
+"precedents": [
+"landmark_route_naming"
+],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "guest_host_reciprocity",
 "line": "logistics",
 "status": "era",
@@ -1272,6 +1299,28 @@
 "research_years": 2.0,
 "requires_all": [
 "fiber_grading"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "fuel_air_drying",
+"line": "production",
+"status": "adopted",
+"name": "Fuel Air Drying",
+"one_liner": "Fuel Air Drying",
+"observation": "Fuel Air Drying.",
+"key_threshold": false,
+"target_year": 6,
+"proposed_year": 6,
+"band_low": 2.0,
+"band_high": 15.0,
+"min_year": 2.0,
+"research_years": 1.5,
+"requires_all": [
+"ember_tending"
 ],
 "requires_any": [],
 "precedents": [],
@@ -3290,6 +3339,30 @@
 ]
 },
 {
+"id": "layered_clothing_design",
+"line": "production",
+"status": "adopted",
+"name": "Layered Clothing Design",
+"one_liner": "Layered Clothing Design",
+"observation": "Layered Clothing Design.",
+"key_threshold": false,
+"target_year": 16,
+"proposed_year": 16,
+"band_low": 8.0,
+"band_high": 25.0,
+"min_year": 8.0,
+"research_years": 2.0,
+"requires_all": [
+"fiber_grading",
+"seasonal_patterns",
+"bone_needle_sewing"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "animal_taming",
 "line": "nutrition",
 "status": "catalog",
@@ -3682,6 +3755,29 @@
 "precedents": [
 "ochre_grave_goods"
 ],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "textile_repair_methods",
+"line": "production",
+"status": "adopted",
+"name": "Textile Repair Methods",
+"one_liner": "Textile Repair Methods",
+"observation": "Textile Repair Methods.",
+"key_threshold": false,
+"target_year": 18,
+"proposed_year": 18,
+"band_low": 10.0,
+"band_high": 30.0,
+"min_year": 10.0,
+"research_years": 2.0,
+"requires_all": [
+"bone_needle_sewing",
+"fiber_grading"
+],
+"requires_any": [],
+"precedents": [],
 "conditions": {},
 "shared_with": []
 },
@@ -6831,6 +6927,52 @@
 "shared_with": []
 },
 {
+"id": "textile_laundering_practice",
+"line": "production",
+"status": "adopted",
+"name": "Textile Laundering",
+"one_liner": "Textile Laundering",
+"observation": "Textile Laundering.",
+"key_threshold": false,
+"target_year": 50,
+"proposed_year": 50,
+"band_low": 40.0,
+"band_high": 70.0,
+"min_year": 40.0,
+"research_years": 2.0,
+"requires_all": [
+"clean_water",
+"plain_weaving"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "sealed_vessels",
+"line": "nutrition",
+"status": "adopted",
+"name": "Sealed Vessels",
+"one_liner": "Sealed Vessels",
+"observation": "Sealed Vessels.",
+"key_threshold": false,
+"target_year": 50,
+"proposed_year": 50,
+"band_low": 35.0,
+"band_high": 70.0,
+"min_year": 35.0,
+"research_years": 3.0,
+"requires_all": [
+"clay_tempering",
+"pit_firing"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "refuse_removal",
 "line": "health",
 "status": "new",
@@ -7219,7 +7361,9 @@
 "lime_plastered_floors"
 ]
 ],
-"precedents": [],
+"precedents": [
+"sealed_vessels"
+],
 "conditions": {},
 "shared_with": []
 },
@@ -8128,6 +8272,28 @@
 "information",
 "research"
 ]
+},
+{
+"id": "paired_signal_confirmation",
+"line": "knowledge",
+"status": "adopted",
+"name": "Paired Signal Confirmation",
+"one_liner": "Paired Signal Confirmation",
+"observation": "Paired Signal Confirmation.",
+"key_threshold": false,
+"target_year": 70,
+"proposed_year": 70,
+"band_low": 45.0,
+"band_high": 100.0,
+"min_year": 45.0,
+"research_years": 2.0,
+"requires_all": [
+"distance_call_signals"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "labor_debt_tallies",
@@ -11139,6 +11305,29 @@
 "shared_with": []
 },
 {
+"id": "mass_seed_selection",
+"line": "nutrition",
+"status": "adopted",
+"name": "Mass Seed Selection",
+"one_liner": "Mass Seed Selection",
+"observation": "Mass Seed Selection.",
+"key_threshold": false,
+"target_year": 120,
+"proposed_year": 120,
+"band_low": 100.0,
+"band_high": 150.0,
+"min_year": 100.0,
+"research_years": 4.0,
+"requires_all": [
+"seed_reserves",
+"crop_calendars"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "staggered_meal_timing",
 "line": "nutrition",
 "status": "era",
@@ -12563,6 +12752,28 @@
 "shared_with": []
 },
 {
+"id": "salt_working",
+"line": "nutrition",
+"status": "adopted",
+"name": "Salt Working",
+"one_liner": "Salt Working",
+"observation": "Salt Working.",
+"key_threshold": false,
+"target_year": 150,
+"proposed_year": 150,
+"band_low": 120.0,
+"band_high": 175.0,
+"min_year": 120.0,
+"research_years": 4.0,
+"requires_all": [
+"sealed_vessels"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "recovery_diet_customs",
 "line": "health",
 "status": "era",
@@ -13011,7 +13222,8 @@
 "requires_any": [],
 "precedents": [
 "salt_shell_routes",
-"smoking"
+"smoking",
+"salt_working"
 ],
 "conditions": {
 "resources_known": [
@@ -13683,6 +13895,30 @@
 "construction",
 "materials"
 ]
+},
+{
+"id": "curing_regimens",
+"line": "nutrition",
+"status": "adopted",
+"name": "Curing Regimens",
+"one_liner": "Curing Regimens",
+"observation": "Curing Regimens.",
+"key_threshold": false,
+"target_year": 170,
+"proposed_year": 170,
+"band_low": 150.0,
+"band_high": 200.0,
+"min_year": 150.0,
+"research_years": 3.0,
+"requires_all": [
+"salt_working",
+"smoking",
+"salting_fish_meat"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "hearth_counts",
@@ -15352,6 +15588,30 @@
 ]
 },
 {
+"id": "wheel_blank_jointing",
+"line": "logistics",
+"status": "adopted",
+"name": "Wheel Blank Jointing",
+"one_liner": "Wheel Blank Jointing",
+"observation": "Wheel Blank Jointing.",
+"key_threshold": false,
+"target_year": 215,
+"proposed_year": 215,
+"band_low": 185.0,
+"band_high": 250.0,
+"min_year": 185.0,
+"research_years": 4.0,
+"requires_all": [
+"joinery",
+"standard_measures",
+"timber_post_beam_connections"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "tens_sixties_bundling",
 "line": "knowledge",
 "status": "new",
@@ -15441,6 +15701,30 @@
 "food",
 "storage"
 ]
+},
+{
+"id": "wheel_hub_boring",
+"line": "logistics",
+"status": "adopted",
+"name": "Wheel Hub Boring",
+"one_liner": "Wheel Hub Boring",
+"observation": "Wheel Hub Boring.",
+"key_threshold": false,
+"target_year": 220,
+"proposed_year": 220,
+"band_low": 190.0,
+"band_high": 255.0,
+"min_year": 190.0,
+"research_years": 4.0,
+"requires_all": [
+"joinery",
+"standard_measures",
+"timber_post_beam_connections"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "dung_cake_fuel",
@@ -16089,6 +16373,29 @@
 "research_years": 4.0,
 "requires_all": [
 "wooden_axle_shaping"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "wooden_axle_boxes",
+"line": "logistics",
+"status": "adopted",
+"name": "Wooden Axle Boxes",
+"one_liner": "Wooden Axle Boxes",
+"observation": "Wooden Axle Boxes.",
+"key_threshold": false,
+"target_year": 232,
+"proposed_year": 232,
+"band_low": 228.0,
+"band_high": 270.0,
+"min_year": 228.0,
+"research_years": 3.0,
+"requires_all": [
+"wooden_axle_shaping",
+"wheel_hub_boring"
 ],
 "requires_any": [],
 "precedents": [],
@@ -18254,6 +18561,54 @@
 "shared_with": []
 },
 {
+"id": "crop_residue_cover",
+"line": "nutrition",
+"status": "adopted",
+"name": "Crop Residue Cover",
+"one_liner": "Crop Residue Cover",
+"observation": "Crop Residue Cover.",
+"key_threshold": false,
+"target_year": 280,
+"proposed_year": 280,
+"band_low": 250.0,
+"band_high": 310.0,
+"min_year": 250.0,
+"research_years": 3.0,
+"requires_all": [
+"managed_fallow",
+"cordage"
+],
+"requires_any": [],
+"precedents": [
+"field_rest_scheduling"
+],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "sail_seaming",
+"line": "logistics",
+"status": "adopted",
+"name": "Sail Seaming",
+"one_liner": "Sail Seaming",
+"observation": "Sail Seaming.",
+"key_threshold": false,
+"target_year": 280,
+"proposed_year": 280,
+"band_low": 272.0,
+"band_high": 320.0,
+"min_year": 272.0,
+"research_years": 3.0,
+"requires_all": [
+"sail_panel_cutting",
+"cordage"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "spring_head_fencing",
 "line": "ecology",
 "status": "new",
@@ -19816,6 +20171,29 @@
 "shared_with": []
 },
 {
+"id": "drawbar_fitting",
+"line": "logistics",
+"status": "adopted",
+"name": "Drawbar Fitting",
+"one_liner": "Drawbar Fitting",
+"observation": "Drawbar Fitting.",
+"key_threshold": false,
+"target_year": 325,
+"proposed_year": 325,
+"band_low": 320.0,
+"band_high": 360.0,
+"min_year": 320.0,
+"research_years": 3.0,
+"requires_all": [
+"joinery",
+"rope_laying"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "messenger_relay_stations",
 "line": "knowledge",
 "status": "era",
@@ -20621,6 +20999,30 @@
 "travel",
 "logistics"
 ]
+},
+{
+"id": "rope_rigging",
+"line": "logistics",
+"status": "adopted",
+"name": "Rope Rigging",
+"one_liner": "Rope Rigging",
+"observation": "Rope Rigging.",
+"key_threshold": false,
+"target_year": 350,
+"proposed_year": 350,
+"band_low": 320.0,
+"band_high": 385.0,
+"min_year": 320.0,
+"research_years": 4.0,
+"requires_all": [
+"woven_carriers",
+"standard_measures",
+"mast_making"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "pit_pond_reclamation",
@@ -23767,6 +24169,30 @@
 "shared_with": []
 },
 {
+"id": "irrigation_loss_accounts",
+"line": "nutrition",
+"status": "adopted",
+"name": "Irrigation Loss Accounts",
+"one_liner": "Irrigation Loss Accounts",
+"observation": "Irrigation Loss Accounts.",
+"key_threshold": false,
+"target_year": 420,
+"proposed_year": 420,
+"band_low": 390.0,
+"band_high": 460.0,
+"min_year": 390.0,
+"research_years": 4.0,
+"requires_all": [
+"irrigation_schedules",
+"material_accounting",
+"clay_record_tablets"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "linen_board_splints",
 "line": "health",
 "status": "new",
@@ -26410,6 +26836,29 @@
 ]
 },
 {
+"id": "felloe_jointing",
+"line": "logistics",
+"status": "adopted",
+"name": "Felloe Jointing",
+"one_liner": "Felloe Jointing",
+"observation": "Felloe Jointing.",
+"key_threshold": false,
+"target_year": 485,
+"proposed_year": 485,
+"band_low": 460.0,
+"band_high": 520.0,
+"min_year": 460.0,
+"research_years": 4.0,
+"requires_all": [
+"joinery",
+"standard_measures"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "hired_carriers",
 "line": "logistics",
 "status": "new",
@@ -26666,7 +27115,8 @@
 "requires_any": [],
 "precedents": [
 "bow_drill_drive",
-"bronze_alloying"
+"bronze_alloying",
+"felloe_jointing"
 ],
 "conditions": {},
 "shared_with": []
@@ -26745,6 +27195,30 @@
 "research_years": 10.0,
 "requires_all": [
 "remedy_tablets"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "bearing_surfaces",
+"line": "logistics",
+"status": "adopted",
+"name": "Bearing Surfaces",
+"one_liner": "Bearing Surfaces",
+"observation": "Bearing Surfaces.",
+"key_threshold": false,
+"target_year": 495,
+"proposed_year": 495,
+"band_low": 490.0,
+"band_high": 540.0,
+"min_year": 490.0,
+"research_years": 5.0,
+"requires_all": [
+"copper_casting",
+"workshop_standards",
+"spoke_tenon_cutting"
 ],
 "requires_any": [],
 "precedents": [],
@@ -29147,6 +29621,31 @@
 ]
 },
 {
+"id": "ocean_sailing",
+"line": "security",
+"status": "adopted",
+"name": "Ocean Sailing",
+"one_liner": "Ocean Sailing",
+"observation": "Ocean Sailing.",
+"key_threshold": false,
+"target_year": 560,
+"proposed_year": 560,
+"band_low": 530.0,
+"band_high": 600.0,
+"min_year": 530.0,
+"research_years": 8.0,
+"requires_all": [
+"coastal_watercraft",
+"rope_rigging",
+"regional_maps",
+"island_hopping_sailing"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "contraceptive_pessaries",
 "line": "demography",
 "status": "new",
@@ -29963,6 +30462,31 @@
 "shared_with": []
 },
 {
+"id": "quilted_layer_assembly",
+"line": "production",
+"status": "adopted",
+"name": "Quilted Layer Assembly",
+"one_liner": "Quilted Layer Assembly",
+"observation": "Quilted Layer Assembly.",
+"key_threshold": false,
+"target_year": 590,
+"proposed_year": 590,
+"band_low": 550.0,
+"band_high": 630.0,
+"min_year": 550.0,
+"research_years": 4.0,
+"requires_all": [
+"bone_needle_sewing",
+"layered_clothing_design",
+"plain_weaving",
+"wool_felting_fulling"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "timber_laced_walls",
 "line": "infrastructure",
 "status": "new",
@@ -30434,5 +30958,23 @@
 "conditions": {},
 "shared_with": []
 }
-]
+],
+"redates": {
+"elephant_training": 500.0,
+"masonry_arch_centering": 620.0,
+"iron_assaying": 660.0,
+"bloomery_smelting": 660.0,
+"forge_welding": 660.0,
+"bloomery_charge_control": 660.0,
+"professional_corps": 660.0,
+"galley_navigation": 660.0,
+"naval_arsenals": 660.0,
+"axle_sleeve_fitting": 670.0,
+"amphibious_operations": 700.0,
+"habitat_observation_records": 700.0,
+"grain_milling": 800.0,
+"germination_trials": 900.0,
+"fiber_pulp_beating": 1080.0,
+"ceramic_slip_casting": 2300.0
+}
 }

@@ -1,0 +1,51 @@
+{
+ "schema": "research_600_amendments/1",
+ "description": "Phase 3 amendments to the approved 600-year design, applied by tools/research/build_research_600.py after the design branch's graph and registry. 'adopt' turns live catalog entries that TechnologyEras dated inside the window, but the design never listed, into registry items with a design year, band, foundations and pace. 'precedents' adds optional precedents to existing registry items. 'redate' sets the earliest year of live entries that stay outside the registry. Proposals: docs/research/PHASE2_*.md (undated in-window items).",
+ "adopt": [
+  {"id": "common_path_alignment", "line": "logistics", "year": 5, "band_low": 2, "band_high": 12, "research_years": 1.5, "requires_all": ["route_memory"], "precedents": ["landmark_route_naming"], "name": "Common Path Alignment", "note": "Adopted beside landmark route naming (LOGISTICS proposal)."},
+  {"id": "fuel_air_drying", "line": "production", "year": 6, "band_low": 2, "band_high": 15, "research_years": 1.5, "requires_all": ["ember_tending"], "name": "Fuel Air Drying", "note": "One of the first fire practices; its -4000 date was far too late (PRODUCTION proposal)."},
+  {"id": "layered_clothing_design", "line": "production", "year": 16, "band_low": 8, "band_high": 25, "research_years": 2, "requires_all": ["fiber_grading", "seasonal_patterns", "bone_needle_sewing"], "name": "Layered Clothing Design", "note": "Adopted beside bone needle sewing (PRODUCTION proposal)."},
+  {"id": "textile_repair_methods", "line": "production", "year": 18, "band_low": 10, "band_high": 30, "research_years": 2, "requires_all": ["bone_needle_sewing", "fiber_grading"], "name": "Textile Repair Methods", "note": "PRODUCTION proposal."},
+  {"id": "textile_laundering_practice", "line": "production", "year": 50, "band_low": 40, "band_high": 70, "research_years": 2, "requires_all": ["clean_water", "plain_weaving"], "name": "Textile Laundering", "note": "Re-dated: no cloth to wash before the loom (PRODUCTION proposal)."},
+  {"id": "sealed_vessels", "line": "nutrition", "year": 50, "band_low": 35, "band_high": 70, "research_years": 3, "requires_all": ["clay_tempering", "pit_firing"], "name": "Sealed Vessels", "note": "Adopted as a precedent of hermetic grain storage; counts toward lean-season stores (NUTRITION proposal)."},
+  {"id": "paired_signal_confirmation", "line": "knowledge", "year": 70, "band_low": 45, "band_high": 100, "research_years": 2, "requires_all": ["distance_call_signals"], "name": "Paired Signal Confirmation", "note": "Signal counterpart of the knot-tally cross-check (KNOWLEDGE proposal)."},
+  {"id": "mass_seed_selection", "line": "nutrition", "year": 120, "band_low": 100, "band_high": 150, "research_years": 4, "requires_all": ["seed_reserves", "crop_calendars"], "name": "Mass Seed Selection", "note": "Re-dated after seed reserves and crop calendars (NUTRITION proposal)."},
+  {"id": "salt_working", "line": "nutrition", "year": 150, "band_low": 120, "band_high": 175, "research_years": 4, "requires_all": ["sealed_vessels"], "name": "Salt Working", "note": "Adopted as a precedent of salting fish and meat (NUTRITION proposal)."},
+  {"id": "curing_regimens", "line": "nutrition", "year": 170, "band_low": 150, "band_high": 200, "research_years": 3, "requires_all": ["salt_working", "smoking", "salting_fish_meat"], "name": "Curing Regimens", "note": "Re-dated after salting and smoking (NUTRITION proposal)."},
+  {"id": "wheel_blank_jointing", "line": "logistics", "year": 215, "band_low": 185, "band_high": 250, "research_years": 4, "requires_all": ["joinery", "standard_measures", "timber_post_beam_connections"], "name": "Wheel Blank Jointing", "note": "Sub-step of the solid wheel (LOGISTICS proposal)."},
+  {"id": "wheel_hub_boring", "line": "logistics", "year": 220, "band_low": 190, "band_high": 255, "research_years": 4, "requires_all": ["joinery", "standard_measures", "timber_post_beam_connections"], "name": "Wheel Hub Boring", "note": "Sub-step of the solid wheel (LOGISTICS proposal)."},
+  {"id": "wooden_axle_boxes", "line": "logistics", "year": 232, "band_low": 228, "band_high": 270, "research_years": 3, "requires_all": ["wooden_axle_shaping", "wheel_hub_boring"], "name": "Wooden Axle Boxes", "note": "Re-dated after its own foundation, wooden axle shaping (LOGISTICS proposal)."},
+  {"id": "crop_residue_cover", "line": "nutrition", "year": 280, "band_low": 250, "band_high": 310, "research_years": 3, "requires_all": ["managed_fallow", "cordage"], "precedents": ["field_rest_scheduling"], "name": "Crop Residue Cover", "note": "Adopted next to field rest scheduling (NUTRITION proposal)."},
+  {"id": "sail_seaming", "line": "logistics", "year": 280, "band_low": 272, "band_high": 320, "research_years": 3, "requires_all": ["sail_panel_cutting", "cordage"], "name": "Sail Seaming", "note": "Right after sail panel cutting (LOGISTICS proposal)."},
+  {"id": "drawbar_fitting", "line": "logistics", "year": 325, "band_low": 320, "band_high": 360, "research_years": 3, "requires_all": ["joinery", "rope_laying"], "name": "Drawbar Fitting", "note": "Requires rope laying (320), so it cannot open at 288 (LOGISTICS proposal)."},
+  {"id": "rope_rigging", "line": "logistics", "year": 350, "band_low": 320, "band_high": 385, "research_years": 4, "requires_all": ["woven_carriers", "standard_measures", "mast_making"], "name": "Rope Rigging", "note": "Rigging before the river sail was anachronistic; beside mast making (LOGISTICS proposal)."},
+  {"id": "irrigation_loss_accounts", "line": "nutrition", "year": 420, "band_low": 390, "band_high": 460, "research_years": 4, "requires_all": ["irrigation_schedules", "material_accounting", "clay_record_tablets"], "name": "Irrigation Loss Accounts", "note": "After irrigation schedules and written accounts (NUTRITION proposal)."},
+  {"id": "felloe_jointing", "line": "logistics", "year": 485, "band_low": 460, "band_high": 520, "research_years": 4, "requires_all": ["joinery", "standard_measures"], "name": "Felloe Jointing", "note": "Just before spoke tenon cutting and spoked wheels (LOGISTICS proposal)."},
+  {"id": "bearing_surfaces", "line": "logistics", "year": 495, "band_low": 490, "band_high": 540, "research_years": 5, "requires_all": ["copper_casting", "workshop_standards", "spoke_tenon_cutting"], "name": "Bearing Surfaces", "note": "Hub bearings with spoked wheels; moved out of Knowledge (KNOWLEDGE and LOGISTICS proposals)."},
+  {"id": "ocean_sailing", "line": "security", "year": 560, "band_low": 530, "band_high": 600, "research_years": 8, "requires_all": ["coastal_watercraft", "rope_rigging", "regional_maps", "island_hopping_sailing"], "name": "Ocean Sailing", "note": "Gates sailing-warship equipment, so it must follow island-hopping sailing (SECURITY proposal)."},
+  {"id": "quilted_layer_assembly", "line": "production", "year": 590, "band_low": 550, "band_high": 630, "research_years": 4, "requires_all": ["bone_needle_sewing", "layered_clothing_design", "plain_weaving", "wool_felting_fulling"], "name": "Quilted Layer Assembly", "note": "PRODUCTION proposal."}
+ ],
+ "precedents": {
+  "hermetic_grain_storage": ["sealed_vessels"],
+  "salting_fish_meat": ["salt_working"],
+  "spoke_tenon_cutting": ["felloe_jointing"]
+ },
+ "redate": {
+  "elephant_training": {"earliest_year": 500, "note": "No earlier than 500, as the Security design says."},
+  "masonry_arch_centering": {"earliest_year": 620, "note": "True arches with centering follow the window."},
+  "iron_assaying": {"earliest_year": 660, "note": "Iron: the 0.9 era margin let it open at 594."},
+  "bloomery_smelting": {"earliest_year": 660, "note": "Iron smelting must not open before about 660."},
+  "forge_welding": {"earliest_year": 660, "note": "Iron."},
+  "bloomery_charge_control": {"earliest_year": 660, "note": "Iron."},
+  "professional_corps": {"earliest_year": 660, "note": "Security design lists it after the window."},
+  "galley_navigation": {"earliest_year": 660, "note": "Security design lists it after the window."},
+  "naval_arsenals": {"earliest_year": 660, "note": "Security design lists it after the window."},
+  "axle_sleeve_fitting": {"earliest_year": 670, "note": "Needs forge welding (iron)."},
+  "amphibious_operations": {"earliest_year": 700, "note": "Security design: about 700."},
+  "habitat_observation_records": {"earliest_year": 700, "note": "Written natural history."},
+  "grain_milling": {"earliest_year": 800, "note": "Rotary milling; the saddle quern covers the early step."},
+  "germination_trials": {"earliest_year": 900, "note": "Measured germination trials."},
+  "fiber_pulp_beating": {"earliest_year": 1080, "note": "The paper-pulp step (about 100 CE)."},
+  "ceramic_slip_casting": {"earliest_year": 2300, "note": "An 18th-century CE method."}
+ }
+}

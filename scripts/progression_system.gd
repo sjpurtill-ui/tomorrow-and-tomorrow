@@ -368,7 +368,9 @@ func rival_effect(civ:Dictionary,effect_id:String)->float:
 	for domain in EFFECTS_PER_TIER:
 		var effects:Dictionary=EFFECTS_PER_TIER[domain]
 		if effects.has(effect_id): total+=float(effects[effect_id])*float(tiers.get(domain,0))
-	return clampf(total,-0.45,0.80)
+	# research_600 balance: rivals share the player's era ceiling (elapsed calendar).
+	var ceiling:Vector2=preload("res://scripts/society_model.gd").era_ceiling_for(effect_id,float(WorldSimulation.state.elapsed_days)/365.0)
+	return clampf(total,maxf(-0.45,ceiling.x),minf(0.80,ceiling.y))
 
 
 func _rival_context(civ:Dictionary)->Dictionary:
@@ -458,7 +460,17 @@ func _rebuild_effects()->void:
 		var tier:=domain_tier(String(domain))
 		for effect_id in (EFFECTS_PER_TIER[domain] as Dictionary):
 			effect_totals[effect_id]=float(effect_totals.get(effect_id,0.0))+float(EFFECTS_PER_TIER[domain][effect_id])*float(tier)
-	for effect_id in effect_totals: effect_totals[effect_id]=clampf(float(effect_totals[effect_id]),-0.45,0.80)
+	# research_600 balance: capability scales add to discoveries only up to the
+	# society's era ceiling (SocietyModel.era_ceiling_for); together they never
+	# exceed what the age allowed.
+	var society:Variant=WorldSimulation.discovery.society_model if WorldSimulation.discovery!=null else null
+	for effect_id in effect_totals:
+		var limit:Vector2=Vector2(-0.45,0.80)
+		if society!=null:
+			var ceiling:Vector2=society.era_ceiling(String(effect_id))
+			var learned:=float(society.effect(String(effect_id)))
+			limit=Vector2(minf(0.0,ceiling.x-minf(0.0,learned)),maxf(0.0,ceiling.y-maxf(0.0,learned)))
+		effect_totals[effect_id]=clampf(float(effect_totals[effect_id]),maxf(-0.45,limit.x),minf(0.80,limit.y))
 
 
 func validate_state()->Array[String]:

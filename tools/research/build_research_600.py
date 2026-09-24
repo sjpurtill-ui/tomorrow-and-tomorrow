@@ -15,6 +15,11 @@ The output is committed. Re-run this tool whenever the design changes:
   python tools/research/build_research_600.py --ref origin/codex/research-plausibility
   python tools/research/build_research_600.py --graph g.json --registry r.json
 
+Phase 3 amendments (tools/research/design_amendments_600.json) are applied after
+the design: adopted in-window catalog entries become registry items, extra
+precedents are added, and entries left outside the registry can be re-dated
+("redates" in the output). Pass --amendments "" to build the bare design.
+
 Year adjustments (docs/research/deps/YEAR_ADJUSTMENTS.md) are already applied
 in graph.json as `proposed_year`; the band is shifted by the same amount so an
 adjusted item keeps its acceptable window around the proposed year.
@@ -31,6 +36,7 @@ EFFECTS_DIR = os.path.join(ROOT, "data", "research", "effects")
 DEFAULT_REF = "origin/codex/research-plausibility"
 GRAPH_PATH = "docs/research/deps/graph.json"
 REGISTRY_PATH = "docs/research/registry.json"
+AMENDMENTS = os.path.join(ROOT, "tools", "research", "design_amendments_600.json")
 
 LINES = ["knowledge", "institutions", "culture", "labor", "production", "infrastructure",
          "nutrition", "health", "demography", "logistics", "ecology", "security"]
@@ -215,12 +221,60 @@ def build(graph, registry):
             item["subcategory"] = subcategory_for(line, one_liner)
             item["signals"] = list(SIGNALS[line])
         items.append(item)
+    return items, problems
+
+
+def amend(items, amendments, problems):
+    """Apply Phase 3 adoptions and extra precedents; returns {id: earliest_year}."""
+    by_id = {item["id"]: item for item in items}
+    for row in amendments.get("adopt", []):
+        if row["id"] in by_id:
+            problems.append("adopted id already in the design: " + row["id"])
+            continue
+        if row["line"] not in SUBCATEGORIES:
+            problems.append("unknown line %s on %s" % (row["line"], row["id"]))
+        name = row.get("name", row["id"].replace("_", " ").title())
+        item = {
+            "id": row["id"], "line": row["line"], "status": "adopted", "name": name, "one_liner": name,
+            "observation": observation(name), "key_threshold": bool(row.get("key_threshold", False)),
+            "target_year": row["year"], "proposed_year": row["year"],
+            "band_low": float(row["band_low"]), "band_high": float(row["band_high"]), "min_year": float(row["band_low"]),
+            "research_years": float(row["research_years"]),
+            "requires_all": list(row.get("requires_all", [])), "requires_any": [list(g) for g in row.get("requires_any", [])],
+            "precedents": list(row.get("precedents", [])), "conditions": clean_conditions(row.get("conditions", {})),
+            "shared_with": [],
+        }
+        items.append(item)
+        by_id[item["id"]] = item
+    for target, extra in amendments.get("precedents", {}).items():
+        if target not in by_id:
+            problems.append("precedent amendment for unknown id " + target)
+            continue
+        for parent in extra:
+            if parent not in by_id[target]["precedents"]:
+                by_id[target]["precedents"].append(parent)
+    redates = {}
+    for target, row in amendments.get("redate", {}).items():
+        if target in by_id:
+            problems.append("re-dated id is a registry item (adjust its band instead): " + target)
+            continue
+        redates[target] = float(row["earliest_year"])
+    for item in items:
+        if item["status"] != "adopted":
+            continue  # the approved design's own in-band inversions stay as designed
+        for parent in item["requires_all"] + [p for g in item["requires_any"] for p in g]:
+            year = by_id.get(parent, {}).get("proposed_year")
+            if year is not None and float(year) > float(item["proposed_year"]):
+                problems.append("%s (%s) requires later %s (%s)" % (item["id"], item["proposed_year"], parent, year))
+    return redates
+
+
+def check_references(items, problems):
     ids = {item["id"] for item in items}
     for item in items:
         for parent in item["requires_all"] + [p for g in item["requires_any"] for p in g] + item["precedents"]:
             if parent not in ids:
                 problems.append("%s references unknown id %s" % (item["id"], parent))
-    return items, problems
 
 
 def assert_acyclic(items):
@@ -261,10 +315,19 @@ def main():
     parser.add_argument("--graph")
     parser.add_argument("--registry")
     parser.add_argument("--output", default=OUTPUT)
+    parser.add_argument("--amendments", default=AMENDMENTS)
     args = parser.parse_args()
     graph, graph_source = load_source(args.graph, args.ref, GRAPH_PATH)
     registry, registry_source = load_source(args.registry, args.ref, REGISTRY_PATH)
     items, problems = build(graph, registry)
+    redates = {}
+    adopted = 0
+    if args.amendments:
+        with open(args.amendments, encoding="utf-8") as handle:
+            amendments = json.load(handle)
+        redates = amend(items, amendments, problems)
+        adopted = len(amendments.get("adopt", []))
+    check_references(items, problems)
     if problems:
         for problem in problems:
             print("ERROR:", problem, file=sys.stderr)
@@ -280,9 +343,13 @@ def main():
             "source_commit": "" if args.graph else source_commit(args.ref),
             "year_adjustments": "applied (proposed_year; band shifted by the same amount)",
             "node_count": len(items),
+            "design_node_count": len(items) - adopted,
+            "amendments": os.path.relpath(args.amendments, ROOT).replace(os.sep, "/") if args.amendments else "",
+            "adopted_count": adopted,
         },
         "lines": LINES,
         "items": items,
+        "redates": redates,
     }
     os.makedirs(os.path.dirname(args.output), exist_ok=True)
     with open(args.output, "w", encoding="utf-8", newline="\n") as handle:

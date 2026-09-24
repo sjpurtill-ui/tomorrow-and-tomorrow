@@ -3,461 +3,997 @@
  "schema": "research_600_effects/1",
  "items": {
   "labor_rotations": {
-   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png",
+   "effects": {
+    "cohesion": 0.016,
+    "fatigue": -0.0151,
+    "injury_risk": -0.0106,
+    "labor_efficiency": 0.0396,
+    "state_capacity": 0.02
+   }
   },
   "household_task_division": {
    "effects": {
-    "labor_efficiency": 0.0026,
-    "task_coordination": 0.0075,
-    "fatigue": -0.0042,
-    "injury_risk": -0.005
+    "fatigue": -0.0011,
+    "injury_risk": -0.0018,
+    "labor_efficiency": 0.0013,
+    "task_coordination": 0.0037
    },
    "observation": "Grandmothers keep the fire and the smallest children while the strong go out, and each season has its own hands for its own work."
   },
   "dawn_task_briefings": {
-   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png",
+   "effects": {
+    "cohesion": 0.0021,
+    "task_coordination": 0.0045
+   }
   },
   "aptitude_trials": {
-   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png",
+   "effects": {
+    "knowledge_preservation": 0.0022,
+    "labor_efficiency": 0.0046
+   }
   },
   "paired_task_assignment": {
-   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png",
+   "effects": {
+    "injury_risk": -0.003,
+    "labor_efficiency": 0.0046
+   }
   },
   "rest_break_timing": {
-   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png",
+   "effects": {
+    "fatigue": -0.0075,
+    "labor_efficiency": 0.0046
+   }
   },
   "shared_work_signals": {
-   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png",
+   "effects": {
+    "labor_efficiency": 0.0032,
+    "task_coordination": 0.0028
+   }
   },
   "seasonal_work_round": {
    "effects": {
-    "labor_efficiency": 0.0022,
-    "labor_demand": -0.015,
-    "task_coordination": 0.0075
+    "labor_demand": -0.0144,
+    "labor_efficiency": 0.0011,
+    "task_coordination": 0.0037
    },
    "observation": "Planting, felling and building each get their own season, so no household is asked to do all three at once."
   },
   "task_sequencing_habits": {
-   "art": "res://assets/ui/research/subjects/work_motion_studies-v1.png"
+   "art": "res://assets/ui/research/subjects/work_motion_studies-v1.png",
+   "effects": {
+    "fatigue": -0.0025,
+    "labor_efficiency": 0.0065
+   }
   },
   "midday_heat_rest": {
    "effects": {
-    "fatigue": -0.0105,
-    "injury_risk": -0.008,
-    "health_risk": -0.006
+    "fatigue": -0.0026,
+    "health_risk": -0.006,
+    "injury_risk": -0.0028
    },
    "observation": "In the hot months work stops while the sun stands highest and starts again in the long shade of afternoon."
   },
   "children_light_tasks": {
    "effects": {
-    "labor_demand": -0.012,
-    "labor_efficiency": 0.0011,
-    "food_output": 0.005
+    "food_output": 0.0046,
+    "labor_demand": -0.0115,
+    "labor_efficiency": 0.0005
    },
    "observation": "Children too small for the hoe run the plots with clappers to scare the birds, and glean what the reapers missed."
   },
   "skill_recognition": {
-   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "effects": {
+    "labor_efficiency": 0.0065,
+    "task_coordination": 0.0014
+   }
   },
   "rotating_heavy_tasks": {
-   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png",
+   "effects": {
+    "fatigue": -0.005,
+    "labor_efficiency": 0.0032
+   }
   },
   "herding_rotas": {
    "effects": {
-    "task_coordination": 0.0112,
-    "labor_demand": -0.01,
-    "cohesion": 0.0025
+    "cohesion": 0.0013,
+    "labor_demand": -0.0096,
+    "task_coordination": 0.0056
    },
    "observation": "Households take turns walking the common flock, so one boy watches forty animals instead of every family watching its own few."
   },
   "work_party_feasts": {
    "effects": {
-    "labor_efficiency": 0.0044,
-    "task_coordination": 0.0188,
-    "cohesion": 0.01,
-    "construction_rate": 0.003,
-    "labor_demand": 0.005
+    "cohesion": 0.0053,
+    "construction_rate": 0.0009,
+    "labor_demand": 0.005,
+    "labor_efficiency": 0.0022,
+    "task_coordination": 0.0093
    },
    "observation": "A family brews and cooks, the neighbours come to raise the roof, and everyone eats and drinks when it is done.",
    "social_consequence": "Jobs no household could finish alone are done in a day, and the feast that repays them binds neighbours in debt and pride."
   },
   "festival_rest_days": {
    "effects": {
-    "fatigue": -0.0105,
-    "cohesion": 0.005,
+    "cohesion": 0.0027,
+    "fatigue": -0.0026,
     "health_risk": -0.004
    },
    "observation": "On the days of the great festivals no one is sent to the fields; tools are hung up and the whole village rests together."
   },
   "part_time_specialists": {
    "effects": {
-    "craft_output": 0.007,
-    "labor_efficiency": 0.0033,
-    "tool_quality": 0.003
+    "craft_output": 0.003,
+    "labor_efficiency": 0.0016,
+    "tool_quality": 0.001
    },
    "observation": "The potter's family still farms, but in the slack months its kiln burns for the whole village and is paid in grain.",
    "social_consequence": "Some households become known for pots or blades and trade that skill for food; the first differences of craft appear."
   },
   "slack_season_building": {
    "effects": {
-    "construction_rate": 0.0037,
-    "labor_demand": -0.015,
-    "housing_output": 0.006
+    "construction_rate": 0.0011,
+    "housing_output": 0.0019,
+    "labor_demand": -0.0144
    },
    "observation": "Walls go up after the harvest is in, when hands are idle and the ground is dry enough to dig."
   },
   "household_craft_learning": {
    "effects": {
-    "labor_efficiency": 0.0022,
-    "craft_output": 0.002,
-    "knowledge_preservation": 0.006
+    "craft_output": 0.0002,
+    "knowledge_preservation": 0.0025,
+    "labor_efficiency": 0.0003
    },
    "observation": "A girl sits at her mother's loom and a boy at his father's knapping stone until the motions are their own."
   },
   "motion_economy_habits": {
-   "art": "res://assets/ui/research/subjects/work_motion_studies-v1.png"
+   "art": "res://assets/ui/research/subjects/work_motion_studies-v1.png",
+   "effects": {
+    "fatigue": -0.0014,
+    "labor_efficiency": 0.0016
+   }
   },
   "recovery_days_after_heavy_tasks": {
-   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png",
+   "effects": {
+    "fatigue": -0.0028,
+    "health_risk": -0.01
+   }
   },
   "boundary_markers_parallel_crews": {
-   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png",
+   "effects": {
+    "labor_efficiency": 0.001,
+    "task_coordination": 0.0015
+   }
   },
   "cross_training_circuits": {
-   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png",
+   "effects": {
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0013,
+    "task_coordination": 0.0012
+   }
   },
   "task_captains": {
-   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png",
+   "effects": {
+    "cohesion": 0.0009,
+    "institutional_rigidity": 0.01,
+    "task_coordination": 0.0017
+   }
   },
   "hauling_chants": {
    "effects": {
-    "labor_efficiency": 0.0022,
-    "task_coordination": 0.0112,
-    "injury_risk": -0.01,
-    "haul_capacity": 0.01
+    "haul_capacity": 0.0022,
+    "injury_risk": -0.0011,
+    "labor_efficiency": 0.0003,
+    "task_coordination": 0.0023
    },
    "observation": "A caller sings the line and the whole team heaves on the answer, so the load moves at once and no one pulls alone."
   },
   "paced_work_cycles": {
-   "art": "res://assets/ui/research/subjects/work_motion_studies-v1.png"
+   "art": "res://assets/ui/research/subjects/work_motion_studies-v1.png",
+   "effects": {
+    "fatigue": -0.0019,
+    "labor_efficiency": 0.0019
+   }
   },
   "great_work_parties": {
    "effects": {
-    "construction_rate": 0.0067,
-    "task_coordination": 0.0225,
-    "labor_efficiency": 0.0033,
-    "cohesion": 0.01,
-    "disaster_resilience": 0.015,
-    "labor_demand": 0.025
+    "cohesion": 0.0017,
+    "construction_rate": 0.0022,
+    "disaster_resilience": 0.0023,
+    "labor_demand": 0.025,
+    "labor_efficiency": 0.0003,
+    "task_coordination": 0.0037
    },
    "observation": "Hundreds come from many villages to drag a great stone or throw up a dyke, fed for the season by the ones who called them.",
    "social_consequence": "Whole districts can now raise a monument or a flood bank together, and whoever can call them out gains a new kind of standing."
   },
   "mentored_task_learning": {
-   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png",
+   "effects": {
+    "fatigue": -0.0009,
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0012
+   }
   },
   "seasonal_labor_pooling": {
-   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png",
+   "effects": {
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0012,
+    "task_coordination": 0.0009
+   }
   },
   "batch_sizing_by_fatigue": {
-   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png",
+   "effects": {
+    "fatigue": -0.0019,
+    "labor_efficiency": 0.0009
+   }
   },
   "elder_instruction_days": {
-   "art": "res://assets/ui/research/subjects/oral_epics-v2.png"
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "effects": {
+    "knowledge_preservation": 0.0062,
+    "labor_efficiency": 0.0007
+   }
   },
   "household_labor_borrowing": {
-   "art": "res://assets/ui/research/subjects/household_councils-v1.png"
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "effects": {
+    "cohesion": 0.001,
+    "labor_efficiency": 0.0009
+   }
   },
   "runner_relays_between_work_sites": {
-   "art": "res://assets/ui/research/subjects/route_memory-v1.png"
+   "art": "res://assets/ui/research/subjects/route_memory-v1.png",
+   "effects": {
+    "labor_demand": 0.01,
+    "task_coordination": 0.0015
+   }
   },
   "full_time_specialists": {
    "effects": {
-    "craft_output": 0.01,
-    "labor_efficiency": 0.0044,
-    "tool_quality": 0.004,
+    "craft_output": 0.0039,
+    "institutional_rigidity": 0.01,
     "labor_demand": 0.01,
-    "institutional_rigidity": 0.01
+    "labor_efficiency": 0.0007,
+    "tool_quality": 0.0011
    },
    "observation": "Smiths and potters who no longer farm draw their bread from the common store and give their whole year to the craft.",
    "social_consequence": "Specialists who never work the fields live off the shared store; the store and its keepers become the center of the town."
   },
   "load_tallies": {
    "effects": {
-    "task_coordination": 0.015,
-    "labor_efficiency": 0.0018,
-    "state_capacity": 0.006,
-    "knowledge_preservation": 0.005
+    "knowledge_preservation": 0.0029,
+    "labor_efficiency": 0.0003,
+    "state_capacity": 0.0016,
+    "task_coordination": 0.0037
    },
    "observation": "The overseer cuts a notch for every basket carried up the bank, and at dusk the stick shows who worked and how much."
   },
   "shrine_work_obligations": {
    "effects": {
-    "construction_rate": 0.0045,
-    "state_capacity": 0.018,
-    "task_coordination": 0.015,
+    "cohesion": -0.0025,
+    "construction_rate": 0.0014,
     "labor_demand": 0.02,
-    "legitimacy": 0.006,
-    "cohesion": -0.0025
+    "legitimacy": 0.005,
+    "state_capacity": 0.0048,
+    "task_coordination": 0.0037
    },
    "observation": "Each household owes the shrine so many days of digging, building or reaping, and the priests keep count of who has given them.",
    "social_consequence": "The shrine's store is filled by owed days rather than gifts; the first labor obligation brings the first resentment of it."
   },
   "tool_handoff_staging": {
-   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png",
+   "effects": {
+    "labor_efficiency": 0.003,
+    "task_coordination": 0.0014
+   }
   },
   "cross_party_scheduling": {
-   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png",
+   "effects": {
+    "labor_efficiency": 0.0016,
+    "task_coordination": 0.0016
+   }
   },
   "fixed_worker_rations": {
    "effects": {
-    "labor_efficiency": 0.0066,
-    "fatigue": -0.0105,
+    "fatigue": -0.0014,
     "health_risk": -0.01,
-    "nutrition_quality": 0.01,
-    "state_capacity": 0.012
+    "labor_efficiency": 0.0008,
+    "nutrition_quality": 0.0017,
+    "state_capacity": 0.0045
    },
    "observation": "Every worker on the great estate is given the same measure of barley each day, in good years and in bad.",
    "social_consequence": "Workers are fed a fixed measure whatever the harvest, and those who hand out the grain decide who works."
   },
   "craft_quarters": {
    "effects": {
-    "craft_output": 0.006,
-    "labor_efficiency": 0.0022,
+    "craft_output": 0.0021,
     "knowledge_rate": 0.01,
+    "labor_efficiency": 0.0003,
     "pollution": 0.004
    },
    "observation": "Potters settle by potters and smiths by smiths, sharing clay pits, fuel yards and the secrets of the trade."
   },
   "specialist_rotation_ladders": {
-   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "effects": {
+    "craft_output": 0.0069,
+    "institutional_rigidity": 0.01,
+    "labor_efficiency": 0.0025
+   }
   },
   "crew_handoffs": {
-   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png",
+   "effects": {
+    "storage_loss": -0.0052,
+    "task_coordination": 0.0134
+   }
   },
   "capacity_ledgers": {
-   "art": "res://assets/ui/research/subjects/material_accounting-v1.png"
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "effects": {
+    "knowledge_preservation": 0.0024,
+    "labor_efficiency": 0.0016,
+    "task_coordination": 0.0011
+   }
   },
   "tool_reach_zoning": {
-   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png"
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png",
+   "effects": {
+    "craft_output": 0.0047,
+    "labor_efficiency": 0.0016
+   }
   },
   "joint_crew_debriefs": {
-   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png",
+   "effects": {
+    "knowledge_preservation": 0.0009,
+    "task_coordination": 0.001
+   }
   },
   "journeyman_placement": {
-   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png",
+   "effects": {
+    "cohesion": -0.0039,
+    "labor_efficiency": 0.0013,
+    "task_coordination": 0.0008
+   }
   },
   "age_graded_load_limits": {
-   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png",
+   "effects": {
+    "injury_risk": -0.0027,
+    "labor_efficiency": 0.001
+   }
   },
   "apprentice_for_keep": {
    "effects": {
-    "labor_efficiency": 0.0026,
-    "craft_output": 0.004,
+    "adoption_rate": 0.01,
+    "craft_output": 0.0016,
     "knowledge_preservation": 0.01,
-    "adoption_rate": 0.01
+    "labor_efficiency": 0.0008
    },
    "observation": "A boy lives in the smith's house and works his bellows for bread and a bed, and in return is shown the trade."
   },
   "workshop_layout_planning": {
-   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png"
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png",
+   "effects": {
+    "craft_output": 0.0079,
+    "fatigue": -0.0065,
+    "labor_efficiency": 0.0057
+   }
   },
   "crew_count_scribes": {
    "effects": {
-    "task_coordination": 0.0225,
-    "state_capacity": 0.012,
-    "labor_efficiency": 0.0018,
-    "knowledge_preservation": 0.005
+    "knowledge_preservation": 0.0015,
+    "labor_efficiency": 0.0005,
+    "state_capacity": 0.0018,
+    "task_coordination": 0.0031
    },
    "observation": "A scribe stands by the work with a tablet, counting each crew by name as it comes and goes."
   },
   "gangs_of_ten": {
    "effects": {
-    "task_coordination": 0.0225,
-    "labor_efficiency": 0.0026,
-    "injury_risk": -0.01,
-    "institutional_rigidity": 0.01
+    "injury_risk": -0.0011,
+    "institutional_rigidity": 0.01,
+    "labor_efficiency": 0.0007,
+    "task_coordination": 0.0031
    },
    "observation": "Workers are counted off in tens, and each ten answers to a foreman who answers for its work and its rations."
   },
   "certified_craft_competence": {
-   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "effects": {
+    "craft_output": 0.009,
+    "labor_efficiency": 0.0053,
+    "standardization": 0.0074
+   }
   },
   "rotating_named_gangs": {
    "effects": {
-    "task_coordination": 0.03,
-    "labor_efficiency": 0.0033,
-    "fatigue": -0.0105,
-    "construction_rate": 0.006,
-    "cohesion": 0.005
+    "cohesion": 0.0017,
+    "construction_rate": 0.0005,
+    "fatigue": -0.0032,
+    "labor_efficiency": 0.0009,
+    "task_coordination": 0.0041
    },
    "observation": "Gangs with names like 'Friends of the King' work their watch on the great work, go home, and are relieved by the next gang.",
    "social_consequence": "Named gangs compete to finish their stretch of the work; pride in the gang keeps rotating levies coming back."
   },
   "flood_season_great_works": {
    "effects": {
-    "labor_demand": -0.03,
-    "construction_rate": 0.0045,
-    "task_coordination": 0.0075
+    "construction_rate": 0.0004,
+    "labor_demand": -0.0237,
+    "task_coordination": 0.001
    },
    "observation": "When the river covers the fields and farming stops, the idle hands are called up to haul stone for the great works."
   },
   "workers_villages": {
    "effects": {
-    "labor_efficiency": 0.0044,
-    "fatigue": -0.0105,
+    "construction_rate": 0.0004,
+    "fatigue": -0.0032,
     "health_risk": -0.01,
-    "construction_rate": 0.0045,
-    "housing_output": 0.012,
-    "task_coordination": 0.015
+    "housing_output": 0.002,
+    "labor_efficiency": 0.0012,
+    "task_coordination": 0.0021
    },
    "observation": "Beside the great work stands a walled village of bakeries, breweries and barracks where the builders eat, sleep and are tended.",
    "social_consequence": "A whole village of bakers, brewers, carriers and builders lives beside the great work, fed and housed by it."
   },
   "shift_overlap_briefings": {
-   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png",
+   "effects": {
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0018,
+    "task_coordination": 0.0035
+   }
   },
   "fatigue_aware_task_assignment": {
-   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png",
+   "effects": {
+    "fatigue": -0.003,
+    "injury_risk": -0.0019,
+    "labor_efficiency": 0.0018
+   }
   },
   "measured_plot_allotment": {
    "effects": {
-    "labor_efficiency": 0.0022,
-    "task_coordination": 0.0112,
-    "cultivation_yield": 0.01,
-    "state_capacity": 0.006
+    "cultivation_yield": 0.0043,
+    "labor_efficiency": 0.0003,
+    "state_capacity": 0.0009,
+    "task_coordination": 0.0047
    },
    "observation": "Fields are measured in rods and each worker is given a plot of known size to plough, sow or reap."
   },
   "brick_quotas": {
    "effects": {
-    "labor_efficiency": 0.0033,
-    "construction_rate": 0.0045,
-    "standardization": 0.006,
-    "fatigue": 0.0035
+    "construction_rate": 0.0008,
+    "fatigue": 0.0035,
+    "labor_efficiency": 0.0005,
+    "standardization": 0.0011
    },
    "observation": "Each moulder owes so many hundred bricks a day, and the overseer counts the drying rows at sunset."
   },
   "hired_harvest_hands": {
    "effects": {
-    "labor_demand": -0.03,
-    "fatigue": -0.0052,
-    "food_output": 0.01
+    "fatigue": -0.0005,
+    "food_output": 0.0013,
+    "labor_demand": -0.0043
    },
    "observation": "At harvest the estates hire extra hands for the month, paid in grain, so the crop is cut before it sheds."
   },
   "daily_task_norms": {
    "effects": {
-    "labor_efficiency": 0.0066,
-    "task_coordination": 0.0225,
-    "standardization": 0.012,
-    "state_capacity": 0.012,
-    "fatigue": 0.0035
+    "fatigue": 0.0035,
+    "labor_efficiency": 0.001,
+    "standardization": 0.0047,
+    "state_capacity": 0.0023,
+    "task_coordination": 0.0086
    },
    "observation": "A day's work is now fixed: so many cubits of earth dug, so many loads carried, and every overseer uses the same figures.",
    "social_consequence": "A day's work now has a number; whole projects are planned in man-days, and a worker who falls short is noticed."
   },
   "light_duty_for_infirm": {
    "effects": {
+    "cohesion": 0.0009,
+    "health_protection": 0.0011,
     "health_risk": -0.02,
-    "injury_risk": -0.012,
-    "health_protection": 0.007,
-    "cohesion": 0.005,
-    "labor_efficiency": 0.0011
+    "injury_risk": -0.0041,
+    "labor_efficiency": 0.0002
    },
    "observation": "The sick and the old are set to lighter work and keep their ration, so no one starves for having fallen ill."
   },
   "man_day_accounts": {
    "effects": {
-    "task_coordination": 0.0263,
-    "state_capacity": 0.018,
-    "labor_efficiency": 0.0033,
-    "knowledge_preservation": 0.01,
-    "institutional_rigidity": 0.01
+    "institutional_rigidity": 0.01,
+    "knowledge_preservation": 0.0023,
+    "labor_efficiency": 0.0005,
+    "state_capacity": 0.0034,
+    "task_coordination": 0.0101
    },
    "observation": "Scribes add up the days owed and the days worked for every crew, and the balance carries into the next year.",
    "social_consequence": "Labor becomes a written account like grain or silver, and those who keep the accounts can demand what is owed."
   },
   "hired_labor_contracts": {
    "effects": {
-    "labor_demand": -0.03,
-    "labor_efficiency": 0.0044,
-    "trade_capacity": 0.012,
-    "fatigue": -0.0035
+    "fatigue": -0.0006,
+    "labor_demand": -0.003,
+    "labor_efficiency": 0.0007,
+    "trade_capacity": 0.0054
    },
    "observation": "A sealed tablet names the worker, the days, the task and the wage in barley or silver, before witnesses.",
    "social_consequence": "Labor can now be bought: the wealthy hire for grain or silver, and a class of people who own only their hands appears."
   },
   "monthly_rest_days": {
    "effects": {
-    "fatigue": -0.0123,
-    "injury_risk": -0.01,
-    "cohesion": 0.005
+    "cohesion": 0.0009,
+    "fatigue": -0.0022,
+    "injury_risk": -0.0034
    },
    "observation": "Every tenth day, and on the feasts of the month, the crews are stood down and go home."
   },
   "levy_substitutes": {
    "effects": {
-    "labor_demand": -0.02,
-    "labor_efficiency": 0.0018,
-    "trade_capacity": 0.006,
-    "legitimacy": -0.003
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.0016,
+    "legitimacy": -0.003,
+    "trade_capacity": 0.0007
    },
    "observation": "A man who owes the levy but can spare the grain pays another to go and dig in his place."
   },
   "apprentice_contracts": {
    "effects": {
-    "craft_output": 0.07,
-    "adoption_rate": 0.045,
-    "labor_efficiency": 0.0033,
-    "knowledge_preservation": 0.01
+    "adoption_rate": 0.0077,
+    "craft_output": 0.0292,
+    "knowledge_preservation": 0.0075,
+    "labor_efficiency": 0.003
    },
    "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
   },
   "levy_exemptions": {
    "effects": {
-    "craft_output": 0.003,
-    "labor_efficiency": 0.0018,
+    "craft_output": 0.0014,
     "institutional_rigidity": 0.015,
+    "labor_efficiency": 0.0012,
     "legitimacy": -0.006
    },
    "observation": "Temple craftsmen and the king's smiths are written off the levy lists, for their work is owed elsewhere."
   },
   "attendance_lists": {
    "effects": {
-    "task_coordination": 0.015,
-    "labor_efficiency": 0.0018,
-    "state_capacity": 0.006
+    "labor_efficiency": 0.0012,
+    "state_capacity": 0.002,
+    "task_coordination": 0.0049
    },
    "observation": "Each morning the foreman reads the names of his crew and marks who is present, who is sick and who has run."
   },
   "trade_elders": {
    "effects": {
-    "cohesion": 0.0075,
-    "craft_output": 0.002,
-    "legitimacy": 0.006,
-    "task_coordination": 0.0075,
-    "institutional_rigidity": 0.01
+    "cohesion": 0.0014,
+    "craft_output": 0.001,
+    "institutional_rigidity": 0.01,
+    "legitimacy": 0.0011,
+    "task_coordination": 0.0024
    },
    "observation": "The eldest master of each trade speaks for the workshop crews before the palace stewards."
   },
   "apprentice_quotas": {
    "effects": {
-    "craft_output": 0.003,
-    "standardization": 0.006,
-    "adoption_rate": 0.01,
-    "institutional_rigidity": 0.01
+    "adoption_rate": 0.0015,
+    "craft_output": 0.0014,
+    "institutional_rigidity": 0.01,
+    "standardization": 0.0042
    },
    "observation": "A master may take only so many apprentices, and each must be taught to the standard of the trade."
   },
   "crew_loans_between_cities": {
    "effects": {
-    "construction_rate": 0.003,
-    "labor_efficiency": 0.0018,
-    "adoption_rate": 0.015,
-    "task_coordination": 0.0075
+    "adoption_rate": 0.0022,
+    "construction_rate": 0.0024,
+    "labor_efficiency": 0.0012,
+    "task_coordination": 0.0024
    },
    "observation": "A city famed for its masons sends a crew to raise an allied ruler's temple, and they bring their methods home."
+  }
+ },
+ "balance_600": {
+  "schema": "research_600_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_600.py; the loader reads only 'items'.",
+  "source": {
+   "labor_rotations": {
+    "cohesion": 0.03,
+    "fatigue": -0.06,
+    "injury_risk": -0.03,
+    "labor_efficiency": 0.08,
+    "state_capacity": 0.02
+   },
+   "crew_handoffs": {
+    "storage_loss": -0.025,
+    "task_coordination": 0.07
+   },
+   "apprentice_contracts": {
+    "adoption_rate": 0.045,
+    "craft_output": 0.07,
+    "knowledge_preservation": 0.01,
+    "labor_efficiency": 0.0033
+   },
+   "aptitude_trials": {
+    "knowledge_preservation": 0.0034,
+    "labor_efficiency": 0.0093
+   },
+   "skill_recognition": {
+    "labor_efficiency": 0.0131,
+    "task_coordination": 0.0028
+   },
+   "cross_training_circuits": {
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0093,
+    "task_coordination": 0.0061
+   },
+   "mentored_task_learning": {
+    "fatigue": -0.01,
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0131
+   },
+   "elder_instruction_days": {
+    "knowledge_preservation": 0.0103,
+    "labor_efficiency": 0.007
+   },
+   "specialist_rotation_ladders": {
+    "craft_output": 0.02,
+    "institutional_rigidity": 0.01,
+    "labor_efficiency": 0.0196
+   },
+   "journeyman_placement": {
+    "cohesion": -0.0039,
+    "labor_efficiency": 0.0093,
+    "task_coordination": 0.0061
+   },
+   "certified_craft_competence": {
+    "craft_output": 0.03,
+    "labor_efficiency": 0.0196,
+    "standardization": 0.02
+   },
+   "dawn_task_briefings": {
+    "cohesion": 0.0039,
+    "task_coordination": 0.0091
+   },
+   "shared_work_signals": {
+    "labor_efficiency": 0.0065,
+    "task_coordination": 0.0056
+   },
+   "boundary_markers_parallel_crews": {
+    "labor_efficiency": 0.007,
+    "task_coordination": 0.0076
+   },
+   "task_captains": {
+    "cohesion": 0.0051,
+    "institutional_rigidity": 0.01,
+    "task_coordination": 0.0084
+   },
+   "runner_relays_between_work_sites": {
+    "labor_demand": 0.01,
+    "task_coordination": 0.0091
+   },
+   "cross_party_scheduling": {
+    "labor_efficiency": 0.0131,
+    "task_coordination": 0.0084
+   },
+   "joint_crew_debriefs": {
+    "knowledge_preservation": 0.0051,
+    "task_coordination": 0.0076
+   },
+   "shift_overlap_briefings": {
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0131,
+    "task_coordination": 0.0084
+   },
+   "rest_break_timing": {
+    "fatigue": -0.03,
+    "labor_efficiency": 0.0093
+   },
+   "task_sequencing_habits": {
+    "fatigue": -0.01,
+    "labor_efficiency": 0.0131
+   },
+   "motion_economy_habits": {
+    "fatigue": -0.015,
+    "labor_efficiency": 0.0116
+   },
+   "paced_work_cycles": {
+    "fatigue": -0.02,
+    "labor_efficiency": 0.0131
+   },
+   "batch_sizing_by_fatigue": {
+    "fatigue": -0.02,
+    "labor_efficiency": 0.0093
+   },
+   "tool_handoff_staging": {
+    "labor_efficiency": 0.0196,
+    "task_coordination": 0.0056
+   },
+   "tool_reach_zoning": {
+    "craft_output": 0.015,
+    "labor_efficiency": 0.0116
+   },
+   "workshop_layout_planning": {
+    "craft_output": 0.02,
+    "fatigue": -0.01,
+    "labor_efficiency": 0.0196
+   },
+   "paired_task_assignment": {
+    "injury_risk": -0.0086,
+    "labor_efficiency": 0.0093
+   },
+   "rotating_heavy_tasks": {
+    "fatigue": -0.02,
+    "labor_efficiency": 0.0065
+   },
+   "recovery_days_after_heavy_tasks": {
+    "fatigue": -0.03,
+    "health_risk": -0.01
+   },
+   "seasonal_labor_pooling": {
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0131,
+    "task_coordination": 0.0056
+   },
+   "household_labor_borrowing": {
+    "cohesion": 0.0058,
+    "labor_efficiency": 0.0093
+   },
+   "capacity_ledgers": {
+    "knowledge_preservation": 0.0051,
+    "labor_efficiency": 0.0131,
+    "task_coordination": 0.0056
+   },
+   "age_graded_load_limits": {
+    "injury_risk": -0.0172,
+    "labor_efficiency": 0.007
+   },
+   "fatigue_aware_task_assignment": {
+    "fatigue": -0.03,
+    "injury_risk": -0.0094,
+    "labor_efficiency": 0.0131
+   },
+   "household_task_division": {
+    "fatigue": -0.0042,
+    "injury_risk": -0.005,
+    "labor_efficiency": 0.0026,
+    "task_coordination": 0.0075
+   },
+   "seasonal_work_round": {
+    "labor_demand": -0.015,
+    "labor_efficiency": 0.0022,
+    "task_coordination": 0.0075
+   },
+   "midday_heat_rest": {
+    "fatigue": -0.0105,
+    "health_risk": -0.006,
+    "injury_risk": -0.008
+   },
+   "children_light_tasks": {
+    "food_output": 0.005,
+    "labor_demand": -0.012,
+    "labor_efficiency": 0.0011
+   },
+   "herding_rotas": {
+    "cohesion": 0.0025,
+    "labor_demand": -0.01,
+    "task_coordination": 0.0112
+   },
+   "work_party_feasts": {
+    "cohesion": 0.01,
+    "construction_rate": 0.003,
+    "labor_demand": 0.005,
+    "labor_efficiency": 0.0044,
+    "task_coordination": 0.0188
+   },
+   "festival_rest_days": {
+    "cohesion": 0.005,
+    "fatigue": -0.0105,
+    "health_risk": -0.004
+   },
+   "part_time_specialists": {
+    "craft_output": 0.007,
+    "labor_efficiency": 0.0033,
+    "tool_quality": 0.003
+   },
+   "slack_season_building": {
+    "construction_rate": 0.0037,
+    "housing_output": 0.006,
+    "labor_demand": -0.015
+   },
+   "household_craft_learning": {
+    "craft_output": 0.002,
+    "knowledge_preservation": 0.006,
+    "labor_efficiency": 0.0022
+   },
+   "hauling_chants": {
+    "haul_capacity": 0.01,
+    "injury_risk": -0.01,
+    "labor_efficiency": 0.0022,
+    "task_coordination": 0.0112
+   },
+   "great_work_parties": {
+    "cohesion": 0.01,
+    "construction_rate": 0.0067,
+    "disaster_resilience": 0.015,
+    "labor_demand": 0.025,
+    "labor_efficiency": 0.0033,
+    "task_coordination": 0.0225
+   },
+   "full_time_specialists": {
+    "craft_output": 0.01,
+    "institutional_rigidity": 0.01,
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0044,
+    "tool_quality": 0.004
+   },
+   "load_tallies": {
+    "knowledge_preservation": 0.005,
+    "labor_efficiency": 0.0018,
+    "state_capacity": 0.006,
+    "task_coordination": 0.015
+   },
+   "shrine_work_obligations": {
+    "cohesion": -0.0025,
+    "construction_rate": 0.0045,
+    "labor_demand": 0.02,
+    "legitimacy": 0.006,
+    "state_capacity": 0.018,
+    "task_coordination": 0.015
+   },
+   "fixed_worker_rations": {
+    "fatigue": -0.0105,
+    "health_risk": -0.01,
+    "labor_efficiency": 0.0066,
+    "nutrition_quality": 0.01,
+    "state_capacity": 0.012
+   },
+   "craft_quarters": {
+    "craft_output": 0.006,
+    "knowledge_rate": 0.01,
+    "labor_efficiency": 0.0022,
+    "pollution": 0.004
+   },
+   "apprentice_for_keep": {
+    "adoption_rate": 0.01,
+    "craft_output": 0.004,
+    "knowledge_preservation": 0.01,
+    "labor_efficiency": 0.0026
+   },
+   "crew_count_scribes": {
+    "knowledge_preservation": 0.005,
+    "labor_efficiency": 0.0018,
+    "state_capacity": 0.012,
+    "task_coordination": 0.0225
+   },
+   "gangs_of_ten": {
+    "injury_risk": -0.01,
+    "institutional_rigidity": 0.01,
+    "labor_efficiency": 0.0026,
+    "task_coordination": 0.0225
+   },
+   "rotating_named_gangs": {
+    "cohesion": 0.005,
+    "construction_rate": 0.006,
+    "fatigue": -0.0105,
+    "labor_efficiency": 0.0033,
+    "task_coordination": 0.03
+   },
+   "flood_season_great_works": {
+    "construction_rate": 0.0045,
+    "labor_demand": -0.03,
+    "task_coordination": 0.0075
+   },
+   "workers_villages": {
+    "construction_rate": 0.0045,
+    "fatigue": -0.0105,
+    "health_risk": -0.01,
+    "housing_output": 0.012,
+    "labor_efficiency": 0.0044,
+    "task_coordination": 0.015
+   },
+   "measured_plot_allotment": {
+    "cultivation_yield": 0.01,
+    "labor_efficiency": 0.0022,
+    "state_capacity": 0.006,
+    "task_coordination": 0.0112
+   },
+   "brick_quotas": {
+    "construction_rate": 0.0045,
+    "fatigue": 0.0035,
+    "labor_efficiency": 0.0033,
+    "standardization": 0.006
+   },
+   "hired_harvest_hands": {
+    "fatigue": -0.0052,
+    "food_output": 0.01,
+    "labor_demand": -0.03
+   },
+   "daily_task_norms": {
+    "fatigue": 0.0035,
+    "labor_efficiency": 0.0066,
+    "standardization": 0.012,
+    "state_capacity": 0.012,
+    "task_coordination": 0.0225
+   },
+   "light_duty_for_infirm": {
+    "cohesion": 0.005,
+    "health_protection": 0.007,
+    "health_risk": -0.02,
+    "injury_risk": -0.012,
+    "labor_efficiency": 0.0011
+   },
+   "man_day_accounts": {
+    "institutional_rigidity": 0.01,
+    "knowledge_preservation": 0.01,
+    "labor_efficiency": 0.0033,
+    "state_capacity": 0.018,
+    "task_coordination": 0.0263
+   },
+   "hired_labor_contracts": {
+    "fatigue": -0.0035,
+    "labor_demand": -0.03,
+    "labor_efficiency": 0.0044,
+    "trade_capacity": 0.012
+   },
+   "monthly_rest_days": {
+    "cohesion": 0.005,
+    "fatigue": -0.0123,
+    "injury_risk": -0.01
+   },
+   "levy_substitutes": {
+    "labor_demand": -0.02,
+    "labor_efficiency": 0.0018,
+    "legitimacy": -0.003,
+    "trade_capacity": 0.006
+   },
+   "levy_exemptions": {
+    "craft_output": 0.003,
+    "institutional_rigidity": 0.015,
+    "labor_efficiency": 0.0018,
+    "legitimacy": -0.006
+   },
+   "attendance_lists": {
+    "labor_efficiency": 0.0018,
+    "state_capacity": 0.006,
+    "task_coordination": 0.015
+   },
+   "trade_elders": {
+    "cohesion": 0.0075,
+    "craft_output": 0.002,
+    "institutional_rigidity": 0.01,
+    "legitimacy": 0.006,
+    "task_coordination": 0.0075
+   },
+   "apprentice_quotas": {
+    "adoption_rate": 0.01,
+    "craft_output": 0.003,
+    "institutional_rigidity": 0.01,
+    "standardization": 0.006
+   },
+   "crew_loans_between_cities": {
+    "adoption_rate": 0.015,
+    "construction_rate": 0.003,
+    "labor_efficiency": 0.0018,
+    "task_coordination": 0.0075
+   }
   }
  }
 }

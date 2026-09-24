@@ -5,15 +5,15 @@
   "seasonal_patterns": {
    "effects": {
     "ecological_pressure": -0.012,
-    "foraging_yield": 0.08,
-    "observation_rate": 0.04
+    "foraging_yield": 0.0732,
+    "observation_rate": 0.0208
    },
    "art": "res://assets/ui/research/paper/seasonal_patterns.png"
   },
   "timber_grading": {
    "effects": {
-    "construction_rate": 0.03,
-    "storage_loss": -0.02,
+    "construction_rate": 0.0087,
+    "storage_loss": -0.0122,
     "timber_yield": 0.05
    },
    "art": "res://assets/ui/research/paper/timber_grading.png"
@@ -21,7 +21,7 @@
   "fiber_grading": {
    "effects": {
     "fiber_yield": 0.06,
-    "survey_speed": 0.02
+    "survey_speed": 0.01
    },
    "art": "res://assets/ui/research/paper/fiber_grading.png"
   },
@@ -29,7 +29,7 @@
    "effects": {
     "mine_safety": 0.03,
     "stone_yield": 0.08,
-    "survey_speed": 0.03
+    "survey_speed": 0.015
    },
    "art": "res://assets/ui/research/paper/quarry_reading.png"
   },
@@ -37,14 +37,14 @@
    "effects": {
     "ecological_pressure": -0.012,
     "ecology_recovery": 0.0067,
-    "soil_productivity": 0.015
+    "soil_productivity": 0.0106
    },
    "art": "res://assets/ui/research/paper/habitat_observation_records.png"
   },
   "fallow_thicket_regrowth": {
    "effects": {
     "ecology_recovery": 0.0202,
-    "foraging_yield": 0.015
+    "foraging_yield": 0.0137
    },
    "art": "res://assets/ui/research/paper/managed_fallow.png"
   },
@@ -52,27 +52,27 @@
    "effects": {
     "pollution": -0.0191,
     "sanitation": 0.01,
-    "water_safety": 0.02
+    "water_safety": 0.0074
    },
    "art": "res://assets/ui/research/paper/latrine_siting.png"
   },
   "topsoil_depth_reading": {
    "effects": {
     "ecological_pressure": -0.009,
-    "soil_productivity": 0.02
+    "soil_productivity": 0.0141
    },
    "art": "res://assets/ui/research/paper/first300-cards/soil_infiltration_trials.tres"
   },
   "burn_scar_regrowth_tracking": {
    "effects": {
     "ecology_recovery": 0.0169,
-    "foraging_yield": 0.015
+    "foraging_yield": 0.0137
    },
    "art": "res://assets/ui/research/paper/habitat_observation_records.png"
   },
   "cookfire_smoke_venting_habit": {
    "effects": {
-    "disease_exposure": -0.015,
+    "disease_exposure": -0.0043,
     "pollution": -0.0064
    },
    "art": "res://assets/ui/research/paper/ember_tending.png"
@@ -88,15 +88,15 @@
    "effects": {
     "ecological_pressure": -0.015,
     "ecology_recovery": 0.0067,
-    "food_output": 0.015
+    "food_output": 0.0139
    },
    "art": "res://assets/ui/research/paper/animal_taming.png"
   },
   "phenology_signs": {
    "effects": {
-    "foraging_yield": 0.03,
+    "foraging_yield": 0.0274,
     "hunting_yield": 0.01,
-    "observation_rate": 0.01
+    "observation_rate": 0.0052
    },
    "name": "Phenology Signs",
    "observation": "When the thorn flowers and the swallows return, the old people say the fish are running and the camp should move.",
@@ -106,7 +106,7 @@
    "effects": {
     "disaster_risk": 0.004,
     "ecology_recovery": 0.0135,
-    "foraging_yield": 0.03,
+    "foraging_yield": 0.0274,
     "hunting_yield": 0.03,
     "pollution": 0.004
    },
@@ -118,7 +118,7 @@
    "effects": {
     "ecological_pressure": -0.009,
     "ecology_recovery": 0.0067,
-    "food_output": 0.02
+    "food_output": 0.0185
    },
    "name": "Spawning Calendar",
    "observation": "Fishers know the weeks each fish comes upriver to spawn, and are waiting at the pools when it does.",
@@ -126,8 +126,8 @@
   },
   "firebreaks": {
    "effects": {
-    "disaster_resilience": 0.02,
-    "disaster_risk": -0.0102,
+    "disaster_resilience": 0.0101,
+    "disaster_risk": -0.0086,
     "ecology_recovery": 0.0067
    },
    "name": "Firebreaks",
@@ -136,9 +136,9 @@
   },
   "indicator_plants": {
    "effects": {
-    "observation_rate": 0.01,
-    "soil_productivity": 0.02,
-    "survey_speed": 0.01
+    "observation_rate": 0.0052,
+    "soil_productivity": 0.0141,
+    "survey_speed": 0.005
    },
    "name": "Indicator Plants",
    "observation": "Nettle and elder mark rich ground; heather and moss mark thin, sour ground not worth the clearing.",
@@ -157,9 +157,9 @@
   },
   "swidden_cycle": {
    "effects": {
-    "cultivation_yield": 0.015,
+    "cultivation_yield": 0.0071,
     "ecology_recovery": 0.0135,
-    "soil_productivity": 0.03,
+    "soil_productivity": 0.0212,
     "timber_pressure": 0.01
    },
    "name": "Swidden Cycle",
@@ -169,7 +169,7 @@
   "leaf_fodder_pollarding": {
    "effects": {
     "ecology_recovery": 0.0101,
-    "food_output": 0.01,
+    "food_output": 0.0093,
     "timber_pressure": -0.015
    },
    "name": "Leaf-fodder Pollarding",
@@ -178,9 +178,9 @@
   },
   "hive_sparing_honey_harvest": {
    "effects": {
-    "ecology_recovery": 0.0067,
-    "foraging_yield": 0.02,
-    "nutrition_quality": 0.01
+    "ecology_recovery": 0.0054,
+    "foraging_yield": 0.0017,
+    "nutrition_quality": 0.0013
    },
    "name": "Hive-sparing Honey Harvest",
    "observation": "Smoke the bees quiet, take part of the comb, leave the rest; the same tree gives honey every year.",
@@ -188,8 +188,8 @@
   },
   "drought_signs": {
    "effects": {
-    "disaster_risk": -0.0102,
-    "observation_rate": 0.01,
+    "disaster_risk": -0.0009,
+    "observation_rate": 0.009,
     "water_access": 0.01
    },
    "name": "Drought Signs",
@@ -198,9 +198,9 @@
   },
   "transhumance": {
    "effects": {
-    "ecological_pressure": -0.018,
-    "ecology_recovery": 0.0135,
-    "food_output": 0.015,
+    "ecological_pressure": -0.0096,
+    "ecology_recovery": 0.011,
+    "food_output": 0.0048,
     "labor_demand": 0.0057
    },
    "name": "Transhumance",
@@ -210,9 +210,9 @@
   },
   "shellfish_bed_recovery": {
    "effects": {
-    "ecological_pressure": -0.009,
-    "ecology_recovery": 0.0135,
-    "food_output": 0.01
+    "ecological_pressure": -0.0048,
+    "ecology_recovery": 0.011,
+    "food_output": 0.0032
    },
    "name": "Shellfish Beds Rested",
    "observation": "A picked-over shellfish bed is left alone for a season, and the shells come back as thick as before.",
@@ -220,15 +220,15 @@
   },
   "downwind_workshop_placement": {
    "effects": {
-    "disease_exposure": -0.01,
+    "disease_exposure": -0.0012,
     "pollution": -0.0127
    },
    "art": "res://assets/ui/research/paper/kiln_control.png"
   },
   "slope_erosion_watch": {
    "effects": {
-    "disaster_risk": -0.004,
-    "ecological_pressure": -0.012
+    "disaster_risk": -0.0004,
+    "ecological_pressure": -0.0064
    },
    "art": "res://assets/ui/research/paper/first300-cards/contour_cultivation.tres"
   },
@@ -236,7 +236,7 @@
    "effects": {
     "extraction_yield": 0.02,
     "metal_yield": 0.01,
-    "survey_speed": 0.03
+    "survey_speed": 0.0035
    },
    "name": "Copper Outcrop Signs",
    "observation": "Green and blue stains on a rock face tell prospectors there is copper in the stone behind.",
@@ -244,17 +244,17 @@
   },
   "spawning_ground_avoidance": {
    "effects": {
-    "ecological_pressure": -0.012,
-    "ecology_recovery": 0.0067,
-    "foraging_yield": 0.025
+    "ecological_pressure": -0.0064,
+    "ecology_recovery": 0.0054,
+    "foraging_yield": 0.0021
    },
    "art": "res://assets/ui/research/paper/habitat_observation_records.png"
   },
   "frost_pocket_reading": {
    "effects": {
-    "cultivation_yield": 0.015,
-    "disaster_risk": -0.004,
-    "soil_productivity": 0.01
+    "cultivation_yield": 0.0039,
+    "disaster_risk": -0.0004,
+    "soil_productivity": 0.0017
    },
    "name": "Frost Pockets and Sun Slopes",
    "observation": "Cold air pools in the hollows; tender crops go on the warm slope that takes the morning sun.",
@@ -262,9 +262,9 @@
   },
   "pest_swarm_watch": {
    "effects": {
-    "cultivation_yield": 0.01,
-    "disaster_risk": -0.0076,
-    "observation_rate": 0.01
+    "cultivation_yield": 0.0026,
+    "disaster_risk": -0.0007,
+    "observation_rate": 0.009
    },
    "name": "Pest-swarm Watch",
    "observation": "Watchers note the first locust hoppers in the dry gullies and warn the fields in time to harvest early.",
@@ -272,10 +272,10 @@
   },
   "sacred_grove_protection": {
    "effects": {
-    "cohesion": 0.01,
-    "ecology_recovery": 0.0202,
+    "cohesion": 0.0017,
+    "ecology_recovery": 0.0048,
     "timber_pressure": -0.02,
-    "water_safety": 0.01
+    "water_safety": 0.0023
    },
    "name": "Sacred Groves and Springs",
    "observation": "The grove and the spring beneath it belong to the spirits; no one cuts, herds or fouls the water there.",
@@ -284,45 +284,45 @@
   },
   "contour_terrace_reading": {
    "effects": {
-    "ecological_pressure": -0.015,
-    "soil_productivity": 0.02
+    "ecological_pressure": -0.0039,
+    "soil_productivity": 0.0037
    },
    "art": "res://assets/ui/research/paper/first300-cards/contour_cultivation.tres"
   },
   "seasonal_hunting_closures": {
    "effects": {
-    "ecological_pressure": -0.012,
-    "ecology_recovery": 0.0067,
-    "hunting_yield": 0.03
+    "ecological_pressure": -0.0031,
+    "ecology_recovery": 0.0016,
+    "hunting_yield": 0.0263
    },
    "art": "res://assets/ui/research/paper/habitat_observation_records.png"
   },
   "selective_deadwood_gathering": {
    "effects": {
-    "ecology_recovery": 0.0169,
+    "ecology_recovery": 0.004,
     "timber_pressure": -0.02
    },
    "art": "res://assets/ui/research/paper/fuel_air_drying.png"
   },
   "tannery_waste_channeling": {
    "effects": {
-    "pollution": -0.0191,
+    "pollution": -0.0106,
     "water_pollution": -0.01,
-    "water_safety": 0.02
+    "water_safety": 0.0047
    },
    "art": "res://assets/ui/research/paper/hide_tanning.png"
   },
   "seed_scatter_after_gathering": {
    "effects": {
-    "ecology_recovery": 0.0202,
-    "foraging_yield": 0.02
+    "ecology_recovery": 0.0048,
+    "foraging_yield": 0.0044
    },
    "art": "res://assets/ui/research/paper/seed_selection.png"
   },
   "reed_bed_rotation": {
    "effects": {
-    "ecological_pressure": -0.006,
-    "ecology_recovery": 0.0101,
+    "ecological_pressure": -0.0016,
+    "ecology_recovery": 0.0024,
     "fiber_yield": 0.02
    },
    "name": "Reed Beds Cut in Rotation",
@@ -331,40 +331,40 @@
   },
   "communal_catch_limits": {
    "effects": {
-    "cohesion": 0.0058,
-    "ecological_pressure": -0.0241,
-    "ecology_recovery": 0.0202,
-    "foraging_yield": 0.02
+    "cohesion": 0.0012,
+    "ecological_pressure": -0.0049,
+    "ecology_recovery": 0.0042,
+    "foraging_yield": 0.0025
    },
    "ability_reason": "Shared limits stop the fishing ground from being emptied by the hungriest family.",
    "art": "res://assets/ui/research/ecology-v1.png"
   },
   "refuse_pit_rotation": {
    "effects": {
-    "pollution": -0.0159,
+    "pollution": -0.0018,
     "sanitation": 0.02
    },
    "art": "res://assets/ui/research/paper/latrine_siting.png"
   },
   "windbreak_hedgerow_siting": {
    "effects": {
-    "ecological_pressure": -0.012,
-    "soil_productivity": 0.02
+    "ecological_pressure": -0.0024,
+    "soil_productivity": 0.0055
    },
    "art": "res://assets/ui/research/paper/first300-cards/crop_residue_cover.tres"
   },
   "root_stock_preservation": {
    "effects": {
-    "ecology_recovery": 0.0169,
-    "foraging_yield": 0.015
+    "ecology_recovery": 0.0035,
+    "foraging_yield": 0.0019
    },
    "art": "res://assets/ui/research/paper/edible_resource_recognition.png"
   },
   "flood_silt_fields": {
    "effects": {
-    "cultivation_yield": 0.02,
+    "cultivation_yield": 0.0073,
     "disaster_risk": 0.004,
-    "soil_productivity": 0.04
+    "soil_productivity": 0.011
    },
    "name": "Flood-silt Fields",
    "observation": "The fresh silt the flood leaves behind grows the best crops, if a field is placed to catch it and not be drowned.",
@@ -372,9 +372,9 @@
   },
   "wood_pasture": {
    "effects": {
-    "ecological_pressure": -0.006,
-    "ecology_recovery": 0.0101,
-    "food_output": 0.01,
+    "ecological_pressure": -0.0012,
+    "ecology_recovery": 0.0021,
+    "food_output": 0.0048,
     "timber_pressure": -0.01
    },
    "name": "Wood-pasture",
@@ -383,7 +383,7 @@
   },
   "coppice_regrowth_cutting": {
    "effects": {
-    "ecology_recovery": 0.027,
+    "ecology_recovery": 0.0056,
     "timber_pressure": -0.05,
     "timber_yield": 0.03
    },
@@ -392,23 +392,23 @@
   },
   "dye_vat_runoff_control": {
    "effects": {
-    "pollution": -0.0191,
+    "pollution": -0.0022,
     "water_pollution": -0.01,
-    "water_safety": 0.02
+    "water_safety": 0.0062
    },
    "art": "res://assets/ui/research/paper/textile_dye_extraction.png"
   },
   "sapling_protection_customs": {
    "effects": {
-    "ecology_recovery": 0.0135,
-    "timber_pressure": -0.025
+    "ecology_recovery": 0.0029,
+    "timber_pressure": -0.018
    },
    "art": "res://assets/ui/research/paper/timber_seasoning.png"
   },
   "grazing_ground_recovery_marking": {
    "effects": {
-    "ecological_pressure": -0.009,
-    "ecology_recovery": 0.0202
+    "ecological_pressure": -0.0026,
+    "ecology_recovery": 0.0043
    },
    "art": "res://assets/ui/research/paper/animal_taming.png"
   },
@@ -417,7 +417,7 @@
     "fuel_demand": -0.01,
     "pollution": 0.004,
     "soil_productivity": -0.01,
-    "timber_pressure": -0.03
+    "timber_pressure": -0.0216
    },
    "name": "Dung-cake Fuel",
    "observation": "Where trees are few, dung patted into cakes and dried on the walls fuels the hearth.",
@@ -426,15 +426,15 @@
   },
   "replanting_after_clearance": {
    "effects": {
-    "ecology_recovery": 0.0202,
+    "ecology_recovery": 0.0043,
     "timber_yield": 0.015
    },
    "art": "res://assets/ui/research/paper/timber_seasoning.png"
   },
   "grazing_rotation_customs": {
    "effects": {
-    "ecological_pressure": -0.0301,
-    "ecology_recovery": 0.0202,
+    "ecological_pressure": -0.0087,
+    "ecology_recovery": 0.0043,
     "food_output": 0.01
    },
    "ability_reason": "Rotated pastures carry the herds year after year instead of turning to dust.",
@@ -442,22 +442,22 @@
   },
   "timber_stand_reserves": {
    "effects": {
-    "timber_pressure": -0.03,
+    "timber_pressure": -0.0216,
     "timber_yield": 0.02
    },
    "art": "res://assets/ui/research/paper/timber_grading.png"
   },
   "kiln_smoke_venting_customs": {
    "effects": {
-    "pollution": -0.0223
+    "pollution": -0.0036
    },
    "art": "res://assets/ui/research/paper/kiln_control.png"
   },
   "waterlogging_recognition": {
    "effects": {
-    "cultivation_yield": 0.01,
-    "disease_exposure": -0.005,
-    "soil_productivity": 0.02
+    "cultivation_yield": 0.0078,
+    "disease_exposure": -0.0013,
+    "soil_productivity": 0.0088
    },
    "name": "Waterlogging Recognized",
    "observation": "Yellowing plants and sour, standing puddles show a plot has been watered too much and too often.",
@@ -465,10 +465,10 @@
   },
   "riparian_tree_belts": {
    "effects": {
-    "disaster_risk": -0.0051,
-    "ecology_recovery": 0.0135,
+    "disaster_risk": -0.0008,
+    "ecology_recovery": 0.009,
     "timber_yield": 0.01,
-    "water_safety": 0.01
+    "water_safety": 0.0017
    },
    "name": "Riparian Tree Belts",
    "observation": "A belt of willow and poplar left along the banks holds them in flood and shades the water.",
@@ -476,9 +476,9 @@
   },
   "fuelwood_rotation": {
    "effects": {
-    "ecology_recovery": 0.0101,
+    "ecology_recovery": 0.0067,
     "fuel_demand": -0.005,
-    "timber_pressure": -0.03
+    "timber_pressure": -0.0113
    },
    "name": "Fuelwood Rotation",
    "observation": "Each year's firewood comes from a different sector around the village, and the cut sectors are left to regrow.",
@@ -486,9 +486,9 @@
   },
   "spring_head_fencing": {
    "effects": {
-    "disease_exposure": -0.01,
-    "sanitation": 0.01,
-    "water_safety": 0.03
+    "disease_exposure": -0.0026,
+    "sanitation": 0.0025,
+    "water_safety": 0.005
    },
    "name": "Spring Heads Fenced",
    "observation": "A fence of stakes around the spring keeps the herds from trampling and fouling the water people drink.",
@@ -496,8 +496,8 @@
   },
   "named_soil_kinds": {
    "effects": {
-    "knowledge_preservation": 0.005,
-    "soil_productivity": 0.03,
+    "knowledge_preservation": 0.0009,
+    "soil_productivity": 0.0132,
     "survey_speed": 0.01
    },
    "name": "Named Soil Kinds",
@@ -506,9 +506,9 @@
   },
   "salinity_recognition": {
    "effects": {
-    "ecological_pressure": -0.012,
+    "ecological_pressure": -0.011,
     "observation_rate": 0.01,
-    "soil_productivity": 0.05
+    "soil_productivity": 0.0111
    },
    "name": "Salt Crust Recognized",
    "observation": "A white crust on the watered fields and a bitter taste to the soil mean the salt is rising.",
@@ -517,8 +517,8 @@
   },
   "riverbank_shift_watch": {
    "effects": {
-    "disaster_risk": -0.0076,
-    "soil_productivity": 0.01
+    "disaster_risk": -0.0052,
+    "soil_productivity": 0.0022
    },
    "name": "Riverbank Shift Watch",
    "observation": "Elders watch where the river is cutting and where it is building before anyone lays out a new field.",
@@ -528,7 +528,7 @@
    "effects": {
     "cultivation_yield": 0.01,
     "labor_demand": 0.0057,
-    "soil_productivity": 0.04
+    "soil_productivity": 0.0089
    },
    "name": "Salted Fields Leached",
    "observation": "Salted fields are flooded with fresh water, drained and left to rest until the crop will grow there again.",
@@ -536,10 +536,10 @@
   },
   "wetland_margin_reserves": {
    "effects": {
-    "ecological_pressure": -0.006,
-    "ecology_recovery": 0.0202,
-    "foraging_yield": 0.02,
-    "hunting_yield": 0.02
+    "ecological_pressure": -0.0055,
+    "ecology_recovery": 0.0152,
+    "foraging_yield": 0.0131,
+    "hunting_yield": 0.015
    },
    "name": "Wetland Margin Reserves",
    "observation": "The marsh edges are left undrained, and they keep giving fish, fowl, eggs and reeds.",
@@ -547,9 +547,9 @@
   },
   "stubble_grazing": {
    "effects": {
-    "ecological_pressure": -0.006,
+    "ecological_pressure": -0.0055,
     "food_output": 0.01,
-    "soil_productivity": 0.02
+    "soil_productivity": 0.0044
    },
    "name": "Stubble Grazing",
    "observation": "Herds turned onto the stubble after harvest feed themselves and dung the field; before harvest they are kept out.",
@@ -558,9 +558,9 @@
   "pit_pond_reclamation": {
    "effects": {
     "disease_exposure": 0.005,
-    "ecology_recovery": 0.0101,
-    "food_output": 0.005,
-    "water_access": 0.01
+    "ecology_recovery": 0.0032,
+    "food_output": 0.0028,
+    "water_access": 0.0061
    },
    "name": "Pit Ponds",
    "observation": "Worked-out clay and stone pits fill with water and are kept as ponds for fish and watering the herds.",
@@ -568,25 +568,25 @@
   },
   "recovery_zone_designation": {
    "effects": {
-    "ecology_recovery": 0.0236,
+    "ecology_recovery": 0.0076,
     "institutional_rigidity": 0.01
    },
    "art": "res://assets/ui/research/ecology-v1.png"
   },
   "watershed_boundary_marking": {
    "effects": {
-    "ecological_pressure": -0.015,
-    "water_access": 0.015
+    "ecological_pressure": -0.0036,
+    "water_access": 0.0091
    },
    "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png"
   },
   "resource_use_quotas": {
    "effects": {
-    "ecological_pressure": -0.0301,
-    "ecology_recovery": 0.0135,
+    "ecological_pressure": -0.0072,
+    "ecology_recovery": 0.0043,
     "institutional_rigidity": 0.01,
-    "state_capacity": 0.01,
-    "timber_pressure": -0.02
+    "state_capacity": 0.0015,
+    "timber_pressure": -0.0108
    },
    "ability_reason": "Quotas spread what the land can give across every household and every year.",
    "social_consequence": "Every household now has its measure of wood, game and clay; the headman's count, not need, sets the limit.",
@@ -594,17 +594,17 @@
   },
   "workshop_effluent_separation": {
    "effects": {
-    "pollution": -0.0191,
+    "pollution": -0.0105,
     "water_pollution": -0.015,
-    "water_safety": 0.02
+    "water_safety": 0.0064
    },
    "art": "res://assets/ui/research/paper/water_settling_basins.png"
   },
   "distant_timber_reserves": {
    "effects": {
-    "timber_pressure": -0.02,
+    "timber_pressure": -0.0108,
     "timber_yield": 0.03,
-    "trade_capacity": 0.0067
+    "trade_capacity": 0.0014
    },
    "name": "Distant Timber Reserves",
    "observation": "The long beams for great halls and boats come from known forests far upriver, not from the village woods.",
@@ -612,8 +612,8 @@
   },
   "salt_tolerant_barley": {
    "effects": {
-    "cultivation_yield": 0.03,
-    "soil_productivity": 0.01
+    "cultivation_yield": 0.013,
+    "soil_productivity": 0.003
    },
    "name": "Barley on Salty Ground",
    "observation": "Where wheat fails on the salty fields, barley still stands; farmers sow it there on purpose.",
@@ -621,10 +621,10 @@
   },
   "water_table_fallow": {
    "effects": {
-    "cultivation_yield": 0.01,
-    "disease_exposure": -0.005,
-    "ecological_pressure": -0.012,
-    "soil_productivity": 0.06
+    "cultivation_yield": 0.0043,
+    "disease_exposure": -0.0003,
+    "ecological_pressure": -0.0108,
+    "soil_productivity": 0.0178
    },
    "name": "Water-table Fallow",
    "observation": "Fields are rested between water turns so the ground water sinks and carries the salt down with it.",
@@ -633,9 +633,9 @@
   },
   "timed_silt_clearance": {
    "effects": {
-    "labor_efficiency": 0.005,
-    "soil_productivity": 0.02,
-    "water_access": 0.02
+    "labor_efficiency": 0.0007,
+    "soil_productivity": 0.0059,
+    "water_access": 0.0094
    },
    "name": "Timed Silt Clearance",
    "observation": "Canals are cleared when the water is lowest, and the silt is piled on the banks, not dumped on the fields.",
@@ -643,7 +643,7 @@
   },
   "layered_shade_gardens": {
    "effects": {
-    "cultivation_yield": 0.02,
+    "cultivation_yield": 0.0105,
     "ecology_recovery": 0.0067,
     "nutrition_quality": 0.015
    },
@@ -653,9 +653,9 @@
   },
   "seasonal_herd_matching": {
    "effects": {
-    "ecological_pressure": -0.018,
+    "ecological_pressure": -0.006,
     "ecology_recovery": 0.0067,
-    "food_output": 0.01
+    "food_output": 0.0035
    },
    "name": "Herds Matched to Pasture",
    "observation": "Before the dry season, herders sell or slaughter the animals the pasture cannot carry.",
@@ -663,7 +663,7 @@
   },
   "dune_spread_watch": {
    "effects": {
-    "disaster_risk": -0.0076,
+    "disaster_risk": -0.0033,
     "ecology_recovery": 0.0067,
     "soil_productivity": 0.01
    },
@@ -673,9 +673,9 @@
   },
   "deforestation_flood_link": {
    "effects": {
-    "disaster_risk": -0.0152,
+    "disaster_risk": -0.0067,
     "ecology_recovery": 0.0067,
-    "timber_pressure": -0.02
+    "timber_pressure": -0.0069
    },
    "name": "Bare Hills and Fast Floods",
    "observation": "Elders see that since the hills were cleared, the floods come faster and carry the fields away.",
@@ -683,9 +683,9 @@
   },
   "mixed_flock_balance": {
    "effects": {
-    "ecological_pressure": -0.012,
+    "ecological_pressure": -0.004,
     "fiber_yield": 0.01,
-    "food_output": 0.01
+    "food_output": 0.0035
    },
    "name": "Balanced Flocks",
    "observation": "Goats go to the scrub and sheep to the grass, in numbers each ground can bear.",
@@ -693,10 +693,10 @@
   },
   "sworn_fishing_closures": {
    "effects": {
-    "cohesion": 0.005,
-    "ecological_pressure": -0.018,
-    "ecology_recovery": 0.0135,
-    "food_output": 0.005
+    "cohesion": 0.0013,
+    "ecological_pressure": -0.01,
+    "ecology_recovery": 0.0055,
+    "food_output": 0.0035
    },
    "name": "Sworn Fishing Closures",
    "observation": "Villages along the river swear together not to fish during the spawning weeks.",
@@ -704,9 +704,9 @@
   },
   "fish_run_weir_opening": {
    "effects": {
-    "cohesion": 0.005,
-    "ecology_recovery": 0.0135,
-    "food_output": 0.01
+    "cohesion": 0.0013,
+    "ecology_recovery": 0.0055,
+    "food_output": 0.007
    },
    "name": "Weirs Opened for the Run",
    "observation": "On set days the fish weirs are opened so the run can pass upstream to the villages above and the spawning beds.",
@@ -714,9 +714,9 @@
   },
   "vermin_control_cats": {
    "effects": {
-    "disease_exposure": -0.01,
-    "food_spoilage": -0.01,
-    "storage_loss": -0.03
+    "disease_exposure": -0.0044,
+    "food_spoilage": -0.004,
+    "storage_loss": -0.0084
    },
    "name": "Cats Against Vermin",
    "observation": "Cats are fed at the granary door and left to hunt the rats and mice in the stores and fields.",
@@ -724,9 +724,9 @@
   },
   "shared_woodland_boundaries": {
    "effects": {
-    "cohesion": 0.01,
-    "legitimacy": 0.005,
-    "timber_pressure": -0.03
+    "cohesion": 0.0026,
+    "legitimacy": 0.0009,
+    "timber_pressure": -0.0086
    },
    "name": "Shared Woodland Boundaries",
    "observation": "Neighbouring villages mark where each may cut, and no one strips a wood that another village needs.",
@@ -735,7 +735,7 @@
   "mine_spoil_containment": {
    "effects": {
     "labor_demand": 0.004,
-    "pollution": -0.0127,
+    "pollution": -0.0099,
     "water_pollution": -0.03
    },
    "name": "Mine Spoil Kept from Streams",
@@ -744,9 +744,9 @@
   },
   "timed_grass_burning": {
    "effects": {
-    "disaster_risk": -0.0051,
-    "ecology_recovery": 0.0135,
-    "food_output": 0.005
+    "disaster_risk": -0.0048,
+    "ecology_recovery": 0.0055,
+    "food_output": 0.0035
    },
    "name": "Timed Grass Burning",
    "observation": "The old grass is burned at the end of the rains, before the new shoots come, so the fire spares the young growth.",
@@ -756,7 +756,7 @@
    "effects": {
     "ecology_recovery": 0.0067,
     "fuel_efficiency": 0.02,
-    "timber_pressure": -0.04
+    "timber_pressure": -0.004
    },
    "name": "Charcoal Coppice Woods",
    "observation": "Woods kept for the smelters are cut in long rotation, a sector each year, so the furnaces never strip the hills.",
@@ -764,11 +764,11 @@
   },
   "farmers_almanac": {
    "effects": {
-    "cultivation_yield": 0.03,
-    "disaster_risk": -0.0102,
-    "ecological_pressure": -0.012,
-    "knowledge_preservation": 0.02,
-    "observation_rate": 0.01
+    "cultivation_yield": 0.0153,
+    "disaster_risk": -0.0032,
+    "ecological_pressure": -0.005,
+    "knowledge_preservation": 0.0045,
+    "observation_rate": 0.0053
    },
    "name": "Farmer's Almanac",
    "observation": "Scribes write down the farming year: when to sow, when to water, which pests come when, and what to do.",
@@ -778,7 +778,7 @@
   "planted_timber_groves": {
    "effects": {
     "ecology_recovery": 0.0067,
-    "timber_pressure": -0.03,
+    "timber_pressure": -0.003,
     "timber_yield": 0.04
    },
    "name": "Planted Timber Groves",
@@ -787,9 +787,9 @@
   },
   "sworn_grazing_rights": {
    "effects": {
-    "cohesion": 0.01,
-    "ecological_pressure": -0.012,
-    "legitimacy": 0.005
+    "cohesion": 0.0019,
+    "ecological_pressure": -0.005,
+    "legitimacy": 0.0009
    },
    "name": "Sworn Grazing Rights",
    "observation": "Herders and farmers swear where and when the flocks may graze, before witnesses and the god of the place.",
@@ -798,8 +798,8 @@
   },
   "protected_temple_woods": {
    "effects": {
-    "legitimacy": 0.005,
-    "timber_pressure": -0.03,
+    "legitimacy": 0.0009,
+    "timber_pressure": -0.003,
     "timber_yield": 0.02
    },
    "name": "Protected Temple Woods",
@@ -848,6 +848,431 @@
    "planted_timber_groves": "res://assets/ui/research/paper/timber_seasoning.png",
    "sworn_grazing_rights": "res://assets/ui/research/paper/customary_law.png",
    "protected_temple_woods": "res://assets/ui/research/paper/timber_seasoning.png"
+  }
+ },
+ "balance_600": {
+  "schema": "research_600_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_600.py; the loader reads only 'items'.",
+  "source": {
+   "seasonal_patterns": {
+    "ecological_pressure": -0.012,
+    "foraging_yield": 0.08,
+    "observation_rate": 0.04
+   },
+   "timber_grading": {
+    "construction_rate": 0.03,
+    "storage_loss": -0.02,
+    "timber_yield": 0.05
+   },
+   "fiber_grading": {
+    "fiber_yield": 0.06,
+    "survey_speed": 0.02
+   },
+   "quarry_reading": {
+    "mine_safety": 0.03,
+    "stone_yield": 0.08,
+    "survey_speed": 0.03
+   },
+   "streambank_vegetation_watch": {
+    "ecological_pressure": -0.012,
+    "ecology_recovery": 0.0067,
+    "soil_productivity": 0.015
+   },
+   "topsoil_depth_reading": {
+    "ecological_pressure": -0.009,
+    "soil_productivity": 0.02
+   },
+   "slope_erosion_watch": {
+    "disaster_risk": -0.004,
+    "ecological_pressure": -0.012
+   },
+   "contour_terrace_reading": {
+    "ecological_pressure": -0.015,
+    "soil_productivity": 0.02
+   },
+   "windbreak_hedgerow_siting": {
+    "ecological_pressure": -0.012,
+    "soil_productivity": 0.02
+   },
+   "grazing_ground_recovery_marking": {
+    "ecological_pressure": -0.009,
+    "ecology_recovery": 0.0202
+   },
+   "grazing_rotation_customs": {
+    "ecological_pressure": -0.0301,
+    "ecology_recovery": 0.0202,
+    "food_output": 0.01
+   },
+   "watershed_boundary_marking": {
+    "ecological_pressure": -0.015,
+    "water_access": 0.015
+   },
+   "fallow_thicket_regrowth": {
+    "ecology_recovery": 0.0202,
+    "foraging_yield": 0.015
+   },
+   "burn_scar_regrowth_tracking": {
+    "ecology_recovery": 0.0169,
+    "foraging_yield": 0.015
+   },
+   "selective_deadwood_gathering": {
+    "ecology_recovery": 0.0169,
+    "timber_pressure": -0.02
+   },
+   "seed_scatter_after_gathering": {
+    "ecology_recovery": 0.0202,
+    "foraging_yield": 0.02
+   },
+   "root_stock_preservation": {
+    "ecology_recovery": 0.0169,
+    "foraging_yield": 0.015
+   },
+   "coppice_regrowth_cutting": {
+    "ecology_recovery": 0.027,
+    "timber_pressure": -0.05,
+    "timber_yield": 0.03
+   },
+   "replanting_after_clearance": {
+    "ecology_recovery": 0.0202,
+    "timber_yield": 0.015
+   },
+   "recovery_zone_designation": {
+    "ecology_recovery": 0.0236,
+    "institutional_rigidity": 0.01
+   },
+   "midden_siting_away_from_water": {
+    "pollution": -0.0191,
+    "sanitation": 0.01,
+    "water_safety": 0.02
+   },
+   "cookfire_smoke_venting_habit": {
+    "disease_exposure": -0.015,
+    "pollution": -0.0064
+   },
+   "downwind_workshop_placement": {
+    "disease_exposure": -0.01,
+    "pollution": -0.0127
+   },
+   "tannery_waste_channeling": {
+    "pollution": -0.0191,
+    "water_pollution": -0.01,
+    "water_safety": 0.02
+   },
+   "refuse_pit_rotation": {
+    "pollution": -0.0159,
+    "sanitation": 0.02
+   },
+   "dye_vat_runoff_control": {
+    "pollution": -0.0191,
+    "water_pollution": -0.01,
+    "water_safety": 0.02
+   },
+   "kiln_smoke_venting_customs": {
+    "pollution": -0.0223
+   },
+   "workshop_effluent_separation": {
+    "pollution": -0.0191,
+    "water_pollution": -0.015,
+    "water_safety": 0.02
+   },
+   "herd_size_limits": {
+    "ecological_pressure": -0.015,
+    "ecology_recovery": 0.0067,
+    "food_output": 0.015
+   },
+   "spawning_ground_avoidance": {
+    "ecological_pressure": -0.012,
+    "ecology_recovery": 0.0067,
+    "foraging_yield": 0.025
+   },
+   "seasonal_hunting_closures": {
+    "ecological_pressure": -0.012,
+    "ecology_recovery": 0.0067,
+    "hunting_yield": 0.03
+   },
+   "communal_catch_limits": {
+    "cohesion": 0.0058,
+    "ecological_pressure": -0.0241,
+    "ecology_recovery": 0.0202,
+    "foraging_yield": 0.02
+   },
+   "sapling_protection_customs": {
+    "ecology_recovery": 0.0135,
+    "timber_pressure": -0.025
+   },
+   "timber_stand_reserves": {
+    "timber_pressure": -0.03,
+    "timber_yield": 0.02
+   },
+   "resource_use_quotas": {
+    "ecological_pressure": -0.0301,
+    "ecology_recovery": 0.0135,
+    "institutional_rigidity": 0.01,
+    "state_capacity": 0.01,
+    "timber_pressure": -0.02
+   },
+   "phenology_signs": {
+    "foraging_yield": 0.03,
+    "hunting_yield": 0.01,
+    "observation_rate": 0.01
+   },
+   "controlled_undergrowth_burning": {
+    "disaster_risk": 0.004,
+    "ecology_recovery": 0.0135,
+    "foraging_yield": 0.03,
+    "hunting_yield": 0.03,
+    "pollution": 0.004
+   },
+   "spawning_calendar": {
+    "ecological_pressure": -0.009,
+    "ecology_recovery": 0.0067,
+    "food_output": 0.02
+   },
+   "firebreaks": {
+    "disaster_resilience": 0.02,
+    "disaster_risk": -0.0102,
+    "ecology_recovery": 0.0067
+   },
+   "indicator_plants": {
+    "observation_rate": 0.01,
+    "soil_productivity": 0.02,
+    "survey_speed": 0.01
+   },
+   "swidden_cycle": {
+    "cultivation_yield": 0.015,
+    "ecology_recovery": 0.0135,
+    "soil_productivity": 0.03,
+    "timber_pressure": 0.01
+   },
+   "leaf_fodder_pollarding": {
+    "ecology_recovery": 0.0101,
+    "food_output": 0.01,
+    "timber_pressure": -0.015
+   },
+   "hive_sparing_honey_harvest": {
+    "ecology_recovery": 0.0067,
+    "foraging_yield": 0.02,
+    "nutrition_quality": 0.01
+   },
+   "drought_signs": {
+    "disaster_risk": -0.0102,
+    "observation_rate": 0.01,
+    "water_access": 0.01
+   },
+   "transhumance": {
+    "ecological_pressure": -0.018,
+    "ecology_recovery": 0.0135,
+    "food_output": 0.015,
+    "labor_demand": 0.0057
+   },
+   "shellfish_bed_recovery": {
+    "ecological_pressure": -0.009,
+    "ecology_recovery": 0.0135,
+    "food_output": 0.01
+   },
+   "copper_outcrop_signs": {
+    "extraction_yield": 0.02,
+    "metal_yield": 0.01,
+    "survey_speed": 0.03
+   },
+   "frost_pocket_reading": {
+    "cultivation_yield": 0.015,
+    "disaster_risk": -0.004,
+    "soil_productivity": 0.01
+   },
+   "pest_swarm_watch": {
+    "cultivation_yield": 0.01,
+    "disaster_risk": -0.0076,
+    "observation_rate": 0.01
+   },
+   "sacred_grove_protection": {
+    "cohesion": 0.01,
+    "ecology_recovery": 0.0202,
+    "timber_pressure": -0.02,
+    "water_safety": 0.01
+   },
+   "reed_bed_rotation": {
+    "ecological_pressure": -0.006,
+    "ecology_recovery": 0.0101,
+    "fiber_yield": 0.02
+   },
+   "flood_silt_fields": {
+    "cultivation_yield": 0.02,
+    "disaster_risk": 0.004,
+    "soil_productivity": 0.04
+   },
+   "wood_pasture": {
+    "ecological_pressure": -0.006,
+    "ecology_recovery": 0.0101,
+    "food_output": 0.01,
+    "timber_pressure": -0.01
+   },
+   "dung_cake_fuel": {
+    "fuel_demand": -0.01,
+    "pollution": 0.004,
+    "soil_productivity": -0.01,
+    "timber_pressure": -0.03
+   },
+   "waterlogging_recognition": {
+    "cultivation_yield": 0.01,
+    "disease_exposure": -0.005,
+    "soil_productivity": 0.02
+   },
+   "riparian_tree_belts": {
+    "disaster_risk": -0.0051,
+    "ecology_recovery": 0.0135,
+    "timber_yield": 0.01,
+    "water_safety": 0.01
+   },
+   "fuelwood_rotation": {
+    "ecology_recovery": 0.0101,
+    "fuel_demand": -0.005,
+    "timber_pressure": -0.03
+   },
+   "spring_head_fencing": {
+    "disease_exposure": -0.01,
+    "sanitation": 0.01,
+    "water_safety": 0.03
+   },
+   "named_soil_kinds": {
+    "knowledge_preservation": 0.005,
+    "soil_productivity": 0.03,
+    "survey_speed": 0.01
+   },
+   "salinity_recognition": {
+    "ecological_pressure": -0.012,
+    "observation_rate": 0.01,
+    "soil_productivity": 0.05
+   },
+   "riverbank_shift_watch": {
+    "disaster_risk": -0.0076,
+    "soil_productivity": 0.01
+   },
+   "salt_leaching_fallow": {
+    "cultivation_yield": 0.01,
+    "labor_demand": 0.0057,
+    "soil_productivity": 0.04
+   },
+   "wetland_margin_reserves": {
+    "ecological_pressure": -0.006,
+    "ecology_recovery": 0.0202,
+    "foraging_yield": 0.02,
+    "hunting_yield": 0.02
+   },
+   "stubble_grazing": {
+    "ecological_pressure": -0.006,
+    "food_output": 0.01,
+    "soil_productivity": 0.02
+   },
+   "pit_pond_reclamation": {
+    "disease_exposure": 0.005,
+    "ecology_recovery": 0.0101,
+    "food_output": 0.005,
+    "water_access": 0.01
+   },
+   "distant_timber_reserves": {
+    "timber_pressure": -0.02,
+    "timber_yield": 0.03,
+    "trade_capacity": 0.0067
+   },
+   "salt_tolerant_barley": {
+    "cultivation_yield": 0.03,
+    "soil_productivity": 0.01
+   },
+   "water_table_fallow": {
+    "cultivation_yield": 0.01,
+    "disease_exposure": -0.005,
+    "ecological_pressure": -0.012,
+    "soil_productivity": 0.06
+   },
+   "timed_silt_clearance": {
+    "labor_efficiency": 0.005,
+    "soil_productivity": 0.02,
+    "water_access": 0.02
+   },
+   "layered_shade_gardens": {
+    "cultivation_yield": 0.02,
+    "ecology_recovery": 0.0067,
+    "nutrition_quality": 0.015
+   },
+   "seasonal_herd_matching": {
+    "ecological_pressure": -0.018,
+    "ecology_recovery": 0.0067,
+    "food_output": 0.01
+   },
+   "dune_spread_watch": {
+    "disaster_risk": -0.0076,
+    "ecology_recovery": 0.0067,
+    "soil_productivity": 0.01
+   },
+   "deforestation_flood_link": {
+    "disaster_risk": -0.0152,
+    "ecology_recovery": 0.0067,
+    "timber_pressure": -0.02
+   },
+   "mixed_flock_balance": {
+    "ecological_pressure": -0.012,
+    "fiber_yield": 0.01,
+    "food_output": 0.01
+   },
+   "sworn_fishing_closures": {
+    "cohesion": 0.005,
+    "ecological_pressure": -0.018,
+    "ecology_recovery": 0.0135,
+    "food_output": 0.005
+   },
+   "fish_run_weir_opening": {
+    "cohesion": 0.005,
+    "ecology_recovery": 0.0135,
+    "food_output": 0.01
+   },
+   "vermin_control_cats": {
+    "disease_exposure": -0.01,
+    "food_spoilage": -0.01,
+    "storage_loss": -0.03
+   },
+   "shared_woodland_boundaries": {
+    "cohesion": 0.01,
+    "legitimacy": 0.005,
+    "timber_pressure": -0.03
+   },
+   "mine_spoil_containment": {
+    "labor_demand": 0.004,
+    "pollution": -0.0127,
+    "water_pollution": -0.03
+   },
+   "timed_grass_burning": {
+    "disaster_risk": -0.0051,
+    "ecology_recovery": 0.0135,
+    "food_output": 0.005
+   },
+   "coppiced_charcoal_woods": {
+    "ecology_recovery": 0.0067,
+    "fuel_efficiency": 0.02,
+    "timber_pressure": -0.04
+   },
+   "farmers_almanac": {
+    "cultivation_yield": 0.03,
+    "disaster_risk": -0.0102,
+    "ecological_pressure": -0.012,
+    "knowledge_preservation": 0.02,
+    "observation_rate": 0.01
+   },
+   "planted_timber_groves": {
+    "ecology_recovery": 0.0067,
+    "timber_pressure": -0.03,
+    "timber_yield": 0.04
+   },
+   "sworn_grazing_rights": {
+    "cohesion": 0.01,
+    "ecological_pressure": -0.012,
+    "legitimacy": 0.005
+   },
+   "protected_temple_woods": {
+    "legitimacy": 0.005,
+    "timber_pressure": -0.03,
+    "timber_yield": 0.02
+   }
   }
  }
 }
