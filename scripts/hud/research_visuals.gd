@@ -77,7 +77,10 @@ static func subject_art_key(item:Dictionary)->String:
 	var id:=String(item.get("id",""))
 	if preload("res://scripts/hud/early_civ_art.gd").active() and first300_manifest().has(id):return String(first300_manifest()[id])
 	if preload("res://scripts/hud/early_civ_art.gd").active() and EARLY_SUBJECTS.has(id):return "res://assets/ui/research/paper/%s.png" % EARLY_SUBJECT_FILES.get(id,id)
-	return String(manifest().get(String(item.get("id","")),{}).get("path",""))
+	var path:=String(manifest().get(String(item.get("id","")),{}).get("path",""))
+	# research_600: design discoveries without their own painting show their line's.
+	if path.is_empty():path=preload("res://scripts/research_600_catalog.gd").art_key(item)
+	return path
 static func focus_for(item:Dictionary)->Vector2:
 	var id:=String(item.get("id",""))
 	if preload("res://scripts/hud/early_civ_art.gd").active() and first300_manifest().has(id):return Vector2(.5,.5) if String(first300_manifest()[id]).ends_with(".tres") else Vector2(.5,.72)

@@ -43,7 +43,7 @@ func prepare()->void:
 
 func materials_setup()->void:
 	prepare()
-	GameState.known_discoveries.assign(["material_accounting","standard_measures","ore_assaying","charcoal"])
+	GameState.known_discoveries.assign(["material_accounting","standard_measures","ore_assaying","charcoal","kiln_control"])
 	GameState.resource_deposits.clear();GameState.resource_stockpiles.erase("Copper Ore")
 	E.owner_state("neighbor").known_discoveries.clear()
 	E.owner_state("neighbor").population_allocations.Logistics=8
@@ -157,7 +157,7 @@ func test_live_embassy_settles_payment_and_materials_exactly_once()->void:
 	assert_float(float(GameState.resource_stockpiles["Copper Ore"])).is_equal(5.0)
 func test_mixed_bundle_refusal_takes_none_of_the_available_material()->void:
 	materials_setup()
-	GameState.known_discoveries.append("copper_casting")
+	GameState.known_discoveries.append_array(["copper_casting","copper_smelting","tin_smelting"]) # 600-year design: bronze follows tin smelting
 	GameState.resource_stockpiles.erase("Tin Ore")
 	E.owner_state("neighbor").resource_stockpiles["Tin Ore"]=2.0
 	assert_bool(M.dispatch("neighbor","bronze_alloying","Stone").get("ok",false)).is_true()
@@ -202,15 +202,16 @@ func test_tree_discloses_the_stock_alternative_without_claiming_local_access()->
 func test_furnace_experiments_have_a_metallurgical_route_without_local_aquifers()->void:
 	materials_setup()
 	var entry:=DiscoverySystem.discovery_definition("blast_furnace")
+	var day:=int(ceil(DiscoverySystem.research_600_earliest_year(entry)*365.0)) # once its era has come
 	GameState.known_discoveries.assign(["refractory_furnaces","rope_rigging","bloomery_smelting"])
 	for resource:String in M.Catalog.EXPERIMENTAL_SUPPLIES.blast_furnace:GameState.resource_stockpiles[resource]=M.Catalog.EXPERIMENTAL_SUPPLIES.blast_furnace[resource]
-	assert_bool(DiscoverySystem._discovery_is_eligible(entry,0)).is_true()
-	assert_str(String(P.chosen(entry,0).id)).is_equal("metallurgical")
+	assert_bool(DiscoverySystem._discovery_is_eligible(entry,day)).is_true()
+	assert_str(String(P.chosen(entry,day).id)).is_equal("metallurgical")
 	GameState.known_discoveries.erase("bloomery_smelting");GameState.known_discoveries.append("mine_drainage")
-	assert_bool(DiscoverySystem._discovery_is_eligible(entry,0)).is_true()
-	assert_str(String(P.chosen(entry,0).id)).is_equal("mine_supported")
+	assert_bool(DiscoverySystem._discovery_is_eligible(entry,day)).is_true()
+	assert_str(String(P.chosen(entry,day).id)).is_equal("mine_supported")
 	GameState.known_discoveries.erase("refractory_furnaces")
-	assert_bool(DiscoverySystem._discovery_is_eligible(entry,0)).is_false()
+	assert_bool(DiscoverySystem._discovery_is_eligible(entry,day)).is_false()
 
 func sec_setup()->void:
 	prepare()

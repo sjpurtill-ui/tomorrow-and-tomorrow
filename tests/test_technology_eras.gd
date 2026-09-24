@@ -14,7 +14,8 @@ func after_test()->void:
 func test_every_catalog_discovery_has_a_dated_period()->void:
 	var missing:Array[String]=[]
 	for entry:Dictionary in DiscoverySystem.technology_catalog:
-		if not Eras.HISTORICAL_YEAR.has(String(entry.id)):missing.append(String(entry.id))
+		# 600-year design discoveries are dated by their design year instead.
+		if not Eras.HISTORICAL_YEAR.has(String(entry.id)) and not preload("res://scripts/research_600_catalog.gd").has(String(entry.id)):missing.append(String(entry.id))
 	assert_array(missing).is_empty()
 
 func test_pacing_curve_matches_campaign_targets()->void:

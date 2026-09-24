@@ -63,14 +63,19 @@ func test_running_gear_reconverges_after_either_wheel_method()->void:
 	WorldSimulation.scoped("carter",func()->void:
 		setup();var discovery=WorldSimulation.discovery
 		var entry:=discovery.discovery_definition("cart_running_gear")
-		forget("solid_wheel_assembly");forget("spoked_wheel_assembly");forget("cart_running_gear")
-		assert_bool(discovery._discovery_is_eligible(entry,0)).is_false()
-		WorldSimulation.state.known_discoveries.append("solid_wheel_assembly")
-		assert_bool(discovery._discovery_is_eligible(entry,0)).is_true()
-		forget("solid_wheel_assembly");WorldSimulation.state.known_discoveries.append("spoked_wheel_assembly")
-		assert_bool(discovery._discovery_is_eligible(entry,0)).is_true()
-		forget("cart_bed_framing")
-		assert_bool(discovery._discovery_is_eligible(entry,0)).is_false()
+		var day:=int(ceil(discovery.research_600_earliest_year(entry)*365.0)) # once its era has come
+		# 600-year design: running gear follows four-wheeled wagons and weighed
+		# load bundling; neither wheel method is its direct gate any more.
+		forget("cart_running_gear")
+		for parent:String in ["four_wheeled_wagons","load_bundling_by_weight"]:
+			if parent not in WorldSimulation.state.known_discoveries:WorldSimulation.state.known_discoveries.append(parent)
+		assert_bool(discovery._discovery_is_eligible(entry,day)).is_true()
+		forget("four_wheeled_wagons")
+		assert_bool(discovery._discovery_is_eligible(entry,day)).is_false()
+		WorldSimulation.state.known_discoveries.append("four_wheeled_wagons");forget("load_bundling_by_weight")
+		assert_bool(discovery._discovery_is_eligible(entry,day)).is_false()
+		WorldSimulation.state.known_discoveries.append("load_bundling_by_weight")
+		assert_bool(discovery._discovery_is_eligible(entry,day-365)).is_false()
 		assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(K.entries(),discovery.technology_catalog)).is_empty()
 	)
 

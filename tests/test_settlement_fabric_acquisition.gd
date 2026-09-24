@@ -48,8 +48,8 @@ func test_fabric_purchase_requires_paid_delivery_and_local_study_without_tools_o
 	for entry:Dictionary in preload("res://scripts/settlement_fabric_knowledge.gd").entries():
 		before_test();prepare()
 		var subject:=String(entry.id)
-		for parent:String in entry.requires_all:GameState.known_discoveries.append(parent)
-		for alternatives:Array in entry.requires_any:
+		for parent:String in live(entry).requires_all:GameState.known_discoveries.append(parent)
+		for alternatives:Array in live(entry).requires_any:
 			GameState.known_discoveries.append(String(alternatives[-1]))
 		var peer:=E.owner_state("neighbor")
 		peer.known_discoveries.append(subject);peer.discovery_adoption[subject]=1.0
@@ -65,7 +65,7 @@ func test_fabric_purchase_requires_paid_delivery_and_local_study_without_tools_o
 		for day in range(100007,100100):E.advance(day)
 		assert_bool(P.evidence(subject).get("research_purchase",false)).is_true()
 		assert_bool(subject in GameState.known_discoveries).is_false()
-		assert_float(P.multiplier(entry)).is_equal(2.5)
+		assert_float(P.multiplier(live(entry))).is_equal(2.5)
 		assert_array(MilitaryCampaign.equipment_queue).is_empty()
 		assert_float(float(GameState.resource_stockpiles.get("Building Shade Lattices",0))).is_equal(0.0)
 
@@ -73,19 +73,19 @@ func test_all_foundations_and_each_alternative_survive_imported_evidence()->void
 	var entries:=preload("res://scripts/settlement_fabric_knowledge.gd").entries()
 	var source:={"id":"studied_foreign_sample","kind":"artifact","source_name":"Neighbor"}
 	for entry:Dictionary in entries:
-		var known:Array=entry.requires_all.duplicate()
-		for group:Array in entry.requires_any:known.append(group[0])
-		for route:Dictionary in P.routes_for(entry,known,{},source):assert_bool(route.ready).is_true()
-		for parent:String in entry.requires_all:
+		var known:Array=live(entry).requires_all.duplicate()
+		for group:Array in live(entry).requires_any:known.append(group[0])
+		for route:Dictionary in P.routes_for(live(entry),known,{},source):assert_bool(route.ready).is_true()
+		for parent:String in live(entry).requires_all:
 			var missing:=known.duplicate();missing.erase(parent)
-			for route:Dictionary in P.routes_for(entry,missing,{},source):assert_bool(route.ready).is_false()
-		for group:Array in entry.requires_any:
+			for route:Dictionary in P.routes_for(live(entry),missing,{},source):assert_bool(route.ready).is_false()
+		for group:Array in live(entry).requires_any:
 			var missing:=known.duplicate()
 			for parent:String in group:missing.erase(parent)
-			for route:Dictionary in P.routes_for(entry,missing,{},source):assert_bool(route.ready).is_false()
+			for route:Dictionary in P.routes_for(live(entry),missing,{},source):assert_bool(route.ready).is_false()
 			for parent:String in group:
 				var alternate:=missing.duplicate();alternate.append(parent)
-				for route:Dictionary in P.routes_for(entry,alternate,{},source):assert_bool(route.ready).is_true()
+				for route:Dictionary in P.routes_for(live(entry),alternate,{},source):assert_bool(route.ready).is_true()
 		for recipe:String in entry.get("production_items",[]):
 			assert_str(String(preload("res://scripts/civilian_industry.gd").product(recipe).gate)).is_equal(String(entry.id))
 
@@ -95,8 +95,8 @@ func test_all_fabric_scholar_visits_pay_for_temporary_subject_specific_teaching(
 		before_test();prepare()
 		var subject:=String(entry.id)
 		assert_bool(scholars.quote("neighbor",subject,"Stone").has("error")).is_true()
-		for parent:String in entry.requires_all:GameState.known_discoveries.append(parent)
-		for group:Array in entry.requires_any:GameState.known_discoveries.append(String(group.back()))
+		for parent:String in live(entry).requires_all:GameState.known_discoveries.append(parent)
+		for group:Array in live(entry).requires_any:GameState.known_discoveries.append(String(group.back()))
 		var provider:=E.owner_state("neighbor")
 		provider.known_discoveries.append(subject);provider.discovery_adoption[subject]=1.0
 		provider.elapsed_days=100000
@@ -124,3 +124,7 @@ func test_all_fabric_scholar_visits_pay_for_temporary_subject_specific_teaching(
 		assert_float(provider.population_exact).is_equal(population)
 		assert_bool(subject in GameState.known_discoveries).is_false()
 		assert_array(MilitaryCampaign.equipment_queue).is_empty()
+
+## Foundations as the live catalog defines them (600-year design overrides included).
+func live(entry:Dictionary)->Dictionary:
+	return DiscoverySystem.discovery_definition(String(entry.id))

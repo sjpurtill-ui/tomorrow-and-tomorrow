@@ -26,10 +26,12 @@ func test_new_catalog_contract_and_graph_are_valid()->void:
 
 func test_cisterns_have_three_lining_routes_without_an_aqueduct_gate()->void:
 	var entry:=DiscoverySystem.discovery_definition("rainwater_cisterns")
+	# 600-year design: cisterns rest on lime-plastered floors; the authored
+	# lining methods remain optional approaches, and no aqueduct is required.
 	for lining:String in ["sealed_vessels","lime_mortar","bitumen_sealing"]:
-		GameState.known_discoveries.assign(["drainage",lining])
+		GameState.known_discoveries.assign(["drainage",lining,"lime_plastered_floors"])
 		assert_bool(P.ready(entry,100000)).is_true()
-	GameState.known_discoveries.assign(["lime_mortar"])
+	GameState.known_discoveries.assign(["drainage","lime_mortar"])
 	assert_bool(P.ready(entry,100000)).is_false()
 
 func test_water_inspections_accept_well_or_cistern_and_keep_record_foundations()->void:

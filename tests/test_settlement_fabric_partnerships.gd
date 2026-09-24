@@ -74,9 +74,9 @@ func test_ten_joint_investigations_require_both_studies_and_paid_returned_findin
 			WorldSimulation.discovery.initialize()
 			assert_dict(WorldSimulation.discovery.catalog_by_id[subject]).is_equal(normalized)
 		)
-		for parent:String in entry.requires_all:
+		for parent:String in live(entry).requires_all:
 			GameState.known_discoveries.append(parent);peer.known_discoveries.append(parent)
-		for group:Array in entry.requires_any:
+		for group:Array in live(entry).requires_any:
 			GameState.known_discoveries.append(String(group.back()));peer.known_discoveries.append(String(group.back()))
 		var payment:=float(GameState.resource_stockpiles.Stone)
 		assert_bool(Joint.dispatch("neighbor",subject,"Stone").get("ok",false)).is_true()
@@ -103,7 +103,11 @@ func test_ten_joint_investigations_require_both_studies_and_paid_returned_findin
 		assert_dict(P.evidence(subject)).is_empty()
 		study(40)
 		assert_bool(P.evidence(subject).get("research_partnership",false)).is_true()
-		assert_float(float(P.chosen(entry,GameState.elapsed_days).progress_multiplier)).is_equal(1.6)
+		assert_float(float(P.chosen(live(entry),GameState.elapsed_days).progress_multiplier)).is_equal(1.6)
 		assert_bool(subject in GameState.known_discoveries).is_false()
 		assert_bool(subject in peer.known_discoveries).is_false()
 		assert_array(MilitaryCampaign.equipment_queue).is_empty()
+
+## Foundations as the live catalog defines them (600-year design overrides included).
+func live(entry:Dictionary)->Dictionary:
+	return DiscoverySystem.discovery_definition(String(entry.id))

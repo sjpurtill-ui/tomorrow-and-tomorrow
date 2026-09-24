@@ -24,7 +24,8 @@ func test_multiple_or_groups_keep_every_common_foundation()->void:
 func test_library_has_a_slower_route_without_printing()->void:
 	var entry:=DiscoverySystem.discovery_definition("public_libraries")
 	GameState.known_discoveries.assign(["public_schools","formal_archives"])
-	assert_bool(DiscoverySystem._discovery_is_eligible(entry,100000)).is_true()
+	# Evaluated once the library's era has come (research_600 era gate).
+	assert_bool(DiscoverySystem._discovery_is_eligible(entry,maxi(100000,int(ceil(DiscoverySystem.research_600_earliest_year(entry)*365.0))))).is_true()
 	assert_str(P.chosen(entry).id).is_equal("manuscript")
 	assert_float(P.multiplier(entry)).is_less(1.0)
 	GameState.known_discoveries.erase("public_schools")
@@ -62,13 +63,17 @@ func test_interface_missing_requirements_describe_available_route()->void:
 	assert_int(reasons.size()).is_equal(1)
 	assert_str(reasons[0]).is_equal(DiscoverySystem.discovery_definition("public_schools").name)
 	GameState.known_discoveries.append("public_schools")
+	# Viewed once the library's era has come (research_600 era gate).
+	GameState.elapsed_days=ceil(DiscoverySystem.research_600_earliest_year(DiscoverySystem.discovery_definition("public_libraries"))*365.0)
 	for row:Dictionary in DiscoverySystem.technology_tree():
 		if row.id=="public_libraries":assert_bool(row.ready).is_true();assert_array(row.missing).is_empty()
 
 func test_existing_craft_can_support_apprenticeship_without_hafted_tools()->void:
-	GameState.known_discoveries.assign(["customary_law","pit_firing"])
+	# 600-year design: contracts formalize keep-for-work apprenticeship and
+	# sealed tablet contracts; hafted tools are still not required.
+	GameState.known_discoveries.assign(["apprentice_for_keep","sealed_tablet_contracts"])
 	assert_bool(P.ready(DiscoverySystem.discovery_definition("apprentice_contracts"),100000)).is_true()
-	GameState.known_discoveries.erase("customary_law")
+	GameState.known_discoveries.erase("sealed_tablet_contracts")
 	assert_bool(P.ready(DiscoverySystem.discovery_definition("apprentice_contracts"),100000)).is_false()
 
 func test_graph_reports_unknown_foundations_and_unrecoverable_cycles()->void:
@@ -86,28 +91,41 @@ func test_live_catalog_has_reachable_causal_foundations()->void:
 
 func test_legacy_opponent_candidates_use_the_same_alternative_foundations()->void:
 	var civ:={"production":1.0,"logistics":1.0,"environment_profile":{"resource_potentials":{}},"discovery_profile":{"seed":42,"technologies":["formal_archives","public_schools"]}}
+	GameState.elapsed_days=ceil(DiscoverySystem.research_600_earliest_year(DiscoverySystem.discovery_definition("public_libraries"))*365.0)
 	var found:=false
 	for entry:Dictionary in DiscoverySystem.rival_research_candidates(civ,"culture"):
 		if entry.id=="public_libraries":found=true
 	assert_bool(found).is_true()
 
-func test_local_ready_foundations_do_not_wait_for_a_calendar_date()->void:
+## research_600: ready foundations still wait for the entry's era (its earliest
+## year); the legacy ordering day is never the gate, and routes are unaffected.
+func test_ready_foundations_wait_only_for_the_era_gate()->void:
 	GameState.elapsed_days=1
 	GameState.known_discoveries.assign(["public_schools","formal_archives"])
 	var entry:=DiscoverySystem.discovery_definition("public_libraries")
-	assert_bool(int(entry.day)>1).is_true()
+	var opens:=int(ceil(DiscoverySystem.research_600_earliest_year(entry)*365.0))
+	assert_bool(int(entry.day)>1 and int(entry.day)<opens).is_true()
 	assert_bool(P.ready(entry,1)).is_true()
-	assert_bool(DiscoverySystem._discovery_is_eligible(entry,1)).is_true()
+	assert_bool(DiscoverySystem._discovery_is_eligible(entry,1)).is_false()
+	assert_bool(DiscoverySystem._discovery_is_eligible(entry,opens-365)).is_false()
+	assert_array(DiscoverySystem.research_600_missing(entry)).is_not_empty()
+	GameState.elapsed_days=opens
+	assert_bool(DiscoverySystem._discovery_is_eligible(entry,opens)).is_true()
+	assert_array(DiscoverySystem.research_600_missing(entry)).is_empty()
 	assert_array(P.missing(entry,1)).is_empty()
 	assert_str(String(P.chosen(entry,1).id)).is_equal("manuscript")
 	assert_bool("public_libraries" in GameState.known_discoveries).is_false()
 	GameState.known_discoveries.erase("formal_archives")
 	assert_bool(P.ready(entry,2000000)).is_false()
 
-func test_rivals_use_foundations_without_a_separate_date_gate()->void:
+## research_600: rivals share the player's foundations and era gate.
+func test_rivals_use_the_same_foundations_and_era_gate()->void:
 	GameState.elapsed_days=1
 	var civ:={"discovery_profile":{"technologies":["public_schools","formal_archives"]},"environment_profile":{},"production":1.0,"logistics":1.0}
 	var candidates:Array[String]=[]
+	for entry:Dictionary in DiscoverySystem.rival_research_candidates(civ,"culture"):candidates.append(entry.id)
+	assert_bool("public_libraries" in candidates).is_false()
+	GameState.elapsed_days=ceil(DiscoverySystem.research_600_earliest_year(DiscoverySystem.discovery_definition("public_libraries"))*365.0)
 	for entry:Dictionary in DiscoverySystem.rival_research_candidates(civ,"culture"):candidates.append(entry.id)
 	assert_bool("public_libraries" in candidates).is_true()
 	civ.discovery_profile.technologies.erase("formal_archives")
@@ -128,17 +146,18 @@ func test_indexed_routes_match_arrays_and_do_not_retain_old_knowledge()->void:
 	var known:Array=["formal_archives","public_schools"]
 	assert_array(P.routes_for(entry,R.index_known(known),{})).is_equal(P.routes_for(entry,known,{}))
 	GameState.known_discoveries.assign(known)
+	var day:=int(ceil(DiscoverySystem.research_600_earliest_year(entry)*365.0)) # once its era has come
 	var channel:=DiscoverySystem._channel_key(String(entry.dynamic),String(entry.subcategory))
 	var original:Array=DiscoverySystem.catalog_by_channel[channel]
 	DiscoverySystem.catalog_by_channel[channel]=[entry]
-	assert_bool(DiscoverySystem._channel_has_candidate(channel,1)).is_true()
-	assert_str(DiscoverySystem._best_candidate_for_channel(channel,1).id).is_equal("public_libraries")
+	assert_bool(DiscoverySystem._channel_has_candidate(channel,day)).is_true()
+	assert_str(DiscoverySystem._best_candidate_for_channel(channel,day).id).is_equal("public_libraries")
 	GameState.known_discoveries.erase("public_schools")
-	assert_bool(DiscoverySystem._channel_has_candidate(channel,1)).is_false()
-	assert_dict(DiscoverySystem._best_candidate_for_channel(channel,1)).is_empty()
+	assert_bool(DiscoverySystem._channel_has_candidate(channel,day)).is_false()
+	assert_dict(DiscoverySystem._best_candidate_for_channel(channel,day)).is_empty()
 	GameState.known_discoveries.append("public_schools")
 	GameState.known_discoveries.append("public_libraries")
-	assert_bool(DiscoverySystem._channel_has_candidate(channel,1)).is_false()
+	assert_bool(DiscoverySystem._channel_has_candidate(channel,day)).is_false()
 	DiscoverySystem.catalog_by_channel[channel]=original
 
 func test_large_reverse_graph_preserves_and_or_and_route_foundations()->void:

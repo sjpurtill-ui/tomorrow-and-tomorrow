@@ -7,7 +7,8 @@ func before_test()->void:
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 	GameState.elapsed_days=0;GameState.food_security=1;GameState.population_health=1
 	MilitaryCampaign.military_inventory.clear();MilitaryCampaign.damaged_equipment.clear()
-	GameState.known_discoveries.assign(["apprentice_contracts","workshop_standards","kiln_control","salt_working"])
+	# faience is glassmaking's 600-year design foundation.
+	GameState.known_discoveries.assign(["apprentice_contracts","workshop_standards","kiln_control","salt_working","faience"])
 	GameState.resource_stockpiles.Glass=2.0
 func after_test()->void:
 	GameState.elapsed_days=0;WorldSimulation.clear()
@@ -24,7 +25,7 @@ func test_quote_is_read_only_and_begin_consumes_only_one_owned_example()->void:
 func test_missing_specimen_or_foundations_cannot_be_bypassed()->void:
 	GameState.resource_stockpiles.Glass=0.0
 	assert_bool(R.begin("glassmaking","glass_batch").has("error")).is_true()
-	GameState.resource_stockpiles.Glass=2.0;GameState.known_discoveries.erase("kiln_control")
+	GameState.resource_stockpiles.Glass=2.0;GameState.known_discoveries.erase("faience")
 	assert_bool(R.begin("glassmaking","glass_batch").has("error")).is_true()
 	assert_float(float(GameState.resource_stockpiles.Glass)).is_equal(2.0)
 	assert_dict(E.data().collections).is_empty()
@@ -41,7 +42,7 @@ func test_examination_needs_local_work_before_weaker_evidence_applies()->void:
 func test_examined_specimen_cannot_replace_lost_local_foundations()->void:
 	R.begin("glassmaking","glass_batch")
 	var item:Dictionary=E.data().collections["reverse:glassmaking"]
-	GameState.known_discoveries.erase("kiln_control")
+	GameState.known_discoveries.erase("faience")
 	for route:Dictionary in P.routes_for(DiscoverySystem.discovery_definition("glassmaking"),GameState.known_discoveries,{},item):assert_bool(route.ready).is_false()
 func test_save_validation_accepts_progress_and_rejects_forged_contracts()->void:
 	R.begin("glassmaking","glass_batch")

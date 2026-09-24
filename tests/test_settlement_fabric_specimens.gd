@@ -54,8 +54,8 @@ func test_ten_owned_examples_require_foundations_consumption_and_local_examinati
 		GameState.known_discoveries.append_array(["apprentice_contracts","workshop_standards"])
 		GameState.resource_stockpiles[output]=2.0
 		assert_bool(Reverse.quote(subject,item).has("error")).is_true()
-		for parent:String in entry.requires_all:GameState.known_discoveries.append(parent)
-		for group:Array in entry.requires_any:GameState.known_discoveries.append(group[0])
+		for parent:String in live(entry).requires_all:GameState.known_discoveries.append(parent)
+		for group:Array in live(entry).requires_any:GameState.known_discoveries.append(group[0])
 		assert_bool(Reverse.begin(subject,item).get("ok",false)).is_true()
 		assert_float(float(GameState.resource_stockpiles[output])).is_equal(1.0)
 		assert_bool(Reverse.begin(subject,item).has("error")).is_true()
@@ -68,3 +68,7 @@ func test_ten_owned_examples_require_foundations_consumption_and_local_examinati
 		assert_float(P.multiplier(DiscoverySystem.catalog_by_id[subject])).is_equal(1.35)
 		assert_bool(subject in GameState.known_discoveries).is_false()
 		assert_array(MilitaryCampaign.equipment_queue).is_empty()
+
+## Foundations as the live catalog defines them (600-year design overrides included).
+func live(entry:Dictionary)->Dictionary:
+	return DiscoverySystem.discovery_definition(String(entry.id))
