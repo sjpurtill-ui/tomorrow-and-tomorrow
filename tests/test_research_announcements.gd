@@ -13,55 +13,32 @@ func fixture(width:int=1200,height:int=900)->Dictionary:
 	var host:=Host.new();canvas.add_child(host)
 	var hud:=Control.new();host.add_child(hud)
 	return {"canvas":canvas,"host":host,"hud":hud}
-func test_routine_findings_do_not_pause_and_are_deduplicated()->void:
-	var f:=fixture()
-	var digest:=Notices.announce(f.host,f.hud,[{"id":"food_drying","day":12},{"id":"drainage","day":12}])
-	assert_float(f.host.game_speed).is_equal(3.0)
-	assert_int(digest.unread).is_equal(2)
-	assert_bool(f.hud.has_meta("discovery_popup")).is_false()
-	Notices.announce(f.host,f.hud,[{"id":"food_drying","day":12}])
-	assert_int(digest.unread).is_equal(2)
-	digest.clear()
-	assert_bool(digest.notice.visible).is_false()
-	assert_float(f.host.game_speed).is_equal(3.0)
-
-func test_milestones_open_a_card_while_simulation_continues()->void:
+## Research news has one home, the Chronicle: there is no research toast or
+## unread counter, and nothing pauses. Only the player's own "every discovery"
+## choice opens the full reading card as well.
+func test_routine_and_milestone_findings_raise_no_toast_or_popup()->void:
 	GameState.known_discoveries.append("powered_flight")
 	var f:=fixture()
-	var digest:=Notices.announce(f.host,f.hud,[{"id":"powered_flight","day":100},{"id":"drainage","day":100}])
-	assert_int(digest.unread).is_equal(1)
-	assert_float(f.host.game_speed).is_equal(3.0)
-	var popup:Variant=f.hud.get_meta("discovery_popup")
-	assert_str(popup.current.id).is_equal("powered_flight")
-	popup.close()
+	assert_object(Notices.announce(f.host,f.hud,[{"id":"food_drying","day":12},{"id":"drainage","day":12},{"id":"powered_flight","day":12}])).is_null()
+	assert_bool(f.hud.has_meta("discovery_popup")).is_false()
+	assert_bool(f.hud.has_meta("research_digest")).is_false()
+	assert_int(f.hud.get_child_count()).is_equal(0)
 	assert_float(f.host.game_speed).is_equal(3.0)
 
 func test_quiet_mode_never_pauses_even_for_first_discovery()->void:
 	GameState.research_notification_mode="quiet"
 	GameState.known_discoveries.assign(["seed_selection"])
 	var f:=fixture()
-	var digest:=Notices.announce(f.host,f.hud,[{"id":"seed_selection","day":1}])
+	assert_object(Notices.announce(f.host,f.hud,[{"id":"seed_selection","day":1}])).is_null()
 	assert_float(f.host.game_speed).is_equal(3.0)
-	assert_int(digest.unread).is_equal(1)
 
-func test_all_mode_preserves_individual_announcements()->void:
+func test_all_mode_opens_the_reading_card_without_pausing()->void:
 	GameState.research_notification_mode="all"
 	var f:=fixture()
-	var digest:=Notices.announce(f.host,f.hud,[{"id":"drainage","day":1}])
-	assert_int(digest.unread).is_equal(0)
+	var popup:=Notices.announce(f.host,f.hud,[{"id":"drainage","day":1}])
+	assert_object(popup).is_not_null()
 	assert_float(f.host.game_speed).is_equal(3.0)
 	f.hud.get_meta("discovery_popup").close()
-
-func test_digest_fits_small_viewport_without_a_fullscreen_input_surface()->void:
-	var f:=fixture(360,640)
-	var digest:=Notices.announce(f.host,f.hud,[{"id":"drainage","day":1}])
-	for i in 5:await get_tree().process_frame
-	assert_bool(Rect2(0,0,360,640).encloses(digest.notice.get_global_rect())).is_true()
-	assert_bool(Rect2(0,0,360,640).encloses(digest.open_button.get_global_rect())).is_true()
-	assert_str(digest.latest_label.text).is_equal("Ground Drainage")
-	assert_str(digest.date_label.text).is_equal("Y1 · D2")
-	assert_bool(digest.open_button.clip_text).is_true()
-	assert_int(digest.get_child_count()).is_equal(1)
 
 func test_invalid_saved_preference_rejected_before_world_mutation()->void:
 	var known:=GameState.known_discoveries.duplicate()
@@ -69,10 +46,10 @@ func test_invalid_saved_preference_rejected_before_world_mutation()->void:
 	assert_bool(result.has("error")).is_true()
 	assert_array(GameState.known_discoveries).is_equal(known)
 
-func test_unknown_findings_cannot_leak_into_digest()->void:
+func test_unknown_findings_cannot_leak_into_a_card()->void:
+	GameState.research_notification_mode="all"
 	var f:=fixture()
-	var digest:=Notices.announce(f.host,f.hud,[{"id":"reactor_engineering","day":1}])
-	assert_int(digest.unread).is_equal(0)
+	assert_object(Notices.announce(f.host,f.hud,[{"id":"reactor_engineering","day":1}])).is_null()
 	assert_float(f.host.game_speed).is_equal(3.0)
 	assert_bool(f.hud.has_meta("discovery_popup")).is_false()
 

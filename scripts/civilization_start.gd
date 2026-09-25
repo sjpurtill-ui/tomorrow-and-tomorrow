@@ -86,10 +86,72 @@ static func _planet_candidate(seed_value:int,seat:int)->Vector2:
 static func supports_founders(profile:Dictionary)->bool:
 	return bool(profile.get("land",false)) and float(profile.get("food_potential",0))>=.4 and float(profile.get("mean_temperature_c",-100))>=6.0 and float(profile.get("growing_season",0))>=.35
 
+## The kinds of country early peoples made their first homes in. Each seat
+## draws a seeded order of these from its own planet point, then settles in the
+## first kind its real surroundings offer within a few days' walk (the same
+## ground survey the map draws). Where none is offered it keeps the plain best
+## site: open country. Coast and dry country are rarer on the ground than in
+## this order, so they are weighted up to be found where they exist.
+const SETTINGS:={"river":0.2,"forest_edge":0.14,"coast":0.24,"hills":0.2,"dry":0.22}
+## How far (km) a people looks for its kind of country around its seed point.
+const SETTING_REACH_KM:=80.0
+## Rain below this (the renderer's 0..1 precipitation) reads as dry country:
+## the ground starts to brown and the grass runs short.
+const DRY_RAIN:=0.52
+## Words for each kind of country (and for open country, "").
+const SETTING_WORDS:={"river":"a river valley","forest_edge":"the edge of the forest","coast":"the sea coast","hills":"the hills","dry":"dry country","":"open country"}
+
+## Seeded preference order of settings for the seat whose planet point is `origin`.
+static func setting_order(origin:Vector2)->Array[String]:
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=hash("%d|%d|founding_setting" % [roundi(origin.x),roundi(origin.y)])
+	var pool:=SETTINGS.duplicate()
+	var order:Array[String]=[]
+	while not pool.is_empty():
+		var total:=0.0
+		for key in pool:total+=float(pool[key])
+		var roll:=rng.randf()*total
+		var picked:=String(pool.keys()[0])
+		for key in pool:
+			roll-=float(pool[key])
+			if roll<=0.0:picked=String(key);break
+		order.append(picked);pool.erase(picked)
+	return order
+
+## Whether a surveyed point (local_terrain._survey_ground_at) is that kind of country.
+static func setting_match(setting:String,sample:Dictionary)->bool:
+	var biome:=String(sample.get("biome",""))
+	var woodland:=float(sample.get("woodland",0.0))
+	match setting:
+		# The valley floor beside the water, or the flood country itself.
+		"river":return biome in ["floodplain","wetland"] or (float(sample.get("river_distance_km",INF))<=0.25 and float(sample.get("relief",0.0))<0.0)
+		# Open ground with the wood's edge close: trees for timber and game, room to plant.
+		"forest_edge":return biome!="woodland" and woodland>=0.28 and woodland<0.42
+		"coast":return bool(sample.get("coastal",false))
+		"hills":return biome=="upland" or float(sample.get("relief",0.0))>=0.22 or float(sample.get("height",0.0))>=3.4
+		# Thin rain: short grass and a river that matters more than any cloud.
+		"dry":return biome=="steppe" or float(sample.get("precipitation",1.0))<DRY_RAIN
+	return false
+
+## The kind of country a founding site is, in its seat's order ("" = open country).
+static func setting_of(origin:Vector2,site:Dictionary)->String:
+	for setting in setting_order(origin):
+		if setting_match(setting,site):return setting
+	return ""
+
+## The same for a site alone, in a fixed order (for text about a loaded world).
+static func country_of(site:Dictionary)->String:
+	for setting in ["coast","hills","dry","river","forest_edge"]:
+		if setting_match(setting,site):return setting
+	return ""
+
 static func choose(origin:Vector2,ground:Callable)->Vector2:
 	var best:=origin;var score:=INF
+	var order:=setting_order(origin)
+	# Best plain score per setting within reach, in the seat's preference order.
+	var by_setting:Dictionary={}
 	for radius:float in [0,2,5,10,20,40,80,160,320,640]:
-		if radius>160 and score<INF:break
+		if radius>SETTING_REACH_KM and score<INF:break
 		for spoke in (1 if radius==0 else 32):
 			var point:=origin+Vector2.from_angle(TAU*float(spoke)/32.0)*radius
 			var sample:Dictionary=ground.call(point)
@@ -101,6 +163,15 @@ static func choose(origin:Vector2,ground:Callable)->Vector2:
 			if water>6:continue
 			var value:=radius*.02+water*3.0+float(sample.get("slope",0))*12.0-float(sample.get("fertility",0))
 			if value<score:score=value;best=point
+			if radius>SETTING_REACH_KM:continue
+			for setting in order:
+				if not setting_match(setting,sample):continue
+				# Of the dry places, the driest that still has its water.
+				var fitted:=value+(float(sample.get("precipitation",0.0))*6.0 if setting=="dry" else 0.0)
+				if not by_setting.has(setting) or fitted<float((by_setting[setting] as Array)[0]):by_setting[setting]=[fitted,point]
+	# The first kind of country in this seat's order that its land really offers.
+	for setting in order:
+		if by_setting.has(setting):return (by_setting[setting] as Array)[1]
 	return best
 
 static func supports_founding_materials(fields:Dictionary)->bool:

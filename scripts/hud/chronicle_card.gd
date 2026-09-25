@@ -6,6 +6,11 @@ extends CanvasLayer
 ## ChronicleCard.flush(terrain, hud) presents every waiting moment
 ## (Chronicle.pending_cards). The card layer also drains the queue itself, so
 ## moments recorded outside the daily loop (the Court) appear too.
+##
+## This is the game's one card queue: discoveries, returned parties and every
+## other moment arrive here, in one place. A card never covers an open dock
+## sheet: it stands beside the sheet when there is room, and otherwise waits
+## (its time does not run) until the sheet closes.
 
 const Chronicle:=preload("res://scripts/chronicle.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
@@ -32,6 +37,8 @@ var hold:=0.0
 var fade:=0.0
 var showing:=false
 var player:AudioStreamPlayer
+## True while an open dock sheet leaves no room: the card is held back.
+var held:=false
 static var _stings:Dictionary={}
 
 
@@ -98,9 +105,27 @@ func layout()->void:
 	var width:=minf(CARD_WIDTH,extent.x-32.0)
 	panel.custom_minimum_size.x=width;panel.size.x=width
 	panel.size.y=panel.get_combined_minimum_size().y
-	# Top right, below the time and status bar: clear of the rail, the dock
-	# and the research digest in the lower corner.
+	# Top right, below the time and status bar, clear of the rail.
 	panel.position=Vector2(roundf(maxf(16.0,extent.x-width-16.0)),TOP)
+	held=false
+	var sheet:=sheet_rect()
+	if sheet.has_area() and Rect2(panel.position,panel.size).intersects(sheet):
+		# Beside the open sheet when it fits; otherwise wait for it to close.
+		var beside:=sheet.end.x+12.0
+		if beside+width<=extent.x-8.0:panel.position.x=roundf(beside)
+		else:held=true
+
+
+## The open dock sheets (the section dock and its detail), in screen space.
+func sheet_rect()->Rect2:
+	var covered:=Rect2()
+	if not is_instance_valid(hud):return covered
+	for sheet_name in ["dock","detail_dock"]:
+		var sheet:Variant=hud.get(sheet_name) if sheet_name in hud else null
+		if sheet is Control and (sheet as Control).is_visible_in_tree():
+			var rect:=(sheet as Control).get_global_rect()
+			covered=rect if not covered.has_area() else covered.merge(rect)
+	return covered
 
 
 func drain()->void:
@@ -113,6 +138,12 @@ func drain()->void:
 func _process(delta:float)->void:
 	if not Chronicle.pending_cards.is_empty():drain()
 	if not showing:return
+	layout()
+	if held:
+		# A sheet is open over the card's place: keep the card, stop its clock.
+		panel.visible=false
+		return
+	panel.visible=true
 	var hovered:=panel.get_global_rect().has_point(panel.get_global_mouse_position())
 	if fade>=0.0:
 		panel.modulate.a=minf(1.0,panel.modulate.a+delta/FADE_SECONDS)
@@ -147,7 +178,7 @@ func _render(entry:Dictionary)->void:
 	caption.visible=caption.text!=""
 	picture.texture=texture_for(entry)
 	var action:Dictionary=entry.get("action",{})
-	action_button.text={"ceremony":"Attend the dedication","court":"Go to the court","section":"See what we learned" if kind=="discovery" else "Look closer"}.get(String(action.get("kind","")),"Open %s" % String(voice.feed))
+	action_button.text={"ceremony":"Attend the dedication","court":"Go to the court","scout_report":"Hear the scouts' tale","section":"See what we learned" if kind=="discovery" else "Look closer"}.get(String(action.get("kind","")),"Open %s" % String(voice.feed))
 
 
 static func texture_for(entry:Dictionary)->Texture2D:
@@ -172,11 +203,24 @@ func _act()->void:
 			if director and director.has_method("open_ceremony"):director.call("open_ceremony",String(action.get("work_id","")))
 		"court":
 			preload("res://scripts/audience_director.gd").open_court_for(action.get("focus",{}))
+		"scout_report":
+			open_scout_report(int(action.get("mission_id",0)))
 		"section":
 			if is_instance_valid(hud) and hud.has_signal("section_requested"):hud.emit_signal("section_requested",String(action.get("section","chronicle")),int(action.get("sub",0)))
 		_:
 			if is_instance_valid(hud) and hud.has_signal("section_requested"):hud.emit_signal("section_requested","chronicle",0)
 	dismiss()
+
+
+## Opens a returned party's illustrated report (the Chronicle card's action).
+func open_scout_report(mission_id:int)->bool:
+	if not is_instance_valid(hud) or not hud.has_method("open_detail"):return false
+	for report in CivilizationSystem.scout_reports:
+		if report is Dictionary and int((report as Dictionary).get("mission_id",-1))==mission_id:
+			hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(terrain,hud,report,preload("res://scripts/hud/content/dock_detail_scout_archive.gd").new(terrain,hud)))
+			return true
+	if hud.has_signal("section_requested"):hud.emit_signal("section_requested","world",0)
+	return false
 
 
 func dismiss()->void:

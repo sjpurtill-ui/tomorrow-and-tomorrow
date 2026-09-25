@@ -567,6 +567,8 @@ const KPI_DEFS:Array[Dictionary]=[
 	{"id":"gdp","label":"REAL GDP / DAY","width":136.0,"accent":Tokens.BLUE,"section":"economy","sub":2},
 ]
 
+const KPI_GUTTER:=10.0
+
 func _build_kpi_strip()->void:
 	kpi_strip=PanelContainer.new()
 	kpi_strip.name="KpiStrip"
@@ -596,6 +598,8 @@ func _build_kpi_strip()->void:
 		row.add_child(chip)
 		var inner:=HBoxContainer.new()
 		inner.set_anchors_preset(Control.PRESET_FULL_RECT)
+		# A gutter on the right keeps a chip's last word off the next caption.
+		inner.offset_right=-KPI_GUTTER
 		inner.add_theme_constant_override("separation",8)
 		inner.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		chip.add_child(inner)
@@ -644,7 +648,7 @@ func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color
 	elif delta_text=="":delta.custom_minimum_size.x=0.0
 	else:
 		# Never so wide that the value itself is squeezed out of its chip.
-		var room:=_kpi_width(id,float(parts.width))-17.0-56.0
+		var room:=_kpi_width(id,float(parts.width))-17.0-56.0-KPI_GUTTER
 		var wanted:=ceilf(delta.get_theme_font("font").get_string_size(delta_text,HORIZONTAL_ALIGNMENT_LEFT,-1,delta.get_theme_font_size("font_size")).x)+2.0
 		delta.custom_minimum_size.x=clampf(wanted,52.0,maxf(52.0,room))
 	delta.add_theme_color_override("font_color",delta_color)
@@ -827,8 +831,12 @@ func _build_toolbar()->void:
 	distance_selector=OptionButton.new();distance_selector.name="MapDistanceLevel"
 	distance_selector.fit_to_longest_item=false
 	distance_selector.custom_minimum_size=Vector2(104,28)
-	for level:Dictionary in terrain.CAMERA_DISTANCE_LEVELS:distance_selector.add_item(String(level.name))
-	distance_selector.tooltip_text="10,000 ft · 50,000 ft · Region · Continent. Scroll or pinch changes one level; Shift-scroll makes gentle fine adjustments."
+	for index:int in terrain.CAMERA_DISTANCE_LEVELS.size():distance_selector.add_item(String(EraWords.DISTANCE_WORDS[mini(index,EraWords.DISTANCE_WORDS.size()-1)]))
+	distance_selector.tooltip_text="How far the map looks: close by, the valley, the region, the far lands. Scroll or pinch changes one step; Shift-scroll makes gentle fine adjustments."
+	# The map speaks in the people's distances; a metric scale bar ("SITE ·
+	# 20 M") is a surveyor's instrument, so the bar is kept only for tooltips.
+	scale_line.visible=false
+	scale_label.visible=false
 	distance_selector.item_selected.connect(func(index:int)->void:terrain.set_camera_distance_level(index))
 	scale_box.add_child(distance_selector)
 
@@ -1025,8 +1033,22 @@ func _temperature_text()->String:
 	var trend:="→"
 	if today-yesterday>0.3: trend="↑"
 	elif today-yesterday<-0.3: trend="↓"
-	# The climate model works in °C; the display speaks Fahrenheit.
-	return "%d°F %s" % [roundi(today*1.8+32.0),trend]
+	return temperature_words(today,trend,GameState.known_discoveries)
+
+## Sealed thermometers with fixed points give the first number for the air.
+const THERMOMETRY:="precision_thermometry"
+## Upper bound (°C) of each felt band; above the last it is scorching.
+const TEMPERATURE_FEEL:=[[-8.0,"Bitter cold"],[3.0,"Cold"],[10.0,"Cool"],[18.0,"Mild"],[26.0,"Warm"],[34.0,"Hot"]]
+
+static func temperature_words(celsius:float,trend:String,known:Array)->String:
+	## Before a thermometer the air is only felt; after it, it is read in
+	## degrees (the climate model already works in them).
+	if known.has(THERMOMETRY): return "%d°C %s" % [roundi(celsius),trend]
+	var feel:="Scorching"
+	for band in TEMPERATURE_FEEL:
+		if celsius<float(band[0]):
+			feel=String(band[1]); break
+	return "%s %s" % [feel,trend]
 
 func refresh()->void:
 	if terrain==null: return
@@ -1081,7 +1103,7 @@ func _refresh_kpis()->void:
 		_update_kpi(id,EraWords.days(days),short_word if shortage>0 else ("partial" if pending else "civ total") if modern else "",Tokens.RED if shortage>0 else Tokens.MUTED,"Civilization reserves and city production")
 	var goods_short:=int(t.goods_shortages)
 	_update_kpi("goods",EraWords.goods(float(t.goods_coverage)),("%d short" % goods_short if modern else "%d in want" % goods_short) if goods_short>0 else EraWords.goods_trend(float(t.goods_net)),Tokens.RED if goods_short>0 else Tokens.MUTED,"Civilian Goods held against what households expect")
-	_update_kpi("health",EraWords.life(float(t.life)),EraWords.babes_lost(float(t.infant)),Tokens.MUTED,"Population-weighted health across all cities")
+	_update_kpi("health",EraWords.life(float(t.life)),EraWords.babes_lost_short(float(t.infant)),Tokens.MUTED,"Population-weighted health across all cities")
 	if modern:
 		_update_kpi("science","%.1f" % t.science,"%.0f%% edu" % (float(t.education)*100),Tokens.GOLD,"Combined research capacity; population-weighted education")
 		_update_kpi("gdp","%.1f" % t.output,"%.2f / person" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"Total city output and per-city contributions")
@@ -1154,7 +1176,7 @@ func _refresh_toolbar()->void:
 	var scouting:Dictionary=CivilizationSystem.scouting_staff.snapshot()
 	# The toolbar reports standing orders. Route planning belongs to departures,
 	# never to a HUD refresh.
-	var scout_presentation:Dictionary={"label":"SCOUTING · %.1f%% · %d AWAY" % [float(scouting.share)*100,int(scouting.away)],"disabled":false,"tooltip":"Set the population allocation and focus. Staff organize future scouting parties."}
+	var scout_presentation:Dictionary={"label":EraWords.scouts_out(int(scouting.away)),"disabled":false,"tooltip":"Choose how many of the people walk out as scouts, and where they look (%.1f%% of the people now)." % (float(scouting.share)*100)}
 	var diplomatic_status:Dictionary=CivilizationSystem.diplomatic_mission_status()
 	var known_destinations:=0
 	for encounter_variant in CivilizationSystem.contact_encounters_snapshot():
@@ -1203,7 +1225,7 @@ func _refresh_toolbar()->void:
 	scouts.disabled=bool(scout_presentation.disabled)
 	scouts.tooltip_text=String(scout_presentation.tooltip)
 	scouts.visible=scouts_visible
-	diplomat.text="SEND DIPLOMAT" if not bool(diplomatic_status.get("active",false)) else "ENVOYS AWAY · %dD" % int(diplomatic_status.get("days_remaining",0))
+	diplomat.text="◇ SEND ENVOYS" if not bool(diplomatic_status.get("active",false)) else "◇ ENVOYS OUT · %d DAYS" % int(diplomatic_status.get("days_remaining",0))
 	diplomat.disabled=bool(diplomat_presentation.disabled)
 	diplomat.tooltip_text=String(diplomat_presentation.tooltip)
 	if returned_reply!="":

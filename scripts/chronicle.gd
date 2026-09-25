@@ -18,7 +18,8 @@ extends RefCounted
 ##       a key is recorded once), "day" (defaults to today), "art"
 ##       ({"discovery_id":id} | {"domain":dynamic} | {"building":index}),
 ##       "action" ({"kind":"ceremony","work_id":id} | {"kind":"court","focus":{}}
-##       | {"kind":"section","section":id,"sub":n}), "ledger" (default true: a
+##       | {"kind":"section","section":id,"sub":n} | {"kind":"scout_report",
+##       "mission_id":n}), "ledger" (default true: a
 ##       notice or moment also appears in the event ledger), "domain".
 ##       Returns the stored entry (its "tier" says what it became), or {}.
 ##       "priority" (true: a moment that the monthly cap never downgrades,
@@ -235,6 +236,7 @@ static func _beat_kind(kind:String)->String:
 	if kind.begins_with("child_lost"):return "death"
 	if kind=="first_discovery":return "discovery"
 	if kind=="first_winter":return "court"
+	if kind=="land":return "settlement"
 	return "milestone"
 
 
@@ -475,6 +477,13 @@ static func _scan_ledger(c:Dictionary)->void:
 			seen[condition]=day
 			c["conditions"]=seen
 		var told_entry:={"key":String(pair[0]),"day":int(ev.get("day",int(GameState.elapsed_days))),"title":String(told[0]),"text":String(told[1]),"tier":tier,"kind":kind_of(ev),"ledger":false,"domain":String(ev.get("domain",""))}
+		# A party home with real news is the Chronicle's own card, and the card
+		# opens the party's illustrated report (no separate expedition toast).
+		if ev.has("mission_id") and tier!="whisper":
+			# A standing city watch reports often; its returns stay notices.
+			if String(ev.get("title",""))!="CITY RECONNAISSANCE":told_entry["tier"]="moment"
+			told_entry["kind"]="scout"
+			told_entry["action"]={"kind":"scout_report","mission_id":int(ev.mission_id)}
 		# First contact is never buried by the moment cap, and remembers whom it met.
 		if String(ev.get("kind",""))=="first_contact":
 			told_entry["priority"]=true
@@ -503,7 +512,7 @@ static func _retell(ev:Dictionary)->Array:
 			var kept:PackedStringArray=[]
 			for sentence in _sentences(description):
 				var lower:=sentence.to_lower()
-				if "no organized foreign polity" in lower or "knowledge workers will examine" in lower or "specific evidence becomes usable" in lower or "the map now reveals" in lower:continue
+				if "no organized foreign polity" in lower or "met no other people" in lower or "knowledge workers will examine" in lower or "specific evidence becomes usable" in lower or "the map now reveals" in lower:continue
 				# Near neighbours' scouts cross ours all the time; their trails are
 				# marked on the map, not told at the fire.
 				if "crossed the trail of a foreign" in lower or kept.has(sentence):continue

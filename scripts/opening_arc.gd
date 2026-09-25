@@ -35,7 +35,11 @@ const WINTER_DEEP:=-0.5
 const SPRING:=0.0
 
 ## Every beat kind, in the order a new people usually meets them.
-const KINDS:=["first_signs","first_winter","named_child","spring_after","first_contact","first_discovery"]
+const KINDS:=["first_signs","first_winter","named_child","spring_after","first_contact","first_discovery","land"]
+const CivStart:=preload("res://scripts/civilization_start.gd")
+## The season wave rising through this is spring coming; falling through 0 is autumn.
+const SPRING_RISE:=0.2
+const HOT_SEASON:=0.6
 
 static func state()->Dictionary:
 	var arc:Dictionary=PeopleDirection.opening_arc
@@ -80,7 +84,8 @@ static func daily(day:int,terrain:Node=null)->Array[Dictionary]:
 			if int(GameState.population_total)>=mark: (arc.counted as Dictionary)[str(mark)]=-1
 	var age:=day-int(arc.founded_day)
 	if age>WINDOW_DAYS and done("spring_after") or age>WINDOW_DAYS*2: return emitted
-	for beat in [_signs(day),_contact(day),_winter(day),_spring(day),_child(day),_first_year(day),_discovery(day,terrain),_headcount(day),_neighbours(day)]:
+	_country(terrain)
+	for beat in [_signs(day),_contact(day),_winter(day),_spring(day),_child(day),_first_year(day),_discovery(day,terrain),_headcount(day),_neighbours(day),_land(day)]:
 		if not (beat as Dictionary).is_empty(): emitted.append(beat)
 	return emitted
 
@@ -146,6 +151,14 @@ static func _winter(day:int)->Dictionary:
 	var lean:=cold>=14.0
 	var season:="lean season" if lean else "winter"
 	var weather:="The lean months have come, and the country gives less every day" if lean else ("Water skins freeze at night now" if cold<=0.5 else ("The nights are bitter now" if cold<6.0 else "The rains have turned cold"))
+	# Each kind of country meets its winter its own way.
+	if not lean:
+		match String(arc.get("country","")):
+			"coast":weather="Spray freezes on the rocks at the shore" if cold<=0.5 else "The wind off the sea has turned cold and wet"
+			"hills":weather="Snow lies on the heights above the camp" if cold<=0.5 else "The wind on the hillside cuts through every hide"
+			"dry":weather="The days are still dry, but the nights are bitter" if cold<6.0 else "The dry wind has turned cold"
+			"forest_edge":weather="The wood drips all day, and the nights are bitter" if cold<6.0 else "Cold rain drips from the wood all day"
+			"river":weather="Ice rims the river shallows at dawn" if cold<=0.5 else "Cold mist lies on the river every morning"
 	if lean and pressure.contains("cold takes"): pressure="the stores are good, %d days, but a hard season takes the old and the newborn first" % roundi(float(c.food_days))
 	var family:=_family_name(day)
 	var summary:="%s. This is our first %s in this place, and %s. The %s hearth worries me most: a grandmother who cannot walk far, and a child not yet weaned." % [weather,season,pressure,family]
@@ -298,6 +311,56 @@ static func _neighbours(day:int)->Dictionary:
 			return _emit("strife_%s_%s" % [id,String(enemy)],day,"%s and %s at war" % [name,enemy_name],"Word has come that %s and %s are killing each other. Whoever wins will be nearer to us, and stronger." % [name,enemy_name],{"civ_id":id,"enemy":String(enemy)})
 	return {}
 
+## What kind of country the people founded in (civilization_start.gd
+## settings: river, forest_edge, coast, hills, dry, or "" for open country),
+## read once from the real ground at the hearth. A world without a map (a
+## test, an older save before the map is up) waits until one is there.
+static func _country(terrain:Node)->void:
+	var arc:=state()
+	if arc.has("country") or not is_instance_valid(terrain) or not terrain.has_method("_survey_ground_at"): return
+	var home:Vector3=GameState.settlement_founded_at
+	var site:Dictionary=terrain._survey_ground_at(Vector2(home.x,home.z))
+	arc["country"]=CivStart.setting_of(CivStart.candidate(int(GameState.world_seed),0),site)
+	arc["water_km"]=float(site.get("river_distance_km",0.0))
+	arc["founding_built"]=GameState.settlement_completed.size()
+	arc["season_seen"]=_season(int(GameState.elapsed_days))
+
+## The land's first test: one beat, different in every kind of country, told
+## when the real season, the real watchers or the real building work brings it.
+static func _land(day:int)->Dictionary:
+	var arc:=state()
+	if done("land") or not arc.has("country"): return {}
+	var age:=day-int(arc.founded_day)
+	var before:=float(arc.get("season_seen",0.0))
+	var now:=_season(day)
+	arc["season_seen"]=now
+	if age<30: return {}
+	var chief:=String(_chief().get("name","The Hearth Chief"))
+	var rising:=before<SPRING_RISE and now>=SPRING_RISE
+	var falling:=before>=0.0 and now<0.0
+	match String(arc.country):
+		"river":
+			if rising: return _emit("land",day,"The river rises","Rain and meltwater swelled the river until it ran over the low ground below the camp. It has drawn back now, leaving black silt where it lay. %s says to plant there once the ground dries." % chief,{"country":"river"})
+		"coast":
+			if falling: return _emit("land",day,"The first storm off the sea","Wind drove the sea up the shore all night. By morning the drying racks were down and the beach was strewn with weed and shellfish; the children gathered both before the tide came back.",{"country":"coast"})
+		"dry":
+			if now>=HOT_SEASON:
+				var km:=float(arc.get("water_km",0.0))
+				var carry:="a short walk off" if km<0.4 else ("%.1f km off" % km)
+				var short:=float((GameState.water_metrics as Dictionary).get("intake_ratio",1.0))<0.97
+				return _emit("land",day,"The near spring fails","The little spring by the camp has sunk to mud. Every drop now comes from the river, %s, and the carrying takes the cool of the morning.%s %s has set the young to it." % [carry," Not every skin comes back full." if short else "",chief],{"country":"dry"})
+		"hills":
+			var seen:=int(CivilizationSystem.local_observation_snapshot().get("visible_count",0))
+			if seen>0: return _emit("land",day,"Seen from the heights","From the ridge above the camp the watchers saw them long before they could have seen us: strangers, far below on the low ground. %s has set a watch on the ridge every day since." % chief,{"country":"hills","seen":seen})
+			if age>=180 and now<WINTER_DEEP*0.6: return _emit("land",day,"Snow on the heights","Snow came to the ridges before it reached the camp. From up here the whole country below is white and still, and our smoke rises straight up in the cold air.",{"country":"hills"})
+		"forest_edge":
+			var built:Array=GameState.settlement_completed
+			if built.size()>int(arc.get("founding_built",built.size())):
+				return _emit("land",day,"Timber from the wood's edge","The posts for the %s came from the wood's edge, a short haul from the camp. %s marked the tall straight trees to leave standing; the crooked ones went to the fire." % [String(built[-1]).to_lower(),chief],{"country":"forest_edge"})
+		_:
+			if rising: return _emit("land",day,"Grass to the knee","The grass on the open country has come up green to the knee, and the game has come back with it. The hunters are out before light every day now.",{"country":""})
+	return {}
+
 static func _discovery(day:int,terrain:Node)->Dictionary:
 	if done("first_discovery"): return {}
 	var arc:=state()
@@ -313,9 +376,10 @@ static func _discovery(day:int,terrain:Node)->Dictionary:
 	var who:=String(finder.get("name","One of our people"))
 	var scene:="At the evening fire %s showed everyone what they had worked out: %s. People passed it from hand to hand until the fire burned low." % [who,name.to_lower()]
 	event["scene"]=scene
-	# When the Chronicle already tells this discovery as a moment, its card
-	# carries the scene (Chronicle.record_beat); a popup would tell it twice.
-	if not Chronicle.discovery_is_moment(id) and is_instance_valid(terrain) and "hud" in terrain and is_instance_valid(terrain.hud):
+	# The Chronicle's card carries the scene (Chronicle.record_beat): the one
+	# card queue, never a second popup. Only the player's "every discovery"
+	# choice also opens the full reading card.
+	if GameState.research_notification_mode=="all" and is_instance_valid(terrain) and "hud" in terrain and is_instance_valid(terrain.hud):
 		preload("res://scripts/hud/discovery_popup.gd").announce(terrain,terrain.hud,[event])
 	return _emit("first_discovery",day,"The first discovery: %s" % name,scene,{"discovery_id":id,"person_id":int(finder.get("person_id",0))})
 

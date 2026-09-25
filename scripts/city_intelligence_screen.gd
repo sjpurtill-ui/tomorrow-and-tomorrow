@@ -214,7 +214,7 @@ func _march()->void:
 func _diplomacy()->void:
 	var city:Dictionary=WorldSimulation.world.city_intelligence.known("player",city_id)
 	var owner:=String(city.get("controller",""));if owner=="":owner=String(city.get("civ_id",""))
-	if owner=="":feedback.show();feedback.text="The polity has not been identified. Return a better report first.";return
+	if owner=="":feedback.show();feedback.text="Who holds this place is not yet known. Return a better report first.";return
 	var scene:=get_tree().current_scene
 	if scene and scene.has_method("_open_civilizations_panel"):
 		scene.selected_civilization_id=owner;scene.selected_civilization_region_id=city_id;_close();scene._open_civilizations_panel()

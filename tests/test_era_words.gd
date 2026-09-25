@@ -89,7 +89,8 @@ func test_the_top_strip_uses_no_modern_statistics_before_writing()->void:
 	var text:=" | ".join(shown)
 	for word in MODERN:assert_str(text).not_contains(word)
 	assert_str((header.kpi_chips.gdp.caption as Label).text).is_equal("BELLIES FILLED")
-	assert_str((header.kpi_chips.health.delta as Label).text).contains("in 100 babes die")
+	# Short enough to sit beside the lifespan without running into LORE.
+	assert_str((header.kpi_chips.health.delta as Label).text).contains("in 100 lost")
 
 func test_the_rail_leads_with_the_fantasy_and_folds_the_ledgers()->void:
 	var rail=auto_free(RailOnly.new())

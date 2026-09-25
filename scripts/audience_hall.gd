@@ -2125,7 +2125,7 @@ static func _proposal_options(audience:Dictionary)->Array[Dictionary]:
 			result.append(_option("refuse","Fight on","Send the envoy home; the war continues.","hostile"))
 		"trade_offer":
 			var why3:=_availability(civ_id,"open_trade")
-			result.append(_option("accept","Open a trade compact","Standing, value-conserved exchange with %s." % name,"warm",why3=="",why3))
+			result.append(_option("accept","Open a trade compact","Standing, fair exchange with %s." % name,"warm",why3=="",why3))
 			result.append(_option("decline","Decline","Not now.","neutral"))
 		"nonaggression_offer":
 			var why4:=_availability(civ_id,"non_aggression")

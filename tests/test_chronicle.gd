@@ -118,9 +118,10 @@ func test_moment_card_replaces_the_research_popup_and_never_pauses()->void:
 	var canvas:SubViewport=auto_free(SubViewport.new());canvas.size=Vector2i(1280,800);add_child(canvas)
 	var host:=Host.new();canvas.add_child(host)
 	var hud:=Control.new();host.add_child(hud)
-	var digest:=Notices.announce(host,hud,[{"id":pair[0],"day":3}])
-	assert_int(digest.unread).is_equal(0)
+	# One card queue: no research toast, no popup, only the Chronicle's card.
+	assert_object(Notices.announce(host,hud,[{"id":pair[0],"day":3}])).is_null()
 	assert_bool(hud.has_meta("discovery_popup")).is_false()
+	assert_bool(hud.has_meta("research_digest")).is_false()
 	var card:=Card.flush(host,hud)
 	assert_object(card).is_not_null()
 	assert_bool(card.showing).is_true()

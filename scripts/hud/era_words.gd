@@ -138,6 +138,14 @@ static func babes_lost(per_1000:float)->String:
 	return "IMR %.0f‰" % per_1000
 
 
+## The same, short enough to sit beside the lifespan in the LIVES chip.
+static func babes_lost_short(per_1000:float)->String:
+	match stage():
+		"hearth":return "%d in 100 lost" % roundi(per_1000/10.0)
+		"lettered":return "%d in 1,000 lost" % roundi(per_1000)
+	return "IMR %.0f‰" % per_1000
+
+
 static func babes_lost_sentence(per_1000:float)->String:
 	match stage():
 		"hearth":return "Of every 100 children born, about %d are lost before their first winter." % roundi(per_1000/10.0)
@@ -224,6 +232,22 @@ static func way_along(progress:float)->String:
 	if p>=0.4:return "half the way"
 	if p>=0.15:return "a quarter of the way"
 	return "barely begun"
+
+
+## The scouts on the map toolbar: who is out walking, never a staffing share.
+static func scouts_out(away:int)->String:
+	if away<=0:return "⌖ SEND SCOUTS"
+	if hearth():return "⌖ %s OUT" % ("ONE WALKER" if away==1 else "%s WALKERS" % count_word(away).to_upper())
+	return "⌖ %d SCOUT%s OUT" % [away,"" if away==1 else "S"]
+
+
+## How far the map looks, in the people's words (the four map distances).
+const DISTANCE_WORDS:=["Close by","The valley","The region","The far lands"]
+
+
+static func count_word(value:int)->String:
+	var words:=["none","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
+	return String(words[value]) if value>=0 and value<words.size() else grouped(value)
 
 
 static func grouped(value:int)->String:

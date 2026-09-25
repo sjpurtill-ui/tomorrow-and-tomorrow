@@ -2320,7 +2320,7 @@ func _create_civilization_threat(incident:Dictionary,campaign_mode:String="defen
 	var strength:=maxi(3,int(incident.get("strength",3)))
 	var technology:=clampf(float(incident.get("technology",0.15)),0.0,1.0)
 	var readiness:=clampf(float(incident.get("readiness",0.5)),0.1,1.0)
-	var source_name:=String(incident.get("source_name","RIVAL POLITY"))
+	var source_name:=String(incident.get("source_name","RIVAL PEOPLE"))
 	var rng:=RandomNumberGenerator.new(); rng.seed=WorldSimulation.state.world_seed^int(WorldSimulation.state.elapsed_days)*104729^String(incident.get("id","")).hash()
 	var enemy:Dictionary={}
 	if WorldSimulation.enabled:

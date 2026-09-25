@@ -34,6 +34,8 @@ const UiMeasure:=preload("res://tests/fun_audit/ui_measure.gd")
 var founded_day:=-1
 var first_ten:Dictionary={"max_surface":0,"auto_docks":[],"rail_max":0,"kpi_max":0,"dock_tiles_max":0}
 var ui_marks:Dictionary={}
+## Days on which each card or toast layer was on screen (UiMeasure.notice_layers).
+var notice_days:Dictionary={}
 ## Generational aims (scripts/legacy_aims.gd), when this build has them.
 const AIMS_PATH:="res://scripts/legacy_aims.gd"
 var aims:GDScript
@@ -90,7 +92,9 @@ func _ready()->void:
 				settled_try=int(GameState.elapsed_days)+3
 				terrain._start_settlement_here()
 				if GameState.settlement_site_committed:
-					w("settled",{"status":String(terrain.travel_status_label.text) if terrain.travel_status_label else ""})
+					var at:Vector3=terrain.settler_marker.position if terrain.settler_marker else Vector3.ZERO
+					var ground:Dictionary=terrain._survey_ground_at(Vector2(at.x,at.z))
+					w("settled",{"status":String(terrain.travel_status_label.text) if terrain.travel_status_label else "","biome":String(ground.get("biome","")),"biome_label":String(ground.get("label","")),"coastal":bool(ground.get("coastal",false)),"relief":float(ground.get("relief",0.0)),"setting":preload("res://tests/fun_audit/founding_probe.gd")._setting(GameState.world_seed,ground)})
 					founded_day=int(GameState.elapsed_days)
 					# The founding frame: what opens by itself, what the rail offers.
 					for i in 3:await get_tree().process_frame
@@ -114,6 +118,7 @@ func _ready()->void:
 		chunk_ms+=Time.get_ticks_msec()-s
 		await get_tree().process_frame
 		_collect()
+		for layer in UiMeasure.notice_layers(terrain.hud):notice_days[layer]=int(notice_days.get(layer,0))+1
 		_handle_court()
 		if founded_day>=0 and GameState.elapsed_days<=founded_day+600:_first_ten_sample()
 		elif founded_day>=0 and not ui_marks.has("first_ten"):
@@ -124,10 +129,12 @@ func _ready()->void:
 		if y!=last_year_mark:
 			last_year_mark=y
 			_year_row(y,chunk_ms);chunk_ms=0
-			if y in [1,5,10,25] and not ui_marks.has(y):
+			if y in [1,5,10,25,50,75,100] and not ui_marks.has(y):
 				ui_marks[y]=true
 				w("ui",UiMeasure.measure(terrain,"year %d" % y))
 	_collect()
+	if int(counts.get("discovery_popup",0))>0:notice_days["discovery_popup"]=int(counts.discovery_popup)
+	w("notices",{"days_shown":notice_days,"systems":notice_days.keys().filter(func(k:String)->bool:return k!="card_over_dock").size()})
 	w("end",{"counts":counts,"inbox":GameState.council_inbox.size(),"matters":Hall.matter_counts(),"hall_history":(Hall.state().get("history",[]) as Array).size()})
 	out.close()
 	print("FUN_PLAYTEST DONE ",counts)

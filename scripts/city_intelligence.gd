@@ -333,7 +333,7 @@ func controller_label(id:String)->String:
 	if id=="player": return "Your settlement"
 	var index:int=system._civilization_index(id)
 	if index>=0 and int(system.civilizations[index].player_relation.get("contact_level",0))>=2: return String(system.civilizations[index].name)
-	return "Unknown polity" if id!="" else "Unknown"
+	return "Unknown people" if id!="" else "Unknown"
 
 func describe(city:Dictionary)->String:
 	if city.is_empty(): return "No report identifies this city."

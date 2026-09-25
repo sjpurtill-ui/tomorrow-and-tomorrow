@@ -11131,7 +11131,7 @@ func _refresh_actions_menu()->void:
 		actions_menu_settlement_button.disabled=false
 	if actions_menu_scout_button:
 		var scouting:Dictionary=CivilizationSystem.scouting_staff.snapshot()
-		actions_menu_scout_button.text="SCOUTING · %.1f%% · %d AWAY" % [float(scouting.share)*100,int(scouting.away)]
+		actions_menu_scout_button.text=preload("res://scripts/hud/era_words.gd").scouts_out(int(scouting.away))
 		actions_menu_scout_button.disabled=false
 		actions_menu_scout_button.tooltip_text="Set a standing population allocation and focus. Leaders organize the parties and future departures."
 	if actions_menu_diplomat_button:
@@ -11866,7 +11866,7 @@ func _render_active_foreign_alert()->void:
 	else:
 		var descriptions:Array=active_foreign_alert.get("group_descriptions",[])
 		var first_description:=String(descriptions[0]) if not descriptions.is_empty() else String(active_foreign_alert.get("description","Foreign formations were observed."))
-		foreign_alert_body.text="MULTIPLE LOCAL OBSERVATIONS\n%s\n%d formations share this alert; open World for the sighting list." % [_bounded_alert_copy(first_description,170),group_count]
+		foreign_alert_body.text="SEVERAL SIGHTINGS\n%s\n%d bands of strangers are in sight; open World for the list." % [_bounded_alert_copy(first_description,170),group_count]
 		foreign_alert_body.tooltip_text="\n\n".join(descriptions) if not descriptions.is_empty() else first_description
 	foreign_alert_panel.add_theme_stylebox_override("panel",_population_report_style(Color("#d5a54f") if first_contact else Color("#c77a56")))
 	if foreign_alert_world_button:
@@ -13472,12 +13472,10 @@ func _refresh_player_field_army_markers()->void:
 
 func _on_scout_report_returned(report:Dictionary)->void:
 	if not ScoutArchive.newsworthy(report):return
-	# The simulation owns report delivery and storage. Arrival is a notification,
-	# not a request to change the player's speed or replace the open detail panel.
+	# The simulation owns report delivery and storage. Arrival is told by the
+	# Chronicle's card (chronicle.gd), never a pause or a second toast.
 	if travel_status_label:
-		travel_status_label.text="SCOUT PARTY RETURNED — open the illustrated return report or find it in WORLD > SCOUTING"
-	if hud and is_instance_valid(hud):
-		preload("res://scripts/hud/scout_return_notice.gd").announce(self,hud,report)
+		travel_status_label.text="THE SCOUTS ARE HOME — their tale is in the Chronicle, and the full report in WORLD > SCOUTING"
 
 
 func _open_foreign_formation_from_screen(screen_position:Vector2)->bool:
@@ -14697,7 +14695,7 @@ func _inspect_location_local(position: Vector3) -> void:
 	if not revealed:
 		lens_location_label.text="BEYOND RETURNED MAP KNOWLEDGE"
 	elif not contact_context.is_empty():
-		lens_location_label.text=("CONFIRMED SETTLEMENT  •  %s" if String(contact_context.get("point_kind","encounter"))=="settlement" else "FIRST CONTACT SITE  •  %s") % String(contact_context.get("name","FOREIGN POLITY")).to_upper()
+		lens_location_label.text=("CONFIRMED SETTLEMENT  •  %s" if String(contact_context.get("point_kind","encounter"))=="settlement" else "FIRST CONTACT SITE  •  %s") % String(contact_context.get("name","STRANGERS")).to_upper()
 	elif bool(GameState.settlement_convoy.get("active",false)):
 		var convoy_position:Vector2=GameState.settlement_convoy.get("position",Vector2.ZERO)
 		var convoy_distance:=convoy_position.distance_to(Vector2(position.x,position.z))*KM_PER_WORLD_UNIT
@@ -14728,12 +14726,12 @@ func _inspect_location_local(position: Vector3) -> void:
 	elif not contact_context.is_empty():
 		if String(contact_context.get("point_kind","encounter"))=="settlement":
 			var observed_day:=maxi(0,int(contact_context.get("last_observed_day",0)))
-			lens_body.text="[font_size=18][color=#e1d08d]CONFIRMED FOREIGN SETTLEMENT[/color][/font_size]\n\n[color=#e1d5b8]%s[/color]\nLocation confirmed by %s. Last physically observed in Year %d, Day %d.\n\nThis aggregate footprint represents the observed occupied place without simulating every structure or inhabitant. Dispatch an observation mission for current population, activity, and defenses." % [String(contact_context.get("name","A foreign polity")),String(contact_context.get("home_location_source","a returned report")),observed_day/365+1,observed_day%365+1]
+			lens_body.text="[font_size=18][color=#e1d08d]CONFIRMED FOREIGN SETTLEMENT[/color][/font_size]\n\n[color=#e1d5b8]%s[/color]\nLocation confirmed by %s. Last physically observed in Year %d, Day %d.\n\nThis aggregate footprint represents the observed occupied place without simulating every structure or inhabitant. Dispatch an observation mission for current population, activity, and defenses." % [String(contact_context.get("name","A foreign people")),String(contact_context.get("home_location_source","a returned report")),observed_day/365+1,observed_day%365+1]
 		else:
 			var met_day:=maxi(0,int(contact_context.get("day",0)))
 			var met_year:=met_day/365+1
 			var met_day_of_year:=met_day%365+1
-			lens_body.text="[font_size=18][color=#bde0d7]RECORDED ENCOUNTER[/color][/font_size]\n\n[color=#e1d5b8]%s[/color] was first identified here in Year %d, Day %d.\n\n[color=#c4aa70]HOW CONTACT HAPPENED[/color]\n%s.\n\n[color=#c27f6c]Their homeland is not known from this encounter.[/color] This marker records where contact occurred—not permanent global tracking and not a guessed capital." % [String(contact_context.get("name","A foreign polity")),met_year,met_day_of_year,String(contact_context.get("source_description","The surviving record does not say"))]
+			lens_body.text="[font_size=18][color=#bde0d7]RECORDED ENCOUNTER[/color][/font_size]\n\n[color=#e1d5b8]%s[/color] was first identified here in Year %d, Day %d.\n\n[color=#c4aa70]HOW CONTACT HAPPENED[/color]\n%s.\n\n[color=#c27f6c]Their homeland is not known from this encounter.[/color] This marker shows where we met them, not where they live." % [String(contact_context.get("name","A foreign people")),met_year,met_day_of_year,String(contact_context.get("source_description","The surviving record does not say"))]
 	elif entries.is_empty() and settlement_plot.is_empty():
 		if not settlement_context.is_empty() and bool(settlement_context.get("inside_border",false)):
 			lens_body.text="[font_size=18][color=#dfd0aa]CONTROLLED SETTLEMENT GROUND[/color][/font_size]\n\nWithin [color=#e1d5b8]%s[/color]'s present border. The boundary covers approximately [color=#ddd2b8]%.1f km²[/color] and supports an aggregate population of [color=#ddd2b8]%s[/color].\n\nBorders expand when population, occupied fabric, routes, survey work, administration, logistics, and defense can sustain a wider claim.\n\n[color=#c4aa70]Surface resources follow the land cover described above. No additional deposit has been identified here.[/color]" % [String(settlement_context.get("name","the settlement")),float(settlement_context.get("controlled_area_km2",0.0)),_compact_population(int(settlement_context.get("population",0)))]
@@ -17929,7 +17927,7 @@ func _open_civilizations_panel()->void:
 		var captive_heading:=Label.new(); captive_heading.text="CAPTURED SCOUT COHORTS  •  INFORMATION DEGRADES"; captive_heading.add_theme_font_size_override("font_size",12); captive_heading.add_theme_color_override("font_color",Color("#d19b6f")); rivals.add_child(captive_heading)
 		for cohort_variant in captive_scouts.slice(0,1):
 			var cohort:Dictionary=cohort_variant
-			var captive_status:=Label.new(); captive_status.text="%s  •  %d HELD  •  KNOWLEDGE REMAINING %d%%" % [String(cohort.get("source_name","FOREIGN POLITY")),int(cohort.get("count",0)),roundi(float(cohort.get("information_remaining",0.0))*100.0)]; captive_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; captive_status.add_theme_font_size_override("font_size",11); captive_status.add_theme_color_override("font_color",Color("#c9b48a")); rivals.add_child(captive_status)
+			var captive_status:=Label.new(); captive_status.text="%s  •  %d HELD  •  KNOWLEDGE REMAINING %d%%" % [String(cohort.get("source_name","STRANGERS")),int(cohort.get("count",0)),roundi(float(cohort.get("information_remaining",0.0))*100.0)]; captive_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; captive_status.add_theme_font_size_override("font_size",11); captive_status.add_theme_color_override("font_color",Color("#c9b48a")); rivals.add_child(captive_status)
 			var methods:=HBoxContainer.new(); methods.add_theme_constant_override("separation",3); rivals.add_child(methods)
 			for method in ["question","coerce","torture"]:
 				var interrogation:=Button.new(); interrogation.text={"question":"QUESTION","coerce":"COERCE","torture":"TORTURE"}[method]; interrogation.disabled=not bool(cohort.get("can_interrogate",false)); interrogation.tooltip_text=("BLOCKED  This captive cohort has no usable information remaining.\nNEXT  Intercept another returning scout cohort while it is still inside local lookout range." if interrogation.disabled else {"question":"ACTION  Question the cohort without coercion.\nCONSEQUENCE  Slow and comparatively reliable, with little diplomatic or domestic harm.","coerce":"ACTION  Coerce a statement.\nCONSEQUENCE  More likely to produce a statement but less reliable; raises grievance and harms legitimacy.","torture":"ACTION  Torture the captive cohort.\nCONSEQUENCE  Only 42% reliable; may kill prisoners, contaminate intelligence, inflame grievance, and damage legitimacy and cohesion."}[method]); interrogation.pressed.connect(_interrogate_captured_scouts.bind(String(cohort.get("civ_id","")),method)); methods.add_child(interrogation)
@@ -18004,7 +18002,7 @@ func _open_civilizations_panel()->void:
 	var selected_profile:=CivilizationSystem.known_civilization_snapshot(selected_civilization_id)
 	if selected_profile.is_empty():
 		var unknown:=Label.new()
-		unknown.text="THE WORLD BEYOND RETURNED REPORTS IS UNKNOWN\n\nSend a scout party and let time pass. The terrain it crossed, the route it survived, and any polity it directly encountered become available only after its return."
+		unknown.text="THE WORLD BEYOND RETURNED REPORTS IS UNKNOWN\n\nSend a scout party and let time pass. The terrain it crossed, the route it survived, and any people it met become known only after its return."
 		unknown.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		unknown.add_theme_font_size_override("font_size",16)
 		unknown.add_theme_color_override("font_color",Color("#b9b19d"))
@@ -18641,17 +18639,17 @@ func _open_diplomat_dispatch_panel(civ_id:String="",purpose:String="goodwill")->
 			var profile:Dictionary=profile_variant
 			if String(profile.get("id",""))!="player" and bool((profile.get("player_relation",{}) as Dictionary).get("home_location_known",false)): contacts.append(profile)
 		if contacts.is_empty():
-			var none:=Label.new(); none.text="NO CONFIRMED DIPLOMATIC DESTINATION\nKnowing a polity exists does not reveal its home. Send scouts to investigate a returned contact site; only their returned location report permits a diplomatic journey."; none.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; none.size_flags_vertical=Control.SIZE_EXPAND_FILL; none.add_theme_font_size_override("font_size",16); none.add_theme_color_override("font_color",Color("#9ea7a2")); root.add_child(none)
+			var none:=Label.new(); none.text="NO CONFIRMED DIPLOMATIC DESTINATION\nKnowing a people exists does not reveal its home. Send scouts to investigate a returned contact site; only their returned location report permits a diplomatic journey."; none.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; none.size_flags_vertical=Control.SIZE_EXPAND_FILL; none.add_theme_font_size_override("font_size",16); none.add_theme_color_override("font_color",Color("#9ea7a2")); root.add_child(none)
 		else:
 			var latest:Dictionary=status.get("latest",{})
 			var latest_observations:Array=latest.get("observations",[])
 			if not latest.is_empty():
-				var returned_report:=Label.new(); returned_report.text="REPLY FROM %s\n%s" % [String(latest.get("civilization","FOREIGN POLITY")),String(latest.get("outcome","Your envoys returned."))]; returned_report.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; returned_report.add_theme_font_size_override("font_size",10); returned_report.add_theme_color_override("font_color",Color("#9fc1b8")); root.add_child(returned_report)
+				var returned_report:=Label.new(); returned_report.text="REPLY FROM %s\n%s" % [String(latest.get("civilization","STRANGERS")),String(latest.get("outcome","Your envoys returned."))]; returned_report.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; returned_report.add_theme_font_size_override("font_size",10); returned_report.add_theme_color_override("font_color",Color("#9fc1b8")); root.add_child(returned_report)
 			var selector:=OptionButton.new(); selector.custom_minimum_size=Vector2(0,38); root.add_child(selector)
 			var selected_index:=0
 			for contact_index in contacts.size():
 				var profile:Dictionary=contacts[contact_index]
-				selector.add_item(String(profile.get("name","FOREIGN POLITY")))
+				selector.add_item(String(profile.get("name","STRANGERS")))
 				selector.set_item_metadata(contact_index,String(profile.get("id","")))
 				if String(profile.get("id",""))==pending_diplomat_civ_id: selected_index=contact_index
 			selector.select(selected_index)
@@ -18759,7 +18757,7 @@ func _focus_known_world_point(civ_id:String,point_kind:String)->void:
 			camera.size=preload("res://scripts/foreign_settlement_visual.gd").framing_size(report) if use_settlement else minf(camera.size,58.0)
 		_set_camera_target(target)
 		if travel_status_label:
-			var notice:="KNOWN HOME SETTLEMENT  •  %s" % String(encounter.get("name","FOREIGN POLITY")).to_upper() if use_settlement else "ENCOUNTER SITE  •  %s  •  THEIR HOMELAND REMAINS UNLOCATED" % String(encounter.get("name","FOREIGN POLITY")).to_upper()
+			var notice:="KNOWN HOME SETTLEMENT  •  %s" % String(encounter.get("name","STRANGERS")).to_upper() if use_settlement else "ENCOUNTER SITE  •  %s  •  THEIR HOMELAND REMAINS UNLOCATED" % String(encounter.get("name","STRANGERS")).to_upper()
 			travel_status_label.text=notice
 			get_tree().create_timer(8.0).timeout.connect(_clear_transient_world_notice.bind(notice))
 		return
@@ -19289,7 +19287,7 @@ func _update_time_interface() -> void:
 		var observation:Dictionary=CivilizationSystem.local_observation_snapshot()
 		if int(observation.get("visible_count",0))>0:
 			world_competition_button.text="WORLD  •  %d" % int(observation.visible_count)
-			world_competition_button.tooltip_text="%d aggregate foreign formation%s currently inside the %.0f km local observation range." % [int(observation.visible_count)," is" if int(observation.visible_count)==1 else "s are",float(observation.radius_km)]
+			world_competition_button.tooltip_text="%d band%s of strangers within %.0f km of our lookouts." % [int(observation.visible_count),"" if int(observation.visible_count)==1 else "s",float(observation.radius_km)]
 		elif bool(exploration.get("active",false)):
 			world_competition_button.text="SCOUT  %dD" % int(exploration.get("days_remaining",0))
 			world_competition_button.tooltip_text="Scout party away for %d more days. Its observations remain physically with the party; interception or capture before return destroys the report." % int(exploration.get("days_remaining",0))

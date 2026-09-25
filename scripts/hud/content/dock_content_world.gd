@@ -49,7 +49,7 @@ func tab(sub:int)->Dictionary:
 	if bool(exploration.get("active",false)):
 		brief={"tone":"info","title":"A scout party is away","why":String(exploration.get("message",""))}
 	elif contacts==0:
-		brief={"tone":"warn","title":"No foreign polity has been met","why":"Only a returned scout report reveals new ground or contacts."}
+		brief={"tone":"warn","title":"No other people have been met","why":"Only a returned scout report reveals new ground or contacts."}
 	else:
 		brief={"tone":"info","title":"%d polit%s known" % [contacts,"y is" if contacts==1 else "ies are"],"why":"Knowledge is only what physically returned; estimates decay as reports age."}
 	match sub:
