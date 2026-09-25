@@ -113,7 +113,9 @@ func test_cards_stay_compact_and_use_the_available_row_for_more_discoveries()->v
 		assert_float(card.painting.custom_minimum_size.y).is_equal(view.CARD_IMAGE_HEIGHT)
 		assert_int(card.frame.mouse_filter).is_equal(Control.MOUSE_FILTER_PASS)
 func test_established_cards_show_the_recorded_discovery_year_and_day()->void:
-	GameState.known_discoveries.append("stone_sorting")
+	# Only the recorded discovery, so the inherited founding practices (which have
+	# no discovery date) do not come first in the established view.
+	GameState.known_discoveries.assign(["stone_sorting"])
 	GameState.discovery_log.push_front({"id":"stone_sorting","day":730})
 	var view:=fixture();view.set_view("known")
 	assert_int(view.records[0].discovered_day).is_equal(730)
@@ -141,12 +143,15 @@ func test_every_research_field_has_a_distinct_painted_asset()->void:
 		if texture:paths[texture.resource_path]=true
 	assert_int(paths.size()).is_equal(12)
 func test_stone_art_is_consistent_in_research_card_and_inspector()->void:
-	GameState.elapsed_days=400*365 # past the early-civilization paper art window
 	GameState.known_discoveries.append("stone_sorting")
 	var view:=fixture();view.set_view("known");view.select("stone_sorting")
 	for frame in 8:await get_tree().process_frame
-	assert_str(Art.source_texture(view.bindings.stone_sorting.painting.texture).resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")
-	assert_str(Art.source_texture(view.detail_body.get_child(0).texture).resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")
+	# The card and the inspector show the same painting: the early-civilization
+	# paper painting inside that art window (EarlyCivArt.active), else the subject art.
+	var expected:=Art.source_texture(Art.for_discovery({"id":"stone_sorting"})).resource_path
+	if not preload("res://scripts/hud/early_civ_art.gd").active():expected="res://assets/ui/research/stone-selection-v1.png"
+	assert_str(Art.source_texture(view.bindings.stone_sorting.painting.texture).resource_path).is_equal(expected)
+	assert_str(Art.source_texture(view.detail_body.get_child(0).texture).resource_path).is_equal(expected)
 
 func test_reviewed_images_resolve_their_explicit_assignments()->void:
 	var parent:VBoxContainer=auto_free(VBoxContainer.new());add_child(parent)

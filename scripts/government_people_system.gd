@@ -1272,10 +1272,12 @@ func _apply_survival_guard(weights:Dictionary)->Dictionary:
 
 
 ## research_600 balance: getting, grinding, cooking and storing food took most
-## of a pre-modern household's working time (docs/research/BENCHMARKS_600.md:
-## about 52% even for the best-organized society at year 0, 40% by year 600).
-## Planned labor keeps at least that share on food; the surplus fills the stores.
-const FOOD_LABOR_FLOOR:Array=[[0.0,0.52],[100.0,0.50],[300.0,0.45],[600.0,0.40],[1500.0,0.30],[2800.0,0.05]]
+## of a pre-modern household's working time (docs/research/BENCHMARKS_600.md,
+## typical: 62% at year 0, 52% by year 600). Planned labor keeps at least that
+## share on food; the surplus fills the stores. A society focused on food and
+## labor research needs less (up to a quarter), and decrees that claim labor
+## (care rotas, watches, levies) leave less time for everything, so food takes more.
+const FOOD_LABOR_FLOOR:Array=[[0.0,0.62],[100.0,0.60],[300.0,0.56],[600.0,0.52],[1500.0,0.35],[2800.0,0.05]]
 
 func _apply_food_labor_floor(weights:Dictionary)->void:
 	var year:=float(WorldSimulation.state.elapsed_days)/365.0
@@ -1286,6 +1288,12 @@ func _apply_food_labor_floor(weights:Dictionary)->void:
 			var high:Array=FOOD_LABOR_FLOOR[index]
 			floor_share=lerpf(float(low[1]),float(high[1]),(year-float(low[0]))/(float(high[0])-float(low[0])))
 			break
+	var focus:Dictionary=WorldSimulation.discovery.society_model.line_focus if WorldSimulation.discovery!=null else {}
+	floor_share*=1.0-0.25*clampf(float(focus.get("nutrition",0.0))+0.5*float(focus.get("labor",0.0)),0.0,1.0)
+	# Care-focused societies keep more of their sick, old and young alive to feed.
+	floor_share*=1.0+0.12*float(focus.get("health",0.0))+0.08*float(focus.get("demography",0.0))
+	if WorldSimulation.consequences!=null:floor_share*=1.0+maxf(0.0,-float(WorldSimulation.consequences.policy_effect("labor_multiplier")))
+	floor_share=clampf(floor_share,0.0,0.85)
 	var other:=0.0
 	for role:String in weights:
 		if role!="Food":other+=maxf(0.0,float(weights[role]))

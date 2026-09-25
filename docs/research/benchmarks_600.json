@@ -270,8 +270,9 @@
      "min": -1.0,
      "low": -0.3,
      "typical": 0.5,
-     "high": 1.2,
-     "max": 1.8
+     "high": 1.4,
+     "max": 1.8,
+     "note": "high = the benchmark's own best crude birth rate (48) minus its best crude death rate (33-34): a well-fed frontier population"
     },
     "300": {
      "min": -1.0,
@@ -540,35 +541,35 @@
    "probe_key": "per_50",
    "years": {
     "0": {
-     "min": 5,
+     "min": 0,
      "low": 25,
      "typical": 65,
      "high": 85,
      "max": 110
     },
     "100": {
-     "min": 5,
+     "min": 0,
      "low": 25,
      "typical": 70,
      "high": 90,
      "max": 115
     },
     "300": {
-     "min": 5,
+     "min": 0,
      "low": 25,
      "typical": 70,
      "high": 90,
      "max": 115
     },
     "600": {
-     "min": 5,
+     "min": 0,
      "low": 25,
      "typical": 70,
      "high": 90,
      "max": 115
     }
    },
-   "note": "A stagnating or collapsing society may learn almost nothing new for a while (min 5%)."
+   "note": "A stagnating society, or one that researches only a few lines, may learn almost none of a block's registry items (min 0)."
   },
   "major_innovations_per_century": {
    "unit": "historically major innovations appearing anywhere per century (writing, wheel, bronze, plough, sail...)",

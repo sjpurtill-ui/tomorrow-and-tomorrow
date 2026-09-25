@@ -823,6 +823,10 @@ func refresh_operating_effects()->void:
 func adoption(discovery_id:String)->float:
 	return society_model.adoption(discovery_id)
 
+## research_600: adoption less specialization neglect (SocietyModel.practiced).
+func practiced(discovery_id:String)->float:
+	return society_model.practiced(discovery_id)
+
 func validate_catalog()->Array[String]:
 	initialize()
 	return society_model.validate_catalog(catalog)

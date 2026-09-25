@@ -226,11 +226,13 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 		var names:Array=row[0]
 		var values:PackedFloat64Array=row[1]
 		var focus:=float(line_focus.get(String((definitions_by_id.get(id,{}) as Dictionary).get("dynamic","")),0.0)) if not line_focus.is_empty() else 0.0
+		# research_600: a focused line's practices are worked harder, every other
+		# line's a little less (benefits only; costs are never scaled).
+		var practice_scale:=1.0+SPECIALIZATION_HEADROOM*focus if focus>0.0 else 1.0-SPECIALIZATION_NEGLECT*_max_focus
 		for i in names.size():
 			var effect_name=names[i]
 			var value:=values[i]
-			# research_600: a focused line's practices are worked harder (benefits only).
-			if focus>0.0 and (value<0.0)==(String(effect_name) in LOWER_IS_BETTER): value*=1.0+SPECIALIZATION_HEADROOM*focus
+			if practice_scale!=1.0 and (value<0.0)==(String(effect_name) in LOWER_IS_BETTER): value*=practice_scale
 			effect_totals[effect_name]=float(effect_totals.get(effect_name,0.0))+value*adoption_level
 	# research_600 balance: totals are held under the society's era ceiling,
 	# never the flat modern limit alone.
@@ -466,6 +468,15 @@ func evaluate_subcategories(_context:Dictionary)->Dictionary:
 func adoption(discovery_id:String)->float:
 	return clampf(float(WorldSimulation.state.discovery_adoption.get(discovery_id,0.0)),0.0,1.0)
 
+## research_600: how thoroughly a known practice is carried out, which is its
+## adoption, less the specialization neglect when another line has the focus.
+func practiced(discovery_id:String)->float:
+	var level:=adoption(discovery_id)
+	if _max_focus<=0.0: return level
+	var line:=String((definitions_by_id.get(discovery_id,{}) as Dictionary).get("dynamic",""))
+	if float(line_focus.get(line,0.0))>0.0: return level
+	return level*(1.0-SPECIALIZATION_NEGLECT*_max_focus)
+
 func validate_catalog(catalog:Array[Dictionary])->Array[String]:
 	var errors:Array[String]=[]
 	var ids:Dictionary={}
@@ -592,10 +603,13 @@ static func era_ceiling_for(effect_id:String,era:float)->Vector2:
 func era_ceiling(effect_id:String)->Vector2:
 	var limit:=era_ceiling_for(effect_id,ceiling_era)
 	var focus:=float(line_focus.get(String(EFFECT_LINE.get(effect_id,"")),0.0))
-	if focus<=0.0: return limit
+	# A focused line's channels may pass the common ceiling; a neglected line's
+	# channels stop short of it while another line takes the society's effort.
+	var scale:=1.0+SPECIALIZATION_HEADROOM*focus if focus>0.0 else 1.0-SPECIALIZATION_NEGLECT*_max_focus
+	if scale==1.0: return limit
 	var modern:Vector2=EFFECT_LIMITS.get(effect_id,Vector2(-0.50,0.80))
-	if effect_id in LOWER_IS_BETTER: return Vector2(maxf(modern.x,limit.x*(1.0+SPECIALIZATION_HEADROOM*focus)),limit.y)
-	return Vector2(limit.x,minf(modern.y,limit.y*(1.0+SPECIALIZATION_HEADROOM*focus)))
+	if effect_id in LOWER_IS_BETTER: return Vector2(maxf(modern.x,limit.x*scale),limit.y)
+	return Vector2(limit.x,minf(modern.y,limit.y*scale))
 
 ## Specialization: a society that pours its research into one line works that
 ## line's practices harder (their benefits count up to SPECIALIZATION_HEADROOM
@@ -604,12 +618,17 @@ func era_ceiling(effect_id:String)->Vector2:
 ## line is researched less. Each effect key belongs to the line that carries most
 ## of its content (derived from the research data).
 const SPECIALIZATION_HEADROOM:=0.35
+## Share of their benefit the neglected lines lose when another line has full focus.
+const SPECIALIZATION_NEGLECT:=0.35
 const EFFECT_LINE:Dictionary={"adoption_rate":"knowledge","chemical_control":"production","clay_yield":"production","cohesion":"culture","conception_support":"demography","construction_rate":"infrastructure","container_capacity":"production","craft_output":"production","cultivation_yield":"nutrition","disaster_resilience":"infrastructure","disaster_risk":"infrastructure","disease_exposure":"health","dry_storage":"infrastructure","ecological_pressure":"ecology","ecology_recovery":"ecology","extraction_yield":"production","fatigue":"labor","fiber_yield":"production","food_output":"nutrition","food_spoilage":"nutrition","food_storage":"nutrition","foraging_yield":"ecology","fuel_demand":"ecology","fuel_efficiency":"production","haul_capacity":"logistics","health_protection":"health","health_risk":"labor","housing_output":"infrastructure","hunting_yield":"nutrition","injury_risk":"health","institutional_rigidity":"culture","knowledge_preservation":"knowledge","knowledge_rate":"knowledge","labor_demand":"labor","labor_efficiency":"labor","legitimacy":"institutions","logistics_endurance":"logistics","maternal_safety":"demography","metal_yield":"production","mine_safety":"infrastructure","mobile_shelter":"production","naval_capacity":"logistics","neonatal_survival":"demography","nutrition_quality":"nutrition","observation_rate":"knowledge","pollution":"ecology","repair_capacity":"infrastructure","route_speed":"logistics","sanitation":"health","security_efficiency":"security","soil_productivity":"ecology","standardization":"production","state_capacity":"institutions","stone_yield":"infrastructure","storage_loss":"nutrition","survey_speed":"knowledge","task_coordination":"labor","timber_pressure":"ecology","timber_yield":"ecology","tool_quality":"production","trade_capacity":"logistics","travel_speed":"logistics","warfare_readiness":"security","water_access":"infrastructure","water_pollution":"ecology","water_safety":"health"}
 ## Emphasis focus per line, 0 (even spread or less) to 1 (all emphasis).
 var line_focus:Dictionary={}
 
+var _max_focus:=0.0
+
 func _refresh_line_focus()->void:
 	line_focus.clear()
+	_max_focus=0.0
 	var total:=0.0
 	for weight:Variant in WorldSimulation.state.research_allocations.values(): total+=maxf(0.0,float(weight))
 	if total<=0.0: return
@@ -617,6 +636,7 @@ func _refresh_line_focus()->void:
 	for line:Variant in WorldSimulation.state.research_allocations:
 		var share:=maxf(0.0,float(WorldSimulation.state.research_allocations[line]))/total
 		if share>even: line_focus[String(line)]=clampf((share-even)/(1.0-even),0.0,1.0)
+	for value:Variant in line_focus.values(): _max_focus=maxf(_max_focus,float(value))
 
 ## The society's age for effect ceilings: the elapsed calendar or its knowledge
 ## frontier (FRONTIER_PERCENTILE of its known discoveries' eras), whichever is

@@ -142,6 +142,8 @@ KNOWN_GAPS = {
     ("ai", "known"): "AI seats research ~1.3x faster in the engine than the surrogate at equal emphasis (cause not isolated)",
     ("ai", "lines_per_decade"): "AI rotation of emphasis is approximated", ("ai", "lines_total"): "AI rotation of emphasis is approximated",
     ("ai", "decades_total"): "follows the AI research gap",
+    ("ai", "population"): "the rival controller founds daughter settlements (fresh wild grounds, housing, territory); the surrogate models only their carrying-capacity territory, so AI growth after ~year 60 runs ~20-25% low",
+    ("ai", "education"): "the rival controller's first-decade labor and records choices are not modelled; converges by year 20",
     ("poor", "population"): "poor-site population falls ~20% faster than the engine's (monthly labor re-planning vs daily); populations < 60 are noisy",
     ("poor", "decades_total"): "follows the poor-site population gap (fewer researchers)",
     ("*", "food_days"): "timing of Storage Pits / Public Stores builds (settlement construction queue) is approximated",

@@ -74,7 +74,7 @@ const GOOD_CONDITIONS:=0.55
 ## only through its era-capped effect channels (SocietyModel.era_ceiling_for),
 ## so it lifts little before the modern era. Missing practices add their excess
 ## on top, weighted by EXCESS_WEIGHT. Old saves blend in with early_care_blend.
-const ERA_BURDEN:={"under5":3.6,"child":4.5,"adult":4.3,"elder":2.1,"neonatal":1.9,"maternal":2.6}
+const ERA_BURDEN:={"under5":4.4,"child":5.0,"adult":4.5,"elder":2.3,"neonatal":2.1,"maternal":2.6}
 const EXCESS_WEIGHT:={"under5":0.15,"child":0.35,"adult":0.5}
 ## Channel totals that relieve the burden, each over its modern limit.
 const RELIEF_CHANNELS:={"health_protection":0.55,"sanitation":0.65,"water_safety":0.60,"disease_exposure":-0.55}
@@ -84,6 +84,11 @@ const RELIEF_POWER:=2.5
 ## above the knee the diet's lift to conception rises only at this slope (the
 ## best-fed society's 1.05 becomes 0.9), while hardship still lowers it in full.
 const PREMODERN_FECUNDITY_KNEE:=0.8
+## research_600: an infant's death ends nursing and shortens the next birth
+## interval; each point of first-year loss above the reference adds this much
+## to conception (1.6: about +24% at 250 infant deaths per 1,000, which keeps
+## crude birth rates inside the benchmark's 44-48 instead of past 50).
+const INFANT_LOSS_REPLACEMENT:=1.6
 const PREMODERN_FECUNDITY_SLOPE:=0.4
 ## Hunger and sickness absorb at most this share of the burden (see age_multiplier).
 const BURDEN_OVERLAP_FLOOR:=0.35
@@ -95,8 +100,8 @@ const BURDEN_OVERLAP_FLOOR:=0.35
 ## growth settles near the capacity and follows it as methods, fields and
 ## daughter settlements extend it (booms and busts come from harvests).
 ## Capacity per settlement by game year (people, before improvements).
-const TERRITORY_CAPACITY:Array=[[0.0,320.0],[100.0,500.0],[300.0,1400.0],[600.0,2600.0],[1500.0,9000.0],[2800.0,60000.0]]
-const CROWDING_ONSET:=0.8
+const TERRITORY_CAPACITY:Array=[[0.0,320.0],[100.0,420.0],[200.0,650.0],[300.0,880.0],[600.0,2600.0],[1500.0,9000.0],[2800.0,60000.0]]
+const CROWDING_ONSET:=0.6
 const CROWDING_MORTALITY:=0.3
 const CROWDING_CONCEPTION:=1.2
 ## Far below capacity land is plentiful: couples marry earlier (the preventive
@@ -178,7 +183,8 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 		var practices:Dictionary=category.practices
 		for id:String in practices:
 			if id in known:
-				practice_cover+=float(practices[id])*clampf(discovery.adoption(id),0.0,1.0)
+				var level:float=discovery.practiced(id) if discovery.has_method("practiced") else discovery.adoption(id)
+				practice_cover+=float(practices[id])*clampf(level,0.0,1.0)
 				named.append(_name(discovery,id))
 			else:
 				var entry:Dictionary=discovery.discovery_definition(id)
@@ -216,7 +222,7 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 	var infant_loss:=clampf(float(context.get("infant_loss",(state.early_care as Dictionary).get("infant_loss",0.0))),0.0,0.6)
 	var conception:=lerpf(0.80,1.05,clampf((diet-0.35)/0.45,0.0,1.0))
 	if conception>PREMODERN_FECUNDITY_KNEE:conception=PREMODERN_FECUNDITY_KNEE+(conception-PREMODERN_FECUNDITY_KNEE)*PREMODERN_FECUNDITY_SLOPE
-	conception*=(1.0-overwork*0.16)*(1.0+maxf(0.0,infant_loss-REFERENCE_INFANT_LOSS)*2.6)
+	conception*=(1.0-overwork*0.16)*(1.0+maxf(0.0,infant_loss-REFERENCE_INFANT_LOSS)*INFANT_LOSS_REPLACEMENT)
 	var result:={"blend":blend,"diet":diet,"nutrition_factor":nutrition,"overwork":overwork,"infant_loss":infant_loss,"categories":categories}
 	for key:String in raw:result[key]=lerpf(1.0,float(raw[key]),blend)
 	result["conception"]=lerpf(1.0,conception,blend)

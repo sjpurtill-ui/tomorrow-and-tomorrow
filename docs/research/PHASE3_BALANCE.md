@@ -30,34 +30,71 @@ User direction: "Progression needs to match the year benchmarks in realistic his
   - owned AI seats, which run the same `SocietyModel`.
 - **Adoption pace.** Practices now spread over years to decades (`ADOPTION_PACE` 0.12). An actively used practice reaches about 90% of households in about three years. Before, it took weeks.
 
+### Carrying capacity (`scripts/early_life_conditions.gd`, "research_600 carrying capacity")
+
+- **Capacity.** `carrying_capacity(state, discovery)` is the people the settled land can carry with the era's methods:
+  - `TERRITORY_CAPACITY` per settlement: 320 at year 0, 500 at 100, 1,400 at 300 and 2,600 at 600.
+  - Daughter settlements add territory as `1 + 1.6·√(n−1)`.
+  - Improved by era-capped cultivation, soil, food-output and storage knowledge.
+  - Lowered by worn-out wild grounds.
+- **Crowding.** Above 60% of capacity, a crowded society marries later (conception × `1 − 1.2·crowding`) and dies a little more (mortality × `1 + 0.3·crowding`). Growth settles near capacity and then follows it as methods, fields and daughter settlements extend it.
+- **Spare land.** Far below the home territory's capacity (under 30%), couples marry earlier, adding up to about 36% to conception. A thinned-out society recovers instead of dying out. Spare land is judged against the home territory, so expansion alone does not raise births.
+- **Chronic hunger.** Chronic food shortfall lowers conception through `sqrt(food)` (`GameState._conception_condition_factor`, one delimited line), and famine still cuts it hard.
+
+### Food labor floor (`scripts/government_people_system.gd`, `_apply_food_labor_floor`)
+
+- Planned labor keeps at least 52% of labor time on food at year 0, falling to 50% at 100, 45% at 300 and 40% at 600. The benchmark "high" is getting, grinding, cooking and storing food.
+- The surplus fills the stores. The old share of about 35% implied modern farm productivity.
+
+### Care decrees (`scripts/government_policy_catalog.gd`, `EarlyLifeConditions.DECREE_COVER`)
+
+Each care decree covers part of a missing care practice while it runs:
+
+| Decree | Coverage while it runs | Other effect |
+|---|---|---|
+| Water security (`water_security`) | about 16% of the clean-water category | none |
+| Care rotation (`care_rotation`) | about 20% of the remedies and child-care categories | newborn survival +0.054 |
+| Expanded watch (`expanded_watch`) | about 13% of the wound and injury category | none |
+
+Their labor cost is unchanged. Before this, all three were no-ops once health and labor sat at their caps.
+
+### Specialization (`scripts/society_model.gd`, `SPECIALIZATION_HEADROOM`)
+
+- **Focus.** A line's focus is its share of research emphasis above an even spread, from 0 (an even spread) to 1 (all emphasis on that line).
+- **Stronger practices.** The benefits of a focused line's practices count up to 35% more.
+- **Higher ceiling.** That line's channels may pass the common era ceiling by the same share. `EFFECT_LINE` maps each effect key to the line that carries most of its content.
+- **Cost.** Every other line is researched less.
+
 ### Research is never free
 
 `SocietyModel._apply_specialist_upkeep` handles specialists beyond what the era's surplus could keep:
 
 - **Sustainable share.** About 4% of workers can be full-time specialists at year 0, 7% at 300 and 10% at 600.
-- **Costs of the excess.** Specialists above that share add `labor_demand` (×1.4) and `fatigue` (×0.6), and cost `cohesion` (×1.0).
+- **Costs of the excess.** Specialists above that share add `labor_demand` (×1.4) and `fatigue` (×0.6), and cost `cohesion` (×1.0), `conception_support` (×1.0) and `food_storage` (×0.6).
 - **Existing labor costs.** The research settlement focus already takes those workers from building, crafting, extraction, logistics and defense. The survival guard still protects food.
 
 ### Pre-modern mortality burden (`scripts/early_life_conditions.gd`)
 
 - **Why.** In good conditions the baseline life table is close to a modern one. A fully cared-for society therefore reached life expectancy 55 and infant mortality 50 by year 100.
 - **The burden.** `ERA_BURDEN` multiplies each age band's hazard:
-  - under 5 ×3.2
+  - under 5 ×3.6
   - ages 5–14 ×4.5
-  - ages 15–44 ×4.0
+  - ages 15–44 ×4.3
   - age 45 and over ×2.1
-  - newborn deaths ×1.3
-  - maternal deaths ×1.4
+  - newborn deaths +0.9 on the care factor
+  - maternal deaths +1.6 on the care factor (both are additive, not compounding)
 - **What lifts it.** Only general health knowledge lifts the burden, through its era-capped channels (`burden_relief`). Before the modern era the relief is small.
 - **Missing practices.** A missing care practice adds its excess on top, weighted by `EXCESS_WEIGHT`. Life expectancy still responds strongly to care discoveries: about 24 at founding, rising to about 30 once they are adopted.
-- **Overlap with bad conditions.** Hunger and sickness already raise the condition factor. They absorb up to 65% of the burden (`BURDEN_OVERLAP_FLOOR`), so the same deaths are not counted twice.
+- **Overlap with bad conditions.** Hunger and sickness already raise the condition factor. They absorb up to 65% of the burden (`BURDEN_OVERLAP_FLOOR` 0.35), so the same deaths are not counted twice.
 - **Fertility.** `PREMODERN_FECUNDITY_KNEE` and `_SLOPE` compress how much a good diet lifts conception above 0.8, so a well-fed crude birth rate stays near 44–48 per 1,000.
 - **Save compatibility.** Old saves blend in through `early_care_blend`.
 - **Other readers.** The neonatal and maternal factors are used by `consequence_engine.gd` (one delimited line) and `civilization_indicators.gd`.
 
 ### Pacing (`scripts/research_600_catalog.gd`, `scripts/discovery_system.gd`)
 
-- **`PACE` 2.5.** A design research year is what a line achieves with the partial staffing a real society gives it, about 0.4 of a full-time team per line in a sensible early village.
+- **`PACE_BY_YEAR`.** The pace factor depends on the item's design year: 4.0 at year 0, 3.0 at 100, 1.3 at 200, 0.75 at 300 and 0.65 from 450.
+  - A founding band has few observers per line. A Bronze Age society has many researchers behind each line.
+  - The curve was fitted with `tools/sim` so milestones land inside their bands.
 - **Staffing return** (`_research_600_return_waiting_attention`):
   - Once a month, a line of a staffed domain that has open work but nobody on it takes one observer back.
   - The observer comes from the domain's most crowded line, and only if that line has two or more.

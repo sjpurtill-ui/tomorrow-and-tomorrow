@@ -62,6 +62,8 @@ DECREE_COVER = g.const("scripts/early_life_conditions.gd", "DECREE_COVER", defau
 FOOD_LABOR_FLOOR = g.const("scripts/government_people_system.gd", "FOOD_LABOR_FLOOR", default=[], optional=True)
 SPECIALIZATION_HEADROOM = float(g.const("scripts/society_model.gd", "SPECIALIZATION_HEADROOM", default=0.0, optional=True))
 EFFECT_LINE = g.const("scripts/society_model.gd", "EFFECT_LINE", default={}, optional=True)
+INFANT_LOSS_REPLACEMENT = float(g.const("scripts/early_life_conditions.gd", "INFANT_LOSS_REPLACEMENT", default=2.6, optional=True))
+SPECIALIZATION_NEGLECT = float(g.const("scripts/society_model.gd", "SPECIALIZATION_NEGLECT", default=0.0, optional=True))
 # Birth-care burden adds to the missing-care excess (EarlyLifeConditions.neonatal_factor).
 ADDITIVE_BIRTH_BURDEN = "float(care.get(\"neonatal\",1.0))+float((care.get(\"burden\"" in g.source("scripts/early_life_conditions.gd")
 # Chronic shortfall lowers conception through sqrt(food) (GameState._conception_condition_factor).
@@ -353,6 +355,15 @@ class Surrogate:
         self.evidence = evidence
 
     @property
+    def territory_settlements(self) -> int:
+        """Settlements that hold land for EarlyLifeConditions.carrying_capacity.
+        Truth probes: the player's delegated society stays in one settlement; the
+        rival controller founds daughter settlements (about one per 30 years)."""
+        if self.s.ai:
+            return 1 + int(self.day / YEAR // float(self.p.get("ai_settlement_years", 30.0)))
+        return 1
+
+    @property
     def settlements(self) -> int:
         return 1 + int(max(0.0, self.population - 120.0) // float(self.p["settlement_population"]))
 
@@ -372,7 +383,8 @@ class Surrogate:
                 even = 1.0 / 12.0
                 focus_by_line = np.array([clamp((max(0.0, float(pol.get(ln, 0))) / tot - even) / (1.0 - even), 0.0, 1.0) for ln in gd.LINES])
                 if focus_by_line.max() > 0:
-                    item_mult = 1.0 + SPECIALIZATION_HEADROOM * focus_by_line[cat.line]
+                    fl = focus_by_line[cat.line]
+                    item_mult = np.where(fl > 0, 1.0 + SPECIALIZATION_HEADROOM * fl, 1.0 - SPECIALIZATION_NEGLECT * focus_by_line.max())
                     benefit = np.where(cat.lower_better[None, :], np.minimum(self.E, 0.0), np.maximum(self.E, 0.0))
                     raw = raw + (weights * (item_mult - 1.0)) @ benefit
         self.effect_raw = raw
@@ -394,7 +406,9 @@ class Surrogate:
             if total > 0:
                 even = 1.0 / 12.0
                 focus = {ln: clamp((max(0.0, float(v)) / total - even) / (1.0 - even), 0.0, 1.0) for ln, v in weights.items()}
-                mult = np.array([1.0 + SPECIALIZATION_HEADROOM * focus.get(EFFECT_LINE.get(k, ""), 0.0) for k in cat.effect_keys])
+                fmax = max(focus.values()) if focus else 0.0
+                mult = np.array([(1.0 + SPECIALIZATION_HEADROOM * focus.get(EFFECT_LINE.get(k, ""), 0.0)) if focus.get(EFFECT_LINE.get(k, ""), 0.0) > 0
+                                 else (1.0 - SPECIALIZATION_NEGLECT * fmax) for k in cat.effect_keys])
                 lo = np.where(cat.lower_better, np.maximum(cat.limit_lo, lo * mult), lo)
                 hi = np.where(cat.lower_better, hi, np.minimum(cat.limit_hi, hi * mult))
         self.effects = np.clip(raw, lo, hi)
@@ -506,6 +520,14 @@ class Surrogate:
         if FOOD_LABOR_FLOOR:
             # GovernmentPeopleSystem._apply_food_labor_floor (Phase 3 R3).
             floor_share = curve(FOOD_LABOR_FLOOR, self.day / YEAR)
+            pol = self.research_policy(self.day / YEAR) or {}
+            tot = sum(max(0.0, float(v)) for v in pol.values())
+            if tot > 0:
+                even = 1.0 / 12.0
+                fo = lambda ln: clamp((max(0.0, float(pol.get(ln, 0))) / tot - even) / (1.0 - even), 0.0, 1.0)
+                floor_share *= 1.0 - 0.25 * clamp(fo("nutrition") + 0.5 * fo("labor"), 0.0, 1.0)
+                floor_share *= 1.0 + 0.12 * fo("health") + 0.08 * fo("demography")
+            floor_share = clamp(floor_share * (1.0 + max(0.0, -self.policy("labor_multiplier"))), 0.0, 0.85)
             other = sum(v for r, v in w.items() if r != "Food")
             w["Food"] = max(w["Food"], other * floor_share / max(0.01, 1.0 - floor_share))
         if not self.s.labor:
@@ -733,6 +755,20 @@ class Surrogate:
         return clamp(total, -1.0, 1.0)
 
     # ----------------------------------------------------------------- mortality
+    def _practice_scale(self, i: int) -> float:
+        """SocietyModel.practiced: neglected lines' practices are carried out less thoroughly."""
+        if SPECIALIZATION_NEGLECT <= 0.0:
+            return 1.0
+        pol = self.research_policy(self.day / YEAR) or {}
+        tot = sum(max(0.0, float(v)) for v in pol.values())
+        if tot <= 0:
+            return 1.0
+        even = 1.0 / 12.0
+        focus = {ln: clamp((max(0.0, float(v)) / tot - even) / (1.0 - even), 0.0, 1.0) for ln, v in pol.items()}
+        fmax = max(focus.values()) if focus else 0.0
+        line = gd.LINES[int(self.cat.line[i])]
+        return 1.0 if focus.get(line, 0.0) > 0 or fmax <= 0 else 1.0 - SPECIALIZATION_NEGLECT * fmax
+
     def _care(self, overwork: float) -> dict:
         """EarlyLifeConditions.profile (blend 1: new world)."""
         c, e = self.c, self.eff
@@ -743,7 +779,7 @@ class Surrogate:
             for rid, wgt in cat["practices"].items():
                 i = self.cat.index.get(rid)
                 if i is not None and self.known[i]:
-                    practice += float(wgt) * clamp(float(self.adoption[i]), 0, 1)
+                    practice += float(wgt) * clamp(float(self.adoption[i]) * self._practice_scale(i), 0, 1)
             if cat["id"] == "stores":
                 for work, wgt in c.storage_works.items():
                     if self.completed_names(work):
@@ -767,7 +803,7 @@ class Surrogate:
         diet_lift = lerp(0.80, 1.05, clamp((diet - 0.35) / 0.45, 0, 1))
         if diet_lift > FECUNDITY_KNEE:
             diet_lift = FECUNDITY_KNEE + (diet_lift - FECUNDITY_KNEE) * FECUNDITY_SLOPE
-        care["conception"] = diet_lift * (1.0 - overwork * 0.16) * (1.0 + max(0.0, il - c.reference_infant_loss) * 2.6) * PREMODERN_FECUNDITY
+        care["conception"] = diet_lift * (1.0 - overwork * 0.16) * (1.0 + max(0.0, il - c.reference_infant_loss) * INFANT_LOSS_REPLACEMENT) * PREMODERN_FECUNDITY
         care["pregnancy_risk"] = 1.0 + overwork * 0.35 + max(0.0, 0.5 - diet) * 0.6
         relief = 0.0
         if RELIEF_CHANNELS:
@@ -778,14 +814,14 @@ class Surrogate:
         crowding = 0.0
         if TERRITORY_CAPACITY:
             base = curve(TERRITORY_CAPACITY, self.day / YEAR)
-            territory = 1.0 + math.sqrt(max(0, int(self.settlements) - 1)) * 1.6
+            territory = 1.0 + math.sqrt(max(0, int(self.territory_settlements) - 1)) * 1.6
             methods = 1.0 + max(0.0, e("cultivation_yield")) + max(0.0, e("soil_productivity")) * 0.6 + max(0.0, e("food_output")) * 0.5 + max(0.0, e("food_storage")) * 0.25
             grounds = clamp(sum(self.source_health.values()) / max(1, len(self.source_health)), 0.4, 1.0)
             self.carrying_capacity = base * territory * methods * lerp(0.6, 1.0, grounds)
             crowding = max(0.0, self.population / max(1.0, self.carrying_capacity) - CROWDING_ONSET)
         self.crowding = crowding
         care["burden"] = {k: (1.0 + (float(v) - 1.0) * scale * (1.0 - relief)) * ((1.0 + crowding * CROWDING_MORTALITY) if k in ("under5", "child", "adult", "elder") else 1.0) for k, v in ERA_BURDEN.items()}
-        home = getattr(self, "carrying_capacity", 1e9) / (1.0 + math.sqrt(max(0, int(self.settlements) - 1)) * 1.6)
+        home = getattr(self, "carrying_capacity", 1e9) / (1.0 + math.sqrt(max(0, int(self.territory_settlements) - 1)) * 1.6)
         spare = max(0.0, SPARE_LAND_ONSET - self.population / max(1.0, home)) if TERRITORY_CAPACITY else 0.0
         care["conception"] *= max(0.3, 1.0 - crowding * CROWDING_CONCEPTION) * (1.0 + spare * SPARE_LAND_CONCEPTION)
         care["excess_weight"] = {k: float(v) for k, v in EXCESS_WEIGHT.items()}

@@ -43,7 +43,9 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "research"))
 import facets  # noqa: E402
+import focus_bench  # noqa: E402  (tools/research/focus_bench.py: per-focus benchmark profiles)
 import gamedata as gd  # noqa: E402
 import simlib  # noqa: E402
 
@@ -78,14 +80,30 @@ def strategies(n_random: int, rng: np.random.Generator) -> list[dict]:
         out.append({"name": f"care-first->research@{switch}", "kind": "timing",
                     "phases": [{"from": 0, "research": care, "knowledge_share": 5.2}, {"from": switch, "research": heavy, "knowledge_share": 20.0}]})
     out.append({"name": "crush-research", "research": {**dict.fromkeys(gd.LINES, 1), "knowledge": 12}, "knowledge_share": 30.0, "kind": "extreme"})
+    # Exploration-heavy play: scouting parties (share of people out exploring)
+    # and artifact study. NOTE: the surrogate models finds and study, but has no
+    # scout-attrition model (codex/scout-survival owns that in the game scripts).
+    # Canonical focus strategies (docs/research/benchmarks_focus_600.json surrogate_spec):
+    # every line focus and archetype, judged against its own profile.
+    fs = focus_bench.FocusBench()
+    for fname in fs.focus_names():
+        spec = (fs.window(0.0).focuses.get(fname, {}).get("strategy") or {}).get("surrogate_spec")
+        if spec:
+            out.append({"name": f"focus:{fname}", "research": spec.get("research", {}), "knowledge_share": float(spec.get("knowledge_share", -1)),
+                        "labor": spec.get("labor"), "policies": spec.get("policies", []), "focus_id": fname, "kind": "focus"})
+    for share in (0.03, 0.06):
+        out.append({"name": f"scouting-heavy@{share:.0%}", "research": dict.fromkeys(gd.LINES, 2), "knowledge_share": -1,
+                    "scouting": share, "study_weight": 2, "kind": "extreme"})
     return out
 
 
 def _run(args):
     strat, seed, years = args[:3]
     shocks = args[3] if len(args) > 3 else False
-    override = {"site": "good", "labor": simlib.scenarios()[0]["sensible"]["labor"], "research": strat.get("research", {}),
-                "knowledge_share": float(strat.get("knowledge_share", -1)), "phases": strat.get("phases", [])}
+    override = {"site": "good", "labor": strat.get("labor") or simlib.scenarios()[0]["sensible"]["labor"], "research": strat.get("research", {}),
+                "policies": list(strat.get("policies", [])),
+                "knowledge_share": float(strat.get("knowledge_share", -1)), "phases": strat.get("phases", []),
+                "scouting": float(strat.get("scouting", 0.0)), "study_weight": int(strat.get("study_weight", 0))}
     result = simlib.run("sensible", seed, years, simlib.params(), scenario_override=override, shocks=shocks)
     constants, cat = simlib.data()
     return strat["name"], facets.century_facets(result, cat, years, step=100), simlib.milestone_years(result, milestone_ids())
@@ -187,6 +205,24 @@ def main() -> int:
                 if why:
                     leads.append({"strategy": n, "milestone": rid, "mean_year": mean_year, "design": design, "why": why})
     report["milestone_leads"] = leads
+    # Focus profiles (tools/research/focus_bench.py): each strategy is judged
+    # against its own focus band, required costs and the balanced run.
+    fs = focus_bench.FocusBench()
+    by_name = {s["name"]: s for s in strats}
+    judged = {}
+    for n in mean:
+        verdicts = {}
+        for c in centuries:
+            if c not in mean[n] or c not in mean.get("balanced", {}):
+                continue
+            focus = fs.classify(by_name[n], c)
+            chk = fs.check_run(focus, {c: mean[n][c]}, balanced={c: mean["balanced"][c]})
+            above = [f for f in chk["flags"] if f["flag"] in ("ABOVE FOCUS HIGH", "OUT OF BOUNDS")]
+            unpaid = [f for f, v in chk["costs"].get(float(c), {}).items() if v["status"] == "UNPAID"]
+            free = [f for f, v in chk["relative"].get(float(c), {}).items() if v["status"] == "FREE LUNCH" and n != "balanced"]
+            verdicts[c] = {"focus": focus, "above": above, "unpaid": unpaid, "free_lunch": free, "ok": not above and not unpaid and not free}
+        judged[n] = verdicts
+    report["focus_judgement"] = judged
     # tradeoff table: what each focused line buys/costs at 300 and 600 vs balanced
     tradeoffs = {}
     for n in mean:
@@ -222,6 +258,32 @@ def write_md(report, mean, kinds, centuries, seconds, args) -> None:
         fl = ", ".join(r["free_lunch_vs_balanced"][:6]) + (" …" if len(r["free_lunch_vs_balanced"]) > 6 else "") or "none"
         md.append(f"| {c} | {r['front_size']} of {len(mean)} | {fl} ({len(r['free_lunch_vs_balanced'])}) | {', '.join(r['strictly_dominant']) or 'none'} | {len(r['benchmark_exceedances'])} |")
     last = report["centuries"].get(centuries[-1], {})
+    fj = report.get("focus_judgement", {})
+    md += ["", "## Focus judgement (docs/research/benchmarks_focus_600.json via tools/research/focus_bench.py)", "",
+           "Every run is classified per century (`FocusBench.classify`) and judged against its own focus profile, its required costs and the same-seed balanced run (`check_run`). "
+           "A run fails with ABOVE FOCUS HIGH / OUT OF BOUNDS (past its focus band or plausibility), UNPAID (a required cost not paid) or FREE LUNCH (boosted with no cost vs balanced).", "",
+           "| century | runs judged | ABOVE FOCUS HIGH / OUT | UNPAID cost | FREE LUNCH | all pass |", "|---:|---:|---:|---:|---:|---:|"]
+    for c in centuries:
+        rows = [v[c] for v in fj.values() if c in v]
+        if rows:
+            md.append(f"| {c} | {len(rows)} | {sum(1 for r in rows if r['above'])} | {sum(1 for r in rows if r['unpaid'])} | {sum(1 for r in rows if r['free_lunch'])} | {sum(1 for r in rows if r['ok'])} |")
+    fails = [(n, c, v) for n, vs in fj.items() for c, v in vs.items() if not v["ok"]]
+    if fails:
+        md += ["", "| strategy | century | focus | problem |", "|---|---:|---|---|"]
+        for n, c, v in fails[:120]:
+            prob = "; ".join([f"{a['flag']} {a['metric']}={a['value']:.4g}" for a in v["above"]] + [f"UNPAID {u}" for u in v["unpaid"]] + [f"FREE LUNCH {f}" for f in v["free_lunch"]])
+            md.append(f"| {n} | {c} | {', '.join(f'{k} {w:.2f}' for k, w in v['focus'].items())} | {prob} |")
+    focus_rows = [n for n in fj if kinds.get(n) in ("focus",) or n.startswith("scouting")]
+    if focus_rows:
+        md += ["", "### Canonical focus strategies and scouting (Δ vs balanced at 300 / 600)", "",
+               "| strategy | " + " | ".join(facets.FACETS[f][0] for f in OUTCOMES) + " |", "|---|" + "---:|" * len(OUTCOMES)]
+        for n in focus_rows:
+            row = report["tradeoffs"].get(n, {})
+            cells = []
+            for f in OUTCOMES:
+                a, b = row.get(300, {}).get(f), row.get(args.years, {}).get(f)
+                cells.append("/".join("—" if v is None else (f"{v:+,.0f}" if fmt[f].startswith("{:,") else fmt[f].format(v)) for v in (a, b)))
+            md.append(f"| {n} | " + " | ".join(cells) + " |")
     md += ["", "## Tradeoffs of the extreme and timed strategies (Δ vs balanced)", "",
            "| strategy | century | " + " | ".join(facets.FACETS[f][0] for f in OUTCOMES) + " |", "|---|---:|" + "---:|" * len(OUTCOMES)]
     for n, row in report["tradeoffs"].items():
