@@ -33,11 +33,11 @@
 | 640 (615–670) | Clay blow-pipe nozzles that direct the blast into the furnace (continues: pot_bellows) | 5 y | 30 min | NEW · clay_tuyere_draft | — |
 | 645 (620–675) | Ore roasted before smelting | 5 y | 30 min | NEW · ore_roasting | — |
 | 652 (625–680) | Earth-covered charcoal clamps at scale (continues: charcoal) | 5 y | 30 min | NEW · covered_charcoal_clamps | — |
-| **660 (640–690)** | **Bloomery smelting: iron reduced to a spongy bloom** | 12 y | 73 min | bloomery_smelting | 101 |
-| 662 (640–690) | Iron ore assaying by color, weight and a test bloom | 6 y | 37 min | iron_assaying | 75 |
-| 666 (645–695) | Measured ore-to-charcoal charges in the bloomery | 8 y | 49 min | bloomery_charge_control | n/r |
+| **660 (660–690)** | **Bloomery smelting: iron reduced to a spongy bloom** | 12 y | 73 min | bloomery_smelting | 101 |
+| 662 (660–690) | Iron ore assaying by color, weight and a test bloom | 6 y | 37 min | iron_assaying | 75 |
+| 666 (660–695) | Measured ore-to-charcoal charges in the bloomery | 8 y | 49 min | bloomery_charge_control | n/r |
 | 670 (650–700) | Blooms consolidated by repeated hot hammering | 6 y | 37 min | NEW · bloom_consolidation | — |
-| **675 (655–705)** | **Forge welding: iron joined at white heat with flux** | 10 y | 61 min | forge_welding | 108 |
+| **675 (660–705)** | **Forge welding: iron joined at white heat with flux** | 10 y | 61 min | forge_welding | 108 |
 | 680 (660–710) | Smith's tool set: tongs, anvil, swages and punches | 5 y | 30 min | NEW · smithing_tool_sets | — |
 | 685 (660–715) | Slag tapped from the furnace during the smelt | 6 y | 37 min | NEW · slag_tapping | — |
 | 690 (665–720) | Blooms split and graded by their fracture | 5 y | 30 min | NEW · bloom_fracture_grading | — |

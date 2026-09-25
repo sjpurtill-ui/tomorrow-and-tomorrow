@@ -149,19 +149,16 @@ The written-alphabet trunk (`consonantal_alphabet` → `full_vowel_alphabet` →
 ## Spot checks used by the game tests
 
 - **`glass_blowing`.** Proposed year 1010, band 975–1045. It requires `mandrel_wound_beads` and `decolorized_clear_glass`.
-- **`bloomery_smelting`.** Proposed year 660, band 640–690. It requires 0–600 `shaft_furnaces` and `clay_tuyere_draft`, and needs Iron Ore known.
+- **`bloomery_smelting`.** Proposed year 660, band 660–690. It requires 0–600 `shaft_furnaces` and `clay_tuyere_draft`, and needs Iron Ore known.
 
 ## Open items
 
-- **Earlier openings than the redates.** The game's 0–600 block redates 11 catalog ids that this block now designs. A designed item wins over a redate, so its `min_year` becomes its `band_low`, and all 11 can now open earlier than the redate allowed:
+- **Iron floor (fixed at the source).** The game's 0–600 block redated the iron items to no earlier than 660, and `BRIEF.md` says iron smelting begins around game 660. A designed item's `min_year` is its `band_low`, which overrides a redate, so the list bands would have let iron open at 640–655. `PRODUCTION_600_1200.md` now floors band_low at 660 for `bloomery_smelting`, `iron_assaying`, `bloomery_charge_control` and `forge_welding`. Their target years are unchanged.
+- **Other redated ids that open earlier than before.** The 0–600 block also redates 7 other ids that this block now designs. Their band_low is below the old redate:
 
   | id | band_low | old redate |
   |---|---:|---:|
   | `masonry_arch_centering` | 595 | 620 |
-  | `iron_assaying` | 640 | 660 |
-  | `bloomery_smelting` | 640 | 660 |
-  | `forge_welding` | 655 | 660 |
-  | `bloomery_charge_control` | 645 | 660 |
   | `professional_corps` | 630 | 660 |
   | `galley_navigation` | 622 | 660 |
   | `naval_arsenals` | 624 | 660 |
@@ -169,5 +166,5 @@ The written-alphabet trunk (`consonantal_alphabet` → `full_vowel_alphabet` →
   | `amphibious_operations` | 628 | 700 |
   | `grain_milling` | 765 | 800 |
 
-  Hard prerequisites still hold most of them later. For example, `axle_sleeve_fitting` needs `bloomery_smelting`. If the redates (for example, iron at 660) are meant as hard floors, raise those bands at the source.
+  They are left as designed. `axle_sleeve_fitting` still waits for iron through its prerequisite `bloomery_smelting`.
 - **Serial queue pressure.** See *Pacing*. `research_years` totals exceed the window in 7 lines.
