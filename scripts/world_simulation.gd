@@ -19,6 +19,9 @@ var advancing:=false
 # loads finish it first (flush_day), so the save format is unchanged.
 var _day_job:DayJob=null
 var _day_number:=-1
+## Developer profiling: when non-empty, every day's step timings accumulate
+## here (tests/fun_audit harness --profile). Never saved.
+var profile_timings:Dictionary={}
 ## Day whose closing views are still current. Rival catch-up skips its opening
 ## refresh when nothing has changed since then.
 var _views_day:=-1
@@ -639,6 +642,7 @@ func begin_day(day:int,daily_context:Dictionary,construction:Callable=Callable()
 	assert(_day_job==null,"A scheduled world day is still in progress")
 	var S=DayJob
 	var job:=DayJob.new()
+	if timings.is_empty() and not profile_timings.is_empty():timings=profile_timings
 	_plan_rivals(job,day,timings)
 	var phases:Dictionary={} if timings.is_empty() else timings.get_or_add("player_phases",{"enabled":true})
 	var clock=preload("res://scripts/civilization_day.gd")

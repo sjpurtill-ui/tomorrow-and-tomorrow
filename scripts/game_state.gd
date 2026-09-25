@@ -4,6 +4,7 @@ var civilian_injuries:Dictionary={"limited":0.0,"severe":0.0}
 
 const SOCIETAL_VALUES_MODEL:=preload("res://scripts/societal_values_model.gd")
 const EARLY_CARE:=preload("res://scripts/early_life_conditions.gd")
+const TRACE:=preload("res://scripts/performance_trace.gd")
 
 const POPULATION_ROLES := ["Food","Survey","Extraction","Construction","Crafting","Logistics","Knowledge","Administration","Defense"]
 const PRODUCTIVE_POPULATION_ROLES := ["Food","Survey","Extraction","Construction","Crafting","Logistics"]
@@ -899,6 +900,7 @@ func _remove_population_exact(amount:float,cause:String,weight_override:Dictiona
 		for severity in civilian_injuries: civilian_injuries[severity]*=survival
 	population_exact=maxf(1.0,population_exact-removed_total)
 	_normalize_population_cohorts()
+	if TRACE.enabled and self==GameState:TRACE.flow("death" if record_mortality else "departure",cause,removed_total)
 	return removed_total
 
 var lifetime_departures := 0
@@ -1091,6 +1093,7 @@ func register_population_arrivals(count:int,source:String="new arrivals",cohort_
 		population_cohorts[key]=float(population_cohorts.get(key,0.0))+amount
 		added[key]=amount
 	population_exact+=float(actual)
+	if TRACE.enabled and self==GameState:TRACE.flow("arrival",source,float(actual))
 	_refresh_population_summary()
 	synchronize_population_allocations()
 	return {"count":actual,"source":source,"population_after":population_total,"cohorts":added}
@@ -1132,6 +1135,7 @@ func process_reproduction_day(context:Dictionary) -> Dictionary:
 	pregnancy_cohorts["postpartum"]=maxf(0.0,postpartum+deliveries-postpartum/365.0)
 	population_cohorts["children"]=float(population_cohorts.get("children",0.0))+live_births_exact
 	population_exact+=live_births_exact
+	if TRACE.enabled and self==GameState:TRACE.flow("birth","Live births",live_births_exact)
 	_remove_population_exact(neonatal_deaths_exact,"Neonatal complications")
 	_remove_population_exact(maternal_deaths_exact,"Complications of childbirth")
 	_normalize_population_cohorts()

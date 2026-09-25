@@ -42,7 +42,7 @@ const WORK_KINDS:=["great_work","wonder_proposal"]
 const GREAT_WORKS_PATH:="res://scripts/great_works_audience.gd"
 const REPORT_SOURCES:=["scouts","envoys","expedition"]
 const REPORT_FACTS_MAX:=24
-const TOPICS:=["food","health","housing","security","grievance","ambition","introduction","follow_up","war","summons","mourning","callback","omen","aim"]
+const TOPICS:=["food","health","housing","security","people","grievance","ambition","introduction","follow_up","war","summons","mourning","callback","omen","aim"]
 const LIVES_PATH:="res://scripts/court_lives.gd"
 const AIMS_PATH:="res://scripts/legacy_aims.gd"
 const RIVALS_PATH:="res://scripts/rival_rulers.gd"
@@ -753,7 +753,7 @@ static func _situation_type(audience:Dictionary)->String:
 		"news": return "news_report"
 		"petition":
 			var topic:=String((audience.get("petition",{}) as Dictionary).get("topic","")) if audience.get("petition") is Dictionary else ""
-			if topic in ["food","health","housing","security"]: return "crisis_petition"
+			if topic in ["food","health","housing","security","people"]: return "crisis_petition"
 			return "grievance" if topic=="grievance" else "ambition"
 	return String(audience.get("kind",""))
 
@@ -935,9 +935,15 @@ static func _condition_bands(c:Dictionary)->Dictionary:
 	var health:=2 if float(c.health)<0.45 or float(c.water_intake)<0.8 else (1 if float(c.health)<0.62 or float(c.water_intake)<0.95 else 0)
 	var housing:=2 if float(c.housing_ratio)<0.8 else (1 if float(c.housing_ratio)<1.0 else 0)
 	var security:=2 if float(c.foreign_threat)>=0.75 else (1 if float(c.security)<0.36 or float(c.foreign_threat)>0.45 else 0)
-	return {"food":food,"health":health,"housing":housing,"security":security}
+	# fun-pop: the people have been fewer at the end of each of the last winters
+	# (hearth_count.gd). Two winters running, or a tenth lost, and it is a crisis.
+	var people:=0
+	var decline_years:=int(c.get("decline_years",0))
+	if decline_years>=1:
+		people=2 if float(c.get("decline_loss",0.0))>=0.10 or decline_years>=4 else (1 if decline_years>=2 or float(c.get("decline_loss",0.0))>=0.03 else 0)
+	return {"food":food,"health":health,"housing":housing,"security":security,"people":people}
 
-const TOPIC_OFFICES:={"food":["Steward","Quartermaster"],"health":["Steward","Scholar"],"housing":["Steward","Quartermaster"],"security":["Marshal"]}
+const TOPIC_OFFICES:={"food":["Steward","Quartermaster"],"health":["Steward","Scholar"],"housing":["Steward","Quartermaster"],"security":["Marshal"],"people":["Steward","Scholar"]}
 
 static func _observe_court(day:int,baseline:bool)->void:
 	var watch:Dictionary=state().watch
@@ -1773,6 +1779,7 @@ static func _relevant_official(offices:Array)->Dictionary:
 
 static func conditions()->Dictionary:
 	var metrics:Dictionary=GameState.simulation_metrics
+	var decline:Dictionary=preload("res://scripts/hearth_count.gd").decline()
 	var pop:=_player_population()
 	var housing:=clampf(float(GameState.housing_capacity)/pop,0.0,2.0)
 	var water:Dictionary=GameState.water_metrics
@@ -1786,7 +1793,8 @@ static func conditions()->Dictionary:
 	return {"food_days":float(metrics.get("food_days",30.0)),"food_intake":float(metrics.get("food_intake_ratio",1.0)),
 		"health":float(GameState.population_health),"security":float(metrics.get("security",0.4)),"cohesion":float(metrics.get("cohesion",0.58)),
 		"housing_ratio":housing,"water_intake":float(water.get("intake_ratio",1.0)) if bool(water.get("source_accessible",true)) or float(water.get("required_today",0))>0 else 1.0,
-		"foreign_threat":threat,"threat_name":threat_name,"population":pop}
+		"foreign_threat":threat,"threat_name":threat_name,"population":pop,
+		"decline_years":int(decline.get("years",0)),"decline_loss":-float(decline.get("total_change",0))/maxf(1.0,pop-float(decline.get("total_change",0))),"decline":decline}
 
 static func _ambition_ladder(person:Dictionary)->Array:
 	var office:=String(person.get("office_key",""))
@@ -1818,6 +1826,10 @@ static func _condition_petition(topic:String,band:int,c:Dictionary)->Dictionary:
 		"housing":
 			var homeless:=maxi(1,roundi(float(c.population)-float(GameState.housing_capacity)))
 			return {"summary":"About %d people have no proper shelter." % homeless,"decree":"Build shelters"}
+		"people":
+			var decline:Dictionary=c.get("decline",{})
+			if String(decline.get("summary",""))=="": return {}
+			return {"summary":String(decline.summary),"decree":String(decline.get("decree",""))}
 		"security":
 			var summary:String="The watch is thin; the settlements feel unsafe." if String(c.threat_name)=="" or float(c.foreign_threat)<0.45 else "%s presses on the frontier and the watch is too thin to answer it." % String(c.threat_name)
 			return {"summary":summary,"decree":"Raise a watch and post guards"}
@@ -1906,7 +1918,7 @@ static func _generate_petition(person_id:int,day:int,forced_topic:String)->Dicti
 		if topic=="": topic="ambition"
 	var built:={}
 	match topic:
-		"food","health","housing","security": built=_court_petition("condition",person,{"topic":topic},day)
+		"food","health","housing","security","people": built=_court_petition("condition",person,{"topic":topic},day)
 		"grievance": built=_court_petition("grievance",person,{},day)
 		"introduction": built=_court_petition("appointment",person,{},day)
 		"war": built=_court_petition("war_council",person,{"enemy_name":"the enemy"},day)
@@ -1920,7 +1932,7 @@ static func _generate_petition(person_id:int,day:int,forced_topic:String)->Dicti
 	return _court_audience(person,built,occasion,day)
 
 static func _topic_words(topic:String)->String:
-	return {"food":"the food stores","health":"the sick and the water","housing":"shelter for the people","security":"the watch","grievance":"a personal grievance","ambition":"a proposal of their own",
+	return {"food":"the food stores","health":"the sick and the water","people":"the people growing fewer","housing":"shelter for the people","security":"the watch","grievance":"a personal grievance","ambition":"a proposal of their own",
 		"introduction":"their new office","follow_up":"a promise you made","war":"the war","summons":"your summons","aim":"what the people should strive for"}.get(topic,"a matter of state")
 
 # --------------------------------------------------------------------------

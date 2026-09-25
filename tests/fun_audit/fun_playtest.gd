@@ -41,6 +41,17 @@ var aim_policy:="player"
 var aim_due:Dictionary={}
 var aim_logged:Dictionary={}
 var policy:="random"
+## --profile: per-year CPU by day step and frame, and population accounting
+## by cause and by step (scripts/performance_trace.gd).
+var profile:=false
+## --petitions=1: a careful player also summons officials who hold a crisis
+## petition (food, health, housing, people...) and issues their decree.
+var petitions:=false
+## --route=1: decrees carried by resolved answers (aim_press) are issued, as
+## the audience modal does. Off by default to match the round-2 audit runs.
+var route:=false
+const Trace:=preload("res://scripts/performance_trace.gd")
+var prof:Dictionary={"adv_us":0,"frame_us":0,"harness_us":0,"days":0,"pop_outside_steps":0.0,"pop_court":0.0,"pop_last":-1.0}
 
 func _arg(n:String,f:String)->String:
 	for a in OS.get_cmdline_user_args():
@@ -59,6 +70,12 @@ func _ready()->void:
 	var seed_value:=int(_arg("seed","424242"))
 	var ambition:=_arg("ambition","makers")
 	policy=_arg("policy","random")
+	profile=_arg("profile","0")=="1"
+	petitions=_arg("petitions","0")=="1"
+	route=_arg("route","0")=="1" or petitions
+	if profile:
+		Trace.enabled=true
+		WorldSimulation.profile_timings={"enabled":true}
 	rng.seed=seed_value
 	aim_policy=_arg("aims","player")
 	if ResourceLoader.exists(AIMS_PATH): aims=load(AIMS_PATH) as GDScript
@@ -90,7 +107,9 @@ func _ready()->void:
 				settled_try=int(GameState.elapsed_days)+3
 				terrain._start_settlement_here()
 				if GameState.settlement_site_committed:
-					w("settled",{"status":String(terrain.travel_status_label.text) if terrain.travel_status_label else ""})
+					var at:Vector3=terrain.settler_marker.position if terrain.settler_marker else Vector3.ZERO
+					var biome:Dictionary=terrain._biome_at(at.x,at.z)
+					w("settled",{"status":String(terrain.travel_status_label.text) if terrain.travel_status_label else "","biome":String(biome.get("id","")),"biome_label":String(biome.get("label",""))})
 					founded_day=int(GameState.elapsed_days)
 					# The founding frame: what opens by itself, what the rail offers.
 					for i in 3:await get_tree().process_frame
@@ -110,21 +129,35 @@ func _ready()->void:
 				SimulationPauseRelease.release_all(terrain)
 				terrain._set_game_speed(5)
 		var s:=Time.get_ticks_msec()
+		var us0:=Time.get_ticks_usec()
+		var pop0:=GameState.population_exact
+		if float(prof.get("pop_last",-1.0))>=0.0:prof.pop_court=float(prof.pop_court)+pop0-float(prof.pop_last)
+		var step_sum0:=_sum_values(Trace.population_steps)
 		terrain.advance_world_time(1.0)
 		chunk_ms+=Time.get_ticks_msec()-s
+		var us1:=Time.get_ticks_usec()
+		prof.adv_us=int(prof.adv_us)+us1-us0
+		prof.pop_outside_steps=float(prof.pop_outside_steps)+(GameState.population_exact-pop0)-(_sum_values(Trace.population_steps)-step_sum0)
+		prof.days=int(prof.days)+1
+		prof.pop_last=GameState.population_exact
 		await get_tree().process_frame
+		var us2:=Time.get_ticks_usec()
+		prof.frame_us=int(prof.frame_us)+us2-us1
 		_collect()
 		_handle_court()
+		_handle_aims()
+		_handle_petitions()
+		prof.harness_us=int(prof.harness_us)+Time.get_ticks_usec()-us2
 		if founded_day>=0 and GameState.elapsed_days<=founded_day+600:_first_ten_sample()
 		elif founded_day>=0 and not ui_marks.has("first_ten"):
 			ui_marks["first_ten"]=true
 			w("ui_first_ten",first_ten)
-		_handle_aims()
 		var y:=int(GameState.elapsed_days/365.0)
 		if y!=last_year_mark:
 			last_year_mark=y
 			_year_row(y,chunk_ms);chunk_ms=0
-			if y in [1,5,10,25] and not ui_marks.has(y):
+			if profile:_profile_row(y)
+			if y in [1,5,10,25,50,75,100] and not ui_marks.has(y):
 				ui_marks[y]=true
 				w("ui",UiMeasure.measure(terrain,"year %d" % y))
 	_collect()
@@ -156,7 +189,84 @@ func _year_row(y:int,ms:int)->void:
 	var civ_contacts:=0
 	for c in CivilizationSystem.civilizations:
 		if int((c.get("player_relation",{}) as Dictionary).get("contact_level",0))>0:civ_contacts+=1
-	w("year",{"year":y,"ms_last_year":ms,"pop":GameState.population_total,"known":GameState.known_discoveries.size(),"food_days":GameState.simulation_metrics.get("food_days",0),"intake":GameState.simulation_metrics.get("food_intake_ratio",0),"built":GameState.settlement_completed.size(),"settlements":GameState.player_settlements.size(),"contacts":civ_contacts,"civs":CivilizationSystem.civilizations.size(),"scout_reports":CivilizationSystem.scout_reports.size(),"officials":GovernmentPeopleSystem.active_offices().size() if GovernmentPeopleSystem.has_method("active_offices") else -1,"matters":Hall.matter_counts(),"chronicle":(CivilizationSystem.chronicle.data.get("chapters",[]) as Array).size() if CivilizationSystem.chronicle else -1,"stage":String(GameState.get("settlement_stage")) if "settlement_stage" in GameState else "","aim":_aim_row()})
+	var wars:=0;var treaties:=0;var met:Array=[]
+	for c in CivilizationSystem.civilizations:
+		var rel:Dictionary=c.get("player_relation",{})
+		if bool(rel.get("at_war",false)):wars+=1
+		if String(rel.get("treaty",""))!="":treaties+=1
+		if int(rel.get("contact_level",0))>0:met.append(String(c.get("name","")))
+	var works:=preload("res://scripts/great_works.gd").works("player")
+	w("year",{"year":y,"wars":wars,"treaties":treaties,"met":met,"works":works.map(func(x:Dictionary)->String:return "%s:%s" % [String(x.get("name",x.get("work_id",""))),String(x.get("status",x.get("stage","")))]),"soldiers":MilitaryCampaign._mobilized_count(),"ms_last_year":ms,"pop":GameState.population_total,"known":GameState.known_discoveries.size(),"food_days":GameState.simulation_metrics.get("food_days",0),"intake":GameState.simulation_metrics.get("food_intake_ratio",0),"built":GameState.settlement_completed.size(),"settlements":GameState.player_settlements.size(),"contacts":civ_contacts,"civs":CivilizationSystem.civilizations.size(),"scout_reports":CivilizationSystem.scout_reports.size(),"officials":GovernmentPeopleSystem.active_offices().size() if GovernmentPeopleSystem.has_method("active_offices") else -1,"matters":Hall.matter_counts(),"chronicle":(CivilizationSystem.chronicle.data.get("chapters",[]) as Array).size() if CivilizationSystem.chronicle else -1,"stage":String(GameState.get("settlement_stage")) if "settlement_stage" in GameState else "","aim":_aim_row()})
+
+func _sum_values(d:Dictionary)->float:
+	var t:=0.0
+	for v in d.values():t+=float(v)
+	return t
+
+func _flatten_timings(d:Dictionary,prefix:String,out_rows:Dictionary)->void:
+	for k in d:
+		var v:Variant=d[k]
+		if not v is Dictionary:continue
+		var vd:Dictionary=v
+		if vd.has("microseconds"):
+			var key:="%s%s" % [prefix,String(k)]
+			out_rows[key]=float(out_rows.get(key,0.0))+float(vd.microseconds)/1000.0
+		else:_flatten_timings(vd,"%s%s/" % [prefix,String(k)],out_rows)
+
+func _top(d:Dictionary,n:int)->Dictionary:
+	var keys:=d.keys()
+	keys.sort_custom(func(a,b)->bool:return absf(float(d[a]))>absf(float(d[b])))
+	var r:Dictionary={}
+	for k in keys.slice(0,n):r[k]=snappedf(float(d[k]),0.001)
+	return r
+
+func _profile_row(y:int)->void:
+	var steps:Dictionary={}
+	_flatten_timings(WorldSimulation.profile_timings,"",steps)
+	# Collapse per-rival detail into one bucket per label.
+	var grouped:Dictionary={}
+	for k:String in steps:
+		var parts:=k.split("/")
+		var gk:=k if parts.size()<2 or not String(parts[0]).begins_with("civ") else "rival/"+"/".join(parts.slice(1))
+		grouped[gk]=float(grouped.get(gk,0.0))+float(steps[k])
+	var frame:Dictionary={}
+	for k in Trace.totals:frame[k]=float(Trace.totals[k].microseconds)/1000.0
+	var mc:Dictionary=GameState.simulation_metrics.get("mortality_components",{})
+	var mcr:Dictionary={}
+	for k in mc:mcr[k]=snappedf(float(mc[k])*1000.0,0.01)
+	w("perf",{"year":y,"days":int(prof.days),"adv_ms":int(prof.adv_us)/1000,"frame_ms":int(prof.frame_us)/1000,"harness_ms":int(prof.harness_us)/1000,"step_ms_total":int(_sum_values(steps)),"steps":_top(grouped,30),"frame_marks":_top(frame,15)})
+	w("demog",{"year":y,"pop":GameState.population_exact,"flow":_top(Trace.population_flow,40),"step_change":_top(Trace.population_steps,20),"outside_steps":snappedf(float(prof.pop_outside_steps),0.001),"court_change":snappedf(float(prof.pop_court),0.001),
+		"life_expectancy":GameState.projected_life_expectancy() if GameState.has_method("projected_life_expectancy") else -1.0,"mortality_per_1000":mcr,"health":GameState.population_health,"absent":int(CivilizationSystem.player_population_commitments().get("total_absent",0)),"reproductive":GameState._reproductive_age_population(),"eligible":int(GameState.simulation_metrics.get("eligible_parents",0)),"conceptions_expected":float(GameState.simulation_metrics.get("annual_conceptions_expected",0.0)),"pregnant":int(GameState.simulation_metrics.get("active_pregnancies",0)),"births":GameState.lifetime_births,"deaths":GameState.lifetime_deaths,"departures":GameState.lifetime_departures,"early_care":(GameState.early_care as Dictionary).duplicate() if "early_care" in GameState else {}})
+	if y%5==0:w("census",_census())
+	WorldSimulation.profile_timings={"enabled":true}
+	Trace.totals.clear();Trace.population_flow.clear();Trace.population_steps.clear()
+	prof={"adv_us":0,"frame_us":0,"harness_us":0,"days":0,"pop_outside_steps":0.0,"pop_court":0.0,"pop_last":prof.get("pop_last",-1.0)}
+
+## Sizes of the growing containers a day may scan: the player's state
+## fields, each civilization record's fields, the court and the Chronicle.
+func _census()->Dictionary:
+	var sizes:Dictionary={}
+	for owner in [["gs",GameState],["civsys",CivilizationSystem],["mil",MilitaryCampaign],["gov",GovernmentPeopleSystem],["disc",DiscoverySystem],["prog",ProgressionSystem],["res",ResourceSystem]]:
+		var node:Object=owner[1]
+		for prop in node.get_property_list():
+			var v:Variant=node.get(String(prop.name))
+			if v is Array or v is Dictionary:
+				var n:int=v.size()
+				if n>=50:sizes["%s.%s" % [owner[0],String(prop.name)]]=n
+	var civ_fields:Dictionary={}
+	for civ in CivilizationSystem.civilizations:
+		for field in civ:
+			var v:Variant=civ[field]
+			if v is Array or v is Dictionary:civ_fields[field]=int(civ_fields.get(field,0))+var_to_str(v).length()
+	var top:Dictionary=_top(civ_fields,12)
+	var actor_sizes:Dictionary={}
+	for id in WorldSimulation.actors:
+		var st:Object=(WorldSimulation.actors[id].systems as Dictionary).get("GameState")
+		if st==null:continue
+		for prop in st.get_property_list():
+			var v:Variant=st.get(String(prop.name))
+			if (v is Array or v is Dictionary) and v.size()>=100:actor_sizes[String(prop.name)]=maxi(int(actor_sizes.get(String(prop.name),0)),v.size())
+	return {"year_sizes":_top(sizes,25),"civ_field_chars":top,"rival_state_max":_top(actor_sizes,15),"hall":var_to_str(Hall.state()).length(),"chronicle":var_to_str(GameState.chronicle).length()}
 
 func _aim_row()->Dictionary:
 	if aims==null: return {}
@@ -202,7 +312,32 @@ func _handle_aims()->void:
 			if not pick in ids: pick=String(ids[0])
 		var lines:Array=(Hall.find(aid).get("lines",[]) as Array).map(func(l:Dictionary)->String:return ("%s: " % String(l.get("speaker","")) if String(l.get("speaker",""))!="" else "")+String(l.get("text","")))
 		var r:=Hall.resolve(aid,pick)
+		_route_decree(String(r.get("decree","")))
 		w("aim_decision",{"holder":String((m.get("holder",{}) as Dictionary).get("name","")),"summary":String(m.get("summary","")).left(300),"options":opts.map(func(o:Dictionary)->String:return String(o.label)),"pick":pick,"lines":lines,"outcome":String(r.get("outcome",r.get("error",""))).left(300)})
+
+## As the audience modal does: a resolved answer that carries a decree is
+## issued as a civic directive (audience_modal.gd _resolve).
+func _route_decree(decree:String)->void:
+	if route and decree!="" and terrain.has_method("issue_civic_directive_text"):
+		terrain.issue_civic_directive_text(decree)
+		w("decree",{"text":decree})
+
+func _handle_petitions()->void:
+	if not petitions: return
+	for m in Hall.matters():
+		if String(m.get("situation_type",""))!="crisis_petition": continue
+		var id:=String(m.get("id",""))
+		if not aim_due.has(id): aim_due[id]=int(GameState.elapsed_days)+rng.randi_range(10,45)
+		if int(GameState.elapsed_days)<int(aim_due[id]): continue
+		var opened:Dictionary=Hall.open_matter(id)
+		if opened.is_empty(): continue
+		var aid:=String(opened.get("id",""))
+		handled_audiences[aid]=true
+		var petition:Dictionary=Hall.find(aid).get("petition",{})
+		var r:=Hall.resolve(aid,"decree")
+		var decree:=String(petition.get("suggested_decree",""))
+		w("petition",{"holder":String((m.get("holder",{}) as Dictionary).get("name","")),"topic":String(petition.get("topic","")),"summary":String(petition.get("summary","")).left(300),"decree":decree,"outcome":String(r.get("outcome",r.get("error",""))).left(200)})
+		if bool(r.get("ok",true)):_route_decree(decree)
 
 func _collect()->void:
 	for e in GameState.simulation_events:

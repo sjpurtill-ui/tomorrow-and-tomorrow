@@ -8,6 +8,11 @@ extends RefCounted
 ## rival civilization's simulation keeps its own count without touching ours.
 
 const Chronicle:=preload("res://scripts/chronicle.gd")
+const Dwindling:=preload("res://scripts/dwindling_cause.gd")
+## Year counters kept across seasons for the winter tally's cause line.
+const YEAR_FIELDS:=["born","buried","infants","mothers"]
+## A decline that has run this many winters is also told in the Chronicle.
+const CHRONICLE_AFTER_YEARS:=2
 const EXCEPTIONAL_CAUSES:=["Hunger","Dehydration","Exposure","Travel exhaustion","Insecurity"]
 const SEASONS:=["spring","summer","autumn","winter"]
 const SEASON_DAYS:=91.25
@@ -51,6 +56,9 @@ static func tally(field:String,count:int)->void:
 	var s:Dictionary=WorldSimulation.state.hearth_season
 	_open(s,int(WorldSimulation.state.elapsed_days))
 	s[field]=int(s.get(field,0))+count
+	if field in YEAR_FIELDS:
+		var year:Dictionary=s.get_or_add("year",{})
+		year[field]=int(year.get(field,0))+count
 	if field in ["born","buried"]:
 		var place:=WorldSimulation.state.settlement_name.strip_edges()
 		if place!="":
@@ -63,6 +71,32 @@ static func tally(field:String,count:int)->void:
 		Chronicle.record_first("first_birth",{"title":"The first child born at %s" % home,"text":"A child was born at the new hearth, the first of its people to know no other home.","kind":"birth","tier":"moment","domain":"population"})
 	elif field=="buried":
 		Chronicle.record_first("first_burial",{"title":"The first grave at %s" % home,"text":"The people buried one of their own beside the new hearth. From now on, this ground holds their dead as well as their living.","kind":"death","tier":"notice","domain":"population"})
+
+
+## The ages of the day's ordinary dead, so the winter tally can say whether
+## the small, the grown or the old are dying. Split by the life table the
+## death rate itself comes from (cohort size x age hazard with the early-care
+## multipliers), which is what the LIVES and babes figures show the player.
+static func tally_ages(count:int)->void:
+	if count<=0:return
+	var state:=WorldSimulation.state
+	var hazards:Dictionary=state._natural_cohort_hazards()
+	var expected:Dictionary={}
+	var total:=0.0
+	for key:String in hazards:
+		var deaths:=float(state.population_cohorts.get(key,0.0))*float(hazards[key])
+		expected[key]=deaths
+		total+=deaths
+	if total<=0.0:return
+	var s:Dictionary=state.hearth_season
+	_open(s,int(state.elapsed_days))
+	var year:Dictionary=s.get_or_add("year",{})
+	var scale:=float(count)/total
+	var grown:=0.0
+	for key in ["youth","early_adults","established_adults","mature_adults"]:grown+=float(expected.get(key,0.0))
+	year["young"]=float(year.get("young",0.0))+float(expected.get("children",0.0))*scale
+	year["grown"]=float(year.get("grown",0.0))+grown*scale
+	year["old"]=float(year.get("old",0.0))+float(expected.get("elders",0.0))*scale
 
 
 static func _open(s:Dictionary,day:int)->void:
@@ -108,9 +142,17 @@ static func advance(events:Array[Dictionary])->void:
 		return
 	var line:=_summary(s,day-1,hemisphere) if told>0 else {}
 	var last_people:=int(s.get("last_people",-1))
+	var year:Dictionary=s.get("year",{})
+	var decline:Dictionary=s.get("decline",{})
 	s.clear()
 	s["hemisphere"]=hemisphere
 	s["last_people"]=int(line.get("people",state.population_total)) if not line.is_empty() else last_people
+	if year_end:
+		var people:=int(line.get("people",_people())) if not line.is_empty() else _people()
+		decline=_close_year(year,decline,people,line)
+		year={"start_people":people}
+	s["year"]=year
+	s["decline"]=decline
 	_open(s,day)
 	if line.is_empty():return
 	state.simulation_events.push_front(line)
@@ -168,6 +210,49 @@ static func _summary(s:Dictionary,end_day:int,hemisphere:float)->Dictionary:
 	text=text.strip_edges()
 	var title:="%s of %s, year %d" % [String(voice.get("count","Tally")),season,year]
 	return {"day":end_day,"start_day":start_day,"end_day":end_day,"title":title,"description":text,"domain":"population","severity":"minor","kind":"hearth_count","season":season,"born":born,"buried":buried,"lost":lost,"people":people,"id":"hearth_%d" % key}
+
+
+static func _people()->int:
+	var people:=WorldSimulation.state.population_total
+	var model:Node=WorldSimulation.settlements
+	if model!=null and model.has_method("national_population"):people=maxi(people,int(model.call("national_population")))
+	return people
+
+
+## Closes a year at the end of winter. When the people are fewer than a year
+## ago, the tally line names who died and why (dwindling_cause.gd); a decline
+## that goes on is also told in the Chronicle, again whenever its cause
+## changes. Returns the decline record the court reads ({years, change,
+## cause, summary, decree, day}), or {} once the people hold or grow.
+static func _close_year(year:Dictionary,decline:Dictionary,people:int,line:Dictionary)->Dictionary:
+	var start:=int(year.get("start_people",-1))
+	if start<=0:return {}
+	var change:=people-start
+	if change>=0:return {}
+	var care:Dictionary=WorldSimulation.state.early_care
+	var why:=Dwindling.explain(year,care,people)
+	if not line.is_empty() and String(why.text)!="":
+		line["description"]=String(line.get("description",""))+" "+String(why.text)
+		line["cause"]=String(why.cause)
+	var years:=int(decline.get("years",0))+1
+	var record:={"years":years,"change":change,"total_change":int(decline.get("total_change",0))+change,"cause":String(why.cause),"summary":String(why.summary),"decree":String(why.decree),"day":int(WorldSimulation.state.elapsed_days),"told":String(decline.get("told","")),"told_day":int(decline.get("told_day",-1))}
+	if Chronicle.active() and WorldSimulation.state.settlement_founded_day>=0:
+		var cause_changed:=String(decline.get("told",""))!=String(why.cause)
+		var stale:=int(WorldSimulation.state.elapsed_days)-int(decline.get("told_day",-100000))>=3*365
+		var heavy:=float(-change)>=0.03*float(start)
+		if (years>=CHRONICLE_AFTER_YEARS or heavy) and (cause_changed or stale):
+			var lost:=-int(record.total_change)
+			Chronicle.record({"title":"Why the hearths are fewer","text":"%s %s" % ["The people have lost %d %s in %s." % [lost,"soul" if lost==1 else "souls","one winter" if years==1 else "%d winters" % years],String(why.text)],
+				"kind":"hearth_count","tier":"notice","domain":"population","key":"dwindling:%d" % int(WorldSimulation.state.elapsed_days),"action":{"kind":"section","section":"health","sub":0}})
+			record["told"]=String(why.cause)
+			record["told_day"]=int(WorldSimulation.state.elapsed_days)
+	return record
+
+
+## The standing decline, for the court (audience_hall.gd): {} when none.
+static func decline()->Dictionary:
+	var s:Dictionary=WorldSimulation.state.hearth_season
+	return s.get("decline",{})
 
 
 static func _change(people:int,last:int,annals:bool)->String:
