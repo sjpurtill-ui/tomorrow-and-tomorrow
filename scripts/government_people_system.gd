@@ -1174,6 +1174,10 @@ func _process_lifespans(day:int,events:Array[Dictionary])->void:
 		# This named person is part of the aggregate population. Register exactly one
 		# death through the same conserved demographic entry point.
 		WorldSimulation.state.register_population_deaths(1,"Natural causes")
+		# research_600: the life table already expects this death; charge it
+		# against the aggregate accumulator so it is not counted twice (the
+		# double count mattered most for a band of a few dozen people).
+		WorldSimulation.state.death_progress-=1.0
 		var service_note:=" while serving as %s" % held_title if held_title!="" else (" while leading a settlement" if local_id!="" else "")
 		var event:Dictionary={"day":day,"title":"Officeholder Died","description":"%s died aged %d%s. The office and local duties now pass through the same succession rules as every other appointment." % [String(person.name),floori(age),service_note],"domain":"institutions","severity":"major"}
 		events.append(event)

@@ -94,6 +94,12 @@ Their labor cost is unchanged. Before this, all three were no-ops once health an
 - **Save compatibility.** Old saves blend in through `early_care_blend`.
 - **Other readers.** The neonatal and maternal factors are used by `consequence_engine.gd` (one delimited line) and `civilization_indicators.gd`.
 
+### Named deaths are not counted twice (`scripts/government_people_system.gd`, `scripts/consequence_engine.gd`)
+
+- **The double count.** A named person (official, leader) who reached their personal death age registered one aggregate death. The aggregate life table had already counted that death.
+- **Who it hurt.** The effect is small for hundreds of people but large for a band of a few dozen. Realized death rates ran well above the projected life expectancy: CDR 53–59 against e0 27.
+- **The fix.** Each named death now takes one expected death from the aggregate accumulator (`death_progress -= 1`), and daily deaths are never negative. The population count stays conserved.
+
 ### Pacing (`scripts/research_600_catalog.gd`, `scripts/discovery_system.gd`)
 
 - **`PACE_BY_YEAR`.** The pace factor depends on the item's design year: 7.0 at year 0, 5.5 at 100, 2.4 at 200, 1.0 at 300, 0.7 at 450 and 0.65 at 600.
@@ -153,3 +159,86 @@ Their labor cost is unchanged. Before this, all three were no-ops once health an
 - **Cropping.** Tiles are cropped the same way as before: the painting box, an 11 px deckle inset, a 4:3 centre crop, then 512×384. They carry no caption.
 
 <!-- RESULTS -->
+## Results
+
+### Before and after (real engine, headless `research_600_campaign_probe`, seed 74119)
+
+| scenario | year | before: pop / growth %/yr / e0 / IMR | after: pop / growth %/yr / e0 / IMR | benchmark typical (low–high) |
+|---|---:|---|---|---|
+| sensible | 50 | 320 / 2.4 / 49.6 / 110 | 109 / 0.35 / 27.9 / 228 | e0 25 (20–30), IMR 260 |
+| sensible | 100 | 1,360 / 3.1 / 52.8 / 71 | 150 / 0.8 / 28.6 / 217 | pop 300 (60–900), growth 0.5 (−0.3–1.4), e0 26 (21–31), IMR 250 (320–190) |
+| sensible | 150 | 7,032 / 3.4 / 55.6 / 63 | 255 / 1.2 / 28.8 / 215 | |
+| sensible | 200 | — | 448 / 1.2 / 28.9 / 214 | |
+| research | 150 | 10,066 / 3.5 / 57.7 / 50 | 298 / — / — / — | |
+| ai | 100 | 1,065 / 2.6 / 42.5 / 132 | (200 y: 392, growth 1.4, CBR 52) | |
+| poor | 100 | 103 / −0.15 / 37.0 / 198 | POOR_ROW_100 | pop low 60, min 30 |
+
+Before, a well-fed society reached near-modern survival (e0 55–58, IMR 50–63) within a century and grew 3%+ a year. Now e0 stays in the 24–29 band. IMR falls from about 300 to about 215 as care practices are adopted. Growth follows the carrying capacity: 0.3–0.8%/yr for the first century, then about 1%/yr while methods and daughter settlements extend the land. Every value is inside the benchmark band.
+
+### Per era (surrogate `tools/sim`, 3 seeds; `LINE_MAX_MATRIX.md`)
+
+| scenario | 100 | 200 | 300 | 400 | 500 | 600 |
+|---|---|---|---|---|---|---|
+| balanced pop | 137 | 329 | 844 | 1,635 | 2,466 | 3,290 |
+| balanced growth %/yr | 0.6 | 0.9 | 1.0 | 0.6 | 0.4 | 0.3 |
+| balanced e0 / IMR | 25.5 / 240 | 26.9 / 221 | 27.1 / 220 | 26.7 / 222 | 26.6 / 223 | 26.5 / 224 |
+| balanced CBR / TFR | 45 / 5.8 | 46 / 5.9 | 46 / 5.9 | 44 / 5.4 | 42 / 5.2 | 41 / 5.1 |
+| balanced food labor % | 60 | 58 | 56 | 55 | 53 | 52 |
+| poor pop | ~50 | ~49 | ~64 | — | — | ~82 |
+
+Benchmark typical population is 300 at year 100, 1,200 at 300 and 3,500 at 600. The balanced surrogate run follows that curve inside the band.
+
+### Milestones (surrogate, mean of 3 seeds)
+
+| milestone | band | sensible | research-heavy |
+|---|---|---:|---:|
+| copper_smelting | 60–125 | 112 | 64 |
+| ox_drawn_ard | 105–185 | 148 | 114 |
+| solid_wheel_assembly | 185–265 | 202 | 199 |
+| pictographic_records | 215–290 | 231 | 224 |
+| four_wheeled_wagons | 220–300 | 264 | 232 |
+| sail_panel_cutting | 230–310 | 253 | 242 |
+| standard_sign_lists | 240–310 | 251 | 248 |
+| kiln_fired_bricks | 290–370 | 300 | 306 |
+| bronze_alloying | 320–400 | 333 | 332 |
+| phonetic_notation | 320–400 | 336 | 332 |
+| formal_archives | 370–440 | 384 | 380 |
+| spoked_wheel_assembly | 460–540 | 471 | 472 |
+| place_value | 470–550 | 486 | 483 |
+| consonantal_alphabet | 520–620 | 537 | 534 |
+| written_law_code | 435–525 | not reached | not reached |
+
+`written_law_code` is gated by `kingship`, which needs 4 settlements (`paramount_chiefdom` needs 3). The probe scenarios never found that many, so the gap comes from expansion, not pacing.
+
+Real engine milestone counts: sensible has 279 discoveries by year 100 and 486 by year 200.
+
+### Strategy sweep and line matrix (surrogate, 295 strategies × 3 seeds × 600 years)
+
+- **Dominance.** No strategy is strictly dominant. None is at least as good as balanced on every facet (no free lunch). At most 2 outcomes per century pass the benchmark high plus its allowed margin.
+- **Focus judgement.** Runs are judged against `benchmarks_focus_600.json` through `tools/research/focus_bench.py`: 1,610 of 1,770 strategy-centuries pass. Balanced, sensible, scouting-heavy and most canonical focuses pass every century.
+- **Remaining focus failures:**
+  - Health UNPAID in timed research-first → care switches.
+  - Infrastructure and logistics UNPAID at years 300–500.
+  - Institutions, labor and infrastructure FREE LUNCH in some centuries at years 400–600.
+  - Growth above focus high in a few focuses at years 300–600 (0.1–0.3 points).
+- **LINE_MAX matrix.**
+  - No `max_<line>` run is superhuman on its own line.
+  - Each leads on its own facets and pays elsewhere. For example, `max_knowledge` stagnates near 100 people with e0 21, and `max_health` has the best IMR among the degenerate runs but a much smaller population.
+  - `max_nutrition` passes the general benchmark on food labor share (41–45%). That is the lead its focus profile allows.
+  - A few degenerate `max_*` and `poor` runs show CBR 46–48 against a general high of 46–47.
+
+### Calibration and tests
+
+- **Calibration.** `python tools/sim/check.py`: OK, 7 truth runs within tolerance.
+- **Suites:**
+  - `test_research_600`, `test_early_life_conditions`, `test_research_visual_atlas` and `test_artifact_culture` pass.
+  - `test_discovery_popup` has 3 failures. They are paper-art paths from main and match the baseline.
+  - `test_directive_system` has 1 failure, which matches the baseline.
+- **Probes.** `research_art_600_probe`, `responsive_decree_probe`, `court_probe` and `court_commands_probe` PASS. `early_consequences_probe`: EC_RESULT.
+
+### Limitations
+
+- The surrogate has no scout-attrition model, so scouting-heavy strategies are judged without their field losses.
+- AI rivals in the surrogate expand one settlement per 30 years. The real AI's expansion is only approximated, and calibration tolerates AI population and education gaps.
+- The probe scenarios found few daughter settlements, so settlement-gated milestones such as `written_law_code` and `kingship` are not reached inside 600 years.
+- The real engine is harsher than the surrogate for tiny populations. POOR_NOTE

@@ -756,7 +756,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	WorldSimulation.state.simulation_metrics["annual_death_rate"]=annual_death_rate
 	WorldSimulation.state.simulation_metrics["mortality_components"]=mortality_components.duplicate(true)
 	WorldSimulation.state.death_progress+=population*annual_death_rate/365.0*span
-	var deaths_today:=floori(WorldSimulation.state.death_progress)
+	var deaths_today:=maxi(0,floori(WorldSimulation.state.death_progress)) # research_600: a named death already registered is a debt, never negative deaths
 	WorldSimulation.state.death_progress-=deaths_today
 	if WorldSimulation.state.population_total-deaths_today<1:
 		deaths_today=maxi(0,WorldSimulation.state.population_total-1)
