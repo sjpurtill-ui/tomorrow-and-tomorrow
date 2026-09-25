@@ -98,8 +98,8 @@
   },
   "logistics": {
    "listed_rows": 79,
-   "canonical": 76,
-   "catalog": 9,
+   "canonical": 75,
+   "catalog": 8,
    "era": 0,
    "new": 67,
    "rows_merged_elsewhere": 2
@@ -121,7 +121,7 @@
    "rows_merged_elsewhere": 3
   }
  },
- "total_canonical": 965,
+ "total_canonical": 964,
  "total_listed_rows": 991,
  "discoveries": [
   {
@@ -2693,7 +2693,7 @@
    "source_file": "docs/research/y600/CULTURE_600_1200.md"
   },
   {
-   "id": "urnfield_cremation",
+   "id": "cremation_urn_cemeteries",
    "line": "culture",
    "name": "Cremation and urn burial fields",
    "target_year": 662,
@@ -10927,20 +10927,6 @@
    "source_file": "docs/research/y600/LOGISTICS_600_1200.md"
   },
   {
-   "id": "sail_seaming",
-   "line": "logistics",
-   "name": "Sailcloth seamed from narrow panels and edge-roped",
-   "target_year": 630,
-   "band_low": 590,
-   "band_high": 670,
-   "research_years": 6.0,
-   "status": "catalog",
-   "shared_with": [],
-   "key_threshold": false,
-   "aliases": [],
-   "source_file": "docs/research/y600/LOGISTICS_600_1200.md"
-  },
-  {
    "id": "harbor_dues_by_cargo",
    "line": "logistics",
    "name": "Harbor dues assessed by cargo",
@@ -15019,6 +15005,14 @@
    "name": "Standard ingot shapes cast for carrying metal by ship and pack",
    "reason": "duplicate of 0-600 registry standard_ingots (production 500; its logistics alias is the oxhide ingot at 570)",
    "source_file": "docs/research/y600/LOGISTICS_600_1200.md"
+  },
+  {
+   "id": "sail_seaming",
+   "line": "logistics",
+   "target_year": 630,
+   "name": "Sailcloth seamed from narrow panels and edge-roped",
+   "reason": "duplicate of sail_seaming adopted into the 0-600 game block (logistics 280, codex/research-1200 tools/research/design_amendments_600.json); brailed_square_sail requires that item",
+   "source_file": "docs/research/y600/LOGISTICS_600_1200.md"
   }
  ],
  "belongs_later": [
@@ -15228,10 +15222,6 @@
   {
    "id": "price_stabilizing_granary",
    "issue": "Canonical id taken from the institutions row because the nutrition slug ever_normal_granary is a calque of a real institution's name."
-  },
-  {
-   "id": "urnfield_cremation",
-   "issue": "'Urnfield' is also the name of a real archaeological culture; the slug is descriptive, but consider cremation_urn_fields."
   }
  ]
 }

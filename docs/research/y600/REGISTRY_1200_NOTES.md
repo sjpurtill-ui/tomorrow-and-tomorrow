@@ -4,7 +4,7 @@
 
 - **Rebuild:** `python tools/research/build_registry_1200.py`. It reads the lists and the 0–600 registry. It resolves catalog ids against `main`, era ids against `origin/codex/era-research-pacing`, and `HISTORICAL_YEAR` against `origin/codex/research-600`.
 - **Validate:** `python tools/research/validate_registry_1200.py`. It checks for unique snake_case ids, a schema that matches 0–600 exactly, all 12 lines, target years in 600–1200 and each inside its band, and no collision with a 0–600 id unless the item is a recorded redate. It also checks that every predecessor resolves, that belongs-later ids are absent, and that no id or name uses a term from the real-name denylist. The current result is **OK**.
-- **Timeline:** game 600 ≈ 1500 BC, 800 ≈ 500 BC, 1200 ≈ AD 360. This follows the `CURVE` in `technology_eras.gd`. `BRIEF.md` still says AD 570; the lists and this registry use AD 360.
+- **Timeline:** game 600 ≈ 1500 BC, 800 ≈ 500 BC, 1200 ≈ AD 360. This follows the `CURVE` in `technology_eras.gd`, and `BRIEF.md` now says the same.
 - **Extra top-level keys:** `window`, `predecessors`, `merge_alias_ids`, `merges`, `renamed_collisions`, `redates`, `excluded_rows`, `belongs_later`, `belongs_before_600` and `ambiguous`. They hold the bookkeeping that 0–600 kept only in its notes. Consumers of the 0–600 schema ignore them.
 - **Predecessors:** a "(continues: id)" note becomes an entry in `predecessors`, keyed by the new id, for 165 entries. The row keeps its own NEW slug, and the continued id stays where it already is. Every predecessor resolves to a 0–600 id or to an id in this block.
 
@@ -23,12 +23,12 @@ The lists contain **991** rows, which matches each file's own stated total. The 
 | nutrition | 86 | 83 | 4 | 0 | 79 | 3 |
 | health | 85 | 85 | 5 | 0 | 80 | 0 |
 | demography | 73 | 69 | 1 | 0 | 68 | 4 |
-| logistics | 79 | 76 | 9 | 0 | 67 | 2 |
+| logistics | 79 | 75 | 8 | 0 | 67 | 2 |
 | ecology | 70 | 67 | 0 | 0 | 67 | 3 |
 | security | 89 | 86 | 16 | 0 | 70 | 3 |
-| **Total** | **991** | **965** | **90** | **0** | **875** | **23** |
+| **Total** | **991** | **964** | **89** | **0** | **875** | **23** |
 
-The total works out as 991 rows = 965 canonical entries + 23 merged aliases + 3 excluded rows. Labor has 74 rows, of which 72 are canonical and 1 is merged elsewhere. The remaining labor row is `craft_guilds`, which was excluded.
+The total works out as 991 rows = 964 canonical entries + 23 merged aliases + 4 excluded rows. Labor has 74 rows, of which 72 are canonical and 1 is merged elsewhere. The remaining labor row is `craft_guilds`, which was excluded.
 
 ## Duplicates merged (23 rows into 22 entries)
 
@@ -71,6 +71,7 @@ The rules follow 0–600. A catalog id listed in two lines stays in the line of 
 - **Excluded as duplicates of 0–600 items:**
   - Production 812 `beam_weight_press` duplicates `beam_olive_press` (nutrition 475).
   - Logistics 610 `standard_ingot_shapes` duplicates `standard_ingots` (production 500, whose logistics alias is the oxhide ingot at 570).
+  - Logistics 630 `sail_seaming` duplicates the `sail_seaming` item that the game adopted into its 0–600 block (logistics 280, from `tools/research/design_amendments_600.json` on `codex/research-1200`). `brailed_square_sail` (650) now requires that 0–600 item.
 
 ## Outside the block
 
@@ -96,10 +97,10 @@ The rules follow 0–600. A catalog id listed in two lines stays in the line of 
   - `drawloom_pattern_control` (1801) and `high_fire_stoneware` (1709).
   - `aggregate_road_foundations`, `vaulted_masonry_roofs`, `timber_roof_trusses` and `domed_masonry_roofs` (all 1747).
   - `caravanserais` (AD 900), `public_credit` (AD 200) and `bookbinding_assemblies` (AD 400).
-  - `grain_milling` (−8000; its catalog label is the rotary mill) and `sail_seaming` (−3000).
+  - `grain_milling` (−8000; its catalog label is the rotary mill). `sail_seaming` (−3000) was excluded as a duplicate of the item the game adopted at 280.
 - **Names:**
   - `price_stabilizing_granary` was chosen over `ever_normal_granary` because the latter is a calque of a real institution's name.
-  - `urnfield_cremation` echoes the name of a real archaeological culture. Consider renaming it `cremation_urn_fields`.
+  - The cremation-cemetery item uses the generic id `cremation_urn_cemeteries` rather than an id echoing a real archaeological culture's name.
   - No other denylist hits.
 - 39 entries near 1200 have bands that reach up to 1240. Every target year is inside the window.
 

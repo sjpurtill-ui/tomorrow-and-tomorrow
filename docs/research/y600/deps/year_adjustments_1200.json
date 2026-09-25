@@ -1,0 +1,13 @@
+{
+ "description": "Year adjustments for graph_1200.json, combined from partials/*_year_adjustments.json. tools/research/build_research_block.py sets proposed_year and shifts the band by proposed - target.",
+ "year_adjustments": [
+  {
+   "id": "textile_rag_pulping",
+   "line": "production",
+   "current": 1095,
+   "proposed": 1080,
+   "reason": "Rag pulp must precede paper_making (1090); inside band 1055-1135, near knowledge alias 1075",
+   "source": "pils"
+  }
+ ]
+}

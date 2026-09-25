@@ -84,6 +84,8 @@ EXCLUDE = {
     ("production", "beam_weight_press"): "duplicate of 0-600 registry beam_olive_press (nutrition 475)",
     ("logistics", "standard_ingot_shapes"): "duplicate of 0-600 registry standard_ingots (production 500; "
         "its logistics alias is the oxhide ingot at 570)",
+    ("logistics", "sail_seaming"): "duplicate of sail_seaming adopted into the 0-600 game block (logistics 280, "
+        "codex/research-1200 tools/research/design_amendments_600.json); brailed_square_sail requires that item",
 }
 
 # Predecessor fixes where a "(continues: id)" note names an excluded id.
@@ -129,8 +131,6 @@ AMBIGUOUS = [
     {"id": "husbandry_handbooks", "issue": "Merged with ecology estate_farming_manuals; years differ by 101 (864 vs 965)."},
     {"id": "price_stabilizing_granary", "issue": "Canonical id taken from the institutions row because the "
         "nutrition slug ever_normal_granary is a calque of a real institution's name."},
-    {"id": "urnfield_cremation", "issue": "'Urnfield' is also the name of a real archaeological culture; the "
-        "slug is descriptive, but consider cremation_urn_fields."},
 ]
 
 

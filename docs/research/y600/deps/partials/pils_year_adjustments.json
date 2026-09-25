@@ -1,0 +1,11 @@
+{
+ "year_adjustments": [
+  {
+   "id": "textile_rag_pulping",
+   "line": "production",
+   "current": 1095,
+   "proposed": 1080,
+   "reason": "Rag pulp must precede paper_making (1090); inside band 1055-1135, near knowledge alias 1075"
+  }
+ ]
+}
