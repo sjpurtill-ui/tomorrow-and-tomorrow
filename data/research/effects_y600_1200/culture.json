@@ -189,7 +189,7 @@
     "adoption_rate": 0.0001,
     "cohesion": 0.0001,
     "knowledge_preservation": 0.0001,
-    "literacy": 0.0024
+    "literacy": 0.0025
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Grave stones name the dead in letters: who they were, and who set up the stone."
@@ -221,7 +221,7 @@
     "cohesion": 0.0001,
     "knowledge_preservation": 0.0014,
     "legitimacy": 0.0001,
-    "literacy": 0.0024
+    "literacy": 0.0025
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "observation": "The great epic is written down in letters, one fixed text for every teacher and reciter.",
@@ -760,7 +760,7 @@
     "fatigue": -0.0001,
     "knowledge_rate": -0.0008,
     "legitimacy": 0.0001,
-    "literacy": 0.0012
+    "literacy": 0.0013
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Schools teach that the soul rises by contemplation toward union with the god.",
@@ -779,7 +779,7 @@
     "cohesion": 0.0001,
     "knowledge_preservation": 0.0001,
     "legitimacy": 0.0001,
-    "literacy": 0.0012
+    "literacy": 0.0013
    },
    "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
    "observation": "Lives of the god's devoted servants are written as models and read aloud on their feast days."
@@ -820,7 +820,7 @@
     "institutional_rigidity": 0.0003,
     "knowledge_preservation": 0.0006,
     "legitimacy": 0.0002,
-    "literacy": 0.0012
+    "literacy": 0.0013
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "The god's sayings are gathered and fixed in one book, and every other version is set aside.",

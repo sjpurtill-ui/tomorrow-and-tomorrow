@@ -142,7 +142,7 @@
    "effects": {
     "conception_support": -0.001,
     "disease_exposure": 0.002,
-    "fertility_transition": 0.0139,
+    "fertility_transition": 0.0121,
     "labor_efficiency": 0.001,
     "modern_survival": 0.0013,
     "neonatal_survival": 0.002
@@ -211,7 +211,7 @@
     "cohesion": -0.0002,
     "conception_support": -0.012,
     "disease_exposure": -0.0003,
-    "fertility_transition": 0.0279
+    "fertility_transition": 0.0241
    },
    "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
    "name": "Rubber Sheaths",
@@ -279,7 +279,7 @@
    "effects": {
     "cohesion": -0.0004,
     "conception_support": -0.07,
-    "fertility_transition": 0.039,
+    "fertility_transition": 0.0338,
     "maternal_safety": 0.004,
     "neonatal_survival": 0.003
    },
@@ -333,7 +333,7 @@
    "effects": {
     "cohesion": 0.0001,
     "conception_support": -0.0051,
-    "fertility_transition": 0.0088,
+    "fertility_transition": 0.0076,
     "maternal_safety": 0.003
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
@@ -487,7 +487,7 @@
    "effects": {
     "cohesion": -0.0002,
     "conception_support": -0.0035,
-    "fertility_transition": 0.1,
+    "fertility_transition": 0.0936,
     "maternal_safety": 0.006
    },
    "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
@@ -524,7 +524,7 @@
    "effects": {
     "cohesion": 0.0004,
     "conception_support": -0.0003,
-    "fertility_transition": 0.025,
+    "fertility_transition": 0.0234,
     "labor_demand": 0.0001,
     "neonatal_survival": 0.002
    },
@@ -689,7 +689,7 @@
    "effects": {
     "cohesion": -0.0002,
     "conception_support": -0.0045,
-    "fertility_transition": 0.0175,
+    "fertility_transition": 0.0152,
     "maternal_safety": 0.004
    },
    "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
@@ -720,7 +720,7 @@
   "family_planning_fieldwork": {
    "effects": {
     "conception_support": -0.0028,
-    "fertility_transition": 0.0117,
+    "fertility_transition": 0.0101,
     "labor_demand": 0.0001,
     "maternal_safety": 0.004,
     "neonatal_survival": 0.0018
@@ -772,7 +772,7 @@
    "effects": {
     "cohesion": -0.0001,
     "conception_support": -0.0022,
-    "fertility_transition": 0.0117
+    "fertility_transition": 0.0101
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Small-family Campaigns",
@@ -810,7 +810,7 @@
    "effects": {
     "cohesion": -0.0005,
     "conception_support": -0.0018,
-    "fertility_transition": 0.0105,
+    "fertility_transition": 0.0091,
     "maternal_safety": 0.01
    },
    "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
@@ -895,7 +895,7 @@
   "long_acting_contraception": {
    "effects": {
     "conception_support": -0.0013,
-    "fertility_transition": 0.021,
+    "fertility_transition": 0.0182,
     "maternal_safety": 0.003
    },
    "art": "res://assets/ui/research/paper/enzyme_catalysis.png",

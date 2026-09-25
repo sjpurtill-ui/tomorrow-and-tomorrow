@@ -181,6 +181,21 @@
    "value": false,
    "source": "research_3000: true mirrors the headless truth-probe world (calibrate.py/check.py set it): no Freshwater deposit past recognized, one site's environment",
    "fit": false
+  },
+  "found_crowding": {
+   "value": 0.15,
+   "source": "research_3000 surrogate player model: crowding (population over 60% of carrying capacity, EarlyLifeConditions) at which a realm founds a daughter settlement; not applied with headless_world",
+   "fit": false
+  },
+  "found_interval_years": {
+   "value": 150.0,
+   "source": "research_3000 surrogate player model: at most one daughter settlement per this many years",
+   "fit": false
+  },
+  "found_from_year": {
+   "value": 600.0,
+   "source": "research_3000 surrogate player model: daughter settlements from this year (the 0-600 balance was fitted to one territory, BENCHMARKS_600)",
+   "fit": false
   }
  },
  "research": {

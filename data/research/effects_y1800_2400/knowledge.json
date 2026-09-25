@@ -29,7 +29,7 @@
     "knowledge_preservation": 0.001,
     "knowledge_rate": 0.0035,
     "labor_demand": 0.0001,
-    "literacy": 0.006,
+    "literacy": 0.0058,
     "state_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
@@ -333,7 +333,7 @@
    "effects": {
     "adoption_rate": 0.001,
     "knowledge_rate": 0.0005,
-    "literacy": 0.0035,
+    "literacy": 0.0031,
     "standardization": 0.0004
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
@@ -438,7 +438,7 @@
     "knowledge_preservation": 0.0002,
     "knowledge_rate": 0.0005,
     "labor_demand": 0.0001,
-    "literacy": 0.0035,
+    "literacy": 0.0031,
     "standardization": 0.0002
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
@@ -483,7 +483,7 @@
    "effects": {
     "adoption_rate": 0.0014,
     "cohesion": -0.0001,
-    "literacy": 0.0021,
+    "literacy": 0.002,
     "state_capacity": 0.0003,
     "trade_capacity": 0.0002
    },
@@ -571,7 +571,7 @@
     "institutional_rigidity": 0.0001,
     "knowledge_preservation": 0.0004,
     "labor_demand": 0.0001,
-    "literacy": 0.0159,
+    "literacy": 0.0153,
     "state_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
@@ -607,7 +607,7 @@
     "construction_rate": 0.0011,
     "craft_output": 0.0009,
     "knowledge_rate": 0.0027,
-    "literacy": 0.006,
+    "literacy": 0.0058,
     "survey_speed": 0.0049
    },
    "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",

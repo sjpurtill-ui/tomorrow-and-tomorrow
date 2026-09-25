@@ -416,23 +416,27 @@ class Surrogate:
         """Settlements that hold land for EarlyLifeConditions.carrying_capacity.
         Truth probes: the player's delegated society stays in one settlement; the
         rival controller founds daughter settlements (about one per 30 years)."""
+        founded = int(getattr(self, "daughters", 0))
         if self.s.ai:
-            return max(self.settlements, 1 + int(min(self.day / YEAR, float(self.p.get("ai_settlement_until", 360.0))) // float(self.p.get("ai_settlement_years", 30.0))))
-        # A growing realm founds daughter settlements (Research600 conditions use
-        # the same count); below settlement_population this is the one founding.
-        return self.settlements
+            return 1 + founded + int(min(self.day / YEAR, float(self.p.get("ai_settlement_until", 360.0))) // float(self.p.get("ai_settlement_years", 30.0)))
+        # The player's realm founds a daughter settlement when its land runs short
+        # (_found_daughters); the truth probes' delegated player never crowds in 100 years.
+        return 1 + founded
+
+    def _found_daughters(self, year: float) -> None:
+        """Surrogate player model (research_3000): a crowded realm founds a daughter
+        settlement, at most one per found_interval_years (not in headless calibration runs)."""
+        if self.p.get("headless_world") or year < float(self.p.get("found_from_year", 600.0)):
+            return
+        last = getattr(self, "_last_found", -1e9)
+        if getattr(self, "crowding", 0.0) >= float(self.p.get("found_crowding", 0.15)) and year - last >= float(self.p.get("found_interval_years", 25.0)):
+            self.daughters = getattr(self, "daughters", 0) + 1
+            self._last_found = year
 
     @property
     def territory_factor(self) -> float:
-        """EarlyLifeConditions.carrying_capacity territory 1 + 1.6 sqrt(n - 1). The
-        player's realm founds settlements as it grows: the count is taken as
-        continuous in population (no step when the second is founded)."""
-        if self.s.ai:
-            return 1.0 + math.sqrt(max(0, int(self.territory_settlements) - 1)) * 1.6
-        n = max(1.0, self.population / float(self.p["settlement_population"]))
-        lo = math.floor(n)
-        f = lambda k: 1.0 + math.sqrt(max(0.0, k - 1.0)) * 1.6
-        return f(lo) + (f(lo + 1) - f(lo)) * (n - lo)
+        """EarlyLifeConditions.carrying_capacity territory 1 + 1.6 sqrt(n - 1)."""
+        return 1.0 + math.sqrt(max(0, int(self.territory_settlements) - 1)) * 1.6
 
     @property
     def settlements(self) -> int:
@@ -1279,6 +1283,15 @@ class Surrogate:
                     # Research600.dead_end: questions nothing later builds on come last.
                     score -= np.where((rel >= 0) & (rel <= cat.design_year[cand] + 0.5), self.stale_k.get("DEAD_END_PENALTY", 0.0), 0.0)
                 item = int(cand[np.argmax(score)])
+                if self.stale_k.get("STALE_DOUBLING") and FOUNDATION_WORK:
+                    # DiscoverySystem: a deferred best question (dead end or leftover past
+                    # STALE_GRACE) yields to foundations of current questions (research_3000).
+                    rel_i = self.relevance[item]
+                    if rel_i >= 0 and (rel_i <= cat.design_year[item] + 0.5 or self.ceiling_era - rel_i > self.stale_k["STALE_GRACE"]):
+                        busy = set(self.active[self.active >= 0].tolist())
+                        found_ids = [i for i in self._foundation_ids(int(cat.channel_line[ch]), year, open_mask) if i not in busy]
+                        if found_ids:
+                            item = found_ids[0]
                 self.active[ch] = item
             researchers = researchers_total * weights[ch] / total_weight
             team = researchers if researchers < 1.0 else 1.0 + math.log10(researchers) * 0.78
@@ -1313,7 +1326,12 @@ class Surrogate:
         cat = self.cat
         n = cat.n
         frontier = []
-        pending = np.where((cat.line == line) & ~self.known & (cat.earliest <= year) & self.cond_ok)[0]
+        pending = (cat.line == line) & ~self.known & (cat.earliest <= year) & self.cond_ok
+        if self.stale_k.get("STALE_ABANDON"):
+            # Research600.pursued: only questions still pursued ask for foundations (research_3000).
+            k = self.stale_k
+            pending &= np.where(self.relevance >= 0, np.maximum(0.0, self.ceiling_era - self.relevance - k["STALE_GRACE"]) / k["STALE_DOUBLING"], 0.0) <= math.log2(k["STALE_ABANDON"])
+        pending = np.where(pending)[0]
         for i in pending.tolist():
             frontier.extend(self._missing_parents(i))
         found, visited, depth = {}, set(), 0
@@ -1516,6 +1534,31 @@ class Surrogate:
             cache[period] = w
         return cache[period]
 
+    def seed_state(self, start_year: float, known_ids: list, adoption: dict, population: float, scholarship: float) -> None:
+        """Mirror of truth_probe.gd _seed_era (research_3000 later-era spot check): the
+        society at game year start_year with these discoveries, adoption and
+        scholarship and ``population`` people (founding age structure), housed, with
+        the founding works and public stores built and two months of stores."""
+        cat = self.cat
+        self.day = float(round(start_year * 365.0))
+        self.known = cat.id_mask(known_ids)
+        self.adoption = np.where(self.known, np.array([float(adoption.get(i, 0.8)) for i in cat.ids]), 0.0)
+        self.discovered_day = np.full(cat.n, -1.0)
+        self.scholarship = float(scholarship)
+        self.coh = np.array([0.32, 0.15, 0.14, 0.13, 0.18, 0.08]) * float(population)
+        self._sync()
+        repro = self._reproductive()
+        self.preg = np.array([0.34, 0.33, 0.33]) * repro * 0.045
+        self.postpartum = repro * 0.018
+        self.housing_capacity = float(population) * 1.1
+        self.stored = float(population) * 60.0
+        self.fresh = 0.0
+        self.last.update({"production": float(population) * 0.95, "need": float(population) * 0.95})
+        self.ready[:] = False
+        self._refresh_ready(np.arange(cat.n))
+        self._effects_update()
+        self._capacities()
+
     def run(self, years: int, record_every: float = 1.0) -> dict:
         p = self.p
         self.phase_a = float(abs(self.seed * 31) % 997)
@@ -1523,12 +1566,13 @@ class Surrogate:
         self.births = self.deaths = self.neonatal = self.maternal = 0.0
         self.imr = 0.0
         self.evidence = np.ones(self.cat.n)
-        self.s_research = self.research_policy(0.0)
-        self._conditions(0.0)
+        start = self.day / YEAR   # 0, or the seeded start year (seed_state)
+        self.s_research = self.research_policy(start)
+        self._conditions(start)
         sub = int(p["substeps_per_month"])
         rows = []
         months = int(years * 12)
-        next_record = 0.0
+        next_record = start
         hearth = False
         for m in range(months + 1):
             year = self.day / YEAR
@@ -1539,6 +1583,7 @@ class Surrogate:
                 break
             if m % 12 == 0:
                 self.s_research = dict(self.research_policy(year))
+                self._found_daughters(year)
                 self._conditions(year)
             if not hearth and self.completed >= 1.0:
                 hearth = True

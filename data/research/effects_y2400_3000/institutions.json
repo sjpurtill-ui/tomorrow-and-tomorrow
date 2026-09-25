@@ -133,7 +133,7 @@
   "public_instruction_ministry": {
    "effects": {
     "adoption_rate": 0.0032,
-    "fertility_transition": 0.045,
+    "fertility_transition": 0.039,
     "institutional_rigidity": 0.0002,
     "knowledge_preservation": 0.0019,
     "labor_demand": 0.0001,
@@ -319,7 +319,7 @@
   "civil_divorce_courts": {
    "effects": {
     "cohesion": -0.0002,
-    "fertility_transition": 0.0098,
+    "fertility_transition": 0.0085,
     "institutional_rigidity": -0.0005,
     "legitimacy": 0.0002
    },
@@ -438,7 +438,7 @@
   "married_women_property": {
    "effects": {
     "cohesion": 0.0003,
-    "fertility_transition": 0.0088,
+    "fertility_transition": 0.0076,
     "legitimacy": 0.0005,
     "trade_capacity": 0.0003
    },
@@ -471,7 +471,7 @@
   "old_age_pensions": {
    "effects": {
     "cohesion": 0.0008,
-    "fertility_transition": 0.0176,
+    "fertility_transition": 0.0153,
     "health_protection": 0.0004,
     "labor_demand": 0.0001,
     "labor_efficiency": -0.0008,
@@ -497,7 +497,7 @@
   "womens_suffrage": {
    "effects": {
     "cohesion": 0.0008,
-    "fertility_transition": 0.0088,
+    "fertility_transition": 0.0076,
     "institutional_rigidity": -0.0016,
     "legitimacy": 0.0016
    },
@@ -795,7 +795,7 @@
   "welfare_state": {
    "effects": {
     "cohesion": 0.0016,
-    "fertility_transition": 0.0233,
+    "fertility_transition": 0.0173,
     "health_protection": 0.0014,
     "labor_demand": 0.0004,
     "labor_efficiency": -0.0016,

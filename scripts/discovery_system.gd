@@ -428,6 +428,10 @@ func _refresh_active_investigations()->void:
 		if String(WorldSimulation.state.active_investigations.get(channel,""))!="": continue
 		var candidate:=_best_candidate_for_channel(channel,current_day)
 		if candidate.is_empty(): candidate=_research_600_foundation_candidate(dynamic_id,current_day) # research_600
+		elif Research600.deferred(String(candidate.get("id","")),society_model.ceiling_era):
+			# research_3000: foundations of current questions before a dead end or leftover.
+			var foundation:=_research_600_foundation_candidate(dynamic_id,current_day)
+			if not foundation.is_empty(): candidate=foundation
 		if not candidate.is_empty(): WorldSimulation.state.active_investigations[channel]=String(candidate.id)
 	WorldSimulation.state.active_observations.clear()
 	for record in active_investigation_records_shallow():
@@ -1442,7 +1446,7 @@ func _research_600_foundation_ids(dynamic_id:String,current_day:int)->Array[Stri
 	var frontier:Array[String]=[]
 	for entry:Dictionary in technology_catalog:
 		if String(entry.get("dynamic",""))!=dynamic_id or known.has(String(entry.get("id",""))): continue
-		if research_600_open(entry,{},current_day): frontier.append_array(_research_600_missing_parents(entry,known))
+		if research_600_open(entry,{},current_day) and Research600.pursued(String(entry.get("id","")),society_model.ceiling_era): frontier.append_array(_research_600_missing_parents(entry,known)) # research_3000: only questions still pursued
 	var found:Dictionary={}
 	var visited:Dictionary={}
 	var depth:=0

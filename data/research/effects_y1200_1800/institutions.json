@@ -694,7 +694,7 @@
     "knowledge_rate": 0.0008,
     "labor_demand": 0.0002,
     "legitimacy": 0.0001,
-    "literacy": 0.0016,
+    "literacy": 0.001,
     "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
@@ -745,7 +745,7 @@
     "institutional_rigidity": 0.0001,
     "knowledge_preservation": 0.0001,
     "legitimacy": 0.0001,
-    "literacy": 0.0016
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Concordance of the God's Law",
@@ -800,7 +800,7 @@
    "effects": {
     "institutional_rigidity": 0.0001,
     "knowledge_preservation": 0.0001,
-    "literacy": 0.0021,
+    "literacy": 0.001,
     "standardization": 0.0003,
     "state_capacity": 0.0001
    },
@@ -910,7 +910,7 @@
     "cohesion": -0.0004,
     "institutional_rigidity": 0.0001,
     "knowledge_preservation": 0.0001,
-    "literacy": 0.0021,
+    "literacy": 0.001,
     "security_efficiency": 0.0004,
     "state_capacity": 0.0001
    },
@@ -923,7 +923,7 @@
    "effects": {
     "institutional_rigidity": -0.0001,
     "legitimacy": 0.0001,
-    "literacy": 0.0021,
+    "literacy": 0.0027,
     "standardization": 0.0001,
     "trade_capacity": 0.0001
    },
@@ -975,7 +975,7 @@
     "adoption_rate": 0.0007,
     "institutional_rigidity": -0.0001,
     "legitimacy": 0.0002,
-    "literacy": 0.0021,
+    "literacy": 0.0027,
     "standardization": 0.0004,
     "state_capacity": 0.0003
    },

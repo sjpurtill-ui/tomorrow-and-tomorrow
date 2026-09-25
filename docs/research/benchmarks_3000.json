@@ -1,6 +1,6 @@
 {
  "schema": "benchmarks_3000/1",
- "description": "Historical plausibility ranges for the 2400-3000 research window (the mechanized era: steam and rail, the electric and chemical age, total war, and the late welfare and information era; about 1800 to 2030 on TechnologyEras.CURVE). Same schema as benchmarks_1200.json; human source and reasoning: docs/research/BENCHMARKS_3000.md. For each metric and game year: min/max bound what is historically plausible at all; low/typical/high are the floor (poor play), typical and best-plausible (best-documented societies of the era) values. 'better' says which direction is an improvement, so for 'lower' metrics the 'low' value is the larger number. Year 2400 is the join with benchmarks_2400.json: it must repeat that file's 2400 row exactly for every shared metric (this build: copied from benchmarks_2400.json for 29 metrics), so the files can be merged by taking the union of each metric's 'years'. 'probe_key' names the facet/RC_ROW field that measures it; null means reported qualitatively only. Metrics introduced by benchmarks_2400.json (state_revenue_pct_output, message_speed_km_per_day, energy_capture_kcal_per_capita_day, cavalry_share_of_force_pct) are continued to 3000; metrics new in this window (manufacturing_labor_share_pct, communication_reach_pct) also carry a year-2400 row. discoveries_known is provisional until registry blocks after 1200 exist.",
+ "description": "Historical plausibility ranges for the 2400-3000 research window (the mechanized era: steam and rail, the electric and chemical age, total war, and the late welfare and information era; about 1800 to 2030 on TechnologyEras.CURVE). Same schema as benchmarks_1200.json; human source and reasoning: docs/research/BENCHMARKS_3000.md. For each metric and game year: min/max bound what is historically plausible at all; low/typical/high are the floor (poor play), typical and best-plausible (best-documented societies of the era) values. 'better' says which direction is an improvement, so for 'lower' metrics the 'low' value is the larger number. Year 2400 is the join with benchmarks_2400.json: it must repeat that file's 2400 row exactly for every shared metric (this build: copied from benchmarks_2400.json for 29 metrics), so the files can be merged by taking the union of each metric's 'years'. 'probe_key' names the facet/RC_ROW field that measures it; null means reported qualitatively only. Metrics introduced by benchmarks_2400.json (state_revenue_pct_output, message_speed_km_per_day, energy_capture_kcal_per_capita_day, cavalry_share_of_force_pct) are continued to 3000; metrics new in this window (manufacturing_labor_share_pct, communication_reach_pct) also carry a year-2400 row. discoveries_known follows the baked registry (tools/research/rescale_known_benchmarks.py).",
  "continues": "docs/research/benchmarks_2400.json",
  "join_2400": {
   "source": "benchmarks_2400.json",
@@ -1235,55 +1235,56 @@
    "probe_key": "known",
    "years": {
     "2400": {
-     "min": 615,
-     "low": 1435,
-     "typical": 2875,
-     "high": 3695,
-     "max": 4104
+     "min": 625,
+     "low": 1457,
+     "typical": 2915,
+     "high": 3748,
+     "max": 4164
     },
     "2500": {
-     "min": 645,
-     "low": 1500,
-     "typical": 3000,
-     "high": 3855,
-     "max": 4284
+     "min": 653,
+     "low": 1524,
+     "typical": 3047,
+     "high": 3918,
+     "max": 4353
     },
     "2600": {
-     "min": 670,
-     "low": 1560,
-     "typical": 3125,
-     "high": 4020,
-     "max": 4464
+     "min": 696,
+     "low": 1624,
+     "typical": 3248,
+     "high": 4176,
+     "max": 4640
     },
     "2700": {
-     "min": 695,
-     "low": 1625,
-     "typical": 3250,
-     "high": 4180,
-     "max": 4644
+     "min": 743,
+     "low": 1733,
+     "typical": 3466,
+     "high": 4456,
+     "max": 4951
     },
     "2800": {
-     "min": 725,
-     "low": 1690,
-     "typical": 3375,
-     "high": 4340,
-     "max": 4824
+     "min": 787,
+     "low": 1836,
+     "typical": 3671,
+     "high": 4720,
+     "max": 5245
     },
     "2900": {
-     "min": 750,
-     "low": 1750,
-     "typical": 3505,
-     "high": 4505,
-     "max": 5004
+     "min": 832,
+     "low": 1942,
+     "typical": 3884,
+     "high": 4993,
+     "max": 5548
     },
     "3000": {
-     "min": 780,
-     "low": 1815,
-     "typical": 3630,
-     "high": 4665,
-     "max": 5184
+     "min": 861,
+     "low": 2008,
+     "typical": 4016,
+     "high": 5163,
+     "max": 5737
     }
-   }
+   },
+   "note": "discoveries_known rows after 1800 are 0.15/0.35/0.70/0.90/1.00 x the baked registry's cumulative target (tools/research/rescale_known_benchmarks.py)"
   },
   "urban_share_pct": {
    "unit": "% of the society's people living in settlements of 5,000 or more",

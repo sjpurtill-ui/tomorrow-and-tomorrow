@@ -212,7 +212,7 @@
   "womens_rights_convention": {
    "effects": {
     "cohesion": 0.0002,
-    "fertility_transition": 0.0279,
+    "fertility_transition": 0.0241,
     "institutional_rigidity": -0.0005,
     "legitimacy": 0.0002
    },
@@ -299,7 +299,7 @@
   "national_history_lessons": {
    "effects": {
     "cohesion": 0.0005,
-    "fertility_transition": 0.0098,
+    "fertility_transition": 0.0085,
     "institutional_rigidity": 0.0001,
     "legitimacy": 0.0008,
     "literacy": 0.0046,
@@ -808,7 +808,7 @@
   "womens_liberation_movement": {
    "effects": {
     "cohesion": 0.0006,
-    "fertility_transition": 0.021,
+    "fertility_transition": 0.0182,
     "institutional_rigidity": -0.0018,
     "labor_efficiency": 0.0004,
     "legitimacy": 0.0008

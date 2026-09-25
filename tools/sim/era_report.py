@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "research"))
 import facets  # noqa: E402
 import focus_bench  # noqa: E402
+import shock_bench  # noqa: E402
 import simlib  # noqa: E402
 
 COLUMNS = [("life_expectancy", "life_expectancy", "{:.1f}"), ("infant_mortality", "infant_mortality", "{:.0f}"), ("tfr", "tfr", "{:.2f}"),
@@ -36,7 +37,20 @@ def _run(args):
     name, seed, years, shocks = args
     result = simlib.run(name, seed, years, simlib.params(), shocks=shocks)
     constants, cat = simlib.data()
-    return name, facets.century_facets(result, cat, years, step=100)
+    era = {int(round(r["year"])): r.get("ceiling_era", r["year"]) for r in result["rows"]}
+    episodes = shock_bench.player_episodes(result["shocks"], era) if shocks else []
+    return name, facets.century_facets(result, cat, years, step=100), episodes
+
+
+class WidenedBench(focus_bench.FocusBench):
+    """FocusBench whose judge() uses the shock-widened bands of ``episodes``."""
+
+    def __init__(self, episodes):
+        super().__init__()
+        self.episodes = episodes
+
+    def judge(self, focus, metric, year, value):
+        return shock_bench.judge(super(), focus, metric, year, value, self.episodes)
 
 
 def research_of(name: str) -> dict:
@@ -59,8 +73,10 @@ def main() -> int:
     with ProcessPoolExecutor(max_workers=args.jobs) as pool:
         outs = list(pool.map(_run, [(s, 1 + k, args.years, args.shocks) for s in args.scenarios for k in range(args.seeds)]))
     by: dict = {}
-    for name, fac in outs:
+    eps_by: dict = {}
+    for name, fac, eps in outs:
         by.setdefault(name, []).append(fac)
+        eps_by.setdefault(name, []).append(eps)
     mean = {s: facets.mean_facets(v) for s, v in by.items()}
     bench = facets.benchmarks()
     fs = focus_bench.FocusBench()
@@ -83,7 +99,10 @@ def main() -> int:
                 cells.append(val)
             focus = fs.classify(research_of(s), c)
             base = mean.get("balanced", {}).get(c) if s != "balanced" else None
-            chk = fs.check_run(focus, {c: row}, balanced=None if base is None else {c: base})
+            # With shocks, a shock recorded in any seed widens the bands for the
+            # checkpoints its window and recovery overlap (shock_bench.py).
+            wfs = WidenedBench([e for eps in eps_by[s] for e in eps]) if args.shocks else fs
+            chk = wfs.check_run(focus, {c: row}, balanced=None if base is None else {c: base})
             bad = [f"{f['metric']} {f['flag']}" for f in chk["flags"] if f["flag"] in ("ABOVE FOCUS HIGH", "OUT OF BOUNDS")]
             low = [f"{f['metric']} low" for f in chk["flags"] if f["flag"] == "below low"]
             unpaid = [f"UNPAID {f}" for f, v in chk["costs"].get(float(c), {}).items() if v["status"] == "UNPAID"]
@@ -93,6 +112,19 @@ def main() -> int:
             rows[c] = {"facets": row, "focus": focus, "verdict": verdict, "ok": chk["ok"]}
         md.append("")
         report["scenarios"][s] = rows
+        if args.shocks:
+            rates = shock_bench.player_rates(eps_by[s], args.years)
+            haz = shock_bench.benchmark_hazards()
+            report.setdefault("shock_rates", {})[s] = rates
+            md += [f"Shock episodes per game century ({s}, mean over seeds) vs the window's hazard range:", "",
+                   "| window | " + " | ".join(shock_bench.KEYS) + " |", "|---|" + "---|" * len(shock_bench.KEYS)]
+            for wname, r in rates.items():
+                cells = []
+                for k in shock_bench.KEYS:
+                    rng = haz.get(wname, {}).get(k)
+                    cells.append(f"{r[k]:.2f}" + (f" ({rng[0]}-{rng[1]})" if rng else ""))
+                md.append(f"| {wname} | " + " | ".join(cells) + " |")
+            md.append("")
     text = "\n".join(md) + "\n"
     print(text)
     if args.md:

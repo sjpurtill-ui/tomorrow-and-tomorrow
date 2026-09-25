@@ -1244,48 +1244,49 @@
      "max": 3024
     },
     "1900": {
-     "min": 480,
-     "low": 1120,
-     "typical": 2245,
-     "high": 2885,
-     "max": 3204
+     "min": 483,
+     "low": 1128,
+     "typical": 2255,
+     "high": 2900,
+     "max": 3222
     },
     "2000": {
-     "min": 510,
-     "low": 1185,
-     "typical": 2370,
-     "high": 3045,
-     "max": 3384
+     "min": 517,
+     "low": 1207,
+     "typical": 2414,
+     "high": 3104,
+     "max": 3449
     },
     "2100": {
-     "min": 535,
-     "low": 1245,
-     "typical": 2495,
-     "high": 3210,
-     "max": 3564
+     "min": 539,
+     "low": 1257,
+     "typical": 2514,
+     "high": 3233,
+     "max": 3592
     },
     "2200": {
-     "min": 560,
-     "low": 1310,
-     "typical": 2620,
-     "high": 3370,
-     "max": 3744
+     "min": 565,
+     "low": 1318,
+     "typical": 2636,
+     "high": 3389,
+     "max": 3766
     },
     "2300": {
      "min": 590,
-     "low": 1375,
-     "typical": 2745,
-     "high": 3530,
-     "max": 3924
+     "low": 1376,
+     "typical": 2752,
+     "high": 3538,
+     "max": 3931
     },
     "2400": {
-     "min": 615,
-     "low": 1435,
-     "typical": 2875,
-     "high": 3695,
-     "max": 4104
+     "min": 625,
+     "low": 1457,
+     "typical": 2915,
+     "high": 3748,
+     "max": 4164
     }
-   }
+   },
+   "note": "discoveries_known rows after 1800 are 0.15/0.35/0.70/0.90/1.00 x the baked registry's cumulative target (tools/research/rescale_known_benchmarks.py)"
   },
   "urban_share_pct": {
    "unit": "% of the society's people living in settlements of 5,000 or more",

@@ -437,7 +437,7 @@
    "effects": {
     "craft_output": 0.0031,
     "knowledge_preservation": 0.0006,
-    "literacy": 0.0014
+    "literacy": 0.0023
    },
    "name": "Techniques Credited to the Teacher Who Began Them",
    "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"

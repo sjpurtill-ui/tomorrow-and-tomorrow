@@ -74,7 +74,7 @@ const GOOD_CONDITIONS:=0.55
 ## only through its era-capped effect channels (SocietyModel.era_ceiling_for),
 ## so it lifts little before the modern era. Missing practices add their excess
 ## on top, weighted by EXCESS_WEIGHT. Old saves blend in with early_care_blend.
-const ERA_BURDEN:={"under5":4.4,"child":5.0,"adult":4.5,"elder":2.3,"neonatal":2.1,"maternal":2.6}
+const ERA_BURDEN:={"under5":4.4,"child":5.0,"adult":4.5,"elder":2.3,"neonatal":2.1,"maternal":3.7}
 const EXCESS_WEIGHT:={"under5":0.15,"child":0.35,"adult":0.5}
 ## Channel totals that relieve the burden, each over its modern limit.
 const RELIEF_CHANNELS:={"health_protection":0.55,"sanitation":0.65,"water_safety":0.60,"disease_exposure":-0.55}
@@ -102,7 +102,7 @@ const BURDEN_OVERLAP_FLOOR:=0.35
 ## Capacity per settlement by game year (people, before improvements).
 ## research_3000: extended to 3000 (industrial farming, rail and steam shipping
 ## let each territory feed far more people after 2400).
-const TERRITORY_CAPACITY:Array=[[0.0,320.0],[100.0,420.0],[200.0,650.0],[300.0,880.0],[600.0,2600.0],[1200.0,5200.0],[1800.0,8000.0],[2400.0,12000.0],[2600.0,17000.0],[2800.0,24000.0],[3000.0,30000.0]]
+const TERRITORY_CAPACITY:Array=[[0.0,320.0],[100.0,420.0],[200.0,650.0],[300.0,880.0],[600.0,2600.0],[1200.0,5200.0],[1800.0,8000.0],[2400.0,12000.0],[2600.0,20000.0],[2800.0,42000.0],[3000.0,60000.0]]
 const CROWDING_ONSET:=0.6
 const CROWDING_MORTALITY:=0.3
 const CROWDING_CONCEPTION:=1.2
@@ -140,9 +140,9 @@ const MODERN_SURVIVAL_LIMIT:=0.85
 ## spread (urban share past URBAN_ONSET, literacy past LITERACY_ONSET). The
 ## share of conceptions not sought applies after every other fertility factor,
 ## beyond conception_support's clamp. Benchmarks: TFR about 1.7 by 3000.
-const TRANSITION_URBAN:=0.30
+const TRANSITION_URBAN:=0.20
 const URBAN_ONSET:=0.25
-const TRANSITION_SCHOOLING:=0.25
+const TRANSITION_SCHOOLING:=0.15
 const LITERACY_ONSET:=0.55
 const TRANSITION_MAX:=0.80
 

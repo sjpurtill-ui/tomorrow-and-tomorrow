@@ -73,7 +73,7 @@ const EFFECT_LIMITS:Dictionary={
 	# share of the baseline life table's hazard that modern medicine and public
 	# health remove, the share of births a society chooses not to have, and the
 	# share of adults who read.
-	"modern_survival":Vector2(-0.10,0.85),"fertility_transition":Vector2(-0.10,0.75),"literacy":Vector2(-0.10,0.99),
+	"modern_survival":Vector2(-0.10,0.85),"fertility_transition":Vector2(-0.10,0.65),"literacy":Vector2(-0.10,0.99),
 	# Extra output per farm worker from machines, fertilizer and bred seed
 	# (FoodSystem cultivated staples): 3.0 is four times the pre-industrial output.
 	"farm_mechanization":Vector2(-0.10,3.0)
@@ -595,11 +595,14 @@ const TECH_LATER_RISE:Array=[[600.0,0.0],[1200.0,0.12],[1800.0,0.24],[2400.0,0.4
 ## 1950 CE), and the modern mortality and fertility transitions, which barely
 ## exist before 1800 CE and follow the benchmark rows century by century.
 const OWN_LATER_RISE:Dictionary={
-	"literacy":[[600.0,0.0],[1200.0,0.09],[1500.0,0.10],[1800.0,0.19],[2100.0,0.30],[2400.0,0.55],[2500.0,0.68],[2600.0,0.85],[2700.0,0.95],[2800.0,0.98],[3000.0,1.0]],
+	"literacy":[[600.0,0.0],[1200.0,0.092],[1300.0,0.071],[1400.0,0.071],[1500.0,0.092],[1600.0,0.112],[1700.0,0.143],[1800.0,0.194],[2100.0,0.30],[2400.0,0.55],[2500.0,0.68],[2600.0,0.85],[2700.0,0.95],[2800.0,0.98],[3000.0,1.0]],
 	"modern_survival":[[600.0,0.0],[2400.0,0.02],[2500.0,0.06],[2600.0,0.14],[2700.0,0.30],[2800.0,0.55],[2900.0,0.80],[3000.0,1.0]],
 	"farm_mechanization":[[600.0,0.0],[2200.0,0.01],[2400.0,0.04],[2500.0,0.09],[2600.0,0.16],[2700.0,0.30],[2800.0,0.55],[2900.0,0.82],[3000.0,1.0]],
 	"fertility_transition":[[600.0,0.0],[2400.0,0.0],[2500.0,0.12],[2600.0,0.38],[2700.0,0.58],[2800.0,0.74],[2900.0,0.88],[3000.0,1.0]],
 }
+## research_3000: keys whose share of the year-600 anchor follows its own curve
+## before 600 (nobody reads before writing, about game year 250).
+const OWN_EARLY_RISE:Dictionary={"literacy":[[0.0,0.0],[150.0,0.0],[300.0,0.5],[600.0,1.0]]}
 ## Share of the known discoveries' eras that defines the knowledge frontier.
 const FRONTIER_PERCENTILE:=0.95
 
@@ -622,7 +625,8 @@ static func era_ceiling_for(effect_id:String,era:float)->Vector2:
 	var modern:=absf(limit.x) if lower else limit.y
 	var anchor:=minf(modern,float(ERA_CEILING_600.get(effect_id,modern*0.5)))
 	var curve:Array=ERA_RISE
-	if effect_id in EARLY_MATURE: curve=EARLY_MATURE_RISE
+	if OWN_EARLY_RISE.has(effect_id): curve=OWN_EARLY_RISE[effect_id]
+	elif effect_id in EARLY_MATURE: curve=EARLY_MATURE_RISE
 	elif effect_id in TECH_KEYS: curve=TECH_RISE
 	var bound:=anchor*_rise(curve,era)
 	if era>600.0:

@@ -614,7 +614,7 @@
     "adoption_rate": 0.0006,
     "knowledge_preservation": 0.0005,
     "labor_demand": 0.0001,
-    "literacy": 0.0016,
+    "literacy": 0.001,
     "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/paper_making-v1.png",
@@ -626,7 +626,7 @@
     "adoption_rate": 0.0004,
     "institutional_rigidity": 0.0002,
     "knowledge_rate": 0.0005,
-    "literacy": 0.0016,
+    "literacy": 0.001,
     "standardization": 0.0004
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
@@ -642,7 +642,7 @@
     "knowledge_rate": 0.0018,
     "labor_demand": 0.0003,
     "legitimacy": 0.0002,
-    "literacy": 0.002,
+    "literacy": 0.0013,
     "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
@@ -658,7 +658,7 @@
     "knowledge_rate": 0.0015,
     "labor_demand": 0.0002,
     "legitimacy": -0.002,
-    "literacy": 0.0016,
+    "literacy": 0.001,
     "observation_rate": 0.0027
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
@@ -672,7 +672,7 @@
     "adoption_rate": 0.0006,
     "institutional_rigidity": 0.0002,
     "legitimacy": 0.0001,
-    "literacy": 0.0016,
+    "literacy": 0.001,
     "standardization": 0.0004
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
@@ -686,7 +686,7 @@
     "knowledge_preservation": 0.0002,
     "knowledge_rate": 0.0024,
     "legitimacy": 0.0001,
-    "literacy": 0.0021
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
    "name": "Scholastic Method",
@@ -699,7 +699,7 @@
     "adoption_rate": 0.0007,
     "institutional_rigidity": 0.0002,
     "knowledge_preservation": 0.0003,
-    "literacy": 0.0021,
+    "literacy": 0.001,
     "standardization": 0.0003
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
@@ -710,7 +710,7 @@
    "effects": {
     "adoption_rate": 0.0009,
     "knowledge_rate": 0.0005,
-    "literacy": 0.0021,
+    "literacy": 0.001,
     "standardization": 0.0009,
     "state_capacity": 0.0006,
     "trade_capacity": 0.0015
@@ -725,7 +725,7 @@
    "effects": {
     "craft_output": 0.0012,
     "knowledge_rate": 0.0005,
-    "literacy": 0.0021,
+    "literacy": 0.001,
     "repair_capacity": 0.002,
     "water_access": 0.0007
    },
@@ -748,7 +748,7 @@
     "adoption_rate": 0.0007,
     "knowledge_preservation": 0.0004,
     "knowledge_rate": 0.0005,
-    "literacy": 0.0021
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/cross_referenced_archives.png",
    "name": "Concordances and Indexes",
@@ -840,7 +840,7 @@
     "construction_rate": 0.0013,
     "craft_output": 0.0002,
     "knowledge_rate": 0.0004,
-    "literacy": 0.0021,
+    "literacy": 0.0027,
     "observation_rate": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
@@ -861,7 +861,7 @@
    "effects": {
     "adoption_rate": 0.0007,
     "labor_demand": 0.0001,
-    "literacy": 0.0021,
+    "literacy": 0.0027,
     "standardization": 0.0002,
     "trade_capacity": 0.0006
    },
@@ -891,7 +891,7 @@
    "effects": {
     "adoption_rate": 0.0003,
     "knowledge_preservation": 0.0004,
-    "literacy": 0.0021
+    "literacy": 0.0027
    },
    "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
    "name": "Numbered Leaves",
@@ -942,7 +942,7 @@
     "institutional_rigidity": -0.0002,
     "knowledge_rate": 0.0005,
     "legitimacy": -0.001,
-    "literacy": 0.0049
+    "literacy": 0.0083
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Learning in the Common Tongue",
@@ -977,7 +977,7 @@
     "adoption_rate": 0.0005,
     "knowledge_preservation": 0.0005,
     "knowledge_rate": 0.0003,
-    "literacy": 0.0049
+    "literacy": 0.0083
    },
    "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
    "name": "Commonplace Books",

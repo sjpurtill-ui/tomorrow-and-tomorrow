@@ -51,7 +51,7 @@ const DAILY_SCALE:=0.12
 ## item's design year. Calibrated with tools/sim so milestones land inside their
 ## design bands (docs/research/BENCHMARKS_600.md).
 ## research_3000: the curve continues through every design block to 3000.
-const PACE_BY_YEAR:Array=[[0.0,7.0],[100.0,5.5],[200.0,2.4],[300.0,1.0],[450.0,0.7],[600.0,0.65],[700.0,0.30],[1200.0,0.20],[1800.0,0.16],[2400.0,0.10],[3000.0,0.05]]
+const PACE_BY_YEAR:Array=[[0.0,7.0],[100.0,5.5],[200.0,2.4],[300.0,1.0],[450.0,0.7],[600.0,0.65],[700.0,0.30],[1200.0,0.20],[1800.0,0.17],[2400.0,0.15],[3000.0,0.10]]
 ## research_3000 parallel research capacity. A band of a few hundred works one
 ## question per staffed channel; a large, literate, well-governed society runs
 ## many investigations at once (academies, universities, laboratories), so a
@@ -291,6 +291,15 @@ static func staleness(id:String,society_era:float)->float:
 static func dead_end(id:String)->bool:
 	var relevance:=relevance_year(id)
 	return relevance>=0.0 and relevance<=float(item(id).get("proposed_year",0.0))+0.5
+
+
+## research_3000: true when registry item `id` is only worth spare attention (a
+## dead end, or left behind past STALE_GRACE): a staffed line then works on the
+## foundations of its current questions first (DiscoverySystem foundation work).
+static func deferred(id:String,society_era:float)->bool:
+	var relevance:=relevance_year(id)
+	if relevance<0.0: return false
+	return dead_end(id) or society_era-relevance>STALE_GRACE
 
 
 ## research_3000: false once registry item `id` is abandoned as superseded.

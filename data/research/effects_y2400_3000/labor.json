@@ -5,7 +5,7 @@
   "first_factory_act": {
    "effects": {
     "fatigue": -0.0111,
-    "fertility_transition": 0.045,
+    "fertility_transition": 0.039,
     "health_risk": -0.004,
     "injury_risk": -0.0054,
     "institutional_rigidity": 0.001,
@@ -210,7 +210,7 @@
   "half_time_schooling": {
    "effects": {
     "fatigue": -0.0011,
-    "fertility_transition": 0.0279,
+    "fertility_transition": 0.0241,
     "knowledge_preservation": 0.0018,
     "labor_demand": 0.0002,
     "literacy": 0.0463
@@ -416,7 +416,7 @@
   },
   "women_office_clerks": {
    "effects": {
-    "fertility_transition": 0.0088,
+    "fertility_transition": 0.0076,
     "knowledge_preservation": 0.0007,
     "labor_efficiency": 0.0029,
     "task_coordination": 0.0008
@@ -517,7 +517,7 @@
    "effects": {
     "cohesion": 0.0002,
     "craft_output": -0.002,
-    "fertility_transition": 0.0221,
+    "fertility_transition": 0.0191,
     "health_protection": 0.0008,
     "knowledge_preservation": 0.0033,
     "labor_demand": 0.0003,
@@ -961,7 +961,7 @@
   "equal_pay_law": {
    "effects": {
     "cohesion": 0.0007,
-    "fertility_transition": 0.0058,
+    "fertility_transition": 0.0051,
     "institutional_rigidity": 0.0006,
     "labor_efficiency": 0.003,
     "legitimacy": 0.0004,

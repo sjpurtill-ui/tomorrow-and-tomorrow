@@ -162,7 +162,7 @@
    "effects": {
     "institutional_rigidity": -0.003,
     "knowledge_preservation": 0.0003,
-    "literacy": 0.0025,
+    "literacy": 0.0031,
     "trade_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
@@ -172,7 +172,7 @@
    "effects": {
     "labor_demand": 0.0001,
     "legitimacy": 0.0001,
-    "literacy": 0.0025,
+    "literacy": 0.0031,
     "observation_rate": 0.0008,
     "state_capacity": 0.0002
    },
@@ -185,7 +185,7 @@
     "institutional_rigidity": -0.006,
     "knowledge_preservation": 0.0023,
     "knowledge_rate": 0.0091,
-    "literacy": 0.0061,
+    "literacy": 0.0078,
     "task_coordination": 0.0005
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
@@ -197,7 +197,7 @@
    "effects": {
     "craft_output": 0.0014,
     "knowledge_preservation": 0.0004,
-    "literacy": 0.0024,
+    "literacy": 0.0025,
     "standardization": 0.0009
    },
    "art": "res://assets/ui/research/subjects/workshop_standards-v1.png",
@@ -269,7 +269,7 @@
     "adoption_rate": 0.0012,
     "knowledge_rate": 0.0003,
     "labor_demand": 0.0004,
-    "literacy": 0.0051,
+    "literacy": 0.0052,
     "task_coordination": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
@@ -567,7 +567,7 @@
     "adoption_rate": 0.0012,
     "knowledge_preservation": 0.0001,
     "knowledge_rate": 0.0001,
-    "literacy": 0.0028
+    "literacy": 0.0029
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
    "observation": "Small marks over the letters show stress, breath and pause, so a stranger reads the verse as its poet meant."
@@ -614,7 +614,7 @@
   },
   "torch_alphabet_signals": {
    "effects": {
-    "literacy": 0.0017,
+    "literacy": 0.0018,
     "security_efficiency": 0.0018,
     "task_coordination": 0.0002,
     "warfare_readiness": 0.0006
@@ -757,7 +757,7 @@
     "knowledge_rate": 0.0012,
     "labor_demand": 0.0002,
     "legitimacy": 0.0001,
-    "literacy": 0.0057
+    "literacy": 0.0058
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "observation": "Towns pay teachers of speech and letters from public funds, and the posts are fiercely competed for."
@@ -872,7 +872,7 @@
     "institutional_rigidity": 0.0003,
     "knowledge_preservation": 0.0005,
     "knowledge_rate": 0.0002,
-    "literacy": 0.0012
+    "literacy": 0.0013
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "Commentators explain the old treatises line by line, and new thought increasingly takes the form of notes.",
@@ -883,7 +883,7 @@
     "adoption_rate": 0.0019,
     "knowledge_rate": 0.0012,
     "labor_demand": 0.0002,
-    "literacy": 0.0012,
+    "literacy": 0.0013,
     "trade_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",

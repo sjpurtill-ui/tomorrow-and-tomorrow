@@ -422,7 +422,7 @@
   "privy_council_minutes": {
    "effects": {
     "knowledge_preservation": 0.0004,
-    "literacy": 0.0035,
+    "literacy": 0.0031,
     "state_capacity": 0.0002,
     "task_coordination": 0.0004
    },

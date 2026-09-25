@@ -405,7 +405,7 @@
    "effects": {
     "adoption_rate": 0.0212,
     "cohesion": 0.0005,
-    "fertility_transition": 0.039,
+    "fertility_transition": 0.0338,
     "knowledge_preservation": 0.0093,
     "knowledge_rate": 0.0023,
     "labor_demand": 0.0006,
@@ -948,7 +948,7 @@
    "effects": {
     "adoption_rate": 0.0141,
     "cohesion": 0.0003,
-    "fertility_transition": 0.0467,
+    "fertility_transition": 0.0347,
     "knowledge_preservation": 0.0135,
     "knowledge_rate": 0.0029,
     "labor_demand": 0.0006,
@@ -1122,7 +1122,7 @@
    "effects": {
     "adoption_rate": 0.0124,
     "cohesion": -0.0001,
-    "fertility_transition": 0.0058,
+    "fertility_transition": 0.0051,
     "knowledge_preservation": 0.0072,
     "knowledge_rate": 0.0034,
     "labor_demand": 0.0004,

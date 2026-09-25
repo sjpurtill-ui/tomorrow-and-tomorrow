@@ -97,6 +97,7 @@ class Constants:
     tech_rise: list = field(default_factory=list)
     tech_later_rise: list = field(default_factory=list)
     own_later_rise: dict = field(default_factory=dict)
+    own_early_rise: dict = field(default_factory=dict)
 
 
 def load_constants() -> Constants:
@@ -170,6 +171,7 @@ def load_constants() -> Constants:
         tech_rise=g.const(sm, "TECH_RISE", default=[], optional=True),
         tech_later_rise=g.const(sm, "TECH_LATER_RISE", default=[], optional=True),
         own_later_rise=g.const(sm, "OWN_LATER_RISE", default={}, optional=True),
+        own_early_rise=g.const(sm, "OWN_EARLY_RISE", default={}, optional=True),
     )
 
 
@@ -419,6 +421,9 @@ def era_bounds(cat: Catalog, c: Constants, era: float) -> tuple[np.ndarray, np.n
     tech = np.array([k in c.tech_keys for k in cat.effect_keys]) if c.tech_keys else np.zeros(len(cat.effect_keys), dtype=bool)
     early = rise(c.tech_rise, era) if c.tech_rise else rise(c.era_rise, era)
     share = np.where(cat.early_mature, rise(c.early_mature_rise, era), np.where(tech, early, rise(c.era_rise, era)))
+    for k, curve in (c.own_early_rise or {}).items():
+        if k in cat.effect_index:
+            share[cat.effect_index[k]] = rise(curve, era)
     bound = cat.anchor * share
     if era > 600.0:
         later = np.where(tech, rise(c.tech_later_rise or c.later_rise, era), rise(c.later_rise, era))
