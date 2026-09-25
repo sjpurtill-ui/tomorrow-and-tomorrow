@@ -66,6 +66,9 @@ const REPEAT_DAYS:=18250
 const MILESTONES:=[25,50,75]
 ## Crisis proposals while an aim is live: at most one per this many days.
 const CRISIS_GAP:=1095
+## Years into a live aim, fresh voices may speak of another (the audit asks
+## that the court speak of an aim at least once a decade).
+const RENEW_DAYS:=1825
 ## Historical growth bands, % per year (benchmarks_600.json growth_pct).
 const GROWTH_BANDS:={0:{"min":-2.0,"low":-0.5,"typical":0.4,"high":1.2,"max":2.0},100:{"min":-1.0,"low":-0.3,"typical":0.5,"high":1.4,"max":1.8},300:{"min":-1.0,"low":-0.2,"typical":0.5,"high":1.5,"max":1.9},600:{"min":-1.0,"low":-0.2,"typical":0.4,"high":1.3,"max":1.8}}
 ## Largest single work at the founding, person-days (benchmarks_600.json
@@ -341,7 +344,7 @@ static func _base(template:String,by:Dictionary,years:int)->Dictionary:
 
 static func _cand_grow(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	var pop:=GameState.population_total
-	var years:=rng.randi_range(12,18)
+	var years:=rng.randi_range(10,14)
 	var goal:=growth_target(pop,years,_focus_aligned("grow"))
 	var c:=_base("grow",by,years)
 	c.target=int(goal.target); c.baseline=pop
@@ -364,7 +367,7 @@ static func _cand_plenty(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	var years:=rng.randi_range(5,7)
 	var c:=_base("plenty",by,years)
 	c.target=ceili(float(years)*365.0*PLENTY_SHARE); c.baseline=0; c.threshold=PLENTY_STORES; c.acc=0.0
-	c.title="No Child Hungry for %s" % _cap(winters(years))
+	c.title="No Child Hungry for %s" % _title(winters(years))
 	c.phrase="keep the stores full and no child hungry through %s" % winters(years)
 	var low:=int(state().low_food_day)
 	var metrics:Dictionary=GameState.simulation_metrics
@@ -452,7 +455,7 @@ static func _cand_knowledge(by:Dictionary,rng:RandomNumberGenerator)->Dictionary
 	var gain:=maxi(3,roundi(rate*float(years)*0.9))
 	var c:=_base("knowledge",by,years)
 	c.target=gain; c.baseline=known
-	c.title="Learn %s New Ways in %s" % [_cap(_count(gain)),_cap(winters(years))]
+	c.title="Learn %s New Ways in %s" % [_cap(_count(gain)),_title(winters(years))]
 	c.phrase="learn %s new ways before %s have passed" % [_count(gain),winters(years)]
 	c.why="Every new way we learn is a winter we survive that we would not have."
 	c.legacy="the Years of Learning"
@@ -513,7 +516,7 @@ static func _cand_fear(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	var c:=_base("fear",by,years)
 	var dread:=DIVINE.civ_dread(civ_id)
 	c.subject=civ_id; c.subject_name=name.substr(0,60)
-	c.target=clampf(dread+0.25,0.3,0.9); c.baseline=dread
+	c.target=clampf(dread+0.15,0.2,0.9); c.baseline=dread
 	c.title="Make %s Fear Our Name" % _the(name)
 	c.phrase="make %s fear our name" % _the(name)
 	match String(slight.situation):
@@ -744,6 +747,8 @@ static func file_proposal(day:int,cands:Array[Dictionary],mode:String="propose")
 	var summary:=""
 	if mode=="crisis":
 		summary="%s would have us set our aim aside for this: %s." % [String(holder.get("name","")),titles[0]]
+	elif mode=="renew":
+		summary="Some at the fire are tired of the old aim and speak of new ones: %s." % "; ".join(titles)
 	else:
 		summary="What should our children say of us? The court speaks of: %s." % "; ".join(titles)
 	audience.petition={"topic":"aim","summary":summary.substr(0,400),"suggested_decree":""}
@@ -753,9 +758,10 @@ static func file_proposal(day:int,cands:Array[Dictionary],mode:String="propose")
 	var entry:=Hall._file_matter(audience,[])
 	s.matter_id=String(entry.get("id",""))
 	s.matter_day=day
+	s["last_proposal_day"]=day
 	s.stats.proposals=int(s.stats.proposals)+1
 	_log("proposed",summary,{"mode":mode,"holder":String(holder.get("name","")),"titles":" | ".join(titles)})
-	Chronicle.record({"key":"aim:proposed:%d:%s" % [day,String(cands[0].cid)],"title":"The Court Speaks of an Aim" if mode!="crisis" else "A Call to Set Our Aim Aside",
+	Chronicle.record({"key":"aim:proposed:%d:%s" % [day,String(cands[0].cid)],"title":"The Court Speaks of an Aim" if mode=="propose" else "A Call to Set Our Aim Aside",
 		"text":"%s waits to be summoned. %s" % [String(holder.get("name","")),summary],"tier":"notice","kind":"court","domain":"institutions",
 		"action":{"kind":"court","focus":{"person_id":int(holder.get("person_id",0))}},"ledger":false})
 	return entry
@@ -783,7 +789,7 @@ static func file_course(day:int)->Dictionary:
 	s.matter_day=day
 	aim["course_filed"]=day
 	_log("course",summary,{"holder":String(holder.get("name",""))})
-	Chronicle.record({"key":"aim:course:%s" % String(aim.id),"title":"Our Aim Falters","text":"%s. %s would speak with the god about it." % [summary,String(holder.get("name",""))],
+	Chronicle.record({"key":"aim:course:%s" % String(aim.id),"title":"Our Aim Falters","text":"%s %s would speak with the god about it." % [summary,String(holder.get("name",""))],
 		"tier":"notice","kind":"court","domain":"institutions","action":{"kind":"court","focus":{"person_id":int(holder.get("person_id",0))}},"ledger":false})
 	return entry
 
@@ -867,7 +873,14 @@ static func _maybe_propose(day:int)->void:
 		var urgent:=""
 		for t in ["plenty","fear"]:
 			if t!=active_t and float(scores.get(t,0.0))>=2.2 and not _recent(t,day): urgent=t
-		if urgent=="": return
+		if urgent=="":
+			# Years into a long aim, fresh voices speak of others.
+			if day-int(s.get("last_proposal_day",day))>=RENEW_DAYS and day-int((s.active as Dictionary).get("start_day",day))>=3*365:
+				var fresh:=propose(day)
+				if fresh.size()>2: fresh.resize(2)
+				for cand in fresh: cand["proposed_day"]=day
+				if not fresh.is_empty(): file_proposal(day,fresh,"renew")
+			return
 		var holder:=_holder_for([])
 		var by:=holder.duplicate(); by["source"]="official"
 		var cand:=_build(urgent,by,_rng("crisis:%d" % day))
@@ -922,7 +935,7 @@ static func on_open(audience:Dictionary)->void:
 		if person.is_empty(): person=holder
 		var model:=_manner(person)
 		_line(audience,person,_say(Lines.URGE.get(model,[]),tokens,"urge:%s" % String(cand.cid)))
-	if String(aim_part.get("mode",""))=="crisis" and has_active():
+	if String(aim_part.get("mode","")) in ["crisis","renew"] and has_active():
 		var aim:Dictionary=state().active
 		_narrate(audience,"[Others at the fire shake their heads. We are sworn to %s: %s.]" % [String(aim.title),value_words(aim)])
 
@@ -970,7 +983,7 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 		if cand.is_empty(): continue
 		var label:=String(cand.title).substr(0,70)
 		out.append(Hall._option("aim_adopt:%s" % String(cand.cid),label,_option_sub(cand),"warm"))
-	if String(aim_part.get("mode",""))=="crisis":
+	if String(aim_part.get("mode","")) in ["crisis","renew"]:
 		out.append(Hall._option("aim_keep","Hold to our aim","We keep the aim we swore. The call is heard, and set aside.","neutral"))
 	else:
 		out.append(Hall._option("aim_wait","Not yet","Let the people wait for a better aim. If you stay silent too long, they will choose one themselves.","neutral"))
@@ -1098,7 +1111,7 @@ static func _press(aim:Dictionary,pid:int)->Dictionary:
 				outcome="You sent %d Food to %s as a gift, for %s." % [roundi(paid),_the(String(aim.subject_name)),String(aim.title)]
 		"fear":
 			var civ_id:=String(aim.subject)
-			DIVINE.add_civ_dread(civ_id,0.05)
+			DIVINE.add_civ_dread(civ_id,0.08)
 			Hall._shift_relation(civ_id,-0.02,0.04)
 			outcome="You showed your strength at the border. %s will hear of it." % _cap(_the(String(aim.subject_name)))
 	if PRESS_DECREES.has(template) and template not in ["friend"]:
@@ -1148,7 +1161,7 @@ static func typed_choice(audience_id:String,text:String,live:bool)->String:
 			for word in pair[0]:
 				if lower.contains(String(word)): return String(pair[1])
 		return ""
-	if lower.contains(" not yet ") or lower.contains(" wait "): return "aim_wait" if String(aim_part.get("mode",""))!="crisis" else "aim_keep"
+	if lower.contains(" not yet ") or lower.contains(" wait "): return "aim_wait" if String(aim_part.get("mode",""))=="propose" else "aim_keep"
 	var template:=template_of_words(text)
 	var found:=""
 	for row_variant in aim_part.get("candidates",[]):
@@ -1196,7 +1209,7 @@ static func from_words(text:String)->Dictionary:
 				cand.subject=named_civ; cand.subject_name=civ_name.substr(0,60)
 				if template=="fear":
 					var dread:=DIVINE.civ_dread(named_civ)
-					cand.target=clampf(dread+0.25,0.3,0.9); cand.baseline=dread
+					cand.target=clampf(dread+0.15,0.2,0.9); cand.baseline=dread
 					cand.legacy="the Years %s Trembled" % _the(civ_name)
 				else:
 					var opinion:=float(_relation(named_civ).get("opinion",0.0))
@@ -1301,7 +1314,10 @@ static func measure(aim:Dictionary)->float:
 			var charted:=float(aim.get("charted_now",base))
 			return clampf((charted-base)/maxf(0.000001,target-base),0.0,1.0)
 		"fear":
-			return clampf((DIVINE.civ_dread(String(aim.subject))-base)/maxf(0.01,target-base),0.0,1.0)
+			# Dread fades between the god's acts; the height it reached counts.
+			var dread:=DIVINE.civ_dread(String(aim.subject))
+			if dread>float(aim.get("peak",0.0)): aim["peak"]=dread
+			return clampf((float(aim.get("peak",dread))-base)/maxf(0.01,target-base),0.0,1.0)
 		"friend":
 			return clampf((float(_relation(String(aim.subject)).get("opinion",base))-base)/maxf(0.01,target-base),0.0,1.0)
 		"unity":
@@ -1360,6 +1376,11 @@ static func _track(day:int,span:int)->void:
 	var elapsed:=float(day-int(aim.start_day))/maxf(1.0,float(int(aim.deadline)-int(aim.start_day)))
 	if elapsed>=0.5 and not aim.has("course_filed") and p<elapsed-0.1 and String(s.matter_id)=="":
 		file_course(day)
+	elif elapsed>=0.75 and aim.has("course_filed") and not aim.has("course_late") and p<elapsed-0.1 and String(s.matter_id)=="":
+		aim["course_late"]=day
+		aim.erase("course_filed")
+		file_course(day)
+		aim["course_filed"]=day
 
 static func _bonds_all(deltas:Dictionary)->void:
 	for person in _officials(): GovernmentPeopleSystem.adjust_person_bonds(int(person.person_id),deltas)
@@ -1556,15 +1577,15 @@ static func _rival_close(r:Dictionary,status:String,day:int)->void:
 	if status=="fulfilled":
 		match String(r.template):
 			"humble":
-				# They got what they wanted from us: they fear the god less.
-				DIVINE.add_civ_dread(String(r.civ_id),-0.05)
+				# They got what they wanted from us: emboldened, they press harder.
+				Hall._shift_relation(String(r.civ_id),-0.02,0.03)
 			"outnumber":
 				if clash: _bonds_all({"love":-0.01})
 	if bool(r.get("known",false)):
 		var text:=""
 		if status=="fulfilled": text="%s of %s has done what they swore: %s.%s" % [String(r.leader),_the(String(r.civ_name)),String(r.phrase),(" It sets back our own aim.") if clash else ""]
 		else: text="%s of %s swore to %s, and it came to nothing. Our people laugh about it at the fires." % [String(r.leader),_the(String(r.civ_name)),String(r.phrase)]
-		Chronicle.record({"key":"aim:rival:%s:%s:%d" % [status,String(r.civ_id),int(r.start_day)],"title":("%s Have Their Way" if status=="fulfilled" else "The Boast of %s Came to Nothing") % _cap(_the(String(r.civ_name))),
+		Chronicle.record({"key":"aim:rival:%s:%s:%d" % [status,String(r.civ_id),int(r.start_day)],"title":("%s Have Their Way" if status=="fulfilled" else "The Boast of %s Came to Nothing") % (_cap(_the(String(r.civ_name))) if status=="fulfilled" else _the(String(r.civ_name))),
 			"text":text,"tier":"notice","kind":"contact","domain":"culture","ledger":true})
 	_log("rival_"+status,String(r.title),{"civ":String(r.civ_name),"clash":clash})
 
