@@ -13,11 +13,11 @@
   ],
   "node_count": 964,
   "edge_counts": {
-   "hard": 1653,
+   "hard": 1655,
    "any": 22,
    "precedent": 1141
   },
-  "cross_block_edges": 1156,
+  "cross_block_edges": 1157,
   "demoted_links": [],
   "year_adjustments": 1
  },
@@ -14577,7 +14577,8 @@
    "research_years": 10.0,
    "key_threshold": false,
    "requires_all": [
-    "incommensurable_lengths"
+    "incommensurable_lengths",
+    "fractional_quantities"
    ],
    "requires_any": [],
    "precedents": [
@@ -14814,7 +14815,8 @@
    "key_threshold": false,
    "requires_all": [
     "ratio_proportion",
-    "demonstrated_geometry"
+    "demonstrated_geometry",
+    "straightedge_compass"
    ],
    "requires_any": [],
    "precedents": [
@@ -15992,22 +15994,22 @@
    "research_years": 6.0,
    "key_threshold": false,
    "requires_all": [
-    "counterweight_cranes"
+    "lever_moments"
    ],
    "requires_any": [],
    "precedents": [
-    "lever_moments"
+    "counterweight_cranes"
    ],
    "conditions": {
     "resources_known": [],
     "environment": [],
     "contact_required": false
    },
-   "note": "Multiple sheaves multiply crane force.",
-   "earliest_feasible_year": 123.5,
-   "serial_line_finish_year": 922.0,
-   "chain_depth": 17,
-   "serial_overrun": false
+   "note": "Multiple sheaves multiply force, by the law of the lever; crane practice precedes.",
+   "earliest_feasible_year": 235.5,
+   "serial_line_finish_year": 1044.0,
+   "chain_depth": 22,
+   "serial_overrun": true
   },
   {
    "id": "standing_running_rigging",
@@ -16119,9 +16121,9 @@
     "contact_required": false
    },
    "note": "Turned sheaves in ship blocks.",
-   "earliest_feasible_year": 129.5,
-   "serial_line_finish_year": 1001.0,
-   "chain_depth": 18,
+   "earliest_feasible_year": 241.5,
+   "serial_line_finish_year": 1050.0,
+   "chain_depth": 23,
    "serial_overrun": true
   },
   {
@@ -16208,9 +16210,9 @@
    },
    "note": "Helical lift built for irrigation.",
    "earliest_feasible_year": 101.5,
-   "serial_line_finish_year": 930.0,
+   "serial_line_finish_year": 1052.0,
    "chain_depth": 13,
-   "serial_overrun": false
+   "serial_overrun": true
   },
   {
    "id": "vessel_distinction",
@@ -16294,7 +16296,7 @@
    },
    "note": "Store receipts circulate as payment.",
    "earliest_feasible_year": 131.5,
-   "serial_line_finish_year": 1009.0,
+   "serial_line_finish_year": 1058.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -16554,9 +16556,9 @@
    },
    "note": "Cast bronze cylinders, turned pistons.",
    "earliest_feasible_year": 115.5,
-   "serial_line_finish_year": 940.0,
+   "serial_line_finish_year": 1062.0,
    "chain_depth": 15,
-   "serial_overrun": false
+   "serial_overrun": true
   },
   {
    "id": "wall_repair_levy",
@@ -16669,9 +16671,9 @@
    },
    "note": "Voussoir arches span rivers.",
    "earliest_feasible_year": 95.5,
-   "serial_line_finish_year": 952.0,
+   "serial_line_finish_year": 1074.0,
    "chain_depth": 13,
-   "serial_overrun": false
+   "serial_overrun": true
   },
   {
    "id": "materia_medica",
@@ -16903,9 +16905,9 @@
    },
    "note": "Arch extended into a barrel vault.",
    "earliest_feasible_year": 95.5,
-   "serial_line_finish_year": 964.0,
+   "serial_line_finish_year": 1086.0,
    "chain_depth": 13,
-   "serial_overrun": false
+   "serial_overrun": true
   },
   {
    "id": "compound_antidotes",
@@ -16958,7 +16960,7 @@
    },
    "note": "Weir gate opened to pass boats.",
    "earliest_feasible_year": 71.5,
-   "serial_line_finish_year": 1019.0,
+   "serial_line_finish_year": 1068.0,
    "chain_depth": 11,
    "serial_overrun": true
   },
@@ -17190,9 +17192,9 @@
    },
    "note": "Water trough mounted on a sighting table.",
    "earliest_feasible_year": 26.0,
-   "serial_line_finish_year": 969.0,
+   "serial_line_finish_year": 1091.0,
    "chain_depth": 5,
-   "serial_overrun": false
+   "serial_overrun": true
   },
   {
    "id": "field_vole_control",
@@ -17447,9 +17449,9 @@
    },
    "note": "Triangulated timbers, iron-fastened.",
    "earliest_feasible_year": 99.5,
-   "serial_line_finish_year": 977.0,
+   "serial_line_finish_year": 1099.0,
    "chain_depth": 14,
-   "serial_overrun": false
+   "serial_overrun": true
   },
   {
    "id": "magistrate_edict_law",
@@ -17796,9 +17798,9 @@
    },
    "note": "Sealed lead pipes cross valleys.",
    "earliest_feasible_year": 143.5,
-   "serial_line_finish_year": 989.0,
+   "serial_line_finish_year": 1111.0,
    "chain_depth": 16,
-   "serial_overrun": false
+   "serial_overrun": true
   },
   {
    "id": "adult_succession_adoption",
@@ -17996,7 +17998,7 @@
    },
    "note": "Dues waived to draw shipping.",
    "earliest_feasible_year": 124.5,
-   "serial_line_finish_year": 1027.0,
+   "serial_line_finish_year": 1076.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -18118,7 +18120,7 @@
    },
    "note": "Baths gain furnace-heated water.",
    "earliest_feasible_year": 42.5,
-   "serial_line_finish_year": 999.0,
+   "serial_line_finish_year": 1121.0,
    "chain_depth": 8,
    "serial_overrun": true
   },
@@ -18205,7 +18207,7 @@
    },
    "note": "Coin-backed relays across many peoples.",
    "earliest_feasible_year": 116.5,
-   "serial_line_finish_year": 1043.0,
+   "serial_line_finish_year": 1092.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -18375,7 +18377,7 @@
    },
    "note": "Bow sail aids steering.",
    "earliest_feasible_year": 99.5,
-   "serial_line_finish_year": 1051.0,
+   "serial_line_finish_year": 1100.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -18523,7 +18525,7 @@
    },
    "note": "Stacked arches carry the conduit.",
    "earliest_feasible_year": 145.5,
-   "serial_line_finish_year": 1013.0,
+   "serial_line_finish_year": 1135.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -18669,7 +18671,7 @@
    },
    "note": "Tolls fixed at the frontier line.",
    "earliest_feasible_year": 83.5,
-   "serial_line_finish_year": 1057.0,
+   "serial_line_finish_year": 1106.0,
    "chain_depth": 13,
    "serial_overrun": true
   },
@@ -18841,7 +18843,7 @@
    },
    "note": "Wardens set bath rules",
    "earliest_feasible_year": 128.5,
-   "serial_line_finish_year": 1029.0,
+   "serial_line_finish_year": 1126.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -18958,7 +18960,7 @@
    },
    "note": "Pile walls dry out pier sites.",
    "earliest_feasible_year": 31.5,
-   "serial_line_finish_year": 1021.0,
+   "serial_line_finish_year": 1143.0,
    "chain_depth": 8,
    "serial_overrun": true
   },
@@ -19075,7 +19077,7 @@
    },
    "note": "Each district levied to keep its road.",
    "earliest_feasible_year": 49.5,
-   "serial_line_finish_year": 1063.0,
+   "serial_line_finish_year": 1112.0,
    "chain_depth": 9,
    "serial_overrun": true
   },
@@ -19338,7 +19340,7 @@
    },
    "note": "Settling tanks split aqueduct flow.",
    "earliest_feasible_year": 149.5,
-   "serial_line_finish_year": 1027.0,
+   "serial_line_finish_year": 1149.0,
    "chain_depth": 17,
    "serial_overrun": true
   },
@@ -19459,7 +19461,7 @@
    },
    "note": "Furnace air passed under raised floors.",
    "earliest_feasible_year": 50.5,
-   "serial_line_finish_year": 1035.0,
+   "serial_line_finish_year": 1157.0,
    "chain_depth": 9,
    "serial_overrun": true
   },
@@ -19547,7 +19549,7 @@
    },
    "note": "Impure lime sets under water.",
    "earliest_feasible_year": 38.5,
-   "serial_line_finish_year": 1045.0,
+   "serial_line_finish_year": 1167.0,
    "chain_depth": 8,
    "serial_overrun": true
   },
@@ -19695,7 +19697,7 @@
    },
    "note": "Monsoon timing written into directions.",
    "earliest_feasible_year": 137.5,
-   "serial_line_finish_year": 1077.0,
+   "serial_line_finish_year": 1126.0,
    "chain_depth": 13,
    "serial_overrun": true
   },
@@ -19783,7 +19785,7 @@
    },
    "note": "Volcanic ash added to hydraulic lime.",
    "earliest_feasible_year": 50.5,
-   "serial_line_finish_year": 1057.0,
+   "serial_line_finish_year": 1179.0,
    "chain_depth": 9,
    "serial_overrun": true
   },
@@ -19898,7 +19900,7 @@
    },
    "note": "Front axle swivels on an iron pin.",
    "earliest_feasible_year": 107.5,
-   "serial_line_finish_year": 1087.0,
+   "serial_line_finish_year": 1136.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -19926,7 +19928,7 @@
    },
    "note": "Damp courses in mortared walls.",
    "earliest_feasible_year": 83.5,
-   "serial_line_finish_year": 1063.0,
+   "serial_line_finish_year": 1185.0,
    "chain_depth": 12,
    "serial_overrun": true
   },
@@ -20128,7 +20130,7 @@
    },
    "note": "Water-lifting machines fitted in hulls.",
    "earliest_feasible_year": 109.5,
-   "serial_line_finish_year": 1095.0,
+   "serial_line_finish_year": 1144.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -20244,7 +20246,7 @@
    },
    "note": "Pozzolanic mortar binds whole rubble walls.",
    "earliest_feasible_year": 89.5,
-   "serial_line_finish_year": 1075.0,
+   "serial_line_finish_year": 1197.0,
    "chain_depth": 12,
    "serial_overrun": true
   },
@@ -20336,7 +20338,7 @@
    },
    "note": "Heated baths become social halls.",
    "earliest_feasible_year": 50.5,
-   "serial_line_finish_year": 1058.0,
+   "serial_line_finish_year": 1129.0,
    "chain_depth": 9,
    "serial_overrun": true
   },
@@ -20480,7 +20482,7 @@
    },
    "note": "Station animals hired by the day.",
    "earliest_feasible_year": 118.5,
-   "serial_line_finish_year": 1101.0,
+   "serial_line_finish_year": 1150.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -20683,7 +20685,7 @@
    },
    "note": "Bath overflow flushes latrines.",
    "earliest_feasible_year": 51.5,
-   "serial_line_finish_year": 1080.0,
+   "serial_line_finish_year": 1202.0,
    "chain_depth": 10,
    "serial_overrun": true
   },
@@ -20827,7 +20829,7 @@
    },
    "note": "Vented public stores on raised floors.",
    "earliest_feasible_year": 81.5,
-   "serial_line_finish_year": 1111.0,
+   "serial_line_finish_year": 1160.0,
    "chain_depth": 11,
    "serial_overrun": true
   },
@@ -21031,7 +21033,7 @@
    },
    "note": "Learned verse devoted to love.",
    "earliest_feasible_year": 192.5,
-   "serial_line_finish_year": 1062.0,
+   "serial_line_finish_year": 1133.0,
    "chain_depth": 19,
    "serial_overrun": true
   },
@@ -21120,7 +21122,7 @@
    },
    "note": "Moulded frames and rigging scale hulls.",
    "earliest_feasible_year": 111.5,
-   "serial_line_finish_year": 1125.0,
+   "serial_line_finish_year": 1174.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -21210,7 +21212,7 @@
    },
    "note": "Concrete poured into sea forms.",
    "earliest_feasible_year": 103.5,
-   "serial_line_finish_year": 1094.0,
+   "serial_line_finish_year": 1216.0,
    "chain_depth": 13,
    "serial_overrun": true
   },
@@ -21299,7 +21301,7 @@
    },
    "note": "Ruler commissions an epic of origins.",
    "earliest_feasible_year": 195.5,
-   "serial_line_finish_year": 1072.0,
+   "serial_line_finish_year": 1143.0,
    "chain_depth": 19,
    "serial_overrun": true
   },
@@ -21462,7 +21464,7 @@
    },
    "note": "Concrete lets housing rise storeys.",
    "earliest_feasible_year": 97.5,
-   "serial_line_finish_year": 1102.0,
+   "serial_line_finish_year": 1224.0,
    "chain_depth": 13,
    "serial_overrun": true
   },
@@ -21520,7 +21522,7 @@
    },
    "note": "Solo dancers mime tragic plots.",
    "earliest_feasible_year": 96.0,
-   "serial_line_finish_year": 1077.0,
+   "serial_line_finish_year": 1148.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -21578,7 +21580,7 @@
    },
    "note": "Rolled lead pipes from distribution tanks.",
    "earliest_feasible_year": 155.5,
-   "serial_line_finish_year": 1108.0,
+   "serial_line_finish_year": 1230.0,
    "chain_depth": 18,
    "serial_overrun": true
   },
@@ -21666,7 +21668,7 @@
    },
    "note": "Courier relay opened to pass-holders.",
    "earliest_feasible_year": 140.5,
-   "serial_line_finish_year": 1135.0,
+   "serial_line_finish_year": 1184.0,
    "chain_depth": 18,
    "serial_overrun": true
   },
@@ -21810,7 +21812,7 @@
    },
    "note": "Neighbour clubs tend street shrines.",
    "earliest_feasible_year": 107.5,
-   "serial_line_finish_year": 1081.0,
+   "serial_line_finish_year": 1152.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -21839,7 +21841,7 @@
    },
    "note": "Brick skin over a concrete core.",
    "earliest_feasible_year": 97.5,
-   "serial_line_finish_year": 1116.0,
+   "serial_line_finish_year": 1238.0,
    "chain_depth": 13,
    "serial_overrun": true
   },
@@ -21868,7 +21870,7 @@
    },
    "note": "Freighters contracted for capital grain.",
    "earliest_feasible_year": 155.5,
-   "serial_line_finish_year": 1145.0,
+   "serial_line_finish_year": 1194.0,
    "chain_depth": 18,
    "serial_overrun": true
   },
@@ -21984,7 +21986,7 @@
    },
    "note": "Strap-on iron shoes for draft animals.",
    "earliest_feasible_year": 110.5,
-   "serial_line_finish_year": 1151.0,
+   "serial_line_finish_year": 1200.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -22130,7 +22132,7 @@
    },
    "note": "Vaulted cistern on column rows.",
    "earliest_feasible_year": 105.5,
-   "serial_line_finish_year": 1126.0,
+   "serial_line_finish_year": 1248.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -22159,7 +22161,7 @@
    },
    "note": "Building cranes moved to the quay.",
    "earliest_feasible_year": 125.5,
-   "serial_line_finish_year": 1159.0,
+   "serial_line_finish_year": 1208.0,
    "chain_depth": 17,
    "serial_overrun": true
   },
@@ -22270,7 +22272,7 @@
    },
    "note": "Intersecting concrete barrel vaults.",
    "earliest_feasible_year": 105.5,
-   "serial_line_finish_year": 1136.0,
+   "serial_line_finish_year": 1258.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -22300,7 +22302,7 @@
    },
    "note": "Chariot teams gain colour-coded fans.",
    "earliest_feasible_year": 131.5,
-   "serial_line_finish_year": 1087.0,
+   "serial_line_finish_year": 1158.0,
    "chain_depth": 17,
    "serial_overrun": true
   },
@@ -22384,7 +22386,7 @@
    },
    "note": "Barges unload deep freighters.",
    "earliest_feasible_year": 117.5,
-   "serial_line_finish_year": 1165.0,
+   "serial_line_finish_year": 1214.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -22583,7 +22585,7 @@
    },
    "note": "Tunnel survey applied to roads.",
    "earliest_feasible_year": 153.5,
-   "serial_line_finish_year": 1146.0,
+   "serial_line_finish_year": 1268.0,
    "chain_depth": 17,
    "serial_overrun": true
   },
@@ -22672,7 +22674,7 @@
    },
    "note": "Stamped jars gain painted details.",
    "earliest_feasible_year": 52.5,
-   "serial_line_finish_year": 1170.0,
+   "serial_line_finish_year": 1219.0,
    "chain_depth": 10,
    "serial_overrun": true
   },
@@ -22734,7 +22736,7 @@
    },
    "note": "Combat shows move to built arenas.",
    "earliest_feasible_year": 138.5,
-   "serial_line_finish_year": 1097.0,
+   "serial_line_finish_year": 1168.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -22791,7 +22793,7 @@
    },
    "note": "Cast panes set in bath windows.",
    "earliest_feasible_year": 115.5,
-   "serial_line_finish_year": 1151.0,
+   "serial_line_finish_year": 1273.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -22873,7 +22875,7 @@
    },
    "note": "Post supplied by its own studs.",
    "earliest_feasible_year": 148.5,
-   "serial_line_finish_year": 1178.0,
+   "serial_line_finish_year": 1227.0,
    "chain_depth": 19,
    "serial_overrun": true
   },
@@ -22989,7 +22991,7 @@
    },
    "note": "Procession route marked by arches.",
    "earliest_feasible_year": 91.5,
-   "serial_line_finish_year": 1105.0,
+   "serial_line_finish_year": 1176.0,
    "chain_depth": 13,
    "serial_overrun": true
   },
@@ -23047,7 +23049,7 @@
    },
    "note": "Basins cleared of silt.",
    "earliest_feasible_year": 97.5,
-   "serial_line_finish_year": 1159.0,
+   "serial_line_finish_year": 1281.0,
    "chain_depth": 13,
    "serial_overrun": true
   },
@@ -23220,7 +23222,7 @@
    },
    "note": "Artful letters edited for readers.",
    "earliest_feasible_year": 182.5,
-   "serial_line_finish_year": 1110.0,
+   "serial_line_finish_year": 1181.0,
    "chain_depth": 18,
    "serial_overrun": true
   },
@@ -23274,7 +23276,7 @@
    },
    "note": "Body slung on straps over the axles.",
    "earliest_feasible_year": 115.5,
-   "serial_line_finish_year": 1186.0,
+   "serial_line_finish_year": 1235.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -23361,7 +23363,7 @@
    },
    "note": "Aqueduct engineers gauge sources first",
    "earliest_feasible_year": 157.5,
-   "serial_line_finish_year": 1129.0,
+   "serial_line_finish_year": 1157.0,
    "chain_depth": 18,
    "serial_overrun": true
   },
@@ -23480,7 +23482,7 @@
    },
    "note": "Long prose tales for private readers.",
    "earliest_feasible_year": 192.5,
-   "serial_line_finish_year": 1118.0,
+   "serial_line_finish_year": 1189.0,
    "chain_depth": 18,
    "serial_overrun": true
   },
@@ -23598,7 +23600,7 @@
    },
    "note": "Vaults rotated into concrete domes.",
    "earliest_feasible_year": 111.5,
-   "serial_line_finish_year": 1175.0,
+   "serial_line_finish_year": 1297.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -23656,7 +23658,7 @@
    },
    "note": "Standardized coin trusted across regions.",
    "earliest_feasible_year": 128.5,
-   "serial_line_finish_year": 1196.0,
+   "serial_line_finish_year": 1245.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -23685,7 +23687,7 @@
    },
    "note": "Illusionist painting on portable panels.",
    "earliest_feasible_year": 191.5,
-   "serial_line_finish_year": 1123.0,
+   "serial_line_finish_year": 1194.0,
    "chain_depth": 19,
    "serial_overrun": true
   },
@@ -23854,7 +23856,7 @@
    },
    "note": "Lighter stone toward the crown.",
    "earliest_feasible_year": 119.5,
-   "serial_line_finish_year": 1183.0,
+   "serial_line_finish_year": 1305.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -23885,7 +23887,7 @@
    },
    "note": "Stages grow into guarded cities.",
    "earliest_feasible_year": 58.5,
-   "serial_line_finish_year": 1206.0,
+   "serial_line_finish_year": 1255.0,
    "chain_depth": 10,
    "serial_overrun": true
   },
@@ -23914,7 +23916,7 @@
    },
    "note": "Spoil containment extended to tailings",
    "earliest_feasible_year": 51.5,
-   "serial_line_finish_year": 1139.0,
+   "serial_line_finish_year": 1167.0,
    "chain_depth": 11,
    "serial_overrun": true
   },
@@ -23943,7 +23945,7 @@
    },
    "note": "Lives compared in pairs.",
    "earliest_feasible_year": 185.5,
-   "serial_line_finish_year": 1129.0,
+   "serial_line_finish_year": 1200.0,
    "chain_depth": 18,
    "serial_overrun": true
   },
@@ -24088,7 +24090,7 @@
    },
    "note": "Coffers cut dome weight.",
    "earliest_feasible_year": 119.5,
-   "serial_line_finish_year": 1191.0,
+   "serial_line_finish_year": 1313.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -24171,7 +24173,7 @@
    },
    "note": "Planed staves hooped into casks.",
    "earliest_feasible_year": 122.5,
-   "serial_line_finish_year": 1216.0,
+   "serial_line_finish_year": 1265.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -24200,7 +24202,7 @@
    },
    "note": "Timber shortages met by distant shipping",
    "earliest_feasible_year": 127.5,
-   "serial_line_finish_year": 1147.0,
+   "serial_line_finish_year": 1175.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -24320,7 +24322,7 @@
    },
    "note": "Brick arches inside concrete walls.",
    "earliest_feasible_year": 103.5,
-   "serial_line_finish_year": 1197.0,
+   "serial_line_finish_year": 1319.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -24433,7 +24435,7 @@
    },
    "note": "One wheel under a carrier's frame.",
    "earliest_feasible_year": 91.5,
-   "serial_line_finish_year": 1222.0,
+   "serial_line_finish_year": 1271.0,
    "chain_depth": 12,
    "serial_overrun": true
   },
@@ -24462,7 +24464,7 @@
    },
    "note": "City fuel from rotated woodland rings",
    "earliest_feasible_year": 39.5,
-   "serial_line_finish_year": 1155.0,
+   "serial_line_finish_year": 1183.0,
    "chain_depth": 7,
    "serial_overrun": true
   },
@@ -24549,9 +24551,9 @@
    },
    "note": "Campaign carved in a spiral relief.",
    "earliest_feasible_year": 50.5,
-   "serial_line_finish_year": 1139.0,
+   "serial_line_finish_year": 1210.0,
    "chain_depth": 10,
-   "serial_overrun": false
+   "serial_overrun": true
   },
   {
    "id": "coordinate_gazetteer_maps",
@@ -24668,7 +24670,7 @@
    },
    "note": "Worn grassland sown again",
    "earliest_feasible_year": 22.5,
-   "serial_line_finish_year": 1163.0,
+   "serial_line_finish_year": 1191.0,
    "chain_depth": 6,
    "serial_overrun": true
   },
@@ -24698,7 +24700,7 @@
    },
    "note": "Guides list shrines and monuments.",
    "earliest_feasible_year": 189.5,
-   "serial_line_finish_year": 1144.0,
+   "serial_line_finish_year": 1215.0,
    "chain_depth": 18,
    "serial_overrun": true
   },
@@ -24786,7 +24788,7 @@
    },
    "note": "Star speakers perform set orations.",
    "earliest_feasible_year": 182.5,
-   "serial_line_finish_year": 1149.0,
+   "serial_line_finish_year": 1220.0,
    "chain_depth": 18,
    "serial_overrun": true
   },
@@ -24814,7 +24816,7 @@
    },
    "note": "Trusses span wide halls.",
    "earliest_feasible_year": 109.5,
-   "serial_line_finish_year": 1207.0,
+   "serial_line_finish_year": 1329.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -24903,7 +24905,7 @@
    },
    "note": "Milestone distances listed by stage.",
    "earliest_feasible_year": 135.5,
-   "serial_line_finish_year": 1230.0,
+   "serial_line_finish_year": 1279.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -25076,7 +25078,7 @@
    },
    "note": "Myth reliefs carved on coffins.",
    "earliest_feasible_year": 45.5,
-   "serial_line_finish_year": 1155.0,
+   "serial_line_finish_year": 1226.0,
    "chain_depth": 8,
    "serial_overrun": true
   },
@@ -25105,7 +25107,7 @@
    },
    "note": "Raised nave walls pierced for light.",
    "earliest_feasible_year": 117.5,
-   "serial_line_finish_year": 1215.0,
+   "serial_line_finish_year": 1337.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -25282,7 +25284,7 @@
    },
    "note": "Wagons classed by road load.",
    "earliest_feasible_year": 113.5,
-   "serial_line_finish_year": 1236.0,
+   "serial_line_finish_year": 1285.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -25309,7 +25311,7 @@
    },
    "note": "Sealed goods pass customs under bond.",
    "earliest_feasible_year": 89.5,
-   "serial_line_finish_year": 1242.0,
+   "serial_line_finish_year": 1291.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -25486,7 +25488,7 @@
    },
    "note": "Conduit drives a chain of mills.",
    "earliest_feasible_year": 157.5,
-   "serial_line_finish_year": 1227.0,
+   "serial_line_finish_year": 1349.0,
    "chain_depth": 17,
    "serial_overrun": true
   },
@@ -25572,7 +25574,7 @@
    },
    "note": "Dikes hold salt meadows for grazing",
    "earliest_feasible_year": 95.5,
-   "serial_line_finish_year": 1173.0,
+   "serial_line_finish_year": 1201.0,
    "chain_depth": 12,
    "serial_overrun": true
   },
@@ -25833,7 +25835,7 @@
    },
    "note": "Concrete dams braced by buttresses.",
    "earliest_feasible_year": 99.5,
-   "serial_line_finish_year": 1237.0,
+   "serial_line_finish_year": 1359.0,
    "chain_depth": 13,
    "serial_overrun": true
   },
@@ -25919,7 +25921,7 @@
    },
    "note": "Transfer orders payable in far markets.",
    "earliest_feasible_year": 141.5,
-   "serial_line_finish_year": 1250.0,
+   "serial_line_finish_year": 1299.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -25948,7 +25950,7 @@
    },
    "note": "Exhausted fields rotated out entirely",
    "earliest_feasible_year": 44.5,
-   "serial_line_finish_year": 1181.0,
+   "serial_line_finish_year": 1209.0,
    "chain_depth": 9,
    "serial_overrun": true
   },
@@ -26035,7 +26037,7 @@
    },
    "note": "Thrown clay tubes form light vaults.",
    "earliest_feasible_year": 103.5,
-   "serial_line_finish_year": 1245.0,
+   "serial_line_finish_year": 1367.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -26152,7 +26154,7 @@
    },
    "note": "Corner arches seat a dome on a square.",
    "earliest_feasible_year": 125.5,
-   "serial_line_finish_year": 1259.0,
+   "serial_line_finish_year": 1381.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -26210,7 +26212,7 @@
    },
    "note": "Appointed officers over reserved forests",
    "earliest_feasible_year": 126.5,
-   "serial_line_finish_year": 1189.0,
+   "serial_line_finish_year": 1217.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -26352,7 +26354,7 @@
    },
    "note": "Haulways built between canal levels.",
    "earliest_feasible_year": 99.5,
-   "serial_line_finish_year": 1260.0,
+   "serial_line_finish_year": 1309.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -26552,9 +26554,9 @@
    },
    "note": "Birds of prey added to vermin control",
    "earliest_feasible_year": 16.5,
-   "serial_line_finish_year": 1194.0,
+   "serial_line_finish_year": 1222.0,
    "chain_depth": 4,
-   "serial_overrun": false
+   "serial_overrun": true
   },
   {
    "id": "annual_tax_budget",
@@ -26698,7 +26700,7 @@
    },
    "note": "Brick-tile courses level city walls.",
    "earliest_feasible_year": 107.5,
-   "serial_line_finish_year": 1269.0,
+   "serial_line_finish_year": 1391.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -26729,9 +26731,9 @@
    },
    "note": "Floodplain kept as overflow",
    "earliest_feasible_year": 44.5,
-   "serial_line_finish_year": 1204.0,
+   "serial_line_finish_year": 1232.0,
    "chain_depth": 9,
-   "serial_overrun": false
+   "serial_overrun": true
   },
   {
    "id": "contracted_circuit_walls",
@@ -26962,7 +26964,7 @@
    },
    "note": "Steering foresail grows into a main sail.",
    "earliest_feasible_year": 115.5,
-   "serial_line_finish_year": 1276.0,
+   "serial_line_finish_year": 1325.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -27282,9 +27284,9 @@
    },
    "note": "Supervisors tally standing timber",
    "earliest_feasible_year": 136.5,
-   "serial_line_finish_year": 1214.0,
+   "serial_line_finish_year": 1242.0,
    "chain_depth": 16,
-   "serial_overrun": false
+   "serial_overrun": true
   },
   {
    "id": "land_bound_tenancy",
@@ -27370,7 +27372,7 @@
    },
    "note": "Itineraries drawn as strip maps.",
    "earliest_feasible_year": 145.5,
-   "serial_line_finish_year": 1286.0,
+   "serial_line_finish_year": 1335.0,
    "chain_depth": 17,
    "serial_overrun": true
   },
@@ -27400,9 +27402,9 @@
    },
    "note": "Gauge records tied to mountain snow",
    "earliest_feasible_year": 139.5,
-   "serial_line_finish_year": 1222.0,
+   "serial_line_finish_year": 1250.0,
    "chain_depth": 16,
-   "serial_overrun": false
+   "serial_overrun": true
   },
   {
    "id": "pharmacy_weights",
@@ -27577,7 +27579,7 @@
    },
    "note": "Welded iron rods restrain vault thrust.",
    "earliest_feasible_year": 101.5,
-   "serial_line_finish_year": 1275.0,
+   "serial_line_finish_year": 1397.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -27723,7 +27725,7 @@
    },
    "note": "Customs posts applied to rivers.",
    "earliest_feasible_year": 89.5,
-   "serial_line_finish_year": 1292.0,
+   "serial_line_finish_year": 1341.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -27753,9 +27755,9 @@
    },
    "note": "Erosion watch changes plough direction",
    "earliest_feasible_year": 81.5,
-   "serial_line_finish_year": 1230.0,
+   "serial_line_finish_year": 1258.0,
    "chain_depth": 11,
-   "serial_overrun": false
+   "serial_overrun": true
   },
   {
    "id": "excerpt_anthologies",

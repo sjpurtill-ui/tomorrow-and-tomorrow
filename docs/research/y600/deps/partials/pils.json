@@ -1586,13 +1586,13 @@
  {
   "id": "compound_pulleys",
   "requires_all": [
-   "counterweight_cranes"
+   "lever_moments"
   ],
   "requires_any": [],
   "precedents": [
-   "lever_moments"
+   "counterweight_cranes"
   ],
-  "note": "Multiple sheaves multiply crane force."
+  "note": "Multiple sheaves multiply force, by the law of the lever; crane practice precedes."
  },
  {
   "id": "screw_water_lifts",

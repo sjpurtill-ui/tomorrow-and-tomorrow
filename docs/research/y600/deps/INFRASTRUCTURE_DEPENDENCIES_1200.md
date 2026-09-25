@@ -52,7 +52,7 @@ The water chain is `iron_tool_rock_cutting` (705) → `groundwater_tunnels` / `r
 | 898 | `water_lifting_wheels` | `shaduf_water_lift` (0–600), `spoked_wheel_assembly` (logistics, 0–600) | - | - | - | Pots on a spoked wheel lift water. |
 | 902 | `distance_milestones` | `drained_intertown_roads`, `graduated_measuring_rods` (knowledge) | - | `road_stations` (logistics, 0–600) | - | Measured roads marked in stone. |
 | 905 | `harbor_beacon_towers` | `stone_quays`, `prearranged_beacon_chains` (knowledge, 0–600) | - | `coastal_raider_watch` (security) | - | Beacon fire raised at the harbor. |
-| 917 | `compound_pulleys` | `counterweight_cranes` | - | `lever_moments` (knowledge) | - | Multiple sheaves multiply crane force. |
+| 917 | `compound_pulleys` | `lever_moments` (knowledge) | - | `counterweight_cranes` | - | Multiple sheaves multiply force, by the law of the lever; crane practice precedes. |
 | 920 | `screw_water_lifts` | `water_lifting_wheels` | - | `mine_drainage_screws` (production) | - | Helical lift built for irrigation. |
 | 925 | `piston_force_pumps` | `pole_lathe_turning` (production), `lost_wax_casting` (production, 0–600) | - | `screw_water_lifts`, `hydrostatic_pressure` (knowledge) | - | Cast bronze cylinders, turned pistons. |
 | 928 | **`stone_arch_bridges`** | `voussoir_arch_assembly` | - | `corbelled_culvert_bridges` | - | Voussoir arches span rivers. |

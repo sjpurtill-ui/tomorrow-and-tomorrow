@@ -8,12 +8,12 @@ Source: `graph_1200.json`, merged from the three dependency partials (`partials/
   - kicl (knowledge, institutions, culture, labor): 328.
   - pils (production, infrastructure, logistics, security): 332, after dropping `sail_seaming`.
   - nhde (nutrition, health, demography, ecology): 304.
-- **Edges:** 2,816.
-  - Hard `requires_all`: 1,653.
+- **Edges:** 2,818.
+  - Hard `requires_all`: 1,655.
   - `requires_any` members: 22, in 11 groups.
   - Precedents: 1,141.
-- **Cross-line edges:** hard 444, any 15, precedent 443.
-- **Cross-block edges (the parent is a 0–600 id):** 1,156 (hard 742, any 2, precedent 412). 295 items have hard or any parents only in 0–600.
+- **Cross-line edges:** hard 445, any 15, precedent 442.
+- **Cross-block edges (the parent is a 0–600 id):** 1,157 (hard 743, any 2, precedent 412). 295 items have hard or any parents only in 0–600.
 - **Items with no requirement:** 0. Every 600–1200 item needs at least one earlier discovery.
 - **Key thresholds:** 146.
 - **Conditions normalized.** The build's `clean_conditions` runs `list()` on the lists, so they must never be bare strings.
@@ -51,12 +51,12 @@ Because nothing needed demoting, `DEMOTE` in the merge tool is empty. If a later
 
 | from \ to | KNO | INS | CUL | LAB | PRO | INF | NUT | HEA | DEM | LOG | ECO | SEC |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| KNO | 144 | 8 | 25 | 9 | 1 | 7 | 4 | 6 | 5 | 6 | 3 | 4 |
+| KNO | 146 | 8 | 25 | 9 | 1 | 8 | 4 | 6 | 5 | 6 | 3 | 4 |
 | INS | 4 | 127 | 3 | 19 | · | · | · | 5 | 20 | 7 | 2 | 4 |
 | CUL | 6 | 2 | 106 | 1 | 1 | 1 | · | 1 | 2 | · | · | · |
 | LAB | · | 2 | 4 | 72 | · | · | 1 | 1 | 1 | · | · | 1 |
 | PRO | 4 | 2 | 10 | 6 | 124 | 14 | 10 | 10 | · | 15 | 5 | 23 |
-| INF | · | · | 7 | 4 | 5 | 101 | 5 | 5 | 1 | 15 | 15 | 14 |
+| INF | · | · | 7 | 4 | 5 | 100 | 5 | 5 | 1 | 15 | 15 | 14 |
 | NUT | 2 | 1 | 2 | 4 | 1 | · | 109 | 2 | 2 | · | 23 | 1 |
 | HEA | · | · | · | · | 1 | 2 | 3 | 116 | 5 | · | 4 | · |
 | DEM | 1 | 4 | · | 4 | · | · | · | · | 67 | · | · | 1 |
@@ -87,6 +87,16 @@ The first `build_research_block.py` run failed with `ERROR: id already defined i
 - **The fix.** The 630 row is now excluded as a duplicate in `build_registry_1200.py` `EXCLUDE`, and its partial row is dropped. `brailed_square_sail` (650) keeps its requirement, which now resolves to the 0–600 item.
 - **The guard.** `merge_graph_1200.py` now reads the adopted items from `origin/codex/research-1200` too. A later collision of this kind fails the merge instead of the game build.
 
+## Aligned with the game's authored mathematics and mechanics overlays
+
+The game's `mathematics_knowledge.gd` and `mechanics_knowledge.gd` author some of this block's catalog ids. They declare foundations and model routes that the design replaced, and the game's contract tests flagged three conflicts. The design partials now keep those links:
+
+| item | change | why |
+|---|---|---|
+| `ratio_proportion` (893) | adds hard `fractional_quantities` (0–600, 520) | Ratios build on named fractions, the authored foundation. |
+| `similar_triangles` (895) | adds hard `straightedge_compass` (780) | Similarity is proved by construction, the authored foundation. |
+| `compound_pulleys` (917) | hard `lever_moments` (916); `counterweight_cranes` (895) moves from hard to precedent | The mechanics model speeds `counterweight_cranes` with compound pulleys, so compound pulleys requiring the crane made that model circular. |
+
 ## Pacing
 
 - **Impossible (critical-path earliest year > band_high): 0.**
@@ -108,7 +118,7 @@ The first `build_research_block.py` run failed with `ERROR: id already defined i
   | labor | 516 |
   | ecology | 501 |
 
-  In the serial model, one project runs per line from year 600, items are taken in proposed-year order (same-year prerequisites first), and an item waits for its cross-line prerequisites. Under that model 583 of 964 items finish after band_high.
+  In the serial model, one project runs per line from year 600, items are taken in proposed-year order (same-year prerequisites first), and an item waits for its cross-line prerequisites. Under that model 597 of 964 items finish after band_high.
 
   | line | items late |
   |---|---:|
@@ -117,12 +127,12 @@ The first `build_research_block.py` run failed with `ERROR: id already defined i
   | knowledge | 64 |
   | logistics | 60 |
   | labor | 58 |
-  | culture | 56 |
+  | culture | 57 |
   | nutrition | 39 |
   | health | 39 |
+  | infrastructure | 39 |
   | institutions | 37 |
-  | infrastructure | 31 |
-  | ecology | 28 |
+  | ecology | 33 |
   | demography | 16 |
 
   The last serial finishes are health 1471, security 1462, culture 1446 and knowledge 1438. The worst overruns are about 265 years:
@@ -142,7 +152,8 @@ The first `build_research_block.py` run failed with `ERROR: id already defined i
 2. **compiled_rescript_code**: 23 links, 249.5. The same trunk to natural_philosophy_schools (800), then → authored_prose_treatises (820) → public_libraries (896) → endowed_scholar_house (900) → state_official_academy (975) → written_office_examinations (980) → professional_service (1115) → petition_registers (1122) → compiled_rescript_code (1172).
 3. **mechanical_treatises**: 23 links, 245.5. It follows the geometry trunk → displacement_buoyancy (918) → hydrostatic_pressure (924) → mechanical_treatises (1060).
 4. **scaled_grid_mapping**: 23 links, 244.5. It follows the geometry trunk → earth_circumference_measure (920) → latitude_zones (972) → coordinate_gazetteer_maps (1105) → scaled_grid_mapping (1150).
-5. **star_position_catalogue**, **geared_sky_calculator**, **syncopated_algebra**, **ground_tremor_detector**, **notarized_work_contracts** and **nine_rank_official_grading** each have 22 links. All of them sit on the same writing → alphabet → natural philosophy trunk.
+5. **wooden_sheave_blocks** has 23 links. It now reaches the geometry trunk through `lever_moments` → `compound_pulleys`.
+6. **star_position_catalogue**, **geared_sky_calculator**, **syncopated_algebra**, **ground_tremor_detector**, **notarized_work_contracts** and **nine_rank_official_grading** each have 22 links. All of them sit on the same writing → alphabet → natural philosophy trunk.
 
 The written-alphabet trunk (`consonantal_alphabet` → `full_vowel_alphabet` → `natural_philosophy_schools`) gates most of the late knowledge and institutions content. A civilization that stalls there loses most of those lines after about 800.
 

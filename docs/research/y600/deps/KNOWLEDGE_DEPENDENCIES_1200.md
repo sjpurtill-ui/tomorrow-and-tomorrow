@@ -44,8 +44,8 @@ Machine-readable source: `partials/kicl.json` (knowledge, institutions, culture,
 | 878 | `descriptive_natural_history` | `authored_prose_treatises`, `natural_philosophy_schools` |  | `thematic_word_lists`, `foreign_plant_gardens`, `syllogistic_logic` |  |
 | 886 | `counting_board_abacus` | `place_value` |  | `money_changers`, `coin_count_trade`, `merchant_letter_accounts` |  |
 | 890 | `geometric_optics_treatise` | `demonstrated_geometry`, `authored_prose_treatises` |  | `squared_grid_drawings`, `seasonal_hour_sundial` |  |
-| 893 | `ratio_proportion` | `incommensurable_lengths` |  | `string_ratio_harmonics`, `reciprocal_tables` |  |
-| 895 | `similar_triangles` | `ratio_proportion`, `demonstrated_geometry` |  | `geometric_survey` |  |
+| 893 | `ratio_proportion` | `incommensurable_lengths`, `fractional_quantities` |  | `string_ratio_harmonics`, `reciprocal_tables` |  |
+| 895 | `similar_triangles` | `ratio_proportion`, `demonstrated_geometry`, `straightedge_compass` |  | `geometric_survey` |  |
 | 897 | `combinatorics` | `counting_board_abacus` |  | `syllogistic_logic`, `string_ratio_harmonics` |  |
 | 899 | `axiomatic_geometry_compendium` | `similar_triangles`, `syllogistic_logic`, `incommensurable_lengths` |  | `ratio_proportion` |  |
 | 900 | `endowed_scholar_house` | `philosophy_school_communities`, `public_libraries` |  | `temple_estates`, `authored_prose_treatises` |  |

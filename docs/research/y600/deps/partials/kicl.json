@@ -518,7 +518,8 @@
  {
   "id": "ratio_proportion",
   "requires_all": [
-   "incommensurable_lengths"
+   "incommensurable_lengths",
+   "fractional_quantities"
   ],
   "requires_any": [],
   "precedents": [
@@ -531,7 +532,8 @@
   "id": "similar_triangles",
   "requires_all": [
    "ratio_proportion",
-   "demonstrated_geometry"
+   "demonstrated_geometry",
+   "straightedge_compass"
   ],
   "requires_any": [],
   "precedents": [
