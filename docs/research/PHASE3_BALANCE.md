@@ -97,7 +97,7 @@ Their labor cost is unchanged. Before this, all three were no-ops once health an
 ### Named deaths are not counted twice (`scripts/government_people_system.gd`, `scripts/consequence_engine.gd`)
 
 - **The double count.** A named person (official, leader) who reached their personal death age registered one aggregate death. The aggregate life table had already counted that death.
-- **Who it hurt.** The effect is small for hundreds of people but large for a band of a few dozen. Realized death rates ran well above the projected life expectancy: CDR 53–59 against e0 27.
+- **Who it hurt.** The extra deaths weigh most on a band of a few dozen people. Named people rarely reach their death age inside the first 200 years, so the fix does not change the short validation runs; it matters for long campaigns.
 - **The fix.** Each named death now takes one expected death from the aggregate accumulator (`death_progress -= 1`), and daily deaths are never negative. The population count stays conserved.
 
 ### Pacing (`scripts/research_600_catalog.gd`, `scripts/discovery_system.gd`)
@@ -171,7 +171,7 @@ Their labor cost is unchanged. Before this, all three were no-ops once health an
 | sensible | 200 | — | 448 / 1.2 / 28.9 / 214 | |
 | research | 150 | 10,066 / 3.5 / 57.7 / 50 | 298 / — / — / — | |
 | ai | 100 | 1,065 / 2.6 / 42.5 / 132 | (200 y: 392, growth 1.4, CBR 52) | |
-| poor | 100 | 103 / −0.15 / 37.0 / 198 | POOR_ROW_100 | pop low 60, min 30 |
+| poor | 100 | 103 / −0.15 / 37.0 / 198 | 44 / −0.43 / 26.6 / 264 (seed 5150: 41); year 200: 32 and 27, stagnant, no die-out | pop low 60, min 30 |
 
 Before, a well-fed society reached near-modern survival (e0 55–58, IMR 50–63) within a century and grew 3%+ a year. Now e0 stays in the 24–29 band. IMR falls from about 300 to about 215 as care practices are adopted. Growth follows the carrying capacity: 0.3–0.8%/yr for the first century, then about 1%/yr while methods and daughter settlements extend the land. Every value is inside the benchmark band.
 
@@ -234,11 +234,16 @@ Real engine milestone counts: sensible has 279 discoveries by year 100 and 486 b
   - `test_research_600`, `test_early_life_conditions`, `test_research_visual_atlas` and `test_artifact_culture` pass.
   - `test_discovery_popup` has 3 failures. They are paper-art paths from main and match the baseline.
   - `test_directive_system` has 1 failure, which matches the baseline.
-- **Probes.** `research_art_600_probe`, `responsive_decree_probe`, `court_probe` and `court_commands_probe` PASS. `early_consequences_probe`: EC_RESULT.
+- **Probes.** `research_art_600_probe`, `responsive_decree_probe`, `court_probe`, `court_commands_probe` and `court_summon_probe` PASS. `early_consequences_probe`: `EC_FAILURES []`. All were run on the final code after merging main 55521645.
 
 ### Limitations
 
 - The surrogate has no scout-attrition model, so scouting-heavy strategies are judged without their field losses.
 - AI rivals in the surrogate expand one settlement per 30 years. The real AI's expansion is only approximated, and calibration tolerates AI population and education gaps.
 - The probe scenarios found few daughter settlements, so settlement-gated milestones such as `written_law_code` and `kingship` are not reached inside 600 years.
-- The real engine is harsher than the surrogate for tiny populations. POOR_NOTE
+- The real engine is harsher than the surrogate for tiny populations.
+  - **Where poor ends up.** The real `poor` scenario keeps compulsory labor and a foraging drive in force for 200 years. It sits on a poor site and does no health, nutrition or demography research. It shrinks to a remnant of 25–45 people and then stagnates. That is between the benchmark minimum (30) and low (60 at year 100). The surrogate settles higher, at about 50.
+  - **Before the remnant rules.** Before the spare-land and remnant-health rules, the real poor run died out (1 person at year 200).
+  - **Unexplained deaths.** Realized CDR in the real poor band runs about 6–10 per 1,000 above the sum of its mortality components. The source is not yet traced. Candidates are small-number rounding of daily deaths and expedition losses.
+- A few degenerate `max_*` runs show CBR slightly above the general high. Their high infant mortality shortens birth intervals.
+- Focus failures remain as listed above. The largest groups are UNPAID health on timed switches and UNPAID infrastructure and logistics at years 300–500.
