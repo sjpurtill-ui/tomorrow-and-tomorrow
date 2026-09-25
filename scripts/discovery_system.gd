@@ -35,9 +35,15 @@ const EFFECT_DISPLAY_NAMES:Dictionary={
 	"security_efficiency":"security efficiency","warfare_readiness":"military readiness","cohesion":"social cohesion","adoption_rate":"spread of new practices"
 }
 
+## Pristine copies of the base entries: initialize() replaces them with
+## design-applied versions, which must not survive into another world or
+## research block manifest.
+var _base_entries:Array[Dictionary]=[]
+
 func reset_for_new_world()->void:
 	initialized=false
 	catalog.resize(BASE_DISCOVERY_COUNT)
+	for i in mini(_base_entries.size(),BASE_DISCOVERY_COUNT): catalog[i]=_base_entries[i].duplicate(true)
 	technology_catalog.clear()
 	technology_limits.clear()
 	catalog_by_id.clear()
@@ -94,6 +100,8 @@ var catalog: Array[Dictionary] = [
 func initialize() -> void:
 	if initialized:
 		return
+	if _base_entries.is_empty():
+		for i in mini(catalog.size(),BASE_DISCOVERY_COUNT): _base_entries.append(catalog[i].duplicate(true))
 	catalog_by_id.clear()
 	catalog_by_channel.clear()
 	era_by_id.clear()

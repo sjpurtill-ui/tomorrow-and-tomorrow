@@ -1,5 +1,6 @@
 {
  "schema": "research_blocks/1",
+ "description": "Test fixture: only the real 0-600 block, as the game shipped before the 600-1200 block (tests/test_research_blocks.gd).",
  "blocks": [
   {
    "id": "y0_600",
@@ -8,14 +9,6 @@
    "art": "res://data/research/art_600.json",
    "window_start": 0.0,
    "window_end": 600.0
-  },
-  {
-   "id": "y600_1200",
-   "data": "res://data/research/blocks/y600_1200.json",
-   "effects_dir": "res://data/research/effects_y600_1200",
-   "art": "res://data/research/art_y600_1200.json",
-   "window_start": 600.0,
-   "window_end": 1200.0
   }
  ]
 }

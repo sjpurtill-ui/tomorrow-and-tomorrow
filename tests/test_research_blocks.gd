@@ -2,12 +2,15 @@ extends GdUnitTestSuite
 ## Multiple research design blocks (data/research/blocks.json): the loader merges
 ## blocks in order, later blocks build on earlier ids, the era gate's window
 ## follows the latest block, and the first block behaves exactly as before.
-## The second block here is a synthetic fixture built by
-## tools/research/build_research_block.py (tests/fixtures/research_blocks).
+## The game manifest lists the real 0-600 and 600-1200 blocks; the fixture
+## second block here is a synthetic one built by
+## tools/research/build_research_block.py (tests/fixtures/research_blocks), and
+## FIRST_ONLY is the 0-600 block alone.
 const Catalog=preload("res://scripts/research_600_catalog.gd")
 const P=preload("res://scripts/knowledge_pathways.gd")
 const Visuals=preload("res://scripts/hud/research_visuals.gd")
 const FIXTURE:="res://tests/fixtures/research_blocks/blocks.json"
+const FIRST_ONLY:="res://tests/fixtures/research_blocks/first_block_only.json"
 const FIXTURE_IDS:=["fx_bloom_hearths","bloomery_smelting","fx_iron_edge_tools","fx_district_courts"]
 
 func before_test()->void:
@@ -33,17 +36,24 @@ func _earliest_years()->Dictionary:
 	for entry:Dictionary in DiscoverySystem.technology_catalog:result[String(entry.id)]=DiscoverySystem.research_600_earliest_year(entry)
 	return result
 
-func test_the_game_manifest_lists_only_the_first_block()->void:
+func test_the_game_manifest_lists_both_blocks()->void:
 	_use("")
-	assert_array(Catalog.blocks()).is_equal(["y0_600"])
-	assert_float(Catalog.window_end_year()).is_equal(Catalog.WINDOW_END_YEAR)
-	assert_array(Catalog.block_ids("y0_600")).is_equal(Catalog.ids())
+	assert_array(Catalog.blocks()).is_equal(["y0_600","y600_1200"])
+	assert_float(Catalog.window_end_year()).is_equal(1200.0)
+	var both:Array[String]=Catalog.block_ids("y0_600").duplicate()
+	both.append_array(Catalog.block_ids("y600_1200"))
+	assert_array(both).is_equal(Catalog.ids())
 	assert_int(int(Catalog.meta().get("design_node_count",0))).is_equal(1101)
 	assert_dict(Catalog.block_meta("y0_600")).is_equal(Catalog.meta())
-	assert_array(Catalog.art_manifests()).is_equal(["res://data/research/art_600.json"])
+	var second:=Catalog.block_meta("y600_1200")
+	assert_int(int(second.get("node_count",0))).is_equal(964)
+	assert_int(Catalog.block_ids("y600_1200").size()).is_equal(964)
+	assert_array(second.get("prior_blocks",[])).is_equal(["y0_600"])
+	assert_int(int(second.get("cross_block_references",0))).is_greater(0)
+	assert_array(Catalog.art_manifests()).is_equal(["res://data/research/art_600.json","res://data/research/art_y600_1200.json"])
 
 func test_blocks_load_in_order_and_keep_the_first_block_intact()->void:
-	_use("")
+	_use(FIRST_ONLY)
 	var first_ids:=Catalog.ids().duplicate()
 	var first_meta:=Catalog.meta().duplicate(true)
 	var first_years:=_earliest_years()
@@ -91,7 +101,7 @@ func test_later_blocks_build_on_earlier_ids()->void:
 	assert_bool(DiscoverySystem.research_600_open(_entry("fx_district_courts"),society)).is_true()
 
 func test_block_effects_and_art_apply_only_to_their_own_ids()->void:
-	_use("")
+	_use(FIRST_ONLY)
 	var copper_effects:Dictionary=_entry("copper_smelting").effects.duplicate(true)
 	var signal_art:=Visuals.subject_art_key(_entry("agreed_signal_codes"))
 	_use(FIXTURE)
@@ -139,12 +149,24 @@ func test_the_era_gate_window_follows_the_latest_block()->void:
 	GameState.elapsed_days=int(ceil(640.0*365.0))
 	assert_bool(DiscoverySystem._discovery_is_eligible(_entry("fx_bloom_hearths"),int(ceil(640.0*365.0)))).is_true()
 
-func test_restoring_the_game_manifest_restores_the_600_window()->void:
+func test_the_first_block_alone_restores_the_600_window()->void:
 	_use(FIXTURE)
-	_use("")
+	_use(FIRST_ONLY)
 	assert_float(Catalog.window_end_year()).is_equal(600.0)
 	assert_bool(Catalog.has("fx_bloom_hearths")).is_false()
 	assert_bool(_entry("fx_bloom_hearths").is_empty()).is_true()
 	assert_float(Catalog.earliest_year({"id":"zz_undated_probe"},300.0,false)).is_equal(600.0)
 	assert_float(Catalog.earliest_year({"id":"zz_dated_probe"},640.0,true)).is_equal(600.0)
 	assert_float(DiscoverySystem.research_600_earliest_year(_entry("bloomery_smelting"))).is_greater_equal(660.0)
+
+func test_restoring_the_game_manifest_restores_both_blocks()->void:
+	_use(FIXTURE)
+	_use("")
+	assert_array(Catalog.blocks()).is_equal(["y0_600","y600_1200"])
+	assert_float(Catalog.window_end_year()).is_equal(1200.0)
+	assert_bool(Catalog.has("fx_bloom_hearths")).is_false()
+	assert_bool(_entry("fx_bloom_hearths").is_empty()).is_true()
+	# The real block designs bloomery smelting again, not the fixture's hearths.
+	assert_str(Catalog.block_of("bloomery_smelting")).is_equal("y600_1200")
+	assert_array(_entry("bloomery_smelting").requires_all).is_equal(["shaft_furnaces","clay_tuyere_draft"])
+	assert_float(DiscoverySystem.research_600_earliest_year(_entry("bloomery_smelting"))).is_equal(660.0)

@@ -39,6 +39,9 @@ func test_mounted_scouting_does_not_supply_archery()->void:
 		assert_bool(Paths.ready(entry,100000)).is_false()
 		assert_bool(preload("res://scripts/persistent_production.gd").recipe(WorldSimulation.military,"mounted_bow").has("error")).is_true()
 		learn(["bow_craft"])
+		# 600-1200 design: horse archery shoots the composite bow (bow craft + tanned hide).
+		assert_bool(Paths.ready(entry,0)).is_false()
+		learn(["hide_tanning","composite_bow"])
 		assert_bool(Paths.ready(entry,0)).is_true()
 		learn(["mounted_archery"])
 		assert_bool(preload("res://scripts/persistent_production.gd").recipe(WorldSimulation.military,"mounted_bow").has("error")).is_false()
