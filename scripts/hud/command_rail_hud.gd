@@ -12,20 +12,25 @@ signal section_requested(section:String,sub:int)
 signal menu_requested
 signal escape_pressed
 
+## The rail leads with the fantasy: the Court (the crest above), the People,
+## the Known World and the Chronicle. The management ledgers wait one click
+## away in a drawer ("Tallies" before writing, "Ledgers" after), so no detail
+## is lost but none of it greets a new god. Labels follow era_words.gd.
 const SECTIONS:Array[Dictionary]=[
-	{"id":"overview","label":"Overview","icon":0,"tooltip":"Civilization overview · F1"},
-	{"id":"government","label":"Government","icon":1,"tooltip":"Government and officeholders · F3"},
-	{"id":"economy","label":"Food","icon":2,"sub":0,"tooltip":"Food and water · F2"},
-	{"id":"materials","label":"Materials","icon":3,"section":"economy","sub":1,"tooltip":"Material stores and supply"},
-	{"id":"wealth","label":"Wealth","icon":4,"section":"economy","sub":2,"tooltip":"Wealth and economic output"},
-	{"id":"construction","label":"Buildings","icon":5,"tooltip":"Construction and infrastructure · F7"},
-	{"id":"production","label":"Production","icon":6,"tooltip":"Civilian and military production · F9"},
-	{"id":"civ","label":"Culture","icon":7,"tooltip":"Society and civic dialogue · F4"},
-	{"id":"military","label":"Military","icon":8,"tooltip":"Military command · F8"},
-	{"id":"inquiry","label":"Research","tooltip":"Inquiry and discoveries · F5"},
-	{"id":"world","label":"World","tooltip":"Scouting and contacts · F6"},
+	{"id":"overview","label":"The People","icon":0,"tooltip":"The people: how many, how fed, how long they live · F1"},
+	{"id":"world","label":"Known World","tooltip":"The world your scouts have walked, and who lives in it · F6"},
 	{"id":"chronicle","label":"Chronicle","tooltip":"The story of your people: moments, news and the seasons' tallies"},
+	{"id":"government","label":"Government","icon":1,"drawer":true,"tooltip":"Chiefs, officeholders and their duties · F3"},
+	{"id":"economy","label":"Food","icon":2,"sub":0,"drawer":true,"tooltip":"Food and water · F2"},
+	{"id":"materials","label":"Materials","icon":3,"section":"economy","sub":1,"drawer":true,"tooltip":"Material stores and supply"},
+	{"id":"wealth","label":"Wealth","icon":4,"section":"economy","sub":2,"drawer":true,"tooltip":"Wealth, gifts and exchange"},
+	{"id":"construction","label":"Buildings","icon":5,"drawer":true,"tooltip":"Construction and infrastructure · F7"},
+	{"id":"production","label":"Production","icon":6,"drawer":true,"tooltip":"Crafts, tools and weapons in the making · F9"},
+	{"id":"civ","label":"Culture","icon":7,"drawer":true,"tooltip":"Society and civic dialogue · F4"},
+	{"id":"military","label":"Military","icon":8,"drawer":true,"tooltip":"Warriors, training and command · F8"},
+	{"id":"inquiry","label":"Research","drawer":true,"tooltip":"What the people know and are learning · F5"},
 ]
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 const ApprovedArt:=preload("res://scripts/hud/approved_ui_art.gd")
 const SPEED_TOOLTIPS:Array[String]=["Pause · 0","0.5 h/s","2 h/s","8 h/s","1 day/s","3 days/s"]
 const MAX_QUEUE_CARDS:=3
@@ -44,6 +49,12 @@ var top_frame:PanelContainer
 var rail_buttons:Dictionary={}
 var rail_badges:Dictionary={}
 var rail_icons:Dictionary={}
+var rail_labels:Dictionary={}
+var drawer_button:Button
+var drawer_label:Label
+var drawer_box:VBoxContainer
+var drawer_open:=false
+var _words_signature:=""
 var time_pill:PanelContainer
 var time_text:RichTextLabel
 var pause_button:Button
@@ -87,6 +98,7 @@ func refresh_information_bar()->void:
 	# The command bar owns its updates, including while a report is open.
 	# Legacy interface controls and dock interaction must not gate live totals.
 	if not is_instance_valid(terrain):return
+	_refresh_words()
 	_refresh_time()
 	_refresh_kpis()
 
@@ -110,8 +122,12 @@ func _ready()->void:
 
 func _layout()->void:
 	var view:=get_viewport().get_visible_rect().size
-	for button:Button in rail_buttons.values():
-		button.custom_minimum_size.y=clampf((view.y-150.0)/SECTIONS.size(),52.0,68.0)
+	var primary:=0
+	for spec in SECTIONS:
+		if not bool(spec.get("drawer",false)):primary+=1
+	for id in rail_buttons:
+		var button:Button=rail_buttons[id]
+		button.custom_minimum_size.y=46.0 if _in_drawer(String(id)) else clampf((view.y-150.0)/float(primary+1),56.0,72.0)
 	if top_frame:
 		top_frame.position=Vector2(Tokens.RAIL_WIDTH,0)
 		top_frame.size=Vector2(view.x-Tokens.RAIL_WIDTH,56)
@@ -128,11 +144,13 @@ func _layout()->void:
 		var compact_top:=view.x<1280
 		(kpi_chips.get("population",{}).get("chip") as Control).visible=not compact_top
 		(kpi_chips.get("water",{}).get("chip") as Control).visible=not compact_top
-		(kpi_chips.get("goods",{}).get("chip") as Control).visible=not compact_top
+		# Before writing, tools and gear are told in the People view, not the strip.
+		var goods_shown:=not compact_top and not EraWords.hearth()
+		(kpi_chips.get("goods",{}).get("chip") as Control).visible=goods_shown
 		if kpi_separators.size()>=3:
 			kpi_separators[0].visible=not compact_top
 			kpi_separators[1].visible=not compact_top
-			kpi_separators[2].visible=not compact_top
+			kpi_separators[2].visible=goods_shown
 		kpi_strip.reset_size()
 		kpi_strip.position=Vector2(maxf(Tokens.DOCK_X,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),6)
 	if queue_root:
@@ -211,8 +229,24 @@ func _build_rail()->void:
 	var scroll:=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
 	var entries:=VBoxContainer.new();entries.size_flags_horizontal=Control.SIZE_EXPAND_FILL;entries.add_theme_constant_override("separation",0);scroll.add_child(entries)
 	for section in SECTIONS:
-		var button:=_make_rail_button(section)
-		entries.add_child(button)
+		if bool(section.get("drawer",false)):continue
+		entries.add_child(_make_rail_button(section))
+	entries.add_child(_make_drawer_button())
+	drawer_box=VBoxContainer.new()
+	drawer_box.name="RailDrawer"
+	drawer_box.visible=false
+	drawer_box.add_theme_constant_override("separation",0)
+	var drawer_style:=Tokens.flat(Color(0,0,0,.16))
+	drawer_box.add_theme_constant_override("separation",0)
+	var drawer_panel:=PanelContainer.new()
+	drawer_panel.name="RailDrawerPanel"
+	drawer_panel.add_theme_stylebox_override("panel",drawer_style)
+	entries.add_child(drawer_panel)
+	drawer_panel.add_child(drawer_box)
+	for section in SECTIONS:
+		if bool(section.get("drawer",false)):drawer_box.add_child(_make_rail_button(section))
+	drawer_panel.visible=false
+	drawer_box.visibility_changed.connect(func()->void:drawer_panel.visible=drawer_box.visible)
 	var menu_button:=Button.new()
 	menu_button.name="RailMenu"
 	menu_button.custom_minimum_size=Vector2(0,Tokens.RAIL_HEADER_HEIGHT)
@@ -246,13 +280,19 @@ func _make_rail_button(section:Dictionary)->Button:
 	content.add_theme_constant_override("separation",0)
 	content.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	button.add_child(content)
-	if section.has("icon"):content.add_child(ApprovedArt.icon(int(section.icon)))
+	var drawer:=bool(section.get("drawer",false))
+	if section.has("icon"):
+		var art:Control=ApprovedArt.icon(int(section.icon))
+		if drawer:art.custom_minimum_size=art.custom_minimum_size*0.72
+		content.add_child(art)
 	else:
 		var symbol:=NavIcon.new(id)
 		symbol.set_icon_color(Color("e1cc91"))
 		symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
+		if drawer:symbol.custom_minimum_size=Vector2(22,22)
 		content.add_child(symbol)
-	var label:=Tokens.make_label(String(section.label),11,Color("eee3c2"));label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
+	var label:=Tokens.make_label(EraWords.word("rail."+id,String(section.label)),10 if drawer else 11,Color("eee3c2"));label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
+	rail_labels[id]=label
 	var badge:=Label.new()
 	badge.visible=false
 	badge.custom_minimum_size=Vector2(16,16)
@@ -270,10 +310,82 @@ func _make_rail_button(section:Dictionary)->Button:
 
 	return button
 
+## The ledgers drawer: food, materials, wealth, buildings, crafts, culture,
+## warriors, lore and chiefs, folded under one tally-stick mark (drawn by the
+## procedural icon engine) until the player asks for them.
+func _make_drawer_button()->Button:
+	var button:=Button.new()
+	button.name="RailLedgers"
+	button.custom_minimum_size=Vector2(0,52)
+	button.tooltip_text="The tallies of the people's work: food, materials, wealth, buildings, crafts, culture, warriors, lore and chiefs"
+	button.add_theme_stylebox_override("normal",_approved_rail_style(false))
+	button.add_theme_stylebox_override("hover",_approved_rail_style(false,true))
+	button.add_theme_stylebox_override("pressed",_approved_rail_style(true))
+	button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	button.pressed.connect(toggle_drawer)
+	var content:=VBoxContainer.new()
+	content.set_anchors_preset(Control.PRESET_FULL_RECT)
+	content.alignment=BoxContainer.ALIGNMENT_CENTER
+	content.add_theme_constant_override("separation",0)
+	content.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	button.add_child(content)
+	var mark:=TextureRect.new()
+	mark.name="DrawerMark"
+	mark.texture=preload("res://scripts/resource_icons.gd").moment_texture("hearth_count",Color("e1cc91"),56)
+	mark.custom_minimum_size=Vector2(26,26)
+	mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+	mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	mark.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
+	mark.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	content.add_child(mark)
+	drawer_label=Tokens.make_label("",11,Color("eee3c2"));drawer_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;drawer_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(drawer_label)
+	drawer_button=button
+	_style_drawer_label()
+	return button
+
+func _style_drawer_label()->void:
+	if drawer_label:drawer_label.text=EraWords.word("rail.drawer","Ledgers")+(" ▾" if drawer_box and drawer_box.visible else " ▸")
+
+func _in_drawer(id:String)->bool:
+	for spec in SECTIONS:
+		if String(spec.id)==id or String(spec.get("section",""))==id and id!="":
+			if bool(spec.get("drawer",false)):return true
+	return false
+
+func toggle_drawer()->void:
+	drawer_open=not drawer_open
+	_sync_drawer()
+
+func _sync_drawer()->void:
+	if drawer_box==null:return
+	# An open ledger keeps its drawer open so the lit entry stays in view.
+	drawer_box.visible=drawer_open or (active_section!="" and _in_drawer(active_section))
+	_style_drawer_label()
+	if drawer_button:
+		var lit:=active_section!="" and _in_drawer(active_section) and not drawer_box.visible
+		drawer_button.add_theme_stylebox_override("normal",_approved_rail_style(lit))
+	_layout()
+
+## Rail labels and top-strip captions follow what the people know.
+func _refresh_words()->void:
+	var signature:=EraWords.stage()
+	if signature==_words_signature:return
+	_words_signature=signature
+	for spec in SECTIONS:
+		var label:Label=rail_labels.get(String(spec.id))
+		if label:label.text=EraWords.word("rail."+String(spec.id),String(spec.label))
+	_style_drawer_label()
+	for def in KPI_DEFS:
+		var parts:Dictionary=kpi_chips.get(String(def.id),{})
+		if parts.has("caption"):(parts.caption as Label).text=EraWords.word("kpi."+String(def.id),String(def.label))
+	_kpi_signature=""
+	_layout()
+
 func _make_court_button()->Button:
 	var button:=Button.new()
 	button.name="RailCourt"
-	button.custom_minimum_size=Vector2(0,46)
+	# The heart of the game gets the largest place on the rail.
+	button.custom_minimum_size=Vector2(0,64)
 	button.tooltip_text="Your court: summon anyone, receive envoys, send word abroad · F12"
 	var gold:=Tokens.flat(Color(.79,.64,.29,.16),Color("c9a24a"),1,3)
 	var gold_hover:=Tokens.flat(Color(.79,.64,.29,.28),Color("e8c35a"),1,3)
@@ -288,11 +400,11 @@ func _make_court_button()->Button:
 	content.add_theme_constant_override("separation",0)
 	content.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	button.add_child(content)
-	var symbol:=ApprovedArt.symbol(Rect2(15,7,46,47),30,30)
+	var symbol:=ApprovedArt.symbol(Rect2(15,7,46,47),38,38)
 	symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
 	symbol.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	content.add_child(symbol)
-	var label:=Tokens.make_label("Court",10,Color("f3dfa2"));label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
+	var label:=Tokens.make_label("Court",12,Color("f3dfa2"));label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
 	var badge:=Label.new()
 	badge.visible=false
 	badge.custom_minimum_size=Vector2(16,16)
@@ -329,6 +441,7 @@ func set_active_section(id:String)->void:
 		if icon:
 			if icon.has_method("set_active"): icon.set_active(active)
 			if icon.has_method("set_icon_color"): icon.set_icon_color(Tokens.GOLD if active else Tokens.TEXT_DIM)
+	_sync_drawer()
 	_position_toolbar()
 
 func _set_badge(id:String,text:String,color:Color)->void:
@@ -467,7 +580,7 @@ func _build_kpi_strip()->void:
 		# Reserve one stable width for every state. In particular, the longer
 		# shortage wording must not make the whole strip collide with the clock
 		# and jump from the first row to the second while the simulation runs.
-		chip.custom_minimum_size=Vector2(float(def.width),Tokens.CHIP_HEIGHT)
+		chip.custom_minimum_size=Vector2(_kpi_width(String(def.id),float(def.width)),Tokens.CHIP_HEIGHT)
 		chip.clip_contents=true
 		chip.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT))
 		chip.add_theme_stylebox_override("hover",Tokens.flat(Tokens.HOVER_BG))
@@ -493,7 +606,7 @@ func _build_kpi_strip()->void:
 		text_column.alignment=BoxContainer.ALIGNMENT_CENTER
 		text_column.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		inner.add_child(text_column)
-		var caption:=Tokens.make_label(String(def.label),9,Tokens.MUTED,0.12)
+		var caption:=Tokens.make_label(EraWords.word("kpi."+String(def.id),String(def.label)),9,Tokens.MUTED,0.12)
 		caption.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		text_column.add_child(caption)
 		var value_row:=HBoxContainer.new()
@@ -512,7 +625,7 @@ func _build_kpi_strip()->void:
 		delta.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		delta.vertical_alignment=VERTICAL_ALIGNMENT_BOTTOM
 		value_row.add_child(delta)
-		kpi_chips[String(def.id)]={"chip":chip,"value":value,"delta":delta,"inner":inner,"width":float(def.width)}
+		kpi_chips[String(def.id)]={"chip":chip,"value":value,"delta":delta,"inner":inner,"width":float(def.width),"caption":caption}
 
 func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color,_tooltip:String)->void:
 	var parts:Dictionary=kpi_chips.get(id,{})
@@ -525,7 +638,12 @@ func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color
 	chip.tooltip_text="View details"
 	# Width is intentionally independent of live text so a deficit cannot move
 	# the complete top bar. Hover details read fresh state when opened.
-	chip.custom_minimum_size=Vector2(float(parts.width),Tokens.CHIP_HEIGHT)
+	chip.custom_minimum_size=Vector2(_kpi_width(id,float(parts.width)),Tokens.CHIP_HEIGHT)
+
+## Stable widths per era: the people's words are longer than the acronyms.
+func _kpi_width(id:String,base:float)->float:
+	if EraWords.reckoned():return base
+	return float({"population":150.0,"food":118.0,"water":112.0,"goods":136.0,"health":196.0,"science":150.0,"gdp":170.0}.get(id,base))
 
 # --- Decision queue ---------------------------------------------------------
 
@@ -852,7 +970,9 @@ func _unhandled_key_input(event:InputEvent)->void:
 	var key:=event as InputEventKey
 	if key==null or not key.pressed or key.echo: return
 	if key.keycode in [KEY_F5,KEY_F6] and key.shift_pressed:
-		MilitaryCampaign.joint_operations.open_service("navy" if key.keycode==KEY_F5 else "air")
+		# No fleet before boats, no air service before flight.
+		if (EraWords.has_boats() if key.keycode==KEY_F5 else EraWords.has_flight()):
+			MilitaryCampaign.joint_operations.open_service("navy" if key.keycode==KEY_F5 else "air")
 		get_viewport().set_input_as_handled();return
 	if key.keycode==KEY_F12:
 		open_court()
@@ -932,17 +1052,30 @@ func _refresh_kpis()->void:
 	var signature:=str(hash(t))
 	if signature==_kpi_signature:return
 	_kpi_signature=signature
-	_update_kpi("population",str(t.population),"%d cities" % t.cities.size(),Tokens.MUTED,"Civilization population and city breakdown")
+	# Every number in the strip is told in the people's own counting
+	# (era_words.gd): souls, winters, bellies filled, before GDP and IMR.
+	var modern:=EraWords.reckoned()
+	_update_kpi("population",EraWords.people(int(t.population)) if not modern else str(t.population),EraWords.places(t.cities.size()),Tokens.MUTED,"Civilization population and city breakdown")
 	for id:String in ["food","water"]:
 		var shortage:=int(t[id+"_shortages"])
 		var pending:bool=int(t[id+"_reports"])<t.cities.size()
 		var days:=float(t[id+"_days"])
-		_update_kpi(id,"%.1f d" % days if days>=0 else "—","%d short" % shortage if shortage>0 else ("partial" if pending else "civ total"),Tokens.RED if shortage>0 else Tokens.MUTED,"Civilization reserves and city production")
+		var short_word:="%d short" % shortage if modern else ("%d %s" % [shortage,"hungry" if id=="food" else "thirsty"])
+		_update_kpi(id,EraWords.days(days),short_word if shortage>0 else ("partial" if pending else ("civ total" if modern else "all told")),Tokens.RED if shortage>0 else Tokens.MUTED,"Civilization reserves and city production")
 	var goods_short:=int(t.goods_shortages)
-	_update_kpi("goods","%d%%" % roundi(float(t.goods_coverage)*100.0),"%d short" % goods_short if goods_short>0 else "%+.1f / day" % float(t.goods_net),Tokens.RED if goods_short>0 else Tokens.MUTED,"Civilian Goods held against what households expect")
-	_update_kpi("health","%.1f yr" % t.life,"IMR %.0f‰" % t.infant,Tokens.MUTED,"Population-weighted health across all cities")
-	_update_kpi("science","%.1f" % t.science,"%.0f%% edu" % (float(t.education)*100),Tokens.GOLD,"Combined research capacity; population-weighted education")
-	_update_kpi("gdp","%.1f" % t.output,"%.2f / person" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"Total city output and per-city contributions")
+	_update_kpi("goods",EraWords.goods(float(t.goods_coverage)),("%d short" % goods_short if modern else "%d in want" % goods_short) if goods_short>0 else EraWords.goods_trend(float(t.goods_net)),Tokens.RED if goods_short>0 else Tokens.MUTED,"Civilian Goods held against what households expect")
+	_update_kpi("health",EraWords.life(float(t.life)),EraWords.babes_lost(float(t.infant)),Tokens.MUTED,"Population-weighted health across all cities")
+	if modern:
+		_update_kpi("science","%.1f" % t.science,"%.0f%% edu" % (float(t.education)*100),Tokens.GOLD,"Combined research capacity; population-weighted education")
+		_update_kpi("gdp","%.1f" % t.output,"%.2f / person" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"Total city output and per-city contributions")
+	else:
+		var keepers:=roundi(float(t.minds))
+		_update_kpi("science","%d ways known" % GameState.known_discoveries.size() if EraWords.hearth() else "%.1f" % t.science,("%d keeper" if keepers==1 else "%d keepers") % keepers if EraWords.hearth() else "%d scholars" % keepers,Tokens.GOLD,"")
+		if EraWords.hearth():
+			var fed:=EraWords.fed(int(t.population),float(t.food_eaten),float(t.food_need))
+			_update_kpi("gdp","%d of %d" % [fed,int(t.population)] if fed>=0 else "—","%d hands at work" % roundi(float(t.output)),Tokens.BLUE,"")
+		else:
+			_update_kpi("gdp","%d hands" % roundi(float(t.output)),"%.2f each" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"")
 	kpi_strip.reset_size()
 	_layout()
 

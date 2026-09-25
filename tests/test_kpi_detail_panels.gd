@@ -44,7 +44,8 @@ func test_selected_city_resources_do_not_leak_into_primary()->void:
 	GameState.water_metrics={"days":9.0,"required_today":60.0,"intake_ratio":1.0}
 	GameState.selected_player_settlement_id="second"
 	var data:=Data.snapshot("water")
-	assert_str(data.scope).is_equal("Entire civilization")
+	# Before writing, the whole people is "all our hearths" (era_words.gd).
+	assert_str(data.scope).is_equal("All our hearths")
 	assert_str(data.value).is_equal("7.3")
 	assert_float(data.meter).is_equal(0.875)
 	assert_float(float(GameState.water_metrics.days)).is_equal(9.0)
@@ -91,18 +92,18 @@ func test_header_refreshes_without_legacy_interface_or_navigation()->void:
 	GameState.water_metrics={"days":5.0,"required_today":10.0,"stored":50.0}
 	GameState.elapsed_days=1.0
 	header._process(.75)
-	assert_str(header.kpi_chips.food.value.text).is_equal("12.0 d")
-	assert_str(header.kpi_chips.water.value.text).is_equal("5.0 d")
+	assert_str(header.kpi_chips.food.value.text).is_equal("12 days")
+	assert_str(header.kpi_chips.water.value.text).is_equal("5.0 days")
 	assert_str(header.time_text.text).contains("Day 2")
 	GameState.simulation_metrics.food_days=9.0
 	GameState.water_metrics.days=3.0
 	GameState.water_metrics.stored=30.0
 	GameState.elapsed_days=2.0
 	header._process(.25)
-	assert_str(header.kpi_chips.food.value.text).is_equal("12.0 d")
+	assert_str(header.kpi_chips.food.value.text).is_equal("12 days")
 	header._process(.5)
-	assert_str(header.kpi_chips.food.value.text).is_equal("9.0 d")
-	assert_str(header.kpi_chips.water.value.text).is_equal("3.0 d")
+	assert_str(header.kpi_chips.food.value.text).is_equal("9.0 days")
+	assert_str(header.kpi_chips.water.value.text).is_equal("3.0 days")
 	assert_str(header.time_text.text).contains("Day 3")
 
 

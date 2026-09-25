@@ -1,4 +1,5 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Charts:=preload("res://scripts/hud/strategic_chart_blocks.gd")
 const Indicators:=preload("res://scripts/civilization_indicators.gd")
 ## SETTLEMENT section: People & Labor / Works & Defense / History.
@@ -174,7 +175,7 @@ func _overview_blocks(settlement:Dictionary)->Array:
 	var age:=maxi(0,int(GameState.elapsed_days)-int(settlement.get("founded_day",0)))
 	return [{"type":"settlement_overview","leader":management.get("leader",{}),"focus":String(management.get("focus_label","Balanced")),"managed":bool(management.get("auto_manage",true)),
 		"reason":String(management.get("focus_reason","The local leader is assessing this settlement’s needs.")),"effect":String(management.get("focus_effect","")),
-		"metrics":[{"label":"Residents","value":str(population)},{"label":"Years since founding","value":"%.1f" % (float(age)/365.0)},{"label":"Life expectancy · years","value":"%.1f" % GameState.projected_life_expectancy()}],
+		"metrics":[{"label":"Residents","value":str(population)},{"label":"Years since founding","value":"%.1f" % (float(age)/365.0)},{"label":"Life expectancy · years" if EraWords.reckoned() else "How long we live","value":"%.1f" % GameState.projected_life_expectancy() if EraWords.reckoned() else EraWords.life(GameState.projected_life_expectancy())}],
 		"cards":[
 			{"kind":"building","art":1,"title":"Homes & shelter","show_art":shelter.built,"empty_label":shelter.empty_label,"detail":shelter.detail,"action":"View buildings","on_press":jump("construction",0)},
 			{"kind":"food","art":0,"title":"Food & water","detail":food,"action":"View provisions","on_press":jump("economy",0)},

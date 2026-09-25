@@ -6,17 +6,17 @@ const PALETTE:=[Color("6b7d50"),Color("497c96"),Color("93958a"),Color("b89339")]
 func setup(block:Dictionary)->void:
 	theme=T.control_theme();data=block;add_theme_constant_override("separation",8)
 	var money:=String(data.stage)=="currency";var metal:=String(data.stage)=="weighed_metal"
-	var status:=HBoxContainer.new();add_child(status);var stage:=_serif("Coin economy" if money else "Weighed-metal exchange" if metal else "Wealth before money",16);stage.size_flags_horizontal=Control.SIZE_EXPAND_FILL;status.add_child(stage);status.add_child(T.make_label(String(data.city),12,T.MUTED))
+	var status:=HBoxContainer.new();add_child(status);var stage:=_serif("Coin economy" if money else "Weighed-metal exchange" if metal else "Wealth in things held",16);stage.size_flags_horizontal=Control.SIZE_EXPAND_FILL;status.add_child(stage);status.add_child(T.make_label(String(data.city),12,T.MUTED))
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",14);add_child(head)
 	if not data.leader.is_empty():head.add_child(Portrait.picture(data.leader,80,100))
 	var manager:=VBoxContainer.new();manager.size_flags_horizontal=Control.SIZE_EXPAND_FILL;manager.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(manager)
 	var name_label:=_serif(String(data.leader.get("name","Founding camp")),16);name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;manager.add_child(name_label);manager.add_child(T.make_label("Leader managed" if bool(data.managed) else "Directed priorities",12,T.MUTED))
 	for spec in [["%.1f" % float(data.economy.gdp),"Output / day"],["%.2f" % float(data.economy.gdp_per_capita),"Output / person"],["%d%%" % roundi(float(data.economy.productivity)*100),"Productivity"]]:
-		var cell:=VBoxContainer.new();cell.custom_minimum_size.x=100;cell.size_flags_vertical=Control.SIZE_SHRINK_CENTER;cell.tooltip_text="Real economic output, not currency or stored wealth";head.add_child(cell);cell.add_child(_serif(spec[0],23));cell.add_child(T.make_label(spec[1],11,T.MUTED))
+		var cell:=VBoxContainer.new();cell.custom_minimum_size.x=100;cell.size_flags_vertical=Control.SIZE_SHRINK_CENTER;cell.tooltip_text="The day's useful work, not stored wealth";head.add_child(cell);cell.add_child(_serif(spec[0],23));cell.add_child(T.make_label(spec[1],11,T.MUTED))
 	_rule(self)
 	if not money and not metal:
 		add_child(_serif("Direct allocation & reciprocity",19))
-		var note:=T.make_label("Wealth is held in useful goods. Currency accounts do not exist yet.",12,T.MUTED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(note)
+		var note:=T.make_label("Wealth is held in useful goods and in gifts owed and given.",12,T.MUTED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(note)
 		_button(self,"View material stores",data.on_stores,"Physical reserves are tracked by material, without invented monetary values")
 	else:
 		var labels:=HBoxContainer.new();labels.add_theme_constant_override("separation",16);add_child(labels)

@@ -1,0 +1,117 @@
+extends GdUnitTestSuite
+## Fun audit item #5: the HUD speaks the people's era (era_words.gd), the rail
+## leads with Court / People / Known World / Chronicle with the ledgers in a
+## drawer, and no fleet or air service is offered before boats or flight.
+const EraWords:=preload("res://scripts/hud/era_words.gd")
+const Rail:=preload("res://scripts/hud/command_rail_hud.gd")
+const UnitMap:=preload("res://scripts/hud/content/military_unit_map.gd")
+const MODERN:=["GDP","IMR","‰","edu","SCIENCE","Navy","Air Force"]
+
+class HeaderTerrain extends Node:
+	var game_speed:float=1.0
+	func site_temperature_c(_day:float=-1.0)->float:return 20.0
+
+class RailOnly extends "res://scripts/hud/command_rail_hud.gd":
+	func _ready()->void:
+		_build_rail()
+	func _layout()->void:pass
+	func _position_toolbar()->void:pass
+
+class LiveHeader extends "res://scripts/hud/command_rail_hud.gd":
+	func _ready()->void:
+		_build_time_pill()
+		_build_kpi_strip()
+	func _layout()->void:pass
+
+func before_test()->void:
+	WorldSimulation.clear()
+	GameState.reset_for_new_world(4242)
+	SettlementModel.reset_for_new_world()
+	GameState.settlement_name="Test Hearth"
+	GameState.settlement_site_committed=true
+	GameState.settlement_completed=["Hearth Circle"]
+	SettlementModel.ensure_founded()
+	MilitaryCampaign.reset_for_new_world()
+
+func _next_frame()->void:
+	await get_tree().process_frame
+
+func test_stages_follow_writing_and_printing()->void:
+	assert_str(EraWords.stage()).is_equal("hearth")
+	GameState.known_discoveries.append("pictographic_records")
+	await _next_frame()
+	assert_str(EraWords.stage()).is_equal("lettered")
+	GameState.known_discoveries.append("printing_process")
+	await _next_frame()
+	assert_str(EraWords.stage()).is_equal("reckoned")
+
+func test_the_people_count_in_their_own_words()->void:
+	assert_str(EraWords.people(118)).is_equal("118 souls")
+	assert_str(EraWords.life(31.4)).is_equal("31 winters")
+	assert_str(EraWords.babes_lost(173.0)).is_equal("17 in 100 babes die")
+	assert_str(EraWords.babes_lost_sentence(173.0)).contains("before their first winter")
+	assert_str(EraWords.days(48.3)).is_equal("48 days")
+	assert_str(EraWords.word("kpi.gdp")).is_equal("BELLIES FILLED")
+	assert_int(EraWords.fed(120,45.0,60.0)).is_equal(90)
+	GameState.known_discoveries.append("printing_process")
+	await _next_frame()
+	assert_str(EraWords.babes_lost(173.0)).is_equal("IMR 173‰")
+	assert_str(EraWords.word("kpi.gdp")).is_equal("REAL GDP / DAY")
+
+func test_no_fleet_before_boats_and_no_air_service_before_flight()->void:
+	assert_bool(EraWords.has_boats()).is_false()
+	assert_bool(EraWords.has_flight()).is_false()
+	var map:=UnitMap.new(null,null)
+	assert_array(map.meta().subtabs).is_equal(["50 LAND"])
+	GameState.known_discoveries.append("river_craft")
+	assert_bool(EraWords.has_boats()).is_true()
+	assert_array(map.meta().subtabs).is_equal(["50 LAND","NAVAL CHAIN"])
+	GameState.known_discoveries.append("aerostat_observation")
+	assert_bool(EraWords.has_flight()).is_true()
+	assert_array(map.meta().subtabs).is_equal(["50 LAND","NAVAL CHAIN","AIR CHAIN"])
+	# The air tab reads the air chain even though it is only the third tab.
+	var rows:Array=(map.tab(2).blocks as Array)[1].items
+	assert_bool(rows.is_empty()).is_false()
+
+func test_the_top_strip_uses_no_modern_statistics_before_writing()->void:
+	var header=auto_free(LiveHeader.new())
+	header.terrain=auto_free(HeaderTerrain.new())
+	add_child(header)
+	header.set_process(false)
+	GameState.simulation_metrics={"food_days":12.0,"food_consumption":10.0,"food_eaten":10.0}
+	GameState.water_metrics={"days":5.0,"required_today":10.0,"stored":50.0}
+	header._refresh_words()
+	header._refresh_kpis()
+	var shown:PackedStringArray=[]
+	for id in header.kpi_chips:
+		var parts:Dictionary=header.kpi_chips[id]
+		shown.append((parts.caption as Label).text);shown.append((parts.value as Label).text);shown.append((parts.delta as Label).text)
+	var text:=" | ".join(shown)
+	for word in MODERN:assert_str(text).not_contains(word)
+	assert_str((header.kpi_chips.gdp.caption as Label).text).is_equal("BELLIES FILLED")
+	assert_str((header.kpi_chips.health.delta as Label).text).contains("in 100 babes die")
+
+func test_the_rail_leads_with_the_fantasy_and_folds_the_ledgers()->void:
+	var rail=auto_free(RailOnly.new())
+	add_child(rail)
+	await _next_frame()
+	var primary:Array=[]
+	for spec in Rail.SECTIONS:
+		if not bool(spec.get("drawer",false)):primary.append(String(spec.id))
+	assert_array(primary).is_equal(["overview","world","chronicle"])
+	assert_str((rail.rail_labels.overview as Label).text).is_equal("The People")
+	assert_str(rail.drawer_label.text).starts_with("Tallies")
+	# Court + the People + Known World + Chronicle + the drawer: five entries.
+	var visible:=0
+	for id in rail.rail_buttons:
+		if (rail.rail_buttons[id] as Control).is_visible_in_tree():visible+=1
+	assert_int(visible).is_equal(3)
+	assert_bool(rail.drawer_box.visible).is_false()
+	rail.toggle_drawer()
+	assert_bool(rail.drawer_box.visible).is_true()
+	rail.toggle_drawer()
+	# Opening a ledger keeps its drawer open so the lit entry stays in view.
+	rail.set_active_section("economy")
+	assert_bool(rail.drawer_box.visible).is_true()
+	rail.set_active_section("")
+	assert_bool(rail.drawer_box.visible).is_false()

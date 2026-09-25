@@ -46,11 +46,20 @@ func _ready()->void:
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",10);panel.add_child(column)
 	var header:=HBoxContainer.new();header.add_theme_constant_override("separation",7);column.add_child(header)
 	heading=_label(header,"FORCES",22);heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	for domain:String in ["army","navy","air"]:
+	# No fleet before boats, no air service before flight: a service the people
+	# cannot yet field is not offered as a tab.
+	var era_words:GDScript=preload("res://scripts/hud/era_words.gd")
+	var services:Array[String]=["army"]
+	if bool(era_words.call("has_boats")):services.append("navy")
+	if bool(era_words.call("has_flight")):services.append("air")
+	if service not in services:service="army"
+	for domain:String in services:
 		var choice:=domain
 		var button:=_button(header,{"army":"Army","navy":"Navy","air":"Air Force"}[domain],func():service=choice;selected_row={};roster_filter="all";scroll.scroll_vertical=0;_build_body())
 		button.icon=Art.symbol(domain,Art.COLORS[domain],22)
 		button.toggle_mode=true;service_buttons[domain]=button
+		# A lone land force needs no service switch.
+		button.visible=services.size()>1
 	close_button=_button(header,"×",queue_free);close_button.custom_minimum_size=Vector2(40,38);close_button.tooltip_text="Close · Escape or click the map"
 	var nav:=HFlowContainer.new();nav.add_theme_constant_override("h_separation",6);column.add_child(nav)
 	for entry:Array in [["forces","Forces"],["recruitment","Recruit & deploy"],["training","Training"],["support","Readiness & supply"]]:

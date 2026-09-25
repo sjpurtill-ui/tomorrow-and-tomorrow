@@ -1,4 +1,5 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 ## INQUIRY section: Direct Attention / Investigations / Established.
 ## Replaces the knowledge panel and the progression panel's research views.
 
@@ -54,8 +55,8 @@ func tab(sub:int)->Dictionary:
 	var established_threads:=DiscoverySystem.established_knowledge_threads()
 	var established:=established_threads.size()
 	var kpis:Array=[
-		{"label":"SCIENCE CAPACITY","value":"%.1f" % float(science.capacity),"delta":"%.1f minds" % float(science.minds),"delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Researcher-equivalent minds currently doing science × their average education level"},
-		{"label":"AVG. EDUCATION","value":"%d%%" % roundi(float(science.education)*100.0),"delta":"research minds","delta_color":Tokens.MUTED,"accent":Tokens.GOLD,"tip":"Average usable education among the research workforce, based on preserved learning and the ability to communicate it"},
+		{"label":"SCIENCE CAPACITY" if EraWords.reckoned() else ("KEEPERS OF LORE" if EraWords.hearth() else "SCHOLARS"),"value":"%.1f" % float(science.capacity) if EraWords.reckoned() else str(roundi(float(science.minds))),"delta":"%.1f minds" % float(science.minds) if EraWords.reckoned() else "watching and testing","delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Researcher-equivalent minds currently doing science × their average education level"},
+		{"label":"AVG. EDUCATION" if EraWords.reckoned() else "HOW WELL IT IS TAUGHT","value":"%d%%" % roundi(float(science.education)*100.0) if EraWords.reckoned() else EraWords.teaching(float(science.education)),"delta":"research minds" if EraWords.reckoned() else "kept and passed on","delta_color":Tokens.MUTED,"accent":Tokens.GOLD,"tip":"Average usable education among the research workforce, based on preserved learning and the ability to communicate it"},
 		{"label":"EMPHASIS","value":str(emphasis_total),"delta":"total weight","delta_color":Tokens.MUTED,"accent":Tokens.AMBER,"tip":"Sum of domain weights; each domain receives its share of the observers"},
 		{"label":"ACTIVE","value":str(lines),"delta":"projects","delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Viable investigations under way"},
 		{"label":"KNOWLEDGE LINES","value":str(established),"delta":"","accent":Tokens.GREEN,"tip":"Concrete bodies of knowledge. Each line consolidates its surveys, tests, standards, and later refinements."},

@@ -11597,9 +11597,8 @@ func _show_convoy_arrival(completed:Dictionary)->void:
 		if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
 		_set_camera_target(Vector3(destination.x,_height_at(destination.x,destination.y),destination.y))
 		stamp=trace.mark("found_camera",stamp)
-		# The dock opens next frame so the network rebuild and dock layout for a
-		# founding never share one frame.
-		pending_hud_section="settlement"
+		# A new hearth is told in the Chronicle and shown on the map; the dock
+		# does not open by itself over it.
 	_update_time_interface()
 
 func _start_settlement_here() -> void:
@@ -11652,7 +11651,8 @@ func _start_settlement_here() -> void:
 	if GameState.simulation_events.size()>80:
 		GameState.simulation_events.resize(80)
 	_issue_travel_council_report("settlement",route_progress)
-	_open_people_panel()
+	# The map stays clear at founding: the dock no longer opens by itself over
+	# the new hearth. The People view is one click away on the rail.
 	_update_time_interface()
 	_open_settlement_naming_panel.call_deferred()
 

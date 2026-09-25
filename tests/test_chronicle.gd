@@ -36,14 +36,80 @@ func test_first_discovery_in_a_field_is_a_moment_and_the_next_is_a_notice()->voi
 	Chronicle.ingest_day({"discoveries":[{"id":pair[0],"day":10}],"progression":[]})
 	GameState.elapsed_days=40.0
 	Chronicle.ingest_day({"discoveries":[{"id":pair[1],"day":40}],"progression":[]})
+	# The repeat is held for the season's telling, not told on its own.
+	assert_int(Chronicle.entries("notice").size()).is_equal(1)
+	GameState.elapsed_days=140.0
+	Chronicle.ingest_day({"discoveries":[],"progression":[]})
 	var told:=Chronicle.entries("notice")
 	assert_int(told.size()).is_equal(2)
 	assert_str(String(told[1].tier)).is_equal("moment")
 	assert_bool(bool(told[1].first)).is_true()
 	assert_str(String(told[0].tier)).is_equal("notice")
+	assert_str(String(told[0].text)).contains("This season the people learned:")
 	assert_bool(Chronicle.discovery_is_moment(pair[0])).is_true()
 	assert_bool(Chronicle.discovery_is_moment(pair[1])).is_false()
 	assert_int(Chronicle.pending_cards.size()).is_equal(1)
+
+
+func _field_run(count:int)->Array:
+	for field in ["knowledge","production","nutrition","labor","culture","health","logistics","ecology","institutions","security","infrastructure","demography"]:
+		var ids:Array=[]
+		for id in DiscoverySystem.catalog_by_id:
+			if id in GameState.known_discoveries or String(id) in Chronicle.RESEARCH_MILESTONES:continue
+			if String((DiscoverySystem.catalog_by_id[id] as Dictionary).get("dynamic",""))==field:ids.append(String(id))
+			if ids.size()>=count:return ids
+	return []
+
+
+func test_repeat_discoveries_in_a_season_are_told_as_one_notice()->void:
+	var run:=_field_run(5)
+	assert_int(run.size()).is_equal(5)
+	GameState.known_discoveries.append_array(run)
+	# The first in its field is a moment; the next three share one season.
+	GameState.elapsed_days=100.0
+	Chronicle.ingest_day({"discoveries":[{"id":run[0],"day":100}],"progression":[]})
+	for i in [1,2,3]:
+		GameState.elapsed_days=100.0+i*10
+		Chronicle.ingest_day({"discoveries":[{"id":run[i],"day":100+i*10}],"progression":[]})
+	# A new season: the three are told together, before the new season's news.
+	GameState.elapsed_days=190.0
+	Chronicle.ingest_day({"discoveries":[{"id":run[4],"day":190}],"progression":[]})
+	var told:=Chronicle.entries("notice")
+	assert_int(told.size()).is_equal(2)
+	var batch:Dictionary=told[0]
+	assert_str(String(batch.title)).is_equal("What the summer taught")
+	for i in [1,2,3]:
+		var name:=String(DiscoverySystem.player_facing_discovery_event({"id":run[i]}).get("name",run[i])).to_lower()
+		assert_str(String(batch.text)).contains(name)
+	assert_array(batch.learned).is_equal([run[1],run[2],run[3]])
+	# Each line is still kept for the season view and the ledger.
+	assert_int(Chronicle.entries("whisper").filter(func(e:Dictionary)->bool:return String(e.get("kind",""))=="discovery" and String(e.get("tier",""))=="whisper").size()).is_equal(4)
+	var ledger:=GameState.simulation_events.filter(func(e:Dictionary)->bool:return String(e.get("id","")).begins_with("chronicle_discovery:"))
+	# Four repeats and the first (a moment) each keep their ledger line.
+	assert_int(ledger.size()).is_equal(5)
+	# The autumn discovery waits for the autumn's telling.
+	GameState.elapsed_days=290.0
+	Chronicle.ingest_day({"discoveries":[],"progression":[]})
+	assert_str(String(Chronicle.entries("notice")[0].title)).is_equal("What the autumn taught")
+
+
+func test_a_carried_tally_is_labelled_with_the_year_it_closes_in()->void:
+	# Spring (days 319-410) begins before the calendar year turns on day 365.
+	GameState.elapsed_days=330.0
+	var events:Array[Dictionary]=[]
+	HearthCount.advance(events)
+	HearthCount.tally("born",1)
+	GameState.elapsed_days=420.0
+	HearthCount.advance(events)
+	assert_int(events.size()).is_equal(0)
+	HearthCount.tally("buried",1);HearthCount.tally("born",1)
+	GameState.elapsed_days=503.0
+	HearthCount.advance(events)
+	assert_int(events.size()).is_equal(1)
+	assert_str(String(events[0].title)).is_equal("Tally of spring and summer, year 2")
+	assert_int(HearthCount.season_year(3)).is_equal(1)
+	assert_int(HearthCount.season_year(4)).is_equal(2)
+
 
 func test_moment_card_replaces_the_research_popup_and_never_pauses()->void:
 	var pair:=_same_field_pair()
@@ -136,9 +202,13 @@ func test_old_saves_without_a_chronicle_do_not_replay_known_fields()->void:
 	assert_bool(GameState.chronicle.is_empty()).is_true()
 	GameState.elapsed_days=900.0
 	Chronicle.ingest_day({"discoveries":[{"id":pair[1],"day":900}],"progression":[]})
+	# Not a first: told with the season's other learning when the season ends.
+	GameState.elapsed_days=1000.0
+	Chronicle.ingest_day({"discoveries":[],"progression":[]})
 	var told:=Chronicle.entries("notice")
 	assert_int(told.size()).is_equal(1)
 	assert_str(String(told[0].tier)).is_equal("notice")
+	assert_bool(bool(told[0].get("first",false))).is_false()
 
 func test_rival_simulations_keep_no_chronicle()->void:
 	WorldSimulation.create_actor("rival_test",4)
