@@ -287,6 +287,8 @@ static func grade(report:Dictionary)->String:
 	var kind:=String(report.get("kind",""))
 	var severity:=String(report.get("severity",""))
 	if kind=="hearth_count" or severity=="minor":return "whisper"
+	# A foreign scout seen on the road is folded into the scouts' own return.
+	if kind=="unit_sighting":return "whisper"
 	if lower.begins_with("first contact") or title in ["Settlement Site Chosen","New Settlement Seeded"]:return "moment"
 	if kind in ["founding","contact","ceremony","milestone"]:return "moment"
 	if lower.ends_with(" complete") and String(report.get("domain",""))=="security":return "whisper"
@@ -399,6 +401,7 @@ static func _scan_ledger(c:Dictionary)->void:
 		var ev:Dictionary=pair[1]
 		var told:=_retell(ev)
 		var tier:=grade(ev)
+		if told.size()>2 and bool(told[2]):tier="whisper"
 		# A standing hardship (short water, falling stores) is news when it
 		# begins, not every time its warning repeats.
 		var condition:=String(ev.get("condition_id",""))
@@ -438,9 +441,13 @@ static func _retell(ev:Dictionary)->Array:
 			for sentence in _sentences(description):
 				var lower:=sentence.to_lower()
 				if "no organized foreign polity" in lower or "knowledge workers will examine" in lower or "specific evidence becomes usable" in lower or "the map now reveals" in lower:continue
+				# Near neighbours' scouts cross ours all the time; their trails are
+				# marked on the map, not told at the fire.
+				if "crossed the trail of a foreign" in lower or kept.has(sentence):continue
 				kept.append(sentence)
 			var told:=" ".join(kept.slice(0,3)) if kept.size()>1 else " ".join(kept)
-			return ["The scouts come home" if title=="SCOUTS RETURN" else "The seekers come home",told.left(320)]
+			# Only the distance walked is left: a routine return, kept as a whisper.
+			return ["The scouts come home" if title=="SCOUTS RETURN" else "The seekers come home",told.left(320),kept.size()<=1]
 	return [_story_title(title),_story_text(ev)]
 
 

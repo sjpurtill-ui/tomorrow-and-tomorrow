@@ -311,3 +311,10 @@ func test_first_winter_and_first_contact_are_never_buried_by_the_moment_cap()->v
 	# An ordinary beat in a crowded month waits as a notice.
 	var crowded:=Chronicle.record_beat(_beat("headcount_130",202,"130 of us"))
 	assert_str(String(crowded.tier)).is_equal("notice")
+
+func test_near_neighbours_scouts_crossing_ours_are_routine()->void:
+	GameState.simulation_events.push_front({"day":0,"title":"Scouts report foreign scout","description":"Returning scouts report a scout of Kintara moving near the marked point.","domain":"diplomacy","severity":"notice","kind":"unit_sighting","civ_id":"rival_b"})
+	GameState.simulation_events.push_front({"day":0,"title":"SCOUTS RETURN","description":"The scout party returns after 37 days and charts roughly 210 km of land travel. They crossed the trail of a foreign scout (of unknown strength) and marked where they saw it. They crossed the trail of a foreign scout (of unknown strength) and marked where they saw it.","domain":"diplomacy","severity":"major"})
+	Chronicle.ingest_day({"discoveries":[],"progression":[]})
+	assert_int(Chronicle.entries("notice").size()).is_equal(0)
+	assert_int(Chronicle.entries().size()).is_equal(2)
