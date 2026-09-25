@@ -9,6 +9,7 @@ const Voice:=preload("res://scripts/audience_voice.gd")
 const SimulationPause:=preload("res://scripts/hud/simulation_pause.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const Works:=preload("res://scripts/great_works_audience.gd")
+const OpeningArc:=preload("res://scripts/opening_arc.gd")
 const CeremonyView:=preload("res://scripts/hud/great_work_ceremony.gd")
 const WorksAtlas:=preload("res://scripts/hud/great_works_atlas.gd")
 
@@ -62,10 +63,13 @@ func _process(delta:float)->void:
 		last_day=day
 		for step_day in range(maxi(start,day-30),day+1):
 			var arrivals:Array=Hall.daily(step_day)
+			# The Opening Arc marks the first years' real turning points as beats.
+			OpeningArc.daily(step_day,terrain)
 			if not arrivals.is_empty() and pending_summon.is_empty():pending_summon=String((arrivals[0] as Dictionary).get("id",""))
 		# Great works: stage gates, hard news, pitches, outcomes, forecasts.
 		var works:Array=Works.daily(day)
 		if not works.is_empty() and pending_summon.is_empty():pending_summon=String((works[0] as Dictionary).get("id",""))
+
 	elif day!=last_day:
 		last_day=day
 	if not pending_summon.is_empty():

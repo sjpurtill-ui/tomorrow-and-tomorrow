@@ -43,6 +43,10 @@ var work_day:=-30
 var history:Array[Dictionary]=[]
 var panel:Control
 var layer:CanvasLayer
+## The Opening Arc's record of the first years (scripts/opening_arc.gd).
+var opening_arc:Dictionary={}
+## Emitted for each Opening Arc beat: {id, kind, tier, day, title, text, refs}.
+signal opening_beat(beat:Dictionary)
 
 func ensure()->void:
 	if initialized and seed_value==WorldSimulation.state.world_seed: return
@@ -50,7 +54,7 @@ func ensure()->void:
 	next_vision_day=last_day+30
 
 func reset_for_new_world()->void:
-	ambition=""; chosen_day=-1; chosen_century=-1; last_day=0; resolved=0; next_vision_day=30; automatic_work=true; work_baseline={}; work_day=-30; history.clear(); cultural_memory=Culture.empty(); auto_scouting=true;auto_settlement=true;auto_research=true;inclination_review_day=-1; initialized=false
+	ambition=""; chosen_day=-1; chosen_century=-1; last_day=0; resolved=0; next_vision_day=30; automatic_work=true; work_baseline={}; work_day=-30; history.clear(); opening_arc={}; cultural_memory=Culture.empty(); auto_scouting=true;auto_settlement=true;auto_research=true;inclination_review_day=-1; initialized=false
 	if is_instance_valid(panel): panel.queue_free()
 
 func choose(id:String)->Dictionary:
@@ -232,7 +236,10 @@ func open_direction()->void:
 		if not needs_century_choice(): panel.queue_free()
 		return
 	if not is_instance_valid(layer): layer=CanvasLayer.new(); layer.layer=81; add_child(layer)
-	panel=preload("res://scripts/people_direction_screen.gd").new(); layer.add_child(panel)
+	# A new people is asked its purpose at the fire circle, in the Hearth Chief's
+	# voice. Later centuries and the F8 review keep the full direction screen.
+	var founding:bool=WorldSimulation.state.founding_focus=="" and ambition.is_empty()
+	panel=(preload("res://scripts/hud/fire_circle_opening.gd") if founding else preload("res://scripts/people_direction_screen.gd")).new(); layer.add_child(panel)
 
 func record_cultural_action(key:String,choice:String,weight:float=1.0)->bool:
 	ensure();_ensure_cultural_memory()

@@ -55,6 +55,9 @@ const TRIBUTARY_WATER_HALF_WIDTH_KM := 0.035
 const MAIN_RIVER_SETTLEMENT_CLEARANCE_KM := 0.25
 const TRIBUTARY_SETTLEMENT_CLEARANCE_KM := 0.10
 const SPEED_HOURS_PER_REAL_SECOND := {1:0.5,2:2.0,3:8.0,4:24.0,5:72.0}
+## A new people's story starts at one day per second: the first real hour is
+## about the first ten years, with a real turning point every few minutes.
+const DEFAULT_PLAY_SPEED := 4.0
 # Per-frame microseconds for a world day in progress (see _day_step_budget_usec).
 const DAY_STEP_BUDGET_USEC := 8000
 const DAY_STEP_BUDGET_FAST_USEC := 14000
@@ -12810,6 +12813,21 @@ func _open_settlement_naming_panel(settlement_id:String="") -> void:
 	settlement_naming_target_id=String(target.get("id",""))
 	naming_previous_speed=game_speed
 	_set_game_speed(0.0)
+	if settlement_naming_target_id=="__founding__":
+		# At the first fire the Hearth Chief asks the name, in their own voice.
+		var fire:Control=preload("res://scripts/hud/fire_circle_opening.gd").new()
+		fire.mode="name"
+		settlement_naming_panel=fire
+		interface_layer.add_child(fire)
+		settlement_name_input=fire.name_input
+		settlement_name_input.text=String(target.get("name",""))
+		settlement_name_input.text_changed.connect(_on_settlement_name_changed)
+		settlement_name_input.text_submitted.connect(_on_settlement_name_submitted)
+		settlement_name_confirm=fire.name_confirm
+		settlement_name_confirm.disabled=settlement_name_input.text.strip_edges()==""
+		settlement_name_confirm.pressed.connect(_commit_settlement_name)
+		fire.later_button.pressed.connect(_dismiss_settlement_naming_panel)
+		return
 	settlement_naming_panel=Control.new()
 	settlement_naming_panel.size=get_viewport().get_visible_rect().size
 	settlement_naming_panel.mouse_filter=Control.MOUSE_FILTER_STOP
@@ -12897,7 +12915,10 @@ func _commit_settlement_name() -> void:
 		if travel_status_label: travel_status_label.text=String(result.get("reason","SETTLEMENT COULD NOT BE RENAMED")).to_upper()
 		return
 	var final_name:=String(result.get("name",chosen))
-	var event:={"day":int(GameState.elapsed_days),"title":"Settlement Named","description":"The selected settlement is now known as %s." % final_name,"domain":"settlement","severity":"major"}
+	var description:="The selected settlement is now known as %s." % final_name
+	if settlement_naming_panel and settlement_naming_panel.has_method("named_line"):
+		description="%s At the first fire the people named their home %s." % [String(settlement_naming_panel.named_line(final_name)),final_name]
+	var event:={"day":int(GameState.elapsed_days),"title":"Settlement Named","description":description,"domain":"settlement","severity":"major"}
 	GameState.simulation_events.push_front(event)
 	if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
 	if travel_status_label:
@@ -20377,7 +20398,7 @@ func _open_founding_focus_panel()->void:
 		founding_focus_panel=null
 		if GameState.founding_focus!="":
 			if convoy_banner_sprite: convoy_banner_sprite.texture=_founding_banner_texture(GameState.founding_banner_index)
-			_set_game_speed(1.0)
+			_set_game_speed(DEFAULT_PLAY_SPEED)
 			_sync_map_help_overlay_visibility())
 
 

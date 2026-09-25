@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/fun_audit/fun_playtest.gd" id="1"]
+
+[node name="FunPlaytest" type="Node"]
+script = ExtResource("1")

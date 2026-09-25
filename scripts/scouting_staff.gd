@@ -95,6 +95,11 @@ func advance_steps(day:int)->Array:
 			var prospecting:Dictionary=host.prospecting_status()
 			if not bool(prospecting.available):data.status=String(prospecting.message);return null
 			target="rare_resources"
+		else:
+			# Signs of an unmet people outrank blank country: follow them first.
+			var skips:Dictionary=data.get("sign_skips",{}) if data.get("sign_skips") is Dictionary else {}
+			var sign:=String(preload("res://scripts/neighbor_signs.gd").sign_to_follow(host,skips,day))
+			if sign!="":target=sign
 		shared.merge({"searching":true,"view":view,"people":people,"spendable":spendable,"target":target},true)
 		data["search_turn"]=int(data.get("search_turn",0))+1
 		return routes
@@ -132,6 +137,13 @@ func advance_steps(day:int)->Array:
 			data.status="%d scouts departed from %s to %s. Expected back in %d days; staff handle the next departure." % [int(party.personnel),String(party.get("origin_label","home")),purpose,int(party.duration_days)]
 		])
 	routes.append(["scouting_status",func()->void:
+		if shared.searching and String(shared.get("target","")).begins_with("sign:"):
+			# No affordable way to the sign this week: explore elsewhere for a season.
+			var skips:Dictionary=data.get("sign_skips",{}) if data.get("sign_skips") is Dictionary else {}
+			skips[String(shared.target)]=day+90
+			if skips.size()>12:skips.erase(skips.keys()[0])
+			data["sign_skips"]=skips
+			data.next_review=mini(int(data.next_review),day+1)
 		if shared.searching:
 			data.status=shared.last_reason
 			# Rival staff with multi-day steps (day_span.gd) wait four weeks after a

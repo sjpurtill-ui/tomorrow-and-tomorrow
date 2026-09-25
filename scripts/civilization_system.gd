@@ -1223,6 +1223,7 @@ func scout_target_options()->Array[Dictionary]:
 			"description":"Return to the known encounter site, chart its surroundings, and look for routes toward the polity's home.",
 			"position":position.duplicate(true)
 		})
+	options.append_array(preload("res://scripts/neighbor_signs.gd").target_options(self))
 	for lead:Dictionary in rumor_network.list_leads("player",int(WorldSimulation.state.elapsed_days)):
 		options.append({"id":"lead:"+String(lead.id),"kind":"investigate_lead","lead_id":String(lead.id),"civ_id":String(lead.subject),"label":"INVESTIGATE LEAD · "+String(lead.name),"description":rumor_network.describe(lead),"position":lead.center.duplicate(true)})
 	for city:Dictionary in city_intelligence.known_cities():
@@ -2583,6 +2584,10 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	windfalls.append_array(military_accounts)
 	for account in military_accounts:
 		(mission.discoveries as Array).push_front({"kind":"intelligence","title":"Armed strangers on the road","description":account,"consequence":"A dated sighting has been added to the map. The force may have moved since it was seen."})
+	# Passing through a neighbour's range without meeting them leaves signs.
+	for sign:Dictionary in preload("res://scripts/neighbor_signs.gd").read_route(self,route,day):
+		windfalls.append(String(sign.description))
+		(mission.discoveries as Array).push_front(sign)
 	var rumor_line:=_resolve_scout_rumors(day,recruits)
 	if rumor_line!="":
 		windfalls.append(rumor_line)
