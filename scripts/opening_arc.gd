@@ -25,6 +25,8 @@ extends RefCounted
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
 const WINDOW_DAYS:=3650
+## Signs of strangers and first meetings are told as beats for this long.
+const CONTACT_WINDOW_DAYS:=36500
 const BEATS_MAX:=40
 const CHILD_GAP_DAYS:=270
 ## The same kind of news about the same people is told at most once a year.
@@ -83,7 +85,13 @@ static func daily(day:int,terrain:Node=null)->Array[Dictionary]:
 		for mark:int in HEADCOUNTS:
 			if int(GameState.population_total)>=mark: (arc.counted as Dictionary)[str(mark)]=-1
 	var age:=day-int(arc.founded_day)
-	if age>WINDOW_DAYS and done("spring_after") or age>WINDOW_DAYS*2: return emitted
+	if age>WINDOW_DAYS and done("spring_after") or age>WINDOW_DAYS*2:
+		# Peoples are usually met only after the first decade. Signs and first
+		# meetings stay beats for as long as a people is still being found.
+		if age<=CONTACT_WINDOW_DAYS:
+			for late in [_signs(day),_contact(day)]:
+				if not (late as Dictionary).is_empty(): emitted.append(late)
+		return emitted
 	_country(terrain)
 	for beat in [_signs(day),_contact(day),_winter(day),_spring(day),_child(day),_first_year(day),_discovery(day,terrain),_headcount(day),_neighbours(day),_land(day)]:
 		if not (beat as Dictionary).is_empty(): emitted.append(beat)
@@ -100,9 +108,11 @@ static func _signs(day:int)->Dictionary:
 		var civ_id:=String(card.get("civ_id",""))
 		if signed.has(civ_id): continue
 		signed[civ_id]=day
-		var smoke:=String(card.get("description","")).to_lower().contains("smoke")
+		var text:=String(card.get("description","")).to_lower()
+		var smoke:=text.contains("smoke")
+		var camp:=text.contains("camp") or text.contains("cache")
 		var kind:="first_signs" if not done("first_signs") else "signs_%s" % civ_id
-		var title:=("Smoke on the horizon" if smoke else "Tracks of strangers") if kind=="first_signs" else ("More smoke, another people" if smoke else "Other tracks, another people")
+		var title:=("Smoke on the horizon" if smoke else ("A strangers' camp" if camp else "Tracks of strangers")) if kind=="first_signs" else ("More smoke, another people" if smoke else ("Another camp, another people" if camp else "Other tracks, another people"))
 		return _emit(kind,day,title,String(card.get("description","")),{"bearing":String(card.get("bearing","")),"walk_days":int(card.get("walk_days",0))})
 	return {}
 
@@ -114,6 +124,9 @@ static func _contact(day:int)->Dictionary:
 		var civ_id:=String(civ.get("id",""))
 		if int(relation.get("contact_level",0))<2 or met.has(civ_id): continue
 		met[civ_id]=day
+		# A meeting long past (an older save) is history, not news today.
+		var met_day:=int(relation.get("met_day",-1))
+		if met_day>=0 and day-met_day>60: continue
 		var name:=String(civ.get("name","strangers"))
 		var how:="Our scouts met them on the road." if String(relation.get("contact_source",""))=="returned_scout_report" else "They found us before we found them."
 		if not done("first_contact"):

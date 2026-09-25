@@ -59,14 +59,29 @@ const COURT_MAX:=4
 const MOOD_OPINION:=0.03
 
 # ---- pacing budget ----
-## Average days between audiences the hall raises itself, by setting.
-const FREQUENCIES:={"rare":150,"normal":90,"lively":60}
+## Envoys come on real business, and rarely. A young people's neighbours live
+## weeks of walking away: in the stone age a people sends an envoy about once
+## in two to four years. Envoys come oftener as the eras turn and as trade and
+## roads tie peoples together; routine goodwill travels with travellers and
+## traders and is told in the Chronicle, not in an audience.
+## The "Visitors" setting scales every gap (rare: fewer envoys).
+const FREQUENCIES:={"rare":1.6,"normal":1.0,"lively":0.6}
+## Average days between any two envoys, by era tier (0 forager, 1 early
+## farming, 2 metal and writing, 3 later), at the "normal" setting.
+const ERA_GLOBAL_GAP:=[700,560,280,140]
+## Average days between envoys from one people, by era tier, at "normal".
+const ERA_CIV_GAP:=[1400,1150,650,350]
 ## Hard minimum between any two arrivals.
 const MIN_GAP:=20
 ## Kept for older callers: the global gap is now the hard minimum.
 const GAP_DAYS:=MIN_GAP
+## Floor between two envoys of one people (a harmed or refused envoy's sequel
+## may come this soon); routine business waits for most of civ_gap().
 const CIV_GAP:=180
-const CIV_CRISIS_GAP:=60
+const CIV_CRISIS_GAP:=120
+## Pure goodwill gifts: at most one per people per decade.
+const PURE_GIFTS:=["gift_goods","artifact_gift"]
+const GIFT_GAP_DAYS:=3650
 const PERSON_GAP:=240
 const PERSON_THREAD_GAP:=120
 const PERSON_CRISIS_GAP:=90
@@ -135,11 +150,11 @@ const SITUATIONS:={
 
 ## Which situations an occasion invites, with base weights.
 const OCCASION_MIX:={
-	"first_contact":{"gift_goods":1.2,"news_report":0.9,"accord_offer":0.7,"rumor_share":0.8,"intelligence_share":0.6,"trade_offer":0.6,"artifact_gift":0.6},
-	"relation_warm":{"gift_goods":0.7,"accord_offer":1.0,"protection_pact":0.8,"league_invitation":0.6,"scholar_offer":0.8,"research_sale":0.6,"license_offer":0.5,"trade_offer":0.8,"nonaggression_offer":0.4,"artifact_gift":0.7,"artifact_purchase":0.5},
+	"first_contact":{"gift_goods":0.25,"news_report":0.9,"accord_offer":0.7,"rumor_share":0.8,"intelligence_share":0.6,"trade_offer":0.6,"artifact_gift":0.15},
+	"relation_warm":{"gift_goods":0.3,"accord_offer":1.0,"protection_pact":0.8,"league_invitation":0.6,"scholar_offer":0.8,"research_sale":0.6,"license_offer":0.5,"trade_offer":0.8,"nonaggression_offer":0.4,"artifact_gift":0.3,"artifact_purchase":0.5},
 	"relation_cool":{"tribute_demand":1.0,"nonaggression_offer":0.6,"accord_offer":0.5,"news_report":0.3,"artifact_return":0.9},
 	"tension_rise":{"tribute_demand":1.2,"nonaggression_offer":0.8,"accord_offer":0.7,"artifact_return":0.6},
-	"war_end":{"gift_goods":0.6,"nonaggression_offer":1.0,"trade_offer":0.6,"accord_offer":0.6,"artifact_return":1.5},
+	"war_end":{"gift_goods":0.3,"nonaggression_offer":1.0,"trade_offer":0.6,"accord_offer":0.6,"artifact_return":1.5},
 	"peace_possible":{"peace_feeler":1.0},
 	"their_famine":{"aid_request":1.0},
 	"recruitment_incident":{"recruitment_protest":1.0},
@@ -149,7 +164,7 @@ const OCCASION_MIX:={
 	"debt_due":{"debt_call":1.0},
 	"grudge":{"redress_demand":1.0,"tribute_demand":0.25},
 	"kin_call":{"war_support":1.0},
-	"ambient":{"gift_goods":0.6,"accord_offer":0.6,"scholar_offer":0.8,"research_sale":0.6,"license_offer":0.5,"rumor_share":0.8,"intelligence_share":0.6,"news_report":0.5,"trade_offer":0.4,"league_invitation":0.4,"protection_pact":0.3,"artifact_gift":0.7,"artifact_purchase":0.6,"artifact_return":1.0},
+	"ambient":{"gift_goods":0.2,"accord_offer":0.6,"scholar_offer":0.8,"research_sale":0.6,"license_offer":0.5,"rumor_share":0.8,"intelligence_share":0.6,"news_report":0.5,"trade_offer":0.4,"league_invitation":0.4,"protection_pact":0.3,"artifact_gift":0.2,"artifact_purchase":0.6,"artifact_return":1.0},
 }
 
 ## An official's evolving ambitions: each is a decree the civic interpreter
@@ -202,6 +217,7 @@ static func state()->Dictionary:
 		if not s.get(key) is Dictionary: s[key]={}
 	if not s.has("next_any"): s["next_any"]=0
 	if not s.get("last_speaker") is String: s["last_speaker"]=""
+	if not s.get("last_word") is Dictionary: s["last_word"]={}
 	if not String(s.get("frequency","")) in FREQUENCIES: s["frequency"]="normal"
 	ForeignDiplomacy.audiences=s
 	if int(s.version)<2: _migrate(s)
@@ -268,8 +284,9 @@ static func _rng(key:String,day:int)->RandomNumberGenerator:
 # --------------------------------------------------------------------------
 
 static func set_frequency(level:String)->bool:
-	## "rare" | "normal" | "lively". The next routine audience is pulled in or
-	## pushed out to fit the new rhythm; the hard minimum gap still applies.
+	## "rare" | "normal" | "lively": a multiplier on every envoy gap. The next
+	## routine audience is pulled in or pushed out to fit the new rhythm; the
+	## hard minimum gap still applies.
 	if not level in FREQUENCIES: return false
 	var s:=state()
 	s.frequency=level
@@ -281,20 +298,41 @@ static func set_frequency(level:String)->bool:
 static func frequency()->String:
 	return String(state().frequency)
 
+static func _scale()->float:
+	return float(FREQUENCIES.get(String(state().get("frequency","normal")),1.0))
+
+static func era_tier()->int:
+	var voice:=load("res://scripts/character_voice.gd") as GDScript
+	if voice==null: return 0
+	return clampi(int(voice.call("era_tier",voice.call("era_tags","player"))),0,ERA_GLOBAL_GAP.size()-1)
+
+static func _roads()->float:
+	return clampf(float(GameState.simulation_metrics.get("logistics",0.16)),0.0,1.0)
+
 static func _gap()->int:
-	return int(FREQUENCIES.get(String(state().get("frequency","normal")),90))
+	## Average days between any two envoys.
+	return maxi(MIN_GAP*2,roundi(float(ERA_GLOBAL_GAP[era_tier()])*_scale()/(1.0+_roads()*0.3)))
+
+static func civ_gap(civ_id:String)->int:
+	## Average days between envoys from one people: long in the stone age,
+	## shorter with each era, with trade between the peoples, and with roads.
+	var relation:Dictionary=ForeignDiplomacy.civilization(civ_id).get("player_relation",{})
+	var trade:=clampf(float(relation.get("trade",0.0)),0.0,1.0)
+	return maxi(CIV_GAP,roundi(float(ERA_CIV_GAP[era_tier()])*_scale()/(1.0+trade*0.8+_roads()*0.4)))
 
 static func pacing()->Dictionary:
 	## Plain numbers for the modal footer and tests.
 	var s:=state()
 	return {"frequency":String(s.frequency),"average_gap_days":_gap(),"min_gap_days":MIN_GAP,"next_routine_day":int(s.next_any),
-		"last_arrival_day":int(s.last_arrival_day),"pending_occasions":(s.occasions as Array).size(),"civ_gap_days":CIV_GAP,"official_gap_days":PERSON_GAP}
+		"last_arrival_day":int(s.last_arrival_day),"pending_occasions":(s.occasions as Array).size(),"civ_gap_days":roundi(float(ERA_CIV_GAP[era_tier()])*_scale()),"official_gap_days":PERSON_GAP,"era_tier":era_tier()}
 
 static func _budget_allows(occasion:Dictionary,day:int)->bool:
 	var s:=state()
 	var since:=day-int(s.last_arrival_day)
 	if since<MIN_GAP: return false
-	if bool(occasion.get("crisis",false)): return since>=maxi(MIN_GAP,roundi(float(_gap())*0.5))
+	# Urgent business (hunger, a threat, a chance of peace) does not wait a season.
+	# Nor does a newly met people's first envoy.
+	if bool(occasion.get("crisis",false)) or String(occasion.get("type",""))=="first_contact": return since>=maxi(MIN_GAP,mini(60,roundi(float(_gap())*0.5)))
 	return day>=int(s.next_any)
 
 static func _speaker_allows(occasion:Dictionary,day:int)->bool:
@@ -306,7 +344,10 @@ static func _speaker_allows(occasion:Dictionary,day:int)->bool:
 	if key==String(s.last_speaker) and not thread: return false
 	if key.begins_with("civ:"):
 		var last:=int((s.last_civ as Dictionary).get(key.trim_prefix("civ:"),-99999))
-		return day-last>=(CIV_CRISIS_GAP if crisis else CIV_GAP)
+		# A sequel was already scheduled a civ gap out; other business from the
+		# same people waits most of one.
+		var floor_days:=CIV_CRISIS_GAP if crisis else (CIV_GAP if thread else maxi(CIV_GAP,roundi(float(civ_gap(key.trim_prefix("civ:")))*0.6)))
+		return day-last>=floor_days
 	var last_person:=int((s.last_person as Dictionary).get(key.trim_prefix("person:"),-99999))
 	return day-last_person>=(PERSON_CRISIS_GAP if crisis else (PERSON_THREAD_GAP if thread else PERSON_GAP))
 
@@ -346,6 +387,9 @@ static func daily(day:int)->Array[Dictionary]:
 		var petition:=_generate_court_occasion(occasion,day)
 		if not petition.is_empty(): _file_matter(petition,[])
 	if waiting().size()>=QUEUE_MAX or day-int(s.last_arrival_day)<MIN_GAP: return arrivals
+	# Never more than one envoy waiting: the others keep their business until
+	# the hall is free, and business that goes stale is told in the Chronicle.
+	if _envoy_waiting(): return arrivals
 	var ready:Array[Dictionary]=[]
 	for occasion in s.occasions:
 		if occasion is Dictionary and int(occasion.get("not_before",0))<=day and int(occasion.get("expires",0))>day and not String(occasion.get("type","")) in COURT_OCCASIONS: ready.append(occasion)
@@ -362,6 +406,11 @@ static func daily(day:int)->Array[Dictionary]:
 		arrivals.append(audience)
 		break
 	return arrivals
+
+static func _envoy_waiting()->bool:
+	for audience in state().queue:
+		if audience is Dictionary and String(audience.get("status",""))=="waiting" and String(audience.get("origin",""))=="foreign": return true
+	return false
 
 static func _occasion_priority(occasion:Dictionary)->int:
 	if bool(occasion.get("crisis",false)): return 2
@@ -749,13 +798,19 @@ static func _note_arrival(audience:Dictionary,day:int,external:bool)->void:
 	s.last_arrival_day=day
 	var gap:=float(_gap())
 	var rng:=_rng("budget:%d" % int(s.serial),day)
-	var next:=day+(roundi(gap*0.5) if external else roundi(gap*rng.randf_range(0.75,1.3)))
+	var next:=day+(roundi(minf(gap*0.5,45.0)) if external else roundi(gap*rng.randf_range(0.75,1.3)))
 	s.next_any=maxi(int(s.next_any),next)
 	var key:=_speaker_key(audience)
 	s.last_speaker=key
 	if key.begins_with("civ:"): s.last_civ[key.trim_prefix("civ:")]=day
 	elif key.begins_with("person:"): s.last_person[key.trim_prefix("person:")]=day
 	_ledger_add(audience)
+
+static func _gift_recent(civ_id:String,day:int)->bool:
+	## Whether this people sent a pure goodwill gift within the decade.
+	for entry in state().ledger:
+		if entry is Dictionary and String(entry.get("civ_id",""))==civ_id and String(entry.get("situation","")) in PURE_GIFTS and day-int(entry.get("day",-99999))<GIFT_GAP_DAYS: return true
+	return false
 
 static func _archive(audience:Dictionary)->void:
 	var s:=state()
@@ -896,7 +951,24 @@ static func _add_occasion(occasion:Dictionary)->void:
 static func _prune_occasions(day:int)->void:
 	var list:Array=state().occasions
 	for occasion in list.duplicate():
-		if not occasion is Dictionary or int(occasion.get("expires",0))<=day: list.erase(occasion)
+		if not occasion is Dictionary or int(occasion.get("expires",0))<=day:
+			list.erase(occasion)
+			if occasion is Dictionary: _stale_note(occasion,day)
+
+const STALE_SILENT:=["ambient","sequel","debug"]
+static func _stale_note(occasion:Dictionary,day:int)->void:
+	## Foreign business that never reached an audience is not lost: the word
+	## arrived some other way, and the Chronicle keeps it.
+	var type:=String(occasion.get("type",""))
+	if type in COURT_OCCASIONS or type in STALE_SILENT or int(occasion.get("not_before",0))>day: return
+	var civ_id:=String(occasion.get("civ_id",""))
+	var civ:=ForeignDiplomacy.civilization(civ_id)
+	if civ.is_empty(): return
+	var text:=String((occasion.get("data",{}) as Dictionary).get("text","")).strip_edges()
+	if text=="": return
+	var carriers:="Traders" if era_tier()>=2 else "Travellers"
+	preload("res://scripts/chronicle.gd").record({"title":"Word of the %s" % String(civ.get("name",civ_id)),"tier":"whisper","kind":"contact",
+		"key":"stale:%s" % String(occasion.get("key","")),"text":"%s told of it: %s. No envoy came to speak of it." % [carriers,text]})
 
 static func occasions()->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
@@ -1044,20 +1116,33 @@ static func _observe_court(day:int,baseline:bool)->void:
 		if not present.has(String(key)): people.erase(key)
 
 static func _ambient(day:int)->void:
-	## When nothing has happened for a long while, a people not heard from in
-	## half a year sends an envoy. Still subject to the budget. (The court never
-	## comes uninvited; see _observe_court for officials' own plans.)
+	## A people long silent sends an envoy only when it has real business: a
+	## demand, an alliance, a trade need, a warning about a third people, a
+	## treasure to reclaim, or (rarely) a goodwill gift. With no business,
+	## their routine word comes with travellers and is kept in the Chronicle.
+	## Still subject to the budget. (The court never comes uninvited; see
+	## _observe_court for officials' own plans.)
 	var s:=state()
 	var gap:=_gap()
-	if day-int(s.last_arrival_day)<roundi(float(gap)*1.2) or day<int(s.next_any): return
+	if day-int(s.last_arrival_day)<gap or day<int(s.next_any): return
 	for occasion in s.occasions:
 		if occasion is Dictionary and int(occasion.get("not_before",0))<=day and _speaker_allows(occasion,day): return
 	var pool:Array[Dictionary]=[]
+	var words:Dictionary=s.last_word
 	for civ in WorldSimulation.world.civilizations:
 		var id:=String(civ.get("id",""))
 		if ForeignDiplomacy.civilization(id).is_empty() or bool(civ.player_relation.get("at_war",false)): continue
-		var silent:=day-int((s.last_civ as Dictionary).get(id,-99999))
-		if silent>=CIV_GAP and "civ:"+id!=String(s.last_speaker): pool.append({"w":minf(3.0,float(silent)/365.0+0.5),"civ_id":id})
+		if "civ:"+id==String(s.last_speaker): continue
+		var heard:=maxi(int((s.last_civ as Dictionary).get(id,-99999)),int(words.get(id,-99999)))
+		heard=maxi(heard,int(civ.player_relation.get("met_day",-99999)))
+		var silent:=day-heard
+		if silent<civ_gap(id): continue
+		var business:=_business_mix(id,day)
+		if business.is_empty():
+			words[id]=day
+			_routine_word(civ,day)
+			continue
+		pool.append({"w":minf(3.0,float(silent)/365.0+0.5),"civ_id":id,"business":business})
 	if pool.is_empty(): return
 	var rng:=_rng("ambient",day)
 	var total:=0.0
@@ -1067,20 +1152,59 @@ static func _ambient(day:int)->void:
 	for entry in pool:
 		roll-=float(entry.w)
 		if roll<=0.0: pick=entry; break
-	if pick.has("civ_id"):
-		_add_occasion({"key":"ambient:%d" % day,"type":"ambient","civ_id":String(pick.civ_id),"day":day,"expires":day+45,"data":{"text":"a long silence between your peoples"}})
-	else:
-		_add_occasion({"key":"ambition:%d" % day,"type":"ambition","person_id":int(pick.person_id),"day":day,"expires":day+45,"data":{"text":"a plan they have been turning over"}})
+	words[String(pick.civ_id)]=day
+	_add_occasion({"key":"ambient:%d" % day,"type":"ambient","civ_id":String(pick.civ_id),"day":day,"expires":day+45,"data":{"text":"business between your peoples","business":pick.business}})
+
+static func _business_mix(civ_id:String,day:int)->Dictionary:
+	## What a people actually has to come about, as situation weights.
+	var civ:=ForeignDiplomacy.civilization(civ_id)
+	if civ.is_empty(): return {}
+	var relation:Dictionary=civ.get("player_relation",{})
+	var opinion:=float(relation.get("opinion",0.0))
+	var tension:=float(relation.get("border_tension",0.0))
+	var rng:=_rng("business:"+civ_id,day)
+	var mix:Dictionary={}
+	# An alliance, or a marriage between ruling families.
+	if opinion>=0.3: mix.merge({"accord_offer":0.7,"protection_pact":0.5,"league_invitation":0.3})
+	# A threat or a demand.
+	if opinion<=-0.2 or tension>=0.45: mix.merge({"tribute_demand":1.0,"nonaggression_offer":0.5})
+	# A treasure taken from them.
+	if not _looted_from(civ_id).is_empty(): mix["artifact_return"]=1.0
+	# A trade need: a trading people, one already trading, or a lean year.
+	if float(relation.get("trade",0.0))>0.05 or String(civ.get("strategy",""))=="commerce" or rng.randf()<0.3:
+		mix.merge({"trade_offer":0.6,"artifact_purchase":0.3,"research_sale":0.3,"license_offer":0.25,"scholar_offer":0.3})
+	# A warning about a third people they are fighting or fear.
+	if not _third_wars(civ).is_empty() or rng.randf()<0.15: mix.merge({"news_report":0.5,"intelligence_share":0.3})
+	# Now and then, simply a gift: at most once in a decade.
+	if not _gift_recent(civ_id,day) and rng.randf()<0.15: mix["gift_goods"]=0.4
+	return mix
+
+static func _routine_word(civ:Dictionary,day:int)->void:
+	## Routine goodwill, folded into one Chronicle line instead of an audience.
+	var name:=String(civ.get("name","strangers"))
+	var opinion:=float((civ.get("player_relation",{}) as Dictionary).get("opinion",0.0))
+	var mood:="they are well and want peace" if opinion>=0.0 else "they keep to themselves and want no trouble"
+	var text:=("The %s sent word through traders: %s." if era_tier()>=2 else "Travellers who crossed the country of the %s say %s.") % [name,mood]
+	preload("res://scripts/chronicle.gd").record({"title":"Word of the %s" % name,"tier":"whisper","kind":"contact","key":"word:%s:%d" % [String(civ.get("id","")),day],"text":text})
 
 static func _add_sequel(audience:Dictionary,option_id:String,day:int)->void:
 	## The next envoy from this people remembers how this audience ended.
 	if String(audience.get("origin",""))!="foreign" or String(audience.get("civ_id",""))=="": return
 	var civ_id:=String(audience.civ_id)
+	# Only unfinished business brings the same people back: a wrong or a
+	# refusal, tribute paid (or refused), help given. A gift received, news
+	# heard or a proposal answered is finished; their next envoy waits for new
+	# business.
+	var harmed:=option_id.begins_with("envoy_")
+	var refused:=option_id in ["refuse","rebuff","rebuke","abstain","dismiss","ignored","expired","defy","stand","decline","counter"]
+	var threat_paid:=String(audience.get("kind",""))=="threat" and option_id=="pay"
+	var aid_given:=_situation_type(audience)=="aid_request" and option_id in ["grant","grant_half"]
+	if not (harmed or refused or threat_paid or aid_given): return
 	var list:Array=state().occasions
 	for existing in list.duplicate():
 		if existing is Dictionary and String(existing.get("type",""))=="sequel" and String(existing.get("civ_id",""))==civ_id: list.erase(existing)
 	var rng:=_rng("sequel:"+civ_id,day)
-	var start:=day+CIV_GAP+rng.randi_range(0,90)
+	var start:=day+(CIV_GAP if harmed else maxi(CIV_GAP,roundi(float(civ_gap(civ_id))*0.6)))+rng.randi_range(0,90)
 	var terms:Dictionary=audience.get("terms",{}) if audience.get("terms") is Dictionary else {}
 	_add_occasion({"key":"sequel:%s:%d" % [civ_id,day],"type":"sequel","civ_id":civ_id,"day":day,"not_before":start,"expires":start+240,
 		"data":{"text":"what came of the last audience","previous":{"day":int(audience.get("arrived_day",day)),"situation":_situation_type(audience),"kind":String(audience.get("kind","")),
@@ -1199,6 +1323,8 @@ static func _weighted(candidates:Array[Dictionary],rng:RandomNumberGenerator)->D
 static func _foreign_candidates(civ_id:String,occasion:Dictionary,rng:RandomNumberGenerator,used:Dictionary,day:int)->Array[Dictionary]:
 	var type:=String(occasion.get("type","ambient"))
 	var mix:Dictionary=OCCASION_MIX.get(type,OCCASION_MIX.ambient)
+	var business:Variant=(occasion.get("data",{}) as Dictionary).get("business") if occasion.get("data") is Dictionary else null
+	if type=="ambient" and business is Dictionary and not (business as Dictionary).is_empty(): mix=business
 	var branches:Dictionary={}
 	if type=="sequel":
 		var plan:=_sequel_plan(civ_id,occasion)
@@ -1293,6 +1419,7 @@ static func _candidate(situation_type:String,civ_id:String,occasion:Dictionary,r
 	match situation_type:
 		"gift_goods","gratitude_gift","dread_tribute":
 			if war: return {}
+			if situation_type=="gift_goods" and _gift_recent(civ_id,day): return {}
 			var terms:=_gift_terms(civ_id,civ,rng,used,1.3 if situation_type=="gratitude_gift" else (1.6 if situation_type=="dread_tribute" else 1.0))
 			if terms.is_empty(): return {}
 			situation.ask="gift:"+String(terms.resource)
@@ -1395,7 +1522,7 @@ static func _candidate(situation_type:String,civ_id:String,occasion:Dictionary,r
 			if war: return {}
 			return _research_candidate(situation_type,civ_id,name,used,situation)
 		"artifact_gift":
-			if war: return {}
+			if war or _gift_recent(civ_id,day): return {}
 			return _artifact_gift_candidate(civ_id,name,used,situation)
 		"artifact_purchase":
 			if war: return {}
