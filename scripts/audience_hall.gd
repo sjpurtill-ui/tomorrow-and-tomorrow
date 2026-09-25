@@ -515,10 +515,51 @@ static func _prune_matters(day:int)->void:
 	var list:Array=state().matters
 	var gwa:=_great_works()
 	for m in list.duplicate():
+		if m is Dictionary and int(m.get("expires",0))<=day: _note_lapse(m,day)
 		if not m is Dictionary or int(m.get("expires",0))<=day: list.erase(m); continue
 		var audience:Dictionary=m.get("audience",{}) if m.get("audience") is Dictionary else {}
 		if String(audience.get("kind",""))=="great_work" and gwa!=null and bool(gwa.call("stale",audience)): list.erase(m)
 		elif String(audience.get("kind",""))=="petition" and _official(int((m.get("holder",{}) as Dictionary).get("person_id",0))).is_empty(): list.erase(m)
+
+## A matter the ruler never heard lapses. The same ask is not filed again for
+## LAPSE_SPACING days; after LAPSE_LIMIT lapses its holder stops asking (and
+## minds it), until REPEAT_DAYS have passed.
+const LAPSE_SPACING:=730
+const LAPSE_LIMIT:=2
+const LAPSES_MAX:=160
+
+static func _lapses()->Dictionary:
+	var s:=state()
+	if not s.get("lapsed") is Dictionary: s["lapsed"]={}
+	return s.lapsed
+
+static func _note_lapse(m:Dictionary,day:int)->void:
+	var audience:Dictionary=m.get("audience",{}) if m.get("audience") is Dictionary else {}
+	if String(audience.get("origin",""))!="court" or String(audience.get("kind",""))!="petition": return
+	var key:=String(m.get("key",""))
+	if key=="": return
+	var lapses:=_lapses()
+	var prior:Dictionary=lapses.get(key,{}) if lapses.get(key) is Dictionary else {}
+	var n:=int(prior.get("n",0))+1 if day-int(prior.get("day",-99999))<REPEAT_DAYS else 1
+	lapses[key]={"n":n,"day":day}
+	var pid:=int((m.get("holder",{}) as Dictionary).get("person_id",0)) if m.get("holder") is Dictionary else 0
+	if n==LAPSE_LIMIT and pid>0 and String(m.get("situation_type",""))=="ambition":
+		# Asked twice and never heard: they stop asking, and they mind it.
+		GovernmentPeopleSystem.adjust_person_bonds(pid,{"resentment":0.04,"trust":-0.02})
+		GovernmentPeopleSystem.record_person_memory(pid,"Twice I waited to put my plan before the god, and twice I was never called: %s." % String(m.get("summary","")).substr(0,120),"audience",0.6,{"emotion":"slighted"})
+	if lapses.size()>LAPSES_MAX:
+		var oldest:=""
+		for k in lapses:
+			if oldest=="" or int((lapses[k] as Dictionary).get("day",0))<int((lapses[oldest] as Dictionary).get("day",0)): oldest=String(k)
+		lapses.erase(oldest)
+
+static func lapse_blocks(key:String,day:int)->bool:
+	## True while an unheard ask should not be filed again.
+	var entry:Variant=_lapses().get(key,{})
+	if not entry is Dictionary or (entry as Dictionary).is_empty(): return false
+	var since:=day-int((entry as Dictionary).get("day",-99999))
+	if since>=REPEAT_DAYS: return false
+	return int((entry as Dictionary).get("n",0))>=LAPSE_LIMIT or since<LAPSE_SPACING
 
 static func matters(holder_key:String="")->Array[Dictionary]:
 	## Pending matters, most pressing first. Pass a holder key ("person:<id>",
@@ -1828,6 +1869,7 @@ static func _ambition_ladder(person:Dictionary)->Array:
 static func _next_ambition(person:Dictionary,day:int)->String:
 	var used:=_used_asks("person:%d" % int(person.get("person_id",0)),day)
 	for decree in _ambition_ladder(person):
+		if lapse_blocks("person:%d|ambition:%s" % [int(person.get("person_id",0)),String(decree)],day): continue
 		if not used.has("ambition:"+String(decree)): return String(decree)
 	return ""
 
@@ -1867,6 +1909,8 @@ static func _generate_court_occasion(occasion:Dictionary,day:int)->Dictionary:
 	var used:=_used_asks("person:%d" % int(person.person_id),day)
 	var built:=_court_petition(type,person,data,day)
 	if built.is_empty() or used.has(String(built.ask)): return {}
+	# An unheard ask waits before it is filed again (crises always come).
+	if not bool(occasion.get("crisis",false)) and lapse_blocks("person:%d|%s" % [int(person.person_id),String(built.ask)],day): return {}
 	return _court_audience(person,built,occasion,day)
 
 static func _court_petition(type:String,person:Dictionary,data:Dictionary,day:int)->Dictionary:
@@ -2093,7 +2137,9 @@ static func options(id:String)->Array[Dictionary]:
 		"summons":
 			result.append(_option("dismiss_summons","That will be all","Send them back to their work.","neutral"))
 	# Every foreign answer shows its cost, and who at court objects.
-	if String(audience.get("origin",""))=="foreign": _rivals().call("annotate_options",audience,result)
+	if String(audience.get("origin",""))=="foreign":
+		_rivals().call("annotate_options",audience,result)
+		_aims().call("annotate_options",audience,result)
 	# A summoned person may raise one of their other matters instead.
 	if String(audience.get("origin",""))=="court":
 		for other in _other_matters(audience):
@@ -2232,6 +2278,7 @@ static func resolve(id:String,option_id:String)->Dictionary:
 	if result.has("error"): return {"ok":false,"outcome":String(result.error),"reaction":"neutral"}
 	if String(audience.get("origin",""))=="foreign":
 		result=_rivals().call("after_answer",audience,option_id,result)
+		result=_aims().call("after_answer",audience,option_id,result)
 		_war().call("after_answer",audience,option_id)
 	audience.status="resolved"
 	audience.outcome=String(result.outcome)
@@ -3444,6 +3491,9 @@ static func validate_state(data:Variant)->bool:
 	for occasion in data.get("occasions",[]):
 		if not occasion is Dictionary or not occasion.get("key","") is String or not occasion.get("type","") is String or not _num(occasion.get("expires")) or not _num(occasion.get("not_before",0)) or JSON.stringify(occasion).length()>3000: return false
 	if not data.get("watch",{}) is Dictionary or JSON.stringify(data.get("watch",{})).length()>100000: return false
+	if not data.get("lapsed",{}) is Dictionary or (data.get("lapsed",{}) as Dictionary).size()>LAPSES_MAX*2: return false
+	for key in data.get("lapsed",{}):
+		if not data.lapsed[key] is Dictionary or not _num((data.lapsed[key] as Dictionary).get("n")) or not _num((data.lapsed[key] as Dictionary).get("day")): return false
 	if not data.get("matters",[]) is Array or (data.get("matters",[]) as Array).size()>MATTERS_MAX: return false
 	for m in data.get("matters",[]):
 		if not m is Dictionary or not m.get("id","") is String or not m.get("key","") is String or not m.get("holder_key","") is String or not m.get("holder",{}) is Dictionary: return false

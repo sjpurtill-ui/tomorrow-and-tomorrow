@@ -169,6 +169,47 @@ static func make(seed_value:int,serial:int,woman:bool,owner:String,used:Dictiona
 	var name:=("%s %s" % [given,byname]).strip_edges()
 	return {"name":name,"given":given,"byname":byname,"family":family,"stage":st,"tradition":tradition(owner,seed_value)}
 
+static func given_for(seed_value:int,key:String,woman:bool,owner:String,taken:Dictionary)->String:
+	## One given name in this people's tradition and of the person's sex (a
+	## newborn, a traveller). A name in `taken` (bare or "given:<name>") is
+	## avoided while any other of that sex remains.
+	var half:Array=(PALETTES[tradition(owner,seed_value)] as Array)[0 if woman else 1]
+	var start:=posmod(hash("%d:given:%s:%s" % [seed_value,owner,key]),half.size())
+	for offset in half.size():
+		var candidate:=String(half[(start+offset)%half.size()])
+		if not taken.has(candidate) and not taken.has("given:"+candidate): return candidate
+	return String(half[start])
+
+static func is_given_of_sex(given:String,woman:bool)->bool:
+	## True when a given name belongs to that sex in any tradition.
+	for palette in PALETTES:
+		if String(given) in ((palette as Array)[0 if woman else 1] as Array): return true
+	return false
+
+static func hearth_of(seed_value:int,key:String,owner:String,taken:Dictionary={})->Dictionary:
+	## How the people name one family. A band names a hearth for its eldest
+	## ("Tesk's hearth"); villagers by where it came from ("the hearth from
+	## Reedwater"); a people with family names by that name ("the Reedwater
+	## hearth"). {name: the hearth, at: "at <the hearth>"}.
+	var tags:Array=CV.era_tags(owner)
+	var start:=posmod(hash("%d:hearth:%s:%s" % [seed_value,owner,key]),1000003)
+	match stage(owner):
+		0:
+			var palette:Array=PALETTES[tradition(owner,seed_value)]
+			var pool:Array=(palette[0] as Array)+(palette[1] as Array)
+			var elder:=String(pool[start%pool.size()])
+			for offset in pool.size():
+				var candidate:=String(pool[(start+offset)%pool.size()])
+				if not taken.has(candidate) and not taken.has("given:"+candidate): elder=candidate; break
+			return {"name":"%s's hearth" % elder,"at":"at %s's hearth" % elder}
+		1:
+			var places:Array=_clean(PLACES,tags)
+			var place:=String(places[start%places.size()])
+			return {"name":"the hearth from %s" % place,"at":"of the hearth from %s" % place}
+	var families:Array=_clean(FAMILIES,tags)
+	var family:=String(families[start%families.size()])
+	return {"name":"the %s hearth" % family,"at":"of the %s hearth" % family}
+
 static func used_in_court()->Dictionary:
 	## Full and given names of every living person the player's court can see:
 	## the government cast, remembered commoners and the realm's great figures.

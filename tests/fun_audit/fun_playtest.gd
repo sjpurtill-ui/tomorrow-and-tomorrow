@@ -41,6 +41,16 @@ var aim_policy:="player"
 var aim_due:Dictionary={}
 var aim_logged:Dictionary={}
 var policy:="random"
+## Typed orders (offline reading), one every ORDER_GAP days from year 2 when
+## --orders=on: great works, miracles and plain orders a god might give.
+const ORDERS:=["Build a great temple to me on the hill.","Make it rain tomorrow.","Hold a feast in my honour.","Raise the dead from the burial mound.",
+	"Teach the people to fly.","Raise a ring of standing stones.","Turn the river stones into gold.","Stop the winter from coming.","Pray to me at dawn and dusk.",
+	"Dig latrines away from the huts and keep the water clean.","Cure all the sick.","Give everyone a day of rest."]
+const ORDER_GAP:=270
+var orders_on:=false
+var order_index:=0
+var next_order_day:=730
+var last_chief:=-1
 ## War in the living world (scripts/war_loop.gd), when this build has it.
 const WAR_PATH:="res://scripts/war_loop.gd"
 var war:GDScript
@@ -66,6 +76,7 @@ func _ready()->void:
 	policy=_arg("policy","random")
 	rng.seed=seed_value
 	aim_policy=_arg("aims","player")
+	orders_on=_arg("orders","off")=="on"
 	if ResourceLoader.exists(AIMS_PATH): aims=load(AIMS_PATH) as GDScript
 	if ResourceLoader.exists(WAR_PATH): war=load(WAR_PATH) as GDScript
 	out=FileAccess.open(_arg("out","user://fun_playtest.jsonl"),FileAccess.WRITE)
@@ -128,6 +139,11 @@ func _ready()->void:
 			ui_marks["first_ten"]=true
 			w("ui_first_ten",first_ten)
 		_handle_aims()
+		_watch_chief()
+		if orders_on and GameState.settlement_site_committed and int(GameState.elapsed_days)>=next_order_day:
+			next_order_day=int(GameState.elapsed_days)+ORDER_GAP
+			_type_order(String(ORDERS[order_index%ORDERS.size()]))
+			order_index+=1
 		_handle_war()
 		var y:=int(GameState.elapsed_days/365.0)
 		if y!=last_year_mark:
@@ -137,6 +153,7 @@ func _ready()->void:
 				ui_marks[y]=true
 				w("ui",UiMeasure.measure(terrain,"year %d" % y))
 	_collect()
+	_dump_people()
 	w("end",{"counts":counts,"inbox":GameState.council_inbox.size(),"matters":Hall.matter_counts(),"hall_history":(Hall.state().get("history",[]) as Array).size()})
 	out.close()
 	print("FUN_PLAYTEST DONE ",counts)
@@ -157,6 +174,53 @@ func _first_ten_sample()->void:
 	first_ten.kpi_max=maxi(int(first_ten.kpi_max),kpis)
 	first_ten.dock_tiles_max=maxi(int(first_ten.dock_tiles_max),tiles)
 	first_ten.max_surface=maxi(int(first_ten.max_surface),rail+kpis+tiles)
+
+func _watch_chief()->void:
+	if GameState.player_settlements.is_empty(): return
+	var chief:Dictionary=GovernmentPeopleSystem.settlement_leader(String(GameState.player_settlements[0].id))
+	var pid:=int(chief.get("person_id",0))
+	if pid==last_chief or pid<=0: return
+	last_chief=pid
+	w("chief",{"pid":pid,"name":String(chief.get("name","")),"age":GovernmentPeopleSystem.age_years(chief),"title":String(chief.get("office_title",""))})
+
+func _type_order(text:String)->void:
+	var city:=String(GameState.player_settlements[0].id)
+	var leader:=GovernmentPeopleSystem.settlement_leader(city)
+	if leader.is_empty(): return
+	var reading:=PronouncementInterpreter._local_interpretation(text,{"settlement":{"id":city}})
+	var order:=AdvisorSystem.begin_civic_directive(text,city,leader)
+	var resolved:=AdvisorSystem.resolve_civic_directive(text,reading,order,city,int(leader.get("person_id",0)))
+	var reply:=String(resolved.get("leader_reply",""))
+	var speech:=reply.split("
+
+STATE ·")[0].split("
+
+RECEIPT · ")[0].replace("
+"," ")
+	var receipt:=reply.split("
+
+STATE ·")[0].split("
+
+RECEIPT · ")[1] if "
+
+RECEIPT · " in reply else ""
+	var frame:=""
+	var reply_script:GDScript=load("res://scripts/divine_reply.gd")
+	if "last_frame" in reply_script: frame=String(reply_script.get("last_frame"))
+	var work:Dictionary=resolved.get("great_work",{}) if resolved.get("great_work") is Dictionary else {}
+	w("order",{"text":text,"speaker":String(leader.get("name","")),"speech":speech.left(600),"receipt":receipt.left(400),"frame":frame,"status":String(resolved.get("status","")),"work_started":bool(work.get("started",false)),"work":String(work.get("name",""))})
+
+func _dump_people()->void:
+	for person in GovernmentPeopleSystem.people:
+		var p:Dictionary=person
+		w("person",{"pid":int(p.get("person_id",0)),"name":String(p.get("name","")),"sex":String(p.get("sex","")),"status":String(p.get("status","")),"age":GovernmentPeopleSystem.age_years(p),
+			"born":int(p.get("born_day",0)),"died":int(p.get("died_day",-1)),"office":String(p.get("died_office_key",p.get("office_key",""))),"local":String(p.get("died_local_leader_of",p.get("local_leader_of",""))),"months":int(p.get("experience_months",0))})
+	for child in preload("res://scripts/opening_arc.gd").state().get("children",[]):
+		w("child",{"name":String((child as Dictionary).get("name","")),"daughter":bool((child as Dictionary).get("daughter",false))})
+	for list_key in ["history","queue"]:
+		for a in Hall.state().get(list_key,[]):
+			if a is Dictionary and String(a.get("origin",""))=="foreign": w("envoy_name",{"name":String((a.get("speaker",{}) as Dictionary).get("name","")),"civ":String(a.get("civ_id",""))})
+	if aims!=null: w("aim_stats",(aims.call("state") as Dictionary).get("stats",{}))
 
 func _on_beat(beat:Dictionary)->void:
 	w("beat",{"kind":String(beat.get("kind","")),"title":String(beat.get("title","")),"text":String(beat.get("text","")).left(400)})

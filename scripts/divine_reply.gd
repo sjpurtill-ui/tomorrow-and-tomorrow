@@ -43,8 +43,55 @@ static func quote(leader:Dictionary,text:String,salt:String)->String:
 	var own:Array=(Lines.BANKS.get(_model(leader),{}) as Dictionary).get("quote",[])
 	var pool:Array=own+(Lines.GENERIC.quote as Array)
 	var template:=_choose(pool,salt,"quote")
+	last_frame="quote:%d" % pool.find(template)
 	var out:=template.replace("{order}",cap).replace("{order_low}",low).replace("{order_cap}",cap)
 	return out.substr(0,1).to_upper()+out.substr(1)
+
+## How a reply first takes up the order. Said back word for word only now
+## and then; more often by what it is ("The feast, then."), by who starts it
+## and when ("Tesk and I will start on the ditch at first light."), or not at
+## all, the speaker going straight to what they will do.
+const TAKE_UP:=[
+	"{topic_cap}, then.","{topic_cap} it is.","You want {topic}. Good.","{topic_cap}. Yes.","{topic_cap}: I understand what you want.",
+]
+const WHO_WHEN:=[
+	"{helper} and I will start on {topic} {when}.","I will have {helper} on {topic} {when}.","{topic_cap} starts {when}; {helper} will help me.",
+]
+const WHEN:=["at first light","tomorrow","this evening","after the next meal","before the moon turns","today"]
+## The frame the last reply used (probes count variety).
+static var last_frame:=""
+
+static func acknowledge(leader:Dictionary,text:String,salt:String,topic_words:String)->String:
+	## The first words about the order, or "" to go straight to the work.
+	var roll:=_hash(salt,"frame")%100
+	var cap:=topic_words.substr(0,1).to_upper()+topic_words.substr(1)
+	if topic_words=="" or topic_words=="the work": roll=mini(roll,24)
+	if roll<25:
+		var quoted:=quote(leader,text,salt)
+		if quoted!="": return quoted
+		last_frame="none"
+		return ""
+	if roll<50:
+		var i:=_hash(salt,"take")%TAKE_UP.size()
+		last_frame="take:%d" % i
+		return String(TAKE_UP[i]).replace("{topic_cap}",cap).replace("{topic}",topic_words)
+	if roll<80:
+		var helper:=_helper(leader,salt)
+		var j:=_hash(salt,"who")%WHO_WHEN.size()
+		var when:=String(WHEN[_hash(salt,"when")%WHEN.size()])
+		last_frame="who:%d" % j
+		var line:=String(WHO_WHEN[j]).replace("{helper}",helper).replace("{topic_cap}",cap).replace("{topic}",topic_words).replace("{when}",when)
+		return line.substr(0,1).to_upper()+line.substr(1)
+	last_frame="none"
+	return ""
+
+static func _helper(leader:Dictionary,salt:String)->String:
+	## Someone the speaker will start the work with: another of the court.
+	var names:Array[String]=[]
+	for person in (load("res://scripts/audience_hall.gd") as GDScript).call("_officials"):
+		if int(person.get("person_id",0))!=int(leader.get("person_id",-1)): names.append(String(person.get("name","")).get_slice(" ",0))
+	if names.is_empty(): return "the young ones"
+	return names[_hash(salt,"helper")%names.size()]
 
 static func topic(policies:Array,text:String)->String:
 	## What the reply calls the order: "the feast", "the rain-calling", or the
@@ -76,13 +123,13 @@ static func report_back(salt:String,when:String,topic_words:String="")->String:
 	return _topic_fill(_choose(Lines.REPORT_BACK,salt,"report"),topic_words).replace("{when}",when)
 
 static func leads_with_opening(salt:String)->bool:
-	## About a third of replies open in the speaker's manner; the rest open by
-	## saying the order back.
-	return _hash(salt,"lead")%10<3
+	## About a fifth of replies that take up the order also open in the
+	## speaker's manner; replies that go straight to the work always do.
+	return _hash(salt,"lead")%10<2
 
 static func miracle_body(summary:String,act:String,risk:String)->String:
 	## "No one has ever done such a thing, but …": a rite fitted to the wish.
-	var wish:=String(load("res://scripts/court_lives.gd").call("_wish_of",summary))
+	var wish:=String(load("res://scripts/custom_directive.gd").call("miracle_kind",summary))
 	var acts:Array=Lines.MIRACLE_ACTS.get(wish,Lines.MIRACLE_ACTS.any)
 	var chosen_act:=_choose(acts,summary,"miracle_act") if act=="try it, with every rite we know" else "I will %s" % act
 	var lead:=_choose(Lines.MIRACLE_LEADS,summary,"miracle_lead")

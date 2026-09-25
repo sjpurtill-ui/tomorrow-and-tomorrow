@@ -226,6 +226,63 @@ const NATURES := {
 		"effects":[["labor",-0.15,0,30],["legitimacy",0.1,0,60],["cohesion",0.05,0,60]]},
 }
 
+## No miracle happens. What a miracle order does is the rite people perform
+## for it, and what that rite really costs and yields: drums and hides set out
+## for rain catch water, fires kept high against the cold burn wood and warm
+## the old, young ones leaping from a ridge with hide wings get hurt, a search
+## of the river for gold turns up good flint. Belief follows coincidence
+## (court_lives.gd watches the sky). effects/side/deaths as in NATURES; every
+## effect here is the rite's own doing, so feasibility does not scale it.
+const MIRACLE_KINDS := {
+	"rain":{"act":"set the drummers on the dry bank and every hide out to catch what falls","risk":"If no rain comes, people will wonder why",
+		"effects":[["water",0.35,0,60],["labor",-0.2,0,14],["cohesion",0.25,0,30]],
+		"side":[["legitimacy",-0.4,0.45,25,90]],"days":30.0},
+	"dry":{"act":"keep the smoke-fires going day and night to push the clouds away","risk":"The smoke will sting every eye in camp, and the wood will go",
+		"effects":[["materials",-0.25,0,30],["health",-0.12,0,30],["cohesion",0.2,0,30],["labor",-0.15,0,14]],
+		"side":[["legitimacy",-0.35,0.4,30,90]],"days":30.0},
+	"winter":{"act":"keep every fire high and the drums going through the dark","risk":"We will burn wood we meant for the huts",
+		"effects":[["materials",-0.35,0,90],["health",0.3,0,90],["cohesion",0.25,0,60],["labor",-0.15,0,30]],
+		"side":[["legitimacy",-0.3,0.4,90,90]],"days":90.0},
+	"harvest":{"act":"lay offerings at every gathering ground and send singers out with the gatherers","risk":"What we lay out for the god we do not eat",
+		"effects":[["food_use",0.2,0,30],["food_yield",0.25,0,60],["cohesion",0.3,0,45]],
+		"side":[["legitimacy",-0.3,0.35,60,90]],"days":60.0},
+	"healing":{"act":"have the herb-finders and the singers sit with every sick one","risk":"Crowding round the sick can spread what they have",
+		"effects":[["health",0.25,0,60],["disease",-0.15,0,60],["labor",-0.15,0,30]],
+		"side":[["disease",0.25,0.25,10,45],["legitimacy",-0.3,0.35,60,90]],"days":60.0},
+	"dead":{"act":"have the old ones sing over the mound until their voices go","risk":"The dead will not stand up, and the grieving will know it",
+		"effects":[["cohesion",0.35,0,45],["labor",-0.25,0,14],["resentment",-0.2,0,60]],
+		"side":[["health",-0.2,0.3,5,30],["legitimacy",-0.45,0.6,20,120]],"days":30.0},
+	"fly":{"act":"let the boldest young ones leap from the ridge with hide wings, and set the rest to watching the birds","risk":"Someone will break a leg, or worse",
+		"effects":[["knowledge",0.25,0,90],["health",-0.2,0,30],["cohesion",0.1,0,30],["labor",-0.1,0,14]],
+		"side":[["legitimacy",-0.3,0.45,30,90]],"deaths":[0.35,0.0,1,"Fell from the ridge",false],"days":45.0},
+	"gold":{"act":"have every stone in the river turned over and every bright one brought to the fire","risk":"The river bed will be torn up, and there will be no gold",
+		"effects":[["materials",0.3,0,60],["labor",-0.25,0,30],["ecology",-0.25,0,0]],
+		"side":[["legitimacy",-0.35,0.5,45,90]],"days":45.0},
+}
+const MIRACLE_WORDS := {"fly":["fly","wings","like birds"],"gold":["gold","silver","riches","treasure"]}
+
+static func miracle_kind(text:String)->String:
+	## Which rite a miracle order calls for: the sky wishes court_lives.gd
+	## watches, the dead, flight, or riches from stone. "" for any other.
+	var wish:=String(load("res://scripts/court_lives.gd").call("_wish_of",text))
+	if MIRACLE_KINDS.has(wish): return wish
+	var padded:=_padded(text)
+	for kind in MIRACLE_WORDS:
+		for word in MIRACLE_WORDS[kind]:
+			if _has_term(padded,String(word))>=0: return String(kind)
+	return ""
+
+static func _nature_spec(nature:String,text:String)->Dictionary:
+	## A nature's table row; a miracle is the rite fitted to what was asked.
+	var spec:Dictionary=NATURES.get(nature,{})
+	if nature!="miracle": return spec
+	var kind:=miracle_kind(text)
+	if kind=="": return spec
+	var fitted:=spec.duplicate(true)
+	for key in MIRACLE_KINDS[kind]: fitted[key]=(MIRACLE_KINDS[kind] as Dictionary)[key]
+	fitted["kind"]=kind
+	return fitted
+
 const COERCION_TERMS := ["force","forced","must ","compel","whether they like","on pain of","or die","or be ","make them","every one of","no exceptions","by any means","drag"]
 const INTENSIFIERS := ["all ","every","entire","double","massive","great ","huge","utterly","completely"]
 const SOFTENERS := ["slightly","a little","gently","encourage","modest","some of","a few","try to","perhaps"]
@@ -335,8 +392,22 @@ static func plan_from_natures(natures:Array[String],text:String,future_delay:int
 		for nature in natures:
 			for parameter in ((NATURES[nature] as Dictionary).get("covered_by",{}) as Dictionary).get(String(catalog_id),[]):
 				covered[String(parameter)]=true
+	var rite_params:Array[String]=[]
+	var rite_kind:=""
+	# A miracle is only its rite: "teach the people to fly" is the leap from the
+	# ridge, not lessons.
+	var rite_only:=natures.has("miracle") and miracle_kind(text)!=""
+	if rite_only and natures[0]!="miracle":
+		var ordered:Array[String]=["miracle"]
+		for nature in natures:
+			if nature!="miracle": ordered.append(nature)
+		natures=ordered
 	for nature in natures:
-		var spec:Dictionary=NATURES[nature]
+		if rite_only and nature!="miracle": continue
+		var spec:Dictionary=_nature_spec(nature,text)
+		if spec.has("kind"):
+			rite_kind=String(spec.kind)
+			for rite_row in spec.get("effects",[]): rite_params.append(String((rite_row as Array)[0]))
 		coercion=maxf(coercion,float(spec.get("coercion",0.1)))
 		feasibility=minf(feasibility,float(spec.get("feasibility",1.0)))
 		food_share=maxf(food_share,float((spec.get("costs",{}) as Dictionary).get("food",0.0)))
@@ -360,7 +431,14 @@ static func plan_from_natures(natures:Array[String],text:String,future_delay:int
 	var duration:Dictionary={} if future_delay>0 else PronouncementInterpreter._explicit_duration(text.to_lower())
 	# Customs and standing arrangements outlast a work order.
 	var nature_days:=DEFAULT_DAYS
-	for nature in natures: nature_days=maxf(nature_days,float((NATURES[nature] as Dictionary).get("days",DEFAULT_DAYS)))
+	var rite_days:=0.0
+	for nature in natures:
+		var nature_spec:=_nature_spec(nature,text)
+		if nature_spec.has("kind"): rite_days=float(nature_spec.get("days",DEFAULT_DAYS))
+		else: nature_days=maxf(nature_days,float(nature_spec.get("days",DEFAULT_DAYS)))
+	# A rite for a miracle lasts as long as the rite, unless the order is also
+	# a standing custom.
+	if rite_days>0.0 and (natures.size()==1 or rite_only): nature_days=rite_days
 	var days:=float(duration.get("days",nature_days))
 	var list:Array[Dictionary]=[]
 	for effect_variant in effects.values():
@@ -372,7 +450,7 @@ static func plan_from_natures(natures:Array[String],text:String,future_delay:int
 		"summary":_summary(text),"natures":natures,"feasibility":feasibility,"coercion":coercion,
 		"effects":DecreeStatistics.validate_custom_effects(list),
 		"costs":{"food_share":food_share,"material_share":material_share},
-		"days":days,"future_delay":future_delay,"source":"lexicon",
+		"days":days,"future_delay":future_delay,"source":"lexicon","rite_params":rite_params,"rite_kind":rite_kind,
 	}
 
 static func attempt_plan(text:String)->Dictionary:
@@ -454,6 +532,7 @@ static func validate_model_plan(raw:Variant,text:String,future_delay:int=0,catal
 		"effects":effects,
 		"costs":{"food_share":clampf(DecreeStatistics._number_or(costs.get("food_share"),float(lexicon.costs.food_share)),0.0,0.25),"material_share":clampf(DecreeStatistics._number_or(costs.get("material_share"),float(lexicon.costs.material_share)),0.0,0.25)},
 		"days":_longest_days(effects,float(lexicon.days)),"future_delay":future_delay,"source":"model",
+		"rite_params":lexicon.get("rite_params",[]),"rite_kind":String(lexicon.get("rite_kind","")),
 	}
 
 static func _longest_days(effects:Array,fallback:float)->float:
@@ -538,6 +617,7 @@ static func realize(plan:Dictionary,order_id:String,implementation:float)->Array
 	var feasibility:=clampf(float(plan.get("feasibility",1.0)),0.0,1.0)
 	var days:=float(plan.get("days",DEFAULT_DAYS))
 	var result:Array[Dictionary]=[]
+	var rite_params:Array=plan.get("rite_params",[]) if plan.get("rite_params") is Array else []
 	for effect_variant in plan.get("effects",[]):
 		var effect:Dictionary=(effect_variant as Dictionary).duplicate(true)
 		var parameter:=String(effect.get("parameter",""))
@@ -545,14 +625,14 @@ static func realize(plan:Dictionary,order_id:String,implementation:float)->Array
 		# The attempt at an impossible thing still costs effort and stirs feeling;
 		# only the intended physical result is scaled by feasibility.
 		var effort:=parameter in ["labor","cohesion","resentment","legitimacy","food_use"] and rolled*float(DecreeStatistics.channel_value(parameter,1.0))<0.0
-		var scale:=implementation*(1.0 if effort or parameter in ["cohesion","resentment"] else feasibility)
+		var scale:=implementation*(1.0 if effort or parameter in ["cohesion","resentment"] or parameter in rite_params else feasibility)
 		effect["strength"]=clampf(rolled*scale,-1.0,1.0)
 		effect["value"]=DecreeStatistics.channel_value(parameter,float(effect.strength)) if parameter!="resentment" else float(effect.strength)*float(DecreeStatistics.PARAMETERS.resentment.max)
 		effect["side_effect"]=false
 		result.append(effect)
 	var future_delay:=float(plan.get("future_delay",0))
 	for nature_variant in plan.get("natures",[]):
-		var spec:Dictionary=NATURES.get(String(nature_variant),{})
+		var spec:Dictionary=_nature_spec(String(nature_variant),String(plan.get("summary","")))
 		for row_variant in spec.get("side",[]):
 			var row:Array=row_variant
 			var chance:=clampf(float(row[2])*(0.6+0.4*implementation),0.0,0.95)
@@ -586,7 +666,7 @@ static func _deaths(plan:Dictionary,order_id:String,implementation:float)->Dicti
 		# and never more than a hundredth of the people.
 		return {"count":mini(counted,maxi(1,floori(population*0.01))),"cause":"sacrifice","deliberate":true,"nature":"counted","delay_days":0}
 	for nature_variant in plan.get("natures",[]):
-		var spec:Dictionary=NATURES.get(String(nature_variant),{})
+		var spec:Dictionary=_nature_spec(String(nature_variant),String(plan.get("summary","")))
 		var row:Array=spec.get("deaths",[])
 		if row.is_empty(): continue
 		var deliberate:=bool(row[4])
@@ -912,7 +992,8 @@ static func voiced(leader:Dictionary,body:String,salt:String,opening:String="")-
 
 static func acceptance_body(plan:Dictionary,capacity_phrase:String)->String:
 	var natures:Array=plan.get("natures",["generic"])
-	var spec:Dictionary=NATURES.get(String(natures[0]) if not natures.is_empty() else "generic",NATURES.generic)
+	var spec:Dictionary=_nature_spec(String(natures[0]) if not natures.is_empty() else "generic",String(plan.get("summary","")))
+	if spec.is_empty(): spec=NATURES.generic
 	var act:=String(spec.get("act","set people to it"))
 	var risk:=String(spec.get("risk",""))
 	var body:="I will %s." % act

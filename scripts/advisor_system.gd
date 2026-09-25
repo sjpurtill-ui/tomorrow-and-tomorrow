@@ -1016,6 +1016,11 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 	if committed==0: stance="unable" if blocked>0 else "refused"
 	var reply_state:="UNDERWAY" if committed>0 else ("BLOCKED" if blocked>0 else "REFUSED")
 	var reply_text:=_civic_commitment_reply(leader,resolved_policies,stance,committed,blocked+deferred+refused,implementation_total,limitation_texts,String(result.get("answer","")),String(order.get("id",""))+"|"+text,text)
+	# An order for a lasting work commissions one (order_great_work.gd).
+	var great_work:Dictionary=preload("res://scripts/order_great_work.gd").start_from_order(text,String(resolved.get("id",""))) if committed>0 else {}
+	if bool(great_work.get("started",false)): reply_text=CustomDirective.voiced(leader,String(great_work.line),String(order.get("id",""))+"|"+text)
+	elif String(great_work.get("line",""))!="": reply_text+=" "+String(great_work.line)
+	if bool(great_work.get("asked",false)): resolved["great_work"]={"started":bool(great_work.get("started",false)),"name":String(great_work.get("name","")).substr(0,80)}
 	if committed>0 and not followup.is_empty(): reply_text+=" "+_implementation_report_promise(followup,text,preload("res://scripts/divine_reply.gd").topic(resolved_policies,text))
 	var inherited_from:=String(result.get("context_inherited_from",""))
 	if not inherited_from.is_empty(): reply_text="I have the recorded exchange with %s and will answer the directive now.\n\n%s" % [inherited_from,reply_text]
@@ -1665,7 +1670,7 @@ func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance
 	var reply_voice:=preload("res://scripts/divine_reply.gd")
 	var opening:=reply_voice.opening(leader,disposition_id,salt)
 	if opening.is_empty(): opening="I understand."
-	var quoted:=reply_voice.quote(leader,order_text,salt) if not order_text.is_empty() else ""
+	var quoted:=reply_voice.acknowledge(leader,order_text,salt,reply_topic) if not order_text.is_empty() else ""
 	# Most replies begin by saying the order back; some open in the speaker's manner.
 	if not quoted.is_empty() and not reply_voice.leads_with_opening(salt): opening=""
 	var speech:=""
