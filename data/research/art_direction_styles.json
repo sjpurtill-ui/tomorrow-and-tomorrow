@@ -1,0 +1,90 @@
+{
+  "schema": "research_direction_styles/1",
+  "shared": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Wide 3:2 landscape composition. The named discovery and its distinctive action or mechanism must read in a central banner crop. Depict the stated historical stage with only materials, dress, tools, buildings, and infrastructure available then. The scene belongs to an alternative-history world: no recognizable real landmark, historical person, nation, flag, or emblem. Vary setting, distance, viewpoint, age, and gender across the batch. No legible text, letters, numbers, captions, logo, watermark, border, UI, montage, voxel geometry, cartoon, photography, or CGI. Any marks on records, signs, and screens are illegible. The field's medium is the way the illustration is rendered, never an object or technology that must appear inside the scene.",
+  "directions": {
+    "demography": {
+      "name": "People & homes",
+      "accent": "#cf9c78",
+      "medium": "Hand-drawn chalk pastel on toothy warm-ivory paper; broad visible strokes, powdery edges, velvety softness, simplified human forms.",
+      "palette": "Terracotta, peach, warm ivory, quiet umber.",
+      "composition": "Intimate human scale; domestic spaces and relationships carry the discovery, with gentle close framing."
+    },
+    "nutrition": {
+      "name": "Food & farming",
+      "accent": "#adbb77",
+      "medium": "Matte botanical egg tempera; opaque layered brushwork, precise plants, food, hands, and cultivation tools.",
+      "palette": "Olive foliage, wheat gold, cream, fertile earth.",
+      "composition": "The edible plant, animal, prepared food, or agricultural action is clear at first glance; sunlit practical abundance."
+    },
+    "health": {
+      "name": "Health & care",
+      "accent": "#92c1ab",
+      "medium": "Translucent watercolor with restrained fine ink; soft washes and compassionate human detail.",
+      "palette": "Pale sage, celadon, warm linen, muted skin tones.",
+      "composition": "A precise care gesture or medical observation anchors an uncluttered, close scene in diffused light."
+    },
+    "labor": {
+      "name": "Work & tools",
+      "accent": "#d5b57d",
+      "medium": "Expressive charcoal drawing over a muted ochre wash; grainy paper, forceful marks, tactile surfaces.",
+      "palette": "Charcoal black, ochre, raw timber, warm gray.",
+      "composition": "Hands, tools, and the physical work step dominate; strong diagonals reveal applied force and skill."
+    },
+    "knowledge": {
+      "name": "Learning & records",
+      "accent": "#9db9d7",
+      "medium": "Fine blue-black ink and pale blue wash on warm parchment; crisp observational lines and quiet negative space.",
+      "palette": "Lapis blue, blue-black, ivory, light stone.",
+      "composition": "Observation, teaching, measurement, or record-making is the focal relationship; all written marks remain illegible."
+    },
+    "production": {
+      "name": "Craft & industry",
+      "accent": "#d6a36d",
+      "medium": "Tactile impasto oil painting with visible bold strokes and strong material texture.",
+      "palette": "Burnished copper, ember orange, soot black, dark umber.",
+      "composition": "Show the transformation of material and the specific apparatus or process; use the real source of heat or light when present."
+    },
+    "infrastructure": {
+      "name": "Water & building",
+      "accent": "#90bccc",
+      "medium": "Matte architectural casein gouache; crisp simplified planes, measured geometry, visible brush texture.",
+      "palette": "Mineral blue, limestone gray, cool ivory, muted slate.",
+      "composition": "The built structure and how it works dominate; use clear perspective and people for scale rather than a decorative city panorama."
+    },
+    "logistics": {
+      "name": "Transport & supply",
+      "accent": "#b7af83",
+      "medium": "Panoramic travel watercolor on textured paper; flowing washes and clear moving silhouettes.",
+      "palette": "Sand gold, sea slate, muted indigo, sun-worn brown.",
+      "composition": "Make the route, vehicle, transfer, or supply chain legible in one directional scene with a sense of distance and motion."
+    },
+    "ecology": {
+      "name": "Land & nature",
+      "accent": "#84b895",
+      "medium": "Naturalist field painting with layered transparent pigments and detailed living textures.",
+      "palette": "Moss, fern, soil brown, muted sky, living green.",
+      "composition": "Landscape and ecological relationships are the subject; people remain small when observation or stewardship calls for them."
+    },
+    "institutions": {
+      "name": "Government",
+      "accent": "#baa2cd",
+      "medium": "Matte civic fresco on plaster; broad deliberate shapes and restrained surface patina.",
+      "palette": "Dusty plum, limestone, muted gold, warm gray.",
+      "composition": "Measured, balanced group arrangement conveys a specific decision, civic procedure, or distribution of authority."
+    },
+    "security": {
+      "name": "Defense",
+      "accent": "#d28c7c",
+      "medium": "Layered hand-cut woodblock print; bold ink silhouettes, carved texture, graphic light and shadow.",
+      "palette": "Vermilion, charcoal, warm parchment, dark earth.",
+      "composition": "Strong diagonals and clear equipment or formation show the defensive method; controlled tension without gratuitous gore."
+    },
+    "culture": {
+      "name": "Culture & memory",
+      "accent": "#c29cb0",
+      "medium": "Luminous tapestry-inspired painting with subtle woven texture and rhythmic shapes; no specific real-world cultural motifs.",
+      "palette": "Dusty rose, indigo, warm gold, dusk violet.",
+      "composition": "Expressive communal gestures, performance, ritual, or remembrance bind the people and central action together."
+    }
+  }
+}
