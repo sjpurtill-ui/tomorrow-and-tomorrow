@@ -39,7 +39,12 @@ func _create(role:String,day:int)->Dictionary:
 	var rng:=RandomNumberGenerator.new(); rng.seed=hash("%d:figure:%d" % [seed_value,serial])
 	var traditions:Array=NAMES.POOLS.keys()
 	var tradition:=String(traditions[posmod(seed_value+serial/8,traditions.size())])
-	var identity:Dictionary=NAMES.make(seed_value,serial,serial%2==0,tradition,used)
+	# The realm's own great figures carry the realm's names for its era.
+	var owner:=String(WorldSimulation.actor_id) if String(WorldSimulation.actor_id)!="" else "player"
+	var taken:Dictionary=preload("res://scripts/era_names.gd").used_in_court() if owner=="player" else {}
+	for known in used: taken[known]=true
+	var identity:Dictionary=preload("res://scripts/era_names.gd").make(seed_value,serial,serial%2==0,owner,taken)
+	if String(identity.get("name",""))=="" or used.has(String(identity.get("name",""))): identity=NAMES.make(seed_value,serial,serial%2==0,tradition,used)
 	serial+=1
 	if identity.is_empty(): return {}
 	used[identity.name]=true

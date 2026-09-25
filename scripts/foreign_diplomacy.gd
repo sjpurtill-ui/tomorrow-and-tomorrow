@@ -42,7 +42,9 @@ func leader(id:String)->Dictionary:
 	if not leaders.has(id):
 		var serial:=posmod(hash(id),10000)
 		var traditions:Array=NAMES.POOLS.keys()
-		var identity:Dictionary=NAMES.make(seed_value,serial,serial%2==0,traditions[serial%4],{})
+		# Named in their own people's tradition and era (era_names.gd).
+		var identity:Dictionary=preload("res://scripts/era_names.gd").make(seed_value,serial,serial%2==0,id,{})
+		if String(identity.get("name",""))=="": identity=NAMES.make(seed_value,serial,serial%2==0,traditions[serial%4],{})
 		var temperament:String=PERSONALITY.temperament(PERSONALITY.foreign(seed_value,id))
 		var past:Array=["Earned a hearing by settling a bitter dispute between families.","Rose to prominence defending the community's right to govern itself.","Won support by organizing work that rival households could not finish alone.","Gathered followers by bringing unfamiliar ideas home from a long journey."]
 		leaders[id]={"name":identity.name,"temperament":temperament,"bio":past[serial%4],"trust":0.0,"memories":[],"accord":{},"counter":{},"next_day":0,"serial":0,"resolved":0}

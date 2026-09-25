@@ -146,8 +146,8 @@ static func find_by_words(text:String)->Dictionary:
 	for entry in people():
 		var score:=0
 		var name:=String(entry.get("name","")).to_lower()
-		for part in name.split(" ",false):
-			if part.length()>=3 and " %s " % part in lower: score=maxi(score,3)
+		for part in preload("res://scripts/era_names.gd").name_keys(name):
+			if " %s " % part in lower: score=maxi(score,3)
 		var title:=String(entry.get("title","")).to_lower()
 		for word in title.split(" ",false):
 			if word.length()>=4 and not word in ["of","the","master","leader"] and word in lower: score=maxi(score,2)

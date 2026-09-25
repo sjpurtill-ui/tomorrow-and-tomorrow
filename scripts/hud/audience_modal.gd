@@ -18,6 +18,7 @@ const Civic:=preload("res://scripts/hud/court_civic.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const Commands:=preload("res://scripts/court_commands.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
+const Lives:=preload("res://scripts/court_lives.gd")
 ## Typed words that are about people (asked, summoned, questioned, accused or
 ## judged) go to the live persons exchange; offline the Court offers choices.
 const PERSONS_WORDS:="(?i)\\b(who|whom|whose|summon|bring|fetch|send for|responsible|blame|fault|lying|liar|lie|lied|truth|swear|ledger|tally|confess|tell me (of|about)|where were you|mercy|pardon|exalt|maim|curse|marry|priest)\\b"
@@ -829,6 +830,14 @@ func _speak()->void:
 		send_envoy_brief(text)
 		return
 	speech_input.clear()
+	# Naming a successor at a mourning ("Let Iska keep the fire") chooses them.
+	if resolved_result.is_empty():
+		var named:=String(Lives.typed_choice(audience_id,text))
+		if not named.is_empty():
+			Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":int(GameState.elapsed_days),"aside":false})
+			choose(named)
+			_pump()
+			return
 	# Words about people, with a live voice: one call maps them onto the
 	# persons engine's actions (ask, summon, question, accuse, judge).
 	if resolved_result.is_empty() and _persons_live() and String(Hall.find(audience_id).get("origin",""))=="court" and not voice.busy(audience_id):
@@ -1679,6 +1688,7 @@ func _build_roster_list(roster:Array[Dictionary])->Control:
 		for entry:Dictionary in groups[group]:list.add_child(_roster_row(entry))
 	if roster.is_empty():
 		var empty:=Tokens.make_label("No one holds office yet. Officials appear as your government grows.",13,Tokens.MUTED);empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;list.add_child(empty)
+	preload("res://scripts/hud/court_remembered.gd").append_to(list,_italic)
 	return list
 
 func _roster_row(entry:Dictionary)->Control:

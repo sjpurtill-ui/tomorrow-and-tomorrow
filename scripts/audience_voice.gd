@@ -25,6 +25,7 @@ const PersonsBridge:=preload("res://scripts/court_persons_bridge.gd")
 const PersonsLines:=preload("res://scripts/court_persons_lines.gd")
 const DIVINE_SPOKEN:=["terrify","penance","bless","raise_up"]
 const HALL_PATH:="res://scripts/audience_hall.gd"
+const LIVES_SCENES:=["mourning","callback","omen"]
 const SCOUT_PATH:="res://scripts/chief_scout.gd"
 const API_TIMEOUT_SECONDS:=45.0
 const MAX_ATTEMPTS:=2
@@ -1348,8 +1349,8 @@ func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Ar
 func _cast_names(s:Dictionary)->Array[String]:
 	var names:Array[String]=[]
 	for member in [s.envoy]+(s.officials as Array):
-		for part in String((member as Dictionary).get("name","")).split(" ",false):
-			if String(part).length()>=3: names.append(String(part).to_lower())
+		# Epithet words ("who", "the") do not count as naming anyone.
+		for part in preload("res://scripts/era_names.gd").name_keys(String((member as Dictionary).get("name",""))): names.append(part)
 	return names
 
 static func filler(text:String,names:Array)->bool:
@@ -2127,6 +2128,9 @@ func _offline_open(s:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
 	## what they remember, then the business), and at most two officials speak,
 	## each in their own manner.
 	var out:Array[Dictionary]=[]
+	# Mourning, omens and callbacks were already staged in the court's own
+	# voices when the matter was taken up (court_lives.gd).
+	if String(s.get("sit_type","")) in LIVES_SCENES and not ((s.audience as Dictionary).get("lines",[]) as Array).is_empty(): return out
 	var kind:String=String(s.kind)
 	var envoy:Dictionary=s.envoy
 	var first_official:Dictionary=s.officials[0] if not s.officials.is_empty() else {}
@@ -2358,6 +2362,7 @@ func answer_bank(s:Dictionary,player_text:String)->Array:
 func _offline_closing(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
 	## One parting line that reacts to the actual outcome, and at most one aside.
 	var out:Array[Dictionary]=[]
+	if String(s.get("sit_type","")) in LIVES_SCENES: return out
 	var option_id:String=String(result.get("option_id",(s.audience as Dictionary).get("option_id","")))
 	var reaction:String=String(result.get("reaction","neutral"))
 	var envoy:Dictionary=s.envoy

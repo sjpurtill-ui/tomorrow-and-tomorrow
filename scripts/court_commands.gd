@@ -192,12 +192,9 @@ static func _speaker_entry(list:Array[Dictionary])->Dictionary:
 
 static func _name_keys(e:Dictionary)->Array[String]:
 	var keys:Array[String]=[]
-	var name:=String(e.name).strip_edges().to_lower()
-	if name!="":
-		keys.append(name)
-		var parts:=name.split(" ",false)
-		for part in parts:
-			if String(part).length()>=3 and not String(part) in ["the","of"]: keys.append(String(part))
+	# Given name, a one-word byname, or the whole epithet; never "who" or "the"
+	# out of "Oren Who Found the Ford" (era_names.gd).
+	keys.append_array(preload("res://scripts/era_names.gd").name_keys(String(e.name)))
 	return keys
 
 static func _title_keys(e:Dictionary)->Array[String]:
