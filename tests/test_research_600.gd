@@ -56,7 +56,7 @@ func test_new_design_items_use_the_catalog_format_and_a_valid_channel()->void:
 		assert_str(String(entry.observation)).is_not_empty()
 		assert_array(entry.signals).is_not_empty()
 		assert_dict(entry.effects).is_not_empty()
-		assert_float(float(entry.chance)).is_equal_approx(Catalog.chance_for(float(Catalog.item(id).research_years)),0.0000001)
+		assert_float(float(entry.chance)).is_equal_approx(Catalog.chance_for(float(Catalog.item(id).research_years),float(Catalog.item(id).proposed_year)),0.0000001)
 		assert_bool(bool(entry.get("frontier",false))).is_false()
 		# A dedicated research_600 painting (data/research/art_600.json) wins; otherwise the line's default art.
 		var visuals:=preload("res://scripts/hud/research_visuals.gd")
@@ -75,7 +75,7 @@ func test_existing_items_take_design_foundations_era_and_pace()->void:
 	assert_float(DiscoverySystem.discovery_era("rigid_pipe_bedding")).is_equal(425.0)
 	assert_float(DiscoverySystem.research_600_earliest_year(rigid)).is_equal(385.0)
 	assert_int(int(rigid.day)).is_equal(425*365)
-	assert_float(float(rigid.chance)).is_equal_approx(Catalog.chance_for(float(Catalog.item("rigid_pipe_bedding").research_years)),0.0000001)
+	assert_float(float(rigid.chance)).is_equal_approx(Catalog.chance_for(float(Catalog.item("rigid_pipe_bedding").research_years),float(Catalog.item("rigid_pipe_bedding").proposed_year)),0.0000001)
 	# Authored production contract and recipe outputs are kept.
 	assert_str(String(rigid.get("production_contract",""))).is_not_empty()
 	assert_array(rigid.get("production_items",[])).is_not_empty()

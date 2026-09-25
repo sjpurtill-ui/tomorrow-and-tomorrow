@@ -233,8 +233,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		var discovery_id:=String(WorldSimulation.state.active_investigations.get(channel,""))
 		var discovery:=discovery_definition(discovery_id)
 		if discovery.is_empty(): continue
-		var allocation:=_subcategory_allocation(String(discovery.dynamic),String(discovery.subcategory))
-		var research_capacity:=research_capacity_for(String(discovery.dynamic),String(discovery.subcategory))
+		var home:=_research_600_channel_home(channel) # research_600: foundation work is staffed by its channel
+		var allocation:=_subcategory_allocation(home[0],home[1])
+		var research_capacity:=research_capacity_for(home[0],home[1])
 		var attention:=float(research_capacity.get("progress_multiplier",0.0))
 		if attention<=0.0: continue
 		var activity := 0.65
@@ -327,10 +328,11 @@ func active_investigation_records()->Array[Dictionary]:
 		var discovery:=discovery_definition(id).duplicate(true)
 		if discovery.is_empty(): continue
 		var progress:=float(WorldSimulation.state.discovery_progress.get(id,0.0))
-		var allocation:=_subcategory_allocation(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))
+		var home:=_research_600_channel_home(String(channel)) # research_600
+		var allocation:=_subcategory_allocation(home[0],home[1])
 		var leader_factor:=_leader_factor(String(discovery.get("dynamic","")))
 		var material_evidence:=_resource_evidence(discovery.get("resource_requirements",[]))
-		var research_capacity:=research_capacity_for(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))
+		var research_capacity:=research_capacity_for(home[0],home[1])
 		var baseline_momentum:=float(discovery.get("chance",0.001))/research_difficulty(discovery,WorldSimulation.state.world_seed)*float(research_capacity.get("progress_multiplier",0.0))*material_evidence*leader_factor*WorldSimulation.consequences.discovery_multiplier()*(1.0+WorldSimulation.progression.effect("knowledge_rate"))*0.12
 		baseline_momentum*=Pathways.multiplier(discovery)*(.85 if Exchange.studying() else 1.0)
 		discovery["discovery_name"]=String(discovery.get("name","Undetermined discovery"))
@@ -402,7 +404,7 @@ func _refresh_active_investigations()->void:
 		var channel:=String(channel_variant)
 		var id:=String(WorldSimulation.state.active_investigations.get(channel,""))
 		var discovery:=discovery_definition(id)
-		if discovery.is_empty() or channel!=_channel_key(String(discovery.get("dynamic","")),String(discovery.get("subcategory",""))) or _subcategory_allocation(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))<=0 or id in WorldSimulation.state.known_discoveries or not _discovery_is_eligible(discovery,current_day):
+		if discovery.is_empty() or not _research_600_investigation_placed(channel,discovery) or id in WorldSimulation.state.known_discoveries or not _discovery_is_eligible(discovery,current_day):
 			WorldSimulation.state.active_investigations.erase(channel)
 	# Attention is a strategic resource, not a queue of forty-eight tiny chores.
 	# When a line completes or temporarily runs out of evidence, keep the same
@@ -417,6 +419,7 @@ func _refresh_active_investigations()->void:
 		var channel:=_channel_key(dynamic_id,subcategory)
 		if String(WorldSimulation.state.active_investigations.get(channel,""))!="": continue
 		var candidate:=_best_candidate_for_channel(channel,current_day)
+		if candidate.is_empty(): candidate=_research_600_foundation_candidate(dynamic_id,current_day) # research_600
 		if not candidate.is_empty(): WorldSimulation.state.active_investigations[channel]=String(candidate.id)
 	WorldSimulation.state.active_observations.clear()
 	for record in active_investigation_records_shallow():
@@ -1380,4 +1383,75 @@ func _research_600_return_waiting_attention(current_day:int)->void:
 			moved=true
 		WorldSimulation.state.research_subcategory_allocations[dynamic_variant]=subcategories
 	if moved: _rebuild_research_domain_totals()
+
+
+## A line whose domain has no open question of its own does foundation work:
+## it investigates an open prerequisite, from any line, of one of its domain's
+## era-open questions (the design has 534 cross-line foundations). Without this
+## an emphasis on a single line starved on foundations nobody researched. The
+## observers and emphasis stay with the chosen domain; only the question differs.
+var _research_600_foundation_cache:Dictionary={}
+
+func _research_600_channel_home(channel:String)->Array[String]:
+	var parts:=channel.split("::")
+	return [String(parts[0]),String(parts[1]) if parts.size()>1 else ""]
+
+
+func _research_600_investigation_placed(channel:String,discovery:Dictionary)->bool:
+	var home:=_research_600_channel_home(channel)
+	if _subcategory_allocation(home[0],home[1])<=0: return false
+	if channel==_channel_key(String(discovery.get("dynamic","")),String(discovery.get("subcategory",""))): return true
+	return String(discovery.get("id","")) in _research_600_foundation_ids(home[0],int(floor(WorldSimulation.state.elapsed_days)))
+
+
+func _research_600_foundation_candidate(dynamic_id:String,current_day:int)->Dictionary:
+	var active:Array=WorldSimulation.state.active_investigations.values()
+	for id:String in _research_600_foundation_ids(dynamic_id,current_day):
+		if not id in active: return discovery_definition(id)
+	return {}
+
+
+## Open prerequisites (followed down to ones that can be researched now) of the
+## domain's era-open unknown questions, earliest first.
+func _research_600_foundation_ids(dynamic_id:String,current_day:int)->Array[String]:
+	var key:="%s:%d:%d" % [dynamic_id,current_day,WorldSimulation.state.known_discoveries.size()]
+	if _research_600_foundation_cache.has(key): return _research_600_foundation_cache[key]
+	if _research_600_foundation_cache.size()>64: _research_600_foundation_cache.clear()
+	var known:Dictionary={}
+	for id:Variant in WorldSimulation.state.known_discoveries: known[String(id)]=true
+	var frontier:Array[String]=[]
+	for entry:Dictionary in technology_catalog:
+		if String(entry.get("dynamic",""))!=dynamic_id or known.has(String(entry.get("id",""))): continue
+		if research_600_open(entry,{},current_day): frontier.append_array(_research_600_missing_parents(entry,known))
+	var found:Dictionary={}
+	var visited:Dictionary={}
+	var depth:=0
+	while not frontier.is_empty() and depth<8:
+		var next:Array[String]=[]
+		for id:String in frontier:
+			if visited.has(id) or known.has(id): continue
+			visited[id]=true
+			var foundation:=discovery_definition(id)
+			if foundation.is_empty() or not research_600_open(foundation,{},current_day): continue
+			if _discovery_is_eligible(foundation,current_day,known): found[id]=int(foundation.get("day",0))
+			else: next.append_array(_research_600_missing_parents(foundation,known))
+		frontier=next
+		depth+=1
+	var ids:Array[String]=[]
+	for id:Variant in found: ids.append(String(id))
+	ids.sort_custom(func(a:String,b:String)->bool: return int(found[a])<int(found[b]))
+	_research_600_foundation_cache[key]=ids
+	return ids
+
+
+func _research_600_missing_parents(entry:Dictionary,known:Dictionary)->Array[String]:
+	var parents:Array[String]=[]
+	for parent:Variant in entry.get("requires_all",[]):
+		if not known.has(String(parent)): parents.append(String(parent))
+	for group:Variant in entry.get("requires_any",[]):
+		var satisfied:=false
+		for option:Variant in group:
+			if known.has(String(option)): satisfied=true
+		if not satisfied and not (group as Array).is_empty(): parents.append(String((group as Array)[0]))
+	return parents
 # --- research_600 (end) -------------------------------------------------------

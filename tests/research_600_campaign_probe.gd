@@ -87,6 +87,9 @@ func _run(scenario_name:String,scenario:Dictionary,seed_value:int,years:int,ever
 	WorldSimulation.context_provider=func(origin:Vector2)->Dictionary:
 		var wood:={"position":Vector3(origin.x,0,origin.y),"density":0.55,"area_km2":9.0}
 		return {"environment_profile":_site_profile(origin,site),"surface_water_distance_km":water_km,"surface_water_recognized":true,"woodland_catchment":wood,"surface_material_catchments":{"Timber":wood,"Stone":{"position":Vector3(origin.x,0,origin.y),"density":0.35,"area_km2":9.0},"Fiber Plants":{"position":Vector3(origin.x,0,origin.y),"density":0.5,"area_km2":9.0},"Clay":{"position":Vector3(origin.x,0,origin.y),"density":0.45,"area_km2":9.0}}}
+	# A measured river beside the camp, as the live map supplies (without it no
+	# Freshwater deposit exists and water-dependent care practices never open).
+	WorldSimulation.water_provider=func(origin:Vector3)->Vector3:return origin+Vector3(water_km,0,0)
 	WorldSimulation.create_actor("rc",seed_value,Vector2.ZERO)
 	WorldSimulation.enabled=true
 	WorldSimulation.scoped("rc",func()->void:
@@ -202,9 +205,24 @@ func _checkpoint(scenario_name:String,seed_value:int,year:int,tally:Dictionary)-
 		"defense_share":snappedf(float(state.population_allocation_percentages.get("Defense",0)),0.1),
 		"education":snappedf(Indicators.education_index(state),0.001),
 		"food_per_worker":snappedf(float(metrics.get("food_production",metrics.get("food_consumption",0.0)))/maxf(1.0,state.effective_workers("Food")),0.01),
-		"housing":state.housing_capacity,"works":state.settlement_completed.size(),"last_works":state.settlement_completed.slice(maxi(0,state.settlement_completed.size()-3)),
+		"housing":state.housing_capacity,"carrying_capacity":roundi(float(state.early_care.get("carrying_capacity",0.0))),"crowding":snappedf(float(state.early_care.get("crowding",0.0)),0.01),
+		"specialist_excess":snappedf(float(WorldSimulation.discovery.society_model.specialist_excess),0.001),
+		"freshwater_stage":_freshwater_stage(state),
+		"mortality":_rounded(metrics.get("mortality_components",{})),"intake":snappedf(float(metrics.get("food_intake_ratio",1.0)),0.01),
+		"allocation":_rounded(state.population_allocation_percentages),"works":state.settlement_completed.size(),"last_works":state.settlement_completed.slice(maxi(0,state.settlement_completed.size()-3)),
 		"discoveries":state.known_discoveries.size(),"mean_adoption":snappedf(adoption_sum/maxf(1.0,float(state.known_discoveries.size())),0.001),
 		"effects":effects,"ceilings":ceilings,"care":{"under5":snappedf(float(state.early_care.get("under5",1.0)),0.01),"neonatal":snappedf(float(state.early_care.get("neonatal",1.0)),0.01),"adult":snappedf(float(state.early_care.get("adult",1.0)),0.01)},
 		"milestones":(tally.milestones as Dictionary).duplicate(),
 		"seconds":(Time.get_ticks_msec()-int(tally.start))/1000
 	}))
+
+func _freshwater_stage(state:Node)->String:
+	for deposit:Dictionary in state.resource_deposits:
+		if String(deposit.get("resource",""))=="Freshwater":return String(deposit.get("stage",""))
+	return "none"
+
+func _rounded(source:Variant)->Dictionary:
+	var result:Dictionary={}
+	if source is Dictionary:
+		for key:Variant in source:result[str(key)]=snappedf(float(source[key]),0.0001)
+	return result

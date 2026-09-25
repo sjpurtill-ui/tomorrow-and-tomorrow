@@ -26,6 +26,21 @@ SIM = Path(__file__).resolve().parent
 ROOT = SIM.parent.parent
 CACHE = SIM / "cache" / "live_catalog.json"
 RESEARCH_PACE = float(g.const("scripts/research_600_catalog.gd", "PACE", default=1.0, optional=True))
+# Research600.PACE_BY_YEAR (Phase 3): pace factor by the item's design year.
+RESEARCH_PACE_BY_YEAR = g.const("scripts/research_600_catalog.gd", "PACE_BY_YEAR", default=[], optional=True)
+
+
+def research_pace(design_year: float) -> float:
+    pts = RESEARCH_PACE_BY_YEAR
+    if not pts:
+        return RESEARCH_PACE
+    if design_year <= float(pts[0][0]):
+        return float(pts[0][1])
+    for i in range(1, len(pts)):
+        if design_year <= float(pts[i][0]):
+            a, b = pts[i - 1], pts[i]
+            return float(a[1]) + (float(b[1]) - float(a[1])) * (design_year - float(a[0])) / (float(b[0]) - float(a[0]))
+    return float(pts[-1][1])
 RESEARCH_DAILY_SCALE = float(g.const("scripts/research_600_catalog.gd", "DAILY_SCALE", default=0.12))
 LINES = ["knowledge", "institutions", "culture", "labor", "production", "infrastructure",
          "nutrition", "health", "demography", "logistics", "ecology", "security"]
@@ -203,7 +218,7 @@ class Catalog:
             row.update({
                 "id": item["id"], "line": line, "design_line": item["line"], "registry": True,
                 # Research600.chance_for: PACE / (DAILY_SCALE * 365 * research_years)
-                "chance": RESEARCH_PACE / (RESEARCH_DAILY_SCALE * 365.0 * max(0.25, float(item.get("research_years", 4.0)))),
+                "chance": research_pace(float(item.get("proposed_year", 0.0))) / (RESEARCH_DAILY_SCALE * 365.0 * max(0.25, float(item.get("research_years", 4.0)))),
                 "research_years": float(item.get("research_years", 4.0)),
                 "era": float(item.get("proposed_year", 0.0)), "design_year": float(item.get("proposed_year", 0.0)),
                 "earliest_year": float(item.get("min_year", 0.0)), "band_low": float(item.get("band_low", 0.0)),
