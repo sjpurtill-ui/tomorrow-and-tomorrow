@@ -54,7 +54,7 @@
 | 1472 (1440–1504) | Figured silks with an extra binding warp (continues: drawloom_pattern_control) | 8 y | 49 min | NEW · lampas_figured_silks | — |
 | 1480 (1450–1510) | Fine goatskin leather for shoes and bindings | 5 y | 30 min | NEW · fine_goatskin_leather | — |
 | 1486 (1454–1518) | Edge-runner mills crush oil seed and ore | 6 y | 37 min | NEW · edge_runner_mills | — |
-| **1492 (1452–1532)** | **True porcelain from white china clay and china stone (continues: pale_hard_fired_ware)** | 14 y | 85 min | NEW · kaolin_porcelain | — |
+| **1492 (1452–1532)** | **True porcelain from white porcelain clay and porcelain stone (continues: pale_hard_fired_ware)** | 14 y | 85 min | NEW · kaolin_porcelain | — |
 | **1498 (1458–1538)** | **Spinning wheel: a hand-turned wheel drives the spindle** | 12 y | 73 min | spinning_wheels | 99 |
 
 ## Years 1500–1800 (≈ AD 1000–1360)
