@@ -856,6 +856,8 @@ func _speak()->void:
 		var named:=String(Lives.typed_choice(audience_id,text))
 		# An aim in the god's own words (online), or one of those proposed.
 		if named.is_empty():named=String(preload("res://scripts/legacy_aims.gd").typed_choice(audience_id,text,_voice_ok() and voice.has_method("is_live") and bool(voice.is_live())))
+		# An order for the war leader in the god's own words ("hold the ford").
+		if named.is_empty():named=String(load("res://scripts/war_loop.gd").typed_choice(audience_id,text))
 		if not named.is_empty():
 			Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":int(GameState.elapsed_days),"aside":false})
 			choose(named)
