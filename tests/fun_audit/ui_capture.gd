@@ -60,6 +60,12 @@ func _ready()->void:
 		await _cap("%02d-year%d-people" % [mark/5+2,mark])
 		terrain._on_hud_section_requested("",0)
 		await _frames(4)
+		if terrain.hud.has_method("toggle_drawer"):
+			terrain.hud.toggle_drawer()
+			await _frames(6)
+			await _cap("%02d-year%d-drawer" % [mark/5+2,mark])
+			terrain.hud.toggle_drawer()
+			await _frames(4)
 		_measure("year %d" % mark)
 		terrain._set_game_speed(5)
 	log_file.close()

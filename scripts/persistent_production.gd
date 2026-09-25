@@ -67,7 +67,7 @@ static func startup_blockers(host:Node,item:String,installed:Dictionary={})->Arr
 	if definition.has("error"):return [String(definition.error)]
 	var tooling:=missing_tooling(definition.tooling,installed)
 	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
-	if not joint.is_empty() and not host.joint_operations.available_base(String(joint.domain)):result.append("Build an operational naval base or airfield for this production branch first.")
+	if not joint.is_empty() and not host.joint_operations.available_base(String(joint.domain)):result.append("Build an operational %s for this production branch first." % ("naval base" if String(joint.domain)=="navy" else "airfield"))
 	var staff:=workforce()
 	if host.production_labor_share<=0:result.append("No crafting labor assigned to workshop production. Increase the workshop crafting share.")
 	if float(staff.workers)<=0:result.append("No available craftspeople. Assign crafting work in your cities.")

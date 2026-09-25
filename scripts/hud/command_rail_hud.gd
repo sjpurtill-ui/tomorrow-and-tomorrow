@@ -125,9 +125,15 @@ func _layout()->void:
 	var primary:=0
 	for spec in SECTIONS:
 		if not bool(spec.get("drawer",false)):primary+=1
+	# With the drawer open on a short screen, everything tightens so every
+	# ledger stays reachable without scrolling.
+	var drawer_shown:=drawer_box!=null and drawer_box.visible
+	var tight:=drawer_shown and view.y<900.0
 	for id in rail_buttons:
 		var button:Button=rail_buttons[id]
-		button.custom_minimum_size.y=46.0 if _in_drawer(String(id)) else clampf((view.y-150.0)/float(primary+1),56.0,72.0)
+		if _in_drawer(String(id)):button.custom_minimum_size.y=36.0 if tight else 46.0
+		else:button.custom_minimum_size.y=44.0 if tight else clampf((view.y-150.0)/float(primary+1),56.0,72.0)
+	if drawer_button:drawer_button.custom_minimum_size.y=44.0 if tight else 52.0
 	if top_frame:
 		top_frame.position=Vector2(Tokens.RAIL_WIDTH,0)
 		top_frame.size=Vector2(view.x-Tokens.RAIL_WIDTH,56)
@@ -283,13 +289,13 @@ func _make_rail_button(section:Dictionary)->Button:
 	var drawer:=bool(section.get("drawer",false))
 	if section.has("icon"):
 		var art:Control=ApprovedArt.icon(int(section.icon))
-		if drawer:art.custom_minimum_size=art.custom_minimum_size*0.72
+		if drawer:art.custom_minimum_size=art.custom_minimum_size*0.6
 		content.add_child(art)
 	else:
 		var symbol:=NavIcon.new(id)
 		symbol.set_icon_color(Color("e1cc91"))
 		symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
-		if drawer:symbol.custom_minimum_size=Vector2(22,22)
+		if drawer:symbol.custom_minimum_size=Vector2(20,20)
 		content.add_child(symbol)
 	var label:=Tokens.make_label(EraWords.word("rail."+id,String(section.label)),10 if drawer else 11,Color("eee3c2"));label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
 	rail_labels[id]=label
@@ -633,6 +639,14 @@ func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color
 	(parts.value as Label).text=value_text
 	var delta:Label=parts.delta
 	delta.text=delta_text
+	# Words need their own width; an empty delta gives its room to the value.
+	if EraWords.reckoned():delta.custom_minimum_size.x=52.0
+	elif delta_text=="":delta.custom_minimum_size.x=0.0
+	else:
+		# Never so wide that the value itself is squeezed out of its chip.
+		var room:=_kpi_width(id,float(parts.width))-17.0-56.0
+		var wanted:=ceilf(delta.get_theme_font("font").get_string_size(delta_text,HORIZONTAL_ALIGNMENT_LEFT,-1,delta.get_theme_font_size("font_size")).x)+2.0
+		delta.custom_minimum_size.x=clampf(wanted,52.0,maxf(52.0,room))
 	delta.add_theme_color_override("font_color",delta_color)
 	var chip:Button=parts.chip
 	chip.tooltip_text="View details"
@@ -643,7 +657,7 @@ func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color
 ## Stable widths per era: the people's words are longer than the acronyms.
 func _kpi_width(id:String,base:float)->float:
 	if EraWords.reckoned():return base
-	return float({"population":150.0,"food":118.0,"water":112.0,"goods":136.0,"health":196.0,"science":150.0,"gdp":170.0}.get(id,base))
+	return float({"population":124.0,"food":100.0,"water":96.0,"goods":130.0,"health":200.0,"science":132.0,"gdp":112.0}.get(id,base))
 
 # --- Decision queue ---------------------------------------------------------
 
@@ -1055,13 +1069,16 @@ func _refresh_kpis()->void:
 	# Every number in the strip is told in the people's own counting
 	# (era_words.gd): souls, winters, bellies filled, before GDP and IMR.
 	var modern:=EraWords.reckoned()
-	_update_kpi("population",EraWords.people(int(t.population)) if not modern else str(t.population),EraWords.places(t.cities.size()),Tokens.MUTED,"Civilization population and city breakdown")
+	# Before writing the strip stays short: a delta is shown only when it says
+	# something (a second hearth, a hungry one).
+	var place_note:=EraWords.places(t.cities.size()) if modern or t.cities.size()>1 else ""
+	_update_kpi("population",EraWords.people(int(t.population)) if not modern else str(t.population),place_note,Tokens.MUTED,"Civilization population and city breakdown")
 	for id:String in ["food","water"]:
 		var shortage:=int(t[id+"_shortages"])
 		var pending:bool=int(t[id+"_reports"])<t.cities.size()
 		var days:=float(t[id+"_days"])
 		var short_word:="%d short" % shortage if modern else ("%d %s" % [shortage,"hungry" if id=="food" else "thirsty"])
-		_update_kpi(id,EraWords.days(days),short_word if shortage>0 else ("partial" if pending else ("civ total" if modern else "all told")),Tokens.RED if shortage>0 else Tokens.MUTED,"Civilization reserves and city production")
+		_update_kpi(id,EraWords.days(days),short_word if shortage>0 else ("partial" if pending else "civ total") if modern else "",Tokens.RED if shortage>0 else Tokens.MUTED,"Civilization reserves and city production")
 	var goods_short:=int(t.goods_shortages)
 	_update_kpi("goods",EraWords.goods(float(t.goods_coverage)),("%d short" % goods_short if modern else "%d in want" % goods_short) if goods_short>0 else EraWords.goods_trend(float(t.goods_net)),Tokens.RED if goods_short>0 else Tokens.MUTED,"Civilian Goods held against what households expect")
 	_update_kpi("health",EraWords.life(float(t.life)),EraWords.babes_lost(float(t.infant)),Tokens.MUTED,"Population-weighted health across all cities")
@@ -1070,10 +1087,11 @@ func _refresh_kpis()->void:
 		_update_kpi("gdp","%.1f" % t.output,"%.2f / person" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"Total city output and per-city contributions")
 	else:
 		var keepers:=roundi(float(t.minds))
-		_update_kpi("science","%d ways known" % GameState.known_discoveries.size() if EraWords.hearth() else "%.1f" % t.science,("%d keeper" if keepers==1 else "%d keepers") % keepers if EraWords.hearth() else "%d scholars" % keepers,Tokens.GOLD,"")
+		_update_kpi("science","%d ways" % GameState.known_discoveries.size() if EraWords.hearth() else "%.1f" % t.science,("%d keeper" if keepers==1 else "%d keepers") % keepers if EraWords.hearth() else "%d scholars" % keepers,Tokens.GOLD,"")
 		if EraWords.hearth():
 			var fed:=EraWords.fed(int(t.population),float(t.food_eaten),float(t.food_need))
-			_update_kpi("gdp","%d of %d" % [fed,int(t.population)] if fed>=0 else "—","%d hands at work" % roundi(float(t.output)),Tokens.BLUE,"")
+			# The hands at work are told in the chip's detail, keeping the strip short.
+			_update_kpi("gdp","%d of %d" % [fed,int(t.population)] if fed>=0 else "—","",Tokens.BLUE,"")
 		else:
 			_update_kpi("gdp","%d hands" % roundi(float(t.output)),"%.2f each" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"")
 	kpi_strip.reset_size()

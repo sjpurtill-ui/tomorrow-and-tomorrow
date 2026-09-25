@@ -9,7 +9,8 @@ func test_city_summary_has_units_unknowns_and_bounded_staleness()->void:
 		assert_float(ThemeDB.fallback_font.get_string_size(String(stat.label),HORIZONTAL_ALIGNMENT_LEFT,-1,9).x).is_less_equal(120.0)
 	assert_str(fresh.stats[0].label).contains("PEOPLE")
 	assert_str(fresh.stats[1].value).is_equal("Unknown")
-	assert_str(fresh.stats[2].label).contains("WORK-DAYS/D")
+	# Before printing, scouts report hands at work, not "GDP · WORK-DAYS/D".
+	assert_str(fresh.stats[2].label).contains("HANDS AT WORK")
 	assert_str(fresh.stats[3].value).is_equal("38–52 yr")
 	assert_int(fresh.level).is_equal(5)
 	assert_dict(Labels.report_summary(report,1000)).is_equal(Labels.report_summary(report,10000))

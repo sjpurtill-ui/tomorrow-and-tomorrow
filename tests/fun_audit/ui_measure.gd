@@ -22,8 +22,17 @@ static func modern_hits(text:String)->Array[String]:
 	if _res.is_empty():
 		for pattern in MODERN:
 			var re:=RegEx.new();re.compile(pattern);_res.append(re)
+	# A fleet is no anachronism once the people have boats, nor an air
+	# service once they fly (the same gates as the joint force catalog).
+	var known:Array=GameState.known_discoveries
+	var boats:=["river_craft","reed_bundle_boats","hide_covered_boats","coastal_watercraft"].any(func(id:String)->bool:return known.has(id))
+	var flight:=["aerostat_observation","powered_flight"].any(func(id:String)->bool:return known.has(id))
 	for re in _res:
-		for m in re.search_all(text):out.append(m.get_string())
+		for m in re.search_all(text):
+			var hit:=m.get_string().to_lower()
+			if boats and hit in ["navy","naval"]:continue
+			if flight and (hit.begins_with("air") or hit=="airfield"):continue
+			out.append(m.get_string())
 	return out
 
 
