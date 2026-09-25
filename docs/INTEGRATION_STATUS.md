@@ -1,3 +1,11 @@
+## September 25 — twelve research direction pilot paintings: WAITING FOR CONTENT
+
+Worker branch `codex/research-art-first-batch`, base `48f74ed5`, head `195240b4c47c9f747ed7e7a16c98fee651c81316` (includes prerequisite art-direction/queue commit `32b00526`). Source worktree: `C:/Users/sjpur/tt-research-art-first-batch`. This is twelve pilot paintings, one per research direction, not the full 4,284-painting set.
+
+Integrator verified all twelve manifest paths/files, twelve distinct SHA-256 hashes matching provenance, and all twelve IDs absent from current main research data. The later research content is on separate `codex/research-cleanup`; its readiness and combined compatibility must be reviewed before art integration. Preserve manifest additions when combining the two deliveries. Do not report these paintings as visible in the player build yet.
+
+Worker reports successful Godot 4.7.2 import and the manifest/uniqueness test case passing. Its full subject-art suite has four Stone Sorting/Oral Epics expectation failures reported as preexisting; that baseline classification has not been independently verified by the integrator. Combined runtime and display checks remain pending. No save changes or player restart. Source assets stay on the pushed worker branch until their content dependency is ready; unrelated canonical import changes are preserved.
+
 ## September 22 — scheduled world days and map refresh cost: INTEGRATED
 
 Branch `codex/day-jobs`, base `8bea9e9`, worker head `448d32f`, merged into canonical `3220e11` (merge with nine intervening art commits; no file overlap). A world day now runs as ordered bounded steps across frames (8 ms/frame, 14 ms at 1+ day/s, 4 ms while the camera moves); the day's reports commit once when it finishes. Saves and loads finish a day in progress first, so the save format is unchanged. AI planning, owned-world civilization work and staff scouting run as separate steps queued only when due. Charted area and nation-wide territory inputs are reused exactly within their revisions. Map borders and scout corridors share exact terrain samples; the settlement network refreshes half a period after marker refreshes. `scheduled_world_days_enabled=false` restores whole-day frames.
