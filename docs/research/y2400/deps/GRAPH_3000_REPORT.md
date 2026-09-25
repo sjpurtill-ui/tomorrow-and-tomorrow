@@ -10,13 +10,13 @@ Rebuild: `python tools/research/merge_graph_3000.py` (add `--stats` to print the
   - kicl (knowledge, institutions, culture, labor): 448 from the partial, plus 5 gap rows.
   - pils (production, infrastructure, logistics, security): 646 from the partial, plus 1 gap row.
   - nhde (nutrition, health, demography, ecology): 475.
-- **Edges:** 4,928.
-  - Hard `requires_all`: 2,859.
-  - `requires_any`: 57 members in 28 groups.
-  - Precedents: 2,012.
-- **Cross-line edges:** hard 891, any 26, precedent 630.
-- **Cross-block edges (the parent is an earlier-block id):** 1,402. By block: 134 to 0–600, 76 to 600–1200, 107 to 1200–1800 and 1,085 to 1800–2400. By kind: hard 757, any 36, precedent 609. 239 items have hard parents only in earlier blocks.
-- **Items with no requirement:** 0.
+- **Edges:** 4,955, after the mechanics and mathematics identities were made optional (see below).
+  - Hard `requires_all`: 2,807.
+  - `requires_any`: 61 members in 30 groups.
+  - Precedents: 2,087.
+- **Cross-line edges:** hard 839, any 24, precedent 693.
+- **Cross-block edges (the parent is an earlier-block id):** 1,422. By block: 142 to 0–600, 80 to 600–1200, 107 to 1200–1800 and 1,093 to 1800–2400. By kind: hard 748, any 35, precedent 639. 257 items have hard parents only in earlier blocks.
+- **Items with no requirement:** 1, the mathematics identity `least_squares_estimation`. Its module parents come later; it is held to its band by `min_year`.
 - **Key thresholds:** 274.
 - **Conditions normalized.** Every `resources_known` and `environment` value is a list, and `contact_required` is a boolean on every node.
   - `resources_known` (32 items): Crude Oil ×5, Coal ×4, Uranium Ore ×4, Sulfur ×3, Iron Ore ×3, Lead Ore ×2, Tin Ore ×2, Salt ×2, Limestone ×2, Bauxite ×2, Fine Sand ×2, Graphite, Nickel Ore, Clay, Bitumen.
@@ -26,23 +26,23 @@ Rebuild: `python tools/research/merge_graph_3000.py` (add `--stats` to print the
 
 ## Validation
 
-The merge tool exits without writing anything when a check fails. Every check below passes. The baked-block check ran with `--game-dir C:/Users/sjpur/tt-research-1200` (the 0–600, 600–1200 and 1200–1800 blocks). `blocks/y1800_2400.json` was not baked yet, so its 1,139 ids were checked against `graph_2400.json` years only; see *Open items*.
+The merge tool exits without writing anything when a check fails. Every check below passes. The baked-block check ran with `--game-dir C:/Users/sjpur/tt-research-1200` against all four earlier baked blocks (0–600, 600–1200, 1200–1800 and 1800–2400, rebuilt with the identity rule).
 
 | check | result |
 |---|---|
 | every registry id mapped (1,575, including the 6 gap rows); no row for an unknown id; no id mapped twice | pass |
 | every referenced id known (this block, 0–600 with the game's adopted items, 600–1200, 1200–1800 or 1800–2400) | pass: 0 unknown |
 | no id defined in two blocks, except recorded redates | pass: `registry_3000` and `registry_2400` have no redates; the 1200–1800 redate of `ocean_sailing` is applied to the prior set |
-| design graphs agree with the game's baked blocks (`research_600.json`, `blocks/y600_1200.json`, `blocks/y1200_1800.json`): same ids, same block, same proposed years | pass: 0 missing, 0 extra, 0 year differences (1800–2400 pending its bake) |
+| design graphs agree with the game's baked blocks (`research_600.json`, `blocks/y600_1200.json`, `blocks/y1200_1800.json`, `blocks/y1800_2400.json`): same ids, same block, same proposed years | pass: 0 missing, 0 extra, 0 year differences |
 | combined 0–3000 graph acyclic over hard/any edges | pass |
 | combined 0–3000 graph acyclic over all edges including precedents | pass |
 | no `requires_all` parent dated after its dependent (adjusted years; baked years for earlier blocks) | pass: 0 |
-| no `requires_any` group entirely later than its dependent | pass: 0 of 28 groups |
+| no `requires_any` group entirely later than its dependent | pass: 0 of 30 groups |
 | no precedent dated after its dependent | pass: 0 |
 | every conditions list is a list (partials and merged nodes) | pass |
 | every proposed year inside 2400–3000 | pass |
 | every year adjustment names a registry id, matches its current year and stays in its band | pass: 49 |
-| every gap row is a registry `rows_added_by_registry` id, and every rewire finds the edge it replaces | pass: 6 rows, 15 rewires |
+| every gap row is a registry `rows_added_by_registry` id, and every rewire finds the edge it replaces | pass: 6 rows, 24 rewires |
 
 ## Gap rows and rewires
 
@@ -67,6 +67,32 @@ Rewires:
 - New hard parents: `recombinant_vaccine` and `engineered_microbe_chemicals` ← `recombinant_dna`; `electron_physics` ← `cathode_ray_discharge_tubes`; `crude_oil_pipelines` ← `rock_oil_well_drilling`.
 - New precedents: `fuel_refining` ← `rock_oil_well_drilling`; `women_office_clerks` and `teleprinter_mechanisms` ← `typewriter`; `formula_programming_languages` and `stored_program_control` ← `stored_program_computer`.
 
+## Mechanics and mathematics identities stay optional
+
+The identity rule (`tools/research/module_identities.py`; see `../../y1800/deps/GRAPH_2400_REPORT.md`) runs in this merge too.
+
+- **Main-path items:** 78 hard edges onto identities became precedents.
+- **Identities:** 15 identities take their module requirements. The module parents of `least_squares_estimation` (`matrix_algebra`, `measurement_uncertainty`) come later, so it has no hard parent and opens at its band_low.
+- **Substituted requirements**, for items that would otherwise be left with no hard parent:
+  - `statistical_inference` ← `mortality_bill_arithmetic`, `register_life_table`, `birth_multiplier_estimates`;
+  - `safety_lifts` ← `reversing_gear_hoists`;
+  - `statistical_quality_programs` ← `quality_circles`, `lean_production`;
+  - named by hand:
+    - `aerodynamics` ← `industrial_research_laboratory` (its precedent `aerostat_observation` is military, and civilian flight must not need military research);
+    - `fluid_film_bearings` ← `basic_machine_shops`, `fuel_refining`;
+    - `shaft_alignment_methods` ← `precision_machinery`, `basic_machine_shops`;
+    - `residual_stress_assessment` and `machine_tool_stiffness_assessment` ← `precision_machinery`, `decimal_earth_measures`;
+    - `machine_condition_monitoring` ← `statistical_inference`.
+
+These rewires keep the game modules' own alternatives:
+
+- **Semiconductors.** `semiconductor_doping` has `band_theory` only as a precedent, and `band_theory` requires `solid_state_physics`.
+- **Glassworking.** `hydrogen_flame_glassworking` needs `water_electrolysis` or `chloralkali_cells` as its hydrogen source.
+- **Alumina.** `alumina_refining` takes its caustic from `ammonia_soda_process` or `chloralkali_cells`.
+- **Digital logic.** `binary_adders` needs `relay_logic` or `diode_logic`.
+
+The totals, matrix and pacing in this report describe the final graph.
+
 ## Year adjustments
 
 There are 49 moves, all inside their bands. They are written to `year_adjustments_3000.json`, where the build tool finds them automatically.
@@ -84,7 +110,7 @@ These moves resolve the registry's backward predecessor `automation_retraining` 
 
 ## Same-year hard edges
 
-26 `requires_all` edges join two items with the same proposed year. All are kept as hard edges, and `DEMOTE` is empty. The build tool rejects only a parent with a **later** year, and the loader opens a dependent once its parents are known and its `min_year` (band_low) has come. Most of these edges are catalog clusters:
+25 `requires_all` edges join two items with the same proposed year. All are kept as hard edges, and `DEMOTE` is empty. The build tool rejects only a parent with a **later** year, and the loader opens a dependent once its parents are known and its `min_year` (band_low) has come. Most of these edges are catalog clusters:
 
 - the compound microscope and its four parts at 2480;
 - the electron trio at 2659;
@@ -96,16 +122,16 @@ The pils moves add one more: `industrial_robots` ← `hardwired_sequence_control
 
 | from \ to | KNO | INS | CUL | LAB | PRO | INF | NUT | HEA | DEM | LOG | ECO | SEC |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| KNO | 218 | 7 | 39 | 15 | 164 | 25 | 37 | 30 | 7 | 18 | 30 | 25 |
-| INS | 2 | 146 | 6 | 20 | · | · | 4 | 3 | 10 | · | 4 | 9 |
+| KNO | 217 | 6 | 39 | 12 | 130 | 24 | 34 | 28 | 6 | 16 | 20 | 25 |
+| INS | 3 | 146 | 6 | 20 | · | · | 4 | 3 | 10 | · | 4 | 9 |
 | CUL | 1 | 5 | 93 | · | · | · | · | · | · | · | · | 1 |
-| LAB | · | 6 | 2 | 118 | · | · | 1 | 2 | 2 | 1 | · | · |
-| PRO | 29 | 1 | 7 | 5 | 435 | 65 | 27 | 12 | 1 | 51 | 11 | 34 |
-| INF | 1 | · | 2 | · | 37 | 133 | 6 | 3 | 1 | 16 | 1 | 4 |
+| LAB | · | 6 | 2 | 118 | 2 | · | 1 | 2 | 2 | 1 | · | · |
+| PRO | 29 | 1 | 7 | 5 | 442 | 65 | 27 | 12 | 1 | 51 | 11 | 34 |
+| INF | · | · | 2 | · | 40 | 133 | 6 | 3 | 1 | 16 | 1 | 4 |
 | NUT | 1 | · | 1 | · | 2 | · | 136 | 4 | 2 | · | 2 | · |
-| HEA | · | 2 | · | 1 | · | 3 | 2 | 159 | 15 | · | 1 | 1 |
-| DEM | · | 4 | · | 1 | · | · | · | 7 | 105 | · | · | · |
-| LOG | 1 | · | 4 | 4 | 6 | 1 | 7 | 2 | 2 | 146 | 3 | 10 |
+| HEA | 1 | 2 | · | 1 | · | 3 | 2 | 159 | 15 | · | 1 | 1 |
+| DEM | 3 | 4 | · | 1 | · | · | · | 7 | 105 | · | · | · |
+| LOG | 2 | · | 4 | 4 | · | 1 | 6 | 2 | 2 | 146 | 3 | 10 |
 | ECO | 2 | · | 1 | · | 2 | 4 | 12 | · | 1 | · | 148 | 1 |
 | SEC | · | 2 | · | 1 | · | · | 1 | · | 3 | 6 | 2 | 162 |
 
@@ -133,33 +159,33 @@ The research items below make a weapon **known**. They do not make it **usable**
 
 ## Pacing
 
-- **Impossible (critical-path earliest year > band_high): 0.** Hard links alone make every item reachable by year 529 counted from year 0. The median critical path is 13% of band_low. Items stay in the window because the loader applies `min_year = band_low`, together with research throughput and conditions.
+- **Impossible (critical-path earliest year > band_high): 0.** Hard links alone make every item reachable by year 518 counted from year 0. The median critical path is 13% of band_low. Items stay in the window because the loader applies `min_year = band_low`, together with research throughput and conditions.
 - **Load per line.** Load is summed `research_years` divided by the 600-year window. A load of 1.0 is one staffed team working without a break for the whole window.
 
   | line | items | research years | load | late (local serial) | last local serial finish |
   |---|---:|---:|---:|---:|---:|
-  | knowledge | 143 | 1,047 | 1.75 | 135 | 3469 |
-  | institutions | 100 | 716 | 1.19 | 89 | 3469 |
-  | culture | 100 | 560 | 0.93 | 87 | 3471 |
-  | labor | 110 | 453 | 0.76 | 88 | 3467 |
-  | production | 278 | 884 | 1.47 | 262 | 3454 |
-  | infrastructure | 111 | 513 | 0.85 | 95 | 3610 |
-  | nutrition | 124 | 811 | 1.35 | 111 | 3537 |
-  | health | 126 | 1,053 | 1.75 | 107 | 3577 |
-  | demography | 100 | 603 | 1.00 | 82 | 3602 |
-  | logistics | 128 | 1,046 | 1.74 | 110 | 3653 |
-  | ecology | 125 | 851 | 1.42 | 106 | 3644 |
-  | security | 130 | 1,105 | 1.84 | 113 | 3614 |
+  | knowledge | 143 | 1,047 | 1.75 | 135 | 3482 |
+  | institutions | 100 | 716 | 1.19 | 89 | 3482 |
+  | culture | 100 | 560 | 0.93 | 87 | 3484 |
+  | labor | 110 | 453 | 0.76 | 88 | 3480 |
+  | production | 278 | 884 | 1.47 | 262 | 3467 |
+  | infrastructure | 111 | 513 | 0.85 | 95 | 3598 |
+  | nutrition | 124 | 811 | 1.35 | 109 | 3519 |
+  | health | 126 | 1,053 | 1.75 | 107 | 3570 |
+  | demography | 100 | 603 | 1.00 | 82 | 3590 |
+  | logistics | 128 | 1,046 | 1.74 | 110 | 3631 |
+  | ecology | 125 | 851 | 1.42 | 106 | 3632 |
+  | security | 130 | 1,105 | 1.84 | 113 | 3592 |
 
   Eight of twelve lines exceed one team's worth of research in the window. Security (1.84), knowledge and health (1.75) and logistics (1.74) are the heaviest; labor (0.76) and infrastructure (0.85) the lightest. The gap rows add 39 research years to knowledge (+0.07) and 5 to infrastructure (+0.01).
 - **Serial model.** In the serial model, each line works on one project at a time from 2400, in proposed-year order, and waits for cross-line parents.
-  - **Local.** Earlier-block parents count as known at their proposed year. 1,385 of 1,575 items still finish after band_high, and the last items finish around 3450–3650.
+  - **Local.** Earlier-block parents count as known at their proposed year. 1,383 of 1,575 items still finish after band_high, and the last items finish around 3450–3650.
   - **Inherited.** Earlier-block parents keep the 1800–2400 graph's own serial finishes, which already run to about 3340. With those, 1,573 items are late, and the last finishes run to 4500. This is the same queue pressure that `GRAPH_2400_REPORT.md` reported.
   - **What it means.** If the engine researches one project per line at a time, this block needs roughly half its `research_years`, or two parallel projects per line. Each node carries `serial_line_finish_year` (inherited) and `serial_overrun`.
 
 ## Longest dependency chains (hard links, counted from year 0)
 
-The deepest items are 55 links deep, with an earliest feasible year of about 525. They run along the writing trunk (fibre grading → tablets → alphabets → natural philosophy → scholastic method → experimental science). The chain then follows electricity (`friction_electric_machine` → `charge_storing_jar` → `electrochemical_cells` → … → `electron_physics` → `quantum_mechanics` → `pn_junctions`) and computing (transistors → registers → `stored_program_control` → `single_chip_processors` → `desk_computers` → `world_hypertext_web` → `cloud_data_halls` → `deep_learning_networks` → `large_language_models`). It ends at `learned_machine_law` → **`algorithmic_decision_audits`** and **`machine_assisted_targeting`**. The new `cathode_ray_discharge_tubes` sits on this spine, between `electromagnetic_induction` and `electron_physics`, but it does not lengthen it: induction → discharge tubes → electron is as long as induction → wave theory → electron.
+The deepest items are 54 links deep, with an earliest feasible year of about 515. They run along the writing trunk (fibre grading → tablets → alphabets → natural philosophy → scholastic method → experimental science). The chain then follows electricity (`friction_electric_machine` → `charge_storing_jar` → `electrochemical_cells` → … → `electron_physics` → `quantum_mechanics` → `pn_junctions`) and computing (transistors → registers → `stored_program_control` → `single_chip_processors` → `desk_computers` → `world_hypertext_web` → `cloud_data_halls` → `deep_learning_networks` → `large_language_models`). It ends at `learned_machine_law` → **`algorithmic_decision_audits`** and **`machine_assisted_targeting`**. The new `cathode_ray_discharge_tubes` sits on this spine, between `electromagnetic_induction` and `electron_physics`, but it does not lengthen it: induction → discharge tubes → electron is as long as induction → wave theory → electron.
 
 ## Spot checks used by the game tests
 
@@ -175,9 +201,19 @@ The deepest items are 55 links deep, with an earliest feasible year of about 525
 2. **Sovereign-use gate.** Generals must not use `chemical_gas_warfare`, `fission_weapon`, `thermonuclear_weapon`, `intercontinental_missiles`, `missile_submarine_patrols` or `hypersonic_glide_vehicles` without the ruler's spoken decision. They must not bomb cities with `aerial_bombardment` or `armed_remote_strike` without it either. `machine_assisted_targeting` needs human sign-off. Enforce this where generals choose weapons and tactics, not in the research tree.
 3. **`orbital_satellite_launch`.** The registry added it for spaceflight. The five satellite items require or follow it here.
 
+## Bake outcome on `codex/research-1200`
+
+- `data/research/blocks/y2400_3000.json`: 1,575 items, 1,422 cross-block references and 49 year adjustments, built from this graph. The build accepted every item.
+- **Sovereign-use gate:** implemented in the game. `scripts/sovereign_weapons.gd` holds the rule.
+  - `MilitaryCampaign` records the decisions (`sovereign_decisions`, saved with the military state) and provides `general_use_gate()`, `filter_general_means()` and `formations_held_from_city()`.
+  - `GeneralCampaign.validate_order()` refuses an objective that names a gated weapon without the ruler's decision. An override does not get around it.
+  - In a city assault, bomber and strike-drone formations are held back until the ruler decides.
+  - `court_commands.hear()` records the ruler's spoken decision to use a known weapon, or to forbid it again.
+  - Tested in `tests/test_research_3000.gd`.
+- **`portland_cement_clinker`:** kept as the catalog id and recorded for a later rename. The display name is already generic.
+
 ## Open items
 
-- **1800–2400 bake pending.** Re-run `merge_graph_3000.py --game-dir <game worktree>` once `blocks/y1800_2400.json` is baked, to confirm that its ids and years agree with `graph_2400.json`.
 - **Queue pressure.** See *Pacing*: eight lines have a load above 1.0, and the local serial model leaves 1,385 items late.
 - **Bands outside the window.** 55 bands reach outside 2400–3000, by up to 37 years. Every proposed year is inside.
 - **`read_write_memory` after the computer.** The catalog's addressable memory (2806) follows the first stored-program computer (2796). The early machines had their own stores, so the computer does not require it.

@@ -13,16 +13,16 @@
   ],
   "node_count": 1575,
   "edge_counts": {
-   "hard": 2795,
-   "any": 53,
-   "precedent": 2089
+   "hard": 2807,
+   "any": 61,
+   "precedent": 2087
   },
-  "cross_block_edges": 1407,
+  "cross_block_edges": 1422,
   "cross_block_edges_by_block": {
-   "y0_600": 134,
-   "y600_1200": 76,
+   "y0_600": 142,
+   "y600_1200": 80,
    "y1200_1800": 107,
-   "y1800_2400": 1090
+   "y1800_2400": 1093
   },
   "redated_into_block": [],
   "demoted_links": [],
@@ -43,22 +43,112 @@
    {
     "dependent": "least_squares_estimation",
     "parent": "statistical_inference",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "least_squares_estimation",
+    "parent": "differential_calculus",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "least_squares_estimation",
+    "module_parent_dated_later_dropped": "matrix_algebra"
+   },
+   {
+    "dependent": "least_squares_estimation",
+    "module_parent_dated_later_dropped": "measurement_uncertainty"
    },
    {
     "dependent": "dimensional_metrology",
     "parent": "decimal_earth_measures",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
    },
    {
     "dependent": "dimensional_metrology",
     "parent": "precision_machinery",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "dimensional_metrology",
+    "module_parent_added": "measurement_uncertainty"
+   },
+   {
+    "dependent": "dimensional_metrology",
+    "module_parent_added": "geometric_survey"
+   },
+   {
+    "dependent": "dimensional_metrology",
+    "module_parent_added": "workshop_standards"
    },
    {
     "dependent": "measurement_uncertainty",
     "parent": "statistical_inference",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "measurement_uncertainty",
+    "module_parent_added": "probability_theory"
+   },
+   {
+    "dependent": "measurement_uncertainty",
+    "module_parent_added": "standard_measures"
+   },
+   {
+    "dependent": "dimensional_analysis",
+    "parent": "differential_equations",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "dimensional_analysis",
+    "module_parent_added": "ratio_proportion"
+   },
+   {
+    "dependent": "dimensional_analysis",
+    "module_parent_added": "symbolic_algebra"
+   },
+   {
+    "dependent": "dimensional_analysis",
+    "module_parent_added": "standard_measures"
+   },
+   {
+    "dependent": "harmonic_analysis",
+    "parent": "differential_equations",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "harmonic_analysis",
+    "module_parent_added": "complex_numbers"
+   },
+   {
+    "dependent": "harmonic_analysis",
+    "module_parent_added": "trigonometry"
+   },
+   {
+    "dependent": "viscous_resistance",
+    "parent": "differential_equations",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "viscous_resistance",
+    "module_parent_added": "friction_measurement"
+   },
+   {
+    "dependent": "mechanical_work_energy",
+    "parent": "momentum_balance",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "mechanical_work_energy",
+    "parent": "friction_measurement",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "mechanical_work_energy",
+    "module_parent_added": "lever_moments"
+   },
+   {
+    "dependent": "mechanical_work_energy",
+    "module_parent_added": "measured_kinematics"
    },
    {
     "dependent": "energy_conservation_law",
@@ -66,14 +156,52 @@
     "direction": "main path on identity"
    },
    {
+    "dependent": "matrix_algebra",
+    "module_parent_added": "place_value"
+   },
+   {
     "dependent": "cyclic_fatigue",
     "parent": "structural_load_testing",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "cyclic_fatigue",
+    "module_parent_added": "experimental_controls"
    },
    {
     "dependent": "electromagnetic_wave_theory",
     "parent": "differential_equations",
     "direction": "main path on identity"
+   },
+   {
+    "dependent": "vector_analysis",
+    "parent": "matrix_algebra",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "vector_analysis",
+    "module_parent_added": "coordinate_geometry"
+   },
+   {
+    "dependent": "vector_analysis",
+    "module_parent_added": "trigonometry"
+   },
+   {
+    "dependent": "vector_analysis",
+    "module_parent_added": "differential_calculus"
+   },
+   {
+    "dependent": "lubrication_regimes",
+    "parent": "viscous_resistance",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "lubrication_regimes",
+    "module_parent_added": "bearing_surfaces"
+   },
+   {
+    "dependent": "lubrication_regimes",
+    "module_parent_added": "friction_measurement"
    },
    {
     "dependent": "aerodynamics",
@@ -88,13 +216,25 @@
    {
     "dependent": "aerodynamics",
     "substituted_requires_all": [
-     "aerostat_observation"
+     "industrial_research_laboratory"
     ]
    },
    {
     "dependent": "statistical_sampling",
     "parent": "statistical_inference",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "statistical_sampling",
+    "module_parent_added": "probability_theory"
+   },
+   {
+    "dependent": "statistical_sampling",
+    "module_parent_added": "census_rolls"
+   },
+   {
+    "dependent": "statistical_sampling",
+    "module_parent_added": "case_records"
    },
    {
     "dependent": "relative_spacetime",
@@ -110,6 +250,19 @@
     "dependent": "computability_theory",
     "parent": "symbolic_algebra",
     "direction": "main path on identity"
+   },
+   {
+    "dependent": "constrained_optimization",
+    "parent": "matrix_algebra",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "constrained_optimization",
+    "module_parent_added": "differential_calculus"
+   },
+   {
+    "dependent": "constrained_optimization",
+    "module_parent_added": "numerical_root_finding"
    },
    {
     "dependent": "information_theory",
@@ -278,8 +431,8 @@
    {
     "dependent": "residual_stress_assessment",
     "substituted_requires_all": [
-     "decimal_earth_measures",
-     "precision_machinery"
+     "precision_machinery",
+     "decimal_earth_measures"
     ]
    },
    {
@@ -325,8 +478,8 @@
    {
     "dependent": "machine_tool_stiffness_assessment",
     "substituted_requires_all": [
-     "decimal_earth_measures",
-     "precision_machinery"
+     "precision_machinery",
+     "decimal_earth_measures"
     ]
    },
    {
@@ -608,6 +761,69 @@
     "field": "precedents",
     "old": null,
     "new": "stored_program_computer"
+   },
+   {
+    "id": "solid_state_physics",
+    "field": "precedents",
+    "old": "band_theory",
+    "new": null
+   },
+   {
+    "id": "band_theory",
+    "field": "requires_all",
+    "old": null,
+    "new": "solid_state_physics"
+   },
+   {
+    "id": "semiconductor_doping",
+    "field": "requires_all",
+    "old": "band_theory",
+    "new": null
+   },
+   {
+    "id": "semiconductor_doping",
+    "field": "precedents",
+    "old": null,
+    "new": "band_theory"
+   },
+   {
+    "id": "hydrogen_flame_glassworking",
+    "field": "requires_any",
+    "old": null,
+    "new": [
+     "water_electrolysis",
+     "chloralkali_cells"
+    ]
+   },
+   {
+    "id": "alumina_refining",
+    "field": "requires_all",
+    "old": "ammonia_soda_process",
+    "new": null
+   },
+   {
+    "id": "alumina_refining",
+    "field": "requires_any",
+    "old": null,
+    "new": [
+     "ammonia_soda_process",
+     "chloralkali_cells"
+    ]
+   },
+   {
+    "id": "binary_adders",
+    "field": "requires_all",
+    "old": "relay_logic",
+    "new": null
+   },
+   {
+    "id": "binary_adders",
+    "field": "requires_any",
+    "old": null,
+    "new": [
+     "relay_logic",
+     "diode_logic"
+    ]
    }
   ],
   "use_authority": {
@@ -1355,9 +1571,7 @@
    "band_high": 2441,
    "research_years": 5.0,
    "key_threshold": false,
-   "requires_all": [
-    "differential_calculus"
-   ],
+   "requires_all": [],
    "requires_any": [],
    "precedents": [
     "decimal_earth_measures",
@@ -1370,9 +1584,9 @@
     "contact_required": false
    },
    "note": "Least squares from orbit and arc-measure reductions.",
-   "earliest_feasible_year": 55.0,
+   "earliest_feasible_year": 5.0,
    "serial_line_finish_year": 3278.0,
-   "chain_depth": 3,
+   "chain_depth": 0,
    "serial_overrun": true
   },
   {
@@ -1859,7 +2073,11 @@
    "band_high": 2449,
    "research_years": 6.0,
    "key_threshold": false,
-   "requires_all": [],
+   "requires_all": [
+    "measurement_uncertainty",
+    "geometric_survey",
+    "workshop_standards"
+   ],
    "requires_any": [],
    "precedents": [
     "screw_cutting_lathe",
@@ -1873,9 +2091,9 @@
     "contact_required": false
    },
    "note": "Standard bars and gauges follow the decimal measures and precise machine work.",
-   "earliest_feasible_year": 6.0,
-   "serial_line_finish_year": 3284.0,
-   "chain_depth": 0,
+   "earliest_feasible_year": 159.5,
+   "serial_line_finish_year": 3289.0,
+   "chain_depth": 17,
    "serial_overrun": true
   },
   {
@@ -1888,7 +2106,10 @@
    "band_high": 2449,
    "research_years": 5.0,
    "key_threshold": false,
-   "requires_all": [],
+   "requires_all": [
+    "probability_theory",
+    "standard_measures"
+   ],
    "requires_any": [],
    "precedents": [
     "least_squares_estimation",
@@ -1901,9 +2122,9 @@
     "contact_required": false
    },
    "note": "Stated probable error on every reading.",
-   "earliest_feasible_year": 5.0,
-   "serial_line_finish_year": 3289.0,
-   "chain_depth": 0,
+   "earliest_feasible_year": 153.5,
+   "serial_line_finish_year": 3283.0,
+   "chain_depth": 16,
    "serial_overrun": true
   },
   {
@@ -3344,7 +3565,9 @@
    "research_years": 5.0,
    "key_threshold": false,
    "requires_all": [
-    "differential_equations"
+    "ratio_proportion",
+    "symbolic_algebra",
+    "standard_measures"
    ],
    "requires_any": [],
    "precedents": [
@@ -3357,9 +3580,9 @@
     "contact_required": false
    },
    "note": "Equations checked by their units once measures are standard.",
-   "earliest_feasible_year": 77.0,
+   "earliest_feasible_year": 148.5,
    "serial_line_finish_year": 3325.0,
-   "chain_depth": 5,
+   "chain_depth": 15,
    "serial_overrun": true
   },
   {
@@ -3373,7 +3596,8 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "differential_equations",
+    "complex_numbers",
+    "trigonometry",
     "integral_calculus"
    ],
    "requires_any": [],
@@ -3387,9 +3611,9 @@
     "contact_required": false
    },
    "note": "Sums of simple waves, first used for heat flow.",
-   "earliest_feasible_year": 80.0,
+   "earliest_feasible_year": 178.5,
    "serial_line_finish_year": 3333.0,
-   "chain_depth": 5,
+   "chain_depth": 17,
    "serial_overrun": true
   },
   {
@@ -3404,21 +3628,19 @@
    "key_threshold": false,
    "requires_all": [
     "flow_continuity",
-    "differential_equations"
-   ],
-   "requires_any": [],
-   "precedents": [
     "friction_measurement"
    ],
+   "requires_any": [],
+   "precedents": [],
    "conditions": {
     "resources_known": [],
     "environment": [],
     "contact_required": false
    },
    "note": "Fluid friction added to the continuity equations.",
-   "earliest_feasible_year": 78.0,
+   "earliest_feasible_year": 144.5,
    "serial_line_finish_year": 3339.0,
-   "chain_depth": 5,
+   "chain_depth": 16,
    "serial_overrun": true
   },
   {
@@ -4086,8 +4308,8 @@
    "research_years": 6.0,
    "key_threshold": false,
    "requires_all": [
-    "momentum_balance",
-    "friction_measurement"
+    "lever_moments",
+    "measured_kinematics"
    ],
    "requires_any": [],
    "precedents": [
@@ -4101,9 +4323,9 @@
     "contact_required": false
    },
    "note": "Work as force through distance, from engineers' duty trials.",
-   "earliest_feasible_year": 37.0,
+   "earliest_feasible_year": 144.5,
    "serial_line_finish_year": 3353.0,
-   "chain_depth": 3,
+   "chain_depth": 16,
    "serial_overrun": true
   },
   {
@@ -10380,7 +10602,8 @@
    "research_years": 6.0,
    "key_threshold": false,
    "requires_all": [
-    "symbolic_algebra"
+    "symbolic_algebra",
+    "place_value"
    ],
    "requires_any": [],
    "precedents": [
@@ -10393,9 +10616,9 @@
     "contact_required": false
    },
    "note": "Arrays of coefficients handled as one quantity.",
-   "earliest_feasible_year": 21.0,
+   "earliest_feasible_year": 149.5,
    "serial_line_finish_year": 3511.0,
-   "chain_depth": 1,
+   "chain_depth": 15,
    "serial_overrun": true
   },
   {
@@ -11005,7 +11228,8 @@
    "research_years": 6.0,
    "key_threshold": false,
    "requires_all": [
-    "stress_strain_relations"
+    "stress_strain_relations",
+    "experimental_controls"
    ],
    "requires_any": [],
    "precedents": [
@@ -11019,9 +11243,9 @@
     "contact_required": false
    },
    "note": "Axle and bridge failures under repeated loads.",
-   "earliest_feasible_year": 20.0,
+   "earliest_feasible_year": 320.5,
    "serial_line_finish_year": 3537.0,
-   "chain_depth": 2,
+   "chain_depth": 30,
    "serial_overrun": true
   },
   {
@@ -15555,12 +15779,13 @@
    "research_years": 6.0,
    "key_threshold": false,
    "requires_all": [
-    "matrix_algebra"
+    "coordinate_geometry",
+    "trigonometry",
+    "differential_calculus"
    ],
    "requires_any": [],
    "precedents": [
-    "electromagnetic_wave_theory",
-    "coordinate_geometry"
+    "electromagnetic_wave_theory"
    ],
    "conditions": {
     "resources_known": [],
@@ -15568,9 +15793,9 @@
     "contact_required": false
    },
    "note": "Vector notation for the field equations.",
-   "earliest_feasible_year": 27.0,
+   "earliest_feasible_year": 184.5,
    "serial_line_finish_year": 3682.0,
-   "chain_depth": 2,
+   "chain_depth": 17,
    "serial_overrun": true
   },
   {
@@ -16338,11 +16563,11 @@
    "research_years": 5.0,
    "key_threshold": false,
    "requires_all": [
-    "viscous_resistance"
+    "bearing_surfaces",
+    "friction_measurement"
    ],
    "requires_any": [],
    "precedents": [
-    "friction_measurement",
     "fuel_refining"
    ],
    "conditions": {
@@ -16351,9 +16576,9 @@
     "contact_required": false
    },
    "note": "Oil-film theory of bearings.",
-   "earliest_feasible_year": 83.0,
+   "earliest_feasible_year": 83.5,
    "serial_line_finish_year": 3692.0,
-   "chain_depth": 6,
+   "chain_depth": 12,
    "serial_overrun": true
   },
   {
@@ -17016,10 +17241,14 @@
    "requires_all": [
     "ore_assaying",
     "chemical_distillation",
-    "pressure_vessels",
-    "ammonia_soda_process"
+    "pressure_vessels"
    ],
-   "requires_any": [],
+   "requires_any": [
+    [
+     "ammonia_soda_process",
+     "chloralkali_cells"
+    ]
+   ],
    "precedents": [],
    "conditions": {
     "resources_known": [
@@ -17030,7 +17259,7 @@
    },
    "note": "Bauxite digested in caustic liquor to alumina.",
    "earliest_feasible_year": 231.5,
-   "serial_line_finish_year": 3658.0,
+   "serial_line_finish_year": 3698.0,
    "chain_depth": 26,
    "serial_overrun": true
   },
@@ -17058,7 +17287,7 @@
    },
    "note": "Snap fasteners pressed onto garments.",
    "earliest_feasible_year": 32.5,
-   "serial_line_finish_year": 3659.0,
+   "serial_line_finish_year": 3656.0,
    "chain_depth": 9,
    "serial_overrun": true
   },
@@ -17292,7 +17521,7 @@
    },
    "note": "Aluminium won from molten salts by current.",
    "earliest_feasible_year": 372.5,
-   "serial_line_finish_year": 3667.0,
+   "serial_line_finish_year": 3706.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -18426,7 +18655,7 @@
    },
    "note": "Porous separators part battery plates.",
    "earliest_feasible_year": 316.5,
-   "serial_line_finish_year": 3697.0,
+   "serial_line_finish_year": 3708.0,
    "chain_depth": 30,
    "serial_overrun": true
   },
@@ -18454,7 +18683,7 @@
    },
    "note": "Hydrogen burned in chlorine gives hydrochloric acid.",
    "earliest_feasible_year": 370.5,
-   "serial_line_finish_year": 3699.0,
+   "serial_line_finish_year": 3710.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -18488,7 +18717,7 @@
    },
    "note": "Rechargeable lead plates in acid.",
    "earliest_feasible_year": 341.5,
-   "serial_line_finish_year": 3702.0,
+   "serial_line_finish_year": 3713.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -18695,7 +18924,7 @@
    },
    "note": "Dissolved wood cellulose spun as artificial silk.",
    "earliest_feasible_year": 326.5,
-   "serial_line_finish_year": 3707.0,
+   "serial_line_finish_year": 3718.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -18843,7 +19072,7 @@
    },
    "note": "Compression ignites heavy oil in the cylinder.",
    "earliest_feasible_year": 322.5,
-   "serial_line_finish_year": 3712.0,
+   "serial_line_finish_year": 3723.0,
    "chain_depth": 30,
    "serial_overrun": true
   },
@@ -18872,7 +19101,7 @@
    },
    "note": "Sulphur dioxide recovered from smelter gases.",
    "earliest_feasible_year": 30.5,
-   "serial_line_finish_year": 3714.0,
+   "serial_line_finish_year": 3725.0,
    "chain_depth": 7,
    "serial_overrun": true
   },
@@ -18988,7 +19217,7 @@
    },
    "note": "Hardened bushings guide the drill.",
    "earliest_feasible_year": 320.5,
-   "serial_line_finish_year": 3715.0,
+   "serial_line_finish_year": 3726.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -19020,7 +19249,7 @@
    },
    "note": "Contact process makes sulphuric acid on a catalyst.",
    "earliest_feasible_year": 234.5,
-   "serial_line_finish_year": 3721.0,
+   "serial_line_finish_year": 3732.0,
    "chain_depth": 26,
    "serial_overrun": true
   },
@@ -19139,7 +19368,7 @@
    },
    "note": "Drill jigs laid out from datum faces.",
    "earliest_feasible_year": 324.5,
-   "serial_line_finish_year": 3722.0,
+   "serial_line_finish_year": 3733.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -19166,7 +19395,7 @@
    },
    "note": "Gears cut continuously by hobbing.",
    "earliest_feasible_year": 319.5,
-   "serial_line_finish_year": 3724.0,
+   "serial_line_finish_year": 3735.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -19285,7 +19514,7 @@
    },
    "note": "Carbon resistors for measured circuits.",
    "earliest_feasible_year": 346.5,
-   "serial_line_finish_year": 3726.0,
+   "serial_line_finish_year": 3737.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -19516,7 +19745,7 @@
    },
    "note": "Enzymes used as catalysts in brewing and chemistry.",
    "earliest_feasible_year": 125.5,
-   "serial_line_finish_year": 3729.0,
+   "serial_line_finish_year": 3740.0,
    "chain_depth": 17,
    "serial_overrun": true
   },
@@ -19545,7 +19774,7 @@
    },
    "note": "Furnace charges balanced by assay and weight.",
    "earliest_feasible_year": 25.5,
-   "serial_line_finish_year": 3731.0,
+   "serial_line_finish_year": 3742.0,
    "chain_depth": 6,
    "serial_overrun": true
   },
@@ -19572,7 +19801,7 @@
    },
    "note": "Rivet holes drifted and reamed in line.",
    "earliest_feasible_year": 325.5,
-   "serial_line_finish_year": 3732.0,
+   "serial_line_finish_year": 3743.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -19628,7 +19857,7 @@
    },
    "note": "Gears generated by a reciprocating shaper cutter.",
    "earliest_feasible_year": 312.5,
-   "serial_line_finish_year": 3734.0,
+   "serial_line_finish_year": 3745.0,
    "chain_depth": 28,
    "serial_overrun": true
   },
@@ -19684,7 +19913,7 @@
    },
    "note": "Hot rivets set by pneumatic hammer.",
    "earliest_feasible_year": 326.5,
-   "serial_line_finish_year": 3735.0,
+   "serial_line_finish_year": 3746.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -19743,7 +19972,7 @@
    },
    "note": "Nickel refined from sulphide ores.",
    "earliest_feasible_year": 27.5,
-   "serial_line_finish_year": 3737.0,
+   "serial_line_finish_year": 3748.0,
    "chain_depth": 7,
    "serial_overrun": true
   },
@@ -20032,7 +20261,7 @@
    },
    "note": "Small rivets set cold by press.",
    "earliest_feasible_year": 326.5,
-   "serial_line_finish_year": 3738.0,
+   "serial_line_finish_year": 3749.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -20084,7 +20313,7 @@
    },
    "note": "Glass annealed on timed cooling schedules.",
    "earliest_feasible_year": 59.5,
-   "serial_line_finish_year": 3740.0,
+   "serial_line_finish_year": 3751.0,
    "chain_depth": 9,
    "serial_overrun": true
   },
@@ -20112,7 +20341,7 @@
    },
    "note": "Hardened thread-rolling dies.",
    "earliest_feasible_year": 325.5,
-   "serial_line_finish_year": 3742.0,
+   "serial_line_finish_year": 3753.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -20156,10 +20385,11 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "aerostat_observation"
+    "industrial_research_laboratory"
    ],
    "requires_any": [],
    "precedents": [
+    "aerostat_observation",
     "viscous_resistance",
     "flow_continuity"
    ],
@@ -20169,9 +20399,9 @@
     "contact_required": false
    },
    "note": "Lift and drag reckoned for wings.",
-   "earliest_feasible_year": 169.5,
+   "earliest_feasible_year": 355.5,
    "serial_line_finish_year": 3749.0,
-   "chain_depth": 21,
+   "chain_depth": 32,
    "serial_overrun": true
   },
   {
@@ -20301,8 +20531,15 @@
    "band_high": 2692,
    "research_years": 6.0,
    "key_threshold": false,
-   "requires_all": [],
-   "requires_any": [],
+   "requires_all": [
+    "probability_theory"
+   ],
+   "requires_any": [
+    [
+     "census_rolls",
+     "case_records"
+    ]
+   ],
    "precedents": [
     "household_poverty_surveys",
     "measurement_uncertainty",
@@ -20314,9 +20551,9 @@
     "contact_required": false
    },
    "note": "Random samples stand for the population.",
-   "earliest_feasible_year": 6.0,
+   "earliest_feasible_year": 154.5,
    "serial_line_finish_year": 3778.0,
-   "chain_depth": 0,
+   "chain_depth": 16,
    "serial_overrun": true
   },
   {
@@ -20370,9 +20607,9 @@
     "contact_required": false
    },
    "note": "Scale models tested in moving air.",
-   "earliest_feasible_year": 175.5,
+   "earliest_feasible_year": 361.5,
    "serial_line_finish_year": 3788.0,
-   "chain_depth": 22,
+   "chain_depth": 33,
    "serial_overrun": true
   },
   {
@@ -20460,7 +20697,7 @@
    },
    "note": "Tool steel that cuts red-hot without softening.",
    "earliest_feasible_year": 194.5,
-   "serial_line_finish_year": 3746.0,
+   "serial_line_finish_year": 3757.0,
    "chain_depth": 23,
    "serial_overrun": true
   },
@@ -20689,7 +20926,7 @@
    },
    "note": "Bolt threads rolled instead of cut.",
    "earliest_feasible_year": 326.5,
-   "serial_line_finish_year": 3747.0,
+   "serial_line_finish_year": 3758.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -20768,7 +21005,12 @@
     "glass_tube_drawing",
     "chemical_distillation"
    ],
-   "requires_any": [],
+   "requires_any": [
+    [
+     "water_electrolysis",
+     "chloralkali_cells"
+    ]
+   ],
    "precedents": [],
    "conditions": {
     "resources_known": [],
@@ -20776,9 +21018,9 @@
     "contact_required": false
    },
    "note": "Glass worked in hydrogen and oxygen flames.",
-   "earliest_feasible_year": 124.5,
-   "serial_line_finish_year": 3749.0,
-   "chain_depth": 17,
+   "earliest_feasible_year": 369.5,
+   "serial_line_finish_year": 3760.0,
+   "chain_depth": 36,
    "serial_overrun": true
   },
   {
@@ -20865,7 +21107,7 @@
    },
    "note": "Electric arcs melt steel and alloys.",
    "earliest_feasible_year": 372.5,
-   "serial_line_finish_year": 3757.0,
+   "serial_line_finish_year": 3768.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -20892,7 +21134,7 @@
    },
    "note": "Abrasive belts finish curved parts.",
    "earliest_feasible_year": 210.5,
-   "serial_line_finish_year": 3759.0,
+   "serial_line_finish_year": 3770.0,
    "chain_depth": 25,
    "serial_overrun": true
   },
@@ -21035,7 +21277,7 @@
    },
    "note": "Gauge blocks lapped flat enough to wring.",
    "earliest_feasible_year": 293.5,
-   "serial_line_finish_year": 3761.0,
+   "serial_line_finish_year": 3772.0,
    "chain_depth": 27,
    "serial_overrun": true
   },
@@ -21181,9 +21423,9 @@
     "contact_required": false
    },
    "note": "Powered, controlled heavier-than-air flight.",
-   "earliest_feasible_year": 342.5,
-   "serial_line_finish_year": 3771.0,
-   "chain_depth": 31,
+   "earliest_feasible_year": 365.5,
+   "serial_line_finish_year": 3782.0,
+   "chain_depth": 33,
    "serial_overrun": true
   },
   {
@@ -21212,7 +21454,7 @@
    },
    "note": "Toolrooms make jigs, gauges and fixtures.",
    "earliest_feasible_year": 335.5,
-   "serial_line_finish_year": 3777.0,
+   "serial_line_finish_year": 3788.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -21299,7 +21541,7 @@
    },
    "note": "Liquefied air parted into oxygen and nitrogen.",
    "earliest_feasible_year": 373.5,
-   "serial_line_finish_year": 3781.0,
+   "serial_line_finish_year": 3792.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -21385,7 +21627,7 @@
    },
    "note": "Looms driven by their own motors.",
    "earliest_feasible_year": 366.5,
-   "serial_line_finish_year": 3783.0,
+   "serial_line_finish_year": 3794.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -21415,7 +21657,7 @@
    },
    "note": "Pulp beaters driven by electric motors.",
    "earliest_feasible_year": 366.5,
-   "serial_line_finish_year": 3785.0,
+   "serial_line_finish_year": 3796.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -21532,7 +21774,7 @@
    },
    "note": "Rolled foil capacitors.",
    "earliest_feasible_year": 346.5,
-   "serial_line_finish_year": 3787.0,
+   "serial_line_finish_year": 3798.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -21732,7 +21974,7 @@
    },
    "note": "Nuts slotted for locking pins.",
    "earliest_feasible_year": 324.5,
-   "serial_line_finish_year": 3788.0,
+   "serial_line_finish_year": 3799.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -21760,7 +22002,7 @@
    },
    "note": "Split pins lock nuts against vibration.",
    "earliest_feasible_year": 325.5,
-   "serial_line_finish_year": 3789.0,
+   "serial_line_finish_year": 3800.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -21903,7 +22145,7 @@
    },
    "note": "Spring washers cut from coiled wire.",
    "earliest_feasible_year": 314.5,
-   "serial_line_finish_year": 3790.0,
+   "serial_line_finish_year": 3801.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -22080,7 +22322,7 @@
    },
    "note": "Metal grain size measured under the microscope.",
    "earliest_feasible_year": 316.5,
-   "serial_line_finish_year": 3792.0,
+   "serial_line_finish_year": 3803.0,
    "chain_depth": 30,
    "serial_overrun": true
   },
@@ -22250,7 +22492,7 @@
    },
    "note": "Resistance thermometers and strain sensors.",
    "earliest_feasible_year": 348.5,
-   "serial_line_finish_year": 3794.0,
+   "serial_line_finish_year": 3805.0,
    "chain_depth": 34,
    "serial_overrun": true
   },
@@ -22277,7 +22519,7 @@
    },
    "note": "Rods and tubes reduced by rotary swaging.",
    "earliest_feasible_year": 208.5,
-   "serial_line_finish_year": 3796.0,
+   "serial_line_finish_year": 3807.0,
    "chain_depth": 24,
    "serial_overrun": true
   },
@@ -22393,7 +22635,7 @@
    },
    "note": "Silicon smelted in the electric furnace.",
    "earliest_feasible_year": 374.5,
-   "serial_line_finish_year": 3798.0,
+   "serial_line_finish_year": 3809.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -22541,7 +22783,7 @@
    },
    "note": "Steel normalised to refine its grain.",
    "earliest_feasible_year": 316.5,
-   "serial_line_finish_year": 3800.0,
+   "serial_line_finish_year": 3811.0,
    "chain_depth": 30,
    "serial_overrun": true
   },
@@ -22603,7 +22845,7 @@
    },
    "note": "Catalysts designed and tested for industry.",
    "earliest_feasible_year": 318.5,
-   "serial_line_finish_year": 3804.0,
+   "serial_line_finish_year": 3815.0,
    "chain_depth": 30,
    "serial_overrun": true
   },
@@ -22631,7 +22873,7 @@
    },
    "note": "Fasteners issued as counted kits.",
    "earliest_feasible_year": 324.5,
-   "serial_line_finish_year": 3805.0,
+   "serial_line_finish_year": 3816.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -22799,7 +23041,7 @@
    },
    "note": "Valves direct compressed air to actuators.",
    "earliest_feasible_year": 369.5,
-   "serial_line_finish_year": 3807.0,
+   "serial_line_finish_year": 3818.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -22856,7 +23098,7 @@
    },
    "note": "Engine bores honed to a fine crosshatch.",
    "earliest_feasible_year": 210.5,
-   "serial_line_finish_year": 3809.0,
+   "serial_line_finish_year": 3820.0,
    "chain_depth": 25,
    "serial_overrun": true
   },
@@ -22884,7 +23126,7 @@
    },
    "note": "Air cylinders move tools and clamps.",
    "earliest_feasible_year": 371.5,
-   "serial_line_finish_year": 3811.0,
+   "serial_line_finish_year": 3822.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -23055,9 +23297,9 @@
     "contact_required": false
    },
    "note": "Naval aviation.",
-   "earliest_feasible_year": 352.5,
-   "serial_line_finish_year": 3781.0,
-   "chain_depth": 32,
+   "earliest_feasible_year": 375.5,
+   "serial_line_finish_year": 3792.0,
+   "chain_depth": 34,
    "serial_overrun": true
   },
   {
@@ -23085,7 +23327,7 @@
    },
    "note": "Pneumatic presses form and assemble parts.",
    "earliest_feasible_year": 373.5,
-   "serial_line_finish_year": 3813.0,
+   "serial_line_finish_year": 3824.0,
    "chain_depth": 38,
    "serial_overrun": true
   },
@@ -23113,7 +23355,7 @@
    },
    "note": "Cloth tested for abrasion and strength.",
    "earliest_feasible_year": 10.0,
-   "serial_line_finish_year": 3815.0,
+   "serial_line_finish_year": 3826.0,
    "chain_depth": 4,
    "serial_overrun": true
   },
@@ -23262,7 +23504,7 @@
    },
    "note": "Powered washing machines.",
    "earliest_feasible_year": 366.5,
-   "serial_line_finish_year": 3817.0,
+   "serial_line_finish_year": 3828.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -23403,9 +23645,9 @@
     "contact_required": false
    },
    "note": "Aerial bombardment.",
-   "earliest_feasible_year": 350.5,
-   "serial_line_finish_year": 3789.0,
-   "chain_depth": 32,
+   "earliest_feasible_year": 373.5,
+   "serial_line_finish_year": 3800.0,
+   "chain_depth": 34,
    "serial_overrun": true,
    "use_authority": "restricted"
   },
@@ -23435,7 +23677,7 @@
    },
    "note": "Formaldehyde made from wood spirit on a catalyst.",
    "earliest_feasible_year": 321.5,
-   "serial_line_finish_year": 3820.0,
+   "serial_line_finish_year": 3831.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -23464,7 +23706,7 @@
    },
    "note": "Hard phenolic resin moulded under heat and pressure.",
    "earliest_feasible_year": 326.5,
-   "serial_line_finish_year": 3825.0,
+   "serial_line_finish_year": 3836.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -23807,7 +24049,7 @@
    },
    "note": "Aromatic amines made by hydrogenation.",
    "earliest_feasible_year": 321.5,
-   "serial_line_finish_year": 3828.0,
+   "serial_line_finish_year": 3839.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -23987,7 +24229,7 @@
    },
    "note": "Promoted iron catalysts for ammonia.",
    "earliest_feasible_year": 376.5,
-   "serial_line_finish_year": 3831.0,
+   "serial_line_finish_year": 3842.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -24164,7 +24406,7 @@
    },
    "note": "Continuous trenches with dugouts and wire.",
    "earliest_feasible_year": 373.5,
-   "serial_line_finish_year": 3797.0,
+   "serial_line_finish_year": 3808.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -24193,7 +24435,7 @@
    },
    "note": "Chromium steels that do not rust.",
    "earliest_feasible_year": 376.5,
-   "serial_line_finish_year": 3835.0,
+   "serial_line_finish_year": 3846.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -24396,9 +24638,9 @@
     "contact_required": false
    },
    "note": "Fighter tactics.",
-   "earliest_feasible_year": 350.5,
-   "serial_line_finish_year": 3805.0,
-   "chain_depth": 32,
+   "earliest_feasible_year": 373.5,
+   "serial_line_finish_year": 3816.0,
+   "chain_depth": 34,
    "serial_overrun": true
   },
   {
@@ -24428,7 +24670,7 @@
    },
    "note": "Mountain field school.",
    "earliest_feasible_year": 84.5,
-   "serial_line_finish_year": 3811.0,
+   "serial_line_finish_year": 3822.0,
    "chain_depth": 11,
    "serial_overrun": true
   },
@@ -24488,7 +24730,7 @@
    },
    "note": "Research only: war gases and the gas mask.",
    "earliest_feasible_year": 381.5,
-   "serial_line_finish_year": 3819.0,
+   "serial_line_finish_year": 3830.0,
    "chain_depth": 36,
    "serial_overrun": true,
    "use_authority": "sovereign"
@@ -24627,7 +24869,7 @@
    },
    "note": "Armoured fighting vehicles.",
    "earliest_feasible_year": 329.5,
-   "serial_line_finish_year": 3831.0,
+   "serial_line_finish_year": 3842.0,
    "chain_depth": 30,
    "serial_overrun": true
   },
@@ -24713,7 +24955,7 @@
    },
    "note": "Armour-piercing weapons.",
    "earliest_feasible_year": 337.5,
-   "serial_line_finish_year": 3839.0,
+   "serial_line_finish_year": 3850.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -24829,7 +25071,7 @@
    },
    "note": "Sound and flash locate hidden guns.",
    "earliest_feasible_year": 350.5,
-   "serial_line_finish_year": 3845.0,
+   "serial_line_finish_year": 3856.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -25059,9 +25301,9 @@
     "contact_required": false
    },
    "note": "Carrier aviation.",
-   "earliest_feasible_year": 364.5,
-   "serial_line_finish_year": 3857.0,
-   "chain_depth": 33,
+   "earliest_feasible_year": 387.5,
+   "serial_line_finish_year": 3868.0,
+   "chain_depth": 35,
    "serial_overrun": true
   },
   {
@@ -25089,7 +25331,7 @@
    },
    "note": "Escorted merchant convoys against submarines.",
    "earliest_feasible_year": 275.5,
-   "serial_line_finish_year": 3865.0,
+   "serial_line_finish_year": 3876.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -25116,7 +25358,7 @@
    },
    "note": "Infiltration squads with light machine guns.",
    "earliest_feasible_year": 381.5,
-   "serial_line_finish_year": 3873.0,
+   "serial_line_finish_year": 3884.0,
    "chain_depth": 34,
    "serial_overrun": true
   },
@@ -25170,7 +25412,7 @@
    },
    "note": "Engineer-infantry security.",
    "earliest_feasible_year": 319.5,
-   "serial_line_finish_year": 3879.0,
+   "serial_line_finish_year": 3890.0,
    "chain_depth": 30,
    "serial_overrun": true
   },
@@ -25197,7 +25439,7 @@
    },
    "note": "Infantry-tank cooperation.",
    "earliest_feasible_year": 337.5,
-   "serial_line_finish_year": 3887.0,
+   "serial_line_finish_year": 3898.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -25342,9 +25584,9 @@
     "contact_required": false
    },
    "note": "Scheduled air mail.",
-   "earliest_feasible_year": 350.5,
+   "earliest_feasible_year": 373.5,
    "serial_line_finish_year": 3828.0,
-   "chain_depth": 32,
+   "chain_depth": 34,
    "serial_overrun": true
   },
   {
@@ -25371,7 +25613,7 @@
    },
    "note": "Mechanized crew school.",
    "earliest_feasible_year": 335.5,
-   "serial_line_finish_year": 3893.0,
+   "serial_line_finish_year": 3904.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -25398,7 +25640,7 @@
    },
    "note": "Submarines ranged by underwater sound.",
    "earliest_feasible_year": 368.5,
-   "serial_line_finish_year": 3901.0,
+   "serial_line_finish_year": 3912.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -25483,9 +25725,9 @@
     "contact_required": false
    },
    "note": "Airline service between capitals.",
-   "earliest_feasible_year": 360.5,
+   "earliest_feasible_year": 383.5,
    "serial_line_finish_year": 3838.0,
-   "chain_depth": 33,
+   "chain_depth": 35,
    "serial_overrun": true
   },
   {
@@ -25510,9 +25752,9 @@
     "contact_required": false
    },
    "note": "An air arm beside army and navy.",
-   "earliest_feasible_year": 358.5,
-   "serial_line_finish_year": 3909.0,
-   "chain_depth": 33,
+   "earliest_feasible_year": 381.5,
+   "serial_line_finish_year": 3920.0,
+   "chain_depth": 35,
    "serial_overrun": true
   },
   {
@@ -25945,7 +26187,7 @@
    },
    "note": "Regulators charge station batteries automatically.",
    "earliest_feasible_year": 362.5,
-   "serial_line_finish_year": 3797.0,
+   "serial_line_finish_year": 3808.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -26176,7 +26418,7 @@
    },
    "note": "Towns build rented estates for working families.",
    "earliest_feasible_year": 327.5,
-   "serial_line_finish_year": 3803.0,
+   "serial_line_finish_year": 3814.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -26290,7 +26532,7 @@
    },
    "note": "Treaty caps battle fleets.",
    "earliest_feasible_year": 402.5,
-   "serial_line_finish_year": 3917.0,
+   "serial_line_finish_year": 3928.0,
    "chain_depth": 38,
    "serial_overrun": true
   },
@@ -26348,7 +26590,7 @@
    },
    "note": "Concrete proportioned by water-cement ratio.",
    "earliest_feasible_year": 199.5,
-   "serial_line_finish_year": 3808.0,
+   "serial_line_finish_year": 3819.0,
    "chain_depth": 23,
    "serial_overrun": true
   },
@@ -26636,7 +26878,7 @@
    },
    "note": "Treaty bans gas and germ weapons.",
    "earliest_feasible_year": 357.5,
-   "serial_line_finish_year": 3923.0,
+   "serial_line_finish_year": 3934.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -26985,7 +27227,7 @@
    },
    "note": "Thin concrete shells roof halls and hangars.",
    "earliest_feasible_year": 226.5,
-   "serial_line_finish_year": 3812.0,
+   "serial_line_finish_year": 3823.0,
    "chain_depth": 26,
    "serial_overrun": true
   },
@@ -27272,7 +27514,7 @@
    },
    "note": "Power lines reach every village and farm.",
    "earliest_feasible_year": 392.5,
-   "serial_line_finish_year": 3820.0,
+   "serial_line_finish_year": 3831.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -27330,7 +27572,7 @@
    },
    "note": "Buried pipes designed for soil and traffic loads.",
    "earliest_feasible_year": 41.5,
-   "serial_line_finish_year": 3823.0,
+   "serial_line_finish_year": 3834.0,
    "chain_depth": 9,
    "serial_overrun": true
   },
@@ -27346,7 +27588,8 @@
    "key_threshold": false,
    "requires_all": [
     "quantum_mechanics",
-    "crystallography"
+    "crystallography",
+    "solid_state_physics"
    ],
    "requires_any": [],
    "precedents": [
@@ -27358,9 +27601,9 @@
     "contact_required": false
    },
    "note": "Electron bands in crystal lattices.",
-   "earliest_feasible_year": 414.5,
-   "serial_line_finish_year": 3933.0,
-   "chain_depth": 39,
+   "earliest_feasible_year": 422.5,
+   "serial_line_finish_year": 3941.0,
+   "chain_depth": 40,
    "serial_overrun": true
   },
   {
@@ -27379,7 +27622,6 @@
    ],
    "requires_any": [],
    "precedents": [
-    "band_theory",
     "crystal_radio_detection"
    ],
    "conditions": {
@@ -27389,7 +27631,7 @@
    },
    "note": "Physics of crystalline solids as a field.",
    "earliest_feasible_year": 414.5,
-   "serial_line_finish_year": 3941.0,
+   "serial_line_finish_year": 3933.0,
    "chain_depth": 39,
    "serial_overrun": true
   },
@@ -27614,7 +27856,7 @@
    },
    "note": "Radio nets command moving formations.",
    "earliest_feasible_year": 413.5,
-   "serial_line_finish_year": 3931.0,
+   "serial_line_finish_year": 3942.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -27668,7 +27910,7 @@
    },
    "note": "Foundation settlement measured over years.",
    "earliest_feasible_year": 344.5,
-   "serial_line_finish_year": 3826.0,
+   "serial_line_finish_year": 3837.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -27723,7 +27965,7 @@
    },
    "note": "Rotor cipher machines.",
    "earliest_feasible_year": 389.5,
-   "serial_line_finish_year": 3939.0,
+   "serial_line_finish_year": 3950.0,
    "chain_depth": 38,
    "serial_overrun": true
   },
@@ -27824,8 +28066,8 @@
    "research_years": 2.0,
    "key_threshold": false,
    "requires_all": [
-    "decimal_earth_measures",
-    "precision_machinery"
+    "precision_machinery",
+    "decimal_earth_measures"
    ],
    "requires_any": [],
    "precedents": [
@@ -27898,7 +28140,7 @@
    },
    "note": "A basin authority builds dams, locks and stations.",
    "earliest_feasible_year": 390.5,
-   "serial_line_finish_year": 3832.0,
+   "serial_line_finish_year": 3843.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -28594,9 +28836,9 @@
     "contact_required": false
    },
    "note": "Stressed-skin metal airframes.",
-   "earliest_feasible_year": 348.5,
+   "earliest_feasible_year": 371.5,
    "serial_line_finish_year": 3955.0,
-   "chain_depth": 32,
+   "chain_depth": 34,
    "serial_overrun": true
   },
   {
@@ -29082,9 +29324,9 @@
     "contact_required": false
    },
    "note": "All-metal monoplanes make flying pay.",
-   "earliest_feasible_year": 370.5,
+   "earliest_feasible_year": 393.5,
    "serial_line_finish_year": 3965.0,
-   "chain_depth": 34,
+   "chain_depth": 36,
    "serial_overrun": true
   },
   {
@@ -29108,9 +29350,9 @@
     "contact_required": false
    },
    "note": "Rotary-wing flight.",
-   "earliest_feasible_year": 356.5,
+   "earliest_feasible_year": 379.5,
    "serial_line_finish_year": 3963.0,
-   "chain_depth": 33,
+   "chain_depth": 35,
    "serial_overrun": true
   },
   {
@@ -29240,10 +29482,13 @@
    "band_high": 2790,
    "research_years": 3.0,
    "key_threshold": false,
-   "requires_all": [
-    "relay_logic"
+   "requires_all": [],
+   "requires_any": [
+    [
+     "relay_logic",
+     "diode_logic"
+    ]
    ],
-   "requires_any": [],
    "precedents": [
     "geared_adding_machine"
    ],
@@ -29254,7 +29499,7 @@
    },
    "note": "Binary adders built from relays.",
    "earliest_feasible_year": 365.5,
-   "serial_line_finish_year": 3975.0,
+   "serial_line_finish_year": 4095.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -29283,7 +29528,7 @@
    },
    "note": "Tendons tensioned before loading.",
    "earliest_feasible_year": 228.5,
-   "serial_line_finish_year": 3838.0,
+   "serial_line_finish_year": 3849.0,
    "chain_depth": 26,
    "serial_overrun": true
   },
@@ -29367,7 +29612,7 @@
    },
    "note": "Isocyanates for foams and coatings.",
    "earliest_feasible_year": 317.5,
-   "serial_line_finish_year": 3978.0,
+   "serial_line_finish_year": 3975.0,
    "chain_depth": 30,
    "serial_overrun": true
   },
@@ -29393,9 +29638,9 @@
     "contact_required": false
    },
    "note": "Wardens, shelters and blackout.",
-   "earliest_feasible_year": 366.5,
+   "earliest_feasible_year": 389.5,
    "serial_line_finish_year": 3992.0,
-   "chain_depth": 34,
+   "chain_depth": 36,
    "serial_overrun": true
   },
   {
@@ -29510,7 +29755,7 @@
    },
    "note": "Hollow plastic ware blow-moulded.",
    "earliest_feasible_year": 369.5,
-   "serial_line_finish_year": 3980.0,
+   "serial_line_finish_year": 3977.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -29622,7 +29867,7 @@
    },
    "note": "Relay registers hold binary numbers.",
    "earliest_feasible_year": 364.5,
-   "serial_line_finish_year": 3982.0,
+   "serial_line_finish_year": 3979.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -29652,7 +29897,7 @@
    },
    "note": "Structural adhesives designed for joints.",
    "earliest_feasible_year": 316.5,
-   "serial_line_finish_year": 3984.0,
+   "serial_line_finish_year": 3981.0,
    "chain_depth": 30,
    "serial_overrun": true
   },
@@ -29681,7 +29926,7 @@
    },
    "note": "Catalysts lift the fuel yield of crude.",
    "earliest_feasible_year": 323.5,
-   "serial_line_finish_year": 3989.0,
+   "serial_line_finish_year": 3986.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -29710,7 +29955,7 @@
    },
    "note": "Water pumped up at night, released at the peak.",
    "earliest_feasible_year": 387.5,
-   "serial_line_finish_year": 3841.0,
+   "serial_line_finish_year": 3852.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -29739,9 +29984,9 @@
     "contact_required": false
    },
    "note": "Gas-turbine jet engines.",
-   "earliest_feasible_year": 358.5,
-   "serial_line_finish_year": 3999.0,
-   "chain_depth": 33,
+   "earliest_feasible_year": 381.5,
+   "serial_line_finish_year": 3996.0,
+   "chain_depth": 35,
    "serial_overrun": true
   },
   {
@@ -29767,9 +30012,9 @@
     "contact_required": false
    },
    "note": "Children evacuated from bombed towns",
-   "earliest_feasible_year": 371.5,
+   "earliest_feasible_year": 394.5,
    "serial_line_finish_year": 3997.0,
-   "chain_depth": 35,
+   "chain_depth": 37,
    "serial_overrun": true
   },
   {
@@ -29797,7 +30042,7 @@
    },
    "note": "Cloth waterproofed with synthetic coatings.",
    "earliest_feasible_year": 318.5,
-   "serial_line_finish_year": 4001.0,
+   "serial_line_finish_year": 3998.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -29812,7 +30057,8 @@
    "research_years": 6.0,
    "key_threshold": false,
    "requires_all": [
-    "matrix_algebra"
+    "differential_calculus",
+    "numerical_root_finding"
    ],
    "requires_any": [],
    "precedents": [
@@ -29826,9 +30072,9 @@
     "contact_required": false
    },
    "note": "Linear programming for planning and logistics.",
-   "earliest_feasible_year": 27.0,
+   "earliest_feasible_year": 184.5,
    "serial_line_finish_year": 3983.0,
-   "chain_depth": 2,
+   "chain_depth": 17,
    "serial_overrun": true
   },
   {
@@ -29853,9 +30099,9 @@
     "contact_required": false
    },
    "note": "Tall buildings designed for measured wind.",
-   "earliest_feasible_year": 335.5,
-   "serial_line_finish_year": 3844.0,
-   "chain_depth": 31,
+   "earliest_feasible_year": 358.5,
+   "serial_line_finish_year": 3855.0,
+   "chain_depth": 33,
    "serial_overrun": true
   },
   {
@@ -29910,9 +30156,9 @@
     "contact_required": false
    },
    "note": "Pressurized cabins fly above the weather.",
-   "earliest_feasible_year": 376.5,
+   "earliest_feasible_year": 399.5,
    "serial_line_finish_year": 3971.0,
-   "chain_depth": 36,
+   "chain_depth": 37,
    "serial_overrun": true
   },
   {
@@ -29966,7 +30212,7 @@
    },
    "note": "Ionic chain polymerization.",
    "earliest_feasible_year": 318.5,
-   "serial_line_finish_year": 4003.0,
+   "serial_line_finish_year": 4000.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -29993,7 +30239,7 @@
    },
    "note": "Glued laminated timber beams and arches.",
    "earliest_feasible_year": 320.5,
-   "serial_line_finish_year": 3988.0,
+   "serial_line_finish_year": 3985.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -30020,7 +30266,7 @@
    },
    "note": "Garment seams sealed against water.",
    "earliest_feasible_year": 320.5,
-   "serial_line_finish_year": 4005.0,
+   "serial_line_finish_year": 4002.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -30046,9 +30292,9 @@
     "contact_required": false
    },
    "note": "Airborne operations.",
-   "earliest_feasible_year": 358.5,
+   "earliest_feasible_year": 381.5,
    "serial_line_finish_year": 4026.0,
-   "chain_depth": 33,
+   "chain_depth": 35,
    "serial_overrun": true
   },
   {
@@ -30074,7 +30320,7 @@
    },
    "note": "Foam cell size controlled in plastics.",
    "earliest_feasible_year": 328.5,
-   "serial_line_finish_year": 4007.0,
+   "serial_line_finish_year": 4004.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -30159,7 +30405,7 @@
    },
    "note": "Polymer chain length controlled.",
    "earliest_feasible_year": 320.5,
-   "serial_line_finish_year": 4009.0,
+   "serial_line_finish_year": 4006.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -30221,7 +30467,7 @@
    },
    "note": "Reaction heat managed in polymer reactors.",
    "earliest_feasible_year": 321.5,
-   "serial_line_finish_year": 4011.0,
+   "serial_line_finish_year": 4008.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -30278,7 +30524,7 @@
    },
    "note": "Solvents recovered in polymer plants.",
    "earliest_feasible_year": 322.5,
-   "serial_line_finish_year": 4013.0,
+   "serial_line_finish_year": 4010.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -30366,7 +30612,7 @@
    },
    "note": "Controlled reactors with cooling and containment.",
    "earliest_feasible_year": 438.5,
-   "serial_line_finish_year": 4000.0,
+   "serial_line_finish_year": 3997.0,
    "chain_depth": 41,
    "serial_overrun": true
   },
@@ -30420,7 +30666,7 @@
    },
    "note": "Hard dies sunk by electric spark.",
    "earliest_feasible_year": 346.5,
-   "serial_line_finish_year": 4015.0,
+   "serial_line_finish_year": 4012.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -30652,7 +30898,7 @@
    },
    "note": "Silicon purified through chlorosilanes.",
    "earliest_feasible_year": 377.5,
-   "serial_line_finish_year": 4018.0,
+   "serial_line_finish_year": 4015.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -30709,9 +30955,9 @@
     "contact_required": false
    },
    "note": "Realms agree civil aviation and air rights.",
-   "earliest_feasible_year": 366.5,
+   "earliest_feasible_year": 389.5,
    "serial_line_finish_year": 3985.0,
-   "chain_depth": 34,
+   "chain_depth": 36,
    "serial_overrun": true
   },
   {
@@ -30736,9 +30982,9 @@
     "contact_required": false
    },
    "note": "Guided weapons.",
-   "earliest_feasible_year": 370.5,
+   "earliest_feasible_year": 393.5,
    "serial_line_finish_year": 4072.0,
-   "chain_depth": 34,
+   "chain_depth": 36,
    "serial_overrun": true
   },
   {
@@ -30764,7 +31010,7 @@
    },
    "note": "Fluorescent tubes light offices and works.",
    "earliest_feasible_year": 375.5,
-   "serial_line_finish_year": 4002.0,
+   "serial_line_finish_year": 3999.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -30791,7 +31037,7 @@
     "contact_required": false
    },
    "note": "Long-range rockets bombard distant targets.",
-   "earliest_feasible_year": 381.5,
+   "earliest_feasible_year": 401.5,
    "serial_line_finish_year": 4080.0,
    "chain_depth": 37,
    "serial_overrun": true
@@ -30820,7 +31066,7 @@
    },
    "note": "Single crystals pulled from the melt.",
    "earliest_feasible_year": 396.5,
-   "serial_line_finish_year": 4022.0,
+   "serial_line_finish_year": 4019.0,
    "chain_depth": 38,
    "serial_overrun": true
   },
@@ -31054,7 +31300,7 @@
    },
    "note": "Tubes bent on rotary draw benders.",
    "earliest_feasible_year": 208.5,
-   "serial_line_finish_year": 4024.0,
+   "serial_line_finish_year": 4021.0,
    "chain_depth": 24,
    "serial_overrun": true
   },
@@ -31261,7 +31507,7 @@
    },
    "note": "Molecules identified by nuclear magnetic resonance.",
    "earliest_feasible_year": 397.5,
-   "serial_line_finish_year": 4027.0,
+   "serial_line_finish_year": 4024.0,
    "chain_depth": 38,
    "serial_overrun": true
   },
@@ -31289,7 +31535,7 @@
    },
    "note": "Welded frames replace site riveting.",
    "earliest_feasible_year": 400.5,
-   "serial_line_finish_year": 4005.0,
+   "serial_line_finish_year": 4002.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -31403,9 +31649,9 @@
     "contact_required": false
    },
    "note": "One ministry over army, navy and air.",
-   "earliest_feasible_year": 366.5,
+   "earliest_feasible_year": 389.5,
    "serial_line_finish_year": 4108.0,
-   "chain_depth": 34,
+   "chain_depth": 36,
    "serial_overrun": true
   },
   {
@@ -31699,7 +31945,7 @@
    },
    "note": "Valve circuits add binary numbers and keep the program in the same store as the data.",
    "earliest_feasible_year": 409.5,
-   "serial_line_finish_year": 4025.0,
+   "serial_line_finish_year": 4105.0,
    "chain_depth": 39,
    "serial_overrun": true
   },
@@ -31727,7 +31973,7 @@
    },
    "note": "Brittle materials cut by ultrasonic abrasive.",
    "earliest_feasible_year": 208.5,
-   "serial_line_finish_year": 4029.0,
+   "serial_line_finish_year": 4026.0,
    "chain_depth": 24,
    "serial_overrun": true
   },
@@ -31754,9 +32000,9 @@
     "contact_required": false
    },
    "note": "A standing alliance with a joint command.",
-   "earliest_feasible_year": 374.5,
+   "earliest_feasible_year": 397.5,
    "serial_line_finish_year": 4116.0,
-   "chain_depth": 35,
+   "chain_depth": 37,
    "serial_overrun": true
   },
   {
@@ -31787,7 +32033,7 @@
    },
    "note": "Plastic sheet thermoformed.",
    "earliest_feasible_year": 326.5,
-   "serial_line_finish_year": 4031.0,
+   "serial_line_finish_year": 4028.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -31816,7 +32062,7 @@
    },
    "note": "Tower cranes climb with the frame.",
    "earliest_feasible_year": 367.5,
-   "serial_line_finish_year": 4008.0,
+   "serial_line_finish_year": 4005.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -31845,7 +32091,7 @@
    },
    "note": "Fabrics engineered to move sweat.",
    "earliest_feasible_year": 316.5,
-   "serial_line_finish_year": 4033.0,
+   "serial_line_finish_year": 4030.0,
    "chain_depth": 30,
    "serial_overrun": true
   },
@@ -31874,7 +32120,7 @@
    },
    "note": "Cine cameras on the microscope.",
    "earliest_feasible_year": 353.5,
-   "serial_line_finish_year": 4030.0,
+   "serial_line_finish_year": 4020.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -31961,7 +32207,7 @@
    },
    "note": "Steel cast continuously into slabs and billets.",
    "earliest_feasible_year": 192.5,
-   "serial_line_finish_year": 4037.0,
+   "serial_line_finish_year": 4034.0,
    "chain_depth": 22,
    "serial_overrun": true
   },
@@ -31987,7 +32233,7 @@
    },
    "note": "Damp-proof courses break capillary rise.",
    "earliest_feasible_year": 86.5,
-   "serial_line_finish_year": 4011.0,
+   "serial_line_finish_year": 4008.0,
    "chain_depth": 13,
    "serial_overrun": true
   },
@@ -32194,9 +32440,9 @@
     "contact_required": false
    },
    "note": "Swept-wing jets with radar sights.",
-   "earliest_feasible_year": 366.5,
+   "earliest_feasible_year": 389.5,
    "serial_line_finish_year": 4124.0,
-   "chain_depth": 34,
+   "chain_depth": 36,
    "serial_overrun": true
   },
   {
@@ -32210,8 +32456,8 @@
    "research_years": 2.0,
    "key_threshold": false,
    "requires_all": [
-    "decimal_earth_measures",
-    "precision_machinery"
+    "precision_machinery",
+    "decimal_earth_measures"
    ],
    "requires_any": [],
    "precedents": [
@@ -32225,7 +32471,7 @@
    },
    "note": "Machine-tool stiffness measured and improved.",
    "earliest_feasible_year": 298.5,
-   "serial_line_finish_year": 4039.0,
+   "serial_line_finish_year": 4036.0,
    "chain_depth": 27,
    "serial_overrun": true
   },
@@ -32257,7 +32503,7 @@
    },
    "note": "Sewers tested for infiltration.",
    "earliest_feasible_year": 17.5,
-   "serial_line_finish_year": 4014.0,
+   "serial_line_finish_year": 4011.0,
    "chain_depth": 6,
    "serial_overrun": true
   },
@@ -32288,7 +32534,7 @@
    },
    "note": "Forecast computed on electronic machines",
    "earliest_feasible_year": 419.5,
-   "serial_line_finish_year": 4035.0,
+   "serial_line_finish_year": 4142.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -32316,9 +32562,9 @@
     "contact_required": false
    },
    "note": "Doped layers form switching junctions.",
-   "earliest_feasible_year": 432.5,
-   "serial_line_finish_year": 4048.0,
-   "chain_depth": 41,
+   "earliest_feasible_year": 414.5,
+   "serial_line_finish_year": 4038.0,
+   "chain_depth": 40,
    "serial_overrun": true
   },
   {
@@ -32332,13 +32578,13 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "band_theory",
     "single_crystal_growth"
    ],
    "requires_any": [],
    "precedents": [
     "crystal_radio_detection",
-    "chlorosilane_purification"
+    "chlorosilane_purification",
+    "band_theory"
    ],
    "conditions": {
     "resources_known": [],
@@ -32346,9 +32592,9 @@
     "contact_required": false
    },
    "note": "Pure crystals doped to set conduction.",
-   "earliest_feasible_year": 422.5,
-   "serial_line_finish_year": 4038.0,
-   "chain_depth": 40,
+   "earliest_feasible_year": 404.5,
+   "serial_line_finish_year": 4028.0,
+   "chain_depth": 39,
    "serial_overrun": true
   },
   {
@@ -32378,7 +32624,7 @@
    },
    "note": "Ring-opening polymerization.",
    "earliest_feasible_year": 320.5,
-   "serial_line_finish_year": 4041.0,
+   "serial_line_finish_year": 4038.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -32409,7 +32655,7 @@
    },
    "note": "Timber designed for moisture movement.",
    "earliest_feasible_year": 86.5,
-   "serial_line_finish_year": 4017.0,
+   "serial_line_finish_year": 4014.0,
    "chain_depth": 13,
    "serial_overrun": true
   },
@@ -32496,9 +32742,9 @@
     "contact_required": false
    },
    "note": "Junction transistors made in quantity.",
-   "earliest_feasible_year": 440.5,
-   "serial_line_finish_year": 4056.0,
-   "chain_depth": 42,
+   "earliest_feasible_year": 422.5,
+   "serial_line_finish_year": 4046.0,
+   "chain_depth": 41,
    "serial_overrun": true
   },
   {
@@ -32524,7 +32770,7 @@
    },
    "note": "Cores and silos slip-formed without stopping.",
    "earliest_feasible_year": 225.5,
-   "serial_line_finish_year": 4020.0,
+   "serial_line_finish_year": 4017.0,
    "chain_depth": 26,
    "serial_overrun": true
   },
@@ -32552,7 +32798,7 @@
    },
    "note": "Memory address decoding circuits.",
    "earliest_feasible_year": 364.5,
-   "serial_line_finish_year": 4058.0,
+   "serial_line_finish_year": 4048.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -32581,7 +32827,7 @@
    },
    "note": "Pure oxygen blown on molten iron makes steel.",
    "earliest_feasible_year": 381.5,
-   "serial_line_finish_year": 4066.0,
+   "serial_line_finish_year": 4056.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -32611,7 +32857,7 @@
    },
    "note": "Glass walls hung on the frame.",
    "earliest_feasible_year": 226.5,
-   "serial_line_finish_year": 4024.0,
+   "serial_line_finish_year": 4021.0,
    "chain_depth": 26,
    "serial_overrun": true
   },
@@ -32726,9 +32972,9 @@
     "contact_required": false
    },
    "note": "Jet airliners.",
-   "earliest_feasible_year": 388.5,
+   "earliest_feasible_year": 411.5,
    "serial_line_finish_year": 4013.0,
-   "chain_depth": 37,
+   "chain_depth": 38,
    "serial_overrun": true
   },
   {
@@ -32755,7 +33001,7 @@
    },
    "note": "Killing smog over a capital",
    "earliest_feasible_year": 107.5,
-   "serial_line_finish_year": 4040.0,
+   "serial_line_finish_year": 3967.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -32811,7 +33057,7 @@
    },
    "note": "Addressable read-write memory.",
    "earliest_feasible_year": 367.5,
-   "serial_line_finish_year": 4069.0,
+   "serial_line_finish_year": 4059.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -32840,9 +33086,9 @@
     "contact_required": false
    },
    "note": "Transistor amplifiers.",
-   "earliest_feasible_year": 442.5,
-   "serial_line_finish_year": 4071.0,
-   "chain_depth": 43,
+   "earliest_feasible_year": 424.5,
+   "serial_line_finish_year": 4061.0,
+   "chain_depth": 42,
    "serial_overrun": true
   },
   {
@@ -32871,7 +33117,7 @@
    },
    "note": "X-ray patterns and heredity yield the double helix.",
    "earliest_feasible_year": 402.5,
-   "serial_line_finish_year": 4058.0,
+   "serial_line_finish_year": 4048.0,
    "chain_depth": 38,
    "serial_overrun": true
   },
@@ -32931,7 +33177,7 @@
    },
    "note": "Catalysts that order polymer chains.",
    "earliest_feasible_year": 321.5,
-   "serial_line_finish_year": 4074.0,
+   "serial_line_finish_year": 4064.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -33077,9 +33323,9 @@
     "contact_required": false
    },
    "note": "Junction cells turn light into current.",
-   "earliest_feasible_year": 438.5,
-   "serial_line_finish_year": 4064.0,
-   "chain_depth": 42,
+   "earliest_feasible_year": 420.5,
+   "serial_line_finish_year": 4054.0,
+   "chain_depth": 41,
    "serial_overrun": true
   },
   {
@@ -33163,9 +33409,9 @@
     "contact_required": false
    },
    "note": "Transistor inverters.",
-   "earliest_feasible_year": 442.5,
-   "serial_line_finish_year": 4076.0,
-   "chain_depth": 43,
+   "earliest_feasible_year": 424.5,
+   "serial_line_finish_year": 4066.0,
+   "chain_depth": 42,
    "serial_overrun": true
   },
   {
@@ -33221,7 +33467,7 @@
    },
    "note": "Catches limited to a sustainable yield",
    "earliest_feasible_year": 367.5,
-   "serial_line_finish_year": 4046.0,
+   "serial_line_finish_year": 3973.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -33273,9 +33519,9 @@
     "contact_required": false
    },
    "note": "Bistable circuits hold one bit.",
-   "earliest_feasible_year": 444.5,
-   "serial_line_finish_year": 4078.0,
-   "chain_depth": 44,
+   "earliest_feasible_year": 426.5,
+   "serial_line_finish_year": 4068.0,
+   "chain_depth": 43,
    "serial_overrun": true
   },
   {
@@ -33304,7 +33550,7 @@
    },
    "note": "Machine steps sequenced by microinstructions.",
    "earliest_feasible_year": 371.5,
-   "serial_line_finish_year": 4070.0,
+   "serial_line_finish_year": 4111.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -33333,7 +33579,7 @@
    },
    "note": "Sampled speech sent as coded pulses.",
    "earliest_feasible_year": 427.5,
-   "serial_line_finish_year": 4076.0,
+   "serial_line_finish_year": 4060.0,
    "chain_depth": 42,
    "serial_overrun": true
   },
@@ -33417,9 +33663,9 @@
     "contact_required": false
    },
    "note": "Binary counters.",
-   "earliest_feasible_year": 446.5,
-   "serial_line_finish_year": 4080.0,
-   "chain_depth": 45,
+   "earliest_feasible_year": 428.5,
+   "serial_line_finish_year": 4070.0,
+   "chain_depth": 44,
    "serial_overrun": true
   },
   {
@@ -33443,9 +33689,9 @@
     "contact_required": false
    },
    "note": "Shift registers.",
-   "earliest_feasible_year": 446.5,
-   "serial_line_finish_year": 4082.0,
-   "chain_depth": 45,
+   "earliest_feasible_year": 428.5,
+   "serial_line_finish_year": 4072.0,
+   "chain_depth": 44,
    "serial_overrun": true
   },
   {
@@ -33473,7 +33719,7 @@
    },
    "note": "Nuclear stations feed the grid.",
    "earliest_feasible_year": 448.5,
-   "serial_line_finish_year": 4034.0,
+   "serial_line_finish_year": 4031.0,
    "chain_depth": 42,
    "serial_overrun": true
   },
@@ -33645,9 +33891,9 @@
     "contact_required": false
    },
    "note": "Parallel register banks.",
-   "earliest_feasible_year": 446.5,
-   "serial_line_finish_year": 4084.0,
-   "chain_depth": 45,
+   "earliest_feasible_year": 428.5,
+   "serial_line_finish_year": 4074.0,
+   "chain_depth": 44,
    "serial_overrun": true
   },
   {
@@ -33672,9 +33918,9 @@
     "contact_required": false
    },
    "note": "Instruction registers.",
-   "earliest_feasible_year": 448.5,
-   "serial_line_finish_year": 4086.0,
-   "chain_depth": 46,
+   "earliest_feasible_year": 430.5,
+   "serial_line_finish_year": 4076.0,
+   "chain_depth": 45,
    "serial_overrun": true
   },
   {
@@ -33728,9 +33974,9 @@
     "contact_required": false
    },
    "note": "Conditional branch circuits.",
-   "earliest_feasible_year": 444.5,
-   "serial_line_finish_year": 4088.0,
-   "chain_depth": 44,
+   "earliest_feasible_year": 426.5,
+   "serial_line_finish_year": 4097.0,
+   "chain_depth": 43,
    "serial_overrun": true
   },
   {
@@ -33756,7 +34002,7 @@
    },
    "note": "Silicon ingots sawn into wafers.",
    "earliest_feasible_year": 398.5,
-   "serial_line_finish_year": 4090.0,
+   "serial_line_finish_year": 4078.0,
    "chain_depth": 39,
    "serial_overrun": true
   },
@@ -33785,7 +34031,7 @@
    },
    "note": "Decks hung straight from towers.",
    "earliest_feasible_year": 232.5,
-   "serial_line_finish_year": 4038.0,
+   "serial_line_finish_year": 4035.0,
    "chain_depth": 27,
    "serial_overrun": true
   },
@@ -33925,9 +34171,9 @@
     "contact_required": false
    },
    "note": "Program counters.",
-   "earliest_feasible_year": 448.5,
-   "serial_line_finish_year": 4092.0,
-   "chain_depth": 46,
+   "earliest_feasible_year": 430.5,
+   "serial_line_finish_year": 4099.0,
+   "chain_depth": 45,
    "serial_overrun": true
   },
   {
@@ -34012,7 +34258,7 @@
     "contact_required": false
    },
    "note": "A many-stage rocket puts a satellite in orbit.",
-   "earliest_feasible_year": 393.5,
+   "earliest_feasible_year": 413.5,
    "serial_line_finish_year": 4108.0,
    "chain_depth": 38,
    "serial_overrun": true
@@ -34043,7 +34289,7 @@
    },
    "note": "Compilers translate formulas to machine code.",
    "earliest_feasible_year": 375.5,
-   "serial_line_finish_year": 4084.0,
+   "serial_line_finish_year": 4068.0,
    "chain_depth": 38,
    "serial_overrun": true
   },
@@ -34101,7 +34347,7 @@
    },
    "note": "Thin metals joined by ultrasonic welding.",
    "earliest_feasible_year": 208.5,
-   "serial_line_finish_year": 4094.0,
+   "serial_line_finish_year": 4080.0,
    "chain_depth": 24,
    "serial_overrun": true
   },
@@ -34189,7 +34435,7 @@
    },
    "note": "Polymer tacticity characterised.",
    "earliest_feasible_year": 340.5,
-   "serial_line_finish_year": 4096.0,
+   "serial_line_finish_year": 4082.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -34216,7 +34462,7 @@
    },
    "note": "Plastics tested against weather.",
    "earliest_feasible_year": 328.5,
-   "serial_line_finish_year": 4098.0,
+   "serial_line_finish_year": 4084.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -34307,7 +34553,7 @@
    },
    "note": "Polymers sorted by size-exclusion chromatography.",
    "earliest_feasible_year": 322.5,
-   "serial_line_finish_year": 4100.0,
+   "serial_line_finish_year": 4086.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -34334,7 +34580,7 @@
    },
    "note": "Metal cast into lost-foam patterns.",
    "earliest_feasible_year": 330.5,
-   "serial_line_finish_year": 4102.0,
+   "serial_line_finish_year": 4088.0,
    "chain_depth": 34,
    "serial_overrun": true
   },
@@ -34423,9 +34669,9 @@
     "contact_required": false
    },
    "note": "Silicon rectifiers.",
-   "earliest_feasible_year": 434.5,
-   "serial_line_finish_year": 4104.0,
-   "chain_depth": 42,
+   "earliest_feasible_year": 416.5,
+   "serial_line_finish_year": 4090.0,
+   "chain_depth": 41,
    "serial_overrun": true
   },
   {
@@ -34450,9 +34696,9 @@
     "contact_required": false
    },
    "note": "Diode logic gates.",
-   "earliest_feasible_year": 436.5,
-   "serial_line_finish_year": 4106.0,
-   "chain_depth": 43,
+   "earliest_feasible_year": 418.5,
+   "serial_line_finish_year": 4092.0,
+   "chain_depth": 42,
    "serial_overrun": true
   },
   {
@@ -34482,9 +34728,9 @@
     "contact_required": false
    },
    "note": "Electronic machine control.",
-   "earliest_feasible_year": 444.5,
-   "serial_line_finish_year": 4108.0,
-   "chain_depth": 44,
+   "earliest_feasible_year": 426.5,
+   "serial_line_finish_year": 4101.0,
+   "chain_depth": 43,
    "serial_overrun": true
   },
   {
@@ -34512,7 +34758,7 @@
    },
    "note": "Arithmetic and logic unit designs.",
    "earliest_feasible_year": 377.5,
-   "serial_line_finish_year": 4090.0,
+   "serial_line_finish_year": 4117.0,
    "chain_depth": 38,
    "serial_overrun": true
   },
@@ -34541,7 +34787,7 @@
    },
    "note": "Lost blocks requested again.",
    "earliest_feasible_year": 436.5,
-   "serial_line_finish_year": 4126.0,
+   "serial_line_finish_year": 4143.0,
    "chain_depth": 44,
    "serial_overrun": true
   },
@@ -34572,7 +34818,7 @@
    },
    "note": "Data tones over telephone lines.",
    "earliest_feasible_year": 417.5,
-   "serial_line_finish_year": 4096.0,
+   "serial_line_finish_year": 4123.0,
    "chain_depth": 41,
    "serial_overrun": true
   },
@@ -34600,9 +34846,9 @@
     "contact_required": false
    },
    "note": "Diode matrices hold the control store.",
-   "earliest_feasible_year": 441.5,
-   "serial_line_finish_year": 4111.0,
-   "chain_depth": 44,
+   "earliest_feasible_year": 423.5,
+   "serial_line_finish_year": 4128.0,
+   "chain_depth": 43,
    "serial_overrun": true
   },
   {
@@ -34629,7 +34875,7 @@
    },
    "note": "Parity and Hamming codes.",
    "earliest_feasible_year": 426.5,
-   "serial_line_finish_year": 4116.0,
+   "serial_line_finish_year": 4133.0,
    "chain_depth": 42,
    "serial_overrun": true
   },
@@ -34657,7 +34903,7 @@
    },
    "note": "Headers and checks frame messages.",
    "earliest_feasible_year": 431.5,
-   "serial_line_finish_year": 4121.0,
+   "serial_line_finish_year": 4138.0,
    "chain_depth": 43,
    "serial_overrun": true
   },
@@ -34716,9 +34962,9 @@
     "contact_required": false
    },
    "note": "Package holidays by chartered airliner.",
-   "earliest_feasible_year": 381.5,
+   "earliest_feasible_year": 404.5,
    "serial_line_finish_year": 3984.0,
-   "chain_depth": 37,
+   "chain_depth": 38,
    "serial_overrun": true
   },
   {
@@ -34803,9 +35049,9 @@
     "contact_required": false
    },
    "note": "Many transistors made together on one chip.",
-   "earliest_feasible_year": 450.5,
-   "serial_line_finish_year": 4118.0,
-   "chain_depth": 43,
+   "earliest_feasible_year": 432.5,
+   "serial_line_finish_year": 4111.0,
+   "chain_depth": 42,
    "serial_overrun": true
   },
   {
@@ -34976,8 +35222,8 @@
     "contact_required": false
    },
    "note": "Weather satellites",
-   "earliest_feasible_year": 402.5,
-   "serial_line_finish_year": 4140.0,
+   "earliest_feasible_year": 421.5,
+   "serial_line_finish_year": 4150.0,
    "chain_depth": 39,
    "serial_overrun": true
   },
@@ -35004,7 +35250,7 @@
     "contact_required": false
    },
    "note": "Satellites photograph from orbit.",
-   "earliest_feasible_year": 405.5,
+   "earliest_feasible_year": 425.5,
    "serial_line_finish_year": 4204.0,
    "chain_depth": 39,
    "serial_overrun": true
@@ -35033,9 +35279,9 @@
     "contact_required": false
    },
    "note": "Machine tools run from punched numerical instructions.",
-   "earliest_feasible_year": 452.5,
-   "serial_line_finish_year": 4126.0,
-   "chain_depth": 45,
+   "earliest_feasible_year": 434.5,
+   "serial_line_finish_year": 4119.0,
+   "chain_depth": 44,
    "serial_overrun": true
   },
   {
@@ -35060,9 +35306,9 @@
     "contact_required": false
    },
    "note": "Rainscreen walls vented behind the cladding.",
-   "earliest_feasible_year": 338.5,
-   "serial_line_finish_year": 4041.0,
-   "chain_depth": 32,
+   "earliest_feasible_year": 361.5,
+   "serial_line_finish_year": 4038.0,
+   "chain_depth": 34,
    "serial_overrun": true
   },
   {
@@ -35210,7 +35456,7 @@
    },
    "note": "Plate glass floated flat on molten tin.",
    "earliest_feasible_year": 118.5,
-   "serial_line_finish_year": 4129.0,
+   "serial_line_finish_year": 4122.0,
    "chain_depth": 17,
    "serial_overrun": true
   },
@@ -35320,7 +35566,7 @@
     "contact_required": false
    },
    "note": "A crewed capsule orbits and returns.",
-   "earliest_feasible_year": 401.5,
+   "earliest_feasible_year": 421.5,
    "serial_line_finish_year": 4151.0,
    "chain_depth": 39,
    "serial_overrun": true
@@ -35347,9 +35593,9 @@
     "contact_required": false
    },
    "note": "Naval missiles.",
-   "earliest_feasible_year": 378.5,
+   "earliest_feasible_year": 401.5,
    "serial_line_finish_year": 4232.0,
-   "chain_depth": 35,
+   "chain_depth": 37,
    "serial_overrun": true
   },
   {
@@ -35376,9 +35622,9 @@
     "contact_required": false
    },
    "note": "Hardwired sequence controllers.",
-   "earliest_feasible_year": 448.5,
-   "serial_line_finish_year": 4131.0,
-   "chain_depth": 46,
+   "earliest_feasible_year": 430.5,
+   "serial_line_finish_year": 4124.0,
+   "chain_depth": 45,
    "serial_overrun": true
   },
   {
@@ -35406,9 +35652,9 @@
     "contact_required": false
    },
    "note": "Programmable arms weld and lift on the line.",
-   "earliest_feasible_year": 458.5,
-   "serial_line_finish_year": 4137.0,
-   "chain_depth": 47,
+   "earliest_feasible_year": 440.5,
+   "serial_line_finish_year": 4130.0,
+   "chain_depth": 46,
    "serial_overrun": true
   },
   {
@@ -35471,9 +35717,9 @@
     "contact_required": false
    },
    "note": "Transistor relays in orbit powered by solar cells.",
-   "earliest_feasible_year": 452.5,
-   "serial_line_finish_year": 4136.0,
-   "chain_depth": 44,
+   "earliest_feasible_year": 434.5,
+   "serial_line_finish_year": 4153.0,
+   "chain_depth": 43,
    "serial_overrun": true
   },
   {
@@ -35498,9 +35744,9 @@
     "contact_required": false
    },
    "note": "Gear power skiving.",
-   "earliest_feasible_year": 454.5,
-   "serial_line_finish_year": 4139.0,
-   "chain_depth": 46,
+   "earliest_feasible_year": 436.5,
+   "serial_line_finish_year": 4132.0,
+   "chain_depth": 45,
    "serial_overrun": true
   },
   {
@@ -35528,7 +35774,7 @@
    },
    "note": "Blocks assembled from factory-cast panels.",
    "earliest_feasible_year": 331.5,
-   "serial_line_finish_year": 4045.0,
+   "serial_line_finish_year": 4042.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -35617,7 +35863,7 @@
    },
    "note": "Persistent pesticides poison food chains",
    "earliest_feasible_year": 382.5,
-   "serial_line_finish_year": 4148.0,
+   "serial_line_finish_year": 4158.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -35646,7 +35892,7 @@
    },
    "note": "Machines monitored against a condition baseline.",
    "earliest_feasible_year": 275.5,
-   "serial_line_finish_year": 4141.0,
+   "serial_line_finish_year": 4134.0,
    "chain_depth": 28,
    "serial_overrun": true
   },
@@ -35676,7 +35922,7 @@
    },
    "note": "Catalog gates",
    "earliest_feasible_year": 279.5,
-   "serial_line_finish_year": 4154.0,
+   "serial_line_finish_year": 4164.0,
    "chain_depth": 28,
    "serial_overrun": true
   },
@@ -35705,7 +35951,7 @@
    },
    "note": "Many new universities for school leavers.",
    "earliest_feasible_year": 347.5,
-   "serial_line_finish_year": 4144.0,
+   "serial_line_finish_year": 4161.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -35821,7 +36067,7 @@
    },
    "note": "Metal fracture toughness tested.",
    "earliest_feasible_year": 334.5,
-   "serial_line_finish_year": 4143.0,
+   "serial_line_finish_year": 4136.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -35850,7 +36096,7 @@
    },
    "note": "Plants make fresh water from the sea.",
    "earliest_feasible_year": 333.5,
-   "serial_line_finish_year": 4050.0,
+   "serial_line_finish_year": 4047.0,
    "chain_depth": 34,
    "serial_overrun": true
   },
@@ -35966,7 +36212,7 @@
    },
    "note": "Catalog gates",
    "earliest_feasible_year": 285.5,
-   "serial_line_finish_year": 4160.0,
+   "serial_line_finish_year": 4170.0,
    "chain_depth": 29,
    "serial_overrun": true
   },
@@ -36022,9 +36268,9 @@
     "contact_required": false
    },
    "note": "Silicon solar cells fabricated.",
-   "earliest_feasible_year": 441.5,
-   "serial_line_finish_year": 4146.0,
-   "chain_depth": 43,
+   "earliest_feasible_year": 423.5,
+   "serial_line_finish_year": 4139.0,
+   "chain_depth": 42,
    "serial_overrun": true
   },
   {
@@ -36053,7 +36299,7 @@
    },
    "note": "Catalog gates",
    "earliest_feasible_year": 341.5,
-   "serial_line_finish_year": 4166.0,
+   "serial_line_finish_year": 4176.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -36111,9 +36357,9 @@
     "contact_required": false
    },
    "note": "Retraining for workers displaced by robots (moved to 2835).",
-   "earliest_feasible_year": 462.5,
-   "serial_line_finish_year": 4141.0,
-   "chain_depth": 48,
+   "earliest_feasible_year": 444.5,
+   "serial_line_finish_year": 4134.0,
+   "chain_depth": 47,
    "serial_overrun": true
   },
   {
@@ -36142,7 +36388,7 @@
    },
    "note": "Equal pay by law.",
    "earliest_feasible_year": 387.5,
-   "serial_line_finish_year": 4147.0,
+   "serial_line_finish_year": 4140.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -36258,7 +36504,7 @@
    },
    "note": "Copolymer sequences controlled.",
    "earliest_feasible_year": 322.5,
-   "serial_line_finish_year": 4148.0,
+   "serial_line_finish_year": 4141.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -36287,7 +36533,7 @@
    },
    "note": "Rotary machines cut whole tunnel bores.",
    "earliest_feasible_year": 381.5,
-   "serial_line_finish_year": 4055.0,
+   "serial_line_finish_year": 4052.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -36315,9 +36561,9 @@
     "contact_required": false
    },
    "note": "Microprogrammed control units in production machines.",
-   "earliest_feasible_year": 447.5,
-   "serial_line_finish_year": 4150.0,
-   "chain_depth": 45,
+   "earliest_feasible_year": 429.5,
+   "serial_line_finish_year": 4167.0,
+   "chain_depth": 44,
    "serial_overrun": true
   },
   {
@@ -36377,9 +36623,9 @@
     "contact_required": false
    },
    "note": "Stored-program controllers run machines.",
-   "earliest_feasible_year": 454.5,
-   "serial_line_finish_year": 4154.0,
-   "chain_depth": 47,
+   "earliest_feasible_year": 436.5,
+   "serial_line_finish_year": 4147.0,
+   "chain_depth": 46,
    "serial_overrun": true
   },
   {
@@ -36530,7 +36776,7 @@
    },
    "note": "Catalog gates",
    "earliest_feasible_year": 128.5,
-   "serial_line_finish_year": 4172.0,
+   "serial_line_finish_year": 4182.0,
    "chain_depth": 17,
    "serial_overrun": true
   },
@@ -36585,9 +36831,9 @@
     "contact_required": false
    },
    "note": "Helicopter air assault.",
-   "earliest_feasible_year": 366.5,
+   "earliest_feasible_year": 389.5,
    "serial_line_finish_year": 4255.0,
-   "chain_depth": 34,
+   "chain_depth": 36,
    "serial_overrun": true
   },
   {
@@ -36644,7 +36890,7 @@
    },
    "note": "Carbon fibre in resin gives light stiff parts.",
    "earliest_feasible_year": 324.5,
-   "serial_line_finish_year": 4159.0,
+   "serial_line_finish_year": 4152.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -36703,7 +36949,7 @@
    },
    "note": "Sea-floor spreading",
    "earliest_feasible_year": 378.5,
-   "serial_line_finish_year": 4182.0,
+   "serial_line_finish_year": 4192.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -36732,7 +36978,7 @@
    },
    "note": "Endangered species listed by law",
    "earliest_feasible_year": 336.5,
-   "serial_line_finish_year": 4190.0,
+   "serial_line_finish_year": 4200.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -36758,9 +37004,9 @@
     "contact_required": false
    },
    "note": "One live broadcast shared worldwide.",
-   "earliest_feasible_year": 457.5,
-   "serial_line_finish_year": 4141.0,
-   "chain_depth": 45,
+   "earliest_feasible_year": 442.5,
+   "serial_line_finish_year": 4158.0,
+   "chain_depth": 44,
    "serial_overrun": true
   },
   {
@@ -36785,9 +37031,9 @@
     "contact_required": false
    },
    "note": "Incremental sheet forming.",
-   "earliest_feasible_year": 454.5,
-   "serial_line_finish_year": 4161.0,
-   "chain_depth": 46,
+   "earliest_feasible_year": 436.5,
+   "serial_line_finish_year": 4154.0,
+   "chain_depth": 45,
    "serial_overrun": true
   },
   {
@@ -36930,7 +37176,7 @@
    },
    "note": "Island theory of species numbers",
    "earliest_feasible_year": 367.5,
-   "serial_line_finish_year": 4196.0,
+   "serial_line_finish_year": 4206.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -36986,7 +37232,7 @@
    },
    "note": "Flexitime around a core.",
    "earliest_feasible_year": 329.5,
-   "serial_line_finish_year": 4150.0,
+   "serial_line_finish_year": 4143.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -37016,7 +37262,7 @@
    },
    "note": "Open-end rotor spinning.",
    "earliest_feasible_year": 366.5,
-   "serial_line_finish_year": 4163.0,
+   "serial_line_finish_year": 4156.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -37048,7 +37294,7 @@
    },
    "note": "Response after a tanker wreck",
    "earliest_feasible_year": 413.5,
-   "serial_line_finish_year": 4201.0,
+   "serial_line_finish_year": 4211.0,
    "chain_depth": 42,
    "serial_overrun": true
   },
@@ -37107,7 +37353,7 @@
    },
    "note": "Student protest and counterculture.",
    "earliest_feasible_year": 413.5,
-   "serial_line_finish_year": 4150.0,
+   "serial_line_finish_year": 4167.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -37136,7 +37382,7 @@
    },
    "note": "Demand-pulled small batches.",
    "earliest_feasible_year": 359.5,
-   "serial_line_finish_year": 4156.0,
+   "serial_line_finish_year": 4149.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -37162,9 +37408,9 @@
     "contact_required": false
    },
    "note": "DC links carry power under seas.",
-   "earliest_feasible_year": 439.5,
-   "serial_line_finish_year": 4109.0,
-   "chain_depth": 43,
+   "earliest_feasible_year": 421.5,
+   "serial_line_finish_year": 4095.0,
+   "chain_depth": 42,
    "serial_overrun": true
   },
   {
@@ -37334,7 +37580,7 @@
    },
    "note": "Stored-program nodes route packets.",
    "earliest_feasible_year": 452.5,
-   "serial_line_finish_year": 4166.0,
+   "serial_line_finish_year": 4183.0,
    "chain_depth": 46,
    "serial_overrun": true
   },
@@ -37365,7 +37611,7 @@
    },
    "note": "Addressed packets over shared lines.",
    "earliest_feasible_year": 446.5,
-   "serial_line_finish_year": 4160.0,
+   "serial_line_finish_year": 4177.0,
    "chain_depth": 45,
    "serial_overrun": true
   },
@@ -37394,7 +37640,7 @@
    },
    "note": "Messages held and forwarded from memory.",
    "earliest_feasible_year": 436.5,
-   "serial_line_finish_year": 4171.0,
+   "serial_line_finish_year": 4188.0,
    "chain_depth": 44,
    "serial_overrun": true
   },
@@ -37422,9 +37668,9 @@
     "contact_required": false
    },
    "note": "Wire spark cutting of hard dies.",
-   "earliest_feasible_year": 454.5,
-   "serial_line_finish_year": 4165.0,
-   "chain_depth": 46,
+   "earliest_feasible_year": 436.5,
+   "serial_line_finish_year": 4158.0,
+   "chain_depth": 45,
    "serial_overrun": true
   },
   {
@@ -37451,9 +37697,9 @@
     "contact_required": false
    },
    "note": "Framed-tube towers pass a hundred storeys.",
-   "earliest_feasible_year": 340.5,
-   "serial_line_finish_year": 4114.0,
-   "chain_depth": 32,
+   "earliest_feasible_year": 363.5,
+   "serial_line_finish_year": 4100.0,
+   "chain_depth": 34,
    "serial_overrun": true
   },
   {
@@ -37508,7 +37754,7 @@
     "contact_required": false
    },
    "note": "A crew lands on the moon and returns.",
-   "earliest_feasible_year": 413.5,
+   "earliest_feasible_year": 433.5,
    "serial_line_finish_year": 4194.0,
    "chain_depth": 40,
    "serial_overrun": true
@@ -37539,7 +37785,7 @@
    },
    "note": "Impact review for public works",
    "earliest_feasible_year": 390.5,
-   "serial_line_finish_year": 4209.0,
+   "serial_line_finish_year": 4219.0,
    "chain_depth": 38,
    "serial_overrun": true
   },
@@ -37569,7 +37815,7 @@
    },
    "note": "Tables queried by relational logic.",
    "earliest_feasible_year": 381.5,
-   "serial_line_finish_year": 4177.0,
+   "serial_line_finish_year": 4194.0,
    "chain_depth": 39,
    "serial_overrun": true
   },
@@ -37600,7 +37846,7 @@
    },
    "note": "A second women's movement.",
    "earliest_feasible_year": 379.5,
-   "serial_line_finish_year": 4158.0,
+   "serial_line_finish_year": 4175.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -37629,7 +37875,7 @@
    },
    "note": "A national safety agency.",
    "earliest_feasible_year": 321.5,
-   "serial_line_finish_year": 4162.0,
+   "serial_line_finish_year": 4155.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -37655,9 +37901,9 @@
     "contact_required": false
    },
    "note": "Abrasive waterjet cutting.",
-   "earliest_feasible_year": 454.5,
-   "serial_line_finish_year": 4167.0,
-   "chain_depth": 46,
+   "earliest_feasible_year": 436.5,
+   "serial_line_finish_year": 4160.0,
+   "chain_depth": 45,
    "serial_overrun": true
   },
   {
@@ -37685,7 +37931,7 @@
    },
    "note": "Cable nets and membranes span stadiums.",
    "earliest_feasible_year": 329.5,
-   "serial_line_finish_year": 4117.0,
+   "serial_line_finish_year": 4103.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -37770,7 +38016,7 @@
    },
    "note": "Environment agency",
    "earliest_feasible_year": 402.5,
-   "serial_line_finish_year": 4221.0,
+   "serial_line_finish_year": 4231.0,
    "chain_depth": 39,
    "serial_overrun": true
   },
@@ -37798,7 +38044,7 @@
     "contact_required": false
    },
    "note": "Satellites warn of missile launches.",
-   "earliest_feasible_year": 401.5,
+   "earliest_feasible_year": 421.5,
    "serial_line_finish_year": 4269.0,
    "chain_depth": 39,
    "serial_overrun": true
@@ -37829,7 +38075,7 @@
    },
    "note": "Catalog gates",
    "earliest_feasible_year": 134.5,
-   "serial_line_finish_year": 4227.0,
+   "serial_line_finish_year": 4237.0,
    "chain_depth": 18,
    "serial_overrun": true
   },
@@ -37887,7 +38133,7 @@
    },
    "note": "Policy honouring many cultures.",
    "earliest_feasible_year": 386.5,
-   "serial_line_finish_year": 4163.0,
+   "serial_line_finish_year": 4180.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -37915,9 +38161,9 @@
     "contact_required": false
    },
    "note": "Computed ray slices",
-   "earliest_feasible_year": 464.5,
+   "earliest_feasible_year": 446.5,
    "serial_line_finish_year": 4190.0,
-   "chain_depth": 48,
+   "chain_depth": 47,
    "serial_overrun": true
   },
   {
@@ -37942,9 +38188,9 @@
     "contact_required": false
    },
    "note": "Stacker cranes run high-bay warehouses.",
-   "earliest_feasible_year": 456.5,
+   "earliest_feasible_year": 438.5,
    "serial_line_finish_year": 4212.0,
-   "chain_depth": 47,
+   "chain_depth": 46,
    "serial_overrun": true
   },
   {
@@ -37972,7 +38218,7 @@
    },
    "note": "Wetlands convention",
    "earliest_feasible_year": 336.5,
-   "serial_line_finish_year": 4232.0,
+   "serial_line_finish_year": 4242.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -38001,9 +38247,9 @@
     "contact_required": false
    },
    "note": "A whole processor on one chip.",
-   "earliest_feasible_year": 462.5,
-   "serial_line_finish_year": 4175.0,
-   "chain_depth": 48,
+   "earliest_feasible_year": 444.5,
+   "serial_line_finish_year": 4168.0,
+   "chain_depth": 47,
    "serial_overrun": true
   },
   {
@@ -38028,9 +38274,9 @@
     "contact_required": false
    },
    "note": "Games on chips and screens.",
-   "earliest_feasible_year": 456.5,
-   "serial_line_finish_year": 4169.0,
-   "chain_depth": 44,
+   "earliest_feasible_year": 443.5,
+   "serial_line_finish_year": 4186.0,
+   "chain_depth": 43,
    "serial_overrun": true
   },
   {
@@ -38058,7 +38304,7 @@
    },
    "note": "A world list of cultural sites.",
    "earliest_feasible_year": 358.5,
-   "serial_line_finish_year": 4174.0,
+   "serial_line_finish_year": 4191.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -38084,7 +38330,7 @@
    },
    "note": "Age discrimination forbidden.",
    "earliest_feasible_year": 384.5,
-   "serial_line_finish_year": 4165.0,
+   "serial_line_finish_year": 4158.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -38113,7 +38359,7 @@
    },
    "note": "Codes require ductile frames and tied walls.",
    "earliest_feasible_year": 360.5,
-   "serial_line_finish_year": 4121.0,
+   "serial_line_finish_year": 4107.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -38143,7 +38389,7 @@
    },
    "note": "Spraying limited by scouting after the pesticide warning",
    "earliest_feasible_year": 388.5,
-   "serial_line_finish_year": 4154.0,
+   "serial_line_finish_year": 4164.0,
    "chain_depth": 38,
    "serial_overrun": true
   },
@@ -38173,7 +38419,7 @@
    },
    "note": "Enzymes convert maize starch to syrup",
    "earliest_feasible_year": 312.5,
-   "serial_line_finish_year": 4159.0,
+   "serial_line_finish_year": 4169.0,
    "chain_depth": 28,
    "serial_overrun": true
   },
@@ -38233,7 +38479,7 @@
    },
    "note": "Environment programme of the realms",
    "earliest_feasible_year": 408.5,
-   "serial_line_finish_year": 4238.0,
+   "serial_line_finish_year": 4248.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -38259,9 +38505,9 @@
     "contact_required": false
    },
    "note": "Laser-guided bombs.",
-   "earliest_feasible_year": 448.5,
+   "earliest_feasible_year": 430.5,
    "serial_line_finish_year": 4277.0,
-   "chain_depth": 43,
+   "chain_depth": 42,
    "serial_overrun": true
   },
   {
@@ -38287,8 +38533,8 @@
     "contact_required": false
    },
    "note": "Land cover imaged",
-   "earliest_feasible_year": 410.5,
-   "serial_line_finish_year": 4246.0,
+   "earliest_feasible_year": 429.5,
+   "serial_line_finish_year": 4256.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -38346,7 +38592,7 @@
    },
    "note": "Cutting enzymes splice a gene into a germ that copies it.",
    "earliest_feasible_year": 412.5,
-   "serial_line_finish_year": 4187.0,
+   "serial_line_finish_year": 4204.0,
    "chain_depth": 39,
    "serial_overrun": true
   },
@@ -38376,7 +38622,7 @@
    },
    "note": "Law on personal records held in databases.",
    "earliest_feasible_year": 386.5,
-   "serial_line_finish_year": 4182.0,
+   "serial_line_finish_year": 4199.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -38462,7 +38708,7 @@
    },
    "note": "Species trade licensed",
    "earliest_feasible_year": 341.5,
-   "serial_line_finish_year": 4251.0,
+   "serial_line_finish_year": 4261.0,
    "chain_depth": 34,
    "serial_overrun": true
   },
@@ -38519,7 +38765,7 @@
    },
    "note": "An independent commission against corruption.",
    "earliest_feasible_year": 372.5,
-   "serial_line_finish_year": 4188.0,
+   "serial_line_finish_year": 4205.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -38548,7 +38794,7 @@
    },
    "note": "Scrap-fed minimills make steel near buyers.",
    "earliest_feasible_year": 375.5,
-   "serial_line_finish_year": 4178.0,
+   "serial_line_finish_year": 4171.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -38575,7 +38821,7 @@
    },
    "note": "Isolating bearings let buildings ride out quakes.",
    "earliest_feasible_year": 364.5,
-   "serial_line_finish_year": 4125.0,
+   "serial_line_finish_year": 4111.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -38691,9 +38937,9 @@
     "contact_required": false
    },
    "note": "Bar codes scanned on goods.",
-   "earliest_feasible_year": 470.5,
+   "earliest_feasible_year": 452.5,
    "serial_line_finish_year": 4228.0,
-   "chain_depth": 49,
+   "chain_depth": 48,
    "serial_overrun": true
   },
   {
@@ -38721,7 +38967,7 @@
    },
    "note": "Chlorinated gases thin ozone",
    "earliest_feasible_year": 376.5,
-   "serial_line_finish_year": 4259.0,
+   "serial_line_finish_year": 4269.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -38750,7 +38996,7 @@
    },
    "note": "Redundancy pay and notice.",
    "earliest_feasible_year": 283.5,
-   "serial_line_finish_year": 4168.0,
+   "serial_line_finish_year": 4161.0,
    "chain_depth": 34,
    "serial_overrun": true
   },
@@ -38778,7 +39024,7 @@
    },
    "note": "Sewage works strip nitrogen and phosphorus.",
    "earliest_feasible_year": 349.5,
-   "serial_line_finish_year": 4128.0,
+   "serial_line_finish_year": 4114.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -38810,7 +39056,7 @@
    },
    "note": "Hatchery fish fed pellet rations in sea pens",
    "earliest_feasible_year": 359.5,
-   "serial_line_finish_year": 4165.0,
+   "serial_line_finish_year": 4175.0,
    "chain_depth": 34,
    "serial_overrun": true
   },
@@ -38839,7 +39085,7 @@
    },
    "note": "Leaded fuel phased out",
    "earliest_feasible_year": 408.5,
-   "serial_line_finish_year": 4265.0,
+   "serial_line_finish_year": 4275.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -38870,7 +39116,7 @@
    },
    "note": "Number theory gives public-key encryption (shared with Security).",
    "earliest_feasible_year": 429.5,
-   "serial_line_finish_year": 4195.0,
+   "serial_line_finish_year": 4212.0,
    "chain_depth": 42,
    "serial_overrun": true
   },
@@ -38899,7 +39145,7 @@
    },
    "note": "Recording television at home.",
    "earliest_feasible_year": 442.5,
-   "serial_line_finish_year": 4179.0,
+   "serial_line_finish_year": 4196.0,
    "chain_depth": 43,
    "serial_overrun": true
   },
@@ -38928,9 +39174,9 @@
     "contact_required": false
    },
    "note": "Parts drawn and tested on screen first.",
-   "earliest_feasible_year": 459.5,
-   "serial_line_finish_year": 4183.0,
-   "chain_depth": 48,
+   "earliest_feasible_year": 441.5,
+   "serial_line_finish_year": 4176.0,
+   "chain_depth": 47,
    "serial_overrun": true
   },
   {
@@ -38959,7 +39205,7 @@
    },
    "note": "Acid rain crosses borders",
    "earliest_feasible_year": 177.5,
-   "serial_line_finish_year": 4271.0,
+   "serial_line_finish_year": 4281.0,
    "chain_depth": 23,
    "serial_overrun": true
   },
@@ -38988,9 +39234,9 @@
     "contact_required": false
    },
    "note": "Single-chip processors bring computers to desks.",
-   "earliest_feasible_year": 472.5,
-   "serial_line_finish_year": 4205.0,
-   "chain_depth": 49,
+   "earliest_feasible_year": 454.5,
+   "serial_line_finish_year": 4222.0,
+   "chain_depth": 48,
    "serial_overrun": true
   },
   {
@@ -39018,7 +39264,7 @@
    },
    "note": "Allowances turned against excess fat, salt and sugar",
    "earliest_feasible_year": 360.5,
-   "serial_line_finish_year": 4170.0,
+   "serial_line_finish_year": 4180.0,
    "chain_depth": 34,
    "serial_overrun": true
   },
@@ -39075,7 +39321,7 @@
    },
    "note": "Circulation models test doubled CO2",
    "earliest_feasible_year": 429.5,
-   "serial_line_finish_year": 4281.0,
+   "serial_line_finish_year": 4291.0,
    "chain_depth": 41,
    "serial_overrun": true
   },
@@ -39104,7 +39350,7 @@
    },
    "note": "Service jobs outnumber factory jobs.",
    "earliest_feasible_year": 380.5,
-   "serial_line_finish_year": 4171.0,
+   "serial_line_finish_year": 4164.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -39132,9 +39378,9 @@
     "contact_required": false
    },
    "note": "Machining cells switch parts without retooling.",
-   "earliest_feasible_year": 458.5,
-   "serial_line_finish_year": 4187.0,
-   "chain_depth": 48,
+   "earliest_feasible_year": 440.5,
+   "serial_line_finish_year": 4180.0,
+   "chain_depth": 47,
    "serial_overrun": true
   },
   {
@@ -39160,7 +39406,7 @@
    },
    "note": "Old sewers relined without digging.",
    "earliest_feasible_year": 327.5,
-   "serial_line_finish_year": 4131.0,
+   "serial_line_finish_year": 4117.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -39276,7 +39522,7 @@
    },
    "note": "State firms sold through share markets.",
    "earliest_feasible_year": 401.5,
-   "serial_line_finish_year": 4194.0,
+   "serial_line_finish_year": 4211.0,
    "chain_depth": 39,
    "serial_overrun": true
   },
@@ -39304,9 +39550,9 @@
     "contact_required": false
    },
    "note": "Pocket music players.",
-   "earliest_feasible_year": 446.5,
-   "serial_line_finish_year": 4183.0,
-   "chain_depth": 44,
+   "earliest_feasible_year": 428.5,
+   "serial_line_finish_year": 4200.0,
+   "chain_depth": 43,
    "serial_overrun": true
   },
   {
@@ -39333,7 +39579,7 @@
    },
    "note": "Spoken-rhythm street music.",
    "earliest_feasible_year": 412.5,
-   "serial_line_finish_year": 4188.0,
+   "serial_line_finish_year": 4205.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -39451,7 +39697,7 @@
    },
    "note": "Long-range air pollution convention",
    "earliest_feasible_year": 413.5,
-   "serial_line_finish_year": 4286.0,
+   "serial_line_finish_year": 4296.0,
    "chain_depth": 41,
    "serial_overrun": true
   },
@@ -39507,9 +39753,9 @@
     "contact_required": false
    },
    "note": "Round-the-clock news by satellite.",
-   "earliest_feasible_year": 457.5,
-   "serial_line_finish_year": 4193.0,
-   "chain_depth": 45,
+   "earliest_feasible_year": 442.5,
+   "serial_line_finish_year": 4210.0,
+   "chain_depth": 44,
    "serial_overrun": true
   },
   {
@@ -39536,7 +39782,7 @@
    },
    "note": "Agency and fixed-term work.",
    "earliest_feasible_year": 316.5,
-   "serial_line_finish_year": 4174.0,
+   "serial_line_finish_year": 4167.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -39563,9 +39809,9 @@
     "contact_required": false
    },
    "note": "Solar cells sealed into weatherproof modules.",
-   "earliest_feasible_year": 443.5,
-   "serial_line_finish_year": 4189.0,
-   "chain_depth": 44,
+   "earliest_feasible_year": 425.5,
+   "serial_line_finish_year": 4182.0,
+   "chain_depth": 43,
    "serial_overrun": true
   },
   {
@@ -39590,9 +39836,9 @@
     "contact_required": false
    },
    "note": "Solar plants of installed modules feed the grid.",
-   "earliest_feasible_year": 449.5,
-   "serial_line_finish_year": 4195.0,
-   "chain_depth": 45,
+   "earliest_feasible_year": 431.5,
+   "serial_line_finish_year": 4188.0,
+   "chain_depth": 44,
    "serial_overrun": true
   },
   {
@@ -39621,7 +39867,7 @@
    },
    "note": "Nutrient solutions replace soil",
    "earliest_feasible_year": 355.5,
-   "serial_line_finish_year": 4175.0,
+   "serial_line_finish_year": 4185.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -39650,9 +39896,9 @@
     "contact_required": false
    },
    "note": "Magnetic resonance images of soft tissue",
-   "earliest_feasible_year": 472.5,
+   "earliest_feasible_year": 454.5,
    "serial_line_finish_year": 4231.0,
-   "chain_depth": 49,
+   "chain_depth": 48,
    "serial_overrun": true
   },
   {
@@ -39680,7 +39926,7 @@
    },
    "note": "Polluter pays",
    "earliest_feasible_year": 410.5,
-   "serial_line_finish_year": 4294.0,
+   "serial_line_finish_year": 4304.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -39706,9 +39952,9 @@
     "contact_required": false
    },
    "note": "Remote aircraft.",
-   "earliest_feasible_year": 380.5,
+   "earliest_feasible_year": 403.5,
    "serial_line_finish_year": 4307.0,
-   "chain_depth": 35,
+   "chain_depth": 37,
    "serial_overrun": true
   },
   {
@@ -39737,7 +39983,7 @@
    },
    "note": "Large wind turbines feed the grid.",
    "earliest_feasible_year": 389.5,
-   "serial_line_finish_year": 4200.0,
+   "serial_line_finish_year": 4193.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -39794,7 +40040,7 @@
    },
    "note": "Coded audio on compact discs.",
    "earliest_feasible_year": 431.5,
-   "serial_line_finish_year": 4197.0,
+   "serial_line_finish_year": 4214.0,
    "chain_depth": 43,
    "serial_overrun": true
   },
@@ -39824,7 +40070,7 @@
    },
    "note": "Deregulation; union membership falls.",
    "earliest_feasible_year": 284.5,
-   "serial_line_finish_year": 4178.0,
+   "serial_line_finish_year": 4171.0,
    "chain_depth": 34,
    "serial_overrun": true
   },
@@ -39852,9 +40098,9 @@
     "contact_required": false
    },
    "note": "Pick-and-place machines assemble circuit boards.",
-   "earliest_feasible_year": 461.5,
-   "serial_line_finish_year": 4192.0,
-   "chain_depth": 48,
+   "earliest_feasible_year": 443.5,
+   "serial_line_finish_year": 4185.0,
+   "chain_depth": 47,
    "serial_overrun": true
   },
   {
@@ -39882,7 +40128,7 @@
    },
    "note": "Whaling moratorium",
    "earliest_feasible_year": 366.5,
-   "serial_line_finish_year": 4299.0,
+   "serial_line_finish_year": 4309.0,
    "chain_depth": 34,
    "serial_overrun": true
   },
@@ -39912,9 +40158,9 @@
     "contact_required": false
    },
    "note": "Cells of radio coverage with computer switching.",
-   "earliest_feasible_year": 470.5,
-   "serial_line_finish_year": 4213.0,
-   "chain_depth": 49,
+   "earliest_feasible_year": 452.5,
+   "serial_line_finish_year": 4230.0,
+   "chain_depth": 48,
    "serial_overrun": true
   },
   {
@@ -39942,7 +40188,7 @@
    },
    "note": "Common protocols join separate packet networks.",
    "earliest_feasible_year": 462.5,
-   "serial_line_finish_year": 4223.0,
+   "serial_line_finish_year": 4240.0,
    "chain_depth": 47,
    "serial_overrun": true
   },
@@ -39973,7 +40219,7 @@
    },
    "note": "Movable barriers close estuaries in floods.",
    "earliest_feasible_year": 395.5,
-   "serial_line_finish_year": 4205.0,
+   "serial_line_finish_year": 4198.0,
    "chain_depth": 38,
    "serial_overrun": true
   },
@@ -40000,9 +40246,9 @@
     "contact_required": false
    },
    "note": "Low-observable stealth aircraft.",
-   "earliest_feasible_year": 469.5,
+   "earliest_feasible_year": 451.5,
    "serial_line_finish_year": 4317.0,
-   "chain_depth": 49,
+   "chain_depth": 48,
    "serial_overrun": true
   },
   {
@@ -40030,7 +40276,7 @@
    },
    "note": "Commissions hear victims of past rule by force.",
    "earliest_feasible_year": 366.5,
-   "serial_line_finish_year": 4199.0,
+   "serial_line_finish_year": 4216.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -40057,9 +40303,9 @@
     "contact_required": false
    },
    "note": "Office work on desk computers.",
-   "earliest_feasible_year": 476.5,
-   "serial_line_finish_year": 4209.0,
-   "chain_depth": 50,
+   "earliest_feasible_year": 458.5,
+   "serial_line_finish_year": 4226.0,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -40086,9 +40332,9 @@
     "contact_required": false
    },
    "note": "Parts built layer by layer from a digital model.",
-   "earliest_feasible_year": 464.5,
-   "serial_line_finish_year": 4197.0,
-   "chain_depth": 49,
+   "earliest_feasible_year": 446.5,
+   "serial_line_finish_year": 4190.0,
+   "chain_depth": 48,
    "serial_overrun": true
   },
   {
@@ -40172,7 +40418,7 @@
    },
    "note": "Harassment actionable.",
    "earliest_feasible_year": 384.5,
-   "serial_line_finish_year": 4212.0,
+   "serial_line_finish_year": 4229.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -40200,9 +40446,9 @@
     "contact_required": false
    },
    "note": "Benefit concerts broadcast worldwide.",
-   "earliest_feasible_year": 461.5,
-   "serial_line_finish_year": 4201.0,
-   "chain_depth": 46,
+   "earliest_feasible_year": 446.5,
+   "serial_line_finish_year": 4218.0,
+   "chain_depth": 45,
    "serial_overrun": true
   },
   {
@@ -40231,8 +40477,8 @@
     "contact_required": false
    },
    "note": "Satellite crop images warn of dearth",
-   "earliest_feasible_year": 416.5,
-   "serial_line_finish_year": 4252.0,
+   "earliest_feasible_year": 435.5,
+   "serial_line_finish_year": 4262.0,
    "chain_depth": 41,
    "serial_overrun": true
   },
@@ -40346,7 +40592,7 @@
    },
    "note": "Ozone hole measured",
    "earliest_feasible_year": 381.5,
-   "serial_line_finish_year": 4304.0,
+   "serial_line_finish_year": 4314.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -40402,7 +40648,7 @@
    },
    "note": "Work moved abroad along container supply chains.",
    "earliest_feasible_year": 362.5,
-   "serial_line_finish_year": 4216.0,
+   "serial_line_finish_year": 4233.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -40432,7 +40678,7 @@
    },
    "note": "Statistical programs drive defects toward none.",
    "earliest_feasible_year": 362.5,
-   "serial_line_finish_year": 4200.0,
+   "serial_line_finish_year": 4193.0,
    "chain_depth": 34,
    "serial_overrun": true
   },
@@ -40460,9 +40706,9 @@
     "contact_required": false
    },
    "note": "Computers run heat, light and air.",
-   "earliest_feasible_year": 457.5,
-   "serial_line_finish_year": 4208.0,
-   "chain_depth": 48,
+   "earliest_feasible_year": 439.5,
+   "serial_line_finish_year": 4201.0,
+   "chain_depth": 47,
    "serial_overrun": true
   },
   {
@@ -40553,7 +40799,7 @@
    },
    "note": "Reactor accident fallout",
    "earliest_feasible_year": 453.5,
-   "serial_line_finish_year": 4309.0,
+   "serial_line_finish_year": 4319.0,
    "chain_depth": 43,
    "serial_overrun": true
   },
@@ -40613,7 +40859,7 @@
    },
    "note": "Ozone treaty",
    "earliest_feasible_year": 418.5,
-   "serial_line_finish_year": 4319.0,
+   "serial_line_finish_year": 4329.0,
    "chain_depth": 41,
    "serial_overrun": true
   },
@@ -40670,7 +40916,7 @@
    },
    "note": "Ice cores",
    "earliest_feasible_year": 375.5,
-   "serial_line_finish_year": 4327.0,
+   "serial_line_finish_year": 4337.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -40698,7 +40944,7 @@
    },
    "note": "Ramps, lifts and wide doors required.",
    "earliest_feasible_year": 324.5,
-   "serial_line_finish_year": 4211.0,
+   "serial_line_finish_year": 4204.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -40757,7 +41003,7 @@
    },
    "note": "Climate panel",
    "earliest_feasible_year": 439.5,
-   "serial_line_finish_year": 4337.0,
+   "serial_line_finish_year": 4347.0,
    "chain_depth": 42,
    "serial_overrun": true
   },
@@ -40786,7 +41032,7 @@
    },
    "note": "Neighbourhood assemblies decide town budgets.",
    "earliest_feasible_year": 365.5,
-   "serial_line_finish_year": 4204.0,
+   "serial_line_finish_year": 4221.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -40843,7 +41089,7 @@
    },
    "note": "An independent bank targets inflation.",
    "earliest_feasible_year": 383.5,
-   "serial_line_finish_year": 4210.0,
+   "serial_line_finish_year": 4227.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -40871,7 +41117,7 @@
    },
    "note": "Accommodation of disabled workers.",
    "earliest_feasible_year": 384.5,
-   "serial_line_finish_year": 4219.0,
+   "serial_line_finish_year": 4236.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -40899,9 +41145,9 @@
     "contact_required": false
    },
    "note": "Energy codes and very low-energy houses.",
-   "earliest_feasible_year": 342.5,
-   "serial_line_finish_year": 4215.0,
-   "chain_depth": 33,
+   "earliest_feasible_year": 365.5,
+   "serial_line_finish_year": 4208.0,
+   "chain_depth": 35,
    "serial_overrun": true
   },
   {
@@ -40930,7 +41176,7 @@
    },
    "note": "Dietary goals printed on packs",
    "earliest_feasible_year": 364.5,
-   "serial_line_finish_year": 4256.0,
+   "serial_line_finish_year": 4266.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -40988,7 +41234,7 @@
    },
    "note": "Sulphur allowances traded",
    "earliest_feasible_year": 408.5,
-   "serial_line_finish_year": 4343.0,
+   "serial_line_finish_year": 4353.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -41017,9 +41263,9 @@
     "contact_required": false
    },
    "note": "Linked pages over the joined networks.",
-   "earliest_feasible_year": 484.5,
-   "serial_line_finish_year": 4235.0,
-   "chain_depth": 50,
+   "earliest_feasible_year": 474.5,
+   "serial_line_finish_year": 4252.0,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -41048,7 +41294,7 @@
    },
    "note": "Light rechargeable lithium-ion cells.",
    "earliest_feasible_year": 398.5,
-   "serial_line_finish_year": 4206.0,
+   "serial_line_finish_year": 4199.0,
    "chain_depth": 38,
    "serial_overrun": true
   },
@@ -41074,9 +41320,9 @@
     "contact_required": false
    },
    "note": "Satellite-guided precision strike.",
-   "earliest_feasible_year": 458.5,
+   "earliest_feasible_year": 440.5,
    "serial_line_finish_year": 4341.0,
-   "chain_depth": 44,
+   "chain_depth": 43,
    "serial_overrun": true
   },
   {
@@ -41104,7 +41350,7 @@
    },
    "note": "Independent bodies run elections.",
    "earliest_feasible_year": 372.5,
-   "serial_line_finish_year": 4215.0,
+   "serial_line_finish_year": 4232.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -41133,9 +41379,9 @@
     "contact_required": false
    },
    "note": "Call centres timed by the second.",
-   "earliest_feasible_year": 475.5,
-   "serial_line_finish_year": 4222.0,
-   "chain_depth": 50,
+   "earliest_feasible_year": 457.5,
+   "serial_line_finish_year": 4239.0,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -41162,7 +41408,7 @@
    },
    "note": "Gas burned twice over for power.",
    "earliest_feasible_year": 388.5,
-   "serial_line_finish_year": 4219.0,
+   "serial_line_finish_year": 4212.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -41219,7 +41465,7 @@
    },
    "note": "Framework convention",
    "earliest_feasible_year": 449.5,
-   "serial_line_finish_year": 4353.0,
+   "serial_line_finish_year": 4363.0,
    "chain_depth": 43,
    "serial_overrun": true
   },
@@ -41249,7 +41495,7 @@
    },
    "note": "Biodiversity convention",
    "earliest_feasible_year": 414.5,
-   "serial_line_finish_year": 4359.0,
+   "serial_line_finish_year": 4369.0,
    "chain_depth": 41,
    "serial_overrun": true
   },
@@ -41276,7 +41522,7 @@
    },
    "note": "Shared working-time rules.",
    "earliest_feasible_year": 372.5,
-   "serial_line_finish_year": 4225.0,
+   "serial_line_finish_year": 4242.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -41331,9 +41577,9 @@
     "contact_required": false
    },
    "note": "Liquid-crystal panels made on glass sheets.",
-   "earliest_feasible_year": 454.5,
-   "serial_line_finish_year": 4210.0,
-   "chain_depth": 44,
+   "earliest_feasible_year": 436.5,
+   "serial_line_finish_year": 4203.0,
+   "chain_depth": 43,
    "serial_overrun": true
   },
   {
@@ -41417,9 +41663,9 @@
     "contact_required": false
    },
    "note": "Low-cost point-to-point airlines.",
-   "earliest_feasible_year": 394.5,
+   "earliest_feasible_year": 417.5,
    "serial_line_finish_year": 4272.0,
-   "chain_depth": 38,
+   "chain_depth": 39,
    "serial_overrun": true
   },
   {
@@ -41447,7 +41693,7 @@
    },
    "note": "Stellar wobble measured in spectra.",
    "earliest_feasible_year": 343.5,
-   "serial_line_finish_year": 4240.0,
+   "serial_line_finish_year": 4257.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -41477,7 +41723,7 @@
    },
    "note": "A world trade body arbitrates tariffs.",
    "earliest_feasible_year": 359.5,
-   "serial_line_finish_year": 4221.0,
+   "serial_line_finish_year": 4238.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -41504,9 +41750,9 @@
     "contact_required": false
    },
    "note": "Forums and personal pages.",
-   "earliest_feasible_year": 489.5,
-   "serial_line_finish_year": 4240.0,
-   "chain_depth": 51,
+   "earliest_feasible_year": 479.5,
+   "serial_line_finish_year": 4257.0,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -41559,9 +41805,9 @@
     "contact_required": false
    },
    "note": "Open satellite positioning for every user.",
-   "earliest_feasible_year": 474.5,
+   "earliest_feasible_year": 456.5,
    "serial_line_finish_year": 4284.0,
-   "chain_depth": 49,
+   "chain_depth": 48,
    "serial_overrun": true
   },
   {
@@ -41590,7 +41836,7 @@
    },
    "note": "Wolves returned",
    "earliest_feasible_year": 373.5,
-   "serial_line_finish_year": 4365.0,
+   "serial_line_finish_year": 4375.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -41643,9 +41889,9 @@
     "contact_required": false
    },
    "note": "Telework over networks.",
-   "earliest_feasible_year": 487.5,
-   "serial_line_finish_year": 4238.0,
-   "chain_depth": 51,
+   "earliest_feasible_year": 477.5,
+   "serial_line_finish_year": 4255.0,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -41672,9 +41918,9 @@
     "contact_required": false
    },
    "note": "Chip features printed below the light's wavelength.",
-   "earliest_feasible_year": 468.5,
-   "serial_line_finish_year": 4216.0,
-   "chain_depth": 49,
+   "earliest_feasible_year": 450.5,
+   "serial_line_finish_year": 4209.0,
+   "chain_depth": 48,
    "serial_overrun": true
   },
   {
@@ -41703,7 +41949,7 @@
    },
    "note": "Fortified groundnut paste for starving children",
    "earliest_feasible_year": 361.5,
-   "serial_line_finish_year": 4262.0,
+   "serial_line_finish_year": 4272.0,
    "chain_depth": 34,
    "serial_overrun": true
   },
@@ -41733,7 +41979,7 @@
    },
    "note": "Gene transfer (first in yeast vaccines) applied to crops",
    "earliest_feasible_year": 424.5,
-   "serial_line_finish_year": 4274.0,
+   "serial_line_finish_year": 4284.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -41819,9 +42065,9 @@
     "contact_required": false
    },
    "note": "Online orders with tracked parcels.",
-   "earliest_feasible_year": 494.5,
+   "earliest_feasible_year": 484.5,
    "serial_line_finish_year": 4294.0,
-   "chain_depth": 51,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -41849,7 +42095,7 @@
    },
    "note": "Binding targets",
    "earliest_feasible_year": 457.5,
-   "serial_line_finish_year": 4373.0,
+   "serial_line_finish_year": 4383.0,
    "chain_depth": 44,
    "serial_overrun": true
   },
@@ -41906,7 +42152,7 @@
    },
    "note": "Plastic in gyres",
    "earliest_feasible_year": 329.5,
-   "serial_line_finish_year": 4378.0,
+   "serial_line_finish_year": 4388.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -41934,9 +42180,9 @@
     "contact_required": false
    },
    "note": "Link-ranked search of the web.",
-   "earliest_feasible_year": 490.5,
-   "serial_line_finish_year": 4246.0,
-   "chain_depth": 51,
+   "earliest_feasible_year": 480.5,
+   "serial_line_finish_year": 4263.0,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -41965,7 +42211,7 @@
    },
    "note": "Trial-proven vitamin added to milled flour",
    "earliest_feasible_year": 359.5,
-   "serial_line_finish_year": 4278.0,
+   "serial_line_finish_year": 4288.0,
    "chain_depth": 34,
    "serial_overrun": true
   },
@@ -41992,7 +42238,7 @@
     "contact_required": false
    },
    "note": "A shared station kept crewed year-round.",
-   "earliest_feasible_year": 411.5,
+   "earliest_feasible_year": 431.5,
    "serial_line_finish_year": 4304.0,
    "chain_depth": 40,
    "serial_overrun": true
@@ -42022,7 +42268,7 @@
    },
    "note": "One currency across a common market.",
    "earliest_feasible_year": 377.5,
-   "serial_line_finish_year": 4229.0,
+   "serial_line_finish_year": 4246.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -42051,7 +42297,7 @@
    },
    "note": "Peer-to-peer sharing of files.",
    "earliest_feasible_year": 466.5,
-   "serial_line_finish_year": 4244.0,
+   "serial_line_finish_year": 4261.0,
    "chain_depth": 48,
    "serial_overrun": true
   },
@@ -42108,9 +42354,9 @@
     "contact_required": false
    },
    "note": "Public services offered on the web.",
-   "earliest_feasible_year": 490.5,
-   "serial_line_finish_year": 4241.0,
-   "chain_depth": 51,
+   "earliest_feasible_year": 480.5,
+   "serial_line_finish_year": 4258.0,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -42138,9 +42384,9 @@
     "contact_required": false
    },
    "note": "White light from semiconductor diodes.",
-   "earliest_feasible_year": 436.5,
-   "serial_line_finish_year": 4220.0,
-   "chain_depth": 42,
+   "earliest_feasible_year": 418.5,
+   "serial_line_finish_year": 4213.0,
+   "chain_depth": 41,
    "serial_overrun": true
   },
   {
@@ -42224,9 +42470,9 @@
     "contact_required": false
    },
    "note": "Volunteers write the encyclopedia online.",
-   "earliest_feasible_year": 489.5,
-   "serial_line_finish_year": 4251.0,
-   "chain_depth": 51,
+   "earliest_feasible_year": 479.5,
+   "serial_line_finish_year": 4268.0,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -42255,7 +42501,7 @@
    },
    "note": "Marriage open to all couples.",
    "earliest_feasible_year": 386.5,
-   "serial_line_finish_year": 4246.0,
+   "serial_line_finish_year": 4263.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -42313,7 +42559,7 @@
    },
    "note": "Forever chemicals found",
    "earliest_feasible_year": 408.5,
-   "serial_line_finish_year": 4384.0,
+   "serial_line_finish_year": 4394.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -42370,9 +42616,9 @@
     "contact_required": false
    },
    "note": "Digital identity for online public services.",
-   "earliest_feasible_year": 496.5,
-   "serial_line_finish_year": 4252.0,
-   "chain_depth": 52,
+   "earliest_feasible_year": 486.5,
+   "serial_line_finish_year": 4269.0,
+   "chain_depth": 51,
    "serial_overrun": true
   },
   {
@@ -42400,7 +42646,7 @@
    },
    "note": "A permanent court for crimes against peoples.",
    "earliest_feasible_year": 365.5,
-   "serial_line_finish_year": 4258.0,
+   "serial_line_finish_year": 4275.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -42429,7 +42675,7 @@
    },
    "note": "Plastics broken back into monomers.",
    "earliest_feasible_year": 322.5,
-   "serial_line_finish_year": 4224.0,
+   "serial_line_finish_year": 4217.0,
    "chain_depth": 31,
    "serial_overrun": true
   },
@@ -42457,9 +42703,9 @@
     "contact_required": false
    },
    "note": "Acoustic sensors listen for leaking mains.",
-   "earliest_feasible_year": 465.5,
-   "serial_line_finish_year": 4222.0,
-   "chain_depth": 49,
+   "earliest_feasible_year": 447.5,
+   "serial_line_finish_year": 4215.0,
+   "chain_depth": 48,
    "serial_overrun": true
   },
   {
@@ -42486,9 +42732,9 @@
     "contact_required": false
    },
    "note": "Ships broadcast identity by transponder.",
-   "earliest_feasible_year": 479.5,
+   "earliest_feasible_year": 461.5,
    "serial_line_finish_year": 4309.0,
-   "chain_depth": 50,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -42513,9 +42759,9 @@
     "contact_required": false
    },
    "note": "Armed remote aircraft strike from afar.",
-   "earliest_feasible_year": 466.5,
+   "earliest_feasible_year": 448.5,
    "serial_line_finish_year": 4377.0,
-   "chain_depth": 45,
+   "chain_depth": 44,
    "serial_overrun": true,
    "use_authority": "restricted"
   },
@@ -42545,9 +42791,9 @@
     "contact_required": false
    },
    "note": "Satellite positioning steers planting and spreading",
-   "earliest_feasible_year": 482.5,
-   "serial_line_finish_year": 4292.0,
-   "chain_depth": 50,
+   "earliest_feasible_year": 464.5,
+   "serial_line_finish_year": 4296.0,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -42575,9 +42821,9 @@
     "contact_required": false
    },
    "note": "Whole hereditary text read",
-   "earliest_feasible_year": 487.5,
+   "earliest_feasible_year": 469.5,
    "serial_line_finish_year": 4311.0,
-   "chain_depth": 50,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -42661,9 +42907,9 @@
     "contact_required": false
    },
    "note": "Online social networks.",
-   "earliest_feasible_year": 499.5,
-   "serial_line_finish_year": 4254.0,
-   "chain_depth": 52,
+   "earliest_feasible_year": 489.5,
+   "serial_line_finish_year": 4271.0,
+   "chain_depth": 51,
    "serial_overrun": true
   },
   {
@@ -42689,7 +42935,7 @@
    },
    "note": "Work offered only when wanted.",
    "earliest_feasible_year": 319.5,
-   "serial_line_finish_year": 4241.0,
+   "serial_line_finish_year": 4258.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -42716,9 +42962,9 @@
     "contact_required": false
    },
    "note": "Planted and reflective roofs cool districts.",
-   "earliest_feasible_year": 344.5,
-   "serial_line_finish_year": 4224.0,
-   "chain_depth": 34,
+   "earliest_feasible_year": 367.5,
+   "serial_line_finish_year": 4217.0,
+   "chain_depth": 36,
    "serial_overrun": true
   },
   {
@@ -42743,9 +42989,9 @@
     "contact_required": false
    },
    "note": "Radio tags on pallets and cases.",
-   "earliest_feasible_year": 476.5,
+   "earliest_feasible_year": 458.5,
    "serial_line_finish_year": 4364.0,
-   "chain_depth": 50,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -42773,7 +43019,7 @@
    },
    "note": "Microplastics measured",
    "earliest_feasible_year": 334.5,
-   "serial_line_finish_year": 4389.0,
+   "serial_line_finish_year": 4399.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -42802,9 +43048,9 @@
     "contact_required": false
    },
    "note": "User-made video online.",
-   "earliest_feasible_year": 489.5,
-   "serial_line_finish_year": 4259.0,
-   "chain_depth": 51,
+   "earliest_feasible_year": 479.5,
+   "serial_line_finish_year": 4276.0,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -42831,9 +43077,9 @@
     "contact_required": false
    },
    "note": "Cameras and software inspect every part.",
-   "earliest_feasible_year": 465.5,
-   "serial_line_finish_year": 4227.0,
-   "chain_depth": 49,
+   "earliest_feasible_year": 447.5,
+   "serial_line_finish_year": 4220.0,
+   "chain_depth": 48,
    "serial_overrun": true
   },
   {
@@ -42862,7 +43108,7 @@
    },
    "note": "Gene markers read in seed guide selection",
    "earliest_feasible_year": 408.5,
-   "serial_line_finish_year": 4298.0,
+   "serial_line_finish_year": 4302.0,
    "chain_depth": 39,
    "serial_overrun": true
   },
@@ -42946,9 +43192,9 @@
     "contact_required": false
    },
    "note": "Turn-by-turn satellite routing in cars.",
-   "earliest_feasible_year": 480.5,
+   "earliest_feasible_year": 462.5,
    "serial_line_finish_year": 4370.0,
-   "chain_depth": 50,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -42976,7 +43222,7 @@
    },
    "note": "Carbon market",
    "earliest_feasible_year": 465.5,
-   "serial_line_finish_year": 4397.0,
+   "serial_line_finish_year": 4407.0,
    "chain_depth": 45,
    "serial_overrun": true
   },
@@ -43005,9 +43251,9 @@
     "contact_required": false
    },
    "note": "Rented computing in large data halls.",
-   "earliest_feasible_year": 490.5,
-   "serial_line_finish_year": 4257.0,
-   "chain_depth": 51,
+   "earliest_feasible_year": 480.5,
+   "serial_line_finish_year": 4274.0,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -43035,7 +43281,7 @@
    },
    "note": "Minimum indexed to median pay.",
    "earliest_feasible_year": 325.5,
-   "serial_line_finish_year": 4245.0,
+   "serial_line_finish_year": 4262.0,
    "chain_depth": 34,
    "serial_overrun": true
   },
@@ -43123,9 +43369,9 @@
     "contact_required": false
    },
    "note": "Touch-screen phones on the data network.",
-   "earliest_feasible_year": 480.5,
-   "serial_line_finish_year": 4267.0,
-   "chain_depth": 50,
+   "earliest_feasible_year": 472.5,
+   "serial_line_finish_year": 4284.0,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -43152,9 +43398,9 @@
     "contact_required": false
    },
    "note": "Wages sent home by phone",
-   "earliest_feasible_year": 474.5,
+   "earliest_feasible_year": 456.5,
    "serial_line_finish_year": 4258.0,
-   "chain_depth": 50,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -43181,9 +43427,9 @@
     "contact_required": false
    },
    "note": "Streaming on demand.",
-   "earliest_feasible_year": 495.5,
-   "serial_line_finish_year": 4264.0,
-   "chain_depth": 52,
+   "earliest_feasible_year": 485.5,
+   "serial_line_finish_year": 4281.0,
+   "chain_depth": 51,
    "serial_overrun": true
   },
   {
@@ -43210,9 +43456,9 @@
     "contact_required": false
    },
    "note": "Lasers fuse metal powder into parts.",
-   "earliest_feasible_year": 468.5,
-   "serial_line_finish_year": 4231.0,
-   "chain_depth": 50,
+   "earliest_feasible_year": 450.5,
+   "serial_line_finish_year": 4224.0,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -43240,7 +43486,7 @@
    },
    "note": "Smart meters balance the grid minute by minute.",
    "earliest_feasible_year": 466.5,
-   "serial_line_finish_year": 4228.0,
+   "serial_line_finish_year": 4244.0,
    "chain_depth": 48,
    "serial_overrun": true
   },
@@ -43269,7 +43515,7 @@
    },
    "note": "Vitamin traits bred into staples",
    "earliest_feasible_year": 414.5,
-   "serial_line_finish_year": 4304.0,
+   "serial_line_finish_year": 4308.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -43352,9 +43598,9 @@
     "contact_required": false
    },
    "note": "Pocket maps with live traffic.",
-   "earliest_feasible_year": 485.5,
+   "earliest_feasible_year": 477.5,
    "serial_line_finish_year": 4383.0,
-   "chain_depth": 51,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -43381,9 +43627,9 @@
     "contact_required": false
    },
    "note": "Species surveyed from water DNA",
-   "earliest_feasible_year": 493.5,
-   "serial_line_finish_year": 4403.0,
-   "chain_depth": 51,
+   "earliest_feasible_year": 475.5,
+   "serial_line_finish_year": 4413.0,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -43441,7 +43687,7 @@
    },
    "note": "Bank resolution and stress tests.",
    "earliest_feasible_year": 400.5,
-   "serial_line_finish_year": 4263.0,
+   "serial_line_finish_year": 4280.0,
    "chain_depth": 39,
    "serial_overrun": true
   },
@@ -43467,9 +43713,9 @@
     "contact_required": false
    },
    "note": "Tasks assigned by app.",
-   "earliest_feasible_year": 486.5,
-   "serial_line_finish_year": 4273.0,
-   "chain_depth": 51,
+   "earliest_feasible_year": 478.5,
+   "serial_line_finish_year": 4290.0,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -43496,9 +43742,9 @@
     "contact_required": false
    },
    "note": "Public data published online by default.",
-   "earliest_feasible_year": 495.5,
-   "serial_line_finish_year": 4268.0,
-   "chain_depth": 52,
+   "earliest_feasible_year": 485.5,
+   "serial_line_finish_year": 4285.0,
+   "chain_depth": 51,
    "serial_overrun": true
   },
   {
@@ -43525,9 +43771,9 @@
     "contact_required": false
    },
    "note": "Wide-bandgap chips switch high voltage efficiently.",
-   "earliest_feasible_year": 472.5,
-   "serial_line_finish_year": 4235.0,
-   "chain_depth": 50,
+   "earliest_feasible_year": 454.5,
+   "serial_line_finish_year": 4228.0,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -43555,7 +43801,7 @@
    },
    "note": "Drought and flood tolerance bred with markers",
    "earliest_feasible_year": 414.5,
-   "serial_line_finish_year": 4310.0,
+   "serial_line_finish_year": 4314.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -43581,9 +43827,9 @@
     "contact_required": false
    },
    "note": "Ride-hailing by pocket telephone.",
-   "earliest_feasible_year": 491.5,
+   "earliest_feasible_year": 483.5,
    "serial_line_finish_year": 4389.0,
-   "chain_depth": 52,
+   "chain_depth": 51,
    "serial_overrun": true
   },
   {
@@ -43611,7 +43857,7 @@
    },
    "note": "Adaptation plans",
    "earliest_feasible_year": 455.5,
-   "serial_line_finish_year": 4409.0,
+   "serial_line_finish_year": 4419.0,
    "chain_depth": 44,
    "serial_overrun": true
   },
@@ -43639,9 +43885,9 @@
     "contact_required": false
    },
    "note": "Protests organized by phone networks.",
-   "earliest_feasible_year": 505.5,
-   "serial_line_finish_year": 4273.0,
-   "chain_depth": 53,
+   "earliest_feasible_year": 495.5,
+   "serial_line_finish_year": 4290.0,
+   "chain_depth": 52,
    "serial_overrun": true
   },
   {
@@ -43666,9 +43912,9 @@
     "contact_required": false
    },
    "note": "Alerts pushed to every pocket telephone.",
-   "earliest_feasible_year": 476.5,
+   "earliest_feasible_year": 458.5,
    "serial_line_finish_year": 4401.0,
-   "chain_depth": 50,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -43697,9 +43943,9 @@
     "contact_required": false
    },
    "note": "Deep networks trained on data-hall hardware.",
-   "earliest_feasible_year": 500.5,
-   "serial_line_finish_year": 4277.0,
-   "chain_depth": 52,
+   "earliest_feasible_year": 490.5,
+   "serial_line_finish_year": 4294.0,
+   "chain_depth": 51,
    "serial_overrun": true
   },
   {
@@ -43726,9 +43972,9 @@
     "contact_required": false
    },
    "note": "Ranked feeds decide what people see.",
-   "earliest_feasible_year": 504.5,
-   "serial_line_finish_year": 4278.0,
-   "chain_depth": 53,
+   "earliest_feasible_year": 494.5,
+   "serial_line_finish_year": 4295.0,
+   "chain_depth": 52,
    "serial_overrun": true
   },
   {
@@ -43754,9 +44000,9 @@
     "contact_required": false
    },
    "note": "Algorithms schedule and rate workers.",
-   "earliest_feasible_year": 490.5,
-   "serial_line_finish_year": 4277.0,
-   "chain_depth": 52,
+   "earliest_feasible_year": 482.5,
+   "serial_line_finish_year": 4294.0,
+   "chain_depth": 51,
    "serial_overrun": true
   },
   {
@@ -43781,9 +44027,9 @@
     "contact_required": false
    },
    "note": "Light robots work beside people without cages.",
-   "earliest_feasible_year": 469.5,
-   "serial_line_finish_year": 4239.0,
-   "chain_depth": 50,
+   "earliest_feasible_year": 451.5,
+   "serial_line_finish_year": 4232.0,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -43808,9 +44054,9 @@
     "contact_required": false
    },
    "note": "Rooftop solar and home batteries.",
-   "earliest_feasible_year": 452.5,
-   "serial_line_finish_year": 4231.0,
-   "chain_depth": 46,
+   "earliest_feasible_year": 434.5,
+   "serial_line_finish_year": 4247.0,
+   "chain_depth": 45,
    "serial_overrun": true
   },
   {
@@ -43866,9 +44112,9 @@
     "contact_required": false
    },
    "note": "Robot fleets move goods in warehouses.",
-   "earliest_feasible_year": 486.5,
+   "earliest_feasible_year": 468.5,
    "serial_line_finish_year": 4399.0,
-   "chain_depth": 51,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -43923,7 +44169,7 @@
    },
    "note": "Attribution by probability",
    "earliest_feasible_year": 435.5,
-   "serial_line_finish_year": 4415.0,
+   "serial_line_finish_year": 4425.0,
    "chain_depth": 42,
    "serial_overrun": true
   },
@@ -43952,7 +44198,7 @@
    },
    "note": "Registered lobbyists and conflict rules.",
    "earliest_feasible_year": 377.5,
-   "serial_line_finish_year": 4273.0,
+   "serial_line_finish_year": 4290.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -43980,9 +44226,9 @@
     "contact_required": false
    },
    "note": "Wind farms on fixed and floating foundations.",
-   "earliest_feasible_year": 444.5,
-   "serial_line_finish_year": 4236.0,
-   "chain_depth": 44,
+   "earliest_feasible_year": 426.5,
+   "serial_line_finish_year": 4252.0,
+   "chain_depth": 43,
    "serial_overrun": true
   },
   {
@@ -44038,9 +44284,9 @@
     "contact_required": false
    },
    "note": "Births registered by phone",
-   "earliest_feasible_year": 474.5,
+   "earliest_feasible_year": 456.5,
    "serial_line_finish_year": 4272.0,
-   "chain_depth": 50,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -44068,7 +44314,7 @@
    },
    "note": "Interferometers detect spacetime ripples.",
    "earliest_feasible_year": 385.5,
-   "serial_line_finish_year": 4282.0,
+   "serial_line_finish_year": 4299.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -44095,7 +44341,7 @@
    },
    "note": "Towers of cross-laminated timber.",
    "earliest_feasible_year": 324.5,
-   "serial_line_finish_year": 4240.0,
+   "serial_line_finish_year": 4256.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -44123,9 +44369,9 @@
     "contact_required": false
    },
    "note": "Ancestry from a swab",
-   "earliest_feasible_year": 491.5,
+   "earliest_feasible_year": 473.5,
    "serial_line_finish_year": 4315.0,
-   "chain_depth": 51,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -44153,7 +44399,7 @@
    },
    "note": "Universal pledges",
    "earliest_feasible_year": 467.5,
-   "serial_line_finish_year": 4425.0,
+   "serial_line_finish_year": 4435.0,
    "chain_depth": 45,
    "serial_overrun": true
   },
@@ -44180,9 +44426,9 @@
     "contact_required": false
    },
    "note": "Organized disinformation campaigns.",
-   "earliest_feasible_year": 510.5,
-   "serial_line_finish_year": 4284.0,
-   "chain_depth": 54,
+   "earliest_feasible_year": 500.5,
+   "serial_line_finish_year": 4301.0,
+   "chain_depth": 53,
    "serial_overrun": true
   },
   {
@@ -44209,9 +44455,9 @@
     "contact_required": false
    },
    "note": "Short videos and memes.",
-   "earliest_feasible_year": 493.5,
-   "serial_line_finish_year": 4288.0,
-   "chain_depth": 52,
+   "earliest_feasible_year": 483.5,
+   "serial_line_finish_year": 4305.0,
+   "chain_depth": 51,
    "serial_overrun": true
   },
   {
@@ -44239,7 +44485,7 @@
    },
    "note": "Plastics made from plant sugars.",
    "earliest_feasible_year": 323.5,
-   "serial_line_finish_year": 4242.0,
+   "serial_line_finish_year": 4235.0,
    "chain_depth": 32,
    "serial_overrun": true
   },
@@ -44269,7 +44515,7 @@
    },
    "note": "Diet law extended to taxation",
    "earliest_feasible_year": 364.5,
-   "serial_line_finish_year": 4314.0,
+   "serial_line_finish_year": 4318.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -44297,9 +44543,9 @@
     "contact_required": false
    },
    "note": "Reusable boosters cut launch costs.",
-   "earliest_feasible_year": 469.5,
+   "earliest_feasible_year": 451.5,
    "serial_line_finish_year": 4426.0,
-   "chain_depth": 48,
+   "chain_depth": 47,
    "serial_overrun": true
   },
   {
@@ -44326,9 +44572,9 @@
     "contact_required": false
    },
    "note": "Right to ignore messages after hours.",
-   "earliest_feasible_year": 490.5,
-   "serial_line_finish_year": 4280.0,
-   "chain_depth": 52,
+   "earliest_feasible_year": 480.5,
+   "serial_line_finish_year": 4297.0,
+   "chain_depth": 51,
    "serial_overrun": true
   },
   {
@@ -44356,7 +44602,7 @@
    },
    "note": "Battery plants store surplus power.",
    "earliest_feasible_year": 404.5,
-   "serial_line_finish_year": 4246.0,
+   "serial_line_finish_year": 4262.0,
    "chain_depth": 39,
    "serial_overrun": true
   },
@@ -44385,9 +44631,9 @@
     "contact_required": false
    },
    "note": "Patient's cells re-engineered",
-   "earliest_feasible_year": 497.5,
+   "earliest_feasible_year": 479.5,
    "serial_line_finish_year": 4349.0,
-   "chain_depth": 51,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -44415,7 +44661,7 @@
    },
    "note": "Data rights widened for networked platforms.",
    "earliest_feasible_year": 391.5,
-   "serial_line_finish_year": 4278.0,
+   "serial_line_finish_year": 4295.0,
    "chain_depth": 41,
    "serial_overrun": true
   },
@@ -44444,9 +44690,9 @@
     "contact_required": false
    },
    "note": "Livestreamers and influencers.",
-   "earliest_feasible_year": 499.5,
-   "serial_line_finish_year": 4292.0,
-   "chain_depth": 53,
+   "earliest_feasible_year": 489.5,
+   "serial_line_finish_year": 4309.0,
+   "chain_depth": 52,
    "serial_overrun": true
   },
   {
@@ -44472,9 +44718,9 @@
     "contact_required": false
    },
    "note": "Whole plants mirrored by live models.",
-   "earliest_feasible_year": 494.5,
-   "serial_line_finish_year": 4261.0,
-   "chain_depth": 52,
+   "earliest_feasible_year": 484.5,
+   "serial_line_finish_year": 4278.0,
+   "chain_depth": 51,
    "serial_overrun": true
   },
   {
@@ -44502,7 +44748,7 @@
    },
    "note": "Targeted edits without foreign genes",
    "earliest_feasible_year": 434.5,
-   "serial_line_finish_year": 4324.0,
+   "serial_line_finish_year": 4328.0,
    "chain_depth": 41,
    "serial_overrun": true
   },
@@ -44557,9 +44803,9 @@
     "contact_required": false
    },
    "note": "Chips patterned with extreme ultraviolet light.",
-   "earliest_feasible_year": 476.5,
-   "serial_line_finish_year": 4269.0,
-   "chain_depth": 50,
+   "earliest_feasible_year": 458.5,
+   "serial_line_finish_year": 4286.0,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -44587,7 +44833,7 @@
    },
    "note": "Net-zero law",
    "earliest_feasible_year": 475.5,
-   "serial_line_finish_year": 4433.0,
+   "serial_line_finish_year": 4443.0,
    "chain_depth": 46,
    "serial_overrun": true
   },
@@ -44615,9 +44861,9 @@
     "contact_required": false
    },
    "note": "Hypersonic glide vehicles.",
-   "earliest_feasible_year": 469.5,
+   "earliest_feasible_year": 451.5,
    "serial_line_finish_year": 4411.0,
-   "chain_depth": 49,
+   "chain_depth": 48,
    "serial_overrun": true,
    "use_authority": "sovereign"
   },
@@ -44646,9 +44892,9 @@
     "contact_required": false
    },
    "note": "Large models trained on the web's text.",
-   "earliest_feasible_year": 512.5,
-   "serial_line_finish_year": 4294.0,
-   "chain_depth": 53,
+   "earliest_feasible_year": 502.5,
+   "serial_line_finish_year": 4311.0,
+   "chain_depth": 52,
    "serial_overrun": true
   },
   {
@@ -44676,9 +44922,9 @@
     "contact_required": false
    },
    "note": "Work, worship and school by video call.",
-   "earliest_feasible_year": 501.5,
-   "serial_line_finish_year": 4298.0,
-   "chain_depth": 53,
+   "earliest_feasible_year": 491.5,
+   "serial_line_finish_year": 4315.0,
+   "chain_depth": 52,
    "serial_overrun": true
   },
   {
@@ -44704,7 +44950,7 @@
    },
    "note": "Parks and permeable paving soak up cloudbursts.",
    "earliest_feasible_year": 459.5,
-   "serial_line_finish_year": 4413.0,
+   "serial_line_finish_year": 4423.0,
    "chain_depth": 45,
    "serial_overrun": true
   },
@@ -44734,7 +44980,7 @@
    },
    "note": "Gene-carrying microbes brew milk and egg proteins",
    "earliest_feasible_year": 420.5,
-   "serial_line_finish_year": 4332.0,
+   "serial_line_finish_year": 4336.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -44763,9 +45009,9 @@
     "contact_required": false
    },
    "note": "Vaccine designed from the read genome",
-   "earliest_feasible_year": 499.5,
+   "earliest_feasible_year": 481.5,
    "serial_line_finish_year": 4361.0,
-   "chain_depth": 51,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -44853,7 +45099,7 @@
    },
    "note": "Realms agree a minimum tax on large firms.",
    "earliest_feasible_year": 367.5,
-   "serial_line_finish_year": 4283.0,
+   "serial_line_finish_year": 4300.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -44881,9 +45127,9 @@
     "contact_required": false
    },
    "note": "Platform workers ruled employees.",
-   "earliest_feasible_year": 490.5,
-   "serial_line_finish_year": 4284.0,
-   "chain_depth": 52,
+   "earliest_feasible_year": 482.5,
+   "serial_line_finish_year": 4301.0,
+   "chain_depth": 51,
    "serial_overrun": true
   },
   {
@@ -44908,7 +45154,7 @@
    },
    "note": "Cobalt-free iron-phosphate cells.",
    "earliest_feasible_year": 401.5,
-   "serial_line_finish_year": 4272.0,
+   "serial_line_finish_year": 4289.0,
    "chain_depth": 39,
    "serial_overrun": true
   },
@@ -44963,9 +45209,9 @@
     "contact_required": false
    },
    "note": "Visas for remote workers",
-   "earliest_feasible_year": 491.5,
+   "earliest_feasible_year": 481.5,
    "serial_line_finish_year": 4324.0,
-   "chain_depth": 52,
+   "chain_depth": 51,
    "serial_overrun": true
   },
   {
@@ -45020,8 +45266,8 @@
     "contact_required": false
    },
    "note": "Methane seen from orbit",
-   "earliest_feasible_year": 415.5,
-   "serial_line_finish_year": 4438.0,
+   "earliest_feasible_year": 434.5,
+   "serial_line_finish_year": 4448.0,
    "chain_depth": 41,
    "serial_overrun": true
   },
@@ -45049,9 +45295,9 @@
     "contact_required": false
    },
    "note": "Limits on electronic monitoring.",
-   "earliest_feasible_year": 493.5,
-   "serial_line_finish_year": 4287.0,
-   "chain_depth": 53,
+   "earliest_feasible_year": 485.5,
+   "serial_line_finish_year": 4304.0,
+   "chain_depth": 52,
    "serial_overrun": true
   },
   {
@@ -45079,7 +45325,7 @@
    },
    "note": "Heat pumps and district heat replace fuel burning.",
    "earliest_feasible_year": 373.5,
-   "serial_line_finish_year": 4417.0,
+   "serial_line_finish_year": 4427.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -45135,9 +45381,9 @@
     "contact_required": false
    },
    "note": "Drones deliver parcels in licensed zones.",
-   "earliest_feasible_year": 482.5,
+   "earliest_feasible_year": 464.5,
    "serial_line_finish_year": 4448.0,
-   "chain_depth": 50,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -45165,7 +45411,7 @@
    },
    "note": "Thirty percent protected",
    "earliest_feasible_year": 420.5,
-   "serial_line_finish_year": 4444.0,
+   "serial_line_finish_year": 4454.0,
    "chain_depth": 42,
    "serial_overrun": true
   },
@@ -45192,9 +45438,9 @@
     "contact_required": false
    },
    "note": "Cheap drones spot and strike at the front.",
-   "earliest_feasible_year": 482.5,
+   "earliest_feasible_year": 464.5,
    "serial_line_finish_year": 4419.0,
-   "chain_depth": 50,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -45220,9 +45466,9 @@
     "contact_required": false
    },
    "note": "Learned models generate images and music.",
-   "earliest_feasible_year": 506.5,
-   "serial_line_finish_year": 4304.0,
-   "chain_depth": 53,
+   "earliest_feasible_year": 496.5,
+   "serial_line_finish_year": 4321.0,
+   "chain_depth": 52,
    "serial_overrun": true
   },
   {
@@ -45254,7 +45500,7 @@
    },
    "note": "Water split at scale with surplus clean power.",
    "earliest_feasible_year": 394.5,
-   "serial_line_finish_year": 4277.0,
+   "serial_line_finish_year": 4294.0,
    "chain_depth": 38,
    "serial_overrun": true
   },
@@ -45284,7 +45530,7 @@
    },
    "note": "Animal cells grown in tanks",
    "earliest_feasible_year": 358.5,
-   "serial_line_finish_year": 4342.0,
+   "serial_line_finish_year": 4346.0,
    "chain_depth": 36,
    "serial_overrun": true
   },
@@ -45313,9 +45559,9 @@
     "contact_required": false
    },
    "note": "Edited blood stem cells",
-   "earliest_feasible_year": 507.5,
+   "earliest_feasible_year": 489.5,
    "serial_line_finish_year": 4385.0,
-   "chain_depth": 52,
+   "chain_depth": 51,
    "serial_overrun": true
   },
   {
@@ -45343,7 +45589,7 @@
    },
    "note": "Loss-and-damage fund",
    "earliest_feasible_year": 472.5,
-   "serial_line_finish_year": 4449.0,
+   "serial_line_finish_year": 4459.0,
    "chain_depth": 46,
    "serial_overrun": true
   },
@@ -45371,9 +45617,9 @@
     "contact_required": false
    },
    "note": "Risk-tiered rules for learned machines.",
-   "earliest_feasible_year": 518.5,
-   "serial_line_finish_year": 4300.0,
-   "chain_depth": 54,
+   "earliest_feasible_year": 508.5,
+   "serial_line_finish_year": 4317.0,
+   "chain_depth": 53,
    "serial_overrun": true
   },
   {
@@ -45400,7 +45646,7 @@
    },
    "note": "Four-day week trials.",
    "earliest_feasible_year": 330.5,
-   "serial_line_finish_year": 4291.0,
+   "serial_line_finish_year": 4308.0,
    "chain_depth": 35,
    "serial_overrun": true
   },
@@ -45430,7 +45676,7 @@
    },
    "note": "Engineered microbes brew chemicals in tanks.",
    "earliest_feasible_year": 416.5,
-   "serial_line_finish_year": 4281.0,
+   "serial_line_finish_year": 4298.0,
    "chain_depth": 40,
    "serial_overrun": true
   },
@@ -45456,9 +45702,9 @@
     "contact_required": false
    },
    "note": "Gantry machines print houses in concrete.",
-   "earliest_feasible_year": 467.5,
-   "serial_line_finish_year": 4420.0,
-   "chain_depth": 50,
+   "earliest_feasible_year": 449.5,
+   "serial_line_finish_year": 4430.0,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -45486,7 +45732,7 @@
    },
    "note": "Carers' leave and pension credits.",
    "earliest_feasible_year": 292.5,
-   "serial_line_finish_year": 4294.0,
+   "serial_line_finish_year": 4311.0,
    "chain_depth": 30,
    "serial_overrun": true
   },
@@ -45516,9 +45762,9 @@
     "contact_required": false
    },
    "note": "Small error-corrected quantum machines.",
-   "earliest_feasible_year": 478.5,
-   "serial_line_finish_year": 4304.0,
-   "chain_depth": 50,
+   "earliest_feasible_year": 460.5,
+   "serial_line_finish_year": 4321.0,
+   "chain_depth": 49,
    "serial_overrun": true
   },
   {
@@ -45546,7 +45792,7 @@
    },
    "note": "Outdoor work halted in extreme heat.",
    "earliest_feasible_year": 324.5,
-   "serial_line_finish_year": 4297.0,
+   "serial_line_finish_year": 4314.0,
    "chain_depth": 33,
    "serial_overrun": true
   },
@@ -45573,7 +45819,7 @@
    },
    "note": "Old buildings retrofitted to near-zero energy.",
    "earliest_feasible_year": 377.5,
-   "serial_line_finish_year": 4424.0,
+   "serial_line_finish_year": 4434.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -45603,7 +45849,7 @@
    },
    "note": "Engineered microbes coat seed to fix nitrogen",
    "earliest_feasible_year": 440.5,
-   "serial_line_finish_year": 4348.0,
+   "serial_line_finish_year": 4352.0,
    "chain_depth": 42,
    "serial_overrun": true
   },
@@ -45631,9 +45877,9 @@
     "contact_required": false
    },
    "note": "Learned models read scans",
-   "earliest_feasible_year": 506.5,
+   "earliest_feasible_year": 496.5,
    "serial_line_finish_year": 4391.0,
-   "chain_depth": 53,
+   "chain_depth": 52,
    "serial_overrun": true
   },
   {
@@ -45685,9 +45931,9 @@
     "contact_required": false
    },
    "note": "Machine assistants take routine desk work.",
-   "earliest_feasible_year": 518.5,
-   "serial_line_finish_year": 4303.0,
-   "chain_depth": 54,
+   "earliest_feasible_year": 508.5,
+   "serial_line_finish_year": 4320.0,
+   "chain_depth": 53,
    "serial_overrun": true
   },
   {
@@ -45717,7 +45963,7 @@
    },
    "note": "Iron ore reduced with hydrogen instead of coke.",
    "earliest_feasible_year": 400.5,
-   "serial_line_finish_year": 4287.0,
+   "serial_line_finish_year": 4304.0,
    "chain_depth": 39,
    "serial_overrun": true
   },
@@ -45745,7 +45991,7 @@
    },
    "note": "Cement burned with less carbon, the rest captured.",
    "earliest_feasible_year": 199.5,
-   "serial_line_finish_year": 4429.0,
+   "serial_line_finish_year": 4439.0,
    "chain_depth": 23,
    "serial_overrun": true
   },
@@ -45774,7 +46020,7 @@
    },
    "note": "Planned resettlement (speculative)",
    "earliest_feasible_year": 463.5,
-   "serial_line_finish_year": 4417.0,
+   "serial_line_finish_year": 4427.0,
    "chain_depth": 45,
    "serial_overrun": true
   },
@@ -45802,9 +46048,9 @@
     "contact_required": false
    },
    "note": "Machines suggest targets; humans sign off.",
-   "earliest_feasible_year": 528.5,
+   "earliest_feasible_year": 518.5,
    "serial_line_finish_year": 4429.0,
-   "chain_depth": 55,
+   "chain_depth": 54,
    "serial_overrun": true,
    "use_authority": "human_signoff"
   },
@@ -45832,9 +46078,9 @@
     "contact_required": false
    },
    "note": "Auditors examine algorithmic decisions.",
-   "earliest_feasible_year": 524.5,
-   "serial_line_finish_year": 4306.0,
-   "chain_depth": 55,
+   "earliest_feasible_year": 514.5,
+   "serial_line_finish_year": 4323.0,
+   "chain_depth": 54,
    "serial_overrun": true
   },
   {
@@ -45861,9 +46107,9 @@
     "contact_required": false
    },
    "note": "Retraining accounts across a working life.",
-   "earliest_feasible_year": 465.5,
-   "serial_line_finish_year": 4306.0,
-   "chain_depth": 49,
+   "earliest_feasible_year": 447.5,
+   "serial_line_finish_year": 4323.0,
+   "chain_depth": 48,
    "serial_overrun": true
   },
   {
@@ -45890,9 +46136,9 @@
     "contact_required": false
    },
    "note": "Stacked hydroponics under electric light (speculative)",
-   "earliest_feasible_year": 442.5,
-   "serial_line_finish_year": 4354.0,
-   "chain_depth": 43,
+   "earliest_feasible_year": 424.5,
+   "serial_line_finish_year": 4358.0,
+   "chain_depth": 42,
    "serial_overrun": true
   },
   {
@@ -45947,9 +46193,9 @@
     "contact_required": false
    },
    "note": "Driverless lorries on fixed motorway corridors.",
-   "earliest_feasible_year": 512.5,
+   "earliest_feasible_year": 502.5,
    "serial_line_finish_year": 4470.0,
-   "chain_depth": 53,
+   "chain_depth": 52,
    "serial_overrun": true
   },
   {
@@ -45977,7 +46223,7 @@
    },
    "note": "Removal verified (speculative-plausible)",
    "earliest_feasible_year": 473.5,
-   "serial_line_finish_year": 4457.0,
+   "serial_line_finish_year": 4467.0,
    "chain_depth": 46,
    "serial_overrun": true
   },
@@ -46004,9 +46250,9 @@
     "contact_required": false
    },
    "note": "Tandem solar cells pass the silicon limit.",
-   "earliest_feasible_year": 446.5,
-   "serial_line_finish_year": 4292.0,
-   "chain_depth": 44,
+   "earliest_feasible_year": 428.5,
+   "serial_line_finish_year": 4309.0,
+   "chain_depth": 43,
    "serial_overrun": true
   },
   {
@@ -46033,9 +46279,9 @@
     "contact_required": false
    },
    "note": "Signed provenance for media.",
-   "earliest_feasible_year": 511.5,
-   "serial_line_finish_year": 4309.0,
-   "chain_depth": 54,
+   "earliest_feasible_year": 501.5,
+   "serial_line_finish_year": 4326.0,
+   "chain_depth": 53,
    "serial_overrun": true
   },
   {
@@ -46064,7 +46310,7 @@
    },
    "note": "Small factory-built reactors near towns.",
    "earliest_feasible_year": 454.5,
-   "serial_line_finish_year": 4435.0,
+   "serial_line_finish_year": 4445.0,
    "chain_depth": 43,
    "serial_overrun": true
   },
@@ -46091,9 +46337,9 @@
     "contact_required": false
    },
    "note": "Hereditary profile guides drug dose",
-   "earliest_feasible_year": 495.5,
+   "earliest_feasible_year": 477.5,
    "serial_line_finish_year": 4405.0,
-   "chain_depth": 51,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -46122,7 +46368,7 @@
    },
    "note": "Ecosystem accounts (speculative-plausible)",
    "earliest_feasible_year": 383.5,
-   "serial_line_finish_year": 4463.0,
+   "serial_line_finish_year": 4473.0,
    "chain_depth": 37,
    "serial_overrun": true
   },
@@ -46148,9 +46394,9 @@
     "contact_required": false
    },
    "note": "Directed energy shoots down drones.",
-   "earliest_feasible_year": 492.5,
+   "earliest_feasible_year": 474.5,
    "serial_line_finish_year": 4439.0,
-   "chain_depth": 51,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -46179,7 +46425,7 @@
    },
    "note": "Unconditional income piloted.",
    "earliest_feasible_year": 340.5,
-   "serial_line_finish_year": 4310.0,
+   "serial_line_finish_year": 4327.0,
    "chain_depth": 34,
    "serial_overrun": true
   },
@@ -46207,7 +46453,7 @@
    },
    "note": "Solid-electrolyte cells leave the pilot line.",
    "earliest_feasible_year": 403.5,
-   "serial_line_finish_year": 4297.0,
+   "serial_line_finish_year": 4314.0,
    "chain_depth": 39,
    "serial_overrun": true
   },
@@ -46236,9 +46482,9 @@
     "contact_required": false
    },
    "note": "Learned models plan and run robot trials.",
-   "earliest_feasible_year": 520.5,
-   "serial_line_finish_year": 4312.0,
-   "chain_depth": 54,
+   "earliest_feasible_year": 510.5,
+   "serial_line_finish_year": 4329.0,
+   "chain_depth": 53,
    "serial_overrun": true
   },
   {
@@ -46266,7 +46512,7 @@
    },
    "note": "Fluid womb support (speculative)",
    "earliest_feasible_year": 432.5,
-   "serial_line_finish_year": 4427.0,
+   "serial_line_finish_year": 4437.0,
    "chain_depth": 42,
    "serial_overrun": true
   },
@@ -46292,9 +46538,9 @@
     "contact_required": false
    },
    "note": "Electric air taxis on short hops.",
-   "earliest_feasible_year": 490.5,
+   "earliest_feasible_year": 472.5,
    "serial_line_finish_year": 4478.0,
-   "chain_depth": 51,
+   "chain_depth": 50,
    "serial_overrun": true
   },
   {
@@ -46322,9 +46568,9 @@
     "contact_required": false
    },
    "note": "Central-bank money issued digitally.",
-   "earliest_feasible_year": 502.5,
-   "serial_line_finish_year": 4312.0,
-   "chain_depth": 53,
+   "earliest_feasible_year": 492.5,
+   "serial_line_finish_year": 4329.0,
+   "chain_depth": 52,
    "serial_overrun": true
   },
   {
@@ -46351,9 +46597,9 @@
     "contact_required": false
    },
    "note": "Virtual venues for gatherings.",
-   "earliest_feasible_year": 500.5,
-   "serial_line_finish_year": 4314.0,
-   "chain_depth": 53,
+   "earliest_feasible_year": 490.5,
+   "serial_line_finish_year": 4331.0,
+   "chain_depth": 52,
    "serial_overrun": true
   },
   {
@@ -46382,7 +46628,7 @@
    },
    "note": "Climate models move varieties by district (speculative)",
    "earliest_feasible_year": 437.5,
-   "serial_line_finish_year": 4362.0,
+   "serial_line_finish_year": 4366.0,
    "chain_depth": 42,
    "serial_overrun": true
   },
@@ -46409,9 +46655,9 @@
     "contact_required": false
    },
    "note": "Vaccines held ready (speculative)",
-   "earliest_feasible_year": 511.5,
+   "earliest_feasible_year": 493.5,
    "serial_line_finish_year": 4417.0,
-   "chain_depth": 52,
+   "chain_depth": 51,
    "serial_overrun": true
   },
   {
@@ -46440,7 +46686,7 @@
    },
    "note": "Plastics cap (speculative-plausible)",
    "earliest_feasible_year": 414.5,
-   "serial_line_finish_year": 4469.0,
+   "serial_line_finish_year": 4479.0,
    "chain_depth": 41,
    "serial_overrun": true
   }

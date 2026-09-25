@@ -136,6 +136,21 @@ REWIRES = [
     ("crude_oil_pipelines", "requires_all", None, "rock_oil_well_drilling"),
     ("formula_programming_languages", "precedents", None, "stored_program_computer"),
     ("stored_program_control", "precedents", None, "stored_program_computer"),
+    # Band theory is the theory of the solid state (the game's semiconductor module
+    # names solid_state_physics as its foundation); same year, so no longer a precedent.
+    ("solid_state_physics", "precedents", "band_theory", None),
+    ("band_theory", "requires_all", None, "solid_state_physics"),
+    # Module alternatives the game keeps (semiconductor, glassworking and alumina tests):
+    # doping was practised before band theory explained it; the hydrogen flame needs a
+    # hydrogen source; caustic for alumina comes from soda ash or from brine cells.
+    ("semiconductor_doping", "requires_all", "band_theory", None),
+    ("semiconductor_doping", "precedents", None, "band_theory"),
+    ("hydrogen_flame_glassworking", "requires_any", None, ["water_electrolysis", "chloralkali_cells"]),
+    ("alumina_refining", "requires_all", "ammonia_soda_process", None),
+    ("alumina_refining", "requires_any", None, ["ammonia_soda_process", "chloralkali_cells"]),
+    # Adders reconverge from relay or diode logic (digital_logic_knowledge.gd).
+    ("binary_adders", "requires_all", "relay_logic", None),
+    ("binary_adders", "requires_any", None, ["relay_logic", "diode_logic"]),
 ]
 
 # Weapons of mass destruction and restricted means (GRAPH_3000_REPORT.md, Security list scope).
@@ -309,7 +324,10 @@ def main():
             if old_parent not in values:
                 problems.append("rewire %s.%s: %s is not there" % (item_id, field, old_parent))
                 continue
-            values[values.index(old_parent)] = new_parent
+            if new_parent is None:
+                values.remove(old_parent)
+            else:
+                values[values.index(old_parent)] = new_parent
         elif new_parent in values:
             problems.append("rewire %s.%s: %s already there" % (item_id, field, new_parent))
             continue
@@ -372,7 +390,8 @@ def main():
 
     before = dict(old)
     before.update({n["id"]: {k: (list(v) if isinstance(v, list) else v) for k, v in n.items()} for n in nodes})
-    identity_demotions = module_identities.demote_identity_edges(nodes, before)
+    identity_demotions = module_identities.demote_identity_edges(
+        nodes, before, module_identities.load_module_requires(ROOT, GAME_DIR if "GAME_DIR" in globals() else None))
     by_id = dict(old)
     by_id.update({n["id"]: n for n in nodes})
 
