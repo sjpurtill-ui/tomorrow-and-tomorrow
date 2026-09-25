@@ -568,6 +568,7 @@ static func _compose_reply(text:String,act:String,tdef:Dictionary,ctx:Dictionary
 		var out:Dictionary=rec.get("output",{})
 		var tpl:String=String(out.get("reply_template",""))
 		if tpl.is_empty(): tpl=extract_template(String(out.get("reply","")))
+		if preload("res://scripts/plain_speech.gd").is_maxim(tpl): continue   # stored before the plain-speech gate
 		# A stored line (even re-slotted) is spoken at most once per session.
 		if not tpl.strip_edges().is_empty() and not _used_record_templates.has(tpl):
 			candidates.append(tpl); from_record[tpl]=true

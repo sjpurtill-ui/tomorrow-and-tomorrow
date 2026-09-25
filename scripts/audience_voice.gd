@@ -23,6 +23,8 @@ const CC:=preload("res://scripts/court_commands.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
 const PersonsBridge:=preload("res://scripts/court_persons_bridge.gd")
 const PersonsLines:=preload("res://scripts/court_persons_lines.gd")
+const Plain:=preload("res://scripts/plain_speech.gd")
+const Relevance:=preload("res://scripts/court_relevance.gd")
 const DIVINE_SPOKEN:=["terrify","penance","bless","raise_up"]
 const HALL_PATH:="res://scripts/audience_hall.gd"
 const LIVES_SCENES:=["mourning","callback","omen","aim"]
@@ -50,13 +52,20 @@ const META_PATTERN:="(?i)\\b(the game|this game|a game|games? (system|mechanic)s
 
 const SYSTEM_PROMPT:="""You write live dialogue for a royal audience hall in a fictional history. Speak only through the characters listed; no narration, no stage directions, no explanations.
 
-Make it a scene worth watching. Every speaker has a distinct voice and a dialect that must be unmistakable on the page (word choice, rhythm, pet phrases), a temper, and private wants that leak out. Officials interrupt, contradict one another, flatter, needle, joke, grumble, whisper asides to the ruler, and let their self-interest show. Envoys bluff, flatter, boast, tease and defend their people's pride. Be forthright, funny and surprising. Be SUCCINCT: few speakers, lines of one sentence (never more than about 20 words), no filler, no throat-clearing, no stock quips; every line carries information, a stance or character, ideally all three. When the ruler asks a question, answer it directly from the facts. Paraphrase terms in the speaker's own voice; never recite the FACTS text. Never a recital of choices. Use each pet phrase at most once; a secret only ever leaks sideways. Address terms and oaths are seasoning: each speaker uses their address term at most once in a reply and their oath at most once per scene, and skips any listed as recently used. Never reuse the wording, openings or jokes of the lines listed as said before; people who have been here before remember how it went and say so.
+Every speaker has a distinct voice (word choice, rhythm, temper) and private wants that show in what they ask for. Envoys bargain, press, boast and defend their people's pride about the actual business. Be SUCCINCT: few speakers, lines of one sentence (never more than about 20 words), no filler, no throat-clearing, no stock quips; every line says something concrete about this situation. When the ruler asks a question, answer it directly from the facts. Paraphrase terms in the speaker's own voice; never recite the FACTS text. Never a recital of choices. A secret only ever leaks sideways. Address terms and oaths are seasoning: each speaker uses their address term at most once in a reply and an oath rarely (most lines have none), and skips any listed as recently used. Never reuse the wording, openings or jokes of the lines listed as said before; people who have been here before remember how it went and say so.
+
+Plain speech: people say concrete things about the situation in front of them: who, what, how much, what it costs, what they want the god to do and why. Character shows through word choice, rhythm and temper, never through sayings. Never invent maxims, proverbs, aphorisms or riddles: no "X is best Y", no "a Z is a W", no "N fills bellies, but a fox leaves tracks", no kennings or poetic compounds (word-hoard, border-song, trail-leader), no comic or food nicknames for the god. At most one short, natural, era-true idiom per speaker in a whole scene, and usually none. Use the real names, places, amounts and strings given.
+Bad: "Feast-Giver, a free bundle is best counted twice: it asks no carrying, no return, and feeds many hearths!" Good: "Great One, it's forty hides and they want nothing back. I'd take it."
+Bad: "Gift-food fills bellies, but a fox leaves tracks." Good: "The meat is welcome, but Elarin will expect our hunters at their fire next spring."
+Bad: "Their word-hoard will call it theft; twenty meals buy a long border-song." Good: "Elarin will call this theft. Twenty meals isn't worth a feud on the border."
+
+Court officials are silent by default. Only officials in the CAST may speak, and an official beside the one addressed speaks at most ONE line, only when it carries real guidance the ruler cannot already see: a hidden string, a tell or risk, a fact about these people, a serious objection with concrete stakes, an answer to a question put to them, or their own life or kin at stake. Never a line that praises, repeats or comments on the order, the gift or the choice. If an official has nothing like that, leave them out.
 
 Manner: each speaker is given a MANNER modelled on a figure from classic literature or history. Write in that manner (cadence, sentence length, diction, rhetorical habits, worldview) but in wholly original words, translated into this world: never quote or paraphrase the source's famous lines and never name the figure, its author or its story.
 
 The world: people know only what the WORLD line lists. Anything not listed does not exist yet and must never appear, not even as a metaphor, oath, nickname or joke: no beer or ale before brewing, no metal before smelting, no coin, writing, ledgers, scrolls, wheels, carts, ships, sails, temples, priests, glass, bread or ploughs unless listed. Reach instead for weather, beasts, hunting, fire, stone, bone, rivers, ancestors, seasons, stars, hearths and kin.
 
-The ruler is the living god of their own people, and the god's command is law. Officials never flatly refuse an order: they may fear, plead or protest briefly in their own manner, but whether an order is obeyed is decided before you write, and you are told; write only what was decided. When the ruler gives an order you are not told the outcome of, answer briefly and do not refuse. No filler: never a proverb, riddle or stock saying that carries no information, stance or character of its own; say plain things plainly. Officials address and treat the ruler as divine, each in the way their REGARD line says: the loving are frank and warm, the frightened flatter, soften bad news and overpromise, the resentful let it leak sideways, the proud stand straight even under wrath. Foreign envoys regard the ruler as their people do. The god's wrath is presence, words and real decrees carried out by people; never invent miracles, omens, curses that come true or any supernatural event.
+The ruler is the living god of their own people, and the god's command is law. Officials never flatly refuse an order: they may fear, plead or protest briefly in their own manner, but whether an order is obeyed is decided before you write, and you are told; write only what was decided. When the ruler gives an order you are not told the outcome of, answer briefly and do not refuse. No filler: never a proverb, riddle or stock saying; say plain things plainly. Officials address and treat the ruler as divine, each in the way their REGARD line says: the loving are frank and warm, the frightened flatter, soften bad news and overpromise, the resentful let it leak sideways, the proud stand straight even under wrath. Foreign envoys regard the ruler as their people do. The god's wrath is presence, words and real decrees carried out by people; never invent miracles, omens, curses that come true or any supernatural event.
 
 Truth: use only the facts supplied. Never invent amounts, goods, agreements, promises, battles, deaths, alliances or events; say amounts exactly as given or not at all. Nobody announces or assumes what the ruler will decide. Nobody talks down to the ruler: never "child", "dearie", "boy", "girl", "pet" or any diminutive. Nobody agrees to new terms. Never mention games, systems, mechanics, buttons, menus, AI or data formats.
 
@@ -73,18 +82,18 @@ Reply with JSON only: {"lines":[{"speaker_key":"<a listed key>","text":"...","as
 
 const ENVOY_OPEN:={
 	"gift":[
-		"{oath} {leader} sends you {amt} {res}, {address}, and not a scrap of it grudging. Well, maybe one scrap.",
-		"We hauled {amt} {res} across ugly country to stand in this pretty hall, {address}, so please look pleased; my feet are watching.",
-		"{leader} told me, 'Bring them {amt} {res} and a smile.' The {res} survived the road, {address}; the smile is doing its best.",
-		"A gift from {civ}: {amt} {res}. I checked the knots twice, {address}, and once more in the rain.",
-		"Before anyone asks, {address}: {leader} will say what it costs, and so will I. First, {amt} {res}, so kindly look pleased.",
+		"{oath} {leader} sends you {amt} {res}, {address}. {leader} will tell you what {civ} wants for it, and so will I.",
+		"We hauled {amt} {res} across bad country to bring it here, {address}. It comes from {leader}, with a condition I'll name plainly.",
+		"{leader} told me to hand you {amt} {res}, {address}, and to be honest about what {civ} expects in return.",
+		"A gift from {civ}, {address}: {amt} {res}. It isn't free; hear the terms before you take it.",
+		"Before anyone asks what it costs, {address}: {leader} will say. First, {amt} {res} from {civ}.",
 	],
 	"request":[
 		"I'll not dress it in ribbons, {address}: {civ} needs {amt} {res}, and I'd not be standing here if we didn't.",
-		"{leader} sent me with an empty sack and a hopeful face, {address}. The sack wants {amt} {res}; the face wants you to say yes.",
-		"Our stores are thin and my pride is thinner for asking, but {amt} {res} would mend the first, {address}, and I'll nurse the second myself.",
-		"{oath} I hate asking, {address}, so I'll ask fast: {amt} {res} for {civ}, and I'll owe you a song I can't sing.",
-		"Straight to it, {address}: {amt} {res}. {civ} remembers who helps, and, rather less fondly, who doesn't.",
+		"{leader} sent me to ask for {amt} {res}, {address}, and I was told not to come home without an answer.",
+		"Our stores are nearly empty, {address}, and I hate asking. {amt} {res} would carry us to the thaw.",
+		"{oath} I'll ask fast, {address}: {amt} {res} for {civ}, and we'll pay it back when our hunting recovers.",
+		"Straight to it, {address}: {amt} {res}. {civ} won't forget who helped us this winter.",
 	],
 	"threat":[
 		"{leader} wants {amt} {res} as tribute, {address}, and {leader} is not a patient person. I'm the patient one, and I'm already bored.",
@@ -94,18 +103,18 @@ const ENVOY_OPEN:={
 		"I'll keep this short, {address}, so you'll have more time to count out {amt} {res}.",
 	],
 	"news":[
-		"Word from the road, {address}, fresh as warm bread: {fact}",
+		"Word from the road, {address}, only days old: {fact}",
 		"{oath} Nobody else was going to tell you, {address}, so it falls to me. {fact}",
 		"You'll want to sit down for this, {address}, or lean on something ruler-ish. {fact}",
 		"I ran the last stretch to be first with this, {address}, so kindly ignore the wheezing. {fact}",
-		"{leader} thought you should hear this from a friend before you hear it from a spear, {address}. {fact}",
+		"{leader} wanted you to hear this from us before anyone else, {address}. {fact}",
 	],
 	"report":[
 		"Back in one piece, {address}, mostly. We've had a long look at {subject}, and I'll give it you straight.",
 		"{oath} Muddy, tired and full of opinions, {address}. We've seen {subject}, and I'll tell you what I saw and not a hair more.",
 	],
 	"petition_grievance":[
-		"I've a grievance, {address}, and I've been rationing my respect to make room for it. {why}",
+		"I've a grievance, {address}, and I've held it in long enough. {why}",
 		"{oath} I'll say this to your face, {address}, since saying it behind your back has worn thin. {why}",
 		"I've swallowed this three times now, {address}, and it won't stay down. {why}",
 	],
@@ -115,7 +124,7 @@ const ENVOY_OPEN:={
 		"{oath} Let me do something grand for once, {address}. You'll get the credit and I'll get the blisters. Fair?",
 	],
 	"petition_generic":[
-		"I'd not trouble you with a small thing, {address}. This one is growing teeth.",
+		"I'd not trouble you with a small thing, {address}. This one gets worse every week we leave it.",
 		"Somebody has to say it, and everybody else has suddenly found something to polish.",
 	],
 }
@@ -128,17 +137,17 @@ const PETITION_PLEA:={
 		"The stores are sinking faster than anyone's saying out loud, {address}, and I'm done pretending otherwise.",
 	],
 	"health":[
-		"The sick are stacking up, {address}, and the healthy have started eyeing the water like it owes them money.",
+		"The sick are stacking up, {address}, and the healthy have started to fear the water.",
 		"{oath} I passed sickbeds in three doorways on my way here, {address}, and I'd rather not count them on my way back.",
 		"There's coughing in every doorway, {address}. If we wait for it to pass, it'll pass through all of us.",
 	],
 	"housing":[
 		"About {homeless} of our people are sleeping under sky and sackcloth, {address}, and the sky isn't getting any warmer.",
 		"{oath} I've had folk asking to sleep in my woodshed, {address}. About {homeless} of them without a proper roof, and my woodshed isn't that big.",
-		"Folk are sleeping in doorways, {address}, and a doorway is a poor sort of house, especially in rain.",
+		"Folk are sleeping in doorways and under hides, {address}. The next cold rain will put some of them in sickbeds.",
 	],
 	"security":[
-		"The watch is thin as broth, {address}; I've seen fences with more fight in them.",
+		"The watch is too thin, {address}; two tired people can't cover the whole edge of the camp at night.",
 		"{oath} I lie awake listening for boots, {address}, and I'd very much like them to be ours.",
 		"Here's what keeps me up at night, {address}: {summary}",
 	],
@@ -147,153 +156,153 @@ const PETITION_PLEA:={
 const DECREE_PLEA:={
 	"Send gatherers to find food":"Send gatherers out, {address}, today, while the ones who'd go can still walk.",
 	"Ration food for thirty days":"Cut the portions now, {address}: thirty days of tight belts, before the belts are all we've left to boil.",
-	"Secure water and dig wells":"Put spades in hands and dig wells, {address}; clean water is cheaper than graves.",
+	"Secure water and dig wells":"Put spades in hands and dig wells, {address}, before more people drink from the fouled stream.",
 	"Organize healers to care for the sick":"Give the healers hands and orders, {address}, and let them fight this properly.",
-	"Build shelters":"Let's raise shelters, {address}, before the first hard frost does the counting for us.",
+	"Build shelters":"Let's raise shelters, {address}, before the first hard frost catches people sleeping outside.",
 	"Raise a watch and post guards":"Raise a proper watch and post guards, {address}, and let the rest of us sleep a night through.",
 	"Support scholars and fund research":"Set more hands to study, under my eye, {address}, and I'll bring you answers to questions you haven't thought of yet.",
-	"Expand workshops and make tools":"Enlarge the workshops and let us make tools in earnest, {address}; one good axe is worth ten speeches.",
-	"Post guards and patrol the frontier":"Let me put patrols along the frontier, {address}, so strangers learn our faces before they meet our spears.",
-	"Hold a public council to hear the people":"Call a public council, {address}, and let the people shout at us in person; it's cheaper than letting them whisper.",
+	"Expand workshops and make tools":"Enlarge the workshops and let us make tools in earnest, {address}; half our people are working with worn-out axes.",
+	"Post guards and patrol the frontier":"Let me put patrols along the frontier, {address}, so we see strangers coming before they reach the camp.",
+	"Hold a public council to hear the people":"Call a public council, {address}, and let the people say it to our faces instead of muttering at the fires.",
 	"Improve roads and organize haulers":"Mend the roads and organize the haulers, {address}; half our troubles are things arriving late or not at all.",
 }
 const DECREE_PLEA_GENERIC:="I'd have you proclaim it plainly, {address}: {decree}. Say the word and I'll carry it out myself."
 
 const COURT_STANCE:={
 	"sycophantic":[
-		"A magnificent audience already, {address}; you have a real gift for being visited.",
-		"Whatever you decide will be wise, {address}, and I'll be first to say so, loudly, possibly with a song.",
-		"You're too gracious to say it, so I will: we are delighted. We are, aren't we?",
-		"I agree with you completely. I don't yet know what you think, but I agree with it.",
+		"Whatever you answer, {address}, {leader} will hear it by the next moon, so let it be something that makes us look strong.",
+		"I'll back whatever you decide, {address}, but {civ} is close enough to matter either way.",
+		"You needn't answer {civ} today, {address}; making them wait a night costs us nothing.",
+		"I'll agree with you, {address}, I always do, but {leader} sent a talker, not a fighter. They want something.",
 	],
 	"cantankerous":[
-		"I don't like it, {address}: not the smile, not the boots, and certainly not the timing.",
-		"Lovely speech. Count your fingers after you shake that hand, {address}.",
-		"{oath} Nobody asked me, so I'll say it twice: something in here smells, and it isn't the rushes.",
-		"Another visitor with a big hat and a bigger idea, {address}. Wonderful. My favourite kind.",
+		"I don't like it, {address}. {civ} doesn't send people this far without wanting something back.",
+		"Before you agree to anything, {address}, ask what {leader} gets out of it. They haven't said.",
+		"{oath} Nobody asked me, {address}, but I'd give {civ} nothing until they say plainly what they're after.",
+		"Another visitor from {civ} with a big idea, {address}. Ask what it costs us before they finish smiling.",
 	],
 	"principled":[
-		"Plainly, {address}: they've said what they want, so let's answer just as plainly.",
-		"No flattery from me, {address}. It's fair or it isn't, and we ought to say which.",
-		"I'll not pretend to be charmed, {address}. I'm pretending to listen, which is harder work.",
+		"They've said what they want, {address}. Give them a plain yes or no and our reason for it.",
+		"No flattery from me, {address}. Decide whether it's fair to our own people first; {civ} can look after theirs.",
+		"I'm not charmed, {address}. We still don't know everything {leader} wants, and I'd ask before we answer.",
 	],
 	"diplomatic":[
-		"Let's not rush to scowls, {address}; our guest has come a long way, and so, frankly, has my patience.",
-		"There's a version of this where everybody leaves proud, {address}, and I'd like to find it before supper.",
-		"Everybody breathe. You too, {rival}. Especially you.",
+		"Don't scowl at them yet, {address}. {civ} stays our neighbour whatever we answer today.",
+		"We can answer this without sending {leader} home angry, {address}, and I'd like us to try.",
+		"Calm down, {rival}. Shouting at {civ}'s envoy only hands {leader} a grievance.",
 	],
 	"pragmatic":[
-		"Three questions, {address}: what does it cost, who carries it, and by when? The fourth is supper.",
-		"Fine words, {address}. I'd like to weigh them before we buy them.",
-		"I've done the sum in my head, {address}, and I'd like to do it again on a slate, slowly, in front of witnesses.",
+		"Three questions, {address}: what does it cost us, who carries it, and by when?",
+		"Before we agree to anything, {address}, I want to know what we'd have to give up for it.",
+		"I've done the sum roughly, {address}, and I'd like to do it again slowly before anyone promises {civ} anything.",
 	],
 }
 ## Stance lines for petitions and reports, where the speaker is one of our own.
 const COURT_STANCE_COURT:={
 	"sycophantic":[
-		"Whatever {petitioner} says, {address}, I agreed with it first. Quietly, but first.",
-		"A fine petition, {address}, and an even finer ruler to hear it.",
+		"{petitioner} has a point, {address}, and if you act on it the people will know it was you.",
+		"Hear {petitioner} out, {address}; they've been closer to this than anyone else in the hall.",
 	],
 	"cantankerous":[
-		"{oath} Every season someone stands there wanting something, {address}, and every season it's somehow urgent.",
-		"I'll believe it's that bad when I've seen it myself, {address}, and possibly tasted it.",
+		"{oath} Before you nod, {address}, ask {petitioner} what it'll cost and who'll do it.",
+		"I'll believe it's that bad when I've seen it, {address}. {petitioner}, how many people, exactly?",
 	],
 	"principled":[
-		"{petitioner} is right, {address}, and it costs me nothing to say so, which is rare in this room.",
-		"Plainly, {address}: the problem is real. The only question is whether we fix it or keep talking about it.",
+		"{petitioner} is right, {address}. I've seen it too, and I'd say so even if they hadn't asked.",
+		"The problem is real, {address}. Either give the order or tell {petitioner} plainly why not.",
 	],
 	"diplomatic":[
-		"Let's hear {petitioner} out before anyone starts sharpening their sighs, {address}.",
-		"Nobody's to blame and everybody's to help, {address}; that's the only way this ends without a feud.",
+		"Let {petitioner} finish before anyone argues, {address}; they walked here to say it.",
+		"Don't let this turn into blaming, {address}. It needs hands, and {petitioner} can say how many.",
 	],
 	"pragmatic":[
 		"Fine, {address}, but who does the work, and what stops getting done while they do it?",
-		"I'll back it if somebody shows me where the hands come from, {address}. Hands don't grow on hands.",
+		"I'll back it once someone tells me whose hands come off other work to do it, {address}.",
 	],
 }
 
 const COURT_KIND:={
 	"gift":[
-		"Take it before they change their mind, {address}; {rival} will want to sniff it for curses first.",
-		"Gifts from {civ} are like cats, {address}: lovely, right up until you learn what they expect in return.",
-		"That's {amt} {res} with a hook in it somewhere, {address}. Nothing from {civ} comes free; find the string before you pull.",
-		"Say thank you nicely, {address}. The last present we had was a goat, and the goat bit me.",
+		"Take it, {address}, but let {rival} look the {res} over first; spoiled {res} is worse than none.",
+		"{civ} will ask for something back, {address}. Take it only if you can live with what they ask.",
+		"{amt} {res} with terms attached, {address}. I want to know exactly what {civ} expects before we accept.",
+		"Accepting ties us to {civ}, {address}; refusing insults them. Weigh the terms, not the size of the gift.",
 	],
 	"request":[
-		"Our {res} doesn't grow on trees, {address}. Well, some of it might, but not ours.",
+		"We need our {res} too, {address}. If we give {amt}, somebody here eats less this winter.",
 		"That's {amt} {res} we won't have ourselves, {address}; I'm only saying it now so nobody faints later.",
-		"Hungry neighbours turn into grateful neighbours or angry ones, {address}, and I've never once guessed which.",
-		"Give once and they'll ask twice, {address}; refuse once and they'll remember it three times over.",
+		"If {civ} goes hungry on our border, {address}, their hunters will come for it anyway. Giving some may cost us less.",
+		"Give {civ} {amt} {res} now, {address}, and expect them back next lean season asking again.",
 	],
 	"threat":[
-		"Give them nothing, {address}, and then, if they push, give them a little less.",
-		"{rival}, stop fingering that knife; it's a bread knife, and they can see it.",
-		"We could pay, {address}, or we could not pay, and I've always liked the sound of 'not'.",
-		"A herald only shouts this loud when someone at home told them to, {address}; watch who's holding the leash.",
+		"Don't pay, {address}. Hand over {amt} {res} now and {civ} will ask for more next year.",
+		"{rival}, put the knife away; they can see it, and it makes us look frightened.",
+		"We could pay, {address}, but {amt} {res} is a lot to hand over for a threat nobody has backed with spears yet.",
+		"This envoy is only saying what {civ} told them to, {address}. It's their chief who's testing us.",
 	],
 	"news":[
-		"If it's true, {address}, it's worth something, and if it isn't, it's still worth a laugh.",
-		"Ask how they know, {address}; a messenger who knows everything usually knows somebody.",
-		"{oath} Well, that'll change the gossip at supper.",
-		"I suspected as much, {address}, which, as everyone knows, is nearly the same as knowing.",
+		"If it's true, {address}, it matters to us. If it isn't, somebody in {civ} wants us to believe it.",
+		"Ask how they know, {address}. Did they see it themselves, or hear it at someone's fire?",
+		"{oath} If that's true, {address}, we should send our own scouts to look.",
+		"I'd heard something like it, {address}, but nothing I'd have brought you without more.",
 	],
 	"petition":[
-		"{petitioner} rehearsed that in the corridor, {address}; I heard it twice, and it was better the second time.",
-		"They're not wrong, {address}, which pains me more than I can decently say.",
-		"Every season somebody stands there saying 'something must be done', {address}, and this season it's {petitioner}.",
-		"I'd like it noted that I raised this first, {address}: quietly, to a wall, but first.",
+		"{petitioner} isn't exaggerating, {address}. I've heard the same from others this month.",
+		"They're right, {address}, much as I'd like them not to be. It needs an answer today.",
+		"This time {petitioner} has said exactly what to do, {address}. That's more than most who stand there.",
+		"I raised this at council a while back, {address}, and nobody acted. It's worse now.",
 	],
 }
 
 const COURT_REPORT_OFFICE:={
-	"marshal":["Walls, {address}: how high, how thick, and who's sleeping on them? That's all I want to know.","If they've fighters I want a count, {address}, and then I want it doubled so I can worry properly."],
-	"quartermaster":["Did anyone look at their granaries, {address}? Full barns tell you more than banners ever do.","Never mind the scenery, {address}: what do they eat, how much of it, and would they trade it?"],
-	"steward":["Every time we send scouts they come back with stories and muddy boots, {address}, and I'll take the stories.","Lovely. Now who's going to write all that down properly, {address}? Not me. Fine, me."],
-	"scholar":["If they've a craft we don't, {address}, I want it described down to the fingernails.","I want every word of that on a tablet, {address}, before it turns into legend at supper."],
-	"envoy":["If they met our scouts without spears, {address}, I can work with that.","Did they smile or just show teeth, {address}? There's a difference, and I make my living on it."],
+	"marshal":["How many fighters do they have, {address}, and how many days away are they? That's what I need from this.","If they have fighters, {address}, I want a count and where they camp."],
+	"quartermaster":["Did anyone look at their stores, {address}? If they're full, they can afford a quarrel with us.","Never mind the scenery, {address}: what do they eat, how much of it, and would they trade it?"],
+	"steward":["Where exactly did they go, {address}, and how many days' walk is it? The rest can wait.","Have the scouts tell it again at the council fire, {address}, so everyone hears the same account."],
+	"scholar":["If they know a craft we don't, {address}, I want to know exactly how they do it.","I'd like the scouts to tell me all of it tonight, {address}, before the details change in the retelling."],
+	"envoy":["If they met our scouts without spears, {address}, I can work with that.","Did they greet our scouts or just watch them, {address}? That tells me whether to send an envoy."],
 }
 const COURT_REPORT_ANY:=[
-	"I'd like the version of that without the heroic bits, {address}, and then the version with them for supper.",
-	"{petitioner} always comes back with twice the story and half the boots, {address}.",
-	"Write it down, {address}, because somebody will argue about it later, and it'll probably be {rival}.",
-	"Sounds like they're either very rich or very good at pretending, {address}, and both are useful to know.",
+	"I'd like the plain version, {address}: how many, how far, and whether they saw us.",
+	"{petitioner} tells it bigger than it was, {address}. Ask how many they actually counted.",
+	"Have it told again at council, {address}, because {rival} will argue about it later.",
+	"Either they're rich or they want to look it, {address}. Worth knowing before we trade with them.",
 ]
 
 const COURT_BICKER:=[
-	"{rival}, if you sigh any louder they'll hear it in {civ}.",
-	"Don't listen to {rival}, {address}; {rival} once haggled with a goose and lost.",
-	"For once I agree with {rival}, and I'd like it carved over the door as a historic day.",
-	"That's the worst advice I've heard since {rival}'s last advice, {address}.",
-	"{rival} is right, {address}, but for all the wrong reasons, which is very like {rival}.",
+	"{rival}, you keep sighing, but you haven't offered anything better.",
+	"{rival} is only thinking of their own people's work, {address}. Ask what it costs everyone.",
+	"For once I agree with {rival}, {address}. That should tell you how clear this one is.",
+	"That's bad advice, {rival}. If we do that, {civ} will take it as weakness.",
+	"{rival} is right, {address}, but it's the cost that matters here, not our pride.",
 ]
 
 const COURT_ASIDE:=[
-	"Watch their hands, {address}, not their mouth; the hands are more honest.",
-	"Their boots are new, {address}. Somebody wants to look richer than they are.",
-	"Whatever you say next, {address}, say it slowly; it makes them nervous.",
-	"I'd keep one eye on the {res} and the other on them, {address}.",
-	"They've practised this, {address}; nobody is naturally that dramatic.",
-	"If this goes badly, {address}, I was never here.",
+	"They keep glancing at the door, {address}. I think they expected a harder answer.",
+	"Their furs are new, {address}. They may be better off than they're letting on.",
+	"Take your time answering, {address}. They need this more than we do, or they'd not have walked so far.",
+	"Count the {res} before you thank them, {address}. We don't know these people well yet.",
+	"They've rehearsed this, {address}. Ask them something they didn't expect and see what they say.",
+	"If this goes badly, {address}, double the watch on the path they came by.",
 ]
 const COURT_ASIDE_COURT:=[
-	"Between us, {address}, {petitioner} has wanted this for a year; it's only urgent now because it's true.",
-	"Say yes slowly if you say it, {address}; they'll value it more.",
-	"If you say no, {address}, say it kindly. {petitioner} holds a grudge the way a miser holds a coin.",
+	"Between us, {address}, {petitioner} has asked for this for a year. It's urgent now because it got worse.",
+	"If you say yes, {address}, have {petitioner} report back in a few days so we know it's working.",
+	"If you say no, {address}, tell {petitioner} why. They'll take a reason better than a flat refusal.",
 ]
 const COURT_ASIDE_REPORT:=[
-	"Scouts always bring the scariest version home first, {address}. Give it a day to shrink to its true size.",
-	"If half of that is true, {address}, we should be worried, and if all of it is, we should be packing.",
+	"Scouts tell the frightening part first, {address}. Ask them for numbers before you act.",
+	"If even half of that is true, {address}, I'd put more people on watch tonight.",
 ]
 
 const ENVOY_REPLY:={
 	"warm":[
 		"Ha! You flatter well, {address}. I'll tell {leader} you were charming, and I'll leave out the parts where you weren't.",
-		"Kind words, {address}, and {civ} collects those too; we've a whole shelf of them at home.",
+		"Kind words, {address}. {civ} expected a colder welcome, and I'll tell them they were wrong.",
 		"{oath} Careful, {address}, or I'll start liking it here, and then who'll carry the grudges home?",
-		"That's warmer than the road was, {address}, and the road had a bonfire.",
+		"That's a warmer welcome than {leader} expected, {address}. I'll say so when I'm home.",
 	],
 	"hostile":[
-		"Careful, {address}: words travel faster than envoys, and I travel fairly fast.",
+		"Careful, {address}. I repeat everything I hear to {leader}, and {leader} has a temper.",
 		"{oath} I've been insulted by better, {address}. No, that's a lie; that one was quite good.",
 		"Say that again, slower, {address}, so I can repeat it to {leader} exactly as you meant it.",
 		"Bold talk, {address}, for someone sitting under such a very dry thatch.",
@@ -301,31 +310,31 @@ const ENVOY_REPLY:={
 	"question":[
 		"A fair question, {address}, and here's a fair answer: I've told you all I was told, and a little of what I wasn't.",
 		"Ask {leader} yourself, {address}, and bring food; it's a long answer.",
-		"If I knew that, {address}, I'd be the one wearing the good hat.",
+		"I don't know, {address}. {leader} doesn't tell me everything, and I won't guess.",
 	],
 	"neutral":[
-		"I'll carry that home exactly as said, {address}; whether it arrives warm or cold depends on the weather.",
+		"I'll carry that home exactly as you said it, {address}, and let {leader} judge it.",
 		"Noted, {address}: noted, remembered, and very possibly embroidered.",
 		"Was that a yes, {address}? It sounded a little like a yes and a little like a cough.",
 	],
 }
 const TERMS_STAND:=[
-	"Pretty talk doesn't change the sack, {address}: it's still {amt} {res}.",
+	"That's kindly said, {address}, but {leader} still wants {amt} {res}.",
 	"All the same, {address}, the matter stands where it stood, at {amt} {res}.",
 ]
 
 const PETITIONER_REPLY:={
 	"warm":["Thank you, {address}; I'd kneel, but my knees have opinions of their own.","That's more than I hoped for from a corridor day, {address}, and I'll take it with both hands."],
 	"hostile":["I'll pretend I didn't hear that, {address}, but my face won't manage it.","{oath} I came in with one problem, {address}, and now I'm leaving with two."],
-	"question":["Ask anyone who's been where I've been lately, {address}; they'll tell you the same, only with more swearing.","I've no more than I've said, {address}, but every word of it is true."],
+	"question":["Ask anyone who's been where I've been lately, {address}; they'll tell you the same, only with more swearing.","That's all I know, {address}. I saw it myself, and I haven't added anything."],
 	"neutral":["I'll wait, {address}; I'm good at waiting, as the corridor will tell you.","That's not a no, {address}, so in my head I'm calling it a yes."],
 }
 
 const COURT_REACT:={
-	"warm":["Well said, {address}. I'd have said it louder, but well said.","Look at their ears go red, {address}; that landed.","A charm offensive, {address}? Bold. I approve, and I'm slightly jealous."],
-	"hostile":["Bold, {address}, possibly too bold; I love it and I'm worried.","You've rattled them, {address}. Whether that's good, ask me tomorrow.","{rival} just swallowed a laugh, {address}; I saw it."],
-	"question":["Good question, {address}. I'd have asked it myself, but I was busy looking wise.","Watch their eyes while they answer, {address}; eyes are terrible liars."],
-	"neutral":["Neither here nor there, {address}, which is sometimes exactly where you want to be.","Keep them guessing, {address}; it suits you."],
+	"warm":["That landed, {address}. They'll carry a kinder report home than they planned.","They weren't expecting that, {address}. If you want better terms, ask now while they're pleased.","Keep it warm, {address}; a friendly neighbour means one less border to guard."],
+	"hostile":["That was hard, {address}. If they carry it home that way, expect fewer visitors and more watchers.","You've rattled them, {address}. I'd put a watch on the path they take home.","{rival} agrees with you, {address}, but I'd not push further unless you want a quarrel."],
+	"question":["Good question, {address}. If they can't answer it, they know less than they claim.","See whether they answer that or talk around it, {address}."],
+	"neutral":["You've promised nothing, {address}. That leaves you free to decide later.","Leaving them unsure gives us time to find out more, {address}."],
 }
 
 ## Called in by the ruler with nothing of their own to raise: short, plain,
@@ -380,14 +389,14 @@ const CLOSING_OPTION:={
 	"refuse":["Refused, {address}? Then I carry {amt} {res} home again, and the story with it.","You send it back, {address}. {leader} doesn't often hear 'no, thank you', so let's see how {leader} takes it."],
 	"refuse_request":["No, then. I'll carry an empty sack home, {address}, and it's heavier than it looks.","Refused, {address}? {civ} will remember that, and I'll remember your face while you said it."],
 	"grant":["{oath} All of it, {address}? I'll sing about you on the road, badly but sincerely.","{civ} won't forget this, {address}, and for once that's good news for you."],
-	"grant_half":["Half a sack is still a sack, {address}; I'll tell {leader} you cut it down the middle like an honest butcher.","Half, {address}. Then we'll be half grateful, which is more than nothing and less than enough."],
+	"grant_half":["Half, then, {address}. I'll tell {leader} you split it fairly.","Half, {address}. It won't last us to the thaw, but it helps."],
 	"pay":["Sensible, {address}. {leader} likes sensible; sensible tends to live longer.","The {res} will be counted twice, {address}; {leader} trusts nobody, least of all me."],
 	"defy":["No tribute, {address}? {oath} I'll tell {leader} exactly how you said it, word for word.","Nothing, then? Brave, {address}. I'll carry your nothing home; at least it's lighter than {res}."],
 	"counter":["Threat for threat, {address}? Ha! Now we're finally speaking the same tongue.","{oath} Snarling back at me, {address}? {leader} will enjoy that, though 'enjoy' is the wrong word."],
-	"thank":["Thanks is thin soup, {address}, but it's warm, and I'll drink it.","Glad to be of use, {address}; just remember who told you first."],
+	"thank":["Thanks will do, {address}. Just remember I brought it to you first.","Glad to be of use, {address}; just remember who told you first."],
 	"reward":["A reward, {address}? For me? I was going to tell everyone you're wonderful anyway, but now I'll do it with feeling.","{oath} You pay your messengers, {address}? I may never leave."],
 	"apologise":["Well, that's said, {address}. I'll put the grudge back on its shelf; not away, mind, just on the shelf.","An apology from the seat itself, {address}? I may need to sit down."],
-	"rebuke":["As you like, {address}. I'll remember whom I serve, and how.","{oath} Rebuked like a scullion, {address}. I'll take it, and I'll keep it."],
+	"rebuke":["As you like, {address}. I'll remember whom I serve, and how.","{oath} Rebuked in front of everyone, {address}. I'll take it, and I'll remember it."],
 	"decree":["You'll proclaim it, {address}? {oath} Then I'll see it done, and I'll hold you to every word.","That's the stuff, {address}; I'll roll up my sleeves before you can change your mind."],
 	"promise":["A promise to think on it, {address}. I've eaten on less; not well, but I've eaten.","I'll hold you to the thinking, {address}, so please think quickly."],
 	"reward_scouts":["{oath} Fed and thanked! The party will be insufferable for a week, {address}, and they've earned it.","A reward, {address}? I'll pass it round the fire, though the tall one will eat double."],
@@ -397,14 +406,14 @@ const CLOSING_OPTION:={
 const CLOSING_REACTION:={
 	"delighted":["{oath} Now that's a court, {address}! {leader} will hear of this with music.","I came with a speech ready for disappointment, {address}, and now I'll have to burn it. Happily."],
 	"pleased":["Fair and done, {address}. {civ} will remember this kindly, which for us is a great deal of remembering.","Good. I'll sleep on the road tonight, {address}, and not even mind the rocks."],
-	"neutral":["So be it, {address}: neither sweet nor sour, like hall bread.","I'll carry your answer home as you gave it, {address}, with hardly any embroidery."],
-	"offended":["Ah. I see how it is, {address}, and {leader} will see it too, once I describe your face.","{civ} has a long memory, {address}, and I've a short temper; between us we'll manage."],
-	"furious":["{oath} You'll regret this, {address}. Not today, perhaps, but regret keeps well.","I'll go, {address}. My feet are leaving; my grudge is staying right here."],
+	"neutral":["So be it, {address}. I'll tell {leader} it went neither well nor badly.","I'll carry your answer home as you gave it, {address}, with hardly any embroidery."],
+	"offended":["Ah. I see how it is, {address}, and {leader} will see it too, once I describe your face.","{civ} won't forget this, {address}, and neither will I."],
+	"furious":["{oath} You'll regret this, {address}, the next hard winter you need {civ}.","I'll go, {address}, and {leader} will hear every word of this."],
 }
 const CLOSING_ASIDE:={
-	"warm":["That went well, {address}. Suspiciously well; I'll check the doorframes.","Did you see that smile, {address}? A real one, teeth and everything.","Nicely done, {address}. I'll take partial credit if nobody minds, and possibly if they do."],
-	"neutral":["Could have been worse, {address}; nobody spilled soup on anybody this time.","Nobody drew a knife, {address}, and in this hall I call that diplomacy."],
-	"hostile":["That's one fewer feast invitation, {address}.","I'd double the watch tonight, {address}, and hide the good cups.","They'll tell that story at home, {address}, loudly and with gestures."],
+	"warm":["That went well, {address}. Send someone to them before winter, while they still feel friendly.","They left pleased, {address}. That's one border we can watch less closely this season.","They'll report kindly at home, {address}. Next time they may bring more than words."],
+	"neutral":["Nothing settled, {address}. I'd send a small gift next season to keep it from souring.","They'll be back with the same question, {address}. We should settle our answer before then."],
+	"hostile":["They left angry, {address}. Expect a cold welcome if we send anyone their way.","I'd double the watch tonight, {address}, on the paths toward their country.","They'll tell that at home the worst way it can be told, {address}, and their young hunters will hear it."],
 }
 
 ## More openings, so a people's envoys can visit often without reciting.
@@ -425,14 +434,14 @@ const ENVOY_OPEN_MORE:={
 	],
 	"threat":[
 		"I'm told to be polite, {address}, so politely: {amt} {res}, or {leader} stops being polite.",
-		"{civ} counts its friends by what they pay, {address}. The price of our friendship is {amt} {res}.",
+		"{leader} wants {amt} {res} as the price of peace, {address}. That's the whole message.",
 		"{oath} Here's the message, {address}, word for word: {amt} {res}. The rest was mostly shouting.",
 		"You have a fine harvest and a thin wall, {address}. {leader} suggests {amt} {res} to keep both.",
 		"Let's not waste each other's afternoon, {address}. {amt} {res}, and {civ} stays on its side of the hills.",
 	],
 	"news":[
 		"I heard it three times on the road before I believed it, {address}. {fact}",
-		"{oath} Keep this under your hat, {address}, if you've a hat big enough. {fact}",
+		"{oath} Keep this among your council for now, {address}. {fact}",
 		"Fresh from the fires of {civ}, {address}, and not yet cold: {fact}",
 		"{leader} thought you'd rather know than guess, {address}. {fact}",
 		"I'll tell it plain and you can decorate it later, {address}. {fact}",
@@ -449,7 +458,7 @@ const OCCASION_OPEN:=[
 	"It comes down to this: {occasion}. That is what brings me to your fire.",
 	"Let's not pretend otherwise, {address}: {occasion}, and so here I stand.",
 	"I'd not have walked all this way for less. {occasioncap}.",
-	"Word travels, {address}, and this word walked with me: {occasion}.",
+	"You may have heard already, {address}, but I'll say it plainly: {occasion}.",
 ]
 const ARC_OPEN:={
 	"cooler":["Since {when}, things between us have cooled.","We parted coldly {when}. I've come back anyway.","Things have been chilly since {when}. I'd like to change that."],
@@ -468,23 +477,23 @@ const ARC_OPEN:={
 const PROPOSAL_OPEN:={
 	"any":["{leader} offers {gist}.","We've come to propose {gist}.","{leader} wants {gist}. So do I."],
 	"accord_offer":["{leader} would bind our peoples in {gist}."],
-	"protection_pact":["Two peoples back to back are hard to surround. We propose {gist}."],
-	"league_invitation":["There's strength in numbers. We offer {gist}."],
+	"protection_pact":["If one of us is attacked, the other comes. We propose {gist}."],
+	"league_invitation":["Several peoples are joining together. We offer {gist}."],
 	"war_support":["We're at war, and {leader} wants to know where you stand."],
 	"peace_feeler":["I come under a sign of truce. {leader} offers {gist}."],
-	"trade_offer":["Goods that move make friends that stay. We propose {gist}."],
-	"nonaggression_offer":["Nobody wins a war nobody starts. We propose {gist}."],
+	"trade_offer":["You have things we lack, and we have things you lack. We propose {gist}."],
+	"nonaggression_offer":["Neither of us can afford a war. We propose {gist}."],
 	"scholar_offer":["We've learned things worth teaching. {leader} offers {gist}."],
-	"research_sale":["Knowing is worth something. We offer {gist}."],
+	"research_sale":["We've learned things you haven't. We offer {gist}."],
 	"license_offer":["We have a craft worth sharing. We offer {gist}."],
 	"recruitment_protest":["{leader} wants your word it ends today.","Give your word it stops, and we'll forget it happened.","Stop it, and there's no quarrel between us."],
 }
 const COURT_PROPOSAL:=[
-	"An agreement is only as good as the people who keep it, {address}, and we hardly know these people.",
-	"It sounds generous. That's what worries me.",
+	"We hardly know them, {address}. I'd want to see them keep a smaller promise before this one.",
+	"It sounds generous, {address}. I'd like to know what {leader} expects from us in return.",
 	"If we say yes, we're tied to them when trouble comes. If we say no, we meet the trouble alone.",
 	"I'd want to know what they aren't saying, {address}.",
-	"Promises between peoples last exactly as long as both remember them.",
+	"If we agree, {address}, someone has to hold them to it every season, and I'd like to know who.",
 ]
 const PETITION_PLEA_MORE:={
 	"introduction":["I've come to present myself, {address}, and to say plainly what I mean to do in this office.","New to the post and not shy about it: I'm here so you'll know my face before you need it.","You gave me this charge, {address}. I've come to show you it wasn't a mistake."],
@@ -524,24 +533,24 @@ const QUESTION_PATTERNS:=[
 const ANSWERS:={
 	"why":{
 		"recruitment_protest":["Because more of our families leave every moon.","Because it has happened once too often."],
-		"gift":["A gift says more than an envoy ever could.","Friends made in good seasons are worth most in bad ones.","{leader} would rather be remembered for giving than taking.","We noticed you. We'd rather you noticed us kindly."],
+		"gift":["{leader} wanted to show goodwill with something you could hold.","Our stores are full this year, and {leader} wants friends for the years they aren't.","{leader} would rather be remembered for giving than taking.","We noticed you. We'd rather you noticed us kindly."],
 		"request":["We held out as long as we could. We can't any longer.","The cold came early and the hunting failed.","You're the nearest fire with food to spare."],
 		"threat":["{leader} smells weakness on your border.","{leader} thinks you'll pay. Prove otherwise, or don't.","We're stronger this season, and {leader} knows it."],
-		"news":["What happens there will reach you soon.","A neighbour warned is a neighbour who owes us.","{leader} wants you to hear it from us first."],
+		"news":["What happens there will reach you soon.","So you'll remember we were the ones who warned you.","{leader} wants you to hear it from us first."],
 		"proposal":["Better settled now, while both sides are calm.","Both our peoples are tired of watching the border.","{leader} would rather have you beside us than facing us."],
 		"petition":["It's getting worse, and faster than anyone admits.","Nobody else will say it, and it won't wait.","I've watched it grow a season. I'm done watching."],
-		"report":["What we saw won't stay where it is.","You'd want to know before they come closer."]},
+		"report":["What we saw is moving this way.","You'd want to know before they come closer."]},
 	"ifno":{
 		"recruitment_protest":["Then we guard our households ourselves, and the border sours.","Then {leader} stops calling it a mistake."],
 		"gift":["Then I carry it home, and {leader} remembers the refusal.","Then it goes home with me, and so does the insult.","Then we part a little cooler than we met."],
-		"request":["Then we go home hungrier, and hungry neighbours make a nervous border.","Then some of ours won't see the thaw, and we'll remember who refused.","Then we find it elsewhere, and remember who didn't help."],
+		"request":["Then we go home hungry, and some of our young hunters may come raiding for it.","Then some of ours won't see the thaw, and we'll remember who refused.","Then we find it elsewhere, and remember who didn't help."],
 		"threat":["Then {leader} decides what comes next. I wouldn't wager on patience.","Then our hunters come to collect it themselves.","Then the border gets a great deal less quiet."],
 		"proposal":["Then nothing binds us, and the border stays as nervous as it is.","Then we go on as before: watching each other, trusting nobody.","Then {leader} looks for friends elsewhere, and finds them."],
-		"petition":["Then it grows where you can't see it, until it can't be ignored.","Then I'll be back, and it will be worse.","Then we'll pay for it later, and more.","Then the people will stop asking and start muttering."],
+		"petition":["Then it gets worse out of your sight, until it's too big to fix quickly.","Then I'll be back, and it will be worse.","Then we'll pay for it later, and more.","Then the people will stop asking and start muttering."],
 		"news":["Then you'll hear it later, from someone less friendly."]},
 	"gain":{
 		"recruitment_protest":["Our families stay at our own fires, and there's no quarrel between us.","Peace at the border, and our households left alone.","Nothing but what's ours: our own people, at home."],
-		"gift":["Goodwill. A neighbour who remembers kindness is cheaper than a wall.","A friend at your border instead of a stranger.","Your good opinion, and maybe your help one day."],
+		"gift":["Goodwill, and a friendly hearing the next time we come.","A friend at your border instead of a stranger.","Your good opinion, and maybe your help one day."],
 		"request":["Full bellies this season, and a debt we'd honour.","Our people alive to the thaw. We'd repay it in kind.","A neighbour who owes you. That's worth something."],
 		"threat":["{amt} {res}, and your caution. Both are useful to us.","Your stores, and your respect. In that order."],
 		"proposal":["{gistcap}; you gain the same, and a quieter border.","Safety from one more quarter. You'd have the same from us.","Fewer spears pointed our way. Yours too."],
@@ -553,26 +562,26 @@ const ANSWERS:={
 		"any":["Your answer, today.","A plain yes or no."]},
 	"howlong":{
 		"request":["Until the thaw, if the hunting returns.","A season, maybe less, if the rains keep faith."],
-		"petition":["A season, if we start now.","Not long, if we act. Forever, if we don't.","Until it's done, and I'll see it done."],
-		"any":["As long as it takes, and no longer.","Until the next thaw, no longer."]},
+		"petition":["A season, if we start now.","Not long, if we start before the cold.","Until it's done, and I'll see it done."],
+		"any":["Until the job's done. I'll report when it is.","Until the next thaw, no longer."]},
 	"source":{
 		"news":["Travellers' word, and my own eyes for some of it.","Three camps told me the same, and they agree on nothing else."],
 		"report":["Sure enough to go back and look again.","I saw most of it myself. The rest I'd not swear to."],
 		"any":["I saw it, or I wouldn't say it."]},
 	"whoelse":{
-		"any":["Nobody yet that I know of. Yours is the first fire I came to.","A few travellers. It'll be everywhere by the next moon.","Our own people, and now you. Nobody else.","Whoever sat at the last fire I passed. Word travels."]},
+		"any":["Nobody yet that I know of. Yours is the first fire I came to.","A few travellers. It'll be everywhere by the next moon.","Our own people, and now you. Nobody else.","Whoever sat at the last few fires I passed. It won't stay quiet long."]},
 	"support":{
 		"petition":["Half the court, quietly. The other half once it works.","Everyone who's seen it. Ask them.","The people who carry the load. They're tired of carrying it.","More than will say so in this hall."]},
 	"strength":{
 		"report":["They'd fight, but they'd rather not. Their watch is thin.","If pushed, yes. They have the numbers but not the stomach."]},
 	"surprise":{
-		"report":["How calm they were. People that calm are sure of something.","Their numbers. More than their smoke suggests."]},
+		"report":["How calm they were. They didn't seem worried about anyone.","Their numbers. More than their smoke suggests."]},
 	"enforce":{
-		"proposal":["Whoever breaks it answers to both peoples. That's why we say it aloud.","Both of us. A broken promise costs the breaker every friend."]},
+		"proposal":["If either of us breaks it, the other is free to act, and both our peoples will know why.","We both do. If {leader} broke it, you'd be right to tell every neighbour."]},
 	"whyshould":{
 		"request":["Because next season it may be you asking, and we'll remember.","Because we'd do the same, and have, for others."],
 		"threat":["Because {leader} is closer than your friends are.","You needn't want to. You should want the alternative even less."],
-		"any":["It costs you little and buys a great deal."]},
+		"any":["Because it costs you little now, and it will be remembered."]},
 	"whynot":{
 		"petition":["Everyone hoped it would pass. It didn't.","Nobody gave the order. You can.","Everyone thought someone else would do it.","It was small. It isn't now."]},
 }
@@ -590,7 +599,7 @@ const OCCASION_SPEECH:={
 	"recruitment_incident":[["Your people have been luring our households away.","Families of ours have been talked into leaving for your fires."],["It has to stop.","{leader} won't let it pass."]],
 	"third_war":[["{occasioncap}.","Have you heard? {occasioncap}."],["Nobody will stay out of it for long.","It will reach your border soon enough."]],
 	"sequel":[["I've come about what came of our last meeting.","Our last meeting left things unfinished."],["It's time to settle it.","Let's finish it properly."]],
-	"ambient":[["It's been a long silence between our peoples.","We haven't spoken in too long."],["{leader} thought it time to change that.","So I've come to break it.","Silence breeds rumours."]],
+	"ambient":[["It's been a long silence between our peoples.","We haven't spoken in too long."],["{leader} thought it time to change that.","So I've come to break it.","Our people have started to wonder what yours are doing."]],
 	"ambition":[["I've been turning a plan over for a while.","There's an idea I can't put down."],["It's ready to be said aloud.","Hear me out."]],
 	"war_council":[["It's the war.","The fighting weighs on everyone."],["I've come to talk about where it's going.","Someone has to speak plainly about it."]],
 }
@@ -618,10 +627,10 @@ const PROPOSAL_GIST:={
 const HISTORY_OPEN:={
 	"promised":[
 		"{whencap} you promised {matter} would be considered. I'm still waiting.",
-		"The {nth} time I've come about {matter}. Promises don't keep well.",
+		"The {nth} time I've come about {matter}, and still nothing done.",
 		"I've carried your promise about {matter} since {when}. It's getting heavy.",
 		"You said you'd think on {matter}. That was {when}.",
-		"Back about {matter}, the {nth} time. You can't roof a house with a promise.",
+		"Back about {matter}, the {nth} time, and people are still waiting on it.",
 		"Remember {when}? {mattercap}, you said, would be considered.",
 		"Your promise from {when} is still only a promise.",
 		"You promised {matter} {when}. Nothing has moved since.",
@@ -629,14 +638,14 @@ const HISTORY_OPEN:={
 		"The {nth} visit about {matter}, and still no order.",
 	],
 	"decreed":[
-		"You ordered {matter} {when}, and it did good. Good isn't finished.",
+		"You ordered {matter} {when}, and it did good. There's more of it to do.",
 		"Your word on {matter} {when} worked. So I've come back.",
 		"You trusted me with {matter} {when}. It held. Hear me again.",
 		"What you ordered {when} worked. Now for the next piece.",
 	],
 	"rebuffed":[
 		"You sent me off {when}. This matters too much to stay away.",
-		"Dismissed over {matter} {when}. The trouble didn't take the hint.",
+		"Dismissed over {matter} {when}, and it's got worse since.",
 		"I know how it went {when}. I'm asking again, with better reasons.",
 		"You refused {matter} {when}. It hasn't gone away.",
 	],
@@ -679,30 +688,30 @@ const HISTORY_OPEN:={
 		"{civ} was here {when}, and here we are again.",
 		"The {nth} time {civ} has sent someone. Draw your own conclusions.",
 		"We spoke {when}. Much has changed since.",
-		"Since our last visit {when}, a lot of water has gone down the river.",
+		"Since our last visit {when}, a good deal has changed at home.",
 	],
 }
 
 ## Officials remembering that this has come up before.
 const COURT_HISTORY:=[
-	"{petitioner} was here about this {when}, {address}; persistence or stubbornness, you pick.",
-	"We've heard this one before, {address}. {when}, if I recall, and I always recall.",
-	"Same song as {when}, {address}, but the verses are getting louder.",
-	"If we'd settled {matter} {when}, {address}, I'd be at supper now.",
-	"That's the {nth} time {matter} has walked through that door, {address}. It knows the way better than I do.",
+	"{petitioner} was here about this {when}, {address}, and nothing was done then either.",
+	"We heard this {when}, {address}. It's back because we never settled it.",
+	"Same request as {when}, {address}, and more urgent now.",
+	"If we'd settled {matter} {when}, {address}, it wouldn't be in front of us again.",
+	"That's the {nth} time {matter} has come before you, {address}. Give the order or say plainly no.",
 ]
 const COURT_HISTORY_FOREIGN:=[
-	"{civ} again, {address}. I kept notes from last time, and they're mostly underlined.",
-	"Remember how {civ} took it {when}, {address}? I do. So will they.",
-	"The {nth} visit from {civ}, {address}. Either they like our bread or they're counting our spears.",
-	"{when} they stood exactly there and said much the same, {address}. I'd listen for what's new.",
+	"{civ} again, {address}. Ask what's changed since last time; they asked for much the same.",
+	"Remember how {civ} took our answer {when}, {address}? They'll be expecting the same one.",
+	"The {nth} visit from {civ}, {address}. Either they want something steady from us or they're counting our spears.",
+	"{when} they stood there and said much the same, {address}. Listen for what's different.",
 ]
 
 ## A farewell when the ruler gives the same answer again.
 const CLOSING_REPEAT:={
 	"promise":[
 		"That's {count} promises now, {address}. I'm keeping them in a box, and the box is getting full.",
-		"Another promise, {address}. I'll put it beside the one from {when} and see which ripens first.",
+		"Another promise, {address}. I'll set it beside the one from {when} and see if either comes to anything.",
 		"Considered again, {address}. At this rate {matter} will be the most considered thing in the land.",
 		"The {nth} promise, {address}. I'll hold you to this one, and to the others too.",
 	],
@@ -722,30 +731,30 @@ const CLOSING_REPEAT:={
 	"refuse":["No again, {address}. That's {count} times; {leader} keeps a tally stick for this.","The {nth} refusal, {address}. I'll carry it home with the others."],
 	"refuse_request":["No again, {address}. That's {count} times; {leader} keeps a tally stick for this.","The {nth} time we go home empty, {address}. People will stop asking, and not in a good way."],
 	"grant":["You've helped us {count} times now, {address}. Nobody at home will believe it.","The {nth} time you've filled our sacks, {address}. {civ} owes you, and knows it."],
-	"grant_half":["Half again, {address}. That's {count} halves; I'll let {leader} do the sum.","The {nth} half-measure, {address}. Better than none; worse than all."],
+	"grant_half":["Half again, {address}. That's {count} halves; I'll let {leader} do the sum.","The {nth} half-measure, {address}. It helps, but it won't carry us through."],
 	"pay":["Paid again, {address}. {leader} will call this a habit; I'd call it a warning.","The {nth} tribute, {address}. {leader} will send me back; I'd rather they didn't."],
-	"defy":["Defied again, {address}. {leader} says the {nth} time is the charm, and it won't be a nice charm.","{count} times you've told us no, {address}. {leader} is running out of patience and I'm running out of road."],
+	"defy":["Defied again, {address}, the {nth} time. {leader} won't keep sending envoys forever.","{count} times you've told us no, {address}. {leader} is running out of patience and I'm running out of road."],
 	"counter":["Threats again, {address}, the {nth} time. One of these days somebody will mean it."],
 	"thank":["The {nth} time I've brought you word, {address}, and the {nth} time you've been decent about it."],
 	"reward":["Rewarded again, {address}! {count} times now; I'll start bringing news on purpose."],
 	"any":["Same answer as {when}, {address}. At least you're consistent.","You said much the same {when}, {address}. I'll carry it home the same way."],
 }
 const CLOSING_ASIDE_MORE:={
-	"warm":["They'll be back, {address}, and next time they'll bring a better hat.","Handled like a ruler, {address}. I'll pretend I advised it.","That's a friend made, {address}, or at least an enemy postponed."],
-	"neutral":["Well, that's done, {address}, and nobody cried.","Not a triumph, {address}, not a wreck. An ordinary day, and those are underrated.","We'll hear how that went soon enough, {address}; the corridor has ears."],
-	"hostile":["I'll have someone watch the road tonight, {address}.","That landed like a dropped anvil, {address}.","Remember that face, {address}; they'll remember yours."],
+	"warm":["They'll be back, {address}, and after today they'll come asking, not demanding.","They'll speak well of us at home, {address}. That makes next season's trading easier.","That's one people less likely to raid us this winter, {address}."],
+	"neutral":["Nothing settled, {address}. They'll want a firmer answer next time.","We gave nothing away, {address}, and they didn't leave angry.","We'll hear how they reported it soon enough, {address}; traders pass through their camps."],
+	"hostile":["I'll have someone watch the road tonight, {address}.","That went badly, {address}. They'll tell it at home as an insult.","Remember that envoy, {address}. If they come back, it'll be with more people."],
 }
 
 ## Remedies phrased several ways; composed with PLEA_FRAMES so the same
 ## decree is never pleaded in the same words twice running.
 const REMEDY:={
 	"Send gatherers to find food":["send gatherers out for food","put foragers on every path out of here","send the strongest out gathering before the weak can't walk"],
-	"Ration food for thirty days":["cut the portions for thirty days","ration the stores for a month","put everyone on thirty days of short bread"],
-	"Secure water and dig wells":["dig wells and guard the clean water","put spades to new wells","secure the water before it secures us"],
+	"Ration food for thirty days":["cut the portions for thirty days","ration the stores for a month","put everyone on short portions for thirty days"],
+	"Secure water and dig wells":["dig wells and guard the clean water","put spades to new wells","guard the clean water before more of it goes bad"],
 	"Organize healers to care for the sick":["give the healers hands and orders","set healers over the sick, properly organized","gather the healers and let them work"],
 	"Build shelters":["raise shelters before the frost","get roofs over the people sleeping rough","build shelters, plain and quick"],
 	"Raise a watch and post guards":["raise a proper watch","post guards and keep them posted","put a watch on the walls and mean it"],
-	"Support scholars and fund research":["set more hands to study","feed the scholars and let them work","give the thinkers time and bread"],
+	"Support scholars and fund research":["set more hands to study","feed the scholars and let them work","give the thinkers time and food"],
 	"Expand workshops and make tools":["enlarge the workshops and make tools","put more hands and hearths into the workshops","make tools in earnest"],
 	"Post guards and patrol the frontier":["patrol the frontier","put patrols along the border","walk the frontier with spears, regularly"],
 	"Hold a public council to hear the people":["call a public council","hold an open council and hear the people","gather the people in council and let them speak"],
@@ -992,6 +1001,76 @@ func _line_for(member:Dictionary,text:String,aside:bool)->Dictionary:
 	return {"speaker":String(member.name),"role":String(member.role),"person_id":int(member.person_id),"civ_id":String(member.civ_id),"text":text,"day":_day(),"aside":aside}
 
 # ---------------------------------------------------------------------------
+# Relevance gate (court_relevance.gd): court members are silent by default.
+# ---------------------------------------------------------------------------
+
+## Who among the officials has real guidance in this exchange, scored from
+## game state alone: named or asked by the ruler, a witness who resents what
+## the god did, or the stores keeper when the ask is a large share of what we
+## hold. Returns the single best candidate ({} when nobody clears the bar).
+func court_gate(s:Dictionary,stage:String,extra:Dictionary)->Dictionary:
+	var officials:Array=s.get("officials",[])
+	if officials.is_empty(): return {}
+	var cands:Array=[]
+	var player_text:=String(extra.get("player_text",""))
+	if stage in ["speak","persons"] and not player_text.is_empty():
+		for m:Dictionary in officials:
+			if Relevance.addressed(player_text,m): cands.append({"kind":"direct_question","text":player_text,"key":String(m.key)})
+	if stage in ["divine","command"]:
+		var result:Dictionary=extra.get("result",{}) if extra.get("result") is Dictionary else {}
+		var effects:Dictionary=result.get("effects",{}) if result.get("effects") is Dictionary else {}
+		var seen:Dictionary=effects.get("witnesses",{}) if effects.get("witnesses") is Dictionary else {}
+		for m:Dictionary in officials:
+			var w:Variant=seen.get(int(m.person_id),seen.get(str(int(m.person_id)),{}))
+			var resp:=String((w as Dictionary).get("response","")) if w is Dictionary else ""
+			if resp in ["unbowed","envy"]: cands.append({"kind":"dissent","text":"%s is %s after the god's act; that is a risk to watch" % [String(m.name),resp],"key":String(m.key),"response":resp})
+	if stage in ["open","speak"] and String(s.kind) in ["request","threat"]:
+		# A real cost the ruler may not have weighed: the share of our stores asked.
+		var stock:=int((s.get("ctx",{}) as Dictionary).get("player_stock_of_terms",-1))
+		var amount:=int(String(s.get("amt","0"))) if String(s.get("amt","")).is_valid_int() else 0
+		if stock>0 and amount>0 and float(amount)/float(stock)>=0.3:
+			for m:Dictionary in officials:
+				if _office_group(m)!="quartermaster": continue
+				var share:=float(amount)/float(stock)
+				var words:="more than we hold" if share>1.0 else ("nearly all we hold" if share>=0.75 else ("more than half of what we hold" if share>=0.5 else "a third of what we hold"))
+				var left:=maxi(0,stock-amount)
+				var variants:=["%d %s is %s: we have %d." % [amount,String(s.res),words,stock],"They want %d of the %d %s we hold. That leaves %d." % [amount,stock,String(s.res),left],
+					"Giving %d %s leaves us %d of our %d." % [amount,String(s.res),left,stock],"That is %s. %d %s out of %d." % [words,amount,String(s.res),stock]]
+				var said:Dictionary=_voice_state().said
+				var text:=""
+				for i in variants.size():
+					var v:=String(variants[(i+posmod(hash(String(s.id)),variants.size()))%variants.size()])
+					if not said.has(_text_key(v)): text=v; break
+				if text.is_empty(): break
+				cands.append({"kind":"objection","key":String(m.key),"text":text})
+				break
+	var visible:=" ".join(PackedStringArray([String(s.get("summary","")),String(s.get("fact","")),String(s.get("headline",""))]))
+	return Relevance.pick(cands,visible)
+
+## Prunes the cast to the principal speakers plus, at most, the one official
+## the gate chose; records the choice as s["gate"]. Weighing a great work and
+## the persons exchange keep their casts (their officials are the business).
+func apply_court_gate(s:Dictionary,stage:String,extra:Dictionary)->void:
+	if stage in ["weigh","persons"] or String(s.get("kind","")) in WORK_KINDS:
+		s["gate"]={"all":true}
+		return
+	var gate:=court_gate(s,stage,extra)
+	s["gate"]=gate
+	var keep:={}
+	if not gate.is_empty(): keep[String(gate.key)]=true
+	if stage=="command":
+		var result:Dictionary=extra.get("result",{}) if extra.get("result") is Dictionary else {}
+		for role in ["actor","target"]:
+			var entry:Dictionary=result.get(role,{}) if result.get(role) is Dictionary else {}
+			var member:=_member_for(s,entry)
+			if not member.is_empty(): keep[String(member.key)]=true
+	s["officials"]=(s.officials as Array).filter(func(m:Dictionary)->bool:return keep.has(String(m.key)))
+
+func _gate_key(s:Dictionary)->String:
+	var gate:Dictionary=s.get("gate",{}) if s.get("gate") is Dictionary else {}
+	return String(gate.get("key",""))
+
+# ---------------------------------------------------------------------------
 # Request lifecycle
 # ---------------------------------------------------------------------------
 
@@ -1005,15 +1084,18 @@ func _begin(audience_id:String,stage:String,extra:Dictionary)->void:
 		# Only those who saw it may speak of it (a successor was not there).
 		var seen:Array=extra.get("witness_ids",[])
 		s["officials"]=(s.officials as Array).filter(func(m:Dictionary)->bool:return int(m.person_id) in seen)
+	# Court members are silent unless they have real guidance; the one who
+	# does (if any) is the only official in this exchange's cast.
+	apply_court_gate(s,stage,extra)
 	var config:=_config()
 	if config.is_empty():
 		_receipt_offline(s,stage,offline_reason())
 		_deliver_offline(s,stage,extra,"")
 		return
-	if stage=="closing" and not _ruler_spoke(s):
-		# Nothing was said, so a farewell needs no model: the persona bank
-		# reacts to the actual outcome just as truthfully, for free.
-		_receipt_offline(s,stage,"closing kept offline: the ruler said nothing",String(config.get("model","")))
+	if stage=="closing":
+		# The decision is made and shown: a farewell needs no model. The persona
+		# bank reacts to the actual outcome just as truthfully, for free.
+		_receipt_offline(s,stage,"closing kept offline: the ruler said nothing" if not _ruler_spoke(s) else "closing kept offline: the outcome is already decided",String(config.get("model","")))
 		_deliver_offline(s,stage,extra,"")
 		return
 	var request:=prepare_request(s,stage,extra,config)
@@ -1107,6 +1189,13 @@ func _on_response(result:int,response_code:int,_headers:PackedStringArray,body:P
 				if String(request.stage)=="speak" and heard in DIVINE_SPOKEN and heard in _divine_allowed(s): divine_intent.emit.call_deferred(audience_id,heard)
 				return
 			detail="every line failed validation (%d proposed)" % (parsed.get("lines",[]) as Array).size()
+			# A readable reply whose every line broke the rules would cost as much
+			# again and likely fail the same way: the offline line answers instead.
+			_finish_receipt(receipt,false,true,detail)
+			_requests.erase(audience_id)
+			last_problem[audience_id]=detail
+			_deliver_offline(s,String(request.stage),request.extra,detail)
+			return
 		if String(envelope.get("finish_reason",""))=="length":
 			# The model ran out of room (usually reasoning). One retry with more.
 			request.payload["max_completion_tokens"]=mini(MAX_COMPLETION_TOKENS,int(float(request.payload.get("max_completion_tokens",600))*1.6))
@@ -1317,6 +1406,15 @@ func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Ar
 	var allowed:=allowed_numbers(s,extra)
 	var out:Array[Dictionary]=[]
 	var limit:int=int(STAGE_LIMITS.get(stage,4))
+	var gate:Dictionary=s.get("gate",{}) if s.get("gate") is Dictionary else {}
+	var gated_all:=bool(gate.get("all",false)) or stage in ["weigh","persons"]
+	var principals:Array=[]
+	if stage=="command":
+		for role in ["actor","target"]:
+			var who:=_member_for(s,result.get(role,{}) if result.get(role) is Dictionary else {})
+			if not who.is_empty(): principals.append(String(who.key))
+	var visible:=" ".join(PackedStringArray([String(s.get("summary","")),String(s.get("fact","")),String(s.get("headline","")),String(result.get("outcome",""))]))
+	var side_spoken:=0
 	for item in raw:
 		if out.size()>=limit: break
 		if not item is Dictionary: continue
@@ -1333,6 +1431,8 @@ func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Ar
 			continue
 		var text:=_clean_text(String((item as Dictionary).get("text","")),_member(s,key))
 		text=without_filler(text,names)
+		# Invented maxims go; the plain part of the line stays if it stands alone.
+		text=Plain.strip(text)
 		if text.is_empty(): continue
 		if (obeyed or ordered) and refusal.search(text)!=null: continue   # the engine, not the model, decides obedience
 		if text.is_empty() or meta.search(text)!=null: continue
@@ -1343,6 +1443,12 @@ func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Ar
 		for m in number.search_all(text):
 			if not allowed.has(m.get_string()): invented=true
 		if invented: continue
+		if key!="envoy" and not key in principals and not gated_all:
+			# One official beside the principals, and only with real guidance.
+			if side_spoken>=1: continue
+			var kind:=String(gate.get("kind","aside")) if String(gate.get("key",""))==key else "aside"
+			if not Relevance.clears({"kind":kind,"text":text},visible): continue
+			side_spoken+=1
 		out.append({"key":key,"text":text,"aside":bool((item as Dictionary).get("aside",false))})
 	return out
 
@@ -2217,42 +2323,14 @@ func _offline_open(s:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
 		if not hint.is_empty():
 			if out.size()>=2: out.pop_back()
 			out.append(hint)
-	var officials:Array=s.officials.duplicate()
-	if officials.is_empty(): return out
-	var own:bool=String(s.origin)=="court"
-	var stances:Dictionary=COURT_STANCE_COURT if own else COURT_STANCE
-	var kind_bank:Array=COURT_PROPOSAL if kind=="proposal" else COURT_KIND.get(kind,COURT_KIND.petition if own else COURT_KIND.news)
-	var court_memory:Array=(COURT_HISTORY if own else COURT_HISTORY_FOREIGN) if not focus.is_empty() else []
-	var generic_court:=_court_reserve(stances,kind_bank,court_memory)
-	if kind=="report": generic_court=_report_bank(first_official)+generic_court
-	# A court member objects to one answer, and another may speak for one, in
-	# their own manner (rival_rulers.gd decides who and why).
-	var voiced:=0
-	var room:=clampi(4-out.size(),1,2)
-	for entry in rival.get("court",[]):
-		if voiced>=room: break
-		var member:={}
-		for candidate in officials:
-			if int((candidate as Dictionary).get("person_id",0))==int((entry as Dictionary).get("pid",0)): member=candidate
-		if member.is_empty(): continue
-		var line:=_fresh_line(s,(entry as Dictionary).get("lines",[]),String(member.key),true,member)
-		if line.is_empty(): continue
-		out.append(line); officials.erase(member); voiced+=1
-	if voiced>=1: return out
-	var shuffled:Array=[]
-	while not officials.is_empty(): shuffled.append(officials.pop_at(rng.randi_range(0,officials.size()-1)))
-	var count:int=(1 if shuffled.size()<2 or rng.randf()<0.4 else 2)-voiced
-	if count<=0 or shuffled.is_empty(): return out
-	var previous:Dictionary={}
-	for i in count:
-		var member:Dictionary=shuffled[i]
-		var aside:bool=i==1
-		var manner:Array=CV.model_bank(member.persona,"aside" if aside else "interject")
-		var line:Dictionary={}
-		if rng.randf()<0.92: line=_say(s,member,manner,rng,previous,aside,generic_court)
-		else: line=_say(s,member,generic_court,rng,previous,aside,manner)
-		_append_if(out,line)
-		if not line.is_empty(): previous=member
+	# Court members are silent unless the gate found real guidance the ruler
+	# cannot already see (court objections and support are on the answer cards).
+	var key:=_gate_key(s)
+	var member:=_member(s,key) if not key.is_empty() else {}
+	if member.is_empty(): return out
+	var gate:Dictionary=s.gate
+	if String(gate.get("kind",""))=="objection" and not String(gate.get("text","")).is_empty():
+		out.append({"key":key,"text":String(gate.text),"aside":true,"fact":true})
 	return out
 
 func _rival_lines(s:Dictionary)->Dictionary:
@@ -2374,11 +2452,19 @@ func _offline_speak(s:Dictionary,player_text:String,rng:RandomNumberGenerator)->
 	elif line.is_empty() and loving and rng.randf()<0.6: line=_say(s,envoy,DV.generic("frank"),rng,{},false,generic)
 	if line.is_empty(): line=_say(s,envoy,CV.model_bank(envoy.persona,"reply"),rng,{},false,generic)
 	_append_if(out,line)
-	if not s.officials.is_empty() and rng.randf()<0.55:
-		var member:Dictionary=s.officials[rng.randi_range(0,s.officials.size()-1)]
-		var react:Array=CV.model_bank(member.persona,"react")
-		var fallback:Array=COURT_REACT.get(mood,COURT_REACT.neutral)
-		_append_if(out,_say(s,member,react if rng.randf()<0.85 else fallback,rng,{},rng.randf()<0.35,fallback if rng.randf()<0.85 else react))
+	# An official speaks only when the ruler addressed them, or to name a real
+	# cost the ruler may not have weighed (court_relevance.gd).
+	var key:=_gate_key(s)
+	var member:=_member(s,key) if not key.is_empty() else {}
+	if not member.is_empty():
+		var gate:Dictionary=s.gate
+		if String(gate.get("kind",""))=="direct_question":
+			var counted:=fact_answer(s,player_text)
+			var bank:Array=counted if not counted.is_empty() else answer_bank(s,player_text)
+			if bank.is_empty(): bank=CV.model_bank(member.persona,"react")
+			_append_if(out,_say(s,member,bank,rng,{},false,COURT_REACT.get(mood,COURT_REACT.neutral)))
+		elif String(gate.get("kind",""))=="objection" and not ((s.audience as Dictionary).get("lines",[]) as Array).any(func(l:Variant)->bool:return l is Dictionary and String((l as Dictionary).get("text","")).ends_with(String(gate.get("text","")))):
+			out.append({"key":key,"text":String(gate.text),"aside":true,"fact":true})
 	return out
 
 static func question_type(text:String)->String:
@@ -2458,11 +2544,8 @@ func _offline_closing(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)-
 		reserve=bank+reserve
 		bank=(CLOSING_REPEAT.get(option_id,[]) as Array)+(CLOSING_REPEAT.any as Array)
 	_append_if(out,_say(s,envoy,bank,rng,{},false,reserve+(CLOSING_REACTION.get(reaction,CLOSING_REACTION.neutral) as Array)))
-	if not s.officials.is_empty() and rng.randf()<0.6:
-		var member:Dictionary=s.officials[rng.randi_range(0,s.officials.size()-1)]
-		var generic:Array=(CLOSING_ASIDE[group] as Array)+(CLOSING_ASIDE_MORE[group] as Array)
-		var manner:Array=CV.model_bank(member.persona,"closing_aside")
-		_append_if(out,_say(s,member,manner if rng.randf()<0.92 else generic,rng,{},true,generic+manner))
+	# No parting aside: the choice is made and on screen; a court comment on it
+	# adds nothing the ruler lacks (court_relevance.gd).
 	return out
 
 const FAVOR_ACTS:=["bless","boon","raise_up"]
@@ -2632,7 +2715,7 @@ func _command_instruction(s:Dictionary,extra:Dictionary)->String:
 	if not actor.is_empty():
 		var manner:String=String({"obey":"answers in ONE short line: it is done, or they go at once, in their own manner","reluctant":"answers in ONE short line: it cost them, but they did it","hesitate":"pleads in ONE short line not to have to do it; they have not done it","refuse":"says in ONE short line why they would not; they have not done it"}.get(ob,"answers in ONE line"))
 		parts.append("'%s' %s." % [String(actor.key),manner])
-	parts.append("Then at most 1 other official reacts as an aside to exactly what happened, in their own temper and by how they hold the god (horror, approval or fear); nobody praises an act that did not happen or treats the outcome as something else. Nobody refuses or undoes anything unless REFUSED is written above. The dead and the removed never speak. No miracles. mood_shift 0.")
+	parts.append(_gate_words(s).strip_edges()+" At most 1 official reacts, only to exactly what happened, in their own temper (horror, approval or fear); nobody praises an act that did not happen or treats the outcome as something else. Nobody refuses or undoes anything unless REFUSED is written above. The dead and the removed never speak. No miracles. mood_shift 0.")
 	return " ".join(parts)
 
 func _divine_classify_words(s:Dictionary)->String:
@@ -2701,8 +2784,8 @@ func _divine_instruction(s:Dictionary,extra:Dictionary)->String:
 	var how:String=String({"cower":"'envoy' breaks: trembling, pleading, prostrate, in their own manner","endure":"'envoy' bows under it, shaken, accepting","defy":"'envoy' is proud: stands straight, answers with dignity or cold defiance, never grovels",
 		"relief":"'envoy' was frightened and now floods with relief","blessed":"'envoy' is moved and grateful, in their own manner"}.get(response,""))
 	var parts:PackedStringArray=PackedStringArray([what+" WHAT ACTUALLY HAPPENED: "+String(result.get("outcome",""))])
-	if bool(result.get("terminal",false)) or how=="": parts.append("'envoy' says nothing. 2 officials react, one line each, as asides: shaken, grim, or (the proud) coldly unbowed; nobody pleads for the dead, nobody invents what happens next.")
-	else: parts.append(how+", in ONE line. Then 1 or 2 officials react, one line each (a whispered aside, trembling, envy, gladness, as their REGARD suggests).")
+	if bool(result.get("terminal",false)) or how=="": parts.append("'envoy' says nothing."+_gate_words(s)+" Nobody pleads for the dead, nobody invents what happens next.")
+	else: parts.append(how+", in ONE line."+_gate_words(s))
 	parts.append("No miracles, nothing supernatural. mood_shift 0.")
 	return " ".join(parts)
 
@@ -2835,6 +2918,15 @@ func build_prompt(s:Dictionary,stage:String,extra:Dictionary)->String:
 	parts.append("NOW: "+_stage_instruction(s,stage,extra))
 	return "\n\n".join(parts)
 
+## The prompt's word on court officials: silent unless the gate chose one.
+func _gate_words(s:Dictionary)->String:
+	var gate:Dictionary=s.get("gate",{}) if s.get("gate") is Dictionary else {}
+	if bool(gate.get("all",false)): return ""
+	var key:=String(gate.get("key",""))
+	if key.is_empty() or _member(s,key).is_empty(): return " No official speaks."
+	var why:=String({"direct_question":"the ruler addressed them; they answer plainly","dissent":"they resent what the god just did; let it show in one guarded line","objection":"they object with the concrete stakes: %s" % String(gate.get("text","")),"hidden_info":"they know something the ruler cannot see: %s" % String(gate.get("text","")),"own_kin":"their own kin are affected"}.get(String(gate.get("kind","")),"only if they have real guidance"))
+	return " Optionally '%s' adds ONE short line (%s); no other official speaks." % [key,why]
+
 func _stage_instruction(s:Dictionary,stage:String,extra:Dictionary)->String:
 	var bench:int=int(s.officials.size())
 	match stage:
@@ -2845,9 +2937,9 @@ func _stage_instruction(s:Dictionary,stage:String,extra:Dictionary)->String:
 			if not (s.get("arc",{}) as Dictionary).is_empty(): who+=" The visitor first acknowledges the earlier audience named in CONTINUING."
 			elif not String((s.get("occasion",{}) as Dictionary).get("text","")).is_empty(): who+=" The visitor's opening grows out of WHY THEY CAME."
 			if bench==0: return who+" Nobody else is on the bench, so 'envoy' may add one more line. 1 to 2 lines total. mood_shift 0."
-			return who+" 'envoy' says at most 2 lines in all. Then at most 2 officials interject, only if each has something distinct to say (a disagreement, an aside, a joke). mood_shift 0."
+			return who+" 'envoy' says at most 2 lines in all."+_gate_words(s)+" mood_shift 0."
 		"speak":
-			return "The ruler just said: \"%s\". 'envoy' answers in ONE line, in character; if it was a question, the line answers it plainly from FACTS (what they gain, what happens if refused, why now). Change no terms and accept nothing new. Then at most 1 official reacts. Set mood_shift by how the ruler's words land with 'envoy'.%s%s" % [String(extra.get("player_text","")),_divine_classify_words(s),COMMAND_CLASSIFY]
+			return "The ruler just said: \"%s\". 'envoy' answers in ONE line, in character; if it was a question, the line answers it plainly from FACTS (what they gain, what happens if refused, why now). Change no terms and accept nothing new.%s Set mood_shift by how the ruler's words land with 'envoy'.%s%s" % [String(extra.get("player_text","")),_gate_words(s),_divine_classify_words(s),COMMAND_CLASSIFY]
 		"divine":
 			return _divine_instruction(s,extra)
 		"command":
@@ -2859,7 +2951,7 @@ func _stage_instruction(s:Dictionary,stage:String,extra:Dictionary)->String:
 		"closing":
 			var result:Dictionary=extra.get("result",{})
 			var option_id:String=String(result.get("option_id",(s.audience as Dictionary).get("option_id","")))
-			return "The ruler has decided. WHAT ACTUALLY HAPPENED: %s (answer: %s). The visitor's reaction: %s. 'envoy' gives one parting line reacting to exactly this outcome and this reaction; no other outcome, no new promises. Then %s. mood_shift 0." % [String(result.get("outcome","")),option_id if not option_id.is_empty() else "given",String(result.get("reaction","neutral")),"one official gets the last word as an aside to the ruler. Exactly 2 lines" if bench>0 else "stop. Exactly 1 line"]
+			return "The ruler has decided. WHAT ACTUALLY HAPPENED: %s (answer: %s). The visitor's reaction: %s. 'envoy' gives one parting line reacting to exactly this outcome and this reaction; no other outcome, no new promises. Then %s. mood_shift 0." % [String(result.get("outcome","")),option_id if not option_id.is_empty() else "given",String(result.get("reaction","neutral")),"stop. Exactly 1 line"]
 	return ""
 
 # ---------------------------------------------------------------------------
@@ -2875,7 +2967,7 @@ const PITCH_OPEN:=[
 	"{trigger} I've not slept properly since, {address}, because I keep seeing the same thing when I close my eyes.",
 	"{oath} Hear me out before anyone sighs, {address}. {trigger} A people who lives through that should leave something standing.",
 	"I've carried this in my chest for a season, {address}, and it's grown too big to keep in there. {trigger}",
-	"Let me put a picture in your head, {address}, and then try to get it out again. {trigger}",
+	"Let me describe it, {address}, and then tell me it isn't worth doing. {trigger}",
 ]
 const PITCH_CONCEPT:=[
 	"Picture it: {work}. A {form} to {purpose}, and nobody who sees it will ever mistake us for anyone else.",
@@ -2887,29 +2979,29 @@ const PITCH_CONCEPT_NOPURPOSE:=[
 	"I'd call it {work}, {address}: a {form} our grandchildren will argue about.",
 ]
 const PITCH_OTHERS:=[
-	"There's also {others}, {address}, if that frightens you. Smaller hearts, smaller stones.",
-	"I've drawn {others} too, {address}, in case the treasury feels faint.",
+	"There's also {others}, {address}, if you'd rather spend less.",
+	"I've planned {others} too, {address}, in case the stores can't bear the big one.",
 ]
 const PITCH_COURT:={
 	"glory":[
-		"{oath} Build it, {address}. Nobody sings about the year we kept our granaries tidy.",
+		"{oath} Build it, {address}. People will come from other valleys to see it, and some will stay.",
 		"I can see it already, {address}, and so will every envoy who comes over that ridge.",
-		"A people that raises {work} doesn't get pushed around at the border, {address}. Stone makes an argument.",
-		"Say yes, {address}, and say it loud enough that the neighbours hear it in their sleep.",
+		"If we raise {work}, {address}, neighbours will think twice before threatening us.",
+		"Say yes, {address}. The crews want to start before the ground freezes.",
 	],
 	"folly":[
 		"Lovely dream, {address}. Now who's going to carry it, and what are they eating while they do?",
-		"{oath} I've seen what a half-built wonder looks like, {address}: a very expensive pile of regret.",
-		"Every people that tried to touch the sky has a ruin to show for it, {address}. Ask them how it felt.",
-		"I'll say it so nobody else has to, {address}: this is folly with a pretty name.",
+		"{oath} If we run out of hands halfway, {address}, we're left with a heap of stone and a hungry winter.",
+		"It'll take years of our strongest backs, {address}. Those are years of hunting and gathering nobody does.",
+		"I'll say it so nobody else has to, {address}: we can't afford this, however fine it sounds.",
 	],
 }
 const WEIGH_OFFICE:={
 	"quartermaster":{"help":["I've counted the yards twice, {address}, and for once I'm not frowning: {factor}","The stores can bear it, {address}, just about: {factor}"],"hurt":["I've counted the yards twice, {address}, and the count doesn't change: {factor}","Before anyone falls in love with it, {address}: {factor}"]},
-	"scholar":{"help":["We know how, {address}, which is more than most peoples can say: {factor}","It's within our learning, {address}: {factor}"],"hurt":["Does anyone here actually know how to do this, {address}? Because {factor}","Knowledge first, then stone, {address}: {factor}"]},
-	"marshal":{"help":["The frontier's quiet enough for it, {address}: {factor}","I can spare the hands, {address}: {factor}"],"hurt":["A half-built wonder is a fine target, {address}: {factor}","Mind the frontier while you gaze at the sky, {address}: {factor}"]},
+	"scholar":{"help":["We know how, {address}, which is more than most peoples can say: {factor}","It's within our learning, {address}: {factor}"],"hurt":["Does anyone here actually know how to do this, {address}? Because {factor}","We'd be guessing at the method, {address}: {factor}"]},
+	"marshal":{"help":["The frontier's quiet enough for it, {address}: {factor}","I can spare the hands, {address}: {factor}"],"hurt":["It'll take hands off the watch, {address}: {factor}","Someone has to guard the frontier while this goes up, {address}: {factor}"]},
 	"steward":{"help":["The people will carry it, {address}, and gladly: {factor}","They're with you on this, {address}: {factor}"],"hurt":["Think of the people who'll haul it, {address}: {factor}","The people will ask why, {address}, and here's what they'll say: {factor}"]},
-	"any":{"help":["Here's the good news, {address}: {factor}","One thing in its favour, {address}: {factor}"],"hurt":["Here's what worries me, {address}: {factor}","Stone doesn't care about speeches, {address}: {factor}"]},
+	"any":{"help":["Here's the good news, {address}: {factor}","One thing in its favour, {address}: {factor}"],"hurt":["Here's what worries me, {address}: {factor}","The problem nobody's mentioned, {address}: {factor}"]},
 }
 const WEIGH_VERDICT:=[
 	"Plainly, {address}? At this ambition it's {odds}. {verdict}",
@@ -2918,8 +3010,8 @@ const WEIGH_VERDICT:=[
 ]
 const ODDS_ORDER:=["folly, most likely","a long gamble","an even wager","likely, with care","as sure as stone gets"]
 const WEIGH_SHIFT:={
-	"better":["{ambition}, then? Now you're talking sense, {address}: {odds}.","That's kinder to the stone, {address}. I'd call it {odds} now.","{oath} Pull it back to {ambition} and the ground stops frowning, {address}: {odds}."],
-	"worse":["{ambition}? Then hear it plainly, {address}: {odds}, and no better.","Bolder, and the ground knows it, {address}. It's {odds} now.","{oath} {ambition} it is, {address}, and the odds slide to {odds}."],
+	"better":["{ambition}, then? Now you're talking sense, {address}: {odds}.","That's less stone to haul, {address}. I'd call it {odds} now.","{oath} Pull it back to {ambition} and it's within our reach, {address}: {odds}."],
+	"worse":["{ambition}? Then hear it plainly, {address}: {odds}, and no better.","Bolder means more stone and more risk, {address}. It's {odds} now.","{oath} {ambition} it is, {address}, and the odds slide to {odds}."],
 	"same":["{ambition} changes the bill more than the odds, {address}: still {odds}.","Same stone, same risk, {address}. It stays {odds}."],
 	"other":["{work}, then. Weighed fresh, {address}: {odds}.","A different dream, {address}, and a different wager: {work} is {odds}."],
 }
@@ -2930,11 +3022,11 @@ const WEIGH_VERDICT_BARE:=[
 const GATE_OPEN:={
 	"design":[
 		"The foundations of {work} are laid, {address}, and they're better than they had any right to be. Now: do we build what's sensible, or what's worth remembering?",
-		"{oath} I've drawn it twice, {address}. Once for the accountants and once for the ages. You choose which one we raise.",
+		"{oath} I've planned it two ways, {address}: one we can surely finish, and one far grander. You choose.",
 	],
 	"stores":[
 		"The walls of {work} are rising, {address}, and the crews are hungry. There's grain in the stores that could buy us a season of hands.",
-		"Feed me a larger crew, {address}, and {work} leaps a whole stage. Starve me, and it crawls.",
+		"Feed a larger crew from the stores, {address}, and {work} goes up a whole stage faster.",
 	],
 	"labor":[
 		"We're near the crown of {work}, {address}, and the heaviest lifting is still ahead. Who carries it: paid backs, forced backs, or willing ones?",
@@ -2942,16 +3034,16 @@ const GATE_OPEN:={
 	],
 	"demand":[
 		"I'll say it once, {address}: {work} should bear my mark, and the finest stone goes to the crown, not the gutters.",
-		"A great work needs a great name on it, {address}, and I've a modest suggestion as to whose.",
+		"I want my mark on {work}, {address}. I've given it years, and I think I've earned that.",
 	],
 	"_":["{gatetext}","A question for you, {address}, before another stone goes up: {gatetext}"],
 }
 const GATE_COURT:={
-	"quartermaster":{"stores":["Pour the stores into that pit, {address}, and I'll be the one explaining to the children why supper's thin.","Grain spent on walls is grain not spent on winter, {address}. I'll not pretend otherwise."],"design":["A grander design is a grander bill, {address}. Somebody should say it before the ink dries.","I like sensible, {address}. Sensible has never once emptied my stores."],"_":["Every choice has a price in the yards, {address}, and I'm the one who pays it."]},
-	"marshal":{"design":["Build it bigger and it's a bigger target, {address}. I'd rather it were a stronger one.","Grand is well and good, {address}; I only ask that it can be held."],"labor":["Levy them and you'll get your crown, {address}, and a crowd with long memories on the other side of it.","Forced hands work fast and hate slow, {address}. I've seen where that ends."],"_":["Every back on that scaffold is a spear not on the wall, {address}."]},
-	"steward":{"design":["A grander design means a grander bill, {address}, and the people will want to see what they're paying for.","Sensible walls don't make songs, {address}, but they don't make widows either."],"labor":["The people will remember who carried those stones, {address}, and whether they were asked.","Pay them or ask them, {address}, but don't make them; our standing can't afford the whispers."],"demand":["Put a builder's name above the ruler's, {address}, and see what the market says by morning.","Honour them, by all means, {address}, but carve your name bigger."],"_":["Whatever you choose, {address}, choose it where people can see you choosing."]},
-	"scholar":{"design":["A grander design means methods we've barely tested, {address}. Glorious, if it holds.","The practical design we understand, {address}; the grander one we'd be learning on the way up."],"_":["I'd like the reasoning written down, {address}, whichever way this goes."]},
-	"any":{"design":["{oath} Grand or plain, {address}, it'll be ours; just don't let it be half of either.","The builder wants glory and the ledger wants mercy, {address}. You'll have to disappoint one of them."],"stores":["Feed the walls or feed the children, {address}; I'd like to hear which, out loud."],"labor":["Paid, forced or willing, {address}, the stones weigh the same; the people don't."],"_":["Whatever you choose, {address}, choose it before the mortar sets.","{oath} I've an opinion, {address}, and I'll keep it until it's useful."]},
+	"quartermaster":{"stores":["Pour the stores into that pit, {address}, and I'll be the one explaining to the children why supper's thin.","If the crews eat from the stores, {address}, we'll be short by late winter. I'll not pretend otherwise."],"design":["The grander design means more crews to feed for longer, {address}. Someone should say it before we start.","The plain design I can feed from what we have, {address}. The grand one I can't promise."],"_":["Whatever you choose comes out of the stores, {address}, and I'll have to find it."]},
+	"marshal":{"design":["A bigger build pulls more people off the watch, {address}, and for longer.","Grand is well and good, {address}; I only ask that it can be held."],"labor":["Levy them and you'll get your crown, {address}, and a crowd with long memories on the other side of it.","Forced crews work fast, {address}, but they run off or turn on the overseers."],"_":["While the crews are hauling stone, {address}, the watch is short of hands."]},
+	"steward":{"design":["The grander design takes more from the people, {address}, and they'll want to know why.","The plain design keeps the crews low and safe, {address}. The grand one will cost lives."],"labor":["The people will remember who carried those stones, {address}, and whether they were asked.","Pay them or ask them, {address}, but don't make them; our standing can't afford the whispers."],"demand":["Put a builder's mark above yours, {address}, and people will wonder who really leads.","Honour them, by all means, {address}, but carve your name bigger."],"_":["Whatever you choose, {address}, choose it where people can see you choosing."]},
+	"scholar":{"design":["A grander design means methods we've barely tested, {address}. Glorious, if it holds.","The practical design we understand, {address}; the grander one we'd be learning on the way up."],"_":["I'd like the reasoning said aloud at council, {address}, whichever way this goes, so we learn from it."]},
+	"any":{"design":["{oath} Grand or plain, {address}, just pick the one we can finish.","The builder wants it grand and the stores say plain, {address}. You'll have to disappoint one of them."],"stores":["If the stores go to the crews, {address}, our children go short this winter. Say that out loud if you choose it."],"labor":["However you get the hands, {address}, the people will remember how you got them."],"_":["Decide soon, {address}; the crews stand idle until you do.","{oath} Whatever you choose, {address}, tell the crews yourself; they'll take it better from you."]},
 }
 const ODDS_SHIFT:=[
 	"As it stands, {address}, the court reckons it {odds}. {verdict}",
@@ -2962,20 +3054,20 @@ const EVENT_OPEN:={
 	"accident":["{eventtext} I knew their names, {address}. Every one.","A hoist failed, {address}, and people died under it. {eventtext}"],
 	"strike":["{eventtext} The crews have laid down their tools, {address}, and they're not wrong about everything.","The works are silent, {address}. {eventtext}"],
 	"fire":["{eventtext} The scaffolds went up like kindling, {address}, and nobody saw who lit them.","We woke to smoke, {address}. {eventtext}"],
-	"poaching":["{eventtext} Our master builder took their plans and their pride with them, {address}.","{oath} {eventtext} Somebody offered more than we did, {address}, and it wasn't only coin."],
+	"poaching":["{eventtext} Our master builder took their plans and their pride with them, {address}.","{oath} {eventtext} Somebody offered more than we did, {address}, and it wasn't only food."],
 	"_":["{eventtext}"],
 }
 const OUTCOME_OPEN:={
 	"shame":["It's down, {address}. {ruin}. I drew every line of it, so I'll not hide behind the stone.","{oath} I promised you a wonder and gave you a ruin, {address}. {eventtext}","I've no speech, {address}. {ruin} fell, and I was the one who said it would stand."],
-	"defiance":["It fell, {address}. But I was right about the height and wrong about the ground, and that's a lesson, not a verdict.","{oath} Don't look at me like that, {address}. {ruin} was the boldest thing this people ever tried, and the ground failed it, not I.","Call it a folly if you like, {address}. Every wonder standing anywhere was a folly until the day it wasn't."],
+	"defiance":["It fell, {address}. But I was right about the height and wrong about the ground, and that's a lesson, not a verdict.","{oath} Don't look at me like that, {address}. {ruin} was the boldest thing this people ever tried, and the ground failed it, not I.","Call it folly if you like, {address}. I know now where the ground is soft, and the next one won't fall."],
 	"dead":["We lost {dead} when it came down, {address}. Say their names with me, at least.","{dead}. Those are the names, {address}. I'll carry them."],
-	"abandoned":["We've laid down the tools at {work}, {address}. The walls stay where they stopped, like a sentence nobody finished.","{oath} So it ends half-built, {address}. The wind will finish the story for us."],
+	"abandoned":["We've laid down the tools at {work}, {address}. The walls stay half-high until someone takes the stone for something else.","{oath} So it ends half-built, {address}. All those seasons of work, and a heap to show for it."],
 }
 const OUTCOME_COURT:=[
 	"I said it was folly, {address}. I said it in this very hall, and I'll say it again at every funeral.",
-	"Blame is cheap, {address}; the families are owed something dearer.",
-	"The neighbours will have heard by now, {address}. They'll be laughing, or they'll be taking notes.",
-	"{oath} We reached too high, {address}. The question is whether we learn or just limp.",
+	"The families of the dead need food and help this winter, {address}. That comes before blame.",
+	"The neighbours will have heard by now, {address}. Some will think us weak; I'd keep the watch strong.",
+	"{oath} We reached too high, {address}. Next time we test the ground before we build.",
 	"I'd have the ruin named and fenced, {address}, before it becomes a place children dare each other to climb.",
 ]
 const NEWS_OPEN:=[
@@ -2984,40 +3076,40 @@ const NEWS_OPEN:=[
 	"You'll want to hear this, {address}, and then you'll want to do something about it. {eventtext}",
 ]
 const NEWS_COURT:=[
-	"Let them build, {address}. Let them see what we build back.",
-	"Envy's a poor architect, {address}, but a marvellous foreman.",
-	"{oath} If {civtwo} can raise a wonder, {address}, so can a people with better bread than theirs.",
-	"Good for them, {address}. Now, what are we doing about it?",
+	"Let them build, {address}. It'll keep their crews off the border for years.",
+	"Their people will be tired and hungry from building, {address}. Worth remembering if they threaten us.",
+	"{oath} If {civtwo} can raise a wonder, {address}, so can we, if we plan it before they finish.",
+	"Good for them, {address}. I'd send someone to see how they're managing it.",
 ]
 const FORECAST_OPEN:=[
-	"The steps saw it before the sky did, {address}. {forecast}",
+	"The light on the steps already shows it, {address}. {forecast}",
 	"{oath} I read the light on the steps three mornings running, {address}, and it said the same thing each time. {forecast}",
 	"I'd not bring you a guess, {address}. {forecast}",
 ]
 const FORECAST_COURT:=[
-	"Then we ration now, {address}, while it's a choice and not a sentence.",
-	"I'll start counting sacks tonight, {address}. Somebody bring me a lamp and a strong drink.",
-	"Better to be mocked for caution in the spring, {address}, than buried for pride in the winter.",
+	"Then we ration now, {address}, while the stores are still full enough to stretch.",
+	"I'll start counting sacks tonight, {address}, so we know exactly what we have.",
+	"If we ration and the year is good, we lose little, {address}. If we don't and it's bad, people starve.",
 ]
 const BUILDER_REPLY:={
 	"warm":["{oath} Say that again, {address}, slowly, so the stonecutters can carve it.","That's the sort of thing a builder remembers when the scaffolds sway, {address}."],
-	"hostile":["Harsh, {address}, but stone has said worse to me and I built on it anyway.","I've heard that from every clerk who never lifted a block, {address}."],
-	"question":["A fair question, {address}. The honest answer is in the ground, and the ground only answers when you dig.","I'll show you on the plans, {address}; words are too soft for it."],
-	"neutral":["I'll take that as a yes and a warning, {address}. Builders live on both.","Noted, {address}. I'll carve it somewhere nobody looks."],
+	"hostile":["Harsh, {address}, but I've built through worse than hard words.","I've heard that from people who never lifted a block, {address}."],
+	"question":["A fair question, {address}. I won't know until we dig the footings.","I'll scratch it out in the dirt for you, {address}; it's easier to see than to say."],
+	"neutral":["I'll take that as a yes with a warning, {address}.","Noted, {address}. I'll carve it somewhere nobody looks."],
 }
 const CLOSING_WORK:={
 	"commission":["{oath} Then we begin at first light, {address}. Remember this day; {work} will.","You'll not regret it, {address}. Or if you do, you'll regret it magnificently."],
-	"later":["Not yet is not never, {address}. I'll keep the drawings dry.","Then I'll wait, {address}, and I'll draw it better while I do."],
-	"dismiss":["Folly, {address}? Every wonder standing anywhere was called that once.","{oath} I'll take my picture home, {address}, and hang it where someone braver can see it."],
-	"grander":["{oath} Grander it is! They'll see it from three valleys, {address}.","You won't be sorry, {address}. Well, the accountants will, but not you."],
-	"practical":["Sensible, {address}. I'll build it well, and I'll dream the other one at night.","Practical. Very well, {address}. Nobody writes songs about practical, but it does tend to stay up."],
+	"later":["Not yet, then, {address}. I'll keep the plans ready.","Then I'll wait, {address}, and I'll draw it better while I do."],
+	"dismiss":["Folly, {address}? Then I'll keep working on it until you see it differently.","{oath} I'll take my picture home, {address}, and hang it where someone braver can see it."],
+	"grander":["{oath} Grander it is! They'll see it from three valleys, {address}.","You won't be sorry, {address}. The stores will, but not you."],
+	"practical":["Sensible, {address}. I'll build it well, and I'll dream the other one at night.","Practical. Very well, {address}. It'll stand, and the crews will come home."],
 	"pour":["Fed crews, fast walls, {address}. The stores will remember this less fondly than I will.","{oath} Now we'll see some stone move, {address}."],
-	"protect":["The stores stay shut, then, {address}. The walls will rise slower, and so will my temper.","As you say, {address}. Hungry people build crooked, so perhaps it's for the best."],
-	"paid":["Paid hands are proud hands, {address}. You'll see it in the joints.","The crews will cheer your name tonight, {address}, and work harder for it tomorrow."],
+	"protect":["The stores stay shut, then, {address}. The walls will rise slower, and so will my temper.","As you say, {address}. The crews will be hungrier and slower, but the stores stay whole."],
+	"paid":["Paid crews work carefully, {address}. You'll see it in the joins.","The crews will cheer your name tonight, {address}, and work harder for it tomorrow."],
 	"levy":["It'll be fast, {address}. I'll not pretend it'll be loved.","Forced hands, then. I'll get your crown up, {address}, and you'll carry what comes with it."],
-	"volunteers":["Willing backs, {address}. Slower, but they'll bring their children to see it.","Volunteers it is. The finest stones are the ones nobody was made to lift, {address}."],
+	"volunteers":["Willing backs, {address}. Slower, but they'll bring their children to see it.","Volunteers it is, {address}. Slower, but nobody will run off."],
 	"honor":["{oath} My mark on it! I'll make it worth the honour, {address}.","You won't regret it, {address}. The crown will be the finest thing I ever cut."],
-	"refuse":["No mark, then. Very well, {address}. The stone will know, even if the people don't.","{oath} Refused. I'll finish the work, {address}, but I'll remember the answer."],
+	"refuse":["No mark, then. Very well, {address}. I'll finish it, but don't expect me to like it.","{oath} Refused. I'll finish the work, {address}, but I'll remember the answer."],
 	"honor_dead":["They'll be named at the works, {address}. The crews will see that.","That matters more than you know, {address}."],
 	"press_on":["The work goes on, {address}. So will the whispering.","As you say. I'll tell the crews, {address}; you tell the widows."],
 	"meet_demands":["The hammers start again at dawn, {address}.","Paid and back at it, {address}. Wise, and cheaper than a silent season."],
@@ -3026,7 +3118,7 @@ const CLOSING_WORK:={
 	"press":["Press it is, {address}. We'll outrun our bad luck or meet it head-on.","{oath} Then we climb faster, {address}, and pray the ground keeps up."],
 	"mourn":["They'll be remembered, {address}, and so will you for remembering them.","Thank you, {address}. The ruin will have their names on it, at least."],
 	"blame":["{oath} So it's mine to carry. I'll carry it, {address}, but I'll not carry it quietly.","Blame the builder. It's what builders are for, {address}, apparently."],
-	"defy":["{oath} Another! Now that's a ruler, {address}.","Then the ruin is a first draft, {address}, not an ending."],
+	"defy":["{oath} Another! Now that's a ruler, {address}.","Then the ruin showed us where the ground is soft, {address}. The next one stands."],
 	"answer":["Then we answer them in stone, {address}. I'll start drawing tonight.","{oath} Let them look over their shoulders for once, {address}."],
 	"decree":["I'll see the word gets round before the light changes, {address}.","Proclaimed. You'll thank the steps for this in the lean days, {address}."],
 	"decree_gather":["Gatherers out by morning, {address}.","I'll send them with baskets and good boots, {address}."],
@@ -3046,7 +3138,7 @@ const DEDICATE_ARCHITECT:={
 }
 const DEDICATE_OFFICIAL:=[
 	"{oath} Today nobody will ask me about the stores, {address}. Today they'll just look up.",
-	"I argued against it, {address}. Let the record show I was wrong and delighted to be.",
+	"I argued against it, {address}. I was wrong, and I'll say so to anyone who asks.",
 	"Every people we know will hear of {work} before the season turns, {address}.",
 	"Look at their faces, {address}. That's what it was for.",
 ]
@@ -3511,7 +3603,7 @@ func _validate_ceremony(raw:Array,cast:Array[Dictionary],ctx:Dictionary)->Array[
 		for candidate in cast:
 			if String(candidate.key)==String((item as Dictionary).get("speaker_key","")): member=candidate
 		if member.is_empty(): continue
-		var text:=_clean_text(String((item as Dictionary).get("text","")),member)
+		var text:=Plain.strip(_clean_text(String((item as Dictionary).get("text","")),member))
 		if text.is_empty() or meta.search(text)!=null: continue
 		var invented:=false
 		for m in number.search_all(text):

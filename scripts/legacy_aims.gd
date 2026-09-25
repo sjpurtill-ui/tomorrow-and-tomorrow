@@ -356,7 +356,7 @@ static func _cand_grow(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	else:
 		c.title="Let Our Hearths Hold %s Souls" % _count(int(goal.target))
 		c.phrase="see our hearths hold %s souls" % _count(int(goal.target))
-		c.why="We are %s. Every child who lives is a hand for the next generation." % _count(pop) if float(goal.trend)>=0.0 else "We are %s, and fewer each winter. That must turn." % _count(pop)
+		c.why="We are %s. We need more of our children to live past their first winters." % _count(pop) if float(goal.trend)>=0.0 else "We are %s, and fewer each winter. That must turn." % _count(pop)
 		c.legacy="the Many Hearths"
 	return c
 
@@ -374,7 +374,7 @@ static func _cand_plenty(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	if low>=0 and _day()-low<365:
 		c.why="The stores ran down to %d days' eating this year, and the little ones felt it first." % maxi(1,int(float(metrics.get("food_days",10.0))))
 	else:
-		c.why="A full store is a quiet camp. One bad winter could undo us."
+		c.why="The stores are fine for now, but not for a bad winter. One could undo us."
 	c.legacy="the Winters Without Hunger"
 	return c
 
@@ -457,7 +457,7 @@ static func _cand_knowledge(by:Dictionary,rng:RandomNumberGenerator)->Dictionary
 	c.target=gain; c.baseline=known
 	c.title="Learn %s New Ways in %s" % [_cap(_count(gain)),_title(winters(years))]
 	c.phrase="learn %s new ways before %s have passed" % [_count(gain),winters(years)]
-	c.why="Every new way we learn is a winter we survive that we would not have."
+	c.why="The last thing we learned got us through a winter we might have lost. We need more like it."
 	c.legacy="the Years of Learning"
 	return c
 
@@ -485,7 +485,7 @@ static func _cand_reach(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 		c.target=charted*1.6; c.baseline=charted
 	c.title="Walk Farther Than Any of Us Has Walked"
 	c.phrase="walk and mark half again as much land as we know"
-	c.why="Past the last ridge we know, the walkers turn back. Someone must not."
+	c.why="Our walkers always turn back at the last ridge we know. No one has seen what lies past it."
 	c.legacy="the Long Walk"
 	return c
 
@@ -543,7 +543,7 @@ static func _cand_friend(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	c.target=minf(0.85,float(best.opinion)+0.3); c.baseline=float(best.opinion)
 	c.title="Bind %s to Us in Friendship" % _the(String(best.name))
 	c.phrase="bind %s to us, so that their children and ours share a fire" % _the(String(best.name))
-	c.why="%s are near, and a neighbour is either a friend or a danger." % _cap(_the(String(best.name)))
+	c.why="%s are close by. We should make friends of them now, before they give us trouble." % _cap(_the(String(best.name)))
 	c.legacy="the Bond with %s" % _the(String(best.name))
 	return c
 
@@ -575,7 +575,7 @@ static func _cand_work(by:Dictionary,rng:RandomNumberGenerator,memorial:Dictiona
 	else:
 		c.title="Raise a Ring of Standing Stones"
 		c.phrase="raise a ring of standing stones the whole valley can see"
-		c.why="Anyone can live in a place. A people leaves a mark on it."
+		c.why="We have lived here for years and built nothing that will outlast us."
 		c.legacy="%s's Ring" % String(c.by_given) if String(c.by_given)!="" else "the Stone Ring"
 	return c
 

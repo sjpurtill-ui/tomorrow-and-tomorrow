@@ -20,6 +20,7 @@ extends RefCounted
 const Store:=preload("res://scripts/interaction_store.gd")
 const Context:=preload("res://scripts/interaction_context.gd")
 const CV:=preload("res://scripts/character_voice.gd")
+const Plain:=preload("res://scripts/plain_speech.gd")
 
 const SURFACE:="court_persons"
 const NOVEL_THRESHOLD:=3
@@ -113,6 +114,8 @@ static func safe_template(template:String,beat:String,era_tags:Array)->bool:
 	if name.search(bare)!=null: return false
 	var meta:=RegEx.new(); meta.compile(META)
 	if meta.search(bare)!=null: return false
+	# Invented maxims are never learned into offline play.
+	if Plain.is_maxim(template): return false
 	return CV.permits(bare,era_tags)
 
 # --------------------------------------------------------------------------
@@ -147,7 +150,7 @@ static func matches(sig:Dictionary,beat:String)->Array:
 		var intent:Dictionary=rec.get("intent",{}) if rec.get("intent") is Dictionary else {}
 		if String(intent.get("type_id",""))!=String(sig.get("action","")): continue
 		var tpl:=String((rec.get("output",{}) as Dictionary).get("reply_template",""))
-		if tpl=="": continue
+		if tpl=="" or Plain.is_maxim(tpl): continue   # learned before the plain-speech gate
 		var got:=parse_sig(String(intent.get("topic","")))
 		# Must agree: the beat, the speaker's role, guilt and lie state.
 		if String(got.get("k",""))!=beat: continue
@@ -271,7 +274,7 @@ static func instruction(player_text:String,menu:Array,hidden:String)->String:
 		rows.append("%d. %s [%s] -> engine decides: %s" % [i,String(m.get("label","")),String(m.get("action","")),String(m.get("decided",""))])
 	return ("The ruler just said: \"%s\". Map these words onto ONE action from the MENU (canonical_action = its [id], choice = its number). " % player_text)+\
 		"If nothing fits, use canonical_action \"novel:<short_snake_slug>\", choice -1, a short label (under 6 words, no names), and at most 3 deltas (metric legitimacy/cohesion/love/dread, each between -0.03 and 0.03); set generalizable true if any ruler might ask it again. "+\
-		"For conversation that asks nothing of the engine use \"talk\". Then write the scene for EXACTLY what the engine decides for that action (never another outcome): 'narrator' may give one stage direction in square brackets; the one addressed answers in their OWN voice (the summoned speak for themselves, never as the officials' mouthpiece); at most one other reacts as an aside. "+\
+		"For conversation that asks nothing of the engine use \"talk\". Then write the scene for EXACTLY what the engine decides for that action (never another outcome): 'narrator' may give one stage direction in square brackets; the one addressed answers in their OWN voice (the summoned speak for themselves, never as the officials' mouthpiece); at most one other official adds ONE aside, and only if it carries real guidance the ruler cannot see (a fact, a risk, a tell, their own kin at stake); never praise or comment on the order. Plain, concrete speech: no invented maxims, proverbs or kennings. "+\
 		"reply_template is the principal speaker's line again with every person, place and event replaced by slots {name} {given} {trade} {village} {event} {place} {witness} {liar} {kin} {named} {god_address}; no names may remain. signature: role (official/commoner/group), guilt (guilty/innocent/none), lying (yes/no/none), band (love/dread/wary) of the one answering.\n"+\
 		"HIDDEN (never state it unless the decided outcome is a confession or an alibi that exposes it): %s\nMENU:\n%s" % [hidden,"\n".join(rows)]
 

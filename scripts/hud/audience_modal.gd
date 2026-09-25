@@ -792,7 +792,8 @@ func _option_card(option:Dictionary)->Button:
 	var shown:=false
 	for side in ["objection","support"]:
 		var said:=String(option.get(side,""))
-		if said.is_empty() or not enabled:continue
+		# Shown only when it tells the ruler something the card does not (court_relevance.gd).
+		if said.is_empty() or not enabled or not preload("res://scripts/court_relevance.gd").card_voice_ok(option,side):continue
 		var words:=("Objects · " if side=="objection" else "For it · ")+said
 		button.tooltip_text+="\n"+words
 		if shown:continue
