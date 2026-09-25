@@ -68,7 +68,7 @@ if (-not [string]::IsNullOrWhiteSpace($leviathanKey)) {
 }
 
 $configuredModel = [Environment]::GetEnvironmentVariable('LEVIATHAN_AI_MODEL', 'User')
-$env:LEVIATHAN_AI_MODEL = if ([string]::IsNullOrWhiteSpace($configuredModel)) { 'gpt-5.6-terra' } else { $configuredModel }
+$env:LEVIATHAN_AI_MODEL = if ([string]::IsNullOrWhiteSpace($configuredModel)) { 'gpt-6-luna' } else { $configuredModel }
 
 $launchLogDirectory = Join-Path $projectRoot 'artifacts'
 [IO.Directory]::CreateDirectory($launchLogDirectory) | Out-Null
