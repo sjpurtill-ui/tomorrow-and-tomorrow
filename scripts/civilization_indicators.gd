@@ -18,7 +18,7 @@ static func infant_mortality_per_1000(state:Node=GameState,discovery:Node=Discov
 	# Deaths in the whole first year per 1,000 live births: newborn deaths at
 	# delivery conditions, then the age-0 life-table hazard for the rest of the
 	# year. Both carry the early-care factors the daily simulation uses.
-	var care:Dictionary=state.early_care
+	var care:Dictionary=state.care_profile() if state.has_method("care_profile") else state.early_care
 	var risk:float=state._pregnancy_risk_multiplier(context)*clampf(float(care.get("pregnancy_risk",1.0)),0.5,2.5)
 	var neonatal:=clampf((0.018+(risk-1.0)*0.025)*(1.0-clampf(float(context.neonatal_survival),0.0,0.60))*clampf(preload("res://scripts/early_life_conditions.gd").neonatal_factor(care),0.5,4.0),0.004,0.18)
 	var conditions:float=state._mortality_condition_factor()
