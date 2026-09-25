@@ -418,7 +418,9 @@ def era_bounds(cat: Catalog, c: Constants, era: float) -> tuple[np.ndarray, np.n
     """SocietyModel.era_ceiling_for for every effect key at once."""
     if not c.era_ceiling_600:  # before Phase 3 era caps: flat modern limits
         return cat.limit_lo, cat.limit_hi
-    tech = np.array([k in c.tech_keys for k in cat.effect_keys]) if c.tech_keys else np.zeros(len(cat.effect_keys), dtype=bool)
+    tech = cat.__dict__.get("_tech_mask")
+    if tech is None:
+        tech = cat._tech_mask = np.array([k in c.tech_keys for k in cat.effect_keys]) if c.tech_keys else np.zeros(len(cat.effect_keys), dtype=bool)
     early = rise(c.tech_rise, era) if c.tech_rise else rise(c.era_rise, era)
     share = np.where(cat.early_mature, rise(c.early_mature_rise, era), np.where(tech, early, rise(c.era_rise, era)))
     for k, curve in (c.own_early_rise or {}).items():

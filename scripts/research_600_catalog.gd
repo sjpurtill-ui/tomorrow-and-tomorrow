@@ -87,6 +87,10 @@ const DEAD_END_PENALTY:=200.0
 ## land and history, so each world offers a seeded subset (DiscoverySystem
 ## _path_is_viable). Key thresholds and every foundation stay open everywhere.
 const DEAD_END_VIABLE:=0.5
+## research_3000 diffusion: a line the society gives no emphasis still takes up
+## its questions slowly from neighbours, traders and migrants. Its first channel
+## works at this team scale (one emphasis unit with a single researcher is 1).
+const DIFFUSION_TEAM:=0.4
 static var _relevance:Dictionary={}
 ## Keys the design governs; Phase 2 effect files cannot override them.
 const PROTECTED_KEYS:=["id","dynamic","direction","requires","requires_all","requires_any","learning_routes","day","chance","research_600","earliest_year","design_year","precedents","conditions"]

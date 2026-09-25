@@ -85,6 +85,7 @@ NEONATAL_CLAMP = (0.1, 0.0008) if MODERN_BIRTH_CLAMPS else (0.5, 0.004)
 MATERNAL_CLAMP = (0.02, 0.00002) if MODERN_BIRTH_CLAMPS else (0.5, 0.0008)
 FERTILITY_TRANSITION = "context.get(\"fertility_transition\"" in g.source("scripts/game_state.gd")
 # Research600.parallel_capacity (research_3000).
+DIFFUSION_TEAM = float(g.const("scripts/research_600_catalog.gd", "DIFFUSION_TEAM", default=0.0, optional=True))
 PARALLEL = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True))
             for k in ("PARALLEL_POPULATION_REF", "PARALLEL_PER_DECADE", "PARALLEL_LITERACY")}
 # Research600.stale_factor (research_3000): superseded registry items.
@@ -467,7 +468,9 @@ class Surrogate:
                 if focus_by_line.max() > 0:
                     fl = focus_by_line[cat.line]
                     item_mult = np.where(fl > 0, 1.0 + SPECIALIZATION_HEADROOM * fl, 1.0 - SPECIALIZATION_NEGLECT * focus_by_line.max())
-                    benefit = np.where(cat.lower_better[None, :], np.minimum(self.E, 0.0), np.maximum(self.E, 0.0))
+                    benefit = self.__dict__.get("_benefit")
+                    if benefit is None:
+                        benefit = self._benefit = np.where(cat.lower_better[None, :], np.minimum(self.E, 0.0), np.maximum(self.E, 0.0))
                     raw = raw + (weights * (item_mult - 1.0)) @ benefit
         self.effect_raw = raw
         eras = cat.ceiling_era[self.known]
@@ -1264,7 +1267,17 @@ class Surrogate:
         throughput = float(p["throughput"]) * math.exp(float(p["throughput_growth"]) * min(year, float(p.get("throughput_growth_until", 100.0))) / 100.0)
         known_ext = None
         kr = 1.0 + self.eff("knowledge_rate")
-        for ch in np.where(weights > 0)[0].tolist():
+        # DiscoverySystem diffusion (research_3000): a line with no emphasis works
+        # its first subcategory channel at DIFFUSION_TEAM.
+        diffusion = set()
+        if DIFFUSION_TEAM > 0:
+            for li, line in enumerate(gd.LINES):
+                if int(self.s_research.get(line, 0)) <= 0:
+                    first = (cat.subcategories.get(line) or [None])[0]
+                    ch = cat.channel_index.get((line, first))
+                    if ch is not None:
+                        diffusion.add(ch)
+        for ch in sorted(set(np.where(weights > 0)[0].tolist()) | diffusion):
             item = self.active[ch]
             cand = None
             if item < 0 or not open_mask[item]:
@@ -1302,6 +1315,8 @@ class Surrogate:
                 self.active[ch] = item
             researchers = researchers_total * weights[ch] / total_weight
             team = researchers if researchers < 1.0 else 1.0 + math.log10(researchers) * 0.78
+            if weights[ch] <= 0 and ch in diffusion:
+                team = DIFFUSION_TEAM
             attention = team * support * parallel * (1.0 + (self.art_bonus_for(gd.LINES[cat.channel_line[ch]]) if self.art["tier"] else 0.0))
             precedent = 1.0
             if cat.has_precedents[item]:

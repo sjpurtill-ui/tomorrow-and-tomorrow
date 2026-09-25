@@ -913,6 +913,8 @@ func research_capacity_for(dynamic_id:String,subcategory:String)->Dictionary:
 	var team_scale:=0.0
 	if researchers>0.0:
 		team_scale=researchers if researchers<1.0 else 1.0+log(researchers)/log(10.0)*0.78
+	elif weight==0 and subcategory==_diffusion_subcategory(dynamic_id):
+		team_scale=Research600.DIFFUSION_TEAM # research_3000: diffusion
 	var food_support:=lerpf(0.62,1.08,clampf(float(WorldSimulation.state.food_security),0.0,1.0))
 	var material_capacity:=clampf(float(WorldSimulation.state.simulation_metrics.get("material_capacity",WorldSimulation.state.society_capacities.get("production",0.12))),0.0,1.2)
 	var material_support:=lerpf(0.72,1.12,material_capacity/1.2)
@@ -962,7 +964,19 @@ func _allocated_channels()->Array[Dictionary]:
 		var subcategories:Dictionary=WorldSimulation.state.research_subcategory_allocations[dynamic_id]
 		for subcategory in subcategories:
 			if int(subcategories[subcategory])>0: result.append({"dynamic":dynamic_id,"subcategory":subcategory})
+		# research_3000: an unemphasized line still takes up questions by diffusion.
+		var diffusion:=_diffusion_subcategory(String(dynamic_id))
+		if not diffusion.is_empty(): result.append({"dynamic":dynamic_id,"subcategory":diffusion,"diffusion":true})
 	return result
+
+## research_3000: the channel through which a line with no emphasis learns by
+## diffusion (its first subcategory), or "" when the line has emphasis.
+func _diffusion_subcategory(dynamic_id:String)->String:
+	var subcategories:Dictionary=WorldSimulation.state.research_subcategory_allocations.get(dynamic_id,{})
+	if subcategories.is_empty(): return ""
+	for value:Variant in subcategories.values():
+		if int(value)>0: return ""
+	return String(subcategories.keys()[0])
 
 func _classify_discovery(source:Dictionary)->Dictionary:
 	var discovery:=source.duplicate(true)
@@ -1426,7 +1440,7 @@ func _research_600_channel_home(channel:String)->Array[String]:
 
 func _research_600_investigation_placed(channel:String,discovery:Dictionary)->bool:
 	var home:=_research_600_channel_home(channel)
-	if _subcategory_allocation(home[0],home[1])<=0: return false
+	if _subcategory_allocation(home[0],home[1])<=0 and home[1]!=_diffusion_subcategory(home[0]): return false
 	if channel==_channel_key(String(discovery.get("dynamic","")),String(discovery.get("subcategory",""))): return true
 	return String(discovery.get("id","")) in _research_600_foundation_ids(home[0],int(floor(WorldSimulation.state.elapsed_days)))
 
