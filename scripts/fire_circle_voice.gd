@@ -12,23 +12,23 @@ extends RefCounted
 const Voice:=preload("res://scripts/character_voice.gd")
 
 const LINES:={
-	"ahab":{"ask":"Hear the wind in it: we are walking into country none of us has seen. Before the first fire is lit, tell me what our children should say of us.","reply":"Then that is our quarry. I will hold us to it through every winter.","name":"Mark this place: the fire is lit and the ground is ours. What do we call it?","named":"{name}. Let the wind learn it.","later":"Unnamed, then, until it earns one."},
-	"judge":{"ask":"Observe: we are about to settle, and what we do first is what our grandchildren will be known for. Let us pick it ourselves. What should our children say of us?","reply":"A sound choice. The first hard winter will show whether we meant it.","name":"The fire has taken, and the others want to know what to call this ground. What is this place?","named":"{name}. Good. Now it exists.","later":"As you like. It is still ours, name or no name."},
-	"atticus":{"ask":"Let's be fair about this: our children will judge us whether we ask them to or not. What should they say of us?","reply":"That's a fair thing to want. I'll see we're held to it.","name":"The fire's lit. A place wants a name the children can say without stumbling. What will it be?","named":"{name}. It's a good name. Plain and honest.","later":"No hurry. We'll know the right name when we hear it."},
-	"lincoln":{"ask":"Here's how I see it: one day our grandchildren will sit at a fire and talk about us. Before we walk on, what should they say?","reply":"That'll do. I can work toward that, and so can the rest of them.","name":"Put it this way: the children keep asking where we are, and I have nothing to tell them. What do we call the place?","named":"{name}. I like it. It'll wear well.","later":"Leave it be for now. Someone will say something at supper and it will stick."},
-	"grant":{"ask":"Plainly: we need to know what we are for. What should our children say of us?","reply":"Good. Then we start.","name":"Fire's lit. What's the place called?","named":"{name}. Done.","later":"Later, then."},
-	"falstaff":{"ask":"Before my legs give out entirely and the stew goes cold: when our children tell tales at their own fires, what should they say of us?","reply":"A fine thing to be remembered for. Better than my singing, at any rate.","name":"The fire's roaring and nobody's died yet. A place this lucky wants a name. What'll it be?","named":"{name}! I'll shout it at the hills until they know it.","later":"No name yet? Then I'll call it Supper until you think of better."},
-	"aurelius":{"ask":"Consider it carefully. We will be dead long before this camp is. What should our children say of us?","reply":"Then let us be that each day, and not only today.","name":"We will be saying this name for the rest of our lives. What shall this place be called?","named":"{name}. May we deserve it.","later":"Let us live here a while first. We will know it better then."},
-	"iago":{"ask":"Between us: the children will believe whatever we tell them at this fire. So tell me, what should they say of us?","reply":"Clever. I'll make sure they say it.","name":"The others will argue over a name all night unless you settle it. What is it called?","named":"{name}. They will think they chose it themselves.","later":"Wise. Keep them guessing a while."},
-	"elizabeth":{"ask":"I confess I'm curious what you'll say. We've walked a long way on hope alone. What should our children say of us?","reply":"Well answered. I'd have been disappointed by anything duller.","name":"The fire's lit, and I refuse to call it the camp for another night. What is its name?","named":"{name}. Yes, that suits it rather well.","later":"Very well. But I will hold you to finding one."},
-	"achilles":{"ask":"I want our names sung at other fires long after we are gone. What should our children say of us?","reply":"Then that is what they will sing. I will see to it.","name":"The fire is ours and the ground is ours. Give it a name worth standing in front of.","named":"{name}. Let whoever wants it come and try.","later":"Unnamed. For now."},
-	"sancho":{"ask":"Before I go and see to the fire, one thing, while everyone's still awake: what should our children say of us?","reply":"Well, that's a fire I can watch. I'll sleep easier.","name":"Fire's lit, bellies nearly full, and the little ones want to know where we are. What'll we call it?","named":"{name}. Easy on the tongue. Good.","later":"No name? Then we'll call it here, and it'll answer to that."},
-	"polonius":{"ask":"If I may, and I shall be brief, which I seldom am: before we build a single shelter, we ought to agree what we are building it for. What should our children say of us?","reply":"Wisely chosen. I'd have said the same, at greater length.","name":"Now, a name: neither too long nor too short, and easily remembered. What shall it be?","named":"{name}. Admirable. Brief, even.","later":"Prudent. We would only have to live with a bad one."},
-	"cicero":{"ask":"Friends, and you above all: the question that decides every other. What should our children say of us?","reply":"Spoken like the founder of a people. Let it be so.","name":"Our people will be saying this name to every stranger they meet. What shall we call this place?","named":"{name}. They will say it with pride, I promise you.","later":"Then let us earn the name first."},
-	"lear":{"ask":"I am old, and I will not see what grows here. Tell me what they will say of us, the children, when I am under the ground.","reply":"Good. Good. Then I can rest easier.","name":"The fire is lit. Name it, before I forget which fire this is.","named":"{name}. I will remember that. I will.","later":"No name. Like me, soon enough."},
-	"churchill":{"ask":"We have come through the worst of the walk, and the worst is not yet over. So let us be clear: what should our children say of us?","reply":"Then we shall never give it up. Not in the cold, not in hunger.","name":"The fire is lit, and this is the ground we mean to keep. What shall we call it?","named":"{name}. We shall hold it.","later":"Very well. We will name it when it has been tested."},
+	"ahab":{"ask":"We walk into country none of us has seen. What should our children say of us?","reply":"Then that is our quarry. I will hold us to it through every winter.","name":"The fire is lit and the ground is ours. What do we call it?","named":"{name}. Let the wind learn it.","later":"Unnamed, then, until it earns one."},
+	"judge":{"ask":"We are about to settle. What should our children say of us?","reply":"A sound choice. The first hard winter will show whether we meant it.","name":"The fire has taken. What is this place called?","named":"{name}. Good. Now it exists.","later":"As you like. It is still ours, name or no name."},
+	"atticus":{"ask":"Our children will judge us either way. What should they say of us?","reply":"That's a fair thing to want. I'll see we're held to it.","name":"The fire's lit. What will we call this place?","named":"{name}. It's a good name. Plain and honest.","later":"No hurry. We'll know the right name when we hear it."},
+	"lincoln":{"ask":"One day our grandchildren will talk about us at a fire. What should they say?","reply":"That'll do. I can work toward that, and so can the rest of them.","name":"The children keep asking where we are. What do we call this place?","named":"{name}. I like it. It'll wear well.","later":"Leave it be for now. Someone will say something at supper and it will stick."},
+	"grant":{"ask":"We need to know what we are for. What should our children say of us?","reply":"Good. Then we start.","name":"Fire's lit. What's the place called?","named":"{name}. Done.","later":"Later, then."},
+	"falstaff":{"ask":"Quick, before the stew goes cold. What should our children say of us?","reply":"A fine thing to be remembered for. Better than my singing, at any rate.","name":"The fire's roaring and nobody's died yet. What'll we call it?","named":"{name}! I'll shout it at the hills until they know it.","later":"No name yet? Then I'll call it Supper until you think of better."},
+	"aurelius":{"ask":"We will be dead long before this camp is. What should our children say of us?","reply":"Then let us be that each day, and not only today.","name":"We will say this name for the rest of our lives. What shall it be?","named":"{name}. May we deserve it.","later":"Let us live here a while first. We will know it better then."},
+	"iago":{"ask":"The children will believe whatever we tell them. What should they say of us?","reply":"Clever. I'll make sure they say it.","name":"They will argue over a name all night unless you settle it. What is it called?","named":"{name}. They will think they chose it themselves.","later":"Wise. Keep them guessing a while."},
+	"elizabeth":{"ask":"We've walked a long way on hope alone. What should our children say of us?","reply":"Well answered. I'd have been disappointed by anything duller.","name":"I refuse to call it the camp for another night. What is its name?","named":"{name}. Yes, that suits it rather well.","later":"Very well. But I will hold you to finding one."},
+	"achilles":{"ask":"I want our names sung at other fires. What should our children say of us?","reply":"Then that is what they will sing. I will see to it.","name":"The ground is ours. Give it a name worth standing in front of.","named":"{name}. Let whoever wants it come and try.","later":"Unnamed. For now."},
+	"sancho":{"ask":"One thing before I see to the fire. What should our children say of us?","reply":"Well, that's a fire I can watch. I'll sleep easier.","name":"The little ones want to know where we are. What'll we call it?","named":"{name}. Easy on the tongue. Good.","later":"No name? Then we'll call it here, and it'll answer to that."},
+	"polonius":{"ask":"I shall be brief, which I seldom am. What should our children say of us?","reply":"Wisely chosen. I'd have said the same, at greater length.","name":"Now, a name, and one easily remembered. What shall it be?","named":"{name}. Admirable. Brief, even.","later":"Prudent. We would only have to live with a bad one."},
+	"cicero":{"ask":"Friends, this question decides all the others. What should our children say of us?","reply":"Spoken like the founder of a people. Let it be so.","name":"Every stranger we meet will hear this name. What shall we call this place?","named":"{name}. They will say it with pride, I promise you.","later":"Then let us earn the name first."},
+	"lear":{"ask":"I am old, and I will not see what grows here. What will the children say of us?","reply":"Good. Good. Then I can rest easier.","name":"The fire is lit. Name it, before I forget which fire this is.","named":"{name}. I will remember that. I will.","later":"No name. Like me, soon enough."},
+	"churchill":{"ask":"The worst of the walk is behind us. What should our children say of us?","reply":"Then we shall never give it up. Not in the cold, not in hunger.","name":"This is the ground we mean to keep. What shall we call it?","named":"{name}. We shall hold it.","later":"Very well. We will name it when it has been tested."},
 }
-const FALLBACK:={"ask":"Before the first fire is lit, one thing. What should our children say of us?","reply":"Then that is what we will be.","name":"The fire is lit. What do we call this place?","named":"{name}. It is a good name.","later":"Then we will name it when it has earned one."}
+const FALLBACK:={"ask":"We are about to settle. What should our children say of us?","reply":"Then that is what we will be.","name":"The fire is lit. What do we call this place?","named":"{name}. It is a good name.","later":"Then we will name it when it has earned one."}
 
 ## Each founding purpose, as a band at the fire would say it.
 const ANSWERS:={
@@ -47,6 +47,30 @@ const ANSWERS:={
 	"dynasty":"That the chief's blood ruled after the chief.",
 	"orthodoxy":"That we held one truth, and no one spoke against it.",
 }
+
+## The same answers as a card shows them: two to four words.
+const LABELS:={
+	"sustenance":"No child hungry","wellbeing":"Long lives","makers":"Things that last","inquiry":"Always asking why",
+	"horizons":"Walk the far lands","gathering":"A place for all","commerce":"Goods that travel","expansion":"Fires in many valleys",
+	"military":"None took ours","dominion":"Others bent to us","retribution":"Wrongs repaid","purity":"Kept ourselves apart",
+	"dynasty":"Chief's line rules","orthodoxy":"One truth held",
+}
+
+## Each answer's card icon: [resource_icons.gd family, glyph].
+const ICONS:={
+	"sustenance":["people","fed"],"wellbeing":["people","life"],"makers":["people","make"],"inquiry":["domain","knowledge"],
+	"horizons":["moment","scout"],"gathering":["moment","contact"],"commerce":["domain","wealth"],"expansion":["moment","settlement"],
+	"military":["domain","security"],"dominion":["moment","court"],"retribution":["moment","war"],"purity":["domain","culture"],
+	"dynasty":["moment","birth"],"orthodoxy":["moment","ceremony"],
+}
+
+static func icon(id:String,accent:Color,px:int=48)->Texture2D:
+	var Icons:=preload("res://scripts/resource_icons.gd")
+	var spec:Array=ICONS.get(id,["moment","milestone"])
+	match String(spec[0]):
+		"people": return Icons.people_texture(String(spec[1]),accent,px)
+		"domain": return Icons.domain_texture(String(spec[1]),accent)
+		_: return Icons.moment_texture(String(spec[1]),accent,px)
 
 ## Words a god might use in their own answer, by founding purpose.
 const KEYWORDS:={

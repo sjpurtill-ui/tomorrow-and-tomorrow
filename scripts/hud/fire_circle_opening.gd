@@ -2,8 +2,9 @@ extends Control
 ## The game opens at the fire circle. The Hearth Chief asks the god one
 ## question in their own voice, "What should our children say of us?", and
 ## the answer becomes the people's founding purpose (PeopleDirection). Four
-## answers suited to the land are offered, the rest on request, and a god who
-## is online may answer in their own words.
+## answers suited to the land are offered as icon cards with a few words each
+## (the full sentence is the tooltip); the rest wait behind "Other answers…",
+## and a god who is online may answer in their own words.
 ##
 ## The same scene returns at the first fire, when the Hearth Chief asks what the
 ## new home is called (mode "name"); the terrain wires that mode to its own
@@ -30,6 +31,7 @@ var speech:Label
 var echo:Label
 var answers:VBoxContainer
 var more_button:Button
+var more_grid:GridContainer
 var typed:LineEdit
 var confirm:Button
 var name_input:LineEdit
@@ -78,49 +80,68 @@ func _ready()->void:
 
 func _build_purpose(column:VBoxContainer)->void:
 	speech.text="“%s”" % Lines.say(person,"ask")
-	answers=VBoxContainer.new();answers.add_theme_constant_override("separation",6);column.add_child(answers)
+	answers=VBoxContainer.new();answers.add_theme_constant_override("separation",8);column.add_child(answers)
 	var profile:=PlanetEnvironment.profile_at(CivilizationSystem.player_world_origin)
 	var first:=Lines.offered(profile,int(GameState.world_seed))
-	for id in first: _answer(id,true)
-	for id in Lines.others(first): _answer(id,false)
-	more_button=Button.new();more_button.text="Other answers…";more_button.flat=true;more_button.alignment=HORIZONTAL_ALIGNMENT_LEFT
+	# Four cards suited to the land; every other answer waits behind one toggle.
+	var offered_row:=HBoxContainer.new();offered_row.add_theme_constant_override("separation",10);answers.add_child(offered_row)
+	for id in first: _answer(offered_row,id,true,false)
+	more_button=Button.new();more_button.name="OtherAnswers";more_button.text="Other answers…";more_button.flat=true;more_button.alignment=HORIZONTAL_ALIGNMENT_LEFT
 	more_button.add_theme_color_override("font_color",Color("a89a7c"));more_button.add_theme_font_size_override("font_size",14)
-	more_button.pressed.connect(func()->void:
-		for button in ambition_buttons: button.visible=true
-		more_button.visible=false;_layout.call_deferred())
-	column.add_child(more_button)
+	more_button.pressed.connect(func()->void:_show_more(not more_grid.visible))
+	answers.add_child(more_button)
+	more_grid=GridContainer.new();more_grid.name="MoreAnswers";more_grid.columns=5;more_grid.visible=false
+	more_grid.add_theme_constant_override("h_separation",8);more_grid.add_theme_constant_override("v_separation",8);answers.add_child(more_grid)
+	for id in Lines.others(first): _answer(more_grid,id,false,true)
 	if _online():
-		typed=LineEdit.new();typed.name="OwnWords";typed.placeholder_text="Or answer in your own words…";typed.max_length=240;typed.custom_minimum_size.y=40
+		typed=LineEdit.new();typed.name="OwnWords";typed.placeholder_text="Or say it in your own words…";typed.max_length=240;typed.custom_minimum_size.y=32
+		typed.add_theme_font_size_override("font_size",14)
 		typed.text_submitted.connect(func(text:String)->void:
 			if text.strip_edges()=="": return
 			typed_words=text.strip_edges()
 			_select(Lines.interpret(typed_words,first[0])))
-		column.add_child(typed)
+		answers.add_child(typed)
 	confirm=Button.new();confirm.name="ConfirmFocus";confirm.text="Answer them";confirm.disabled=true;confirm.custom_minimum_size=Vector2(0,44)
 	confirm.add_theme_stylebox_override("normal",_box(Color("c7a55f"),Color("c7a55f"),8));confirm.add_theme_stylebox_override("disabled",_box(Color("3a3226"),Color("5c4a2c"),8));confirm.add_theme_color_override("font_color",Color("112126"));confirm.add_theme_font_size_override("font_size",16)
 	confirm.add_theme_color_override("font_disabled_color",Color("6a6150"))
 	confirm.pressed.connect(_begin)
 	column.add_child(confirm)
 
-func _answer(id:String,shown:bool)->void:
-	var button:=Button.new();button.text=String(Lines.ANSWERS.get(id,PeopleDirection.AMBITIONS[id].name))
-	button.alignment=HORIZONTAL_ALIGNMENT_LEFT;button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;button.custom_minimum_size.y=38
-	button.add_theme_font_size_override("font_size",16);button.set_meta("ambition",id);button.visible=shown
+func _show_more(open:bool)->void:
+	more_grid.visible=open
+	for button in ambition_buttons:
+		if bool(button.get_meta("more",false)): button.visible=open or String(button.get_meta("ambition"))==selected_focus
+	more_button.text="Fewer answers" if open else "Other answers…"
+	_layout.call_deferred()
+
+func _answer(parent:Container,id:String,shown:bool,small:bool)->void:
+	## One answer as a card: an icon and a few words. The full sentence is the
+	## tooltip, and is what the god is heard to say once it is chosen.
+	var button:=Button.new();button.name="Answer_"+id
+	button.text=String(Lines.LABELS.get(id,PeopleDirection.AMBITIONS[id].name))
+	button.icon=Lines.icon(id,Color("d9b56a"),36 if small else 48)
+	button.icon_alignment=HORIZONTAL_ALIGNMENT_CENTER;button.vertical_icon_alignment=VERTICAL_ALIGNMENT_TOP
+	button.expand_icon=false;button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	button.custom_minimum_size=Vector2(0,72) if small else Vector2(0,104)
+	button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	button.add_theme_font_size_override("font_size",13 if small else 16)
+	button.add_theme_constant_override("icon_max_width",36 if small else 48)
+	button.set_meta("ambition",id);button.set_meta("more",small);button.visible=shown
 	for kind in ["normal","hover","pressed","focus"]:
-		button.add_theme_stylebox_override(kind,_box(Color(1,1,1,0.04) if kind=="normal" else Color(0.85,0.7,0.4,0.16),Color("5c4a2c") if kind=="normal" else Color("c7a55f"),9))
+		button.add_theme_stylebox_override(kind,_box(Color(1,1,1,0.04) if kind=="normal" else Color(0.85,0.7,0.4,0.16),Color("5c4a2c") if kind=="normal" else Color("c7a55f"),8))
 	button.add_theme_color_override("font_color",Color("e6dcc4"))
-	button.tooltip_text=String(PeopleDirection.AMBITIONS[id].vision)
+	button.tooltip_text=String(Lines.ANSWERS.get(id,PeopleDirection.AMBITIONS[id].vision))
 	button.pressed.connect(func()->void:typed_words="";_select(id))
-	answers.add_child(button);ambition_buttons.append(button)
+	parent.add_child(button);ambition_buttons.append(button)
 
 func _select(id:String)->void:
 	if not PeopleDirection.AMBITIONS.has(id): return
 	selected_focus=id
 	for button in ambition_buttons:
 		var mine:=String(button.get_meta("ambition"))==id
-		if mine: button.visible=true
+		if mine and bool(button.get_meta("more",false)) and not more_grid.visible: _show_more(true)
 		button.add_theme_color_override("font_color",Color("ffe3a3") if mine else Color("e6dcc4"))
-		button.add_theme_stylebox_override("normal",_box(Color(0.85,0.7,0.4,0.2) if mine else Color(1,1,1,0.04),Color("c7a55f") if mine else Color("5c4a2c"),9))
+		button.add_theme_stylebox_override("normal",_box(Color(0.85,0.7,0.4,0.2) if mine else Color(1,1,1,0.04),Color("c7a55f") if mine else Color("5c4a2c"),8))
 	var said:=typed_words if typed_words!="" else String(Lines.ANSWERS.get(id,""))
 	echo.text="You: “%s”\n%s: “%s”" % [said,String(person.get("name","The Hearth Chief")).get_slice(" ",0),Lines.say(person,"reply")]
 	echo.visible=true

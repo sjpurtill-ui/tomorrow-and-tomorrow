@@ -113,6 +113,16 @@ func _ready()->void:
 			var v:Variant=(d.subs as Dictionary)[key]
 			for word in (v if v is Array else [v]):
 				if absurd.search(String(word))!=null or RegEx.create_from_string(Plain.KENNING).search(String(word))!=null: failures.append("comic or kenning word swap in %s: %s -> %s" % [String(d.id),String(key),String(word)])
+	# No speaker announces a line with a label ("Observe:", "Mark this:").
+	for tagged in ["Observe: we are about to settle.","Mark this place: the fire is lit.","Plainly:","Good. Listen: they are close."]:
+		if Plain.tag_opener(String(tagged)).is_empty(): failures.append("tag-opener detector missed: "+String(tagged))
+	if Plain.strip("Observe: we are about to settle.")!="We are about to settle.": failures.append("strip kept a tag-opener")
+	var openers:Array=CV.TICS.duplicate()
+	for bank in CV.DISPOSITION_TICS.values(): openers.append_array(bank)
+	for m:Dictionary in CV.VOICE_MODELS: openers.append_array(m.get("leads",[]))
+	for d:Dictionary in CV.DIALECTS: openers.append_array(d.get("open",[]))
+	for o in openers:
+		if not Plain.tag_opener(String(o)).is_empty(): failures.append("tag-opener in a voice's openers: "+String(o))
 	print("PLAIN_SPEECH scanned %d offline lines, %d flagged %s" % [scanned,flagged,JSON.stringify(per_file)])
 	if failures.is_empty():
 		print("PLAIN_SPEECH PASS")

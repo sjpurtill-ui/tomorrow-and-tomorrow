@@ -20,14 +20,14 @@ const BANKS:={
 		"omen":["You called for {wish}, and {sign}. The sky itself heard you. I saw it.","{sign}. After your word. Tell me that is chance and I will laugh at you."],
 		"callback":["Since {since}, {change} The hunt turned, as you said it would.","I've watched it since {since}. {change}"]},
 	"judge":{
-		"mourn":["Consider {dead}: {years} of service, and they {deed}. No one here is ready to do that in their place.","{dead} taught the others well. We will soon find out how well.","Observe how quiet the circle is without {dead}. No one has spoken up in their place."],
+		"mourn":["{dead} gave {years} of service, and they {deed}. No one here is ready to do that in their place.","{dead} taught the others well. We will soon find out how well.","Observe how quiet the circle is without {dead}. No one has spoken up in their place."],
 		"pitch":["I have {own}. You may weigh the others; I have already weighed them.","Choose as you like. But I have {own}, and the others know it."],
-		"open":["Consider it calmly.","Observe: the thing is simple.","A curious order. It will be done.","Very well. We will see what it costs.","I see the shape of it already.","An interesting order. I will watch how they take it."],
+		"open":["Consider it calmly.","The thing is simple.","A curious order. It will be done.","Very well. We will see what it costs.","I see the shape of it already.","An interesting order. I will watch how they take it."],
 		"quote":["“{order}.” It sounds small, but people will feel it for years. It will be done.","You say “{order},” and the people will do it, whatever they think of it."],
 		"omen":["You asked for {wish}. {sign}. I do not believe in chance. Neither, now, do they.","{sign}, and every mouth in the camp says your name. Remarkable."],
 		"callback":["Since {since}, {change} It took longer to show than I expected.","Consider what followed {since}. {change}"]},
 	"atticus":{
-		"mourn":["{dead} {deed}, and asked nothing for it. I'd like that said plainly.","We owe {dead} a fair memory. {years} they served, and served us well.","Let's be fair to {dead}: they did right when it was hard."],
+		"mourn":["{dead} {deed}, and asked nothing for it. I'd like that said plainly.","We owe {dead} a fair memory. {years} they served, and served us well.","In fairness to {dead}, they did right when it was hard."],
 		"pitch":["I'd serve honestly. I have {own}; I hope that counts for something.","You'll choose fairly, I know. For my part, I have {own}."],
 		"open":["Plainly, and with respect.","Let's be fair about this.","I understand you.","Very well; I'll see to it.","It can be done, and done decently.","I'll tell you honestly how it stands."],
 		"quote":["“{order}” — I'll carry it out, and carry it out fairly.","You've asked that we {order_low}, so we will, as decently as we can."],
@@ -35,11 +35,11 @@ const BANKS:={
 		"callback":["Since {since}, {change} I thought you should hear it from me.","It's been a while since {since}. Honestly: {change}"]},
 	"lincoln":{
 		"mourn":["{dead} was the kind of neighbour who shows up before you ask. They {deed}.","There's an old stump by the river that {dead} used to sit on. It'll be a lonely stump now.","{years} {dead} carried us. We'll carry their name a while."],
-		"pitch":["I'm no great talker, but I have {own}. I'll do the job and not make a fuss about it.","Put it this way: I have {own}, and I'd keep at it."],
+		"pitch":["I'm no great talker, but I have {own}. I'll do the job and not make a fuss about it.","The way I see it, I have {own}, and I'd keep at it."],
 		"open":["Here's how I see it.","Put it this way.","Well, that's a clear enough word.","All right, we'll put a shoulder to it.","That's a real job of work, but we'll get it done.","I've heard harder asks."],
 		"quote":["“{order}” is plain enough, and we'll get it done.","So it's {order_low}, and that's what we'll do."],
 		"omen":["You said {wish}, and {sign}. The old folks are telling it already, and they'll tell it better every time.","{sign}. Could be chance. Try telling that to anyone at the fire tonight."],
-		"callback":["Since {since}, {change} Funny how things come round.","Put it this way: since {since}, {change}"]},
+		"callback":["Since {since}, {change} Funny how things come round.","The way I see it, since {since}, {change}"]},
 	"grant":{
 		"mourn":["{dead} {deed}. Did the work. That is the whole of it.","We lost {dead}. {years} in the office. Good service.","{dead} is dead. The work they started goes on."],
 		"pitch":["I have {own}. I will do the work.","Appoint me and it gets done. I have {own}."],
@@ -60,7 +60,7 @@ const BANKS:={
 		"open":["It is within our power.","So be it.","Let it be done without complaint.","A duty, then.","We will do what the hour asks.","Nothing here is beyond us."],
 		"quote":["“{order}.” It is work, and we have the hands for it.","You bid us {order_low}, and we will, without complaint."],
 		"omen":["You asked for {wish}, and {sign}. Whether it answered you I cannot know. The people have decided.","{sign}. The people are sure it was you."],
-		"callback":["Since {since}, {change} It came of what we did, nothing more.","Consider what came of {since}: {change}"]},
+		"callback":["Since {since}, {change} It came of what we did, nothing more.","Look what came of {since}. {change}"]},
 	"iago":{
 		"mourn":["Poor {dead}. They {deed}. Some of us will miss them.","{dead} served {years}. Give it a month and half the camp will have forgotten.","Such a loss. And such an empty seat, too."],
 		"pitch":["I'm only a humble servant. Though I have {own}, as it happens.","Others will tell you what they are. I have {own}; judge by that."],
@@ -90,19 +90,19 @@ const BANKS:={
 		"omen":["You asked for {wish}, and {sign}! I never thought I'd see it.","{sign}! My knees are knocking still."],
 		"callback":["Since {since}, {change} So that's what came of it.","Remember {since}? Here's the tale: {change}"]},
 	"polonius":{
-		"mourn":["{dead}, who {deed}, was — and I will be brief — a most excellent servant.","To be brief: {dead} served {years}, and served well.","Mark, and I say it once: {dead} is gone, and no one here knows their work as they did."],
+		"mourn":["{dead}, who {deed}, was — and I will be brief — a most excellent servant.","In brief, {dead} served {years}, and served well.","I say it once: {dead} is gone, and no one here knows their work as they did."],
 		"pitch":["I shall be brief. I have {own}, and more besides, which I will not list.","I will not boast. I will only say: I have {own}."],
-		"open":["Most wisely commanded.","I would advise the same, and briefly.","I will see to it at once.","Let it be done, and let me say so.","Mark it: this is the right course.","In brief: yes."],
+		"open":["Most wisely commanded.","I would advise the same, and briefly.","I will see to it at once.","Let it be done, and let me say so.","This is the right course.","In brief: yes."],
 		"quote":["“{order}” is a fine order, which I shall see done, and done in order.","To {order_low} is most apt, and it shall be so."],
 		"omen":["You asked for {wish}, and — mark it — {sign}. I said as much, or nearly.","{sign}. I will be brief: the people are astonished."],
 		"callback":["Since {since}, {change} Which, briefly, I foresaw.","As to {since}: {change}"]},
 	"cicero":{
-		"mourn":["Who among us {deed} as {dead} did? None. Let that stand as their praise.","For {years} {dead} served this people. Shall we let that be forgotten? We shall not.","I ask you: who will do what {dead} did, now?"],
-		"pitch":["Consider my record: I have {own}. Consider theirs. The case makes itself.","I will not flatter the court. I have {own}; judge me on it."],
+		"mourn":["Who among us {deed} as {dead} did? None. Let that stand as their praise.","For {years} {dead} served this people. Shall we let that be forgotten? We shall not.","Who will do what {dead} did, now?"],
+		"pitch":["Set my record beside theirs. I have {own}. The case makes itself.","I will not flatter the court. I have {own}; judge me on it."],
 		"open":["It is just, and I will say so to anyone.","Who could argue with that?","A command worth defending.","I will argue it to every hearth.","Let no one say it was not wise.","Consider how well this answers."],
 		"quote":["“{order}” — I will make the people understand why.","You say {order_low}, and I will persuade them it was their own idea."],
 		"omen":["You asked for {wish}. And then? {sign}. Who could doubt you now?","{sign}! What more proof does any doubter need?"],
-		"callback":["Since {since}, {change} I put it to you: was it not well done?","Consider what followed {since}: {change}"]},
+		"callback":["Since {since}, {change} I put it to you: was it not well done?","Look what followed {since}. {change}"]},
 	"lear":{
 		"mourn":["{dead}! {dead}! They were well this morning!","They {deed}. And now nothing. Nothing.","Howl for {dead}. {years} they sat at this fire, and now their place is empty."],
 		"pitch":["I am old in heart, but I have {own}. Do not cast me aside.","Choose me and I will be true. I have {own}."],
@@ -133,7 +133,7 @@ const GENERIC:={
 const DISPOSITION_OPEN:={
 	"sycophantic":["A wise and far-sighted word.","What a word; the people will marvel.","You see further than any of us.","Nothing could please us more.","It is already as good as done.","I'll start at once."],
 	"cantankerous":["I have heard you.","If it must be done, it must.","Hm, well, you are the one who decides.","I have doubts, but I'll carry it.","That will cost us, but so be it.","Fine, but don't say I didn't warn you."],
-	"principled":["I will answer plainly.","Then I will do it, and tell you the truth of it.","Honestly: yes, it can be tried.","You'll have a straight answer.","I'll carry it out, and report what really happens.","It is clear, and I'll do it."],
+	"principled":["I will answer plainly.","Then I will do it, and tell you the truth of it.","Honestly, yes, it can be tried.","You'll have a straight answer.","I'll carry it out, and report what really happens.","It is clear, and I'll do it."],
 	"diplomatic":["I believe I can make this workable.","Let me find a way everyone can live with.","I'll bring the hearths along with me.","It can be done, gently.","We'll manage it without breaking anyone.","I'll talk it through at every fire."],
 	"pragmatic":["I understand.","All right, here is how it goes.","That's workable.","Good; it's clear.","I'll see to it.","We can start at once."],
 }

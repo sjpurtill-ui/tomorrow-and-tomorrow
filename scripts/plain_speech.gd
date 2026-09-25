@@ -39,6 +39,10 @@ const PARALLEL_STOP:=["of","how","not","no","very","so","too","as","what","who",
 ## Skaldic kennings and invented compound metaphors.
 const KENNING:="(?i)\\b[a-z]+-(hoard|song|road|storm|horse|feast|knot|sayer)\\b"
 
+## A label stuck on the front of a line to announce it ("Observe:", "Mark
+## this:", "Plainly:", "Hear me:"). People at a fire just say the thing.
+const TAG_OPENER:="(?i)^\\W*((good|well|now|so|friends|o)[.,]\\s+)?(observe|mark|hear|consider|note|behold|listen|know|understand|watch|attend|remember|picture|weigh|write this down|trust me|plainly|honestly|briefly|frankly|bluntly|calmly|simply|to be brief|to wit|in short|short answer|straight talk|cold truth|true thing first|put it this way|here'?s how i see it|let'?s be fair|between us|i ask you|i tell you|let it be known|let there be no doubt)\\b[^:.!?\"]{0,30}:(\\s+|$)"
+
 static var _res:Dictionary={}
 
 static func _re(key:String,pattern:String)->RegEx:
@@ -193,6 +197,8 @@ static func _sentence_reason(sentence:String)->String:
 ## Every flagged sentence of a line: [{"sentence","reason"}].
 static func flags(text:String)->Array:
 	var out:Array=[]
+	var tag:=tag_opener(text)
+	if not tag.is_empty(): out.append({"sentence":tag,"reason":"tag_opener"})
 	for s in sentences(text):
 		var r:=sentence_reason(s,text)
 		if not r.is_empty(): out.append({"sentence":s,"reason":r})
@@ -207,6 +213,7 @@ static func is_maxim(text:String)->bool:
 ## otherwise plain sentence) removed. Returns "" when nothing of substance is
 ## left, so the caller drops the line or falls back to an offline one.
 static func strip(text:String)->String:
+	text=strip_tag_opener(text)
 	var kept:PackedStringArray=PackedStringArray()
 	for s in sentences(text):
 		if sentence_reason(s,text).is_empty():
@@ -225,6 +232,19 @@ static func strip(text:String)->String:
 	var out:=" ".join(kept).strip_edges()
 	if out.split(" ",false).size()<3: return ""
 	return out
+
+## The announcing label at the start of a line ("Observe:"), or "".
+static func tag_opener(text:String)->String:
+	var m:=_re("tag_opener",TAG_OPENER).search(text)
+	return m.get_string().strip_edges() if m!=null else ""
+
+## The line without its announcing label, first letter raised.
+static func strip_tag_opener(text:String)->String:
+	var m:=_re("tag_opener",TAG_OPENER).search(text)
+	if m==null: return text
+	var rest:=text.substr(m.get_end()).strip_edges()
+	if rest.is_empty(): return ""
+	return rest.substr(0,1).to_upper()+rest.substr(1)
 
 ## Share of lines flagged, for reports: {"lines","flagged","share","examples"}.
 static func survey(lines:Array,keep_examples:int=12)->Dictionary:
