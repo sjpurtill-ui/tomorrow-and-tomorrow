@@ -323,7 +323,7 @@ const ITEMS:Dictionary={
 	},
 	"hand_cannon": {
 		"name": "Hand Cannoneers equipment",
-		"gate": "black_powder",
+		"gate": "powder_artillery",
 		"materials": {
 			"Timber": 0.8,
 			"Stone": 0.2

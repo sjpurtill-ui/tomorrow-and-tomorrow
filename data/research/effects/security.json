@@ -733,12 +733,6 @@
     "warfare_readiness": 0.0019
    },
    "art": "res://assets/ui/research/paper/first300-cards/field_armorer_teams.tres"
-  },
-  "ocean_sailing": {
-   "effects": {
-    "task_coordination": 0.0049,
-    "warfare_readiness": 0.008
-   }
   }
  },
  "art_proposals": {
@@ -841,10 +835,6 @@
     "task_coordination": 0.015,
     "travel_speed": 0.02,
     "warfare_readiness": 0.0363
-   },
-   "ocean_sailing": {
-    "task_coordination": 0.015,
-    "warfare_readiness": 0.035
    },
    "field_armorer_teams": {
     "logistics_endurance": 0.01,

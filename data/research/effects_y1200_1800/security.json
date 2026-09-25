@@ -1,0 +1,12 @@
+{
+ "line": "security",
+ "schema": "research_600_effects/1",
+ "items": {
+  "ocean_sailing": {
+   "effects": {
+    "task_coordination": 0.0049,
+    "warfare_readiness": 0.008
+   }
+  }
+ }
+}

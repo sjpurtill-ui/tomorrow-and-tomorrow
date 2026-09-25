@@ -15,6 +15,9 @@ func test_charcoal_furnace_research_has_no_coal_dependency_but_needs_fuel()->voi
 		setup();var state=WorldSimulation.state;state.resource_deposits.clear();state.resource_stockpiles["Coal"]=0.0
 		state.known_discoveries.assign(["rope_rigging","charcoal","refractory_brick_firing","bloomery_smelting"])
 		var discovery=WorldSimulation.discovery;var entry:=discovery.discovery_definition("blast_furnace")
+		# 1200-1800 design: water-blown stacks and liquid iron are the common
+		# foundations; the charcoal furnace remains an authored route.
+		state.known_discoveries.append_array(entry.requires_all)
 		var day:=int(ceil(discovery.research_600_earliest_year(entry)*365.0)) # once its era has come
 		assert_bool(discovery._discovery_is_eligible(entry,day)).is_false()
 		for row:Dictionary in discovery.technology_tree():
@@ -27,6 +30,8 @@ func test_charcoal_furnace_research_has_no_coal_dependency_but_needs_fuel()->voi
 		assert_dict(preload("res://scripts/research_materials.gd").needed("blast_furnace")).is_empty()
 		assert_float(discovery._resource_evidence(entry.resource_requirements)).is_greater_equal(.82)
 		state.known_discoveries.erase("refractory_brick_firing")
+		assert_str(String(preload("res://scripts/knowledge_pathways.gd").chosen(entry,day).id)).is_not_equal("charcoal_furnace")
+		state.known_discoveries.erase("liquid_iron_furnaces")
 		assert_bool(discovery._discovery_is_eligible(entry,day)).is_false()
 	)
 func test_authored_contracts_and_missing_fuel_are_explicit()->void:

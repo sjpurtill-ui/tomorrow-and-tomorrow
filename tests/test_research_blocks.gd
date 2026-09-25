@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 ## Multiple research design blocks (data/research/blocks.json): the loader merges
 ## blocks in order, later blocks build on earlier ids, the era gate's window
 ## follows the latest block, and the first block behaves exactly as before.
-## The game manifest lists the real 0-600 and 600-1200 blocks; the fixture
+## The game manifest lists the real 0-600, 600-1200 and 1200-1800 blocks; the fixture
 ## second block here is a synthetic one built by
 ## tools/research/build_research_block.py (tests/fixtures/research_blocks), and
 ## FIRST_ONLY is the 0-600 block alone.
@@ -36,13 +36,14 @@ func _earliest_years()->Dictionary:
 	for entry:Dictionary in DiscoverySystem.technology_catalog:result[String(entry.id)]=DiscoverySystem.research_600_earliest_year(entry)
 	return result
 
-func test_the_game_manifest_lists_both_blocks()->void:
+func test_the_game_manifest_lists_all_three_blocks()->void:
 	_use("")
-	assert_array(Catalog.blocks()).is_equal(["y0_600","y600_1200"])
-	assert_float(Catalog.window_end_year()).is_equal(1200.0)
-	var both:Array[String]=Catalog.block_ids("y0_600").duplicate()
-	both.append_array(Catalog.block_ids("y600_1200"))
-	assert_array(both).is_equal(Catalog.ids())
+	assert_array(Catalog.blocks()).is_equal(["y0_600","y600_1200","y1200_1800"])
+	assert_float(Catalog.window_end_year()).is_equal(1800.0)
+	var all:Array[String]=Catalog.block_ids("y0_600").duplicate()
+	all.append_array(Catalog.block_ids("y600_1200"))
+	all.append_array(Catalog.block_ids("y1200_1800"))
+	assert_array(all).is_equal(Catalog.ids())
 	assert_int(int(Catalog.meta().get("design_node_count",0))).is_equal(1101)
 	assert_dict(Catalog.block_meta("y0_600")).is_equal(Catalog.meta())
 	var second:=Catalog.block_meta("y600_1200")
@@ -50,7 +51,12 @@ func test_the_game_manifest_lists_both_blocks()->void:
 	assert_int(Catalog.block_ids("y600_1200").size()).is_equal(964)
 	assert_array(second.get("prior_blocks",[])).is_equal(["y0_600"])
 	assert_int(int(second.get("cross_block_references",0))).is_greater(0)
-	assert_array(Catalog.art_manifests()).is_equal(["res://data/research/art_600.json","res://data/research/art_y600_1200.json"])
+	var third:=Catalog.block_meta("y1200_1800")
+	assert_int(int(third.get("node_count",0))).is_equal(937)
+	assert_int(Catalog.block_ids("y1200_1800").size()).is_equal(937)
+	assert_array(third.get("prior_blocks",[])).is_equal(["y0_600","y600_1200"])
+	assert_int(int(third.get("cross_block_references",0))).is_greater(0)
+	assert_array(Catalog.art_manifests()).is_equal(["res://data/research/art_600.json","res://data/research/art_y600_1200.json","res://data/research/art_y1200_1800.json"])
 
 func test_blocks_load_in_order_and_keep_the_first_block_intact()->void:
 	_use(FIRST_ONLY)
@@ -159,11 +165,11 @@ func test_the_first_block_alone_restores_the_600_window()->void:
 	assert_float(Catalog.earliest_year({"id":"zz_dated_probe"},640.0,true)).is_equal(600.0)
 	assert_float(DiscoverySystem.research_600_earliest_year(_entry("bloomery_smelting"))).is_greater_equal(660.0)
 
-func test_restoring_the_game_manifest_restores_both_blocks()->void:
+func test_restoring_the_game_manifest_restores_every_block()->void:
 	_use(FIXTURE)
 	_use("")
-	assert_array(Catalog.blocks()).is_equal(["y0_600","y600_1200"])
-	assert_float(Catalog.window_end_year()).is_equal(1200.0)
+	assert_array(Catalog.blocks()).is_equal(["y0_600","y600_1200","y1200_1800"])
+	assert_float(Catalog.window_end_year()).is_equal(1800.0)
 	assert_bool(Catalog.has("fx_bloom_hearths")).is_false()
 	assert_bool(_entry("fx_bloom_hearths").is_empty()).is_true()
 	# The real block designs bloomery smelting again, not the fixture's hearths.

@@ -22,7 +22,6 @@
   {"id": "irrigation_loss_accounts", "line": "nutrition", "year": 420, "band_low": 390, "band_high": 460, "research_years": 4, "requires_all": ["irrigation_schedules", "material_accounting", "clay_record_tablets"], "name": "Irrigation Loss Accounts", "note": "After irrigation schedules and written accounts (NUTRITION proposal)."},
   {"id": "felloe_jointing", "line": "logistics", "year": 485, "band_low": 460, "band_high": 520, "research_years": 4, "requires_all": ["joinery", "standard_measures"], "name": "Felloe Jointing", "note": "Just before spoke tenon cutting and spoked wheels (LOGISTICS proposal)."},
   {"id": "bearing_surfaces", "line": "logistics", "year": 495, "band_low": 490, "band_high": 540, "research_years": 5, "requires_all": ["copper_casting", "workshop_standards", "spoke_tenon_cutting"], "name": "Bearing Surfaces", "note": "Hub bearings with spoked wheels; moved out of Knowledge (KNOWLEDGE and LOGISTICS proposals)."},
-  {"id": "ocean_sailing", "line": "security", "year": 560, "band_low": 530, "band_high": 600, "research_years": 8, "requires_all": ["coastal_watercraft", "rope_rigging", "regional_maps", "island_hopping_sailing"], "name": "Ocean Sailing", "note": "Gates sailing-warship equipment, so it must follow island-hopping sailing (SECURITY proposal)."},
   {"id": "quilted_layer_assembly", "line": "production", "year": 590, "band_low": 550, "band_high": 630, "research_years": 4, "requires_all": ["bone_needle_sewing", "layered_clothing_design", "plain_weaving", "wool_felting_fulling"], "name": "Quilted Layer Assembly", "note": "PRODUCTION proposal."}
  ],
  "precedents": {
@@ -46,6 +45,7 @@
   "grain_milling": {"earliest_year": 800, "note": "Rotary milling; the saddle quern covers the early step."},
   "germination_trials": {"earliest_year": 900, "note": "Measured germination trials."},
   "fiber_pulp_beating": {"earliest_year": 1080, "note": "The paper-pulp step (about 100 CE)."},
-  "ceramic_slip_casting": {"earliest_year": 2300, "note": "An 18th-century CE method."}
+  "ceramic_slip_casting": {"earliest_year": 2300, "note": "An 18th-century CE method."},
+  "powder_artillery": {"earliest_year": 1880, "note": "Gunpowder weapons (bombards, hand cannons) follow the 1200-1800 design, where black powder is chemistry only at 1787; the registry places bombards at about 1880-1920. The 1800-2400 design replaces this floor."}
  }
 }

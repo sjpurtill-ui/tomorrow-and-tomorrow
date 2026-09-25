@@ -203,14 +203,22 @@ func test_furnace_experiments_have_a_metallurgical_route_without_local_aquifers(
 	materials_setup()
 	var entry:=DiscoverySystem.discovery_definition("blast_furnace")
 	var day:=int(ceil(DiscoverySystem.research_600_earliest_year(entry)*365.0)) # once its era has come
+	# 1200-1800 design: the blast furnace's common foundations are water-blown
+	# stacks and liquid iron; the authored furnace routes remain alternatives.
+	var design:Array=entry.requires_all
+	assert_array(design).is_equal(["water_driven_bellows","water_blown_stack_bloomery","liquid_iron_furnaces"])
 	GameState.known_discoveries.assign(["refractory_furnaces","rope_rigging","bloomery_smelting"])
+	GameState.known_discoveries.append_array(design)
 	for resource:String in M.Catalog.EXPERIMENTAL_SUPPLIES.blast_furnace:GameState.resource_stockpiles[resource]=M.Catalog.EXPERIMENTAL_SUPPLIES.blast_furnace[resource]
 	assert_bool(DiscoverySystem._discovery_is_eligible(entry,day)).is_true()
 	assert_str(String(P.chosen(entry,day).id)).is_equal("metallurgical")
 	GameState.known_discoveries.erase("bloomery_smelting");GameState.known_discoveries.append("mine_drainage")
 	assert_bool(DiscoverySystem._discovery_is_eligible(entry,day)).is_true()
 	assert_str(String(P.chosen(entry,day).id)).is_equal("mine_supported")
+	# Without refractory furnaces only the design's own route remains.
 	GameState.known_discoveries.erase("refractory_furnaces")
+	assert_str(String(P.chosen(entry,day).id)).is_equal("local")
+	GameState.known_discoveries.erase("liquid_iron_furnaces")
 	assert_bool(DiscoverySystem._discovery_is_eligible(entry,day)).is_false()
 
 func sec_setup()->void:

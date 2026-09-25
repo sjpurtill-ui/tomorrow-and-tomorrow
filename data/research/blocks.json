@@ -16,6 +16,14 @@
    "art": "res://data/research/art_y600_1200.json",
    "window_start": 600.0,
    "window_end": 1200.0
+  },
+  {
+   "id": "y1200_1800",
+   "data": "res://data/research/blocks/y1200_1800.json",
+   "effects_dir": "res://data/research/effects_y1200_1800",
+   "art": "res://data/research/art_y1200_1800.json",
+   "window_start": 1200.0,
+   "window_end": 1800.0
   }
  ]
 }

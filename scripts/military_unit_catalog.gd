@@ -564,7 +564,7 @@ const ARCHETYPES:Dictionary={
 		"branch": "heavy_infantry",
 		"lineage": "crossbowman",
 		"era": "gunpowder",
-		"gate": "black_powder",
+		"gate": "powder_artillery",
 		"equipment": [
 			"hand_cannon"
 		],
@@ -856,7 +856,7 @@ const EQUIPMENT_GATES:Dictionary={
 	"horse_gun": "mounted_firearms",
 	"mortar": "indirect_fire",
 	"rocket_launcher": "indirect_fire",
-	"hand_cannon": "black_powder",
+	"hand_cannon": "powder_artillery",
 	"musket": "matchlock_drill",
 	"grenadier_kit": "matchlock_drill",
 	"marksman_rifle": "rifled_barrels",

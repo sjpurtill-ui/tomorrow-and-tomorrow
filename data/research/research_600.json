@@ -6,10 +6,10 @@
 "registry_source": "origin/codex/research-plausibility:docs/research/registry.json",
 "source_commit": "2ffd5b734a2f9a69ce9c7025ffc429ccb660fbd9",
 "year_adjustments": "applied (proposed_year; band shifted by the same amount)",
-"node_count": 1123,
+"node_count": 1122,
 "design_node_count": 1101,
 "amendments": "tools/research/design_amendments_600.json",
-"adopted_count": 22
+"adopted_count": 21
 },
 "lines": [
 "knowledge",
@@ -29621,31 +29621,6 @@
 ]
 },
 {
-"id": "ocean_sailing",
-"line": "security",
-"status": "adopted",
-"name": "Ocean Sailing",
-"one_liner": "Ocean Sailing",
-"observation": "Ocean Sailing.",
-"key_threshold": false,
-"target_year": 560,
-"proposed_year": 560,
-"band_low": 530.0,
-"band_high": 600.0,
-"min_year": 530.0,
-"research_years": 8.0,
-"requires_all": [
-"coastal_watercraft",
-"rope_rigging",
-"regional_maps",
-"island_hopping_sailing"
-],
-"requires_any": [],
-"precedents": [],
-"conditions": {},
-"shared_with": []
-},
-{
 "id": "contraceptive_pessaries",
 "line": "demography",
 "status": "new",
@@ -30975,6 +30950,7 @@
 "grain_milling": 800.0,
 "germination_trials": 900.0,
 "fiber_pulp_beating": 1080.0,
-"ceramic_slip_casting": 2300.0
+"ceramic_slip_casting": 2300.0,
+"powder_artillery": 1880.0
 }
 }
