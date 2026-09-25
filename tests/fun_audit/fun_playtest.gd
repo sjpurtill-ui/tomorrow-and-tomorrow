@@ -41,6 +41,11 @@ var aim_policy:="player"
 var aim_due:Dictionary={}
 var aim_logged:Dictionary={}
 var policy:="random"
+## Crises (scripts/crisis_system.gd), when this build has them.
+const CRISES_PATH:="res://scripts/crisis_system.gd"
+var crises:GDScript
+var crisis_due:Dictionary={}
+var crisis_logged:Dictionary={}
 
 func _arg(n:String,f:String)->String:
 	for a in OS.get_cmdline_user_args():
@@ -62,6 +67,7 @@ func _ready()->void:
 	rng.seed=seed_value
 	aim_policy=_arg("aims","player")
 	if ResourceLoader.exists(AIMS_PATH): aims=load(AIMS_PATH) as GDScript
+	if ResourceLoader.exists(CRISES_PATH): crises=load(CRISES_PATH) as GDScript
 	out=FileAccess.open(_arg("out","user://fun_playtest.jsonl"),FileAccess.WRITE)
 	GameState.reset_for_new_world(seed_value)
 	DiscoverySystem.reset_for_new_world();ResourceSystem.reset_for_new_world();FoodSystem.reset_for_new_world()
@@ -90,7 +96,9 @@ func _ready()->void:
 				settled_try=int(GameState.elapsed_days)+3
 				terrain._start_settlement_here()
 				if GameState.settlement_site_committed:
-					w("settled",{"status":String(terrain.travel_status_label.text) if terrain.travel_status_label else ""})
+					var at:Vector3=terrain.settler_marker.position if terrain.settler_marker else Vector3.ZERO
+					var biome:Dictionary=terrain._biome_at(at.x,at.z)
+					w("settled",{"status":String(terrain.travel_status_label.text) if terrain.travel_status_label else "","biome":String(biome.get("id","")),"biome_label":String(biome.get("label",""))})
 					founded_day=int(GameState.elapsed_days)
 					# The founding frame: what opens by itself, what the rail offers.
 					for i in 3:await get_tree().process_frame
@@ -120,14 +128,16 @@ func _ready()->void:
 			ui_marks["first_ten"]=true
 			w("ui_first_ten",first_ten)
 		_handle_aims()
+		_handle_crises()
 		var y:=int(GameState.elapsed_days/365.0)
 		if y!=last_year_mark:
 			last_year_mark=y
 			_year_row(y,chunk_ms);chunk_ms=0
-			if y in [1,5,10,25] and not ui_marks.has(y):
+			if y in [1,5,10,25,50,75,100] and not ui_marks.has(y):
 				ui_marks[y]=true
 				w("ui",UiMeasure.measure(terrain,"year %d" % y))
 	_collect()
+	if crises!=null: w("crisis_stats",{"stats":crises.call("stats")})
 	w("end",{"counts":counts,"inbox":GameState.council_inbox.size(),"matters":Hall.matter_counts(),"hall_history":(Hall.state().get("history",[]) as Array).size()})
 	out.close()
 	print("FUN_PLAYTEST DONE ",counts)
@@ -156,7 +166,14 @@ func _year_row(y:int,ms:int)->void:
 	var civ_contacts:=0
 	for c in CivilizationSystem.civilizations:
 		if int((c.get("player_relation",{}) as Dictionary).get("contact_level",0))>0:civ_contacts+=1
-	w("year",{"year":y,"ms_last_year":ms,"pop":GameState.population_total,"known":GameState.known_discoveries.size(),"food_days":GameState.simulation_metrics.get("food_days",0),"intake":GameState.simulation_metrics.get("food_intake_ratio",0),"built":GameState.settlement_completed.size(),"settlements":GameState.player_settlements.size(),"contacts":civ_contacts,"civs":CivilizationSystem.civilizations.size(),"scout_reports":CivilizationSystem.scout_reports.size(),"officials":GovernmentPeopleSystem.active_offices().size() if GovernmentPeopleSystem.has_method("active_offices") else -1,"matters":Hall.matter_counts(),"chronicle":(CivilizationSystem.chronicle.data.get("chapters",[]) as Array).size() if CivilizationSystem.chronicle else -1,"stage":String(GameState.get("settlement_stage")) if "settlement_stage" in GameState else "","aim":_aim_row()})
+	var wars:=0;var treaties:=0;var met:Array=[]
+	for c in CivilizationSystem.civilizations:
+		var rel:Dictionary=c.get("player_relation",{})
+		if bool(rel.get("at_war",false)):wars+=1
+		if String(rel.get("treaty",""))!="":treaties+=1
+		if int(rel.get("contact_level",0))>0:met.append(String(c.get("name","")))
+	var works:=preload("res://scripts/great_works.gd").works("player")
+	w("year",{"year":y,"wars":wars,"treaties":treaties,"met":met,"works":works.map(func(x:Dictionary)->String:return "%s:%s" % [String(x.get("name",x.get("work_id",""))),String(x.get("status",x.get("stage","")))]),"soldiers":MilitaryCampaign._mobilized_count(),"ms_last_year":ms,"pop":GameState.population_total,"known":GameState.known_discoveries.size(),"food_days":GameState.simulation_metrics.get("food_days",0),"intake":GameState.simulation_metrics.get("food_intake_ratio",0),"built":GameState.settlement_completed.size(),"settlements":GameState.player_settlements.size(),"contacts":civ_contacts,"civs":CivilizationSystem.civilizations.size(),"scout_reports":CivilizationSystem.scout_reports.size(),"officials":GovernmentPeopleSystem.active_offices().size() if GovernmentPeopleSystem.has_method("active_offices") else -1,"matters":Hall.matter_counts(),"chronicle":(CivilizationSystem.chronicle.data.get("chapters",[]) as Array).size() if CivilizationSystem.chronicle else -1,"stage":String(GameState.get("settlement_stage")) if "settlement_stage" in GameState else "","aim":_aim_row()})
 
 func _aim_row()->Dictionary:
 	if aims==null: return {}
@@ -235,7 +252,7 @@ func _collect()->void:
 		var fk:=String(entry.get("key",""))
 		if seen_feed.has(fk):continue
 		seen_feed[fk]=true
-		w("feed",{"tier":String(entry.get("tier","")),"kind":String(entry.get("kind","")),"title":String(entry.get("title","")),"text":String(entry.get("text","")).left(300),"entry_day":int(entry.get("day",0))})
+		w("feed",{"key":fk.left(80),"tier":String(entry.get("tier","")),"kind":String(entry.get("kind","")),"title":String(entry.get("title","")),"text":String(entry.get("text","")).left(300),"entry_day":int(entry.get("day",0))})
 	if CivilizationSystem.chronicle:
 		for ch in CivilizationSystem.chronicle.data.get("chapters",[]):
 			var k:=JSON.stringify(ch).md5_text()
@@ -304,3 +321,39 @@ class SimulationPauseRelease:
 	static func release_all(t:Node)->void:
 		var P:=preload("res://scripts/hud/simulation_pause.gd")
 		P.owners.erase(t.get_instance_id())
+
+func _handle_crises()->void:
+	## A plausible player summons whoever holds a crisis within days: the
+	## onset is a moment card that points at the court. "--aims=silent" never
+	## summons, so the holders act alone.
+	if crises==null: return
+	var log_list:Array=(crises.call("state") as Dictionary).get("log",[])
+	for i in range(log_list.size()-1,-1,-1):
+		var entry:Dictionary=log_list[i]
+		var key:="%d|%s|%s" % [int(entry.get("day",0)),String(entry.get("kind","")),String(entry.get("text",""))]
+		if crisis_logged.has(key): continue
+		crisis_logged[key]=true
+		var row:=entry.duplicate(); row.erase("day")
+		row["crisis_kind"]=String(row.get("kind","")); row.erase("kind")
+		w("crisis",row)
+	if aim_policy=="silent": return
+	for m in Hall.matters():
+		if String(m.get("situation_type",""))!="crisis": continue
+		var id:=String(m.get("id",""))
+		if not crisis_due.has(id): crisis_due[id]=int(GameState.elapsed_days)+rng.randi_range(2,12)
+		if int(GameState.elapsed_days)<int(crisis_due[id]): continue
+		var opened:Dictionary=Hall.open_matter(id)
+		if opened.is_empty(): continue
+		var aid:=String(opened.get("id",""))
+		handled_audiences[aid]=true
+		var a:=Hall.find(aid)
+		var opts:=Hall.options(aid)
+		var enabled:Array=[]
+		for o in opts:
+			if bool(o.get("enabled",true)) and not String(o.get("id","")).begins_with("hear:"):enabled.append(o)
+		var pick:Dictionary=_pick(a,enabled)
+		if pick.is_empty(): continue
+		var lines:Array=(a.get("lines",[]) as Array).map(func(l:Dictionary)->String:return ("%s: " % String(l.get("speaker","")) if String(l.get("speaker",""))!="" else "")+String(l.get("text","")))
+		var r:=Hall.resolve(aid,String(pick.id))
+		var situation:Dictionary=a.get("situation",{}) if a.get("situation") is Dictionary else {}
+		w("crisis_decision",{"holder":String((m.get("holder",{}) as Dictionary).get("name","")),"phase":String((situation.get("crisis",{}) as Dictionary).get("phase","")),"type":String((situation.get("crisis",{}) as Dictionary).get("type","")),"summary":String(m.get("summary","")).left(300),"options":opts.map(func(o:Dictionary)->String:return String(o.label)),"pick":String(pick.id),"lines":lines,"outcome":String(r.get("outcome",r.get("error",""))).left(300)})
