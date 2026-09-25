@@ -154,6 +154,8 @@ func known_world_model(exploration:Dictionary)->Dictionary:
 		"parties":_parties_model(exploration),
 		"finds":_finds_model(reports),
 		"chief_name":chief_name,
+		# What the people strive for, and what rivals have sworn (legacy_aims.gd).
+		"aims":preload("res://scripts/legacy_aims.gd").board_model(),
 		"actions":{"plan":plan_expedition,"archive":open_archive,"rumor_map":open_rumor_map,"summon":summon_chief_scout,"summon_label":summon_label,"summon_tip":summon_tip,"envoys":envoys},
 	}
 
@@ -339,7 +341,7 @@ func _peoples_model(encounters:Array,home:Vector2,pace:float)->Array:
 		result.append({"civ_id":id,"name":String(encounter.get("name","A people")),"leader":leader,"leader_name":String(leader.get("name","")),"temperament":String(leader.get("temperament","")),
 			"regard":String(regard.get("read","are undecided about you")),"regard_id":String(regard.get("id","undecided")),"love":float(regard.get("love",0.5)),"dread":float(regard.get("dread",0.0)),
 			"where":where,"located":located,"met":("First met "+Archive.calendar_date(met)) if met>=0 else "","last_word":last_word,"mark":mark_for(id),"pigment":pigment_for(id),
-			"on_speak":speak_with.bind(id),"on_record":open_record.bind(id)})
+			"on_speak":speak_with.bind(id),"on_record":open_record.bind(id),"aim":preload("res://scripts/legacy_aims.gd").rival_aim(id)})
 	return result
 
 func _leads_model(leads:Array,home:Vector2,pace:float)->Array:

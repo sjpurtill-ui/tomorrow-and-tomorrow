@@ -20,6 +20,7 @@ static func line_for(entry:Dictionary)->String:
 	return text
 
 static func append_to(list:VBoxContainer,italic:Font=null)->void:
+	_append_aims(list,italic)
 	var dead:=Lives.remembered(SHOWN)
 	if dead.is_empty(): return
 	var head:=Tokens.make_label("THE REMEMBERED",10,Tokens.TEXT_DIM,.12);head.name="RememberedHead";list.add_child(head)
@@ -30,5 +31,22 @@ static func append_to(list:VBoxContainer,italic:Font=null)->void:
 	for entry in dead:
 		var row:=Tokens.make_label(line_for(entry),12,Tokens.TEXT_SOFT);row.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		row.name="Remembered_%d" % int(entry.get("pid",0))
+		if italic!=null: row.add_theme_font_override("font",italic)
+		list.add_child(row)
+
+## What the people strive for now, and what they are remembered for
+## (legacy_aims.gd), above the roll of the dead.
+static func _append_aims(list:VBoxContainer,italic:Font=null)->void:
+	var Aims:=preload("res://scripts/legacy_aims.gd")
+	var line:=String(Aims.court_line())
+	var model:Dictionary=Aims.board_model()
+	var legacies:Array=model.get("legacies",[])
+	if line=="" and legacies.is_empty(): return
+	var head:=Tokens.make_label("WHAT WE STRIVE FOR",10,Tokens.TEXT_DIM,.12);head.name="AimsHead";list.add_child(head)
+	if line!="":
+		var now:=Tokens.make_label(line,12,Tokens.GOLD_BRIGHT);now.name="AimNow";now.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;list.add_child(now)
+	for legacy in legacies.slice(0,3):
+		var row:=Tokens.make_label("Remembered: %s. %s, year %d." % [String(legacy.get("name","")),String(legacy.get("title","")),int(int(legacy.get("day",0))/365.0)+1],12,Tokens.TEXT_SOFT)
+		row.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;row.name="Legacy_%d" % int(legacy.get("day",0))
 		if italic!=null: row.add_theme_font_override("font",italic)
 		list.add_child(row)

@@ -26,6 +26,12 @@ var counts:Dictionary={}
 var seen_matters:Dictionary={}
 var handled_audiences:Dictionary={}
 var known_logged:Dictionary={}
+## Generational aims (scripts/legacy_aims.gd), when this build has them.
+const AIMS_PATH:="res://scripts/legacy_aims.gd"
+var aims:GDScript
+var aim_policy:="player"
+var aim_due:Dictionary={}
+var aim_logged:Dictionary={}
 
 func _arg(n:String,f:String)->String:
 	for a in OS.get_cmdline_user_args():
@@ -44,6 +50,8 @@ func _ready()->void:
 	var seed_value:=int(_arg("seed","424242"))
 	var ambition:=_arg("ambition","makers")
 	rng.seed=seed_value
+	aim_policy=_arg("aims","player")
+	if ResourceLoader.exists(AIMS_PATH): aims=load(AIMS_PATH) as GDScript
 	out=FileAccess.open(_arg("out","user://fun_playtest.jsonl"),FileAccess.WRITE)
 	GameState.reset_for_new_world(seed_value)
 	DiscoverySystem.reset_for_new_world();ResourceSystem.reset_for_new_world();FoodSystem.reset_for_new_world()
@@ -91,6 +99,7 @@ func _ready()->void:
 		await get_tree().process_frame
 		_collect()
 		_handle_court()
+		_handle_aims()
 		var y:=int(GameState.elapsed_days/365.0)
 		if y!=last_year_mark:
 			last_year_mark=y
@@ -108,7 +117,53 @@ func _year_row(y:int,ms:int)->void:
 	var civ_contacts:=0
 	for c in CivilizationSystem.civilizations:
 		if int((c.get("player_relation",{}) as Dictionary).get("contact_level",0))>0:civ_contacts+=1
-	w("year",{"year":y,"ms_last_year":ms,"pop":GameState.population_total,"known":GameState.known_discoveries.size(),"food_days":GameState.simulation_metrics.get("food_days",0),"intake":GameState.simulation_metrics.get("food_intake_ratio",0),"built":GameState.settlement_completed.size(),"settlements":GameState.player_settlements.size(),"contacts":civ_contacts,"civs":CivilizationSystem.civilizations.size(),"scout_reports":CivilizationSystem.scout_reports.size(),"officials":GovernmentPeopleSystem.active_offices().size() if GovernmentPeopleSystem.has_method("active_offices") else -1,"matters":Hall.matter_counts(),"chronicle":(CivilizationSystem.chronicle.data.get("chapters",[]) as Array).size() if CivilizationSystem.chronicle else -1,"stage":String(GameState.get("settlement_stage")) if "settlement_stage" in GameState else ""})
+	w("year",{"year":y,"ms_last_year":ms,"pop":GameState.population_total,"known":GameState.known_discoveries.size(),"food_days":GameState.simulation_metrics.get("food_days",0),"intake":GameState.simulation_metrics.get("food_intake_ratio",0),"built":GameState.settlement_completed.size(),"settlements":GameState.player_settlements.size(),"contacts":civ_contacts,"civs":CivilizationSystem.civilizations.size(),"scout_reports":CivilizationSystem.scout_reports.size(),"officials":GovernmentPeopleSystem.active_offices().size() if GovernmentPeopleSystem.has_method("active_offices") else -1,"matters":Hall.matter_counts(),"chronicle":(CivilizationSystem.chronicle.data.get("chapters",[]) as Array).size() if CivilizationSystem.chronicle else -1,"stage":String(GameState.get("settlement_stage")) if "settlement_stage" in GameState else "","aim":_aim_row()})
+
+func _aim_row()->Dictionary:
+	if aims==null: return {}
+	var model:Dictionary=aims.call("board_model")
+	var live:Dictionary=model.get("active",{})
+	return {"title":String(live.get("title","")),"progress":float(live.get("progress",0.0)),"words":String(live.get("words","")),"left":int(live.get("years_left",0)),"stats":(aims.call("state") as Dictionary).get("stats",{}),"legacies":(model.get("legacies",[]) as Array).size(),"rivals":(model.get("rivals",[]) as Array).map(func(r:Dictionary)->String:return String(r.civ_name)+": "+String(r.title))}
+
+func _handle_aims()->void:
+	## A plausible player summons whoever holds an aim matter within a few
+	## weeks to a season, and answers. "--aims=silent" never summons.
+	if aims==null: return
+	var log_list:Array=(aims.call("state") as Dictionary).get("log",[])
+	for i in range(log_list.size()-1,-1,-1):
+		var entry:Dictionary=log_list[i]
+		var key:="%d|%s|%s" % [int(entry.get("day",0)),String(entry.get("kind","")),String(entry.get("text",""))]
+		if aim_logged.has(key): continue
+		aim_logged[key]=true
+		var row:=entry.duplicate(); row.erase("day")
+		row["aim_kind"]=String(row.get("kind","")); row.erase("kind")
+		w("aim",row)
+	if aim_policy=="silent": return
+	for m in Hall.matters():
+		if String(m.get("situation_type",""))!="aim": continue
+		var id:=String(m.get("id",""))
+		if not aim_due.has(id): aim_due[id]=int(GameState.elapsed_days)+rng.randi_range(15,75)
+		if int(GameState.elapsed_days)<int(aim_due[id]): continue
+		var opened:Dictionary=Hall.open_matter(id)
+		if opened.is_empty(): continue
+		var aid:=String(opened.get("id",""))
+		handled_audiences[aid]=true
+		var opts:=Hall.options(aid)
+		var ids:Array=opts.map(func(o:Dictionary)->String:return String(o.id))
+		var adopts:Array=ids.filter(func(x:String)->bool:return x.begins_with("aim_adopt:"))
+		var pick:=""
+		var roll:=rng.randf()
+		if not adopts.is_empty():
+			if "aim_keep" in ids: pick=String(adopts[0]) if roll<0.5 else "aim_keep"
+			elif roll<0.85: pick=String(adopts[0]) if rng.randf()<0.5 else String(adopts[rng.randi()%adopts.size()])
+			else: pick="aim_wait"
+		else:
+			var course:=["aim_press","aim_extend","aim_hold","aim_press","aim_extend","aim_release"]
+			pick=String(course[rng.randi()%course.size()])
+			if not pick in ids: pick=String(ids[0])
+		var lines:Array=(Hall.find(aid).get("lines",[]) as Array).map(func(l:Dictionary)->String:return ("%s: " % String(l.get("speaker","")) if String(l.get("speaker",""))!="" else "")+String(l.get("text","")))
+		var r:=Hall.resolve(aid,pick)
+		w("aim_decision",{"holder":String((m.get("holder",{}) as Dictionary).get("name","")),"summary":String(m.get("summary","")).left(300),"options":opts.map(func(o:Dictionary)->String:return String(o.label)),"pick":pick,"lines":lines,"outcome":String(r.get("outcome",r.get("error",""))).left(300)})
 
 func _collect()->void:
 	for e in GameState.simulation_events:

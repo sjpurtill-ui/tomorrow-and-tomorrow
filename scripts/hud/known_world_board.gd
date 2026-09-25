@@ -31,6 +31,7 @@ func setup(block:Dictionary)->void:
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	add_theme_constant_override("separation",18)
 	_build_counters()
+	_build_aims()
 	chart=Chart.new();chart.name="KnownWorldChart";chart.data=model.get("chart",{});chart.tier=tier;chart.settlement=String(model.get("settlement","Our hearth"))
 	chart.custom_minimum_size.y=CHART_HEIGHT;add_child(chart)
 	columns=GridContainer.new();columns.name="PeoplesAndWalkers";columns.columns=2
@@ -39,6 +40,49 @@ func setup(block:Dictionary)->void:
 	_build_walkers(_sheet(columns,"Walkers"))
 	_build_finds()
 	resized.connect(_layout);_layout()
+
+## "What we strive for": the live generational aim (legacy_aims.gd), its
+## progress in the people's words, what rivals have sworn, and legacies won.
+func _build_aims()->void:
+	var aims:Dictionary=model.get("aims",{})
+	var live:Dictionary=aims.get("active",{})
+	var waiting:=String(aims.get("waiting",""))
+	var rivals:Array=aims.get("rivals",[])
+	var legacies:Array=aims.get("legacies",[])
+	if live.is_empty() and waiting=="" and rivals.is_empty() and legacies.is_empty(): return
+	var frame:=PanelContainer.new();frame.name="AimsSheet";frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	frame.add_theme_stylebox_override("panel",sheet_style());add_child(frame)
+	var stack:=VBoxContainer.new();stack.name="Aims";stack.add_theme_constant_override("separation",8);frame.add_child(stack)
+	heading(stack,"WHAT WE STRIVE FOR",String(live.get("by","")) if not live.is_empty() else "")
+	if not live.is_empty():
+		var title:=Kit.serif(stack,String(live.get("title","")),24,T.INK,true);title.name="AimTitle"
+		var bar:=AimBar.new();bar.name="AimProgress";bar.progress=float(live.get("progress",0.0));bar.marks=live.get("milestones",[]);bar.custom_minimum_size=Vector2(0,18);stack.add_child(bar)
+		bar.tooltip_text="%d%% of the way" % roundi(float(live.get("progress",0.0))*100.0)
+		var said:=String(live.get("words",""))
+		var line:=Kit.label(stack,"%s · %s left" % [said.substr(0,1).to_upper()+said.substr(1),String(live.get("left",""))],13,T.BODY,false);line.name="AimWords"
+		if String(live.get("clash",""))!="":
+			Kit.label(stack,"%s have sworn against it." % String(live.clash),12,T.GOLD,false)
+	elif waiting!="":
+		Kit.serif(stack,"The people want an aim. Summon %s to hear it." % waiting,16,T.INK,true).name="AimWaiting"
+	for rival:Dictionary in rivals:
+		var row:=Kit.label(stack,"%s of %s has sworn to %s%s" % [String(rival.get("leader","")),String(rival.get("people","")),String(rival.get("phrase","")),(" (against our aim)" if bool(rival.get("clash",false)) else "")],12,T.TEXT_SOFT,false)
+		row.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;row.name="Vow_"+String(rival.get("civ_id","")).validate_node_name()
+	for legacy:Dictionary in legacies:
+		var remembered:=Kit.serif(stack,"Remembered: %s, year %d" % [String(legacy.get("name","")),int(int(legacy.get("day",0))/365.0)+1],13,T.BODY,true)
+		remembered.name="Legacy_%d" % int(legacy.get("day",0))
+
+class AimBar extends Control:
+	var progress:=0.0
+	var marks:Array=[]
+	func _ready()->void:resized.connect(queue_redraw)
+	func _draw()->void:
+		var h:=size.y*0.5
+		var y:=(size.y-h)*0.5
+		draw_rect(Rect2(0,y,size.x,h),Color(T.BORDER_SOFT,.5))
+		draw_rect(Rect2(0,y,size.x*clampf(progress,0.0,1.0),h),T.GOLD)
+		for mark in [25,50,75]:
+			var x:=size.x*float(mark)/100.0
+			draw_line(Vector2(x,y-3),Vector2(x,y+h+3),T.INK if int(mark) in marks else Color(T.INK,.35),1.5)
 
 func _layout()->void:
 	var width:=size.x if size.x>0 else 940.0
@@ -161,6 +205,10 @@ func _people_card(people:Dictionary)->Control:
 	var last:=String(people.get("last_word","")).strip_edges()
 	var quote:=Kit.serif(words,("“%s”" % (last if last.length()<=150 else last.substr(0,147)+"…")) if not last.is_empty() else "No word has yet passed between you.",13,T.BODY if not last.is_empty() else T.MUTED,true)
 	quote.name="LastWord"
+	var vow:Dictionary=people.get("aim",{})
+	if not vow.is_empty():
+		var sworn:=Kit.label(words,"%s has sworn to %s" % [String(vow.get("leader","Their chief")),String(vow.get("phrase",""))],12,T.GOLD,false);sworn.name="RivalAim"
+		sworn.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	var buttons:=HBoxContainer.new();buttons.add_theme_constant_override("separation",8);words.add_child(buttons)
 	var speak:=_action(buttons,"Send word",people.get("on_speak"),true,"Their leader is heard in the court.");speak.name="SendWord"
 	var record:=_action(buttons,"What we know",people.get("on_record"),false,"Everything that has returned about them.");record.name="KnownRecord"

@@ -21,9 +21,9 @@ func _ready()->void:
 	PeopleDirection.advance(30)
 	check(GameState.societal_values.official.experimentation==after,"same day applied twice")
 	GameState.elapsed_days=30
-	check(PeopleDirection.decide(0).get("ok",false),"vision decision failed")
-	check(PeopleDirection.decide(0).has("error"),"decision effect could be farmed")
-	check(PeopleDirection.resolved==1,"decision not recorded")
+	# The one-shot visions are retired: generational aims (legacy_aims.gd) replace them.
+	check(PeopleDirection.decide(0).has("error"),"a retired vision was applied")
+	check(PeopleDirection.resolved==0,"a retired vision was recorded")
 	GameState.simulation_metrics["food_days"]=3
 	PeopleDirection.routine_work(30)
 	var sum:=0.0
@@ -40,11 +40,11 @@ func _ready()->void:
 	var invalid:=save.duplicate(true); invalid.ambition="invalid"
 	check(PeopleDirection.import_state(invalid).has("error") and PeopleDirection.ambition=="inquiry","invalid save mutated direction")
 	GameState.elapsed_days=5000
-	check(PeopleDirection.decide(1).get("ok",false),"unanswered vision expired")
+	check(PeopleDirection.decide(1).has("error"),"a retired vision came back")
 	PeopleDirection.reset_for_new_world()
 	check(PeopleDirection.ambition=="" and PeopleDirection.history.is_empty(),"new world retained choices")
 	GameState.societal_values=original
-	if failures.is_empty(): print("PEOPLE_DIRECTION PASS: ambitions, paced values, no duplicate decisions, no expiry, labor conservation, manual override, save roundtrip, reset")
+	if failures.is_empty(): print("PEOPLE_DIRECTION PASS: ambitions, paced values, visions retired for aims, labor conservation, manual override, save roundtrip, reset")
 	else:
 		for message in failures: push_error(message)
 	get_tree().quit(0 if failures.is_empty() else 1)
