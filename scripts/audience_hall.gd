@@ -42,8 +42,9 @@ const WORK_KINDS:=["great_work","wonder_proposal"]
 const GREAT_WORKS_PATH:="res://scripts/great_works_audience.gd"
 const REPORT_SOURCES:=["scouts","envoys","expedition"]
 const REPORT_FACTS_MAX:=24
-const TOPICS:=["food","health","housing","security","grievance","ambition","introduction","follow_up","war","summons","mourning","callback","omen"]
+const TOPICS:=["food","health","housing","security","grievance","ambition","introduction","follow_up","war","summons","mourning","callback","omen","aim"]
 const LIVES_PATH:="res://scripts/court_lives.gd"
+const AIMS_PATH:="res://scripts/legacy_aims.gd"
 const REACTIONS:=["delighted","pleased","neutral","offended","furious"]
 const VERSION:=3
 const EXPIRY_DAYS:=20
@@ -120,6 +121,7 @@ const SITUATIONS:={
 	"mourning":{"kind":"petition","headline":"comes from the burial","mechanic":"court_lives.gd; GovernmentPeopleSystem appoints the successor"},
 	"callback":{"kind":"petition","headline":"brings word of an old order","mechanic":"court_lives.gd; what really changed since the order"},
 	"omen":{"kind":"petition","headline":"comes about the sign","mechanic":"court_lives.gd; the real weather or health agreed with the god's word"},
+	"aim":{"kind":"petition","headline":"speaks of what we should strive for","mechanic":"legacy_aims.gd; a generational aim measured against the real simulation"},
 	"dread_tribute":{"kind":"gift","headline":"brings tribute, fearing your wrath","mechanic":"civilization_exchange take/receive between real ledgers"},
 }
 
@@ -220,6 +222,11 @@ static func _lives()->GDScript:
 	## because that module reaches back into this one.
 	return load(LIVES_PATH) as GDScript
 
+static func _aims()->GDScript:
+	## Generational aims (legacy_aims.gd); loaded lazily because that module
+	## reaches back into this one.
+	return load(AIMS_PATH) as GDScript
+
 static func _great_works()->GDScript:
 	## Great Works audiences (architects, rival races, forecasts); loaded lazily
 	## because that module reaches back into this one.
@@ -300,6 +307,7 @@ static func daily(day:int)->Array[Dictionary]:
 	_prune_occasions(day)
 	_prune_matters(day)
 	_lives().call("daily",day)
+	_aims().call("daily",day)
 	# The court never comes on its own: its occasions become matters, held by
 	# the official until the ruler summons them.
 	for occasion in (s.occasions as Array).duplicate():
@@ -523,6 +531,7 @@ static func open_matter(matter_id:String)->Dictionary:
 		for index in mini(prefilled.size(),4):
 			if prefilled[index] is Dictionary: append_line(String(stored.id),prefilled[index])
 		_lives().call("on_open",stored)
+		_aims().call("on_open",stored)
 		return stored
 	return {}
 
@@ -1889,7 +1898,7 @@ static func _generate_petition(person_id:int,day:int,forced_topic:String)->Dicti
 
 static func _topic_words(topic:String)->String:
 	return {"food":"the food stores","health":"the sick and the water","housing":"shelter for the people","security":"the watch","grievance":"a personal grievance","ambition":"a proposal of their own",
-		"introduction":"their new office","follow_up":"a promise you made","war":"the war","summons":"your summons"}.get(topic,"a matter of state")
+		"introduction":"their new office","follow_up":"a promise you made","war":"the war","summons":"your summons","aim":"what the people should strive for"}.get(topic,"a matter of state")
 
 # --------------------------------------------------------------------------
 # Court bench
@@ -2016,6 +2025,8 @@ static func options(id:String)->Array[Dictionary]:
 					result.append(_option("rebuke","Remind them of their place","Make plain that the office serves the ruler.","hostile"))
 				"mourning","callback","omen":
 					for lives_option:Dictionary in _lives().call("options",audience): result.append(lives_option)
+				"aim":
+					for aim_option:Dictionary in _aims().call("options",audience): result.append(aim_option)
 				"follow_up":
 					result.append(_option("decree","Issue it now","\"%s\"" % decree,"warm",decree!="","Nothing was promised."))
 					result.append(_option("patience","Ask for patience","Admit it waits; promise nothing new.","neutral"))
@@ -2569,6 +2580,7 @@ static func _posture_words(actual:String,name:String)->String:
 
 static func _resolve_petition(audience:Dictionary,option_id:String)->Dictionary:
 	if String((audience.get("petition",{}) as Dictionary).get("topic","")) in ["mourning","callback","omen"]: return _lives().call("resolve",audience,option_id)
+	if String((audience.get("petition",{}) as Dictionary).get("topic",""))=="aim": return _aims().call("resolve",audience,option_id)
 	var pid:=int(audience.speaker.person_id)
 	var person:=_official(pid)
 	var name:=String(audience.speaker.name)

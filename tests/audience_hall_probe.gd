@@ -552,11 +552,13 @@ func _test_court_matters()->void:
 	# Matters lapse quietly.
 	var quiet:=HALL._generate_petition(pid,40,"ambition")
 	HALL._file_matter(quiet,[])
-	var before:=HALL.matters("person:%d" % pid).size()
+	# (A generational aim the court may propose that same day is new business, not an old matter.)
+	var not_aim:=func(m:Dictionary)->bool:return String(m.get("situation_type",""))!="aim"
+	var before:=HALL.matters("person:%d" % pid).filter(not_aim).size()
 	GameState.simulation_metrics["food_days"]=60.0; GameState.simulation_metrics["food_intake_ratio"]=1.0
 	GameState.elapsed_days=40+HALL.MATTER_DAYS+1
 	HALL.daily(40+HALL.MATTER_DAYS+1)
-	check(HALL.matters("person:%d" % pid).size()<before,"Old matters never lapsed")
+	check(HALL.matters("person:%d" % pid).filter(not_aim).size()<before,"Old matters never lapsed")
 	check(is_equal_approx(float(GovernmentPeopleSystem.person_snapshot(pid).relationships.sovereign.resentment),resent),"A lapsed matter cost the official's goodwill")
 	# A version-2 save with a court audience waiting in the antechamber.
 	var petition:=HALL._generate_petition(pid,int(GameState.elapsed_days),"ambition")

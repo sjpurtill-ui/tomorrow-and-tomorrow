@@ -45,6 +45,9 @@ var panel:Control
 var layer:CanvasLayer
 ## The Opening Arc's record of the first years (scripts/opening_arc.gd).
 var opening_arc:Dictionary={}
+## Generational aims (scripts/legacy_aims.gd): the live aim, proposals,
+## legacies and rivals' vows. Replaces the three one-shot visions.
+var aims:Dictionary={}
 ## Emitted for each Opening Arc beat: {id, kind, tier, day, title, text, refs}.
 signal opening_beat(beat:Dictionary)
 
@@ -54,7 +57,7 @@ func ensure()->void:
 	next_vision_day=last_day+30
 
 func reset_for_new_world()->void:
-	ambition=""; chosen_day=-1; chosen_century=-1; last_day=0; resolved=0; next_vision_day=30; automatic_work=true; work_baseline={}; work_day=-30; history.clear(); opening_arc={}; cultural_memory=Culture.empty(); auto_scouting=true;auto_settlement=true;auto_research=true;inclination_review_day=-1; initialized=false
+	ambition=""; chosen_day=-1; chosen_century=-1; last_day=0; resolved=0; next_vision_day=30; automatic_work=true; work_baseline={}; work_day=-30; history.clear(); opening_arc={}; aims={}; cultural_memory=Culture.empty(); auto_scouting=true;auto_settlement=true;auto_research=true;inclination_review_day=-1; initialized=false
 	if is_instance_valid(panel): panel.queue_free()
 
 func choose(id:String)->Dictionary:
@@ -121,7 +124,11 @@ func advance(day:int)->void:
 	last_day=day
 
 func decide(option:int)->Dictionary:
+	## The three one-shot visions have given way to generational aims
+	## (legacy_aims.gd), which the court proposes and the god takes up. Kept
+	## for older callers; it never applies a vision now.
 	ensure()
+	if option>=0: return {"error":"The people's visions are now their aims: summon the court to hear what they would strive for."}
 	var day:=int(WorldSimulation.state.elapsed_days)
 	if ambition=="" or resolved>=VISIONS.size() or day<next_vision_day: return {"error":"There is no vision awaiting your support."}
 	if option<0 or option>=2: return {"error":"Unknown vision."}
@@ -194,7 +201,7 @@ func _recommendation(role:String,known:Array)->Dictionary:
 
 func export_state()->Dictionary:
 	ensure()
-	return {"version":3,"inclination_review_day":inclination_review_day,"auto_scouting":auto_scouting,"auto_settlement":auto_settlement,"auto_research":auto_research,"cultural_memory":cultural_memory.duplicate(true),"chosen_century":chosen_century,"network":WorldSimulation.communities.export_state(),"seed":seed_value,"ambition":ambition,"chosen_day":chosen_day,"last_day":last_day,"resolved":resolved,"next_vision_day":next_vision_day,"automatic_work":automatic_work,"work_baseline":work_baseline.duplicate(true),"work_day":work_day,"history":history.duplicate(true)}
+	return {"version":3,"inclination_review_day":inclination_review_day,"auto_scouting":auto_scouting,"auto_settlement":auto_settlement,"auto_research":auto_research,"cultural_memory":cultural_memory.duplicate(true),"chosen_century":chosen_century,"network":WorldSimulation.communities.export_state(),"seed":seed_value,"ambition":ambition,"chosen_day":chosen_day,"last_day":last_day,"resolved":resolved,"next_vision_day":next_vision_day,"automatic_work":automatic_work,"work_baseline":work_baseline.duplicate(true),"work_day":work_day,"history":history.duplicate(true),"aims":aims.duplicate(true)}
 
 func import_state(state:Dictionary)->Dictionary:
 	if int(state.get("version",0)) not in [1,2,3] or state.get("seed",0)!=WorldSimulation.state.world_seed: return {"error":"Incompatible people-direction save."}
@@ -213,6 +220,7 @@ func import_state(state:Dictionary)->Dictionary:
 		if not (value is int or value is float) or not is_finite(float(value)) or float(value)<0: return {"error":"Invalid work share."}
 	for event in state.get("history",[]):
 		if not event is Dictionary or not event.has_all(["day","text"]): return {"error":"Invalid history record."}
+	if state.has("aims") and not preload("res://scripts/legacy_aims.gd").valid_state(state.aims): return {"error":"Invalid aims save."}
 	if state.has("network"):
 		if not state.network is Dictionary: return {"error":"Invalid network save."}
 		var network_result:=WorldSimulation.communities.import_state(state.network)
@@ -221,6 +229,8 @@ func import_state(state:Dictionary)->Dictionary:
 		WorldSimulation.communities.reset_for_new_world(); WorldSimulation.communities.ensure()
 	ambition=state.get("ambition",""); chosen_day=int(state.get("chosen_day",-1)); last_day=int(state.get("last_day",0)); resolved=int(state.get("resolved",0)); next_vision_day=int(state.get("next_vision_day",30)); automatic_work=bool(state.get("automatic_work",true)); work_baseline=state.get("work_baseline",{}).duplicate(true); work_day=int(state.get("work_day",-30)); history.assign(state.get("history",[]).duplicate(true)); seed_value=WorldSimulation.state.world_seed; initialized=true
 	chosen_century=imported_century
+	# Older saves have no aims: the court will propose one in due course.
+	aims=(state.get("aims",{}) as Dictionary).duplicate(true) if state.get("aims") is Dictionary else {}
 	cultural_memory=state.get("cultural_memory",Culture.empty()).duplicate(true)
 	auto_scouting=bool(state.get("auto_scouting",true));auto_settlement=bool(state.get("auto_settlement",true));auto_research=bool(state.get("auto_research",true));inclination_review_day=int(state.get("inclination_review_day",-1))
 	_ensure_cultural_memory()

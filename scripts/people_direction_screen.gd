@@ -165,7 +165,6 @@ func _traditions_page()->void:
 	_clear(traditions)
 	traditions.add_theme_constant_override("separation",14)
 	var state=WorldSimulation.direction
-	var day:=int(WorldSimulation.state.elapsed_days)
 	var spread:=BoxContainer.new();spread.vertical=size.x<900;spread.add_theme_constant_override("separation",18);traditions.add_child(spread)
 	var portrait:=_box(spread);portrait.get_parent().size_flags_stretch_ratio=.85
 	var focus:=String(state.ambition)
@@ -221,16 +220,20 @@ func _traditions_page()->void:
 	if commitments.is_empty():
 		timeline_scroll.hide()
 		_label(history,"Your first choice begins the story.",14)
-	if state.ambition!="" and state.resolved<state.VISIONS.size() and day>=state.next_vision_day:
-		var vision:Dictionary=state.VISIONS[state.resolved]
-		var row:=_box(traditions);_label(row,vision.title,20)
-		var options:=HBoxContainer.new();row.add_child(options)
-		for index in 2:
-			var choice_index:=index
-			var option:=_button(options,vision.options[index].label,func():
-				var result:Dictionary=state.decide(choice_index)
-				status.text=String(result.get("error",""));status.visible=result.has("error");_traditions_page())
-			option.tooltip_text=vision.question+"\n"+vision.options[index].meaning
+	# The one-shot visions have become generational aims (legacy_aims.gd):
+	# the court proposes them and the god takes one up in the Court.
+	var aims:=preload("res://scripts/legacy_aims.gd").board_model()
+	var aim_row:=_box(traditions)
+	var live:Dictionary=aims.get("active",{})
+	if not live.is_empty():
+		_label(aim_row,"What we strive for: %s" % String(live.title),20)
+		_label(aim_row,"%s · %s left · %s" % [String(live.words).substr(0,1).to_upper()+String(live.words).substr(1),String(live.left),String(live.by)],14)
+	elif String(aims.get("waiting",""))!="":
+		_label(aim_row,"The people want an aim. Summon %s in the Court to hear it." % String(aims.waiting),16)
+	else:
+		_label(aim_row,"No aim is sworn. The court will speak of one when the time comes.",14)
+	for legacy:Dictionary in aims.get("legacies",[]):
+		_label(aim_row,"Remembered: %s (year %d)" % [String(legacy.name),int(legacy.day)/365+1],13)
 
 func _capture_opening()->void:
 	if "--capture-opening" not in OS.get_cmdline_user_args() or get_tree().root.has_meta("opening_captured"):return
