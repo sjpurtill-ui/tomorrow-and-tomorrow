@@ -327,6 +327,8 @@ var map_help_body:Label
 var map_help_dismissed:=true
 var travel_council_notice: Button
 var travel_council_notice_until_msec := 0
+## The map-control hint in the status strip is for the first few real minutes.
+const MAP_HINT_REAL_MSEC:=240000
 var foreign_alert_panel:PanelContainer
 var foreign_alert_title:Label
 var foreign_alert_body:Label
@@ -1055,6 +1057,10 @@ func _process(delta: float) -> void:
 	stamp=trace.mark("frame_map_snapshots",stamp)
 	if travel_council_notice and travel_council_notice.visible and Time.get_ticks_msec()>travel_council_notice_until_msec:
 		travel_council_notice.visible=false
+	if travel_status_label:
+		# The status strip never sits under the road notice or a moment card.
+		var card:Variant=hud.get_meta("chronicle_card") if hud and hud.has_meta("chronicle_card") else null
+		travel_status_label.visible=not ((travel_council_notice!=null and travel_council_notice.visible) or (is_instance_valid(card) and bool(card.showing)))
 	if event_report_button and event_report_button.visible and Time.get_ticks_msec()>event_report_visible_until_msec:
 		event_report_button.visible=false
 	_arbitrate_notification_overlays()
@@ -11011,6 +11017,7 @@ func _show_caravan_notice(entry:Dictionary)->void:
 	var danger:=String(entry.get("severity",""))=="danger" or String(entry.get("severity",""))=="warning"
 	var accent:=Color("#b46452") if danger else Color("#b59b5d")
 	travel_council_notice.text="CARAVAN LEADER  •  %s\n%s — %s\nOPEN COUNCIL" % [String(entry.get("leader","")),String(entry.get("title","")),String(entry.get("text",""))]
+	_place_travel_council_notice()
 	travel_council_notice.add_theme_stylebox_override("normal",_population_report_style(accent))
 	travel_council_notice.add_theme_stylebox_override("hover",_population_report_style(accent,true))
 	travel_council_notice.add_theme_stylebox_override("pressed",_population_report_style(accent,true))
@@ -11597,9 +11604,8 @@ func _show_convoy_arrival(completed:Dictionary)->void:
 		if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
 		_set_camera_target(Vector3(destination.x,_height_at(destination.x,destination.y),destination.y))
 		stamp=trace.mark("found_camera",stamp)
-		# The dock opens next frame so the network rebuild and dock layout for a
-		# founding never share one frame.
-		pending_hud_section="settlement"
+		# A new hearth is told in the Chronicle and shown on the map; the dock
+		# does not open by itself over it.
 	_update_time_interface()
 
 func _start_settlement_here() -> void:
@@ -11652,7 +11658,8 @@ func _start_settlement_here() -> void:
 	if GameState.simulation_events.size()>80:
 		GameState.simulation_events.resize(80)
 	_issue_travel_council_report("settlement",route_progress)
-	_open_people_panel()
+	# The map stays clear at founding: the dock no longer opens by itself over
+	# the new hearth. The People view is one click away on the rail.
 	_update_time_interface()
 	_open_settlement_naming_panel.call_deferred()
 
@@ -11777,12 +11784,32 @@ func _issue_travel_council_report(stage: String,progress: float,reason:="") -> v
 		return
 	var urgency:=float(item.get("urgency",0.4))
 	var accent:=Color("#b46452") if urgency>0.7 else Color("#b59b5d")
-	travel_council_notice.text="TRAVEL COUNCIL  •  %s\n%s\nOPEN COUNCIL" % [String(item.get("advisor","Council")),String(item.get("text",""))]
+	travel_council_notice.text="WORD FROM THE ROAD  •  %s\n%s\nOPEN COUNCIL" % [String(item.get("advisor","the caravan's speakers")),String(item.get("text",""))]
+	_place_travel_council_notice()
 	travel_council_notice.add_theme_stylebox_override("normal",_population_report_style(accent))
 	travel_council_notice.add_theme_stylebox_override("hover",_population_report_style(accent,true))
 	travel_council_notice.add_theme_stylebox_override("pressed",_population_report_style(accent,true))
 	travel_council_notice.visible=true
 	travel_council_notice_until_msec=Time.get_ticks_msec()+(13000 if urgency>0.7 else 8500)
+
+## Sizes the road notice to its words and keeps it clear of the Chronicle's
+## moment card (top right): beside the card when there is room, else below it.
+func _place_travel_council_notice()->void:
+	if travel_council_notice==null:return
+	var view:=get_viewport().get_visible_rect().size
+	var width:=clampf(view.x-140.0,260.0,390.0)
+	var font:Font=travel_council_notice.get_theme_font("font")
+	var font_size:=travel_council_notice.get_theme_font_size("font_size")
+	var text_height:=font.get_multiline_string_size(travel_council_notice.text,HORIZONTAL_ALIGNMENT_LEFT,width-36.0,font_size).y if font else 120.0
+	travel_council_notice.size=Vector2(width,ceilf(text_height)+30.0)
+	var card_width:=float(preload("res://scripts/hud/chronicle_card.gd").CARD_WIDTH)
+	var x:=view.x-card_width-32.0-width
+	var y:=84.0
+	if x<110.0:
+		x=maxf(110.0,view.x-width-16.0)
+		var card:Variant=hud.get_meta("chronicle_card") if hud and hud.has_meta("chronicle_card") else null
+		if is_instance_valid(card) and bool(card.showing) and is_instance_valid(card.panel):y=float(card.panel.position.y+card.panel.size.y)+12.0
+	travel_council_notice.position=Vector2(roundf(x),y)
 
 func _on_diplomatic_event(event:Dictionary)->void:
 	if String(event.get("kind",""))=="diplomatic_return":
@@ -19327,7 +19354,10 @@ func _update_time_interface() -> void:
 		# The control hint is for the first month; after it, the ticker keeps
 		# the latest thing worth telling from the Chronicle.
 		var headline:=preload("res://scripts/chronicle.gd").latest_headline() if GameState.settlement_site_committed and GameState.settlement_founded_day>=0 and GameState.elapsed_days-float(GameState.settlement_founded_day)>30.0 else ""
-		travel_status_label.text = headline if headline!="" else ("FOUNDING CONVOY READY  •  RIGHT-CLICK VISIBLE OR BLACK LAND TO TRAVEL  •  CAMP TO FORAGE BETWEEN LEGS" if not GameState.settlement_site_committed else "RECOGNIZED RESOURCES %s  •  TWO-FINGER SLIDE TO PAN  •  UP / DOWN TO ZOOM" % ("SHOWN" if resource_view_enabled else "HIDDEN"))
+		# The pan/zoom hint also gives way after the first few real minutes (a
+		# slow first month would otherwise keep it up for an hour).
+		var hint_done:=GameState.settlement_site_committed and Time.get_ticks_msec()>MAP_HINT_REAL_MSEC
+		travel_status_label.text = headline if headline!="" else ("FOUNDING CONVOY READY  •  RIGHT-CLICK VISIBLE OR BLACK LAND TO TRAVEL  •  CAMP TO FORAGE BETWEEN LEGS" if not GameState.settlement_site_committed else ("" if hint_done else "RECOGNIZED RESOURCES %s  •  TWO-FINGER SLIDE TO PAN  •  UP / DOWN TO ZOOM" % ("SHOWN" if resource_view_enabled else "HIDDEN")))
 	if start_settlement_button:
 		# All map commands now live together under ACTIONS. The contextual status
 		# above provides onboarding without a modal-sized permanent map obstruction.

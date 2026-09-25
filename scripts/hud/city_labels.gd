@@ -5,6 +5,10 @@ const POP_SIZE:=13
 const GAP:=7.0
 const REPORT=preload("res://scripts/hud/city_report_visuals.gd")
 const T=preload("res://scripts/hud/hud_tokens.gd")
+const EraWords=preload("res://scripts/hud/era_words.gd")
+const MODERN_LABELS:={"population":"POP · PEOPLE","science_capacity":"SCIENCE · MIND-EQ.","gdp":"GDP · WORK-DAYS/D","life_expectancy":"HEALTH · LIFE EXP."}
+## What scouts can say of a stranger town before anyone keeps statistics.
+const EARLY_LABELS:={"population":"PEOPLE","science_capacity":"LORE · KEEPERS","gdp":"HANDS AT WORK","life_expectancy":"LIVES · YEARS"}
 
 static func report_summary(record:Dictionary,today:int)->Dictionary:
 	var fields:Dictionary=record.get("fields",{})
@@ -12,9 +16,10 @@ static func report_summary(record:Dictionary,today:int)->Dictionary:
 	for key:String in ["population","science_capacity","gdp","life_expectancy"]:
 		var field:Dictionary=fields.get(key,{})
 		var detail:=""
-		if key=="science_capacity":detail="Edu "+REPORT.estimate("education",fields.get("education",{}))
-		if key=="life_expectancy":detail="IMR "+REPORT.estimate("infant_mortality",fields.get("infant_mortality",{}))
-		stats.append({"key":key,"label":{"population":"POP · PEOPLE","science_capacity":"SCIENCE · MIND-EQ.","gdp":"GDP · WORK-DAYS/D","life_expectancy":"HEALTH · LIFE EXP."}[key],"value":REPORT.estimate(key,field),"detail":detail})
+		var modern:=EraWords.reckoned()
+		if key=="science_capacity":detail=("Edu " if modern else "Taught ")+REPORT.estimate("education",fields.get("education",{}))
+		if key=="life_expectancy":detail="IMR "+REPORT.estimate("infant_mortality",fields.get("infant_mortality",{})) if modern else "Babes lost "+REPORT.estimate("infant_mortality",fields.get("infant_mortality",{})).replace("‰"," in 1,000")
+		stats.append({"key":key,"label":String((MODERN_LABELS if modern else EARLY_LABELS)[key]),"value":REPORT.estimate(key,field),"detail":detail})
 	var fresh:=REPORT.freshness(record,today)
 	return {"stats":stats,"level":fresh.level,"status":fresh.status}
 var terrain:Node

@@ -28,7 +28,7 @@ func _city_tab()->Dictionary:
 	var rows:Array=[
 		{"name":"Construction era","value":ERAS[tier],"sub":"Buildings are drawn in this era; it rises with builders, materials, age and knowledge","accent":Tokens.GOLD},
 		{"name":"Condition","value":"%d%%" % roundi(float(form.get("condition",1.0))*100.0),"sub":"Builders keep the city in repair; damage and neglect lower it","accent":Tokens.GREEN if float(form.get("condition",1.0))>=.7 else Tokens.AMBER},
-		{"name":"Building materials","value":"%d%% supplied" % roundi(paid*100.0),"sub":"Monthly timber, fibre, clay and stone for upkeep and renewal (stone and lime from masonry eras)","accent":Tokens.GREEN if paid>=.9 else Tokens.AMBER},
+		{"name":"Building materials","value":"%d%% supplied" % roundi(paid*100.0),"sub":"Monthly timber, fibre, clay and stone for upkeep and renewal (stone and lime come later, with walls of stone)","accent":Tokens.GREEN if paid>=.9 else Tokens.AMBER},
 		{"name":"Builders","value":str(builders),"sub":"Construction workers maintain the city and raise infrastructure","accent":Tokens.MUTED},
 		{"name":"Housing","value":"%d places" % int(GameState.housing_capacity),"sub":"%d residents" % int(GameState.population_total),"accent":Tokens.GREEN if int(GameState.housing_capacity)>=int(GameState.population_total) else Tokens.AMBER},
 		{"name":"Built storage","value":"%.0f" % (float(storage.get("dry",0))+float(storage.get("covered",0))+float(storage.get("sealed",0))+float(storage.get("secure",0))),"sub":"Dry %.0f · covered %.0f · sealed %.0f · secure %.0f" % [float(storage.get("dry",0)),float(storage.get("covered",0)),float(storage.get("sealed",0)),float(storage.get("secure",0))],"accent":Tokens.MUTED},

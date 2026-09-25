@@ -242,34 +242,35 @@ func generate_travel_item(stage: String,data: Dictionary) -> Dictionary:
 	if advisor.is_empty() and not WorldSimulation.state.advisor_roster.is_empty():
 		advisor=WorldSimulation.state.advisor_roster[0]
 	var advisor_name:=String(advisor.get("name","The caravan speakers"))
-	var distance:=float(data.get("distance_km",0.0))
 	var duration:=float(data.get("duration_days",0.0))
 	var food_days:=float(data.get("food_days",0.0))
 	var progress:=roundi(float(data.get("progress",0.0))*100.0)
 	var supply_ratio:=roundi(float(data.get("supply_ratio",1.0))*100.0)
+	# Spoken as the caravan would speak to its god: the court's own address,
+	# walking days and bellies rather than kilometres and decimal stores.
 	var text:=""
 	match stage:
 		"departure":
-			text="Sovereign, the column is underway: %.0f km over roughly %.0f hours. We carry %.1f days of provisions; the road will decide the rest." % [distance,duration*24.0,food_days]
+			text="Great One, we are on the road: %s. We carry %s; the road will decide the rest." % [_walk_words(duration),_stores_words(food_days)]
 		"quarter":
-			text="Sovereign, one quarter of the route lies behind us. The column remains together and the pace is holding."
+			text="Great One, a quarter of the way lies behind us. We keep together, and the pace holds."
 		"half":
-			text="Sovereign, we have crossed the midpoint. Stores stand at %.1f days; route foraging is meeting %d%% of daily need." % [food_days,supply_ratio]
+			text="Great One, we are past the middle of the road. We carry %s, and what we find on the way feeds %s." % [_stores_words(food_days),_share_words(supply_ratio)]
 		"three_quarters":
-			text="Sovereign, the destination is now the nearer horizon. We are %d%% through the march and watching the weakest travelers closely." % progress
+			text="Great One, the end of the road is the nearer horizon now. We watch the weakest walkers closely."
 		"provisions_low":
-			text="Sovereign, fewer than three days of provisions remain. Route foraging supplies only %d%% of need. Another delay may force a halt." % supply_ratio
+			text="Great One, fewer than three days of food remain, and what we find on the way feeds %s. Another delay may force us to stop." % _share_words(supply_ratio)
 		"arrival":
-			text="Sovereign, the convoy has reached the ordered ground. Population groups are regrouping while losses, stores, and usable shelter are assessed."
+			text="Great One, we have reached the ground you chose. The families gather again while we count the lost, the food and the shelter."
 		"settlement":
 			var known_resources:=int(data.get("known_resources",0))
-			text="Sovereign, your directive is given. The convoy is halting here to establish a permanent home. Stores stand at %.1f days, and %d nearby resource %s known. The builders are organizing the first Hearth Circle from the roles you assigned." % [food_days,known_resources,"site is" if known_resources==1 else "sites are"]
+			text="Great One, it is done as you said: we stop here and make a home. We carry %s, and the scouts know %s worth working nearby. The first hearth circle will rise from the work you gave each of us." % [_stores_words(food_days),("one place" if known_resources==1 else "%s places" % _count_words(known_resources))]
 		"halt":
-			text="Sovereign, the column has stopped. %s" % String(data.get("reason","Continuing would endanger the population."))
+			text="Great One, the column has stopped. %s" % String(data.get("reason","Going on would put the people in danger."))
 		"forage_ready":
-			text="Sovereign, the camp has rebuilt a viable marching reserve. %s" % String(data.get("reason","The Travel Council judges that another leg can now be attempted."))
+			text="Great One, the camp has gathered enough to walk on. %s" % String(data.get("reason","The walkers judge that another stretch of road can be tried."))
 		_:
-			text="Sovereign, the travel council reports that the convoy is %d%% through its present route." % progress
+			text="Great One, we are %s of the way along the road." % ("most" if progress>=75 else "half" if progress>=45 else "some" if progress>=20 else "a little")
 	var item:={
 		"id":"travel_%s_%d_%d" % [stage,int(WorldSimulation.state.elapsed_days*24.0),rng.randi()],
 		"advisor":advisor_name,"office":office,"topic":"settlement" if stage=="settlement" else "travel","act":{"type":"report"},
@@ -280,6 +281,35 @@ func generate_travel_item(stage: String,data: Dictionary) -> Dictionary:
 	WorldSimulation.state.council_inbox.push_front(item)
 	if WorldSimulation.state.council_inbox.size()>80: WorldSimulation.state.council_inbox.resize(80)
 	return item
+
+const _COUNT_WORDS:=["no","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
+
+static func _count_words(count:int)->String:
+	return _COUNT_WORDS[count] if count>=0 and count<_COUNT_WORDS.size() else str(count)
+
+## Days of carried food, as walkers count it.
+static func _stores_words(days:float)->String:
+	if days<1.0:return "less than a day's food"
+	if days<3.0:return "food for a day or two"
+	if days<6.0:return "food for a few days"
+	if days<10.0:return "food for about a hand of days"
+	if days<20.0:return "food for half a moon"
+	if days<40.0:return "food for about a moon"
+	return "food for %s moons" % _count_words(roundi(days/29.5))
+
+## How long the walk is, in days of walking.
+static func _walk_words(days:float)->String:
+	if days<0.75:return "less than a day's walk"
+	if days<1.5:return "a day's walk"
+	return "about %s days' walk" % _count_words(roundi(days))
+
+## A share (percent) told as how many of us it feeds.
+static func _share_words(percent:int)->String:
+	if percent>=100:return "all of us"
+	if percent>=75:return "most of us"
+	if percent>=45:return "half of us"
+	if percent>=20:return "some of us"
+	return "few of us"
 
 func _recommendation_for(advisor: Dictionary,domain: String) -> String:
 	var forceful: bool = "Directive" in advisor.traits or "Centralized" in advisor.traits

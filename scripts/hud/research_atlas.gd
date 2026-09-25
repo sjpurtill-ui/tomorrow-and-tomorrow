@@ -160,7 +160,9 @@ func refresh(refit:bool)->void:
 	for index in leaders.item_count:
 		if (index==0 and leader_filter=="") or (index>0 and String(leaders.get_item_metadata(index))==leader_filter):leaders.select(index)
 	var science:=Indicators.science()
-	stats.text="SCIENCE %.1f  ·  %.1f minds × %d%% education  ·  %d staffed / %d projects" % [float(science.capacity),float(science.minds),roundi(float(science.education)*100.0),staffed,active]
+	var era_words:GDScript=preload("res://scripts/hud/era_words.gd")
+	if bool(era_words.call("reckoned")):stats.text="SCIENCE %.1f  ·  %.1f minds × %d%% education  ·  %d staffed / %d projects" % [float(science.capacity),float(science.minds),roundi(float(science.education)*100.0),staffed,active]
+	else:stats.text="%d keeping the lore  ·  taught %s  ·  %d staffed / %d projects" % [roundi(float(science.minds)),String(era_words.call("teaching",float(science.education))),staffed,active]
 	tabs.active.text="Being researched · %d" % active;tabs.known.text="Established · %d" % known
 	for id:String in tabs:
 		var tab:Button=tabs[id]

@@ -55,7 +55,9 @@ func test_content_reads_city_changes_without_reopening_and_links_every_city()->v
 		GameState.simulation_metrics.food_days=20.0;GameState.simulation_metrics.food_intake_ratio=1.0
 		GameState.water_metrics={"days":3.0,"intake_ratio":1.0})
 	var next:Dictionary=content.tab(0)
-	assert_str(String(next.blocks[0].items[2].value)).is_equal("20.0 days")
+	# The People view: stores of food are the second of six plain answers.
+	assert_str(String(next.blocks[0].items[1].value)).is_equal("20 days")
+	assert_int((next.blocks[0].items as Array).size()).is_equal(6)
 	assert_str(String(next.blocks[1].items[0].value)).is_equal("Basic needs met")
 
 func test_city_navigation_and_overview_layout()->void:

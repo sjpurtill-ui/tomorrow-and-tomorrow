@@ -1,9 +1,11 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
 const Indicators:=preload("res://scripts/civilization_indicators.gd")
 const EarlyCare:=preload("res://scripts/early_life_conditions.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 ## Dedicated health and longevity view opened directly from the HEALTH KPI.
 
 func meta()->Dictionary:
+	if not EraWords.reckoned():return {"eyebrow":"THE PEOPLE · LIFE & DEATH","title":"How long we live","subtabs":["LIVES"]}
 	return {
 		"eyebrow":"POPULATION · HEALTH & SURVIVAL",
 		"title":"Health & Life Expectancy",
@@ -26,14 +28,14 @@ func _city_health()->Dictionary:
 	var housing:=roundi(float(GameState.simulation_metrics.get("housing_ratio",1.0))*100.0)
 	var infant_mortality:=Indicators.infant_mortality_per_1000()
 	var kpis:Array=[
-		{"label":"LIFE EXPECTANCY","value":"%.1f years" % expectancy,"delta":"%+.1f" % expectancy_delta if absf(expectancy_delta)>=0.05 else "stable","delta_color":Tokens.GREEN if expectancy_delta>0.0 else (Tokens.RED if expectancy_delta<0.0 else Tokens.MUTED),"accent":Tokens.TEAL,"tip":"Expected lifespan at birth under current age-specific mortality and living conditions. Early societies lose many infants and young children; each care practice they learn removes part of that loss (see WHAT DECIDES WHO SURVIVES)."},
-		{"label":"INFANT MORTALITY","value":"%.0f / 1,000" % infant_mortality,"delta":"projected now","accent":Tokens.RED if infant_mortality>=50.0 else Tokens.AMBER,"tip":"Projected deaths before a first birthday per 1,000 live births under current birth care, diet, water and living conditions"},
-		{"label":"DEATHS · 12M","value":str(int(vital.get("deaths",0))),"delta":"recorded","accent":Tokens.RED,"tip":"Actual deaths during the trailing 365 days"},
-		{"label":"MEAN AGE AT DEATH","value":"%.1f years" % observed_age if observed_age>=0.0 else "—","delta":"observed" if observed_age>=0.0 else "no deaths","accent":Tokens.AMBER,"tip":"Observed mean age among recorded deaths; unlike life expectancy, this depends on who has died so far"},
+		{"label":"LIFE EXPECTANCY" if EraWords.reckoned() else "HOW LONG WE LIVE","value":"%.1f years" % expectancy if EraWords.reckoned() else EraWords.life(expectancy),"delta":"%+.1f" % expectancy_delta if absf(expectancy_delta)>=0.05 else "stable","delta_color":Tokens.GREEN if expectancy_delta>0.0 else (Tokens.RED if expectancy_delta<0.0 else Tokens.MUTED),"accent":Tokens.TEAL,"tip":"Expected lifespan at birth under current age-specific mortality and living conditions. Early societies lose many infants and young children; each care practice they learn removes part of that loss (see WHAT DECIDES WHO SURVIVES)."},
+		{"label":EraWords.babes_title() if EraWords.reckoned() else ("BABES LOST" if EraWords.hearth() else "INFANTS BURIED"),"value":"%.0f / 1,000" % infant_mortality if EraWords.reckoned() else EraWords.babes_lost(infant_mortality).get_slice(" ",0)+" in "+EraWords.babes_lost(infant_mortality).get_slice(" ",2),"delta":"projected now" if EraWords.reckoned() else "before the first winter" if EraWords.hearth() else "before the first year","accent":Tokens.RED if infant_mortality>=50.0 else Tokens.AMBER,"tip":"Projected deaths before a first birthday per 1,000 live births under current birth care, diet, water and living conditions"},
+		{"label":"DEATHS · 12M" if EraWords.reckoned() else "BURIED THIS YEAR","value":str(int(vital.get("deaths",0))),"delta":"recorded" if EraWords.reckoned() else "since this time last year","accent":Tokens.RED,"tip":"Actual deaths during the trailing 365 days"},
+		{"label":"MEAN AGE AT DEATH" if EraWords.reckoned() else "AGE OF THE DEAD","value":("%.1f years" % observed_age if EraWords.reckoned() else EraWords.life(observed_age)) if observed_age>=0.0 else "—","delta":"observed" if observed_age>=0.0 else "no deaths","accent":Tokens.AMBER,"tip":"Observed mean age among recorded deaths; unlike life expectancy, this depends on who has died so far"},
 	]
 	var brief:=_health_brief(expectancy,expectancy_delta,water_intake,housing)
 	var blocks:Array=[{
-		"type":"line_chart","heading":"LIFE EXPECTANCY HISTORY","note":"monthly · up to 40 years","items":history,
+		"type":"line_chart","heading":"LIFE EXPECTANCY HISTORY" if EraWords.reckoned() else "HOW LONG WE LIVE, OVER THE YEARS","note":"monthly · up to 40 years","items":history,
 		"tip":"Projected life expectancy recorded from the simulation. Gold diamonds mark health-related discoveries; circles mark meaningful changes without a health discovery."
 	}]
 	var care_rows:=_care_rows()
@@ -50,7 +52,7 @@ func _city_health()->Dictionary:
 		changes.append({
 			"name":String(point.get("marker_label","Living conditions changed")),
 			"sub":"Year %d · day %d" % [int(point.get("day",0))/365+1,int(point.get("day",0))%365+1],
-			"detail":"Life expectancy %+.1f years" % delta,
+			"detail":("Life expectancy %+.1f years" if EraWords.reckoned() else "%+.1f years of life") % delta,
 			"value":"DISCOVERY" if marker=="discovery" else "CONDITIONS",
 			"value_color":Tokens.GOLD if marker=="discovery" else (Tokens.RED if delta<0.0 else Tokens.BLUE),
 			"accent":Tokens.GOLD if marker=="discovery" else (Tokens.RED if delta<0.0 else Tokens.BLUE),
@@ -99,12 +101,15 @@ func _care_rows()->Array:
 	return rows
 
 func _health_brief(expectancy:float,delta:float,water_intake:int,housing:int)->Dictionary:
+	var lives:="Life expectancy is %.1f years." % expectancy if EraWords.reckoned() else "A child born now can hope for %s." % EraWords.life(expectancy)
 	if water_intake<90:
-		return {"tone":"danger","title":"Water access is shortening lives","why":"Only %d%% of daily drinking need is met. Life expectancy is %.1f years." % [water_intake,expectancy]}
+		return {"tone":"danger","title":"Water access is shortening lives","why":"Only %d%% of daily drinking need is met. %s" % [water_intake,lives]}
 	if housing<80:
-		return {"tone":"warn","title":"Exposure is shortening lives","why":"Shelter covers %d%% of the population. Life expectancy is %.1f years." % [housing,expectancy]}
+		return {"tone":"warn","title":"Exposure is shortening lives","why":"Shelter covers %d%% of the population. %s" % [housing,lives]}
 	if delta<=-0.5:
-		return {"tone":"warn","title":"Life expectancy has fallen","why":"The latest monthly observation changed by %.1f years. Check the marked history and current mortality pressures below." % delta}
+		return {"tone":"warn","title":"Life expectancy has fallen" if EraWords.reckoned() else "Lives are growing shorter","why":"The latest monthly observation changed by %.1f years. Check the marked history and current mortality pressures below." % delta}
+	if not EraWords.reckoned():
+		return {"tone":"info","title":"A child born now can hope for %s" % EraWords.life(expectancy),"why":"This is how long a newborn may live as things stand, not the age of everyone alive. %s The chart shows which changes came from new knowledge and which from how the people live." % EraWords.babes_lost_sentence(Indicators.infant_mortality_per_1000())}
 	return {"tone":"info","title":"Expected lifespan is %.1f years" % expectancy,"why":"This is the modeled lifespan of a newborn under current conditions, not the average age of everyone alive. The chart distinguishes research-linked changes from shifts in living conditions."}
 
 func signature()->Array:

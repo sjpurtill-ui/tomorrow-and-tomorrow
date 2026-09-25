@@ -26,6 +26,10 @@ var counts:Dictionary={}
 var seen_matters:Dictionary={}
 var handled_audiences:Dictionary={}
 var known_logged:Dictionary={}
+const UiMeasure:=preload("res://tests/fun_audit/ui_measure.gd")
+var founded_day:=-1
+var first_ten:Dictionary={"max_surface":0,"auto_docks":[],"rail_max":0,"kpi_max":0,"dock_tiles_max":0}
+var ui_marks:Dictionary={}
 
 func _arg(n:String,f:String)->String:
 	for a in OS.get_cmdline_user_args():
@@ -71,7 +75,13 @@ func _ready()->void:
 			if int(GameState.elapsed_days)>=settled_try:
 				settled_try=int(GameState.elapsed_days)+3
 				terrain._start_settlement_here()
-				if GameState.settlement_site_committed:w("settled",{"status":String(terrain.travel_status_label.text) if terrain.travel_status_label else ""})
+				if GameState.settlement_site_committed:
+					w("settled",{"status":String(terrain.travel_status_label.text) if terrain.travel_status_label else ""})
+					founded_day=int(GameState.elapsed_days)
+					# The founding frame: what opens by itself, what the rail offers.
+					for i in 3:await get_tree().process_frame
+					_first_ten_sample()
+					w("ui",UiMeasure.measure(terrain,"founding"))
 		if is_instance_valid(terrain.settlement_naming_panel):terrain.settlement_naming_panel.queue_free()
 		if PeopleDirection.needs_century_choice():
 			w("century_choice",{});PeopleDirection.choose(ambition)
@@ -91,15 +101,38 @@ func _ready()->void:
 		await get_tree().process_frame
 		_collect()
 		_handle_court()
+		if founded_day>=0 and GameState.elapsed_days<=founded_day+600:_first_ten_sample()
+		elif founded_day>=0 and not ui_marks.has("first_ten"):
+			ui_marks["first_ten"]=true
+			w("ui_first_ten",first_ten)
 		var y:=int(GameState.elapsed_days/365.0)
 		if y!=last_year_mark:
 			last_year_mark=y
 			_year_row(y,chunk_ms);chunk_ms=0
+			if y in [1,5,10,25] and not ui_marks.has(y):
+				ui_marks[y]=true
+				w("ui",UiMeasure.measure(terrain,"year %d" % y))
 	_collect()
 	w("end",{"counts":counts,"inbox":GameState.council_inbox.size(),"matters":Hall.matter_counts(),"hall_history":(Hall.state().get("history",[]) as Array).size()})
 	out.close()
 	print("FUN_PLAYTEST DONE ",counts)
 	get_tree().quit(0)
+
+## The first ten real minutes (600 game days at 1 day/s) after founding: the
+## largest surface of rail entries, top-strip chips and self-opened dock tiles.
+func _first_ten_sample()->void:
+	var hud:Node=terrain.hud
+	var rail:=UiMeasure.rail_visible(hud).size()
+	var kpis:=UiMeasure.kpi_visible(hud).size()
+	var tiles:=0
+	if hud.dock.visible and String(hud.active_section)!="":
+		tiles=UiMeasure.provider_items(hud,String(hud.active_section),int(hud.dock.sub))
+		var tag:="%s@%d" % [String(hud.active_section),int(GameState.elapsed_days)-founded_day]
+		if (first_ten.auto_docks as Array).size()<8 and not (first_ten.auto_docks as Array).any(func(x:String)->bool:return x.begins_with(String(hud.active_section)+"@")):(first_ten.auto_docks as Array).append(tag)
+	first_ten.rail_max=maxi(int(first_ten.rail_max),rail)
+	first_ten.kpi_max=maxi(int(first_ten.kpi_max),kpis)
+	first_ten.dock_tiles_max=maxi(int(first_ten.dock_tiles_max),tiles)
+	first_ten.max_surface=maxi(int(first_ten.max_surface),rail+kpis+tiles)
 
 func _on_beat(beat:Dictionary)->void:
 	w("beat",{"kind":String(beat.get("kind","")),"title":String(beat.get("title","")),"text":String(beat.get("text","")).left(400)})

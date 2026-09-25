@@ -27,6 +27,11 @@ static func season_key(day:int)->int:
 	return floori((float(day)+SEASON_DAYS*0.5)/SEASON_DAYS)
 
 
+## The calendar year (1-based) holding the middle of season `key`.
+static func season_year(key:int)->int:
+	return floori(float(key)*SEASON_DAYS/365.0)+1
+
+
 static func season_name(key:int,hemisphere:float=1.0)->String:
 	return SEASONS[posmod(key+(0 if hemisphere>=0.0 else 2),4)]
 
@@ -127,7 +132,11 @@ static func _summary(s:Dictionary,end_day:int,hemisphere:float)->Dictionary:
 	var season:=season_name(key,hemisphere)
 	if first_key!=key:
 		season=("%s and %s" if key-first_key==1 else "%s to %s") % [season_name(first_key,hemisphere),season]
-	var year:=start_day/365+1
+	# The year is the closing season's own year. A carried tally opens in an
+	# earlier season (spring begins before the calendar year turns), so its
+	# start day can fall in the previous year: a spring-and-summer tally told
+	# on day 503 is year 2's, not year 1's.
+	var year:=season_year(key)
 	var voice:=Chronicle.voice() if Engine.get_main_loop()!=null and WorldSimulation.state==GameState else {"era":"tally","count":"Tally","people":"souls at the hearths"}
 	var annals:=String(voice.get("era",""))=="annals"
 	var parts:PackedStringArray=[]

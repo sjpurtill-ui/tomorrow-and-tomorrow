@@ -109,7 +109,10 @@ static func paint_discovery(parent:Node,item:Dictionary,height:float=96,scroll:S
 	parent.add_child(image);return image
 static func color(domain:String)->Color:return COLORS.get(domain,T.TEAL)
 static func text_color(domain:String)->Color:return color(domain).darkened(.48) if T.is_light() else color(domain)
-static func name_for(domain:String)->String:return NAMES.get(domain,domain.capitalize())
+static func name_for(domain:String)->String:
+	# Before sown fields the people gather and hunt; "farming" waits for them.
+	if domain=="nutrition" and not preload("res://scripts/character_voice.gd").era_tags("player").has("farming"):return "Food & foraging"
+	return NAMES.get(domain,domain.capitalize())
 static func team(item:Dictionary)->float:
 	var assignment:Dictionary=item.get("assignment",{})
 	return float(assignment.get("capacity",{}).get("researchers",0)) if assignment.get("active",false) else 0.0

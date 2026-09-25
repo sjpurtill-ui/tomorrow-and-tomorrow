@@ -109,7 +109,7 @@ static func record(moment:Dictionary)->Dictionary:
 		tier="notice";downgraded=true
 	var entry:Dictionary={"key":key,"day":day,"tier":tier,"kind":String(moment.get("kind","story")),"title":title,"text":String(moment.get("text","")).strip_edges()}
 	if downgraded:entry["crowded"]=true
-	for optional in ["art","action","domain","source","first"]:
+	for optional in ["art","action","domain","source","first","learned"]:
 		if moment.has(optional):entry[optional]=moment[optional].duplicate(true) if moment[optional] is Dictionary or moment[optional] is Array else moment[optional]
 	(c.entries as Array).push_front(entry)
 	keys[key]=day
@@ -321,6 +321,8 @@ static func kind_of(report:Dictionary)->String:
 static func ingest_day(day_result:Dictionary)->void:
 	if not active():return
 	var c:=data()
+	# A season just ended: tell what it taught before today's news.
+	_flush_learned(c,int(GameState.elapsed_days))
 	for discovery in day_result.get("discoveries",[]):
 		if discovery is Dictionary:_discovery(discovery)
 	for progress in day_result.get("progression",[]):
@@ -367,12 +369,73 @@ static func _discovery(event:Dictionary)->void:
 	var first:=dynamic!="" and not firsts.has("domain:"+dynamic)
 	if first:firsts["domain:"+dynamic]=id
 	var name:=String(shown.get("name",id.replace("_"," ").capitalize()))
-	var field:=String(DOMAIN_NAMES.get(dynamic,dynamic.replace("_"," ")))
+	var field:=field_name(dynamic)
 	var text:=_first_sentences(String(shown.get("description","")),1)
 	if first:text=("The first knowing of %s. " % field)+text
 	var tier:="moment" if (first or id in RESEARCH_MILESTONES) and GameState.research_notification_mode!="quiet" else "notice"
+	if tier=="notice" and not first and id not in RESEARCH_MILESTONES:
+		# A repeat discovery in a field already known is kept as a line in the
+		# season's tally and the event ledger, and told once at the season's
+		# end with everything else the people learned (_flush_learned).
+		var kept:=record({"key":"discovery:"+id,"title":name,"text":text.strip_edges(),"kind":"discovery","tier":"whisper","art":{"discovery_id":id,"domain":dynamic},"action":{"kind":"section","section":"inquiry","sub":0},"domain":dynamic,"ledger":false})
+		if kept.is_empty():return
+		var ledger_line:=kept.duplicate(true);ledger_line["tier"]="notice"
+		_to_ledger(ledger_line)
+		var learned:Dictionary=c.get("learned",{})
+		var season:=season_of(int(kept.day))
+		if learned.is_empty() or int(learned.get("season",season))!=season:
+			_flush_learned(c)
+			learned={"season":season,"ids":[],"names":[],"fields":[]}
+		(learned.ids as Array).append(id);(learned.names as Array).append(name)
+		if not (learned.fields as Array).has(dynamic):(learned.fields as Array).append(dynamic)
+		c["learned"]=learned
+		return
 	var entry:=record({"key":"discovery:"+id,"title":name,"text":text.strip_edges(),"kind":"discovery","tier":tier,"art":{"discovery_id":id,"domain":dynamic},"action":{"kind":"section","section":"inquiry","sub":0},"domain":dynamic,"first":first})
 	if String(entry.get("tier",""))=="moment":(c.moment_ids as Dictionary)[id]=true
+
+
+## A field of knowledge in the people's words ("food & foraging" before farming).
+static func field_name(dynamic:String)->String:
+	if dynamic=="nutrition" and not preload("res://scripts/character_voice.gd").era_tags("player").has("farming"):return "food & foraging"
+	return String(DOMAIN_NAMES.get(dynamic,dynamic.replace("_"," ")))
+
+
+## Season index since the world began (same quarter-years as hearth_count.gd).
+static func season_of(day:int)->int:
+	return floori((float(day)+45.625)/91.25)
+
+
+## Tells the season's repeat discoveries as one notice: "This season the
+## people learned: ...". Called when a new season begins (ingest_day) or when
+## a discovery of a new season arrives. The first discovery in each field stays
+## its own moment.
+static func _flush_learned(c:Dictionary,today:int=-1)->Dictionary:
+	var learned:Dictionary=c.get("learned",{})
+	if learned.is_empty() or (learned.get("ids",[]) as Array).is_empty():
+		c.erase("learned");return {}
+	var season:=int(learned.season)
+	if today>=0 and season_of(today)==season:return {}
+	c.erase("learned")
+	var names:Array=learned.names
+	var hemisphere:=float((GameState.hearth_season as Dictionary).get("hemisphere",1.0))
+	var season_name:String=["spring","summer","autumn","winter"][posmod(season+(0 if hemisphere>=0.0 else 2),4)]
+	var annals:=String(voice().era)=="annals"
+	var listed:=_list(names.map(func(n:Variant)->String:return String(n).to_lower()))
+	var fields:PackedStringArray=[]
+	for f in learned.fields:fields.append(field_name(String(f)))
+	var text:=("This season the keepers recorded new learning: %s." if annals else "This season the people learned: %s.") % listed
+	if fields.size()>1:text+=" Their knowing grew in %s." % _list(Array(fields))
+	var day:=int(season*91.25+45.625)-1 if today<0 else today
+	var first_id:=String((learned.ids as Array)[0])
+	return record({"key":"learned:%d" % season,"day":mini(day,int(GameState.elapsed_days)),"title":"What the %s taught" % season_name,"text":text,"kind":"discovery","tier":"notice","art":{"discovery_id":first_id,"domain":String((learned.fields as Array)[0])},"action":{"kind":"section","section":"inquiry","sub":0},"domain":"knowledge","ledger":false,"learned":(learned.ids as Array).duplicate()})
+
+
+static func _list(items:Array)->String:
+	if items.is_empty():return ""
+	if items.size()==1:return String(items[0])
+	var head:=PackedStringArray()
+	for i in items.size()-1:head.append(String(items[i]))
+	return "%s and %s" % [", ".join(head),String(items.back())]
 
 
 ## True when this discovery was presented as a moment (its card replaces the popup).
