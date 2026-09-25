@@ -972,6 +972,9 @@ func _allocated_channels()->Array[Dictionary]:
 ## research_3000: the channel through which a line with no emphasis learns by
 ## diffusion (its first subcategory), or "" when the line has emphasis.
 func _diffusion_subcategory(dynamic_id:String)->String:
+	# Diffusion off (Research600.DIFFUSION_TEAM 0): no channel, so an
+	# unstaffed line never holds an investigation.
+	if Research600.DIFFUSION_TEAM<=0.0: return ""
 	var subcategories:Dictionary=WorldSimulation.state.research_subcategory_allocations.get(dynamic_id,{})
 	if subcategories.is_empty(): return ""
 	for value:Variant in subcategories.values():

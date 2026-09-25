@@ -87,10 +87,16 @@ const DEAD_END_PENALTY:=200.0
 ## land and history, so each world offers a seeded subset (DiscoverySystem
 ## _path_is_viable). Key thresholds and every foundation stay open everywhere.
 const DEAD_END_VIABLE:=0.5
-## research_3000 diffusion: a line the society gives no emphasis still takes up
-## its questions slowly from neighbours, traders and migrants. Its first channel
-## works at this team scale (one emphasis unit with a single researcher is 1).
-const DIFFUSION_TEAM:=0.4
+## research_3000 diffusion: a line the society gives no emphasis would still take
+## up its questions from neighbours, traders and migrants at this team scale
+## (one emphasis unit with a single researcher is 1). OFF (0): a fixed team on
+## every unemphasized line ignored the player's allocation and, in a band of a
+## hundred whose staffed lines have well under one researcher each, outpaced
+## them several times over (60 discoveries in four years on the default
+## emphasis). Knowledge from other peoples arrives through SocietyExchange
+## (contact, trade, artifacts), which names its source; a line with no
+## researchers makes no deliberate progress.
+const DIFFUSION_TEAM:=0.0
 static var _relevance:Dictionary={}
 ## Keys the design governs; Phase 2 effect files cannot override them.
 const PROTECTED_KEYS:=["id","dynamic","direction","requires","requires_all","requires_any","learning_routes","day","chance","research_600","earliest_year","design_year","precedents","conditions"]
