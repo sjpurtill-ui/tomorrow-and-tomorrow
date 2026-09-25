@@ -412,6 +412,31 @@ func _generate_person(person_id:int)->Dictionary:
 	}
 
 
+func admit_person(identity:Dictionary)->Dictionary:
+	## A commoner the god raises into public life (court_persons.gd): generated
+	## like any public person, then given the identity the court already knows.
+	## Offices still come only through mark_central_appointment and its rules.
+	initialize()
+	var living_count:=0
+	for person in people:
+		if String(person.get("status","active"))=="active": living_count+=1
+	if living_count>=MAX_GOVERNMENT_PEOPLE: return {}
+	var person:=_generate_person(next_person_id)
+	next_person_id+=1
+	if String(identity.get("name",""))!="": person["name"]=String(identity.name).substr(0,80)
+	if identity.get("born_day") is int or identity.get("born_day") is float:
+		person["born_day"]=int(identity.born_day)
+		person["death_age_years"]=maxf(float(person.get("death_age_years",60.0)),float(age_years(person))+4.0)
+	if String(identity.get("home_settlement_id",""))!="": person["home_settlement_id"]=String(identity.home_settlement_id)
+	for key in ["courage","honesty","pride"]:
+		if identity.get(key) is float or identity.get(key) is int: person[key]=clampf(float(identity[key]),0.0,1.0)
+	if String(identity.get("background",""))!="": person["background"]=String(identity.background).substr(0,120)
+	person["known_since_day"]=int(WorldSimulation.state.elapsed_days)
+	people.append(person)
+	revision+=1
+	return person_snapshot(int(person.person_id))
+
+
 func _background_for_skills(skills:Dictionary)->String:
 	var best:="Administration"
 	for skill in SKILL_KEYS:

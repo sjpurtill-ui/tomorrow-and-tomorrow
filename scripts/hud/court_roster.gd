@@ -7,8 +7,10 @@ extends RefCounted
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const Civic:=preload("res://scripts/hud/court_civic.gd")
-const GROUPS:=["council","settlement","scouts","builders","generals"]
-const GROUP_WORDS:={"council":"THE COUNCIL","settlement":"LEADERS OF SETTLEMENTS","scouts":"SCOUTS","builders":"MASTER BUILDERS","generals":"WAR LEADERS"}
+const Persons:=preload("res://scripts/court_persons.gd")
+const GROUPS:=["council","settlement","scouts","builders","generals","folk"]
+const GROUP_WORDS:={"council":"THE COUNCIL","settlement":"LEADERS OF SETTLEMENTS","scouts":"SCOUTS","builders":"MASTER BUILDERS","generals":"WAR LEADERS","folk":"PEOPLE YOU HAVE CALLED"}
+const MAX_FOLK:=6
 const MAX_GENERALS:=3
 
 static func people()->Array[Dictionary]:
@@ -54,6 +56,17 @@ static func people()->Array[Dictionary]:
 		var title:=_figure_title(figure)
 		result.append({"key":key,"target":target,"name":String(figure.get("name","")),"title":title,"group":group,"matters":0,
 			"person":{"name":String(figure.get("name","")),"person_id":0},"regard":{},"settlement_id":"","figure":figure})
+	# Commoners the god has asked about or called: the court remembers them.
+	var folk:Array=[]
+	for p in Persons.people():
+		var rec:Dictionary=p
+		if String(rec.get("status",""))=="living" and float(rec.get("importance",1.0))>=2.0: folk.append(rec)
+	folk.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.get("last_seen_day",0))>int(b.get("last_seen_day",0)))
+	for index in mini(folk.size(),MAX_FOLK):
+		var known:Dictionary=folk[index]
+		var target2:={"known_id":String(known.id)}
+		result.append({"key":_key(target2),"target":target2,"name":String(known.name),"title":Persons.title_of(known),"group":"folk","matters":0,
+			"person":{"name":String(known.name),"person_id":0},"regard":{},"settlement_id":""})
 	return result
 
 static func grouped()->Dictionary:
@@ -63,6 +76,7 @@ static func grouped()->Dictionary:
 	return groups
 
 static func _key(target:Dictionary)->String:
+	if String(target.get("known_id",""))!="": return "known:"+String(target.known_id)
 	if int(target.get("person_id",0))>0: return "person:%d" % int(target.person_id)
 	if String(target.get("figure_id",""))!="": return "figure:"+String(target.figure_id)
 	if String(target.get("role",""))!="": return "role:"+String(target.role)
