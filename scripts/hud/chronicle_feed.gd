@@ -22,6 +22,14 @@ func setup(block:Dictionary)->void:
 	_fill()
 
 
+## Kept across a live refresh (see view_state.gd): how far back the reader has
+## opened the feed.
+func view_state()->Dictionary:return {"shown":shown}
+func restore_view_state(state:Dictionary)->void:
+	var wanted:=int(state.get("shown",PAGE))
+	if wanted!=shown:shown=wanted;_fill()
+
+
 func _fill()->void:
 	for child in list.get_children():list.remove_child(child);child.queue_free()
 	var entries:Array=data.get("entries",[])
