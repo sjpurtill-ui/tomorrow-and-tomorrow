@@ -263,6 +263,8 @@ static func _names(count:int,key:String,women_share:float)->Array[String]:
 	## The named dead: the people are counted in aggregate, but the Chronicle
 	## gives the first few their names.
 	var used:Dictionary={}
+	var fallen:Array=state().get("fallen",[]) if state().get("fallen") is Array else []
+	for given_name in fallen: used["given:"+String(given_name)]=true
 	var out:Array[String]=[]
 	for i in mini(count,3):
 		var serial:=posmod(hash("%s:%d" % [key,i]),800000)+100000
@@ -272,6 +274,9 @@ static func _names(count:int,key:String,women_share:float)->Array[String]:
 		if given=="" or used.has("given:"+given): continue
 		used["given:"+given]=true
 		out.append(given)
+		fallen.push_front(given)
+	while fallen.size()>60: fallen.pop_back()
+	state()["fallen"]=fallen
 	return out
 
 static func _dead_words(count:int,names:Array[String],who:String)->String:
