@@ -1,0 +1,22 @@
+{
+ "start_year": 2750,
+ "years": 40,
+ "commit": "7cfeb2a36df41e1ec7d3a0bbfd342290c3aab4d9",
+ "sources_at_launch": {
+  "scripts/discovery_system.gd": "46b438f478be",
+  "scripts/society_model.gd": "9124994f74e2",
+  "scripts/game_state.gd": "b17b5978e6bc",
+  "scripts/early_life_conditions.gd": "2dd6069634e4",
+  "scripts/food_system.gd": "ffc2f4101076",
+  "scripts/consequence_engine.gd": "0a50798c02a0",
+  "scripts/research_600_catalog.gd": "d645441e31f7",
+  "scripts/technology_eras.gd": "b9fb387f0be4",
+  "scripts/artifact_collection.gd": "e2d786dae38b",
+  "data/research/research_600.json": "9706adc9a2f1",
+  "data/research/effects/*.json": "b8cc73838195"
+ },
+ "seconds": 5187.162595748901,
+ "returncode": 0,
+ "stdout_tail": "Godot Engine v4.7.stable.mono.official.5b4e0cb0f - https://godotengine.org\n\n[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)\nSIM_TRUTH C:/Users/sjpur/tt-research-1200/tools/sim/ground_truth/spot/spot_sensible_1_2750_40y.json rows=41 discoveries=47\n",
+ "stderr_tail": ""
+}
