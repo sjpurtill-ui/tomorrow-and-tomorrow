@@ -17,6 +17,11 @@ const Roster:=preload("res://scripts/hud/court_roster.gd")
 const Civic:=preload("res://scripts/hud/court_civic.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const Commands:=preload("res://scripts/court_commands.gd")
+const Persons:=preload("res://scripts/court_persons.gd")
+const Lives:=preload("res://scripts/court_lives.gd")
+## Typed words that are about people (asked, summoned, questioned, accused or
+## judged) go to the live persons exchange; offline the Court offers choices.
+const PERSONS_WORDS:="(?i)\\b(who|whom|whose|summon|bring|fetch|send for|responsible|blame|fault|lying|liar|lie|lied|truth|swear|ledger|tally|confess|tell me (of|about)|where were you|mercy|pardon|exalt|maim|curse|marry|priest)\\b"
 
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
@@ -69,6 +74,8 @@ var mood_label:Label
 var regard_meter:Control
 var regard_label:Label
 var divine_row:HBoxContainer
+## Offline, the Court's choices about people: ask, summon, question, confront, judge.
+var persons_row:HBoxContainer
 var speaker_frame:PanelContainer
 var bench_cards:Dictionary={}      # person_id -> PanelContainer
 var envoy_color:=Color.WHITE
@@ -161,7 +168,7 @@ func _reset_card(next_mode:String)->void:
 	civic_strip=null;civic_state_label=null;civic_status_label=null;civic_replies=null
 	transcript=null;transcript_scroll=null;thinking=null;options_row=null;outcome_box=null;proposal_box=null
 	speech_input=null;speak_button=null;wait_button=null;next_button=null;queue_label=null;return_button=null
-	mood_meter=null;regard_meter=null;regard_label=null;divine_row=null;speaker_frame=null;scene_area=null
+	mood_meter=null;regard_meter=null;regard_label=null;divine_row=null;speaker_frame=null;scene_area=null;persons_row=null
 	weigh_clock=-1.0
 	mode=next_mode
 	if next_mode!="audience":audience_id=""
@@ -231,6 +238,7 @@ func show_audience(id:String)->void:
 		_build_proposal()
 	column.add_child(_build_speech_row())
 	options_row=HBoxContainer.new();options_row.name="Options";options_row.add_theme_constant_override("separation",10);column.add_child(options_row)
+	persons_row=HBoxContainer.new();persons_row.name="PersonsRow";persons_row.add_theme_constant_override("separation",6);column.add_child(persons_row)
 	outcome_box=VBoxContainer.new();outcome_box.name="Outcome";outcome_box.add_theme_constant_override("separation",8);outcome_box.visible=false;column.add_child(outcome_box)
 	body.add_child(_build_footer())
 	_fit()
@@ -501,6 +509,10 @@ func _build_dossier(audience:Dictionary)->Control:
 
 func _speaker_person(audience:Dictionary)->Dictionary:
 	var speaker:Dictionary=audience.get("speaker",{})
+	if String(speaker.get("known_id",""))!="":
+		# A summoned commoner: their own lasting look, drawn from their name.
+		var known:=Persons.by_id(String(speaker.known_id))
+		return {"name":String(known.get("name",speaker.get("name",""))),"person_id":0,"office_title":String(speaker.get("title","")),"sex":String(known.get("sex",""))}
 	var person_id:=int(speaker.get("person_id",0))
 	if person_id>0:
 		var snapshot:Dictionary=GovernmentPeopleSystem.person_snapshot(person_id)
@@ -566,6 +578,88 @@ func _build_options()->void:
 	for option:Dictionary in Hall.options(audience_id):
 		options_row.add_child(_option_card(option))
 	_build_divine_row()
+	_build_persons_row()
+
+const PERSONS_GROUPS:=[["ask","ASK ▾"],["summon","SUMMON ▾"],["question","QUESTION ▾"],["confront","CONFRONT ▾"],["judge","JUDGE ▾"]]
+
+func _persons_live()->bool:
+	return _voice_ok() and voice.has_method("is_live") and bool(voice.is_live()) and voice.has_method("persons_turn")
+
+func persons_choices()->Array[Dictionary]:
+	## What the Court offers about people at this step (from real state).
+	return Persons.choices(audience_id if mode=="audience" else "")
+
+func _build_persons_row()->void:
+	## Offline there is no free-text parsing about people: the Court shows the
+	## choices that exist now, grouped as the steps of an inquiry.
+	if not is_instance_valid(persons_row):return
+	for child in persons_row.get_children():child.queue_free()
+	var audience:=Hall.find(audience_id)
+	persons_row.visible=not _persons_live() and resolved_result.is_empty() and String(audience.get("origin",""))=="court" and String(audience.get("status",""))=="waiting"
+	if not persons_row.visible:return
+	_fill_persons_menus(persons_row,persons_choices())
+
+func _fill_persons_menus(row:HBoxContainer,all:Array[Dictionary])->void:
+	for pair in PERSONS_GROUPS:
+		var items:Array[Dictionary]=[]
+		for c in all:
+			if String(c.get("group",""))==String(pair[0]):items.append(c)
+		if items.is_empty():continue
+		var menu:=MenuButton.new();menu.name="Persons_"+String(pair[0]);menu.text=String(pair[1]);menu.flat=false
+		_divine_style(menu,Tokens.GOLD if String(pair[0]) in ["ask","summon","question"] else Tokens.RED)
+		var popup:=menu.get_popup()
+		for index in items.size():popup.add_item(String(items[index].label),index)
+		menu.set_meta("choices",items)
+		popup.id_pressed.connect(func(item:int):persons_choose(items[item]))
+		row.add_child(menu)
+
+func persons_choose(choice:Dictionary)->Dictionary:
+	## One step of an inquiry, chosen from the Court's choices (or by a test).
+	## The same core decides and applies it as the live path does.
+	var action:=String(choice.get("action",""))
+	var params:Dictionary=choice.get("params",{}) if choice.get("params") is Dictionary else {}
+	if action=="command":
+		if mode!="audience":return {}
+		var heard:=Commands.hear(audience_id,String(params.get("command_text","")),{"terrain":terrain,"civic_settlement":civic_settlement})
+		if bool(heard.get("handled",false)):_after_command(heard)
+		return heard
+	if mode!="audience" or audience_id.is_empty() or not resolved_result.is_empty():
+		if action=="summon":
+			var made:=Persons.summon_ref(params.get("ref",{}) as Dictionary,"")
+			if made.is_empty():
+				_court_note("They cannot be brought before you now.");return {}
+			from_court=true
+			show_audience(String(made.id))
+			return {"ok":true,"summon_audience_id":String(made.id)}
+		# Someone must answer: the fitting official comes forward.
+		var answerer:=Persons.answerer_for(Persons.event_by_key(String(params.get("event","")),""),"") if action=="ask_blame" else Persons.answerer_for_desc(params.get("desc",{}) as Dictionary)
+		if answerer.is_empty():
+			_court_note("No one is at court to answer you yet.");return {}
+		if not summon({"person_id":int(answerer.person_id)}):return {}
+	var result:=Persons.perform(audience_id,action,params,{"echo":String(choice.get("label",""))})
+	_after_persons(result)
+	return result
+
+func _after_persons(result:Dictionary)->void:
+	var next_id:=String(result.get("summon_audience_id",""))
+	if next_id!="" and next_id!=audience_id:
+		if mode=="audience" and resolved_result.is_empty() and not audience_id.is_empty():Hall.defer(audience_id)
+		from_court=true
+		show_audience(next_id)
+		return
+	if mode!="audience":return
+	_refresh_regard()
+	var audience:=Hall.find(audience_id)
+	_update_mood(audience)
+	if String(audience.get("status","waiting"))!="waiting":
+		_show_outcome({"ok":true,"outcome":String(result.get("outcome","")),"reaction":"furious" if String(result.get("action","")) in ["execute","exile"] else "neutral","terminal":true})
+	else:
+		_build_options()
+		if not String(result.get("outcome","")).is_empty():_show_toast(String(result.outcome))
+	_pump()
+
+func _on_persons_done(id:String,result:Dictionary)->void:
+	if id==audience_id:_after_persons(result)
 
 func _build_divine_row()->void:
 	## The god's wrath and favour live beside SPEAK: two menus for a summoned
@@ -719,6 +813,7 @@ func _connect_voice()->void:
 	if voice.has_signal("lines_ready") and not voice.lines_ready.is_connected(_on_lines_ready):voice.lines_ready.connect(_on_lines_ready)
 	if voice.has_signal("divine_intent") and not voice.divine_intent.is_connected(_on_divine_intent):voice.divine_intent.connect(_on_divine_intent)
 	if "command_router" in voice:voice.command_router=_route_live_command
+	if voice.has_signal("persons_done") and not voice.persons_done.is_connected(_on_persons_done):voice.persons_done.connect(_on_persons_done)
 
 func _on_lines_ready(id:String)->void:
 	if id==audience_id:_pump()
@@ -735,6 +830,25 @@ func _speak()->void:
 		send_envoy_brief(text)
 		return
 	speech_input.clear()
+	# Naming a successor at a mourning ("Let Iska keep the fire") chooses them.
+	if resolved_result.is_empty():
+		var named:=String(Lives.typed_choice(audience_id,text))
+		if not named.is_empty():
+			Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":int(GameState.elapsed_days),"aside":false})
+			choose(named)
+			_pump()
+			return
+	# Words about people, with a live voice: one call maps them onto the
+	# persons engine's actions (ask, summon, question, accuse, judge).
+	if resolved_result.is_empty() and _persons_live() and String(Hall.find(audience_id).get("origin",""))=="court" and not voice.busy(audience_id):
+		var about_people:=not Persons.speaker_known(audience_id).is_empty()
+		if not about_people:
+			var re:=RegEx.new();re.compile(PERSONS_WORDS)
+			about_people=re.search(text)!=null
+		if about_people:
+			voice.persons_turn(audience_id,text)
+			_pump()
+			return
 	# The god's word is law: an order (to the one before you, to anyone at
 	# court, or to the guards) is decided and carried out by the engine first;
 	# the court then reacts to what actually happened.
@@ -836,6 +950,7 @@ func _show_outcome(result:Dictionary)->void:
 	for child in options_row.get_children():child.queue_free()
 	options_row.visible=false
 	if is_instance_valid(divine_row):divine_row.visible=false
+	if is_instance_valid(persons_row):persons_row.visible=false
 	for child in outcome_box.get_children():child.queue_free()
 	outcome_box.visible=true
 	var reaction:=String(result.get("reaction","neutral"))
@@ -1356,7 +1471,7 @@ func focus(target:Dictionary)->bool:
 ## Calls someone before you, here and now.
 func summon(target:Dictionary)->bool:
 	if mode=="audience" and resolved_result.is_empty() and not audience_id.is_empty():Hall.defer(audience_id)
-	var made:=Hall.summon(target)
+	var made:=Persons.summon_ref({"kind":"known","id":String(target.known_id)},audience_id) if String(target.get("known_id",""))!="" else Hall.summon(target)
 	if made.is_empty():
 		if mode!="rest":show_court()
 		_court_note("They cannot be brought before you now.")
@@ -1380,7 +1495,7 @@ func _court_note(text:String)->void:
 
 # --- The court at rest ---------------------------------------------------------
 
-const ROSTER_ORDER:={"council":0,"settlement":1,"scouts":2,"builders":3,"generals":4}
+const ROSTER_ORDER:={"council":0,"settlement":1,"scouts":2,"builders":3,"generals":4,"folk":5}
 const MAX_SEATED:=7
 var pending_words:=""
 
@@ -1573,6 +1688,7 @@ func _build_roster_list(roster:Array[Dictionary])->Control:
 		for entry:Dictionary in groups[group]:list.add_child(_roster_row(entry))
 	if roster.is_empty():
 		var empty:=Tokens.make_label("No one holds office yet. Officials appear as your government grows.",13,Tokens.MUTED);empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;list.add_child(empty)
+	preload("res://scripts/hud/court_remembered.gd").append_to(list,_italic)
 	return list
 
 func _roster_row(entry:Dictionary)->Control:
@@ -1698,6 +1814,14 @@ func _build_rest_footer()->Control:
 	speak_button=Button.new();speak_button.name="Speak";speak_button.text="SPEAK";speak_button.custom_minimum_size=Vector2(96,38)
 	speak_button.add_theme_stylebox_override("normal",Tokens.gold_outline_style());speak_button.pressed.connect(_speak);row.add_child(speak_button)
 	_add_court_controls(row,"Receive envoys at once")
+	if not _persons_live():
+		# Offline: ask the court about people from choices, not parsing.
+		var ask_row:=HBoxContainer.new();ask_row.name="PersonsRow";ask_row.add_theme_constant_override("separation",6);stack.add_child(ask_row)
+		persons_row=ask_row
+		var rest_choices:Array[Dictionary]=[]
+		for c in persons_choices():
+			if String(c.get("group",""))in ["ask","summon"]:rest_choices.append(c)
+		_fill_persons_menus(ask_row,rest_choices)
 	var note:=Tokens.make_label("",12,Tokens.TEXT_DIM);note.name="CourtNote";note.add_theme_font_override("font",_italic);stack.add_child(note)
 	return bar
 

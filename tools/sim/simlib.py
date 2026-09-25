@@ -65,16 +65,23 @@ def params(overrides: dict | None = None, path: Path | None = None) -> dict:
     return p
 
 
-def make(name: str, seed: int, p: dict | None = None, scenario_override: dict | None = None) -> Surrogate:
+def make(name: str, seed: int, p: dict | None = None, scenario_override: dict | None = None, shocks=False) -> Surrogate:
+    """``shocks`` (default off): True or an options dict runs the society inside the
+    multi-civ epochal-shock world (``shock_world.py``); off is the unchanged surrogate."""
     table, sites = scenarios()
     spec = dict(table[name])
     if scenario_override:
         spec.update(scenario_override)
-    return Surrogate(Scenario.from_dict(name, spec, sites), seed, p if p is not None else params(), data())
+    scenario = Scenario.from_dict(name, spec, sites)
+    if shocks:
+        from shock_world import ShockSurrogate
+        return ShockSurrogate(scenario, seed, p if p is not None else params(), data(), shock_opts=shocks if isinstance(shocks, dict) else None)
+    return Surrogate(scenario, seed, p if p is not None else params(), data())
 
 
-def run(name: str, seed: int, years: int, p: dict | None = None, record_every: float = 1.0, scenario_override: dict | None = None) -> dict:
-    return make(name, seed, p, scenario_override).run(years, record_every)
+def run(name: str, seed: int, years: int, p: dict | None = None, record_every: float = 1.0, scenario_override: dict | None = None,
+        shocks=False) -> dict:
+    return make(name, seed, p, scenario_override, shocks).run(years, record_every)
 
 
 def truth_runs() -> list[dict]:

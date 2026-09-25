@@ -55,6 +55,9 @@ const TRIBUTARY_WATER_HALF_WIDTH_KM := 0.035
 const MAIN_RIVER_SETTLEMENT_CLEARANCE_KM := 0.25
 const TRIBUTARY_SETTLEMENT_CLEARANCE_KM := 0.10
 const SPEED_HOURS_PER_REAL_SECOND := {1:0.5,2:2.0,3:8.0,4:24.0,5:72.0}
+## A new people's story starts at one day per second: the first real hour is
+## about the first ten years, with a real turning point every few minutes.
+const DEFAULT_PLAY_SPEED := 4.0
 # Per-frame microseconds for a world day in progress (see _day_step_budget_usec).
 const DAY_STEP_BUDGET_USEC := 8000
 const DAY_STEP_BUDGET_FAST_USEC := 14000
@@ -1172,6 +1175,8 @@ func advance_world_time(days_advanced:float)->void:
 ## Presents one committed simulation day: reports, advisors, overlays.
 func _commit_world_day(day_result:Dictionary)->void:
 	var discoveries:Array[Dictionary]=day_result.discoveries
+	# The Chronicle grades the day first; its moments replace research popups.
+	preload("res://scripts/chronicle.gd").ingest_day(day_result)
 	if not discoveries.is_empty():preload("res://scripts/hud/research_announcements.gd").announce(self,hud,discoveries)
 	var resource_events:Array[Dictionary]=day_result.resources
 	var simulation_events:Array[Dictionary]=day_result.events
@@ -1190,6 +1195,7 @@ func _commit_world_day(day_result:Dictionary)->void:
 	preload("res://scripts/strategic_history.gd").sample()
 	_refresh_discovered_resource_overlays()
 	_refresh_settlement_footprint()
+	preload("res://scripts/rite_marks.gd").refresh(self)
 	if not progression_events.is_empty() and travel_status_label:
 		travel_status_label.text="CIVILIZATION MILESTONE: %s" % String(progression_events[0].name).to_upper()
 	elif not discoveries.is_empty() and travel_status_label:
@@ -1199,6 +1205,7 @@ func _commit_world_day(day_result:Dictionary)->void:
 	elif not simulation_events.is_empty() and travel_status_label:
 		travel_status_label.text = "%s: %s" % [simulation_events[0].title.to_upper(), simulation_events[0].description]
 	_evaluate_travel_survival()
+	if hud:preload("res://scripts/hud/chronicle_card.gd").flush(self,hud)
 
 ## Calendar-time presentation after whole days are committed.
 func _after_world_time(days_advanced:float)->void:
@@ -12436,6 +12443,7 @@ func _build_command_rail_hud(layer:CanvasLayer)->void:
 	hud.register_provider("inquiry",preload("res://scripts/hud/content/dock_content_inquiry.gd").new(self,hud))
 	hud.register_provider("world",preload("res://scripts/hud/content/dock_content_world.gd").new(self,hud))
 	hud.register_provider("military",preload("res://scripts/hud/content/dock_content_military.gd").new(self,hud))
+	hud.register_provider("chronicle",preload("res://scripts/hud/content/dock_content_chronicle.gd").new(self,hud))
 	var audience_director:=preload("res://scripts/audience_director.gd").new();audience_director.terrain=self;layer.add_child(audience_director)
 	_update_scale_bar()
 
@@ -12810,6 +12818,21 @@ func _open_settlement_naming_panel(settlement_id:String="") -> void:
 	settlement_naming_target_id=String(target.get("id",""))
 	naming_previous_speed=game_speed
 	_set_game_speed(0.0)
+	if settlement_naming_target_id=="__founding__":
+		# At the first fire the Hearth Chief asks the name, in their own voice.
+		var fire:Control=preload("res://scripts/hud/fire_circle_opening.gd").new()
+		fire.mode="name"
+		settlement_naming_panel=fire
+		interface_layer.add_child(fire)
+		settlement_name_input=fire.name_input
+		settlement_name_input.text=String(target.get("name",""))
+		settlement_name_input.text_changed.connect(_on_settlement_name_changed)
+		settlement_name_input.text_submitted.connect(_on_settlement_name_submitted)
+		settlement_name_confirm=fire.name_confirm
+		settlement_name_confirm.disabled=settlement_name_input.text.strip_edges()==""
+		settlement_name_confirm.pressed.connect(_commit_settlement_name)
+		fire.later_button.pressed.connect(_dismiss_settlement_naming_panel)
+		return
 	settlement_naming_panel=Control.new()
 	settlement_naming_panel.size=get_viewport().get_visible_rect().size
 	settlement_naming_panel.mouse_filter=Control.MOUSE_FILTER_STOP
@@ -12897,7 +12920,10 @@ func _commit_settlement_name() -> void:
 		if travel_status_label: travel_status_label.text=String(result.get("reason","SETTLEMENT COULD NOT BE RENAMED")).to_upper()
 		return
 	var final_name:=String(result.get("name",chosen))
-	var event:={"day":int(GameState.elapsed_days),"title":"Settlement Named","description":"The selected settlement is now known as %s." % final_name,"domain":"settlement","severity":"major"}
+	var description:="The selected settlement is now known as %s." % final_name
+	if settlement_naming_panel and settlement_naming_panel.has_method("named_line"):
+		description="%s At the first fire the people named their home %s." % [String(settlement_naming_panel.named_line(final_name)),final_name]
+	var event:={"day":int(GameState.elapsed_days),"title":"Settlement Named","description":description,"domain":"settlement","severity":"major"}
 	GameState.simulation_events.push_front(event)
 	if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
 	if travel_status_label:
@@ -13416,7 +13442,7 @@ func _refresh_player_field_army_markers()->void:
 
 
 func _on_scout_report_returned(report:Dictionary)->void:
-	if not ScoutArchive.should_notify(report):return
+	if not ScoutArchive.newsworthy(report):return
 	# The simulation owns report delivery and storage. Arrival is a notification,
 	# not a request to change the player's speed or replace the open detail panel.
 	if travel_status_label:
@@ -19298,7 +19324,10 @@ func _update_time_interface() -> void:
 	elif settlement_convoy_targeting:
 		travel_status_label.text="SELECT KNOWN LAND FOR THE NEW SETTLEMENT  •  click a viable destination or press the button again to cancel"
 	elif placement_building == "":
-		travel_status_label.text = ("FOUNDING CONVOY READY  •  RIGHT-CLICK VISIBLE OR BLACK LAND TO TRAVEL  •  CAMP TO FORAGE BETWEEN LEGS" if not GameState.settlement_site_committed else "RECOGNIZED RESOURCES %s  •  TWO-FINGER SLIDE TO PAN  •  UP / DOWN TO ZOOM" % ("SHOWN" if resource_view_enabled else "HIDDEN"))
+		# The control hint is for the first month; after it, the ticker keeps
+		# the latest thing worth telling from the Chronicle.
+		var headline:=preload("res://scripts/chronicle.gd").latest_headline() if GameState.settlement_site_committed and GameState.settlement_founded_day>=0 and GameState.elapsed_days-float(GameState.settlement_founded_day)>30.0 else ""
+		travel_status_label.text = headline if headline!="" else ("FOUNDING CONVOY READY  •  RIGHT-CLICK VISIBLE OR BLACK LAND TO TRAVEL  •  CAMP TO FORAGE BETWEEN LEGS" if not GameState.settlement_site_committed else "RECOGNIZED RESOURCES %s  •  TWO-FINGER SLIDE TO PAN  •  UP / DOWN TO ZOOM" % ("SHOWN" if resource_view_enabled else "HIDDEN"))
 	if start_settlement_button:
 		# All map commands now live together under ACTIONS. The contextual status
 		# above provides onboarding without a modal-sized permanent map obstruction.
@@ -20377,7 +20406,7 @@ func _open_founding_focus_panel()->void:
 		founding_focus_panel=null
 		if GameState.founding_focus!="":
 			if convoy_banner_sprite: convoy_banner_sprite.texture=_founding_banner_texture(GameState.founding_banner_index)
-			_set_game_speed(1.0)
+			_set_game_speed(DEFAULT_PLAY_SPEED)
 			_sync_map_help_overlay_visibility())
 
 

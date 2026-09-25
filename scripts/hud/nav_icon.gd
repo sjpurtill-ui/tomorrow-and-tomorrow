@@ -63,6 +63,11 @@ func _draw()->void:
 		"military":
 			draw_colored_polygon(PackedVector2Array([Vector2(15,3),Vector2(25,7),Vector2(23,19),Vector2(15,27),Vector2(7,19),Vector2(5,7)]),c)
 			draw_colored_polygon(PackedVector2Array([Vector2(15,8),Vector2(20,10),Vector2(18,18),Vector2(15,21)]),_cut_color())
+		"chronicle":
+			# A tally-stick: four notches and a fifth struck across.
+			draw_rect(Rect2(4,20,22,5),c,true)
+			for x in [7.0,11.0,15.0,19.0]: draw_line(Vector2(x,5),Vector2(x,18),c,2.4,true)
+			draw_line(Vector2(4,15),Vector2(23,7),c,2.4,true)
 
 func _cut_color()->Color:
 	return HudTokens.PANEL_BG_SOLID

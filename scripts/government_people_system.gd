@@ -370,11 +370,10 @@ func _ensure_pool()->void:
 func _generate_person(person_id:int)->Dictionary:
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=hash("%d:government_person:%d" % [WorldSimulation.state.world_seed,person_id])
-	var name:="%s %s" % [GIVEN_NAMES[posmod(person_id*7+rng.randi(),GIVEN_NAMES.size())],FAMILY_NAMES[posmod(person_id*11+rng.randi(),FAMILY_NAMES.size())]]
-	for existing in people:
-		if String(existing.get("name",""))==name:
-			name="%s %s" % [name,String.chr(65+posmod(person_id,26))]
-			break
+	# Names follow what the people know (era_names.gd); drawn after skills so a
+	# stone-age epithet can say what the band values in them.
+	var woman:=posmod(hash("%d:government_sex:%d" % [WorldSimulation.state.world_seed,person_id]),2)==0
+	rng.randi(); rng.randi()   # the two draws the older naming used, so ages and skills keep their seeds
 	var age:=rng.randi_range(18,58)
 	var life_expectancy:=clampf(WorldSimulation.state.projected_life_expectancy()+18.0,48.0,88.0)
 	var death_age:=clampf(rng.randfn(life_expectancy,11.5),maxf(36.0,float(age)+2.0),105.0)
@@ -391,6 +390,19 @@ func _generate_person(person_id:int)->Dictionary:
 	skills[String(SKILL_KEYS[primary_index])]=rng.randi_range(72,93)
 	skills[String(SKILL_KEYS[secondary_index])]=maxi(int(skills[String(SKILL_KEYS[secondary_index])]),rng.randi_range(58,82))
 	skills[String(SKILL_KEYS[weak_index])]=rng.randi_range(14,36)
+	var era_names:=preload("res://scripts/era_names.gd")
+	var owner:=String(WorldSimulation.actor_id) if String(WorldSimulation.actor_id)!="" else "player"
+	var used_names:Dictionary=era_names.used_in_court() if owner=="player" else {}
+	for existing_person in people:
+		if String(existing_person.get("status","active")) in ["active","detained"]:
+			used_names[String(existing_person.get("name",""))]=true
+			used_names["given:"+era_names.given_of(String(existing_person.get("name","")))]=true
+	var identity:Dictionary=era_names.make(int(WorldSimulation.state.world_seed),person_id,woman,owner,used_names,{"skill":String(SKILL_KEYS[primary_index])})
+	var name:=String(identity.get("name","Nameless"))
+	for existing in people:
+		if String(existing.get("name",""))==name:
+			name="%s %s" % [name,String.chr(65+posmod(person_id,26))]
+			break
 	var trait_a:=String(TRAITS[rng.randi_range(0,TRAITS.size()-1)])
 	var trait_b:=String(TRAITS[rng.randi_range(0,TRAITS.size()-1)])
 	while trait_b==trait_a: trait_b=String(TRAITS[rng.randi_range(0,TRAITS.size()-1)])
@@ -402,7 +414,7 @@ func _generate_person(person_id:int)->Dictionary:
 	var born_day:=int(WorldSimulation.state.elapsed_days)-age*365-rng.randi_range(0,364)
 	var profile:=_dynamic_profile(skills,personality)
 	return {
-		"person_id":person_id,"name":name,"born_day":born_day,"death_age_years":death_age,"died_day":-1,"status":"active","known_since_day":int(WorldSimulation.state.elapsed_days),
+		"person_id":person_id,"name":name,"given":String(identity.get("given","")),"family":String(identity.get("family","")),"sex":"female" if woman else "male","born_day":born_day,"death_age_years":death_age,"died_day":-1,"status":"active","known_since_day":int(WorldSimulation.state.elapsed_days),
 		"home_settlement_id":home_id,"office_key":"","local_leader_of":"","appointed_day":-1,"experience_months":0,
 		"background":background,"institutional":false,"traits":[trait_a,trait_b],"personality":personality,"skills":skills,"doctrine":doctrine,
 		"dynamic_profile":profile,"subcategory_profile":{},"support":clampi(roundi(28.0+float(profile.culture)*34.0+float(profile.institutions)*26.0),18,92),
@@ -410,6 +422,31 @@ func _generate_person(person_id:int)->Dictionary:
 		"relationships":{"sovereign":{"trust":rng.randf_range(0.30,0.76),"respect":rng.randf_range(0.30,0.80),"fear":rng.randf_range(0.03,0.32),"resentment":0.0,"obligation":rng.randf_range(0.28,0.72)}},
 		"honesty":rng.randf_range(0.30,0.94),"courage":rng.randf_range(0.24,0.92),"pride":rng.randf_range(0.16,0.88),"suspicion":rng.randf_range(0.12,0.86),
 	}
+
+
+func admit_person(identity:Dictionary)->Dictionary:
+	## A commoner the god raises into public life (court_persons.gd): generated
+	## like any public person, then given the identity the court already knows.
+	## Offices still come only through mark_central_appointment and its rules.
+	initialize()
+	var living_count:=0
+	for person in people:
+		if String(person.get("status","active"))=="active": living_count+=1
+	if living_count>=MAX_GOVERNMENT_PEOPLE: return {}
+	var person:=_generate_person(next_person_id)
+	next_person_id+=1
+	if String(identity.get("name",""))!="": person["name"]=String(identity.name).substr(0,80)
+	if identity.get("born_day") is int or identity.get("born_day") is float:
+		person["born_day"]=int(identity.born_day)
+		person["death_age_years"]=maxf(float(person.get("death_age_years",60.0)),float(age_years(person))+4.0)
+	if String(identity.get("home_settlement_id",""))!="": person["home_settlement_id"]=String(identity.home_settlement_id)
+	for key in ["courage","honesty","pride"]:
+		if identity.get(key) is float or identity.get(key) is int: person[key]=clampf(float(identity[key]),0.0,1.0)
+	if String(identity.get("background",""))!="": person["background"]=String(identity.background).substr(0,120)
+	person["known_since_day"]=int(WorldSimulation.state.elapsed_days)
+	people.append(person)
+	revision+=1
+	return person_snapshot(int(person.person_id))
 
 
 func _background_for_skills(skills:Dictionary)->String:
@@ -1145,10 +1182,18 @@ func _process_lifespans(day:int,events:Array[Dictionary])->void:
 		person["died_day"]=day
 		var held_title:=String(person.get("office_title",person.get("office_key","")))
 		var local_id:=String(person.get("local_leader_of",""))
+		# What they held when they died, for the court's mourning (court_lives.gd).
+		person["died_office_key"]=String(person.get("office_key",""))
+		person["died_office_title"]=held_title
+		person["died_local_leader_of"]=local_id
 		people[index]=person
 		# This named person is part of the aggregate population. Register exactly one
 		# death through the same conserved demographic entry point.
 		WorldSimulation.state.register_population_deaths(1,"Natural causes")
+		# research_600: the life table already expects this death; charge it
+		# against the aggregate accumulator so it is not counted twice (the
+		# double count mattered most for a band of a few dozen people).
+		WorldSimulation.state.death_progress-=1.0
 		var service_note:=" while serving as %s" % held_title if held_title!="" else (" while leading a settlement" if local_id!="" else "")
 		var event:Dictionary={"day":day,"title":"Officeholder Died","description":"%s died aged %d%s. The office and local duties now pass through the same succession rules as every other appointment." % [String(person.name),floori(age),service_note],"domain":"institutions","severity":"major"}
 		events.append(event)
@@ -1271,6 +1316,35 @@ func _apply_survival_guard(weights:Dictionary)->Dictionary:
 	return guard
 
 
+## research_600 balance: getting, grinding, cooking and storing food took most
+## of a pre-modern household's working time (docs/research/BENCHMARKS_600.md,
+## typical: 62% at year 0, 52% by year 600). Planned labor keeps at least that
+## share on food; the surplus fills the stores. A society focused on food and
+## labor research needs less (up to a quarter), and decrees that claim labor
+## (care rotas, watches, levies) leave less time for everything, so food takes more.
+const FOOD_LABOR_FLOOR:Array=[[0.0,0.62],[100.0,0.60],[300.0,0.56],[600.0,0.52],[1500.0,0.35],[2800.0,0.05]]
+
+func _apply_food_labor_floor(weights:Dictionary)->void:
+	var year:=float(WorldSimulation.state.elapsed_days)/365.0
+	var floor_share:=float(FOOD_LABOR_FLOOR[FOOD_LABOR_FLOOR.size()-1][1])
+	for index in range(1,FOOD_LABOR_FLOOR.size()):
+		if year<=float(FOOD_LABOR_FLOOR[index][0]):
+			var low:Array=FOOD_LABOR_FLOOR[index-1]
+			var high:Array=FOOD_LABOR_FLOOR[index]
+			floor_share=lerpf(float(low[1]),float(high[1]),(year-float(low[0]))/(float(high[0])-float(low[0])))
+			break
+	var focus:Dictionary=WorldSimulation.discovery.society_model.line_focus if WorldSimulation.discovery!=null else {}
+	floor_share*=1.0-0.25*clampf(float(focus.get("nutrition",0.0))+0.5*float(focus.get("labor",0.0)),0.0,1.0)
+	# Care-focused societies keep more of their sick, old and young alive to feed.
+	floor_share*=1.0+0.12*float(focus.get("health",0.0))+0.08*float(focus.get("demography",0.0))
+	if WorldSimulation.consequences!=null:floor_share*=1.0+maxf(0.0,-float(WorldSimulation.consequences.policy_effect("labor_multiplier")))
+	floor_share=clampf(floor_share,0.0,0.85)
+	var other:=0.0
+	for role:String in weights:
+		if role!="Food":other+=maxf(0.0,float(weights[role]))
+	weights.Food=maxf(float(weights.get("Food",0)),other*floor_share/maxf(.01,1.0-floor_share))
+
+
 func _allocations_for_focus(focus:String,leader:Dictionary,cultural:bool=false)->Dictionary:
 	var weights:Dictionary=BASE_ALLOCATIONS.duplicate(true)
 	var changes:Dictionary=({
@@ -1289,6 +1363,7 @@ func _allocations_for_focus(focus:String,leader:Dictionary,cultural:bool=false)-
 		var bias:=preload("res://scripts/cultural_inheritance.gd").labor_bias(WorldSimulation.direction.cultural_memory,int(WorldSimulation.state.elapsed_days))
 		for role in bias:weights[role]=float(weights.get(role,0))+float(bias[role])
 	_apply_survival_guard(weights)
+	_apply_food_labor_floor(weights) # research_600 balance
 	if not leader.is_empty():
 		var skills:Dictionary=leader.get("skills",{})
 		weights.Administration=float(weights.Administration)+float(skills.get("Administration",50))*0.025

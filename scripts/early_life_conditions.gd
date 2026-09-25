@@ -74,13 +74,76 @@ const GOOD_CONDITIONS:=0.55
 ## only through its era-capped effect channels (SocietyModel.era_ceiling_for),
 ## so it lifts little before the modern era. Missing practices add their excess
 ## on top, weighted by EXCESS_WEIGHT. Old saves blend in with early_care_blend.
-const ERA_BURDEN:={"under5":3.6,"child":4.5,"adult":4.0,"elder":2.1,"neonatal":1.3,"maternal":1.0}
+const ERA_BURDEN:={"under5":4.4,"child":5.0,"adult":4.5,"elder":2.3,"neonatal":2.1,"maternal":2.6}
 const EXCESS_WEIGHT:={"under5":0.15,"child":0.35,"adult":0.5}
 ## Channel totals that relieve the burden, each over its modern limit.
 const RELIEF_CHANNELS:={"health_protection":0.55,"sanitation":0.65,"water_safety":0.60,"disease_exposure":-0.55}
 const RELIEF_POWER:=2.5
+## Long nursing, infection-caused sterility and widowhood kept even well-fed
+## pre-modern crude birth rates near 40-48 per 1,000 (docs/research/BENCHMARKS_600.md):
+## above the knee the diet's lift to conception rises only at this slope (the
+## best-fed society's 1.05 becomes 0.9), while hardship still lowers it in full.
+const PREMODERN_FECUNDITY_KNEE:=0.8
+## research_600: an infant's death ends nursing and shortens the next birth
+## interval; each point of first-year loss above the reference adds this much
+## to conception (1.3: about +20% at 250 infant deaths per 1,000, which keeps
+## crude birth rates inside the benchmark's 44-48 instead of past 50).
+const INFANT_LOSS_REPLACEMENT:=1.3
+const PREMODERN_FECUNDITY_SLOPE:=0.4
 ## Hunger and sickness absorb at most this share of the burden (see age_multiplier).
-const BURDEN_OVERLAP_FLOOR:=0.5
+const BURDEN_OVERLAP_FLOOR:=0.35
+
+## --- research_600 carrying capacity (Phase 3 balance) ---
+## Land, wild grounds and fields around each settlement feed only so many
+## people with the era's methods. Past CROWDING_ONSET of that capacity, the
+## crowded, hungrier and sicker population dies more and marries later, so
+## growth settles near the capacity and follows it as methods, fields and
+## daughter settlements extend it (booms and busts come from harvests).
+## Capacity per settlement by game year (people, before improvements).
+const TERRITORY_CAPACITY:Array=[[0.0,320.0],[100.0,420.0],[200.0,650.0],[300.0,880.0],[600.0,2600.0],[1500.0,9000.0],[2800.0,60000.0]]
+const CROWDING_ONSET:=0.6
+const CROWDING_MORTALITY:=0.3
+const CROWDING_CONCEPTION:=1.2
+## A remnant far below the founding territory's capacity finds land plentiful:
+## couples marry earlier (the preventive check relaxes), so a thinned-out band
+## recovers instead of dying out.
+const SPARE_LAND_ONSET:=0.3
+const SPARE_LAND_CONCEPTION:=2.0
+## Crowd diseases need numbers: a remnant band sheds part of the era's excess
+## mortality burden (about -18% at 37 people, -30% for a handful).
+const SPARE_LAND_HEALTH:=1.0
+
+## People the society's settled land can carry now: territory by era and
+## settlement count, raised by (era-capped) cultivation, soil and storage
+## knowledge and lowered by worn-out wild grounds.
+static func carrying_capacity(state:Node,discovery:Node)->float:
+	var era:=float(state.elapsed_days)/365.0
+	var base:=float(TERRITORY_CAPACITY[TERRITORY_CAPACITY.size()-1][1])
+	for index in range(1,TERRITORY_CAPACITY.size()):
+		var high:Array=TERRITORY_CAPACITY[index]
+		if era<=float(high[0]):
+			var low:Array=TERRITORY_CAPACITY[index-1]
+			base=lerpf(float(low[1]),float(high[1]),(era-float(low[0]))/(float(high[0])-float(low[0])))
+			break
+	var settlements:=maxi(1,(state.player_settlements as Array).size())
+	# Daughter settlements claim less new land each than the first.
+	var territory:=1.0+sqrt(float(settlements-1))*1.6
+	var methods:=1.0+maxf(0.0,discovery.effect("cultivation_yield"))+maxf(0.0,discovery.effect("soil_productivity"))*0.6+maxf(0.0,discovery.effect("food_output"))*0.5+maxf(0.0,discovery.effect("food_storage"))*0.25
+	var grounds:=0.0
+	var sources:Dictionary=state.food_source_health
+	for key:Variant in sources:grounds+=float(sources[key])
+	grounds=clampf(grounds/maxf(1.0,float(sources.size())),0.4,1.0) if not sources.is_empty() else 1.0
+	return base*territory*methods*lerpf(0.6,1.0,grounds)
+
+## Care decrees (government_policy_catalog.gd) organize people to do what a
+## missing practice would: fetch and store clean water, tend the sick and
+## newborns, keep watch against fire, falls and beasts. Their policy channels
+## add coverage to these categories while the decree runs.
+const DECREE_COVER:={"water":"water_care_coverage","remedies":"sick_care_coverage","childcare":"sick_care_coverage","wounds":"injury_care_coverage"}
+
+static func _decree_cover(category_id:String)->float:
+	if not DECREE_COVER.has(category_id) or WorldSimulation.consequences==null:return 0.0
+	return maxf(0.0,float(WorldSimulation.consequences.policy_effect(String(DECREE_COVER[category_id]))))
 
 ## Share (0..1) of the pre-modern burden lifted by general health knowledge.
 static func burden_relief(discovery:Node)->float:
@@ -124,7 +187,8 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 		var practices:Dictionary=category.practices
 		for id:String in practices:
 			if id in known:
-				practice_cover+=float(practices[id])*clampf(discovery.adoption(id),0.0,1.0)
+				var level:float=discovery.practiced(id) if discovery.has_method("practiced") else discovery.adoption(id)
+				practice_cover+=float(practices[id])*clampf(level,0.0,1.0)
 				named.append(_name(discovery,id))
 			else:
 				var entry:Dictionary=discovery.discovery_definition(id)
@@ -139,7 +203,8 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 		for channel:String in channels:
 			var scale:=float(channels[channel])
 			channel_cover+=maxf(0.0,discovery.effect(channel)/scale)
-		var coverage:=clampf(maxf(practice_cover,channel_cover),0.0,1.0)
+		# research_600: organized care decrees cover part of a missing practice.
+		var coverage:=clampf(maxf(practice_cover,channel_cover)+_decree_cover(String(category.id)),0.0,1.0)
 		for key:String in excess:
 			var amount:=float(category.get(key,0.0))
 			excess[key]=float(excess[key])+amount*(1.0-coverage)
@@ -159,13 +224,29 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 	# Conception: a well-fed mother conceives sooner; heavy labor delays it; an
 	# infant's death ends nursing and shortens the next interval.
 	var infant_loss:=clampf(float(context.get("infant_loss",(state.early_care as Dictionary).get("infant_loss",0.0))),0.0,0.6)
-	var conception:=lerpf(0.80,1.05,clampf((diet-0.35)/0.45,0.0,1.0))*(1.0-overwork*0.16)*(1.0+maxf(0.0,infant_loss-REFERENCE_INFANT_LOSS)*2.6)
+	var conception:=lerpf(0.80,1.05,clampf((diet-0.35)/0.45,0.0,1.0))
+	if conception>PREMODERN_FECUNDITY_KNEE:conception=PREMODERN_FECUNDITY_KNEE+(conception-PREMODERN_FECUNDITY_KNEE)*PREMODERN_FECUNDITY_SLOPE
+	conception*=(1.0-overwork*0.16)*(1.0+maxf(0.0,infant_loss-REFERENCE_INFANT_LOSS)*INFANT_LOSS_REPLACEMENT)
 	var result:={"blend":blend,"diet":diet,"nutrition_factor":nutrition,"overwork":overwork,"infant_loss":infant_loss,"categories":categories}
 	for key:String in raw:result[key]=lerpf(1.0,float(raw[key]),blend)
 	result["conception"]=lerpf(1.0,conception,blend)
 	var relief:=burden_relief(discovery)
+	var capacity:=carrying_capacity(state,discovery)
+	var crowding:=maxf(0.0,float(state.population_exact)/maxf(1.0,capacity)-CROWDING_ONSET)
+	# Spare land rescues only a remnant: it is judged against the founding
+	# territory (not later capacity), so a band thinned below a few score
+	# people recovers while a large but slow-growing society gets no boost.
+	var founding:=float((TERRITORY_CAPACITY[0] as Array)[1])
+	var spare:=maxf(0.0,SPARE_LAND_ONSET-float(state.population_exact)/founding)
 	var burden:Dictionary={}
-	for key:String in ERA_BURDEN:burden[key]=lerpf(1.0,1.0+(float(ERA_BURDEN[key])-1.0)*(1.0-relief),blend)
+	for key:String in ERA_BURDEN:
+		var by_age:=key in ["under5","child","adult","elder"]
+		var crowd:=1.0+crowding*CROWDING_MORTALITY if by_age else 1.0
+		var remnant:=1.0-spare*SPARE_LAND_HEALTH if by_age else 1.0
+		burden[key]=lerpf(1.0,(1.0+(float(ERA_BURDEN[key])-1.0)*(1.0-relief)*remnant)*crowd,blend)
+	result["conception"]=float(result.conception)*lerpf(1.0,maxf(0.3,1.0-crowding*CROWDING_CONCEPTION)*(1.0+spare*SPARE_LAND_CONCEPTION),blend)
+	result["carrying_capacity"]=capacity
+	result["crowding"]=crowding
 	var weights:Dictionary={}
 	for key:String in EXCESS_WEIGHT:weights[key]=lerpf(1.0,float(EXCESS_WEIGHT[key]),blend)
 	result["burden"]=burden
@@ -209,12 +290,14 @@ static func age_multiplier(care:Dictionary,age:int,condition_factor:float=GOOD_C
 	var era_burden:=1.0+(float(burden.get("elder" if age>=45 else band,1.0))-1.0)*maxf(BURDEN_OVERLAP_FLOOR,overlap)
 	return era_burden*(1.0+(excess-1.0)*weight)
 
-## Newborn and maternal death multipliers including the pre-modern burden.
+## Newborn and maternal death multipliers including the pre-modern burden. The
+## burden adds to the missing-care excess rather than compounding it: the same
+## untended births are not lost twice.
 static func neonatal_factor(care:Dictionary)->float:
-	return float(care.get("neonatal",1.0))*float((care.get("burden",{}) as Dictionary).get("neonatal",1.0))
+	return float(care.get("neonatal",1.0))+float((care.get("burden",{}) as Dictionary).get("neonatal",1.0))-1.0
 
 static func maternal_factor(care:Dictionary)->float:
-	return float(care.get("maternal",1.0))*float((care.get("burden",{}) as Dictionary).get("maternal",1.0))
+	return float(care.get("maternal",1.0))+float((care.get("burden",{}) as Dictionary).get("maternal",1.0))-1.0
 
 ## Player-facing lines for the health view: what protects life, what is missing.
 static func explanation(care:Dictionary)->Array[Dictionary]:

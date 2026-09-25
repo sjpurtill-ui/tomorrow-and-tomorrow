@@ -42,7 +42,8 @@ const WORK_KINDS:=["great_work","wonder_proposal"]
 const GREAT_WORKS_PATH:="res://scripts/great_works_audience.gd"
 const REPORT_SOURCES:=["scouts","envoys","expedition"]
 const REPORT_FACTS_MAX:=24
-const TOPICS:=["food","health","housing","security","grievance","ambition","introduction","follow_up","war","summons"]
+const TOPICS:=["food","health","housing","security","grievance","ambition","introduction","follow_up","war","summons","mourning","callback","omen"]
+const LIVES_PATH:="res://scripts/court_lives.gd"
 const REACTIONS:=["delighted","pleased","neutral","offended","furious"]
 const VERSION:=3
 const EXPIRY_DAYS:=20
@@ -116,6 +117,10 @@ const SITUATIONS:={
 	"introduction":{"kind":"petition","headline":"presents themselves","mechanic":"civic decree pipeline; official relationship"},
 	"war_council":{"kind":"petition","headline":"comes about the war","mechanic":"civic decree pipeline; official relationship"},
 	"summons":{"kind":"summons","headline":"answers your summons","mechanic":"the ruler's own call; spoken orders go to the civic pipeline"},
+	"mourning":{"kind":"petition","headline":"comes from the burial","mechanic":"court_lives.gd; GovernmentPeopleSystem appoints the successor"},
+	"callback":{"kind":"petition","headline":"brings word of an old order","mechanic":"court_lives.gd; what really changed since the order"},
+	"omen":{"kind":"petition","headline":"comes about the sign","mechanic":"court_lives.gd; the real weather or health agreed with the god's word"},
+	"dread_tribute":{"kind":"gift","headline":"brings tribute, fearing your wrath","mechanic":"civilization_exchange take/receive between real ledgers"},
 }
 
 ## Which situations an occasion invites, with base weights.
@@ -129,6 +134,8 @@ const OCCASION_MIX:={
 	"their_famine":{"aid_request":1.0},
 	"recruitment_incident":{"recruitment_protest":1.0},
 	"third_war":{"war_support":1.0,"news_report":0.35},
+	"dread_tribute":{"dread_tribute":1.0},
+	"dread_test":{"test_of_resolve":1.0,"tribute_demand":0.4},
 	"ambient":{"gift_goods":0.6,"accord_offer":0.6,"scholar_offer":0.8,"research_sale":0.6,"license_offer":0.5,"rumor_share":0.8,"intelligence_share":0.6,"news_report":0.5,"trade_offer":0.4,"league_invitation":0.4,"protection_pact":0.3,"artifact_gift":0.7,"artifact_purchase":0.6,"artifact_return":1.0},
 }
 
@@ -207,6 +214,11 @@ static func _serial_of(audience:Dictionary)->int:
 
 static func _day()->int:
 	return int(GameState.elapsed_days)
+
+static func _lives()->GDScript:
+	## Deaths, successions, omens and callbacks (court_lives.gd); loaded lazily
+	## because that module reaches back into this one.
+	return load(LIVES_PATH) as GDScript
 
 static func _great_works()->GDScript:
 	## Great Works audiences (architects, rival races, forecasts); loaded lazily
@@ -287,6 +299,7 @@ static func daily(day:int)->Array[Dictionary]:
 	_observe(day)
 	_prune_occasions(day)
 	_prune_matters(day)
+	_lives().call("daily",day)
 	# The court never comes on its own: its occasions become matters, held by
 	# the official until the ruler summons them.
 	for occasion in (s.occasions as Array).duplicate():
@@ -509,6 +522,7 @@ static func open_matter(matter_id:String)->Dictionary:
 		var prefilled:Array=m.get("lines",[])
 		for index in mini(prefilled.size(),4):
 			if prefilled[index] is Dictionary: append_line(String(stored.id),prefilled[index])
+		_lives().call("on_open",stored)
 		return stored
 	return {}
 
@@ -1075,6 +1089,8 @@ static func _generate_foreign_occasion(occasion:Dictionary,day:int)->Dictionary:
 	var leader:=ForeignDiplomacy.leader(civ_id)
 	if civ.is_empty() or leader.is_empty(): return {}
 	var rng:=_rng("occasion:%s:%s:%d" % [civ_id,String(occasion.get("key","")),int(state().serial)],day)
+	# A people that dreads the god and keeps its distance sends fewer envoys.
+	if bool(_lives().call("avoids",civ_id,occasion,rng)): return {}
 	var used:=_used_asks("civ:"+civ_id,day)
 	var candidates:=_foreign_candidates(civ_id,occasion,rng,used,day)
 	var chosen:=_weighted(candidates,rng)
@@ -1106,7 +1122,7 @@ static func _foreign_candidates(civ_id:String,occasion:Dictionary,rng:RandomNumb
 		if base<=0.0: continue
 		var candidate:=_candidate(situation_type,civ_id,occasion,rng,used,day)
 		if candidate.is_empty(): continue
-		candidate["w"]=base*_temperament_factor(situation_type,p,civ)
+		candidate["w"]=base*_temperament_factor(situation_type,p,civ)*float(_lives().call("dread_weight",situation_type,civ_id))
 		if branches.has(situation_type):
 			var previous:Dictionary=(occasion.get("data",{}) as Dictionary).get("previous",{})
 			(candidate.situation as Dictionary)["arc"]={"branch":String(branches[situation_type]),"previous":previous.duplicate(true)}
@@ -1182,12 +1198,12 @@ static func _candidate(situation_type:String,civ_id:String,occasion:Dictionary,r
 	var kind:=String(SITUATIONS.get(situation_type,{}).get("kind",""))
 	var situation:={"type":situation_type,"headline":String(SITUATIONS.get(situation_type,{}).get("headline",""))}
 	match situation_type:
-		"gift_goods","gratitude_gift":
+		"gift_goods","gratitude_gift","dread_tribute":
 			if war: return {}
-			var terms:=_gift_terms(civ_id,civ,rng,used,1.3 if situation_type=="gratitude_gift" else 1.0)
+			var terms:=_gift_terms(civ_id,civ,rng,used,1.3 if situation_type=="gratitude_gift" else (1.6 if situation_type=="dread_tribute" else 1.0))
 			if terms.is_empty(): return {}
 			situation.ask="gift:"+String(terms.resource)
-			situation.summary=("%s sends %s in thanks for your help." if situation_type=="gratitude_gift" else "%s sends %s as a gift.") % [name,_terms_text(terms)]
+			situation.summary=("%s sends %s in thanks for your help." if situation_type=="gratitude_gift" else ("%s sends %s as tribute; they have heard of your wrath." if situation_type=="dread_tribute" else "%s sends %s as a gift.")) % [name,_terms_text(terms)]
 			return {"kind":kind,"terms":terms,"situation":situation}
 		"aid_request":
 			if war or not _hungry(civ): return {}
@@ -1542,7 +1558,8 @@ static func _envoy(civ_id:String,audience_id:String,kind:String,leader:Dictionar
 	var traditions:Array=NAMES.POOLS.keys()
 	var tradition:String=traditions[serial%traditions.size()]
 	var envoy_serial:=posmod(hash(civ_id+":"+audience_id),100000)+10000
-	var identity:Dictionary=NAMES.make(int(GameState.world_seed),envoy_serial,envoy_serial%2==0,tradition,{String(leader.get("name","")):true})
+	var identity:Dictionary=preload("res://scripts/era_names.gd").make(int(GameState.world_seed),envoy_serial,envoy_serial%2==0,civ_id,{String(leader.get("name","")):true,"given:"+String(leader.get("name","")).get_slice(" ",0):true})
+	if String(identity.get("name",""))=="": identity=NAMES.make(int(GameState.world_seed),envoy_serial,envoy_serial%2==0,tradition,{String(leader.get("name","")):true})
 	var leader_name:=String(leader.get("name","their leader"))
 	var titles:Dictionary={
 		"gift":["Gift-bearer of %s","Friend of the house of %s","Hand of %s"],
@@ -1882,7 +1899,19 @@ static func court(id:String)->Array[Dictionary]:
 	var audience:=find(id)
 	var result:Array[Dictionary]=[]
 	var speaker_id:=int(audience.get("speaker",{}).get("person_id",0)) if not audience.is_empty() else 0
-	for person in _officials():
+	var officials:=_officials()
+	# Those who came in with the god's attention (the official who named a
+	# summoned person) keep their seats on the bench first.
+	var first:Array=audience.get("court_pids",[]) if not audience.is_empty() and audience.get("court_pids") is Array else []
+	if not first.is_empty():
+		var ordered:Array[Dictionary]=[]
+		for pid in first:
+			for person in officials:
+				if int(person.person_id)==int(pid) and not ordered.has(person): ordered.append(person)
+		for person in officials:
+			if not ordered.has(person): ordered.append(person)
+		officials=ordered
+	for person in officials:
 		if int(person.person_id)==speaker_id: continue
 		result.append(person)
 		if result.size()>=COURT_MAX: break
@@ -1985,6 +2014,8 @@ static func options(id:String)->Array[Dictionary]:
 					result.append(_option("decree","Charge them with their first task","\"%s\"" % decree,"warm",decree!="","They have no task to propose."))
 					result.append(_option("welcome","Welcome them warmly","Words of confidence; no order yet.","warm"))
 					result.append(_option("rebuke","Remind them of their place","Make plain that the office serves the ruler.","hostile"))
+				"mourning","callback","omen":
+					for lives_option:Dictionary in _lives().call("options",audience): result.append(lives_option)
 				"follow_up":
 					result.append(_option("decree","Issue it now","\"%s\"" % decree,"warm",decree!="","Nothing was promised."))
 					result.append(_option("patience","Ask for patience","Admit it waits; promise nothing new.","neutral"))
@@ -2537,6 +2568,7 @@ static func _posture_words(actual:String,name:String)->String:
 	return "%s made no change in its posture." % name
 
 static func _resolve_petition(audience:Dictionary,option_id:String)->Dictionary:
+	if String((audience.get("petition",{}) as Dictionary).get("topic","")) in ["mourning","callback","omen"]: return _lives().call("resolve",audience,option_id)
 	var pid:=int(audience.speaker.person_id)
 	var person:=_official(pid)
 	var name:=String(audience.speaker.name)
@@ -2854,6 +2886,12 @@ static func voice_context(id:String)->Dictionary:
 		if audience.kind in WORK_KINDS:
 			var gwa:=_great_works()
 			if gwa!=null: context["wonder_proposal" if audience.kind=="wonder_proposal" else "great_work"]=gwa.call("voice_facts",audience)
+		var known_id:=String((audience.speaker as Dictionary).get("known_id",""))
+		if known_id!="":
+			# A summoned commoner speaks for themselves, from their own life.
+			var persons:GDScript=load("res://scripts/court_persons.gd")
+			var known:Dictionary=persons.call("by_id",known_id)
+			if not known.is_empty(): context["summoned_person"]=persons.call("view",known)
 		var person:=_official(int(audience.speaker.person_id))
 		if not person.is_empty():
 			var rel:Dictionary=person.get("relationships",{}).get("sovereign",{})
@@ -3280,6 +3318,10 @@ static func validate_state(data:Variant)->bool:
 	if data.has("frequency") and not String(data.frequency) in FREQUENCIES: return false
 	if data.has("last_speaker") and (not data.last_speaker is String or String(data.last_speaker).length()>120): return false
 	if data.has("divine") and not DIVINE.valid_state(data.divine): return false
+	if data.has("lives") and not bool(_lives().call("valid_state",data.lives)): return false
+	if data.has("court_persons"):
+		var persons:GDScript=load("res://scripts/court_persons.gd")
+		if persons==null or not bool(persons.call("valid_state",data.court_persons)): return false
 	if not data.get("ledger",[]) is Array or (data.get("ledger",[]) as Array).size()>LEDGER_MAX: return false
 	for entry in data.get("ledger",[]):
 		if not entry is Dictionary or not _num(entry.get("day")) or not entry.get("speaker","") is String or not entry.get("ask","") is String or JSON.stringify(entry).length()>2000: return false

@@ -26,6 +26,7 @@ FACETS = {
     "food_per_worker": ("Food per food worker (rations/day)", "{:.2f}", True),
     "food_security": ("Food security", "{:.2f}", True),
     "food_share": ("Food labor share %", "{:.1f}", False),
+    "defense_share": ("Defense labor share %", "{:.1f}", None),
     "diet": ("Diet quality", "{:.2f}", True),
     "health": ("Health", "{:.2f}", True),
     "labor_efficiency": ("Labor efficiency", "{:.2f}", True),
@@ -57,7 +58,8 @@ FACETS = {
 }
 BENCH_KEYS = {"life_expectancy": "life_expectancy", "infant_mortality": "infant_mortality", "child_mortality_1_4": "child_mortality_1_4",
               "maternal_per_100k": "maternal_per_100k", "tfr": "tfr", "cbr": "cbr", "cdr": "cdr", "growth_pct": "growth_pct",
-              "population": "population", "food_share": "food_labor_share", "per_50": "discoveries_per_50_years"}
+              "population": "population", "food_share": "food_labor_share", "per_50": "discoveries_per_50_years",
+              "defense_share": "defense_labor_share"}
 
 
 def benchmarks() -> dict:
@@ -134,6 +136,7 @@ def century_facets(result: dict, cat, years: int, step: int = 100) -> dict:
             "maternal_per_100k": maternal / max(1.0, births) * 1e5, "tfr": births / span / mean_women * 30.0,
             "cbr": births / span / mean_pop * 1000.0, "cdr": deaths / span / mean_pop * 1000.0,
             "food_per_worker": r["food_per_worker"], "food_security": r["food_security"], "food_share": r["food_share"], "diet": r["diet"],
+            "defense_share": r.get("defense_share", 0.0),
             "health": r["health"], "labor_efficiency": r["labor_efficiency"],
             "cap_production": r["capacities"]["production"], "craft_output": r["craft_output"], "tool_quality": r["tool_quality"],
             "cap_infrastructure": r["capacities"]["infrastructure"], "housing_ratio": r["housing_ratio"], "construction_rate": r["construction_rate"],

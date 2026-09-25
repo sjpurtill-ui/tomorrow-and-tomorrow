@@ -1,20 +1,20 @@
 {
  "spec": "sensible:74119:100",
- "commit": "d9892ce1fa862da4ce20b9c17905e0dd2cca9555",
+ "commit": "0b7f5b392b2cded9910b36e1402e38a7e02b3dd2",
  "sources_at_launch": {
-  "scripts/discovery_system.gd": "55e37c81bd45",
-  "scripts/society_model.gd": "211cf8af83c2",
-  "scripts/game_state.gd": "bab3ff0149d4",
-  "scripts/early_life_conditions.gd": "1e460b980263",
+  "scripts/discovery_system.gd": "73d597cce423",
+  "scripts/society_model.gd": "d281acbd81cb",
+  "scripts/game_state.gd": "eb20cd51670e",
+  "scripts/early_life_conditions.gd": "482881d89267",
   "scripts/food_system.gd": "0dfd3965c9c0",
   "scripts/consequence_engine.gd": "b54e9f9f92a2",
-  "scripts/research_600_catalog.gd": "f1d70b5a5356",
+  "scripts/research_600_catalog.gd": "a7f8753bebe6",
   "scripts/technology_eras.gd": "bf0b64921759",
   "scripts/artifact_collection.gd": "0fc1c9560ba6",
   "data/research/research_600.json": "f065c17f69cb",
   "data/research/effects/*.json": "3ec572a3eaf9"
  },
- "wall_seconds": 970.0,
+ "wall_seconds": 1542.1,
  "returncode": 0,
- "generated": "2026-09-24 18:13:58"
+ "generated": "2026-09-25 00:39:30"
 }

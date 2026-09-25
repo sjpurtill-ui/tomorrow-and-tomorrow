@@ -2537,3 +2537,67 @@ Fast-forwarded `codex/early-consequences`. Seven early protections (clean water,
 ### Divine commands in the Court (main)
 
 Fast-forwarded `codex/divine-commands`. Everything typed in the Court is read as question, statement, command, threat or blessing, with names, titles and pronouns resolved to people present. The engine decides obedience from love and dread before anyone speaks (most obey; the gentle may plead once and comply on insistence; rare true refusals end in flight or seizure). Commands act through real effects: killings by a named hand or the guards, exile, detention, penance, blessing, raising, demotion, appointment, moving real stores, dispatching scouts and envoys, and other orders through the civic or custom-directive path. Executed acts get a vivid bracketed stage direction with era-appropriate weapons; the voice treats the god's word as law and empty proverbs are filtered. court_commands, court, audience_modal/summon/voice/hall, fear_love, responsive_decree, universal_order and early_consequences probes pass on the merged tree.
+
+### Summon anyone, blame, lies and confessions (main)
+
+Fast-forwarded `codex/court-summon` (ce924847). In the Court the god can ask "who is responsible for this?" about a recent event, the current matter or a discovery. An official names a person: either someone the records show was involved (a war leader, a discovery figure, an office holder) or a grounded commoner created from the real settlement and era. Asking again always names the same person. "Summon them" brings that identity into the Court; groups send a spokesperson.
+
+Every attributed event keeps a hidden truth record. Officials at fault may lie and name a scapegoat. Each lie leaves one or two tells grounded in game state, and the scapegoat's own alibi exposes it. Summoned people speak for themselves and know whether they are guilty. They deny, beg, crack or confess, and terror can produce a false confession, which the truth record marks as false. The player can confront with "You are lying" (a false accusation costs love), or with "The records say otherwise" once a tell has appeared.
+
+Judgment choices (execute, exile, maim, curse, exalt, reward, pardon, make priest or official, marry off, make an example) carry bounded consequences. Execution or exile removes one from the population. Appointments go through GovernmentPeopleSystem.admit_person. Offline, the Court shows state-driven ASK / SUMMON / QUESTION / CONFRONT / JUDGE choices. Online, typed text is mapped onto the same actions in one call per exchange. Each online exchange is stored as a slot template with its situation signature, and offline play reuses those templates. Repeated new actions are promoted to offline choices. Gaps in template coverage can be listed or deliberately filled with tools/court_persons_coverage.tscn; this is off by default and has a spending cap.
+
+Probes and suites:
+- court_summon_probe passes.
+- The court_commands, court, audience_modal/summon/voice/hall, fear_love and universal_order probes pass.
+- test_government_people_system fails the same cases as the base.
+
+Save data sits under ForeignDiplomacy.audiences.court_persons; older saves load with it empty.
+
+### Research 0–600 overhaul and era-anchored balance (main)
+
+Fast-forwarded `codex/research-600` (776ef19f, with main 55521645 already merged in).
+
+What changed:
+- **Research catalogue.** Years 0–600 now draw on the 12-line research design: 1,122 items, with dependencies, effects and art. The loader is `scripts/research_600_catalog.gd`, the data is `data/research/research_600.json`, the effects are in `data/research/effects/`, and there are 182 paintings.
+- **Pacing.** Early research is paced to history: no year-16 bookbinding, iron from about year 660. Outcomes are held to the era through ceilings on what research can deliver, a carrying capacity, opportunity costs for research, specialist upkeep, era mortality, and a floor under a remnant band's survival.
+- **Named deaths.** A named person's death now replaces an expected death instead of adding one.
+- **Surrogate simulation.** `tools/sim` gains a Python surrogate with calibration, a line-max matrix and a strategy sweep, plus opt-in epochal shocks and civ emergence (`--shocks`).
+
+Results:
+- **Headless engine runs.**
+  - Sensible play reaches 150 people at year 100 and 448 at year 200, with life expectancy around 29 and infant mortality around 215.
+  - Research-heavy play reaches 298 people at year 150.
+  - Poor play stagnates at 25–45 people.
+- **Milestones.** 14 of 15 land inside their design bands. The written law code needs four settlements and never appears in the probes.
+- **Surrogate sweep.** 295 strategies were run. None dominates, and 1,610 of 1,770 strategy-centuries pass their focus benchmarks.
+
+Tests. test_research_600, test_early_life_conditions, test_research_visual_atlas and test_artifact_culture pass. early_consequences, responsive_decree, court, court_commands, court_summon and research_art_600 probes pass. Remaining suite failures match baseline.
+
+Known issues. The poor scenario sits near the minimum band and still has some death excess that isn't explained. The surrogate lacks scout losses. Later research blocks (600–3000), scout survival and civic evolution live on separate branches and are not yet in main.
+
+### Fun wave 1: opening, Chronicle, court lives, scout survival (main)
+
+Fast-forwarded `codex/fun-integrate-1` (eb8796db). This integrates codex/fun-signal, codex/fun-court, codex/fun-opening and codex/scout-survival on top of the research-600 main, all from the fun audit (codex/fun-audit, docs/FUN_AUDIT.md).
+
+What changed:
+- **First contact restored.** Peoples now start in regional groups of three, 95–210 km apart. The player's start is not moved. Scouts bring back signs of neighbours (smoke, tracks) that point the way.
+- **Opening Arc.** Beats are drawn from real simulation state: signs, first contact, the first winter as a Hearth Chief's petition with a spring outcome, named children at court, and the first discovery as a scene. Default speed is 1 day/s.
+- **Fire-circle opening.** The Hearth Chief asks one question in voice, then names the settlement, replacing the 14 purpose cards.
+- **Chronicle.** Every report is graded whisper, notice or moment. Moments get an illustrated card and a synthesized sting, with a 30-day cap that never demotes contact or the first winter. Births and deaths fold into seasonal hearth tallies. Scout returns are quiet unless they found something new. Dedications show a card with an "Attend the dedication" button. The rail gains a Chronicle section, called Hearth-Tales before writing and The Annals after.
+- **Court lives.** A death becomes mourning in court, where the god picks among 2–3 voiced successors. The court tracks kin links and keeps The Remembered roll. Names follow the era, with epithets in the stone age. Every portrait is distinct.
+- **The god's word.** Order replies vary by personality. Rites leave marks on the map. Consequences come back 30–180 days later. Omens follow real coincidences. Rivals answer the god's dread.
+- **Scout survival.** Scout deaths are now rare (about 10% of natural increase at 0.2%/yr), and the Chief Scout is cautious when the population is small.
+
+Results:
+- **First hour** (seeds 424242 and 77013): 14–32 moments and 10–18 decisions per 10 real minutes. The longest gap is about 1.5 real minutes, and first contact comes on day 36–58.
+- **25-year Chronicle:** routine share 35–37%, against the audit's 95–96%.
+
+Tests:
+- test_chronicle 21, test_opening_arc 14, test_scout_survival, test_scouting_staff, test_research_600, test_civilization_system and the civic, court and audience suites and probes pass.
+- early_consequences reports EC_FAILURES [].
+- save_load_probe, civic_journey, scout_archive_ui, coherent_scout_return and ancient_scouting fail or time out identically on base.
+
+Open follow-ups:
+- Batch repeat discovery notices, which dominate the Chronicle after research-600.
+- The year label on carried-over tallies can be wrong.
+- The harness does not exercise orders or summons.

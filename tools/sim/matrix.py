@@ -23,7 +23,9 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "research"))
 import facets  # noqa: E402
+import focus_bench  # noqa: E402  (per-focus benchmark profiles)
 import gamedata as gd  # noqa: E402
 import simlib  # noqa: E402
 
@@ -43,10 +45,11 @@ LINE_TARGETS = {
 
 
 def _run(args):
-    scenario, seed, years = args
+    scenario, seed, years = args[:3]
+    shocks = args[3] if len(args) > 3 else False
     # Every matrix run scouts (3 % of people) and staffs artifact study (weight 2)
     # so the artifact facets are comparable; poor keeps its own site and decrees.
-    result = simlib.run(scenario, seed, years, simlib.params(), scenario_override={"scouting": 0.03, "study_weight": 2})
+    result = simlib.run(scenario, seed, years, simlib.params(), scenario_override={"scouting": 0.03, "study_weight": 2}, shocks=shocks)
     constants, cat = simlib.data()
     return scenario, facets.century_facets(result, cat, years, step=50)
 
@@ -64,13 +67,17 @@ def main() -> int:
     ap.add_argument("--seeds", type=int, default=6)
     ap.add_argument("--years", type=int, default=600)
     ap.add_argument("--jobs", type=int, default=24)
+    ap.add_argument("--shocks", action="store_true", help="opt-in: every scenario lives through epochal shocks (writes docs/research/epochal/LINE_MAX_MATRIX_SHOCKS.*)")
     args = ap.parse_args()
+    global OUT
+    if args.shocks:
+        OUT = ROOT / "docs/research/epochal" / (OUT.name + "_SHOCKS")
     constants, cat = simlib.data()
     bench = facets.benchmarks()
     scenarios = ["balanced", "poor"] + [f"max_{line}" for line in gd.LINES] + [f"lead_{line}" for line in gd.LINES]
     t0 = time.time()
     with ProcessPoolExecutor(max_workers=args.jobs) as pool:
-        outs = list(pool.map(_run, [(s, 1 + k, args.years) for s in scenarios for k in range(args.seeds)]))
+        outs = list(pool.map(_run, [(s, 1 + k, args.years, args.shocks) for s in scenarios for k in range(args.seeds)]))
     by = {}
     for scenario, fac in outs:
         by.setdefault(scenario, []).append(fac)
@@ -97,9 +104,30 @@ def main() -> int:
         w.writerows(records)
     OUT.with_suffix(".json").write_text(json.dumps({"generated": time.strftime("%Y-%m-%d %H:%M"), "seeds": args.seeds, "years": args.years,
                                                     "benchmarks": bench.get("_source"), "records": records}, indent=0), encoding="utf-8")
+    # ---- focus judgement (tools/research/focus_bench.py): each scenario against its own profile
+    fs = focus_bench.FocusBench()
+    judgement = {}
+    for s in scenarios:
+        if s.startswith("max_"):
+            research = {l: (12 if l == s[4:] else 0) for l in gd.LINES}
+        elif s.startswith("lead_"):
+            research = {l: (12 if l == s[5:] else 1) for l in gd.LINES}
+        else:
+            research = dict.fromkeys(gd.LINES, 2)
+        rows = {}
+        for c in centuries:
+            if c not in mean[s] or c not in base:
+                continue
+            focus = fs.classify({"research": research}, c)
+            chk = fs.check_run(focus, {c: mean[s][c]}, balanced=None if s == "balanced" else {c: base[c]})
+            above = [f"{a['flag']} {a['metric']}" for a in chk["flags"] if a["flag"] in ("ABOVE FOCUS HIGH", "OUT OF BOUNDS")]
+            unpaid = [f for f, v in chk["costs"].get(float(c), {}).items() if v["status"] == "UNPAID"]
+            free = [f for f, v in chk["relative"].get(float(c), {}).items() if v["status"] == "FREE LUNCH"]
+            rows[c] = {"focus": focus, "above": above, "unpaid": unpaid, "free_lunch": free}
+        judgement[s] = rows
     # ---- markdown
-    md = [f"# Research line maximization matrix (surrogate, {args.seeds} seeds x {args.years} years)", "",
-          f"Generated {time.strftime('%Y-%m-%d %H:%M')} by `python tools/sim/matrix.py --seeds {args.seeds} --years {args.years}` "
+    md = [f"# Research line maximization matrix (surrogate{', epochal shocks on' if args.shocks else ''}, {args.seeds} seeds x {args.years} years)", "",
+          f"Generated {time.strftime('%Y-%m-%d %H:%M')} by `python tools/sim/matrix.py --seeds {args.seeds} --years {args.years}{' --shocks' if args.shocks else ''}` "
           f"({time.time() - t0:.0f} s). Surrogate model: `tools/sim` (see `docs/research/SURROGATE_SIM.md` for what it models, "
           f"its calibration against the real engine, and its known gaps). Benchmarks: `{bench.get('_source')}`.", "",
           "Each `max_<line>` run puts the full research emphasis (12) on one line and none on the others; `lead_<line>` puts 12 on the line "
@@ -167,6 +195,22 @@ def main() -> int:
                 cells.append(fmt.format(v) + delta + mark)
             md.append(f"| {label} | " + " | ".join(cells) + " |")
         md.append("")
+    md += ["", "## Focus judgement (docs/research/benchmarks_focus_600.json)", "",
+           "Each scenario is classified (`FocusBench.classify`: max_/lead_ runs as their line, balanced and poor as balanced) and judged against its own focus profile, "
+           "its required costs and balanced (`check_run`). `poor` is bad play on a poor site, so only plausibility (OUT OF BOUNDS) matters for it.", "",
+           "| scenario | " + " | ".join(str(c) for c in centuries) + " |", "|---|" + "---|" * len(centuries)]
+    for s_name, rows in judgement.items():
+        cells = []
+        for c in centuries:
+            r = rows.get(c)
+            if r is None:
+                cells.append("-")
+                continue
+            probs = r["above"] + [f"UNPAID {u}" for u in r["unpaid"]] + [f"FREE LUNCH {f}" for f in r["free_lunch"]]
+            if s_name == "poor":
+                probs = [p for p in probs if p.startswith("OUT")]
+            cells.append("ok" if not probs else "; ".join(probs))
+        md.append(f"| {s_name} | " + " | ".join(cells) + " |")
     OUT.with_suffix(".md").write_text("\n".join(md) + "\n", encoding="utf-8")
     print(f"wrote {OUT.with_suffix('.md').relative_to(ROOT)} (+ .json, .tsv) in {time.time() - t0:.0f} s")
     return 0

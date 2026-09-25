@@ -13,12 +13,19 @@ signal failed(audience_id:String,reason:String)
 ## The live voice heard the ruler perform a spoken act of wrath or favour
 ## (bounded to divine_regard.gd SPOKEN); the hall validates and applies it.
 signal divine_intent(audience_id:String,action:String)
+## A court-known persons exchange finished (court_persons.gd result; ok=false
+## when the words could not be mapped and the room simply answered).
+signal persons_done(audience_id:String,result:Dictionary)
 
 const CV:=preload("res://scripts/character_voice.gd")
 const DV:=preload("res://scripts/divine_voice.gd")
 const CC:=preload("res://scripts/court_commands.gd")
+const Persons:=preload("res://scripts/court_persons.gd")
+const PersonsBridge:=preload("res://scripts/court_persons_bridge.gd")
+const PersonsLines:=preload("res://scripts/court_persons_lines.gd")
 const DIVINE_SPOKEN:=["terrify","penance","bless","raise_up"]
 const HALL_PATH:="res://scripts/audience_hall.gd"
+const LIVES_SCENES:=["mourning","callback","omen"]
 const SCOUT_PATH:="res://scripts/chief_scout.gd"
 const API_TIMEOUT_SECONDS:=45.0
 const MAX_ATTEMPTS:=2
@@ -27,14 +34,14 @@ const MAX_COMPLETION_TOKENS:=1600   ## ceiling; each stage asks for less (STAGE_
 ## Per-stage completion caps. Reasoning models spend part of this on thinking
 ## (a measured opening used ~260 reasoning + ~260 visible tokens), so the caps
 ## leave headroom; a reply cut off by the cap retries once with more room.
-const STAGE_TOKENS:={"open":1100,"speak":900,"closing":650,"weigh":950,"divine":700,"command":900}
+const STAGE_TOKENS:={"open":1100,"speak":900,"closing":650,"weigh":950,"divine":700,"command":900,"persons":1200}
 const MAX_RESPONSE_BYTES:=98304
 const USAGE_LIMIT:=40               ## receipts kept in memory (not saved)
 const HISTORY_ENTRIES:=5            ## prior audiences described to the model
 const AVOID_LINES:=10               ## prior lines the model is told not to echo
 const MAX_LINE_CHARS:=300
 const MAX_PLAYER_CHARS:=400
-const STAGE_LIMITS:={"open":4,"speak":2,"closing":2,"weigh":5,"divine":3,"command":4}
+const STAGE_LIMITS:={"open":4,"speak":2,"closing":2,"weigh":5,"divine":3,"command":4,"persons":4}
 ## A proverb or riddle standing in for a thought: no one speaks in it (no I,
 ## you, we), no one is named, nothing is counted.
 const FILLER_OPENING:="(?i)^(a|an|no|every|each|even a|never|the \\w+ that|what the|when the|where the)\\b"
@@ -807,6 +814,19 @@ func player_speaks(audience_id:String,text:String,offline_order:bool=false)->voi
 	h.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":clean,"day":_day(),"aside":false})
 	_begin(audience_id,"speak",{"player_text":clean,"offline_order":offline_order})
 
+## Words about people (who is responsible, tell me of, summon, questioning,
+## accusation, judgment) with a live model: ONE call maps them onto the
+## court_persons.gd action vocabulary and writes the scene for what the engine
+## decides; the engine then applies it and the exchange is learned for offline
+## play. Offline there is no parsing: the Court offers choices instead.
+func persons_turn(audience_id:String,text:String)->void:
+	var clean:String=text.strip_edges().replace("\n"," ").substr(0,MAX_PLAYER_CHARS)
+	if clean.is_empty(): return
+	var h:Variant=_hall()
+	if h==null or (h.find(audience_id) as Dictionary).is_empty(): return
+	h.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":clean,"day":_day(),"aside":false})
+	_begin(audience_id,"persons",{"player_text":clean,"menu":Persons.menu(audience_id,true)})
+
 func closing(audience_id:String,result:Dictionary)->void:
 	_begin(audience_id,"closing",{"result":result.duplicate(true)})
 
@@ -874,7 +894,8 @@ func scene(audience_id:String)->Dictionary:
 		if pid>0 and GovernmentPeopleSystem.has_method("person_snapshot"): person=GovernmentPeopleSystem.person_snapshot(pid)
 		if person.is_empty(): person={"person_id":pid,"name":String(speaker.get("name","")),"traits":[]}
 		person["office_title"]=String(speaker.get("title",person.get("office_title","")))
-		envoy_persona=CV.for_person(person)
+		var known:Dictionary=Persons.by_id(String(speaker.get("known_id",""))) if String(speaker.get("known_id",""))!="" else {}
+		envoy_persona=Persons.persona(known) if not known.is_empty() else CV.for_person(person)
 	else:
 		envoy_persona=CV.for_envoy(civ_id,audience_id)
 	envoy_persona["key"]="envoy"
@@ -1010,8 +1031,8 @@ func prepare_request(s:Dictionary,stage:String,extra:Dictionary,config:Dictionar
 	if not bool(_compat.get("no_reasoning_effort",false)) and "api.openai.com" in String(config.get("endpoint","")).to_lower():
 		payload["reasoning_effort"]="low"
 	var divine:Array=_divine_allowed(s) if stage=="speak" else []
-	if stage=="command": keys.append("narrator")
-	if bool(config.get("structured_output",false)) and not bool(_compat.get("no_schema",false)): payload["response_format"]=response_format(keys,divine,stage=="speak")
+	if stage=="command" or stage=="persons": keys.append("narrator")
+	if bool(config.get("structured_output",false)) and not bool(_compat.get("no_schema",false)): payload["response_format"]=PersonsBridge.response_format(keys) if stage=="persons" else response_format(keys,divine,stage=="speak")
 	var headers:PackedStringArray=PackedStringArray(["Content-Type: application/json","Authorization: Bearer %s" % String(config.get("api_key","")),"X-Client-Request-Id: audience-%s-%d" % [String(s.id),Time.get_ticks_msec()]])
 	return {"scene":s,"stage":stage,"extra":extra,"config":config,"payload":payload,"headers":headers,"keys":keys,
 		"attempts":0,"max_attempts":MAX_ATTEMPTS,"downgraded":false,"http":null}
@@ -1051,7 +1072,11 @@ func _on_response(result:int,response_code:int,_headers:PackedStringArray,body:P
 	var envelope:=_envelope_facts(body)
 	var receipt:=_receipt_http(audience_id,request,result,response_code,envelope)
 	var detail:=""
-	if ok_http:
+	if ok_http and String(request.stage)=="persons":
+		var why:=_persons_response(audience_id,request,body,receipt)
+		if why=="": return
+		detail=why
+	elif ok_http:
 		var parsed:=parse_body(body)
 		if parsed.is_empty():
 			detail="reply cut off at the token cap" if String(envelope.get("finish_reason",""))=="length" else ("model declined to answer" if bool(envelope.get("refusal",false)) else "reply was not the expected JSON")
@@ -1280,7 +1305,7 @@ func allowed_numbers(s:Dictionary,extra:Dictionary)->Dictionary:
 
 func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Array[Dictionary]:
 	var keys:=cast_keys(s)
-	if stage=="command": keys.append("narrator")
+	if stage=="command" or stage=="persons": keys.append("narrator")
 	var refusal:=RegEx.new(); refusal.compile(CC.REFUSAL_PATTERN)
 	var result:Dictionary=extra.get("result",{}) if extra.get("result") is Dictionary else {}
 	var obeyed:=stage=="command" and String((result.get("obedience",{}) as Dictionary).get("id","obey")) in ["obey","reluctant"]
@@ -1324,8 +1349,8 @@ func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Ar
 func _cast_names(s:Dictionary)->Array[String]:
 	var names:Array[String]=[]
 	for member in [s.envoy]+(s.officials as Array):
-		for part in String((member as Dictionary).get("name","")).split(" ",false):
-			if String(part).length()>=3: names.append(String(part).to_lower())
+		# Epithet words ("who", "the") do not count as naming anyone.
+		for part in preload("res://scripts/era_names.gd").name_keys(String((member as Dictionary).get("name",""))): names.append(part)
 	return names
 
 static func filler(text:String,names:Array)->bool:
@@ -1443,9 +1468,85 @@ func _deliver(s:Dictionary,stage:String,extra:Dictionary,lines:Array[Dictionary]
 	if stage=="speak" and absf(mood_shift)>0.0: h.apply_mood(String(s.id),clampf(mood_shift,-0.25,0.25))
 	lines_ready.emit.call_deferred(String(s.id))
 
+func _proposal(body:PackedByteArray)->Dictionary:
+	## The model's JSON object (from a chat envelope or bare), or {}.
+	var parser:=JSON.new()
+	if parser.parse(body.get_string_from_utf8())!=OK or not parser.data is Dictionary: return {}
+	var envelope:Dictionary=parser.data
+	if envelope.has("canonical_action"): return envelope
+	var content:=""
+	var choices:Variant=envelope.get("choices",[])
+	if choices is Array and not (choices as Array).is_empty() and choices[0] is Dictionary:
+		var message:Variant=(choices[0] as Dictionary).get("message",{})
+		if message is Dictionary: content=PronouncementInterpreter._content_text((message as Dictionary).get("content",""))
+	if content.is_empty(): content=PronouncementInterpreter._content_text(envelope.get("output_text",""))
+	var first:=content.find("{"); var last:=content.rfind("}")
+	if first<0 or last<=first: return {}
+	var inner:=JSON.new()
+	if inner.parse(content.substr(first,last-first+1))!=OK or not inner.data is Dictionary: return {}
+	return inner.data
+
+func _persons_response(audience_id:String,request:Dictionary,body:PackedByteArray,receipt:Dictionary)->String:
+	## Validates the live mapping, lets the engine decide and apply, speaks the
+	## model's lines for it, and stores the exchange for offline replay.
+	## Returns "" when handled, else why it failed (retry, then offline).
+	var raw:=_proposal(body)
+	if raw.is_empty(): return "reply was not the expected JSON"
+	var extra:Dictionary=request.extra
+	var menu:Array=extra.get("menu",[])
+	var mapped:=PersonsBridge.validate_live(raw,menu)
+	if not bool(mapped.get("ok",false)): return String(mapped.get("reason","invalid mapping"))
+	var s:Dictionary=request.scene
+	var lines:=validate_lines(raw.get("lines",[]) if raw.get("lines") is Array else [],s,"persons",extra)
+	var params:Dictionary=mapped.params
+	if raw.get("descriptor") is Dictionary and String(mapped.action) in ["ask_about","summon"] and not params.has("desc") and not params.has("ref"):
+		params["desc"]=Persons.descriptor_from(raw.descriptor)
+	var spoken:Array=[]
+	var principal_text:=""
+	for line in lines:
+		var l:Dictionary=line
+		if String(l.key)=="narrator":
+			spoken.append({"speaker":"","role":"narrator","person_id":0,"text":String(l.text)})
+			continue
+		var member:=_member(s,String(l.key))
+		if member.is_empty(): continue
+		spoken.append({"speaker":String(member.name),"role":"official","person_id":int(member.person_id),"text":String(l.text),"aside":bool(l.get("aside",false))})
+		if principal_text=="" and not bool(l.get("aside",false)): principal_text=String(l.text)
+	_requests.erase(audience_id)
+	_finish_receipt(receipt,true,false,"")
+	last_problem.erase(audience_id)
+	var action:=String(mapped.action)
+	var result:Dictionary
+	if action=="talk":
+		if not spoken.is_empty():
+			for l2 in spoken: _hall().append_line(audience_id,(l2 as Dictionary).merged({"day":_day()}))
+		else:
+			var said:={"player_text":String(extra.get("player_text",""))}
+			_deliver(s,"speak",said,_offline_lines(s,"speak",said,_scene_rng(s,"speak")),0.0)
+		result={"ok":true,"action":"talk","signature":Persons.signature(audience_id,"talk",{}),"lines":[]}
+	else:
+		result=Persons.perform(audience_id,action,params,{"lines":spoken,"deltas":mapped.deltas,"require_name":true})
+	for l3 in lines: _mark_said("",String((l3 as Dictionary).text))
+	var beat:=PersonsLines.principal_beat(result.get("lines",[]))
+	if action.begins_with("novel:") and beat=="": beat="react_novel"
+	if principal_text!="" and beat!="" and bool(result.get("spoke_live",action=="talk" or action.begins_with("novel:"))):
+		var usage_row:Dictionary=receipt
+		PersonsBridge.learn(String(extra.get("player_text","")),action,beat,result.get("signature",{}),principal_text,String(mapped.template),mapped.deltas,
+			{"model":String(s.envoy.persona.get("model","")),"generalizable":bool(mapped.generalizable),"label":String(mapped.label),"model_name":String(request.config.get("model","")),
+			"usage":{"prompt_tokens":int(usage_row.get("prompt_tokens",0)),"completion_tokens":int(usage_row.get("completion_tokens",0)),"total_tokens":int(usage_row.get("total_tokens",0))}})
+	lines_ready.emit.call_deferred(audience_id)
+	persons_done.emit.call_deferred(audience_id,result)
+	return ""
+
 const GENERAL_ORDER:={"act":"command","verb":"order","actor_ref":"","target_ref":"","object":"","confidence":1.0}
 
 func _deliver_offline(s:Dictionary,stage:String,extra:Dictionary,_problem:String)->void:
+	if stage=="persons":
+		# The words could not be mapped: the one before you simply answers.
+		var said:={"player_text":String(extra.get("player_text",""))}
+		_deliver(s,"speak",said,_offline_lines(s,"speak",said,_scene_rng(s,"speak")),0.0)
+		persons_done.emit.call_deferred(String(s.id),{"ok":false,"action":"talk"})
+		return
 	if stage=="speak" and bool(extra.get("offline_order",false)) and command_router.is_valid():
 		if bool(command_router.call(String(s.id),String(extra.get("player_text","")),GENERAL_ORDER)): return
 	var rng:=_scene_rng(s,stage)
@@ -2027,6 +2128,9 @@ func _offline_open(s:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
 	## what they remember, then the business), and at most two officials speak,
 	## each in their own manner.
 	var out:Array[Dictionary]=[]
+	# Mourning, omens and callbacks were already staged in the court's own
+	# voices when the matter was taken up (court_lives.gd).
+	if String(s.get("sit_type","")) in LIVES_SCENES and not ((s.audience as Dictionary).get("lines",[]) as Array).is_empty(): return out
 	var kind:String=String(s.kind)
 	var envoy:Dictionary=s.envoy
 	var first_official:Dictionary=s.officials[0] if not s.officials.is_empty() else {}
@@ -2258,6 +2362,7 @@ func answer_bank(s:Dictionary,player_text:String)->Array:
 func _offline_closing(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
 	## One parting line that reacts to the actual outcome, and at most one aside.
 	var out:Array[Dictionary]=[]
+	if String(s.get("sit_type","")) in LIVES_SCENES: return out
 	var option_id:String=String(result.get("option_id",(s.audience as Dictionary).get("option_id","")))
 	var reaction:String=String(result.get("reaction","neutral"))
 	var envoy:Dictionary=s.envoy
@@ -2636,6 +2741,8 @@ func _stage_instruction(s:Dictionary,stage:String,extra:Dictionary)->String:
 			return _divine_instruction(s,extra)
 		"command":
 			return _command_instruction(s,extra)
+		"persons":
+			return PersonsBridge.instruction(String(extra.get("player_text","")),extra.get("menu",[]),Persons.hidden_words(String(s.id)))
 		"weigh":
 			return "The ruler is weighing the chosen work at the chosen ambition. Using ONLY the feasibility factors and verdict in FACTS (wonder_proposal.factors, spoken_verdict, odds_in_words), 2 to 4 officials each speak to the factor nearest their office (stores and stone: the Quartermaster; know-how and craft: the Scholar; war and safety: the Marshal; the people's mood and food: the Steward), one line each, in character, never as a number or percentage; then 'envoy' answers the doubts in one line. mood_shift 0."
 		"closing":

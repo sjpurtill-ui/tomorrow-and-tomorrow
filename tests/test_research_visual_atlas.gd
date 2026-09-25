@@ -113,7 +113,9 @@ func test_cards_stay_compact_and_use_the_available_row_for_more_discoveries()->v
 		assert_float(card.painting.custom_minimum_size.y).is_equal(view.CARD_IMAGE_HEIGHT)
 		assert_int(card.frame.mouse_filter).is_equal(Control.MOUSE_FILTER_PASS)
 func test_established_cards_show_the_recorded_discovery_year_and_day()->void:
-	GameState.known_discoveries.append("stone_sorting")
+	# Only the recorded discovery, so the inherited founding practices (which have
+	# no discovery date) do not come first in the established view.
+	GameState.known_discoveries.assign(["stone_sorting"])
 	GameState.discovery_log.push_front({"id":"stone_sorting","day":730})
 	var view:=fixture();view.set_view("known")
 	assert_int(view.records[0].discovered_day).is_equal(730)
@@ -133,6 +135,8 @@ func test_established_grid_scrolls_through_a_long_catalogue()->void:
 	for frame in 2:await get_tree().process_frame
 	assert_int(view.scroll.scroll_vertical).is_greater(0)
 func test_every_research_field_has_a_distinct_painted_asset()->void:
+	# Past the early-civilization art window (EarlyCivArt.active) each field shows its own painting.
+	GameState.elapsed_days=400*365
 	var paths:Dictionary={}
 	for id:String in Art.NAMES:
 		var texture:=Art.art(id);assert_object(texture).is_not_null()
@@ -142,8 +146,12 @@ func test_stone_art_is_consistent_in_research_card_and_inspector()->void:
 	GameState.known_discoveries.append("stone_sorting")
 	var view:=fixture();view.set_view("known");view.select("stone_sorting")
 	for frame in 8:await get_tree().process_frame
-	assert_str(Art.source_texture(view.bindings.stone_sorting.painting.texture).resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")
-	assert_str(Art.source_texture(view.detail_body.get_child(0).texture).resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")
+	# The card and the inspector show the same painting: the early-civilization
+	# paper painting inside that art window (EarlyCivArt.active), else the subject art.
+	var expected:=Art.source_texture(Art.for_discovery({"id":"stone_sorting"})).resource_path
+	if not preload("res://scripts/hud/early_civ_art.gd").active():expected="res://assets/ui/research/stone-selection-v1.png"
+	assert_str(Art.source_texture(view.bindings.stone_sorting.painting.texture).resource_path).is_equal(expected)
+	assert_str(Art.source_texture(view.detail_body.get_child(0).texture).resource_path).is_equal(expected)
 
 func test_reviewed_images_resolve_their_explicit_assignments()->void:
 	var parent:VBoxContainer=auto_free(VBoxContainer.new());add_child(parent)
@@ -151,8 +159,9 @@ func test_reviewed_images_resolve_their_explicit_assignments()->void:
 		var item:Dictionary={"id":id,"domain":"knowledge","exposed":true}
 		var picture:=Art.paint_discovery(parent,item,104)
 		assert_object(picture.texture).is_not_null()
-		# research_600 paintings (data/research/art_600.json) take precedence over reviewed subject art.
-		assert_str(picture.texture.resource_path).is_equal(Art.art600_manifest()[id].path if Art.art600_manifest().has(id) else Art.manifest()[id].path)
+		# research_600 paintings (data/research/art_600.json) take precedence over reviewed subject art;
+		# in the early-civilization window the early paper paintings do too.
+		assert_str(picture.texture.resource_path).is_equal(_expected_art(id))
 		assert_int(Art.textures.size()).is_less_equal(Art.CACHE_LIMIT)
 		item.exposed=false
 		assert_str(Art.subject_art_key(item)).is_empty()
@@ -174,3 +183,10 @@ func test_known_microscopy_has_one_live_panel_and_locked_method_has_none()->void
 		assert_int(panels).is_equal(1)
 	view.set_view("tree");view.show_locked=true;view.refresh(true);view.select("microscopic_cell_observation")
 	for child:Node in view.detail_body.get_children():assert_bool(child.get_script()==preload("res://scripts/hud/microscopy_panel.gd")).is_false()
+
+func _expected_art(id:String)->String:
+	if Art.art600_manifest().has(id):return String(Art.art600_manifest()[id].path)
+	var early:=preload("res://scripts/hud/early_civ_art.gd").active()
+	if early and Art.first300_manifest().has(id):return String(Art.first300_manifest()[id])
+	if early and Art.EARLY_SUBJECTS.has(id):return "res://assets/ui/research/paper/%s.png" % Art.EARLY_SUBJECT_FILES.get(id,id)
+	return String(Art.manifest()[id].path)

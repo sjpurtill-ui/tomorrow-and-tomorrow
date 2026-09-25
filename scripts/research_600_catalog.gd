@@ -45,10 +45,12 @@ const PRECEDENT_CAP:=1.30
 ## DiscoverySystem progress per day = chance * 0.12 * (attention factors).
 const DAILY_SCALE:=0.12
 ## Phase 3 pacing: a design research year is what a line achieves with the
-## partial staffing a real society gives it (about 0.4 of a full-time team per
-## line in a sensible early village), not with a fully staffed team; calibrated
-## so milestones land inside their design bands (docs/research/BENCHMARKS_600.md).
-const PACE:=2.5
+## partial staffing a real society gives it, not with a fully staffed team. A
+## founding band has few observers per line; a Bronze Age city has scribes and
+## a large population behind each line, so the pace factor falls with the
+## item's design year. Calibrated with tools/sim so milestones land inside their
+## design bands (docs/research/BENCHMARKS_600.md).
+const PACE_BY_YEAR:Array=[[0.0,7.0],[100.0,5.5],[200.0,2.4],[300.0,1.0],[450.0,0.7],[600.0,0.65]]
 ## Keys the design governs; Phase 2 effect files cannot override them.
 const PROTECTED_KEYS:=["id","dynamic","direction","requires","requires_all","requires_any","learning_routes","day","chance","research_600","earliest_year","design_year","precedents","conditions"]
 ## Safe minimal consequence per line for NEW entries until Phase 2 authors them.
@@ -223,8 +225,19 @@ static func effect_row(id:String)->Dictionary:
 	return _effects.get(id,{})
 
 
-static func chance_for(research_years:float)->float:
-	return PACE/(DAILY_SCALE*365.0*maxf(0.25,research_years))
+static func chance_for(research_years:float,design_year:float=0.0)->float:
+	return pace_for(design_year)/(DAILY_SCALE*365.0*maxf(0.25,research_years))
+
+
+## Research pace for an item of `design_year` (PACE_BY_YEAR, linear between points).
+static func pace_for(design_year:float)->float:
+	if design_year<=float(PACE_BY_YEAR[0][0]): return float(PACE_BY_YEAR[0][1])
+	for index in range(1,PACE_BY_YEAR.size()):
+		if design_year<=float(PACE_BY_YEAR[index][0]):
+			var low:Array=PACE_BY_YEAR[index-1]
+			var high:Array=PACE_BY_YEAR[index]
+			return lerpf(float(low[1]),float(high[1]),(design_year-float(low[0]))/(float(high[0])-float(low[0])))
+	return float(PACE_BY_YEAR[PACE_BY_YEAR.size()-1][1])
 
 
 ## Registry entries that the authored catalog does not already define, in the
@@ -293,7 +306,7 @@ static func apply(entry:Dictionary)->Dictionary:
 	result["design_year"]=float(source.get("proposed_year",0.0))
 	result["earliest_year"]=float(source.get("min_year",0.0))
 	result["day"]=int(round(float(source.get("proposed_year",0.0))*365.0))
-	result["chance"]=chance_for(float(source.get("research_years",4.0)))
+	result["chance"]=chance_for(float(source.get("research_years",4.0)),float(source.get("proposed_year",0.0)))
 	result["research_600"]=true
 	var authored:Dictionary=_effects.get(id,{})
 	for key:Variant in authored:

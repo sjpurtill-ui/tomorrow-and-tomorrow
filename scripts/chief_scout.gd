@@ -163,6 +163,8 @@ static func findings(event:Dictionary)->Dictionary:
 				facts.append(_fact("nomads","wanderers met",description,0.8,{}))
 			"knowledge":
 				facts.append(_fact("taught","learned from strangers",description,0.9,{}))
+			"sign":
+				facts.append(_fact("sign","signs of people · %s" % String(card.get("bearing","")),description,0.6,{"bearing":String(card.get("bearing","")),"walk_days":int(card.get("walk_days",0))}))
 	var recruits:=int(event.get("recruits",0))
 	if recruits>0:
 		facts.append(_fact("recruits","%d newcomers" % recruits,"%d people came home with the party to join us." % recruits,1.0,{"value":recruits}))
@@ -178,11 +180,20 @@ static func findings(event:Dictionary)->Dictionary:
 
 	var flags:=_flags(facts,city.is_empty() or fields.is_empty(),contacts)
 	return {
-		"subject_civ_id":subject_civ_id,"subject_name":civ_name if civ_name!="" else (place if place!="" else "the wild country"),
+		"subject_civ_id":subject_civ_id,"subject_name":civ_name if civ_name!="" else (place if place!="" else _sign_subject(facts)),
 		"place":place,"civ_name":civ_name,"source":source,"observed_day":observed_day,"age_days":age,"day":day,
 		"facts":facts,"flags":flags,"home":home.duplicate(),
 		"significant":_significant(facts,flags),
 	}
+
+
+static func _sign_subject(facts:Array[Dictionary])->String:
+	## Signs of an unmet people are their own subject, never the empty country.
+	var sign:Dictionary=_by_key(facts).get("sign",{})
+	if sign.is_empty(): return "the wild country"
+	var bearing:=String(sign.get("bearing",""))
+	var what:="smoke" if String(sign.get("text","")).to_lower().contains("smoke") else "tracks"
+	return "the %s to the %s" % [what,bearing] if bearing!="" else "signs of people"
 
 
 static func _source(event:Dictionary)->String:
@@ -372,13 +383,14 @@ static func _flags(facts:Array[Dictionary],no_city:bool,contacts:Array)->Diction
 	flags["big"]=float(by.get("population",{}).get("home_ratio",0.0))>=1.4
 	flags["small"]=by.has("population") and float(by.get("population",{}).get("home_ratio",1.0))<0.7
 	flags["armed"]=by.has("armed") or float(by.get("garrison",{}).get("value",0.0))>=40.0
-	flags["empty"]=no_city and contacts.is_empty() and not by.has("nomads") and not by.has("reception")
+	flags["empty"]=no_city and contacts.is_empty() and not by.has("nomads") and not by.has("reception") and not by.has("sign")
+	flags["signs"]=by.has("sign") and contacts.is_empty()
 	return flags
 
 
 static func _significant(facts:Array[Dictionary],flags:Dictionary)->bool:
 	var by:=_by_key(facts)
-	for key in ["population","makers","walls","food","garrison","contact","losses","armed","ornament","reception","nomads","taught","recruits","turnback","beauty"]:
+	for key in ["population","makers","walls","food","garrison","contact","losses","armed","ornament","reception","nomads","taught","recruits","turnback","beauty","sign"]:
 		if by.has(key): return true
 	if by.has("resource"):
 		for fact in facts:
@@ -435,6 +447,7 @@ static func debrief_lines(audience:Dictionary)->Array[Dictionary]:
 	if by.has("food") or by.has("health") or by.has("old_age") or by.has("infants"): beats.append(_beat_food.bind(by,flags,ctx,persona,rng,used))
 	if by.has("resource"): beats.append(_beat_covet.bind(facts,by,flags,ctx,persona,rng,used))
 	if by.has("nomads") or by.has("taught") or by.has("recruits"): beats.append(_beat_people_met.bind(by,flags,ctx,persona,rng,used))
+	if by.has("sign"): beats.push_front(_beat_signs.bind(by,flags,ctx,persona,rng,used))
 	if by.has("rumor"): beats.append(_beat_rumor.bind(by,flags,ctx,persona,rng,used))
 	if flags.get("empty",false) and by.has("terrain"): beats.push_front(_beat_country.bind(by,flags,ctx,persona,rng,used))
 	for beat in beats:
@@ -938,6 +951,14 @@ static func _beat_people_met(by:Dictionary,flags:Dictionary,ctx:Dictionary,perso
 	return " ".join(PackedStringArray(parts))
 
 
+static func _beat_signs(by:Dictionary,flags:Dictionary,ctx:Dictionary,persona:Dictionary,rng:RandomNumberGenerator,used:Dictionary)->String:
+	## What the party saw of a people it did not meet: told as seen, not guessed.
+	used["sign"]=true
+	var text:=String(by.sign.get("text",""))
+	if text=="": return ""
+	return _fill(_pick(rng,["We are not alone out there, {addr}. {sign}","Listen, {addr}. {sign} We did not go closer; there were too few of us.","{sign} Someone lives there, {addr}, and they know that country better than we do."]),ctx.merged({"sign":text}))
+
+
 static func _beat_rumor(by:Dictionary,flags:Dictionary,ctx:Dictionary,persona:Dictionary,rng:RandomNumberGenerator,used:Dictionary)->String:
 	used["rumor"]=true
 	var text:=String(by.rumor.get("text","")).split(". ")[0].trim_suffix(".")
@@ -970,6 +991,8 @@ static func _closing(by:Dictionary,flags:Dictionary,ctx:Dictionary,persona:Dicti
 		worry=_pick(rng,["I'd trade with them, {addr}. We've things they need, and they've a knack we haven't.","Send them tools and they'd send back wonders, I reckon."])
 	elif flags.get("hostile",false):
 		worry=_pick(rng,["I'd keep the watch doubled on that side for a while.","They won't forget we came. Neither should we."])
+	elif flags.get("signs",false):
+		worry=_pick(rng,["Send us back the way we came and we'll find whose fires those are.","Whoever they are, they'll have seen our smoke by now too."])
 	elif flags.get("empty",false):
 		worry=_pick(rng,["Good country for the taking, {addr}, if we've people to spare to take it.","Nobody's claimed it. That's either an opportunity or a warning, and I don't yet know which."])
 	elif flags.get("hungry",false):

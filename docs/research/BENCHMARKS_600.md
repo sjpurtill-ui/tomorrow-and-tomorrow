@@ -24,7 +24,7 @@ The same numbers are in machine-readable form in `docs/research/benchmarks_600.j
 | Maternal deaths per 100,000 births | 2,000 / 1,400 / 1,000 | 1,900 / 1,300 / 950 | 1,800 / 1,250 / 900 | 1,700 / 1,150 / 800 |
 | Total fertility (births per woman) | 4.5 / 5.5 / 6.5 | 4.5 / 5.8 / 6.8 | 4.5 / 5.8 / 6.8 | 4.5 / 5.6 / 6.5 |
 | Crude birth / death rate per 1,000 (typical) | 44 / 40 | 44 / 39 | 43 / 38 | 42 / 37 |
-| Growth, % per game year (low / typical / high) | −0.5 / 0.4 / 1.2 | −0.3 / 0.5 / 1.2 | −0.2 / 0.4 / 1.0 | −0.2 / 0.3 / 0.8 |
+| Growth, % per game year (low / typical / high) | −0.5 / 0.4 / 1.2 | −0.3 / 0.5 / 1.4 | −0.2 / 0.4 / 1.0 | −0.2 / 0.3 / 0.8 |
 | Plausible growth bounds | −2.0 to 2.0 | −1.0 to 1.8 | −1.0 to 1.5 | −1.0 to 1.3 |
 
 Why these values:
@@ -41,6 +41,7 @@ Why these values:
   - Long-run growth nevertheless stayed near 0.1% per year, because booms were cancelled by famine, epidemic and war (Hassan 1981, *Demographic Archaeology*; Livi-Bacci 2017, *A Concise History of World Population*).
   - A young farming population on open land can grow about 1–1.5% a year for several generations, as on the LBK expansion front (Shennan 2018, *The First Farmers of Europe*).
   - Growth above about 2% a year sustained over a century is not plausible pre-modern. It needs modern mortality.
+  - The "high" growth at year 100 (1.4%) is the table's own best birth rate (48 per 1,000) minus its best death rate (about 34): a well-fed frontier population before land fills. Later, crowding near the carrying capacity pulls growth down.
 
 ## Settlement and society scale
 
@@ -82,7 +83,7 @@ Why these values:
 |---|---|---|---|---|
 | Craft and tool proxies | ground stone and flint; coil pottery; flax plain weave; cold-worked native copper | smelted and cast copper (Varna, about 4500 BCE); kilns at about 900 °C; tournette | arsenical copper common; first tin bronze; wheel-thrown pottery; lost wax; cylinder seals | tin bronze standard; spoked chariot wheels; core-formed glass; iron still rare |
 | Major innovations per century (low / typical / high) | 0.5 / 1.5 / 3 | 1 / 2 / 4 | 2 / 4 / 6 | 2 / 3 / 5 |
-| Design discoveries learned per 50-year block, % of that block's registry targets | 35 / 65 / 85 | 35 / 70 / 90 | 35 / 70 / 90 | 35 / 70 / 90 |
+| Design discoveries learned per 50-year block, % of that block's registry targets (a stagnating society, or one researching only a few lines, may learn almost none) | 25 / 65 / 85 | 25 / 70 / 90 | 25 / 70 / 90 | 25 / 70 / 90 |
 | Literacy, % of adults | 0 | 0 | ≤ 0.5 (scribes) | about 0.5–1 |
 | Largest force fielded | 10–60 (raiding party) | 20–300 | 100–3,000 (city levy) | 300–20,000 (a great state) |
 | Share of workers under arms or on watch, % | 2–8 | 2–8 | 2–10 | 2–10 |

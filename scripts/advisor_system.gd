@@ -985,8 +985,8 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 	if blocked>0 or deferred>0 or refused>0 or (committed>0 and implementation_total/float(committed)<0.74): stance="qualified"
 	if committed==0: stance="unable" if blocked>0 else "refused"
 	var reply_state:="UNDERWAY" if committed>0 else ("BLOCKED" if blocked>0 else "REFUSED")
-	var reply_text:=_civic_commitment_reply(leader,resolved_policies,stance,committed,blocked+deferred+refused,implementation_total,limitation_texts,String(result.get("answer","")),String(order.get("id","")))
-	if committed>0 and not followup.is_empty(): reply_text+=" "+_implementation_report_promise(followup)
+	var reply_text:=_civic_commitment_reply(leader,resolved_policies,stance,committed,blocked+deferred+refused,implementation_total,limitation_texts,String(result.get("answer","")),String(order.get("id",""))+"|"+text,text)
+	if committed>0 and not followup.is_empty(): reply_text+=" "+_implementation_report_promise(followup,text,preload("res://scripts/divine_reply.gd").topic(resolved_policies,text))
 	var inherited_from:=String(result.get("context_inherited_from",""))
 	if not inherited_from.is_empty(): reply_text="I have the recorded exchange with %s and will answer the directive now.\n\n%s" % [inherited_from,reply_text]
 	var accepted_meaning:=String(order.get("accepted_meaning",""))
@@ -1011,6 +1011,8 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 				prior_order["continued_by_order_id"]=String(resolved.get("id",""))
 				break
 	_append_leader_reply(settlement_id,leader,reply,resolved,stance)
+	# The order leaves a rite on the map and comes back to court later.
+	if committed>0: preload("res://scripts/court_lives.gd").note_order(text,resolved_policies,leader,String(resolved.get("id","")))
 	return resolved
 
 
@@ -1566,8 +1568,10 @@ func _order_subject(order:Dictionary)->String:
 	return "“%s”" % raw.substr(0,90) if not raw.is_empty() else "the earlier proposal"
 
 
-func _join_limitations(limitations:Array[String])->String:
-	if limitations.is_empty(): return "our reach, labor, and stores impose real limits."
+func _join_limitations(limitations:Array[String],salt:String="")->String:
+	if limitations.is_empty():
+		if salt=="": return "our reach, labor, and stores impose real limits."
+		return String(["our reach, labor, and stores impose real limits.","there are only so many hands and so much in the stores.","we can only stretch so far this season.","the camp has only so much to give at once."][posmod(hash(salt+"|limits"),4)])
 	return "; ".join(limitations).trim_suffix(".")+"."
 
 
@@ -1597,7 +1601,7 @@ func _civic_commitment_receipt(policies:Array[Dictionary])->String:
 	return " · ".join(receipts)
 
 
-func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance:String,committed:int,uncommitted:int,implementation_total:float,limitations:Array[String],model_answer:String="",salt:String="")->String:
+func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance:String,committed:int,uncommitted:int,implementation_total:float,limitations:Array[String],model_answer:String="",salt:String="",order_text:String="")->String:
 	var actions:Array[String]=[]
 	var custom_plans:Array[Dictionary]=[]
 	var counted_deaths:=-1
@@ -1617,7 +1621,8 @@ func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance
 			"principled": return "I will not pretend this is possible. %s" % reasons
 			"diplomatic": return "We need more hands, stores, or local support before I can make this workable. %s" % reasons
 			_: return "I cannot carry this out with the means now available. %s" % reasons
-	var capacity_phrase:=_leader_capacity_phrase(leader,implementation_total/float(committed))
+	var reply_topic:=preload("res://scripts/divine_reply.gd").topic(policies,order_text) if not order_text.is_empty() else ""
+	var capacity_phrase:=_leader_capacity_phrase(leader,implementation_total/float(committed),salt,reply_topic)
 	# The model already answered in this leader's voice; use it when it stays in
 	# the world. Otherwise the leader speaks from their own lifelong manner.
 	var answer:=model_answer.strip_edges()
@@ -1625,12 +1630,14 @@ func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance
 		return answer
 	var memory_phrase:=_relevant_civic_memory_phrase(leader,policies)
 	var disposition_id:=String(WorldSimulation.government.leader_disposition(leader).get("id","pragmatic"))
-	var opening:="I understand."
-	match disposition_id:
-		"sycophantic": opening="A wise and far-sighted instruction."
-		"cantankerous": opening="I have heard you."
-		"principled": opening="I will answer plainly."
-		"diplomatic": opening="I believe I can make this workable."
+	# Each speaker opens in their own manner and says the order back in their
+	# own words (divine_reply.gd); no two orders need sound alike.
+	var reply_voice:=preload("res://scripts/divine_reply.gd")
+	var opening:=reply_voice.opening(leader,disposition_id,salt)
+	if opening.is_empty(): opening="I understand."
+	var quoted:=reply_voice.quote(leader,order_text,salt) if not order_text.is_empty() else ""
+	# Most replies begin by saying the order back; some open in the speaker's manner.
+	if not quoted.is_empty() and not reply_voice.leads_with_opening(salt): opening=""
 	var speech:=""
 	if counted_deaths>=0:
 		if counted_deaths==1: speech="It is done. One life was taken, as you ordered."
@@ -1638,17 +1645,20 @@ func _civic_commitment_reply(leader:Dictionary,policies:Array[Dictionary],stance
 		else: speech="It could not be done; no one was taken."
 	elif not actions.is_empty():
 		var action_text:=", ".join(actions)
-		if stance=="accepted": speech="%s I will put %s into effect. %s%s" % [opening,action_text,capacity_phrase if custom_plans.is_empty() else "",memory_phrase]
+		var lead:=("%s %s" % [opening,quoted]).strip_edges()
+		if stance=="accepted": speech="%s I will put %s into effect. %s%s" % [lead,action_text,capacity_phrase if custom_plans.is_empty() else "",memory_phrase]
 		else:
 			var omission:=" Some parts cannot be attempted." if uncommitted>0 else ""
-			var reasons:=_join_limitations(limitations)
-			speech="%s I will do what can be done toward %s. %s%s%s %s" % [opening,action_text,capacity_phrase,memory_phrase,omission,reasons.substr(0,1).to_upper()+reasons.substr(1)]
+			var reasons:=_join_limitations(limitations,salt)
+			speech="%s I will do what can be done toward %s. %s%s%s %s" % [lead,action_text,capacity_phrase,memory_phrase,omission,reasons.substr(0,1).to_upper()+reasons.substr(1)]
 	for plan in custom_plans:
 		var body:=CustomDirective.acceptance_body(plan,capacity_phrase if actions.is_empty() else "")
 		if float(plan.get("future_delay",0))>0.0:
 			body="It is set for %s from now: “%s.” %s" % [_future_words(int(plan.future_delay)),String(plan.get("summary","")).trim_suffix("."),body]
 		if actions.is_empty() and uncommitted>0 and not limitations.is_empty(): body+=" The trouble is that %s" % _lower_first_letter(_join_limitations(limitations))
-		if speech.is_empty(): speech=CustomDirective.voiced(leader,body if stance=="accepted" else "%s %s" % [opening,body],salt)
+		if not quoted.is_empty() and not body.contains(reply_voice.gist(order_text)) and not speech.contains(quoted): body="%s %s" % [quoted,body]
+		# A reply that opens by saying the order back needs no lead-in (" ").
+		if speech.is_empty(): speech=CustomDirective.voiced(leader,body,salt,opening if not opening.is_empty() else (" " if not quoted.is_empty() else "I understand."))
 		else: speech+=" "+body
 	return speech.strip_edges()
 
@@ -1724,7 +1734,7 @@ func _custom_directive_policy(text:String,result:Dictionary,policies:Array,futur
 	return CustomDirective.policy_from_plan(plan)
 
 
-func _implementation_report_promise(followup:Dictionary)->String:
+func _implementation_report_promise(followup:Dictionary,salt:String="",topic:String="")->String:
 	var snapshots:Array=followup.get("policies",[])
 	if not snapshots.is_empty() and snapshots.all(func(snapshot:Dictionary)->bool: return bool(snapshot.get("directive_parameters",{}).get("one_time",false))):
 		return "The counted action is complete. I will review its wider consequences around %s." % _calendar_label(int(followup.get("due_day",WorldSimulation.state.elapsed_days+7)))
@@ -1736,21 +1746,23 @@ func _implementation_report_promise(followup:Dictionary)->String:
 	if has_operation:
 		return "This is underway. I will report when the commissioned party returns—or when we have reason to believe it will not."
 	var due_day:=int(followup.get("due_day",int(WorldSimulation.state.elapsed_days)+7))
-	return "This is underway. I will report back around %s with what actually happened." % _calendar_label(due_day)
+	var reply_voice:=preload("res://scripts/divine_reply.gd")
+	return reply_voice.report_back(salt,_calendar_label(due_day),topic)
 
 
 func _calendar_label(absolute_day:int)->String:
 	return "Year %d, Day %d" % [absolute_day/365+1,absolute_day%365+1]
 
 
-func _leader_capacity_phrase(leader:Dictionary,implementation_rate:float)->String:
+func _leader_capacity_phrase(leader:Dictionary,implementation_rate:float,salt:String="",topic:String="")->String:
 	# The simulation retains its exact rate. The officeholder offers a fallible,
 	# qualitative forecast instead of exposing the engine's percentage to the player.
 	var prediction:=_leader_forecast_score(leader,implementation_rate)
-	if prediction>=0.86: return "We appear to have the hands, stores, and authority to carry most of it through."
-	if prediction>=0.64: return "We can carry the main work, though thin labor or local resistance may leave gaps."
-	if prediction>=0.40: return "We can make a visible start, but the settlement cannot sustain every part at once."
-	return "Only a narrow attempt looks possible with the hands, stores, and authority now available."
+	var reply_voice:=preload("res://scripts/divine_reply.gd")
+	if prediction>=0.86: return reply_voice.capacity("high",salt,"We appear to have the hands, stores, and authority to carry most of it through.",topic)
+	if prediction>=0.64: return reply_voice.capacity("mid",salt,"We can carry the main work, though thin labor or local resistance may leave gaps.",topic)
+	if prediction>=0.40: return reply_voice.capacity("low",salt,"We can make a visible start, but the settlement cannot sustain every part at once.",topic)
+	return reply_voice.capacity("narrow",salt,"Only a narrow attempt looks possible with the hands, stores, and authority now available.",topic)
 
 
 func _leader_forecast_score(leader:Dictionary,implementation_rate:float)->float:

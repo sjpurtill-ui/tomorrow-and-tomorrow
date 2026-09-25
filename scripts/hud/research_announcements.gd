@@ -2,6 +2,7 @@ extends CanvasLayer
 ## A compact research digest. It never pauses simulation and is deliberately
 ## bounded so UI scaling cannot turn its clickable text into an offscreen strip.
 const DiscoveryNotice=preload("res://scripts/hud/discovery_popup.gd")
+const Chronicle=preload("res://scripts/chronicle.gd")
 const Art=preload("res://scripts/hud/research_visuals.gd")
 const T=preload("res://scripts/hud/hud_tokens.gd")
 const UI_FONT:=preload("res://assets/fonts/battle/Barlow-Medium.ttf")
@@ -77,6 +78,8 @@ func receive(events:Array[Dictionary])->void:
 		if id.is_empty() or id not in GameState.known_discoveries or seen.has(id):continue
 		seen[id]=true
 		if seen.size()>8192:seen.erase(seen.keys()[0])
+		# A first-in-its-field discovery is a Chronicle moment: its card tells it.
+		if GameState.research_notification_mode=="milestones" and Chronicle.discovery_is_moment(id):continue
 		if important(event,GameState.research_notification_mode,first_batch):interruptions.append(event)
 		else:
 			unread+=1;latest=id;latest_event=DiscoverySystem.player_facing_discovery_event(event)
