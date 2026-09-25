@@ -166,7 +166,7 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "electron_physics"
+	      "steam_suction_pump"
 	    ]
 	  },
 	  {
@@ -200,8 +200,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "foundation_for": [
 	      "calorimetry",
-	      "fractional_distillation",
-	      "spectroscopy"
+	      "fractional_distillation"
 	    ]
 	  },
 	  {
@@ -267,7 +266,7 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "steam_propulsion",
+	      "steam_turbines",
 	      "internal_combustion",
 	      "jet_propulsion"
 	    ]
@@ -302,7 +301,7 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "heat_engine_cycles",
+	      "compressed_air_systems",
 	      "reactor_engineering"
 	    ]
 	  },
@@ -336,8 +335,7 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "fractional_distillation",
-	      "electrochemical_cells"
+	      "fractional_distillation"
 	    ]
 	  },
 	  {
@@ -436,8 +434,7 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "electromagnetic_induction",
-	      "electron_physics"
+	      "electromagnetic_induction"
 	    ]
 	  },
 	  {
@@ -537,7 +534,7 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "wind_tunnel_testing"
+	      "electric_street_tramways"
 	    ]
 	  },
 	  {
@@ -570,7 +567,7 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "atomic_physics"
+	      "periodic_element_table"
 	    ]
 	  },
 	  {
@@ -739,7 +736,6 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "aerodynamics",
 	      "powered_flight",
 	      "advanced_airframes"
 	    ]

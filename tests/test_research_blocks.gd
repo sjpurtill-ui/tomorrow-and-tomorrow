@@ -36,14 +36,15 @@ func _earliest_years()->Dictionary:
 	for entry:Dictionary in DiscoverySystem.technology_catalog:result[String(entry.id)]=DiscoverySystem.research_600_earliest_year(entry)
 	return result
 
-func test_the_game_manifest_lists_all_four_blocks()->void:
+func test_the_game_manifest_lists_all_five_blocks()->void:
 	_use("")
-	assert_array(Catalog.blocks()).is_equal(["y0_600","y600_1200","y1200_1800","y1800_2400"])
-	assert_float(Catalog.window_end_year()).is_equal(2400.0)
+	assert_array(Catalog.blocks()).is_equal(["y0_600","y600_1200","y1200_1800","y1800_2400","y2400_3000"])
+	assert_float(Catalog.window_end_year()).is_equal(3000.0)
 	var all:Array[String]=Catalog.block_ids("y0_600").duplicate()
 	all.append_array(Catalog.block_ids("y600_1200"))
 	all.append_array(Catalog.block_ids("y1200_1800"))
 	all.append_array(Catalog.block_ids("y1800_2400"))
+	all.append_array(Catalog.block_ids("y2400_3000"))
 	assert_array(all).is_equal(Catalog.ids())
 	assert_int(int(Catalog.meta().get("design_node_count",0))).is_equal(1101)
 	assert_dict(Catalog.block_meta("y0_600")).is_equal(Catalog.meta())
@@ -62,7 +63,12 @@ func test_the_game_manifest_lists_all_four_blocks()->void:
 	assert_int(Catalog.block_ids("y1800_2400").size()).is_equal(1139)
 	assert_array(fourth.get("prior_blocks",[])).is_equal(["y0_600","y600_1200","y1200_1800"])
 	assert_int(int(fourth.get("cross_block_references",0))).is_greater(0)
-	assert_array(Catalog.art_manifests()).is_equal(["res://data/research/art_600.json","res://data/research/art_y600_1200.json","res://data/research/art_y1200_1800.json","res://data/research/art_y1800_2400.json"])
+	var fifth:=Catalog.block_meta("y2400_3000")
+	assert_int(int(fifth.get("node_count",0))).is_equal(1575)
+	assert_int(Catalog.block_ids("y2400_3000").size()).is_equal(1575)
+	assert_array(fifth.get("prior_blocks",[])).is_equal(["y0_600","y600_1200","y1200_1800","y1800_2400"])
+	assert_int(int(fifth.get("cross_block_references",0))).is_greater(0)
+	assert_array(Catalog.art_manifests()).is_equal(["res://data/research/art_600.json","res://data/research/art_y600_1200.json","res://data/research/art_y1200_1800.json","res://data/research/art_y1800_2400.json","res://data/research/art_y2400_3000.json"])
 
 func test_blocks_load_in_order_and_keep_the_first_block_intact()->void:
 	_use(FIRST_ONLY)
@@ -174,8 +180,8 @@ func test_the_first_block_alone_restores_the_600_window()->void:
 func test_restoring_the_game_manifest_restores_every_block()->void:
 	_use(FIXTURE)
 	_use("")
-	assert_array(Catalog.blocks()).is_equal(["y0_600","y600_1200","y1200_1800","y1800_2400"])
-	assert_float(Catalog.window_end_year()).is_equal(2400.0)
+	assert_array(Catalog.blocks()).is_equal(["y0_600","y600_1200","y1200_1800","y1800_2400","y2400_3000"])
+	assert_float(Catalog.window_end_year()).is_equal(3000.0)
 	assert_bool(Catalog.has("fx_bloom_hearths")).is_false()
 	assert_bool(_entry("fx_bloom_hearths").is_empty()).is_true()
 	# The real block designs bloomery smelting again, not the fixture's hearths.

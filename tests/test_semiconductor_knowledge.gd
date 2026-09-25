@@ -35,14 +35,20 @@ func test_authored_catalog_contracts_and_peaceful_reachability()->void:
 				if route.ready:known.append(entry.id);changed=true;break
 	assert_bool("photovoltaic_power" in known).is_true()
 func test_empirical_routes_reconverge_without_requiring_band_theory()->void:
-	GameState.known_discoveries.assign(["chemical_distillation","electrical_measurement"])
-	var doping:=P.chosen(DiscoverySystem.discovery_definition("semiconductor_doping"),100000)
-	assert_str(String(doping.id)).is_equal("empirical")
-	assert_float(float(doping.progress_multiplier)).is_equal(.65)
-	GameState.known_discoveries.assign(["electrical_measurement","photoconductivity","electrochemical_cells"])
-	assert_str(String(P.chosen(DiscoverySystem.discovery_definition("photovoltaic_conversion"),100000).id)).is_equal("empirical")
-	GameState.known_discoveries.erase("electrical_measurement")
-	assert_bool(P.ready(DiscoverySystem.discovery_definition("photovoltaic_conversion"),100000)).is_false()
+	# The 2400-3000 design owns these entries: doping needs grown single crystals
+	# but not band theory (a precedent), and solar conversion needs the junction.
+	var doping:=DiscoverySystem.discovery_definition("semiconductor_doping")
+	assert_bool((doping.requires_all as Array).has("band_theory")).is_false()
+	GameState.known_discoveries.assign(["chemical_distillation","electrical_measurement","single_crystal_growth"])
+	assert_bool(P.ready(doping,100000)).is_true()
+	var empirical:=false
+	for route:Dictionary in P.routes_for(doping,GameState.known_discoveries,{}):empirical=empirical or String(route.id)=="empirical"
+	assert_bool(empirical).is_true()
+	var solar:=DiscoverySystem.discovery_definition("photovoltaic_conversion")
+	GameState.known_discoveries.assign(["electrical_measurement","photoconductivity","electrochemical_cells","pn_junctions"])
+	assert_bool(P.ready(solar,100000)).is_true()
+	GameState.known_discoveries.erase("pn_junctions")
+	assert_bool(P.ready(solar,100000)).is_false()
 func pay_array()->void:
 	for item:String in Ops.PLANTS.solar_array.cost:GameState.resource_stockpiles[item]=float(GameState.resource_stockpiles.get(item,0))+float(Ops.PLANTS.solar_array.cost[item])
 func test_paid_array_commissions_from_raw_materials_and_goods()->void:

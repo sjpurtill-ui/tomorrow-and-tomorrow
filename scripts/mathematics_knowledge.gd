@@ -503,7 +503,6 @@ static func entries()->Array[Dictionary]:
 	    "observation": "Rectangular arrays organize coupled linear equations and transformations.",
 	    "effects": {},
 	    "foundation_for": [
-	      "least_squares_estimation",
 	      "structural_load_testing",
 	      "crystallography"
 	    ],
@@ -642,7 +641,6 @@ static func entries()->Array[Dictionary]:
 	    "observation": "Measured values are reported with assessed uncertainty from instruments, procedures and repeated observations.",
 	    "effects": {},
 	    "foundation_for": [
-	      "least_squares_estimation",
 	      "dimensional_metrology",
 	      "precision_thermometry"
 	    ],

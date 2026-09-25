@@ -163,6 +163,12 @@ func validate_order(order:Dictionary)->Dictionary:
 		var goal:Vector2i=state.seen[target].home
 		if goal!=state.cell and route(state.cell,goal).is_empty():return {"error":"There is no passable land approach. I cannot march an army across water.","kind":"impossible"}
 	if int(army().get("troops",0))<=0 and action not in ["discuss","relieve"]:return {"error":"No fit soldiers remain under this command.","kind":"impossible"}
+	# Weapons of mass destruction: never on the general's own authority, whatever
+	# the order or its insistence; only the ruler's decision spoken in the Court.
+	var means:=String(order.get("means",""))
+	if means!="":
+		var use:Dictionary=WorldSimulation.military.general_use_gate(means,{"target":"city" if action in ["attack","besiege"] else "field","signoff":bool(order.get("signoff",false))})
+		if use.has("error"):return use
 	return {"ok":true}
 
 func propose(order:Dictionary)->Dictionary:
@@ -173,6 +179,7 @@ func propose(order:Dictionary)->Dictionary:
 	if action=="approve":return commit_proposal(false)
 	if action=="override":return commit_proposal(true)
 	state.proposal={"action":action,"target":String(order.get("target","home")),"override":false}
+	if String(order.get("means",""))!="":state.proposal["means"]=String(order.means)
 	changed.emit()
 	return {"ok":true,"message":"Objective ready. Commit it when you are ready for time to advance."}
 
@@ -404,7 +411,17 @@ func _secure_home(r:Dictionary,home_result:Dictionary,enemy_result:Dictionary)->
 func _battle(id:String)->void:
 	var r:=rival(id);var a:=army()
 	if r.is_empty():return
+	# Bombers and strike drones do not strike a city on the general's own authority.
+	var held:Array=WorldSimulation.military.formations_held_from_city(a) if r.cell==r.home else []
+	if not held.is_empty():
+		var kept:Array=a.formations.filter(func(f:Variant)->bool:return not held.has(f))
+		a.formations=kept+held
 	var our:Dictionary=a.duplicate(true);var enemy:Dictionary=r.force.duplicate(true)
+	if not held.is_empty():
+		var fighting:Dictionary=WorldSimulation.military.simulator.create_formation_force(String(a.get("name","")),a.formations.slice(0,a.formations.size()-held.size()),float(a.get("morale",1)),float(a.get("readiness",.8)))
+		for key:Variant in a:
+			if not fighting.has(key):fighting[key]=a[key]
+		our=fighting
 	our.readiness=float(our.get("readiness",.8))*clampf(food_days()/2,.25,1)*(1-float(state.exhaustion)*.6)
 	enemy.readiness=float(enemy.get("readiness",.8))*clampf(float(r.food)/maxf(1,int(enemy.troops)*RATION*2),.25,1)*(1-float(r.get("exhaustion",0))*.6)
 	var ground:=float(r.fortification) if r.cell==r.home else 1.05
@@ -414,6 +431,10 @@ func _battle(id:String)->void:
 	var extra:=maxf(0,(int(result.round_count)-1)*30.0/1440.0)
 	_advance_campaign_interval(extra,id)
 	WorldSimulation.military._apply_field_army_result(int(state.army_id),result.attacker,result.rounds,int(result.seed),"attacker")
+	if not held.is_empty():
+		var after:=army()
+		for f:Dictionary in held:after.formations.append(f);after.troops=int(after.get("troops",0))+int(f.get("count",0))
+		_report("Our bombers and strike craft stayed out of the assault on %s. Turning them on its people needs the ruler's own word in the Court."%String(r.name),false)
 	r.force=WorldSimulation.military.simulator.create_formation_force(enemy.name,result.defender.formations,float(result.defender.morale),float(enemy.readiness))
 	var killed:=0
 	for row:Dictionary in result.rounds:killed+=int(row.get("defender_casualties",{}).get("killed",0))

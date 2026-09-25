@@ -381,6 +381,7 @@ func test_machine_purchase_requires_paid_delivery_and_local_study_without_tools_
 		for parent:String in entry.requires_all:GameState.known_discoveries.append(parent)
 		for alternatives:Array in entry.requires_any:
 			GameState.known_discoveries.append(String(alternatives[-1]))
+		_know_live_foundations(subject)
 		var peer:=E.owner_state("neighbor")
 		peer.known_discoveries.append(subject);peer.discovery_adoption[subject]=1.0
 		var before:=float(GameState.resource_stockpiles.Stone)

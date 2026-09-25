@@ -32,9 +32,7 @@ static func entries()->Array[Dictionary]:
     "observation": "A community agrees which distinct visible or audible signs denote particular messages; the shared code must be learned at both ends.",
     "effects": {},
     "foundation_for": [
-      "timed_signal_sequences",
-      "punched_message_tape",
-      "message_framing"
+      "letter_substitution_cipher"
     ],
     "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
   },
@@ -102,9 +100,7 @@ static func entries()->Array[Dictionary]:
     "observation": "Separating marks, gaps and message boundaries by agreed durations lets a short set of signals encode longer messages.",
     "effects": {},
     "foundation_for": [
-      "optical_telegraphy",
-      "telegraph_keys",
-      "radio_telegraphy"
+      "electrical_telegraphy"
     ],
     "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
   },
@@ -164,6 +160,14 @@ static func entries()->Array[Dictionary]:
         "id": "local",
         "label": "Optical Telegraphy",
         "requires_all": []
+      },
+      {
+        "id": "relay_posts",
+        "label": "Chains of manned relay posts",
+        "requires_all": [
+          "relay_observation_posts"
+        ],
+        "progress_multiplier": 1.1
       }
     ],
     "signals": [
@@ -1232,7 +1236,7 @@ static func entries()->Array[Dictionary]:
     "observation": "Repeated comparison against a reference distinguishes frequency drift from intentional modulation and guides correction.",
     "effects": {},
     "foundation_for": [
-      "frequency_modulation"
+      "hyperbolic_radio_navigation"
     ],
     "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
   },
@@ -1533,9 +1537,7 @@ static func entries()->Array[Dictionary]:
     "observation": "Start boundaries, lengths or reserved symbols separate a continuous bit stream into messages a receiver can parse.",
     "effects": {},
     "foundation_for": [
-      "error_detection_codes",
       "automatic_repeat_request",
-      "data_modems",
       "packet_switching"
     ],
     "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
