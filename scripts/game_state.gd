@@ -387,6 +387,10 @@ func building_ledger_summary(settlement_id:String="")->Dictionary:
 				materials[String(material_name)]=float(materials.get(String(material_name),0.0))+float((row.get("materials",{}) as Dictionary)[material_name])
 	return {"records":records,"materials":materials,"kinds":kinds,"events":events}
 var demographic_ledger: Array[Dictionary] = []
+## Seasonal fold of routine births, deaths and losses (see consequence_engine),
+## and the Chronicle: graded story of the people (scripts/chronicle.gd).
+var hearth_season:Dictionary={}
+var chronicle:Dictionary={}
 var lifetime_births := 0
 var lifetime_deaths := 0
 ## Exact daily vital counts retained for rolling population statistics. Older
@@ -584,6 +588,8 @@ func reset_for_new_world(new_seed:int)->void:
 	last_simulation_event_days={}
 	field_observation_signals={}
 	demographic_ledger=[]
+	hearth_season={}
+	chronicle={}
 	lifetime_births=0
 	lifetime_deaths=0
 	vital_statistics_history=[]
@@ -1052,7 +1058,7 @@ func register_directive_population_deaths(count:int,directive_id:String,descript
 	var day:=int(elapsed_days)
 	var record:Dictionary={
 		"id":"directive_deaths_%d_%d" % [day,demographic_ledger.size()],"day":day,"start_day":day,"end_day":day,
-		"title":("%d executed by decree" % actual) if target.has("exact_count") else "%d deaths during %s" % [actual,safe_id.replace("_"," ")],"description":description.substr(0,320),
+		"title":("%d executed by decree" % actual) if target.has("exact_count") else "%d %s during %s" % [actual,"death" if actual==1 else "deaths",safe_id.replace("_"," ")],"description":description.substr(0,320),
 		"domain":"population","severity":"demographic","kind":"death","count":actual,"cause":cause,
 		"location":"Civilization under directive","population_after":population_total,"source_order_id":String(target.get("source_order_id","")),
 		"affected_cohorts":(result.get("affected_cohorts",{}) as Dictionary).duplicate(true),"demographic_target":target.duplicate(true),"target_label":String(target.get("label","")),"aggregate":true

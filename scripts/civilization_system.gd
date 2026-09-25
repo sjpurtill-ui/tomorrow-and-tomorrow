@@ -1197,7 +1197,7 @@ func exploration_status()->Dictionary:
 		# return day is the road's secret; the UI must never leak it.
 		var overdue_days:=maxi(0,current_day-int(party.get("return_day",current_day)))
 		parties.append({"mission_id":int(party.get("mission_id",0)),"personnel":int(party.get("personnel",0)),"days_remaining":party_remaining,"return_day":int(party.get("return_day",-1)),"duration_days":party_duration,"overdue_days":overdue_days,"progress":clampf(1.0-float(party_remaining)/float(party_duration),0.0,1.0),"origin_city_id":String(party.get("origin_city_id","")),"origin_label":String(party.get("origin_label","Home settlement")),"target_id":String(party.get("target_id","")),"target_label":String(party.get("target_label","OPEN EXPLORATION")),"ordered_heading":String(party.get("ordered_heading","")),"planned_heading":String(party.get("planned_heading","")),"route_status":String(party.get("route_status","")),"turnback_reason":String(party.get("turnback_reason","")),"provisions":float(party.get("provisions",0.0))})
-	var idle_message:="The last scout party did not return, so none of its observations became knowledge. %d scouts remain missing from the population's available labor." % missing if missing>0 else ("No foreign polity has been met. Choose how long a scout party may range before it must return." if known==0 else "Dispatch another scout party; only its returned report reveals new ground or contacts.")
+	var idle_message:="The last scout party did not return, so none of its observations became knowledge. %d %s missing from the population's available labor." % [missing,"scout remains" if missing==1 else "scouts remain"] if missing>0 else ("No foreign polity has been met. Choose how long a scout party may range before it must return." if known==0 else "Dispatch another scout party; only its returned report reveals new ground or contacts.")
 	var active_message:="%d scout part%s away. Observations remain aboard each party; interception can erase an entire report before it returns." % [scout_missions.size(),"y is" if scout_missions.size()==1 else "ies are"]
 	if active and String(mission.get("route_status",""))=="turning_back": active_message=String(mission.get("turnback_reason","The land route was blocked, so the party is turning back."))
 	return {"active":active,"progress":clampf(1.0-float(remaining)/float(duration),0.0,1.0) if active else 0.0,"days_remaining":remaining,"return_day":int(mission.get("return_day",-1)),"duration_days":int(mission.get("duration_days",0)),"personnel":int(mission.get("personnel",0)),"provisions":float(mission.get("provisions",0.0)),"target_id":String(mission.get("target_id","")),"target_kind":String(mission.get("target_kind","explore")),"target_label":String(mission.get("target_label","OPEN EXPLORATION")),"travel_mode":String(mission.get("travel_mode","land")),"route_status":String(mission.get("route_status","")),"contacted_count":known,"can_begin":scout_missions.size()<capacity,"active_count":scout_missions.size(),"capacity":capacity,"parties":parties,"report_count":scout_reports.size(),"latest_report":scout_reports[0].duplicate(true) if not scout_reports.is_empty() else {},"last_outcome":last_scout_outcome.duplicate(true),"missing_scouts":missing,"risk":risk,"message":active_message if active else idle_message}
@@ -2612,7 +2612,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	var finding:=String(recruitment_account.get("summary","")) if not recruitment_account.is_empty() else ("No organized foreign polity was encountered." if contacts.is_empty() else ("Direct contact was established with %s." % ", ".join(contacts)))
 	if not recruitment_account.is_empty() and not contacts.is_empty(): finding+=" Direct contact was also established with %s." % ", ".join(contacts)
 	if targeted_finding!="": finding+=" "+targeted_finding
-	if recruits>0 and recruitment_account.is_empty(): finding+=" The scouts also return with %d wanderers who agreed to join the settlement." % recruits
+	if recruits>0 and recruitment_account.is_empty(): finding+=" The scouts also return with %d %s who agreed to join the settlement." % [recruits,"wanderer" if recruits==1 else "wanderers"]
 	for windfall in windfalls: finding+=" "+windfall
 	var turnback_note:=String(report.get("turnback_reason",""))
 	if turnback_note!="": finding="%s %s" % [turnback_note,finding]
@@ -2626,8 +2626,13 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	scout_report_returned.emit(report.duplicate(true))
 	# The Chief Scout asks for an audience to tell the court what the party saw.
 	_chief_scout_report(report,"scouts")
-	if ScoutArchive.should_notify(report):
+	if ScoutArchive.newsworthy(report):
 		WorldSimulation.state.simulation_events.push_front({"day":day,"title":"CITY RECONNAISSANCE" if String(mission.get("target_kind",""))=="observe_city" else "RECRUITMENT PARTY RETURNS" if is_recruitment else "SCOUTS RETURN","description":message,"domain":"diplomacy","severity":"major"})
+	elif int(report.get("lost_personnel",0))>0:
+		# A quiet return still counts its dead in the season's tally.
+		preload("res://scripts/hearth_count.gd").tally("afield",int(report.lost_personnel))
+	if nomad_line!="":
+		preload("res://scripts/chronicle.gd").record_first("band_sighted",{"title":"Other people walk this land","text":"Our scouts saw a band of strangers on the move. They did not stop, but we are not alone.","kind":"contact","tier":"notice","domain":"diplomacy"})
 	_erase_scout_mission(mission)
 
 
@@ -2749,7 +2754,7 @@ func _recruitment_return_account(mission:Dictionary,_day:int,recruits:int)->Dict
 		return {"disposition":"some_joined" if recruits>0 else "none_joined","encountered":int(nomad.get("joined",0))+int(nomad.get("remaining",0)) if bool(nomad.get("met",false)) else 0,"met_community":bool(nomad.get("met",false)),"group":String(nomad.get("group","Wandering people")),"joined":recruits,"declined":maxi(0,int(nomad.get("remaining",0))),"summary":String(nomad.get("summary","No wandering band was found.")),"reasons":[String(nomad.get("reason","Nomadic encounters are uncertain."))],"diplomatic_response":"","diplomatic_severity":""}
 	var reservation:Dictionary=mission.get("migrant_reservation",{})
 	var encounter:Dictionary=mission.get("recruitment_encounter",{})
-	var summary:="%d people arrived from %s. They are the households met on this journey; reception is now under way." % [recruits,String(reservation.get("source_name","the visited community"))] if recruits>0 else String(mission.get("recruitment_reason","No community was physically visited on this journey. No recruitment offer could be made."))
+	var summary:="%d %s from %s. They are the households met on this journey; reception is now under way." % [recruits,"person arrived" if recruits==1 else "people arrived",String(reservation.get("source_name","the visited community"))] if recruits>0 else String(mission.get("recruitment_reason","No community was physically visited on this journey. No recruitment offer could be made."))
 	var outlook:Dictionary=mission.get("recruitment_outlook",{})
 	var reasons:Array[String]=[String(outlook.get("reason",summary))]
 	var response:Dictionary=mission.get("recruitment_diplomatic_response",{})
@@ -2920,7 +2925,7 @@ func _resolve_nomad_recruitment(mission:Dictionary,day:int)->int:
 	if count>0:
 		tribe["population"]=int(tribe.population)-count;nomad_sightings[index]=tribe
 		WorldSimulation.state.register_population_arrivals(count,"Households from a wandering band")
-	mission["nomad_recruitment_account"]={"met":true,"joined":count,"remaining":int(tribe.population),"group":String(tribe.band_hint),"summary":"%d people from %s chose to settle here; %d remain with the wandering band." % [count,String(tribe.band_hint),int(tribe.population)] if count>0 else "%s was encountered, but nobody joined." % String(tribe.band_hint).capitalize(),"reason":reason}
+	mission["nomad_recruitment_account"]={"met":true,"joined":count,"remaining":int(tribe.population),"group":String(tribe.band_hint),"summary":"%d %s from %s chose to settle here; %d remain with the wandering band." % [count,"person" if count==1 else "people",String(tribe.band_hint),int(tribe.population)] if count>0 else "%s was encountered, but nobody joined." % String(tribe.band_hint).capitalize(),"reason":reason}
 	return count
 
 

@@ -24,6 +24,7 @@ const SECTIONS:Array[Dictionary]=[
 	{"id":"military","label":"Military","icon":8,"tooltip":"Military command · F8"},
 	{"id":"inquiry","label":"Research","tooltip":"Inquiry and discoveries · F5"},
 	{"id":"world","label":"World","tooltip":"Scouting and contacts · F6"},
+	{"id":"chronicle","label":"Chronicle","tooltip":"The story of your people: moments, news and the seasons' tallies"},
 ]
 const ApprovedArt:=preload("res://scripts/hud/approved_ui_art.gd")
 const SPEED_TOOLTIPS:Array[String]=["Pause · 0","0.5 h/s","2 h/s","8 h/s","1 day/s","3 days/s"]
@@ -110,7 +111,7 @@ func _ready()->void:
 func _layout()->void:
 	var view:=get_viewport().get_visible_rect().size
 	for button:Button in rail_buttons.values():
-		button.custom_minimum_size.y=clampf((view.y-104.0)/SECTIONS.size(),52.0,68.0)
+		button.custom_minimum_size.y=clampf((view.y-150.0)/SECTIONS.size(),52.0,68.0)
 	if top_frame:
 		top_frame.position=Vector2(Tokens.RAIL_WIDTH,0)
 		top_frame.size=Vector2(view.x-Tokens.RAIL_WIDTH,56)

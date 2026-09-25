@@ -59,20 +59,23 @@ static func _sd(primitive:Dictionary,p:Vector2)->float:
 	return 1e6
 
 
-static func _render(primitives:Array)->Image:
-	var image:=Image.create(ICON_PX,ICON_PX,false,Image.FORMAT_RGBA8)
+static func _render(primitives:Array,px:int=ICON_PX)->Image:
+	## Glyphs are designed on the 56px grid; larger sizes re-evaluate the same
+	## distance field so card-sized marks stay crisp instead of upscaled.
+	var image:=Image.create(px,px,false,Image.FORMAT_RGBA8)
+	var scale:=float(px)/float(ICON_PX)
 	var stack:Array=[
 		_c(28,28,25,Color(0.035,0.066,0.060,0.88)),
 		_ring(28,28,24.0,1.6,Color(0.87,0.82,0.70,0.55)),
 	]
 	stack.append_array(primitives)
-	for y in ICON_PX:
-		for x in ICON_PX:
-			var p:=Vector2(x+0.5,y+0.5)
+	for y in px:
+		for x in px:
+			var p:=Vector2(x+0.5,y+0.5)/scale
 			var out:=Color(0,0,0,0)
 			for primitive_variant in stack:
 				var primitive:Dictionary=primitive_variant
-				var coverage:=clampf(0.5-_sd(primitive,p),0.0,1.0)*(primitive.col as Color).a
+				var coverage:=clampf(0.5-_sd(primitive,p)*scale,0.0,1.0)*(primitive.col as Color).a
 				if coverage<=0.0: continue
 				var col:Color=primitive.col
 				out.r=lerpf(out.r,col.r,coverage)
@@ -244,3 +247,38 @@ static func _domain_glyph(domain_id:String,c:Color)->Array:
 		"culture": return [_s(21,12,21,45,2,hi),_t(21,14,41,20,21,27,c)]
 		"wealth": return [_rr(28,39,11,3.2,2.5,c),_rr(28,32,11,3.2,2.5,hi),_rr(28,25,11,3.2,2.5,c),_ring(28,16,6.5,2.2,hi)]
 	return [_c(28,28,10,c)]
+
+
+# -- Chronicle moments ------------------------------------------------------
+
+static var _moment_textures:Dictionary={}
+
+## One mark per kind of remembered moment (scripts/chronicle.gd), drawn at card
+## size. Kinds without a mark fall back to the hearth fire.
+static func moment_texture(kind:String,accent:Color,px:int=112)->Texture2D:
+	var key:="%s|%s|%d" % [kind,accent.to_html(),px]
+	if _moment_textures.has(key): return _moment_textures[key]
+	var texture:=ImageTexture.create_from_image(_render(_moment_glyph(kind,accent),px))
+	_moment_textures[key]=texture
+	return texture
+
+
+static func _moment_glyph(kind:String,c:Color)->Array:
+	var hi:=c.lightened(0.30)
+	var dim:=c.darkened(0.35)
+	match kind:
+		"birth": return [_c(22,16,5,c),_rr(22,31,6.5,11,4,c),_c(35,27,3.6,hi),_rr(35,36,4.2,6,3,hi),_s(26,28,32,33,2.4,c),_s(10,45,46,45,1.6,dim)]
+		"death": return [_rr(28,41,13,3.5,2,dim),_rr(28,34,9,3.5,2,c),_rr(28,27,6,3,2,c),_c(28,20,3.5,hi)]
+		"discovery": return [_d(28,27,11,hi),_s(28,10,28,44,1.6,c),_s(11,27,45,27,1.6,c),_c(28,27,3,Color(1,1,1,0.9))]
+		"contact": return [_c(19,20,4.5,c),_rr(19,33,5,9,3,c),_c(37,20,4.5,hi),_rr(37,33,5,9,3,hi),_s(23,29,33,29,2.4,hi)]
+		"settlement": return [_t(18,22,9,32,27,32,c),_rr(18,37,7,5,1,c),_t(38,26,31,34,45,34,hi),_rr(38,38,5,4,1,hi),_s(10,44,46,44,1.6,dim)]
+		"ceremony": return [_rr(28,31,5,13,2,hi),_rr(17,35,3.5,9,1.5,c),_rr(39,35,3.5,9,1.5,c),_ring(28,14,5,1.8,hi),_s(10,45,46,45,1.6,dim)]
+		"milestone": return [_c(28,34,10,hi),_rr(28,42,19,6,0,Color(0.035,0.066,0.060,1)),_s(28,14,28,19,2,c),_s(15,21,18,24,2,c),_s(41,21,38,24,2,c),_s(10,40,46,40,1.8,c)]
+		"scout": return [_rr(22,34,4,6,3,c),_c(22,25,2.2,c),_rr(34,24,4,6,3,hi),_c(34,15,2.2,hi),_s(12,44,44,12,1.2,dim)]
+		"omen": return [_c(30,24,10,hi),_c(35,21,9,Color(0.035,0.066,0.060,1)),_c(20,38,5,c),_c(28,36,6,c),_c(36,38,5,c)]
+		"war": return [_s(14,42,40,14,2.6,c),_s(42,42,16,14,2.6,c),_t(40,14,44,10,36,12,hi),_t(16,14,12,10,20,12,hi)]
+		"court": return [_ring(28,30,13,2.4,c),_t(28,20,23,33,33,33,hi),_c(28,31,3,Color(1,0.9,0.6,0.95))]
+		"hearth_count": return [_s(15,16,15,40,2.4,c),_s(21,16,21,40,2.4,c),_s(27,16,27,40,2.4,c),_s(33,16,33,40,2.4,c),_s(11,34,39,22,2.2,hi)]
+		"work": return [_rr(28,36,13,6,1,c),_rr(28,26,9,5,1,hi),_rr(28,18,5,4,1,c)]
+	# Founding and anything unnamed: the hearth fire.
+	return [_t(28,11,18,36,38,36,hi),_t(28,21,23,36,33,36,Color(1,0.92,0.62,0.95)),_s(16,40,40,44,2.4,dim),_s(40,40,16,44,2.4,dim)]

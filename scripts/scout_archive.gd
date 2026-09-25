@@ -14,6 +14,24 @@ static func should_notify(report:Dictionary)->bool:
 	if city_record(report).is_empty():return true
 	return not significant_findings(report).is_empty()
 
+## Whether a return deserves a word to the player at all. Exploration that
+## brought home nothing new (only the route, examined curiosities, supplies)
+## stays silent: the Known World and the scout archive still receive it.
+static func newsworthy(report:Dictionary)->bool:
+	if not should_notify(report):return false
+	if bool(report.get("continuous_watch",false)) or String(report.get("mission_kind",""))=="observe_city":return true
+	if int(report.get("new_contact_count",0))>0 or not (report.get("contacts",[]) as Array).is_empty():return true
+	if int(report.get("recruits",0))>0 or not (report.get("recruitment_account",{}) as Dictionary).is_empty():return true
+	if int(report.get("stayed_personnel",0))>0:return true
+	if not String(report.get("target_finding","")).is_empty() or not String(report.get("turnback_reason","")).is_empty():return true
+	if not (report.get("city_observations",[]) as Array).is_empty():return true
+	for finding:Dictionary in report.get("discoveries",[]):
+		# Curiosities go to the knowledge workers; a passing band that "kept
+		# moving" is marked on the Known World (the first is told separately).
+		if routine_finding(finding) or finding.has("collection_id") or String(finding.get("kind",""))=="encounter":continue
+		return true
+	return false
+
 static func city_record(report:Dictionary)->Dictionary:
 	var id:=String(report.get("target_city_id",String(report.get("target_id","")).trim_prefix("city:")))
 	for city:Dictionary in report.get("city_observations",[]):

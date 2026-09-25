@@ -11,6 +11,7 @@ const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const Works:=preload("res://scripts/great_works_audience.gd")
 const CeremonyView:=preload("res://scripts/hud/great_work_ceremony.gd")
 const WorksAtlas:=preload("res://scripts/hud/great_works_atlas.gd")
+const Chronicle:=preload("res://scripts/chronicle.gd")
 
 var terrain:Node
 var voice:Node
@@ -77,7 +78,10 @@ func _process(delta:float)->void:
 	_ceremony_clock-=delta
 	if _ceremony_clock<=0.0:
 		_ceremony_clock=.5
-		# Ceremonies wait on the works screen; unattended ones dedicate themselves.
+		# A finished work's dedication is announced as a Chronicle moment; the
+		# god chooses to attend (court business never opens by itself).
+		# Unattended ones still dedicate themselves on the works screen.
+		_offer_ceremony()
 	_refresh_clock-=delta
 	if _refresh_clock<=0.0:
 		_refresh_clock=.25;_refresh_badge()
@@ -133,16 +137,18 @@ func _refresh_badge()->void:
 # --- Great works ---------------------------------------------------------------
 
 func _offer_ceremony()->void:
-	## A finished work's dedication opens once by itself; the works screen and
-	## the dock can reopen it until it is dedicated.
-	if not _world_ready() or not can_open():return
+	## Each newly finished work is told once, as a moment card whose action
+	## opens the dedication. The works screen and the dock can reopen it until
+	## it is dedicated.
+	if not _world_ready():return
 	for entry in Works.api_list("pending_ceremonies",["player"]):
 		if not entry is Dictionary:continue
 		var key:="%s/%s" % [String(entry.get("city_id","")),String(entry.get("work_id",""))]
 		if ceremonies_offered.has(key):continue
 		ceremonies_offered[key]=true
-		open_ceremony(String(entry.get("work_id","")))
-		return
+		var work_name:=String(entry.get("name",entry.get("title","the great work")))
+		var place:=String(entry.get("city_name",entry.get("city","")))
+		Chronicle.record({"key":"ceremony:"+key,"title":"%s stands finished" % work_name,"text":"The builders have set down their tools%s. The people gather for its dedication, and wait for the god." % (" at "+place if place!="" else ""),"kind":"ceremony","tier":"moment","action":{"kind":"ceremony","work_id":String(entry.get("work_id",""))},"domain":"great_works"})
 
 func open_ceremony(work_id:String)->Control:
 	for entry in Works.api_list("pending_ceremonies",["player"]):

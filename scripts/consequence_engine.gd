@@ -4,6 +4,7 @@ const SOCIETAL_VALUES_MODEL:=preload("res://scripts/societal_values_model.gd")
 const SPAN:=preload("res://scripts/day_span.gd")
 const EARLY_CARE:=preload("res://scripts/early_life_conditions.gd")
 const CUSTOM:=preload("res://scripts/custom_directive.gd")
+const HearthCount:=preload("res://scripts/hearth_count.gd")
 
 # One bounded causal model drives the early civilization. Narrative systems may
 # choose from these pressures, but only this file turns them into numbers.
@@ -786,23 +787,28 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	_process_directive_migration(population,span)
 	CUSTOM.process_day()
 	var events: Array[Dictionary] = []
+	# Ordinary births, deaths and losses stay in the demographic ledger but are
+	# told once a season (HearthCount); crises still report as their own episodes.
 	if births_today>0:
 		var birth_cause:="Birth during migration" if traveling else "Births"
-		events.append(_record_demographic_change("birth",births_today,birth_cause,food_days,production_ratio,housing_ratio,{"children":births_today}))
+		_record_demographic_change("birth",births_today,birth_cause,food_days,production_ratio,housing_ratio,{"children":births_today},false)
+		HearthCount.tally("born",births_today)
 	if deaths_today>0:
-		events.append(_record_demographic_change("death",deaths_today,dominant_cause,food_days,production_ratio,housing_ratio,mortality_result.get("affected_cohorts",{})))
+		var ordinary_deaths:=HearthCount.routine(dominant_cause)
+		var death_record:=_record_demographic_change("death",deaths_today,dominant_cause,food_days,production_ratio,housing_ratio,mortality_result.get("affected_cohorts",{}),not ordinary_deaths)
+		if ordinary_deaths:HearthCount.tally("buried",deaths_today)
+		else:events.append(death_record)
 	var maternal_deaths:=int(reproduction.get("maternal_deaths_count",0))
 	if maternal_deaths>0:
-		events.append(_record_demographic_change("death",maternal_deaths,"Complications of childbirth",food_days,production_ratio,housing_ratio,{"reproductive_age":maternal_deaths}))
+		_record_demographic_change("death",maternal_deaths,"Complications of childbirth",food_days,production_ratio,housing_ratio,{"reproductive_age":maternal_deaths},false)
+		HearthCount.tally("buried",maternal_deaths);HearthCount.tally("mothers",maternal_deaths)
 	var neonatal_deaths:=int(reproduction.get("neonatal_deaths_count",0))
 	if neonatal_deaths>0:
-		events.append(_record_demographic_change("death",neonatal_deaths,"Neonatal complications",food_days,production_ratio,housing_ratio,{"children":neonatal_deaths}))
-	var pregnancy_losses:=int(reproduction.get("pregnancy_losses_count",0))
-	if pregnancy_losses>0:
-		events.append(_add_event("Pregnancy Losses","%d pregnancies ended before delivery under current health, nutrition, shelter, and care conditions." % pregnancy_losses,"population","warning"))
-	var stillbirths:=int(reproduction.get("stillbirths_count",0))
-	if stillbirths>0:
-		events.append(_add_event("Stillbirths","%d births were lost at delivery under current maternal and neonatal conditions." % stillbirths,"population","warning"))
+		_record_demographic_change("death",neonatal_deaths,"Neonatal complications",food_days,production_ratio,housing_ratio,{"children":neonatal_deaths},false)
+		HearthCount.tally("buried",neonatal_deaths);HearthCount.tally("infants",neonatal_deaths)
+	HearthCount.tally("lost",int(reproduction.get("pregnancy_losses_count",0)))
+	HearthCount.tally("stillborn",int(reproduction.get("stillbirths_count",0)))
+	HearthCount.advance(events)
 	var annual_birth_rate:=float(reproduction.get("projected_birth_rate",0.0))
 
 	var settlement_score := clampf(float(WorldSimulation.state.settlement_completed.size())/8.0,0.0,1.0)
@@ -895,7 +901,7 @@ func _population_location() -> String:
 		return "the founding camp in %s" % WorldSimulation.state.province_name
 	return "the settlement in %s" % WorldSimulation.state.province_name
 
-func _record_demographic_change(kind: String,count: int,cause: String,food_days: float,production_ratio: float,housing_ratio: float,affected_cohorts:Dictionary={}) -> Dictionary:
+func _record_demographic_change(kind: String,count: int,cause: String,food_days: float,production_ratio: float,housing_ratio: float,affected_cohorts:Dictionary={},publish:bool=true) -> Dictionary:
 	var location:=_population_location()
 	var day:=int(WorldSimulation.state.elapsed_days)
 	var water_intake:=clampf(float(WorldSimulation.state.water_metrics.get("intake_ratio",0.0)),0.0,1.0)
@@ -948,13 +954,19 @@ func _record_demographic_change(kind: String,count: int,cause: String,food_days:
 			recent["title"]="%d %s%s at %s" % [total,noun,"" if total==1 else "s",location]
 			recent["description"]=description
 			WorldSimulation.state.demographic_ledger[0]=recent
+			var listed:=false
 			for i in WorldSimulation.state.simulation_events.size():
 				if String(WorldSimulation.state.simulation_events[i].get("id",""))==String(recent.id):
 					WorldSimulation.state.simulation_events[i]=recent
+					listed=true
 					break
+			if publish and not listed:
+				WorldSimulation.state.simulation_events.push_front(recent)
+				if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
 			return recent
 	WorldSimulation.state.demographic_ledger.push_front(record)
 	if WorldSimulation.state.demographic_ledger.size()>120: WorldSimulation.state.demographic_ledger.resize(120)
+	if not publish: return record
 	WorldSimulation.state.simulation_events.push_front(record)
 	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
 	return record

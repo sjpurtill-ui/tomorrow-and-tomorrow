@@ -1,5 +1,7 @@
 extends Node
 
+const DRILL_REPORT_MIN_PARTICIPANTS:=40
+const DRILL_REPORT_MIN_POPULATION:=500
 const PersistentProduction = preload("res://scripts/persistent_production.gd")
 const GoodsBills = preload("res://scripts/goods_bills.gd")
 var recruit_deploy=preload("res://scripts/recruit_deploy.gd").new(self)
@@ -4032,8 +4034,12 @@ func _complete_training_program(definition:Dictionary)->void:
 	last_training_program=completed
 	training_program.clear()
 	training_program_cycles+=1
-	WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"%s complete" % String(definition.label).capitalize(),"description":"The exercise improved aggregate formation preparation and command practice. It consumed %.1f extra rations and wore %d issued equipment." % [float(completed.get("food_consumed_total",0.0)),int(completed.get("equipment_worn",0))],"domain":"security","severity":"notice"})
-	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
+	# A small band's routine drill is kept in the military record, not reported:
+	# it only becomes news once there is a real force to exercise.
+	if int(completed.get("participants",0))>=DRILL_REPORT_MIN_PARTICIPANTS and WorldSimulation.state.population_total>=DRILL_REPORT_MIN_POPULATION:
+		var worn:=int(completed.get("equipment_worn",0))
+		WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"%s complete" % String(definition.label).capitalize(),"description":"The exercise sharpened formations and command. It consumed %.1f extra rations%s." % [float(completed.get("food_consumed_total",0.0))," and wore out %d %s of issued equipment" % [worn,"piece" if worn==1 else "pieces"] if worn>0 else ""],"domain":"security","severity":"notice"})
+		if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
 	_refresh_readiness()
 	army_changed.emit(home_army.duplicate(true))
 

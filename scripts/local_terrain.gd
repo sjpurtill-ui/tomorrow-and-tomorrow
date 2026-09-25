@@ -1172,6 +1172,8 @@ func advance_world_time(days_advanced:float)->void:
 ## Presents one committed simulation day: reports, advisors, overlays.
 func _commit_world_day(day_result:Dictionary)->void:
 	var discoveries:Array[Dictionary]=day_result.discoveries
+	# The Chronicle grades the day first; its moments replace research popups.
+	preload("res://scripts/chronicle.gd").ingest_day(day_result)
 	if not discoveries.is_empty():preload("res://scripts/hud/research_announcements.gd").announce(self,hud,discoveries)
 	var resource_events:Array[Dictionary]=day_result.resources
 	var simulation_events:Array[Dictionary]=day_result.events
@@ -1199,6 +1201,7 @@ func _commit_world_day(day_result:Dictionary)->void:
 	elif not simulation_events.is_empty() and travel_status_label:
 		travel_status_label.text = "%s: %s" % [simulation_events[0].title.to_upper(), simulation_events[0].description]
 	_evaluate_travel_survival()
+	if hud:preload("res://scripts/hud/chronicle_card.gd").flush(self,hud)
 
 ## Calendar-time presentation after whole days are committed.
 func _after_world_time(days_advanced:float)->void:
@@ -12436,6 +12439,7 @@ func _build_command_rail_hud(layer:CanvasLayer)->void:
 	hud.register_provider("inquiry",preload("res://scripts/hud/content/dock_content_inquiry.gd").new(self,hud))
 	hud.register_provider("world",preload("res://scripts/hud/content/dock_content_world.gd").new(self,hud))
 	hud.register_provider("military",preload("res://scripts/hud/content/dock_content_military.gd").new(self,hud))
+	hud.register_provider("chronicle",preload("res://scripts/hud/content/dock_content_chronicle.gd").new(self,hud))
 	var audience_director:=preload("res://scripts/audience_director.gd").new();audience_director.terrain=self;layer.add_child(audience_director)
 	_update_scale_bar()
 
@@ -13416,7 +13420,7 @@ func _refresh_player_field_army_markers()->void:
 
 
 func _on_scout_report_returned(report:Dictionary)->void:
-	if not ScoutArchive.should_notify(report):return
+	if not ScoutArchive.newsworthy(report):return
 	# The simulation owns report delivery and storage. Arrival is a notification,
 	# not a request to change the player's speed or replace the open detail panel.
 	if travel_status_label:
@@ -19298,7 +19302,10 @@ func _update_time_interface() -> void:
 	elif settlement_convoy_targeting:
 		travel_status_label.text="SELECT KNOWN LAND FOR THE NEW SETTLEMENT  •  click a viable destination or press the button again to cancel"
 	elif placement_building == "":
-		travel_status_label.text = ("FOUNDING CONVOY READY  •  RIGHT-CLICK VISIBLE OR BLACK LAND TO TRAVEL  •  CAMP TO FORAGE BETWEEN LEGS" if not GameState.settlement_site_committed else "RECOGNIZED RESOURCES %s  •  TWO-FINGER SLIDE TO PAN  •  UP / DOWN TO ZOOM" % ("SHOWN" if resource_view_enabled else "HIDDEN"))
+		# The control hint is for the first month; after it, the ticker keeps
+		# the latest thing worth telling from the Chronicle.
+		var headline:=preload("res://scripts/chronicle.gd").latest_headline() if GameState.settlement_site_committed and GameState.settlement_founded_day>=0 and GameState.elapsed_days-float(GameState.settlement_founded_day)>30.0 else ""
+		travel_status_label.text = headline if headline!="" else ("FOUNDING CONVOY READY  •  RIGHT-CLICK VISIBLE OR BLACK LAND TO TRAVEL  •  CAMP TO FORAGE BETWEEN LEGS" if not GameState.settlement_site_committed else "RECOGNIZED RESOURCES %s  •  TWO-FINGER SLIDE TO PAN  •  UP / DOWN TO ZOOM" % ("SHOWN" if resource_view_enabled else "HIDDEN"))
 	if start_settlement_button:
 		# All map commands now live together under ACTIONS. The contextual status
 		# above provides onboarding without a modal-sized permanent map obstruction.
