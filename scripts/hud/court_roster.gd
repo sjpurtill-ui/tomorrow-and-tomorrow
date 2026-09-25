@@ -10,6 +10,60 @@ const Civic:=preload("res://scripts/hud/court_civic.gd")
 const GROUPS:=["council","settlement","scouts","builders","generals"]
 const GROUP_WORDS:={"council":"THE COUNCIL","settlement":"LEADERS OF SETTLEMENTS","scouts":"SCOUTS","builders":"MASTER BUILDERS","generals":"WAR LEADERS"}
 const MAX_GENERALS:=3
+## The form of court follows discoveries (data/civic/civic_stages.json): how
+## many sit before the god, what the council is called, and who attends.
+const Stages:=preload("res://scripts/civic_stages.gd")
+const ATTENDANT_WORDS:={"elder":"elder","guard":"guard","petitioner":"petitioner","priest":"priest","scribe":"scribe","herald":"herald",
+	"minister":"minister","citizen":"citizen","senator":"councillor","delegate":"deputy"}
+
+static func stage()->Dictionary:
+	return Stages.current()
+
+static func seat_limit()->int:
+	## How many of the court sit in the scene at once.
+	return clampi(int(stage().get("seats",7)),4,9)
+
+static func group_word(group:String)->String:
+	## The heading for a roster group in this form of court.
+	var civic:=stage()
+	if group=="council" and String(civic.get("council_word",""))!="": return String(civic.council_word)
+	if group=="settlement" and String(civic.get("settlement_word",""))!="": return String(civic.settlement_word)
+	return String(GROUP_WORDS.get(group,group.to_upper()))
+
+static func attendants()->Array[Dictionary]:
+	## Those present by office of the court itself, not summoned: heralds,
+	## scribes, priests, ministers, guards, petitioners, the citizens on the
+	## tiers. {role,count,label}. Drawn in the scene and named in the header.
+	var result:Array[Dictionary]=[]
+	for entry_variant in stage().get("attendants",[]):
+		var entry:Dictionary=entry_variant
+		if int(entry.get("count",0))<=0: continue
+		result.append({"role":String(entry.get("role","")),"count":int(entry.get("count",0)),"label":String(entry.get("label",entry.get("role","")))})
+	return result
+
+static func attendant_roles()->Array[String]:
+	var roles:Array[String]=[]
+	for entry in attendants(): roles.append(String(entry.role))
+	return roles
+
+static func attendance_line()->String:
+	## "A herald, three scribes and two guards attend." or "" at the hearth.
+	var parts:PackedStringArray=PackedStringArray()
+	for entry in attendants():
+		var count:=int(entry.count)
+		var label:=String(entry.label)
+		if count==1: parts.append("%s %s" % ["an" if label.substr(0,1).to_lower() in ["a","e","i","o","u"] else "a",label])
+		else: parts.append("%s %s" % [_count_word(count),label])
+	if parts.is_empty(): return ""
+	var joined:=parts[0] if parts.size()==1 else ", ".join(parts.slice(0,parts.size()-1))+" and "+parts[parts.size()-1]
+	return "Present: %s." % joined
+
+static func _count_word(count:int)->String:
+	var words:=["no","a","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
+	return String(words[count]) if count<words.size() else "many"
+
+static func ceremony_line()->String:
+	return Stages.protocol_line(stage())
 
 static func people()->Array[Dictionary]:
 	## Everyone who may be summoned, each once:

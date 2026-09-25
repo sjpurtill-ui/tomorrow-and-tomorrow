@@ -121,7 +121,10 @@ func test_offices_and_titles_evolve_only_after_society_becomes_more_complex()->v
 	GameState.society_capacities["institutions"]=0.74
 	GameState.elapsed_days=30.0
 	var events:=GovernmentPeopleSystem.process_day(30)
-	assert_int(GovernmentPeopleSystem.active_offices().size()).is_equal(6)
+	# The six founding offices, plus the treasury that public credit splits
+	# from the stores (data/civic/civic_stages.json).
+	assert_int(GovernmentPeopleSystem.active_offices().size()).is_equal(7)
+	assert_bool(GovernmentPeopleSystem.office_is_active("Treasurer")).is_true()
 	assert_str(String(GovernmentPeopleSystem.active_offices()[0].title)).is_not_equal(initial_title)
 	assert_bool(events.any(func(event:Dictionary)->bool: return String(event.get("title",""))=="Government Expanded")).is_true()
 	assert_int(GovernmentPeopleSystem.living_people().size()).is_less_equal(GovernmentPeopleSystem.MAX_GOVERNMENT_PEOPLE)

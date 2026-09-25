@@ -6,6 +6,8 @@ extends Node
 ## continue to matter.
 
 const ValuesModel:=preload("res://scripts/societal_values_model.gd")
+## Forms of court and office derived from discoveries (never saved).
+const CivicStages:=preload("res://scripts/civic_stages.gd")
 const NORMAL_GOVERNMENT_POOL:=96
 # Covers the bounded 256-settlement network, central offices and successors.
 const MAX_GOVERNMENT_PEOPLE:=288
@@ -39,6 +41,10 @@ const OFFICE_SKILL_WEIGHTS:Dictionary={
 	# Reading country, keeping a party fed on the road, noticing what matters and
 	# coming home alive to say it plainly.
 	"ChiefScout":{"Logistics":0.36,"Knowledge":0.30,"Defense":0.20,"Diplomacy":0.14},
+	# Offices that discoveries add to the court (data/civic/civic_stages.json).
+	"HighPriest":{"Diplomacy":0.40,"Knowledge":0.34,"Administration":0.16,"Provisioning":0.10},
+	"Justice":{"Administration":0.46,"Knowledge":0.30,"Diplomacy":0.24},
+	"Treasurer":{"Administration":0.44,"Provisioning":0.26,"Logistics":0.20,"Knowledge":0.10},
 	"SettlementLeader":{"Administration":0.32,"Provisioning":0.23,"Construction":0.18,"Logistics":0.15,"Diplomacy":0.12},
 }
 const DYNAMIC_SKILL_WEIGHTS:Dictionary={
@@ -193,6 +199,7 @@ func process_day(day:int)->Array[Dictionary]:
 	var events:Array[Dictionary]=[]
 	_process_lifespans(day,events)
 	_update_government_stage(true,events)
+	_note_court_change(events)
 	_ensure_pool()
 	_synchronize_office_holders(events,true)
 	_ensure_local_leaders(events)
@@ -238,6 +245,26 @@ func _update_government_stage(record_event:bool,events:Array[Dictionary]=[])->vo
 		if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
 
 
+func _note_court_change(events:Array[Dictionary])->void:
+	## The court's form follows discoveries; say so, dated, when it changes.
+	var change:=CivicStages.note_change()
+	if change.is_empty(): return
+	var after:=CivicStages.stage(String(change.to))
+	var before:=CivicStages.stage(String(change.from))
+	revision+=1
+	var event:Dictionary={"day":int(WorldSimulation.state.elapsed_days),"title":"The Court Changes: %s" % String(after.get("name","")),
+		"description":"%s gives way to %s. %s" % [String(before.get("place_name","The old court")),String(after.get("place_name","a new court")).to_lower(),CivicStages.protocol_line(after)],
+		"domain":"institutions","severity":"major"}
+	events.append(event)
+	WorldSimulation.state.simulation_events.push_front(event)
+	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
+
+
+func court_stage()->Dictionary:
+	## The form of court this people's discoveries support (see CivicStages).
+	return CivicStages.current()
+
+
 func government_form()->String:
 	var identity:Dictionary=ValuesModel.identity_snapshot(WorldSimulation.state.societal_values)
 	var name:=String(identity.get("name","FEDERATED FORMING ORDER")).to_upper()
@@ -250,7 +277,7 @@ func structure_snapshot()->Dictionary:
 	initialize()
 	return {
 		"stage":government_stage,"form":government_form(),"name":String(ValuesModel.identity_snapshot(WorldSimulation.state.societal_values).get("name","Forming Order")),
-		"scope":government_scope(),"active_offices":active_offices(),"living_people":living_people().size(),"pool_limit":MAX_GOVERNMENT_PEOPLE,"revision":revision,
+		"scope":government_scope(),"active_offices":active_offices(),"court_stage":String(court_stage().get("id","")),"court_stage_name":String(court_stage().get("name","")),"living_people":living_people().size(),"pool_limit":MAX_GOVERNMENT_PEOPLE,"revision":revision,
 	}
 
 
@@ -272,12 +299,29 @@ func active_offices()->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
 	var form:=government_form()
 	var cap:=_title_era_cap()
+	# The court's form (from discoveries) renames offices from the elders' circle
+	# on; the founding hearth council keeps the size-and-form titles above.
+	var civic:=CivicStages.current()
+	var staged:=int(civic.get("rank",0))>=1
 	for definition in definitions:
 		if government_stage<int(definition.unlock): continue
 		var titles:Array=definition.titles.get(form,definition.titles.federated)
 		var title:=String(titles[clampi(mini(government_stage,cap),0,titles.size()-1)])
 		if cap==0: title=String(STONE_AGE_TITLES.get(String(definition.key),title))
+		if staged:
+			var stage_title:=CivicStages.office_title(civic,String(definition.key))
+			if stage_title!="": title=stage_title
 		result.append({"key":String(definition.key),"title":title,"unlock_stage":int(definition.unlock)})
+	# Offices that discoveries add (the god's priesthood, judges, a treasury),
+	# and that some forms of court abolish again.
+	var held:=CivicStages.held()
+	for extra_variant in CivicStages.office_definitions():
+		var extra:Dictionary=extra_variant
+		if not CivicStages.office_open(extra,civic,held,government_stage): continue
+		var key:=String(extra.get("key",""))
+		var title:=CivicStages.office_title(civic,key)
+		if title=="": title=String(extra.get("title",key))
+		result.append({"key":key,"title":title,"unlock_stage":int(extra.get("min_government_stage",0)),"added_by":"discovery"})
 	return result
 
 
@@ -306,6 +350,8 @@ func settlement_leader_title()->String:
 		"localist":["Hearth Elder","Local Speaker","Town Convenor","Mayor","Commons Delegate"],
 	}
 	var options:Array=titles.get(form,titles.federated)
+	var civic:=CivicStages.current()
+	if int(civic.get("rank",0))>=1 and CivicStages.office_title(civic,"Settlement")!="": return CivicStages.office_title(civic,"Settlement")
 	var cap:=_title_era_cap()
 	if cap==0: return String(STONE_AGE_TITLES.Settlement)
 	return String(options[clampi(mini(government_stage,cap),0,options.size()-1)])
@@ -501,6 +547,9 @@ func _personality_fit(person:Dictionary,office_key:String)->float:
 		"Marshal": return discipline*0.30+assertiveness*0.25+risk*0.25+openness*0.10+empathy*0.10
 		"Scholar": return openness*0.45+discipline*0.35+empathy*0.10+(1.0-assertiveness)*0.10
 		"Envoy": return empathy*0.38+openness*0.28+assertiveness*0.20+discipline*0.14
+		"HighPriest": return empathy*0.34+discipline*0.30+openness*0.20+(1.0-risk)*0.16
+		"Justice": return discipline*0.40+empathy*0.25+(1.0-risk)*0.20+openness*0.15
+		"Treasurer": return discipline*0.45+(1.0-risk)*0.30+openness*0.15+empathy*0.10
 		"ChiefScout":
 			# Curiosity to look, nerve to go close, and enough discipline to count.
 			var courage:=clampf(float(person.get("courage",0.5)),0.0,1.0)
