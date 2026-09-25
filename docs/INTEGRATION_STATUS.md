@@ -1,10 +1,10 @@
-## September 25 — twelve research direction pilot paintings: WAITING FOR CONTENT
+## September 25 — twelve research direction pilot paintings: REJECTED / HELD (not queued)
 
 Worker branch `codex/research-art-first-batch`, base `48f74ed5`, head `195240b4c47c9f747ed7e7a16c98fee651c81316` (includes prerequisite art-direction/queue commit `32b00526`). Source worktree: `C:/Users/sjpur/tt-research-art-first-batch`. This is twelve pilot paintings, one per research direction, not the full 4,284-painting set.
 
-Integrator verified all twelve manifest paths/files, twelve distinct SHA-256 hashes matching provenance, and all twelve IDs absent from current main research data. The later research content is on separate `codex/research-cleanup`; its readiness and combined compatibility must be reviewed before art integration. Preserve manifest additions when combining the two deliveries. Do not report these paintings as visible in the player build yet.
+The user rejected all twelve pilot images because they read as photorealistic/realist and fail the requested distinct aesthetics. This delivery is removed from the integration queue. Do not merge its PNGs or present them as approved art, even when the later research content becomes available. The style brief and earlier previews also require reevaluation; prerequisite commit `32b00526` is not an approved art direction. The immediate chalk-pastel retry was also explicitly rejected. No further generation is underway.
 
-Worker reports successful Godot 4.7.2 import and the manifest/uniqueness test case passing. Its full subject-art suite has four Stone Sorting/Oral Epics expectation failures reported as preexisting; that baseline classification has not been independently verified by the integrator. Combined runtime and display checks remain pending. No save changes or player restart. Source assets stay on the pushed worker branch until their content dependency is ready; unrelated canonical import changes are preserved.
+Earlier file/hash and import checks establish technical integrity only, not aesthetic approval. The rejected delivery remains preserved on its worker branch as a record, with no pending integration action. This correction changes queue metadata only: no game assets, saves, running session or unrelated canonical changes are altered.
 
 ## September 22 — scheduled world days and map refresh cost: INTEGRATED
 
