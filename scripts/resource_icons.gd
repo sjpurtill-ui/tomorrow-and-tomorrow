@@ -282,3 +282,43 @@ static func _moment_glyph(kind:String,c:Color)->Array:
 		"work": return [_rr(28,36,13,6,1,c),_rr(28,26,9,5,1,hi),_rr(28,18,5,4,1,c)]
 	# Founding and anything unnamed: the hearth fire.
 	return [_t(28,11,18,36,38,36,hi),_t(28,21,23,36,33,36,Color(1,0.92,0.62,0.95)),_s(16,40,40,44,2.4,dim),_s(40,40,16,44,2.4,dim)]
+
+
+# -- War on the map ---------------------------------------------------------
+
+static var _war_textures:Dictionary={}
+
+## The few marks an early war leaves on the map, drawn so each reads without
+## a legend: "band" is a few figures with spears, "raid" is fire and smoke at
+## the place that was struck, "feud" is two crossed spears.
+static func war_texture(kind:String,accent:Color,px:int=ICON_PX)->Texture2D:
+	var key:="%s|%s|%d" % [kind,accent.to_html(),px]
+	if _war_textures.has(key): return _war_textures[key]
+	var texture:=ImageTexture.create_from_image(_render(_war_glyph(kind,accent),px))
+	_war_textures[key]=texture
+	return texture
+
+
+static func _war_glyph(kind:String,c:Color)->Array:
+	var hi:=c.lightened(0.30)
+	match kind:
+		"band":
+			var out:Array=[]
+			for x in [17.0,28.0,39.0]:
+				var y:=3.0 if x==28.0 else 0.0
+				out.append_array([
+					_c(x,19-y,3.4,c),_rr(x,30-y,3.6,7.5,2.6,c),
+					_s(x-1.6,37-y,x-2.4,44-y,2.2,c),_s(x+1.6,37-y,x+2.4,44-y,2.2,c),
+					_s(x+5,11-y,x+5,44-y,1.4,hi),_t(x+5,6-y,x+3,12-y,x+7,12-y,hi),
+				])
+			return out
+		"raid":
+			var smoke:=Color(0.62,0.60,0.56,0.85)
+			return [
+				_c(23,20,6,smoke),_c(31,14,5,smoke),_c(36,9,3.5,Color(smoke,0.6)),
+				_t(28,24,18,44,38,44,Color("#d8612f")),_t(28,31,22,44,34,44,Color("#f2b544")),
+				_s(15,45,41,45,2.2,Color("#5a4632")),
+			]
+		"feud":
+			return [_s(14,42,40,14,2.6,c),_s(42,42,16,14,2.6,c),_t(40,14,44,10,36,12,hi),_t(16,14,12,10,20,12,hi)]
+	return [_c(28,28,8,c)]

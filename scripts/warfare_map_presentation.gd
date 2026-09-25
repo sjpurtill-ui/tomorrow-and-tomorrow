@@ -15,6 +15,11 @@ const SCOUT_COLOR:="#91BDC4"
 const FRONT_COLOR:="#D8B25E"
 const ENGAGEMENT_COLOR:="#ED725F"
 
+## The era's words for labels (see hud/era_words.gd). Before the statistical age
+## a formation label carries no readiness or supply percentages. Set for the
+## duration of build_snapshot; direct calls read the full modern label.
+static var words_stage:="reckoned"
+
 
 static func scale_band(camera_size:float)->String:
 	if camera_size<8.0: return "ground"
@@ -128,7 +133,14 @@ static func formation_visual_state(army:Dictionary)->Dictionary:
 	return {"order_state":order_state,"damage_state":damage_state,"damage_ratio":damage,"scatter":clampf(1.0-readiness,0.0,0.78),"missing_elements":clampi(floori(damage*4.0),0,3),"element_budget":7}
 
 
-static func build_snapshot(camera_size:float,armies:Array,foreign_sightings:Array,fronts:Array,destinations:Array,engagement:Dictionary={},selected_army_id:int=0)->Dictionary:
+static func build_snapshot(camera_size:float,armies:Array,foreign_sightings:Array,fronts:Array,destinations:Array,engagement:Dictionary={},selected_army_id:int=0,stage:String="reckoned")->Dictionary:
+	words_stage=stage
+	var snapshot:=_build_snapshot(camera_size,armies,foreign_sightings,fronts,destinations,engagement,selected_army_id)
+	words_stage="reckoned"
+	return snapshot
+
+
+static func _build_snapshot(camera_size:float,armies:Array,foreign_sightings:Array,fronts:Array,destinations:Array,engagement:Dictionary,selected_army_id:int)->Dictionary:
 	var band:=scale_band(camera_size)
 	var player:Array[Dictionary]=[]
 	for index in mini(armies.size(),MAX_PLAYER_MARKERS):
@@ -351,6 +363,9 @@ static func _aggregate_formation_label(cluster:Array,views:Array[Dictionary],ban
 		readiness_low=minf(readiness_low,float(view.get("readiness",view.get("readiness_low",0.0))))
 		readiness_high=maxf(readiness_high,float(view.get("readiness",view.get("readiness_high",0.0))))
 		if bool(view.get("moving",false)): moving+=1
+	if words_stage!="reckoned":
+		var total:=total_low if player_owned else total_high
+		return "%s · %d bands · about %d fighters%s" % ["Ours" if player_owned else "Strangers",cluster.size(),total,(" · %d on the move" % moving) if moving>0 else ""]
 	var owner:="YOU" if player_owned else "FOREIGN"
 	var strength:=compact_count(total_low) if player_owned else "~%s–%s" % [compact_count(total_low),compact_count(total_high)]
 	var movement:=" • %d MOVING" % moving if moving>0 else ""
@@ -394,6 +409,9 @@ static func player_marker(army:Dictionary,camera_size:float,selected:bool=false)
 	if moving and destination_data.has("x") and destination_data.has("z"):
 		var heading_delta:=Vector2(float(destination_data.get("x",0.0))-float(position_data.get("x",0.0)),float(destination_data.get("z",0.0))-float(position_data.get("z",0.0)))
 		if heading_delta.length_squared()>0.000001: heading=-heading_delta.angle()-PI*0.5
+	if words_stage!="reckoned" and band!="world":
+		# Before the statistical age: who, how many, where to. No percentages.
+		label="%s · %d fighters%s" % ["Our band" if words_stage=="hearth" else String(army.get("name","Our army")),troops,(" · going to %s" % destination) if moving else ""]
 	if army.has("report_age_days"):
 		label+="\nLAST REPORT · %d DAY%s OLD"%[int(army.report_age_days),"" if int(army.report_age_days)==1 else "S"]
 	return {
@@ -439,7 +457,11 @@ static func foreign_marker(sighting:Dictionary,camera_size:float)->Dictionary:
 	elif band=="regional":
 		label="%s · ~%s–%s SOLDIERS%s\n%s" % [(owner.to_upper()+" · SCOUT PARTY" if identified else "FOREIGN SCOUTS") if scout else owner.to_upper()+" · FIELD ARMY",compact_count(low),compact_count(high),damage_text,"CLICK TO INTERCEPT" if scout else ("ENEMY · CLICK TO ENGAGE" if hostile else "CLICK FOR CONTACT")]
 	var observed_day := int(sighting.get("last_seen_day",sighting.get("observed_day",sighting.get("day",-1))))
-	label += "\nOBSERVED DAY %d" % observed_day if observed_day >= 0 else "\nOBSERVATION DATE UNKNOWN"
+	if words_stage!="reckoned" and band in ["ground","local","regional"]:
+		label="%s · about %d–%d men" % [owner.capitalize() if identified else "Strangers",low,high]
+		label+="\nSeen on day %d" % observed_day if observed_day>=0 else ""
+	else:
+		label += "\nOBSERVED DAY %d" % observed_day if observed_day >= 0 else "\nOBSERVATION DATE UNKNOWN"
 	return {
 		"id":String(sighting.get("id","")),"owner":String(sighting.get("civ_id","")),"owner_label":owner.to_upper(),"visible":band in ["ground","local","regional"] and bool(sighting.get("visible",true)),
 		"show_label":band in ["ground","local","regional"],"label":label,"selected":false,"moving":moving,"heading":float(sighting.get("heading",0.0)),
@@ -465,6 +487,9 @@ static func front_marker(front:Dictionary,destination:Dictionary,camera_size:flo
 		label="%s\n%s • %s • %d%%" % [String(front.get("opponent","WAR FRONT")).to_upper(),phase,String(front.get("objective","OBJECTIVE")).to_upper(),roundi(progress*100.0)]
 	elif band=="regional":
 		label="%s\n%s • %d%% • FIELD %s" % ["BATTLE IN PROGRESS" if engagement_active else ("OCCUPATION FRONT" if occupation_personnel>0 else String(front.get("war_name","ACTIVE FRONT")).to_upper()),String(front.get("objective","OBJECTIVE")).to_upper(),roundi(progress*100.0),compact_count(fielded)]
+	if words_stage!="reckoned":
+		# Never drawn in play (war_map_overlay owns wars); kept plain regardless.
+		label=("Feud with %s" if words_stage=="hearth" else "War with %s") % String(front.get("opponent","them"))
 	elif band=="local":
 		label="%s • %s %d%%\nFIELD %s\nREADY %d%% • SUPPLY %d%%" % [phase if phase!="OBJECTIVE" else String(front.get("war_name","ACTIVE FRONT")).to_upper(),String(front.get("target","HOME TERRITORY")).to_upper(),roundi(progress*100.0),compact_count(fielded),roundi(readiness*100.0),roundi(clampf(float(front.get("supply",0.0)),0.0,1.0)*100.0)]
 	return {

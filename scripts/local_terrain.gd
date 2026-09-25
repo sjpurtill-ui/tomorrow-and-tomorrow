@@ -24,6 +24,7 @@ const SocietalValuesModel:=preload("res://scripts/societal_values_model.gd")
 const LandscapeCover=preload("res://scripts/landscape_cover.gd")
 const WorldDiscoveryMapScript:=preload("res://scripts/world_discovery_map.gd")
 const WarfareMapPresentation:=preload("res://scripts/warfare_map_presentation.gd")
+const EraWordsMap:=preload("res://scripts/hud/era_words.gd")
 const SCORE_TRACKS:=[
 	preload("res://assets/audio/Tomorrow.mp3"),
 	preload("res://assets/audio/War.mp3"),
@@ -411,6 +412,7 @@ var player_field_army_paths:Dictionary={}
 ## player's order, not supernatural live tracking or discoveries in the fog.
 var player_scout_route_markers:Dictionary={}
 var warfare_front_markers:Dictionary={}
+var war_map_overlay:Control
 var rendered_observation_revision:=-1
 const LIVE_REPORT_REFRESH_INTERVAL_SECONDS:=0.75
 var live_report_refresh_elapsed:=0.0
@@ -13372,7 +13374,7 @@ func _refresh_foreign_formation_markers()->void:
 	rendered_observation_revision=int(observation.get("revision",0))
 	# Use the same bounded snapshot pass as player armies so foreign stacks receive
 	# collision spacing and label budgets before nodes are placed on the terrain.
-	var presentation:Dictionary=WarfareMapPresentation.build_snapshot(camera.size if camera else 190.0,[],observation.get("visible",[]),[],[])
+	var presentation:Dictionary=WarfareMapPresentation.build_snapshot(camera.size if camera else 190.0,[],observation.get("visible",[]),[],[],{},0,EraWordsMap.stage())
 	var visible_ids:Dictionary={}
 	for view_variant in presentation.get("foreign",[]):
 		var view:Dictionary=view_variant
@@ -13389,7 +13391,7 @@ func _refresh_foreign_formation_markers()->void:
 			add_child(marker); foreign_formation_markers[sighting_id]=marker
 		marker.position=world_position
 		_apply_warfare_formation_view(marker,view)
-		marker.visible=bool(view.get("visible",false)) and _world_position_is_revealed(marker.global_position)
+		marker.visible=bool(view.get("visible",false)) and _world_position_is_revealed(marker.global_position) and not EraWordsMap.hearth()
 	for sighting_id in foreign_formation_markers.keys():
 		if visible_ids.has(String(sighting_id)): continue
 		var stale:Node3D=foreign_formation_markers[sighting_id]
@@ -13425,7 +13427,7 @@ func _refresh_player_field_army_markers()->void:
 			if selected_army_id==int(army.get("army_id",0)):_clear_army_selection()
 			continue
 		reported_armies.append(army)
-	var presentation:Dictionary=WarfareMapPresentation.build_snapshot(camera.size if camera else 190.0,reported_armies,[],front_state.get("fronts",[]),state.get("destinations",[]),MilitaryCampaign.engagement_snapshot(),marker_selected_id)
+	var presentation:Dictionary=WarfareMapPresentation.build_snapshot(camera.size if camera else 190.0,reported_armies,[],front_state.get("fronts",[]),state.get("destinations",[]),MilitaryCampaign.engagement_snapshot(),marker_selected_id,EraWordsMap.stage())
 	var visible_ids:Dictionary={}
 	for view_variant in presentation.get("player",[]):
 		var view:Dictionary=view_variant
@@ -14299,7 +14301,16 @@ func _create_player_field_army_path(view:Dictionary,current:Vector3,destination:
 	return root
 
 
+func _ensure_war_map_overlay()->void:
+	## Wars and feuds are drawn by the war map overlay: a small mark near the
+	## contested border, a short tag and plain words on hover.
+	if is_instance_valid(war_map_overlay) or not is_inside_tree(): return
+	var layer:=CanvasLayer.new(); layer.name="WarMapMarks"; layer.layer=0; add_child(layer)
+	war_map_overlay=preload("res://scripts/hud/war_map_overlay.gd").new(); war_map_overlay.name="WarMapOverlay"; war_map_overlay.terrain=self; layer.add_child(war_map_overlay)
+
+
 func _refresh_warfare_front_markers(front_views:Array)->void:
+	_ensure_war_map_overlay()
 	var visible_ids:Dictionary={}
 	for view_variant in front_views:
 		var view:Dictionary=view_variant; var front_id:=String(view.get("id","")); visible_ids[front_id]=true
@@ -14331,6 +14342,10 @@ func _refresh_warfare_front_markers(front_views:Array)->void:
 		var selected:=String(view.get("target_region_id",""))!="" and String(view.get("target_region_id",""))==selected_civilization_region_id
 		(marker.get_node("SelectedRing") as MeshInstance3D).visible=selected
 		var label:=marker.get_node("FrontLabel") as Label3D; label.scale=Vector3.ONE/marker_scale; label.text=String(view.get("label","")); label.visible=bool(view.get("show_label",false)); label.modulate=color.lightened(0.24)
+		# The old front token (diamond core, objective bar, readiness dot and a
+		# paragraph of percentages over the target city) is not drawn: the war map
+		# overlay owns how a war appears.
+		marker.visible=false
 	for front_id in warfare_front_markers.keys():
 		if visible_ids.has(String(front_id)): continue
 		var stale:Node3D=warfare_front_markers[front_id]

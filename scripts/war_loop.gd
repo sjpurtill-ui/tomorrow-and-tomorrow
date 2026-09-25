@@ -56,6 +56,10 @@ const GUARD_DAYS:=180
 const CARRY:=14.0
 const TERMS_WAIT:=60
 const LEVEL_DECAY_DAYS:=4*365
+## A war in which neither side has fought for this long goes quiet: a truce.
+const QUIET_DAYS:=365
+## Worn-out raiders stop coming; the war can then go quiet.
+const ENEMY_SPENT:=0.55
 
 ## How often a ruler with a real grievance comes, by signature trait.
 const FOLLOW:={"grudge":0.9,"hunter":0.8,"ledger":0.72,"bluffer":0.7,"magpie":0.62,"matchmaker":0.5}
@@ -465,6 +469,7 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool)->Dictionary:
 	if cause=="refusal": rivals.call("settle_grudges",civ_id,0.4)
 	if their_dead>0: rivals.call("grudge",civ_id,"the %s we lost at your %s" % ["hunters" if their_dead>1 else "hunter",String(t.words).trim_prefix("the ").trim_prefix("a ").trim_prefix("our ")],0.25,"raid_dead:"+key)
 	f["level"]=maxi(int(f.level),2 if skirmish else 1)
+	if int(f.get("feud_since",-1))<0 or day-int(f.last_harm)>LEVEL_DECAY_DAYS: f["feud_since"]=day
 	f["last_harm"]=day
 	if skirmish: f["last_skirmish"]=day
 	f["taken"]=taken
@@ -725,6 +730,7 @@ static func _resolve_op(civ_id:String,op:Dictionary,day:int)->void:
 	if loot>0.0: EXCHANGE.receive("player","Food",loot)
 	if at_war:
 		war["score"]=int(war.get("score",0))+(1 if won else -1)
+		war["last_fight"]=day
 		_exhaust(civ_id,our_dead,their_dead)
 		_record_battle(civ_id,title,our_dead,their_dead,captives,"won" if won else "lost")
 	else:
@@ -768,6 +774,8 @@ static func _enemy_op(civ_id:String,day:int)->void:
 		if taken>0.0: Hall._credit_civ(civ_id,"Food",taken)
 		if rng.randf()<0.3: captives=_our_captives_lost(1,civ_id)
 	war["score"]=int(war.get("score",0))+(-1 if won else 1)
+	war["last_fight"]=day
+	war["last_attack"]={"day":day,"target":target if target!="scouts" else "gathering","our_dead":our_dead,"taken":roundi(taken),"won":won}
 	_exhaust(civ_id,our_dead,their_dead)
 	_record_battle(civ_id,"%s attack at %s" % [name,String(t.words)],our_dead,their_dead,0,"lost" if won else "held")
 	var text:=""
@@ -808,6 +816,11 @@ static func _check_end(civ_id:String,day:int)->void:
 		return
 	if not (war.terms as Dictionary).is_empty() and day-int(war.get("terms_day",day))>=TERMS_WAIT and (war.op as Dictionary).is_empty():
 		_close_war(civ_id,day,"exhaustion","No one answered %s's herald. Our people stopped going out to fight, and so did theirs." % name)
+		return
+	# A handful of fighters on each side cannot keep a war alive with no one
+	# fighting: after a quiet year with no band out, the feud goes quiet.
+	if day-int(war.get("last_fight",war.get("start",day)))>=QUIET_DAYS and (war.op as Dictionary).is_empty():
+		_close_war(civ_id,day,"quiet","Neither side has sent fighters for a year. The feud has gone quiet.")
 		return
 	if (length>=int(2.5*365) and ours>=0.3 and theirs>=0.3) or length>=4*365:
 		_close_war(civ_id,day,"exhaustion","After %d winters of it, neither side sends fighters any more. No one made peace; the war just stopped." % maxi(1,roundi(length/365.0)))
@@ -884,7 +897,8 @@ static func daily(day:int)->void:
 				var said:=order(id,"war_general",true)
 				_chronicle("auto:%s:%d" % [id,day],"%s Acts Alone" % EraNames.given_of(String(general.get("name",""))),said,"notice",id)
 		if day>=int(war.get("next_enemy",day+1)):
-			_enemy_op(id,day)
+			# Spent raiders stay home; the war may then go quiet.
+			if float(war.get("their_exh",0.0))<ENEMY_SPENT: _enemy_op(id,day)
 			war["next_enemy"]=day+_rng("next:%s:%d" % [id,day]).randi_range(50,120)
 		if not (front(id).war as Dictionary).is_empty(): _check_end(id,day)
 	if day%30==0:

@@ -231,7 +231,7 @@ func _ready()->void:
 	var destination:={"position":{"x":origin.x,"z":origin.z}}
 	terrain._refresh_warfare_front_markers([PRESENTATION.front_marker(front,destination,320.0,true)])
 	var front_marker:Node3D=terrain.warfare_front_markers.get("front_probe",null)
-	_expect(front_marker!=null and front_marker.visible,"active engagement/front marker is absent at regional scale")
+	_expect(front_marker!=null and not front_marker.visible,"the old 3D front token must stay hidden; war_map_overlay draws wars")
 	if front_marker:
 		for wing_name in ["AttackerWing","DefenderWing"]:
 			var wing:=front_marker.get_node(wing_name) as MeshInstance3D
@@ -254,7 +254,7 @@ func _ready()->void:
 		terrain.camera.size=zoom
 		terrain._refresh_warfare_front_markers([PRESENTATION.front_marker(front,destination,zoom,true)])
 		var grounded_front:Node3D=terrain.warfare_front_markers.get("front_probe",null)
-		_expect(grounded_front!=null and grounded_front.visible,"local front disappeared during ground-clearance update")
+		_expect(grounded_front!=null and not grounded_front.visible,"the old 3D front token must stay hidden; war_map_overlay draws wars")
 		if grounded_front:
 			var lift:float=grounded_front.position.y-terrain._height_at(grounded_front.position.x,grounded_front.position.z)
 			_expect(absf(lift-PRESENTATION.marker_ground_clearance(zoom))<0.00001,"front does not use zoom-aware ground clearance")
@@ -264,7 +264,7 @@ func _ready()->void:
 	_expect(marker!=null and not marker.visible,"world scale still renders individual army detail")
 	terrain._refresh_warfare_front_markers([PRESENTATION.front_marker(front,destination,12_000.0,true)])
 	front_marker=terrain.warfare_front_markers.get("front_probe",null)
-	_expect(front_marker!=null and front_marker.visible,"world scale lost aggregate strategic war state")
+	_expect(front_marker!=null and not front_marker.visible,"the old 3D front token must stay hidden; war_map_overlay draws wars")
 	if front_marker:
 		_expect("WAR OF NORTH CROSSING" in (front_marker.get_node("FrontLabel") as Label3D).text,"world front marker omits the named war")
 	MilitaryCampaign.field_armies.clear()
