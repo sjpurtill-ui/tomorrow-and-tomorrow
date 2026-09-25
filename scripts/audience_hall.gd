@@ -42,9 +42,11 @@ const WORK_KINDS:=["great_work","wonder_proposal"]
 const GREAT_WORKS_PATH:="res://scripts/great_works_audience.gd"
 const REPORT_SOURCES:=["scouts","envoys","expedition"]
 const REPORT_FACTS_MAX:=24
-const TOPICS:=["food","health","housing","security","grievance","ambition","introduction","follow_up","war","summons","mourning","callback","omen","aim","campaign"]
+const TOPICS:=["food","health","housing","security","grievance","ambition","introduction","follow_up","war","summons","mourning","callback","omen","aim","campaign","crisis"]
 const LIVES_PATH:="res://scripts/court_lives.gd"
 const AIMS_PATH:="res://scripts/legacy_aims.gd"
+const CRISES_PATH:="res://scripts/crisis_system.gd"
+const TURNING_PATH:="res://scripts/turning_points.gd"
 const RIVALS_PATH:="res://scripts/rival_rulers.gd"
 const WAR_PATH:="res://scripts/war_loop.gd"
 const REACTIONS:=["delighted","pleased","neutral","offended","furious"]
@@ -125,6 +127,7 @@ const SITUATIONS:={
 	"omen":{"kind":"petition","headline":"comes about the sign","mechanic":"court_lives.gd; the real weather or health agreed with the god's word"},
 	"aim":{"kind":"petition","headline":"speaks of what we should strive for","mechanic":"legacy_aims.gd; a generational aim measured against the real simulation"},
 	"war_campaign":{"kind":"petition","headline":"comes about the fighting","mechanic":"war_loop.gd; the war leader runs the operation, the combat simulator resolves it"},
+	"crisis":{"kind":"petition","headline":"comes about a crisis","mechanic":"crisis_system.gd; hazards from real state (the epochal-shock catalog), costs from real stores and policy channels"},
 	"dread_tribute":{"kind":"gift","headline":"brings tribute, fearing your wrath","mechanic":"civilization_exchange take/receive between real ledgers"},
 	"debt_call":{"kind":"request","headline":"comes to collect a debt","mechanic":"rival_rulers.gd debts; player stores debited"},
 	"redress_demand":{"kind":"threat","headline":"demands redress for an old wrong","mechanic":"rival_rulers.gd grudges; stores debited or ForeignDiplomacy.apply_conversation_reaction"},
@@ -235,6 +238,11 @@ static func _aims()->GDScript:
 	## reaches back into this one.
 	return load(AIMS_PATH) as GDScript
 
+static func _crises()->GDScript:
+	## Crises from real state (crisis_system.gd); loaded lazily because that
+	## module reaches back into this one.
+	return load(CRISES_PATH) as GDScript
+
 static func _rivals()->GDScript:
 	## Rival rulers as characters, and the strings envoys carry
 	## (rival_rulers.gd); loaded lazily because it reaches back into this one.
@@ -326,6 +334,7 @@ static func daily(day:int)->Array[Dictionary]:
 	_prune_matters(day)
 	_lives().call("daily",day)
 	_aims().call("daily",day)
+	_crises().call("daily",day)
 	_rivals().call("daily",day)
 	_war().call("daily",day)
 	# The court never comes on its own: its occasions become matters, held by
@@ -553,6 +562,7 @@ static func open_matter(matter_id:String)->Dictionary:
 		_lives().call("on_open",stored)
 		_aims().call("on_open",stored)
 		_war().call("on_open",stored)
+		_crises().call("on_open",stored)
 		return stored
 	return {}
 
@@ -2070,6 +2080,8 @@ static func options(id:String)->Array[Dictionary]:
 					for aim_option:Dictionary in _aims().call("options",audience): result.append(aim_option)
 				"campaign":
 					for war_option:Dictionary in _war().call("options",audience): result.append(war_option)
+				"crisis":
+					for crisis_option:Dictionary in _crises().call("options",audience): result.append(crisis_option)
 				"follow_up":
 					result.append(_option("decree","Issue it now","\"%s\"" % decree,"warm",decree!="","Nothing was promised."))
 					result.append(_option("patience","Ask for patience","Admit it waits; promise nothing new.","neutral"))
@@ -2639,6 +2651,7 @@ static func _resolve_petition(audience:Dictionary,option_id:String)->Dictionary:
 	if String((audience.get("petition",{}) as Dictionary).get("topic","")) in ["mourning","callback","omen"]: return _lives().call("resolve",audience,option_id)
 	if String((audience.get("petition",{}) as Dictionary).get("topic",""))=="aim": return _aims().call("resolve",audience,option_id)
 	if String((audience.get("petition",{}) as Dictionary).get("topic",""))=="campaign": return _war().call("resolve",audience,option_id)
+	if String((audience.get("petition",{}) as Dictionary).get("topic",""))=="crisis": return _crises().call("resolve",audience,option_id)
 	var pid:=int(audience.speaker.person_id)
 	var person:=_official(pid)
 	var name:=String(audience.speaker.name)
@@ -3419,6 +3432,8 @@ static func validate_state(data:Variant)->bool:
 	if data.has("divine") and not DIVINE.valid_state(data.divine): return false
 	if data.has("lives") and not bool(_lives().call("valid_state",data.lives)): return false
 	if data.has("war") and not bool(_war().call("valid_state",data.war)): return false
+	if data.has("crises") and not bool(_crises().call("valid_state",data.crises)): return false
+	if data.has("turning_points") and not bool((load(TURNING_PATH) as GDScript).call("valid_state",data.turning_points)): return false
 	if data.has("court_persons"):
 		var persons:GDScript=load("res://scripts/court_persons.gd")
 		if persons==null or not bool(persons.call("valid_state",data.court_persons)): return false
