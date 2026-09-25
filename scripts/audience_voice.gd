@@ -2186,6 +2186,26 @@ func _offline_open(s:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
 			if business.is_empty(): business=_business_fallback(s)
 			_append_if(out,business)
 	while out.size()>2: out.pop_front()
+	# The ruler behind a foreign envoy: what they remember, then the string
+	# their business carries, in the tone of that ruler's signature trait.
+	var rival:=_rival_lines(s)
+	var rival_envoy:Array=rival.get("envoy",[])
+	if not rival_envoy.is_empty():
+		var said_now:Array[Dictionary]=[]
+		for variants in rival_envoy:
+			var line:=_fresh_line(s,variants as Array,"envoy",false)
+			if not line.is_empty(): said_now.append(line)
+		if not said_now.is_empty():
+			# The memory replaces why-they-came; the string follows the business.
+			var recall_first:=said_now.size()>1 or not (((s.situation as Dictionary).get("recall",{})) as Dictionary).is_empty()
+			if recall_first and out.size()>=2: out.pop_front()
+			if recall_first: out.push_front(said_now.pop_front())
+			for line in said_now: out.append(line)
+	var staged:=0
+	var stage_room:=2 if out.size()<=2 else 1
+	for text in rival.get("narrator",[]):
+		if staged>=stage_room: break
+		if not _voice_state().said.has(_text_key(String(text))): out.append({"key":"narrator","text":String(text),"aside":false,"fact":true}); staged+=1
 	# Dread curdled with resentment leaks out sideways before it becomes flight.
 	if String(s.origin)=="court" and bool((s.get("regard",{}) as Dictionary).get("warned",false)):
 		var hint:=_say(s,envoy,DV.generic("flight_hint"),rng,{},true)
@@ -2200,9 +2220,24 @@ func _offline_open(s:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
 	var court_memory:Array=(COURT_HISTORY if own else COURT_HISTORY_FOREIGN) if not focus.is_empty() else []
 	var generic_court:=_court_reserve(stances,kind_bank,court_memory)
 	if kind=="report": generic_court=_report_bank(first_official)+generic_court
+	# A court member objects to one answer, and another may speak for one, in
+	# their own manner (rival_rulers.gd decides who and why).
+	var voiced:=0
+	var room:=clampi(4-out.size(),1,2)
+	for entry in rival.get("court",[]):
+		if voiced>=room: break
+		var member:={}
+		for candidate in officials:
+			if int((candidate as Dictionary).get("person_id",0))==int((entry as Dictionary).get("pid",0)): member=candidate
+		if member.is_empty(): continue
+		var line:=_fresh_line(s,(entry as Dictionary).get("lines",[]),String(member.key),true,member)
+		if line.is_empty(): continue
+		out.append(line); officials.erase(member); voiced+=1
+	if voiced>=1: return out
 	var shuffled:Array=[]
 	while not officials.is_empty(): shuffled.append(officials.pop_at(rng.randi_range(0,officials.size()-1)))
-	var count:int=1 if shuffled.size()<2 or rng.randf()<0.4 else 2
+	var count:int=(1 if shuffled.size()<2 or rng.randf()<0.4 else 2)-voiced
+	if count<=0 or shuffled.is_empty(): return out
 	var previous:Dictionary={}
 	for i in count:
 		var member:Dictionary=shuffled[i]
@@ -2214,6 +2249,38 @@ func _offline_open(s:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
 		_append_if(out,line)
 		if not line.is_empty(): previous=member
 	return out
+
+func _rival_lines(s:Dictionary)->Dictionary:
+	if String(s.get("origin",""))!="foreign": return {}
+	var rivals:GDScript=load("res://scripts/rival_rulers.gd") as GDScript
+	if rivals==null: return {}
+	return rivals.call("open_lines",s.audience)
+
+func _fresh_line(s:Dictionary,variants:Array,key:String,manner:bool,member:Dictionary={})->Dictionary:
+	## The first of these ready lines not yet said in this hall. Officials say it
+	## in their own manner (their lead-ins and tics).
+	var said:Dictionary=_voice_state().said
+	var rng:=_scene_rng(s,"rival:"+key)
+	var era:=_era_for(s,member if not member.is_empty() else s.envoy)
+	for text in variants:
+		var raw:=String(text).strip_edges()
+		if raw.is_empty(): continue
+		if said.has(_text_key(raw)) or not line_ok(raw,era): continue
+		if manner and not member.is_empty():
+			# The reason, then a turn of phrase in their own manner.
+			var flourishes:Array=[]
+			for bank in ["aside","interject"]:
+				for template in CV.model_bank(member.persona,bank):
+					var t:=String(template)
+					if "{" in t or said.has(_template_key(t)) or not line_ok(t,era) or t.split(" ",false).size()>10: continue
+					flourishes.append(t)
+			if not flourishes.is_empty():
+				var flourish:=String(flourishes[rng.randi_range(0,flourishes.size()-1)])
+				return {"key":key,"text":raw+" "+flourish,"aside":false,"tkey":_template_key(flourish),"manner":true,"fact":false}
+			var spoken:=CV.speak(member.persona,raw,rng,true,_flourish_memory(s,member),true)
+			return {"key":key,"text":spoken,"aside":false,"fact":true}
+		return {"key":key,"text":raw,"aside":false,"fact":true}
+	return {}
 
 func _occasion_bank(s:Dictionary)->Array:
 	## Why they came, as natural speech: every opener half with every closer.

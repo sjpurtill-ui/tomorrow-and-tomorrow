@@ -44,6 +44,7 @@ const REPORT_SOURCES:=["scouts","envoys","expedition"]
 const REPORT_FACTS_MAX:=24
 const TOPICS:=["food","health","housing","security","grievance","ambition","introduction","follow_up","war","summons","mourning","callback","omen"]
 const LIVES_PATH:="res://scripts/court_lives.gd"
+const RIVALS_PATH:="res://scripts/rival_rulers.gd"
 const REACTIONS:=["delighted","pleased","neutral","offended","furious"]
 const VERSION:=3
 const EXPIRY_DAYS:=20
@@ -121,6 +122,8 @@ const SITUATIONS:={
 	"callback":{"kind":"petition","headline":"brings word of an old order","mechanic":"court_lives.gd; what really changed since the order"},
 	"omen":{"kind":"petition","headline":"comes about the sign","mechanic":"court_lives.gd; the real weather or health agreed with the god's word"},
 	"dread_tribute":{"kind":"gift","headline":"brings tribute, fearing your wrath","mechanic":"civilization_exchange take/receive between real ledgers"},
+	"debt_call":{"kind":"request","headline":"comes to collect a debt","mechanic":"rival_rulers.gd debts; player stores debited"},
+	"redress_demand":{"kind":"threat","headline":"demands redress for an old wrong","mechanic":"rival_rulers.gd grudges; stores debited or ForeignDiplomacy.apply_conversation_reaction"},
 }
 
 ## Which situations an occasion invites, with base weights.
@@ -136,6 +139,9 @@ const OCCASION_MIX:={
 	"third_war":{"war_support":1.0,"news_report":0.35},
 	"dread_tribute":{"dread_tribute":1.0},
 	"dread_test":{"test_of_resolve":1.0,"tribute_demand":0.4},
+	"debt_due":{"debt_call":1.0},
+	"grudge":{"redress_demand":1.0,"tribute_demand":0.25},
+	"kin_call":{"war_support":1.0},
 	"ambient":{"gift_goods":0.6,"accord_offer":0.6,"scholar_offer":0.8,"research_sale":0.6,"license_offer":0.5,"rumor_share":0.8,"intelligence_share":0.6,"news_report":0.5,"trade_offer":0.4,"league_invitation":0.4,"protection_pact":0.3,"artifact_gift":0.7,"artifact_purchase":0.6,"artifact_return":1.0},
 }
 
@@ -220,6 +226,11 @@ static func _lives()->GDScript:
 	## because that module reaches back into this one.
 	return load(LIVES_PATH) as GDScript
 
+static func _rivals()->GDScript:
+	## Rival rulers as characters, and the strings envoys carry
+	## (rival_rulers.gd); loaded lazily because it reaches back into this one.
+	return load(RIVALS_PATH) as GDScript
+
 static func _great_works()->GDScript:
 	## Great Works audiences (architects, rival races, forecasts); loaded lazily
 	## because that module reaches back into this one.
@@ -300,6 +311,7 @@ static func daily(day:int)->Array[Dictionary]:
 	_prune_occasions(day)
 	_prune_matters(day)
 	_lives().call("daily",day)
+	_rivals().call("daily",day)
 	# The court never comes on its own: its occasions become matters, held by
 	# the official until the ruler summons them.
 	for occasion in (s.occasions as Array).duplicate():
@@ -1122,7 +1134,7 @@ static func _foreign_candidates(civ_id:String,occasion:Dictionary,rng:RandomNumb
 		if base<=0.0: continue
 		var candidate:=_candidate(situation_type,civ_id,occasion,rng,used,day)
 		if candidate.is_empty(): continue
-		candidate["w"]=base*_temperament_factor(situation_type,p,civ)*float(_lives().call("dread_weight",situation_type,civ_id))
+		candidate["w"]=base*_temperament_factor(situation_type,p,civ)*float(_lives().call("dread_weight",situation_type,civ_id))*float(_rivals().call("weight",situation_type,civ_id))
 		if branches.has(situation_type):
 			var previous:Dictionary=(occasion.get("data",{}) as Dictionary).get("previous",{})
 			(candidate.situation as Dictionary)["arc"]={"branch":String(branches[situation_type]),"previous":previous.duplicate(true)}
@@ -1316,6 +1328,8 @@ static func _candidate(situation_type:String,civ_id:String,occasion:Dictionary,r
 			situation.visits=int(relation.get("recruitment_visits",0))
 			situation.summary="%s protests that your recruiters invited its households away (%d visit%s so far) and wants it stopped." % [name,int(relation.get("recruitment_visits",0)),"" if int(relation.get("recruitment_visits",0))==1 else "s"]
 			return {"kind":kind,"situation":situation}
+		"debt_call","redress_demand":
+			return _rivals().call("candidate",situation_type,civ_id,occasion,rng,used,day)
 	return {}
 
 static func _rumor_candidate(civ_id:String,name:String,used:Dictionary,day:int,situation:Dictionary)->Dictionary:
@@ -1532,6 +1546,8 @@ static func _foreign_audience(civ_id:String,chosen:Dictionary,occasion:Dictionar
 	var situation:Dictionary=(chosen.get("situation",{}) as Dictionary).duplicate(true)
 	situation["occasion"]={"type":String(occasion.get("type","")),"text":String((occasion.get("data",{}) as Dictionary).get("text","")),"day":int(occasion.get("day",day)),"crisis":bool(occasion.get("crisis",false))}
 	audience.situation=situation
+	# The ruler behind the envoy: memory, a string on the business, a bluff.
+	_rivals().call("dress",audience,occasion,day)
 	return audience
 
 static func _generate_foreign(civ_id:String,day:int,forced_kind:String)->Dictionary:
@@ -1558,7 +1574,14 @@ static func _envoy(civ_id:String,audience_id:String,kind:String,leader:Dictionar
 	var traditions:Array=NAMES.POOLS.keys()
 	var tradition:String=traditions[serial%traditions.size()]
 	var envoy_serial:=posmod(hash(civ_id+":"+audience_id),100000)+10000
-	var identity:Dictionary=preload("res://scripts/era_names.gd").make(int(GameState.world_seed),envoy_serial,envoy_serial%2==0,civ_id,{String(leader.get("name","")):true,"given:"+String(leader.get("name","")).get_slice(" ",0):true})
+	# Envoys of other peoples keep their own names: one name, one person.
+	var taken:={String(leader.get("name","")):true,"given:"+String(leader.get("name","")).get_slice(" ",0):true}
+	for list_key in ["history","queue"]:
+		for other in state().get(list_key,[]):
+			if other is Dictionary and String(other.get("origin",""))=="foreign" and String(other.get("civ_id",""))!=civ_id:
+				var other_name:=String((other.get("speaker",{}) as Dictionary).get("name",""))
+				if other_name!="": taken[other_name]=true; taken["given:"+other_name.get_slice(" ",0)]=true
+	var identity:Dictionary=preload("res://scripts/era_names.gd").make(int(GameState.world_seed),envoy_serial,envoy_serial%2==0,civ_id,taken)
 	if String(identity.get("name",""))=="": identity=NAMES.make(int(GameState.world_seed),envoy_serial,envoy_serial%2==0,tradition,{String(leader.get("name","")):true})
 	var leader_name:=String(leader.get("name","their leader"))
 	var titles:Dictionary={
@@ -1966,6 +1989,7 @@ static func options(id:String)->Array[Dictionary]:
 			var short:=_short(String(courtesy.resource),float(courtesy.amount))
 			result.append(_option("accept","Accept the gift","Receive %s from %s." % [text,audience.civ_name],"warm"))
 			result.append(_option("accept_return","Accept and send a courtesy gift","Receive %s; send back %s." % [text,_terms_text(courtesy)],"warm",short=="",short))
+			result.append(_option("decline","Decline it courteously","Thank them and let them take it home: no gift, and nothing owed.","neutral"))
 			result.append(_option("refuse","Refuse the gift","Send it back unopened. They will take offence.","hostile"))
 		"request":
 			var half:={"resource":terms.resource,"amount":_nice(float(terms.amount)*0.5)}
@@ -2026,6 +2050,8 @@ static func options(id:String)->Array[Dictionary]:
 					result.append(_option("dismiss","Dismiss the petition","Send them away. They will resent it.","hostile"))
 		"summons":
 			result.append(_option("dismiss_summons","That will be all","Send them back to their work.","neutral"))
+	# Every foreign answer shows its cost, and who at court objects.
+	if String(audience.get("origin",""))=="foreign": _rivals().call("annotate_options",audience,result)
 	# A summoned person may raise one of their other matters instead.
 	if String(audience.get("origin",""))=="court":
 		for other in _other_matters(audience):
@@ -2162,6 +2188,7 @@ static func resolve(id:String,option_id:String)->Dictionary:
 	elif audience.kind=="report": result=_resolve_report(audience,option_id)
 	else: result=_resolve_petition(audience,option_id)
 	if result.has("error"): return {"ok":false,"outcome":String(result.error),"reaction":"neutral"}
+	if String(audience.get("origin",""))=="foreign": result=_rivals().call("after_answer",audience,option_id,result)
 	audience.status="resolved"
 	audience.outcome=String(result.outcome)
 	audience.option_id=option_id
@@ -2227,6 +2254,9 @@ static func _resolve_foreign(audience:Dictionary,option_id:String)->Dictionary:
 	var outcome:=""
 	var reaction:="neutral"
 	var memory:=""
+	# An empty threat, called: they back down (rival_rulers.gd keeps the truth).
+	if String(audience.kind)=="threat" and option_id in ["defy","counter"] and bool((audience.get("hidden",{}) as Dictionary).get("bluff",false)):
+		return _rivals().call("bluff_called",audience,option_id)
 	match "%s:%s" % [audience.kind,option_id]:
 		"gift:accept","gift:accept_return":
 			var got:=EXCHANGE.take(civ_id,resource,amount)
@@ -2247,6 +2277,12 @@ static func _resolve_foreign(audience:Dictionary,option_id:String)->Dictionary:
 				_leader_trust(civ_id,0.04)
 				reaction="pleased"
 				memory="The ruler accepted our gift of %d %s." % [roundi(received),resource]
+		"gift:decline":
+			_shift_relation(civ_id,-0.01+mood,0.0)
+			_leader_trust(civ_id,-0.01)
+			reaction="neutral"
+			outcome="You declined %s's gift of %s with thanks. They took it home, a little stiffly." % [audience.civ_name,_terms_text(terms)]
+			memory="The ruler declined our gift of %s, politely." % _terms_text(terms)
 		"gift:refuse":
 			var sting:=0.05+(0.04 if proud else 0.0)
 			_shift_relation(civ_id,-sting+mood,0.02)
@@ -2879,7 +2915,7 @@ static func voice_context(id:String)->Dictionary:
 			"at_war_with_player":bool(relation.get("at_war",false)),"treaty":String(relation.get("treaty","none")),"wars":wars,
 			"food":_words(float(civ.get("food_days",30)),[[12,"going hungry"],[22,"short of food"],[60,"fed"],[1e9,"well provisioned"]])}
 		context["leader"]={"name":String(leader.get("name","")),"temperament":String(leader.get("temperament","")),"bio":String(leader.get("bio","")),"goals":goals.slice(0,3),
-			"trust":_words(float(leader.get("trust",0)),[[-0.3,"distrustful"],[0.1,"undecided"],[1e9,"trusting"]])}
+			"trust":_words(float(leader.get("trust",0)),[[-0.3,"distrustful"],[0.1,"undecided"],[1e9,"trusting"]]),"character":_rivals().call("prompt_view",String(audience.civ_id))}
 		var regard:=DIVINE.foreign_regard(String(audience.civ_id))
 		if not regard.is_empty(): context["their_regard"]={"reads":"they "+String(regard.read),"reverence":_band_word(float(regard.love)),"dread":_band_word(float(regard.dread))}
 	else:

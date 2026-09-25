@@ -989,7 +989,19 @@ static func for_foreign_leader(civ_id:String)->Dictionary:
 	p["stance"]=stance
 	p["sample"]=String(people.proverb)
 	p["model_rank"]=rank_models(features,stance,"leader:"+civ_id)
-	_lifelong(p,"leader:"+civ_id)
+	# A ruler keeps the manner chosen at their accession for life; an heir has
+	# their own (rival_rulers.gd stores it on the ruler's character).
+	var character:Dictionary=info.get("character",{}) if info.get("character") is Dictionary else {}
+	var kept:=String(character.get("model",""))
+	var who:="leader:"+civ_id
+	if not kept.is_empty() and not model(kept).is_empty():
+		var ranking:Array=p.model_rank
+		ranking.erase(kept); ranking.push_front(kept)
+		p["model_rank"]=ranking
+		who="leader:%s:%d" % [civ_id,int(character.get("gen",1))]
+		var models:Dictionary=registry.get("models",{})
+		models[who]=kept; registry["models"]=models
+	_lifelong(p,who)
 	return p
 
 static func for_envoy(civ_id:String,audience_id:String)->Dictionary:

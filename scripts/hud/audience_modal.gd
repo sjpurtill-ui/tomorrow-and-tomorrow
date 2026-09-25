@@ -19,6 +19,7 @@ const Divine:=preload("res://scripts/divine_regard.gd")
 const Commands:=preload("res://scripts/court_commands.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
 const Lives:=preload("res://scripts/court_lives.gd")
+const Rivals:=preload("res://scripts/rival_rulers.gd")
 ## Typed words that are about people (asked, summoned, questioned, accused or
 ## judged) go to the live persons exchange; offline the Court offers choices.
 const PERSONS_WORDS:="(?i)\\b(who|whom|whose|summon|bring|fetch|send for|responsible|blame|fault|lying|liar|lie|lied|truth|swear|ledger|tally|confess|tell me (of|about)|where were you|mercy|pardon|exalt|maim|curse|marry|priest)\\b"
@@ -575,7 +576,9 @@ func _build_speech_row()->Control:
 func _build_options()->void:
 	for child in options_row.get_children():child.queue_free()
 	options_row.visible=true;outcome_box.visible=false
-	for option:Dictionary in Hall.options(audience_id):
+	var listed:=Hall.options(audience_id)
+	_option_count=listed.size()
+	for option:Dictionary in listed:
 		options_row.add_child(_option_card(option))
 	_build_divine_row()
 	_build_persons_row()
@@ -725,6 +728,7 @@ func _on_divine_intent(id:String,action:String)->void:
 	if id!=audience_id or not resolved_result.is_empty():return
 	divine(action,"",false)
 
+var _option_count:=0
 func _option_card(option:Dictionary)->Button:
 	var tone:=String(option.get("tone","neutral"))
 	var tone_color:=_tone_color(tone)
@@ -753,6 +757,23 @@ func _option_card(option:Dictionary)->Button:
 	sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;sub.max_lines_visible=2;sub.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	if not enabled:sub.add_theme_font_override("font",_italic)
 	stack.add_child(sub)
+	# Who at court objects to this answer, or speaks for it (rival_rulers.gd).
+	# One voice shows on the card (the objection first); both are in the tooltip.
+	# Cards keep their height: the voice takes the second line of the terms.
+	if _option_count>=4:
+		title.max_lines_visible=1;title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	var shown:=false
+	for side in ["objection","support"]:
+		var said:=String(option.get(side,""))
+		if said.is_empty() or not enabled:continue
+		var words:=("Objects · " if side=="objection" else "For it · ")+said
+		button.tooltip_text+="\n"+words
+		if shown:continue
+		shown=true;sub.max_lines_visible=1
+		var voice:=Tokens.make_label(words,12,Tokens.RED if side=="objection" else Tokens.GREEN)
+		voice.name="Option"+side.capitalize();voice.mouse_filter=Control.MOUSE_FILTER_IGNORE;voice.add_theme_font_override("font",_italic)
+		voice.clip_text=true;voice.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+		stack.add_child(voice)
 	var chosen:=String(option.get("id",""))
 	button.pressed.connect(func():choose(chosen))
 	return button
@@ -2049,6 +2070,7 @@ func show_foreign(civ_id:String)->bool:
 	transcript_scroll.add_child(transcript)
 	thinking=Tokens.make_label("",14,Tokens.TEXT_DIM);thinking.name="Thinking";thinking.add_theme_font_override("font",_italic);thinking.visible=false;stack.add_child(thinking)
 	column.add_child(_build_brief_row(civ_id))
+	column.add_child(_build_offline_briefs())
 	column.add_child(_build_terms_row(civ_id))
 	body.add_child(_build_foreign_footer())
 	if not ForeignDialogue.changed.is_connected(_on_foreign_changed):ForeignDialogue.changed.connect(_on_foreign_changed)
@@ -2090,6 +2112,9 @@ func _build_foreign_herald(civ_id:String,civ:Dictionary,leader:Dictionary)->Cont
 
 func _foreign_leader_person(civ_id:String,leader:Dictionary)->Dictionary:
 	var person:={"name":String(leader.get("name","")),"person_id":0}
+	# The same picture for a ruler's whole life (rival_rulers.gd).
+	var portrait:Dictionary=Rivals.portrait_person(civ_id)
+	if portrait.has("early_art_index"):person["early_art_index"]=int(portrait.early_art_index)
 	EarlyArt.bind_foreign_identity(person,civ_id,int(GameState.world_seed))
 	return person
 
@@ -2124,6 +2149,16 @@ func _build_foreign_speaker(civ_id:String,civ:Dictionary,leader:Dictionary)->Con
 	var accord:Dictionary=leader.get("accord",{}) if leader.get("accord") is Dictionary else {}
 	if not accord.is_empty() and ForeignDiplomacy.ACCORDS.has(String(accord.get("kind",""))):
 		rows.append(["Understanding","%s · %d days" % [String(ForeignDiplomacy.ACCORDS[String(accord.kind)].name),maxi(0,int(accord.get("until",0))-int(GameState.elapsed_days))],Tokens.GREEN])
+	var character:Dictionary=Rivals.rival_character(civ_id)
+	if not character.is_empty():
+		rows.append(["Known for",String(character.get("trait_words","")),Tokens.BODY])
+		if int(character.get("age",0))>0:rows.append(["Age","about %d" % int(character.age),Tokens.BODY])
+		var grudges:Array=character.get("grudges",[])
+		if not grudges.is_empty():rows.append(["Remembers",String((grudges[0] as Dictionary).get("text","")),Tokens.RED])
+		var bonds:Array=character.get("bonds",[])
+		if not bonds.is_empty():rows.append(["Bound by",String((bonds[0] as Dictionary).get("text","")),Tokens.GREEN])
+		var lineage:Array=character.get("lineage",[])
+		if not lineage.is_empty():rows.append(["Before them",String((lineage[0] as Dictionary).get("name","")),Tokens.BODY])
 	var goals:Array=leader.get("goals",[]) if leader.get("goals") is Array else []
 	for index in mini(goals.size(),2):
 		if goals[index] is Dictionary:rows.append(["They want",String((goals[index] as Dictionary).get("title","")),Tokens.BODY])
@@ -2165,6 +2200,37 @@ func _build_brief_row(civ_id:String)->Control:
 	set_aside.pressed.connect(func()->void:ForeignDialogue.set_aside_reply(civ_id);_refresh_foreign())
 	row.add_child(set_aside);foreign_refs["set_aside"]=set_aside
 	return row
+
+func _build_offline_briefs()->Control:
+	## Without a live voice, briefs are chosen from what lies between the peoples.
+	var box:=HFlowContainer.new();box.name="OfflineBriefs";box.add_theme_constant_override("h_separation",8);box.add_theme_constant_override("v_separation",6)
+	box.visible=false;foreign_refs["offline"]=box
+	return box
+
+func _refresh_offline_briefs(civ_id:String,show:bool,away:bool)->void:
+	var box:=foreign_refs.get("offline") as HFlowContainer
+	if box==null:return
+	box.visible=show
+	var choices:Array[Dictionary]=ForeignDialogue.offline_choices(civ_id) if show else []
+	var signature:="%s|%s|%s" % [str(show),str(away),JSON.stringify(choices)]
+	if String(foreign_refs.get("offline_sig",""))==signature:return
+	foreign_refs["offline_sig"]=signature
+	for child in box.get_children():child.queue_free()
+	if not show:return
+	var lead:=Tokens.make_label("BRIEF YOUR ENVOY",11,Tokens.TEXT_DIM,.12);lead.size_flags_vertical=Control.SIZE_SHRINK_CENTER;box.add_child(lead)
+	for choice:Dictionary in choices:
+		var button:=Button.new();button.name="Brief_"+String(choice.get("id",""));button.text=String(choice.get("label",""));button.custom_minimum_size=Vector2(0,34)
+		button.add_theme_stylebox_override("normal",Tokens.gold_outline_style());button.focus_mode=Control.FOCUS_NONE
+		var cost:Dictionary=choice.get("cost",{}) if choice.get("cost") is Dictionary else {}
+		button.tooltip_text=("Your envoy carries %d %s." % [roundi(float(cost.amount)),String(cost.resource)]) if not cost.is_empty() else "Your envoy carries these words there and back."
+		button.disabled=away or not bool(choice.get("enabled",true))
+		if not bool(choice.get("enabled",true)):button.tooltip_text=String(choice.get("reason",""))
+		var id:=String(choice.get("id",""))
+		button.pressed.connect(func()->void:
+			var sent:=ForeignDialogue.ask_offline(civ_id,id)
+			foreign_refs["message"]="Your envoy sets out with your brief. The answer comes back with them." if sent else String(ForeignDialogue.thread(civ_id).get("status",""))
+			_refresh_foreign())
+		box.add_child(button)
 
 func _build_terms_row(civ_id:String)->Control:
 	## Terms the envoys can carry, with the council's reading of their reception.
@@ -2271,7 +2337,7 @@ func _refresh_foreign()->void:
 	var status_lines:PackedStringArray=PackedStringArray()
 	var message:=String(foreign_refs.get("message",""))
 	if not message.is_empty():status_lines.append(message)
-	if not connection_issue.is_empty():status_lines.append("Your envoys cannot yet carry words: "+connection_issue)
+	if not connection_issue.is_empty() and not bool(gate.ok):status_lines.append("Your envoys cannot yet carry words: "+connection_issue)
 	elif bool(thread.get("retryable",false)):status_lines.append(String(thread.get("status","")))
 	elif not bool(gate.ok):status_lines.append(String(gate.reason))
 	if bool(thread.get("returned_home",false)) and bool(thread.get("in_transit",false)):
@@ -2291,9 +2357,12 @@ func _refresh_foreign()->void:
 		thinking.visible=ForeignDialogue.pending.has(id) or bool(thread.get("in_transit",false))
 		thinking.text="Your envoy is away with your brief…" if bool(thread.get("in_transit",false)) else "The reply is being set down…"
 	if is_instance_valid(speak_button):
-		speak_button.visible=bool(gate.ok)
+		speak_button.visible=bool(gate.ok) and connection_issue.is_empty()
 		speak_button.disabled=not connection_issue.is_empty() or ForeignDialogue.pending.has(id) or not bool(gate.ok) or away
 		speak_button.tooltip_text="Envoys must return before another party departs." if away else ("Your envoys need a working connection to carry words." if not connection_issue.is_empty() else "Send your envoy with this brief.")
+	# Offline, the brief is chosen from what lies between you (rival_rulers.gd).
+	_refresh_offline_briefs(id,not connection_issue.is_empty() and bool(gate.ok),away or ForeignDialogue.pending.has(id))
+	if is_instance_valid(speech_input):speech_input.visible=connection_issue.is_empty() or not bool(gate.ok)
 	var delegates:=foreign_refs.get("delegates") as Button
 	if delegates!=null:
 		delegates.visible=not bool(gate.ok)
