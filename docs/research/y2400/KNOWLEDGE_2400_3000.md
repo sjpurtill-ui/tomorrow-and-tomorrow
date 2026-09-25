@@ -22,8 +22,8 @@
 | 2424 (2399–2449) | Precision gauges and standard bars for length | 6 y | 36 min | dimensional_metrology | not seen |
 | 2424 (2399–2449) | Every measurement carries its stated error | 5 y | 30 min | measurement_uncertainty | 205 |
 | **2427 (2392–2462)** | **Research university: seminars, laboratories and the research doctorate (continues: chartered_university)** | 15 y | 91 min | NEW · research_university | — |
-| **2437 (2402–2472)** | **Steam-driven cylinder press prints thousands of sheets an hour (continues: screw_press_printing)** | 10 y | 61 min | NEW · steam_cylinder_press | — |
-| 2453 (2428–2478) | Needle galvanometers measure current | 6 y | 36 min | electrical_measurement | 202 |
+| **2437 (2402–2472)** | **Steam-driven cylinder press prints thousands of sheets an hour (continues: screw_press_printing)** | 10 y | 61 min | cylinder_press_printing | not seen |
+| 2453 (2428–2478) | Needle current meters measure current | 6 y | 36 min | electrical_measurement | 202 |
 | 2459 (2434–2484) | Quantities checked by their units and dimensions | 5 y | 30 min | dimensional_analysis | 216 |
 | 2459 (2434–2484) | Any wave split into a sum of simple waves | 8 y | 49 min | harmonic_analysis | not seen |
 | 2459 (2434–2484) | Drag of thick fluids measured and reckoned | 6 y | 36 min | viscous_resistance | not seen |
@@ -73,7 +73,7 @@
 | 2613 (2588–2638) | Vector analysis for fields and forces | 6 y | 36 min | vector_analysis | 211 |
 | 2616 (2591–2641) | Twisted balanced pairs quiet the line | 5 y | 30 min | balanced_conductor_pairs | not seen |
 | 2621 (2596–2646) | Oil films between moving parts reckoned | 5 y | 30 min | lubrication_regimes | not seen |
-| 2640 (2615–2665) | Punched-card tabulating machines count the census [gov: office] | 10 y | 61 min | NEW · punched_card_tabulation | — |
+| 2640 (2615–2665) | Punched-card tabulating machines count the census [gov: offices] | 10 y | 61 min | NEW · punched_card_tabulation | — |
 | 2659 (2634–2684) | The electron: a charged particle smaller than any atom | 10 y | 61 min | electron_physics | not seen |
 | 2659 (2634–2684) | Rays and radioactivity measured | 6 y | 36 min | radiation_measurement | not seen |
 | 2659 (2634–2684) | Hot filaments give off charge in a vacuum | 6 y | 36 min | thermionic_emission | not seen |
@@ -118,7 +118,7 @@
 | **2768 (2733–2803)** | **Heavy nuclei split and free more neutrons; reactors and bombs both follow** | 12 y | 73 min | nuclear_fission | not seen |
 | 2768 (2743–2793) | Moderators slow neutrons to sustain a chain | 8 y | 49 min | neutron_moderation | not seen |
 | 2773 (2748–2798) | Best choices under limits: constrained optimization | 6 y | 36 min | constrained_optimization | not seen |
-| 2779 (2754–2804) | State-funded great laboratories for science [gov: office] | 12 y | 73 min | NEW · state_great_laboratories | — |
+| 2779 (2754–2804) | State-funded great laboratories for science [gov: offices] | 12 y | 73 min | NEW · state_great_laboratories | — |
 | 2784 (2759–2809) | Secondary schooling for every child [gov: law] (continues: compulsory_elementary_schooling) | 10 y | 61 min | NEW · universal_secondary_schooling | — |
 | **2795 (2760–2830)** | **Mathematical theory of information and channel capacity** | 10 y | 61 min | NEW · information_theory | — |
 | 2800 (2775–2825) | Living cells filmed in time lapse | 5 y | 30 min | live_cell_time_lapse | not seen |
@@ -164,7 +164,7 @@
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Knowledge advances | 9 | 15 | 10 | 13 | 13 | 25 | 9 | 8 | 20 | 5 | 6 | 5 |
 
-The total is **138** advances: 85 in years 2400–2700 and 53 in years 2700–3000. Across the four channels, one lands about every 4.4 years, so each channel always has work of its age. The list runs longer than the 100–130 target because 98 rows are catalog ids that must be placed; many of them (telegraph and radio parts, microscope parts) are small steps that take 4–6 years. Long thresholds (25 bold rows) take 10–15 years (1–1.5 real hours). The densest stretch is 2650–2700 (≈ AD 1894–1912), when the catalog's radio and electron items cluster.
+The total is **138** advances: 85 in years 2400–2700 and 53 in years 2700–3000. Across the four channels, one lands about every 4.4 years, so each channel always has work of its age. The list runs longer than the 100–130 target because 99 rows are catalog ids that must be placed; many of them (telegraph and radio parts, microscope parts) are small steps that take 4–6 years. Long thresholds (25 bold rows) take 10–15 years (1–1.5 real hours). The densest stretch is 2650–2700 (≈ AD 1894–1912), when the catalog's radio and electron items cluster.
 
 **Key thresholds:**
 1. **Electricity and the field:** electrochemical_cells (2400) → electrical_measurement (2453) → electromagnetic_induction (2483) → energy_conservation_law (2525) → electromagnetic_wave_theory (2571) → electron_physics (2659) → energy_quanta (2667) → relative_spacetime (2680) → atomic_physics (2696) → quantum_mechanics (2733) → band_theory (2747) → pn_junctions (2802).
@@ -174,7 +174,7 @@ The total is **138** advances: 85 in years 2400–2700 and 53 in years 2700–30
 5. **Life under the lens:** compound_microscopy (2480) → cell_theory (2504) → biological_staining (2555) → descent_by_selection (2557) → microbial_isolation_methods (2603) → cell_culture_methods (2685) → live_cell_time_lapse (2800) → hereditary_double_helix (2808).
 6. **Matter and the nucleus:** atomic_combining_weights (2408) → spectroscopy (2557) → periodic_element_table (2584) → radiation_measurement (2659) → crystallography (2699) → nuclear_fission (2768) → neutron_moderation (2768). Fission is framed soberly: it opens both reactors (Production) and bombs (Security).
 7. **Schools and science as institutions:** research_university (2427) → compulsory_elementary_schooling (2587) → industrial_research_laboratory (2603) → refereed_journals (2667) → state_great_laboratories (2779) → universal_secondary_schooling (2784) → mass_higher_education (2832).
-8. **The page and the image:** steam_cylinder_press (2437) → fixed_light_images (2504) → punched_message_tape (2587) → teleprinter_mechanisms (2683) → volunteer_open_encyclopedia (2928). Photography as portrait and press art is Culture (`portrait_photo_studios`, `photo_news_magazines`).
+8. **The page and the image:** cylinder_press_printing (2437) → fixed_light_images (2504) → punched_message_tape (2587) → teleprinter_mechanisms (2683) → volunteer_open_encyclopedia (2928). Photography as portrait and press art is Culture (`portrait_photo_studios`, `photo_news_magazines`).
 9. **Ownership of overlaps:** the catalog's microbial and aseptic items stay here by direction; Health builds germ theory, vaccines and antisepsis in surgery on them. `public_key_ciphers` is shared with Security. Railway time and standard time zones are left to Logistics and Labor. `aerodynamics` and `wind_tunnel_testing` feed Logistics' powered flight. `photovoltaic_conversion` feeds Production's solar cells. Undersea cables are laid by Logistics ships but owned here as communication. Newspapers, broadcasting and social media as public culture are Culture; their state control is Institutions (`state_propaganda_ministry`) and Security (`mass_signals_surveillance`).
 
 ## Government and civic life

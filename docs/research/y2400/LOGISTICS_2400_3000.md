@@ -36,7 +36,7 @@ Names are generic practices. Real history is used only to calibrate dates.
 | 2493 (2453–2533) | Chronometers carried by ordinary merchant ships for longitude (continues: marine_timekeeper) | 6 y | 36 min | NEW · merchant_chronometer_issue | — |
 | **2501 (2471–2531)** | **Steamships cross the ocean on a regular line (continues: mail_packet_ships)** | 12 y | 73 min | NEW · ocean_steamship_line | — |
 | 2504 (2464–2544) | Printed railway guides and public timetables | 4 y | 24 min | NEW · printed_railway_timetables | — |
-| **2507 (2477–2537)** | **Uniform low-rate letter postage prepaid with adhesive stamps [gov: office] (continues: distance_postage_rates)** | 8 y | 49 min | NEW · prepaid_stamp_postage | — |
+| **2507 (2477–2537)** | **Uniform low-rate letter postage prepaid with adhesive stamps [gov: offices] (continues: distance_postage_rates)** | 8 y | 49 min | NEW · prepaid_stamp_postage | — |
 | 2509 (2469–2549) | Screw propeller replaces paddle wheels at sea (continues: steam_propulsion) | 10 y | 61 min | NEW · screw_propeller_ships | — |
 | 2512 (2472–2552) | Steam grain elevators with bins and chutes at railheads and ports | 8 y | 49 min | NEW · steam_grain_elevators | — |
 | 2515 (2475–2555) | Iron-hulled ocean steamers (shared: production) | 10 y | 61 min | NEW · iron_hulled_steamers | — |
@@ -78,10 +78,10 @@ Names are generic practices. Real history is used only to calibrate dates.
 | 2677 (2637–2717) | Motor lorries carry freight on roads | 8 y | 49 min | NEW · motor_freight_lorries | — |
 | 2683 (2643–2723) | Motor buses replace the horse omnibus | 5 y | 30 min | NEW · motor_bus_routes | — |
 | **2688 (2658–2718)** | **Cheap motor car built in long series (shared: production)** | 12 y | 73 min | NEW · series_built_motor_car | — |
-| 2691 (2651–2731) | Road board builds motor roads from fuel and licence taxes [gov: office] | 8 y | 49 min | NEW · motor_road_fund | — |
+| 2691 (2651–2731) | Road board builds motor roads from fuel and licence taxes [gov: offices] | 8 y | 49 min | NEW · motor_road_fund | — |
 | 2693 (2653–2733) | Passenger airships on scheduled routes | 8 y | 49 min | NEW · passenger_airships | — |
 | 2696 (2656–2736) | Radio direction-finding fixes a ship's position (continues: radio_telegraphy) | 6 y | 36 min | NEW · radio_direction_finding | — |
-| 2699 (2659–2739) | Diesel motor ships | 10 y | 61 min | NEW · diesel_motor_ships | — |
+| 2699 (2659–2739) | Heavy-oil motor ships | 10 y | 61 min | NEW · heavy_oil_motor_ships | — |
 
 ## Years 2700–3000 (≈ AD 1912–2030)
 
@@ -94,7 +94,7 @@ Names are generic practices. Real history is used only to calibrate dates.
 | 2709 (2669–2749) | Roadside fuel filling stations | 5 y | 30 min | NEW · roadside_fuel_stations | — |
 | **2715 (2685–2745)** | **Scheduled air mail** | 8 y | 49 min | NEW · scheduled_air_mail | — |
 | 2717 (2677–2757) | Passenger airline service between capitals | 10 y | 61 min | NEW · passenger_air_service | — |
-| 2720 (2680–2760) | State railway administration takes over the lines [gov: office] (shared: institutions) | 8 y | 49 min | NEW · state_railway_administration | — |
+| 2720 (2680–2760) | State railway administration takes over the lines [gov: offices] (shared: institutions) | 8 y | 49 min | NEW · state_railway_administration | — |
 | **2731 (2701–2761)** | **Limited-access motor roads with no level crossings** | 15 y | 91 min | NEW · limited_access_motorways | — |
 | 2733 (2693–2773) | Articulated tractor-trailer lorries | 6 y | 36 min | NEW · tractor_trailer_rigs | — |
 | 2739 (2699–2779) | Rail signals across a whole district worked from one control room | 6 y | 36 min | NEW · centralized_traffic_control | — |
@@ -103,7 +103,7 @@ Names are generic practices. Real history is used only to calibrate dates.
 | 2747 (2707–2787) | Electrified main-line railways | 10 y | 61 min | NEW · electrified_main_lines | — |
 | **2752 (2722–2782)** | **Fork-lift trucks and standard wooden pallets in warehouses** | 6 y | 36 min | NEW · pallet_forklift_handling | — |
 | 2755 (2715–2795) | Road haulage licensed and taxed [gov: law] | 5 y | 30 min | NEW · road_haulage_licensing | — |
-| **2757 (2727–2787)** | **Diesel-electric locomotives replace steam** | 10 y | 61 min | NEW · diesel_electric_locomotives | — |
+| **2757 (2727–2787)** | **Oil-engined electric locomotives replace steam** | 10 y | 61 min | NEW · oil_electric_locomotives | — |
 | 2763 (2723–2803) | All-metal monoplane airliners make flying pay (continues: advanced_airframes) | 10 y | 61 min | NEW · metal_monoplane_airliners | — |
 | 2773 (2733–2813) | Pressurized airliner cabins fly above the weather | 6 y | 36 min | NEW · pressurized_airliner_cabins | — |
 | 2781 (2741–2821) | Hyperbolic radio navigation for ships and aircraft | 8 y | 49 min | NEW · hyperbolic_radio_navigation | — |
@@ -113,15 +113,18 @@ Names are generic practices. Real history is used only to calibrate dates.
 | **2805 (2775–2835)** | **Jet airliners (continues: jet_propulsion)** | 12 y | 73 min | NEW · jet_airliners | — |
 | 2808 (2768–2848) | Roll-on/roll-off ferries for lorries and cars | 6 y | 36 min | NEW · roll_on_roll_off_ferries | — |
 | **2815 (2785–2845)** | **Standard steel shipping containers move ship to lorry to train unopened** | 15 y | 91 min | NEW · intermodal_shipping_containers | — |
-| **2815 (2785–2845)** | **National motorway network paid from a fuel tax [gov: office]** | 15 y | 91 min | NEW · national_highway_network | — |
+| **2815 (2785–2845)** | **National motorway network paid from a fuel tax [gov: offices]** | 15 y | 91 min | NEW · national_highway_network | — |
+| **2817 (2787–2847)** | **First artificial satellite carried into orbit by a many-stage rocket (shared: knowledge, security)** | 12 y | 73 min | NEW · orbital_satellite_launch | — |
 | 2818 (2778–2858) | Very large oil tankers | 8 y | 49 min | NEW · very_large_tankers | — |
 | 2822 (2782–2862) | Ship-to-shore gantry cranes and container terminals | 8 y | 49 min | NEW · container_gantry_terminals | — |
 | 2825 (2785–2865) | Unit trains carry one bulk cargo from mine to port | 5 y | 30 min | NEW · bulk_unit_trains | — |
 | 2825 (2785–2865) | Dedicated bulk carriers for ore and grain | 6 y | 36 min | NEW · dedicated_bulk_carriers | — |
 | 2828 (2788–2868) | Computer seat reservations for airlines | 8 y | 49 min | NEW · computer_seat_reservations | — |
+| 2828 (2788–2868) | Crewed capsule orbits the earth and returns (continues: orbital_satellite_launch) | 8 y | 49 min | NEW · crewed_orbital_flight | — |
 | **2835 (2805–2865)** | **High-speed passenger rail on dedicated lines** | 15 y | 91 min | NEW · high_speed_rail_lines | — |
 | 2835 (2795–2875) | Satellite navigation for ships (continues: hyperbolic_radio_navigation) | 10 y | 61 min | NEW · satellite_ship_navigation | — |
 | 2845 (2805–2885) | Container sizes standardized across realms [gov: law] | 6 y | 36 min | NEW · standard_container_sizes | — |
+| **2848 (2818–2878)** | **Crew landed on the moon and brought home (continues: crewed_orbital_flight)** | 12 y | 73 min | NEW · crewed_lunar_landing | — |
 | 2850 (2810–2890) | Wide-body airliners and hub airports | 10 y | 61 min | NEW · wide_body_hub_flights | — |
 | 2852 (2812–2892) | Automated high-bay warehouses with stacker cranes | 8 y | 49 min | NEW · automated_high_bay_warehouses | — |
 | **2858 (2828–2888)** | **Overnight air express parcel network** | 8 y | 49 min | NEW · overnight_air_express | — |
@@ -134,8 +137,9 @@ Names are generic practices. Real history is used only to calibrate dates.
 | 2910 (2870–2950) | Low-cost point-to-point airlines | 6 y | 36 min | NEW · low_cost_point_airlines | — |
 | **2912 (2882–2942)** | **Open satellite positioning for every user (continues: satellite_ship_navigation)** | 12 y | 73 min | NEW · open_satellite_positioning | — |
 | **2918 (2888–2948)** | **Online orders with tracked parcel delivery** | 10 y | 61 min | NEW · online_order_parcel_tracking | — |
+| 2920 (2880–2960) | Crewed station kept in orbit year-round, built and shared by several realms (continues: crewed_orbital_flight) | 10 y | 61 min | NEW · shared_orbital_station | — |
 | 2930 (2890–2970) | Automatic ship identification transponders [gov: law] | 5 y | 30 min | NEW · automatic_ship_identification | — |
-| 2932 (2892–2972) | Congestion charges for driving into town centres [gov: civic] | 5 y | 30 min | NEW · urban_congestion_charging | — |
+| 2932 (2892–2972) | Congestion charges for driving into town centres [gov: towns] | 5 y | 30 min | NEW · urban_congestion_charging | — |
 | 2935 (2895–2975) | Radio tags on pallets and cases | 6 y | 36 min | NEW · rfid_pallet_tags | — |
 | 2938 (2898–2978) | Turn-by-turn satellite routing in cars | 6 y | 36 min | NEW · in_car_satellite_routing | — |
 | 2940 (2900–2980) | Ultra-large container ships | 8 y | 49 min | NEW · ultra_large_container_ships | — |
@@ -143,7 +147,7 @@ Names are generic practices. Real history is used only to calibrate dates.
 | 2950 (2910–2990) | Ride-hailing by pocket telephone | 6 y | 36 min | NEW · app_ride_hailing | — |
 | 2955 (2915–2995) | Mobile robot fleets in fulfilment warehouses | 10 y | 61 min | NEW · warehouse_robot_fleets | — |
 | **2958 (2928–2988)** | **Battery-electric cars in mass production (shared: production)** | 12 y | 73 min | NEW · mass_battery_electric_cars | — |
-| 2965 (2925–3000) | Reusable orbital boosters cut launch costs (shared: knowledge) | 15 y | 91 min | NEW · reusable_orbital_boosters | — |
+| 2965 (2925–3000) | Reusable orbital boosters cut launch costs (shared: knowledge; continues: orbital_satellite_launch) | 15 y | 91 min | NEW · reusable_orbital_boosters | — |
 | 2970 (2930–3000) | Battery-electric city buses | 6 y | 36 min | NEW · battery_electric_buses | — |
 | 2978 (2938–3000) | Supply-chain resilience reviews and critical-goods stocks [gov: law] | 8 y | 49 min | NEW · supply_chain_resilience_reviews | — |
 | 2980 (2940–3000) | Drone parcel delivery in licensed zones | 8 y | 49 min | NEW · drone_parcel_delivery | — |
@@ -155,18 +159,19 @@ Names are generic practices. Real history is used only to calibrate dates.
 
 | Years | 2400–2450 | 2450–2500 | 2500–2550 | 2550–2600 | 2600–2650 | 2650–2700 | 2700–2750 | 2750–2800 | 2800–2850 | 2850–2900 | 2900–2950 | 2950–3000 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Logistics advances | 6 | 7 | 14 | 13 | 9 | 12 | 14 | 9 | 12 | 9 | 9 | 10 |
+| Logistics advances | 6 | 7 | 14 | 13 | 9 | 12 | 14 | 9 | 15 | 9 | 10 | 10 |
 
-The total is **124** advances: 61 in years 2400–2700 and 63 in years 2700–3000. 4 are catalog ids. Across the six channels, one lands about every 5 game years, so each channel gets work about every 30 years. Most items take 5–10 years (30–61 min). Key thresholds (bold) mostly take 12–15 years (73–91 min): the first public railway, the ocean steamship line, the ship canals, the container and the national motorway network. A few law and handling thresholds (standard time, stamped postage, pallets, bar codes) take 6–8 years. The list is fairly even. Years 2500–2600 and 2700–2750 are densest, because railways and posts spread in AD 1838–1875, and motor roads and airlines in AD 1912–1931.
+The total is **128** advances: 61 in years 2400–2700 and 67 in years 2700–3000. 4 are catalog ids. Across the six channels, one lands about every 5 game years, so each channel gets work about every 30 years. Most items take 5–10 years (30–61 min). Key thresholds (bold) mostly take 12–15 years (73–91 min): the first public railway, the ocean steamship line, the ship canals, the container and the national motorway network. A few law and handling thresholds (standard time, stamped postage, pallets, bar codes) take 6–8 years. The list is fairly even. Years 2500–2600 and 2700–2750 are densest, because railways and posts spread in AD 1838–1875, and motor roads and airlines in AD 1912–1931.
 
 **Key thresholds:**
-1. **Railways:** plate-rail horse railway (2408) → public steam railway (2467) → many-tubed boilers (2477) → intercity passenger railway (2480) → `rail_track_foundations` (2485) → `rail_gauge_standards` (2523) → clearing house (2525) → interlocked signals (2549) → `rail_vehicle_braking` (2584) → continental trunk line (2584) → standard time (2621) → state railway administration (2720) → electrified main lines (2747) → diesel-electric locomotives (2757) → high-speed lines (2835) → double-stack container trains (2885). Troop movement by railway timetable is Security (`railway_mobilization`).
+1. **Railways:** plate-rail horse railway (2408) → public steam railway (2467) → many-tubed boilers (2477) → intercity passenger railway (2480) → `rail_track_foundations` (2485) → `rail_gauge_standards` (2523) → clearing house (2525) → interlocked signals (2549) → `rail_vehicle_braking` (2584) → continental trunk line (2584) → standard time (2621) → state railway administration (2720) → electrified main lines (2747) → oil-electric locomotives (2757) → high-speed lines (2835) → double-stack container trains (2885). Troop movement by railway timetable is Security (`railway_mobilization`).
 2. **Roads and motor transport:** layered stone road beds (1800–2400 Infrastructure `layered_stone_road_beds`, 2350) → timed mail coaches (1800–2400 `timed_mail_coaches`, 2372) → horse omnibus (2459) → chain-drive bicycle (2627) → motor carriage (2629) → air-filled tyres (2635) → motor lorries (2677) → series-built motor car (2688) → road fund (2691) → limited-access motorways (2731) → national motorway network (2815) → battery-electric cars (2958) → driverless freight corridors (2992).
-3. **Ships and services at sea:** trial paddle boat (1800–2400 `trial_steam_paddle_boat`, 2390) → scheduled river steamers (2419) → steam tugs (2443) → ocean steamship line (2501) → screw propeller (2509) → iron hulls (2515) → compound engines (2573) → isthmus ship canal (2584) → frozen meat by sea (Nutrition `frozen_meat_trade`, 2605) → triple expansion (2616) → steam turbines (2659) → diesel motor ships (2699) → high-lock ship canal (2704) → steel containers (2815) → ultra-large container ships (2940) → methanol and ammonia fuels (2988).
+3. **Ships and services at sea:** trial paddle boat (1800–2400 `trial_steam_paddle_boat`, 2390) → scheduled river steamers (2419) → steam tugs (2443) → ocean steamship line (2501) → screw propeller (2509) → iron hulls (2515) → compound engines (2573) → isthmus ship canal (2584) → frozen meat by sea (Nutrition `frozen_meat_trade`, 2605) → triple expansion (2616) → steam turbines (2659) → heavy-oil motor ships (2699) → high-lock ship canal (2704) → steel containers (2815) → ultra-large container ships (2940) → methanol and ammonia fuels (2988).
 4. **Navigation and safety at sea:** chronometers for merchant ships (2493) → wind-and-current charts (2536) → sea collision rules (2568) → load lines (2603) → `hull_condition_surveys` (2667) → radio direction-finding (2696) → wireless distress watch (2700) → hyperbolic radio navigation (2781) → satellite ship navigation (2835) → open satellite positioning (2912) → ship identification transponders (2930).
 5. **Posts, parcels and freight handling:** distance postage (1800–2400 `distance_postage_rates`) → stamped postage (2507) → post cars on trains (2528) → mail-order trade (2592) → postal union (2597) → parcel post (2701) → pallets and fork-lifts (2752) → air express (2858) → bar codes (2860) → just-in-time (2868) → supply-chain management (2895) → tracked online parcels (2918) → warehouse robots (2955) → drone parcels (2980).
 6. **Air carriage:** passenger airships (2693) → air mail (2715) → passenger airlines (2717) → radio beacons (2744) → all-metal airliners (2763) → aviation convention (2784) → jet airliners (2805) → wide-body hubs (2850) → low-cost airlines (2910) → reusable boosters (2965) → electric air taxis (2998).
-7. **Ownership of overlaps:** these are kept by other lists and were removed here: the mail packets and timed mail coaches (1800–2400 `mail_packet_ships`, `timed_mail_coaches`), broken-stone road beds (1800–2400 Infrastructure `layered_stone_road_beds`), the emigrant passage law (Demography `emigrant_passenger_law`, 2525), frozen and chilled meat by sea (Nutrition `frozen_meat_trade`, 2605) and the rail-rate commission (Institutions `rate_regulation_commissions`, 2685). Engines are Production's: screw ships, compound marine engines and turbine ships here continue `steam_propulsion`, `compound_steam_engines` and `steam_turbines`. Escorted convoys are Security (`escorted_convoy_system`), and so are fleet replenishment (`naval_logistics`) and the uses of airlift in war. The telegraph and radio are Knowledge; train dispatch, direction-finding and ship navigation here continue them. Bridges, tunnels, ports, paved streets and broken-stone road beds (1800–2400 `layered_stone_road_beds`) are Infrastructure; the ship canals, the underground railway and electric tramways here are marked (shared: infrastructure). `wagonway_haulage` and `dry_dock_services` belong to the 1800–2400 window.
+7. **Spaceflight** (added by the 2400–3000 registry pass; Knowledge's scope assigns it here): **first orbital satellite (2817)** → crewed orbital flight (2828) → **crewed landing on the moon (2848)** → station shared by several realms (2920) → reusable boosters (2965). Security's reconnaissance and launch-warning satellites, Knowledge's relay satellites and Ecology's weather satellites follow the first launch.
+8. **Ownership of overlaps:** these are kept by other lists and were removed here: the mail packets and timed mail coaches (1800–2400 `mail_packet_ships`, `timed_mail_coaches`), broken-stone road beds (1800–2400 Infrastructure `layered_stone_road_beds`), the emigrant passage law (Demography `emigrant_passenger_law`, 2525), frozen and chilled meat by sea (Nutrition `frozen_meat_trade`, 2605) and the rail-rate commission (Institutions `rate_regulation_commissions`, 2685). Engines are Production's: screw ships, compound marine engines and turbine ships here continue `steam_propulsion`, `compound_steam_engines` and `steam_turbines`. Escorted convoys are Security (`escorted_convoy_system`), and so are fleet replenishment (`naval_logistics`) and the uses of airlift in war. The telegraph and radio are Knowledge; train dispatch, direction-finding and ship navigation here continue them. Bridges, tunnels, ports, paved streets and broken-stone road beds (1800–2400 `layered_stone_road_beds`) are Infrastructure; the ship canals, the underground railway and electric tramways here are marked (shared: infrastructure). `wagonway_haulage` and `dry_dock_services` belong to the 1800–2400 window.
 
 ## Government and civic life
 
