@@ -29,6 +29,7 @@ extends RefCounted
 const Hall:=preload("res://scripts/audience_hall.gd")
 const DIVINE:=preload("res://scripts/divine_regard.gd")
 const CV:=preload("res://scripts/character_voice.gd")
+const ScoutSurvival:=preload("res://scripts/scout_survival.gd")
 const CustomDirective:=preload("res://scripts/custom_directive.gd")
 
 const ACTS:=["question","statement","command","threat","blessing"]
@@ -736,9 +737,19 @@ static func _send(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,cl
 		r.outcome="Envoys set out for %s at your word. %s" % [String(civ.get("name","")),String(sent.get("message","")).get_slice(".",0)+"."]
 	else:
 		var heading:=String(cls.heading)
-		var sent2:Dictionary=CivilizationSystem.dispatch_scouts(30,"open_world",heading)
+		# The god may overrule the Chief Scout's caution. The party goes, and
+		# the odds it carries say plainly what that costs.
+		var reckless:=_re("(?i)\\b(regardless|whatever the (cost|danger|risk)|no matter (what|the cost|the danger)|at any cost|at all costs|do not turn back|don't turn back|never turn back)\\b").search(text)!=null
+		var far:=_re("(?i)\\b(far|farther|further|distant|beyond the|to the ends|as far as|long journey|a year)\\b").search(text)!=null
+		var sent2:Dictionary={}
+		for days:int in ([365,180,90,30] if far else [30]):
+			sent2=CivilizationSystem.dispatch_scouts(days,"open_world",heading,0,false,"",reckless)
+			if not sent2.has("error"): break
 		if sent2.has("error"): return _order(id,audience,r,actor,text,context,String(sent2.error))
 		r.outcome="A scouting party sets out%s at your word%s. %s" % [" to the "+heading if heading!="" else ""," under "+who if who!="" else "",String(sent2.get("message","")).get_slice(".",0)+"."]
+		if reckless:
+			var party:Dictionary=CivilizationSystem.scout_missions[-1] if not CivilizationSystem.scout_missions.is_empty() else {}
+			r.outcome+=" You have told them not to turn back; the Chief Scout judges that %s." % ScoutSurvival.odds_phrase({"death_chance":float(party.get("field_death_chance",0.0))})
 	if int(actor.get("person_id",0))>0:
 		GovernmentPeopleSystem.adjust_person_bonds(int(actor.person_id),{"obligation":0.02,"respect":0.01})
 		GovernmentPeopleSystem.record_person_memory(int(actor.person_id),"The god sent me out: %s" % text.substr(0,160),"divine",0.6,{"emotion":"duty","outcome":"sent"})
