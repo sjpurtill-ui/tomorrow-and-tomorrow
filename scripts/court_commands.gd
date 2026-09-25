@@ -890,7 +890,7 @@ const STAGE:={
 		"[Spear points herd {target} to the edge of the camp and push them out into the dark; the court listens to the footsteps fade.]"],
 	"detain":["[{target}'s arms are wrenched behind them and their wrists bound with rawhide cord; they are dragged away to be kept under guard.]",
 		"[{target} is thrown to the floor and tied hand and foot; the guards haul them off under watch while the court looks away.]"],
-	"give":["[Bearers carry {amt} {res} out of the stores and heap it at {target}'s feet; every eye in the court follows the loads.]",
+	"give":["[Bearers carry {amt} {res} out of the stores and heap it at {target}'s feet while the whole court watches.]",
 		"[{amt} {res} is brought out and laid before {target}, who stares at the pile and then at you.]"],
 	"take":["[The guards tear open the envoy's packs and haul the goods away; the envoy watches, white to the lips.]",
 		"[Your guards strip the envoy's bearers of their loads while the envoy stands rigid with fury.]"],

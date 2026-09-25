@@ -136,7 +136,12 @@ func _run_scene(id:String,kind:String,origin:String,speeches:Array,option_id:Str
 	ready_ids.clear()
 	voice.open_scene(id)
 	var after_open:=(a.lines as Array).size()
-	_expect(after_open>=3,"%s open produced only %d lines" % [id,after_open])
+	# The visitor speaks; the court stays silent unless it has real guidance.
+	_expect(after_open>=1,"%s open produced no lines" % id)
+	var chimes:=0
+	for line in a.lines:
+		if String(line.role)=="official" and String(line.speaker)!=String(a.speaker.name): chimes+=1
+	_expect(chimes<=1,"%s open had %d court chime-ins; at most one with real guidance" % [id,chimes])
 	_expect(String(a.lines[0].speaker)==String(a.speaker.name),"%s open did not start with the visitor" % id)
 	for text in speeches:
 		voice.player_speaks(id,String(text))
@@ -231,10 +236,16 @@ func _test_validator()->void:
 		"not a dict",
 	]
 	var out:Array=voice.validate_lines(raw,s,"open")
-	_expect(out.size()==3,"validator kept %d lines, expected 3: %s" % [out.size(),JSON.stringify(out)])
-	if out.size()==2:
-		_expect(String(out[0].text).begins_with("Forty sacks"),"speaker-name prefix not stripped")
-		_expect(bool(out[1].aside),"aside flag lost")
+	# No official was chosen by the relevance gate: only the visitor's line stands.
+	_expect(out.size()==1,"validator kept %d lines, expected 1: %s" % [out.size(),JSON.stringify(out)])
+	if out.size()>=1: _expect(String(out[0].text).begins_with("Forty sacks"),"speaker-name prefix not stripped")
+	# With a gated objection, that one official may add one line with real stakes.
+	s["gate"]={"key":"official_12","kind":"objection","text":"40 food is a third of what we hold"}
+	var gated:Array=voice.validate_lines(raw,s,"open")
+	_expect(gated.size()==2 and String(gated[1].key)=="official_12" and bool(gated[1].aside),"gated official line not kept once: %s" % JSON.stringify(gated))
+	# Invented maxims are stripped from live lines; the plain part stays.
+	var maxims:Array=voice.validate_lines([{"speaker_key":"envoy","text":"A full store is a quiet camp. We ask 40 food and nothing more.","aside":false}],s,"open")
+	_expect(maxims.size()==1 and not "quiet camp" in String(maxims[0].text),"maxim not stripped from a live line: %s" % JSON.stringify(maxims))
 
 func _mock_send(id:String,payload:Dictionary,attempt:int)->void:
 	sent_payloads.append(payload)
@@ -263,20 +274,20 @@ func _test_mocked_api()->void:
 	for i in 10: await get_tree().process_frame
 	_expect(not voice.busy("aud_m"),"busy() stuck after response")
 	var lines:Array=a.lines
-	_expect(lines.size()==3,"mock success appended %d lines, expected 3" % lines.size())
-	if lines.size()==3:
+	# The court was silent (no official had guidance), so only the visitor speaks.
+	_expect(lines.size()==1,"mock success appended %d lines, expected 1" % lines.size())
+	if lines.size()>=1:
 		_expect(String(lines[0].role)=="envoy","visitor was not moved to speak first")
-		_expect(bool(lines[2].aside),"aside lost from API line")
 	_expect(is_equal_approx(float(a.mood),0.0),"opening should not shift mood")
 	if not sent_payloads.is_empty():
 		var p:Dictionary=sent_payloads[0]
 		_expect(not p.has("temperature"),"payload sends temperature")
 		_expect(p.has("response_format") and p.max_completion_tokens>0 and String(p.model)=="mock-model","payload shape wrong")
 		var enum_keys:Array=p.response_format.json_schema.schema.properties.lines.items.properties.speaker_key.enum
-		_expect(enum_keys.has("envoy") and enum_keys.has("official_13") and enum_keys.size()==4,"speaker_key enum wrong")
+		_expect(enum_keys==["envoy"],"speaker_key enum should hold only the visitor when no official has guidance: %s" % str(enum_keys))
 		var user:String=p.messages[1].content
 		_expect("40 Food" in user or "40 food" in user,"terms missing from prompt")
-		_expect("Orrin Vale" in user and "Sabeth Orrow" in user,"cast missing from prompt")
+		_expect("Sabeth Orrow" in user and not "Orrin Vale" in user,"prompt cast should bill only the visitor")
 		print("--- EXACT PROMPT (threat open) ---")
 		print("[system]\n"+String(p.messages[0].content))
 		print("[user]\n"+user)
@@ -293,8 +304,7 @@ func _test_mocked_api()->void:
 	mock_plan=[[HTTPRequest.RESULT_SUCCESS,500,"oops"],[HTTPRequest.RESULT_SUCCESS,200,_envelope({"lines":[{"speaker_key":"stranger","text":"nope","aside":false}],"mood_shift":0})]]
 	sent_payloads.clear()
 	var before:=(a.lines as Array).size()
-	a.option_id="defy"
-	voice.closing("aud_m",{"ok":true,"outcome":"You refuse the tribute.","reaction":"furious","option_id":"defy"})
+	voice.player_speaks("aud_m","Then hear our answer: no tribute.")
 	for i in 10: await get_tree().process_frame
 	_expect(sent_payloads.size()==2,"failure path did not retry exactly once (%d sends)" % sent_payloads.size())
 	_expect((a.lines as Array).size()>before,"failure left the scene blank")
@@ -669,11 +679,13 @@ func _test_house_rules()->void:
 			_expect(not seen.has(key),"said twice across audiences: %s" % text)
 			seen[key]=true
 			_expect(not openers.has(text.get_slice(" ",0)) and not text.begins_with("HA!"),"modelled speaker got a dialect flourish: %s" % text)
-			var terms:Dictionary=addresses.get(String(line.speaker),{})
+			# Three peoples send an envoy of the same name here; each is their own person.
+			var who:=String(line.speaker)+("" if String(line.role)=="official" else " of "+String(a.civ_id))
+			var terms:Dictionary=addresses.get(who,{})
 			for d in CV.DIALECTS:
 				for term in d.address:
 					if String(term) in text: terms[String(term)]=true
-			addresses[String(line.speaker)]=terms
+			addresses[who]=terms
 		_expect(count<=9,"%s ran to %d lines" % [id,count])
 	for speaker in models: _expect((models[speaker] as Dictionary).size()==1,"%s changed manner: %s" % [speaker,JSON.stringify(models[speaker])])
 	for speaker in addresses: _expect((addresses[speaker] as Dictionary).size()<=1,"%s addresses the ruler several ways: %s" % [speaker,JSON.stringify(addresses[speaker])])
