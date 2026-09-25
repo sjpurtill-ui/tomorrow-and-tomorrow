@@ -3,7 +3,11 @@ extends Node
 ## through the same advance_world_time/_commit_world_day path, answers envoys
 ## like a plausible player, and logs everything the player would be told.
 ## Requires the worktree override.cfg (isolated userdata). Never saves.
-##   <godot> --headless --path <worktree> res://tests/fun_audit/fun_playtest.tscn -- --years=30 --seed=424242 --out=<file>
+##   <godot> --headless --path <worktree> res://tests/fun_audit/fun_playtest.tscn -- --years=30 --seed=424242 --out=<file> [--policy=random|heuristic]
+## --policy=random (default) answers every audience at random among the enabled
+## options. --policy=heuristic reads only what the player is shown: the tone of
+## each answer, a stated cost or string, a court member's objection or support,
+## and the tells of a bluff, and picks the answer a careful player would.
 const Hall:=preload("res://scripts/audience_hall.gd")
 
 class QuietPopup extends CanvasLayer:
@@ -36,6 +40,7 @@ var aims:GDScript
 var aim_policy:="player"
 var aim_due:Dictionary={}
 var aim_logged:Dictionary={}
+var policy:="random"
 
 func _arg(n:String,f:String)->String:
 	for a in OS.get_cmdline_user_args():
@@ -53,6 +58,7 @@ func _ready()->void:
 	var years:=float(_arg("years","30"))
 	var seed_value:=int(_arg("seed","424242"))
 	var ambition:=_arg("ambition","makers")
+	policy=_arg("policy","random")
 	rng.seed=seed_value
 	aim_policy=_arg("aims","player")
 	if ResourceLoader.exists(AIMS_PATH): aims=load(AIMS_PATH) as GDScript
@@ -255,17 +261,44 @@ func _handle_court()->void:
 	var enabled:Array=[]
 	for o in opts:
 		if bool(o.get("enabled",true)):enabled.append(o)
-	var pick:Dictionary=enabled[rng.randi()%enabled.size()] if not enabled.is_empty() else {}
-	var lines:Array=[]
-	w("audience",{"kind":String(a.get("kind","")),"situation":String((a.get("situation",{}) as Dictionary).get("type","")) if a.get("situation") is Dictionary else str(a.get("situation","")),"speaker":str((a.get("speaker",{}) as Dictionary).get("name","")) if a.get("speaker") is Dictionary else "","origin":String(a.get("origin","")),"civ":String(a.get("civ_id","")),"title":String(a.get("title",a.get("headline",""))),"facts":str(a.get("facts","")).left(300),"options":opts.map(func(o):return String(o.get("id",""))+":"+String(o.get("label",""))),"pick":String(pick.get("id",""))})
+	var pick:Dictionary=_pick(a,enabled)
+	var situation:Dictionary=a.get("situation",{}) if a.get("situation") is Dictionary else {}
+	var spoken:Array=[]
+	for line in a.get("lines",[]):
+		if line is Dictionary:spoken.append("%s: %s" % [String(line.get("speaker","")),String(line.get("text",""))])
+	w("audience",{"kind":String(a.get("kind","")),"situation":String(situation.get("type","")),"speaker":str((a.get("speaker",{}) as Dictionary).get("name","")) if a.get("speaker") is Dictionary else "","origin":String(a.get("origin","")),"civ":String(a.get("civ_id","")),"title":String(a.get("title",a.get("headline",""))),"facts":String(situation.get("summary","")).left(600),
+		"string":String((situation.get("string",{}) as Dictionary).get("type","")) if situation.get("string") is Dictionary else "","recall":situation.get("recall",{}) if situation.get("recall") is Dictionary else {},"ruler":String(situation.get("ruler","")),"tells":situation.get("tells",[]) if situation.get("tells") is Array else [],
+		"lines":spoken,"options":opts.map(func(o):return String(o.get("id",""))+":"+String(o.get("label",""))+" — "+String(o.get("sub",""))+(" | "+String(o.get("objection","")) if String(o.get("objection",""))!="" else "")),"pick":String(pick.get("id","")),"policy":policy})
 	if not pick.is_empty():
 		var r:=Hall.resolve(id,String(pick.id))
-		w("audience_result",{"outcome":String(r.get("outcome",r.get("message",""))).left(300)})
+		w("audience_result",{"outcome":String(r.get("outcome",r.get("message",""))).left(400),"pick":String(pick.get("id",""))})
 	dir.modal.queue_free()
 	await get_tree().process_frame
 	# release any pause the modal took
 	SimulationPauseRelease.release_all(terrain)
 	terrain._set_game_speed(5)
+
+func _pick(a:Dictionary,enabled:Array)->Dictionary:
+	if enabled.is_empty():return {}
+	if policy!="heuristic":return enabled[rng.randi()%enabled.size()]
+	## A careful player: prefers warm answers, heeds a court member's objection
+	## and a stated cost, and calls a threat whose tells show it is a bluff.
+	var situation:Dictionary=a.get("situation",{}) if a.get("situation") is Dictionary else {}
+	var tells:Array=situation.get("tells",[]) if situation.get("tells") is Array else []
+	if not (situation.get("signs",[]) as Array).is_empty():tells=[]
+	var best:Dictionary={};var best_score:=-INF
+	for o in enabled:
+		var score:float={"warm":0.6,"neutral":0.3,"hostile":-0.4}.get(String(o.get("tone","neutral")),0.0)
+		var cost_text:=String(o.get("cost",""))
+		if cost_text!="":score-=0.7 if cost_text.begins_with("String") else 0.3
+		if String(o.get("objection",""))!="":score-=1.0
+		if String(o.get("support",""))!="":score+=0.9
+		var oid:=String(o.get("id",""))
+		if not tells.is_empty() and oid in ["defy","counter"]:score+=2.0
+		if not tells.is_empty() and oid=="pay":score-=1.0
+		score+=rng.randf()*0.3
+		if score>best_score:best_score=score;best=o
+	return best
 
 class SimulationPauseRelease:
 	static func release_all(t:Node)->void:

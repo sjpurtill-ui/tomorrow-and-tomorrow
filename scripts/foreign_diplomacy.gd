@@ -335,6 +335,7 @@ func import_state(data:Dictionary)->Dictionary:
 		for m in p.memories:
 			if not m is Dictionary or not m.get("text") is String or m.text.length()>2000 or not (m.get("day") is int or m.get("day") is float): return {"error":"Invalid foreign memory."}
 		if not p.counter.is_empty() and not ACCORDS.has(p.counter.get("accord","")): return {"error":"Invalid counteroffer."}
+		if p.has("character") and not preload("res://scripts/rival_rulers.gd").valid_character(p.character): return {"error":"Invalid foreign ruler character."}
 		if not p.accord.is_empty():
 			if not ACCORDS.has(p.accord.get("kind","")) or p.accord.get("bonus",0) not in [.08,.12] or not (p.accord.get("until") is int or p.accord.get("until") is float) or not is_finite(float(p.accord.until)) or p.accord.until<0: return {"error":"Invalid active understanding."}
 	leaders=data.leaders.duplicate(true); seed_value=WorldSimulation.state.world_seed; WorldSimulation.dialogue.import_state(data.get("dialogue",{}))
@@ -342,6 +343,11 @@ func import_state(data:Dictionary)->Dictionary:
 	if data.has("commitments"): commitments.state=data.commitments.duplicate(true)
 	audiences=(data.audiences as Dictionary).duplicate(true) if data.get("audiences") is Dictionary else {}
 	return {"ok":true}
+
+## The ruler of this people as a lasting character (portrait, literary voice,
+## signature trait, grudges, debts, bonds, lineage). {} without contact.
+func rival_character(id:String)->Dictionary:
+	return preload("res://scripts/rival_rulers.gd").rival_character(id)
 
 func notify_defensive_siege(attacker_id:String,defender_id:String,siege_id:String,day:int)->void:
 	ensure(); commitments.notify_attack(attacker_id,defender_id,siege_id,day)

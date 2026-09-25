@@ -69,6 +69,45 @@ func ask(id:String,message:String)->bool:
 	_request(id,_envoy_brief_prompt(clean),false,true)
 	return true
 
+## Offline talk: without a live model the ruler still answers. The god picks a
+## brief shaped by what lies between the peoples (rival_rulers.talk_choices);
+## the envoy makes the same real journey, and on return the ruler answers in
+## their own manner from what they remember. Online play keeps free briefs.
+func offline_choices(id:String)->Array[Dictionary]:
+	var rivals:GDScript=load("res://scripts/rival_rulers.gd") as GDScript
+	var result:Array[Dictionary]=[]
+	if rivals==null: return result
+	for choice:Dictionary in rivals.call("talk_choices",id): result.append(choice)
+	return result
+
+func ask_offline(id:String,choice_id:String)->bool:
+	if pending.has(id): return false
+	var t:=thread(id)
+	if bool(t.get("in_transit",false)): return false
+	var gate:=access(id)
+	if not bool(gate.ok): t.status=gate.reason; changed.emit(id); return false
+	var choice:={}
+	for option:Dictionary in offline_choices(id):
+		if String(option.get("id",""))==choice_id: choice=option
+	if choice.is_empty() or not bool(choice.get("enabled",true)):
+		t.status=String(choice.get("reason","That brief cannot be carried now.")); changed.emit(id); return false
+	if not WorldSimulation.world.diplomatic_mission.is_empty():
+		t.status="Another diplomatic party is already away. This brief cannot leave until they return.";changed.emit(id);return false
+	var cost:Dictionary=choice.get("cost",{}) if choice.get("cost") is Dictionary else {}
+	if not cost.is_empty() and preload("res://scripts/audience_hall.gd")._short(String(cost.resource),float(cost.amount))!="":
+		t.status=preload("res://scripts/audience_hall.gd")._short(String(cost.resource),float(cost.amount));changed.emit(id);return false
+	var journey:Dictionary=WorldSimulation.world.dispatch_diplomat(id,"","leader_parley")
+	if journey.has("error"):t.status=String(journey.error);changed.emit(id);return false
+	load("res://scripts/rival_rulers.gd").call("talk_depart",id,choice)
+	var label:=String(choice.get("label","")).substr(0,1500)
+	WorldSimulation.world.diplomatic_mission["dialogue_brief"]=label
+	WorldSimulation.world.diplomatic_mission["dialogue_exchange"]=true
+	t.private_brief=label;t.in_transit=true;t.staged_result={};t.retryable=false;t["returned_home"]=false
+	t["offline_choice"]=choice_id
+	t.status="Your envoy sets out with your brief. The answer comes back with them."
+	changed.emit(id)
+	return true
+
 func retry(id:String)->void:
 	var t:=thread(id)
 	if PronouncementInterpreter._api_config().is_empty():
@@ -199,6 +238,10 @@ func resolve_returned(id:String)->Dictionary:
 	var t:=thread(id)
 	if not bool(t.in_transit):return {"error":"No traveling discussion is awaiting return."}
 	if pending.has(id):return {"pending_reply":true,"message":"The envoys have arrived home, but their account is still being prepared."}
+	if (t.staged_result as Dictionary).is_empty() and String(t.get("offline_choice",""))!="":
+		# An offline brief: the ruler answers from what they remember, now.
+		t.staged_result=load("res://scripts/rival_rulers.gd").call("talk_reply",id,String(t.offline_choice))
+		t.erase("offline_choice")
 	if (t.staged_result as Dictionary).is_empty():
 		if not bool(t.retryable):_failure(id,"The conversation report is unavailable. Retry to request it again.")
 		return {"pending_reply":true,"message":"The envoys have arrived home, but no usable account is ready yet."}
@@ -264,6 +307,7 @@ func validate_state(data:Variant)->bool:
 		if t.has("returned_home") and not t.returned_home is bool:return false
 		if t.has("private_brief") and (not t.private_brief is String or t.private_brief.length()>1500):return false
 		if t.has("next_brief") and (not t.next_brief is String or t.next_brief.length()>1500):return false
+		if t.has("offline_choice") and (not t.offline_choice is String or t.offline_choice.length()>40):return false
 		if t.has("staged_result"):
 			if not t.staged_result is Dictionary:return false
 			if not t.staged_result.is_empty() and not _valid_response(t.staged_result,true,String(t.get("private_brief",""))):return false
