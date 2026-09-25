@@ -43,6 +43,9 @@ import os
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import module_identities  # noqa: E402  (mechanics/mathematics identities stay optional)
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DEPS = os.path.join(ROOT, "docs", "research", "y1200", "deps")
 REGISTRY = os.path.join(ROOT, "docs", "research", "y1200", "registry_1800.json")
@@ -118,6 +121,11 @@ def refs(n):
     return n["requires_all"] + [p for g in n["requires_any"] for p in g] + list(n["precedents"])
 
 
+def adopted_removed_at_bake(i):
+    """Redated ids whose earlier game placement the bake has already removed."""
+    return {"ocean_sailing"}
+
+
 def main():
     stats_wanted = "--stats" in sys.argv
     registry = json.load(open(REGISTRY, encoding="utf-8"))
@@ -176,6 +184,11 @@ def main():
         if i not in reg:
             problems.append("redate %s is not a 1200-1800 registry id" % i)
         if i not in old:
+            # The game bake already removed the earlier placement (ocean_sailing's
+            # 0-600 adoption row, 2026-09-25); nothing is left to move.
+            if i in adopted_removed_at_bake(i):
+                moved_out[i] = {}
+                continue
             problems.append("redate %s has no earlier placement" % i)
             continue
         moved_out[i] = old.pop(i)
@@ -265,6 +278,9 @@ def main():
         if d not in reg or p not in deps.get(d, {}).get("requires_all", []):
             problems.append("demotion %s <- %s does not match a requires_all edge" % (d, p))
 
+    before = dict(old)
+    before.update({n["id"]: {k: (list(v) if isinstance(v, list) else v) for k, v in n.items()} for n in nodes})
+    identity_demotions = module_identities.demote_identity_edges(nodes, before)
     by_id = dict(old)
     by_id.update({n["id"]: n for n in nodes})
 
@@ -400,6 +416,7 @@ def main():
             "cross_block_edges_by_block": cross,
             "redated_into_block": sorted(moved_out),
             "demoted_links": [{"dependent": d, "parent": p, "reason": r} for d, p, r in DEMOTE],
+            "identity_demotions": identity_demotions,
             "year_adjustments": len(moves),
         },
         "nodes": sorted(nodes, key=key),

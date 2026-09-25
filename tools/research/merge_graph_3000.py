@@ -55,6 +55,9 @@ import os
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import module_identities  # noqa: E402  (mechanics/mathematics identities stay optional)
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 _spec = importlib.util.spec_from_file_location("merge_graph_2400", os.path.join(HERE, "merge_graph_2400.py"))
@@ -367,6 +370,9 @@ def main():
         if d not in reg or p not in deps.get(d, {}).get("requires_all", []):
             problems.append("demotion %s <- %s does not match a requires_all edge" % (d, p))
 
+    before = dict(old)
+    before.update({n["id"]: {k: (list(v) if isinstance(v, list) else v) for k, v in n.items()} for n in nodes})
+    identity_demotions = module_identities.demote_identity_edges(nodes, before)
     by_id = dict(old)
     by_id.update({n["id"]: n for n in nodes})
 
@@ -522,6 +528,7 @@ def main():
             "cross_block_edges_by_block": cross,
             "redated_into_block": sorted(moved_out),
             "demoted_links": [{"dependent": d, "parent": p, "reason": r} for d, p, r in DEMOTE],
+            "identity_demotions": identity_demotions,
             "year_adjustments": len(moves),
             "gap_rows": [r["id"] for r in GAP_ROWS],
             "rewires": rewired,

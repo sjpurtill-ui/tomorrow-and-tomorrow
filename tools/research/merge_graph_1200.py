@@ -30,6 +30,9 @@ import os
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import module_identities  # noqa: E402  (mechanics/mathematics identities stay optional)
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DEPS = os.path.join(ROOT, "docs", "research", "y600", "deps")
 REGISTRY = os.path.join(ROOT, "docs", "research", "y600", "registry_1200.json")
@@ -185,6 +188,9 @@ def main():
         if d not in reg or p not in deps.get(d, {}).get("requires_all", []):
             problems.append("demotion %s <- %s does not match a requires_all edge" % (d, p))
 
+    before = dict(old)
+    before.update({n["id"]: {k: (list(v) if isinstance(v, list) else v) for k, v in n.items()} for n in nodes})
+    identity_demotions = module_identities.demote_identity_edges(nodes, before)
     by_id = dict(old)
     by_id.update({n["id"]: n for n in nodes})
     year = lambda i: float(by_id[i]["proposed_year"])
@@ -307,6 +313,7 @@ def main():
             "edge_counts": edge_counts,
             "cross_block_edges": sum(1 for n in nodes for p in n["requires_all"] + [q for g in n["requires_any"] for q in g] + n["precedents"] if p in old),
             "demoted_links": [{"dependent": d, "parent": p, "reason": r} for d, p, r in DEMOTE],
+            "identity_demotions": identity_demotions,
             "year_adjustments": len(moves),
         },
         "nodes": sorted(nodes, key=lambda n: (float(n["proposed_year"]), LINES.index(n["line"]), n["id"])),

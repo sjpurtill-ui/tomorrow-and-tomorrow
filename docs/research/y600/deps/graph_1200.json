@@ -13,12 +13,154 @@
   ],
   "node_count": 964,
   "edge_counts": {
-   "hard": 1655,
+   "hard": 1635,
    "any": 22,
-   "precedent": 1141
+   "precedent": 1161
   },
   "cross_block_edges": 1157,
   "demoted_links": [],
+  "identity_demotions": [
+   {
+    "dependent": "graduated_measuring_rods",
+    "parent": "fractional_quantities",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "straightedge_compass",
+    "parent": "squared_grid_drawings",
+    "direction": "identity on main path"
+   },
+   {
+    "dependent": "straightedge_compass",
+    "parent": "geometric_survey",
+    "direction": "identity on main path"
+   },
+   {
+    "dependent": "string_ratio_harmonics",
+    "parent": "fractional_quantities",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "demonstrated_geometry",
+    "parent": "straightedge_compass",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "ratio_proportion",
+    "parent": "incommensurable_lengths",
+    "direction": "identity on main path"
+   },
+   {
+    "dependent": "similar_triangles",
+    "parent": "demonstrated_geometry",
+    "direction": "identity on main path"
+   },
+   {
+    "dependent": "combinatorics",
+    "parent": "counting_board_abacus",
+    "direction": "identity on main path"
+   },
+   {
+    "dependent": "axiomatic_geometry_compendium",
+    "parent": "similar_triangles",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "lever_moments",
+    "parent": "axiomatic_geometry_compendium",
+    "direction": "identity on main path"
+   },
+   {
+    "dependent": "lever_moments",
+    "parent": "balance_beam_weights",
+    "direction": "identity on main path"
+   },
+   {
+    "dependent": "displacement_buoyancy",
+    "parent": "axiomatic_geometry_compendium",
+    "direction": "identity on main path"
+   },
+   {
+    "dependent": "displacement_buoyancy",
+    "parent": "balance_beam_weights",
+    "direction": "identity on main path"
+   },
+   {
+    "dependent": "earth_circumference_measure",
+    "parent": "similar_triangles",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "mineral_specific_gravity",
+    "parent": "displacement_buoyancy",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "mineral_specific_gravity",
+    "substituted_requires_all": [
+     "iron_assaying",
+     "touchstone_testing"
+    ]
+   },
+   {
+    "dependent": "trigonometry",
+    "parent": "square_root_tables",
+    "direction": "identity on main path"
+   },
+   {
+    "dependent": "dioptra_survey",
+    "parent": "similar_triangles",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "star_position_catalogue",
+    "parent": "trigonometry",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "mechanical_treatises",
+    "parent": "lever_moments",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "mechanical_treatises",
+    "parent": "hydrostatic_pressure",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "mechanical_treatises",
+    "substituted_requires_all": [
+     "piston_force_pumps",
+     "geared_sky_calculator",
+     "mechanical_screw_presses"
+    ]
+   },
+   {
+    "dependent": "number_theory_treatise",
+    "parent": "ratio_proportion",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "ground_tremor_detector",
+    "parent": "lever_moments",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "coordinate_gazetteer_maps",
+    "parent": "trigonometry",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "sky_tables_compendium",
+    "parent": "trigonometry",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "wooden_sheave_blocks",
+    "parent": "compound_pulleys",
+    "direction": "main path on identity"
+   }
+  ],
   "year_adjustments": 1
  },
  "nodes": [
@@ -2054,13 +2196,13 @@
    "research_years": 5.0,
    "key_threshold": false,
    "requires_all": [
-    "standard_measures",
-    "fractional_quantities"
+    "standard_measures"
    ],
    "requires_any": [],
    "precedents": [
     "workshop_standards",
-    "proclaimed_standard_weights"
+    "proclaimed_standard_weights",
+    "fractional_quantities"
    ],
    "conditions": {
     "resources_known": [],
@@ -2068,9 +2210,9 @@
     "contact_required": false
    },
    "note": "Fractions of the standard cut onto rods.",
-   "earliest_feasible_year": 123.5,
+   "earliest_feasible_year": 12.0,
    "serial_line_finish_year": 674.0,
-   "chain_depth": 14,
+   "chain_depth": 2,
    "serial_overrun": false
   },
   {
@@ -6594,9 +6736,9 @@
     "contact_required": false
    },
    "note": "Works priced by measured length.",
-   "earliest_feasible_year": 129.5,
+   "earliest_feasible_year": 87.5,
    "serial_line_finish_year": 808.0,
-   "chain_depth": 15,
+   "chain_depth": 11,
    "serial_overrun": true
   },
   {
@@ -7751,9 +7893,9 @@
     "contact_required": false
    },
    "note": "Graduated gauges read flood marks",
-   "earliest_feasible_year": 131.5,
+   "earliest_feasible_year": 20.0,
    "serial_line_finish_year": 756.0,
-   "chain_depth": 15,
+   "chain_depth": 3,
    "serial_overrun": false
   },
   {
@@ -8324,9 +8466,9 @@
     "contact_required": false
    },
    "note": "Guaranteed length contracts put to bid.",
-   "earliest_feasible_year": 139.5,
+   "earliest_feasible_year": 99.5,
    "serial_line_finish_year": 848.0,
-   "chain_depth": 16,
+   "chain_depth": 12,
    "serial_overrun": true
   },
   {
@@ -8523,9 +8665,9 @@
     "contact_required": false
    },
    "note": "Tendered work paid stage by stage.",
-   "earliest_feasible_year": 145.5,
+   "earliest_feasible_year": 105.5,
    "serial_line_finish_year": 854.0,
-   "chain_depth": 17,
+   "chain_depth": 13,
    "serial_overrun": true
   },
   {
@@ -8596,14 +8738,13 @@
    "band_high": 815,
    "research_years": 12.0,
    "key_threshold": false,
-   "requires_all": [
-    "squared_grid_drawings",
-    "geometric_survey"
-   ],
+   "requires_all": [],
    "requires_any": [],
    "precedents": [
     "area_volume_rules",
-    "graduated_measuring_rods"
+    "graduated_measuring_rods",
+    "squared_grid_drawings",
+    "geometric_survey"
    ],
    "conditions": {
     "resources_known": [],
@@ -8611,9 +8752,9 @@
     "contact_required": false
    },
    "note": "Survey and grid drafting become construction.",
-   "earliest_feasible_year": 52.0,
+   "earliest_feasible_year": 12.0,
    "serial_line_finish_year": 784.0,
-   "chain_depth": 7,
+   "chain_depth": 0,
    "serial_overrun": false
   },
   {
@@ -8699,9 +8840,9 @@
     "contact_required": false
    },
    "note": "Graduated rods hold a steady fall.",
-   "earliest_feasible_year": 131.5,
+   "earliest_feasible_year": 23.0,
    "serial_line_finish_year": 762.0,
-   "chain_depth": 15,
+   "chain_depth": 4,
    "serial_overrun": false
   },
   {
@@ -9135,9 +9276,9 @@
     "contact_required": false
    },
    "note": "Tenders carry penalties for delay.",
-   "earliest_feasible_year": 144.5,
+   "earliest_feasible_year": 104.5,
    "serial_line_finish_year": 865.0,
-   "chain_depth": 17,
+   "chain_depth": 13,
    "serial_overrun": true
   },
   {
@@ -9345,9 +9486,9 @@
     "contact_required": false
    },
    "note": "Survey aligns headings from both ends.",
-   "earliest_feasible_year": 143.5,
+   "earliest_feasible_year": 114.5,
    "serial_line_finish_year": 780.0,
-   "chain_depth": 16,
+   "chain_depth": 15,
    "serial_overrun": false
   },
   {
@@ -9547,9 +9688,9 @@
     "contact_required": false
    },
    "note": "Tender accounts inscribed publicly.",
-   "earliest_feasible_year": 145.5,
+   "earliest_feasible_year": 105.5,
    "serial_line_finish_year": 871.0,
-   "chain_depth": 17,
+   "chain_depth": 13,
    "serial_overrun": true
   },
   {
@@ -9596,12 +9737,12 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "harps_and_lyres",
-    "fractional_quantities"
+    "harps_and_lyres"
    ],
    "requires_any": [],
    "precedents": [
-    "reciprocal_tables"
+    "reciprocal_tables",
+    "fractional_quantities"
    ],
    "conditions": {
     "resources_known": [],
@@ -9609,9 +9750,9 @@
     "contact_required": false
    },
    "note": "Lyre string lengths matched to simple ratios.",
-   "earliest_feasible_year": 126.5,
+   "earliest_feasible_year": 28.5,
    "serial_line_finish_year": 802.0,
-   "chain_depth": 14,
+   "chain_depth": 6,
    "serial_overrun": false
   },
   {
@@ -9929,9 +10070,9 @@
     "contact_required": false
    },
    "note": "Each tendered trade gets a foreman.",
-   "earliest_feasible_year": 144.5,
+   "earliest_feasible_year": 104.5,
    "serial_line_finish_year": 876.0,
-   "chain_depth": 17,
+   "chain_depth": 13,
    "serial_overrun": true
   },
   {
@@ -10504,9 +10645,9 @@
     "contact_required": false
    },
    "note": "One architect over all trade foremen.",
-   "earliest_feasible_year": 156.5,
+   "earliest_feasible_year": 116.5,
    "serial_line_finish_year": 888.0,
-   "chain_depth": 18,
+   "chain_depth": 14,
    "serial_overrun": true
   },
   {
@@ -10804,12 +10945,12 @@
    "research_years": 12.0,
    "key_threshold": false,
    "requires_all": [
-    "straightedge_compass",
     "natural_philosophy_schools"
    ],
    "requires_any": [],
    "precedents": [
-    "worked_problem_tablets"
+    "worked_problem_tablets",
+    "straightedge_compass"
    ],
    "conditions": {
     "resources_known": [],
@@ -12035,9 +12176,9 @@
     "contact_required": false
    },
    "note": "Works tenders extended to tax farming.",
-   "earliest_feasible_year": 145.5,
+   "earliest_feasible_year": 105.5,
    "serial_line_finish_year": 863.0,
-   "chain_depth": 17,
+   "chain_depth": 13,
    "serial_overrun": false
   },
   {
@@ -14577,13 +14718,13 @@
    "research_years": 10.0,
    "key_threshold": false,
    "requires_all": [
-    "incommensurable_lengths",
     "fractional_quantities"
    ],
    "requires_any": [],
    "precedents": [
     "string_ratio_harmonics",
-    "reciprocal_tables"
+    "reciprocal_tables",
+    "incommensurable_lengths"
    ],
    "conditions": {
     "resources_known": [],
@@ -14591,9 +14732,9 @@
     "contact_required": false
    },
    "note": "Proportion theory covers incommensurable lengths.",
-   "earliest_feasible_year": 191.5,
+   "earliest_feasible_year": 128.5,
    "serial_line_finish_year": 967.0,
-   "chain_depth": 18,
+   "chain_depth": 14,
    "serial_overrun": true
   },
   {
@@ -14815,12 +14956,12 @@
    "key_threshold": false,
    "requires_all": [
     "ratio_proportion",
-    "demonstrated_geometry",
     "straightedge_compass"
    ],
    "requires_any": [],
    "precedents": [
-    "geometric_survey"
+    "geometric_survey",
+    "demonstrated_geometry"
    ],
    "conditions": {
     "resources_known": [],
@@ -14828,9 +14969,9 @@
     "contact_required": false
    },
    "note": "Proportion applied to shapes of one form.",
-   "earliest_feasible_year": 199.5,
+   "earliest_feasible_year": 136.5,
    "serial_line_finish_year": 975.0,
-   "chain_depth": 19,
+   "chain_depth": 15,
    "serial_overrun": true
   },
   {
@@ -14932,13 +15073,12 @@
    "band_high": 932,
    "research_years": 10.0,
    "key_threshold": false,
-   "requires_all": [
-    "counting_board_abacus"
-   ],
+   "requires_all": [],
    "requires_any": [],
    "precedents": [
     "syllogistic_logic",
-    "string_ratio_harmonics"
+    "string_ratio_harmonics",
+    "counting_board_abacus"
    ],
    "conditions": {
     "resources_known": [],
@@ -14946,9 +15086,9 @@
     "contact_required": false
    },
    "note": "Counted arrangements of letters and tones.",
-   "earliest_feasible_year": 144.5,
+   "earliest_feasible_year": 10.0,
    "serial_line_finish_year": 985.0,
-   "chain_depth": 15,
+   "chain_depth": 0,
    "serial_overrun": true
   },
   {
@@ -15077,13 +15217,13 @@
    "research_years": 20.0,
    "key_threshold": true,
    "requires_all": [
-    "similar_triangles",
     "syllogistic_logic",
     "incommensurable_lengths"
    ],
    "requires_any": [],
    "precedents": [
-    "ratio_proportion"
+    "ratio_proportion",
+    "similar_triangles"
    ],
    "conditions": {
     "resources_known": [],
@@ -15091,9 +15231,9 @@
     "contact_required": false
    },
    "note": "Proven results ordered from stated axioms.",
-   "earliest_feasible_year": 219.5,
+   "earliest_feasible_year": 212.5,
    "serial_line_finish_year": 1005.0,
-   "chain_depth": 20,
+   "chain_depth": 19,
    "serial_overrun": true
   },
   {
@@ -15238,9 +15378,9 @@
     "contact_required": false
    },
    "note": "Measured roads marked in stone.",
-   "earliest_feasible_year": 127.5,
+   "earliest_feasible_year": 46.5,
    "serial_line_finish_year": 906.0,
-   "chain_depth": 15,
+   "chain_depth": 8,
    "serial_overrun": false
   },
   {
@@ -15354,7 +15494,7 @@
     "contact_required": false
    },
    "note": "Partnerships pool capital for tenders.",
-   "earliest_feasible_year": 149.5,
+   "earliest_feasible_year": 140.5,
    "serial_line_finish_year": 973.0,
    "chain_depth": 17,
    "serial_overrun": true
@@ -15935,13 +16075,12 @@
    "band_high": 951,
    "research_years": 10.0,
    "key_threshold": false,
-   "requires_all": [
-    "axiomatic_geometry_compendium",
-    "balance_beam_weights"
-   ],
+   "requires_all": [],
    "requires_any": [],
    "precedents": [
-    "ratio_proportion"
+    "ratio_proportion",
+    "axiomatic_geometry_compendium",
+    "balance_beam_weights"
    ],
    "conditions": {
     "resources_known": [],
@@ -15949,9 +16088,9 @@
     "contact_required": false
    },
    "note": "Balance proven by proportion of arms.",
-   "earliest_feasible_year": 229.5,
+   "earliest_feasible_year": 10.0,
    "serial_line_finish_year": 1038.0,
-   "chain_depth": 21,
+   "chain_depth": 0,
    "serial_overrun": true
   },
   {
@@ -16006,9 +16145,9 @@
     "contact_required": false
    },
    "note": "Multiple sheaves multiply force, by the law of the lever; crane practice precedes.",
-   "earliest_feasible_year": 235.5,
+   "earliest_feasible_year": 16.0,
    "serial_line_finish_year": 1044.0,
-   "chain_depth": 22,
+   "chain_depth": 1,
    "serial_overrun": true
   },
   {
@@ -16050,14 +16189,13 @@
    "band_high": 953,
    "research_years": 8.0,
    "key_threshold": false,
-   "requires_all": [
-    "axiomatic_geometry_compendium",
-    "balance_beam_weights"
-   ],
+   "requires_all": [],
    "requires_any": [],
    "precedents": [
     "lever_moments",
-    "deep_hold_merchantmen"
+    "deep_hold_merchantmen",
+    "axiomatic_geometry_compendium",
+    "balance_beam_weights"
    ],
    "conditions": {
     "resources_known": [],
@@ -16065,9 +16203,9 @@
     "contact_required": false
    },
    "note": "Weighing in water proven by displacement.",
-   "earliest_feasible_year": 227.5,
+   "earliest_feasible_year": 8.0,
    "serial_line_finish_year": 1046.0,
-   "chain_depth": 21,
+   "chain_depth": 0,
    "serial_overrun": true
   },
   {
@@ -16108,12 +16246,12 @@
    "research_years": 6.0,
    "key_threshold": false,
    "requires_all": [
-    "pole_lathe_turning",
-    "compound_pulleys"
+    "pole_lathe_turning"
    ],
    "requires_any": [],
    "precedents": [
-    "standing_running_rigging"
+    "standing_running_rigging",
+    "compound_pulleys"
    ],
    "conditions": {
     "resources_known": [],
@@ -16121,9 +16259,9 @@
     "contact_required": false
    },
    "note": "Turned sheaves in ship blocks.",
-   "earliest_feasible_year": 241.5,
-   "serial_line_finish_year": 1050.0,
-   "chain_depth": 23,
+   "earliest_feasible_year": 111.5,
+   "serial_line_finish_year": 1001.0,
+   "chain_depth": 15,
    "serial_overrun": true
   },
   {
@@ -16137,14 +16275,14 @@
    "research_years": 12.0,
    "key_threshold": false,
    "requires_all": [
-    "similar_triangles",
     "seasonal_hour_sundial"
    ],
    "requires_any": [],
    "precedents": [
     "paced_distance_counting",
     "world_maps",
-    "endowed_scholar_house"
+    "endowed_scholar_house",
+    "similar_triangles"
    ],
    "conditions": {
     "resources_known": [],
@@ -16152,9 +16290,9 @@
     "contact_required": false
    },
    "note": "Two shadow angles and a paced distance.",
-   "earliest_feasible_year": 211.5,
+   "earliest_feasible_year": 193.5,
    "serial_line_finish_year": 1058.0,
-   "chain_depth": 20,
+   "chain_depth": 18,
    "serial_overrun": true
   },
   {
@@ -16296,7 +16434,7 @@
    },
    "note": "Store receipts circulate as payment.",
    "earliest_feasible_year": 131.5,
-   "serial_line_finish_year": 1058.0,
+   "serial_line_finish_year": 1009.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -16382,9 +16520,9 @@
     "contact_required": false
    },
    "note": "Lever theory locates balance points of figures.",
-   "earliest_feasible_year": 237.5,
+   "earliest_feasible_year": 18.0,
    "serial_line_finish_year": 1066.0,
-   "chain_depth": 22,
+   "chain_depth": 1,
    "serial_overrun": true
   },
   {
@@ -16410,9 +16548,9 @@
     "contact_required": false
    },
    "note": "Buoyancy study extends to fluid pressure.",
-   "earliest_feasible_year": 235.5,
+   "earliest_feasible_year": 16.0,
    "serial_line_finish_year": 1074.0,
-   "chain_depth": 22,
+   "chain_depth": 1,
    "serial_overrun": true
   },
   {
@@ -16496,9 +16634,9 @@
     "contact_required": false
    },
    "note": "Standing crews keep conduits flowing.",
-   "earliest_feasible_year": 150.5,
+   "earliest_feasible_year": 110.5,
    "serial_line_finish_year": 985.0,
-   "chain_depth": 18,
+   "chain_depth": 14,
    "serial_overrun": true
   },
   {
@@ -16600,12 +16738,12 @@
    "research_years": 6.0,
    "key_threshold": false,
    "requires_all": [
-    "displacement_buoyancy"
+    "iron_assaying",
+    "touchstone_testing"
    ],
    "requires_any": [],
    "precedents": [
-    "iron_assaying",
-    "touchstone_testing"
+    "displacement_buoyancy"
    ],
    "conditions": {
     "resources_known": [],
@@ -16613,9 +16751,9 @@
     "contact_required": false
    },
    "note": "Displacement weighs minerals against water.",
-   "earliest_feasible_year": 233.5,
+   "earliest_feasible_year": 77.5,
    "serial_line_finish_year": 1080.0,
-   "chain_depth": 22,
+   "chain_depth": 11,
    "serial_overrun": true
   },
   {
@@ -16642,9 +16780,9 @@
     "contact_required": false
    },
    "note": "Curved areas squeezed by inscribed figures.",
-   "earliest_feasible_year": 231.5,
+   "earliest_feasible_year": 224.5,
    "serial_line_finish_year": 1092.0,
-   "chain_depth": 21,
+   "chain_depth": 20,
    "serial_overrun": true
   },
   {
@@ -16960,7 +17098,7 @@
    },
    "note": "Weir gate opened to pass boats.",
    "earliest_feasible_year": 71.5,
-   "serial_line_finish_year": 1068.0,
+   "serial_line_finish_year": 1019.0,
    "chain_depth": 11,
    "serial_overrun": true
   },
@@ -17767,9 +17905,9 @@
     "contact_required": false
    },
    "note": "Sky circles modelled as bronze rings.",
-   "earliest_feasible_year": 229.5,
+   "earliest_feasible_year": 222.5,
    "serial_line_finish_year": 1143.0,
-   "chain_depth": 21,
+   "chain_depth": 20,
    "serial_overrun": true
   },
   {
@@ -17797,9 +17935,9 @@
     "contact_required": false
    },
    "note": "Sealed lead pipes cross valleys.",
-   "earliest_feasible_year": 143.5,
+   "earliest_feasible_year": 47.5,
    "serial_line_finish_year": 1111.0,
-   "chain_depth": 16,
+   "chain_depth": 8,
    "serial_overrun": true
   },
   {
@@ -17998,7 +18136,7 @@
    },
    "note": "Dues waived to draw shipping.",
    "earliest_feasible_year": 124.5,
-   "serial_line_finish_year": 1076.0,
+   "serial_line_finish_year": 1027.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -18207,7 +18345,7 @@
    },
    "note": "Coin-backed relays across many peoples.",
    "earliest_feasible_year": 116.5,
-   "serial_line_finish_year": 1092.0,
+   "serial_line_finish_year": 1043.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -18276,13 +18414,13 @@
    "research_years": 15.0,
    "key_threshold": true,
    "requires_all": [
-    "similar_triangles",
-    "square_root_tables"
+    "similar_triangles"
    ],
    "requires_any": [],
    "precedents": [
     "armillary_sphere",
-    "earth_circumference_measure"
+    "earth_circumference_measure",
+    "square_root_tables"
    ],
    "conditions": {
     "resources_known": [],
@@ -18290,9 +18428,9 @@
     "contact_required": false
    },
    "note": "Similar figures tabulated as chord lengths.",
-   "earliest_feasible_year": 214.5,
+   "earliest_feasible_year": 151.5,
    "serial_line_finish_year": 1158.0,
-   "chain_depth": 20,
+   "chain_depth": 16,
    "serial_overrun": true
   },
   {
@@ -18377,7 +18515,7 @@
    },
    "note": "Bow sail aids steering.",
    "earliest_feasible_year": 99.5,
-   "serial_line_finish_year": 1100.0,
+   "serial_line_finish_year": 1051.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -18392,13 +18530,13 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "water_trough_leveling",
-    "similar_triangles"
+    "water_trough_leveling"
    ],
    "requires_any": [],
    "precedents": [
     "trough_leveling_table",
-    "gravity_conduit_grade_control"
+    "gravity_conduit_grade_control",
+    "similar_triangles"
    ],
    "conditions": {
     "resources_known": [],
@@ -18406,9 +18544,9 @@
     "contact_required": false
    },
    "note": "Sighting table levels by similar triangles.",
-   "earliest_feasible_year": 207.5,
+   "earliest_feasible_year": 29.0,
    "serial_line_finish_year": 1166.0,
-   "chain_depth": 20,
+   "chain_depth": 5,
    "serial_overrun": true
   },
   {
@@ -18524,9 +18662,9 @@
     "contact_required": false
    },
    "note": "Stacked arches carry the conduit.",
-   "earliest_feasible_year": 145.5,
+   "earliest_feasible_year": 109.5,
    "serial_line_finish_year": 1135.0,
-   "chain_depth": 16,
+   "chain_depth": 14,
    "serial_overrun": true
   },
   {
@@ -18671,7 +18809,7 @@
    },
    "note": "Tolls fixed at the frontier line.",
    "earliest_feasible_year": 83.5,
-   "serial_line_finish_year": 1106.0,
+   "serial_line_finish_year": 1057.0,
    "chain_depth": 13,
    "serial_overrun": true
   },
@@ -18699,9 +18837,9 @@
     "contact_required": false
    },
    "note": "Longest day sorts places into zones.",
-   "earliest_feasible_year": 219.5,
+   "earliest_feasible_year": 201.5,
    "serial_line_finish_year": 1180.0,
-   "chain_depth": 21,
+   "chain_depth": 19,
    "serial_overrun": true
   },
   {
@@ -18858,13 +18996,13 @@
    "research_years": 15.0,
    "key_threshold": false,
    "requires_all": [
-    "armillary_sphere",
-    "trigonometry"
+    "armillary_sphere"
    ],
    "requires_any": [],
    "precedents": [
     "astronomical_diaries",
-    "named_star_figures"
+    "named_star_figures",
+    "trigonometry"
    ],
    "conditions": {
     "resources_known": [],
@@ -18872,9 +19010,9 @@
     "contact_required": false
    },
    "note": "Ring sightings tabulated as star positions.",
-   "earliest_feasible_year": 244.5,
+   "earliest_feasible_year": 237.5,
    "serial_line_finish_year": 1195.0,
-   "chain_depth": 22,
+   "chain_depth": 21,
    "serial_overrun": true
   },
   {
@@ -19077,7 +19215,7 @@
    },
    "note": "Each district levied to keep its road.",
    "earliest_feasible_year": 49.5,
-   "serial_line_finish_year": 1112.0,
+   "serial_line_finish_year": 1063.0,
    "chain_depth": 9,
    "serial_overrun": true
   },
@@ -19339,9 +19477,9 @@
     "contact_required": false
    },
    "note": "Settling tanks split aqueduct flow.",
-   "earliest_feasible_year": 149.5,
+   "earliest_feasible_year": 53.5,
    "serial_line_finish_year": 1149.0,
-   "chain_depth": 17,
+   "chain_depth": 9,
    "serial_overrun": true
   },
   {
@@ -19697,7 +19835,7 @@
    },
    "note": "Monsoon timing written into directions.",
    "earliest_feasible_year": 137.5,
-   "serial_line_finish_year": 1126.0,
+   "serial_line_finish_year": 1077.0,
    "chain_depth": 13,
    "serial_overrun": true
   },
@@ -19727,9 +19865,9 @@
     "contact_required": false
    },
    "note": "Known cycles set into bronze gear trains.",
-   "earliest_feasible_year": 244.5,
+   "earliest_feasible_year": 237.5,
    "serial_line_finish_year": 1226.0,
-   "chain_depth": 22,
+   "chain_depth": 21,
    "serial_overrun": true
   },
   {
@@ -19900,7 +20038,7 @@
    },
    "note": "Front axle swivels on an iron pin.",
    "earliest_feasible_year": 107.5,
-   "serial_line_finish_year": 1136.0,
+   "serial_line_finish_year": 1087.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -20130,7 +20268,7 @@
    },
    "note": "Water-lifting machines fitted in hulls.",
    "earliest_feasible_year": 109.5,
-   "serial_line_finish_year": 1144.0,
+   "serial_line_finish_year": 1095.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -20482,7 +20620,7 @@
    },
    "note": "Station animals hired by the day.",
    "earliest_feasible_year": 118.5,
-   "serial_line_finish_year": 1150.0,
+   "serial_line_finish_year": 1101.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -20770,7 +20908,7 @@
     "contact_required": false
    },
    "note": "Graded millrace feeds wheel from above",
-   "earliest_feasible_year": 143.5,
+   "earliest_feasible_year": 138.5,
    "serial_line_finish_year": 1062.0,
    "chain_depth": 17,
    "serial_overrun": true
@@ -20799,9 +20937,9 @@
     "contact_required": false
    },
    "note": "Lead conduits known and judged unhealthy",
-   "earliest_feasible_year": 137.5,
+   "earliest_feasible_year": 41.5,
    "serial_line_finish_year": 1253.0,
-   "chain_depth": 16,
+   "chain_depth": 8,
    "serial_overrun": true
   },
   {
@@ -20829,7 +20967,7 @@
    },
    "note": "Vented public stores on raised floors.",
    "earliest_feasible_year": 81.5,
-   "serial_line_finish_year": 1160.0,
+   "serial_line_finish_year": 1111.0,
    "chain_depth": 11,
    "serial_overrun": true
   },
@@ -20887,9 +21025,9 @@
     "contact_required": false
    },
    "note": "Builders enlisted as permanent engineers.",
-   "earliest_feasible_year": 166.5,
+   "earliest_feasible_year": 126.5,
    "serial_line_finish_year": 1040.0,
-   "chain_depth": 19,
+   "chain_depth": 15,
    "serial_overrun": false
   },
   {
@@ -21122,7 +21260,7 @@
    },
    "note": "Moulded frames and rigging scale hulls.",
    "earliest_feasible_year": 111.5,
-   "serial_line_finish_year": 1174.0,
+   "serial_line_finish_year": 1125.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -21579,9 +21717,9 @@
     "contact_required": false
    },
    "note": "Rolled lead pipes from distribution tanks.",
-   "earliest_feasible_year": 155.5,
+   "earliest_feasible_year": 59.5,
    "serial_line_finish_year": 1230.0,
-   "chain_depth": 18,
+   "chain_depth": 10,
    "serial_overrun": true
   },
   {
@@ -21668,7 +21806,7 @@
    },
    "note": "Courier relay opened to pass-holders.",
    "earliest_feasible_year": 140.5,
-   "serial_line_finish_year": 1184.0,
+   "serial_line_finish_year": 1135.0,
    "chain_depth": 18,
    "serial_overrun": true
   },
@@ -21869,9 +22007,9 @@
     "contact_required": false
    },
    "note": "Freighters contracted for capital grain.",
-   "earliest_feasible_year": 155.5,
-   "serial_line_finish_year": 1194.0,
-   "chain_depth": 18,
+   "earliest_feasible_year": 121.5,
+   "serial_line_finish_year": 1145.0,
+   "chain_depth": 16,
    "serial_overrun": true
   },
   {
@@ -21986,7 +22124,7 @@
    },
    "note": "Strap-on iron shoes for draft animals.",
    "earliest_feasible_year": 110.5,
-   "serial_line_finish_year": 1200.0,
+   "serial_line_finish_year": 1151.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -22161,7 +22299,7 @@
    },
    "note": "Building cranes moved to the quay.",
    "earliest_feasible_year": 125.5,
-   "serial_line_finish_year": 1208.0,
+   "serial_line_finish_year": 1159.0,
    "chain_depth": 17,
    "serial_overrun": true
   },
@@ -22216,9 +22354,9 @@
     "contact_required": false
    },
    "note": "Graduated sight on the stock.",
-   "earliest_feasible_year": 129.5,
+   "earliest_feasible_year": 83.5,
    "serial_line_finish_year": 1348.0,
-   "chain_depth": 15,
+   "chain_depth": 11,
    "serial_overrun": true
   },
   {
@@ -22386,7 +22524,7 @@
    },
    "note": "Barges unload deep freighters.",
    "earliest_feasible_year": 117.5,
-   "serial_line_finish_year": 1214.0,
+   "serial_line_finish_year": 1165.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -22557,9 +22695,9 @@
     "contact_required": false
    },
    "note": "Works crews put on public salary.",
-   "earliest_feasible_year": 158.5,
+   "earliest_feasible_year": 118.5,
    "serial_line_finish_year": 1283.0,
-   "chain_depth": 19,
+   "chain_depth": 15,
    "serial_overrun": true
   },
   {
@@ -22584,9 +22722,9 @@
     "contact_required": false
    },
    "note": "Tunnel survey applied to roads.",
-   "earliest_feasible_year": 153.5,
+   "earliest_feasible_year": 124.5,
    "serial_line_finish_year": 1268.0,
-   "chain_depth": 17,
+   "chain_depth": 16,
    "serial_overrun": true
   },
   {
@@ -22674,7 +22812,7 @@
    },
    "note": "Stamped jars gain painted details.",
    "earliest_feasible_year": 52.5,
-   "serial_line_finish_year": 1219.0,
+   "serial_line_finish_year": 1170.0,
    "chain_depth": 10,
    "serial_overrun": true
   },
@@ -22689,15 +22827,15 @@
    "research_years": 10.0,
    "key_threshold": false,
    "requires_all": [
-    "lever_moments",
-    "hydrostatic_pressure"
+    "piston_force_pumps",
+    "geared_sky_calculator",
+    "mechanical_screw_presses"
    ],
    "requires_any": [],
    "precedents": [
     "compound_pulleys",
-    "piston_force_pumps",
-    "geared_sky_calculator",
-    "mechanical_screw_presses"
+    "lever_moments",
+    "hydrostatic_pressure"
    ],
    "conditions": {
     "resources_known": [],
@@ -22705,9 +22843,9 @@
     "contact_required": false
    },
    "note": "Machine practice written up on theory.",
-   "earliest_feasible_year": 245.5,
+   "earliest_feasible_year": 247.5,
    "serial_line_finish_year": 1279.0,
-   "chain_depth": 23,
+   "chain_depth": 22,
    "serial_overrun": true
   },
   {
@@ -22875,7 +23013,7 @@
    },
    "note": "Post supplied by its own studs.",
    "earliest_feasible_year": 148.5,
-   "serial_line_finish_year": 1227.0,
+   "serial_line_finish_year": 1178.0,
    "chain_depth": 19,
    "serial_overrun": true
   },
@@ -23276,7 +23414,7 @@
    },
    "note": "Body slung on straps over the axles.",
    "earliest_feasible_year": 115.5,
-   "serial_line_finish_year": 1235.0,
+   "serial_line_finish_year": 1186.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -23362,9 +23500,9 @@
     "contact_required": false
    },
    "note": "Aqueduct engineers gauge sources first",
-   "earliest_feasible_year": 157.5,
+   "earliest_feasible_year": 61.5,
    "serial_line_finish_year": 1157.0,
-   "chain_depth": 18,
+   "chain_depth": 10,
    "serial_overrun": true
   },
   {
@@ -23497,12 +23635,12 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "axiomatic_geometry_compendium",
-    "ratio_proportion"
+    "axiomatic_geometry_compendium"
    ],
    "requires_any": [],
    "precedents": [
-    "combinatorics"
+    "combinatorics",
+    "ratio_proportion"
    ],
    "conditions": {
     "resources_known": [],
@@ -23510,9 +23648,9 @@
     "contact_required": false
    },
    "note": "Number properties proven in axiomatic form.",
-   "earliest_feasible_year": 227.5,
+   "earliest_feasible_year": 220.5,
    "serial_line_finish_year": 1308.0,
-   "chain_depth": 21,
+   "chain_depth": 20,
    "serial_overrun": true
   },
   {
@@ -23658,7 +23796,7 @@
    },
    "note": "Standardized coin trusted across regions.",
    "earliest_feasible_year": 128.5,
-   "serial_line_finish_year": 1245.0,
+   "serial_line_finish_year": 1196.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -23887,7 +24025,7 @@
    },
    "note": "Stages grow into guarded cities.",
    "earliest_feasible_year": 58.5,
-   "serial_line_finish_year": 1255.0,
+   "serial_line_finish_year": 1206.0,
    "chain_depth": 10,
    "serial_overrun": true
   },
@@ -24173,7 +24311,7 @@
    },
    "note": "Planed staves hooped into casks.",
    "earliest_feasible_year": 122.5,
-   "serial_line_finish_year": 1265.0,
+   "serial_line_finish_year": 1216.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -24248,13 +24386,13 @@
    "research_years": 10.0,
    "key_threshold": false,
    "requires_all": [
-    "closed_moulds",
-    "lever_moments"
+    "closed_moulds"
    ],
    "requires_any": [],
    "precedents": [
     "armillary_sphere",
-    "geared_sky_calculator"
+    "geared_sky_calculator",
+    "lever_moments"
    ],
    "conditions": {
     "resources_known": [],
@@ -24262,9 +24400,9 @@
     "contact_required": false
    },
    "note": "Cast bronze vessel with pendulum trip levers.",
-   "earliest_feasible_year": 239.5,
+   "earliest_feasible_year": 67.5,
    "serial_line_finish_year": 1330.0,
-   "chain_depth": 22,
+   "chain_depth": 10,
    "serial_overrun": true
   },
   {
@@ -24435,7 +24573,7 @@
    },
    "note": "One wheel under a carrier's frame.",
    "earliest_feasible_year": 91.5,
-   "serial_line_finish_year": 1271.0,
+   "serial_line_finish_year": 1222.0,
    "chain_depth": 12,
    "serial_overrun": true
   },
@@ -24567,12 +24705,12 @@
    "key_threshold": false,
    "requires_all": [
     "regional_maps",
-    "latitude_zones",
-    "trigonometry"
+    "latitude_zones"
    ],
    "requires_any": [],
    "precedents": [
-    "star_position_catalogue"
+    "star_position_catalogue",
+    "trigonometry"
    ],
    "conditions": {
     "resources_known": [],
@@ -24580,9 +24718,9 @@
     "contact_required": false
    },
    "note": "Places listed by computed grid coordinates.",
-   "earliest_feasible_year": 234.5,
+   "earliest_feasible_year": 216.5,
    "serial_line_finish_year": 1345.0,
-   "chain_depth": 22,
+   "chain_depth": 20,
    "serial_overrun": true
   },
   {
@@ -24744,13 +24882,13 @@
    "research_years": 20.0,
    "key_threshold": true,
    "requires_all": [
-    "star_position_catalogue",
-    "trigonometry"
+    "star_position_catalogue"
    ],
    "requires_any": [],
    "precedents": [
     "leap_year_solar_calendar",
-    "encyclopedic_compendia"
+    "encyclopedic_compendia",
+    "trigonometry"
    ],
    "conditions": {
     "resources_known": [],
@@ -24758,9 +24896,9 @@
     "contact_required": false
    },
    "note": "Sky models and tables gathered in one work.",
-   "earliest_feasible_year": 264.5,
+   "earliest_feasible_year": 257.5,
    "serial_line_finish_year": 1365.0,
-   "chain_depth": 23,
+   "chain_depth": 22,
    "serial_overrun": true
   },
   {
@@ -24904,9 +25042,9 @@
     "contact_required": false
    },
    "note": "Milestone distances listed by stage.",
-   "earliest_feasible_year": 135.5,
-   "serial_line_finish_year": 1279.0,
-   "chain_depth": 16,
+   "earliest_feasible_year": 54.5,
+   "serial_line_finish_year": 1230.0,
+   "chain_depth": 9,
    "serial_overrun": true
   },
   {
@@ -25284,7 +25422,7 @@
    },
    "note": "Wagons classed by road load.",
    "earliest_feasible_year": 113.5,
-   "serial_line_finish_year": 1285.0,
+   "serial_line_finish_year": 1236.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -25311,7 +25449,7 @@
    },
    "note": "Sealed goods pass customs under bond.",
    "earliest_feasible_year": 89.5,
-   "serial_line_finish_year": 1291.0,
+   "serial_line_finish_year": 1242.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -25487,7 +25625,7 @@
     "contact_required": false
    },
    "note": "Conduit drives a chain of mills.",
-   "earliest_feasible_year": 157.5,
+   "earliest_feasible_year": 138.5,
    "serial_line_finish_year": 1349.0,
    "chain_depth": 17,
    "serial_overrun": true
@@ -25921,7 +26059,7 @@
    },
    "note": "Transfer orders payable in far markets.",
    "earliest_feasible_year": 141.5,
-   "serial_line_finish_year": 1299.0,
+   "serial_line_finish_year": 1250.0,
    "chain_depth": 16,
    "serial_overrun": true
   },
@@ -25978,9 +26116,9 @@
     "contact_required": false
    },
    "note": "Outbreak records mapped onto routes",
-   "earliest_feasible_year": 141.5,
+   "earliest_feasible_year": 139.5,
    "serial_line_finish_year": 1405.0,
-   "chain_depth": 17,
+   "chain_depth": 15,
    "serial_overrun": true
   },
   {
@@ -26066,9 +26204,9 @@
     "contact_required": false
    },
    "note": "Survey grids drawn to a stated scale.",
-   "earliest_feasible_year": 244.5,
+   "earliest_feasible_year": 226.5,
    "serial_line_finish_year": 1387.0,
-   "chain_depth": 23,
+   "chain_depth": 21,
    "serial_overrun": true
   },
   {
@@ -26268,9 +26406,9 @@
     "contact_required": false
    },
    "note": "Unknowns abbreviated in written problems.",
-   "earliest_feasible_year": 242.5,
+   "earliest_feasible_year": 235.5,
    "serial_line_finish_year": 1402.0,
-   "chain_depth": 22,
+   "chain_depth": 21,
    "serial_overrun": true
   },
   {
@@ -26354,7 +26492,7 @@
    },
    "note": "Haulways built between canal levels.",
    "earliest_feasible_year": 99.5,
-   "serial_line_finish_year": 1309.0,
+   "serial_line_finish_year": 1260.0,
    "chain_depth": 14,
    "serial_overrun": true
   },
@@ -26383,9 +26521,9 @@
     "contact_required": false
    },
    "note": "Doubled polygons squeeze the circle ratio.",
-   "earliest_feasible_year": 239.5,
+   "earliest_feasible_year": 232.5,
    "serial_line_finish_year": 1410.0,
-   "chain_depth": 22,
+   "chain_depth": 21,
    "serial_overrun": true
   },
   {
@@ -26964,7 +27102,7 @@
    },
    "note": "Steering foresail grows into a main sail.",
    "earliest_feasible_year": 115.5,
-   "serial_line_finish_year": 1325.0,
+   "serial_line_finish_year": 1276.0,
    "chain_depth": 15,
    "serial_overrun": true
   },
@@ -27371,9 +27509,9 @@
     "contact_required": false
    },
    "note": "Itineraries drawn as strip maps.",
-   "earliest_feasible_year": 145.5,
-   "serial_line_finish_year": 1335.0,
-   "chain_depth": 17,
+   "earliest_feasible_year": 83.5,
+   "serial_line_finish_year": 1286.0,
+   "chain_depth": 10,
    "serial_overrun": true
   },
   {
@@ -27401,9 +27539,9 @@
     "contact_required": false
    },
    "note": "Gauge records tied to mountain snow",
-   "earliest_feasible_year": 139.5,
+   "earliest_feasible_year": 28.0,
    "serial_line_finish_year": 1250.0,
-   "chain_depth": 16,
+   "chain_depth": 4,
    "serial_overrun": true
   },
   {
@@ -27725,7 +27863,7 @@
    },
    "note": "Customs posts applied to rivers.",
    "earliest_feasible_year": 89.5,
-   "serial_line_finish_year": 1341.0,
+   "serial_line_finish_year": 1292.0,
    "chain_depth": 14,
    "serial_overrun": true
   },

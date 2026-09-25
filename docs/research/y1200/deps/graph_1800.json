@@ -13,9 +13,9 @@
   ],
   "node_count": 937,
   "edge_counts": {
-   "hard": 1671,
+   "hard": 1669,
    "any": 18,
-   "precedent": 1866
+   "precedent": 1868
   },
   "cross_block_edges": 1999,
   "cross_block_edges_by_block": {
@@ -26,6 +26,41 @@
    "ocean_sailing"
   ],
   "demoted_links": [],
+  "identity_demotions": [
+   {
+    "dependent": "half_chord_sine_tables",
+    "parent": "trigonometry",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "half_chord_sine_tables",
+    "substituted_requires_all": [
+     "sky_tables_compendium",
+     "polygon_circle_estimation",
+     "nine_digits_and_zero"
+    ]
+   },
+   {
+    "dependent": "binomial_coefficient_triangle",
+    "parent": "combinatorics",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "science_of_weights",
+    "parent": "lever_moments",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "ratchet_motion_control",
+    "parent": "compound_pulleys",
+    "direction": "main path on identity"
+   },
+   {
+    "dependent": "tracing_floor_templates",
+    "parent": "straightedge_compass",
+    "direction": "main path on identity"
+   }
+  ],
   "year_adjustments": 1
  },
  "nodes": [
@@ -84,9 +119,9 @@
     "contact_required": false
    },
    "note": "Tunnels and bridges carry water from distant hills.",
-   "earliest_feasible_year": 157.5,
+   "earliest_feasible_year": 121.5,
    "serial_line_finish_year": 1212.0,
-   "chain_depth": 17,
+   "chain_depth": 15,
    "serial_overrun": false
   },
   {
@@ -308,14 +343,14 @@
    "research_years": 5.0,
    "key_threshold": false,
    "requires_all": [
-    "smithing_tool_sets",
-    "compound_pulleys"
+    "smithing_tool_sets"
    ],
    "requires_any": [],
    "precedents": [
     "crossbow_mechanism",
     "counterweight_cranes",
-    "treadwheel_quay_cranes"
+    "treadwheel_quay_cranes",
+    "compound_pulleys"
    ],
    "conditions": {
     "resources_known": [],
@@ -323,9 +358,9 @@
     "contact_required": false
    },
    "note": "An iron pawl locks the winch drum against running back.",
-   "earliest_feasible_year": 240.5,
+   "earliest_feasible_year": 91.5,
    "serial_line_finish_year": 1205.0,
-   "chain_depth": 23,
+   "chain_depth": 13,
    "serial_overrun": false
   },
   {
@@ -826,9 +861,9 @@
     "contact_required": false
    },
    "note": "Written itineraries drawn out as day-stage strips.",
-   "earliest_feasible_year": 141.5,
+   "earliest_feasible_year": 79.5,
    "serial_line_finish_year": 1339.0,
-   "chain_depth": 17,
+   "chain_depth": 10,
    "serial_overrun": true
   },
   {
@@ -2482,13 +2517,13 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "trigonometry"
-   ],
-   "requires_any": [],
-   "precedents": [
     "sky_tables_compendium",
     "polygon_circle_estimation",
     "nine_digits_and_zero"
+   ],
+   "requires_any": [],
+   "precedents": [
+    "trigonometry"
    ],
    "conditions": {
     "resources_known": [],
@@ -2496,9 +2531,9 @@
     "contact_required": false
    },
    "note": "Chord tables halved into sine tables.",
-   "earliest_feasible_year": 222.5,
+   "earliest_feasible_year": 265.5,
    "serial_line_finish_year": 1477.0,
-   "chain_depth": 21,
+   "chain_depth": 23,
    "serial_overrun": true
   },
   {
@@ -3095,9 +3130,9 @@
    },
    "note": "Merchant ships carry long-yarded lateen sails.",
    "earliest_feasible_year": 125.5,
-   "serial_line_finish_year": 1335.0,
+   "serial_line_finish_year": 1286.0,
    "chain_depth": 16,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "retreat_copying_rooms",
@@ -3428,9 +3463,9 @@
    },
    "note": "Cargo is sold on at each port in short coastal hops.",
    "earliest_feasible_year": 116.5,
-   "serial_line_finish_year": 1341.0,
+   "serial_line_finish_year": 1292.0,
    "chain_depth": 14,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "slit_silk_tapestry",
@@ -3757,9 +3792,9 @@
    },
    "note": "A padded rigid collar moves the pull onto the shoulders.",
    "earliest_feasible_year": 126.5,
-   "serial_line_finish_year": 1355.0,
+   "serial_line_finish_year": 1306.0,
    "chain_depth": 16,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "fen_commons",
@@ -3965,9 +4000,9 @@
    },
    "note": "Estates run carting services between their holdings.",
    "earliest_feasible_year": 100.5,
-   "serial_line_finish_year": 1361.0,
+   "serial_line_finish_year": 1312.0,
    "chain_depth": 14,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "three_department_ministries",
@@ -4291,9 +4326,9 @@
    },
    "note": "Free hostels at passes shelter travellers.",
    "earliest_feasible_year": 48.5,
-   "serial_line_finish_year": 1369.0,
+   "serial_line_finish_year": 1320.0,
    "chain_depth": 8,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "high_bow_war_saddle",
@@ -4912,9 +4947,9 @@
    },
    "note": "Provincial payments are redeemed in the capital.",
    "earliest_feasible_year": 151.5,
-   "serial_line_finish_year": 1379.0,
+   "serial_line_finish_year": 1330.0,
    "chain_depth": 17,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "seabird_colony_shares",
@@ -5240,9 +5275,9 @@
     "contact_required": false
    },
    "note": "The sky sphere projected flat onto a brass disc.",
-   "earliest_feasible_year": 254.5,
+   "earliest_feasible_year": 247.5,
    "serial_line_finish_year": 1538.0,
-   "chain_depth": 23,
+   "chain_depth": 22,
    "serial_overrun": true
   },
   {
@@ -5331,9 +5366,9 @@
    },
    "note": "Overlapping planks are riveted into a shell.",
    "earliest_feasible_year": 103.5,
-   "serial_line_finish_year": 1391.0,
+   "serial_line_finish_year": 1342.0,
    "chain_depth": 14,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "village_wood_reeves",
@@ -5663,9 +5698,9 @@
    },
    "note": "Treadles turn paddle wheels.",
    "earliest_feasible_year": 103.5,
-   "serial_line_finish_year": 1401.0,
+   "serial_line_finish_year": 1352.0,
    "chain_depth": 13,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "relief_block_cutting",
@@ -6112,9 +6147,9 @@
    },
    "note": "Caulked cross-walls divide the hold.",
    "earliest_feasible_year": 95.5,
-   "serial_line_finish_year": 1413.0,
+   "serial_line_finish_year": 1364.0,
    "chain_depth": 13,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "yearly_grain_share_crafts",
@@ -6319,9 +6354,9 @@
     "contact_required": false
    },
    "note": "Gnomon stations along a meridian measure its length.",
-   "earliest_feasible_year": 223.5,
+   "earliest_feasible_year": 205.5,
    "serial_line_finish_year": 1577.0,
-   "chain_depth": 21,
+   "chain_depth": 19,
    "serial_overrun": true
   },
   {
@@ -6350,9 +6385,9 @@
     "contact_required": false
    },
    "note": "A water wheel checked step by step turns the globe.",
-   "earliest_feasible_year": 259.5,
+   "earliest_feasible_year": 252.5,
    "serial_line_finish_year": 1592.0,
-   "chain_depth": 23,
+   "chain_depth": 22,
    "serial_overrun": true
   },
   {
@@ -6438,9 +6473,9 @@
     "contact_required": false
    },
    "note": "Tide lore tied to the moon's tabulated age.",
-   "earliest_feasible_year": 270.5,
+   "earliest_feasible_year": 263.5,
    "serial_line_finish_year": 1598.0,
-   "chain_depth": 24,
+   "chain_depth": 23,
    "serial_overrun": true
   },
   {
@@ -6557,9 +6592,9 @@
    },
    "note": "Twin shafts put one horse between them.",
    "earliest_feasible_year": 120.5,
-   "serial_line_finish_year": 1421.0,
+   "serial_line_finish_year": 1372.0,
    "chain_depth": 16,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "estate_survey_books",
@@ -6829,9 +6864,9 @@
    },
    "note": "A true keel lets a clinker ship carry sail at sea.",
    "earliest_feasible_year": 115.5,
-   "serial_line_finish_year": 1433.0,
+   "serial_line_finish_year": 1384.0,
    "chain_depth": 15,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "managed_heathland",
@@ -6917,9 +6952,9 @@
    },
    "note": "Beach markets meet where ships winter.",
    "earliest_feasible_year": 35.5,
-   "serial_line_finish_year": 1441.0,
+   "serial_line_finish_year": 1392.0,
    "chain_depth": 8,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "mounted_retinue_summons",
@@ -7157,9 +7192,9 @@
    },
    "note": "Birds, swell and cloud are read to find land.",
    "earliest_feasible_year": 15.0,
-   "serial_line_finish_year": 1447.0,
+   "serial_line_finish_year": 1398.0,
    "chain_depth": 3,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "reserved_hunting_rights",
@@ -7457,9 +7492,9 @@
    },
    "note": "Caravans of thousands cross the desert.",
    "earliest_feasible_year": 79.5,
-   "serial_line_finish_year": 1459.0,
+   "serial_line_finish_year": 1410.0,
    "chain_depth": 12,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "wolf_bounties",
@@ -7729,9 +7764,9 @@
    },
    "note": "Paid teams haul boats between rivers.",
    "earliest_feasible_year": 19.5,
-   "serial_line_finish_year": 1467.0,
+   "serial_line_finish_year": 1418.0,
    "chain_depth": 5,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "castle_guard_rotations",
@@ -8208,9 +8243,9 @@
    },
    "note": "A pivot bar evens the pull of each animal.",
    "earliest_feasible_year": 132.5,
-   "serial_line_finish_year": 1473.0,
+   "serial_line_finish_year": 1424.0,
    "chain_depth": 17,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "digit_reckoning_handbook",
@@ -8267,9 +8302,9 @@
     "contact_required": false
    },
    "note": "Equations solved by restoring and balancing terms.",
-   "earliest_feasible_year": 257.5,
+   "earliest_feasible_year": 250.5,
    "serial_line_finish_year": 1637.0,
-   "chain_depth": 23,
+   "chain_depth": 22,
    "serial_overrun": true
   },
   {
@@ -8419,9 +8454,9 @@
    },
    "note": "Bridge and road upkeep is owed from land.",
    "earliest_feasible_year": 106.5,
-   "serial_line_finish_year": 1479.0,
+   "serial_line_finish_year": 1430.0,
    "chain_depth": 13,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "realm_beacon_chain",
@@ -8629,9 +8664,9 @@
     "contact_required": false
    },
    "note": "Court scholars build great fixed instruments.",
-   "earliest_feasible_year": 239.5,
+   "earliest_feasible_year": 237.5,
    "serial_line_finish_year": 1667.0,
-   "chain_depth": 22,
+   "chain_depth": 21,
    "serial_overrun": true
   },
   {
@@ -8718,9 +8753,9 @@
    },
    "note": "Beamy keeled hulls carry cargo on open-sea runs.",
    "earliest_feasible_year": 127.5,
-   "serial_line_finish_year": 1491.0,
+   "serial_line_finish_year": 1442.0,
    "chain_depth": 16,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "foreign_household_guard",
@@ -9164,9 +9199,9 @@
    },
    "note": "A spar holds the luff forward when beating.",
    "earliest_feasible_year": 121.5,
-   "serial_line_finish_year": 1497.0,
+   "serial_line_finish_year": 1448.0,
    "chain_depth": 16,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "hospital_formulary",
@@ -9404,9 +9439,9 @@
    },
    "note": "Silver is cut, tested and weighed again.",
    "earliest_feasible_year": 50.5,
-   "serial_line_finish_year": 1502.0,
+   "serial_line_finish_year": 1453.0,
    "chain_depth": 9,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "burgh_defense_network",
@@ -9675,9 +9710,9 @@
    },
    "note": "Frozen rivers and marsh serve as sledge roads.",
    "earliest_feasible_year": 12.5,
-   "serial_line_finish_year": 1508.0,
+   "serial_line_finish_year": 1459.0,
    "chain_depth": 3,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "frontier_march_lords",
@@ -10003,9 +10038,9 @@
     "contact_required": false
    },
    "note": "Fixed instruments correct the inherited tables.",
-   "earliest_feasible_year": 274.5,
+   "earliest_feasible_year": 267.5,
    "serial_line_finish_year": 1710.0,
-   "chain_depth": 24,
+   "chain_depth": 23,
    "serial_overrun": true
   },
   {
@@ -10153,9 +10188,9 @@
    },
    "note": "Iron shoes are nailed to the hoof.",
    "earliest_feasible_year": 120.5,
-   "serial_line_finish_year": 1518.0,
+   "serial_line_finish_year": 1469.0,
    "chain_depth": 16,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "shadowing_raid_defense",
@@ -10212,9 +10247,9 @@
     "contact_required": false
    },
    "note": "A graduated quarter circle reads heights and hours.",
-   "earliest_feasible_year": 228.5,
+   "earliest_feasible_year": 271.5,
    "serial_line_finish_year": 1716.0,
-   "chain_depth": 22,
+   "chain_depth": 24,
    "serial_overrun": true
   },
   {
@@ -10663,10 +10698,10 @@
     "contact_required": false
    },
    "note": "Pole-star height is held with a knotted tablet.",
-   "earliest_feasible_year": 227.5,
-   "serial_line_finish_year": 1526.0,
-   "chain_depth": 22,
-   "serial_overrun": true
+   "earliest_feasible_year": 209.5,
+   "serial_line_finish_year": 1477.0,
+   "chain_depth": 20,
+   "serial_overrun": false
   },
   {
    "id": "planned_ring_forts",
@@ -11087,9 +11122,9 @@
    },
    "note": "Battens let the sail reef panel by panel.",
    "earliest_feasible_year": 123.5,
-   "serial_line_finish_year": 1534.0,
+   "serial_line_finish_year": 1485.0,
    "chain_depth": 16,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "storm_surge_records",
@@ -11533,9 +11568,9 @@
     "contact_required": false
    },
    "note": "Revised star positions drawn with magnitudes.",
-   "earliest_feasible_year": 284.5,
+   "earliest_feasible_year": 277.5,
    "serial_line_finish_year": 1752.0,
-   "chain_depth": 25,
+   "chain_depth": 24,
    "serial_overrun": true
   },
   {
@@ -11564,9 +11599,9 @@
    },
    "note": "Ship stores are reckoned per man per day.",
    "earliest_feasible_year": 56.5,
-   "serial_line_finish_year": 1540.0,
+   "serial_line_finish_year": 1491.0,
    "chain_depth": 10,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "edge_runner_mills",
@@ -12107,9 +12142,9 @@
     "contact_required": false
    },
    "note": "Algebra extended to powers and many terms.",
-   "earliest_feasible_year": 269.5,
+   "earliest_feasible_year": 262.5,
    "serial_line_finish_year": 1782.0,
-   "chain_depth": 24,
+   "chain_depth": 23,
    "serial_overrun": true
   },
   {
@@ -12433,9 +12468,9 @@
    },
    "note": "Hired carriers run pack-horse trains.",
    "earliest_feasible_year": 92.5,
-   "serial_line_finish_year": 1546.0,
+   "serial_line_finish_year": 1497.0,
    "chain_depth": 12,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "court_psychological_novel",
@@ -12824,7 +12859,7 @@
    },
    "note": "Collared horses are put in file.",
    "earliest_feasible_year": 138.5,
-   "serial_line_finish_year": 1552.0,
+   "serial_line_finish_year": 1503.0,
    "chain_depth": 18,
    "serial_overrun": false
   },
@@ -13064,9 +13099,9 @@
     "contact_required": false
    },
    "note": "New observations expose faults in the models.",
-   "earliest_feasible_year": 282.5,
+   "earliest_feasible_year": 275.5,
    "serial_line_finish_year": 1805.0,
-   "chain_depth": 25,
+   "chain_depth": 24,
    "serial_overrun": true
   },
   {
@@ -13157,7 +13192,7 @@
    },
    "note": "Carriage is priced per load and stage.",
    "earliest_feasible_year": 94.5,
-   "serial_line_finish_year": 1557.0,
+   "serial_line_finish_year": 1508.0,
    "chain_depth": 12,
    "serial_overrun": false
   },
@@ -13573,7 +13608,7 @@
    },
    "note": "A partner at home funds one who travels.",
    "earliest_feasible_year": 138.5,
-   "serial_line_finish_year": 1565.0,
+   "serial_line_finish_year": 1516.0,
    "chain_depth": 17,
    "serial_overrun": false
   },
@@ -13753,9 +13788,9 @@
    },
    "note": "Frames go up first and flush planks are fastened to them.",
    "earliest_feasible_year": 113.5,
-   "serial_line_finish_year": 1581.0,
+   "serial_line_finish_year": 1532.0,
    "chain_depth": 15,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "oak_bark_seasons",
@@ -13811,9 +13846,9 @@
     "contact_required": false
    },
    "note": "New stars logged against the revised tables.",
-   "earliest_feasible_year": 282.5,
+   "earliest_feasible_year": 275.5,
    "serial_line_finish_year": 1828.0,
-   "chain_depth": 25,
+   "chain_depth": 24,
    "serial_overrun": true
   },
   {
@@ -13976,12 +14011,12 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "polynomial_term_algebra",
-    "combinatorics"
+    "polynomial_term_algebra"
    ],
    "requires_any": [],
    "precedents": [
-    "digit_column_counting_board"
+    "digit_column_counting_board",
+    "combinatorics"
    ],
    "conditions": {
     "resources_known": [],
@@ -13989,9 +14024,9 @@
     "contact_required": false
    },
    "note": "Expanded powers give a triangle of coefficients.",
-   "earliest_feasible_year": 277.5,
+   "earliest_feasible_year": 270.5,
    "serial_line_finish_year": 1836.0,
-   "chain_depth": 25,
+   "chain_depth": 24,
    "serial_overrun": true
   },
   {
@@ -14020,9 +14055,9 @@
    },
    "note": "Hulls are fitted to carry and land horses.",
    "earliest_feasible_year": 137.5,
-   "serial_line_finish_year": 1591.0,
+   "serial_line_finish_year": 1542.0,
    "chain_depth": 17,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "universal_astrolabe_plate",
@@ -14050,7 +14085,7 @@
     "contact_required": false
    },
    "note": "One projection plate serves every latitude.",
-   "earliest_feasible_year": 262.5,
+   "earliest_feasible_year": 273.5,
    "serial_line_finish_year": 1844.0,
    "chain_depth": 24,
    "serial_overrun": true
@@ -14231,9 +14266,9 @@
     "contact_required": false
    },
    "note": "Cubic equations met by intersecting conics.",
-   "earliest_feasible_year": 279.5,
+   "earliest_feasible_year": 272.5,
    "serial_line_finish_year": 1854.0,
-   "chain_depth": 25,
+   "chain_depth": 24,
    "serial_overrun": true
   },
   {
@@ -14291,7 +14326,7 @@
    },
    "note": "An iron shoe under the wheel brakes on descents.",
    "earliest_feasible_year": 96.5,
-   "serial_line_finish_year": 1596.0,
+   "serial_line_finish_year": 1547.0,
    "chain_depth": 13,
    "serial_overrun": false
   },
@@ -14654,7 +14689,7 @@
    },
    "note": "Sealed letters protect merchants on hostile ground.",
    "earliest_feasible_year": 33.5,
-   "serial_line_finish_year": 1602.0,
+   "serial_line_finish_year": 1553.0,
    "chain_depth": 8,
    "serial_overrun": false
   },
@@ -14772,9 +14807,9 @@
     "contact_required": false
    },
    "note": "The escapement globe housed in a public tower.",
-   "earliest_feasible_year": 274.5,
+   "earliest_feasible_year": 267.5,
    "serial_line_finish_year": 1875.0,
-   "chain_depth": 24,
+   "chain_depth": 23,
    "serial_overrun": true
   },
   {
@@ -15138,9 +15173,9 @@
    },
    "note": "Fairs run under a guarded peace with settling days.",
    "earliest_feasible_year": 39.5,
-   "serial_line_finish_year": 1614.0,
+   "serial_line_finish_year": 1565.0,
    "chain_depth": 8,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "forest_perambulation",
@@ -15737,7 +15772,7 @@
    },
    "note": "Merchants' marks go on bales and casks.",
    "earliest_feasible_year": 57.5,
-   "serial_line_finish_year": 1619.0,
+   "serial_line_finish_year": 1570.0,
    "chain_depth": 11,
    "serial_overrun": false
   },
@@ -15886,9 +15921,9 @@
     "contact_required": false
    },
    "note": "Arsenal work on one payroll.",
-   "earliest_feasible_year": 170.5,
+   "earliest_feasible_year": 130.5,
    "serial_line_finish_year": 1859.0,
-   "chain_depth": 20,
+   "chain_depth": 16,
    "serial_overrun": true
   },
   {
@@ -16128,9 +16163,9 @@
    },
    "note": "A rubbed iron needle floated in water points north.",
    "earliest_feasible_year": 106.5,
-   "serial_line_finish_year": 1633.0,
+   "serial_line_finish_year": 1584.0,
    "chain_depth": 14,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "glossator_law_schools",
@@ -16216,7 +16251,7 @@
    },
    "note": "Carriers answer for goods lost on the road.",
    "earliest_feasible_year": 127.5,
-   "serial_line_finish_year": 1638.0,
+   "serial_line_finish_year": 1589.0,
    "chain_depth": 16,
    "serial_overrun": false
   },
@@ -16577,7 +16612,7 @@
    },
    "note": "Brotherhoods keep bridges by toll and gift.",
    "earliest_feasible_year": 103.5,
-   "serial_line_finish_year": 1646.0,
+   "serial_line_finish_year": 1597.0,
    "chain_depth": 15,
    "serial_overrun": false
   },
@@ -17115,9 +17150,9 @@
     "contact_required": false
    },
    "note": "Spring water is piped in lead to fountains.",
-   "earliest_feasible_year": 165.5,
+   "earliest_feasible_year": 129.5,
    "serial_line_finish_year": 1686.0,
-   "chain_depth": 19,
+   "chain_depth": 16,
    "serial_overrun": true
   },
   {
@@ -17326,7 +17361,7 @@
    },
    "note": "Collared horses tow barges on towpaths.",
    "earliest_feasible_year": 132.5,
-   "serial_line_finish_year": 1652.0,
+   "serial_line_finish_year": 1603.0,
    "chain_depth": 17,
    "serial_overrun": false
   },
@@ -17744,7 +17779,7 @@
    },
    "note": "Sea customs are written down.",
    "earliest_feasible_year": 145.5,
-   "serial_line_finish_year": 1662.0,
+   "serial_line_finish_year": 1613.0,
    "chain_depth": 18,
    "serial_overrun": false
   },
@@ -18254,7 +18289,7 @@
    },
    "note": "Horse teams haul freight wagons on long routes.",
    "earliest_feasible_year": 146.5,
-   "serial_line_finish_year": 1670.0,
+   "serial_line_finish_year": 1621.0,
    "chain_depth": 19,
    "serial_overrun": false
   },
@@ -18612,9 +18647,9 @@
     "contact_required": false
    },
    "note": "Great stone houses retain a master mason.",
-   "earliest_feasible_year": 162.5,
+   "earliest_feasible_year": 140.5,
    "serial_line_finish_year": 2010.0,
-   "chain_depth": 19,
+   "chain_depth": 18,
    "serial_overrun": true
   },
   {
@@ -18826,9 +18861,9 @@
    },
    "note": "A bill is paid in another coin at a set date.",
    "earliest_feasible_year": 153.5,
-   "serial_line_finish_year": 1682.0,
+   "serial_line_finish_year": 1633.0,
    "chain_depth": 17,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "guild_welfare_chests",
@@ -19210,9 +19245,9 @@
     "contact_required": false
    },
    "note": "Building wages differ by season.",
-   "earliest_feasible_year": 167.5,
+   "earliest_feasible_year": 145.5,
    "serial_line_finish_year": 2020.0,
-   "chain_depth": 20,
+   "chain_depth": 19,
    "serial_overrun": true
   },
   {
@@ -19391,7 +19426,7 @@
    },
    "note": "Endowed inns are a day's ride apart.",
    "earliest_feasible_year": 50.5,
-   "serial_line_finish_year": 1692.0,
+   "serial_line_finish_year": 1643.0,
    "chain_depth": 8,
    "serial_overrun": false
   },
@@ -19807,7 +19842,7 @@
    },
    "note": "A ferry is hauled along a fixed rope.",
    "earliest_feasible_year": 27.5,
-   "serial_line_finish_year": 1698.0,
+   "serial_line_finish_year": 1649.0,
    "chain_depth": 6,
    "serial_overrun": false
   },
@@ -20225,7 +20260,7 @@
    },
    "note": "Weekly markets are set a day's walk apart.",
    "earliest_feasible_year": 131.5,
-   "serial_line_finish_year": 1706.0,
+   "serial_line_finish_year": 1657.0,
    "chain_depth": 15,
    "serial_overrun": false
   },
@@ -20521,9 +20556,9 @@
     "contact_required": false
    },
    "note": "Carving priced by the piece.",
-   "earliest_feasible_year": 167.5,
+   "earliest_feasible_year": 145.5,
    "serial_line_finish_year": 2057.0,
-   "chain_depth": 20,
+   "chain_depth": 19,
    "serial_overrun": true
   },
   {
@@ -20704,9 +20739,9 @@
    },
    "note": "A rudder hangs on iron pintles at the sternpost.",
    "earliest_feasible_year": 105.5,
-   "serial_line_finish_year": 1720.0,
+   "serial_line_finish_year": 1671.0,
    "chain_depth": 14,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "petty_trial_jury",
@@ -20762,9 +20797,9 @@
     "contact_required": false
    },
    "note": "A works clerk keeps weekly pay books.",
-   "earliest_feasible_year": 172.5,
+   "earliest_feasible_year": 150.5,
    "serial_line_finish_year": 2062.0,
-   "chain_depth": 21,
+   "chain_depth": 20,
    "serial_overrun": true
   },
   {
@@ -20868,13 +20903,13 @@
    "research_years": 10.0,
    "key_threshold": false,
    "requires_all": [
-    "lever_moments",
     "rival_tongue_translation_school"
    ],
    "requires_any": [],
    "precedents": [
     "scholastic_question_method",
-    "centers_of_mass"
+    "centers_of_mass",
+    "lever_moments"
    ],
    "conditions": {
     "resources_known": [],
@@ -21184,9 +21219,9 @@
    },
    "note": "A flat bottom and high sides carry bulk.",
    "earliest_feasible_year": 139.5,
-   "serial_line_finish_year": 1732.0,
+   "serial_line_finish_year": 1683.0,
    "chain_depth": 17,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "stinted_commons",
@@ -21380,13 +21415,13 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "template_based_sizing",
-    "straightedge_compass"
+    "template_based_sizing"
    ],
    "requires_any": [],
    "precedents": [
     "squared_grid_drawings",
-    "master_builder_office"
+    "master_builder_office",
+    "straightedge_compass"
    ],
    "conditions": {
     "resources_known": [],
@@ -21394,9 +21429,9 @@
     "contact_required": false
    },
    "note": "Full-size drawings on a plaster floor give the masons templates.",
-   "earliest_feasible_year": 60.0,
+   "earliest_feasible_year": 30.5,
    "serial_line_finish_year": 1799.0,
-   "chain_depth": 8,
+   "chain_depth": 7,
    "serial_overrun": true
   },
   {
@@ -21423,9 +21458,9 @@
     "contact_required": false
    },
    "note": "A pawled windlass works anchors and yards.",
-   "earliest_feasible_year": 246.5,
-   "serial_line_finish_year": 1738.0,
-   "chain_depth": 24,
+   "earliest_feasible_year": 97.5,
+   "serial_line_finish_year": 1689.0,
+   "chain_depth": 14,
    "serial_overrun": false
   },
   {
@@ -21818,9 +21853,9 @@
    },
    "note": "Horse relays a day apart cross the realm.",
    "earliest_feasible_year": 162.5,
-   "serial_line_finish_year": 1752.0,
+   "serial_line_finish_year": 1703.0,
    "chain_depth": 20,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "rose_windows",
@@ -22024,9 +22059,9 @@
     "contact_required": false
    },
    "note": "Standard gauges report rainfall to the court.",
-   "earliest_feasible_year": 139.5,
+   "earliest_feasible_year": 28.0,
    "serial_line_finish_year": 2035.0,
-   "chain_depth": 16,
+   "chain_depth": 4,
    "serial_overrun": true
   },
   {
@@ -22116,9 +22151,9 @@
    },
    "note": "Bulk fleets sail together each year.",
    "earliest_feasible_year": 147.5,
-   "serial_line_finish_year": 1760.0,
+   "serial_line_finish_year": 1711.0,
    "chain_depth": 18,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "stepwise_high_root_extraction",
@@ -22145,9 +22180,9 @@
     "contact_required": false
    },
    "note": "Coefficient triangle drives stepwise root finding.",
-   "earliest_feasible_year": 287.5,
+   "earliest_feasible_year": 280.5,
    "serial_line_finish_year": 2045.0,
-   "chain_depth": 26,
+   "chain_depth": 25,
    "serial_overrun": true
   },
   {
@@ -22692,9 +22727,9 @@
    },
    "note": "Bulk goods are weighed for a fee.",
    "earliest_feasible_year": 21.5,
-   "serial_line_finish_year": 1766.0,
+   "serial_line_finish_year": 1717.0,
    "chain_depth": 6,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "ward_night_watch",
@@ -23265,9 +23300,9 @@
    },
    "note": "Reef points shorten the square sail aloft.",
    "earliest_feasible_year": 56.5,
-   "serial_line_finish_year": 1772.0,
+   "serial_line_finish_year": 1723.0,
    "chain_depth": 10,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "pressed_merchant_fleets",
@@ -23354,9 +23389,9 @@
     "contact_required": false
    },
    "note": "The court funds a full recomputation.",
-   "earliest_feasible_year": 286.5,
+   "earliest_feasible_year": 279.5,
    "serial_line_finish_year": 2085.0,
-   "chain_depth": 25,
+   "chain_depth": 24,
    "serial_overrun": true
   },
   {
@@ -23592,9 +23627,9 @@
    },
    "note": "Ships are rated by casks carried.",
    "earliest_feasible_year": 128.5,
-   "serial_line_finish_year": 1778.0,
+   "serial_line_finish_year": 1729.0,
    "chain_depth": 17,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "itinerant_forest_glassworks",
@@ -23953,9 +23988,9 @@
    },
    "note": "Upland reservoirs feed a canal's summit pound.",
    "earliest_feasible_year": 101.5,
-   "serial_line_finish_year": 1792.0,
+   "serial_line_finish_year": 1743.0,
    "chain_depth": 13,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "spun_crown_panes",
@@ -24012,9 +24047,9 @@
     "contact_required": false
    },
    "note": "A weight and verge replace the water drive.",
-   "earliest_feasible_year": 294.5,
+   "earliest_feasible_year": 287.5,
    "serial_line_finish_year": 2129.0,
-   "chain_depth": 25,
+   "chain_depth": 24,
    "serial_overrun": true
   },
   {
@@ -24312,9 +24347,9 @@
    },
    "note": "Harbors are charted by compass bearing.",
    "earliest_feasible_year": 135.5,
-   "serial_line_finish_year": 1804.0,
+   "serial_line_finish_year": 1755.0,
    "chain_depth": 15,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "coat_of_plates",
@@ -24702,9 +24737,9 @@
    },
    "note": "The master signs for cargo loaded.",
    "earliest_feasible_year": 128.5,
-   "serial_line_finish_year": 1810.0,
+   "serial_line_finish_year": 1761.0,
    "chain_depth": 16,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "closed_hereditary_council",
@@ -25032,10 +25067,10 @@
     "contact_required": false
    },
    "note": "State galleys are auctioned to merchants.",
-   "earliest_feasible_year": 155.5,
-   "serial_line_finish_year": 1820.0,
-   "chain_depth": 18,
-   "serial_overrun": true
+   "earliest_feasible_year": 115.5,
+   "serial_line_finish_year": 1771.0,
+   "chain_depth": 14,
+   "serial_overrun": false
   },
   {
    "id": "militia_pike_hedge",
@@ -25389,9 +25424,9 @@
    },
    "note": "A pivoted needle turns a wind-rose card.",
    "earliest_feasible_year": 116.5,
-   "serial_line_finish_year": 1830.0,
+   "serial_line_finish_year": 1781.0,
    "chain_depth": 15,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "infantry_polearms",
@@ -25869,9 +25904,9 @@
    },
    "note": "Passing goods must be offered for sale in staple towns.",
    "earliest_feasible_year": 47.5,
-   "serial_line_finish_year": 1838.0,
+   "serial_line_finish_year": 1789.0,
    "chain_depth": 9,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "felling_rotation_ordinance",
@@ -26137,9 +26172,9 @@
     "contact_required": false
    },
    "note": "Geometric rules size piers and buttresses.",
-   "earliest_feasible_year": 68.0,
+   "earliest_feasible_year": 38.5,
    "serial_line_finish_year": 1864.0,
-   "chain_depth": 9,
+   "chain_depth": 8,
    "serial_overrun": true
   },
   {
@@ -26169,9 +26204,9 @@
    },
    "note": "Sandglass watches, heading and speed give the ship's place.",
    "earliest_feasible_year": 114.5,
-   "serial_line_finish_year": 1846.0,
+   "serial_line_finish_year": 1797.0,
    "chain_depth": 15,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "double_entry_ledgers",
@@ -26416,9 +26451,9 @@
    },
    "note": "Pilots are licensed for river and harbor.",
    "earliest_feasible_year": 122.5,
-   "serial_line_finish_year": 1852.0,
+   "serial_line_finish_year": 1803.0,
    "chain_depth": 15,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "scrutiny_lot_elections",
@@ -26506,9 +26541,9 @@
     "contact_required": false
    },
    "note": "A verge clock strikes a tower bell.",
-   "earliest_feasible_year": 304.5,
+   "earliest_feasible_year": 297.5,
    "serial_line_finish_year": 2181.0,
-   "chain_depth": 26,
+   "chain_depth": 25,
    "serial_overrun": true
   },
   {
@@ -26716,9 +26751,9 @@
    },
    "note": "Merchant couriers run on schedules.",
    "earliest_feasible_year": 138.5,
-   "serial_line_finish_year": 1860.0,
+   "serial_line_finish_year": 1811.0,
    "chain_depth": 18,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "mean_speed_rule",
@@ -26924,9 +26959,9 @@
     "contact_required": false
    },
    "note": "A windlass spans the heavy crossbow.",
-   "earliest_feasible_year": 246.5,
+   "earliest_feasible_year": 97.5,
    "serial_line_finish_year": 2111.0,
-   "chain_depth": 24,
+   "chain_depth": 14,
    "serial_overrun": true
   },
   {
@@ -27014,10 +27049,10 @@
     "contact_required": false
    },
    "note": "Handbooks list routes, tolls, coins and measures.",
-   "earliest_feasible_year": 143.5,
-   "serial_line_finish_year": 1868.0,
-   "chain_depth": 17,
-   "serial_overrun": true
+   "earliest_feasible_year": 62.5,
+   "serial_line_finish_year": 1819.0,
+   "chain_depth": 10,
+   "serial_overrun": false
   },
   {
    "id": "commonplace_books",
@@ -27439,7 +27474,7 @@
    },
    "note": "Sea risk is covered for a premium.",
    "earliest_feasible_year": 163.5,
-   "serial_line_finish_year": 1878.0,
+   "serial_line_finish_year": 1829.0,
    "chain_depth": 18,
    "serial_overrun": true
   },
@@ -27859,9 +27894,9 @@
    },
    "note": "The harbor registers ships, owners and masters.",
    "earliest_feasible_year": 122.5,
-   "serial_line_finish_year": 1884.0,
+   "serial_line_finish_year": 1835.0,
    "chain_depth": 15,
-   "serial_overrun": true
+   "serial_overrun": false
   },
   {
    "id": "daily_weather_diaries",
