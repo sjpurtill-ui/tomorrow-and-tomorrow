@@ -57,7 +57,7 @@ func _build_aims()->void:
 	if not live.is_empty():
 		var title:=Kit.serif(stack,String(live.get("title","")),24,T.INK,true);title.name="AimTitle"
 		var bar:=AimBar.new();bar.name="AimProgress";bar.progress=float(live.get("progress",0.0));bar.marks=live.get("milestones",[]);bar.custom_minimum_size=Vector2(0,18);stack.add_child(bar)
-		bar.tooltip_text="%d%% of the way" % roundi(float(live.get("progress",0.0))*100.0)
+		bar.tooltip_text=preload("res://scripts/hud/era_words.gd").way_along(float(live.get("progress",0.0)))
 		var said:=String(live.get("words",""))
 		var line:=Kit.label(stack,"%s · %s left" % [said.substr(0,1).to_upper()+said.substr(1),String(live.get("left",""))],13,T.BODY,false);line.name="AimWords"
 		if String(live.get("clash",""))!="":

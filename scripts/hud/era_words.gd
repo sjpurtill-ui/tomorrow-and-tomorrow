@@ -214,6 +214,18 @@ static func teaching(value:float)->String:
 	return "barely"
 
 
+## How far along an aim or a work is: plain words before writing, a share after.
+static func way_along(progress:float)->String:
+	var p:=clampf(progress,0.0,1.0)
+	if not hearth():return "%d%% of the way" % roundi(p*100.0)
+	if p>=1.0:return "done"
+	if p>=0.85:return "nearly there"
+	if p>=0.6:return "most of the way"
+	if p>=0.4:return "half the way"
+	if p>=0.15:return "a quarter of the way"
+	return "barely begun"
+
+
 static func grouped(value:int)->String:
 	var digits:=str(absi(value))
 	var out:=""
