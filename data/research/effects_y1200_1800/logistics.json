@@ -1,5 +1,825 @@
 {
  "line": "logistics",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "wagon_requisition_levy": {
+   "effects": {
+    "haul_capacity": 0.005,
+    "logistics_endurance": 0.0068,
+    "warfare_readiness": 0.001,
+    "labor_demand": 0.002,
+    "legitimacy": -0.002,
+    "travel_speed": 0.0016
+   },
+   "name": "Wagon Levies on the Line of March",
+   "observation": "When the army passes, each town along the road must send wagons, teams and drivers on to the next halt.",
+   "social_consequence": "Towns lose their carts in harvest month and curse the army's road.",
+   "art": "res://assets/ui/research/paper/first300-cards/cart_bed_framing.tres"
+  },
+  "camel_displaces_cart": {
+   "effects": {
+    "haul_capacity": 0.005,
+    "route_speed": 0.004,
+    "labor_demand": -0.001,
+    "repair_capacity": -0.001
+   },
+   "name": "Camels Replace Carts",
+   "observation": "In the dry country the carters sell their wheels; a string of camels needs no paved road and no bridge.",
+   "art": "res://assets/ui/research/paper/pack_animals.png"
+  },
+  "fee_kept_post_stations": {
+   "effects": {
+    "travel_speed": 0.0064,
+    "route_speed": 0.002,
+    "state_capacity": 0.001,
+    "trade_capacity": -0.001
+   },
+   "name": "Fee-Kept Post Stations",
+   "observation": "Where the ruler's post has lapsed, a landholder keeps horses at the old station and charges each rider who changes there.",
+   "art": "res://assets/ui/research/discovery-600/messenger_relay_stations.png"
+  },
+  "sewn_plank_hulls": {
+   "effects": {
+    "naval_capacity": 0.0044,
+    "haul_capacity": 0.0025,
+    "repair_capacity": 0.002
+   },
+   "name": "Sewn-Plank Hulls",
+   "observation": "Planks stitched together with coconut-fibre cord give, rather than split, when the boat is run through the surf onto the beach.",
+   "art": "res://assets/ui/research/paper/coastal_watercraft.png"
+  },
+  "road_to_water_freight_shift": {
+   "effects": {
+    "haul_capacity": 0.0063,
+    "route_speed": 0.003,
+    "trade_capacity": 0.002,
+    "travel_speed": -0.0016,
+    "disease_exposure": 0.001,
+    "storage_loss": -0.0014
+   },
+   "name": "Freight Turns to the Water",
+   "observation": "The paved roads crack and no one mends them, so grain and stone now go by barge and coaster.",
+   "social_consequence": "Inland towns far from any river wither as the carters vanish.",
+   "art": "res://assets/ui/research/paper/river_craft.png"
+  },
+  "hired_caravan_guides": {
+   "effects": {
+    "logistics_endurance": 0.0068,
+    "route_speed": 0.003,
+    "trade_capacity": 0.002,
+    "injury_risk": -0.001
+   },
+   "name": "Hired Caravan Guides",
+   "observation": "A guide who knows where the wells lie and which tribes take tolls is paid a share of the caravan's goods.",
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png"
+  },
+  "spaced_tenon_planking": {
+   "effects": {
+    "naval_capacity": 0.0044,
+    "construction_rate": 0.002,
+    "repair_capacity": 0.001,
+    "timber_pressure": -0.001
+   },
+   "name": "Spaced-Tenon Planking",
+   "observation": "Shipwrights cut fewer tenons, set wider apart, since the frames now carry more of the hull's strain.",
+   "art": "res://assets/ui/research/paper/grown_frame_selection.png"
+  },
+  "lateen_merchant_rig": {
+   "effects": {
+    "naval_capacity": 0.0055,
+    "route_speed": 0.004,
+    "trade_capacity": 0.003
+   },
+   "name": "Lateen Merchant Rig",
+   "observation": "A long slanting yard carries a three-cornered sail that lets merchantmen work along the coast against a side wind.",
+   "art": "res://assets/ui/research/paper/sail_seaming.png"
+  },
+  "coastal_cabotage_trade": {
+   "effects": {
+    "trade_capacity": 0.005,
+    "haul_capacity": 0.0025,
+    "naval_capacity": 0.0022,
+    "disease_exposure": 0.001
+   },
+   "name": "Coastal Carrying Trade",
+   "observation": "Small ships run from port to port, selling part of the cargo and taking on more at each.",
+   "art": "res://assets/ui/research/discovery-600/pilots_sea_lanes.png"
+  },
+  "rigid_horse_collar": {
+   "effects": {
+    "haul_capacity": 0.02,
+    "labor_efficiency": 0.004,
+    "fatigue": -0.004,
+    "cultivation_yield": 0.003,
+    "food_output": -0.002,
+    "travel_speed": 0.0048
+   },
+   "name": "Rigid Horse Collar",
+   "observation": "A padded frame sits on the horse's shoulders, so it can pull with its full strength without choking.",
+   "ability_reason": "A horse in a collar can draw a plough or a loaded wagon that once needed a team of oxen, and draw it faster.",
+   "social_consequence": "Farms that can feed horses outpace those that cannot, and oats claim a share of every field.",
+   "art": "res://assets/ui/research/paper/first300-cards/haul_harness_weaving.tres"
+  },
+  "estate_carrying_services": {
+   "effects": {
+    "haul_capacity": 0.0037,
+    "food_storage": 0.0028,
+    "state_capacity": 0.001,
+    "labor_demand": 0.002,
+    "logistics_endurance": 0.0034
+   },
+   "name": "Estate Carrying Services",
+   "observation": "Tenants owe carting days, hauling grain and wine between an estate's scattered farms and its hall.",
+   "art": "res://assets/ui/research/paper/first300-cards/cart_running_gear.tres"
+  },
+  "pass_hospices": {
+   "effects": {
+    "travel_speed": 0.0064,
+    "logistics_endurance": 0.0034,
+    "injury_risk": -0.002,
+    "labor_demand": 0.001
+   },
+   "name": "Pass Hospices",
+   "observation": "At the top of the pass a house of brothers keeps fire, bread and dogs for travelers caught by the snow.",
+   "art": "res://assets/ui/research/discovery-600/guest_host_reciprocity.png"
+  },
+  "remittance_certificates": {
+   "effects": {
+    "trade_capacity": 0.004,
+    "state_capacity": 0.002,
+    "storage_loss": -0.0014,
+    "knowledge_preservation": 0.001
+   },
+   "name": "Remittance Certificates",
+   "observation": "A merchant pays silver into a provincial office and carries only a sealed paper to collect it at the capital.",
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_letters.png"
+  },
+  "clinker_shell_construction": {
+   "effects": {
+    "naval_capacity": 0.0154,
+    "haul_capacity": 0.005,
+    "repair_capacity": 0.003,
+    "timber_pressure": 0.004
+   },
+   "observation": "Each plank overlaps the one below and is riveted through, so the hull is built up as a light, strong shell before any frame goes in.",
+   "ability_reason": "Light, flexible clinker hulls ride out open water and can be beached anywhere, carrying crews and cargo far beyond the coast.",
+   "art": "res://assets/ui/research/paper/clinker_shell_construction.png"
+  },
+  "treadle_paddle_boats": {
+   "effects": {
+    "route_speed": 0.003,
+    "naval_capacity": 0.0022,
+    "warfare_readiness": 0.001,
+    "labor_demand": 0.002,
+    "fatigue": 0.002
+   },
+   "name": "Treadle Paddle Boats",
+   "observation": "Men treading a shaft turn paddle wheels on the boat's sides and drive it upstream without sail or oar.",
+   "art": "res://assets/ui/research/paper/river_craft.png"
+  },
+  "watertight_bulkheads": {
+   "effects": {
+    "naval_capacity": 0.0044,
+    "storage_loss": -0.0042,
+    "injury_risk": -0.002,
+    "disaster_resilience": 0.001,
+    "container_capacity": 0.0014
+   },
+   "name": "Watertight Bulkheads",
+   "observation": "Wooden walls divide the hold into sealed compartments, so one holed plank floods only one of them.",
+   "art": "res://assets/ui/research/paper/hull_seam_caulking.png"
+  },
+  "single_horse_shafts": {
+   "effects": {
+    "haul_capacity": 0.0037,
+    "route_speed": 0.002,
+    "labor_efficiency": 0.001,
+    "travel_speed": 0.0032
+   },
+   "name": "Single-Horse Shafts",
+   "observation": "Two poles fixed to the cart run along the horse's flanks, so a single animal can both pull it and back it.",
+   "art": "res://assets/ui/research/paper/first300-cards/cart_running_gear.tres"
+  },
+  "keeled_sailing_longships": {
+   "effects": {
+    "naval_capacity": 0.0176,
+    "route_speed": 0.005,
+    "trade_capacity": 0.003,
+    "warfare_readiness": 0.003,
+    "timber_pressure": 0.004,
+    "injury_risk": 0.002,
+    "logistics_endurance": 0.0051
+   },
+   "name": "Keeled Sailing Longships",
+   "observation": "A true keel under a clinker hull lets a single square sail drive the ship across open sea.",
+   "ability_reason": "Crews can now cross open water for days at a stretch, trading and raiding across seas that once walled them in.",
+   "social_consequence": "Coasts that were safe behind open water now watch the horizon for sails.",
+   "art": "res://assets/ui/research/subjects/coastal_watercraft-v1.png"
+  },
+  "seasonal_beach_emporia": {
+   "effects": {
+    "trade_capacity": 0.004,
+    "food_storage": 0.0014,
+    "disease_exposure": 0.001,
+    "storage_loss": -0.0014
+   },
+   "name": "Seasonal Beach Markets",
+   "observation": "Where ships winter at a river mouth, a market of booths grows on the beach each spring and melts away each autumn.",
+   "art": "res://assets/ui/research/discovery-600/reciprocal_gift_exchange.png"
+  },
+  "land_finding_signs": {
+   "effects": {
+    "route_speed": 0.003,
+    "survey_speed": 0.002,
+    "naval_capacity": 0.0011,
+    "injury_risk": -0.001
+   },
+   "name": "Land-Finding Signs",
+   "observation": "Out of sight of land, pilots watch for shore birds, a change in the swell and clouds piled over an unseen island.",
+   "art": "res://assets/ui/research/paper/wayfinding_stars.png"
+  },
+  "great_desert_caravans": {
+   "effects": {
+    "logistics_endurance": 0.008,
+    "trade_capacity": 0.005,
+    "haul_capacity": 0.0037,
+    "disease_exposure": 0.001,
+    "injury_risk": 0.001
+   },
+   "name": "Great Desert Caravans",
+   "observation": "Thousands of camels march together across the sand, watering at wells that lie days apart.",
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png"
+  },
+  "portage_hauling_stations": {
+   "effects": {
+    "route_speed": 0.003,
+    "haul_capacity": 0.0025,
+    "trade_capacity": 0.002,
+    "labor_demand": 0.002
+   },
+   "name": "Portage Hauling Stations",
+   "observation": "At each portage, hired teams drag the boats on rollers from one river to the next for a set fee.",
+   "art": "res://assets/ui/research/paper/first300-cards/wedges_and_levers.tres"
+  },
+  "whippletree_evener": {
+   "effects": {
+    "haul_capacity": 0.005,
+    "fatigue": -0.002,
+    "labor_efficiency": 0.001,
+    "travel_speed": 0.0016
+   },
+   "name": "Whippletree Evener",
+   "observation": "A pivoting bar behind each horse evens the pull, so no animal carries the load for its teammate.",
+   "art": "res://assets/ui/research/paper/first300-cards/haul_harness_weaving.tres"
+  },
+  "landholder_bridge_duty": {
+   "effects": {
+    "route_speed": 0.004,
+    "repair_capacity": 0.002,
+    "disaster_resilience": 0.001,
+    "labor_demand": 0.003,
+    "legitimacy": -0.001
+   },
+   "name": "Road and Bridge Duty",
+   "observation": "Every holder of land owes days each year to mend the roads and bridges that cross it.",
+   "social_consequence": "Farmers resent road days in planting time, but the bridges no longer fall.",
+   "art": "res://assets/ui/research/paper/first300-cards/timber_bridges.tres"
+  },
+  "open_sea_cargo_ships": {
+   "effects": {
+    "naval_capacity": 0.0066,
+    "haul_capacity": 0.005,
+    "trade_capacity": 0.004,
+    "timber_pressure": 0.002,
+    "logistics_endurance": 0.0051,
+    "container_capacity": 0.0028
+   },
+   "name": "Open-Sea Cargo Ships",
+   "observation": "A broad hull with a half-deck and a deep hold carries cattle, timber and grain across open sea.",
+   "art": "res://assets/ui/research/paper/coastal_watercraft.png"
+  },
+  "windward_luff_spar": {
+   "effects": {
+    "naval_capacity": 0.0033,
+    "route_speed": 0.003
+   },
+   "name": "Windward Luff Spar",
+   "observation": "A spar pushed out from the bow holds the sail's leading edge taut, so the ship can beat against the wind.",
+   "art": "res://assets/ui/research/paper/sail_seaming.png"
+  },
+  "hacksilver_trade": {
+   "effects": {
+    "trade_capacity": 0.003,
+    "standardization": -0.001
+   },
+   "name": "Hack-Silver Trade",
+   "observation": "Coins, bracelets and plate are cut up and weighed again at each market on the northern rivers.",
+   "art": "res://assets/ui/research/discovery-600/balance_beam_weights.png"
+  },
+  "winter_sledge_roads": {
+   "effects": {
+    "route_speed": 0.003,
+    "haul_capacity": 0.0037,
+    "travel_speed": 0.0032,
+    "injury_risk": 0.001
+   },
+   "name": "Winter Sledge Roads",
+   "observation": "When the rivers freeze, sledges run along the ice and across marsh that no one can cross in summer.",
+   "art": "res://assets/ui/research/paper/route_memory.png"
+  },
+  "nailed_horseshoes": {
+   "effects": {
+    "travel_speed": 0.016,
+    "logistics_endurance": 0.0085,
+    "haul_capacity": 0.005,
+    "warfare_readiness": 0.002,
+    "fuel_demand": 0.001
+   },
+   "name": "Nailed Horseshoes",
+   "observation": "Iron shoes nailed to the hoof let horses work on stone roads and wet ground without going lame.",
+   "ability_reason": "Horses shod with iron keep their feet on long roads and wet fields, so riders, posts and teams travel farther without resting their animals.",
+   "art": "res://assets/ui/research/paper/first300-cards/domesticated_mounts.tres"
+  },
+  "pole_star_latitude_tablet": {
+   "effects": {
+    "route_speed": 0.003,
+    "survey_speed": 0.002,
+    "naval_capacity": 0.0022
+   },
+   "name": "Pole-Star Latitude Tablet",
+   "observation": "A pilot holds a knotted cord and tablet up to the pole star and keeps the ship at the star's known height.",
+   "art": "res://assets/ui/research/paper/wayfinding_stars.png"
+  },
+  "battened_panel_sails": {
+   "effects": {
+    "naval_capacity": 0.0033,
+    "route_speed": 0.002,
+    "injury_risk": -0.002
+   },
+   "name": "Battened Panel Sails",
+   "observation": "Cane battens stiffen the sail, and it is shortened panel by panel from the deck.",
+   "art": "res://assets/ui/research/paper/sail_seaming.png"
+  },
+  "voyage_victualling_scales": {
+   "effects": {
+    "logistics_endurance": 0.008,
+    "food_storage": 0.0028,
+    "storage_loss": -0.0028,
+    "disease_exposure": -0.001
+   },
+   "name": "Voyage Victualling Scales",
+   "observation": "The purser reckons bread, water and salt meat per sailor per day and loads the ship for the length of the voyage.",
+   "art": "res://assets/ui/research/paper/first300-cards/stock_rotation.tres"
+  },
+  "packhorse_carrier_trains": {
+   "effects": {
+    "haul_capacity": 0.0037,
+    "route_speed": 0.003,
+    "trade_capacity": 0.002,
+    "logistics_endurance": 0.0034
+   },
+   "name": "Packhorse Carrier Trains",
+   "observation": "Hired carriers lead strings of packhorses over upland tracks too steep for wagons.",
+   "art": "res://assets/ui/research/paper/pack_animals.png"
+  },
+  "tandem_file_harness": {
+   "effects": {
+    "haul_capacity": 0.005,
+    "labor_efficiency": 0.001,
+    "logistics_endurance": 0.0017
+   },
+   "name": "Tandem Harness",
+   "observation": "Horses hitched one in front of another haul a heavy load through narrow lanes a wide team could not pass.",
+   "art": "res://assets/ui/research/paper/first300-cards/haul_harness_weaving.tres"
+  },
+  "carrier_stage_tariffs": {
+   "effects": {
+    "trade_capacity": 0.003,
+    "standardization": 0.002,
+    "route_speed": 0.001
+   },
+   "name": "Carrier Stage Tariffs",
+   "observation": "A carrier's charge is fixed per pack and per stage, so the merchant knows the cost before he loads.",
+   "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png"
+  },
+  "funded_traveling_merchant": {
+   "effects": {
+    "trade_capacity": 0.005,
+    "adoption_rate": 0.001
+   },
+   "name": "Funded Traveling Merchant",
+   "observation": "A merchant who stays at home puts up the money; his partner carries the goods, and they split the profit.",
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_contracts.png"
+  },
+  "carvel_frame_construction": {
+   "effects": {
+    "naval_capacity": 0.0154,
+    "haul_capacity": 0.0063,
+    "repair_capacity": 0.003,
+    "construction_rate": 0.002,
+    "timber_pressure": 0.005,
+    "logistics_endurance": 0.0034
+   },
+   "observation": "Shipwrights raise the frames first and fasten the planks edge to edge upon them, so a hull can be as large as its frames allow.",
+   "ability_reason": "Frame-first hulls can be built bigger and mended plank by plank, so large ships can be laid down to a plan.",
+   "art": "res://assets/ui/research/paper/carvel_frame_construction.png"
+  },
+  "horse_transport_ships": {
+   "effects": {
+    "naval_capacity": 0.0044,
+    "warfare_readiness": 0.004,
+    "logistics_endurance": 0.0034
+   },
+   "name": "Horse Transports",
+   "observation": "Ships with stalls in the hold and a door in the stern put horses ashore on a beach ready to ride.",
+   "art": "res://assets/ui/research/paper/galley_navigation.png"
+  },
+  "wheel_drag_shoes": {
+   "effects": {
+    "injury_risk": -0.002,
+    "haul_capacity": 0.0025,
+    "route_speed": 0.001,
+    "repair_capacity": 0.001
+   },
+   "name": "Wheel Drag Shoes",
+   "observation": "An iron shoe chained under the rear wheel locks it on a steep hill, so the wagon cannot run away.",
+   "art": "res://assets/ui/research/paper/felloe_jointing.png"
+  },
+  "merchant_safe_conducts": {
+   "effects": {
+    "trade_capacity": 0.004,
+    "security_efficiency": 0.001,
+    "legitimacy": 0.001
+   },
+   "name": "Merchant Safe-Conducts",
+   "observation": "A sealed letter from the ruler lets a merchant pass through a hostile land unharmed.",
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_letters.png"
+  },
+  "guarded_trade_fairs": {
+   "effects": {
+    "trade_capacity": 0.016,
+    "state_capacity": 0.003,
+    "security_efficiency": 0.002,
+    "disease_exposure": 0.002
+   },
+   "name": "Guarded Trade Fairs",
+   "observation": "Merchants from many lands meet at a fixed season under a guarded peace, and all debts are settled on the fair's last days.",
+   "ability_reason": "A fair that gathers the far merchants in one place, at one time, under one peace draws goods from half the world.",
+   "social_consequence": "The fair town grows rich and crowded, and its fever season arrives with the merchants.",
+   "art": "res://assets/ui/research/discovery-600/town_identity.png"
+  },
+  "merchant_bale_marks": {
+   "effects": {
+    "storage_loss": -0.0028,
+    "trade_capacity": 0.002,
+    "standardization": 0.001
+   },
+   "name": "Merchant Bale Marks",
+   "observation": "Each merchant paints or stamps his mark on his bales and casks, so lost goods can be claimed at any port.",
+   "art": "res://assets/ui/research/discovery-600/owner_marks.png"
+  },
+  "floating_needle_compass": {
+   "effects": {
+    "route_speed": 0.008,
+    "naval_capacity": 0.0066,
+    "survey_speed": 0.004,
+    "injury_risk": -0.002
+   },
+   "name": "Floating Needle Compass",
+   "observation": "A needle rubbed on lodestone and floated on a straw in a bowl of water swings round to point north.",
+   "ability_reason": "Pilots can hold a course under cloud and in fog, when neither sun nor star can be seen.",
+   "art": "res://assets/ui/research/paper/wayfinding_stars.png"
+  },
+  "carrier_loss_liability": {
+   "effects": {
+    "storage_loss": -0.0042,
+    "trade_capacity": 0.002
+   },
+   "name": "Carrier Liability",
+   "observation": "A carrier who loses or spoils goods on the road must pay their value, so carriers guard their loads.",
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_contracts.png"
+  },
+  "bridge_brotherhoods": {
+   "effects": {
+    "route_speed": 0.004,
+    "repair_capacity": 0.002,
+    "disaster_resilience": 0.001,
+    "cohesion": 0.001
+   },
+   "name": "Bridge Brotherhoods",
+   "observation": "A brotherhood of townsmen gathers alms and tolls to keep the great bridge standing.",
+   "art": "res://assets/ui/research/paper/first300-cards/timber_bridges.tres"
+  },
+  "horse_towed_barges": {
+   "effects": {
+    "haul_capacity": 0.005,
+    "route_speed": 0.002,
+    "labor_efficiency": 0.002,
+    "food_output": -0.001
+   },
+   "name": "Horse-Towed Barges",
+   "observation": "Horses on the towpath draw barges upstream that once needed a gang of men hauling on ropes.",
+   "art": "res://assets/ui/research/paper/river_craft.png"
+  },
+  "written_sea_customs": {
+   "effects": {
+    "trade_capacity": 0.003,
+    "injury_risk": -0.001,
+    "legitimacy": 0.001,
+    "institutional_rigidity": 0.001
+   },
+   "name": "Written Sea Customs",
+   "observation": "The customs of the sea are written down: what the master owes the crew, and who bears the loss of cargo thrown overboard in a storm.",
+   "art": "res://assets/ui/research/paper/customary_law.png"
+  },
+  "horse_freight_wagons": {
+   "effects": {
+    "haul_capacity": 0.0063,
+    "travel_speed": 0.0048,
+    "route_speed": 0.002,
+    "food_output": -0.001,
+    "logistics_endurance": 0.0034
+   },
+   "name": "Horse Freight Wagons",
+   "observation": "Four-wheeled wagons behind horses cover in a day what an ox cart covered in two.",
+   "art": "res://assets/ui/research/paper/first300-cards/cart_bed_framing.tres"
+  },
+  "bills_of_exchange": {
+   "effects": {
+    "trade_capacity": 0.014,
+    "storage_loss": -0.0028,
+    "state_capacity": 0.001,
+    "cohesion": -0.001
+   },
+   "name": "Bills of Exchange",
+   "observation": "A merchant pays coin in one city and receives a paper that a partner abroad must honour, in his own coin, on a set day.",
+   "ability_reason": "Traders can move payment across seas without carrying silver, so the far trade grows past the coin in hand.",
+   "social_consequence": "Townsmen who cannot read the bills distrust a wealth that lives on paper.",
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_letters.png"
+  },
+  "endowed_day_stage_inns": {
+   "effects": {
+    "travel_speed": 0.0064,
+    "logistics_endurance": 0.0051,
+    "disease_exposure": 0.001
+   },
+   "name": "Day-Stage Inns",
+   "observation": "Inns endowed by pious gift stand a day's ride apart along the great roads.",
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png"
+  },
+  "cable_ferries": {
+   "effects": {
+    "route_speed": 0.003,
+    "haul_capacity": 0.0013,
+    "injury_risk": -0.001
+   },
+   "name": "Cable Ferries",
+   "observation": "A ferry hauled along a rope stretched across the river crosses safely even in flood.",
+   "art": "res://assets/ui/research/paper/rope_laying.png"
+  },
+  "day_walk_market_spacing": {
+   "effects": {
+    "trade_capacity": 0.004,
+    "food_storage": 0.0014,
+    "travel_speed": 0.0016
+   },
+   "name": "Day-Walk Market Spacing",
+   "observation": "Charters space the markets a day's walk apart, so every village can reach one, sell, and walk home by night.",
+   "art": "res://assets/ui/research/discovery-600/town_identity.png"
+  },
+  "sternpost_rudder": {
+   "effects": {
+    "naval_capacity": 0.0154,
+    "route_speed": 0.005,
+    "haul_capacity": 0.0037,
+    "injury_risk": -0.002,
+    "logistics_endurance": 0.0034
+   },
+   "name": "Sternpost Rudder",
+   "observation": "A rudder hung on iron pins at the stern steers a big ship far better than an oar over the side.",
+   "ability_reason": "Large ships can be steered in heavy seas, so hulls can grow deeper and taller without losing control.",
+   "art": "res://assets/ui/research/paper/hull_condition_surveys.png"
+  },
+  "high_sided_bulk_ships": {
+   "effects": {
+    "haul_capacity": 0.0175,
+    "naval_capacity": 0.0088,
+    "trade_capacity": 0.006,
+    "warfare_readiness": 0.002,
+    "timber_pressure": 0.005,
+    "logistics_endurance": 0.0068,
+    "container_capacity": 0.0042
+   },
+   "name": "High-Sided Bulk Ships",
+   "observation": "A flat-bottomed, high-sided ship with a straight sternpost carries grain, wine and cloth in bulk and is hard to board.",
+   "ability_reason": "One high-sided ship carries what a fleet of small ones did, so grain, timber and wine move by sea at a fraction of the cost.",
+   "art": "res://assets/ui/research/paper/dry_dock_services.png"
+  },
+  "deck_windlass": {
+   "effects": {
+    "naval_capacity": 0.0033,
+    "labor_efficiency": 0.002,
+    "injury_risk": -0.001
+   },
+   "name": "Deck Windlass",
+   "observation": "A barrel turned by handspikes on the deck raises the anchor and hoists the heavy yards.",
+   "art": "res://assets/ui/research/paper/compound_pulleys.png"
+  },
+  "realm_relay_post": {
+   "effects": {
+    "travel_speed": 0.02,
+    "state_capacity": 0.006,
+    "task_coordination": 0.003,
+    "labor_demand": 0.003,
+    "legitimacy": -0.002,
+    "food_output": -0.001,
+    "logistics_endurance": 0.0068
+   },
+   "name": "Realm Relay Post",
+   "observation": "Relay stations a day's ride apart span the realm, and a rider with a metal pass takes fresh horses at each.",
+   "ability_reason": "Orders and reports cross the whole realm in days, so a distant province can be ruled and its generals kept informed.",
+   "social_consequence": "Villages near the stations must feed the post horses and riders, and they hate the burden.",
+   "art": "res://assets/ui/research/discovery-600/messenger_relay_stations.png"
+  },
+  "annual_bulk_fleets": {
+   "effects": {
+    "trade_capacity": 0.005,
+    "haul_capacity": 0.0037,
+    "naval_capacity": 0.0022,
+    "food_storage": 0.0028,
+    "storage_loss": -0.0014
+   },
+   "name": "Annual Bulk Fleets",
+   "observation": "The wine and salt ships sail together once a year to fixed markets, safer in company.",
+   "art": "res://assets/ui/research/paper/coastal_watercraft.png"
+  },
+  "public_weighhouses": {
+   "effects": {
+    "standardization": 0.003,
+    "trade_capacity": 0.003,
+    "state_capacity": 0.001,
+    "storage_loss": -0.0014
+   },
+   "name": "Public Weighhouses",
+   "observation": "Bulk goods must be weighed on the town's great beam, for a fee, before they are sold.",
+   "art": "res://assets/ui/research/discovery-600/balance_beam_weights.png"
+  },
+  "reef_points": {
+   "effects": {
+    "naval_capacity": 0.0033,
+    "injury_risk": -0.002,
+    "route_speed": 0.001
+   },
+   "name": "Reef Points",
+   "observation": "Short ties sewn across the sail let the crew bundle part of it to the yard as the wind rises.",
+   "art": "res://assets/ui/research/paper/sail_seaming.png"
+  },
+  "cask_tonnage_rating": {
+   "effects": {
+    "standardization": 0.003,
+    "container_capacity": 0.0042,
+    "trade_capacity": 0.002,
+    "storage_loss": -0.0014,
+    "food_storage": 0.0014
+   },
+   "name": "Cask Tonnage Rating",
+   "observation": "A ship is rated by how many standard wine casks it carries, and dues are charged by that number.",
+   "art": "res://assets/ui/research/paper/sealed_vessels.png"
+  },
+  "reservoir_fed_summit_canals": {
+   "effects": {
+    "haul_capacity": 0.0063,
+    "route_speed": 0.003,
+    "water_access": 0.002,
+    "labor_demand": 0.004,
+    "ecological_pressure": 0.002,
+    "disease_exposure": 0.001
+   },
+   "name": "Summit Canals",
+   "observation": "A canal climbs over a ridge, its summit reach fed by reservoirs dammed in the hills above.",
+   "social_consequence": "Millers above the reservoirs lose their water to the boatmen below.",
+   "art": "res://assets/ui/research/subjects/canal_locks-v1.png"
+  },
+  "compass_bearing_sea_charts": {
+   "effects": {
+    "route_speed": 0.008,
+    "naval_capacity": 0.0055,
+    "survey_speed": 0.004,
+    "knowledge_preservation": 0.003,
+    "injury_risk": -0.002
+   },
+   "name": "Compass-Bearing Sea Charts",
+   "observation": "Charts drawn with lines of compass bearing run from harbor to harbor, with the coasts traced true between them.",
+   "ability_reason": "Pilots can set a course between distant harbors from a drawn chart rather than from memory alone.",
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png"
+  },
+  "bills_of_lading": {
+   "effects": {
+    "trade_capacity": 0.003,
+    "storage_loss": -0.0028,
+    "knowledge_preservation": 0.001,
+    "container_capacity": 0.0014
+   },
+   "name": "Bills of Lading",
+   "observation": "The master signs a list of every bale taken aboard, and the merchant keeps a copy ashore.",
+   "art": "res://assets/ui/research/discovery-600/marked_storage_registers.png"
+  },
+  "auctioned_galley_convoys": {
+   "effects": {
+    "trade_capacity": 0.004,
+    "naval_capacity": 0.0033,
+    "state_capacity": 0.002,
+    "security_efficiency": 0.001,
+    "institutional_rigidity": 0.001
+   },
+   "name": "Auctioned Galley Convoys",
+   "observation": "The state builds the merchant galleys and auctions each voyage's charter to merchants on fixed routes.",
+   "art": "res://assets/ui/research/paper/galley_navigation.png"
+  },
+  "dry_compass_card": {
+   "effects": {
+    "route_speed": 0.008,
+    "naval_capacity": 0.0055,
+    "survey_speed": 0.002,
+    "injury_risk": -0.003
+   },
+   "name": "Dry Compass Card",
+   "observation": "A needle on a pivot beneath a card painted with the winds turns in a dry box, and the steersman reads his course off the card.",
+   "ability_reason": "A compass read at a glance in any weather lets ships steer long courses by night and through storms.",
+   "art": "res://assets/ui/research/discovery-600/cross_bearing_confirmation.png"
+  },
+  "staple_market_towns": {
+   "effects": {
+    "trade_capacity": 0.002,
+    "state_capacity": 0.002,
+    "institutional_rigidity": 0.002,
+    "food_storage": 0.0028,
+    "storage_loss": -0.0014
+   },
+   "name": "Staple Towns",
+   "observation": "Goods passing through the staple town must be unloaded and offered for sale there for three days.",
+   "social_consequence": "Merchants resent the forced halt, but the staple town grows fat.",
+   "art": "res://assets/ui/research/discovery-600/central_storehouses.png"
+  },
+  "sandglass_dead_reckoning": {
+   "effects": {
+    "route_speed": 0.005,
+    "naval_capacity": 0.0033,
+    "survey_speed": 0.002
+   },
+   "name": "Sandglass Dead Reckoning",
+   "observation": "A sandglass turned each half-watch and a tally of the ship's speed let the pilot reckon how far she has run.",
+   "art": "res://assets/ui/research/discovery-600/outflow_water_clock.png"
+  },
+  "licensed_pilots": {
+   "effects": {
+    "injury_risk": -0.003,
+    "naval_capacity": 0.0022,
+    "route_speed": 0.002
+   },
+   "name": "Licensed Pilots",
+   "observation": "Only a pilot sworn and licensed by the harbor may bring a ship over the bar.",
+   "art": "res://assets/ui/research/discovery-600/pilots_sea_lanes.png"
+  },
+  "merchant_courier_schedules": {
+   "effects": {
+    "travel_speed": 0.0048,
+    "trade_capacity": 0.003,
+    "task_coordination": 0.001
+   },
+   "name": "Merchant Courier Schedules",
+   "observation": "Couriers leave on fixed days between the trading cities, carrying letters, prices and bills.",
+   "art": "res://assets/ui/research/discovery-600/messenger_relay_stations.png"
+  },
+  "merchant_route_handbooks": {
+   "effects": {
+    "trade_capacity": 0.003,
+    "knowledge_preservation": 0.002,
+    "route_speed": 0.001
+   },
+   "name": "Merchant Route Handbooks",
+   "observation": "A merchant's handbook lists the roads, tolls, coins and measures of every market from here to the far sea.",
+   "art": "res://assets/ui/research/discovery-600/regional_maps.png"
+  },
+  "premium_sea_insurance": {
+   "effects": {
+    "trade_capacity": 0.004,
+    "disaster_resilience": 0.002
+   },
+   "name": "Premium Sea Insurance",
+   "observation": "For a premium paid in advance, underwriters promise the value of a cargo lost at sea.",
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_contracts.png"
+  },
+  "harbor_ship_registers": {
+   "effects": {
+    "state_capacity": 0.002,
+    "knowledge_preservation": 0.002,
+    "trade_capacity": 0.001,
+    "security_efficiency": 0.001
+   },
+   "name": "Harbor Ship Registers",
+   "observation": "The harbor keeps a register of every ship, its owners and its master.",
+   "art": "res://assets/ui/research/discovery-600/marked_storage_registers.png"
+  }
+ }
 }

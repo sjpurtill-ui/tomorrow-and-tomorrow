@@ -1,5 +1,826 @@
 {
  "line": "demography",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "infanticide_ban": {
+   "effects": {
+    "legitimacy": 0.001,
+    "neonatal_survival": 0.004,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Infant Killing Outlawed",
+   "observation": "Killing a newborn is punished as murder, and a father may no longer decide at the hearth whether a child will live."
+  },
+  "fifteen_year_assessment": {
+   "effects": {
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0015,
+    "labor_demand": 0.002,
+    "legitimacy": -0.002,
+    "state_capacity": 0.0035
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Fifteen-Year Assessment",
+   "observation": "Heads and land are assessed afresh every fifteen years, and the tax follows the new count."
+  },
+  "town_to_estate_drift": {
+   "effects": {
+    "craft_output": -0.001,
+    "disease_exposure": -0.0027,
+    "housing_output": 0.002,
+    "knowledge_preservation": -0.002,
+    "state_capacity": -0.002,
+    "trade_capacity": -0.003
+   },
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "name": "Flight to the Estates",
+   "observation": "As the towns shrink, their people drift to estates and hill villages; fewer die of town fevers, and fewer trades are practised.",
+   "social_consequence": "Townsfolk become the lord's tenants, and the old town walls enclose gardens and ruins."
+  },
+  "settler_estate_shares": {
+   "effects": {
+    "cohesion": -0.002,
+    "cultivation_yield": 0.0023,
+    "housing_output": 0.003,
+    "legitimacy": -0.003,
+    "security_efficiency": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Settler Estate Shares",
+   "observation": "Settling peoples receive a set share of the host landowners' estates, a third of the land or the slaves, by treaty.",
+   "social_consequence": "Old landowners resent the strangers quartered on their land by law."
+  },
+  "foundling_free_status": {
+   "effects": {
+    "cohesion": 0.001,
+    "neonatal_survival": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Foundlings Stay Free",
+   "observation": "A child exposed and taken up by a stranger is free, not the finder's slave, and more are taken up."
+  },
+  "refuge_site_towns": {
+   "effects": {
+    "disease_exposure": 0.003,
+    "housing_output": 0.004,
+    "labor_demand": 0.002,
+    "security_efficiency": 0.003,
+    "water_safety": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
+   "name": "Refuge Towns",
+   "observation": "Refugees from the plains build towns on hilltops and lagoon islands where raiders cannot reach them, crowded and short of clean water."
+  },
+  "conqueror_landed_settlement": {
+   "effects": {
+    "cohesion": -0.006,
+    "housing_output": 0.005,
+    "legitimacy": -0.004,
+    "state_capacity": 0.0021,
+    "warfare_readiness": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Conquerors Settled on the Land",
+   "observation": "The conquering host is settled on the land it took, each warrior with his holding and his duty to ride when called.",
+   "ability_reason": "Conquest becomes a standing order that can hold its gains, with a warrior class rooted on the land.",
+   "social_consequence": "The natives till for new masters of another tongue, and the two peoples live apart for generations."
+  },
+  "bride_dower_gift": {
+   "effects": {
+    "cohesion": 0.002,
+    "conception_support": 0.002,
+    "maternal_safety": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "name": "Bride's Dower",
+   "observation": "The groom secures a morning gift and a dower to the bride, hers to keep if she is widowed."
+  },
+  "child_oblation": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": -0.001,
+    "knowledge_preservation": 0.0015,
+    "labor_demand": -0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/scribal_apprenticeship.png",
+   "name": "Child Oblation",
+   "observation": "Families give a young child to a religious house to be raised and trained, and it seldom leaves.",
+   "social_consequence": "Religious houses fill with the younger sons and daughters of the realm, who never marry."
+  },
+  "presumed_death_term": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": 0.002,
+    "legitimacy": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Presumed Death",
+   "observation": "A wife whose husband has been gone a set term of years may treat him as dead and marry again."
+  },
+  "captive_artisan_resettlement": {
+   "effects": {
+    "cohesion": -0.004,
+    "craft_output": 0.004,
+    "disease_exposure": 0.002,
+    "housing_output": 0.002,
+    "legitimacy": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "name": "Captive Craftsmen",
+   "observation": "Craftsmen taken in war are marched home and settled in the ruler's cities to work for him.",
+   "social_consequence": "Whole quarters of captive strangers work under guard, bringing their skills and their fevers with them."
+  },
+  "intermarriage_permission": {
+   "effects": {
+    "cohesion": 0.004,
+    "conception_support": 0.002,
+    "legitimacy": 0.0014
+   },
+   "art": "res://assets/ui/research/discovery-600/intermarriage_visiting_customs.png",
+   "name": "Intermarriage Permitted",
+   "observation": "Settlers may lawfully marry native women and men, and the children inherit from both."
+  },
+  "ranked_clan_genealogies": {
+   "effects": {
+    "cohesion": -0.002,
+    "institutional_rigidity": 0.006,
+    "knowledge_preservation": 0.0015,
+    "legitimacy": 0.0028,
+    "state_capacity": 0.0028
+   },
+   "art": "res://assets/ui/research/discovery-600/genealogical_recitation.png",
+   "name": "Ranked Clan Genealogies",
+   "observation": "The pedigrees of the great clans are ranked and written, and birth decides who may hold which office.",
+   "ability_reason": "Office and marriage now follow a written ranking of lineages that the court can consult and enforce.",
+   "social_consequence": "Able men of low lineage find every door shut, and a genealogist's roll now says who belongs at court."
+  },
+  "blood_heir_rule": {
+   "effects": {
+    "conception_support": 0.001,
+    "institutional_rigidity": 0.003,
+    "legitimacy": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Heirs of the Body",
+   "observation": "Only heirs of the body may inherit; adoption falls out of use, and a childless line ends with its holder."
+  },
+  "soldier_farmer_holdings": {
+   "effects": {
+    "conception_support": 0.002,
+    "cultivation_yield": 0.0011,
+    "housing_output": 0.003,
+    "labor_demand": 0.002,
+    "warfare_readiness": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/professional_corps-v1.png",
+   "name": "Soldier-Farmer Holdings",
+   "observation": "Families hold frontier land for as long as they send a son to serve, generation after generation."
+  },
+  "godparent_kinship": {
+   "effects": {
+    "cohesion": 0.004,
+    "neonatal_survival": 0.002,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/naming_day_rites.png",
+   "name": "Godparent Kinship",
+   "observation": "Sponsors at a child's naming become kin to its parents, and the bond ties families across villages."
+  },
+  "herder_tribute_registers": {
+   "effects": {
+    "knowledge_preservation": 0.001,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0021
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Herder Tribute Registers",
+   "observation": "Herding families who settle are written into registers as tribute households under their own chiefs."
+  },
+  "wide_kin_marriage_ban": {
+   "effects": {
+    "cohesion": 0.002,
+    "conception_support": -0.002,
+    "institutional_rigidity": 0.002,
+    "neonatal_survival": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "name": "Wide Kin Marriage Ban",
+   "observation": "Marriage is forbidden to cousins out to distant degrees, and brides must be sought in other villages."
+  },
+  "child_fosterage": {
+   "effects": {
+    "cohesion": 0.003,
+    "knowledge_preservation": 0.001,
+    "neonatal_survival": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Fosterage",
+   "observation": "Children are sent to be raised by kin or a patron, and grow up bound to two households."
+  },
+  "frontier_repopulation": {
+   "effects": {
+    "cohesion": -0.004,
+    "cultivation_yield": 0.0023,
+    "disease_exposure": 0.002,
+    "housing_output": 0.004,
+    "legitimacy": -0.003,
+    "security_efficiency": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/route_memory-v1.png",
+   "name": "Frontier Repopulation",
+   "observation": "Whole districts are moved by order to repopulate an emptied frontier, and many die on the road.",
+   "social_consequence": "Uprooted families remember the order that moved them, and the new frontier is full of strangers."
+  },
+  "foundling_house": {
+   "effects": {
+    "cohesion": 0.003,
+    "disease_exposure": 0.003,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0014,
+    "neonatal_survival": 0.008
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Foundling House",
+   "observation": "A house takes in abandoned infants, with wet-nurses and a warden, and records each child it receives.",
+   "ability_reason": "A child left at the gate now has a chance it never had on the roadside.",
+   "social_consequence": "Many still die inside; the house becomes a place where the poor can leave a child they cannot feed without shame."
+  },
+  "commemorative_death_books": {
+   "effects": {
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0023,
+    "observation_rate": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/mourning_days.png",
+   "name": "Books of the Dead",
+   "observation": "Religious houses keep books of the dead to be remembered at their yearly services, name by name."
+  },
+  "hearth_tax_counts": {
+   "effects": {
+    "housing_output": -0.001,
+    "knowledge_preservation": 0.0015,
+    "labor_demand": 0.002,
+    "legitimacy": -0.002,
+    "state_capacity": 0.0042
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Hearth Counts",
+   "observation": "Households are counted by their hearths for the tax, and families crowd round one fire to pay less."
+  },
+  "hereditary_unfree_status": {
+   "effects": {
+    "cohesion": -0.004,
+    "conception_support": -0.002,
+    "institutional_rigidity": 0.003,
+    "labor_efficiency": -0.001,
+    "legitimacy": -0.002,
+    "state_capacity": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/labor_rotations-v1.png",
+   "name": "Unfree Birth",
+   "observation": "A child with one unfree parent is born unfree and belongs to the lord's roll.",
+   "social_consequence": "A free man who marries an unfree woman sees his children born into bondage, and the lord's roll of bondfolk grows each generation."
+  },
+  "invited_craft_colonies": {
+   "effects": {
+    "cohesion": -0.002,
+    "craft_output": 0.004,
+    "housing_output": 0.002,
+    "trade_capacity": 0.0021
+   },
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "name": "Invited Craftsmen",
+   "observation": "Foreign craftsmen are invited to settle with privileges, a quarter of their own and freedom from some dues."
+  },
+  "childhood_disease_book": {
+   "effects": {
+    "health_protection": 0.0012,
+    "knowledge_preservation": 0.0015,
+    "neonatal_survival": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Children's Diseases",
+   "observation": "A physician writes the first book on the diseases of children, from teething to the fevers of the young."
+  },
+  "fortified_frontier_villages": {
+   "effects": {
+    "conception_support": 0.002,
+    "cultivation_yield": 0.0023,
+    "housing_output": 0.004,
+    "labor_demand": 0.002,
+    "security_efficiency": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/field_fortifications-v1.png",
+   "name": "Chartered Frontier Villages",
+   "observation": "Free farmers settle fortified frontier villages under charters that fix their dues and rights."
+  },
+  "marriage_out_fee": {
+   "effects": {
+    "cohesion": -0.002,
+    "conception_support": -0.002,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Marriage-Out Fee",
+   "observation": "A tenant's daughter who marries off the estate owes the lord a fee for the loss of her and her children."
+  },
+  "herder_sedentarization": {
+   "effects": {
+    "cohesion": -0.001,
+    "cultivation_yield": 0.0023,
+    "disease_exposure": 0.002,
+    "ecological_pressure": 0.002,
+    "housing_output": 0.003,
+    "neonatal_survival": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "name": "Herders Settle",
+   "observation": "Herding peoples settle as farming villages near the towns and trade their flocks for fields."
+  },
+  "village_nucleation": {
+   "effects": {
+    "cohesion": 0.004,
+    "cultivation_yield": 0.0034,
+    "disaster_risk": 0.001,
+    "disease_exposure": 0.003,
+    "housing_output": 0.008,
+    "labor_demand": 0.002,
+    "task_coordination": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
+   "name": "Village Nucleation",
+   "observation": "Scattered farmsteads are gathered into one village around shrine, manor and green, with open fields all round.",
+   "ability_reason": "The open fields can now be worked in common, and one priest, smith and miller serve the whole village.",
+   "social_consequence": "Those who would not move lose their rights in the common fields, and the manor gate becomes the village's centre."
+  },
+  "foreign_merchant_quarters": {
+   "effects": {
+    "cohesion": -0.002,
+    "disease_exposure": 0.004,
+    "state_capacity": 0.001,
+    "trade_capacity": 0.0035
+   },
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
+   "name": "Merchant Quarters",
+   "observation": "Foreign merchants live in a walled quarter under their own headman, and the ships that bring their goods bring strange fevers."
+  },
+  "single_heir_holdings": {
+   "effects": {
+    "cohesion": -0.002,
+    "conception_support": -0.003,
+    "cultivation_yield": 0.0023,
+    "labor_efficiency": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Undivided Farms",
+   "observation": "One heir takes the farm undivided and pays the others off in coin or goods.",
+   "social_consequence": "Brothers and sisters without land become servants or wanderers, or wait long to marry."
+  },
+  "eldest_son_succession": {
+   "effects": {
+    "cohesion": -0.003,
+    "conception_support": -0.001,
+    "institutional_rigidity": 0.005,
+    "legitimacy": 0.0042,
+    "state_capacity": 0.0028
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Eldest-Son Succession",
+   "observation": "The fief and its office pass whole to the eldest son.",
+   "ability_reason": "Realms no longer shatter among brothers at every death, and a succession can be known before it comes.",
+   "social_consequence": "Younger sons are left landless and restless, and fill the religious houses, the warbands and the roads."
+  },
+  "younger_son_careers": {
+   "effects": {
+    "conception_support": -0.002,
+    "knowledge_preservation": 0.0015,
+    "trade_capacity": 0.0014,
+    "warfare_readiness": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "name": "Younger Sons' Careers",
+   "observation": "Younger sons are sent into religious houses, to war or into trade, so the patrimony stays whole."
+  },
+  "realm_holding_survey": {
+   "effects": {
+    "cohesion": -0.002,
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0037,
+    "labor_demand": 0.004,
+    "legitimacy": -0.004,
+    "state_capacity": 0.007
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Great Realm Survey",
+   "observation": "Commissioners record every holding, plough, household and beast in the realm in one great book.",
+   "ability_reason": "The ruler knows what the land bears and who owes it, and the survey book becomes the final word on holdings.",
+   "social_consequence": "People call it the day of reckoning; no appeal against the book is allowed."
+  },
+  "minimum_marriage_ages": {
+   "effects": {
+    "conception_support": -0.002,
+    "maternal_safety": 0.005,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "name": "Minimum Marriage Ages",
+   "observation": "No girl may be married before a fixed age, nor a boy before his, and child brides grow rarer."
+  },
+  "consent_marriage": {
+   "effects": {
+    "cohesion": 0.004,
+    "conception_support": 0.002,
+    "institutional_rigidity": -0.002,
+    "legitimacy": 0.0014,
+    "maternal_safety": 0.0025
+   },
+   "art": "res://assets/ui/research/discovery-600/love_wedding_songs.png",
+   "name": "Marriage by Consent",
+   "observation": "A marriage is made by the word of the two spouses, not their kin; a forced match can be undone.",
+   "ability_reason": "Young couples can found their own households by their own choice, and forced marriages no longer bind.",
+   "social_consequence": "Clans lose their hold on alliances made by marriage, and fathers rage at secret weddings."
+  },
+  "womens_medicine_treatise": {
+   "effects": {
+    "knowledge_preservation": 0.0015,
+    "maternal_safety": 0.01,
+    "neonatal_survival": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "name": "Women's Medicine",
+   "observation": "A treatise on the diseases of women and on childbirth tells how to turn a child lying wrong and stop a bleeding."
+  },
+  "widow_third_dower": {
+   "effects": {
+    "cohesion": 0.002,
+    "conception_support": 0.001,
+    "legitimacy": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Widow's Third",
+   "observation": "A widow keeps a third of her husband's estate for her lifetime, whatever the heir says."
+  },
+  "legitimation_by_marriage": {
+   "effects": {
+    "cohesion": 0.002,
+    "legitimacy": 0.001,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Legitimation by Marriage",
+   "observation": "Children born before the wedding become lawful heirs when their parents later marry."
+  },
+  "burgess_rolls": {
+   "effects": {
+    "cohesion": 0.001,
+    "institutional_rigidity": 0.002,
+    "state_capacity": 0.0021,
+    "trade_capacity": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Burgess Rolls",
+   "observation": "The town keeps a roll of its burgesses, those born or sworn into its freedom, and only they may trade freely."
+  },
+  "colonist_recruiting_agents": {
+   "effects": {
+    "cohesion": -0.002,
+    "conception_support": 0.003,
+    "cultivation_yield": 0.0046,
+    "disease_exposure": 0.002,
+    "ecological_pressure": 0.004,
+    "housing_output": 0.008
+   },
+   "art": "res://assets/ui/research/subjects/route_memory-v1.png",
+   "name": "Colonist Recruiters",
+   "observation": "Settlement agents recruit whole villages of colonists for new lands, lead them there and become their headmen.",
+   "ability_reason": "The frontier is filled by contract, not by force, and each new village arrives with a headman and a charter.",
+   "social_consequence": "Old settlers and new colonists quarrel over woods and water, and the agent-headman's heirs become a new petty gentry."
+  },
+  "heiress_fief_inheritance": {
+   "effects": {
+    "cohesion": 0.001,
+    "legitimacy": 0.0021,
+    "maternal_safety": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Heiresses Inherit",
+   "observation": "When no son lives, a daughter inherits the fief, and her marriage is hurried and fought over."
+  },
+  "heir_wardship": {
+   "effects": {
+    "legitimacy": -0.002,
+    "maternal_safety": -0.001,
+    "state_capacity": 0.0021
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "name": "Heir Wardship",
+   "observation": "The lord keeps the wardship and marriage of underage heirs, and sells both to the highest bidder.",
+   "social_consequence": "Orphaned heirs are sold as wards, and guardians strip their lands before they come of age."
+  },
+  "burgage_plot_towns": {
+   "effects": {
+    "construction_rate": 0.002,
+    "disease_exposure": 0.004,
+    "housing_output": 0.007,
+    "sanitation": -0.002,
+    "trade_capacity": 0.0028
+   },
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
+   "name": "Planted Towns",
+   "observation": "New towns are laid out in equal narrow house plots for incomers, each paying a fixed rent, and the backyards fill with middens."
+  },
+  "settler_home_law": {
+   "effects": {
+    "cohesion": 0.003,
+    "housing_output": 0.002,
+    "legitimacy": 0.0014,
+    "state_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Settlers' Home Law",
+   "observation": "Colonists keep the law of the region they came from in their new villages, and appeal to its courts."
+  },
+  "fixed_majority_ages": {
+   "effects": {
+    "institutional_rigidity": 0.001,
+    "legitimacy": 0.0014,
+    "state_capacity": 0.001,
+    "warfare_readiness": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/coming_of_age_rites.png",
+   "name": "Fixed Ages of Majority",
+   "observation": "Heirs of arms come of age at twenty-one and others younger, and guardians must hand over on the day."
+  },
+  "noble_lineage_rolls": {
+   "effects": {
+    "cohesion": -0.003,
+    "institutional_rigidity": 0.004,
+    "knowledge_preservation": 0.001,
+    "legitimacy": 0.0014
+   },
+   "art": "res://assets/ui/research/discovery-600/genealogical_recitation.png",
+   "name": "Noble Lineage Rolls",
+   "observation": "Heralds keep rolls of noble lineages, and only those who can prove their descent may hold certain offices or bear arms."
+  },
+  "dynastic_vital_register": {
+   "effects": {
+    "knowledge_preservation": 0.0015,
+    "legitimacy": 0.0028,
+    "state_capacity": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
+   "name": "Ruling-House Register",
+   "observation": "The births, marriages and deaths of the ruling house are kept in a court register, so succession is known to all."
+  },
+  "captive_ransom_brotherhoods": {
+   "effects": {
+    "cohesion": 0.003,
+    "conception_support": 0.001,
+    "legitimacy": 0.0014,
+    "trade_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/mutual_aid_customs.png",
+   "name": "Ransom Brotherhoods",
+   "observation": "Charitable brotherhoods collect silver to ransom captives taken by raiders and bring them home."
+  },
+  "foundling_wheel": {
+   "effects": {
+    "cohesion": 0.001,
+    "disease_exposure": 0.001,
+    "labor_demand": 0.001,
+    "neonatal_survival": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Foundling Wheel",
+   "observation": "A turning cradle in the foundling house wall lets a mother leave her child inside unseen, and fewer are left in the cold."
+  },
+  "public_marriage_banns": {
+   "effects": {
+    "conception_support": 0.001,
+    "legitimacy": 0.0014,
+    "neonatal_survival": 0.001,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/marriage_feasts.png",
+   "name": "Marriage Banns",
+   "observation": "A coming marriage is announced in public three times, so that any bar to it can be spoken."
+  },
+  "retirement_maintenance_contracts": {
+   "effects": {
+    "cohesion": 0.002,
+    "conception_support": 0.002,
+    "health_protection": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Retirement Contracts",
+   "observation": "Aged parents hand the farm to a child in return for a written keep of food, fuel and a room."
+  },
+  "hereditary_surnames": {
+   "effects": {
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.003,
+    "legitimacy": 0.0014,
+    "state_capacity": 0.0042,
+    "trade_capacity": 0.0014
+   },
+   "art": "res://assets/ui/research/discovery-600/household_lineage_tokens.png",
+   "name": "Hereditary Surnames",
+   "observation": "Family names are fixed and passed from parent to child, instead of changing with each generation.",
+   "ability_reason": "A person can be found in any roll, court or contract across the generations.",
+   "social_consequence": "Clerks write every name the same way, and a family's standing and debts follow its name."
+  },
+  "single_women_houses": {
+   "effects": {
+    "cohesion": 0.002,
+    "conception_support": -0.002,
+    "craft_output": 0.002,
+    "labor_efficiency": 0.002
+   },
+   "art": "res://assets/ui/research/discovery-600/communal_work_songs.png",
+   "name": "Single Women's Houses",
+   "observation": "Unmarried women and widows live and work together in houses under a simple rule, spinning and nursing for their keep."
+  },
+  "decimal_unit_census": {
+   "effects": {
+    "cohesion": -0.003,
+    "legitimacy": -0.002,
+    "security_efficiency": 0.002,
+    "state_capacity": 0.0042,
+    "warfare_readiness": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Decimal Census",
+   "observation": "Conquered lands are counted in tens, hundreds and thousands of households, each unit owing men and tribute."
+  },
+  "holding_fragmentation": {
+   "effects": {
+    "conception_support": 0.003,
+    "cultivation_yield": -0.003,
+    "ecological_pressure": 0.003,
+    "housing_output": 0.004,
+    "nutrition_quality": -0.003,
+    "soil_productivity": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "name": "Divided Holdings",
+   "observation": "Holdings are split into half and quarter farms as numbers press on the land, and cottagers crowd the waste.",
+   "social_consequence": "Half-farms and cottars' plots crowd the parish, and a bad harvest now hits a people with no margin."
+  },
+  "town_migration_dependence": {
+   "effects": {
+    "disease_exposure": 0.006,
+    "housing_output": 0.003,
+    "labor_efficiency": 0.002,
+    "maternal_safety": -0.001,
+    "neonatal_survival": -0.003,
+    "trade_capacity": 0.0021
+   },
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
+   "name": "Towns Fed by Migrants",
+   "observation": "Burials in the towns outrun baptisms year after year, and only the stream of incomers keeps the streets full.",
+   "social_consequence": "Country folk come to the towns to work and die of town fevers; the countryside pays for the town's growth in children."
+  },
+  "purchased_corrodies": {
+   "effects": {
+    "cohesion": 0.001,
+    "health_protection": 0.001,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Corrodies",
+   "observation": "Buyers pay a religious house a lump sum for bed, board and care for the rest of their lives."
+  },
+  "orphan_chambers": {
+   "effects": {
+    "cohesion": 0.002,
+    "legitimacy": 0.0014,
+    "neonatal_survival": 0.002,
+    "state_capacity": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Orphan Chambers",
+   "observation": "A town chamber keeps the property of fatherless children until they come of age, and audits the guardians."
+  },
+  "age_priced_life_annuities": {
+   "effects": {
+    "knowledge_rate": 0.001,
+    "state_capacity": 0.0028,
+    "trade_capacity": 0.0021
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Life Annuities",
+   "observation": "Towns sell life annuities, charging an old buyer less than a young one for the same yearly payment."
+  },
+  "entailed_family_land": {
+   "effects": {
+    "cohesion": -0.002,
+    "institutional_rigidity": 0.005,
+    "legitimacy": 0.0014,
+    "trade_capacity": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Entailed Land",
+   "observation": "Land is bound to the family line and cannot be sold or split, whatever the present holder's debts."
+  },
+  "service_before_marriage": {
+   "effects": {
+    "cohesion": 0.002,
+    "conception_support": -0.006,
+    "housing_output": 0.002,
+    "labor_efficiency": 0.004,
+    "maternal_safety": 0.0063,
+    "neonatal_survival": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "name": "Service Before Marriage",
+   "observation": "Young people spend years in service in other households and marry only when they can set up house for themselves.",
+   "ability_reason": "Fewer and later births in households that can feed them: mothers are older and stronger, and more children live.",
+   "social_consequence": "Servants live under a master's roof and rule, and a couple who cannot set up house must wait."
+  },
+  "widow_trade_continuation": {
+   "effects": {
+    "cohesion": 0.002,
+    "craft_output": 0.002,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "name": "Widows Keep the Trade",
+   "observation": "A widow may carry on her late husband's trade and shop, with his journeymen, as a guild member."
+  },
+  "poor_bride_dowries": {
+   "effects": {
+    "cohesion": 0.003,
+    "conception_support": 0.003,
+    "legitimacy": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/marriage_feasts.png",
+   "name": "Poor Brides' Dowries",
+   "observation": "Charitable funds give dowries to poor girls so that they can marry."
+  },
+  "vagrant_expulsion": {
+   "effects": {
+    "cohesion": -0.004,
+    "disease_exposure": -0.0018,
+    "legitimacy": -0.002,
+    "security_efficiency": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png",
+   "name": "Vagrant Expulsion",
+   "observation": "Towns whip and expel beggars and vagrants born elsewhere, and the beadle walks them to the boundary.",
+   "social_consequence": "The landless poor are driven from town to town, and each parish passes its paupers to the next."
+  },
+  "bread_mouth_census": {
+   "effects": {
+    "food_storage": 0.0054,
+    "labor_demand": 0.002,
+    "legitimacy": 0.0014,
+    "state_capacity": 0.0028
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Bread Census",
+   "observation": "In siege or dearth, officials count the mouths in every house so the bread can be rationed fairly."
+  },
+  "sworn_town_midwives": {
+   "effects": {
+    "health_risk": -0.001,
+    "institutional_rigidity": 0.002,
+    "maternal_safety": 0.0125,
+    "neonatal_survival": 0.006,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "name": "Sworn Midwives",
+   "observation": "The town swears in and licenses its midwives, who must call a second midwife to a hard birth."
+  },
+  "deserted_village_pasture": {
+   "effects": {
+    "cohesion": -0.002,
+    "cultivation_yield": -0.002,
+    "ecology_recovery": 0.003,
+    "food_output": 0.001,
+    "housing_output": -0.002,
+    "nutrition_quality": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "name": "Deserted Villages to Pasture",
+   "observation": "Villages emptied by the great mortality are turned over to sheep, and the house platforms show under the grass.",
+   "social_consequence": "Survivors are moved off or left alone amid empty holdings, and the parish church stands in a field."
+  },
+  "adult_poll_rolls": {
+   "effects": {
+    "cohesion": -0.004,
+    "knowledge_preservation": 0.0023,
+    "labor_demand": 0.003,
+    "legitimacy": -0.005,
+    "state_capacity": 0.0056
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Poll-Tax Rolls",
+   "observation": "Every adult over fourteen is written in the poll roll, and the tax is laid on heads, not hearths.",
+   "ability_reason": "The state knows how many live in the realm and can tax every adult, not only every household.",
+   "social_consequence": "Collectors come door to door; families hide daughters and servants, and a hard poll can bring the countryside to revolt."
+  }
+ }
 }

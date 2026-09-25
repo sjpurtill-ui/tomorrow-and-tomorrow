@@ -1,5 +1,897 @@
 {
  "line": "culture",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "brush_writing_fine_art": {
+   "effects": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0005,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/discovery-600/scribal_specialties.png",
+   "name": "Brush-writing as Fine Art",
+   "observation": "Collectors prize a master's brushed characters as highly as paintings, and students copy his strokes for years."
+  },
+  "holy_tomb_pilgrimage": {
+   "effects": {
+    "cohesion": 0.001,
+    "disease_exposure": 0.001,
+    "legitimacy": 0.0008,
+    "trade_capacity": 0.001,
+    "travel_speed": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/pilgrimage.png",
+   "name": "Tomb Pilgrimage",
+   "observation": "Pilgrims walk for weeks to pray at the tombs of the god's servants and bring home a flask of oil from the lamps."
+  },
+  "holy_relic_shrines": {
+   "effects": {
+    "cohesion": 0.0008,
+    "legitimacy": 0.0011,
+    "trade_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/sacred_places.png",
+   "name": "Relic Shrines",
+   "observation": "The bones of the god's servants are kept in shrines of silver, and oaths sworn on them are feared."
+  },
+  "confessional_autobiography": {
+   "effects": {
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Confessional Life",
+   "observation": "A servant of the god writes his own life as a confession of his faults, spoken to the god himself."
+  },
+  "providential_world_history": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0009,
+    "legitimacy": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
+   "name": "World History as the God's Plan",
+   "observation": "Chroniclers tell the history of all peoples as one story moving by the god's plan toward its end."
+  },
+  "holy_servants_feast_year": {
+   "effects": {
+    "cohesion": 0.001,
+    "food_storage": -0.001,
+    "labor_efficiency": -0.0005,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
+   "name": "Feast Year of the God's Servants",
+   "observation": "Every day of the year belongs to one of the god's servants, and the greater ones bring a feast and a day of rest."
+  },
+  "rock_cut_cave_sanctuaries": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0006,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0008
+   },
+   "art": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
+   "name": "Cave Sanctuaries",
+   "observation": "Halls and shrines are cut into a cliff face and painted with the god's stories from floor to ceiling."
+  },
+  "devotee_communities_under_rule": {
+   "effects": {
+    "cohesion": 0.0024,
+    "cultivation_yield": 0.0016,
+    "food_storage": 0.0024,
+    "knowledge_preservation": 0.0038,
+    "labor_demand": 0.0024,
+    "legitimacy": 0.0018
+   },
+   "art": "res://assets/ui/research/discovery-600/first_shrine_house.png",
+   "name": "Devotees Under a Rule",
+   "observation": "Devotees live together under a written rule that sets their hours of prayer, work in the fields and reading.",
+   "ability_reason": "Devotees live together under a written rule of prayer, work and reading; their houses farm, copy and shelter travellers when the towns fail.",
+   "social_consequence": "Many sons and daughters leave their families for the house of the rule"
+  },
+  "official_ivory_diptychs": {
+   "effects": {
+    "craft_output": 0.0005,
+    "legitimacy": 0.0008,
+    "state_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/stone_relief_carving.png",
+   "name": "Ivory Office Panels",
+   "observation": "A new official sends carved ivory panels bearing his portrait and titles to his friends and patrons."
+  },
+  "venerated_icons": {
+   "effects": {
+    "cohesion": 0.0008,
+    "legitimacy": 0.0011
+   },
+   "art": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
+   "name": "Venerated Icons",
+   "observation": "Painted images of the god's servants are kissed, carried in procession and credited with saving the town."
+  },
+  "race_faction_parties": {
+   "effects": {
+    "cohesion": -0.001,
+    "injury_risk": 0.001,
+    "legitimacy": -0.0007,
+    "security_efficiency": -0.001,
+    "trade_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/civic_games-v2.png",
+   "name": "Race Factions Sway Rulers",
+   "observation": "The circus factions have their own colours, officers and quarters, and their riots can topple a minister.",
+   "social_consequence": "Street factions riot for their charioteers and can unseat a minister"
+  },
+  "stanza_hymn_sermons": {
+   "effects": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/seasonal_hymn_cycles.png",
+   "name": "Sung Stanza Sermons",
+   "observation": "A preacher sings his sermon in stanzas, and the whole crowd answers each one with the refrain."
+  },
+  "great_domed_temple": {
+   "effects": {
+    "cohesion": 0.0024,
+    "construction_rate": 0.0037,
+    "fuel_demand": 0.0008,
+    "labor_demand": 0.0048,
+    "legitimacy": 0.0054,
+    "timber_pressure": 0.0016
+   },
+   "art": "res://assets/ui/research/discovery-600/first_shrine_house.png",
+   "name": "Great Domed Temple",
+   "observation": "A brick dome rises on four great arches over a hall wider than any before, lit by a ring of windows at its base.",
+   "ability_reason": "A dome on four arches spans the greatest hall of the realm; the god's house outshines every palace, and the ruler's piety is set in stone.",
+   "social_consequence": "Masons and labourers from half the realm are called to the god's great house"
+  },
+  "peoples_origin_histories": {
+   "effects": {
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0009,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
+   "name": "Origin Histories of Peoples",
+   "observation": "Each newcomer people has its history written from its wandering ancestors to its present kings."
+  },
+  "chant_schools": {
+   "effects": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0006,
+    "labor_demand": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
+   "name": "Chant Schools",
+   "observation": "Boys are trained for years in a chant school to sing the god's rites from memory."
+  },
+  "strategy_board_war_game": {
+   "effects": {
+    "cohesion": 0.0003,
+    "knowledge_rate": 0.0009,
+    "warfare_readiness": 0.0017
+   },
+   "art": "res://assets/ui/research/discovery-600/board_race_games.png",
+   "name": "War Board Game",
+   "observation": "Two players move foot, horse, chariot and elephant on a checkered board to trap the other's king."
+  },
+  "mead_hall_gift_feasts": {
+   "effects": {
+    "cohesion": 0.001,
+    "food_storage": -0.0015,
+    "legitimacy": 0.0006,
+    "warfare_readiness": 0.0011
+   },
+   "art": "res://assets/ui/research/discovery-600/shared_hearth_gatherings.png",
+   "name": "Hall Gift Feasts",
+   "observation": "In the lord's hall the warriors drink, the poet sings their deeds and the lord hands out rings."
+  },
+  "lantern_festival_nights": {
+   "effects": {
+    "cohesion": 0.001,
+    "food_storage": -0.0005,
+    "fuel_demand": 0.0005,
+    "trade_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
+   "name": "Lantern Festival",
+   "observation": "On the first full moon of the year the streets hang with lanterns and the curfew is lifted for three nights."
+  },
+  "devotional_songs_common_tongue": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.001,
+    "institutional_rigidity": -0.0005,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/seasonal_hymn_cycles.png",
+   "name": "Devotional Songs",
+   "observation": "Wandering singers make songs of love for the god in the everyday tongue that anyone can learn."
+  },
+  "warband_heroic_poems": {
+   "effects": {
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0006,
+    "warfare_readiness": 0.0017
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "name": "Warband Heroic Poems",
+   "observation": "Poets sing the deeds of the warband's heroes in the everyday tongue, in lines bound by alliteration."
+  },
+  "interlace_illuminated_books": {
+   "effects": {
+    "craft_output": 0.0005,
+    "knowledge_preservation": 0.0009,
+    "labor_demand": 0.001,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
+   "name": "Interlace Illumination",
+   "observation": "Painters fill whole pages of the god's books with knotwork, spirals and beasts twisted together."
+  },
+  "regulated_tonal_verse": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0006,
+    "standardization": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/debate_poems.png",
+   "name": "Regulated Tonal Verse",
+   "observation": "Poets write eight-line verses in which the tones of each word and the matched couplets follow fixed rules."
+  },
+  "image_breaking_dispute": {
+   "effects": {
+    "cohesion": -0.0017,
+    "institutional_rigidity": -0.001,
+    "knowledge_rate": 0.0009,
+    "legitimacy": -0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
+   "name": "Dispute Over Images",
+   "observation": "One party smashes the painted images of the god's servants, and the other hides them and paints them again.",
+   "social_consequence": "Image-breakers and image-keepers fight over the walls of the god's house"
+  },
+  "court_learning_revival": {
+   "effects": {
+    "adoption_rate": 0.0022,
+    "knowledge_preservation": 0.0038,
+    "knowledge_rate": 0.0074,
+    "labor_demand": 0.0016,
+    "legitimacy": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "name": "Court Revival of Learning",
+   "observation": "The court gathers scholars from abroad, has the old books copied in a clear hand, and orders schools opened.",
+   "ability_reason": "The court gathers scholars, has the old books copied and orders schools opened; learning that had withered is revived by command."
+  },
+  "carved_story_stones": {
+   "effects": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0006,
+    "labor_demand": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/stone_relief_carving.png",
+   "name": "Carved Story Stones",
+   "observation": "Tall stones carved with scenes of the god's story stand at crossroads and meeting places."
+  },
+  "terraced_temple_mountain": {
+   "effects": {
+    "cohesion": 0.001,
+    "construction_rate": 0.0012,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0022,
+    "timber_pressure": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/shrine_terraces.png",
+   "name": "Temple Mountain",
+   "observation": "Terrace upon terrace of carved stone rises like a mountain, and pilgrims climb it past the god's stories."
+  },
+  "neume_chant_notation": {
+   "effects": {
+    "adoption_rate": 0.0015,
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0034,
+    "standardization": 0.0024
+   },
+   "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
+   "name": "Neume Notation",
+   "observation": "Small signs written over the words show where the chant rises and falls.",
+   "ability_reason": "Signs over the words show the rise and fall of the chant; distant choirs sing the god's praise alike without learning every chant by ear."
+  },
+  "mirror_for_rulers": {
+   "effects": {
+    "cohesion": 0.0003,
+    "legitimacy": 0.0008,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Mirror for Rulers",
+   "observation": "Advice books tell a young ruler how to judge, whom to trust and how to fear the god."
+  },
+  "ruler_biography": {
+   "effects": {
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
+   "name": "Life of the Ruler",
+   "observation": "A courtier writes the ruler's life, his wars, habits and death, in the manner of the old biographies."
+  },
+  "frame_story_collections": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0009
+   },
+   "art": "res://assets/ui/research/discovery-600/winter_tale_nights.png",
+   "name": "Frame-story Collections",
+   "observation": "A storyteller keeps her life by telling one tale each night, and each tale holds another."
+  },
+  "liturgical_drama": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0008,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Plays Within the Rites",
+   "observation": "At the great feast the servants of the god act the story in the god's house, speaking in turn."
+  },
+  "court_poetry_contests": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/puzzle_riddle_contests.png",
+   "name": "Court Poetry Contests",
+   "observation": "Courtiers compose poems on a set theme, and judges rank them before the ruler."
+  },
+  "many_voice_singing": {
+   "effects": {
+    "cohesion": 0.0008,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
+   "name": "Many-voice Singing",
+   "observation": "A second voice sings the chant a fifth below the first, and a third joins it on the great feasts."
+  },
+  "coronation_regalia_rite": {
+   "effects": {
+    "cohesion": 0.0016,
+    "institutional_rigidity": 0.0016,
+    "legitimacy": 0.0045,
+    "state_capacity": 0.0016
+   },
+   "art": "res://assets/ui/research/discovery-600/officiant_vestments.png",
+   "name": "Crowning Rite and Regalia",
+   "observation": "A written rite sets out the anointing, the crown, the orb and the staff, and the oath the ruler must speak.",
+   "ability_reason": "A written rite fixes the crown, orb, staff and oath; every crowning follows the same form, so a new ruler's title cannot be questioned for want of it."
+  },
+  "great_pipe_organs": {
+   "effects": {
+    "cohesion": 0.0005,
+    "craft_output": 0.001,
+    "labor_demand": 0.001,
+    "legitimacy": 0.0008
+   },
+   "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
+   "name": "Great Pipe Organs",
+   "observation": "A great organ of hundreds of pipes, blown by many bellows men, fills the god's house with sound."
+  },
+  "printed_playing_cards": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "craft_output": 0.0005,
+    "labor_efficiency": -0.0005
+   },
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png",
+   "name": "Playing Cards",
+   "observation": "Printed card packs of suits and courts sell in the markets, and townsmen gamble in the inns."
+  },
+  "kin_memorial_stones": {
+   "effects": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/discovery-600/memorial_cairn_marking.png",
+   "name": "Kin Memorial Stones",
+   "observation": "Families raise carved stones for kinsmen who died trading or raiding abroad, naming them and where they fell."
+  },
+  "shadow_puppet_theatre": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Shadow Puppets",
+   "observation": "Puppets of painted hide cast their shadows on a lit screen while the master speaks every part."
+  },
+  "court_psychological_novel": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0009
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Court Novel",
+   "observation": "A lady of the court writes a long tale of love and rivalry told through its people's thoughts."
+  },
+  "book_of_kings_epic": {
+   "effects": {
+    "adoption_rate": 0.0015,
+    "cohesion": 0.0036,
+    "knowledge_preservation": 0.0029,
+    "legitimacy": 0.0027
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "name": "Book of Kings",
+   "observation": "One poet spends his life setting every king of the realm in verse in the common tongue, from the first ruler onward.",
+   "ability_reason": "The realm's kings are set in verse in the common tongue; the people's history is sung by everyone instead of being held by the learned."
+  },
+  "staff_line_notation": {
+   "effects": {
+    "adoption_rate": 0.0029,
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0038,
+    "standardization": 0.0024
+   },
+   "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
+   "name": "Staff Notation",
+   "observation": "Notes are written on ruled lines with a clef, so every pitch is fixed on the page.",
+   "ability_reason": "Lines and clefs fix every pitch; a singer can sing a new melody from the page without ever having heard it."
+  },
+  "monumental_landscape_painting": {
+   "effects": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Landscape Scrolls",
+   "observation": "Painters set towering mountains, streams and tiny travellers on hanging scrolls taller than a man."
+  },
+  "round_arch_great_houses": {
+   "effects": {
+    "cohesion": 0.002,
+    "construction_rate": 0.0046,
+    "fuel_demand": 0.0008,
+    "labor_demand": 0.0056,
+    "legitimacy": 0.004,
+    "timber_pressure": 0.0024
+   },
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png",
+   "name": "Round-arch Great Houses",
+   "observation": "Thick walls, round arches and small windows raise a stone great house of the god in town after town.",
+   "ability_reason": "Stone great houses with round arches rise in every town; the god's house dominates each skyline and keeps masons in standing lodges."
+  },
+  "embroidered_conquest_hangings": {
+   "effects": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0005,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0008
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Conquest Hangings",
+   "observation": "Women embroider a long hanging that tells, scene by scene, how the ruler's army crossed the sea and won."
+  },
+  "pleasure_quarter_storytellers": {
+   "effects": {
+    "cohesion": 0.0008,
+    "disease_exposure": 0.0005,
+    "knowledge_preservation": 0.0003,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Pleasure-quarter Storytellers",
+   "observation": "In the pleasure quarters, storytellers, jugglers and players perform under awnings until late at night."
+  },
+  "pilgrim_road_badges": {
+   "effects": {
+    "cohesion": 0.0008,
+    "craft_output": 0.0005,
+    "disease_exposure": 0.001,
+    "route_speed": 0.001,
+    "trade_capacity": 0.0015
+   },
+   "art": "res://assets/ui/research/discovery-600/pilgrimage.png",
+   "name": "Pilgrim Roads and Badges",
+   "observation": "Hostels line the pilgrim roads a day apart, and pilgrims come home with a lead badge of the shrine on their hats."
+  },
+  "armed_pilgrimage_preaching": {
+   "effects": {
+    "cohesion": 0.0008,
+    "injury_risk": 0.0015,
+    "legitimacy": 0.0011,
+    "trade_capacity": -0.0005,
+    "warfare_readiness": 0.0028
+   },
+   "art": "res://assets/ui/research/subjects/armored_riding-v1.png",
+   "name": "Armed Pilgrimage",
+   "observation": "The god's servants preach that warriors who take the pilgrim's sign and fight for the holy places are forgiven.",
+   "social_consequence": "Armed pilgrims take the sign and leave their fields and families for years"
+  },
+  "champion_deed_songs": {
+   "effects": {
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0006,
+    "warfare_readiness": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "name": "Champion Songs",
+   "observation": "Singers chant the deeds of a champion who died holding a pass against a great army."
+  },
+  "courtly_love_lyric": {
+   "effects": {
+    "adoption_rate": 0.0029,
+    "cohesion": 0.0024,
+    "institutional_rigidity": -0.0016,
+    "knowledge_preservation": 0.0014,
+    "legitimacy": 0.0009
+   },
+   "art": "res://assets/ui/research/discovery-600/love_wedding_songs.png",
+   "name": "Courtly Love Songs",
+   "observation": "Travelling poets sing of loving a noble lady from afar, in the everyday tongue, at court after court.",
+   "ability_reason": "Travelling poets carry love songs in the common tongue from court to court; a shared manner of courtesy spreads among the nobles of many realms."
+  },
+  "sculpted_portal_programs": {
+   "effects": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0003,
+    "labor_demand": 0.001,
+    "legitimacy": 0.0011
+   },
+   "art": "res://assets/ui/research/discovery-600/stone_relief_carving.png",
+   "name": "Carved Portals",
+   "observation": "Over the great doors, carved figures show the god's judgement to everyone who passes beneath."
+  },
+  "moralized_bestiaries": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0006,
+    "observation_rate": 0.0005
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Moral Bestiaries",
+   "observation": "A book of beasts pictures the lion, the pelican and the unicorn, and draws a lesson from each."
+  },
+  "knightly_conduct_code": {
+   "effects": {
+    "cohesion": 0.002,
+    "injury_risk": -0.0008,
+    "institutional_rigidity": 0.0016,
+    "legitimacy": 0.0018,
+    "security_efficiency": 0.0024,
+    "warfare_readiness": 0.0053
+   },
+   "art": "res://assets/ui/research/subjects/armored_riding-v1.png",
+   "name": "Knightly Code",
+   "observation": "Mounted warriors are taught to keep faith, give freely, spare a yielded foe and protect the weak.",
+   "ability_reason": "Mounted warriors swear to a code of loyalty, largesse and mercy to the yielded; a general can count on his vassals' honour as well as their oaths."
+  },
+  "heraldic_arms": {
+   "effects": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.0016,
+    "knowledge_preservation": 0.0014,
+    "legitimacy": 0.0027,
+    "warfare_readiness": 0.0027
+   },
+   "art": "res://assets/ui/research/discovery-600/household_lineage_tokens.png",
+   "name": "Heraldic Arms",
+   "observation": "Each noble house bears its own colours and figures on shield and banner, and sons inherit them.",
+   "ability_reason": "Noble houses bear inherited arms on shield and banner; a general can see which lord holds which ground in battle."
+  },
+  "pointed_arch_glass_temples": {
+   "effects": {
+    "cohesion": 0.0024,
+    "construction_rate": 0.0065,
+    "craft_output": 0.0016,
+    "fuel_demand": 0.0024,
+    "labor_demand": 0.0064,
+    "legitimacy": 0.0045,
+    "timber_pressure": 0.0024
+   },
+   "art": "res://assets/ui/research/subjects/counterweight_cranes-v1.png",
+   "name": "Pointed-arch Glass Great Houses",
+   "observation": "Pointed arches and outside buttresses lift the walls into tall windows of coloured glass.",
+   "ability_reason": "Pointed arches and buttresses turn walls into coloured glass; each town raises a great house over generations under standing masters' lodges.",
+   "social_consequence": "Whole towns give their labour and coin to the great house for generations"
+  },
+  "ink_wash_painting": {
+   "effects": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0005,
+    "knowledge_preservation": 0.0003
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Ink-wash Painting",
+   "observation": "Painters work in black ink alone, wet and dry, to catch mist, bamboo and mountains in a few strokes."
+  },
+  "beast_epic_satire": {
+   "effects": {
+    "cohesion": 0.0003,
+    "institutional_rigidity": -0.0015,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": -0.0007
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Beast Epic Satire",
+   "observation": "The fox cheats the lion, the wolf and the god's servants in a long comic tale everyone knows is about the great."
+  },
+  "poor_devout_dissent": {
+   "effects": {
+    "cohesion": -0.001,
+    "disaster_resilience": 0.0005,
+    "institutional_rigidity": -0.0015,
+    "legitimacy": -0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/shared_meal_obligations.png",
+   "name": "Poor Devout Movements",
+   "observation": "Townsfolk give away their goods and preach that the god's servants should own nothing.",
+   "social_consequence": "The poor devout preach that the god's house should own nothing"
+  },
+  "chivalric_romance": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0006,
+    "warfare_readiness": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "name": "Chivalric Romance",
+   "observation": "Romances tell of knights who ride out alone on quests for love, honour and the god's wonders."
+  },
+  "polyphonic_choirbooks": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0012,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
+   "name": "Polyphonic Choirbooks",
+   "observation": "Choirbooks large enough for a whole choir to read at once hold great works for four voices."
+  },
+  "wandering_scholar_songs": {
+   "effects": {
+    "cohesion": 0.0003,
+    "institutional_rigidity": -0.001,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": -0.0003
+   },
+   "art": "res://assets/ui/research/discovery-600/scribal_songs_satires.png",
+   "name": "Wandering Scholar Songs",
+   "observation": "Wandering students sing drinking songs and mock the greed of the god's senior servants."
+  },
+  "wandering_preacher_orders": {
+   "effects": {
+    "adoption_rate": 0.0022,
+    "cohesion": 0.0024,
+    "institutional_rigidity": 0.0016,
+    "knowledge_preservation": 0.0014,
+    "knowledge_rate": 0.003,
+    "legitimacy": 0.0031
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Preaching Orders",
+   "observation": "Barefoot preachers of the new orders live by alms and preach in the town squares in the everyday tongue.",
+   "ability_reason": "Orders of wandering preachers live by alms and preach in the squares in the common tongue; the god's word reaches crowds the great houses never gathered.",
+   "social_consequence": "Preachers in the square can raise a crowd for the god's house or against its enemies"
+  },
+  "family_prose_sagas": {
+   "effects": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "name": "Family Sagas",
+   "observation": "Prose sagas tell of farming families, their lawsuits and feuds over generations."
+  },
+  "sacred_world_maps": {
+   "effects": {
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
+   "name": "World Maps of the God's Order",
+   "observation": "A great round map sets the holy city at the centre and paradise at the top, with every people in its place."
+  },
+  "carnival_misrule": {
+   "effects": {
+    "cohesion": 0.0013,
+    "food_storage": -0.0015,
+    "injury_risk": 0.001,
+    "security_efficiency": -0.0005
+   },
+   "art": "res://assets/ui/research/subjects/civic_games-v2.png",
+   "name": "Carnival",
+   "observation": "Before the fast, a mock king rules the town, masks are worn and the great are mocked for a few days.",
+   "social_consequence": "For a few days the town mocks its betters, and the next week the fast begins"
+  },
+  "guild_patron_feasts": {
+   "effects": {
+    "cohesion": 0.001,
+    "craft_output": 0.0005,
+    "food_storage": -0.001,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "name": "Guild Patron Feasts",
+   "observation": "Each guild feasts on the day of its patron servant of the god and pays for a candle in the god's house."
+  },
+  "measured_rhythm_notation": {
+   "effects": {
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0012,
+    "standardization": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
+   "name": "Measured Rhythm Notation",
+   "observation": "The shape of each note now shows how long it lasts, as well as how high."
+  },
+  "recumbent_tomb_effigies": {
+   "effects": {
+    "cohesion": 0.0005,
+    "labor_demand": 0.0005,
+    "legitimacy": 0.0008
+   },
+   "art": "res://assets/ui/research/discovery-600/royal_stone_portraits.png",
+   "name": "Tomb Effigies",
+   "observation": "A lord and his lady lie carved in stone on their tomb, their hands joined in prayer."
+  },
+  "private_devotion_books": {
+   "effects": {
+    "adoption_rate": 0.0009,
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0008
+   },
+   "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
+   "name": "Books of Hours",
+   "observation": "A small painted book of prayers for each hour of the day belongs to one household."
+  },
+  "ruler_town_entries": {
+   "effects": {
+    "cohesion": 0.0008,
+    "food_storage": -0.0005,
+    "legitimacy": 0.0011,
+    "trade_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
+   "name": "Royal Entries",
+   "observation": "When the ruler enters a town, its guilds build arches, stage tableaux and hand him the keys."
+  },
+  "jubilee_pilgrimage_year": {
+   "effects": {
+    "cohesion": 0.0008,
+    "disease_exposure": 0.0015,
+    "food_storage": -0.0005,
+    "legitimacy": 0.0011,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/pilgrimage.png",
+   "name": "Jubilee Year",
+   "observation": "The head of the god's house proclaims a year of pardon for all who come to the holy city."
+  },
+  "naturalistic_fresco_cycles": {
+   "effects": {
+    "cohesion": 0.0024,
+    "knowledge_preservation": 0.0014,
+    "legitimacy": 0.0022,
+    "observation_rate": 0.0016
+   },
+   "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
+   "name": "Lifelike Fresco Cycles",
+   "observation": "Painters give figures weight, shadow and grief on the walls of the god's houses and town halls.",
+   "ability_reason": "Painters give figures weight, depth and feeling on the walls; the god's story and the town's pride are shown as if witnessed."
+  },
+  "vernacular_allegory_epic": {
+   "effects": {
+    "adoption_rate": 0.0029,
+    "cohesion": 0.0028,
+    "institutional_rigidity": -0.0016,
+    "knowledge_preservation": 0.0024,
+    "legitimacy": 0.0013
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Allegorical Journey Poem",
+   "observation": "A poet journeys in verse through the realms of the god's judgement, in the everyday tongue of his town.",
+   "ability_reason": "A great allegorical poem in the everyday tongue journeys through the god's judgement; the common tongue proves it can carry the highest learning."
+  },
+  "guild_cycle_plays": {
+   "effects": {
+    "cohesion": 0.0013,
+    "craft_output": 0.0005,
+    "food_storage": -0.0005,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Guild Cycle Plays",
+   "observation": "Each guild stages one scene of the god's story on a wagon, and the wagons roll through the town in turn."
+  },
+  "vernacular_town_chronicles": {
+   "effects": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0012,
+    "state_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
+   "name": "Town Chronicles",
+   "observation": "A merchant writes his town's chronicle in the everyday tongue, with prices, floods and council quarrels."
+  },
+  "chivalric_orders_insignia": {
+   "effects": {
+    "cohesion": 0.0008,
+    "institutional_rigidity": 0.001,
+    "legitimacy": 0.0011,
+    "warfare_readiness": 0.0011
+   },
+   "art": "res://assets/ui/research/discovery-600/rank_inlay_ornament.png",
+   "name": "Knightly Orders",
+   "observation": "The ruler founds a knightly order with a badge and a feast day, and its companions sit at his side."
+  },
+  "sonnet_sequences": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0006
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Sonnet Sequences",
+   "observation": "A poet writes hundreds of fourteen-line poems to one beloved, alive and then dead."
+  },
+  "old_text_recovery": {
+   "effects": {
+    "adoption_rate": 0.0009,
+    "knowledge_preservation": 0.0018,
+    "knowledge_rate": 0.0028
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "name": "Recovery of Old Texts",
+   "observation": "Scholars search forgotten book rooms of the retreat houses for old works lost for centuries."
+  },
+  "penitent_processions": {
+   "effects": {
+    "cohesion": 0.0008,
+    "disease_exposure": 0.002,
+    "food_storage": -0.0005,
+    "labor_efficiency": -0.0005,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
+   "name": "Penitent Processions",
+   "observation": "Bands of penitents walk from town to town, scourging themselves to turn away the pestilence.",
+   "social_consequence": "Crowds of penitents carry the pestilence from town to town"
+  },
+  "townsfolk_tale_collections": {
+   "effects": {
+    "adoption_rate": 0.0009,
+    "cohesion": 0.0008,
+    "institutional_rigidity": -0.0005,
+    "knowledge_preservation": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/winter_tale_nights.png",
+   "name": "Hundred Tales",
+   "observation": "Ten young townsfolk, fleeing the pestilence, tell a hundred tales of merchants, lovers and tricked priests."
+  },
+  "dance_of_death_images": {
+   "effects": {
+    "cohesion": 0.0008,
+    "disaster_resilience": 0.0015,
+    "legitimacy": -0.0003
+   },
+   "art": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
+   "name": "Dance of Death",
+   "observation": "A painted wall shows death leading the ruler, the merchant and the ploughman alike in one dance."
+  }
+ }
 }

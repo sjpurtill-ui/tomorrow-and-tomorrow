@@ -1,5 +1,826 @@
 {
  "line": "health",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "excerpted_medical_collections": {
+   "effects": {
+    "health_protection": 0.0012,
+    "knowledge_preservation": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Medical Excerpts",
+   "observation": "Physicians copy out the useful chapters of the old authorities into handy collections, and less is lost as the old books rot."
+  },
+  "palace_physician_office": {
+   "effects": {
+    "health_protection": 0.0023,
+    "knowledge_preservation": 0.0015,
+    "labor_demand": 0.001,
+    "legitimacy": 0.0014,
+    "state_capacity": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Chief Court Physician",
+   "observation": "The ruler keeps a chief physician as a standing officer of the household, with healers under him.",
+   "ability_reason": "The court's healing now has one keeper and one voice, and the best healers are drawn to the seat of rule.",
+   "social_consequence": "Healers compete for the chief's favour; the palace physician decides who may treat the great."
+  },
+  "ruled_hospital_staff": {
+   "effects": {
+    "disease_exposure": -0.0018,
+    "health_protection": 0.0023,
+    "institutional_rigidity": 0.001,
+    "labor_demand": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Hospital Rule",
+   "observation": "Hospital attendants serve under a master and a written rule of washing, feeding and watching the sick."
+  },
+  "endowed_hospital_beds": {
+   "effects": {
+    "cohesion": 0.002,
+    "disease_exposure": 0.002,
+    "health_protection": 0.0017,
+    "nutrition_quality": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Endowed Beds",
+   "observation": "Donors endow beds with a fixed allowance of bread, meat and clean linen; the beds are rarely empty, and fevers pass along the rows."
+  },
+  "illustrated_herbals": {
+   "effects": {
+    "health_protection": 0.0012,
+    "health_risk": -0.001,
+    "knowledge_preservation": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Painted Herbals",
+   "observation": "Herbals are copied with painted plants, so a gatherer can match the leaf in the field and not pick its poisonous cousin."
+  },
+  "bubo_plague_recognition": {
+   "effects": {
+    "disease_exposure": -0.0036,
+    "health_protection": 0.0012,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/contagion_mapping-v1.png",
+   "name": "Swelling Plague Known",
+   "observation": "Healers tell the plague of swellings in groin and armpit apart from other pestilence, and the town knows sooner what has come."
+  },
+  "quicklime_mass_graves": {
+   "effects": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.0027,
+    "labor_demand": 0.002,
+    "sanitation": 0.0048
+   },
+   "art": "res://assets/ui/research/discovery-600/burial_ground_separation.png",
+   "name": "Limed Plague Pits",
+   "observation": "In great pestilence the dead go into long pits dressed with quicklime, layer by layer.",
+   "social_consequence": "Families lose the right to bury their own; the dead go unmourned into the lime."
+  },
+  "plague_bedding_burning": {
+   "effects": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.0036,
+    "sanitation": 0.0024
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Burning the Dead's Bedding",
+   "observation": "The bedding and clothes of those who died of plague are burned in the street, though the poor weep to see good cloth go to the fire."
+  },
+  "seaweed_goitre_remedy": {
+   "effects": {
+    "health_protection": 0.0017,
+    "neonatal_survival": 0.001,
+    "nutrition_quality": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Seaweed for Goitre",
+   "observation": "Burnt sponge and seaweed are given to those with swollen throats in the inland valleys, and the swellings shrink."
+  },
+  "road_hostel_infirmaries": {
+   "effects": {
+    "disease_exposure": 0.002,
+    "health_protection": 0.0012,
+    "logistics_endurance": 0.002,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
+   "name": "Road Hostel Infirmaries",
+   "observation": "Hostels at the mountain passes keep a sick room for travellers, and what the travellers carry spreads through the hostel."
+  },
+  "disease_causes_treatise": {
+   "effects": {
+    "health_protection": 0.0017,
+    "knowledge_preservation": 0.003,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Treatise of Causes",
+   "observation": "A great treatise lists every known disorder with its causes and signs, chapter by chapter."
+  },
+  "medical_office_specialties": {
+   "effects": {
+    "health_protection": 0.0035,
+    "injury_risk": -0.002,
+    "institutional_rigidity": 0.002,
+    "knowledge_rate": 0.003,
+    "labor_demand": 0.002,
+    "state_capacity": 0.0021
+   },
+   "art": "res://assets/ui/research/subjects/professional_corps-v1.png",
+   "name": "Court Medical Office",
+   "observation": "A court office divides healing into specialties, body, children, sores, bones and eyes, and runs a school that tests its pupils.",
+   "ability_reason": "Healing is taught by specialty and examined, so the court can post a trained physician wherever it needs one.",
+   "social_consequence": "The medical office ranks healers like officials; those outside it lose trust and custom."
+  },
+  "uroscopy_flask": {
+   "effects": {
+    "health_protection": 0.001,
+    "health_risk": 0.001,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Urine Flask",
+   "observation": "The physician holds the patient's urine up in a clear flask and reads its colour, cloud and sediment, sometimes rightly."
+  },
+  "practitioner_compendium": {
+   "effects": {
+    "health_protection": 0.0017,
+    "injury_risk": -0.001,
+    "knowledge_preservation": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Practitioner's Compendium",
+   "observation": "A compendium in seven books gathers medicine, surgery and drugs for the working practitioner."
+  },
+  "liver_night_blindness": {
+   "effects": {
+    "health_protection": 0.0012,
+    "nutrition_quality": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Liver for Night Blindness",
+   "observation": "Those who cannot see at dusk are fed liver, and within days they find their way home in the evening again."
+  },
+  "household_formulary": {
+   "effects": {
+    "adoption_rate": 0.002,
+    "health_protection": 0.0017,
+    "health_risk": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Household Formulary",
+   "observation": "A book of a thousand remedies for common households lets families treat themselves, well or badly, without a physician."
+  },
+  "licensed_drug_shops": {
+   "effects": {
+    "health_protection": 0.0012,
+    "health_risk": -0.002,
+    "institutional_rigidity": 0.002,
+    "state_capacity": 0.0014,
+    "trade_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png",
+   "name": "Licensed Drug Shops",
+   "observation": "Drug shops need the market warden's licence, and he inspects their jars and weights."
+  },
+  "sickroom_diet_books": {
+   "effects": {
+    "disease_exposure": -0.001,
+    "health_protection": 0.0012,
+    "nutrition_quality": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/curing_regimens-v1.png",
+   "name": "Sickroom Diets",
+   "observation": "Diet books rank every food by its qualities and tell the sick what to eat and what to refuse."
+  },
+  "cloister_infirmary": {
+   "effects": {
+    "health_protection": 0.0017,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.0013,
+    "sanitation": 0.0036,
+    "water_safety": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/public_baths-v1.png",
+   "name": "Cloister Infirmary",
+   "observation": "Religious communities keep an infirmary with its own herb garden, bath and piped water, apart from the main house."
+  },
+  "ward_hospitals": {
+   "effects": {
+    "disease_exposure": -0.0027,
+    "fuel_demand": 0.002,
+    "health_protection": 0.0058,
+    "injury_risk": -0.003,
+    "knowledge_rate": 0.002,
+    "labor_demand": 0.005,
+    "maternal_safety": 0.0025
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Ward Hospitals",
+   "observation": "Hospitals sort their sick into wards for fevers, wounds, eyes and the mad, with physicians on the staff and a pharmacy within.",
+   "ability_reason": "The town's sick have a place to recover, not merely to die: fevers are kept from wounds and every ward has its physician.",
+   "social_consequence": "The ward hospital is the largest building in town after the seat of rule, and its master answers to the founders' endowment."
+  },
+  "travelling_dispensaries": {
+   "effects": {
+    "adoption_rate": 0.002,
+    "disease_exposure": -0.001,
+    "health_protection": 0.0023,
+    "labor_demand": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/pack_animals-v1.png",
+   "name": "Travelling Dispensaries",
+   "observation": "Physicians travel with drugs on pack animals to villages and army camps that have no healer of their own."
+  },
+  "bonesetting_treatise": {
+   "effects": {
+    "injury_risk": -0.005,
+    "knowledge_preservation": 0.0015
+   },
+   "art": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
+   "name": "Bone-Setting Treatise",
+   "observation": "An illustrated treatise shows how each broken bone and dislocated joint is pulled, set and splinted."
+  },
+  "hospital_formulary": {
+   "effects": {
+    "health_protection": 0.0017,
+    "health_risk": -0.0015,
+    "standardization": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Hospital Formulary",
+   "observation": "The hospital pharmacy compounds only the drugs in its approved book, each by the same recipe."
+  },
+  "sugar_syrup_remedies": {
+   "effects": {
+    "health_protection": 0.0012,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
+   "name": "Sugar Syrups",
+   "observation": "Bitter drugs are made into syrups, electuaries and conserves with sugar, which keep well and are taken willingly."
+  },
+  "eye_anatomy_treatise": {
+   "effects": {
+    "health_protection": 0.0012,
+    "injury_risk": -0.002,
+    "knowledge_preservation": 0.0015
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Treatise on the Eye",
+   "observation": "A treatise on the eye draws its coats, humours, lens and the nerves that run to the brain."
+  },
+  "physician_conduct_book": {
+   "effects": {
+    "cohesion": 0.001,
+    "health_risk": -0.001,
+    "legitimacy": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Physician's Conduct",
+   "observation": "A book of the physician's duties teaches him to be sober, discreet, honest in his fees and never to give poison."
+  },
+  "pox_measles_distinction": {
+   "effects": {
+    "disease_exposure": -0.0054,
+    "health_protection": 0.0023,
+    "neonatal_survival": 0.004,
+    "observation_rate": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/contagion_mapping-v1.png",
+   "name": "Pox and Measles Told Apart",
+   "observation": "Physicians tell the two child-killing rashes apart by their course: the fever before, the rash after and the pits left behind.",
+   "ability_reason": "Each pox is nursed and kept apart by its own rule, and fewer children die of the wrong treatment."
+  },
+  "compared_treatment_groups": {
+   "effects": {
+    "health_risk": -0.002,
+    "knowledge_rate": 0.004,
+    "observation_rate": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
+   "name": "Compared Treatments",
+   "observation": "A physician treats one group of patients one way and a second group another, and counts which recovered."
+  },
+  "physician_licensing_exam": {
+   "effects": {
+    "health_protection": 0.0029,
+    "health_risk": -0.0035,
+    "institutional_rigidity": 0.004,
+    "labor_demand": 0.002,
+    "legitimacy": 0.0014,
+    "state_capacity": 0.0021
+   },
+   "art": "res://assets/ui/research/subjects/professional_corps-v1.png",
+   "name": "Physicians' Examination",
+   "observation": "No one may practise physic until the examiners have questioned him and granted a licence.",
+   "ability_reason": "The worst quacks are driven off, and a sick family can know that their physician has at least been examined.",
+   "social_consequence": "Unlicensed wise-women and bone-setters now practise at risk of a fine, and much good folk skill is shut out with the quackery."
+  },
+  "bedside_teaching": {
+   "effects": {
+    "adoption_rate": 0.002,
+    "health_protection": 0.0023,
+    "knowledge_rate": 0.004
+   },
+   "art": "res://assets/ui/research/paper/clinical_observation_rounds.png",
+   "name": "Bedside Teaching",
+   "observation": "Hospital physicians walk their students from bed to bed, teaching from the patient rather than the book."
+  },
+  "hospital_madness_wards": {
+   "effects": {
+    "cohesion": 0.002,
+    "health_protection": 0.0012,
+    "injury_risk": -0.001,
+    "labor_demand": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Madness Wards",
+   "observation": "General hospitals keep a ward for the mad, with keepers, baths and music, instead of leaving them chained at home."
+  },
+  "printed_state_pharmacopoeia": {
+   "effects": {
+    "adoption_rate": 0.002,
+    "health_risk": -0.002,
+    "knowledge_preservation": 0.0023,
+    "standardization": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png",
+   "name": "State Pharmacopoeia",
+   "observation": "The state issues one book of approved drugs from carved blocks, and every district pharmacy works from the same page."
+  },
+  "graded_cautery_irons": {
+   "effects": {
+    "health_risk": 0.002,
+    "injury_risk": -0.003
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Cautery Irons",
+   "observation": "Surgeons keep irons of different shapes, one for bleeding vessels, one for abscesses, one for wounds, and the burns are cruel."
+  },
+  "illustrated_surgery_treatise": {
+   "effects": {
+    "health_protection": 0.0017,
+    "health_risk": -0.001,
+    "injury_risk": -0.008,
+    "knowledge_preservation": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Illustrated Surgery",
+   "observation": "A surgery book draws each instrument and shows how each operation is done, step by step.",
+   "ability_reason": "Surgeons learn from drawn plates, not only a master's hands, and a skilled operation can be repeated in another town."
+  },
+  "distilled_herb_waters": {
+   "effects": {
+    "disease_exposure": -0.001,
+    "fuel_demand": 0.002,
+    "health_protection": 0.0012,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
+   "name": "Distilled Waters",
+   "observation": "Roses and herbs are distilled into fragrant waters for washing wounds and sickrooms and for drinking as remedies."
+  },
+  "drug_adulteration_tests": {
+   "effects": {
+    "health_risk": -0.002,
+    "labor_demand": 0.001,
+    "state_capacity": 0.0014,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png",
+   "name": "Adulteration Tests",
+   "observation": "The market inspector tests drugs by weight, smell, fire and water, and burns the false ones in the square."
+  },
+  "catgut_sutures": {
+   "effects": {
+    "disease_exposure": -0.001,
+    "injury_risk": -0.004
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Gut Sutures",
+   "observation": "Wounds and vessels are tied with thread of dried gut, which the body takes up instead of rotting around it."
+  },
+  "canon_textbook": {
+   "effects": {
+    "adoption_rate": 0.003,
+    "health_protection": 0.0046,
+    "health_risk": 0.002,
+    "institutional_rigidity": 0.006,
+    "knowledge_preservation": 0.006,
+    "knowledge_rate": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "The Ordered Canon",
+   "observation": "One great textbook orders all of physic from cause to cure, and every school teaches from it.",
+   "ability_reason": "A student in any town now learns the same medicine, and a physician's training can be judged against one book.",
+   "social_consequence": "Its authority is such that doubting it becomes a fault, and its errors are taught as faithfully as its truths."
+  },
+  "contact_contagion": {
+   "effects": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.0045,
+    "health_protection": 0.0012,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/contagion_mapping-v1.png",
+   "name": "Contact Contagion",
+   "observation": "Physicians teach that consumption and the itch pass by touch and shared bedding, and households keep the sick apart.",
+   "social_consequence": "The consumptive and the scabby are shunned, sometimes put out of doors by their own kin."
+  },
+  "hollow_needle_cataract": {
+   "effects": {
+    "health_protection": 0.0012,
+    "injury_risk": -0.002,
+    "labor_efficiency": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Cataract Needle",
+   "observation": "A hollow needle draws out the clouded lens, and old craftsmen see well enough to work again."
+  },
+  "needling_teaching_figures": {
+   "effects": {
+    "health_protection": 0.0012,
+    "knowledge_preservation": 0.0015,
+    "standardization": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Needling Figures",
+   "observation": "Bronze figures pierced at every needling point are filled with water and coated in wax to test students."
+  },
+  "state_drug_bureau": {
+   "effects": {
+    "health_protection": 0.0023,
+    "health_risk": -0.0015,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.002,
+    "state_capacity": 0.0021,
+    "trade_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "name": "State Drug Bureau",
+   "observation": "State pharmacy offices sell standard drugs at fixed prices and give them free in epidemics."
+  },
+  "burning_sickness_hospitals": {
+   "effects": {
+    "cohesion": 0.001,
+    "health_protection": 0.0012,
+    "injury_risk": -0.002,
+    "labor_demand": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Burning-Sickness Hospitals",
+   "observation": "Houses are founded for those whose limbs blacken and burn; the sick sometimes mend there without knowing why."
+  },
+  "nursing_brotherhoods": {
+   "effects": {
+    "cohesion": 0.005,
+    "disease_exposure": -0.0018,
+    "health_protection": 0.0052,
+    "labor_demand": 0.004,
+    "maternal_safety": 0.0025
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Nursing Brotherhoods",
+   "observation": "Sworn brotherhoods and sisterhoods run the hospitals of town and road, washing, feeding and turning the sick.",
+   "ability_reason": "The sick are nursed by people who have made it their calling, not by whoever the hospital can hire.",
+   "social_consequence": "The nursing orders become a power in the towns, holding endowments and answering to their own rule."
+  },
+  "mercury_ointment": {
+   "effects": {
+    "disease_exposure": -0.001,
+    "health_protection": 0.0012,
+    "health_risk": 0.005
+   },
+   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
+   "name": "Quicksilver Ointment",
+   "observation": "Quicksilver rubbed into the skin clears stubborn scabs and sores, though the patient drools, loses teeth and sometimes shakes for life."
+  },
+  "household_health_verses": {
+   "effects": {
+    "adoption_rate": 0.003,
+    "cohesion": 0.001,
+    "health_protection": 0.0017
+   },
+   "art": "res://assets/ui/research/discovery-600/mnemonic_verse_encoding.png",
+   "name": "Health Verses",
+   "observation": "Rules of health for every season are set in verse that children learn and households repeat."
+  },
+  "aged_almshouses": {
+   "effects": {
+    "cohesion": 0.003,
+    "health_protection": 0.0017,
+    "labor_demand": 0.002,
+    "legitimacy": 0.0014
+   },
+   "art": "res://assets/ui/research/discovery-600/mutual_aid_customs.png",
+   "name": "Almshouses",
+   "observation": "Almshouses give the old and infirm a room, a fire and a daily allowance in return for their prayers."
+  },
+  "itch_mite_removal": {
+   "effects": {
+    "disease_exposure": -0.0018,
+    "health_protection": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Itch Mite Removal",
+   "observation": "Women pick the tiny itch mite out of its burrow with a needle, and the itch heals once the mites are gone."
+  },
+  "town_antidotary": {
+   "effects": {
+    "health_protection": 0.0012,
+    "health_risk": -0.0015,
+    "standardization": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Town Compound Book",
+   "observation": "Every apothecary in the town must compound by the same book, and the council's inspectors check the jars."
+  },
+  "medical_faculty_licence": {
+   "effects": {
+    "health_protection": 0.0035,
+    "health_risk": -0.002,
+    "institutional_rigidity": 0.005,
+    "knowledge_rate": 0.003,
+    "legitimacy": 0.0014,
+    "state_capacity": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "Medical Faculty Licence",
+   "observation": "The medical faculty examines and licenses both teachers and practitioners, and its degree is accepted everywhere.",
+   "ability_reason": "The degree becomes the physician's warrant in any town, and the teaching of medicine has a guild of its own.",
+   "social_consequence": "Faculty men look down on surgeons and apothecaries, and women healers lose what standing they had."
+  },
+  "bloodletting_calendars": {
+   "effects": {
+    "cohesion": 0.001,
+    "health_protection": 0.001,
+    "health_risk": 0.004
+   },
+   "art": "res://assets/ui/research/discovery-600/moon_counting.png",
+   "name": "Bleeding Calendars",
+   "observation": "Bleeders consult a chart of the body's signs and the calendar's days before opening a vein, and bleed more often for having a rule."
+  },
+  "spoiled_food_condemnation": {
+   "effects": {
+    "disease_exposure": -0.0036,
+    "food_spoilage": -0.003,
+    "health_protection": 0.0012,
+    "state_capacity": 0.0014,
+    "trade_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "name": "Condemned Meat and Fish",
+   "observation": "Market inspectors seize stinking meat and fish and burn them before the seller's stall.",
+   "social_consequence": "Butchers and fishwives are fined and shamed in public; the market inspector becomes a feared town officer."
+  },
+  "hospital_admission_books": {
+   "effects": {
+    "knowledge_preservation": 0.0023,
+    "observation_rate": 0.003,
+    "state_capacity": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Admission Books",
+   "observation": "Hospitals write down every admission, discharge and death, and the masters can see which wards lose the most."
+  },
+  "apothecary_separation": {
+   "effects": {
+    "health_protection": 0.0023,
+    "health_risk": -0.0035,
+    "institutional_rigidity": 0.004,
+    "standardization": 0.004,
+    "state_capacity": 0.0014,
+    "trade_capacity": 0.0014
+   },
+   "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png",
+   "name": "Apothecaries Separated",
+   "observation": "The law parts the physician from the apothecary: one prescribes, the other compounds, and drug prices are fixed.",
+   "ability_reason": "Neither profits from the other's error, and a patient can have a prescription made up by a sworn apothecary at a fixed price.",
+   "social_consequence": "Sworn apothecaries become town officers, with price schedules posted on the shop door."
+  },
+  "pulmonary_transit": {
+   "effects": {
+    "health_protection": 0.001,
+    "knowledge_rate": 0.005,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Blood Through the Lungs",
+   "observation": "A physician writes that the blood passes from the right side of the heart to the left through the lungs, not through the wall between."
+  },
+  "inquest_handbook": {
+   "effects": {
+    "injury_risk": -0.002,
+    "knowledge_preservation": 0.0015,
+    "legitimacy": 0.0028,
+    "observation_rate": 0.003,
+    "security_efficiency": 0.003,
+    "state_capacity": 0.0035
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Inquest Handbook",
+   "observation": "Officials who view the dead follow a handbook of wounds, poisons, stranglings and drownings.",
+   "ability_reason": "A hidden killing is now harder to pass off as fate, and deaths become matters of law.",
+   "social_consequence": "An inquest officer is attached to the courts, and every sudden death brings him to the door."
+  },
+  "blind_hospice": {
+   "effects": {
+    "cohesion": 0.003,
+    "health_protection": 0.001,
+    "labor_demand": 0.001,
+    "legitimacy": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Hospice for the Blind",
+   "observation": "A hospice houses the blind poor, who beg in the streets by day under its badge and sleep there at night."
+  },
+  "dry_wound_dressing": {
+   "effects": {
+    "disease_exposure": -0.0018,
+    "health_risk": -0.001,
+    "injury_risk": -0.005
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Dry Wound Dressing",
+   "observation": "Surgeons wash wounds with wine and bind them dry, instead of coaxing pus with salves, and more wounds close clean."
+  },
+  "leper_inspection_panels": {
+   "effects": {
+    "cohesion": -0.004,
+    "disease_exposure": -0.0027,
+    "legitimacy": -0.001,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Leper Panels",
+   "observation": "A sworn panel examines anyone suspected of leprosy and sends those it condemns to the lazar house.",
+   "social_consequence": "A panel's finding casts a person out of town and household alike, and some who are clean are cast out too."
+  },
+  "reading_spectacles": {
+   "effects": {
+    "craft_output": 0.002,
+    "knowledge_preservation": 0.0015,
+    "knowledge_rate": 0.003,
+    "labor_efficiency": 0.004
+   },
+   "art": "res://assets/ui/research/paper/glass_blowing.png",
+   "name": "Reading Spectacles",
+   "observation": "Two ground lenses riveted in a frame let the long-sighted old read and sew again."
+  },
+  "street_filth_ordinances": {
+   "effects": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.0036,
+    "labor_demand": 0.003,
+    "sanitation": 0.0096,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
+   "name": "Street Filth Ordinances",
+   "observation": "Town ordinances forbid dung, offal and slops in the streets, and householders must sweep before their doors."
+  },
+  "court_autopsy": {
+   "effects": {
+    "cohesion": -0.002,
+    "knowledge_rate": 0.003,
+    "legitimacy": 0.0014,
+    "observation_rate": 0.002,
+    "state_capacity": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Court Autopsy",
+   "observation": "When a death is disputed, the courts order a physician to open the body and report what he finds."
+  },
+  "public_theriac_compounding": {
+   "effects": {
+    "health_protection": 0.001,
+    "health_risk": -0.001,
+    "legitimacy": 0.001,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Public Great Antidote",
+   "observation": "The great antidote of many ingredients is compounded in the square before the inspectors, so none can be left out."
+  },
+  "surgeons_guild": {
+   "effects": {
+    "health_protection": 0.0012,
+    "injury_risk": -0.004,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.001,
+    "standardization": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "name": "Surgeons' Guild",
+   "observation": "Surgeons form a guild with apprenticeship and a master's test, and barbers may no longer cut for the stone."
+  },
+  "public_anatomy_dissection": {
+   "effects": {
+    "cohesion": -0.004,
+    "health_protection": 0.0023,
+    "injury_risk": -0.004,
+    "knowledge_rate": 0.006,
+    "legitimacy": -0.001,
+    "observation_rate": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Public Dissection",
+   "observation": "The body of a hanged felon is opened before students in a public hall, and the master shows what the books describe.",
+   "ability_reason": "What the old books say of the body can be checked against what lies on the table.",
+   "social_consequence": "Kin guard fresh graves, and the crowd at a public dissection is half learning and half spectacle."
+  },
+  "walled_out_slaughter": {
+   "effects": {
+    "disease_exposure": -0.0027,
+    "labor_demand": 0.002,
+    "sanitation": 0.0072,
+    "trade_capacity": -0.001,
+    "water_safety": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/drainage-v1.png",
+   "name": "Slaughter Outside the Walls",
+   "observation": "Butchers must kill their beasts outside the town walls and downstream, and bring in only the dressed meat."
+  },
+  "school_surgery_manual": {
+   "effects": {
+    "adoption_rate": 0.002,
+    "injury_risk": -0.004,
+    "knowledge_preservation": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
+   "name": "Surgery Casebook",
+   "observation": "A surgery textbook of cases teaches school-trained surgeons what was done and what came of it."
+  },
+  "plague_advice_tracts": {
+   "effects": {
+    "adoption_rate": 0.003,
+    "cohesion": 0.001,
+    "disease_exposure": -0.0027
+   },
+   "art": "res://assets/ui/research/subjects/contagion_mapping-v1.png",
+   "name": "Pestilence Tracts",
+   "observation": "Short tracts tell households what to do in pestilence: fly early, keep fires, clean the house and shun the crowd."
+  },
+  "pestilence_health_boards": {
+   "effects": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.009,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.003,
+    "legitimacy": -0.002,
+    "sanitation": 0.0048,
+    "state_capacity": 0.0035,
+    "trade_capacity": -0.005
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Pestilence Health Boards",
+   "observation": "In pestilence years a board of health takes power over the ordinary officials, closing markets, shutting infected houses and burying the dead.",
+   "ability_reason": "The town fights the sickness as one body under one board, instead of every quarter shifting for itself.",
+   "social_consequence": "Shut-in households starve behind barred doors; the board's orders are resented and evaded even as they save lives."
+  },
+  "pestilence_gate_watch": {
+   "effects": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.0054,
+    "labor_demand": 0.003,
+    "security_efficiency": 0.003,
+    "trade_capacity": -0.005
+   },
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png",
+   "name": "Pestilence Gate Watch",
+   "observation": "In pestilence the gates are watched, cordons are drawn round sick districts and every traveller is questioned.",
+   "social_consequence": "Armed cordons turn back the hungry along with the sick, and trade halts while the watch stands."
+  },
+  "pestilence_physicians": {
+   "effects": {
+    "disease_exposure": -0.001,
+    "health_protection": 0.0023,
+    "labor_demand": 0.002,
+    "legitimacy": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Pestilence Physicians",
+   "observation": "The town pays physicians to stay and treat the sick through the pestilence instead of fleeing with the rich."
+  },
+  "arrival_isolation_period": {
+   "effects": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.0108,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.002,
+    "state_capacity": 0.0021,
+    "trade_capacity": -0.008,
+    "travel_speed": -0.004
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Arrival Isolation",
+   "observation": "Ships and travellers from a sick coast must wait thirty days apart before they may land or enter the town.",
+   "ability_reason": "A pestilence must now outlast its carriers to reach the town, and a harbour isolation station stands off the quay.",
+   "social_consequence": "Merchants curse the lost month, and bribes to shorten the wait are the harbour's commonest crime."
+  }
+ }
 }

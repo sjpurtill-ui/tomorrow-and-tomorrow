@@ -1,5 +1,1006 @@
 {
  "line": "labor",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "city_supply_corporations": {
+   "effects": {
+    "task_coordination": 0.003,
+    "state_capacity": 0.0014,
+    "trade_capacity": 0.0011,
+    "institutional_rigidity": 0.0032,
+    "adoption_rate": -0.001
+   },
+   "name": "City-Supply Corporations",
+   "observation": "The baker's son must bake and the bargeman's son must carry the grain; the city is fed, and no one may leave his father's corporation.",
+   "social_consequence": "The city never goes hungry for want of bakers or boatmen, but a whole class of families is tied to one trade from birth.",
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png"
+  },
+  "improvement_leases": {
+   "effects": {
+    "cultivation_yield": 0.003,
+    "labor_efficiency": 0.001,
+    "cohesion": 0.001
+   },
+   "name": "Improvement Leases",
+   "observation": "A tenant who plants vines on waste ground holds it for his life and his son's, and pays nothing for the first five vintages.",
+   "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png"
+  },
+  "landowner_patronage_tenancy": {
+   "effects": {
+    "labor_demand": -0.002,
+    "cohesion": 0.002,
+    "state_capacity": -0.0021,
+    "legitimacy": -0.0016,
+    "institutional_rigidity": 0.0024
+   },
+   "name": "Patronage Tenancy",
+   "observation": "Whole villages commend themselves to the great house on the hill, and the tax collector finds its steward answering for them at the gate.",
+   "social_consequence": "Tenants escape the tax collector and the levy, but only by putting themselves in a great landowner's hands.",
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png"
+  },
+  "registered_state_artisans": {
+   "effects": {
+    "craft_output": 0.0014,
+    "standardization": 0.002,
+    "warfare_readiness": 0.003,
+    "institutional_rigidity": 0.0032,
+    "adoption_rate": -0.001
+   },
+   "name": "Registered State Artisans",
+   "observation": "Each armourer's name is entered in the arsenal roll, and a mark on his arm shows he belongs to the state for life.",
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png"
+  },
+  "fugitive_worker_returns": {
+   "effects": {
+    "state_capacity": 0.0014,
+    "labor_demand": -0.001,
+    "institutional_rigidity": 0.004,
+    "cohesion": -0.003,
+    "legitimacy": -0.0016
+   },
+   "name": "Runaway Returns",
+   "observation": "The decree is read at every town gate: a runaway baker or miner found inside must be sent back in chains to his corporation.",
+   "social_consequence": "The bound trades keep their hands, and every town gate becomes a place where the poor are questioned and seized.",
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png"
+  },
+  "convict_work_gangs": {
+   "effects": {
+    "labor_demand": -0.004,
+    "mining_output": 0.003,
+    "construction_rate": 0.002,
+    "injury_risk": 0.003,
+    "health_risk": 0.002
+   },
+   "name": "Convict Gangs",
+   "observation": "Men condemned for theft and brawling are marched in fetters to the quarries and the silver pits, and few come back.",
+   "social_consequence": "The mines and roads get hands no free man would offer, and a sentence to the pits becomes a slow death.",
+   "art": "res://assets/ui/research/subjects/mine_shoring-v1.png"
+  },
+  "hereditary_waterworks_crews": {
+   "effects": {
+    "repair_capacity": 0.003,
+    "water_access": 0.002,
+    "sanitation": 0.001,
+    "institutional_rigidity": 0.0016
+   },
+   "name": "Hereditary Waterworks Crews",
+   "observation": "The conduit keeper's family has walked the channel for five generations and knows every leaking joint by its sound.",
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "communal_house_workshops": {
+   "effects": {
+    "craft_output": 0.0021,
+    "task_coordination": 0.003,
+    "knowledge_preservation": 0.002,
+    "cohesion": 0.002
+   },
+   "name": "Communal House Workshops",
+   "observation": "Behind the walls of the communal house the brothers keep a smithy, a bakery and a fulling trough, and want nothing from the town.",
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+  },
+  "rotating_artisan_service": {
+   "effects": {
+    "state_capacity": 0.0021,
+    "construction_rate": 0.002,
+    "labor_demand": 0.002,
+    "fatigue": 0.001
+   },
+   "name": "Rotating Artisan Service",
+   "observation": "Every carpenter owes the palace one month in twelve; in his month he sleeps in the works yard and eats the palace bread.",
+   "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
+  },
+  "settled_bondsman_households": {
+   "effects": {
+    "labor_efficiency": 0.0039,
+    "cultivation_yield": 0.004,
+    "cohesion": 0.004,
+    "conception_support": 0.002,
+    "institutional_rigidity": 0.0016
+   },
+   "name": "Settled Bondsmen",
+   "observation": "The barrack gangs are broken up: each bond-servant gets a hut, a few strips and a share of an ox, and brings his rent in grain at harvest.",
+   "ability_reason": "A bondsman with his own plot and hearth works for his rent and his harvest with a will no overseer could force.",
+   "social_consequence": "The gang barracks empty into hamlets of rent-paying families. The lord gains a steady rent and loses the power to move men wherever he likes.",
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png"
+  },
+  "estate_weaving_houses": {
+   "effects": {
+    "craft_output": 0.0021,
+    "fatigue": 0.002,
+    "cohesion": -0.001
+   },
+   "name": "Estate Weaving Houses",
+   "observation": "In the women's house by the hall a dozen looms clack from dawn, and the cloth goes to the lord's chests, not to market.",
+   "art": "res://assets/ui/research/discovery-600/warp_weighted_looms.png"
+  },
+  "vineyard_task_work": {
+   "effects": {
+    "labor_efficiency": 0.002,
+    "cultivation_yield": 0.002,
+    "fatigue": 0.001
+   },
+   "name": "Vineyard Task Work",
+   "observation": "The steward pays by the row dug and the vine pruned, and the quick hands are finished by midday.",
+   "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png"
+  },
+  "week_work_service": {
+   "effects": {
+    "food_output": 0.0042,
+    "task_coordination": 0.005,
+    "state_capacity": 0.0021,
+    "labor_demand": -0.006,
+    "fatigue": 0.003,
+    "institutional_rigidity": 0.0048,
+    "cohesion": -0.003,
+    "adoption_rate": -0.002
+   },
+   "name": "Week-Work",
+   "observation": "Three days a week the tenant brings his own ox and plough to the lord's fields, and the reeve ticks his name at the gate.",
+   "ability_reason": "Tying rent to fixed days of work every week gives the lord's home farm a known and steady workforce all year.",
+   "social_consequence": "The lord's fields are ploughed on time. The tenant's own strips wait until the lord's are done, and resentment grows with every late sowing.",
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png"
+  },
+  "harvest_boon_work": {
+   "effects": {
+    "food_output": 0.0021,
+    "labor_demand": -0.002,
+    "fatigue": 0.002,
+    "cohesion": 0.001
+   },
+   "name": "Boon-Work",
+   "observation": "On boon days every household sends all its hands to the lord's harvest, and at noon the lord sets out bread, ale and salt fish.",
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png"
+  },
+  "estate_bound_craftsmen": {
+   "effects": {
+    "repair_capacity": 0.003,
+    "craft_output": 0.0014,
+    "tool_quality": 0.002,
+    "adoption_rate": -0.001
+   },
+   "name": "Estate Craftsmen",
+   "observation": "The estate smith keeps every ploughshare sharp and is paid in land and a pig at midwinter; he may not work for the next estate.",
+   "art": "res://assets/ui/research/subjects/forge_welding-v1.png"
+  },
+  "reciprocal_work_days": {
+   "effects": {
+    "task_coordination": 0.003,
+    "cohesion": 0.003,
+    "construction_rate": 0.002,
+    "labor_demand": -0.001
+   },
+   "name": "Reciprocal Work Days",
+   "observation": "When the miller's barn goes up twenty neighbours come, and next spring the miller sends two sons to each of them in turn.",
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png"
+  },
+  "yearly_grain_share_crafts": {
+   "effects": {
+    "repair_capacity": 0.002,
+    "labor_efficiency": 0.0013,
+    "cohesion": 0.002
+   },
+   "name": "Grain-Share Crafts",
+   "observation": "Every household leaves a sheaf at the smith's door after harvest, and he mends their sickles all year without further charge.",
+   "art": "res://assets/ui/research/subjects/hardened_edges-v1.png"
+  },
+  "load_paid_forest_crews": {
+   "effects": {
+    "timber_yield": 0.003,
+    "labor_efficiency": 0.0013,
+    "timber_pressure": 0.003,
+    "injury_risk": 0.001
+   },
+   "name": "Load-Paid Forest Crews",
+   "observation": "The charcoal master counts the sacks at the forest edge and pays each crew by the load, and the woods thin quickly under such counting.",
+   "art": "res://assets/ui/research/subjects/charcoal-v1.png"
+  },
+  "estate_survey_books": {
+   "effects": {
+    "state_capacity": 0.0042,
+    "task_coordination": 0.004,
+    "knowledge_preservation": 0.003,
+    "institutional_rigidity": 0.0032,
+    "cohesion": -0.001
+   },
+   "name": "Estate Survey Books",
+   "observation": "The steward's clerk walks every hamlet with his book, writing down each tenant's name, his acres, his plough-days and the eggs he owes at the spring feast.",
+   "ability_reason": "A written survey of every holding tells the lord exactly what work and dues each household owes, and lets him demand them.",
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png"
+  },
+  "craft_quarter_streets": {
+   "effects": {
+    "craft_output": 0.0021,
+    "task_coordination": 0.002,
+    "standardization": 0.002,
+    "knowledge_rate": 0.001
+   },
+   "name": "Craft Quarters",
+   "observation": "The coppersmiths hammer on one street and the tanners stink on another, and a buyer can compare ten shops in a morning.",
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "increase_share_herding": {
+   "effects": {
+    "food_output": 0.0014,
+    "labor_efficiency": 0.0013,
+    "cohesion": 0.001
+   },
+   "name": "Increase-Share Herding",
+   "observation": "The herdsman takes every fifth lamb born in his care, so he watches the ewes at lambing as if they were his own.",
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png"
+  },
+  "craft_render_quotas": {
+   "effects": {
+    "craft_output": 0.0021,
+    "state_capacity": 0.0014,
+    "fatigue": 0.002
+   },
+   "name": "Craft Render Quotas",
+   "observation": "Each potter's household owes the hall forty jars at the autumn reckoning; whatever they make beyond that is theirs to sell.",
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png"
+  },
+  "estate_steward_audits": {
+   "effects": {
+    "state_capacity": 0.0028,
+    "task_coordination": 0.003,
+    "storage_loss": -0.002,
+    "institutional_rigidity": 0.0016
+   },
+   "name": "Steward Audits",
+   "observation": "Once a year the stewards ride in and stand before the auditors, and every missing bushel must be accounted for or paid for.",
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png"
+  },
+  "communal_bell_hours": {
+   "effects": {
+    "task_coordination": 0.004,
+    "labor_efficiency": 0.0013,
+    "fatigue": -0.002,
+    "cohesion": 0.001
+   },
+   "name": "Communal Bell Hours",
+   "observation": "The house bell rings seven times a day, and at its sound the brothers leave the field for prayer, food or sleep.",
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
+  },
+  "shared_plough_teams": {
+   "effects": {
+    "cultivation_yield": 0.004,
+    "labor_efficiency": 0.002,
+    "task_coordination": 0.002,
+    "cohesion": 0.002
+   },
+   "name": "Shared Plough Teams",
+   "observation": "No household owns eight oxen, but four households together yoke a full team to the heavy plough and turn each other's strips in turn.",
+   "art": "res://assets/ui/research/subjects/crop_rotation-v1.png"
+  },
+  "salaried_trade_factors": {
+   "effects": {
+    "trade_capacity": 0.0022,
+    "task_coordination": 0.002,
+    "knowledge_rate": 0.001
+   },
+   "name": "Salaried Factors",
+   "observation": "The merchant house keeps a factor in the far port on a yearly salary, and his letters come back with every ship.",
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png"
+  },
+  "sheaf_share_reaping": {
+   "effects": {
+    "food_output": 0.0021,
+    "labor_efficiency": 0.0013,
+    "fatigue": 0.001
+   },
+   "name": "Sheaf-Share Reaping",
+   "observation": "The reapers take every tenth sheaf they bind, and the field is cleared before the rain comes.",
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png"
+  },
+  "contracted_silk_reelers": {
+   "effects": {
+    "fiber_yield": 0.002,
+    "craft_output": 0.0014,
+    "trade_capacity": 0.0011,
+    "fatigue": 0.002,
+    "cohesion": -0.001
+   },
+   "name": "Contracted Silk Reelers",
+   "observation": "The merchant brings cocoons in spring and takes the reeled silk in summer, and the household is paid by the weight of thread.",
+   "art": "res://assets/ui/research/subjects/fiber_grading-v1.png"
+  },
+  "saltworks_shift_crews": {
+   "effects": {
+    "craft_output": 0.0014,
+    "labor_efficiency": 0.0013,
+    "fatigue": 0.003,
+    "fuel_demand": 0.002,
+    "injury_risk": 0.001
+   },
+   "name": "Salt-Works Shifts",
+   "observation": "The fires under the brine pans are never allowed to die: one crew stokes by day and another by night.",
+   "art": "res://assets/ui/research/subjects/salt_working-v1.png"
+  },
+  "yearly_herdsman_hire": {
+   "effects": {
+    "labor_efficiency": 0.0013,
+    "task_coordination": 0.001,
+    "cohesion": 0.001
+   },
+   "name": "Yearly Herdsman Hire",
+   "observation": "At the autumn fair the shepherd agrees on his year: so much grain, a coat, and the milk of two ewes.",
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png"
+  },
+  "mill_suit_obligation": {
+   "effects": {
+    "food_output": 0.0021,
+    "labor_efficiency": 0.0013,
+    "state_capacity": 0.0014,
+    "legitimacy": -0.0016,
+    "cohesion": -0.002
+   },
+   "name": "Mill Suit",
+   "observation": "The lord's men break up the hand querns, and every sack must go to his mill, which keeps one measure in sixteen.",
+   "social_consequence": "Grinding is quicker at the mill, but the toll and the smashed querns are remembered in every village.",
+   "art": "res://assets/ui/research/subjects/water_mills-v1.png"
+  },
+  "catch_share_crews": {
+   "effects": {
+    "food_output": 0.0014,
+    "labor_efficiency": 0.0013,
+    "naval_capacity": 0.001,
+    "cohesion": 0.001
+   },
+   "name": "Catch-Share Crews",
+   "observation": "The catch is laid out on the beach and divided: a share for the boat, a share for the nets, and one for each man who rowed.",
+   "art": "res://assets/ui/research/subjects/river_craft-v1.png"
+  },
+  "manumission_charters": {
+   "effects": {
+    "labor_efficiency": 0.002,
+    "adoption_rate": 0.002,
+    "legitimacy": 0.0016,
+    "cohesion": 0.002,
+    "institutional_rigidity": -0.0016
+   },
+   "name": "Manumission Charters",
+   "observation": "The freed man keeps his charter wrapped in leather; before witnesses his lord gave up every claim on him and his children.",
+   "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png"
+  },
+  "migrant_harvest_crews": {
+   "effects": {
+    "food_output": 0.0021,
+    "labor_demand": -0.002,
+    "disease_exposure": 0.001,
+    "cohesion": -0.001
+   },
+   "name": "Migrant Harvest Crews",
+   "observation": "Bands of reapers come down from the hills as the lowland grain ripens and follow the harvest upward week by week.",
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png"
+  },
+  "voyage_share_wages": {
+   "effects": {
+    "trade_capacity": 0.0017,
+    "naval_capacity": 0.002
+   },
+   "name": "Voyage Wages",
+   "observation": "The master signs each sailor on for wages or for a share of the profit at the voyage's end, and the share-men watch the cargo closely.",
+   "art": "res://assets/ui/research/subjects/naval_logistics-v1.png"
+  },
+  "cloth_craft_chain": {
+   "effects": {
+    "craft_output": 0.0035,
+    "labor_efficiency": 0.0026,
+    "standardization": 0.003,
+    "fatigue": 0.002,
+    "cohesion": -0.001
+   },
+   "name": "Cloth Craft Chain",
+   "observation": "A single bolt of cloth passes through a dozen pairs of hands: sorter, carder, spinner, weaver, fuller and shearman.",
+   "art": "res://assets/ui/research/subjects/work_motion_studies-v1.png"
+  },
+  "clearance_dues_holiday": {
+   "effects": {
+    "cultivation_yield": 0.003,
+    "food_output": 0.0014,
+    "ecological_pressure": 0.003,
+    "timber_pressure": 0.002
+   },
+   "name": "Clearance Dues Holiday",
+   "observation": "Settlers who clear forest at the edge of the lordship pay nothing for five years, and the woods retreat an acre at a time.",
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png"
+  },
+  "apprentice_indentures": {
+   "effects": {
+    "labor_efficiency": 0.0039,
+    "knowledge_preservation": 0.004,
+    "tool_quality": 0.003,
+    "adoption_rate": 0.003,
+    "institutional_rigidity": 0.0016,
+    "labor_demand": 0.001
+   },
+   "name": "Apprentice Indentures",
+   "observation": "The indenture is cut in two along a wavy line; the master keeps one half and the father the other, and seven years later they are matched again.",
+   "ability_reason": "A written term of years binds the master to teach the whole trade and the boy to serve it, so skills pass on complete instead of in pieces.",
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+  },
+  "hired_labor_levy": {
+   "effects": {
+    "labor_demand": -0.008,
+    "construction_rate": 0.005,
+    "labor_efficiency": 0.0026,
+    "state_capacity": 0.0028,
+    "legitimacy": 0.0024,
+    "cohesion": 0.002,
+    "trade_capacity": 0.0011
+   },
+   "name": "Hired Labor Levy",
+   "observation": "The villages pay a levy in coin instead of sending men, and the treasury hires masons and diggers who want the work.",
+   "ability_reason": "Money paid in place of service lets the treasury hire willing, skilled crews instead of dragging farmers from their fields.",
+   "social_consequence": "The court no longer summons villagers to build its walls and roads. The works go faster, and the villages keep their men at harvest.",
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png"
+  },
+  "sworn_porter_guilds": {
+   "effects": {
+    "haul_capacity": 0.003,
+    "task_coordination": 0.002,
+    "institutional_rigidity": 0.0016
+   },
+   "name": "Sworn Porters",
+   "observation": "Only the sworn porters with their badges may carry a bale from the quay, and a merchant who uses his own servants is fined.",
+   "art": "res://assets/ui/research/subjects/woven_carriers-v1.png"
+  },
+  "cottager_day_laborers": {
+   "effects": {
+    "labor_demand": -0.003,
+    "labor_efficiency": 0.0013,
+    "health_risk": 0.002,
+    "nutrition_quality": -0.001,
+    "cohesion": -0.002
+   },
+   "name": "Day-Laboring Cottagers",
+   "observation": "The cottager has a garden and a cow on the common, but his bread comes from threshing other men's grain by the day.",
+   "social_consequence": "Farmers find hands whenever they need them, and a growing class of landless families lives one bad harvest from hunger.",
+   "art": "res://assets/ui/research/paper/threshing_frames.png"
+  },
+  "mill_fulling_crews": {
+   "effects": {
+    "labor_efficiency": 0.002,
+    "labor_demand": -0.003,
+    "fatigue": -0.002,
+    "cohesion": -0.001
+   },
+   "name": "Mill Fulling Crews",
+   "observation": "Where six men once trod cloth in the trough all day, one man now tends the hammers and the rest look for other work.",
+   "art": "res://assets/ui/research/paper/water_powered_hammers.png"
+  },
+  "state_shipyard_workforce": {
+   "effects": {
+    "naval_capacity": 0.01,
+    "task_coordination": 0.006,
+    "state_capacity": 0.0028,
+    "warfare_readiness": 0.003,
+    "labor_demand": 0.004,
+    "timber_pressure": 0.004,
+    "injury_risk": 0.002
+   },
+   "name": "State Shipyard Payroll",
+   "observation": "Behind the arsenal wall thousands of sawyers, smiths, rope-makers and caulkers draw their pay from one clerk's roll.",
+   "ability_reason": "One payroll and one yard master let thousands of sawyers, smiths and caulkers build a fleet in a single season.",
+   "social_consequence": "A shipyard master and a clerk of the arsenal join the ruler's officials, and whole quarters of the port live on the yard's wages.",
+   "art": "res://assets/ui/research/subjects/naval_arsenals-v2.png"
+  },
+  "guild_trade_monopoly": {
+   "effects": {
+    "standardization": 0.003,
+    "craft_output": 0.0014,
+    "institutional_rigidity": 0.004,
+    "adoption_rate": -0.003,
+    "trade_capacity": -0.0011
+   },
+   "name": "Guild Monopoly",
+   "observation": "A stranger who sets up a bench inside the walls finds the wardens at his door and his tools carried off.",
+   "social_consequence": "Guild members are protected from cheap rivals. Newcomers, rural craftsmen and new methods are kept outside the walls.",
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+  },
+  "yearly_farm_servants": {
+   "effects": {
+    "labor_efficiency": 0.002,
+    "food_output": 0.0014,
+    "cohesion": 0.002,
+    "conception_support": -0.001
+   },
+   "name": "Yearly Farm Servants",
+   "observation": "Young men and women live in the farmer's house for the year, eat at his table and are paid when the year turns.",
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png"
+  },
+  "single_craft_rule": {
+   "effects": {
+    "standardization": 0.003,
+    "tool_quality": 0.002,
+    "institutional_rigidity": 0.0024,
+    "adoption_rate": -0.002
+   },
+   "name": "Single-Craft Rule",
+   "observation": "The cutler may not tan leather for his own sheaths; he must buy them from the sheath-maker two doors down.",
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+  },
+  "lay_brother_granges": {
+   "effects": {
+    "cultivation_yield": 0.003,
+    "food_output": 0.0021,
+    "task_coordination": 0.002,
+    "labor_efficiency": 0.0013
+   },
+   "name": "Lay-Brother Granges",
+   "observation": "Far from the cloister, lay brothers in brown work the outlying granges and raise sheep and grain for the house.",
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png"
+  },
+  "shearing_gangs": {
+   "effects": {
+    "fiber_yield": 0.002,
+    "labor_efficiency": 0.002,
+    "injury_risk": 0.001
+   },
+   "name": "Shearing Gangs",
+   "observation": "The gang moves from flock to flock in early summer, and each shearer counts his fleeces for his pay.",
+   "art": "res://assets/ui/research/subjects/fiber_grading-v1.png"
+  },
+  "town_residence_freedom": {
+   "effects": {
+    "labor_efficiency": 0.0026,
+    "adoption_rate": 0.004,
+    "trade_capacity": 0.0022,
+    "legitimacy": 0.0016,
+    "labor_demand": 0.002,
+    "state_capacity": -0.0014,
+    "cohesion": -0.002
+   },
+   "name": "A Year and a Day",
+   "observation": "The runaway keeps his head down in the tanners' lane for a year and a day, and when his old lord's bailiff comes, the town court sends him away.",
+   "ability_reason": "A bond-servant who lives a year and a day in a chartered town is free, so towns fill with the ambitious and the skilled.",
+   "social_consequence": "Chartered towns become a separate estate with their own law. Bound tenants now have somewhere to escape to, and lords must treat them better or lose them.",
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "guild_searchers": {
+   "effects": {
+    "standardization": 0.004,
+    "trade_capacity": 0.0011,
+    "institutional_rigidity": 0.0016
+   },
+   "name": "Guild Searchers",
+   "observation": "Twice a year the wardens walk every shop with a measuring rod, and short cloth is cut up and burned in the square.",
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png"
+  },
+  "village_reeve_office": {
+   "effects": {
+    "task_coordination": 0.004,
+    "state_capacity": 0.0014,
+    "cohesion": 0.001
+   },
+   "name": "Village Reeve",
+   "observation": "The villagers choose one of their own as reeve, and at dawn he walks the lanes calling who is to plough and who is to cart.",
+   "social_consequence": "Each village has a reeve who answers to the lord's steward, and village business now has a known face.",
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png"
+  },
+  "harvest_bylaws": {
+   "effects": {
+    "food_output": 0.0021,
+    "task_coordination": 0.002,
+    "cohesion": 0.002,
+    "nutrition_quality": 0.001
+   },
+   "name": "Harvest By-laws",
+   "observation": "No one may reap before the bell or glean before the sheaves are carried, and the old and the widows glean first.",
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png"
+  },
+  "guild_cloth_seals": {
+   "effects": {
+    "standardization": 0.004,
+    "trade_capacity": 0.0022
+   },
+   "name": "Guild Cloth Seals",
+   "observation": "A lead seal pressed onto the selvage tells a buyer in a far city that this cloth passed the wardens of its town.",
+   "art": "res://assets/ui/research/subjects/cargo_seals-v1.png"
+  },
+  "journeyman_passes": {
+   "effects": {
+    "adoption_rate": 0.003,
+    "labor_efficiency": 0.0013,
+    "knowledge_rate": 0.001
+   },
+   "name": "Journeyman Passes",
+   "observation": "The journeyman shows his pass at the lodge of a strange town, and they know at once where he learned and whom he served.",
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png"
+  },
+  "dike_duty_lengths": {
+   "effects": {
+    "disaster_resilience": 0.005,
+    "task_coordination": 0.002,
+    "cohesion": 0.001,
+    "labor_demand": 0.003
+   },
+   "name": "Dike Duty",
+   "observation": "Each landholder's stretch of the sea wall is marked with stakes, and whoever lets his length fail loses his land to the man who mends it.",
+   "art": "res://assets/ui/research/subjects/drainage-v1.png"
+  },
+  "master_mason_retainers": {
+   "effects": {
+    "construction_rate": 0.004,
+    "disaster_resilience": 0.002,
+    "knowledge_preservation": 0.002
+   },
+   "name": "Master Mason Retainers",
+   "observation": "The chapter pays its master mason a yearly fee, a house by the works and a new robe every feast, and he stays for thirty years.",
+   "art": "res://assets/ui/research/subjects/framed_construction-v1.png"
+  },
+  "guild_welfare_chests": {
+   "effects": {
+    "cohesion": 0.003,
+    "health_risk": -0.001
+   },
+   "name": "Guild Welfare Chests",
+   "observation": "Each master pays a penny a week into the iron-bound chest, and when a brother dies the chest buys his candles and feeds his widow.",
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png"
+  },
+  "seasonal_day_rates": {
+   "effects": {
+    "labor_efficiency": 0.0013,
+    "construction_rate": 0.002,
+    "fatigue": -0.001
+   },
+   "name": "Seasonal Day Rates",
+   "observation": "Masons earn more in the long days of summer and less in the short days of winter, and each knows the rate before he starts.",
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
+  },
+  "purchased_freedom": {
+   "effects": {
+    "labor_efficiency": 0.0013,
+    "adoption_rate": 0.002,
+    "trade_capacity": 0.0011,
+    "cohesion": 0.001
+   },
+   "name": "Purchased Freedom",
+   "observation": "After twenty years of saving, the bond-servant counts his silver out on the steward's table and walks home a free man.",
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png"
+  },
+  "masons_lodge_rules": {
+   "effects": {
+    "construction_rate": 0.003,
+    "knowledge_preservation": 0.002,
+    "injury_risk": -0.002,
+    "institutional_rigidity": 0.0016
+   },
+   "name": "Masons' Lodge Rules",
+   "observation": "The lodge rules are read aloud each quarter: no man may work drunk, and the secrets of the square are told to no outsider.",
+   "art": "res://assets/ui/research/subjects/framed_construction-v1.png"
+  },
+  "shop_size_limits": {
+   "effects": {
+    "cohesion": 0.002,
+    "fatigue": -0.001,
+    "craft_output": -0.0014,
+    "institutional_rigidity": 0.0024,
+    "adoption_rate": -0.001
+   },
+   "name": "Shop Size Limits",
+   "observation": "No master may keep more than two apprentices and three journeymen, so that no shop grows rich by starving its neighbours.",
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+  },
+  "free_miner_companies": {
+   "effects": {
+    "mining_output": 0.005,
+    "extraction_yield": 0.003,
+    "labor_efficiency": 0.0013,
+    "injury_risk": 0.002,
+    "ecological_pressure": 0.002
+   },
+   "name": "Free Miner Companies",
+   "observation": "Any miner may sink a shaft on the open hillside and keep a share of what he raises, so long as he pays the lord his tenth.",
+   "art": "res://assets/ui/research/subjects/ore_assaying-v1.png"
+  },
+  "carver_piece_rates": {
+   "effects": {
+    "craft_output": 0.0021,
+    "labor_efficiency": 0.0013,
+    "fatigue": 0.002
+   },
+   "name": "Carver Piece Rates",
+   "observation": "The image carver is paid for each finished head and leafy capital, while the wall setters earn a fixed day's wage.",
+   "art": "res://assets/ui/research/subjects/quarry_reading-v1.png"
+  },
+  "weekly_works_payrolls": {
+   "effects": {
+    "state_capacity": 0.0021,
+    "construction_rate": 0.002,
+    "task_coordination": 0.002,
+    "knowledge_preservation": 0.001
+   },
+   "name": "Works Payrolls",
+   "observation": "At the end of every week the clerk of works reads the roll, and each man steps up to take his pence.",
+   "social_consequence": "A clerk of the works joins the officials who report to the ruler, and every wall and tower now has a written cost.",
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png"
+  },
+  "masterpiece_trial": {
+   "effects": {
+    "tool_quality": 0.005,
+    "standardization": 0.004,
+    "craft_output": 0.0021,
+    "knowledge_preservation": 0.002,
+    "institutional_rigidity": 0.0024,
+    "adoption_rate": -0.001
+   },
+   "name": "Masterpiece Trial",
+   "observation": "The journeyman's test piece, a lock with a hidden ward, is laid before the masters, who turn it over in silence before they vote.",
+   "ability_reason": "A journeyman must prove his hand with a finished test piece before he may open a shop, so every master in the town has shown the full skill of the trade.",
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png"
+  },
+  "guild_fixed_journey_rates": {
+   "effects": {
+    "cohesion": 0.001,
+    "institutional_rigidity": 0.0024
+   },
+   "name": "Fixed Journeyman Rates",
+   "observation": "The ordinance nailed to the guildhall door fixes a journeyman's day at so many pence, and a master who pays more is fined.",
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+  },
+  "debt_bound_putting_out": {
+   "effects": {
+    "craft_output": 0.0028,
+    "trade_capacity": 0.0017,
+    "labor_efficiency": 0.0013,
+    "fatigue": 0.003,
+    "cohesion": -0.003
+   },
+   "name": "Debt-Bound Putting-Out",
+   "observation": "The clothier advances wool and coin before winter, and the weaver's family works off the debt at whatever price he names for the cloth.",
+   "social_consequence": "More cloth reaches market, and weaving families sink into debts that pass from father to son.",
+   "art": "res://assets/ui/research/subjects/fiber_grading-v1.png"
+  },
+  "town_trade_statute_book": {
+   "effects": {
+    "state_capacity": 0.0035,
+    "standardization": 0.004,
+    "knowledge_preservation": 0.003,
+    "legitimacy": 0.0024,
+    "institutional_rigidity": 0.0032
+   },
+   "name": "Town Book of Trades",
+   "observation": "The town clerk copies every guild's ordinances into one great book chained in the council house, and disputes are settled by reading it aloud.",
+   "ability_reason": "Writing every guild's statutes into the town's own book puts the trades under the council's law, with rules that can be read, cited and amended.",
+   "art": "res://assets/ui/research/subjects/formal_archives-v1.png"
+  },
+  "night_work_bans": {
+   "effects": {
+    "fatigue": -0.004,
+    "injury_risk": -0.002,
+    "health_risk": -0.001,
+    "standardization": 0.002,
+    "craft_output": -0.0014
+   },
+   "name": "Night Work Bans",
+   "observation": "No goldsmith may work by candlelight, for work done in the dark hides bad metal, and the shutters close at sundown.",
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
+  },
+  "miners_relief_chest": {
+   "effects": {
+    "cohesion": 0.003,
+    "health_risk": -0.002,
+    "mine_safety": 0.002
+   },
+   "name": "Miners' Relief Chest",
+   "observation": "A penny from every shift goes into the miners' box, and when the roof falls the box pays the bonesetter and the burial.",
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png"
+  },
+  "womens_craft_guilds": {
+   "effects": {
+    "craft_output": 0.0021,
+    "adoption_rate": 0.002,
+    "cohesion": 0.002,
+    "standardization": 0.002
+   },
+   "name": "Women's Craft Guilds",
+   "observation": "The silk-women have their own mistresses and wardens, and they take girls as apprentices for seven years like any other guild.",
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+  },
+  "rented_loom_putting_out": {
+   "effects": {
+    "craft_output": 0.0021,
+    "trade_capacity": 0.0011,
+    "fatigue": 0.002,
+    "cohesion": -0.002
+   },
+   "name": "Rented Looms",
+   "observation": "The loom in the weaver's cottage belongs to the clothier, and the rent is taken out of every piece before the weaver is paid.",
+   "art": "res://assets/ui/research/discovery-600/warp_weighted_looms.png"
+  },
+  "general_rent_commutation": {
+   "effects": {
+    "labor_demand": -0.006,
+    "labor_efficiency": 0.0026,
+    "trade_capacity": 0.0022,
+    "state_capacity": 0.0021,
+    "cohesion": 0.002,
+    "legitimacy": 0.0016,
+    "institutional_rigidity": -0.0024
+   },
+   "name": "Rent Commutation",
+   "observation": "The steward strikes out the plough-days in the book and writes a money rent beside each name; the lord will hire men for his own harvest.",
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png"
+  },
+  "weaver_walkouts": {
+   "effects": {
+    "institutional_rigidity": 0.0016,
+    "cohesion": -0.004,
+    "legitimacy": -0.0016,
+    "craft_output": -0.0014
+   },
+   "name": "Weaver Walkouts",
+   "observation": "The weavers leave their looms and gather outside the walls, swearing not to work for less, and the council answers with a ban on sworn leagues.",
+   "social_consequence": "Wages become something weavers fight over openly, and the council takes the masters' side by law.",
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png"
+  },
+  "guild_letter_schools": {
+   "effects": {
+    "knowledge_rate": 0.003,
+    "knowledge_preservation": 0.003,
+    "labor_efficiency": 0.002,
+    "adoption_rate": 0.002,
+    "labor_demand": 0.001
+   },
+   "name": "Guild Letter Schools",
+   "observation": "In a room over the guildhall a clerk teaches apprentices to read an order, keep an account and reckon a price.",
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png"
+  },
+  "work_bell_hours": {
+   "effects": {
+    "task_coordination": 0.004,
+    "labor_efficiency": 0.0013,
+    "fatigue": 0.001,
+    "cohesion": -0.001
+   },
+   "name": "Town Work Bell",
+   "observation": "The work bell in the tower rings at dawn, at the meal and at dusk, and a master docks the pay of any man who comes after the first stroke.",
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png"
+  },
+  "joint_rate_boards": {
+   "effects": {
+    "cohesion": 0.003,
+    "legitimacy": 0.0016,
+    "labor_efficiency": 0.0013
+   },
+   "name": "Joint Rate Boards",
+   "observation": "Four masters and four weavers sit at one table before the magistrate and settle the price of each kind of cloth for the year.",
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png"
+  },
+  "rural_putting_out": {
+   "effects": {
+    "craft_output": 0.0035,
+    "trade_capacity": 0.0017,
+    "labor_efficiency": 0.0013,
+    "standardization": -0.002,
+    "fatigue": 0.002,
+    "cohesion": -0.002,
+    "institutional_rigidity": -0.0016
+   },
+   "name": "Rural Putting-Out",
+   "observation": "The clothier's carts go out to villages beyond the town's reach, where spinners and weavers work cheaper than any guild allows.",
+   "social_consequence": "Village households gain winter earnings, and the town guilds watch work leave the walls that they can no longer police.",
+   "art": "res://assets/ui/research/subjects/woven_carriers-v1.png"
+  },
+  "guild_almshouses": {
+   "effects": {
+    "cohesion": 0.003,
+    "legitimacy": 0.0016,
+    "health_risk": -0.002,
+    "labor_demand": 0.001
+   },
+   "name": "Guild Almshouses",
+   "observation": "Old masters who can no longer hold a chisel live out their days in the guild's almshouse, with a room, a fire and bread.",
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png"
+  },
+  "journeymen_brotherhoods": {
+   "effects": {
+    "cohesion": 0.003,
+    "adoption_rate": 0.002,
+    "health_risk": -0.001
+   },
+   "name": "Journeymen's Brotherhoods",
+   "observation": "The journeymen keep their own inn and their own box, and a stranger of the trade who knocks is given a bed and word of work.",
+   "art": "res://assets/ui/research/discovery-600/guest_host_reciprocity.png"
+  },
+  "closed_mastership": {
+   "effects": {
+    "institutional_rigidity": 0.0096,
+    "standardization": 0.002,
+    "adoption_rate": -0.006,
+    "cohesion": -0.004,
+    "labor_efficiency": -0.002,
+    "legitimacy": -0.0024
+   },
+   "name": "Closed Mastership",
+   "observation": "The master's fee is raised tenfold for outsiders and waived for masters' sons, and journeymen grow grey waiting for a shop of their own.",
+   "ability_reason": "Masters' families close their ranks, so the trades keep their standards but lose fresh hands and fresh methods.",
+   "social_consequence": "Mastership becomes an inheritance. Journeymen who will never be masters form their own brotherhoods and grow bitter.",
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+  },
+  "guild_council_seats": {
+   "effects": {
+    "state_capacity": 0.0042,
+    "legitimacy": 0.004,
+    "trade_capacity": 0.0017,
+    "cohesion": 0.003,
+    "institutional_rigidity": 0.004
+   },
+   "name": "Guild Council Seats",
+   "observation": "The masters of the great guilds take their seats on the council bench in their furred gowns, beside the merchants who once ruled alone.",
+   "ability_reason": "With masters seated beside merchants on the council, the trades that fill the town also help to govern it.",
+   "social_consequence": "The council chamber becomes a second seat of civic power beside the ruler's hall, and the guilds now speak with the town's voice.",
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png"
+  },
+  "truck_pay_ban": {
+   "effects": {
+    "cohesion": 0.002,
+    "legitimacy": 0.0016,
+    "nutrition_quality": 0.001
+   },
+   "name": "Truck Pay Ban",
+   "observation": "A clothier who pays his spinners in stale bread and bad cloth is summoned before the magistrate and fined, for wages must be paid in coin.",
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png"
+  },
+  "hiring_fairs": {
+   "effects": {
+    "labor_efficiency": 0.002,
+    "task_coordination": 0.003,
+    "adoption_rate": 0.001,
+    "cohesion": 0.001
+   },
+   "name": "Hiring Fairs",
+   "observation": "At the autumn fair servants stand in the market with a sign of their work: a wisp of wool for a shepherd, a whip for a carter.",
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png"
+  },
+  "post_plague_labor_statutes": {
+   "effects": {
+    "state_capacity": 0.0042,
+    "labor_efficiency": 0.0013,
+    "labor_demand": -0.004,
+    "institutional_rigidity": 0.0064,
+    "legitimacy": -0.004,
+    "cohesion": -0.004,
+    "adoption_rate": -0.002
+   },
+   "name": "Labor Statutes",
+   "observation": "Justices ride from town to town fining reapers who ask the new wages and putting idle men to work under threat of the stocks.",
+   "ability_reason": "After mass deaths leave fields without hands, the realm fixes the old wages by law and compels the idle to work, keeping the harvest in but setting laborers against their lords.",
+   "social_consequence": "Justices of labor enforce wage law across the realm, and wages become a matter the ruler legislates on. Laborers feel cheated of what the dying years had given them.",
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png"
+  },
+  "laborer_mobility": {
+   "effects": {
+    "labor_efficiency": 0.0026,
+    "adoption_rate": 0.003,
+    "trade_capacity": 0.0011,
+    "institutional_rigidity": -0.0024,
+    "cohesion": -0.002,
+    "state_capacity": -0.0014
+   },
+   "name": "Laborer Mobility",
+   "observation": "Whole families slip away from the manor by night and turn up a week later, reaping for double wages in the next valley.",
+   "art": "res://assets/ui/research/subjects/route_memory-v1.png"
+  }
+ }
 }

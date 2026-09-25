@@ -2,11 +2,824 @@
  "line": "security",
  "schema": "research_600_effects/1",
  "items": {
+  "hilltop_citadel_towns": {
+   "effects": {
+    "security_efficiency": 0.0036,
+    "disaster_resilience": 0.002,
+    "labor_demand": 0.002,
+    "housing_output": -0.002,
+    "trade_capacity": -0.001
+   },
+   "name": "Hilltop Citadel Towns",
+   "observation": "The old town wall is too long to hold, so the people crowd into a small walled citadel on the height.",
+   "social_consequence": "The lower town is left to fall into ruin.",
+   "art": "res://assets/ui/research/paper/first300-cards/fortified_stores.tres"
+  },
+  "triple_line_land_walls": {
+   "effects": {
+    "security_efficiency": 0.0126,
+    "warfare_readiness": 0.003,
+    "disaster_resilience": 0.003,
+    "labor_demand": 0.006
+   },
+   "name": "Triple Land Walls",
+   "observation": "A moat, a low outer wall and a tall towered inner wall stand one behind another across the landward side.",
+   "ability_reason": "A general defending the city can give ground wall by wall, and an attacker must win three lines under fire from the towers.",
+   "art": "res://assets/ui/research/subjects/curtain_wall_systems-v1.png"
+  },
+  "pass_command_garrisons": {
+   "effects": {
+    "security_efficiency": 0.0036,
+    "state_capacity": 0.001,
+    "trade_capacity": 0.001,
+    "labor_demand": 0.001
+   },
+   "name": "Pass Commanders",
+   "observation": "A pass commander with a small garrison holds each mountain pass and questions everyone who crosses.",
+   "art": "res://assets/ui/research/paper/first300-cards/mountain_field_school.tres"
+  },
+  "military_district_settlement": {
+   "effects": {
+    "warfare_readiness": 0.0075,
+    "security_efficiency": 0.0054,
+    "state_capacity": 0.003,
+    "food_output": 0.002,
+    "institutional_rigidity": 0.002,
+    "labor_demand": -0.002
+   },
+   "name": "Military District Settlement",
+   "observation": "Soldiers are given farms in the frontier districts, and their sons inherit both the land and the duty to serve.",
+   "ability_reason": "A general can raise a ready local army in each district without paying it in coin.",
+   "social_consequence": "The soldier-farmers grow into a proud caste, loyal first to their district's commander.",
+   "art": "res://assets/ui/research/paper/first300-cards/public_levies.tres"
+  },
+  "mounted_remount_school": {
+   "effects": {
+    "warfare_readiness": 0.0045,
+    "travel_speed": 0.002,
+    "logistics_endurance": 0.002,
+    "food_output": -0.002
+   },
+   "observation": "The state's studs breed and school cavalry horses, and each squadron draws its remounts from them.",
+   "art": "res://assets/ui/research/subjects/domesticated_mounts-v1.png"
+  },
+  "bow_and_lance_cavalry": {
+   "effects": {
+    "warfare_readiness": 0.0037,
+    "task_coordination": 0.0014
+   },
+   "name": "Bow-and-Lance Cavalry",
+   "observation": "The same rider shoots from the saddle at a distance and then charges home with the lance.",
+   "art": "res://assets/ui/research/paper/first300-cards/mounted_archery.tres"
+  },
+  "harbor_chain_booms": {
+   "effects": {
+    "security_efficiency": 0.0036,
+    "naval_capacity": 0.002,
+    "trade_capacity": -0.001
+   },
+   "name": "Harbor Chain Booms",
+   "observation": "A chain floated on timbers is drawn across the harbor mouth at night and in time of war.",
+   "art": "res://assets/ui/research/paper/compound_pulleys.png"
+  },
+  "generals_field_manual": {
+   "effects": {
+    "task_coordination": 0.0056,
+    "warfare_readiness": 0.006,
+    "knowledge_preservation": 0.003,
+    "injury_risk": -0.0016
+   },
+   "name": "Generals' Field Manual",
+   "observation": "A manual sets down for commanders how to order a march, pitch a camp, draw up the lines and deceive the enemy.",
+   "ability_reason": "Generals learn from a book what generations learned in the field, so even a new commander can march and fight in good order.",
+   "art": "res://assets/ui/research/discovery-600/written_apprentice_instructions.png"
+  },
+  "paired_stirrups": {
+   "effects": {
+    "warfare_readiness": 0.009,
+    "injury_risk": -0.0024,
+    "task_coordination": 0.0014
+   },
+   "name": "Paired Stirrups",
+   "observation": "A stirrup hangs on each side of the saddle, so the rider can stand and brace in the charge without being unseated.",
+   "ability_reason": "Horsemen can strike and take blows at close quarters without being unhorsed, and cavalry becomes a shock arm in a general's hand.",
+   "art": "res://assets/ui/research/paper/first300-cards/armored_riding.tres"
+  },
+  "high_bow_war_saddle": {
+   "effects": {
+    "warfare_readiness": 0.003,
+    "injury_risk": -0.0016
+   },
+   "name": "High-Bow War Saddle",
+   "observation": "A war saddle with high boards before and behind holds the rider in his seat when a lance strikes him.",
+   "art": "res://assets/ui/research/paper/first300-cards/armored_riding.tres"
+  },
+  "raid_season_refuges": {
+   "effects": {
+    "security_efficiency": 0.0036,
+    "food_storage": 0.003,
+    "disaster_resilience": 0.002,
+    "labor_demand": 0.002
+   },
+   "name": "Raid-Season Refuges",
+   "observation": "In the raiding season the villagers drive their beasts and carry their grain into a walled enclosure on the hill.",
+   "art": "res://assets/ui/research/paper/first300-cards/fortified_stores.tres"
+  },
+  "arms_export_bans": {
+   "effects": {
+    "security_efficiency": 0.0027,
+    "warfare_readiness": 0.0008,
+    "state_capacity": 0.001,
+    "trade_capacity": -0.002
+   },
+   "name": "Arms Export Bans",
+   "observation": "No sword, mail or warhorse may be sold across the frontier, and the border guards search the carts.",
+   "art": "res://assets/ui/research/paper/hafted_weapons.png"
+  },
+  "lugged_war_spears": {
+   "effects": {
+    "warfare_readiness": 0.0023
+   },
+   "name": "Lugged War Spears",
+   "observation": "Lugs below the spear blade stop it sinking too deep to pull free.",
+   "art": "res://assets/ui/research/paper/hafted_weapons.png"
+  },
+  "siphoned_liquid_fire": {
+   "effects": {
+    "naval_capacity": 0.008,
+    "warfare_readiness": 0.006,
+    "security_efficiency": 0.0018,
+    "disaster_risk": 0.004,
+    "injury_risk": 0.0016
+   },
+   "name": "Siphoned Liquid Fire",
+   "observation": "A bronze siphon in the warship's bow sprays burning oil that water cannot put out.",
+   "ability_reason": "An admiral can burn an enemy fleet at close range, though the mixture's secret is kept by the ruler's own workshop.",
+   "art": "res://assets/ui/research/paper/first300-cards/bitumen_sealing.tres"
+  },
+  "spur_prow_galleys": {
+   "effects": {
+    "naval_capacity": 0.005,
+    "warfare_readiness": 0.0023,
+    "timber_pressure": 0.003,
+    "labor_demand": 0.002
+   },
+   "name": "Spur-Prow Galleys",
+   "observation": "War galleys with a spur above the waterline to smash oars, and a lateen sail for the passage, form the fleet's backbone.",
+   "art": "res://assets/ui/research/paper/galley_navigation.png"
+  },
+  "muster_rolls": {
+   "effects": {
+    "security_efficiency": 0.0027,
+    "task_coordination": 0.0021,
+    "state_capacity": 0.002,
+    "legitimacy": -0.001
+   },
+   "name": "Muster Rolls",
+   "observation": "The roll lists each holding's armed men, their horses and their gear, and the captain checks it at every muster.",
+   "art": "res://assets/ui/research/paper/first300-cards/census_rolls.tres"
+  },
+  "river_raiding_ships": {
+   "effects": {
+    "warfare_readiness": 0.0037,
+    "naval_capacity": 0.003,
+    "travel_speed": 0.001
+   },
+   "name": "River Raiding Ships",
+   "observation": "Long shallow ships row far up the rivers, strike a town and are gone before the levy can gather.",
+   "social_consequence": "Riverside villages move their houses back from the banks.",
+   "art": "res://assets/ui/research/paper/river_craft.png"
+  },
+  "mounted_retinue_summons": {
+   "effects": {
+    "warfare_readiness": 0.009,
+    "security_efficiency": 0.0036,
+    "state_capacity": 0.002,
+    "labor_demand": 0.002,
+    "legitimacy": -0.002,
+    "cohesion": -0.002
+   },
+   "name": "Summoned Mounted Retinues",
+   "observation": "Each lord answers the ruler's summons with his retinue of heavily armed horsemen, armed at his own cost.",
+   "ability_reason": "A general can gather a heavy mounted force within weeks, though its lords serve for a set term and quarrel over precedence.",
+   "social_consequence": "Power flows to the lords who keep armed horsemen, and the ruler depends on their loyalty.",
+   "art": "res://assets/ui/research/subjects/armored_riding-v1.png"
+  },
+  "castle_guard_rotations": {
+   "effects": {
+    "security_efficiency": 0.0036,
+    "labor_demand": 0.002,
+    "fatigue": -0.001
+   },
+   "name": "Castle-Guard Rotations",
+   "observation": "Paid knights take turns guarding the border castles, a set number of weeks each.",
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "fortified_river_bridges": {
+   "effects": {
+    "security_efficiency": 0.0045,
+    "route_speed": 0.001,
+    "labor_demand": 0.002
+   },
+   "name": "Fortified River Bridges",
+   "observation": "A bridge with towers at each end closes the river to raiders' ships and holds the crossing.",
+   "art": "res://assets/ui/research/paper/first300-cards/timber_bridges.tres"
+  },
+  "realm_beacon_chain": {
+   "effects": {
+    "security_efficiency": 0.0045,
+    "task_coordination": 0.0021,
+    "labor_demand": 0.002
+   },
+   "name": "Realm Beacon Chain",
+   "observation": "Fires lit from hill to hill carry warning of a raid from the frontier to the court in a single night.",
+   "art": "res://assets/ui/research/discovery-600/prearranged_beacon_chains.png"
+  },
+  "foreign_household_guard": {
+   "effects": {
+    "security_efficiency": 0.0036,
+    "legitimacy": -0.002,
+    "cohesion": -0.001
+   },
+   "name": "Foreign Household Guard",
+   "observation": "The ruler's guard are foreigners sworn to him alone, with no kin in the realm to be bought.",
+   "art": "res://assets/ui/research/paper/first300-cards/professional_corps.tres"
+  },
+  "captive_trained_corps": {
+   "effects": {
+    "warfare_readiness": 0.0045,
+    "task_coordination": 0.0014,
+    "legitimacy": -0.002,
+    "cohesion": -0.002
+   },
+   "name": "Captive-Trained Corps",
+   "observation": "Captive boys are bought, trained from youth and bound to the ruler as soldiers.",
+   "social_consequence": "The captive soldiers come to know their strength, and they begin to make and unmake rulers.",
+   "art": "res://assets/ui/research/paper/first300-cards/professional_corps.tres"
+  },
+  "burgh_defense_network": {
+   "effects": {
+    "security_efficiency": 0.0108,
+    "disaster_resilience": 0.004,
+    "state_capacity": 0.003,
+    "trade_capacity": 0.002,
+    "labor_demand": 0.005
+   },
+   "name": "Burgh Defense Network",
+   "observation": "Fortified towns stand a day's march apart, and each length of wall is manned by men from lands assigned to it.",
+   "ability_reason": "No raider is more than a day from a garrison, so a general can defend a whole realm from a network of strongholds.",
+   "art": "res://assets/ui/research/paper/first300-cards/masonry_bond_patterns.tres"
+  },
+  "rotating_half_levy": {
+   "effects": {
+    "warfare_readiness": 0.003,
+    "food_output": 0.002,
+    "labor_demand": -0.002
+   },
+   "name": "Rotating Half-Levy",
+   "observation": "Half the levy serves in the field while the other half farms, and they change places at set times.",
+   "art": "res://assets/ui/research/paper/first300-cards/public_levies.tres"
+  },
+  "shadowing_raid_defense": {
+   "effects": {
+    "security_efficiency": 0.0045,
+    "warfare_readiness": 0.0023,
+    "task_coordination": 0.0014
+   },
+   "name": "Shadowing the Raiders",
+   "observation": "Rather than meet raiders head on, the local levies follow them, pick off stragglers and strike when they turn home laden.",
+   "art": "res://assets/ui/research/paper/first300-cards/skirmish_pair_drill.tres"
+  },
+  "planned_ring_forts": {
+   "effects": {
+    "security_efficiency": 0.0054,
+    "labor_demand": 0.003,
+    "timber_pressure": 0.002
+   },
+   "name": "Planned Ring Forts",
+   "observation": "Round forts built to one plan hold garrisons on a grid across the land.",
+   "art": "res://assets/ui/research/paper/field_fortifications.png"
+  },
+  "twin_gate_passage": {
+   "effects": {
+    "security_efficiency": 0.0036,
+    "labor_demand": 0.001
+   },
+   "name": "Twin-Gate Passage",
+   "observation": "The gate is a stone tower with a passage and a barred door at each end, so attackers who force one are trapped at the next.",
+   "art": "res://assets/ui/research/paper/first300-cards/voussoir_arch_assembly.tres"
+  },
+  "motte_and_bailey": {
+   "effects": {
+    "security_efficiency": 0.009,
+    "warfare_readiness": 0.003,
+    "labor_demand": 0.004,
+    "timber_pressure": 0.003,
+    "legitimacy": -0.002
+   },
+   "name": "Motte and Bailey",
+   "observation": "A heaped earth mound crowned with a timber tower rises over a fenced yard, and it can be raised in a few weeks.",
+   "ability_reason": "A general can hold newly taken land by planting quick castles across it, each a base for a small garrison.",
+   "social_consequence": "The castles overawe the country around them, and the villagers who dug the mound resent the lord who sits on it.",
+   "art": "res://assets/ui/research/paper/field_fortifications.png"
+  },
+  "kite_shield_cavalry": {
+   "effects": {
+    "warfare_readiness": 0.0037,
+    "injury_risk": -0.0016
+   },
+   "name": "Kite-Shield Cavalry",
+   "observation": "Riders in mail carry long shields that cover the left side from shoulder to shin.",
+   "art": "res://assets/ui/research/paper/first300-cards/armored_riding.tres"
+  },
+  "couched_lance_charge": {
+   "effects": {
+    "warfare_readiness": 0.0105,
+    "task_coordination": 0.0021,
+    "injury_risk": 0.0016,
+    "food_output": -0.002
+   },
+   "name": "Couched Lance Charge",
+   "observation": "Riders tuck the lance under the arm and charge knee to knee, so the horse's weight drives the point home.",
+   "ability_reason": "Close-ordered horsemen can break an enemy line in one charge, if the general picks his ground and his moment.",
+   "art": "res://assets/ui/research/subjects/armored_riding-v1.png"
+  },
+  "stone_keep_towers": {
+   "effects": {
+    "security_efficiency": 0.0108,
+    "disaster_resilience": 0.003,
+    "state_capacity": 0.002,
+    "labor_demand": 0.005,
+    "legitimacy": -0.001
+   },
+   "name": "Stone Keep Towers",
+   "observation": "A square stone tower several floors high holds the lord's hall, his stores and his last defense.",
+   "ability_reason": "A lord can hold out for months against anything short of a full siege, so a general must bring engines or starve the keep.",
+   "art": "res://assets/ui/research/paper/first300-cards/masonry_buttressing.tres"
+  },
+  "wall_top_hoardings": {
+   "effects": {
+    "security_efficiency": 0.0036,
+    "timber_pressure": 0.002
+   },
+   "name": "Wall-Top Hoardings",
+   "observation": "Timber galleries built out over the wall top let defenders drop stones on men at the foot of the wall.",
+   "art": "res://assets/ui/research/paper/timber_post_beam_connections.png"
+  },
+  "hearth_cover_curfew": {
+   "effects": {
+    "disaster_risk": -0.004,
+    "disaster_resilience": 0.002,
+    "cohesion": -0.001
+   },
+   "name": "Hearth-Cover Curfew",
+   "observation": "At the evening bell every hearth in the town must be covered with its lid, against fire in the night.",
+   "art": "res://assets/ui/research/paper/ember_tending.png"
+  },
+  "keep_cistern_stores": {
+   "effects": {
+    "security_efficiency": 0.0036,
+    "water_access": 0.002,
+    "food_storage": 0.002,
+    "disaster_resilience": 0.002
+   },
+   "name": "Keep Cisterns",
+   "observation": "Deep wells and cisterns inside the keep give the garrison water for a siege of many months.",
+   "art": "res://assets/ui/research/paper/first300-cards/rainwater_cisterns.tres"
+  },
+  "stirrup_cocked_crossbow": {
+   "effects": {
+    "warfare_readiness": 0.0037,
+    "fatigue": -0.001
+   },
+   "name": "Stirrup-Cocked Crossbow",
+   "observation": "An iron stirrup at the crossbow's nose lets the bowman stand on it and draw the string with both arms.",
+   "art": "res://assets/ui/research/paper/crossbow_mechanism.png"
+  },
+  "curtain_wall_flanking_towers": {
+   "effects": {
+    "security_efficiency": 0.0063,
+    "labor_demand": 0.003
+   },
+   "name": "Flanking Towers",
+   "observation": "Square towers jut out from the stone curtain wall, so archers can shoot along its face.",
+   "art": "res://assets/ui/research/subjects/curtain_wall_systems-v1.png"
+  },
+  "series_built_war_galleys": {
+   "effects": {
+    "naval_capacity": 0.012,
+    "warfare_readiness": 0.0045,
+    "standardization": 0.003,
+    "state_capacity": 0.002,
+    "timber_pressure": 0.005,
+    "labor_demand": 0.004
+   },
+   "name": "Arsenal-Built War Galleys",
+   "observation": "The state arsenal builds war galleys one after another to one pattern, from timber cut and seasoned in advance.",
+   "ability_reason": "An admiral can have a lost fleet replaced within a season, so the realm can lose a sea battle and still hold the sea.",
+   "art": "res://assets/ui/research/subjects/naval_arsenals-v1.png"
+  },
+  "mail_underpadding": {
+   "effects": {
+    "injury_risk": -0.0024,
+    "warfare_readiness": 0.0015
+   },
+   "name": "Padding Under Mail",
+   "observation": "A quilted coat under the mail spreads the force of a blow that the rings have stopped.",
+   "art": "res://assets/ui/research/paper/quilted_layer_assembly.png"
+  },
+  "hue_and_cry": {
+   "effects": {
+    "security_efficiency": 0.0045,
+    "cohesion": 0.001,
+    "legitimacy": 0.001,
+    "labor_demand": 0.001
+   },
+   "name": "Hue and Cry",
+   "observation": "When a crime is cried, every household must leave its work and join the chase of the felon.",
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "hybrid_counterweight_engine": {
+   "effects": {
+    "warfare_readiness": 0.0037,
+    "labor_demand": 0.001
+   },
+   "name": "Hybrid Counterweight Engine",
+   "observation": "A box of stones hung on the throwing arm adds its weight to the crew hauling on the ropes.",
+   "art": "res://assets/ui/research/paper/first300-cards/siege_engineering.tres"
+  },
+  "service_money_commutation": {
+   "effects": {
+    "warfare_readiness": 0.003,
+    "state_capacity": 0.003,
+    "labor_demand": -0.003,
+    "legitimacy": -0.001,
+    "cohesion": -0.001
+   },
+   "name": "Service Money",
+   "observation": "Holders who would rather stay at home pay money in place of service, and the ruler hires soldiers with it.",
+   "art": "res://assets/ui/research/discovery-600/grain_levy_accounting.png"
+  },
+  "sworn_frontier_brotherhoods": {
+   "effects": {
+    "security_efficiency": 0.0054,
+    "warfare_readiness": 0.0023,
+    "cohesion": 0.001,
+    "institutional_rigidity": 0.001,
+    "legitimacy": -0.001
+   },
+   "name": "Sworn Frontier Brotherhoods",
+   "observation": "Brotherhoods of warriors sworn to a rule hold the frontier castles and answer to their own masters.",
+   "art": "res://assets/ui/research/paper/first300-cards/professional_corps.tres"
+  },
+  "full_mail_harness": {
+   "effects": {
+    "injury_risk": -0.0032,
+    "warfare_readiness": 0.003,
+    "fatigue": 0.002,
+    "fuel_demand": 0.002
+   },
+   "name": "Full Mail Harness",
+   "observation": "Mail covers the rider from head to foot: a hood, mittens and leggings.",
+   "art": "res://assets/ui/research/paper/mail_armor_fabrication.png"
+  },
+  "siege_counter_forts": {
+   "effects": {
+    "warfare_readiness": 0.0037,
+    "security_efficiency": 0.0009,
+    "labor_demand": 0.003,
+    "timber_pressure": 0.002
+   },
+   "name": "Siege Counter-Forts",
+   "observation": "The besiegers build forts of their own facing the town's gates, so no one goes in or out.",
+   "art": "res://assets/ui/research/paper/first300-cards/siege_engineering.tres"
+  },
+  "mounted_crossbowmen": {
+   "effects": {
+    "warfare_readiness": 0.003,
+    "security_efficiency": 0.0018,
+    "survey_speed": 0.001
+   },
+   "name": "Mounted Crossbowmen",
+   "observation": "Crossbowmen ride to the fight, dismount to shoot and remount to scout.",
+   "art": "res://assets/ui/research/paper/first300-cards/mounted_scouts.tres"
+  },
+  "tournament_training": {
+   "effects": {
+    "warfare_readiness": 0.0037,
+    "task_coordination": 0.0014,
+    "legitimacy": 0.001,
+    "injury_risk": 0.0016
+   },
+   "name": "Tournament Training",
+   "observation": "Knights fight mock battles, team against team, and learn to charge and rally together.",
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "round_flanking_towers": {
+   "effects": {
+    "security_efficiency": 0.0054,
+    "labor_demand": 0.002
+   },
+   "name": "Round Flanking Towers",
+   "observation": "Round and half-round towers turn aside the ram and have no corners for miners to undermine.",
+   "art": "res://assets/ui/research/subjects/curtain_wall_systems-v1.png"
+  },
+  "fireproof_roof_ordinance": {
+   "effects": {
+    "disaster_risk": -0.005,
+    "disaster_resilience": 0.003,
+    "housing_output": -0.002
+   },
+   "name": "Fireproof Roof Ordinance",
+   "observation": "After the great fire, every new house must be roofed with stone slates or tile instead of thatch.",
+   "social_consequence": "Poor householders who cannot afford tile are fined or driven outside the walls.",
+   "art": "res://assets/ui/research/paper/fired_roof_tiles.png"
+  },
+  "counterweight_engines": {
+   "effects": {
+    "warfare_readiness": 0.0105,
+    "labor_demand": 0.003,
+    "timber_pressure": 0.003
+   },
+   "observation": "A great beam swung by a falling box of earth and stone throws stones heavier than a man against the walls.",
+   "ability_reason": "A besieging general can batter down a stone wall from beyond bowshot, and no curtain wall is safe any longer.",
+   "art": "res://assets/ui/research/subjects/counterweight_engines-v1.png"
+  },
+  "decimal_army_organization": {
+   "effects": {
+    "task_coordination": 0.007,
+    "warfare_readiness": 0.0075,
+    "state_capacity": 0.003,
+    "labor_demand": 0.002,
+    "legitimacy": -0.002
+   },
+   "name": "Decimal Army",
+   "observation": "The army is ordered in tens, hundreds, thousands and ten-thousands, each under a commander answerable to the next.",
+   "ability_reason": "A general can command a host of a hundred thousand through a chain of officers, and every order has a path to follow.",
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "multi_remount_riders": {
+   "effects": {
+    "travel_speed": 0.004,
+    "warfare_readiness": 0.003,
+    "logistics_endurance": 0.003,
+    "food_output": -0.002
+   },
+   "name": "Riders with Remount Strings",
+   "observation": "Each rider leads several spare horses and changes mount as each tires, covering great distances at speed.",
+   "art": "res://assets/ui/research/paper/first300-cards/domesticated_mounts.tres"
+  },
+  "great_helm": {
+   "effects": {
+    "injury_risk": -0.0024,
+    "warfare_readiness": 0.0015,
+    "task_coordination": -0.0007
+   },
+   "name": "Great Helm",
+   "observation": "A flat-topped iron helmet encloses the whole head, with slits for the eyes and holes for breath.",
+   "art": "res://assets/ui/research/paper/scale_armor_attachment.png"
+  },
   "ocean_sailing": {
    "effects": {
+    "naval_capacity": 0.016,
+    "warfare_readiness": 0.012,
+    "logistics_endurance": 0.006,
     "task_coordination": 0.0049,
-    "warfare_readiness": 0.008
-   }
+    "disease_exposure": 0.003,
+    "timber_pressure": 0.003,
+    "labor_demand": 0.002
+   },
+   "observation": "Fleets and troop convoys cross the open sea out of sight of land, steered by compass and kept in company by signal.",
+   "ability_reason": "An admiral can carry an army across open sea, land it on a far shore and keep it supplied there by convoy.",
+   "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png"
+  },
+  "stone_machicolations": {
+   "effects": {
+    "security_efficiency": 0.0045,
+    "labor_demand": 0.002
+   },
+   "name": "Stone Machicolations",
+   "observation": "Stone galleries corbelled out over the gates let defenders drop stones through openings in the floor.",
+   "art": "res://assets/ui/research/paper/first300-cards/masonry_buttressing.tres"
+  },
+  "ship_fighting_castles": {
+   "effects": {
+    "naval_capacity": 0.004,
+    "warfare_readiness": 0.0023
+   },
+   "name": "Ship Fighting Castles",
+   "observation": "Wooden towers built at bow and stern of a merchant ship give archers a height to shoot from.",
+   "art": "res://assets/ui/research/paper/galley_navigation.png"
+  },
+  "captured_engineer_corps": {
+   "effects": {
+    "warfare_readiness": 0.0037,
+    "task_coordination": 0.0014,
+    "legitimacy": -0.001
+   },
+   "name": "Captured Engineer Corps",
+   "observation": "Engineers taken from conquered cities build the army's siege engines, and are well paid to do it.",
+   "art": "res://assets/ui/research/paper/first300-cards/siege_crew_rehearsals.tres"
+  },
+  "compulsory_archery_practice": {
+   "effects": {
+    "warfare_readiness": 0.0037,
+    "security_efficiency": 0.0018,
+    "cohesion": 0.001,
+    "labor_demand": 0.002
+   },
+   "name": "Compulsory Archery Practice",
+   "observation": "On rest days every commoner must shoot at the village butts, and each household must keep a bow.",
+   "art": "res://assets/ui/research/paper/bow_craft.png"
+  },
+  "ward_night_watch": {
+   "effects": {
+    "security_efficiency": 0.0045,
+    "disaster_risk": -0.001,
+    "labor_demand": 0.002,
+    "fatigue": 0.001
+   },
+   "name": "Ward Night Watch",
+   "observation": "Each ward of the town keeps its own night watch of citizens with lanterns and staves.",
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "pressed_merchant_fleets": {
+   "effects": {
+    "naval_capacity": 0.005,
+    "warfare_readiness": 0.0015,
+    "trade_capacity": -0.003,
+    "legitimacy": -0.001
+   },
+   "name": "Pressed Merchant Fleets",
+   "observation": "In war, merchant ships are seized, fitted with fighting castles and manned for the fleet.",
+   "social_consequence": "Shipowners whose vessels are pressed lose a season's trade and seldom see fair payment.",
+   "art": "res://assets/ui/research/paper/coastal_watercraft.png"
+  },
+  "concentric_castles": {
+   "effects": {
+    "security_efficiency": 0.0126,
+    "warfare_readiness": 0.003,
+    "state_capacity": 0.002,
+    "labor_demand": 0.006,
+    "legitimacy": -0.001
+   },
+   "name": "Concentric Castles",
+   "observation": "An inner ward of tall towers rises inside a lower outer ward, so defenders on both walls can shoot at once.",
+   "ability_reason": "A general holding a concentric castle can defend it with a small garrison against a great army for a whole season.",
+   "art": "res://assets/ui/research/paper/first300-cards/masonry_bond_patterns.tres"
+  },
+  "springald_wall_engines": {
+   "effects": {
+    "security_efficiency": 0.0045,
+    "warfare_readiness": 0.0015
+   },
+   "name": "Springald Wall Engines",
+   "observation": "Great crossbows mounted on the towers shoot heavy bolts at the besiegers' engines and their crews.",
+   "art": "res://assets/ui/research/paper/crossbow_mechanism.png"
+  },
+  "roadside_brush_clearance": {
+   "effects": {
+    "security_efficiency": 0.0036,
+    "travel_speed": 0.001,
+    "labor_demand": 0.002,
+    "timber_pressure": 0.001
+   },
+   "name": "Roadside Brush Clearance",
+   "observation": "Brush and trees are cleared a bowshot back from the high roads, so robbers have no cover.",
+   "art": "res://assets/ui/research/paper/graded_roads.png"
+  },
+  "coat_of_plates": {
+   "effects": {
+    "warfare_readiness": 0.006,
+    "injury_risk": -0.0048,
+    "fuel_demand": 0.002
+   },
+   "name": "Coat of Plates",
+   "observation": "Iron plates riveted inside a cloth coat guard the body beneath the mail.",
+   "ability_reason": "Men-at-arms can stand in the line against spear thrusts and arrows that once pierced mail.",
+   "art": "res://assets/ui/research/paper/lamellar_armor_assembly.png"
+  },
+  "armor_breaking_maces": {
+   "effects": {
+    "warfare_readiness": 0.003
+   },
+   "name": "Armor-Breaking Maces",
+   "observation": "Flanged maces and war hammers crush through mail and plate where a sword would glance off.",
+   "art": "res://assets/ui/research/paper/hafted_weapons.png"
+  },
+  "belt_hook_spanning": {
+   "effects": {
+    "warfare_readiness": 0.003,
+    "fatigue": -0.001
+   },
+   "name": "Belt-Hook Spanning",
+   "observation": "A hook on the crossbowman's belt lets him span the bow by straightening his back.",
+   "art": "res://assets/ui/research/paper/crossbow_mechanism.png"
+  },
+  "militia_pike_hedge": {
+   "effects": {
+    "warfare_readiness": 0.0075,
+    "security_efficiency": 0.0036,
+    "cohesion": 0.003,
+    "legitimacy": 0.002,
+    "injury_risk": 0.0016
+   },
+   "name": "Militia Pike Hedge",
+   "observation": "Town militia stand shoulder to shoulder in a hedge of long spears that horses will not charge into.",
+   "ability_reason": "A general can hold ground against heavy horse with townsmen and farmers, if they keep their nerve.",
+   "social_consequence": "Townsmen who have faced knights in the field and held begin to ask for a voice in council.",
+   "art": "res://assets/ui/research/subjects/pike_drill-v1.png"
+  },
+  "infantry_polearms": {
+   "effects": {
+    "warfare_readiness": 0.0037
+   },
+   "name": "Infantry Polearms",
+   "observation": "Long-hafted bills and axes let a foot soldier hook a rider from the saddle and cut him down.",
+   "art": "res://assets/ui/research/paper/hafted_weapons.png"
+  },
+  "nitre_incendiary_mixtures": {
+   "effects": {
+    "warfare_readiness": 0.0023,
+    "chemical_control": 0.002,
+    "disaster_risk": 0.003
+   },
+   "name": "Nitre Incendiaries",
+   "observation": "Nitre stirred into pitch and sulfur makes fire pots and fire arrows that flare fiercely and are hard to smother.",
+   "art": "res://assets/ui/research/paper/first300-cards/bitumen_sealing.tres"
+  },
+  "massed_longbow_volleys": {
+   "effects": {
+    "warfare_readiness": 0.009,
+    "task_coordination": 0.0021,
+    "labor_demand": 0.002
+   },
+   "name": "Massed Longbow Volleys",
+   "observation": "Ranks of archers loose their long bows together, and the arrows fall on the enemy like hail.",
+   "ability_reason": "A general can break charges and thin a host before it closes, with archers trained from childhood.",
+   "art": "res://assets/ui/research/paper/bow_craft.png"
+  },
+  "plate_limb_defences": {
+   "effects": {
+    "injury_risk": -0.0032,
+    "warfare_readiness": 0.003,
+    "fuel_demand": 0.001
+   },
+   "name": "Plate Limb Defences",
+   "observation": "Plates of iron shaped to arm and leg guard the limbs that mail left bruised and broken.",
+   "art": "res://assets/ui/research/paper/articulated_plate_armor.png"
+  },
+  "windlass_crossbow": {
+   "effects": {
+    "warfare_readiness": 0.0037,
+    "fatigue": 0.001
+   },
+   "name": "Windlass Crossbow",
+   "observation": "A crank-wound windlass draws a heavy crossbow that no man could span with his arms alone.",
+   "art": "res://assets/ui/research/paper/crossbow_mechanism.png"
+  },
+  "visored_helmet": {
+   "effects": {
+    "injury_risk": -0.0024,
+    "warfare_readiness": 0.0015
+   },
+   "name": "Visored Helmet",
+   "observation": "A pointed visor hinged to the helmet closes over the face and lifts when the fighting pauses.",
+   "art": "res://assets/ui/research/paper/scale_armor_attachment.png"
+  },
+  "black_powder": {
+   "effects": {
+    "chemical_control": 0.008,
+    "observation_rate": 0.002,
+    "disaster_risk": 0.004,
+    "injury_risk": 0.0016
+   },
+   "observation": "Nitre, sulfur and charcoal ground together burn with a flash and a roar that the men who grind them learn to fear.",
+   "ability_reason": "The mixture is known only as a dangerous curiosity: no one can yet make it throw a stone, and it gives no general a new weapon.",
+   "art": "res://assets/ui/research/subjects/black_powder-v1.png"
+  },
+  "free_mercenary_companies": {
+   "effects": {
+    "warfare_readiness": 0.0045,
+    "labor_demand": -0.002,
+    "security_efficiency": -0.0018,
+    "legitimacy": -0.003,
+    "cohesion": -0.002
+   },
+   "name": "Free Companies",
+   "observation": "Bands of soldiers under contract captains sell their service to any paymaster, and plunder when they are unpaid.",
+   "social_consequence": "Between wars the free companies live off the country, and villages pay them to pass by.",
+   "art": "res://assets/ui/research/paper/first300-cards/professional_corps.tres"
+  },
+  "dispatch_code_lists": {
+   "effects": {
+    "security_efficiency": 0.0027,
+    "task_coordination": 0.0014,
+    "knowledge_preservation": 0.001
+   },
+   "name": "Dispatch Code Lists",
+   "observation": "Lists of code words replace names and places in dispatches, so a captured letter tells the enemy little.",
+   "art": "res://assets/ui/research/discovery-600/agreed_signal_codes.png"
   }
  }
 }
