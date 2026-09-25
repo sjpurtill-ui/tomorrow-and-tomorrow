@@ -132,7 +132,7 @@ func _layout()->void:
 	for id in rail_buttons:
 		var button:Button=rail_buttons[id]
 		if _in_drawer(String(id)):button.custom_minimum_size.y=36.0 if tight else 46.0
-		else:button.custom_minimum_size.y=44.0 if tight else clampf((view.y-150.0)/float(primary+1),56.0,72.0)
+		else:button.custom_minimum_size.y=(52.0 if view.y>=700.0 else 44.0) if tight else clampf((view.y-150.0)/float(primary+1),56.0,72.0)
 	if drawer_button:drawer_button.custom_minimum_size.y=44.0 if tight else 52.0
 	if top_frame:
 		top_frame.position=Vector2(Tokens.RAIL_WIDTH,0)
@@ -657,7 +657,7 @@ func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color
 ## Stable widths per era: the people's words are longer than the acronyms.
 func _kpi_width(id:String,base:float)->float:
 	if EraWords.reckoned():return base
-	return float({"population":124.0,"food":100.0,"water":96.0,"goods":130.0,"health":200.0,"science":132.0,"gdp":112.0}.get(id,base))
+	return float({"population":120.0,"food":100.0,"water":96.0,"goods":130.0,"health":194.0,"science":142.0,"gdp":112.0}.get(id,base))
 
 # --- Decision queue ---------------------------------------------------------
 
