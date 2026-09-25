@@ -163,4 +163,61 @@ static func measure(terrain:Node,label:String)->Dictionary:
 	row["modern_total"]=modern_total;row["lexicon_total"]=lexicon_total
 	row["sections"]=per
 	row["known"]=GameState.known_discoveries.size()
+	row["bars"]=bars(hud)
 	return row
+
+
+## The two bars the player reads all game: the top strip (clock, weather and
+## the vital chips) and the bottom map toolbar. Counts what is visible, keeps
+## the words, and flags a chip whose words need more room than it has (the
+## "30 in 100 babes die" line that ran into LORE).
+static func bars(hud:Node)->Dictionary:
+	var top:PackedStringArray=[]
+	if hud.time_text and (hud.time_text as Control).is_visible_in_tree():top.append((hud.time_text as RichTextLabel).get_parsed_text())
+	var overflow:Array=[]
+	for id in hud.kpi_chips:
+		var parts:Dictionary=hud.kpi_chips[id]
+		var chip:Control=parts.get("chip")
+		if chip==null or not chip.is_visible_in_tree():continue
+		var value:Label=parts.value;var delta:Label=parts.delta;var caption:Label=parts.get("caption")
+		top.append("%s %s %s" % [caption.text if caption else String(id),value.text,delta.text])
+		var need:=_text_width(value)+_text_width(delta)+17.0+6.0+(10.0 if delta.text!="" else 0.0)
+		if need>chip.custom_minimum_size.x+0.5:overflow.append("%s needs %d of %d" % [String(id),roundi(need),roundi(chip.custom_minimum_size.x)])
+	var bottom:PackedStringArray=[]
+	if hud.toolbar and (hud.toolbar as Control).is_visible_in_tree():
+		_bar_items(hud.toolbar,bottom)
+	return {"top_items":top.size(),"top":" | ".join(top),"top_overflow":overflow,"bottom_items":bottom.size(),"bottom":" | ".join(bottom)}
+
+
+static func _text_width(label:Label)->float:
+	if label.text=="":return 0.0
+	var font:Font=label.get_theme_font("font")
+	return font.get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,label.get_theme_font_size("font_size")).x if font else 0.0
+
+
+static func _bar_items(node:Node,out:PackedStringArray)->void:
+	if node is CanvasItem and not (node as CanvasItem).is_visible_in_tree():return
+	if node is OptionButton:
+		var option:=node as OptionButton
+		if option.selected>=0:out.append(option.get_item_text(option.selected))
+		return
+	if node is Button and String((node as Button).text).strip_edges()!="":out.append(String((node as Button).text));return
+	if node is Label and String((node as Label).text).strip_edges()!="":out.append(String((node as Label).text));return
+	for child in node.get_children():_bar_items(child,out)
+
+
+## Which card and toast layers the player has been shown: the Chronicle card,
+## the old research digest and expedition toast, and the full discovery popup.
+static func notice_layers(hud:Node)->Dictionary:
+	var shown:={}
+	var card:Variant=hud.get_meta("chronicle_card") if hud.has_meta("chronicle_card") else null
+	if is_instance_valid(card) and bool(card.get("showing")) and (card.panel as Control).visible:
+		shown["chronicle_card"]=true
+		var rect:Rect2=(card.panel as Control).get_global_rect()
+		for dock_name in ["dock","detail_dock"]:
+			var dock:Control=hud.get(dock_name)
+			if dock and dock.is_visible_in_tree() and dock.get_global_rect().intersects(rect):shown["card_over_dock"]=true
+	for key in ["research_digest","scout_return_digest"]:
+		var layer:Variant=hud.get_meta(key) if hud.has_meta(key) else null
+		if is_instance_valid(layer) and layer.get("notice") and (layer.notice as Control).visible:shown[key]=true
+	return shown

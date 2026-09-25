@@ -186,7 +186,7 @@ func accept(id:String,value:Variant)->bool:
 	var envoy_words:=String(value.get("envoy_words","")).strip_edges()
 	if not envoy_words.is_empty():_append(id,"envoy",envoy_words)
 	_append(id,"assistant",value.reply)
-	t.status="The envoys returned with this exchange. Any actual change of posture now belongs to the foreign polity's simulated decisions."; t.retryable=false
+	t.status="The envoys returned with this exchange. What the strangers do about it is theirs to decide."; t.retryable=false
 	return true
 
 func _last_user_message(id:String)->String:

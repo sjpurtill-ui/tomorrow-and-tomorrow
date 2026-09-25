@@ -182,7 +182,7 @@ func _resolve_resistance(entry:Dictionary,day:int)->void:
 			for civ:Dictionary in WorldSimulation.world.civilizations:
 				if int(civ.player_relation.get("contact_level",0))>=2 and float(civ.player_relation.get("opinion",0))>.3:friendly=true;break
 			if friendly:government.support=clampf(float(government.support)+.08,0,1)
-			else:outcome_message="No known friendly polity offered support. The outside appeal did not strengthen the movement."
+			else:outcome_message="No friendly people offered support. The outside appeal did not strengthen the movement."
 			government.suspicion=clampf(float(government.suspicion)+.08,0,1)
 		"autonomy":success=float(government.support)>.45 and rng.randf()<float(government.support)*(1-float(government.repression))*.65
 		"revolt":

@@ -94,6 +94,13 @@ func _layout()->void:
 
 # ---------------------------------------------------------------- pieces
 
+## "the Keshan", but "The Nine Fires" when the name already carries its article.
+static func the_name(people:String)->String:
+	var name_text:=people.strip_edges()
+	if name_text.to_lower().begins_with("the "):return name_text
+	return "the "+name_text
+
+
 static func sheet_style()->StyleBoxFlat:
 	var style:=T.flat(Kit.plate_color(),T.BORDER_SOFT,1,6)
 	style.content_margin_left=18;style.content_margin_right=18;style.content_margin_top=14;style.content_margin_bottom=16
@@ -162,8 +169,8 @@ func _build_peoples(stack:VBoxContainer)->void:
 		for people:Dictionary in peoples:stack.add_child(_people_card(people))
 		if not leads.is_empty():
 			var names:PackedStringArray=[]
-			for lead:Dictionary in leads:names.append(String(lead.get("name","")))
-			Kit.serif(stack,"Still only told of: the %s." % ", the ".join(names),13,T.TEXT_SOFT,true)
+			for lead:Dictionary in leads:names.append(the_name(String(lead.get("name",""))))
+			Kit.serif(stack,"Still only told of: %s." % ", ".join(names),13,T.TEXT_SOFT,true)
 	var row:=HFlowContainer.new();row.add_theme_constant_override("h_separation",8);row.add_theme_constant_override("v_separation",8);stack.add_child(row)
 	var map_button:=_action(row,"Map of hearsay",actions.get("rumor_map"),false,"Where travelers' accounts place peoples we have not seen.");map_button.name="RumorMap"
 	if not leads.is_empty():
@@ -720,6 +727,10 @@ class Chart extends Control:
 		return best
 
 class InkLayer extends Control:
+	## As the board's the_name: never "the The Nine Fires".
+	static func the_people(people:String)->String:
+		var name_text:=people.strip_edges()
+		return name_text if name_text.to_lower().begins_with("the ") else "the "+name_text
 	var chart:Chart
 	var labels:Array[Rect2]=[]
 	func _init()->void:mouse_filter=Control.MOUSE_FILTER_PASS;tooltip_text=" "
@@ -870,7 +881,7 @@ class InkLayer extends Control:
 			var alpha:=clampf(.35+float(rumor.confidence),.35,.85)
 			dashed(_circle(at,r),Color(yellow,alpha*.8),1.3,5.0,5.0)
 			KnownWorld.glyph(self,"question",at,11,Color(yellow,alpha))
-			label("the %s?" % String(rumor.name),at+Vector2(0,r*.4),13,Color(yellow,minf(1.0,alpha+.15)),true,false,true)
+			label("%s?" % the_people(String(rumor.name)),at+Vector2(0,r*.4),13,Color(yellow,minf(1.0,alpha+.15)),true,false,true)
 			chart.add_hit(at,r,String(rumor.get("tip","")))
 		_edge_marks(hearsay,home_px,yellow)
 		# walkers abroad, where the settlement reckons them to be
@@ -926,9 +937,10 @@ class InkLayer extends Control:
 			dashed(PackedVector2Array([tail,at]),Color(tone,.7),1.4,4.0,3.0)
 			var side:=Vector2(-dir.y,dir.x)*5.0
 			draw_colored_polygon(PackedVector2Array([at+dir*6.0,at+side-dir*2.0,at-side-dir*2.0]),Color(tone,.8))
-			var text:="the %s? · far %s" % [String(entry.get("name","")),key]
+			var text:="%s? · far %s" % [the_people(String(entry.get("name",""))),key]
 			label(text,tail-dir*4.0,12,tone,true,dir.x>0,true)
-			chart.add_hit(at,18,"The %s — only hearsay: off to the %s, %s." % [String(entry.get("name","")),key,String(entry.get("distance","far"))])
+			var told:=the_people(String(entry.get("name","")))
+			chart.add_hit(at,18,"%s — only hearsay: off to the %s, %s." % [told.substr(0,1).to_upper()+told.substr(1),key,String(entry.get("distance","far"))])
 	func _frame_marks(line:Color,red:Color,yellow:Color,faint:Color,paper:bool)->void:
 		# Caption, orientation and a small key, drawn like the rest of the chart.
 		var title_font:=Kit.italic_font()

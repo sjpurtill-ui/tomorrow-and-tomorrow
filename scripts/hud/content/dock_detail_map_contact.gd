@@ -49,10 +49,10 @@ func tab(_sub:int)->Dictionary:
 	var high:=int(sighting.get("strength_estimate_high",low))
 	var distance:=float(sighting.get("distance_km",0.0))
 	var kpis:Array=[
-		{"label":"CONTACT","value":"SCOUTS" if scout else "FORMATION","delta":"visible now","accent":Tokens.RED if hostile else Tokens.AMBER,"tip":"A current local observation, not omniscient tracking"},
+		{"label":"CONTACT","value":"SCOUTS" if scout else "FORMATION","delta":"visible now","accent":Tokens.RED if hostile else Tokens.AMBER,"tip":"Seen by our lookouts now; where they go next, no one can say"},
 		{"label":"EST. SIZE","value":"%d–%d" % [low,high],"delta":"uncertain","accent":Tokens.AMBER,"tip":"The public estimate stays a range; exact rival strength remains hidden"},
 		{"label":"FROM HOME","value":"%.0f km" % distance,"delta":"","accent":Tokens.MUTED,"tip":"Distance from your primary settlement"},
-		{"label":"STATUS","value":"ENEMY" if hostile else "OBSERVED","delta":"","accent":Tokens.RED if hostile else Tokens.TEAL,"tip":"Only a force belonging to a polity already at war with you is an enemy army"},
+		{"label":"STATUS","value":"ENEMY" if hostile else "OBSERVED","delta":"","accent":Tokens.RED if hostile else Tokens.TEAL,"tip":"Only a band from a people already at war with you is an enemy army"},
 	]
 	if scout: return _scout_tab(sighting,kpis)
 	return _formation_tab(sighting,kpis)

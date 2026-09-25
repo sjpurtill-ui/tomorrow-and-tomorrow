@@ -368,7 +368,7 @@ func _default_war_target(civ:Dictionary,goal:String="limited") -> String:
 func _participant_name(participant_id:String)->String:
 	if participant_id=="player": return _player_civilization_name()
 	var index:=_civilization_index(participant_id)
-	return String(civilizations[index].name) if index>=0 else "UNKNOWN POLITY"
+	return String(civilizations[index].name) if index>=0 else "UNKNOWN PEOPLE"
 
 
 func _war_name(first_id:String,second_id:String,target_region_id:String,day:int)->String:
@@ -1199,7 +1199,7 @@ func exploration_status()->Dictionary:
 		# return day is the road's secret; the UI must never leak it.
 		var overdue_days:=maxi(0,current_day-int(party.get("return_day",current_day)))
 		parties.append({"mission_id":int(party.get("mission_id",0)),"personnel":int(party.get("personnel",0)),"days_remaining":party_remaining,"return_day":int(party.get("return_day",-1)),"duration_days":party_duration,"overdue_days":overdue_days,"progress":clampf(1.0-float(party_remaining)/float(party_duration),0.0,1.0),"origin_city_id":String(party.get("origin_city_id","")),"origin_label":String(party.get("origin_label","Home settlement")),"target_id":String(party.get("target_id","")),"target_label":String(party.get("target_label","OPEN EXPLORATION")),"ordered_heading":String(party.get("ordered_heading","")),"planned_heading":String(party.get("planned_heading","")),"route_status":String(party.get("route_status","")),"turnback_reason":String(party.get("turnback_reason","")),"provisions":float(party.get("provisions",0.0))})
-	var idle_message:="The last scout party did not return, so none of its observations became knowledge. %d %s missing from the population's available labor." % [missing,"scout remains" if missing==1 else "scouts remain"] if missing>0 else ("No foreign polity has been met. Choose how long a scout party may range before it must return." if known==0 else "Dispatch another scout party; only its returned report reveals new ground or contacts.")
+	var idle_message:="The last scout party did not return, so none of its observations became knowledge. %d %s missing from the population's available labor." % [missing,"scout remains" if missing==1 else "scouts remain"] if missing>0 else ("No other people have been met yet. Choose how long a scout party may range before it must return." if known==0 else "Dispatch another scout party; only its returned report reveals new ground or contacts.")
 	var active_message:="%d scout part%s away. Observations remain aboard each party; interception can erase an entire report before it returns." % [scout_missions.size(),"y is" if scout_missions.size()==1 else "ies are"]
 	if active and String(mission.get("route_status",""))=="turning_back": active_message=String(mission.get("turnback_reason","The land route was blocked, so the party is turning back."))
 	return {"active":active,"progress":clampf(1.0-float(remaining)/float(duration),0.0,1.0) if active else 0.0,"days_remaining":remaining,"return_day":int(mission.get("return_day",-1)),"duration_days":int(mission.get("duration_days",0)),"personnel":int(mission.get("personnel",0)),"provisions":float(mission.get("provisions",0.0)),"target_id":String(mission.get("target_id","")),"target_kind":String(mission.get("target_kind","explore")),"target_label":String(mission.get("target_label","OPEN EXPLORATION")),"travel_mode":String(mission.get("travel_mode","land")),"route_status":String(mission.get("route_status","")),"contacted_count":known,"can_begin":scout_missions.size()<capacity,"active_count":scout_missions.size(),"capacity":capacity,"parties":parties,"report_count":scout_reports.size(),"latest_report":scout_reports[0].duplicate(true) if not scout_reports.is_empty() else {},"last_outcome":last_scout_outcome.duplicate(true),"missing_scouts":missing,"risk":risk,"message":active_message if active else idle_message}
@@ -1222,7 +1222,7 @@ func scout_target_options()->Array[Dictionary]:
 		options.append({
 			"id":"contact:%s" % String(encounter.civ_id),"kind":"investigate_contact","civ_id":String(encounter.civ_id),
 			"label":"INVESTIGATE %s ENCOUNTER" % String(encounter.name).to_upper(),
-			"description":"Return to the known encounter site, chart its surroundings, and look for routes toward the polity's home.",
+			"description":"Return to the known encounter site, chart its surroundings, and look for routes toward that people's home.",
 			"position":position.duplicate(true)
 		})
 	options.append_array(preload("res://scripts/neighbor_signs.gd").target_options(self))
@@ -1586,7 +1586,7 @@ func diplomatic_mission_status()->Dictionary:
 	if diplomatic_mission.is_empty():
 		return {"active":false,"history_count":diplomatic_history.size(),"latest":diplomatic_history[0].duplicate(true) if not diplomatic_history.is_empty() else {}}
 	var day:=int(WorldSimulation.state.elapsed_days)
-	var status:Dictionary={"active":true,"civilization":String(diplomatic_mission.get("civilization","FOREIGN POLITY")),"civ_id":String(diplomatic_mission.get("civ_id","")),"purpose":String(diplomatic_mission.get("purpose","goodwill")),"purpose_label":String(diplomatic_mission.get("purpose_label","DIPLOMATIC MISSION")),"personnel":int(diplomatic_mission.get("personnel",0)),"provisions":float(diplomatic_mission.get("provisions",0.0)),"gift_resource":String(diplomatic_mission.get("gift_resource","")),"gift_amount":float(diplomatic_mission.get("gift_amount",0.0)),"stage":String(diplomatic_mission.get("stage","outbound")),"days_remaining":maxi(0,int(diplomatic_mission.get("return_day",day))-day),"arrival_days_remaining":maxi(0,int(diplomatic_mission.get("arrival_day",day))-day),"target_kind":String(diplomatic_mission.get("target_kind","rendezvous"))}
+	var status:Dictionary={"active":true,"civilization":String(diplomatic_mission.get("civilization","STRANGERS")),"civ_id":String(diplomatic_mission.get("civ_id","")),"purpose":String(diplomatic_mission.get("purpose","goodwill")),"purpose_label":String(diplomatic_mission.get("purpose_label","DIPLOMATIC MISSION")),"personnel":int(diplomatic_mission.get("personnel",0)),"provisions":float(diplomatic_mission.get("provisions",0.0)),"gift_resource":String(diplomatic_mission.get("gift_resource","")),"gift_amount":float(diplomatic_mission.get("gift_amount",0.0)),"stage":String(diplomatic_mission.get("stage","outbound")),"days_remaining":maxi(0,int(diplomatic_mission.get("return_day",day))-day),"arrival_days_remaining":maxi(0,int(diplomatic_mission.get("arrival_day",day))-day),"target_kind":String(diplomatic_mission.get("target_kind","rendezvous"))}
 
 	status.merge(preload("res://scripts/diplomatic_journey.gd").describe(diplomatic_mission,day),true)
 	return status
@@ -2087,12 +2087,12 @@ func _process_local_observation(day:int,force:bool=false)->void:
 			if foreign_sightings.size()>FOREIGN_SIGHTING_LIMIT: foreign_sightings.resize(FOREIGN_SIGHTING_LIMIT)
 		else: foreign_sightings[sighting_index]=sighting
 		if direct_contact_began:
-			var contact_description:="Lookouts make direct contact with a %s of the %s at the marked position, %.0f km away. Their identity is now known; this encounter does not reveal their homeland." % [String(formation.get("kind","formation")).replace("_"," "),String(civ.name),distance]
+			var contact_description:="Lookouts meet %s of the %s at the marked place, %.0f km away. Now we know who they are, though not yet where their home lies." % [with_article(band_word(String(formation.get("kind","formation")))),String(civ.name),distance]
 			_publish_observed_event("First contact — %s" % String(civ.name),contact_description,day,{"kind":"first_contact","civ_id":civ_id,"formation_id":formation_id,"formation_kind":String(formation.get("kind","formation")),"identified":true,"position":{"x":position.x,"z":position.y}})
 		elif first_sighting:
 			var identified:=int(relation.contact_level)>=2
-			var observed_name:=String(civ.name) if identified else "an unidentified aggregate formation"
-			var sighting_description:="Lookouts sight %s about %.0f km away at the marked position. This is a local observation, not global tracking." % [observed_name,distance]
+			var observed_name:=("a band of the %s" % String(civ.name)) if identified else "a band of strangers"
+			var sighting_description:="Lookouts see %s about %.0f km off, at the marked place. Where they go next, no one here can say." % [observed_name,distance]
 			_publish_observed_event("Foreign unit sighted",sighting_description,day,{"kind":"unit_sighting","civ_id":civ_id if identified else "","formation_id":formation_id,"formation_kind":String(formation.get("kind","formation")),"identified":identified,"position":{"x":position.x,"z":position.y}})
 		changed=true
 	for index in foreign_sightings.size():
@@ -2272,7 +2272,7 @@ func _receive_captured_scout_cohort(civ:Dictionary,formation:Dictionary,count:in
 	var existing:Dictionary=captured_foreign_scouts.get(civ_id,{})
 	var a:=Vector2(formation.get("point_a",Vector2.ZERO)); var b:=Vector2(formation.get("point_b",a))
 	existing["civ_id"]=civ_id
-	existing["source_name"]=String(civ.get("name","FOREIGN POLITY"))
+	existing["source_name"]=String(civ.get("name","STRANGERS"))
 	existing["count"]=maxi(0,int(existing.get("count",0)))+maxi(0,count)
 	existing["captured_day"]=day
 	existing["information_remaining"]=maxf(float(existing.get("information_remaining",0.0)),1.0)
@@ -2384,7 +2384,7 @@ func captured_scouts_snapshot()->Array[Dictionary]:
 	for civ_id in captured_foreign_scouts:
 		var cohort:Dictionary=captured_foreign_scouts[civ_id]
 		if int(cohort.get("count",0))<=0: continue
-		result.append({"civ_id":String(civ_id),"source_name":String(cohort.get("source_name","FOREIGN POLITY")),"count":int(cohort.get("count",0)),"captured_day":int(cohort.get("captured_day",0)),"information_remaining":clampf(float(cohort.get("information_remaining",0.0)),0.0,1.0),"interrogations":int(cohort.get("interrogations",0)),"can_interrogate":int(WorldSimulation.state.elapsed_days)>int(cohort.get("last_interrogation_day",-9999)) and float(cohort.get("information_remaining",0.0))>0.02})
+		result.append({"civ_id":String(civ_id),"source_name":String(cohort.get("source_name","STRANGERS")),"count":int(cohort.get("count",0)),"captured_day":int(cohort.get("captured_day",0)),"information_remaining":clampf(float(cohort.get("information_remaining",0.0)),0.0,1.0),"interrogations":int(cohort.get("interrogations",0)),"can_interrogate":int(WorldSimulation.state.elapsed_days)>int(cohort.get("last_interrogation_day",-9999)) and float(cohort.get("information_remaining",0.0))>0.02})
 	return result
 
 
@@ -2541,6 +2541,15 @@ func _reverse_scout_route(route:Array)->Array[Dictionary]:
 	return reversed
 
 
+## A foreign band's kind in the people's words (formation kinds are sim keys).
+static func band_word(kind:String)->String:
+	return String({"scout":"scouting party","expedition":"travelling band","patrol":"band of watchmen","migration":"people on the move","army":"war band","formation":"band"}.get(kind,kind.replace("_"," ")))
+
+## "a war band", "an armed band".
+static func with_article(noun:String)->String:
+	if noun.is_empty():return noun
+	return ("an " if noun.substr(0,1).to_lower() in ["a","e","i","o","u"] else "a ")+noun
+
 func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	var interception:=_resolve_player_scout_interception(mission,day)
 	if bool(interception.get("intercepted",false)) and String(interception.get("fate",""))!="driven_off":
@@ -2642,7 +2651,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	report["archive_reviewed"]=false
 	scout_reports.push_front(report)
 	if scout_reports.size()>SCOUT_REPORT_LIMIT: scout_reports.resize(SCOUT_REPORT_LIMIT)
-	var finding:=String(recruitment_account.get("summary","")) if not recruitment_account.is_empty() else ("No organized foreign polity was encountered." if contacts.is_empty() else ("Direct contact was established with %s." % ", ".join(contacts)))
+	var finding:=String(recruitment_account.get("summary","")) if not recruitment_account.is_empty() else ("They met no other people." if contacts.is_empty() else ("Direct contact was established with %s." % ", ".join(contacts)))
 	if not recruitment_account.is_empty() and not contacts.is_empty(): finding+=" Direct contact was also established with %s." % ", ".join(contacts)
 	if targeted_finding!="": finding+=" "+targeted_finding
 	if recruits>0 and recruitment_account.is_empty(): finding+=" The scouts also return with %d %s who agreed to join the settlement." % [recruits,"wanderer" if recruits==1 else "wanderers"]
@@ -2660,7 +2669,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	# The Chief Scout asks for an audience to tell the court what the party saw.
 	_chief_scout_report(report,"scouts")
 	if ScoutArchive.newsworthy(report):
-		WorldSimulation.state.simulation_events.push_front({"day":day,"title":"CITY RECONNAISSANCE" if String(mission.get("target_kind",""))=="observe_city" else "RECRUITMENT PARTY RETURNS" if is_recruitment else "SCOUTS RETURN","description":message,"domain":"diplomacy","severity":"major"})
+		WorldSimulation.state.simulation_events.push_front({"day":day,"title":"CITY RECONNAISSANCE" if String(mission.get("target_kind",""))=="observe_city" else "RECRUITMENT PARTY RETURNS" if is_recruitment else "SCOUTS RETURN","description":message,"domain":"diplomacy","severity":"major","mission_id":int(report.get("mission_id",mission.get("mission_id",0)))})
 	elif int(report.get("lost_personnel",0))>0:
 		# A quiet return still counts its dead in the season's tally.
 		preload("res://scripts/hearth_count.gd").tally("afield",int(report.lost_personnel))
@@ -2740,7 +2749,7 @@ func _resolve_targeted_scout_report(mission:Dictionary,day:int)->String:
 	if not bool(mission.get("reached_target",false)): return "The party could not reach its intended target."
 	var civ_id:=String(mission.get("target_civ_id",""))
 	var index:=_civilization_index(civ_id)
-	if index<0: return "The intended polity could no longer be identified."
+	if index<0: return "The people the envoys set out for can no longer be found."
 	var civ:Dictionary=civilizations[index]
 	var relation:=_relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
 	var duration:=maxi(1,int(mission.get("duration_days",30)))
@@ -3053,7 +3062,7 @@ func _resolve_prospecting(mission:Dictionary,route:Array,day:int)->String:
 	var origin:=Vector2(float(origin_data.get("x",player_world_origin.x)),float(origin_data.get("z",player_world_origin.y)))
 	var card:=preload("res://scripts/expedition_findings.gd").deposit_card(deposit,roundi(origin.distance_to(best_position)))
 	(mission.get("discoveries",[]) as Array).push_front(card)
-	_record_world_event("Prospectors locate %s" % best_resource,String(card.description),"resources",day,{"kind":"resource_survey","resource":best_resource,"deposit_id":String(deposit.id),"position":card.position})
+	_record_world_event("Prospectors locate %s" % preload("res://scripts/resource_names.gd").label(best_resource),String(card.description),"resources",day,{"kind":"resource_survey","resource":best_resource,"deposit_id":String(deposit.id),"position":card.position})
 	return "%s — %s" % [String(card.title),String(card.consequence)]
 
 func _resolve_taught_knowledge(_day:int,_recruits:int,_contacts:Array)->String:
@@ -3107,10 +3116,10 @@ func _resolve_route_military_sightings(mission:Dictionary,route:Array,day:int)->
 			foreign_sightings.push_front(sighting)
 			if foreign_sightings.size()>FOREIGN_SIGHTING_LIMIT: foreign_sightings.resize(FOREIGN_SIGHTING_LIMIT)
 		else: foreign_sightings[sighting_index]=sighting
-		var observed_name:=String(civ.get("name","an unidentified polity")) if identified else "an unidentified polity"
-		var kind_label:=String(formation.get("kind","formation")).replace("_"," ")
+		var observed_name:=String(civ.get("name","strangers we cannot yet name")) if identified else "strangers we cannot yet name"
+		var kind_label:=band_word(String(formation.get("kind","formation")))
 		var strength_text:="roughly %d under arms" % roundi(strength) if strength>=5.0 else "of unknown strength"
-		var description:="Returning scouts report a %s of %s — %s — moving near the marked point on their charted route. The report is days old; the column has since moved." % [kind_label,observed_name,strength_text]
+		var description:="Returning scouts saw %s of %s — %s — moving near the marked point on their route. What they saw is days old; the band has moved on since." % [with_article(kind_label),observed_name,strength_text]
 		_publish_observed_event("Scouts report foreign %s" % kind_label,description,day,{"kind":"unit_sighting","civ_id":civ_id if identified else "","formation_id":formation_id,"formation_kind":kind_label,"identified":identified,"position":sighting.position})
 		findings.append("They crossed the trail of a foreign %s (%s) and marked where they saw it." % [kind_label,strength_text])
 	if not findings.is_empty():
@@ -3922,7 +3931,7 @@ func occupation_resident_order(civ_id:String,region_id:String,order:String,count
 			if withdrawal.has("error"):return withdrawal
 		var restored:=abandon_occupied_region(civ_id,region_id)
 		if restored.has("error"):return restored
-		return {"ok":true,"message":"Local control returned to the original polity. The occupation force is returning physically; prior damage and grievance remain."}
+		return {"ok":true,"message":"Local control returned to the people who held it before. The occupation force is returning physically; prior damage and grievance remain."}
 	if order!="kill_residents" or count<1:return {"error":"Choose a valid resident order and headcount."}
 	var ability:=occupation_coercion_availability(civ_id,region_id,count)
 	if ability.has("error"):return ability
@@ -3941,7 +3950,7 @@ func occupation_resident_order(civ_id:String,region_id:String,order:String,count
 	civ.military_population=minf(float(civ.military_population),_working_age_population(civ.cohorts)*.55)
 	civ.player_relation.opinion=-1.0;civ.player_relation.border_tension=1.0
 	civilizations[index]=civ
-	var message:="%d residents were killed in %s. These are deaths, not transfers. Survivors retain lasting grievance; relations with their polity have collapsed." % [int(deaths.dead),String(region.name)]
+	var message:="%d residents were killed in %s. These are deaths, not transfers. Survivors retain lasting grievance; relations with their people have collapsed." % [int(deaths.dead),String(region.name)]
 	_record_world_event("Mass killing of residents",message,"war",int(WorldSimulation.state.elapsed_days))
 	return {"ok":true,"dead":int(deaths.dead),"message":message}
 
@@ -4046,7 +4055,7 @@ func war_goal_options(civ_id:String,region_id:String="") -> Array[Dictionary]:
 	options.append({"id":"limited","label":String(WAR_GOAL_LABELS.limited),"target_region_id":limited_target,"available":limited_target!="","description":"Take one exposed strategic region, then press for a bounded settlement."})
 	options.append({"id":"break_power","label":String(WAR_GOAL_LABELS.break_power),"target_region_id":_default_war_target(civ,"break_power") if not city_intelligence.known("player",_default_war_target(civ,"break_power")).is_empty() else "","available":not city_intelligence.known("player",_default_war_target(civ,"break_power")).is_empty(),"description":"Occupy the capital or three home regions. Greater leverage, exhaustion, and occupation cost."})
 	var liberation_available:=not selected.is_empty() and bool(selected.get("foreign_holding",false))
-	options.append({"id":"liberation","label":String(WAR_GOAL_LABELS.liberation),"target_region_id":region_id if liberation_available else "","available":liberation_available,"description":"Defeat this occupier and return the selected foreign region to its original polity."})
+	options.append({"id":"liberation","label":String(WAR_GOAL_LABELS.liberation),"target_region_id":region_id if liberation_available else "","available":liberation_available,"description":"Defeat this occupier and return the selected foreign region to the people who held it before."})
 	return options
 
 
@@ -4218,7 +4227,7 @@ func conduct_player_action(civ_id:String,action:String,arrived_via_envoy:bool=fa
 	match normalized:
 		"open_trade":
 			relation["treaty"]="trade"; relation["stance"]="cooperative"; relation["opinion"]=clampf(opinion+0.08,-1.0,1.0)
-			message="A standing trade compact opens value-conserved exchange with %s." % String(civ.name)
+			message="A standing trade compact opens fair exchange with %s." % String(civ.name)
 		"non_aggression":
 			relation["treaty"]="non_aggression"; relation["stance"]="cooperative"; relation["trade"]=0.0; relation["opinion"]=clampf(opinion+0.06,-1.0,1.0); relation["border_tension"]=maxf(0.0,float(relation.border_tension)-0.18)
 			message="%s accepts a non-aggression compact." % String(civ.name)

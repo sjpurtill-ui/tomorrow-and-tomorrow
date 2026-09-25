@@ -20,14 +20,14 @@ func meta()->Dictionary:
 	var civ:=_civ()
 	return {
 		"eyebrow":"KNOWN RECORD · CONTACT",
-		"title":String(civ.get("name","Unknown polity")),
+		"title":String(civ.get("name","Unknown people")),
 		"subtabs":["THE RECORD"],
 	}
 
 func tab(_sub:int)->Dictionary:
 	var civ:=_civ()
 	if civ.is_empty():
-		return {"kpis":[],"brief":{},"blocks":[{"type":"text","text":"No record exists for this polity."}]}
+		return {"kpis":[],"brief":{},"blocks":[{"type":"text","text":"No record exists for this people."}]}
 	var relation:Dictionary=civ.get("player_relation",{})
 	var met_day:=int(relation.get("met_day",-1))
 	var observed:=maxi(met_day,int(relation.get("last_observed_day",-1)))
@@ -69,7 +69,7 @@ func tab(_sub:int)->Dictionary:
 		{"label":"SEND DIPLOMAT","sub":"goodwill delegation","primary":true,
 		"disabled":mission_active or not bool(relation.get("home_location_known",false)),
 		"on_press":func()->void: terrain._open_diplomat_dispatch_panel(civ_id),
-		"tip":"A physical delegation travels to the located settlement" if bool(relation.get("home_location_known",false)) else "Locate the polity's home settlement first"},
+		"tip":"A physical delegation travels to the located settlement" if bool(relation.get("home_location_known",false)) else "Find where this people lives first"},
 		{"label":"INVESTIGATE","sub":"scout the encounter site",
 		"disabled":bool(CivilizationSystem.exploration_status().get("active",false)),
 		"on_press":func()->void: terrain._open_scout_dispatch_panel(),
