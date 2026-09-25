@@ -16,6 +16,7 @@ func before_test()->void:
 	DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
 	GameState.research_notification_mode="milestones"
 	Chronicle.pending_cards.clear()
+	ForeignDiplomacy.ensure();ForeignDiplomacy.audiences.erase("lives")
 
 func _same_field_pair()->Array:
 	var by_field:Dictionary={}
@@ -180,12 +181,45 @@ func test_scout_and_death_lines_are_retold_for_the_people()->void:
 	GameState.simulation_events.push_front({"day":0,"title":"Officeholder Died","description":"Sana Ivers died aged 53 while serving as Hearth Chief. The office and local duties now pass through the same succession rules as every other appointment.","domain":"institutions","severity":"major"})
 	Chronicle.ingest_day({"discoveries":[],"progression":[]})
 	var told:=Chronicle.entries("notice")
-	assert_int(told.size()).is_equal(2)
-	assert_str(String(told[1].title)).is_equal("The scouts come home")
-	assert_str(String(told[1].text)).contains("traveling band")
-	assert_str(String(told[1].text)).not_contains("No organized foreign polity")
-	assert_str(String(told[0].title)).is_equal("Sana Ivers has died")
-	assert_str(String(told[0].text)).not_contains("succession rules")
+	# The clerk's death line is left to the court's mourning (court_lives.gd).
+	assert_int(told.size()).is_equal(1)
+	assert_str(String(told[0].title)).is_equal("The scouts come home")
+	assert_str(String(told[0].text)).contains("traveling band")
+	assert_str(String(told[0].text)).not_contains("No organized foreign polity")
+
+func test_court_records_are_told_once_and_open_the_court()->void:
+	var Lives:=preload("res://scripts/court_lives.gd")
+	GameState.elapsed_days=200.0
+	Lives.record("death","Sana Ivers Is Dead","Sana Ivers, Hearth Chief, died aged 53.",{"pid":7},{"key":"court:death:person:7","focus":{"person_id":9}})
+	Lives.record("omen","The Sky Answered","Nine days after the god demanded rain, the rain came.",{"wish":"rain"})
+	Lives.record("rite","A Rite at the Camp","A bonfire: for the feast.")
+	Chronicle.ingest_day({"discoveries":[],"progression":[]})
+	Chronicle.ingest_day({"discoveries":[],"progression":[]})
+	var told:=Chronicle.entries("notice")
+	assert_int(told.size()).is_equal(3)
+	var death:Dictionary=told.filter(func(e:Dictionary)->bool:return String(e.kind)=="death")[0]
+	assert_str(String(death.tier)).is_equal("moment")
+	assert_str(String((death.action as Dictionary).kind)).is_equal("court")
+	assert_int(int(((death.action as Dictionary).focus as Dictionary).person_id)).is_equal(9)
+	assert_int(told.filter(func(e:Dictionary)->bool:return String(e.kind)=="omen").size()).is_equal(1)
+	assert_int(told.filter(func(e:Dictionary)->bool:return String(e.kind)=="ceremony").size()).is_equal(1)
+	# The court's ledger lines stay, marked as already told.
+	for ev in GameState.simulation_events:
+		if (ev as Dictionary).has("court_kind"):assert_bool(bool(ev.get("chronicle",false))).is_true()
+
+func test_the_season_tally_names_the_courts_dead()->void:
+	var Lives:=preload("res://scripts/court_lives.gd")
+	GameState.elapsed_days=10.0
+	var events:Array[Dictionary]=[]
+	HearthCount.advance(events)
+	HearthCount.tally("buried",3)
+	(Lives.state().remembered as Array).push_front({"key":"person:7","pid":7,"day":30,"died":30,"name":"Sana Ivers","title":"Hearth Chief"})
+	(Lives.state().remembered as Array).push_front({"key":"person:8","pid":8,"day":31,"died":31,"name":"Oda Reed","title":"of the hearth"})
+	GameState.elapsed_days=140.0
+	HearthCount.advance(events)
+	assert_int(events.size()).is_equal(1)
+	assert_str(String(events[0].description)).contains("Among the dead: Sana Ivers, Hearth Chief.")
+	assert_str(String(events[0].description)).not_contains("Oda Reed")
 
 func test_a_new_high_headcount_is_remembered_once()->void:
 	GameState.settlement_founded_day=0

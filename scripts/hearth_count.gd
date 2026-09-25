@@ -171,6 +171,18 @@ static func _change(people:int,last:int,annals:bool)->String:
 
 static func _officeholders_lost(start_day:int,end_day:int)->PackedStringArray:
 	var out:PackedStringArray=[]
+	# The court replaces the clerk's "Officeholder Died" line with its own
+	# mourning, so the Remembered roll (court_lives.gd) names the season's dead.
+	if Chronicle.active():
+		var lives:GDScript=load("res://scripts/court_lives.gd")
+		for remembered in lives.call("remembered"):
+			var died:=int((remembered as Dictionary).get("died",-1))
+			var office:=String((remembered as Dictionary).get("title",""))
+			if died<start_day or died>end_day or office=="" or office=="of the hearth":continue
+			var name:=String((remembered as Dictionary).get("name","")).strip_edges()
+			if name=="" or out.has(name+", "+office):continue
+			out.append(name+", "+office)
+			if out.size()>=3:return out
 	for event_variant in WorldSimulation.state.simulation_events:
 		if not event_variant is Dictionary:continue
 		var ev:Dictionary=event_variant
@@ -181,7 +193,9 @@ static func _officeholders_lost(start_day:int,end_day:int)->PackedStringArray:
 		if name.is_empty() or name==description:continue
 		var office:=""
 		if "while serving as " in description:office=description.get_slice("while serving as ",1).get_slice(".",0).strip_edges()
-		out.append(name+(", "+office if office!="" else ""))
+		var line:=name+(", "+office if office!="" else "")
+		if out.has(line) or Array(out).any(func(told:String)->bool:return told.begins_with(name+", ")):continue
+		out.append(line)
 		if out.size()>=3:break
 	return out
 

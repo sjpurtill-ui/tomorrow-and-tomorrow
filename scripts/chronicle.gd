@@ -276,6 +276,9 @@ static func _scan_ledger(c:Dictionary)->void:
 		if not event_variant is Dictionary:continue
 		var ev:Dictionary=event_variant
 		if bool(ev.get("chronicle",false)):continue
+		# The court tells a death in office itself, as a mourning moment
+		# (court_lives.gd), and removes this clerk's line; never tell it twice.
+		if String(ev.get("title",""))=="Officeholder Died":continue
 		var day:=int(ev.get("day",int(GameState.elapsed_days)))
 		if day<from_day:continue
 		var key:=_ledger_key(ev)
@@ -314,10 +317,6 @@ static func _retell(ev:Dictionary)->Array:
 				var founders:=parts[0].strip_edges()
 				var village:=parts[1].get_slice(".",0).strip_edges()
 				return ["%s is founded" % village,"%s of our people walked out and raised a new hearth at %s. They are still our people, and still the god's." % [founders,village]]
-		"Officeholder Died":
-			var name:=description.get_slice(" died aged",0).strip_edges()
-			if name!="" and name!=description:
-				return ["%s has died" % name,_first_sentences(description,1)]
 		"SCOUTS RETURN","RECRUITMENT PARTY RETURNS":
 			# Tell what was new, not the clerk's lines about what was not.
 			var kept:PackedStringArray=[]

@@ -124,9 +124,12 @@ static func remove_listener(callable:Callable)->void:
 		if entry.has("callable") and entry.callable==callable: listeners.erase(entry)
 		elif entry.has("ref") and (entry.ref as WeakRef).get_ref()==target and StringName(entry.method)==callable.get_method(): listeners.erase(entry)
 
-static func record(kind:String,title:String,text:String,extra:Dictionary={})->Dictionary:
+static func record(kind:String,title:String,text:String,extra:Dictionary={},told:Dictionary={})->Dictionary:
 	## The one place deaths, successions, omens, callbacks, rites and rivals'
 	## answers are written down. kind: death|succession|omen|callback|rite|rival.
+	## Each is also told in the people's Chronicle (chronicle.gd) as a moment or
+	## a notice whose card opens the court; `told` may set its "tier", "key",
+	## "focus" (AudienceModal.focus target) and "text" (Chronicle wording).
 	var entry:={"day":_day(),"kind":kind.substr(0,24),"title":title.substr(0,80),"text":text.strip_edges().substr(0,600)}
 	for key in extra:
 		var value:Variant=extra[key]
@@ -134,8 +137,13 @@ static func record(kind:String,title:String,text:String,extra:Dictionary={})->Di
 	var list:Array=state().chronicle
 	list.push_front(entry)
 	while list.size()>CHRONICLE_MAX: list.pop_back()
+	# Told once: a repeated key is simply not told again.
+	var chronicled:=preload("res://scripts/chronicle.gd").active()
+	_tell_chronicle(entry,told)
 	if kind!="rite":
 		var event:={"day":_day(),"title":title,"description":String(entry.text),"domain":"institutions" if kind in ["death","succession"] else "social","severity":"major" if kind in ["death","omen","succession"] else "notice","court_kind":kind}
+		# Already in the Chronicle: its daily ledger scan must not tell it twice.
+		if chronicled: event["chronicle"]=true
 		GameState.simulation_events.push_front(event)
 		if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
 	for listener in listeners.duplicate():
@@ -148,6 +156,22 @@ static func record(kind:String,title:String,text:String,extra:Dictionary={})->Di
 		if target==null or not is_instance_valid(target): listeners.erase(listener); continue
 		target.call(StringName(listener.method),entry.duplicate())
 	return entry
+
+## Chronicle tier and card mark for each kind of court record.
+const CHRONICLE_TIERS:={"death":"moment","succession":"notice","omen":"moment","callback":"notice","rite":"notice","rival":"notice"}
+const CHRONICLE_KINDS:={"death":"death","succession":"court","omen":"omen","callback":"court","rite":"ceremony","rival":"contact"}
+
+static func _tell_chronicle(entry:Dictionary,told:Dictionary)->Dictionary:
+	var Chronicle:=preload("res://scripts/chronicle.gd")
+	if not Chronicle.active(): return {}
+	var kind:=String(entry.kind)
+	var text:=String(told.get("text",entry.text))
+	var key:=String(told.get("key","court:%s:%d:%s" % [kind,int(entry.day),(String(entry.title)+text).md5_text().left(10)]))
+	var focus:Dictionary=told.get("focus",{}) if told.get("focus") is Dictionary else {}
+	# The court's own ledger line stands in for the event ledger (rites have none).
+	return Chronicle.record({"key":key,"day":int(entry.day),"title":String(entry.title),"text":text,
+		"tier":String(told.get("tier",CHRONICLE_TIERS.get(kind,"notice"))),"kind":String(CHRONICLE_KINDS.get(kind,"court")),
+		"action":{"kind":"court","focus":focus},"ledger":false,"domain":"institutions" if kind in ["death","succession","callback"] else "court"})
 
 static func chronicle(limit:int=40,kind:String="")->Array[Dictionary]:
 	var out:Array[Dictionary]=[]
@@ -337,10 +361,14 @@ static func _on_official_death(person:Dictionary,day:int)->void:
 	while list.size()>REMEMBERED_MAX: list.pop_back()
 	var given:=EraNames.given_of(String(person.get("name","")))
 	_replace_hr_notice(String(person.get("name","")))
-	record("death","%s Is Dead" % String(person.get("name","")).substr(0,60),"%s, %s, died aged %d. They %s. The court gathers at the fire to mourn them." % [String(person.get("name","")),String(office.title),age,deed],{"pid":pid})
+	# The mourning is filed first so the Chronicle's card can open it.
+	# Summoning the one who holds the mourning opens it (AudienceHall.summon).
+	var holder_pid:=0 if executed else _file_mourning(person,office,day)
+	var said:="%s, %s, died aged %d. They %s. The court gathers at the fire to mourn them." % [String(person.get("name","")),String(office.title),age,deed]
+	var told:={"key":"court:death:person:%d" % pid,"focus":{"person_id":holder_pid} if holder_pid>0 else {}}
+	if holder_pid>0: told["text"]=said+" Summon the court to name who follows."
+	record("death","%s Is Dead" % String(person.get("name","")).substr(0,60),said,{"pid":pid},told)
 	_mark_rite("pyre","for "+given,day,5,pid)
-	if executed: return
-	_file_mourning(person,office,day)
 
 static func _replace_hr_notice(name:String)->void:
 	## The court's own words replace the government's one-line notice.
@@ -365,7 +393,7 @@ static func _on_notable_death(person:Dictionary,day:int)->void:
 	while list.size()>REMEMBERED_MAX: list.pop_back()
 	_replace_hr_notice(String(person.get("name","")))
 	var grief:=(" %s, keeps vigil." % mourners[0]) if not mourners.is_empty() else ""
-	record("death","%s Is Dead" % String(person.get("name","")).substr(0,60),"%s died aged %d. They %s.%s" % [String(person.get("name","")),age,deed,grief],{"pid":pid,"notable":true})
+	record("death","%s Is Dead" % String(person.get("name","")).substr(0,60),"%s died aged %d. They %s.%s" % [String(person.get("name","")),age,deed,grief],{"pid":pid,"notable":true},{"key":"court:death:person:%d" % pid,"tier":"notice"})
 
 static func _on_figure_death(figure:Dictionary)->void:
 	var role:=String(figure.get("role",""))
@@ -377,7 +405,7 @@ static func _on_figure_death(figure:Dictionary)->void:
 	var list:Array=state().remembered
 	list.push_front(entry)
 	while list.size()>REMEMBERED_MAX: list.pop_back()
-	record("death","%s Is Dead" % String(figure.get("name","")).substr(0,60),"%s, %s, is dead. They %s." % [String(figure.get("name","")),title.to_lower(),deed])
+	record("death","%s Is Dead" % String(figure.get("name","")).substr(0,60),"%s, %s, is dead. They %s." % [String(figure.get("name","")),title.to_lower(),deed],{},{"key":"court:death:figure:"+String(figure.get("id","")),"tier":"notice"})
 
 static func _acting(office:Dictionary)->Dictionary:
 	if String(office.key)=="settlement": return GovernmentPeopleSystem.settlement_leader(String(office.settlement_id))
@@ -468,11 +496,13 @@ static func _holder_for(office:Dictionary,candidates:Array[Dictionary],dead_pid:
 		if int(official.get("person_id",0))!=dead_pid: return official
 	return {}
 
-static func _file_mourning(dead:Dictionary,office:Dictionary,day:int)->void:
+static func _file_mourning(dead:Dictionary,office:Dictionary,day:int)->int:
+	## Returns the person_id of the one who holds the mourning, or 0 when no
+	## mourning could be held.
 	var candidates:=_candidates(dead,office)
-	if candidates.is_empty(): return
+	if candidates.is_empty(): return 0
 	var holder:=_holder_for(office,candidates,int(dead.get("person_id",0)))
-	if holder.is_empty(): return
+	if holder.is_empty(): return 0
 	var dead_pid:=int(dead.get("person_id",0))
 	var given:=EraNames.given_of(String(dead.get("name","")))
 	var acting:=_acting(office)
@@ -492,6 +522,7 @@ static func _file_mourning(dead:Dictionary,office:Dictionary,day:int)->void:
 		"mourning":{"dead_pid":dead_pid,"dead":String(dead.get("name","")).substr(0,60),"given":given,"office_key":String(office.key),"settlement_id":String(office.settlement_id),
 			"title":String(office.title).substr(0,60),"deed":_deed(dead).substr(0,120),"served":_years_words(int(dead.get("experience_months",0))),"candidates":rows}}
 	Hall._file_matter(audience,[])
+	return int(holder.person_id)
 
 static func on_open(audience:Dictionary)->void:
 	## A lives matter was taken up: stage it in the court's own voices.
@@ -635,7 +666,7 @@ static func _resolve_mourning(audience:Dictionary,situation:Dictionary,option_id
 		passed.append(EraNames.given_of(String(person.get("name",""))))
 	_set_successor(int(m.get("dead_pid",0)),String(chosen.get("name","")))
 	var passed_text:=(" %s will remember being passed over." % " and ".join(passed)) if not passed.is_empty() else ""
-	record("succession","The God Chose %s" % chosen_given,"Before the fire, the god chose %s to follow %s as %s.%s" % [String(chosen.get("name","")),given,String(office.title).to_lower(),passed_text],{"pid":chosen_pid})
+	record("succession","The God Chose %s" % chosen_given,"Before the fire, the god chose %s to follow %s as %s.%s" % [String(chosen.get("name","")),given,String(office.title).to_lower(),passed_text],{"pid":chosen_pid},{"key":"court:succession:%d" % int(m.get("dead_pid",0)),"focus":{"person_id":chosen_pid}})
 	return {"outcome":"You chose %s to follow %s as %s.%s" % [String(chosen.get("name","")),given,String(office.title).to_lower(),passed_text],"reaction":"delighted"}
 
 static func _set_successor(dead_pid:int,name:String)->void:
@@ -783,7 +814,7 @@ static func _file_callback(order:Dictionary,day:int)->void:
 	audience.situation={"type":"callback","ask":"callback:%s" % String(order.get("id","")).substr(0,40),"headline":"brings word of an old order","summary":summary.substr(0,400),"spoken":spoken.substr(0,400),
 		"occasion":{"type":"callback","text":"what came of %s" % since,"day":day,"crisis":false}}
 	Hall._file_matter(audience,[])
-	record("callback","An Old Order Remembered","%s has word for you of what came of it: %s" % [String(person.get("name","")),spoken],{"pid":int(person.person_id)})
+	record("callback","An Old Order Remembered","%s has word for you of what came of it: %s" % [String(person.get("name","")),spoken],{"pid":int(person.person_id)},{"key":"court:callback:"+String(order.get("id","")).substr(0,40),"focus":{"person_id":int(person.person_id)}})
 
 # --------------------------------------------------------------------------
 # Omens: when the sky happens to agree
@@ -855,7 +886,8 @@ static func _omen(omen:Dictionary,day:int)->void:
 	var days:=day-int(omen.get("day",day))
 	var wish_words:=String(spec.get("wish","a sign"))
 	var spoken:=_say(_manner(person),"omen",{"wish":wish_words,"sign":sign},"omen:%d:%s" % [day,wish]) if not person.is_empty() else ""
-	record("omen","The Sky Answered","%s after the god demanded %s, %s. The people swear it was the god's doing." % [("%d days" % days) if days!=1 else "A day",wish_words,sign],{"wish":wish})
+	record("omen","The Sky Answered","%s after the god demanded %s, %s. The people swear it was the god's doing." % [("%d days" % days) if days!=1 else "A day",wish_words,sign],{"wish":wish},
+		{"key":"court:omen:%d:%s" % [day,wish],"focus":{"person_id":int(person.person_id)} if not person.is_empty() else {}})
 	_mark_rite("bonfire","thanks for "+wish_words,day,4,int(person.get("person_id",0)))
 	if person.is_empty(): return
 	var audience:=Hall._new_audience("court","petition",day)
@@ -948,17 +980,17 @@ static func _rivals(day:int)->void:
 		match rival_stance(civ_id):
 			"tribute":
 				Hall._add_occasion({"key":"dread_tribute:%s:%d" % [civ_id,day],"type":"dread_tribute","civ_id":civ_id,"day":day,"not_before":day,"expires":day+90,"crisis":true,"data":{"text":"they fear your wrath"}})
-				record("rival","%s Send Tribute" % name.substr(0,40),"Word of the god's wrath reached %s. Their envoys are on the road with tribute." % name,{"civ_id":civ_id})
+				record("rival","%s Send Tribute" % name.substr(0,40),"Word of the god's wrath reached %s. Their envoys are on the road with tribute." % name,{"civ_id":civ_id},{"focus":{"civ_id":civ_id}})
 			"provoke":
 				Hall._add_occasion({"key":"dread_test:%s:%d" % [civ_id,day],"type":"dread_test","civ_id":civ_id,"day":day,"not_before":day,"expires":day+90,"crisis":true,"data":{"text":"they mean to test whether the god's wrath is real"}})
-				record("rival","%s Test You" % name.substr(0,40),"%s have heard what is said of the god and mean to see if it is true." % name,{"civ_id":civ_id})
+				record("rival","%s Test You" % name.substr(0,40),"%s have heard what is said of the god and mean to see if it is true." % name,{"civ_id":civ_id},{"focus":{"civ_id":civ_id}})
 			_:
 				ForeignDiplomacy.remember(civ_id,"We keep our hunters off the far ridge. The god of that people is not to be crossed.")
 				var index:=Hall._civ_index(civ_id)
 				if index>=0:
 					var rel:Dictionary=CivilizationSystem.civilizations[index].get("player_relation",{})
 					rel["border_tension"]=clampf(float(rel.get("border_tension",0.0))-0.04*d,0.0,1.0)
-				record("rival","%s Keep Away" % name.substr(0,40),"%s keep their hunters off the ridge since word of the god's wrath reached them." % name,{"civ_id":civ_id})
+				record("rival","%s Keep Away" % name.substr(0,40),"%s keep their hunters off the ridge since word of the god's wrath reached them." % name,{"civ_id":civ_id},{"focus":{"civ_id":civ_id}})
 
 # --------------------------------------------------------------------------
 # Portraits: one picture per living court member

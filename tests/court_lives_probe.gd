@@ -22,6 +22,7 @@ const ModalProbe:=preload("res://tests/audience_modal_probe.gd")
 const Director:=preload("res://scripts/audience_director.gd")
 const RiteMarks:=preload("res://scripts/rite_marks.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
+const Chronicle:=preload("res://scripts/chronicle.gd")
 const ORDERS:=["Hold a feast in my honour.","Pray to me at dawn and dusk.","Carve my likeness into the cliff.","Build a palisade around the village.","Teach the children to count the stars.","Make it rain tomorrow."]
 
 var failures:Array[String]=[]
@@ -130,6 +131,17 @@ func _test_death_and_succession()->void:
 	_check(heard.any(func(e:Dictionary)->bool:return String(e.kind)=="death"),"the chronicle hook heard the death")
 	var events:=GameState.simulation_events.filter(func(e:Variant)->bool:return e is Dictionary and String(e.get("title",""))=="Officeholder Died" and String(e.get("description","")).begins_with(String(chief.name)))
 	_check(events.is_empty(),"the HR notice was replaced by the court's words")
+	# The people's Chronicle tells the death once, as the court's mourning.
+	Chronicle.ingest_day({"discoveries":[],"progression":[]})
+	var told_death:=Chronicle.entries().filter(func(e:Dictionary)->bool:return String(e.get("kind",""))=="death" and String(e.get("title","")).contains(String(chief.name)))
+	_check(told_death.size()==1,"the Chronicle tells the chief's death exactly once (%d)" % told_death.size())
+	if told_death.size()==1:
+		var told:Dictionary=told_death[0]
+		transcript.append("CHRONICLE [%s] %s · %s" % [String(told.tier),String(told.title),String(told.text)])
+		_check(String(told.key)=="court:death:person:%d" % pid,"the told death is the court's mourning")
+		_check(String(told.tier) in ["moment","notice"],"a death in office is a moment or notice")
+		var action:Dictionary=told.get("action",{})
+		_check(String(action.get("kind",""))=="court" and int((action.get("focus",{}) as Dictionary).get("person_id",0))==int((mourning.holder as Dictionary).get("person_id",-1)),"the death card opens the court on the mourning's holder")
 	# The god summons the holder: the modal opens on the mourning.
 	var terrain:=ModalProbe.TerrainDouble.new(); terrain.name="TerrainDouble"; add_child(terrain)
 	var director:=Director.new(); director.terrain=terrain; add_child(director)
@@ -169,6 +181,7 @@ func _test_death_and_succession()->void:
 	_check(int(_office_holder("Steward").get("person_id",0))==chosen_pid,"GovernmentPeopleSystem appointed the chosen successor")
 	_check(String(Lives.remembered()[0].get("successor",""))!="","the Remembered roll records who followed")
 	_check(heard.any(func(e:Dictionary)->bool:return String(e.kind)=="succession"),"the chronicle hook heard the succession")
+	_check(Chronicle.entries("notice").any(func(e:Dictionary)->bool:return String(e.get("key",""))=="court:succession:%d" % pid),"the Chronicle tells the god's choice of successor")
 	for line in (Hall.find(String(opened.id)).get("lines",[]) as Array).slice(lines.size()):
 		transcript.append("AFTER [%s] %s" % [String(line.get("speaker","")) if String(line.get("speaker",""))!="" else "—",String(line.get("text",""))])
 	if is_instance_valid(modal): modal.queue_free()
