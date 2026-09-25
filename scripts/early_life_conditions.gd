@@ -109,6 +109,9 @@ const CROWDING_CONCEPTION:=1.2
 ## recovers instead of dying out.
 const SPARE_LAND_ONSET:=0.3
 const SPARE_LAND_CONCEPTION:=2.0
+## Crowd diseases need numbers: a remnant band sheds part of the era's excess
+## mortality burden (about -18% at 37 people, -30% for a handful).
+const SPARE_LAND_HEALTH:=1.0
 
 ## People the society's settled land can carry now: territory by era and
 ## settlement count, raised by (era-capped) cultivation, soil and storage
@@ -230,15 +233,17 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 	var relief:=burden_relief(discovery)
 	var capacity:=carrying_capacity(state,discovery)
 	var crowding:=maxf(0.0,float(state.population_exact)/maxf(1.0,capacity)-CROWDING_ONSET)
-	var burden:Dictionary={}
-	for key:String in ERA_BURDEN:
-		var crowd:=1.0+crowding*CROWDING_MORTALITY if key in ["under5","child","adult","elder"] else 1.0
-		burden[key]=lerpf(1.0,(1.0+(float(ERA_BURDEN[key])-1.0)*(1.0-relief))*crowd,blend)
 	# Spare land rescues only a remnant: it is judged against the founding
 	# territory (not later capacity), so a band thinned below a few score
 	# people recovers while a large but slow-growing society gets no boost.
 	var founding:=float((TERRITORY_CAPACITY[0] as Array)[1])
 	var spare:=maxf(0.0,SPARE_LAND_ONSET-float(state.population_exact)/founding)
+	var burden:Dictionary={}
+	for key:String in ERA_BURDEN:
+		var by_age:=key in ["under5","child","adult","elder"]
+		var crowd:=1.0+crowding*CROWDING_MORTALITY if by_age else 1.0
+		var remnant:=1.0-spare*SPARE_LAND_HEALTH if by_age else 1.0
+		burden[key]=lerpf(1.0,(1.0+(float(ERA_BURDEN[key])-1.0)*(1.0-relief)*remnant)*crowd,blend)
 	result["conception"]=float(result.conception)*lerpf(1.0,maxf(0.3,1.0-crowding*CROWDING_CONCEPTION)*(1.0+spare*SPARE_LAND_CONCEPTION),blend)
 	result["carrying_capacity"]=capacity
 	result["crowding"]=crowding

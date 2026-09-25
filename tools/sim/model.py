@@ -56,6 +56,7 @@ CROWDING_MORTALITY = float(g.const("scripts/early_life_conditions.gd", "CROWDING
 CROWDING_CONCEPTION = float(g.const("scripts/early_life_conditions.gd", "CROWDING_CONCEPTION", default=0.0, optional=True))
 SPARE_LAND_ONSET = float(g.const("scripts/early_life_conditions.gd", "SPARE_LAND_ONSET", default=0.0, optional=True))
 SPARE_LAND_CONCEPTION = float(g.const("scripts/early_life_conditions.gd", "SPARE_LAND_CONCEPTION", default=0.0, optional=True))
+SPARE_LAND_HEALTH = float(g.const("scripts/early_life_conditions.gd", "SPARE_LAND_HEALTH", default=0.0, optional=True))
 SUSTAINABLE_SPECIALISTS = g.const("scripts/society_model.gd", "SUSTAINABLE_SPECIALISTS", default=[], optional=True)
 SPECIALIST_UPKEEP = g.const("scripts/society_model.gd", "SPECIALIST_UPKEEP", default={}, optional=True)
 DECREE_COVER = g.const("scripts/early_life_conditions.gd", "DECREE_COVER", default={}, optional=True)
@@ -820,9 +821,10 @@ class Surrogate:
             self.carrying_capacity = base * territory * methods * lerp(0.6, 1.0, grounds)
             crowding = max(0.0, self.population / max(1.0, self.carrying_capacity) - CROWDING_ONSET)
         self.crowding = crowding
-        care["burden"] = {k: (1.0 + (float(v) - 1.0) * scale * (1.0 - relief)) * ((1.0 + crowding * CROWDING_MORTALITY) if k in ("under5", "child", "adult", "elder") else 1.0) for k, v in ERA_BURDEN.items()}
         # engine: spare land is judged against the founding territory only
         spare = max(0.0, SPARE_LAND_ONSET - self.population / float(TERRITORY_CAPACITY[0][1])) if TERRITORY_CAPACITY else 0.0
+        age_keys = ("under5", "child", "adult", "elder")
+        care["burden"] = {k: (1.0 + (float(v) - 1.0) * scale * (1.0 - relief) * ((1.0 - spare * SPARE_LAND_HEALTH) if k in age_keys else 1.0)) * ((1.0 + crowding * CROWDING_MORTALITY) if k in age_keys else 1.0) for k, v in ERA_BURDEN.items()}
         care["conception"] *= max(0.3, 1.0 - crowding * CROWDING_CONCEPTION) * (1.0 + spare * SPARE_LAND_CONCEPTION)
         care["excess_weight"] = {k: float(v) for k, v in EXCESS_WEIGHT.items()}
         care["coverage"] = cover

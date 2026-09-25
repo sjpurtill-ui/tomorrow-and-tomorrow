@@ -1,6 +1,6 @@
 # Strategy sweep (295 strategies × 3 seeds × 600 years, surrogate)
 
-Generated 2026-09-25 02:04 by `python tools/sim/sweep_strategies.py --random 160 --seeds 3 --years 600` in 1035 s. Model and its calibration: `docs/research/SURROGATE_SIM.md`. Lead margins: docs/research/benchmarks_600.json allowed_deviation (milestones up to 20% early but never before band_low or after band_high; facets up to 15% of |high - typical| past high).
+Generated 2026-09-25 02:42 by `python tools/sim/sweep_strategies.py --random 160 --seeds 3 --years 600` in 1057 s. Model and its calibration: `docs/research/SURROGATE_SIM.md`. Lead margins: docs/research/benchmarks_600.json allowed_deviation (milestones up to 20% early but never before band_low or after band_high; facets up to 15% of |high - typical| past high).
 
 Outcome facets compared: Population, Life expectancy, Infant mortality /1000, Food security, Health, Production capacity, Infrastructure capacity, Logistics capacity, Institutions capacity, Security capacity, Culture capacity, Ecology, Discoveries known, Education index. A strategy dominates another when it is at least as good on every facet (within ±3% seed noise) and better on one.
 
@@ -121,7 +121,7 @@ Every run is classified per century (`FocusBench.classify`) and judged against i
 | pair:labor+health | 400 | labor 0.50, health 0.50 | UNPAID health |
 | pair:labor+health | 500 | labor 0.50, health 0.50 | UNPAID health |
 | pair:labor+health | 600 | labor 0.50, health 0.50 | UNPAID health |
-| pair:labor+security | 600 | labor 0.50, security 0.50 | ABOVE FOCUS HIGH cbr=46.08 |
+| pair:labor+security | 600 | labor 0.50, security 0.50 | ABOVE FOCUS HIGH cbr=46.09 |
 | pair:infrastructure+demography | 100 | infrastructure 0.50, demography 0.50 | UNPAID infrastructure |
 | pair:infrastructure+demography | 200 | infrastructure 0.50, demography 0.50 | UNPAID infrastructure |
 | pair:infrastructure+demography | 300 | infrastructure 0.50, demography 0.50 | UNPAID infrastructure |
@@ -158,9 +158,9 @@ Every run is classified per century (`FocusBench.classify`) and judged against i
 | focus:knowledge | -357/-457 | -0.3/-0.1 | 5/3 | 0.00/-0.00 | 0.00/0.00 | -0.01/-0.02 | -0.01/-0.02 | -0.04/-0.05 | -0.04/-0.05 | -0.05/-0.07 | -0.03/-0.04 | 0.00/0.01 | -1/0 | -0.00/-0.02 |
 | focus:institutions | -318/-268 | -1.6/-0.3 | 19/5 | 0.00/-0.00 | 0.00/0.00 | -0.02/-0.02 | -0.02/-0.02 | -0.06/-0.05 | 0.11/0.12 | -0.01/-0.02 | 0.08/0.06 | -0.04/-0.04 | -136/0 | -0.04/-0.02 |
 | focus:culture | -413/-344 | -1.8/-0.3 | 22/4 | 0.00/-0.00 | 0.00/0.00 | -0.03/-0.02 | -0.02/-0.02 | -0.05/-0.04 | -0.02/-0.01 | -0.03/-0.02 | 0.02/0.02 | -0.02/-0.02 | -137/0 | -0.04/-0.02 |
-| focus:labor | -677/-2,826 | -2.0/0.4 | 34/6 | 0.00/0.00 | 0.00/0.00 | -0.02/-0.04 | -0.03/-0.05 | -0.06/-0.06 | -0.04/-0.03 | -0.04/-0.06 | -0.03/-0.03 | 0.18/0.17 | -290/-208 | -0.06/-0.06 |
-| focus:production | -531/-538 | -2.0/-0.1 | 25/3 | 0.00/-0.00 | 0.00/0.00 | -0.02/-0.01 | -0.03/-0.03 | -0.08/-0.05 | -0.08/-0.06 | -0.08/-0.07 | -0.04/-0.04 | -0.09/-0.09 | -247/-30 | -0.03/-0.02 |
-| focus:infrastructure | -546/-453 | -1.5/0.0 | 20/2 | 0.00/-0.00 | 0.00/0.00 | -0.03/-0.03 | -0.00/0.01 | -0.05/-0.03 | -0.07/-0.04 | -0.07/-0.06 | -0.03/-0.03 | -0.01/-0.01 | -229/-6 | -0.04/-0.02 |
+| focus:labor | -674/-2,816 | -2.0/0.4 | 34/6 | 0.00/0.00 | 0.00/0.00 | -0.02/-0.04 | -0.03/-0.05 | -0.06/-0.06 | -0.04/-0.03 | -0.04/-0.06 | -0.03/-0.03 | 0.18/0.17 | -284/-200 | -0.05/-0.06 |
+| focus:production | -531/-537 | -2.0/-0.1 | 25/3 | 0.00/-0.00 | 0.00/0.00 | -0.02/-0.01 | -0.03/-0.03 | -0.08/-0.05 | -0.08/-0.06 | -0.08/-0.07 | -0.04/-0.04 | -0.09/-0.09 | -247/-29 | -0.03/-0.02 |
+| focus:infrastructure | -545/-451 | -1.5/0.0 | 20/2 | 0.00/-0.00 | 0.00/0.00 | -0.03/-0.03 | -0.00/0.01 | -0.05/-0.03 | -0.07/-0.04 | -0.07/-0.06 | -0.03/-0.03 | -0.01/-0.01 | -228/-7 | -0.04/-0.02 |
 | focus:nutrition | -238/-34 | -0.4/-0.2 | 6/3 | 0.00/-0.00 | 0.00/0.00 | -0.02/-0.02 | -0.02/-0.02 | -0.02/-0.02 | 0.00/0.00 | -0.00/-0.01 | 0.00/-0.00 | 0.37/0.22 | -65/0 | -0.03/-0.02 |
 | focus:health | -387/-357 | -0.2/0.0 | 2/0 | 0.00/-0.00 | 0.00/0.00 | -0.03/-0.02 | -0.03/-0.02 | -0.07/-0.04 | -0.05/-0.04 | -0.05/-0.05 | -0.03/-0.02 | -0.25/-0.23 | -177/0 | -0.04/-0.02 |
 | focus:demography | -74/-250 | -0.7/-0.4 | 5/2 | -0.00/-0.00 | 0.00/0.00 | -0.03/-0.02 | -0.02/-0.02 | -0.05/-0.04 | -0.03/-0.03 | -0.04/-0.04 | -0.01/-0.01 | -0.15/-0.14 | -95/0 | -0.04/-0.02 |
@@ -168,7 +168,7 @@ Every run is classified per century (`FocusBench.classify`) and judged against i
 | focus:ecology | -387/-265 | -0.7/-0.2 | 9/4 | 0.00/0.00 | 0.00/0.00 | -0.03/-0.02 | -0.02/-0.02 | -0.05/-0.03 | -0.03/-0.02 | -0.04/-0.03 | -0.02/-0.01 | 0.55/0.38 | -148/0 | -0.04/-0.02 |
 | focus:security | -454/-368 | -1.8/-0.1 | 23/4 | 0.00/-0.00 | 0.00/0.00 | -0.03/-0.02 | -0.03/-0.02 | -0.06/-0.05 | -0.05/-0.03 | 0.19/0.22 | -0.02/-0.02 | -0.01/-0.00 | -206/0 | -0.05/-0.02 |
 | focus:balanced | +0/+0 | 0.0/0.0 | 0/0 | 0.00/0.00 | 0.00/0.00 | 0.00/0.00 | 0.00/0.00 | 0.00/0.00 | 0.00/0.00 | 0.00/0.00 | 0.00/0.00 | 0.00/0.00 | 0/0 | 0.00/0.00 |
-| focus:militarised_agrarian_state | -652/-2,550 | -1.6/0.7 | 27/0 | 0.00/0.00 | 0.00/0.00 | -0.02/-0.03 | -0.02/-0.04 | -0.06/-0.03 | 0.03/0.03 | 0.20/0.22 | -0.01/-0.00 | 0.13/0.13 | -221/-118 | -0.04/-0.03 |
+| focus:militarised_agrarian_state | -650/-2,545 | -1.6/0.7 | 27/1 | 0.00/0.00 | 0.00/0.00 | -0.02/-0.02 | -0.02/-0.04 | -0.06/-0.03 | 0.03/0.03 | 0.20/0.22 | -0.01/-0.00 | 0.13/0.13 | -221/-112 | -0.04/-0.03 |
 | focus:maritime_trading_league | -449/-186 | -1.6/0.0 | 19/1 | 0.00/0.00 | 0.00/0.00 | -0.01/-0.00 | -0.02/-0.01 | 0.07/0.09 | -0.05/-0.04 | -0.03/-0.02 | -0.03/-0.03 | 0.01/0.01 | -144/0 | -0.01/-0.00 |
 | focus:temple_scribal_economy | +89/-57 | -0.6/-0.1 | 5/2 | 0.00/0.00 | 0.00/0.00 | 0.00/-0.00 | -0.00/-0.01 | -0.02/-0.03 | 0.08/0.08 | -0.00/-0.01 | 0.07/0.06 | -0.07/-0.06 | 1/0 | 0.00/-0.00 |
 | focus:expansionist_settler_state | -2/-64 | -0.3/-0.1 | 2/1 | 0.00/0.00 | 0.00/0.00 | -0.02/-0.01 | -0.01/-0.01 | 0.03/0.03 | -0.02/-0.02 | 0.06/0.07 | -0.00/-0.00 | -0.06/-0.05 | -52/0 | -0.02/-0.00 |
@@ -180,20 +180,20 @@ Every run is classified per century (`FocusBench.classify`) and judged against i
 
 | strategy | century | Population | Life expectancy | Infant mortality /1000 | Food security | Health | Production capacity | Infrastructure capacity | Logistics capacity | Institutions capacity | Security capacity | Culture capacity | Ecology | Discoveries known | Education index |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| research-first->care@100 | 300 | -305 | -0.0 | -0 | 0.00 | 0.00 | -0.02 | -0.03 | -0.05 | -0.03 | -0.07 | -0.09 | 0.07 | -206 | -0.03 |
+| research-first->care@100 | 300 | -303 | -0.0 | -0 | 0.00 | 0.00 | -0.02 | -0.03 | -0.05 | -0.03 | -0.07 | -0.09 | 0.07 | -206 | -0.03 |
 | research-first->care@100 | 600 | -62 | -0.2 | 1 | 0.00 | 0.00 | -0.03 | -0.07 | -0.11 | -0.05 | -0.12 | -0.09 | 0.07 | -357 | -0.07 |
 | care-first->research@100 | 300 | -223 | -0.7 | 8 | 0.00 | 0.00 | -0.01 | -0.00 | -0.02 | -0.05 | -0.10 | -0.11 | 0.04 | -181 | 0.01 |
 | care-first->research@100 | 600 | -810 | -0.5 | 8 | -0.00 | 0.00 | -0.03 | -0.01 | -0.03 | -0.06 | -0.14 | -0.12 | 0.05 | -305 | -0.00 |
-| research-first->care@200 | 300 | -608 | -0.0 | -0 | 0.00 | 0.00 | -0.02 | -0.02 | -0.03 | -0.02 | -0.07 | -0.08 | 0.07 | -183 | -0.02 |
-| research-first->care@200 | 600 | -105 | -0.2 | 0 | 0.00 | 0.00 | -0.03 | -0.06 | -0.09 | -0.04 | -0.12 | -0.09 | 0.07 | -311 | -0.06 |
+| research-first->care@200 | 300 | -606 | -0.0 | -0 | 0.00 | 0.00 | -0.02 | -0.02 | -0.03 | -0.02 | -0.07 | -0.08 | 0.07 | -183 | -0.02 |
+| research-first->care@200 | 600 | -103 | -0.2 | 0 | 0.00 | 0.00 | -0.03 | -0.06 | -0.09 | -0.04 | -0.12 | -0.09 | 0.07 | -311 | -0.06 |
 | care-first->research@200 | 300 | -18 | -0.6 | 7 | 0.00 | 0.00 | -0.00 | -0.00 | -0.02 | -0.04 | -0.10 | -0.11 | 0.04 | -116 | 0.01 |
 | care-first->research@200 | 600 | -645 | -0.4 | 6 | -0.00 | 0.00 | -0.02 | -0.01 | -0.03 | -0.06 | -0.14 | -0.12 | 0.05 | -242 | -0.00 |
-| research-first->care@300 | 300 | -716 | -3.1 | 54 | 0.00 | 0.00 | -0.03 | -0.02 | -0.04 | -0.06 | -0.10 | -0.12 | 0.04 | -346 | -0.02 |
-| research-first->care@300 | 600 | -1,654 | 0.9 | -9 | 0.00 | 0.00 | -0.04 | -0.05 | -0.08 | -0.04 | -0.12 | -0.09 | 0.07 | -272 | -0.05 |
+| research-first->care@300 | 300 | -716 | -3.0 | 54 | 0.00 | 0.00 | -0.03 | -0.02 | -0.04 | -0.06 | -0.10 | -0.12 | 0.04 | -346 | -0.02 |
+| research-first->care@300 | 600 | -1,645 | 0.9 | -9 | 0.00 | 0.00 | -0.04 | -0.05 | -0.08 | -0.04 | -0.12 | -0.09 | 0.07 | -272 | -0.05 |
 | care-first->research@300 | 300 | +133 | -0.8 | 6 | 0.00 | 0.00 | -0.03 | -0.04 | -0.10 | -0.04 | -0.08 | -0.09 | 0.07 | -311 | -0.06 |
 | care-first->research@300 | 600 | -575 | -0.1 | 3 | -0.00 | 0.00 | -0.02 | -0.01 | -0.03 | -0.06 | -0.14 | -0.12 | 0.05 | -209 | -0.00 |
 | crush-research | 300 | -582 | -0.3 | 5 | 0.00 | 0.00 | -0.01 | -0.01 | -0.06 | -0.07 | -0.09 | -0.06 | 0.07 | -4 | -0.00 |
-| crush-research | 600 | -2,343 | 0.7 | -4 | 0.00 | 0.00 | -0.03 | -0.02 | -0.08 | -0.08 | -0.10 | -0.07 | 0.08 | -1 | -0.02 |
+| crush-research | 600 | -2,341 | 0.7 | -4 | 0.00 | 0.00 | -0.03 | -0.02 | -0.08 | -0.08 | -0.10 | -0.07 | 0.08 | -1 | -0.02 |
 | scouting-heavy@3% | 300 | +33 | -0.1 | 1 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.03 | 0.00 | 2 | 0.00 |
 | scouting-heavy@3% | 600 | +0 | -0.0 | 0 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.03 | 0.00 | 0 | 0.00 |
 | scouting-heavy@6% | 300 | +34 | -0.1 | 1 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.03 | 0.00 | 2 | 0.00 |
@@ -224,7 +224,7 @@ Every run is classified per century (`FocusBench.classify`) and judged against i
 - **200**: mix010 (beats 190), mix069 (beats 168), mix148 (beats 159), mix057 (beats 149), sensible (beats 143)
 - **300**: mix010 (beats 194), mix057 (beats 182), mix148 (beats 163), focus:nutrition (beats 160), sensible (beats 154)
 - **400**: mix057 (beats 232), focus:nutrition (beats 227), mix010 (beats 203), mix148 (beats 162), sensible (beats 157)
-- **500**: focus:nutrition (beats 251), mix057 (beats 229), mix010 (beats 193), focus:insular_subsistence_people (beats 186), focus:ecology (beats 181)
+- **500**: focus:nutrition (beats 251), mix057 (beats 229), mix010 (beats 193), focus:insular_subsistence_people (beats 186), focus:ecology (beats 180)
 - **600**: focus:nutrition (beats 242), mix057 (beats 238), focus:insular_subsistence_people (beats 215), mix010 (beats 193), focus:ecology (beats 184)
 
 ## Benchmark lead violations
@@ -291,7 +291,7 @@ Every run is classified per century (`FocusBench.classify`) and judged against i
 | mix092 | ox_drawn_ard | 110 | 145 | too early |
 | mix102 | ox_drawn_ard | 109 | 145 | too early |
 | mix106 | copper_smelting | 64 | 90 | too early |
-| mix107 | ox_drawn_ard | 112 | 145 | too early |
+| mix107 | ox_drawn_ard | 113 | 145 | too early |
 | mix109 | copper_smelting | 71 | 90 | too early |
 
 3 strategy × century × metric outcomes are better than the era's benchmark high by more than the allowed deviation.

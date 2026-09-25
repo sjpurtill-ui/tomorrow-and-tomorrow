@@ -39,6 +39,7 @@ User direction: "Progression needs to match the year benchmarks in realistic his
   - Lowered by worn-out wild grounds.
 - **Crowding.** Above 60% of capacity, a crowded society marries later (conception × `1 − 1.2·crowding`) and dies a little more (mortality × `1 + 0.3·crowding`). Growth settles near capacity and then follows it as methods, fields and daughter settlements extend it.
 - **Spare land.** A remnant below 30% of the founding territory's capacity (under 96 people) finds land plentiful, and couples marry earlier (`SPARE_LAND_CONCEPTION` 2.0): about +30% to conception at 50 people, up to +60% for a handful. A thinned-out band recovers instead of dying out. The test uses the founding territory, not later capacity, so a large society that grows slowly (for example one neglecting care) gets no extra births.
+- **Remnant health.** Crowd diseases need numbers, so the same remnant also sheds part of the era's excess mortality burden (`SPARE_LAND_HEALTH` 1.0): about −18% of the excess at 37 people, up to −30% for a handful.
 - **Chronic hunger.** Chronic food shortfall lowers conception through `sqrt(food)` (`GameState._conception_condition_factor`, one delimited line), and famine still cuts it hard.
 
 ### Food labor floor (`scripts/government_people_system.gd`, `_apply_food_labor_floor`)

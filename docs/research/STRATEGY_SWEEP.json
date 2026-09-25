@@ -1,5 +1,5 @@
 {
-"generated": "2026-09-25 02:04",
+"generated": "2026-09-25 02:42",
 "strategies": 295,
 "seeds": 3,
 "years": 600,
@@ -105,54 +105,54 @@
 "benchmark_exceedances": [],
 "ranges": {
 "population": [
-87.11743646007706,
+88.48087107527702,
 118.75624446474087,
 164.8686835981009
 ],
 "life_expectancy": [
-21.004733767193187,
+21.106464281645028,
 25.164858440905377,
 26.58709422580959
 ],
 "infant_mortality": [
 225.431929993166,
 248.33297001798474,
-313.00607791650356
+311.78879377067557
 ],
 "food_security": [
-0.9390733387028649,
+0.9388955889409006,
 0.98,
 0.98
 ],
 "health": [
-0.9648360883251277,
+0.9647757111479375,
 0.9699999999999999,
 0.9699999999999999
 ],
 "cap_production": [
-0.6004277096876794,
+0.6004294851030721,
 0.6386760886783331,
 0.6611119873740079
 ],
 "cap_infrastructure": [
 0.5514624003599425,
-0.6301536215181985,
+0.6301640241007627,
 0.6522214073873293
 ],
 "cap_logistics": [
 0.21882290482799946,
 0.27062997773492564,
-0.37578846246802566
+0.37579116465482243
 ],
 "cap_institutions": [
-0.5765043330082844,
+0.5765079303336083,
 0.6195450663536617,
 0.7609162193837747
 ],
 "cap_security": [
 0.42270312737748555,
 0.47727613422706033,
-0.7105910736137792
+0.7109322931270733
 ],
 "cap_culture": [
 0.6328957322153504,
@@ -170,9 +170,9 @@
 425.6666666666667
 ],
 "education": [
-0.6991500773468479,
+0.6991500773577771,
 0.7333824218755262,
-0.7584870500734726
+0.758487453572648
 ]
 }
 },
@@ -258,27 +258,27 @@
 "benchmark_exceedances": [],
 "ranges": {
 "population": [
-87.30581573699048,
-190.86737707947358,
+89.08442487275416,
+190.88796151435636,
 412.07870300067526
 ],
 "life_expectancy": [
-21.72762960673764,
+21.72430223517328,
 25.88384952342429,
 26.966946238340075
 ],
 "infant_mortality": [
 220.75905958428405,
 240.72499627569906,
-303.9845354444024
+304.024113566616
 ],
 "food_security": [
-0.9589337171049368,
+0.9588645307863324,
 0.98,
 0.98
 ],
 "health": [
-0.9679402365080162,
+0.9679229228590648,
 0.9699999999999999,
 0.9699999999999999
 ],
@@ -295,7 +295,7 @@
 "cap_logistics": [
 0.2233266537720837,
 0.2917778781167063,
-0.403317008377901
+0.40331701039666257
 ],
 "cap_institutions": [
 0.5949866098344831,
@@ -303,13 +303,13 @@
 0.780842556277581
 ],
 "cap_security": [
-0.4367319136648482,
+0.436730900186469,
 0.5009454954721771,
-0.7421437812943248
+0.7391781812035494
 ],
 "cap_culture": [
 0.6381379678802243,
-0.7148348302013178,
+0.7148351949862378,
 0.8745858195642731
 ],
 "ecology": [
@@ -397,58 +397,58 @@
 "benchmark_exceedances": [],
 "ranges": {
 "population": [
-89.34997325996785,
+90.93181092474374,
 328.49036521249036,
 944.7522776659306
 ],
 "life_expectancy": [
-22.23833648031062,
-26.327626896690813,
+22.23676403129791,
+26.327369662891737,
 27.26428103510693
 ],
 "infant_mortality": [
 217.77657572798296,
 235.6891241071256,
-297.3541022777225
+297.3541022777626
 ],
 "food_security": [
-0.9607777616647137,
+0.9607261237166171,
 0.98,
 0.98
 ],
 "health": [
-0.9697612830969783,
+0.9697573689773799,
 0.9699999999999999,
 0.9699999999999999
 ],
 "cap_production": [
 0.6163846513693237,
-0.6530254459167799,
+0.6530254242098067,
 0.677737751888575
 ],
 "cap_infrastructure": [
 0.5866730529919129,
-0.6520703552794614,
+0.6520703552816705,
 0.677202708403485
 ],
 "cap_logistics": [
 0.2279182483656712,
-0.32053229352386364,
-0.43769270428097934
+0.3209022205218562,
+0.4376927038881681
 ],
 "cap_institutions": [
 0.6043106494216167,
-0.6617438390537436,
+0.661753417242747,
 0.8093747571478019
 ],
 "cap_security": [
-0.4444336618076626,
-0.5146796767091574,
-0.7768581490445077
+0.4444326733475578,
+0.5146542767533355,
+0.7752274706164538
 ],
 "cap_culture": [
 0.6424293318050794,
-0.7220914625664027,
+0.7221747454072847,
 0.8823208186918551
 ],
 "ecology": [
@@ -531,57 +531,57 @@
 "benchmark_exceedances": [],
 "ranges": {
 "population": [
-92.30135416117749,
-631.5880981714191,
+93.30003157593876,
+631.9511600268236,
 1648.9966247654509
 ],
 "life_expectancy": [
-22.556883593319625,
+22.55688392522413,
 26.52628512796272,
 27.43137831937447
 ],
 "infant_mortality": [
 215.24464463383245,
 230.0110172106658,
-294.4390860282303
+294.4390840083786
 ],
 "food_security": [
-0.9758795226681874,
+0.9758483286374858,
 0.9799999999999877,
 0.98
 ],
 "health": [
-0.9699999013080043,
+0.9699999000724123,
 0.9699999999999999,
 0.9699999999999999
 ],
 "cap_production": [
 0.6212714991897352,
-0.6660002072587132,
+0.6659928228832895,
 0.6989497911252897
 ],
 "cap_infrastructure": [
 0.587547416319329,
-0.6625780311583883,
+0.6625780311581625,
 0.6895666815714027
 ],
 "cap_logistics": [
 0.23797657291749055,
-0.3456759011775983,
-0.47925068869405213
+0.34573878817779063,
+0.4792506885051256
 ],
 "cap_institutions": [
-0.6291760031774177,
-0.6746980960275826,
+0.6291754202589693,
+0.6747786199533676,
 0.8265381920267952
 ],
 "cap_security": [
-0.4570459042919373,
+0.45704475175688736,
 0.5265472419746299,
-0.794143950247353
+0.7932342714334486
 ],
 "cap_culture": [
-0.6513097816385955,
+0.6513024133604296,
 0.7291164681229203,
 0.8817466513827513
 ],
@@ -597,7 +597,7 @@
 ],
 "education": [
 0.7099896801966524,
-0.7733834276260941,
+0.7736942833063444,
 0.8045165233080439
 ]
 }
@@ -645,7 +645,7 @@
 ],
 [
 "focus:ecology",
-181
+180
 ],
 [
 "sensible",
@@ -664,34 +664,34 @@
 {
 "strategy": "research-first->care@200",
 "facet": "growth_pct",
-"value": 1.0239052251004817,
+"value": 1.0239155178658106,
 "high": 0.8666666666666667
 },
 {
 "strategy": "research-first->care@300",
 "facet": "growth_pct",
-"value": 1.032372886000103,
+"value": 1.0324119579340134,
 "high": 0.8666666666666667
 }
 ],
 "ranges": {
 "population": [
-94.35767094673672,
-1298.3721995161534,
+94.8281369377836,
+1300.1738761917625,
 2479.067915521477
 ],
 "life_expectancy": [
-22.63487222535066,
+22.634872287504027,
 26.381879287217135,
 27.566831670557008
 ],
 "infant_mortality": [
 214.3649257792476,
 229.82207197299047,
-294.2230510079782
+294.22305074518675
 ],
 "food_security": [
-0.97751075677531,
+0.9774940607117886,
 0.98,
 0.98
 ],
@@ -706,28 +706,28 @@
 0.7110964360090275
 ],
 "cap_infrastructure": [
-0.5990186220160512,
+0.5990810906884386,
 0.6800241817646343,
 0.7048150439854171
 ],
 "cap_logistics": [
 0.24760293521400303,
 0.37575012810692837,
-0.5110730126786329
+0.5110730637908546
 ],
 "cap_institutions": [
-0.6429822099502527,
+0.6430322730821182,
 0.6886445095536383,
 0.856695958343168
 ],
 "cap_security": [
-0.46585772000265174,
-0.5409869453479003,
-0.8248997970418328
+0.46585698891926297,
+0.5409869623848973,
+0.8249018269460656
 ],
 "cap_culture": [
-0.659552861040129,
-0.733104487186985,
+0.6595707005810536,
+0.73294478482614,
 0.8836558180935693
 ],
 "ecology": [
@@ -790,11 +790,11 @@
 184
 ],
 [
-"mix148",
-159
+"sensible",
+158
 ],
 [
-"sensible",
+"mix148",
 158
 ],
 [
@@ -806,33 +806,33 @@
 {
 "strategy": "research-first->care@300",
 "facet": "growth_pct",
-"value": 1.0335452735886246,
+"value": 1.034947496333875,
 "high": 0.8
 }
 ],
 "ranges": {
 "population": [
-95.82194880886998,
+95.99927212467303,
 2100.2739298841648,
 3312.979014014157
 ],
 "life_expectancy": [
-22.32937852187545,
+22.3270541735436,
 26.320313480523723,
-27.486824177591924
+27.486055111033167
 ],
 "infant_mortality": [
-214.1175242144673,
+214.12318413290996,
 229.72059744135802,
-296.2658772174358
+296.291706177523
 ],
 "food_security": [
-0.9685041890906357,
+0.9684468738668556,
 0.98,
 0.98
 ],
 "health": [
-0.9699999998025456,
+0.9699999997946258,
 0.9699999999999999,
 0.9699999999999999
 ],
@@ -842,28 +842,28 @@
 0.7174574121075749
 ],
 "cap_infrastructure": [
-0.6116000753182789,
+0.6116011011299977,
 0.696238877676271,
-0.7212422561892335
+0.7212030125070141
 ],
 "cap_logistics": [
 0.2515221234932858,
 0.3897372229838754,
-0.5374823155183218
+0.5374823165340185
 ],
 "cap_institutions": [
-0.6490294949992395,
-0.698065480542512,
+0.6490525638787835,
+0.6980610422381005,
 0.87134274742597
 ],
 "cap_security": [
 0.477975896667038,
-0.5664313289922395,
-0.8747913344912277
+0.5665816063887285,
+0.8747542489378147
 ],
 "cap_culture": [
-0.6662086882387056,
-0.7370115907566985,
+0.6661994761073373,
+0.7369531779668974,
 0.8849559968254298
 ],
 "ecology": [
@@ -1679,28 +1679,28 @@
 {
 "strategy": "mix034",
 "milestone": "copper_smelting",
-"mean_year": 63.472222222221454,
+"mean_year": 63.41666666666591,
 "design": 90.0,
 "why": "too early"
 },
 {
 "strategy": "mix034",
 "milestone": "pictographic_records",
-"mean_year": 326.6111111110757,
+"mean_year": 326.52777777774236,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "mix034",
 "milestone": "standard_sign_lists",
-"mean_year": 337.61111111107215,
+"mean_year": 337.4444444444055,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "mix034",
 "milestone": "formal_archives",
-"mean_year": 524.6666666667264,
+"mean_year": 524.6944444445043,
 "design": 405.0,
 "why": "late"
 },
@@ -1868,7 +1868,7 @@
 {
 "strategy": "mix041",
 "milestone": "copper_smelting",
-"mean_year": 131.86111111111495,
+"mean_year": 131.91666666667052,
 "design": 90.0,
 "why": "late"
 },
@@ -1931,7 +1931,7 @@
 {
 "strategy": "mix045",
 "milestone": "copper_smelting",
-"mean_year": 217.49999999999935,
+"mean_year": 217.52777777777712,
 "design": 90.0,
 "why": "late"
 },
@@ -1945,7 +1945,7 @@
 {
 "strategy": "mix045",
 "milestone": "bronze_alloying",
-"mean_year": 527.3333333333949,
+"mean_year": 527.305555555617,
 "design": 360.0,
 "why": "late"
 },
@@ -1966,21 +1966,21 @@
 {
 "strategy": "mix048",
 "milestone": "copper_smelting",
-"mean_year": 64.05555555555475,
+"mean_year": 63.9999999999992,
 "design": 90.0,
 "why": "too early"
 },
 {
 "strategy": "mix048",
 "milestone": "ox_drawn_ard",
-"mean_year": 110.88888888888938,
+"mean_year": 110.83333333333383,
 "design": 145.0,
 "why": "too early"
 },
 {
 "strategy": "mix048",
 "milestone": "four_wheeled_wagons",
-"mean_year": 328.80555555551945,
+"mean_year": 328.83333333329716,
 "design": 260.0,
 "why": "late"
 },
@@ -2169,28 +2169,28 @@
 {
 "strategy": "mix056",
 "milestone": "pictographic_records",
-"mean_year": 311.3749999999694,
+"mean_year": 311.2916666666361,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "mix056",
 "milestone": "four_wheeled_wagons",
-"mean_year": 350.0277777777356,
+"mean_year": 350.05555555551337,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "mix056",
 "milestone": "standard_sign_lists",
-"mean_year": 325.2916666666316,
+"mean_year": 325.249999999965,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "mix056",
 "milestone": "kiln_fired_bricks",
-"mean_year": 564.0833333334183,
+"mean_year": 564.0833333334182,
 "design": 330.0,
 "why": "late"
 },
@@ -2253,21 +2253,21 @@
 {
 "strategy": "mix061",
 "milestone": "copper_smelting",
-"mean_year": 144.05555555556134,
+"mean_year": 144.08333333333914,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "mix061",
 "milestone": "ox_drawn_ard",
-"mean_year": 109.38888888888916,
+"mean_year": 109.36111111111137,
 "design": 145.0,
 "why": "too early"
 },
 {
 "strategy": "mix061",
 "milestone": "bronze_alloying",
-"mean_year": 527.4444444445061,
+"mean_year": 527.4166666667282,
 "design": 360.0,
 "why": "late"
 },
@@ -2302,14 +2302,14 @@
 {
 "strategy": "mix064",
 "milestone": "ox_drawn_ard",
-"mean_year": 109.22222222222246,
+"mean_year": 109.19444444444467,
 "design": 145.0,
 "why": "too early"
 },
 {
 "strategy": "mix064",
 "milestone": "pictographic_records",
-"mean_year": 316.8611111110788,
+"mean_year": 316.72222222218994,
 "design": 255.0,
 "why": "late"
 },
@@ -2323,7 +2323,7 @@
 {
 "strategy": "mix064",
 "milestone": "phonetic_notation",
-"mean_year": 557.6388888889697,
+"mean_year": 557.3333333334141,
 "design": 360.0,
 "why": "late"
 },
@@ -2344,56 +2344,56 @@
 {
 "strategy": "mix066",
 "milestone": "solid_wheel_assembly",
-"mean_year": 299.72222222219534,
+"mean_year": 299.6111111110843,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "mix066",
 "milestone": "pictographic_records",
-"mean_year": 383.3749999999697,
+"mean_year": 383.2083333333029,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "mix066",
 "milestone": "four_wheeled_wagons",
-"mean_year": 406.4444444444289,
+"mean_year": 406.41666666665105,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "mix066",
 "milestone": "standard_sign_lists",
-"mean_year": 426.666666666664,
+"mean_year": 426.4999999999972,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "mix066",
 "milestone": "bronze_alloying",
-"mean_year": 455.7500000000158,
+"mean_year": 455.7083333333492,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "mix066",
 "milestone": "phonetic_notation",
-"mean_year": 451.8333333333467,
+"mean_year": 451.9166666666801,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "mix066",
 "milestone": "formal_archives",
-"mean_year": 464.04166666668783,
+"mean_year": 463.9583333333544,
 "design": 405.0,
 "why": "late"
 },
 {
 "strategy": "mix066",
 "milestone": "place_value",
-"mean_year": 580.0000000000952,
+"mean_year": 579.9166666667618,
 "design": 510.0,
 "why": "late"
 },
@@ -2575,28 +2575,28 @@
 {
 "strategy": "mix077",
 "milestone": "solid_wheel_assembly",
-"mean_year": 462.7222222222426,
+"mean_year": 462.6944444444648,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "mix077",
 "milestone": "sail_panel_cutting",
-"mean_year": 534.0000000000658,
+"mean_year": 534.0277777778437,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "mix077",
 "milestone": "kiln_fired_bricks",
-"mean_year": 593.4166666667703,
+"mean_year": 593.1111111112145,
 "design": 330.0,
 "why": "late"
 },
 {
 "strategy": "mix077",
 "milestone": "place_value",
-"mean_year": 555.9444444445243,
+"mean_year": 568.5555555556434,
 "design": 510.0,
 "why": "late"
 },
@@ -2680,21 +2680,21 @@
 {
 "strategy": "mix080",
 "milestone": "ox_drawn_ard",
-"mean_year": 212.8888888888897,
+"mean_year": 220.83333333333164,
 "design": 145.0,
 "why": "late"
 },
 {
 "strategy": "mix080",
 "milestone": "four_wheeled_wagons",
-"mean_year": 317.7222222221896,
+"mean_year": 317.6111111110785,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "mix080",
 "milestone": "sail_panel_cutting",
-"mean_year": 365.0555555555213,
+"mean_year": 359.66666666663417,
 "design": 272.0,
 "why": "late"
 },
@@ -2848,7 +2848,7 @@
 {
 "strategy": "mix089",
 "milestone": "sail_panel_cutting",
-"mean_year": 328.80555555551945,
+"mean_year": 328.7777777777416,
 "design": 272.0,
 "why": "late"
 },
@@ -3268,51 +3268,44 @@
 {
 "strategy": "mix105",
 "milestone": "kiln_fired_bricks",
-"mean_year": 474.66666666669465,
+"mean_year": 474.80555555558357,
 "design": 330.0,
 "why": "late"
 },
 {
 "strategy": "mix106",
 "milestone": "copper_smelting",
-"mean_year": 64.3333333333325,
+"mean_year": 64.30555555555473,
 "design": 90.0,
 "why": "too early"
 },
 {
 "strategy": "mix106",
 "milestone": "sail_panel_cutting",
-"mean_year": 346.4722222221805,
+"mean_year": 346.0555555555139,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "mix106",
 "milestone": "standard_sign_lists",
-"mean_year": 317.6111111110785,
+"mean_year": 399.08333333334053,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "mix106",
 "milestone": "phonetic_notation",
-"mean_year": 435.083333333336,
+"mean_year": 480.9722222222542,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "mix107",
 "milestone": "ox_drawn_ard",
-"mean_year": 112.47222222222298,
+"mean_year": 112.50000000000075,
 "design": 145.0,
 "why": "too early"
-},
-{
-"strategy": "mix107",
-"milestone": "four_wheeled_wagons",
-"mean_year": 303.61111111108306,
-"design": 260.0,
-"why": "late"
 },
 {
 "strategy": "mix108",
@@ -3415,7 +3408,7 @@
 {
 "strategy": "mix111",
 "milestone": "standard_sign_lists",
-"mean_year": 316.833333333301,
+"mean_year": 316.88888888885657,
 "design": 280.0,
 "why": "late"
 },
@@ -3506,14 +3499,14 @@
 {
 "strategy": "mix116",
 "milestone": "four_wheeled_wagons",
-"mean_year": 359.2222222221767,
+"mean_year": 359.2499999999545,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "mix116",
 "milestone": "sail_panel_cutting",
-"mean_year": 458.3888888889064,
+"mean_year": 458.41666666668425,
 "design": 272.0,
 "why": "late"
 },
@@ -3751,7 +3744,7 @@
 {
 "strategy": "mix127",
 "milestone": "copper_smelting",
-"mean_year": 224.1944444444417,
+"mean_year": 224.2499999999972,
 "design": 90.0,
 "why": "late"
 },
@@ -3765,21 +3758,21 @@
 {
 "strategy": "mix127",
 "milestone": "solid_wheel_assembly",
-"mean_year": 485.00000000003456,
+"mean_year": 484.9722222222567,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "mix127",
 "milestone": "sail_panel_cutting",
-"mean_year": 578.111111111205,
+"mean_year": 578.0833333334272,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "mix127",
 "milestone": "bronze_alloying",
-"mean_year": 443.72222222223036,
+"mean_year": 443.7222222222304,
 "design": 360.0,
 "why": "late"
 },
@@ -3814,21 +3807,21 @@
 {
 "strategy": "mix128",
 "milestone": "kiln_fired_bricks",
-"mean_year": 561.7777777778612,
+"mean_year": 561.7500000000836,
 "design": 330.0,
 "why": "late"
 },
 {
 "strategy": "mix129",
 "milestone": "copper_smelting",
-"mean_year": 63.249999999999254,
+"mean_year": 63.22222222222148,
 "design": 90.0,
 "why": "too early"
 },
 {
 "strategy": "mix129",
 "milestone": "ox_drawn_ard",
-"mean_year": 108.55555555555567,
+"mean_year": 108.50000000000011,
 "design": 145.0,
 "why": "too early"
 },
@@ -3968,7 +3961,7 @@
 {
 "strategy": "mix137",
 "milestone": "sail_panel_cutting",
-"mean_year": 339.7222222221826,
+"mean_year": 339.666666666627,
 "design": 272.0,
 "why": "late"
 },
@@ -3996,7 +3989,7 @@
 {
 "strategy": "mix140",
 "milestone": "copper_smelting",
-"mean_year": 64.24999999999918,
+"mean_year": 64.22222222222139,
 "design": 90.0,
 "why": "too early"
 },
@@ -4010,21 +4003,21 @@
 {
 "strategy": "mix140",
 "milestone": "pictographic_records",
-"mean_year": 365.8888888888611,
+"mean_year": 341.0277777777478,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "mix140",
 "milestone": "standard_sign_lists",
-"mean_year": 376.3333333333091,
+"mean_year": 351.5277777777479,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "mix140",
 "milestone": "phonetic_notation",
-"mean_year": 441.3055555555622,
+"mean_year": 437.50000000000426,
 "design": 360.0,
 "why": "late"
 },
@@ -4381,21 +4374,21 @@
 {
 "strategy": "mix157",
 "milestone": "copper_smelting",
-"mean_year": 64.27777777777695,
+"mean_year": 64.24999999999918,
 "design": 90.0,
 "why": "too early"
 },
 {
 "strategy": "mix157",
 "milestone": "ox_drawn_ard",
-"mean_year": 109.44444444444473,
+"mean_year": 109.47222222222251,
 "design": 145.0,
 "why": "too early"
 },
 {
 "strategy": "mix157",
 "milestone": "kiln_fired_bricks",
-"mean_year": 568.611111111199,
+"mean_year": 568.5833333334211,
 "design": 330.0,
 "why": "late"
 },
@@ -4430,133 +4423,133 @@
 {
 "strategy": "mix159",
 "milestone": "four_wheeled_wagons",
-"mean_year": 425.0833333333387,
+"mean_year": 424.6666666666719,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "mix159",
 "milestone": "standard_sign_lists",
-"mean_year": 325.0555555555206,
+"mean_year": 325.0277777777428,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+institutions",
 "milestone": "copper_smelting",
-"mean_year": 437.16666666667066,
+"mean_year": 437.1111111111151,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+culture",
 "milestone": "copper_smelting",
-"mean_year": 423.97222222221785,
+"mean_year": 423.7777777777732,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+labor",
 "milestone": "copper_smelting",
-"mean_year": 494.16666666670704,
+"mean_year": 494.00000000004025,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+labor",
 "milestone": "solid_wheel_assembly",
-"mean_year": 502.00000000004536,
+"mean_year": 501.8333333333786,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+labor",
 "milestone": "formal_archives",
-"mean_year": 475.2777777778061,
+"mean_year": 475.1944444444727,
 "design": 405.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+production",
 "milestone": "solid_wheel_assembly",
-"mean_year": 494.9583333333742,
+"mean_year": 495.2916666667078,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+production",
 "milestone": "pictographic_records",
-"mean_year": 299.69444444441757,
+"mean_year": 334.47222222218426,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+production",
 "milestone": "standard_sign_lists",
-"mean_year": 320.3055555555222,
+"mean_year": 353.08333333328954,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+production",
 "milestone": "kiln_fired_bricks",
-"mean_year": 593.7500000001038,
+"mean_year": 593.5000000001037,
 "design": 330.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+production",
 "milestone": "formal_archives",
-"mean_year": 503.9166666667133,
+"mean_year": 504.500000000047,
 "design": 405.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+production",
 "milestone": "place_value",
-"mean_year": 556.5000000000801,
+"mean_year": 557.472222222303,
 "design": 510.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+infrastructure",
 "milestone": "copper_smelting",
-"mean_year": 149.3888888888955,
+"mean_year": 149.36111111111774,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+infrastructure",
 "milestone": "four_wheeled_wagons",
-"mean_year": 345.02777777773645,
+"mean_year": 344.722222222181,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+infrastructure",
 "milestone": "sail_panel_cutting",
-"mean_year": 435.9444444444477,
+"mean_year": 436.00000000000324,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+infrastructure",
 "milestone": "bronze_alloying",
-"mean_year": 584.3888888889868,
+"mean_year": 584.2500000000979,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+infrastructure",
 "milestone": "formal_archives",
-"mean_year": 501.3333333333783,
+"mean_year": 501.1388888889337,
 "design": 405.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+infrastructure",
 "milestone": "place_value",
-"mean_year": 556.7777777778581,
+"mean_year": 556.6388888889691,
 "design": 510.0,
 "why": "late"
 },
@@ -4584,7 +4577,7 @@
 {
 "strategy": "pair:knowledge+health",
 "milestone": "solid_wheel_assembly",
-"mean_year": 562.6666666667506,
+"mean_year": 562.5833333334174,
 "design": 225.0,
 "why": "late"
 },
@@ -4605,63 +4598,63 @@
 {
 "strategy": "pair:knowledge+logistics",
 "milestone": "copper_smelting",
-"mean_year": 365.05555555551354,
+"mean_year": 364.8333333332912,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+logistics",
 "milestone": "solid_wheel_assembly",
-"mean_year": 417.2499999999913,
+"mean_year": 416.80555555554656,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+logistics",
 "milestone": "four_wheeled_wagons",
-"mean_year": 445.0555555555646,
+"mean_year": 444.6388888888976,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+logistics",
 "milestone": "formal_archives",
-"mean_year": 514.5277777778311,
+"mean_year": 514.2500000000532,
 "design": 405.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+logistics",
 "milestone": "place_value",
-"mean_year": 563.0277777778621,
+"mean_year": 562.5555555556397,
 "design": 510.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+ecology",
 "milestone": "copper_smelting",
-"mean_year": 586.5833333334327,
+"mean_year": 586.4166666667659,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+ecology",
 "milestone": "solid_wheel_assembly",
-"mean_year": 595.6666666667718,
+"mean_year": 595.5555555556606,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+security",
 "milestone": "solid_wheel_assembly",
-"mean_year": 478.05555555558567,
+"mean_year": 477.83333333336327,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+security",
 "milestone": "sail_panel_cutting",
-"mean_year": 548.6388888889641,
+"mean_year": 548.361111111186,
 "design": 272.0,
 "why": "late"
 },
@@ -4675,56 +4668,56 @@
 {
 "strategy": "pair:knowledge+security",
 "milestone": "formal_archives",
-"mean_year": 513.4722222222749,
+"mean_year": 513.0000000000524,
 "design": 405.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+security",
 "milestone": "place_value",
-"mean_year": 562.7222222223064,
+"mean_year": 562.3055555556393,
 "design": 510.0,
 "why": "late"
 },
 {
 "strategy": "pair:knowledge+security",
 "milestone": "spoked_wheel_assembly",
-"mean_year": 595.3888888889937,
+"mean_year": 595.0833333334381,
 "design": 500.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+culture",
 "milestone": "copper_smelting",
-"mean_year": 428.4444444444429,
+"mean_year": 428.3611111111095,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+culture",
 "milestone": "pictographic_records",
-"mean_year": 321.99999999996606,
+"mean_year": 321.999999999966,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+culture",
 "milestone": "standard_sign_lists",
-"mean_year": 403.583333333316,
+"mean_year": 403.49999999998255,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+culture",
 "milestone": "phonetic_notation",
-"mean_year": 419.8611111111041,
+"mean_year": 419.7777777777707,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+culture",
 "milestone": "formal_archives",
-"mean_year": 446.11111111112086,
+"mean_year": 446.0000000000096,
 "design": 405.0,
 "why": "late"
 },
@@ -4766,70 +4759,70 @@
 {
 "strategy": "pair:institutions+production",
 "milestone": "pictographic_records",
-"mean_year": 387.3333333333056,
+"mean_year": 386.5555555555273,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+production",
 "milestone": "standard_sign_lists",
-"mean_year": 447.58333333334394,
+"mean_year": 457.00000000001666,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+production",
 "milestone": "kiln_fired_bricks",
-"mean_year": 583.3611111112084,
+"mean_year": 583.2500000000972,
 "design": 330.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+production",
 "milestone": "phonetic_notation",
-"mean_year": 469.0277777778021,
+"mean_year": 486.2500000000353,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+production",
 "milestone": "formal_archives",
-"mean_year": 495.5000000000412,
+"mean_year": 471.61111111113706,
 "design": 405.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+infrastructure",
 "milestone": "copper_smelting",
-"mean_year": 148.88888888889548,
+"mean_year": 148.91666666667322,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+infrastructure",
 "milestone": "pictographic_records",
-"mean_year": 314.38888888885737,
+"mean_year": 314.41666666663514,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+infrastructure",
 "milestone": "sail_panel_cutting",
-"mean_year": 369.9999999999745,
+"mean_year": 369.91666666664105,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+infrastructure",
 "milestone": "standard_sign_lists",
-"mean_year": 441.1666666666733,
+"mean_year": 441.13888888889545,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+infrastructure",
 "milestone": "bronze_alloying",
-"mean_year": 540.8333333334035,
+"mean_year": 540.8750000000701,
 "design": 360.0,
 "why": "late"
 },
@@ -4913,49 +4906,49 @@
 {
 "strategy": "pair:institutions+logistics",
 "milestone": "copper_smelting",
-"mean_year": 365.38888888884713,
+"mean_year": 365.3333333332915,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+logistics",
 "milestone": "solid_wheel_assembly",
-"mean_year": 387.9722222221949,
+"mean_year": 387.8333333333059,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+logistics",
 "milestone": "pictographic_records",
-"mean_year": 315.36111111107925,
+"mean_year": 315.30555555552377,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+logistics",
 "milestone": "four_wheeled_wagons",
-"mean_year": 399.5277777777578,
+"mean_year": 399.41666666664656,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+logistics",
 "milestone": "standard_sign_lists",
-"mean_year": 442.6111111111186,
+"mean_year": 442.44444444445185,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+logistics",
 "milestone": "phonetic_notation",
-"mean_year": 467.66666666669016,
+"mean_year": 467.38888888891216,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+logistics",
 "milestone": "formal_archives",
-"mean_year": 501.3333333333783,
+"mean_year": 501.0555555556003,
 "design": 405.0,
 "why": "late"
 },
@@ -4997,56 +4990,56 @@
 {
 "strategy": "pair:institutions+security",
 "milestone": "solid_wheel_assembly",
-"mean_year": 472.1111111111374,
+"mean_year": 471.88888888891506,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+security",
 "milestone": "pictographic_records",
-"mean_year": 317.3611111110786,
+"mean_year": 316.52777777774554,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+security",
 "milestone": "sail_panel_cutting",
-"mean_year": 543.611111111183,
+"mean_year": 543.1111111111827,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+security",
 "milestone": "standard_sign_lists",
-"mean_year": 461.027777777797,
+"mean_year": 461.00000000001927,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+security",
 "milestone": "bronze_alloying",
-"mean_year": 401.41666666664787,
+"mean_year": 401.3055555555367,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+security",
 "milestone": "phonetic_notation",
-"mean_year": 504.7222222222693,
+"mean_year": 504.638888888936,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+security",
 "milestone": "formal_archives",
-"mean_year": 473.30555555558266,
+"mean_year": 473.27777777780483,
 "design": 405.0,
 "why": "late"
 },
 {
 "strategy": "pair:institutions+security",
 "milestone": "spoked_wheel_assembly",
-"mean_year": 573.8611111112024,
+"mean_year": 573.2777777778687,
 "design": 500.0,
 "why": "late"
 },
@@ -5095,35 +5088,35 @@
 {
 "strategy": "pair:culture+production",
 "milestone": "pictographic_records",
-"mean_year": 418.8333333333257,
+"mean_year": 418.7777777777701,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+production",
 "milestone": "standard_sign_lists",
-"mean_year": 427.47222222222007,
+"mean_year": 427.36111111110887,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+production",
 "milestone": "kiln_fired_bricks",
-"mean_year": 598.3333333334401,
+"mean_year": 598.2500000001068,
 "design": 330.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+production",
 "milestone": "phonetic_notation",
-"mean_year": 513.2222222222748,
+"mean_year": 513.0833333333858,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+production",
 "milestone": "formal_archives",
-"mean_year": 527.7500000000617,
+"mean_year": 527.722222222284,
 "design": 405.0,
 "why": "late"
 },
@@ -5284,56 +5277,56 @@
 {
 "strategy": "pair:culture+logistics",
 "milestone": "copper_smelting",
-"mean_year": 375.83333333329824,
+"mean_year": 375.69444444440927,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+logistics",
 "milestone": "solid_wheel_assembly",
-"mean_year": 393.4166666666428,
+"mean_year": 393.3055555555316,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+logistics",
 "milestone": "pictographic_records",
-"mean_year": 410.0555555555423,
+"mean_year": 409.1666666666528,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+logistics",
 "milestone": "four_wheeled_wagons",
-"mean_year": 405.27777777776146,
+"mean_year": 405.22222222220586,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+logistics",
 "milestone": "standard_sign_lists",
-"mean_year": 423.19444444443957,
+"mean_year": 422.30555555555014,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+logistics",
 "milestone": "phonetic_notation",
-"mean_year": 441.75000000000693,
+"mean_year": 441.7916666666737,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+logistics",
 "milestone": "formal_archives",
-"mean_year": 531.2916666667307,
+"mean_year": 532.6666666667315,
 "design": 405.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+ecology",
 "milestone": "copper_smelting",
-"mean_year": 425.027777777774,
+"mean_year": 424.9722222222185,
 "design": 90.0,
 "why": "late"
 },
@@ -5347,56 +5340,56 @@
 {
 "strategy": "pair:culture+ecology",
 "milestone": "standard_sign_lists",
-"mean_year": 411.5555555555432,
+"mean_year": 411.49999999998766,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+ecology",
 "milestone": "phonetic_notation",
-"mean_year": 422.0555555555499,
+"mean_year": 422.0277777777721,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+ecology",
 "milestone": "formal_archives",
-"mean_year": 540.0277777778474,
+"mean_year": 539.7777777778473,
 "design": 405.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+security",
 "milestone": "solid_wheel_assembly",
-"mean_year": 473.1111111111381,
+"mean_year": 472.97222222224906,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+security",
 "milestone": "pictographic_records",
-"mean_year": 398.83333333331285,
+"mean_year": 398.80555555553514,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+security",
 "milestone": "sail_panel_cutting",
-"mean_year": 584.8888888889873,
+"mean_year": 584.7222222223203,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+security",
 "milestone": "standard_sign_lists",
-"mean_year": 416.22222222221285,
+"mean_year": 416.194444444435,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:culture+security",
 "milestone": "bronze_alloying",
-"mean_year": 404.41666666664986,
+"mean_year": 404.3611111110942,
 "design": 360.0,
 "why": "late"
 },
@@ -5543,35 +5536,35 @@
 {
 "strategy": "pair:labor+logistics",
 "milestone": "copper_smelting",
-"mean_year": 380.611111111079,
+"mean_year": 380.4999999999679,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "pair:labor+logistics",
 "milestone": "solid_wheel_assembly",
-"mean_year": 393.22222222219824,
+"mean_year": 392.88888888886464,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "pair:labor+logistics",
 "milestone": "pictographic_records",
-"mean_year": 330.58333333329665,
+"mean_year": 330.6111111110744,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:labor+logistics",
 "milestone": "four_wheeled_wagons",
-"mean_year": 405.0833333333169,
+"mean_year": 404.8055555555389,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "pair:labor+logistics",
 "milestone": "standard_sign_lists",
-"mean_year": 343.7499999999591,
+"mean_year": 343.77777777773684,
 "design": 280.0,
 "why": "late"
 },
@@ -5606,49 +5599,49 @@
 {
 "strategy": "pair:labor+security",
 "milestone": "solid_wheel_assembly",
-"mean_year": 478.0833333333635,
+"mean_year": 478.05555555558567,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "pair:labor+security",
 "milestone": "pictographic_records",
-"mean_year": 329.8055555555191,
+"mean_year": 329.8333333332969,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:labor+security",
 "milestone": "sail_panel_cutting",
-"mean_year": 556.527777777858,
+"mean_year": 559.2222222223041,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "pair:labor+security",
 "milestone": "standard_sign_lists",
-"mean_year": 342.4444444444039,
+"mean_year": 342.4722222221817,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:labor+security",
 "milestone": "bronze_alloying",
-"mean_year": 403.9166666666495,
+"mean_year": 403.8888888888717,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "pair:labor+security",
 "milestone": "phonetic_notation",
-"mean_year": 587.6388888889888,
+"mean_year": 572.555555555646,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "pair:production+infrastructure",
 "milestone": "sail_panel_cutting",
-"mean_year": 514.555555555609,
+"mean_year": 514.3611111111644,
 "design": 272.0,
 "why": "late"
 },
@@ -5711,7 +5704,7 @@
 {
 "strategy": "pair:production+health",
 "milestone": "formal_archives",
-"mean_year": 505.16666666671404,
+"mean_year": 505.11111111115844,
 "design": 405.0,
 "why": "late"
 },
@@ -5746,14 +5739,14 @@
 {
 "strategy": "pair:production+logistics",
 "milestone": "pictographic_records",
-"mean_year": 483.305555555589,
+"mean_year": 482.77777777781085,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:production+logistics",
 "milestone": "four_wheeled_wagons",
-"mean_year": 361.30555555551115,
+"mean_year": 358.6666666666229,
 "design": 260.0,
 "why": "late"
 },
@@ -5781,56 +5774,56 @@
 {
 "strategy": "pair:production+ecology",
 "milestone": "standard_sign_lists",
-"mean_year": 524.444444444504,
+"mean_year": 524.4166666667263,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:production+ecology",
 "milestone": "kiln_fired_bricks",
-"mean_year": 577.2222222223155,
+"mean_year": 575.5833333334257,
 "design": 330.0,
 "why": "late"
 },
 {
 "strategy": "pair:production+ecology",
 "milestone": "phonetic_notation",
-"mean_year": 532.888888888954,
+"mean_year": 532.8888888889539,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "pair:production+security",
 "milestone": "solid_wheel_assembly",
-"mean_year": 475.02777777780597,
+"mean_year": 474.8333333333614,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "pair:production+security",
 "milestone": "pictographic_records",
-"mean_year": 548.916666666742,
+"mean_year": 548.7500000000751,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:production+security",
 "milestone": "sail_panel_cutting",
-"mean_year": 572.5833333334236,
+"mean_year": 572.3611111112014,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "pair:production+security",
 "milestone": "standard_sign_lists",
-"mean_year": 576.4166666667595,
+"mean_year": 576.1944444445372,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:production+security",
 "milestone": "phonetic_notation",
-"mean_year": 599.7500000001078,
+"mean_year": 599.4166666667742,
 "design": 360.0,
 "why": "late"
 },
@@ -5977,14 +5970,14 @@
 {
 "strategy": "pair:infrastructure+logistics",
 "milestone": "copper_smelting",
-"mean_year": 149.55555555556222,
+"mean_year": 149.47222222222888,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "pair:infrastructure+logistics",
 "milestone": "pictographic_records",
-"mean_year": 479.97222222225355,
+"mean_year": 481.11111111114315,
 "design": 255.0,
 "why": "late"
 },
@@ -5998,7 +5991,7 @@
 {
 "strategy": "pair:infrastructure+logistics",
 "milestone": "bronze_alloying",
-"mean_year": 585.1250000000985,
+"mean_year": 584.7500000000981,
 "design": 360.0,
 "why": "late"
 },
@@ -6061,35 +6054,35 @@
 {
 "strategy": "pair:infrastructure+security",
 "milestone": "pictographic_records",
-"mean_year": 559.3055555556375,
+"mean_year": 569.3611111111994,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:infrastructure+security",
 "milestone": "sail_panel_cutting",
-"mean_year": 518.3055555556112,
+"mean_year": 535.3333333334,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "pair:infrastructure+security",
 "milestone": "standard_sign_lists",
-"mean_year": 567.7222222223095,
+"mean_year": 577.4722222223157,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:infrastructure+security",
 "milestone": "bronze_alloying",
-"mean_year": 406.8611111110958,
+"mean_year": 406.833333333318,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "pair:infrastructure+security",
 "milestone": "phonetic_notation",
-"mean_year": 584.8333333334315,
+"mean_year": 586.666666666766,
 "design": 360.0,
 "why": "late"
 },
@@ -6285,7 +6278,7 @@
 {
 "strategy": "pair:health+logistics",
 "milestone": "copper_smelting",
-"mean_year": 322.4999999999659,
+"mean_year": 322.52777777774367,
 "design": 90.0,
 "why": "late"
 },
@@ -6306,7 +6299,7 @@
 {
 "strategy": "pair:health+logistics",
 "milestone": "four_wheeled_wagons",
-"mean_year": 386.4166666666383,
+"mean_year": 386.3888888888605,
 "design": 260.0,
 "why": "late"
 },
@@ -6327,7 +6320,7 @@
 {
 "strategy": "pair:health+logistics",
 "milestone": "formal_archives",
-"mean_year": 505.22222222226964,
+"mean_year": 505.19444444449186,
 "design": 405.0,
 "why": "late"
 },
@@ -6523,91 +6516,84 @@
 {
 "strategy": "pair:logistics+ecology",
 "milestone": "solid_wheel_assembly",
-"mean_year": 392.12499999997533,
+"mean_year": 392.0833333333086,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "pair:logistics+ecology",
 "milestone": "pictographic_records",
-"mean_year": 435.50000000000296,
+"mean_year": 435.55555555555856,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:logistics+ecology",
 "milestone": "four_wheeled_wagons",
-"mean_year": 404.33333333331643,
+"mean_year": 404.24999999998306,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "pair:logistics+ecology",
 "milestone": "standard_sign_lists",
-"mean_year": 534.7500000000663,
+"mean_year": 534.500000000066,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:logistics+security",
 "milestone": "pictographic_records",
-"mean_year": 491.44444444448305,
+"mean_year": 490.41666666670466,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:logistics+security",
-"milestone": "four_wheeled_wagons",
-"mean_year": 308.36111111108534,
-"design": 260.0,
-"why": "late"
-},
-{
-"strategy": "pair:logistics+security",
 "milestone": "standard_sign_lists",
-"mean_year": 537.3611111111791,
+"mean_year": 529.7500000000631,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "pair:logistics+security",
 "milestone": "bronze_alloying",
-"mean_year": 401.7777777777592,
+"mean_year": 404.2222222222052,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "pair:logistics+security",
 "milestone": "phonetic_notation",
-"mean_year": 546.8888888889629,
+"mean_year": 545.3888888889619,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "pair:logistics+security",
 "milestone": "spoked_wheel_assembly",
-"mean_year": 584.1666666667644,
+"mean_year": 584.8611111112094,
 "design": 500.0,
 "why": "late"
 },
 {
 "strategy": "pair:ecology+security",
 "milestone": "solid_wheel_assembly",
-"mean_year": 468.61111111113513,
+"mean_year": 468.6111111111352,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "pair:ecology+security",
 "milestone": "pictographic_records",
-"mean_year": 433.22222222222376,
+"mean_year": 433.2222222222237,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "pair:ecology+security",
 "milestone": "sail_panel_cutting",
-"mean_year": 541.0555555556258,
+"mean_year": 541.0277777778481,
 "design": 272.0,
 "why": "late"
 },
@@ -6621,7 +6607,7 @@
 {
 "strategy": "pair:ecology+security",
 "milestone": "phonetic_notation",
-"mean_year": 537.3611111111791,
+"mean_year": 537.3333333334012,
 "design": 360.0,
 "why": "late"
 },
@@ -6642,14 +6628,14 @@
 {
 "strategy": "triple:production+knowledge+ecology",
 "milestone": "solid_wheel_assembly",
-"mean_year": 574.4444444445361,
+"mean_year": 574.3611111112027,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "triple:production+knowledge+ecology",
 "milestone": "kiln_fired_bricks",
-"mean_year": 572.694444444535,
+"mean_year": 572.6666666667571,
 "design": 330.0,
 "why": "late"
 },
@@ -6852,21 +6838,21 @@
 {
 "strategy": "triple:institutions+logistics+knowledge",
 "milestone": "copper_smelting",
-"mean_year": 412.52777777776606,
+"mean_year": 412.27777777776583,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "triple:institutions+logistics+knowledge",
 "milestone": "solid_wheel_assembly",
-"mean_year": 439.19444444444974,
+"mean_year": 438.9444444444496,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "triple:institutions+logistics+knowledge",
 "milestone": "four_wheeled_wagons",
-"mean_year": 450.2777777777901,
+"mean_year": 450.02777777779005,
 "design": 260.0,
 "why": "late"
 },
@@ -6936,21 +6922,21 @@
 {
 "strategy": "triple:knowledge+culture+infrastructure",
 "milestone": "four_wheeled_wagons",
-"mean_year": 346.2222222221805,
+"mean_year": 344.3333333332923,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "triple:knowledge+culture+infrastructure",
 "milestone": "sail_panel_cutting",
-"mean_year": 402.8611111110932,
+"mean_year": 402.83333333331547,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "triple:knowledge+culture+infrastructure",
 "milestone": "bronze_alloying",
-"mean_year": 546.8333333334073,
+"mean_year": 546.5833333334072,
 "design": 360.0,
 "why": "late"
 },
@@ -7055,21 +7041,21 @@
 {
 "strategy": "triple:ecology+knowledge+culture",
 "milestone": "copper_smelting",
-"mean_year": 418.69444444443667,
+"mean_year": 418.66666666665884,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "triple:ecology+knowledge+culture",
 "milestone": "solid_wheel_assembly",
-"mean_year": 593.7777777778816,
+"mean_year": 593.6666666667705,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "triple:ecology+knowledge+culture",
 "milestone": "formal_archives",
-"mean_year": 483.9444444444783,
+"mean_year": 483.444444444478,
 "design": 405.0,
 "why": "late"
 },
@@ -7300,42 +7286,42 @@
 {
 "strategy": "triple:security+culture+institutions",
 "milestone": "copper_smelting",
-"mean_year": 129.5000000000035,
+"mean_year": 129.50000000000347,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "triple:security+culture+institutions",
 "milestone": "solid_wheel_assembly",
-"mean_year": 472.4166666666932,
+"mean_year": 472.3611111111375,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "triple:security+culture+institutions",
 "milestone": "pictographic_records",
-"mean_year": 327.3333333333062,
+"mean_year": 327.2777777777507,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "triple:security+culture+institutions",
 "milestone": "sail_panel_cutting",
-"mean_year": 552.3611111111886,
+"mean_year": 552.8055555556333,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "triple:security+culture+institutions",
 "milestone": "standard_sign_lists",
-"mean_year": 398.27777777775697,
+"mean_year": 398.24999999997914,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "triple:security+culture+institutions",
 "milestone": "bronze_alloying",
-"mean_year": 403.2222222222046,
+"mean_year": 403.24999999998244,
 "design": 360.0,
 "why": "late"
 },
@@ -7349,28 +7335,28 @@
 {
 "strategy": "triple:security+culture+institutions",
 "milestone": "spoked_wheel_assembly",
-"mean_year": 548.2777777778527,
+"mean_year": 548.3055555556306,
 "design": 500.0,
 "why": "late"
 },
 {
 "strategy": "triple:culture+ecology+knowledge",
 "milestone": "copper_smelting",
-"mean_year": 418.69444444443667,
+"mean_year": 418.66666666665884,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "triple:culture+ecology+knowledge",
 "milestone": "solid_wheel_assembly",
-"mean_year": 593.7777777778816,
+"mean_year": 593.6666666667705,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "triple:culture+ecology+knowledge",
 "milestone": "formal_archives",
-"mean_year": 483.9444444444783,
+"mean_year": 483.444444444478,
 "design": 405.0,
 "why": "late"
 },
@@ -7454,14 +7440,14 @@
 {
 "strategy": "triple:security+culture+ecology",
 "milestone": "copper_smelting",
-"mean_year": 127.4444444444476,
+"mean_year": 127.50000000000314,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "triple:security+culture+ecology",
 "milestone": "solid_wheel_assembly",
-"mean_year": 474.3055555555832,
+"mean_year": 474.2222222222499,
 "design": 225.0,
 "why": "late"
 },
@@ -7475,91 +7461,91 @@
 {
 "strategy": "triple:security+culture+ecology",
 "milestone": "sail_panel_cutting",
-"mean_year": 554.6666666667456,
+"mean_year": 554.6944444445234,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "triple:security+culture+ecology",
 "milestone": "standard_sign_lists",
-"mean_year": 499.3611111111548,
+"mean_year": 499.3888888889326,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "triple:security+culture+ecology",
 "milestone": "bronze_alloying",
-"mean_year": 403.7222222222049,
+"mean_year": 403.69444444442706,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "triple:security+culture+ecology",
 "milestone": "phonetic_notation",
-"mean_year": 514.3888888889422,
+"mean_year": 514.3333333333866,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "triple:security+culture+ecology",
 "milestone": "formal_archives",
-"mean_year": 546.194444444518,
+"mean_year": 546.0833333334068,
 "design": 405.0,
 "why": "late"
 },
 {
 "strategy": "triple:security+culture+ecology",
 "milestone": "spoked_wheel_assembly",
-"mean_year": 546.5555555556293,
+"mean_year": 546.5277777778515,
 "design": 500.0,
 "why": "late"
 },
 {
 "strategy": "triple:production+knowledge+logistics",
 "milestone": "solid_wheel_assembly",
-"mean_year": 271.1111111110934,
+"mean_year": 270.9999999999823,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "triple:production+knowledge+logistics",
 "milestone": "pictographic_records",
-"mean_year": 338.6944444444052,
+"mean_year": 338.6388888888496,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "triple:production+knowledge+logistics",
 "milestone": "four_wheeled_wagons",
-"mean_year": 416.88888888888,
+"mean_year": 416.6666666666576,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "triple:production+knowledge+logistics",
 "milestone": "standard_sign_lists",
-"mean_year": 364.6666666666245,
+"mean_year": 364.583333333291,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "triple:production+knowledge+logistics",
 "milestone": "kiln_fired_bricks",
-"mean_year": 590.6666666667685,
+"mean_year": 590.3055555556572,
 "design": 330.0,
 "why": "late"
 },
 {
 "strategy": "triple:production+knowledge+logistics",
 "milestone": "formal_archives",
-"mean_year": 504.6944444444916,
+"mean_year": 504.30555555560244,
 "design": 405.0,
 "why": "late"
 },
 {
 "strategy": "triple:production+knowledge+logistics",
 "milestone": "place_value",
-"mean_year": 563.6111111111958,
+"mean_year": 564.3888888889741,
 "design": 510.0,
 "why": "late"
 },
@@ -7811,14 +7797,14 @@
 {
 "strategy": "triple:infrastructure+knowledge+production",
 "milestone": "four_wheeled_wagons",
-"mean_year": 400.5555555555507,
+"mean_year": 400.4444444444395,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "triple:infrastructure+knowledge+production",
 "milestone": "sail_panel_cutting",
-"mean_year": 451.5833333333465,
+"mean_year": 451.50000000001313,
 "design": 272.0,
 "why": "late"
 },
@@ -7902,21 +7888,21 @@
 {
 "strategy": "research-first->care@100",
 "milestone": "ox_drawn_ard",
-"mean_year": 229.49999999999554,
+"mean_year": 205.8055555555586,
 "design": 145.0,
 "why": "late"
 },
 {
 "strategy": "research-first->care@100",
 "milestone": "pictographic_records",
-"mean_year": 318.9166666666337,
+"mean_year": 318.8888888888559,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "research-first->care@100",
 "milestone": "standard_sign_lists",
-"mean_year": 343.4722222221814,
+"mean_year": 343.38888888884804,
 "design": 280.0,
 "why": "late"
 },
@@ -7930,7 +7916,7 @@
 {
 "strategy": "research-first->care@100",
 "milestone": "formal_archives",
-"mean_year": 495.6944444444858,
+"mean_year": 495.7500000000414,
 "design": 405.0,
 "why": "late"
 },
@@ -7944,7 +7930,7 @@
 {
 "strategy": "research-first->care@200",
 "milestone": "ox_drawn_ard",
-"mean_year": 220.72222222222058,
+"mean_year": 220.5833333333317,
 "design": 145.0,
 "why": "late"
 },
@@ -7958,21 +7944,21 @@
 {
 "strategy": "research-first->care@200",
 "milestone": "standard_sign_lists",
-"mean_year": 331.55555555551854,
+"mean_year": 331.4444444444075,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "research-first->care@200",
 "milestone": "phonetic_notation",
-"mean_year": 449.22222222223394,
+"mean_year": 449.25000000001177,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "research-first->care@200",
 "milestone": "formal_archives",
-"mean_year": 496.22222222226384,
+"mean_year": 496.1944444444861,
 "design": 405.0,
 "why": "late"
 },
@@ -7993,7 +7979,7 @@
 {
 "strategy": "research-first->care@300",
 "milestone": "ox_drawn_ard",
-"mean_year": 315.5277777777459,
+"mean_year": 315.44444444441257,
 "design": 145.0,
 "why": "late"
 },
@@ -8007,7 +7993,7 @@
 {
 "strategy": "research-first->care@300",
 "milestone": "formal_archives",
-"mean_year": 495.8333333333748,
+"mean_year": 495.805555555597,
 "design": 405.0,
 "why": "late"
 },
@@ -8056,7 +8042,7 @@
 {
 "strategy": "crush-research",
 "milestone": "copper_smelting",
-"mean_year": 70.80555555555419,
+"mean_year": 70.74999999999865,
 "design": 90.0,
 "why": "too early"
 },
@@ -8168,147 +8154,147 @@
 {
 "strategy": "focus:labor",
 "milestone": "copper_smelting",
-"mean_year": 287.47222222219926,
+"mean_year": 284.97222222220006,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "focus:labor",
 "milestone": "ox_drawn_ard",
-"mean_year": 340.16666666664656,
+"mean_year": 303.24999999997203,
 "design": 145.0,
 "why": "late"
 },
 {
 "strategy": "focus:labor",
 "milestone": "solid_wheel_assembly",
-"mean_year": 478.02777777780784,
+"mean_year": 476.72222222225145,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "focus:labor",
 "milestone": "pictographic_records",
-"mean_year": 331.91666666662957,
+"mean_year": 331.58333333329637,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "focus:labor",
 "milestone": "four_wheeled_wagons",
-"mean_year": 530.7916666667304,
+"mean_year": 526.1250000000607,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "focus:labor",
 "milestone": "sail_panel_cutting",
-"mean_year": 463.1388888889207,
+"mean_year": 450.1388888889139,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "focus:labor",
 "milestone": "standard_sign_lists",
-"mean_year": 342.8333333332927,
+"mean_year": 342.4444444444039,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "focus:labor",
 "milestone": "bronze_alloying",
-"mean_year": 477.7222222222521,
+"mean_year": 474.1944444444721,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "focus:labor",
 "milestone": "phonetic_notation",
-"mean_year": 493.5277777778177,
+"mean_year": 490.05555555559334,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "focus:labor",
 "milestone": "formal_archives",
-"mean_year": 585.583333333432,
+"mean_year": 581.7222222223185,
 "design": 405.0,
 "why": "late"
 },
 {
 "strategy": "focus:production",
 "milestone": "copper_smelting",
-"mean_year": 66.24999999999902,
+"mean_year": 66.22222222222125,
 "design": 90.0,
 "why": "too early"
 },
 {
 "strategy": "focus:production",
 "milestone": "ox_drawn_ard",
-"mean_year": 305.47222222219347,
+"mean_year": 305.36111111108244,
 "design": 145.0,
 "why": "late"
 },
 {
 "strategy": "focus:production",
 "milestone": "solid_wheel_assembly",
-"mean_year": 278.0555555555356,
+"mean_year": 277.88888888886896,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "focus:production",
 "milestone": "pictographic_records",
-"mean_year": 397.38888888886754,
+"mean_year": 397.22222222220074,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "focus:production",
 "milestone": "four_wheeled_wagons",
-"mean_year": 383.611111111081,
+"mean_year": 383.3888888888586,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "focus:production",
 "milestone": "sail_panel_cutting",
-"mean_year": 363.2499999999738,
+"mean_year": 363.0555555555293,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "focus:production",
 "milestone": "standard_sign_lists",
-"mean_year": 447.44444444445503,
+"mean_year": 447.4166666666772,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "focus:production",
 "milestone": "kiln_fired_bricks",
-"mean_year": 570.5277777778668,
+"mean_year": 570.5555555556447,
 "design": 330.0,
 "why": "late"
 },
 {
 "strategy": "focus:production",
 "milestone": "phonetic_notation",
-"mean_year": 515.6666666667207,
+"mean_year": 515.500000000054,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "focus:production",
 "milestone": "formal_archives",
-"mean_year": 444.194444444453,
+"mean_year": 444.0833333333417,
 "design": 405.0,
 "why": "late"
 },
 {
 "strategy": "focus:production",
 "milestone": "place_value",
-"mean_year": 559.0277777778596,
+"mean_year": 559.0000000000817,
 "design": 510.0,
 "why": "late"
 },
@@ -8322,36 +8308,43 @@
 {
 "strategy": "focus:infrastructure",
 "milestone": "ox_drawn_ard",
-"mean_year": 317.194444444412,
+"mean_year": 316.9722222221898,
 "design": 145.0,
 "why": "late"
 },
 {
 "strategy": "focus:infrastructure",
 "milestone": "pictographic_records",
-"mean_year": 392.6388888888644,
+"mean_year": 386.3611111110827,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "focus:infrastructure",
 "milestone": "sail_panel_cutting",
-"mean_year": 369.0277777777383,
+"mean_year": 368.61111111107135,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "focus:infrastructure",
 "milestone": "standard_sign_lists",
-"mean_year": 427.36111111110887,
+"mean_year": 423.277777777773,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "focus:infrastructure",
 "milestone": "phonetic_notation",
-"mean_year": 477.3611111111408,
+"mean_year": 477.4444444444742,
 "design": 360.0,
+"why": "late"
+},
+{
+"strategy": "focus:infrastructure",
+"milestone": "formal_archives",
+"mean_year": 456.138888888905,
+"design": 405.0,
 "why": "late"
 },
 {
@@ -8490,35 +8483,35 @@
 {
 "strategy": "focus:logistics",
 "milestone": "copper_smelting",
-"mean_year": 221.9166666666646,
+"mean_year": 221.86111111110907,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "focus:logistics",
 "milestone": "ox_drawn_ard",
-"mean_year": 284.99999999997783,
+"mean_year": 284.97222222220006,
 "design": 145.0,
 "why": "late"
 },
 {
 "strategy": "focus:logistics",
 "milestone": "pictographic_records",
-"mean_year": 346.47222222218426,
+"mean_year": 346.44444444440643,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "focus:logistics",
 "milestone": "standard_sign_lists",
-"mean_year": 394.9722222222044,
+"mean_year": 394.9444444444266,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "focus:logistics",
 "milestone": "kiln_fired_bricks",
-"mean_year": 559.6111111111933,
+"mean_year": 559.5277777778598,
 "design": 330.0,
 "why": "late"
 },
@@ -8602,14 +8595,14 @@
 {
 "strategy": "focus:security",
 "milestone": "four_wheeled_wagons",
-"mean_year": 364.0833333332917,
+"mean_year": 364.055555555514,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "focus:security",
 "milestone": "sail_panel_cutting",
-"mean_year": 325.972222222187,
+"mean_year": 325.9444444444092,
 "design": 272.0,
 "why": "late"
 },
@@ -8623,7 +8616,7 @@
 {
 "strategy": "focus:security",
 "milestone": "kiln_fired_bricks",
-"mean_year": 546.0000000000734,
+"mean_year": 546.0277777778512,
 "design": 330.0,
 "why": "late"
 },
@@ -8644,56 +8637,63 @@
 {
 "strategy": "focus:militarised_agrarian_state",
 "milestone": "copper_smelting",
-"mean_year": 165.36111111111825,
+"mean_year": 178.02777777778763,
 "design": 90.0,
 "why": "late"
 },
 {
 "strategy": "focus:militarised_agrarian_state",
 "milestone": "solid_wheel_assembly",
-"mean_year": 337.72222222220256,
+"mean_year": 346.16666666664395,
 "design": 225.0,
 "why": "late"
 },
 {
 "strategy": "focus:militarised_agrarian_state",
 "milestone": "pictographic_records",
-"mean_year": 357.4444444444088,
+"mean_year": 355.80555555551956,
 "design": 255.0,
 "why": "late"
 },
 {
 "strategy": "focus:militarised_agrarian_state",
 "milestone": "four_wheeled_wagons",
-"mean_year": 489.3611111111484,
+"mean_year": 470.80555555558095,
 "design": 260.0,
 "why": "late"
 },
 {
 "strategy": "focus:militarised_agrarian_state",
 "milestone": "sail_panel_cutting",
-"mean_year": 505.7500000000478,
+"mean_year": 487.91666666670307,
 "design": 272.0,
 "why": "late"
 },
 {
 "strategy": "focus:militarised_agrarian_state",
 "milestone": "standard_sign_lists",
-"mean_year": 445.6388888888983,
+"mean_year": 441.08333333333985,
 "design": 280.0,
 "why": "late"
 },
 {
 "strategy": "focus:militarised_agrarian_state",
+"milestone": "bronze_alloying",
+"mean_year": 401.97222222220375,
+"design": 360.0,
+"why": "late"
+},
+{
+"strategy": "focus:militarised_agrarian_state",
 "milestone": "phonetic_notation",
-"mean_year": 478.3888888889192,
+"mean_year": 476.33333333336236,
 "design": 360.0,
 "why": "late"
 },
 {
 "strategy": "focus:militarised_agrarian_state",
 "milestone": "formal_archives",
-"mean_year": 479.7222222222534,
+"mean_year": 474.0000000000275,
 "design": 405.0,
 "why": "late"
 },
@@ -18800,7 +18800,7 @@
 {
 "year": 600.0,
 "metric": "cbr",
-"value": 46.12765705476181,
+"value": 46.12718724181164,
 "flag": "ABOVE FOCUS HIGH"
 }
 ],
@@ -19303,7 +19303,7 @@
 {
 "year": 600.0,
 "metric": "cbr",
-"value": 46.10299499535162,
+"value": 46.10324461358788,
 "flag": "ABOVE FOCUS HIGH"
 }
 ],
@@ -19434,7 +19434,7 @@
 {
 "year": 600.0,
 "metric": "cbr",
-"value": 46.07294045794606,
+"value": 46.072925402767,
 "flag": "ABOVE FOCUS HIGH"
 }
 ],
@@ -20001,7 +20001,7 @@
 {
 "year": 600.0,
 "metric": "cbr",
-"value": 46.10072340658605,
+"value": 46.10073531283533,
 "flag": "ABOVE FOCUS HIGH"
 }
 ],
@@ -21012,7 +21012,7 @@
 {
 "year": 600.0,
 "metric": "cbr",
-"value": 46.07621141080253,
+"value": 46.086062679632896,
 "flag": "ABOVE FOCUS HIGH"
 }
 ],
@@ -25836,7 +25836,7 @@
 {
 "year": 500.0,
 "metric": "growth_pct",
-"value": 1.032372886000103,
+"value": 1.0324119579340134,
 "flag": "ABOVE FOCUS HIGH"
 }
 ],
@@ -25855,7 +25855,7 @@
 {
 "year": 600.0,
 "metric": "growth_pct",
-"value": 1.0335452735886246,
+"value": 1.034947496333875,
 "flag": "ABOVE FOCUS HIGH"
 }
 ],
@@ -26270,7 +26270,7 @@
 {
 "year": 600.0,
 "metric": "growth_pct",
-"value": 0.7541270355790072,
+"value": 0.7528535352110474,
 "flag": "ABOVE FOCUS HIGH"
 }
 ],
@@ -26686,7 +26686,7 @@
 {
 "year": 500.0,
 "metric": "growth_pct",
-"value": 0.8751319017604361,
+"value": 0.8751353641169487,
 "flag": "ABOVE FOCUS HIGH"
 }
 ],
@@ -26861,7 +26861,7 @@
 {
 "year": 500.0,
 "metric": "growth_pct",
-"value": 0.9065636035654986,
+"value": 0.9065624828024754,
 "flag": "ABOVE FOCUS HIGH"
 }
 ],
@@ -27423,33 +27423,33 @@
 },
 "mix007": {
 "300": {
-"population": -387.1281909668466,
-"life_expectancy": -0.2598910650961166,
-"infant_mortality": 2.91423595648439,
+"population": -387.12005111523274,
+"life_expectancy": -0.2598905944199146,
+"infant_mortality": 2.9142296894818003,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.0139345675209539,
-"cap_infrastructure": -0.027048923072572117,
-"cap_logistics": -0.05142310307972253,
-"cap_institutions": -0.07306463921817008,
-"cap_security": -0.12911869281250238,
-"cap_culture": -0.11323486539631644,
+"cap_production": -0.013934660166060153,
+"cap_infrastructure": -0.027048923072557685,
+"cap_logistics": -0.0514230997203331,
+"cap_institutions": -0.07306484054251283,
+"cap_security": -0.12911968127260715,
+"cap_culture": -0.11323724875752827,
 "ecology": -0.009356558071672072,
 "known": -218.66666666666669,
-"education": -0.006547651718955549
+"education": -0.006547651730389181
 },
 "600": {
-"population": -780.7049131971876,
-"life_expectancy": -0.08096834913385109,
-"infant_mortality": 0.44628951443789333,
-"food_security": -0.0001329633067354008,
+"population": -780.7041625458442,
+"life_expectancy": -0.08096967729892057,
+"infant_mortality": 0.4463016217780478,
+"food_security": -0.00013296329402467943,
 "health": 0.0,
-"cap_production": -0.031206614890134765,
-"cap_infrastructure": -0.05055877614421689,
-"cap_logistics": -0.06692002090403892,
-"cap_institutions": -0.09177015056525262,
-"cap_security": -0.17440801740365913,
-"cap_culture": -0.12022891375435374,
+"cap_production": -0.03120660882427484,
+"cap_infrastructure": -0.05055877614421633,
+"cap_logistics": -0.06692001388766738,
+"cap_institutions": -0.09177016373251079,
+"cap_security": -0.17440811787503052,
+"cap_culture": -0.12022917625966056,
 "ecology": 0.0009872759851828894,
 "known": -314.0,
 "education": -0.017161584362901494
@@ -27729,36 +27729,36 @@
 },
 "mix016": {
 "300": {
-"population": -522.8036582409496,
-"life_expectancy": -1.3779132087769632,
-"infant_mortality": 14.61185571120393,
+"population": -522.57650529024,
+"life_expectancy": -1.3778953769800388,
+"infant_mortality": 14.611605443396257,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.006590884895812721,
-"cap_infrastructure": -0.02998262025829579,
-"cap_logistics": -0.09840330478233916,
-"cap_institutions": -0.07430192359829269,
-"cap_security": -0.058872167177571044,
-"cap_culture": -0.10875952109607001,
+"cap_production": -0.006594512230860827,
+"cap_infrastructure": -0.02998262016553299,
+"cap_logistics": -0.09840335076875262,
+"cap_institutions": -0.07430558608579729,
+"cap_security": -0.058898077866829435,
+"cap_culture": -0.10883447220513853,
 "ecology": 0.16474245914368213,
 "known": -214.0,
-"education": -0.022441319196310427
+"education": -0.022441319090743872
 },
 "600": {
-"population": -1805.3848011922632,
-"life_expectancy": -0.3543044147113079,
-"infant_mortality": 3.973215249478045,
+"population": -1804.2354298849762,
+"life_expectancy": -0.3543884205978287,
+"infant_mortality": 3.97437917263062,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.012535715183372154,
-"cap_infrastructure": -0.04841786452132235,
-"cap_logistics": -0.11673646197491128,
-"cap_institutions": -0.09000364094388691,
-"cap_security": -0.06821114255771132,
-"cap_culture": -0.11187339486764092,
+"cap_production": -0.012538922958478027,
+"cap_infrastructure": -0.04841786452132213,
+"cap_logistics": -0.1167364240137736,
+"cap_institutions": -0.09000000317941548,
+"cap_security": -0.06821313545248564,
+"cap_culture": -0.11193150612404779,
 "ecology": 0.1624032594630337,
 "known": -273.0,
-"education": -0.03085661877787127
+"education": -0.030856618777913902
 }
 },
 "mix017": {
@@ -28341,36 +28341,36 @@
 },
 "mix034": {
 "300": {
-"population": -721.9616836231967,
-"life_expectancy": -2.960560174394729,
-"infant_mortality": 53.35535246878854,
+"population": -720.3798459584208,
+"life_expectancy": -2.7050069308487856,
+"infant_mortality": 50.79438198347506,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.019617173836977253,
-"cap_infrastructure": -0.00702074291817123,
-"cap_logistics": -0.035366320331980894,
-"cap_institutions": -0.07951882352143402,
-"cap_security": -0.11929094824463232,
-"cap_culture": -0.12300333916069905,
+"cap_production": -0.01935806800484352,
+"cap_infrastructure": -0.007018509410699814,
+"cap_logistics": -0.035267253638265605,
+"cap_institutions": -0.07937639292063758,
+"cap_security": -0.11913315816686881,
+"cap_culture": -0.12292194328873018,
 "ecology": 0.08060538762696862,
 "known": -333.0,
-"education": -0.016593666421223507
+"education": -0.016593654852997686
 },
 "600": {
-"population": -3193.866555401489,
-"life_expectancy": -1.7701814298084493,
-"infant_mortality": 41.487806080791984,
+"population": -3193.689232085686,
+"life_expectancy": -1.7699480396210596,
+"infant_mortality": 41.485435982981414,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.04494576758144131,
-"cap_infrastructure": -0.0232613570063257,
-"cap_logistics": -0.054809195591479565,
-"cap_institutions": -0.10149690476306394,
-"cap_security": -0.17543217522055166,
-"cap_culture": -0.124128143887825,
+"cap_production": -0.0449068220145068,
+"cap_infrastructure": -0.02326135700632559,
+"cap_logistics": -0.05479312248921031,
+"cap_institutions": -0.10147383588351988,
+"cap_security": -0.1754065573637021,
+"cap_culture": -0.12411492663483514,
 "ecology": 0.0843955351057073,
 "known": -463.0,
-"education": -0.040575373650262536
+"education": -0.04057537365026298
 }
 },
 "mix035": {
@@ -28579,36 +28579,36 @@
 },
 "mix041": {
 "300": {
-"population": -644.5018261906017,
-"life_expectancy": -0.5156948018742256,
-"infant_mortality": 21.633366905246987,
+"population": -644.4917619892003,
+"life_expectancy": -0.5157201517551826,
+"infant_mortality": 21.63353800690237,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.00660711951569759,
-"cap_infrastructure": -0.00493309979946055,
-"cap_logistics": -0.02278667506140003,
-"cap_institutions": -0.03396437332134783,
-"cap_security": -0.09224580799936855,
-"cap_culture": -0.06788175283797449,
+"cap_production": -0.006607914397366077,
+"cap_infrastructure": -0.0049563724229819695,
+"cap_logistics": -0.022792095238505228,
+"cap_institutions": -0.03397443150297497,
+"cap_security": -0.09225304804584994,
+"cap_culture": -0.06792925443552456,
 "ecology": 0.09517836425572201,
 "known": -202.33333333333331,
-"education": -0.010503392556450164
+"education": -0.010510920571920046
 },
 "600": {
-"population": -2803.816101924073,
-"life_expectancy": 0.5144582202583372,
-"infant_mortality": 13.122592886909985,
+"population": -2803.7863120272746,
+"life_expectancy": 0.5144599228352433,
+"infant_mortality": 13.122570441076647,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.014973576962163504,
+"cap_production": -0.014974003707571404,
 "cap_infrastructure": -0.010178768590436094,
-"cap_logistics": -0.03382595223865881,
-"cap_institutions": -0.049059995151211844,
-"cap_security": -0.13977858673118193,
-"cap_culture": -0.074857786971947,
+"cap_logistics": -0.033825969166478675,
+"cap_institutions": -0.04906068422967802,
+"cap_security": -0.1397819989842931,
+"cap_culture": -0.07486603923656276,
 "ecology": 0.0942469478575163,
 "known": -246.0,
-"education": -0.01315676444958147
+"education": -0.01315676444959979
 }
 },
 "mix042": {
@@ -28715,70 +28715,70 @@
 },
 "mix045": {
 "300": {
-"population": -453.3981791893868,
-"life_expectancy": -0.8852808056773753,
-"infant_mortality": 6.624453360563848,
+"population": -453.3824805877453,
+"life_expectancy": -0.8855380394764509,
+"infant_mortality": 6.627635569521431,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.031328775820909316,
-"cap_infrastructure": -0.008100807605847415,
-"cap_logistics": -0.044225423452900536,
-"cap_institutions": -0.05633316231941066,
-"cap_security": -0.11307197284042131,
-"cap_culture": -0.0844492097461178,
+"cap_production": -0.03132861445811741,
+"cap_infrastructure": -0.008103409282718577,
+"cap_logistics": -0.04422533846306387,
+"cap_institutions": -0.056331042793389074,
+"cap_security": -0.11306484077598594,
+"cap_culture": -0.08444438343748062,
 "ecology": 0.08896988555690105,
 "known": -156.0,
-"education": -0.021908478339220938
+"education": -0.021912918569281237
 },
 "600": {
-"population": -941.0394423275552,
-"life_expectancy": -0.02078721729786892,
-"infant_mortality": -2.6238930621834697,
+"population": -940.9582112501403,
+"life_expectancy": -0.02079087965515214,
+"infant_mortality": -2.623843428491199,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.05583463450065307,
-"cap_infrastructure": -0.014280301634741366,
-"cap_logistics": -0.04123463823808449,
-"cap_institutions": -0.07138090966423405,
-"cap_security": -0.15893962859950755,
-"cap_culture": -0.0887219997139731,
+"cap_production": -0.05583478392431673,
+"cap_infrastructure": -0.014280301634745474,
+"cap_logistics": -0.041234632264782745,
+"cap_institutions": -0.07138055144712618,
+"cap_security": -0.15893940091114006,
+"cap_culture": -0.08872479566990743,
 "ecology": 0.09215068318898811,
 "known": -218.0,
-"education": -0.021669957420622943
+"education": -0.02166995742062261
 }
 },
 "mix046": {
 "300": {
-"population": -542.8093391869022,
-"life_expectancy": -1.0403234547387825,
-"infant_mortality": 11.224896171882534,
+"population": -542.1138039180257,
+"life_expectancy": -1.0402469780875236,
+"infant_mortality": 11.2238434048582,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.039052017440477815,
-"cap_infrastructure": -0.0034698808744078047,
-"cap_logistics": -0.030863095296071064,
-"cap_institutions": -0.08198387418558484,
-"cap_security": -0.07466420471019447,
-"cap_culture": -0.12280554304172409,
+"cap_production": -0.039046291314056014,
+"cap_infrastructure": -0.0034703258071902,
+"cap_logistics": -0.03086308777759117,
+"cap_institutions": -0.08194648241020841,
+"cap_security": -0.07450776136667397,
+"cap_culture": -0.12263221648959188,
 "ecology": 0.057953099141699715,
 "known": -267.0,
-"education": -0.024168805614404487
+"education": -0.024168806298299206
 },
 "600": {
-"population": -1899.9186062395906,
-"life_expectancy": -0.134198115280185,
-"infant_mortality": 2.4120699193694293,
+"population": -1896.3490983296394,
+"life_expectancy": -0.1344056395947888,
+"infant_mortality": 2.4148959158731884,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.05944149990787917,
+"cap_production": -0.05945627982156254,
 "cap_infrastructure": -0.004248452874137776,
-"cap_logistics": -0.039020514641038395,
-"cap_institutions": -0.09480560552716155,
-"cap_security": -0.08512992480755655,
-"cap_culture": -0.1231578046100924,
+"cap_logistics": -0.039020193273582526,
+"cap_institutions": -0.09483775470139855,
+"cap_security": -0.08528757930692399,
+"cap_culture": -0.12353739667800556,
 "ecology": 0.06339345547104336,
 "known": -346.0,
-"education": -0.023800204692834948
+"education": -0.023800204693045446
 }
 },
 "mix047": {
@@ -28817,36 +28817,36 @@
 },
 "mix048": {
 "300": {
-"population": -499.2445363834819,
-"life_expectancy": -1.4639294754698469,
-"infant_mortality": 14.87422722121238,
+"population": -498.7884330133374,
+"life_expectancy": -1.4638950335861765,
+"infant_mortality": 14.87374163963969,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.00353529932448704,
-"cap_infrastructure": -0.027990103472585348,
-"cap_logistics": -0.0514056265853815,
-"cap_institutions": -0.05882555816890023,
-"cap_security": -0.11328270362126919,
-"cap_culture": -0.07640733518015597,
+"cap_production": -0.0035236374255489533,
+"cap_infrastructure": -0.027990104275109617,
+"cap_logistics": -0.05140552487969052,
+"cap_institutions": -0.05879117322652849,
+"cap_security": -0.1131144110454893,
+"cap_culture": -0.07614064198015325,
 "ecology": 0.15626563581630248,
 "known": -129.33333333333337,
-"education": -0.0061026032266462416
+"education": -0.006102603228405501
 },
 "600": {
-"population": -1462.5976323251,
-"life_expectancy": -0.0792097504245568,
-"infant_mortality": -0.7143052649129231,
+"population": -1459.919037581062,
+"life_expectancy": -0.07934019228296663,
+"infant_mortality": -0.7125274537156372,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.015454402218689434,
-"cap_infrastructure": -0.04857955955012938,
-"cap_logistics": -0.06295427975532603,
-"cap_institutions": -0.07873161457784672,
-"cap_security": -0.1631838476825716,
-"cap_culture": -0.08445825132041318,
+"cap_production": -0.015438569522156165,
+"cap_infrastructure": -0.04857955955012783,
+"cap_logistics": -0.06295413860860127,
+"cap_institutions": -0.07872382461854621,
+"cap_security": -0.1631193572701019,
+"cap_culture": -0.08414748945737416,
 "ecology": 0.1545439688361111,
 "known": -186.66666666666663,
-"education": -0.011368661815618908
+"education": -0.011368661815617687
 }
 },
 "mix049": {
@@ -29021,36 +29021,36 @@
 },
 "mix054": {
 "300": {
-"population": -642.1044365887824,
-"life_expectancy": -0.6204842611461743,
-"infant_mortality": 22.192879995550356,
+"population": -642.103737259008,
+"life_expectancy": -0.6204841765700237,
+"infant_mortality": 22.192878868657544,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.00456810798109164,
-"cap_infrastructure": -0.0015550199887227611,
-"cap_logistics": -0.057384224731744427,
-"cap_institutions": -0.058861716650139395,
-"cap_security": -0.09916569252836849,
-"cap_culture": -0.0961766094655554,
+"cap_production": -0.004568118864377024,
+"cap_infrastructure": -0.0015550199865285164,
+"cap_logistics": -0.05738422302416091,
+"cap_institutions": -0.05886174311425563,
+"cap_security": -0.09916582903489746,
+"cap_culture": -0.09617694239769892,
 "ecology": 0.03920798610258247,
 "known": -255.33333333333331,
-"education": -0.019655846531732468
+"education": -0.01965584653010688
 },
 "600": {
-"population": -2804.8496127176254,
-"life_expectancy": 0.5022730344711555,
-"infant_mortality": 12.801092097048723,
+"population": -2804.847661219909,
+"life_expectancy": 0.502273085347813,
+"infant_mortality": 12.801091425496026,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.015642204655453185,
-"cap_infrastructure": -0.009093306682739222,
-"cap_logistics": -0.08706909036649335,
-"cap_institutions": -0.08160974870404958,
-"cap_security": -0.15135493579471004,
-"cap_culture": -0.10615478692622926,
+"cap_production": -0.015642238747953008,
+"cap_infrastructure": -0.009093306682925628,
+"cap_logistics": -0.08706909585833028,
+"cap_institutions": -0.08160979860853534,
+"cap_security": -0.15135514840870024,
+"cap_culture": -0.10615528072114633,
 "ecology": 0.04235398614113417,
 "known": -340.0,
-"education": -0.03234433146997695
+"education": -0.03234433147069071
 }
 },
 "mix055": {
@@ -29089,36 +29089,36 @@
 },
 "mix056": {
 "300": {
-"population": -553.5481220629788,
-"life_expectancy": -0.8521289338395128,
-"infant_mortality": 12.489912671295997,
+"population": -553.0069781414331,
+"life_expectancy": -0.8520633262711286,
+"infant_mortality": 12.489014296855004,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.016515541674705814,
-"cap_infrastructure": -0.03145081271000638,
-"cap_logistics": -0.07401496005640634,
-"cap_institutions": -0.0691740048591426,
-"cap_security": -0.05825312704075736,
-"cap_culture": -0.09022081437970475,
+"cap_production": -0.016550021117144653,
+"cap_infrastructure": -0.03145423666029534,
+"cap_logistics": -0.07401502400949711,
+"cap_institutions": -0.06917012545069079,
+"cap_security": -0.05827642760349472,
+"cap_culture": -0.09036723481247044,
 "ecology": 0.057953099141699715,
 "known": -184.66666666666669,
-"education": -0.023662959067336065
+"education": -0.023661631217044343
 },
 "600": {
-"population": -1946.4108928316741,
-"life_expectancy": 0.25797535552868567,
-"infant_mortality": 1.3137966159696077,
-"food_security": -0.00016832946157052664,
+"population": -1943.6081755175271,
+"life_expectancy": 0.25775411335277454,
+"infant_mortality": 1.3165526389061881,
+"food_security": -0.00016948737892052979,
 "health": 0.0,
-"cap_production": -0.032432536040297055,
-"cap_infrastructure": -0.057925944581515676,
-"cap_logistics": -0.08810392501396236,
-"cap_institutions": -0.08979167693010959,
-"cap_security": -0.07358927295763851,
-"cap_culture": -0.09897699713239261,
+"cap_production": -0.03244238375144004,
+"cap_infrastructure": -0.057925944617694625,
+"cap_logistics": -0.08810380653830913,
+"cap_institutions": -0.08980093773506448,
+"cap_security": -0.07365523188400636,
+"cap_culture": -0.09919025428554562,
 "ecology": 0.06339345547104336,
 "known": -249.33333333333337,
-"education": -0.039089316150678344
+"education": -0.03908931615067224
 }
 },
 "mix057": {
@@ -29259,36 +29259,36 @@
 },
 "mix061": {
 "300": {
-"population": -697.974811081101,
-"life_expectancy": -0.2340311176424521,
-"infant_mortality": 16.321242046910612,
+"population": -697.7904753040772,
+"life_expectancy": -0.23401040045751031,
+"infant_mortality": 16.320971032133713,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.02654056061855692,
-"cap_infrastructure": -0.005331614957182262,
-"cap_logistics": -0.0444853827556102,
-"cap_institutions": -0.06941826516265726,
-"cap_security": -0.11474146114209577,
-"cap_culture": -0.10087162011710815,
+"cap_production": -0.026528059550143257,
+"cap_infrastructure": -0.005331614958026143,
+"cap_logistics": -0.04447788173802347,
+"cap_institutions": -0.0693978547966182,
+"cap_security": -0.11472648380178574,
+"cap_culture": -0.10086688873471239,
 "ecology": 0.17793801892955285,
 "known": -213.0,
-"education": -0.029488794841650123
+"education": -0.029479714071223517
 },
 "600": {
-"population": -3098.4227038105623,
-"life_expectancy": 0.7112397675192064,
-"infant_mortality": 5.009478509824049,
+"population": -3098.101389640245,
+"life_expectancy": 0.7112638790590573,
+"infant_mortality": 5.009165774765165,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.04616288602391361,
-"cap_infrastructure": -0.006604583437423983,
-"cap_logistics": -0.044037288509123695,
-"cap_institutions": -0.09150050233250506,
-"cap_security": -0.16586068708348845,
-"cap_culture": -0.10751810898109926,
+"cap_production": -0.046160458330485765,
+"cap_infrastructure": -0.00659743336005203,
+"cap_logistics": -0.043958799498440115,
+"cap_institutions": -0.09149701255560849,
+"cap_security": -0.16588002539073776,
+"cap_culture": -0.10769205976525698,
 "ecology": 0.1746375287567098,
 "known": -308.33333333333337,
-"education": -0.0435199738957005
+"education": -0.04347133074212106
 }
 },
 "mix062": {
@@ -29361,36 +29361,36 @@
 },
 "mix064": {
 "300": {
-"population": -690.7287316845652,
-"life_expectancy": -0.20388642733279383,
-"infant_mortality": 15.981523978512541,
+"population": -690.5879672790286,
+"life_expectancy": -0.20383541408565975,
+"infant_mortality": 15.980949931413335,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.017307448344175858,
-"cap_infrastructure": -0.004372738630081585,
-"cap_logistics": -0.02985442491651924,
-"cap_institutions": -0.050924322032113944,
-"cap_security": -0.05325789894084143,
-"cap_culture": -0.08029797415507267,
+"cap_production": -0.017248585486633994,
+"cap_infrastructure": -0.004018029648870658,
+"cap_logistics": -0.029854544831650454,
+"cap_institutions": -0.050936597045663556,
+"cap_security": -0.05324751626026414,
+"cap_culture": -0.08021469131419068,
 "ecology": 0.06442518156606208,
-"known": -148.33333333333337,
-"education": -0.010302932853613389
+"known": -148.0,
+"education": -0.01030888081355541
 },
 "600": {
-"population": -3065.1614336254506,
-"life_expectancy": 0.8062865996599946,
-"infant_mortality": 4.208155453844142,
+"population": -3064.8873448022814,
+"life_expectancy": 0.806307996610311,
+"infant_mortality": 4.2078796632851265,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.03072363633849129,
-"cap_infrastructure": -0.011672230741125111,
-"cap_logistics": -0.03413355181915084,
-"cap_institutions": -0.06651571213382068,
-"cap_security": -0.08259728336267569,
-"cap_culture": -0.09325580265992273,
+"cap_production": -0.030701040958808434,
+"cap_infrastructure": -0.011672230706870734,
+"cap_logistics": -0.03413338915753572,
+"cap_institutions": -0.06649253436170066,
+"cap_security": -0.08245470045624159,
+"cap_culture": -0.09277737662166763,
 "ecology": 0.06939404965237572,
 "known": -187.0,
-"education": -0.013108354174726444
+"education": -0.0131083541326934
 }
 },
 "mix065": {
@@ -29429,70 +29429,70 @@
 },
 "mix066": {
 "300": {
-"population": -589.8466915152605,
-"life_expectancy": -0.9694784325184997,
-"infant_mortality": 27.737384868526817,
+"population": -589.7387924061695,
+"life_expectancy": -0.9694492720085321,
+"infant_mortality": 27.736996340959934,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.028516192421904063,
-"cap_infrastructure": -0.035442246766698826,
-"cap_logistics": -0.043592563237388915,
-"cap_institutions": -0.041869981563999015,
-"cap_security": -0.00027148339250149256,
-"cap_culture": -0.06767419369726557,
+"cap_production": -0.028509165989311303,
+"cap_infrastructure": -0.035439923242192584,
+"cap_logistics": -0.043582295744861055,
+"cap_institutions": -0.04185857552854688,
+"cap_security": -0.00020790316534213815,
+"cap_culture": -0.06760697846850228,
 "ecology": -0.021227761836644765,
 "known": -280.6666666666667,
-"education": -0.043244560191727066
+"education": -0.043243587941956374
 },
 "600": {
-"population": -2384.5017621952697,
-"life_expectancy": 0.22968147770464853,
-"infant_mortality": 16.64113748983175,
+"population": -2384.046374514304,
+"life_expectancy": 0.22969129353088746,
+"infant_mortality": 16.640999412477072,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.04458609809222858,
-"cap_infrastructure": -0.05355678334434977,
-"cap_logistics": -0.03607088823188859,
-"cap_institutions": -0.05204003262748125,
-"cap_security": -0.00727946807150881,
-"cap_culture": -0.06889835857575854,
+"cap_production": -0.04458704269337488,
+"cap_infrastructure": -0.05355632233560903,
+"cap_logistics": -0.03607106481024075,
+"cap_institutions": -0.05204134527948545,
+"cap_security": -0.007296766775112595,
+"cap_culture": -0.06895568333922997,
 "ecology": -0.019681329100537548,
 "known": -305.0,
-"education": -0.04980773050335441
+"education": -0.04980566844574563
 }
 },
 "mix067": {
 "300": {
-"population": -711.0077230532539,
-"life_expectancy": -1.028107601152442,
-"infant_mortality": 27.972997992328942,
+"population": -710.6509494883298,
+"life_expectancy": -1.0256850150771797,
+"infant_mortality": 27.950996770175863,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.0332309219826441,
-"cap_infrastructure": -0.0320985772369653,
-"cap_logistics": -0.06445544280070714,
-"cap_institutions": -0.072528212156311,
-"cap_security": -0.05839987723499607,
-"cap_culture": -0.12216966798423368,
+"cap_production": -0.03323404338703284,
+"cap_infrastructure": -0.03209857716169073,
+"cap_logistics": -0.0644563033403075,
+"cap_institutions": -0.07252934753643903,
+"cap_security": -0.058404838475070275,
+"cap_culture": -0.12219471741042676,
 "ecology": 0.057953099141699715,
 "known": -265.3333333333333,
-"education": -0.02777619188211411
+"education": -0.02777610215015891
 },
 "600": {
-"population": -3142.1458546288563,
-"life_expectancy": -0.01035715246447566,
-"infant_mortality": 18.336109876091854,
+"population": -3141.902873093644,
+"life_expectancy": -0.010331851079950383,
+"infant_mortality": 18.335769179323478,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.052959840433659644,
-"cap_infrastructure": -0.052292691717066186,
-"cap_logistics": -0.06934115382434058,
-"cap_institutions": -0.09703469111621943,
-"cap_security": -0.08049423138662892,
-"cap_culture": -0.13969650626929475,
+"cap_production": -0.05296718925393762,
+"cap_infrastructure": -0.05229269171856332,
+"cap_logistics": -0.06934154499163758,
+"cap_institutions": -0.09693016208480398,
+"cap_security": -0.08056251581043827,
+"cap_culture": -0.1398110379852483,
 "ecology": 0.06339345547104336,
-"known": -379.0,
-"education": -0.035302147333800105
+"known": -378.33333333333337,
+"education": -0.03530214736584458
 }
 },
 "mix068": {
@@ -29803,36 +29803,36 @@
 },
 "mix077": {
 "300": {
-"population": -717.3209242851583,
-"life_expectancy": -2.381138946970566,
-"infant_mortality": 43.37541283537692,
+"population": -716.8288871943117,
+"life_expectancy": -2.305310282542713,
+"infant_mortality": 42.63568357055871,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.016472996513509086,
-"cap_infrastructure": -0.03318576896194747,
-"cap_logistics": -0.10324888623460948,
-"cap_institutions": -0.053011216227978664,
-"cap_security": -0.04591466390135368,
-"cap_culture": -0.0812725744304239,
+"cap_production": -0.016386035947851152,
+"cap_infrastructure": -0.03373560850273871,
+"cap_logistics": -0.10321512195601112,
+"cap_institutions": -0.052962668975650495,
+"cap_security": -0.04586088884443751,
+"cap_culture": -0.08124479639245685,
 "ecology": 0.1453262118705957,
-"known": -198.33333333333331,
-"education": -0.03115938969733878
+"known": -198.66666666666669,
+"education": -0.031132853457184195
 },
 "600": {
-"population": -3183.040356983587,
-"life_expectancy": -1.124603912580401,
-"infant_mortality": 26.786320508559953,
+"population": -3182.8650539539503,
+"life_expectancy": -1.1244343324919477,
+"infant_mortality": 26.784098193414593,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.038237573184597196,
-"cap_infrastructure": -0.05577199818059808,
-"cap_logistics": -0.12276246139487668,
-"cap_institutions": -0.07902865446528162,
-"cap_security": -0.07780682886418733,
-"cap_culture": -0.0891654969413267,
+"cap_production": -0.03862984777163714,
+"cap_infrastructure": -0.05662465317234866,
+"cap_logistics": -0.12275752950362201,
+"cap_institutions": -0.07902630977489777,
+"cap_security": -0.0778192614741009,
+"cap_culture": -0.08921918929955841,
 "ecology": 0.14440147691903493,
-"known": -288.0,
-"education": -0.049271818871428175
+"known": -287.0,
+"education": -0.049698175732258876
 }
 },
 "mix078": {
@@ -29905,36 +29905,36 @@
 },
 "mix080": {
 "300": {
-"population": -423.39221283788794,
-"life_expectancy": -1.2267348334369679,
-"infant_mortality": 12.813042320251157,
+"population": -423.2569319081214,
+"life_expectancy": -1.2267179081746633,
+"infant_mortality": 12.81284942338209,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.023187643247032153,
-"cap_infrastructure": -0.012555477631789325,
-"cap_logistics": -0.08768599235859786,
-"cap_institutions": -0.03784305559906598,
-"cap_security": -0.09836714221029641,
-"cap_culture": -0.06470255581549722,
+"cap_production": -0.023189455996326158,
+"cap_infrastructure": -0.012555340269642778,
+"cap_logistics": -0.08768529354137478,
+"cap_institutions": -0.03785170908399971,
+"cap_security": -0.09894538705560707,
+"cap_culture": -0.0647496335775426,
 "ecology": 0.03600116764863093,
-"known": -164.33333333333337,
-"education": -0.036359306373953904
+"known": -164.66666666666663,
+"education": -0.03635930193136416
 },
 "600": {
-"population": -579.029653855323,
-"life_expectancy": -0.7080776762105501,
-"infant_mortality": 6.711388707626867,
+"population": -578.7788747402778,
+"life_expectancy": -0.708421013676027,
+"infant_mortality": 6.714588616070472,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.0379474959158832,
-"cap_infrastructure": -0.020432805781766095,
-"cap_logistics": -0.09999235411939533,
-"cap_institutions": -0.05241169880498808,
-"cap_security": -0.14345413233011184,
-"cap_culture": -0.06731316095273066,
+"cap_production": -0.03794671110100134,
+"cap_infrastructure": -0.02043280578175999,
+"cap_logistics": -0.09999095125290469,
+"cap_institutions": -0.05242091779594893,
+"cap_security": -0.14404168739133905,
+"cap_culture": -0.06737093504644909,
 "ecology": 0.039380782944132164,
-"known": -212.66666666666663,
-"education": -0.03821073964401278
+"known": -213.0,
+"education": -0.038210739644009006
 }
 },
 "mix081": {
@@ -30211,33 +30211,33 @@
 },
 "mix089": {
 "300": {
-"population": -496.08307083039455,
-"life_expectancy": -1.4020507364529102,
-"infant_mortality": 14.738682529159234,
+"population": -496.04900229280366,
+"life_expectancy": -1.4020481992078615,
+"infant_mortality": 14.738646853313895,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.0027691653616429557,
-"cap_infrastructure": 0.00037642482717270553,
-"cap_logistics": -0.062109314020362905,
-"cap_institutions": -0.04619556185375906,
-"cap_security": -0.050900321587677544,
-"cap_culture": -0.07010356986607347,
+"cap_production": -0.002763173004294517,
+"cap_infrastructure": 0.00037722330901890366,
+"cap_logistics": -0.06210934825116343,
+"cap_institutions": -0.04619664574305604,
+"cap_security": -0.0509054199033665,
+"cap_culture": -0.07011570189407501,
 "ecology": 0.10649371732441881,
 "known": -125.0,
-"education": -0.009826625884151174
+"education": -0.009826624885909574
 },
 "600": {
-"population": -1470.4755015697115,
-"life_expectancy": -0.022000297008304415,
-"infant_mortality": -0.2001314554465523,
+"population": -1470.2798537318972,
+"life_expectancy": -0.02200938025640653,
+"infant_mortality": -0.200007793852933,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.011777010166047708,
+"cap_production": -0.011769270339193838,
 "cap_infrastructure": 0.00039661076227603953,
-"cap_logistics": -0.08270125628086578,
-"cap_institutions": -0.05867080888477838,
-"cap_security": -0.06046113110806839,
-"cap_culture": -0.07450250157604243,
+"cap_logistics": -0.08270123626735537,
+"cap_institutions": -0.0586631668403611,
+"cap_security": -0.06041237394839116,
+"cap_culture": -0.07434260882249977,
 "ecology": 0.10839791183103897,
 "known": -155.0,
 "education": -0.016304606988915116
@@ -30381,36 +30381,36 @@
 },
 "mix094": {
 "300": {
-"population": -608.6615686333281,
-"life_expectancy": -1.1654574387820738,
-"infant_mortality": 28.742669917045646,
+"population": -608.6615244896885,
+"life_expectancy": -1.165457433398732,
+"infant_mortality": 28.742669843175236,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.015859586963025585,
-"cap_infrastructure": -0.029081241756616638,
-"cap_logistics": -0.028094437719002385,
-"cap_institutions": -0.02873939373498091,
-"cap_security": -0.007325493523080762,
-"cap_culture": -0.042605448009190416,
+"cap_production": -0.015859587449268298,
+"cap_infrastructure": -0.02908124175661264,
+"cap_logistics": -0.02809443763184699,
+"cap_institutions": -0.02873939491496247,
+"cap_security": -0.007325499669460722,
+"cap_culture": -0.042605463028478674,
 "ecology": 0.01722683185128443,
 "known": -182.0,
-"education": -0.021854963786522186
+"education": -0.021854963786432258
 },
 "600": {
-"population": -2441.1201789185143,
-"life_expectancy": 0.3292637095299433,
-"infant_mortality": 15.478758849662057,
+"population": -2441.120016692903,
+"life_expectancy": 0.32926371207033966,
+"infant_mortality": 15.478758815896896,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.017106418587176986,
-"cap_infrastructure": -0.04663474090959363,
-"cap_logistics": -0.03413755198191187,
-"cap_institutions": -0.0414222565466591,
-"cap_security": -0.016257547998897337,
-"cap_culture": -0.052959080030370975,
+"cap_production": -0.017106418692927727,
+"cap_infrastructure": -0.04663474090958941,
+"cap_logistics": -0.0341375519581516,
+"cap_institutions": -0.04142225679873279,
+"cap_security": -0.016257549338873134,
+"cap_culture": -0.05295908331858279,
 "ecology": 0.0183142197205578,
 "known": -179.33333333333337,
-"education": -0.021708341109519358
+"education": -0.02170834110951836
 }
 },
 "mix095": {
@@ -30755,104 +30755,104 @@
 },
 "mix105": {
 "300": {
-"population": -652.1536048223509,
-"life_expectancy": -0.5615488033422196,
-"infant_mortality": 22.120467945855353,
+"population": -652.2316700928509,
+"life_expectancy": -0.6337320484245765,
+"infant_mortality": 22.761616548051336,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.006243747943197708,
-"cap_infrastructure": -0.010086533513986917,
-"cap_logistics": -0.031390426420862816,
-"cap_institutions": -0.03088515287150695,
-"cap_security": -0.03673800845226116,
-"cap_culture": -0.055161615922206586,
+"cap_production": -0.00621932075576348,
+"cap_infrastructure": -0.010092466241593878,
+"cap_logistics": -0.031412512854587404,
+"cap_institutions": -0.030855485508196057,
+"cap_security": -0.03662587010524998,
+"cap_culture": -0.05444052262919952,
 "ecology": 0.07768980754999394,
-"known": -173.33333333333331,
-"education": -0.011604648135197015
+"known": -173.66666666666669,
+"education": -0.011610699007975733
 },
 "600": {
-"population": -2829.8470919533415,
-"life_expectancy": 0.4815452648742671,
-"infant_mortality": 13.780296646466553,
+"population": -2830.258188082048,
+"life_expectancy": 0.4815257992954791,
+"infant_mortality": 13.780553565469319,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.012097695698679578,
-"cap_infrastructure": -0.010700681814135637,
-"cap_logistics": -0.04208248304507506,
-"cap_institutions": -0.04464569502077953,
-"cap_security": -0.061552579608393776,
-"cap_culture": -0.061870965861729244,
+"cap_production": -0.012094758280309037,
+"cap_infrastructure": -0.010700681814165058,
+"cap_logistics": -0.0420824323241904,
+"cap_institutions": -0.04464032263358453,
+"cap_security": -0.061526890321013106,
+"cap_culture": -0.0618094522205721,
 "ecology": 0.07803242450514392,
 "known": -192.0,
-"education": -0.0120432130630862
+"education": -0.012043213018797183
 }
 },
 "mix106": {
 "300": {
-"population": -692.5197689225657,
-"life_expectancy": -0.1737938801232275,
-"infant_mortality": 15.846264932252694,
+"population": -692.3092641852411,
+"life_expectancy": -0.17374248492081534,
+"infant_mortality": 15.84564314482742,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.008307735948677286,
-"cap_infrastructure": -0.004125195362379319,
-"cap_logistics": -0.06736893507773811,
-"cap_institutions": -0.05494052366684021,
-"cap_security": -0.05696110943160215,
-"cap_culture": -0.09042286073373651,
+"cap_production": -0.008307477118849493,
+"cap_infrastructure": -0.00412596936986076,
+"cap_logistics": -0.06736557624021572,
+"cap_institutions": -0.05494066679990828,
+"cap_security": -0.05696144991483687,
+"cap_culture": -0.09042463755045838,
 "ecology": 0.11943788217314422,
 "known": -167.66666666666663,
-"education": -0.021427955257579567
+"education": -0.021427941958033214
 },
 "600": {
-"population": -3071.7733410546634,
-"life_expectancy": 0.9503176152513184,
-"infant_mortality": 3.1749928097921156,
+"population": -3071.3470943768907,
+"life_expectancy": 0.9495485486925617,
+"infant_mortality": 3.1822445723304043,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.013128539204122935,
-"cap_infrastructure": -0.012435318989790889,
-"cap_logistics": -0.08344586814398364,
-"cap_institutions": -0.0696602505675562,
-"cap_security": -0.08736693501802495,
-"cap_culture": -0.10381572763540703,
+"cap_production": -0.013098129058654706,
+"cap_infrastructure": -0.012435318989864386,
+"cap_logistics": -0.08344291320737868,
+"cap_institutions": -0.06941731814539975,
+"cap_security": -0.08721665762153596,
+"cap_culture": -0.10333341827102838,
 "ecology": 0.1203991001937037,
-"known": -208.0,
-"education": -0.027807382320190865
+"known": -207.33333333333337,
+"education": -0.027465484266125495
 }
 },
 "mix107": {
 "300": {
-"population": -500.1986143120466,
-"life_expectancy": -0.23211420580179976,
-"infant_mortality": 4.236486196734404,
+"population": -499.95196281084867,
+"life_expectancy": -0.23210212962769816,
+"infant_mortality": 4.2363261556327245,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.04068436413588905,
-"cap_infrastructure": -0.03111203790013206,
-"cap_logistics": -0.06416429047588279,
-"cap_institutions": -0.07646101620123702,
-"cap_security": -0.07859013626236105,
-"cap_culture": -0.09760346987425272,
+"cap_production": -0.04071911434532938,
+"cap_infrastructure": -0.031112034762520002,
+"cap_logistics": -0.06416420654118016,
+"cap_institutions": -0.07646959005472798,
+"cap_security": -0.0786322127586031,
+"cap_culture": -0.09773878632645883,
 "ecology": 0.054846499578006025,
-"known": -147.33333333333337,
-"education": -0.028160972309442034
+"known": -147.66666666666663,
+"education": -0.028160972309484444
 },
 "600": {
-"population": -1468.9886871429346,
-"life_expectancy": 0.6266320788440716,
-"infant_mortality": -4.093982693877365,
+"population": -1467.5669317133631,
+"life_expectancy": 0.6265670802144747,
+"infant_mortality": -4.093124853847627,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.054566345920664006,
+"cap_production": -0.05456878025216472,
 "cap_infrastructure": -0.04852136113854966,
-"cap_logistics": -0.06235949938202029,
-"cap_institutions": -0.09209973131678983,
-"cap_security": -0.09166368966227112,
-"cap_culture": -0.09894881555785262,
+"cap_logistics": -0.06235948258143598,
+"cap_institutions": -0.09210316262321383,
+"cap_security": -0.09168431644242891,
+"cap_culture": -0.09900421262266168,
 "ecology": 0.060513170264003824,
 "known": -194.66666666666663,
-"education": -0.02968191905644757
+"education": -0.029681919056432138
 }
 },
 "mix108": {
@@ -30959,36 +30959,36 @@
 },
 "mix111": {
 "300": {
-"population": -694.426022446524,
-"life_expectancy": -0.4667557828578488,
-"infant_mortality": 20.915181873559504,
+"population": -694.1033602072798,
+"life_expectancy": -0.46671126350068803,
+"infant_mortality": 20.914589798411413,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.012516375395172474,
-"cap_infrastructure": -0.006727803384485975,
-"cap_logistics": -0.041014845786266685,
-"cap_institutions": -0.0585700087554234,
-"cap_security": -0.11440004941891135,
-"cap_culture": -0.08290625885924663,
+"cap_production": -0.012517829591756735,
+"cap_infrastructure": -0.006727815798783787,
+"cap_logistics": -0.04101491223938303,
+"cap_institutions": -0.05857488413882239,
+"cap_security": -0.11440046025308936,
+"cap_culture": -0.08290735984427189,
 "ecology": 0.05808575008725675,
 "known": -187.0,
-"education": -0.013607598529681963
+"education": -0.01361288873891342
 },
 "600": {
-"population": -3088.8221868009296,
-"life_expectancy": 0.46716423910131866,
-"infant_mortality": 13.196458585657325,
+"population": -3088.2683446200635,
+"life_expectancy": 0.4692720117016158,
+"infant_mortality": 13.177186424474002,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.03166184974434594,
-"cap_infrastructure": -0.014404104940256346,
-"cap_logistics": -0.05422494608340772,
-"cap_institutions": -0.0772085488406331,
-"cap_security": -0.17207304705038579,
-"cap_culture": -0.09637702587772945,
+"cap_production": -0.03131193362379481,
+"cap_infrastructure": -0.014404104940257123,
+"cap_logistics": -0.05422440998397715,
+"cap_institutions": -0.07685441489658151,
+"cap_security": -0.17216919595751484,
+"cap_culture": -0.09660004584900916,
 "ecology": 0.06351644285591695,
-"known": -264.0,
-"education": -0.03339837441838078
+"known": -261.0,
+"education": -0.03276005482767186
 }
 },
 "mix112": {
@@ -31129,36 +31129,36 @@
 },
 "mix116": {
 "300": {
-"population": -540.7552795454151,
-"life_expectancy": -0.4630942157768487,
-"infant_mortality": 7.234988327566413,
-"food_security": -1.058533048325927e-06,
+"population": -540.4807140847777,
+"life_expectancy": -0.4630859212068259,
+"infant_mortality": 7.234849376543053,
+"food_security": -1.0338427821610097e-06,
 "health": 0.0,
-"cap_production": -0.019029650382709873,
-"cap_infrastructure": -0.009655615527091044,
-"cap_logistics": -0.0808569077975137,
-"cap_institutions": -0.06023276386002008,
-"cap_security": -0.048922463396710913,
-"cap_culture": -0.08928636276747082,
+"cap_production": -0.019034251663120227,
+"cap_infrastructure": -0.009659469736588155,
+"cap_logistics": -0.08074353393768097,
+"cap_institutions": -0.06023701790107927,
+"cap_security": -0.04895369963291807,
+"cap_culture": -0.08938289607980787,
 "ecology": 0.11943788217314422,
-"known": -197.0,
-"education": -0.037882726266035505
+"known": -196.66666666666669,
+"education": -0.03788290875808076
 },
 "600": {
-"population": -1732.864386885271,
-"life_expectancy": 0.5523819599975326,
-"infant_mortality": -2.2625637867375588,
-"food_security": -0.0002623597768711683,
+"population": -1731.311237781192,
+"life_expectancy": 0.5522091343536495,
+"infant_mortality": -2.260713998125084,
+"food_security": -0.0002647034343671306,
 "health": 0.0,
-"cap_production": -0.029925209244734297,
+"cap_production": -0.029932216137316336,
 "cap_infrastructure": -0.01633076940310385,
-"cap_logistics": -0.10714228603122988,
-"cap_institutions": -0.07578512844093854,
-"cap_security": -0.05376251132738774,
-"cap_culture": -0.0981294055185955,
+"cap_logistics": -0.10714240427331295,
+"cap_institutions": -0.07579743092227476,
+"cap_security": -0.0538217066872031,
+"cap_culture": -0.09827458684114854,
 "ecology": 0.1203991001937037,
 "known": -228.0,
-"education": -0.0359956412561836
+"education": -0.035995641256206135
 }
 },
 "mix117": {
@@ -31503,67 +31503,67 @@
 },
 "mix127": {
 "300": {
-"population": -653.8925720604383,
-"life_expectancy": -3.2853769226177754,
-"infant_mortality": 53.75914210611043,
+"population": -653.8365540641835,
+"life_expectancy": -3.2853539036741637,
+"infant_mortality": 53.758706922128425,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.020606623486752795,
-"cap_infrastructure": -0.02213601904388518,
-"cap_logistics": -0.07942132077369546,
-"cap_institutions": -0.01831661623329539,
-"cap_security": -0.033948405929068226,
-"cap_culture": -0.05699932360264581,
+"cap_production": -0.02060757161056026,
+"cap_infrastructure": -0.022124278751335824,
+"cap_logistics": -0.07941942998544316,
+"cap_institutions": -0.018309447408512924,
+"cap_security": -0.033963677157989314,
+"cap_culture": -0.05703200457511781,
 "ecology": 0.022112251913171843,
 "known": -313.0,
-"education": -0.0398405693120748
+"education": -0.039837636363680984
 },
 "600": {
-"population": -2917.6076078168426,
-"life_expectancy": -1.678454477663248,
-"infant_mortality": 36.33380425428953,
+"population": -2917.4649308775674,
+"life_expectancy": -1.6784493354482102,
+"infant_mortality": 36.33373070160593,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.038441738036214534,
-"cap_infrastructure": -0.03387110531321402,
-"cap_logistics": -0.0985085217327214,
-"cap_institutions": -0.02528462340428861,
-"cap_security": -0.06117530930470194,
-"cap_culture": -0.06321021892795575,
+"cap_production": -0.03844289314223237,
+"cap_infrastructure": -0.03387114821493953,
+"cap_logistics": -0.09850521997145034,
+"cap_institutions": -0.02528214471881307,
+"cap_security": -0.061177095420083316,
+"cap_culture": -0.0632427640743527,
 "ecology": 0.020501384479726936,
 "known": -351.33333333333337,
-"education": -0.04302895064878198
+"education": -0.04302713349348031
 }
 },
 "mix128": {
 "300": {
-"population": -498.2995586350824,
-"life_expectancy": -0.3665212476127273,
-"infant_mortality": 5.305581704267468,
+"population": -498.07599893092066,
+"life_expectancy": -0.3665102201668162,
+"infant_mortality": 5.305434406882853,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.007635079336508532,
-"cap_infrastructure": -0.029198258695301904,
-"cap_logistics": -0.10125181166008324,
-"cap_institutions": -0.07454608992135803,
-"cap_security": -0.05202994095824687,
-"cap_culture": -0.08541723490944231,
+"cap_production": -0.00763851418446837,
+"cap_infrastructure": -0.02919825869439341,
+"cap_logistics": -0.10125186471766245,
+"cap_institutions": -0.074552643690447,
+"cap_security": -0.05206171860657183,
+"cap_culture": -0.08549353600455734,
 "ecology": 0.08060538762696862,
 "known": -120.0,
-"education": -0.026917627037306158
+"education": -0.026917627037354785
 },
 "600": {
-"population": -1348.5518586451897,
-"life_expectancy": 0.6825097524130008,
-"infant_mortality": -4.7224284010449935,
+"population": -1347.167178544603,
+"life_expectancy": 0.682452435363075,
+"infant_mortality": -4.7216730195395655,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.013161661677244196,
-"cap_infrastructure": -0.04973768108213106,
-"cap_logistics": -0.1207603262591384,
-"cap_institutions": -0.08942790619100671,
-"cap_security": -0.0603372141734243,
-"cap_culture": -0.08614068377442241,
+"cap_production": -0.013152414180595429,
+"cap_infrastructure": -0.049737681080776475,
+"cap_logistics": -0.1207603241295428,
+"cap_institutions": -0.08942221070081602,
+"cap_security": -0.0602925378950272,
+"cap_culture": -0.0859519609643683,
 "ecology": 0.0843955351057073,
 "known": -137.66666666666663,
 "education": -0.03844821009459931
@@ -31571,36 +31571,36 @@
 },
 "mix129": {
 "300": {
-"population": -712.449085498345,
-"life_expectancy": -1.550019222183522,
-"infant_mortality": 32.41548665675083,
+"population": -712.2518828432794,
+"life_expectancy": -1.549951094640594,
+"infant_mortality": 32.414555868253046,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.020795817339513523,
-"cap_infrastructure": -0.006491645340720886,
-"cap_logistics": -0.03359510813225097,
-"cap_institutions": -0.05431225943864437,
-"cap_security": -0.05101542598735209,
-"cap_culture": -0.09241570534212351,
+"cap_production": -0.020798054060211624,
+"cap_infrastructure": -0.006498885638388074,
+"cap_logistics": -0.0336167694394468,
+"cap_institutions": -0.05431244539295477,
+"cap_security": -0.05101724527201401,
+"cap_culture": -0.09241583934104192,
 "ecology": 0.10325767611223774,
 "known": -183.33333333333331,
-"education": -0.006301466516662413
+"education": -0.006301463892757653
 },
 "600": {
-"population": -3157.5377271758716,
-"life_expectancy": -0.5358193401811668,
-"infant_mortality": 19.267443269779875,
+"population": -3157.2904019928833,
+"life_expectancy": -0.5357796058917792,
+"infant_mortality": 19.266895022989416,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.042827965729123174,
-"cap_infrastructure": -0.006368173536275612,
-"cap_logistics": -0.04538311168831477,
-"cap_institutions": -0.072935376783683,
-"cap_security": -0.07562819801203857,
-"cap_culture": -0.10262216384607847,
+"cap_production": -0.04282798491555562,
+"cap_infrastructure": -0.0063681735362730585,
+"cap_logistics": -0.04538311977333237,
+"cap_institutions": -0.07293538842312586,
+"cap_security": -0.07562821093361471,
+"cap_culture": -0.10262217051692324,
 "ecology": 0.10539761474037201,
 "known": -252.0,
-"education": -0.018375159327923996
+"education": -0.018375159327917334
 }
 },
 "mix130": {
@@ -31809,70 +31809,70 @@
 },
 "mix136": {
 "300": {
-"population": -705.5278249448659,
-"life_expectancy": -0.6799312108411755,
-"infant_mortality": 24.095380781284263,
+"population": -705.1481342329555,
+"life_expectancy": -0.6799088835618505,
+"infant_mortality": 24.095080856353462,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.030453642205694686,
-"cap_infrastructure": -0.01737359649088699,
-"cap_logistics": -0.04984947838197451,
-"cap_institutions": -0.06237925934373911,
-"cap_security": -0.04821363033037818,
-"cap_culture": -0.11744776651562328,
+"cap_production": -0.03045335964145157,
+"cap_infrastructure": -0.01737878818945393,
+"cap_logistics": -0.04987744915251924,
+"cap_institutions": -0.06237941799761948,
+"cap_security": -0.04821584719606409,
+"cap_culture": -0.11744789742120842,
 "ecology": 0.054846499578006025,
 "known": -284.0,
-"education": -0.026303811426181323
+"education": -0.02631310079611293
 },
 "600": {
-"population": -3123.4573715925867,
-"life_expectancy": 0.1623488043902519,
-"infant_mortality": 17.165679077494815,
+"population": -3122.8657480016277,
+"life_expectancy": 0.16239073507276558,
+"infant_mortality": 17.165117470685715,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.05090574024746264,
-"cap_infrastructure": -0.02350399750339338,
-"cap_logistics": -0.06354652351586326,
-"cap_institutions": -0.08377753308358415,
-"cap_security": -0.06865513155740766,
-"cap_culture": -0.13345181555201935,
+"cap_production": -0.050921824991641884,
+"cap_infrastructure": -0.023503997503253937,
+"cap_logistics": -0.06354675731878612,
+"cap_institutions": -0.08380884274858413,
+"cap_security": -0.06880505634423506,
+"cap_culture": -0.13381113407203682,
 "ecology": 0.060513170264003824,
 "known": -389.0,
-"education": -0.03292545063456764
+"education": -0.032925450633969455
 }
 },
 "mix137": {
 "300": {
-"population": -464.8804243418584,
-"life_expectancy": -1.9341259252857874,
-"infant_mortality": 22.882186842646462,
-"food_security": -7.255416993678931e-05,
+"population": -464.68220765590615,
+"life_expectancy": -1.934118212743222,
+"infant_mortality": 22.88204337416974,
+"food_security": -7.276618457385808e-05,
 "health": 0.0,
-"cap_production": -0.005570134378902525,
-"cap_infrastructure": -0.0048075685523458755,
-"cap_logistics": -0.05678790787688481,
-"cap_institutions": -0.04640902530708313,
-"cap_security": -0.09479952686488485,
-"cap_culture": -0.08830531545816822,
+"cap_production": -0.005562873281780956,
+"cap_infrastructure": -0.00480755158762225,
+"cap_logistics": -0.05678765881868875,
+"cap_institutions": -0.04639367366056557,
+"cap_security": -0.09471544475047816,
+"cap_culture": -0.08813695964220014,
 "ecology": 0.17389436116852175,
 "known": -261.6666666666667,
-"education": -0.01452049169417613
+"education": -0.014520414573686358
 },
 "600": {
-"population": -1188.6058598691461,
-"life_expectancy": -1.0312173517044556,
-"infant_mortality": 11.750935896896635,
-"food_security": -0.0007665691672689157,
+"population": -1188.4236256676654,
+"life_expectancy": -1.0316056773317719,
+"infant_mortality": 11.754629804768598,
+"food_security": -0.0007667924330733156,
 "health": 0.0,
-"cap_production": -0.013296933838246594,
-"cap_infrastructure": -0.005115452874559168,
-"cap_logistics": -0.08571309527388893,
-"cap_institutions": -0.06170431835972712,
-"cap_security": -0.14294754502341656,
-"cap_culture": -0.09006690118071792,
+"cap_production": -0.013294790338082008,
+"cap_infrastructure": -0.005115452874559057,
+"cap_logistics": -0.08571120276527289,
+"cap_institutions": -0.06170521820753172,
+"cap_security": -0.1429615212388674,
+"cap_culture": -0.09010620396212898,
 "ecology": 0.16722852041517122,
 "known": -331.0,
-"education": -0.027905206157245233
+"education": -0.02790520613354952
 }
 },
 "mix138": {
@@ -31945,36 +31945,36 @@
 },
 "mix140": {
 "300": {
-"population": -691.674219375197,
-"life_expectancy": -0.14816997547846,
-"infant_mortality": 15.155432975176979,
+"population": -691.5206831126562,
+"life_expectancy": -0.14811404173254772,
+"infant_mortality": 15.154801102619558,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.009147876294439028,
-"cap_infrastructure": -0.006784461734737235,
-"cap_logistics": -0.03623057318910211,
-"cap_institutions": -0.06030104914712153,
-"cap_security": -0.1089471720481861,
-"cap_culture": -0.09074767044737908,
+"cap_production": -0.009148252697344539,
+"cap_infrastructure": -0.006784816504904034,
+"cap_logistics": -0.03622908618973236,
+"cap_institutions": -0.06030464195728247,
+"cap_security": -0.10894811173441477,
+"cap_culture": -0.09075206000614289,
 "ecology": 0.1259099645975077,
 "known": -173.66666666666669,
-"education": -0.011695879236811035
+"education": -0.011697234852771299
 },
 "600": {
-"population": -3072.611620798682,
-"life_expectancy": 0.8944358928426652,
-"infant_mortality": 3.1924147061210135,
+"population": -3071.7907478108395,
+"life_expectancy": 0.8945460814060766,
+"infant_mortality": 3.191226877409946,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.017740689593871095,
-"cap_infrastructure": -0.014206883452600683,
-"cap_logistics": -0.045730658840112626,
-"cap_institutions": -0.07390722221909796,
-"cap_security": -0.166253790724312,
-"cap_culture": -0.10474719230720386,
+"cap_production": -0.017918475395435562,
+"cap_infrastructure": -0.014206883452600572,
+"cap_logistics": -0.045733807052412534,
+"cap_institutions": -0.07368288401820278,
+"cap_security": -0.1661015980554308,
+"cap_culture": -0.1028877207394745,
 "ecology": 0.12639969437503684,
-"known": -223.0,
-"education": -0.01759392920455416
+"known": -225.66666666666663,
+"education": -0.019682353969932675
 }
 },
 "mix141": {
@@ -32013,36 +32013,36 @@
 },
 "mix142": {
 "300": {
-"population": -420.01454520697627,
-"life_expectancy": -0.03651058851112765,
-"infant_mortality": 1.0980274453022787,
+"population": -420.00419823657336,
+"life_expectancy": -0.03651031967932994,
+"infant_mortality": 1.098023905456273,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.005846710203206262,
-"cap_infrastructure": -0.004064843633225457,
-"cap_logistics": -0.030859594384048283,
-"cap_institutions": -0.061128685592953036,
-"cap_security": -0.054378338367731205,
-"cap_culture": -0.05769083988772805,
+"cap_production": -0.005846788375642786,
+"cap_infrastructure": -0.004064843649433492,
+"cap_logistics": -0.030859595299373932,
+"cap_institutions": -0.061128838229302374,
+"cap_security": -0.05437906995625852,
+"cap_culture": -0.05769259291956408,
 "ecology": 0.057953099141699715,
 "known": -32.0,
-"education": -0.0008456646030794435
+"education": -0.0008456646019285863
 },
 "600": {
-"population": -497.3312490291437,
-"life_expectancy": 0.46952033598809706,
-"infant_mortality": -3.4702947362255543,
+"population": -497.30955601410096,
+"life_expectancy": 0.4694864954705942,
+"infant_mortality": -3.469993590973445,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.008617971621578624,
+"cap_production": -0.008617651568442408,
 "cap_infrastructure": -0.005709673535357673,
-"cap_logistics": -0.039832828469037684,
-"cap_institutions": -0.06616565701818611,
-"cap_security": -0.06057151662835991,
-"cap_culture": -0.05528152682864118,
+"cap_logistics": -0.03983271187355841,
+"cap_institutions": -0.06616547026757869,
+"cap_security": -0.060571234578592925,
+"cap_culture": -0.055281196967600144,
 "ecology": 0.06339345547104336,
 "known": -27.33333333333337,
-"education": -0.0035147402671508177
+"education": -0.0035147402671507066
 }
 },
 "mix143": {
@@ -32251,36 +32251,36 @@
 },
 "mix149": {
 "300": {
-"population": -404.596848664923,
-"life_expectancy": -1.5498770950707765,
-"infant_mortality": 17.453876647342923,
+"population": -404.60386179491394,
+"life_expectancy": -1.5498769092499174,
+"infant_mortality": 17.453874022100933,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.016898635892396152,
-"cap_infrastructure": -0.026753260805071566,
-"cap_logistics": -0.04847682489366162,
-"cap_institutions": -0.038152450615568045,
-"cap_security": -0.03495579127035131,
-"cap_culture": -0.054941512338394394,
+"cap_production": -0.016898734430019546,
+"cap_infrastructure": -0.026753260810790325,
+"cap_logistics": -0.048476835277100117,
+"cap_institutions": -0.03815372467394118,
+"cap_security": -0.03496023756206301,
+"cap_culture": -0.05494479487797854,
 "ecology": 0.04241480455653296,
 "known": -116.33333333333337,
-"education": -0.011219940633297565
+"education": -0.0112199406400737
 },
 "600": {
-"population": -426.4237122571162,
-"life_expectancy": -0.809068336770963,
-"infant_mortality": 8.093690544948544,
+"population": -426.43323657220253,
+"life_expectancy": -0.8090538505166229,
+"infant_mortality": 8.093554261882986,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.03150727514738594,
-"cap_infrastructure": -0.046294112372892715,
-"cap_logistics": -0.0547083371243125,
-"cap_institutions": -0.053243043195466466,
-"cap_security": -0.04192438633482176,
-"cap_culture": -0.05861739244329778,
+"cap_production": -0.0315073262217076,
+"cap_infrastructure": -0.046294112372964435,
+"cap_logistics": -0.05470839083092249,
+"cap_institutions": -0.053242996202618964,
+"cap_security": -0.04192387290446664,
+"cap_culture": -0.05861600011090884,
 "ecology": 0.04532718933813473,
 "known": -163.0,
-"education": -0.020008628125615324
+"education": -0.02000862812566595
 }
 },
 "mix150": {
@@ -32387,36 +32387,36 @@
 },
 "mix153": {
 "300": {
-"population": -329.5561042704529,
-"life_expectancy": -1.5405070325209813,
-"infant_mortality": 17.349960982423738,
+"population": -329.54059356332806,
+"life_expectancy": -1.5405060024445802,
+"infant_mortality": 17.34994641028277,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.0034459214487322365,
-"cap_infrastructure": -0.023713430065933072,
-"cap_logistics": -0.04391228818426718,
-"cap_institutions": -0.038519718048822704,
-"cap_security": -0.03762438726543138,
-"cap_culture": -0.056562847039900443,
+"cap_production": -0.0034460574317938253,
+"cap_infrastructure": -0.023713430056784612,
+"cap_logistics": -0.043912266901405816,
+"cap_institutions": -0.03852005526997282,
+"cap_security": -0.03762612463510506,
+"cap_culture": -0.056567081183359846,
 "ecology": 0.05641137448959549,
 "known": -145.66666666666663,
-"education": -0.0075193584676213066
+"education": -0.0075193584641813915
 },
 "600": {
-"population": -680.4411077377313,
-"life_expectancy": -0.7162042705850702,
-"infant_mortality": 6.6219342516848485,
-"food_security": -0.00014265083314179972,
+"population": -680.4411982784864,
+"life_expectancy": -0.7162040052057641,
+"infant_mortality": 6.621931634769908,
+"food_security": -0.00014265060385643125,
 "health": 0.0,
-"cap_production": -0.007538329773862484,
-"cap_infrastructure": -0.040711417833594665,
-"cap_logistics": -0.045001348619669035,
-"cap_institutions": -0.05018271201552893,
-"cap_security": -0.04355833611627624,
-"cap_culture": -0.058784203967192195,
+"cap_production": -0.007538375006526432,
+"cap_infrastructure": -0.040711417833591224,
+"cap_logistics": -0.04500133957604968,
+"cap_institutions": -0.05018281996583329,
+"cap_security": -0.04355890437658727,
+"cap_culture": -0.05878559570011266,
 "ecology": 0.05830411555631776,
 "known": -186.66666666666663,
-"education": -0.012703028297806562
+"education": -0.012703028297803898
 }
 },
 "mix154": {
@@ -32523,36 +32523,36 @@
 },
 "mix157": {
 "300": {
-"population": -717.0911634351386,
-"life_expectancy": -2.2799129305477805,
-"infant_mortality": 42.02583077077881,
+"population": -716.6483566774656,
+"life_expectancy": -2.2131267572657194,
+"infant_mortality": 41.37735680103859,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.023635558961194847,
-"cap_infrastructure": -0.028063477695233763,
-"cap_logistics": -0.04190630048601374,
-"cap_institutions": -0.06124693753228949,
-"cap_security": -0.05857569237799698,
-"cap_culture": -0.10687469091101509,
+"cap_production": -0.02355968277880316,
+"cap_infrastructure": -0.028063412933138743,
+"cap_logistics": -0.04187569799706625,
+"cap_institutions": -0.06120157517365188,
+"cap_security": -0.0585265924130679,
+"cap_culture": -0.10684867305520174,
 "ecology": 0.14209017065841312,
 "known": -219.33333333333331,
-"education": -0.010734135452512339
+"education": -0.010733879365955379
 },
 "600": {
-"population": -3178.5757470816934,
-"life_expectancy": -0.8365509920036054,
-"infant_mortality": 22.454996567706985,
+"population": -3178.3485576857984,
+"life_expectancy": -0.8365069567392318,
+"infant_mortality": 22.454380985290157,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.04916587449923815,
-"cap_infrastructure": -0.050303038742253725,
-"cap_logistics": -0.0666103968066708,
-"cap_institutions": -0.08677624444525533,
-"cap_security": -0.09190835366116512,
-"cap_culture": -0.11745976958534676,
+"cap_production": -0.049165892264952715,
+"cap_infrastructure": -0.05030303871216102,
+"cap_logistics": -0.0666104044598339,
+"cap_institutions": -0.08677625547242718,
+"cap_security": -0.091908365891337,
+"cap_culture": -0.11745977589901813,
 "ecology": 0.14140117982836864,
 "known": -326.0,
-"education": -0.02482010353400821
+"education": -0.02482010353426012
 }
 },
 "mix158": {
@@ -32591,36 +32591,36 @@
 },
 "mix159": {
 "300": {
-"population": -706.2599581823606,
-"life_expectancy": -2.9520728721607874,
-"infant_mortality": 51.522268872696685,
+"population": -705.9118153910069,
+"life_expectancy": -2.952073457775491,
+"infant_mortality": 51.52227616915886,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.025471608180111516,
-"cap_infrastructure": -0.01961804433819636,
-"cap_logistics": -0.06227432121601323,
-"cap_institutions": -0.041405171348794734,
-"cap_security": -0.029915895909547796,
-"cap_culture": -0.07641539395145802,
+"cap_production": -0.025470125246422448,
+"cap_infrastructure": -0.019600276085126822,
+"cap_logistics": -0.06215172919767131,
+"cap_institutions": -0.041407204145698095,
+"cap_security": -0.029907660734698527,
+"cap_culture": -0.07641553169809945,
 "ecology": 0.0584488968262879,
 "known": -265.6666666666667,
-"education": -0.03687401826566916
+"education": -0.03685417884902098
 },
 "600": {
-"population": -3130.8109115785305,
-"life_expectancy": -1.7709977746793015,
-"infant_mortality": 40.04567462118666,
+"population": -3130.018810398659,
+"life_expectancy": -1.770882536702885,
+"infant_mortality": 40.043959375294264,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.04032063036602185,
-"cap_infrastructure": -0.0307609876978282,
-"cap_logistics": -0.06231940204045988,
-"cap_institutions": -0.057059860115452166,
-"cap_security": -0.056651591275282964,
-"cap_culture": -0.08352098457967394,
+"cap_production": -0.04033972220393378,
+"cap_infrastructure": -0.029855245061806923,
+"cap_logistics": -0.06232075954347005,
+"cap_institutions": -0.057405718483607204,
+"cap_security": -0.05686960834965682,
+"cap_culture": -0.08410188393680029,
 "ecology": 0.060193205323138654,
-"known": -334.33333333333337,
-"education": -0.04751341962920219
+"known": -334.66666666666663,
+"education": -0.047510028546012384
 }
 },
 "triple:knowledge+institutions+health": {
@@ -32659,36 +32659,36 @@
 },
 "triple:production+knowledge+ecology": {
 "300": {
-"population": -669.9148488389824,
-"life_expectancy": -2.9910310514017375,
-"infant_mortality": 53.0938076489509,
+"population": -669.8267744677916,
+"life_expectancy": -2.9910309419255157,
+"infant_mortality": 53.09380655367286,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.02488471295360306,
-"cap_infrastructure": -0.0367795847075465,
-"cap_logistics": -0.08652553276851982,
-"cap_institutions": -0.04573212533117721,
-"cap_security": -0.07772359703872173,
-"cap_culture": -0.12307855511419308,
+"cap_production": -0.02488182349700907,
+"cap_infrastructure": -0.03677888151173381,
+"cap_logistics": -0.08652559082201794,
+"cap_institutions": -0.045736176741609236,
+"cap_security": -0.07774596479902168,
+"cap_culture": -0.12313558669721214,
 "ecology": 0.0,
 "known": -437.0,
-"education": -0.032338081738296776
+"education": -0.03233808137652394
 },
 "600": {
-"population": -2966.3825367603604,
-"life_expectancy": -2.0252317785428886,
-"infant_mortality": 44.40052595937726,
+"population": -2966.171285227564,
+"life_expectancy": -2.0252157376426148,
+"infant_mortality": 44.40029050693289,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.048874453468043644,
-"cap_infrastructure": -0.06258568378373963,
-"cap_logistics": -0.1402495516430911,
-"cap_institutions": -0.06661638913992496,
-"cap_security": -0.1278615776112384,
-"cap_culture": -0.12876238032405896,
+"cap_production": -0.04886426433874802,
+"cap_infrastructure": -0.06258544988065451,
+"cap_logistics": -0.14024617423650942,
+"cap_institutions": -0.06661683978169441,
+"cap_security": -0.12785307914498345,
+"cap_culture": -0.12856110451421165,
 "ecology": 0.0,
 "known": -584.0,
-"education": -0.05015479132449685
+"education": -0.05015469548289453
 }
 },
 "triple:nutrition+institutions+demography": {
@@ -32897,36 +32897,36 @@
 },
 "triple:knowledge+health+security": {
 "300": {
-"population": -583.9422071050668,
-"life_expectancy": -0.7573337155308089,
-"infant_mortality": 24.52174342315007,
-"food_security": -6.995392407671552e-06,
+"population": -583.9335311046109,
+"life_expectancy": -0.7573327038745674,
+"infant_mortality": 24.521726464139476,
+"food_security": -7.012484379731454e-06,
 "health": 0.0,
-"cap_production": -0.036539082320692806,
-"cap_infrastructure": -0.03768147773652486,
-"cap_logistics": -0.10174088693579525,
-"cap_institutions": -0.0597660813434896,
-"cap_security": -0.01945861345648936,
-"cap_culture": -0.13296802204622138,
+"cap_production": -0.03653921590290743,
+"cap_infrastructure": -0.037681477734390234,
+"cap_logistics": -0.10174087083126815,
+"cap_institutions": -0.05976640874753558,
+"cap_security": -0.019460219155825964,
+"cap_culture": -0.13297193616608194,
 "ecology": -0.10007373437275502,
 "known": -423.0,
-"education": -0.049500949397208616
+"education": -0.049500949394655436
 },
 "600": {
-"population": -2369.956318081033,
-"life_expectancy": 0.22927888429198262,
-"infant_mortality": 15.646944861172159,
+"population": -2369.9197577310797,
+"life_expectancy": 0.22927797413584017,
+"infant_mortality": 15.646956994957833,
 "food_security": -9.993572671262996e-05,
 "health": 0.0,
-"cap_production": -0.05633312622139064,
-"cap_infrastructure": -0.05554048808692491,
-"cap_logistics": -0.09700970755434601,
-"cap_institutions": -0.06624634676598729,
-"cap_security": -0.0164999036986343,
-"cap_culture": -0.13109865441817548,
+"cap_production": -0.05633336452841564,
+"cap_infrastructure": -0.05554048808692813,
+"cap_logistics": -0.0970097188156745,
+"cap_institutions": -0.06624681143155031,
+"cap_security": -0.0165020944710087,
+"cap_culture": -0.13110387852761107,
 "ecology": -0.09278340861682188,
 "known": -541.0,
-"education": -0.05999681364782483
+"education": -0.059996813648464986
 }
 },
 "triple:security+nutrition+institutions": {
@@ -32965,36 +32965,36 @@
 },
 "triple:institutions+logistics+knowledge": {
 "300": {
-"population": -692.6671406300595,
-"life_expectancy": -4.35021083081913,
-"infant_mortality": 71.4183496505091,
+"population": -692.4128059079537,
+"life_expectancy": -4.3501675715161525,
+"infant_mortality": 71.41781360636534,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.03621633690518711,
-"cap_infrastructure": -0.03780555500898308,
-"cap_logistics": -0.03574409937725209,
-"cap_institutions": -0.043862388778688643,
-"cap_security": -0.08423681448390669,
-"cap_culture": -0.12134547877894397,
+"cap_production": -0.03621643744626035,
+"cap_infrastructure": -0.0378053892260547,
+"cap_logistics": -0.035743383057474654,
+"cap_institutions": -0.04386250662764246,
+"cap_security": -0.08423692472065925,
+"cap_culture": -0.12134554786169982,
 "ecology": 0.0,
 "known": -479.0,
-"education": -0.03432683752740351
+"education": -0.0343268365117565
 },
 "600": {
-"population": -3093.940182130544,
-"life_expectancy": -3.0902379470793058,
-"infant_mortality": 57.05999432644063,
+"population": -3093.505144027989,
+"life_expectancy": -3.0902379470018992,
+"infant_mortality": 57.059994326070466,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.07073820165444111,
-"cap_infrastructure": -0.061594631776223374,
-"cap_logistics": -0.05011661087903946,
-"cap_institutions": -0.07283603969106767,
-"cap_security": -0.13297442487183941,
-"cap_culture": -0.13526871511901395,
+"cap_production": -0.0706760398780042,
+"cap_infrastructure": -0.061594631621649465,
+"cap_logistics": -0.05011608691125968,
+"cap_institutions": -0.07271052840705927,
+"cap_security": -0.132369447270558,
+"cap_culture": -0.13380723230915081,
 "ecology": 0.0,
 "known": -674.3333333333333,
-"education": -0.0566753094054101
+"education": -0.05666810503724018
 }
 },
 "triple:institutions+health+ecology": {
@@ -33067,36 +33067,36 @@
 },
 "triple:knowledge+culture+infrastructure": {
 "300": {
-"population": -668.8929780466068,
-"life_expectancy": -3.5358549454873227,
-"infant_mortality": 58.69981747579149,
+"population": -668.8317960051588,
+"life_expectancy": -3.535854945418965,
+"infant_mortality": 58.69981747511062,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.03844037499487618,
-"cap_infrastructure": -0.004514311963429218,
-"cap_logistics": -0.062467129807484756,
-"cap_institutions": -0.02601379944898874,
-"cap_security": -0.07149762400501314,
-"cap_culture": -0.10189156536069355,
+"cap_production": -0.03843667385469507,
+"cap_infrastructure": -0.004514524259054631,
+"cap_logistics": -0.06246861651478075,
+"cap_institutions": -0.025997276025421567,
+"cap_security": -0.07145280204920024,
+"cap_culture": -0.10184784020620286,
 "ecology": 0.0,
 "known": -411.0,
-"education": -0.03879049855967298
+"education": -0.038790507683930775
 },
 "600": {
-"population": -2995.824587155064,
-"life_expectancy": -2.115590687054933,
-"infant_mortality": 43.039016837819474,
+"population": -2995.682926445465,
+"life_expectancy": -2.115569597839933,
+"infant_mortality": 43.03870276122262,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.06898142925116035,
-"cap_infrastructure": -0.008269449945733531,
-"cap_logistics": -0.07483747511327987,
-"cap_institutions": -0.047677696322334207,
-"cap_security": -0.12014069321109377,
-"cap_culture": -0.1033811282748116,
+"cap_production": -0.06898329057869124,
+"cap_infrastructure": -0.008269451203012701,
+"cap_logistics": -0.0748372510030677,
+"cap_institutions": -0.04768214898373757,
+"cap_security": -0.12016341319934931,
+"cap_culture": -0.10343641296165762,
 "ecology": 0.0,
 "known": -531.3333333333333,
-"education": -0.050334954766347195
+"education": -0.05033501465085721
 }
 },
 "triple:demography+nutrition+security": {
@@ -33203,36 +33203,36 @@
 },
 "triple:ecology+knowledge+culture": {
 "300": {
-"population": -672.9819661847738,
-"life_expectancy": -3.5756579366046495,
-"infant_mortality": 58.97718732067611,
+"population": -672.9281253966777,
+"life_expectancy": -3.575657936584051,
+"infant_mortality": 58.97718732043401,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.04130306025348229,
-"cap_infrastructure": -0.04010007596981946,
-"cap_logistics": -0.11136913138401777,
-"cap_institutions": -0.035082752169626974,
-"cap_security": -0.08345254568566013,
-"cap_culture": -0.10671126633592698,
+"cap_production": -0.04130418884994891,
+"cap_infrastructure": -0.040100077092139585,
+"cap_logistics": -0.1113689114351954,
+"cap_institutions": -0.03508561709290314,
+"cap_security": -0.0834674022447694,
+"cap_culture": -0.10674761214783346,
 "ecology": 0.0,
 "known": -423.6666666666667,
-"education": -0.05156367115610916
+"education": -0.051563679352409686
 },
 "600": {
-"population": -3012.3098905918414,
-"life_expectancy": -2.4359558303297746,
-"infant_mortality": 47.16937848858254,
+"population": -3012.186199523326,
+"life_expectancy": -2.4359440383185635,
+"infant_mortality": 47.16920300255288,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.07376520778757745,
-"cap_infrastructure": -0.06141018595758907,
-"cap_logistics": -0.15012043670370911,
-"cap_institutions": -0.05507016791009933,
-"cap_security": -0.13111871505498007,
-"cap_culture": -0.10646904427115178,
+"cap_production": -0.07376053083070155,
+"cap_infrastructure": -0.061406026203011166,
+"cap_logistics": -0.1502066930174467,
+"cap_institutions": -0.0550739719082447,
+"cap_security": -0.13113617621431561,
+"cap_culture": -0.10651703450773509,
 "ecology": 0.0,
 "known": -552.3333333333333,
-"education": -0.07608878238744254
+"education": -0.07608640246472631
 }
 },
 "triple:infrastructure+demography+labor": {
@@ -33441,70 +33441,70 @@
 },
 "triple:security+culture+institutions": {
 "300": {
-"population": -677.9714805575156,
-"life_expectancy": -4.187005105542312,
-"infant_mortality": 67.99663855721516,
+"population": -677.9209896825578,
+"life_expectancy": -4.1870050682556865,
+"infant_mortality": 67.9966383338037,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.034744707944727615,
-"cap_infrastructure": -0.03769631545324548,
-"cap_logistics": -0.1034534127997172,
-"cap_institutions": -0.013950909729722016,
-"cap_security": -0.0022794662917772213,
-"cap_culture": -0.09460364732003934,
+"cap_production": -0.03474477473740967,
+"cap_infrastructure": -0.037696306893916676,
+"cap_logistics": -0.10345340946353498,
+"cap_institutions": -0.013949470127595398,
+"cap_security": -0.0022793259934008603,
+"cap_culture": -0.0946029779531612,
 "ecology": 0.0,
 "known": -425.6666666666667,
-"education": -0.0496984694464877
+"education": -0.04969644985869093
 },
 "600": {
-"population": -3066.7432034865346,
-"life_expectancy": -3.3380035365724723,
-"infant_mortality": 60.484589629041864,
+"population": -3066.6609758642558,
+"life_expectancy": -3.3380111278623907,
+"infant_mortality": 60.48444776412839,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.05702709931126759,
-"cap_infrastructure": -0.06195643089752967,
-"cap_logistics": -0.095333963765319,
-"cap_institutions": -0.03318330646703682,
-"cap_security": -0.023731553528835714,
-"cap_culture": -0.10424132570131861,
+"cap_production": -0.057029188492535576,
+"cap_infrastructure": -0.06195840264489927,
+"cap_logistics": -0.0953555267089442,
+"cap_institutions": -0.033188521195746334,
+"cap_security": -0.023757652625136072,
+"cap_culture": -0.10428371742185116,
 "ecology": 0.0,
 "known": -531.0,
-"education": -0.06290710461969251
+"education": -0.06291640829092993
 }
 },
 "triple:culture+ecology+knowledge": {
 "300": {
-"population": -672.9819661847738,
-"life_expectancy": -3.5756579366046495,
-"infant_mortality": 58.97718732067611,
+"population": -672.9281253966777,
+"life_expectancy": -3.575657936584051,
+"infant_mortality": 58.97718732043401,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.04130306025348229,
-"cap_infrastructure": -0.04010007596981946,
-"cap_logistics": -0.11136913138401777,
-"cap_institutions": -0.035082752169626974,
-"cap_security": -0.08345254568566013,
-"cap_culture": -0.10671126633592698,
+"cap_production": -0.04130418884994891,
+"cap_infrastructure": -0.040100077092139585,
+"cap_logistics": -0.1113689114351954,
+"cap_institutions": -0.03508561709290314,
+"cap_security": -0.0834674022447694,
+"cap_culture": -0.10674761214783346,
 "ecology": 0.0,
 "known": -423.6666666666667,
-"education": -0.05156367115610916
+"education": -0.051563679352409686
 },
 "600": {
-"population": -3012.3098905918414,
-"life_expectancy": -2.4359558303297746,
-"infant_mortality": 47.16937848858254,
+"population": -3012.186199523326,
+"life_expectancy": -2.4359440383185635,
+"infant_mortality": 47.16920300255288,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.07376520778757745,
-"cap_infrastructure": -0.06141018595758907,
-"cap_logistics": -0.15012043670370911,
-"cap_institutions": -0.05507016791009933,
-"cap_security": -0.13111871505498007,
-"cap_culture": -0.10646904427115178,
+"cap_production": -0.07376053083070155,
+"cap_infrastructure": -0.061406026203011166,
+"cap_logistics": -0.1502066930174467,
+"cap_institutions": -0.0550739719082447,
+"cap_security": -0.13113617621431561,
+"cap_culture": -0.10651703450773509,
 "ecology": 0.0,
 "known": -552.3333333333333,
-"education": -0.07608878238744254
+"education": -0.07608640246472631
 }
 },
 "triple:health+security+institutions": {
@@ -33577,104 +33577,104 @@
 },
 "triple:security+culture+ecology": {
 "300": {
-"population": -668.0218185991071,
-"life_expectancy": -3.5617152551575373,
-"infant_mortality": 58.93843283225229,
+"population": -667.9708111879356,
+"life_expectancy": -3.561715130608107,
+"infant_mortality": 58.938431152808874,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.03747204504611157,
-"cap_infrastructure": -0.038672454248648735,
-"cap_logistics": -0.10363936684806918,
-"cap_institutions": -0.03353497901783553,
-"cap_security": -0.007697159256438324,
-"cap_culture": -0.10476605768002312,
+"cap_production": -0.03747350189816889,
+"cap_infrastructure": -0.03867229950597251,
+"cap_logistics": -0.10363929289304674,
+"cap_institutions": -0.03353618463696206,
+"cap_security": -0.007711429885351673,
+"cap_culture": -0.10479962566453671,
 "ecology": 0.0,
 "known": -396.3333333333333,
-"education": -0.05474398186335805
+"education": -0.0547434416093695
 },
 "600": {
-"population": -3000.158492964946,
-"life_expectancy": -2.4248840046619335,
-"infant_mortality": 47.13620201609746,
+"population": -3000.047401690462,
+"life_expectancy": -2.4246913215939223,
+"infant_mortality": 47.13451598784292,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.06460767368963127,
-"cap_infrastructure": -0.0629559252560582,
-"cap_logistics": -0.09390947022308699,
-"cap_institutions": -0.05246091921979135,
-"cap_security": -0.028082239795012343,
-"cap_culture": -0.10304640322656011,
+"cap_production": -0.06460730499977974,
+"cap_infrastructure": -0.06296024401197442,
+"cap_logistics": -0.09391952272337384,
+"cap_institutions": -0.052465357524202894,
+"cap_security": -0.028097657267165843,
+"cap_culture": -0.10308652754732739,
 "ecology": 0.0,
 "known": -499.0,
-"education": -0.07482965837585909
+"education": -0.07483617835327627
 }
 },
 "triple:production+knowledge+logistics": {
 "300": {
-"population": -691.902091941876,
-"life_expectancy": -3.6583699461547923,
-"infant_mortality": 62.60486658995828,
+"population": -691.5797196090629,
+"life_expectancy": -3.6583699887114918,
+"infant_mortality": 62.60486701391679,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.023887824011900816,
-"cap_infrastructure": -0.03372556537485605,
-"cap_logistics": -0.016854134060910853,
-"cap_institutions": -0.05976271702283764,
-"cap_security": -0.07694313259960744,
-"cap_culture": -0.12847894782690317,
+"cap_production": -0.02386619105511001,
+"cap_infrastructure": -0.033722704778843204,
+"cap_logistics": -0.016853577041999024,
+"cap_institutions": -0.05976278388518608,
+"cap_security": -0.07694318834804253,
+"cap_culture": -0.12847898568402805,
 "ecology": 0.0,
 "known": -450.66666666666663,
-"education": -0.018645338856890348
+"education": -0.01864533657775802
 },
 "600": {
-"population": -3056.177238518052,
-"life_expectancy": -2.558757292872688,
-"infant_mortality": 51.696954510120634,
+"population": -3055.5149391115688,
+"life_expectancy": -2.5585959817288177,
+"infant_mortality": 51.69456666517482,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.04923760312945458,
-"cap_infrastructure": -0.05466682023351488,
-"cap_logistics": -0.02590045776004868,
-"cap_institutions": -0.0638946508224727,
-"cap_security": -0.12007532794087783,
-"cap_culture": -0.12641274250946044,
+"cap_production": -0.04921332535658518,
+"cap_infrastructure": -0.05465724584356979,
+"cap_logistics": -0.02590149141014436,
+"cap_institutions": -0.06380364803111216,
+"cap_security": -0.11974465279255508,
+"cap_culture": -0.12574400001535901,
 "ecology": 0.0,
 "known": -587.0,
-"education": -0.021198419473518748
+"education": -0.021148360339375394
 }
 },
 "triple:logistics+health+knowledge": {
 "300": {
-"population": -599.282610165237,
-"life_expectancy": -1.0754659811280476,
-"infant_mortality": 27.89251016844733,
-"food_security": -1.2681501188605004e-05,
+"population": -599.277615640524,
+"life_expectancy": -1.0754653840874262,
+"infant_mortality": 27.892501834318693,
+"food_security": -1.2682227991889228e-05,
 "health": 0.0,
-"cap_production": -0.041747398755517584,
-"cap_infrastructure": -0.03612380365273793,
-"cap_logistics": -0.04060622130505176,
-"cap_institutions": -0.06773536083120357,
-"cap_security": -0.09626755034922968,
-"cap_culture": -0.1345869620928144,
+"cap_production": -0.0417475071150919,
+"cap_infrastructure": -0.03612380365300227,
+"cap_logistics": -0.04060621507649831,
+"cap_institutions": -0.06773559891584624,
+"cap_security": -0.0962687294409253,
+"cap_culture": -0.13458981204505993,
 "ecology": -0.10007373437275502,
 "known": -434.66666666666663,
-"education": -0.03947117446169657
+"education": -0.03947117446159942
 },
 "600": {
-"population": -2450.935144402992,
-"life_expectancy": 0.16797429698301514,
-"infant_mortality": 15.873677461524949,
-"food_security": -8.936723040020578e-05,
+"population": -2450.914881240965,
+"life_expectancy": 0.16797414182696002,
+"infant_mortality": 15.87367873707953,
+"food_security": -8.937135984632416e-05,
 "health": 0.0,
-"cap_production": -0.07001926584591933,
+"cap_production": -0.07001939682058689,
 "cap_infrastructure": -0.0595925537005394,
-"cap_logistics": -0.045779777680614364,
-"cap_institutions": -0.07166190037108133,
-"cap_security": -0.13637100659847812,
-"cap_culture": -0.13154899467826575,
+"cap_logistics": -0.0457797526071172,
+"cap_institutions": -0.07166221789070393,
+"cap_security": -0.13637266287756555,
+"cap_culture": -0.13155304816363134,
 "ecology": -0.09278340861682188,
 "known": -573.6666666666667,
-"education": -0.04712910392883851
+"education": -0.047129103928836846
 }
 },
 "triple:demography+security+health": {
@@ -33781,33 +33781,33 @@
 },
 "triple:health+knowledge+production": {
 "300": {
-"population": -583.5435209448793,
-"life_expectancy": -0.766386803724096,
-"infant_mortality": 24.14152307714238,
+"population": -583.5434401591922,
+"life_expectancy": -0.7663867920145577,
+"infant_mortality": 24.141522919364945,
 "food_security": -1.843580574256709e-05,
 "health": 0.0,
-"cap_production": -0.020730438141388086,
-"cap_infrastructure": -0.03613030232226666,
-"cap_logistics": -0.0864234670839995,
-"cap_institutions": -0.06670059216168434,
-"cap_security": -0.09049935158257233,
-"cap_culture": -0.13683226225838885,
+"cap_production": -0.020730438825393382,
+"cap_infrastructure": -0.03613030232211867,
+"cap_logistics": -0.08642346696135528,
+"cap_institutions": -0.06670059385078353,
+"cap_security": -0.09049936036841222,
+"cap_culture": -0.13683228372136758,
 "ecology": -0.10007373437275502,
 "known": -425.3333333333333,
-"education": -0.02994773459035449
+"education": -0.029947734590034525
 },
 "600": {
-"population": -2384.6431241998475,
-"life_expectancy": 0.20694757394577934,
-"infant_mortality": 15.215421337044319,
+"population": -2384.6428379859763,
+"life_expectancy": 0.2069475698871095,
+"infant_mortality": 15.215421391143792,
 "food_security": -0.00012288543593352852,
 "health": 0.0,
-"cap_production": -0.04526126739377445,
-"cap_infrastructure": -0.06348247645230165,
-"cap_logistics": -0.14275282758917185,
-"cap_institutions": -0.07568470557627394,
-"cap_security": -0.13760429571569222,
-"cap_culture": -0.13543864579349174,
+"cap_production": -0.04526126752344273,
+"cap_infrastructure": -0.06348247645229665,
+"cap_logistics": -0.14275282754387886,
+"cap_institutions": -0.07568470593195797,
+"cap_security": -0.13760429766761473,
+"cap_culture": -0.13543865061577742,
 "ecology": -0.09278340861682188,
 "known": -581.6666666666667,
 "education": -0.0515486915491179
@@ -33883,36 +33883,36 @@
 },
 "triple:infrastructure+knowledge+production": {
 "300": {
-"population": -678.2826982597431,
-"life_expectancy": -3.09523181246022,
-"infant_mortality": 54.2344454769117,
-"food_security": -0.001437437213314019,
+"population": -678.179648967089,
+"life_expectancy": -3.095747803927061,
+"infant_mortality": 54.23957427885361,
+"food_security": -0.0014465876964577795,
 "health": 0.0,
-"cap_production": -0.03011701080266782,
-"cap_infrastructure": -0.005076131069083334,
-"cap_logistics": -0.046297469514843315,
-"cap_institutions": -0.051740614637262095,
-"cap_security": -0.07251563213289924,
-"cap_culture": -0.12682350476078152,
+"cap_production": -0.030124124370452088,
+"cap_infrastructure": -0.005071382298963645,
+"cap_logistics": -0.046287358524051414,
+"cap_institutions": -0.051741277488520865,
+"cap_security": -0.07251535106333762,
+"cap_culture": -0.12682605125739488,
 "ecology": 0.0,
 "known": -439.33333333333337,
-"education": -0.025701435967827146
+"education": -0.02570012708247793
 },
 "600": {
-"population": -2991.165665398849,
-"life_expectancy": -1.6880676594334183,
-"infant_mortality": 39.73888689551802,
+"population": -2990.926711990402,
+"life_expectancy": -1.6880287135880536,
+"infant_mortality": 39.738322241053595,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.048111877490290555,
-"cap_infrastructure": -0.007751652829367295,
-"cap_logistics": -0.06694784055337377,
-"cap_institutions": -0.05978350818064282,
-"cap_security": -0.11806887511108644,
-"cap_culture": -0.12537506911829877,
+"cap_production": -0.04811163692108855,
+"cap_infrastructure": -0.007751637100107511,
+"cap_logistics": -0.06694734160756638,
+"cap_institutions": -0.05978185484988696,
+"cap_security": -0.11802085146799868,
+"cap_culture": -0.12537236767194893,
 "ecology": 0.0,
 "known": -562.3333333333333,
-"education": -0.03293596164530188
+"education": -0.032938159621288876
 }
 },
 "triple:institutions+nutrition+culture": {
@@ -33985,36 +33985,36 @@
 },
 "research-first->care@100": {
 "300": {
-"population": -305.4010248212964,
-"life_expectancy": -0.04269424279799949,
-"infant_mortality": -0.36066910719307543,
+"population": -302.6651026396124,
+"life_expectancy": -0.042582969247327185,
+"infant_mortality": -0.36214406454928394,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.017292615973431236,
-"cap_infrastructure": -0.026363225411805025,
-"cap_logistics": -0.04681306913117411,
-"cap_institutions": -0.03315388225974514,
-"cap_security": -0.0679123016114227,
-"cap_culture": -0.08762560974840916,
+"cap_production": -0.017278072350022766,
+"cap_infrastructure": -0.026363098681788766,
+"cap_logistics": -0.046809377764704896,
+"cap_institutions": -0.03312354809791074,
+"cap_security": -0.06777408479982261,
+"cap_culture": -0.087328110516399,
 "ecology": 0.07255735154322801,
 "known": -206.0,
-"education": -0.03269124013977054
+"education": -0.03269038094750942
 },
 "600": {
-"population": -62.295061774449096,
-"life_expectancy": -0.20753772843171703,
-"infant_mortality": 0.6633038557956752,
+"population": -62.306031629002064,
+"life_expectancy": -0.2075498491237937,
+"infant_mortality": 0.6634816655144959,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.03453305808443641,
+"cap_production": -0.034530357091625996,
 "cap_infrastructure": -0.06598783056003699,
-"cap_logistics": -0.10565389869812913,
-"cap_institutions": -0.04571274452057272,
-"cap_security": -0.12309908310742912,
-"cap_culture": -0.08896858984277867,
+"cap_logistics": -0.10565404477309986,
+"cap_institutions": -0.04568650511514605,
+"cap_security": -0.12299793553747074,
+"cap_culture": -0.08887813841765424,
 "ecology": 0.06727165036223892,
 "known": -357.0,
-"education": -0.06684769367116816
+"education": -0.06684769560636217
 }
 },
 "care-first->research@100": {
@@ -34053,36 +34053,36 @@
 },
 "research-first->care@200": {
 "300": {
-"population": -607.6989160997783,
-"life_expectancy": -0.03559604352825119,
-"infant_mortality": -0.3164897120227579,
+"population": -606.2363128960372,
+"life_expectancy": -0.037189964685456545,
+"infant_mortality": -0.3143209193902692,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.015624294057598798,
-"cap_infrastructure": -0.022733050569194058,
-"cap_logistics": -0.03278417172337361,
-"cap_institutions": -0.02219045841164513,
-"cap_security": -0.06724689634805947,
-"cap_culture": -0.08380608590847682,
+"cap_production": -0.015587543693627026,
+"cap_infrastructure": -0.022684794791453355,
+"cap_logistics": -0.03277995650362303,
+"cap_institutions": -0.022197709223125917,
+"cap_security": -0.06713130369486464,
+"cap_culture": -0.08416353232689566,
 "ecology": 0.07251037152069434,
 "known": -183.0,
-"education": -0.023207181247114406
+"education": -0.02320696040848569
 },
 "600": {
-"population": -105.25909491046787,
-"life_expectancy": -0.15425360488317708,
-"infant_mortality": 0.08030217202679069,
+"population": -103.07946893627195,
+"life_expectancy": -0.1574945165280468,
+"infant_mortality": 0.110047024454758,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.03240926628682139,
+"cap_production": -0.03237761594688848,
 "cap_infrastructure": -0.062013623948466656,
-"cap_logistics": -0.09228217414352047,
-"cap_institutions": -0.03732228905639534,
-"cap_security": -0.1182121736414824,
-"cap_culture": -0.08810208788637741,
+"cap_logistics": -0.09226052255798178,
+"cap_institutions": -0.03730348480325396,
+"cap_security": -0.11823624447673176,
+"cap_culture": -0.08822464856891632,
 "ecology": 0.06727165036211213,
 "known": -311.0,
-"education": -0.05857401880263613
+"education": -0.058574011726631015
 }
 },
 "care-first->research@200": {
@@ -34121,36 +34121,36 @@
 },
 "research-first->care@300": {
 "300": {
-"population": -716.0780820216839,
-"life_expectancy": -3.06101215940258,
-"infant_mortality": 54.30355641332946,
+"population": -715.6954594355908,
+"life_expectancy": -3.0416334824749107,
+"infant_mortality": 54.107370794256866,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.027314613577157143,
-"cap_infrastructure": -0.01540129780532462,
-"cap_logistics": -0.03817578780841613,
-"cap_institutions": -0.05855853562512625,
-"cap_security": -0.10420241568822186,
-"cap_culture": -0.11727061027203256,
+"cap_production": -0.0272399571025983,
+"cap_infrastructure": -0.015401240492631807,
+"cap_logistics": -0.03814305544809682,
+"cap_institutions": -0.058511519118073396,
+"cap_security": -0.10415028088246048,
+"cap_culture": -0.11724370389002026,
 "ecology": 0.04331847814632073,
 "known": -346.0,
-"education": -0.015055780703804977
+"education": -0.015055776576152757
 },
 "600": {
-"population": -1654.0517798331377,
-"life_expectancy": 0.888455379647116,
-"infant_mortality": -9.347675420026206,
+"population": -1645.2684553444758,
+"life_expectancy": 0.8880243273693829,
+"infant_mortality": -9.342015501583546,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.03647905181051292,
-"cap_infrastructure": -0.0530354793205462,
-"cap_logistics": -0.07560456147289751,
-"cap_institutions": -0.041427085180597234,
-"cap_security": -0.12235853314386835,
-"cap_culture": -0.08978549059973384,
+"cap_production": -0.03645949481610056,
+"cap_infrastructure": -0.053035479320505674,
+"cap_logistics": -0.07560419625175757,
+"cap_institutions": -0.041401271028977726,
+"cap_security": -0.12221585776287702,
+"cap_culture": -0.08938208735774655,
 "ecology": 0.06727165028367976,
 "known": -271.66666666666663,
-"education": -0.049625755843506036
+"education": -0.04962574870076519
 }
 },
 "care-first->research@300": {
@@ -34189,33 +34189,33 @@
 },
 "crush-research": {
 "300": {
-"population": -582.3074446409778,
-"life_expectancy": -0.29700515430113583,
-"infant_mortality": 4.753641655676375,
+"population": -581.8095758775546,
+"life_expectancy": -0.2969584692729583,
+"infant_mortality": 4.753040710024777,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.014526932605245513,
-"cap_infrastructure": -0.010645982275523158,
-"cap_logistics": -0.057941863709102426,
-"cap_institutions": -0.06883544109593742,
-"cap_security": -0.08595909782116212,
-"cap_culture": -0.06179454401126849,
+"cap_production": -0.014522297669544826,
+"cap_infrastructure": -0.010641520618393296,
+"cap_logistics": -0.05794017455934197,
+"cap_institutions": -0.06885475475692016,
+"cap_security": -0.08605351393591448,
+"cap_culture": -0.062022715781480664,
 "ecology": 0.07258772013707732,
 "known": -4.333333333333371,
-"education": -0.004859422555764437
+"education": -0.004858309527127513
 },
 "600": {
-"population": -2343.4297964597927,
-"life_expectancy": 0.6971723059458306,
-"infant_mortality": -4.377859370370544,
+"population": -2341.365677025348,
+"life_expectancy": 0.6971644629715961,
+"infant_mortality": -4.37775603727178,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.02572071436909995,
+"cap_production": -0.025726889320988433,
 "cap_infrastructure": -0.018747155676820615,
-"cap_logistics": -0.07821996323898844,
-"cap_institutions": -0.08489162313899212,
-"cap_security": -0.10458025822653727,
-"cap_culture": -0.07014819228743918,
+"cap_logistics": -0.07821987503027261,
+"cap_institutions": -0.08487019348322711,
+"cap_security": -0.1045309858619139,
+"cap_culture": -0.07024481292834184,
 "ecology": 0.07940190382231616,
 "known": -1.0,
 "education": -0.019333038376717626
@@ -34325,104 +34325,104 @@
 },
 "focus:labor": {
 "300": {
-"population": -677.2744223099801,
-"life_expectancy": -1.9662846391880358,
-"infant_mortality": 34.0121666251861,
+"population": -673.8830344773598,
+"life_expectancy": -1.958752418170846,
+"infant_mortality": 34.019989094852036,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.0246863760963012,
-"cap_infrastructure": -0.029365157516344942,
-"cap_logistics": -0.06131728721468693,
-"cap_institutions": -0.037632909528829805,
-"cap_security": -0.04019669216509225,
-"cap_culture": -0.03071563328511573,
+"cap_production": -0.02459287780554731,
+"cap_infrastructure": -0.02913705425061286,
+"cap_logistics": -0.05969024881241686,
+"cap_institutions": -0.0373876080053025,
+"cap_security": -0.03971224346990687,
+"cap_culture": -0.03076468816442912,
 "ecology": 0.1828037720275273,
-"known": -289.6666666666667,
-"education": -0.055145360924202746
+"known": -283.6666666666667,
+"education": -0.05422654107899527
 },
 "600": {
-"population": -2826.3890694166766,
-"life_expectancy": 0.4319916195804119,
-"infant_mortality": 5.846948008395088,
+"population": -2816.439438324385,
+"life_expectancy": 0.43502261139579446,
+"infant_mortality": 5.7873759685338655,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.03616734075225514,
-"cap_infrastructure": -0.04752374422415928,
-"cap_logistics": -0.05854467377240319,
-"cap_institutions": -0.03234679245506944,
-"cap_security": -0.05838825447339613,
-"cap_culture": -0.028903785375387736,
+"cap_production": -0.03579811524297749,
+"cap_infrastructure": -0.045815481733395114,
+"cap_logistics": -0.05759603946845959,
+"cap_institutions": -0.03201804695521915,
+"cap_security": -0.0570171360505235,
+"cap_culture": -0.028962272230493635,
 "ecology": 0.1694866008851973,
-"known": -208.33333333333337,
-"education": -0.06339294386474048
+"known": -200.33333333333337,
+"education": -0.06278380092922076
 }
 },
 "focus:production": {
 "300": {
-"population": -531.49214757349,
-"life_expectancy": -1.9592204033170972,
-"infant_mortality": 25.057413021527395,
+"population": -531.1716841505461,
+"life_expectancy": -1.9590802746838847,
+"infant_mortality": 25.05641666126479,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.016014884844985144,
-"cap_infrastructure": -0.031082716116844766,
-"cap_logistics": -0.07809642588186944,
-"cap_institutions": -0.08301186445142494,
-"cap_security": -0.0775891053550743,
-"cap_culture": -0.0443356927778763,
+"cap_production": -0.015825902029146244,
+"cap_infrastructure": -0.031042362607069274,
+"cap_logistics": -0.07806046255028959,
+"cap_institutions": -0.08299402212133566,
+"cap_security": -0.07761788203482706,
+"cap_culture": -0.04443886174786427,
 "ecology": -0.08830280016477915,
-"known": -247.33333333333331,
-"education": -0.02517599408841198
+"known": -246.66666666666669,
+"education": -0.025058070123244125
 },
 "600": {
-"population": -537.649763803398,
-"life_expectancy": -0.050511660650027324,
-"infant_mortality": 2.5341391129024657,
-"food_security": -5.840856470051836e-05,
+"population": -537.2989193267904,
+"life_expectancy": -0.057340091368633495,
+"infant_mortality": 2.5558035374884867,
+"food_security": -5.8607170135061004e-05,
 "health": 0.0,
-"cap_production": -0.011101714432619092,
-"cap_infrastructure": -0.02676238713815271,
-"cap_logistics": -0.05242519677274471,
-"cap_institutions": -0.0635730559446448,
-"cap_security": -0.07440716067102382,
-"cap_culture": -0.038621644925867504,
+"cap_production": -0.011098309736816137,
+"cap_infrastructure": -0.02625022872551952,
+"cap_logistics": -0.05242236603382089,
+"cap_institutions": -0.06349465496463824,
+"cap_security": -0.07274002163273896,
+"cap_culture": -0.0386371276469577,
 "ecology": -0.09121634143200386,
-"known": -30.33333333333337,
-"education": -0.016614770376045085
+"known": -29.33333333333337,
+"education": -0.01658229091078456
 }
 },
 "focus:infrastructure": {
 "300": {
-"population": -546.2819794043834,
-"life_expectancy": -1.538552556237768,
-"infant_mortality": 20.19383134021183,
+"population": -545.4361562122971,
+"life_expectancy": -1.5374131310927055,
+"infant_mortality": 20.177438069391314,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.03033233540544944,
-"cap_infrastructure": -0.00044833578633418636,
-"cap_logistics": -0.04932399846794788,
-"cap_institutions": -0.0656897727005249,
-"cap_security": -0.0663807297980723,
-"cap_culture": -0.034534099398018214,
+"cap_production": -0.030270188243449292,
+"cap_infrastructure": -0.0004449875628681488,
+"cap_logistics": -0.0493065789479718,
+"cap_institutions": -0.06555375759120907,
+"cap_security": -0.06600763326895831,
+"cap_culture": -0.03369579556132862,
 "ecology": -0.012056637651992552,
-"known": -228.66666666666669,
-"education": -0.042702849392681874
+"known": -227.66666666666669,
+"education": -0.04267992509764862
 },
 "600": {
-"population": -453.2151012015811,
-"life_expectancy": 0.03842883979894296,
-"infant_mortality": 1.625223398235704,
-"food_security": -3.096091632659448e-05,
+"population": -450.9985009400407,
+"life_expectancy": 0.0331567003356632,
+"infant_mortality": 1.6745412073615569,
+"food_security": -3.158631728394923e-05,
 "health": 0.0,
-"cap_production": -0.027261692894199108,
-"cap_infrastructure": 0.005246257034155377,
-"cap_logistics": -0.0345140242386861,
-"cap_institutions": -0.04102701458679969,
-"cap_security": -0.05676107668752295,
-"cap_culture": -0.0274604039740054,
+"cap_production": -0.02721534875506426,
+"cap_infrastructure": 0.005207013351935963,
+"cap_logistics": -0.03448089405568938,
+"cap_institutions": -0.04106715971175079,
+"cap_security": -0.057207415603462874,
+"cap_culture": -0.028637007872523323,
 "ecology": -0.0076331461375871434,
-"known": -6.0,
-"education": -0.020074977519493165
+"known": -6.666666666666629,
+"education": -0.02007773625634468
 }
 },
 "focus:nutrition": {
@@ -34529,36 +34529,36 @@
 },
 "focus:logistics": {
 "300": {
-"population": -469.24774169845284,
-"life_expectancy": -1.7293779595071221,
-"infant_mortality": 22.184191753721763,
+"population": -469.17447354478634,
+"life_expectancy": -1.7293556000828865,
+"infant_mortality": 22.18247535159196,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.030246416290317546,
-"cap_infrastructure": -0.024414414476531254,
-"cap_logistics": 0.0644909518631055,
-"cap_institutions": -0.05832001114769392,
-"cap_security": -0.0344599841542198,
-"cap_culture": -0.028196043702053086,
+"cap_production": -0.030243371435829447,
+"cap_infrastructure": -0.024409295203086323,
+"cap_logistics": 0.06449106514810171,
+"cap_institutions": -0.05832126992295528,
+"cap_security": -0.03446649644623179,
+"cap_culture": -0.02821608202609971,
 "ecology": -0.006695249143028381,
 "known": -191.66666666666669,
-"education": -0.03793649383869957
+"education": -0.03793633509852745
 },
 "600": {
-"population": -373.27549728342456,
-"life_expectancy": -0.1796751599842139,
-"infant_mortality": 3.873841070250478,
-"food_security": -4.105258347575358e-05,
+"population": -373.2060668012573,
+"life_expectancy": -0.17977690713398786,
+"infant_mortality": 3.8747736590222814,
+"food_security": -4.1077638942899064e-05,
 "health": 0.0,
-"cap_production": -0.0215010027356215,
-"cap_infrastructure": -0.0187654912299825,
-"cap_logistics": 0.08485918437518708,
-"cap_institutions": -0.03400376441064146,
-"cap_security": -0.02473563642343779,
-"cap_culture": -0.02199688873698058,
+"cap_production": -0.02149967538247821,
+"cap_infrastructure": -0.018764984383579875,
+"cap_logistics": 0.08486040149870361,
+"cap_institutions": -0.03400442715090657,
+"cap_security": -0.02473668204556978,
+"cap_culture": -0.02200158684984066,
 "ecology": -0.0036291971404806,
 "known": -1.0,
-"education": -0.014704130870017762
+"education": -0.0147045893969594
 }
 },
 "focus:ecology": {
@@ -34597,36 +34597,36 @@
 },
 "focus:security": {
 "300": {
-"population": -453.6292521861181,
-"life_expectancy": -1.7713243937574,
-"infant_mortality": 23.374738769622354,
+"population": -453.61838418351334,
+"life_expectancy": -1.771323159069798,
+"infant_mortality": 23.374728037401894,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.030272371060576786,
-"cap_infrastructure": -0.02832967227457639,
-"cap_logistics": -0.060988262910804,
-"cap_institutions": -0.05281460587485942,
-"cap_security": 0.18653185363729463,
-"cap_culture": -0.024668260769624917,
+"cap_production": -0.030272502942858326,
+"cap_infrastructure": -0.028329672275040574,
+"cap_logistics": -0.06098778792808185,
+"cap_institutions": -0.05281489492878333,
+"cap_security": 0.18653046416903385,
+"cap_culture": -0.02467172563166331,
 "ecology": -0.006695249143028381,
 "known": -205.66666666666669,
-"education": -0.04705561106815259
+"education": -0.047055353433853586
 },
 "600": {
-"population": -367.82072706582494,
-"life_expectancy": -0.07959775441165462,
-"infant_mortality": 3.673162531615276,
-"food_security": -4.1947652948182146e-05,
+"population": -367.80880394147516,
+"life_expectancy": -0.07961568418640397,
+"infant_mortality": 3.6733258041342367,
+"food_security": -4.195536460926963e-05,
 "health": 0.0,
-"cap_production": -0.020524626648684707,
-"cap_infrastructure": -0.017474473841538884,
-"cap_logistics": -0.045487540863663245,
-"cap_institutions": -0.028650299545566305,
-"cap_security": 0.21835863166804714,
-"cap_culture": -0.016020003711948005,
+"cap_production": -0.02052171272758918,
+"cap_infrastructure": -0.01747441259664828,
+"cap_logistics": -0.04548746785415664,
+"cap_institutions": -0.02865033746392487,
+"cap_security": 0.2183577180051488,
+"cap_culture": -0.016023701164574744,
 "ecology": -0.0036291971404806,
 "known": 0.0,
-"education": -0.02266279911121638
+"education": -0.022662750425185507
 }
 },
 "focus:balanced": {
@@ -34665,70 +34665,70 @@
 },
 "focus:militarised_agrarian_state": {
 "300": {
-"population": -652.3024884204184,
-"life_expectancy": -1.5533202808730842,
-"infant_mortality": 27.013453281335387,
+"population": -650.0111232448594,
+"life_expectancy": -1.5504756396738522,
+"infant_mortality": 27.009276104020387,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.020140087301491416,
-"cap_infrastructure": -0.023813505381492628,
-"cap_logistics": -0.05501791442971027,
-"cap_institutions": 0.028040928873393156,
-"cap_security": 0.2033057944243427,
-"cap_culture": -0.005830934948438005,
+"cap_production": -0.01998574320302471,
+"cap_infrastructure": -0.024283826255819596,
+"cap_logistics": -0.05522013581304169,
+"cap_institutions": 0.028665090049990183,
+"cap_security": 0.20167511599628885,
+"cap_culture": -0.005587307458376545,
 "ecology": 0.13406277290714042,
-"known": -220.66666666666669,
-"education": -0.04050282371845537
+"known": -221.0,
+"education": -0.040474624522242264
 },
 "600": {
-"population": -2549.830566615069,
-"life_expectancy": 0.734339591640218,
-"infant_mortality": 0.48410137976995316,
+"population": -2544.922647878381,
+"life_expectancy": 0.7442692593240565,
+"infant_mortality": 0.505634025473654,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.02502360281286453,
-"cap_infrastructure": -0.036659193522353584,
-"cap_logistics": -0.030798947814370037,
-"cap_institutions": 0.030362943578299495,
-"cap_security": 0.22099307048096328,
-"cap_culture": -0.004793016737004607,
+"cap_production": -0.024647507420968662,
+"cap_infrastructure": -0.036359808005022365,
+"cap_logistics": -0.029306635970934247,
+"cap_institutions": 0.030799026748275726,
+"cap_security": 0.2209559849275503,
+"cap_culture": -0.004199421793151137,
 "ecology": 0.12784153222565198,
-"known": -118.0,
-"education": -0.02796022446044444
+"known": -112.33333333333337,
+"education": -0.027248952696435236
 }
 },
 "focus:maritime_trading_league": {
 "300": {
-"population": -449.29196221878664,
-"life_expectancy": -1.5873406115254198,
-"infant_mortality": 19.371707606306302,
+"population": -449.29101373270845,
+"life_expectancy": -1.5873405706373802,
+"infant_mortality": 19.371707025801925,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.007714458576628447,
-"cap_infrastructure": -0.02172842857017887,
-"cap_logistics": 0.06825941304880867,
-"cap_institutions": -0.05189431386341037,
-"cap_security": -0.03420418999697039,
-"cap_culture": -0.03312455174330042,
+"cap_production": -0.007714457604096836,
+"cap_infrastructure": -0.02172842856796986,
+"cap_logistics": 0.06825941265599744,
+"cap_institutions": -0.051894311291859285,
+"cap_security": -0.03420417666432363,
+"cap_culture": -0.033124519022335264,
 "ecology": 0.008625723275950292,
 "known": -143.66666666666663,
-"education": -0.011802126299629512
+"education": -0.011802126277199787
 },
 "600": {
-"population": -185.99102562678945,
-"life_expectancy": 0.002261772923272787,
-"infant_mortality": 0.8573106939826118,
+"population": -185.99077628363466,
+"life_expectancy": 0.002261384254101273,
+"infant_mortality": 0.8573142542045389,
 "food_security": 0.0,
 "health": 0.0,
-"cap_production": -0.00486341425054293,
-"cap_infrastructure": -0.0073842756465873904,
-"cap_logistics": 0.09268731112354006,
-"cap_institutions": -0.04028158016132766,
-"cap_security": -0.022063070648263294,
-"cap_culture": -0.030633285989263515,
+"cap_production": -0.004863404194019316,
+"cap_infrastructure": -0.0073842756455076985,
+"cap_logistics": 0.0926873121392367,
+"cap_institutions": -0.04028156296714913,
+"cap_security": -0.022062990129360638,
+"cap_culture": -0.03063309425954297,
 "ecology": 0.013153955614739865,
 "known": 0.0,
-"education": -0.001893989871795121
+"education": -0.0018939898705145897
 }
 },
 "focus:temple_scribal_economy": {
