@@ -2213,7 +2213,8 @@ func _refresh_offline_briefs(civ_id:String,show:bool,away:bool)->void:
 	var box:=foreign_refs.get("offline") as HFlowContainer
 	if box==null:return
 	box.visible=show
-	var choices:Array[Dictionary]=ForeignDialogue.offline_choices(civ_id) if show else []
+	var choices:Array[Dictionary]=[]
+	if show:choices.assign(ForeignDialogue.offline_choices(civ_id))
 	var signature:="%s|%s|%s" % [str(show),str(away),JSON.stringify(choices)]
 	if String(foreign_refs.get("offline_sig",""))==signature:return
 	foreign_refs["offline_sig"]=signature
