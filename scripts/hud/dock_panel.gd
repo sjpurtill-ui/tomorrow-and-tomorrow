@@ -228,6 +228,11 @@ func _render_sections(blocks:Array)->void:
 		prints.append(block_print)
 		if index<old.size() and index<_section_prints.size() and _section_prints[index]==block_print and String(block.get("type","")) in PURE_BLOCKS:
 			continue
+		# A widget that can take new data in place keeps its nodes (the People
+		# screen's scene, open card and figures) instead of being replaced.
+		if index<old.size() and index<_section_prints.size() and _section_prints[index].get_slice("|",0)==String(block.get("type","")):
+			var widget:=_in_place_widget(old[index])
+			if widget!=null and bool(widget.call("update_block",block)):continue
 		var before:=body.get_child_count()
 		Blocks.render(body,[block])
 		sections_built+=body.get_child_count()-before
@@ -241,6 +246,13 @@ func _render_sections(blocks:Array)->void:
 		if is_instance_valid(old[index]) and old[index].get_parent()==body:
 			body.remove_child(old[index]);old[index].queue_free()
 	_section_prints=prints
+
+
+static func _in_place_widget(section:Node)->Node:
+	if section==null or not is_instance_valid(section):return null
+	for child in section.get_children():
+		if child.has_method("update_block"):return child
+	return null
 
 
 static func fingerprint(value:Variant)->String:

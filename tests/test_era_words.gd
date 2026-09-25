@@ -69,6 +69,19 @@ func test_the_people_count_in_their_own_words()->void:
 	assert_str(EraWords.babes_lost(173.0)).is_equal("IMR 173‰")
 	assert_str(EraWords.word("kpi.gdp")).is_equal("REAL GDP / DAY")
 
+func test_stores_are_told_in_moons_then_weeks_then_days()->void:
+	assert_str(EraWords.store_span(67.0)).is_equal("food for two moons")
+	assert_str(EraWords.store_span(5.2)).is_equal("food for five days")
+	assert_str(EraWords.register()).is_equal("TOLD AT THE FIRE")
+	GameState.known_discoveries.append("pictographic_records")
+	await _next_frame()
+	assert_str(EraWords.store_span(67.0)).is_equal("food for two months")
+	assert_str(EraWords.register()).is_equal("FROM THE REGISTERS")
+	GameState.known_discoveries.append("printing_process")
+	await _next_frame()
+	assert_str(EraWords.store_span(67.0)).is_equal("food for 67 days")
+	assert_str(EraWords.register()).is_equal("FROM THE CENSUS")
+
 func test_no_fleet_before_boats_and_no_air_service_before_flight()->void:
 	assert_bool(EraWords.has_boats()).is_false()
 	assert_bool(EraWords.has_flight()).is_false()

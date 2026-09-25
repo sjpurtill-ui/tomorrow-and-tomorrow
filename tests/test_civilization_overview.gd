@@ -48,17 +48,42 @@ func test_reading_overview_preserves_selected_city_and_live_state()->void:
 func test_content_reads_city_changes_without_reopening_and_links_every_city()->void:
 	var content:=Content.new(null,null)
 	var first:Dictionary=content.tab(0)
-	assert_int(first.blocks[1].items.size()).is_equal(2)
-	assert_bool(first.blocks[1].items[0].on_click is Callable).is_true()
+	var people:Dictionary=first.blocks[0]
+	assert_str(String(people.type)).is_equal("people")
+	assert_int(people.hearths.size()).is_equal(2)
+	assert_bool(people.hearths[0].on_click is Callable).is_true()
 	SettlementModel.with_city_resources("second",func()->void:
 		GameState.housing_capacity=1000
 		GameState.simulation_metrics.food_days=20.0;GameState.simulation_metrics.food_intake_ratio=1.0
 		GameState.water_metrics={"days":3.0,"intake_ratio":1.0})
-	var next:Dictionary=content.tab(0)
-	# The People view: stores of food are the second of six plain answers.
-	assert_str(String(next.blocks[0].items[1].value)).is_equal("20 days")
-	assert_int((next.blocks[0].items as Array).size()).is_equal(6)
-	assert_str(String(next.blocks[1].items[0].value)).is_equal("Basic needs met")
+	var next:Dictionary=content.tab(0).blocks[0]
+	# The People view: stores of food are the second of six vitals.
+	assert_str(String(next.vitals[1].value)).is_equal("20 days")
+	assert_int((next.vitals as Array).size()).is_equal(6)
+	assert_str(String(next.hearths[0].status)).is_equal("Basic needs met")
+	assert_str(String(next.hearths[0].needs)).contains("roofs for all")
+
+func test_the_people_screen_shows_named_faces_a_voice_and_work()->void:
+	GameState.hearth_season["born"]=2
+	var block:Dictionary=Content.new(null,null).tab(0).blocks[0]
+	var roles:Array=(block.faces as Array).map(func(f:Dictionary)->String:return String(f.role))
+	assert_array(roles).contains(["newborn","oldest","provider","maker","grievance"])
+	for face:Dictionary in block.faces:
+		assert_str(String(face.name)).is_not_empty()
+		if bool(face.alive) and String(face.role)!="newborn":assert_str(String(face.summon.known_id)).is_not_empty()
+	var babe:Dictionary=(block.faces as Array).filter(func(f:Dictionary)->bool:return f.role=="newborn")[0]
+	assert_int(int(babe.age)).is_equal(0)
+	# The same people come back on the next read: they are remembered.
+	var again:Dictionary=Content.new(null,null).tab(0).blocks[0]
+	assert_str(String(again.faces[1].id)).is_equal(String(block.faces[1].id))
+	var voice:Dictionary=block.scene.voice
+	assert_str(String(voice.line)).is_not_empty()
+	assert_str(String(voice.face.name)).is_not_empty()
+	assert_str(String(block.scene.headline)).contains("souls at the Capital fires")
+	assert_str(String(block.scene.register)).is_equal("TOLD AT THE FIRE")
+	assert_int((block.labor.tasks as Array).size()).is_greater(3)
+	for task:Dictionary in block.labor.tasks:assert_int(int(task.count)).is_greater(0)
+	for word in ["GDP","‰","per mille","%"]:assert_str(String(block.scene.headline)).not_contains(word)
 
 func test_city_navigation_and_overview_layout()->void:
 	var hud:=TestHud.new();add_child(hud)
@@ -73,7 +98,10 @@ func test_city_navigation_and_overview_layout()->void:
 		panel.size=Vector2(width,900);panel.present(content,0)
 		for frame in 6:await get_tree().process_frame
 		assert_float(panel.size.x).is_less_equal(float(width))
-		assert_int(panel.body.get_child_count()).is_greater(1)
+		assert_int(panel.body.get_child_count()).is_greater(0)
+		var screen:Node=panel.body.find_child("PeopleScreen",true,false)
+		assert_object(screen).is_not_null()
+		assert_int((screen.get("columns") as GridContainer).columns).is_equal(2 if width>=1200 else 1)
 	panel.queue_free();hud.queue_free();await get_tree().process_frame
 
 func test_unsettled_overview_keeps_actual_carried_stores()->void:

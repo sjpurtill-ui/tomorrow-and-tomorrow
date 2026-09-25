@@ -31,6 +31,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var board:=preload("res://scripts/hud/known_world_board.gd").new();section.add_child(board);board.setup(block)
 			"culture":
 				var panel:=preload("res://scripts/hud/culture_panel.gd").new();section.add_child(panel);panel.setup(block)
+			"people":
+				var screen:=preload("res://scripts/hud/people_screen.gd").new();section.add_child(screen);screen.setup(block)
 			"settlement_overview":
 				var panel:=preload("res://scripts/hud/settlement_overview.gd").new();section.add_child(panel);panel.setup(block)
 			"chronicle":

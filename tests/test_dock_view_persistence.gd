@@ -7,6 +7,7 @@ const Health:=preload("res://scripts/hud/content/dock_detail_health.gd")
 const ChronicleDock:=preload("res://scripts/hud/content/dock_content_chronicle.gd")
 const PopulationLedger:=preload("res://scripts/hud/content/dock_detail_population_ledger.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
+const PeopleDock:=preload("res://scripts/hud/content/dock_content_overview.gd")
 
 class TestHud extends Control:
 	signal section_requested(section:String,sub:int)
@@ -114,6 +115,34 @@ func test_chronicle_keeps_its_place_and_opened_pages_as_tales_arrive()->void:
 		assert_int(absi(panel.body_scroll.scroll_vertical-middle)).is_less_equal(3)
 	feed=panel.body.find_child("ChronicleFeed",true,false)
 	assert_int(int(feed.shown)).is_equal(int(feed.PAGE)*2)
+
+func test_the_people_update_in_place_keeping_scene_card_and_place()->void:
+	var provider:=PeopleDock.new(null,hud)
+	await _open(provider)
+	var screen:Node=panel.body.find_child("PeopleScreen",true,false)
+	assert_object(screen).is_not_null()
+	var scene:Node=screen.find_child("Scene",true,false)
+	# Open the oldest one's card, then read deep into the screen.
+	var oldest:=""
+	for face:Dictionary in screen.data.faces:
+		if String(face.role)=="oldest":oldest=String(face.id)
+	screen._select(oldest)
+	await _frames(4)
+	assert_bool((screen.card as Control).visible).is_true()
+	var middle:int=await _scroll_deep()
+	var signature:Array=panel.provider.signature().duplicate(true)+[panel.sub]
+	var built:int=panel.sections_built
+	for day in 4:
+		GameState.elapsed_days+=1.0
+		GameState.simulation_metrics.food_days=40.0-day*6.0
+		signature=_live_tick(signature)
+		await _frames(4)
+		assert_int(absi(panel.body_scroll.scroll_vertical-middle)).is_less_equal(3)
+	# The same widget took the new days: its scene nodes and the open card stayed.
+	assert_int(panel.sections_built).is_equal(built)
+	assert_bool(is_instance_valid(scene) and panel.body.is_ancestor_of(scene)).is_true()
+	assert_str(String(screen.selected_id)).is_equal(oldest)
+	assert_bool((screen.card as Control).visible).is_true()
 
 func test_population_ledger_keeps_its_place_and_tab_across_days()->void:
 	var provider:=PopulationLedger.new(null,hud)

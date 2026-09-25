@@ -122,6 +122,32 @@ static func days(value:float)->String:
 	return "%.1f days" % value if value>=1.0 else "under a day"
 
 
+## How long the stores last, in the way the people count time: moons before
+## writing, weeks and months after it, days once there are statistics.
+static func store_span(value:float)->String:
+	if value<0.0:return "stores not yet counted"
+	if reckoned():return "food for %d days" % roundi(value)
+	if value<1.0:return "food for less than a day"
+	if value<1.5:return "food for one day"
+	var lettered:=stage()=="lettered"
+	if value<13.5:return "food for %s days" % count_word(roundi(value))
+	if lettered:
+		if value<60.0:return "food for %s weeks" % count_word(roundi(value/7.0))
+		return "food for %s months" % count_word(roundi(value/30.0))
+	if value<22.0:return "food for half a moon"
+	if value<44.0:return "food for a moon"
+	return "food for %s moons" % count_word(roundi(value/29.5))
+
+
+## Where the People screen's knowledge comes from: talk at the fire before
+## writing, the registers after it, the census once numbers are gathered.
+static func register()->String:
+	match stage():
+		"hearth":return "TOLD AT THE FIRE"
+		"lettered":return "FROM THE REGISTERS"
+	return "FROM THE CENSUS"
+
+
 ## How long a person born now can hope to live.
 static func life(years:float)->String:
 	match stage():

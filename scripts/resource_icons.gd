@@ -59,15 +59,16 @@ static func _sd(primitive:Dictionary,p:Vector2)->float:
 	return 1e6
 
 
-static func _render(primitives:Array,px:int=ICON_PX)->Image:
+static func _render(primitives:Array,px:int=ICON_PX,disc:bool=true)->Image:
 	## Glyphs are designed on the 56px grid; larger sizes re-evaluate the same
 	## distance field so card-sized marks stay crisp instead of upscaled.
+	## Without the disc a glyph stands alone (small figures in a row).
 	var image:=Image.create(px,px,false,Image.FORMAT_RGBA8)
 	var scale:=float(px)/float(ICON_PX)
 	var stack:Array=[
 		_c(28,28,25,Color(0.035,0.066,0.060,0.88)),
 		_ring(28,28,24.0,1.6,Color(0.87,0.82,0.70,0.55)),
-	]
+	] if disc else []
 	stack.append_array(primitives)
 	for y in px:
 		for x in px:
@@ -324,3 +325,53 @@ static func _war_glyph(kind:String,c:Color)->Array:
 		"feud":
 			return [_s(14,42,40,14,2.6,c),_s(42,42,16,14,2.6,c),_t(40,14,44,10,36,12,hi),_t(16,14,12,10,20,12,hi)]
 	return [_c(28,28,8,c)]
+
+
+
+# -- The People -------------------------------------------------------------
+
+static var _people_textures:Dictionary={}
+
+## Marks for the People screen: the six vitals (fed, stores, water, shelter,
+## life, spirit) drawn on the disc, and small standing figures for what the
+## people are doing (gather, hunt, fish, tend, build, fetch, make, carry,
+## scout, learn, steward, watch), drawn bare so a row of them reads as a crowd.
+static func people_texture(kind:String,accent:Color,px:int=ICON_PX,disc:bool=true)->Texture2D:
+	var key:="%s|%s|%d|%s" % [kind,accent.to_html(),px,disc]
+	if _people_textures.has(key): return _people_textures[key]
+	var texture:=ImageTexture.create_from_image(_render(_people_glyph(kind,accent),px,disc))
+	_people_textures[key]=texture
+	return texture
+
+
+static func _figure(x:float,c:Color)->Array:
+	## One standing person, feet on the 48 line.
+	return [_c(x,13,5.2,c),_rr(x,27,6,9.5,4,c),_s(x-2.6,36,x-3.6,48,3.4,c),_s(x+2.6,36,x+3.6,48,3.4,c)]
+
+
+static func _people_glyph(kind:String,c:Color)->Array:
+	var hi:=c.lightened(0.32)
+	var dim:=c.darkened(0.35)
+	var dark:=Color(0.035,0.066,0.060,1)
+	match kind:
+		# Vitals, on the disc.
+		"fed": return [_rr(28,34,15,7,6,c),_rr(28,27,17,2.2,1,hi),_c(22,24,3.6,hi),_c(29,23,4,hi),_c(35,24.5,3.4,hi),_s(24,17,25,11,1.4,dim),_s(32,17,31,11,1.4,dim)]
+		"stores": return _pot(c,hi)+[_s(19,31,37,31,1.4,dark),_s(19,37,37,37,1.4,dark)]
+		"water": return _droplet(c,hi)
+		"shelter": return [_t(28,9,9,31,47,31,c),_rr(28,38,13,8,1,hi),_rr(28,41,3.6,5.5,1,dark),_s(28,9,28,5,1.6,dim)]
+		"life": return [_c(24,14,5,c),_rr(24,28,6,9.5,4,c),_s(21.5,37,20.5,48,3.2,c),_s(26.5,37,27.5,48,3.2,c),_s(35,12,33,48,2.2,hi),_c(35,12,2.4,hi)]
+		"spirit": return [_c(19,16,4.2,c),_rr(19,29,5,9,3,c),_c(37,16,4.2,c),_rr(37,29,5,9,3,c),_s(23,26,33,26,2.4,hi),_t(28,32,24,44,32,44,Color(1,0.72,0.35,0.95)),_t(28,37,26,44,30,44,Color(1,0.92,0.62,0.95))]
+		# Figures at work, bare.
+		"gather": return [_c(20,16,5,c),_s(21,21,29,34,8,c),_s(27,35,24,48,3.2,c),_s(30,35,33,48,3.2,c),_s(24,26,36,34,2.6,c),_rr(41,40,7,6,2.5,hi),_s(34,34,48,34,1.6,hi)]
+		"hunt": return _figure(24,c)+[_s(41,6,35,50,2.2,hi),_t(41,3,38,11,44,11,hi),_s(24,24,38,22,2.6,c)]
+		"fish": return _figure(22,c)+[_s(26,24,38,20,2.4,c),_s(38,20,51,8,1.6,hi),_s(51,8,51,30,1,hi),_c(51,34,3.2,hi),_t(47,34,44,31,44,37,hi)]
+		"tend": return _figure(20,c)+[_s(24,26,36,36,2.4,c),_s(42,49,42,34,2.2,hi),_c(38,33,3.6,hi),_c(46,31,3.6,hi),_c(42,27,3.2,hi)]
+		"build": return _figure(20,c)+[_s(24,24,34,18,2.4,c),_s(34,48,42,28,2.4,hi),_s(42,28,50,48,2.4,hi),_s(37,40,47,40,1.8,hi)]
+		"fetch": return _figure(26,c)+[_s(8,19,48,15,4.4,hi),_c(8,19,2.4,dim),_c(48,15,2.4,dim)]
+		"make": return [_c(20,20,5,c),_rr(20,33,6,8,4,c),_s(16,41,30,44,3.4,c),_s(24,30,36,28,2.4,c),_s(36,28,44,20,2.2,hi),_rr(45,19,4,2.6,1,hi),_rr(40,44,8,3,1,dim)]
+		"carry": return _figure(24,c)+[_rr(34,24,6.5,9,3,hi),_s(30,18,34,15,1.6,hi)]
+		"scout": return [_c(24,13,5,c),_rr(25,27,5.5,9,4,c),_s(22,36,16,47,3.3,c),_s(28,36,33,47,3.3,c),_s(28,24,38,28,2.4,c),_s(39,10,41,49,2,hi)]
+		"learn": return _figure(20,c)+[_rr(39,27,8,10,1,hi),_s(34,22,44,22,1.2,dark),_s(34,26,44,26,1.2,dark),_s(34,30,42,30,1.2,dark),_s(24,26,32,28,2.4,c)]
+		"steward": return _figure(24,c)+[_s(38,12,38,49,2,hi),_ring(38,10,3.6,1.6,hi),_s(24,24,37,22,2.4,c)]
+		"watch": return _figure(26,c)+[_s(39,4,39,50,2,hi),_t(39,1,36,8,42,8,hi),_rr(18,28,4,7,2,dim)]
+	return _figure(28,c)
