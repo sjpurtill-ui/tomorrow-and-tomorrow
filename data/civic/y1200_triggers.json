@@ -1,0 +1,36 @@
+{
+ "schema": "civic_y1200_triggers/1",
+ "notes": "The ONE place that maps 1200-1800 research ids (docs/research/y1200/*_1200_1800.md on codex/research-plausibility, rows tagged [gov: ...]) onto the civic stages. These ids are not in the game catalog yet: each stage below gains an alternative requirement set that activates as soon as a built research block makes the ids knowable. If the registry renames or dedupes an id, change it here only. Stages marked y1200_only in civic_stages.json are reachable only through this file.",
+ "source": "C:/Users/sjpur/tt-research-plausibility/docs/research/y1200 (Institutions, Culture, Knowledge, Demography, Labor, Ecology, Health, Security)",
+ "tracks": {
+  "throne": ["household_great_offices", "homage_commendation", "fief_tenure_for_service", "hereditary_fief_succession", "itinerant_royal_court", "coronation_regalia_rite", "overlord_crowned_by_high_priest", "district_counts", "castellan_local_lordship", "sworn_royal_council"],
+  "assembly": ["sworn_town_commune", "elected_town_consuls", "chartered_town_liberties", "chartered_town_league", "scrutiny_lot_elections", "hired_outside_magistrate", "guild_council_seats"]
+ },
+ "stages": {
+  "late_antique_hall": [
+   [{"any": ["promulgated_edict_code", "household_great_offices", "register_of_dignities", "jurist_digest_codification", "regional_vicariates"], "min": 2}]
+  ],
+  "feudal_hall": [
+   [{"any": ["homage_commendation", "fief_tenure_for_service", "hereditary_fief_succession"]},
+    {"any": ["itinerant_royal_court", "household_great_offices", "hereditary_fief_succession", "seigneurial_immunity_courts", "castellan_local_lordship", "frontier_march_lords", "forest_law_courts"]}]
+  ],
+  "chancery_court": [
+   [{"any": ["royal_chancery_office", "chancery_enrolment_rolls", "sealed_royal_writs"]},
+    {"any": ["counting_table_audit", "royal_justice_circuits", "realm_holding_survey", "public_notaries", "writ_forms_of_action"]}]
+  ],
+  "chartered_commune": [
+   [{"any": ["sworn_town_commune", "chartered_town_liberties"]},
+    {"any": ["elected_town_consuls", "chartered_town_liberties", "town_residence_freedom", "town_trade_statute_book", "guild_council_seats", "craft_guilds"]}]
+  ],
+  "estates_assembly": [
+   [{"any": ["estates_assembly"]},
+    {"any": ["great_liberties_charter", "fixed_capital_archives", "permanent_high_court", "consented_taxation", "chartered_town_liberties", "guild_council_seats"]}]
+  ]
+ },
+ "offices": {
+  "HighPriest": ["ranked_priestly_hierarchy", "overlord_crowned_by_high_priest", "closed_college_election"],
+  "Justice": ["royal_justice_circuits", "permanent_high_court", "shire_reeve_courts", "presenting_jury_of_neighbours"],
+  "Treasurer": ["counting_table_audit", "fixed_court_of_accounts", "funded_public_debt_shares"]
+ },
+ "watch": ["pestilence_health_boards", "impeaching_censorate", "three_department_ministries", "sworn_royal_council", "privy_seal_office", "keepers_of_the_peace"]
+}

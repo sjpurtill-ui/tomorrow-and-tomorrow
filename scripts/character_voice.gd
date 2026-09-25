@@ -609,14 +609,54 @@ static func _lifelong(p:Dictionary,who:String)->void:
 		while models.size()>600: models.erase(models.keys()[0])
 	_apply_model(p,chosen)
 	# One way of addressing the ruler, kept for life (until the era forbids it).
+	# Past the hearth council the court's protocol sets the form of address, so
+	# the same official, kept on at a grander court, learns its new manners.
 	var tags:Array=p.get("era_tags",[])
-	var address:=String(addresses.get(who,""))
+	var staged:Array=p.get("stage_address",[])
+	var slot:=who if staged.is_empty() else "%s@%s" % [who,String(p.get("court_stage",""))]
+	var address:=String(addresses.get(slot,""))
 	if address.is_empty() or not permits(address,tags):
-		var options:Array=dialect(String(p.get("dialect_id","")),tags).get("address",[])
-		address=String(options[0]) if not options.is_empty() else "chief"
-		addresses[who]=address
+		# The stage picks the form; the reverent god-address tables (plain
+		# speech) stay authoritative for wording: a stage form the speaker's own
+		# dialect already uses is preferred, and a stage form that reads as a
+		# maxim, a kenning or anything not reverent is never used.
+		var own:Array=dialect(String(p.get("dialect_id","")),tags).get("address",[])
+		var options:Array=[]
+		var shared:Array=[]
+		for option in staged:
+			if not permits(String(option),tags) or not reverent_address(String(option)): continue
+			options.append(option)
+			if String(option) in own: shared.append(option)
+		if not shared.is_empty(): options=shared
+		if options.is_empty():
+			options=dialect(String(p.get("dialect_id","")),tags).get("address",[])
+			address=String(options[0]) if not options.is_empty() else "chief"
+		else:
+			address=String(options[posmod(hash(who),options.size())])
+		addresses[slot]=address
 		while addresses.size()>600: addresses.erase(addresses.keys()[0])
 	p["address"]=address
+
+## Words that mark a form of address as reverent toward the god-ruler.
+const REVERENT_ADDRESS_WORDS:=["one","high","most","majesty","eternal","eternity","divine","sacred","above","serene","keeper","giver","guardian","protector","patron","lord","liege","sovereign","overlord","grace","fire","pious"]
+
+static func reverent_address(address:String)->bool:
+	## A court-stage form of address is used only when it is reverent, plain
+	## (no maxim or kenning: plain_speech.gd) and short.
+	var text:=address.strip_edges()
+	if text.is_empty() or text.length()>32 or text.contains("-"): return false
+	if preload("res://scripts/plain_speech.gd").is_maxim(text): return false
+	for word in text.to_lower().split(" ",false):
+		if word in REVERENT_ADDRESS_WORDS: return true
+	return false
+
+static func _court_manners(p:Dictionary)->void:
+	## The court they serve in: its form of address and its protocol.
+	var stages:=preload("res://scripts/civic_stages.gd")
+	var civic:Dictionary=stages.current()
+	p["court_stage"]=String(civic.get("id",""))
+	p["stage_address"]=stages.address_options(civic)
+	p["protocol"]=stages.protocol_line(civic)
 
 static func model(model_id:String)->Dictionary:
 	for m:Dictionary in VOICE_MODELS:
@@ -1161,6 +1201,7 @@ static func for_person(person:Dictionary)->Dictionary:
 		"address":String(_pick(rng,d.address)),"oath":String(_pick(rng,d.oath)),"proverb":String(_pick(rng,d.proverb)),
 		"era_owner":"player","era_tags":tags,"era_tier":tier}
 	p["sample"]=String(p.proverb)
+	_court_manners(p)
 	# The manner is theirs for life: it depends on who they are, never the era.
 	var features:=_features_from(person)
 	for t in traits:
@@ -1240,6 +1281,7 @@ static func for_figure(figure:Dictionary,work:Dictionary={})->Dictionary:
 		"address":String(_pick(rng,d.address)),"oath":String(_pick(rng,d.oath)),"proverb":String(_pick(rng,d.proverb)),
 		"era_owner":"player","era_tags":tags,"era_tier":tier}
 	p["sample"]=String(p.proverb)
+	_court_manners(p)
 	var features:={"assertiveness":ego,"pride":ego,"openness":vision,"risk_tolerance":vision,"discipline":0.75 if temperament.contains("disciplined") or temperament.contains("patient") else 0.5,
 		"empathy":0.6 if temperament.contains("generous") else 0.4,"suspicion":0.7 if temperament.contains("suspicious") or temperament.contains("skeptical") else 0.4,"honesty":0.55,"courage":0.6}
 	p["model_rank"]=rank_models(features,stance,"figure:"+id)
@@ -1260,6 +1302,7 @@ static func brief(p:Dictionary)->String:
 	parts.append("wants %s; fears %s; quirk: %s" % [String(p.get("want","")),String(p.get("fear","")),String(p.get("quirk",""))])
 	parts.append("secret (only let it leak sideways, never state it): %s" % String(p.get("secret","")))
 	if p.has("toward_ruler"): parts.append("feels %s toward the ruler" % String(p.toward_ruler))
+	if not String(p.get("protocol","")).is_empty(): parts.append("court protocol: %s" % String(p.protocol))
 	if not String(p.get("traits","")).is_empty(): parts.append("traits %s" % String(p.traits))
 	return " | ".join(parts)
 

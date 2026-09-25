@@ -497,11 +497,24 @@ func _test_backdrop_tiers()->void:
 		var scene:=court.find_child("CourtScene",true,false)
 		_check(scene!=null and int(scene.tier)==int(case[1]),"with %s the court should stand in tier %d, found %s" % [case[0],int(case[1]),scene.tier if scene else "-"])
 		var title:=court.find_child("CourtTitle",true,false) as Label
-		_check(title!=null and title.text==Backdrop.place_name(int(case[1])),"tier %d court is not named %s" % [int(case[1]),Backdrop.place_name(int(case[1]))])
+		_check(title!=null and title.text==Backdrop.stage_place_name(String(scene.stage_id)),"tier %d court is not named for its stage %s" % [int(case[1]),Backdrop.stage_place_name(String(scene.stage_id))])
+	# The form of court follows institutions, not only the era: a people of
+	# elected magistrates meets in the open, a kingdom in its palace.
+	var stage_cases:=[[["elder_council_assent","customary_law"],"elders_circle","elders_ring"],
+		[["kingship","formal_archives","copper_smelting","pictographic_records"],"palace_bureaucracy","palace_hall"],
+		[["majority_vote_assembly","annual_elected_magistrates","free_adult_assembly","phonetic_notation"],"citizen_assembly","assembly_tiers"]]
+	for case:Array in stage_cases:
+		Voice.knowledge_override["player"]=case[0]
+		court.show_court()
+		await _frames(2)
+		var scene:=court.find_child("CourtScene",true,false)
+		_check(scene!=null and String(scene.stage_id)==String(case[1]) and String(scene.scene)==String(case[2]),"with %s the court should be %s drawn as %s, found %s" % [case[0],case[1],case[2],scene.stage_id if scene else "-"])
+		var protocol:=court.find_child("CourtProtocol",true,false) as Label
+		_check(protocol!=null and protocol.text!="","the %s court names no ceremony" % String(case[1]))
 	Voice.knowledge_override.erase("player")
 	court._close()
 	await _frames(2)
-	print("COURT backdrop follows the era through tiers 0-4")
+	print("COURT backdrop follows the era through tiers 0-4 and the form of court through its stages")
 
 func _test_fit_sizes()->void:
 	for view:Vector2i in [Vector2i(1920,1080),Vector2i(1600,900),Vector2i(1366,768),Vector2i(1280,720)]:
@@ -541,6 +554,17 @@ func _captures()->void:
 		court.show_court()
 		await _capture("rest-tier%d-%s" % [tier,HudTokens.color_mode])
 		court._close();await _frames(2)
+	# Every form of court, for the art review (docs/art/COURT_STAGE_ART_BRIEF.md).
+	Backdrop.tier_override=-1
+	for index in Backdrop.Stages.ids().size():
+		var stage_id:=Backdrop.Stages.ids()[index]
+		HudTokens.set_color_mode("light" if index%2==0 else "dark")
+		Backdrop.Stages.stage_override=stage_id
+		var court:Control=director.open_court()
+		court.show_court()
+		await _capture("stage-%s-%s" % [stage_id,HudTokens.color_mode])
+		court._close();await _frames(2)
+	Backdrop.Stages.stage_override=""
 	# A foreign ruler's reply, as the envoy channel shows it.
 	HudTokens.set_color_mode("light");Backdrop.tier_override=0
 	var civ_id:=rival_a

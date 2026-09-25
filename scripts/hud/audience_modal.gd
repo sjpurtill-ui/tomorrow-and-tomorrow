@@ -1586,7 +1586,7 @@ func show_court()->void:
 func _rest_state()->Array:
 	## What the court at rest shows; it redraws only when this changes.
 	return [Hall.waiting().size(),Hall.matter_counts().hash(),Roster.people().size(),Roster.foreign_peoples().size(),int(GameState.elapsed_days),
-		GovernmentPeopleSystem.revision,AdvisorSystem.council_decision_items(3,false).size(),Tokens.color_mode,ForeignDialogue.pending.size(),Backdrop.current_tier()]
+		GovernmentPeopleSystem.revision,AdvisorSystem.council_decision_items(3,false).size(),Tokens.color_mode,ForeignDialogue.pending.size(),Backdrop.current_tier(),Backdrop.current_stage()]
 
 func _rest_scene_height()->float:
 	var view:=get_viewport().get_visible_rect().size if is_inside_tree() else Vector2(1920,1080)
@@ -1611,8 +1611,13 @@ func _build_rest_scene(roster:Array[Dictionary])->Control:
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",0);row.add_child(words)
 	var day:=int(GameState.elapsed_days)
 	words.add_child(Tokens.make_label("YOUR COURT · YEAR %d, DAY %d" % [day/365+1,day%365+1],11,Color("e2d3b4"),.12))
-	var title:=Tokens.make_label(Backdrop.place_name(court_tier),28,Color("f6ecd6"));title.name="CourtTitle";title.add_theme_font_override("font",_bold);words.add_child(title)
-	var line:=Tokens.make_label(Backdrop.place_line(court_tier).capitalize().substr(0,1)+Backdrop.place_line(court_tier).substr(1),13,Color("e2d3b4"));line.add_theme_font_override("font",_italic);words.add_child(line)
+	# The form of court follows discoveries: its name, its setting, its ceremony.
+	var title:=Tokens.make_label(Backdrop.stage_place_name(),28,Color("f6ecd6"));title.name="CourtTitle";title.add_theme_font_override("font",_bold);words.add_child(title)
+	var place:=Backdrop.stage_place_line()
+	var line:=Tokens.make_label(place.substr(0,1).to_upper()+place.substr(1),13,Color("e2d3b4"));line.add_theme_font_override("font",_italic);words.add_child(line)
+	var ceremony:=Tokens.make_label(Roster.ceremony_line(),11,Color("d8c8a4"));ceremony.name="CourtProtocol";ceremony.clip_text=true;ceremony.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	ceremony.tooltip_text=(Roster.ceremony_line()+"
+"+Roster.attendance_line()).strip_edges();ceremony.mouse_filter=Control.MOUSE_FILTER_PASS;words.add_child(ceremony)
 	var people:=Hall.people_regard()
 	if not people.is_empty():
 		var regard_box:=VBoxContainer.new();regard_box.name="PeopleRegard";regard_box.add_theme_constant_override("separation",2);regard_box.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -1629,7 +1634,7 @@ func _build_rest_scene(roster:Array[Dictionary])->Control:
 	seated.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
 		if int(a.matters)!=int(b.matters):return int(a.matters)>int(b.matters)
 		return int(ROSTER_ORDER.get(String(a.group),9))<int(ROSTER_ORDER.get(String(b.group),9)))
-	for index in mini(seated.size(),MAX_SEATED):
+	for index in mini(seated.size(),Roster.seat_limit()):
 		var entry:Dictionary=seated[index]
 		var seat:=_rest_seat(entry)
 		scene_area.add_child(seat);rest_seats[String(entry.key)]=seat
@@ -1743,7 +1748,7 @@ func _build_roster_list(roster:Array[Dictionary])->Control:
 		(groups[String(entry.group)] as Array).append(entry)
 	for group in Roster.GROUPS:
 		if not groups.has(group):continue
-		var label:=Tokens.make_label(String(Roster.GROUP_WORDS.get(group,group.to_upper())),10,Tokens.TEXT_DIM,.12)
+		var label:=Tokens.make_label(Roster.group_word(group),10,Tokens.TEXT_DIM,.12)
 		list.add_child(label)
 		for entry:Dictionary in groups[group]:list.add_child(_roster_row(entry))
 	if roster.is_empty():
