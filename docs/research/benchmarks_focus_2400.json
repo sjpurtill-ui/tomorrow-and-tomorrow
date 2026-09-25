@@ -1,6 +1,6 @@
 {
  "schema": "benchmarks_focus/1",
- "description": "Focus-dependent historical benchmarks for game years 1800-2400 (about AD 1360-1800: the late-medieval recovery, the gunpowder, printing and oceanic transitions, the fiscal-military and court states, and the agrarian and scientific improvements before steam industry). A society that pours itself into one research line or a mixed archetype is judged against what comparable societies achieved with that emphasis: higher bands on its focus metrics, lower bands elsewhere, and at least one required cost below the base typical. Human summary and calibration notes: docs/research/BENCHMARKS_FOCUS_2400.md. Resolver and validator: tools/research/focus_bench.py.",
+ "description": "Focus-dependent historical benchmarks for game years 1800-2400 (about AD 1360-1800: the recovery after the late agrarian crisis, the gunpowder, printing and oceanic transitions, the fiscal-military and court states, and the agrarian and scientific improvements before steam industry). A society that pours itself into one research line or a mixed archetype is judged against what comparable societies achieved with that emphasis: higher bands on its focus metrics, lower bands elsewhere, and at least one required cost below the base typical. Human summary and calibration notes: docs/research/BENCHMARKS_FOCUS_2400.md. Resolver and validator: tools/research/focus_bench.py.",
  "base": "docs/research/benchmarks_2400.json",
  "continues": "docs/research/benchmarks_focus_1800.json",
  "window": [

@@ -12,26 +12,42 @@ on its focus metrics, lower ones elsewhere, and at least one REQUIRED cost.
     python tools/research/focus_bench.py list
     python tools/research/focus_bench.py band security population 600
     python tools/research/focus_bench.py table security 600  # every metric, base vs focus
-    python tools/research/focus_bench.py classify --research '{"security": 12}' --labor '{"Defense": 9}'
+    python tools/research/focus_bench.py classify --year 300 --research '{"security": 12}' --labor '{"Defense": 9}'
     python tools/research/focus_bench.py judge security population 600 25000
+    python tools/research/focus_bench.py selftest                # every focus x metric x century, joins, helpers
 
 Library use (the surrogate, tools/sim):
 
     sys.path.insert(0, "tools/research"); import focus_bench as fb
     fs = fb.FocusBench()                          # loads every window found
-    focus = fs.classify(strategy_dict)            # {"security": 1.0} or a blend {"security": .5, "nutrition": .5}
+    focus = fs.classify(strategy_dict, 600)       # year required; {"security": 1.0} or a blend {"security": .5, "nutrition": .5}
     fs.band(focus, "population", 600)             # effective {min, low, typical, high, max, role, allowed_lead, ...}
     fs.judge(focus, "population", 600, value)     # "within" / "above high (allowed)" / "ABOVE FOCUS HIGH" / "below low" / "OUT OF BOUNDS"
     fs.check_run(focus, {600: {"population": v, ...}}, balanced={600: {...}})   # bands + required cost + relative facets
     fs.milestone_early_fraction(focus, "security", 300)   # absolute early-landing fraction for a registry line
     fs.shock_hazard_mult(focus, 300)                      # {shock type: hazard multiplier}, lower = safer
 
-Classification order (same thresholds in both files' "classification"):
+Classification order (thresholds from each window's "classification"):
 explicit "focus_id" > archetype on the raw research shares (>= 55 % over its
 lines, >= 12 % each, no line >= 40 %) > line focuses (>= 25 %, with a 0.15
 labor/decree signature bonus, blended with balanced below 40 %) > balanced.
 Rules and focuses come from the window of the year being judged, so
-600-1200-only archetypes are never returned before 600.
+600-1200-only archetypes are never returned before 600. classify() therefore
+REQUIRES the year (it no longer defaults to the 0-600 window).
+
+Windows and joins. Five windows (0-600, 600-1200, 1200-1800, 1800-2400,
+2400-3000) each pair a focus file with its base file. A shared join year is
+judged by the EARLIER window. A focus that the later window introduces (an era
+archetype) does not exist in the earlier file, so at the join year it is
+treated as NEUTRAL: base band, base over-high allowance, no required cost,
+hazard multipliers of 1 and the base milestone_early_fraction. Just after the
+join it takes the later file's values, so an introduced archetype steps once at
+its join; every focus defined on both sides, and every base band, is continuous
+(validate and selftest check this). Anywhere else a focus unknown to the
+judging window raises KeyError. allowed_lead.milestone_early_fraction
+({focus_lines, other_lines, floor}, absolute) and shock_hazard_mult (keys of
+the base file's shock_widening.hazard_per_game_century) are read the same way
+in all five windows; validate checks their shape.
 
 Schema (benchmarks_focus/1). A band POSITION is a number on the base band's own
 scale, oriented so that larger is better (for 'neither' metrics: numerically
@@ -84,14 +100,49 @@ FACET_BETTER_FALLBACK = {"population": True, "life_expectancy": True, "infant_mo
 # Real places, peoples and periods that must not appear in the JSON (game data
 # rule: alternative history; real names only in the markdown calibration notes).
 # Matched at the start of a word (prefixes such as "mesopotam"); FULL_WORD
-# entries must match a whole word ("mari" must not hit "maritime").
+# entries must match a whole word ("mari" must not hit "maritime", "indus" must
+# not hit "industry"). Every string key and value of the focus file AND its base
+# file is checked (see _real_name_hits); GENERIC_PHRASES are blanked first
+# because they are ordinary terms that merely contain a listed word
+# ("age pyramid" is demography, not a monument).
 REAL_NAMES = ["uruk", "ubaid", "sumer", "akkad", "babylon", "assyri", "egypt", "nile", "naqada", "thebes", "mesopotam", "indus",
               "harappa", "mohenjo", "minoan", "crete", "mycen", "hittite", "phoenic", "canaan", "levant", "anatolia", "catalhoyuk",
               "çatalhöyük", "jericho", "tripolye", "trypillia", "cucuteni", "varna", "lbk", "linearbandkeramik", "jomon", "jōmon",
               "yangshao", "longshan", "erlitou", "shang", "xia", "china", "stonehenge", "orkney", "malta", "maltese", "gobekli",
               "göbekli", "cyclad", "aegean", "ur iii", "ebla", "mari", "lagash", "elam", "susa", "dilmun", "magan", "meluhha",
-              "bronze age", "neolithic", "chalcolithic", "old kingdom", "middle kingdom", "new kingdom", "pharaoh", "ziggurat", "pyramid"]
-FULL_WORD = {"nile", "crete", "varna", "lbk", "shang", "xia", "china", "malta", "ur iii", "ebla", "mari", "elam", "susa", "magan"}
+              "bronze age", "neolithic", "chalcolithic", "old kingdom", "middle kingdom", "new kingdom", "pharaoh", "ziggurat", "pyramid",
+              # later windows (600-3000)
+              "iron age", "roman", "romans", "rome", "greek", "greece", "hellen", "athens", "athenian", "sparta", "persia", "achaemenid",
+              "carthag", "macedon", "alexandria", "ptolem", "seleucid", "maurya", "gupta", "han dynasty", "tang dynasty",
+              "song dynasty", "ming", "qing", "byzant", "ottoman", "mongol", "abbasid", "umayyad", "caliph", "islam", "muslim",
+              "christian", "venice", "venetian", "genoa", "genoese", "florenc", "hanseatic", "renaissance", "reformation",
+              "industrial revolution", "medieval", "middle ages", "viking", "inca", "aztec", "maya", "mayan", "britain", "british",
+              "england", "english", "france", "french", "prussia", "german", "japan", "dutch", "holland", "spain", "spanish",
+              "portug", "europe", "america", "africa", "asia", "india", "napoleon", "victorian", "soviet", "ussr"]
+FULL_WORD = {"nile", "crete", "varna", "lbk", "shang", "xia", "china", "malta", "ur iii", "ebla", "mari", "elam", "susa", "magan",
+             "indus", "pyramid", "roman", "romans", "rome", "ming", "qing", "maya", "inca", "asia", "india", "sparta", "ussr"}
+GENERIC_PHRASES = ["age pyramid", "age-pyramid", "population pyramid", "pyramid-shaped age", "pyramid shaped age"]
+_NAME_RES = [(nm, re.compile(r"\b" + re.escape(nm) + (r"\b" if nm in FULL_WORD else ""))) for nm in REAL_NAMES]
+
+
+def _real_name_hits(obj, path: str = "$") -> list[tuple[str, str, str]]:
+    """(json path, name, text) for every real name in the keys and values of a JSON tree."""
+    out = []
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            out += _real_name_hits(str(k), f"{path}.{k}<key>")
+            out += _real_name_hits(v, f"{path}.{k}")
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            out += _real_name_hits(v, f"{path}[{i}]")
+    elif isinstance(obj, str):
+        text = obj.lower()
+        for ph in GENERIC_PHRASES:
+            text = text.replace(ph, " " * len(ph))
+        for nm, rx in _NAME_RES:
+            if rx.search(text):
+                out.append((path, nm, obj))
+    return out
 
 
 # --------------------------------------------------------------------------- loading
@@ -214,20 +265,39 @@ class FocusBench:
         tot = sum(max(0.0, float(v)) for v in focus.values())
         return {k: max(0.0, float(v)) / tot for k, v in focus.items() if v > 0} if tot > 0 else {"balanced": 1.0}
 
+    def _is_boundary(self, w: Window, year: float) -> bool:
+        """True when `year` is w's end and a later window starts there (the join year)."""
+        return abs(year - w.end) <= 1e-6 and any(abs(o.start - w.end) <= 1e-6 for o in self.windows if o is not w)
+
+    def _check_known(self, w: Window, blend: dict, year: float) -> None:
+        """Focuses missing from the judging window are neutral ONLY at a join year.
+
+        A shared boundary year (600, 1200, ...) is judged with the EARLIER window,
+        but archetypes introduced by the later window do not exist there. At that
+        year such a focus is treated as neutral: base band, base allowance, no
+        required cost, hazard multiplier 1, base milestone fraction. (Each window
+        ramps its new archetypes from neutral at its start year, so this is also
+        the continuous value.) Anywhere else a focus unknown to the window raises
+        KeyError, since classify() never returns it there."""
+        missing = [f for f in blend if f not in w.focuses]
+        if missing and not (self._is_boundary(w, year) and
+                            all(any(f in o.focuses for o in self.windows) for f in missing)):
+            raise KeyError(f"unknown focus {missing} in {w.name} at year {year:g}")
+
     def band(self, focus, metric: str, year: float) -> dict | None:
-        """Effective band for a focus (name or {focus: weight} blend)."""
+        """Effective band for a focus (name or {focus: weight} blend).
+
+        A focus not yet defined at a window join year is neutral (see _check_known)."""
         w = self.window(year)
         base = w.base_band(metric, year)
         if base is None:
             return None
         blend = self._norm(focus)
-        missing = [f for f in blend if f not in w.focuses]
-        if missing:
-            raise KeyError(f"unknown focus {missing} in {w.name}")
+        self._check_known(w, blend, year)
         pos = [0.0, 0.0, 0.0]
         lead = 0.0
         for f, wt in blend.items():
-            p = w.positions(f, metric, year)
+            p = w.positions(f, metric, year)   # NEUTRAL for a focus absent from w
             for i in range(3):
                 pos[i] += wt * p[i]
             lead += wt * self._allowed_lead(w, f, metric)
@@ -282,11 +352,13 @@ class FocusBench:
     def shock_hazard_mult(self, focus, year: float) -> dict:
         """Per-shock hazard multipliers (lower = safer); a blend uses the weighted geometric mean."""
         w = self.window(year)
-        keys = {k for f in self._norm(focus) for k in w.focuses.get(f, {}).get("shock_hazard_mult", {})}
+        blend = self._norm(focus)
+        self._check_known(w, blend, year)
+        keys = {k for f in blend for k in w.focuses.get(f, {}).get("shock_hazard_mult", {})}
         out = {}
         for k in sorted(keys):
             logm = sum(wt * math.log(float(w.focuses.get(f, {}).get("shock_hazard_mult", {}).get(k, 1.0)))
-                       for f, wt in self._norm(focus).items())
+                       for f, wt in blend.items())
             out[k] = math.exp(logm)
         return out
 
@@ -307,11 +379,15 @@ class FocusBench:
         allowed_lead.milestone_early_fraction is absolute in both files:
         {"focus_lines": f, "other_lines": g, "floor": "band_low"}. For a blend the
         weights average the fractions. The floor (band_low) and ceiling
-        (band_high) of the base rule still apply."""
+        (band_high) of the base rule still apply. The same shape is used by all
+        five windows (validate() checks it); a focus absent from the window at a
+        join year gets the base file's allowed_deviation.milestone_early_fraction."""
         w = self.window(year)
         base = float(w.base.get("allowed_deviation", {}).get("milestone_early_fraction", 0.2))
+        blend = self._norm(focus)
+        self._check_known(w, blend, year)
         total = 0.0
-        for f, wt in self._norm(focus).items():
+        for f, wt in blend.items():
             spec = w.focuses.get(f, {})
             me = spec.get("allowed_lead", {}).get("milestone_early_fraction", {})
             own = line in self.focus_lines(f, year)
@@ -392,22 +468,29 @@ class FocusBench:
                 "shock_hazard_mult": self.shock_hazard_mult(blend, last), "ok": ok}
 
     # -- classification of a surrogate strategy spec -------------------------------
-    def classify(self, strategy: dict, year: float | None = None) -> dict:
-        """{focus: weight} for a tools/sim strategy dict.
+    def classify(self, strategy: dict, year: float) -> dict:
+        """{focus: weight} for a tools/sim strategy dict at game year `year`.
+
+        `year` is REQUIRED (it used to default to the 0-600 window, so later
+        archetypes were never found): the classification rules and the focus
+        catalogue come from the window that judges that year, and with phases
+        the phase active at that year is classified (the first phase if the
+        year precedes them all).
 
         Accepts the sweep_strategies.py shape: {"research": {line: units},
         "knowledge_share": pct, "labor": {role: pct}, "policies": [...],
         "phases": [{"from": y, "research": ..., "knowledge_share": ...}]} and an
-        explicit {"focus": name-or-blend} which wins. With phases, the phase
-        active at `year` (default: the first) is classified.
+        explicit {"focus_id": name-or-blend} which wins.
         """
+        if year is None:
+            raise TypeError("classify() needs the game year being judged")
+        year = float(year)
         if strategy.get("focus_id"):
             return self._norm(strategy["focus_id"])
-        w = self.window(0.0 if year is None else float(year))
+        w = self.window(year)
         if strategy.get("phases"):
             phases = sorted(strategy["phases"], key=lambda p: float(p.get("from", 0)))
-            y = phases[0].get("from", 0) if year is None else year
-            ph = [p for p in phases if float(p.get("from", 0)) <= float(y) + EPS][-1]
+            ph = ([p for p in phases if float(p.get("from", 0)) <= year + EPS] or phases[:1])[-1]
             strategy = {**strategy, **ph, "phases": []}
         rules = w.data.get("classification", {})
         single = float(rules.get("single_line_min_share", 0.40))
@@ -453,7 +536,15 @@ class FocusBench:
             e, wn = _validate_window(self, w)
             errors += [f"{w.name}: {x}" for x in e]
             warnings += [f"{w.name}: {x}" for x in wn]
-        # boundary continuity between consecutive windows
+        # allowed_lead.milestone_early_fraction and shock_hazard_mult, read the same way in every window
+        for i, w in enumerate(self.windows):
+            e = _validate_lead_and_hazards(self, w, self.windows[i + 1:])
+            errors += [f"{w.name}: {x}" for x in e]
+        # boundary continuity between consecutive windows, for focuses defined on
+        # both sides, and for the base bands. A focus the later window introduces
+        # is neutral AT the join year (judged by the earlier window, see
+        # FocusBench._check_known) and takes the later file's era-weighted start
+        # values just after it: a deliberate one-point step, not checked here.
         for a, b in zip(self.windows, self.windows[1:]):
             y = a.end
             if abs(b.start - y) > EPS:
@@ -462,11 +553,20 @@ class FocusBench:
             for f in a.focuses:
                 if f not in b.focuses:
                     warnings.append(f"focus '{f}' is in {a.name} but not {b.name}")
+            shared = sorted(set(a.base.get("metrics", {})) & set(b.base.get("metrics", {})))
+            for f in b.focuses:
+                if f not in a.focuses:
                     continue
-                for m in a.base.get("metrics", {}):
+                for m in shared:
                     pa, pb = a.positions(f, m, y), b.positions(f, m, y)
                     if max(abs(x - z) for x, z in zip(pa, pb)) > 0.05:
                         warnings.append(f"{f}/{m} jumps at the window boundary {y:g}: {a.name} {pa} vs {b.name} {pb}")
+            for m in shared:
+                ba, bb = a.base_band(m, y), b.base_band(m, y)
+                for k in ("min", "low", "typical", "high", "max"):
+                    if k in ba and k in bb and abs(ba[k] - bb[k]) > 1e-6 * max(1.0, abs(ba[k])):
+                        errors.append(f"base {m}.{k} is discontinuous at the join {y:g}: {a.base_path.name} {ba[k]} "
+                                      f"vs {b.base_path.name} {bb[k]}")
         return errors, warnings
 
 
@@ -482,10 +582,10 @@ def _validate_window(fs: FocusBench, w: Window) -> tuple[list[str], list[str]]:
     if set(d.get("metric_keys", metrics)) != set(metrics):
         errors.append("metric_keys differ from the base file's metric keys")
     # real names must stay out of the JSON
-    blob = json.dumps(d, ensure_ascii=False).lower()
-    for nm in REAL_NAMES:
-        if re.search(r"" + re.escape(nm) + (r"" if nm in FULL_WORD else ""), blob):
-            errors.append(f"real historical name {nm.strip()!r} appears in the JSON (keep real names to the markdown notes)")
+    for label, tree in ((w.name, d), (w.base_path.name if w.base_path else "base", w.base)):
+        for path, nm, text in _real_name_hits(tree):
+            snippet = text if len(text) <= 90 else text[:87] + "..."
+            errors.append(f"real historical name {nm!r} in {label} {path} (keep real names to the markdown notes): {snippet!r}")
     years = w.years()
     check_years = sorted(set(years) | {float(y) for m in w.base["metrics"].values() for y in m.get("years", {})})
     directional = [m for m in metrics if w.better(m) in ("higher", "lower")]
@@ -567,6 +667,174 @@ def _validate_window(fs: FocusBench, w: Window) -> tuple[list[str], list[str]]:
     return errors, warnings
 
 
+def _hazard_keys(w: Window, later: list[Window]) -> set[str]:
+    """Shock hazard keys of a window's base file (the 0-600 base has none; it uses the next file's)."""
+    for win in [w] + list(later):
+        hz = (win.base.get("shock_widening") or {}).get("hazard_per_game_century")
+        if hz:
+            return set(hz)
+    return set()
+
+
+def _validate_lead_and_hazards(fs: FocusBench, w: Window, later: list[Window]) -> list[str]:
+    """allowed_lead.milestone_early_fraction and shock_hazard_mult have the shape the helper reads."""
+    errors = []
+    base_me = w.base.get("allowed_deviation", {}).get("milestone_early_fraction")
+    if not isinstance(base_me, (int, float)) or not 0 < float(base_me) < 1:
+        errors.append(f"base allowed_deviation.milestone_early_fraction {base_me!r} must be a number in (0, 1)")
+    hz_keys = _hazard_keys(w, later)
+    for f, spec in w.focuses.items():
+        me = spec.get("allowed_lead", {}).get("milestone_early_fraction")
+        if not isinstance(me, dict) or not {"focus_lines", "other_lines"} <= set(me):
+            errors.append(f"focus '{f}': allowed_lead.milestone_early_fraction must be "
+                          f"{{focus_lines, other_lines, floor}} (absolute fractions), got {me!r}")
+        else:
+            fl, ol = me["focus_lines"], me["other_lines"]
+            if not all(isinstance(x, (int, float)) and 0 <= float(x) < 1 for x in (fl, ol)):
+                errors.append(f"focus '{f}': milestone_early_fraction values {fl!r}/{ol!r} must be numbers in [0, 1)")
+            elif float(fl) < float(ol) - EPS:
+                errors.append(f"focus '{f}': milestone_early_fraction focus_lines {fl} < other_lines {ol}")
+        if spec.get("kind") != "balanced" and not fs.focus_lines(f, w.end):
+            errors.append(f"focus '{f}': no research lines (line / strategy.lines) for milestone_early_fraction")
+        shm = spec.get("shock_hazard_mult", {})
+        if not isinstance(shm, dict):
+            errors.append(f"focus '{f}': shock_hazard_mult must be an object, got {shm!r}")
+            continue
+        for k, v in shm.items():
+            if not isinstance(v, (int, float)) or float(v) <= 0:
+                errors.append(f"focus '{f}': shock_hazard_mult[{k!r}] = {v!r} must be a positive number")
+            if hz_keys and k not in hz_keys:
+                errors.append(f"focus '{f}': shock_hazard_mult key {k!r} is not a base hazard key {sorted(hz_keys)}")
+    return errors
+
+
+def selftest(fs: FocusBench) -> list[str]:
+    """Sample every focus x metric x century (plus each join year and just past it)
+    through band/judge/check_run/shock_hazard_mult/milestone_early_fraction/classify
+    and check there are no exceptions, the bands are ordered and the joins are continuous."""
+    fails: list[str] = []
+
+    def guard(label, fn, *a):
+        try:
+            return fn(*a)
+        except Exception as ex:  # noqa: BLE001 - the point is to catch anything
+            fails.append(f"{label}: {type(ex).__name__}: {ex}")
+            return None
+
+    # real-name matcher
+    for text, want in (("late Bronze Age", "bronze age"), ("the Indus valley", "indus"), ("a pyramid tomb", "pyramid"),
+                       ("Mari tablets", "mari")):
+        if want not in [nm for _, nm, _ in _real_name_hits(text)]:
+            fails.append(f"real-name check misses {want!r} in {text!r}")
+    for text in ("industry", "industrial output", "an age pyramid", "population pyramid", "maritime trade", "romance",
+                 "summer", "concrete", "fantasia"):
+        hits = _real_name_hits(text)
+        if hits:
+            fails.append(f"real-name check wrongly flags {text!r}: {[nm for _, nm, _ in hits]}")
+
+    if not fs.windows:
+        return fails + ["no windows loaded"]
+    first, last = fs.windows[0].start, fs.windows[-1].end
+    joins = [w.end for w in fs.windows[:-1]]
+    centuries = [float(y) for y in range(int(first), int(last) + 1, 100)]
+    metrics = sorted({m for w in fs.windows for m in w.base.get("metrics", {})})
+    all_lines = sorted({l for w in fs.windows for f in w.focuses for l in fs.focus_lines(f, w.end)})
+    introduced: dict[str, float] = {}
+    for w in fs.windows:
+        for f in w.focuses:
+            introduced.setdefault(f, w.start)
+    # a focus unknown to a window still raises away from a join
+    late = [(f, y0) for f, y0 in introduced.items() if y0 - 50 > first]
+    if late:
+        f, y0 = late[0]
+        try:
+            fs.band(f, metrics[0], y0 - 50)
+            fails.append(f"band({f}) at {y0 - 50:g}, before its window, did not raise")
+        except KeyError:
+            pass
+    for f, y0 in introduced.items():
+        years = sorted({y for y in centuries if y >= y0} | {y0} | {j + 1e-3 for j in joins if j >= y0})
+        for y in years:
+            w = fs.window(y)
+            row = {}
+            for m in metrics:
+                label = f"band({f}, {m}, {y:g})"
+                nf = len(fails)
+                b = guard(label, fs.band, f, m, y)
+                if b is None:
+                    if len(fails) == nf and m in w.base.get("metrics", {}):
+                        fails.append(f"{label} is None although {w.name} has the metric")
+                    continue
+                vals = [b[k] for k in ("min", "low", "typical", "high", "max")]
+                if not all(isinstance(v, (int, float)) and math.isfinite(v) for v in vals):
+                    fails.append(f"{label} not finite: {vals}")
+                    continue
+                seq = [b["min"], b["high"], b["typical"], b["low"], b["max"]] if b["better"] == "lower" else vals
+                if any(x > z + 1e-6 * max(1.0, abs(z)) for x, z in zip(seq, seq[1:])):
+                    fails.append(f"{label} out of order: {seq}")
+                j = guard(f"judge({f}, {m}, {y:g})", fs.judge, f, m, y, b["typical"])
+                if j is not None and j != "within":
+                    fails.append(f"judge({f}, {m}, {y:g}, typical) = {j!r}, expected 'within'")
+                row[m] = b["typical"]
+            sh = guard(f"shock_hazard_mult({f}, {y:g})", fs.shock_hazard_mult, f, y)
+            if sh is not None and not all(math.isfinite(v) and v > 0 for v in sh.values()):
+                fails.append(f"shock_hazard_mult({f}, {y:g}) = {sh}")
+            for line in all_lines:
+                fr = guard(f"milestone_early_fraction({f}, {line}, {y:g})", fs.milestone_early_fraction, f, line, y)
+                if fr is not None and not 0 <= fr < 1:
+                    fails.append(f"milestone_early_fraction({f}, {line}, {y:g}) = {fr}")
+            res = guard(f"check_run({f}, {y:g})", fs.check_run, f, {y: row}, {y: row})
+            if res is not None and not res["ok"]:
+                fails.append(f"check_run({f}, {y:g}) on its own typical values is not ok: "
+                             f"{[x for x in res['flags']][:3]} {res['costs']}")
+        guard(f"band({{{f}: .5, balanced: .5}}, {y0:g})", fs.band, {f: 0.5, "balanced": 0.5}, metrics[0], y0)
+    # join continuity: the join year (earlier window) vs just after it (later window),
+    # for every focus defined on both sides (introduced focuses step once, by design)
+    for a, b_ in zip(fs.windows, fs.windows[1:]):
+        y = a.end
+        for f in b_.focuses:
+            if f not in a.focuses:
+                continue
+            for m in sorted(set(a.base.get("metrics", {})) & set(b_.base.get("metrics", {}))):
+                p = guard(f"band({f}, {m}, {y:g})", fs.band, f, m, y)
+                q = guard(f"band({f}, {m}, {y + 1e-4:g})", fs.band, f, m, y + 1e-4)
+                if not p or not q:
+                    continue
+                span = max(abs(p["max"] - p["min"]), 1e-9)
+                for k in ("min", "low", "typical", "high", "max"):
+                    if abs(p[k] - q[k]) > 0.02 * span:
+                        fails.append(f"join {y:g} {f}/{m}.{k}: {p[k]:.6g} ({p['window']}) vs {q[k]:.6g} ({q['window']})")
+    # classify: year required; each window classifies with its own catalogue
+    try:
+        fs.classify({"research": {"security": 1}})  # type: ignore[call-arg]
+        fails.append("classify() without a year did not raise")
+    except TypeError:
+        pass
+    lines12 = ["knowledge", "institutions", "culture", "labor", "production", "infrastructure",
+               "nutrition", "health", "demography", "logistics", "ecology", "security"]
+    for y in centuries:
+        w = fs.window(y)
+        got = guard(f"classify(even, {y:g})", fs.classify, {"research": {l: 1 for l in lines12}}, y)
+        if got is not None and got != {"balanced": 1.0}:
+            fails.append(f"classify(even, {y:g}) = {got}")
+        for f, spec in w.focuses.items():
+            ls = spec.get("strategy", {}).get("lines") or []
+            if not ls:
+                continue
+            res = {l: 1 for l in lines12}
+            if spec.get("kind") == "archetype":
+                for l in ls:
+                    res[l] = 30 // len(ls) + 1
+            else:
+                res[ls[0]] = 40
+            got = guard(f"classify({f}, {y:g})", fs.classify, {"research": res}, y)
+            if got is not None and any(k not in w.focuses for k in got):
+                fails.append(f"classify({f}, {y:g}) returned a focus unknown to {w.name}: {got}")
+            if got is not None and spec.get("kind") == "line" and got != {f: 1.0}:
+                fails.append(f"classify(heavy {f}, {y:g}) = {got}")
+    return fails
+
+
 def _band_in(fs: FocusBench, w: Window, focus: str, metric: str, year: float) -> dict | None:
     """band() forced to a given window (for validating a window's own boundary years)."""
     saved = fs.windows
@@ -634,6 +902,7 @@ def main(argv: list[str] | None = None) -> int:
     sub = ap.add_subparsers(dest="cmd")
     sub.add_parser("validate")
     sub.add_parser("list")
+    sub.add_parser("selftest")
     p = sub.add_parser("band")
     p.add_argument("focus")
     p.add_argument("metric")
@@ -647,6 +916,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("year", type=float)
     p.add_argument("value", type=float)
     p = sub.add_parser("classify")
+    p.add_argument("--year", type=float, required=True, help="game year being judged (selects the window)")
     p.add_argument("--research", default="{}")
     p.add_argument("--knowledge-share", type=float, default=-1)
     p.add_argument("--labor", default="{}")
@@ -667,6 +937,12 @@ def main(argv: list[str] | None = None) -> int:
         for x in errors:
             print("ERROR", x)
         print(f"{len(errors)} error(s), {len(warnings)} warning(s)")
+        return 1 if errors else 0
+    if cmd == "selftest":
+        errors = selftest(fs)
+        for x in errors:
+            print("FAIL ", x)
+        print(f"selftest: {len(errors)} failure(s)")
         return 1 if errors else 0
     if cmd == "list":
         for w in fs.windows:
@@ -700,7 +976,7 @@ def main(argv: list[str] | None = None) -> int:
             lines = ["knowledge", "institutions", "culture", "labor", "production", "infrastructure",
                      "nutrition", "health", "demography", "logistics", "ecology", "security"]
             strat["research"] = {l: strat["research"].get(l, 0) for l in lines}
-        print(json.dumps(fs.classify(strat)))
+        print(json.dumps(fs.classify(strat, args.year)))
         return 0
     return 0
 
