@@ -189,7 +189,7 @@
     "adoption_rate": 0.0001,
     "cohesion": 0.0001,
     "knowledge_preservation": 0.0001,
-    "literacy": 0.0025
+    "literacy": 0.0059
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Grave stones name the dead in letters: who they were, and who set up the stone."
@@ -221,7 +221,7 @@
     "cohesion": 0.0001,
     "knowledge_preservation": 0.0014,
     "legitimacy": 0.0001,
-    "literacy": 0.0025
+    "literacy": 0.0059
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "observation": "The great epic is written down in letters, one fixed text for every teacher and reciter.",
@@ -373,7 +373,7 @@
     "cohesion": -0.0001,
     "knowledge_rate": 0.0001,
     "legitimacy": -0.0004,
-    "literacy": 0.0013
+    "literacy": 0.0023
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "observation": "Travelling teachers charge fees to teach young men to argue either side of a case.",
@@ -416,7 +416,7 @@
     "knowledge_rate": 0.0008,
     "labor_demand": 0.0001,
     "legitimacy": -0.0013,
-    "literacy": 0.0015
+    "literacy": 0.0026
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "Schools of philosophy hold their own grounds and heads, and teaching passes from each head to the next.",
@@ -438,7 +438,7 @@
     "adoption_rate": 0.0001,
     "cohesion": 0.0001,
     "knowledge_preservation": 0.0001,
-    "literacy": 0.0015
+    "literacy": 0.0026
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Writers sketch human types, the flatterer, the miser, the boor, in short, sharp portraits."
@@ -458,7 +458,7 @@
     "knowledge_preservation": 0.0005,
     "knowledge_rate": 0.0009,
     "labor_demand": 0.0001,
-    "literacy": 0.0015
+    "literacy": 0.0026
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "Great collections of books are opened to readers from beyond the court, who copy and argue over them.",
@@ -760,7 +760,7 @@
     "fatigue": -0.0001,
     "knowledge_rate": -0.0008,
     "legitimacy": 0.0001,
-    "literacy": 0.0013
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Schools teach that the soul rises by contemplation toward union with the god.",
@@ -779,7 +779,7 @@
     "cohesion": 0.0001,
     "knowledge_preservation": 0.0001,
     "legitimacy": 0.0001,
-    "literacy": 0.0013
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
    "observation": "Lives of the god's devoted servants are written as models and read aloud on their feast days."
@@ -820,7 +820,7 @@
     "institutional_rigidity": 0.0003,
     "knowledge_preservation": 0.0006,
     "legitimacy": 0.0002,
-    "literacy": 0.0013
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "The god's sayings are gathered and fixed in one book, and every other version is set aside.",

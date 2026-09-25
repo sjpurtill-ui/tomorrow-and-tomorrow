@@ -422,7 +422,7 @@
   "privy_council_minutes": {
    "effects": {
     "knowledge_preservation": 0.0004,
-    "literacy": 0.0031,
+    "literacy": 0.0021,
     "state_capacity": 0.0002,
     "task_coordination": 0.0004
    },
@@ -640,7 +640,7 @@
     "cohesion": 0.0001,
     "institutional_rigidity": -0.0003,
     "legitimacy": 0.0002,
-    "literacy": 0.0082,
+    "literacy": 0.0075,
     "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
@@ -718,7 +718,7 @@
     "cohesion": 0.0001,
     "institutional_rigidity": -0.0001,
     "legitimacy": 0.0001,
-    "literacy": 0.02
+    "literacy": 0.0188
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Writ Against Imprisonment",
@@ -964,7 +964,7 @@
     "institutional_rigidity": -0.0001,
     "knowledge_rate": 0.0007,
     "labor_demand": 0.0001,
-    "literacy": 0.0117,
+    "literacy": 0.0107,
     "state_capacity": 0.0009,
     "task_coordination": 0.0008
    },
@@ -1077,7 +1077,7 @@
     "cohesion": 0.0001,
     "institutional_rigidity": -0.0001,
     "legitimacy": 0.0001,
-    "literacy": 0.0139,
+    "literacy": 0.0125,
     "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/problem_council_sessions.png",

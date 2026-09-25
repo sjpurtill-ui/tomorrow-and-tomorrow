@@ -77,7 +77,7 @@
     "knowledge_preservation": 0.0051,
     "knowledge_rate": 0.0082,
     "labor_demand": 0.0003,
-    "literacy": 0.0091
+    "literacy": 0.0126
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Research University",
@@ -91,7 +91,7 @@
     "fuel_demand": 0.0002,
     "knowledge_preservation": 0.0051,
     "labor_demand": 0.0002,
-    "literacy": 0.0227,
+    "literacy": 0.0315,
     "trade_capacity": 0.0028
    },
    "art": "res://assets/ui/research/paper/rolling_intaglio_printing.png",

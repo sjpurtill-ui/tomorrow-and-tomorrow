@@ -846,7 +846,7 @@
    "effects": {
     "adoption_rate": 0.0021,
     "knowledge_preservation": 0.0016,
-    "literacy": 0.0077,
+    "literacy": 0.005,
     "state_capacity": 0.001,
     "trade_capacity": 0.0003
    },

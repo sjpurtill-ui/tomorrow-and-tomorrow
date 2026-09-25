@@ -407,7 +407,7 @@
     "institutional_rigidity": 0.0014,
     "knowledge_preservation": 0.0001,
     "legitimacy": 0.0001,
-    "literacy": 0.0015,
+    "literacy": 0.0026,
     "security_efficiency": 0.0002
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
@@ -487,7 +487,7 @@
     "cohesion": -0.0006,
     "haul_capacity": 0.001,
     "institutional_rigidity": 0.0006,
-    "literacy": 0.0023,
+    "literacy": 0.0029,
     "standardization": 0.0015,
     "state_capacity": 0.0007,
     "trade_capacity": 0.0009
@@ -556,7 +556,7 @@
     "institutional_rigidity": 0.0008,
     "knowledge_preservation": 0.0005,
     "labor_demand": 0.0002,
-    "literacy": 0.0018,
+    "literacy": 0.0022,
     "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
@@ -568,7 +568,7 @@
     "knowledge_preservation": 0.0009,
     "labor_demand": 0.0002,
     "legitimacy": 0.0001,
-    "literacy": 0.0018,
+    "literacy": 0.0022,
     "state_capacity": 0.0013,
     "task_coordination": 0.0013
    },
@@ -734,7 +734,7 @@
     "cohesion": 0.0001,
     "labor_demand": 0.0001,
     "legitimacy": 0.0001,
-    "literacy": 0.0075,
+    "literacy": 0.001,
     "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
@@ -819,7 +819,7 @@
     "institutional_rigidity": 0.0005,
     "knowledge_preservation": 0.0006,
     "legitimacy": 0.0003,
-    "literacy": 0.0013,
+    "literacy": 0.001,
     "security_efficiency": 0.0008,
     "state_capacity": 0.0003
    },

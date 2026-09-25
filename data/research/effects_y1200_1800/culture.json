@@ -745,7 +745,7 @@
    "effects": {
     "cohesion": 0.0001,
     "knowledge_preservation": 0.0001,
-    "literacy": 0.0027,
+    "literacy": 0.001,
     "standardization": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
@@ -768,7 +768,7 @@
     "cohesion": 0.0001,
     "knowledge_preservation": 0.0001,
     "legitimacy": 0.0001,
-    "literacy": 0.0027
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
    "name": "Books of Hours",
@@ -868,7 +868,7 @@
     "adoption_rate": 0.0002,
     "knowledge_preservation": 0.0002,
     "knowledge_rate": 0.0005,
-    "literacy": 0.0083
+    "literacy": 0.0036
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Recovery of Old Texts",

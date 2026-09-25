@@ -17,7 +17,7 @@
     "adoption_rate": 0.0005,
     "cohesion": 0.0001,
     "knowledge_preservation": 0.0015,
-    "literacy": 0.0227
+    "literacy": 0.0315
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Reading Circles",
@@ -101,7 +101,7 @@
     "institutional_rigidity": 0.0002,
     "knowledge_preservation": 0.002,
     "legitimacy": 0.0005,
-    "literacy": 0.0059
+    "literacy": 0.0082
    },
    "art": "res://assets/ui/research/discovery-600/consonantal_alphabet.png",
    "name": "National Tongue Revival",
@@ -125,7 +125,7 @@
     "institutional_rigidity": -0.0006,
     "knowledge_preservation": 0.0026,
     "legitimacy": -0.0008,
-    "literacy": 0.0222
+    "literacy": 0.0308
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
    "name": "Cheap Daily Press",
@@ -138,7 +138,7 @@
     "adoption_rate": 0.0007,
     "cohesion": 0.0002,
     "knowledge_preservation": 0.0007,
-    "literacy": 0.0059
+    "literacy": 0.0082
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
    "name": "Serialized Novels",

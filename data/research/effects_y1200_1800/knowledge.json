@@ -840,7 +840,7 @@
     "construction_rate": 0.0013,
     "craft_output": 0.0002,
     "knowledge_rate": 0.0004,
-    "literacy": 0.0027,
+    "literacy": 0.001,
     "observation_rate": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
@@ -861,7 +861,7 @@
    "effects": {
     "adoption_rate": 0.0007,
     "labor_demand": 0.0001,
-    "literacy": 0.0027,
+    "literacy": 0.001,
     "standardization": 0.0002,
     "trade_capacity": 0.0006
    },
@@ -891,7 +891,7 @@
    "effects": {
     "adoption_rate": 0.0003,
     "knowledge_preservation": 0.0004,
-    "literacy": 0.0027
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
    "name": "Numbered Leaves",
@@ -942,7 +942,7 @@
     "institutional_rigidity": -0.0002,
     "knowledge_rate": 0.0005,
     "legitimacy": -0.001,
-    "literacy": 0.0083
+    "literacy": 0.0036
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Learning in the Common Tongue",
@@ -977,7 +977,7 @@
     "adoption_rate": 0.0005,
     "knowledge_preservation": 0.0005,
     "knowledge_rate": 0.0003,
-    "literacy": 0.0083
+    "literacy": 0.0036
    },
    "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
    "name": "Commonplace Books",

@@ -42,7 +42,7 @@
     "cohesion": 0.0001,
     "disease_exposure": -0.0001,
     "legitimacy": 0.0001,
-    "literacy": 0.0058
+    "literacy": 0.0052
    },
    "art": "res://assets/ui/research/discovery-600/rank_dress_styles.png",
    "name": "Courtesy Books",
@@ -53,7 +53,7 @@
     "cohesion": 0.0001,
     "knowledge_rate": 0.0005,
     "legitimacy": -0.0005,
-    "literacy": 0.0058
+    "literacy": 0.0052
    },
    "art": "res://assets/ui/research/paper/household_councils.png",
    "name": "Defence of Women",
@@ -345,7 +345,7 @@
    "effects": {
     "cohesion": 0.0001,
     "knowledge_preservation": 0.0001,
-    "literacy": 0.0031
+    "literacy": 0.0021
    },
    "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
    "name": "Lives of the Artists",
@@ -368,7 +368,7 @@
     "cohesion": 0.0001,
     "craft_output": 0.0005,
     "institutional_rigidity": -0.0001,
-    "literacy": 0.0031
+    "literacy": 0.0021
    },
    "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
    "name": "Academy of Drawing",
@@ -514,7 +514,7 @@
    "effects": {
     "institutional_rigidity": 0.0002,
     "knowledge_preservation": 0.0006,
-    "literacy": 0.0058,
+    "literacy": 0.0052,
     "standardization": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/standard_sign_lists.png",
@@ -558,7 +558,7 @@
     "craft_output": 0.0009,
     "institutional_rigidity": 0.0002,
     "legitimacy": 0.0001,
-    "literacy": 0.0058,
+    "literacy": 0.0052,
     "standardization": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
@@ -594,7 +594,7 @@
    "effects": {
     "cohesion": 0.0001,
     "legitimacy": 0.0001,
-    "literacy": 0.0082,
+    "literacy": 0.0075,
     "standardization": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/circle_dances.png",
@@ -658,7 +658,7 @@
     "adoption_rate": 0.0003,
     "cohesion": 0.0001,
     "disease_exposure": 0.0005,
-    "literacy": 0.02
+    "literacy": 0.0188
    },
    "art": "res://assets/ui/research/paper/textile_printing.png",
    "name": "Prints of the Floating World",
@@ -938,7 +938,7 @@
     "adoption_rate": 0.0001,
     "cohesion": 0.0001,
     "legitimacy": 0.0001,
-    "literacy": 0.02
+    "literacy": 0.0188
    },
    "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
    "name": "Annual Exhibition",
