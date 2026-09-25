@@ -70,7 +70,7 @@
 
 | Year (band) | Discovery | Research | Real time | Id | Today |
 |---|---|---|---|---|---|
-| 2120 (2100–2140) | Japanning: tin and iron ware coated in hard stoved varnish (continues: multi_coat_lacquer) | 6 y | 37 min | NEW · japanned_ware | — |
+| 2120 (2100–2140) | Tin and iron ware coated in hard black varnish stoved in an oven (continues: multi_coat_lacquer) | 6 y | 37 min | NEW · japanned_ware | — |
 | 2138 (2118–2158) | Wheel-cutting engine divides clock-gear teeth (continues: mainspring_fusee_clocks) (shared: knowledge) | 8 y | 49 min | NEW · gear_cutting_engine | — |
 | 2144 (2124–2164) | Cotton painted and printed with mordants in fast colours (continues: textile_printing) | 8 y | 49 min | NEW · mordant_printed_calico | — |
 | **2148 (2118–2178)** | **Lead crystal: heavy, brilliant glass fluxed with lead (continues: clear_crystal_glass)** | 10 y | 61 min | NEW · lead_crystal_glass | — |
@@ -124,7 +124,7 @@
 | 2381 (2361–2401) | Gunlocks filed to hardened jigs so parts interchange (shared: security) | 8 y | 49 min | NEW · jig_filed_gunlocks | — |
 | 2383 (2363–2403) | Braided cords laid by bobbins circling a mandrel (continues: yarn_tension_control) | 5 y | 30 min | textile_braiding | n/r |
 | **2385 (2355–2415)** | **Soda made from salt, oil of vitriol, chalk and coal (continues: kelp_alkali)** | 10 y | 61 min | NEW · salt_cake_soda | — |
-| 2388 (2368–2408) | Bone ash added to porcelain for a white, strong china (continues: soft_paste_porcelain) | 6 y | 37 min | NEW · bone_ash_china | — |
+| 2388 (2368–2408) | Bone ash added to porcelain for a white, strong ware (continues: soft_paste_porcelain) | 6 y | 37 min | NEW · bone_ash_china | — |
 | 2391 (2371–2411) | Yarn sorted by a standard count of hanks per pound | 5 y | 30 min | yarn_count_standards | n/r |
 | 2394 (2374–2414) | Metal softened and hardened by timed, watched annealing | 6 y | 37 min | metal_annealing_control | n/r |
 | 2396 (2376–2416) | Clutches engage and release machines from a running shaft (continues: belt_power_transmission) | 6 y | 37 min | mechanical_clutches | n/r |

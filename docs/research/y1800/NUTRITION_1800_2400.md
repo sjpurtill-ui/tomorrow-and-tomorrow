@@ -97,7 +97,7 @@
 | 2348 (2308–2388) | Free internal grain trade declared (continues: free_grain_trade_doctrine) [gov: law] (shared: institutions) | 8 y | 49 min | NEW · free_grain_trade_edict | — |
 | 2352 (2312–2392) | Chaff cutters and root slicers prepare winter fodder (shared: production) | 6 y | 37 min | NEW · fodder_cutting_machines | — |
 | 2358 (2318–2398) | Brewing ruled by the thermometer (continues: porter_vat_brewing) | 6 y | 37 min | NEW · brewing_thermometer | — |
-| 2362 (2322–2402) | Swedes and mangolds grown as hardier winter roots (continues: field_turnips) | 6 y | 37 min | NEW · swede_mangold_roots | — |
+| 2362 (2322–2402) | Yellow winter turnips and mangolds grown as hardier roots (continues: field_turnips) | 6 y | 37 min | NEW · swede_mangold_roots | — |
 | 2364 (2324–2404) | Crushed bones spread as manure (shared: production) | 6 y | 37 min | NEW · crushed_bone_manure | — |
 | 2368 (2328–2408) | Saccharometer measures the strength of the wort (continues: brewing_thermometer) | 5 y | 30 min | NEW · brewers_saccharometer | — |
 | **2372 (2327–2417)** | **Threshing machine driven by horse or water (shared: production, labor)** | 12 y | 73 min | NEW · threshing_machine | — |
