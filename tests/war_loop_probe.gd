@@ -43,6 +43,7 @@ func _ready()->void:
 		_war_to_truce(civ_id)
 	_bluff_collapses()
 	_dragged_in()
+	_rival_war_rate()
 	_saves()
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://reports/war/"))
 	var file:=FileAccess.open(OUT_PATH,FileAccess.WRITE)
@@ -267,6 +268,27 @@ func _dragged_in()->void:
 	check(bool(WAR._relation(enemy).get("at_war",false)),"The enemy's relation is not at war")
 	var entry:Dictionary=(WAR.state().log as Array)[0]
 	out.append("  %s" % String(entry.get("text","")))
+
+# ------------------------------------------------------------------ 8
+
+func _rival_war_rate()->void:
+	out.append("
+8. RIVAL WARS: BENCHMARK HAZARD")
+	var civs:=CivilizationSystem.civilizations
+	var counts:=WAR.neighbour_counts()
+	var expected:=0.0
+	var pairs:=0
+	for i in civs.size():
+		for j in range(i+1,civs.size()):
+			var a:Vector2=civs[i].get("position",Vector2.ZERO); var b:Vector2=civs[j].get("position",Vector2.ZERO)
+			if a.distance_to(b)>WAR.NEIGHBOUR_RANGE: continue
+			var relation:Dictionary=(civs[i].relations as Dictionary).get(String(civs[j].id),{})
+			if relation.is_empty(): continue
+			pairs+=1
+			expected+=WAR.rival_war_hazard(civs[i],civs[j],{"opinion":relation.get("opinion",0.0),"border_tension":relation.get("border_tension",0.2)},(float(counts.get(String(civs[i].id),1))+float(counts.get(String(civs[j].id),1)))*0.5)
+	var per_civ_century:=expected*2.0/maxf(1.0,civs.size())*100.0
+	out.append("  %d neighbouring pairs; expected war participation %.2f per people per century (benchmark 0.15-0.6 ancient, up to 1.0 medieval)" % [pairs,per_civ_century])
+	check(per_civ_century>=0.1 and per_civ_century<=1.0,"Rival war hazard %.2f per people-century is outside the benchmark" % per_civ_century)
 
 # ------------------------------------------------------------------ 7
 

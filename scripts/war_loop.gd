@@ -396,8 +396,10 @@ static func _execute(civ_id:String,day:int)->void:
 	var rng:=_rng("rung:%s:%d" % [civ_id,day])
 	var level:=int(f.level)
 	var cause:=String(pending.get("cause","refusal"))
-	if level>=2 and day-int(f.last_war_end)>=WAR_COOLDOWN:
-		var p_war:=clampf(0.2+ratio(civ_id)*0.15+float(rival.get("grudge_weight",0.0))*0.12+(0.12 if String(rival.get("trait","")) in ["grudge","hunter"] else 0.0),0.1,0.65)
+	# The ladder is strict: war comes only after they have already fought us
+	# at the border (a skirmish of theirs within three years).
+	if level>=2 and day-int(f.get("last_skirmish",-99999))<=3*365 and day-int(f.last_war_end)>=WAR_COOLDOWN:
+		var p_war:=clampf(0.12+ratio(civ_id)*0.12+float(rival.get("grudge_weight",0.0))*0.1+(0.1 if String(rival.get("trait","")) in ["grudge","hunter"] else 0.0),0.1,0.5)
 		if rng.randf()<p_war:
 			declare(civ_id,day,_cause_words(civ_id,cause))
 			return
@@ -459,6 +461,7 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool)->Dictionary:
 	if their_dead>0: rivals.call("grudge",civ_id,"the %s we lost at your %s" % ["hunters" if their_dead>1 else "hunter",String(t.words).trim_prefix("the ").trim_prefix("a ").trim_prefix("our ")],0.25,"raid_dead:"+key)
 	f["level"]=maxi(int(f.level),2 if skirmish else 1)
 	f["last_harm"]=day
+	if skirmish: f["last_skirmish"]=day
 	f["taken"]=taken
 	f["last_raid"]={"day":day,"target":target,"their_n":their_n,"our_dead":our_dead,"their_dead":their_dead,"taken":roundi(taken),"captives":captives,"skirmish":skirmish,"cause":cause,"names":names}
 	_mark_harm(civ_id,day)
@@ -570,7 +573,8 @@ static func _objective_for_general(civ_id:String,general:Dictionary,at_war:bool)
 		if r<0.85 and courage>0.55: return "war_burn"
 		if r<0.7 and courage>0.75: return "war_chief"
 		return "war_guard"
-	if r<0.9 and courage>0.6: return "war_pursue"
+	if r<1.1 and courage>0.55: return "war_pursue"
+	if care>0.65: return "war_parley"
 	return "war_guard"
 
 static func _march_days(civ_id:String,rng:RandomNumberGenerator)->int:
@@ -688,7 +692,7 @@ static func _resolve_op(civ_id:String,op:Dictionary,day:int)->void:
 			if won:
 				loot=EXCHANGE.take(civ_id,"Food",minf(maxf(float(f.get("taken",0.0)),8.0),float(op.get("band",4))*CARRY))
 				captives=_their_captives(civ_id,1 if rng.randf()<0.4 else 0)
-				text="%s caught the %s raiders two days out. %d of theirs fell. We brought back %d Food%s." % [gname,name,their_dead,roundi(loot)," and one captive" if captives>0 else ""]
+				text="%s caught the %s raiders two days out.%s We brought back %d Food%s." % [gname,name," %d of theirs fell." % their_dead if their_dead>0 else "",roundi(loot)," and one captive" if captives>0 else ""]
 			else:
 				text="%s followed the %s raiders to their own ground and turned back." % [gname,name]
 				if their_dead>0: text+=" %d of theirs fell in a fight at the edge of it." % their_dead
@@ -698,7 +702,8 @@ static func _resolve_op(civ_id:String,op:Dictionary,day:int)->void:
 				var stock:=Hall.foreign_stock(civ_id,"Food")
 				var burned:=EXCHANGE.take(civ_id,"Food",minf(stock*rng.randf_range(0.15,0.3),float(op.get("band",4))*rng.randf_range(30.0,50.0)))
 				loot=minf(burned*rng.randf_range(0.25,0.45),float(op.get("band",4))*CARRY)
-				text="%s's band reached %s's stores by night and burned them. They carried %d Food home and left %d burning. %d of theirs fell." % [gname,name,roundi(loot),roundi(burned-loot),their_dead]
+				text="%s's band reached %s's stores by night and burned them. They carried %d Food home and left %d burning." % [gname,name,roundi(loot),roundi(burned-loot)]
+				if their_dead>0: text+=" %d of theirs fell." % their_dead
 			else:
 				text="%s's band was seen before it reached %s's stores and had to fight its way out." % [gname,name]
 				if their_dead>0: text+=" %d of theirs fell." % their_dead
@@ -834,11 +839,13 @@ static func _close_war(civ_id:String,day:int,result:String,text:String)->void:
 
 static func daily(day:int)->void:
 	if WorldSimulation.actor_id!="player" or not GameState.settlement_site_committed or day%TICK!=0: return
+	# The authored General Campaign runs its own war; leave it alone.
+	if WorldSimulation.system("GeneralCampaign")!=null and bool(WorldSimulation.campaign.active): return
 	var s:=state()
 	# Wars opened by other means are taken up by the war leader.
 	for civ in WorldSimulation.world.civilizations:
 		var relation:Dictionary=civ.get("player_relation",{})
-		if bool(relation.get("at_war",false)) and bool(civ.get("alive",true)) and ((front(String(civ.id)).war as Dictionary).is_empty()): _adopt(String(civ.id),day)
+		if bool(relation.get("at_war",false)) and bool(civ.get("alive",true)) and not bool(civ.get("general_campaign_owned",false)) and int(relation.get("contact_level",0))>=1 and ((front(String(civ.id)).war as Dictionary).is_empty()): _adopt(String(civ.id),day)
 	for civ_id in (s.fronts as Dictionary).keys():
 		var id:=String(civ_id)
 		var f:=front(id)
@@ -875,7 +882,70 @@ static func daily(day:int)->void:
 			_enemy_op(id,day)
 			war["next_enemy"]=day+_rng("next:%s:%d" % [id,day]).randi_range(50,120)
 		if not (front(id).war as Dictionary).is_empty(): _check_end(id,day)
-	if day%30==0: _grudges(day)
+	if day%30==0:
+		_grudges(day)
+		_rival_wars(day)
+
+## Neighbouring peoples go to war with each other at about the benchmark rate
+## for general war (EPOCHAL_SHIFTS.md s5: 0.15-0.6 wars per people per game
+## century before the modern era), faster when they are hungry, hostile,
+## pressed at the border or ruled by a grudge-holder or a far hunter. The
+## declaration is carried and the war fought by CivilizationSystem.
+## Annual war onset per people (split across its neighbours), before the
+## multipliers of its condition.
+const RIVAL_WAR_BASE:=0.0018
+const RIVAL_WAR_CAP:=0.012
+const NEIGHBOUR_RANGE:=1.55
+
+static func rival_war_hazard(first:Dictionary,second:Dictionary,relation:Dictionary,neighbours:float=1.0)->float:
+	## Annual chance that these two neighbours go to war, from their condition.
+	## `neighbours` is the pair's mean count of neighbours: a people's hazard
+	## is shared across its borders, not multiplied by them.
+	var opinion:=float(relation.get("opinion",0.0))
+	var tension:=float(relation.get("border_tension",0.0))
+	var factor:=1.0+maxf(0.0,-opinion)*3.0+tension*2.0+(float(first.get("aggression",0.3))+float(second.get("aggression",0.3)))*0.8
+	for civ in [first,second]:
+		if Hall._hungry(civ): factor+=1.0
+		var known:Variant=ForeignDiplomacy.leaders.get(String(civ.id),{})
+		var c:Variant=(known as Dictionary).get("character") if known is Dictionary else null
+		if c is Dictionary and String((c as Dictionary).get("trait","")) in ["grudge","hunter"]: factor+=0.5
+	return clampf(RIVAL_WAR_BASE*factor,0.0,RIVAL_WAR_CAP)/maxf(1.0,neighbours)
+
+static func neighbour_counts()->Dictionary:
+	var counts:={}
+	var civs:=WorldSimulation.world.civilizations
+	for i in civs.size():
+		for j in range(i+1,civs.size()):
+			if not bool(civs[i].get("alive",true)) or not bool(civs[j].get("alive",true)): continue
+			var a:Vector2=civs[i].get("position",Vector2.ZERO); var b:Vector2=civs[j].get("position",Vector2.ZERO)
+			if a.distance_to(b)>NEIGHBOUR_RANGE: continue
+			counts[String(civs[i].id)]=int(counts.get(String(civs[i].id),0))+1
+			counts[String(civs[j].id)]=int(counts.get(String(civs[j].id),0))+1
+	return counts
+
+static func _rival_wars(day:int)->void:
+	var world:=WorldSimulation.world
+	var civs:=world.civilizations
+	var counts:=neighbour_counts()
+	for i in civs.size():
+		for j in range(i+1,civs.size()):
+			var first:Dictionary=civs[i]; var second:Dictionary=civs[j]
+			if not bool(first.get("alive",true)) or not bool(second.get("alive",true)): continue
+			if bool(first.get("general_campaign_owned",false)) or bool(second.get("general_campaign_owned",false)): continue
+			var a:Vector2=first.get("position",Vector2.ZERO); var b:Vector2=second.get("position",Vector2.ZERO)
+			if a.distance_to(b)>NEIGHBOUR_RANGE: continue
+			var relation:Dictionary=(first.get("relations",{}) as Dictionary).get(String(second.id),{})
+			if relation.is_empty() or bool(relation.get("at_war",false)) or String(relation.get("pending_message",""))!="" or String(relation.get("treaty","none")) in ["non_aggression","truce","trade"]: continue
+			var monthly:=rival_war_hazard(first,second,relation,(float(counts.get(String(first.id),1))+float(counts.get(String(second.id),1)))*0.5)/12.0
+			if _rng("rivalwar:%s:%s:%d" % [String(first.id),String(second.id),day]).randf()>=monthly: continue
+			var carried:=relation.duplicate(true)
+			carried["pending_message"]="war"
+			carried["pending_message_sent_day"]=day
+			carried["pending_message_due_day"]=day+(world._intercivilization_message_days(first,second,false) if world.has_method("_intercivilization_message_days") else 10)
+			carried["border_tension"]=maxf(0.55,float(carried.get("border_tension",0.0)))
+			carried["opinion"]=minf(-0.25,float(carried.get("opinion",0.0)))
+			world._set_pair_relation(i,j,carried)
+			_stat("rival_wars")
 
 static func _grudges(day:int)->void:
 	## A heavy old grudge sends raiders without a new demand.
