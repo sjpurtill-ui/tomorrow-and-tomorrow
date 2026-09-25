@@ -82,7 +82,7 @@ Why these values:
 |---|---|---|---|---|
 | Craft and tool proxies | ground stone and flint; coil pottery; flax plain weave; cold-worked native copper | smelted and cast copper (Varna, about 4500 BCE); kilns at about 900 °C; tournette | arsenical copper common; first tin bronze; wheel-thrown pottery; lost wax; cylinder seals | tin bronze standard; spoked chariot wheels; core-formed glass; iron still rare |
 | Major innovations per century (low / typical / high) | 0.5 / 1.5 / 3 | 1 / 2 / 4 | 2 / 4 / 6 | 2 / 3 / 5 |
-| Design discoveries learned per 50-year block, % of that block's registry targets | 35 / 65 / 85 | 35 / 70 / 90 | 35 / 70 / 90 | 35 / 70 / 90 |
+| Design discoveries learned per 50-year block, % of that block's registry targets (a stagnating society may fall to about 5%) | 25 / 65 / 85 | 25 / 70 / 90 | 25 / 70 / 90 | 25 / 70 / 90 |
 | Literacy, % of adults | 0 | 0 | ≤ 0.5 (scribes) | about 0.5–1 |
 | Largest force fielded | 10–60 (raiding party) | 20–300 | 100–3,000 (city levy) | 300–20,000 (a great state) |
 | Share of workers under arms or on watch, % | 2–8 | 2–8 | 2–10 | 2–10 |

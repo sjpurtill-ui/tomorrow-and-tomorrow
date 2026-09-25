@@ -74,7 +74,7 @@ const GOOD_CONDITIONS:=0.55
 ## only through its era-capped effect channels (SocietyModel.era_ceiling_for),
 ## so it lifts little before the modern era. Missing practices add their excess
 ## on top, weighted by EXCESS_WEIGHT. Old saves blend in with early_care_blend.
-const ERA_BURDEN:={"under5":3.6,"child":4.5,"adult":4.3,"elder":2.1,"neonatal":1.6,"maternal":2.0}
+const ERA_BURDEN:={"under5":3.6,"child":4.5,"adult":4.3,"elder":2.1,"neonatal":1.9,"maternal":2.6}
 const EXCESS_WEIGHT:={"under5":0.15,"child":0.35,"adult":0.5}
 ## Channel totals that relieve the burden, each over its modern limit.
 const RELIEF_CHANNELS:={"health_protection":0.55,"sanitation":0.65,"water_safety":0.60,"disease_exposure":-0.55}
@@ -125,6 +125,16 @@ static func carrying_capacity(state:Node,discovery:Node)->float:
 	for key:Variant in sources:grounds+=float(sources[key])
 	grounds=clampf(grounds/maxf(1.0,float(sources.size())),0.4,1.0) if not sources.is_empty() else 1.0
 	return base*territory*methods*lerpf(0.6,1.0,grounds)
+
+## Care decrees (government_policy_catalog.gd) organize people to do what a
+## missing practice would: fetch and store clean water, tend the sick and
+## newborns, keep watch against fire, falls and beasts. Their policy channels
+## add coverage to these categories while the decree runs.
+const DECREE_COVER:={"water":"water_care_coverage","remedies":"sick_care_coverage","childcare":"sick_care_coverage","wounds":"injury_care_coverage"}
+
+static func _decree_cover(category_id:String)->float:
+	if not DECREE_COVER.has(category_id) or WorldSimulation.consequences==null:return 0.0
+	return maxf(0.0,float(WorldSimulation.consequences.policy_effect(String(DECREE_COVER[category_id]))))
 
 ## Share (0..1) of the pre-modern burden lifted by general health knowledge.
 static func burden_relief(discovery:Node)->float:
@@ -183,7 +193,8 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 		for channel:String in channels:
 			var scale:=float(channels[channel])
 			channel_cover+=maxf(0.0,discovery.effect(channel)/scale)
-		var coverage:=clampf(maxf(practice_cover,channel_cover),0.0,1.0)
+		# research_600: organized care decrees cover part of a missing practice.
+		var coverage:=clampf(maxf(practice_cover,channel_cover)+_decree_cover(String(category.id)),0.0,1.0)
 		for key:String in excess:
 			var amount:=float(category.get(key,0.0))
 			excess[key]=float(excess[key])+amount*(1.0-coverage)
@@ -216,7 +227,10 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 	for key:String in ERA_BURDEN:
 		var crowd:=1.0+crowding*CROWDING_MORTALITY if key in ["under5","child","adult","elder"] else 1.0
 		burden[key]=lerpf(1.0,(1.0+(float(ERA_BURDEN[key])-1.0)*(1.0-relief))*crowd,blend)
-	var spare:=maxf(0.0,SPARE_LAND_ONSET-float(state.population_exact)/maxf(1.0,capacity))
+	# Spare land is judged against the home territory alone, so settling new
+	# land spreads people out instead of raising births everywhere.
+	var home:=capacity/(1.0+sqrt(float(maxi(1,(state.player_settlements as Array).size())-1))*1.6)
+	var spare:=maxf(0.0,SPARE_LAND_ONSET-float(state.population_exact)/maxf(1.0,home))
 	result["conception"]=float(result.conception)*lerpf(1.0,maxf(0.3,1.0-crowding*CROWDING_CONCEPTION)*(1.0+spare*SPARE_LAND_CONCEPTION),blend)
 	result["carrying_capacity"]=capacity
 	result["crowding"]=crowding

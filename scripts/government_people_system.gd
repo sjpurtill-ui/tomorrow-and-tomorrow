@@ -1271,6 +1271,27 @@ func _apply_survival_guard(weights:Dictionary)->Dictionary:
 	return guard
 
 
+## research_600 balance: getting, grinding, cooking and storing food took most
+## of a pre-modern household's working time (docs/research/BENCHMARKS_600.md:
+## about 52% even for the best-organized society at year 0, 40% by year 600).
+## Planned labor keeps at least that share on food; the surplus fills the stores.
+const FOOD_LABOR_FLOOR:Array=[[0.0,0.52],[100.0,0.50],[300.0,0.45],[600.0,0.40],[1500.0,0.30],[2800.0,0.05]]
+
+func _apply_food_labor_floor(weights:Dictionary)->void:
+	var year:=float(WorldSimulation.state.elapsed_days)/365.0
+	var floor_share:=float(FOOD_LABOR_FLOOR[FOOD_LABOR_FLOOR.size()-1][1])
+	for index in range(1,FOOD_LABOR_FLOOR.size()):
+		if year<=float(FOOD_LABOR_FLOOR[index][0]):
+			var low:Array=FOOD_LABOR_FLOOR[index-1]
+			var high:Array=FOOD_LABOR_FLOOR[index]
+			floor_share=lerpf(float(low[1]),float(high[1]),(year-float(low[0]))/(float(high[0])-float(low[0])))
+			break
+	var other:=0.0
+	for role:String in weights:
+		if role!="Food":other+=maxf(0.0,float(weights[role]))
+	weights.Food=maxf(float(weights.get("Food",0)),other*floor_share/maxf(.01,1.0-floor_share))
+
+
 func _allocations_for_focus(focus:String,leader:Dictionary,cultural:bool=false)->Dictionary:
 	var weights:Dictionary=BASE_ALLOCATIONS.duplicate(true)
 	var changes:Dictionary=({
@@ -1289,6 +1310,7 @@ func _allocations_for_focus(focus:String,leader:Dictionary,cultural:bool=false)-
 		var bias:=preload("res://scripts/cultural_inheritance.gd").labor_bias(WorldSimulation.direction.cultural_memory,int(WorldSimulation.state.elapsed_days))
 		for role in bias:weights[role]=float(weights.get(role,0))+float(bias[role])
 	_apply_survival_guard(weights)
+	_apply_food_labor_floor(weights) # research_600 balance
 	if not leader.is_empty():
 		var skills:Dictionary=leader.get("skills",{})
 		weights.Administration=float(weights.Administration)+float(skills.get("Administration",50))*0.025

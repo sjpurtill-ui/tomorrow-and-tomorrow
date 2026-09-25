@@ -58,6 +58,8 @@ SPARE_LAND_ONSET = float(g.const("scripts/early_life_conditions.gd", "SPARE_LAND
 SPARE_LAND_CONCEPTION = float(g.const("scripts/early_life_conditions.gd", "SPARE_LAND_CONCEPTION", default=0.0, optional=True))
 SUSTAINABLE_SPECIALISTS = g.const("scripts/society_model.gd", "SUSTAINABLE_SPECIALISTS", default=[], optional=True)
 SPECIALIST_UPKEEP = g.const("scripts/society_model.gd", "SPECIALIST_UPKEEP", default={}, optional=True)
+DECREE_COVER = g.const("scripts/early_life_conditions.gd", "DECREE_COVER", default={}, optional=True)
+FOOD_LABOR_FLOOR = g.const("scripts/government_people_system.gd", "FOOD_LABOR_FLOOR", default=[], optional=True)
 SPECIALIZATION_HEADROOM = float(g.const("scripts/society_model.gd", "SPECIALIZATION_HEADROOM", default=0.0, optional=True))
 EFFECT_LINE = g.const("scripts/society_model.gd", "EFFECT_LINE", default={}, optional=True)
 # Birth-care burden adds to the missing-care excess (EarlyLifeConditions.neonatal_factor).
@@ -501,6 +503,11 @@ class Surrogate:
             needed = clamp(prev * demand * buffer / max(0.01, produced), 0.0, 0.85)
             other = sum(v for r, v in w.items() if r != "Food")
             w["Food"] = max(w["Food"], other * needed / max(0.01, 1.0 - needed))
+        if FOOD_LABOR_FLOOR:
+            # GovernmentPeopleSystem._apply_food_labor_floor (Phase 3 R3).
+            floor_share = curve(FOOD_LABOR_FLOOR, self.day / YEAR)
+            other = sum(v for r, v in w.items() if r != "Food")
+            w["Food"] = max(w["Food"], other * floor_share / max(0.01, 1.0 - floor_share))
         if not self.s.labor:
             # Default leader skills of 50 (Administration/Logistics/Knowledge bonuses).
             w["Administration"] += 50 * 0.025
@@ -742,7 +749,7 @@ class Surrogate:
                     if self.completed_names(work):
                         practice += float(wgt)
             channel = sum(max(0.0, e(ch) / float(scale)) for ch, scale in cat["channels"].items())
-            coverage = clamp(max(practice, channel), 0.0, 1.0)
+            coverage = clamp(max(practice, channel) + (max(0.0, self.policy(DECREE_COVER[cat["id"]])) if cat["id"] in DECREE_COVER else 0.0), 0.0, 1.0)
             cover[cat["id"]] = coverage
             for k in excess:
                 excess[k] += float(cat.get(k, 0.0)) * (1.0 - coverage)
@@ -778,7 +785,8 @@ class Surrogate:
             crowding = max(0.0, self.population / max(1.0, self.carrying_capacity) - CROWDING_ONSET)
         self.crowding = crowding
         care["burden"] = {k: (1.0 + (float(v) - 1.0) * scale * (1.0 - relief)) * ((1.0 + crowding * CROWDING_MORTALITY) if k in ("under5", "child", "adult", "elder") else 1.0) for k, v in ERA_BURDEN.items()}
-        spare = max(0.0, SPARE_LAND_ONSET - self.population / max(1.0, getattr(self, "carrying_capacity", 1e9))) if TERRITORY_CAPACITY else 0.0
+        home = getattr(self, "carrying_capacity", 1e9) / (1.0 + math.sqrt(max(0, int(self.settlements) - 1)) * 1.6)
+        spare = max(0.0, SPARE_LAND_ONSET - self.population / max(1.0, home)) if TERRITORY_CAPACITY else 0.0
         care["conception"] *= max(0.3, 1.0 - crowding * CROWDING_CONCEPTION) * (1.0 + spare * SPARE_LAND_CONCEPTION)
         care["excess_weight"] = {k: float(v) for k, v in EXCESS_WEIGHT.items()}
         care["coverage"] = cover
@@ -867,7 +875,7 @@ class Surrogate:
         else:
             neonatal_care = care["neonatal"] * (care.get("burden") or {}).get("neonatal", 1.0)
             maternal_care = care["maternal"] * (care.get("burden") or {}).get("maternal", 1.0)
-        neonatal_rate = clamp((0.018 + (risk - 1.0) * 0.025) * (1.0 - clamp(self.eff("neonatal_survival"), -0.50, 0.60)) * clamp(neonatal_care, 0.5, 4.0), 0.004, 0.18)
+        neonatal_rate = clamp((0.018 + (risk - 1.0) * 0.025) * (1.0 - clamp(self.eff("neonatal_survival") + self.policy("neonatal_survival"), -0.50, 0.60)) * clamp(neonatal_care, 0.5, 4.0), 0.004, 0.18)
         maternal_rate = clamp((0.0045 + (risk - 1.0) * 0.0065) * (1.0 - clamp(self.eff("maternal_safety"), 0.0, 0.65)) * clamp(maternal_care, 0.5, 4.0), 0.0008, 0.055)
         self.preg = np.maximum(0.0, np.array([f + annual / YEAR * days - losses[0] - to2, s + to2 - losses[1] - to3, t + to3 - losses[2] - deliveries]))
         self.postpartum = max(0.0, self.postpartum + deliveries - self.postpartum * (1 - math.exp(-days / 365.0)))
