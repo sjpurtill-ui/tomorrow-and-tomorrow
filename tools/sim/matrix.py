@@ -43,10 +43,11 @@ LINE_TARGETS = {
 
 
 def _run(args):
-    scenario, seed, years = args
+    scenario, seed, years = args[:3]
+    shocks = args[3] if len(args) > 3 else False
     # Every matrix run scouts (3 % of people) and staffs artifact study (weight 2)
     # so the artifact facets are comparable; poor keeps its own site and decrees.
-    result = simlib.run(scenario, seed, years, simlib.params(), scenario_override={"scouting": 0.03, "study_weight": 2})
+    result = simlib.run(scenario, seed, years, simlib.params(), scenario_override={"scouting": 0.03, "study_weight": 2}, shocks=shocks)
     constants, cat = simlib.data()
     return scenario, facets.century_facets(result, cat, years, step=50)
 
@@ -64,13 +65,17 @@ def main() -> int:
     ap.add_argument("--seeds", type=int, default=6)
     ap.add_argument("--years", type=int, default=600)
     ap.add_argument("--jobs", type=int, default=24)
+    ap.add_argument("--shocks", action="store_true", help="opt-in: every scenario lives through epochal shocks (writes docs/research/epochal/LINE_MAX_MATRIX_SHOCKS.*)")
     args = ap.parse_args()
+    global OUT
+    if args.shocks:
+        OUT = ROOT / "docs/research/epochal" / (OUT.name + "_SHOCKS")
     constants, cat = simlib.data()
     bench = facets.benchmarks()
     scenarios = ["balanced", "poor"] + [f"max_{line}" for line in gd.LINES] + [f"lead_{line}" for line in gd.LINES]
     t0 = time.time()
     with ProcessPoolExecutor(max_workers=args.jobs) as pool:
-        outs = list(pool.map(_run, [(s, 1 + k, args.years) for s in scenarios for k in range(args.seeds)]))
+        outs = list(pool.map(_run, [(s, 1 + k, args.years, args.shocks) for s in scenarios for k in range(args.seeds)]))
     by = {}
     for scenario, fac in outs:
         by.setdefault(scenario, []).append(fac)
@@ -98,8 +103,8 @@ def main() -> int:
     OUT.with_suffix(".json").write_text(json.dumps({"generated": time.strftime("%Y-%m-%d %H:%M"), "seeds": args.seeds, "years": args.years,
                                                     "benchmarks": bench.get("_source"), "records": records}, indent=0), encoding="utf-8")
     # ---- markdown
-    md = [f"# Research line maximization matrix (surrogate, {args.seeds} seeds x {args.years} years)", "",
-          f"Generated {time.strftime('%Y-%m-%d %H:%M')} by `python tools/sim/matrix.py --seeds {args.seeds} --years {args.years}` "
+    md = [f"# Research line maximization matrix (surrogate{', epochal shocks on' if args.shocks else ''}, {args.seeds} seeds x {args.years} years)", "",
+          f"Generated {time.strftime('%Y-%m-%d %H:%M')} by `python tools/sim/matrix.py --seeds {args.seeds} --years {args.years}{' --shocks' if args.shocks else ''}` "
           f"({time.time() - t0:.0f} s). Surrogate model: `tools/sim` (see `docs/research/SURROGATE_SIM.md` for what it models, "
           f"its calibration against the real engine, and its known gaps). Benchmarks: `{bench.get('_source')}`.", "",
           "Each `max_<line>` run puts the full research emphasis (12) on one line and none on the others; `lead_<line>` puts 12 on the line "

@@ -323,6 +323,10 @@ apply_changes(state, civ_graph, changes, year)                             # slo
 - `state["shock_hazard"]` and `state["shock_signs"]` hold this year's hazards and lit signs, for the court.
 - **Surrogate bridge**: `adapters.row_from_surrogate(sur)` and `stack_rows` (read-only; verified against `simlib.make("sensible", 1)`). Set `harvest_noise_sd=0` when the host already draws weather.
 
+### Integrated into the surrogate (opt-in)
+
+`tools/sim/shock_world.py` binds the detailed surrogate to slot 0 of this world. It is enabled with `--shocks` or `simlib.run(..., shocks=True)` and is off by default. Its mapping refines the table below. Density is the era norm × crowding (population ÷ housing). Capacity comes from food security. Institutions are the era norm × (institutions capacity, education). The player's famine deaths are left to the surrogate's hunger model. Results are in `SHOCKS_IN_SURROGATE.md`.
+
 ### Variable mapping
 
 | Shock key | Surrogate (`tools/sim/model.py`) | Game |

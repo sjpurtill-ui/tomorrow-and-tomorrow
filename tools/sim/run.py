@@ -33,6 +33,7 @@ def main() -> int:
     ap.add_argument("--params", type=Path, default=None, help="alternate params.json")
     ap.add_argument("--set", nargs="*", default=[], help="param overrides key=value (JSON values)")
     ap.add_argument("--json", type=Path, default=None)
+    ap.add_argument("--shocks", action="store_true", help="opt-in: run inside the multi-civ epochal-shock world (shock_world.py)")
     args = ap.parse_args()
     overrides = {}
     for kv in args.set:
@@ -45,11 +46,11 @@ def main() -> int:
     results, times = [], []
     for s in range(args.seed0, args.seed0 + args.seeds):
         t = time.time()
-        results.append(simlib.run(args.scenario, s, args.years, p))
+        results.append(simlib.run(args.scenario, s, args.years, p, shocks=args.shocks))
         times.append(time.time() - t)
     for w in gdparse.WARNINGS:
         print("WARNING:", w)
-    print(f"scenario={args.scenario} seeds={args.seeds} years={args.years}  load {load_s:.2f}s  "
+    print(f"scenario={args.scenario}{' +shocks' if args.shocks else ''} seeds={args.seeds} years={args.years}  load {load_s:.2f}s  "
           f"run {np.mean(times):.2f}s/seed (min {min(times):.2f}, max {max(times):.2f})")
     keys = ["population", "life_expectancy", "infant_mortality", "food_days", "food_security", "health", "known", "scholarship", "education"]
     print("year  " + "  ".join(f"{k[:14]:>14}" for k in keys))

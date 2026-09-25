@@ -82,10 +82,11 @@ def strategies(n_random: int, rng: np.random.Generator) -> list[dict]:
 
 
 def _run(args):
-    strat, seed, years = args
+    strat, seed, years = args[:3]
+    shocks = args[3] if len(args) > 3 else False
     override = {"site": "good", "labor": simlib.scenarios()[0]["sensible"]["labor"], "research": strat.get("research", {}),
                 "knowledge_share": float(strat.get("knowledge_share", -1)), "phases": strat.get("phases", [])}
-    result = simlib.run("sensible", seed, years, simlib.params(), scenario_override=override)
+    result = simlib.run("sensible", seed, years, simlib.params(), scenario_override=override, shocks=shocks)
     constants, cat = simlib.data()
     return strat["name"], facets.century_facets(result, cat, years, step=100), simlib.milestone_years(result, milestone_ids())
 
@@ -118,7 +119,11 @@ def main() -> int:
     ap.add_argument("--years", type=int, default=600)
     ap.add_argument("--jobs", type=int, default=24)
     ap.add_argument("--eps", type=float, default=0.03, help="relative tie band for dominance (seed noise)")
+    ap.add_argument("--shocks", action="store_true", help="opt-in: every strategy lives through epochal shocks (writes docs/research/epochal/STRATEGY_SWEEP_SHOCKS.*)")
     args = ap.parse_args()
+    global OUT
+    if args.shocks:
+        OUT = ROOT / "docs/research/epochal" / (OUT.name + "_SHOCKS")
     t0 = time.time()
     rng = np.random.default_rng(600)
     strats = strategies(args.random, rng)
@@ -126,7 +131,7 @@ def main() -> int:
     bench = facets.benchmarks()
     lead_frac, out_margin, margin_src = margins(bench)
     with ProcessPoolExecutor(max_workers=args.jobs) as pool:
-        outs = list(pool.map(_run, [(s, 1 + k, args.years) for s in strats for k in range(args.seeds)], chunksize=2))
+        outs = list(pool.map(_run, [(s, 1 + k, args.years, args.shocks) for s in strats for k in range(args.seeds)], chunksize=2))
     fac, mil = {}, {}
     for name, f, m in outs:
         fac.setdefault(name, []).append(f)
@@ -203,8 +208,8 @@ def main() -> int:
 
 def write_md(report, mean, kinds, centuries, seconds, args) -> None:
     fmt = {f: facets.FACETS[f][1] for f in OUTCOMES}
-    md = [f"# Strategy sweep ({report['strategies']} strategies × {args.seeds} seeds × {args.years} years, surrogate)", "",
-          f"Generated {report['generated']} by `python tools/sim/sweep_strategies.py --random {args.random} --seeds {args.seeds} --years {args.years}` in {seconds:.0f} s. "
+    md = [f"# Strategy sweep ({report['strategies']} strategies × {args.seeds} seeds × {args.years} years, surrogate{', epochal shocks on' if args.shocks else ''})", "",
+          f"Generated {report['generated']} by `python tools/sim/sweep_strategies.py --random {args.random} --seeds {args.seeds} --years {args.years}{' --shocks' if args.shocks else ''}` in {seconds:.0f} s. "
           "Model and its calibration: `docs/research/SURROGATE_SIM.md`. Lead margins: " + report["margins"]["source"] + ".", "",
           "Outcome facets compared: " + ", ".join(facets.FACETS[f][0] for f in OUTCOMES) +
           f". A strategy dominates another when it is at least as good on every facet (within ±{args.eps:.0%} seed noise) and better on one.", "",
