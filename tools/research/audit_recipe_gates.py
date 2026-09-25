@@ -25,6 +25,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import recipe_data as R  # noqa: E402
 
 THRESHOLD = 150.0
+# Recipes that deliberately open with an analytical gate and prepare specimens
+# from material acquired elsewhere (the specimen bench measures traded lots).
+SPECIMEN_FROM_ACQUIRED = {"sealed_copolymer_specimens", "sealed_polypropylene_specimens", "sealed_peg_specimens"}
 ELECTRIC_SERVICE_AD = 1880
 # Inputs made by other systems, not by PRODUCTS; historical AD year of the material.
 EXTERNAL_INPUT_AD = {
@@ -134,7 +137,7 @@ def main():
     ap.add_argument("--threshold", type=float, default=THRESHOLD)
     a = ap.parse_args()
     rows, th = audit(a.threshold)
-    flagged = [r for r in rows if r["lead"] > th]
+    flagged = [r for r in rows if r["lead"] > th and r["id"] not in SPECIMEN_FROM_ACQUIRED]
     for r in (rows if a.all else flagged):
         print("%-44s gate %-38s %6.0f  era %6.0f (AD %5.0f)  lead %6.0f  %s" % (
             r["id"], r["gate"], r["gate_year"], r["era"], r["era_ad"], r["lead"], r["why"]))

@@ -72,7 +72,7 @@
     "adoption_rate": 0.001
    },
    "name": "Copyhold Tenure",
-   "observation": "The widow keeps her copy of the manor roll in a box: it shows her strips owe four shillings a year and no days at the plough.",
+   "observation": "The widow keeps her copy of the manor roll in a box: it shows her strips owe four silver pieces a year and no days at the plough.",
    "art": "res://assets/ui/research/subjects/property_registers-v1.png"
   },
   "demesne_leasing_to_farmers": {
@@ -211,7 +211,7 @@
     "standardization": 0.0012
    },
    "name": "Wage Books",
-   "observation": "Each Saturday the clerk rules a line under the week: days worked, pieces made, pence paid, and the hand makes his mark.",
+   "observation": "At each week's end the clerk rules a line under the week: days worked, pieces made, coppers paid, and the hand makes his mark.",
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png"
   },
   "printing_house_crews": {
@@ -311,7 +311,7 @@
     "cohesion": 0.0014
    },
    "name": "Public Work Relief",
-   "observation": "In the hard winter the council sets the idle men to cleaning the moat and paving the market, at a penny under the day rate.",
+   "observation": "In the hard winter the council sets the idle men to cleaning the moat and paving the market, at a copper under the day rate.",
    "art": "res://assets/ui/research/subjects/public_stores-v1.png"
   },
   "clothier_household_workshops": {
@@ -437,7 +437,7 @@
     "fatigue": 0.0023
    },
    "name": "Acre-Rate Harvest Gangs",
-   "observation": "The reapers take the forty acres at a shilling each and work by moonlight to finish before the weather breaks.",
+   "observation": "The reapers take the forty acres at a silver piece each and work by moonlight to finish before the weather breaks.",
    "art": "res://assets/ui/research/discovery-600/cooperative_harvest_gatherings.png"
   },
   "bound_colliers": {
@@ -717,7 +717,7 @@
     "health_risk": -0.0014
    },
    "name": "Friendly Society Boxes",
-   "observation": "Every Saturday night at the inn each member drops his pennies into the box with three locks, and a sick member draws from it.",
+   "observation": "At every week's end at the inn each member drops his coppers into the box with three locks, and a sick member draws from it.",
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png"
   },
   "seamens_hospital_levy": {
@@ -820,17 +820,17 @@
     "adoption_rate": 0.001
    },
    "name": "Town-Wide Combinations",
-   "observation": "The journeymen of every tailor's shop in town meet at one tavern and send a single petition: a shilling more and an hour less.",
+   "observation": "The journeymen of every tailor's shop in town meet at one tavern and send a single petition: a silver piece more and an hour less.",
    "art": "res://assets/ui/research/subjects/household_councils-v1.png"
   },
-  "saint_monday_custom": {
+  "idle_weekstart_custom": {
    "effects": {
     "fatigue": -0.0023,
     "labor_efficiency": -0.0012,
     "cohesion": 0.0014
    },
-   "name": "Idle Monday",
-   "observation": "On Monday the cutlers' wheels stand still; the grinders drink and play at skittles, and make up the week by working all Friday night.",
+   "name": "Idle First Day",
+   "observation": "On the first day of the week the cutlers' wheels stand still; the grinders drink and play at skittles, and make up the week by working through the last night of the week.",
    "art": "res://assets/ui/research/subjects/festival_calendar-v1.png"
   },
   "servant_register_offices": {
@@ -839,7 +839,7 @@
     "labor_demand": -0.001
    },
    "name": "Servant Register Offices",
-   "observation": "For a shilling the register office writes down a cook's character and her last place, and sends her to a lady who needs one.",
+   "observation": "For a silver piece the register office writes down a cook's character and her last place, and sends her to a lady who needs one.",
    "art": "res://assets/ui/research/subjects/property_registers-v1.png"
   },
   "gauged_piece_tickets": {
@@ -909,7 +909,7 @@
     "cohesion": 0.0021
    },
    "name": "Strike Funds",
-   "observation": "Each weaver pays a penny a week into the common box, and when the masters cut the price the box keeps the looms idle for a month.",
+   "observation": "Each weaver pays a copper a week into the common box, and when the masters cut the price the box keeps the looms idle for a month.",
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png"
   },
   "wage_assessment_lapse": {
@@ -980,7 +980,7 @@
    },
    "name": "Factory Villages",
    "observation": "The mill owner builds three rows of stone cottages, a chapel and a shop that takes his own tokens.",
-   "social_consequence": "Mill families get sound houses, and the master owns their roof, their shop and their Sunday.",
+   "social_consequence": "Mill families get sound houses, and the master owns their roof, their shop and their rest day.",
    "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
   },
   "trade_freedom_edict": {
@@ -1055,7 +1055,7 @@
     "cohesion": -0.0021
    },
    "name": "Mill Fine Rules",
-   "observation": "The board by the gate lists the fines: a penny for talking, twopence for an open window, a morning's pay for coming after the bell.",
+   "observation": "The board by the gate lists the fines: a copper for talking, two coppers for an open window, a morning's pay for coming after the bell.",
    "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
   },
   "bound_labor_abolition_movement": {

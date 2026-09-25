@@ -313,7 +313,7 @@
     "labor_demand": 0.001
    },
    "name": "Vermin Bounties",
-   "observation": "Every parish pays a bounty on crows, kites, foxes and hedgehogs, and churchwardens count the heads.",
+   "observation": "Every parish pays a bounty on crows, kites, foxes and hedgehogs, and parish wardens count the heads.",
    "art": "res://assets/ui/research/subjects/seed_reserves-v1.png"
   },
   "goat_woodland_bans": {

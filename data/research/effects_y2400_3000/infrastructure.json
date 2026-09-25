@@ -78,7 +78,7 @@
    "ability_reason": "A single span across a wide navigable river joins roads the ferry once broke, without piers to block the shipping below.",
    "art": "res://assets/ui/research/subjects/timber_bridges-v1.png"
   },
-  "portland_cement_clinker": {
+  "clinker_cement": {
    "effects": {
     "construction_rate": 0.0156,
     "disaster_resilience": 0.0084,
@@ -1132,7 +1132,7 @@
     "cohesion": -0.001
    },
    "name": "Wind Farms",
-   "observation": "White three-bladed towers turn slowly along the ridge line, each taller than a church spire, humming in the evening wind.",
+   "observation": "White three-bladed towers turn slowly along the ridge line, each taller than a temple spire, humming in the evening wind.",
    "art": "res://assets/ui/research/subjects/water_mills-v1.png"
   },
   "storm_surge_barriers": {

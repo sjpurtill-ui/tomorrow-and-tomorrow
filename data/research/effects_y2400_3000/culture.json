@@ -116,7 +116,7 @@
    "name": "Revival Meetings",
    "observation": "Preachers of the god hold great open-air meetings where crowds are moved to repentance."
   },
-  "penny_daily_press": {
+  "cheap_daily_press": {
    "effects": {
     "adoption_rate": 0.0032,
     "cohesion": 0.0012,
@@ -125,7 +125,7 @@
     "legitimacy": -0.0028
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
-   "name": "Penny Daily Press",
+   "name": "Cheap Daily Press",
    "observation": "Cheap daily papers are sold on every street corner and read by clerks and labourers.",
    "ability_reason": "News reaches ordinary people every day; public opinion becomes something ministers answer to.",
    "social_consequence": "Scandal sells papers; ministers are judged in print by people who never met them."
@@ -440,7 +440,7 @@
    "name": "Moving Pictures",
    "observation": "Moving pictures are shown to paying crowds in darkened halls.",
    "ability_reason": "Stories, news and customs reach whole populations through the same pictures.",
-   "social_consequence": "Picture palaces fill every Saturday; preachers warn of their influence on the young."
+   "social_consequence": "Picture palaces fill every rest-day eve; preachers warn of their influence on the young."
   },
   "revived_realm_games": {
    "effects": {

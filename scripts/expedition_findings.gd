@@ -39,7 +39,15 @@ static func resource_for(ground:Dictionary,day:int,rng:RandomNumberGenerator,lon
 		if not recognized.is_empty(): return recognized[rng.randi_range(0,recognized.size()-1)]
 	return pool[rng.randi_range(0,pool.size()-1)]
 
+## Told before the people can name the metal in the stone (resource_names.gd).
+const PLAIN_STORIES:Dictionary={
+	"Copper Ore":["The green-stained hills","The scouts marked rock streaked with green in the high country, a stone our people have no name for yet.","Worth remembering. What the green stone holds, and how it might be worked, is not yet known."],
+	"Tin Ore":["The heavy black stones","The party returned with the place of a heavy dark stone unlike any our people know.","Its use is not yet understood. Finding it does not bring the knowledge or labor to work it."],
+	"Iron Ore":["The red-stone uplands","The expedition's chart marks a heavy red-brown stone in the uplands.","Its use is not yet understood, and its remoteness still has to be overcome."],
+}
+
 static func deposit_card(deposit:Dictionary,distance:int)->Dictionary:
 	var resource:=String(deposit.resource)
 	var story:Array=STORIES.get(resource,STORIES["Stone"])
+	if PLAIN_STORIES.has(resource) and not preload("res://scripts/resource_names.gd").knows_metal(resource): story=PLAIN_STORIES[resource]
 	return {"kind":"resource","title":String(story[0]),"description":String(story[1]),"consequence":String(story[2]),"resource":resource,"distance_km":distance,"position":{"x":deposit.position.x,"z":deposit.position.z},"deposit_id":String(deposit.id),"quality":float(deposit.quality),"minor":resource=="Fiber Plants"}

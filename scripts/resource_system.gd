@@ -34,8 +34,9 @@ const FOUNDING_SURFACE_RESOURCES:=["Timber","Stone","Fertile Soil","Game","Fiber
 
 # Keep the simulation/save key stable while giving players a name that describes
 # the usable material rather than an unexplained class of plants.
+## The name the player's people use; ores keep a plain name until their metal is known.
 func display_name(resource_name:String)->String:
-	return "Plant Fiber" if resource_name=="Fiber Plants" else resource_name
+	return preload("res://scripts/resource_names.gd").label(resource_name)
 
 func plain_language_description(resource_name:String)->String:
 	if resource_name=="Stone": return "Loose surface stone can be gathered across rocky ground. Heavy blocks and deeper deposits still require better tools and access; gathered stone does not regrow."

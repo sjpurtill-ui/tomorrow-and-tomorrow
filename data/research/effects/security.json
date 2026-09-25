@@ -131,8 +131,8 @@
     "craft_output": 0.0022,
     "warfare_readiness": 0.0062
    },
-   "name": "Clay Sling Bullets",
-   "observation": "Fired clay bullets of one weight fly truer than river stones and can be made by the basketful.",
+   "name": "Fired Clay Sling Shot",
+   "observation": "Fired clay shot of one weight fly truer than river stones and can be made by the basketful.",
    "art": "res://assets/ui/research/security-v1.png"
   },
   "raid_scouting": {

@@ -104,7 +104,7 @@
     "standardization": 0.0071
    },
    "art": "res://assets/ui/research/paper/battery_bank_wiring.png",
-   "observation": "Needle galvanometers show the strength of a current and let one laboratory check another's work."
+   "observation": "Needle current meters show the strength of a current and let one laboratory check another's work."
   },
   "dimensional_analysis": {
    "effects": {

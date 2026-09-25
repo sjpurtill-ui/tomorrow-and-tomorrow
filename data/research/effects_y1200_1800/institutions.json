@@ -905,7 +905,7 @@
     "state_capacity": 0.0012
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
-   "name": "Written Inquisition",
+   "name": "Written Inquest",
    "observation": "The judge questions witnesses in private, writes their words into a dossier and decides from the file.",
    "social_consequence": "Suspects are questioned in secret, and the dossier decides"
   },

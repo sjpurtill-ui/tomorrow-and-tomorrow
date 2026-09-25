@@ -96,7 +96,7 @@
     "labor_demand": 0.004
    },
    "name": "Great Dome Without Centering",
-   "observation": "The masons lay the dome's bricks in herringbone, each course locking the last, and it rises over the great church with no timber frame beneath.",
+   "observation": "The masons lay the dome's bricks in herringbone, each course locking the last, and it rises over the great temple with no timber frame beneath.",
    "ability_reason": "Self-supporting brickwork lets a vault rise without scaffolding a forest, and builders learn that geometry can replace timber.",
    "art": "res://assets/ui/research/subjects/lime_mortar-v1.png"
   },

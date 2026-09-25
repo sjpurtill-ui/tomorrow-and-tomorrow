@@ -523,7 +523,7 @@
     "logistics_endurance": 0.0047
    },
    "name": "Triple-Expansion Freighters",
-   "observation": "Three cylinders use the steam in turn, and a plain freighter carries grain across the ocean for pennies a sack.",
+   "observation": "Three cylinders use the steam in turn, and a plain freighter carries grain across the ocean for a few coppers a sack.",
    "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
   },
   "railway_standard_time": {

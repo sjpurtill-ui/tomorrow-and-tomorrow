@@ -654,7 +654,7 @@
     "health_risk": -0.001
    },
    "name": "Guild Welfare Chests",
-   "observation": "Each master pays a penny a week into the iron-bound chest, and when a brother dies the chest buys his candles and feeds his widow.",
+   "observation": "Each master pays a copper a week into the iron-bound chest, and when a brother dies the chest buys his candles and feeds his widow.",
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png"
   },
   "seasonal_day_rates": {
@@ -731,7 +731,7 @@
     "knowledge_preservation": 0.001
    },
    "name": "Works Payrolls",
-   "observation": "At the end of every week the clerk of works reads the roll, and each man steps up to take his pence.",
+   "observation": "At the end of every week the clerk of works reads the roll, and each man steps up to take his coppers.",
    "social_consequence": "A clerk of the works joins the officials who report to the ruler, and every wall and tower now has a written cost.",
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png"
   },
@@ -755,7 +755,7 @@
     "institutional_rigidity": 0.0024
    },
    "name": "Fixed Journeyman Rates",
-   "observation": "The ordinance nailed to the guildhall door fixes a journeyman's day at so many pence, and a master who pays more is fined.",
+   "observation": "The ordinance nailed to the guildhall door fixes a journeyman's day at so many coppers, and a master who pays more is fined.",
    "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
   },
   "debt_bound_putting_out": {
@@ -803,7 +803,7 @@
     "mine_safety": 0.002
    },
    "name": "Miners' Relief Chest",
-   "observation": "A penny from every shift goes into the miners' box, and when the roof falls the box pays the bonesetter and the burial.",
+   "observation": "A copper from every shift goes into the miners' box, and when the roof falls the box pays the bonesetter and the burial.",
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png"
   },
   "womens_craft_guilds": {

@@ -201,7 +201,7 @@
     "chemical_control": 0.001,
     "fuel_demand": 0.0026
    },
-   "observation": "A hand-cranked disc spins between the jaws of a magnet, and a wire touched to its rim makes the needle of the galvanometer swing and hold.",
+   "observation": "A hand-cranked disc spins between the jaws of a magnet, and a wire touched to its rim makes the needle of the current meter swing and hold.",
    "ability_reason": "Current no longer comes only from jars of acid; any turning shaft can now be made to yield it, which opens the whole electrical trade.",
    "art": "res://assets/ui/research/paper/wound_transformers.png"
   },
@@ -586,7 +586,7 @@
    },
    "name": "Wood Pulp Paper",
    "observation": "Spruce logs are ground against a wet millstone and cooked in sulphite liquor; the paper is cheap, if it yellows within a few years.",
-   "social_consequence": "Newspapers and schoolbooks cost pennies, while the pulp mills foul the rivers below them with a sour brown effluent.",
+   "social_consequence": "Newspapers and schoolbooks cost a few coppers, while the pulp mills foul the rivers below them with a sour brown effluent.",
    "art": "res://assets/ui/research/paper/fiber_pulp_beating.png"
   },
   "open_hearth_steel": {
@@ -1519,7 +1519,7 @@
     "water_pollution": 0.001
    },
    "name": "Powered Washing Machines",
-   "observation": "A motor churns the tub back and forth while the laundress folds yesterday's sheets; Monday no longer breaks her back over the washboard.",
+   "observation": "A motor churns the tub back and forth while the laundress folds yesterday's sheets; washday no longer breaks her back over the washboard.",
    "social_consequence": "Laundry women and households with current gain whole days; hand laundries in the poorer quarters lose their customers.",
    "art": "res://assets/ui/research/paper/mechanical_screw_presses.png"
   },

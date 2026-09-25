@@ -561,8 +561,8 @@
    },
    "art": "res://assets/ui/research/discovery-600/shared_hearth_gatherings.png",
    "name": "Coffee-house Talk",
-   "observation": "For a penny a man may sit, read the news sheets and argue politics with strangers over a dish of coffee.",
-   "ability_reason": "Coffee-houses become a public forum: news, trade and politics are argued by strangers, and opinion becomes a power.",
+   "observation": "For a copper a man may sit, read the news sheets and argue politics with strangers over a dish of coffee.",
+   "ability_reason": "Coffee-houses become a public meeting ground: news, trade and politics are argued by strangers, and opinion becomes a power.",
    "social_consequence": "Rulers try to close them as seedbeds of sedition, and fail"
   },
   "perspective_scenery_stage": {

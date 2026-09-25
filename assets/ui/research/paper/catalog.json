@@ -5926,7 +5926,7 @@
       "asset": "res://assets/ui/research/paper/portland_cement_clinker.png",
       "description": "Produce and qualify a clinker-based hydraulic binder through controlled mineral processing",
       "domain": "infrastructure",
-      "id": "portland_cement_clinker",
+      "id": "clinker_cement",
       "name": "Portland-Cement Clinker",
       "status": "queued",
       "day": 0

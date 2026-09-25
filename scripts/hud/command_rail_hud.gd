@@ -891,8 +891,22 @@ func _temperature_text()->String:
 	var trend:="→"
 	if today-yesterday>0.3: trend="↑"
 	elif today-yesterday<-0.3: trend="↓"
-	# The climate model works in °C; the display speaks Fahrenheit.
-	return "%d°F %s" % [roundi(today*1.8+32.0),trend]
+	return temperature_words(today,trend,GameState.known_discoveries)
+
+## Sealed thermometers with fixed points give the first number for the air.
+const THERMOMETRY:="precision_thermometry"
+## Upper bound (°C) of each felt band; above the last it is scorching.
+const TEMPERATURE_FEEL:=[[-8.0,"Bitter cold"],[3.0,"Cold"],[10.0,"Cool"],[18.0,"Mild"],[26.0,"Warm"],[34.0,"Hot"]]
+
+static func temperature_words(celsius:float,trend:String,known:Array)->String:
+	## Before a thermometer the air is only felt; after it, it is read in
+	## degrees (the climate model already works in them).
+	if known.has(THERMOMETRY): return "%d°C %s" % [roundi(celsius),trend]
+	var feel:="Scorching"
+	for band in TEMPERATURE_FEEL:
+		if celsius<float(band[0]):
+			feel=String(band[1]); break
+	return "%s %s" % [feel,trend]
 
 func refresh()->void:
 	if terrain==null: return

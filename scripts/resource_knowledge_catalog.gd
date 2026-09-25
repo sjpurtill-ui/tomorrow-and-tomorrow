@@ -134,11 +134,11 @@ static func _entry(id: String,name: String,direction: String,day: int,chance: fl
 		result["production_contract"]="Enables physical ground phosphate dressing. Field uptake requires nutrient response trials and complementary nitrogen inputs; the deposit itself supplies no manufactured fertilizer."
 	if id=="coke_firing":
 		result.effects={}
-		result["production_items"]=["metallurgical_coke"]
+		result["production_items"]=["metallurgical_coke","blast_pig_iron"]
 		result["production_contract"]="Converts actual coal into coke through finite workshop labor and paid kiln tooling. Coke is a stock consumed by ironmaking; the discovery's society-wide effect is a small era-scaled contribution, not a direct fuel or metal bonus."
 	if id=="blast_furnace":
 		result.effects={}
-		result["production_items"]=["blast_pig_iron","charcoal_pig_iron"]
+		result["production_items"]=["charcoal_pig_iron"]
 		result.requires=["rope_rigging"]
 		result["requires_all"]=result.requires.duplicate()
 		result["learning_routes"]=[{"id":"mine_supported","label":"Mine-supported furnace scale-up","requires_all":["refractory_furnaces","mine_drainage"]},{"id":"metallurgical","label":"Scaling forced-air iron reduction","requires_all":["refractory_furnaces","bloomery_smelting"]},{"id":"charcoal_furnace","label":"Charcoal and prepared furnace linings","requires_all":["charcoal","refractory_brick_firing","bloomery_smelting"]}]

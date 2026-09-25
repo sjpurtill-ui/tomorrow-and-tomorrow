@@ -806,7 +806,7 @@
    "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
    "name": "Deserted Villages to Pasture",
    "observation": "Villages emptied by the great mortality are turned over to sheep, and the house platforms show under the grass.",
-   "social_consequence": "Survivors are moved off or left alone amid empty holdings, and the parish church stands in a field."
+   "social_consequence": "Survivors are moved off or left alone amid empty holdings, and the parish temple stands in a field."
   },
   "adult_poll_rolls": {
    "effects": {

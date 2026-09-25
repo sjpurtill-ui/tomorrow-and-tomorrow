@@ -131,8 +131,11 @@ const ERA_GATES:={
 	"dairy":{"ids":["animal_taming","pack_animals"],"label":"tame herds, milk and cheese",
 		"words":"butter|buttered|cheese|cheeses|milk|milked|milking|dairy|cream|churn|churned|shepherd|shepherds|sheepfold|cowshed|yoke|yoked"},
 	"riding":{"ids":["domesticated_mounts","mounted_scouts"],"label":"riding horses",
-		"words":"saddle|saddles|saddled|rider|riders|riding|ride|rides|rode|stirrup|stirrups|cavalry|horseback|horseman|horsemen|mounted|bridle|reins|far-rider"},
-	"wheel":{"ids":["joined_wheel_blank","bored_wheel_hubs","assembled_transport_cart","cart_assembly_kits","iron_tired_wheels"],"label":"wheels and carts",
+		"words":"rider|riders|riding|ride|rides|rode|stirrup|stirrups|cavalry|horseback|horseman|horsemen|mounted|bridle|reins|far-rider"},
+	# A pack saddle comes before anyone rides; a saddle quern is a grinding stone.
+	"saddles":{"ids":["pack_saddles","framed_camel_saddle","domesticated_mounts","mounted_scouts","horned_riding_saddle"],"label":"saddles",
+		"words":"saddle|saddles|saddled"},
+	"wheel":{"ids":["wheel_blank_jointing","wheel_hub_boring","solid_wheel_assembly","spoked_wheel_assembly","cart_bed_framing","cart_running_gear","four_wheeled_wagons","war_chariots","chariot_crews","battle_wagons","sleeved_cart_assembly","iron_tyre_fitting"],"label":"wheels and carts",
 		"words":"wheel|wheels|wheeled|cart|carts|cartload|wagon|wagons|axle|axles|chariot|chariots|cartwright|wheelwright|wheelbarrow"},
 	"pottery":{"ids":["clay_shaping","pit_firing","clay_tempering","sealed_vessels","kiln_control"],"label":"pottery (pots, jars, kilns)",
 		"words":"pot|pots|potter|potters|pottery|jar|jars|jug|jugs|urn|urns|kiln|kilns|crock|crocks|amphora|pitcher|pitchers|pickle|pickled"},
@@ -247,6 +250,65 @@ static func world_line(tags:Array)->String:
 		(have if tags.has(tag) else lack).append(String(ERA_GATES[tag].label))
 	return "%s. Known: fire, stone, bone, hide, cord, wood, hunting and gathering%s. NOT YET KNOWN, so these do not exist and may not appear even as metaphor or in names: %s." % [
 		ERA_WORDS[era_tier(tags)],("; "+", ".join(have)) if not have.is_empty() else "",", ".join(lack) if not lack.is_empty() else "nothing"]
+
+# ---------------------------------------------------------------------------
+# Era stand-ins. Narrated text (the Chronicle, the scouts' reports) can carry a
+# gated word the listening people cannot name yet; it is retold with the
+# nearest thing they do know. [gate tag, word pattern, stand-in], phrases
+# before the words inside them.
+# ---------------------------------------------------------------------------
+const ERA_STANDINS:=[
+	["wheel","cartloads","sledge-loads"],["wheel","cartload","sledge-load"],["wheel","carts","sledges"],["wheel","cart","sledge"],
+	["wheel","wagons","sledges"],["wheel","wagon","sledge"],["wheel","wheelbarrows","carrying frames"],["wheel","wheelbarrow","carrying frame"],
+	["wheel","cartwrights|wheelwrights","sledge-makers"],["wheel","cartwright|wheelwright","sledge-maker"],
+	["wheel","chariots","war sledges"],["wheel","chariot","war sledge"],["wheel","axles","drag poles"],["wheel","axle","drag pole"],
+	["wheel","(?:four|two|single)-wheeled","heavy"],["wheel","wheeled","dragged"],
+	["wheel","wheels(?![- ](?:thrown|made))","rollers"],["wheel","(?<!potter's )wheel(?![- ](?:thrown|made))","roller"],
+	["saddles","saddle[- ]frames","pack-frames"],["saddles","saddle[- ]frame","pack-frame"],["saddles","saddled","loaded"],
+	["saddles","pack saddles","pack frames"],["saddles","pack saddle","pack frame"],["saddles","saddles","pack frames"],["saddles","saddle(?![- ]?(?:quern|stone))","pack frame"],
+	["riding","stirrups","foot loops"],["riding","stirrup","foot loop"],["riding","on horseback","on foot"],["riding","horseback","afoot"],
+	["riding","horsemen|riders","runners"],["riding","horseman|rider","runner"],["riding","cavalry","swift runners"],["riding","mounted scouts","far-runners"],
+	["muskets","muskets","long guns"],["muskets","musket","long gun"],["pistols","pistols","hand guns"],["pistols","pistol","hand gun"],
+	["rifles","rifles","grooved guns"],["rifles","rifle","grooved gun"],
+	["guns","sling bullets|bullets","sling stones"],["guns","sling bullet|bullet","sling stone"],
+	["guns","cannons","great fire-tubes"],["guns","cannon","great fire-tube"],["guns","guns","fire-tubes"],["guns","gun","fire-tube"],
+	["gunpowder","gunpowder","fire powder"],
+]
+static var _standin_res:Array=[]
+
+static func era_plain(text:String,tags:Array)->String:
+	## Retells the gated words these tags do not permit with ERA_STANDINS.
+	if text.is_empty(): return text
+	if _standin_res.is_empty():
+		for rule in ERA_STANDINS:
+			var re:=RegEx.new()
+			re.compile("(?i)(?<![A-Za-z'])("+String(rule[1])+")(?![A-Za-z])")
+			_standin_res.append(re)
+	var out:=text
+	for i in ERA_STANDINS.size():
+		if tags.has(String(ERA_STANDINS[i][0])): continue
+		var re:RegEx=_standin_res[i]
+		var m:=re.search(out)
+		while m!=null:
+			var swap:=_standin_case(m.get_string(),String(ERA_STANDINS[i][2]))
+			out=out.substr(0,m.get_start())+swap+out.substr(m.get_end())
+			m=re.search(out,m.get_start()+swap.length())
+	return out
+
+static func era_plain_for(text:String,owner:String="player")->String:
+	return era_plain(text,era_tags(owner))
+
+static func _standin_case(original:String,swap:String)->String:
+	if original.length()>1 and original==original.to_upper(): return swap.to_upper()
+	if original.substr(0,1)==original.substr(0,1).to_lower(): return swap
+	var words:=original.split(" ")
+	var titled:=words.size()>1
+	for word in words:
+		if word.substr(0,1)==word.substr(0,1).to_lower(): titled=false
+	if not titled: return swap.substr(0,1).to_upper()+swap.substr(1)
+	var parts:=swap.split(" ")
+	for i in parts.size(): parts[i]=parts[i].substr(0,1).to_upper()+parts[i].substr(1)
+	return " ".join(parts)
 
 static func _era_pick(rng:RandomNumberGenerator,list:Array,tags:Array,fallback:String="")->String:
 	var pool:Array=[]

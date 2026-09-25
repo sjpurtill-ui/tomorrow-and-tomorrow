@@ -314,7 +314,7 @@
     "trade_capacity": 0.002
    },
    "name": "Cochineal Scarlet",
-   "observation": "A pound of dried insects from the new lands dyes more scarlet than ten pounds of the old kermes grain.",
+   "observation": "A measure of dried insects from the new lands dyes more scarlet than ten measures of the old kermes grain.",
    "art": "res://assets/ui/research/paper/textile_dye_extraction.png"
   },
   "rolled_metal_strip": {
@@ -1303,7 +1303,7 @@
     "trade_capacity": 0.001,
     "fiber_yield": 0.0013
    },
-   "observation": "Yarn is sold by its count, how many hanks of set length weigh a pound, so spinner and weaver speak one language.",
+   "observation": "Yarn is sold by its count, how many hanks of set length weigh one standard weight, so spinner and weaver speak one language.",
    "art": "res://assets/ui/research/paper/yarn_count_standards.png"
   },
   "metal_annealing_control": {
