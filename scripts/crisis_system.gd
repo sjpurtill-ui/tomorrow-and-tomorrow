@@ -486,6 +486,8 @@ static func _maybe_onset(day:int,x:Dictionary,h:Dictionary)->void:
 			(s.echoes as Array).erase(echo)
 			if _active_of("sickness").is_empty() and _active_of("stranger").is_empty():
 				_open_sickness(day,x,"sickness",float(echo.get("v",0.01)),String(echo.get("civ_id","")),true)
+				var opened:=_active_of("sickness")
+				if not opened.is_empty(): opened["echo_count"]=int(echo.get("count",1))
 				return
 	# Hunger: the hazard, or hunger already at the door.
 	var hungry_now:=(float(x.shortage_days)>=10.0 and float(x.intake)<0.94) or (int(x.first_shortage)>0 and int(x.first_shortage)<=(75 if unlocked("hunger:early") else 45) and float(x.food_days)<(70.0 if unlocked("hunger:early") else 40.0))
@@ -599,7 +601,7 @@ static func _record(c:Dictionary,suffix:String,title:String,text:String,tier:Str
 static func _announce(c:Dictionary,title:String,text:String)->void:
 	var waits:=" %s waits to be summoned." % _given(String(c.holder)) if String(c.holder)!="" else ""
 	_record(c,"onset",title,text+waits,"moment","omen",true,true)
-	_log("onset",text,{"type":String(c.type),"kind":String(c.kind),"name":String(c.name),"crisis":String(c.id),"m":float(c.m),"severe":bool(c.get("severe",false))})
+	_log("onset",text,{"type":String(c.type),"sub":String(c.kind),"name":String(c.name),"crisis":String(c.id),"m":float(c.m),"severe":bool(c.get("severe",false))})
 
 static func _plan_deaths(c:Dictionary,m:float)->void:
 	c.m=clampf(m,0.0,0.6)
@@ -863,7 +865,7 @@ static func _advance(c:Dictionary,day:int,x:Dictionary)->void:
 		_apply(c,_default_choice(c,"mid"),"mid",true)
 	if phase=="remember" and String(c.get("rite",""))=="" and day>=int(c.get("remember_by",day+1)):
 		_withdraw(c)
-		_apply(c,"rest_no_rite","remember",true)
+		_apply(c,"cairn","remember",true)
 	if phase=="open" and day>=int(c.mid_day):
 		_mid(c,day,x)
 	elif phase in ["open","mid"] and day>=int(c.end_day):
@@ -909,7 +911,7 @@ static func _mid(c:Dictionary,day:int,x:Dictionary)->void:
 		"cold":
 			text="Frost again at midsummer. The berries are small and few."
 		"thinning":
-			text="The gatherers are at it as you ordered."
+			text=String({"range":"The gatherers leave before light and come back after dark. The near ground is quiet.","rest":"The near ground is left alone. The pits fill more slowly.","burn_brush":"Green shoots are coming through the ash. The deer are back at the edge of it.","press":"The gatherers still work the same worn ground."}.get(String(c.choice),"The gatherers go on as before."))
 	(c.notes as Array).append(text)
 	_record(c,"mid",_cap(String(c.name)),text,"moment" if n>0 or needs else "notice","death" if n>0 else "omen",needs)
 	_log("mid",text,{"type":type,"crisis":String(c.id),"deaths":n,"decision":needs})
@@ -950,7 +952,7 @@ static func _end(c:Dictionary,day:int,x:Dictionary)->void:
 			var echoes:=int(c.get("echo_count",0))
 			if v>=0.03 and echoes<6 and _rng("echo:%s" % String(c.id)).randf()<minf(0.8,0.9 if bool(c.get("virgin",false)) else 2.0*v):
 				var gap_years:=_rng("echoy:%s" % String(c.id)).randi_range(8,20)
-				(s.echoes as Array).append({"day":day+gap_years*365,"v":v*(0.75 if bool(c.get("virgin",false)) else _rng("echov:%s" % String(c.id)).randf_range(0.35,0.75)),"civ_id":String(c.get("civ_id",""))})
+				(s.echoes as Array).append({"count":echoes+1,"day":day+gap_years*365,"v":v*(0.75 if bool(c.get("virgin",false)) else _rng("echov:%s" % String(c.id)).randf_range(0.35,0.75)),"civ_id":String(c.get("civ_id",""))})
 				while (s.echoes as Array).size()>24: (s.echoes as Array).pop_front()
 		"hunger":
 			text="%s is over; the land gives again. " % _cap(String(c.name))
