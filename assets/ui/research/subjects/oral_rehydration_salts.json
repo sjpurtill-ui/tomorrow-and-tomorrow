@@ -1,0 +1,12 @@
+{
+  "id": "oral_rehydration_salts",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-40d86534-981a-4cc5-ad5f-827244e60a06.png",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Wide 3:2 landscape composition. The named discovery and its distinctive action or mechanism must read in a central banner crop. Depict the stated historical stage with only materials, dress, tools, buildings, and infrastructure available then. The scene belongs to an alternative-history world: no recognizable real landmark, historical person, nation, flag, or emblem. Vary setting, distance, viewpoint, age, and gender across the batch. No legible text, letters, numbers, captions, logo, watermark, border, UI, montage, voxel geometry, cartoon, photography, or CGI. Any marks on records, signs, and screens are illegible. The field's medium is the way the illustration is rendered, never an object or technology that must appear inside the scene.\nResearch direction: Health & care.\nMedium and finish: Translucent watercolor with restrained fine ink; soft washes and compassionate human detail.\nPalette: Pale sage, celadon, warm linen, muted skin tones.\nComposition: A precise care gesture or medical observation anchors an uncluttered, close scene in diffused light.\nHistorical span: Information age; specific date: 2845 (~AD 1970).\nSpecific discovery, Oral Rehydration: A drink of clean water with sugar and salt, given by the mother, stops children dying of diarrhoea. Paint it as a late twentieth to early twenty-first century scene.",
+  "line": "health",
+  "block": "y2400_3000",
+  "style_schema": "research_direction_styles/1",
+  "review": "Visual pilot reviewed at central card crop on 2026-09-25; confirm historical details when later research block integrates.",
+  "asset": "res://assets/ui/research/subjects/oral_rehydration_salts-v1.png",
+  "sha256": "fa4de74cc08de9cfdf3af2c13d5eaa2ee28b83942a3bc8bca8e63d3222b364f4",
+  "mode": "built-in image_gen / new image"
+}

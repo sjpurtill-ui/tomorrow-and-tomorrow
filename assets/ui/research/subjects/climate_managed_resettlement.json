@@ -1,0 +1,12 @@
+{
+  "id": "climate_managed_resettlement",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cbd770c2-ad70-4837-ba54-ebe6e06c03f9.png",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Wide 3:2 landscape composition. The named discovery and its distinctive action or mechanism must read in a central banner crop. Depict the stated historical stage with only materials, dress, tools, buildings, and infrastructure available then. The scene belongs to an alternative-history world: no recognizable real landmark, historical person, nation, flag, or emblem. Vary setting, distance, viewpoint, age, and gender across the batch. No legible text, letters, numbers, captions, logo, watermark, border, UI, montage, voxel geometry, cartoon, photography, or CGI. Any marks on records, signs, and screens are illegible. The field's medium is the way the illustration is rendered, never an object or technology that must appear inside the scene.\nResearch direction: People & homes.\nMedium and finish: Hand-drawn chalk pastel on toothy warm-ivory paper; broad visible strokes, powdery edges, velvety softness, simplified human forms.\nPalette: Terracotta, peach, warm ivory, quiet umber.\nComposition: Intimate human scale; domestic spaces and relationships carry the discovery, with gentle close framing.\nHistorical span: Information age; specific date: 2990 (~AD 2030).\nSpecific discovery, Managed Resettlement: Districts lost to rising seas and heat are resettled by plan before the disaster strikes. Paint it as a late twentieth to early twenty-first century scene.",
+  "line": "demography",
+  "block": "y2400_3000",
+  "style_schema": "research_direction_styles/1",
+  "review": "Visual pilot reviewed at central card crop on 2026-09-25; confirm historical details when later research block integrates.",
+  "asset": "res://assets/ui/research/subjects/climate_managed_resettlement-v1.png",
+  "sha256": "e92981dee9a6ed71d17324b8aaba36474a0d69b3ece64728f658d7b34687b909",
+  "mode": "built-in image_gen / new image"
+}

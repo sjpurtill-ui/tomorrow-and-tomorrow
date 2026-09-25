@@ -1,0 +1,12 @@
+{
+  "id": "intermodal_shipping_containers",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f80f5a9d-8c1e-4226-8dd6-1d4daa34923b.png",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Wide 3:2 landscape composition. The named discovery and its distinctive action or mechanism must read in a central banner crop. Depict the stated historical stage with only materials, dress, tools, buildings, and infrastructure available then. The scene belongs to an alternative-history world: no recognizable real landmark, historical person, nation, flag, or emblem. Vary setting, distance, viewpoint, age, and gender across the batch. No legible text, letters, numbers, captions, logo, watermark, border, UI, montage, voxel geometry, cartoon, photography, or CGI. Any marks on records, signs, and screens are illegible. The field's medium is the way the illustration is rendered, never an object or technology that must appear inside the scene.\nResearch direction: Transport & supply.\nMedium and finish: Panoramic travel watercolor on textured paper; flowing washes and clear moving silhouettes.\nPalette: Sand gold, sea slate, muted indigo, sun-worn brown.\nComposition: Make the route, vehicle, transfer, or supply chain legible in one directional scene with a sense of distance and motion.\nHistorical span: Information age; specific date: 2815 (~AD 1960).\nSpecific discovery, Shipping Containers: A steel box packed at an inland factory is lifted aboard ship and delivered unopened to a store across the ocean. Paint it as a late twentieth to early twenty-first century scene.",
+  "line": "logistics",
+  "block": "y2400_3000",
+  "style_schema": "research_direction_styles/1",
+  "review": "Visual pilot reviewed at central card crop on 2026-09-25; confirm historical details when later research block integrates.",
+  "asset": "res://assets/ui/research/subjects/intermodal_shipping_containers-v1.png",
+  "sha256": "46c205b31b913c87d360cf66ca9bad69eb7edb5688845dfbba256ce9806f9232",
+  "mode": "built-in image_gen / new image"
+}

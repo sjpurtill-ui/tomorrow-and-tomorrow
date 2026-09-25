@@ -3302,5 +3302,53 @@
       0.5,
       0.65
     ]
+  },
+  "climate_managed_resettlement": {
+    "path": "res://assets/ui/research/subjects/climate_managed_resettlement-v1.png",
+    "focus": [0.5, 0.5]
+  },
+  "gene_edited_crops": {
+    "path": "res://assets/ui/research/subjects/gene_edited_crops-v1.png",
+    "focus": [0.5, 0.5]
+  },
+  "oral_rehydration_salts": {
+    "path": "res://assets/ui/research/subjects/oral_rehydration_salts-v1.png",
+    "focus": [0.5, 0.5]
+  },
+  "moving_assembly_line": {
+    "path": "res://assets/ui/research/subjects/moving_assembly_line-v1.png",
+    "focus": [0.5, 0.5]
+  },
+  "stored_program_computer": {
+    "path": "res://assets/ui/research/subjects/stored_program_computer-v1.png",
+    "focus": [0.5, 0.5]
+  },
+  "industrial_robots": {
+    "path": "res://assets/ui/research/subjects/industrial_robots-v1.png",
+    "focus": [0.5, 0.5]
+  },
+  "hydroelectric_stations": {
+    "path": "res://assets/ui/research/subjects/hydroelectric_stations-v1.png",
+    "focus": [0.5, 0.5]
+  },
+  "intermodal_shipping_containers": {
+    "path": "res://assets/ui/research/subjects/intermodal_shipping_containers-v1.png",
+    "focus": [0.5, 0.5]
+  },
+  "atmospheric_co2_record": {
+    "path": "res://assets/ui/research/subjects/atmospheric_co2_record-v1.png",
+    "focus": [0.5, 0.5]
+  },
+  "civil_rights_law": {
+    "path": "res://assets/ui/research/subjects/civil_rights_law-v1.png",
+    "focus": [0.5, 0.5]
+  },
+  "radio_detection_ranging": {
+    "path": "res://assets/ui/research/subjects/radio_detection_ranging-v1.png",
+    "focus": [0.5, 0.5]
+  },
+  "radio_broadcasting": {
+    "path": "res://assets/ui/research/subjects/radio_broadcasting-v1.png",
+    "focus": [0.5, 0.5]
   }
 }

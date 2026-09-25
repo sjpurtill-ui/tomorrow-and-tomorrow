@@ -1,0 +1,12 @@
+{
+  "id": "stored_program_computer",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d8e87c0b-b2bc-467b-b331-b926e48f972d.png",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Wide 3:2 landscape composition. The named discovery and its distinctive action or mechanism must read in a central banner crop. Depict the stated historical stage with only materials, dress, tools, buildings, and infrastructure available then. The scene belongs to an alternative-history world: no recognizable real landmark, historical person, nation, flag, or emblem. Vary setting, distance, viewpoint, age, and gender across the batch. No legible text, letters, numbers, captions, logo, watermark, border, UI, montage, voxel geometry, cartoon, photography, or CGI. Any marks on records, signs, and screens are illegible. The field's medium is the way the illustration is rendered, never an object or technology that must appear inside the scene.\nResearch direction: Learning & records.\nMedium and finish: Fine blue-black ink and pale blue wash on warm parchment; crisp observational lines and quiet negative space.\nPalette: Lapis blue, blue-black, ivory, light stone.\nComposition: Observation, teaching, measurement, or record-making is the focal relationship; all written marks remain illegible.\nHistorical span: Electric / Mass production; specific date: 2796 (~AD 1950).\nSpecific discovery, Stored-program Computer: An electronic machine of valves holds its own instructions in memory and runs any calculation it is given. Paint it as an early twentieth century scene.",
+  "line": "knowledge",
+  "block": "y2400_3000",
+  "style_schema": "research_direction_styles/1",
+  "review": "Visual pilot reviewed at central card crop on 2026-09-25; confirm historical details when later research block integrates.",
+  "asset": "res://assets/ui/research/subjects/stored_program_computer-v1.png",
+  "sha256": "e8e84b317b5ce699a8c7b5d06abac2e7ec4d735c34f5bd3a6e44e00635e4c7d6",
+  "mode": "built-in image_gen / new image"
+}

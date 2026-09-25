@@ -1,0 +1,12 @@
+{
+  "id": "radio_detection_ranging",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-98d7fbf5-7707-42bc-bbe5-3f20da7cf750.png",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Wide 3:2 landscape composition. The named discovery and its distinctive action or mechanism must read in a central banner crop. Depict the stated historical stage with only materials, dress, tools, buildings, and infrastructure available then. The scene belongs to an alternative-history world: no recognizable real landmark, historical person, nation, flag, or emblem. Vary setting, distance, viewpoint, age, and gender across the batch. No legible text, letters, numbers, captions, logo, watermark, border, UI, montage, voxel geometry, cartoon, photography, or CGI. Any marks on records, signs, and screens are illegible. The field's medium is the way the illustration is rendered, never an object or technology that must appear inside the scene.\nResearch direction: Defense.\nMedium and finish: Layered hand-cut woodblock print; bold ink silhouettes, carved texture, graphic light and shadow.\nPalette: Vermilion, charcoal, warm parchment, dark earth.\nComposition: Strong diagonals and clear equipment or formation show the defensive method; controlled tension without gratuitous gore.\nHistorical span: Electric / Mass production; specific date: 2764 (~AD 1940).\nSpecific discovery, Radar: Radio echoes reveal aircraft and ships far beyond sight, day and night, through cloud and fog. Paint it as an early twentieth century scene.",
+  "line": "security",
+  "block": "y2400_3000",
+  "style_schema": "research_direction_styles/1",
+  "review": "Visual pilot reviewed at central card crop on 2026-09-25; confirm historical details when later research block integrates.",
+  "asset": "res://assets/ui/research/subjects/radio_detection_ranging-v1.png",
+  "sha256": "55727886696fb3d1e715a4a365e050ad6fd1346750daa1a08934e0c3f5deb32c",
+  "mode": "built-in image_gen / new image"
+}

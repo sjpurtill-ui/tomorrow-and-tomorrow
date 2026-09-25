@@ -1,0 +1,12 @@
+{
+  "id": "atmospheric_co2_record",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f61e6c9e-2159-43ea-abc0-c0c1230125c7.png",
+  "prompt": "Use case: historical-scene. Asset type: Land & nature research direction aesthetic and discovery preview for Tomorrow and Tomorrow. Specific discovery: a sustained atmospheric carbon-dioxide measurement record, circa AD 1960. At an isolated mountain field station, one researcher collects a clean air sample through a glass-and-metal sampling line while another tends the period-appropriate recording instrument; the act of measuring the air is clear and central, with alpine vegetation and weather surrounding the small station. Render as an unmistakably HAND-PAINTED NATURALIST FIELD PAINTING, layered transparent mineral pigments and visible dry brush on paper, finely observed plants, moss, rock and sky; muted moss and fern green, soil brown, cool blue-gray. The apparatus and sampling gesture fill the central banner crop, landscape supports them. Wide 3:2 composition. Alternative-history setting, no recognizable real place, nation, badge or emblem. No legible writing, numbers, charts with text, labels, captions, logos, watermark, UI, border, montage, photograph, photorealism or CGI.",
+  "line": "ecology",
+  "block": "y2400_3000",
+  "style_schema": "research_direction_styles/1",
+  "review": "Visual pilot reviewed at central card crop on 2026-09-25; confirm historical details when later research block integrates.",
+  "asset": "res://assets/ui/research/subjects/atmospheric_co2_record-v1.png",
+  "sha256": "3da1768a4ff23fa0c99e126ce52f5b12d071f8ac5860aaadada0be3c3ae8cd5b",
+  "mode": "built-in image_gen / new image"
+}
