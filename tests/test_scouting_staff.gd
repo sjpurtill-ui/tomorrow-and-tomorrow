@@ -289,7 +289,9 @@ func test_one_person_allocation_explains_minimum_party_and_food_wait_is_precise(
 func test_exploration_can_cross_a_charted_neighborhood_to_a_more_distant_frontier()->void:
 	system.initialize()
 	# All routes possible under the old automatic 90-day budget are charted.
-	var near:float=system.scout_one_way_range(90)*.58+40
+	# Known country caps a young people's range, so the charted neighbourhood
+	# stays inside it, as the 72 km founding circle does in a real game.
+	var near:float=minf(system.scout_one_way_range(90)*.58+40,system.scout_known_reach_km()*.7)
 	system._add_revealed_area(Vector2.ZERO,near,"previous expeditions")
 	GameState.resource_stockpiles.Food=100000;GameState.food_stocks={"Preserved food":100000.0}
 	system.scouting_staff.set_policy(.05,"exploration");system.scouting_staff.advance(0)

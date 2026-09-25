@@ -1334,7 +1334,7 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 	elif directional_search:
 		var quote_seed:=last_world_seed^duration_days*8191^String(target.id).hash()^next_scout_mission_id*2654435761
 		if wandering:
-			var walker:=preload("res://scripts/scout_frontier.gd").new(self,one_way_range*.55,float(quote_seed%6283)/1000.0,origin)
+			var walker:=preload("res://scripts/scout_frontier.gd").new(self,scout_outward_search_km(duration_days),float(quote_seed%6283)/1000.0,origin)
 			# Range changes with logistics, knowledge and mounted adoption. A
 			# warm cache must choose the same route as a restored empty cache.
 			var key:="staff:"+var_to_str([quote_seed,fog_revision,scout_missions.size(),origin,_scout_water_crossing_allowance_km(),one_way_range])
@@ -3088,6 +3088,21 @@ func scout_one_way_range(duration_days:int)->float:
 	var travel_knowledge:=clampf(WorldSimulation.discovery.effect("route_speed")+WorldSimulation.progression.effect("route_speed"),0.0,0.60)
 	var mount_bonus:=1.0+WorldSimulation.discovery.adoption("mounted_scouts")*0.50
 	return minf(float(duration_days)*14.0*(0.72+logistics*0.28)*(1.0+travel_knowledge)*mount_bonus,scout_known_reach_km())
+
+
+## How far out a roving staff party searches before its side trips. Walking
+## pace keeps its detour margin, but known country is already a limit on
+## distance from home: a young people's parties must be able to walk past the
+## founding circle toward its edge, or every route stays on charted ground.
+func scout_outward_search_km(duration_days:int)->float:
+	var pace:=scout_one_way_range(duration_days)
+	var reach:=scout_known_reach_km()
+	if pace<reach-0.01:return pace*.55
+	var logistics:=clampf(float(WorldSimulation.state.simulation_metrics.get("logistics",0.16)),0.0,1.0)
+	var travel_knowledge:=clampf(WorldSimulation.discovery.effect("route_speed")+WorldSimulation.progression.effect("route_speed"),0.0,0.60)
+	var mount_bonus:=1.0+WorldSimulation.discovery.adoption("mounted_scouts")*0.50
+	var walking:=float(duration_days)*14.0*(0.72+logistics*0.28)*(1.0+travel_knowledge)*mount_bonus
+	return minf(walking*.55,reach*.85)
 
 
 ## How far from home a party can find its way and its food. Walking pace is
