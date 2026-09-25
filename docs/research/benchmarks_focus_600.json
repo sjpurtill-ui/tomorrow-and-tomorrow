@@ -1,0 +1,7516 @@
+{
+ "schema": "benchmarks_focus/1",
+ "description": "Focus-dependent historical benchmarks for game years 0-600 (about 5000-1500 BCE). A society that pours itself into one research line or a mixed archetype is judged against what comparable societies achieved with that emphasis: higher bands on its focus metrics, lower bands elsewhere, and at least one required cost below the base typical. Human summary and calibration notes: docs/research/BENCHMARKS_FOCUS_600.md. Resolver and validator: tools/research/focus_bench.py.",
+ "base": "docs/research/benchmarks_600.json",
+ "continued_by": "docs/research/benchmarks_focus_1200.json",
+ "window": [
+  0,
+  600
+ ],
+ "years": [
+  0,
+  100,
+  300,
+  600
+ ],
+ "game_years": {
+  "0": -5000,
+  "100": -4000,
+  "300": -3000,
+  "600": -1500
+ },
+ "metric_keys": [
+  "life_expectancy",
+  "infant_mortality",
+  "child_mortality_1_4",
+  "maternal_per_100k",
+  "tfr",
+  "cbr",
+  "cdr",
+  "growth_pct",
+  "population",
+  "largest_settlement_historical",
+  "settlement_density",
+  "food_labor_share",
+  "non_food_population_share",
+  "grain_yield_ratio",
+  "largest_structure_person_days",
+  "discoveries_per_50_years",
+  "major_innovations_per_century",
+  "literacy_pct",
+  "army_levy_size",
+  "defense_labor_share",
+  "trade_reach_km"
+ ],
+ "position_scale": {
+  "meaning": "a band position on the base band's own scale, oriented so larger is better ('neither' metrics: numerically larger)",
+  "anchors": {
+   "-2": "worse plausibility bound (min; max for 'lower' metrics)",
+   "-1": "base low",
+   "0": "base typical",
+   "1": "base high",
+   "2": "better plausibility bound (max; min for 'lower' metrics)"
+  },
+  "interpolation": "linear between anchors, geometric for metrics listed as 'log' in metric_scales; positions interpolate linearly between years",
+  "modifier": "[low_pos, typical_pos, high_pos]; min and max never move; an omitted metric is neutral [-1, 0, 1]",
+  "construction": "each focus metric uses a named preset (the \"presets\" table: [low, typical, high] positions at full effect) scaled by the \"ramp\": by_year = neutral + ramp[year] x (preset - neutral). Ramp 0 at year 0 (the 120 founders are identical whatever the player will choose), 0.5 at 100, 0.85 at 300, 1.0 at 600. The 600-1200 file copies these year-600 positions as its own 600 row so the band is continuous at the join."
+ },
+ "metric_scales": {
+  "life_expectancy": "linear",
+  "infant_mortality": "linear",
+  "child_mortality_1_4": "linear",
+  "maternal_per_100k": "linear",
+  "tfr": "linear",
+  "cbr": "linear",
+  "cdr": "linear",
+  "growth_pct": "linear",
+  "population": "log",
+  "largest_settlement_historical": "log",
+  "settlement_density": "linear",
+  "food_labor_share": "linear",
+  "non_food_population_share": "linear",
+  "grain_yield_ratio": "linear",
+  "largest_structure_person_days": "log",
+  "discoveries_per_50_years": "linear",
+  "major_innovations_per_century": "linear",
+  "literacy_pct": "linear",
+  "army_levy_size": "log",
+  "defense_labor_share": "linear",
+  "trade_reach_km": "log"
+ },
+ "presets": {
+  "boost+": [
+   -0.5,
+   0.6,
+   1.35
+  ],
+  "boost": [
+   -0.7,
+   0.35,
+   1.2
+  ],
+  "boost-": [
+   -0.85,
+   0.15,
+   1.08
+  ],
+  "cost-": [
+   -1.1,
+   -0.2,
+   0.9
+  ],
+  "cost": [
+   -1.25,
+   -0.4,
+   0.75
+  ],
+  "cost+": [
+   -1.45,
+   -0.65,
+   0.5
+  ],
+  "up+": [
+   -0.3,
+   0.7,
+   1.5
+  ],
+  "up": [
+   -0.6,
+   0.4,
+   1.25
+  ],
+  "up-": [
+   -0.85,
+   0.15,
+   1.08
+  ],
+  "down-": [
+   -1.08,
+   -0.15,
+   0.85
+  ],
+  "down": [
+   -1.25,
+   -0.4,
+   0.6
+  ],
+  "down+": [
+   -1.5,
+   -0.7,
+   0.3
+  ],
+  "steady": [
+   -0.8,
+   0.0,
+   0.9
+  ],
+  "peakless": [
+   -0.9,
+   -0.2,
+   0.7
+  ]
+ },
+ "ramp": {
+  "by_year": {
+   "0": 0.0,
+   "100": 0.5,
+   "300": 0.85,
+   "600": 1.0
+  },
+  "note": "by_year positions = neutral + ramp x (full - neutral): founders are identical at year 0, a focus shows half its effect after one century and all of it by 600"
+ },
+ "roles": {
+  "boost": "focus metric: effective typical above the base typical; may pass the effective high by allowed_lead.boosted x |high - typical|",
+  "neutral": "base band (possibly with a raised floor or lowered ceiling); base allowed_deviation applies",
+  "cost": "effective typical below the base typical; no lead past the (lowered) high",
+  "shift": "'neither' metric moved up or down (e.g. more people under arms); must stay inside the shifted low..high",
+  "context": "reserved for era-wide records; the 0-600 file uses none: here largest_settlement_historical is read as the largest settlement a society with this focus reached (calibrated to comparable societies) and major_innovations_per_century as innovations it originated. The 600-1200 file treats both as context and fades these 0-600 effects out by 700."
+ },
+ "classification": {
+  "single_line_min_share": 0.4,
+  "partial_line_min_share": 0.25,
+  "archetype_min_combined_share": 0.55,
+  "archetype_min_each_share": 0.12,
+  "signature_share_bonus": 0.15,
+  "rule": "share = emphasis units on a line / all units (the research_emphasis order). 1) An archetype matches when its lines hold >= 55% combined, >= 12% each, and no line holds >= 40%; the best combined share wins. 2) Otherwise every line with share >= 25% gets weight min(1, (share - 1/12) / (0.40 - 1/12)); any remaining weight goes to 'balanced'; weights are normalised and the focus is that blend (positions are averaged). 3) Nothing >= 25%: balanced. A line focus's labor/decree 'signature' adds 0.15 to its line's share in step 2 only (archetypes are matched on the raw research shares). Timed strategies are classified per phase: judge a century by the phase active during most of it.",
+  "explicit": "a strategy dict with \"focus_id\" (a focus name or a {focus: weight} blend) is judged under it; strategy_spec \"focus\" is the settlement focus (government_people_system.gd), not a benchmark focus"
+ },
+ "focuses": {
+  "knowledge": {
+   "label": "Scholarly focus",
+   "kind": "line",
+   "line": "knowledge",
+   "description": "The society puts its observers and record keepers first: calendars, counting, notation, systematic observation of sky, plants and materials.",
+   "definition": "The society puts its observers and record keepers first: calendars, counting, notation, systematic observation of sky, plants and materials. Operationally: >= 40% of research emphasis units on knowledge (share = units on the line / all units).",
+   "strategy": {
+    "rule": ">= 40% of research emphasis units on knowledge (share = units on the line / all units)",
+    "research_share_min": {
+     "knowledge": 0.4
+    },
+    "lines": [
+     "knowledge"
+    ],
+    "settlement_focus": "research",
+    "typical_decrees": [
+     "directed_inquiry"
+    ],
+    "signature": {
+     "knowledge_share_min": 15.0,
+     "decrees_any": [
+      "directed_inquiry"
+     ]
+    },
+    "surrogate_spec": {
+     "name": "focus:knowledge",
+     "research": {
+      "knowledge": 12,
+      "institutions": 1,
+      "culture": 1,
+      "labor": 1,
+      "production": 1,
+      "infrastructure": 1,
+      "nutrition": 1,
+      "health": 1,
+      "demography": 1,
+      "logistics": 1,
+      "ecology": 1,
+      "security": 1
+     },
+     "knowledge_share": 17.5,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 6.6,
+      "Extraction": 9.1,
+      "Construction": 14.0,
+      "Crafting": 15.7,
+      "Logistics": 6.6,
+      "Knowledge": 5.2,
+      "Administration": 4.8,
+      "Defense": 3.3
+     },
+     "policies": [
+      "directed_inquiry"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "research = matrix.py lead_<line> (12 on the line, 1 elsewhere: 12/23 = 52%); labor = sensible with the listed roles changed"
+   },
+   "metrics": {
+    "discoveries_per_50_years": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "major_innovations_per_century": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "literacy_pct": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "non_food_population_share": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "population": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "growth_pct": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "largest_structure_person_days": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "army_levy_size": {
+     "role": "shift",
+     "preset": "down",
+     "full": [
+      -1.25,
+      -0.4,
+      0.6
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.8
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.66
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.6
+      ]
+     }
+    },
+    "defense_labor_share": {
+     "role": "shift",
+     "preset": "down-",
+     "full": [
+      -1.08,
+      -0.15,
+      0.85
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.04,
+       -0.075,
+       0.925
+      ],
+      "300": [
+       -1.068,
+       -0.128,
+       0.873
+      ],
+      "600": [
+       -1.08,
+       -0.15,
+       0.85
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.25,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.25,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "largest_structure_person_days",
+     "population",
+     "growth_pct"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "population",
+     "growth_pct"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "known",
+     "per_century",
+     "per_50",
+     "education"
+    ],
+    "cost_facets": [
+     "cap_production",
+     "cap_infrastructure",
+     "cap_security",
+     "population"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Early calendrical and record-keeping communities: specialist observers 1-3% of adults; tokens, tallies and proto-notation; 4-6 notable innovations per century at the very best; literacy never above about 1-2% of adults before 1500 BCE-equivalent. The observers come out of building, crafts and the watch, so monuments stay small and growth slightly slower.",
+   "shock_hazard_mult": {}
+  },
+  "institutions": {
+   "label": "Administrative focus",
+   "kind": "line",
+   "line": "institutions",
+   "description": "Offices, redistribution, tribute and law: the society organises people into a state that can plan and command.",
+   "definition": "Offices, redistribution, tribute and law: the society organises people into a state that can plan and command. Operationally: >= 40% of research emphasis units on institutions (share = units on the line / all units).",
+   "strategy": {
+    "rule": ">= 40% of research emphasis units on institutions (share = units on the line / all units)",
+    "research_share_min": {
+     "institutions": 0.4
+    },
+    "lines": [
+     "institutions"
+    ],
+    "typical_decrees": [
+     "public_assembly",
+     "wealth_levy"
+    ],
+    "signature": {
+     "labor_min": {
+      "Administration": 8.0
+     },
+     "decrees_any": [
+      "wealth_levy"
+     ]
+    },
+    "surrogate_spec": {
+     "name": "focus:institutions",
+     "research": {
+      "knowledge": 1,
+      "institutions": 12,
+      "culture": 1,
+      "labor": 1,
+      "production": 1,
+      "infrastructure": 1,
+      "nutrition": 1,
+      "health": 1,
+      "demography": 1,
+      "logistics": 1,
+      "ecology": 1,
+      "security": 1
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 6.2,
+      "Extraction": 8.5,
+      "Construction": 13.0,
+      "Crafting": 14.6,
+      "Logistics": 6.1,
+      "Knowledge": 4.8,
+      "Administration": 9.0,
+      "Defense": 3.1
+     },
+     "policies": [
+      "public_assembly",
+      "wealth_levy"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "research = matrix.py lead_<line> (12 on the line, 1 elsewhere: 12/23 = 52%); labor = sensible with the listed roles changed"
+   },
+   "metrics": {
+    "largest_structure_person_days": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "largest_settlement_historical": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "non_food_population_share": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "literacy_pct": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "settlement_density": {
+     "role": "shift",
+     "preset": "up-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "army_levy_size": {
+     "role": "shift",
+     "preset": "up-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "life_expectancy": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "child_mortality_1_4": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "infant_mortality": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.25,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.25,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "life_expectancy",
+     "child_mortality_1_4"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "life_expectancy",
+     "child_mortality_1_4"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "cap_institutions",
+     "legitimacy",
+     "state_capacity"
+    ],
+    "cost_facets": [
+     "health",
+     "life_expectancy",
+     "cohesion"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Early redistributive and tributary polities: 20-35% of households off the land, corvee labor for monuments of 10^5-10^7 person-days, largest centres of tens of thousands. Skeletal series from the first states show shorter stature, more enamel defects and no gain (often a loss) in life expectancy versus their village neighbours.",
+   "shock_hazard_mult": {}
+  },
+  "culture": {
+   "label": "Cultic and cultural focus",
+   "kind": "line",
+   "line": "culture",
+   "description": "Shared ritual, feasting, ceremony and prestige: cohesion and allure over output.",
+   "definition": "Shared ritual, feasting, ceremony and prestige: cohesion and allure over output. Operationally: >= 40% of research emphasis units on culture (share = units on the line / all units).",
+   "strategy": {
+    "rule": ">= 40% of research emphasis units on culture (share = units on the line / all units)",
+    "research_share_min": {
+     "culture": 0.4
+    },
+    "lines": [
+     "culture"
+    ],
+    "typical_decrees": [
+     "public_assembly"
+    ],
+    "signature": {},
+    "surrogate_spec": {
+     "name": "focus:culture",
+     "research": {
+      "knowledge": 1,
+      "institutions": 1,
+      "culture": 12,
+      "labor": 1,
+      "production": 1,
+      "infrastructure": 1,
+      "nutrition": 1,
+      "health": 1,
+      "demography": 1,
+      "logistics": 1,
+      "ecology": 1,
+      "security": 1
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 6.6,
+      "Extraction": 9.1,
+      "Construction": 14.0,
+      "Crafting": 15.7,
+      "Logistics": 6.6,
+      "Knowledge": 5.2,
+      "Administration": 4.8,
+      "Defense": 3.3
+     },
+     "policies": [
+      "public_assembly"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "research = matrix.py lead_<line> (12 on the line, 1 elsewhere: 12/23 = 52%); labor = sensible with the listed roles changed"
+   },
+   "metrics": {
+    "largest_structure_person_days": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "largest_settlement_historical": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "trade_reach_km": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "discoveries_per_50_years": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "major_innovations_per_century": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "food_labor_share": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "growth_pct": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.25,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.25,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "discoveries_per_50_years",
+     "food_labor_share",
+     "growth_pct"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "discoveries_per_50_years",
+     "food_labor_share",
+     "growth_pct"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "cap_culture",
+     "cohesion",
+     "allure"
+    ],
+    "cost_facets": [
+     "per_50",
+     "known",
+     "food_security",
+     "cap_production"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Ritual-centred monument builders without states: ceremonial enclosures and megaliths of 10^4-10^6 person-days raised by dispersed farming communities; prestige goods moving 500-1,500 km through gift exchange; feasting that consumes surpluses; tradition that conserves technique and slows innovation.",
+   "shock_hazard_mult": {}
+  },
+  "labor": {
+   "label": "Labor organization focus",
+   "kind": "line",
+   "line": "labor",
+   "description": "Work organisation, rotations, draught animals and tools that make each worker produce more; the people work harder.",
+   "definition": "Work organisation, rotations, draught animals and tools that make each worker produce more; the people work harder. Operationally: >= 40% of research emphasis units on labor (share = units on the line / all units).",
+   "strategy": {
+    "rule": ">= 40% of research emphasis units on labor (share = units on the line / all units)",
+    "research_share_min": {
+     "labor": 0.4
+    },
+    "lines": [
+     "labor"
+    ],
+    "typical_decrees": [
+     "labor_mobilization"
+    ],
+    "signature": {
+     "decrees_any": [
+      "labor_mobilization"
+     ]
+    },
+    "surrogate_spec": {
+     "name": "focus:labor",
+     "research": {
+      "knowledge": 1,
+      "institutions": 1,
+      "culture": 1,
+      "labor": 12,
+      "production": 1,
+      "infrastructure": 1,
+      "nutrition": 1,
+      "health": 1,
+      "demography": 1,
+      "logistics": 1,
+      "ecology": 1,
+      "security": 1
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 6.6,
+      "Extraction": 9.1,
+      "Construction": 14.0,
+      "Crafting": 15.7,
+      "Logistics": 6.6,
+      "Knowledge": 5.2,
+      "Administration": 4.8,
+      "Defense": 3.3
+     },
+     "policies": [
+      "labor_mobilization"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "research = matrix.py lead_<line> (12 on the line, 1 elsewhere: 12/23 = 52%); labor = sensible with the listed roles changed"
+   },
+   "metrics": {
+    "food_labor_share": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "non_food_population_share": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "largest_structure_person_days": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "grain_yield_ratio": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "life_expectancy": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "maternal_per_100k": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "cdr": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.25,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.25,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "life_expectancy",
+     "maternal_per_100k",
+     "cdr"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "life_expectancy",
+     "maternal_per_100k",
+     "cdr"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "labor_efficiency",
+     "cap_production",
+     "food_per_worker"
+    ],
+    "cost_facets": [
+     "health",
+     "life_expectancy",
+     "cohesion"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Intensified agrarian labor regimes: draught animals and organised work groups cut food labor time by a quarter to a third, but skeletons show heavy osteoarthritis, grinding and carrying injuries, and women's workloads that raise maternal risk.",
+   "shock_hazard_mult": {}
+  },
+  "production": {
+   "label": "Craft and metallurgy focus",
+   "kind": "line",
+   "line": "production",
+   "description": "Crafts, kilns, metallurgy and workshops: specialised makers and better tools.",
+   "definition": "Crafts, kilns, metallurgy and workshops: specialised makers and better tools. Operationally: >= 40% of research emphasis units on production (share = units on the line / all units).",
+   "strategy": {
+    "rule": ">= 40% of research emphasis units on production (share = units on the line / all units)",
+    "research_share_min": {
+     "production": 0.4
+    },
+    "lines": [
+     "production"
+    ],
+    "settlement_focus": "development",
+    "typical_decrees": [
+     "craft_mobilization"
+    ],
+    "signature": {
+     "labor_min": {
+      "Crafting": 20.0
+     },
+     "decrees_any": [
+      "craft_mobilization"
+     ]
+    },
+    "surrogate_spec": {
+     "name": "focus:production",
+     "research": {
+      "knowledge": 1,
+      "institutions": 1,
+      "culture": 1,
+      "labor": 1,
+      "production": 12,
+      "infrastructure": 1,
+      "nutrition": 1,
+      "health": 1,
+      "demography": 1,
+      "logistics": 1,
+      "ecology": 1,
+      "security": 1
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 5.1,
+      "Extraction": 12.0,
+      "Construction": 10.8,
+      "Crafting": 22.0,
+      "Logistics": 5.1,
+      "Knowledge": 4.0,
+      "Administration": 3.7,
+      "Defense": 2.6
+     },
+     "policies": [
+      "craft_mobilization"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "research = matrix.py lead_<line> (12 on the line, 1 elsewhere: 12/23 = 52%); labor = sensible with the listed roles changed"
+   },
+   "metrics": {
+    "non_food_population_share": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "major_innovations_per_century": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "trade_reach_km": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "largest_structure_person_days": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "discoveries_per_50_years": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "life_expectancy": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "growth_pct": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "grain_yield_ratio": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.25,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.25,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "life_expectancy",
+     "growth_pct",
+     "grain_yield_ratio"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "life_expectancy",
+     "growth_pct"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "cap_production",
+     "craft_output",
+     "tool_quality"
+    ],
+    "cost_facets": [
+     "food_security",
+     "health",
+     "population",
+     "ecology"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Early metallurgical and craft centres: 10-20% of households in crafts, metal and fine goods traded over 1,000-3,000 km, a cluster of innovations (smelting, alloying, the wheel, glazes). Costs: toxic smelting (arsenical copper), charcoal demand stripping woodland and fields of labor, and specialists who must be fed from others' surplus.",
+   "shock_hazard_mult": {}
+  },
+  "infrastructure": {
+   "label": "Building focus",
+   "kind": "line",
+   "line": "infrastructure",
+   "description": "Building: houses, walls, storage, water works and roads; the society lives densely and builds big.",
+   "definition": "Building: houses, walls, storage, water works and roads; the society lives densely and builds big. Operationally: >= 40% of research emphasis units on infrastructure (share = units on the line / all units).",
+   "strategy": {
+    "rule": ">= 40% of research emphasis units on infrastructure (share = units on the line / all units)",
+    "research_share_min": {
+     "infrastructure": 0.4
+    },
+    "lines": [
+     "infrastructure"
+    ],
+    "settlement_focus": "shelter",
+    "typical_decrees": [
+     "emergency_building"
+    ],
+    "signature": {
+     "labor_min": {
+      "Construction": 18.0
+     },
+     "decrees_any": [
+      "emergency_building",
+      "stone_housing_program"
+     ]
+    },
+    "surrogate_spec": {
+     "name": "focus:infrastructure",
+     "research": {
+      "knowledge": 1,
+      "institutions": 1,
+      "culture": 1,
+      "labor": 1,
+      "production": 1,
+      "infrastructure": 12,
+      "nutrition": 1,
+      "health": 1,
+      "demography": 1,
+      "logistics": 1,
+      "ecology": 1,
+      "security": 1
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 5.9,
+      "Extraction": 8.0,
+      "Construction": 20.0,
+      "Crafting": 13.9,
+      "Logistics": 5.8,
+      "Knowledge": 4.6,
+      "Administration": 4.2,
+      "Defense": 2.9
+     },
+     "policies": [
+      "emergency_building"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "research = matrix.py lead_<line> (12 on the line, 1 elsewhere: 12/23 = 52%); labor = sensible with the listed roles changed"
+   },
+   "metrics": {
+    "largest_structure_person_days": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "largest_settlement_historical": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "settlement_density": {
+     "role": "shift",
+     "preset": "up",
+     "full": [
+      -0.6,
+      0.4,
+      1.25
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.8,
+       0.2,
+       1.125
+      ],
+      "300": [
+       -0.66,
+       0.34,
+       1.212
+      ],
+      "600": [
+       -0.6,
+       0.4,
+       1.25
+      ]
+     }
+    },
+    "grain_yield_ratio": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "non_food_population_share": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "infant_mortality": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "cdr": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "child_mortality_1_4": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.25,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.25,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "infant_mortality",
+     "cdr"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "infant_mortality",
+     "cdr"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "cap_infrastructure",
+     "housing_ratio",
+     "construction_rate"
+    ],
+    "cost_facets": [
+     "health",
+     "life_expectancy",
+     "infant_mortality"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Dense walled towns with storage and water works: 150-300 people per hectare, walls and terraces of 10^5-10^6 person-days, irrigation lifting yields. The urban penalty: crowd diseases, contaminated water and refuse raise infant and adult deaths well above village levels.",
+   "shock_hazard_mult": {}
+  },
+  "nutrition": {
+   "label": "Agrarian intensification focus",
+   "kind": "line",
+   "line": "nutrition",
+   "description": "Farming, herding, storage and cooking: more and steadier food.",
+   "definition": "Farming, herding, storage and cooking: more and steadier food. Operationally: >= 40% of research emphasis units on nutrition (share = units on the line / all units).",
+   "strategy": {
+    "rule": ">= 40% of research emphasis units on nutrition (share = units on the line / all units)",
+    "research_share_min": {
+     "nutrition": 0.4
+    },
+    "lines": [
+     "nutrition"
+    ],
+    "settlement_focus": "provisions",
+    "typical_decrees": [],
+    "signature": {},
+    "surrogate_spec": {
+     "name": "focus:nutrition",
+     "research": {
+      "knowledge": 1,
+      "institutions": 1,
+      "culture": 1,
+      "labor": 1,
+      "production": 1,
+      "infrastructure": 1,
+      "nutrition": 12,
+      "health": 1,
+      "demography": 1,
+      "logistics": 1,
+      "ecology": 1,
+      "security": 1
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 6.6,
+      "Extraction": 9.1,
+      "Construction": 14.0,
+      "Crafting": 15.7,
+      "Logistics": 6.6,
+      "Knowledge": 5.2,
+      "Administration": 4.8,
+      "Defense": 3.3
+     },
+     "policies": [],
+     "site": "good"
+    },
+    "surrogate_note": "research = matrix.py lead_<line> (12 on the line, 1 elsewhere: 12/23 = 52%); labor = sensible with the listed roles changed"
+   },
+   "metrics": {
+    "grain_yield_ratio": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "food_labor_share": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "growth_pct": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "population": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "life_expectancy": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "child_mortality_1_4": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "discoveries_per_50_years": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "trade_reach_km": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "largest_structure_person_days": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "army_levy_size": {
+     "role": "shift",
+     "preset": "down-",
+     "full": [
+      -1.08,
+      -0.15,
+      0.85
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.04,
+       -0.075,
+       0.925
+      ],
+      "300": [
+       -1.068,
+       -0.128,
+       0.873
+      ],
+      "600": [
+       -1.08,
+       -0.15,
+       0.85
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.25,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.25,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "discoveries_per_50_years",
+     "trade_reach_km"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "discoveries_per_50_years"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "food_security",
+     "food_per_worker",
+     "diet",
+     "population"
+    ],
+    "cost_facets": [
+     "per_50",
+     "known",
+     "cap_logistics",
+     "cap_security"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Well-managed intensive mixed farming villages: manuring, crop rotation and storage give 1:10-1:20 yields and steady growth near the high end of the era. They are self-sufficient: little long-distance exchange, few specialists, modest monuments and slower invention.",
+   "shock_hazard_mult": {}
+  },
+  "health": {
+   "label": "Healing and sanitation focus",
+   "kind": "line",
+   "line": "health",
+   "description": "Healing, hygiene, midwifery and care of the sick.",
+   "definition": "Healing, hygiene, midwifery and care of the sick. Operationally: >= 40% of research emphasis units on health (share = units on the line / all units).",
+   "strategy": {
+    "rule": ">= 40% of research emphasis units on health (share = units on the line / all units)",
+    "research_share_min": {
+     "health": 0.4
+    },
+    "lines": [
+     "health"
+    ],
+    "typical_decrees": [
+     "care_rotation"
+    ],
+    "signature": {
+     "decrees_any": [
+      "care_rotation"
+     ]
+    },
+    "surrogate_spec": {
+     "name": "focus:health",
+     "research": {
+      "knowledge": 1,
+      "institutions": 1,
+      "culture": 1,
+      "labor": 1,
+      "production": 1,
+      "infrastructure": 1,
+      "nutrition": 1,
+      "health": 12,
+      "demography": 1,
+      "logistics": 1,
+      "ecology": 1,
+      "security": 1
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 6.6,
+      "Extraction": 9.1,
+      "Construction": 14.0,
+      "Crafting": 15.7,
+      "Logistics": 6.6,
+      "Knowledge": 5.2,
+      "Administration": 4.8,
+      "Defense": 3.3
+     },
+     "policies": [
+      "care_rotation"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "research = matrix.py lead_<line> (12 on the line, 1 elsewhere: 12/23 = 52%); labor = sensible with the listed roles changed"
+   },
+   "metrics": {
+    "life_expectancy": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "infant_mortality": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "child_mortality_1_4": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "maternal_per_100k": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "cdr": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "growth_pct": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "food_labor_share": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "largest_structure_person_days": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "non_food_population_share": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.15,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.25,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "food_labor_share",
+     "largest_structure_person_days"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "food_labor_share"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "health",
+     "life_expectancy",
+     "infant_mortality",
+     "child_mortality_1_4"
+    ],
+    "cost_facets": [
+     "labor_efficiency",
+     "cap_production",
+     "food_share"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Communities with strong care traditions: long-term care of the disabled, herbal and surgical practice, trained midwives. Pre-modern medicine buys only a few years of life expectancy (about +2 to +4), infant mortality near the best-recorded 160-180 per 1,000 and maternal deaths near 500-800 per 100,000; care work takes labor from fields and building.",
+   "shock_hazard_mult": {}
+  },
+  "demography": {
+   "label": "Household and fertility focus",
+   "kind": "line",
+   "line": "demography",
+   "description": "Many children and large families: fertility, family support and settling new land.",
+   "definition": "Many children and large families: fertility, family support and settling new land. Operationally: >= 40% of research emphasis units on demography (share = units on the line / all units).",
+   "strategy": {
+    "rule": ">= 40% of research emphasis units on demography (share = units on the line / all units)",
+    "research_share_min": {
+     "demography": 0.4
+    },
+    "lines": [
+     "demography"
+    ],
+    "typical_decrees": [
+     "family_support"
+    ],
+    "signature": {
+     "decrees_any": [
+      "family_support",
+      "coercive_pronatalism"
+     ]
+    },
+    "surrogate_spec": {
+     "name": "focus:demography",
+     "research": {
+      "knowledge": 1,
+      "institutions": 1,
+      "culture": 1,
+      "labor": 1,
+      "production": 1,
+      "infrastructure": 1,
+      "nutrition": 1,
+      "health": 1,
+      "demography": 12,
+      "logistics": 1,
+      "ecology": 1,
+      "security": 1
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 6.6,
+      "Extraction": 9.1,
+      "Construction": 14.0,
+      "Crafting": 15.7,
+      "Logistics": 6.6,
+      "Knowledge": 5.2,
+      "Administration": 4.8,
+      "Defense": 3.3
+     },
+     "policies": [
+      "family_support"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "research = matrix.py lead_<line> (12 on the line, 1 elsewhere: 12/23 = 52%); labor = sensible with the listed roles changed"
+   },
+   "metrics": {
+    "population": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "growth_pct": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "tfr": {
+     "role": "shift",
+     "preset": "up+",
+     "full": [
+      -0.3,
+      0.7,
+      1.5
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.65,
+       0.35,
+       1.25
+      ],
+      "300": [
+       -0.405,
+       0.595,
+       1.425
+      ],
+      "600": [
+       -0.3,
+       0.7,
+       1.5
+      ]
+     }
+    },
+    "cbr": {
+     "role": "shift",
+     "preset": "up+",
+     "full": [
+      -0.3,
+      0.7,
+      1.5
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.65,
+       0.35,
+       1.25
+      ],
+      "300": [
+       -0.405,
+       0.595,
+       1.425
+      ],
+      "600": [
+       -0.3,
+       0.7,
+       1.5
+      ]
+     }
+    },
+    "maternal_per_100k": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "child_mortality_1_4": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "food_labor_share": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "non_food_population_share": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.25,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.25,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "food_labor_share",
+     "child_mortality_1_4",
+     "non_food_population_share"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "food_labor_share",
+     "child_mortality_1_4"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "population",
+     "growth_pct"
+    ],
+    "cost_facets": [
+     "food_security",
+     "diet",
+     "food_share",
+     "child_mortality_1_4"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "The farming demographic transition at its strongest: total fertility 6.5-7.5, growth 1-1.5% a year for generations. Shorter birth intervals mean earlier weaning and more child deaths, and more mouths keep most labor in the fields.",
+   "shock_hazard_mult": {}
+  },
+  "logistics": {
+   "label": "Transport and exchange focus",
+   "kind": "line",
+   "line": "logistics",
+   "description": "Carrying, boats, pack animals, routes and exchange partners.",
+   "definition": "Carrying, boats, pack animals, routes and exchange partners. Operationally: >= 40% of research emphasis units on logistics (share = units on the line / all units).",
+   "strategy": {
+    "rule": ">= 40% of research emphasis units on logistics (share = units on the line / all units)",
+    "research_share_min": {
+     "logistics": 0.4
+    },
+    "lines": [
+     "logistics"
+    ],
+    "settlement_focus": "logistics",
+    "typical_decrees": [
+     "route_priority"
+    ],
+    "signature": {
+     "labor_min": {
+      "Logistics": 11.0
+     },
+     "decrees_any": [
+      "route_priority",
+      "market_deregulation"
+     ]
+    },
+    "surrogate_spec": {
+     "name": "focus:logistics",
+     "research": {
+      "knowledge": 1,
+      "institutions": 1,
+      "culture": 1,
+      "labor": 1,
+      "production": 1,
+      "infrastructure": 1,
+      "nutrition": 1,
+      "health": 1,
+      "demography": 1,
+      "logistics": 12,
+      "ecology": 1,
+      "security": 1
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 5.9,
+      "Extraction": 8.3,
+      "Construction": 12.7,
+      "Crafting": 14.3,
+      "Logistics": 12.0,
+      "Knowledge": 4.7,
+      "Administration": 4.4,
+      "Defense": 3.0
+     },
+     "policies": [
+      "route_priority"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "research = matrix.py lead_<line> (12 on the line, 1 elsewhere: 12/23 = 52%); labor = sensible with the listed roles changed"
+   },
+   "metrics": {
+    "trade_reach_km": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "largest_settlement_historical": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "non_food_population_share": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "major_innovations_per_century": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "discoveries_per_50_years": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "cdr": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "infant_mortality": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "grain_yield_ratio": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.25,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.25,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "cdr",
+     "grain_yield_ratio"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "cdr"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "cap_logistics",
+     "trade_capacity"
+    ],
+    "cost_facets": [
+     "health",
+     "food_per_worker",
+     "cap_security"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Trade-diaspora and caravan societies: exotic stone, metal and shell arriving from 2,000-4,000 km, trading outposts, early adoption of others' inventions. Exposure to strangers' diseases and labor on the road instead of the fields.",
+   "shock_hazard_mult": {
+    "pandemic_ge_5pct": 1.3,
+    "pandemic_ge_25pct": 1.3
+   }
+  },
+  "ecology": {
+   "label": "Land stewardship focus",
+   "kind": "line",
+   "line": "ecology",
+   "description": "Care of the land: fallowing, managed woodland, restraint in taking game and fish.",
+   "definition": "Care of the land: fallowing, managed woodland, restraint in taking game and fish. Operationally: >= 40% of research emphasis units on ecology (share = units on the line / all units).",
+   "strategy": {
+    "rule": ">= 40% of research emphasis units on ecology (share = units on the line / all units)",
+    "research_share_min": {
+     "ecology": 0.4
+    },
+    "lines": [
+     "ecology"
+    ],
+    "typical_decrees": [
+     "conservation_order"
+    ],
+    "signature": {
+     "decrees_any": [
+      "conservation_order"
+     ]
+    },
+    "surrogate_spec": {
+     "name": "focus:ecology",
+     "research": {
+      "knowledge": 1,
+      "institutions": 1,
+      "culture": 1,
+      "labor": 1,
+      "production": 1,
+      "infrastructure": 1,
+      "nutrition": 1,
+      "health": 1,
+      "demography": 1,
+      "logistics": 1,
+      "ecology": 12,
+      "security": 1
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 6.6,
+      "Extraction": 9.1,
+      "Construction": 14.0,
+      "Crafting": 15.7,
+      "Logistics": 6.6,
+      "Knowledge": 5.2,
+      "Administration": 4.8,
+      "Defense": 3.3
+     },
+     "policies": [
+      "conservation_order"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "research = matrix.py lead_<line> (12 on the line, 1 elsewhere: 12/23 = 52%); labor = sensible with the listed roles changed"
+   },
+   "metrics": {
+    "grain_yield_ratio": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "life_expectancy": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "child_mortality_1_4": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "cdr": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "population": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "growth_pct": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "largest_settlement_historical": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "largest_structure_person_days": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "non_food_population_share": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.25,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.25,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "population",
+     "growth_pct",
+     "largest_settlement_historical"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "population",
+     "growth_pct"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "ecology",
+     "ground_health"
+    ],
+    "cost_facets": [
+     "population",
+     "cap_production",
+     "growth_pct"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Long-lived sustainable forager-horticulturalist and small-farm communities: stable for millennia at low density, often taller and healthier than early farmers, but with small villages, few specialists and slow growth.",
+   "shock_hazard_mult": {
+    "famine_ge_2pct": 0.7,
+    "collapse": 0.8
+   }
+  },
+  "security": {
+   "label": "Martial focus",
+   "kind": "line",
+   "line": "security",
+   "description": "Watch, weapons, walls and war leaders.",
+   "definition": "Watch, weapons, walls and war leaders. Operationally: >= 40% of research emphasis units on security (share = units on the line / all units).",
+   "strategy": {
+    "rule": ">= 40% of research emphasis units on security (share = units on the line / all units)",
+    "research_share_min": {
+     "security": 0.4
+    },
+    "lines": [
+     "security"
+    ],
+    "settlement_focus": "defense",
+    "typical_decrees": [
+     "expanded_watch"
+    ],
+    "signature": {
+     "labor_min": {
+      "Defense": 8.0
+     },
+     "decrees_any": [
+      "expanded_watch",
+      "conscription_drive"
+     ]
+    },
+    "surrogate_spec": {
+     "name": "focus:security",
+     "research": {
+      "knowledge": 1,
+      "institutions": 1,
+      "culture": 1,
+      "labor": 1,
+      "production": 1,
+      "infrastructure": 1,
+      "nutrition": 1,
+      "health": 1,
+      "demography": 1,
+      "logistics": 1,
+      "ecology": 1,
+      "security": 12
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 5.9,
+      "Extraction": 8.3,
+      "Construction": 12.7,
+      "Crafting": 14.3,
+      "Logistics": 6.0,
+      "Knowledge": 4.7,
+      "Administration": 4.4,
+      "Defense": 9.0
+     },
+     "policies": [
+      "expanded_watch"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "research = matrix.py lead_<line> (12 on the line, 1 elsewhere: 12/23 = 52%); labor = sensible with the listed roles changed"
+   },
+   "metrics": {
+    "defense_labor_share": {
+     "role": "shift",
+     "preset": "up+",
+     "full": [
+      -0.3,
+      0.7,
+      1.5
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.65,
+       0.35,
+       1.25
+      ],
+      "300": [
+       -0.405,
+       0.595,
+       1.425
+      ],
+      "600": [
+       -0.3,
+       0.7,
+       1.5
+      ]
+     }
+    },
+    "army_levy_size": {
+     "role": "shift",
+     "preset": "up+",
+     "full": [
+      -0.3,
+      0.7,
+      1.5
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.65,
+       0.35,
+       1.25
+      ],
+      "300": [
+       -0.405,
+       0.595,
+       1.425
+      ],
+      "600": [
+       -0.3,
+       0.7,
+       1.5
+      ]
+     }
+    },
+    "largest_settlement_historical": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "largest_structure_person_days": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "settlement_density": {
+     "role": "shift",
+     "preset": "up-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "food_labor_share": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "growth_pct": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "life_expectancy": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "discoveries_per_50_years": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.25,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.25,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "food_labor_share",
+     "growth_pct",
+     "life_expectancy"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "food_labor_share",
+     "growth_pct",
+     "life_expectancy"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "cap_security",
+     "warfare_readiness"
+    ],
+    "cost_facets": [
+     "food_security",
+     "cap_production",
+     "known",
+     "population"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Fortified agrarian communities in contested land: 5-15% of adult men under arms or on watch, ditched and walled villages, aggregation into defensible towns; violent trauma on 10-20% of skeletons, massacre sites, and the watch's labor missing from the fields.",
+   "shock_hazard_mult": {}
+  },
+  "balanced": {
+   "label": "Balanced",
+   "kind": "balanced",
+   "description": "No emphasis: effort spread evenly across all lines.",
+   "definition": "No emphasis: effort spread evenly across all lines. Operationally: no research line above 25% of emphasis units (e.g. balanced 2 on every line = 8%, sensible max 3/22 = 14%).",
+   "strategy": {
+    "rule": "no research line above 25% of emphasis units (e.g. balanced 2 on every line = 8%, sensible max 3/22 = 14%)",
+    "research_share_max": 0.25,
+    "lines": [],
+    "typical_decrees": [],
+    "signature": {},
+    "surrogate_spec": {
+     "name": "focus:balanced",
+     "research": {
+      "knowledge": 2,
+      "institutions": 2,
+      "culture": 2,
+      "labor": 2,
+      "production": 2,
+      "infrastructure": 2,
+      "nutrition": 2,
+      "health": 2,
+      "demography": 2,
+      "logistics": 2,
+      "ecology": 2,
+      "security": 2
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 6.6,
+      "Extraction": 9.1,
+      "Construction": 14.0,
+      "Crafting": 15.7,
+      "Logistics": 6.6,
+      "Knowledge": 5.2,
+      "Administration": 4.8,
+      "Defense": 3.3
+     },
+     "policies": [],
+     "site": "good"
+    },
+    "surrogate_note": "identical to the sweep's 'balanced' baseline; it is the reference for every relative facet check"
+   },
+   "metrics": {
+    "life_expectancy": {
+     "role": "neutral",
+     "preset": "steady",
+     "full": [
+      -0.8,
+      0.0,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.9,
+       0.0,
+       0.95
+      ],
+      "300": [
+       -0.83,
+       0.0,
+       0.915
+      ],
+      "600": [
+       -0.8,
+       0.0,
+       0.9
+      ]
+     }
+    },
+    "infant_mortality": {
+     "role": "neutral",
+     "preset": "steady",
+     "full": [
+      -0.8,
+      0.0,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.9,
+       0.0,
+       0.95
+      ],
+      "300": [
+       -0.83,
+       0.0,
+       0.915
+      ],
+      "600": [
+       -0.8,
+       0.0,
+       0.9
+      ]
+     }
+    },
+    "child_mortality_1_4": {
+     "role": "neutral",
+     "preset": "steady",
+     "full": [
+      -0.8,
+      0.0,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.9,
+       0.0,
+       0.95
+      ],
+      "300": [
+       -0.83,
+       0.0,
+       0.915
+      ],
+      "600": [
+       -0.8,
+       0.0,
+       0.9
+      ]
+     }
+    },
+    "maternal_per_100k": {
+     "role": "neutral",
+     "preset": "steady",
+     "full": [
+      -0.8,
+      0.0,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.9,
+       0.0,
+       0.95
+      ],
+      "300": [
+       -0.83,
+       0.0,
+       0.915
+      ],
+      "600": [
+       -0.8,
+       0.0,
+       0.9
+      ]
+     }
+    },
+    "cdr": {
+     "role": "neutral",
+     "preset": "steady",
+     "full": [
+      -0.8,
+      0.0,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.9,
+       0.0,
+       0.95
+      ],
+      "300": [
+       -0.83,
+       0.0,
+       0.915
+      ],
+      "600": [
+       -0.8,
+       0.0,
+       0.9
+      ]
+     }
+    },
+    "growth_pct": {
+     "role": "neutral",
+     "preset": "steady",
+     "full": [
+      -0.8,
+      0.0,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.9,
+       0.0,
+       0.95
+      ],
+      "300": [
+       -0.83,
+       0.0,
+       0.915
+      ],
+      "600": [
+       -0.8,
+       0.0,
+       0.9
+      ]
+     }
+    },
+    "population": {
+     "role": "neutral",
+     "preset": "steady",
+     "full": [
+      -0.8,
+      0.0,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.9,
+       0.0,
+       0.95
+      ],
+      "300": [
+       -0.83,
+       0.0,
+       0.915
+      ],
+      "600": [
+       -0.8,
+       0.0,
+       0.9
+      ]
+     }
+    },
+    "largest_settlement_historical": {
+     "role": "neutral",
+     "preset": "steady",
+     "full": [
+      -0.8,
+      0.0,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.9,
+       0.0,
+       0.95
+      ],
+      "300": [
+       -0.83,
+       0.0,
+       0.915
+      ],
+      "600": [
+       -0.8,
+       0.0,
+       0.9
+      ]
+     }
+    },
+    "food_labor_share": {
+     "role": "neutral",
+     "preset": "steady",
+     "full": [
+      -0.8,
+      0.0,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.9,
+       0.0,
+       0.95
+      ],
+      "300": [
+       -0.83,
+       0.0,
+       0.915
+      ],
+      "600": [
+       -0.8,
+       0.0,
+       0.9
+      ]
+     }
+    },
+    "non_food_population_share": {
+     "role": "neutral",
+     "preset": "steady",
+     "full": [
+      -0.8,
+      0.0,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.9,
+       0.0,
+       0.95
+      ],
+      "300": [
+       -0.83,
+       0.0,
+       0.915
+      ],
+      "600": [
+       -0.8,
+       0.0,
+       0.9
+      ]
+     }
+    },
+    "grain_yield_ratio": {
+     "role": "neutral",
+     "preset": "steady",
+     "full": [
+      -0.8,
+      0.0,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.9,
+       0.0,
+       0.95
+      ],
+      "300": [
+       -0.83,
+       0.0,
+       0.915
+      ],
+      "600": [
+       -0.8,
+       0.0,
+       0.9
+      ]
+     }
+    },
+    "discoveries_per_50_years": {
+     "role": "neutral",
+     "preset": "steady",
+     "full": [
+      -0.8,
+      0.0,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.9,
+       0.0,
+       0.95
+      ],
+      "300": [
+       -0.83,
+       0.0,
+       0.915
+      ],
+      "600": [
+       -0.8,
+       0.0,
+       0.9
+      ]
+     }
+    },
+    "trade_reach_km": {
+     "role": "neutral",
+     "preset": "steady",
+     "full": [
+      -0.8,
+      0.0,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.9,
+       0.0,
+       0.95
+      ],
+      "300": [
+       -0.83,
+       0.0,
+       0.915
+      ],
+      "600": [
+       -0.8,
+       0.0,
+       0.9
+      ]
+     }
+    },
+    "major_innovations_per_century": {
+     "role": "cost",
+     "preset": "peakless",
+     "full": [
+      -0.9,
+      -0.2,
+      0.7
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -0.95,
+       -0.1,
+       0.85
+      ],
+      "300": [
+       -0.915,
+       -0.17,
+       0.745
+      ],
+      "600": [
+       -0.9,
+       -0.2,
+       0.7
+      ]
+     }
+    },
+    "largest_structure_person_days": {
+     "role": "cost",
+     "preset": "peakless",
+     "full": [
+      -0.9,
+      -0.2,
+      0.7
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -0.95,
+       -0.1,
+       0.85
+      ],
+      "300": [
+       -0.915,
+       -0.17,
+       0.745
+      ],
+      "600": [
+       -0.9,
+       -0.2,
+       0.7
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.1,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.2,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "major_innovations_per_century",
+     "largest_structure_person_days"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": []
+   },
+   "surrogate": {
+    "boost_facets": [],
+    "cost_facets": [],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "balanced is the reference run; judge it by its bands only (its ceiling is lowered everywhere, so no metric may pass 0.9 of the way to the base high plus the 0.10 lead)"
+   },
+   "calibration": "Generalist farming societies of the era with no dominant institution: ordinary outcomes everywhere, a slightly higher floor (fewer collapses) and a lower ceiling: nobody raises the era's greatest monuments or clusters its major inventions.",
+   "shock_hazard_mult": {
+    "famine_ge_2pct": 0.9
+   }
+  },
+  "militarised_agrarian_state": {
+   "label": "Militarised agrarian state",
+   "kind": "archetype",
+   "description": "A grain-growing state organised for war: large levies drawn from a farming population, forts and granaries, tribute from neighbours.",
+   "definition": "A grain-growing state organised for war: large levies drawn from a farming population, forts and granaries, tribute from neighbours. Operationally: >= 55% of research emphasis units across security, nutrition, institutions with >= 12% on each and no single line >= 40%.",
+   "strategy": {
+    "rule": ">= 55% of research emphasis units across security, nutrition, institutions with >= 12% on each and no single line >= 40%",
+    "lines": [
+     "security",
+     "nutrition",
+     "institutions"
+    ],
+    "combined_share_min": 0.55,
+    "each_share_min": 0.12,
+    "typical_decrees": [
+     "conscription_drive",
+     "labor_mobilization"
+    ],
+    "signature": {},
+    "surrogate_spec": {
+     "name": "focus:security+nutrition+institutions",
+     "research": {
+      "knowledge": 1,
+      "institutions": 4,
+      "culture": 1,
+      "labor": 1,
+      "production": 1,
+      "infrastructure": 1,
+      "nutrition": 5,
+      "health": 1,
+      "demography": 1,
+      "logistics": 1,
+      "ecology": 1,
+      "security": 5
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 5.8,
+      "Extraction": 8.0,
+      "Construction": 12.3,
+      "Crafting": 13.8,
+      "Logistics": 5.8,
+      "Knowledge": 4.6,
+      "Administration": 6.0,
+      "Defense": 9.0
+     },
+     "policies": [
+      "conscription_drive",
+      "labor_mobilization"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "canonical run puts 61% of units on its lines"
+   },
+   "metrics": {
+    "grain_yield_ratio": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "population": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "growth_pct": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "largest_structure_person_days": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "largest_settlement_historical": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "army_levy_size": {
+     "role": "shift",
+     "preset": "up+",
+     "full": [
+      -0.3,
+      0.7,
+      1.5
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.65,
+       0.35,
+       1.25
+      ],
+      "300": [
+       -0.405,
+       0.595,
+       1.425
+      ],
+      "600": [
+       -0.3,
+       0.7,
+       1.5
+      ]
+     }
+    },
+    "defense_labor_share": {
+     "role": "shift",
+     "preset": "up",
+     "full": [
+      -0.6,
+      0.4,
+      1.25
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.8,
+       0.2,
+       1.125
+      ],
+      "300": [
+       -0.66,
+       0.34,
+       1.212
+      ],
+      "600": [
+       -0.6,
+       0.4,
+       1.25
+      ]
+     }
+    },
+    "life_expectancy": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "child_mortality_1_4": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "trade_reach_km": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "discoveries_per_50_years": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.25,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.23,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "life_expectancy",
+     "child_mortality_1_4"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "life_expectancy",
+     "child_mortality_1_4"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "cap_security",
+     "warfare_readiness",
+     "food_security",
+     "cap_institutions"
+    ],
+    "cost_facets": [
+     "health",
+     "life_expectancy",
+     "cohesion",
+     "known"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Militarised agrarian polities of the later window: levies of thousands to tens of thousands from populations of 10^4-10^5, fortified granaries and tribute; stature and life expectancy below unmilitarised neighbours, heavy violent trauma, and innovation concentrated in weapons.",
+   "shock_hazard_mult": {
+    "general_war": 1.2
+   }
+  },
+  "maritime_trading_league": {
+   "label": "Maritime trading league",
+   "kind": "archetype",
+   "description": "Small coastal and island communities linked by boats, living from exchange and crafts rather than broad fields.",
+   "definition": "Small coastal and island communities linked by boats, living from exchange and crafts rather than broad fields. Operationally: >= 55% of research emphasis units across logistics, production, culture with >= 12% on each and no single line >= 40%.",
+   "strategy": {
+    "rule": ">= 55% of research emphasis units across logistics, production, culture with >= 12% on each and no single line >= 40%",
+    "lines": [
+     "logistics",
+     "production",
+     "culture"
+    ],
+    "combined_share_min": 0.55,
+    "each_share_min": 0.12,
+    "typical_decrees": [
+     "route_priority",
+     "market_deregulation"
+    ],
+    "signature": {},
+    "surrogate_spec": {
+     "name": "focus:logistics+production+culture",
+     "research": {
+      "knowledge": 1,
+      "institutions": 1,
+      "culture": 3,
+      "labor": 1,
+      "production": 5,
+      "infrastructure": 1,
+      "nutrition": 1,
+      "health": 1,
+      "demography": 1,
+      "logistics": 6,
+      "ecology": 1,
+      "security": 1
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 5.4,
+      "Extraction": 7.5,
+      "Construction": 11.5,
+      "Crafting": 18.0,
+      "Logistics": 12.0,
+      "Knowledge": 4.3,
+      "Administration": 3.9,
+      "Defense": 2.7
+     },
+     "policies": [
+      "route_priority",
+      "market_deregulation"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "canonical run puts 61% of units on its lines; needs a coastal site; the surrogate's 'good' site is a river/woodland stand-in"
+   },
+   "metrics": {
+    "trade_reach_km": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "non_food_population_share": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "major_innovations_per_century": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "largest_settlement_historical": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "discoveries_per_50_years": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "army_levy_size": {
+     "role": "shift",
+     "preset": "down",
+     "full": [
+      -1.25,
+      -0.4,
+      0.6
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.8
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.66
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.6
+      ]
+     }
+    },
+    "defense_labor_share": {
+     "role": "shift",
+     "preset": "down-",
+     "full": [
+      -1.08,
+      -0.15,
+      0.85
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.04,
+       -0.075,
+       0.925
+      ],
+      "300": [
+       -1.068,
+       -0.128,
+       0.873
+      ],
+      "600": [
+       -1.08,
+       -0.15,
+       0.85
+      ]
+     }
+    },
+    "population": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "growth_pct": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "grain_yield_ratio": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "cdr": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.25,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.23,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "population",
+     "grain_yield_ratio",
+     "cdr"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "population",
+     "cdr"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "cap_logistics",
+     "trade_capacity",
+     "cap_production",
+     "craft_output"
+    ],
+    "cost_facets": [
+     "population",
+     "food_security",
+     "health",
+     "cap_security"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Island and coastal exchange networks: sailing routes carrying metals, obsidian and fine goods 1,500-4,000 km; palace or town workshops with a high craft share; small total populations on limited arable land, thin fields, and port-borne disease.",
+   "shock_hazard_mult": {
+    "pandemic_ge_5pct": 1.4,
+    "pandemic_ge_25pct": 1.4,
+    "economic_crisis": 1.3
+   }
+  },
+  "temple_scribal_economy": {
+   "label": "Temple and scribal economy",
+   "kind": "archetype",
+   "description": "A redistributive economy run from a sacred household: scribes, rations, stores, calendars and great platforms.",
+   "definition": "A redistributive economy run from a sacred household: scribes, rations, stores, calendars and great platforms. Operationally: >= 55% of research emphasis units across institutions, knowledge, culture with >= 12% on each and no single line >= 40%.",
+   "strategy": {
+    "rule": ">= 55% of research emphasis units across institutions, knowledge, culture with >= 12% on each and no single line >= 40%",
+    "lines": [
+     "institutions",
+     "knowledge",
+     "culture"
+    ],
+    "combined_share_min": 0.55,
+    "each_share_min": 0.12,
+    "typical_decrees": [
+     "directed_inquiry",
+     "public_assembly",
+     "wealth_levy"
+    ],
+    "signature": {},
+    "surrogate_spec": {
+     "name": "focus:institutions+knowledge+culture",
+     "research": {
+      "knowledge": 5,
+      "institutions": 5,
+      "culture": 4,
+      "labor": 1,
+      "production": 1,
+      "infrastructure": 1,
+      "nutrition": 1,
+      "health": 1,
+      "demography": 1,
+      "logistics": 1,
+      "ecology": 1,
+      "security": 1
+     },
+     "knowledge_share": 10.0,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 6.2,
+      "Extraction": 8.6,
+      "Construction": 13.3,
+      "Crafting": 14.9,
+      "Logistics": 6.3,
+      "Knowledge": 4.9,
+      "Administration": 8.0,
+      "Defense": 3.1
+     },
+     "policies": [
+      "directed_inquiry",
+      "public_assembly",
+      "wealth_levy"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "canonical run puts 61% of units on its lines"
+   },
+   "metrics": {
+    "literacy_pct": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "discoveries_per_50_years": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "largest_structure_person_days": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "non_food_population_share": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "largest_settlement_historical": {
+     "role": "boost",
+     "preset": "boost",
+     "full": [
+      -0.7,
+      0.35,
+      1.2
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.85,
+       0.175,
+       1.1
+      ],
+      "300": [
+       -0.745,
+       0.297,
+       1.17
+      ],
+      "600": [
+       -0.7,
+       0.35,
+       1.2
+      ]
+     }
+    },
+    "settlement_density": {
+     "role": "shift",
+     "preset": "up-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "major_innovations_per_century": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "life_expectancy": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "infant_mortality": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "growth_pct": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.25,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.23,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "life_expectancy",
+     "growth_pct"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "life_expectancy",
+     "growth_pct"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "known",
+     "education",
+     "cap_institutions",
+     "cap_culture"
+    ],
+    "cost_facets": [
+     "health",
+     "life_expectancy",
+     "population",
+     "food_per_worker"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Temple-centred redistributive economies: ration lists for thousands of dependent workers, the first writing arising from accounting, a scribal class of well under 1% of people, monumental platforms of 10^5-10^6 person-days. Dependent laborers on standard rations show poorer health and the centres grew by drawing people in rather than by births.",
+   "shock_hazard_mult": {
+    "collapse": 1.3
+   }
+  },
+  "expansionist_settler_state": {
+   "label": "Expansionist settler state",
+   "kind": "archetype",
+   "description": "A people that grows fast and keeps moving onto new land: daughter villages, frontier defence, cleared fields.",
+   "definition": "A people that grows fast and keeps moving onto new land: daughter villages, frontier defence, cleared fields. Operationally: >= 55% of research emphasis units across demography, logistics, security with >= 12% on each and no single line >= 40%.",
+   "strategy": {
+    "rule": ">= 55% of research emphasis units across demography, logistics, security with >= 12% on each and no single line >= 40%",
+    "lines": [
+     "demography",
+     "logistics",
+     "security"
+    ],
+    "combined_share_min": 0.55,
+    "each_share_min": 0.12,
+    "typical_decrees": [
+     "family_support"
+    ],
+    "signature": {},
+    "surrogate_spec": {
+     "name": "focus:demography+logistics+security",
+     "research": {
+      "knowledge": 1,
+      "institutions": 1,
+      "culture": 1,
+      "labor": 1,
+      "production": 1,
+      "infrastructure": 1,
+      "nutrition": 1,
+      "health": 1,
+      "demography": 5,
+      "logistics": 4,
+      "ecology": 1,
+      "security": 4
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 34.7,
+      "Survey": 6.2,
+      "Extraction": 8.4,
+      "Construction": 13.0,
+      "Crafting": 14.5,
+      "Logistics": 9.0,
+      "Knowledge": 4.8,
+      "Administration": 4.4,
+      "Defense": 5.0
+     },
+     "policies": [
+      "family_support"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "canonical run puts 59% of units on its lines"
+   },
+   "metrics": {
+    "population": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "growth_pct": {
+     "role": "boost",
+     "preset": "boost+",
+     "full": [
+      -0.5,
+      0.6,
+      1.35
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.75,
+       0.3,
+       1.175
+      ],
+      "300": [
+       -0.575,
+       0.51,
+       1.298
+      ],
+      "600": [
+       -0.5,
+       0.6,
+       1.35
+      ]
+     }
+    },
+    "tfr": {
+     "role": "shift",
+     "preset": "up",
+     "full": [
+      -0.6,
+      0.4,
+      1.25
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.8,
+       0.2,
+       1.125
+      ],
+      "300": [
+       -0.66,
+       0.34,
+       1.212
+      ],
+      "600": [
+       -0.6,
+       0.4,
+       1.25
+      ]
+     }
+    },
+    "cbr": {
+     "role": "shift",
+     "preset": "up",
+     "full": [
+      -0.6,
+      0.4,
+      1.25
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.8,
+       0.2,
+       1.125
+      ],
+      "300": [
+       -0.66,
+       0.34,
+       1.212
+      ],
+      "600": [
+       -0.6,
+       0.4,
+       1.25
+      ]
+     }
+    },
+    "trade_reach_km": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "army_levy_size": {
+     "role": "shift",
+     "preset": "up",
+     "full": [
+      -0.6,
+      0.4,
+      1.25
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.8,
+       0.2,
+       1.125
+      ],
+      "300": [
+       -0.66,
+       0.34,
+       1.212
+      ],
+      "600": [
+       -0.6,
+       0.4,
+       1.25
+      ]
+     }
+    },
+    "defense_labor_share": {
+     "role": "shift",
+     "preset": "up-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "largest_settlement_historical": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "largest_structure_person_days": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "discoveries_per_50_years": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "child_mortality_1_4": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "settlement_density": {
+     "role": "shift",
+     "preset": "down",
+     "full": [
+      -1.25,
+      -0.4,
+      0.6
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.8
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.66
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.6
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.25,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.23,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "largest_settlement_historical",
+     "largest_structure_person_days",
+     "child_mortality_1_4"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "child_mortality_1_4"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "population",
+     "growth_pct",
+     "cap_logistics",
+     "cap_security"
+    ],
+    "cost_facets": [
+     "per_50",
+     "known",
+     "cap_infrastructure",
+     "child_mortality_1_4"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Farming expansion fronts: colonisation of new land at 1-1.5% growth for centuries, uniform small villages of 50-300 people, few monuments, standardised rather than inventive material culture, and frontier violence and child mortality from constant resettlement.",
+   "shock_hazard_mult": {}
+  },
+  "insular_subsistence_people": {
+   "label": "Insular subsistence people",
+   "kind": "archetype",
+   "description": "A small, inward-looking people living from their own land and waters, avoiding strangers and large works.",
+   "definition": "A small, inward-looking people living from their own land and waters, avoiding strangers and large works. Operationally: >= 55% of research emphasis units across ecology, nutrition, health with >= 12% on each and no single line >= 40%.",
+   "strategy": {
+    "rule": ">= 55% of research emphasis units across ecology, nutrition, health with >= 12% on each and no single line >= 40%",
+    "lines": [
+     "ecology",
+     "nutrition",
+     "health"
+    ],
+    "combined_share_min": 0.55,
+    "each_share_min": 0.12,
+    "typical_decrees": [
+     "conservation_order"
+    ],
+    "signature": {},
+    "surrogate_spec": {
+     "name": "focus:ecology+nutrition+health",
+     "research": {
+      "knowledge": 1,
+      "institutions": 1,
+      "culture": 1,
+      "labor": 1,
+      "production": 1,
+      "infrastructure": 1,
+      "nutrition": 4,
+      "health": 4,
+      "demography": 1,
+      "logistics": 1,
+      "ecology": 6,
+      "security": 1
+     },
+     "knowledge_share": -1,
+     "labor": {
+      "Food": 42.0,
+      "Survey": 8.4,
+      "Extraction": 11.7,
+      "Construction": 10.0,
+      "Crafting": 10.0,
+      "Logistics": 4.5,
+      "Knowledge": 3.0,
+      "Administration": 6.2,
+      "Defense": 4.2
+     },
+     "policies": [
+      "conservation_order"
+     ],
+     "site": "good"
+    },
+    "surrogate_note": "canonical run puts 61% of units on its lines"
+   },
+   "metrics": {
+    "life_expectancy": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "infant_mortality": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "child_mortality_1_4": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "cdr": {
+     "role": "boost",
+     "preset": "boost-",
+     "full": [
+      -0.85,
+      0.15,
+      1.08
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       0.0,
+       1.0
+      ],
+      "100": [
+       -0.925,
+       0.075,
+       1.04
+      ],
+      "300": [
+       -0.873,
+       0.128,
+       1.068
+      ],
+      "600": [
+       -0.85,
+       0.15,
+       1.08
+      ]
+     }
+    },
+    "population": {
+     "role": "cost",
+     "preset": "cost+",
+     "full": [
+      -1.45,
+      -0.65,
+      0.5
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.225,
+       -0.325,
+       0.75
+      ],
+      "300": [
+       -1.382,
+       -0.552,
+       0.575
+      ],
+      "600": [
+       -1.45,
+       -0.65,
+       0.5
+      ]
+     }
+    },
+    "growth_pct": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "largest_settlement_historical": {
+     "role": "cost",
+     "preset": "cost+",
+     "full": [
+      -1.45,
+      -0.65,
+      0.5
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.225,
+       -0.325,
+       0.75
+      ],
+      "300": [
+       -1.382,
+       -0.552,
+       0.575
+      ],
+      "600": [
+       -1.45,
+       -0.65,
+       0.5
+      ]
+     }
+    },
+    "largest_structure_person_days": {
+     "role": "cost",
+     "preset": "cost+",
+     "full": [
+      -1.45,
+      -0.65,
+      0.5
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.225,
+       -0.325,
+       0.75
+      ],
+      "300": [
+       -1.382,
+       -0.552,
+       0.575
+      ],
+      "600": [
+       -1.45,
+       -0.65,
+       0.5
+      ]
+     }
+    },
+    "non_food_population_share": {
+     "role": "cost",
+     "preset": "cost+",
+     "full": [
+      -1.45,
+      -0.65,
+      0.5
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.225,
+       -0.325,
+       0.75
+      ],
+      "300": [
+       -1.382,
+       -0.552,
+       0.575
+      ],
+      "600": [
+       -1.45,
+       -0.65,
+       0.5
+      ]
+     }
+    },
+    "trade_reach_km": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "major_innovations_per_century": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "discoveries_per_50_years": {
+     "role": "cost",
+     "preset": "cost",
+     "full": [
+      -1.25,
+      -0.4,
+      0.75
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.875
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.787
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.75
+      ]
+     }
+    },
+    "food_labor_share": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "grain_yield_ratio": {
+     "role": "cost",
+     "preset": "cost-",
+     "full": [
+      -1.1,
+      -0.2,
+      0.9
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.05,
+       -0.1,
+       0.95
+      ],
+      "300": [
+       -1.085,
+       -0.17,
+       0.915
+      ],
+      "600": [
+       -1.1,
+       -0.2,
+       0.9
+      ]
+     }
+    },
+    "army_levy_size": {
+     "role": "shift",
+     "preset": "down",
+     "full": [
+      -1.25,
+      -0.4,
+      0.6
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.8
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.66
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.6
+      ]
+     }
+    },
+    "settlement_density": {
+     "role": "shift",
+     "preset": "down",
+     "full": [
+      -1.25,
+      -0.4,
+      0.6
+     ],
+     "by_year": {
+      "0": [
+       -1.0,
+       -0.0,
+       1.0
+      ],
+      "100": [
+       -1.125,
+       -0.2,
+       0.8
+      ],
+      "300": [
+       -1.212,
+       -0.34,
+       0.66
+      ],
+      "600": [
+       -1.25,
+       -0.4,
+       0.6
+      ]
+     }
+    }
+   },
+   "allowed_lead": {
+    "boosted": 0.15,
+    "neutral": "base allowed_deviation",
+    "cost": 0.0,
+    "shift": 0.0,
+    "milestone_early_fraction": {
+     "focus_lines": 0.2,
+     "other_lines": 0.2,
+     "floor": "band_low"
+    },
+    "per_metric": {}
+   },
+   "required_costs": {
+    "metrics": [
+     "population",
+     "non_food_population_share",
+     "discoveries_per_50_years"
+    ],
+    "min_count": 1,
+    "from_year": 100,
+    "rule": "at each checkpoint from from_year, the run's value on at least min_count of these metrics (surrogate-measured ones count) must be worse than the BASE typical (not the focus typical)",
+    "measured": [
+     "population",
+     "discoveries_per_50_years"
+    ]
+   },
+   "surrogate": {
+    "boost_facets": [
+     "ecology",
+     "health",
+     "life_expectancy"
+    ],
+    "cost_facets": [
+     "population",
+     "known",
+     "cap_production",
+     "cap_logistics"
+    ],
+    "min_cost_hits": 1,
+    "margin": 0.02,
+    "from_year": 100,
+    "rule": "vs the balanced run (same seeds, same century): relative change > +margin counts as boosted, < -margin as a paid cost; boosted with no paid cost is a FREE LUNCH"
+   },
+   "calibration": "Isolated forager-farmer and island peoples: stable small populations of hundreds to a few thousand, hamlets rather than towns, almost no specialists or exotic goods, slow technical change; low density keeps crowd diseases away, so health is slightly better than the era's typical.",
+   "shock_hazard_mult": {
+    "pandemic_ge_5pct": 0.6,
+    "pandemic_ge_25pct": 0.6,
+    "collapse": 0.5,
+    "general_war": 0.7
+   }
+  }
+ },
+ "shock_hazard_mult_doc": "Per focus, optional multipliers on the per-century shock hazards of tools/sim/shocks/catalog.py (ancient band; the same keys as benchmarks_1200.json shock_widening.hazard_per_game_century). Values match the 600-1200 file for the same focus so the join is continuous: connected trade societies suffer more epidemics, redistributive economies more systemic collapse, stewards fewer famines, isolated peoples fewer epidemics, collapses and wars. Lower is better; focus_bench.py counts them as dimensions in the pairwise dominance check. A blend uses the weighted geometric mean.",
+ "allowed_lead_doc": "allowed_lead.boosted (x |effective high - effective typical|) is the lead past the effective high on boosted metrics; per_metric overrides it; neutral metrics keep benchmarks_600.json facet_over_high_fraction (0.15); cost and shifted metrics get none. milestone_early_fraction is ABSOLUTE (same representation as the 600-1200 file): registry items in the focus lines (strategy.lines) may land up to focus_lines x design year early, others up to other_lines (= base 0.2), never before band_low."
+}
