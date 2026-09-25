@@ -140,9 +140,9 @@ const MODERN_SURVIVAL_LIMIT:=0.85
 ## spread (urban share past URBAN_ONSET, literacy past LITERACY_ONSET). The
 ## share of conceptions not sought applies after every other fertility factor,
 ## beyond conception_support's clamp. Benchmarks: TFR about 1.7 by 3000.
-const TRANSITION_URBAN:=0.20
+const TRANSITION_URBAN:=0.28
 const URBAN_ONSET:=0.25
-const TRANSITION_SCHOOLING:=0.15
+const TRANSITION_SCHOOLING:=0.22
 const LITERACY_ONSET:=0.55
 const TRANSITION_MAX:=0.80
 
