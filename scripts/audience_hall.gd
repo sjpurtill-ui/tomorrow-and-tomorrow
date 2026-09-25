@@ -1882,7 +1882,19 @@ static func court(id:String)->Array[Dictionary]:
 	var audience:=find(id)
 	var result:Array[Dictionary]=[]
 	var speaker_id:=int(audience.get("speaker",{}).get("person_id",0)) if not audience.is_empty() else 0
-	for person in _officials():
+	var officials:=_officials()
+	# Those who came in with the god's attention (the official who named a
+	# summoned person) keep their seats on the bench first.
+	var first:Array=audience.get("court_pids",[]) if not audience.is_empty() and audience.get("court_pids") is Array else []
+	if not first.is_empty():
+		var ordered:Array[Dictionary]=[]
+		for pid in first:
+			for person in officials:
+				if int(person.person_id)==int(pid) and not ordered.has(person): ordered.append(person)
+		for person in officials:
+			if not ordered.has(person): ordered.append(person)
+		officials=ordered
+	for person in officials:
 		if int(person.person_id)==speaker_id: continue
 		result.append(person)
 		if result.size()>=COURT_MAX: break
@@ -2854,6 +2866,12 @@ static func voice_context(id:String)->Dictionary:
 		if audience.kind in WORK_KINDS:
 			var gwa:=_great_works()
 			if gwa!=null: context["wonder_proposal" if audience.kind=="wonder_proposal" else "great_work"]=gwa.call("voice_facts",audience)
+		var known_id:=String((audience.speaker as Dictionary).get("known_id",""))
+		if known_id!="":
+			# A summoned commoner speaks for themselves, from their own life.
+			var persons:GDScript=load("res://scripts/court_persons.gd")
+			var known:Dictionary=persons.call("by_id",known_id)
+			if not known.is_empty(): context["summoned_person"]=persons.call("view",known)
 		var person:=_official(int(audience.speaker.person_id))
 		if not person.is_empty():
 			var rel:Dictionary=person.get("relationships",{}).get("sovereign",{})
@@ -3280,6 +3298,9 @@ static func validate_state(data:Variant)->bool:
 	if data.has("frequency") and not String(data.frequency) in FREQUENCIES: return false
 	if data.has("last_speaker") and (not data.last_speaker is String or String(data.last_speaker).length()>120): return false
 	if data.has("divine") and not DIVINE.valid_state(data.divine): return false
+	if data.has("court_persons"):
+		var persons:GDScript=load("res://scripts/court_persons.gd")
+		if persons==null or not bool(persons.call("valid_state",data.court_persons)): return false
 	if not data.get("ledger",[]) is Array or (data.get("ledger",[]) as Array).size()>LEDGER_MAX: return false
 	for entry in data.get("ledger",[]):
 		if not entry is Dictionary or not _num(entry.get("day")) or not entry.get("speaker","") is String or not entry.get("ask","") is String or JSON.stringify(entry).length()>2000: return false
