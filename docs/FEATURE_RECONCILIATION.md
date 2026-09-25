@@ -2574,3 +2574,30 @@ Results:
 Tests. test_research_600, test_early_life_conditions, test_research_visual_atlas and test_artifact_culture pass. early_consequences, responsive_decree, court, court_commands, court_summon and research_art_600 probes pass. Remaining suite failures match baseline.
 
 Known issues. The poor scenario sits near the minimum band and still has some death excess that isn't explained. The surrogate lacks scout losses. Later research blocks (600–3000), scout survival and civic evolution live on separate branches and are not yet in main.
+
+### Fun wave 1: opening, Chronicle, court lives, scout survival (main)
+
+Fast-forwarded `codex/fun-integrate-1` (eb8796db). This integrates codex/fun-signal, codex/fun-court, codex/fun-opening and codex/scout-survival on top of the research-600 main, all from the fun audit (codex/fun-audit, docs/FUN_AUDIT.md).
+
+What changed:
+- **First contact restored.** Peoples now start in regional groups of three, 95–210 km apart. The player's start is not moved. Scouts bring back signs of neighbours (smoke, tracks) that point the way.
+- **Opening Arc.** Beats are drawn from real simulation state: signs, first contact, the first winter as a Hearth Chief's petition with a spring outcome, named children at court, and the first discovery as a scene. Default speed is 1 day/s.
+- **Fire-circle opening.** The Hearth Chief asks one question in voice, then names the settlement, replacing the 14 purpose cards.
+- **Chronicle.** Every report is graded whisper, notice or moment. Moments get an illustrated card and a synthesized sting, with a 30-day cap that never demotes contact or the first winter. Births and deaths fold into seasonal hearth tallies. Scout returns are quiet unless they found something new. Dedications show a card with an "Attend the dedication" button. The rail gains a Chronicle section, called Hearth-Tales before writing and The Annals after.
+- **Court lives.** A death becomes mourning in court, where the god picks among 2–3 voiced successors. The court tracks kin links and keeps The Remembered roll. Names follow the era, with epithets in the stone age. Every portrait is distinct.
+- **The god's word.** Order replies vary by personality. Rites leave marks on the map. Consequences come back 30–180 days later. Omens follow real coincidences. Rivals answer the god's dread.
+- **Scout survival.** Scout deaths are now rare (about 10% of natural increase at 0.2%/yr), and the Chief Scout is cautious when the population is small.
+
+Results:
+- **First hour** (seeds 424242 and 77013): 14–32 moments and 10–18 decisions per 10 real minutes. The longest gap is about 1.5 real minutes, and first contact comes on day 36–58.
+- **25-year Chronicle:** routine share 35–37%, against the audit's 95–96%.
+
+Tests:
+- test_chronicle 21, test_opening_arc 14, test_scout_survival, test_scouting_staff, test_research_600, test_civilization_system and the civic, court and audience suites and probes pass.
+- early_consequences reports EC_FAILURES [].
+- save_load_probe, civic_journey, scout_archive_ui, coherent_scout_return and ancient_scouting fail or time out identically on base.
+
+Open follow-ups:
+- Batch repeat discovery notices, which dominate the Chronicle after research-600.
+- The year label on carried-over tallies can be wrong.
+- The harness does not exercise orders or summons.
