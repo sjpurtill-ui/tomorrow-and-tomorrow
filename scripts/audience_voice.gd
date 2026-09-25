@@ -76,8 +76,8 @@ const ENVOY_OPEN:={
 		"{oath} {leader} sends you {amt} {res}, {address}, and not a scrap of it grudging. Well, maybe one scrap.",
 		"We hauled {amt} {res} across ugly country to stand in this pretty hall, {address}, so please look pleased; my feet are watching.",
 		"{leader} told me, 'Bring them {amt} {res} and a smile.' The {res} survived the road, {address}; the smile is doing its best.",
-		"A gift from {civ}: {amt} {res}, no strings attached. I checked twice, {address}, and once more in the rain.",
-		"Before anyone asks what it costs, {address}: nothing. That's {amt} {res} because {leader} likes you, so kindly don't make it strange.",
+		"A gift from {civ}: {amt} {res}. I checked the knots twice, {address}, and once more in the rain.",
+		"Before anyone asks, {address}: {leader} will say what it costs, and so will I. First, {amt} {res}, so kindly look pleased.",
 	],
 	"request":[
 		"I'll not dress it in ribbons, {address}: {civ} needs {amt} {res}, and I'd not be standing here if we didn't.",
@@ -216,7 +216,7 @@ const COURT_KIND:={
 	"gift":[
 		"Take it before they change their mind, {address}; {rival} will want to sniff it for curses first.",
 		"Gifts from {civ} are like cats, {address}: lovely, right up until you learn what they expect in return.",
-		"That's {amt} {res} for nothing, {address}? Nothing's free; even the air in here costs me a headache.",
+		"That's {amt} {res} with a hook in it somewhere, {address}. Nothing from {civ} comes free; find the string before you pull.",
 		"Say thank you nicely, {address}. The last present we had was a goat, and the goat bit me.",
 	],
 	"request":[
@@ -1428,9 +1428,11 @@ func _deliver(s:Dictionary,stage:String,extra:Dictionary,lines:Array[Dictionary]
 	var said:={}
 	for line in (h.find(String(s.id)) as Dictionary).get("lines",[]): said[String(line.get("text","")).strip_edges().to_lower()]=true
 	var ordered:Array[Dictionary]=[]
+	var outcome_words:=String((extra.get("result",{}) as Dictionary).get("outcome","")).strip_edges().to_lower() if stage=="command" else ""
 	for line in lines:
 		var text:=String(line.get("text","")).strip_edges().to_lower()
 		if said.has(text): continue
+		if outcome_words!="" and (text==outcome_words or text.trim_prefix("[").trim_suffix("]")==outcome_words): continue
 		said[text]=true
 		ordered.append(line)
 	# The visitor always speaks first when the room opens or answers the ruler.
@@ -1463,7 +1465,10 @@ func _deliver(s:Dictionary,stage:String,extra:Dictionary,lines:Array[Dictionary]
 		while line_log.size()>4000: line_log.pop_front()
 	if stage=="command":
 		var outcome:=String((extra.get("result",{}) as Dictionary).get("outcome",""))
-		if not outcome.is_empty(): h.append_line(String(s.id),{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":outcome,"day":_day(),"aside":false})
+		var already:=false
+		for line in (h.find(String(s.id)) as Dictionary).get("lines",[]):
+			if String((line as Dictionary).get("text","")).strip_edges()==outcome.strip_edges(): already=true
+		if not outcome.is_empty() and not already: h.append_line(String(s.id),{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":outcome,"day":_day(),"aside":false})
 	# Only the ruler's own words move the room; openings and farewells do not.
 	if stage=="speak" and absf(mood_shift)>0.0: h.apply_mood(String(s.id),clampf(mood_shift,-0.25,0.25))
 	lines_ready.emit.call_deferred(String(s.id))
@@ -2535,7 +2540,7 @@ func _stage_line(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)->Dict
 	var chosen:=String(pool[rng.randi_range(0,pool.size()-1)])
 	return {"key":"narrator","text":_fill(chosen,tokens),"tkey":_template_key(chosen)}
 
-const COMMAND_WITNESS:={"kill":"witness_execution","exile":"witness_exile","detain":"witness_exile","terrify":"witness_shaken","penance":"witness_shaken",
+const COMMAND_WITNESS:={"maim":"witness_execution","kill":"witness_execution","exile":"witness_exile","detain":"witness_exile","terrify":"witness_shaken","penance":"witness_shaken",
 	"hesitate":"witness_shaken","refuse_flee":"witness_shaken","refuse_seized":"witness_shaken","prostrate":"witness_shaken","demote":"witness_shaken",
 	"bless":"witness_glad","raise":"witness_envy","appoint":"witness_envy","boon":"witness_glad","give":"witness_glad"}
 
@@ -2575,10 +2580,44 @@ func _offline_command(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)-
 			if not spoke.has(String(member.key)): pool.append(member)
 		if not pool.is_empty():
 			var witness:Dictionary=pool[rng.randi_range(0,pool.size()-1)]
+			var envoy_act:=String(target_entry.get("kind",""))=="envoy" and stage in ["kill","maim","detain","exile"]
+			if envoy_act:
+				# Horror, approval or fear, by the witness's own temper and regard.
+				var wbank:=DV.generic(witness_envoy_key(int(witness.get("person_id",0))))
+				_append_if(out,_say(s,witness,wbank,rng,{},true,wbank))
+				return out
 			var generic:Array=DV.generic(wkey)
 			var manner:Array=DV.model_bank(witness.persona,"witness_favor" if wkey in ["witness_glad","witness_envy"] else "witness_dread")
 			_append_if(out,_say(s,witness,manner if not manner.is_empty() and rng.randf()<0.5 else generic,rng,{},true,generic+manner))
 	return out
+
+static func witness_envoy_key(person_id:int)->String:
+	## How one of the court takes violence done to an envoy: fear when dread
+	## rules them, horror when they are tender-hearted or cool to the god,
+	## approval otherwise.
+	var person:Dictionary=CC.Hall._official(person_id) if person_id>0 else {}
+	if person.is_empty(): return "witness_envoy_fear"
+	var personality:Dictionary=person.get("personality",{}) if person.get("personality") is Dictionary else {}
+	var empathy:=float(personality.get("empathy",0.5))
+	var dread:=CC.DIVINE.dread_of(person)
+	var love:=CC.DIVINE.love_of(person)
+	if dread>=0.55: return "witness_envoy_fear"
+	if empathy>=0.6 or love<0.35: return "witness_envoy_horror"
+	return "witness_envoy_approve"
+
+static func envoy_state_words(result:Dictionary)->String:
+	## What became of a foreign envoy, for the live voice.
+	var target:Dictionary=result.get("target",{}) if result.get("target") is Dictionary else {}
+	if String(target.get("kind",""))!="envoy": return ""
+	var name:=String(result.get("target_name","the envoy"))
+	match String(result.get("envoy_state","")):
+		"dead": return "THE ENVOY %s IS DEAD and says nothing, ever again. Their retinue flees or wails; the narrator shows it." % name
+		"maimed": return "THE ENVOY %s WAS MAIMED%s: they scream, faint or are dragged out by their own bearers; they never answer calmly and never say 'it is done'. Their retinue reacts in terror and grief." % [name," (their "+String(result.get("part",""))+")" if String(result.get("part",""))!="" else ""]
+		"beaten": return "THE ENVOY %s WAS FLOGGED BLOODY and is carried out groaning; they say nothing calm. Their retinue reacts." % name
+		"shamed": return "THE ENVOY %s WAS SHAMED before the court and is pushed out shaking with shame and fury; no calm reply." % name
+		"bound": return "THE ENVOY %s IS BOUND and dragged away under guard; their retinue is driven out to carry word home." % name
+		"driven out": return "THE ENVOY %s WAS DRIVEN OUT of the hall and does not speak again here." % name
+	return ""
 
 func _command_instruction(s:Dictionary,extra:Dictionary)->String:
 	var result:Dictionary=extra.get("result",{})
@@ -2586,11 +2625,14 @@ func _command_instruction(s:Dictionary,extra:Dictionary)->String:
 	var actor:=_member_for(s,result.get("actor",{}) if result.get("actor") is Dictionary else {})
 	var ob:=String((result.get("obedience",{}) as Dictionary).get("id","obey"))
 	var parts:PackedStringArray=PackedStringArray([CC.decided_words(result)])
+	var fate:=envoy_state_words(result)
+	if fate!="": parts.append(fate+" Any goods moved are exactly as WHAT ACTUALLY HAPPENED says, and no others.")
+	parts.append("The ruler's words were: \"%s\". The stage direction shows what the engine decided, never a different act." % String(result.get("text","")).substr(0,200))
 	parts.append("First 'narrator' writes ONE stage direction in square brackets, one or two sentences, vivid, concrete and physical (graphic is fine), showing exactly what was decided and how the watchers take it. Weapons and tools only from: %s, cord, or bare hands; nothing the WORLD line lacks. Name people as given." % ", ".join(tools))
 	if not actor.is_empty():
 		var manner:String=String({"obey":"answers in ONE short line: it is done, or they go at once, in their own manner","reluctant":"answers in ONE short line: it cost them, but they did it","hesitate":"pleads in ONE short line not to have to do it; they have not done it","refuse":"says in ONE short line why they would not; they have not done it"}.get(ob,"answers in ONE line"))
 		parts.append("'%s' %s." % [String(actor.key),manner])
-	parts.append("Then at most 1 other official reacts as an aside. Nobody refuses or undoes anything unless REFUSED is written above. The dead and the removed never speak. No miracles. mood_shift 0.")
+	parts.append("Then at most 1 other official reacts as an aside to exactly what happened, in their own temper and by how they hold the god (horror, approval or fear); nobody praises an act that did not happen or treats the outcome as something else. Nobody refuses or undoes anything unless REFUSED is written above. The dead and the removed never speak. No miracles. mood_shift 0.")
 	return " ".join(parts)
 
 func _divine_classify_words(s:Dictionary)->String:
@@ -2701,7 +2743,9 @@ static func _mood_words(value:float)->String:
 func _kind_words(s:Dictionary)->String:
 	var civ:String=String(s.civ)
 	match String(s.kind):
-		"gift": return "An envoy of %s brings a GIFT: %s %s, from their own stores, freely offered." % [civ,s.amt,s.res]
+		"gift":
+			var string:=String(((s.get("situation",{}) as Dictionary).get("string",{}) as Dictionary).get("text",""))
+			return "An envoy of %s brings a GIFT: %s %s, from their own stores. It is NOT free; its string or cost: %s Whoever speaks of the gift names this cost or string; nobody calls it free, a free bundle, or without strings." % [civ,s.amt,s.res,string if string!="" else "every gift between peoples obliges something in return, and their ruler will remember it."]
 		"request": return "An envoy of %s makes a REQUEST: they ask the ruler for %s %s." % [civ,s.amt,s.res]
 		"threat": return "A herald of %s makes a THREAT: they demand %s %s as tribute." % [civ,s.amt,s.res]
 		"news": return "A messenger of %s brings NEWS: %s" % [civ,s.fact]

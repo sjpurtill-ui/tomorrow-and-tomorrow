@@ -33,9 +33,26 @@ const ScoutSurvival:=preload("res://scripts/scout_survival.gd")
 const CustomDirective:=preload("res://scripts/custom_directive.gd")
 
 const ACTS:=["question","statement","command","threat","blessing"]
-const VERBS:=["kill","exile","detain","penance","terrify","bless","boon","raise","demote","appoint","give","take","send","order"]
+const VERBS:=["kill","maim","exile","detain","penance","terrify","bless","boon","raise","demote","appoint","give","take","send","order"]
 ## Acts done to a person by a person: the ones a gentle hand balks at.
-const CRUEL:=["kill","detain","exile"]
+const CRUEL:=["kill","maim","detain","exile"]
+## Acts on a body. Checked before goods and dispatch, so "cut his arms off" is
+## never a store seizure and "send him home handless" is never a scout party.
+const BODY_PARTS:="(hands?|arms?|ears?|nose|noses|tongues?|fingers?|thumbs?|feet|foot|legs?|knees?|toes?|lips?|eyes?|eyelids|teeth|jaw|spine|hamstrings?|tendons?|manhood|balls|testicles|genitals|beard|hair|scalp|face|cheeks?)"
+const POSSESSOR:="(his|her|their|its|both|each|one|the envoy's|the herald's|the messenger's|(?-i:[A-Z])[\\w-]*'s)"
+const MAIM_PATTERN:="(?i)\\b(maim|maims|mutilate|mutilates|cripple|disfigure|deface|blind|castrate|geld|emasculate|hamstring|hobble|kneecap|gouge|put out (his|her|their) eyes|take (his|her|their) (eyes|hands|ears|tongue|fingers)|(cut|cuts|slice|slices|chop|chops|hack|hacks|lop|lops|saw|tear|rip|shear|clip|cleave|sever|severs|break|breaks|smash|crush|burn|brand|pierce|nail|remove|pluck|pull) [\\w' ]{0,20}?"+POSSESSOR+" [\\w' ]{0,14}?"+BODY_PARTS+"|"+POSSESSOR+" "+BODY_PARTS+" (off|cut off|cut out|sliced off|chopped off|hacked off|broken|crushed|put out)|handless|armless|earless|noseless|tongueless|eyeless|footless|legless|blinded|maimed|mutilated|crippled|gelded|branded|brand (him|her|them|(?-i:[A-Z])\\w+|the envoy|the herald)|(flog|whip|scourge|lash|beat|thrash|cane|birch|kick) (him|her|them|(?-i:[A-Z])\\w+|the envoy|the herald|the messenger)|humiliate|shave (his|her|their) (head|beard)|strip [\\w' ]{0,30}?(naked|bare)|parade [\\w' ]{0,30}?naked|spit (on|at) (him|her|them|(?-i:[A-Z])\\w+)|piss on|urinate on|tar and feather|smear [\\w' ]{0,30}?(dung|filth|excrement)|drag [\\w' ]{0,30}?through the (dirt|mud|dung|filth))\\b"
+## Shame and beatings, as opposed to cutting: the envoy walks home bruised or shamed.
+const HUMILIATE_PATTERN:="(?i)\\b(humiliate|shave (his|her|their) (head|beard)|strip [\\w' ]{0,30}?(naked|bare)|parade [\\w' ]{0,30}?naked|spit (on|at)|piss on|urinate on|tar and feather|smear [\\w' ]{0,30}?(dung|filth|excrement)|drag [\\w' ]{0,30}?through the (dirt|mud|dung|filth))\\b"
+const BEAT_PATTERN:="(?i)\\b(flog|whip|scourge|lash|beat|thrash|cane|birch|kick)\\b"
+## The ruler's explicit word to keep what the envoy carried.
+const SEIZE_PATTERN:="(?i)\\b(seize|keep|take|confiscate|plunder|loot|claim)\\b[\\w' ]{0,40}?\\b(gift|gifts|goods|packs?|bundles?|loads?|tribute|offering|what (he|she|they) (brought|carried|carries)|food|timber|stone|clay|fiber|fibre|grain|meat|wood)\\b"
+## "Send him home / back": for a foreign envoy, a dismissal, never a dispatch.
+const SEND_HOME_PATTERN:="(?i)\\b(send|sent|ship|return|pack) (him|her|them|(?-i:[A-Z])\\w+|the envoy|the herald|the messenger|this envoy)( [\\w']+){0,2}? (home|back|away|packing)\\b"
+const HARSH_DISMISSAL_PATTERN:="(?i)\\b(empty-handed|in disgrace|in chains|with nothing|packing|kick|kicked|throw|thrown|drive|driven|out of my (sight|hall)|get out|begone|whip|spear|dogs?)\\b"
+## A foreign envoy leads our scouts only when the ruler says exactly that.
+const ENVOY_LEADS_PATTERN:="(?i)\\b(lead|guide|show) (our|my|the) (scouts?|party|parties|outriders|hunters|way)\\b"
+## Explicit words for goods moving, and for a party going out.
+const EXPLICIT_TAKE_PATTERN:="(?i)\\b(take|seize|confiscate|plunder|loot|strip)\\b[\\w' ]{0,40}?\\b(food|meat|grain|provisions|rations|timber|wood|logs|stone|stones|clay|fiber|fibre|reeds|flax|gift|gifts|goods|packs?|stores|tribute|loads?)\\b"
 const LIVE_CONFIDENCE:=0.6
 const PENDING_DAYS:=2
 
@@ -48,7 +65,8 @@ static var custom_directive_handler:Callable=Callable()
 const INSIST_PATTERN:="(?i)^\\s*(i demand it|i command it|i insist|do it|do it now|now|obey|obey me|obey your god|you heard me|did you not hear me|do as i (say|said|command)|i said do it|i said (kill|strike|do)|i will be obeyed|i gave you an order|do what i (say|said|command)|you will do it|at once|go on|carry it out)\\b[\\s!.]*$"
 ## [verb, pattern]; checked in order. Patterns match the verb phrase only.
 const VERB_PATTERNS:=[
-	["kill","(?i)\\b(kill|kills|slay|slaughter|execute|behead|murder|butcher|stab|strangle|throttle|hang|smite|gut|decapitate|strike [\\w' ]{0,30}?down|cut [\\w' ]{0,24}?(throat|down)|put [\\w' ]{0,30}?to death|take (his|her|their) (head|life)|end (his|her|their) (life|days)|break (his|her|their) neck|off with (his|her|their) head|death to|make (him|her|them) (die|bleed)|spill (his|her|their) blood|bleed (him|her|them))\\b"],
+	["kill","(?i)\\b(kill|kills|slay|slaughter|execute|behead|murder|butcher|stab|strangle|throttle|hang|smite|gut|decapitate|strike [\\w' ]{0,30}?down|cut [\\w' ]{0,24}?(throat|down)|put [\\w' ]{0,30}?to death|take (his|her|their) (head|life)|end (his|her|their) (life|days)|break (his|her|their) neck|off with (his|her|their) head|death to|make (him|her|them) (die|bleed)|spill (his|her|their) blood|bleed (him|her|them)|burn (him|her|them|(?-i:[A-Z])\\w+|the envoy|the herald)( alive)?|bur(y|ied) [\\w' ]{0,30}?alive|feed [\\w' ]{0,30}?to (the |my )?(dogs|wolves|pigs|hounds|crows|ravens|fire|fish|river|beasts)|(throw|give|hand|toss) [\\w' ]{0,30}?to the (dogs|wolves|pigs|hounds)|drown (him|her|them|(?-i:[A-Z])\\w+)|impale|crucify|flay|skin [\\w' ]{0,20}?alive|boil [\\w' ]{0,20}?alive|stone (him|her|them|(?-i:[A-Z])\\w+)|(beat|whip|flog|club|stone|burn|kick|starve|bleed|torture) [\\w' ]{0,30}?to death|(send|return|ship) [\\w' ]{0,40}?in pieces|(chop|cut|hack) [\\w' ]{0,30}?(head off|into pieces|to pieces|in pieces|apart)|draw and quarter|quarter (him|her|them)|sacrifice (him|her|them|(?-i:[A-Z])\\w+)|slit (his|her|their) throat)\\b"],
+	["maim",MAIM_PATTERN],
 	["exile","(?i)\\b(exile|banish|expel|cast [\\w' ]{0,30}?out|drive [\\w' ]{0,30}?out|throw [\\w' ]{0,30}?out|send [\\w' ]{0,30}?away (forever|for good|from the realm)|out of my (sight|realm|lands) forever)\\b"],
 	["detain","(?i)\\b(imprison|jail|gaol|lock [\\w' ]{0,30}?up|bind (him|her|them|(?-i:[A-Z])\\w+)|chain|shackle|arrest|detain|seize (him|her|them)|put [\\w' ]{0,30}?under guard|take [\\w' ]{0,24}?prisoner|throw [\\w' ]{0,30}?in(to)? the pit)\\b"],
 	["penance","(?i)\\b(penance|atone|repent|keep vigil)\\b"],
@@ -82,7 +100,7 @@ static func classify(text:String)->Dictionary:
 	## Offline reading of the ruler's words. Always returns
 	## {act, verb, verb_at, confidence, insist, resource, amount, heading, order}.
 	var clean:=text.strip_edges()
-	var out:={"act":"statement","verb":"none","verb_at":-1,"verb_end":-1,"confidence":0.3,"insist":false,"resource":"","amount":0.0,"heading":"","text":clean}
+	var out:={"act":"statement","verb":"none","verb_at":-1,"verb_end":-1,"confidence":0.3,"insist":false,"resource":"","amount":0.0,"heading":"","text":clean,"harm":"","seize":false}
 	if clean.is_empty(): return out
 	var lower:=clean.to_lower()
 	if _re(INSIST_PATTERN).search(clean)!=null:
@@ -100,7 +118,17 @@ static func classify(text:String)->Dictionary:
 	out.amount=_amount_in(lower)
 	for h:String in HEADINGS:
 		if _re("\\b%s\\b" % h).search(lower)!=null: out.heading=h; break
-	# Goods first: "give Zuri 20 food", "take their stone".
+	# Harm first: a body is never goods or a party ("cut his arms off", "slice
+	# his hands off and send him home"). Keeping what they carried is its own
+	# explicit clause ("kill him and seize the gift").
+	for pair in VERB_PATTERNS.slice(0,2):
+		var hm:=_re(String(pair[1])).search(clean)
+		if hm!=null:
+			_verb(out,String(pair[0]),hm)
+			out.harm="kill" if String(pair[0])=="kill" else harm_kind(clean)
+			out.seize=_re(SEIZE_PATTERN).search(clean)!=null
+			return out
+	# Goods next: "give Zuri 20 food", "take their stone".
 	if resource!="":
 		var give:=_re(GIVE_PATTERN).search(clean)
 		if give!=null and not " from " in lower:
@@ -115,6 +143,22 @@ static func classify(text:String)->Dictionary:
 	if spoken in ["bless","raise_up"]: out.act="blessing"; out.verb="bless" if spoken=="bless" else "raise"; out.confidence=0.8; return out
 	if _imperative(clean): out.act="command"; out.verb="order"; out.confidence=0.65; return out
 	return out
+
+static func harm_kind(text:String)->String:
+	## "mutilate" (a body part, blinding, gelding, branding), "beat" or "humiliate".
+	var cut:=_re(MAIM_PATTERN).search(text)
+	var shame:=_re(HUMILIATE_PATTERN).search(text)
+	var beat:=_re(BEAT_PATTERN).search(text)
+	var body:=_re("(?i)\\b(maim|mutilat|cripple|disfigure|deface|blind|castrat|geld|emasculat|hamstring|hobble|kneecap|gouge|brand|put out|handless|armless|earless|noseless|tongueless|eyeless|footless|legless)").search(text)
+	var part:=_re("(?i)\\b"+BODY_PARTS+"\\b").search(text)
+	if body!=null or (part!=null and cut!=null and shame==null): return "mutilate"
+	if beat!=null: return "beat"
+	if shame!=null: return "humiliate"
+	return "mutilate"
+
+static func is_harm(text:String)->bool:
+	## Violence or punishment done to a body, however phrased.
+	return _re(String(VERB_PATTERNS[0][1])).search(text)!=null or _re(MAIM_PATTERN).search(text)!=null
 
 static func _verb(out:Dictionary,verb:String,m:RegExMatch)->Dictionary:
 	out.act="command"; out.verb=verb; out.verb_at=m.get_start(); out.verb_end=m.get_end(); out.confidence=0.85
@@ -352,13 +396,21 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	if not live.is_empty() and (String(cls.act) in ["statement","question"] or String(cls.verb) in ["none","order"]):
 		var lact:=String(live.get("act",""))
 		var lverb:=String(live.get("verb","none"))
-		if lact=="command" and lverb in VERBS and float(live.get("confidence",0.0))>=LIVE_CONFIDENCE:
+		if lact=="command" and lverb in VERBS and float(live.get("confidence",0.0))>=LIVE_CONFIDENCE and live_verb_allowed(lverb,clean):
 			cls.act="command"; cls.verb=lverb; cls.confidence=float(live.confidence); from_live=true
+			if lverb in ["kill","maim"]: cls.harm="kill" if lverb=="kill" else harm_kind(clean); cls.seize=_re(SEIZE_PATTERN).search(clean)!=null
 			var obj:=String(live.get("object","")).to_lower()
 			if String(cls.resource)=="": cls.resource=_resource_in(obj)
 			if float(cls.amount)<=0.0: cls.amount=_amount_in(obj)
 			for h:String in HEADINGS:
 				if String(cls.heading)=="" and h in obj: cls.heading=h
+	var foreign:=String(audience.get("origin",""))=="foreign"
+	if foreign and not bool(cls.insist) and String(cls.verb) in ["none","order","send","give"] and not String(cls.act)=="question" and _re(SEND_HOME_PATTERN).search(clean)!=null and _re("(?i)\\b(scouts?|scouting|explore|exploring|outriders|expedition)\\b").search(clean)==null:
+		# "Send him home": the envoy goes home, never made to lead a party nor
+		# sent as our own embassy. Driven out when said harshly; otherwise the
+		# audience carries on and the answer cards remain.
+		if _re(HARSH_DISMISSAL_PATTERN).search(clean)==null: return {"handled":false,"act":"statement"}
+		cls.act="command"; cls.verb="exile"; cls.confidence=0.85; cls.verb_at=_re(SEND_HOME_PATTERN).search(clean).get_start()
 	var insist:=bool(cls.insist)
 	if insist:
 		var pending:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
@@ -381,12 +433,25 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	var actor:Dictionary=parts2.actor
 	var target:Dictionary=parts2.target
 	var speaker:=_speaker_entry(list)
+	# Words to a foreign envoy ("tell your chief...") are conversation, not an
+	# order to our own realm with the envoy as its hand.
+	if foreign and String(cls.verb)=="order" and String(actor.get("kind",""))=="envoy": return {"handled":false,"act":"command","verb":"order"}
 	if String(cls.act) in ["threat","blessing"]:
 		# Aimed at the one before you, the ordinary spoken act already carries it.
 		if target.is_empty() or String(target.get("kind",""))!="official" or String(target.key)==String(speaker.get("key","")): return {"handled":false,"act":String(cls.act)}
 	if String(cls.verb)=="order" and String(context.get("civic_settlement",""))!="" and (actor.is_empty() or String(actor.key)==String(speaker.get("key",""))):
 		return {"handled":false,"act":"command","verb":"order"}   # the settlement leader's civic conversation carries it
 	return _perform(id,audience,list,String(cls.verb),actor,target,clean,cls,false,context)
+
+static func live_verb_allowed(verb:String,text:String)->bool:
+	## The live reading may sharpen an order, never turn a punishment into
+	## moving stores or a party, nor move goods on words that name none.
+	if is_harm(text) and not verb in ["kill","maim","detain","exile","terrify","penance"]: return false
+	match verb:
+		"take": return _re(EXPLICIT_TAKE_PATTERN).search(text)!=null
+		"give": return _resource_in(text.to_lower())!="" or _re("(?i)\\b(gift|gifts|goods|reward|bundle)\\b").search(text)!=null
+		"send": return _re(String(VERB_PATTERNS[VERB_PATTERNS.size()-1][1])).search(text)!=null or _re("(?i)\\b(scouts?|scouting|explore|expedition|party|envoys?|messengers?|embassy)\\b").search(text)!=null
+	return true
 
 static func _parties(text:String,cls:Dictionary,audience:Dictionary,list:Array[Dictionary],live:Dictionary)->Dictionary:
 	## Who must act and on whom.
@@ -420,6 +485,7 @@ static func _parties(text:String,cls:Dictionary,audience:Dictionary,list:Array[D
 			if String(m.by) in ["name","title"] and int(m.at)==0: actor=_entry(list,String(m.key)); actor_mention=m
 	if actor.is_empty() and not guards and verb in ["give","send","order","take"]:
 		actor=_speaker_entry(list)
+		if verb=="send" and String(actor.get("kind",""))=="envoy": actor={}
 	var actor_key:=String(actor.get("key",""))
 	var target:Dictionary={}
 	if not live.is_empty() and String(live.get("target_ref",""))!="":
@@ -436,7 +502,7 @@ static func _parties(text:String,cls:Dictionary,audience:Dictionary,list:Array[D
 			if at<0 or int(m.at)>=at: chosen=m; break
 		if chosen.is_empty() and not candidates.is_empty(): chosen=candidates[0]
 		if not chosen.is_empty(): target=_land(chosen,audience,list,actor_key)
-	if target.is_empty() and verb in ["kill","exile","detain","penance","demote","raise","bless","boon","terrify"]:
+	if target.is_empty() and verb in ["kill","maim","exile","detain","penance","demote","raise","bless","boon","terrify"]:
 		target=_salient(audience,list,actor_key)
 	if verb in ["send","order"] and target.is_empty(): target=actor
 	return {"actor":actor,"target":target,"guards":guards}
@@ -468,7 +534,7 @@ static func _perform(id:String,audience:Dictionary,list:Array[Dictionary],verb:S
 		"refuse":
 			return _refusal(id,audience,list,r,person,verb)
 	match verb:
-		"kill","exile","detain": return _punish(id,audience,list,r,verb,actor,target)
+		"kill","exile","detain","maim": return _punish(id,audience,list,r,verb,actor,target,cls)
 		"penance","terrify","bless","boon","raise": return _spoken_act(id,audience,r,verb,target)
 		"demote": return _demote(id,audience,r,target)
 		"appoint": return _appoint(id,audience,r,target,text)
@@ -507,8 +573,10 @@ static func _apply_court(id:String,action:String,target:Dictionary,exclude:Array
 # Acts
 # --------------------------------------------------------------------------
 
-static func _punish(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictionary,verb:String,actor:Dictionary,target:Dictionary)->Dictionary:
+static func _punish(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictionary,verb:String,actor:Dictionary,target:Dictionary,cls:Dictionary={})->Dictionary:
 	var kind:=String(target.get("kind",""))
+	if kind=="envoy": return _punish_envoy(id,audience,r,verb,actor,cls)
+	if verb=="maim": return _maim_person(id,audience,r,actor,target,cls)
 	var name:=String(target.get("name","them"))
 	var by:=String(actor.get("name",""))
 	var hand:=" by %s's hand" % by if by!="" else ""
@@ -548,8 +616,6 @@ static func _punish(id:String,audience:Dictionary,list:Array[Dictionary],r:Dicti
 		r.outcome=String({"kill":"%s was killed%s at your word, before the court. It cost you legitimacy and cohesion.","exile":"%s was cast out of the realm%s at your word.","detain":"%s was bound and put under guard%s at your word."}.get(verb,"%s was dealt with%s at your word.")) % [name,hand]
 		r.removed=true; r.terminal=true; r.reaction="furious"
 		Hall.conclude(id,String(r.outcome),action)
-	elif kind=="envoy":
-		return _punish_envoy(id,audience,r,verb,actor)
 	else:
 		return _fallback(id,r,"")
 	r.executed=true
@@ -571,32 +637,145 @@ static func _hand_of_the_god(r:Dictionary,actor:Dictionary,target:Dictionary,ver
 	var memory:=String({"kill":"At the god's word I killed %s with my own hands, before the whole court.","exile":"At the god's word I drove %s out of the realm.","detain":"At the god's word I bound %s and put them under guard."}.get(verb,"At the god's word I acted against %s.")) % name
 	GovernmentPeopleSystem.record_person_memory(int(actor.person_id),memory,"divine",0.9 if verb=="kill" else 0.7,{"emotion":"horror" if reluctant else "duty","outcome":"carried_out_"+verb})
 
-static func _punish_envoy(id:String,audience:Dictionary,r:Dictionary,verb:String,actor:Dictionary)->Dictionary:
+## What each act on a foreign envoy costs between the peoples:
+## [opinion, tension, trust, their dread, grudge weight, grudge kind].
+const ENVOY_ACTS:={
+	"kill":[-0.5,0.45,-0.4,0.3,1.0,"slain_envoy"],
+	"mutilate":[-0.42,0.38,-0.35,0.3,0.85,"maimed_envoy"],
+	"beat":[-0.3,0.26,-0.25,0.18,0.6,"beaten_envoy"],
+	"humiliate":[-0.26,0.2,-0.2,0.12,0.5,"insulted_envoy"],
+	"detain":[-0.3,0.3,-0.25,0.18,0.7,"seized_envoy"],
+	"exile":[-0.12,0.08,-0.1,0.06,0.3,"insulted_envoy"],
+}
+const ENVOY_STATE:={"kill":"dead","mutilate":"maimed","beat":"beaten","humiliate":"shamed","detain":"bound","exile":"driven out"}
+
+static func envoy_act(id:String,verb:String,text:String="",harm:String="")->Dictionary:
+	## The offline WRATH menu's acts on a foreign envoy (kill, maim, detain,
+	## drive out), through the same engine path as the typed order.
+	var audience:=Hall.find(id)
+	if audience.is_empty() or String(audience.get("status",""))!="waiting" or String(audience.get("origin",""))!="foreign": return {"handled":false,"ok":false,"outcome":"No envoy is waiting."}
+	var list:=roster(audience)
+	var envoy:=_speaker_entry(list)
+	var words:=text if text!="" else ("Flog the envoy and throw them out." if harm=="beat" else String({"kill":"Put the envoy to death.","maim":"Maim the envoy and send them home.","detain":"Seize the envoy and hold them.","exile":"Drive the envoy out of my hall."}.get(verb,"Drive the envoy out.")))
+	var cls:=classify(words)
+	cls.act="command"; cls.verb=verb
+	if harm!="": cls.harm=harm
+	elif verb=="maim" and String(cls.get("harm",""))=="": cls.harm="mutilate"
+	return _perform(id,audience,list,verb,{},envoy,words,cls,false,{})
+
+static func _envoy_harm(verb:String,cls:Dictionary)->String:
+	if verb=="maim":
+		var h:=String(cls.get("harm",""))
+		return h if h in ["mutilate","beat","humiliate"] else "mutilate"
+	return verb if ENVOY_ACTS.has(verb) else "exile"
+
+static func _body_part(text:String)->String:
+	var m:=_re("(?i)\\b"+BODY_PARTS+"\\b").search(text)
+	return m.get_string(1).to_lower() if m!=null else ""
+
+static func _punish_envoy(id:String,audience:Dictionary,r:Dictionary,verb:String,actor:Dictionary,cls:Dictionary={})->Dictionary:
 	var civ_id:=String(audience.civ_id)
 	var civ_name:=String(audience.get("civ_name",civ_id))
 	var name:=String((audience.speaker as Dictionary).get("name","the envoy"))
-	var by:=String(actor.get("name",""))
+	var by:=String(actor.get("name","")) if String(actor.get("kind",""))!="envoy" else ""
+	if by=="": r.actor={}; r.actor_name=""
 	var hand:=" by %s's hand" % by if by!="" else ""
-	match verb:
+	var harm:=_envoy_harm(verb,cls)
+	var row:Array=ENVOY_ACTS[harm]
+	var part:=_body_part(String(r.text)) if harm=="mutilate" else ""
+	Hall._shift_relation(civ_id,float(row[0]),float(row[1])); Hall._leader_trust(civ_id,float(row[2]))
+	DIVINE.record_envoy_harm(civ_id,civ_name,name,harm,float(row[3]))
+	var parts:PackedStringArray=PackedStringArray()
+	match harm:
 		"kill":
-			Hall._shift_relation(civ_id,-0.45,0.4); Hall._leader_trust(civ_id,-0.35)
-			DIVINE.add_civ_dread(civ_id,0.3)
-			ForeignDiplomacy.remember(civ_id,"Our envoy %s was put to death in the ruler's hall." % name)
-			r.outcome="%s, envoy of %s, was killed%s at your word. Their people will hear of it: hatred and dread of you both rise, and the border grows dangerous." % [name,civ_name,hand]
+			var died:=envoy_dies(civ_id)
+			ForeignDiplomacy.remember(civ_id,"Our envoy %s was put to death in the ruler's hall and will never come home." % name)
+			parts.append("%s, envoy of %s, was killed%s at your word. They will never come home; %s counts one fewer (about %d now)." % [name,civ_name,hand,civ_name,roundi(float(died.get("after",0.0)))])
+		"mutilate":
+			ForeignDiplomacy.remember(civ_id,"Our envoy %s was sent home maimed%s from the ruler's hall." % [name," (their "+part+" cut away)" if part!="" else ""])
+			parts.append("%s, envoy of %s, was maimed%s at your word%s and sent home alive, crippled, to show their people what you did." % [name,civ_name,hand," (their "+part+")" if part!="" else ""])
+		"beat":
+			ForeignDiplomacy.remember(civ_id,"Our envoy %s was flogged in the ruler's hall and sent home bleeding." % name)
+			parts.append("%s, envoy of %s, was beaten bloody%s at your word and thrown out to walk home." % [name,civ_name,hand])
+		"humiliate":
+			ForeignDiplomacy.remember(civ_id,"Our envoy %s was shamed before the ruler's court and sent home in disgrace." % name)
+			parts.append("%s, envoy of %s, was shamed before the whole court%s at your word and sent home in disgrace." % [name,civ_name,hand])
 		"detain":
-			Hall._shift_relation(civ_id,-0.3,0.3); Hall._leader_trust(civ_id,-0.25)
-			DIVINE.add_civ_dread(civ_id,0.18)
 			ForeignDiplomacy.remember(civ_id,"Our envoy %s was seized and held captive in the ruler's hall." % name)
-			r.outcome="%s, envoy of %s, was bound and held%s at your word. Their people take it as a grave insult." % [name,civ_name,hand]
+			parts.append("%s, envoy of %s, was bound and held%s at your word." % [name,civ_name,hand])
 		_:
-			Hall._shift_relation(civ_id,-0.12,0.08); Hall._leader_trust(civ_id,-0.1)
-			DIVINE.add_civ_dread(civ_id,0.06)
 			ForeignDiplomacy.remember(civ_id,"Our envoy %s was driven out of the ruler's hall." % name)
-			r.outcome="%s, envoy of %s, was driven out of your hall%s. Their people will feel the slight." % [name,civ_name,hand]
+			parts.append("%s, envoy of %s, was driven out of your hall%s." % [name,civ_name,hand])
+	# What they carried: kept only on the ruler's explicit word, otherwise it
+	# goes home with the fleeing bearers.
+	var terms:Dictionary=audience.get("terms",{}) if audience.get("terms") is Dictionary else {}
+	var carried:=String(audience.get("kind",""))=="gift" and not terms.is_empty() and float(terms.get("amount",0.0))>0.0
+	var goods:={}
+	if carried and bool(cls.get("seize",false)):
+		var got:=Hall.EXCHANGE.take(civ_id,String(terms.resource),float(terms.amount))
+		var kept:=Hall.EXCHANGE.receive("player",String(terms.resource),got) if got>0.0 else 0.0
+		goods={"resource":String(terms.resource),"amount":kept,"seized":true}
+		parts.append("You kept the %d %s they carried; they will call it theft as well." % [roundi(kept),String(terms.resource)] if kept>0.0 else "Your guards turned out their packs, but the %s never reached your stores." % String(terms.resource).to_lower())
+		Hall._shift_relation(civ_id,-0.06,0.05)
+	elif carried:
+		goods={"resource":String(terms.resource),"amount":0.0,"seized":false}
+		parts.append("The %s gift is forfeit: their bearers fled with it." % String(terms.resource))
+	r.terms=goods
+	var weight:=float(row[4])+(0.2 if bool(goods.get("seized",false)) else 0.0)
+	var clause:=String({"kill":"how you slew our envoy %s in your hall","mutilate":"how you sent our envoy %s home maimed","beat":"how you had our envoy %s flogged","humiliate":"how you shamed our envoy %s before your court","detain":"how you seized our envoy %s","exile":"how you drove our envoy %s from your hall"}[harm]) % name.get_slice(" ",0)
+	var rivals:=Hall._rivals()
+	var posture:=""
+	if rivals!=null:
+		rivals.call("grudge",civ_id,clause,weight,"%s:%s" % [String(row[5]),id])
+		if bool(goods.get("seized",false)): rivals.call("grudge",civ_id,"the gift you tore from our bearers",0.3,"seized_gift:"+id)
+		posture=String(rivals.call("envoy_posture",civ_id))
+	parts.append(String({"redress":"%s will demand redress, and the border is on edge.","halt":"%s may send no more envoys.","fearful":"%s is frightened; hatred and dread of you both rise.","war":"%s is preparing for war."}.get(posture,"Their people will hear of it: hatred and dread of you both rise, and the border grows dangerous.")).replace("%s",civ_name))
+	r.outcome=" ".join(parts)
+	r.envoy_state=String(ENVOY_STATE.get(harm,"gone")); r.harm=harm; r.part=part
+	audience["envoy_fate"]={"state":String(r.envoy_state),"harm":harm,"part":part}
 	r.executed=true; r.removed=true; r.terminal=true; r.reaction="furious"
+	r.stage=verb
 	r.witness_ids=_witness_ids(id,[])
-	r.effects=_apply_court(id,"strike_down" if verb=="kill" else "cast_out",{"person_id":0,"name":name},[])
-	Hall.conclude(id,String(r.outcome),"envoy_"+verb)
+	r.effects=_apply_court(id,"strike_down" if harm in ["kill","mutilate"] else "cast_out",{"person_id":0,"name":name},[])
+	Hall.conclude(id,String(r.outcome),"envoy_"+("maim" if verb=="maim" else verb))
+	Hall._add_sequel(audience,"envoy_"+harm,Hall._day())
+	return r
+
+static func envoy_dies(civ_id:String)->Dictionary:
+	## A foreign envoy killed at our court: their people count one fewer (the
+	## simulated polity's own ledger when it has one); ours is untouched.
+	var index:=Hall._civ_index(civ_id)
+	if index<0: return {}
+	var civ:Dictionary=WorldSimulation.world.civilizations[index]
+	var before:=float(civ.get("population",1.0))
+	var owner:=Hall.SOCIETY.owner_id(civ_id)
+	if owner!="player" and Hall.SOCIETY.owner_state(civ_id)!=null and WorldSimulation.actors.has(owner):
+		WorldSimulation.scoped(owner,func()->void:
+			if WorldSimulation.state.has_method("register_population_deaths"): WorldSimulation.state.call("register_population_deaths",1,"envoy slain at a foreign court"))
+	var after:=maxf(1.0,before-1.0)
+	civ["population"]=after
+	if civ.get("cohorts") is Dictionary and before>0.0:
+		var cohorts:Dictionary=civ.cohorts
+		for key in cohorts.keys(): cohorts[key]=float(cohorts[key])*after/before
+	WorldSimulation.world.civilizations[index]=civ
+	return {"before":before,"after":after}
+
+static func _maim_person(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,target:Dictionary,cls:Dictionary)->Dictionary:
+	## One of our own maimed or flogged before the court: they live, keep their
+	## place, and carry terror and a wound that becomes resentment.
+	if String(target.get("kind",""))!="official": return _fallback(id,r,"")
+	var pid:=int(target.person_id)
+	var harm:=String(cls.get("harm","mutilate"))
+	var person:=_person(target)
+	var name:=String(target.get("name","them"))
+	var by:=String(actor.get("name",""))
+	GovernmentPeopleSystem.adjust_person_bonds(pid,{"fear":0.3 if harm=="mutilate" else 0.2,"resentment":0.2 if harm=="mutilate" else 0.12,"love":-0.12,"respect":-0.05,"hold_days":90})
+	GovernmentPeopleSystem.record_person_memory(pid,"The god had me %s before the whole court." % String({"mutilate":"maimed","beat":"flogged","humiliate":"shamed"}.get(harm,"maimed")),"divine",0.9,{"emotion":"terror","outcome":"maimed"})
+	r.effects=_apply_court(id,"terrify",person,[pid])
+	r.outcome="%s was %s%s at your word, before the court. They live, and they will not forget it." % [name,String({"mutilate":"maimed","beat":"flogged bloody","humiliate":"shamed"}.get(harm,"maimed")),(" by %s's hand" % by) if by!="" else ""]
+	r.executed=true; r.reaction="furious"; r.stage="maim"; r.harm=harm; r.part=_body_part(String(r.text))
+	r.witness_ids=_witness_ids(id,[pid])
+	if not actor.is_empty() and int(actor.get("person_id",0))>0: _hand_of_the_god(r,actor,target,"maim")
 	return r
 
 static func _spoken_act(id:String,audience:Dictionary,r:Dictionary,verb:String,target:Dictionary)->Dictionary:
@@ -730,6 +909,7 @@ static func _send(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,cl
 	for c:Dictionary in WorldSimulation.world.civilizations:
 		var cname:=String(c.get("name","")).to_lower()
 		if cname!="" and cname in lower: civ=c; break
+	if String(actor.get("kind",""))=="envoy" and _re(ENVOY_LEADS_PATTERN).search(text)==null: actor={}; r.actor={}; r.actor_name=""
 	var who:=String(actor.get("name",""))
 	if not civ.is_empty() and (_re("(?i)\\b(envoy|envoys|messenger|embassy|word)\\b").search(text)!=null or not "scout" in lower):
 		var sent:Dictionary=CivilizationSystem.dispatch_diplomat(String(civ.id))
@@ -777,6 +957,7 @@ static func _order(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,t
 
 static func _strip_vocative(text:String,actor:Dictionary)->String:
 	var clean:=text.strip_edges()
+	if actor.is_empty() or not actor.has("name"): return clean
 	for k:String in _name_keys(actor)+_title_keys(actor):
 		var re:=_re("(?i)^(the )?%s\\s*[,:\\-—]?\\s*" % _escape(k))
 		var m:=re.search(clean)
@@ -915,10 +1096,21 @@ const STAGE:={
 	"refuse_seized":["[{actor} throws {weapon} down; the others fall on them at once and force them to their knees before you, arms bound.]",
 		"[{actor} refuses and the court is on them in a heartbeat, dragging them to the floor and binding them before your seat.]"],
 	"prostrate":["[The whole court falls on its face; nobody dares so much as lift their eyes toward you.]"],
-	"envoy_kill":["[The guards seize {target} and cut them down where they stand with {blade}; their blood runs over the gifts they carried.]",
-		"[{target} has no time to cry out; {blade} opens their throat and the envoy's bearers flee screaming from the hall.]"],
+	"envoy_kill":["[The guards seize {target} and cut them down where they stand with {blade}; their blood runs across the floor stones and their bearers flee screaming from the hall.]",
+		"[{target} has no time to cry out; {blade} opens their throat, and the envoy's companions throw down their packs and run.]",
+		"[The guards bring {club} down on {target}'s skull; they crumple without a word, and their retinue wails at the door as the guards drive them off.]"],
+	"envoy_maim_mutilate":["[The guards force {target} to the floor and {blade} takes their {part}; they scream until their voice breaks, and their bearers weep as they drag them out toward home.]",
+		"[{target} is held down across the hearthstones while {blade} does its work on their {part}; they faint, and their retinue carries them out, white-faced and silent.]",
+		"[Two guards pin {target} while {blade} hacks at them; the envoy's shrieks fill the hall, and their companions haul them out with blood soaking through the cloth.]",
+		"[{target} screams and thrashes as {blade} falls; the wound is seared in the fire, and their bearers drag the fainting envoy out onto the road home.]"],
+	"envoy_maim_beat":["[The guards throw {target} down and flog them until their back runs red; their bearers lift the sobbing envoy and stumble out.]",
+		"[Fists and {club} fall on {target} until they curl on the floor; their companions drag them out, bleeding and groaning.]"],
+	"envoy_maim_humiliate":["[The guards shave {target}'s head and strip them before the whole court; the envoy shakes with shame and fury as they are shoved out of the door.]",
+		"[{target} is dragged through the ash and dung by the fire while the court jeers; their retinue throws a cloak over them and hurries them away.]"],
+	"maim":["[The guards hold {target} down and {blade} falls; they scream, and the court stares at the floor until it is over.]",
+		"[{target} is forced to their knees and struck again and again with {club}; nobody in the hall moves to help them.]"],
 	"envoy_detain":["[{target} is thrown down and bound with cord while their bearers are driven out, wailing, to carry word home.]"],
-	"envoy_exile":["[{target} is hustled out of the hall at spear point, their gifts kicked after them into the dirt.]"],
+	"envoy_exile":["[{target} is hustled out of the hall at spear point, their packs kicked after them into the dirt.]"],
 }
 
 static func stage_key(result:Dictionary)->String:
@@ -926,6 +1118,7 @@ static func stage_key(result:Dictionary)->String:
 	var target:Dictionary=result.get("target",{}) if result.get("target") is Dictionary else {}
 	var has_actor:=String(result.get("actor_name",""))!="" and not (result.get("actor",{}) as Dictionary).is_empty()
 	if String(target.get("kind",""))=="envoy" and stage in ["kill","detain","exile"]: return "envoy_"+stage
+	if String(target.get("kind",""))=="envoy" and stage=="maim": return "envoy_maim_"+String(result.get("harm","mutilate"))
 	if stage=="kill":
 		if not has_actor: return "kill_guards"
 		return "kill_by_reluctant" if String((result.get("obedience",{}) as Dictionary).get("id",""))=="reluctant" else "kill_by"
@@ -950,6 +1143,7 @@ static func stage_tokens(result:Dictionary,tags:Array,rng:RandomNumberGenerator)
 		"blade":_pick(BLADES,tags,rng,"a sharpened stone"),"club":_pick(CLUBS,tags,rng,"a heavy stone"),
 		"res":String(terms.get("resource","")).to_lower(),"amt":"%d" % roundi(float(terms.get("amount",0.0))) if terms.has("amount") else ""}
 	if String(out.actor)=="": out.erase("actor")
+	if String(result.get("part",""))!="": out["part"]=String(result.part)
 	return out
 
 ## Reactions (opener x closer pairs, as in divine_voice.gd).
@@ -984,8 +1178,8 @@ static func actor_reaction_key(result:Dictionary)->String:
 	match ob:
 		"hesitate": return "plead"
 		"refuse": return "refuse"
-		"reluctant": return "reluctant_deed" if stage in ["kill","exile","detain"] else "obey_task"
-	if stage in ["kill","exile","detain"]: return "obey_deed"
+		"reluctant": return "reluctant_deed" if stage in ["kill","exile","detain","maim"] else "obey_task"
+	if stage in ["kill","exile","detain","maim"]: return "obey_deed"
 	if stage in ["send","order"]: return "obey_task"
 	return ""
 
