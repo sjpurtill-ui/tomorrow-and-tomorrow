@@ -1,5 +1,862 @@
 {
  "line": "health",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "dosed_prescriptions": {
+   "effects": {
+    "health_protection": 0.0013,
+    "health_risk": -0.003,
+    "knowledge_preservation": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Dosed Prescriptions",
+   "observation": "Healers write each remedy with its measure, the hour to take it and the number of days, so the household can follow it alone."
+  },
+  "street_cleaning_wardens": {
+   "effects": {
+    "disease_exposure": -0.006,
+    "labor_demand": 0.004,
+    "sanitation": 0.012
+   },
+   "art": "res://assets/ui/research/subjects/latrine_siting-v1.png",
+   "name": "Street Wardens",
+   "observation": "Paid wardens see that streets are swept and gutters cleared, and fine householders who throw refuse out of doors."
+  },
+  "skull_wound_grading": {
+   "effects": {
+    "injury_risk": -0.0017,
+    "knowledge_preservation": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Head Wound Grading",
+   "observation": "Healers probe head wounds and grade them by depth and fracture, knowing which to open and which to leave alone."
+  },
+  "dedicated_surgical_blades": {
+   "effects": {
+    "disease_exposure": -0.002,
+    "injury_risk": -0.0017
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Healers' Knives",
+   "observation": "Healers keep bronze knives for their work alone, never for meat or leather."
+  },
+  "incubation_shrines": {
+   "effects": {
+    "cohesion": 0.006,
+    "disease_exposure": 0.003,
+    "health_protection": 0.004,
+    "labor_demand": 0.004,
+    "legitimacy": 0.004
+   },
+   "art": "res://assets/ui/research/discovery-600/dream_interpretation.png",
+   "name": "Healing Shrines",
+   "observation": "The sick sleep in the shrine's colonnade, bathe in its spring and wait for a healing dream while the priests tend them.",
+   "ability_reason": "Shrines where the sick sleep, bathe and are fed give them rest and care that a crowded house cannot, though sickness gathers there too."
+  },
+  "allium_tonic": {
+   "effects": {
+    "health_protection": 0.0008,
+    "nutrition_quality": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Garlic and Onion Tonic",
+   "observation": "Labourers and soldiers eat garlic and onion every day to keep up their strength."
+  },
+  "mineral_spring_bathing": {
+   "effects": {
+    "cohesion": 0.002,
+    "fatigue": -0.003,
+    "health_protection": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/public_baths-v1.png",
+   "name": "Mineral Springs",
+   "observation": "The aching and the scabbed travel to warm springs to bathe, and lodgings grow up around them."
+  },
+  "bed_nets": {
+   "effects": {
+    "disease_exposure": -0.006,
+    "fatigue": -0.002,
+    "health_protection": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Bed Nets",
+   "observation": "Fine linen nets hung over the bed keep off gnats and biting flies in the fever months."
+  },
+  "sulfur_fumigation": {
+   "effects": {
+    "disease_exposure": -0.006,
+    "health_risk": 0.002,
+    "pollution": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
+   "name": "Sulfur Fumigation",
+   "observation": "After a death from fever the house is shut and filled with the smoke of burning sulfur before anyone sleeps there again."
+  },
+  "marsh_fever_drainage": {
+   "effects": {
+    "cultivation_yield": 0.0015,
+    "disease_exposure": -0.02,
+    "ecological_pressure": 0.006,
+    "health_protection": 0.002,
+    "labor_demand": 0.01
+   },
+   "art": "res://assets/ui/research/subjects/drainage-v1.png",
+   "name": "Marsh Drainage Against Fever",
+   "observation": "Ditches drain the stagnant marsh beside the town, and the summer fevers that rose with its mists grow rarer.",
+   "ability_reason": "Draining the stagnant marsh beside a town takes away much of the summer fever that came with its mists."
+  },
+  "iron_surgical_probes": {
+   "effects": {
+    "health_protection": 0.0006,
+    "injury_risk": -0.0023
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Iron Surgical Probes",
+   "observation": "Smiths forge fine iron lancets, probes and hooks that hold an edge and a point far better than bronze."
+  },
+  "forceps_tooth_extraction": {
+   "effects": {
+    "health_protection": 0.0008,
+    "health_risk": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Tooth Forceps",
+   "observation": "A rotten tooth is gripped with iron forceps and drawn out whole, ending months of pain."
+  },
+  "wooden_prostheses": {
+   "effects": {
+    "cohesion": 0.002,
+    "labor_efficiency": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Wooden Limbs",
+   "observation": "Carpenters carve feet and toes of wood, strapped on with leather, so the maimed can walk and work."
+  },
+  "wine_wound_washing": {
+   "effects": {
+    "disease_exposure": -0.002,
+    "injury_risk": -0.0023
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Wine-washed Wounds",
+   "observation": "Wounds are washed with wine or vinegar before dressing, and fewer of them fester."
+  },
+  "fever_crisis_days": {
+   "effects": {
+    "health_protection": 0.0008,
+    "knowledge_preservation": 0.0011,
+    "observation_rate": 0.0022
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Fever Crisis Days",
+   "observation": "Healers count the days of a fever and look for its turn to better or worse on fixed days."
+  },
+  "resin_wound_salves": {
+   "effects": {
+    "injury_risk": -0.0017,
+    "trade_capacity": 0.0009
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Resin Salves",
+   "observation": "Salves of myrrh and pine resin spread on wounds and sores keep them clean as they heal."
+  },
+  "clyster_enemas": {
+   "effects": {
+    "health_protection": 0.0004,
+    "health_risk": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Enemas",
+   "observation": "Healers give enemas through a reed fixed to a bladder to empty the bowels of the feverish and the bound."
+  },
+  "hellebore_squill_purges": {
+   "effects": {
+    "health_protection": 0.0006,
+    "health_risk": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Measured Purges",
+   "observation": "Hellebore and squill are given in weighed doses to purge the body; a little too much kills."
+  },
+  "gold_band_dentures": {
+   "effects": {
+    "craft_output": 0.001,
+    "nutrition_quality": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Gold-band Dentures",
+   "observation": "Lost front teeth are replaced with carved or borrowed teeth held in bands of gold, a luxury of the rich."
+  },
+  "town_physicians": {
+   "effects": {
+    "health_protection": 0.004,
+    "injury_risk": -0.0018,
+    "labor_demand": 0.006,
+    "maternal_safety": 0.0034,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Town Physicians",
+   "observation": "The town council pays a physician a yearly salary to treat townsfolk who cannot pay.",
+   "ability_reason": "A physician paid from town funds treats rich and poor alike and stays on through epidemics."
+  },
+  "skin_flap_repair": {
+   "effects": {
+    "cohesion": 0.002,
+    "injury_risk": -0.0009
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Skin Flap Repair",
+   "observation": "A flap of skin from cheek or brow is turned and sewn to rebuild a severed nose or ear."
+  },
+  "cataract_couching": {
+   "effects": {
+    "health_protection": 0.0017,
+    "health_risk": 0.002,
+    "labor_efficiency": 0.0017
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Cataract Couching",
+   "observation": "A needle passed into the eye pushes the clouded lens down, and the blind see light again, though not always for long.",
+   "ability_reason": "Pushing a clouded lens aside gives sight back to old craftsmen and elders who would otherwise have lived out their years blind."
+  },
+  "venesection": {
+   "effects": {
+    "health_protection": 0.0004,
+    "health_risk": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Bloodletting",
+   "observation": "Healers open a chosen vein to let blood in fevers and fullness, sometimes more than the patient can spare.",
+   "social_consequence": "Bleeding becomes the healer's first resort, and the weak are bled weaker."
+  },
+  "exercise_regimens": {
+   "effects": {
+    "fatigue": -0.004,
+    "health_protection": 0.001,
+    "labor_efficiency": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/public_baths-v1.png",
+   "name": "Exercise Regimens",
+   "observation": "Trainers prescribe running, wrestling, rubbing with oil and set meals to keep citizens fit."
+  },
+  "flushed_latrines": {
+   "effects": {
+    "disease_exposure": -0.008,
+    "labor_demand": 0.004,
+    "sanitation": 0.016,
+    "water_pollution": 0.006,
+    "water_safety": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/latrine_siting-v1.png",
+   "name": "Flushed Latrines",
+   "observation": "Rows of public latrines sit over a channel of running water that carries the waste away, into the river below the town."
+  },
+  "healer_conduct_oath": {
+   "effects": {
+    "health_protection": 0.0006,
+    "institutional_rigidity": 0.003,
+    "legitimacy": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Healer's Oath",
+   "observation": "New healers swear before the gods to help and not harm, keep the sick's secrets and never give poison."
+  },
+  "reduction_bench": {
+   "effects": {
+    "injury_risk": -0.0023,
+    "labor_efficiency": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Reduction Bench",
+   "observation": "A board with a winch stretches a dislocated hip or broken thigh until the bone slides home."
+  },
+  "cupping_vessels": {
+   "effects": {
+    "health_protection": 0.0004,
+    "health_risk": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Cupping",
+   "observation": "Bronze or horn cups, heated and pressed to the skin, draw blood and ill humours to the surface."
+  },
+  "fluid_balance_theory": {
+   "effects": {
+    "health_protection": 0.0027,
+    "health_risk": 0.004,
+    "knowledge_rate": 0.0062,
+    "observation_rate": 0.0052
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Balance of the Fluids",
+   "observation": "Healers teach that health is a balance of the body's fluids, and treat every sickness by restoring it.",
+   "ability_reason": "One theory of sickness gives healers a way to reason from case to case, for better and, when it calls for bleeding and purging, for worse."
+  },
+  "seasonal_regimen": {
+   "effects": {
+    "health_protection": 0.001,
+    "nutrition_quality": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Seasonal Regimen",
+   "observation": "Diet, sleep and exercise are prescribed by season and age: lighter food in summer, more for the growing."
+  },
+  "measured_poppy_draughts": {
+   "effects": {
+    "fatigue": -0.003,
+    "health_protection": 0.0008,
+    "health_risk": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Measured Poppy Draughts",
+   "observation": "Poppy juice is measured by drops for sleep and pain, since a spoonful too many brings a sleep with no waking."
+  },
+  "healing_schools": {
+   "effects": {
+    "adoption_rate": 0.006,
+    "health_protection": 0.0033,
+    "knowledge_preservation": 0.0069,
+    "knowledge_rate": 0.0062,
+    "labor_demand": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Healing Schools",
+   "observation": "Healers gather around famous masters, and pupils learn from books of cases handed down the lineage.",
+   "ability_reason": "Masters teaching pupils from written case books pass on more skill than any single healer could gather in a lifetime."
+  },
+  "epidemic_chronicles": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "knowledge_preservation": 0.0021,
+    "observation_rate": 0.0022
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Epidemic Chronicles",
+   "observation": "Scribes record each pestilence by town, season and weather, and the elders learn which summers bring sickness."
+  },
+  "prognostic_signs": {
+   "effects": {
+    "health_protection": 0.0008,
+    "observation_rate": 0.0022
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Prognostic Signs",
+   "observation": "Healers read the face, the breath, the urine and the stool to foretell whether the sick will live."
+  },
+  "chest_draining": {
+   "effects": {
+    "health_protection": 0.0006,
+    "health_risk": 0.002,
+    "injury_risk": -0.0009
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Chest Draining",
+   "observation": "When pus fills the chest a healer cuts between the ribs and drains it, and some who would have drowned in it live."
+  },
+  "hernia_trusses": {
+   "effects": {
+    "injury_risk": -0.0009,
+    "labor_efficiency": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Hernia Trusses",
+   "observation": "Padded bands and trusses hold ruptures in, so porters and ploughmen can keep working."
+  },
+  "barley_water_draughts": {
+   "effects": {
+    "health_protection": 0.001,
+    "nutrition_quality": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Barley Water for Fevers",
+   "observation": "The feverish are given barley water and honey with vinegar, and fewer waste away in the fever's drought."
+  },
+  "clinical_observation_rounds": {
+   "effects": {
+    "health_protection": 0.0027,
+    "knowledge_preservation": 0.0034,
+    "labor_demand": 0.004,
+    "observation_rate": 0.0069
+   },
+   "ability_reason": "Visiting each patient daily and writing down the course of the illness turns a healer's hunches into knowledge others can check."
+  },
+  "clinical_pulse_assessment": {
+   "effects": {
+    "health_protection": 0.0008,
+    "observation_rate": 0.0032
+   },
+   "ability_reason": "The strength and rhythm of the pulse give a sign of the patient's state that the eye cannot see."
+  },
+  "air_water_places": {
+   "effects": {
+    "disease_exposure": -0.006,
+    "health_protection": 0.0008,
+    "survey_speed": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/well_siting-v1.png",
+   "name": "Airs, Waters and Places",
+   "observation": "Healers judge a place's health by its winds, waters and sun, and new towns are sited by their advice."
+  },
+  "gymnasium_baths": {
+   "effects": {
+    "cohesion": 0.004,
+    "disease_exposure": 0.003,
+    "fatigue": -0.003,
+    "fuel_demand": 0.004,
+    "health_protection": 0.0008,
+    "labor_demand": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/public_baths-v1.png",
+   "name": "Gymnasium Baths",
+   "observation": "Citizens exercise in walled grounds and wash in the adjoining baths, and skin complaints pass from bather to bather."
+  },
+  "healer_travel_circuits": {
+   "effects": {
+    "adoption_rate": 0.004,
+    "health_protection": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Travelling Healers",
+   "observation": "Healers travel from town to town on circuit, bringing their skill to places too small to keep one."
+  },
+  "wound_classification": {
+   "effects": {
+    "injury_risk": -0.0017,
+    "knowledge_preservation": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Wound Classes",
+   "observation": "Wounds are classed by weapon, place struck and depth, and each class has its own treatment."
+  },
+  "battlefield_medicine": {
+   "effects": {
+    "health_protection": 0.0013,
+    "injury_risk": -0.0092,
+    "labor_demand": 0.006,
+    "logistics_endurance": 0.004,
+    "warfare_readiness": 0.006
+   },
+   "ability_reason": "Surgeons and litter bearers who follow the host bring wounded men back to the line or home alive."
+  },
+  "civic_infirmaries": {
+   "effects": {
+    "disease_exposure": 0.004,
+    "health_protection": 0.005,
+    "labor_demand": 0.008,
+    "maternal_safety": 0.0051,
+    "neonatal_survival": 0.0035,
+    "state_capacity": 0.0026
+   },
+   "ability_reason": "A house where the sick poor are fed, washed and nursed saves lives no family could, though fevers spread along its crowded beds."
+  },
+  "surgical_anatomy": {
+   "effects": {
+    "cohesion": -0.004,
+    "health_risk": 0.003,
+    "injury_risk": -0.0069,
+    "knowledge_rate": 0.0074,
+    "maternal_safety": 0.0051
+   },
+   "ability_reason": "Opening the dead shows surgeons where vessels and nerves run, so they cut where it is safe; many are horrified by the work."
+  },
+  "nerve_tracing": {
+   "effects": {
+    "injury_risk": -0.0009,
+    "knowledge_rate": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Nerve Tracing",
+   "observation": "Anatomists follow the white cords of the body back to brain and spine, and learn why a cut arm may lose its feeling."
+  },
+  "timed_pulse": {
+   "effects": {
+    "health_protection": 0.0004,
+    "observation_rate": 0.0027
+   },
+   "art": "res://assets/ui/research/paper/clinical_pulse_assessment.png",
+   "name": "Timed Pulse",
+   "observation": "A small water clock at the bedside lets the healer count the pulse against a steady flow."
+  },
+  "vessel_distinction": {
+   "effects": {
+    "injury_risk": -0.0009,
+    "knowledge_rate": 0.0019
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Arteries and Veins",
+   "observation": "Anatomists learn that arteries beat and carry blood from the heart, while veins lie slack."
+  },
+  "materia_medica": {
+   "effects": {
+    "health_protection": 0.0033,
+    "health_risk": -0.004,
+    "knowledge_preservation": 0.0057,
+    "trade_capacity": 0.0028
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Book of Healing Substances",
+   "observation": "A great herbal describes hundreds of plants, minerals and animal parts, how each looks, where it grows and what it cures.",
+   "ability_reason": "One book of hundreds of drugs, their look and their uses, lets healers everywhere use the same remedies and use them with care."
+  },
+  "compound_antidotes": {
+   "effects": {
+    "health_protection": 0.0006,
+    "health_risk": 0.001,
+    "trade_capacity": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Compound Antidotes",
+   "observation": "Antidotes of dozens of ingredients are compounded against poison and snakebite and sold dear to the wealthy."
+  },
+  "stamped_eye_salves": {
+   "effects": {
+    "health_protection": 0.0006,
+    "standardization": 0.003,
+    "trade_capacity": 0.0009
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Stamped Eye Salves",
+   "observation": "Eye salves are rolled into sticks and stamped with the maker's name and the ailment they treat."
+  },
+  "barber_bleeders": {
+   "effects": {
+    "adoption_rate": 0.002,
+    "health_protection": 0.0006,
+    "health_risk": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Barber-bleeders",
+   "observation": "Barbers in the market shave beards, pull teeth and open veins for a small coin."
+  },
+  "vessel_ligature": {
+   "effects": {
+    "health_protection": 0.0013,
+    "injury_risk": -0.0069,
+    "maternal_safety": 0.0034
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Vessel Ligature",
+   "observation": "Surgeons tie off cut vessels with thread instead of searing them, and the bleeding stops without a burn.",
+   "ability_reason": "Tying off a cut vessel stops the bleeding that used to kill the wounded and those under the knife."
+  },
+  "bladder_stone_cutting": {
+   "effects": {
+    "health_protection": 0.0006,
+    "health_risk": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Stone Cutting",
+   "observation": "A cut below the belly draws out a bladder stone; many live who would have died in agony, and some die of the cut."
+  },
+  "surgical_instrument_kits": {
+   "effects": {
+    "injury_risk": -0.0014,
+    "standardization": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Surgeon's Instrument Case",
+   "observation": "Surgeons carry cases of lancets, probes, hooks, forceps and saws, each made for its task."
+  },
+  "bath_house_regulation": {
+   "effects": {
+    "disease_exposure": -0.006,
+    "sanitation": 0.008,
+    "state_capacity": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/public_baths-v1.png",
+   "name": "Bath-house Rules",
+   "observation": "Bath hours and fees, and the draining and scrubbing of the pools, are set by rule and checked by wardens."
+  },
+  "camp_sanitation": {
+   "effects": {
+    "disease_exposure": -0.008,
+    "sanitation": 0.006,
+    "warfare_readiness": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/latrine_siting-v1.png",
+   "name": "Camp Sanitation",
+   "observation": "Every camp digs its latrines downstream and downwind, and water is drawn above the camp."
+  },
+  "military_hospitals": {
+   "effects": {
+    "health_protection": 0.002,
+    "injury_risk": -0.0055,
+    "labor_demand": 0.006,
+    "state_capacity": 0.0013,
+    "warfare_readiness": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
+   "name": "Fortress Hospitals",
+   "observation": "Fortresses build wards of small rooms around a courtyard, with a surgeon and orderlies for the sick and wounded.",
+   "ability_reason": "Hospital wards inside the fortress turn wounds that would have killed or crippled into months of mending."
+  },
+  "root_cutter_shops": {
+   "effects": {
+    "health_protection": 0.0008,
+    "health_risk": 0.002,
+    "trade_capacity": 0.0017
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Drug Sellers' Shops",
+   "observation": "Drug sellers keep shops of dried roots, minerals and seeds, and not every powder is what the seller says."
+  },
+  "marsh_creature_theory": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "knowledge_rate": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/drainage-v1.png",
+   "name": "Marsh Creature Theory",
+   "observation": "Some healers teach that creatures too small to see breed in marshes and enter the body with the breath."
+  },
+  "clay_over_lead_pipes": {
+   "effects": {
+    "health_risk": -0.006,
+    "water_safety": 0.008
+   },
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png",
+   "name": "Clay Pipes Over Lead",
+   "observation": "Builders learn that water from clay pipes is healthier than from lead, whose workers grow pale and weak.",
+   "ability_reason": "Where the town's water runs through lead, the slow harm it does is at last noticed, and clay is laid instead."
+  },
+  "soporific_sponges": {
+   "effects": {
+    "health_risk": 0.003,
+    "injury_risk": -0.0011
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Sleep Sponges",
+   "observation": "A sponge soaked in poppy, mandrake and henbane, dried and wetted again, is held to the nose before the knife."
+  },
+  "ligated_amputation": {
+   "effects": {
+    "health_risk": 0.002,
+    "injury_risk": -0.0023,
+    "labor_efficiency": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Ligated Amputation",
+   "observation": "A rotting limb is cut off above the rot and the vessels tied, and more amputees now survive the cut."
+  },
+  "periodic_fever_classes": {
+   "effects": {
+    "disease_exposure": -0.003,
+    "health_protection": 0.0008,
+    "knowledge_preservation": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Periodic Fevers",
+   "observation": "Healers class fevers by whether they return every third or fourth day, and forecast and treat each kind."
+  },
+  "estate_sickrooms": {
+   "effects": {
+    "health_protection": 0.001,
+    "labor_demand": 0.004,
+    "labor_efficiency": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Estate Sickrooms",
+   "observation": "Large estates keep a sick room for workers and servants, since a hand nursed back is cheaper than a new one."
+  },
+  "gentle_madness_care": {
+   "effects": {
+    "cohesion": 0.004,
+    "health_protection": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Gentle Care of the Mad",
+   "observation": "Some healers treat the mad with rest, quiet, music and gentle diet instead of chains and beating."
+  },
+  "medical_encyclopedias": {
+   "effects": {
+    "adoption_rate": 0.006,
+    "health_protection": 0.002,
+    "knowledge_preservation": 0.0069
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Medical Encyclopedias",
+   "observation": "Scholars gather all known healing, from diet and drugs to surgery, into great books copied throughout the land.",
+   "ability_reason": "All known practice in one great work lets a healer in a small town consult the best of every school."
+  },
+  "examination_specula": {
+   "effects": {
+    "health_protection": 0.0006,
+    "health_risk": 0.001,
+    "maternal_safety": 0.0016
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Specula",
+   "observation": "Bronze specula opened by a screw let the healer see and treat what lies within the body's passages."
+  },
+  "plague_burial_crews": {
+   "effects": {
+    "cohesion": 0.003,
+    "disease_exposure": -0.008,
+    "labor_demand": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Plague Burial Crews",
+   "observation": "In pestilence years the town pays crews to carry the dead outside the walls and bury them fast."
+  },
+  "cold_damage_treatise": {
+   "effects": {
+    "health_protection": 0.001,
+    "knowledge_preservation": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Treatise on Cold Fevers",
+   "observation": "A treatise follows fevers from cold inward through the body stage by stage, each stage with its own remedy."
+  },
+  "needling_therapy": {
+   "effects": {
+    "fatigue": -0.002,
+    "health_protection": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Needling",
+   "observation": "Fine needles set at fixed points along the body's channels ease pain and restore balance."
+  },
+  "fixed_formula_decoctions": {
+   "effects": {
+    "health_protection": 0.001,
+    "health_risk": -0.002,
+    "standardization": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Fixed-formula Decoctions",
+   "observation": "Herbs are boiled by fixed formula and ratio, so the same illness gets the same draught from any healer."
+  },
+  "anesthetic_wine_powder": {
+   "effects": {
+    "health_protection": 0.0013,
+    "health_risk": 0.003,
+    "injury_risk": -0.0037
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Numbing Powder",
+   "observation": "The patient drinks a numbing powder in wine and lies still while the surgeon opens the belly.",
+   "ability_reason": "A patient numbed by a powder in wine lets the surgeon work slowly and cut deep."
+  },
+  "imitative_exercises": {
+   "effects": {
+    "fatigue": -0.003,
+    "health_protection": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_baths-v1.png",
+   "name": "Animal-posture Exercises",
+   "observation": "Healers teach exercises that imitate the tiger, deer, bear, ape and bird to keep the body supple."
+  },
+  "experimental_vivisection": {
+   "effects": {
+    "cohesion": -0.004,
+    "injury_risk": -0.0018,
+    "knowledge_rate": 0.0074,
+    "observation_rate": 0.0052
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Animal Experiments",
+   "observation": "Anatomists cut living animals, tying off nerves and vessels one by one, to learn what each part does.",
+   "ability_reason": "Tying off nerves and vessels in living animals shows what each organ does, not only where it lies."
+  },
+  "wrist_pulse_positions": {
+   "effects": {
+    "health_protection": 0.0004,
+    "observation_rate": 0.0022
+   },
+   "art": "res://assets/ui/research/paper/clinical_pulse_assessment.png",
+   "name": "Three Wrist Pulses",
+   "observation": "Healers feel the pulse at three places on each wrist and read in each the state of a different organ."
+  },
+  "district_physicians": {
+   "effects": {
+    "health_protection": 0.0017,
+    "labor_demand": 0.005,
+    "maternal_safety": 0.0016,
+    "neonatal_survival": 0.0016,
+    "state_capacity": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "District Physicians",
+   "observation": "Each quarter of the town has its own paid physician who treats the poor without fee."
+  },
+  "pestilence_route_tracking": {
+   "effects": {
+    "disease_exposure": -0.006,
+    "observation_rate": 0.0022,
+    "trade_capacity": -0.003
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Tracking Pestilence",
+   "observation": "Magistrates follow a pestilence along the roads and sea lanes and turn back travellers from stricken ports."
+  },
+  "hernia_repair": {
+   "effects": {
+    "health_risk": 0.002,
+    "injury_risk": -0.0011,
+    "labor_efficiency": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Hernia Repair",
+   "observation": "Surgeons open the groin, return the bowel and close the gap, and some ruptured men work again."
+  },
+  "medical_synthesis": {
+   "effects": {
+    "health_protection": 0.0033,
+    "institutional_rigidity": 0.01,
+    "knowledge_preservation": 0.0057,
+    "knowledge_rate": 0.0062
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "The Grand Medical System",
+   "observation": "A great physician joins anatomy, pulse and regimen into one system, written in many books and taught everywhere.",
+   "ability_reason": "One grand system joining anatomy, pulse and regimen gives healers everywhere a shared framework, and one few will dare to question for centuries.",
+   "social_consequence": "Healers argue less and learn from one book; its errors are copied along with its truths."
+  },
+  "leper_houses": {
+   "effects": {
+    "cohesion": -0.004,
+    "disease_exposure": -0.008,
+    "health_protection": 0.0004,
+    "labor_demand": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Leper Houses",
+   "observation": "Lepers are housed outside the walls, fed by alms and forbidden the town.",
+   "social_consequence": "The sick are cared for and cast out in the same act."
+  },
+  "fountain_fouling_law": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "state_capacity": 0.0008,
+    "water_safety": 0.01
+   },
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png",
+   "name": "Fountain Fouling Fines",
+   "observation": "Fines are set for washing, watering beasts or throwing refuse at the public fountains and cisterns."
+  },
+  "pharmacy_weights": {
+   "effects": {
+    "health_risk": -0.004,
+    "standardization": 0.004
+   },
+   "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png",
+   "name": "Pharmacy Weights",
+   "observation": "Drug sellers weigh doses on small balances with fixed weights, and fewer patients are poisoned by a heavy hand."
+  },
+  "charity_hospitals": {
+   "effects": {
+    "cohesion": 0.006,
+    "disease_exposure": 0.003,
+    "health_protection": 0.004,
+    "labor_demand": 0.008,
+    "legitimacy": 0.004,
+    "maternal_safety": 0.0034,
+    "neonatal_survival": 0.0035
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Charity Hospitals",
+   "observation": "Endowed hospitals take in the poor, the sick and travellers without kin, feeding and nursing them for charity.",
+   "ability_reason": "Houses open to any poor, sick or travelling stranger give care to those with no kin to nurse them."
+  }
+ }
 }

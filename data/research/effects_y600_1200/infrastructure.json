@@ -1,5 +1,812 @@
 {
  "line": "infrastructure",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "slab_paved_streets": {
+   "effects": {
+    "construction_rate": 0.0012,
+    "labor_demand": 0.002,
+    "route_speed": 0.002,
+    "sanitation": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
+   "observation": "The main street is laid with fitted stone slabs, and the mud of the rains no longer swallows carts and sandals."
+  },
+  "cyclopean_masonry": {
+   "effects": {
+    "disaster_resilience": 0.0042,
+    "labor_demand": 0.008,
+    "legitimacy": 0.0024,
+    "security_efficiency": 0.008
+   },
+   "art": "res://assets/ui/research/subjects/wedges_and_levers-v1.png",
+   "observation": "Blocks too big for any crew of men to lift, people say, are levered into the citadel wall and wedged with small stones.",
+   "social_consequence": "The citadel walls awe friend and enemy alike, and every season of hauling blocks is a season the villages owe the palace."
+  },
+  "corbelled_domed_tombs": {
+   "effects": {
+    "cohesion": 0.002,
+    "construction_rate": 0.0012,
+    "labor_demand": 0.006,
+    "legitimacy": 0.0036
+   },
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png",
+   "observation": "A long passage leads into a beehive chamber whose stone rings step inward until a single capstone closes it."
+  },
+  "masonry_arch_centering": {
+   "effects": {
+    "construction_rate": 0.0024,
+    "disaster_resilience": 0.0021,
+    "timber_pressure": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/framed_construction-v1.png",
+   "observation": "A timber frame holds the curve while the masons set the stones, and it is knocked out only when the last one locks."
+  },
+  "relieving_triangles": {
+   "effects": {
+    "construction_rate": 0.0018,
+    "disaster_resilience": 0.0035
+   },
+   "art": "res://assets/ui/research/subjects/quarry_reading-v1.png",
+   "observation": "Above the great lintel the builders leave an open triangle, and the wall's weight passes round the doorway instead of onto it."
+  },
+  "corbelled_culvert_bridges": {
+   "effects": {
+    "disaster_resilience": 0.0014,
+    "haul_capacity": 0.0015,
+    "route_speed": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/graded_roads-v1.png",
+   "observation": "Stone slabs stepped inward from each bank close over the stream, and wagons cross where they once forded."
+  },
+  "ashlar_retaining_terraces": {
+   "effects": {
+    "cultivation_yield": 0.002,
+    "disaster_resilience": 0.0035,
+    "housing_output": 0.003,
+    "soil_productivity": 0.003
+   },
+   "art": "res://assets/ui/research/discovery-600/shrine_terraces.png",
+   "observation": "Dressed-stone retaining walls hold the hillside in level steps for houses and gardens."
+  },
+  "spillway_reservoirs": {
+   "effects": {
+    "disaster_resilience": 0.0035,
+    "disaster_risk": -0.003,
+    "labor_demand": 0.003,
+    "water_access": 0.0064
+   },
+   "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
+   "observation": "When the reservoir fills, the surplus runs out over a paved stone spill instead of tearing through the dam."
+  },
+  "stepped_spring_tunnels": {
+   "effects": {
+    "security_efficiency": 0.003,
+    "water_access": 0.0048,
+    "water_safety": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/well_siting-v1.png",
+   "observation": "A stair cut through the rock leads down inside the walls to the spring, so the town drinks even under siege."
+  },
+  "plastered_rock_cisterns": {
+   "effects": {
+    "disaster_resilience": 0.0021,
+    "water_access": 0.0048,
+    "water_safety": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png",
+   "observation": "Bell-shaped cisterns cut into the rock and sealed with lime plaster hold a winter's rain through the dry months."
+  },
+  "stone_quays": {
+   "effects": {
+    "haul_capacity": 0.002,
+    "labor_demand": 0.004,
+    "naval_capacity": 0.003,
+    "trade_capacity": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/coastal_watercraft-v1.png",
+   "observation": "Dressed-stone quays let ships tie up alongside and unload over a plank instead of into small boats."
+  },
+  "rubble_breakwaters": {
+   "effects": {
+    "disaster_resilience": 0.0028,
+    "labor_demand": 0.006,
+    "naval_capacity": 0.003,
+    "trade_capacity": 0.0015
+   },
+   "art": "res://assets/ui/research/subjects/coastal_watercraft-v1.png",
+   "observation": "Ten thousand boatloads of rubble dumped in the sea make an arm of stone that the winter waves break against."
+  },
+  "flanged_interlocking_tiles": {
+   "effects": {
+    "disaster_resilience": 0.0028,
+    "fuel_demand": 0.002,
+    "housing_output": 0.006,
+    "repair_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/paper/fired_roof_tiles.png",
+   "observation": "Flat tiles with raised edges are laid side by side and capped with rounded tiles, and the roof sheds the heaviest rain."
+  },
+  "iron_tool_rock_cutting": {
+   "effects": {
+    "construction_rate": 0.0036,
+    "stone_yield": 0.005,
+    "water_access": 0.0016
+   },
+   "art": "res://assets/ui/research/subjects/quarry_reading-v1.png",
+   "observation": "With iron picks a crew cuts a chamber into the cliff in a season where bronze once took years."
+  },
+  "pillared_storehouses": {
+   "effects": {
+    "dry_storage": 0.008,
+    "food_storage": 0.006,
+    "storage_loss": -0.004
+   },
+   "art": "res://assets/ui/research/subjects/regional_granaries-v1.png",
+   "observation": "Long storehouses with rows of stone pillars keep the grain dry and let the carts drive right inside."
+  },
+  "canal_sluice_gates": {
+   "effects": {
+    "cultivation_yield": 0.004,
+    "disaster_resilience": 0.0021,
+    "labor_demand": 0.002,
+    "water_access": 0.0048
+   },
+   "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
+   "observation": "A timber gate raised in its stone grooves lets water into the town canal or shuts out the flood."
+  },
+  "groundwater_tunnels": {
+   "effects": {
+    "cultivation_yield": 0.006,
+    "disaster_resilience": 0.0014,
+    "labor_demand": 0.008,
+    "water_access": 0.016,
+    "water_safety": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/well_siting-v1.png",
+   "observation": "A line of shafts across the plain marks a tunnel sloping gently from the foothills' groundwater to the village fields.",
+   "ability_reason": "A tunnel graded just steeper than level draws groundwater out of the hills with no lifting at all.",
+   "social_consequence": "Villages on the tunnel line owe days every year to clear its shafts; a neglected tunnel silts up and the fields die with it."
+  },
+  "drained_intertown_roads": {
+   "effects": {
+    "haul_capacity": 0.002,
+    "labor_demand": 0.004,
+    "route_speed": 0.004,
+    "trade_capacity": 0.0015
+   },
+   "art": "res://assets/ui/research/subjects/graded_roads-v1.png",
+   "observation": "The road between the towns is raised, cambered and ditched on both sides, and carts use it even after rain."
+  },
+  "rock_cut_water_tunnels": {
+   "effects": {
+    "labor_demand": 0.004,
+    "security_efficiency": 0.002,
+    "water_access": 0.008,
+    "water_safety": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/well_siting-v1.png",
+   "observation": "A tunnel cut through the hill brings the spring's water inside the walls, hidden from any besieger."
+  },
+  "stone_channel_aqueduct_bridges": {
+   "effects": {
+    "construction_rate": 0.0018,
+    "labor_demand": 0.004,
+    "water_access": 0.0064
+   },
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png",
+   "observation": "Where the conduit meets a valley, a stone bridge carries its channel across on a single row of piers."
+  },
+  "gravity_conduit_grade_control": {
+   "effects": {
+    "construction_rate": 0.0012,
+    "sanitation": 0.002,
+    "water_access": 0.0048
+   },
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
+   "observation": "Surveyors set the conduit's fall with leveling staffs, a finger's drop for every hundred paces, and the water never pools."
+  },
+  "crushed_pottery_plaster": {
+   "effects": {
+    "disaster_resilience": 0.0028,
+    "water_access": 0.0024,
+    "water_safety": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png",
+   "observation": "Lime mixed with crushed pottery sets into a pink plaster that holds water in cisterns and baths."
+  },
+  "two_ended_tunnels": {
+   "effects": {
+    "construction_rate": 0.0036,
+    "labor_demand": 0.006,
+    "labor_efficiency": 0.003,
+    "survey_speed": 0.006,
+    "water_access": 0.0096
+   },
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
+   "observation": "Two crews dig toward each other from opposite sides of the mountain and meet in the dark within an arm's length.",
+   "ability_reason": "Survey carried over the ridge lets two crews dig at once, halving the years a long tunnel takes."
+  },
+  "public_fountain_houses": {
+   "effects": {
+    "cohesion": 0.003,
+    "fatigue": -0.002,
+    "water_access": 0.0064,
+    "water_safety": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png",
+   "observation": "At the end of the pipe the water pours from bronze lion heads into a basin under a columned roof, and the women gather there."
+  },
+  "lewis_block_lifting": {
+   "effects": {
+    "construction_rate": 0.0036,
+    "injury_risk": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/wedges_and_levers-v1.png",
+   "observation": "A dovetailed slot cut in the top of a block takes an iron lewis, and the crane lifts it with no ropes round its faces."
+  },
+  "caravanserais": {
+   "effects": {
+    "food_storage": 0.004,
+    "labor_demand": 0.004,
+    "logistics_endurance": 0.008,
+    "trade_capacity": 0.005,
+    "travel_speed": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png"
+  },
+  "pontoon_bridges": {
+   "effects": {
+    "haul_capacity": 0.0015,
+    "route_speed": 0.003,
+    "warfare_readiness": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/river_craft-v1.png",
+   "observation": "Boats anchored side by side and planked over carry a whole army across the strait in a day."
+  },
+  "excavated_harbor_basins": {
+   "effects": {
+    "disaster_resilience": 0.0028,
+    "labor_demand": 0.01,
+    "naval_capacity": 0.0075,
+    "trade_capacity": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/naval_arsenals-v2.png",
+   "observation": "The harbor is dug out of the shore and lined with stone, and ships lie safe inside while the storms blow past.",
+   "ability_reason": "A dug and walled basin gives shelter where the coast offers none, and a fleet can winter at home."
+  },
+  "leaded_iron_clamps": {
+   "effects": {
+    "construction_rate": 0.0012,
+    "disaster_resilience": 0.0042
+   },
+   "art": "res://assets/ui/research/subjects/quarry_reading-v1.png",
+   "observation": "Iron clamps set in slots between blocks are sealed with poured lead, and the wall stands as one piece when the ground shakes."
+  },
+  "timber_pile_foundations": {
+   "effects": {
+    "construction_rate": 0.0024,
+    "disaster_resilience": 0.0035,
+    "housing_output": 0.003,
+    "timber_pressure": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/timber_seasoning-v1.png",
+   "observation": "Oak piles hammered into the marsh until they stop sinking carry the warehouse walls above the soft ground."
+  },
+  "rubble_core_walling": {
+   "effects": {
+    "construction_rate": 0.0048,
+    "housing_output": 0.003,
+    "stone_yield": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png",
+   "observation": "Two faces of dressed stone rise together, and the space between them is packed with rubble and mortar."
+  },
+  "ship_sheds": {
+   "effects": {
+    "naval_capacity": 0.004,
+    "repair_capacity": 0.004,
+    "storage_loss": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/naval_arsenals-v2.png",
+   "observation": "Warships are hauled up stone slipways into long roofed sheds, and their timbers dry out between campaigns."
+  },
+  "standard_lot_grid_towns": {
+   "effects": {
+    "housing_output": 0.008,
+    "sanitation": 0.003,
+    "standardization": 0.004,
+    "state_capacity": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
+   "observation": "The new town is laid out in equal blocks, each split into equal house lots, and every street runs straight."
+  },
+  "windlass_wells": {
+   "effects": {
+    "fatigue": -0.003,
+    "labor_efficiency": 0.002,
+    "water_access": 0.0048
+   },
+   "art": "res://assets/ui/research/subjects/well_siting-v1.png",
+   "observation": "A crank-turned drum winds the rope, and a child can raise a full bucket from a well too deep for arms alone."
+  },
+  "street_gutter_gratings": {
+   "effects": {
+    "disaster_resilience": 0.0021,
+    "disease_exposure": -0.004,
+    "sanitation": 0.008
+   },
+   "art": "res://assets/ui/research/subjects/covered_sewers-v1.png",
+   "observation": "Rain and waste run off the street through slotted stone gratings into the covered drain below."
+  },
+  "curbed_paved_streets": {
+   "effects": {
+    "injury_risk": -0.002,
+    "route_speed": 0.002,
+    "sanitation": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
+   "observation": "Raised curbs keep walkers dry, and stepping stones let them cross without wading through the gutter."
+  },
+  "aggregate_road_foundations": {
+   "effects": {
+    "disaster_resilience": 0.0021,
+    "haul_capacity": 0.004,
+    "labor_demand": 0.006,
+    "route_speed": 0.005
+   },
+   "art": "res://assets/ui/research/paper/aggregate_road_foundations.png",
+   "observation": "Big stones at the bottom, rubble and gravel above, and a paved or rammed top: the road carries loads through the wettest season.",
+   "production_contract": "Build a layered road bed of large stones, rubble, graded gravel and a paved or rammed surface, matched to the ground. Crews, stone and continuing repair are required; the discovery builds no road.",
+   "ability_reason": "A road built in layers spreads each load into the ground, so carts keep moving when a dirt track turns to mire."
+  },
+  "voussoir_arch_assembly": {
+   "effects": {
+    "construction_rate": 0.006,
+    "disaster_resilience": 0.0056,
+    "housing_output": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/quarry_reading-v1.png",
+   "observation": "Wedge-shaped stones set over a timber frame press on one another so hard that the arch stands when the frame is struck.",
+   "ability_reason": "A true arch turns weight into thrust along its curve, spanning gaps no lintel could."
+  },
+  "counterweight_cranes": {
+   "effects": {
+    "construction_rate": 0.006,
+    "haul_capacity": 0.004,
+    "injury_risk": 0.002,
+    "labor_efficiency": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/counterweight_cranes-v1.png"
+  },
+  "water_lifting_wheels": {
+   "effects": {
+    "cultivation_yield": 0.006,
+    "fatigue": -0.003,
+    "labor_demand": -0.004,
+    "water_access": 0.008
+   },
+   "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
+   "observation": "The river turns a great wheel hung with clay pots, and each pot empties into the channel at the top of its turn."
+  },
+  "distance_milestones": {
+   "effects": {
+    "route_speed": 0.002,
+    "state_capacity": 0.002,
+    "travel_speed": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/route_memory-v1.png",
+   "observation": "Every thousand paces a stone post gives the distance to the capital, and couriers reckon their days by them."
+  },
+  "harbor_beacon_towers": {
+   "effects": {
+    "disaster_risk": -0.004,
+    "fuel_demand": 0.002,
+    "labor_demand": 0.003,
+    "naval_capacity": 0.003,
+    "trade_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/coastal_watercraft-v1.png",
+   "observation": "A fire kept burning all night on the harbor tower guides ships through the reefs to the entrance."
+  },
+  "compound_pulleys": {
+   "effects": {
+    "construction_rate": 0.0036,
+    "haul_capacity": 0.003
+   },
+   "art": "res://assets/ui/research/paper/compound_pulleys.png"
+  },
+  "screw_water_lifts": {
+   "effects": {
+    "cultivation_yield": 0.004,
+    "labor_efficiency": 0.002,
+    "water_access": 0.0064
+   },
+   "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
+   "observation": "A wooden screw in a sealed tube, turned by a man treading its end, lifts water steadily up the bank."
+  },
+  "piston_force_pumps": {
+   "effects": {
+    "disaster_resilience": 0.0028,
+    "disaster_risk": -0.003,
+    "water_access": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/mine_drainage-v1.png",
+   "observation": "Two bronze cylinders with pistons force water up a pipe in spurts, enough to throw it onto a burning roof."
+  },
+  "stone_arch_bridges": {
+   "effects": {
+    "disaster_resilience": 0.0042,
+    "haul_capacity": 0.003,
+    "labor_demand": 0.006,
+    "route_speed": 0.005,
+    "trade_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/timber_bridges-v1.png",
+   "observation": "The river is crossed on stone arches, and floods that swept away three timber bridges pass beneath this one.",
+   "ability_reason": "Stone arches outlast any timber bridge and carry the heaviest wagons across rivers year after year."
+  },
+  "vaulted_masonry_roofs": {
+   "effects": {
+    "construction_rate": 0.0018,
+    "disaster_resilience": 0.0056,
+    "dry_storage": 0.004,
+    "housing_output": 0.01,
+    "labor_demand": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png",
+   "observation": "A continuous half-barrel of stone roofs the storehouse, and nothing up there can burn or rot.",
+   "ability_reason": "A barrel vault roofs a room in stone, safe from fire and rot where timber roofs fail."
+  },
+  "trough_leveling_table": {
+   "effects": {
+    "construction_rate": 0.0018,
+    "survey_speed": 0.006,
+    "water_access": 0.0016
+   },
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
+   "observation": "A long table with a water-filled groove along its top shows true level where a plumb line alone is fooled by the wind."
+  },
+  "timber_roof_trusses": {
+   "effects": {
+    "construction_rate": 0.0024,
+    "housing_output": 0.008,
+    "timber_pressure": 0.003
+   },
+   "art": "res://assets/ui/research/paper/timber_lateral_bracing.png",
+   "observation": "Rafters tied by a tie-beam and struts form a stiff triangle, and a roof spans a hall no single beam could cross."
+  },
+  "inverted_pressure_siphons": {
+   "effects": {
+    "health_risk": 0.003,
+    "labor_demand": 0.004,
+    "water_access": 0.012,
+    "water_safety": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png",
+   "observation": "Lead pipes carry the water down one side of the valley and push it up the other, rising nearly to where it began.",
+   "ability_reason": "Sealed pipes let water cross a valley too deep for any bridge, rising again on the far side under its own head."
+  },
+  "heated_public_baths": {
+   "effects": {
+    "cohesion": 0.004,
+    "disease_exposure": 0.003,
+    "fuel_demand": 0.008,
+    "health_protection": 0.006,
+    "sanitation": 0.008,
+    "timber_pressure": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/public_baths-v1.png",
+   "observation": "A furnace below the floors heats the water, and the whole town bathes, gossips and does its business in the warm rooms.",
+   "social_consequence": "The baths become the town's meeting place; they also burn a forest of wood each year and pass sickness through the shared pools."
+  },
+  "arcaded_aqueduct_bridges": {
+   "effects": {
+    "labor_demand": 0.01,
+    "legitimacy": 0.0036,
+    "sanitation": 0.004,
+    "water_access": 0.016
+   },
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png",
+   "observation": "Three tiers of arches carry the channel across the gorge, higher than any tower in the city.",
+   "ability_reason": "Stacked arcades carry a conduit across valleys at full height, so a city can draw water from hills a long day's walk away.",
+   "social_consequence": "The city now depends on a single long channel; crews must walk it forever, and a break or a siege cuts the whole supply."
+  },
+  "timber_cofferdams": {
+   "effects": {
+    "construction_rate": 0.003,
+    "disaster_resilience": 0.0021,
+    "timber_pressure": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/timber_seasoning-v1.png",
+   "observation": "A double ring of piles packed with clay keeps the river out while the masons set the pier on the riverbed."
+  },
+  "aqueduct_distribution_tanks": {
+   "effects": {
+    "sanitation": 0.003,
+    "water_access": 0.0032,
+    "water_safety": 0.008
+   },
+   "art": "res://assets/ui/research/paper/water_settling_basins.png",
+   "observation": "At the conduit's end the water settles in a tank and is divided three ways: fountains first, then baths, then houses."
+  },
+  "raised_floor_heating": {
+   "effects": {
+    "fatigue": -0.002,
+    "fuel_demand": 0.006,
+    "health_protection": 0.004,
+    "housing_output": 0.004,
+    "timber_pressure": 0.004
+   },
+   "art": "res://assets/ui/research/paper/hearth_heat_retention.png",
+   "observation": "Hot air from the furnace flows under a floor raised on brick stacks and up through flues in the walls."
+  },
+  "hydraulic_lime_binders": {
+   "effects": {
+    "construction_rate": 0.0024,
+    "disaster_resilience": 0.0042,
+    "fuel_demand": 0.003,
+    "water_access": 0.0024
+   },
+   "art": "res://assets/ui/research/subjects/lime_burning-v1.png",
+   "observation": "Lime burned from a clayey limestone sets hard even in wet ground, where common lime stays soft."
+  },
+  "pozzolanic_binder_blends": {
+   "effects": {
+    "construction_rate": 0.006,
+    "disaster_resilience": 0.0084,
+    "naval_capacity": 0.0015,
+    "repair_capacity": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png",
+   "observation": "Lime mixed with a certain volcanic sand sets like stone, even under the sea.",
+   "ability_reason": "A reactive earth mixed into lime makes a mortar that hardens by itself, wet or dry, and lasts for centuries."
+  },
+  "masonry_moisture_management": {
+   "effects": {
+    "disease_exposure": -0.002,
+    "housing_output": 0.004,
+    "repair_capacity": 0.006
+   },
+   "art": "res://assets/ui/research/paper/building_capillary_breaks.png",
+   "observation": "A course of slate below the wall and vents under the floor keep the damp from climbing into the plaster."
+  },
+  "mass_rubble_concrete": {
+   "effects": {
+    "construction_rate": 0.009,
+    "disaster_resilience": 0.0056,
+    "fuel_demand": 0.004,
+    "housing_output": 0.008,
+    "labor_efficiency": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png",
+   "observation": "Rubble and mortar laid in layers between timber forms set into walls as solid as cut stone and far cheaper to raise.",
+   "ability_reason": "Unskilled crews can build in rubble and hydraulic mortar what once needed a master mason for every block.",
+   "resource_requirements": [
+    {
+     "resource": "Limestone",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ]
+  },
+  "flushed_public_latrines": {
+   "effects": {
+    "disease_exposure": -0.006,
+    "health_protection": 0.003,
+    "sanitation": 0.008
+   },
+   "art": "res://assets/ui/research/subjects/latrine_siting-v1.png",
+   "observation": "Overflow from the baths runs beneath a long stone bench of seats and carries the waste to the main drain."
+  },
+  "underwater_concrete_moles": {
+   "effects": {
+    "disaster_resilience": 0.0042,
+    "labor_demand": 0.01,
+    "naval_capacity": 0.0075,
+    "timber_pressure": 0.004,
+    "trade_capacity": 0.005
+   },
+   "art": "res://assets/ui/research/subjects/coastal_watercraft-v1.png",
+   "observation": "Timber forms sunk offshore are filled with lime and volcanic ash, and a harbor wall rises where there was open sea.",
+   "ability_reason": "Mortar that sets under water lets a harbor be built on an open coast with no natural shelter at all."
+  },
+  "tenement_blocks": {
+   "effects": {
+    "disaster_risk": 0.004,
+    "disease_exposure": 0.004,
+    "housing_output": 0.008,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
+   "observation": "Apartment blocks five storeys high crowd the city, and the law now caps how tall a landlord may build.",
+   "social_consequence": "The city houses far more people on the same ground; upper floors burn, collapse and breed fever, and the poor live highest."
+  },
+  "stamped_lead_pipes": {
+   "effects": {
+    "health_risk": 0.004,
+    "standardization": 0.004,
+    "water_access": 0.0064
+   },
+   "art": "res://assets/ui/research/paper/clay_pipe_socket_jointing.png",
+   "observation": "Lead sheet rolled round a rod and seamed makes pipes of fixed bore, each stamped with its maker's name."
+  },
+  "brick_faced_concrete": {
+   "effects": {
+    "construction_rate": 0.0048,
+    "disaster_resilience": 0.0042,
+    "fuel_demand": 0.004,
+    "housing_output": 0.004
+   },
+   "art": "res://assets/ui/research/paper/adobe_wall_construction.png",
+   "observation": "Concrete cores are faced with triangular fired bricks, and a wall rises faster than any stone mason could raise it."
+  },
+  "columned_underground_cisterns": {
+   "effects": {
+    "disaster_resilience": 0.0042,
+    "labor_demand": 0.004,
+    "water_access": 0.008,
+    "water_safety": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png",
+   "observation": "A forest of stone columns holds up the vaults of a cistern big enough to water the city through a siege."
+  },
+  "cross_vaults": {
+   "effects": {
+    "construction_rate": 0.0024,
+    "disaster_resilience": 0.0028,
+    "housing_output": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png",
+   "observation": "Two barrel vaults crossing at right angles leave the walls free for windows, and the weight rests on four corner piers."
+  },
+  "road_tunnels": {
+   "effects": {
+    "haul_capacity": 0.002,
+    "injury_risk": 0.002,
+    "labor_demand": 0.006,
+    "route_speed": 0.004,
+    "travel_speed": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/graded_roads-v1.png",
+   "observation": "A tunnel cut through the ridge spares carts the long climb and brings the coast a day closer to the capital."
+  },
+  "glazed_windows": {
+   "effects": {
+    "fatigue": -0.002,
+    "health_protection": 0.003,
+    "housing_output": 0.006
+   },
+   "art": "res://assets/ui/research/paper/building_shading_design.png",
+   "observation": "Small panes of greenish glass in bronze frames let light into the bath halls while keeping the heat in."
+  },
+  "harbor_dredging": {
+   "effects": {
+    "ecological_pressure": 0.003,
+    "labor_demand": 0.006,
+    "naval_capacity": 0.004,
+    "trade_capacity": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/river_craft-v1.png",
+   "observation": "Crews with buckets on a floating frame scoop out the silt each season, or the river would close the harbor mouth."
+  },
+  "domed_masonry_roofs": {
+   "effects": {
+    "cohesion": 0.004,
+    "construction_rate": 0.0036,
+    "housing_output": 0.012,
+    "labor_demand": 0.01,
+    "legitimacy": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png",
+   "observation": "A single concrete dome, open to the sky at its crown, roofs a hall wider than any timber could span.",
+   "ability_reason": "A dome of hydraulic concrete carries its own weight round a ring, roofing halls that no beam or vault could cross.",
+   "social_consequence": "The great dome proclaims the city's power to every visitor, and years of levies and quarry work are the price."
+  },
+  "graded_weight_aggregate": {
+   "effects": {
+    "construction_rate": 0.0024,
+    "disaster_resilience": 0.0035
+   },
+   "art": "res://assets/ui/research/subjects/quarry_reading-v1.png",
+   "observation": "Heavy stone goes into the base of the dome and light pumice near its crown, so it weighs least where it spans most."
+  },
+  "coffered_vaults": {
+   "effects": {
+    "construction_rate": 0.0024,
+    "disaster_resilience": 0.0028,
+    "legitimacy": 0.0018
+   },
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png",
+   "observation": "Sunken square panels in the vault cut its weight without weakening the ribs between them."
+  },
+  "embedded_relieving_arches": {
+   "effects": {
+    "disaster_resilience": 0.0042,
+    "repair_capacity": 0.003
+   },
+   "art": "res://assets/ui/research/paper/adobe_wall_construction.png",
+   "observation": "Brick arches buried in the concrete walls carry loads round weak points, so a settling wall cracks less."
+  },
+  "long_span_timber_halls": {
+   "effects": {
+    "construction_rate": 0.0018,
+    "dry_storage": 0.004,
+    "housing_output": 0.006,
+    "timber_pressure": 0.006
+   },
+   "art": "res://assets/ui/research/paper/timber_lateral_bracing.png",
+   "observation": "Great trussed roofs of fir span halls wide enough for a thousand people to stand in beneath a painted ceiling."
+  },
+  "clerestory_halls": {
+   "effects": {
+    "cohesion": 0.002,
+    "health_protection": 0.002,
+    "housing_output": 0.004,
+    "legitimacy": 0.0018
+   },
+   "art": "res://assets/ui/research/paper/building_shading_design.png",
+   "observation": "A raised central roof pierced with windows floods the long hall with daylight above the side aisles."
+  },
+  "aqueduct_mill_cascades": {
+   "effects": {
+    "craft_output": 0.004,
+    "food_output": 0.008,
+    "labor_demand": -0.006,
+    "water_access": -0.0024
+   },
+   "art": "res://assets/ui/research/subjects/water_mills-v1.png",
+   "observation": "The conduit falls down the hillside through sixteen mills in pairs, each wheel fed by the one above it.",
+   "social_consequence": "One hillside of mills grinds a city's bread; the water they take is water the fields and fountains below do not get."
+  },
+  "buttressed_masonry_dams": {
+   "effects": {
+    "disaster_resilience": 0.0042,
+    "disaster_risk": -0.004,
+    "ecological_pressure": 0.004,
+    "labor_demand": 0.006,
+    "water_access": 0.008
+   },
+   "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
+   "observation": "Stone buttresses on the downstream face brace the dam wall, and it holds back a lake for the city's summer."
+  },
+  "vaulting_tubes": {
+   "effects": {
+    "construction_rate": 0.0024,
+    "housing_output": 0.003,
+    "timber_pressure": -0.003
+   },
+   "art": "res://assets/ui/research/subjects/clay_shaping-v1.png",
+   "observation": "Clay tubes, each fitted into the next, build a light vault that needs almost no timber frame to raise."
+  },
+  "squinch_domes": {
+   "effects": {
+    "construction_rate": 0.003,
+    "disaster_resilience": 0.0028,
+    "housing_output": 0.008,
+    "legitimacy": 0.0048
+   },
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png",
+   "observation": "Small arches thrown across the corners of a square hall turn it into an octagon, and the dome rises on top."
+  },
+  "tile_banded_walls": {
+   "effects": {
+    "construction_rate": 0.0018,
+    "disaster_resilience": 0.0042,
+    "labor_demand": 0.006,
+    "security_efficiency": 0.008
+   },
+   "art": "res://assets/ui/research/subjects/field_fortifications-v1.png",
+   "observation": "Courses of flat red tile run through the city wall every few feet, binding the rubble core to its stone faces."
+  },
+  "iron_tie_rods": {
+   "effects": {
+    "construction_rate": 0.0018,
+    "disaster_resilience": 0.0042
+   },
+   "art": "res://assets/ui/research/subjects/forge_welding-v1.png",
+   "observation": "Iron rods anchored across the springing of each arch keep its feet from spreading while the mortar cures."
+  }
+ }
 }

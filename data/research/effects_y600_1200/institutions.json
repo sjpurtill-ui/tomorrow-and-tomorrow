@@ -1,5 +1,845 @@
 {
  "line": "institutions",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "palace_department_registers": {
+   "effects": {
+    "food_storage": 0.006,
+    "institutional_rigidity": 0.009,
+    "labor_demand": 0.0075,
+    "state_capacity": 0.0106,
+    "task_coordination": 0.0059
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "observation": "Separate bureaus of the palace keep their own tablets for fields, flocks, workshops, chariots and rations.",
+   "ability_reason": "Each palace bureau keeps registers of land, herds, workshops and rations; the palace can direct a whole province's labor and stores.",
+   "social_consequence": "The palace sees every sheep and furrow, and every household answers to a register"
+  },
+  "envoy_inviolability": {
+   "effects": {
+    "legitimacy": 0.0007,
+    "security_efficiency": 0.0006,
+    "trade_capacity": 0.0014
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "observation": "An envoy may not be touched on the road or at court, even by a ruler at war with his master."
+  },
+  "vassal_loyalty_oaths": {
+   "effects": {
+    "cohesion": -0.0006,
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0011,
+    "warfare_readiness": 0.0013
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "observation": "Lesser rulers swear before the god to hold the overlord's friends as friends and his enemies as enemies."
+  },
+  "material_allotment_ledgers": {
+   "effects": {
+    "craft_output": 0.0069,
+    "institutional_rigidity": 0.0037,
+    "labor_demand": 0.0045,
+    "state_capacity": 0.0008,
+    "storage_loss": -0.0034
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "observation": "The palace weighs out bronze, wool and ivory to each workshop and records what must come back.",
+   "social_consequence": "Craftsmen work to the palace's allotment, and owe it whatever falls short"
+  },
+  "deposited_treaty_copies": {
+   "effects": {
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0008,
+    "trade_capacity": 0.0009
+   },
+   "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
+   "observation": "Each side keeps a copy of the treaty in its god's house, where breaking it is an offence to the god."
+  },
+  "village_quota_collectors": {
+   "effects": {
+    "cohesion": -0.0008,
+    "food_storage": 0.0055,
+    "labor_demand": 0.003,
+    "state_capacity": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "observation": "Village stewards answer for a fixed quota of grain, oil and linen, and make up any shortfall themselves.",
+   "social_consequence": "Stewards squeeze their neighbours to meet the palace's number"
+  },
+  "treaty_hostage_exchange": {
+   "effects": {
+    "cohesion": -0.0003,
+    "legitimacy": 0.0003,
+    "security_efficiency": 0.0013,
+    "trade_capacity": 0.0007
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "observation": "Sons of each ruling house live at the other's court as pledges that the treaty will hold."
+  },
+  "royal_inquiry_commissions": {
+   "effects": {
+    "institutional_rigidity": 0.0023,
+    "labor_demand": 0.0023,
+    "legitimacy": 0.0013,
+    "state_capacity": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "observation": "The ruler sends trusted men to ask how a governor's stores went missing, and to name who took them."
+  },
+  "village_self_rule_after_collapse": {
+   "effects": {
+    "cohesion": 0.0081,
+    "disaster_resilience": 0.0081,
+    "food_storage": 0.006,
+    "legitimacy": 0.0025,
+    "state_capacity": -0.0092
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "observation": "The palace burned and its scribes scattered, but the village elders still keep the fields, the stores and the peace.",
+   "ability_reason": "When the palace fails, villages keep order, stores and fields under their own elders, and the collapse stops at their boundary.",
+   "social_consequence": "Villages lose the palace's reach and trade, but keep their own counsel"
+  },
+  "warrior_acclamation_assembly": {
+   "effects": {
+    "cohesion": 0.0004,
+    "institutional_rigidity": -0.0038,
+    "legitimacy": 0.0013,
+    "warfare_readiness": 0.0019
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "observation": "Free fighters gather under arms and choose their war leader by shouting and clashing their shields."
+  },
+  "shrine_league_confederation": {
+   "effects": {
+    "cohesion": 0.0054,
+    "labor_demand": 0.0037,
+    "legitimacy": 0.005,
+    "security_efficiency": 0.0053,
+    "state_capacity": 0.0035,
+    "trade_capacity": 0.0035
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "observation": "Settlements that share a god's shrine swear to keep peace among themselves and to defend the shrine together.",
+   "ability_reason": "Towns bound to one shrine keep peace with each other and defend it together; a league acts where no single town could.",
+   "social_consequence": "Member towns give up the right to raze one another and send delegates to the shrine council"
+  },
+  "monthly_provisioning_districts": {
+   "effects": {
+    "cohesion": -0.0006,
+    "food_storage": 0.0091,
+    "labor_demand": 0.0045,
+    "state_capacity": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "observation": "Each district feeds the court for one month of the year, by turns, from its own stores."
+  },
+  "noble_council": {
+   "effects": {
+    "cohesion": -0.0006,
+    "institutional_rigidity": 0.0045,
+    "legitimacy": 0.001,
+    "state_capacity": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "observation": "The heads of the leading warrior houses meet as a council, and the leader acts only with their consent."
+  },
+  "royal_covenant_charter": {
+   "effects": {
+    "cohesion": 0.0009,
+    "institutional_rigidity": 0.003,
+    "legitimacy": 0.002,
+    "state_capacity": -0.0006
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "observation": "The ruler swears before the god to keep the people's customs, and his rule holds only while he keeps the oath."
+  },
+  "priestly_anointing": {
+   "effects": {
+    "cohesion": 0.0004,
+    "institutional_rigidity": 0.0045,
+    "legitimacy": 0.0023
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "observation": "The god's servants pour oil on the chosen ruler, and he rules as one the god has marked."
+  },
+  "licensed_court_critics": {
+   "effects": {
+    "institutional_rigidity": -0.0075,
+    "legitimacy": 0.001,
+    "state_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "observation": "Certain seers may rebuke the ruler to his face in the god's name, and are not punished for it."
+  },
+  "charter_colonies": {
+   "effects": {
+    "cohesion": -0.0006,
+    "labor_demand": 0.003,
+    "state_capacity": 0.0011,
+    "trade_capacity": 0.0019,
+    "warfare_readiness": 0.001
+   },
+   "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
+   "observation": "A new settlement is founded under a charter from the mother town that fixes its founder, laws, land shares and duties."
+  },
+  "annual_elected_magistrates": {
+   "effects": {
+    "cohesion": 0.0016,
+    "institutional_rigidity": -0.012,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0083,
+    "state_capacity": 0.0042,
+    "task_coordination": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "observation": "Magistrates are chosen each year for a fixed term, and the year is named for the chief of them.",
+   "ability_reason": "Magistrates hold office for one year at a time; no one keeps power long enough to make it his own.",
+   "social_consequence": "Leading families compete every year for office, and old grudges are settled at the election"
+  },
+  "foreign_consul_hosts": {
+   "effects": {
+    "legitimacy": 0.0003,
+    "security_efficiency": 0.0004,
+    "trade_capacity": 0.0023
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "observation": "A citizen is appointed to host the foreigners of one land, speak for them in court and see their contracts kept."
+  },
+  "term_limit_laws": {
+   "effects": {
+    "institutional_rigidity": -0.0075,
+    "legitimacy": 0.001,
+    "state_capacity": -0.0006
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "observation": "No man may hold the same office again until ten years have passed.",
+   "social_consequence": "Experienced men must step aside, and the town trades skill in office for safety from tyrants"
+  },
+  "intent_graded_homicide_law": {
+   "effects": {
+    "cohesion": 0.0004,
+    "legitimacy": 0.001,
+    "security_efficiency": 0.0017
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "observation": "Courts tell killing on purpose from killing by mischance, and punish each differently."
+  },
+  "debt_bondage_ban": {
+   "effects": {
+    "cohesion": 0.0013,
+    "legitimacy": 0.0013,
+    "state_capacity": 0.0003,
+    "trade_capacity": -0.0018
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "observation": "No citizen may be seized as a slave for debt; loans are secured on goods, not on bodies.",
+   "social_consequence": "Lenders grow wary and credit tightens, but no citizen sells himself for a loan"
+  },
+  "property_class_franchise": {
+   "effects": {
+    "cohesion": -0.0008,
+    "legitimacy": 0.0003,
+    "state_capacity": 0.0008,
+    "warfare_readiness": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "observation": "Citizens are ranked by the size of their harvest, and only the higher ranks may hold the great offices."
+  },
+  "citizen_jury_courts": {
+   "effects": {
+    "cohesion": 0.0006,
+    "labor_demand": 0.0045,
+    "legitimacy": 0.002,
+    "security_efficiency": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "observation": "Hundreds of citizens chosen by lot hear each case and vote with pebbles, too many to bribe.",
+   "social_consequence": "Every citizen may sit in judgment, and many days go to the courts instead of the fields"
+  },
+  "divided_provincial_powers": {
+   "effects": {
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.003,
+    "security_efficiency": 0.0008,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
+   "observation": "In each province the governor, the tax officer and the garrison commander answer separately to the ruler, and watch one another."
+  },
+  "majority_vote_assembly": {
+   "effects": {
+    "cohesion": 0.0027,
+    "institutional_rigidity": -0.01,
+    "labor_demand": 0.0037,
+    "legitimacy": 0.0099,
+    "state_capacity": 0.0021
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "observation": "The citizens vote by show of hands, and what the majority decides binds the whole town.",
+   "ability_reason": "The assembly's counted vote binds the town: laws, war and peace are decided by the citizens themselves.",
+   "social_consequence": "The minority must bow to a counted vote, and ambitious speakers learn to court the crowd"
+  },
+  "term_limited_emergency_office": {
+   "effects": {
+    "institutional_rigidity": 0.0015,
+    "security_efficiency": 0.0017,
+    "state_capacity": 0.0006,
+    "warfare_readiness": 0.0019
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "observation": "In a crisis one man may rule alone, but for six months only, and then he must lay the power down."
+  },
+  "lot_chosen_council": {
+   "effects": {
+    "cohesion": 0.0006,
+    "institutional_rigidity": -0.0038,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0013,
+    "task_coordination": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "observation": "A council chosen by lot from every district prepares the assembly's business, and is replaced each year."
+  },
+  "commoners_veto_tribunes": {
+   "effects": {
+    "cohesion": 0.0011,
+    "institutional_rigidity": -0.0038,
+    "legitimacy": 0.001,
+    "state_capacity": -0.0007
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "observation": "Officers of the common people may halt any magistrate's act with a single word.",
+   "social_consequence": "The commons gain a shield, and public business can stall for months"
+  },
+  "ostracism_vote": {
+   "effects": {
+    "cohesion": -0.0006,
+    "institutional_rigidity": -0.0056,
+    "legitimacy": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "observation": "Once a year the citizens may scratch a name on sherds; the man named most must leave for ten years."
+  },
+  "league_common_treasury": {
+   "effects": {
+    "cohesion": -0.0006,
+    "security_efficiency": 0.0008,
+    "state_capacity": 0.0014,
+    "warfare_readiness": 0.0019
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "observation": "League members pay assessed shares into a common treasury at the shrine, for ships and defence.",
+   "social_consequence": "The weaker members pay while the leading town decides how the money is spent"
+  },
+  "end_of_term_audits": {
+   "effects": {
+    "institutional_rigidity": -0.0038,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0013,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "observation": "No magistrate may leave office until auditors have checked every coin and measure of grain he handled."
+  },
+  "paid_civic_duty": {
+   "effects": {
+    "cohesion": 0.0009,
+    "labor_demand": 0.0045,
+    "legitimacy": 0.001,
+    "state_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "observation": "Jurors and councillors are paid a day's wage, so poor men can serve as well as rich ones."
+  },
+  "inscribed_treasury_accounts": {
+   "effects": {
+    "knowledge_preservation": 0.0006,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0017,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "observation": "The treasury's receipts and payments are cut in stone where every citizen may read them."
+  },
+  "auctioned_public_contracts": {
+   "effects": {
+    "cohesion": -0.0008,
+    "construction_rate": 0.0025,
+    "legitimacy": -0.0009,
+    "state_capacity": 0.0011,
+    "trade_capacity": 0.0009
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "observation": "Road works and tax collection are let by auction to the highest bidder, who then profits as he can.",
+   "social_consequence": "Contractors grow rich squeezing taxpayers for more than they bid"
+  },
+  "unlawful_decree_challenge": {
+   "effects": {
+    "institutional_rigidity": -0.0056,
+    "legitimacy": 0.001,
+    "state_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "observation": "Any citizen may prosecute the man who proposed a decree that breaks the laws, even after it has passed."
+  },
+  "risk_pools": {
+   "effects": {
+    "cohesion": 0.0004,
+    "disaster_resilience": 0.0023,
+    "labor_demand": 0.0015,
+    "trade_capacity": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "observation": "Lenders advance money on a ship and its cargo and forfeit it if the ship is lost, so many small shares spread the risk."
+  },
+  "market_wardens": {
+   "effects": {
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0007,
+    "standardization": 0.0007,
+    "trade_capacity": 0.0019
+   },
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
+   "observation": "Elected wardens walk the market checking weights, measures and the quality of bread and grain."
+  },
+  "written_court_procedure": {
+   "effects": {
+    "institutional_rigidity": 0.0045,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.001,
+    "security_efficiency": 0.0017
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "observation": "Charges, answers, witnesses and the time for speeches are fixed in writing, and a water-clock times each side."
+  },
+  "commissioned_lawgivers": {
+   "effects": {
+    "cohesion": 0.0004,
+    "institutional_rigidity": 0.003,
+    "legitimacy": 0.0013,
+    "state_capacity": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "observation": "A town in strife invites a wise man from elsewhere to write all its laws anew."
+  },
+  "bail_guarantors": {
+   "effects": {
+    "cohesion": 0.0004,
+    "legitimacy": 0.0007,
+    "security_efficiency": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "observation": "Friends stand as guarantors for an accused man, and he stays free until his trial."
+  },
+  "comparative_constitutions": {
+   "effects": {
+    "adoption_rate": 0.002,
+    "institutional_rigidity": -0.0038,
+    "knowledge_rate": 0.004,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
+   "observation": "Scholars gather the constitutions of many towns and compare how each one rules itself."
+  },
+  "district_royal_banks": {
+   "effects": {
+    "labor_demand": 0.003,
+    "state_capacity": 0.0017,
+    "storage_loss": -0.0051,
+    "trade_capacity": 0.0019
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "observation": "Royal banks in each district receive taxes, pay officials and record every transfer by written order."
+  },
+  "federal_proportional_league": {
+   "effects": {
+    "cohesion": 0.0006,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0013,
+    "security_efficiency": 0.0017,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "observation": "League members vote by size in a federal council and send soldiers in proportion."
+  },
+  "legal_jurisconsults": {
+   "effects": {
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.001,
+    "security_efficiency": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "observation": "Men learned in the law advise judges and parties, and their opinions are copied and cited."
+  },
+  "foreigners_court": {
+   "effects": {
+    "legitimacy": 0.0007,
+    "security_efficiency": 0.0004,
+    "trade_capacity": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "observation": "A separate magistrate hears cases between foreigners and citizens, judging by fairness instead of the town's own rites."
+  },
+  "realm_wide_standardization": {
+   "effects": {
+    "cohesion": -0.0035,
+    "haul_capacity": 0.006,
+    "institutional_rigidity": 0.0075,
+    "standardization": 0.0109,
+    "state_capacity": 0.0071,
+    "trade_capacity": 0.0082
+   },
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
+   "observation": "One set of weights, one script and one axle width are decreed for every province of the realm.",
+   "ability_reason": "One set of weights, one script and one axle width across the realm: taxes, trade and carts pass every province alike.",
+   "social_consequence": "Local scripts and measures are forbidden, and old provinces feel conquered twice"
+  },
+  "rotated_appointed_prefects": {
+   "effects": {
+    "cohesion": -0.0021,
+    "institutional_rigidity": 0.006,
+    "legitimacy": 0.0017,
+    "security_efficiency": 0.0042,
+    "state_capacity": 0.0106
+   },
+   "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
+   "observation": "Governors are appointed from the capital and moved to a new province every few years.",
+   "ability_reason": "Appointed governors are rotated before they can root local power, and the provinces answer to the capital.",
+   "social_consequence": "Provinces are ruled by strangers who never stay long enough to learn them"
+  },
+  "magistrate_edict_law": {
+   "effects": {
+    "institutional_rigidity": -0.0094,
+    "legitimacy": 0.0007,
+    "security_efficiency": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "observation": "Each year the incoming magistrate posts the rules he will follow, adapting the law to new kinds of case."
+  },
+  "mixed_constitution_checks": {
+   "effects": {
+    "cohesion": 0.0027,
+    "institutional_rigidity": -0.01,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0099,
+    "state_capacity": 0.0028
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "observation": "Magistrates, a council of elders and the assemblies each hold part of the power, and each can check the others.",
+   "ability_reason": "Power is shared among officers, elders and assemblies that check one another; no faction can seize the whole state.",
+   "social_consequence": "No faction can rule alone, and decisions come slower for it"
+  },
+  "extortion_court": {
+   "effects": {
+    "labor_demand": 0.0023,
+    "legitimacy": 0.0013,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "observation": "A standing court tries governors who robbed their provinces, and the guilty must repay double."
+  },
+  "merit_recommendation": {
+   "effects": {
+    "adoption_rate": 0.004,
+    "institutional_rigidity": 0.0023,
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "observation": "Each district's notables send up men of known conduct and learning to serve as officials."
+  },
+  "state_official_academy": {
+   "effects": {
+    "institutional_rigidity": 0.006,
+    "knowledge_preservation": 0.0009,
+    "labor_demand": 0.0045,
+    "state_capacity": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "observation": "Young men study the classics at a state academy, and its graduates fill the offices."
+  },
+  "written_office_examinations": {
+   "effects": {
+    "institutional_rigidity": 0.0105,
+    "knowledge_preservation": 0.0015,
+    "labor_demand": 0.0045,
+    "legitimacy": 0.0025,
+    "state_capacity": 0.0106,
+    "task_coordination": 0.0049
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "observation": "Candidates for office sit written examinations, and posts go to those who pass.",
+   "ability_reason": "Posts go to candidates who pass written examinations, not only to the well-born; the realm is run by trained officials.",
+   "social_consequence": "Office opens to talent, but only to talent schooled in the set texts"
+  },
+  "salt_iron_monopoly": {
+   "effects": {
+    "cohesion": -0.0011,
+    "legitimacy": -0.0013,
+    "state_capacity": 0.0028,
+    "trade_capacity": -0.003
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "observation": "Only the state's works may boil salt or smelt iron, and the profits pay the frontier armies.",
+   "social_consequence": "The treasury fills while households pay more for salt and get worse iron tools"
+  },
+  "price_stabilizing_granary": {
+   "effects": {
+    "disaster_resilience": 0.0016,
+    "food_storage": 0.0127,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0013,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/regional_granaries-v1.png",
+   "observation": "The state buys grain when it is cheap and sells it when it is dear, and famine prices are held down."
+  },
+  "citizenship_extension": {
+   "effects": {
+    "cohesion": 0.0015,
+    "institutional_rigidity": -0.0038,
+    "legitimacy": 0.0013,
+    "state_capacity": 0.0006,
+    "warfare_readiness": 0.0019
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "observation": "Allied towns are granted citizenship, and their men vote, trade and serve as citizens."
+  },
+  "public_credit": {
+   "effects": {
+    "construction_rate": 0.0095,
+    "institutional_rigidity": 0.0045,
+    "legitimacy": -0.0032,
+    "state_capacity": 0.0071,
+    "trade_capacity": 0.0058
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "observation": "The treasury borrows from the god's house and from wealthy citizens, and repays from future revenues.",
+   "ability_reason": "The treasury can borrow against future revenues for a war or a wall, and repay over years.",
+   "social_consequence": "Debts outlive the officials who contracted them, and future taxes are already spent"
+  },
+  "veiled_monarchy_offices": {
+   "effects": {
+    "cohesion": 0.0006,
+    "institutional_rigidity": 0.0075,
+    "legitimacy": 0.001,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "observation": "One man holds every old office at once; the forms of the old constitution stay, but he decides.",
+   "social_consequence": "Peace returns, and the assemblies' voice becomes a formality"
+  },
+  "universal_loyalty_oath": {
+   "effects": {
+    "cohesion": 0.0004,
+    "institutional_rigidity": 0.003,
+    "legitimacy": 0.0013,
+    "state_capacity": 0.0008
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "observation": "Every province swears the same oath to the ruler and his house, on the same day each year."
+  },
+  "military_pension_treasury": {
+   "effects": {
+    "cohesion": 0.0006,
+    "legitimacy": 0.0007,
+    "state_capacity": -0.0007,
+    "warfare_readiness": 0.0032
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "observation": "A special treasury, fed by taxes on sales and inheritances, pays each soldier a lump sum at discharge.",
+   "social_consequence": "Veterans are provided for, and every sale and inheritance pays for it"
+  },
+  "binding_jurist_opinions": {
+   "effects": {
+    "institutional_rigidity": 0.006,
+    "legitimacy": 0.0007,
+    "security_efficiency": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "observation": "The opinions of licensed jurists bind the courts, and judges follow the majority of them."
+  },
+  "capped_advocate_fees": {
+   "effects": {
+    "cohesion": 0.0004,
+    "legitimacy": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "observation": "Advocates' fees are capped by law, and a poor man can afford to be heard."
+  },
+  "provincial_town_councils": {
+   "effects": {
+    "institutional_rigidity": -0.0038,
+    "legitimacy": 0.0013,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "observation": "Councils of provincial towns meet each year and send their petitions and complaints to the ruler."
+  },
+  "municipal_charters": {
+   "effects": {
+    "cohesion": 0.0027,
+    "institutional_rigidity": -0.006,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0058,
+    "state_capacity": 0.0057,
+    "task_coordination": 0.003
+   },
+   "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
+   "observation": "Towns govern themselves under charters, with elected councils and magistrates for roads, markets and courts.",
+   "ability_reason": "Chartered towns run their own roads, markets and courts under elected councils; the realm governs through self-governing towns.",
+   "social_consequence": "Town notables carry the cost of office and answer for their town's taxes"
+  },
+  "graded_land_tax": {
+   "effects": {
+    "cohesion": -0.0006,
+    "cultivation_yield": 0.004,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0007,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "observation": "Fields are measured and graded by their soil, and each grade pays its own fixed rate."
+  },
+  "chartered_craft_associations": {
+   "effects": {
+    "cohesion": 0.0009,
+    "craft_output": 0.0069,
+    "institutional_rigidity": 0.0045,
+    "standardization": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "observation": "Craftsmen's associations hold charters, keep a common chest and bury their members with honour."
+  },
+  "professional_service": {
+   "effects": {
+    "institutional_rigidity": 0.0105,
+    "knowledge_preservation": 0.003,
+    "labor_demand": 0.006,
+    "state_capacity": 0.0124,
+    "task_coordination": 0.0059
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "observation": "Officials are salaried, ranked and promoted through a career, and serve whoever rules.",
+   "ability_reason": "Salaried officials in ranked careers keep procedure and records through every change of ruler.",
+   "social_consequence": "The offices outlast their holders and become a power of their own"
+  },
+  "petition_registers": {
+   "effects": {
+    "cohesion": 0.0004,
+    "labor_demand": 0.0023,
+    "legitimacy": 0.0017,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "observation": "Petitions to the ruler are registered and answered in writing, and the reply is posted for all to read."
+  },
+  "official_mandate_registers": {
+   "effects": {
+    "institutional_rigidity": 0.003,
+    "security_efficiency": 0.0008,
+    "state_capacity": 0.0011,
+    "task_coordination": 0.0008
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "observation": "Every official's commission, powers and term are registered, and orders beyond them can be refused."
+  },
+  "public_office_handover": {
+   "effects": {
+    "knowledge_preservation": 0.0006,
+    "state_capacity": 0.0008,
+    "storage_loss": -0.0034,
+    "task_coordination": 0.0016
+   },
+   "art": "res://assets/ui/research/paper/public_office_handover.png",
+   "observation": "An outgoing official hands over the stores, records and pending cases to his successor by inventory."
+  },
+  "universal_citizenship": {
+   "effects": {
+    "cohesion": 0.0015,
+    "legitimacy": 0.0013,
+    "state_capacity": 0.0008,
+    "trade_capacity": 0.0009
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "observation": "All free inhabitants of the realm become citizens under one law, and pay the citizens' taxes.",
+   "social_consequence": "Old distinctions fade, and the new citizens owe the new taxes"
+  },
+  "nine_rank_official_grading": {
+   "effects": {
+    "cohesion": -0.0006,
+    "institutional_rigidity": 0.0075,
+    "state_capacity": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "observation": "Officials are graded in nine ranks, and the ranks soon follow family more than merit.",
+   "social_consequence": "Great families settle into the high ranks and pass them to their sons"
+  },
+  "annual_tax_budget": {
+   "effects": {
+    "food_storage": 0.0036,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.003,
+    "state_capacity": 0.0023,
+    "task_coordination": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "observation": "Taxes are fixed each year from a set assessment cycle, and the needs of army and court are reckoned in advance."
+  },
+  "shared_co_rulers": {
+   "effects": {
+    "cohesion": -0.0008,
+    "labor_demand": 0.003,
+    "legitimacy": -0.0013,
+    "security_efficiency": 0.0017,
+    "state_capacity": 0.0017
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "observation": "Two or four rulers divide the realm, each with his own court and army, bound to one another by oath.",
+   "social_consequence": "Each court must be fed and garrisoned, and taxes rise to pay for them"
+  },
+  "civil_military_separation": {
+   "effects": {
+    "legitimacy": 0.0007,
+    "security_efficiency": 0.0008,
+    "state_capacity": 0.0011,
+    "warfare_readiness": -0.0017
+   },
+   "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
+   "observation": "Governors keep the courts and the taxes; generals keep the troops, and neither commands the other."
+  },
+  "compiled_rescript_code": {
+   "effects": {
+    "institutional_rigidity": 0.0105,
+    "knowledge_preservation": 0.0038,
+    "legitimacy": 0.005,
+    "security_efficiency": 0.0084,
+    "state_capacity": 0.0028
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "observation": "The ruler's written replies to officials and petitioners are collected into one code for every court.",
+   "ability_reason": "The ruler's rulings are gathered into one code; every judge in the realm cites the same decisions.",
+   "social_consequence": "The law becomes certain and uniform, and harder to change"
+  },
+  "shrine_arbitration_courts": {
+   "effects": {
+    "cohesion": 0.0006,
+    "institutional_rigidity": 0.0023,
+    "legitimacy": 0.0013,
+    "security_efficiency": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "observation": "Parties may bring civil suits before the god's servants, whose judgment is swift and cheap."
+  },
+  "town_advocate_for_poor": {
+   "effects": {
+    "cohesion": 0.0011,
+    "legitimacy": 0.0013,
+    "state_capacity": -0.0004
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "observation": "Each town appoints an advocate to defend the poor against the exactions of officials."
+  }
+ }
 }

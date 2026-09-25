@@ -1,5 +1,845 @@
 {
  "line": "culture",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "funeral_masks": {
+   "effects": {
+    "cohesion": 0.0002,
+    "craft_output": 0.0003,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "The ruling dead are buried with hammered gold faces, so they meet the god as they looked in life."
+  },
+  "elite_drinking_feasts": {
+   "effects": {
+    "cohesion": 0.0002,
+    "food_storage": -0.0016,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
+   "observation": "The great houses keep feasting halls where drinking sets are shared among allies and retainers."
+  },
+  "throne_room_protocol": {
+   "effects": {
+    "cohesion": -0.0002,
+    "legitimacy": 0.0007,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Every visitor to the throne room knows where to stand, when to bow and when to speak."
+  },
+  "daily_life_tomb_painting": {
+   "effects": {
+    "cohesion": 0.0002,
+    "craft_output": 0.0003,
+    "knowledge_preservation": 0.0004
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Tomb walls show ploughing, fishing and feasting, so the dead keep their daily life beyond death."
+  },
+  "guardian_beast_gateways": {
+   "effects": {
+    "labor_demand": 0.0016,
+    "legitimacy": 0.0005,
+    "security_efficiency": 0.002
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Carved beasts flank the town gate and stare down every stranger who enters."
+  },
+  "carved_ivory_panels": {
+   "effects": {
+    "craft_output": 0.001,
+    "legitimacy": 0.0002,
+    "trade_capacity": 0.0008
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Carvers cut ivory panels with hunts and battles for the furniture and caskets of the great."
+  },
+  "chariot_race_games": {
+   "effects": {
+    "cohesion": 0.0005,
+    "injury_risk": 0.0008,
+    "legitimacy": 0.0003,
+    "warfare_readiness": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/civic_games-v2.png",
+   "observation": "Chariots race around a turning post at the festival, and the whole town takes sides."
+  },
+  "voyage_offerings": {
+   "effects": {
+    "cohesion": 0.0003,
+    "disaster_resilience": 0.0018
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Before a voyage the crew pours offerings to the god and vows a gift if they come home."
+  },
+  "sketch_sherd_humor": {
+   "effects": {
+    "cohesion": 0.0003,
+    "fatigue": -0.001
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Workmen scratch jokes on sherds: a cat serving mice, an overseer asleep at his post."
+  },
+  "cremation_urn_cemeteries": {
+   "effects": {
+    "cohesion": 0.0005,
+    "disease_exposure": -0.004,
+    "fuel_demand": 0.0008,
+    "knowledge_preservation": 0.0002
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "The dead are burned and their ashes buried in urns, row upon row in shared fields."
+  },
+  "lost_age_remembrance": {
+   "effects": {
+    "cohesion": 0.0052,
+    "disaster_resilience": 0.01,
+    "knowledge_preservation": 0.0038,
+    "legitimacy": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "observation": "Singers lament the burned palaces and tell of the heroes who lived when kings were great.",
+   "ability_reason": "The fallen palaces live on in lament and tale; what was lost is remembered, and the survivors hold together around it."
+  },
+  "warrior_weapon_burials": {
+   "effects": {
+    "cohesion": 0.0002,
+    "legitimacy": 0.0003,
+    "warfare_readiness": 0.0009
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Iron swords are bent and buried with the warriors who carried them."
+  },
+  "fixed_meter_epic_bards": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0009,
+    "legitimacy": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "observation": "Bards recite thousands of lines in one fixed meter, with set phrases that carry the tale."
+  },
+  "armed_youth_dances": {
+   "effects": {
+    "cohesion": 0.0003,
+    "fatigue": 0.0008,
+    "warfare_readiness": 0.0027
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
+   "observation": "Young men dance in armour to the pipes, leaping and striking their shields in time."
+  },
+  "hero_tomb_offerings": {
+   "effects": {
+    "cohesion": 0.0005,
+    "food_storage": -0.0012,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Families bring offerings to the old tombs, believing the heroes of the lost age lie there."
+  },
+  "geometric_funeral_vases": {
+   "effects": {
+    "craft_output": 0.001,
+    "knowledge_preservation": 0.0002,
+    "trade_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Great vases painted with bands and mourners mark the graves of the rich families."
+  },
+  "oracle_consultation": {
+   "effects": {
+    "cohesion": 0.0026,
+    "institutional_rigidity": 0.0024,
+    "legitimacy": 0.0049,
+    "state_capacity": 0.006,
+    "trade_capacity": 0.0024
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "At the shrine the god's chosen speaker answers questions of war, founding and law, and the answer is carried home.",
+   "ability_reason": "Towns and rulers bring their hardest questions to the god's chosen speaker; a colony, a war or a law begins with the god's answer.",
+   "social_consequence": "The shrine's answers weigh on every ruler, and its keepers grow rich on offerings"
+  },
+  "inscribed_dedications": {
+   "effects": {
+    "adoption_rate": 0.0003,
+    "knowledge_preservation": 0.0004,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Letters cut on a bowl or a statue say who gave it to the god, and why."
+  },
+  "shrine_festival_games": {
+   "effects": {
+    "cohesion": 0.0052,
+    "food_storage": -0.0024,
+    "labor_demand": 0.0016,
+    "legitimacy": 0.0029,
+    "security_efficiency": 0.004,
+    "trade_capacity": 0.0036
+   },
+   "art": "res://assets/ui/research/subjects/civic_games-v2.png",
+   "observation": "Towns send athletes to games at the shared shrine, and a sacred truce protects them on the road even in war.",
+   "ability_reason": "Games at the shared shrine bring rival towns together under a sacred truce; travel and trade go on even in wartime.",
+   "social_consequence": "Victors come home as heroes, and towns spend lavishly to win"
+  },
+  "alphabetic_epitaphs": {
+   "effects": {
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.0005
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Grave stones name the dead in letters: who they were, and who set up the stone."
+  },
+  "civic_games": {
+   "effects": {
+    "cohesion": 0.0012,
+    "food_storage": -0.0016,
+    "labor_demand": 0.0012,
+    "legitimacy": 0.0007,
+    "warfare_readiness": 0.0018
+   },
+   "art": "res://assets/ui/research/subjects/civic_games-v2.png",
+   "observation": "Every town holds its own games under agreed rules, and its victors are honoured at home."
+  },
+  "origin_order_poem": {
+   "effects": {
+    "cohesion": 0.0003,
+    "institutional_rigidity": 0.0012,
+    "knowledge_preservation": 0.0004,
+    "legitimacy": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "observation": "A poem sets out the world's beginnings in order, every power in its place under the god."
+  },
+  "written_epic": {
+   "effects": {
+    "adoption_rate": 0.0025,
+    "cohesion": 0.0026,
+    "knowledge_preservation": 0.0068,
+    "legitimacy": 0.0015
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "observation": "The great epic is written down in letters, one fixed text for every teacher and reciter.",
+   "ability_reason": "The epic becomes one written text, taught to every child and quoted across the land; the shared story no longer drifts."
+  },
+  "symposium_song_circles": {
+   "effects": {
+    "cohesion": 0.0003,
+    "fatigue": -0.0007,
+    "food_storage": -0.0012
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
+   "observation": "Guests on couches pass the cup and take turns singing verses of their own."
+  },
+  "personal_lyric_poetry": {
+   "effects": {
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0003
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Poets sing of their own loves, fears and griefs, in their own voices."
+  },
+  "lifesize_stone_statues": {
+   "effects": {
+    "craft_output": 0.001,
+    "labor_demand": 0.0016,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Life-size stone youths stand at graves and in the god's house, one foot forward."
+  },
+  "columned_stone_temple": {
+   "effects": {
+    "cohesion": 0.0026,
+    "construction_rate": 0.006,
+    "labor_demand": 0.0048,
+    "legitimacy": 0.0049,
+    "timber_pressure": 0.0016
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "A stone house with columns on every side shelters the god's image, and the town builds its pride into it.",
+   "ability_reason": "The god's house becomes a columned stone temple; the town's wealth, skill and devotion are built into one lasting monument.",
+   "social_consequence": "Years of quarrying and hauling go into the god's house, and the town is proud of every drum of stone"
+  },
+  "animal_fables": {
+   "effects": {
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0003
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Fables of the fox, the crow and the lion carry a moral any child remembers."
+  },
+  "initiation_mysteries": {
+   "effects": {
+    "cohesion": 0.0009,
+    "food_storage": -0.0008,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Initiates are led through secret rites at night and promised a better lot after death."
+  },
+  "civic_coin_emblems": {
+   "effects": {
+    "cohesion": 0.0005,
+    "legitimacy": 0.0005,
+    "trade_capacity": 0.0008
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Each town stamps its own emblem, a beast, a plant or a wheel, on the coins it strikes."
+  },
+  "choral_district_contests": {
+   "effects": {
+    "cohesion": 0.0007,
+    "food_storage": -0.0008,
+    "labor_demand": 0.0008,
+    "legitimacy": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
+   "observation": "Each district trains a chorus of men and boys, and they compete at the festival for a bronze prize."
+  },
+  "public_theatre": {
+   "effects": {
+    "adoption_rate": 0.0042,
+    "cohesion": 0.0047,
+    "food_storage": -0.0012,
+    "knowledge_rate": 0.0019,
+    "labor_demand": 0.0024,
+    "legitimacy": 0.0015
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "observation": "The whole town sits on a hillside to watch actors and chorus perform the old stories.",
+   "ability_reason": "Plays bring stories, criticism and public argument before the whole town; ideas spread through a shared audience.",
+   "social_consequence": "The town argues over what it saw on stage, and the festival costs a rich man his year's surplus"
+  },
+  "narrative_figure_pottery": {
+   "effects": {
+    "craft_output": 0.0014,
+    "knowledge_preservation": 0.0002,
+    "trade_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Painted figures on vases tell the stories of gods and heroes, and the vases sell overseas."
+  },
+  "tragic_drama_contests": {
+   "effects": {
+    "adoption_rate": 0.0006,
+    "cohesion": 0.0009,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "observation": "Poets compete with tragedies of old heroes whose pride brings ruin, and the town judges."
+  },
+  "comparative_chronicles": {
+   "effects": {
+    "institutional_rigidity": -0.006,
+    "knowledge_preservation": 0.0054,
+    "knowledge_rate": 0.0028,
+    "observation_rate": 0.008
+   },
+   "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
+   "observation": "Historians travel, question witnesses and weigh rival accounts, and write down why wars began.",
+   "ability_reason": "History becomes inquiry: rival accounts are compared and causes argued, instead of one official memory repeated."
+  },
+  "public_funeral_orations": {
+   "effects": {
+    "cohesion": 0.0009,
+    "legitimacy": 0.0005,
+    "warfare_readiness": 0.0018
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Each year a chosen speaker praises the town's war dead before their families."
+  },
+  "satirical_comedy": {
+   "effects": {
+    "cohesion": 0.0003,
+    "institutional_rigidity": -0.0023,
+    "legitimacy": -0.0004
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "observation": "Comic poets mock generals, speakers and philosophers by name before the whole town.",
+   "social_consequence": "The powerful are laughed at, and a little less feared"
+  },
+  "paid_wandering_teachers": {
+   "effects": {
+    "adoption_rate": 0.0011,
+    "cohesion": -0.0002,
+    "knowledge_rate": 0.0006,
+    "legitimacy": -0.0004
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "observation": "Travelling teachers charge fees to teach young men to argue either side of a case.",
+   "social_consequence": "Rich youths learn eloquence, and their elders complain that nothing is held sacred"
+  },
+  "proportion_canon_sculpture": {
+   "effects": {
+    "craft_output": 0.001,
+    "legitimacy": 0.0002,
+    "standardization": 0.004
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Sculptors follow a canon in which each part of the body is a fixed fraction of the whole."
+  },
+  "public_ethical_dialogue": {
+   "effects": {
+    "adoption_rate": 0.0006,
+    "institutional_rigidity": -0.0023,
+    "knowledge_rate": 0.0009,
+    "legitimacy": -0.0004
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "A questioner stops men in the market and asks them what justice is, until their answers fall apart.",
+   "social_consequence": "Young men learn to question every custom, and their elders grow uneasy"
+  },
+  "painted_public_colonnades": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0002,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Long colonnades painted with battles and myths serve as the town's meeting place."
+  },
+  "philosophy_school_communities": {
+   "effects": {
+    "adoption_rate": 0.0025,
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0033,
+    "knowledge_rate": 0.0083,
+    "labor_demand": 0.0024,
+    "legitimacy": -0.0013
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "observation": "Schools of philosophy hold their own grounds and heads, and teaching passes from each head to the next.",
+   "ability_reason": "Schools of philosophy become lasting communities; teaching and argument pass unbroken from generation to generation.",
+   "social_consequence": "Rival schools draw the ablest young men away from public life and from the god's rites"
+  },
+  "stone_theatre_building": {
+   "effects": {
+    "cohesion": 0.0007,
+    "construction_rate": 0.002,
+    "disease_exposure": 0.0008,
+    "labor_demand": 0.0032
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "observation": "Stone seats rise in a great half-bowl, and ten thousand hear an actor's whisper."
+  },
+  "character_portrait_writing": {
+   "effects": {
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.0004
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Writers sketch human types, the flatterer, the miser, the boor, in short, sharp portraits."
+  },
+  "portrait_likeness_sculpture": {
+   "effects": {
+    "craft_output": 0.0007,
+    "knowledge_preservation": 0.0002,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Sculptors carve rulers and thinkers as they truly look, wrinkles and all."
+  },
+  "public_libraries": {
+   "effects": {
+    "adoption_rate": 0.005,
+    "knowledge_preservation": 0.0054,
+    "knowledge_rate": 0.0093,
+    "labor_demand": 0.0024
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "observation": "Great collections of books are opened to readers from beyond the court, who copy and argue over them.",
+   "ability_reason": "Great collections are open to scholars beyond the court; readers across the land compare, copy and teach from the same books."
+  },
+  "figured_floor_mosaics": {
+   "effects": {
+    "craft_output": 0.001,
+    "legitimacy": 0.0002,
+    "trade_capacity": 0.0004
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Floors of small set stones show hunts, sea creatures and scenes from the plays."
+  },
+  "consolation_philosophies": {
+   "effects": {
+    "cohesion": 0.0005,
+    "disaster_resilience": 0.0037,
+    "fatigue": -0.0014
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Teachers counsel calm: what cannot be controlled should not be feared."
+  },
+  "colossal_city_statue": {
+   "effects": {
+    "cohesion": 0.0005,
+    "labor_demand": 0.004,
+    "legitimacy": 0.001,
+    "trade_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "A bronze giant of the town's patron stands over the harbour, cast in sections over twelve years.",
+   "social_consequence": "Twelve years of bronze and labor stand in the harbour"
+  },
+  "pastoral_poetry": {
+   "effects": {
+    "cohesion": 0.0003,
+    "fatigue": -0.0007
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Poets sing of shepherds, flocks and love in a gentle, idealized countryside."
+  },
+  "translated_foreign_drama": {
+   "effects": {
+    "adoption_rate": 0.0008,
+    "cohesion": 0.0002,
+    "knowledge_rate": 0.0003,
+    "trade_capacity": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "observation": "Foreign plays and epics are translated into the home tongue and staged at the festivals."
+  },
+  "learned_allusive_poetry": {
+   "effects": {
+    "cohesion": -0.0002,
+    "knowledge_preservation": 0.0004,
+    "knowledge_rate": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "observation": "Court poets write short, learned verse full of rare myths that only scholars catch."
+  },
+  "funeral_combat_spectacles": {
+   "effects": {
+    "cohesion": 0.0003,
+    "injury_risk": 0.0016,
+    "legitimacy": 0.0005,
+    "warfare_readiness": 0.0009
+   },
+   "art": "res://assets/ui/research/subjects/civic_games-v2.png",
+   "observation": "At great funerals, pairs of armed men fight in honour of the dead."
+  },
+  "ancestor_wax_masks": {
+   "effects": {
+    "cohesion": 0.0003,
+    "institutional_rigidity": 0.0016,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Wax masks of ancestors who held office hang in the hall, and walk again at family funerals."
+  },
+  "emotional_realism_sculpture": {
+   "effects": {
+    "cohesion": 0.0003,
+    "craft_output": 0.0007
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Sculptors carve agony and struggle: a dying warrior, a drunken old woman, a boxer resting."
+  },
+  "victory_triumph_procession": {
+   "effects": {
+    "cohesion": 0.0003,
+    "food_storage": -0.0016,
+    "legitimacy": 0.001,
+    "warfare_readiness": 0.0027
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
+   "observation": "The victorious general parades his army, spoils and captives through the town to the god's house."
+  },
+  "verse_satire": {
+   "effects": {
+    "cohesion": 0.0002,
+    "institutional_rigidity": -0.0015,
+    "legitimacy": -0.0002
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Poets mock the vices of the day in verse: greed, pretension and the hunting of legacies."
+  },
+  "leisure_gardens": {
+   "effects": {
+    "fatigue": -0.0014,
+    "health_protection": 0.002,
+    "knowledge_rate": 0.0006
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Schools and wealthy men keep gardens with shaded walks for study and talk."
+  },
+  "illusion_wall_painting": {
+   "effects": {
+    "craft_output": 0.001,
+    "legitimacy": 0.0002
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Painted columns and windows open imaginary vistas on the walls of the great houses."
+  },
+  "founding_era_annals": {
+   "effects": {
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0011,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
+   "observation": "Years are counted from the town's founding, and every event is set in one unbroken reckoning."
+  },
+  "public_bath_sociability": {
+   "effects": {
+    "cohesion": 0.0009,
+    "disease_exposure": 0.0024,
+    "fatigue": -0.0014,
+    "health_protection": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/public_baths-v1.png",
+   "observation": "Men of every rank meet at the baths to wash, exercise, talk business and trade gossip.",
+   "social_consequence": "The baths bring every rank together, and every rank's ailments with them"
+  },
+  "love_elegy": {
+   "effects": {
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.0002
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Poets write elegies to a single beloved, and a book of them makes a name."
+  },
+  "commissioned_founding_epic": {
+   "effects": {
+    "cohesion": 0.0031,
+    "institutional_rigidity": 0.0024,
+    "knowledge_preservation": 0.0022,
+    "legitimacy": 0.0061
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "observation": "The ruler's poet sings the town's founding by the god's will, and every schoolboy learns the new epic.",
+   "ability_reason": "A commissioned epic ties the ruling house to the town's founding under the god; every school teaches it.",
+   "social_consequence": "The epic makes the ruler's house the goal of all history"
+  },
+  "pantomime_dance_theatre": {
+   "effects": {
+    "cohesion": 0.0005,
+    "fatigue": -0.0007,
+    "food_storage": -0.0008
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "observation": "A single masked dancer mimes every role of a myth to music, and the crowds adore him."
+  },
+  "crossroads_shrine_clubs": {
+   "effects": {
+    "cohesion": 0.0009,
+    "legitimacy": 0.0003,
+    "security_efficiency": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
+   "observation": "Neighbours form clubs to keep the crossroads shrine, hold its feast and elect its officers."
+  },
+  "circus_race_factions": {
+   "effects": {
+    "cohesion": 0.0005,
+    "injury_risk": 0.0012,
+    "legitimacy": 0.0005,
+    "security_efficiency": -0.004
+   },
+   "art": "res://assets/ui/research/subjects/civic_games-v2.png",
+   "observation": "Four racing teams in four colours command fierce loyalties, and their supporters brawl in the streets.",
+   "social_consequence": "The races bind the town to its ruler and split it into rival colours"
+  },
+  "amphitheatre_spectacles": {
+   "effects": {
+    "cohesion": 0.0003,
+    "ecological_pressure": 0.0024,
+    "food_storage": -0.0012,
+    "injury_risk": 0.0016,
+    "labor_demand": 0.0024,
+    "legitimacy": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/civic_games-v2.png",
+   "observation": "In the amphitheatre, beasts brought from distant lands are hunted before the crowd.",
+   "social_consequence": "The crowd is fed spectacle, and whole regions are stripped of their great beasts"
+  },
+  "triumphal_arch": {
+   "effects": {
+    "labor_demand": 0.0024,
+    "legitimacy": 0.0008
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "A stone arch carved with the victory spans the road the army marched in on."
+  },
+  "published_letter_collections": {
+   "effects": {
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.0005
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "A statesman's letters are collected and published, and read as models of style."
+  },
+  "prose_romance_novel": {
+   "effects": {
+    "adoption_rate": 0.0006,
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0002
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Long prose tales of parted lovers, pirates and shipwrecks are read aloud in households."
+  },
+  "painted_panel_portraits": {
+   "effects": {
+    "cohesion": 0.0002,
+    "craft_output": 0.0007,
+    "knowledge_preservation": 0.0004
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "A painted wooden panel of the dead person's face is bound over the wrapped body."
+  },
+  "paired_lives_biography": {
+   "effects": {
+    "adoption_rate": 0.0004,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
+   "observation": "Lives of great men are written in pairs, one from each of two peoples, and compared."
+  },
+  "narrative_victory_column": {
+   "effects": {
+    "knowledge_preservation": 0.0004,
+    "labor_demand": 0.0024,
+    "legitimacy": 0.0008
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "A carved band winds up a tall column, telling a whole campaign scene by scene."
+  },
+  "monument_travel_guides": {
+   "effects": {
+    "knowledge_preservation": 0.0004,
+    "trade_capacity": 0.0008,
+    "travel_speed": 0.002
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Guidebooks lead travellers from shrine to shrine, describing each monument and its story."
+  },
+  "display_oratory": {
+   "effects": {
+    "adoption_rate": 0.0006,
+    "cohesion": 0.0002,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Famous speakers give display orations to packed halls, and are paid like champion athletes."
+  },
+  "carved_sarcophagi": {
+   "effects": {
+    "craft_output": 0.0007,
+    "knowledge_preservation": 0.0002,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Stone coffins carved with myths of death and return hold the wealthy dead."
+  },
+  "glass_wall_mosaics": {
+   "effects": {
+    "craft_output": 0.0007,
+    "fuel_demand": 0.0012,
+    "legitimacy": 0.0007
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Walls and vaults glitter with glass cubes, gold sealed behind glass catching the lamplight."
+  },
+  "contemplative_ascent_schools": {
+   "effects": {
+    "cohesion": 0.0005,
+    "fatigue": -0.0007,
+    "knowledge_rate": -0.0008,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Schools teach that the soul rises by contemplation toward union with the god.",
+   "social_consequence": "Inquiry turns inward, away from the measurable world"
+  },
+  "underground_burial_galleries": {
+   "effects": {
+    "cohesion": 0.0007,
+    "labor_demand": 0.0016
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Burial clubs dig long galleries under the town where members lie side by side in niches."
+  },
+  "holy_servant_lives": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0004,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
+   "observation": "Lives of the god's devoted servants are written as models and read aloud on their feast days."
+  },
+  "congregational_hymns": {
+   "effects": {
+    "cohesion": 0.001,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
+   "observation": "The whole congregation sings hymns together in the god's house, not the choir alone."
+  },
+  "honored_ascetics": {
+   "effects": {
+    "cohesion": 0.0003,
+    "labor_efficiency": -0.0016,
+    "legitimacy": 0.0007
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Solitary men who live on bread and water in the wilderness are sought out as close to the god.",
+   "social_consequence": "Some of the able leave fields and families for solitude"
+  },
+  "weekly_rest_day": {
+   "effects": {
+    "cohesion": 0.0007,
+    "fatigue": -0.0041,
+    "labor_efficiency": -0.0016,
+    "legitimacy": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
+   "observation": "Every seventh day work stops for the god, and markets, courts and workshops close.",
+   "social_consequence": "One day in seven the fields and workshops stand idle, and the people are the better rested for it"
+  },
+  "canonized_sacred_sayings": {
+   "effects": {
+    "adoption_rate": 0.0017,
+    "cohesion": 0.0037,
+    "institutional_rigidity": 0.0056,
+    "knowledge_preservation": 0.0038,
+    "legitimacy": 0.0049
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "observation": "The god's sayings are gathered and fixed in one book, and every other version is set aside.",
+   "ability_reason": "The god's sayings are fixed in one book; every congregation reads the same words, and disputes are settled by the text.",
+   "social_consequence": "A fixed canon unites the faithful and brands every other text as false"
+  },
+  "congregation_hall_temples": {
+   "effects": {
+    "cohesion": 0.0052,
+    "construction_rate": 0.004,
+    "labor_demand": 0.004,
+    "legitimacy": 0.0024,
+    "timber_pressure": 0.0024
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "observation": "Long timber-roofed halls hold the whole congregation when it gathers for the god's rites.",
+   "ability_reason": "The whole congregation gathers under one roof for the god's rites; the faithful meet every week as one body.",
+   "social_consequence": "Every town must raise a great hall, and the roof beams come from ever farther forests"
+  },
+  "illuminated_codices": {
+   "effects": {
+    "craft_output": 0.0007,
+    "knowledge_preservation": 0.0005,
+    "labor_demand": 0.0008,
+    "legitimacy": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "observation": "Books are painted with pictures of the story, framed on the page beside the text."
+  }
+ }
 }
