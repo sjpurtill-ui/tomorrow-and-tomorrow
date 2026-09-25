@@ -13,6 +13,10 @@ func setup(block:Dictionary)->void:
 	previous=Button.new();previous.text="Newer";previous.pressed.connect(func():page-=1;_page());controls.add_child(previous)
 	next=Button.new();next.text="Older";next.pressed.connect(func():page+=1;_page());controls.add_child(next)
 	records=VBoxContainer.new();records.add_theme_constant_override("separation",14);add_child(records);_page()
+func view_state()->Dictionary:return {"page":page}
+func restore_view_state(state:Dictionary)->void:
+	var wanted:=int(state.get("page",0))
+	if wanted!=page:page=wanted;_page()
 func _page()->void:
 	for child in records.get_children():records.remove_child(child);child.queue_free()
 	var events:Array=data.events

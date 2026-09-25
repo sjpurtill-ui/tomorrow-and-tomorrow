@@ -6,6 +6,11 @@ extends PanelContainer
 
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const Blocks:=preload("res://scripts/hud/dock_blocks.gd")
+const ViewState:=preload("res://scripts/hud/view_state.gd")
+## Block types drawn purely from their dictionary. An identical block keeps its
+## nodes across a live refresh; widget blocks may read live state, so they are
+## always rebuilt (with their scroll and view state carried over).
+const PURE_BLOCKS:=["discovery","line_chart","segments","alloc","bars","tiles","rows","caps","actions","conversation","order","image","text",""]
 
 signal close_requested
 signal tab_changed(sub:int)
@@ -23,6 +28,13 @@ var body_scroll:ScrollContainer
 var body:VBoxContainer
 var close_button:Button
 var back_mode:bool=false
+## Fingerprints of the rendered body sections, KPI row and brief, so a live
+## refresh only replaces what changed.
+var _section_prints:Array[String]=[]
+var _kpi_print:=""
+var _brief_print:=""
+## Sections created since the dock was made (tests read this to prove reuse).
+var sections_built:=0
 
 func _ready()->void:
 	name="DockPanel" if name=="" or String(name).begins_with("@") else name
@@ -117,7 +129,9 @@ func _ready()->void:
 
 
 func present(new_provider:Object,new_sub:int=0)->void:
-	if provider!=new_provider or sub!=new_sub: body_scroll.scroll_vertical=0
+	if provider!=new_provider or sub!=new_sub:
+		body_scroll.scroll_vertical=0
+		_clear_body()
 	provider=new_provider
 	sub=maxi(0,new_sub)
 	rebuild()
@@ -173,13 +187,18 @@ func rebuild_body()->void:
 	if provider==null: return
 	var data:Dictionary=provider.tab(sub)
 	if not data.get("blocks",[]).is_empty() and data.blocks[0].get("type","") in ["materials_ledger","wealth_ledger"]:title_label.text=String(data.blocks[0].title)
-	_rebuild_kpis(data.get("kpis",[]))
-	_rebuild_brief(data.get("brief",{}))
-	var scroll_position:=body_scroll.scroll_vertical
-	for child in body.get_children():
-		body.remove_child(child)
-		child.queue_free()
-	Blocks.render(body,data.get("blocks",[]))
+	# Keep what the player is looking at: scroll offsets (the dock's and any
+	# nested one), the focused control, and widget page state.
+	var view:=ViewState.capture(body_scroll)
+	var kpi_print:=fingerprint(data.get("kpis",[]))
+	if kpi_print!=_kpi_print:
+		_kpi_print=kpi_print
+		_rebuild_kpis(data.get("kpis",[]))
+	var brief_print:=fingerprint(data.get("brief",{}))
+	if brief_print!=_brief_print:
+		_brief_print=brief_print
+		_rebuild_brief(data.get("brief",{}))
+	_render_sections(data.get("blocks",[]))
 	var military_board:bool=not data.get("blocks",[]).is_empty() and data.blocks[0].get("type","")=="recruit_deploy"
 	var dock_skin:=Tokens.dock_style()
 	if military_board:dock_skin.bg_color=Color("151e19");dock_skin.border_color=Color("69715b");dock_skin.set_corner_radius_all(0)
@@ -195,7 +214,62 @@ func rebuild_body()->void:
 			for state:String in ["hover","pressed"]:
 				tab_buttons[index].add_theme_stylebox_override(state,tab_buttons[index].get_theme_stylebox("normal"))
 			tab_buttons[index].add_theme_color_override("font_hover_color",Color("ffffff"))
-	body_scroll.scroll_vertical=scroll_position
+	ViewState.restore(body_scroll,view)
+
+
+func _render_sections(blocks:Array)->void:
+	## One body section per block. An unchanged pure block keeps its nodes; a
+	## changed one is replaced in place, at the same index.
+	var old:Array[Node]=body.get_children()
+	var prints:Array[String]=[]
+	for index in blocks.size():
+		var block:Dictionary=blocks[index]
+		var block_print:=String(block.get("type",""))+"|"+fingerprint(block)
+		prints.append(block_print)
+		if index<old.size() and index<_section_prints.size() and _section_prints[index]==block_print and String(block.get("type","")) in PURE_BLOCKS:
+			continue
+		var before:=body.get_child_count()
+		Blocks.render(body,[block])
+		sections_built+=body.get_child_count()-before
+		var fresh:=body.get_child(body.get_child_count()-1)
+		if index<old.size():
+			var stale:=old[index]
+			body.move_child(fresh,stale.get_index())
+			body.remove_child(stale);stale.queue_free()
+		else:body.move_child(fresh,index)
+	for index in range(blocks.size(),old.size()):
+		if is_instance_valid(old[index]) and old[index].get_parent()==body:
+			body.remove_child(old[index]);old[index].queue_free()
+	_section_prints=prints
+
+
+static func fingerprint(value:Variant)->String:
+	## Stable text for a block/KPI dictionary. Callables and objects are named,
+	## not hashed, because each rebuild makes fresh lambdas.
+	match typeof(value):
+		TYPE_DICTIONARY:
+			var parts:PackedStringArray=[]
+			var keys:Array=(value as Dictionary).keys();keys.sort()
+			for key in keys:parts.append(str(key)+":"+fingerprint(value[key]))
+			return "{"+",".join(parts)+"}"
+		TYPE_ARRAY:
+			var parts:PackedStringArray=[]
+			for item in value:parts.append(fingerprint(item))
+			return "["+",".join(parts)+"]"
+		TYPE_CALLABLE:
+			var callable:Callable=value
+			return "fn:"+String(callable.get_method())+str(callable.get_bound_arguments())
+		TYPE_OBJECT:
+			return "obj:"+(str((value as Object).get_instance_id()) if is_instance_valid(value) else "null")
+		_:
+			return var_to_str(value)
+
+
+func _clear_body()->void:
+	## A different view: nothing of the previous one is kept.
+	_section_prints.clear()
+	for child in body.get_children():
+		body.remove_child(child);child.queue_free()
 
 
 func _rebuild_kpis(kpis:Array)->void:
@@ -264,6 +338,7 @@ func _rebuild_brief(brief:Dictionary)->void:
 func _on_tab_pressed(index:int)->void:
 	if index==sub: return
 	body_scroll.scroll_vertical=0
+	_clear_body()
 	sub=index
 	rebuild()
 	tab_changed.emit(sub)

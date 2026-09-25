@@ -134,6 +134,8 @@ func _staffing()->void:
 func _unhandled_key_input(event:InputEvent)->void:
 	if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:_close();get_viewport().set_input_as_handled()
 func _process(delta:float)->void:
+	# Not looked at (hidden behind another screen): no daily rebuild work.
+	if not is_visible_in_tree():return
 	elapsed+=delta
 	if elapsed<.75:return
 	elapsed=0
@@ -247,7 +249,7 @@ func select(id:String,open_detail:bool=false)->void:
 	var signature:=str(hash([id,selected_record,main.vertical]))
 	if signature==detail_revision:return
 	detail_revision=signature
-	var old_scroll:=detail_scroll.scroll_vertical if detail_selected==id else 0;detail_selected=id
+	var view:Dictionary=preload("res://scripts/hud/view_state.gd").capture(detail_scroll) if detail_selected==id else {};detail_selected=id
 	for child in detail_body.get_children():detail_body.remove_child(child);child.queue_free()
 	for item:Dictionary in records:
 		if item.id!=id:continue
@@ -350,7 +352,9 @@ func select(id:String,open_detail:bool=false)->void:
 		action=Art.button(detail_body,"Team already investigating" if assignment.get("active",false) else "Established knowledge" if item.known else "Focus this team here" if item.ready else "More evidence needed",_act)
 		action.disabled=not item.ready or assignment.get("active",false)
 		Art.button(detail_body,"Research staffing",_staffing)
-		detail_scroll.set_deferred("scroll_vertical",old_scroll);return
+		# Re-applied until the rebuilt detail has laid out; a single deferred
+		# assignment is clamped to the empty pane and snaps to the top.
+		preload("res://scripts/hud/view_state.gd").restore(detail_scroll,view);return
 	detail=Art.label(detail_body,"Select a discovery to see its team, supervising leader and findings.",14,T.TEXT_SOFT,true)
 	action=null
 

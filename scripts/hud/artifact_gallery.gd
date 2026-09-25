@@ -284,8 +284,14 @@ func _unhandled_key_input(event:InputEvent)->void:
 		else:close()
 
 func _process(delta:float)->void:
+	if not is_visible_in_tree():return
 	timer+=delta
-	if timer>=1.0:timer=0.0;refresh(false)
+	if timer<1.0:return
+	timer=0.0
+	# A live refresh keeps the reader's scroll, focus and page in place.
+	var view:=preload("res://scripts/hud/view_state.gd").capture(self)
+	refresh(false)
+	preload("res://scripts/hud/view_state.gd").restore(self,view)
 
 # ---------------------------------------------------------------- facade access
 

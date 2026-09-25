@@ -25,6 +25,7 @@ const Rivals:=preload("res://scripts/rival_rulers.gd")
 const PERSONS_WORDS:="(?i)\\b(who|whom|whose|summon|bring|fetch|send for|responsible|blame|fault|lying|liar|lie|lied|truth|swear|ledger|tally|confess|tell me (of|about)|where were you|mercy|pardon|exalt|maim|curse|marry|priest)\\b"
 
 const Hall:=preload("res://scripts/audience_hall.gd")
+const ViewState:=preload("res://scripts/hud/view_state.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
@@ -1091,7 +1092,12 @@ func _process(delta:float)->void:
 		_rest_clock-=delta
 		if _rest_clock<=0.0:
 			_rest_clock=.5
-			if _rest_state()!=rest_signature:show_court()
+			if _rest_state()!=rest_signature:
+				# A new day redraws the court at rest; keep the roster lists
+				# where the player had scrolled them, and their focus.
+				var view:=ViewState.capture(card)
+				show_court()
+				ViewState.restore(card,view)
 			else:_refresh_voice_indicator()
 		return
 	if mode=="foreign":

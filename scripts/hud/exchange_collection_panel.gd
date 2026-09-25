@@ -72,8 +72,14 @@ func layout()->void:
 func _unhandled_key_input(event:InputEvent)->void:
 	if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:close();get_viewport().set_input_as_handled()
 func _process(delta:float)->void:
+	if not is_visible_in_tree():return
 	timer+=delta
-	if timer>=1:timer=0;refresh(false)
+	if timer<1.0:return
+	timer=0.0
+	# A live refresh keeps the reader's scroll, focus and page in place.
+	var view:=preload("res://scripts/hud/view_state.gd").capture(self)
+	refresh(false)
+	preload("res://scripts/hud/view_state.gd").restore(self,view)
 func refresh(force:bool)->void:
 	var state:=E.data();var pressure:=E.pressure()
 	var sig:=str([state.collections.size(),state.history.size(),int(pressure.unsettled),int(GameState.elapsed_days),filter.selected,search.text,page])
