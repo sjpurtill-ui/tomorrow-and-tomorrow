@@ -67,7 +67,12 @@ BAKED = {"y0_600": "data/research/research_600.json", "y600_1200": "data/researc
 PRIOR_BLOCKS = ["y0_600", "y600_1200", "y1200_1800"]
 
 # Hard edges demoted to precedents to break a cycle: (dependent, parent, reason).
-DEMOTE = []
+DEMOTE = [
+    ("cylinder_boring", "solid_bored_cannon",
+     "Boring mills for cannon came first and stay the precedent, but engine cylinders must not need gun research: "
+     "the game requires a peaceful path to precision machinery and later civilian capabilities "
+     "(tests/test_civilian_science.gd on the game branch)."),
+]
 
 LINES = ["knowledge", "institutions", "culture", "labor", "production", "infrastructure",
          "nutrition", "health", "demography", "logistics", "ecology", "security"]

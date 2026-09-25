@@ -13,9 +13,9 @@
   ],
   "node_count": 1139,
   "edge_counts": {
-   "hard": 1847,
+   "hard": 1846,
    "any": 0,
-   "precedent": 1973
+   "precedent": 1974
   },
   "cross_block_edges": 1567,
   "cross_block_edges_by_block": {
@@ -24,7 +24,13 @@
    "y1200_1800": 1100
   },
   "redated_into_block": [],
-  "demoted_links": [],
+  "demoted_links": [
+   {
+    "dependent": "cylinder_boring",
+    "parent": "solid_bored_cannon",
+    "reason": "Boring mills for cannon came first and stay the precedent, but engine cylinders must not need gun research: the game requires a peaceful path to precision machinery and later civilian capabilities (tests/test_civilian_science.gd on the game branch)."
+   }
+  ],
   "year_adjustments": 0
  },
  "nodes": [
@@ -29399,13 +29405,13 @@
    "research_years": 10.0,
    "key_threshold": false,
    "requires_all": [
-    "solid_bored_cannon",
     "atmospheric_beam_engine"
    ],
    "requires_any": [],
    "precedents": [
     "cog_and_lantern_gearing",
-    "tested_waterwheel_efficiency"
+    "tested_waterwheel_efficiency",
+    "solid_bored_cannon"
    ],
    "conditions": {
     "resources_known": [],

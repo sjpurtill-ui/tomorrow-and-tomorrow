@@ -11,10 +11,10 @@ Rebuild: `python tools/research/merge_graph_2400.py` (add `--stats` to print the
   - pils (production, infrastructure, logistics, security): 383.
   - nhde (nutrition, health, demography, ecology): 345.
 - **Edges:** 3,820.
-  - Hard `requires_all`: 1,847.
+  - Hard `requires_all`: 1,846.
   - `requires_any`: none.
-  - Precedents: 1,973.
-- **Cross-line edges:** hard 379, precedent 614.
+  - Precedents: 1,974 (including one demoted hard edge, see *Demoted link*).
+- **Cross-line edges:** hard 378, precedent 615.
 - **Cross-block edges (the parent is an earlier-block id):** 1,567. By block: 121 to 0–600, 346 to 600–1200 and 1,100 to 1200–1800. By kind: hard 768, precedent 799. 326 items have hard parents only in earlier blocks.
 - **Items with no requirement:** 0.
 - **Key thresholds:** 238.
@@ -44,7 +44,7 @@ The merge tool exits without writing anything when a check fails. Every check be
 
 ## Same-year hard edges (KICL)
 
-Six `requires_all` edges join two items with the same proposed year. All six are kept as hard edges, and `DEMOTE` is empty:
+Six `requires_all` edges join two items with the same proposed year. All six are kept as hard edges; none is demoted:
 
 - `build_research_block.py` rejects only a parent with a **later** proposed year, so equal years pass.
 - The loader (`scripts/research_600_catalog.gd`) compares no years between parent and dependent. An item opens once every hard parent is known and the year has reached its `min_year` (band_low), so the dependent simply waits for its parent.
@@ -59,6 +59,14 @@ Six `requires_all` edges join two items with the same proposed year. All six are
 | `rebuild_trade_opening` (labor) | `fire_rebuilding_acts` (infrastructure) | 2114 |
 
 `realm_bill_of_rights` has band_low 2133, ten years below its parent's 2143, so in play it opens only after the settlement is known. The first two form a same-year chain of three (assembly → abolition of privileges → abolition of bondage at 2378).
+
+## Demoted link
+
+One hard edge is demoted to a precedent through `DEMOTE` in the merge tool:
+
+| dependent | former hard parent | reason |
+|---|---|---|
+| `cylinder_boring` (infrastructure 2342) | `solid_bored_cannon` (security 2224) | Cannon boring came first and stays the precedent. As a hard edge, though, it made `precision_machinery` (and through it the game's modern civilian capabilities) depend on gun research. The game requires a peaceful path to those capabilities (`tests/test_civilian_science.gd`). `cylinder_boring` now requires `atmospheric_beam_engine` only. |
 
 ## Year adjustments
 
@@ -79,7 +87,7 @@ None. The kicl, pils and nhde adjustment files are empty. `year_adjustments_2400
 | DEM | · | 1 | · | 2 | · | · | 1 | 1 | 99 | · | 2 | 1 |
 | LOG | 2 | 3 | 3 | 3 | 3 | 4 | 17 | 5 | 2 | 100 | 5 | 4 |
 | ECO | · | · | · | 4 | 5 | 1 | 2 | · | · | · | 91 | 1 |
-| SEC | · | 2 | 1 | 2 | 3 | 4 | · | 5 | 2 | · | · | 140 |
+| SEC | · | 2 | 1 | 2 | 3 | 3 | · | 5 | 2 | · | · | 140 |
 
 ## Pacing
 
