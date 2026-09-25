@@ -196,6 +196,7 @@ static func daily(day:int)->void:
 	var l:=state()
 	_ensure_kin()
 	_watch_deaths(day)
+	_watch_successions(day)
 	_orders_due(day)
 	_watch_omens(day)
 	_rivals(day)
@@ -330,6 +331,35 @@ static func _watch_deaths(day:int)->void:
 			if died_on<since or known.has("figure:"+String(figure.get("id",""))): continue
 			_on_figure_death(figure)
 
+## Days after a death before the people say aloud who keeps the fire, when
+## the god has not yet named anyone.
+const SUCCESSION_DAYS:=30
+
+static func _watch_successions(day:int)->void:
+	## A death in office is followed by a succession the people see: if the god
+	## has named no one within a month, the one keeping the fire is named, with
+	## what they are to the dead. The god may still choose another at court.
+	for entry_variant in state().remembered:
+		var entry:Dictionary=entry_variant
+		if bool(entry.get("told_successor",false)) or String(entry.get("successor",""))!="" or int(entry.get("pid",0))<=0: continue
+		if String(entry.get("title",""))=="of the hearth" or String(entry.get("cause",""))!="old age": continue
+		var died:=int(entry.get("died",entry.get("day",day)))
+		if day-died<SUCCESSION_DAYS: continue
+		entry["told_successor"]=true
+		if day-died>SUCCESSION_DAYS+30: continue
+		var dead:=_record(int(entry.pid))
+		if dead.is_empty(): continue
+		var office:=_office_of(dead)
+		var acting:=_acting(office)
+		if acting.is_empty(): continue
+		var given:=EraNames.given_of(String(entry.get("name","")))
+		var kin:=kin_words(int(acting.get("person_id",0)),int(entry.pid))
+		var who:="%s%s" % [String(acting.get("name","")),(", %s," % kin) if kin!="" else ""]
+		var age:=GovernmentPeopleSystem.age_years(acting)
+		record("succession","%s Keeps the Fire" % EraNames.given_of(String(acting.get("name",""))).substr(0,40),
+			"A month after %s's burning, %s keeps the fire as %s. %s is %d and has %s. The god has named no one; the people take this as the god's leave." % [given,who,String(office.title).to_lower(),EraNames.given_of(String(acting.get("name",""))),age,_own_words(acting)],
+			{"pid":int(acting.get("person_id",0))},{"key":"court:succession:kept:%d" % int(entry.pid),"tier":"moment","focus":{"person_id":int(acting.get("person_id",0))}})
+
 static func _office_of(person:Dictionary)->Dictionary:
 	## {key, settlement_id, title}: the post a dead person held.
 	var office_key:=String(person.get("died_office_key",person.get("office_key","")))
@@ -364,7 +394,9 @@ static func _on_official_death(person:Dictionary,day:int)->void:
 	# The mourning is filed first so the Chronicle's card can open it.
 	# Summoning the one who holds the mourning opens it (AudienceHall.summon).
 	var holder_pid:=0 if executed else _file_mourning(person,office,day)
-	var said:="%s, %s, died aged %d. They %s. The court gathers at the fire to mourn them." % [String(person.get("name","")),String(office.title),age,deed]
+	var months:=int(person.get("experience_months",0))
+	var tenure:=(" after %s in office" % _years_words(months)) if months>=12 else ""
+	var said:="%s, %s, died aged %d%s. They %s. The court gathers at the fire to mourn them." % [String(person.get("name","")),String(office.title),age,tenure,deed]
 	var told:={"key":"court:death:person:%d" % pid,"focus":{"person_id":holder_pid} if holder_pid>0 else {}}
 	if holder_pid>0: told["text"]=said+" Summon the court to name who follows."
 	record("death","%s Is Dead" % String(person.get("name","")).substr(0,60),said,{"pid":pid},told)
@@ -860,12 +892,31 @@ static func _watch_omens(day:int)->void:
 		if String(omen.get("state",""))!="watching": continue
 		if day>int(omen.get("until",day)):
 			omen["state"]="silent"
+			_silence(omen,day)
 			continue
 		if day<=int(omen.get("day",day)): continue
 		if not sky_agrees(omen,day): continue
 		omen["state"]="agreed"
 		omen["agreed_day"]=day
 		_omen(omen,day)
+
+## When the sky does not agree, the rite is remembered as a failure.
+const SILENCE_WORDS:={"rain":"The drummers have gone home hoarse, and the hides are dry.","dry":"The smoke-fires are out and the rain still falls.",
+	"winter":"The cold held to its own time.","harvest":"The baskets came home no heavier than before.","healing":"The sick are no better for the singing.",
+	"dead":"The mound is as it was.","any":"Nothing came of it."}
+
+static func _silence(omen:Dictionary,day:int)->void:
+	## A rite that nothing answered: a little doubt, and the one who led it
+	## remembers. Belief rises only on coincidence (_omen), never by decree.
+	var wish:=String(omen.get("wish","any"))
+	var metrics:Dictionary=GameState.simulation_metrics
+	metrics["legitimacy"]=clampf(float(metrics.get("legitimacy",0.5))-0.01,0.01,0.99)
+	var pid:=int(omen.get("pid",0))
+	if pid>0: GovernmentPeopleSystem.record_person_memory(pid,"I led the rite the god asked for, and nothing came of it.","omen",0.5,{"emotion":"doubt"})
+	var wish_words:=String((Lines.WISHES.get(wish,{}) as Dictionary).get("wish","what was asked")) if Lines.WISHES.has(wish) else "what was asked"
+	preload("res://scripts/chronicle.gd").record({"key":"court:silent:%d:%s" % [int(omen.get("day",day)),wish],"title":"The Sky Kept Silent",
+		"text":"The god called for %s, and nothing came. %s Some at the fires have stopped looking up." % [wish_words,String(SILENCE_WORDS.get(wish,SILENCE_WORDS.any))],
+		"tier":"notice","kind":"omen","domain":"court","ledger":false})
 
 static func _omen(omen:Dictionary,day:int)->void:
 	var wish:=String(omen.get("wish","rain"))

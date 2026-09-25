@@ -41,6 +41,16 @@ var aim_policy:="player"
 var aim_due:Dictionary={}
 var aim_logged:Dictionary={}
 var policy:="random"
+## Typed orders (offline reading), one every ORDER_GAP days from year 2 when
+## --orders=on: great works, miracles and plain orders a god might give.
+const ORDERS:=["Build a great temple to me on the hill.","Make it rain tomorrow.","Hold a feast in my honour.","Raise the dead from the burial mound.",
+	"Teach the people to fly.","Raise a ring of standing stones.","Turn the river stones into gold.","Stop the winter from coming.","Pray to me at dawn and dusk.",
+	"Dig latrines away from the huts and keep the water clean.","Cure all the sick.","Give everyone a day of rest."]
+const ORDER_GAP:=270
+var orders_on:=false
+var order_index:=0
+var next_order_day:=730
+var last_chief:=-1
 
 func _arg(n:String,f:String)->String:
 	for a in OS.get_cmdline_user_args():
@@ -61,6 +71,7 @@ func _ready()->void:
 	policy=_arg("policy","random")
 	rng.seed=seed_value
 	aim_policy=_arg("aims","player")
+	orders_on=_arg("orders","off")=="on"
 	if ResourceLoader.exists(AIMS_PATH): aims=load(AIMS_PATH) as GDScript
 	out=FileAccess.open(_arg("out","user://fun_playtest.jsonl"),FileAccess.WRITE)
 	GameState.reset_for_new_world(seed_value)
@@ -90,7 +101,9 @@ func _ready()->void:
 				settled_try=int(GameState.elapsed_days)+3
 				terrain._start_settlement_here()
 				if GameState.settlement_site_committed:
-					w("settled",{"status":String(terrain.travel_status_label.text) if terrain.travel_status_label else ""})
+					var at:Vector3=terrain.settler_marker.position if terrain.settler_marker else Vector3.ZERO
+					var biome:Dictionary=terrain._biome_at(at.x,at.z)
+					w("settled",{"status":String(terrain.travel_status_label.text) if terrain.travel_status_label else "","biome":String(biome.get("id","")),"biome_label":String(biome.get("label",""))})
 					founded_day=int(GameState.elapsed_days)
 					# The founding frame: what opens by itself, what the rail offers.
 					for i in 3:await get_tree().process_frame
@@ -120,14 +133,20 @@ func _ready()->void:
 			ui_marks["first_ten"]=true
 			w("ui_first_ten",first_ten)
 		_handle_aims()
+		_watch_chief()
+		if orders_on and GameState.settlement_site_committed and int(GameState.elapsed_days)>=next_order_day:
+			next_order_day=int(GameState.elapsed_days)+ORDER_GAP
+			_type_order(String(ORDERS[order_index%ORDERS.size()]))
+			order_index+=1
 		var y:=int(GameState.elapsed_days/365.0)
 		if y!=last_year_mark:
 			last_year_mark=y
 			_year_row(y,chunk_ms);chunk_ms=0
-			if y in [1,5,10,25] and not ui_marks.has(y):
+			if y in [1,5,10,25,50,75,100] and not ui_marks.has(y):
 				ui_marks[y]=true
 				w("ui",UiMeasure.measure(terrain,"year %d" % y))
 	_collect()
+	_dump_people()
 	w("end",{"counts":counts,"inbox":GameState.council_inbox.size(),"matters":Hall.matter_counts(),"hall_history":(Hall.state().get("history",[]) as Array).size()})
 	out.close()
 	print("FUN_PLAYTEST DONE ",counts)
@@ -149,6 +168,53 @@ func _first_ten_sample()->void:
 	first_ten.dock_tiles_max=maxi(int(first_ten.dock_tiles_max),tiles)
 	first_ten.max_surface=maxi(int(first_ten.max_surface),rail+kpis+tiles)
 
+func _watch_chief()->void:
+	if GameState.player_settlements.is_empty(): return
+	var chief:Dictionary=GovernmentPeopleSystem.settlement_leader(String(GameState.player_settlements[0].id))
+	var pid:=int(chief.get("person_id",0))
+	if pid==last_chief or pid<=0: return
+	last_chief=pid
+	w("chief",{"pid":pid,"name":String(chief.get("name","")),"age":GovernmentPeopleSystem.age_years(chief),"title":String(chief.get("office_title",""))})
+
+func _type_order(text:String)->void:
+	var city:=String(GameState.player_settlements[0].id)
+	var leader:=GovernmentPeopleSystem.settlement_leader(city)
+	if leader.is_empty(): return
+	var reading:=PronouncementInterpreter._local_interpretation(text,{"settlement":{"id":city}})
+	var order:=AdvisorSystem.begin_civic_directive(text,city,leader)
+	var resolved:=AdvisorSystem.resolve_civic_directive(text,reading,order,city,int(leader.get("person_id",0)))
+	var reply:=String(resolved.get("leader_reply",""))
+	var speech:=reply.split("
+
+STATE ·")[0].split("
+
+RECEIPT · ")[0].replace("
+"," ")
+	var receipt:=reply.split("
+
+STATE ·")[0].split("
+
+RECEIPT · ")[1] if "
+
+RECEIPT · " in reply else ""
+	var frame:=""
+	var reply_script:GDScript=load("res://scripts/divine_reply.gd")
+	if "last_frame" in reply_script: frame=String(reply_script.get("last_frame"))
+	var work:Dictionary=resolved.get("great_work",{}) if resolved.get("great_work") is Dictionary else {}
+	w("order",{"text":text,"speaker":String(leader.get("name","")),"speech":speech.left(600),"receipt":receipt.left(400),"frame":frame,"status":String(resolved.get("status","")),"work_started":bool(work.get("started",false)),"work":String(work.get("name",""))})
+
+func _dump_people()->void:
+	for person in GovernmentPeopleSystem.people:
+		var p:Dictionary=person
+		w("person",{"pid":int(p.get("person_id",0)),"name":String(p.get("name","")),"sex":String(p.get("sex","")),"status":String(p.get("status","")),"age":GovernmentPeopleSystem.age_years(p),
+			"born":int(p.get("born_day",0)),"died":int(p.get("died_day",-1)),"office":String(p.get("died_office_key",p.get("office_key",""))),"local":String(p.get("died_local_leader_of",p.get("local_leader_of",""))),"months":int(p.get("experience_months",0))})
+	for child in preload("res://scripts/opening_arc.gd").state().get("children",[]):
+		w("child",{"name":String((child as Dictionary).get("name","")),"daughter":bool((child as Dictionary).get("daughter",false))})
+	for list_key in ["history","queue"]:
+		for a in Hall.state().get(list_key,[]):
+			if a is Dictionary and String(a.get("origin",""))=="foreign": w("envoy_name",{"name":String((a.get("speaker",{}) as Dictionary).get("name","")),"civ":String(a.get("civ_id",""))})
+	if aims!=null: w("aim_stats",(aims.call("state") as Dictionary).get("stats",{}))
+
 func _on_beat(beat:Dictionary)->void:
 	w("beat",{"kind":String(beat.get("kind","")),"title":String(beat.get("title","")),"text":String(beat.get("text","")).left(400)})
 
@@ -156,7 +222,14 @@ func _year_row(y:int,ms:int)->void:
 	var civ_contacts:=0
 	for c in CivilizationSystem.civilizations:
 		if int((c.get("player_relation",{}) as Dictionary).get("contact_level",0))>0:civ_contacts+=1
-	w("year",{"year":y,"ms_last_year":ms,"pop":GameState.population_total,"known":GameState.known_discoveries.size(),"food_days":GameState.simulation_metrics.get("food_days",0),"intake":GameState.simulation_metrics.get("food_intake_ratio",0),"built":GameState.settlement_completed.size(),"settlements":GameState.player_settlements.size(),"contacts":civ_contacts,"civs":CivilizationSystem.civilizations.size(),"scout_reports":CivilizationSystem.scout_reports.size(),"officials":GovernmentPeopleSystem.active_offices().size() if GovernmentPeopleSystem.has_method("active_offices") else -1,"matters":Hall.matter_counts(),"chronicle":(CivilizationSystem.chronicle.data.get("chapters",[]) as Array).size() if CivilizationSystem.chronicle else -1,"stage":String(GameState.get("settlement_stage")) if "settlement_stage" in GameState else "","aim":_aim_row()})
+	var wars:=0;var treaties:=0;var met:Array=[]
+	for c in CivilizationSystem.civilizations:
+		var rel:Dictionary=c.get("player_relation",{})
+		if bool(rel.get("at_war",false)):wars+=1
+		if String(rel.get("treaty",""))!="":treaties+=1
+		if int(rel.get("contact_level",0))>0:met.append(String(c.get("name","")))
+	var works:=preload("res://scripts/great_works.gd").works("player")
+	w("year",{"year":y,"wars":wars,"treaties":treaties,"met":met,"works":works.map(func(x:Dictionary)->String:return "%s:%s" % [String(x.get("name",x.get("work_id",""))),String(x.get("status",x.get("stage","")))]),"soldiers":MilitaryCampaign._mobilized_count(),"ms_last_year":ms,"pop":GameState.population_total,"known":GameState.known_discoveries.size(),"food_days":GameState.simulation_metrics.get("food_days",0),"intake":GameState.simulation_metrics.get("food_intake_ratio",0),"built":GameState.settlement_completed.size(),"settlements":GameState.player_settlements.size(),"contacts":civ_contacts,"civs":CivilizationSystem.civilizations.size(),"scout_reports":CivilizationSystem.scout_reports.size(),"officials":GovernmentPeopleSystem.active_offices().size() if GovernmentPeopleSystem.has_method("active_offices") else -1,"matters":Hall.matter_counts(),"chronicle":(CivilizationSystem.chronicle.data.get("chapters",[]) as Array).size() if CivilizationSystem.chronicle else -1,"stage":String(GameState.get("settlement_stage")) if "settlement_stage" in GameState else "","aim":_aim_row()})
 
 func _aim_row()->Dictionary:
 	if aims==null: return {}

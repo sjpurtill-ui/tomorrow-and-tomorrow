@@ -12,18 +12,16 @@ const MAX_GOVERNMENT_PEOPLE:=288
 const MAX_PERSON_MEMORIES:=20
 const MONTH_DAYS:=30
 
+## Invented names only (alternative history); people are named through
+## era_names.gd, which knows the era and each people's tradition. These lists
+## remain for callers that need a plain pool.
 const GIVEN_NAMES:=[
-	"Alda","Amara","Ansel","Arin","Aster","Bako","Bera","Cassian","Chika","Dara","Dimitra","Edda",
-	"Elian","Enna","Eshe","Farid","Galen","Hana","Hyeon","Idris","Ilya","Iona","Iskra","Joren",
-	"Kaia","Kamau","Kavi","Laleh","Leif","Liora","Mara","Meilin","Nadiya","Niko","Nkiru","Oren",
-	"Priya","Qamar","Rafiq","Rhea","Rufaro","Sana","Sefu","Soraya","Tala","Tarin","Temur","Vera",
-	"Xia","Yara","Yejun","Zahra","Zhen","Zuri",
+	"Ama","Sela","Iri","Nuna","Vesa","Tilla","Ysa","Oda","Luma","Pira","Runa","Wenna",
+	"Harl","Tesk","Oru","Brim","Kael","Dunn","Vesh","Tam","Pell","Rook","Faro","Garro",
 ]
 const FAMILY_NAMES:=[
-	"Adebayo","Alder","Almasi","Anvari","Ashfield","Batsaikhan","Briar","Cairn","Chandra","Dawn","Dlamini",
-	"Ember","Farrow","Flint","Grove","Haddad","Hearth","Ivers","Jafari","Kestrel","Khan","Kim","Kovač",
-	"Lark","Mensah","Morrow","Ndlovu","North","Oak","Okafor","Petrescu","Qureshi","Reed","Sato","Silva",
-	"Stone","Tadesse","Thorne","Tran","Vale","Ward","Wells","Yarrow","Yi","Zoric","Wren",
+	"Reedwater","Ford","Ashbank","Longmeadow","Saltspring","Hollowhill","Redcliff","Stonewash","Birchstand","Deepwell","Otterpool","Windgap",
+	"Twinoak","Mossbrook","Whitestone","Fernside","Highcamp","Crowfield","Lakeshore","Thornbrake","Stonehand","Longstride","Owlsight","Keeneye",
 ]
 const TRAITS:=[
 	"Patient","Forceful","Curious","Methodical","Warm","Skeptical","Bold","Cautious","Frugal","Generous",
@@ -375,8 +373,7 @@ func _generate_person(person_id:int)->Dictionary:
 	var woman:=posmod(hash("%d:government_sex:%d" % [WorldSimulation.state.world_seed,person_id]),2)==0
 	rng.randi(); rng.randi()   # the two draws the older naming used, so ages and skills keep their seeds
 	var age:=rng.randi_range(18,58)
-	var life_expectancy:=clampf(WorldSimulation.state.projected_life_expectancy()+18.0,48.0,88.0)
-	var death_age:=clampf(rng.randfn(life_expectancy,11.5),maxf(36.0,float(age)+2.0),105.0)
+	var death_age:=adult_death_age(rng,age,float(WorldSimulation.state.projected_life_expectancy()))
 	var skills:Dictionary={}
 	for skill in SKILL_KEYS: skills[skill]=clampi(roundi(rng.randfn(47.0,11.0)),22,72)
 	# Every public figure has an intelligible comparative advantage and a real
@@ -414,7 +411,7 @@ func _generate_person(person_id:int)->Dictionary:
 	var born_day:=int(WorldSimulation.state.elapsed_days)-age*365-rng.randi_range(0,364)
 	var profile:=_dynamic_profile(skills,personality)
 	return {
-		"person_id":person_id,"name":name,"given":String(identity.get("given","")),"family":String(identity.get("family","")),"sex":"female" if woman else "male","born_day":born_day,"death_age_years":death_age,"died_day":-1,"status":"active","known_since_day":int(WorldSimulation.state.elapsed_days),
+		"person_id":person_id,"name":name,"given":String(identity.get("given","")),"family":String(identity.get("family","")),"sex":"female" if woman else "male","born_day":born_day,"death_age_years":death_age,"adult_life":1,"died_day":-1,"status":"active","known_since_day":int(WorldSimulation.state.elapsed_days),
 		"home_settlement_id":home_id,"office_key":"","local_leader_of":"","appointed_day":-1,"experience_months":0,
 		"background":background,"institutional":false,"traits":[trait_a,trait_b],"personality":personality,"skills":skills,"doctrine":doctrine,
 		"dynamic_profile":profile,"subcategory_profile":{},"support":clampi(roundi(28.0+float(profile.culture)*34.0+float(profile.institutions)*26.0),18,92),
@@ -422,6 +419,18 @@ func _generate_person(person_id:int)->Dictionary:
 		"relationships":{"sovereign":{"trust":rng.randf_range(0.30,0.76),"respect":rng.randf_range(0.30,0.80),"fear":rng.randf_range(0.03,0.32),"resentment":0.0,"obligation":rng.randf_range(0.28,0.72)}},
 		"honesty":rng.randf_range(0.30,0.94),"courage":rng.randf_range(0.24,0.92),"pride":rng.randf_range(0.16,0.88),"suspicion":rng.randf_range(0.12,0.86),
 	}
+
+
+static func adult_death_age(rng:RandomNumberGenerator,age:int,life_expectancy_at_birth:float)->float:
+	## A public person is already grown, so the hard years of infancy are behind
+	## them: birth expectancy (often 20-35 in early eras) says little about when
+	## an adult dies. Adult life tables of foragers and early farmers put the
+	## years still to come at about 35-40 at twenty and 20-25 at forty, so a
+	## grown person usually reaches 55-65. `old` is the age the grown reach in
+	## this era; the years remaining shrink as a person nears it.
+	var old:=clampf(62.0+(life_expectancy_at_birth-30.0)*0.35,60.0,80.0)
+	var remaining:=maxf(4.0,(old+16.0-float(age))*0.6)
+	return clampf(float(age)+rng.randfn(remaining,remaining*0.4),float(age)+2.0,105.0)
 
 
 func admit_person(identity:Dictionary)->Dictionary:
@@ -1175,6 +1184,13 @@ func _process_lifespans(day:int,events:Array[Dictionary])->void:
 		if String(person.get("office_key",""))!="" or String(person.get("local_leader_of",""))!="":
 			person["experience_months"]=int(person.get("experience_months",0))+1
 		var age:=float(day-int(person.get("born_day",day)))/365.0
+		if not person.has("adult_life"):
+			# Records from before adult life tables: a grown person gets the
+			# adult span (never a shorter one than they had).
+			person["adult_life"]=1
+			var life_rng:=RandomNumberGenerator.new()
+			life_rng.seed=hash("%d:adult_life:%d" % [WorldSimulation.state.world_seed,int(person.get("person_id",0))])
+			person["death_age_years"]=maxf(float(person.get("death_age_years",60.0)),adult_death_age(life_rng,floori(age),float(WorldSimulation.state.projected_life_expectancy())))
 		if age<float(person.get("death_age_years",90.0)):
 			people[index]=person
 			continue

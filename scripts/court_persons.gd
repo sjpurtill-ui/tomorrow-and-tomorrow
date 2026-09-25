@@ -241,7 +241,7 @@ static func _name_for(sex:String,rng:RandomNumberGenerator,family:String="")->Di
 		return {"given":String(made.given),"family":"","name":String(made.name)}
 	var pool:Array=Notables.MEN if sex=="male" else Notables.WOMEN
 	var families:Array=[]
-	for f in GovernmentPeopleSystem.FAMILY_NAMES:
+	for f in era_names.FAMILIES:
 		if CV.permits(String(f),tags()) and String(f).length()<=9: families.append(String(f))
 	var used:=_used_names()
 	for attempt in 60:

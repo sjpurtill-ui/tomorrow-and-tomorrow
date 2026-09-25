@@ -81,6 +81,14 @@ const WORK_PRESSED_SHARE:=0.2
 ## days that must be days of plenty.
 const PLENTY_STORES:=30.0
 const PLENTY_SHARE:=0.8
+## Cohesion at which "Keep One Fire" is an aim to hold, not to raise.
+const UNITY_HOLD:=0.7
+## How much warmer a people must grow toward us for a bond of friendship.
+const FRIEND_GAIN:=0.22
+## A live aim this far behind its pace lets fresh voices speak of others.
+const RENEW_BEHIND:=0.2
+## A hostile answer to the envoy of a people we mean to make fear us.
+const FEAR_ANSWER_DREAD:=0.07
 
 ## Each template: its century ambition (focus), research domain, legacy word,
 ## and which office speaks for it first.
@@ -292,7 +300,9 @@ static func growth_target(pop:int,years:int,aligned:bool)->Dictionary:
 	for sample in state().pop_samples: peak=maxi(peak,int(sample))
 	var target:=ceili(float(pop)*pow(1.0+rate/100.0,float(years)))
 	var restore:=false
-	if peak>pop and target<=peak:
+	# Restoring the old number is an aim only while the band is not shrinking
+	# away from it; a people in decline is asked for what its trend can bear.
+	if peak>pop and target<=peak and (trend>=0.0 or float(peak)<=float(pop)*1.05):
 		target=peak; restore=true
 	target=maxi(target,pop+maxi(3,ceili(pop*0.02)))
 	var ceiling:=floori(float(pop)*pow(1.0+float(band.max)/100.0,float(years)))
@@ -344,7 +354,7 @@ static func _base(template:String,by:Dictionary,years:int)->Dictionary:
 
 static func _cand_grow(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	var pop:=GameState.population_total
-	var years:=rng.randi_range(10,14)
+	var years:=rng.randi_range(8,12)
 	var goal:=growth_target(pop,years,_focus_aligned("grow"))
 	var c:=_base("grow",by,years)
 	c.target=int(goal.target); c.baseline=pop
@@ -411,7 +421,7 @@ static func _cand_learn(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	var half:=_half_learned()
 	if half.is_empty(): return {}
 	var domain:=String(half.domain)
-	var years:=rng.randi_range(8,12)
+	var years:=rng.randi_range(6,10)
 	var learned:=maxi(0,GameState.known_discoveries.size()-10)
 	# The field's share of what the people learn (smoothed: a young people's
 	# first finds say little), times their pace of learning.
@@ -449,10 +459,10 @@ static func learning_pace()->float:
 	return maxf(EARLY_LEARNING_PACE,float(GameState.known_discoveries.size()-10)/since)
 
 static func _cand_knowledge(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
-	var years:=rng.randi_range(10,15)
+	var years:=rng.randi_range(6,9)
 	var known:=GameState.known_discoveries.size()
 	var rate:=learning_pace()*(1.1 if _focus_aligned("knowledge") else 1.0)
-	var gain:=maxi(3,roundi(rate*float(years)*0.9))
+	var gain:=maxi(3,roundi(rate*float(years)*0.8))
 	var c:=_base("knowledge",by,years)
 	c.target=gain; c.baseline=known
 	c.title="Learn %s New Ways in %s" % [_cap(_count(gain)),_title(winters(years))]
@@ -512,7 +522,7 @@ static func _cand_fear(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	if slight.is_empty(): return {}
 	var civ_id:=String(slight.civ_id)
 	var name:=_civ_name(civ_id)
-	var years:=rng.randi_range(8,12)
+	var years:=rng.randi_range(6,10)
 	var c:=_base("fear",by,years)
 	var dread:=DIVINE.civ_dread(civ_id)
 	c.subject=civ_id; c.subject_name=name.substr(0,60)
@@ -537,10 +547,10 @@ static func _cand_friend(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 		if opinion< -0.25 or opinion>0.6: continue
 		if best.is_empty() or opinion>float(best.opinion): best={"civ_id":String(civ.id),"name":String(civ.name),"opinion":opinion}
 	if best.is_empty(): return {}
-	var years:=rng.randi_range(8,12)
+	var years:=rng.randi_range(6,10)
 	var c:=_base("friend",by,years)
 	c.subject=String(best.civ_id); c.subject_name=String(best.name).substr(0,60)
-	c.target=minf(0.85,float(best.opinion)+0.3); c.baseline=float(best.opinion)
+	c.target=minf(0.85,float(best.opinion)+FRIEND_GAIN); c.baseline=float(best.opinion)
 	c.title="Bind %s to Us in Friendship" % _the(String(best.name))
 	c.phrase="bind %s to us, so that their children and ours share a fire" % _the(String(best.name))
 	c.why="%s are near, and a neighbour is either a friend or a danger." % _cap(_the(String(best.name)))
@@ -550,6 +560,8 @@ static func _cand_friend(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 static func _cand_settle(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	var count:=GameState.player_settlements.size()
 	if GameState.population_total<90 or count>=6: return {}
+	# A shrinking band cannot spare its young; the court does not ask it.
+	if String(by.get("source",""))!="god" and (observed_growth()<=0.0 or GameState.population_total<140): return {}
 	var years:=rng.randi_range(8,12)
 	var c:=_base("settle",by,years)
 	c.target=count+1; c.baseline=count
@@ -586,6 +598,11 @@ static func _cand_unity(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	c.target=minf(0.95,coh+0.06); c.baseline=coh
 	c.title="Keep One Fire"
 	c.phrase="keep every hearth at one fire, with no family splitting away"
+	if coh>=UNITY_HOLD:
+		# Already one fire: the aim is to keep it so, season after season.
+		c["hold"]=true; c.threshold=coh-0.04; c.acc=0.0
+		c.target=ceili(float(years)*365.0*PLENTY_SHARE); c.baseline=0.0
+		c.phrase="keep every hearth at one fire through %s, with no family splitting away" % winters(years)
 	c.why="The quarrels between the hearths are louder than they were."
 	c.legacy="the One Fire"
 	return c
@@ -626,7 +643,9 @@ static func _condition_scores(day:int)->Dictionary:
 	var metrics:Dictionary=GameState.simulation_metrics
 	if int(s.low_food_day)>=0 and day-int(s.low_food_day)<365: scores.plenty=2.5
 	elif float(metrics.get("food_days",30.0))<30.0: scores.plenty=1.0
-	if observed_growth()< -0.2: scores.grow=1.8
+	# A shrinking band worries the court, but an aim to grow that its trend
+	# cannot meet only ends in grief; the court speaks of it less.
+	if observed_growth()< -0.2: scores.grow=0.7
 	else: scores.grow=0.8
 	if not _slighted_by().is_empty(): scores.fear=2.2
 	if not _memorial().is_empty(): scores.work=1.6
@@ -638,7 +657,7 @@ static func _condition_scores(day:int)->Dictionary:
 		var level:=int(((civ as Dictionary).get("player_relation",{}) as Dictionary).get("contact_level",0))
 		if level==1: scores.reach=1.4
 		if level>=2: scores.friend=maxf(float(scores.friend),0.9)
-	if GameState.player_settlements.size()<=1 and GameState.population_total>=110: scores.settle=1.0
+	if GameState.player_settlements.size()<=1 and GameState.population_total>=140 and observed_growth()>0.0: scores.settle=1.0
 	if float(metrics.get("cohesion",0.58))<0.5: scores.unity=1.5
 	# The century's ambition colours what the court reaches for.
 	var ambition:=String(PeopleDirection.ambition)
@@ -871,11 +890,19 @@ static func _maybe_propose(day:int)->void:
 		var scores:=_condition_scores(day)
 		var active_t:=String((s.active as Dictionary).template)
 		var urgent:=""
+		var sworn:Dictionary=s.active
+		var sworn_elapsed:=float(day-int(sworn.start_day))/maxf(1.0,float(int(sworn.deadline)-int(sworn.start_day)))
+		var on_pace:=float(sworn.get("progress",0.0))>=sworn_elapsed-0.1
 		for t in ["plenty","fear"]:
+			# Hunger always speaks; a grudge does not unseat an aim that is on pace.
+			if t=="fear" and on_pace: continue
 			if t!=active_t and float(scores.get(t,0.0))>=2.2 and not _recent(t,day): urgent=t
 		if urgent=="":
 			# Years into a long aim, fresh voices speak of others.
-			if day-int(s.get("last_proposal_day",day))>=RENEW_DAYS and day-int((s.active as Dictionary).get("start_day",day))>=3*365:
+			var live:Dictionary=s.active
+			var elapsed:=float(day-int(live.start_day))/maxf(1.0,float(int(live.deadline)-int(live.start_day)))
+			# Only an aim that is well behind its pace wearies the people.
+			if day-int(s.get("last_proposal_day",day))>=RENEW_DAYS and day-int(live.get("start_day",day))>=3*365 and float(live.get("progress",0.0))<elapsed-RENEW_BEHIND:
 				var fresh:=propose(day)
 				if fresh.size()>2: fresh.resize(2)
 				for cand in fresh: cand["proposed_day"]=day
@@ -935,6 +962,14 @@ static func on_open(audience:Dictionary)->void:
 		if person.is_empty(): person=holder
 		var model:=_manner(person)
 		_line(audience,person,_say(Lines.URGE.get(model,[]),tokens,"urge:%s" % String(cand.cid)))
+		var clash:=_flag_contradiction(cand,"proposed")
+		if clash!="":
+			# Someone else at the fire names the clash aloud.
+			var doubter:Dictionary={}
+			for other in Hall.court(String(audience.id)):
+				if int(other.get("person_id",0))!=int(person.get("person_id",0)): doubter=other; break
+			if doubter.is_empty(): _narrate(audience,"[Someone at the fire asks: %s]" % clash)
+			else: _line(audience,doubter,clash,true)
 	if String(aim_part.get("mode","")) in ["crisis","renew"] and has_active():
 		var aim:Dictionary=state().active
 		_narrate(audience,"[Others at the fire shake their heads. We are sworn to %s: %s.]" % [String(aim.title),value_words(aim)])
@@ -982,9 +1017,18 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 		var cand:Dictionary=(state().candidates as Dictionary).get(String(row.get("cid","")),{})
 		if cand.is_empty(): continue
 		var label:=String(cand.title).substr(0,70)
-		out.append(Hall._option("aim_adopt:%s" % String(cand.cid),label,_option_sub(cand),"warm"))
+		var sub:=_option_sub(cand)
+		var clash:=contradiction(cand)
+		if clash!="": sub=("%s It clashes with what we have already bound ourselves to." % sub).substr(0,300)
+		if has_active() and String(aim_part.get("mode","")) in ["crisis","renew"]:
+			var live:Dictionary=state().active
+			sub=("%s It sets down %s (%s)." % [sub,String(live.title),value_words(live)]).substr(0,300)
+		out.append(Hall._option("aim_adopt:%s" % String(cand.cid),label,sub,"warm"))
 	if String(aim_part.get("mode","")) in ["crisis","renew"]:
-		out.append(Hall._option("aim_keep","Hold to our aim","We keep the aim we swore. The call is heard, and set aside.","neutral"))
+		var kept:Dictionary=state().active
+		var keep_sub:="We keep the aim we swore. The call is heard, and set aside."
+		if not kept.is_empty(): keep_sub="We keep %s: %s. The call is heard, and set aside." % [String(kept.title),value_words(kept)]
+		out.append(Hall._option("aim_keep","Hold to our aim",keep_sub.substr(0,300),"neutral"))
 	else:
 		out.append(Hall._option("aim_wait","Not yet","Let the people wait for a better aim. If you stay silent too long, they will choose one themselves.","neutral"))
 	return out
@@ -1213,7 +1257,7 @@ static func from_words(text:String)->Dictionary:
 					cand.legacy="the Years %s Trembled" % _the(civ_name)
 				else:
 					var opinion:=float(_relation(named_civ).get("opinion",0.0))
-					cand.target=minf(0.85,opinion+0.3); cand.baseline=opinion
+					cand.target=minf(0.85,opinion+FRIEND_GAIN); cand.baseline=opinion
 					cand.legacy="the Bond with %s" % _the(civ_name)
 			else:
 				cand=_cand_unity(god,rng)
@@ -1290,6 +1334,11 @@ static func adopt(cand:Dictionary,chosen_by:String,day:int)->Dictionary:
 	PeopleDirection._log(day,"Took up an aim: %s." % String(aim.title))
 	_log("adopted",String(aim.title),{"template":String(aim.template),"by":chosen_by,"years":int(aim.years),"target":str(aim.get("target",""))})
 	_note_clash(aim)
+	var clash:=_flag_contradiction(cand,"adopted")
+	if clash!="":
+		aim["contradiction"]=clash.substr(0,200)
+		Chronicle.record({"key":"aim:contradiction:"+String(aim.id),"title":"An Aim at Odds","text":"Some at the fire shake their heads. %s The god has chosen, and the people will try to do both." % clash,
+			"tier":"notice","kind":"court","domain":String(aim.domain),"ledger":false})
 	return aim
 
 static func measure(aim:Dictionary)->float:
@@ -1321,6 +1370,7 @@ static func measure(aim:Dictionary)->float:
 		"friend":
 			return clampf((float(_relation(String(aim.subject)).get("opinion",base))-base)/maxf(0.01,target-base),0.0,1.0)
 		"unity":
+			if bool(aim.get("hold",false)): return clampf(float(aim.get("acc",0.0))/maxf(1.0,target),0.0,1.0)
 			return clampf((float(GameState.simulation_metrics.get("cohesion",base))-base)/maxf(0.01,target-base),0.0,1.0)
 	return 0.0
 
@@ -1334,6 +1384,8 @@ static func value_words(aim:Dictionary)->String:
 		"learn": return "%s new ways of %s" % [_count(maxi(0,known_in(String(aim.subject))-int(aim.baseline))),_count(int(aim.target))]
 		"settle": return "%s of %s hearths" % [_count(GameState.player_settlements.size()),_count(int(aim.target))]
 		"plenty": return "%s of %s full" % [winters(int(floor(float(aim.get("acc",0.0))/365.0))),winters(int(aim.years))]
+		"unity":
+			if bool(aim.get("hold",false)): return "%s of %s at one fire" % [winters(int(floor(float(aim.get("acc",0.0))/365.0))),winters(int(aim.years))]
 		"reach":
 			if String(aim.get("subject",""))!="": return "their fires found; not yet sat at" if p>=0.5 else "their smoke seen, their fires not yet found"
 	var words:=["barely begun","a quarter done","half done","most of the way","all but done"]
@@ -1346,6 +1398,8 @@ static func _track(day:int,span:int)->void:
 		"plenty":
 			var metrics:Dictionary=GameState.simulation_metrics
 			if float(metrics.get("food_days",0.0))>=float(aim.get("threshold",PLENTY_STORES)) and float(metrics.get("food_intake_ratio",1.0))>=0.98: aim.acc=float(aim.get("acc",0.0))+float(span)
+		"unity":
+			if bool(aim.get("hold",false)) and float(GameState.simulation_metrics.get("cohesion",0.0))>=float(aim.get("threshold",UNITY_HOLD)): aim.acc=float(aim.get("acc",0.0))+float(span)
 		"work":
 			var builders:=float(GameState.population_total)*float(GameState.population_allocation_percentages.get("Construction",8.0))/100.0
 			aim.acc=float(aim.get("acc",0.0))+builders*float(aim.get("share",WORK_SHARE))*float(span)
@@ -1526,10 +1580,19 @@ static func _rival_why(view:Dictionary,template:String)->String:
 			if b is Dictionary and String(b.get("kind","")) in ["marriage","ally"]: return ("They hold to %s." % String(b.text)).substr(0,200)
 	return ""
 
+## Answers that count as yielding to a demand. Repaying what we owe (a debt
+## called in) and helping the hungry (an aid request) are not yielding.
+const YIELD_SITUATIONS:=["tribute_demand","emboldened_demand","test_of_resolve","redress_demand","artifact_return","recruitment_protest"]
+
+static func is_yield(kind:String,situation:String,option_id:String)->bool:
+	if situation in ["debt_call","aid_request"]: return false
+	if option_id=="pay": return true
+	return option_id in ["grant","grant_half"] and (kind=="threat" or situation in YIELD_SITUATIONS)
+
 static func _yields_to(civ_id:String,since:int)->int:
 	var n:=0
 	for entry in Hall.ledger():
-		if String(entry.get("civ_id",""))==civ_id and int(entry.get("day",0))>=since and String(entry.get("option","")) in ["pay","grant","grant_half"]: n+=1
+		if String(entry.get("civ_id",""))==civ_id and int(entry.get("day",0))>=since and is_yield(String(entry.get("kind","")),String(entry.get("situation","")),String(entry.get("option",""))): n+=1
 	return n
 
 static func _rival_progress(r:Dictionary)->float:
@@ -1619,8 +1682,35 @@ static func _rivals(day:int)->void:
 					_log("rival_known",String(r.title),{"civ":String(r.civ_name),"clash":clash})
 					break
 		r.progress=_rival_progress(r)
-		if float(r.progress)>=1.0: _rival_close(r,"fulfilled",day)
+		if float(r.progress)>=RIVAL_WARN_AT and not r.has("warned_day") and day<int(r.deadline): _rival_warn(r,day)
+		if float(r.progress)>=1.0 and r.has("warned_day") and day-int(r.warned_day)>=RIVAL_WARN_DAYS: _rival_close(r,"fulfilled",day)
 		elif day>=int(r.deadline): _rival_close(r,"failed",day)
+
+## A rival's vow at this share is told to the god, with what would stop it,
+## before it can be fulfilled; no vow is fulfilled sooner than RIVAL_WARN_DAYS
+## after that warning.
+const RIVAL_WARN_AT:=0.5
+const RIVAL_WARN_DAYS:=60
+const RIVAL_ANSWERS:={
+	"humble":"They count every tribute we pay them as yielding. Refuse their next demand and the vow comes to nothing.",
+	"outnumber":"Their fires are filling faster than ours. More children at our hearths would turn it.",
+	"bond":"Every gift we accept and every warm answer we give them binds us closer. A cold answer at their next visit would slow it.",
+	"spread":"Their hunters come further toward our grounds each season. Walkers and a watch on our edge would slow them.",
+}
+
+static func _rival_warn(r:Dictionary,day:int)->void:
+	r["warned_day"]=day
+	var first:=not bool(r.get("known",false))
+	r.known=true
+	var answer:=String(RIVAL_ANSWERS.get(String(r.template),""))
+	var how:=""
+	if String(r.template)=="humble":
+		var n:=_yields_to(String(r.civ_id),int(r.start_day))
+		how=" We have yielded to them %s since the vow." % ("once" if n==1 else "%s times" % number_words(n))
+	var text:="%s %s of %s is close to what they swore: to %s.%s %s" % ["Word comes from their fires:" if first else "Their vow is nearly kept:",String(r.leader),_the(String(r.civ_name)),String(r.phrase),how,answer]
+	Chronicle.record({"key":"aim:rival:warn:%s:%d" % [String(r.civ_id),int(r.start_day)],"title":"%s Is Close to the Vow" % String(r.leader).get_slice(" ",0),
+		"text":text.strip_edges(),"tier":"moment","kind":"contact","domain":"culture","ledger":true})
+	_log("rival_warned",String(r.title),{"civ":String(r.civ_name),"progress":float(r.get("progress",0.0))})
 
 static func _clashes(r:Dictionary)->bool:
 	var aim:Dictionary=state().active
@@ -1668,6 +1758,99 @@ static func _clash_on_fulfil(aim:Dictionary)->void:
 # --------------------------------------------------------------------------
 # Read models for the board and the court
 # --------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------
+# Contradictions: an aim against what we have already bound ourselves to
+# --------------------------------------------------------------------------
+
+static func _paid_to(civ_id:String,days:int)->int:
+	var n:=0
+	for entry in Hall.ledger():
+		if String(entry.get("civ_id",""))==civ_id and _day()-int(entry.get("day",-99999))<=days and is_yield(String(entry.get("kind","")),String(entry.get("situation","")),String(entry.get("option",""))): n+=1
+	return n
+
+static func contradiction(cand:Dictionary)->String:
+	## What in our live dealings an aim works against, in the court's words;
+	## "" when nothing does. A fear aim against a people we are married to,
+	## sworn to, or paying; a friendship with a people we mean to make fear us.
+	var template:=String(cand.get("template",""))
+	var civ_id:=String(cand.get("subject",""))
+	if civ_id=="" or not template in ["fear","friend"]: return ""
+	var people:=_the(String(cand.get("subject_name",_civ_name(civ_id))))
+	var live:Dictionary=state().active
+	var view:=_rival_view(civ_id)
+	if template=="fear":
+		for b in view.get("bonds",[]):
+			if b is Dictionary and String(b.get("kind",""))=="marriage": return "You would have %s fear us, with %s?" % [people,String(b.get("text","a marriage between our peoples")).trim_suffix(".")]
+		for b in view.get("bonds",[]):
+			if b is Dictionary and String(b.get("kind",""))=="ally": return "You would have %s fear us, when we are sworn to them: %s?" % [people,String(b.get("text","")).trim_suffix(".")]
+		var rel:=_relation(civ_id)
+		if String(rel.get("treaty",""))!="": return "You would have %s fear us, while we keep a pact with them?" % people
+		var paid:=_paid_to(civ_id,730)
+		if paid>0: return "You would have %s fear us, and we paid them tribute %s these two winters?" % [people,"once" if paid==1 else number_words(paid)+" times"]
+		if String(live.get("template",""))=="friend" and String(live.get("subject",""))==civ_id: return "You would have %s fear us, when we are sworn to bind them to us in friendship?" % people
+	else:
+		if bool(_relation(civ_id).get("at_war",false)): return "You would bind %s to us, while our spears are out against them?" % people
+		if String(live.get("template",""))=="fear" and String(live.get("subject",""))==civ_id: return "You would bind %s to us, when we are sworn to make them fear our name?" % people
+	return ""
+
+static func _flag_contradiction(cand:Dictionary,when:String)->String:
+	var clash:=contradiction(cand)
+	if clash=="": return ""
+	var key:="%s|%s" % [String(cand.get("cid",cand.get("id",""))),when]
+	var flagged:Array=state().get("flagged",[]) if state().get("flagged") is Array else []
+	if not key in flagged:
+		flagged.push_front(key)
+		while flagged.size()>24: flagged.pop_back()
+		state()["flagged"]=flagged
+		(state().stats as Dictionary)["contradictions"]=int((state().stats as Dictionary).get("contradictions",0))+1
+		_log("contradiction",clash,{"when":when,"title":String(cand.get("title",""))})
+	return clash
+
+# --------------------------------------------------------------------------
+# Envoys' answers and the aims they serve or cross
+# --------------------------------------------------------------------------
+
+const HOSTILE_ANSWERS:=["refuse","defy","counter","rebuff"]
+const WARM_ANSWERS:=["accept","accept_return","grant","grant_half","reward","thank"]
+
+static func annotate_options(audience:Dictionary,result:Array[Dictionary])->void:
+	## Each answer to an envoy says what it does to our aim and to their vow:
+	## "It serves our aim", "Oskel will count this as yielding (1 of 2)".
+	var civ_id:=String(audience.get("civ_id",""))
+	if civ_id=="": return
+	var aim:Dictionary=state().active
+	var aim_here:=not aim.is_empty() and String(aim.get("subject",""))==civ_id
+	var r:Dictionary=(state().rivals as Dictionary).get(civ_id,{})
+	var vow_live:=not r.is_empty() and String(r.get("status",""))=="active" and String(r.get("template",""))=="humble"
+	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
+	var sit:=String(situation.get("type",""))
+	for option in result:
+		var id:=String(option.get("id",""))
+		var note:=""
+		if aim_here and String(aim.template)=="fear":
+			if id in HOSTILE_ANSWERS: note="It serves our aim: %s." % String(aim.phrase)
+			elif is_yield(String(audience.get("kind","")),sit,id): note="It works against our aim: %s." % String(aim.phrase)
+		elif aim_here and String(aim.template)=="friend":
+			if id in WARM_ANSWERS: note="It serves our aim: %s." % String(aim.phrase)
+			elif id in HOSTILE_ANSWERS: note="It works against our aim: %s." % String(aim.phrase)
+		if vow_live and is_yield(String(audience.get("kind","")),sit,id):
+			var n:=_yields_to(civ_id,int(r.start_day))+1
+			note=("%s %s will count this as yielding (%s of %s)." % [note,String(r.leader).get_slice(" ",0),number_words(mini(n,int(r.target))),number_words(int(r.target))]).strip_edges()
+		elif vow_live and sit=="debt_call" and id in ["grant","grant_half"]:
+			note=("%s Repaying a debt is not yielding; %s cannot boast of it." % [note,String(r.leader).get_slice(" ",0)]).strip_edges()
+		if note!="": option["sub"]=("%s %s" % [String(option.get("sub","")),note]).strip_edges().substr(0,300)
+
+static func after_answer(audience:Dictionary,option_id:String,result:Dictionary)->Dictionary:
+	## A hostile answer to the people we mean to make fear us is a show of teeth.
+	var civ_id:=String(audience.get("civ_id",""))
+	var aim:Dictionary=state().active
+	if civ_id=="" or aim.is_empty() or String(aim.get("subject",""))!=civ_id: return result
+	if String(aim.template)=="fear" and option_id in HOSTILE_ANSWERS:
+		DIVINE.add_civ_dread(civ_id,FEAR_ANSWER_DREAD)
+		_log("fear_answer",String(aim.title),{"civ":String(aim.subject_name),"option":option_id})
+		result["outcome"]=("%s Word of it will run ahead of their messenger: our god did not bend." % String(result.get("outcome",""))).strip_edges()
+	return result
 
 static func board_model()->Dictionary:
 	var s:=state()

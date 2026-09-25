@@ -147,9 +147,10 @@ static func _winter(day:int)->Dictionary:
 	var season:="lean season" if lean else "winter"
 	var weather:="The lean months have come, and the country gives less every day" if lean else ("Water skins freeze at night now" if cold<=0.5 else ("The nights are bitter now" if cold<6.0 else "The rains have turned cold"))
 	if lean and pressure.contains("cold takes"): pressure="the stores are good, %d days, but a hard season takes the old and the newborn first" % roundi(float(c.food_days))
-	var family:=_family_name(day)
-	var summary:="%s. This is our first %s in this place, and %s. The %s hearth worries me most: a grandmother who cannot walk far, and a child not yet weaned." % [weather,season,pressure,family]
-	arc["winter"]={"day":day,"family":family,"topic":topic,"decree":decree,"deaths_before":int(GameState.lifetime_deaths),"chief_id":int(chief.get("person_id",0)),"cold_c":cold,"lean":lean}
+	var hearth:=_hearth(day)
+	var family:=String(hearth.name)
+	var summary:="%s. This is our first %s in this place, and %s. %s worries me most: a grandmother who cannot walk far, and a child not yet weaned." % [weather,season,pressure,family.substr(0,1).to_upper()+family.substr(1)]
+	arc["winter"]={"day":day,"family":family,"hearth":family,"at_hearth":String(hearth.at),"topic":topic,"decree":decree,"deaths_before":int(GameState.lifetime_deaths),"chief_id":int(chief.get("person_id",0)),"cold_c":cold,"lean":lean}
 	var matter:={}
 	if not chief.is_empty():
 		var built:={"topic":topic,"summary":summary,"decree":decree,"ask":"opening:first_winter","situation_type":"crisis_petition"}
@@ -165,7 +166,9 @@ static func _spring(day:int)->Dictionary:
 	if day-int(winter.get("day",day))<60 or _season(day)<SPRING: return {}
 	var deaths:=maxi(0,int(GameState.lifetime_deaths)-int(winter.get("deaths_before",GameState.lifetime_deaths)))
 	var answer:=_winter_answer()
-	var family:=String(winter.get("family","the"))
+	# Saves from before era hearths keep their family word ("the X hearth").
+	var family:=String(winter.get("hearth","the %s hearth" % String(winter.get("family",""))))
+	var grandmother:="the grandmother %s" % String(winter.get("at_hearth","")) if winter.has("at_hearth") else "the %s grandmother" % String(winter.get("family",""))
 	var helped:=answer=="decree"
 	var lean:=bool(winter.get("lean",false))
 	var thaw:="The good season has come back." if lean else "The thaw has come."
@@ -174,13 +177,13 @@ static func _spring(day:int)->Dictionary:
 	var outcome:=""
 	if deaths==0:
 		outcome="all_lived"
-		text="%s No one was buried this %s. The %s grandmother sat in the sun today with the child on her knee." % [thaw,season,family]
+		text="%s No one was buried this %s. %s sat in the sun today with the child on her knee." % [thaw,season,grandmother.substr(0,1).to_upper()+grandmother.substr(1)]
 	elif helped:
 		outcome="family_lived"
-		text="%s %s did not live to see it, but the %s hearth came through whole; they say it was your word that kept them." % [thaw,_people_count(deaths),family]
+		text="%s %s did not live to see it, but %s came through whole; they say it was your word that kept them." % [thaw,_people_count(deaths),family]
 	else:
 		outcome="grandmother_died"
-		text=("%s We buried the %s grandmother this %s; she was the only one we lost. The child lived." % [thaw,family,season]) if deaths==1 else ("%s %s were buried this %s, and the %s grandmother was one of them. The child lived." % [thaw,_people_count(deaths),season,family])
+		text=("%s We buried %s this %s; she was the only one we lost. The child lived." % [thaw,grandmother,season]) if deaths==1 else ("%s %s were buried this %s, and %s was one of them. The child lived." % [thaw,_people_count(deaths),season,grandmother])
 	var chief_id:=int(winter.get("chief_id",0))
 	if chief_id>0 and not GovernmentPeopleSystem.person_snapshot(chief_id).is_empty():
 		GovernmentPeopleSystem.record_person_memory(chief_id,"Our first %s here: %s" % [season,text],"opening",0.7,{"emotion":"grief" if outcome=="grandmother_died" else "relief"})
@@ -208,17 +211,15 @@ static func _child(day:int)->Dictionary:
 	var taken:Dictionary={}
 	for person in GovernmentPeopleSystem.living_people(): taken[String(person.get("name","")).get_slice(" ",0)]=true
 	for child in children: taken[String((child as Dictionary).get("name","")).get_slice(" ",0)]=true
-	var pool:Array=GovernmentPeopleSystem.GIVEN_NAMES
-	var start:=rng.randi_range(0,pool.size()-1)
-	var given:=String(pool[start])
-	for offset in pool.size():
-		if not taken.has(String(pool[(start+offset)%pool.size()])): given=String(pool[(start+offset)%pool.size()]); break
+	# A child is named in the people's own tradition and for their sex (era_names.gd).
+	rng.randi()
+	var daughter:=rng.randf()<0.5
+	var given:=preload("res://scripts/era_names.gd").given_for(int(GameState.world_seed),"child:%d" % day,daughter,"player",taken)
 	var parent_name:=String(parent.get("name",""))
 	# Only a real family name passes to the child: never an epithet ("Stone-Hand")
 	# or a place ("of Stonewash"), which belong to the parent (era_names.gd).
 	var family:=preload("res://scripts/era_names.gd").family_of(parent)
 	var child_name:=given+(" "+family if family!="" else "")
-	var daughter:=rng.randf()<0.5
 	var record:={"day":day,"name":child_name,"parent_id":int(parent.person_id),"parent_name":parent_name,"daughter":daughter}
 	children.append(record)
 	GovernmentPeopleSystem.record_person_memory(int(parent.person_id),"My %s %s was born." % ["daughter" if daughter else "son",given],"family",0.8,{"emotion":"joy","child_name":child_name})
@@ -344,15 +345,12 @@ static func _chief()->Dictionary:
 		if String(person.get("office_key",""))=="Steward": return person
 	return officials[0] if not officials.is_empty() else {}
 
-static func _family_name(day:int)->String:
+static func _hearth(day:int)->Dictionary:
+	## The family at risk in the first winter, named as this people names a
+	## hearth (era_names.gd): never after a living official.
 	var taken:Dictionary={}
-	for person in Hall._officials(): taken[String(person.get("name","")).get_slice(" ",1)]=true
-	var names:Array=GovernmentPeopleSystem.FAMILY_NAMES
-	var start:=posmod(hash("%d|winter_family|%d" % [int(GameState.world_seed),day]),names.size())
-	for offset in names.size():
-		var candidate:=String(names[(start+offset)%names.size()])
-		if not taken.has(candidate): return candidate
-	return String(names[start])
+	for person in Hall._officials(): taken[String(person.get("name","")).get_slice(" ",0)]=true
+	return preload("res://scripts/era_names.gd").hearth_of(int(GameState.world_seed),"winter:%d" % day,"player",taken)
 
 static func _births_today(day:int)->int:
 	var history:Array=GameState.vital_statistics_history

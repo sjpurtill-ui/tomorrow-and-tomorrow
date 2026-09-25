@@ -101,9 +101,9 @@ static func leader_from_person(person:Dictionary)->Dictionary:
 static func generated_leader(salt:String="founding")->Dictionary:
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=hash("%d:%s:caravan_leader:%s" % [int(WorldSimulation.state.world_seed),WorldSimulation.actor_id,salt])
-	var given:Array=GPS.GIVEN_NAMES
-	var family:Array=GPS.FAMILY_NAMES
-	var name:String="%s %s" % [String(given[rng.randi_range(0,given.size()-1)]),String(family[rng.randi_range(0,family.size()-1)])]
+	# Named as the people name anyone (era_names.gd): their tradition, their era.
+	var identity:Dictionary=preload("res://scripts/era_names.gd").make(int(WorldSimulation.state.world_seed),rng.randi(),rng.randf()<0.5,String(WorldSimulation.actor_id) if String(WorldSimulation.actor_id)!="" else "player",{},{"skill":"Logistics"})
+	var name:String=String(identity.get("name","The caravan leader"))
 	var skills:Dictionary={"Logistics":float(rng.randi_range(52,80)),"Provisioning":float(rng.randi_range(44,74)),"Knowledge":float(rng.randi_range(36,70)),"Defense":float(rng.randi_range(30,66))}
 	return {"name":name,"person_id":0,"skills":skills,"competency":competency_of(skills),"background":"Route and caravan organizer","generated":true}
 
