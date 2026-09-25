@@ -28,7 +28,9 @@ const POLICY_TERMS:Dictionary={
 	"foraging_drive":["forag","gather food","gather wild food","send gatherers","hunt","hunt more","find food","search for food","seek food"],
 	"conservation_order":["conserv","protect the land","preserve the land","rest the land","limit gathering","restrict harvest"],
 	"water_security":["secure water","collect water","collect drinking water","fetch water","fetch drinking water","carry water","water carriers","water storage","store water","water supply","dig wells","build wells","drinking water","cistern"],
-	"care_rotation":["heal","organize healers","care for the sick","tend the sick","help the sick","nurse the sick","treat the sick","treat wounds","help the injured","clinic"],
+	"care_rotation":["heal","organize healers","care for the sick","tend the sick","help the sick","nurse the sick","treat the sick","treat wounds","help the injured","clinic",
+		# fun-pop: care of mothers in childbirth and of newborns (neonatal_survival, sick_care_coverage).
+		"care for the mothers","tend the mothers","help the mothers","midwife","midwives","birth attendants","care for the newborns","tend the newborns","care for the babies","tend the babies","care for the infants","keep the children alive"],
 	"expanded_watch":["watch","raise a watch","guard","post guards","sentries","defen","patrol","protect the camp","protect the settlement"],
 	"public_assembly":["assembly","gather the people","explain","public council","hear the people","hear grievances","speak to the people","meet with the people"],
 	"emergency_building":["build","raise shelters","construct homes","construct houses","repair housing","repair shelters","shelter","construction","housing"],

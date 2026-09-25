@@ -63,7 +63,15 @@ func step_once()->void:
 		return
 	var next:Dictionary=steps.pop_front()
 	var start:=Time.get_ticks_usec()
+	var tracing:bool=preload("res://scripts/performance_trace.gd").enabled
+	var population_before:float=WorldSimulation.state.population_exact if tracing else 0.0
 	var inserted:Variant=WorldSimulation.scoped(String(group.owner),next.call)
+	if tracing:
+		var change:float=WorldSimulation.state.population_exact-population_before
+		if change!=0.0:
+			var steps_trace:Dictionary=preload("res://scripts/performance_trace.gd").population_steps
+			var step_key:="%s:%s" % [String(group.owner),String(next.label)]
+			steps_trace[step_key]=float(steps_trace.get(step_key,0.0))+change
 	var elapsed:=Time.get_ticks_usec()-start
 	steps_run+=1
 	longest_step_usec=maxi(longest_step_usec,elapsed)

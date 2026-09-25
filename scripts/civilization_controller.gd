@@ -40,8 +40,16 @@ static func research_orders(id:String,plan:Dictionary)->void:
 	for value in WorldSimulation.state.research_allocations.values():budget+=int(value)
 	var priorities:Dictionary=plan.research_weights.duplicate()
 	var viable:Dictionary={}
+	# fun-pop performance: only whether each field has an open problem matters,
+	# so a field already shown viable is not checked again, and "known" is a set
+	# (an Array made every check O(known) for every catalog entry, monthly per rival).
+	var known:Dictionary={}
+	for known_id in WorldSimulation.state.known_discoveries:known[known_id]=true
+	var today:=int(WorldSimulation.state.elapsed_days)
 	for entry:Dictionary in WorldSimulation.discovery.technology_catalog:
-		if WorldSimulation.discovery._discovery_is_eligible(entry,int(WorldSimulation.state.elapsed_days)):viable[String(entry.dynamic)]=true
+		var field:=String(entry.dynamic)
+		if viable.has(field):continue
+		if WorldSimulation.discovery._discovery_is_eligible(entry,today,known):viable[field]=true
 	# This ruler chooses its own emphasis through ordinary orders. Do not spend
 	# every point on blocked fields while their cross-field foundations await work.
 	# Player emphasis remains authoritative and is never changed by this controller.

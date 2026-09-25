@@ -499,6 +499,8 @@ const PETITION_PLEA_MORE:={
 	"introduction":["I've come to present myself, {address}, and to say plainly what I mean to do in this office.","New to the post and not shy about it: I'm here so you'll know my face before you need it.","You gave me this charge, {address}. I've come to show you it wasn't a mistake."],
 	"follow_up":["I'm here about what we spoke of before, {address}. It hasn't gone away.","You'll remember the matter; it certainly remembers us."],
 	"war":["The war sits on everyone's shoulders, {address}, and I've come to say how heavy it's getting.","About the fighting: I've things to say the others won't.","Every day of this war costs us something, {address}. I've come to talk about what."],
+	# fun-pop: the people are dwindling; {summary} names who dies and why (dwindling_cause.gd).
+	"people":["{summary} I count the graves every winter, {address}, and there are more each time.","We buried more of our own than were born to us, {address}. {summary}"],
 }
 const CLOSING_MORE:={
 	"welcome":["A warm welcome! I'll try to be worth it.","That's more than I expected, {address}. I'll start earning it tomorrow."],
@@ -772,7 +774,7 @@ const PLEA_FRAMES:=[
 	"Give the word to {remedy}, {address}, and I'll carry it out before the dust settles.",
 	"You needn't love the idea, {address}; just {remedy}.",
 ]
-const TOPIC_MATTER:={"food":"the food stores","health":"the sickness","housing":"shelter for the homeless","security":"the watch","grievance":"my grievance","ambition":"my proposal","introduction":"my new charge","follow_up":"the old matter","war":"the war"}
+const TOPIC_MATTER:={"food":"the food stores","health":"the sickness","people":"the empty cradles","housing":"shelter for the homeless","security":"the watch","grievance":"my grievance","ambition":"my proposal","introduction":"my new charge","follow_up":"the old matter","war":"the war"}
 const ORDINALS:=["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth","eleventh","twelfth"]
 const CARDINALS:=["one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
 

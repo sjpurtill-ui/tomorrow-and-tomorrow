@@ -796,7 +796,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	if deaths_today>0:
 		var ordinary_deaths:=HearthCount.routine(dominant_cause)
 		var death_record:=_record_demographic_change("death",deaths_today,dominant_cause,food_days,production_ratio,housing_ratio,mortality_result.get("affected_cohorts",{}),not ordinary_deaths)
-		if ordinary_deaths:HearthCount.tally("buried",deaths_today)
+		if ordinary_deaths:
+			HearthCount.tally("buried",deaths_today)
+			HearthCount.tally_ages(deaths_today)
 		else:events.append(death_record)
 	var maternal_deaths:=int(reproduction.get("maternal_deaths_count",0))
 	if maternal_deaths>0:

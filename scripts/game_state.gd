@@ -4,6 +4,11 @@ var civilian_injuries:Dictionary={"limited":0.0,"severe":0.0}
 
 const SOCIETAL_VALUES_MODEL:=preload("res://scripts/societal_values_model.gd")
 const EARLY_CARE:=preload("res://scripts/early_life_conditions.gd")
+const TRACE:=preload("res://scripts/performance_trace.gd")
+## Pregnancies under way at founding, as a share of the baseline annual
+## conceptions: about 0.65 of the baseline is conceived in ordinary founding
+## conditions, and a pregnancy lasts about three quarters of a year.
+const FOUNDING_PREGNANCY_SHARE:=0.5
 
 const POPULATION_ROLES := ["Food","Survey","Extraction","Construction","Crafting","Logistics","Knowledge","Administration","Defense"]
 const PRODUCTIVE_POPULATION_ROLES := ["Food","Survey","Extraction","Construction","Crafting","Logistics"]
@@ -710,7 +715,13 @@ func initialize_population_model() -> void:
 		"elders":total*0.08
 	}
 	var reproductive_population:=_reproductive_age_population()
-	var seeded_pregnancies:=reproductive_population*0.045
+	# fun-pop: the founders arrive already carrying the pregnancies of their
+	# usual conception rate, about FOUNDING_PREGNANCY_SHARE of the baseline
+	# annual conceptions (process_reproduction_day). The old seed (4.5% of the
+	# reproductive weight, about 1.2 pregnancies among 120 people) left the
+	# first year with half its births and cost the band 2-3 people for nothing.
+	var baseline_annual:=float(population_cohorts.youth)*0.45*0.23+float(population_cohorts.early_adults)*0.50*0.285+float(population_cohorts.established_adults)*0.45*0.18+float(population_cohorts.mature_adults)*0.16*0.040
+	var seeded_pregnancies:=baseline_annual*FOUNDING_PREGNANCY_SHARE
 	pregnancy_cohorts={
 		"first_trimester":seeded_pregnancies*0.34,
 		"second_trimester":seeded_pregnancies*0.33,
@@ -899,6 +910,7 @@ func _remove_population_exact(amount:float,cause:String,weight_override:Dictiona
 		for severity in civilian_injuries: civilian_injuries[severity]*=survival
 	population_exact=maxf(1.0,population_exact-removed_total)
 	_normalize_population_cohorts()
+	if TRACE.enabled and self==GameState:TRACE.flow("death" if record_mortality else "departure",cause,removed_total)
 	return removed_total
 
 var lifetime_departures := 0
@@ -1091,6 +1103,7 @@ func register_population_arrivals(count:int,source:String="new arrivals",cohort_
 		population_cohorts[key]=float(population_cohorts.get(key,0.0))+amount
 		added[key]=amount
 	population_exact+=float(actual)
+	if TRACE.enabled and self==GameState:TRACE.flow("arrival",source,float(actual))
 	_refresh_population_summary()
 	synchronize_population_allocations()
 	return {"count":actual,"source":source,"population_after":population_total,"cohorts":added}
@@ -1132,6 +1145,7 @@ func process_reproduction_day(context:Dictionary) -> Dictionary:
 	pregnancy_cohorts["postpartum"]=maxf(0.0,postpartum+deliveries-postpartum/365.0)
 	population_cohorts["children"]=float(population_cohorts.get("children",0.0))+live_births_exact
 	population_exact+=live_births_exact
+	if TRACE.enabled and self==GameState:TRACE.flow("birth","Live births",live_births_exact)
 	_remove_population_exact(neonatal_deaths_exact,"Neonatal complications")
 	_remove_population_exact(maternal_deaths_exact,"Complications of childbirth")
 	_normalize_population_cohorts()
@@ -1342,12 +1356,13 @@ func current_natural_mortality_rate(housing_ratio:float=-1.0)->float:
 func _natural_cohort_hazards(condition_factor:float=-1.0)->Dictionary:
 	var result:Dictionary={}
 	var conditions:=_mortality_condition_factor() if condition_factor<0.0 else condition_factor
+	var care:=care_profile()
 	for key in POPULATION_AGE_COHORTS:
 		var age_range:Vector2=POPULATION_COHORT_AGE_RANGES[key]
 		var hazard_sum:=0.0
 		var years:=maxi(1,roundi(age_range.y-age_range.x))
 		for age in range(roundi(age_range.x),roundi(age_range.y)):
-			hazard_sum+=BASELINE_HAZARD_BY_AGE[age]*EARLY_CARE.age_multiplier(early_care,age,conditions)
+			hazard_sum+=BASELINE_HAZARD_BY_AGE[age]*EARLY_CARE.age_multiplier(care,age,conditions)
 		result[key]=hazard_sum/float(years)
 	return result
 
@@ -1360,13 +1375,24 @@ func _current_exceptional_mortality_rate()->float:
 		return exceptional
 	return maxf(0.0,float(simulation_metrics.get("annual_death_rate",0.0))-current_natural_mortality_rate())
 
+## The early-care profile the day's rates use. Before the first simulated day
+## of a new world (or of a save loaded without one) it is not yet stored, and
+## LIVES and the babes lost read the bare life table: 46 winters at the
+## founding that became 22 the next day. Computing it on demand shows the
+## founders' true odds from the start (fun audit 2, item 3).
+func care_profile()->Dictionary:
+	if not early_care.is_empty() or WorldSimulation.discovery==null:return early_care
+	if elapsed_days<30.0:early_care_blend=1.0
+	return EARLY_CARE.profile(self,WorldSimulation.discovery)
+
 func projected_life_expectancy() -> float:
+	var care:=care_profile()
 	var condition_factor:=_mortality_condition_factor()
 	var exceptional_hazard:=_current_exceptional_mortality_rate()
 	var survival:=1.0
 	var expected_years:=0.0
 	for age in 110:
-		var baseline_hazard:=BASELINE_HAZARD_BY_AGE[age]*EARLY_CARE.age_multiplier(early_care,age,condition_factor)
+		var baseline_hazard:=BASELINE_HAZARD_BY_AGE[age]*EARLY_CARE.age_multiplier(care,age,condition_factor)
 		var annual_hazard:=clampf(baseline_hazard*condition_factor+exceptional_hazard,0.0001,0.98)
 		expected_years+=survival
 		survival*=1.0-annual_hazard

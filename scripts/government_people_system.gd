@@ -1175,6 +1175,21 @@ func _ensure_local_leaders(events:Array[Dictionary]=[])->void:
 			events.append({"day":int(WorldSimulation.state.elapsed_days),"title":"Local Succession","description":"%s now serves as %s of %s." % [String(candidates[0].name),String(result.title),String(settlement.get("name","the settlement"))],"domain":"institutions","severity":"notice"})
 
 
+## research_600: the life table already expects a named person's death, so it
+## is charged against the natural-death accumulator and not counted twice.
+## fun-pop: once a settlement exists, daily deaths run on the settlement's own
+## accumulator inside SettlementModel.with_local_population; the national
+## death_progress is swapped out there and never read. Charging the national
+## field left every named death as an extra one (about 6-10 per 1,000 a year
+## in a band of a hundred), so the death and its charge go through the local
+## scope that the daily mortality reads.
+func _register_named_death()->void:
+	WorldSimulation.settlements.with_local_population(func()->void:
+		WorldSimulation.state.register_population_deaths(1,"Natural causes")
+		WorldSimulation.state.death_progress-=1.0
+	,true)
+
+
 func _process_lifespans(day:int,events:Array[Dictionary])->void:
 	for index in people.size():
 		var person:Dictionary=people[index]
@@ -1205,11 +1220,7 @@ func _process_lifespans(day:int,events:Array[Dictionary])->void:
 		people[index]=person
 		# This named person is part of the aggregate population. Register exactly one
 		# death through the same conserved demographic entry point.
-		WorldSimulation.state.register_population_deaths(1,"Natural causes")
-		# research_600: the life table already expects this death; charge it
-		# against the aggregate accumulator so it is not counted twice (the
-		# double count mattered most for a band of a few dozen people).
-		WorldSimulation.state.death_progress-=1.0
+		_register_named_death()
 		var service_note:=" while serving as %s" % held_title if held_title!="" else (" while leading a settlement" if local_id!="" else "")
 		var event:Dictionary={"day":day,"title":"Officeholder Died","description":"%s died aged %d%s. The office and local duties now pass through the same succession rules as every other appointment." % [String(person.name),floori(age),service_note],"domain":"institutions","severity":"major"}
 		events.append(event)

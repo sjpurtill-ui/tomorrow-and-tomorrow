@@ -41,6 +41,12 @@ BASE_ALLOC = g.const("scripts/government_people_system.gd", "BASE_ALLOCATIONS",
 FOCUS_CHANGES = g.literal_after("scripts/government_people_system.gd", "var changes:Dictionary=(", default={})
 LABOR_EXTRAS = g.literal_after("scripts/food_system.gd", "var extras:=", default={"Food": 0.17, "Extraction": 0.18, "Construction": 0.18, "Defense": 0.12, "Survey": 0.13, "Logistics": 0.14, "Crafting": 0.08, "Knowledge": 0.04, "Administration": 0.04})
 # Optional Phase 3 pre-modern burden (early_life_conditions.gd); absent -> 1.
+# fun-pop: pregnancies under way at founding (game_state.gd initialize_population_model).
+# Named officials' deaths are charged to the natural-death accumulator in the engine
+# (government_people_system.gd _register_named_death), so the surrogate needs no separate
+# term for them; the fitted other_mortality/disease_pressure absorbed the old double
+# count and should fall when the truth runs are regenerated.
+FOUNDING_PREGNANCY_SHARE = float(g.const("scripts/game_state.gd", "FOUNDING_PREGNANCY_SHARE", default=0.0, optional=True))
 ERA_BURDEN = g.const("scripts/early_life_conditions.gd", "ERA_BURDEN", default={}, optional=True)
 EXCESS_WEIGHT = g.const("scripts/early_life_conditions.gd", "EXCESS_WEIGHT", default={}, optional=True)
 RELIEF_CHANNELS = g.const("scripts/early_life_conditions.gd", "RELIEF_CHANNELS", default={}, optional=True)
@@ -175,7 +181,10 @@ class Surrogate:
         self.coh = np.array([0.32, 0.15, 0.14, 0.13, 0.18, 0.08]) * total   # initialize_population_model
         self._sync()
         repro = self._reproductive()
-        self.preg = np.array([0.34, 0.33, 0.33]) * repro * 0.045
+        # fun-pop: founding pregnancies = FOUNDING_PREGNANCY_SHARE x baseline annual conceptions
+        # (game_state.gd initialize_population_model; was repro * 0.045).
+        founding_baseline = (self.coh[1] * 0.45 * 0.23 + self.coh[2] * 0.50 * 0.285 + self.coh[3] * 0.45 * 0.18 + self.coh[4] * 0.16 * 0.040)
+        self.preg = np.array([0.34, 0.33, 0.33]) * (founding_baseline * FOUNDING_PREGNANCY_SHARE if FOUNDING_PREGNANCY_SHARE > 0.0 else repro * 0.045)
         self.postpartum = repro * 0.018
         self.health = 0.72
         self.food_security = 0.82
