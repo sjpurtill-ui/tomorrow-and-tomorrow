@@ -215,8 +215,8 @@ func _response(result:int,code:int,_headers:PackedStringArray,body:PackedByteArr
 				var msg:Variant=choices[0].get("message",{})
 				if msg is Dictionary:
 					problem="The leader's reply failed the game's dialogue validation after a repair attempt."
-					if String(choices[0].get("finish_reason",""))=="length":problem="The service cut off the reply at its output limit."
-					elif not String(msg.get("refusal","")).is_empty():problem="The service declined to generate this reply."
+					if str(choices[0].get("finish_reason",""))=="length":problem="The service cut off the reply at its output limit."
+					elif msg.get("refusal") is String and not String(msg.get("refusal")).is_empty():problem="The service declined to generate this reply."
 					var content:String=PronouncementInterpreter._content_text(msg.get("content",""))
 					var parser:=JSON.new()
 					if parser.parse(content.trim_prefix("```json").trim_suffix("```").strip_edges())==OK:value=parser.data
