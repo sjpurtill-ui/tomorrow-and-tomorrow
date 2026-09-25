@@ -2537,3 +2537,18 @@ Fast-forwarded `codex/early-consequences`. Seven early protections (clean water,
 ### Divine commands in the Court (main)
 
 Fast-forwarded `codex/divine-commands`. Everything typed in the Court is read as question, statement, command, threat or blessing, with names, titles and pronouns resolved to people present. The engine decides obedience from love and dread before anyone speaks (most obey; the gentle may plead once and comply on insistence; rare true refusals end in flight or seizure). Commands act through real effects: killings by a named hand or the guards, exile, detention, penance, blessing, raising, demotion, appointment, moving real stores, dispatching scouts and envoys, and other orders through the civic or custom-directive path. Executed acts get a vivid bracketed stage direction with era-appropriate weapons; the voice treats the god's word as law and empty proverbs are filtered. court_commands, court, audience_modal/summon/voice/hall, fear_love, responsive_decree, universal_order and early_consequences probes pass on the merged tree.
+
+### Summon anyone, blame, lies and confessions (main)
+
+Fast-forwarded `codex/court-summon` (ce924847). In the Court the god can ask "who is responsible for this?" about a recent event, the current matter or a discovery. An official names a person: either someone the records show was involved (a war leader, a discovery figure, an office holder) or a grounded commoner created from the real settlement and era. Asking again always names the same person. "Summon them" brings that identity into the Court; groups send a spokesperson.
+
+Every attributed event keeps a hidden truth record. Officials at fault may lie and name a scapegoat. Each lie leaves one or two tells grounded in game state, and the scapegoat's own alibi exposes it. Summoned people speak for themselves and know whether they are guilty. They deny, beg, crack or confess, and terror can produce a false confession, which the truth record marks as false. The player can confront with "You are lying" (a false accusation costs love), or with "The records say otherwise" once a tell has appeared.
+
+Judgment choices (execute, exile, maim, curse, exalt, reward, pardon, make priest or official, marry off, make an example) carry bounded consequences. Execution or exile removes one from the population. Appointments go through GovernmentPeopleSystem.admit_person. Offline, the Court shows state-driven ASK / SUMMON / QUESTION / CONFRONT / JUDGE choices. Online, typed text is mapped onto the same actions in one call per exchange. Each online exchange is stored as a slot template with its situation signature, and offline play reuses those templates. Repeated new actions are promoted to offline choices. Gaps in template coverage can be listed or deliberately filled with tools/court_persons_coverage.tscn; this is off by default and has a spending cap.
+
+Probes and suites:
+- court_summon_probe passes.
+- The court_commands, court, audience_modal/summon/voice/hall, fear_love and universal_order probes pass.
+- test_government_people_system fails the same cases as the base.
+
+Save data sits under ForeignDiplomacy.audiences.court_persons; older saves load with it empty.
