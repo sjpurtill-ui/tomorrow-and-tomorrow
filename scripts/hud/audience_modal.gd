@@ -680,6 +680,21 @@ func _build_divine_row()->void:
 		button.tooltip_text=String(act.get("sub","")) if not button.disabled else String(act.get("reason",""))
 		button.pressed.connect(func():divine("terrify"))
 		divine_row.add_child(button)
+		# The god's hand on the envoy: maim, flog, kill, seize, drive out.
+		var envoy_acts:=Hall.envoy_acts(audience_id)
+		if not envoy_acts.is_empty():
+			var menu:=MenuButton.new();menu.name="Divine_envoy";menu.text="WRATH ▾";menu.flat=false
+			_divine_style(menu,Tokens.RED)
+			menu.tooltip_text="Your hand on the envoy: maim, flog, death, chains or the door."
+			var popup:=menu.get_popup()
+			var act_ids:Array[String]=[]
+			for envoy_act:Dictionary in envoy_acts:
+				popup.add_item(String(envoy_act.label),act_ids.size())
+				popup.set_item_tooltip(popup.get_item_index(act_ids.size()),String(envoy_act.get("sub","")))
+				act_ids.append(String(envoy_act.id))
+			menu.set_meta("actions",act_ids)
+			popup.id_pressed.connect(func(item:int):act_on_envoy(String(act_ids[item])))
+			divine_row.add_child(menu)
 		return
 	for tone in ["wrath","favor"]:
 		var menu:=MenuButton.new();menu.name="Divine_"+tone;menu.text="WRATH ▾" if tone=="wrath" else "FAVOUR ▾"
@@ -721,6 +736,17 @@ func divine(action:String,words:String="",voice_reacts:bool=true)->Dictionary:
 	if bool(result.get("terminal",false)):_show_outcome(result)
 	else:_build_options()
 	_pump()
+	return result
+
+func act_on_envoy(act_id:String,words:String="")->Dictionary:
+	## An offline WRATH choice on a foreign envoy: the engine acts, then the
+	## court reacts to exactly that.
+	if not resolved_result.is_empty():return resolved_result
+	var result:=Hall.envoy_act(audience_id,act_id,words)
+	if not bool(result.get("handled",false)):
+		_show_toast(String(result.get("outcome","That cannot be done.")))
+		return result
+	_after_command(result)
 	return result
 
 func _on_divine_intent(id:String,action:String)->void:

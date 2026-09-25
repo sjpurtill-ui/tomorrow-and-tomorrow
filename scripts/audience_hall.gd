@@ -1110,8 +1110,10 @@ static func _generate_foreign_occasion(occasion:Dictionary,day:int)->Dictionary:
 	var leader:=ForeignDiplomacy.leader(civ_id)
 	if civ.is_empty() or leader.is_empty(): return {}
 	var rng:=_rng("occasion:%s:%s:%d" % [civ_id,String(occasion.get("key","")),int(state().serial)],day)
-	# A people that dreads the god and keeps its distance sends fewer envoys.
+	# A people that dreads the god and keeps its distance sends fewer envoys;
+	# one whose envoys were harmed here may send none at all.
 	if bool(_lives().call("avoids",civ_id,occasion,rng)): return {}
+	if bool(_rivals().call("withholds_envoys",civ_id,occasion,rng)): return {}
 	var used:=_used_asks("civ:"+civ_id,day)
 	var candidates:=_foreign_candidates(civ_id,occasion,rng,used,day)
 	var chosen:=_weighted(candidates,rng)
@@ -1135,6 +1137,10 @@ static func _foreign_candidates(civ_id:String,occasion:Dictionary,rng:RandomNumb
 	if type=="sequel":
 		var plan:=_sequel_plan(civ_id,occasion)
 		mix=plan.mix; branches=plan.branch
+	# Envoys harmed at this court: threats, demands or frightened tribute
+	# replace whatever the occasion would have brought.
+	var wronged:Dictionary=_rivals().call("envoy_mix",civ_id,type)
+	if not wronged.is_empty(): mix=wronged; branches={}
 	var p:=_personality(civ_id)
 	var civ:=ForeignDiplomacy.civilization(civ_id)
 	var result:Array[Dictionary]=[]
@@ -3200,6 +3206,34 @@ static func divine_options(id:String)->Array[Dictionary]:
 		result.append({"id":action,"label":String(definition.label),"sub":sub,"tone":String(definition.tone),"enabled":enabled,"reason":reason})
 	return result
 
+## The god's hand on a foreign envoy, offline as well as typed: each goes
+## through court_commands.gd (envoy_act) exactly as the spoken order would.
+const ENVOY_ACTS:=[
+	{"id":"envoy_maim","verb":"maim","label":"Maim the envoy","sub":"Cut them and send them home crippled. Their people will not forget it; the gift is forfeit.","tone":"wrath"},
+	{"id":"envoy_flog","verb":"maim","harm":"beat","label":"Flog the envoy","sub":"Have them flogged bloody and thrown out. A grave insult to their people.","tone":"wrath"},
+	{"id":"envoy_kill","verb":"kill","label":"Put the envoy to death","sub":"They never go home. Their people will want blood, or will fear you.","tone":"wrath"},
+	{"id":"envoy_detain","verb":"detain","label":"Seize the envoy","sub":"Bind them and hold them. Their people take it as a grave insult.","tone":"wrath"},
+	{"id":"envoy_exile","verb":"exile","label":"Drive the envoy out","sub":"Spear points to the door, their packs after them. A slight they will feel.","tone":"wrath"},
+]
+
+static func envoy_acts(id:String)->Array[Dictionary]:
+	## Punishments open on a waiting foreign envoy.
+	var result:Array[Dictionary]=[]
+	var audience:=find(id)
+	if audience.is_empty() or String(audience.get("status",""))!="waiting" or String(audience.get("origin",""))!="foreign": return result
+	if ForeignDiplomacy.civilization(String(audience.get("civ_id",""))).is_empty(): return result
+	for act:Dictionary in ENVOY_ACTS:
+		var entry:=act.duplicate()
+		entry["enabled"]=true; entry["reason"]=""
+		result.append(entry)
+	return result
+
+static func envoy_act(id:String,act_id:String,words:String="")->Dictionary:
+	for act:Dictionary in envoy_acts(id):
+		if String(act.id)==act_id:
+			return (load("res://scripts/court_commands.gd") as GDScript).call("envoy_act",id,String(act.verb),words,String(act.get("harm","")))
+	return {"handled":false,"ok":false,"outcome":"That is not open to you here."}
+
 static func divine_intent(id:String,text:String)->String:
 	## The ruler's words, read for a spoken act the god may perform here.
 	var action:=DIVINE.intent(text)
@@ -3233,6 +3267,7 @@ static func divine(id:String,action:String,words:String="",target_pid:int=0,how:
 		done.append(key)
 		audience["divine"]=done
 		return _divine_act(audience,action,other,watchers,false,how)
+	if action.begins_with("envoy_"): return envoy_act(id,action,words)
 	var chosen:={}
 	for option in divine_options(id):
 		if String(option.id)==action: chosen=option
