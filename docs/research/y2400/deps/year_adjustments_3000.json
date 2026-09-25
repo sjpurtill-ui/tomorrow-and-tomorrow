@@ -1,0 +1,397 @@
+{
+ "description": "Year adjustments for graph_3000.json, combined from partials/*_year_adjustments.json. tools/research/build_research_block.py sets proposed_year and shifts the band by proposed - target.",
+ "year_adjustments": [
+  {
+   "id": "automation_retraining",
+   "line": "labor",
+   "current": 2830,
+   "proposed": 2835,
+   "reason": "Continues industrial_robots (production 2834); the registry had the dependent 4 years before its parent. Moved to 2835, inside band 2805-2855.",
+   "source": "kicl"
+  },
+  {
+   "id": "humidity_measurement",
+   "line": "nutrition",
+   "current": 2424,
+   "proposed": 2427,
+   "reason": "Catalog gate measurement_uncertainty (knowledge 2424) is the same year; inside band 2399-2449.",
+   "source": "nhde"
+  },
+  {
+   "id": "soil_assays",
+   "line": "ecology",
+   "current": 2507,
+   "proposed": 2500,
+   "reason": "Nutrient trials and infiltration trials (2507) need soil assays first; inside band 2467-2547.",
+   "source": "nhde"
+  },
+  {
+   "id": "mulch_water_management",
+   "line": "nutrition",
+   "current": 2507,
+   "proposed": 2511,
+   "reason": "Needs soil_infiltration_trials (2507); inside band 2482-2532.",
+   "source": "nhde"
+  },
+  {
+   "id": "mineral_nitrate_dressing",
+   "line": "nutrition",
+   "current": 2507,
+   "proposed": 2511,
+   "reason": "Catalog gate nutrient_response_trials (2507) precedes it; inside band 2482-2532.",
+   "source": "nhde"
+  },
+  {
+   "id": "can_body_forming",
+   "line": "nutrition",
+   "current": 2560,
+   "proposed": 2564,
+   "reason": "Catalog gate tinplate_coating (production 2562) is dated after it; inside band 2535-2585.",
+   "source": "nhde"
+  },
+  {
+   "id": "heredity_experiments",
+   "line": "nutrition",
+   "current": 2680,
+   "proposed": 2683,
+   "reason": "Catalog gate controlled_pollination is the same year (2680); inside band 2645-2715.",
+   "source": "nhde"
+  },
+  {
+   "id": "ammonium_sulfate_fertilizer",
+   "line": "nutrition",
+   "current": 2701,
+   "proposed": 2711,
+   "reason": "Catalog gate catalytic_ammonia_synthesis (production 2708) is dated after it; inside band 2666-2736.",
+   "source": "nhde"
+  },
+  {
+   "id": "strip_cropping",
+   "line": "nutrition",
+   "current": 2747,
+   "proposed": 2750,
+   "reason": "Catalog gate contour_cultivation is the same year (2747); inside band 2722-2772.",
+   "source": "nhde"
+  },
+  {
+   "id": "food_package_barrier_testing",
+   "line": "nutrition",
+   "current": 2822,
+   "proposed": 2826,
+   "reason": "Catalog gate food_process_hazard_analysis is the same year (2822); inside band 2797-2847.",
+   "source": "nhde"
+  },
+  {
+   "id": "food_water_activity_measurement",
+   "line": "nutrition",
+   "current": 2822,
+   "proposed": 2826,
+   "reason": "Catalog gate food_process_hazard_analysis is the same year (2822); inside band 2797-2847.",
+   "source": "nhde"
+  },
+  {
+   "id": "food_package_leak_detection",
+   "line": "nutrition",
+   "current": 2822,
+   "proposed": 2829,
+   "reason": "Catalog gate food_package_barrier_testing moves to 2826; inside band 2797-2847.",
+   "source": "nhde"
+  },
+  {
+   "id": "casualty_transfer_records",
+   "line": "health",
+   "current": 2560,
+   "proposed": 2563,
+   "reason": "Follows casualty_collection_posts (2560); inside band 2535-2585.",
+   "source": "nhde"
+  },
+  {
+   "id": "triage_registers",
+   "line": "health",
+   "current": 2560,
+   "proposed": 2563,
+   "reason": "Follows field_aid_stations (2560); inside band 2535-2585.",
+   "source": "nhde"
+  },
+  {
+   "id": "residual_house_spraying",
+   "line": "health",
+   "current": 2787,
+   "proposed": 2790,
+   "reason": "Needs synthetic_crop_insecticide (nutrition 2787, same year); inside band 2762-2812.",
+   "source": "nhde"
+  },
+  {
+   "id": "equal_partible_inheritance",
+   "line": "demography",
+   "current": 2411,
+   "proposed": 2414,
+   "reason": "Continues institutions universal_civil_code (2411, same year); inside band 2386-2436.",
+   "source": "nhde"
+  },
+  {
+   "id": "lead_screw_cutting",
+   "line": "production",
+   "current": 2549,
+   "proposed": 2540,
+   "reason": "Catalog prerequisite of cross_slide_assembly (2545) and tailstock_fitting (2547)",
+   "source": "pils"
+  },
+  {
+   "id": "split_feed_nuts",
+   "line": "production",
+   "current": 2551,
+   "proposed": 2542,
+   "reason": "Catalog prerequisite of cross_slide_assembly (2545)",
+   "source": "pils"
+  },
+  {
+   "id": "sheet_steel_rolling",
+   "line": "production",
+   "current": 2566,
+   "proposed": 2556,
+   "reason": "Catalog prerequisite of washer_punching (2560) and tinplate_coating (2562)",
+   "source": "pils"
+  },
+  {
+   "id": "toolbit_heat_treatment",
+   "line": "production",
+   "current": 2600,
+   "proposed": 2575,
+   "reason": "Catalog prerequisite of the 2576-2598 lathe, drill, thread and spring items",
+   "source": "pils"
+  },
+  {
+   "id": "drill_bit_fluting",
+   "line": "production",
+   "current": 2567,
+   "proposed": 2576,
+   "reason": "Its catalog prerequisite toolbit_heat_treatment moves to 2575",
+   "source": "pils"
+  },
+  {
+   "id": "quill_feed_mechanisms",
+   "line": "production",
+   "current": 2601,
+   "proposed": 2581,
+   "reason": "Catalog prerequisite of column_drilling_machines (2583); needs centre_lathe_assembly (2580)",
+   "source": "pils"
+  },
+  {
+   "id": "nut_bore_drilling",
+   "line": "production",
+   "current": 2582,
+   "proposed": 2584,
+   "reason": "Needs column_drilling_machines (2583)",
+   "source": "pils"
+  },
+  {
+   "id": "thread_tap_cutting",
+   "line": "production",
+   "current": 2586,
+   "proposed": 2584,
+   "reason": "Catalog prerequisite of thread_die_cutting (2585)",
+   "source": "pils"
+  },
+  {
+   "id": "bench_vise_screws",
+   "line": "production",
+   "current": 2575,
+   "proposed": 2585,
+   "reason": "Needs column_drilling_machines (2583)",
+   "source": "pils"
+  },
+  {
+   "id": "milling_spindle_heads",
+   "line": "production",
+   "current": 2593,
+   "proposed": 2586,
+   "reason": "Catalog prerequisite of horizontal_milling_machines; needs column_drilling_machines (2583)",
+   "source": "pils"
+  },
+  {
+   "id": "horizontal_milling_machines",
+   "line": "production",
+   "current": 2570,
+   "proposed": 2592,
+   "reason": "Needs milling_spindle_heads (2586) and milling_cutter_relief (2590)",
+   "source": "pils"
+  },
+  {
+   "id": "worm_dividing_heads",
+   "line": "production",
+   "current": 2591,
+   "proposed": 2594,
+   "reason": "Needs horizontal_milling_machines (2592)",
+   "source": "pils"
+  },
+  {
+   "id": "spring_wire_coiling",
+   "line": "production",
+   "current": 2599,
+   "proposed": 2595,
+   "reason": "Catalog prerequisite of coil_spring_tempering (2597)",
+   "source": "pils"
+  },
+  {
+   "id": "packed_piston_seals",
+   "line": "production",
+   "current": 2620,
+   "proposed": 2622,
+   "reason": "Needs knowledge lubrication_regimes (2621)",
+   "source": "pils"
+  },
+  {
+   "id": "structural_steel",
+   "line": "infrastructure",
+   "current": 2632,
+   "proposed": 2625,
+   "reason": "Catalog prerequisite of reinforced_concrete (2627)",
+   "source": "pils"
+  },
+  {
+   "id": "alumina_refining",
+   "line": "production",
+   "current": 2632,
+   "proposed": 2628,
+   "reason": "Catalog prerequisite of aluminum_electrolysis (2630)",
+   "source": "pils"
+  },
+  {
+   "id": "porous_battery_separators",
+   "line": "production",
+   "current": 2671,
+   "proposed": 2646,
+   "reason": "Catalog prerequisite of lead_acid_cells; band low",
+   "source": "pils"
+  },
+  {
+   "id": "lead_acid_cells",
+   "line": "production",
+   "current": 2622,
+   "proposed": 2647,
+   "reason": "Needs porous_battery_separators (2646); band high",
+   "source": "pils"
+  },
+  {
+   "id": "sulfur_dioxide_recovery",
+   "line": "production",
+   "current": 2656,
+   "proposed": 2652,
+   "reason": "Catalog prerequisite of sulfuric_acid_production (2655)",
+   "source": "pils"
+  },
+  {
+   "id": "drill_jig_bushings",
+   "line": "production",
+   "current": 2675,
+   "proposed": 2655,
+   "reason": "Catalog prerequisite of drill_jig_layout",
+   "source": "pils"
+  },
+  {
+   "id": "drill_jig_layout",
+   "line": "production",
+   "current": 2674,
+   "proposed": 2658,
+   "reason": "Catalog prerequisite of rivet_hole_alignment",
+   "source": "pils"
+  },
+  {
+   "id": "metallurgical_mass_balances",
+   "line": "production",
+   "current": 2685,
+   "proposed": 2660,
+   "reason": "Catalog prerequisite of nickel_metal_recovery (2663); band low",
+   "source": "pils"
+  },
+  {
+   "id": "rivet_hole_alignment",
+   "line": "production",
+   "current": 2664,
+   "proposed": 2660,
+   "reason": "Catalog prerequisite of hot_rivet_setting (2662)",
+   "source": "pils"
+  },
+  {
+   "id": "thread_rolling_die_making",
+   "line": "production",
+   "current": 2691,
+   "proposed": 2666,
+   "reason": "Catalog prerequisite of bolt_thread_rolling (2668); band low",
+   "source": "pils"
+  },
+  {
+   "id": "industrial_catalyst_design",
+   "line": "production",
+   "current": 2703,
+   "proposed": 2690,
+   "reason": "Catalog prerequisite of formaldehyde_synthesis (2697) and aromatic_amine_hydrogenation (2701)",
+   "source": "pils"
+  },
+  {
+   "id": "polymer_monomer_purification",
+   "line": "production",
+   "current": 2742,
+   "proposed": 2735,
+   "reason": "Catalog prerequisite of radical_chain_polymerization (2740)",
+   "source": "pils"
+  },
+  {
+   "id": "polymer_melt_rheology",
+   "line": "production",
+   "current": 2766,
+   "proposed": 2760,
+   "reason": "Catalog prerequisite of film extrusion (2762) and injection moulding (2763)",
+   "source": "pils"
+  },
+  {
+   "id": "adhesive_bond_design",
+   "line": "production",
+   "current": 2773,
+   "proposed": 2770,
+   "reason": "Catalog prerequisite of textile_waterproofing (2772)",
+   "source": "pils"
+  },
+  {
+   "id": "chlorosilane_purification",
+   "line": "production",
+   "current": 2787,
+   "proposed": 2784,
+   "reason": "Catalog prerequisite of single_crystal_growth (2786)",
+   "source": "pils"
+  },
+  {
+   "id": "shift_registers",
+   "line": "production",
+   "current": 2817,
+   "proposed": 2812,
+   "reason": "Catalog prerequisite of instruction_registers (2814)",
+   "source": "pils"
+  },
+  {
+   "id": "wafer_sawing",
+   "line": "production",
+   "current": 2835,
+   "proposed": 2815,
+   "reason": "Catalog prerequisite of silicon_rectifiers (2823)",
+   "source": "pils"
+  },
+  {
+   "id": "electronic_machine_control",
+   "line": "production",
+   "current": 2828,
+   "proposed": 2824,
+   "reason": "Catalog prerequisite of numerical_machine_control (2826); needs silicon_rectifiers (2823)",
+   "source": "pils"
+  },
+  {
+   "id": "industrial_robots",
+   "line": "production",
+   "current": 2834,
+   "proposed": 2829,
+   "reason": "Registry link: labor automation_retraining (2830) continues it; needs hardwired_sequence_control (2829)",
+   "source": "pils"
+  }
+ ]
+}

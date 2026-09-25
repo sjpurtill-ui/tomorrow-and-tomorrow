@@ -43,6 +43,7 @@
 | 2545 (2520–2570) | Rolled iron I-beams carry fireproof floors (continues: iron_framed_fireproof_mill) | 4 y | 24 min | NEW · rolled_iron_floor_beams | — |
 | 2548 (2523–2573) | Steam and hot-water radiators heat whole buildings (continues: narrow_throat_fireplace) | 3 y | 18 min | NEW · radiator_central_heating | — |
 | **2550 (2515–2585)** | **Intercepting sewers carry town waste far downstream (continues: egg_shaped_sewers; shared: health) [gov: towns]** | 10 y | 61 min | NEW · intercepting_sewers | — |
+| 2555 (2530–2580) | Wells drilled for rock oil by steam-driven boring rigs (continues: percussion_drilled_wells; shared: production) | 5 y | 30 min | NEW · rock_oil_well_drilling | — |
 | **2558 (2523–2593)** | **Great boulevards cut through old quarters, with sewers, water and gas beneath [gov: towns, seat]** | 8 y | 49 min | NEW · boulevard_reconstruction | — |
 | 2560 (2535–2585) | Sewer rodding crews clear blocked conduits | 2 y | 12 min | sewer_rodding_service | not seen |
 | 2570 (2545–2595) | Compressed-air caissons sink bridge piers deep in riverbeds (continues: bridge_pier_caissons, compressed_air_systems) | 5 y | 30 min | NEW · pneumatic_caissons | — |
@@ -141,9 +142,9 @@
 
 | Years | 2400–2450 | 2450–2500 | 2500–2550 | 2550–2600 | 2600–2650 | 2650–2700 | 2700–2750 | 2750–2800 | 2800–2850 | 2850–2900 | 2900–2950 | 2950–3000 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Infrastructure advances | 4 | 8 | 9 | 10 | 13 | 8 | 11 | 9 | 13 | 10 | 5 | 10 |
+| Infrastructure advances | 4 | 8 | 9 | 11 | 13 | 8 | 11 | 9 | 13 | 10 | 5 | 10 |
 
-The total is **110** advances: 52 in 2400–2700 and 58 in 2700–3000, with 25 catalog ids and 85 new items. 25 rows are key thresholds. One advance lands about every 5–6 years. The 2400–2450 band is thin because the 1800–2400 list already holds the fireproof mill, iron mains and S-trap closets at its end. The 2600–2650 band is the densest: electricity, steel frames and reinforced concrete arrive within one historical generation. Short items take 2–4 years; the long thresholds take 8–12 years (49–73 real minutes).
+The total is **111** advances: 53 in 2400–2700 and 58 in 2700–3000, with 25 catalog ids and 86 new items. The registry pass added `rock_oil_well_drilling` (2555, ≈ AD 1858), which no list claimed: rock-oil wells bored like the old brine wells, feeding Production's `fuel_refining` and Logistics' `crude_oil_pipelines`. 25 rows are key thresholds. One advance lands about every 5–6 years. The 2400–2450 band is thin because the 1800–2400 list already holds the fireproof mill, iron mains and S-trap closets at its end. The 2600–2650 band is the densest: electricity, steel frames and reinforced concrete arrive within one historical generation. Short items take 2–4 years; the long thresholds take 8–12 years (49–73 real minutes).
 
 **Key thresholds:**
 1. **Frames and materials:** iron roof trusses (2430) → **clinker cement (2464)** → **iron-and-glass halls (2533)** → rolled iron beams (2545) → **reinforced concrete (2627)** → **steel skeletons (2632)** → **skeleton-frame towers (2640)** → concrete practice and mix design (2668–2728) → thin shells (2740) → **prestressed concrete (2765)** → glulam (2774) → welded frames (2790) → curtain walls (2805) → framed tubes (2848) → mass timber (2962) → printed houses and low-carbon cement (2985–2990).

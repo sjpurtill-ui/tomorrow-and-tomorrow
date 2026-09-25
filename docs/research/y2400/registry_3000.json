@@ -25,11 +25,11 @@
  ],
  "counts": {
   "knowledge": {
-   "listed_rows": 138,
-   "canonical": 138,
+   "listed_rows": 143,
+   "canonical": 143,
    "catalog": 99,
    "era": 0,
-   "new": 39,
+   "new": 44,
    "rows_merged_elsewhere": 0
   },
   "institutions": {
@@ -65,11 +65,11 @@
    "rows_merged_elsewhere": 0
   },
   "infrastructure": {
-   "listed_rows": 110,
-   "canonical": 110,
+   "listed_rows": 111,
+   "canonical": 111,
    "catalog": 25,
    "era": 0,
-   "new": 85,
+   "new": 86,
    "rows_merged_elsewhere": 0
   },
   "nutrition": {
@@ -121,8 +121,8 @@
    "rows_merged_elsewhere": 0
   }
  },
- "total_canonical": 1569,
- "total_listed_rows": 1570,
+ "total_canonical": 1575,
+ "total_listed_rows": 1576,
  "discoveries": [
   {
    "id": "electrochemical_cells",
@@ -783,6 +783,22 @@
    "source_file": "docs/research/y2400/KNOWLEDGE_2400_3000.md"
   },
   {
+   "id": "typewriter",
+   "line": "knowledge",
+   "name": "Typewriter: a keyed machine prints letters on the page",
+   "target_year": 2600,
+   "band_low": 2575,
+   "band_high": 2625,
+   "research_years": 5.0,
+   "status": "new",
+   "shared_with": [
+    "labor"
+   ],
+   "key_threshold": false,
+   "aliases": [],
+   "source_file": "docs/research/y2400/KNOWLEDGE_2400_3000.md"
+  },
+  {
    "id": "acoustic_diaphragms",
    "line": "knowledge",
    "name": "Vibrating diaphragms carry the voice",
@@ -792,6 +808,22 @@
    "research_years": 4.0,
    "status": "catalog",
    "shared_with": [],
+   "key_threshold": false,
+   "aliases": [],
+   "source_file": "docs/research/y2400/KNOWLEDGE_2400_3000.md"
+  },
+  {
+   "id": "cathode_ray_discharge_tubes",
+   "line": "knowledge",
+   "name": "Evacuated discharge tubes glow; cathode rays stream from the negative plate",
+   "target_year": 2603,
+   "band_low": 2578,
+   "band_high": 2628,
+   "research_years": 6.0,
+   "status": "new",
+   "shared_with": [
+    "health"
+   ],
    "key_threshold": false,
    "aliases": [],
    "source_file": "docs/research/y2400/KNOWLEDGE_2400_3000.md"
@@ -1413,6 +1445,20 @@
    "source_file": "docs/research/y2400/KNOWLEDGE_2400_3000.md"
   },
   {
+   "id": "expanding_universe_cosmology",
+   "line": "knowledge",
+   "name": "Distant star systems recede: the universe is expanding",
+   "target_year": 2744,
+   "band_low": 2719,
+   "band_high": 2769,
+   "research_years": 8.0,
+   "status": "new",
+   "shared_with": [],
+   "key_threshold": false,
+   "aliases": [],
+   "source_file": "docs/research/y2400/KNOWLEDGE_2400_3000.md"
+  },
+  {
    "id": "band_theory",
    "line": "knowledge",
    "name": "Electronic band theory of solids",
@@ -1548,6 +1594,22 @@
    "research_years": 10.0,
    "status": "new",
    "shared_with": [],
+   "key_threshold": true,
+   "aliases": [],
+   "source_file": "docs/research/y2400/KNOWLEDGE_2400_3000.md"
+  },
+  {
+   "id": "stored_program_computer",
+   "line": "knowledge",
+   "name": "Electronic computer holds its own program in memory",
+   "target_year": 2796,
+   "band_low": 2761,
+   "band_high": 2831,
+   "research_years": 10.0,
+   "status": "new",
+   "shared_with": [
+    "production"
+   ],
    "key_threshold": true,
    "aliases": [],
    "source_file": "docs/research/y2400/KNOWLEDGE_2400_3000.md"
@@ -1843,6 +1905,23 @@
    "status": "new",
    "shared_with": [],
    "key_threshold": false,
+   "aliases": [],
+   "source_file": "docs/research/y2400/KNOWLEDGE_2400_3000.md"
+  },
+  {
+   "id": "recombinant_dna",
+   "line": "knowledge",
+   "name": "Genes cut from one living thing and spliced into another",
+   "target_year": 2858,
+   "band_low": 2823,
+   "band_high": 2893,
+   "research_years": 10.0,
+   "status": "new",
+   "shared_with": [
+    "health",
+    "nutrition"
+   ],
+   "key_threshold": true,
    "aliases": [],
    "source_file": "docs/research/y2400/KNOWLEDGE_2400_3000.md"
   },
@@ -10729,6 +10808,22 @@
     "health"
    ],
    "key_threshold": true,
+   "aliases": [],
+   "source_file": "docs/research/y2400/INFRASTRUCTURE_2400_3000.md"
+  },
+  {
+   "id": "rock_oil_well_drilling",
+   "line": "infrastructure",
+   "name": "Wells drilled for rock oil by steam-driven boring rigs",
+   "target_year": 2555,
+   "band_low": 2530,
+   "band_high": 2580,
+   "research_years": 5.0,
+   "status": "new",
+   "shared_with": [
+    "production"
+   ],
+   "key_threshold": false,
    "aliases": [],
    "source_file": "docs/research/y2400/INFRASTRUCTURE_2400_3000.md"
   },
@@ -22524,6 +22619,7 @@
   "last_year": 3000,
   "curve": "origin/codex/research-600 technology_eras.gd CURVE: 2400 = AD 1800, 2800 = AD 1950, 3000 = AD 2030 (end of game)",
   "game_blocks_checked": [
+   "origin/codex/research-1200:data/research/blocks/y1200_1800.json",
    "origin/codex/research-1200:data/research/blocks/y600_1200.json",
    "origin/codex/research-1200:data/research/research_600.json"
   ],
@@ -22628,6 +22724,9 @@
   ],
   "catalytic_cracking": [
    "fuel_refining"
+  ],
+  "cathode_ray_discharge_tubes": [
+   "vacuum_pumps"
   ],
   "cause_of_death_tables": [
    "civil_vital_registration",
@@ -22852,6 +22951,10 @@
   ],
   "expanding_base_bullet": [
    "rifled_barrels"
+  ],
+  "expanding_universe_cosmology": [
+   "spectroscopy",
+   "relative_spacetime"
   ],
   "experimental_farm_station": [
    "agriculture_board_surveys"
@@ -23327,6 +23430,9 @@
   "randomised_controlled_trial": [
    "numerical_treatment_method"
   ],
+  "recombinant_dna": [
+   "hereditary_double_helix"
+  ],
   "recommended_daily_allowances": [
    "vitamin_factors"
   ],
@@ -23383,6 +23489,9 @@
   ],
   "rock_drill_tunnelling": [
    "compressed_air_systems"
+  ],
+  "rock_oil_well_drilling": [
+   "percussion_drilled_wells"
   ],
   "rolled_iron_floor_beams": [
    "iron_framed_fireproof_mill"
@@ -23508,6 +23617,9 @@
   "stored_citrated_blood": [
    "blood_group_typing"
   ],
+  "stored_program_computer": [
+   "computability_theory"
+  ],
   "stress_tolerant_varieties": [
    "plant_resistance_trait_trials"
   ],
@@ -23549,6 +23661,9 @@
   ],
   "twine_binding_harvester": [
    "mechanical_reaper"
+  ],
+  "typewriter": [
+   "metal_type_casting"
   ],
   "unemployment_insurance": [
    "worker_sickness_insurance"
@@ -23779,6 +23894,56 @@
    "year": 2920,
    "status": "new",
    "reason": "Spaceflight, as above. Continuously crewed station shared by several realms, AD 1998-2000."
+  },
+  {
+   "id": "typewriter",
+   "line": "knowledge",
+   "year": 2600,
+   "status": "new",
+   "reason": "Gap: no list placed the typewriter (first commercial machine AD 1874; 2600 = AD 1875). Knowledge's Preserved-knowledge channel; shared with Labor, whose women_office_clerks (2615) are typists."
+  },
+  {
+   "id": "cathode_ray_discharge_tubes",
+   "line": "knowledge",
+   "year": 2603,
+   "status": "new",
+   "reason": "Gap: discharge tubes and cathode rays (AD 1857-1879; 2603 = AD 1876). Health's bone_shadow_imaging had to hang on electromagnetic_induction; it and electron_physics now require this row."
+  },
+  {
+   "id": "expanding_universe_cosmology",
+   "line": "knowledge",
+   "year": 2744,
+   "status": "new",
+   "reason": "Gap: the expanding universe (AD 1929). Needs spectroscopy and relative_spacetime."
+  },
+  {
+   "id": "stored_program_computer",
+   "line": "knowledge",
+   "year": 2796,
+   "status": "new",
+   "reason": "Gap: the first stored-program electronic computer (AD 1948-49; 2796 = AD 1948.5). Placed in Knowledge (shared with Production) because Production's 2750-2800 bin is already flagged for load and Knowledge's is not. numerical_weather_prediction used binary_adders as a stand-in; it now requires this row."
+  },
+  {
+   "id": "recombinant_dna",
+   "line": "knowledge",
+   "year": 2858,
+   "status": "new",
+   "reason": "Gap: recombinant DNA (AD 1973). transgenic_crops and precision_fermented_proteins used recombinant_vaccine (2890) as a stand-in; they, recombinant_vaccine and engineered_microbe_chemicals now require this row."
+  },
+  {
+   "id": "rock_oil_well_drilling",
+   "line": "infrastructure",
+   "year": 2555,
+   "status": "new",
+   "reason": "Gap: drilled oil wells (AD 1859; fuel_refining 2557 covered only refining). Infrastructure, beside the brine wells of percussion_drilled_wells (1200-1800); Production's 2550-2600 bin is already flagged."
+  }
+ ],
+ "gaps_checked_not_added": [
+  {
+   "gap": "progressive income tax",
+   "covered_by": "graduated_income_tax",
+   "where": "registry_2400.json, institutions 2398 ('Graduated income tax', [gov: law])",
+   "reason": "The 1800-2400 row already places a graduated (progressive) income tax; a second row would repeat it."
   }
  ],
  "real_name_id_exceptions": {
@@ -24498,7 +24663,7 @@
   "model": "load = summed research_years / band width; one staffed team per line. Flag: load > 2.0 (50-year bins as in the lists' pacing tables, and 25-year sliding windows) or more than 30 items in 50 years.",
   "lines": {
    "knowledge": {
-    "window_load": 1.68,
+    "window_load": 1.75,
     "bins_50y": [
      {
       "years": "2400-2450",
@@ -24526,9 +24691,9 @@
      },
      {
       "years": "2600-2650",
-      "items": 13,
-      "research_years": 84.0,
-      "load": 1.68
+      "items": 15,
+      "research_years": 95.0,
+      "load": 1.9
      },
      {
       "years": "2650-2700",
@@ -24538,15 +24703,15 @@
      },
      {
       "years": "2700-2750",
-      "items": 9,
-      "research_years": 61.0,
-      "load": 1.22
+      "items": 10,
+      "research_years": 69.0,
+      "load": 1.38
      },
      {
       "years": "2750-2800",
-      "items": 8,
-      "research_years": 74.0,
-      "load": 1.48
+      "items": 9,
+      "research_years": 84.0,
+      "load": 1.68
      },
      {
       "years": "2800-2850",
@@ -24556,9 +24721,9 @@
      },
      {
       "years": "2850-2900",
-      "items": 5,
-      "research_years": 42.0,
-      "load": 0.84
+      "items": 6,
+      "research_years": 52.0,
+      "load": 1.04
      },
      {
       "years": "2900-2950",
@@ -24588,8 +24753,8 @@
      {
       "span": "2552-2628",
       "peak_window": "2584-2609",
-      "peak_load": 3.92,
-      "peak_items": 14
+      "peak_load": 4.36,
+      "peak_items": 16
      },
      {
       "span": "2643-2721",
@@ -24598,7 +24763,7 @@
       "peak_items": 19
      },
      {
-      "span": "2744-2855",
+      "span": "2744-2873",
       "peak_window": "2801-2826",
       "peak_load": 3.44,
       "peak_items": 13
@@ -25037,9 +25202,9 @@
      },
      {
       "years": "2550-2600",
-      "items": 10,
-      "research_years": 52.0,
-      "load": 1.04
+      "items": 11,
+      "research_years": 57.0,
+      "load": 1.14
      },
      {
       "years": "2600-2650",
@@ -26947,14 +27112,6 @@
   {
    "id": "networked_telework",
    "issue": "Labor 2915 (telework) and Culture remote_video_gatherings (2975, the pandemic-era video call) are kept separate; the second should require the first."
-  },
-  {
-   "id": "electronic computer",
-   "issue": "No row names the first general-purpose electronic computer (AD 1945-49, about 2787-2798). Knowledge defers computing hardware to Production's Materials catalog (read_write_memory 2806, stored_program_control 2838); the gap is the machine itself. Not added."
-  },
-  {
-   "id": "possible gaps",
-   "issue": "No row for the typewriter (AD 1868), rock-oil well drilling (AD 1859; fuel_refining 2557 covers refining), a progressive income tax, or the expanding-universe cosmology (AD 1929). Recorded for the list owners; not added by this pass."
   },
   {
    "id": "postmortem_cesarean",

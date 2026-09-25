@@ -1,0 +1,109 @@
+{
+ "year_adjustments": [
+  {
+   "id": "humidity_measurement",
+   "line": "nutrition",
+   "current": 2424,
+   "proposed": 2427,
+   "reason": "Catalog gate measurement_uncertainty (knowledge 2424) is the same year; inside band 2399-2449."
+  },
+  {
+   "id": "soil_assays",
+   "line": "ecology",
+   "current": 2507,
+   "proposed": 2500,
+   "reason": "Nutrient trials and infiltration trials (2507) need soil assays first; inside band 2467-2547."
+  },
+  {
+   "id": "mulch_water_management",
+   "line": "nutrition",
+   "current": 2507,
+   "proposed": 2511,
+   "reason": "Needs soil_infiltration_trials (2507); inside band 2482-2532."
+  },
+  {
+   "id": "mineral_nitrate_dressing",
+   "line": "nutrition",
+   "current": 2507,
+   "proposed": 2511,
+   "reason": "Catalog gate nutrient_response_trials (2507) precedes it; inside band 2482-2532."
+  },
+  {
+   "id": "can_body_forming",
+   "line": "nutrition",
+   "current": 2560,
+   "proposed": 2564,
+   "reason": "Catalog gate tinplate_coating (production 2562) is dated after it; inside band 2535-2585."
+  },
+  {
+   "id": "heredity_experiments",
+   "line": "nutrition",
+   "current": 2680,
+   "proposed": 2683,
+   "reason": "Catalog gate controlled_pollination is the same year (2680); inside band 2645-2715."
+  },
+  {
+   "id": "ammonium_sulfate_fertilizer",
+   "line": "nutrition",
+   "current": 2701,
+   "proposed": 2711,
+   "reason": "Catalog gate catalytic_ammonia_synthesis (production 2708) is dated after it; inside band 2666-2736."
+  },
+  {
+   "id": "strip_cropping",
+   "line": "nutrition",
+   "current": 2747,
+   "proposed": 2750,
+   "reason": "Catalog gate contour_cultivation is the same year (2747); inside band 2722-2772."
+  },
+  {
+   "id": "food_package_barrier_testing",
+   "line": "nutrition",
+   "current": 2822,
+   "proposed": 2826,
+   "reason": "Catalog gate food_process_hazard_analysis is the same year (2822); inside band 2797-2847."
+  },
+  {
+   "id": "food_water_activity_measurement",
+   "line": "nutrition",
+   "current": 2822,
+   "proposed": 2826,
+   "reason": "Catalog gate food_process_hazard_analysis is the same year (2822); inside band 2797-2847."
+  },
+  {
+   "id": "food_package_leak_detection",
+   "line": "nutrition",
+   "current": 2822,
+   "proposed": 2829,
+   "reason": "Catalog gate food_package_barrier_testing moves to 2826; inside band 2797-2847."
+  },
+  {
+   "id": "casualty_transfer_records",
+   "line": "health",
+   "current": 2560,
+   "proposed": 2563,
+   "reason": "Follows casualty_collection_posts (2560); inside band 2535-2585."
+  },
+  {
+   "id": "triage_registers",
+   "line": "health",
+   "current": 2560,
+   "proposed": 2563,
+   "reason": "Follows field_aid_stations (2560); inside band 2535-2585."
+  },
+  {
+   "id": "residual_house_spraying",
+   "line": "health",
+   "current": 2787,
+   "proposed": 2790,
+   "reason": "Needs synthetic_crop_insecticide (nutrition 2787, same year); inside band 2762-2812."
+  },
+  {
+   "id": "equal_partible_inheritance",
+   "line": "demography",
+   "current": 2411,
+   "proposed": 2414,
+   "reason": "Continues institutions universal_civil_code (2411, same year); inside band 2386-2436."
+  }
+ ]
+}

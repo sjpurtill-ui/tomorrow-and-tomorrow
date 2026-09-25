@@ -43,23 +43,23 @@
 
 ## Counts
 
-The lists hold **1570** rows: 1565 as written, plus 5 added by this pass. They give 1569 canonical entries and 1 excluded row, with no merged aliases. Of the canonical entries, 440 carry catalog ids, 1129 are new, none are era ids, and 272 are key thresholds.
+The lists hold **1576** rows: 1565 as written, plus 5 added by this pass and 6 gap rows added by the follow-up pass. They give 1575 canonical entries and 1 excluded row, with no merged aliases. Of the canonical entries, 440 carry catalog ids, 1135 are new, none are era ids, and 274 are key thresholds.
 
 | Line | Rows listed | Canonical | catalog | era | new | Merged into another line |
 |---|---|---|---|---|---|---|
-| knowledge | 138 | 138 | 99 | 0 | 39 | 0 |
+| knowledge | 143 | 143 | 99 | 0 | 44 | 0 |
 | institutions | 100 | 100 | 0 | 0 | 100 | 0 |
 | culture | 100 | 100 | 0 | 0 | 100 | 0 |
 | labor | 110 | 110 | 2 | 0 | 108 | 0 |
 | production | 278 | 278 | 220 | 0 | 58 | 0 |
-| infrastructure | 110 | 110 | 25 | 0 | 85 | 0 |
+| infrastructure | 111 | 111 | 25 | 0 | 86 | 0 |
 | nutrition | 124 | 124 | 36 | 0 | 88 | 0 |
 | health | 126 | 126 | 11 | 0 | 115 | 0 |
 | demography | 100 | 100 | 1 | 0 | 99 | 0 |
 | logistics | 128 | 128 | 4 | 0 | 124 | 0 |
 | ecology | 126 | 125 | 15 | 0 | 110 | 0 |
 | security | 130 | 130 | 27 | 0 | 103 | 0 |
-| **Total** | **1570** | **1569** | **440** | **0** | **1129** | **0** |
+| **Total** | **1576** | **1575** | **440** | **0** | **1135** | **0** |
 
 - Ecology lists 126 rows but has 125 entries, because one row is excluded.
 - Logistics was 124 rows and is now 128, with its 4 spaceflight rows.
@@ -239,12 +239,15 @@ The worst 25-year window is 2747–2772, with 22 items and a load of 3.12. Produ
 - **Predecessors out of order.** These two links run backwards, and the list owners should pick a fix:
   - `scheduled_river_steamers` (2419, AD 1807) continues the catalog's `steam_propulsion`, placed at 2452 (AD 1824). Either place `steam_propulsion` at or before 2419, or drop the link.
   - `automation_retraining` (2830) continues `industrial_robots` (2834). The fix is to move it to 2834 or later.
-- **Possible gaps.** These are not added, because no list claimed them:
-  - the first general-purpose electronic computer, AD 1945–49 (≈ 2787–2798). Production's `read_write_memory` (2806) and `stored_program_control` (2838) cover the parts, but not the machine;
-  - the typewriter (AD 1868; Labor's `women_office_clerks` mentions typists);
-  - rock-oil well drilling (AD 1859; `fuel_refining` covers refining);
-  - a progressive income tax;
-  - the expanding-universe cosmology (AD 1929).
+- **Gaps filled (follow-up pass).** Rows no list claimed are now placed and recorded in `rows_added_by_registry`:
+  - `stored_program_computer` (knowledge 2796, ≈ AD 1948; shared with Production). Production's `read_write_memory` (2806) and `stored_program_control` (2838) stay as the later catalog parts. `numerical_weather_prediction` now requires it instead of `binary_adders`;
+  - `typewriter` (knowledge 2600, ≈ AD 1875; shared with Labor, whose `women_office_clerks` are typists);
+  - `rock_oil_well_drilling` (infrastructure 2555, ≈ AD 1858; shared with Production). It feeds `fuel_refining` and `crude_oil_pipelines`;
+  - `expanding_universe_cosmology` (knowledge 2744, ≈ AD 1929);
+  - `recombinant_dna` (knowledge 2858, ≈ AD 1973). `transgenic_crops` and `precision_fermented_proteins` now require it instead of `recombinant_vaccine`;
+  - `cathode_ray_discharge_tubes` (knowledge 2603, ≈ AD 1876). `bone_shadow_imaging` and `electron_physics` require it.
+  - A progressive income tax is **not** added: the 1800–2400 row `graduated_income_tax` (institutions 2398) covers it (`gaps_checked_not_added`).
+  - The dependency rows for these ids and the rewired dependents are applied in `tools/research/merge_graph_3000.py` (`GAP_ROWS`, `REWIRES`). See `deps/GRAPH_3000_REPORT.md`.
 - **Weapons of mass destruction.** The Security list requires that a general can never use gas, fission or thermonuclear weapons, or intercontinental missiles, on his own authority. Their use is the ruler's spoken decision. The effects pass must gate use, not only research (`bake_time_fixes`).
 - **Denylist divergence.** The 1800–2400 validator allows "caesarean" and treats "galvan" as exact-only. This window's list is stricter. Decide whether the 1800–2400 list should adopt the stricter form.
 - **Source notes with small year slips.** These were left as written:

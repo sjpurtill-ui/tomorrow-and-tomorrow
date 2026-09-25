@@ -1,0 +1,11 @@
+{
+ "year_adjustments": [
+  {
+   "id": "automation_retraining",
+   "line": "labor",
+   "current": 2830,
+   "proposed": 2835,
+   "reason": "Continues industrial_robots (production 2834); the registry had the dependent 4 years before its parent. Moved to 2835, inside band 2805-2855."
+  }
+ ]
+}

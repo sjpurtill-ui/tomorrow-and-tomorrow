@@ -1,0 +1,5554 @@
+[
+ {
+  "id": "electrochemical_cells",
+  "requires_all": [
+   "charge_storing_jar",
+   "zinc_retort_distillation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "friction_electric_machine",
+   "lightning_electricity_trial",
+   "torsion_balance_force_law",
+   "isolated_airs_chemistry"
+  ],
+  "note": "Stacked zinc and copper discs in brine; needs stored-charge experiments and smelted zinc."
+ },
+ {
+  "id": "statistical_inference",
+  "requires_all": [
+   "probability_theory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mortality_bill_arithmetic",
+   "register_life_table",
+   "birth_multiplier_estimates"
+  ],
+  "note": "Probability turned on observations of births, deaths and errors."
+ },
+ {
+  "id": "atomic_combining_weights",
+  "requires_all": [
+   "systematic_chemical_names",
+   "oxygen_combustion_theory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "isolated_airs_chemistry",
+   "calorimetry"
+  ],
+  "note": "Fixed combining proportions read as atoms of each element."
+ },
+ {
+  "id": "optical_telegraphy",
+  "requires_all": [
+   "shutter_signal_frames"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "two_lens_telescope",
+   "numbered_signal_flags",
+   "military_telegraph_lines"
+  ],
+  "note": "State relay towers extend the shutter frames across the realm."
+ },
+ {
+  "id": "least_squares_estimation",
+  "requires_all": [
+   "statistical_inference",
+   "differential_calculus"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "decimal_earth_measures",
+   "comet_return_prediction"
+  ],
+  "note": "Least squares from orbit and arc-measure reductions."
+ },
+ {
+  "id": "dimensional_metrology",
+  "requires_all": [
+   "decimal_earth_measures",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "screw_cutting_lathe",
+   "precision_thermometry"
+  ],
+  "note": "Standard bars and gauges follow the decimal measures and precise machine work."
+ },
+ {
+  "id": "measurement_uncertainty",
+  "requires_all": [
+   "statistical_inference"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "least_squares_estimation",
+   "decimal_earth_measures"
+  ],
+  "note": "Stated probable error on every reading."
+ },
+ {
+  "id": "research_university",
+  "requires_all": [
+   "chartered_university",
+   "salaried_science_academy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "state_polytechnic_school",
+   "laboratory_notebooks",
+   "ruler_founded_universities",
+   "mining_engineering_academies"
+  ],
+  "note": "Seminar and laboratory join teaching to paid research."
+ },
+ {
+  "id": "cylinder_press_printing",
+  "requires_all": [
+   "screw_press_printing",
+   "rotative_steam_engine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "continuous_paper_machine",
+   "metal_type_casting",
+   "daily_printed_newspaper"
+  ],
+  "note": "The flat press recast as an inked cylinder turned by steam."
+ },
+ {
+  "id": "electrical_measurement",
+  "requires_all": [
+   "electrochemical_cells"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "torsion_balance_force_law",
+   "earth_magnet_treatise"
+  ],
+  "note": "Needle deflection by a steady current from cells."
+ },
+ {
+  "id": "dimensional_analysis",
+  "requires_all": [
+   "differential_equations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "decimal_earth_measures",
+   "dimensional_metrology"
+  ],
+  "note": "Equations checked by their units once measures are standard."
+ },
+ {
+  "id": "harmonic_analysis",
+  "requires_all": [
+   "differential_equations",
+   "integral_calculus"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mechanical_oscillation",
+   "calorimetry"
+  ],
+  "note": "Sums of simple waves, first used for heat flow."
+ },
+ {
+  "id": "viscous_resistance",
+  "requires_all": [
+   "flow_continuity",
+   "differential_equations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "friction_measurement"
+  ],
+  "note": "Fluid friction added to the continuity equations."
+ },
+ {
+  "id": "heat_engine_cycles",
+  "requires_all": [
+   "calorimetry",
+   "separate_condenser_engine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "high_pressure_steam_engines",
+   "precision_thermometry",
+   "air_spring_law"
+  ],
+  "note": "The ideal cycle reasoned from working steam engines and heat measure."
+ },
+ {
+  "id": "mechanical_work_energy",
+  "requires_all": [
+   "momentum_balance",
+   "friction_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tested_waterwheel_efficiency",
+   "heat_engine_cycles",
+   "rotational_dynamics"
+  ],
+  "note": "Work as force through distance, from engineers' duty trials."
+ },
+ {
+  "id": "compound_microscopy",
+  "requires_all": [
+   "two_lens_tube_microscope",
+   "eyepiece_design",
+   "lead_crystal_glass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lens_centering",
+   "experimental_optics",
+   "animalcule_microscope"
+  ],
+  "note": "Achromatic objectives need flint glass and designed eyepieces."
+ },
+ {
+  "id": "fine_focus_stages",
+  "requires_all": [
+   "compound_microscopy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "screw_cutting_lathe",
+   "precision_machinery"
+  ],
+  "note": "Screw fine focus on the new microscope."
+ },
+ {
+  "id": "illumination_apertures",
+  "requires_all": [
+   "compound_microscopy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "experimental_optics"
+  ],
+  "note": "Condenser and diaphragm below the stage."
+ },
+ {
+  "id": "specimen_slide_mounting",
+  "requires_all": [
+   "compound_microscopy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cast_plate_glass",
+   "microscope_drawing_atlas"
+  ],
+  "note": "Glass slides and cover slips for the new objectives."
+ },
+ {
+  "id": "microbial_observation",
+  "requires_all": [
+   "compound_microscopy",
+   "animalcule_microscope"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "microscope_drawing_atlas",
+   "specimen_slide_mounting"
+  ],
+  "note": "Old animalcule watching made reliable by achromatic lenses."
+ },
+ {
+  "id": "microscopic_cell_observation",
+  "requires_all": [
+   "compound_microscopy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "capillary_observation",
+   "specimen_slide_mounting",
+   "microscope_drawing_atlas"
+  ],
+  "note": "Nuclei and cells seen clearly in tissue."
+ },
+ {
+  "id": "electromagnetic_induction",
+  "requires_all": [
+   "electrochemical_cells",
+   "electrical_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "earth_magnet_treatise",
+   "torsion_balance_force_law"
+  ],
+  "note": "Moving magnets and switched currents induce current, measured by needle meters."
+ },
+ {
+  "id": "electromagnet_sounders",
+  "requires_all": [
+   "electrochemical_cells",
+   "electrical_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electromagnetic_induction",
+   "earth_magnet_treatise"
+  ],
+  "note": "Wound iron cores pull an armature at a distance."
+ },
+ {
+  "id": "timed_signal_sequences",
+  "requires_all": [
+   "electromagnet_sounders"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "optical_telegraphy",
+   "numbered_signal_flags"
+  ],
+  "note": "A dot-and-dash code for clicks on one wire."
+ },
+ {
+  "id": "electrical_telegraphy",
+  "requires_all": [
+   "electromagnet_sounders",
+   "timed_signal_sequences"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "optical_telegraphy",
+   "public_steam_railway",
+   "intercity_passenger_railway",
+   "electromagnetic_relays"
+  ],
+  "note": "Wires along the railway carry coded current."
+ },
+ {
+  "id": "cell_theory",
+  "requires_all": [
+   "microscopic_cell_observation",
+   "compound_microscopy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "biological_classification",
+   "comparative_anatomy",
+   "developmental_stage_series"
+  ],
+  "note": "All living bodies made of cells."
+ },
+ {
+  "id": "tissue_histology",
+  "requires_all": [
+   "microscopic_cell_observation",
+   "specimen_slide_mounting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cell_theory",
+   "organ_seat_pathology"
+  ],
+  "note": "Tissues classed by their cells under the microscope."
+ },
+ {
+  "id": "fixed_light_images",
+  "requires_all": [
+   "darkened_room_optics",
+   "fused_silver_plate"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "systematic_chemical_names",
+   "experimental_optics",
+   "stone_lithography"
+  ],
+  "note": "Camera image fixed on a silvered copper plate by light-sensitive salts."
+ },
+ {
+  "id": "telegraph_keys",
+  "requires_all": [
+   "electrical_telegraphy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timed_signal_sequences"
+  ],
+  "note": "A sprung key for sending code."
+ },
+ {
+  "id": "line_insulators",
+  "requires_all": [
+   "electrical_telegraphy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bone_ash_porcelain",
+   "plunger_pressed_glass"
+  ],
+  "note": "Glass and porcelain knobs on the poles."
+ },
+ {
+  "id": "energy_conservation_law",
+  "requires_all": [
+   "mechanical_work_energy",
+   "heat_engine_cycles"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "calorimetry",
+   "electromagnetic_induction",
+   "electrochemical_cells"
+  ],
+  "note": "Heat, work, chemistry and electricity shown to convert at fixed rates."
+ },
+ {
+  "id": "telegraph_return_circuits",
+  "requires_all": [
+   "electrical_telegraphy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "line_insulators",
+   "electrical_measurement"
+  ],
+  "note": "The earth used as the return conductor."
+ },
+ {
+  "id": "polarized_telegraph_relays",
+  "requires_all": [
+   "electrical_telegraphy",
+   "electromagnetic_relays"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "telegraph_return_circuits"
+  ],
+  "note": "Relays repeat weak line signals."
+ },
+ {
+  "id": "entropy_second_law",
+  "requires_all": [
+   "heat_engine_cycles",
+   "energy_conservation_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "calorimetry"
+  ],
+  "note": "Heat flows one way; the engine cycle generalized."
+ },
+ {
+  "id": "matrix_algebra",
+  "requires_all": [
+   "symbolic_algebra"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coordinate_geometry",
+   "least_squares_estimation"
+  ],
+  "note": "Arrays of coefficients handled as one quantity."
+ },
+ {
+  "id": "biological_staining",
+  "requires_all": [
+   "tissue_histology",
+   "coal_tar_dyes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "specimen_slide_mounting"
+  ],
+  "note": "Aniline dyes pick out cell parts."
+ },
+ {
+  "id": "spectroscopy",
+  "requires_all": [
+   "experimental_optics",
+   "atomic_combining_weights"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "eyepiece_design",
+   "water_sphere_rainbow_test",
+   "gas_lit_streets"
+  ],
+  "note": "Prism lines of flames identify the elements."
+ },
+ {
+  "id": "descent_by_selection",
+  "requires_all": [
+   "biological_classification",
+   "deep_time_geology"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "comparative_anatomy",
+   "extinction_recognized",
+   "population_pressure_treatise",
+   "developmental_stage_series",
+   "pedigree_stock_breeding"
+  ],
+  "note": "Deep time, classification and population pressure yield descent with selection."
+ },
+ {
+  "id": "cyclic_fatigue",
+  "requires_all": [
+   "stress_strain_relations",
+   "structural_load_testing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_steam_railway",
+   "chain_suspension_bridges"
+  ],
+  "note": "Axle and bridge failures under repeated loads."
+ },
+ {
+  "id": "electromagnetic_wave_theory",
+  "requires_all": [
+   "electromagnetic_induction",
+   "differential_equations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "light_speed_from_eclipses",
+   "harmonic_analysis",
+   "energy_conservation_law"
+  ],
+  "note": "Field equations predict waves travelling at light speed."
+ },
+ {
+  "id": "undersea_telegraph_cable",
+  "requires_all": [
+   "electrical_telegraphy",
+   "cable_insulation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "iron_hulled_steamers",
+   "telegraph_return_circuits"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Insulated cable laid from steamers."
+ },
+ {
+  "id": "periodic_element_table",
+  "requires_all": [
+   "atomic_combining_weights",
+   "spectroscopy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "systematic_chemical_names",
+   "research_university"
+  ],
+  "note": "Elements ordered by combining weight and properties."
+ },
+ {
+  "id": "compulsory_elementary_schooling",
+  "requires_all": [
+   "compulsory_parish_schooling",
+   "public_instruction_ministry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "half_time_schooling",
+   "national_tongue_revival",
+   "manhood_suffrage"
+  ],
+  "note": "A ministry makes the parish school a free universal duty."
+ },
+ {
+  "id": "punched_message_tape",
+  "requires_all": [
+   "electrical_telegraphy",
+   "punched_card_loom_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timed_signal_sequences"
+  ],
+  "note": "Loom-card punching applied to stored messages."
+ },
+ {
+  "id": "cell_division_observation",
+  "requires_all": [
+   "cell_theory",
+   "biological_staining"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compound_microscopy"
+  ],
+  "note": "Stained nuclei show the stages of division."
+ },
+ {
+  "id": "photoconductivity",
+  "requires_all": [
+   "electrical_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "undersea_telegraph_cable",
+   "fixed_light_images"
+  ],
+  "note": "Selenium resistors found changing with light during cable testing."
+ },
+ {
+  "id": "duplex_telegraphy",
+  "requires_all": [
+   "electrical_telegraphy",
+   "polarized_telegraph_relays"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "telegraph_return_circuits"
+  ],
+  "note": "Balanced relays send both ways at once."
+ },
+ {
+  "id": "acoustic_diaphragms",
+  "requires_all": [
+   "electromagnetic_induction"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harmonic_analysis"
+  ],
+  "note": "Thin plates follow the voice and move a magnet."
+ },
+ {
+  "id": "electromagnetic_earpieces",
+  "requires_all": [
+   "electromagnetic_induction",
+   "acoustic_diaphragms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electromagnet_sounders"
+  ],
+  "note": "A coil and diaphragm reproduce sound."
+ },
+ {
+  "id": "instrument_sterilization",
+  "requires_all": [
+   "microbial_observation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "antiseptic_surgery",
+   "food_retorts",
+   "gentle_heat_treatment"
+  ],
+  "note": "Heat kills what the microscope shows."
+ },
+ {
+  "id": "microbial_isolation_methods",
+  "requires_all": [
+   "microbial_observation",
+   "biological_staining"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "gentle_heat_treatment",
+   "fermentation_starter_cultures",
+   "cell_theory"
+  ],
+  "note": "Pure cultures on solid media, identified by stain."
+ },
+ {
+  "id": "industrial_research_laboratory",
+  "requires_all": [
+   "research_university",
+   "examined_patent_office"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coal_tar_dyes",
+   "electrical_generators"
+  ],
+  "note": "Firms hire university-trained inventors and patent the results."
+ },
+ {
+  "id": "telephone_circuits",
+  "requires_all": [
+   "electromagnetic_earpieces",
+   "acoustic_diaphragms",
+   "electrical_telegraphy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harmonic_analysis"
+  ],
+  "note": "Voice currents on telegraph-style lines."
+ },
+ {
+  "id": "carbon_microphones",
+  "requires_all": [
+   "telephone_circuits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "acoustic_diaphragms"
+  ],
+  "note": "Carbon contact varies the current strongly."
+ },
+ {
+  "id": "manual_switchboards",
+  "requires_all": [
+   "telephone_circuits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electromagnetic_relays"
+  ],
+  "note": "Operators join any two lines."
+ },
+ {
+  "id": "aseptic_laboratory_practice",
+  "requires_all": [
+   "microbial_isolation_methods",
+   "instrument_sterilization"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "antiseptic_surgery"
+  ],
+  "note": "Sterile technique in the laboratory."
+ },
+ {
+  "id": "vector_analysis",
+  "requires_all": [
+   "matrix_algebra"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electromagnetic_wave_theory",
+   "coordinate_geometry"
+  ],
+  "note": "Vector notation for the field equations."
+ },
+ {
+  "id": "balanced_conductor_pairs",
+  "requires_all": [
+   "telephone_circuits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "telegraph_return_circuits"
+  ],
+  "note": "Twisted pairs cancel crosstalk."
+ },
+ {
+  "id": "lubrication_regimes",
+  "requires_all": [
+   "viscous_resistance"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "friction_measurement",
+   "fuel_refining"
+  ],
+  "note": "Oil-film theory of bearings."
+ },
+ {
+  "id": "punched_card_tabulation",
+  "requires_all": [
+   "punched_card_loom_control",
+   "electromagnetic_relays"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nominal_realm_census",
+   "household_schedule_census",
+   "punched_message_tape"
+  ],
+  "note": "Census cards read by electric contacts."
+ },
+ {
+  "id": "electron_physics",
+  "requires_all": [
+   "electromagnetic_wave_theory",
+   "glass_tube_drawing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "vacuum_pumps",
+   "spectroscopy",
+   "filament_lamp_works"
+  ],
+  "note": "Cathode rays in evacuated tubes are charged particles."
+ },
+ {
+  "id": "radiation_measurement",
+  "requires_all": [
+   "electron_physics",
+   "electrical_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "photoconductivity",
+   "fixed_light_images",
+   "bone_shadow_imaging"
+  ],
+  "note": "Penetrating rays and radioactivity measured by plates and electrometers."
+ },
+ {
+  "id": "thermionic_emission",
+  "requires_all": [
+   "filament_lamp_works",
+   "electron_physics"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "vacuum_pumps"
+  ],
+  "note": "Hot lamp filaments emit electrons."
+ },
+ {
+  "id": "inductive_line_loading",
+  "requires_all": [
+   "telephone_circuits",
+   "electromagnetic_wave_theory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "balanced_conductor_pairs"
+  ],
+  "note": "Line theory adds inductance to long lines."
+ },
+ {
+  "id": "radio_telegraphy",
+  "requires_all": [
+   "electromagnetic_wave_theory",
+   "electrical_telegraphy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electrical_generators",
+   "undersea_telegraph_cable"
+  ],
+  "note": "Spark waves carry telegraph code without wires."
+ },
+ {
+  "id": "energy_quanta",
+  "requires_all": [
+   "entropy_second_law",
+   "electromagnetic_wave_theory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spectroscopy",
+   "filament_lamp_works"
+  ],
+  "note": "Black-body radiation explained in quanta."
+ },
+ {
+  "id": "aerodynamics",
+  "requires_all": [
+   "viscous_resistance",
+   "flow_continuity"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "aerostat_observation"
+  ],
+  "note": "Lift and drag reckoned for wings."
+ },
+ {
+  "id": "wind_tunnel_testing",
+  "requires_all": [
+   "aerodynamics"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dimensional_analysis"
+  ],
+  "note": "Scale models tested in moving air."
+ },
+ {
+  "id": "refereed_journals",
+  "requires_all": [
+   "experimental_protocol_publication",
+   "research_university"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chartered_experimental_society"
+  ],
+  "note": "Specialist journals with peer review."
+ },
+ {
+  "id": "resonant_tuned_circuits",
+  "requires_all": [
+   "electromagnetic_wave_theory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "charge_storing_jar",
+   "radio_telegraphy",
+   "harmonic_analysis"
+  ],
+  "note": "Coil and condenser tuned to one wavelength."
+ },
+ {
+  "id": "statistical_sampling",
+  "requires_all": [
+   "statistical_inference"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "household_poverty_surveys",
+   "measurement_uncertainty"
+  ],
+  "note": "Random samples stand for the population."
+ },
+ {
+  "id": "microbial_growth_measurement",
+  "requires_all": [
+   "microbial_isolation_methods"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "aseptic_laboratory_practice"
+  ],
+  "note": "Colony counts and growth curves."
+ },
+ {
+  "id": "variable_air_capacitors",
+  "requires_all": [
+   "resonant_tuned_circuits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "charge_storing_jar"
+  ],
+  "note": "Meshing plates vary the tuning."
+ },
+ {
+  "id": "crystal_radio_detection",
+  "requires_all": [
+   "radio_telegraphy",
+   "resonant_tuned_circuits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "photoconductivity",
+   "electromagnetic_earpieces"
+  ],
+  "note": "Mineral crystal contacts rectify radio signals."
+ },
+ {
+  "id": "vacuum_diodes",
+  "requires_all": [
+   "thermionic_emission"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "filament_lamp_works",
+   "radio_telegraphy"
+  ],
+  "note": "Two-electrode valves rectify signals."
+ },
+ {
+  "id": "relative_spacetime",
+  "requires_all": [
+   "electromagnetic_wave_theory",
+   "vector_analysis"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "light_speed_from_eclipses",
+   "energy_quanta"
+  ],
+  "note": "Constant light speed forces a joined space and time."
+ },
+ {
+  "id": "automatic_telegraphy",
+  "requires_all": [
+   "punched_message_tape",
+   "duplex_telegraphy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timed_signal_sequences"
+  ],
+  "note": "Punched tape drives fast senders."
+ },
+ {
+  "id": "teleprinter_mechanisms",
+  "requires_all": [
+   "punched_message_tape",
+   "telegraph_keys"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "automatic_telegraphy"
+  ],
+  "note": "Keyboard printers at both ends."
+ },
+ {
+  "id": "triode_valves",
+  "requires_all": [
+   "vacuum_diodes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "resonant_tuned_circuits"
+  ],
+  "note": "A grid added to the diode amplifies."
+ },
+ {
+  "id": "cell_culture_methods",
+  "requires_all": [
+   "aseptic_laboratory_practice",
+   "cell_theory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "microbial_growth_measurement"
+  ],
+  "note": "Tissue cells kept alive in sterile media."
+ },
+ {
+  "id": "tuned_radio_reception",
+  "requires_all": [
+   "radio_telegraphy",
+   "resonant_tuned_circuits",
+   "variable_air_capacitors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crystal_radio_detection"
+  ],
+  "note": "Receivers select one station."
+ },
+ {
+  "id": "atomic_physics",
+  "requires_all": [
+   "electron_physics",
+   "radiation_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "periodic_element_table",
+   "energy_quanta"
+  ],
+  "note": "Scattering of rays reveals the nucleus."
+ },
+ {
+  "id": "amplitude_modulation",
+  "requires_all": [
+   "triode_valves",
+   "telephone_circuits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "radio_telegraphy",
+   "carbon_microphones"
+  ],
+  "note": "Voice currents modulate a valve-made carrier."
+ },
+ {
+  "id": "crystallography",
+  "requires_all": [
+   "radiation_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bone_shadow_imaging",
+   "mineral_cleavage",
+   "atomic_physics"
+  ],
+  "note": "Penetrating rays diffracted by crystal lattices."
+ },
+ {
+  "id": "feedback_radio_oscillators",
+  "requires_all": [
+   "triode_valves",
+   "resonant_tuned_circuits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "feedback_governors"
+  ],
+  "note": "Feedback through a triode sustains a steady wave."
+ },
+ {
+  "id": "telephone_repeaters",
+  "requires_all": [
+   "triode_valves",
+   "telephone_circuits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "inductive_line_loading",
+   "balanced_conductor_pairs"
+  ],
+  "note": "Valve amplifiers span the continent."
+ },
+ {
+  "id": "frequency_conversion",
+  "requires_all": [
+   "triode_valves",
+   "feedback_radio_oscillators"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tuned_radio_reception"
+  ],
+  "note": "Mixing with a local oscillator shifts frequency."
+ },
+ {
+  "id": "superheterodyne_reception",
+  "requires_all": [
+   "frequency_conversion",
+   "tuned_radio_reception"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "amplitude_modulation"
+  ],
+  "note": "Fixed intermediate-frequency receivers."
+ },
+ {
+  "id": "aerial_matching",
+  "requires_all": [
+   "radio_telegraphy",
+   "resonant_tuned_circuits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "feedback_radio_oscillators"
+  ],
+  "note": "Aerials tuned and matched to the set."
+ },
+ {
+  "id": "frequency_stabilization",
+  "requires_all": [
+   "feedback_radio_oscillators",
+   "crystallography"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tuned_radio_reception"
+  ],
+  "note": "Quartz crystal holds the oscillator steady."
+ },
+ {
+  "id": "quantum_mechanics",
+  "requires_all": [
+   "atomic_physics",
+   "energy_quanta"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "relative_spacetime",
+   "matrix_algebra",
+   "spectroscopy"
+  ],
+  "note": "Wave and matrix mechanics of the atom."
+ },
+ {
+  "id": "signal_sampling",
+  "requires_all": [
+   "harmonic_analysis",
+   "amplitude_modulation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "telephone_repeaters",
+   "teleprinter_mechanisms"
+  ],
+  "note": "Sampling theorem from carrier telephony."
+ },
+ {
+  "id": "band_theory",
+  "requires_all": [
+   "quantum_mechanics",
+   "crystallography"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "photoconductivity"
+  ],
+  "note": "Electron bands in crystal lattices."
+ },
+ {
+  "id": "solid_state_physics",
+  "requires_all": [
+   "quantum_mechanics",
+   "crystallography"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "band_theory",
+   "crystal_radio_detection"
+  ],
+  "note": "Physics of crystalline solids as a field."
+ },
+ {
+  "id": "frequency_modulation",
+  "requires_all": [
+   "feedback_radio_oscillators",
+   "superheterodyne_reception"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "frequency_stabilization"
+  ],
+  "note": "Wide-band FM reduces static."
+ },
+ {
+  "id": "computability_theory",
+  "requires_all": [
+   "syllogistic_logic",
+   "symbolic_algebra"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "geared_adding_machine",
+   "punched_card_tabulation",
+   "relay_logic"
+  ],
+  "note": "Formal logic yields the universal machine."
+ },
+ {
+  "id": "nuclear_fission",
+  "requires_all": [
+   "atomic_physics",
+   "quantum_mechanics",
+   "radiation_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "periodic_element_table"
+  ],
+  "note": "Research only: neutron splitting of heavy nuclei. Weapon use is Security's and never a general's own decision."
+ },
+ {
+  "id": "neutron_moderation",
+  "requires_all": [
+   "nuclear_fission"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "water_electrolysis",
+   "cryogenic_air_separation"
+  ],
+  "note": "Heavy water and graphite slow neutrons for a chain."
+ },
+ {
+  "id": "constrained_optimization",
+  "requires_all": [
+   "matrix_algebra"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_income_accounts",
+   "central_five_year_plan",
+   "statistical_sampling"
+  ],
+  "note": "Linear programming for planning and logistics."
+ },
+ {
+  "id": "state_great_laboratories",
+  "requires_all": [
+   "industrial_research_laboratory",
+   "research_university"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nuclear_fission",
+   "war_economy_boards"
+  ],
+  "note": "State-funded big science after wartime projects."
+ },
+ {
+  "id": "universal_secondary_schooling",
+  "requires_all": [
+   "compulsory_elementary_schooling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "child_labor_prohibition",
+   "examined_trade_apprenticeships"
+  ],
+  "note": "Schooling extended to every adolescent."
+ },
+ {
+  "id": "information_theory",
+  "requires_all": [
+   "signal_sampling",
+   "probability_theory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "entropy_second_law",
+   "computability_theory",
+   "telephone_repeaters"
+  ],
+  "note": "Channel capacity and entropy of messages."
+ },
+ {
+  "id": "live_cell_time_lapse",
+  "requires_all": [
+   "cell_culture_methods",
+   "moving_pictures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cell_division_observation"
+  ],
+  "note": "Cine cameras on the microscope."
+ },
+ {
+  "id": "semiconductor_doping",
+  "requires_all": [
+   "band_theory",
+   "single_crystal_growth"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crystal_radio_detection",
+   "chlorosilane_purification"
+  ],
+  "note": "Pure crystals doped to set conduction."
+ },
+ {
+  "id": "pn_junctions",
+  "requires_all": [
+   "semiconductor_doping"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "band_theory",
+   "crystal_radio_detection"
+  ],
+  "note": "Doped layers form switching junctions."
+ },
+ {
+  "id": "hereditary_double_helix",
+  "requires_all": [
+   "crystallography",
+   "heredity_experiments"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cell_division_observation",
+   "quantum_mechanics"
+  ],
+  "note": "X-ray patterns and heredity yield the double helix."
+ },
+ {
+  "id": "photovoltaic_conversion",
+  "requires_all": [
+   "pn_junctions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "photoconductivity"
+  ],
+  "note": "Junction cells turn light into current."
+ },
+ {
+  "id": "microinstruction_sequencing",
+  "requires_all": [
+   "computability_theory",
+   "binary_adders"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "relay_registers",
+   "punched_card_tabulation"
+  ],
+  "note": "Machine steps sequenced by microinstructions."
+ },
+ {
+  "id": "pulse_code_modulation",
+  "requires_all": [
+   "signal_sampling",
+   "information_theory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "automatic_telegraphy"
+  ],
+  "note": "Sampled speech sent as coded pulses."
+ },
+ {
+  "id": "formula_programming_languages",
+  "requires_all": [
+   "computability_theory",
+   "read_write_memory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "microinstruction_sequencing"
+  ],
+  "note": "Compilers translate formulas to machine code."
+ },
+ {
+  "id": "arithmetic_logic_units",
+  "requires_all": [
+   "binary_adders",
+   "microinstruction_sequencing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bipolar_junction_transistors"
+  ],
+  "note": "Arithmetic and logic unit designs."
+ },
+ {
+  "id": "diode_control_stores",
+  "requires_all": [
+   "microinstruction_sequencing",
+   "diode_logic"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "silicon_rectifiers"
+  ],
+  "note": "Diode matrices hold the control store."
+ },
+ {
+  "id": "error_detection_codes",
+  "requires_all": [
+   "information_theory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "punched_message_tape"
+  ],
+  "note": "Parity and Hamming codes."
+ },
+ {
+  "id": "message_framing",
+  "requires_all": [
+   "error_detection_codes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "teleprinter_mechanisms"
+  ],
+  "note": "Headers and checks frame messages."
+ },
+ {
+  "id": "automatic_repeat_request",
+  "requires_all": [
+   "error_detection_codes",
+   "message_framing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "automatic_telegraphy"
+  ],
+  "note": "Lost blocks requested again."
+ },
+ {
+  "id": "data_modems",
+  "requires_all": [
+   "telephone_repeaters",
+   "signal_sampling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "error_detection_codes",
+   "pulse_code_modulation",
+   "transistor_amplifiers"
+  ],
+  "note": "Data tones over telephone lines."
+ },
+ {
+  "id": "relay_satellites",
+  "requires_all": [
+   "orbital_satellite_launch",
+   "transistor_amplifiers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "frequency_modulation",
+   "television_broadcasting",
+   "photovoltaic_conversion"
+  ],
+  "note": "Transistor relays in orbit powered by solar cells."
+ },
+ {
+  "id": "mass_higher_education",
+  "requires_all": [
+   "universal_secondary_schooling",
+   "research_university"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "state_great_laboratories"
+  ],
+  "note": "Many new universities for school leavers."
+ },
+ {
+  "id": "microprogrammed_machine_control",
+  "requires_all": [
+   "microinstruction_sequencing",
+   "diode_control_stores"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stored_program_control"
+  ],
+  "note": "Microprogrammed control units in production machines."
+ },
+ {
+  "id": "packet_switching",
+  "requires_all": [
+   "message_framing",
+   "automatic_repeat_request",
+   "data_modems"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "information_theory",
+   "store_forward_archives"
+  ],
+  "note": "Addressed packets over shared lines."
+ },
+ {
+  "id": "packet_routers",
+  "requires_all": [
+   "packet_switching"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stored_program_control"
+  ],
+  "note": "Stored-program nodes route packets."
+ },
+ {
+  "id": "store_forward_archives",
+  "requires_all": [
+   "message_framing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "automatic_telegraphy",
+   "read_write_memory"
+  ],
+  "note": "Messages held and forwarded from memory."
+ },
+ {
+  "id": "relational_databases",
+  "requires_all": [
+   "formula_programming_languages",
+   "read_write_memory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "punched_card_tabulation",
+   "syllogistic_logic"
+  ],
+  "note": "Tables queried by relational logic."
+ },
+ {
+  "id": "public_key_ciphers",
+  "requires_all": [
+   "information_theory",
+   "number_theory_treatise"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "machine_cryptanalysis",
+   "rotor_cipher_machines",
+   "letter_frequency_codebreaking"
+  ],
+  "note": "Number theory gives public-key encryption (shared with Security)."
+ },
+ {
+  "id": "desk_computers",
+  "requires_all": [
+   "single_chip_processors",
+   "formula_programming_languages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "relational_databases",
+   "microprogrammed_machine_control"
+  ],
+  "note": "Single-chip processors bring computers to desks."
+ },
+ {
+  "id": "internetworking_protocols",
+  "requires_all": [
+   "packet_switching",
+   "packet_routers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "desk_computers"
+  ],
+  "note": "Common protocols join separate packet networks."
+ },
+ {
+  "id": "cellular_telephony",
+  "requires_all": [
+   "frequency_modulation",
+   "single_chip_processors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "manual_switchboards",
+   "radio_patrol_emergency_line",
+   "stored_program_control"
+  ],
+  "note": "Cells of radio coverage with computer switching."
+ },
+ {
+  "id": "world_hypertext_web",
+  "requires_all": [
+   "internetworking_protocols",
+   "desk_computers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "relational_databases",
+   "refereed_journals"
+  ],
+  "note": "Linked pages over the joined networks."
+ },
+ {
+  "id": "exoplanet_detection",
+  "requires_all": [
+   "spectroscopy",
+   "universal_gravitation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "desk_computers"
+  ],
+  "note": "Stellar wobble measured in spectra."
+ },
+ {
+  "id": "ranked_search_indexes",
+  "requires_all": [
+   "world_hypertext_web",
+   "relational_databases"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "matrix_algebra"
+  ],
+  "note": "Link-ranked search of the web."
+ },
+ {
+  "id": "volunteer_open_encyclopedia",
+  "requires_all": [
+   "world_hypertext_web"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reasoned_trades_encyclopedia"
+  ],
+  "note": "Volunteers write the encyclopedia online."
+ },
+ {
+  "id": "cloud_data_halls",
+  "requires_all": [
+   "internetworking_protocols",
+   "world_hypertext_web"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "relational_databases",
+   "deep_submicron_lithography"
+  ],
+  "note": "Rented computing in large data halls."
+ },
+ {
+  "id": "pocket_networked_computers",
+  "requires_all": [
+   "cellular_telephony",
+   "internetworking_protocols",
+   "lithium_ion_cells",
+   "flat_panel_displays"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "open_satellite_positioning"
+  ],
+  "note": "Touch-screen phones on the data network."
+ },
+ {
+  "id": "deep_learning_networks",
+  "requires_all": [
+   "cloud_data_halls",
+   "constrained_optimization"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "machine_vision_inspection",
+   "ranked_search_indexes",
+   "statistical_inference"
+  ],
+  "note": "Deep networks trained on data-hall hardware."
+ },
+ {
+  "id": "gravitational_wave_detection",
+  "requires_all": [
+   "relative_spacetime"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "signal_sampling",
+   "cloud_data_halls"
+  ],
+  "note": "Interferometers detect spacetime ripples."
+ },
+ {
+  "id": "large_language_models",
+  "requires_all": [
+   "deep_learning_networks",
+   "cloud_data_halls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "volunteer_open_encyclopedia",
+   "information_theory"
+  ],
+  "note": "Large models trained on the web's text."
+ },
+ {
+  "id": "error_corrected_quantum_processors",
+  "requires_all": [
+   "quantum_mechanics",
+   "error_detection_codes",
+   "deep_submicron_lithography"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cryogenic_air_separation",
+   "public_key_ciphers"
+  ],
+  "note": "Small error-corrected quantum machines."
+ },
+ {
+  "id": "automated_discovery_labs",
+  "requires_all": [
+   "large_language_models"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "collaborative_robots",
+   "digital_twin_plants",
+   "state_great_laboratories"
+  ],
+  "note": "Learned models plan and run robot trials."
+ },
+ {
+  "id": "appointed_department_prefects",
+  "requires_all": [
+   "uniform_departments"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "provincial_intendants",
+   "cameral_service_examinations"
+  ],
+  "note": "Each uniform department gets an appointed prefect."
+ },
+ {
+  "id": "civil_merit_order",
+  "requires_all": [
+   "chivalric_orders_insignia",
+   "abolition_of_estate_privileges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "table_of_service_ranks"
+  ],
+  "note": "An order of honour opened to commoners once estate privilege ends."
+ },
+ {
+  "id": "universal_civil_code",
+  "requires_all": [
+   "compiled_civil_code",
+   "abolition_of_estate_privileges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "general_land_code",
+   "declaration_of_rights"
+  ],
+  "note": "One code for all persons once estates are abolished."
+ },
+ {
+  "id": "administrative_courts",
+  "requires_all": [
+   "uniform_departments",
+   "compiled_civil_code"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "justice_ombudsman",
+   "separation_of_powers",
+   "universal_civil_code"
+  ],
+  "note": "Courts review the acts of the departments."
+ },
+ {
+  "id": "commercial_code",
+  "requires_all": [
+   "universal_civil_code"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "joint_stock_company",
+   "endorsed_bills",
+   "fair_merchant_courts"
+  ],
+  "note": "Merchant law codified beside the civil code."
+ },
+ {
+  "id": "assembly_ombudsman",
+  "requires_all": [
+   "justice_ombudsman"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "single_national_assembly",
+   "separation_of_powers"
+  ],
+  "note": "The ombudsman answers to the assembly."
+ },
+ {
+  "id": "single_minister_departments",
+  "requires_all": [
+   "three_department_ministries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "secretaries_of_state",
+   "cabinet_first_minister",
+   "governing_senate_colleges",
+   "ministry_office_block"
+  ],
+  "note": "Each ministry under one answerable minister."
+ },
+ {
+  "id": "granted_constitution",
+  "requires_all": [
+   "great_liberties_charter",
+   "written_frame_of_government"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "federal_written_constitution",
+   "declaration_of_rights",
+   "realm_bill_of_rights",
+   "conditional_crown_settlement"
+  ],
+  "note": "A written constitution granted and sworn in the god's name."
+ },
+ {
+  "id": "great_realm_conference",
+  "requires_all": [
+   "sovereign_realms_congress",
+   "resident_ambassadors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "balance_of_power_league",
+   "law_of_war_and_peace"
+  ],
+  "note": "The occasional congress becomes a standing concert."
+ },
+ {
+  "id": "annual_budget_vote",
+  "requires_all": [
+   "consented_taxation",
+   "appropriated_annual_budget"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "single_national_assembly",
+   "fixed_court_of_accounts"
+  ],
+  "note": "The chamber votes the budget line by line."
+ },
+ {
+  "id": "penitentiary_sentences",
+  "requires_all": [
+   "penal_reform_no_torture"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "prison_hygiene_reform",
+   "correction_workhouses",
+   "convict_transportation"
+  ],
+  "note": "Prison terms replace most hangings."
+ },
+ {
+  "id": "public_instruction_ministry",
+  "requires_all": [
+   "single_minister_departments",
+   "compulsory_parish_schooling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "state_polytechnic_school",
+   "research_university"
+  ],
+  "note": "A ministry for schools and universities."
+ },
+ {
+  "id": "householder_franchise",
+  "requires_all": [
+   "single_national_assembly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fixed_term_estates",
+   "estates_parties",
+   "granted_constitution",
+   "decennial_apportionment_census"
+  ],
+  "note": "The vote widened to middling householders."
+ },
+ {
+  "id": "poor_law_boards",
+  "requires_all": [
+   "workhouse_test",
+   "compulsory_poor_rate"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "single_minister_departments",
+   "parish_poor_law"
+  ],
+  "note": "A central board unites parish relief under the workhouse test."
+ },
+ {
+  "id": "customs_union",
+  "requires_all": [
+   "great_realm_conference",
+   "free_grain_trade_doctrine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "customs_frontier_patrols",
+   "realm_union_treaty",
+   "bonded_warehouses"
+  ],
+  "note": "Member realms drop tolls between them."
+ },
+ {
+  "id": "examined_patent_office",
+  "requires_all": [
+   "invention_patent_statute",
+   "single_minister_departments"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "precision_machinery"
+  ],
+  "note": "Patents examined for novelty by an office."
+ },
+ {
+  "id": "responsible_ministry",
+  "requires_all": [
+   "cabinet_first_minister",
+   "householder_franchise"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "granted_constitution",
+   "estates_parties"
+  ],
+  "note": "Ministers depend on the elected chamber's confidence."
+ },
+ {
+  "id": "central_note_monopoly",
+  "requires_all": [
+   "chartered_central_bank"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "treasury_paper_notes",
+   "city_exchange_bank"
+  ],
+  "note": "One bank issues the realm's notes."
+ },
+ {
+  "id": "bankruptcy_discharge",
+  "requires_all": [
+   "commercial_code"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "creditor_debt_house",
+   "joint_stock_company"
+  ],
+  "note": "Discharge in bankruptcy replaces debt prison."
+ },
+ {
+  "id": "grain_tariff_repeal",
+  "requires_all": [
+   "free_grain_trade_doctrine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "customs_union",
+   "free_grain_trade_edict",
+   "householder_franchise"
+  ],
+  "note": "The widened chamber repeals grain duties."
+ },
+ {
+  "id": "manhood_suffrage",
+  "requires_all": [
+   "householder_franchise"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "decennial_apportionment_census",
+   "penny_daily_press"
+  ],
+  "note": "The vote extended to every grown man."
+ },
+ {
+  "id": "mass_political_parties",
+  "requires_all": [
+   "estates_parties",
+   "householder_franchise"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "penny_daily_press",
+   "reading_circles"
+  ],
+  "note": "Parties with clubs and papers for a mass electorate."
+ },
+ {
+  "id": "ruler_plebiscite",
+  "requires_all": [
+   "granted_constitution",
+   "manhood_suffrage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "emergency_safety_committee"
+  ],
+  "note": "Manhood suffrage used to confirm a ruler's rule."
+ },
+ {
+  "id": "competitive_civil_service",
+  "requires_all": [
+   "cameral_service_examinations",
+   "research_university"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "single_minister_departments",
+   "regular_merit_examinations"
+  ],
+  "note": "Open examinations staff the ministries."
+ },
+ {
+  "id": "limited_liability_registration",
+  "requires_all": [
+   "joint_stock_company",
+   "commercial_code"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bubble_company_law"
+  ],
+  "note": "Companies registered with limited liability."
+ },
+ {
+  "id": "secret_printed_ballot",
+  "requires_all": [
+   "manhood_suffrage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "scrutiny_lot_elections",
+   "town_printing_houses"
+  ],
+  "note": "Printed ballots marked in secret."
+ },
+ {
+  "id": "civil_divorce_courts",
+  "requires_all": [
+   "civil_divorce",
+   "universal_civil_code"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "marriage_dissolution_courts"
+  ],
+  "note": "Civil courts grant divorce under the code."
+ },
+ {
+  "id": "dependencies_ministry",
+  "requires_all": [
+   "single_minister_departments",
+   "overseas_viceroyalties"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "trade_and_colonies_board"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "A ministry for distant dependencies."
+ },
+ {
+  "id": "rural_district_assemblies",
+  "requires_all": [
+   "elected_municipal_councils"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "abolition_of_estate_privileges",
+   "householder_franchise"
+  ],
+  "note": "Elected assemblies in the countryside."
+ },
+ {
+  "id": "lender_of_last_resort",
+  "requires_all": [
+   "central_note_monopoly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "share_exchange_bourse",
+   "limited_liability_registration"
+  ],
+  "note": "The note-issuing bank lends freely in panics."
+ },
+ {
+  "id": "independent_audit_office",
+  "requires_all": [
+   "fixed_court_of_accounts",
+   "annual_budget_vote"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "responsible_ministry"
+  ],
+  "note": "Auditors report to the chamber that voted the budget."
+ },
+ {
+  "id": "ceremonial_crown",
+  "requires_all": [
+   "granted_constitution",
+   "responsible_ministry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "manhood_suffrage"
+  ],
+  "note": "The crown reigns while responsible ministers govern."
+ },
+ {
+  "id": "interrealm_arbitration",
+  "requires_all": [
+   "great_realm_conference",
+   "law_of_war_and_peace"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "neutral_wounded_convention"
+  ],
+  "note": "Standing arbitration of disputes between realms."
+ },
+ {
+  "id": "career_diplomatic_service",
+  "requires_all": [
+   "resident_ambassadors",
+   "competitive_civil_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "envoy_credentials_immunity",
+   "foreign_affairs_office"
+  ],
+  "note": "Examined career diplomats in every realm."
+ },
+ {
+  "id": "gold_standard_link",
+  "requires_all": [
+   "central_note_monopoly",
+   "lender_of_last_resort"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "undersea_telegraph_cable",
+   "customs_union"
+  ],
+  "note": "Trading realms tie notes to gold."
+ },
+ {
+  "id": "municipal_utilities",
+  "requires_all": [
+   "elected_municipal_councils",
+   "coal_gas_works"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steam_pumped_waterworks",
+   "gas_lit_streets"
+  ],
+  "note": "Towns buy out water and gas companies."
+ },
+ {
+  "id": "probation_parole",
+  "requires_all": [
+   "penitentiary_sentences"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "prison_hygiene_reform"
+  ],
+  "note": "Supervised release shortens prison terms."
+ },
+ {
+  "id": "married_women_property",
+  "requires_all": [
+   "universal_civil_code",
+   "separate_wife_property"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "womens_rights_convention"
+  ],
+  "note": "Wives keep their own property under the code."
+ },
+ {
+  "id": "audited_company_accounts",
+  "requires_all": [
+   "limited_liability_registration",
+   "double_entry_ledgers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bankruptcy_discharge",
+   "independent_audit_office"
+  ],
+  "note": "Registered companies publish audited accounts."
+ },
+ {
+  "id": "elected_county_councils",
+  "requires_all": [
+   "rural_district_assemblies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "manhood_suffrage"
+  ],
+  "note": "Elected councils for counties."
+ },
+ {
+  "id": "old_age_pensions",
+  "requires_all": [
+   "poor_law_boards",
+   "mortality_table_insurance"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "actuarial_widows_fund",
+   "registered_friendly_societies",
+   "worker_sickness_insurance"
+  ],
+  "note": "State pensions priced by life tables."
+ },
+ {
+  "id": "antimonopoly_law",
+  "requires_all": [
+   "limited_liability_registration",
+   "commercial_code"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "merchant_guild_monopoly",
+   "abolition_of_estate_privileges",
+   "railway_clearing_house"
+  ],
+  "note": "Law against trusts and price rings."
+ },
+ {
+  "id": "womens_suffrage",
+  "requires_all": [
+   "manhood_suffrage",
+   "womens_rights_convention"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "married_women_property"
+  ],
+  "note": "Women win the vote."
+ },
+ {
+  "id": "initiative_referendum",
+  "requires_all": [
+   "manhood_suffrage",
+   "secret_printed_ballot"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ruler_plebiscite"
+  ],
+  "note": "Citizens propose and ratify laws."
+ },
+ {
+  "id": "proportional_representation",
+  "requires_all": [
+   "mass_political_parties",
+   "secret_printed_ballot"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "manhood_suffrage"
+  ],
+  "note": "Seats by party list shares."
+ },
+ {
+  "id": "juvenile_courts",
+  "requires_all": [
+   "probation_parole"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "child_labor_prohibition",
+   "orphan_boarding_out"
+  ],
+  "note": "Separate courts for children."
+ },
+ {
+  "id": "rate_regulation_commissions",
+  "requires_all": [
+   "antimonopoly_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "classed_freight_tariffs",
+   "municipal_utilities",
+   "alternating_current_grids"
+  ],
+  "note": "Commissions set rates for utilities and railways."
+ },
+ {
+  "id": "unemployment_insurance",
+  "requires_all": [
+   "worker_sickness_insurance",
+   "public_labor_exchanges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "old_age_pensions",
+   "strike_funds",
+   "amalgamated_craft_unions"
+  ],
+  "note": "Out-of-work insurance administered through labor exchanges."
+ },
+ {
+  "id": "upper_chamber_curbed",
+  "requires_all": [
+   "responsible_ministry",
+   "manhood_suffrage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "annual_budget_vote"
+  ],
+  "note": "The upper chamber loses its money veto."
+ },
+ {
+  "id": "war_economy_boards",
+  "requires_all": [
+   "single_minister_departments",
+   "labor_statistics_bureau"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "railway_mobilization",
+   "reserve_mobilization_plans",
+   "economic_blockade_decrees"
+  ],
+  "note": "Boards direct industry and labor in total war."
+ },
+ {
+  "id": "frontier_passport_control",
+  "requires_all": [
+   "travel_passports"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "immigration_inspection_station",
+   "fingerprint_identification"
+  ],
+  "note": "Passports and visas checked at every frontier."
+ },
+ {
+  "id": "one_party_state",
+  "requires_all": [
+   "mass_political_parties",
+   "ruler_plebiscite"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "political_police_bureau",
+   "emergency_safety_committee"
+  ],
+  "note": "A mass party fuses with the state."
+ },
+ {
+  "id": "league_of_realms",
+  "requires_all": [
+   "great_realm_conference",
+   "interrealm_arbitration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "land_war_conventions",
+   "interrealm_postal_union"
+  ],
+  "note": "A standing league with secretariat."
+ },
+ {
+  "id": "constitutional_court",
+  "requires_all": [
+   "granted_constitution",
+   "administrative_courts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "separation_of_powers",
+   "permanent_high_court"
+  ],
+  "note": "A court strikes down unconstitutional law."
+ },
+ {
+  "id": "interrealm_permanent_court",
+  "requires_all": [
+   "interrealm_arbitration",
+   "league_of_realms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "permanent_high_court"
+  ],
+  "note": "A permanent court beside the league."
+ },
+ {
+  "id": "corporatist_chambers",
+  "requires_all": [
+   "trade_wide_employer_bargaining",
+   "union_legal_standing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "one_party_state",
+   "guild_council_seats"
+  ],
+  "note": "Employers and trades seated in state chambers."
+ },
+ {
+  "id": "central_five_year_plan",
+  "requires_all": [
+   "war_economy_boards",
+   "common_ownership_doctrine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "one_party_state",
+   "labor_statistics_bureau",
+   "punched_card_tabulation"
+  ],
+  "note": "War boards turned into peacetime planning."
+ },
+ {
+  "id": "emergency_decree_rule",
+  "requires_all": [
+   "emergency_safety_committee",
+   "granted_constitution"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "one_party_state",
+   "constitutional_court"
+  ],
+  "note": "Emergency clauses used to suspend the chamber."
+ },
+ {
+  "id": "state_propaganda_ministry",
+  "requires_all": [
+   "single_minister_departments",
+   "radio_broadcasting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "one_party_state",
+   "war_newsreels_posters",
+   "press_licensing_censors"
+  ],
+  "note": "A ministry commands press and broadcast."
+ },
+ {
+  "id": "deposit_insurance",
+  "requires_all": [
+   "lender_of_last_resort"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "risk_pools"
+  ],
+  "note": "Small deposits insured after bank runs."
+ },
+ {
+  "id": "securities_commission",
+  "requires_all": [
+   "audited_company_accounts",
+   "share_exchange_bourse"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "antimonopoly_law"
+  ],
+  "note": "A commission polices share markets."
+ },
+ {
+  "id": "national_income_accounts",
+  "requires_all": [
+   "statistical_sampling",
+   "punched_card_tabulation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "labor_statistics_bureau",
+   "state_statistical_office"
+  ],
+  "note": "Total output measured by sampled statistics."
+ },
+ {
+  "id": "countercyclical_spending",
+  "requires_all": [
+   "national_income_accounts",
+   "central_note_monopoly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_relief_works",
+   "slump_hunger_marches"
+  ],
+  "note": "Deficit spending steadies the slump."
+ },
+ {
+  "id": "fixed_exchange_accord",
+  "requires_all": [
+   "gold_standard_link",
+   "league_of_realms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "countercyclical_spending",
+   "national_income_accounts"
+  ],
+  "note": "Pegged rates and a shared monetary fund."
+ },
+ {
+  "id": "world_assembly_of_realms",
+  "requires_all": [
+   "league_of_realms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "interrealm_permanent_court",
+   "land_war_conventions"
+  ],
+  "note": "The league remade with a security council."
+ },
+ {
+  "id": "atrocity_tribunals",
+  "requires_all": [
+   "interrealm_permanent_court",
+   "land_war_conventions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "world_assembly_of_realms",
+   "gas_germ_weapon_ban"
+  ],
+  "note": "Leaders tried for crimes against peoples."
+ },
+ {
+  "id": "welfare_state",
+  "requires_all": [
+   "worker_sickness_insurance",
+   "old_age_pensions",
+   "unemployment_insurance"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_income_accounts",
+   "universal_family_allowances"
+  ],
+  "note": "One cradle-to-grave insurance office."
+ },
+ {
+  "id": "nationalized_core_industries",
+  "requires_all": [
+   "war_economy_boards",
+   "common_ownership_doctrine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "central_five_year_plan",
+   "state_railway_administration",
+   "municipal_utilities"
+  ],
+  "note": "Coal, power and rail taken into state ownership."
+ },
+ {
+  "id": "universal_rights_declaration",
+  "requires_all": [
+   "declaration_of_rights",
+   "world_assembly_of_realms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "atrocity_tribunals"
+  ],
+  "note": "The world assembly declares universal rights."
+ },
+ {
+  "id": "regional_rights_court",
+  "requires_all": [
+   "universal_rights_declaration",
+   "constitutional_court"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "interrealm_permanent_court"
+  ],
+  "note": "Neighbouring realms submit to a rights court."
+ },
+ {
+  "id": "value_added_tax",
+  "requires_all": [
+   "national_income_accounts",
+   "salt_and_drink_excise"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "audited_company_accounts",
+   "graduated_income_tax"
+  ],
+  "note": "Tax on value added at each stage."
+ },
+ {
+  "id": "common_market_union",
+  "requires_all": [
+   "customs_union",
+   "fixed_exchange_accord"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "league_of_realms",
+   "grain_tariff_repeal"
+  ],
+  "note": "A customs union widened to a common market."
+ },
+ {
+  "id": "dependency_self_rule",
+  "requires_all": [
+   "dependencies_ministry",
+   "world_assembly_of_realms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "universal_rights_declaration",
+   "settler_self_government_compact"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Former dependencies granted self-rule."
+ },
+ {
+  "id": "public_defenders",
+  "requires_all": [
+   "constitutional_court"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "universal_rights_declaration",
+   "poor_petition_court"
+  ],
+  "note": "State-paid defence for the poor."
+ },
+ {
+  "id": "civil_rights_law",
+  "requires_all": [
+   "constitutional_court",
+   "universal_rights_declaration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nonviolent_rights_movements"
+  ],
+  "note": "Discrimination forbidden by law."
+ },
+ {
+  "id": "death_penalty_abolition",
+  "requires_all": [
+   "penitentiary_sentences",
+   "probation_parole"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "universal_rights_declaration",
+   "regional_rights_court"
+  ],
+  "note": "Death penalty abolished."
+ },
+ {
+  "id": "freedom_of_information",
+  "requires_all": [
+   "press_freedom_statute",
+   "independent_audit_office"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "assembly_ombudsman"
+  ],
+  "note": "Right of access to official records."
+ },
+ {
+  "id": "ombudsman_network",
+  "requires_all": [
+   "assembly_ombudsman"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "administrative_courts",
+   "elected_county_councils"
+  ],
+  "note": "Ombudsmen for every ministry and town."
+ },
+ {
+  "id": "floating_fiat_currency",
+  "requires_all": [
+   "fixed_exchange_accord",
+   "central_note_monopoly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "countercyclical_spending"
+  ],
+  "note": "Pegs abandoned for floating state money."
+ },
+ {
+  "id": "personal_data_protection",
+  "requires_all": [
+   "universal_rights_declaration",
+   "relational_databases"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "punched_card_tabulation",
+   "continuous_population_register"
+  ],
+  "note": "Law on personal records held in databases."
+ },
+ {
+  "id": "anticorruption_commission",
+  "requires_all": [
+   "independent_audit_office"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ombudsman_network",
+   "freedom_of_information"
+  ],
+  "note": "An independent commission against corruption."
+ },
+ {
+  "id": "state_enterprise_privatization",
+  "requires_all": [
+   "nationalized_core_industries",
+   "securities_commission"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "floating_fiat_currency"
+  ],
+  "note": "State firms sold through share markets."
+ },
+ {
+  "id": "truth_commissions",
+  "requires_all": [
+   "universal_rights_declaration",
+   "atrocity_tribunals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "regional_rights_court"
+  ],
+  "note": "Commissions hear victims of past rule by force."
+ },
+ {
+  "id": "participatory_budgets",
+  "requires_all": [
+   "elected_municipal_councils",
+   "annual_budget_vote"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "initiative_referendum"
+  ],
+  "note": "Neighbourhood assemblies decide town budgets."
+ },
+ {
+  "id": "inflation_targeting",
+  "requires_all": [
+   "floating_fiat_currency",
+   "national_income_accounts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "central_note_monopoly"
+  ],
+  "note": "An independent bank targets inflation."
+ },
+ {
+  "id": "electoral_commissions",
+  "requires_all": [
+   "secret_printed_ballot"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "proportional_representation",
+   "anticorruption_commission"
+  ],
+  "note": "Independent bodies run elections."
+ },
+ {
+  "id": "trade_dispute_panels",
+  "requires_all": [
+   "world_assembly_of_realms",
+   "interrealm_arbitration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "common_market_union",
+   "fixed_exchange_accord"
+  ],
+  "note": "A world trade body arbitrates tariffs."
+ },
+ {
+  "id": "single_currency_union",
+  "requires_all": [
+   "common_market_union",
+   "floating_fiat_currency"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "inflation_targeting"
+  ],
+  "note": "One currency across a common market."
+ },
+ {
+  "id": "online_government_services",
+  "requires_all": [
+   "world_hypertext_web"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "relational_databases",
+   "competitive_civil_service"
+  ],
+  "note": "Public services offered on the web."
+ },
+ {
+  "id": "equal_marriage_law",
+  "requires_all": [
+   "civil_rights_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "registered_partnerships",
+   "womens_liberation_movement",
+   "civil_divorce_courts"
+  ],
+  "note": "Marriage open to all couples."
+ },
+ {
+  "id": "permanent_atrocity_court",
+  "requires_all": [
+   "atrocity_tribunals",
+   "interrealm_permanent_court"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "truth_commissions"
+  ],
+  "note": "A permanent court for crimes against peoples."
+ },
+ {
+  "id": "digital_identity_register",
+  "requires_all": [
+   "continuous_population_register",
+   "online_government_services"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_key_ciphers"
+  ],
+  "note": "Digital identity for online public services."
+ },
+ {
+  "id": "bank_stress_tests",
+  "requires_all": [
+   "deposit_insurance",
+   "securities_commission"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lender_of_last_resort",
+   "constrained_optimization"
+  ],
+  "note": "Bank resolution and stress tests."
+ },
+ {
+  "id": "open_government_data",
+  "requires_all": [
+   "freedom_of_information",
+   "online_government_services"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "relational_databases"
+  ],
+  "note": "Public data published online by default."
+ },
+ {
+  "id": "lobbying_register",
+  "requires_all": [
+   "anticorruption_commission"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "freedom_of_information",
+   "open_government_data"
+  ],
+  "note": "Registered lobbyists and conflict rules."
+ },
+ {
+  "id": "comprehensive_data_rights",
+  "requires_all": [
+   "personal_data_protection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "online_social_networks",
+   "cloud_data_halls"
+  ],
+  "note": "Data rights widened for networked platforms."
+ },
+ {
+  "id": "global_minimum_tax",
+  "requires_all": [
+   "graduated_income_tax",
+   "trade_dispute_panels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "offshored_work",
+   "single_currency_union"
+  ],
+  "note": "Realms agree a minimum tax on large firms."
+ },
+ {
+  "id": "learned_machine_law",
+  "requires_all": [
+   "comprehensive_data_rights",
+   "large_language_models"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "algorithmic_feeds"
+  ],
+  "note": "Risk-tiered rules for learned machines."
+ },
+ {
+  "id": "algorithmic_decision_audits",
+  "requires_all": [
+   "learned_machine_law",
+   "independent_audit_office"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "algorithmic_management"
+  ],
+  "note": "Auditors examine algorithmic decisions."
+ },
+ {
+  "id": "central_bank_digital_currency",
+  "requires_all": [
+   "floating_fiat_currency",
+   "digital_identity_register"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_key_ciphers",
+   "mobile_remittances"
+  ],
+  "note": "Central-bank money issued digitally."
+ },
+ {
+  "id": "panorama_rotundas",
+  "requires_all": [
+   "single_point_perspective_painting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "perspective_scenery_stage",
+   "landscape_park_gardens"
+  ],
+  "note": "Painted all-round views in a rotunda."
+ },
+ {
+  "id": "reading_circles",
+  "requires_all": [
+   "subscription_libraries",
+   "periodical_essay_sheets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coffeehouse_public_talk",
+   "salon_conversation"
+  ],
+  "note": "Middling readers pool books and papers."
+ },
+ {
+  "id": "gymnastics_grounds",
+  "requires_all": [
+   "natural_education_treatise"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_civic_festivals"
+  ],
+  "note": "Open grounds for drilling the young."
+ },
+ {
+  "id": "historical_novel",
+  "requires_all": [
+   "castaway_realist_novel"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ruined_castle_terror_tales",
+   "folk_song_collections",
+   "realm_history_plays"
+  ],
+  "note": "The novel turned to the realm's past."
+ },
+ {
+  "id": "civic_concert_halls",
+  "requires_all": [
+   "subscription_concerts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "four_movement_symphony",
+   "public_opera_house"
+  ],
+  "note": "Public halls for paid orchestras."
+ },
+ {
+  "id": "home_art_songs",
+  "requires_all": [
+   "hammer_keyboard"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "folk_song_collections",
+   "plain_speech_nature_poetry"
+  ],
+  "note": "Songs for voice and keyboard in the home."
+ },
+ {
+  "id": "comparative_philology",
+  "requires_all": [
+   "standard_tongue_dictionary",
+   "written_grammar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "folk_song_collections",
+   "philological_forgery_critique",
+   "research_university"
+  ],
+  "note": "Sound laws trace related tongues."
+ },
+ {
+  "id": "temperance_societies",
+  "requires_all": [
+   "spirit_licensing_duties"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "inward_devotion_movement",
+   "friendly_society_boxes"
+  ],
+  "note": "Societies against cheap spirits."
+ },
+ {
+  "id": "national_tongue_revival",
+  "requires_all": [
+   "comparative_philology"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "folk_song_collections",
+   "tongue_purity_academy",
+   "national_flag_anthem"
+  ],
+  "note": "Philology gives the national tongue a standard grammar."
+ },
+ {
+  "id": "grand_opera_houses",
+  "requires_all": [
+   "public_opera_house"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "gas_lit_streets",
+   "civic_concert_halls"
+  ],
+  "note": "Large gas-lit opera houses."
+ },
+ {
+  "id": "god_revival_meetings",
+  "requires_all": [
+   "inward_devotion_movement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wandering_preacher_orders",
+   "rite_toleration_edict"
+  ],
+  "note": "Open-air revivals for the god."
+ },
+ {
+  "id": "penny_daily_press",
+  "requires_all": [
+   "daily_printed_newspaper",
+   "cylinder_press_printing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "continuous_paper_machine",
+   "reading_circles",
+   "press_freedom_statute"
+  ],
+  "note": "Steam presses and machine paper make a cheap daily."
+ },
+ {
+  "id": "serialized_novels",
+  "requires_all": [
+   "penny_daily_press"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "historical_novel"
+  ],
+  "note": "Novels printed in parts."
+ },
+ {
+  "id": "portrait_photo_studios",
+  "requires_all": [
+   "fixed_light_images"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "burgher_portraiture"
+  ],
+  "note": "Commercial portrait photography."
+ },
+ {
+  "id": "political_cartoon_weeklies",
+  "requires_all": [
+   "penny_daily_press",
+   "stone_lithography"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "satirical_print_series"
+  ],
+  "note": "Lithographed satire weekly."
+ },
+ {
+  "id": "family_winter_feast",
+  "requires_all": [
+   "prepaid_stamp_postage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "calendar_feast_days",
+   "guild_patron_feasts",
+   "stone_lithography"
+  ],
+  "note": "Cheap post and printed cards make a family feast."
+ },
+ {
+  "id": "realist_novel",
+  "requires_all": [
+   "historical_novel",
+   "serialized_novels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "castaway_realist_novel"
+  ],
+  "note": "Novels of ordinary lives."
+ },
+ {
+  "id": "national_unity_movements",
+  "requires_all": [
+   "national_tongue_revival"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_flag_anthem",
+   "national_civic_festivals",
+   "penny_daily_press"
+  ],
+  "note": "One tongue, one people, one realm."
+ },
+ {
+  "id": "womens_rights_convention",
+  "requires_all": [
+   "womens_rights_treatise"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "temperance_societies",
+   "bound_labor_abolition_movement"
+  ],
+  "note": "Women's rights meet in convention."
+ },
+ {
+  "id": "common_ownership_doctrine",
+  "requires_all": [
+   "division_of_labor_doctrine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "machine_breaking_riots",
+   "ideal_commonwealth_fiction",
+   "social_contract_doctrine",
+   "strike_funds"
+  ],
+  "note": "Doctrine of worker ownership, answering the division-of-labor economy."
+ },
+ {
+  "id": "sacred_text_criticism",
+  "requires_all": [
+   "philological_forgery_critique",
+   "comparative_philology"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deep_time_geology"
+  ],
+  "note": "The sacred texts dated by philology."
+ },
+ {
+  "id": "great_realms_exhibition",
+  "requires_all": [
+   "prefabricated_iron_glass_halls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "annual_art_exhibition",
+   "public_steam_railway",
+   "great_realm_conference"
+  ],
+  "note": "An iron-and-glass hall shows the works of all realms."
+ },
+ {
+  "id": "excursion_tourism",
+  "requires_all": [
+   "public_steam_railway",
+   "intercity_passenger_railway"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grand_tour_travel",
+   "spa_town_physicians"
+  ],
+  "note": "Rail excursions and seaside holidays."
+ },
+ {
+  "id": "war_photography",
+  "requires_all": [
+   "fixed_light_images"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "portrait_photo_studios",
+   "penny_daily_press"
+  ],
+  "note": "Photographs from the field reach the public."
+ },
+ {
+  "id": "mountain_climbing_clubs",
+  "requires_all": [
+   "excursion_tourism"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plain_speech_nature_poetry",
+   "landscape_park_gardens"
+  ],
+  "note": "Clubs for climbing peaks."
+ },
+ {
+  "id": "codified_ball_games",
+  "requires_all": [
+   "bat_ball_wager_matches"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "gymnastics_grounds",
+   "saturday_half_holiday",
+   "public_steam_railway"
+  ],
+  "note": "Written rules and associations for field ball."
+ },
+ {
+  "id": "childrens_books",
+  "requires_all": [
+   "fairy_tale_collections",
+   "cylinder_press_printing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_alphabet_primers",
+   "natural_education_treatise"
+  ],
+  "note": "Books written for children."
+ },
+ {
+  "id": "national_history_lessons",
+  "requires_all": [
+   "compulsory_elementary_schooling",
+   "national_unity_movements"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "historical_novel"
+  ],
+  "note": "National history in every school."
+ },
+ {
+  "id": "layered_excavation",
+  "requires_all": [
+   "buried_town_excavation",
+   "relative_stratigraphy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deep_time_geology"
+  ],
+  "note": "Stratigraphy applied to excavation."
+ },
+ {
+  "id": "open_air_light_painting",
+  "requires_all": [
+   "annual_art_exhibition",
+   "oil_glaze_painting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fixed_light_images",
+   "coal_tar_dyes",
+   "public_steam_railway"
+  ],
+  "note": "Painting of passing light out of doors."
+ },
+ {
+  "id": "variety_music_halls",
+  "requires_all": [
+   "gas_lit_streets",
+   "public_playhouses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "servants_comic_opera",
+   "ballad_opera_satire"
+  ],
+  "note": "Music halls and variety."
+ },
+ {
+  "id": "recorded_sound",
+  "requires_all": [
+   "acoustic_diaphragms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harmonic_analysis",
+   "rolled_tinplate"
+  ],
+  "note": "Diaphragm and stylus cut sound into foil and wax."
+ },
+ {
+  "id": "brand_advertising",
+  "requires_all": [
+   "penny_daily_press"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "limited_liability_registration",
+   "mail_order_parcel_trade"
+  ],
+  "note": "Brands and agencies buy newspaper space."
+ },
+ {
+  "id": "monument_protection_law",
+  "requires_all": [
+   "layered_excavation",
+   "realm_public_museum"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_history_lessons"
+  ],
+  "note": "Law guards ancient monuments."
+ },
+ {
+  "id": "endowed_town_libraries",
+  "requires_all": [
+   "public_libraries",
+   "subscription_libraries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compulsory_elementary_schooling",
+   "reading_circles"
+  ],
+  "note": "Free libraries endowed in every town."
+ },
+ {
+  "id": "professional_sport_leagues",
+  "requires_all": [
+   "codified_ball_games"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "saturday_half_holiday",
+   "intercity_passenger_railway",
+   "penny_daily_press"
+  ],
+  "note": "Paid players in leagues."
+ },
+ {
+  "id": "constructed_common_language",
+  "requires_all": [
+   "comparative_philology"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "interrealm_postal_union",
+   "great_realms_exhibition"
+  ],
+  "note": "A constructed tongue for all peoples."
+ },
+ {
+  "id": "handcraft_revival",
+  "requires_all": [
+   "iron_power_loom_sheds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "handloom_weaver_distress",
+   "realist_novel"
+  ],
+  "note": "Hand crafts revived against machine goods."
+ },
+ {
+  "id": "workers_festival_day",
+  "requires_all": [
+   "eight_hour_campaign",
+   "common_ownership_doctrine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_civic_festivals"
+  ],
+  "note": "The eight-hour campaign's annual marching day."
+ },
+ {
+  "id": "mystery_fiction",
+  "requires_all": [
+   "serialized_novels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "detective_branch",
+   "ruined_castle_terror_tales"
+  ],
+  "note": "Detective stories."
+ },
+ {
+  "id": "open_air_folk_museum",
+  "requires_all": [
+   "realm_public_museum",
+   "folk_song_collections"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "handcraft_revival",
+   "national_unity_movements"
+  ],
+  "note": "Country buildings moved to open-air museums."
+ },
+ {
+  "id": "moving_pictures",
+  "requires_all": [
+   "fixed_light_images",
+   "celluloid_moulding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "panorama_rotundas",
+   "electric_street_lighting"
+  ],
+  "note": "Celluloid film projected to paying crowds."
+ },
+ {
+  "id": "revived_realm_games",
+  "requires_all": [
+   "codified_ball_games",
+   "gymnastics_grounds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "great_realms_exhibition",
+   "layered_excavation"
+  ],
+  "note": "Ancient games revived every fourth year."
+ },
+ {
+  "id": "peace_congresses",
+  "requires_all": [
+   "interrealm_arbitration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "neutral_wounded_convention",
+   "womens_rights_convention"
+  ],
+  "note": "Citizens' congresses for peace."
+ },
+ {
+  "id": "million_reader_dailies",
+  "requires_all": [
+   "penny_daily_press",
+   "wood_pulp_paper"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compulsory_elementary_schooling",
+   "brand_advertising",
+   "electrical_telegraphy"
+  ],
+  "note": "Pulp paper and literate millions."
+ },
+ {
+  "id": "great_merit_prizes",
+  "requires_all": [
+   "research_university",
+   "refereed_journals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "civil_merit_order",
+   "stable_blasting_explosive"
+  ],
+  "note": "Endowed prizes for science, letters and peace."
+ },
+ {
+  "id": "abstract_painting",
+  "requires_all": [
+   "open_air_light_painting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fixed_light_images"
+  ],
+  "note": "Painting leaves representation."
+ },
+ {
+  "id": "youth_scouting",
+  "requires_all": [
+   "gymnastics_grounds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mountain_climbing_clubs"
+  ],
+  "note": "Scouting for the young."
+ },
+ {
+  "id": "syncopated_dance_music",
+  "requires_all": [
+   "variety_music_halls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "recorded_sound",
+   "chattel_bondage_abolition",
+   "hammer_keyboard"
+  ],
+  "note": "Syncopated port-city dance music."
+ },
+ {
+  "id": "newspaper_puzzles",
+  "requires_all": [
+   "million_reader_dailies"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Crosswords in the daily paper."
+ },
+ {
+  "id": "war_newsreels_posters",
+  "requires_all": [
+   "moving_pictures",
+   "million_reader_dailies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "war_photography",
+   "brand_advertising"
+  ],
+  "note": "Newsreels and posters for the home front."
+ },
+ {
+  "id": "ethnographic_fieldwork",
+  "requires_all": [
+   "comparative_philology",
+   "research_university"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "far_land_specimen_voyages",
+   "fixed_light_images",
+   "recorded_sound"
+  ],
+  "note": "Long residence among other peoples."
+ },
+ {
+  "id": "unknown_warrior_remembrance",
+  "requires_all": [
+   "national_unity_movements"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "war_newsreels_posters",
+   "national_civic_festivals"
+  ],
+  "note": "A tomb and day of remembrance."
+ },
+ {
+  "id": "radio_broadcasting",
+  "requires_all": [
+   "amplitude_modulation",
+   "tuned_radio_reception"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "recorded_sound",
+   "million_reader_dailies"
+  ],
+  "note": "Broadcast speech and music into homes."
+ },
+ {
+  "id": "public_broadcasting_charter",
+  "requires_all": [
+   "radio_broadcasting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "press_freedom_statute",
+   "rate_regulation_commissions"
+  ],
+  "note": "A chartered public broadcaster."
+ },
+ {
+  "id": "inner_voice_novel",
+  "requires_all": [
+   "realist_novel"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "talking_cure"
+  ],
+  "note": "The inner stream of thought in fiction."
+ },
+ {
+  "id": "film_studio_system",
+  "requires_all": [
+   "moving_pictures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "limited_liability_registration",
+   "brand_advertising"
+  ],
+  "note": "Studios produce for a world market."
+ },
+ {
+  "id": "sound_films",
+  "requires_all": [
+   "moving_pictures",
+   "recorded_sound",
+   "triode_valves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "radio_broadcasting"
+  ],
+  "note": "Valve-amplified sound synchronized with film."
+ },
+ {
+  "id": "world_ball_cup",
+  "requires_all": [
+   "codified_ball_games",
+   "professional_sport_leagues"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "revived_realm_games",
+   "radio_broadcasting"
+  ],
+  "note": "A world cup of field ball."
+ },
+ {
+  "id": "leader_mass_rallies",
+  "requires_all": [
+   "one_party_state",
+   "radio_broadcasting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_civic_festivals",
+   "war_newsreels_posters"
+  ],
+  "note": "Choreographed rallies broadcast to the realm."
+ },
+ {
+  "id": "picture_story_magazines",
+  "requires_all": [
+   "million_reader_dailies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "newspaper_puzzles",
+   "political_cartoon_weeklies"
+  ],
+  "note": "Drawn picture stories."
+ },
+ {
+  "id": "mass_paperbacks",
+  "requires_all": [
+   "cylinder_press_printing",
+   "wood_pulp_paper"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "million_reader_dailies",
+   "endowed_town_libraries"
+  ],
+  "note": "Cheap paperbound books."
+ },
+ {
+  "id": "photo_news_magazines",
+  "requires_all": [
+   "war_photography",
+   "million_reader_dailies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "picture_story_magazines"
+  ],
+  "note": "News told in photographs."
+ },
+ {
+  "id": "television_broadcasting",
+  "requires_all": [
+   "radio_broadcasting",
+   "thermionic_emission",
+   "photoconductivity"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "moving_pictures",
+   "sound_films"
+  ],
+  "note": "Pictures scanned and broadcast."
+ },
+ {
+  "id": "animated_features",
+  "requires_all": [
+   "sound_films",
+   "film_studio_system"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "political_cartoon_weeklies"
+  ],
+  "note": "Feature-length animation."
+ },
+ {
+  "id": "long_play_records",
+  "requires_all": [
+   "recorded_sound",
+   "thermoplastic_processing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "radio_broadcasting"
+  ],
+  "note": "Long-playing plastic discs."
+ },
+ {
+  "id": "broadcast_rites",
+  "requires_all": [
+   "radio_broadcasting",
+   "god_revival_meetings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "television_broadcasting"
+  ],
+  "note": "The god's rites broadcast to every home."
+ },
+ {
+  "id": "televised_state_rites",
+  "requires_all": [
+   "television_broadcasting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "unknown_warrior_remembrance",
+   "ceremonial_crown"
+  ],
+  "note": "Rites of the seat televised."
+ },
+ {
+  "id": "electric_youth_music",
+  "requires_all": [
+   "syncopated_dance_music",
+   "triode_valves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "long_play_records",
+   "radio_broadcasting"
+  ],
+  "note": "Amplified guitars for the young."
+ },
+ {
+  "id": "mass_television_age",
+  "requires_all": [
+   "television_broadcasting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rural_electrification",
+   "transistor_amplifiers"
+  ],
+  "note": "Television in most homes."
+ },
+ {
+  "id": "televised_debates",
+  "requires_all": [
+   "mass_television_age"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mass_political_parties"
+  ],
+  "note": "Candidates debate on television."
+ },
+ {
+  "id": "mass_image_art",
+  "requires_all": [
+   "abstract_painting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "brand_advertising",
+   "photo_news_magazines",
+   "mass_television_age"
+  ],
+  "note": "Art from mass-produced images."
+ },
+ {
+  "id": "charter_flight_holidays",
+  "requires_all": [
+   "excursion_tourism",
+   "pressurized_airliner_cabins"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "jet_airliners",
+   "paid_annual_holidays"
+  ],
+  "note": "Package holidays by chartered airliner."
+ },
+ {
+  "id": "nonviolent_rights_movements",
+  "requires_all": [
+   "universal_rights_declaration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chattel_bondage_abolition",
+   "mass_television_age",
+   "peace_congresses"
+  ],
+  "note": "Mass nonviolent civil-rights campaigns."
+ },
+ {
+  "id": "worldwide_live_broadcast",
+  "requires_all": [
+   "relay_satellites",
+   "mass_television_age"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "One live broadcast shared worldwide."
+ },
+ {
+  "id": "youth_counterculture",
+  "requires_all": [
+   "electric_youth_music",
+   "mass_higher_education"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nonviolent_rights_movements",
+   "oral_contraceptive_pill"
+  ],
+  "note": "Student protest and counterculture."
+ },
+ {
+  "id": "womens_liberation_movement",
+  "requires_all": [
+   "womens_rights_convention",
+   "womens_suffrage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "oral_contraceptive_pill",
+   "youth_counterculture",
+   "equal_pay_law"
+  ],
+  "note": "A second women's movement."
+ },
+ {
+  "id": "many_cultures_policy",
+  "requires_all": [
+   "civil_rights_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "guest_worker_programmes",
+   "dependency_self_rule"
+  ],
+  "note": "Policy honouring many cultures."
+ },
+ {
+  "id": "electronic_games",
+  "requires_all": [
+   "integrated_circuits",
+   "mass_television_age"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Games on chips and screens."
+ },
+ {
+  "id": "world_heritage_list",
+  "requires_all": [
+   "monument_protection_law",
+   "world_assembly_of_realms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "layered_excavation"
+  ],
+  "note": "A world list of cultural sites."
+ },
+ {
+  "id": "home_video_recording",
+  "requires_all": [
+   "mass_television_age"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "long_play_records",
+   "transistor_amplifiers"
+  ],
+  "note": "Recording television at home."
+ },
+ {
+  "id": "portable_music_players",
+  "requires_all": [
+   "transistor_amplifiers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "long_play_records",
+   "electric_youth_music"
+  ],
+  "note": "Pocket music players."
+ },
+ {
+  "id": "spoken_rhythm_music",
+  "requires_all": [
+   "electric_youth_music"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "long_play_records"
+  ],
+  "note": "Spoken-rhythm street music."
+ },
+ {
+  "id": "continuous_news_channels",
+  "requires_all": [
+   "mass_television_age",
+   "relay_satellites"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "worldwide_live_broadcast"
+  ],
+  "note": "Round-the-clock news by satellite."
+ },
+ {
+  "id": "digital_music_discs",
+  "requires_all": [
+   "pulse_code_modulation",
+   "long_play_records"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "single_chip_processors"
+  ],
+  "note": "Coded audio on compact discs."
+ },
+ {
+  "id": "benefit_broadcast_concerts",
+  "requires_all": [
+   "worldwide_live_broadcast",
+   "electric_youth_music"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "peace_congresses"
+  ],
+  "note": "Benefit concerts broadcast worldwide."
+ },
+ {
+  "id": "online_forums",
+  "requires_all": [
+   "world_hypertext_web"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "store_forward_archives"
+  ],
+  "note": "Forums and personal pages."
+ },
+ {
+  "id": "file_sharing_networks",
+  "requires_all": [
+   "internetworking_protocols",
+   "digital_music_discs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "online_forums"
+  ],
+  "note": "Peer-to-peer sharing of files."
+ },
+ {
+  "id": "online_social_networks",
+  "requires_all": [
+   "world_hypertext_web",
+   "online_forums"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ranked_search_indexes"
+  ],
+  "note": "Online social networks."
+ },
+ {
+  "id": "user_video_sharing",
+  "requires_all": [
+   "world_hypertext_web",
+   "home_video_recording"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "online_social_networks",
+   "file_sharing_networks"
+  ],
+  "note": "User-made video online."
+ },
+ {
+  "id": "streaming_media",
+  "requires_all": [
+   "cloud_data_halls",
+   "digital_music_discs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "user_video_sharing"
+  ],
+  "note": "Streaming on demand."
+ },
+ {
+  "id": "networked_protest_movements",
+  "requires_all": [
+   "online_social_networks",
+   "pocket_networked_computers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nonviolent_rights_movements"
+  ],
+  "note": "Protests organized by phone networks."
+ },
+ {
+  "id": "algorithmic_feeds",
+  "requires_all": [
+   "online_social_networks",
+   "ranked_search_indexes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deep_learning_networks"
+  ],
+  "note": "Ranked feeds decide what people see."
+ },
+ {
+  "id": "networked_disinformation",
+  "requires_all": [
+   "algorithmic_feeds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "state_propaganda_ministry"
+  ],
+  "note": "Organized disinformation campaigns."
+ },
+ {
+  "id": "short_viral_video",
+  "requires_all": [
+   "user_video_sharing",
+   "pocket_networked_computers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "algorithmic_feeds"
+  ],
+  "note": "Short videos and memes."
+ },
+ {
+  "id": "online_influencers",
+  "requires_all": [
+   "user_video_sharing",
+   "streaming_media"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "brand_advertising",
+   "short_viral_video"
+  ],
+  "note": "Livestreamers and influencers."
+ },
+ {
+  "id": "remote_video_gatherings",
+  "requires_all": [
+   "cloud_data_halls",
+   "streaming_media"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "networked_telework",
+   "broadcast_rites"
+  ],
+  "note": "Work, worship and school by video call."
+ },
+ {
+  "id": "generated_media",
+  "requires_all": [
+   "deep_learning_networks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "large_language_models"
+  ],
+  "note": "Learned models generate images and music."
+ },
+ {
+  "id": "media_provenance_marks",
+  "requires_all": [
+   "generated_media",
+   "public_key_ciphers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "networked_disinformation"
+  ],
+  "note": "Signed provenance for media."
+ },
+ {
+  "id": "shared_virtual_venues",
+  "requires_all": [
+   "streaming_media",
+   "electronic_games"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "remote_video_gatherings"
+  ],
+  "note": "Virtual venues for gatherings."
+ },
+ {
+  "id": "first_factory_act",
+  "requires_all": [
+   "pauper_mill_apprentices"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "factory_shift_system",
+   "statutory_work_hours"
+  ],
+  "note": "Hours of bound mill children limited by statute."
+ },
+ {
+  "id": "overlookers_foremen",
+  "requires_all": [
+   "factory_fine_rules"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "factory_shift_system",
+   "mill_hand_workforce"
+  ],
+  "note": "Foremen drive the pace under the fine rules."
+ },
+ {
+  "id": "weavers_minimum_rate_petition",
+  "requires_all": [
+   "statutory_price_lists"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wage_assessment_lapse"
+  ],
+  "note": "Weavers ask for a legal rate after assessment lapses."
+ },
+ {
+  "id": "secret_trade_societies",
+  "requires_all": [
+   "general_combination_ban"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "journeymen_brotherhoods",
+   "houses_of_call",
+   "strike_funds"
+  ],
+  "note": "Trade societies go underground under the ban."
+ },
+ {
+  "id": "handloom_weaver_distress",
+  "requires_all": [
+   "iron_power_loom_sheds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weavers_minimum_rate_petition",
+   "off_season_cottage_weaving"
+  ],
+  "note": "Power looms collapse hand-loom rates."
+ },
+ {
+  "id": "spinners_federation",
+  "requires_all": [
+   "strike_funds",
+   "mule_spinning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "secret_trade_societies"
+  ],
+  "note": "Mule spinners federate across towns."
+ },
+ {
+  "id": "union_tramping_cards",
+  "requires_all": [
+   "strike_funds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tramping_relief",
+   "spinners_federation"
+  ],
+  "note": "Cards entitle travelling members to relief."
+ },
+ {
+  "id": "mechanics_institutes",
+  "requires_all": [
+   "public_experiment_lectures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "subscription_libraries",
+   "state_polytechnic_school",
+   "reading_circles"
+  ],
+  "note": "Evening science for working men."
+ },
+ {
+  "id": "combination_ban_repeal",
+  "requires_all": [
+   "general_combination_ban"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "secret_trade_societies",
+   "spinners_federation"
+  ],
+  "note": "Combinations made lawful."
+ },
+ {
+  "id": "master_servant_penalties",
+  "requires_all": [
+   "worker_pass_books"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "yearly_pitmen_bond",
+   "combination_ban_repeal"
+  ],
+  "note": "Breach of contract punished as crime."
+ },
+ {
+  "id": "mine_butty_gangs",
+  "requires_all": [
+   "navvy_gangs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "corf_piece_rates",
+   "lump_sum_building_contracts"
+  ],
+  "note": "Gang subcontracting in mines and building."
+ },
+ {
+  "id": "coin_wages_act",
+  "requires_all": [
+   "truck_pay_ban"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pay_ticket_wages"
+  ],
+  "note": "Wages must be paid in coin."
+ },
+ {
+  "id": "factory_inspectorate",
+  "requires_all": [
+   "first_factory_act"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "single_minister_departments"
+  ],
+  "note": "Inspectors enforce the factory acts."
+ },
+ {
+  "id": "chattel_bondage_abolition",
+  "requires_all": [
+   "bound_labor_abolition_movement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plantation_gang_labor",
+   "estate_bondage_abolition"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Chattel bondage abolished with compensation."
+ },
+ {
+  "id": "indentured_contract_migration",
+  "requires_all": [
+   "chattel_bondage_abolition",
+   "indentured_passage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "overseas_bound_estate_labor",
+   "island_cane_plantations"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Indentured laborers replace the freed on plantations."
+ },
+ {
+  "id": "underground_work_limits",
+  "requires_all": [
+   "factory_inspectorate"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mining_ordinances"
+  ],
+  "note": "Women and children barred from the pits."
+ },
+ {
+  "id": "consumer_cooperatives",
+  "requires_all": [
+   "friendly_society_boxes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "registered_friendly_societies",
+   "factory_villages"
+  ],
+  "note": "Cooperative stores share surplus."
+ },
+ {
+  "id": "half_time_schooling",
+  "requires_all": [
+   "factory_inspectorate",
+   "compulsory_parish_schooling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spinning_schools"
+  ],
+  "note": "Inspected factory children must attend school half-time."
+ },
+ {
+  "id": "ten_hour_day",
+  "requires_all": [
+   "factory_inspectorate"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "statutory_work_hours",
+   "eight_hour_mine_shifts"
+  ],
+  "note": "Ten-hour limit enforced by inspectors."
+ },
+ {
+  "id": "amalgamated_craft_unions",
+  "requires_all": [
+   "strike_funds",
+   "combination_ban_repeal"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "union_tramping_cards",
+   "registered_friendly_societies"
+  ],
+  "note": "National unions with officers and benefit funds."
+ },
+ {
+  "id": "saturday_half_holiday",
+  "requires_all": [
+   "ten_hour_day"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "saint_monday_custom"
+  ],
+  "note": "Saturday afternoon off."
+ },
+ {
+  "id": "district_rate_lists",
+  "requires_all": [
+   "joint_rate_boards",
+   "combination_ban_repeal"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "statutory_price_lists",
+   "amalgamated_craft_unions"
+  ],
+  "note": "District wage lists agreed."
+ },
+ {
+  "id": "sweated_home_work",
+  "requires_all": [
+   "sewing_machine_mechanisms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "debt_bound_putting_out",
+   "rural_putting_out"
+  ],
+  "note": "Sewing machines in sweated homes."
+ },
+ {
+  "id": "company_towns",
+  "requires_all": [
+   "factory_villages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crown_works_settlements",
+   "model_worker_dwellings"
+  ],
+  "note": "Employer-owned towns."
+ },
+ {
+  "id": "railway_staff_hierarchy",
+  "requires_all": [
+   "public_steam_railway",
+   "intercity_passenger_railway"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_railway_timetables",
+   "railway_clearing_house"
+  ],
+  "note": "Uniformed ranked railway staff."
+ },
+ {
+  "id": "worker_owned_workshops",
+  "requires_all": [
+   "consumer_cooperatives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "limited_liability_registration"
+  ],
+  "note": "Producer cooperatives."
+ },
+ {
+  "id": "employer_lockouts",
+  "requires_all": [
+   "amalgamated_craft_unions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "district_rate_lists",
+   "coal_river_strikes"
+  ],
+  "note": "Employers' federations answer with lockouts."
+ },
+ {
+  "id": "union_legal_standing",
+  "requires_all": [
+   "combination_ban_repeal",
+   "amalgamated_craft_unions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "manhood_suffrage"
+  ],
+  "note": "Unions given legal standing and protected funds."
+ },
+ {
+  "id": "machine_guarding_rules",
+  "requires_all": [
+   "factory_inspectorate"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "belt_power_transmission"
+  ],
+  "note": "Fencing of shafts and belts."
+ },
+ {
+  "id": "conciliation_boards",
+  "requires_all": [
+   "district_rate_lists"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "employer_lockouts"
+  ],
+  "note": "Joint boards settle disputes."
+ },
+ {
+  "id": "peaceful_picketing",
+  "requires_all": [
+   "union_legal_standing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Picketing made lawful."
+ },
+ {
+  "id": "trade_wide_employer_bargaining",
+  "requires_all": [
+   "employer_lockouts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "conciliation_boards"
+  ],
+  "note": "Employers bargain as a trade."
+ },
+ {
+  "id": "rail_harvest_gangs",
+  "requires_all": [
+   "acre_rate_harvest_gangs",
+   "public_steam_railway"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "gang_master_harvest_crews"
+  ],
+  "note": "Harvest gangs travel by rail."
+ },
+ {
+  "id": "labor_statistics_bureau",
+  "requires_all": [
+   "state_statistical_office"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "amalgamated_craft_unions",
+   "statistical_inference"
+  ],
+  "note": "A bureau counts wages, hours and strikes."
+ },
+ {
+  "id": "employer_liability_law",
+  "requires_all": [
+   "factory_inspectorate"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "machine_guarding_rules",
+   "union_legal_standing",
+   "commercial_code"
+  ],
+  "note": "Employers liable for negligent injury."
+ },
+ {
+  "id": "women_office_clerks",
+  "requires_all": [
+   "compulsory_elementary_schooling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "telephone_circuits",
+   "manual_switchboards"
+  ],
+  "note": "Schooled women enter offices and exchanges."
+ },
+ {
+  "id": "shop_hours_limits",
+  "requires_all": [
+   "factory_inspectorate"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "saturday_half_holiday",
+   "ten_hour_day"
+  ],
+  "note": "Shop hours limited."
+ },
+ {
+  "id": "blacklists_and_no_union_pledges",
+  "requires_all": [
+   "employer_lockouts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "company_towns"
+  ],
+  "note": "Employers bar organisers."
+ },
+ {
+  "id": "profit_sharing_schemes",
+  "requires_all": [
+   "limited_liability_registration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "worker_owned_workshops",
+   "share_exchange_bourse"
+  ],
+  "note": "Profit-sharing and employee shares."
+ },
+ {
+  "id": "accident_insurance",
+  "requires_all": [
+   "employer_liability_law",
+   "worker_sickness_insurance"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mortality_table_insurance"
+  ],
+  "note": "No-fault accident insurance."
+ },
+ {
+  "id": "time_clock_recording",
+  "requires_all": [
+   "pendulum_regulated_clock",
+   "overlookers_foremen"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mine_shift_registers"
+  ],
+  "note": "Clocks stamp each worker in and out."
+ },
+ {
+  "id": "eight_hour_campaign",
+  "requires_all": [
+   "ten_hour_day",
+   "union_legal_standing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "amalgamated_craft_unions"
+  ],
+  "note": "Legal unions campaign for eight hours."
+ },
+ {
+  "id": "general_unions",
+  "requires_all": [
+   "amalgamated_craft_unions",
+   "union_legal_standing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "employer_lockouts"
+  ],
+  "note": "Unions of dockers and laborers."
+ },
+ {
+  "id": "job_cost_accounting",
+  "requires_all": [
+   "double_entry_ledgers",
+   "time_clock_recording"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "audited_company_accounts"
+  ],
+  "note": "Costing by job and hour."
+ },
+ {
+  "id": "child_labor_prohibition",
+  "requires_all": [
+   "factory_inspectorate",
+   "compulsory_elementary_schooling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "half_time_schooling",
+   "underground_work_limits"
+  ],
+  "note": "No work under fourteen; school first."
+ },
+ {
+  "id": "premium_bonus_pay",
+  "requires_all": [
+   "time_clock_recording",
+   "job_cost_accounting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "gauged_piece_tickets"
+  ],
+  "note": "Bonus for beating the set time."
+ },
+ {
+  "id": "minimum_wage_boards",
+  "requires_all": [
+   "sweated_home_work",
+   "conciliation_boards"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weavers_minimum_rate_petition"
+  ],
+  "note": "Boards fix minimum pay in sweated trades."
+ },
+ {
+  "id": "examined_trade_apprenticeships",
+  "requires_all": [
+   "apprentice_indentures",
+   "mechanics_institutes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compulsory_elementary_schooling",
+   "state_polytechnic_school"
+  ],
+  "note": "Trade schools and examined apprenticeships."
+ },
+ {
+  "id": "industrial_arbitration_courts",
+  "requires_all": [
+   "conciliation_boards",
+   "union_legal_standing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "trade_wide_employer_bargaining"
+  ],
+  "note": "Binding wage awards."
+ },
+ {
+  "id": "work_rest_limits",
+  "requires_all": [
+   "ten_hour_day",
+   "statistical_sampling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "eight_hour_campaign"
+  ],
+  "note": "Fatigue studies set hour limits."
+ },
+ {
+  "id": "scheduled_occupational_diseases",
+  "requires_all": [
+   "accident_insurance"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "trade_diseases_treatise",
+   "disease_notification_law"
+  ],
+  "note": "Scheduled diseases compensated."
+ },
+ {
+  "id": "general_strike",
+  "requires_all": [
+   "general_unions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "eight_hour_campaign",
+   "workers_festival_day"
+  ],
+  "note": "A whole city stops work."
+ },
+ {
+  "id": "public_labor_exchanges",
+  "requires_all": [
+   "labor_statistics_bureau",
+   "servant_register_offices"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "union_tramping_cards",
+   "telephone_circuits"
+  ],
+  "note": "Public exchanges match jobless to vacancies."
+ },
+ {
+  "id": "work_motion_studies",
+  "requires_all": [
+   "time_clock_recording",
+   "premium_bonus_pay"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "job_cost_accounting",
+   "fixed_light_images",
+   "work_rest_limits"
+  ],
+  "note": "Stopwatch and camera fix the standard time."
+ },
+ {
+  "id": "labor_ministry",
+  "requires_all": [
+   "labor_statistics_bureau",
+   "single_minister_departments"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_labor_exchanges"
+  ],
+  "note": "A ministry of labor at the council."
+ },
+ {
+  "id": "moving_assembly_line",
+  "requires_all": [
+   "work_motion_studies",
+   "interchangeable_component_fits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "machine_block_line",
+   "series_built_motor_car",
+   "electric_motors"
+  ],
+  "note": "Work moved past fixed stations."
+ },
+ {
+  "id": "domestic_service_decline",
+  "requires_all": [
+   "women_office_clerks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compulsory_elementary_schooling",
+   "mechanical_washing_machines"
+  ],
+  "note": "Servants leave for offices and works."
+ },
+ {
+  "id": "high_day_wage",
+  "requires_all": [
+   "moving_assembly_line"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "A high wage stops turnover on the line."
+ },
+ {
+  "id": "industrial_welfare_departments",
+  "requires_all": [
+   "company_towns"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "accident_insurance",
+   "codified_ball_games"
+  ],
+  "note": "Canteens, nurses and sports clubs at work."
+ },
+ {
+  "id": "employment_departments",
+  "requires_all": [
+   "job_cost_accounting",
+   "public_labor_exchanges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "work_motion_studies",
+   "high_day_wage"
+  ],
+  "note": "Personnel departments."
+ },
+ {
+  "id": "eight_hour_day_law",
+  "requires_all": [
+   "eight_hour_campaign",
+   "labor_ministry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "general_strike"
+  ],
+  "note": "Eight-hour day by law."
+ },
+ {
+  "id": "standing_labor_conference",
+  "requires_all": [
+   "labor_ministry",
+   "league_of_realms"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "A conference of realms on labor standards."
+ },
+ {
+  "id": "works_councils",
+  "requires_all": [
+   "union_legal_standing",
+   "labor_ministry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "industrial_arbitration_courts"
+  ],
+  "note": "Elected works councils."
+ },
+ {
+  "id": "five_day_week",
+  "requires_all": [
+   "saturday_half_holiday",
+   "eight_hour_day_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "moving_assembly_line"
+  ],
+  "note": "Five-day week."
+ },
+ {
+  "id": "work_group_morale_studies",
+  "requires_all": [
+   "work_motion_studies",
+   "statistical_sampling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "employment_departments"
+  ],
+  "note": "Morale and group studies."
+ },
+ {
+  "id": "slump_hunger_marches",
+  "requires_all": [
+   "unemployment_insurance"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "general_unions",
+   "general_strike"
+  ],
+  "note": "Jobless march when benefits run out."
+ },
+ {
+  "id": "public_relief_works",
+  "requires_all": [
+   "labor_ministry",
+   "public_labor_exchanges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "famine_relief_works",
+   "public_work_relief"
+  ],
+  "note": "Public works hire the jobless."
+ },
+ {
+  "id": "industrial_unions",
+  "requires_all": [
+   "general_unions",
+   "moving_assembly_line"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "works_councils"
+  ],
+  "note": "Unions for a whole industry."
+ },
+ {
+  "id": "collective_bargaining_law",
+  "requires_all": [
+   "union_legal_standing",
+   "industrial_arbitration_courts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "industrial_unions",
+   "labor_ministry"
+  ],
+  "note": "Right to bargain with a relations board."
+ },
+ {
+  "id": "sit_down_strikes",
+  "requires_all": [
+   "industrial_unions",
+   "moving_assembly_line"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Occupying the line."
+ },
+ {
+  "id": "paid_annual_holidays",
+  "requires_all": [
+   "eight_hour_day_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "five_day_week",
+   "excursion_tourism"
+  ],
+  "note": "Paid holidays by law."
+ },
+ {
+  "id": "penal_labor_camps",
+  "requires_all": [
+   "one_party_state",
+   "penitentiary_sentences"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "convict_transportation",
+   "political_police_bureau"
+  ],
+  "note": "Political prisoners worked in camps; a harsh ruler's option."
+ },
+ {
+  "id": "national_minimum_wage",
+  "requires_all": [
+   "minimum_wage_boards",
+   "labor_ministry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "collective_bargaining_law",
+   "eight_hour_day_law"
+  ],
+  "note": "National minimum and forty-hour week."
+ },
+ {
+  "id": "total_labor_mobilization",
+  "requires_all": [
+   "war_economy_boards",
+   "class_year_conscription"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "women_office_clerks",
+   "public_labor_exchanges"
+  ],
+  "note": "Workers conscripted for war industry."
+ },
+ {
+  "id": "wartime_wage_controls",
+  "requires_all": [
+   "war_economy_boards",
+   "collective_bargaining_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_minimum_wage"
+  ],
+  "note": "Wage controls and no-strike pledges."
+ },
+ {
+  "id": "tripartite_wage_bargaining",
+  "requires_all": [
+   "collective_bargaining_law",
+   "labor_ministry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "corporatist_chambers",
+   "wartime_wage_controls"
+  ],
+  "note": "State, unions and employers bargain together."
+ },
+ {
+  "id": "board_level_codetermination",
+  "requires_all": [
+   "works_councils"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tripartite_wage_bargaining",
+   "limited_liability_registration"
+  ],
+  "note": "Workers on company boards."
+ },
+ {
+  "id": "negotiated_occupational_pensions",
+  "requires_all": [
+   "old_age_pensions",
+   "collective_bargaining_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mortality_table_insurance"
+  ],
+  "note": "Pensions won in bargaining."
+ },
+ {
+  "id": "public_sector_unions",
+  "requires_all": [
+   "collective_bargaining_law",
+   "competitive_civil_service"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Civil servants organise."
+ },
+ {
+  "id": "automation_retraining",
+  "requires_all": [
+   "industrial_robots"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "numerical_machine_control",
+   "unemployment_insurance",
+   "examined_trade_apprenticeships"
+  ],
+  "note": "Retraining for workers displaced by robots (moved to 2835)."
+ },
+ {
+  "id": "quality_circles",
+  "requires_all": [
+   "work_group_morale_studies",
+   "statistical_sampling"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Line workers solve defects in groups."
+ },
+ {
+  "id": "equal_pay_law",
+  "requires_all": [
+   "civil_rights_law",
+   "national_minimum_wage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "womens_suffrage",
+   "total_labor_mobilization"
+  ],
+  "note": "Equal pay by law."
+ },
+ {
+  "id": "flexible_working_hours",
+  "requires_all": [
+   "time_clock_recording",
+   "five_day_week"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Flexitime around a core."
+ },
+ {
+  "id": "lean_production",
+  "requires_all": [
+   "moving_assembly_line",
+   "quality_circles"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "statistical_sampling"
+  ],
+  "note": "Demand-pulled small batches."
+ },
+ {
+  "id": "occupational_safety_agency",
+  "requires_all": [
+   "machine_guarding_rules",
+   "labor_ministry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "scheduled_occupational_diseases"
+  ],
+  "note": "A national safety agency."
+ },
+ {
+  "id": "age_discrimination_ban",
+  "requires_all": [
+   "civil_rights_law"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Age discrimination forbidden."
+ },
+ {
+  "id": "redundancy_pay",
+  "requires_all": [
+   "collective_bargaining_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "unemployment_insurance",
+   "industrial_robots"
+  ],
+  "note": "Redundancy pay and notice."
+ },
+ {
+  "id": "service_economy_shift",
+  "requires_all": [
+   "national_income_accounts",
+   "women_office_clerks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mass_higher_education"
+  ],
+  "note": "Service jobs outnumber factory jobs."
+ },
+ {
+  "id": "temporary_agency_work",
+  "requires_all": [
+   "public_labor_exchanges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "service_economy_shift"
+  ],
+  "note": "Agency and fixed-term work."
+ },
+ {
+  "id": "labor_market_deregulation",
+  "requires_all": [
+   "collective_bargaining_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "state_enterprise_privatization",
+   "temporary_agency_work",
+   "floating_fiat_currency"
+  ],
+  "note": "Deregulation; union membership falls."
+ },
+ {
+  "id": "desktop_office_work",
+  "requires_all": [
+   "desk_computers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "women_office_clerks"
+  ],
+  "note": "Office work on desk computers."
+ },
+ {
+  "id": "workplace_harassment_rules",
+  "requires_all": [
+   "civil_rights_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "womens_liberation_movement"
+  ],
+  "note": "Harassment actionable."
+ },
+ {
+  "id": "offshored_work",
+  "requires_all": [
+   "intermodal_shipping_containers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "labor_market_deregulation",
+   "data_modems"
+  ],
+  "note": "Work moved abroad along container supply chains."
+ },
+ {
+  "id": "disability_accommodation",
+  "requires_all": [
+   "civil_rights_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "accessible_building_rules"
+  ],
+  "note": "Accommodation of disabled workers."
+ },
+ {
+  "id": "call_centre_work",
+  "requires_all": [
+   "desk_computers",
+   "data_modems"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "service_economy_shift",
+   "work_motion_studies"
+  ],
+  "note": "Call centres timed by the second."
+ },
+ {
+  "id": "common_working_time_rules",
+  "requires_all": [
+   "eight_hour_day_law",
+   "common_market_union"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Shared working-time rules."
+ },
+ {
+  "id": "networked_telework",
+  "requires_all": [
+   "world_hypertext_web",
+   "desktop_office_work"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Telework over networks."
+ },
+ {
+  "id": "zero_hours_contracts",
+  "requires_all": [
+   "temporary_agency_work",
+   "labor_market_deregulation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Work offered only when wanted."
+ },
+ {
+  "id": "living_wage_indexing",
+  "requires_all": [
+   "national_minimum_wage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "statistical_sampling",
+   "national_income_accounts"
+  ],
+  "note": "Minimum indexed to median pay."
+ },
+ {
+  "id": "platform_gig_work",
+  "requires_all": [
+   "pocket_networked_computers",
+   "temporary_agency_work"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Tasks assigned by app."
+ },
+ {
+  "id": "algorithmic_management",
+  "requires_all": [
+   "platform_gig_work"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deep_learning_networks"
+  ],
+  "note": "Algorithms schedule and rate workers."
+ },
+ {
+  "id": "right_to_disconnect",
+  "requires_all": [
+   "networked_telework",
+   "pocket_networked_computers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "eight_hour_day_law"
+  ],
+  "note": "Right to ignore messages after hours."
+ },
+ {
+  "id": "platform_worker_status",
+  "requires_all": [
+   "platform_gig_work"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "zero_hours_contracts",
+   "industrial_arbitration_courts"
+  ],
+  "note": "Platform workers ruled employees."
+ },
+ {
+  "id": "worker_monitoring_limits",
+  "requires_all": [
+   "algorithmic_management",
+   "personal_data_protection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "comprehensive_data_rights"
+  ],
+  "note": "Limits on electronic monitoring."
+ },
+ {
+  "id": "four_day_week_trials",
+  "requires_all": [
+   "five_day_week"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "networked_telework"
+  ],
+  "note": "Four-day week trials."
+ },
+ {
+  "id": "paid_care_work",
+  "requires_all": [
+   "old_age_pensions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "long_term_care_insurance",
+   "paid_parental_leave"
+  ],
+  "note": "Carers' leave and pension credits."
+ },
+ {
+  "id": "heat_stress_work_limits",
+  "requires_all": [
+   "work_rest_limits",
+   "occupational_safety_agency"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "extreme_event_attribution"
+  ],
+  "note": "Outdoor work halted in extreme heat."
+ },
+ {
+  "id": "machine_assistant_desk_work",
+  "requires_all": [
+   "desktop_office_work",
+   "large_language_models"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Machine assistants take routine desk work."
+ },
+ {
+  "id": "lifelong_learning_accounts",
+  "requires_all": [
+   "automation_retraining"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mass_higher_education",
+   "online_government_services"
+  ],
+  "note": "Retraining accounts across a working life."
+ },
+ {
+  "id": "basic_income_pilots",
+  "requires_all": [
+   "welfare_state"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mobile_remittances",
+   "machine_assistant_desk_work",
+   "living_wage_indexing"
+  ],
+  "note": "Unconditional income piloted."
+ }
+]

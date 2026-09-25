@@ -153,6 +153,33 @@ ROWS_ADDED = [
      "reason": "Spaceflight, as above. AD 1969. Key threshold."},
     {"id": "shared_orbital_station", "line": "logistics", "year": 2920, "status": "new",
      "reason": "Spaceflight, as above. Continuously crewed station shared by several realms, AD 1998-2000."},
+    # Gap rows: items no list claimed (REGISTRY_3000_NOTES.md, the dependency pass's workarounds).
+    {"id": "typewriter", "line": "knowledge", "year": 2600, "status": "new",
+     "reason": "Gap: no list placed the typewriter (first commercial machine AD 1874; 2600 = AD 1875). Knowledge's "
+        "Preserved-knowledge channel; shared with Labor, whose women_office_clerks (2615) are typists."},
+    {"id": "cathode_ray_discharge_tubes", "line": "knowledge", "year": 2603, "status": "new",
+     "reason": "Gap: discharge tubes and cathode rays (AD 1857-1879; 2603 = AD 1876). Health's bone_shadow_imaging "
+        "had to hang on electromagnetic_induction; it and electron_physics now require this row."},
+    {"id": "expanding_universe_cosmology", "line": "knowledge", "year": 2744, "status": "new",
+     "reason": "Gap: the expanding universe (AD 1929). Needs spectroscopy and relative_spacetime."},
+    {"id": "stored_program_computer", "line": "knowledge", "year": 2796, "status": "new",
+     "reason": "Gap: the first stored-program electronic computer (AD 1948-49; 2796 = AD 1948.5). Placed in Knowledge "
+        "(shared with Production) because Production's 2750-2800 bin is already flagged for load and Knowledge's is "
+        "not. numerical_weather_prediction used binary_adders as a stand-in; it now requires this row."},
+    {"id": "recombinant_dna", "line": "knowledge", "year": 2858, "status": "new",
+     "reason": "Gap: recombinant DNA (AD 1973). transgenic_crops and precision_fermented_proteins used "
+        "recombinant_vaccine (2890) as a stand-in; they, recombinant_vaccine and engineered_microbe_chemicals now "
+        "require this row."},
+    {"id": "rock_oil_well_drilling", "line": "infrastructure", "year": 2555, "status": "new",
+     "reason": "Gap: drilled oil wells (AD 1859; fuel_refining 2557 covered only refining). Infrastructure, beside "
+        "the brine wells of percussion_drilled_wells (1200-1800); Production's 2550-2600 bin is already flagged."},
+]
+
+# Gap checked and not added: the progressive income tax.
+GAPS_NOT_ADDED = [
+    {"gap": "progressive income tax", "covered_by": "graduated_income_tax",
+     "where": "registry_2400.json, institutions 2398 ('Graduated income tax', [gov: law])",
+     "reason": "The 1800-2400 row already places a graduated (progressive) income tax; a second row would repeat it."},
 ]
 
 # Duplicates resolved before or during this pass that leave no alias row.
@@ -572,12 +599,6 @@ def main():
             "the marine service, not the engine. Should require it."},
         {"id": "networked_telework", "issue": "Labor 2915 (telework) and Culture remote_video_gatherings (2975, the "
             "pandemic-era video call) are kept separate; the second should require the first."},
-        {"id": "electronic computer", "issue": "No row names the first general-purpose electronic computer (AD "
-            "1945-49, about 2787-2798). Knowledge defers computing hardware to Production's Materials catalog "
-            "(read_write_memory 2806, stored_program_control 2838); the gap is the machine itself. Not added."},
-        {"id": "possible gaps", "issue": "No row for the typewriter (AD 1868), rock-oil well drilling (AD 1859; "
-            "fuel_refining 2557 covers refining), a progressive income tax, or the expanding-universe cosmology "
-            "(AD 1929). Recorded for the list owners; not added by this pass."},
         {"id": "postmortem_cesarean", "issue": "Prior-window id (continued by sutured_surgical_birth) whose slug "
             "uses 'cesarean', a variant of the caesar* eponym the denylist catches in its 'caesarean' spelling. "
             "Rename in its own window."},
@@ -615,6 +636,7 @@ def main():
         "name_fixes": NAME_FIXES,
         "note_fixes": NOTE_FIXES,
         "rows_added_by_registry": ROWS_ADDED,
+        "gaps_checked_not_added": GAPS_NOT_ADDED,
         "real_name_id_exceptions": REAL_NAME_ID_EXCEPTIONS,
         "redates": redates,
         "previously_excluded_now_placed": previously_excluded,

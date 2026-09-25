@@ -1,0 +1,7630 @@
+[
+ {
+  "id": "punched_card_loom_control",
+  "requires_all": [
+   "drawloom_pattern_control",
+   "pictographic_records"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ribbon_engine_loom",
+   "flying_shuttles"
+  ],
+  "note": "Chained punched cards select the pattern threads."
+ },
+ {
+  "id": "high_pressure_steam_engines",
+  "requires_all": [
+   "double_acting_engine",
+   "pressure_vessels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rotative_steam_engine",
+   "feedback_governors"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Coal"
+   ]
+  },
+  "note": "Strong boilers let small engines work at high steam."
+ },
+ {
+  "id": "continuous_paper_machine",
+  "requires_all": [
+   "wove_paper_moulds",
+   "belt_power_transmission"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hollander_beater",
+   "paper_sheet_pressing"
+  ],
+  "note": "Paper formed as an endless web on moving wire."
+ },
+ {
+  "id": "machine_block_line",
+  "requires_all": [
+   "precision_machinery",
+   "belt_power_transmission"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "screw_cutting_lathe",
+   "rotative_steam_engine"
+  ],
+  "note": "A line of special machines makes pulley blocks."
+ },
+ {
+  "id": "coal_gas_works",
+  "requires_all": [
+   "coke_firing",
+   "pressure_pipe_jointing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coal_tar_pitch",
+   "isolated_airs_chemistry"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Coal"
+   ]
+  },
+  "note": "Coal gas distilled in retorts and held in gasholders."
+ },
+ {
+  "id": "interchangeable_component_fits",
+  "requires_all": [
+   "dimensional_metrology",
+   "workshop_standards",
+   "jig_filed_gunlocks",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "screw_cutting_lathe",
+   "machine_block_line"
+  ],
+  "note": "Parts made to gauges fit any machine."
+ },
+ {
+  "id": "iron_power_loom_sheds",
+  "requires_all": [
+   "flying_shuttles",
+   "belt_power_transmission",
+   "rotative_steam_engine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mule_spinning",
+   "yarn_tension_control"
+  ],
+  "note": "Steam-driven iron looms fill weaving sheds."
+ },
+ {
+  "id": "steam_propulsion",
+  "requires_all": [
+   "precision_machinery",
+   "high_pressure_steam_engines"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "scheduled_river_steamers",
+   "trial_steam_paddle_boat"
+  ],
+  "note": "Engines drive paddle and screw hulls at sea."
+ },
+ {
+  "id": "friction_matches",
+  "requires_all": [
+   "isolated_airs_chemistry",
+   "oxygen_combustion_theory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "potash_saltpetre_works"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Sulfur"
+   ]
+  },
+  "note": "Chemical match heads light by friction."
+ },
+ {
+  "id": "plunger_pressed_glass",
+  "requires_all": [
+   "glassmaking",
+   "forge_welding",
+   "workshop_standards"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cast_plate_glass",
+   "coal_fired_glass_furnace"
+  ],
+  "note": "Plungers press glass into iron moulds."
+ },
+ {
+  "id": "ring_spinning_systems",
+  "requires_all": [
+   "flyer_spinning",
+   "rotational_dynamics"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "roller_water_frame",
+   "mule_spinning"
+  ],
+  "note": "Yarn wound continuously on a travelling ring."
+ },
+ {
+  "id": "hot_blast_smelting",
+  "requires_all": [
+   "blast_furnace",
+   "iron_blowing_cylinders"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coke_firing",
+   "refractory_furnaces"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Iron Ore"
+   ]
+  },
+  "note": "Heated blast cuts the iron furnace's fuel."
+ },
+ {
+  "id": "three_plate_lapping",
+  "requires_all": [
+   "standard_measures",
+   "stone_sorting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "screw_cutting_lathe",
+   "precision_machinery"
+  ],
+  "note": "Three plates lapped together give true planes."
+ },
+ {
+  "id": "graphite_crucibles",
+  "requires_all": [
+   "graphite_marking",
+   "refractory_furnaces"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "graphite_clay_crucibles",
+   "steel_refining"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Graphite"
+   ]
+  },
+  "note": "Clay-graphite crucibles last many meltings."
+ },
+ {
+  "id": "charcoal_retorts",
+  "requires_all": [
+   "charcoal",
+   "pressure_vessels",
+   "refractory_brick_firing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coal_gas_works",
+   "turpentine_rosin_distilling"
+  ],
+  "note": "Closed retorts save the tars of charcoal burning."
+ },
+ {
+  "id": "wood_methanol_recovery",
+  "requires_all": [
+   "charcoal_retorts",
+   "chemical_distillation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "turpentine_rosin_distilling"
+  ],
+  "note": "Wood spirit and acetic acid caught from retort vapours."
+ },
+ {
+  "id": "electrical_generators",
+  "requires_all": [
+   "electromagnetic_induction",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electrochemical_cells",
+   "friction_electric_machine"
+  ],
+  "note": "Rotating magnets and coils make steady current."
+ },
+ {
+  "id": "fractional_distillation",
+  "requires_all": [
+   "chemical_distillation",
+   "precision_thermometry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coal_gas_works",
+   "calorimetry"
+  ],
+  "note": "Columns part mixed liquids by boiling point."
+ },
+ {
+  "id": "water_electrolysis",
+  "requires_all": [
+   "electrochemical_cells",
+   "electrical_generators",
+   "pressure_vessels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "isolated_airs_chemistry"
+  ],
+  "note": "Current splits water into hydrogen and oxygen."
+ },
+ {
+  "id": "gear_tooth_generation",
+  "requires_all": [
+   "gear_cutting_engine",
+   "dimensional_metrology"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "screw_cutting_lathe"
+  ],
+  "note": "Gear teeth cut to a true rolling curve."
+ },
+ {
+  "id": "straightedge_scraping",
+  "requires_all": [
+   "three_plate_lapping",
+   "forge_welding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "precision_machinery"
+  ],
+  "note": "Slides scraped straight against master straightedges."
+ },
+ {
+  "id": "aromatic_nitration",
+  "requires_all": [
+   "chemical_distillation",
+   "experimental_controls",
+   "coal_gas_works"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coal_tar_pitch",
+   "lead_chamber_acid"
+  ],
+  "note": "Coal-tar benzene nitrated for dyes and explosives."
+ },
+ {
+  "id": "electric_motors",
+  "requires_all": [
+   "electromagnetic_induction",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electrical_generators",
+   "electrochemical_cells"
+  ],
+  "note": "Current turned back into motion."
+ },
+ {
+  "id": "electromagnetic_relays",
+  "requires_all": [
+   "electromagnetic_induction",
+   "wire_drawing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electromagnet_sounders"
+  ],
+  "note": "A weak current switches a strong one."
+ },
+ {
+  "id": "electroplating",
+  "requires_all": [
+   "electrochemical_cells",
+   "electrical_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fused_silver_plate",
+   "electrical_generators"
+  ],
+  "note": "Current lays silver and nickel on base metal."
+ },
+ {
+  "id": "machine_way_scraping",
+  "requires_all": [
+   "straightedge_scraping",
+   "bearing_surfaces"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "precision_machinery"
+  ],
+  "note": "Machine ways scraped to bearing marks."
+ },
+ {
+  "id": "sulphur_cured_rubber",
+  "requires_all": [
+   "sulfur_purification",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "calorimetry",
+   "bitumen_sealing"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Sulfur"
+   ],
+   "contact_required": true
+  },
+  "note": "Sulphur and heat cure rubber firm in heat and cold."
+ },
+ {
+  "id": "steam_hammer_forging",
+  "requires_all": [
+   "high_pressure_steam_engines",
+   "puddling_furnace"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "iron_plate_hammer_mills",
+   "steam_propulsion"
+  ],
+  "note": "Steam hammers forge shafts with a controlled blow."
+ },
+ {
+  "id": "sewing_machine_mechanisms",
+  "requires_all": [
+   "bone_needle_sewing",
+   "cam_motion_design"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "interchangeable_component_fits",
+   "stocking_knitting_frame"
+  ],
+  "note": "Lockstitch machine with an eye-pointed needle."
+ },
+ {
+  "id": "cable_insulation",
+  "requires_all": [
+   "wire_drawing",
+   "bitumen_sealing",
+   "electrical_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sulphur_cured_rubber",
+   "electrical_telegraphy"
+  ],
+  "note": "Wire sheathed in gutta-percha and rubber."
+ },
+ {
+  "id": "leather_thickness_skiving",
+  "requires_all": [
+   "leather_goods_patterning",
+   "dimensional_metrology"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Leather skived to even thickness by machine."
+ },
+ {
+  "id": "coal_light_oil_recovery",
+  "requires_all": [
+   "coke_firing",
+   "fractional_distillation",
+   "coal_tar_pitch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coal_gas_works"
+  ],
+  "note": "Light oils and benzene recovered from coal tar."
+ },
+ {
+  "id": "cotter_pin_forming",
+  "requires_all": [
+   "wire_drawing",
+   "forge_welding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "slitting_mills"
+  ],
+  "note": "Split pins bent from half-round wire."
+ },
+ {
+  "id": "rivet_blank_heading",
+  "requires_all": [
+   "forge_welding",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bolt_blank_forging",
+   "nut_blank_forging"
+  ],
+  "note": "Rivet blanks headed cold in dies."
+ },
+ {
+  "id": "compound_steam_engines",
+  "requires_all": [
+   "high_pressure_steam_engines",
+   "heat_engine_cycles"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steam_propulsion",
+   "cylinder_boring"
+  ],
+  "note": "Steam expanded twice for less coal."
+ },
+ {
+  "id": "lead_screw_cutting",
+  "requires_all": [
+   "standard_measures",
+   "steel_refining",
+   "gear_cutting_engine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "screw_cutting_lathe"
+  ],
+  "note": "Master lead screws cut and corrected."
+ },
+ {
+  "id": "split_feed_nuts",
+  "requires_all": [
+   "lead_screw_cutting",
+   "copper_smelting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Split nuts engage and release the lead screw."
+ },
+ {
+  "id": "cross_slide_assembly",
+  "requires_all": [
+   "machine_way_scraping",
+   "lead_screw_cutting",
+   "split_feed_nuts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "screw_cutting_lathe"
+  ],
+  "note": "Cross-slides feed the tool square to the work."
+ },
+ {
+  "id": "tailstock_fitting",
+  "requires_all": [
+   "straightedge_scraping",
+   "lead_screw_cutting",
+   "bearing_surfaces"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "screw_cutting_lathe"
+  ],
+  "note": "Screw-fed tailstocks on standard lathes."
+ },
+ {
+  "id": "steelplate_engraving",
+  "requires_all": [
+   "burin_engraving",
+   "steel_refining"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stone_lithography"
+  ],
+  "note": "Hardened steel plates engraved for long runs."
+ },
+ {
+  "id": "pneumatic_steel_converter",
+  "requires_all": [
+   "steel_refining",
+   "hot_blast_smelting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "puddling_furnace",
+   "refractory_furnaces"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Iron Ore"
+   ]
+  },
+  "note": "Air blown through molten iron makes cheap steel."
+ },
+ {
+  "id": "four_jaw_chucks",
+  "requires_all": [
+   "lead_screw_cutting",
+   "forge_welding"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Four-jaw chucks grip irregular work."
+ },
+ {
+  "id": "coal_tar_dyes",
+  "requires_all": [
+   "aromatic_nitration",
+   "coal_light_oil_recovery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fast_madder_red",
+   "systematic_chemical_names"
+  ],
+  "note": "The first coal-tar dye founds a dye trade."
+ },
+ {
+  "id": "thread_pitch_gauging",
+  "requires_all": [
+   "lead_screw_cutting",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "screw_tap_and_die"
+  ],
+  "note": "Thread pitch checked with standard gauges."
+ },
+ {
+  "id": "lead_oxide_preparation",
+  "requires_all": [
+   "lead_smelting",
+   "chemical_distillation",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": [
+    "Lead Ore"
+   ]
+  },
+  "note": "Litharge and red lead made in controlled furnaces."
+ },
+ {
+  "id": "sheet_steel_rolling",
+  "requires_all": [
+   "steel_refining",
+   "bearing_surfaces"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grooved_bar_rolls",
+   "rolled_metal_strip"
+  ],
+  "note": "Sheet steel rolled thin in powered mills."
+ },
+ {
+  "id": "fuel_refining",
+  "requires_all": [
+   "fractional_distillation",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "turpentine_rosin_distilling",
+   "coal_light_oil_recovery"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Crude Oil"
+   ]
+  },
+  "note": "Rock oil distilled into lamp oil and fuels."
+ },
+ {
+  "id": "gas_composition_analysis",
+  "requires_all": [
+   "spectroscopy",
+   "chemical_distillation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coal_gas_works",
+   "isolated_airs_chemistry"
+  ],
+  "note": "Furnace gases analysed by absorption."
+ },
+ {
+  "id": "washer_punching",
+  "requires_all": [
+   "sheet_steel_rolling",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Washers punched from sheet in one stroke."
+ },
+ {
+  "id": "abrasive_grinding_control",
+  "requires_all": [
+   "comparative_mineral_hardness",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Grinding wheels graded by grit and bond."
+ },
+ {
+  "id": "tinplate_coating",
+  "requires_all": [
+   "sheet_steel_rolling",
+   "tin_smelting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rolled_tinplate"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Tin Ore"
+   ]
+  },
+  "note": "Tin coated evenly on rolled steel sheet."
+ },
+ {
+  "id": "biomass_gasification",
+  "requires_all": [
+   "charcoal",
+   "gas_composition_analysis"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coal_gas_works",
+   "charcoal_retorts"
+  ],
+  "note": "Wood and peat turned into producer gas."
+ },
+ {
+  "id": "milling_table_feeds",
+  "requires_all": [
+   "cross_slide_assembly",
+   "machine_way_scraping"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Screw-fed milling tables advance the work steadily."
+ },
+ {
+  "id": "wood_pulp_paper",
+  "requires_all": [
+   "continuous_paper_machine",
+   "salt_cake_soda"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hollander_beater"
+  ],
+  "note": "Paper pulped from ground and cooked wood."
+ },
+ {
+  "id": "open_hearth_steel",
+  "requires_all": [
+   "pneumatic_steel_converter",
+   "refractory_furnaces"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coal_gas_works",
+   "biomass_gasification"
+  ],
+  "note": "Regenerative hearth makes steel from pig and scrap."
+ },
+ {
+  "id": "toolbit_heat_treatment",
+  "requires_all": [
+   "steel_refining",
+   "charcoal"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "metal_annealing_control"
+  ],
+  "note": "Tool bits hardened and tempered to a standard."
+ },
+ {
+  "id": "drill_bit_fluting",
+  "requires_all": [
+   "toolbit_heat_treatment",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Twist drills milled with helical flutes."
+ },
+ {
+  "id": "ammonia_soda_process",
+  "requires_all": [
+   "salt_cake_soda",
+   "coal_gas_works"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "brine_purification"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Salt",
+    "Limestone"
+   ]
+  },
+  "note": "Soda ash made cleanly with gasworks ammonia."
+ },
+ {
+  "id": "centre_lathe_assembly",
+  "requires_all": [
+   "cross_slide_assembly",
+   "four_jaw_chucks",
+   "tailstock_fitting",
+   "toolbit_heat_treatment"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Standard lathes assembled from matched parts."
+ },
+ {
+  "id": "quill_feed_mechanisms",
+  "requires_all": [
+   "centre_lathe_assembly",
+   "bearing_surfaces",
+   "lead_screw_cutting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Quill feeds advance the drill spindle."
+ },
+ {
+  "id": "steel_wire_drawing",
+  "requires_all": [
+   "wire_drawing",
+   "toolbit_heat_treatment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pneumatic_steel_converter"
+  ],
+  "note": "Steel wire drawn through hard dies."
+ },
+ {
+  "id": "column_drilling_machines",
+  "requires_all": [
+   "quill_feed_mechanisms",
+   "drill_bit_fluting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Column drills with powered feed."
+ },
+ {
+  "id": "nut_bore_drilling",
+  "requires_all": [
+   "nut_blank_forging",
+   "column_drilling_machines"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Nut bores drilled true to the thread size."
+ },
+ {
+  "id": "thread_tap_cutting",
+  "requires_all": [
+   "lead_screw_cutting",
+   "toolbit_heat_treatment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "screw_tap_and_die"
+  ],
+  "note": "Taps made to cut internal threads."
+ },
+ {
+  "id": "bench_vise_screws",
+  "requires_all": [
+   "lead_screw_cutting",
+   "split_feed_nuts",
+   "column_drilling_machines"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Screw vices hold work at the fitter's bench."
+ },
+ {
+  "id": "thread_die_cutting",
+  "requires_all": [
+   "thread_tap_cutting",
+   "toolbit_heat_treatment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "screw_tap_and_die"
+  ],
+  "note": "Screw threads cut with split dies."
+ },
+ {
+  "id": "milling_spindle_heads",
+  "requires_all": [
+   "centre_lathe_assembly",
+   "column_drilling_machines",
+   "gear_cutting_engine"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Geared spindle heads on milling machines."
+ },
+ {
+  "id": "celluloid_moulding",
+  "requires_all": [
+   "aromatic_nitration",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sulphur_cured_rubber"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Nitrated cotton and camphor moulded as the first plastic."
+ },
+ {
+  "id": "external_thread_cutting",
+  "requires_all": [
+   "bolt_blank_forging",
+   "thread_die_cutting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "External threads cut to standard forms."
+ },
+ {
+  "id": "internal_thread_tapping",
+  "requires_all": [
+   "nut_bore_drilling",
+   "thread_tap_cutting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Holes tapped to standard threads."
+ },
+ {
+  "id": "milling_cutter_relief",
+  "requires_all": [
+   "toolbit_heat_treatment",
+   "centre_lathe_assembly"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Cutters backed off for resharpening."
+ },
+ {
+  "id": "horizontal_milling_machines",
+  "requires_all": [
+   "milling_table_feeds",
+   "milling_spindle_heads",
+   "milling_cutter_relief"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "gear_cutting_engine"
+  ],
+  "note": "Arbor milling machines with a fed table."
+ },
+ {
+  "id": "matched_thread_inspection",
+  "requires_all": [
+   "thread_pitch_gauging",
+   "internal_thread_tapping"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "interchangeable_component_fits"
+  ],
+  "note": "Threads checked with go and no-go gauges."
+ },
+ {
+  "id": "reamed_bore_finishing",
+  "requires_all": [
+   "column_drilling_machines",
+   "dimensional_metrology"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Bores reamed to a fitted size."
+ },
+ {
+  "id": "worm_dividing_heads",
+  "requires_all": [
+   "horizontal_milling_machines",
+   "gear_cutting_engine"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Worm dividing heads index gears and flutes."
+ },
+ {
+  "id": "basic_machine_shops",
+  "requires_all": [
+   "centre_lathe_assembly",
+   "column_drilling_machines",
+   "bench_vise_screws"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "interchangeable_component_fits"
+  ],
+  "note": "Lathes, drills and benches set out as one plant."
+ },
+ {
+  "id": "spring_wire_coiling",
+  "requires_all": [
+   "steel_wire_drawing",
+   "tailstock_fitting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Spring wire coiled on powered arbors."
+ },
+ {
+  "id": "reciprocating_profile_slotting",
+  "requires_all": [
+   "crank_driven_sawmills",
+   "toolbit_heat_treatment"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Slotting machines cut keyways and profiles."
+ },
+ {
+  "id": "coil_spring_tempering",
+  "requires_all": [
+   "spring_wire_coiling",
+   "toolbit_heat_treatment"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Coil springs tempered to a set load."
+ },
+ {
+  "id": "progressive_profile_broaching",
+  "requires_all": [
+   "toolbit_heat_treatment",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Stepped broach teeth cut a profile in one pass."
+ },
+ {
+  "id": "metal_spinning_forming",
+  "requires_all": [
+   "centre_lathe_assembly",
+   "sheet_steel_rolling"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Sheet spun over formers on the lathe."
+ },
+ {
+  "id": "glass_batch_composition_control",
+  "requires_all": [
+   "glassmaking",
+   "material_accounting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clear_crystal_glass",
+   "systematic_chemical_names"
+  ],
+  "note": "Glass batches weighed to a set composition."
+ },
+ {
+  "id": "internal_combustion",
+  "requires_all": [
+   "fuel_refining",
+   "heat_engine_cycles",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coal_gas_works",
+   "compound_steam_engines"
+  ],
+  "note": "Fuel burned inside the cylinder on four strokes."
+ },
+ {
+  "id": "cylindrical_grinding",
+  "requires_all": [
+   "centre_lathe_assembly",
+   "abrasive_grinding_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Cylindrical grinding to fitted sizes."
+ },
+ {
+  "id": "surface_grinding",
+  "requires_all": [
+   "machine_way_scraping",
+   "abrasive_grinding_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hardened flat parts surface-ground."
+ },
+ {
+  "id": "glass_tube_drawing",
+  "requires_all": [
+   "glass_blowing",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "drawn_cane_beads"
+  ],
+  "note": "Glass tubing drawn continuously to size."
+ },
+ {
+  "id": "filament_lamp_works",
+  "requires_all": [
+   "electrical_generators",
+   "vacuum_pumps",
+   "glass_tube_drawing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electroplating"
+  ],
+  "note": "Carbon-filament lamps blown, pumped and sealed."
+ },
+ {
+  "id": "chain_power_transmission",
+  "requires_all": [
+   "forge_welding",
+   "gear_cutting_engine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "belt_power_transmission"
+  ],
+  "note": "Roller chains carry power between sprockets."
+ },
+ {
+  "id": "shaft_alignment_methods",
+  "requires_all": [
+   "dimensional_metrology",
+   "bearing_surfaces"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Shafts aligned by line, level and dial."
+ },
+ {
+  "id": "roll_formed_sections",
+  "requires_all": [
+   "sheet_steel_rolling",
+   "shaft_alignment_methods"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Sheet rolled into channels and sections."
+ },
+ {
+  "id": "rolling_element_bearings",
+  "requires_all": [
+   "dimensional_metrology",
+   "hardened_edges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "abrasive_grinding_control",
+   "cylindrical_grinding"
+  ],
+  "note": "Ball and roller bearings ground to size."
+ },
+ {
+  "id": "fluid_film_bearings",
+  "requires_all": [
+   "viscous_resistance",
+   "lubrication_regimes"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Oil films carry heavy shafts."
+ },
+ {
+  "id": "packed_piston_seals",
+  "requires_all": [
+   "plain_weaving",
+   "lubrication_regimes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "double_acting_engine"
+  ],
+  "note": "Packed glands seal piston rods."
+ },
+ {
+  "id": "steam_turbines",
+  "requires_all": [
+   "electrical_generators",
+   "compound_steam_engines",
+   "heat_engine_cycles"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rolling_element_bearings",
+   "fluid_film_bearings"
+  ],
+  "note": "Turbines spin generators at high speed."
+ },
+ {
+  "id": "resistance_welding",
+  "requires_all": [
+   "electrical_measurement",
+   "electrical_generators"
+  ],
+  "requires_any": [
+   [
+    "forge_welding"
+   ]
+  ],
+  "precedents": [],
+  "note": "Sheet joined by resistance heating."
+ },
+ {
+  "id": "alumina_refining",
+  "requires_all": [
+   "ore_assaying",
+   "chemical_distillation",
+   "pressure_vessels",
+   "ammonia_soda_process"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": [
+    "Bauxite"
+   ]
+  },
+  "note": "Bauxite digested in caustic liquor to alumina."
+ },
+ {
+  "id": "snap_fastener_closures",
+  "requires_all": [
+   "leather_goods_patterning",
+   "elastic_deformation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Snap fasteners pressed onto garments."
+ },
+ {
+  "id": "aluminum_electrolysis",
+  "requires_all": [
+   "alumina_refining",
+   "electrical_generators",
+   "electrochemical_cells"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "water_electrolysis"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Bauxite"
+   ]
+  },
+  "note": "Aluminium won from molten salts by current."
+ },
+ {
+  "id": "induction_motors",
+  "requires_all": [
+   "electric_motors",
+   "wound_transformers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electromagnetic_wave_theory"
+  ],
+  "note": "Rotating-field motors run on alternating current."
+ },
+ {
+  "id": "cutting_fluid_management",
+  "requires_all": [
+   "calorimetry",
+   "lubrication_regimes"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Cutting fluids cool and wash the tool."
+ },
+ {
+  "id": "arc_welding_processes",
+  "requires_all": [
+   "electrical_measurement",
+   "electrical_generators",
+   "forge_welding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "resistance_welding"
+  ],
+  "note": "Arc welding with carbon and metal electrodes."
+ },
+ {
+  "id": "relay_logic",
+  "requires_all": [
+   "electromagnetic_relays"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "polarized_telegraph_relays",
+   "manual_switchboards"
+  ],
+  "note": "Relay contacts wired to do logic."
+ },
+ {
+  "id": "chloralkali_cells",
+  "requires_all": [
+   "brine_purification",
+   "electrochemical_cells",
+   "electrical_generators",
+   "pressure_vessels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "water_electrolysis"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Salt"
+   ]
+  },
+  "note": "Brine split by current into chlorine and caustic."
+ },
+ {
+  "id": "porous_battery_separators",
+  "requires_all": [
+   "paper_making",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Porous separators part battery plates."
+ },
+ {
+  "id": "hydrogen_chloride_synthesis",
+  "requires_all": [
+   "chloralkali_cells",
+   "pressure_vessels",
+   "chemical_distillation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hydrogen burned in chlorine gives hydrochloric acid."
+ },
+ {
+  "id": "lead_acid_cells",
+  "requires_all": [
+   "electrochemical_cells",
+   "lead_sheet_rolling",
+   "lead_oxide_preparation",
+   "porous_battery_separators",
+   "lead_chamber_acid"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electrical_generators"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Lead Ore"
+   ]
+  },
+  "note": "Rechargeable lead plates in acid."
+ },
+ {
+  "id": "regenerated_cellulose_fibre",
+  "requires_all": [
+   "celluloid_moulding",
+   "wood_pulp_paper"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "silk_throwing_mills"
+  ],
+  "note": "Dissolved wood cellulose spun as artificial silk."
+ },
+ {
+  "id": "compression_ignition_engines",
+  "requires_all": [
+   "internal_combustion",
+   "fuel_refining"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "heat_engine_cycles"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Crude Oil"
+   ]
+  },
+  "note": "Compression ignites heavy oil in the cylinder."
+ },
+ {
+  "id": "sulfur_dioxide_recovery",
+  "requires_all": [
+   "sulfur_purification",
+   "sealed_vessels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lead_chamber_acid"
+  ],
+  "note": "Sulphur dioxide recovered from smelter gases."
+ },
+ {
+  "id": "drill_jig_bushings",
+  "requires_all": [
+   "centre_lathe_assembly",
+   "column_drilling_machines"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hardened bushings guide the drill."
+ },
+ {
+  "id": "sulfuric_acid_production",
+  "requires_all": [
+   "sulfur_dioxide_recovery",
+   "chemical_distillation",
+   "pressure_vessels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lead_chamber_acid"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Sulfur"
+   ]
+  },
+  "note": "Contact process makes sulphuric acid on a catalyst."
+ },
+ {
+  "id": "drill_jig_layout",
+  "requires_all": [
+   "drill_jig_bushings",
+   "horizontal_milling_machines",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Drill jigs laid out from datum faces."
+ },
+ {
+  "id": "gear_hobbing",
+  "requires_all": [
+   "gear_tooth_generation",
+   "milling_cutter_relief"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Gears cut continuously by hobbing."
+ },
+ {
+  "id": "carbon_resistors",
+  "requires_all": [
+   "electrical_measurement",
+   "graphite_marking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Carbon resistors for measured circuits."
+ },
+ {
+  "id": "enzyme_catalysis",
+  "requires_all": [
+   "fermentation_control",
+   "chemical_distillation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "microbial_isolation_methods"
+  ],
+  "note": "Enzymes used as catalysts in brewing and chemistry."
+ },
+ {
+  "id": "metallurgical_mass_balances",
+  "requires_all": [
+   "material_accounting",
+   "ore_assaying"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "gas_composition_analysis"
+  ],
+  "note": "Furnace charges balanced by assay and weight."
+ },
+ {
+  "id": "rivet_hole_alignment",
+  "requires_all": [
+   "sheet_steel_rolling",
+   "drill_jig_layout"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Rivet holes drifted and reamed in line."
+ },
+ {
+  "id": "gear_shaping_generation",
+  "requires_all": [
+   "gear_tooth_generation",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Gears generated by a reciprocating shaper cutter."
+ },
+ {
+  "id": "hot_rivet_setting",
+  "requires_all": [
+   "rivet_blank_heading",
+   "rivet_hole_alignment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compressed_air_systems"
+  ],
+  "note": "Hot rivets set by pneumatic hammer."
+ },
+ {
+  "id": "nickel_metal_recovery",
+  "requires_all": [
+   "ore_assaying",
+   "metallurgical_mass_balances"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": [
+    "Nickel Ore"
+   ]
+  },
+  "note": "Nickel refined from sulphide ores."
+ },
+ {
+  "id": "cold_rivet_setting",
+  "requires_all": [
+   "rivet_blank_heading",
+   "rivet_hole_alignment"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Small rivets set cold by press."
+ },
+ {
+  "id": "glass_annealing_schedules",
+  "requires_all": [
+   "glassmaking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Glass annealed on timed cooling schedules."
+ },
+ {
+  "id": "thread_rolling_die_making",
+  "requires_all": [
+   "thread_pitch_gauging",
+   "horizontal_milling_machines",
+   "toolbit_heat_treatment"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hardened thread-rolling dies."
+ },
+ {
+  "id": "high_speed_tool_steel",
+  "requires_all": [
+   "toolbit_heat_treatment",
+   "metallurgical_mass_balances"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "graphite_crucibles"
+  ],
+  "note": "Tool steel that cuts red-hot without softening."
+ },
+ {
+  "id": "bolt_thread_rolling",
+  "requires_all": [
+   "bolt_blank_forging",
+   "thread_rolling_die_making"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Bolt threads rolled instead of cut."
+ },
+ {
+  "id": "hydrogen_flame_glassworking",
+  "requires_all": [
+   "glass_tube_drawing",
+   "chemical_distillation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Glass worked in hydrogen and oxygen flames."
+ },
+ {
+  "id": "electric_arc_furnaces",
+  "requires_all": [
+   "steel_refining",
+   "electrical_generators",
+   "electrical_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "graphite_crucibles"
+  ],
+  "note": "Electric arcs melt steel and alloys."
+ },
+ {
+  "id": "abrasive_belt_finishing",
+  "requires_all": [
+   "abrasive_grinding_control",
+   "belt_power_transmission"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Abrasive belts finish curved parts."
+ },
+ {
+  "id": "gauge_block_lapping",
+  "requires_all": [
+   "three_plate_lapping",
+   "precision_machinery",
+   "precision_thermometry"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Gauge blocks lapped flat enough to wring."
+ },
+ {
+  "id": "powered_flight",
+  "requires_all": [
+   "aerodynamics",
+   "structural_load_testing",
+   "internal_combustion"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "aerostat_observation",
+   "wind_tunnel_testing"
+  ],
+  "note": "Powered, controlled heavier-than-air flight."
+ },
+ {
+  "id": "precision_toolrooms",
+  "requires_all": [
+   "basic_machine_shops",
+   "horizontal_milling_machines",
+   "worm_dividing_heads",
+   "drill_jig_layout",
+   "gauge_block_lapping"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Toolrooms make jigs, gauges and fixtures."
+ },
+ {
+  "id": "cryogenic_air_separation",
+  "requires_all": [
+   "compressed_air_systems",
+   "mechanical_refrigeration",
+   "chemical_distillation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Liquefied air parted into oxygen and nitrogen."
+ },
+ {
+  "id": "electric_power_looms",
+  "requires_all": [
+   "flying_shuttles",
+   "crank_driven_sawmills",
+   "electric_motors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "iron_power_loom_sheds"
+  ],
+  "note": "Looms driven by their own motors."
+ },
+ {
+  "id": "electric_pulp_beating",
+  "requires_all": [
+   "hollander_beater",
+   "electric_motors",
+   "bearing_surfaces"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wood_pulp_paper"
+  ],
+  "note": "Pulp beaters driven by electric motors."
+ },
+ {
+  "id": "foil_capacitors",
+  "requires_all": [
+   "electrical_measurement",
+   "paper_making",
+   "wire_drawing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "charge_storing_jar"
+  ],
+  "note": "Rolled foil capacitors."
+ },
+ {
+  "id": "castellated_nut_slotting",
+  "requires_all": [
+   "internal_thread_tapping",
+   "horizontal_milling_machines"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Nuts slotted for locking pins."
+ },
+ {
+  "id": "split_pin_locking",
+  "requires_all": [
+   "castellated_nut_slotting",
+   "cotter_pin_forming",
+   "column_drilling_machines"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Split pins lock nuts against vibration."
+ },
+ {
+  "id": "split_washer_cutting",
+  "requires_all": [
+   "coil_spring_tempering",
+   "washer_punching"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Spring washers cut from coiled wire."
+ },
+ {
+  "id": "metal_grain_size_measurement",
+  "requires_all": [
+   "compound_microscopy",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "metallurgical_mass_balances"
+  ],
+  "note": "Metal grain size measured under the microscope."
+ },
+ {
+  "id": "resistive_sensing",
+  "requires_all": [
+   "carbon_resistors",
+   "electrical_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Resistance thermometers and strain sensors."
+ },
+ {
+  "id": "rotary_swaging",
+  "requires_all": [
+   "precision_machinery",
+   "toolbit_heat_treatment"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Rods and tubes reduced by rotary swaging."
+ },
+ {
+  "id": "silicon_smelting",
+  "requires_all": [
+   "electric_arc_furnaces",
+   "glassmaking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": [
+    "Fine Sand"
+   ]
+  },
+  "note": "Silicon smelted in the electric furnace."
+ },
+ {
+  "id": "steel_normalizing_control",
+  "requires_all": [
+   "steel_refining",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "metal_annealing_control",
+   "metal_grain_size_measurement"
+  ],
+  "note": "Steel normalised to refine its grain."
+ },
+ {
+  "id": "industrial_catalyst_design",
+  "requires_all": [
+   "experimental_controls",
+   "chemical_distillation"
+  ],
+  "requires_any": [
+   [
+    "enzyme_catalysis",
+    "sulfuric_acid_production"
+   ]
+  ],
+  "precedents": [],
+  "note": "Catalysts designed and tested for industry."
+ },
+ {
+  "id": "standard_fastener_kitting",
+  "requires_all": [
+   "matched_thread_inspection",
+   "washer_punching",
+   "split_washer_cutting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Fasteners issued as counted kits."
+ },
+ {
+  "id": "directional_air_valves",
+  "requires_all": [
+   "pressure_pipe_jointing",
+   "compressed_air_systems"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Valves direct compressed air to actuators."
+ },
+ {
+  "id": "honed_bore_finishing",
+  "requires_all": [
+   "cylinder_boring",
+   "abrasive_grinding_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Engine bores honed to a fine crosshatch."
+ },
+ {
+  "id": "pneumatic_cylinders",
+  "requires_all": [
+   "cylinder_boring",
+   "packed_piston_seals",
+   "directional_air_valves"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Air cylinders move tools and clamps."
+ },
+ {
+  "id": "pneumatic_pressing",
+  "requires_all": [
+   "pneumatic_cylinders",
+   "column_buckling",
+   "workshop_standards"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Pneumatic presses form and assemble parts."
+ },
+ {
+  "id": "textile_durability_testing",
+  "requires_all": [
+   "textile_repair_methods",
+   "measurement_uncertainty"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Cloth tested for abrasion and strength."
+ },
+ {
+  "id": "mechanical_washing_machines",
+  "requires_all": [
+   "textile_laundering_practice",
+   "crank_driven_sawmills",
+   "electric_motors"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Powered washing machines."
+ },
+ {
+  "id": "formaldehyde_synthesis",
+  "requires_all": [
+   "industrial_catalyst_design",
+   "chemical_distillation",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wood_methanol_recovery"
+  ],
+  "note": "Formaldehyde made from wood spirit on a catalyst."
+ },
+ {
+  "id": "phenolic_resin_moulding",
+  "requires_all": [
+   "formaldehyde_synthesis",
+   "coal_light_oil_recovery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "celluloid_moulding"
+  ],
+  "note": "Hard phenolic resin moulded under heat and pressure."
+ },
+ {
+  "id": "aromatic_amine_hydrogenation",
+  "requires_all": [
+   "industrial_catalyst_design",
+   "pressure_vessels"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Aromatic amines made by hydrogenation."
+ },
+ {
+  "id": "iron_ammonia_catalysts",
+  "requires_all": [
+   "bloomery_smelting",
+   "experimental_controls",
+   "chemical_distillation",
+   "pressure_vessels",
+   "cryogenic_air_separation"
+  ],
+  "requires_any": [
+   [
+    "water_electrolysis",
+    "chloralkali_cells"
+   ]
+  ],
+  "precedents": [],
+  "note": "Promoted iron catalysts for ammonia."
+ },
+ {
+  "id": "stainless_steel",
+  "requires_all": [
+   "electric_arc_furnaces",
+   "metal_grain_size_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steel_normalizing_control"
+  ],
+  "note": "Chromium steels that do not rust."
+ },
+ {
+  "id": "material_phase_diagrams",
+  "requires_all": [
+   "crystallography",
+   "precision_thermometry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "metal_grain_size_measurement"
+  ],
+  "note": "Alloy phase diagrams guide heat treatment."
+ },
+ {
+  "id": "welding_metallurgy",
+  "requires_all": [
+   "forge_welding",
+   "material_phase_diagrams"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "arc_welding_processes"
+  ],
+  "note": "Weld metal and heated zones understood."
+ },
+ {
+  "id": "catalytic_ammonia_synthesis",
+  "requires_all": [
+   "iron_ammonia_catalysts",
+   "cryogenic_air_separation",
+   "pressure_vessels"
+  ],
+  "requires_any": [
+   [
+    "chloralkali_cells",
+    "water_electrolysis"
+   ]
+  ],
+  "precedents": [],
+  "note": "Ammonia fixed from air at high pressure."
+ },
+ {
+  "id": "hydrocarbon_steam_cracking",
+  "requires_all": [
+   "fuel_refining",
+   "pressure_vessels",
+   "precision_thermometry"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": [
+    "Crude Oil"
+   ]
+  },
+  "note": "Oil cracked by heat into lighter streams."
+ },
+ {
+  "id": "zipper_chain_closures",
+  "requires_all": [
+   "sewing_machine_mechanisms",
+   "dimensional_metrology"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Interlocking slide fasteners."
+ },
+ {
+  "id": "centrifugal_tube_casting",
+  "requires_all": [
+   "metal_casting_feed_design",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Pipes cast in spinning moulds."
+ },
+ {
+  "id": "centerless_grinding",
+  "requires_all": [
+   "abrasive_grinding_control",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Centreless grinding of pins and rollers."
+ },
+ {
+  "id": "polymer_chain_models",
+  "requires_all": [
+   "chemical_distillation",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "phenolic_resin_moulding",
+   "regenerated_cellulose_fibre"
+  ],
+  "note": "Plastics understood as long chain molecules."
+ },
+ {
+  "id": "vacuum_metal_melting",
+  "requires_all": [
+   "vacuum_pumps",
+   "metal_casting_feed_design"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electric_arc_furnaces"
+  ],
+  "note": "Metals melted in vacuum for purity."
+ },
+ {
+  "id": "garment_size_grading",
+  "requires_all": [
+   "garment_pattern_cutting",
+   "statistical_sampling"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Patterns graded into standard sizes."
+ },
+ {
+  "id": "urea_synthesis",
+  "requires_all": [
+   "pressure_vessels",
+   "chemical_distillation",
+   "experimental_controls",
+   "catalytic_ammonia_synthesis"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Urea made from ammonia and carbon dioxide."
+ },
+ {
+  "id": "cemented_carbide_tools",
+  "requires_all": [
+   "high_speed_tool_steel",
+   "electric_arc_furnaces"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "material_phase_diagrams"
+  ],
+  "note": "Sintered carbide tips cut hardened steel."
+ },
+ {
+  "id": "polymer_monomer_purification",
+  "requires_all": [
+   "experimental_controls"
+  ],
+  "requires_any": [
+   [
+    "fractional_distillation",
+    "chemical_distillation"
+   ]
+  ],
+  "precedents": [],
+  "note": "Monomers purified for polymer plants."
+ },
+ {
+  "id": "radical_chain_polymerization",
+  "requires_all": [
+   "polymer_monomer_purification"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Monomers chained by free radicals."
+ },
+ {
+  "id": "additive_step_polymerization",
+  "requires_all": [
+   "polymer_monomer_purification"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Polymers built by step addition."
+ },
+ {
+  "id": "brazed_joint_qualification",
+  "requires_all": [
+   "copper_casting"
+  ],
+  "requires_any": [
+   [
+    "forge_welding",
+    "experimental_controls"
+   ]
+  ],
+  "precedents": [],
+  "note": "Brazed joints qualified by test."
+ },
+ {
+  "id": "condensative_step_polymerization",
+  "requires_all": [
+   "polymer_monomer_purification"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Polymers built by condensation."
+ },
+ {
+  "id": "polymer_solution_processing",
+  "requires_all": [
+   "polymer_chain_models",
+   "chemical_distillation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Polymers cast and spun from solution."
+ },
+ {
+  "id": "ethylene_oxide_synthesis",
+  "requires_all": [
+   "industrial_catalyst_design",
+   "chemical_distillation",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Ethylene oxide made by direct oxidation."
+ },
+ {
+  "id": "electrochemical_machining",
+  "requires_all": [
+   "electrochemical_cells",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hard metals shaped by electrochemical dissolution."
+ },
+ {
+  "id": "residual_stress_assessment",
+  "requires_all": [
+   "stress_strain_relations",
+   "dimensional_metrology"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Residual stresses measured in parts."
+ },
+ {
+  "id": "ethylene_glycol_hydrolysis",
+  "requires_all": [
+   "chemical_distillation",
+   "experimental_controls",
+   "ethylene_oxide_synthesis"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Glycol made from ethylene oxide and water."
+ },
+ {
+  "id": "short_stroke_superfinishing",
+  "requires_all": [
+   "cylindrical_grinding",
+   "lubrication_regimes"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Bearing surfaces superfinished by short-stroke stones."
+ },
+ {
+  "id": "synthetic_rubber",
+  "requires_all": [
+   "polymer_chain_models",
+   "radical_chain_polymerization",
+   "hydrocarbon_steam_cracking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sulphur_cured_rubber"
+  ],
+  "note": "Synthetic rubber made from butadiene."
+ },
+ {
+  "id": "induction_surface_hardening",
+  "requires_all": [
+   "electromagnetic_induction",
+   "hardened_edges"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Surfaces hardened by induction heating."
+ },
+ {
+  "id": "thermoplastic_processing",
+  "requires_all": [
+   "polymer_chain_models",
+   "precision_thermometry"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Thermoplastics melted and reshaped by machine."
+ },
+ {
+  "id": "advanced_airframes",
+  "requires_all": [
+   "powered_flight",
+   "wind_tunnel_testing",
+   "structural_load_testing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "aluminum_electrolysis"
+  ],
+  "note": "Stressed-skin metal airframes."
+ },
+ {
+  "id": "polymer_melt_rheology",
+  "requires_all": [
+   "thermoplastic_processing",
+   "viscous_resistance"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Plastic melt flow measured and predicted."
+ },
+ {
+  "id": "polymer_additive_formulation",
+  "requires_all": [
+   "thermoplastic_processing",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Plastics compounded with fillers and stabilisers."
+ },
+ {
+  "id": "polymer_film_extrusion",
+  "requires_all": [
+   "polymer_melt_rheology",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Plastic film extruded and blown."
+ },
+ {
+  "id": "polymer_injection_molding",
+  "requires_all": [
+   "polymer_melt_rheology",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Plastics injection-moulded in steel dies."
+ },
+ {
+  "id": "polyamide_synthetic_fibre",
+  "requires_all": [
+   "condensative_step_polymerization",
+   "polymer_solution_processing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "regenerated_cellulose_fibre"
+  ],
+  "note": "Synthetic fibre drawn from a polyamide melt."
+ },
+ {
+  "id": "binary_adders",
+  "requires_all": [
+   "relay_logic"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "geared_adding_machine"
+  ],
+  "note": "Binary adders built from relays."
+ },
+ {
+  "id": "isocyanate_synthesis",
+  "requires_all": [
+   "chemical_distillation",
+   "pressure_vessels",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Isocyanates for foams and coatings."
+ },
+ {
+  "id": "polymer_blow_molding",
+  "requires_all": [
+   "polymer_melt_rheology",
+   "compressed_air_systems"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hollow plastic ware blow-moulded."
+ },
+ {
+  "id": "relay_registers",
+  "requires_all": [
+   "relay_logic"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Relay registers hold binary numbers."
+ },
+ {
+  "id": "adhesive_bond_design",
+  "requires_all": [
+   "experimental_controls"
+  ],
+  "requires_any": [
+   [
+    "joinery",
+    "elastic_deformation"
+   ]
+  ],
+  "precedents": [
+   "phenolic_resin_moulding"
+  ],
+  "note": "Structural adhesives designed for joints."
+ },
+ {
+  "id": "catalytic_cracking",
+  "requires_all": [
+   "fuel_refining",
+   "industrial_catalyst_design"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hydrocarbon_steam_cracking"
+  ],
+  "note": "Catalysts lift the fuel yield of crude."
+ },
+ {
+  "id": "jet_propulsion",
+  "requires_all": [
+   "advanced_airframes",
+   "heat_engine_cycles"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steam_turbines",
+   "compression_ignition_engines"
+  ],
+  "note": "Gas-turbine jet engines."
+ },
+ {
+  "id": "textile_waterproofing",
+  "requires_all": [
+   "plain_weaving",
+   "adhesive_bond_design"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sulphur_cured_rubber"
+  ],
+  "note": "Cloth waterproofed with synthetic coatings."
+ },
+ {
+  "id": "ionic_chain_polymerization",
+  "requires_all": [
+   "polymer_monomer_purification"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Ionic chain polymerization."
+ },
+ {
+  "id": "garment_seam_sealing",
+  "requires_all": [
+   "textile_waterproofing",
+   "sewing_machine_mechanisms"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Garment seams sealed against water."
+ },
+ {
+  "id": "polymer_foam_cell_control",
+  "requires_all": [
+   "polymer_additive_formulation",
+   "polymer_melt_rheology"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Foam cell size controlled in plastics."
+ },
+ {
+  "id": "polymer_molecular_weight_control",
+  "requires_all": [
+   "polymer_chain_models",
+   "measurement_uncertainty"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Polymer chain length controlled."
+ },
+ {
+  "id": "polymer_reaction_heat_management",
+  "requires_all": [
+   "calorimetry"
+  ],
+  "requires_any": [
+   [
+    "radical_chain_polymerization",
+    "condensative_step_polymerization",
+    "additive_step_polymerization"
+   ]
+  ],
+  "precedents": [],
+  "note": "Reaction heat managed in polymer reactors."
+ },
+ {
+  "id": "polymer_solvent_recovery",
+  "requires_all": [
+   "polymer_solution_processing",
+   "fractional_distillation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Solvents recovered in polymer plants."
+ },
+ {
+  "id": "sinker_electrical_discharge_machining",
+  "requires_all": [
+   "electrical_measurement",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hard dies sunk by electric spark."
+ },
+ {
+  "id": "chlorosilane_purification",
+  "requires_all": [
+   "silicon_smelting",
+   "fractional_distillation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Silicon purified through chlorosilanes."
+ },
+ {
+  "id": "single_crystal_growth",
+  "requires_all": [
+   "crystallography",
+   "chlorosilane_purification",
+   "precision_thermometry"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Single crystals pulled from the melt."
+ },
+ {
+  "id": "tube_rotary_draw_bending",
+  "requires_all": [
+   "precision_machinery",
+   "stress_strain_relations"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Tubes bent on rotary draw benders."
+ },
+ {
+  "id": "nuclear_magnetic_resonance_spectroscopy",
+  "requires_all": [
+   "atomic_physics",
+   "spectroscopy",
+   "resonant_tuned_circuits",
+   "precision_thermometry"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Molecules identified by nuclear magnetic resonance."
+ },
+ {
+  "id": "ultrasonic_abrasive_machining",
+  "requires_all": [
+   "mechanical_oscillation",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Brittle materials cut by ultrasonic abrasive."
+ },
+ {
+  "id": "polymer_thermoforming",
+  "requires_all": [
+   "thermoplastic_processing"
+  ],
+  "requires_any": [
+   [
+    "vacuum_pumps",
+    "compressed_air_systems",
+    "precision_machinery"
+   ]
+  ],
+  "precedents": [],
+  "note": "Plastic sheet thermoformed."
+ },
+ {
+  "id": "textile_moisture_transport",
+  "requires_all": [
+   "fiber_grading",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "polyamide_synthetic_fibre"
+  ],
+  "note": "Fabrics engineered to move sweat."
+ },
+ {
+  "id": "continuous_metal_casting",
+  "requires_all": [
+   "steel_refining",
+   "metal_casting_feed_design"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "open_hearth_steel"
+  ],
+  "note": "Steel cast continuously into slabs and billets."
+ },
+ {
+  "id": "machine_tool_stiffness_assessment",
+  "requires_all": [
+   "stress_strain_relations",
+   "dimensional_metrology"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Machine-tool stiffness measured and improved."
+ },
+ {
+  "id": "ring_opening_polymerization",
+  "requires_all": [
+   "industrial_catalyst_design"
+  ],
+  "requires_any": [
+   [
+    "polymer_chain_models",
+    "experimental_controls"
+   ]
+  ],
+  "precedents": [],
+  "note": "Ring-opening polymerization."
+ },
+ {
+  "id": "bipolar_junction_transistors",
+  "requires_all": [
+   "pn_junctions",
+   "semiconductor_doping"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crystal_radio_detection",
+   "single_crystal_growth"
+  ],
+  "note": "Junction transistors made in quantity."
+ },
+ {
+  "id": "memory_address_decoding",
+  "requires_all": [
+   "relay_logic"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "relay_registers"
+  ],
+  "note": "Memory address decoding circuits."
+ },
+ {
+  "id": "oxygen_steelmaking",
+  "requires_all": [
+   "open_hearth_steel",
+   "cryogenic_air_separation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pneumatic_steel_converter"
+  ],
+  "note": "Pure oxygen blown on molten iron makes steel."
+ },
+ {
+  "id": "read_write_memory",
+  "requires_all": [
+   "memory_address_decoding",
+   "relay_registers"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Addressable read-write memory."
+ },
+ {
+  "id": "transistor_amplifiers",
+  "requires_all": [
+   "bipolar_junction_transistors",
+   "carbon_resistors",
+   "foil_capacitors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "triode_valves"
+  ],
+  "note": "Transistor amplifiers."
+ },
+ {
+  "id": "coordination_polymerization",
+  "requires_all": [
+   "industrial_catalyst_design"
+  ],
+  "requires_any": [
+   [
+    "polymer_chain_models",
+    "experimental_controls"
+   ]
+  ],
+  "precedents": [],
+  "note": "Catalysts that order polymer chains."
+ },
+ {
+  "id": "transistor_inverters",
+  "requires_all": [
+   "bipolar_junction_transistors",
+   "carbon_resistors"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Transistor inverters."
+ },
+ {
+  "id": "bistable_multivibrators",
+  "requires_all": [
+   "transistor_inverters"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Bistable circuits hold one bit."
+ },
+ {
+  "id": "binary_counters",
+  "requires_all": [
+   "bistable_multivibrators"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Binary counters."
+ },
+ {
+  "id": "shift_registers",
+  "requires_all": [
+   "bistable_multivibrators"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Shift registers."
+ },
+ {
+  "id": "parallel_register_banks",
+  "requires_all": [
+   "bistable_multivibrators"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Parallel register banks."
+ },
+ {
+  "id": "instruction_registers",
+  "requires_all": [
+   "shift_registers",
+   "binary_counters"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Instruction registers."
+ },
+ {
+  "id": "conditional_branch_circuits",
+  "requires_all": [
+   "binary_adders",
+   "transistor_inverters"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Conditional branch circuits."
+ },
+ {
+  "id": "wafer_sawing",
+  "requires_all": [
+   "single_crystal_growth",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Silicon ingots sawn into wafers."
+ },
+ {
+  "id": "program_counters",
+  "requires_all": [
+   "binary_counters",
+   "binary_adders"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Program counters."
+ },
+ {
+  "id": "ultrasonic_metal_joining",
+  "requires_all": [
+   "mechanical_oscillation",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Thin metals joined by ultrasonic welding."
+ },
+ {
+  "id": "polymer_tacticity_characterization",
+  "requires_all": [
+   "coordination_polymerization",
+   "spectroscopy"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Polymer tacticity characterised."
+ },
+ {
+  "id": "polymer_weathering_trials",
+  "requires_all": [
+   "polymer_additive_formulation",
+   "statistical_inference"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Plastics tested against weather."
+ },
+ {
+  "id": "size_exclusion_chromatography",
+  "requires_all": [
+   "polymer_solution_processing",
+   "glass_tube_drawing",
+   "optical_lenses",
+   "experimental_controls",
+   "measurement_uncertainty"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Polymers sorted by size-exclusion chromatography."
+ },
+ {
+  "id": "lost_foam_casting",
+  "requires_all": [
+   "polymer_foam_cell_control",
+   "metal_casting_feed_design"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Metal cast into lost-foam patterns."
+ },
+ {
+  "id": "silicon_rectifiers",
+  "requires_all": [
+   "pn_junctions",
+   "wafer_sawing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Silicon rectifiers."
+ },
+ {
+  "id": "diode_logic",
+  "requires_all": [
+   "silicon_rectifiers",
+   "carbon_resistors"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Diode logic gates."
+ },
+ {
+  "id": "electronic_machine_control",
+  "requires_all": [
+   "transistor_amplifiers",
+   "resistive_sensing",
+   "electromagnetic_relays",
+   "wound_transformers",
+   "silicon_rectifiers",
+   "feedback_governors"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Electronic machine control."
+ },
+ {
+  "id": "integrated_circuits",
+  "requires_all": [
+   "bipolar_junction_transistors",
+   "wafer_sawing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "diode_logic"
+  ],
+  "note": "Many transistors made together on one chip."
+ },
+ {
+  "id": "numerical_machine_control",
+  "requires_all": [
+   "electronic_machine_control",
+   "coordinate_geometry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "punched_card_tabulation"
+  ],
+  "note": "Machine tools run from punched numerical instructions."
+ },
+ {
+  "id": "float_glass",
+  "requires_all": [
+   "cast_plate_glass",
+   "glass_annealing_schedules"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tinplate_coating"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Fine Sand",
+    "Tin Ore"
+   ]
+  },
+  "note": "Plate glass floated flat on molten tin."
+ },
+ {
+  "id": "hardwired_sequence_control",
+  "requires_all": [
+   "binary_counters",
+   "shift_registers",
+   "binary_adders",
+   "electronic_machine_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hardwired sequence controllers."
+ },
+ {
+  "id": "industrial_robots",
+  "requires_all": [
+   "numerical_machine_control",
+   "hardwired_sequence_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "resistance_welding",
+   "pneumatic_cylinders"
+  ],
+  "note": "Programmable arms weld and lift on the line."
+ },
+ {
+  "id": "gear_power_skiving",
+  "requires_all": [
+   "gear_tooth_generation",
+   "numerical_machine_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Gear power skiving."
+ },
+ {
+  "id": "machine_condition_monitoring",
+  "requires_all": [
+   "mechanical_oscillation",
+   "statistical_sampling"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Machines monitored against a condition baseline."
+ },
+ {
+  "id": "metal_fracture_toughness_testing",
+  "requires_all": [
+   "stress_strain_relations"
+  ],
+  "requires_any": [
+   [
+    "cyclic_fatigue",
+    "structural_load_testing"
+   ]
+  ],
+  "precedents": [],
+  "note": "Metal fracture toughness tested."
+ },
+ {
+  "id": "solar_cell_fabrication",
+  "requires_all": [
+   "photovoltaic_conversion",
+   "wafer_sawing",
+   "semiconductor_doping"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Silicon solar cells fabricated."
+ },
+ {
+  "id": "copolymer_sequence_control",
+  "requires_all": [
+   "polymer_molecular_weight_control"
+  ],
+  "requires_any": [
+   [
+    "radical_chain_polymerization",
+    "ionic_chain_polymerization",
+    "coordination_polymerization"
+   ]
+  ],
+  "precedents": [],
+  "note": "Copolymer sequences controlled."
+ },
+ {
+  "id": "stored_program_control",
+  "requires_all": [
+   "read_write_memory",
+   "instruction_registers",
+   "program_counters",
+   "conditional_branch_circuits",
+   "electronic_machine_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Stored-program controllers run machines."
+ },
+ {
+  "id": "carbon_fibre_composites",
+  "requires_all": [
+   "radical_chain_polymerization",
+   "adhesive_bond_design"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "advanced_airframes"
+  ],
+  "note": "Carbon fibre in resin gives light stiff parts."
+ },
+ {
+  "id": "incremental_sheet_forming",
+  "requires_all": [
+   "numerical_machine_control",
+   "sheet_steel_rolling"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Incremental sheet forming."
+ },
+ {
+  "id": "rotor_spinning_systems",
+  "requires_all": [
+   "drop_spindles",
+   "rotational_dynamics",
+   "electric_motors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ring_spinning_systems"
+  ],
+  "note": "Open-end rotor spinning."
+ },
+ {
+  "id": "wire_electrical_discharge_machining",
+  "requires_all": [
+   "electrical_measurement",
+   "numerical_machine_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sinker_electrical_discharge_machining"
+  ],
+  "note": "Wire spark cutting of hard dies."
+ },
+ {
+  "id": "abrasive_waterjet_cutting",
+  "requires_all": [
+   "pressure_vessels",
+   "numerical_machine_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Abrasive waterjet cutting."
+ },
+ {
+  "id": "single_chip_processors",
+  "requires_all": [
+   "integrated_circuits",
+   "stored_program_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "arithmetic_logic_units",
+   "microinstruction_sequencing"
+  ],
+  "note": "A whole processor on one chip."
+ },
+ {
+  "id": "scrap_steel_minimills",
+  "requires_all": [
+   "electric_arc_furnaces",
+   "continuous_metal_casting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "open_hearth_steel"
+  ],
+  "note": "Scrap-fed minimills make steel near buyers."
+ },
+ {
+  "id": "computer_aided_design",
+  "requires_all": [
+   "stored_program_control",
+   "numerical_machine_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "formula_programming_languages",
+   "coordinate_geometry"
+  ],
+  "note": "Parts drawn and tested on screen first."
+ },
+ {
+  "id": "flexible_machining_cells",
+  "requires_all": [
+   "numerical_machine_control",
+   "stored_program_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "industrial_robots"
+  ],
+  "note": "Machining cells switch parts without retooling."
+ },
+ {
+  "id": "module_encapsulation",
+  "requires_all": [
+   "solar_cell_fabrication",
+   "glassmaking",
+   "cable_insulation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Solar cells sealed into weatherproof modules."
+ },
+ {
+  "id": "surface_mount_assembly",
+  "requires_all": [
+   "integrated_circuits",
+   "industrial_robots"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "single_chip_processors"
+  ],
+  "note": "Pick-and-place machines assemble circuit boards."
+ },
+ {
+  "id": "additive_manufacturing",
+  "requires_all": [
+   "computer_aided_design",
+   "thermoplastic_processing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "flexible_machining_cells"
+  ],
+  "note": "Parts built layer by layer from a digital model."
+ },
+ {
+  "id": "statistical_quality_programs",
+  "requires_all": [
+   "statistical_sampling",
+   "measurement_uncertainty"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "quality_circles",
+   "lean_production"
+  ],
+  "note": "Statistical programs drive defects toward none."
+ },
+ {
+  "id": "lithium_ion_cells",
+  "requires_all": [
+   "electrochemical_cells",
+   "crystallography",
+   "polymer_film_extrusion"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lead_acid_cells"
+  ],
+  "note": "Light rechargeable lithium-ion cells."
+ },
+ {
+  "id": "flat_panel_displays",
+  "requires_all": [
+   "integrated_circuits",
+   "float_glass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "solid_state_physics"
+  ],
+  "note": "Liquid-crystal panels made on glass sheets."
+ },
+ {
+  "id": "deep_submicron_lithography",
+  "requires_all": [
+   "integrated_circuits",
+   "single_chip_processors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "computer_aided_design"
+  ],
+  "note": "Chip features printed below the light's wavelength."
+ },
+ {
+  "id": "solid_state_lighting",
+  "requires_all": [
+   "pn_junctions",
+   "single_crystal_growth"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fluorescent_lighting",
+   "filament_lamp_works"
+  ],
+  "note": "White light from semiconductor diodes."
+ },
+ {
+  "id": "selective_polymer_depolymerization",
+  "requires_all": [
+   "polymer_chain_models",
+   "industrial_catalyst_design"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "polymer_weathering_trials"
+  ],
+  "note": "Plastics broken back into monomers."
+ },
+ {
+  "id": "machine_vision_inspection",
+  "requires_all": [
+   "single_chip_processors",
+   "statistical_quality_programs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "industrial_robots"
+  ],
+  "note": "Cameras and software inspect every part."
+ },
+ {
+  "id": "metal_powder_printing",
+  "requires_all": [
+   "additive_manufacturing",
+   "welding_metallurgy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "vacuum_metal_melting"
+  ],
+  "note": "Lasers fuse metal powder into parts."
+ },
+ {
+  "id": "wide_bandgap_power_chips",
+  "requires_all": [
+   "deep_submicron_lithography",
+   "single_crystal_growth"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "solid_state_lighting"
+  ],
+  "note": "Wide-bandgap chips switch high voltage efficiently."
+ },
+ {
+  "id": "collaborative_robots",
+  "requires_all": [
+   "industrial_robots",
+   "machine_vision_inspection"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Light robots work beside people without cages."
+ },
+ {
+  "id": "plant_based_plastics",
+  "requires_all": [
+   "condensative_step_polymerization",
+   "enzyme_catalysis"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "selective_polymer_depolymerization"
+  ],
+  "note": "Plastics made from plant sugars."
+ },
+ {
+  "id": "digital_twin_plants",
+  "requires_all": [
+   "computer_aided_design",
+   "machine_condition_monitoring",
+   "cloud_data_halls"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Whole plants mirrored by live models."
+ },
+ {
+  "id": "extreme_ultraviolet_lithography",
+  "requires_all": [
+   "deep_submicron_lithography",
+   "vacuum_pumps"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Chips patterned with extreme ultraviolet light."
+ },
+ {
+  "id": "iron_phosphate_cells",
+  "requires_all": [
+   "lithium_ion_cells"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Cobalt-free iron-phosphate cells."
+ },
+ {
+  "id": "green_hydrogen_electrolysis",
+  "requires_all": [
+   "water_electrolysis"
+  ],
+  "requires_any": [
+   [
+    "photovoltaic_power",
+    "wind_turbine_farms"
+   ]
+  ],
+  "precedents": [
+   "chloralkali_cells"
+  ],
+  "note": "Water split at scale with surplus clean power."
+ },
+ {
+  "id": "engineered_microbe_chemicals",
+  "requires_all": [
+   "enzyme_catalysis",
+   "hereditary_double_helix"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "recombinant_vaccine"
+  ],
+  "note": "Engineered microbes brew chemicals in tanks."
+ },
+ {
+  "id": "hydrogen_reduced_iron",
+  "requires_all": [
+   "oxygen_steelmaking",
+   "green_hydrogen_electrolysis"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "scrap_steel_minimills"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Iron Ore"
+   ]
+  },
+  "note": "Iron ore reduced with hydrogen instead of coke."
+ },
+ {
+  "id": "perovskite_tandem_cells",
+  "requires_all": [
+   "solar_cell_fabrication"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "flat_panel_displays"
+  ],
+  "note": "Tandem solar cells pass the silicon limit."
+ },
+ {
+  "id": "solid_state_battery_cells",
+  "requires_all": [
+   "lithium_ion_cells"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "iron_phosphate_cells"
+  ],
+  "note": "Solid-electrolyte cells leave the pilot line."
+ },
+ {
+  "id": "back_to_back_terraces",
+  "requires_all": [
+   "speculative_terrace_rows"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "house_pattern_books",
+   "iron_framed_fireproof_mill"
+  ],
+  "note": "Cheap terraces house mill hands in haste."
+ },
+ {
+  "id": "steam_pumped_waterworks",
+  "requires_all": [
+   "steam_waterworks",
+   "pressure_pipe_jointing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cast_iron_water_mains",
+   "rotative_steam_engine"
+  ],
+  "note": "Steam pumps lift town water into reservoirs."
+ },
+ {
+  "id": "gas_lit_streets",
+  "requires_all": [
+   "coal_gas_works",
+   "cast_iron_water_mains"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "street_lantern_lighting"
+  ],
+  "note": "Gas lamps fed by mains light the streets."
+ },
+ {
+  "id": "iron_roof_trusses",
+  "requires_all": [
+   "puddling_furnace",
+   "structural_load_testing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "iron_framed_fireproof_mill",
+   "grooved_bar_rolls"
+  ],
+  "note": "Iron trusses span wide sheds and markets."
+ },
+ {
+  "id": "iron_roofed_market_halls",
+  "requires_all": [
+   "iron_roof_trusses",
+   "cast_plate_glass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "merchants_exchange_hall"
+  ],
+  "note": "Market halls roofed in iron and glass."
+ },
+ {
+  "id": "chain_suspension_bridges",
+  "requires_all": [
+   "cast_iron_arch_bridge",
+   "puddling_furnace"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "structural_load_testing"
+  ],
+  "note": "Wrought-iron chains hang wide river spans."
+ },
+ {
+  "id": "portland_cement_clinker",
+  "requires_all": [
+   "refractory_furnaces",
+   "clay_testing",
+   "material_accounting",
+   "concrete_mix_design"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": [
+    "Limestone",
+    "Clay"
+   ]
+  },
+  "note": "Clinker burned hot from lime and clay."
+ },
+ {
+  "id": "cast_iron_street_fronts",
+  "requires_all": [
+   "iron_roof_trusses",
+   "sand_flask_casting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Cast-iron fronts for shops and warehouses."
+ },
+ {
+  "id": "tunnelling_shield",
+  "requires_all": [
+   "canal_tunnels",
+   "cylinder_boring"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bridge_pier_caissons"
+  ],
+  "note": "A shield drives tunnels through soft ground."
+ },
+ {
+  "id": "light_stud_frame_houses",
+  "requires_all": [
+   "crank_driven_sawmills",
+   "slitting_mills"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nailer_workshops",
+   "braced_timber_cage_walls"
+  ],
+  "note": "Houses nailed together from sawn studs."
+ },
+ {
+  "id": "brick_arch_viaducts",
+  "requires_all": [
+   "public_steam_railway",
+   "elliptical_arch_bridges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "canal_river_aqueducts"
+  ],
+  "note": "Many-arched brick viaducts carry level lines."
+ },
+ {
+  "id": "model_worker_dwellings",
+  "requires_all": [
+   "back_to_back_terraces",
+   "s_trap_water_closets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steam_pumped_waterworks"
+  ],
+  "note": "Model dwellings with water and privies on each stair."
+ },
+ {
+  "id": "egg_shaped_sewers",
+  "requires_all": [
+   "vaulted_brick_sewers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "culverted_town_streams",
+   "flow_continuity"
+  ],
+  "note": "Egg-shaped sewers scoured by their own flow."
+ },
+ {
+  "id": "riveted_box_girder_bridges",
+  "requires_all": [
+   "puddling_furnace",
+   "grooved_bar_rolls",
+   "structural_load_testing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chain_suspension_bridges",
+   "public_steam_railway"
+  ],
+  "note": "Riveted iron box girders carry heavy loads."
+ },
+ {
+  "id": "prefabricated_iron_glass_halls",
+  "requires_all": [
+   "iron_roofed_market_halls",
+   "interchangeable_component_fits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cast_plate_glass"
+  ],
+  "note": "Halls built from standard iron and glass parts."
+ },
+ {
+  "id": "timber_lateral_bracing",
+  "requires_all": [
+   "framed_construction"
+  ],
+  "requires_any": [
+   [
+    "structural_load_testing",
+    "experimental_controls"
+   ]
+  ],
+  "precedents": [
+   "light_stud_frame_houses"
+  ],
+  "note": "Timber frames braced against wind and sway."
+ },
+ {
+  "id": "compressed_air_systems",
+  "requires_all": [
+   "pressure_vessels",
+   "electric_motors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "high_pressure_steam_engines"
+  ],
+  "note": "Compressors feed air mains to works and tunnels."
+ },
+ {
+  "id": "mechanical_refrigeration",
+  "requires_all": [
+   "heat_engine_cycles",
+   "pressure_vessels",
+   "electric_motors"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Compression machines chill cold stores."
+ },
+ {
+  "id": "safety_lifts",
+  "requires_all": [
+   "compound_pulleys",
+   "mechanical_oscillation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reversing_gear_hoists"
+  ],
+  "note": "Passenger lifts with safety catches."
+ },
+ {
+  "id": "rolled_iron_floor_beams",
+  "requires_all": [
+   "iron_framed_fireproof_mill",
+   "grooved_bar_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "iron_roof_trusses"
+  ],
+  "note": "Rolled iron beams carry fireproof floors."
+ },
+ {
+  "id": "radiator_central_heating",
+  "requires_all": [
+   "narrow_throat_fireplace",
+   "pressure_pipe_jointing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "heated_orangeries",
+   "iron_flue_stoves"
+  ],
+  "note": "Radiators heat whole buildings."
+ },
+ {
+  "id": "intercepting_sewers",
+  "requires_all": [
+   "egg_shaped_sewers",
+   "sanitary_town_survey"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "central_board_of_health"
+  ],
+  "note": "Intercepting sewers carry waste far downstream."
+ },
+ {
+  "id": "boulevard_reconstruction",
+  "requires_all": [
+   "cut_through_avenues",
+   "egg_shaped_sewers",
+   "gas_lit_streets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "building_line_regulation"
+  ],
+  "note": "Boulevards cut through old quarters with services beneath."
+ },
+ {
+  "id": "sewer_rodding_service",
+  "requires_all": [
+   "covered_sewers"
+  ],
+  "requires_any": [
+   [
+    "joinery",
+    "wire_drawing"
+   ]
+  ],
+  "precedents": [],
+  "note": "Rodding crews clear blocked sewers."
+ },
+ {
+  "id": "pneumatic_caissons",
+  "requires_all": [
+   "bridge_pier_caissons",
+   "compressed_air_systems"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Compressed-air caissons sink deep bridge piers."
+ },
+ {
+  "id": "rock_drill_tunnelling",
+  "requires_all": [
+   "compressed_air_systems",
+   "powder_rock_blasting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tunnelling_shield"
+  ],
+  "note": "Air-driven rock drills bore mountain tunnels."
+ },
+ {
+  "id": "steel_long_span_bridges",
+  "requires_all": [
+   "riveted_box_girder_bridges",
+   "pneumatic_steel_converter"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pneumatic_caissons"
+  ],
+  "note": "Steel arches, trusses and cantilevers of long span."
+ },
+ {
+  "id": "asphalt_street_paving",
+  "requires_all": [
+   "toll_paved_streets",
+   "bitumen_sealing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "layered_stone_road_beds",
+   "road_rolling_maintenance"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Bitumen"
+   ]
+  },
+  "note": "Hot asphalt laid over concrete streets."
+ },
+ {
+  "id": "building_codes",
+  "requires_all": [
+   "building_line_regulation",
+   "sanitary_town_survey"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "model_worker_dwellings"
+  ],
+  "note": "Codes set walls, stairs, light and air."
+ },
+ {
+  "id": "hydraulic_power_mains",
+  "requires_all": [
+   "pressure_pipe_jointing",
+   "steam_pumped_waterworks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "safety_lifts"
+  ],
+  "note": "Pressure mains drive cranes, lifts and dock gates."
+ },
+ {
+  "id": "water_towers",
+  "requires_all": [
+   "steam_pumped_waterworks",
+   "water_tower_cisterns"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Towers hold pressure for upper storeys and hydrants."
+ },
+ {
+  "id": "piped_hot_water_bathrooms",
+  "requires_all": [
+   "s_trap_water_closets",
+   "radiator_central_heating"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steam_pumped_waterworks"
+  ],
+  "note": "Piped hot water and bathrooms in ordinary houses."
+ },
+ {
+  "id": "hollow_tile_fireproof_floors",
+  "requires_all": [
+   "rolled_iron_floor_beams"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "iron_framed_fireproof_mill"
+  ],
+  "note": "Hollow clay tile floors resist fire."
+ },
+ {
+  "id": "electric_street_lighting",
+  "requires_all": [
+   "gas_lit_streets",
+   "filament_lamp_works",
+   "electrical_generators"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Arc and filament lamps light streets and halls."
+ },
+ {
+  "id": "central_power_stations",
+  "requires_all": [
+   "electrical_generators",
+   "compound_steam_engines"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "filament_lamp_works"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Coal"
+   ]
+  },
+  "note": "Central stations supply a district by wire."
+ },
+ {
+  "id": "refuse_destructors",
+  "requires_all": [
+   "sanitary_town_survey",
+   "refractory_furnaces"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Town refuse collected and burned in destructors."
+ },
+ {
+  "id": "wire_cable_suspension_bridges",
+  "requires_all": [
+   "chain_suspension_bridges",
+   "steel_wire_drawing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steel_long_span_bridges"
+  ],
+  "note": "Spun steel-wire cables hang very long spans."
+ },
+ {
+  "id": "structural_steel",
+  "requires_all": [
+   "blast_furnace",
+   "precision_machinery",
+   "pneumatic_steel_converter"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rolled_iron_floor_beams"
+  ],
+  "note": "Steel skeletons carry walls and floors."
+ },
+ {
+  "id": "reinforced_concrete",
+  "requires_all": [
+   "structural_steel",
+   "lime_mortar",
+   "portland_cement_clinker"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "concrete_formwork_systems"
+  ],
+  "note": "Steel rods cast in concrete."
+ },
+ {
+  "id": "wound_transformers",
+  "requires_all": [
+   "electromagnetic_induction",
+   "cable_insulation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Transformers step voltage up and down."
+ },
+ {
+  "id": "plate_glass_shopfronts",
+  "requires_all": [
+   "cast_plate_glass",
+   "cast_iron_street_fronts"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Plate-glass shopfronts line the streets."
+ },
+ {
+  "id": "skeleton_frame_towers",
+  "requires_all": [
+   "structural_steel",
+   "safety_lifts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hollow_tile_fireproof_floors"
+  ],
+  "note": "Tall towers on steel skeletons with lifts."
+ },
+ {
+  "id": "street_utility_ducts",
+  "requires_all": [
+   "central_power_stations",
+   "telephone_circuits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "boulevard_reconstruction"
+  ],
+  "note": "Power and telephone wires ducted under streets."
+ },
+ {
+  "id": "alternating_current_grids",
+  "requires_all": [
+   "wound_transformers",
+   "central_power_stations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "induction_motors"
+  ],
+  "note": "High-voltage alternating current between towns."
+ },
+ {
+  "id": "mountain_gravity_aqueducts",
+  "requires_all": [
+   "long_distance_conduits",
+   "portland_cement_clinker"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rock_drill_tunnelling"
+  ],
+  "note": "Long gravity aqueducts bring mountain water."
+ },
+ {
+  "id": "hydroelectric_stations",
+  "requires_all": [
+   "electrical_generators",
+   "tested_waterwheel_efficiency"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "alternating_current_grids",
+   "central_power_stations"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Stations at falls and weirs generate power."
+ },
+ {
+  "id": "battery_bank_wiring",
+  "requires_all": [
+   "lead_acid_cells",
+   "cable_insulation",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Battery rooms steady station supply."
+ },
+ {
+  "id": "concrete_compaction_practice",
+  "requires_all": [
+   "concrete_mix_design"
+  ],
+  "requires_any": [
+   [
+    "concrete_formwork_systems",
+    "experimental_controls"
+   ]
+  ],
+  "precedents": [],
+  "note": "Concrete compacted by rodding and vibration."
+ },
+ {
+  "id": "concrete_curing_control",
+  "requires_all": [
+   "concrete_mix_design"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "portland_cement_clinker"
+  ],
+  "note": "Concrete kept wet for a set time."
+ },
+ {
+  "id": "refrigerated_air_conditioning",
+  "requires_all": [
+   "mechanical_refrigeration",
+   "electric_motors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "humidity_measurement"
+  ],
+  "note": "Refrigerating plant cools and dries rooms."
+ },
+ {
+  "id": "steel_sheet_pile_cofferdams",
+  "requires_all": [
+   "sheet_steel_rolling",
+   "roll_formed_sections"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bridge_pier_caissons"
+  ],
+  "note": "Driven steel sheet piles make quick cofferdams."
+ },
+ {
+  "id": "reinforced_concrete_bridges",
+  "requires_all": [
+   "reinforced_concrete"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steel_long_span_bridges"
+  ],
+  "note": "Reinforced concrete arch and beam bridges."
+ },
+ {
+  "id": "activated_sludge_treatment",
+  "requires_all": [
+   "intercepting_sewers",
+   "microbial_growth_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compressed_air_systems"
+  ],
+  "note": "Aerated sludge cleans sewage before release."
+ },
+ {
+  "id": "zoning_ordinances",
+  "requires_all": [
+   "building_codes"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Zoning separates homes, works and shops."
+ },
+ {
+  "id": "concrete_arch_dams",
+  "requires_all": [
+   "hydroelectric_stations",
+   "portland_cement_clinker"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reinforced_concrete"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Concrete dams store whole valleys."
+ },
+ {
+  "id": "shallow_foundation_assessment",
+  "requires_all": [
+   "soil_assays",
+   "structural_load_testing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Footings sized from tested soil bearing."
+ },
+ {
+  "id": "charge_regulation",
+  "requires_all": [
+   "battery_bank_wiring",
+   "resistive_sensing",
+   "electromagnetic_relays"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Regulators charge station batteries automatically."
+ },
+ {
+  "id": "public_housing_estates",
+  "requires_all": [
+   "building_codes",
+   "model_worker_dwellings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "municipal_utilities"
+  ],
+  "note": "Towns build rented estates for working families."
+ },
+ {
+  "id": "water_cement_ratio_design",
+  "requires_all": [
+   "concrete_mix_design",
+   "portland_cement_clinker"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "concrete_compaction_practice"
+  ],
+  "note": "Concrete proportioned by water-cement ratio."
+ },
+ {
+  "id": "thin_concrete_shell_roofs",
+  "requires_all": [
+   "reinforced_concrete",
+   "water_cement_ratio_design"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Thin concrete shells roof halls and hangars."
+ },
+ {
+  "id": "rural_electrification",
+  "requires_all": [
+   "alternating_current_grids",
+   "hydroelectric_stations"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Power lines reach every village and farm."
+ },
+ {
+  "id": "buried_pipe_load_assessment",
+  "requires_all": [
+   "rigid_pipe_bedding",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Buried pipes designed for soil and traffic loads."
+ },
+ {
+  "id": "foundation_settlement_monitoring",
+  "requires_all": [
+   "geometric_survey",
+   "shallow_foundation_assessment"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Foundation settlement measured over years."
+ },
+ {
+  "id": "river_basin_works",
+  "requires_all": [
+   "concrete_arch_dams",
+   "alternating_current_grids"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "canal_locks"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "A basin authority builds dams, locks and stations."
+ },
+ {
+  "id": "prestressed_concrete",
+  "requires_all": [
+   "reinforced_concrete",
+   "steel_wire_drawing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "water_cement_ratio_design"
+  ],
+  "note": "Tendons tensioned before loading."
+ },
+ {
+  "id": "pumped_storage_hydro",
+  "requires_all": [
+   "hydroelectric_stations",
+   "alternating_current_grids"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "concrete_arch_dams"
+  ],
+  "note": "Water pumped up at night, released at the peak."
+ },
+ {
+  "id": "building_wind_load_assessment",
+  "requires_all": [
+   "aerodynamics",
+   "structural_load_testing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Tall buildings designed for measured wind."
+ },
+ {
+  "id": "engineered_wood_lamination",
+  "requires_all": [
+   "adhesive_bond_design",
+   "timber_grading"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Glued laminated timber beams and arches."
+ },
+ {
+  "id": "reactor_engineering",
+  "requires_all": [
+   "nuclear_fission",
+   "neutron_moderation",
+   "pressure_vessels",
+   "electrical_generators"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": [
+    "Uranium Ore"
+   ]
+  },
+  "note": "Controlled reactors with cooling and containment."
+ },
+ {
+  "id": "fluorescent_lighting",
+  "requires_all": [
+   "electric_street_lighting",
+   "glass_tube_drawing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Fluorescent tubes light offices and works."
+ },
+ {
+  "id": "welded_steel_frames",
+  "requires_all": [
+   "structural_steel",
+   "arc_welding_processes",
+   "welding_metallurgy"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Welded frames replace site riveting."
+ },
+ {
+  "id": "climbing_tower_cranes",
+  "requires_all": [
+   "skeleton_frame_towers",
+   "electric_motors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "welded_steel_frames"
+  ],
+  "note": "Tower cranes climb with the frame."
+ },
+ {
+  "id": "building_capillary_breaks",
+  "requires_all": [
+   "masonry_moisture_management"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Damp-proof courses break capillary rise."
+ },
+ {
+  "id": "conduit_infiltration_testing",
+  "requires_all": [
+   "standard_measures"
+  ],
+  "requires_any": [
+   [
+    "clay_pipe_socket_jointing",
+    "wooden_log_conduits",
+    "pressure_pipe_jointing"
+   ]
+  ],
+  "precedents": [],
+  "note": "Sewers tested for infiltration."
+ },
+ {
+  "id": "timber_moisture_movement_design",
+  "requires_all": [
+   "timber_seasoning"
+  ],
+  "requires_any": [
+   [
+    "masonry_moisture_management",
+    "experimental_controls"
+   ]
+  ],
+  "precedents": [],
+  "note": "Timber designed for moisture movement."
+ },
+ {
+  "id": "slipformed_concrete_cores",
+  "requires_all": [
+   "reinforced_concrete",
+   "concrete_curing_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Cores and silos slip-formed without stopping."
+ },
+ {
+  "id": "curtain_wall_systems",
+  "requires_all": [
+   "structural_steel",
+   "reinforced_concrete",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plate_glass_shopfronts"
+  ],
+  "note": "Glass walls hung on the frame."
+ },
+ {
+  "id": "nuclear_power_stations",
+  "requires_all": [
+   "reactor_engineering",
+   "alternating_current_grids"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": [
+    "Uranium Ore"
+   ]
+  },
+  "note": "Nuclear stations feed the grid."
+ },
+ {
+  "id": "cable_stayed_bridges",
+  "requires_all": [
+   "prestressed_concrete",
+   "wire_cable_suspension_bridges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "welded_steel_frames"
+  ],
+  "note": "Decks hung straight from towers."
+ },
+ {
+  "id": "rainscreen_wall_assemblies",
+  "requires_all": [
+   "building_drainage_coordination",
+   "building_wind_load_assessment"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Rainscreen walls vented behind the cladding."
+ },
+ {
+  "id": "precast_panel_housing",
+  "requires_all": [
+   "reinforced_concrete",
+   "public_housing_estates"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "climbing_tower_cranes"
+  ],
+  "note": "Blocks assembled from factory-cast panels."
+ },
+ {
+  "id": "seawater_desalination",
+  "requires_all": [
+   "fractional_distillation",
+   "polymer_film_extrusion"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Plants make fresh water from the sea."
+ },
+ {
+  "id": "tunnel_boring_machines",
+  "requires_all": [
+   "tunnelling_shield",
+   "cemented_carbide_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rock_drill_tunnelling"
+  ],
+  "note": "Rotary machines cut whole tunnel bores."
+ },
+ {
+  "id": "direct_current_links",
+  "requires_all": [
+   "alternating_current_grids",
+   "silicon_rectifiers"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "DC links carry power under seas."
+ },
+ {
+  "id": "framed_tube_supertall",
+  "requires_all": [
+   "skeleton_frame_towers",
+   "building_wind_load_assessment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "welded_steel_frames"
+  ],
+  "note": "Framed-tube towers pass a hundred storeys."
+ },
+ {
+  "id": "cable_net_membrane_roofs",
+  "requires_all": [
+   "steel_wire_drawing",
+   "polymer_additive_formulation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "thin_concrete_shell_roofs"
+  ],
+  "note": "Cable nets and membranes span stadiums."
+ },
+ {
+  "id": "ductile_seismic_codes",
+  "requires_all": [
+   "building_codes",
+   "earthquake_magnitude_scale"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "welded_steel_frames"
+  ],
+  "note": "Codes require ductile frames and tied walls."
+ },
+ {
+  "id": "seismic_base_isolation",
+  "requires_all": [
+   "ductile_seismic_codes",
+   "synthetic_rubber"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Isolating bearings let buildings ride out quakes."
+ },
+ {
+  "id": "nutrient_removal_treatment",
+  "requires_all": [
+   "activated_sludge_treatment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "environment_protection_agency"
+  ],
+  "note": "Sewage works strip nitrogen and phosphorus."
+ },
+ {
+  "id": "trenchless_pipe_relining",
+  "requires_all": [
+   "conduit_infiltration_testing",
+   "thermoplastic_processing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Old sewers relined without digging."
+ },
+ {
+  "id": "photovoltaic_power",
+  "requires_all": [
+   "module_encapsulation",
+   "electrical_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Solar plants of installed modules feed the grid."
+ },
+ {
+  "id": "wind_turbine_farms",
+  "requires_all": [
+   "alternating_current_grids",
+   "aerodynamics"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "carbon_fibre_composites",
+   "fantail_windmills"
+  ],
+  "note": "Large wind turbines feed the grid."
+ },
+ {
+  "id": "storm_surge_barriers",
+  "requires_all": [
+   "river_basin_works",
+   "steel_sheet_pile_cofferdams"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "drained_lake_polders"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Movable barriers close estuaries in floods."
+ },
+ {
+  "id": "building_management_systems",
+  "requires_all": [
+   "stored_program_control",
+   "refrigerated_air_conditioning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "desk_computers"
+  ],
+  "note": "Computers run heat, light and air."
+ },
+ {
+  "id": "accessible_building_rules",
+  "requires_all": [
+   "building_codes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "civil_rights_law"
+  ],
+  "note": "Ramps, lifts and wide doors required."
+ },
+ {
+  "id": "low_energy_building_codes",
+  "requires_all": [
+   "building_codes",
+   "rainscreen_wall_assemblies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "environment_protection_agency"
+  ],
+  "note": "Energy codes and very low-energy houses."
+ },
+ {
+  "id": "combined_cycle_stations",
+  "requires_all": [
+   "jet_propulsion",
+   "steam_turbines",
+   "alternating_current_grids"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Gas burned twice over for power."
+ },
+ {
+  "id": "acoustic_leak_detection",
+  "requires_all": [
+   "water_towers",
+   "single_chip_processors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "conduit_infiltration_testing"
+  ],
+  "note": "Acoustic sensors listen for leaking mains."
+ },
+ {
+  "id": "green_cool_roofs",
+  "requires_all": [
+   "low_energy_building_codes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "building_capillary_breaks"
+  ],
+  "note": "Planted and reflective roofs cool districts."
+ },
+ {
+  "id": "smart_grid_metering",
+  "requires_all": [
+   "alternating_current_grids",
+   "internetworking_protocols"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "building_management_systems"
+  ],
+  "note": "Smart meters balance the grid minute by minute."
+ },
+ {
+  "id": "rooftop_solar_home_batteries",
+  "requires_all": [
+   "photovoltaic_power",
+   "lithium_ion_cells"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Rooftop solar and home batteries."
+ },
+ {
+  "id": "offshore_wind_farms",
+  "requires_all": [
+   "wind_turbine_farms",
+   "direct_current_links"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Wind farms on fixed and floating foundations."
+ },
+ {
+  "id": "mass_timber_towers",
+  "requires_all": [
+   "engineered_wood_lamination",
+   "timber_moisture_movement_design"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Towers of cross-laminated timber."
+ },
+ {
+  "id": "grid_scale_batteries",
+  "requires_all": [
+   "battery_bank_wiring",
+   "lithium_ion_cells"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "smart_grid_metering"
+  ],
+  "note": "Battery plants store surplus power."
+ },
+ {
+  "id": "sponge_districts",
+  "requires_all": [
+   "green_cool_roofs",
+   "climate_adaptation_plans"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Parks and permeable paving soak up cloudbursts."
+ },
+ {
+  "id": "heat_pump_district_networks",
+  "requires_all": [
+   "radiator_central_heating",
+   "mechanical_refrigeration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "low_energy_building_codes"
+  ],
+  "note": "Heat pumps and district heat replace fuel burning."
+ },
+ {
+  "id": "printed_concrete_houses",
+  "requires_all": [
+   "additive_manufacturing",
+   "water_cement_ratio_design"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Gantry machines print houses in concrete."
+ },
+ {
+  "id": "near_zero_energy_retrofits",
+  "requires_all": [
+   "low_energy_building_codes",
+   "heat_pump_district_networks"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Old buildings retrofitted to near-zero energy."
+ },
+ {
+  "id": "low_carbon_cement",
+  "requires_all": [
+   "portland_cement_clinker"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "carbon_emission_market"
+  ],
+  "note": "Cement burned with less carbon, the rest captured."
+ },
+ {
+  "id": "small_modular_reactors",
+  "requires_all": [
+   "nuclear_power_stations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "flexible_machining_cells"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Uranium Ore"
+   ]
+  },
+  "note": "Small factory-built reactors near towns."
+ },
+ {
+  "id": "canal_fly_boats",
+  "requires_all": [
+   "trunk_canal_cross",
+   "night_fly_wagons"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "draft_horse_breeding"
+  ],
+  "note": "Fly-boats run day and night with relay horses."
+ },
+ {
+  "id": "public_plateway_hire",
+  "requires_all": [
+   "iron_plated_wagonway_rails"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "canal_share_companies",
+   "wagonway_haulage"
+  ],
+  "note": "Plate rails open to any carrier for a toll."
+ },
+ {
+  "id": "scheduled_river_steamers",
+  "requires_all": [
+   "trial_steam_paddle_boat",
+   "double_acting_engine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "high_pressure_steam_engines",
+   "river_navigation_commissions"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Paddle steamers keep a timetable against the current."
+ },
+ {
+  "id": "passenger_canal_packets",
+  "requires_all": [
+   "scheduled_passenger_barges",
+   "canal_fly_boats"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Passenger packet boats on the canals."
+ },
+ {
+  "id": "steam_estuary_ferries",
+  "requires_all": [
+   "scheduled_river_steamers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mail_packet_ships"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Steam ferries cross the estuaries hourly."
+ },
+ {
+  "id": "steam_harbour_tugs",
+  "requires_all": [
+   "scheduled_river_steamers",
+   "enclosed_wet_docks"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Steam tugs tow sailing ships through harbours."
+ },
+ {
+  "id": "town_omnibus_routes",
+  "requires_all": [
+   "hackney_coaches",
+   "steel_leaf_springs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "long_route_stagecoaches"
+  ],
+  "note": "Horse omnibuses run fixed town routes."
+ },
+ {
+  "id": "public_steam_railway",
+  "requires_all": [
+   "high_pressure_steam_engines",
+   "iron_plated_wagonway_rails"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_plateway_hire"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Coal"
+   ]
+  },
+  "note": "Locomotives haul a public line."
+ },
+ {
+  "id": "multitube_locomotive_boilers",
+  "requires_all": [
+   "public_steam_railway",
+   "pressure_vessels"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Many-tubed boilers win the speed trials."
+ },
+ {
+  "id": "intercity_passenger_railway",
+  "requires_all": [
+   "public_steam_railway",
+   "multitube_locomotive_boilers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timed_mail_coaches"
+  ],
+  "note": "Double-track railway between two cities."
+ },
+ {
+  "id": "rail_track_foundations",
+  "requires_all": [
+   "aggregate_road_foundations",
+   "public_steam_railway"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "layered_stone_road_beds"
+  ],
+  "note": "Track laid on sleepers in drained ballast."
+ },
+ {
+  "id": "classed_freight_tariffs",
+  "requires_all": [
+   "intercity_passenger_railway",
+   "carrier_stage_tariffs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Freight charged by class of goods."
+ },
+ {
+  "id": "merchant_chronometer_issue",
+  "requires_all": [
+   "marine_timekeeper"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nautical_almanac",
+   "lunar_distance_longitude"
+  ],
+  "note": "Merchant ships carry chronometers for longitude."
+ },
+ {
+  "id": "ocean_steamship_line",
+  "requires_all": [
+   "mail_packet_ships",
+   "steam_propulsion"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steam_estuary_ferries"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Steamships cross the ocean on a regular line."
+ },
+ {
+  "id": "printed_railway_timetables",
+  "requires_all": [
+   "intercity_passenger_railway"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "carriers_guide",
+   "printed_road_books"
+  ],
+  "note": "Printed railway guides and timetables."
+ },
+ {
+  "id": "prepaid_stamp_postage",
+  "requires_all": [
+   "distance_postage_rates",
+   "public_letter_post"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "intercity_passenger_railway"
+  ],
+  "note": "Uniform cheap postage prepaid with stamps."
+ },
+ {
+  "id": "screw_propeller_ships",
+  "requires_all": [
+   "steam_propulsion"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ocean_steamship_line"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Screw propellers replace paddle wheels at sea."
+ },
+ {
+  "id": "steam_grain_elevators",
+  "requires_all": [
+   "high_pressure_steam_engines",
+   "public_steam_railway"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "belt_power_transmission"
+  ],
+  "note": "Steam elevators fill bins at railheads and ports."
+ },
+ {
+  "id": "iron_hulled_steamers",
+  "requires_all": [
+   "screw_propeller_ships",
+   "puddling_furnace"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ocean_steamship_line"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Iron-hulled ocean steamers."
+ },
+ {
+  "id": "rail_express_parcels",
+  "requires_all": [
+   "intercity_passenger_railway"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "carriers_guide"
+  ],
+  "note": "Express parcel carriers ride the railways."
+ },
+ {
+  "id": "rail_gauge_standards",
+  "requires_all": [
+   "standard_measures",
+   "workshop_standards",
+   "intercity_passenger_railway"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rail_track_foundations"
+  ],
+  "note": "One track gauge fixed by law."
+ },
+ {
+  "id": "railway_clearing_house",
+  "requires_all": [
+   "intercity_passenger_railway",
+   "classed_freight_tariffs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "A clearing house settles through-fares between lines."
+ },
+ {
+  "id": "travelling_post_office_cars",
+  "requires_all": [
+   "intercity_passenger_railway",
+   "prepaid_stamp_postage"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Post cars sort letters on moving trains."
+ },
+ {
+  "id": "fast_clipper_hulls",
+  "requires_all": [
+   "drawn_hull_plans",
+   "copper_hull_sheathing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "jib_staysail_rig"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Sharp clipper hulls for fast long hauls."
+ },
+ {
+  "id": "wind_current_passage_charts",
+  "requires_all": [
+   "hydrographic_office",
+   "ship_logbooks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "isotherm_maps",
+   "statistical_inference"
+  ],
+  "note": "Wind and current charts shorten ocean passages."
+ },
+ {
+  "id": "telegraph_train_dispatch",
+  "requires_all": [
+   "electrical_telegraphy",
+   "intercity_passenger_railway"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Telegraph orders run trains on single track."
+ },
+ {
+  "id": "interlocked_rail_signals",
+  "requires_all": [
+   "intercity_passenger_railway",
+   "telegraph_train_dispatch"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Interlocked levers forbid conflicting routes."
+ },
+ {
+  "id": "sleeping_dining_cars",
+  "requires_all": [
+   "intercity_passenger_railway"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steel_leaf_springs"
+  ],
+  "note": "Sleeping and dining cars on long trains."
+ },
+ {
+  "id": "ocean_coaling_stations",
+  "requires_all": [
+   "ocean_steamship_line"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coal_grading"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Coaling stations along the ocean routes."
+ },
+ {
+  "id": "sea_collision_rules",
+  "requires_all": [
+   "ocean_steamship_line"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "numbered_signal_flags"
+  ],
+  "note": "Uniform lights and steering rules at sea."
+ },
+ {
+  "id": "underground_town_railway",
+  "requires_all": [
+   "public_steam_railway",
+   "tunnelling_shield"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_omnibus_routes"
+  ],
+  "note": "A railway runs beneath a great town."
+ },
+ {
+  "id": "compound_marine_engines",
+  "requires_all": [
+   "compound_steam_engines",
+   "screw_propeller_ships"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Compound engines cut coal on each voyage."
+ },
+ {
+  "id": "crude_oil_pipelines",
+  "requires_all": [
+   "fuel_refining",
+   "pressure_pipe_jointing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "resources_known": [
+    "Crude Oil"
+   ]
+  },
+  "note": "Crude piped from wells to railheads."
+ },
+ {
+  "id": "rolled_steel_rails",
+  "requires_all": [
+   "pneumatic_steel_converter",
+   "grooved_bar_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rail_track_foundations"
+  ],
+  "note": "Steel rails outlast iron under traffic."
+ },
+ {
+  "id": "continental_trunk_railway",
+  "requires_all": [
+   "intercity_passenger_railway",
+   "telegraph_train_dispatch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rock_drill_tunnelling",
+   "rolled_steel_rails"
+  ],
+  "note": "A trunk railway joins two coasts."
+ },
+ {
+  "id": "isthmus_ship_canal",
+  "requires_all": [
+   "canal_locks",
+   "steam_propulsion"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "two_sea_canal",
+   "powder_rock_blasting"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "A sea-level ship canal cuts an isthmus."
+ },
+ {
+  "id": "rail_vehicle_braking",
+  "requires_all": [
+   "friction_measurement",
+   "rail_track_foundations",
+   "compressed_air_systems"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Continuous air brakes on whole trains."
+ },
+ {
+  "id": "mail_order_parcel_trade",
+  "requires_all": [
+   "rail_express_parcels",
+   "prepaid_stamp_postage"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Catalogues ship goods to farms by rail and post."
+ },
+ {
+  "id": "automatic_rail_couplers",
+  "requires_all": [
+   "rail_vehicle_braking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rail_gauge_standards"
+  ],
+  "note": "Automatic couplers join cars safely."
+ },
+ {
+  "id": "interrealm_postal_union",
+  "requires_all": [
+   "prepaid_stamp_postage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "career_diplomatic_service",
+   "inter_realm_statistical_congress"
+  ],
+  "note": "Realms fix one postal rate across borders."
+ },
+ {
+  "id": "hull_load_lines",
+  "requires_all": [
+   "iron_hulled_steamers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "builders_measure_tonnage"
+  ],
+  "note": "Load lines painted against overloading."
+ },
+ {
+  "id": "refrigerated_rail_cars",
+  "requires_all": [
+   "mechanical_refrigeration",
+   "intercity_passenger_railway"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Refrigerated cars with ice bunkers."
+ },
+ {
+  "id": "triple_expansion_freighters",
+  "requires_all": [
+   "compound_marine_engines",
+   "pneumatic_steel_converter"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "open_hearth_steel"
+  ],
+  "note": "Triple-expansion engines make freighters cheap."
+ },
+ {
+  "id": "railway_standard_time",
+  "requires_all": [
+   "printed_railway_timetables",
+   "telegraph_train_dispatch"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Railways set standard time zones."
+ },
+ {
+  "id": "chain_drive_bicycle",
+  "requires_all": [
+   "chain_power_transmission",
+   "rolling_element_bearings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steel_leaf_springs"
+  ],
+  "note": "Chain-driven safety bicycle."
+ },
+ {
+  "id": "motor_carriage",
+  "requires_all": [
+   "internal_combustion",
+   "fuel_refining"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chain_drive_bicycle"
+  ],
+  "note": "Petrol-engined motor carriage."
+ },
+ {
+  "id": "electric_street_tramways",
+  "requires_all": [
+   "electric_motors",
+   "central_power_stations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_omnibus_routes"
+  ],
+  "note": "Electric tramways on town streets."
+ },
+ {
+  "id": "pneumatic_tyres",
+  "requires_all": [
+   "sulphur_cured_rubber",
+   "chain_drive_bicycle"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Air-filled rubber tyres."
+ },
+ {
+  "id": "tramp_bulk_charters",
+  "requires_all": [
+   "triple_expansion_freighters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "underwriters_room",
+   "undersea_telegraph_cable"
+  ],
+  "note": "Tramp steamers carry bulk wherever cargo waits."
+ },
+ {
+  "id": "steam_turbine_ships",
+  "requires_all": [
+   "steam_turbines",
+   "screw_propeller_ships"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Fast steam-turbine ships."
+ },
+ {
+  "id": "hump_marshalling_yards",
+  "requires_all": [
+   "rail_vehicle_braking",
+   "interlocked_rail_signals"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hump yards sort cars by gravity."
+ },
+ {
+  "id": "hull_condition_surveys",
+  "requires_all": [
+   "hull_seam_caulking",
+   "measurement_uncertainty"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hull_load_lines"
+  ],
+  "note": "Independent surveyors class hulls at intervals."
+ },
+ {
+  "id": "tar_bound_road_surfaces",
+  "requires_all": [
+   "layered_stone_road_beds",
+   "coal_tar_pitch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "motor_carriage",
+   "asphalt_street_paving"
+  ],
+  "note": "Tar-bound surfaces lay the dust."
+ },
+ {
+  "id": "driver_licensing",
+  "requires_all": [
+   "motor_carriage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hackney_coaches"
+  ],
+  "note": "Driving licences and number plates."
+ },
+ {
+  "id": "motor_freight_lorries",
+  "requires_all": [
+   "motor_carriage",
+   "pneumatic_tyres"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compression_ignition_engines"
+  ],
+  "note": "Motor lorries carry road freight."
+ },
+ {
+  "id": "motor_bus_routes",
+  "requires_all": [
+   "motor_carriage",
+   "pneumatic_tyres"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_omnibus_routes"
+  ],
+  "note": "Motor buses replace the horse omnibus."
+ },
+ {
+  "id": "series_built_motor_car",
+  "requires_all": [
+   "motor_carriage",
+   "interchangeable_component_fits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "basic_machine_shops",
+   "precision_toolrooms"
+  ],
+  "note": "Cheap cars built in long series."
+ },
+ {
+  "id": "motor_road_fund",
+  "requires_all": [
+   "driver_licensing",
+   "tar_bound_road_surfaces"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Fuel and licence taxes fund motor roads."
+ },
+ {
+  "id": "passenger_airships",
+  "requires_all": [
+   "aerostat_observation",
+   "internal_combustion",
+   "aluminum_electrolysis"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Passenger airships on scheduled routes."
+ },
+ {
+  "id": "radio_direction_finding",
+  "requires_all": [
+   "radio_telegraphy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tuned_radio_reception"
+  ],
+  "note": "Radio bearings fix a ship's position."
+ },
+ {
+  "id": "heavy_oil_motor_ships",
+  "requires_all": [
+   "compression_ignition_engines",
+   "screw_propeller_ships"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Heavy-oil motor ships."
+ },
+ {
+  "id": "wireless_distress_watch",
+  "requires_all": [
+   "radio_telegraphy",
+   "ocean_steamship_line"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Passenger ships keep a wireless distress watch."
+ },
+ {
+  "id": "state_parcel_post",
+  "requires_all": [
+   "prepaid_stamp_postage",
+   "rail_express_parcels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mail_order_parcel_trade"
+  ],
+  "note": "The state post carries parcels."
+ },
+ {
+  "id": "lock_ship_canal_divide",
+  "requires_all": [
+   "isthmus_ship_canal",
+   "electric_motors",
+   "portland_cement_clinker"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mosquito_control_brigades"
+  ],
+  "note": "High locks lift ocean ships over a divide."
+ },
+ {
+  "id": "electric_traffic_signals",
+  "requires_all": [
+   "motor_carriage",
+   "electromagnetic_relays"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "interlocked_rail_signals"
+  ],
+  "note": "Electric signals at street crossings."
+ },
+ {
+  "id": "roadside_fuel_stations",
+  "requires_all": [
+   "motor_carriage",
+   "fuel_refining"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Roadside fuel filling stations."
+ },
+ {
+  "id": "scheduled_air_mail",
+  "requires_all": [
+   "powered_flight"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "state_parcel_post"
+  ],
+  "note": "Scheduled air mail."
+ },
+ {
+  "id": "passenger_air_service",
+  "requires_all": [
+   "powered_flight",
+   "scheduled_air_mail"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Airline service between capitals."
+ },
+ {
+  "id": "state_railway_administration",
+  "requires_all": [
+   "railway_clearing_house"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "war_economy_boards"
+  ],
+  "note": "The state takes over the railways."
+ },
+ {
+  "id": "limited_access_motorways",
+  "requires_all": [
+   "motor_road_fund",
+   "reinforced_concrete_bridges"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Motor roads with no level crossings."
+ },
+ {
+  "id": "tractor_trailer_rigs",
+  "requires_all": [
+   "motor_freight_lorries",
+   "compression_ignition_engines"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Articulated tractor-trailer lorries."
+ },
+ {
+  "id": "centralized_traffic_control",
+  "requires_all": [
+   "interlocked_rail_signals",
+   "electromagnetic_relays"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "relay_logic"
+  ],
+  "note": "District rail signals worked from one room."
+ },
+ {
+  "id": "airway_radio_beacons",
+  "requires_all": [
+   "scheduled_air_mail",
+   "radio_direction_finding"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Radio beacons mark night air routes."
+ },
+ {
+  "id": "airport_control_towers",
+  "requires_all": [
+   "passenger_air_service",
+   "amplitude_modulation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Towers clear flights by radio."
+ },
+ {
+  "id": "electrified_main_lines",
+  "requires_all": [
+   "alternating_current_grids",
+   "electric_street_tramways"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Main-line railways electrified."
+ },
+ {
+  "id": "pallet_forklift_handling",
+  "requires_all": [
+   "internal_combustion",
+   "rolling_element_bearings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steam_grain_elevators"
+  ],
+  "note": "Fork-lift trucks and standard pallets."
+ },
+ {
+  "id": "road_haulage_licensing",
+  "requires_all": [
+   "motor_freight_lorries",
+   "driver_licensing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Road haulage licensed and taxed."
+ },
+ {
+  "id": "oil_electric_locomotives",
+  "requires_all": [
+   "compression_ignition_engines",
+   "electric_motors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electrified_main_lines"
+  ],
+  "note": "Oil-engined electric locomotives replace steam."
+ },
+ {
+  "id": "metal_monoplane_airliners",
+  "requires_all": [
+   "advanced_airframes",
+   "passenger_air_service"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "All-metal monoplanes make flying pay."
+ },
+ {
+  "id": "pressurized_airliner_cabins",
+  "requires_all": [
+   "metal_monoplane_airliners",
+   "compressed_air_systems"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Pressurized cabins fly above the weather."
+ },
+ {
+  "id": "hyperbolic_radio_navigation",
+  "requires_all": [
+   "radio_direction_finding",
+   "frequency_stabilization"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Timed radio chains fix ships and aircraft."
+ },
+ {
+  "id": "civil_aviation_convention",
+  "requires_all": [
+   "passenger_air_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "interrealm_postal_union",
+   "league_of_realms"
+  ],
+  "note": "Realms agree civil aviation and air rights."
+ },
+ {
+  "id": "radar_approach_control",
+  "requires_all": [
+   "airport_control_towers",
+   "radio_detection_ranging"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Radar guides airliners to the runway."
+ },
+ {
+  "id": "sustained_airlift",
+  "requires_all": [
+   "metal_monoplane_airliners",
+   "airport_control_towers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "airborne_operations"
+  ],
+  "note": "A besieged city fed by air alone."
+ },
+ {
+  "id": "jet_airliners",
+  "requires_all": [
+   "jet_propulsion",
+   "pressurized_airliner_cabins"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Jet airliners."
+ },
+ {
+  "id": "roll_on_roll_off_ferries",
+  "requires_all": [
+   "amphibious_landing_doctrine",
+   "series_built_motor_car"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Lorries and cars drive on and off ferries."
+ },
+ {
+  "id": "intermodal_shipping_containers",
+  "requires_all": [
+   "tractor_trailer_rigs",
+   "pallet_forklift_handling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "welded_steel_frames"
+  ],
+  "note": "Steel containers move ship to lorry unopened."
+ },
+ {
+  "id": "national_highway_network",
+  "requires_all": [
+   "limited_access_motorways",
+   "motor_road_fund"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "prestressed_concrete"
+  ],
+  "note": "A national motorway net paid by fuel tax."
+ },
+ {
+  "id": "orbital_satellite_launch",
+  "requires_all": [
+   "ballistic_rocket_bombardment",
+   "guided_weapons"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "jet_propulsion"
+  ],
+  "note": "A many-stage rocket puts a satellite in orbit."
+ },
+ {
+  "id": "very_large_tankers",
+  "requires_all": [
+   "heavy_oil_motor_ships",
+   "welded_steel_frames"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crude_oil_pipelines"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Very large oil tankers."
+ },
+ {
+  "id": "container_gantry_terminals",
+  "requires_all": [
+   "intermodal_shipping_containers",
+   "electric_motors"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Gantry cranes work container terminals."
+ },
+ {
+  "id": "bulk_unit_trains",
+  "requires_all": [
+   "oil_electric_locomotives",
+   "centralized_traffic_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Unit trains carry one bulk cargo."
+ },
+ {
+  "id": "dedicated_bulk_carriers",
+  "requires_all": [
+   "heavy_oil_motor_ships",
+   "welded_steel_frames"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Dedicated carriers for ore and grain."
+ },
+ {
+  "id": "computer_seat_reservations",
+  "requires_all": [
+   "passenger_air_service",
+   "data_modems",
+   "read_write_memory"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Computers book airline seats."
+ },
+ {
+  "id": "crewed_orbital_flight",
+  "requires_all": [
+   "orbital_satellite_launch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pressurized_airliner_cabins"
+  ],
+  "note": "A crewed capsule orbits and returns."
+ },
+ {
+  "id": "high_speed_rail_lines",
+  "requires_all": [
+   "electrified_main_lines",
+   "centralized_traffic_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "prestressed_concrete"
+  ],
+  "note": "High-speed trains on dedicated lines."
+ },
+ {
+  "id": "satellite_ship_navigation",
+  "requires_all": [
+   "hyperbolic_radio_navigation",
+   "orbital_satellite_launch"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Ships navigate by satellite."
+ },
+ {
+  "id": "standard_container_sizes",
+  "requires_all": [
+   "intermodal_shipping_containers"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Container sizes standardized across realms."
+ },
+ {
+  "id": "crewed_lunar_landing",
+  "requires_all": [
+   "crewed_orbital_flight"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "formula_programming_languages"
+  ],
+  "note": "A crew lands on the moon and returns."
+ },
+ {
+  "id": "wide_body_hub_flights",
+  "requires_all": [
+   "jet_airliners",
+   "computer_seat_reservations"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Wide-body airliners and hub airports."
+ },
+ {
+  "id": "automated_high_bay_warehouses",
+  "requires_all": [
+   "pallet_forklift_handling",
+   "hardwired_sequence_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Stacker cranes run high-bay warehouses."
+ },
+ {
+  "id": "overnight_air_express",
+  "requires_all": [
+   "jet_airliners",
+   "wide_body_hub_flights"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Overnight air express parcel network."
+ },
+ {
+  "id": "scanned_product_barcodes",
+  "requires_all": [
+   "single_chip_processors",
+   "relational_databases"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "punched_card_tabulation"
+  ],
+  "note": "Bar codes scanned on goods."
+ },
+ {
+  "id": "just_in_time_supply",
+  "requires_all": [
+   "lean_production",
+   "tractor_trailer_rigs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Just-in-time deliveries to factories."
+ },
+ {
+  "id": "transport_deregulation",
+  "requires_all": [
+   "road_haulage_licensing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "state_enterprise_privatization"
+  ],
+  "note": "Freight and fares deregulated."
+ },
+ {
+  "id": "double_stack_container_trains",
+  "requires_all": [
+   "intermodal_shipping_containers",
+   "bulk_unit_trains"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Containers stacked two high on trains."
+ },
+ {
+  "id": "electronic_shipping_documents",
+  "requires_all": [
+   "bills_of_lading",
+   "data_modems"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standard_container_sizes"
+  ],
+  "note": "Shipping documents exchanged electronically."
+ },
+ {
+  "id": "supply_chain_management",
+  "requires_all": [
+   "just_in_time_supply",
+   "relational_databases"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "scanned_product_barcodes"
+  ],
+  "note": "Supply chains managed as one flow."
+ },
+ {
+  "id": "low_cost_point_airlines",
+  "requires_all": [
+   "jet_airliners",
+   "transport_deregulation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Low-cost point-to-point airlines."
+ },
+ {
+  "id": "open_satellite_positioning",
+  "requires_all": [
+   "satellite_ship_navigation",
+   "single_chip_processors"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Open satellite positioning for every user."
+ },
+ {
+  "id": "online_order_parcel_tracking",
+  "requires_all": [
+   "world_hypertext_web",
+   "scanned_product_barcodes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "overnight_air_express"
+  ],
+  "note": "Online orders with tracked parcels."
+ },
+ {
+  "id": "shared_orbital_station",
+  "requires_all": [
+   "crewed_orbital_flight"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crewed_lunar_landing"
+  ],
+  "note": "A shared station kept crewed year-round."
+ },
+ {
+  "id": "automatic_ship_identification",
+  "requires_all": [
+   "open_satellite_positioning",
+   "packet_switching"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Ships broadcast identity by transponder."
+ },
+ {
+  "id": "urban_congestion_charging",
+  "requires_all": [
+   "town_camera_surveillance"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "driver_licensing"
+  ],
+  "note": "Charges for driving into town centres."
+ },
+ {
+  "id": "rfid_pallet_tags",
+  "requires_all": [
+   "scanned_product_barcodes",
+   "single_chip_processors"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Radio tags on pallets and cases."
+ },
+ {
+  "id": "in_car_satellite_routing",
+  "requires_all": [
+   "open_satellite_positioning",
+   "flat_panel_displays"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Turn-by-turn satellite routing in cars."
+ },
+ {
+  "id": "ultra_large_container_ships",
+  "requires_all": [
+   "standard_container_sizes",
+   "heavy_oil_motor_ships"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Ultra-large container ships."
+ },
+ {
+  "id": "live_traffic_mapping",
+  "requires_all": [
+   "in_car_satellite_routing",
+   "pocket_networked_computers"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Pocket maps with live traffic."
+ },
+ {
+  "id": "app_ride_hailing",
+  "requires_all": [
+   "live_traffic_mapping",
+   "pocket_networked_computers"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Ride-hailing by pocket telephone."
+ },
+ {
+  "id": "warehouse_robot_fleets",
+  "requires_all": [
+   "automated_high_bay_warehouses",
+   "rfid_pallet_tags"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "collaborative_robots"
+  ],
+  "note": "Robot fleets move goods in warehouses."
+ },
+ {
+  "id": "mass_battery_electric_cars",
+  "requires_all": [
+   "lithium_ion_cells",
+   "series_built_motor_car"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Battery-electric cars in mass production."
+ },
+ {
+  "id": "reusable_orbital_boosters",
+  "requires_all": [
+   "orbital_satellite_launch",
+   "stored_program_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "shared_orbital_station"
+  ],
+  "note": "Reusable boosters cut launch costs."
+ },
+ {
+  "id": "battery_electric_buses",
+  "requires_all": [
+   "lithium_ion_cells",
+   "motor_bus_routes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mass_battery_electric_cars"
+  ],
+  "note": "Battery-electric city buses."
+ },
+ {
+  "id": "supply_chain_resilience_reviews",
+  "requires_all": [
+   "supply_chain_management"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pandemic_test_trace_orders"
+  ],
+  "note": "Reviews and stocks for critical goods."
+ },
+ {
+  "id": "drone_parcel_delivery",
+  "requires_all": [
+   "open_satellite_positioning",
+   "lithium_ion_cells"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mass_small_drones"
+  ],
+  "note": "Drones deliver parcels in licensed zones."
+ },
+ {
+  "id": "low_carbon_ship_fuels",
+  "requires_all": [
+   "green_hydrogen_electrolysis",
+   "heavy_oil_motor_ships"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Ships burn methanol or ammonia fuels."
+ },
+ {
+  "id": "driverless_highway_freight",
+  "requires_all": [
+   "deep_learning_networks",
+   "open_satellite_positioning",
+   "tractor_trailer_rigs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Driverless lorries on fixed motorway corridors."
+ },
+ {
+  "id": "electric_air_taxis",
+  "requires_all": [
+   "lithium_ion_cells",
+   "drone_parcel_delivery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Electric air taxis on short hops."
+ },
+ {
+  "id": "all_arms_army_corps",
+  "requires_all": [
+   "all_arms_divisions",
+   "military_staffs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "military_survey_maps"
+  ],
+  "note": "Corps of divisions under one commander."
+ },
+ {
+  "id": "class_year_conscription",
+  "requires_all": [
+   "nation_in_arms_levy",
+   "canton_regimental_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Young men called up by class-year."
+ },
+ {
+  "id": "rifle_skirmisher_battalions",
+  "requires_all": [
+   "light_troop_screens",
+   "rifled_barrels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "columns_behind_skirmishers"
+  ],
+  "note": "Rifle battalions screen the line."
+ },
+ {
+  "id": "spherical_case_shot",
+  "requires_all": [
+   "standardized_artillery_system",
+   "corned_powder_mills"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Shells of balls burst over troops."
+ },
+ {
+  "id": "economic_blockade_decrees",
+  "requires_all": [
+   "sail_battle_fleet",
+   "own_hull_navigation_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "customs_frontier_patrols"
+  ],
+  "note": "Decrees close whole coasts to enemy trade."
+ },
+ {
+  "id": "guerrilla_band_warfare",
+  "requires_all": [
+   "light_troop_screens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nation_in_arms_levy"
+  ],
+  "note": "Irregular bands harass an occupying army."
+ },
+ {
+  "id": "staff_war_college",
+  "requires_all": [
+   "military_staffs",
+   "officer_war_games"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "officer_cadet_schools"
+  ],
+  "note": "Staff officers trained in planning."
+ },
+ {
+  "id": "percussion_cap_ignition",
+  "requires_all": [
+   "flintlock_ignition",
+   "isolated_airs_chemistry"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Percussion caps fire in the rain."
+ },
+ {
+  "id": "coast_guard_service",
+  "requires_all": [
+   "customs_frontier_patrols"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dovetailed_rock_lighthouse"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Coast stations watch for wrecks and smugglers."
+ },
+ {
+  "id": "naval_shell_guns",
+  "requires_all": [
+   "naval_gunnery",
+   "solid_bored_cannon"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spherical_case_shot"
+  ],
+  "note": "Flat-firing shell guns at sea."
+ },
+ {
+  "id": "volunteer_lifeboat_rescue",
+  "requires_all": [
+   "coast_guard_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "insured_fire_brigades"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Volunteer lifeboat crews on dangerous coasts."
+ },
+ {
+  "id": "masonry_casemate_forts",
+  "requires_all": [
+   "coastal_gun_forts",
+   "naval_shell_guns"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Casemate forts guard harbour mouths."
+ },
+ {
+  "id": "uniformed_beat_police",
+  "requires_all": [
+   "magistrates_runners",
+   "capital_police_lieutenant"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Salaried uniformed police on fixed beats."
+ },
+ {
+  "id": "paddle_steam_warships",
+  "requires_all": [
+   "steam_propulsion",
+   "sail_battle_fleet"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Paddle warships tow sailing ships into action."
+ },
+ {
+  "id": "war_as_policy_doctrine",
+  "requires_all": [
+   "staff_war_college"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "War taught as the continuation of policy."
+ },
+ {
+  "id": "rural_constabulary",
+  "requires_all": [
+   "uniformed_beat_police",
+   "mounted_highway_constabulary"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "County police in the countryside."
+ },
+ {
+  "id": "revolving_pistols",
+  "requires_all": [
+   "percussion_cap_ignition",
+   "interchangeable_component_fits"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Revolving pistols for horsemen and officers."
+ },
+ {
+  "id": "detached_fort_rings",
+  "requires_all": [
+   "fortress_frontier_belt",
+   "masonry_casemate_forts"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Detached forts ring great towns."
+ },
+ {
+  "id": "needle_breech_rifle",
+  "requires_all": [
+   "percussion_cap_ignition",
+   "rifled_barrels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paper_cartridges"
+  ],
+  "note": "Breech-loading needle rifle."
+ },
+ {
+  "id": "detective_branch",
+  "requires_all": [
+   "uniformed_beat_police"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_wanted_notices"
+  ],
+  "note": "Plain-clothes detectives."
+ },
+ {
+  "id": "screw_steam_warships",
+  "requires_all": [
+   "screw_propeller_ships",
+   "paddle_steam_warships"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Screw-propelled steam warships."
+ },
+ {
+  "id": "expanding_base_bullet",
+  "requires_all": [
+   "rifled_barrels",
+   "percussion_cap_ignition"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Expanding bullets load rifles quickly."
+ },
+ {
+  "id": "engineer_demonstration_ranges",
+  "requires_all": [
+   "siege_engineering",
+   "experimental_controls"
+  ],
+  "requires_any": [
+   [
+    "professional_corps",
+    "military_staffs"
+   ]
+  ],
+  "precedents": [],
+  "note": "Engineers demonstrate works on test ranges."
+ },
+ {
+  "id": "range_estimation_drill",
+  "requires_all": [
+   "standard_measures"
+  ],
+  "requires_any": [
+   [
+    "crossbow_mechanism",
+    "rifled_barrels"
+   ]
+  ],
+  "precedents": [
+   "expanding_base_bullet"
+  ],
+  "note": "Musketry schools drill range judging and aimed fire."
+ },
+ {
+  "id": "field_telegraph_trains",
+  "requires_all": [
+   "electrical_telegraphy",
+   "military_telegraph_lines"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Telegraph wagons link headquarters to corps."
+ },
+ {
+  "id": "armored_hulls",
+  "requires_all": [
+   "steam_propulsion",
+   "naval_gunnery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "screw_steam_warships",
+   "naval_shell_guns"
+  ],
+  "note": "Iron-armoured steam warships."
+ },
+ {
+  "id": "railway_mobilization",
+  "requires_all": [
+   "intercity_passenger_railway",
+   "military_staffs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "telegraph_train_dispatch"
+  ],
+  "note": "Troops sent to the frontier by timetable."
+ },
+ {
+  "id": "rifled_breech_artillery",
+  "requires_all": [
+   "rifled_barrels",
+   "standardized_artillery_system",
+   "steel_refining"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "needle_breech_rifle"
+  ],
+  "note": "Rifled breech-loading artillery."
+ },
+ {
+  "id": "metallic_cartridges",
+  "requires_all": [
+   "rifled_barrels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "needle_breech_rifle",
+   "expanding_base_bullet"
+  ],
+  "note": "Metallic cartridges."
+ },
+ {
+  "id": "magazine_repeating_rifles",
+  "requires_all": [
+   "metallic_cartridges",
+   "interchangeable_component_fits"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Lever and tube-magazine repeaters."
+ },
+ {
+  "id": "revolving_gun_turrets",
+  "requires_all": [
+   "armored_hulls",
+   "rifled_breech_artillery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Revolving turrets on low-sided warships."
+ },
+ {
+  "id": "field_army_war_rules",
+  "requires_all": [
+   "articles_of_war",
+   "staff_war_college"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "war_as_policy_doctrine"
+  ],
+  "note": "Rules of war issued to armies as orders."
+ },
+ {
+  "id": "steam_fire_brigades",
+  "requires_all": [
+   "insured_fire_brigades",
+   "high_pressure_steam_engines"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "leather_fire_hose"
+  ],
+  "note": "Paid brigades with steam fire engines."
+ },
+ {
+  "id": "crank_volley_guns",
+  "requires_all": [
+   "metallic_cartridges",
+   "interchangeable_component_fits"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hand-cranked many-barrel volley guns."
+ },
+ {
+  "id": "naval_torpedoes",
+  "requires_all": [
+   "steam_propulsion",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compressed_air_systems"
+  ],
+  "note": "Self-propelled naval torpedoes."
+ },
+ {
+  "id": "stable_blasting_explosive",
+  "requires_all": [
+   "aromatic_nitration",
+   "powder_rock_blasting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Stable high explosive for demolition."
+ },
+ {
+  "id": "reserve_mobilization_plans",
+  "requires_all": [
+   "railway_mobilization",
+   "class_year_conscription"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "field_telegraph_trains"
+  ],
+  "note": "Reservists mobilized by plan and telegraph."
+ },
+ {
+  "id": "examined_officer_commissions",
+  "requires_all": [
+   "officer_cadet_schools",
+   "competitive_civil_service"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Commissions won by examination, not bought."
+ },
+ {
+  "id": "political_police_bureau",
+  "requires_all": [
+   "detective_branch"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Political police watch dissenters."
+ },
+ {
+  "id": "automatic_actions",
+  "requires_all": [
+   "metallic_cartridges",
+   "precision_machinery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crank_volley_guns"
+  ],
+  "note": "Automatic firearms."
+ },
+ {
+  "id": "naval_war_college",
+  "requires_all": [
+   "staff_war_college"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "war_as_policy_doctrine"
+  ],
+  "note": "Naval officers study strategy at college."
+ },
+ {
+  "id": "smokeless_propellant",
+  "requires_all": [
+   "stable_blasting_explosive",
+   "aromatic_nitration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "celluloid_moulding"
+  ],
+  "note": "Smokeless propellant."
+ },
+ {
+  "id": "sea_power_doctrine",
+  "requires_all": [
+   "naval_war_college"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Command of the sea decides wars."
+ },
+ {
+  "id": "torpedo_boat_destroyers",
+  "requires_all": [
+   "naval_torpedoes",
+   "screw_steam_warships"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steam_turbines"
+  ],
+  "note": "Fast destroyers hunt torpedo boats."
+ },
+ {
+  "id": "fingerprint_identification",
+  "requires_all": [
+   "detective_branch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_wanted_notices"
+  ],
+  "note": "Offenders identified by fingerprints."
+ },
+ {
+  "id": "recoil_absorbing_field_gun",
+  "requires_all": [
+   "rifled_breech_artillery",
+   "smokeless_propellant"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "packed_piston_seals"
+  ],
+  "note": "Quick-firing gun absorbs its own recoil."
+ },
+ {
+  "id": "indirect_fire",
+  "requires_all": [
+   "powder_artillery",
+   "military_staffs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "military_survey_maps"
+  ],
+  "note": "Hidden batteries fire by map and observer."
+ },
+ {
+  "id": "barbed_wire_entanglements",
+  "requires_all": [
+   "steel_wire_drawing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Barbed-wire entanglements."
+ },
+ {
+  "id": "land_war_conventions",
+  "requires_all": [
+   "field_army_war_rules",
+   "neutral_wounded_convention"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "interrealm_arbitration"
+  ],
+  "note": "Realms agree laws of land war."
+ },
+ {
+  "id": "submersible_hulls",
+  "requires_all": [
+   "naval_torpedoes",
+   "armored_hulls"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Submersible hulls."
+ },
+ {
+  "id": "field_telephone_lines",
+  "requires_all": [
+   "telephone_circuits",
+   "field_telegraph_trains"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Field telephones link observers and guns."
+ },
+ {
+  "id": "naval_fire_control",
+  "requires_all": [
+   "armored_hulls",
+   "military_staffs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "indirect_fire"
+  ],
+  "note": "Naval fire control."
+ },
+ {
+  "id": "all_big_gun_battleships",
+  "requires_all": [
+   "revolving_gun_turrets",
+   "steam_turbine_ships"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "naval_fire_control"
+  ],
+  "note": "All-big-gun turbine battleships."
+ },
+ {
+  "id": "machine_gun_companies",
+  "requires_all": [
+   "automatic_actions"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Machine-gun companies in every regiment."
+ },
+ {
+  "id": "state_intelligence_service",
+  "requires_all": [
+   "political_police_bureau",
+   "career_diplomatic_service"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "State foreign intelligence service."
+ },
+ {
+  "id": "naval_aviation",
+  "requires_all": [
+   "powered_flight",
+   "naval_torpedoes"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Naval aviation."
+ },
+ {
+  "id": "aerial_bombardment",
+  "requires_all": [
+   "powered_flight",
+   "powder_artillery"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Aerial bombardment."
+ },
+ {
+  "id": "continuous_trench_systems",
+  "requires_all": [
+   "barbed_wire_entanglements",
+   "machine_gun_companies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "siege_by_parallels"
+  ],
+  "note": "Continuous trenches with dugouts and wire."
+ },
+ {
+  "id": "fighter_tactics",
+  "requires_all": [
+   "powered_flight",
+   "formation_drill"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Fighter tactics."
+ },
+ {
+  "id": "mountain_field_school",
+  "requires_all": [
+   "route_memory"
+  ],
+  "requires_any": [
+   [
+    "military_staffs",
+    "professional_corps"
+   ]
+  ],
+  "precedents": [],
+  "note": "Mountain field school."
+ },
+ {
+  "id": "chemical_gas_warfare",
+  "requires_all": [
+   "chloralkali_cells",
+   "continuous_trench_systems"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Research only: war gases and the gas mask."
+ },
+ {
+  "id": "armored_vehicles",
+  "requires_all": [
+   "internal_combustion",
+   "armored_hulls"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Armoured fighting vehicles."
+ },
+ {
+  "id": "armor_piercing_weapons",
+  "requires_all": [
+   "armored_vehicles",
+   "indirect_fire"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Armour-piercing weapons."
+ },
+ {
+  "id": "sound_flash_ranging",
+  "requires_all": [
+   "indirect_fire",
+   "electrical_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "acoustic_diaphragms"
+  ],
+  "note": "Sound and flash locate hidden guns."
+ },
+ {
+  "id": "carrier_aviation",
+  "requires_all": [
+   "naval_aviation",
+   "naval_fire_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Carrier aviation."
+ },
+ {
+  "id": "escorted_convoy_system",
+  "requires_all": [
+   "submersible_hulls",
+   "torpedo_boat_destroyers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "escorted_ocean_fleets"
+  ],
+  "note": "Escorted merchant convoys against submarines."
+ },
+ {
+  "id": "infiltration_storm_squads",
+  "requires_all": [
+   "continuous_trench_systems",
+   "machine_gun_companies"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Infiltration squads with light machine guns."
+ },
+ {
+  "id": "engineer_infantry_security",
+  "requires_all": [
+   "indirect_fire",
+   "military_staffs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Engineer-infantry security."
+ },
+ {
+  "id": "infantry_tank_cooperation",
+  "requires_all": [
+   "armored_vehicles",
+   "military_staffs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Infantry-tank cooperation."
+ },
+ {
+  "id": "mechanized_crew_school",
+  "requires_all": [
+   "armored_vehicles",
+   "workshop_standards",
+   "military_staffs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Mechanized crew school."
+ },
+ {
+  "id": "underwater_sound_ranging",
+  "requires_all": [
+   "submersible_hulls",
+   "acoustic_diaphragms"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Submarines ranged by underwater sound."
+ },
+ {
+  "id": "independent_air_arm",
+  "requires_all": [
+   "aerial_bombardment",
+   "fighter_tactics"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "An air arm beside army and navy."
+ },
+ {
+  "id": "naval_arms_limitation",
+  "requires_all": [
+   "all_big_gun_battleships",
+   "league_of_realms"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Treaty caps battle fleets."
+ },
+ {
+  "id": "gas_germ_weapon_ban",
+  "requires_all": [
+   "league_of_realms",
+   "land_war_conventions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chemical_gas_warfare"
+  ],
+  "note": "Treaty bans gas and germ weapons."
+ },
+ {
+  "id": "mobile_radio_command",
+  "requires_all": [
+   "amplitude_modulation",
+   "armored_vehicles"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Radio nets command moving formations."
+ },
+ {
+  "id": "rotor_cipher_machines",
+  "requires_all": [
+   "electromagnetic_relays",
+   "teleprinter_mechanisms"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Rotor cipher machines."
+ },
+ {
+  "id": "rotary_wing",
+  "requires_all": [
+   "advanced_airframes"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Rotary-wing flight."
+ },
+ {
+  "id": "radio_detection_ranging",
+  "requires_all": [
+   "feedback_radio_oscillators",
+   "superheterodyne_reception"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "underwater_sound_ranging"
+  ],
+  "note": "Radio echoes range aircraft and ships."
+ },
+ {
+  "id": "radio_patrol_emergency_line",
+  "requires_all": [
+   "uniformed_beat_police",
+   "amplitude_modulation",
+   "motor_carriage"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Radio patrol cars and an emergency number."
+ },
+ {
+  "id": "civil_air_defence",
+  "requires_all": [
+   "aerial_bombardment",
+   "independent_air_arm"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Wardens, shelters and blackout."
+ },
+ {
+  "id": "armoured_division",
+  "requires_all": [
+   "armored_vehicles",
+   "mobile_radio_command",
+   "infantry_tank_cooperation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Tanks, motor infantry and guns in one division."
+ },
+ {
+  "id": "integrated_air_defence",
+  "requires_all": [
+   "radio_detection_ranging",
+   "independent_air_arm"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mobile_radio_command"
+  ],
+  "note": "Radar, plotting rooms and fighter control."
+ },
+ {
+  "id": "airborne_operations",
+  "requires_all": [
+   "advanced_airframes",
+   "professional_corps"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Airborne operations."
+ },
+ {
+  "id": "infantry_antitank_coordination",
+  "requires_all": [
+   "armor_piercing_weapons",
+   "military_staffs"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Infantry-antitank coordination."
+ },
+ {
+  "id": "machine_cryptanalysis",
+  "requires_all": [
+   "rotor_cipher_machines",
+   "relay_logic"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "computability_theory"
+  ],
+  "note": "Codes broken by electromechanical machines."
+ },
+ {
+  "id": "naval_logistics",
+  "requires_all": [
+   "steam_propulsion",
+   "supply_groups"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Fleets replenished while under way."
+ },
+ {
+  "id": "amphibious_landing_doctrine",
+  "requires_all": [
+   "sea_soldier_regiments",
+   "compression_ignition_engines"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "carrier_aviation"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Landing craft and beach-assault doctrine."
+ },
+ {
+  "id": "guided_weapons",
+  "requires_all": [
+   "jet_propulsion",
+   "naval_fire_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Guided weapons."
+ },
+ {
+  "id": "ballistic_rocket_bombardment",
+  "requires_all": [
+   "iron_cased_war_rockets",
+   "guided_weapons",
+   "cryogenic_air_separation"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Long-range rockets bombard distant targets."
+ },
+ {
+  "id": "fission_weapon",
+  "requires_all": [
+   "nuclear_fission",
+   "reactor_engineering"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "state_great_laboratories"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Uranium Ore"
+   ]
+  },
+  "note": "Research only: a fission bomb can destroy a city."
+ },
+ {
+  "id": "unified_defence_ministry",
+  "requires_all": [
+   "independent_air_arm",
+   "single_minister_departments"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "One ministry over army, navy and air."
+ },
+ {
+  "id": "standing_alliance_command",
+  "requires_all": [
+   "unified_defence_ministry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "world_assembly_of_realms"
+  ],
+  "note": "A standing alliance with a joint command."
+ },
+ {
+  "id": "swept_wing_jet_fighters",
+  "requires_all": [
+   "jet_propulsion",
+   "fighter_tactics"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "radio_detection_ranging"
+  ],
+  "note": "Swept-wing jets with radar sights."
+ },
+ {
+  "id": "thermonuclear_weapon",
+  "requires_all": [
+   "fission_weapon"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "state_great_laboratories"
+  ],
+  "note": "Research only: fusion-stage weapon."
+ },
+ {
+  "id": "nuclear_propulsion",
+  "requires_all": [
+   "reactor_engineering",
+   "submersible_hulls"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Nuclear propulsion."
+ },
+ {
+  "id": "surface_to_air_missiles",
+  "requires_all": [
+   "guided_weapons",
+   "radio_detection_ranging"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "integrated_air_defence"
+  ],
+  "note": "Missile batteries defend against aircraft."
+ },
+ {
+  "id": "nuclear_civil_defence",
+  "requires_all": [
+   "civil_air_defence",
+   "nuclear_fission"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fission_weapon"
+  ],
+  "note": "Shelters and evacuation against nuclear attack."
+ },
+ {
+  "id": "interrealm_peacekeepers",
+  "requires_all": [
+   "world_assembly_of_realms"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Lightly armed peacekeepers of the world assembly."
+ },
+ {
+  "id": "continuity_of_government",
+  "requires_all": [
+   "nuclear_civil_defence"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Bunkers keep government working through attack."
+ },
+ {
+  "id": "intercontinental_missiles",
+  "requires_all": [
+   "ballistic_rocket_bombardment",
+   "thermonuclear_weapon"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "orbital_satellite_launch"
+  ],
+  "note": "Research only: intercontinental ballistic missiles."
+ },
+ {
+  "id": "reconnaissance_satellites",
+  "requires_all": [
+   "orbital_satellite_launch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "war_photography"
+  ],
+  "note": "Satellites photograph from orbit."
+ },
+ {
+  "id": "deterrence_doctrine",
+  "requires_all": [
+   "thermonuclear_weapon"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "intercontinental_missiles"
+  ],
+  "note": "Deterrence doctrine and hardened command."
+ },
+ {
+  "id": "missile_submarine_patrols",
+  "requires_all": [
+   "nuclear_propulsion",
+   "intercontinental_missiles"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Research only: missile submarines on patrol."
+ },
+ {
+  "id": "naval_missiles",
+  "requires_all": [
+   "guided_weapons",
+   "naval_torpedoes"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Naval missiles."
+ },
+ {
+  "id": "rival_capital_hotline",
+  "requires_all": [
+   "teleprinter_mechanisms",
+   "career_diplomatic_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deterrence_doctrine"
+  ],
+  "note": "A direct line between rival capitals."
+ },
+ {
+  "id": "nuclear_test_ban_treaties",
+  "requires_all": [
+   "nuclear_fission",
+   "fallout_monitoring"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "thermonuclear_weapon"
+  ],
+  "note": "Test-ban and non-proliferation treaties."
+ },
+ {
+  "id": "helicopter_air_assault",
+  "requires_all": [
+   "rotary_wing",
+   "airborne_operations"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Helicopter air assault."
+ },
+ {
+  "id": "night_vision_intensifiers",
+  "requires_all": [
+   "photoconductivity",
+   "electron_physics"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bipolar_junction_transistors"
+  ],
+  "note": "Image intensifiers see by starlight."
+ },
+ {
+  "id": "launch_warning_satellites",
+  "requires_all": [
+   "orbital_satellite_launch",
+   "ballistic_rocket_bombardment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "intercontinental_missiles"
+  ],
+  "note": "Satellites warn of missile launches."
+ },
+ {
+  "id": "laser_guided_munitions",
+  "requires_all": [
+   "guided_weapons",
+   "bipolar_junction_transistors"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Laser-guided bombs."
+ },
+ {
+  "id": "biological_weapons_ban",
+  "requires_all": [
+   "gas_germ_weapon_ban"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nuclear_test_ban_treaties"
+  ],
+  "note": "Convention bans germ weapons."
+ },
+ {
+  "id": "counterterror_units",
+  "requires_all": [
+   "state_intelligence_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "helicopter_air_assault"
+  ],
+  "note": "Counterterror and hostage-rescue units."
+ },
+ {
+  "id": "disaster_management_agency",
+  "requires_all": [
+   "continuity_of_government"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "troops_in_disaster_relief"
+  ],
+  "note": "A national disaster management agency."
+ },
+ {
+  "id": "remote_aircraft",
+  "requires_all": [
+   "guided_weapons",
+   "advanced_airframes"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Remote aircraft."
+ },
+ {
+  "id": "stealth_aircraft",
+  "requires_all": [
+   "swept_wing_jet_fighters",
+   "computer_aided_design",
+   "carbon_fibre_composites"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Low-observable stealth aircraft."
+ },
+ {
+  "id": "tactical_data_links",
+  "requires_all": [
+   "packet_switching",
+   "mobile_radio_command"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Digital links join command posts, ships and aircraft."
+ },
+ {
+  "id": "onsite_arms_inspection",
+  "requires_all": [
+   "nuclear_test_ban_treaties"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rival_capital_hotline"
+  ],
+  "note": "Missile elimination checked on site."
+ },
+ {
+  "id": "satellite_guided_strike",
+  "requires_all": [
+   "satellite_ship_navigation",
+   "laser_guided_munitions"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Satellite-guided precision strike."
+ },
+ {
+  "id": "chemical_weapons_convention",
+  "requires_all": [
+   "gas_germ_weapon_ban",
+   "biological_weapons_ban"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Convention bans and destroys chemical weapons."
+ },
+ {
+  "id": "town_camera_surveillance",
+  "requires_all": [
+   "television_broadcasting",
+   "uniformed_beat_police"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Cameras watch town streets."
+ },
+ {
+  "id": "antipersonnel_mine_ban",
+  "requires_all": [
+   "land_war_conventions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chemical_weapons_convention"
+  ],
+  "note": "Anti-personnel mines banned; demining begins."
+ },
+ {
+  "id": "mass_signals_surveillance",
+  "requires_all": [
+   "internetworking_protocols",
+   "state_intelligence_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "machine_cryptanalysis"
+  ],
+  "note": "The state intercepts communications en masse."
+ },
+ {
+  "id": "armed_remote_strike",
+  "requires_all": [
+   "remote_aircraft",
+   "satellite_guided_strike"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Armed remote aircraft strike from afar."
+ },
+ {
+  "id": "biometric_border_documents",
+  "requires_all": [
+   "frontier_passport_control",
+   "fingerprint_identification"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "digital_identity_register"
+  ],
+  "note": "Biometric identity documents at borders."
+ },
+ {
+  "id": "cyber_defence_command",
+  "requires_all": [
+   "internetworking_protocols",
+   "unified_defence_ministry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mass_signals_surveillance"
+  ],
+  "note": "Network sabotage met by a cyber command."
+ },
+ {
+  "id": "public_alert_broadcasts",
+  "requires_all": [
+   "cellular_telephony",
+   "disaster_management_agency"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Alerts pushed to every pocket telephone."
+ },
+ {
+  "id": "hypersonic_glide_vehicles",
+  "requires_all": [
+   "ballistic_rocket_bombardment",
+   "computer_aided_design"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "intercontinental_missiles"
+  ],
+  "note": "Hypersonic glide vehicles."
+ },
+ {
+  "id": "mass_small_drones",
+  "requires_all": [
+   "remote_aircraft",
+   "lithium_ion_cells",
+   "open_satellite_positioning"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Cheap drones spot and strike at the front."
+ },
+ {
+  "id": "machine_assisted_targeting",
+  "requires_all": [
+   "deep_learning_networks",
+   "learned_machine_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "armed_remote_strike"
+  ],
+  "note": "Machines suggest targets; humans sign off."
+ },
+ {
+  "id": "directed_energy_point_defence",
+  "requires_all": [
+   "mass_small_drones",
+   "wide_bandgap_power_chips"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Directed energy shoots down drones."
+ }
+]

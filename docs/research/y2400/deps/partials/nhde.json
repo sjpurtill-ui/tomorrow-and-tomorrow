@@ -1,0 +1,5981 @@
+[
+ {
+  "id": "carbonated_table_waters",
+  "requires_all": [
+   "isolated_airs_chemistry",
+   "dark_bottle_glass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bottle_sparkling_wine",
+   "pressure_vessels"
+  ],
+  "note": "Fixed air forced into water under pressure and bottled"
+ },
+ {
+  "id": "humidity_measurement",
+  "requires_all": [
+   "precision_thermometry",
+   "measurement_uncertainty"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grain_bellows_ventilation",
+   "estate_ice_houses"
+  ],
+  "note": "Catalog gates: thermometry and error bounds judge store dampness"
+ },
+ {
+  "id": "food_retorts",
+  "requires_all": [
+   "pressure_vessels",
+   "precision_thermometry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "voyage_keeping_foods",
+   "sealed_vessels"
+  ],
+  "note": "Catalog gates: sealed jars boiled in pressure vessels at measured heat"
+ },
+ {
+  "id": "root_beet_sugar",
+  "requires_all": [
+   "sugar_beet_selection",
+   "sugar_loaf_refining"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "beet_sugar_discovery",
+   "high_pressure_steam_engines"
+  ],
+  "note": "Selected beet boiled and refined in factories"
+ },
+ {
+  "id": "farm_improvement_societies",
+  "requires_all": [
+   "agricultural_improvement_societies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_farm_journals",
+   "agriculture_board_surveys"
+  ],
+  "note": "Improvement societies grow into shows and ploughing matches"
+ },
+ {
+  "id": "pedigree_herd_books",
+  "requires_all": [
+   "pedigree_stock_breeding",
+   "printed_farm_journals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "farm_improvement_societies",
+   "stall_winter_fattening"
+  ],
+  "note": "Pedigree breeding recorded in printed herd books"
+ },
+ {
+  "id": "pressed_bakers_yeast",
+  "requires_all": [
+   "brewers_yeast_bread",
+   "juniper_grain_spirit"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "porter_vat_brewing"
+  ],
+  "note": "Grain-distillery yeast pressed and sold to bakers"
+ },
+ {
+  "id": "cocoa_press_chocolate",
+  "requires_all": [
+   "court_chocolate_drink",
+   "root_beet_sugar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sugar_confectionery",
+   "seed_oil_pressing"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Cocoa butter pressed out; sweetened cake moulded to eat"
+ },
+ {
+  "id": "household_preserving_jars",
+  "requires_all": [
+   "food_retorts",
+   "plunger_pressed_glass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rolled_tinplate",
+   "honey_fruit_preserves"
+  ],
+  "note": "Retort preserving brought into the kitchen with cheap pressed jars"
+ },
+ {
+  "id": "vacuum_pan_sugar",
+  "requires_all": [
+   "root_beet_sugar",
+   "vacuum_experiments"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steam_suction_pump",
+   "high_pressure_steam_engines"
+  ],
+  "note": "Sugar boiled under reduced pressure at low heat"
+ },
+ {
+  "id": "oilcake_winter_feed",
+  "requires_all": [
+   "seed_oil_pressing",
+   "stall_winter_fattening"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "field_turnips",
+   "bean_cake_fertilizer"
+  ],
+  "note": "Press cake from oil mills fed to stalled stock"
+ },
+ {
+  "id": "sheep_scab_dipping",
+  "requires_all": [
+   "veterinary_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cattle_health_passes",
+   "pedigree_herd_books",
+   "mineral_acid_distillation"
+  ],
+  "note": "Veterinary schools prescribe mineral dips against scab"
+ },
+ {
+  "id": "mechanical_reaper",
+  "requires_all": [
+   "cast_iron_plough_parts",
+   "fodder_cutting_machines"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "threshing_machine",
+   "interchangeable_component_fits",
+   "draft_horse_breeding"
+  ],
+  "note": "Horse-drawn cutter bar from cast-iron parts and fodder cutters"
+ },
+ {
+  "id": "steel_scouring_plough",
+  "requires_all": [
+   "cast_iron_plough_parts",
+   "steel_refining"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "light_swing_plough",
+   "mechanical_reaper"
+  ],
+  "note": "Polished steel mouldboard sheds heavy sod"
+ },
+ {
+  "id": "nutrient_response_trials",
+  "requires_all": [
+   "soil_assays",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crushed_bone_manure",
+   "agriculture_board_surveys",
+   "atomic_combining_weights"
+  ],
+  "note": "Catalog gates: measured nutrients compared on controlled plots"
+ },
+ {
+  "id": "soil_infiltration_trials",
+  "requires_all": [
+   "soil_assays",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "covered_field_drains"
+  ],
+  "note": "Catalog gates: measured water additions on assayed soils"
+ },
+ {
+  "id": "seabird_guano_trade",
+  "requires_all": [
+   "nutrient_response_trials",
+   "company_merchant_fleets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seabird_colony_shares",
+   "crushed_bone_manure"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Island seabird dung shipped once nitrogen's value is measured"
+ },
+ {
+  "id": "mineral_nitrate_dressing",
+  "requires_all": [
+   "nitrate_cultivation",
+   "nutrient_response_trials"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "state_nitre_plantations",
+   "ocean_steamship_line"
+  ],
+  "note": "Catalog gates: mined nitrate applied at trial rates"
+ },
+ {
+  "id": "mulch_water_management",
+  "requires_all": [
+   "crop_residue_cover",
+   "soil_infiltration_trials"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "horse_hoe_tillage"
+  ],
+  "note": "Catalog gates: mulch depth compared once infiltration is measured"
+ },
+ {
+  "id": "phosphate_dressing",
+  "requires_all": [
+   "crushed_bone_manure"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nutrient_response_trials",
+   "steam_bone_digester"
+  ],
+  "note": "Bone manure extended to ground phosphate rock"
+ },
+ {
+  "id": "experimental_farm_station",
+  "requires_all": [
+   "agriculture_board_surveys",
+   "nutrient_response_trials"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "experimental_controls",
+   "farm_improvement_societies",
+   "research_university"
+  ],
+  "note": "Long-term plots run as a standing station"
+ },
+ {
+  "id": "phosphate_solubilization",
+  "requires_all": [
+   "phosphate_dressing",
+   "nutrient_response_trials",
+   "lead_chamber_acid"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steam_bone_digester"
+  ],
+  "note": "Catalog gates, with lead_chamber_acid for sulfuric_acid_production (2655, dated after)"
+ },
+ {
+  "id": "machine_tile_drainage",
+  "requires_all": [
+   "ridge_furrow_strips",
+   "covered_field_drains"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "soil_infiltration_trials",
+   "drained_lake_polders"
+  ],
+  "note": "Machine-made pipe tiles replace ridge and furrow"
+ },
+ {
+  "id": "famine_relief_works",
+  "requires_all": [
+   "public_soup_kitchens",
+   "poor_law_boards"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "free_grain_trade_edict",
+   "public_work_relief",
+   "grain_magistracy"
+  ],
+  "note": "Relief works and food imports run by the seat of rule"
+ },
+ {
+  "id": "heated_glasshouses",
+  "requires_all": [
+   "heated_orangeries",
+   "hotbed_forcing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "iron_roof_trusses",
+   "cast_plate_glass",
+   "town_luxury_vegetables"
+  ],
+  "note": "Orangery heating applied to forcing houses"
+ },
+ {
+  "id": "intensive_gardens",
+  "requires_all": [
+   "periurban_market_gardens",
+   "heated_glasshouses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_luxury_vegetables",
+   "hotbed_forcing"
+  ],
+  "note": "Town-edge market gardens intensified under glass"
+ },
+ {
+  "id": "steam_threshing_sets",
+  "requires_all": [
+   "threshing_machine",
+   "high_pressure_steam_engines"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mechanical_reaper"
+  ],
+  "note": "Portable steam engine drives the thresher"
+ },
+ {
+  "id": "food_adulteration_tests",
+  "requires_all": [
+   "compound_microscopy",
+   "systematic_chemical_names"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spoiled_food_condemnation",
+   "bread_weight_assize"
+  ],
+  "note": "Microscope and chemistry applied to food fraud"
+ },
+ {
+  "id": "graded_grain_elevators",
+  "requires_all": [
+   "steam_grain_elevators"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_grain_prices",
+   "electrical_telegraphy",
+   "standard_measures"
+  ],
+  "note": "Elevator grain sold by inspected grade"
+ },
+ {
+  "id": "chemical_baking_powder",
+  "requires_all": [
+   "salt_cake_soda",
+   "dough_leavening"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "brewers_yeast_bread"
+  ],
+  "note": "Soda and acid salts raise dough without yeast"
+ },
+ {
+  "id": "condensed_milk",
+  "requires_all": [
+   "vacuum_pan_sugar",
+   "food_retorts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "household_preserving_jars",
+   "lowland_export_dairying",
+   "rolled_tinplate"
+  ],
+  "note": "Milk evaporated in vacuum pans and tinned"
+ },
+ {
+  "id": "fermentation_starter_cultures",
+  "requires_all": [
+   "fermentation_control"
+  ],
+  "requires_any": [
+   [
+    "experimental_controls"
+   ]
+  ],
+  "precedents": [
+   "microbial_observation",
+   "grain_mould_starters"
+  ],
+  "note": "Catalog gates: fermentation_control plus experimental_controls"
+ },
+ {
+  "id": "plant_pathology_diagnosis",
+  "requires_all": [
+   "biological_classification",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compound_microscopy",
+   "microbial_observation"
+  ],
+  "note": "Catalog gates; germ_theory is unknown here, so experimental_controls stands for the any-group"
+ },
+ {
+  "id": "can_body_forming",
+  "requires_all": [
+   "tinplate_coating",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "food_retorts",
+   "household_preserving_jars"
+  ],
+  "note": "Catalog gates: tinplate cut and rolled by machine"
+ },
+ {
+  "id": "farm_colleges_ministry",
+  "requires_all": [
+   "experimental_farm_station",
+   "single_minister_departments"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "research_university",
+   "farm_improvement_societies"
+  ],
+  "note": "Station science becomes a ministry and colleges"
+ },
+ {
+  "id": "gentle_heat_treatment",
+  "requires_all": [
+   "microbial_observation",
+   "precision_thermometry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "food_retorts",
+   "fermentation_starter_cultures"
+  ],
+  "note": "Measured mild heat kills spoiling microbes"
+ },
+ {
+  "id": "meat_extract_cubes",
+  "requires_all": [
+   "steam_bone_digester",
+   "vacuum_pan_sugar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "condensed_milk",
+   "atomic_combining_weights"
+  ],
+  "note": "Meat juices evaporated to extract"
+ },
+ {
+  "id": "beef_fat_margarine",
+  "requires_all": [
+   "keg_salted_butter",
+   "systematic_chemical_names"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "condensed_milk",
+   "lowland_export_dairying"
+  ],
+  "note": "Butter substitute from separated beef fat"
+ },
+ {
+  "id": "roller_grain_milling",
+  "requires_all": [
+   "graded_flour_bolting",
+   "high_pressure_steam_engines"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steam_grain_elevators",
+   "open_hearth_steel"
+  ],
+  "note": "Steel rolls replace millstones"
+ },
+ {
+  "id": "twine_binding_harvester",
+  "requires_all": [
+   "mechanical_reaper"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steel_wire_drawing",
+   "steam_threshing_sets"
+  ],
+  "note": "Reaper gains a twine knotter"
+ },
+ {
+  "id": "food_adulteration_law",
+  "requires_all": [
+   "food_adulteration_tests"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "central_board_of_health",
+   "bread_weight_assize",
+   "medical_officer_of_health"
+  ],
+  "note": "Adulteration tests backed by law and public analysts"
+ },
+ {
+  "id": "frozen_meat_trade",
+  "requires_all": [
+   "mechanical_refrigeration",
+   "iron_hulled_steamers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compound_marine_engines",
+   "marsh_fattened_cattle"
+  ],
+  "note": "Refrigerated holds carry meat from grazing lands"
+ },
+ {
+  "id": "cream_separator",
+  "requires_all": [
+   "butter_churning",
+   "gear_tooth_generation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lowland_export_dairying"
+  ],
+  "note": "High-speed geared bowl spins cream from milk"
+ },
+ {
+  "id": "resistant_vine_rootstocks",
+  "requires_all": [
+   "vine_rootstock_grafting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grafted_tree_nurseries",
+   "plant_pathology_diagnosis"
+  ],
+  "note": "Grafting onto resistant roots against the root louse (regional)"
+ },
+ {
+  "id": "cooperative_creameries",
+  "requires_all": [
+   "consumer_cooperatives",
+   "cream_separator"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cheese_weigh_houses",
+   "lowland_export_dairying"
+  ],
+  "note": "Farmer cooperatives run separator creameries"
+ },
+ {
+  "id": "silage_towers",
+  "requires_all": [
+   "winter_fodder",
+   "fodder_cutting_machines"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clover_ley_fodder",
+   "maize_field_crop"
+  ],
+  "note": "Chopped green fodder ensiled"
+ },
+ {
+  "id": "copper_lime_spray",
+  "requires_all": [
+   "plant_pathology_diagnosis"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "resistant_vine_rootstocks",
+   "chlorine_bleaching"
+  ],
+  "note": "Fungicide spray once fungal blight is diagnosed"
+ },
+ {
+  "id": "double_seaming",
+  "requires_all": [
+   "can_body_forming",
+   "bearing_surfaces"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "food_retorts"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "bottled_town_milk",
+  "requires_all": [
+   "gentle_heat_treatment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "refrigerated_rail_cars",
+   "plunger_pressed_glass"
+  ],
+  "note": "Heat-treated milk bottled for towns"
+ },
+ {
+  "id": "butterfat_milk_test",
+  "requires_all": [
+   "lead_chamber_acid",
+   "cream_separator"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cooperative_creameries"
+  ],
+  "note": "Acid and spinning test measure fat"
+ },
+ {
+  "id": "dietary_heat_units",
+  "requires_all": [
+   "calorimetry",
+   "energy_conservation_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "meat_extract_cubes",
+   "food_adulteration_tests"
+  ],
+  "note": "Food energy measured in calorimeters"
+ },
+ {
+  "id": "deficiency_disease_discovery",
+  "requires_all": [
+   "experimental_controls",
+   "dietary_heat_units"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "scurvy_controlled_trial",
+   "lemon_juice_scurvy",
+   "maize_skin_sickness"
+  ],
+  "note": "Controlled feeding finds diseases of lack (first seen with polished rice)"
+ },
+ {
+  "id": "chilled_fruit_shipping",
+  "requires_all": [
+   "frozen_meat_trade"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "refrigerated_rail_cars",
+   "steam_turbine_ships"
+  ],
+  "note": "Cold ships carry fruit"
+ },
+ {
+  "id": "progeny_rows",
+  "requires_all": [
+   "mass_seed_selection",
+   "tallies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pedigree_herd_books",
+   "experimental_farm_station"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "controlled_pollination",
+  "requires_all": [
+   "progeny_rows",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "descent_by_selection"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "field_variety_trials",
+  "requires_all": [
+   "progeny_rows",
+   "statistical_sampling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "experimental_farm_station"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "heredity_experiments",
+  "requires_all": [
+   "progeny_rows",
+   "controlled_pollination"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "descent_by_selection",
+   "cell_division_observation"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "regional_seed_trials",
+  "requires_all": [
+   "field_variety_trials",
+   "regional_maps"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "experimental_farm_station",
+   "farm_colleges_ministry"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "school_meals",
+  "requires_all": [
+   "compulsory_elementary_schooling",
+   "public_soup_kitchens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dietary_heat_units",
+   "famine_relief_works"
+  ],
+  "note": "Compulsory schooling reveals hungry pupils"
+ },
+ {
+  "id": "plant_resistance_trait_trials",
+  "requires_all": [
+   "heredity_experiments",
+   "plant_pathology_diagnosis"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "field_variety_trials"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "food_acidity_measurement",
+  "requires_all": [
+   "standard_measures",
+   "electrochemical_cells"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "food_retorts",
+   "household_preserving_jars"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "clean_milk_ordinances",
+  "requires_all": [
+   "bottled_town_milk",
+   "consumption_germ_identified"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "butterfat_milk_test",
+   "germ_theory_of_disease",
+   "medical_officer_of_health"
+  ],
+  "note": "Tested herds once milk-borne germs are known"
+ },
+ {
+  "id": "vitamin_factors",
+  "requires_all": [
+   "deficiency_disease_discovery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dietary_heat_units",
+   "atomic_physics"
+  ],
+  "note": "Deficiency diseases traced to named factors"
+ },
+ {
+  "id": "farm_extension_agents",
+  "requires_all": [
+   "experimental_farm_station",
+   "farm_colleges_ministry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "regional_seed_trials",
+   "printed_farm_journals"
+  ],
+  "note": "Station results carried to every farm"
+ },
+ {
+  "id": "ammonium_sulfate_fertilizer",
+  "requires_all": [
+   "catalytic_ammonia_synthesis",
+   "sulfuric_acid_production",
+   "nutrient_response_trials"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mineral_nitrate_dressing",
+   "iron_ammonia_catalysts"
+  ],
+  "note": "Catalog gates; moved after catalytic_ammonia_synthesis"
+ },
+ {
+  "id": "farm_tractor",
+  "requires_all": [
+   "internal_combustion",
+   "steel_scouring_plough"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steam_threshing_sets",
+   "series_built_motor_car"
+  ],
+  "note": "Light engine pulls the plough"
+ },
+ {
+  "id": "wartime_ration_cards",
+  "requires_all": [
+   "war_economy_boards",
+   "dietary_heat_units"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_soup_kitchens",
+   "famine_relief_works"
+  ],
+  "note": "War boards ration food by measured needs"
+ },
+ {
+  "id": "forced_air_grain_drying",
+  "requires_all": [
+   "electric_motors",
+   "grain_bellows_ventilation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "graded_grain_elevators",
+   "humidity_measurement"
+  ],
+  "note": "Motor fans dry stored grain"
+ },
+ {
+  "id": "grain_moisture_testing",
+  "requires_all": [
+   "humidity_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "graded_grain_elevators",
+   "electrical_measurement"
+  ],
+  "note": "Store dampness measured in the grain itself"
+ },
+ {
+  "id": "thermal_process_validation",
+  "requires_all": [
+   "food_retorts",
+   "double_seaming",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "food_acidity_measurement"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "rickets_prevention",
+  "requires_all": [
+   "vitamin_factors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "school_meals",
+   "infant_milk_depots"
+  ],
+  "note": "Fish-liver oil and sunlight supply the missing factor"
+ },
+ {
+  "id": "iodized_salt",
+  "requires_all": [
+   "iodine_goitre_treatment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "vitamin_factors",
+   "school_medical_inspection"
+  ],
+  "note": "Goitre dose moved into table salt"
+ },
+ {
+  "id": "hybrid_maize_seed",
+  "requires_all": [
+   "heredity_experiments",
+   "maize_field_crop"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "controlled_pollination",
+   "regional_seed_trials"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Inbred lines crossed for vigour (regional)"
+ },
+ {
+  "id": "quick_frozen_foods",
+  "requires_all": [
+   "mechanical_refrigeration",
+   "frozen_meat_trade"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "thermal_process_validation",
+   "regenerated_cellulose_fibre"
+  ],
+  "note": "Fast freezing in plates; wrapped packs"
+ },
+ {
+  "id": "contour_cultivation",
+  "requires_all": [
+   "geometric_survey",
+   "crop_calendars"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cross_slope_ploughing"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "cover_crop_mixtures",
+  "requires_all": [
+   "green_manure_crops",
+   "field_variety_trials"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crop_residue_cover"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "strip_cropping",
+  "requires_all": [
+   "contour_cultivation",
+   "crop_rotation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cross_slope_ploughing"
+  ],
+  "note": "Catalog gates; moved after contour_cultivation"
+ },
+ {
+  "id": "household_refrigerator",
+  "requires_all": [
+   "mechanical_refrigeration",
+   "induction_motors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "alternating_current_grids",
+   "quick_frozen_foods"
+  ],
+  "note": "Motor-driven refrigeration in the house"
+ },
+ {
+  "id": "soil_conservation_service",
+  "requires_all": [
+   "contour_cultivation",
+   "plains_dust_storms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "strip_cropping",
+   "cover_crop_mixtures",
+   "farm_extension_agents"
+  ],
+  "note": "Dust storms turn contour farming into an agency"
+ },
+ {
+  "id": "hitch_tractor",
+  "requires_all": [
+   "farm_tractor",
+   "pneumatic_tyres"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chain_power_transmission"
+  ],
+  "note": "Tyres, power take-off and hitch"
+ },
+ {
+  "id": "combine_harvester",
+  "requires_all": [
+   "twine_binding_harvester",
+   "farm_tractor"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hitch_tractor",
+   "steam_threshing_sets"
+  ],
+  "note": "Reaping and threshing in one machine"
+ },
+ {
+  "id": "recommended_daily_allowances",
+  "requires_all": [
+   "vitamin_factors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wartime_ration_cards",
+   "dietary_heat_units",
+   "rickets_prevention"
+  ],
+  "note": "Vitamin science set as daily allowances"
+ },
+ {
+  "id": "food_group_guides",
+  "requires_all": [
+   "recommended_daily_allowances"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "school_meals",
+   "radio_broadcasting"
+  ],
+  "note": "Allowances turned into household guides"
+ },
+ {
+  "id": "synthetic_crop_insecticide",
+  "requires_all": [
+   "chloralkali_cells",
+   "coal_tar_dyes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "copper_lime_spray",
+   "mosquito_control_brigades"
+  ],
+  "note": "Chlorinated organic synthesis gives a contact poison"
+ },
+ {
+  "id": "selective_hormone_herbicide",
+  "requires_all": [
+   "chloralkali_cells",
+   "experimental_farm_station"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "synthetic_crop_insecticide",
+   "enzyme_catalysis"
+  ],
+  "note": "Growth-hormone chemical kills broad-leaved weeds"
+ },
+ {
+  "id": "artificial_cattle_insemination",
+  "requires_all": [
+   "pedigree_herd_books",
+   "cryogenic_air_separation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "heredity_experiments",
+   "veterinary_schools"
+  ],
+  "note": "Semen frozen with liquefied gas"
+ },
+ {
+  "id": "confinement_broiler_houses",
+  "requires_all": [
+   "vitamin_factors",
+   "poultry_breed_selection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "recommended_daily_allowances",
+   "rural_electrification",
+   "mould_broth_antibiotic"
+  ],
+  "note": "Vitamin-balanced feed allows housed flocks"
+ },
+ {
+  "id": "food_batch_traceability",
+  "requires_all": [
+   "material_accounting",
+   "cargo_seals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clean_milk_ordinances",
+   "punched_card_tabulation"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "postharvest_loss_measurement",
+  "requires_all": [
+   "material_accounting",
+   "statistical_sampling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grain_moisture_testing"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "soil_moisture_scheduling",
+  "requires_all": [
+   "soil_infiltration_trials",
+   "irrigation_loss_accounts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "resistive_sensing"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "self_service_cold_stores",
+  "requires_all": [
+   "quick_frozen_foods",
+   "mechanical_refrigeration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pallet_forklift_handling",
+   "brand_advertising",
+   "household_refrigerator"
+  ],
+  "note": "Frozen packs sold from cold cabinets"
+ },
+ {
+  "id": "centre_pivot_irrigation",
+  "requires_all": [
+   "rural_electrification",
+   "soil_moisture_scheduling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "river_basin_works",
+   "hitch_tractor"
+  ],
+  "note": "Powered pivot sprinkler"
+ },
+ {
+  "id": "food_process_hazard_analysis",
+  "requires_all": [
+   "food_batch_traceability"
+  ],
+  "requires_any": [
+   [
+    "thermal_process_validation",
+    "experimental_controls"
+   ]
+  ],
+  "precedents": [
+   "clean_milk_ordinances",
+   "food_acidity_measurement"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "food_package_barrier_testing",
+  "requires_all": [
+   "food_process_hazard_analysis"
+  ],
+  "requires_any": [
+   [
+    "experimental_controls"
+   ]
+  ],
+  "precedents": [
+   "polymer_film_extrusion"
+  ],
+  "note": "Catalog gates; placed after hazard analysis"
+ },
+ {
+  "id": "food_water_activity_measurement",
+  "requires_all": [
+   "food_process_hazard_analysis",
+   "humidity_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grain_moisture_testing"
+  ],
+  "note": "Catalog gates; placed after hazard analysis"
+ },
+ {
+  "id": "food_package_leak_detection",
+  "requires_all": [
+   "food_package_barrier_testing"
+  ],
+  "requires_any": [
+   [
+    "pressure_vessels",
+    "electrical_measurement"
+   ]
+  ],
+  "precedents": [
+   "food_water_activity_measurement",
+   "polymer_film_extrusion"
+  ],
+  "note": "Catalog gates; placed after barrier testing"
+ },
+ {
+  "id": "inter_realm_food_standards",
+  "requires_all": [
+   "food_adulteration_law",
+   "world_assembly_of_realms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "food_process_hazard_analysis",
+   "inter_realm_health_council"
+  ],
+  "note": "Food law agreed between realms"
+ },
+ {
+  "id": "drip_irrigation",
+  "requires_all": [
+   "thermoplastic_processing",
+   "soil_moisture_scheduling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "centre_pivot_irrigation"
+  ],
+  "note": "Plastic lines drip water to each plant"
+ },
+ {
+  "id": "reduced_tillage",
+  "requires_all": [
+   "contour_cultivation",
+   "soil_assays"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "selective_hormone_herbicide",
+   "soil_conservation_service"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "semi_dwarf_grain_package",
+  "requires_all": [
+   "plant_resistance_trait_trials",
+   "ammonium_sulfate_fertilizer"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hybrid_maize_seed",
+   "centre_pivot_irrigation",
+   "farm_extension_agents",
+   "regional_seed_trials"
+  ],
+  "note": "Short-strawed varieties bred to take fertilizer and water"
+ },
+ {
+  "id": "food_banks",
+  "requires_all": [
+   "public_soup_kitchens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "self_service_cold_stores",
+   "postharvest_loss_measurement"
+  ],
+  "note": "Surplus from stores collected for the hungry"
+ },
+ {
+  "id": "microwave_oven",
+  "requires_all": [
+   "radio_detection_ranging"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "household_refrigerator"
+  ],
+  "note": "Radar valve heats food"
+ },
+ {
+  "id": "aseptic_carton_milk",
+  "requires_all": [
+   "bottled_town_milk",
+   "polymer_film_extrusion"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "thermal_process_validation",
+   "food_package_barrier_testing"
+  ],
+  "note": "Sterile laminated cartons"
+ },
+ {
+  "id": "integrated_pest_management",
+  "requires_all": [
+   "synthetic_crop_insecticide",
+   "persistent_pesticide_warning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "population_dynamics_equations",
+   "farm_extension_agents"
+  ],
+  "note": "Spraying limited by scouting after the pesticide warning"
+ },
+ {
+  "id": "starch_sugar_syrup",
+  "requires_all": [
+   "enzyme_catalysis",
+   "maize_field_crop"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hybrid_maize_seed",
+   "vacuum_pan_sugar"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Enzymes convert maize starch to syrup"
+ },
+ {
+  "id": "net_pen_aquaculture",
+  "requires_all": [
+   "fish_hatcheries",
+   "confinement_broiler_houses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stocked_fish_ponds",
+   "sustainable_yield_fisheries"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Hatchery fish fed pellet rations in sea pens"
+ },
+ {
+  "id": "national_dietary_goals",
+  "requires_all": [
+   "recommended_daily_allowances"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "food_group_guides",
+   "tobacco_cancer_evidence"
+  ],
+  "note": "Allowances turned against excess fat, salt and sugar"
+ },
+ {
+  "id": "hydroponic_glasshouses",
+  "requires_all": [
+   "heated_glasshouses",
+   "nutrient_response_trials"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "drip_irrigation",
+   "thermoplastic_processing"
+  ],
+  "note": "Nutrient solutions replace soil"
+ },
+ {
+  "id": "famine_early_warning",
+  "requires_all": [
+   "earth_observation_satellites",
+   "famine_relief_works"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "postharvest_loss_measurement",
+   "printed_grain_prices",
+   "weather_satellites"
+  ],
+  "note": "Satellite crop images warn of dearth"
+ },
+ {
+  "id": "nutrition_labels",
+  "requires_all": [
+   "national_dietary_goals",
+   "food_adulteration_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "scanned_product_barcodes",
+   "recommended_daily_allowances"
+  ],
+  "note": "Dietary goals printed on packs"
+ },
+ {
+  "id": "therapeutic_ready_food",
+  "requires_all": [
+   "recommended_daily_allowances",
+   "groundnut_oil_crop"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "oral_rehydration_salts",
+   "famine_early_warning"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Fortified groundnut paste for starving children"
+ },
+ {
+  "id": "transgenic_crops",
+  "requires_all": [
+   "recombinant_vaccine",
+   "plant_resistance_trait_trials"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hereditary_double_helix",
+   "hybrid_maize_seed"
+  ],
+  "note": "Gene transfer (first in yeast vaccines) applied to crops"
+ },
+ {
+  "id": "folic_acid_fortification",
+  "requires_all": [
+   "recommended_daily_allowances",
+   "roller_grain_milling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "vitamin_factors",
+   "randomised_controlled_trial"
+  ],
+  "note": "Trial-proven vitamin added to milled flour"
+ },
+ {
+  "id": "precision_agriculture",
+  "requires_all": [
+   "open_satellite_positioning",
+   "hitch_tractor"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "earth_observation_satellites",
+   "desk_computers",
+   "soil_moisture_scheduling"
+  ],
+  "note": "Satellite positioning steers planting and spreading"
+ },
+ {
+  "id": "marker_assisted_breeding",
+  "requires_all": [
+   "field_variety_trials",
+   "hereditary_double_helix"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "transgenic_crops",
+   "human_genome_reading"
+  ],
+  "note": "Gene markers read in seed guide selection"
+ },
+ {
+  "id": "biofortified_staples",
+  "requires_all": [
+   "marker_assisted_breeding",
+   "vitamin_factors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "folic_acid_fortification"
+  ],
+  "note": "Vitamin traits bred into staples"
+ },
+ {
+  "id": "stress_tolerant_varieties",
+  "requires_all": [
+   "plant_resistance_trait_trials",
+   "marker_assisted_breeding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "climate_assessment_panel"
+  ],
+  "note": "Drought and flood tolerance bred with markers"
+ },
+ {
+  "id": "sugar_drink_taxes",
+  "requires_all": [
+   "national_dietary_goals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tobacco_control_laws",
+   "starch_sugar_syrup",
+   "nutrition_labels"
+  ],
+  "note": "Diet law extended to taxation"
+ },
+ {
+  "id": "gene_edited_crops",
+  "requires_all": [
+   "transgenic_crops",
+   "marker_assisted_breeding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "human_genome_reading"
+  ],
+  "note": "Targeted edits without foreign genes"
+ },
+ {
+  "id": "precision_fermented_proteins",
+  "requires_all": [
+   "recombinant_vaccine",
+   "fermentation_starter_cultures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "transgenic_crops"
+  ],
+  "note": "Gene-carrying microbes brew milk and egg proteins"
+ },
+ {
+  "id": "cultivated_cell_meat",
+  "requires_all": [
+   "cell_culture_methods",
+   "fermentation_starter_cultures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "precision_fermented_proteins",
+   "monoclonal_antibody_drugs"
+  ],
+  "note": "Animal cells grown in tanks"
+ },
+ {
+  "id": "nitrogen_fixing_seed_microbes",
+  "requires_all": [
+   "gene_edited_crops",
+   "nutrient_response_trials"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "precision_fermented_proteins",
+   "green_manure_crops"
+  ],
+  "note": "Engineered microbes coat seed to fix nitrogen"
+ },
+ {
+  "id": "vertical_indoor_farms",
+  "requires_all": [
+   "hydroponic_glasshouses",
+   "solid_state_lighting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "digital_twin_plants"
+  ],
+  "note": "Stacked hydroponics under electric light (speculative)"
+ },
+ {
+  "id": "climate_shift_crop_planning",
+  "requires_all": [
+   "climate_circulation_models",
+   "regional_seed_trials"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stress_tolerant_varieties",
+   "climate_adaptation_plans"
+  ],
+  "note": "Climate models move varieties by district (speculative)"
+ },
+ {
+  "id": "vaccine_carrier_voyage",
+  "requires_all": [
+   "cowpox_vaccination",
+   "transoceanic_contact_voyages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "foundling_nurse_inspection",
+   "ocean_victualling"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Cowpox kept alive arm to arm across the ocean"
+ },
+ {
+  "id": "slow_sand_filtration",
+  "requires_all": [
+   "water_settling_basins",
+   "experimental_controls"
+  ],
+  "requires_any": [
+   [
+    "lime_mortar",
+    "sealed_vessels"
+   ]
+  ],
+  "precedents": [
+   "clean_water",
+   "steam_waterworks"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "isolated_poppy_alkaloid",
+  "requires_all": [
+   "measured_poppy_draughts",
+   "systematic_chemical_names"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "opium_tincture",
+   "atomic_combining_weights"
+  ],
+  "note": "Poppy's active principle crystallised as a salt"
+ },
+ {
+  "id": "public_vaccine_stations",
+  "requires_all": [
+   "cowpox_vaccination"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "outpatient_dispensaries",
+   "mass_shallow_inoculation"
+  ],
+  "note": "Standing stations keep lymph alive arm to arm"
+ },
+ {
+  "id": "planned_abdominal_operation",
+  "requires_all": [
+   "organ_seat_pathology",
+   "surgeons_college"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lateral_lithotomy",
+   "screw_tourniquet"
+  ],
+  "note": "Diagnosed tumour removed by planned incision"
+ },
+ {
+  "id": "chest_listening_tube",
+  "requires_all": [
+   "chest_percussion"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "organ_seat_pathology",
+   "university_clinical_wards"
+  ],
+  "note": "Listening tube adds to percussion"
+ },
+ {
+  "id": "human_blood_transfusion",
+  "requires_all": [
+   "blood_circulation",
+   "surgeons_college"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "transfusion_ban",
+   "planned_abdominal_operation"
+  ],
+  "note": "Person-to-person transfusion after haemorrhage"
+ },
+ {
+  "id": "fever_bark_alkaloid",
+  "requires_all": [
+   "cinchona_fever_bark",
+   "isolated_poppy_alkaloid"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "foxglove_dropsy",
+   "fleet_citrus_ration"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Alkaloid method applied to fever bark (regional)"
+ },
+ {
+  "id": "iodine_goitre_treatment",
+  "requires_all": [
+   "seaweed_goitre_remedy",
+   "systematic_chemical_names"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "atomic_combining_weights"
+  ],
+  "note": "Seaweed remedy reduced to measured iodine"
+ },
+ {
+  "id": "national_pharmacopoeia",
+  "requires_all": [
+   "printed_state_pharmacopoeia"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "isolated_poppy_alkaloid",
+   "state_medical_collegium"
+  ],
+  "note": "One national book of drugs and strengths"
+ },
+ {
+  "id": "croup_tracheotomy",
+  "requires_all": [
+   "surgeons_college"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "planned_abdominal_operation",
+   "chest_listening_tube"
+  ],
+  "note": "Windpipe opened in choking croup"
+ },
+ {
+  "id": "hospital_medical_schools",
+  "requires_all": [
+   "bedside_teaching",
+   "university_clinical_wards"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chest_listening_tube",
+   "anatomical_wax_models"
+  ],
+  "note": "Examined teaching on wards and in the dead-house"
+ },
+ {
+  "id": "epidemic_house_visiting",
+  "requires_all": [
+   "pestilence_health_boards",
+   "medical_police_code"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_fever_houses"
+  ],
+  "note": "Board visitors cleanse houses in a purging-sickness year"
+ },
+ {
+  "id": "intravenous_saline",
+  "requires_all": [
+   "human_blood_transfusion",
+   "systematic_chemical_names"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "medical_police_code",
+   "transfusion_ban"
+  ],
+  "note": "Salt water run into the veins"
+ },
+ {
+  "id": "anatomy_body_supply_law",
+  "requires_all": [
+   "public_anatomy_dissection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hospital_medical_schools"
+  ],
+  "note": "Unclaimed bodies given to anatomy schools"
+ },
+ {
+  "id": "numerical_treatment_method",
+  "requires_all": [
+   "organ_seat_pathology",
+   "scurvy_controlled_trial"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "statistical_inference",
+   "hospital_admission_books"
+  ],
+  "note": "Treatments tested on counted cases"
+ },
+ {
+  "id": "dental_surgery_licence",
+  "requires_all": [
+   "dental_surgery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "surgeons_college",
+   "medical_faculty_licence"
+  ],
+  "note": "Tooth surgeons licensed apart"
+ },
+ {
+  "id": "sanitary_town_survey",
+  "requires_all": [
+   "civil_vital_registration",
+   "numerical_treatment_method"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cause_of_death_tables",
+   "back_to_back_terraces",
+   "medical_police_code"
+  ],
+  "note": "Registered deaths tied to filth and crowding"
+ },
+ {
+  "id": "ether_anaesthesia",
+  "requires_all": [
+   "mineral_acid_distillation",
+   "surgeons_college"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "isolated_airs_chemistry",
+   "planned_abdominal_operation",
+   "dental_surgery_licence"
+  ],
+  "note": "Inhaled ether vapour for surgery"
+ },
+ {
+  "id": "chlorine_handwashing",
+  "requires_all": [
+   "lying_in_hospital",
+   "chlorine_bleaching"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "numerical_treatment_method",
+   "childbed_death_counts"
+  ],
+  "note": "Chlorine wash before the lying-in ward"
+ },
+ {
+  "id": "chloroform_anaesthesia",
+  "requires_all": [
+   "ether_anaesthesia"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chlorine_bleaching"
+  ],
+  "note": "Chloroform replaces ether in many cases"
+ },
+ {
+  "id": "central_board_of_health",
+  "requires_all": [
+   "pestilence_health_boards",
+   "sanitary_town_survey"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "single_minister_departments",
+   "poor_law_boards"
+  ],
+  "note": "Standing board replaces pestilence magistracies"
+ },
+ {
+  "id": "water_service_inspections",
+  "requires_all": [
+   "case_records",
+   "standard_measures"
+  ],
+  "requires_any": [
+   [
+    "protected_wellheads",
+    "rainwater_cisterns"
+   ]
+  ],
+  "precedents": [
+   "slow_sand_filtration",
+   "steam_pumped_waterworks"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "compulsory_infant_vaccination",
+  "requires_all": [
+   "cowpox_vaccination",
+   "public_vaccine_stations",
+   "civil_vital_registration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "preventive_inoculation",
+   "vaccination_mortality_tables"
+  ],
+  "note": "Vaccination made a registered legal duty"
+ },
+ {
+  "id": "hypodermic_syringe",
+  "requires_all": [
+   "isolated_poppy_alkaloid"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "intravenous_saline",
+   "plunger_pressed_glass"
+  ],
+  "note": "Hollow needle injects pure alkaloids"
+ },
+ {
+  "id": "contagion_mapping",
+  "requires_all": [
+   "cause_of_death_tables",
+   "sanitary_town_survey"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "house_numbering",
+   "regional_maps"
+  ],
+  "note": "Cases mapped to water sources"
+ },
+ {
+  "id": "nursing_care_organization",
+  "requires_all": [
+   "clinical_observation_rounds",
+   "crew_handoffs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "charity_nursing_sisters",
+   "army_field_hospitals",
+   "subscription_hospitals"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "medical_officer_of_health",
+  "requires_all": [
+   "central_board_of_health"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "contagion_mapping",
+   "cause_of_death_tables"
+  ],
+  "note": "District health officer under the central board"
+ },
+ {
+  "id": "cellular_pathology",
+  "requires_all": [
+   "cell_theory",
+   "organ_seat_pathology"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compound_microscopy",
+   "tissue_histology"
+  ],
+  "note": "Disease located in cells"
+ },
+ {
+  "id": "medical_practitioner_register",
+  "requires_all": [
+   "medical_faculty_licence"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hospital_medical_schools",
+   "surgeons_college"
+  ],
+  "note": "One public register of qualified practitioners"
+ },
+ {
+  "id": "district_visiting_nurses",
+  "requires_all": [
+   "nursing_care_organization"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "charity_nursing_sisters",
+   "outpatient_dispensaries"
+  ],
+  "note": "Organised nurses sent into homes"
+ },
+ {
+  "id": "casualty_collection_posts",
+  "requires_all": [
+   "litter_bearer_drill"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "army_field_hospitals"
+  ],
+  "note": "Bearers work to marked posts"
+ },
+ {
+  "id": "field_aid_stations",
+  "requires_all": [
+   "battlefield_medicine",
+   "army_field_hospitals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "litter_bearer_drill",
+   "field_surgery_handbook"
+  ],
+  "note": "Aid stations close behind the fighting line"
+ },
+ {
+  "id": "nurse_training_school",
+  "requires_all": [
+   "nursing_care_organization"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hospital_medical_schools"
+  ],
+  "note": "Probation year in a nursing school"
+ },
+ {
+  "id": "casualty_transfer_records",
+  "requires_all": [
+   "casualty_collection_posts",
+   "hospital_admission_books"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "field_aid_stations"
+  ],
+  "note": "Records follow each casualty; placed after the posts"
+ },
+ {
+  "id": "triage_registers",
+  "requires_all": [
+   "field_aid_stations",
+   "case_records"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "casualty_collection_posts"
+  ],
+  "note": "Wounded sorted by urgency; placed after the stations"
+ },
+ {
+  "id": "evacuation_relays",
+  "requires_all": [
+   "casualty_transfer_records",
+   "public_steam_railway"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "railway_mobilization",
+   "triage_registers"
+  ],
+  "note": "Wagon and train relays for the wounded"
+ },
+ {
+  "id": "neutral_wounded_convention",
+  "requires_all": [
+   "field_aid_stations",
+   "great_realm_conference"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "field_army_war_rules",
+   "nursing_care_organization"
+  ],
+  "note": "Treaty makes aid stations and their badge neutral"
+ },
+ {
+  "id": "pavilion_ward_hospitals",
+  "requires_all": [
+   "nursing_care_organization",
+   "sanitary_town_survey"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ventilator_bellows",
+   "iron_roof_trusses"
+  ],
+  "note": "Cross-ventilated pavilion wards"
+ },
+ {
+  "id": "antiseptic_surgery",
+  "requires_all": [
+   "coal_light_oil_recovery",
+   "microbial_observation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "gentle_heat_treatment",
+   "ether_anaesthesia",
+   "nursing_care_organization"
+  ],
+  "note": "Carbolic from coal tar on wound and dressing"
+ },
+ {
+  "id": "germ_theory_of_disease",
+  "requires_all": [
+   "microbial_isolation_methods"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "gentle_heat_treatment",
+   "contagion_mapping",
+   "cellular_pathology"
+  ],
+  "note": "Isolated germs shown to cause specific diseases"
+ },
+ {
+  "id": "isolation_fever_hospitals",
+  "requires_all": [
+   "town_fever_houses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "germ_theory_of_disease",
+   "pavilion_ward_hospitals",
+   "smallpox_hospital"
+  ],
+  "note": "Separate hospitals for each infection"
+ },
+ {
+  "id": "consumption_germ_identified",
+  "requires_all": [
+   "germ_theory_of_disease",
+   "biological_staining"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cellular_pathology"
+  ],
+  "note": "Stained germ of the wasting cough"
+ },
+ {
+  "id": "worker_sickness_insurance",
+  "requires_all": [
+   "registered_friendly_societies",
+   "medical_practitioner_register"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mortality_table_insurance",
+   "employer_liability_law"
+  ],
+  "note": "Compulsory sickness funds pay registered doctors"
+ },
+ {
+  "id": "local_anaesthesia",
+  "requires_all": [
+   "hypodermic_syringe",
+   "isolated_poppy_alkaloid"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ether_anaesthesia"
+  ],
+  "note": "Injected coca alkaloid numbs locally"
+ },
+ {
+  "id": "attenuated_laboratory_vaccine",
+  "requires_all": [
+   "compulsory_infant_vaccination",
+   "germ_theory_of_disease"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "microbial_isolation_methods"
+  ],
+  "note": "Germs weakened in the laboratory"
+ },
+ {
+  "id": "aseptic_operating_room",
+  "requires_all": [
+   "antiseptic_surgery",
+   "instrument_sterilization"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "aseptic_laboratory_practice",
+   "germ_theory_of_disease"
+  ],
+  "note": "Steam sterilising replaces the carbolic spray"
+ },
+ {
+  "id": "consumption_sanatoria",
+  "requires_all": [
+   "consumption_germ_identified"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spa_town_physicians",
+   "isolation_fever_hospitals"
+  ],
+  "note": "Rest cure for the consumptive"
+ },
+ {
+  "id": "disease_notification_law",
+  "requires_all": [
+   "medical_officer_of_health",
+   "germ_theory_of_disease"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "isolation_fever_hospitals"
+  ],
+  "note": "Physicians must report infectious cases"
+ },
+ {
+  "id": "diphtheria_antitoxin",
+  "requires_all": [
+   "attenuated_laboratory_vaccine",
+   "hypodermic_syringe"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "croup_tracheotomy",
+   "microbial_isolation_methods"
+  ],
+  "note": "Horse serum neutralises the croup poison"
+ },
+ {
+  "id": "port_sanitary_inspection",
+  "requires_all": [
+   "arrival_isolation_period",
+   "germ_theory_of_disease"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "disease_notification_law",
+   "isolation_fever_hospitals"
+  ],
+  "note": "Ship inspection replaces blanket quarantine"
+ },
+ {
+  "id": "shared_death_cause_list",
+  "requires_all": [
+   "cause_of_death_tables",
+   "inter_realm_statistical_congress"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "germ_theory_of_disease"
+  ],
+  "note": "One cause list agreed between realms"
+ },
+ {
+  "id": "bone_shadow_imaging",
+  "requires_all": [
+   "electromagnetic_induction",
+   "fixed_light_images"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "glass_tube_drawing",
+   "vacuum_pumps"
+  ],
+  "note": "Invisible rays from a discharge tube photograph bone"
+ },
+ {
+  "id": "enteric_fever_vaccine",
+  "requires_all": [
+   "attenuated_laboratory_vaccine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "diphtheria_antitoxin",
+   "field_aid_stations"
+  ],
+  "note": "Killed typhoid germ vaccine for soldiers"
+ },
+ {
+  "id": "mosquito_fever_vector",
+  "requires_all": [
+   "germ_theory_of_disease",
+   "biological_staining"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "marsh_fever_drainage"
+  ],
+  "note": "Stained parasites traced to mosquitoes"
+ },
+ {
+  "id": "synthetic_willow_analgesic",
+  "requires_all": [
+   "coal_tar_dyes",
+   "coal_light_oil_recovery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "isolated_poppy_alkaloid"
+  ],
+  "note": "Willow principle made from coal-tar phenol"
+ },
+ {
+  "id": "blood_group_typing",
+  "requires_all": [
+   "human_blood_transfusion",
+   "diphtheria_antitoxin"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cellular_pathology"
+  ],
+  "note": "Serum tests sort blood groups"
+ },
+ {
+  "id": "mosquito_control_brigades",
+  "requires_all": [
+   "mosquito_fever_vector"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "marsh_fever_drainage",
+   "coal_light_oil_recovery"
+  ],
+  "note": "Breeding pools drained and oiled"
+ },
+ {
+  "id": "talking_cure",
+  "requires_all": [
+   "moral_treatment_asylums"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hospital_madness_wards"
+  ],
+  "note": "Conversation as treatment of the mind"
+ },
+ {
+  "id": "radium_tumour_therapy",
+  "requires_all": [
+   "radiation_measurement",
+   "bone_shadow_imaging"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cellular_pathology"
+  ],
+  "note": "Rays turned on tumours"
+ },
+ {
+  "id": "school_medical_inspection",
+  "requires_all": [
+   "compulsory_elementary_schooling",
+   "medical_officer_of_health"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "school_meals"
+  ],
+  "note": "Every pupil examined"
+ },
+ {
+  "id": "water_chlorination",
+  "requires_all": [
+   "slow_sand_filtration",
+   "chloralkali_cells"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "germ_theory_of_disease",
+   "water_service_inspections"
+  ],
+  "note": "Chlorine dosed after filtration"
+ },
+ {
+  "id": "targeted_arsenical_drug",
+  "requires_all": [
+   "coal_tar_dyes",
+   "germ_theory_of_disease"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "biological_staining"
+  ],
+  "note": "Dye chemistry seeks a drug that stains only the germ"
+ },
+ {
+  "id": "laboratory_medical_schools",
+  "requires_all": [
+   "hospital_medical_schools",
+   "germ_theory_of_disease"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "research_university",
+   "industrial_research_laboratory"
+  ],
+  "note": "Schools bound to laboratory and hospital"
+ },
+ {
+  "id": "drug_label_purity_law",
+  "requires_all": [
+   "apothecary_separation",
+   "national_pharmacopoeia"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "food_adulteration_law"
+  ],
+  "note": "Labels must state contents and poisons"
+ },
+ {
+  "id": "medical_resupply_packing",
+  "requires_all": [
+   "field_aid_stations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_pharmacopoeia",
+   "evacuation_relays",
+   "antiseptic_surgery"
+  ],
+  "note": "Standard packed medical sets"
+ },
+ {
+  "id": "convalescent_duty_reviews",
+  "requires_all": [
+   "casualty_transfer_records"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "medical_resupply_packing",
+   "nursing_care_organization"
+  ],
+  "note": "Convalescents reviewed for return to service"
+ },
+ {
+  "id": "reconstructive_surgery",
+  "requires_all": [
+   "aseptic_operating_room",
+   "arm_flap_nose_repair"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bone_shadow_imaging"
+  ],
+  "note": "Faces and hands rebuilt after wounds"
+ },
+ {
+  "id": "stored_citrated_blood",
+  "requires_all": [
+   "blood_group_typing",
+   "mechanical_refrigeration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "field_aid_stations"
+  ],
+  "note": "Typed blood kept cold"
+ },
+ {
+  "id": "pandemic_closure_orders",
+  "requires_all": [
+   "disease_notification_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "port_sanitary_inspection"
+  ],
+  "note": "Closures and case reporting in a pandemic"
+ },
+ {
+  "id": "consumption_vaccine",
+  "requires_all": [
+   "consumption_germ_identified",
+   "attenuated_laboratory_vaccine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "consumption_sanatoria"
+  ],
+  "note": "Weakened cattle germ vaccine"
+ },
+ {
+  "id": "insulin_therapy",
+  "requires_all": [
+   "hypodermic_syringe",
+   "laboratory_medical_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "enzyme_catalysis"
+  ],
+  "note": "Pancreas extract injected"
+ },
+ {
+  "id": "hospital_prepayment_plans",
+  "requires_all": [
+   "worker_sickness_insurance"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "subscription_hospitals"
+  ],
+  "note": "Group prepayment for hospital care"
+ },
+ {
+  "id": "cancer_registries",
+  "requires_all": [
+   "radium_tumour_therapy",
+   "cause_of_death_tables"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "aseptic_operating_room"
+  ],
+  "note": "Registries and combined treatment"
+ },
+ {
+  "id": "sulfa_drugs",
+  "requires_all": [
+   "targeted_arsenical_drug",
+   "coal_tar_dyes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "aromatic_amine_hydrogenation"
+  ],
+  "note": "Dye-derived drugs cure infection"
+ },
+ {
+  "id": "blood_bank",
+  "requires_all": [
+   "stored_citrated_blood"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hospital_prepayment_plans"
+  ],
+  "note": "Stored donated blood for any hospital"
+ },
+ {
+  "id": "mould_broth_antibiotic",
+  "requires_all": [
+   "microbial_isolation_methods",
+   "fermentation_starter_cultures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sulfa_drugs",
+   "microbial_growth_measurement"
+  ],
+  "note": "Mould broth grown in deep tanks"
+ },
+ {
+  "id": "consumption_antibiotic",
+  "requires_all": [
+   "mould_broth_antibiotic",
+   "consumption_germ_identified"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "consumption_vaccine"
+  ],
+  "note": "Soil-germ antibiotic cures consumption"
+ },
+ {
+  "id": "water_fluoridation",
+  "requires_all": [
+   "water_chlorination"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dental_surgery_licence"
+  ],
+  "note": "Fluoride dosed like chlorine"
+ },
+ {
+  "id": "residual_house_spraying",
+  "requires_all": [
+   "synthetic_crop_insecticide",
+   "mosquito_control_brigades"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mosquito_fever_vector"
+  ],
+  "note": "Residual insecticide on house walls; moved after the crop insecticide"
+ },
+ {
+  "id": "artificial_kidney_dialysis",
+  "requires_all": [
+   "intravenous_saline",
+   "regenerated_cellulose_fibre"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "blood_group_typing"
+  ],
+  "note": "Cellulose membrane cleans the blood"
+ },
+ {
+  "id": "inter_realm_health_council",
+  "requires_all": [
+   "world_assembly_of_realms",
+   "shared_death_cause_list"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "neutral_wounded_convention",
+   "port_sanitary_inspection"
+  ],
+  "note": "Realms pool reports and standards"
+ },
+ {
+  "id": "national_health_service",
+  "requires_all": [
+   "worker_sickness_insurance",
+   "welfare_state"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hospital_prepayment_plans"
+  ],
+  "note": "Free care from one national service"
+ },
+ {
+  "id": "randomised_controlled_trial",
+  "requires_all": [
+   "numerical_treatment_method",
+   "statistical_sampling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "consumption_antibiotic"
+  ],
+  "note": "Random allotment with a control group"
+ },
+ {
+  "id": "tobacco_cancer_evidence",
+  "requires_all": [
+   "cancer_registries",
+   "statistical_sampling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "randomised_controlled_trial"
+  ],
+  "note": "Case comparisons tie smoking to lung cancer"
+ },
+ {
+  "id": "antipsychotic_drugs",
+  "requires_all": [
+   "moral_treatment_asylums",
+   "aromatic_amine_hydrogenation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "talking_cure",
+   "sulfa_drugs"
+  ],
+  "note": "Synthetic calming drugs"
+ },
+ {
+  "id": "combination_consumption_therapy",
+  "requires_all": [
+   "consumption_antibiotic",
+   "randomised_controlled_trial"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "consumption_sanatoria",
+   "consumption_vaccine"
+  ],
+  "note": "Trialled drug combinations defeat resistance"
+ },
+ {
+  "id": "heart_lung_machine",
+  "requires_all": [
+   "blood_bank",
+   "aseptic_operating_room"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "artificial_kidney_dialysis"
+  ],
+  "note": "Pump-oxygenator for open-heart surgery"
+ },
+ {
+  "id": "intensive_care_units",
+  "requires_all": [
+   "nursing_care_organization",
+   "blood_bank"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ventilator_bellows",
+   "transistor_amplifiers"
+  ],
+  "note": "Round-the-clock breathing machines and nursing"
+ },
+ {
+  "id": "organ_transplant",
+  "requires_all": [
+   "artificial_kidney_dialysis",
+   "aseptic_operating_room"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "blood_group_typing"
+  ],
+  "note": "Kidney grafted between twins"
+ },
+ {
+  "id": "paralysis_virus_vaccine",
+  "requires_all": [
+   "cell_culture_methods",
+   "attenuated_laboratory_vaccine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "randomised_controlled_trial"
+  ],
+  "note": "Virus grown in cell culture and killed"
+ },
+ {
+  "id": "cardiac_resuscitation",
+  "requires_all": [
+   "intensive_care_units",
+   "electrical_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "transistor_amplifiers"
+  ],
+  "note": "Compression, breathing and shock"
+ },
+ {
+  "id": "drug_efficacy_approval",
+  "requires_all": [
+   "drug_label_purity_law",
+   "randomised_controlled_trial"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_pharmacopoeia",
+   "sulfa_drugs"
+  ],
+  "note": "Trials required before sale"
+ },
+ {
+  "id": "community_mental_health",
+  "requires_all": [
+   "antipsychotic_drugs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_health_service"
+  ],
+  "note": "Clinics replace asylums"
+ },
+ {
+  "id": "measles_vaccine",
+  "requires_all": [
+   "paralysis_virus_vaccine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cell_culture_methods"
+  ],
+  "note": "Live attenuated virus from cell culture"
+ },
+ {
+  "id": "tobacco_control_laws",
+  "requires_all": [
+   "tobacco_cancer_evidence"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "drug_label_purity_law"
+  ],
+  "note": "Warnings, taxes and advertising limits"
+ },
+ {
+  "id": "hospice_care",
+  "requires_all": [
+   "district_visiting_nurses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cancer_registries",
+   "isolated_poppy_alkaloid"
+  ],
+  "note": "Care for the dying"
+ },
+ {
+  "id": "oral_rehydration_salts",
+  "requires_all": [
+   "intravenous_saline",
+   "randomised_controlled_trial"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "inter_realm_health_council"
+  ],
+  "note": "Sugar and salt by mouth"
+ },
+ {
+  "id": "body_slice_scanner",
+  "requires_all": [
+   "bone_shadow_imaging",
+   "stored_program_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "radiation_measurement"
+  ],
+  "note": "Computed ray slices"
+ },
+ {
+  "id": "expanded_immunisation_program",
+  "requires_all": [
+   "measles_vaccine",
+   "compulsory_infant_vaccination"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "inter_realm_health_council"
+  ],
+  "note": "One childhood schedule"
+ },
+ {
+  "id": "primary_health_care",
+  "requires_all": [
+   "district_visiting_nurses",
+   "inter_realm_health_council"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "oral_rehydration_salts"
+  ],
+  "note": "Village health workers"
+ },
+ {
+  "id": "smallpox_eradication",
+  "requires_all": [
+   "cowpox_vaccination",
+   "inter_realm_health_council"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "expanded_immunisation_program",
+   "disease_notification_law"
+  ],
+  "note": "Ring vaccination ends the smallpox"
+ },
+ {
+  "id": "magnetic_resonance_imaging",
+  "requires_all": [
+   "nuclear_magnetic_resonance_spectroscopy",
+   "body_slice_scanner"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "radiation_measurement",
+   "stored_program_control"
+  ],
+  "note": "Magnetic resonance images of soft tissue"
+ },
+ {
+  "id": "immune_virus_blood_test",
+  "requires_all": [
+   "blood_bank",
+   "cell_culture_methods"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "blood_group_typing",
+   "inter_realm_health_council"
+  ],
+  "note": "Screening donated blood"
+ },
+ {
+  "id": "recombinant_vaccine",
+  "requires_all": [
+   "hereditary_double_helix",
+   "fermentation_starter_cultures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cell_culture_methods",
+   "enzyme_catalysis"
+  ],
+  "note": "Yeast carrying one viral gene"
+ },
+ {
+  "id": "cholesterol_lowering_drugs",
+  "requires_all": [
+   "randomised_controlled_trial",
+   "mould_broth_antibiotic"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tobacco_cancer_evidence",
+   "national_dietary_goals"
+  ],
+  "note": "Mould-derived drugs prevent heart attacks"
+ },
+ {
+  "id": "systematic_review_medicine",
+  "requires_all": [
+   "randomised_controlled_trial"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "desk_computers"
+  ],
+  "note": "Pooled trial reviews"
+ },
+ {
+  "id": "insecticide_bed_nets",
+  "requires_all": [
+   "residual_house_spraying",
+   "polyamide_synthetic_fibre"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mosquito_control_brigades",
+   "primary_health_care"
+  ],
+  "note": "Treated nets"
+ },
+ {
+  "id": "combination_antiviral_therapy",
+  "requires_all": [
+   "immune_virus_blood_test",
+   "drug_efficacy_approval"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "combination_consumption_therapy"
+  ],
+  "note": "Three drugs hold the virus in check"
+ },
+ {
+  "id": "monoclonal_antibody_drugs",
+  "requires_all": [
+   "cell_culture_methods",
+   "recombinant_vaccine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "blood_group_typing"
+  ],
+  "note": "Engineered antibodies"
+ },
+ {
+  "id": "antibiotic_stewardship",
+  "requires_all": [
+   "mould_broth_antibiotic",
+   "inter_realm_health_council"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "combination_consumption_therapy"
+  ],
+  "note": "Resistant-germ surveillance"
+ },
+ {
+  "id": "artemisinin_combination_therapy",
+  "requires_all": [
+   "randomised_controlled_trial",
+   "fever_bark_alkaloid"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "residual_house_spraying"
+  ],
+  "note": "Wormwood-derived combinations (regional)"
+ },
+ {
+  "id": "human_genome_reading",
+  "requires_all": [
+   "hereditary_double_helix",
+   "desk_computers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "relational_databases",
+   "heredity_experiments"
+  ],
+  "note": "Whole hereditary text read"
+ },
+ {
+  "id": "tobacco_control_treaty",
+  "requires_all": [
+   "tobacco_control_laws",
+   "inter_realm_health_council"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "systematic_review_medicine"
+  ],
+  "note": "Treaty on tobacco"
+ },
+ {
+  "id": "inter_realm_health_rules",
+  "requires_all": [
+   "inter_realm_health_council"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pandemic_closure_orders",
+   "port_sanitary_inspection"
+  ],
+  "note": "Binding outbreak reporting"
+ },
+ {
+  "id": "electronic_health_records",
+  "requires_all": [
+   "relational_databases",
+   "national_health_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "world_hypertext_web"
+  ],
+  "note": "Shared electronic records"
+ },
+ {
+  "id": "immune_checkpoint_therapy",
+  "requires_all": [
+   "monoclonal_antibody_drugs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cancer_registries"
+  ],
+  "note": "Antibodies release the immune brake"
+ },
+ {
+  "id": "engineered_immune_cell_therapy",
+  "requires_all": [
+   "human_genome_reading",
+   "cell_culture_methods"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "immune_checkpoint_therapy",
+   "monoclonal_antibody_drugs"
+  ],
+  "note": "Patient's cells re-engineered"
+ },
+ {
+  "id": "messenger_molecule_vaccine",
+  "requires_all": [
+   "recombinant_vaccine",
+   "human_genome_reading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "monoclonal_antibody_drugs",
+   "pandemic_closure_orders"
+  ],
+  "note": "Vaccine designed from the read genome"
+ },
+ {
+  "id": "pandemic_test_trace_orders",
+  "requires_all": [
+   "pandemic_closure_orders"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pocket_networked_computers",
+   "inter_realm_health_rules"
+  ],
+  "note": "Test, trace and lockdown"
+ },
+ {
+  "id": "malaria_vaccine",
+  "requires_all": [
+   "recombinant_vaccine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "artemisinin_combination_therapy"
+  ],
+  "note": "Recombinant vaccine against marsh fever"
+ },
+ {
+  "id": "gene_edited_blood_cure",
+  "requires_all": [
+   "human_genome_reading",
+   "engineered_immune_cell_therapy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "blood_bank",
+   "gene_edited_crops"
+  ],
+  "note": "Edited blood stem cells"
+ },
+ {
+  "id": "machine_read_diagnostics",
+  "requires_all": [
+   "deep_learning_networks",
+   "body_slice_scanner"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electronic_health_records"
+  ],
+  "note": "Learned models read scans"
+ },
+ {
+  "id": "gut_hormone_drugs",
+  "requires_all": [
+   "insulin_therapy",
+   "recombinant_vaccine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "drug_efficacy_approval"
+  ],
+  "note": "Hormone analogues"
+ },
+ {
+  "id": "genome_guided_prescribing",
+  "requires_all": [
+   "human_genome_reading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electronic_health_records"
+  ],
+  "note": "Hereditary profile guides drug dose"
+ },
+ {
+  "id": "broad_virus_family_vaccines",
+  "requires_all": [
+   "messenger_molecule_vaccine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "inter_realm_health_rules"
+  ],
+  "note": "Vaccines held ready (speculative)"
+ },
+ {
+  "id": "equal_partible_inheritance",
+  "requires_all": [
+   "universal_civil_code"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "separate_wife_property",
+   "strict_family_settlement"
+  ],
+  "note": "Civil code splits estates equally; moved after the code"
+ },
+ {
+  "id": "vaccination_mortality_tables",
+  "requires_all": [
+   "inoculation_mortality_reckoning",
+   "cowpox_vaccination"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "civil_vital_registration"
+  ],
+  "note": "Mortality reckoning applied to vaccination"
+ },
+ {
+  "id": "soldier_family_allowances",
+  "requires_all": [
+   "class_year_conscription"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "war_orphan_upkeep",
+   "soldier_marriage_limits"
+  ],
+  "note": "Conscripts' families granted allowances"
+ },
+ {
+  "id": "war_dependants_pensions",
+  "requires_all": [
+   "war_orphan_upkeep",
+   "soldier_family_allowances"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "military_pension_treasury",
+   "actuarial_widows_fund"
+  ],
+  "note": "Widows and orphans of the fallen pensioned"
+ },
+ {
+  "id": "assisted_emigration",
+  "requires_all": [
+   "emigrant_recruiting_agents",
+   "parish_poor_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "overseas_settler_colonies",
+   "population_pressure_treatise"
+  ],
+  "note": "Parish or state pays passage"
+ },
+ {
+  "id": "age_specific_fertility_rates",
+  "requires_all": [
+   "population_tables_office"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "civil_vital_registration",
+   "statistical_inference"
+  ],
+  "note": "Births reckoned by mother's age"
+ },
+ {
+  "id": "mortality_table_insurance",
+  "requires_all": [
+   "age_priced_life_annuities",
+   "life_expectancy_tables"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "actuarial_widows_fund",
+   "tontine_annuities"
+  ],
+  "note": "Life cover priced from death tables"
+ },
+ {
+  "id": "state_statistical_office",
+  "requires_all": [
+   "population_tables_office"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "age_specific_fertility_rates",
+   "single_minister_departments"
+  ],
+  "note": "Standing statistical office"
+ },
+ {
+  "id": "colony_land_sale_scheme",
+  "requires_all": [
+   "colonist_recruiting_agents",
+   "assisted_emigration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cadastral_tax_survey",
+   "headright_land_grants"
+  ],
+  "note": "Land sales pay settlers' passage"
+ },
+ {
+  "id": "cause_of_death_tables",
+  "requires_all": [
+   "civil_vital_registration",
+   "infant_death_causes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "state_statistical_office",
+   "weekly_mortality_bills"
+  ],
+  "note": "Registered deaths tabulated by cause"
+ },
+ {
+  "id": "household_schedule_census",
+  "requires_all": [
+   "decennial_apportionment_census",
+   "state_statistical_office"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "house_numbering",
+   "nominal_realm_census"
+  ],
+  "note": "Household schedules name every person"
+ },
+ {
+  "id": "national_life_tables",
+  "requires_all": [
+   "life_expectancy_tables",
+   "cause_of_death_tables",
+   "household_schedule_census"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "register_life_table"
+  ],
+  "note": "Realm life tables from census and registers"
+ },
+ {
+  "id": "working_mothers_creches",
+  "requires_all": [
+   "shared_childcare"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mill_hand_workforce",
+   "factory_villages"
+  ],
+  "note": "Crèches beside the mills"
+ },
+ {
+  "id": "emigrant_passenger_law",
+  "requires_all": [
+   "ship_passenger_lists",
+   "assisted_emigration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "emigrant_port_licences"
+  ],
+  "note": "Emigrant ships inspected by law"
+ },
+ {
+  "id": "steamship_mass_emigration",
+  "requires_all": [
+   "ocean_steamship_line",
+   "assisted_emigration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "emigrant_passenger_law",
+   "screw_propeller_ships"
+  ],
+  "note": "Steam lines carry mass emigration"
+ },
+ {
+  "id": "district_mortality_comparison",
+  "requires_all": [
+   "national_life_tables"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sanitary_town_survey"
+  ],
+  "note": "Mortality compared by district and trade"
+ },
+ {
+  "id": "childrens_hospitals",
+  "requires_all": [
+   "subscription_hospitals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "infant_death_causes",
+   "hospital_medical_schools"
+  ],
+  "note": "Hospitals for sick children"
+ },
+ {
+  "id": "inter_realm_statistical_congress",
+  "requires_all": [
+   "state_statistical_office"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "great_realm_conference",
+   "household_schedule_census"
+  ],
+  "note": "Realms agree how to count"
+ },
+ {
+  "id": "rubber_sheaths",
+  "requires_all": [
+   "sulphur_cured_rubber",
+   "marital_birth_limitation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "population_pressure_treatise"
+  ],
+  "note": "Cured rubber sheaths"
+ },
+ {
+  "id": "civil_marriage_registrar",
+  "requires_all": [
+   "registered_marriage",
+   "civil_vital_registration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "universal_civil_code",
+   "civil_divorce"
+  ],
+  "note": "Marriage before a registrar"
+ },
+ {
+  "id": "orphan_boarding_out",
+  "requires_all": [
+   "orphan_chambers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "foundling_nurse_inspection",
+   "poor_law_boards"
+  ],
+  "note": "Orphans boarded with foster families"
+ },
+ {
+  "id": "homestead_land_grants",
+  "requires_all": [
+   "headright_land_grants",
+   "colony_land_sale_scheme"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cadastral_tax_survey",
+   "general_land_code"
+  ],
+  "note": "Free land to settler families"
+ },
+ {
+  "id": "manufactured_infant_food",
+  "requires_all": [
+   "feeding_horns",
+   "condensed_milk"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wet_nurse_bureau"
+  ],
+  "note": "Tinned milk foods and bottle feeding"
+ },
+ {
+  "id": "residence_naturalisation",
+  "requires_all": [
+   "craftsman_naturalization"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steamship_mass_emigration",
+   "universal_civil_code"
+  ],
+  "note": "Citizenship after residence"
+ },
+ {
+  "id": "family_limitation",
+  "requires_all": [
+   "marital_birth_limitation",
+   "rubber_sheaths"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "population_pressure_treatise"
+  ],
+  "note": "Limitation spreads to every class"
+ },
+ {
+  "id": "population_pyramid_charts",
+  "requires_all": [
+   "household_schedule_census"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_life_tables"
+  ],
+  "note": "Age and sex drawn as pyramids"
+ },
+ {
+  "id": "premature_infant_incubator",
+  "requires_all": [
+   "childrens_hospitals",
+   "radiator_central_heating"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "precision_thermometry"
+  ],
+  "note": "Heated cases for premature infants"
+ },
+ {
+  "id": "antiseptic_maternity_wards",
+  "requires_all": [
+   "lying_in_hospital",
+   "antiseptic_surgery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chlorine_handwashing"
+  ],
+  "note": "Antisepsis in the lying-in wards"
+ },
+ {
+  "id": "sutured_surgical_birth",
+  "requires_all": [
+   "postmortem_cesarean",
+   "ether_anaesthesia",
+   "antiseptic_surgery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "living_mother_caesarean"
+  ],
+  "note": "Sutured womb; mother survives"
+ },
+ {
+  "id": "raised_consent_age",
+  "requires_all": [
+   "minimum_marriage_ages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clandestine_marriage_ban",
+   "penitentiary_sentences"
+  ],
+  "note": "Consent and marriage ages raised"
+ },
+ {
+  "id": "settlement_houses",
+  "requires_all": [
+   "poor_law_boards",
+   "research_university"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "district_visiting_nurses"
+  ],
+  "note": "University residents and social workers in poor districts"
+ },
+ {
+  "id": "household_poverty_surveys",
+  "requires_all": [
+   "household_schedule_census",
+   "settlement_houses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "labor_statistics_bureau"
+  ],
+  "note": "Street surveys of poverty"
+ },
+ {
+  "id": "room_overcrowding_census",
+  "requires_all": [
+   "household_schedule_census"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "household_poverty_surveys",
+   "building_codes"
+  ],
+  "note": "Persons per room counted"
+ },
+ {
+  "id": "immigration_inspection_station",
+  "requires_all": [
+   "steamship_mass_emigration",
+   "residence_naturalisation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "quarantine_island_station",
+   "isolation_fever_hospitals"
+  ],
+  "note": "Arrivals inspected"
+ },
+ {
+  "id": "infant_milk_depots",
+  "requires_all": [
+   "nursing_mother_diet",
+   "bottled_town_milk"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "infant_death_causes",
+   "manufactured_infant_food"
+  ],
+  "note": "Clean milk and weighing clinics"
+ },
+ {
+  "id": "child_growth_records",
+  "requires_all": [
+   "infant_milk_depots",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "population_pyramid_charts",
+   "census_age_recording"
+  ],
+  "note": "Weights charted against age standards"
+ },
+ {
+  "id": "infant_mortality_index",
+  "requires_all": [
+   "cause_of_death_tables",
+   "infant_death_causes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "district_mortality_comparison"
+  ],
+  "note": "Infant deaths as a town's measure"
+ },
+ {
+  "id": "registered_midwives",
+  "requires_all": [
+   "sworn_town_midwives",
+   "medical_practitioner_register"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "manikin_midwife_schools"
+  ],
+  "note": "State-examined midwives"
+ },
+ {
+  "id": "newborn_health_visitors",
+  "requires_all": [
+   "district_visiting_nurses",
+   "infant_milk_depots"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "infant_mortality_index"
+  ],
+  "note": "Visitors call on newborns"
+ },
+ {
+  "id": "child_protection_law",
+  "requires_all": [
+   "orphan_guardianship"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "juvenile_courts",
+   "settlement_houses"
+  ],
+  "note": "Officers may remove neglected children"
+ },
+ {
+  "id": "antenatal_clinics",
+  "requires_all": [
+   "registered_midwives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "infant_milk_depots"
+  ],
+  "note": "Mothers examined before birth"
+ },
+ {
+  "id": "maternity_benefit",
+  "requires_all": [
+   "worker_sickness_insurance"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "antenatal_clinics"
+  ],
+  "note": "Benefit paid under sickness insurance"
+ },
+ {
+  "id": "childrens_welfare_bureau",
+  "requires_all": [
+   "infant_mortality_index",
+   "child_protection_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "child_growth_records"
+  ],
+  "note": "Standing children's bureau"
+ },
+ {
+  "id": "birth_control_clinics",
+  "requires_all": [
+   "family_limitation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "antenatal_clinics",
+   "rubber_sheaths"
+  ],
+  "note": "Clinics for married women"
+ },
+ {
+  "id": "origin_immigration_quotas",
+  "requires_all": [
+   "immigration_inspection_station",
+   "frontier_passport_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "residence_naturalisation",
+   "steamship_mass_emigration"
+  ],
+  "note": "Quotas by origin"
+ },
+ {
+  "id": "treaty_population_exchange",
+  "requires_all": [
+   "league_of_realms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "household_schedule_census"
+  ],
+  "note": "Populations exchanged by treaty"
+ },
+ {
+  "id": "widows_orphans_insurance",
+  "requires_all": [
+   "old_age_pensions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "war_dependants_pensions",
+   "mortality_table_insurance"
+  ],
+  "note": "Contributory widows' and orphans' pensions"
+ },
+ {
+  "id": "court_adoption_orders",
+  "requires_all": [
+   "heir_adoption"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "orphan_boarding_out",
+   "child_protection_law"
+  ],
+  "note": "Adoption by court order"
+ },
+ {
+  "id": "demographic_transition_theory",
+  "requires_all": [
+   "national_life_tables",
+   "family_limitation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "population_pyramid_charts"
+  ],
+  "note": "Death rates fall first, then births"
+ },
+ {
+  "id": "maternal_death_inquiries",
+  "requires_all": [
+   "antenatal_clinics"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cause_of_death_tables"
+  ],
+  "note": "Each maternal death investigated"
+ },
+ {
+  "id": "pronatalist_bonuses",
+  "requires_all": [
+   "marriage_incentive_laws"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "demographic_transition_theory",
+   "large_family_tax_relief"
+  ],
+  "note": "Bonuses and loans to couples"
+ },
+ {
+  "id": "obstetric_flying_squads",
+  "requires_all": [
+   "stored_citrated_blood",
+   "series_built_motor_car"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "registered_midwives"
+  ],
+  "note": "Motor squads carry blood to home births"
+ },
+ {
+  "id": "child_evacuation_schemes",
+  "requires_all": [
+   "civil_air_defence"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "railway_mobilization"
+  ],
+  "note": "Children evacuated from bombed towns"
+ },
+ {
+  "id": "cohort_population_projection",
+  "requires_all": [
+   "national_life_tables",
+   "demographic_transition_theory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "population_pyramid_charts",
+   "statistical_sampling"
+  ],
+  "note": "Cohort-component projections"
+ },
+ {
+  "id": "displaced_persons_camps",
+  "requires_all": [
+   "treaty_population_exchange"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "refugee_land_settlement"
+  ],
+  "note": "Camps and repatriation after a war"
+ },
+ {
+  "id": "universal_family_allowances",
+  "requires_all": [
+   "widows_orphans_insurance",
+   "maternity_benefit"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pronatalist_bonuses"
+  ],
+  "note": "Allowances for every child"
+ },
+ {
+  "id": "birth_cohort_study",
+  "requires_all": [
+   "cohort_population_projection",
+   "child_growth_records"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "infant_mortality_index",
+   "punched_card_tabulation"
+  ],
+  "note": "A birth cohort followed for life"
+ },
+ {
+  "id": "refugee_convention",
+  "requires_all": [
+   "refugee_land_settlement",
+   "displaced_persons_camps"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "universal_rights_declaration"
+  ],
+  "note": "Refugee status by treaty"
+ },
+ {
+  "id": "hospital_birth_norm",
+  "requires_all": [
+   "antenatal_clinics",
+   "national_health_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sulfa_drugs"
+  ],
+  "note": "Birth in hospital becomes the norm"
+ },
+ {
+  "id": "guest_worker_programmes",
+  "requires_all": [
+   "origin_immigration_quotas"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "indentured_contract_migration",
+   "residence_naturalisation"
+  ],
+  "note": "Foreign labour recruited"
+ },
+ {
+  "id": "household_residence_permits",
+  "requires_all": [
+   "internal_passes",
+   "household_schedule_census"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "one_party_state",
+   "room_overcrowding_census"
+  ],
+  "note": "Families bound to their district"
+ },
+ {
+  "id": "oral_contraceptive_pill",
+  "requires_all": [
+   "birth_control_clinics",
+   "randomised_controlled_trial"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "family_limitation",
+   "insulin_therapy"
+  ],
+  "note": "Daily hormone pill"
+ },
+ {
+  "id": "retirement_communities",
+  "requires_all": [
+   "old_age_pensions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "negotiated_occupational_pensions"
+  ],
+  "note": "A long old age outside work"
+ },
+ {
+  "id": "newborn_blood_screening",
+  "requires_all": [
+   "hospital_birth_norm"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hereditary_double_helix"
+  ],
+  "note": "Blood spot screened"
+ },
+ {
+  "id": "family_planning_fieldwork",
+  "requires_all": [
+   "oral_contraceptive_pill"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "birth_control_clinics",
+   "demographic_transition_theory"
+  ],
+  "note": "Field workers and devices"
+ },
+ {
+  "id": "neonatal_intensive_care",
+  "requires_all": [
+   "premature_infant_incubator",
+   "intensive_care_units"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "newborn_health_visitors",
+   "blood_bank"
+  ],
+  "note": "Newborn intensive care"
+ },
+ {
+  "id": "rh_disease_prevention",
+  "requires_all": [
+   "blood_group_typing",
+   "antenatal_clinics"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stored_citrated_blood",
+   "hospital_birth_norm"
+  ],
+  "note": "Antibody injection protects Rh-negative mothers"
+ },
+ {
+  "id": "points_based_immigration",
+  "requires_all": [
+   "origin_immigration_quotas"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "guest_worker_programmes"
+  ],
+  "note": "Entry by skills and language"
+ },
+ {
+  "id": "continuous_population_register",
+  "requires_all": [
+   "civil_vital_registration",
+   "punched_card_tabulation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "household_residence_permits"
+  ],
+  "note": "One continuous register"
+ },
+ {
+  "id": "small_family_campaigns",
+  "requires_all": [
+   "family_planning_fieldwork"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "demographic_transition_theory",
+   "television_broadcasting"
+  ],
+  "note": "Public campaigns for the small family"
+ },
+ {
+  "id": "no_fault_divorce",
+  "requires_all": [
+   "civil_divorce_courts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "civil_marriage_registrar",
+   "married_women_property"
+  ],
+  "note": "Divorce without fault"
+ },
+ {
+  "id": "equal_birth_status",
+  "requires_all": [
+   "legitimation_by_marriage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "civil_rights_law"
+  ],
+  "note": "Equal rights for children outside marriage"
+ },
+ {
+  "id": "prenatal_ultrasound",
+  "requires_all": [
+   "antenatal_clinics",
+   "underwater_sound_ranging"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "radio_detection_ranging",
+   "newborn_blood_screening"
+  ],
+  "note": "Sound echoes image the unborn"
+ },
+ {
+  "id": "legal_pregnancy_termination",
+  "requires_all": [
+   "birth_control_clinics",
+   "aseptic_operating_room"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "family_planning_fieldwork",
+   "maternal_death_inquiries"
+  ],
+  "note": "Safe legal termination"
+ },
+ {
+  "id": "inter_realm_population_conference",
+  "requires_all": [
+   "inter_realm_statistical_congress",
+   "world_assembly_of_realms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "demographic_transition_theory",
+   "cohort_population_projection"
+  ],
+  "note": "Conference on population and development"
+ },
+ {
+  "id": "paid_parental_leave",
+  "requires_all": [
+   "maternity_benefit"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "universal_family_allowances",
+   "equal_pay_law"
+  ],
+  "note": "Leave for mothers and fathers"
+ },
+ {
+  "id": "in_vitro_fertilisation",
+  "requires_all": [
+   "cell_culture_methods",
+   "oral_contraceptive_pill"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "prenatal_ultrasound"
+  ],
+  "note": "Conception outside the body"
+ },
+ {
+  "id": "skin_to_skin_newborn_care",
+  "requires_all": [
+   "neonatal_intensive_care"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "newborn_health_visitors",
+   "maternal_nursing_campaign"
+  ],
+  "note": "Kangaroo care of small newborns"
+ },
+ {
+  "id": "state_birth_quotas",
+  "requires_all": [
+   "household_residence_permits",
+   "family_planning_fieldwork"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "small_family_campaigns",
+   "cohort_population_projection"
+  ],
+  "note": "Coercive birth quotas"
+ },
+ {
+  "id": "register_based_census",
+  "requires_all": [
+   "continuous_population_register"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "relational_databases"
+  ],
+  "note": "Census from registers"
+ },
+ {
+  "id": "fertility_sample_surveys",
+  "requires_all": [
+   "statistical_sampling",
+   "age_specific_fertility_rates"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "family_planning_fieldwork",
+   "household_poverty_surveys"
+  ],
+  "note": "Household sample surveys"
+ },
+ {
+  "id": "long_acting_contraception",
+  "requires_all": [
+   "oral_contraceptive_pill"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "family_planning_fieldwork"
+  ],
+  "note": "Implants and injections"
+ },
+ {
+  "id": "surrogacy_contracts",
+  "requires_all": [
+   "in_vitro_fertilisation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "court_adoption_orders"
+  ],
+  "note": "Surrogacy regulated"
+ },
+ {
+  "id": "registered_partnerships",
+  "requires_all": [
+   "civil_marriage_registrar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "no_fault_divorce"
+  ],
+  "note": "Registered partnerships"
+ },
+ {
+  "id": "preimplantation_testing",
+  "requires_all": [
+   "in_vitro_fertilisation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "newborn_blood_screening"
+  ],
+  "note": "Embryos tested"
+ },
+ {
+  "id": "sex_selection_ban",
+  "requires_all": [
+   "prenatal_ultrasound"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "birth_sex_ratio",
+   "state_birth_quotas"
+  ],
+  "note": "Sex-selective scanning banned"
+ },
+ {
+  "id": "long_term_care_insurance",
+  "requires_all": [
+   "old_age_pensions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_health_service"
+  ],
+  "note": "Insurance for the frail old"
+ },
+ {
+  "id": "emergency_contraception",
+  "requires_all": [
+   "oral_contraceptive_pill"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "legal_pregnancy_termination",
+   "long_acting_contraception"
+  ],
+  "note": "Over the counter"
+ },
+ {
+  "id": "dual_citizenship",
+  "requires_all": [
+   "residence_naturalisation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "points_based_immigration",
+   "origin_immigration_quotas"
+  ],
+  "note": "Dual citizenship"
+ },
+ {
+  "id": "dementia_care_units",
+  "requires_all": [
+   "long_term_care_insurance"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "retirement_communities",
+   "community_mental_health"
+  ],
+  "note": "Memory clinics and care units"
+ },
+ {
+  "id": "mobile_remittances",
+  "requires_all": [
+   "cellular_telephony"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "data_modems",
+   "steamship_mass_emigration"
+  ],
+  "note": "Wages sent home by phone"
+ },
+ {
+  "id": "indexed_pension_age",
+  "requires_all": [
+   "old_age_pensions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_life_tables"
+  ],
+  "note": "Pension age tied to life tables"
+ },
+ {
+  "id": "egg_freezing",
+  "requires_all": [
+   "in_vitro_fertilisation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "artificial_cattle_insemination",
+   "preimplantation_testing"
+  ],
+  "note": "Eggs frozen for later"
+ },
+ {
+  "id": "mobile_birth_registration",
+  "requires_all": [
+   "continuous_population_register",
+   "cellular_telephony"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "register_based_census",
+   "pocket_networked_computers"
+  ],
+  "note": "Births registered by phone"
+ },
+ {
+  "id": "genetic_ancestry_testing",
+  "requires_all": [
+   "human_genome_reading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lineage_genealogy_books",
+   "preimplantation_testing"
+  ],
+  "note": "Ancestry from a swab"
+ },
+ {
+  "id": "excess_death_tracking",
+  "requires_all": [
+   "cause_of_death_tables"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pandemic_closure_orders",
+   "register_based_census",
+   "shared_death_cause_list"
+  ],
+  "note": "Weekly excess deaths"
+ },
+ {
+  "id": "remote_worker_visas",
+  "requires_all": [
+   "networked_telework"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "points_based_immigration"
+  ],
+  "note": "Visas for remote workers"
+ },
+ {
+  "id": "low_fertility_family_package",
+  "requires_all": [
+   "pronatalist_bonuses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paid_parental_leave"
+  ],
+  "note": "Childcare places and bonuses"
+ },
+ {
+  "id": "climate_managed_resettlement",
+  "requires_all": [
+   "climate_adaptation_plans"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "homestead_land_grants",
+   "treaty_population_exchange"
+  ],
+  "note": "Planned resettlement (speculative)"
+ },
+ {
+  "id": "artificial_womb_support",
+  "requires_all": [
+   "neonatal_intensive_care"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "skin_to_skin_newborn_care",
+   "in_vitro_fertilisation"
+  ],
+  "note": "Fluid womb support (speculative)"
+ },
+ {
+  "id": "mineral_streak_tests",
+  "requires_all": [
+   "stone_sorting",
+   "pit_firing",
+   "mineral_cleavage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "relative_stratigraphy"
+  ],
+  "note": "Catalog gates plus the cleavage tests it continues"
+ },
+ {
+  "id": "vegetation_zone_mapping",
+  "requires_all": [
+   "far_land_specimen_voyages",
+   "instrumental_weather_registers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "biological_classification",
+   "habitat_observation_records"
+  ],
+  "note": "Plant zones mapped against altitude and latitude"
+ },
+ {
+  "id": "sediment_provenance",
+  "requires_all": [
+   "relative_stratigraphy",
+   "mineral_specific_gravity",
+   "seasonal_patterns"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mineral_streak_tests"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "forestry_academy",
+  "requires_all": [
+   "tree_volume_tables"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sustained_yield_forestry",
+   "state_polytechnic_school"
+  ],
+  "note": "Yield tables taught in a forest academy"
+ },
+ {
+  "id": "comparative_mineral_hardness",
+  "requires_all": [
+   "controlled_flaking",
+   "standard_measures",
+   "mineral_streak_tests"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mineral_cleavage"
+  ],
+  "note": "Catalog gates plus the streak tests it continues"
+ },
+ {
+  "id": "lithologic_correlation",
+  "requires_all": [
+   "relative_stratigraphy",
+   "mineral_cleavage",
+   "regional_maps"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sediment_provenance",
+   "deep_time_geology"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "geologic_cross_sections",
+  "requires_all": [
+   "geometric_survey",
+   "relative_stratigraphy",
+   "similar_triangles"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mining_engineering_academies"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "structural_geologic_mapping",
+  "requires_all": [
+   "geologic_cross_sections",
+   "trigonometry",
+   "regional_maps",
+   "lithologic_correlation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "military_survey_maps"
+  ],
+  "note": "Catalog gates plus the correlation it continues"
+ },
+ {
+  "id": "isotherm_maps",
+  "requires_all": [
+   "vegetation_zone_mapping",
+   "instrumental_weather_registers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weather_observer_network"
+  ],
+  "note": "Mean temperatures drawn as lines"
+ },
+ {
+  "id": "tall_dispersal_stacks",
+  "requires_all": [
+   "tall_smelter_flues"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tall_chimney_orders",
+   "high_pressure_steam_engines"
+  ],
+  "note": "Works chimneys raised to scatter fumes"
+ },
+ {
+  "id": "atmospheric_heat_retention",
+  "requires_all": [
+   "precision_thermometry",
+   "isolated_airs_chemistry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "isotherm_maps",
+   "calorimetry"
+  ],
+  "note": "Air shown to hold back heat"
+ },
+ {
+  "id": "acid_fume_blight",
+  "requires_all": [
+   "salt_cake_soda"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "smelter_fume_blight",
+   "dye_works_nuisance"
+  ],
+  "note": "Alkali-works acid fumes blight fields"
+ },
+ {
+  "id": "state_forest_code",
+  "requires_all": [
+   "forestry_academy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "realm_forest_ordinance",
+   "sustained_yield_forestry"
+  ],
+  "note": "State foresters take village woods"
+ },
+ {
+  "id": "developmental_stage_series",
+  "requires_all": [
+   "comparative_anatomy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "animalcule_microscope",
+   "biological_classification"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "gasworks_river_waste",
+  "requires_all": [
+   "coal_gas_works"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_river_fish_kills",
+   "dye_works_nuisance"
+  ],
+  "note": "Gas-works tar and lime foul rivers"
+ },
+ {
+  "id": "realm_geological_survey",
+  "requires_all": [
+   "structural_geologic_mapping"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "single_minister_departments",
+   "mining_engineering_academies"
+  ],
+  "note": "Survey office maps the realm"
+ },
+ {
+  "id": "soil_assays",
+  "requires_all": [
+   "atomic_combining_weights",
+   "systematic_chemical_names"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plantation_soil_exhaustion",
+   "crushed_bone_manure",
+   "named_soil_kinds"
+  ],
+  "note": "Soils analysed for nutrients; moved just before the trials that need it"
+ },
+ {
+  "id": "ice_age_theory",
+  "requires_all": [
+   "glacier_advance_records",
+   "lithologic_correlation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deep_time_geology",
+   "glacier_farm_remission"
+  ],
+  "note": "Boulders and scoured rock read as former ice"
+ },
+ {
+  "id": "colony_hunting_collapse",
+  "requires_all": [
+   "ocean_whaling_depletion"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seabird_colony_shares",
+   "island_extinction_record"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Commercial killing empties colonies"
+ },
+ {
+  "id": "telegraphed_weather_maps",
+  "requires_all": [
+   "weather_observer_network",
+   "electrical_telegraphy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "isotherm_maps",
+   "storm_path_reconstruction"
+  ],
+  "note": "Same-hour maps from telegraphed reports"
+ },
+ {
+  "id": "fish_hatcheries",
+  "requires_all": [
+   "river_fish_restocking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_river_fish_kills",
+   "stocked_fish_ponds"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Hatcheries restock depleted rivers"
+ },
+ {
+  "id": "smoke_nuisance_ordinances",
+  "requires_all": [
+   "coal_smoke_limits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tall_dispersal_stacks",
+   "coal_smoke_treatise"
+  ],
+  "note": "Furnace inspectors enforce smoke limits"
+ },
+ {
+  "id": "acclimatization_societies",
+  "requires_all": [
+   "colonial_plant_transfers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ocean_steamship_line",
+   "far_land_specimen_voyages"
+  ],
+  "note": "Foreign animals and plants released"
+ },
+ {
+  "id": "heat_trapping_gases",
+  "requires_all": [
+   "atmospheric_heat_retention"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "precision_thermometry",
+   "isolated_airs_chemistry"
+  ],
+  "note": "Gases absorbing heat measured"
+ },
+ {
+  "id": "invasive_species_spread",
+  "requires_all": [
+   "acclimatization_societies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "brown_rat_invasion",
+   "contact_species_exchange"
+  ],
+  "note": "Released species run wild"
+ },
+ {
+  "id": "harbour_storm_warnings",
+  "requires_all": [
+   "telegraphed_weather_maps"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hydrographic_office"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Storm signals telegraphed to harbours"
+ },
+ {
+  "id": "fume_works_inspectorate",
+  "requires_all": [
+   "acid_fume_blight",
+   "smoke_nuisance_ordinances"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "condensing_smelter_flues",
+   "smelter_damage_payments"
+  ],
+  "note": "Inspectors require condensing towers"
+ },
+ {
+  "id": "human_impact_treatise",
+  "requires_all": [
+   "economy_of_nature",
+   "desiccation_forest_reserves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "acid_fume_blight",
+   "vegetation_zone_mapping"
+  ],
+  "note": "How human work changes land and climate"
+ },
+ {
+  "id": "household_of_nature_science",
+  "requires_all": [
+   "descent_by_selection",
+   "economy_of_nature"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "vegetation_zone_mapping",
+   "habitat_observation_records"
+  ],
+  "note": "Ecology named as a science"
+ },
+ {
+  "id": "lichen_air_indicators",
+  "requires_all": [
+   "biological_classification",
+   "acid_fume_blight"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "smoke_nuisance_ordinances"
+  ],
+  "note": "Lichens read as air gauges"
+ },
+ {
+  "id": "state_weather_service",
+  "requires_all": [
+   "harbour_storm_warnings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "telegraphed_weather_maps",
+   "single_minister_departments"
+  ],
+  "note": "Daily forecasts from a state service"
+ },
+ {
+  "id": "reserved_nature_park",
+  "requires_all": [
+   "human_impact_treatise"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "landscape_park_gardens",
+   "desiccation_forest_reserves"
+  ],
+  "note": "Great park set apart for ever"
+ },
+ {
+  "id": "tree_planting_days",
+  "requires_all": [
+   "forestry_academy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hedgerow_timber_planting",
+   "state_forest_code"
+  ],
+  "note": "Planting days and shelterbelts"
+ },
+ {
+  "id": "river_pollution_act",
+  "requires_all": [
+   "river_offal_bans",
+   "gasworks_river_waste"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "intercepting_sewers"
+  ],
+  "note": "Statute against river pollution"
+ },
+ {
+  "id": "biogeographic_realms",
+  "requires_all": [
+   "vegetation_zone_mapping",
+   "descent_by_selection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "far_land_specimen_voyages"
+  ],
+  "note": "Animal realms mapped"
+ },
+ {
+  "id": "fish_ladder_requirements",
+  "requires_all": [
+   "weir_fish_gaps"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fish_hatcheries",
+   "illegal_weir_removal"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Fish ladders required"
+ },
+ {
+  "id": "smoke_damage_leaf_assays",
+  "requires_all": [
+   "smelter_fume_blight",
+   "soil_assays"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fume_works_inspectorate",
+   "lichen_air_indicators"
+  ],
+  "note": "Leaf sulphur proves smoke damage"
+ },
+ {
+  "id": "volcanic_dust_cooling",
+  "requires_all": [
+   "volcanic_dry_fog_year",
+   "telegraphed_weather_maps"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "isotherm_maps",
+   "storm_path_reconstruction"
+  ],
+  "note": "Eruption dust cools the globe"
+ },
+ {
+  "id": "bird_protection_societies",
+  "requires_all": [
+   "colony_hunting_collapse"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "acclimatization_societies"
+  ],
+  "note": "Campaign against the plume trade"
+ },
+ {
+  "id": "relict_herd_protection",
+  "requires_all": [
+   "last_wild_cattle"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reserved_nature_park",
+   "colony_hunting_collapse"
+  ],
+  "note": "Last wild herds guarded"
+ },
+ {
+  "id": "state_forest_reserves",
+  "requires_all": [
+   "state_forest_code"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reserved_nature_park"
+  ],
+  "note": "Forest withdrawn from sale"
+ },
+ {
+  "id": "irrigation_salinization",
+  "requires_all": [
+   "soil_assays"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "saline_drain_channels",
+   "irrigation_water_tribunals"
+  ],
+  "conditions": {
+   "environment": [
+    "dry",
+    "river"
+   ]
+  },
+  "note": "Salted canal land recognised"
+ },
+ {
+  "id": "game_warden_licences",
+  "requires_all": [
+   "game_bird_close_seasons"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "property_game_qualification",
+   "relict_herd_protection"
+  ],
+  "note": "Licences, bag limits and wardens"
+ },
+ {
+  "id": "fossil_carbon_warming_estimate",
+  "requires_all": [
+   "heat_trapping_gases",
+   "ice_age_theory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "volcanic_dust_cooling"
+  ],
+  "note": "Burning coal calculated to warm the world"
+ },
+ {
+  "id": "smoke_density_charts",
+  "requires_all": [
+   "smoke_nuisance_ordinances"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fume_works_inspectorate"
+  ],
+  "note": "Smoke read against printed charts"
+ },
+ {
+  "id": "plant_succession",
+  "requires_all": [
+   "household_of_nature_science"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dune_pine_plantations",
+   "dune_grass_laws"
+  ],
+  "note": "Succession on shifting dunes"
+ },
+ {
+  "id": "systematic_channel_sampling",
+  "requires_all": [
+   "ore_assaying",
+   "standard_measures",
+   "geometric_survey"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "realm_geological_survey"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "wildlife_refuges",
+  "requires_all": [
+   "game_warden_licences",
+   "reserved_nature_park"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bird_protection_societies"
+  ],
+  "note": "Refuges proclaimed"
+ },
+ {
+  "id": "state_forest_service",
+  "requires_all": [
+   "state_forest_reserves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "forestry_academy"
+  ],
+  "note": "Forest service with rangers"
+ },
+ {
+  "id": "resource_conservation_policy",
+  "requires_all": [
+   "state_forest_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "human_impact_treatise",
+   "realm_geological_survey"
+  ],
+  "note": "Conservation made state policy"
+ },
+ {
+  "id": "forest_fire_suppression",
+  "requires_all": [
+   "state_forest_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "firebreak_rides"
+  ],
+  "note": "Total fire suppression"
+ },
+ {
+  "id": "pelagic_sealing_treaty",
+  "requires_all": [
+   "colony_hunting_collapse",
+   "interrealm_arbitration"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bird_protection_societies",
+   "game_warden_licences"
+  ],
+  "note": "Treaty ends open-sea sealing"
+ },
+ {
+  "id": "continental_drift_hypothesis",
+  "requires_all": [
+   "structural_geologic_mapping",
+   "realm_geological_survey"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "biogeographic_realms"
+  ],
+  "note": "Continents proposed to drift"
+ },
+ {
+  "id": "human_caused_extinction",
+  "requires_all": [
+   "extinction_recognized"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "relict_herd_protection",
+   "colony_hunting_collapse"
+  ],
+  "note": "Extinction by hunting accepted"
+ },
+ {
+  "id": "migratory_bird_treaty",
+  "requires_all": [
+   "bird_protection_societies",
+   "game_warden_licences"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pelagic_sealing_treaty"
+  ],
+  "note": "Treaty for migratory birds"
+ },
+ {
+  "id": "park_service_office",
+  "requires_all": [
+   "reserved_nature_park"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "state_forest_service"
+  ],
+  "note": "Service runs the parks"
+ },
+ {
+  "id": "range_carrying_capacity",
+  "requires_all": [
+   "soil_assays",
+   "plant_succession"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "herd_size_limits"
+  ],
+  "note": "Grazing capacity measured"
+ },
+ {
+  "id": "population_dynamics_equations",
+  "requires_all": [
+   "differential_equations",
+   "household_of_nature_science"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "population_pressure_treatise",
+   "plant_succession"
+  ],
+  "note": "Growth curves and predator-prey equations"
+ },
+ {
+  "id": "oil_discharge_limits",
+  "requires_all": [
+   "heavy_oil_motor_ships"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "river_pollution_act",
+   "migratory_bird_treaty"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Oily discharges limited"
+ },
+ {
+  "id": "food_chain_pyramids",
+  "requires_all": [
+   "household_of_nature_science"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plant_succession"
+  ],
+  "note": "Food chains and number pyramids"
+ },
+ {
+  "id": "plains_dust_storms",
+  "requires_all": [
+   "farm_tractor"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steel_scouring_plough",
+   "range_carrying_capacity"
+  ],
+  "conditions": {
+   "environment": [
+    "dry"
+   ]
+  },
+  "note": "Dry-ploughed plains blow away"
+ },
+ {
+  "id": "public_grazing_districts",
+  "requires_all": [
+   "range_carrying_capacity"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plains_dust_storms"
+  ],
+  "note": "Grazing districts on public land"
+ },
+ {
+  "id": "ecosystem_concept",
+  "requires_all": [
+   "food_chain_pyramids",
+   "plant_succession"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "population_dynamics_equations"
+  ],
+  "note": "Living things and setting as one system"
+ },
+ {
+  "id": "earthquake_magnitude_scale",
+  "requires_all": [
+   "realm_geological_survey"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "electrical_measurement"
+  ],
+  "note": "Magnitude scale"
+ },
+ {
+  "id": "measured_carbon_warming",
+  "requires_all": [
+   "fossil_carbon_warming_estimate"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "state_weather_service"
+  ],
+  "note": "Measured warming tied to fuel"
+ },
+ {
+  "id": "trophic_energy_flow",
+  "requires_all": [
+   "ecosystem_concept"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "calorimetry"
+  ],
+  "note": "Energy flow between levels"
+ },
+ {
+  "id": "whaling_quota_commission",
+  "requires_all": [
+   "ocean_whaling_depletion",
+   "world_assembly_of_realms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "population_dynamics_equations"
+  ],
+  "note": "Commission sets quotas"
+ },
+ {
+  "id": "nature_union_red_lists",
+  "requires_all": [
+   "human_caused_extinction"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "world_assembly_of_realms"
+  ],
+  "note": "Threatened species listed"
+ },
+ {
+  "id": "grade_tonnage_models",
+  "requires_all": [
+   "ore_assaying",
+   "statistical_sampling",
+   "geologic_cross_sections",
+   "ratio_proportion"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "systematic_channel_sampling"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "numerical_weather_prediction",
+  "requires_all": [
+   "state_weather_service",
+   "binary_adders"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "relay_registers",
+   "computability_theory"
+  ],
+  "note": "Forecast computed on electronic machines"
+ },
+ {
+  "id": "killer_smog_episode",
+  "requires_all": [
+   "smoke_density_charts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "smoke_nuisance_ordinances"
+  ],
+  "note": "Killing smog over a capital"
+ },
+ {
+  "id": "sustainable_yield_fisheries",
+  "requires_all": [
+   "population_dynamics_equations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fish_hatcheries"
+  ],
+  "note": "Catches limited to a sustainable yield"
+ },
+ {
+  "id": "fallout_monitoring",
+  "requires_all": [
+   "fission_weapon",
+   "radiation_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "radium_tumour_therapy",
+   "state_weather_service"
+  ],
+  "note": "Weapon-test fallout monitored (research only; no use authority)"
+ },
+ {
+  "id": "clean_air_act",
+  "requires_all": [
+   "killer_smog_episode",
+   "smoke_nuisance_ordinances"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "smoke_density_charts",
+   "lichen_air_indicators"
+  ],
+  "note": "Smokeless zones"
+ },
+ {
+  "id": "industrial_mercury_poisoning",
+  "requires_all": [
+   "river_pollution_act",
+   "mercury_amalgam_poisoning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "gasworks_river_waste",
+   "fish_hatcheries"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Mercury traced to factory waste"
+ },
+ {
+  "id": "atmospheric_co2_record",
+  "requires_all": [
+   "measured_carbon_warming",
+   "gas_composition_analysis"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "heat_trapping_gases",
+   "state_weather_service"
+  ],
+  "note": "Continuous CO2 record"
+ },
+ {
+  "id": "weather_satellites",
+  "requires_all": [
+   "orbital_satellite_launch",
+   "state_weather_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "numerical_weather_prediction",
+   "telegraphed_weather_maps"
+  ],
+  "note": "Weather satellites"
+ },
+ {
+  "id": "persistent_pesticide_warning",
+  "requires_all": [
+   "synthetic_crop_insecticide",
+   "food_chain_pyramids"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bird_protection_societies",
+   "ecosystem_concept"
+  ],
+  "note": "Persistent pesticides poison food chains"
+ },
+ {
+  "id": "spatial_variograms",
+  "requires_all": [
+   "statistical_inference",
+   "coordinate_geometry",
+   "systematic_channel_sampling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grade_tonnage_models"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "resource_kriging",
+  "requires_all": [
+   "spatial_variograms",
+   "matrix_algebra",
+   "least_squares_estimation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grade_tonnage_models"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "orebody_block_models",
+  "requires_all": [
+   "geologic_cross_sections",
+   "resource_kriging",
+   "grade_tonnage_models"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spatial_variograms"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "geochemical_baselines",
+  "requires_all": [
+   "chemical_distillation",
+   "statistical_sampling",
+   "systematic_channel_sampling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "soil_assays",
+   "realm_geological_survey"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "plate_tectonics",
+  "requires_all": [
+   "continental_drift_hypothesis",
+   "underwater_sound_ranging"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "earthquake_magnitude_scale"
+  ],
+  "note": "Sea-floor spreading"
+ },
+ {
+  "id": "endangered_species_list",
+  "requires_all": [
+   "nature_union_red_lists"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "human_caused_extinction",
+   "wildlife_refuges"
+  ],
+  "note": "Endangered species listed by law"
+ },
+ {
+  "id": "island_biogeography",
+  "requires_all": [
+   "biogeographic_realms",
+   "population_dynamics_equations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ecosystem_concept",
+   "vegetation_zone_mapping"
+  ],
+  "note": "Island theory of species numbers"
+ },
+ {
+  "id": "oil_spill_response",
+  "requires_all": [
+   "oil_discharge_limits",
+   "very_large_tankers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "river_pollution_act",
+   "industrial_mercury_poisoning"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Response after a tanker wreck"
+ },
+ {
+  "id": "environmental_impact_review",
+  "requires_all": [
+   "clean_air_act",
+   "persistent_pesticide_warning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "river_pollution_act",
+   "industrial_mercury_poisoning"
+  ],
+  "note": "Impact review for public works"
+ },
+ {
+  "id": "environment_protection_agency",
+  "requires_all": [
+   "environmental_impact_review",
+   "clean_air_act"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fume_works_inspectorate",
+   "industrial_mercury_poisoning"
+  ],
+  "note": "Environment agency"
+ },
+ {
+  "id": "geochemical_anomaly_mapping",
+  "requires_all": [
+   "geochemical_baselines",
+   "regional_maps",
+   "measurement_uncertainty"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "systematic_channel_sampling"
+  ],
+  "note": "Catalog gates"
+ },
+ {
+  "id": "wetland_convention",
+  "requires_all": [
+   "migratory_bird_treaty"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wildlife_refuges",
+   "nature_union_red_lists"
+  ],
+  "note": "Wetlands convention"
+ },
+ {
+  "id": "interrealm_environment_programme",
+  "requires_all": [
+   "world_assembly_of_realms",
+   "environment_protection_agency"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nature_union_red_lists",
+   "whaling_quota_commission"
+  ],
+  "note": "Environment programme of the realms"
+ },
+ {
+  "id": "earth_observation_satellites",
+  "requires_all": [
+   "weather_satellites"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reconnaissance_satellites"
+  ],
+  "note": "Land cover imaged"
+ },
+ {
+  "id": "endangered_trade_convention",
+  "requires_all": [
+   "endangered_species_list"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nature_union_red_lists",
+   "wetland_convention"
+  ],
+  "note": "Species trade licensed"
+ },
+ {
+  "id": "ozone_depletion_theory",
+  "requires_all": [
+   "gas_composition_analysis",
+   "chloralkali_cells"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "atmospheric_co2_record"
+  ],
+  "note": "Chlorinated gases thin ozone"
+ },
+ {
+  "id": "leaded_fuel_phaseout",
+  "requires_all": [
+   "environment_protection_agency"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clean_air_act",
+   "industrial_mercury_poisoning"
+  ],
+  "note": "Leaded fuel phased out"
+ },
+ {
+  "id": "transboundary_acid_rain",
+  "requires_all": [
+   "clean_air_act",
+   "fume_works_inspectorate"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "smoke_damage_leaf_assays",
+   "lichen_air_indicators"
+  ],
+  "note": "Acid rain crosses borders"
+ },
+ {
+  "id": "climate_circulation_models",
+  "requires_all": [
+   "numerical_weather_prediction",
+   "measured_carbon_warming"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "atmospheric_co2_record",
+   "weather_satellites"
+  ],
+  "note": "Circulation models test doubled CO2"
+ },
+ {
+  "id": "transboundary_air_convention",
+  "requires_all": [
+   "transboundary_acid_rain",
+   "interrealm_environment_programme"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clean_air_act",
+   "whaling_quota_commission"
+  ],
+  "note": "Long-range air pollution convention"
+ },
+ {
+  "id": "polluter_pays_cleanup",
+  "requires_all": [
+   "environment_protection_agency"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "industrial_mercury_poisoning",
+   "oil_spill_response"
+  ],
+  "note": "Polluter pays"
+ },
+ {
+  "id": "whaling_moratorium",
+  "requires_all": [
+   "whaling_quota_commission"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nature_union_red_lists",
+   "endangered_trade_convention"
+  ],
+  "note": "Whaling moratorium"
+ },
+ {
+  "id": "polar_ozone_hole",
+  "requires_all": [
+   "ozone_depletion_theory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "earth_observation_satellites"
+  ],
+  "note": "Ozone hole measured"
+ },
+ {
+  "id": "reactor_fallout_crisis",
+  "requires_all": [
+   "nuclear_power_stations",
+   "radiation_measurement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fallout_monitoring",
+   "environment_protection_agency",
+   "nuclear_civil_defence",
+   "reactor_engineering"
+  ],
+  "note": "Reactor accident fallout"
+ },
+ {
+  "id": "ozone_protection_treaty",
+  "requires_all": [
+   "polar_ozone_hole",
+   "interrealm_environment_programme"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "transboundary_air_convention",
+   "leaded_fuel_phaseout"
+  ],
+  "note": "Ozone treaty"
+ },
+ {
+  "id": "deep_ice_core_records",
+  "requires_all": [
+   "atmospheric_co2_record"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ice_age_theory",
+   "climate_circulation_models"
+  ],
+  "note": "Ice cores"
+ },
+ {
+  "id": "climate_assessment_panel",
+  "requires_all": [
+   "climate_circulation_models",
+   "interrealm_environment_programme"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deep_ice_core_records",
+   "atmospheric_co2_record"
+  ],
+  "note": "Climate panel"
+ },
+ {
+  "id": "sulfur_allowance_trading",
+  "requires_all": [
+   "transboundary_acid_rain",
+   "environment_protection_agency"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "transboundary_air_convention",
+   "polluter_pays_cleanup"
+  ],
+  "note": "Sulphur allowances traded"
+ },
+ {
+  "id": "climate_framework_convention",
+  "requires_all": [
+   "climate_assessment_panel"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ozone_protection_treaty",
+   "transboundary_air_convention"
+  ],
+  "note": "Framework convention"
+ },
+ {
+  "id": "biodiversity_convention",
+  "requires_all": [
+   "endangered_trade_convention",
+   "interrealm_environment_programme"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "island_biogeography",
+   "whaling_moratorium"
+  ],
+  "note": "Biodiversity convention"
+ },
+ {
+  "id": "predator_reintroduction",
+  "requires_all": [
+   "park_service_office",
+   "ecosystem_concept"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "population_dynamics_equations",
+   "endangered_species_list"
+  ],
+  "note": "Wolves returned"
+ },
+ {
+  "id": "binding_emission_targets",
+  "requires_all": [
+   "climate_framework_convention"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sulfur_allowance_trading",
+   "ozone_protection_treaty"
+  ],
+  "note": "Binding targets"
+ },
+ {
+  "id": "ocean_plastic_gyres",
+  "requires_all": [
+   "thermoplastic_processing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "oil_spill_response",
+   "polymer_film_extrusion"
+  ],
+  "note": "Plastic in gyres"
+ },
+ {
+  "id": "persistent_fluorochemicals",
+  "requires_all": [
+   "environment_protection_agency"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "geochemical_baselines",
+   "industrial_mercury_poisoning"
+  ],
+  "note": "Forever chemicals found"
+ },
+ {
+  "id": "microplastic_monitoring",
+  "requires_all": [
+   "ocean_plastic_gyres"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "persistent_fluorochemicals",
+   "geochemical_baselines"
+  ],
+  "note": "Microplastics measured"
+ },
+ {
+  "id": "carbon_emission_market",
+  "requires_all": [
+   "binding_emission_targets",
+   "sulfur_allowance_trading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "climate_assessment_panel"
+  ],
+  "note": "Carbon market"
+ },
+ {
+  "id": "environmental_dna_surveys",
+  "requires_all": [
+   "human_genome_reading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "endangered_species_list",
+   "island_biogeography"
+  ],
+  "note": "Species surveyed from water DNA"
+ },
+ {
+  "id": "climate_adaptation_plans",
+  "requires_all": [
+   "climate_framework_convention"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "storm_surge_barriers",
+   "deep_ice_core_records"
+  ],
+  "note": "Adaptation plans"
+ },
+ {
+  "id": "extreme_event_attribution",
+  "requires_all": [
+   "climate_circulation_models"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deep_ice_core_records",
+   "climate_assessment_panel"
+  ],
+  "note": "Attribution by probability"
+ },
+ {
+  "id": "universal_climate_pledges",
+  "requires_all": [
+   "binding_emission_targets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "carbon_emission_market",
+   "extreme_event_attribution"
+  ],
+  "note": "Universal pledges"
+ },
+ {
+  "id": "net_zero_statutes",
+  "requires_all": [
+   "universal_climate_pledges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "carbon_emission_market",
+   "extreme_event_attribution"
+  ],
+  "note": "Net-zero law"
+ },
+ {
+  "id": "methane_plume_satellites",
+  "requires_all": [
+   "earth_observation_satellites"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "climate_assessment_panel",
+   "universal_climate_pledges"
+  ],
+  "note": "Methane seen from orbit"
+ },
+ {
+  "id": "thirty_percent_protection",
+  "requires_all": [
+   "biodiversity_convention"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reserved_nature_park",
+   "predator_reintroduction"
+  ],
+  "note": "Thirty percent protected"
+ },
+ {
+  "id": "loss_damage_fund",
+  "requires_all": [
+   "universal_climate_pledges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "climate_adaptation_plans",
+   "extreme_event_attribution"
+  ],
+  "note": "Loss-and-damage fund"
+ },
+ {
+  "id": "verified_carbon_removal",
+  "requires_all": [
+   "carbon_emission_market"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "net_zero_statutes",
+   "earth_observation_satellites"
+  ],
+  "note": "Removal verified (speculative-plausible)"
+ },
+ {
+  "id": "natural_capital_accounts",
+  "requires_all": [
+   "national_income_accounts",
+   "ecosystem_concept"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "thirty_percent_protection",
+   "carbon_emission_market"
+  ],
+  "note": "Ecosystem accounts (speculative-plausible)"
+ },
+ {
+  "id": "plastics_production_cap",
+  "requires_all": [
+   "microplastic_monitoring",
+   "interrealm_environment_programme"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ocean_plastic_gyres",
+   "universal_climate_pledges"
+  ],
+  "note": "Plastics cap (speculative-plausible)"
+ }
+]
