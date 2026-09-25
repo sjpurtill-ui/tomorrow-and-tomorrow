@@ -1192,6 +1192,7 @@ func _commit_world_day(day_result:Dictionary)->void:
 	preload("res://scripts/strategic_history.gd").sample()
 	_refresh_discovered_resource_overlays()
 	_refresh_settlement_footprint()
+	preload("res://scripts/rite_marks.gd").refresh(self)
 	if not progression_events.is_empty() and travel_status_label:
 		travel_status_label.text="CIVILIZATION MILESTONE: %s" % String(progression_events[0].name).to_upper()
 	elif not discoveries.is_empty() and travel_status_label:

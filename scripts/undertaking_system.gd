@@ -867,9 +867,11 @@ static func _victim_names(h:int,count:int)->Array:
 	var traditions:Array=NAMES.POOLS.keys()
 	var used:={}
 	for i in count:
-		var identity:Dictionary=NAMES.make(_seed(),100000+h%100000+i*7,(h+i)%2==0,String(traditions[(h/7+i)%traditions.size()]),used)
+		# The fallen carry their own people's names for the era (era_names.gd).
+		var identity:Dictionary=preload("res://scripts/era_names.gd").make(_seed(),100000+h%100000+i*7,(h+i)%2==0,String(WorldSimulation.actor_id) if String(WorldSimulation.actor_id)!="" else "player",used)
+		if String(identity.get("name",""))=="":identity=NAMES.make(_seed(),100000+h%100000+i*7,(h+i)%2==0,String(traditions[(h/7+i)%traditions.size()]),used)
 		if identity.is_empty():continue
-		used[identity.name]=true;names.append(String(identity.name))
+		used[identity.name]=true;used["given:"+String(identity.name).get_slice(" ",0)]=true;names.append(String(identity.name))
 	return names
 
 # --- Dedication ---------------------------------------------------------------

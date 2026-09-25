@@ -879,7 +879,7 @@ static func _lower_first(s:String)->String:
 static func _soften_opening(text:String)->String:
 	## Lower-case a common opening word after an address; keep names capitalised.
 	var first:=text.get_slice(" ",0)
-	if first in ["I","It","We","The","There","That","This","A","An","More","Some","No","Yes","When","If","And","Our","Your","They","What","As","At","Then","Now","Only","Every","Consider"]:
+	if first in ["I","It","We","The","There","That","This","A","An","More","Some","No","Yes","When","If","And","Our","Your","They","What","As","At","Then","Now","Only","Every","Consider","So","You"]:
 		return _lower_first(text) if first!="I" else text
 	return text
 
@@ -888,7 +888,7 @@ static func _address(p:Dictionary,salt:String)->String:
 	if posmod(hash(salt+"|address"),3)!=0: return ""
 	return String(p.get("address",""))
 
-static func voiced(leader:Dictionary,body:String,salt:String)->String:
+static func voiced(leader:Dictionary,body:String,salt:String,opening:String="")->String:
 	## Wrap plain in-world content in this leader's lifelong manner: one lead-in
 	## from their manner, their address term now and then, and the god-regard
 	## colour (terror hurries, worship exalts, resentment clips).
@@ -900,7 +900,9 @@ static func voiced(leader:Dictionary,body:String,salt:String)->String:
 		"hates_dread": prefix="As you command. "
 		"worships": prefix="Your will moves us. "
 		"resents": prefix="As you say. "
-	var lead:=_lead(p,salt)
+	# A full opening sentence in their own manner (divine_reply.gd) replaces
+	# the short lead-in when the caller has one.
+	var lead:=opening if opening!="" else _lead(p,salt)
 	var address:=_address(p,salt)
 	var text:=body.strip_edges()
 	if not address.is_empty(): text="%s, %s" % [address,_soften_opening(text)]
@@ -917,7 +919,9 @@ static func acceptance_body(plan:Dictionary,capacity_phrase:String)->String:
 	if String(natures[0] if not natures.is_empty() else "generic") in ["generic","attempt"] and not String(plan.get("summary","")).is_empty():
 		body="I will %s: “%s.”" % [act,String(plan.summary).strip_edges().trim_suffix(".")]
 	if float(plan.get("future_delay",0))>0.0: body="When the day comes, I will %s." % act
-	if float(plan.get("feasibility",1.0))<0.2: body="No one has ever done such a thing, but I will %s." % act
+	if float(plan.get("feasibility",1.0))<0.2:
+		body=preload("res://scripts/divine_reply.gd").miracle_body(String(plan.get("summary","")),act,risk)
+		risk=""
 	if not risk.is_empty(): body+=" %s." % risk.trim_suffix(".")
 	if not capacity_phrase.is_empty(): body+=" "+capacity_phrase
 	return body

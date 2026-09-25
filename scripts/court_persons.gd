@@ -231,6 +231,14 @@ static func _used_names()->Dictionary:
 	return used
 
 static func _name_for(sex:String,rng:RandomNumberGenerator,family:String="")->Dictionary:
+	# Before writing or institutions nobody has a family name (era_names.gd):
+	# a commoner is a name and an epithet, or a name and a place.
+	var era_names:=preload("res://scripts/era_names.gd")
+	if era_names.stage("player")<2:
+		var taken:=era_names.used_in_court()
+		for full in _used_names(): taken[full]=true
+		var made:Dictionary=era_names.make(int(GameState.world_seed),rng.randi(),sex=="female","player",taken)
+		return {"given":String(made.given),"family":"","name":String(made.name)}
 	var pool:Array=Notables.MEN if sex=="male" else Notables.WOMEN
 	var families:Array=[]
 	for f in GovernmentPeopleSystem.FAMILY_NAMES:
@@ -278,7 +286,7 @@ static func create(desc:Dictionary,key:String="")->Dictionary:
 	if sid=="" or _settlement(sid).is_empty(): sid=String(_settlement("").get("id",""))
 	var kin_of:Dictionary=desc.get("kin_of",{}) if desc.get("kin_of") is Dictionary else {}
 	var family:=""
-	if not kin_of.is_empty(): family=String(GovernmentPeopleSystem.person_snapshot(int(kin_of.get("pid",0))).get("name","")).get_slice(" ",1)
+	if not kin_of.is_empty(): family=preload("res://scripts/era_names.gd").family_of(GovernmentPeopleSystem.person_snapshot(int(kin_of.get("pid",0))))
 	var n:=_name_for(sex,rng,family)
 	var children:=0
 	if age>=20: children=clampi(roundi((float(age)-19.0)*0.18*rng.randf_range(0.5,1.3)),0,7)

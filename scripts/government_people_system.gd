@@ -370,11 +370,10 @@ func _ensure_pool()->void:
 func _generate_person(person_id:int)->Dictionary:
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=hash("%d:government_person:%d" % [WorldSimulation.state.world_seed,person_id])
-	var name:="%s %s" % [GIVEN_NAMES[posmod(person_id*7+rng.randi(),GIVEN_NAMES.size())],FAMILY_NAMES[posmod(person_id*11+rng.randi(),FAMILY_NAMES.size())]]
-	for existing in people:
-		if String(existing.get("name",""))==name:
-			name="%s %s" % [name,String.chr(65+posmod(person_id,26))]
-			break
+	# Names follow what the people know (era_names.gd); drawn after skills so a
+	# stone-age epithet can say what the band values in them.
+	var woman:=posmod(hash("%d:government_sex:%d" % [WorldSimulation.state.world_seed,person_id]),2)==0
+	rng.randi(); rng.randi()   # the two draws the older naming used, so ages and skills keep their seeds
 	var age:=rng.randi_range(18,58)
 	var life_expectancy:=clampf(WorldSimulation.state.projected_life_expectancy()+18.0,48.0,88.0)
 	var death_age:=clampf(rng.randfn(life_expectancy,11.5),maxf(36.0,float(age)+2.0),105.0)
@@ -391,6 +390,19 @@ func _generate_person(person_id:int)->Dictionary:
 	skills[String(SKILL_KEYS[primary_index])]=rng.randi_range(72,93)
 	skills[String(SKILL_KEYS[secondary_index])]=maxi(int(skills[String(SKILL_KEYS[secondary_index])]),rng.randi_range(58,82))
 	skills[String(SKILL_KEYS[weak_index])]=rng.randi_range(14,36)
+	var era_names:=preload("res://scripts/era_names.gd")
+	var owner:=String(WorldSimulation.actor_id) if String(WorldSimulation.actor_id)!="" else "player"
+	var used_names:Dictionary=era_names.used_in_court() if owner=="player" else {}
+	for existing_person in people:
+		if String(existing_person.get("status","active")) in ["active","detained"]:
+			used_names[String(existing_person.get("name",""))]=true
+			used_names["given:"+era_names.given_of(String(existing_person.get("name","")))]=true
+	var identity:Dictionary=era_names.make(int(WorldSimulation.state.world_seed),person_id,woman,owner,used_names,{"skill":String(SKILL_KEYS[primary_index])})
+	var name:=String(identity.get("name","Nameless"))
+	for existing in people:
+		if String(existing.get("name",""))==name:
+			name="%s %s" % [name,String.chr(65+posmod(person_id,26))]
+			break
 	var trait_a:=String(TRAITS[rng.randi_range(0,TRAITS.size()-1)])
 	var trait_b:=String(TRAITS[rng.randi_range(0,TRAITS.size()-1)])
 	while trait_b==trait_a: trait_b=String(TRAITS[rng.randi_range(0,TRAITS.size()-1)])
@@ -402,7 +414,7 @@ func _generate_person(person_id:int)->Dictionary:
 	var born_day:=int(WorldSimulation.state.elapsed_days)-age*365-rng.randi_range(0,364)
 	var profile:=_dynamic_profile(skills,personality)
 	return {
-		"person_id":person_id,"name":name,"born_day":born_day,"death_age_years":death_age,"died_day":-1,"status":"active","known_since_day":int(WorldSimulation.state.elapsed_days),
+		"person_id":person_id,"name":name,"given":String(identity.get("given","")),"family":String(identity.get("family","")),"sex":"female" if woman else "male","born_day":born_day,"death_age_years":death_age,"died_day":-1,"status":"active","known_since_day":int(WorldSimulation.state.elapsed_days),
 		"home_settlement_id":home_id,"office_key":"","local_leader_of":"","appointed_day":-1,"experience_months":0,
 		"background":background,"institutional":false,"traits":[trait_a,trait_b],"personality":personality,"skills":skills,"doctrine":doctrine,
 		"dynamic_profile":profile,"subcategory_profile":{},"support":clampi(roundi(28.0+float(profile.culture)*34.0+float(profile.institutions)*26.0),18,92),
@@ -1170,6 +1182,10 @@ func _process_lifespans(day:int,events:Array[Dictionary])->void:
 		person["died_day"]=day
 		var held_title:=String(person.get("office_title",person.get("office_key","")))
 		var local_id:=String(person.get("local_leader_of",""))
+		# What they held when they died, for the court's mourning (court_lives.gd).
+		person["died_office_key"]=String(person.get("office_key",""))
+		person["died_office_title"]=held_title
+		person["died_local_leader_of"]=local_id
 		people[index]=person
 		# This named person is part of the aggregate population. Register exactly one
 		# death through the same conserved demographic entry point.
