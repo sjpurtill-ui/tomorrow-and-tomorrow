@@ -21,7 +21,11 @@
      "sample_sufficient": true
     }
    ],
-   "art": "res://assets/ui/research/paper/water_powered_hammers.png"
+   "art": "res://assets/ui/research/paper/water_powered_hammers.png",
+   "production_items": [
+    "battery_brass_wares"
+   ],
+   "production_contract": "Finite workshop batches make Brass Wares from brass and charcoal, using water hammer drives, wrought iron and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "salt_glazed_stoneware": {
    "effects": {
@@ -130,7 +134,11 @@
      "sample_sufficient": true
     }
    ],
-   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png"
+   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
+   "production_items": [
+    "leached_saltpetre"
+   ],
+   "production_contract": "Finite workshop batches make Saltpetre from nitrates, wood-ash lye, timber and freshwater, using clay and wrought iron. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "corned_powder_mills": {
    "effects": {
@@ -142,7 +150,11 @@
    "name": "Corned Powder Mills",
    "observation": "The damp powder cake is pressed through a sieve into grains, which burn fast and even and keep dry on the cart.",
    "social_consequence": "Powder grows stronger and safer to carry, and now and then a stamping mill and its crew vanish in one flash.",
-   "art": "res://assets/ui/research/subjects/black_powder-v1.png"
+   "art": "res://assets/ui/research/subjects/black_powder-v1.png",
+   "production_items": [
+    "corned_black_powder"
+   ],
+   "production_contract": "Finite workshop batches make Black Powder from saltpetre, sulfur, charcoal and freshwater, using water hammer drives, stone and timber. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "mainspring_fusee_clocks": {
    "effects": {
@@ -746,7 +758,11 @@
    },
    "observation": "Coal is baked in heaps away from air until only grey coke is left, strong enough to carry the furnace charge without crushing.",
    "ability_reason": "Coke frees ironmaking from the forests: furnaces grow larger, and iron can be made wherever coal lies.",
-   "art": "res://assets/ui/research/subjects/coke_firing-v1.png"
+   "art": "res://assets/ui/research/subjects/coke_firing-v1.png",
+   "production_items": [
+    "metallurgical_coke",
+    "blast_pig_iron"
+   ]
   },
   "atmospheric_beam_engine": {
    "effects": {
@@ -852,7 +868,11 @@
    },
    "name": "Zinc Distillation",
    "observation": "Calamine and charcoal heated in sealed clay pots give off zinc vapour, which runs down an iron pipe into water.",
-   "art": "res://assets/ui/research/subjects/copper_smelting-v2.png"
+   "art": "res://assets/ui/research/subjects/copper_smelting-v2.png",
+   "production_items": [
+    "retort_zinc"
+   ],
+   "production_contract": "Finite workshop batches make Refined Zinc from zinc ore and coal, using ceramic crucibles and refractory bricks. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "metal_casting_feed_design": {
    "effects": {
@@ -891,7 +911,13 @@
    },
    "name": "Slip Casting",
    "observation": "Liquid clay poured into a plaster mould leaves a thin, even skin as the plaster drinks the water, and every teapot comes out alike.",
-   "art": "res://assets/ui/research/paper/ceramic_slip_casting.png"
+   "art": "res://assets/ui/research/paper/ceramic_slip_casting.png",
+   "production_items": [
+    "pottery_plaster_molds",
+    "slip_cast_stoneware",
+    "fired_cast_stoneware"
+   ],
+   "production_contract": "Finite workshop batches make Pottery Plaster Molds from gypsum, timber and freshwater, using timber and clay; and Dry Cast Stoneware from stoneware body, freshwater and pottery plaster molds, using pottery plaster molds and timber; and Stoneware Vessels from dry cast stoneware and timber, using refractory bricks and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "fantail_windmills": {
    "effects": {
@@ -927,7 +953,11 @@
      "sample_sufficient": true
     }
    ],
-   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png"
+   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
+   "production_items": [
+    "lead_chamber_sulfuric_acid"
+   ],
+   "production_contract": "Finite workshop batches make Sulfuric Acid from sulfur, nitrates and freshwater, using lead sheets and timber. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "cylinder_carding": {
    "effects": {
@@ -1291,7 +1321,8 @@
     "injury_risk": -0.001
    },
    "observation": "A lever slides the dog clutch out of mesh, and one machine stands still while the shaft keeps turning.",
-   "art": "res://assets/ui/research/paper/cam_motion_design.png"
+   "art": "res://assets/ui/research/paper/cam_motion_design.png",
+   "production_contract": "Finite workshop batches forge dog clutches that let one mill or hoist shaft stand while another turns, paying wrought iron, a little steel and work. Lathe-turned friction clutches come later with centre-lathe assembly; imported finished parts remain usable."
   },
   "pressure_vessels": {
    "effects": {

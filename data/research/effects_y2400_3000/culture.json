@@ -552,7 +552,11 @@
    "name": "Radio Broadcasting",
    "observation": "Radio broadcasts reach every home with news, music and the ruler's voice.",
    "ability_reason": "One voice can address the whole people at once; news spreads in minutes.",
-   "social_consequence": "The ruler speaks into every kitchen; rumour and propaganda travel as fast as news."
+   "social_consequence": "The ruler speaks into every kitchen; rumour and propaganda travel as fast as news.",
+   "production_items": [
+    "broadcast_radio_sets"
+   ],
+   "production_contract": "Finite workshop batches make Broadcast Radio Sets from triode valves, tuned circuits, variable capacitors, resistors, capacitors, telephone earpieces, insulated cable and timber, using timber and wrought iron. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "unknown_warrior_remembrance": {
    "effects": {

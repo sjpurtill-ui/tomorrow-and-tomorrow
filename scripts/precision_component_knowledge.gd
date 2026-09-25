@@ -31,10 +31,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "A multi-edge tool finishes an already prepared hole.",
     "effects": {},
-    "production_items": [
-      "precision_reamers",
-      "reamed_sleeves_20"
-    ],
+    "production_items": ["precision_reamers", "reamed_sleeves_20", "interchangeable_bearings_20"],
     "production_contract": "Produce paid finishing reamers and consume pilot-bored sleeves with reamer wear into gauged 20 mm sleeves. Rough holes and generic bearings do not satisfy the named finished-sleeve feed. These sleeves enter the separate fit-check and motor-assembly route."
   },
   {
@@ -171,10 +168,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Specify and verify compatible dimensional ranges across separately made components",
     "effects": {},
-    "production_items": [
-      "fit_gauges_20",
-      "interchangeable_bearings_20"
-    ],
+    "production_items": ["jig_filed_lock_parts"],
     "production_contract": "Produce gauges for the selected nominal 20 mm shaft/sleeve family, then pay comparison/fit work, actual turned shafts, reamed sleeves, lubricant and sample material into interchangeable bearing assemblies. Those actual assemblies are consumed by a compatible electric-motor recipe. Sizes, tolerances and rejection yield are bounded product-grade abstractions, not a dimensional physics simulator or universal fit certificate."
   }
 ]

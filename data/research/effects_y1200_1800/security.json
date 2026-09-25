@@ -796,7 +796,11 @@
    },
    "observation": "Nitre, sulfur and charcoal ground together burn with a flash and a roar that the men who grind them learn to fear.",
    "ability_reason": "The mixture is known only as a dangerous curiosity: no one can yet make it throw a stone, and it gives no general a new weapon.",
-   "art": "res://assets/ui/research/subjects/black_powder-v1.png"
+   "art": "res://assets/ui/research/subjects/black_powder-v1.png",
+   "production_items": [
+    "black_powder_meal"
+   ],
+   "production_contract": "Finite workshop batches make Black Powder from nitrates, sulfur and charcoal, using stone and timber. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "free_mercenary_companies": {
    "effects": {

@@ -135,7 +135,7 @@ static func _entry(id: String,name: String,direction: String,day: int,chance: fl
 	if id=="coke_firing":
 		result.effects={}
 		result["production_items"]=["metallurgical_coke"]
-		result["production_contract"]="Converts actual coal into coke through finite workshop labor and paid kiln tooling. Coke is a stock consumed by ironmaking, not a global fuel or metal bonus."
+		result["production_contract"]="Converts actual coal into coke through finite workshop labor and paid kiln tooling. Coke is a stock consumed by ironmaking; the discovery's society-wide effect is a small era-scaled contribution, not a direct fuel or metal bonus."
 	if id=="blast_furnace":
 		result.effects={}
 		result["production_items"]=["blast_pig_iron","charcoal_pig_iron"]

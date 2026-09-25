@@ -317,7 +317,11 @@
    "name": "Small Change Coins",
    "observation": "Little bronze coins buy a loaf or a cup, so the poorest can trade with money instead of favors.",
    "social_consequence": "Neighbors who once traded favors now settle in coin, and old obligations fade.",
-   "art": "res://assets/ui/research/discovery-600/stamp_seals.png"
+   "art": "res://assets/ui/research/discovery-600/stamp_seals.png",
+   "production_items": [
+    "struck_copper_coins"
+   ],
+   "production_contract": "Finite workshop batches make Struck Copper Coins from refined copper and charcoal, using wrought iron and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "written_sailing_directions": {
    "effects": {

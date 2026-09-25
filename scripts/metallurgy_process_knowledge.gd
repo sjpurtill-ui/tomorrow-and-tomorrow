@@ -326,10 +326,8 @@ static func entries()->Array[Dictionary]:
     "observation": "An expendable pattern creates a refractory casting mold.",
     "effects": {},
     "operating_contract": "Pay pattern, shell layers, drying, pattern removal, molten alloy and cleanup work; retain shrinkage and shell-failure checks.",
-    "production_items": [
-      "investment_copper_brackets"
-    ],
-    "production_contract": "Pay pattern, multiple shell layers, drying, hot-exposure burnout, molten metal, cooling and inspection; selected geometry and normalized thermal/fill response determine bracket acceptance without a full mold-flow solver."
+    "production_items": ["lost_pattern_castings"],
+    "production_contract": "A pattern of fat and clay is coated in a clay mould, burned out and replaced by molten copper alloy. Each batch pays metal, pattern stuff, clay, fuel and work; later near-net brackets from foamed-polymer patterns come with polymer foam control."
   },
   {
     "id": "lost_foam_casting",

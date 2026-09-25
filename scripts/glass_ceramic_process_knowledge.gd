@@ -102,11 +102,8 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Form qualified ceramic shapes by draining or consolidating a controlled suspension in suitable molds",
     "effects": {},
-    "production_items": [
-      "pottery_plaster_molds",
-      "slip_cast_stoneware"
-    ],
-    "production_contract": "Finite workshop routes pay for prepared feedstock, rejected trial material, fuel, molds and work. Graded cullet remelts into usable glass; annealed blanks feed lens grinding. Slip-cast forms need a separate firing route, and fired stoneware needs paid glaze-fit trials before supplying the glazed brine workshop. These are bounded compatible material classes, not arbitrary glass mixing, universal refractory ware or food/medical certification."
+    "production_items": ["fired_mould_slip_wares"],
+    "production_contract": "Finite workshop batches drain prepared clay slip in porous fired-clay moulds to make Slip-Moulded Clay Wares, paying clay, water, fuel and work. Plaster moulds and slip-cast stoneware come later with plaster-mould slip casting."
   },
   {
     "id": "ceramic_glaze_formulation",
@@ -139,9 +136,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Fit a fired glassy surface to a compatible ceramic body",
     "effects": {},
-    "production_items": [
-      "glazed_stoneware_vessels"
-    ],
+    "production_items": ["glazed_earthenware_vessels"],
     "production_contract": "Finite workshop routes pay for prepared feedstock, rejected trial material, fuel, molds and work. Graded cullet remelts into usable glass; annealed blanks feed lens grinding. Slip-cast forms need a separate firing route, and fired stoneware needs paid glaze-fit trials before supplying the glazed brine workshop. These are bounded compatible material classes, not arbitrary glass mixing, universal refractory ware or food/medical certification."
   },
   {
@@ -173,11 +168,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Produce a qualified dense ceramic body through controlled high-temperature firing",
     "effects": {},
-    "production_items": [
-      "stoneware_body",
-      "formed_stoneware_vessels",
-      "fired_cast_stoneware"
-    ],
+    "production_items": ["stoneware_body", "formed_stoneware_vessels", "glazed_stoneware_vessels"],
     "production_contract": "Finite workshop routes pay for prepared feedstock, rejected trial material, fuel, molds and work. Graded cullet remelts into usable glass; annealed blanks feed lens grinding. Slip-cast forms need a separate firing route, and fired stoneware needs paid glaze-fit trials before supplying the glazed brine workshop. These are bounded compatible material classes, not arbitrary glass mixing, universal refractory ware or food/medical certification."
   }
 ]

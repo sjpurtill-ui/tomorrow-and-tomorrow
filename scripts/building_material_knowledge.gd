@@ -341,11 +341,7 @@ static func entries()->Array:
     ],
     "observation": "Produce and qualify a clinker-based hydraulic binder through controlled mineral processing",
     "effects": {},
-    "production_items": [
-      "cement_clinker",
-      "ground_cement",
-      "cement_gypsum"
-    ],
+    "production_items": ["cement_clinker", "ground_cement"],
     "production_contract": "Suitable mineral feed, kiln, grinding, energy and emissions management. Supply a repeatable binder at substantial heat and process-emission cost. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners."
   },
   {

@@ -344,7 +344,12 @@
    },
    "art": "res://assets/ui/research/subjects/printing_process-v1.png",
    "name": "Block-printed Books",
-   "observation": "A whole book is printed from carved blocks and bound, and its last leaf gives the day it was made and who paid for it."
+   "observation": "A whole book is printed from carved blocks and bound, and its last leaf gives the day it was made and who paid for it.",
+   "production_items": [
+    "soot_block_ink",
+    "block_printed_leaves"
+   ],
+   "production_contract": "Finite workshop batches make Printing Ink from lampblack, timber and freshwater, using stone and clay; and Printed Sheets from paper and printing ink, using printing forms and timber. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "printed_almanacs": {
    "effects": {
@@ -389,7 +394,11 @@
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Printed Standard Classics",
    "observation": "The realm prints one checked edition of the classics, and every school teaches from the same pages.",
-   "social_consequence": "Every school reads the same pages, and any other reading becomes a mistake"
+   "social_consequence": "Every school reads the same pages, and any other reading becomes a mistake",
+   "production_items": [
+    "bound_printed_books"
+   ],
+   "production_contract": "Finite workshop batches make Printed Books from printed sheets, spun yarn, timber and tanned leather, using timber and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "scholarly_question_letters": {
    "effects": {
@@ -486,7 +495,8 @@
     "labor_demand": 0.003
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
-   "observation": "Each character is pressed in clay, fired hard, and set in an iron frame with wax so that a page can be printed and then broken up."
+   "observation": "Each character is pressed in clay, fired hard, and set in an iron frame with wax so that a page can be printed and then broken up.",
+   "production_contract": "Characters pressed in clay and fired hard are set in an iron forme with wax, then inked and proofed into reusable Printing Forms. Cast metal and carved wooden type come with their own later discoveries. Installed forms feed existing printing and study; no text or discovered knowledge is created."
   },
   "guest_star_records": {
    "effects": {
@@ -841,7 +851,11 @@
    "art": "res://assets/ui/research/discovery-600/outflow_water_clock.png",
    "name": "Verge Escapement Clock",
    "observation": "A falling weight turns a toothed wheel that a swinging verge checks and releases, tooth by tooth, all day and all night.",
-   "ability_reason": "A falling weight checked by a swinging verge keeps the hours day and night in any weather; time is kept by machine instead of sun, water or candle."
+   "ability_reason": "A falling weight checked by a swinging verge keeps the hours day and night in any weather; time is kept by machine instead of sun, water or candle.",
+   "production_items": [
+    "verge_clock_movements"
+   ],
+   "production_contract": "Finite workshop batches make Clock Movements from wrought iron, refined copper, timber and stone, using wrought iron and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "foliated_running_heads": {
    "effects": {
@@ -875,7 +889,11 @@
    },
    "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
    "name": "Mineral Acids",
-   "observation": "Vitriol and saltpetre heated together in a glass still give a water strong enough to part silver from gold."
+   "observation": "Vitriol and saltpetre heated together in a glass still give a water strong enough to part silver from gold.",
+   "production_items": [
+    "parting_acid"
+   ],
+   "production_contract": "Finite workshop batches make Parting Acid from saltpetre, sulfur, iron ore and freshwater, using laboratory glassware and clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "water_sphere_rainbow_test": {
    "effects": {

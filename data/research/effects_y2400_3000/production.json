@@ -80,7 +80,8 @@
    "observation": "The inspector drops a lock plate from one crate into the stock of a musket from another; it seats without a file stroke, and he chalks the gauge as passed.",
    "ability_reason": "Parts made to fixed gauges can be made in separate shops and repaired from a bin of spares, which is the foundation of every later factory.",
    "social_consequence": "Gauge rooms and inspectors gain authority over the shop; fitters who once shaped each part by hand are reduced to assembling them.",
-   "art": "res://assets/ui/research/paper/interchangeable_component_fits.png"
+   "art": "res://assets/ui/research/paper/interchangeable_component_fits.png",
+   "production_contract": "Lock parts are filed to hardened jigs and checked in gauges so that any part fits any lock of the pattern. Each batch pays steel, iron and filing work. Machine-turned 20 mm shaft and sleeve families come later with lathe, reaming and gauge-block work."
   },
   "iron_power_loom_sheds": {
    "effects": {
@@ -263,7 +264,12 @@
    },
    "observation": "Current from a bank of cells turns a wheel of coiled iron between magnet poles, and it spins on with no steam, no belt, no horse.",
    "ability_reason": "Motion that can be sent down a wire means power can later be divided and delivered to each machine instead of one engine driving a whole shed.",
-   "art": "res://assets/ui/research/paper/battery_bank_wiring.png"
+   "art": "res://assets/ui/research/paper/battery_bank_wiring.png",
+   "production_items": [
+    "electric_mule_yarn",
+    "motor_printed_sheets"
+   ],
+   "production_contract": "A causal engineering foundation for electric motor manufacture and for motor-driven spinning and printing routes, which consume shared electricity. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus."
   },
   "electromagnetic_relays": {
    "effects": {
@@ -849,7 +855,11 @@
    "observation": "A small engine thumps in the corner of the workshop, drawing town gas and air into its cylinder and firing it; there is no boiler and no stoker.",
    "ability_reason": "An engine that burns its fuel inside the cylinder can start at once and stay small, which will soon put power in carriages, boats and farms.",
    "social_consequence": "Small workshops gain power without a boiler license or coal yard; the engine's fumes stay in the room with the men who tend it.",
-   "art": "res://assets/ui/research/paper/cylinder_boring.png"
+   "art": "res://assets/ui/research/paper/cylinder_boring.png",
+   "production_items": [
+    "combustion_engines"
+   ],
+   "production_contract": "Finite workshop batches make Combustion Engines from bored cylinders, piston packings, crank assemblies, flywheels and steel, using basic machine tool sets and timber. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "cylindrical_grinding": {
    "effects": {

@@ -135,7 +135,8 @@
     "cohesion": 0.0013,
     "craft_output": 0.0009
    },
-   "art": "res://assets/ui/research/paper/mineral_pigment_preparation.png"
+   "art": "res://assets/ui/research/paper/mineral_pigment_preparation.png",
+   "production_contract": "Finite selected feed, grinding equipment, actual water, work and trial material make levigated and finely ground earth pigments. Ochre is a nonrenewable observed occurrence; generic clay or iron ore cannot substitute. Printing inks and printed sheets from these pigments need later printing knowledge. No imported output grants local mastery or a universal pigment rating."
   },
   "pit_firing": {
    "art": "res://assets/ui/research/subjects/pit_firing-v1.png",
@@ -253,7 +254,8 @@
     "construction_rate": 0.012,
     "health_protection": 0.0031,
     "soil_productivity": 0.005
-   }
+   },
+   "production_contract": "Finite workshop batches make Quicklime from limestone, using stone and clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "scrap_reclamation_habits": {
    "art": "res://assets/ui/research/stone-selection-v1.png",
@@ -344,7 +346,8 @@
     "pollution": 0.01,
     "tool_quality": 0.0155,
     "trade_capacity": 0.0054
-   }
+   },
+   "production_contract": "Finite workshop batches make Refined Copper from copper ore and timber, using stone and clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "haft_fit_checking": {
    "art": "res://assets/ui/research/subjects/hafted_tools-v1.png",
@@ -363,12 +366,11 @@
    },
    "art": "res://assets/ui/research/paper/hide_tanning.png",
    "production_items": [
-    "bated_vegetable_leather",
     "rendered_leather_fat",
-    "prepared_tanning_hides",
     "plant_tannin_extract",
     "vegetable_tanned_leather",
-    "finished_flexible_leather"
+    "finished_flexible_leather",
+    "ash_prepared_hides"
    ]
   },
   "copper_casting": {
@@ -846,7 +848,11 @@
     "craft_output": 0.0017,
     "trade_capacity": 0.0015
    },
-   "observation": "Wool boiled first in alum water takes madder and weld deep and fast, and the colour no longer washes out."
+   "observation": "Wool boiled first in alum water takes madder and weld deep and fast, and the colour no longer washes out.",
+   "production_items": [
+    "gathered_alum"
+   ],
+   "production_contract": "Finite workshop batches make Alum from stone and freshwater, using clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "ceramic_glaze_formulation": {
    "effects": {
@@ -857,7 +863,8 @@
     "water_safety": 0.0052
    },
    "art": "res://assets/ui/research/paper/ceramic_glaze_formulation.png",
-   "social_consequence": "Glazed jars keep oil and wine without seeping; fine glazed wares become a mark of a well-off household."
+   "social_consequence": "Glazed jars keep oil and wine without seeping; fine glazed wares become a mark of a well-off household.",
+   "production_contract": "Finite workshop batches fit a glassy glaze to prepared earthenware, paying clay, ground glass, fuel and work. Glazed stoneware needs high-fire stoneware; these are bounded compatible material classes, not arbitrary glaze mixing."
   },
   "refractory_body_trials": {
    "effects": {

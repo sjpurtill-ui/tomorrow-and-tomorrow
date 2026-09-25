@@ -894,7 +894,11 @@
    },
    "observation": "A lathe with true iron slides, a screw feed and hardened bearings cuts parts that fit without the filer's endless trying.",
    "ability_reason": "Machines that guide the cutter truly let every part be made to measure, so engines and instruments can be built to fit.",
-   "art": "res://assets/ui/research/subjects/precision_machinery-v1.png"
+   "art": "res://assets/ui/research/subjects/precision_machinery-v1.png",
+   "production_items": [
+    "case_hardened_gears"
+   ],
+   "production_contract": "Case-hardened gear sets are packed in charcoal and held at red heat until a hard skin forms over a tough core. Batches pay iron, charcoal, fuel and work; learning grants no stock."
   },
   "rubble_mound_breakwaters": {
    "effects": {

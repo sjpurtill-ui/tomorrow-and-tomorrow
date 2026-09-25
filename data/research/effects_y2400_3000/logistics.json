@@ -114,7 +114,11 @@
    },
    "name": "Many-Tubed Boilers",
    "observation": "Flue tubes run through the boiler like reeds in a bundle, and the engine that carries them wins the trial by miles an hour.",
-   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png",
+   "production_items": [
+    "steam_locomotives"
+   ],
+   "production_contract": "Finite workshop batches make Steam Locomotives from pressure vessels, bored cylinders, crank assemblies, 1435 mm rail wheelsets, wrought iron and steel, using wrought iron, timber and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "intercity_passenger_railway": {
    "effects": {
@@ -144,7 +148,8 @@
     "logistics_endurance": 0.0031
    },
    "observation": "Rails fixed to timber sleepers and bedded in drained broken stone stay true under the heaviest trains.",
-   "art": "res://assets/ui/research/paper/rail_track_foundations.png"
+   "art": "res://assets/ui/research/paper/rail_track_foundations.png",
+   "production_contract": "Manufactures paid Timber Rail Panels and Track Ballast. Installed wagonways require a surveyed owned route, compatible wagons and brakes, actual construction work and continuing supplies. Capacity and crews remain committed through the return journey; worn or occupied routes cannot dispatch. The current haulage is human-worked; engines and animals are not supplied by this discovery."
   },
   "classed_freight_tariffs": {
    "effects": {
@@ -266,7 +271,8 @@
    },
    "observation": "The realm fixes one gauge for every railway, and the odd-gauge lines are relaid at their owners' cost.",
    "ability_reason": "Every wagon runs on every line, so goods and troops cross the realm without unloading at the gauge breaks.",
-   "art": "res://assets/ui/research/paper/rail_gauge_standards.png"
+   "art": "res://assets/ui/research/paper/rail_gauge_standards.png",
+   "production_contract": "Manufactures paid Rail Gauge Templates, 900 mm and 1435 mm Rail Wheelsets and the matching Rail Wagons. Installed wagonways require a surveyed owned route, compatible wagons and brakes, actual construction work and continuing supplies. Capacity and crews remain committed through the return journey; worn or occupied routes cannot dispatch. The current haulage is human-worked; engines and animals are not supplied by this discovery."
   },
   "railway_clearing_house": {
    "effects": {
@@ -677,7 +683,11 @@
    "observation": "Motor cars come off a moving line in long series, cheap enough for a farmer or a clerk to buy.",
    "ability_reason": "Ordinary households can own a car, so people and goods move door to door without rails, and towns spread out along the roads.",
    "social_consequence": "Road deaths climb every year, and the streets are given over to machines.",
-   "art": "res://assets/ui/research/logistics-v1.png"
+   "art": "res://assets/ui/research/logistics-v1.png",
+   "production_items": [
+    "motor_car_chassis"
+   ],
+   "production_contract": "Finite workshop batches make Motor Car Chassis from combustion engines, steel, steel sheets, gear sets, shaft bearings and insulated cable, using basic machine tool sets and steel. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "motor_road_fund": {
    "effects": {

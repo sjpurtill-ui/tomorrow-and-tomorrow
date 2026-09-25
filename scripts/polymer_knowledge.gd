@@ -693,12 +693,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Identify biological catalysts that alter reaction rates under suitable conditions",
     "effects": {},
-    "production_items": [
-      "pancreatic_enzyme_fraction",
-      "qualified_bating_protease",
-      "enzyme_bated_hides",
-      "wash_bottle_bating_assay"
-    ],
+    "production_items": ["pancreatic_enzyme_fraction", "qualified_bating_protease", "enzyme_bated_hides", "wash_bottle_bating_assay", "bated_vegetable_leather"],
     "production_contract": "Separate a finite rapidly decaying pancreatic fraction from actual hunted gland tissue, qualify its activity on hide samples, and spend specific protease in hide bating. Biological stocks lose activity daily; imported enzyme does not teach extraction."
   },
   {
@@ -905,11 +900,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Join functional molecules through qualified step reactions without a required small-molecule elimination",
     "effects": {},
-    "production_items": [
-      "addition_cured_belt_web",
-      "recovered_blend_belt_web",
-      "recovered_blend_drive_belts"
-    ],
+    "production_items": ["addition_cured_belt_web"],
     "production_contract": "Consumes separately produced polyol and diisocyanate feeds, cloth reinforcement, reaction work and cooling to form a dry-interior belt web. Cutting/splicing under belt-transmission knowledge supplies actual workshop maintenance belts; no universal resin or free strength effect."
   },
   {
@@ -1330,14 +1321,7 @@ static func entries()->Array[Dictionary]:
     "observation": "Control and measure cell structure in a qualified expanded polymer material",
     "effects": {},
     "production_contract": "Finite screened carbonate and LDPE feed a tested formulation. Gas expansion and destructive cell/compression qualification produce enclosed insulation panels; cold storage still requires refrigeration machinery, operators, power and maintenance. No structural, fireproof or universal polymer-grade claim.",
-    "production_items": [
-      "expanded_ldpe_foam",
-      "qualified_ldpe_foam",
-      "foam_cold_store_panels",
-      "polybutene_sealed_cold_panels",
-      "exposure_tested_cold_panels",
-      "aluminum_faced_cold_panels"
-    ],
+    "production_items": ["expanded_ldpe_foam", "qualified_ldpe_foam", "foam_cold_store_panels", "polybutene_sealed_cold_panels", "exposure_tested_cold_panels", "aluminum_faced_cold_panels", "investment_copper_brackets"],
     "operating_plants": [
       "foam_insulated_cold_store"
     ]
@@ -1372,10 +1356,7 @@ static func entries()->Array[Dictionary]:
     "observation": "Deconstruct a specified polymer into qualified recoverable intermediates through a selected process",
     "effects": {},
     "production_contract": "Clean virgin-route PU belt offcuts undergo paid glycolysis and separation. The recovered mixture is kept distinct from virgin PEG and is qualified only as a limited blend with fresh material. Recovered-blend cutting waste is not automatically accepted by this once-recycled feed specification.",
-    "production_items": [
-      "pu_offcut_glycolysis",
-      "qualified_recovered_pu_blend"
-    ]
+    "production_items": ["pu_offcut_glycolysis", "qualified_recovered_pu_blend", "recovered_blend_belt_web", "recovered_blend_drive_belts"]
   },
   {
     "id": "ionic_chain_polymerization",
