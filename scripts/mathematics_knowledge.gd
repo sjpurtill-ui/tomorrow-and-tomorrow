@@ -177,8 +177,7 @@ static func entries()->Array[Dictionary]:
 	    "observation": "Lines and circles generate repeatable geometric constructions without relying on a drawing by eye.",
 	    "effects": {},
 	    "foundation_for": [
-	      "similar_triangles",
-	      "demonstrated_geometry"
+	      "similar_triangles"
 	    ],
 	    "production_contract": "Provides the named mathematical foundations for downstream knowledge and model-assisted investigations. It creates no physical equipment and does not replace practical foundations."
 	  },
@@ -532,7 +531,7 @@ static func entries()->Array[Dictionary]:
 	    "observation": "Arrangements and selections are counted without listing every possibility.",
 	    "effects": {},
 	    "foundation_for": [
-	      "binomial_coefficient_triangle"
+	      "probability_theory"
 	    ],
 	    "production_contract": "Provides the named mathematical foundations for downstream knowledge and model-assisted investigations. It creates no physical equipment and does not replace practical foundations."
 	  },
