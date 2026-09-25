@@ -25,6 +25,7 @@ const Rivals:=preload("res://scripts/rival_rulers.gd")
 const PERSONS_WORDS:="(?i)\\b(who|whom|whose|summon|bring|fetch|send for|responsible|blame|fault|lying|liar|lie|lied|truth|swear|ledger|tally|confess|tell me (of|about)|where were you|mercy|pardon|exalt|maim|curse|marry|priest)\\b"
 
 const Hall:=preload("res://scripts/audience_hall.gd")
+const ViewState:=preload("res://scripts/hud/view_state.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
@@ -680,6 +681,21 @@ func _build_divine_row()->void:
 		button.tooltip_text=String(act.get("sub","")) if not button.disabled else String(act.get("reason",""))
 		button.pressed.connect(func():divine("terrify"))
 		divine_row.add_child(button)
+		# The god's hand on the envoy: maim, flog, kill, seize, drive out.
+		var envoy_acts:=Hall.envoy_acts(audience_id)
+		if not envoy_acts.is_empty():
+			var menu:=MenuButton.new();menu.name="Divine_envoy";menu.text="WRATH ▾";menu.flat=false
+			_divine_style(menu,Tokens.RED)
+			menu.tooltip_text="Your hand on the envoy: maim, flog, death, chains or the door."
+			var popup:=menu.get_popup()
+			var act_ids:Array[String]=[]
+			for envoy_act:Dictionary in envoy_acts:
+				popup.add_item(String(envoy_act.label),act_ids.size())
+				popup.set_item_tooltip(popup.get_item_index(act_ids.size()),String(envoy_act.get("sub","")))
+				act_ids.append(String(envoy_act.id))
+			menu.set_meta("actions",act_ids)
+			popup.id_pressed.connect(func(item:int):act_on_envoy(String(act_ids[item])))
+			divine_row.add_child(menu)
 		return
 	for tone in ["wrath","favor"]:
 		var menu:=MenuButton.new();menu.name="Divine_"+tone;menu.text="WRATH ▾" if tone=="wrath" else "FAVOUR ▾"
@@ -721,6 +737,17 @@ func divine(action:String,words:String="",voice_reacts:bool=true)->Dictionary:
 	if bool(result.get("terminal",false)):_show_outcome(result)
 	else:_build_options()
 	_pump()
+	return result
+
+func act_on_envoy(act_id:String,words:String="")->Dictionary:
+	## An offline WRATH choice on a foreign envoy: the engine acts, then the
+	## court reacts to exactly that.
+	if not resolved_result.is_empty():return resolved_result
+	var result:=Hall.envoy_act(audience_id,act_id,words)
+	if not bool(result.get("handled",false)):
+		_show_toast(String(result.get("outcome","That cannot be done.")))
+		return result
+	_after_command(result)
 	return result
 
 func _on_divine_intent(id:String,action:String)->void:
@@ -765,7 +792,8 @@ func _option_card(option:Dictionary)->Button:
 	var shown:=false
 	for side in ["objection","support"]:
 		var said:=String(option.get(side,""))
-		if said.is_empty() or not enabled:continue
+		# Shown only when it tells the ruler something the card does not (court_relevance.gd).
+		if said.is_empty() or not enabled or not preload("res://scripts/court_relevance.gd").card_voice_ok(option,side):continue
 		var words:=("Objects · " if side=="objection" else "For it · ")+said
 		button.tooltip_text+="\n"+words
 		if shown:continue
@@ -856,6 +884,8 @@ func _speak()->void:
 		var named:=String(Lives.typed_choice(audience_id,text))
 		# An aim in the god's own words (online), or one of those proposed.
 		if named.is_empty():named=String(preload("res://scripts/legacy_aims.gd").typed_choice(audience_id,text,_voice_ok() and voice.has_method("is_live") and bool(voice.is_live())))
+		# An order for the war leader in the god's own words ("hold the ford").
+		if named.is_empty():named=String(load("res://scripts/war_loop.gd").typed_choice(audience_id,text))
 		if not named.is_empty():
 			Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":int(GameState.elapsed_days),"aside":false})
 			choose(named)
@@ -1091,7 +1121,12 @@ func _process(delta:float)->void:
 		_rest_clock-=delta
 		if _rest_clock<=0.0:
 			_rest_clock=.5
-			if _rest_state()!=rest_signature:show_court()
+			if _rest_state()!=rest_signature:
+				# A new day redraws the court at rest; keep the roster lists
+				# where the player had scrolled them, and their focus.
+				var view:=ViewState.capture(card)
+				show_court()
+				ViewState.restore(card,view)
 			else:_refresh_voice_indicator()
 		return
 	if mode=="foreign":

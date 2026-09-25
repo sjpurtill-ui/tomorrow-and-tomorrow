@@ -71,7 +71,7 @@ static func valid_state(data:Variant)->bool:
 	if data.has("events"):
 		if not data.events is Array or (data.events as Array).size()>EVENTS_MAX: return false
 		for e in data.events:
-			if not e is Dictionary or not _num(e.get("day")) or not String(e.get("action","")) in WRATH+FAVOR+["terrify_envoy","flight"] or JSON.stringify(e).length()>1200: return false
+			if not e is Dictionary or not _num(e.get("day")) or not String(e.get("action","")) in WRATH+FAVOR+["terrify_envoy","flight","slay_envoy","maim_envoy","shame_envoy"] or JSON.stringify(e).length()>1200: return false
 	if data.has("warned"):
 		if not data.warned is Dictionary or (data.warned as Dictionary).size()>300: return false
 		for k in data.warned:
@@ -308,7 +308,7 @@ static func people_regard(officials:Array)->Dictionary:
 		var age:=_day()-int(e.get("day",0)) if e is Dictionary else 9999
 		if age>365: continue
 		# The memory of wrath fades from the people's talk over a few months.
-		echo+=float({"strike_down":0.08,"cast_out":0.05,"terrify":0.02,"penance":0.01}.get(String(e.get("action","")),0.0))*pow(0.5,maxf(0.0,float(age))/90.0)
+		echo+=float({"strike_down":0.08,"slay_envoy":0.08,"maim_envoy":0.06,"shame_envoy":0.03,"cast_out":0.05,"terrify":0.02,"penance":0.01}.get(String(e.get("action","")),0.0))*pow(0.5,maxf(0.0,float(age))/90.0)
 	var dread:=clampf((dread_sum/n if n>0 else 0.1)*0.75+minf(0.3,echo),0.0,1.0)
 	var resentment:=res_sum/n if n>0 else 0.0
 	var out:=read(clampf(love,0.0,1.0),dread,resentment)
@@ -461,6 +461,13 @@ static func apply_to_court(action:String,target:Dictionary,witnesses:Array)->Dic
 static func record_envoy_terror(civ_id:String,civ_name:String,envoy_name:String,amount:float)->void:
 	add_civ_dread(civ_id,amount)
 	_record_event({"day":_day(),"action":"terrify_envoy","person_id":0,"name":envoy_name.substr(0,80),"civ_id":civ_id.substr(0,64),"civ_name":civ_name.substr(0,80),"witnesses":[]})
+
+static func record_envoy_harm(civ_id:String,civ_name:String,envoy_name:String,harm:String,amount:float)->void:
+	## Violence done to a foreign envoy: their people's dread rises, and our own
+	## people talk of it (the echo in people_regard).
+	add_civ_dread(civ_id,amount)
+	var action:=String({"kill":"slay_envoy","mutilate":"maim_envoy"}.get(harm,"shame_envoy"))
+	_record_event({"day":_day(),"action":action,"person_id":0,"name":envoy_name.substr(0,80),"civ_id":civ_id.substr(0,64),"civ_name":civ_name.substr(0,80),"witnesses":[]})
 
 # --------------------------------------------------------------------------
 # Daily: telegraphing, then flight

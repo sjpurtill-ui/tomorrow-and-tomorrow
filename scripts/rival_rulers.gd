@@ -303,6 +303,7 @@ static func daily(day:int)->void:
 		var war:=bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false))
 		_later(id,c,day)
 		_hunting(id,c,day)
+		_war_preparation(id,c,day)
 		if war: continue
 		var name:=String(civ.get("name",id))
 		for d in c.debts:
@@ -421,7 +422,12 @@ static func _succeed(civ_id:String,day:int)->void:
 
 static func weight(situation_type:String,civ_id:String)->float:
 	## Grudges make hostile business likelier and warm business rarer; kinship
-	## the reverse.
+	## the reverse. A people whose envoys were harmed brings no gifts at all,
+	## only terrified tribute (when dread rules them) or demands.
+	var posture:=envoy_posture(civ_id)
+	if posture!="":
+		if situation_type=="dread_tribute": return 3.0 if posture=="fearful" else 0.0
+		if situation_type in WARM_TYPES: return 0.0
 	var g:=grudge_weight(civ_id)
 	var kin:=not has_bond(civ_id,["marriage","ally"]).is_empty()
 	match situation_type:
@@ -788,7 +794,7 @@ static func _voices(audience:Dictionary)->Dictionary:
 	match stype:
 		"debt":
 			if lean and res=="Food": against="refuse"; against_why="We are hungry now. Take it; we can pay it back after the harvest."
-			else: against="accept"; against_why="A loan in a gift's clothes. We have %d %s of our own." % [stock,res]
+			else: against="accept"; against_why="They will want this paid back. We have %d %s of our own." % [stock,res]
 			favour="accept_return" if against!="accept_return" else ""; favour_why="Send something back, and the debt shrinks."
 		"marriage":
 			if String(string.get("enemy",""))!="":
@@ -796,23 +802,23 @@ static func _voices(audience:Dictionary)->Dictionary:
 				favour="decline"; favour_why="Send the child home with honour. Keep out of their quarrel."
 			else:
 				against="decline"; against_why="Turn their child away and we shame their whole house."
-				favour="accept"; favour_why="Blood ties hold longer than gifts. Take the match."
+				favour="accept"; favour_why="Take the match. With their child living here, they will think twice before raiding us."
 		"hunting":
 			var value:=float(terms.get("amount",0))*(1.0 if res=="Food" else 1.5)
 			if value>=float(string.monthly)*24.0 and not lean:
 				against="decline"; against_why="Send all that back? The game they take we would never reach."
 				favour="accept"; favour_why="The %s has more game than we can take ourselves." % String(string.place)
 			else:
-				against="accept"; against_why="Let their hunters into the %s once, and the paths are theirs." % String(string.place)
+				against="accept"; against_why="Once their hunters learn the paths in the %s, they will keep coming back." % String(string.place)
 				favour="decline"; favour_why="Thank them and keep our woods. We will need that game."
 		"dependent":
-			if lean: against="accept" if String(audience.kind)=="gift" else "grant"; against_why="Every mouth we feed of theirs is one of ours gone hungry."
+			if lean: against="accept" if String(audience.kind)=="gift" else "grant"; against_why="We are short ourselves. Whatever we send them comes out of our own children's meals."
 			else: against="refuse"; against_why="Let them starve and they will come for ours."
-			favour="accept" if String(audience.kind)=="gift" else "grant"; favour_why="A people that counts on us will not raid us."
+			favour="accept" if String(audience.kind)=="gift" else "grant"; favour_why="If they live on our food, they will not raid us."
 		"emboldens":
 			if String(string.get("third",""))!="":
 				against="accept"; against_why="Take their tribute and %s counts its spears against us." % String(string.third_name)
-				favour="decline"; favour_why="Send it back. Mercy frightens neighbours less than greed."
+				favour="decline"; favour_why="Send it back. If we take tribute, the other neighbours will wonder if they are next."
 			else:
 				against="refuse"; against_why="Throw it back at them and they will fear us less."
 				favour="accept"; favour_why="They fear us. Let them pay for it."
@@ -822,48 +828,48 @@ static func _voices(audience:Dictionary)->Dictionary:
 			var enemy_size:=float(WorldSimulation.world.civilizations[enemy_index].get("population",100)) if enemy_index>=0 else 100.0
 			var yes:="accept" if String(audience.kind)=="proposal" else "grant"
 			against=yes; against_why="Their quarrel with %s is not ours. Not yet." % String(string.enemy_name)
-			if ally_size>=enemy_size: favour=yes; favour_why="A friend in a fight is a friend for life, and they are the stronger."
+			if ally_size>=enemy_size: favour=yes; favour_why="They are the stronger side. Help them win and they will owe us."
 			else: favour="decline" if String(audience.kind)=="proposal" else "grant_half"; favour_why="Keep friends with both. %s is the stronger." % String(string.enemy_name)
 		"secret":
 			var warm:=float((ForeignDiplomacy.civilization(civ_id).get("player_relation",{}) as Dictionary).get("opinion",0.0))>0.2
 			if warm and String(character(civ_id).get("trait",""))!="magpie":
 				against="decline"; against_why="Turn their teachers away and we learn nothing of theirs either."
-				favour="accept"; favour_why="What they learn, they will trade back with interest."
+				favour="accept"; favour_why="Let them learn. They will show us their own crafts in return."
 			else:
 				against="accept"; against_why="The secret of %s is ours. They will copy it within a season." % String(string.craft_name)
 				favour="decline"; favour_why="Not this year. Let them earn it."
 		"sickness":
 			against="accept"; against_why="I have seen that cough empty a camp. Keep their traders out this season."
-			favour="decline"; favour_why="Wait a season. Trade will keep; the old and small ones may not."
+			favour="decline"; favour_why="Wait a season. The trade can wait; our old people and small children might not survive that cough."
 		"muster":
 			var bigger:=float(ForeignDiplomacy.civilization(civ_id).get("population",100))>=Hall._player_population()*0.8
 			if bigger:
-				against="decline"; against_why="A strong friend is worth a few hunters lent."
-				favour="accept"; favour_why="Better their spears beside ours than against."
+				against="decline"; against_why="They are nearly our size. Lend them a few hunters now and their spears are ours when we need them."
+				favour="accept"; favour_why="If we refuse, those same spears could be pointed at us next."
 			else:
 				against="accept"; against_why="Their fights will cost our young hunters, and they are too few to help ours."
 				favour="decline"; favour_why="Stay friends without the oath."
 		"frontier":
 			var tense:=float((ForeignDiplomacy.civilization(civ_id).get("player_relation",{}) as Dictionary).get("border_tension",0.0))>0.35
 			if tense:
-				against="rebuff"; against_why="The border is one spark from burning. Take the quiet while it is offered."
-				favour="accept"; favour_why="A quiet frontier lets us plant and build."
+				against="rebuff"; against_why="Our hunters and theirs nearly came to blows on that border. Take the peace while they offer it."
+				favour="accept"; favour_why="With the border settled, our people can hunt and build without watching their backs."
 			else:
 				against="accept"; against_why="The %s is ours by right. Do not sign it away." % String(string.place)
 				favour="decline"; favour_why="The border is quiet already. We need no line drawn."
 		"kin":
-			against="stand"; against_why="Kin or not, it is not our war."
-			favour="stand"; favour_why="We gave our word with our blood. Keep it."
+			against="stand"; against_why="Kin or not, our hunters would be dying in their fight, not ours."
+			favour="stand"; favour_why="We married into them and swore to stand with them. If we stay home, no one will trust our oath again."
 		"bluff":
 			if not tells.is_empty() and signs.is_empty():
 				against="pay"; against_why=_tell_reason(String(tells[0]))
 				favour="defy"; favour_why="Call it. %s has nothing behind the words." % given(civ_id)
 			elif not signs.is_empty():
 				against="defy"; against_why=_sign_reason(String(signs[0]))
-				favour="defy"; favour_why="Pay once and we pay every year."
+				favour="defy"; favour_why="If we pay now, they will be back every winter asking for more."
 			else:
-				against="pay"; against_why="Pay once and we pay every year."
-				favour="pay"; favour_why="We cannot know if they mean it. Stores grow back; the dead do not."
+				against="pay"; against_why="If we give in now, they will come back next year with the same threat."
+				favour="pay"; favour_why="We cannot tell if they mean it. Paying costs us food; a raid would cost us people."
 		"messenger":
 			if String(situation.get("type",""))=="news_report":
 				favour="thank"; favour_why="Thanks is enough for news this thin."
@@ -889,18 +895,18 @@ static func _voices(audience:Dictionary)->Dictionary:
 
 static func _sign_reason(sign:String)->String:
 	var low:=sign.to_lower()
-	if "painted" in low: return "They mean it. Men do not paint for war to bluff."
+	if "painted" in low: return "They mean it. Their hunters are already painted for war."
 	if "paths" in low: return "They mean it. They have walked those paths already."
 	if "more grown hunters" in low: return "They mean it, and they have the hunters to do it."
 	return "They mean it. I would not call this one."
 
 static func _tell_reason(tell:String)->String:
 	var low:=tell.to_lower()
-	if "hungry" in low: return "Look at their escort. Hungry men do not march."
+	if "hungry" in low: return "Their escort is half-starved. They could not march three days on that."
 	if "more spears" in low: return "They have not the hunters to make good on that."
 	if "two sides" in low: return "They are fighting elsewhere. They cannot come here too."
 	if "never arrive" in low: return "They have threatened before and never come."
-	return "Watch the herald's eyes. There is nothing behind this."
+	return "The herald will not meet my eye. I do not think they will come."
 
 static func _official_for(offices:Array,used:Dictionary,speaker_id:int,salt:String)->Dictionary:
 	## From those seated at this audience (the court bench).
@@ -964,7 +970,7 @@ static func after_answer(audience:Dictionary,option_id:String,result:Dictionary)
 				if third!="":
 					Hall._shift_relation(third,-0.08,0.1)
 					grudge(third,"how you took tribute from %s; we could be next" % name,0.35,"tribute_from:"+civ_id)
-					notes.append("Word travels: %s now fears it is next." % String(string.third_name))
+					notes.append("%s has heard of it, and now fears it is next." % String(string.third_name))
 				else:
 					grudge(civ_id,"the tribute you took from us",0.45,"tribute:"+key)
 					notes.append("%s's young hunters swear to win it back." % name)
@@ -1102,6 +1108,15 @@ static func open_lines(audience:Dictionary)->Dictionary:
 	for key in ["signs","tells"]:
 		for t in situation.get(key,[]): staged.append("[%s]" % String(t))
 	if String(string.get("type",""))=="messenger": staged.append("[The messenger lingers by the fire, hoping to go home with a gift.]")
+	# After envoys were harmed here, the next one shows it.
+	var wrong:=_top_envoy_wrong(character(civ_id))
+	if not wrong.is_empty():
+		if String(situation.get("type",""))=="dread_tribute":
+			staged.push_front("[The envoy will not lift their eyes from the floor; their hands shake as the tribute is set down, and their bearers stay close to the door.]")
+			(out.envoy as Array).push_front(["We know %s. Take this, and let us go home whole." % String(wrong.get("text","what befell the last of us")),"Everyone at home knows %s. We bring this so it does not happen to us." % String(wrong.get("text","what befell the last of us"))])
+		elif String(situation.get("type","")) in ["redress_demand","tribute_demand","test_of_resolve"]:
+			staged.push_front("[The envoy comes in with a guard of spearmen and keeps a hand near their knife; nobody from %s kneels.]" % Hall._civ_name(civ_id))
+			(out.envoy as Array).push_front(["You know why I stand here armed: %s." % String(wrong.get("text","")),"%s has not forgotten %s, and neither will you." % [given(civ_id),String(wrong.get("text",""))]])
 	out["narrator"]=staged
 	var voices:=_voices(audience)
 	for side in ["objection","support"]:
@@ -1133,7 +1148,7 @@ static func _envoy_string_lines(audience:Dictionary,string:Dictionary)->Array:
 				"Take it as a loan, not a gift. We will come for %d %s before the year is out." % [owed,res]]
 		"marriage":
 			var kin:="daughter" if bool(string.get("woman",false)) else "son"
-			var quarrel:=(" Kin to us is kin against %s." % String(string.enemy_name)) if String(string.get("enemy",""))!="" else " Kin to us is kin in our quarrels."
+			var quarrel:=(" Marry into us and you are in our quarrel with %s too." % String(string.enemy_name)) if String(string.get("enemy",""))!="" else " Marry into us and our quarrels are yours too."
 			lines=["%s, %s's %s, comes with it, to marry among you.%s" % [String(string.inlaw),who,kin,quarrel],
 				"The gift is a bride-gift. %s's %s %s will marry into your people.%s" % [who,kin,String(string.inlaw),quarrel],
 				"%s binds peoples with marriages. %s comes with the gift.%s" % [who,String(string.inlaw),quarrel]]
@@ -1151,7 +1166,7 @@ static func _envoy_string_lines(audience:Dictionary,string:Dictionary)->Array:
 			else: lines=["Our young hunters grumble at this. They say they will win it back one day.","Take it. But our young men carry this home like a stone."]
 		"feud":
 			var enemy:=String(string.enemy_name)
-			if String(audience.get("kind",""))=="request": lines=["We are fighting %s. Feed us, and they will count you with us." % enemy,"%s will know where our bread came from." % enemy]
+			if String(audience.get("kind",""))=="request": lines=["We are fighting %s. Feed us, and they will count you with us." % enemy,"%s will know where our food came from." % enemy]
 			else: lines=["Bind yourselves to us, and %s counts you its enemy too. We will not pretend otherwise." % enemy,"Our quarrel with %s comes with our friendship. %s will not hide it." % [enemy,who]]
 		"secret":
 			lines=["Our teachers would like to see how you work %s. Only to learn, of course." % String(string.craft_name),"%s is curious about your %s. Our people learn quickly." % [who,String(string.craft_name)]]
@@ -1159,7 +1174,7 @@ static func _envoy_string_lines(audience:Dictionary,string:Dictionary)->Array:
 		"sickness":
 			lines=["Our traders are coughing this season. It will pass, they say.","A cough is going round our camps. Nothing, surely."]
 		"muster":
-			lines=["When we are threatened, %s will look for your hunters beside ours." % who,"Friends stand together. %s will call on you when the spears come." % who]
+			lines=["When we are threatened, %s will look for your hunters beside ours." % who,"If we are attacked, %s will send for your hunters and expect them to come." % who]
 		"frontier":
 			lines=["The line stays where it is. The %s is ours." % String(string.place),"%s wants the %s settled as ours, for good." % [who,String(string.place)]]
 		"kin":
@@ -1339,3 +1354,115 @@ static func _manner_line(persona:Dictionary,bank:String,rng:RandomNumberGenerato
 		if not "{" in String(line) and CV.permits(String(line),tags) and CV.imitation_ok(String(line)): lines.append(String(line))
 	if lines.is_empty(): return ""
 	return String(lines[rng.randi_range(0,lines.size()-1)])
+
+# --------------------------------------------------------------------------
+# Wronged envoys: a people whose envoys were slain, maimed, flogged, shamed or
+# seized does not keep sending gifts. What they do instead depends on the
+# ruler's trait, whether dread or hatred rules them, and relative strength.
+# --------------------------------------------------------------------------
+
+## Grudge sources that record a wrong done to an envoy (see court_commands.gd).
+const ENVOY_WRONGS:=["slain_envoy","maimed_envoy","beaten_envoy","insulted_envoy","seized_envoy"]
+## Business a wronged people will not bring: gifts and friendship.
+const WARM_TYPES:=["gift_goods","gratitude_gift","artifact_gift","accord_offer","protection_pact","league_invitation","trade_offer","scholar_offer","research_sale","license_offer","nonaggression_offer","artifact_purchase","rumor_share","intelligence_share"]
+## Occasions a posture never overrides.
+const POSTURE_EXEMPT:=["first_contact","debt_due","peace_possible"]
+const POSTURE_MIX:={
+	"redress":{"redress_demand":1.4,"tribute_demand":0.6,"test_of_resolve":0.4},
+	"war":{"test_of_resolve":1.0,"redress_demand":0.9,"tribute_demand":0.4},
+	"fearful":{"dread_tribute":1.6,"redress_demand":0.15},
+}
+const WAR_PREP_MIN:=150
+const WAR_PREP_MAX:=420
+
+static func envoy_wrongs(civ_id:String)->Dictionary:
+	## Unsettled wrongs done to this people's envoys (inherited ones included).
+	var out:={"slain":0,"maimed":0,"beaten":0,"insulted":0,"seized":0,"count":0,"weight":0.0,"last_day":-1}
+	for g in character(civ_id).get("grudges",[]):
+		if not g is Dictionary or bool(g.get("settled",false)): continue
+		var kind:=String(g.get("source","")).get_slice(":",0)
+		if not kind in ENVOY_WRONGS: continue
+		var key:=kind.trim_suffix("_envoy")
+		out[key]=int(out[key])+1
+		out.count=int(out.count)+1
+		out.weight=float(out.weight)+float(g.get("weight",0.0))
+		out.last_day=maxi(int(out.last_day),int(g.get("day",-1)))
+	return out
+
+static func envoy_posture(civ_id:String)->String:
+	## "" (no wrong remembered), "redress" (threats and demands), "halt" (no more
+	## envoys), "fearful" (terrified tribute) or "war" (preparing for war).
+	var wrongs:=envoy_wrongs(civ_id)
+	if float(wrongs.weight)<0.25: return ""
+	var civ:=ForeignDiplomacy.civilization(civ_id)
+	if civ.is_empty(): return ""
+	var relation:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
+	if bool(relation.get("at_war",false)): return "war"
+	var c:=character(civ_id)
+	var trait_id:=String(c.get("trait",""))
+	var p:=Hall._personality(civ_id)
+	var bold:=(float(p.get("assertiveness",0.5))+float(p.get("risk_tolerance",0.5)))*0.5
+	var size_ratio:=clampf(float(civ.get("population",100.0))/maxf(1.0,Hall._player_population()),0.2,3.0)
+	var hatred:=clampf(float(wrongs.weight)*0.6,0.0,1.2)+maxf(0.0,-float(relation.get("opinion",0.0)))*0.3
+	var lives:=Hall._lives()
+	var dread:=float(lives.call("rival_dread",civ_id)) if lives!=null else 0.0
+	var blood:=int(wrongs.slain)+int(wrongs.maimed)
+	# Dread outweighs hatred in a weaker, less bold people: they pay, shaking.
+	var fear:=dread*(1.4-bold)
+	if fear>hatred*0.35+0.15 and size_ratio<1.1 and bold<0.62 and trait_id!="grudge": return "fearful"
+	var war_score:=hatred*(0.55+bold)*clampf(size_ratio,0.5,1.6)+(0.35 if trait_id in ["grudge","bluffer"] else 0.0)+0.25*maxi(0,blood-1)
+	if blood>=2 and war_score>=1.5: return "war"
+	if blood>=1 and dread>=0.35 and size_ratio<0.9 and bold<0.5: return "halt"
+	if fear>hatred*0.45+0.1 and size_ratio<1.2 and trait_id!="grudge": return "fearful"
+	return "redress"
+
+static func envoy_mix(civ_id:String,occasion_type:String)->Dictionary:
+	## The business a wronged people brings instead of what the occasion invites.
+	if occasion_type in POSTURE_EXEMPT: return {}
+	return (POSTURE_MIX.get(envoy_posture(civ_id),{}) as Dictionary).duplicate()
+
+static func withholds_envoys(civ_id:String,occasion:Dictionary,rng:RandomNumberGenerator)->bool:
+	## A people that has lost envoys at your court may stop sending them.
+	if String(occasion.get("type","")) in POSTURE_EXEMPT: return false
+	var posture:=envoy_posture(civ_id)
+	var halt:=posture=="halt" or (posture=="war" and rng.randf()<0.5)
+	if not halt: return false
+	var c:=character(civ_id)
+	if not c.is_empty():
+		c["envoys_withheld"]=int(c.get("envoys_withheld",0))+1
+		if _day()-int(c.get("withheld_noted",-99999))>=365:
+			c["withheld_noted"]=_day()
+			var name:=Hall._civ_name(civ_id)
+			_record("%s Sends No Envoys" % name.substr(0,40),"%s will not send another envoy into the hall where %s." % [name,narrate(String(_top_envoy_wrong(c).get("text","their envoys were harmed")))],civ_id,"notice")
+			ForeignDiplomacy.remember(civ_id,"We will send no more envoys to a ruler who harms them.")
+	return true
+
+static func _top_envoy_wrong(c:Dictionary)->Dictionary:
+	var best:={}
+	for g in c.get("grudges",[]):
+		if not g is Dictionary or bool(g.get("settled",false)) or not String(g.get("source","")).get_slice(":",0) in ENVOY_WRONGS: continue
+		if best.is_empty() or float(g.weight)>float(best.weight): best=g
+	return best
+
+static func _war_preparation(civ_id:String,c:Dictionary,day:int)->void:
+	## Wronged and bold enough: they sharpen spears, the border hardens, and in
+	## time their ruler opens a war that their own generals run.
+	if envoy_posture(civ_id)!="war":
+		if c.has("war_prep_day") and envoy_posture(civ_id)!="war": c.erase("war_prep_day")
+		return
+	var civ:=ForeignDiplomacy.civilization(civ_id)
+	var relation:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
+	if bool(relation.get("at_war",false)): return
+	var name:=Hall._civ_name(civ_id)
+	if not c.has("war_prep_day"):
+		c["war_prep_day"]=day
+		c["war_due_day"]=day+rng_days("war:%s:%d" % [civ_id,day],WAR_PREP_MIN,WAR_PREP_MAX)
+		_record("%s Sharpens Its Spears" % name.substr(0,40),"%s is gathering fighters on the border. %s has not forgotten %s." % [name,given(civ_id),narrate(String(_top_envoy_wrong(c).get("text","what was done to their envoys")))],civ_id,"moment")
+		ForeignDiplomacy.remember(civ_id,"We make ready for war over what was done to our envoys.")
+	Hall._shift_relation(civ_id,-0.01,0.02)
+	if day>=int(c.get("war_due_day",day+1)) and CivilizationSystem.has_method("rival_opens_war"):
+		var clause:=narrate(String(_top_envoy_wrong(c).get("text","what was done to their envoys")))
+		var opened:Dictionary=CivilizationSystem.rival_opens_war(civ_id,"Vengeance for %s" % clause)
+		if bool(opened.get("ok",false)):
+			c.erase("war_prep_day"); c.erase("war_due_day")
+			_record("%s Goes to War" % name.substr(0,40),"%s opens war to avenge %s. Their generals take the field." % [name,clause],civ_id,"moment")

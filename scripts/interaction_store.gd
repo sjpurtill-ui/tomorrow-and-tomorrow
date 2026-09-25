@@ -14,6 +14,7 @@ const _Text:=preload("res://scripts/interaction_text.gd")
 const _Types:=preload("res://scripts/interaction_types.gd")
 const _Context:=preload("res://scripts/interaction_context.gd")
 const _Mode:=preload("res://scripts/ai_mode.gd")
+const _Plain:=preload("res://scripts/plain_speech.gd")
 
 const SCHEMA_VERSION:=1
 const SHIPPED_ROOT:="res://data/interactions/"
@@ -80,13 +81,14 @@ static func sanitize(raw:Dictionary)->Dictionary:
 		"family":String(speaker_in.get("family",_Types.family_for_model(model_id) if not model_id.is_empty() else "")).substr(0,24)}
 	var out_in:Dictionary=raw.get("output",{}) if raw.get("output") is Dictionary else {}
 	var output:Dictionary={
-		"reply":_Text.redact(String(out_in.get("reply",""))).strip_edges().substr(0,MAX_REPLY),
+		# Invented maxims are not learned: offline replay reuses these words.
+		"reply":_Plain.strip(_Text.redact(String(out_in.get("reply",""))).strip_edges()).substr(0,MAX_REPLY),
 		"summary":_Text.redact(String(out_in.get("summary",""))).strip_edges().substr(0,300),
 		"effects":_clean_effects(out_in.get("effects",[])),
 		"side_effects":_clean_side(out_in.get("side_effects",[])),
 		"policy_ids":_string_list(out_in.get("policy_ids",[]),6,48),
 	}
-	if out_in.has("reply_template"): output["reply_template"]=String(out_in.reply_template).substr(0,MAX_REPLY)
+	if out_in.has("reply_template"): output["reply_template"]="" if _Plain.is_maxim(String(out_in.reply_template)) else String(out_in.reply_template).substr(0,MAX_REPLY)
 	if out_in.get("counted") is Dictionary:
 		var cnt:Dictionary=out_in.counted
 		output["counted"]={"kind":String(cnt.get("kind","")).substr(0,32),"count":clampi(int(cnt.get("count",0)),0,1000000)}

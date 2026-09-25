@@ -51,6 +51,11 @@ var orders_on:=false
 var order_index:=0
 var next_order_day:=730
 var last_chief:=-1
+## War in the living world (scripts/war_loop.gd), when this build has it.
+const WAR_PATH:="res://scripts/war_loop.gd"
+var war:GDScript
+var war_due:Dictionary={}
+var war_logged:Dictionary={}
 
 func _arg(n:String,f:String)->String:
 	for a in OS.get_cmdline_user_args():
@@ -73,6 +78,7 @@ func _ready()->void:
 	aim_policy=_arg("aims","player")
 	orders_on=_arg("orders","off")=="on"
 	if ResourceLoader.exists(AIMS_PATH): aims=load(AIMS_PATH) as GDScript
+	if ResourceLoader.exists(WAR_PATH): war=load(WAR_PATH) as GDScript
 	out=FileAccess.open(_arg("out","user://fun_playtest.jsonl"),FileAccess.WRITE)
 	GameState.reset_for_new_world(seed_value)
 	DiscoverySystem.reset_for_new_world();ResourceSystem.reset_for_new_world();FoodSystem.reset_for_new_world()
@@ -138,6 +144,7 @@ func _ready()->void:
 			next_order_day=int(GameState.elapsed_days)+ORDER_GAP
 			_type_order(String(ORDERS[order_index%ORDERS.size()]))
 			order_index+=1
+		_handle_war()
 		var y:=int(GameState.elapsed_days/365.0)
 		if y!=last_year_mark:
 			last_year_mark=y
@@ -229,7 +236,15 @@ func _year_row(y:int,ms:int)->void:
 		if String(rel.get("treaty",""))!="":treaties+=1
 		if int(rel.get("contact_level",0))>0:met.append(String(c.get("name","")))
 	var works:=preload("res://scripts/great_works.gd").works("player")
-	w("year",{"year":y,"wars":wars,"treaties":treaties,"met":met,"works":works.map(func(x:Dictionary)->String:return "%s:%s" % [String(x.get("name",x.get("work_id",""))),String(x.get("status",x.get("stage","")))]),"soldiers":MilitaryCampaign._mobilized_count(),"ms_last_year":ms,"pop":GameState.population_total,"known":GameState.known_discoveries.size(),"food_days":GameState.simulation_metrics.get("food_days",0),"intake":GameState.simulation_metrics.get("food_intake_ratio",0),"built":GameState.settlement_completed.size(),"settlements":GameState.player_settlements.size(),"contacts":civ_contacts,"civs":CivilizationSystem.civilizations.size(),"scout_reports":CivilizationSystem.scout_reports.size(),"officials":GovernmentPeopleSystem.active_offices().size() if GovernmentPeopleSystem.has_method("active_offices") else -1,"matters":Hall.matter_counts(),"chronicle":(CivilizationSystem.chronicle.data.get("chapters",[]) as Array).size() if CivilizationSystem.chronicle else -1,"stage":String(GameState.get("settlement_stage")) if "settlement_stage" in GameState else "","aim":_aim_row()})
+	var civ_wars:=0;var civ_wars_active:=0
+	for record in CivilizationSystem.war_history:
+		if "player" in (record.get("participants",[]) as Array): continue
+		civ_wars+=1
+		if String(record.get("status",""))=="active": civ_wars_active+=1
+	var player_wars:=0
+	for record in CivilizationSystem.war_history:
+		if "player" in (record.get("participants",[]) as Array): player_wars+=1
+	w("year",{"year":y,"wars":wars,"player_wars_total":player_wars,"civ_wars_total":civ_wars,"civ_wars_active":civ_wars_active,"war_loop":war.call("summary") if war!=null else {},"treaties":treaties,"met":met,"works":works.map(func(x:Dictionary)->String:return "%s:%s" % [String(x.get("name",x.get("work_id",""))),String(x.get("status",x.get("stage","")))]),"soldiers":MilitaryCampaign._mobilized_count(),"ms_last_year":ms,"pop":GameState.population_total,"known":GameState.known_discoveries.size(),"food_days":GameState.simulation_metrics.get("food_days",0),"intake":GameState.simulation_metrics.get("food_intake_ratio",0),"built":GameState.settlement_completed.size(),"settlements":GameState.player_settlements.size(),"contacts":civ_contacts,"civs":CivilizationSystem.civilizations.size(),"scout_reports":CivilizationSystem.scout_reports.size(),"officials":GovernmentPeopleSystem.active_offices().size() if GovernmentPeopleSystem.has_method("active_offices") else -1,"matters":Hall.matter_counts(),"chronicle":(CivilizationSystem.chronicle.data.get("chapters",[]) as Array).size() if CivilizationSystem.chronicle else -1,"stage":String(GameState.get("settlement_stage")) if "settlement_stage" in GameState else "","aim":_aim_row()})
 
 func _aim_row()->Dictionary:
 	if aims==null: return {}
@@ -276,6 +291,54 @@ func _handle_aims()->void:
 		var lines:Array=(Hall.find(aid).get("lines",[]) as Array).map(func(l:Dictionary)->String:return ("%s: " % String(l.get("speaker","")) if String(l.get("speaker",""))!="" else "")+String(l.get("text","")))
 		var r:=Hall.resolve(aid,pick)
 		w("aim_decision",{"holder":String((m.get("holder",{}) as Dictionary).get("name","")),"summary":String(m.get("summary","")).left(300),"options":opts.map(func(o:Dictionary)->String:return String(o.label)),"pick":pick,"lines":lines,"outcome":String(r.get("outcome",r.get("error",""))).left(300)})
+
+func _handle_war()->void:
+	## War in the living world: log the war ledger, and summon the war leader
+	## for a war matter within days to weeks, answering by policy. A player who
+	## never summons leaves the war leader to act alone (war_loop.gd).
+	if war==null: return
+	var st:Dictionary=war.call("state")
+	var entries:Array=st.get("log",[])
+	for i in range(entries.size()-1,-1,-1):
+		var entry:Dictionary=entries[i]
+		var key:="%d|%s|%s|%s" % [int(entry.get("day",0)),String(entry.get("civ","")),String(entry.get("kind","")),String(entry.get("text","")).left(40)]
+		if war_logged.has(key): continue
+		war_logged[key]=true
+		var row:=entry.duplicate(); row.erase("day")
+		row["war_kind"]=String(row.get("kind","")); row.erase("kind")
+		w("war",row)
+	for r in st.get("refusals",[]):
+		var rkey:="refusal|%s" % String(r.get("id",""))
+		if war_logged.has(rkey): continue
+		war_logged[rkey]=true
+		w("war_refusal",{"civ":String(r.get("civ","")),"follow":bool(r.get("follow",false)),"chance":float(r.get("chance",0)),"refused_day":int(r.get("day",0))})
+	for m in Hall.matters():
+		if String(m.get("situation_type",""))!="war_campaign": continue
+		var id:=String(m.get("id",""))
+		if not war_due.has(id): war_due[id]=int(GameState.elapsed_days)+rng.randi_range(2,25)
+		if int(GameState.elapsed_days)<int(war_due[id]): continue
+		var opened:Dictionary=Hall.open_matter(id)
+		if opened.is_empty(): continue
+		var aid:=String(opened.get("id",""))
+		handled_audiences[aid]=true
+		var opts:=Hall.options(aid)
+		var enabled:Array=opts.filter(func(o:Dictionary)->bool:return bool(o.get("enabled",true)))
+		if enabled.is_empty(): continue
+		var pick:=String(enabled[rng.randi()%enabled.size()].id)
+		if policy=="heuristic":
+			# A careful player weighs the war leader's own counsel and odds.
+			var lines_text:=" ".join(PackedStringArray((Hall.find(aid).get("lines",[]) as Array).map(func(l:Dictionary)->String:return String(l.get("text","")))))
+			var ids:Array=enabled.map(func(o:Dictionary)->String:return String(o.id))
+			var advised:=""
+			for pair in [["hold the approaches","war_guard"],["burn their stores","war_burn"],["go for their chief","war_chief"],["go after them","war_pursue"],["send for a truce","war_parley"]]:
+				if String(pair[0]) in lines_text and String(pair[1]) in ids: advised=String(pair[1])
+			var roll:=rng.randf()
+			if "war_pay" in ids and roll<0.5: pick="war_pay"
+			elif advised!="" and roll<0.6: pick=advised
+			elif "war_guard" in ids and roll<0.8: pick="war_guard"
+		var lines:Array=(Hall.find(aid).get("lines",[]) as Array).map(func(l:Dictionary)->String:return ("%s: " % String(l.get("speaker","")) if String(l.get("speaker",""))!="" else "")+String(l.get("text","")))
+		var r:=Hall.resolve(aid,pick)
+		w("war_decision",{"holder":String((m.get("holder",{}) as Dictionary).get("name","")),"summary":String(m.get("summary","")).left(300),"options":opts.map(func(o:Dictionary)->String:return String(o.label)),"pick":pick,"lines":lines,"outcome":String(r.get("outcome",r.get("error",""))).left(300)})
 
 func _collect()->void:
 	for e in GameState.simulation_events:

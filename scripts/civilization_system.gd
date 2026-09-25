@@ -3750,6 +3750,29 @@ func _occupation_uprising_pressure(civ:Dictionary)->Dictionary:
 	return selected
 
 
+## A rival ruler's own decision to open war on the player (vengeance for
+## harmed envoys, rival_rulers.gd). The war then runs like any organized
+## rival invasion: their generals, battles, exhaustion and settlement.
+func rival_opens_war(civ_id:String,reason:String)->Dictionary:
+	for index in civilizations.size():
+		var civ:Dictionary=civilizations[index]
+		if String(civ.get("id",""))!=civ_id: continue
+		if not bool(civ.get("alive",true)): return {"ok":false,"error":"gone"}
+		var relation:Dictionary=civ.get("player_relation",{})
+		if bool(relation.get("at_war",false)): return {"ok":false,"error":"already at war"}
+		var day:=int(WorldSimulation.state.elapsed_days)
+		relation["at_war"]=true; relation["treaty"]="war"; relation["stance"]="hostile"
+		relation["war_goal"]="defend"; relation["war_target_region_id"]=""; relation["war_score"]=0.0
+		relation["war_started_day"]=day; relation["conflict_turns"]=0; relation["trade"]=0.0
+		relation["war_id"]=_start_war("player",civ_id,"defend","",day,reason.substr(0,120))
+		relation["border_tension"]=maxf(0.8,float(relation.get("border_tension",0.0)))
+		civ["player_relation"]=relation
+		civilizations[index]=civ
+		_record_world_event("A rival opens war","%s begins a campaign of vengeance against the player civilization: %s." % [String(civ.get("name",civ_id)),reason],"war",day)
+		_queue_player_incident_if_due(civ,relation,day)
+		return {"ok":true,"war_id":String(relation.war_id)}
+	return {"ok":false,"error":"unknown people"}
+
 func _queue_player_incident_if_due(civ:Dictionary,relation:Dictionary,day:int)->void:
 	if pending_player_incidents.size()>=INCIDENT_LIMIT: return
 	if day-int(relation.get("last_incident_day",-9999))<90: return

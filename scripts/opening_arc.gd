@@ -146,7 +146,7 @@ static func _winter(day:int)->Dictionary:
 	var lean:=cold>=14.0
 	var season:="lean season" if lean else "winter"
 	var weather:="The lean months have come, and the country gives less every day" if lean else ("Water skins freeze at night now" if cold<=0.5 else ("The nights are bitter now" if cold<6.0 else "The rains have turned cold"))
-	if lean and pressure.contains("cold takes"): pressure="the stores are good, %d days, but a hard season takes the old and the newborn first" % roundi(float(c.food_days))
+	if lean and pressure.contains("cold takes"): pressure="the stores are good, %d days, but if the lean weeks run long we could lose the old and the newborn" % roundi(float(c.food_days))
 	var hearth:=_hearth(day)
 	var family:=String(hearth.name)
 	var summary:="%s. This is our first %s in this place, and %s. %s worries me most: a grandmother who cannot walk far, and a child not yet weaned." % [weather,season,pressure,family.substr(0,1).to_upper()+family.substr(1)]

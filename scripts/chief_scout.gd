@@ -716,7 +716,7 @@ static func _beat_reception(by:Dictionary,flags:Dictionary,ctx:Dictionary,person
 	if by.has("turnback") and not used.has("turnback"):
 		used["turnback"]=true
 		var reason:=String(by.turnback.get("text","")).trim_suffix(".")
-		return _fill(_pick(rng,["We never reached where you sent us: {reason}. I'll not pretend otherwise.","We turned back, {addr}. {Reason}. Better a scout who comes home than a map with a hole in it."]),ctx.merged({"reason":reason.to_lower() if reason.length()>0 else reason,"Reason":reason}))
+		return _fill(_pick(rng,["We never reached where you sent us: {reason}. I'll not pretend otherwise.","We turned back, {addr}. {Reason}. I'd rather bring everyone home than push on and lose them."]),ctx.merged({"reason":reason.to_lower() if reason.length()>0 else reason,"Reason":reason}))
 	if by.has("reception") and not used.has("reception"):
 		used["reception"]=true
 		match String(by.reception.get("band","")):
@@ -727,9 +727,9 @@ static func _beat_reception(by:Dictionary,flags:Dictionary,ctx:Dictionary,person
 					"Make no mistake about {people}: they see us as trouble, and they'd sooner we stayed home.",
 				]),ctx)
 			"welcome":
-				return _fill(_pick(rng,["They were glad enough to see us — or they pretend beautifully.","Friendly lot. Too friendly, some would say. I say take it while it's going."]),ctx)
+				return _fill(_pick(rng,["They were glad enough to see us — or they pretend beautifully.","Friendly lot. Too friendly, maybe. But they fed us and let us walk about."]),ctx)
 			"refused":
-				return _fill(_pick(rng,["They said no, and said it politely, which somehow made it worse.","A no, {addr}. Clear as a bell and twice as loud."]),ctx)
+				return _fill(_pick(rng,["They said no, and said it politely, which somehow made it worse.","A no, {addr}. They didn't leave any room to ask again."]),ctx)
 	if by.has("losses") and not used.has("losses"):
 		used["losses"]=true
 		return _fill("We lost {n}, {addr}. I'd have that remembered when we talk about what this cost.",ctx.merged({"n":_number_word(int(by.losses.get("value",1)))}))
@@ -754,7 +754,7 @@ static func _beat_size(by:Dictionary,flags:Dictionary,ctx:Dictionary,persona:Dic
 	elif ratio>=1.25:
 		text=_pick(rng,["About {pop} of them by my count — more than us, not by a mile, but more.","{pop}, give or take. Bigger than us. Not frighteningly. Yet."])
 	elif ratio>=0.8:
-		text=_pick(rng,["About {pop} souls — near enough our own size. We'd look each other in the eye.","Much our size: {pop} or so. Like looking in a muddy puddle."])
+		text=_pick(rng,["About {pop} souls — near enough our own size. We'd look each other in the eye.","Much our size: {pop} or so. We'd be evenly matched."])
 	else:
 		text=_pick(rng,["Small place — {pop}, give or take. We'd outnumber them {outnumber}.","Only about {pop} of them, {addr}. You could lose that many at one of our harvest feasts and not notice."])
 	var rev:=1.0/maxf(0.01,ratio) if ratio>0.0 else 1.0
@@ -785,7 +785,7 @@ static func _beat_work(by:Dictionary,flags:Dictionary,ctx:Dictionary,persona:Dic
 	elif String(busy.get("band",""))=="hard":
 		text=_pick(rng,["Everybody works there, {addr}. Everybody. Even the ones who look like they shouldn't.","Not an idle soul in sight — I felt guilty just standing there counting them."])
 	elif String(busy.get("band",""))=="idle":
-		text=_pick(rng,["A lot of people sitting about with nothing to do. That's either peace or trouble brewing.","Idle hands everywhere. Somebody ought to give them a job before somebody else gives them an idea."])
+		text=_pick(rng,["A lot of people sitting about with nothing to do. Either they're at ease, or they're bored and restless.","Idle hands everywhere. Bored young men with nothing to do will start looking for trouble."])
 	if text=="": return ""
 	used["makers"]=true
 	var home:=float(makers.get("home",-1.0))
@@ -812,13 +812,13 @@ static func _beat_poor_but_lovely(by:Dictionary,flags:Dictionary,ctx:Dictionary,
 	if detail!="":
 		return _fill(_pick(rng,[
 			"Poor as field mice, {addr} — hardly a workshop fire between them. But the place is lovely: {detail}. I stood there longer than a scout should.",
-			"They've next to nothing, and they've made nothing into something. {Detail}. We've more than they have and it looks like less.",
+			"They've next to nothing, but they've taken care of the place. {Detail}. Our camp looks shabby beside it.",
 			"No riches — hardly a craftsman working. And yet, {addr}, I'd live there tomorrow. {Detail}.",
 		]),ctx.merged(extra).merged({"Detail":_cap(detail)}))
 	used["ornament"]=true
 	return _fill(_pick(rng,[
 		"Poor as field mice, {addr} — hardly a workshop working. But look at this {thing} we brought home. Somebody with nothing took their time over that.",
-		"They've not much of anything. Except this {thing} — look at the work on it. Poor hands, patient ones.",
+		"They've not much of anything. Except this {thing} — look at the work on it. Someone spent days on that.",
 	]),ctx.merged(extra))
 
 
@@ -851,8 +851,8 @@ static func _beat_defense(by:Dictionary,flags:Dictionary,ctx:Dictionary,persona:
 		used["walls"]=true
 		var walls:Dictionary=by.walls
 		match String(walls.get("band","")):
-			"none": parts.append(_pick(rng,["Walls? Not really. Nothing a determined goat couldn't argue its way past.","Defenses? A good shove and a bad attitude would see you through.","No walls to speak of. They either trust the world or haven't met it yet."]))
-			"light": parts.append(_pick(rng,["They've made a start on defending themselves — something between a ditch and a hope.","Some defenses, half-finished. Enough to slow a thief, not a war."]))
+			"none": parts.append(_pick(rng,["Walls? Not really. A few of our hunters could walk straight in.","Defenses? Hardly any. A small raiding party would get through.","No walls to speak of. Nobody has ever attacked them, I'd guess."]))
+			"light": parts.append(_pick(rng,["They've made a start on defending themselves — a ditch, half dug.","Some defenses, half-finished. Enough to slow a thief, not a war."]))
 			"walled": parts.append(_fill(_pick(rng,["The walls are real, {addr}. You'd want ladders, patience and a better reason than we've got.","Proper walls. Somebody there has thought hard about people like us."]),ctx))
 			"heavy": parts.append(_fill(_pick(rng,["Heavily walled. I walked the whole way round looking for a soft spot and came back with sore feet and no soft spot.","Walls on walls, {addr}. Whoever built them was frightened of something, and built like it."]),ctx))
 		var home_walls:=float(walls.get("home",-1.0))
@@ -947,7 +947,7 @@ static func _beat_people_met(by:Dictionary,flags:Dictionary,ctx:Dictionary,perso
 		parts.append(_fill("{N} of them walked home with us, {addr}. Feed them and they'll stay.",ctx.merged({"N":_cap(_number_word(int(by.recruits.get("value",0))))})))
 	if by.has("taught"):
 		used["taught"]=true
-		parts.append(_pick(rng,["And they showed us a trick or two — our scholars already have it in hand.","We learned something off them, too. I made the scholars write it down before I forgot it."]))
+		parts.append(_pick(rng,["And they showed us a trick or two — our scholars already have it in hand.","We learned something off them, too. I made the old ones learn it before I forgot it."]))
 	return " ".join(PackedStringArray(parts))
 
 
@@ -963,7 +963,7 @@ static func _beat_rumor(by:Dictionary,flags:Dictionary,ctx:Dictionary,persona:Di
 	used["rumor"]=true
 	var text:=String(by.rumor.get("text","")).split(". ")[0].trim_suffix(".")
 	if text=="": return ""
-	return _fill(_pick(rng,["And people talk. Here's what we heard, for what it's worth: {rumor}. Hearsay — I'd not stake a pig on it.","One more thing, only hearsay: {rumor}. Might be nothing. Might be someone."]),ctx.merged({"rumor":text}))
+	return _fill(_pick(rng,["And people talk. Here's what we heard, for what it's worth: {rumor}. Hearsay — I'd not act on it alone.","One more thing, only hearsay: {rumor}. Might be nothing. Might be someone."]),ctx.merged({"rumor":text}))
 
 
 static func _beat_country(by:Dictionary,flags:Dictionary,ctx:Dictionary,persona:Dictionary,rng:RandomNumberGenerator,used:Dictionary)->String:
@@ -982,23 +982,23 @@ static func _closing(by:Dictionary,flags:Dictionary,ctx:Dictionary,persona:Dicti
 	var worry:=""
 	var temper:=String(persona.temperament)
 	if flags.get("starving",false) and flags.get("big",false):
-		worry=_pick(rng,["That many hungry people don't stay home forever. I'd watch that border.","Hungry and numerous is a bad mix, {addr}. When their stores run out, they'll look over the hill — at us."])
+		worry=_pick(rng,["That many hungry people don't stay home forever. I'd watch that border.","There are a lot of them and they're hungry, {addr}. When their stores run out, they'll look over the hill — at us."])
 	elif flags.get("armed",false) and flags.get("walled",false):
-		worry=_pick(rng,["If they ever turn their eyes our way, we'll want more than good intentions.","Walls and weapons both. People don't build that for decoration."])
+		worry=_pick(rng,["If they ever come our way, we'll need walls and spears of our own.","Walls and weapons both. They're expecting a fight with somebody."])
 	elif flags.get("rich",false) and flags.get("open",false):
-		worry=_pick(rng,["That's a lot of good things sitting behind nothing. Somebody will notice — better we're the friendly somebody.","Rich and unguarded. If I've noticed, others have."])
+		worry=_pick(rng,["That's a lot of good things sitting behind nothing. Somebody will try to take it. I'd rather we got there first as friends.","Rich and unguarded. Other scouts will have seen that too."])
 	elif flags.get("poor",false) and flags.get("beautiful",false):
-		worry=_pick(rng,["I'd trade with them, {addr}. We've things they need, and they've a knack we haven't.","Send them tools and they'd send back wonders, I reckon."])
+		worry=_pick(rng,["I'd trade with them, {addr}. We've things they need, and they've a knack we haven't.","Send them good stone tools and they'd send back fine work, I reckon."])
 	elif flags.get("hostile",false):
-		worry=_pick(rng,["I'd keep the watch doubled on that side for a while.","They won't forget we came. Neither should we."])
+		worry=_pick(rng,["I'd keep the watch doubled on that side for a while.","They know where we came from now. They may come and look at us next."])
 	elif flags.get("signs",false):
 		worry=_pick(rng,["Send us back the way we came and we'll find whose fires those are.","Whoever they are, they'll have seen our smoke by now too."])
 	elif flags.get("empty",false):
-		worry=_pick(rng,["Good country for the taking, {addr}, if we've people to spare to take it.","Nobody's claimed it. That's either an opportunity or a warning, and I don't yet know which."])
+		worry=_pick(rng,["Good country for the taking, {addr}, if we've people to spare to take it.","Nobody's claimed it. Either nobody's found it yet, or something drove them off. I don't know which."])
 	elif flags.get("hungry",false):
-		worry=_pick(rng,["They could use food more than compliments, if you wanted a friend there.","A cartload of grain would buy more goodwill there than any speech."])
+		worry=_pick(rng,["They could use food more than compliments, if you wanted a friend there.","A few baskets of food would win us more friends there than any talk."])
 	elif flags.get("rich",false):
-		worry=_pick(rng,["They've things worth having. Better to trade for them than wish for them.","I'd know them better, {addr}. People that busy are going somewhere."])
+		worry=_pick(rng,["They've things worth having. I'd trade for them.","I'd know them better, {addr}. People working that hard will be strong in a few years."])
 	else:
 		worry=_pick(rng,["That's the lot of it. Make of it what you will.","I'd send us back in a season and see what's changed."])
 	if temper=="blunt" and rng.randf()<0.5: worry=worry.split(".")[0]+"."

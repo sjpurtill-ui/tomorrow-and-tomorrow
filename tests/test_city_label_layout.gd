@@ -2,6 +2,7 @@ extends GdUnitTestSuite
 const Labels=preload("res://scripts/hud/city_labels.gd")
 
 func test_city_summary_has_units_unknowns_and_bounded_staleness()->void:
+	GameState.known_discoveries=[]
 	var report:={"observed_day":10,"fields":{"population":{"low":67,"high":158,"observed_day":10},"life_expectancy":{"low":38,"high":52,"observed_day":10}}}
 	var fresh:=Labels.report_summary(report,20)
 	assert_int(fresh.stats.size()).is_equal(4)
@@ -11,7 +12,7 @@ func test_city_summary_has_units_unknowns_and_bounded_staleness()->void:
 	assert_str(fresh.stats[1].value).is_equal("Unknown")
 	# Before printing, scouts report hands at work, not "GDP · WORK-DAYS/D".
 	assert_str(fresh.stats[2].label).contains("HANDS AT WORK")
-	assert_str(fresh.stats[3].value).is_equal("38–52 yr")
+	assert_str(fresh.stats[3].value).is_equal("40–50 winters")
 	assert_int(fresh.level).is_equal(5)
 	assert_dict(Labels.report_summary(report,1000)).is_equal(Labels.report_summary(report,10000))
 	assert_int(Labels.report_summary({"observed_day":-1},100).level).is_equal(0)
@@ -186,3 +187,59 @@ func test_map_cards_avoid_site_review_panel_as_well_as_other_cards()->void:
 	assert_array(result.cards).has_size(2)
 	for card:Dictionary in result.cards:assert_bool(card.rect.intersects(review)).is_false()
 	assert_separate(result.cards,bounds)
+
+func kusala_report()->Dictionary:
+	return {"observed_day":10,"fields":{"population":{"low":89,"high":144},"gdp":{"low":37,"high":70},"science_capacity":{"low":3.2,"high":5.8},"education":{"low":.52,"high":.95},"life_expectancy":{"low":14,"high":28},"infant_mortality":{"low":206,"high":382}}}
+
+func test_scout_report_uses_plain_era_words_and_round_ranges_before_statistics()->void:
+	GameState.known_discoveries=[]
+	var summary:=Labels.report_summary(kusala_report(),20)
+	var text:=str(summary)
+	assert_str(text).not_contains("Taught").not_contains("3.2").not_contains("5.8").not_contains("‰").not_contains("GDP")
+	assert_str(summary.stats[0].value).is_equal("90–140")
+	assert_str(summary.stats[1].value).is_equal("3–6")
+	assert_str(summary.stats[1].detail).is_equal("many are taught")
+	assert_str(summary.stats[2].value).is_equal("35–70")
+	assert_str(summary.stats[3].value).is_equal("14–30 winters")
+	assert_str(summary.stats[3].detail).is_equal("Babes lost: 20–40 in 100")
+	assert_str(summary.heading).is_equal("WORD")
+	# Once statistics exist the precise report returns.
+	GameState.known_discoveries=["printing_process"]
+	var modern:=Labels.report_summary(kusala_report(),20)
+	assert_str(modern.stats[1].value).is_equal("3.2–5.8")
+	assert_str(modern.stats[3].detail).contains("IMR")
+	GameState.known_discoveries=[]
+
+func hover_overlay()->Control:
+	var overlay:Control=auto_free(Labels.new());add_child(overlay)
+	overlay.last_bounds=Rect2(0,0,1280,720)
+	var cards:Array[Dictionary]=[
+		{"id":"kusala","compact":true,"rect":Rect2(400,300,120,30),"detail_extent":Vector2(260,150),"anchor":Vector2(460,350),"foreign":true,"lines":["Kusala"],"color":Color.RED,"flag":null},
+		{"id":"home","compact":true,"rect":Rect2(700,300,120,30),"detail_extent":Vector2(160,65),"anchor":Vector2(760,350),"foreign":false,"lines":["Seanston"],"color":Color.GREEN,"flag":null}]
+	overlay.cards=cards
+	return overlay
+
+func test_city_card_is_a_name_until_hovered_then_collapses_on_exit()->void:
+	var overlay:=hover_overlay()
+	assert_str(overlay.expanded_id()).is_empty()
+	overlay.hover_at(Vector2(450,315))
+	overlay._process(.1)
+	assert_str(overlay.expanded_id()).is_empty()
+	overlay._process(.3)
+	assert_str(overlay.expanded_id()).is_equal("kusala")
+	# The open card is itself part of the hover area.
+	var detail:Rect2=overlay.detail_rect(overlay.cards[0])
+	assert_vector(detail.size).is_equal(Vector2(260,150))
+	overlay.hover_at(Vector2(detail.end.x-5,detail.end.y-5))
+	assert_str(overlay.expanded_id()).is_equal("kusala")
+	overlay.hover_at(Vector2(100,650))
+	assert_str(overlay.expanded_id()).is_empty()
+
+func test_tap_pins_city_card_until_click_away()->void:
+	var overlay:=hover_overlay()
+	var tap:=InputEventScreenTouch.new();tap.pressed=true;tap.position=Vector2(750,315)
+	overlay._input(tap)
+	assert_str(overlay.expanded_id()).is_equal("home")
+	var away:=InputEventMouseButton.new();away.button_index=MOUSE_BUTTON_LEFT;away.pressed=true;away.position=Vector2(100,650)
+	overlay._input(away)
+	assert_str(overlay.expanded_id()).is_empty()

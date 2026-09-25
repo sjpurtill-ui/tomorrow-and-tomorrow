@@ -47,7 +47,7 @@ To use an OpenAI-compatible generative endpoint, provide these environment
 variables before launching Godot:
 
 - `LEVIATHAN_AI_ENDPOINT` — full chat-completions endpoint; the official OpenAI endpoint is used when only an API key is supplied
-- `LEVIATHAN_AI_MODEL` — provider model identifier; defaults to `gpt-5.6-terra`
+- `LEVIATHAN_AI_MODEL` — provider model identifier; defaults to `gpt-6-luna`
 - `LEVIATHAN_AI_API_KEY` — API credential (or use `OPENAI_API_KEY`)
 - `LEVIATHAN_AI_STRUCTURED_OUTPUT` — `on`, `off`, or `auto` (default); `auto`
   enables strict JSON schema for the official OpenAI endpoint
