@@ -2601,3 +2601,19 @@ Open follow-ups:
 - Batch repeat discovery notices, which dominate the Chronicle after research-600.
 - The year label on carried-over tallies can be wrong.
 - The harness does not exercise orders or summons.
+
+### Fun wave 2: era UI, living map, generational aims, envoys (codex/fun-integrate-2)
+
+Integrates codex/fun-ui (047bdee0), codex/fun-map (c0a82fde), codex/fun-aims (24f8465f) and codex/fun-envoys (6121d6bd), all based on 5828bf41.
+
+What changed:
+- **Era UI.** The rail leads with the Court, the People, the Known World and the Chronicle; other ledgers sit in a Tallies/Ledgers drawer. Vital statistics speak the people's era (`scripts/hud/era_words.gd`). No Navy before boats, no Air before flight, no auto-opening dock, seasonal batching of repeat discoveries, the tally year label fix.
+- **Living map.** Opens at 200 m with labour figures, hearth smoke, map events and seasons.
+- **Generational aims.** `scripts/legacy_aims.gd` replaces the three visions. Aims are proposed as court matters and shown on the Known World sheet, the court roll and People Direction. The aim bar's progress uses era words.
+- **Envoys and rival rulers.** Every envoy carries a cost or string; rulers are lasting characters with grudges, debts, bonds and heirs; offline briefs.
+- **Integration wiring.** Rival vows now come from `rival_character()`: grudges swear to humble us, marriages and alliances to bind us, hunters to take ground. Each vow keeps the ruler's trait and reason, and passes to an heir when the ruler dies; the Chronicle and Known World tell both.
+- **Fix.** The offline envoy briefs assigned an untyped array to `Array[Dictionary]` (court_probe script error).
+
+Results (25 years, `--aims=player`, seeds 424242 / 77013): routine share 21% / 24%; first-hour moments 27–42 / 18–31 and decisions 10–20 / 11–17 per 10 minutes, longest gap 1.6 real minutes; a live aim 96% of the time; rail 5 entries and 0 modern terms at every mark; 0 free gifts.
+
+Tests: listed suites and probes pass. menu_architecture fails identically on base. foreign_dialogue_ui and research_600_campaign time out identically on base. early_consequences reports EC_FAILURES [] with rows identical to base.
