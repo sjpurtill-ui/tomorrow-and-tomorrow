@@ -1,0 +1,4492 @@
+[
+ {
+  "id": "post_mortality_meat_diet",
+  "requires_all": [
+   "cattle_droving",
+   "deserted_village_pasture"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "barreled_salt_meat",
+   "bread_weight_assize"
+  ],
+  "note": "Fewer mouths after the mortality eat more meat, cheese and wheat"
+ },
+ {
+  "id": "estate_fishpond_chains",
+  "requires_all": [
+   "stew_pond_fisheries",
+   "mill_leats"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pond_carp_rearing",
+   "river_fish_restocking"
+  ],
+  "note": "Carp ponds drained and restocked in turn"
+ },
+ {
+  "id": "rice_wheat_double_crop",
+  "requires_all": [
+   "double_crop_calendar",
+   "early_ripening_rice"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "irrigated_winter_wheat",
+   "terraced_rice_paddies"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Rice and wheat on one field each year (regional)"
+ },
+ {
+  "id": "town_hopped_brewhouses",
+  "requires_all": [
+   "hopped_export_beer",
+   "malting_floor_brewhouses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ale_taster_licensing",
+   "coopered_cargo_casks"
+  ],
+  "note": "Big town brewhouses make hopped beer the common drink"
+ },
+ {
+  "id": "herring_buss_fleets",
+  "requires_all": [
+   "barrel_gutted_herring",
+   "two_masted_round_ships"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "smoked_red_herring",
+   "catch_share_crews"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ],
+   "resources_known": [
+    "Salt"
+   ]
+  },
+  "note": "Decked drift-net ships cure herring at sea"
+ },
+ {
+  "id": "famine_food_herbal",
+  "requires_all": [
+   "illustrated_herbals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "famine_reserves",
+   "town_dearth_granaries",
+   "edible_resource_recognition"
+  ],
+  "note": "Wild plants safe in dearth drawn and described"
+ },
+ {
+  "id": "sworn_cask_gaugers",
+  "requires_all": [
+   "coopered_cargo_casks",
+   "cask_tonnage_rating"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ale_taster_licensing",
+   "market_wardens"
+  ],
+  "note": "Sworn gaugers measure every cask"
+ },
+ {
+  "id": "grain_magistracy",
+  "requires_all": [
+   "town_dearth_granaries",
+   "dearth_price_ceilings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bread_mouth_census",
+   "municipal_exchange_bank"
+  ],
+  "note": "Standing grain office buys abroad and sells in dearth"
+ },
+ {
+  "id": "marsh_fattened_cattle",
+  "requires_all": [
+   "cattle_droving"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "embanked_salt_meadows",
+   "protected_drove_routes",
+   "post_mortality_meat_diet"
+  ],
+  "note": "Oxen fattened on marsh grazing for town butchers"
+ },
+ {
+  "id": "island_cane_plantations",
+  "requires_all": [
+   "irrigated_cane_fields",
+   "roller_cotton_gin"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "refined_loaf_sugar",
+   "fortified_trading_posts"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Cane on settled ocean islands, crushed between rollers"
+ },
+ {
+  "id": "cheese_weigh_houses",
+  "requires_all": [
+   "public_weighhouses",
+   "long_aged_hard_cheese"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "keg_salted_butter",
+   "market_wardens"
+  ],
+  "note": "Cheese and butter sold through a weigh-house"
+ },
+ {
+  "id": "sworn_fish_packers",
+  "requires_all": [
+   "barrel_gutted_herring",
+   "sworn_cask_gaugers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "herring_buss_fleets",
+   "spoiled_food_condemnation"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Sworn packers brand barrels of salt fish"
+ },
+ {
+  "id": "printed_cookery_books",
+  "requires_all": [
+   "measured_court_recipes",
+   "screw_press_printing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_printing_houses",
+   "recipe_collections"
+  ],
+  "note": "Cookery books printed and sold beyond the court"
+ },
+ {
+  "id": "printed_farm_manuals",
+  "requires_all": [
+   "illustrated_farm_treatise",
+   "town_printing_houses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "farm_encyclopedia",
+   "monthly_farm_calendar"
+  ],
+  "note": "Farm manuals printed in the common tongue"
+ },
+ {
+  "id": "maize_garden_trials",
+  "requires_all": [
+   "transoceanic_contact_voyages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "new_garden_vegetables",
+   "walled_kitchen_gardens"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Maize grown in gardens from seed brought across the ocean"
+ },
+ {
+  "id": "hop_drying_kilns",
+  "requires_all": [
+   "hop_gardens",
+   "grain_drying_kilns"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_hopped_brewhouses"
+  ],
+  "note": "Hops dried in purpose-built kilns"
+ },
+ {
+  "id": "distant_bank_salt_cod",
+  "requires_all": [
+   "offshore_cod_fishing",
+   "ocean_carrack"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "latitude_sailing",
+   "barrel_gutted_herring"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ],
+   "resources_known": [
+    "Salt"
+   ]
+  },
+  "note": "Cod split and dried on shore stages by far banks"
+ },
+ {
+  "id": "chili_pepper_spread",
+  "requires_all": [
+   "transoceanic_contact_voyages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "imported_spice_blends",
+   "maize_garden_trials"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Chili peppers enter every cook's pot"
+ },
+ {
+  "id": "sugar_fruit_pastes",
+  "requires_all": [
+   "sugar_candied_fruit",
+   "refined_loaf_sugar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sugar_confectionery",
+   "honey_fruit_preserves"
+  ],
+  "note": "Fruit pastes set firm with sugar"
+ },
+ {
+  "id": "farmyard_turkeys",
+  "requires_all": [
+   "transoceanic_contact_voyages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "poultry_breed_selection"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Turkeys raised in farmyards"
+ },
+ {
+  "id": "new_land_beans_squash",
+  "requires_all": [
+   "maize_garden_trials"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "new_garden_vegetables",
+   "legume_field_interplanting"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "New-land beans, squash and gourds in gardens"
+ },
+ {
+  "id": "coffee_houses",
+  "requires_all": [
+   "transoceanic_contact_voyages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "teahouse_tea",
+   "street_bakeries",
+   "imported_spice_blends"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Coffee roasted and drunk in small coffee houses"
+ },
+ {
+  "id": "mulberry_dike_fishponds",
+  "requires_all": [
+   "sericulture_reeling",
+   "stocked_fish_ponds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paddy_fish_rearing",
+   "estate_fishpond_chains"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Fish ponds and mulberry dykes as one system (regional)"
+ },
+ {
+  "id": "maize_field_crop",
+  "requires_all": [
+   "maize_garden_trials"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "new_land_beans_squash",
+   "summer_millet_catch_crop"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Maize as a lowland field crop eaten as porridge"
+ },
+ {
+  "id": "potato_garden_curiosity",
+  "requires_all": [
+   "transoceanic_contact_voyages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "walled_kitchen_gardens",
+   "root_cellars"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Potato grown as a garden curiosity"
+ },
+ {
+  "id": "hill_sweet_potato_maize",
+  "requires_all": [
+   "maize_field_crop"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cross_slope_ploughing",
+   "potato_garden_curiosity"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Sweet potato and maize on cleared hill land (regional)"
+ },
+ {
+  "id": "cassava_cultivation",
+  "requires_all": [
+   "transoceanic_contact_voyages",
+   "root_grating_dewatering"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "starch_washing_separation",
+   "maize_garden_trials"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Cassava grown and soaked safe in hot lands (regional)"
+ },
+ {
+  "id": "convertible_husbandry",
+  "requires_all": [
+   "three_field_rotation",
+   "pasture_reseeding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hay_meadow_management",
+   "fodder_crop_fallow",
+   "estate_yield_accounts"
+  ],
+  "note": "Years of grain alternate with years of grass"
+ },
+ {
+  "id": "bean_cake_fertilizer",
+  "requires_all": [
+   "seed_oil_pressing",
+   "soy_curd_pressing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "manure_field_spreading",
+   "bean_paste_fermentation"
+  ],
+  "note": "Oilseed press cake spread as fertilizer (regional)"
+ },
+ {
+  "id": "hotbed_forcing",
+  "requires_all": [
+   "walled_kitchen_gardens",
+   "spun_crown_panes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "periurban_market_gardens",
+   "manure_field_spreading"
+  ],
+  "note": "Glass bells and dung beds force early vegetables"
+ },
+ {
+  "id": "groundnut_oil_crop",
+  "requires_all": [
+   "transoceanic_contact_voyages",
+   "seed_oil_pressing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "new_land_beans_squash"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Groundnuts grown for oil on sandy land (regional)"
+ },
+ {
+  "id": "court_chocolate_drink",
+  "requires_all": [
+   "transoceanic_contact_voyages",
+   "refined_loaf_sugar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coffee_houses",
+   "measured_court_recipes"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Cacao whipped into a sweet court drink"
+ },
+ {
+  "id": "lowland_export_dairying",
+  "requires_all": [
+   "estate_vaccaries",
+   "drainage_windmills"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cheese_weigh_houses",
+   "keg_salted_butter",
+   "long_aged_hard_cheese"
+  ],
+  "note": "Dairy farms on drained grass export cheese and butter"
+ },
+ {
+  "id": "shipped_tea_trade",
+  "requires_all": [
+   "transoceanic_contact_voyages",
+   "company_merchant_fleets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "teahouse_tea",
+   "coffee_houses"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Tea shipped from the far east and sold by the pound"
+ },
+ {
+  "id": "printed_grain_prices",
+  "requires_all": [
+   "grain_magistracy",
+   "printed_weekly_news"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_broadsides",
+   "share_exchange_bourse"
+  ],
+  "note": "Weekly grain prices printed"
+ },
+ {
+  "id": "town_luxury_vegetables",
+  "requires_all": [
+   "periurban_market_gardens",
+   "hotbed_forcing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "new_garden_vegetables",
+   "walled_kitchen_gardens"
+  ],
+  "note": "Cauliflower, artichokes and asparagus for town tables"
+ },
+ {
+  "id": "cottage_potato_patches",
+  "requires_all": [
+   "potato_garden_curiosity"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "root_cellars",
+   "hill_sweet_potato_maize"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Potatoes as a cottage food of the upland poor"
+ },
+ {
+  "id": "bottled_strong_cider",
+  "requires_all": [
+   "cider_perry_pressing",
+   "dark_bottle_glass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coal_fired_glass_furnace"
+  ],
+  "note": "Strong cider matured in stout bottles"
+ },
+ {
+  "id": "clover_ley_fodder",
+  "requires_all": [
+   "spring_field_legumes",
+   "convertible_husbandry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fodder_legume_fields",
+   "alfalfa_fodder",
+   "green_manure_crops"
+  ],
+  "note": "Clover sown in the fallow for stock and soil"
+ },
+ {
+  "id": "seedsmen_named_varieties",
+  "requires_all": [
+   "named_fruit_cultivars",
+   "printed_farm_manuals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grafted_tree_nurseries",
+   "town_luxury_vegetables"
+  ],
+  "note": "Seedsmen sell named garden varieties"
+ },
+ {
+  "id": "field_turnips",
+  "requires_all": [
+   "winter_fodder",
+   "convertible_husbandry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clover_ley_fodder",
+   "new_garden_vegetables",
+   "walled_kitchen_gardens"
+  ],
+  "note": "Turnips sown in open fields for winter stock feed"
+ },
+ {
+  "id": "molasses_rum",
+  "requires_all": [
+   "distilled_spirits",
+   "island_cane_plantations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sugar_loaf_refining"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Rum distilled from cane molasses"
+ },
+ {
+  "id": "estate_ice_houses",
+  "requires_all": [
+   "root_cellars",
+   "pitched_brick_vaults"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "frozen_river_winters",
+   "channelled_garden_courts"
+  ],
+  "note": "Ice houses keep winter ice for summer kitchens"
+ },
+ {
+  "id": "sainfoin_lucerne_hay",
+  "requires_all": [
+   "alfalfa_fodder",
+   "clover_ley_fodder"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "liming_sour_soils",
+   "thin_soil_grassland"
+  ],
+  "note": "Sainfoin and lucerne for hay on chalk and lime"
+ },
+ {
+  "id": "brewers_yeast_bread",
+  "requires_all": [
+   "town_hopped_brewhouses",
+   "dough_leavening"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "village_bake_ovens",
+   "graded_bread_loaves"
+  ],
+  "note": "Brewers' yeast sold to bakers"
+ },
+ {
+  "id": "juniper_grain_spirit",
+  "requires_all": [
+   "distilled_spirits",
+   "malting_floor_brewhouses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "distilled_herb_waters"
+  ],
+  "note": "Cheap juniper-flavoured grain spirit"
+ },
+ {
+  "id": "stall_winter_fattening",
+  "requires_all": [
+   "stall_fattened_cattle",
+   "field_turnips"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "marsh_fattened_cattle",
+   "clover_ley_fodder"
+  ],
+  "note": "Cattle wintered on roots and hay in stalls"
+ },
+ {
+  "id": "steam_bone_digester",
+  "requires_all": [
+   "air_spring_law",
+   "vacuum_experiments"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "food_steaming_vessels",
+   "cast_iron_vessels"
+  ],
+  "note": "Pressure digester softens bones into broth"
+ },
+ {
+  "id": "grain_export_bounties",
+  "requires_all": [
+   "dearth_price_ceilings",
+   "printed_grain_prices"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mercantile_trade_council",
+   "salt_and_drink_excise"
+  ],
+  "note": "Bounties on grain exports when prices fall"
+ },
+ {
+  "id": "fortified_voyage_wines",
+  "requires_all": [
+   "distilled_spirits",
+   "vintage_wine_aging"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ocean_victualling",
+   "coopered_cargo_casks"
+  ],
+  "note": "Wine fortified with spirit for long voyages"
+ },
+ {
+  "id": "tomato_sauce_cookery",
+  "requires_all": [
+   "transoceanic_contact_voyages",
+   "printed_cookery_books"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "verjuice_sauces",
+   "new_land_beans_squash"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Tomatoes cooked into sauces"
+ },
+ {
+  "id": "sown_ryegrass_leys",
+  "requires_all": [
+   "clover_ley_fodder"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pasture_reseeding",
+   "seedsmen_named_varieties"
+  ],
+  "note": "Ryegrass sown for short leys"
+ },
+ {
+  "id": "bottle_sparkling_wine",
+  "requires_all": [
+   "dark_bottle_glass",
+   "vintage_wine_aging"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bottled_strong_cider"
+  ],
+  "note": "Sparkling wine fermented in sealed bottles"
+ },
+ {
+  "id": "coke_dried_pale_malt",
+  "requires_all": [
+   "malting_floor_brewhouses",
+   "coal_grading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grain_drying_kilns",
+   "sea_coal_substitution"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Coal"
+   ]
+  },
+  "note": "Pale malt dried with coked coal"
+ },
+ {
+  "id": "coffee_plantations",
+  "requires_all": [
+   "coffee_houses",
+   "plantation_gang_labor"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "island_cane_plantations",
+   "overseas_settler_colonies"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Coffee planted on warm colonial estates"
+ },
+ {
+  "id": "row_spacing_trials",
+  "requires_all": [
+   "estate_yield_accounts",
+   "standard_measures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chartered_experimental_society",
+   "laboratory_notebooks",
+   "convertible_husbandry"
+  ],
+  "note": "Parallel strips test row spacing against yield"
+ },
+ {
+  "id": "field_potato_crop",
+  "requires_all": [
+   "cottage_potato_patches"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "convertible_husbandry",
+   "ridge_furrow_strips"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Potatoes as a field crop that feeds the poor"
+ },
+ {
+  "id": "porter_vat_brewing",
+  "requires_all": [
+   "town_hopped_brewhouses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coke_dried_pale_malt",
+   "coopered_cargo_casks"
+  ],
+  "note": "Dark beer aged in giant vats"
+ },
+ {
+  "id": "seed_drill",
+  "requires_all": [
+   "seed_drill_funnel",
+   "row_spacing_trials"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spiked_harrow",
+   "printed_farm_manuals",
+   "iron_farm_tools"
+  ],
+  "note": "Drill sows in straight rows at a set depth"
+ },
+ {
+  "id": "light_swing_plough",
+  "requires_all": [
+   "mouldboard_plough",
+   "horse_ploughing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "iron_plate_hammer_mills",
+   "heavy_draught_breeding"
+  ],
+  "note": "Light swing plough with iron share and curved mouldboard"
+ },
+ {
+  "id": "horse_hoe_tillage",
+  "requires_all": [
+   "seed_drill",
+   "horse_ploughing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "light_swing_plough"
+  ],
+  "note": "Horse hoe weeds between drilled rows"
+ },
+ {
+  "id": "household_sugared_tea",
+  "requires_all": [
+   "shipped_tea_trade",
+   "sugar_loaf_refining"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pale_hard_fired_ware"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Tea drunk daily with sugar in every household"
+ },
+ {
+  "id": "agricultural_improvement_societies",
+  "requires_all": [
+   "chartered_experimental_society",
+   "printed_farm_manuals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_experiment_lectures",
+   "fraternal_lodges",
+   "row_spacing_trials"
+  ],
+  "note": "Landowners' societies award prizes and print trials"
+ },
+ {
+  "id": "sowing_depth_trials",
+  "requires_all": [
+   "experimental_controls",
+   "row_spacing_trials"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seed_drill"
+  ],
+  "note": "Seed sown at measured depths"
+ },
+ {
+  "id": "beet_sugar_discovery",
+  "requires_all": [
+   "chemical_distillation",
+   "two_lens_tube_microscope"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sugar_loaf_refining",
+   "laboratory_notebooks"
+  ],
+  "note": "Sugar found in beet roots by the chemists"
+ },
+ {
+  "id": "field_carrot_cabbage_fodder",
+  "requires_all": [
+   "field_turnips"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stall_winter_fattening",
+   "town_luxury_vegetables"
+  ],
+  "note": "Field carrots and cabbages for cattle"
+ },
+ {
+  "id": "tidal_rice_fields",
+  "requires_all": [
+   "flooded_paddy_fields",
+   "sluiced_polders"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plantation_gang_labor",
+   "dryland_rice_basins"
+  ],
+  "conditions": {
+   "environment": [
+    "coast",
+    "river"
+   ]
+  },
+  "note": "Tidal floodplain rice worked by sluice gates (regional)"
+ },
+ {
+  "id": "grain_bellows_ventilation",
+  "requires_all": [
+   "ventilated_granaries",
+   "wooden_tub_bellows"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "air_spring_law",
+   "granary_fumigation"
+  ],
+  "note": "Bellows air through stored grain"
+ },
+ {
+  "id": "spirit_licensing_duties",
+  "requires_all": [
+   "salt_and_drink_excise",
+   "juniper_grain_spirit"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ale_taster_licensing"
+  ],
+  "note": "Cheap spirits taxed and sellers licensed"
+ },
+ {
+  "id": "potato_planting_edict",
+  "requires_all": [
+   "field_potato_crop"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "police_ordinance_science",
+   "cameral_domain_chambers"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Districts ordered to plant potatoes against dearth"
+ },
+ {
+  "id": "seedbed_firming",
+  "requires_all": [
+   "seed_drill"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sowing_depth_trials",
+   "spiked_harrow"
+  ],
+  "note": "Seedbeds rolled firm after sowing"
+ },
+ {
+  "id": "four_course_rotation",
+  "requires_all": [
+   "three_field_rotation",
+   "clover_ley_fodder",
+   "field_turnips"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "convertible_husbandry",
+   "enclosure_by_agreement",
+   "horse_hoe_tillage",
+   "sainfoin_lucerne_hay"
+  ],
+  "note": "Wheat, turnips, barley, clover with no fallow"
+ },
+ {
+  "id": "pedigree_stock_breeding",
+  "requires_all": [
+   "heavy_draught_breeding",
+   "stall_winter_fattening"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pasture_matched_breeds",
+   "poultry_breed_selection",
+   "enclosure_by_agreement",
+   "draft_horse_breeding"
+  ],
+  "note": "Stock bred by pedigree for meat, wool and milk"
+ },
+ {
+  "id": "voyage_keeping_foods",
+  "requires_all": [
+   "brine_fermentation",
+   "ocean_victualling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steam_bone_digester",
+   "victualling_yards",
+   "lemon_juice_scurvy"
+  ],
+  "note": "Sauerkraut and portable soup stowed for voyages"
+ },
+ {
+  "id": "printed_farm_journals",
+  "requires_all": [
+   "printed_farm_manuals",
+   "agricultural_improvement_societies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "periodical_essay_sheets",
+   "daily_printed_newspaper"
+  ],
+  "note": "Monthly farm journals"
+ },
+ {
+  "id": "free_grain_trade_edict",
+  "requires_all": [
+   "free_grain_trade_doctrine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grain_export_bounties",
+   "printed_grain_prices"
+  ],
+  "note": "Free internal grain trade declared"
+ },
+ {
+  "id": "fodder_cutting_machines",
+  "requires_all": [
+   "field_turnips",
+   "stall_winter_fattening"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sand_flask_casting",
+   "gear_cutting_engine"
+  ],
+  "note": "Chaff cutters and root slicers"
+ },
+ {
+  "id": "brewing_thermometer",
+  "requires_all": [
+   "porter_vat_brewing",
+   "precision_thermometry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "laboratory_notebooks"
+  ],
+  "note": "Brewing ruled by the thermometer"
+ },
+ {
+  "id": "yellow_turnip_mangold_roots",
+  "requires_all": [
+   "field_turnips"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seedsmen_named_varieties",
+   "four_course_rotation"
+  ],
+  "note": "Hardier winter roots"
+ },
+ {
+  "id": "crushed_bone_manure",
+  "requires_all": [
+   "manure_field_spreading",
+   "edge_runner_mills"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "steam_bone_digester",
+   "four_course_rotation"
+  ],
+  "note": "Crushed bones spread as manure"
+ },
+ {
+  "id": "brewers_saccharometer",
+  "requires_all": [
+   "brewing_thermometer",
+   "hydrostatic_pressure"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "experimental_controls"
+  ],
+  "note": "Floating gauge measures wort strength"
+ },
+ {
+  "id": "threshing_machine",
+  "requires_all": [
+   "hand_crank_winnower",
+   "gear_cutting_engine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "horse_whim_hoists",
+   "tested_waterwheel_efficiency",
+   "fodder_cutting_machines"
+  ],
+  "note": "Threshing machine driven by horse or water"
+ },
+ {
+  "id": "cast_iron_plough_parts",
+  "requires_all": [
+   "light_swing_plough",
+   "sand_flask_casting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coke_firing"
+  ],
+  "note": "Cast-iron shares and mouldboards made to pattern"
+ },
+ {
+  "id": "public_soup_kitchens",
+  "requires_all": [
+   "town_grain_dole",
+   "parish_poor_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grain_magistracy",
+   "field_potato_crop",
+   "subscription_hospitals"
+  ],
+  "note": "Soup kitchens feed the poor in dearth"
+ },
+ {
+  "id": "agriculture_board_surveys",
+  "requires_all": [
+   "agricultural_improvement_societies",
+   "cadastral_tax_survey"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_farm_journals",
+   "trade_and_colonies_board"
+  ],
+  "note": "Board of agriculture surveys every district"
+ },
+ {
+  "id": "closed_cooking_range",
+  "requires_all": [
+   "iron_flue_stoves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sand_flask_casting",
+   "coke_firing"
+  ],
+  "note": "Closed iron range saves kitchen fuel"
+ },
+ {
+  "id": "sugar_beet_selection",
+  "requires_all": [
+   "beet_sugar_discovery",
+   "mass_seed_selection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seedsmen_named_varieties",
+   "yellow_turnip_mangold_roots"
+  ],
+  "note": "White beet selected for sugar"
+ },
+ {
+  "id": "council_plague_treatises",
+  "requires_all": [
+   "plague_advice_tracts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pestilence_physicians",
+   "pestilence_health_boards"
+  ],
+  "note": "Plague treatises for the town council"
+ },
+ {
+  "id": "forty_day_quarantine",
+  "requires_all": [
+   "arrival_isolation_period"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pestilence_gate_watch",
+   "pestilence_health_boards"
+  ],
+  "note": "Forty-day quarantine of ships and travellers"
+ },
+ {
+  "id": "health_passes",
+  "requires_all": [
+   "forty_day_quarantine",
+   "pestilence_gate_watch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "internal_passes",
+   "sealed_travel_passes"
+  ],
+  "note": "Travellers carry a health pass"
+ },
+ {
+  "id": "quarantine_island_station",
+  "requires_all": [
+   "forty_day_quarantine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "leper_inspection_panels",
+   "ward_hospitals"
+  ],
+  "conditions": {
+   "environment": [
+    "coast",
+    "river"
+   ]
+  },
+  "note": "Pest house on an island for the sick and suspect"
+ },
+ {
+  "id": "leper_house_conversion",
+  "requires_all": [
+   "leper_inspection_panels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "quarantine_island_station",
+   "pestilence_health_boards"
+  ],
+  "note": "Leper houses turned into plague houses"
+ },
+ {
+  "id": "pestilence_market_seals",
+  "requires_all": [
+   "spoiled_food_condemnation",
+   "pestilence_health_boards"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plague_bedding_burning"
+  ],
+  "note": "Market officers seal infected shops"
+ },
+ {
+  "id": "concave_spectacles",
+  "requires_all": [
+   "reading_spectacles",
+   "optical_lenses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spun_crown_panes"
+  ],
+  "note": "Hollow lenses for the short-sighted"
+ },
+ {
+  "id": "incurables_hospital",
+  "requires_all": [
+   "nursing_brotherhoods",
+   "ward_hospitals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "endowed_hospital_beds"
+  ],
+  "note": "Nursing hospital for the incurable"
+ },
+ {
+  "id": "printed_plague_regimens",
+  "requires_all": [
+   "council_plague_treatises",
+   "town_printing_houses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_broadsides"
+  ],
+  "note": "Plague regimens printed and posted"
+ },
+ {
+  "id": "printed_dissection_manual",
+  "requires_all": [
+   "public_anatomy_dissection",
+   "screw_press_printing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "illustrated_surgery_treatise"
+  ],
+  "note": "Printed manual guides the dissection"
+ },
+ {
+  "id": "sweating_fever_record",
+  "requires_all": [
+   "epidemic_chronicles"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pestilence_physicians",
+   "disease_causes_treatise"
+  ],
+  "note": "A new sweating fever recorded"
+ },
+ {
+  "id": "standing_health_magistracy",
+  "requires_all": [
+   "pestilence_health_boards"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "council_plague_treatises",
+   "forty_day_quarantine",
+   "specialized_royal_councils"
+  ],
+  "note": "Health magistracy sits in plague-free years"
+ },
+ {
+  "id": "field_surgery_handbook",
+  "requires_all": [
+   "school_surgery_manual",
+   "town_printing_houses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hand_gun_tubes",
+   "dry_wound_dressing"
+  ],
+  "note": "Common-tongue handbook for field surgeons"
+ },
+ {
+  "id": "great_pox_recognition",
+  "requires_all": [
+   "mercury_ointment",
+   "transoceanic_contact_voyages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "contact_contagion",
+   "itch_mite_removal"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "The new pox recognized and treated with mercury"
+ },
+ {
+  "id": "ship_bills_of_health",
+  "requires_all": [
+   "health_passes",
+   "forty_day_quarantine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "merchant_bale_marks",
+   "quarantine_island_station"
+  ],
+  "note": "Every ship carries a bill of health"
+ },
+ {
+  "id": "bathhouse_closures",
+  "requires_all": [
+   "great_pox_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "domed_steam_baths",
+   "street_filth_ordinances"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Bathhouses and stews shut against the pox"
+ },
+ {
+  "id": "college_of_physicians",
+  "requires_all": [
+   "medical_faculty_licence",
+   "physician_licensing_exam"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standing_health_magistracy",
+   "craft_guilds"
+  ],
+  "note": "College licenses every practitioner in the capital"
+ },
+ {
+  "id": "guaiac_pox_remedy",
+  "requires_all": [
+   "great_pox_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fixed_formula_decoctions"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Guaiac wood drink against the pox"
+ },
+ {
+  "id": "from_life_printed_herbals",
+  "requires_all": [
+   "illustrated_herbals",
+   "hand_relief_printing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "burin_engraving",
+   "printed_state_pharmacopoeia"
+  ],
+  "note": "Herbals printed from drawings made from life"
+ },
+ {
+  "id": "gentle_gunshot_dressing",
+  "requires_all": [
+   "dry_wound_dressing",
+   "field_surgery_handbook"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "powder_artillery",
+   "matchlock_drill"
+  ],
+  "note": "Gunshot wounds dressed with mild salve"
+ },
+ {
+  "id": "dissection_anatomy_atlas",
+  "requires_all": [
+   "public_anatomy_dissection",
+   "printed_dissection_manual"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "burin_engraving",
+   "single_point_perspective_painting",
+   "mirror_grid_perspective"
+  ],
+  "note": "Atlas from dissection corrects the authorities"
+ },
+ {
+  "id": "faculty_physic_garden",
+  "requires_all": [
+   "from_life_printed_herbals",
+   "walled_kitchen_gardens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "foreign_plant_gardens",
+   "medical_faculty_licence"
+  ],
+  "note": "Faculty physic garden for teaching remedies"
+ },
+ {
+  "id": "contagion_seeds_treatise",
+  "requires_all": [
+   "contact_contagion",
+   "council_plague_treatises"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "great_pox_recognition",
+   "plague_advice_tracts"
+  ],
+  "note": "Treatise on seeds of contagion"
+ },
+ {
+  "id": "spotted_fever_distinction",
+  "requires_all": [
+   "contagion_seeds_treatise"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pox_measles_distinction",
+   "sweating_fever_record"
+  ],
+  "note": "Spotted fever told apart"
+ },
+ {
+  "id": "printed_city_pharmacopoeia",
+  "requires_all": [
+   "town_antidotary",
+   "town_printing_houses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_state_pharmacopoeia",
+   "hospital_formulary"
+  ],
+  "note": "City book of remedies printed by law"
+ },
+ {
+  "id": "chemical_medicine_school",
+  "requires_all": [
+   "distilled_herb_waters",
+   "mineral_acid_distillation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chemical_distillation",
+   "mercury_ointment"
+  ],
+  "note": "Metals and salts prepared by fire as drugs"
+ },
+ {
+  "id": "amputation_ligature",
+  "requires_all": [
+   "catgut_sutures",
+   "gentle_gunshot_dressing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "graded_cautery_irons"
+  ],
+  "note": "Arteries tied in amputation"
+ },
+ {
+  "id": "jointed_artificial_limbs",
+  "requires_all": [
+   "amputation_ligature"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mainspring_fusee_clocks",
+   "articulated_plate_armor"
+  ],
+  "note": "Iron limbs with jointed fingers"
+ },
+ {
+  "id": "army_field_hospitals",
+  "requires_all": [
+   "military_hospitals",
+   "field_surgery_handbook"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pike_and_shot_regiment",
+   "wheeled_siege_train"
+  ],
+  "note": "Field hospitals move with the troops"
+ },
+ {
+  "id": "corpse_searchers",
+  "requires_all": [
+   "health_office_death_registers",
+   "standing_health_magistracy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "inquest_handbook"
+  ],
+  "note": "Sworn searchers name each cause of death"
+ },
+ {
+  "id": "tiered_anatomy_theatre",
+  "requires_all": [
+   "dissection_anatomy_atlas"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_playhouses",
+   "ruler_founded_universities"
+  ],
+  "note": "Permanent tiered anatomy theatre"
+ },
+ {
+  "id": "arm_flap_nose_repair",
+  "requires_all": [
+   "skin_flap_repair",
+   "dissection_anatomy_atlas"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "catgut_sutures"
+  ],
+  "note": "Nose rebuilt from an arm flap"
+ },
+ {
+  "id": "folk_variolation",
+  "requires_all": [
+   "pox_measles_distinction"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "childhood_disease_book",
+   "contact_contagion"
+  ],
+  "note": "Smallpox matter given to cause a mild case (regional)"
+ },
+ {
+  "id": "lemon_juice_scurvy",
+  "requires_all": [
+   "citrus_orchards",
+   "ocean_victualling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sickroom_diet_books"
+  ],
+  "note": "Lemon juice given to sailors"
+ },
+ {
+  "id": "shut_up_plague_houses",
+  "requires_all": [
+   "standing_health_magistracy",
+   "parish_constables"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plague_bedding_burning",
+   "corpse_searchers"
+  ],
+  "note": "Infected houses shut and watched"
+ },
+ {
+  "id": "sea_surgeons_chest",
+  "requires_all": [
+   "field_surgery_handbook",
+   "ocean_victualling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lemon_juice_scurvy",
+   "travelling_dispensaries"
+  ],
+  "note": "Sea surgeon's chest and manual"
+ },
+ {
+  "id": "chartered_apothecary_company",
+  "requires_all": [
+   "apothecary_separation",
+   "printed_city_pharmacopoeia"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "craft_guilds",
+   "chemical_medicine_school"
+  ],
+  "note": "Apothecaries chartered apart from grocers"
+ },
+ {
+  "id": "blood_circulation",
+  "requires_all": [
+   "pulmonary_transit",
+   "dissection_anatomy_atlas"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "experimental_vivisection",
+   "inductive_method_program",
+   "measured_kinematics"
+  ],
+  "note": "The blood circulates, pumped by the heart"
+ },
+ {
+  "id": "charity_nursing_sisters",
+  "requires_all": [
+   "nursing_brotherhoods"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "incurables_hospital",
+   "parish_poor_law"
+  ],
+  "note": "Sisters nurse the sick poor"
+ },
+ {
+  "id": "university_clinical_wards",
+  "requires_all": [
+   "bedside_teaching",
+   "ward_hospitals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tiered_anatomy_theatre",
+   "college_of_physicians"
+  ],
+  "note": "Clinical wards in the university hospital"
+ },
+ {
+  "id": "cinchona_fever_bark",
+  "requires_all": [
+   "transoceanic_contact_voyages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "marsh_fever_drainage",
+   "periodic_fever_classes",
+   "compared_treatment_groups"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Fever bark cures the shaking fever"
+ },
+ {
+  "id": "general_confinement_hospital",
+  "requires_all": [
+   "ward_hospitals",
+   "correction_workhouses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "aged_almshouses",
+   "parish_poor_law",
+   "hospital_madness_wards"
+  ],
+  "note": "General hospital for the sick, aged and idle poor"
+ },
+ {
+  "id": "opium_tincture",
+  "requires_all": [
+   "measured_poppy_draughts",
+   "distilled_spirits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chemical_medicine_school"
+  ],
+  "note": "Opium tincture dosed in drops"
+ },
+ {
+  "id": "capillary_observation",
+  "requires_all": [
+   "blood_circulation",
+   "two_lens_tube_microscope"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lens_centering"
+  ],
+  "note": "Capillaries seen joining arteries to veins"
+ },
+ {
+  "id": "transfusion_ban",
+  "requires_all": [
+   "blood_circulation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chartered_experimental_society"
+  ],
+  "note": "Animal blood transfusion tried, then forbidden"
+ },
+ {
+  "id": "invalid_soldiers_hospital",
+  "requires_all": [
+   "army_field_hospitals",
+   "crown_standing_army"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "general_confinement_hospital"
+  ],
+  "note": "Hospital and pensions for disabled soldiers"
+ },
+ {
+  "id": "epidemic_season_records",
+  "requires_all": [
+   "case_records",
+   "epidemic_chronicles"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weekly_mortality_bills",
+   "daily_weather_diaries"
+  ],
+  "note": "Fevers recorded with season and weather"
+ },
+ {
+  "id": "ergot_cause_identified",
+  "requires_all": [
+   "burning_sickness_hospitals",
+   "rye_cultivation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "epidemic_season_records",
+   "compared_treatment_groups"
+  ],
+  "note": "Rye blight named as the cause of burning sickness"
+ },
+ {
+  "id": "regimental_surgeons",
+  "requires_all": [
+   "army_field_hospitals",
+   "crown_standing_army"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "invalid_soldiers_hospital",
+   "regimental_uniforms"
+  ],
+  "note": "A surgeon for every regiment"
+ },
+ {
+  "id": "state_medical_collegium",
+  "requires_all": [
+   "college_of_physicians",
+   "chartered_apothecary_company"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standing_health_magistracy",
+   "war_ministry_bureaus",
+   "sworn_town_midwives"
+  ],
+  "note": "State college oversees all healers"
+ },
+ {
+  "id": "ipecac_flux_remedy",
+  "requires_all": [
+   "transoceanic_contact_voyages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cinchona_fever_bark"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Root against the bloody flux"
+ },
+ {
+  "id": "medical_case_journals",
+  "requires_all": [
+   "experimental_protocol_publication"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_weekly_news",
+   "case_records"
+  ],
+  "note": "Journals print cases and remedies"
+ },
+ {
+  "id": "spa_town_physicians",
+  "requires_all": [
+   "mineral_spring_bathing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "college_of_physicians",
+   "passenger_coach"
+  ],
+  "note": "Spa towns with physicians and bath rules"
+ },
+ {
+  "id": "trade_diseases_treatise",
+  "requires_all": [
+   "case_records",
+   "medical_case_journals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mining_ordinances",
+   "mercury_amalgam_poisoning"
+  ],
+  "note": "Treatise on the diseases of each trade"
+ },
+ {
+  "id": "pulse_watch",
+  "requires_all": [
+   "mainspring_fusee_clocks",
+   "timed_pulse"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pendulum_regulated_clock",
+   "medical_case_journals"
+  ],
+  "note": "Pulse counted against a watch"
+ },
+ {
+  "id": "screw_tourniquet",
+  "requires_all": [
+   "amputation_ligature",
+   "screw_tap_and_die"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "regimental_surgeons"
+  ],
+  "note": "Screw tourniquet stops bleeding"
+ },
+ {
+  "id": "frontier_sanitary_cordon",
+  "requires_all": [
+   "pestilence_gate_watch",
+   "quarantine_island_station"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fortress_frontier_belt",
+   "health_passes"
+  ],
+  "note": "Garrisoned quarantine posts along the frontier"
+ },
+ {
+  "id": "variolation_trials",
+  "requires_all": [
+   "folk_variolation",
+   "compared_treatment_groups"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chartered_experimental_society",
+   "medical_case_journals"
+  ],
+  "note": "Variolation tried on volunteers in the capital"
+ },
+ {
+  "id": "subscription_hospitals",
+  "requires_all": [
+   "ward_hospitals",
+   "joint_stock_company"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "general_confinement_hospital",
+   "university_clinical_wards"
+  ],
+  "note": "Voluntary hospitals funded by subscribers"
+ },
+ {
+  "id": "lateral_lithotomy",
+  "requires_all": [
+   "bladder_stone_cutting",
+   "dissection_anatomy_atlas"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tiered_anatomy_theatre"
+  ],
+  "note": "Quick lateral cut for bladder stone"
+ },
+ {
+  "id": "dental_surgery",
+  "requires_all": [
+   "gold_band_dentures",
+   "tooth_drilling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "surgeons_guild",
+   "screw_cutting_lathe"
+  ],
+  "note": "Teeth filled, scaled and replaced"
+ },
+ {
+  "id": "anatomical_wax_models",
+  "requires_all": [
+   "tiered_anatomy_theatre",
+   "lost_wax_casting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ancestor_wax_masks"
+  ],
+  "note": "Wax anatomical models for teaching"
+ },
+ {
+  "id": "maize_skin_sickness",
+  "requires_all": [
+   "maize_field_crop"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "epidemic_season_records",
+   "case_records"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Maize-eaters' skin sickness described"
+ },
+ {
+  "id": "ventilator_bellows",
+  "requires_all": [
+   "wooden_tub_bellows"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mine_airways",
+   "air_spring_law"
+  ],
+  "note": "Bellows pump foul air from ships and prisons"
+ },
+ {
+  "id": "surgeons_college",
+  "requires_all": [
+   "surgeons_guild",
+   "college_of_physicians"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "university_clinical_wards"
+  ],
+  "note": "Surgeons form their own college"
+ },
+ {
+  "id": "smallpox_hospital",
+  "requires_all": [
+   "variolation_trials",
+   "ward_hospitals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "subscription_hospitals"
+  ],
+  "note": "Hospital for smallpox and inoculation"
+ },
+ {
+  "id": "scurvy_controlled_trial",
+  "requires_all": [
+   "compared_treatment_groups",
+   "lemon_juice_scurvy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sea_surgeons_chest",
+   "experimental_controls"
+  ],
+  "note": "Controlled trial at sea: citrus cures scurvy"
+ },
+ {
+  "id": "cataract_extraction",
+  "requires_all": [
+   "hollow_needle_cataract",
+   "eye_anatomy_treatise"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "surgeons_college"
+  ],
+  "note": "Clouded lens lifted out"
+ },
+ {
+  "id": "preventive_inoculation",
+  "requires_all": [
+   "variolation_trials",
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "smallpox_hospital",
+   "medical_case_journals",
+   "weekly_mortality_bills"
+  ],
+  "note": "Organized smallpox inoculation"
+ },
+ {
+  "id": "gastric_digestion_experiments",
+  "requires_all": [
+   "experimental_controls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "blood_circulation",
+   "chartered_experimental_society",
+   "steam_bone_digester"
+  ],
+  "note": "Digestion shown by experiment"
+ },
+ {
+  "id": "bedside_thermometer",
+  "requires_all": [
+   "pulse_watch",
+   "precision_thermometry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "university_clinical_wards"
+  ],
+  "note": "Thermometer read at the bedside"
+ },
+ {
+  "id": "chest_percussion",
+  "requires_all": [
+   "university_clinical_wards",
+   "court_autopsy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pulse_watch"
+  ],
+  "note": "Chest tapped to hear disease"
+ },
+ {
+  "id": "organ_seat_pathology",
+  "requires_all": [
+   "court_autopsy",
+   "university_clinical_wards"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "medical_case_journals",
+   "chest_percussion",
+   "anatomical_wax_models"
+  ],
+  "note": "Diseases traced to the organs"
+ },
+ {
+  "id": "deaf_sign_school",
+  "requires_all": [
+   "printed_alphabet_primers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standard_tongue_dictionary",
+   "compulsory_parish_schooling"
+  ],
+  "note": "School teaches the deaf"
+ },
+ {
+  "id": "mass_shallow_inoculation",
+  "requires_all": [
+   "preventive_inoculation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "annual_soul_lists",
+   "smallpox_hospital"
+  ],
+  "note": "Quick shallow inoculation for villages"
+ },
+ {
+  "id": "drowning_rescue_societies",
+  "requires_all": [
+   "subscription_hospitals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "air_spring_law",
+   "fraternal_lodges"
+  ],
+  "note": "Societies revive the drowned"
+ },
+ {
+  "id": "outpatient_dispensaries",
+  "requires_all": [
+   "subscription_hospitals",
+   "chartered_apothecary_company"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "travelling_dispensaries"
+  ],
+  "note": "Free drugs and home visits"
+ },
+ {
+  "id": "prison_hygiene_reform",
+  "requires_all": [
+   "ventilator_bellows",
+   "spotted_fever_distinction"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "penal_reform_no_torture",
+   "correction_workhouses"
+  ],
+  "note": "Jail fever checked by washing and air"
+ },
+ {
+  "id": "medical_police_code",
+  "requires_all": [
+   "state_medical_collegium",
+   "police_ordinance_science"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cameral_science_chairs"
+  ],
+  "note": "A state code of public health"
+ },
+ {
+  "id": "blind_reading_school",
+  "requires_all": [
+   "blind_hospice",
+   "metal_type_casting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deaf_sign_school"
+  ],
+  "note": "Blind taught to read raised letters"
+ },
+ {
+  "id": "foxglove_dropsy",
+  "requires_all": [
+   "compared_treatment_groups",
+   "from_life_printed_herbals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "medical_case_journals",
+   "experimental_controls"
+  ],
+  "note": "Foxglove for dropsy, dosed by trial"
+ },
+ {
+  "id": "town_fever_houses",
+  "requires_all": [
+   "smallpox_hospital",
+   "spotted_fever_distinction"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "subscription_hospitals",
+   "outpatient_dispensaries"
+  ],
+  "note": "Fever houses isolate contagious fevers"
+ },
+ {
+  "id": "moral_treatment_asylums",
+  "requires_all": [
+   "hospital_madness_wards"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "general_confinement_hospital",
+   "subscription_hospitals"
+  ],
+  "note": "Asylums unchain the mad"
+ },
+ {
+  "id": "litter_bearer_drill",
+  "requires_all": [
+   "army_field_hospitals",
+   "printed_drill_manual"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "regimental_surgeons"
+  ],
+  "note": "Drilled bearers carry the wounded off"
+ },
+ {
+  "id": "fleet_citrus_ration",
+  "requires_all": [
+   "scurvy_controlled_trial",
+   "navy_board"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "victualling_yards"
+  ],
+  "note": "Citrus ration issued to the whole fleet"
+ },
+ {
+  "id": "cowpox_vaccination",
+  "requires_all": [
+   "preventive_inoculation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mass_shallow_inoculation",
+   "inoculation_mortality_reckoning",
+   "veterinary_schools"
+  ],
+  "note": "Cowpox protects against smallpox"
+ },
+ {
+  "id": "post_mortality_remarriage",
+  "requires_all": [
+   "consent_marriage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "widow_third_dower",
+   "deserted_village_pasture"
+  ],
+  "note": "Survivors remarry; births surge"
+ },
+ {
+  "id": "vacant_holding_migration",
+  "requires_all": [
+   "deserted_village_pasture"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_migration_dependence",
+   "holding_fragmentation"
+  ],
+  "note": "Families take up holdings left by the dead"
+ },
+ {
+  "id": "decennial_household_registers",
+  "requires_all": [
+   "mutual_surety_tithings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hearth_tax_counts",
+   "decimal_unit_census"
+  ],
+  "note": "Village heads renew household registers each decade (regional)"
+ },
+ {
+  "id": "free_citizenship_grants",
+  "requires_all": [
+   "burgess_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "vacant_holding_migration",
+   "invited_craft_colonies"
+  ],
+  "note": "Free citizenship to incomers"
+ },
+ {
+  "id": "wage_seeking_migration",
+  "requires_all": [
+   "town_migration_dependence"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "vacant_holding_migration",
+   "quarter_session_wage_hearings",
+   "board_and_dry_wage_rates"
+  ],
+  "note": "Workers leave home estates for pay"
+ },
+ {
+  "id": "town_quarter_house_lists",
+  "requires_all": [
+   "burgess_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hearth_tax_counts",
+   "adult_poll_rolls"
+  ],
+  "note": "Quarter books list residents house by house"
+ },
+ {
+  "id": "public_dowry_fund",
+  "requires_all": [
+   "poor_bride_dowries",
+   "municipal_exchange_bank"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "age_priced_life_annuities"
+  ],
+  "note": "Fathers invest early for a daughter's dowry"
+ },
+ {
+  "id": "household_wealth_census",
+  "requires_all": [
+   "realm_holding_survey",
+   "town_quarter_house_lists"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "poll_tax_per_head",
+   "adult_poll_rolls",
+   "hearth_tax_counts"
+  ],
+  "note": "Every person, hearth and asset declared"
+ },
+ {
+  "id": "dowry_caps",
+  "requires_all": [
+   "public_dowry_fund"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bride_dower_gift"
+  ],
+  "note": "Dowries capped by law"
+ },
+ {
+  "id": "census_age_recording",
+  "requires_all": [
+   "household_wealth_census"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fixed_majority_ages"
+  ],
+  "note": "Ages written in the census"
+ },
+ {
+  "id": "registered_foundling_hospital",
+  "requires_all": [
+   "foundling_wheel",
+   "foundling_house"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ward_hospitals"
+  ],
+  "note": "Foundling hospital registers each child"
+ },
+ {
+  "id": "health_office_death_registers",
+  "requires_all": [
+   "town_quarter_house_lists",
+   "pestilence_health_boards"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "commemorative_death_books"
+  ],
+  "note": "Death register with age and cause"
+ },
+ {
+  "id": "foundling_wet_nurses",
+  "requires_all": [
+   "registered_foundling_hospital",
+   "wet_nurse_licensing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Country wet-nurses paid to suckle foundlings"
+ },
+ {
+  "id": "town_orphanage",
+  "requires_all": [
+   "orphan_chambers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "apprentice_indentures",
+   "registered_foundling_hospital"
+  ],
+  "note": "Orphanage raises and apprentices children"
+ },
+ {
+  "id": "women_refuge_houses",
+  "requires_all": [
+   "single_women_houses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "inward_devotion_movement"
+  ],
+  "note": "Refuge houses for women leaving the street"
+ },
+ {
+  "id": "pestilence_orphan_lists",
+  "requires_all": [
+   "town_orphanage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "health_office_death_registers",
+   "congregation_widow_rolls"
+  ],
+  "note": "Plague orphans and widows listed for relief"
+ },
+ {
+  "id": "lineage_genealogy_books",
+  "requires_all": [
+   "ranked_clan_genealogies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "block_printed_books"
+  ],
+  "note": "Lineage books reprinted each generation (regional)"
+ },
+ {
+  "id": "expelled_community_refuge",
+  "requires_all": [
+   "invited_craft_colonies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "foreign_merchant_quarters",
+   "orthodoxy_tribunal"
+  ],
+  "note": "Expelled communities taken in under charter"
+ },
+ {
+  "id": "emigrant_port_licences",
+  "requires_all": [
+   "transoceanic_contact_voyages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ocean_house_of_trade",
+   "town_quarter_house_lists"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Emigrants licensed at the port"
+ },
+ {
+  "id": "overseas_settler_colonies",
+  "requires_all": [
+   "overseas_colony_founding",
+   "transoceanic_contact_voyages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "emigrant_port_licences",
+   "fortified_trading_posts"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Settlers found colonies across the ocean"
+ },
+ {
+  "id": "printed_midwife_manual",
+  "requires_all": [
+   "womens_medicine_treatise",
+   "town_printing_houses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "midwifery_manuals",
+   "sworn_town_midwives"
+  ],
+  "note": "Printed midwives' manual"
+ },
+ {
+  "id": "contact_epidemic_records",
+  "requires_all": [
+   "overseas_settler_colonies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "epidemic_chronicles",
+   "pox_measles_distinction"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Newly met peoples dying of crowd diseases"
+ },
+ {
+  "id": "shrine_vital_registers",
+  "requires_all": [
+   "commemorative_death_books",
+   "dynastic_vital_register"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_marriage_banns",
+   "godparent_kinship"
+  ],
+  "note": "Births, marriages and burials registered at each shrine"
+ },
+ {
+  "id": "devotee_house_closure",
+  "requires_all": [
+   "celibate_communities"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crown_seizes_temple_lands",
+   "printed_reform_dispute"
+  ],
+  "note": "Devotee houses closed"
+ },
+ {
+  "id": "marriage_dissolution_courts",
+  "requires_all": [
+   "divorce_settlements"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_reform_dispute",
+   "equity_conscience_court"
+  ],
+  "note": "Courts may dissolve marriages"
+ },
+ {
+  "id": "witnessed_marriage_rule",
+  "requires_all": [
+   "public_marriage_banns",
+   "shrine_vital_registers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "consent_marriage"
+  ],
+  "note": "Marriage valid only when public and witnessed"
+ },
+ {
+  "id": "mixed_descent_status",
+  "requires_all": [
+   "intermarriage_permission",
+   "overseas_settler_colonies"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Children of settlers and natives given standing"
+ },
+ {
+  "id": "postmortem_caesarean_rule",
+  "requires_all": [
+   "sworn_town_midwives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_midwife_manual",
+   "surgical_anatomy"
+  ],
+  "note": "Children of dying mothers saved by cutting"
+ },
+ {
+  "id": "weekly_mortality_bills",
+  "requires_all": [
+   "shrine_vital_registers",
+   "corpse_searchers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_broadsides",
+   "health_office_death_registers"
+  ],
+  "note": "Weekly bills of burials and baptisms"
+ },
+ {
+  "id": "living_mother_caesarean",
+  "requires_all": [
+   "postmortem_caesarean_rule"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dissection_anatomy_atlas",
+   "amputation_ligature"
+  ],
+  "note": "Mother survives birth by cutting"
+ },
+ {
+  "id": "annual_soul_lists",
+  "requires_all": [
+   "shrine_vital_registers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_quarter_house_lists"
+  ],
+  "note": "Every resident listed each year"
+ },
+ {
+  "id": "headright_land_grants",
+  "requires_all": [
+   "frontier_settler_grants",
+   "overseas_settler_colonies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "settler_estate_shares"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Land for each settler brought over"
+ },
+ {
+  "id": "secret_obstetric_forceps",
+  "requires_all": [
+   "sworn_town_midwives",
+   "printed_midwife_manual"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "screw_tap_and_die",
+   "dissection_anatomy_atlas"
+  ],
+  "note": "Forceps kept as a family secret"
+ },
+ {
+  "id": "soldier_marriage_limits",
+  "requires_all": [
+   "pike_and_shot_regiment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "witnessed_marriage_rule",
+   "articles_of_war"
+  ],
+  "note": "Soldiers' marriages limited"
+ },
+ {
+  "id": "man_midwives",
+  "requires_all": [
+   "sworn_town_midwives",
+   "secret_obstetric_forceps"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "living_mother_caesarean"
+  ],
+  "note": "Man-midwives called to hard births"
+ },
+ {
+  "id": "ship_passenger_lists",
+  "requires_all": [
+   "emigrant_port_licences"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ship_logbooks",
+   "overseas_settler_colonies"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Passenger lists by age and trade"
+ },
+ {
+  "id": "childbed_death_counts",
+  "requires_all": [
+   "weekly_mortality_bills"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "man_midwives"
+  ],
+  "note": "Childbed deaths counted apart"
+ },
+ {
+  "id": "strict_family_settlement",
+  "requires_all": [
+   "entailed_family_land"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "equity_conscience_court",
+   "heir_wardship"
+  ],
+  "note": "Estate tied to the eldest line"
+ },
+ {
+  "id": "burial_age_entries",
+  "requires_all": [
+   "shrine_vital_registers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "census_age_recording",
+   "weekly_mortality_bills"
+  ],
+  "note": "Burial registers note ages"
+ },
+ {
+  "id": "mortality_bill_arithmetic",
+  "requires_all": [
+   "weekly_mortality_bills"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_arithmetic_summa",
+   "inductive_method_program",
+   "probability_theory"
+  ],
+  "note": "Tables drawn from the mortality bills"
+ },
+ {
+  "id": "colonist_bride_passages",
+  "requires_all": [
+   "overseas_settler_colonies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ship_passenger_lists",
+   "public_dowry_fund"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Brides shipped out with dowries"
+ },
+ {
+  "id": "large_family_tax_relief",
+  "requires_all": [
+   "marriage_incentive_laws"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "household_wealth_census"
+  ],
+  "note": "Tax relief for fathers of many children"
+ },
+ {
+  "id": "country_wet_nursing",
+  "requires_all": [
+   "wet_nurse_licensing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "foundling_wet_nurses"
+  ],
+  "note": "Town infants sent to country nurses"
+ },
+ {
+  "id": "colonial_household_registers",
+  "requires_all": [
+   "annual_soul_lists",
+   "overseas_settler_colonies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "overseas_viceroyalties"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Colonial registers by household"
+ },
+ {
+  "id": "separate_wife_property",
+  "requires_all": [
+   "sealed_family_contracts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "equity_conscience_court",
+   "strict_family_settlement"
+  ],
+  "note": "Wife's property kept separate"
+ },
+ {
+  "id": "populationist_policy",
+  "requires_all": [
+   "mortality_bill_arithmetic"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reason_of_state_treatise",
+   "cameral_domain_chambers",
+   "personal_rule_ministers"
+  ],
+  "note": "People counted as the realm's wealth"
+ },
+ {
+  "id": "faith_refugee_edict",
+  "requires_all": [
+   "expelled_community_refuge",
+   "rite_toleration_edict"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "populationist_policy"
+  ],
+  "note": "Refugees of a proscribed faith invited"
+ },
+ {
+  "id": "tontine_annuities",
+  "requires_all": [
+   "age_priced_life_annuities"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mortality_bill_arithmetic",
+   "probability_theory"
+  ],
+  "note": "Annuity shares that grow as members die"
+ },
+ {
+  "id": "register_life_table",
+  "requires_all": [
+   "mortality_bill_arithmetic",
+   "burial_age_entries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "probability_theory",
+   "decimal_log_tables"
+  ],
+  "note": "Life table from deaths by age"
+ },
+ {
+  "id": "vital_events_tax",
+  "requires_all": [
+   "shrine_vital_registers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "appropriated_annual_budget"
+  ],
+  "note": "Taxes on births, marriages, burials and bachelors"
+ },
+ {
+  "id": "birth_multiplier_estimates",
+  "requires_all": [
+   "mortality_bill_arithmetic"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "annual_soul_lists"
+  ],
+  "note": "Numbers estimated from births by a multiplier"
+ },
+ {
+  "id": "nominal_realm_census",
+  "requires_all": [
+   "household_wealth_census",
+   "register_life_table"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "birth_multiplier_estimates",
+   "annual_soul_lists"
+  ],
+  "note": "Whole-realm census on one set day"
+ },
+ {
+  "id": "birth_sex_ratio",
+  "requires_all": [
+   "register_life_table"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "probability_theory"
+  ],
+  "note": "More boys than girls born every year"
+ },
+ {
+  "id": "post_plague_colonization",
+  "requires_all": [
+   "vacant_holding_migration",
+   "populationist_policy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "colonist_recruiting_agents"
+  ],
+  "note": "Emptied districts resettled by state colonists"
+ },
+ {
+  "id": "marriage_register_details",
+  "requires_all": [
+   "shrine_vital_registers",
+   "witnessed_marriage_rule"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "census_age_recording"
+  ],
+  "note": "Marriage registers record ages and birthplaces"
+ },
+ {
+  "id": "convict_transportation",
+  "requires_all": [
+   "overseas_settler_colonies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "convict_galley_oarsmen",
+   "realm_criminal_code"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Convicts transported to colonies"
+ },
+ {
+  "id": "midwife_birth_returns",
+  "requires_all": [
+   "sworn_town_midwives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weekly_mortality_bills",
+   "man_midwives"
+  ],
+  "note": "Midwives return a count of births"
+ },
+ {
+  "id": "military_orphanage",
+  "requires_all": [
+   "town_orphanage",
+   "crown_standing_army"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "invalid_soldiers_hospital"
+  ],
+  "note": "Orphanage for the regiments' children"
+ },
+ {
+  "id": "lodging_guest_registers",
+  "requires_all": [
+   "town_quarter_house_lists"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "capital_police_lieutenant",
+   "travel_passports"
+  ],
+  "note": "Lodging keepers register every guest"
+ },
+ {
+  "id": "published_obstetric_forceps",
+  "requires_all": [
+   "secret_obstetric_forceps",
+   "man_midwives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "medical_case_journals"
+  ],
+  "note": "Forceps made public and taught"
+ },
+ {
+  "id": "national_foundling_hospital",
+  "requires_all": [
+   "registered_foundling_hospital"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "subscription_hospitals",
+   "foundling_wet_nurses"
+  ],
+  "note": "National foundling hospital"
+ },
+ {
+  "id": "divine_order_population_treatise",
+  "requires_all": [
+   "register_life_table"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "birth_sex_ratio"
+  ],
+  "note": "Treatise on the god's order in vital events"
+ },
+ {
+  "id": "actuarial_widows_fund",
+  "requires_all": [
+   "register_life_table"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tontine_annuities",
+   "friendly_society_boxes"
+  ],
+  "note": "Widows' fund reckoned from life tables"
+ },
+ {
+  "id": "lying_in_hospital",
+  "requires_all": [
+   "man_midwives",
+   "subscription_hospitals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "published_obstetric_forceps"
+  ],
+  "note": "Lying-in hospital for poor mothers"
+ },
+ {
+  "id": "population_tables_office",
+  "requires_all": [
+   "nominal_realm_census",
+   "register_life_table"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cameral_science_chairs",
+   "midwife_birth_returns"
+  ],
+  "note": "Standing office of population tables"
+ },
+ {
+  "id": "life_expectancy_tables",
+  "requires_all": [
+   "register_life_table"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "integral_calculus",
+   "actuarial_widows_fund"
+  ],
+  "note": "Expectation of life for every age"
+ },
+ {
+  "id": "settler_doubling_observation",
+  "requires_all": [
+   "colonial_household_registers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "birth_multiplier_estimates"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Settler colonies double each generation"
+ },
+ {
+  "id": "clandestine_marriage_ban",
+  "requires_all": [
+   "witnessed_marriage_rule",
+   "marriage_register_details"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Secret marriages void"
+ },
+ {
+  "id": "maternal_nursing_campaign",
+  "requires_all": [
+   "country_wet_nursing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "foundling_wet_nurses",
+   "epistolary_novel"
+  ],
+  "note": "Mothers urged to nurse their own"
+ },
+ {
+  "id": "inoculation_mortality_reckoning",
+  "requires_all": [
+   "population_tables_office",
+   "preventive_inoculation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "register_life_table"
+  ],
+  "note": "Smallpox deaths with and without inoculation"
+ },
+ {
+  "id": "frontier_colonist_recruitment",
+  "requires_all": [
+   "colonist_recruiting_agents",
+   "populationist_policy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "post_plague_colonization",
+   "faith_refugee_edict"
+  ],
+  "note": "State recruits colonists abroad for the frontier"
+ },
+ {
+  "id": "manikin_midwife_schools",
+  "requires_all": [
+   "sworn_town_midwives",
+   "published_obstetric_forceps"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "anatomical_wax_models"
+  ],
+  "note": "Midwife schools teach with a birth manikin"
+ },
+ {
+  "id": "wet_nurse_bureau",
+  "requires_all": [
+   "wet_nurse_licensing",
+   "country_wet_nursing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "servant_register_offices"
+  ],
+  "note": "City bureau registers and pays nurses"
+ },
+ {
+  "id": "pauper_marriage_bar",
+  "requires_all": [
+   "settlement_removal_laws"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "workhouse_test"
+  ],
+  "note": "Paupers barred from marrying"
+ },
+ {
+  "id": "emigrant_recruiting_agents",
+  "requires_all": [
+   "indentured_passage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "frontier_colonist_recruitment",
+   "ship_passenger_lists"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Agents recruit farming families for overseas"
+ },
+ {
+  "id": "infant_death_causes",
+  "requires_all": [
+   "population_tables_office"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "childbed_death_counts",
+   "foundling_wet_nurses"
+  ],
+  "note": "Infant deaths counted by cause and season"
+ },
+ {
+  "id": "marital_birth_limitation",
+  "requires_all": [
+   "family_size_counsel"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "life_expectancy_tables",
+   "maternal_nursing_campaign"
+  ],
+  "note": "Couples limit births on purpose"
+ },
+ {
+  "id": "secret_birth_house",
+  "requires_all": [
+   "lying_in_hospital"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_foundling_hospital"
+  ],
+  "note": "Birth house for secret deliveries"
+ },
+ {
+  "id": "foundling_nurse_inspection",
+  "requires_all": [
+   "wet_nurse_bureau"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "national_foundling_hospital",
+   "infant_death_causes"
+  ],
+  "note": "Foundling deaths counted; nurses inspected"
+ },
+ {
+  "id": "decennial_apportionment_census",
+  "requires_all": [
+   "nominal_realm_census",
+   "population_tables_office"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fixed_term_estates",
+   "federal_written_constitution"
+  ],
+  "note": "Ten-yearly census apportions seats"
+ },
+ {
+  "id": "civil_vital_registration",
+  "requires_all": [
+   "shrine_vital_registers",
+   "population_tables_office"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "abolition_of_estate_privileges",
+   "uniform_departments"
+  ],
+  "note": "Town officials register vital events"
+ },
+ {
+  "id": "civil_divorce",
+  "requires_all": [
+   "marriage_dissolution_courts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "civil_vital_registration",
+   "declaration_of_rights"
+  ],
+  "note": "Civil divorce by mutual consent"
+ },
+ {
+  "id": "population_pressure_treatise",
+  "requires_all": [
+   "divine_order_population_treatise"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "settler_doubling_observation",
+   "four_course_rotation",
+   "division_of_labor_doctrine"
+  ],
+  "note": "Numbers outgrow food unless checked"
+ },
+ {
+  "id": "great_drowning_flood_marks",
+  "requires_all": [
+   "storm_surge_records"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dike_boards",
+   "drowned_land_abandonment"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Storm surge drowns parishes; flood lines cut"
+ },
+ {
+  "id": "post_plague_woodland",
+  "requires_all": [
+   "abandoned_land_regrowth"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deserted_village_pasture",
+   "woodbank_enclosures"
+  ],
+  "note": "Woods reclaim abandoned ploughland"
+ },
+ {
+  "id": "pine_seed_row_sowing",
+  "requires_all": [
+   "conifer_seed_sowing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tree_nurseries"
+  ],
+  "conditions": {
+   "environment": [
+    "woodland"
+   ]
+  },
+  "note": "Pine seed sown in rows"
+ },
+ {
+  "id": "salmon_conservators",
+  "requires_all": [
+   "river_fishery_wardens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weir_fish_gaps",
+   "net_mesh_limits"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "River conservators guard salmon runs"
+ },
+ {
+  "id": "leased_fuel_blocks",
+  "requires_all": [
+   "kiln_fuel_licences"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "marked_tree_sales",
+   "coppice_with_standards"
+  ],
+  "conditions": {
+   "environment": [
+    "woodland"
+   ]
+  },
+  "note": "Town woods leased by measured block"
+ },
+ {
+  "id": "yearly_felling_blocks",
+  "requires_all": [
+   "felling_rotation_ordinance"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "leased_fuel_blocks"
+  ],
+  "note": "Felling blocks cut in strict rotation"
+ },
+ {
+  "id": "herring_shoal_shift",
+  "requires_all": [
+   "barrel_gutted_herring"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "herring_buss_fleets"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Herring shoals move; fishing towns decline"
+ },
+ {
+  "id": "sheep_enclosure_depopulation",
+  "requires_all": [
+   "deserted_village_pasture",
+   "quickset_hedges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wool_flock_overgrazing"
+  ],
+  "note": "Hedged sheep enclosures empty townships"
+ },
+ {
+  "id": "cold_margin_abandonment",
+  "requires_all": [
+   "crop_limit_shift_watch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "marginal_land_retreat"
+  ],
+  "note": "Upland margins abandoned in cold decades"
+ },
+ {
+  "id": "replant_on_cut_licence",
+  "requires_all": [
+   "leased_fuel_blocks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tree_nurseries",
+   "conifer_seed_sowing"
+  ],
+  "note": "Licence tied to replanting"
+ },
+ {
+  "id": "arsenal_oak_reserves",
+  "requires_all": [
+   "naval_timber_reserves",
+   "marked_tree_sales"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ordnance_office",
+   "forest_law_courts"
+  ],
+  "conditions": {
+   "environment": [
+    "woodland"
+   ]
+  },
+  "note": "State oak reserves, every tree marked"
+ },
+ {
+  "id": "smelter_fume_blight",
+  "requires_all": [
+   "windy_hill_smelting_hearths"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mine_water_complaints"
+  ],
+  "note": "Smelter fumes kill trees on the hills"
+ },
+ {
+  "id": "nitre_earth_exhaustion",
+  "requires_all": [
+   "nitre_earth_leaching"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "potash_saltpetre_works",
+   "nitrate_cultivation"
+  ],
+  "note": "Nitre earth exhausted; beds relaid"
+ },
+ {
+  "id": "game_damage_compensation",
+  "requires_all": [
+   "paled_deer_parks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "warren_escape_liability"
+  ],
+  "note": "Crop damage by protected game paid"
+ },
+ {
+  "id": "illegal_weir_removal",
+  "requires_all": [
+   "weir_fish_gaps",
+   "salmon_conservators"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mill_dam_height_limits"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Weirs without fish gaps pulled down"
+ },
+ {
+  "id": "tillage_protection_laws",
+  "requires_all": [
+   "sheep_enclosure_depopulation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deserted_village_pasture",
+   "dearth_price_ceilings"
+  ],
+  "note": "Laws forbid turning ploughland to pasture"
+ },
+ {
+  "id": "wolf_extirpation",
+  "requires_all": [
+   "wolf_bounties"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hand_gun_tubes",
+   "post_plague_woodland"
+  ],
+  "note": "Wolves hunted out of the lowlands"
+ },
+ {
+  "id": "mine_tailings_silting",
+  "requires_all": [
+   "mine_water_complaints"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "valley_sediment_burial",
+   "liquation_silver_parting"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Silver Ore"
+   ]
+  },
+  "note": "Silver-mine tailings silt the rivers"
+ },
+ {
+  "id": "home_fur_exhaustion",
+  "requires_all": [
+   "fur_beast_depletion"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wildlife_return_watch"
+  ],
+  "note": "Beaver and otter gone from home rivers"
+ },
+ {
+  "id": "enclosure_by_agreement",
+  "requires_all": [
+   "stinted_commons",
+   "quickset_hedges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sheep_enclosure_depopulation",
+   "tillage_protection_laws",
+   "estate_survey_books"
+  ],
+  "note": "Open fields enclosed by agreement"
+ },
+ {
+  "id": "contact_species_exchange",
+  "requires_all": [
+   "introduced_weed_watch",
+   "transoceanic_contact_voyages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "maize_garden_trials"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Weeds, pests and stock cross the ocean both ways"
+ },
+ {
+  "id": "dune_grass_laws",
+  "requires_all": [
+   "drifting_sand_burial"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "great_drowning_flood_marks"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Dune grass protected; dune grazing banned"
+ },
+ {
+  "id": "pressed_plant_herbaria",
+  "requires_all": [
+   "illustrated_herbals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "from_life_printed_herbals",
+   "herbal_classification"
+  ],
+  "note": "Dried specimens glued into books"
+ },
+ {
+  "id": "comparative_anatomy",
+  "requires_all": [
+   "dissection_anatomy_atlas",
+   "herbal_classification"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bird_observation_treatise",
+   "pressed_plant_herbaria"
+  ],
+  "note": "Skeletons compared bone for bone"
+ },
+ {
+  "id": "mercury_amalgam_poisoning",
+  "requires_all": [
+   "mercury_ore_amalgamation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mine_water_complaints",
+   "mercury_ointment"
+  ],
+  "note": "Mercury poisons miners and streams"
+ },
+ {
+  "id": "statute_vermin_bounties",
+  "requires_all": [
+   "wolf_bounties"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "locust_bounty_campaigns"
+  ],
+  "note": "Statute bounties on crop pests"
+ },
+ {
+  "id": "goat_woodland_bans",
+  "requires_all": [
+   "forest_law_courts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coppice_with_standards",
+   "yearly_felling_blocks"
+  ],
+  "note": "Goats barred from young woods"
+ },
+ {
+  "id": "island_forest_felling",
+  "requires_all": [
+   "contact_species_exchange",
+   "island_cane_plantations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sugar_loaf_refining"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Far island forests felled for ships and sugar"
+ },
+ {
+  "id": "commercial_peat_cutting",
+  "requires_all": [
+   "peat_fuel_cutting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sea_coal_substitution",
+   "drainage_windmills"
+  ],
+  "note": "Raised bogs cut by companies"
+ },
+ {
+  "id": "frozen_river_winters",
+  "requires_all": [
+   "crop_limit_shift_watch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cold_margin_abandonment",
+   "daily_weather_diaries"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Rivers freeze; fairs held on the ice"
+ },
+ {
+  "id": "far_land_specimen_voyages",
+  "requires_all": [
+   "pressed_plant_herbaria",
+   "transoceanic_contact_voyages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "foreign_plant_gardens",
+   "faculty_physic_garden"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Naturalists bring back far-land specimens"
+ },
+ {
+  "id": "smelter_damage_payments",
+  "requires_all": [
+   "smelter_fume_blight"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "equity_conscience_court"
+  ],
+  "note": "Smelter owners pay for blighted land"
+ },
+ {
+  "id": "private_nuisance_law",
+  "requires_all": [
+   "coal_smoke_limits",
+   "pleaded_case_reports"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "smelter_damage_payments"
+  ],
+  "note": "Court abates a neighbour's smoke or stench"
+ },
+ {
+  "id": "whale_ground_depletion",
+  "requires_all": [
+   "ocean_galleon"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seabird_colony_shares",
+   "distant_bank_salt_cod",
+   "company_merchant_fleets"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Northern whale grounds fished out"
+ },
+ {
+  "id": "floated_water_meadows",
+  "requires_all": [
+   "hay_meadow_management",
+   "mill_leats"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sluiced_polders",
+   "convertible_husbandry"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Meadows flooded in winter for early grass"
+ },
+ {
+  "id": "last_wild_cattle",
+  "requires_all": [
+   "relict_wild_cattle_reserves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paled_deer_parks"
+  ],
+  "note": "The last wild cattle die"
+ },
+ {
+  "id": "fur_frontier_depletion",
+  "requires_all": [
+   "home_fur_exhaustion",
+   "overseas_settler_colonies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fortified_trading_posts"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Frontier fur trade exhausts beaver"
+ },
+ {
+  "id": "plantation_soil_exhaustion",
+  "requires_all": [
+   "island_forest_felling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plantation_gang_labor",
+   "soil_exhaustion_recognition"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Tobacco and cane exhaust soils"
+ },
+ {
+  "id": "glacier_farm_remission",
+  "requires_all": [
+   "glacier_advance_records"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cold_margin_abandonment"
+  ],
+  "note": "Tax on glacier-buried land remitted"
+ },
+ {
+  "id": "timber_import_dependence",
+  "requires_all": [
+   "arsenal_oak_reserves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fluyt_bulk_carrier"
+  ],
+  "note": "Timber shipped in from northern forests"
+ },
+ {
+  "id": "instrumental_weather_registers",
+  "requires_all": [
+   "daily_weather_diaries",
+   "mercury_barometer"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "district_rain_gauges"
+  ],
+  "note": "Instrument readings at fixed hours"
+ },
+ {
+  "id": "oak_planting_treatise",
+  "requires_all": [
+   "arsenal_oak_reserves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timber_import_dependence",
+   "printed_farm_manuals"
+  ],
+  "note": "Treatise urges planting oak for the fleet"
+ },
+ {
+  "id": "coal_smoke_treatise",
+  "requires_all": [
+   "coal_smoke_limits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "private_nuisance_law",
+   "weekly_mortality_bills"
+  ],
+  "note": "Treatise on the capital's coal smoke"
+ },
+ {
+  "id": "fossil_organic_origin",
+  "requires_all": [
+   "comparative_anatomy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "quarry_reading",
+   "two_lens_tube_microscope"
+  ],
+  "note": "Fossils as remains of living creatures"
+ },
+ {
+  "id": "island_extinction_record",
+  "requires_all": [
+   "contact_species_exchange"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "island_forest_felling"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Island bird wiped out after landing"
+ },
+ {
+  "id": "realm_forest_ordinance",
+  "requires_all": [
+   "forest_law_courts",
+   "arsenal_oak_reserves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cameral_domain_chambers",
+   "yearly_felling_blocks"
+  ],
+  "note": "Realm forest ordinance with district forest masters"
+ },
+ {
+  "id": "oyster_spat_relaying",
+  "requires_all": [
+   "shellfish_closed_seasons",
+   "oyster_bed_culture"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Oyster beds restocked with spat"
+ },
+ {
+  "id": "relative_stratigraphy",
+  "requires_all": [
+   "fossil_organic_origin",
+   "quarry_reading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "route_memory",
+   "powder_rock_blasting"
+  ],
+  "note": "Lower layers are older"
+ },
+ {
+  "id": "property_game_qualification",
+  "requires_all": [
+   "reserved_hunting_rights"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "game_damage_compensation"
+  ],
+  "note": "Hunting limited to landholders"
+ },
+ {
+  "id": "covered_field_drains",
+  "requires_all": [
+   "ridge_furrow_strips"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "convertible_husbandry"
+  ],
+  "note": "Buried brush and stone drains"
+ },
+ {
+  "id": "habitat_observation_records",
+  "requires_all": [
+   "pressed_plant_herbaria",
+   "seasonal_patterns"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "daily_weather_diaries",
+   "herbal_classification"
+  ],
+  "note": "County flora and fauna from dated notes"
+ },
+ {
+  "id": "peat_shrinkage_pumping",
+  "requires_all": [
+   "drained_land_subsidence",
+   "fen_drainage_cuts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "drainage_windmills"
+  ],
+  "note": "Drained peat shrinks; more mills needed"
+ },
+ {
+  "id": "trade_wind_map",
+  "requires_all": [
+   "ocean_wind_circuit"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "instrumental_weather_registers",
+   "ship_logbooks"
+  ],
+  "note": "World map of trade winds"
+ },
+ {
+  "id": "tall_chimney_orders",
+  "requires_all": [
+   "coal_smoke_treatise"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "multi_flue_chimney_stacks"
+  ],
+  "note": "Tall chimneys ordered"
+ },
+ {
+  "id": "pannage_decline",
+  "requires_all": [
+   "mast_count_pannage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "enclosure_by_agreement"
+  ],
+  "note": "Pannage ends; swine penned"
+ },
+ {
+  "id": "storm_path_reconstruction",
+  "requires_all": [
+   "instrumental_weather_registers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_weekly_news",
+   "public_letter_post"
+  ],
+  "note": "Storm path pieced together"
+ },
+ {
+  "id": "game_bird_close_seasons",
+  "requires_all": [
+   "property_game_qualification"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "shellfish_closed_seasons"
+  ],
+  "note": "Close seasons for game birds"
+ },
+ {
+  "id": "sustained_yield_forestry",
+  "requires_all": [
+   "realm_forest_ordinance"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "yearly_felling_blocks",
+   "oak_planting_treatise"
+  ],
+  "note": "Cut no more than grows back"
+ },
+ {
+  "id": "cattle_plague_slaughter_orders",
+  "requires_all": [
+   "contact_contagion",
+   "cattle_droving"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standing_health_magistracy",
+   "walled_out_slaughter"
+  ],
+  "note": "Cattle plague met by slaughter and movement bans"
+ },
+ {
+  "id": "cattle_health_passes",
+  "requires_all": [
+   "cattle_plague_slaughter_orders",
+   "health_passes"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Health certificates for driven cattle"
+ },
+ {
+  "id": "hedgerow_timber_planting",
+  "requires_all": [
+   "enclosure_by_agreement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "oak_planting_treatise"
+  ],
+  "note": "Timber trees planted in new hedges"
+ },
+ {
+  "id": "brown_rat_invasion",
+  "requires_all": [
+   "company_merchant_fleets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "enclosed_wet_docks"
+  ],
+  "note": "Brown rats overrun the ports"
+ },
+ {
+  "id": "plant_transpiration_measurement",
+  "requires_all": [
+   "chartered_experimental_society",
+   "habitat_observation_records"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "laboratory_notebooks",
+   "science_of_weights"
+  ],
+  "note": "Plant water measured by weight"
+ },
+ {
+  "id": "caterpillar_nest_ordinance",
+  "requires_all": [
+   "police_ordinance_science"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "locust_bounty_campaigns"
+  ],
+  "note": "Householders strip caterpillar nests"
+ },
+ {
+  "id": "biological_classification",
+  "requires_all": [
+   "comparative_anatomy",
+   "habitat_observation_records"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "herbal_classification",
+   "pressed_plant_herbaria"
+  ],
+  "note": "Two-part names in a nested classification"
+ },
+ {
+  "id": "tree_ring_notes",
+  "requires_all": [
+   "storm_path_reconstruction"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "yearly_felling_blocks"
+  ],
+  "note": "Tree rings date wet and dry years"
+ },
+ {
+  "id": "pheasant_preserves",
+  "requires_all": [
+   "statute_vermin_bounties",
+   "property_game_qualification"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Keepered pheasant preserves"
+ },
+ {
+  "id": "dye_works_nuisance",
+  "requires_all": [
+   "private_nuisance_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "indigo_vat_dyeing"
+  ],
+  "note": "Dye-works waste ruled a nuisance"
+ },
+ {
+  "id": "tree_volume_tables",
+  "requires_all": [
+   "sustained_yield_forestry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "integral_calculus",
+   "triangulation_survey"
+  ],
+  "note": "Tree volume by girth and height"
+ },
+ {
+  "id": "economy_of_nature",
+  "requires_all": [
+   "biological_classification"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "habitat_observation_records"
+  ],
+  "note": "Each creature's place in a balance"
+ },
+ {
+  "id": "biological_reference_collections",
+  "requires_all": [
+   "biological_classification",
+   "far_land_specimen_voyages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_collection_museum"
+  ],
+  "note": "Type specimens in a public cabinet"
+ },
+ {
+  "id": "phenology_records",
+  "requires_all": [
+   "habitat_observation_records"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "instrumental_weather_registers"
+  ],
+  "note": "First flowers and bird arrivals dated yearly"
+ },
+ {
+  "id": "dune_pine_plantations",
+  "requires_all": [
+   "dune_grass_laws",
+   "pine_seed_row_sowing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Marram and pine fix the dunes"
+ },
+ {
+  "id": "firebreak_rides",
+  "requires_all": [
+   "pine_seed_row_sowing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sustained_yield_forestry"
+  ],
+  "note": "Firebreak rides through pine plantations"
+ },
+ {
+  "id": "assembly_enclosure_acts",
+  "requires_all": [
+   "enclosure_by_agreement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cadastral_tax_survey",
+   "triangulation_survey"
+  ],
+  "note": "Commissioners reallot the commons by act"
+ },
+ {
+  "id": "veterinary_schools",
+  "requires_all": [
+   "cattle_plague_slaughter_orders"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "comparative_anatomy",
+   "draft_horse_breeding"
+  ],
+  "note": "School trains horse and cattle doctors"
+ },
+ {
+  "id": "desiccation_forest_reserves",
+  "requires_all": [
+   "island_forest_felling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "instrumental_weather_registers",
+   "sustained_yield_forestry"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Island forests reserved against drought"
+ },
+ {
+  "id": "state_nitre_plantations",
+  "requires_all": [
+   "nitrate_cultivation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "saltpetre_commissioners",
+   "recrystallised_saltpetre"
+  ],
+  "note": "State nitre plantations under inspectors"
+ },
+ {
+  "id": "colonial_plant_transfers",
+  "requires_all": [
+   "far_land_specimen_voyages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "biological_classification",
+   "coffee_plantations"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Useful plants moved between colonies"
+ },
+ {
+  "id": "charcoal_wood_clearance",
+  "requires_all": [
+   "ironmaster_coppice_contracts",
+   "coke_firing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coal_grading"
+  ],
+  "note": "Charcoal woods grubbed up for farms"
+ },
+ {
+  "id": "weather_observer_network",
+  "requires_all": [
+   "instrumental_weather_registers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "precision_thermometry",
+   "salaried_science_academy"
+  ],
+  "note": "Observers with matched instruments report"
+ },
+ {
+  "id": "mineral_cleavage",
+  "requires_all": [
+   "stone_sorting",
+   "quarry_reading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "relative_stratigraphy",
+   "mining_engineering_academies"
+  ],
+  "note": "Minerals classified by how they split"
+ },
+ {
+  "id": "volcanic_dry_fog_year",
+  "requires_all": [
+   "dim_sun_years"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weather_observer_network"
+  ],
+  "note": "Dry fog from an eruption blights crops"
+ },
+ {
+  "id": "deep_time_geology",
+  "requires_all": [
+   "relative_stratigraphy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fossil_organic_origin",
+   "mineral_cleavage"
+  ],
+  "note": "Earth's age reckoned beyond the chronicles"
+ },
+ {
+  "id": "ocean_whaling_depletion",
+  "requires_all": [
+   "whale_ground_depletion"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "copper_hull_sheathing"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Try-works whalers hunt every ocean"
+ },
+ {
+  "id": "torrent_check_dams",
+  "requires_all": [
+   "avalanche_guard_forests"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sustained_yield_forestry"
+  ],
+  "note": "Check dams and replanting on torrent slopes"
+ },
+ {
+  "id": "town_river_fish_kills",
+  "requires_all": [
+   "river_offal_bans"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dye_works_nuisance"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Fish die below growing towns"
+ },
+ {
+  "id": "extinction_recognized",
+  "requires_all": [
+   "fossil_organic_origin",
+   "comparative_anatomy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "island_extinction_record",
+   "deep_time_geology"
+  ],
+  "note": "Fossil beasts shown extinct"
+ },
+ {
+  "id": "condensing_smelter_flues",
+  "requires_all": [
+   "tall_smelter_flues",
+   "smelter_damage_payments"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reverberatory_furnace"
+  ],
+  "note": "Condensing flues recover lead from fumes"
+ }
+]

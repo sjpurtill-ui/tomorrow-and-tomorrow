@@ -1,0 +1,4 @@
+{
+ "description": "Year adjustments for graph_2400.json, combined from partials/*_year_adjustments.json. tools/research/build_research_block.py sets proposed_year and shifts the band by proposed - target.",
+ "year_adjustments": []
+}
