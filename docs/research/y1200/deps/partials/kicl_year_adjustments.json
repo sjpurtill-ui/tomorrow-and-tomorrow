@@ -1,0 +1,11 @@
+{
+ "year_adjustments": [
+  {
+   "id": "great_domed_temple",
+   "line": "culture",
+   "current": 1283,
+   "proposed": 1287,
+   "reason": "The great domed house stands on pendentives; pendentive_domes (infrastructure 1285) must precede it. Inside band 1238-1328."
+  }
+ ]
+}

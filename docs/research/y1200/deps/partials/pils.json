@@ -1,0 +1,4166 @@
+[
+ {
+  "id": "ratchet_motion_control",
+  "requires_all": [
+   "smithing_tool_sets",
+   "compound_pulleys"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crossbow_mechanism",
+   "counterweight_cranes",
+   "treadwheel_quay_cranes"
+  ],
+  "note": "An iron pawl locks the winch drum against running back."
+ },
+ {
+  "id": "iron_gall_ink",
+  "requires_all": [
+   "ink_on_hide_scrolls",
+   "textile_dye_extraction"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hide_tanning",
+   "parchment_record_preparation",
+   "lampblack_capture"
+  ],
+  "note": "Gall tannin and iron salt make a black ink that bites into hide."
+ },
+ {
+  "id": "salt_cementation_parting",
+  "requires_all": [
+   "argentiferous_lead_working"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "silver_cupellation",
+   "touchstone_testing",
+   "die_struck_coinage"
+  ],
+  "note": "Cupellers learn to draw silver out of gold with salt and heat."
+ },
+ {
+  "id": "niello_inlay",
+  "requires_all": [
+   "goldsmith_filigree",
+   "sulfur_purification"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "inlay_carving",
+   "argentiferous_lead_working"
+  ],
+  "note": "Black sulphide of silver is fused into engraved lines."
+ },
+ {
+  "id": "wire_cell_enamel",
+  "requires_all": [
+   "champleve_enamel",
+   "hard_soldering"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wire_drawing",
+   "goldsmith_filigree"
+  ],
+  "note": "Enamel moves from cut hollows into soldered wire cells."
+ },
+ {
+  "id": "membrane_beaten_gold_leaf",
+  "requires_all": [
+   "goldsmith_filigree"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mercury_fire_gilding",
+   "gold_glass_tesserae",
+   "parchment_record_preparation"
+  ],
+  "note": "Gold is beaten between prepared membranes to a thin leaf."
+ },
+ {
+  "id": "pale_hard_fired_ware",
+  "requires_all": [
+   "high_fire_stoneware"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clay_levigation",
+   "sloped_climbing_kilns",
+   "industrial_pottery_kilns"
+  ],
+  "note": "Refined clay in hotter kilns gives pale, hard stoneware."
+ },
+ {
+  "id": "floating_boat_mills",
+  "requires_all": [
+   "water_mills"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grain_milling",
+   "pontoon_bridges"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "The mill wheel is moored on boats in the current."
+ },
+ {
+  "id": "cord_tensioned_frame_saws",
+  "requires_all": [
+   "hardened_edges",
+   "bronze_toothed_saws"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "iron_files_rasps",
+   "rope_laying"
+  ],
+  "note": "A thin hardened blade is held taut in a frame by twisted cord."
+ },
+ {
+  "id": "horizontal_wheel_mills",
+  "requires_all": [
+   "water_mills"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grain_milling",
+   "river_supply_channels"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "A small flat wheel drives the millstone directly on fast streams."
+ },
+ {
+  "id": "sericulture_reeling",
+  "requires_all": [
+   "drop_spindles"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fruit_tree_grafting",
+   "food_steaming_vessels",
+   "weft_faced_compound_weave"
+  ],
+  "note": "Reared cocoons are stifled and reeled off as continuous thread."
+ },
+ {
+  "id": "slit_silk_tapestry",
+  "requires_all": [
+   "sericulture_reeling",
+   "tapestry_weaving"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weft_faced_compound_weave"
+  ],
+  "note": "Tapestry weaving is done in reeled silk."
+ },
+ {
+  "id": "roller_cotton_gin",
+  "requires_all": [
+   "pole_lathe_turning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hand_crank_winnower",
+   "drop_spindles",
+   "quilted_layer_assembly"
+  ],
+  "note": "Turned rollers, cranked together, strip seed from cotton."
+ },
+ {
+  "id": "bow_fibre_fluffing",
+  "requires_all": [
+   "roller_cotton_gin"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bow_craft",
+   "fiber_combing"
+  ],
+  "note": "A plucked bowstring opens ginned cotton for spinning."
+ },
+ {
+  "id": "trailed_glass_vessels",
+  "requires_all": [
+   "glass_blowing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mold_blown_glass",
+   "fused_cane_glass"
+  ],
+  "note": "Hot glass threads are applied to blown beakers."
+ },
+ {
+  "id": "textile_printing",
+  "requires_all": [
+   "resist_dyeing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "alum_mordant_dyeing",
+   "cylinder_seals",
+   "inlay_carving"
+  ],
+  "note": "Carved blocks print mordant and dye onto cloth."
+ },
+ {
+  "id": "tide_mills",
+  "requires_all": [
+   "water_mills",
+   "tide_reckoning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "canal_sluice_gates",
+   "spillway_reservoirs"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "A gated pond fills at the flood and drives the wheel on the ebb."
+ },
+ {
+  "id": "co_fusion_steel",
+  "requires_all": [
+   "crucible_steel_cakes",
+   "liquid_iron_furnaces"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cast_iron_annealing",
+   "surface_carburization"
+  ],
+  "note": "Molten cast iron is run onto wrought iron to make steel."
+ },
+ {
+  "id": "monumental_iron_casting",
+  "requires_all": [
+   "cast_iron_vessels",
+   "liquid_iron_furnaces"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "closed_moulds",
+   "cored_socket_casting"
+  ],
+  "note": "Several furnaces pour together for statues and bells."
+ },
+ {
+  "id": "multi_coat_lacquer",
+  "requires_all": [
+   "mineral_pigment_preparation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timber_seasoning",
+   "burnished_slipped_wares",
+   "bitumen_sealing"
+  ],
+  "conditions": {
+   "environment": [
+    "woodland"
+   ]
+  },
+  "note": "Tree sap is laid on in many thin coats and polished."
+ },
+ {
+  "id": "cog_and_lantern_gearing",
+  "requires_all": [
+   "water_mills"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "geared_sky_calculator",
+   "hourglass_animal_mill",
+   "overshot_mill_wheels"
+  ],
+  "note": "Pegged cog wheels and lantern pinions change speed and direction."
+ },
+ {
+  "id": "horn_lantern_panes",
+  "requires_all": [
+   "mechanical_screw_presses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "feeding_horns",
+   "hardened_edges"
+  ],
+  "note": "Boiled horn is split and pressed into thin clear leaves."
+ },
+ {
+  "id": "alum_tawed_leather",
+  "requires_all": [
+   "hide_tanning",
+   "alum_mordant_dyeing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lined_tanning_pits"
+  ],
+  "note": "Alum and salt dress skins white without bark tanning."
+ },
+ {
+  "id": "brine_purification",
+  "requires_all": [
+   "salt_working"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "water_settling_basins",
+   "shore_salting_vats"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Salt"
+   ]
+  },
+  "note": "Brine is settled and strained before it is boiled."
+ },
+ {
+  "id": "tin_opacified_glaze",
+  "requires_all": [
+   "lead_glazed_ware",
+   "tin_smelting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ceramic_glaze_formulation",
+   "pewter_casting"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Tin Ore"
+   ]
+  },
+  "note": "Tin ash turns lead glaze an opaque white."
+ },
+ {
+  "id": "lustre_glazed_ware",
+  "requires_all": [
+   "tin_opacified_glaze",
+   "reduction_firing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "argentiferous_lead_working"
+  ],
+  "note": "Silver and copper pigments are reduced to a metallic film on the glaze."
+ },
+ {
+  "id": "crank_grindstones",
+  "requires_all": [
+   "hand_crank_winnower"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "gem_cutting_wheel",
+   "pole_lathe_turning",
+   "hardened_edges"
+  ],
+  "note": "The winnower's crank handle is fitted to a grindstone."
+ },
+ {
+  "id": "paper_sheet_pressing",
+  "requires_all": [
+   "paper_making",
+   "mechanical_screw_presses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "beam_olive_press"
+  ],
+  "note": "The screw press squeezes a wet stack of sheets."
+ },
+ {
+  "id": "potash_forest_glass",
+  "requires_all": [
+   "decolorized_clear_glass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ash_lye_cleansers",
+   "glass_blowing"
+  ],
+  "note": "Forest-plant ash replaces imported soda as the flux."
+ },
+ {
+  "id": "gilt_membrane_thread",
+  "requires_all": [
+   "gold_thread_embroidery",
+   "membrane_beaten_gold_leaf"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "drawloom_pattern_control"
+  ],
+  "note": "Gilded membrane strips are wound or woven as gold thread."
+ },
+ {
+  "id": "pit_cast_bells",
+  "requires_all": [
+   "closed_moulds",
+   "bronze_scrap_remelting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "monumental_iron_casting",
+   "cored_socket_casting"
+  ],
+  "note": "A loam mould is built in a pit and filled with bronze."
+ },
+ {
+  "id": "cast_bronze_doors",
+  "requires_all": [
+   "lost_wax_casting",
+   "bronze_alloying"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pit_cast_bells",
+   "stone_relief_carving"
+  ],
+  "note": "Relief panels are cast in bronze and framed as doors."
+ },
+ {
+  "id": "vertical_axis_windmills",
+  "requires_all": [
+   "horizontal_wheel_mills"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wind_catchers",
+   "brailed_square_sail"
+  ],
+  "conditions": {
+   "environment": [
+    "dry"
+   ]
+  },
+  "note": "Walled towers turn a sailed vertical shaft onto the stone, as the flat water wheel does."
+ },
+ {
+  "id": "lampas_figured_silks",
+  "requires_all": [
+   "drawloom_pattern_control",
+   "sericulture_reeling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weft_faced_compound_weave"
+  ],
+  "note": "The drawloom adds a binding warp to figured silk."
+ },
+ {
+  "id": "fine_goatskin_leather",
+  "requires_all": [
+   "hide_tanning",
+   "textile_dye_extraction"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "alum_tawed_leather",
+   "lined_tanning_pits"
+  ],
+  "note": "Goatskins are tanned with leaf tannin and dyed."
+ },
+ {
+  "id": "edge_runner_mills",
+  "requires_all": [
+   "olive_crushing_mill"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "animal_mill_tending",
+   "ore_roasting",
+   "water_mills"
+  ],
+  "note": "The rolling olive stone is set to crush seed and ore."
+ },
+ {
+  "id": "kaolin_porcelain",
+  "requires_all": [
+   "pale_hard_fired_ware"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clay_levigation",
+   "sloped_climbing_kilns"
+  ],
+  "note": "White clay and porcelain stone fire to a translucent body."
+ },
+ {
+  "id": "spinning_wheels",
+  "requires_all": [
+   "drop_spindles"
+  ],
+  "requires_any": [
+   [
+    "sericulture_reeling",
+    "bow_fibre_fluffing"
+   ]
+  ],
+  "precedents": [
+   "pole_lathe_turning",
+   "wool_spinning"
+  ],
+  "note": "A band from a hand wheel drives the spindle."
+ },
+ {
+  "id": "knitted_loop_fabrics",
+  "requires_all": [
+   "wool_spinning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spinning_wheels",
+   "tablet_weaving"
+  ],
+  "note": "Yarn is worked into interlocked loops on needles."
+ },
+ {
+  "id": "warded_locks",
+  "requires_all": [
+   "smithing_tool_sets",
+   "iron_files_rasps"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spring_shears",
+   "sealed_store_doors"
+  ],
+  "note": "Filed wards and a sprung bolt secure doors and chests."
+ },
+ {
+  "id": "coal_fired_ironworking",
+  "requires_all": [
+   "bloomery_smelting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "liquid_iron_furnaces",
+   "smelter_fuel_depletion_watch"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Coal"
+   ]
+  },
+  "note": "Where charcoal runs short, dug coal fires the smelt."
+ },
+ {
+  "id": "celadon_reduction_glaze",
+  "requires_all": [
+   "reduction_firing",
+   "high_fire_stoneware"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pale_hard_fired_ware",
+   "ceramic_glaze_formulation"
+  ],
+  "note": "An iron glaze fired in a smoky kiln turns grey-green."
+ },
+ {
+  "id": "cam_motion_design",
+  "requires_all": [
+   "water_mills",
+   "water_powered_hammers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cog_and_lantern_gearing",
+   "geared_sky_calculator"
+  ],
+  "note": "Cams on a turning shaft are laid out to lift hammers, stamps and stocks."
+ },
+ {
+  "id": "fulling_mills",
+  "requires_all": [
+   "fullers_earth_finishing",
+   "cam_motion_design"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wool_felting_fulling",
+   "water_mills"
+  ],
+  "note": "Cam-lifted stocks pound cloth in fuller's earth."
+ },
+ {
+  "id": "sgraffito_slipware",
+  "requires_all": [
+   "lead_glazed_ware"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "burnished_slipped_wares",
+   "inlay_carving"
+  ],
+  "note": "A pattern is scratched through slip before glazing."
+ },
+ {
+  "id": "broad_treadle_loom",
+  "requires_all": [
+   "treadle_frame_loom"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "two_beam_upright_loom",
+   "fine_linen_counts"
+  ],
+  "note": "The treadle loom is widened for two weavers."
+ },
+ {
+  "id": "nailer_workshops",
+  "requires_all": [
+   "forged_iron_nails"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "household_workshops_with_hands",
+   "workshop_task_division"
+  ],
+  "note": "Households forge nails to a counted standard."
+ },
+ {
+  "id": "water_ore_stamps",
+  "requires_all": [
+   "cam_motion_design"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "water_powered_hammers",
+   "edge_runner_mills",
+   "ore_roasting"
+  ],
+  "note": "Cam-lifted stamps crush ore."
+ },
+ {
+  "id": "ore_washing_sluices",
+  "requires_all": [
+   "water_ore_stamps"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mine_tailing_ponds",
+   "ore_assaying"
+  ],
+  "note": "Crushed ore is washed and settled by weight."
+ },
+ {
+  "id": "frit_stonepaste",
+  "requires_all": [
+   "faience",
+   "lead_glazed_ware"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "kaolin_porcelain",
+   "crucible_glass_melting"
+  ],
+  "note": "Ground quartz and glass frit make a white body."
+ },
+ {
+  "id": "oil_varnish_paints",
+  "requires_all": [
+   "seed_oil_pressing",
+   "mineral_pigment_preparation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "multi_coat_lacquer",
+   "painted_panel_portraits"
+  ],
+  "note": "Boiled linseed oil binds pigment and varnish."
+ },
+ {
+  "id": "leaded_stained_glass",
+  "requires_all": [
+   "cast_window_glass",
+   "lead_sheet_rolling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "blown_cylinder_panes",
+   "glazed_windows",
+   "glass_wall_mosaics",
+   "potash_forest_glass"
+  ],
+  "note": "Coloured panes are set in lead cames to form pictures."
+ },
+ {
+  "id": "scale_insect_scarlet",
+  "requires_all": [
+   "alum_mordant_dyeing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "textile_dye_extraction",
+   "reduction_vat_blue_dye"
+  ],
+  "note": "Dried scale insects give a scarlet fixed with alum."
+ },
+ {
+  "id": "field_linen_bleaching",
+  "requires_all": [
+   "fiber_retting",
+   "ash_lye_cleansers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fine_linen_counts",
+   "deliberate_milk_souring"
+  ],
+  "note": "Linen is steeped in lye and sour milk and laid out in the sun."
+ },
+ {
+  "id": "soap_manufacture",
+  "requires_all": [
+   "salted_hard_soap"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ash_lye_cleansers",
+   "seed_oil_pressing",
+   "raised_bronze_vessels"
+  ],
+  "note": "Hard soap is boiled in large coppers for sale."
+ },
+ {
+  "id": "clamp_fired_brick",
+  "requires_all": [
+   "kiln_fired_bricks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mould_made_mudbricks",
+   "covered_charcoal_clamps",
+   "stamped_brickyard_output"
+  ],
+  "note": "Moulded bricks are stacked and fired in clamps."
+ },
+ {
+  "id": "fustian_cloth",
+  "requires_all": [
+   "bow_fibre_fluffing",
+   "fiber_retting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spinning_wheels",
+   "broad_treadle_loom"
+  ],
+  "note": "Cotton weft is woven on a linen warp."
+ },
+ {
+  "id": "teasel_nap_shearing",
+  "requires_all": [
+   "spring_shears"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fullers_earth_finishing",
+   "fulling_mills",
+   "wool_felting_fulling"
+  ],
+  "note": "Fulled cloth has its nap raised with teasels and cropped."
+ },
+ {
+  "id": "standard_bar_iron",
+  "requires_all": [
+   "bloom_consolidation",
+   "water_powered_hammers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coal_fired_ironworking",
+   "bloom_fracture_grading",
+   "proclaimed_standard_weights"
+  ],
+  "note": "Water hammers draw blooms into bars of set size."
+ },
+ {
+  "id": "alum_works",
+  "requires_all": [
+   "alum_mordant_dyeing",
+   "ore_roasting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "brine_purification",
+   "lime_burning"
+  ],
+  "note": "Alum rock is roasted, leached and boiled down."
+ },
+ {
+  "id": "post_windmills",
+  "requires_all": [
+   "cog_and_lantern_gearing",
+   "timber_post_beam_connections"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "vertical_axis_windmills",
+   "brailed_square_sail"
+  ],
+  "note": "Geared sails on a turning post face the wind."
+ },
+ {
+  "id": "water_grinding_wheels",
+  "requires_all": [
+   "water_mills",
+   "crank_grindstones"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cog_and_lantern_gearing",
+   "edge_tempering"
+  ],
+  "note": "Grinding wheels are put on the mill shaft."
+ },
+ {
+  "id": "buttonhole_edge_reinforcement",
+  "requires_all": [
+   "garment_pattern_cutting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bone_needle_sewing",
+   "knitted_loop_fabrics",
+   "fine_linen_counts"
+  ],
+  "note": "Bound buttonholes and buttons close garments."
+ },
+ {
+  "id": "treadle_lathe_drive",
+  "requires_all": [
+   "pole_lathe_turning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "treadle_frame_loom",
+   "crank_grindstones"
+  ],
+  "note": "The loom's foot treadle is put to the lathe."
+ },
+ {
+  "id": "paper_stamping_mills",
+  "requires_all": [
+   "paper_sheet_pressing",
+   "water_mills",
+   "cam_motion_design"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "textile_rag_pulping",
+   "fulling_mills"
+  ],
+  "note": "Cam-lifted water stamps beat rags for the paper vat."
+ },
+ {
+  "id": "pile_fabric_weaving",
+  "requires_all": [
+   "sericulture_reeling",
+   "drawloom_pattern_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "knotted_pile_rugs",
+   "lampas_figured_silks"
+  ],
+  "note": "Silk warp loops are raised over rods and cut to pile."
+ },
+ {
+  "id": "wire_hand_cards",
+  "requires_all": [
+   "wire_drawing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "teasel_nap_shearing",
+   "fiber_combing",
+   "spinning_wheels"
+  ],
+  "note": "Bent wire teeth in leather card fibre for the wheel."
+ },
+ {
+  "id": "enamelled_gilt_glass",
+  "requires_all": [
+   "glass_blowing",
+   "wire_cell_enamel"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "membrane_beaten_gold_leaf",
+   "gold_glass_tesserae",
+   "trailed_glass_vessels"
+  ],
+  "note": "Enamel colours and gold are fired onto blown glass."
+ },
+ {
+  "id": "crank_driven_sawmills",
+  "requires_all": [
+   "water_powered_stone_saws",
+   "crank_grindstones"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cord_tensioned_frame_saws",
+   "cam_motion_design"
+  ],
+  "note": "A crank and sliding frame saw timber by water."
+ },
+ {
+  "id": "gelatin_paper_sizing",
+  "requires_all": [
+   "paper_stamping_mills"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "alum_tawed_leather",
+   "hide_tanning"
+  ],
+  "note": "Sheets are dipped in hide glue so ink does not spread."
+ },
+ {
+  "id": "water_blown_stack_bloomery",
+  "requires_all": [
+   "water_driven_bellows",
+   "bloomery_charge_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "slag_tapping",
+   "paired_bag_bellows",
+   "coal_fired_ironworking"
+  ],
+  "note": "Water-driven bellows blow taller bloomery stacks."
+ },
+ {
+  "id": "inlaid_floor_tiles",
+  "requires_all": [
+   "lead_glazed_ware"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sgraffito_slipware",
+   "inlay_carving",
+   "glazed_relief_bricks"
+  ],
+  "note": "White clay is inlaid into stamped red tiles under glaze."
+ },
+ {
+  "id": "deep_silver_mining",
+  "requires_all": [
+   "argentiferous_lead_working",
+   "mine_drainage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "water_ore_stamps",
+   "ore_washing_sluices",
+   "mine_shoring"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Silver Ore"
+   ]
+  },
+  "note": "Deep shafts with drainage reach new silver-lead veins."
+ },
+ {
+  "id": "horse_whim_hoists",
+  "requires_all": [
+   "hourglass_animal_mill",
+   "mine_shoring"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ratchet_motion_control",
+   "rigid_horse_collar",
+   "deep_silver_mining"
+  ],
+  "note": "A horse walking round a drum winds the shaft rope."
+ },
+ {
+  "id": "tinned_iron_plate",
+  "requires_all": [
+   "vessel_tinning",
+   "water_powered_hammers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standard_bar_iron",
+   "lead_sheet_rolling"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Tin Ore"
+   ]
+  },
+  "note": "Hammered iron sheet is dipped in molten tin."
+ },
+ {
+  "id": "draw_lime_kilns",
+  "requires_all": [
+   "lime_burning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "industrial_pottery_kilns",
+   "clamp_fired_brick"
+  ],
+  "note": "Lime is drawn from the base as fresh stone and fuel go in the top."
+ },
+ {
+  "id": "ropewalk_cables",
+  "requires_all": [
+   "rope_laying"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ratchet_motion_control",
+   "rope_rigging",
+   "standing_running_rigging"
+  ],
+  "note": "Long walks lay yarn into ship cables."
+ },
+ {
+  "id": "spun_crown_panes",
+  "requires_all": [
+   "blown_cylinder_panes",
+   "glass_blowing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "potash_forest_glass",
+   "lathe_ground_cast_glass"
+  ],
+  "note": "A blown bubble is spun open into a round pane."
+ },
+ {
+  "id": "rag_chain_mine_pumps",
+  "requires_all": [
+   "mine_drainage",
+   "cog_and_lantern_gearing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "horse_whim_hoists",
+   "mine_drainage_screws",
+   "water_lifting_wheels"
+  ],
+  "note": "Geared drums pull rag balls up a pipe to lift mine water."
+ },
+ {
+  "id": "paper_watermarks",
+  "requires_all": [
+   "paper_stamping_mills",
+   "wire_drawing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "owner_marks",
+   "paper_sheet_pressing"
+  ],
+  "note": "A wire figure sewn on the mould marks the mill's sheets."
+ },
+ {
+  "id": "silk_throwing_mills",
+  "requires_all": [
+   "sericulture_reeling",
+   "cog_and_lantern_gearing",
+   "water_mills"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spinning_wheels",
+   "fulling_mills"
+  ],
+  "note": "A water-driven frame twists many silk threads at once."
+ },
+ {
+  "id": "assay_hallmarks",
+  "requires_all": [
+   "die_struck_coinage",
+   "touchstone_testing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "silver_cupellation",
+   "salt_cementation_parting",
+   "market_wardens",
+   "owner_marks"
+  ],
+  "note": "Tested plate is struck with the assay office's mark."
+ },
+ {
+  "id": "silver_stain_glass",
+  "requires_all": [
+   "leaded_stained_glass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lustre_glazed_ware",
+   "argentiferous_lead_working"
+  ],
+  "note": "A silver compound fired on glass stains it yellow."
+ },
+ {
+  "id": "water_wire_drawing",
+  "requires_all": [
+   "wire_drawing",
+   "cam_motion_design"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "water_powered_hammers",
+   "wire_hand_cards"
+  ],
+  "note": "A water-driven tongs pulls wire through the plate."
+ },
+ {
+  "id": "acid_gold_parting",
+  "requires_all": [
+   "salt_cementation_parting",
+   "mineral_acid_distillation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chemical_distillation",
+   "alembic_distillation"
+  ],
+  "note": "Distilled strong acid dissolves silver away from gold."
+ },
+ {
+  "id": "blast_furnace",
+  "requires_all": [
+   "water_driven_bellows",
+   "water_blown_stack_bloomery",
+   "liquid_iron_furnaces"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coal_fired_ironworking",
+   "monumental_iron_casting",
+   "standard_bar_iron"
+  ],
+  "note": "A tall water-blown stack runs liquid iron without stopping."
+ },
+ {
+  "id": "fitted_tailoring",
+  "requires_all": [
+   "garment_pattern_cutting",
+   "buttonhole_edge_reinforcement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "broad_treadle_loom",
+   "fulling_mills"
+  ],
+  "note": "Cut pieces and buttoned closings shape clothes to the body."
+ },
+ {
+  "id": "underglaze_cobalt_blue",
+  "requires_all": [
+   "kaolin_porcelain"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mineral_pigment_preparation",
+   "tin_opacified_glaze",
+   "lustre_glazed_ware"
+  ],
+  "note": "Cobalt is painted on the body before the glaze."
+ },
+ {
+  "id": "finery_forges",
+  "requires_all": [
+   "blast_furnace",
+   "water_powered_hammers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standard_bar_iron",
+   "co_fusion_steel",
+   "cast_iron_annealing"
+  ],
+  "note": "Pig iron is reheated in blast and hammered to bar."
+ },
+ {
+  "id": "long_distance_conduits",
+  "requires_all": [
+   "arcaded_aqueduct_bridges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "gravity_conduit_grade_control",
+   "two_ended_tunnels",
+   "inverted_pressure_siphons"
+  ],
+  "note": "Tunnels and bridges carry water from distant hills."
+ },
+ {
+  "id": "reused_stone_building",
+  "requires_all": [
+   "dressed_stone_masonry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lewis_block_lifting",
+   "structural_repair_triage"
+  ],
+  "note": "Old dressed stone is taken down and relaid."
+ },
+ {
+  "id": "reservoir_valve_pits",
+  "requires_all": [
+   "spillway_reservoirs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "canal_sluice_gates",
+   "buttressed_masonry_dams"
+  ],
+  "note": "Gated pits meter water out of the reservoir."
+ },
+ {
+  "id": "open_town_cisterns",
+  "requires_all": [
+   "columned_underground_cisterns"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rainwater_cisterns",
+   "plastered_rock_cisterns",
+   "hydraulic_lime_binders"
+  ],
+  "note": "Cistern building moves into large open walled tanks."
+ },
+ {
+  "id": "great_tank_reservoirs",
+  "requires_all": [
+   "diversion_dams",
+   "spillway_reservoirs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reservoir_valve_pits",
+   "canal_sluice_gates",
+   "irrigation_schedules"
+  ],
+  "note": "Long earthen banks store water for channel networks."
+ },
+ {
+  "id": "lead_sheet_roofing",
+  "requires_all": [
+   "lead_sheet_rolling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "domed_masonry_roofs",
+   "fired_roof_tiles"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Lead Ore"
+   ]
+  },
+  "note": "Rolled lead is laid over domes and roofs."
+ },
+ {
+  "id": "thin_brick_shell_vaults",
+  "requires_all": [
+   "vaulting_tubes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pitched_brick_vaults",
+   "gypsum_mortar",
+   "domed_masonry_roofs"
+  ],
+  "note": "Light brick shells in quick mortar need no centering."
+ },
+ {
+  "id": "pendentive_domes",
+  "requires_all": [
+   "squinch_domes",
+   "domed_masonry_roofs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "thin_brick_shell_vaults",
+   "cross_vaults"
+  ],
+  "note": "Curved triangles carry a round dome over a square bay."
+ },
+ {
+  "id": "buttressing_half_domes",
+  "requires_all": [
+   "pendentive_domes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "embedded_relieving_arches",
+   "coffered_vaults"
+  ],
+  "note": "Half-domes take the thrust of the central dome."
+ },
+ {
+  "id": "stepwells",
+  "requires_all": [
+   "ashlar_masonry",
+   "lined_well_shafts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "windlass_wells",
+   "ashlar_retaining_terraces"
+  ],
+  "conditions": {
+   "environment": [
+    "dry"
+   ]
+  },
+  "note": "Stairs and galleries step down to the water table."
+ },
+ {
+  "id": "open_spandrel_arch_bridges",
+  "requires_all": [
+   "stone_arch_bridges",
+   "voussoir_arch_assembly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "embedded_relieving_arches",
+   "masonry_arch_centering"
+  ],
+  "note": "Small arches pierce the spandrels of a flat segmental arch."
+ },
+ {
+  "id": "bracket_set_timber_towers",
+  "requires_all": [
+   "timber_post_beam_connections",
+   "timber_roof_trusses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "long_span_timber_halls",
+   "joinery"
+  ],
+  "note": "Interlocking bracket sets carry stacked timber storeys."
+ },
+ {
+  "id": "plank_walled_timber_halls",
+  "requires_all": [
+   "long_span_timber_halls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timber_splice_connections"
+  ],
+  "note": "Post-built halls are walled with split planks."
+ },
+ {
+  "id": "horseshoe_arches",
+  "requires_all": [
+   "voussoir_arch_assembly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reused_stone_building",
+   "colonnaded_porticoes"
+  ],
+  "note": "Arches are carried past the half-circle on reused columns."
+ },
+ {
+  "id": "domed_steam_baths",
+  "requires_all": [
+   "heated_public_baths",
+   "domed_masonry_roofs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "raised_floor_heating",
+   "sweat_baths"
+  ],
+  "note": "Bath halls are roofed with small domes and filled with steam."
+ },
+ {
+  "id": "channelled_garden_courts",
+  "requires_all": [
+   "courtyard_houses",
+   "river_supply_channels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "leisure_gardens",
+   "public_fountain_houses"
+  ],
+  "note": "Stone channels quarter a walled garden court."
+ },
+ {
+  "id": "river_diversion_weirs",
+  "requires_all": [
+   "diversion_dams"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timber_cofferdams",
+   "canal_sluice_gates"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Weirs raise the river into canal heads."
+ },
+ {
+  "id": "carved_stucco",
+  "requires_all": [
+   "gypsum_mortar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crushed_pottery_plaster",
+   "stone_relief_carving"
+  ],
+  "note": "Gypsum plaster is carved in relief over brick."
+ },
+ {
+  "id": "cross_domed_halls",
+  "requires_all": [
+   "pendentive_domes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cross_vaults",
+   "buttressing_half_domes"
+  ],
+  "note": "A dome on four piers crowns a cross-plan hall."
+ },
+ {
+  "id": "pointed_arches",
+  "requires_all": [
+   "voussoir_arch_assembly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "horseshoe_arches",
+   "masonry_arch_centering"
+  ],
+  "note": "Two arcs meet at a point and push out less."
+ },
+ {
+  "id": "corbelled_spire_towers",
+  "requires_all": [
+   "corbelled_vaults",
+   "dressed_stone_masonry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stepped_temple_towers"
+  ],
+  "note": "Corbelled courses close a tower to a curved peak."
+ },
+ {
+  "id": "wind_catchers",
+  "requires_all": [
+   "building_shading_design",
+   "light_wells"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "courtyard_houses"
+  ],
+  "conditions": {
+   "environment": [
+    "dry"
+   ]
+  },
+  "note": "Tower vents turn the breeze down into rooms."
+ },
+ {
+  "id": "marsh_causeways",
+  "requires_all": [
+   "aggregate_road_foundations",
+   "timber_pile_foundations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plank_trackways",
+   "brushwood_trackways"
+  ],
+  "note": "A paved road is raised on piles across the marsh."
+ },
+ {
+  "id": "intersecting_rib_domes",
+  "requires_all": [
+   "pendentive_domes",
+   "pointed_arches"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cross_domed_halls"
+  ],
+  "note": "Crossing arched ribs carry a dome."
+ },
+ {
+  "id": "brick_stair_towers",
+  "requires_all": [
+   "kiln_fired_bricks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "corbelled_spire_towers",
+   "harbor_beacon_towers",
+   "pitched_brick_vaults"
+  ],
+  "note": "Tall brick towers enclose a climbing stair."
+ },
+ {
+  "id": "mill_leats",
+  "requires_all": [
+   "water_mills"
+  ],
+  "requires_any": [
+   [
+    "diversion_dams",
+    "river_diversion_weirs"
+   ]
+  ],
+  "precedents": [
+   "canal_sluice_gates",
+   "aqueduct_mill_cascades"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Dams and races bring a steady head to the wheel."
+ },
+ {
+  "id": "cutwater_pier_bridges",
+  "requires_all": [
+   "timber_bridges",
+   "timber_cofferdams"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stone_arch_bridges",
+   "timber_pile_foundations"
+  ],
+  "note": "Pointed stone piers built in cofferdams carry a timber deck."
+ },
+ {
+  "id": "canal_locks",
+  "requires_all": [
+   "flash_lock_gates",
+   "canal_sluice_gates"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "trunk_canals",
+   "navigation_canals",
+   "timber_cofferdams",
+   "reservoir_valve_pits"
+  ],
+  "note": "A second gate turns the flash lock into a chamber that lifts boats."
+ },
+ {
+  "id": "estuary_embankments",
+  "requires_all": [
+   "flood_levees"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "embanked_salt_meadows",
+   "timber_pile_foundations"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "River levees are carried along the estuary against the tide."
+ },
+ {
+  "id": "newel_spiral_stairs",
+  "requires_all": [
+   "dressed_stone_masonry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "brick_stair_towers",
+   "corbelled_spire_towers"
+  ],
+  "note": "Each step's end is cut to form the central post."
+ },
+ {
+  "id": "percussion_drilled_wells",
+  "requires_all": [
+   "lined_well_shafts",
+   "windlass_wells"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "brine_purification",
+   "salt_working"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Salt"
+   ]
+  },
+  "note": "A dropped iron bit bores deep brine wells lined with tube."
+ },
+ {
+  "id": "crib_work_quays",
+  "requires_all": [
+   "stone_quays",
+   "timber_cofferdams"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timber_pile_foundations"
+  ],
+  "note": "Stone-filled timber cribs form quays."
+ },
+ {
+  "id": "honeycomb_corbel_vaults",
+  "requires_all": [
+   "squinch_domes",
+   "carved_stucco"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "corbelled_vaults",
+   "intersecting_rib_domes"
+  ],
+  "note": "Tiers of small corbelled niches fill the vault corners."
+ },
+ {
+  "id": "four_hall_courtyards",
+  "requires_all": [
+   "courtyard_houses",
+   "cross_vaults"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "caravanserais",
+   "pointed_arches"
+  ],
+  "note": "A vaulted open hall is set in each side of the court."
+ },
+ {
+  "id": "masonry_buttressing",
+  "requires_all": [
+   "dressed_stone_masonry",
+   "cross_vaults"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ashlar_retaining_terraces",
+   "buttressing_half_domes"
+  ],
+  "note": "Wall piers are thickened where vaults push."
+ },
+ {
+  "id": "vaulted_cloister_walks",
+  "requires_all": [
+   "cross_vaults",
+   "colonnaded_porticoes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "four_hall_courtyards",
+   "masonry_buttressing"
+  ],
+  "note": "The courtyard portico is vaulted."
+ },
+ {
+  "id": "double_shell_domes",
+  "requires_all": [
+   "pendentive_domes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "intersecting_rib_domes",
+   "iron_tie_rods"
+  ],
+  "note": "A tall outer shell is raised over a lower inner dome."
+ },
+ {
+  "id": "rib_vaults",
+  "requires_all": [
+   "pointed_arches",
+   "cross_vaults"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "intersecting_rib_domes",
+   "masonry_buttressing",
+   "masonry_arch_centering"
+  ],
+  "note": "Pointed ribs carry the cross vault's web."
+ },
+ {
+  "id": "self_closing_tide_gates",
+  "requires_all": [
+   "estuary_embankments"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "canal_sluice_gates",
+   "flash_lock_gates"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Flap gates in the dike close as the tide rises."
+ },
+ {
+  "id": "glazed_tile_domes",
+  "requires_all": [
+   "domed_masonry_roofs",
+   "glazed_relief_bricks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tin_opacified_glaze",
+   "frit_stonepaste",
+   "pendentive_domes"
+  ],
+  "note": "Domes are faced in glazed tile."
+ },
+ {
+  "id": "latrine_chute_towers",
+  "requires_all": [
+   "latrine_siting",
+   "dressed_stone_masonry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "flushed_public_latrines",
+   "brick_stair_towers",
+   "stone_keep_towers"
+  ],
+  "note": "Latrine chutes are corbelled out from towers beyond the wall."
+ },
+ {
+  "id": "roof_treadwheel_cranes",
+  "requires_all": [
+   "counterweight_cranes",
+   "treadwheel_quay_cranes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compound_pulleys",
+   "ratchet_motion_control",
+   "timber_roof_trusses"
+  ],
+  "note": "The quay treadwheel is built into the roof space."
+ },
+ {
+  "id": "putlog_scaffolding",
+  "requires_all": [
+   "timber_post_beam_connections"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "masonry_arch_centering",
+   "brick_stair_towers"
+  ],
+  "note": "Scaffold poles rest in holes left in the rising wall."
+ },
+ {
+  "id": "piped_town_conduits",
+  "requires_all": [
+   "stamped_lead_pipes",
+   "long_distance_conduits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_fountain_houses",
+   "aqueduct_distribution_tanks",
+   "open_town_cisterns"
+  ],
+  "note": "Spring water is piped in lead to fountains."
+ },
+ {
+  "id": "clustered_piers",
+  "requires_all": [
+   "rib_vaults"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "masonry_buttressing"
+  ],
+  "note": "Shafts on the piers rise to meet each rib."
+ },
+ {
+  "id": "vaulted_undercrofts",
+  "requires_all": [
+   "cross_vaults"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rib_vaults",
+   "pillared_storehouses"
+  ],
+  "note": "Low vaults carry halls over storage."
+ },
+ {
+  "id": "wall_chimneys",
+  "requires_all": [
+   "upper_storeys",
+   "kiln_fired_bricks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cookfire_smoke_venting_habit",
+   "kiln_smoke_venting_customs",
+   "stone_keep_towers"
+  ],
+  "note": "A hooded hearth vents through a flue in the wall."
+ },
+ {
+  "id": "flying_buttresses",
+  "requires_all": [
+   "masonry_buttressing",
+   "rib_vaults"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clustered_piers",
+   "buttressing_half_domes"
+  ],
+  "note": "Arched struts carry vault thrust over the aisles."
+ },
+ {
+  "id": "bored_log_mains",
+  "requires_all": [
+   "wooden_log_conduits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "piped_town_conduits",
+   "iron_files_rasps"
+  ],
+  "note": "Augered logs jointed end to end carry water under streets."
+ },
+ {
+  "id": "buttress_pinnacles",
+  "requires_all": [
+   "masonry_buttressing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "flying_buttresses",
+   "corbelled_spire_towers"
+  ],
+  "note": "Weighted pinnacles steady the buttress heads."
+ },
+ {
+  "id": "inhabited_bridges",
+  "requires_all": [
+   "stone_arch_bridges",
+   "upper_storeys"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cutwater_pier_bridges",
+   "open_spandrel_arch_bridges"
+  ],
+  "note": "Houses and shops are built along the bridge."
+ },
+ {
+  "id": "roof_flashing_interfaces",
+  "requires_all": [
+   "lead_sheet_roofing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wall_chimneys",
+   "masonry_moisture_management"
+  ],
+  "note": "Lead strips seal roof joints and chimney edges."
+ },
+ {
+  "id": "moulded_brick_architecture",
+  "requires_all": [
+   "clamp_fired_brick"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "glazed_relief_bricks",
+   "moulded_terracotta_series"
+  ],
+  "note": "Moulded and glazed bricks shape whole facades."
+ },
+ {
+  "id": "masonry_repointing",
+  "requires_all": [
+   "lime_mortar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "structural_repair_triage",
+   "masonry_moisture_management"
+  ],
+  "note": "Worn joints are raked and refilled."
+ },
+ {
+  "id": "crown_post_roofs",
+  "requires_all": [
+   "timber_roof_trusses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timber_splice_connections",
+   "long_span_timber_halls"
+  ],
+  "note": "A post on the tie beam carries a collar purlin."
+ },
+ {
+  "id": "carved_rain_spouts",
+  "requires_all": [
+   "dressed_stone_masonry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "masonry_moisture_management",
+   "building_drainage_coordination",
+   "stone_relief_carving"
+  ],
+  "note": "Carved spouts throw rain clear of the wall."
+ },
+ {
+  "id": "mortar_compatibility_assessment",
+  "requires_all": [
+   "masonry_repointing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hydraulic_lime_binders",
+   "pozzolanic_binder_blends"
+  ],
+  "note": "Repair mortar is matched to the old wall."
+ },
+ {
+  "id": "lead_rain_gutters",
+  "requires_all": [
+   "carved_rain_spouts",
+   "lead_sheet_roofing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stamped_lead_pipes",
+   "roof_flashing_interfaces"
+  ],
+  "note": "Lead gutters and pipes lead roof water down."
+ },
+ {
+  "id": "bar_tracery_windows",
+  "requires_all": [
+   "pointed_arches",
+   "glazed_windows"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "leaded_stained_glass",
+   "rib_vaults",
+   "flying_buttresses"
+  ],
+  "note": "Cut stone bars divide wide glazed openings."
+ },
+ {
+  "id": "tracing_floor_templates",
+  "requires_all": [
+   "template_based_sizing",
+   "straightedge_compass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "squared_grid_drawings",
+   "master_builder_office"
+  ],
+  "note": "Full-size drawings on a plaster floor give the masons templates."
+ },
+ {
+  "id": "stone_merchant_houses",
+  "requires_all": [
+   "upper_storeys",
+   "cross_vaults"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "vaulted_undercrofts",
+   "courtyard_houses"
+  ],
+  "note": "Stone houses stand over vaulted shops."
+ },
+ {
+  "id": "rose_windows",
+  "requires_all": [
+   "bar_tracery_windows"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "straightedge_compass",
+   "leaded_stained_glass"
+  ],
+  "note": "Tracery bars radiate in a great circle."
+ },
+ {
+  "id": "covered_cloth_halls",
+  "requires_all": [
+   "timber_roof_trusses",
+   "dressed_stone_masonry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "market_wardens",
+   "caravanserais",
+   "vaulted_undercrofts",
+   "crown_post_roofs"
+  ],
+  "note": "A roofed hall houses the cloth market."
+ },
+ {
+  "id": "jettied_timber_houses",
+  "requires_all": [
+   "timber_post_beam_connections",
+   "upper_storeys"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crown_post_roofs",
+   "timber_splice_connections"
+  ],
+  "note": "Upper floors are built out over the street on joists."
+ },
+ {
+  "id": "belfry_town_halls",
+  "requires_all": [
+   "covered_cloth_halls",
+   "pit_cast_bells"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "brick_stair_towers",
+   "provincial_town_councils"
+  ],
+  "note": "The council hall gains a bell tower."
+ },
+ {
+  "id": "stone_party_walls",
+  "requires_all": [
+   "dressed_stone_masonry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fireproof_roof_ordinance",
+   "jettied_timber_houses"
+  ],
+  "note": "Stone walls between houses stop fire spreading."
+ },
+ {
+  "id": "tiled_stoves",
+  "requires_all": [
+   "wall_chimneys",
+   "lead_glazed_ware"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "raised_floor_heating",
+   "inlaid_floor_tiles"
+  ],
+  "note": "Glazed tile stoves store heat and vent to the flue."
+ },
+ {
+  "id": "toll_paved_streets",
+  "requires_all": [
+   "curbed_paved_streets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "street_gutter_gratings",
+   "river_toll_stations"
+  ],
+  "note": "Street paving is paid for by paving tolls."
+ },
+ {
+  "id": "geometric_design_rules",
+  "requires_all": [
+   "tracing_floor_templates"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "demonstrated_geometry",
+   "ratio_proportion",
+   "flying_buttresses"
+  ],
+  "note": "Geometric rules size piers and buttresses."
+ },
+ {
+  "id": "house_glass_windows",
+  "requires_all": [
+   "glazed_windows",
+   "leaded_stained_glass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spun_crown_panes",
+   "blown_cylinder_panes"
+  ],
+  "note": "Plain leaded glazing reaches town houses."
+ },
+ {
+  "id": "arcaded_market_squares",
+  "requires_all": [
+   "standard_lot_grid_towns",
+   "colonnaded_porticoes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "covered_cloth_halls",
+   "stone_merchant_houses"
+  ],
+  "note": "Arcades are built around the market square."
+ },
+ {
+  "id": "flat_segmental_bridges",
+  "requires_all": [
+   "open_spandrel_arch_bridges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cutwater_pier_bridges",
+   "inhabited_bridges",
+   "geometric_design_rules"
+  ],
+  "note": "Shallow segmental arches give wide flat town bridges."
+ },
+ {
+  "id": "wagon_requisition_levy",
+  "requires_all": [
+   "four_wheeled_wagons",
+   "forward_supply_depots"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "army_grain_levy",
+   "graded_wagon_classes"
+  ],
+  "note": "Towns on the line of march must furnish wagons."
+ },
+ {
+  "id": "camel_displaces_cart",
+  "requires_all": [
+   "camel_caravans",
+   "framed_camel_saddle"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "desert_water_stages",
+   "oasis_caravan_cities"
+  ],
+  "conditions": {
+   "environment": [
+    "dry"
+   ]
+  },
+  "note": "Pack camels undercut carts on dry-country roads."
+ },
+ {
+  "id": "fee_kept_post_stations",
+  "requires_all": [
+   "state_post_passes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "road_stations",
+   "stage_animal_hire",
+   "post_horse_studs"
+  ],
+  "note": "Local holders keep post stations for fees."
+ },
+ {
+  "id": "sewn_plank_hulls",
+  "requires_all": [
+   "plank_extended_dugouts",
+   "cordage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hull_seam_caulking",
+   "seasonal_wind_crossings"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Planks are sewn with coir for surf coasts."
+ },
+ {
+  "id": "road_to_water_freight_shift",
+  "requires_all": [
+   "grain_barge_fleets",
+   "coastal_watercraft"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lighter_transshipment",
+   "state_grain_fleets"
+  ],
+  "note": "Bulk freight moves to barges and coasters."
+ },
+ {
+  "id": "hired_caravan_guides",
+  "requires_all": [
+   "camel_caravans"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "desert_water_stages",
+   "route_memory",
+   "hired_carriers"
+  ],
+  "note": "Guides who know the wells are hired for each crossing."
+ },
+ {
+  "id": "spaced_tenon_planking",
+  "requires_all": [
+   "grown_frame_selection",
+   "frame_moulding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "keel_scarfing",
+   "treenail_fastening"
+  ],
+  "note": "Frames take more load, so tenons are spaced wider."
+ },
+ {
+  "id": "lateen_merchant_rig",
+  "requires_all": [
+   "fore_and_aft_sail"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "raked_bow_foresail",
+   "standing_running_rigging",
+   "deep_hold_merchantmen"
+  ],
+  "note": "Merchant ships carry long-yarded lateen sails."
+ },
+ {
+  "id": "coastal_cabotage_trade",
+  "requires_all": [
+   "coastal_watercraft",
+   "harbor_dues_by_cargo"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coin_count_trade",
+   "pilots_sea_lanes"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Cargo is sold on at each port in short coastal hops."
+ },
+ {
+  "id": "rigid_horse_collar",
+  "requires_all": [
+   "breast_strap_harness"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "haul_harness_weaving",
+   "pack_saddles",
+   "horned_riding_saddle"
+  ],
+  "note": "A padded rigid collar moves the pull onto the shoulders."
+ },
+ {
+  "id": "estate_carrying_services",
+  "requires_all": [
+   "hired_carriers",
+   "four_wheeled_wagons"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "estate_bailiffs"
+  ],
+  "note": "Estates run carting services between their holdings."
+ },
+ {
+  "id": "pass_hospices",
+  "requires_all": [
+   "road_stations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "caravanserais",
+   "mountain_pack_trains",
+   "charity_hospitals"
+  ],
+  "note": "Free hostels at passes shelter travellers."
+ },
+ {
+  "id": "remittance_certificates",
+  "requires_all": [
+   "distant_payment_letters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deposit_transfer_orders",
+   "grain_receipt_banks",
+   "transit_bond_seals"
+  ],
+  "note": "Provincial payments are redeemed in the capital."
+ },
+ {
+  "id": "clinker_shell_construction",
+  "requires_all": [
+   "hull_seam_caulking",
+   "forged_iron_nails"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spaced_tenon_planking",
+   "keel_scarfing",
+   "plank_spiling"
+  ],
+  "note": "Overlapping planks are riveted into a shell."
+ },
+ {
+  "id": "treadle_paddle_boats",
+  "requires_all": [
+   "river_craft",
+   "water_lifting_wheels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "overshot_mill_wheels",
+   "treadle_frame_loom"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Treadles turn paddle wheels."
+ },
+ {
+  "id": "watertight_bulkheads",
+  "requires_all": [
+   "deep_hold_merchantmen",
+   "hull_seam_caulking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spaced_tenon_planking",
+   "great_bulk_freighters"
+  ],
+  "note": "Caulked cross-walls divide the hold."
+ },
+ {
+  "id": "single_horse_shafts",
+  "requires_all": [
+   "breast_strap_harness",
+   "cart_bed_framing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rigid_horse_collar",
+   "drawbar_fitting"
+  ],
+  "note": "Twin shafts put one horse between them."
+ },
+ {
+  "id": "keeled_sailing_longships",
+  "requires_all": [
+   "clinker_shell_construction",
+   "brailed_square_sail"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "keel_scarfing",
+   "mast_making",
+   "standing_running_rigging"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "A true keel lets a clinker ship carry sail at sea."
+ },
+ {
+  "id": "seasonal_beach_emporia",
+  "requires_all": [
+   "seasonal_trade_gathering",
+   "river_landings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coastal_cabotage_trade",
+   "keeled_sailing_longships"
+  ],
+  "note": "Beach markets meet where ships winter."
+ },
+ {
+  "id": "land_finding_signs",
+  "requires_all": [
+   "wayfinding_stars"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pilots_sea_lanes",
+   "seasonal_wind_crossings",
+   "island_hopping_sailing"
+  ],
+  "note": "Birds, swell and cloud are read to find land."
+ },
+ {
+  "id": "great_desert_caravans",
+  "requires_all": [
+   "camel_caravans",
+   "camel_displaces_cart"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hired_caravan_guides",
+   "oasis_caravan_cities",
+   "desert_water_stages"
+  ],
+  "conditions": {
+   "environment": [
+    "dry"
+   ]
+  },
+  "note": "Caravans of thousands cross the desert."
+ },
+ {
+  "id": "portage_hauling_stations",
+  "requires_all": [
+   "portage_paths",
+   "rollers_and_runners"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paved_ship_haulway",
+   "hired_carriers"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Paid teams haul boats between rivers."
+ },
+ {
+  "id": "whippletree_evener",
+  "requires_all": [
+   "rigid_horse_collar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "drawbar_fitting",
+   "single_horse_shafts"
+  ],
+  "note": "A pivot bar evens the pull of each animal."
+ },
+ {
+  "id": "landholder_bridge_duty",
+  "requires_all": [
+   "timber_bridges",
+   "service_land_grants"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "district_road_crews",
+   "wall_repair_levy"
+  ],
+  "note": "Bridge and road upkeep is owed from land."
+ },
+ {
+  "id": "open_sea_cargo_ships",
+  "requires_all": [
+   "keeled_sailing_longships"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deep_hold_merchantmen",
+   "clinker_shell_construction"
+  ],
+  "note": "Beamy keeled hulls carry cargo on open-sea runs."
+ },
+ {
+  "id": "windward_luff_spar",
+  "requires_all": [
+   "keeled_sailing_longships"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "raked_bow_foresail",
+   "fore_and_aft_sail"
+  ],
+  "note": "A spar holds the luff forward when beating."
+ },
+ {
+  "id": "hacksilver_trade",
+  "requires_all": [
+   "weighed_silver_payment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "traveling_balance_kits",
+   "touchstone_testing"
+  ],
+  "note": "Silver is cut, tested and weighed again."
+ },
+ {
+  "id": "winter_sledge_roads",
+  "requires_all": [
+   "sledges_travois"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ox_drawn_sledges",
+   "skis_snowshoes"
+  ],
+  "note": "Frozen rivers and marsh serve as sledge roads."
+ },
+ {
+  "id": "nailed_horseshoes",
+  "requires_all": [
+   "iron_hoof_boots",
+   "forged_iron_nails"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "smithing_tool_sets",
+   "rigid_horse_collar"
+  ],
+  "note": "Iron shoes are nailed to the hoof."
+ },
+ {
+  "id": "pole_star_latitude_tablet",
+  "requires_all": [
+   "wayfinding_stars",
+   "latitude_zones"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "land_finding_signs",
+   "star_position_catalogue"
+  ],
+  "note": "Pole-star height is held with a knotted tablet."
+ },
+ {
+  "id": "battened_panel_sails",
+  "requires_all": [
+   "fore_and_aft_sail"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sail_panel_cutting",
+   "watertight_bulkheads"
+  ],
+  "note": "Battens let the sail reef panel by panel."
+ },
+ {
+  "id": "voyage_victualling_scales",
+  "requires_all": [
+   "graded_rations",
+   "cache_capacity_accounting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "siege_ration_reckoning",
+   "open_sea_cargo_ships"
+  ],
+  "note": "Ship stores are reckoned per man per day."
+ },
+ {
+  "id": "packhorse_carrier_trains",
+  "requires_all": [
+   "mountain_pack_trains",
+   "hired_carriers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nailed_horseshoes",
+   "pack_load_balancing"
+  ],
+  "note": "Hired carriers run pack-horse trains."
+ },
+ {
+  "id": "tandem_file_harness",
+  "requires_all": [
+   "rigid_horse_collar",
+   "whippletree_evener"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nailed_horseshoes"
+  ],
+  "note": "Collared horses are put in file."
+ },
+ {
+  "id": "carrier_stage_tariffs",
+  "requires_all": [
+   "hired_carriers",
+   "price_wage_schedules"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "packhorse_carrier_trains",
+   "stage_animal_hire"
+  ],
+  "note": "Carriage is priced per load and stage."
+ },
+ {
+  "id": "funded_traveling_merchant",
+  "requires_all": [
+   "voyage_partnerships"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "written_freight_contracts",
+   "sealed_family_contracts"
+  ],
+  "note": "A partner at home funds one who travels."
+ },
+ {
+  "id": "carvel_frame_construction",
+  "requires_all": [
+   "frame_moulding",
+   "grown_frame_selection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spaced_tenon_planking",
+   "hull_seam_caulking",
+   "forged_iron_nails",
+   "keel_scarfing"
+  ],
+  "note": "Frames go up first and flush planks are fastened to them."
+ },
+ {
+  "id": "horse_transport_ships",
+  "requires_all": [
+   "open_sea_cargo_ships"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "amphibious_operations",
+   "deep_hold_merchantmen",
+   "mounted_remount_school"
+  ],
+  "note": "Hulls are fitted to carry and land horses."
+ },
+ {
+  "id": "wheel_drag_shoes",
+  "requires_all": [
+   "iron_tyre_fitting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "four_wheeled_wagons",
+   "pivoting_front_axle"
+  ],
+  "note": "An iron shoe under the wheel brakes on descents."
+ },
+ {
+  "id": "merchant_safe_conducts",
+  "requires_all": [
+   "sealed_travel_passes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "envoy_inviolability",
+   "transit_bond_seals"
+  ],
+  "note": "Sealed letters protect merchants on hostile ground."
+ },
+ {
+  "id": "guarded_trade_fairs",
+  "requires_all": [
+   "seasonal_trade_gathering",
+   "market_peacekeepers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_beach_emporia",
+   "market_wardens",
+   "holy_truce_days"
+  ],
+  "note": "Fairs run under a guarded peace with settling days."
+ },
+ {
+  "id": "merchant_bale_marks",
+  "requires_all": [
+   "painted_cargo_labels",
+   "owner_marks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cargo_seals",
+   "coopered_cargo_casks"
+  ],
+  "note": "Merchants' marks go on bales and casks."
+ },
+ {
+  "id": "floating_needle_compass",
+  "requires_all": [
+   "wire_drawing",
+   "land_finding_signs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pole_star_latitude_tablet",
+   "hardened_edges",
+   "open_sea_cargo_ships"
+  ],
+  "note": "A rubbed iron needle floated in water points north."
+ },
+ {
+  "id": "carrier_loss_liability",
+  "requires_all": [
+   "written_freight_contracts",
+   "carrier_stage_tariffs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "general_average_jettison"
+  ],
+  "note": "Carriers answer for goods lost on the road."
+ },
+ {
+  "id": "bridge_brotherhoods",
+  "requires_all": [
+   "river_toll_stations",
+   "stone_arch_bridges"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "landholder_bridge_duty",
+   "cutwater_pier_bridges",
+   "craft_mutual_aid_clubs"
+  ],
+  "note": "Brotherhoods keep bridges by toll and gift."
+ },
+ {
+  "id": "horse_towed_barges",
+  "requires_all": [
+   "towpaths",
+   "rigid_horse_collar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grain_barge_fleets",
+   "canal_locks"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Collared horses tow barges on towpaths."
+ },
+ {
+  "id": "written_sea_customs",
+  "requires_all": [
+   "general_average_jettison",
+   "written_freight_contracts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harbor_masters",
+   "written_law_code"
+  ],
+  "note": "Sea customs are written down."
+ },
+ {
+  "id": "horse_freight_wagons",
+  "requires_all": [
+   "four_wheeled_wagons",
+   "tandem_file_harness"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pivoting_front_axle",
+   "nailed_horseshoes",
+   "iron_tyre_fitting"
+  ],
+  "note": "Horse teams haul freight wagons on long routes."
+ },
+ {
+  "id": "bills_of_exchange",
+  "requires_all": [
+   "distant_payment_letters",
+   "money_changers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "remittance_certificates",
+   "deposit_transfer_orders",
+   "guarded_trade_fairs"
+  ],
+  "note": "A bill is paid in another coin at a set date."
+ },
+ {
+  "id": "endowed_day_stage_inns",
+  "requires_all": [
+   "road_stations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pass_hospices",
+   "caravanserais",
+   "fee_kept_post_stations"
+  ],
+  "note": "Endowed inns are a day's ride apart."
+ },
+ {
+  "id": "cable_ferries",
+  "requires_all": [
+   "ferry_crossings",
+   "rope_laying"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pontoon_bridges"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "A ferry is hauled along a fixed rope."
+ },
+ {
+  "id": "day_walk_market_spacing",
+  "requires_all": [
+   "market_wardens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paced_distance_counting",
+   "market_timing_knowledge",
+   "guarded_trade_fairs"
+  ],
+  "note": "Weekly markets are set a day's walk apart."
+ },
+ {
+  "id": "sternpost_rudder",
+  "requires_all": [
+   "paired_quarter_rudders",
+   "smithing_tool_sets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "carvel_frame_construction",
+   "keeled_sailing_longships",
+   "open_sea_cargo_ships"
+  ],
+  "note": "A rudder hangs on iron pintles at the sternpost."
+ },
+ {
+  "id": "high_sided_bulk_ships",
+  "requires_all": [
+   "open_sea_cargo_ships",
+   "sternpost_rudder"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clinker_shell_construction",
+   "carvel_frame_construction",
+   "great_bulk_freighters"
+  ],
+  "note": "A flat bottom and high sides carry bulk."
+ },
+ {
+  "id": "deck_windlass",
+  "requires_all": [
+   "ratchet_motion_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "windlass_wells",
+   "high_sided_bulk_ships"
+  ],
+  "note": "A pawled windlass works anchors and yards."
+ },
+ {
+  "id": "realm_relay_post",
+  "requires_all": [
+   "state_post_passes",
+   "post_horse_studs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fee_kept_post_stations",
+   "trunk_road_courier_relay",
+   "endowed_day_stage_inns"
+  ],
+  "note": "Horse relays a day apart cross the realm."
+ },
+ {
+  "id": "annual_bulk_fleets",
+  "requires_all": [
+   "merchant_ship_convoys",
+   "high_sided_bulk_ships"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coopered_cargo_casks",
+   "seasonal_wind_crossings"
+  ],
+  "note": "Bulk fleets sail together each year."
+ },
+ {
+  "id": "public_weighhouses",
+  "requires_all": [
+   "public_grain_weighing",
+   "standard_weight_sets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "proclaimed_standard_weights",
+   "traveling_balance_kits"
+  ],
+  "note": "Bulk goods are weighed for a fee."
+ },
+ {
+  "id": "reef_points",
+  "requires_all": [
+   "brailed_square_sail"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "high_sided_bulk_ships",
+   "sail_panel_cutting"
+  ],
+  "note": "Reef points shorten the square sail aloft."
+ },
+ {
+  "id": "cask_tonnage_rating",
+  "requires_all": [
+   "coopered_cargo_casks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "annual_bulk_fleets",
+   "high_sided_bulk_ships",
+   "standard_transport_jars"
+  ],
+  "note": "Ships are rated by casks carried."
+ },
+ {
+  "id": "reservoir_fed_summit_canals",
+  "requires_all": [
+   "trunk_canals",
+   "canal_locks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "great_tank_reservoirs",
+   "reservoir_valve_pits",
+   "spillway_reservoirs"
+  ],
+  "note": "Upland reservoirs feed a canal's summit pound."
+ },
+ {
+  "id": "compass_bearing_sea_charts",
+  "requires_all": [
+   "written_sailing_directions",
+   "floating_needle_compass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "scaled_grid_mapping",
+   "strip_route_maps",
+   "magnetic_declination_note"
+  ],
+  "note": "Harbors are charted by compass bearing."
+ },
+ {
+  "id": "bills_of_lading",
+  "requires_all": [
+   "written_freight_contracts",
+   "consignment_lists"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "written_sea_customs",
+   "merchant_bale_marks"
+  ],
+  "note": "The master signs for cargo loaded."
+ },
+ {
+  "id": "auctioned_galley_convoys",
+  "requires_all": [
+   "merchant_ship_convoys",
+   "auctioned_public_contracts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "series_built_war_galleys",
+   "naval_arsenals"
+  ],
+  "note": "State galleys are auctioned to merchants."
+ },
+ {
+  "id": "dry_compass_card",
+  "requires_all": [
+   "floating_needle_compass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compass_bearing_sea_charts",
+   "magnetic_declination_note",
+   "lodestone_pole_experiments"
+  ],
+  "note": "A pivoted needle turns a wind-rose card."
+ },
+ {
+  "id": "staple_market_towns",
+  "requires_all": [
+   "guarded_trade_fairs",
+   "public_weighhouses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "merchant_guild_monopoly",
+   "chartered_town_liberties"
+  ],
+  "note": "Passing goods must be offered for sale in staple towns."
+ },
+ {
+  "id": "sandglass_dead_reckoning",
+  "requires_all": [
+   "floating_needle_compass",
+   "glass_blowing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "outflow_water_clock",
+   "compass_bearing_sea_charts",
+   "dry_compass_card"
+  ],
+  "note": "Sandglass watches, heading and speed give the ship's place."
+ },
+ {
+  "id": "licensed_pilots",
+  "requires_all": [
+   "pilots_sea_lanes",
+   "harbor_masters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sounding_lead",
+   "written_sea_customs"
+  ],
+  "note": "Pilots are licensed for river and harbor."
+ },
+ {
+  "id": "merchant_courier_schedules",
+  "requires_all": [
+   "trunk_road_courier_relay"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "realm_relay_post",
+   "bills_of_exchange",
+   "guarded_trade_fairs"
+  ],
+  "note": "Merchant couriers run on schedules."
+ },
+ {
+  "id": "merchant_route_handbooks",
+  "requires_all": [
+   "road_itineraries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "strip_route_maps",
+   "carrier_stage_tariffs",
+   "merchant_bale_marks"
+  ],
+  "note": "Handbooks list routes, tolls, coins and measures."
+ },
+ {
+  "id": "premium_sea_insurance",
+  "requires_all": [
+   "general_average_jettison",
+   "bills_of_exchange"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "risk_pools",
+   "bills_of_lading"
+  ],
+  "note": "Sea risk is covered for a premium."
+ },
+ {
+  "id": "harbor_ship_registers",
+  "requires_all": [
+   "harbor_masters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cask_tonnage_rating",
+   "licensed_pilots",
+   "property_registers"
+  ],
+  "note": "The harbor registers ships, owners and masters."
+ },
+ {
+  "id": "hilltop_citadel_towns",
+  "requires_all": [
+   "contracted_circuit_walls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hilltop_refuges",
+   "town_enclosure_walls"
+  ],
+  "note": "Shrunken towns wall in a small hilltop core."
+ },
+ {
+  "id": "triple_line_land_walls",
+  "requires_all": [
+   "wet_moats",
+   "engine_proof_walls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bowshot_tower_spacing",
+   "city_port_long_walls",
+   "glacis_ramparts"
+  ],
+  "note": "Moat, outer wall and towered inner wall form one defense."
+ },
+ {
+  "id": "pass_command_garrisons",
+  "requires_all": [
+   "permanent_frontier_fortresses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "guarded_road_posts",
+   "frontier_customs_posts"
+  ],
+  "note": "Pass commanders hold the frontier passes."
+ },
+ {
+  "id": "military_district_settlement",
+  "requires_all": [
+   "garrison_farm_colonies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "veteran_land_allotments",
+   "service_land_grants",
+   "military_settler_colonies"
+  ],
+  "note": "Soldiers hold district land for service."
+ },
+ {
+  "id": "mounted_remount_school",
+  "requires_all": [
+   "domesticated_mounts",
+   "armored_riding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "post_horse_studs",
+   "mounted_scouts"
+  ],
+  "note": "State studs train cavalry horses."
+ },
+ {
+  "id": "bow_and_lance_cavalry",
+  "requires_all": [
+   "mounted_archery",
+   "two_handed_lancers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "armored_horse_cataphracts",
+   "mounted_remount_school"
+  ],
+  "note": "Riders carry both bow and lance."
+ },
+ {
+  "id": "harbor_chain_booms",
+  "requires_all": [
+   "forge_welding",
+   "stone_quays"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harbor_beacon_towers",
+   "anti_piracy_squadrons"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Welded chain on floats closes the harbor mouth."
+ },
+ {
+  "id": "generals_field_manual",
+  "requires_all": [
+   "siege_defense_manual",
+   "recruit_drill_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "authored_prose_treatises",
+   "nightly_marching_camps",
+   "manipular_lines"
+  ],
+  "note": "Generals get a written manual of tactics and march order."
+ },
+ {
+  "id": "paired_stirrups",
+  "requires_all": [
+   "single_mounting_stirrup"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "horned_riding_saddle",
+   "forge_welding"
+  ],
+  "note": "A stirrup on each side gives a firm seat."
+ },
+ {
+  "id": "high_bow_war_saddle",
+  "requires_all": [
+   "horned_riding_saddle",
+   "paired_stirrups"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "armored_riding",
+   "smithing_tool_sets"
+  ],
+  "note": "High iron-shod boards brace the rider."
+ },
+ {
+  "id": "raid_season_refuges",
+  "requires_all": [
+   "hilltop_refuges",
+   "fortified_stores"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coastal_raider_watch",
+   "ventilated_granaries"
+  ],
+  "note": "Villagers and grain withdraw to walled refuges."
+ },
+ {
+  "id": "arms_export_bans",
+  "requires_all": [
+   "frontier_customs_posts",
+   "standard_kit_issue"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "salt_iron_monopoly",
+   "treaty_border_levies"
+  ],
+  "note": "Arms may not pass the frontier."
+ },
+ {
+  "id": "lugged_war_spears",
+  "requires_all": [
+   "socketed_spearheads",
+   "forge_welding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "iron_spear_levy",
+   "hardened_edges"
+  ],
+  "note": "Lugs below the blade stop over-penetration."
+ },
+ {
+  "id": "siphoned_liquid_fire",
+  "requires_all": [
+   "incendiary_missiles",
+   "piston_force_pumps"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "alembic_distillation",
+   "force_pump_fire_engines",
+   "bitumen_sealing"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Bitumen"
+   ]
+  },
+  "note": "A force pump throws burning petroleum from ships; no powder."
+ },
+ {
+  "id": "spur_prow_galleys",
+  "requires_all": [
+   "three_banked_warships",
+   "lateen_merchant_rig"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bronze_ram_galleys",
+   "boarding_bridges",
+   "siphoned_liquid_fire"
+  ],
+  "note": "Lateen-rigged galleys carry a spur above the water."
+ },
+ {
+  "id": "muster_rolls",
+  "requires_all": [
+   "household_muster",
+   "levy_age_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "census_rolls",
+   "standard_kit_issue"
+  ],
+  "note": "Rolls list each holding's men and gear."
+ },
+ {
+  "id": "river_raiding_ships",
+  "requires_all": [
+   "clinker_shell_construction"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "amphibious_operations",
+   "river_craft",
+   "raid_scouting"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Light clinker ships strike upriver."
+ },
+ {
+  "id": "mounted_retinue_summons",
+  "requires_all": [
+   "armored_riding",
+   "service_land_grants"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paired_stirrups",
+   "muster_rolls",
+   "vassal_loyalty_oaths"
+  ],
+  "note": "Armed riders are called out by summons."
+ },
+ {
+  "id": "castle_guard_rotations",
+  "requires_all": [
+   "permanent_frontier_fortresses",
+   "muster_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "watch_rotation",
+   "rotating_relief_wardens"
+  ],
+  "note": "Paid castle-guard serves by rotation."
+ },
+ {
+  "id": "fortified_river_bridges",
+  "requires_all": [
+   "timber_bridges",
+   "gate_watchtowers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "river_watch_posts",
+   "flanked_gate_complex"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Gated bridges block raiders' ships."
+ },
+ {
+  "id": "realm_beacon_chain",
+  "requires_all": [
+   "alarm_relay_signals",
+   "prearranged_beacon_chains"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harbor_beacon_towers",
+   "torch_alphabet_signals"
+  ],
+  "note": "Beacons carry alarm from frontier to court."
+ },
+ {
+  "id": "foreign_household_guard",
+  "requires_all": [
+   "palace_guard"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "contracted_mercenary_captains",
+   "vassal_loyalty_oaths"
+  ],
+  "note": "Sworn foreigners guard the ruler."
+ },
+ {
+  "id": "captive_trained_corps",
+  "requires_all": [
+   "recruit_drill_schools",
+   "long_service_enlistment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "captive_adoption",
+   "mounted_archery"
+  ],
+  "note": "Bought captives are trained from youth as soldiers."
+ },
+ {
+  "id": "burgh_defense_network",
+  "requires_all": [
+   "town_enclosure_walls",
+   "wall_repair_levy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bowshot_tower_spacing",
+   "border_fortress_chains",
+   "timber_laced_ramparts"
+  ],
+  "note": "Walled towns a day apart are manned from assigned land."
+ },
+ {
+  "id": "rotating_half_levy",
+  "requires_all": [
+   "muster_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "labor_rotations",
+   "iron_spear_levy"
+  ],
+  "note": "Half the levy serves while half farms."
+ },
+ {
+  "id": "shadowing_raid_defense",
+  "requires_all": [
+   "mounted_scouts",
+   "mobile_field_reserves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coastal_raider_watch",
+   "raid_season_refuges"
+  ],
+  "note": "Raiders are shadowed and struck on the way home."
+ },
+ {
+  "id": "planned_ring_forts",
+  "requires_all": [
+   "field_fortifications",
+   "standard_lot_grid_towns"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nightly_marching_camps",
+   "burgh_defense_network"
+  ],
+  "note": "Ring forts are laid out to one plan on a grid."
+ },
+ {
+  "id": "twin_gate_passage",
+  "requires_all": [
+   "flanked_gate_complex",
+   "portcullis_gates"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dressed_stone_masonry",
+   "sally_ports_cistern_stairs"
+  ],
+  "note": "Two gates close a barred passage between towers."
+ },
+ {
+  "id": "motte_and_bailey",
+  "requires_all": [
+   "ditch_palisades",
+   "defensive_ditch_siting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "timber_laced_ramparts",
+   "gate_watchtowers"
+  ],
+  "note": "A ditched mound carries a timber tower over a fenced yard."
+ },
+ {
+  "id": "kite_shield_cavalry",
+  "requires_all": [
+   "mail_armor_fabrication",
+   "armored_riding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paired_stirrups",
+   "hide_wicker_shields"
+  ],
+  "note": "Mailed riders carry long kite shields."
+ },
+ {
+  "id": "couched_lance_charge",
+  "requires_all": [
+   "two_handed_lancers",
+   "paired_stirrups",
+   "high_bow_war_saddle"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "kite_shield_cavalry",
+   "wedge_shock_cavalry",
+   "mounted_retinue_summons"
+  ],
+  "note": "The lance is couched and driven by horse and saddle."
+ },
+ {
+  "id": "stone_keep_towers",
+  "requires_all": [
+   "dressed_stone_masonry",
+   "motte_and_bailey"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lime_mortar",
+   "corbelled_spire_towers"
+  ],
+  "note": "The lord's tower is built in stone."
+ },
+ {
+  "id": "wall_top_hoardings",
+  "requires_all": [
+   "timber_post_beam_connections",
+   "wall_missile_posts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stone_keep_towers"
+  ],
+  "note": "Timber galleries overhang the wall top."
+ },
+ {
+  "id": "hearth_cover_curfew",
+  "requires_all": [
+   "town_night_curfew"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_fire_watch",
+   "communal_bell_hours"
+  ],
+  "note": "Hearths are covered at the evening bell."
+ },
+ {
+  "id": "keep_cistern_stores",
+  "requires_all": [
+   "fortified_stores",
+   "rainwater_cisterns"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stone_keep_towers",
+   "sally_ports_cistern_stairs",
+   "siege_ration_reckoning"
+  ],
+  "note": "Keeps get cisterns and wells for long sieges."
+ },
+ {
+  "id": "stirrup_cocked_crossbow",
+  "requires_all": [
+   "crossbow_mechanism",
+   "standard_trigger_locks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rotating_crossbow_ranks",
+   "crossbow_sight_graduation",
+   "smithing_tool_sets"
+  ],
+  "note": "A foot stirrup lets the archer span with the back."
+ },
+ {
+  "id": "curtain_wall_flanking_towers",
+  "requires_all": [
+   "dressed_stone_masonry",
+   "bowshot_tower_spacing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stone_keep_towers",
+   "triple_line_land_walls"
+  ],
+  "note": "Square towers flank stone curtain walls."
+ },
+ {
+  "id": "series_built_war_galleys",
+  "requires_all": [
+   "naval_arsenals",
+   "spur_prow_galleys"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "workshop_task_division",
+   "state_manufactories"
+  ],
+  "note": "The arsenal builds galleys in series."
+ },
+ {
+  "id": "mail_underpadding",
+  "requires_all": [
+   "mail_armor_fabrication",
+   "quilted_layer_assembly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "textile_armor_layering"
+  ],
+  "note": "A quilted coat is worn under mail."
+ },
+ {
+  "id": "hue_and_cry",
+  "requires_all": [
+   "alarm_relay_customs",
+   "mutual_surety_tithings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "road_bandit_patrols",
+   "herd_recovery_pursuit"
+  ],
+  "note": "Every household must join the pursuit."
+ },
+ {
+  "id": "hybrid_counterweight_engine",
+  "requires_all": [
+   "traction_stone_throwers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "counterweight_cranes",
+   "siege_engineering"
+  ],
+  "note": "A weight box is added to the pulling crew's engine."
+ },
+ {
+  "id": "service_money_commutation",
+  "requires_all": [
+   "contracted_mercenary_captains",
+   "labor_dues_commutation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "muster_rolls",
+   "twice_yearly_coin_tax"
+  ],
+  "note": "Money paid for service hires troops."
+ },
+ {
+  "id": "sworn_frontier_brotherhoods",
+  "requires_all": [
+   "formal_oath_taking",
+   "permanent_frontier_fortresses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "devotee_communities_under_rule",
+   "castle_guard_rotations"
+  ],
+  "note": "Sworn brotherhoods garrison frontier castles."
+ },
+ {
+  "id": "full_mail_harness",
+  "requires_all": [
+   "mail_armor_fabrication",
+   "wire_drawing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mail_underpadding",
+   "kite_shield_cavalry"
+  ],
+  "note": "Mail extends to hood, mittens and leggings."
+ },
+ {
+  "id": "siege_counter_forts",
+  "requires_all": [
+   "field_fortifications",
+   "siege_engineering"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nightly_marching_camps",
+   "siege_ration_reckoning"
+  ],
+  "note": "Blockade forts face the besieged town."
+ },
+ {
+  "id": "mounted_crossbowmen",
+  "requires_all": [
+   "stirrup_cocked_crossbow",
+   "mounted_scouts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mounted_archery",
+   "skirmisher_infantry_screens"
+  ],
+  "note": "Crossbowmen ride to scout and skirmish."
+ },
+ {
+  "id": "tournament_training",
+  "requires_all": [
+   "couched_lance_charge"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "festival_wrestling_races",
+   "sparring_customs",
+   "heraldic_arms"
+  ],
+  "note": "Mock battles train the charge."
+ },
+ {
+  "id": "round_flanking_towers",
+  "requires_all": [
+   "curtain_wall_flanking_towers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "countermine_listening",
+   "siege_ramps_mining"
+  ],
+  "note": "Round towers resist mining and ramming."
+ },
+ {
+  "id": "fireproof_roof_ordinance",
+  "requires_all": [
+   "fired_roof_tiles",
+   "town_fire_watch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hearth_cover_curfew",
+   "public_law_stele"
+  ],
+  "note": "Tile and stone roofs are ordered after fires."
+ },
+ {
+  "id": "counterweight_engines",
+  "requires_all": [
+   "hybrid_counterweight_engine"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "counterweight_cranes",
+   "ratchet_motion_control",
+   "lever_moments"
+  ],
+  "note": "The weight box alone drives the arm."
+ },
+ {
+  "id": "decimal_army_organization",
+  "requires_all": [
+   "muster_rolls",
+   "unit_rally_standards"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "gangs_of_ten",
+   "tens_sixties_bundling",
+   "generals_field_manual"
+  ],
+  "note": "Tens, hundreds and thousands under set commanders."
+ },
+ {
+  "id": "multi_remount_riders",
+  "requires_all": [
+   "mounted_remount_school"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mounted_archery",
+   "nailed_horseshoes"
+  ],
+  "note": "Each rider leads spare mounts."
+ },
+ {
+  "id": "great_helm",
+  "requires_all": [
+   "closed_helmet_greaves",
+   "full_mail_harness"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "couched_lance_charge",
+   "water_powered_hammers"
+  ],
+  "note": "An enclosed helm covers the head."
+ },
+ {
+  "id": "ocean_sailing",
+  "requires_all": [
+   "open_sea_cargo_ships",
+   "floating_needle_compass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "land_finding_signs",
+   "pole_star_latitude_tablet",
+   "seasonal_wind_crossings",
+   "sternpost_rudder"
+  ],
+  "note": "Fleets cross open sea out of sight of land."
+ },
+ {
+  "id": "stone_machicolations",
+  "requires_all": [
+   "wall_top_hoardings",
+   "dressed_stone_masonry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "corbelled_vaults",
+   "round_flanking_towers"
+  ],
+  "note": "Hoardings are rebuilt in corbelled stone."
+ },
+ {
+  "id": "ship_fighting_castles",
+  "requires_all": [
+   "high_sided_bulk_ships"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wall_top_hoardings",
+   "boarding_bridges"
+  ],
+  "note": "Castles are raised fore and aft."
+ },
+ {
+  "id": "captured_engineer_corps",
+  "requires_all": [
+   "siege_engineering"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standing_engineer_corps",
+   "captive_artisan_resettlement",
+   "counterweight_engines"
+  ],
+  "note": "Captured engineers serve the army."
+ },
+ {
+  "id": "compulsory_archery_practice",
+  "requires_all": [
+   "bow_craft",
+   "household_muster"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lath_stiffened_bow",
+   "weekly_rest_day",
+   "rotating_half_levy"
+  ],
+  "note": "Commoners must practise archery on rest days."
+ },
+ {
+  "id": "ward_night_watch",
+  "requires_all": [
+   "town_night_curfew"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "watch_rotation",
+   "hearth_cover_curfew",
+   "hue_and_cry"
+  ],
+  "note": "Citizens keep watch by ward."
+ },
+ {
+  "id": "pressed_merchant_fleets",
+  "requires_all": [
+   "high_sided_bulk_ships",
+   "ship_fighting_castles"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "anti_piracy_squadrons",
+   "horse_transport_ships"
+  ],
+  "note": "Merchant ships are pressed and armed."
+ },
+ {
+  "id": "concentric_castles",
+  "requires_all": [
+   "curtain_wall_flanking_towers",
+   "round_flanking_towers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "triple_line_land_walls",
+   "stone_machicolations",
+   "twin_gate_passage"
+  ],
+  "note": "Inner and outer wards command each other."
+ },
+ {
+  "id": "springald_wall_engines",
+  "requires_all": [
+   "torsion_spring_engines",
+   "bolt_throwing_frames"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stirrup_cocked_crossbow",
+   "round_flanking_towers"
+  ],
+  "note": "Large bolt engines are mounted on towers."
+ },
+ {
+  "id": "roadside_brush_clearance",
+  "requires_all": [
+   "road_bandit_patrols"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "guarded_road_posts",
+   "firebreaks"
+  ],
+  "note": "Brush is cleared a bowshot back."
+ },
+ {
+  "id": "coat_of_plates",
+  "requires_all": [
+   "banded_plate_cuirass",
+   "full_mail_harness"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "water_powered_hammers",
+   "scale_armor_attachment",
+   "hardened_edges"
+  ],
+  "note": "Plates are riveted inside a cloth cover over mail."
+ },
+ {
+  "id": "armor_breaking_maces",
+  "requires_all": [
+   "edge_tempering"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stone_maceheads",
+   "copper_maceheads",
+   "full_mail_harness",
+   "great_helm"
+  ],
+  "note": "Flanged maces and hammers answer mail and helm."
+ },
+ {
+  "id": "belt_hook_spanning",
+  "requires_all": [
+   "stirrup_cocked_crossbow"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mounted_crossbowmen"
+  ],
+  "note": "A belt hook spans heavier bows."
+ },
+ {
+  "id": "militia_pike_hedge",
+  "requires_all": [
+   "long_pike_phalanx",
+   "sworn_town_commune"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deep_phalanx",
+   "couched_lance_charge",
+   "muster_rolls"
+  ],
+  "note": "Town militia hold a pike hedge."
+ },
+ {
+  "id": "infantry_polearms",
+  "requires_all": [
+   "socketed_spearheads",
+   "edge_tempering"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "militia_pike_hedge",
+   "lugged_war_spears",
+   "curved_chopping_sword"
+  ],
+  "note": "Hooked, bladed polearms pull down riders."
+ },
+ {
+  "id": "nitre_incendiary_mixtures",
+  "requires_all": [
+   "incendiary_missiles",
+   "nitre_earth_leaching"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "siphoned_liquid_fire",
+   "chemical_distillation",
+   "sulfur_purification"
+  ],
+  "note": "Leached nitre makes fire pots flare."
+ },
+ {
+  "id": "massed_longbow_volleys",
+  "requires_all": [
+   "bow_craft",
+   "compulsory_archery_practice"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lath_stiffened_bow",
+   "heavy_javelin_volley",
+   "rotating_crossbow_ranks"
+  ],
+  "note": "Trained archers shoot in massed volleys."
+ },
+ {
+  "id": "plate_limb_defences",
+  "requires_all": [
+   "coat_of_plates"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "closed_helmet_greaves",
+   "edge_tempering",
+   "water_powered_hammers"
+  ],
+  "note": "Plates are shaped for arms and legs."
+ },
+ {
+  "id": "windlass_crossbow",
+  "requires_all": [
+   "belt_hook_spanning",
+   "ratchet_motion_control"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "springald_wall_engines",
+   "compound_pulleys",
+   "co_fusion_steel"
+  ],
+  "note": "A windlass spans the heavy crossbow."
+ },
+ {
+  "id": "visored_helmet",
+  "requires_all": [
+   "great_helm"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "plate_limb_defences",
+   "edge_tempering"
+  ],
+  "note": "A pivoted visor closes over the face."
+ },
+ {
+  "id": "black_powder",
+  "requires_all": [
+   "nitre_incendiary_mixtures",
+   "sulfur_purification",
+   "charcoal"
+  ],
+  "requires_any": [
+   [
+    "nitre_earth_leaching",
+    "nitrate_cultivation"
+   ]
+  ],
+  "precedents": [
+   "chemical_distillation",
+   "mineral_acid_distillation",
+   "alembic_distillation"
+  ],
+  "note": "Refined nitre, sulfur and charcoal are ground into a propellant mixture; chemistry only, no weapon."
+ },
+ {
+  "id": "free_mercenary_companies",
+  "requires_all": [
+   "contracted_mercenary_captains",
+   "service_money_commutation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sworn_frontier_brotherhoods",
+   "captured_engineer_corps"
+  ],
+  "note": "Contract captains lead standing mercenary bands."
+ },
+ {
+  "id": "dispatch_code_lists",
+  "requires_all": [
+   "letter_substitution_cipher"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "letter_frequency_codebreaking",
+   "frontier_spy_service",
+   "timed_beacon_code"
+  ],
+  "note": "Code lists replace names in dispatches."
+ }
+]

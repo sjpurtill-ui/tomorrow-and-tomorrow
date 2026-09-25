@@ -1,0 +1,3792 @@
+[
+ {
+  "id": "pork_oil_dole",
+  "requires_all": [
+   "state_bread_ovens",
+   "cured_pork_sides"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_grain_dole",
+   "pitched_oil_jars"
+  ],
+  "note": "Bread dole widened with cured pork, oil and wine"
+ },
+ {
+  "id": "excerpted_medical_collections",
+  "requires_all": [
+   "medical_encyclopedias",
+   "excerpt_anthologies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "epitome_digests"
+  ],
+  "note": "Medical authorities excerpted"
+ },
+ {
+  "id": "infanticide_ban",
+  "requires_all": [
+   "intent_graded_homicide_law",
+   "foundling_rescue"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compiled_rescript_code"
+  ],
+  "note": "Infant killing treated as murder"
+ },
+ {
+  "id": "palace_physician_office",
+  "requires_all": [
+   "town_physicians"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "medical_synthesis",
+   "professional_service"
+  ],
+  "note": "Salaried physician attached to the ruler"
+ },
+ {
+  "id": "terrace_collapse_watch",
+  "requires_all": [
+   "terrace_wall_upkeep",
+   "slope_erosion_watch"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Neglected terraces fail"
+ },
+ {
+  "id": "maslin_mixed_sowing",
+  "requires_all": [
+   "rye_cultivation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "intercrop_pairing_lore",
+   "famine_reserves"
+  ],
+  "note": "Rye sown with wheat as insurance"
+ },
+ {
+  "id": "fifteen_year_assessment",
+  "requires_all": [
+   "head_land_tax_units"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "periodic_citizen_census",
+   "graded_land_tax"
+  ],
+  "note": "Assessment renewed on a fixed cycle"
+ },
+ {
+  "id": "ruled_hospital_staff",
+  "requires_all": [
+   "charity_hospitals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "civic_infirmaries",
+   "celibate_communities"
+  ],
+  "note": "Hospital staff under a written rule"
+ },
+ {
+  "id": "monthly_farm_calendar",
+  "requires_all": [
+   "husbandry_handbooks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sowing_almanac_verses",
+   "crop_calendars"
+  ],
+  "note": "Handbook reorganized month by month"
+ },
+ {
+  "id": "runoff_catchment_fields",
+  "requires_all": [
+   "wadi_dams"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "brush_check_dams",
+   "dune_spread_watch"
+  ],
+  "conditions": {
+   "environment": [
+    "dry"
+   ]
+  },
+  "note": "Hillside runoff led onto fields"
+ },
+ {
+  "id": "town_to_estate_drift",
+  "requires_all": [
+   "land_bound_tenancy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "city_grain_migration",
+   "famine_refugee_hosting"
+  ],
+  "note": "Townsfolk leave shrinking towns for estates"
+ },
+ {
+  "id": "grain_drying_kilns",
+  "requires_all": [
+   "grain_moisture_watch",
+   "clay_dome_ovens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grain_malting",
+   "raised_granaries"
+  ],
+  "note": "Oven heat turned to drying damp grain"
+ },
+ {
+  "id": "settler_estate_shares",
+  "requires_all": [
+   "federate_settlement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "service_land_grants"
+  ],
+  "note": "Settled allies take a share of estates"
+ },
+ {
+  "id": "failed_drain_marsh_return",
+  "requires_all": [
+   "planned_wetland_drainage",
+   "marsh_fever_drainage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "waterlogging_recognition"
+  ],
+  "note": "Unkept drains let marsh return"
+ },
+ {
+  "id": "walled_kitchen_gardens",
+  "requires_all": [
+   "kitchen_gardens",
+   "trenched_garden_beds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "periurban_market_gardens"
+  ],
+  "note": "Kitchen gardens walled and trenched"
+ },
+ {
+  "id": "straw_skep_hives",
+  "requires_all": [
+   "wall_hive_apiaries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hive_beekeeping"
+  ],
+  "note": "Coiled-straw skeps replace clay tube hives"
+ },
+ {
+  "id": "foundling_free_status",
+  "requires_all": [
+   "foundling_rescue",
+   "freed_person_status"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "infanticide_ban"
+  ],
+  "note": "Rescued foundlings keep free status"
+ },
+ {
+  "id": "refuge_site_towns",
+  "requires_all": [
+   "refugee_land_settlement",
+   "town_enclosure_walls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hilltop_citadel_towns"
+  ],
+  "note": "Refugees found defensible towns"
+ },
+ {
+  "id": "abandoned_land_regrowth",
+  "requires_all": [
+   "worn_field_retirement"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deserted_land_grants"
+  ],
+  "note": "Regrowth on abandoned fields tracked"
+ },
+ {
+  "id": "grain_mould_starters",
+  "requires_all": [
+   "fermentation_control",
+   "bean_paste_fermentation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grain_parboiling"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Cultured grain mould for ferments (regional)"
+ },
+ {
+  "id": "farm_encyclopedia",
+  "requires_all": [
+   "husbandry_handbooks",
+   "encyclopedic_compendia"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "monthly_farm_calendar",
+   "recipe_collections"
+  ],
+  "note": "Husbandry gathered into one encyclopedia"
+ },
+ {
+  "id": "endowed_hospital_beds",
+  "requires_all": [
+   "ruled_hospital_staff"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "devotee_communities_under_rule",
+   "alimentary_child_funds"
+  ],
+  "note": "Beds funded by endowment"
+ },
+ {
+  "id": "wildlife_return_watch",
+  "requires_all": [
+   "local_extirpation_watch",
+   "abandoned_land_regrowth"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Beasts return to empty land"
+ },
+ {
+  "id": "conqueror_landed_settlement",
+  "requires_all": [
+   "military_settler_colonies",
+   "settler_estate_shares"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "forced_resettlement"
+  ],
+  "note": "Conquering host settled on land"
+ },
+ {
+  "id": "illustrated_herbals",
+  "requires_all": [
+   "materia_medica"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "descriptive_natural_history",
+   "squared_grid_drawings"
+  ],
+  "note": "Materia medica with painted plants"
+ },
+ {
+  "id": "valley_sediment_burial",
+  "requires_all": [
+   "slope_erosion_watch",
+   "deforestation_flood_link"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harbor_silting_link"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Hill soil buries valley floors"
+ },
+ {
+  "id": "cow_dairying",
+  "requires_all": [
+   "milk_flock_breeding",
+   "butter_churning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rennet_curdling",
+   "hay_meadow_mowing"
+  ],
+  "note": "Milk breeding extended from ewes and goats to cows"
+ },
+ {
+  "id": "bride_dower_gift",
+  "requires_all": [
+   "recorded_dowry",
+   "widow_portion_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "written_customary_codes"
+  ],
+  "note": "Gift to the bride secured"
+ },
+ {
+  "id": "dim_sun_years",
+  "requires_all": [
+   "famine_reserves",
+   "astronomical_diaries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "eclipse_records"
+  ],
+  "note": "Dim-sun years recorded and stored against"
+ },
+ {
+  "id": "autumn_stock_slaughter",
+  "requires_all": [
+   "salting_fish_meat",
+   "winter_fodder"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cured_pork_sides",
+   "hay_meadow_mowing"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Salt"
+   ]
+  },
+  "note": "Stock beyond the fodder supply salted down"
+ },
+ {
+  "id": "child_oblation",
+  "requires_all": [
+   "celibate_communities",
+   "devotee_communities_under_rule"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "kin_fostering_networks"
+  ],
+  "note": "Children given to religious houses"
+ },
+ {
+  "id": "well_spacing_rules",
+  "requires_all": [
+   "well_drawdown_watch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "oasis_water_shares",
+   "promulgated_edict_code"
+  ],
+  "note": "Well spacing rules"
+ },
+ {
+  "id": "bubo_plague_recognition",
+  "requires_all": [
+   "epidemic_chronicles",
+   "prognostic_signs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pestilence_route_tracking"
+  ],
+  "note": "Swelling plague distinguished by signs"
+ },
+ {
+  "id": "licensed_estuary_weirs",
+  "requires_all": [
+   "fish_weirs_and_traps"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fish_run_weir_opening",
+   "sworn_fishing_closures"
+  ],
+  "conditions": {
+   "environment": [
+    "coast",
+    "river"
+   ]
+  },
+  "note": "Estuary weirs licensed by stretch"
+ },
+ {
+  "id": "presumed_death_term",
+  "requires_all": [
+   "widow_remarriage_custom",
+   "written_customary_codes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "registered_marriage"
+  ],
+  "note": "Term after which an absent husband is dead"
+ },
+ {
+  "id": "quicklime_mass_graves",
+  "requires_all": [
+   "plague_burial_crews",
+   "lime_mortar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bubo_plague_recognition",
+   "outbreak_burial_protocols"
+  ],
+  "note": "Burial crews use quicklime"
+ },
+ {
+  "id": "captive_artisan_resettlement",
+  "requires_all": [
+   "forced_resettlement",
+   "craftsman_naturalization"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "registered_state_artisans"
+  ],
+  "note": "Captured craftsmen moved to the ruler's cities"
+ },
+ {
+  "id": "fen_commons",
+  "requires_all": [
+   "wetland_plot_leases",
+   "wetland_margin_reserves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "common_pasture_fees"
+  ],
+  "note": "Fen shared as commons"
+ },
+ {
+  "id": "plague_bedding_burning",
+  "requires_all": [
+   "bubo_plague_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sulfur_fumigation",
+   "sickroom_fumigation"
+  ],
+  "note": "Goods of the plague dead destroyed"
+ },
+ {
+  "id": "intermarriage_permission",
+  "requires_all": [
+   "personal_law_by_people",
+   "settler_estate_shares"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "intertown_marriage_rights"
+  ],
+  "note": "Settler and native marriage allowed"
+ },
+ {
+  "id": "mast_count_pannage",
+  "requires_all": [
+   "mast_fed_swine",
+   "wood_pasture"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_herd_matching"
+  ],
+  "conditions": {
+   "environment": [
+    "woodland"
+   ]
+  },
+  "note": "Swine numbers set by the mast"
+ },
+ {
+  "id": "seaweed_goitre_remedy",
+  "requires_all": [
+   "materia_medica"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seaweed_harvest_rotation"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Seaweed used against goitre (regional)"
+ },
+ {
+  "id": "road_hostel_infirmaries",
+  "requires_all": [
+   "charity_hospitals",
+   "pass_hospices"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "caravanserais"
+  ],
+  "note": "Sick wards added to road hostels"
+ },
+ {
+  "id": "ranked_clan_genealogies",
+  "requires_all": [
+   "nine_rank_official_grading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "merit_recommendation",
+   "peoples_origin_histories"
+  ],
+  "note": "Ranked genealogies decide office"
+ },
+ {
+  "id": "disease_causes_treatise",
+  "requires_all": [
+   "medical_synthesis",
+   "prognostic_signs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cold_damage_treatise"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Causes and signs treatise (regional)"
+ },
+ {
+  "id": "pressed_tea_cakes",
+  "requires_all": [
+   "food_steaming_vessels",
+   "food_drying"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mechanical_screw_presses"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Steamed leaf pressed into keeping cakes (regional)"
+ },
+ {
+  "id": "endowed_reclamation",
+  "requires_all": [
+   "devotee_communities_under_rule",
+   "deserted_land_grants"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "abandoned_land_regrowth"
+  ],
+  "note": "Religious communities reclaim waste"
+ },
+ {
+  "id": "medical_office_specialties",
+  "requires_all": [
+   "palace_physician_office",
+   "healing_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "three_department_ministries"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Court medical office with specialties (regional)"
+ },
+ {
+  "id": "blood_heir_rule",
+  "requires_all": [
+   "dynastic_succession",
+   "written_customary_codes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "heir_adoption"
+  ],
+  "note": "Heirs of the body replace adoption"
+ },
+ {
+  "id": "seabird_colony_shares",
+  "requires_all": [
+   "nesting_season_netting_ban",
+   "communal_catch_limits"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Seabird taking by shares"
+ },
+ {
+  "id": "uroscopy_flask",
+  "requires_all": [
+   "prognostic_signs",
+   "glass_blowing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "decolorized_clear_glass"
+  ],
+  "note": "Clear blown flask for reading urine"
+ },
+ {
+  "id": "practitioner_compendium",
+  "requires_all": [
+   "medical_encyclopedias",
+   "excerpted_medical_collections"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "surgical_instrument_kits"
+  ],
+  "note": "Compendium for practitioners"
+ },
+ {
+  "id": "soldier_farmer_holdings",
+  "requires_all": [
+   "military_district_settlement",
+   "garrison_farm_colonies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "veteran_land_allotments"
+  ],
+  "note": "Hereditary service holdings"
+ },
+ {
+  "id": "village_wood_reeves",
+  "requires_all": [
+   "shared_woodland_boundaries",
+   "fuelwood_rotation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "charcoal_licensing"
+  ],
+  "conditions": {
+   "environment": [
+    "woodland"
+   ]
+  },
+  "note": "Village officer allots wood"
+ },
+ {
+  "id": "liver_night_blindness",
+  "requires_all": [
+   "food_qualities_lore"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "case_records",
+   "dietary_healing_regimens"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Dietary remedy for night blindness (regional)"
+ },
+ {
+  "id": "irrigated_cane_fields",
+  "requires_all": [
+   "cane_sugar_crystals",
+   "irrigation_schedules"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "water_lifting_wheels"
+  ],
+  "conditions": {
+   "environment": [
+    "dry",
+    "river"
+   ],
+   "contact_required": true
+  },
+  "note": "Cane sugar scaled up on irrigated valley fields (regional)"
+ },
+ {
+  "id": "godparent_kinship",
+  "requires_all": [
+   "kin_birth_registration",
+   "ranked_priestly_hierarchy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "kin_fostering_networks"
+  ],
+  "note": "Birth rites create sponsor kin"
+ },
+ {
+  "id": "household_formulary",
+  "requires_all": [
+   "fixed_formula_decoctions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "household_remedy_kits",
+   "remedy_compendia"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Fixed formulas for households (regional)"
+ },
+ {
+  "id": "herder_tribute_registers",
+  "requires_all": [
+   "household_tax_registers",
+   "people_herd_counts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "codified_tribute_schedules"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Herders registered as tribute households (regional)"
+ },
+ {
+  "id": "summer_shielings",
+  "requires_all": [
+   "transhumance",
+   "summer_pasture_dairies"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "High summer pasture with dairy huts"
+ },
+ {
+  "id": "seaweed_manuring",
+  "requires_all": [
+   "seaweed_harvest_rotation",
+   "manure_field_spreading"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Gathered seaweed spread as field manure"
+ },
+ {
+  "id": "wide_kin_marriage_ban",
+  "requires_all": [
+   "single_wife_households",
+   "ranked_priestly_hierarchy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "heiress_marriage_rule",
+   "ranked_clan_genealogies"
+  ],
+  "note": "Marriage barred in distant degrees"
+ },
+ {
+  "id": "fixed_charcoal_hearths",
+  "requires_all": [
+   "coppiced_charcoal_woods",
+   "covered_charcoal_clamps"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "charcoal_licensing"
+  ],
+  "conditions": {
+   "environment": [
+    "woodland"
+   ]
+  },
+  "note": "Permanent charcoal hearths in coppice"
+ },
+ {
+  "id": "terraced_rice_paddies",
+  "requires_all": [
+   "flooded_paddy_fields",
+   "terrace_wall_upkeep"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "contour_terrace_reading"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Paddies carried up terraced slopes (regional)"
+ },
+ {
+  "id": "quickset_hedges",
+  "requires_all": [
+   "windbreak_hedgerow_siting",
+   "sapling_protection_customs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tree_nurseries"
+  ],
+  "note": "Planted thorn hedges as stock fence"
+ },
+ {
+  "id": "child_fosterage",
+  "requires_all": [
+   "kin_fostering_networks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "child_oblation",
+   "patron_protection"
+  ],
+  "note": "Fostering with kin or patrons as a practice"
+ },
+ {
+  "id": "licensed_drug_shops",
+  "requires_all": [
+   "root_cutter_shops",
+   "market_wardens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pharmacy_weights"
+  ],
+  "note": "Drug shops under market inspection"
+ },
+ {
+  "id": "teahouse_tea",
+  "requires_all": [
+   "pressed_tea_cakes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "street_bakeries",
+   "pale_hard_fired_ware"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Tea sold as a daily drink (regional)"
+ },
+ {
+  "id": "frontier_repopulation",
+  "requires_all": [
+   "forced_resettlement",
+   "deserted_land_grants"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "conqueror_landed_settlement"
+  ],
+  "note": "Districts moved to fill a frontier"
+ },
+ {
+  "id": "managed_heathland",
+  "requires_all": [
+   "timed_grass_burning",
+   "grazing_rotation_customs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "thin_soil_grassland"
+  ],
+  "note": "Heath kept open by burning and grazing"
+ },
+ {
+  "id": "northern_slope_vineyards",
+  "requires_all": [
+   "staked_vine_training",
+   "vine_rootstock_grafting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "volcanic_soil_choice",
+   "named_fruit_cultivars"
+  ],
+  "note": "Trained, grafted vines pushed to colder slopes"
+ },
+ {
+  "id": "reserved_hunting_rights",
+  "requires_all": [
+   "game_wardens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "enclosed_game_parks",
+   "service_land_grants"
+  ],
+  "note": "Game reserved to landholders"
+ },
+ {
+  "id": "mouldboard_plough",
+  "requires_all": [
+   "coulter_plough",
+   "iron_farm_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "iron_ard_shares",
+   "forge_welding"
+  ],
+  "note": "Iron mouldboard added to the wheeled coulter plough"
+ },
+ {
+  "id": "sickroom_diet_books",
+  "requires_all": [
+   "food_qualities_lore",
+   "seasonal_regimen"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dietary_healing_regimens",
+   "practitioner_compendium"
+  ],
+  "note": "Diet for the sick ranked by quality"
+ },
+ {
+  "id": "wolf_bounties",
+  "requires_all": [
+   "crop_raider_culls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "local_extirpation_watch",
+   "wildlife_return_watch"
+  ],
+  "note": "Bounties on wolves"
+ },
+ {
+  "id": "hop_gardens",
+  "requires_all": [
+   "herb_bittered_beer",
+   "staked_vine_training"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "kitchen_gardens"
+  ],
+  "note": "Bittering herb grown on poles like vines"
+ },
+ {
+  "id": "foundling_house",
+  "requires_all": [
+   "foundling_free_status",
+   "charity_hospitals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wet_nurse_licensing",
+   "alimentary_child_funds"
+  ],
+  "note": "House for abandoned infants"
+ },
+ {
+  "id": "cloister_infirmary",
+  "requires_all": [
+   "devotee_communities_under_rule",
+   "estate_sickrooms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "walled_kitchen_gardens",
+   "heated_public_baths"
+  ],
+  "note": "Religious community keeps its own infirmary"
+ },
+ {
+  "id": "malting_floor_brewhouses",
+  "requires_all": [
+   "grain_malting",
+   "grain_drying_kilns"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "named_beers",
+   "villa_press_rooms",
+   "hop_gardens"
+  ],
+  "note": "Malting and kiln drying at estate scale"
+ },
+ {
+  "id": "mould_brewed_rice_wine",
+  "requires_all": [
+   "grain_mould_starters",
+   "flooded_paddy_fields"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fermentation_control"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Rice brewed with mould starters (regional)"
+ },
+ {
+  "id": "locust_bounty_campaigns",
+  "requires_all": [
+   "locust_egg_digging",
+   "district_counts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "price_stabilizing_granary"
+  ],
+  "conditions": {
+   "environment": [
+    "dry"
+   ]
+  },
+  "note": "Officials run locust hunts"
+ },
+ {
+  "id": "dearth_price_ceilings",
+  "requires_all": [
+   "price_stabilizing_granary",
+   "price_wage_schedules"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_grain_dole",
+   "numbered_article_decrees"
+  ],
+  "note": "Granary policy backed by export bans and ceilings"
+ },
+ {
+  "id": "ward_hospitals",
+  "requires_all": [
+   "charity_hospitals",
+   "licensed_drug_shops"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ruled_hospital_staff",
+   "military_hospitals",
+   "periodic_fever_classes"
+  ],
+  "note": "Hospitals divided by illness with a pharmacy"
+ },
+ {
+  "id": "commemorative_death_books",
+  "requires_all": [
+   "devotee_communities_under_rule",
+   "household_vital_lists"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "retreat_copying_rooms"
+  ],
+  "note": "Religious houses list their dead"
+ },
+ {
+  "id": "travelling_dispensaries",
+  "requires_all": [
+   "licensed_drug_shops",
+   "healer_travel_circuits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "road_hostel_infirmaries"
+  ],
+  "note": "Drugs carried on circuit"
+ },
+ {
+  "id": "three_field_rotation",
+  "requires_all": [
+   "crop_rotation",
+   "oat_field_crop"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mouldboard_plough",
+   "fodder_crop_fallow"
+  ],
+  "note": "Rotation with a spring grain field"
+ },
+ {
+  "id": "hearth_tax_counts",
+  "requires_all": [
+   "hearth_counts",
+   "household_tax_registers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "twice_yearly_coin_tax"
+  ],
+  "note": "Hearth counting used for tax"
+ },
+ {
+  "id": "fur_beast_depletion",
+  "requires_all": [
+   "local_extirpation_watch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "transcontinental_relay_trade",
+   "wildlife_return_watch"
+  ],
+  "note": "Fur trapping depletes rivers"
+ },
+ {
+  "id": "bonesetting_treatise",
+  "requires_all": [
+   "reduction_bench",
+   "traction_fracture_setting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "squared_grid_drawings"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Illustrated bone-setting (regional)"
+ },
+ {
+  "id": "hospital_formulary",
+  "requires_all": [
+   "ward_hospitals",
+   "materia_medica"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "household_formulary",
+   "pharmacy_weights"
+  ],
+  "note": "Approved compound drugs for the hospital"
+ },
+ {
+  "id": "ridge_furrow_strips",
+  "requires_all": [
+   "mouldboard_plough"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "named_soil_kinds",
+   "waterlogging_recognition"
+  ],
+  "note": "Turned sod builds ridges that drain clay"
+ },
+ {
+  "id": "turf_manuring_depletion",
+  "requires_all": [
+   "managed_heathland",
+   "manure_field_spreading"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "soil_exhaustion_recognition"
+  ],
+  "note": "Turf stripping ruins heaths"
+ },
+ {
+  "id": "sugar_syrup_remedies",
+  "requires_all": [
+   "remedy_vehicles"
+  ],
+  "requires_any": [
+   [
+    "irrigated_cane_fields",
+    "cane_sugar_crystals"
+   ]
+  ],
+  "precedents": [
+   "honey_fruit_preserves",
+   "hospital_formulary"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Sugar replaces honey as remedy vehicle"
+ },
+ {
+  "id": "hereditary_unfree_status",
+  "requires_all": [
+   "unfree_headcount",
+   "land_bound_tenancy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bound_estate_tenants"
+  ],
+  "note": "Unfree status inherited"
+ },
+ {
+  "id": "mill_dam_height_limits",
+  "requires_all": [
+   "water_mills",
+   "hay_meadow_management"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "overshot_mill_wheels"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Mill dams capped to spare meadows"
+ },
+ {
+  "id": "spring_field_legumes",
+  "requires_all": [
+   "three_field_rotation",
+   "legume_field_interplanting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "green_manure_crops"
+  ],
+  "note": "Legumes fill the spring field"
+ },
+ {
+  "id": "eye_anatomy_treatise",
+  "requires_all": [
+   "surgical_anatomy",
+   "nerve_tracing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cataract_couching",
+   "geometric_optics_treatise"
+  ],
+  "note": "Eye anatomy with optic nerve and lens"
+ },
+ {
+  "id": "citrus_orchards",
+  "requires_all": [
+   "fruit_tree_grafting",
+   "irrigation_schedules"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "staged_acclimatization",
+   "foreign_plant_gardens"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Grafted citrus on watered land (regional)"
+ },
+ {
+  "id": "physician_conduct_book",
+  "requires_all": [
+   "healer_conduct_oath",
+   "authored_prose_treatises"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "palace_physician_office"
+  ],
+  "note": "Oath expanded into a conduct book"
+ },
+ {
+  "id": "invited_craft_colonies",
+  "requires_all": [
+   "craftsman_naturalization"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "charter_colonies",
+   "witnessed_land_charters"
+  ],
+  "note": "Foreign craftsmen invited with privileges"
+ },
+ {
+  "id": "irrigation_water_tribunals",
+  "requires_all": [
+   "river_diversion_weirs"
+  ],
+  "requires_any": [
+   [
+    "oasis_water_shares",
+    "irrigation_schedules"
+   ]
+  ],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "dry",
+    "river"
+   ]
+  },
+  "note": "Water tribunals settle turns"
+ },
+ {
+  "id": "new_garden_vegetables",
+  "requires_all": [
+   "walled_kitchen_gardens",
+   "staged_acclimatization"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "foreign_plant_gardens"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Introduced vegetables acclimatized in gardens (regional)"
+ },
+ {
+  "id": "childhood_disease_book",
+  "requires_all": [
+   "childhood_illness_recognition",
+   "authored_prose_treatises"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "practitioner_compendium",
+   "midwifery_manuals"
+  ],
+  "note": "Book on children's diseases"
+ },
+ {
+  "id": "pox_measles_distinction",
+  "requires_all": [
+   "childhood_illness_recognition",
+   "prognostic_signs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "disease_causes_treatise",
+   "clinical_observation_rounds"
+  ],
+  "note": "Two rash fevers told apart by course"
+ },
+ {
+  "id": "saffron_fields",
+  "requires_all": [
+   "flavouring_herbs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "alum_mordant_dyeing",
+   "kitchen_gardens"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Spice crop grown in fields (regional)"
+ },
+ {
+  "id": "compared_treatment_groups",
+  "requires_all": [
+   "clinical_observation_rounds",
+   "case_records"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ward_hospitals"
+  ],
+  "note": "Two treated groups compared"
+ },
+ {
+  "id": "introduced_weed_watch",
+  "requires_all": [
+   "staged_acclimatization",
+   "foreign_plant_gardens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "new_garden_vegetables",
+   "orchard_pest_smokes"
+  ],
+  "note": "Weeds of imported crops watched"
+ },
+ {
+  "id": "dryland_rice_basins",
+  "requires_all": [
+   "flooded_paddy_fields",
+   "irrigation_schedules"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "groundwater_tunnels"
+  ],
+  "conditions": {
+   "environment": [
+    "dry"
+   ],
+   "contact_required": true
+  },
+  "note": "Paddy practice moved to walled dry-land basins (regional)"
+ },
+ {
+  "id": "fortified_frontier_villages",
+  "requires_all": [
+   "deserted_land_grants",
+   "frontier_settler_grants"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "burgh_defense_network",
+   "witnessed_land_charters"
+  ],
+  "note": "Chartered fortified frontier villages"
+ },
+ {
+  "id": "physician_licensing_exam",
+  "requires_all": [
+   "written_office_examinations",
+   "healing_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "regular_merit_examinations",
+   "physician_conduct_book"
+  ],
+  "note": "Office examinations applied to physicians"
+ },
+ {
+  "id": "stockfish_drying",
+  "requires_all": [
+   "food_drying"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "jarred_salt_fish",
+   "keeled_sailing_longships"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Wind drying applied to cod on racks"
+ },
+ {
+  "id": "bedside_teaching",
+  "requires_all": [
+   "ward_hospitals",
+   "apprentice_healer_rounds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clinical_observation_rounds"
+  ],
+  "note": "Students taught on hospital wards"
+ },
+ {
+  "id": "marriage_out_fee",
+  "requires_all": [
+   "hereditary_unfree_status",
+   "manor_court_customals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bound_estate_tenants"
+  ],
+  "note": "Fee to marry off the estate"
+ },
+ {
+  "id": "storm_surge_records",
+  "requires_all": [
+   "embanked_salt_meadows"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "flood_height_gauges",
+   "formal_chronicle_keeping"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Surge floods recorded and dikes raised"
+ },
+ {
+  "id": "spiked_harrow",
+  "requires_all": [
+   "ox_drawn_ard",
+   "iron_farm_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "three_field_rotation"
+  ],
+  "note": "Harrow with iron or wooden teeth"
+ },
+ {
+  "id": "hospital_madness_wards",
+  "requires_all": [
+   "ward_hospitals",
+   "gentle_madness_care"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Wards for the mad in general hospitals"
+ },
+ {
+  "id": "herder_sedentarization",
+  "requires_all": [
+   "herder_tribute_registers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "deserted_land_grants"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Herders settle as farmers (regional)"
+ },
+ {
+  "id": "village_bake_ovens",
+  "requires_all": [
+   "clay_dome_ovens",
+   "dough_leavening"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "street_bakeries",
+   "mill_suit_obligation"
+  ],
+  "note": "Communal ovens for leavened bread"
+ },
+ {
+  "id": "drifting_sand_burial",
+  "requires_all": [
+   "turf_manuring_depletion"
+  ],
+  "requires_any": [
+   [
+    "dune_spread_watch",
+    "dune_fixing_plantings"
+   ]
+  ],
+  "precedents": [],
+  "note": "Drifting sand blamed on overgrazing"
+ },
+ {
+  "id": "paddy_chain_pumps",
+  "requires_all": [
+   "terraced_rice_paddies",
+   "water_lifting_wheels"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cog_and_lantern_gearing"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Treadle chain lifts water up paddy terraces (regional)"
+ },
+ {
+  "id": "common_fallow_grazing_rule",
+  "requires_all": [
+   "stubble_grazing",
+   "three_field_rotation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "night_folding_on_fallow",
+   "manor_court_customals"
+  ],
+  "note": "Fallow grazing by fixed rule"
+ },
+ {
+  "id": "dried_fruit_trade",
+  "requires_all": [
+   "dried_fruit_cakes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coastal_cabotage_trade",
+   "great_desert_caravans"
+  ],
+  "note": "Dried fruit shipped in bulk"
+ },
+ {
+  "id": "printed_state_pharmacopoeia",
+  "requires_all": [
+   "hospital_formulary",
+   "block_printed_books"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "materia_medica",
+   "illustrated_herbals"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "State pharmacopoeia printed (regional)"
+ },
+ {
+  "id": "village_nucleation",
+  "requires_all": [
+   "three_field_rotation",
+   "manor_court_customals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_consolidation",
+   "shared_plough_teams"
+  ],
+  "note": "Open fields gather farms into villages"
+ },
+ {
+  "id": "graded_cautery_irons",
+  "requires_all": [
+   "cautery",
+   "smithing_tool_sets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "surgical_instrument_kits"
+  ],
+  "note": "Forged cautery irons by purpose"
+ },
+ {
+  "id": "licensed_forest_clearing",
+  "requires_all": [
+   "replanting_after_clearance",
+   "forest_supervisors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "endowed_reclamation"
+  ],
+  "conditions": {
+   "environment": [
+    "woodland"
+   ]
+  },
+  "note": "Clearing only under licence"
+ },
+ {
+  "id": "illustrated_surgery_treatise",
+  "requires_all": [
+   "surgical_instrument_kits",
+   "practitioner_compendium"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "illustrated_herbals",
+   "graded_cautery_irons"
+  ],
+  "note": "Surgery with drawn instruments"
+ },
+ {
+  "id": "foreign_merchant_quarters",
+  "requires_all": [
+   "merchant_quarters_abroad",
+   "resident_alien_status"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "foreigners_court"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Walled foreign merchant quarter"
+ },
+ {
+  "id": "distilled_herb_waters",
+  "requires_all": [
+   "chemical_distillation",
+   "materia_medica"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "alembic_distillation"
+  ],
+  "note": "Distilled waters used as remedies"
+ },
+ {
+  "id": "peat_fuel_cutting",
+  "requires_all": [
+   "peat_drying",
+   "city_firewood_supply"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fen_commons"
+  ],
+  "note": "Peat as fuel where wood is short"
+ },
+ {
+  "id": "early_ripening_rice",
+  "requires_all": [
+   "mass_seed_selection"
+  ],
+  "requires_any": [
+   [
+    "terraced_rice_paddies",
+    "dryland_rice_basins"
+   ]
+  ],
+  "precedents": [
+   "double_crop_calendar"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Selected quick-ripening rice (regional)"
+ },
+ {
+  "id": "drug_adulteration_tests",
+  "requires_all": [
+   "licensed_drug_shops"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mineral_specific_gravity",
+   "touchstone_testing"
+  ],
+  "note": "Inspectors test drugs"
+ },
+ {
+  "id": "single_heir_holdings",
+  "requires_all": [
+   "partible_inheritance",
+   "written_wills"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "carrying_capacity_awareness",
+   "hereditary_fief_succession"
+  ],
+  "note": "Farm passed whole to one heir"
+ },
+ {
+  "id": "catgut_sutures",
+  "requires_all": [
+   "vessel_ligature",
+   "wound_suturing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cased_sausages"
+  ],
+  "note": "Gut string used for stitches"
+ },
+ {
+  "id": "protected_hawk_eyries",
+  "requires_all": [
+   "reserved_hunting_rights",
+   "raptor_nesting_encouragement"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Hawk nests protected for falconry"
+ },
+ {
+  "id": "offshore_cod_fishing",
+  "requires_all": [
+   "stockfish_drying",
+   "keeled_sailing_longships"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "land_finding_signs"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Stockfish demand sends boats offshore"
+ },
+ {
+  "id": "canon_textbook",
+  "requires_all": [
+   "medical_synthesis",
+   "practitioner_compendium"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chapter_contents_lists",
+   "syllogistic_logic"
+  ],
+  "note": "Medicine ordered into one teaching text"
+ },
+ {
+  "id": "contact_contagion",
+  "requires_all": [
+   "contagion_avoidance_customs",
+   "clinical_observation_rounds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "canon_textbook",
+   "leper_houses"
+  ],
+  "note": "Spread by close contact recognized"
+ },
+ {
+  "id": "soy_sauce_drawing",
+  "requires_all": [
+   "bean_paste_fermentation",
+   "grain_mould_starters"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Liquid drawn from mould-fermented paste (regional)"
+ },
+ {
+  "id": "windy_hill_smelting_hearths",
+  "requires_all": [
+   "argentiferous_lead_working",
+   "tall_smelter_flues"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mine_spoil_containment"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Lead Ore"
+   ]
+  },
+  "note": "Lead hearths set away from farms"
+ },
+ {
+  "id": "hollow_needle_cataract",
+  "requires_all": [
+   "cataract_couching",
+   "eye_anatomy_treatise"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wire_drawing"
+  ],
+  "note": "Hollow needle improves couching"
+ },
+ {
+  "id": "terraced_tea_gardens",
+  "requires_all": [
+   "teahouse_tea",
+   "terrace_wall_upkeep"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "terraced_rice_paddies"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Tea planted on terraces (regional)"
+ },
+ {
+  "id": "needling_teaching_figures",
+  "requires_all": [
+   "needling_therapy",
+   "lost_wax_casting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "medical_office_specialties"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Cast bronze needling figures (regional)"
+ },
+ {
+  "id": "eldest_son_succession",
+  "requires_all": [
+   "hereditary_fief_succession",
+   "eldest_double_share"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "single_heir_holdings"
+  ],
+  "note": "Fief passes whole to the eldest"
+ },
+ {
+  "id": "oak_bark_seasons",
+  "requires_all": [
+   "coppice_regrowth_cutting",
+   "lined_tanning_pits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "alum_tawed_leather"
+  ],
+  "note": "Bark stripping by season"
+ },
+ {
+  "id": "refined_loaf_sugar",
+  "requires_all": [
+   "irrigated_cane_fields",
+   "closed_moulds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "brine_purification"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Cane juice refined in conical moulds (regional)"
+ },
+ {
+  "id": "sluiced_polders",
+  "requires_all": [
+   "embanked_salt_meadows",
+   "canal_sluice_gates"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "estuary_embankments"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Polders drained by sluice"
+ },
+ {
+  "id": "horse_ploughing",
+  "requires_all": [
+   "rigid_horse_collar",
+   "mouldboard_plough"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nailed_horseshoes",
+   "whippletree_evener",
+   "oat_field_crop"
+  ],
+  "note": "Collar lets horses pull the heavy plough"
+ },
+ {
+  "id": "state_drug_bureau",
+  "requires_all": [
+   "printed_state_pharmacopoeia",
+   "licensed_drug_shops"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "price_stabilizing_granary",
+   "salt_iron_monopoly"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "State pharmacies at fixed prices (regional)"
+ },
+ {
+  "id": "younger_son_careers",
+  "requires_all": [
+   "eldest_son_succession"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "celibate_communities",
+   "fief_tenure_for_service"
+  ],
+  "note": "Non-inheriting sons placed elsewhere"
+ },
+ {
+  "id": "realm_holding_survey",
+  "requires_all": [
+   "estate_survey_books",
+   "hearth_tax_counts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "graded_land_tax",
+   "raider_tribute_land_tax"
+  ],
+  "note": "Survey of every holding in the realm"
+ },
+ {
+  "id": "marked_tree_sales",
+  "requires_all": [
+   "forest_inventory_counts",
+   "charcoal_licensing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "licensed_forest_clearing"
+  ],
+  "note": "Trees marked for sale"
+ },
+ {
+  "id": "sugar_candied_fruit",
+  "requires_all": [
+   "honey_fruit_preserves"
+  ],
+  "requires_any": [
+   [
+    "refined_loaf_sugar",
+    "cane_sugar_crystals"
+   ]
+  ],
+  "precedents": [
+   "citrus_orchards"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Sugar replaces honey in fruit preserving"
+ },
+ {
+  "id": "burning_sickness_hospitals",
+  "requires_all": [
+   "ward_hospitals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rye_cultivation",
+   "leper_houses",
+   "devotee_communities_under_rule"
+  ],
+  "note": "Hospitals for ergot limb-rot"
+ },
+ {
+  "id": "minimum_marriage_ages",
+  "requires_all": [
+   "marriage_age_norms",
+   "registered_marriage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "written_customary_codes"
+  ],
+  "note": "Minimum ages fixed by rule"
+ },
+ {
+  "id": "forest_perambulation",
+  "requires_all": [
+   "shared_woodland_boundaries",
+   "forest_supervisors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "watershed_boundary_marking"
+  ],
+  "note": "Forest bounds walked"
+ },
+ {
+  "id": "consent_marriage",
+  "requires_all": [
+   "registered_marriage",
+   "wide_kin_marriage_ban"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "minimum_marriage_ages"
+  ],
+  "note": "Spouses' consent makes the marriage"
+ },
+ {
+  "id": "nursing_brotherhoods",
+  "requires_all": [
+   "charity_hospitals",
+   "devotee_communities_under_rule"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "road_hostel_infirmaries",
+   "chartered_craft_associations"
+  ],
+  "note": "Sworn nursing brotherhoods"
+ },
+ {
+  "id": "stew_pond_fisheries",
+  "requires_all": [
+   "stocked_fish_ponds",
+   "mill_leats"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pond_carp_rearing",
+   "river_fish_restocking",
+   "devotee_communities_under_rule"
+  ],
+  "note": "Dammed, drainable ponds stocked for fast days"
+ },
+ {
+  "id": "womens_medicine_treatise",
+  "requires_all": [
+   "midwifery_manuals",
+   "womens_ailment_texts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "practitioner_compendium",
+   "canon_textbook"
+  ],
+  "note": "Treatise on women's medicine"
+ },
+ {
+  "id": "forest_law_courts",
+  "requires_all": [
+   "forest_supervisors",
+   "reserved_hunting_rights"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seigneurial_immunity_courts",
+   "forest_perambulation"
+  ],
+  "note": "Forest law with its own courts"
+ },
+ {
+  "id": "widow_third_dower",
+  "requires_all": [
+   "bride_dower_gift",
+   "widow_portion_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hereditary_fief_succession"
+  ],
+  "note": "Widow's third for life"
+ },
+ {
+  "id": "graded_bread_loaves",
+  "requires_all": [
+   "graded_flour_bolting",
+   "stamped_loaves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "village_bake_ovens"
+  ],
+  "note": "Bolted flour grades sold as loaf grades"
+ },
+ {
+  "id": "legitimation_by_marriage",
+  "requires_all": [
+   "consent_marriage",
+   "blood_heir_rule"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compiled_rescript_code"
+  ],
+  "note": "Later marriage legitimates children"
+ },
+ {
+  "id": "woodbank_enclosures",
+  "requires_all": [
+   "coppice_regrowth_cutting",
+   "sapling_protection_customs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "quickset_hedges"
+  ],
+  "conditions": {
+   "environment": [
+    "woodland"
+   ]
+  },
+  "note": "Banks keep stock from coppice"
+ },
+ {
+  "id": "mercury_ointment",
+  "requires_all": [
+   "materia_medica",
+   "mercury_fire_gilding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "contact_contagion"
+  ],
+  "note": "Mercury used on skin disease"
+ },
+ {
+  "id": "household_health_verses",
+  "requires_all": [
+   "seasonal_regimen",
+   "sickroom_diet_books"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "canon_textbook"
+  ],
+  "note": "Regimen versified for households"
+ },
+ {
+  "id": "coney_warrens",
+  "requires_all": [
+   "small_game_pens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "enclosed_game_parks",
+   "managed_heathland"
+  ],
+  "note": "Hare pens scaled up to heath warrens"
+ },
+ {
+  "id": "burgess_rolls",
+  "requires_all": [
+   "ward_residence_lists",
+   "sworn_town_commune"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "belonging_oaths"
+  ],
+  "note": "Sworn townsmen listed"
+ },
+ {
+  "id": "river_fishery_wardens",
+  "requires_all": [
+   "sworn_fishing_closures",
+   "net_mesh_limits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "licensed_estuary_weirs"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Wardens enforce fishing rules"
+ },
+ {
+  "id": "aged_almshouses",
+  "requires_all": [
+   "charity_hospitals",
+   "endowed_hospital_beds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "congregation_widow_rolls"
+  ],
+  "note": "Endowed houses for the aged"
+ },
+ {
+  "id": "heavy_draught_breeding",
+  "requires_all": [
+   "horse_ploughing",
+   "pasture_matched_breeds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "post_horse_studs",
+   "mounted_remount_school"
+  ],
+  "note": "Plough horses bred for weight"
+ },
+ {
+  "id": "colonist_recruiting_agents",
+  "requires_all": [
+   "clearance_dues_holiday",
+   "fortified_frontier_villages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "invited_craft_colonies"
+  ],
+  "note": "Agents recruit settler villages"
+ },
+ {
+  "id": "paled_deer_parks",
+  "requires_all": [
+   "enclosed_game_parks",
+   "reserved_hunting_rights"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "forest_law_courts"
+  ],
+  "note": "Paled deer parks"
+ },
+ {
+  "id": "itch_mite_removal",
+  "requires_all": [
+   "delousing",
+   "contact_contagion"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "iron_surgical_probes"
+  ],
+  "note": "Itch mite picked out with a needle"
+ },
+ {
+  "id": "heiress_fief_inheritance",
+  "requires_all": [
+   "hereditary_fief_succession",
+   "eldest_son_succession"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "heiress_marriage_rule"
+  ],
+  "note": "Daughters inherit without sons"
+ },
+ {
+  "id": "dried_durum_pasta",
+  "requires_all": [
+   "dried_noodle_strips",
+   "free_threshing_wheat"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "graded_flour_bolting"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Hard-wheat dough dried for keeping (regional)"
+ },
+ {
+  "id": "town_antidotary",
+  "requires_all": [
+   "hospital_formulary",
+   "licensed_drug_shops"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "compound_antidotes",
+   "craft_guilds"
+  ],
+  "note": "One formulary binding all town apothecaries"
+ },
+ {
+  "id": "heir_wardship",
+  "requires_all": [
+   "orphan_guardianship",
+   "fief_tenure_for_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "heiress_fief_inheritance"
+  ],
+  "note": "Lord holds wardship of minor heirs"
+ },
+ {
+  "id": "salt_pan_fuel_draw",
+  "requires_all": [
+   "saltworks_shift_crews",
+   "smelter_fuel_depletion_watch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "brine_purification"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Salt"
+   ]
+  },
+  "note": "Salt boiling strips woods"
+ },
+ {
+  "id": "great_aisled_barns",
+  "requires_all": [
+   "timber_roof_trusses",
+   "three_field_rotation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "long_span_timber_halls",
+   "plank_walled_timber_halls",
+   "compulsory_tithe"
+  ],
+  "note": "Larger harvests stored under trussed roofs"
+ },
+ {
+  "id": "burgage_plot_towns",
+  "requires_all": [
+   "planned_colony_lots",
+   "chartered_town_liberties"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "standard_lot_grid_towns"
+  ],
+  "note": "New towns in equal plots"
+ },
+ {
+  "id": "woodland_common_allowances",
+  "requires_all": [
+   "village_wood_reeves",
+   "mast_count_pannage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "manor_court_customals"
+  ],
+  "conditions": {
+   "environment": [
+    "woodland"
+   ]
+  },
+  "note": "Common wood rights by allowance"
+ },
+ {
+  "id": "medical_faculty_licence",
+  "requires_all": [
+   "physician_licensing_exam",
+   "chartered_university"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "teaching_licence_degree",
+   "canon_textbook"
+  ],
+  "note": "University faculty licenses practitioners"
+ },
+ {
+  "id": "settler_home_law",
+  "requires_all": [
+   "colonist_recruiting_agents",
+   "personal_law_by_people"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Colonists keep home law"
+ },
+ {
+  "id": "fixed_majority_ages",
+  "requires_all": [
+   "majority_enrollment",
+   "heir_wardship"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "knightly_conduct_code"
+  ],
+  "note": "Majority age fixed by rank"
+ },
+ {
+  "id": "irrigated_husbandry_treatise",
+  "requires_all": [
+   "husbandry_handbooks",
+   "fruit_tree_grafting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "irrigation_schedules",
+   "rival_tongue_translation_school"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Dry-land husbandry written up (regional)"
+ },
+ {
+  "id": "noble_lineage_rolls",
+  "requires_all": [
+   "ranked_clan_genealogies",
+   "heraldic_arms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "eldest_son_succession"
+  ],
+  "note": "Lineage proven by rolls"
+ },
+ {
+  "id": "coppice_with_standards",
+  "requires_all": [
+   "coppiced_charcoal_woods",
+   "timber_stand_reserves"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "woodbank_enclosures"
+  ],
+  "conditions": {
+   "environment": [
+    "woodland"
+   ]
+  },
+  "note": "Timber standards over coppice"
+ },
+ {
+  "id": "bloodletting_calendars",
+  "requires_all": [
+   "venesection",
+   "printed_almanacs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_regimen",
+   "planispheric_astrolabe"
+  ],
+  "note": "Bleeding timed by almanac"
+ },
+ {
+  "id": "cider_perry_pressing",
+  "requires_all": [
+   "named_fruit_cultivars",
+   "mechanical_screw_presses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "beam_olive_press"
+  ],
+  "note": "Screw press applied to apples and pears"
+ },
+ {
+  "id": "dynastic_vital_register",
+  "requires_all": [
+   "household_vital_lists",
+   "dynastic_succession"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "royal_chancery_office",
+   "commemorative_death_books"
+  ],
+  "note": "Court register of the ruling house"
+ },
+ {
+  "id": "verjuice_sauces",
+  "requires_all": [
+   "vinegar_pickling",
+   "staked_vine_training"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "recipe_collections"
+  ],
+  "note": "Unripe grape juice used as souring"
+ },
+ {
+  "id": "relict_wild_cattle_reserves",
+  "requires_all": [
+   "forest_law_courts",
+   "local_extirpation_watch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paled_deer_parks"
+  ],
+  "note": "Wild cattle survive in reserves"
+ },
+ {
+  "id": "estate_vaccaries",
+  "requires_all": [
+   "cow_dairying",
+   "cave_aged_cheese"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "estate_steward_audits"
+  ],
+  "note": "Cow dairy run as an estate unit"
+ },
+ {
+  "id": "captive_ransom_brotherhoods",
+  "requires_all": [
+   "devotee_communities_under_rule"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "treaty_hostage_exchange",
+   "nursing_brotherhoods"
+  ],
+  "note": "Brotherhoods ransom captives"
+ },
+ {
+  "id": "foundling_wheel",
+  "requires_all": [
+   "foundling_house"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wet_nurse_licensing"
+  ],
+  "note": "Anonymous turning cradle"
+ },
+ {
+  "id": "mine_water_complaints",
+  "requires_all": [
+   "mine_drainage",
+   "mine_spoil_containment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "water_ore_stamps",
+   "ore_washing_sluices"
+  ],
+  "note": "Mine water fouls fields"
+ },
+ {
+  "id": "estate_yield_accounts",
+  "requires_all": [
+   "estate_survey_books",
+   "plot_yield_memory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "annual_receipt_rolls",
+   "digit_reckoning_handbook"
+  ],
+  "note": "Survey books extended to seed and yield"
+ },
+ {
+  "id": "kiln_fuel_licences",
+  "requires_all": [
+   "charcoal_licensing",
+   "lime_mortar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "clamp_fired_brick",
+   "smelter_fuel_depletion_watch"
+  ],
+  "note": "Kiln burners licensed for fuel"
+ },
+ {
+  "id": "spoiled_food_condemnation",
+  "requires_all": [
+   "market_wardens",
+   "spoilage_inspection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "guild_searchers"
+  ],
+  "note": "Market inspection of meat and fish"
+ },
+ {
+  "id": "public_marriage_banns",
+  "requires_all": [
+   "registered_marriage",
+   "wide_kin_marriage_ban"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_heralds"
+  ],
+  "note": "Banns expose forbidden unions"
+ },
+ {
+  "id": "keg_salted_butter",
+  "requires_all": [
+   "butter_churning",
+   "coopered_cargo_casks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "estate_vaccaries"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Salt"
+   ]
+  },
+  "note": "Butter salted into casks for trade"
+ },
+ {
+  "id": "downstream_trade_quarters",
+  "requires_all": [
+   "smoky_trades_zoning",
+   "workshop_effluent_separation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dye_vat_runoff_control"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Noxious trades sent downstream"
+ },
+ {
+  "id": "sea_coal_substitution",
+  "requires_all": [
+   "city_firewood_supply",
+   "coal_fired_ironworking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "peat_fuel_cutting"
+  ],
+  "note": "Coal replaces scarce firewood"
+ },
+ {
+  "id": "bread_weight_assize",
+  "requires_all": [
+   "graded_bread_loaves",
+   "proclaimed_standard_weights"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dearth_price_ceilings",
+   "market_wardens"
+  ],
+  "note": "Loaf weight tied to grain price"
+ },
+ {
+  "id": "hospital_admission_books",
+  "requires_all": [
+   "ward_hospitals",
+   "case_records"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "annual_receipt_rolls",
+   "daily_death_counts"
+  ],
+  "note": "Hospital registers of admissions and deaths"
+ },
+ {
+  "id": "retirement_maintenance_contracts",
+  "requires_all": [
+   "single_heir_holdings",
+   "manor_court_customals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_notaries",
+   "multigenerational_household_norms"
+  ],
+  "note": "Farm handed over for written keep"
+ },
+ {
+  "id": "warren_escape_liability",
+  "requires_all": [
+   "coney_warrens",
+   "manor_court_customals"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Warreners liable for rabbit damage"
+ },
+ {
+  "id": "stinted_commons",
+  "requires_all": [
+   "common_pasture_fees",
+   "seasonal_herd_matching"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "common_fallow_grazing_rule"
+  ],
+  "note": "Grazing stinted per holding"
+ },
+ {
+  "id": "crop_limit_shift_watch",
+  "requires_all": [
+   "northern_slope_vineyards",
+   "dim_sun_years"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "estate_yield_accounts"
+  ],
+  "note": "Crop limits shift with climate"
+ },
+ {
+  "id": "long_aged_hard_cheese",
+  "requires_all": [
+   "cave_aged_cheese",
+   "estate_vaccaries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rennet_curdling"
+  ],
+  "note": "Large estate cheeses aged for years"
+ },
+ {
+  "id": "apothecary_separation",
+  "requires_all": [
+   "licensed_drug_shops",
+   "medical_faculty_licence"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_antidotary",
+   "craft_guilds"
+  ],
+  "note": "Apothecary split from physician by law"
+ },
+ {
+  "id": "hereditary_surnames",
+  "requires_all": [
+   "hearth_tax_counts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "noble_lineage_rolls",
+   "burgess_rolls",
+   "chancery_enrolment_rolls"
+  ],
+  "note": "Registers fix family names"
+ },
+ {
+  "id": "dike_boards",
+  "requires_all": [
+   "dike_duty_lengths"
+  ],
+  "requires_any": [
+   [
+    "sluiced_polders",
+    "flood_levees"
+   ]
+  ],
+  "precedents": [
+   "sworn_town_commune"
+  ],
+  "conditions": {
+   "environment": [
+    "coast",
+    "river"
+   ]
+  },
+  "note": "Elected dike boards"
+ },
+ {
+  "id": "grafted_tree_nurseries",
+  "requires_all": [
+   "named_fruit_cultivars",
+   "tree_nurseries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fruit_tree_grafting",
+   "cider_perry_pressing"
+  ],
+  "note": "Nurseries sell grafted cultivars"
+ },
+ {
+  "id": "pulmonary_transit",
+  "requires_all": [
+   "vessel_distinction",
+   "experimental_vivisection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "canon_textbook"
+  ],
+  "note": "Lung passage of blood described"
+ },
+ {
+  "id": "single_women_houses",
+  "requires_all": [
+   "devotee_communities_under_rule"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "poor_devout_dissent",
+   "estate_weaving_houses"
+  ],
+  "note": "Houses of single women"
+ },
+ {
+  "id": "wool_flock_overgrazing",
+  "requires_all": [
+   "seasonal_herd_matching",
+   "pasture_matched_breeds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stinted_commons"
+  ],
+  "note": "Wool flocks overgraze uplands"
+ },
+ {
+  "id": "inquest_handbook",
+  "requires_all": [
+   "skull_wound_grading",
+   "wound_classification"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "intent_graded_homicide_law",
+   "presenting_jury_of_neighbours"
+  ],
+  "note": "Wound lore for death inquests"
+ },
+ {
+  "id": "bird_observation_treatise",
+  "requires_all": [
+   "descriptive_natural_history",
+   "protected_hawk_eyries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "observation_notebooks"
+  ],
+  "note": "Bird treatise from falconry"
+ },
+ {
+  "id": "imported_spice_blends",
+  "requires_all": [
+   "preserved_herb_salts",
+   "transcontinental_relay_trade"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "great_desert_caravans"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Long-distance spices in court kitchens"
+ },
+ {
+  "id": "decimal_unit_census",
+  "requires_all": [
+   "decimal_army_organization",
+   "household_tax_registers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "realm_holding_survey"
+  ],
+  "note": "Households counted in decimal units"
+ },
+ {
+  "id": "holding_fragmentation",
+  "requires_all": [
+   "partible_inheritance",
+   "carrying_capacity_awareness"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "single_heir_holdings",
+   "cottager_day_laborers"
+  ],
+  "note": "Holdings split under population pressure"
+ },
+ {
+  "id": "hopped_export_beer",
+  "requires_all": [
+   "hop_gardens",
+   "malting_floor_brewhouses",
+   "coopered_cargo_casks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "annual_bulk_fleets"
+  ],
+  "note": "Hops keep beer fit for shipping"
+ },
+ {
+  "id": "shellfish_closed_seasons",
+  "requires_all": [
+   "shellfish_bed_recovery",
+   "oyster_bed_culture"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "river_fishery_wardens"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Shellfish beds closed by season"
+ },
+ {
+  "id": "town_migration_dependence",
+  "requires_all": [
+   "rural_urban_migration",
+   "burgess_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "tenement_crowding",
+   "town_residence_freedom"
+  ],
+  "note": "Towns depend on incomers"
+ },
+ {
+  "id": "blind_hospice",
+  "requires_all": [
+   "charity_hospitals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "aged_almshouses",
+   "disability_care"
+  ],
+  "note": "Hospice for the blind"
+ },
+ {
+  "id": "ironmaster_coppice_contracts",
+  "requires_all": [
+   "charcoal_licensing",
+   "water_blown_stack_bloomery"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coppice_with_standards"
+  ],
+  "conditions": {
+   "environment": [
+    "woodland"
+   ]
+  },
+  "note": "Ironmasters buy coppice"
+ },
+ {
+  "id": "purchased_corrodies",
+  "requires_all": [
+   "devotee_communities_under_rule",
+   "aged_almshouses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "retirement_maintenance_contracts"
+  ],
+  "note": "Life places bought in religious houses"
+ },
+ {
+  "id": "distilled_spirits",
+  "requires_all": [
+   "chemical_distillation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "alembic_distillation",
+   "vintage_wine_aging",
+   "named_beers"
+  ],
+  "note": "Cooled-head still applied to wine and beer"
+ },
+ {
+  "id": "dry_wound_dressing",
+  "requires_all": [
+   "wine_wound_washing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "resin_wound_salves",
+   "woven_dressings",
+   "catgut_sutures"
+  ],
+  "note": "Dry dressing against suppuration"
+ },
+ {
+  "id": "orphan_chambers",
+  "requires_all": [
+   "orphan_guardianship",
+   "sworn_town_commune"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_notaries"
+  ],
+  "note": "Town office for orphans' property"
+ },
+ {
+  "id": "ale_taster_licensing",
+  "requires_all": [
+   "named_beers",
+   "market_wardens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bread_weight_assize"
+  ],
+  "note": "Market inspection extended to ale"
+ },
+ {
+  "id": "protected_drove_routes",
+  "requires_all": [
+   "protected_drove_roads"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_herd_matching",
+   "summer_shielings"
+  ],
+  "note": "Drove roads protected along the whole seasonal route"
+ },
+ {
+  "id": "itinerant_forest_glassworks",
+  "requires_all": [
+   "potash_forest_glass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "licensed_forest_clearing"
+  ],
+  "conditions": {
+   "environment": [
+    "woodland"
+   ]
+  },
+  "note": "Forest glassworks move on"
+ },
+ {
+  "id": "age_priced_life_annuities",
+  "requires_all": [
+   "annuity_life_tables",
+   "funded_public_debt_shares"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "purchased_corrodies"
+  ],
+  "note": "Annuities priced by age"
+ },
+ {
+  "id": "steward_husbandry_treatises",
+  "requires_all": [
+   "husbandry_handbooks",
+   "estate_yield_accounts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "farm_encyclopedia"
+  ],
+  "note": "Steward treatises on husbandry"
+ },
+ {
+  "id": "leper_inspection_panels",
+  "requires_all": [
+   "leper_houses",
+   "contact_contagion"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "presenting_jury_of_neighbours"
+  ],
+  "note": "Sworn examination of suspected lepers"
+ },
+ {
+  "id": "entailed_family_land",
+  "requires_all": [
+   "eldest_son_succession",
+   "written_wills"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "noble_lineage_rolls"
+  ],
+  "note": "Land tied to the line"
+ },
+ {
+  "id": "reading_spectacles",
+  "requires_all": [
+   "optical_lenses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "decolorized_clear_glass",
+   "school_perspective_optics"
+  ],
+  "note": "Lenses mounted as spectacles"
+ },
+ {
+  "id": "drained_land_subsidence",
+  "requires_all": [
+   "planned_wetland_drainage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sluiced_polders",
+   "peat_fuel_cutting"
+  ],
+  "note": "Drained peat sinks"
+ },
+ {
+  "id": "barreled_salt_meat",
+  "requires_all": [
+   "cured_pork_sides",
+   "coopered_cargo_casks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "campaign_rations",
+   "voyage_victualling_scales"
+  ],
+  "conditions": {
+   "resources_known": [
+    "Salt"
+   ]
+  },
+  "note": "Salt meat packed in casks for ships and garrisons"
+ },
+ {
+  "id": "street_filth_ordinances",
+  "requires_all": [
+   "street_cleaning_wardens",
+   "municipal_charters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_dung_collectors",
+   "revised_town_statute_books"
+  ],
+  "note": "Town ordinances against street filth"
+ },
+ {
+  "id": "nitre_earth_leaching",
+  "requires_all": [
+   "ash_lye_cleansers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "brine_purification",
+   "town_dung_collectors"
+  ],
+  "note": "Nitre leached from midden earth"
+ },
+ {
+  "id": "almond_milk_fast_food",
+  "requires_all": [
+   "nut_orchards",
+   "recipe_collections"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "devotee_communities_under_rule"
+  ],
+  "note": "Fast-day cookery from almonds and fish"
+ },
+ {
+  "id": "court_autopsy",
+  "requires_all": [
+   "surgical_anatomy",
+   "inquest_handbook"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "inquisitorial_written_procedure"
+  ],
+  "note": "Physicians open bodies for the court"
+ },
+ {
+  "id": "service_before_marriage",
+  "requires_all": [
+   "yearly_farm_servants",
+   "minimum_marriage_ages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "consent_marriage"
+  ],
+  "note": "Service delays marriage"
+ },
+ {
+  "id": "river_offal_bans",
+  "requires_all": [
+   "workshop_effluent_separation",
+   "street_filth_ordinances"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fountain_fouling_law"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Offal banned from the river"
+ },
+ {
+  "id": "measured_court_recipes",
+  "requires_all": [
+   "recipe_collections"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "household_great_offices",
+   "sickroom_diet_books",
+   "imported_spice_blends"
+  ],
+  "note": "Court kitchen recipes measured and written"
+ },
+ {
+  "id": "public_theriac_compounding",
+  "requires_all": [
+   "compound_antidotes",
+   "town_antidotary"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "drug_adulteration_tests"
+  ],
+  "note": "Antidote made in public under inspection"
+ },
+ {
+  "id": "coal_smoke_limits",
+  "requires_all": [
+   "sea_coal_substitution",
+   "smoky_trades_zoning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "kiln_smoke_venting_customs"
+  ],
+  "note": "Limits on coal smoke"
+ },
+ {
+  "id": "sugar_confectionery",
+  "requires_all": [
+   "refined_loaf_sugar",
+   "nut_orchards"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sugar_candied_fruit"
+  ],
+  "conditions": {
+   "contact_required": true
+  },
+  "note": "Refined sugar worked with almonds"
+ },
+ {
+  "id": "widow_trade_continuation",
+  "requires_all": [
+   "guild_trade_monopoly",
+   "widow_portion_law"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "guild_welfare_chests"
+  ],
+  "note": "Widows keep the shop"
+ },
+ {
+  "id": "illustrated_farm_treatise",
+  "requires_all": [
+   "farm_encyclopedia"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "irrigated_husbandry_treatise",
+   "automata_machine_book",
+   "steward_husbandry_treatises"
+  ],
+  "note": "Farm treatise with drawn tools and machines"
+ },
+ {
+  "id": "surgeons_guild",
+  "requires_all": [
+   "craft_guilds",
+   "barber_bleeders"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "apprentice_indentures",
+   "masterpiece_trial"
+  ],
+  "note": "Surgeons organized as a guild"
+ },
+ {
+  "id": "weir_fish_gaps",
+  "requires_all": [
+   "fish_run_weir_opening",
+   "mill_dam_height_limits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "river_fishery_wardens"
+  ],
+  "conditions": {
+   "environment": [
+    "river"
+   ]
+  },
+  "note": "Fish gaps in weirs"
+ },
+ {
+  "id": "raised_pie_crusts",
+  "requires_all": [
+   "street_bakeries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cased_sausages"
+  ],
+  "note": "Stiff pastry cases carry meat"
+ },
+ {
+  "id": "poor_bride_dowries",
+  "requires_all": [
+   "recorded_dowry",
+   "guild_welfare_chests"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "alimentary_child_funds"
+  ],
+  "note": "Charitable dowries"
+ },
+ {
+  "id": "felling_rotation_ordinance",
+  "requires_all": [
+   "forest_inventory_counts",
+   "coppice_with_standards"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "marked_tree_sales"
+  ],
+  "note": "Felling rotations by ordinance"
+ },
+ {
+  "id": "buckwheat_cultivation",
+  "requires_all": [
+   "staged_acclimatization",
+   "named_soil_kinds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rye_cultivation",
+   "licensed_forest_clearing"
+  ],
+  "note": "Introduced crop for sour and newly broken ground"
+ },
+ {
+  "id": "public_anatomy_dissection",
+  "requires_all": [
+   "surgical_anatomy",
+   "chartered_university"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "court_autopsy",
+   "illustrated_surgery_treatise"
+  ],
+  "note": "Dissection returns as university teaching"
+ },
+ {
+  "id": "vagrant_expulsion",
+  "requires_all": [
+   "burgess_rolls",
+   "internal_passes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fugitive_worker_returns"
+  ],
+  "note": "Outsider beggars expelled"
+ },
+ {
+  "id": "barrel_gutted_herring",
+  "requires_all": [
+   "coopered_cargo_casks",
+   "salting_fish_meat"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "shore_salting_vats",
+   "offshore_cod_fishing"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ],
+   "resources_known": [
+    "Salt"
+   ]
+  },
+  "note": "Herring gutted and brined at sea"
+ },
+ {
+  "id": "walled_out_slaughter",
+  "requires_all": [
+   "smoky_trades_zoning",
+   "street_filth_ordinances"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spoiled_food_condemnation"
+  ],
+  "note": "Slaughter moved outside the walls"
+ },
+ {
+  "id": "bread_mouth_census",
+  "requires_all": [
+   "ward_residence_lists",
+   "graded_rations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dearth_price_ceilings",
+   "keep_cistern_stores"
+  ],
+  "note": "Mouths counted for rationing"
+ },
+ {
+  "id": "nitrate_cultivation",
+  "requires_all": [
+   "nitre_earth_leaching"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "nitre_incendiary_mixtures",
+   "manure_field_spreading"
+  ],
+  "note": "Nitre beds built deliberately"
+ },
+ {
+  "id": "cattle_droving",
+  "requires_all": [
+   "protected_drove_routes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "day_walk_market_spacing",
+   "estate_vaccaries"
+  ],
+  "note": "Drove routes used for market cattle"
+ },
+ {
+  "id": "dredge_mixed_grain",
+  "requires_all": [
+   "oat_field_crop",
+   "three_field_rotation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "maslin_mixed_sowing"
+  ],
+  "note": "Mixed sowing in the spring field"
+ },
+ {
+  "id": "marginal_land_retreat",
+  "requires_all": [
+   "worn_field_retirement",
+   "crop_limit_shift_watch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "dim_sun_years"
+  ],
+  "note": "Marginal fields abandoned after wet famines"
+ },
+ {
+  "id": "school_surgery_manual",
+  "requires_all": [
+   "illustrated_surgery_treatise",
+   "chartered_university"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "surgeons_guild",
+   "set_text_lectures"
+  ],
+  "note": "Case-based surgery textbook for schools"
+ },
+ {
+  "id": "town_dearth_granaries",
+  "requires_all": [
+   "price_stabilizing_granary",
+   "dearth_price_ceilings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "great_aisled_barns",
+   "sworn_town_commune"
+  ],
+  "note": "Town-held reserve against dearth"
+ },
+ {
+  "id": "sworn_town_midwives",
+  "requires_all": [
+   "midwifery_manuals",
+   "trained_midwives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "womens_medicine_treatise",
+   "craft_guilds"
+  ],
+  "note": "Midwives sworn by the town"
+ },
+ {
+  "id": "glacier_advance_records",
+  "requires_all": [
+   "crop_limit_shift_watch",
+   "snowpack_flow_forecast"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Glacier advance recorded"
+ },
+ {
+  "id": "plague_advice_tracts",
+  "requires_all": [
+   "bubo_plague_recognition",
+   "household_health_verses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "vernacular_learned_writing",
+   "printed_almanacs"
+  ],
+  "note": "Plague advice for households"
+ },
+ {
+  "id": "pestilence_health_boards",
+  "requires_all": [
+   "plague_bedding_burning",
+   "sworn_town_commune"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "daily_death_counts",
+   "pestilence_route_tracking"
+  ],
+  "note": "Town boards with emergency powers"
+ },
+ {
+  "id": "avalanche_guard_forests",
+  "requires_all": [
+   "steep_slope_forest_retention"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "glacier_advance_records",
+   "felling_rotation_ordinance"
+  ],
+  "note": "Forests closed against avalanches"
+ },
+ {
+  "id": "smoked_red_herring",
+  "requires_all": [
+   "barrel_gutted_herring",
+   "smoking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Herring hard-smoked for long keeping"
+ },
+ {
+  "id": "pestilence_gate_watch",
+  "requires_all": [
+   "pestilence_health_boards",
+   "ward_night_watch"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "quarantine_travel_restrictions",
+   "internal_passes"
+  ],
+  "note": "Gates and cordons in pestilence"
+ },
+ {
+  "id": "deserted_village_pasture",
+  "requires_all": [
+   "post_plague_resettlement",
+   "bubo_plague_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wool_flock_overgrazing",
+   "marginal_land_retreat"
+  ],
+  "note": "Plague-emptied villages turned to pasture"
+ },
+ {
+  "id": "drowned_land_abandonment",
+  "requires_all": [
+   "storm_surge_records",
+   "dike_boards"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "drained_land_subsidence"
+  ],
+  "conditions": {
+   "environment": [
+    "coast"
+   ]
+  },
+  "note": "Drowned land left to salt marsh"
+ },
+ {
+  "id": "pestilence_physicians",
+  "requires_all": [
+   "pestilence_health_boards",
+   "district_physicians"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_physicians"
+  ],
+  "note": "Physicians paid to stay in pestilence"
+ },
+ {
+  "id": "daily_weather_diaries",
+  "requires_all": [
+   "district_rain_gauges",
+   "commonplace_books"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "star_weather_almanac"
+  ],
+  "note": "Daily weather diaries"
+ },
+ {
+  "id": "arrival_isolation_period",
+  "requires_all": [
+   "isolation_practice",
+   "pestilence_health_boards"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "harbor_masters",
+   "pestilence_gate_watch"
+  ],
+  "note": "Fixed isolation of arrivals"
+ },
+ {
+  "id": "adult_poll_rolls",
+  "requires_all": [
+   "hearth_tax_counts",
+   "levy_age_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "realm_holding_survey"
+  ],
+  "note": "Poll tax on each adult"
+ },
+ {
+  "id": "conifer_seed_sowing",
+  "requires_all": [
+   "tree_nurseries",
+   "felling_rotation_ordinance"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "note": "Conifer seed sown on cut-over forest"
+ }
+]

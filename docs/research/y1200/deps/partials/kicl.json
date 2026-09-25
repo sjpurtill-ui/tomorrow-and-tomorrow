@@ -1,0 +1,4505 @@
+[
+ {
+  "id": "rounded_book_hand",
+  "requires_all": [
+   "parchment_record_preparation",
+   "bookbinding_assemblies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cursive_document_hand",
+   "checked_master_copies",
+   "canonized_sacred_sayings"
+  ],
+  "note": "A formal hand for codices copied on parchment."
+ },
+ {
+  "id": "devised_script_for_new_tongue",
+  "requires_all": [
+   "adapted_alphabet_borrowing",
+   "full_vowel_alphabet"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "translation_bureaus",
+   "written_grammar",
+   "canonized_sacred_sayings"
+  ],
+  "conditions": {
+   "resources_known": [],
+   "environment": [],
+   "contact_required": true
+  },
+  "note": "Borrowed letters fitted to a neighbour's sounds."
+ },
+ {
+  "id": "itinerary_strip_maps",
+  "requires_all": [
+   "regional_maps",
+   "road_itineraries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "strip_route_maps",
+   "distance_milestones",
+   "coordinate_gazetteer_maps"
+  ],
+  "note": "Written itineraries drawn out as day-stage strips."
+ },
+ {
+  "id": "seven_arts_manuals",
+  "requires_all": [
+   "liberal_curriculum",
+   "epitome_digests"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "encyclopedic_compendia",
+   "salaried_public_teachers",
+   "rhetoric_handbooks"
+  ],
+  "note": "The old curriculum condensed into school manuals."
+ },
+ {
+  "id": "moving_feast_reckoning",
+  "requires_all": [
+   "nineteen_year_cycle",
+   "leap_year_solar_calendar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "calendar_feast_days",
+   "weekly_rest_day"
+  ],
+  "note": "Lunar cycle set against the solar year for feasts."
+ },
+ {
+  "id": "hard_word_glossaries",
+  "requires_all": [
+   "thematic_word_lists",
+   "written_grammar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bilingual_sign_lists",
+   "scholarly_commentaries",
+   "rounded_book_hand"
+  ],
+  "note": "Word lists gloss learned words in the common tongue."
+ },
+ {
+  "id": "nine_digits_and_zero",
+  "requires_all": [
+   "place_value",
+   "counting_rod_decimals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "counting_board_abacus",
+   "number_theory_treatise"
+  ],
+  "note": "Rod and board place value written with a zero sign."
+ },
+ {
+  "id": "half_chord_sine_tables",
+  "requires_all": [
+   "trigonometry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sky_tables_compendium",
+   "polygon_circle_estimation",
+   "nine_digits_and_zero"
+  ],
+  "note": "Chord tables halved into sine tables."
+ },
+ {
+  "id": "sacred_epoch_year_count",
+  "requires_all": [
+   "founding_era_annals",
+   "moving_feast_reckoning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "eponym_year_lists",
+   "providential_world_history"
+  ],
+  "note": "Feast reckoning fixes one epoch for counting years."
+ },
+ {
+  "id": "retreat_copying_rooms",
+  "requires_all": [
+   "devotee_communities_under_rule",
+   "rounded_book_hand"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_libraries",
+   "checked_master_copies",
+   "bookbinding_assemblies"
+  ],
+  "note": "Ruled communities copy and keep books."
+ },
+ {
+  "id": "school_logic_primers",
+  "requires_all": [
+   "syllogistic_logic",
+   "seven_arts_manuals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "translation_bureaus",
+   "scholarly_commentaries"
+  ],
+  "note": "Old logic rendered as a school primer."
+ },
+ {
+  "id": "rhyme_sound_dictionary",
+  "requires_all": [
+   "hard_word_glossaries",
+   "phonetic_notation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "written_grammar",
+   "learned_allusive_poetry"
+  ],
+  "note": "Glossaries reordered by sound for poets and readers."
+ },
+ {
+  "id": "zero_negative_rules",
+  "requires_all": [
+   "red_black_rod_negatives",
+   "nine_digits_and_zero"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "syncopated_algebra"
+  ],
+  "note": "Rod negatives written as rules with the zero sign."
+ },
+ {
+  "id": "word_origin_encyclopedia",
+  "requires_all": [
+   "encyclopedic_compendia",
+   "hard_word_glossaries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seven_arts_manuals",
+   "author_subject_catalogues"
+  ],
+  "note": "Compendia ordered by the origins of words."
+ },
+ {
+  "id": "planispheric_astrolabe",
+  "requires_all": [
+   "armillary_sphere",
+   "star_position_catalogue"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "half_chord_sine_tables",
+   "straightedge_compass",
+   "cementation_brass"
+  ],
+  "note": "The sky sphere projected flat onto a brass disc."
+ },
+ {
+  "id": "relief_block_cutting",
+  "requires_all": [
+   "textile_printing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cylinder_seals",
+   "inlay_carving",
+   "lampblack_capture"
+  ],
+  "note": "Cloth-printing blocks cut in reverse for text."
+ },
+ {
+  "id": "printing_process",
+  "requires_all": [
+   "relief_block_cutting",
+   "paper_making"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "lampblack_capture",
+   "retreat_copying_rooms",
+   "canonized_sacred_sayings"
+  ],
+  "note": "Inked relief blocks pressed onto paper."
+ },
+ {
+  "id": "word_spacing",
+  "requires_all": [
+   "rounded_book_hand",
+   "reading_marks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hard_word_glossaries",
+   "chapter_contents_lists"
+  ],
+  "note": "Reading marks extended to spaces between words."
+ },
+ {
+  "id": "meridian_shadow_stations",
+  "requires_all": [
+   "earth_circumference_measure",
+   "seasonal_hour_sundial"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "latitude_zones",
+   "half_chord_sine_tables"
+  ],
+  "note": "Gnomon stations along a meridian measure its length."
+ },
+ {
+  "id": "waterwheel_escapement_globe",
+  "requires_all": [
+   "geared_sky_calculator",
+   "water_mills"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "armillary_sphere",
+   "outflow_water_clock",
+   "cog_and_lantern_gearing"
+  ],
+  "note": "A water wheel checked step by step turns the globe."
+ },
+ {
+  "id": "lunar_tide_reckoning",
+  "requires_all": [
+   "tide_reckoning",
+   "sky_tables_compendium"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "written_sailing_directions"
+  ],
+  "note": "Tide lore tied to the moon's tabulated age."
+ },
+ {
+  "id": "small_letter_book_hand",
+  "requires_all": [
+   "rounded_book_hand",
+   "cursive_document_hand"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "word_spacing",
+   "retreat_copying_rooms"
+  ],
+  "note": "Book and cursive hands fused into small letters."
+ },
+ {
+  "id": "chemical_distillation",
+  "requires_all": [
+   "alembic_distillation",
+   "glass_blowing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ceramic_crucibles",
+   "written_craft_recipes"
+  ],
+  "note": "Blown glass stills with a cooled head."
+ },
+ {
+  "id": "digit_reckoning_handbook",
+  "requires_all": [
+   "nine_digits_and_zero",
+   "zero_negative_rules"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "counting_board_abacus",
+   "worked_problem_tablets"
+  ],
+  "note": "Written digit reckoning taught from a handbook."
+ },
+ {
+  "id": "restoration_balancing_algebra",
+  "requires_all": [
+   "syncopated_algebra",
+   "zero_negative_rules"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "digit_reckoning_handbook",
+   "demonstrated_geometry"
+  ],
+  "note": "Equations solved by restoring and balancing terms."
+ },
+ {
+  "id": "royal_house_of_learning",
+  "requires_all": [
+   "translation_bureaus",
+   "public_libraries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "court_learning_revival",
+   "endowed_scholar_house",
+   "retreat_copying_rooms"
+  ],
+  "note": "Court translators, library and observers in one house."
+ },
+ {
+  "id": "fixed_instrument_observatory",
+  "requires_all": [
+   "royal_house_of_learning",
+   "armillary_sphere"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "planispheric_astrolabe",
+   "meridian_shadow_stations",
+   "star_position_catalogue"
+  ],
+  "note": "Court scholars build great fixed instruments."
+ },
+ {
+  "id": "letter_frequency_codebreaking",
+  "requires_all": [
+   "letter_substitution_cipher",
+   "hard_word_glossaries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "royal_house_of_learning",
+   "rhyme_sound_dictionary",
+   "combinatorics"
+  ],
+  "note": "Counting letters of a known tongue breaks ciphers."
+ },
+ {
+  "id": "timed_beacon_code",
+  "requires_all": [
+   "realm_beacon_chain",
+   "outflow_water_clock"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "prearranged_beacon_chains",
+   "torch_alphabet_signals",
+   "agreed_signal_codes"
+  ],
+  "note": "Beacon fires read against matched water clocks."
+ },
+ {
+  "id": "block_printed_books",
+  "requires_all": [
+   "printing_process",
+   "paper_sheet_pressing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bookbinding_assemblies",
+   "tablet_colophons",
+   "retreat_copying_rooms"
+  ],
+  "note": "Printed paper sheets bound into whole books."
+ },
+ {
+  "id": "printed_almanacs",
+  "requires_all": [
+   "printing_process",
+   "star_weather_almanac"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "moving_feast_reckoning",
+   "farmers_almanac",
+   "block_printed_books"
+  ],
+  "note": "Almanacs cut in blocks and sold cheaply."
+ },
+ {
+  "id": "observed_table_revision",
+  "requires_all": [
+   "sky_tables_compendium",
+   "fixed_instrument_observatory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "half_chord_sine_tables",
+   "astronomical_diaries"
+  ],
+  "note": "Fixed instruments correct the inherited tables."
+ },
+ {
+  "id": "horary_quadrant",
+  "requires_all": [
+   "dioptra_survey",
+   "half_chord_sine_tables"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "planispheric_astrolabe",
+   "seasonal_hour_sundial"
+  ],
+  "note": "A graduated quarter circle reads heights and hours."
+ },
+ {
+  "id": "printed_standard_classics",
+  "requires_all": [
+   "block_printed_books",
+   "collated_critical_editions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "regular_merit_examinations",
+   "checked_master_copies"
+  ],
+  "note": "Collated texts printed as one standard edition."
+ },
+ {
+  "id": "scholarly_question_letters",
+  "requires_all": [
+   "royal_house_of_learning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "published_letter_collections",
+   "fee_kept_post_stations",
+   "diplomatic_letter_formulary"
+  ],
+  "conditions": {
+   "resources_known": [],
+   "environment": [],
+   "contact_required": true
+  },
+  "note": "Houses of learning exchange letters of questions."
+ },
+ {
+  "id": "written_decimal_fractions",
+  "requires_all": [
+   "digit_reckoning_handbook",
+   "counting_rod_decimals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "restoration_balancing_algebra",
+   "fractional_quantities"
+  ],
+  "note": "Rod decimals written with the nine digits."
+ },
+ {
+  "id": "illustrated_star_atlas",
+  "requires_all": [
+   "star_position_catalogue",
+   "observed_table_revision"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "named_star_figures",
+   "interlace_illuminated_books"
+  ],
+  "note": "Revised star positions drawn with magnitudes."
+ },
+ {
+  "id": "digit_column_counting_board",
+  "requires_all": [
+   "counting_board_abacus",
+   "nine_digits_and_zero"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "digit_reckoning_handbook"
+  ],
+  "note": "Board columns marked with the nine digits."
+ },
+ {
+  "id": "great_house_schools",
+  "requires_all": [
+   "seven_arts_manuals",
+   "retreat_copying_rooms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "palace_school_for_officials",
+   "court_learning_revival",
+   "small_letter_book_hand"
+  ],
+  "note": "Great temple houses teach the seven arts."
+ },
+ {
+  "id": "polynomial_term_algebra",
+  "requires_all": [
+   "restoration_balancing_algebra",
+   "written_decimal_fractions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "number_theory_treatise",
+   "zero_negative_rules"
+  ],
+  "note": "Algebra extended to powers and many terms."
+ },
+ {
+  "id": "darkened_room_optics",
+  "requires_all": [
+   "geometric_optics_treatise",
+   "royal_house_of_learning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fixed_instrument_observatory",
+   "lathe_ground_cast_glass"
+  ],
+  "note": "Light tested by trial in a darkened room."
+ },
+ {
+  "id": "sky_model_doubts",
+  "requires_all": [
+   "sky_tables_compendium",
+   "observed_table_revision"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "fixed_instrument_observatory",
+   "scholarly_question_letters"
+  ],
+  "note": "New observations expose faults in the models."
+ },
+ {
+  "id": "movable_type_composition",
+  "requires_all": [
+   "printing_process",
+   "industrial_pottery_kilns"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "block_printed_books",
+   "printed_standard_classics",
+   "rhyme_sound_dictionary"
+  ],
+  "note": "Single fired-clay characters set for printing."
+ },
+ {
+  "id": "guest_star_records",
+  "requires_all": [
+   "sky_watch_reports",
+   "observed_table_revision"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "illustrated_star_atlas",
+   "fixed_instrument_observatory"
+  ],
+  "note": "New stars logged against the revised tables."
+ },
+ {
+  "id": "binomial_coefficient_triangle",
+  "requires_all": [
+   "polynomial_term_algebra",
+   "combinatorics"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "digit_column_counting_board"
+  ],
+  "note": "Expanded powers give a triangle of coefficients."
+ },
+ {
+  "id": "universal_astrolabe_plate",
+  "requires_all": [
+   "planispheric_astrolabe",
+   "half_chord_sine_tables"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "horary_quadrant",
+   "fixed_instrument_observatory",
+   "latitude_zones"
+  ],
+  "note": "One projection plate serves every latitude."
+ },
+ {
+  "id": "geometric_cubic_solutions",
+  "requires_all": [
+   "polynomial_term_algebra",
+   "axiomatic_geometry_compendium"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "binomial_coefficient_triangle",
+   "exhaustion_area_method"
+  ],
+  "note": "Cubic equations met by intersecting conics."
+ },
+ {
+  "id": "letter_writing_art",
+  "requires_all": [
+   "rhetoric_handbooks",
+   "diplomatic_letter_formulary"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "small_letter_book_hand",
+   "great_house_schools",
+   "sealed_royal_writs"
+  ],
+  "note": "Rhetoric and formularies taught to clerks."
+ },
+ {
+  "id": "astronomical_clock_tower",
+  "requires_all": [
+   "waterwheel_escapement_globe",
+   "public_clock_tower"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cog_and_lantern_gearing",
+   "brick_stair_towers",
+   "fixed_instrument_observatory"
+  ],
+  "note": "The escapement globe housed in a public tower."
+ },
+ {
+  "id": "observation_notebooks",
+  "requires_all": [
+   "descriptive_natural_history",
+   "great_house_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paper_sheet_pressing",
+   "sky_model_doubts",
+   "guest_star_records"
+  ],
+  "note": "Scholars log curiosities they see themselves."
+ },
+ {
+  "id": "contrary_authorities_method",
+  "requires_all": [
+   "school_logic_primers",
+   "great_house_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "collated_critical_editions",
+   "scholarly_commentaries",
+   "sky_model_doubts"
+  ],
+  "note": "Logic applied to conflicting authorities."
+ },
+ {
+  "id": "magnetic_declination_note",
+  "requires_all": [
+   "floating_needle_compass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "observation_notebooks",
+   "meridian_shadow_stations"
+  ],
+  "note": "The needle checked against a known meridian."
+ },
+ {
+  "id": "paper_working_copies",
+  "requires_all": [
+   "paper_making",
+   "paper_sheet_pressing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "iron_gall_ink",
+   "wax_writing_boards"
+  ],
+  "note": "Cheap pressed paper takes over drafts."
+ },
+ {
+  "id": "collected_sentences_textbook",
+  "requires_all": [
+   "excerpt_anthologies",
+   "contrary_authorities_method"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "great_house_schools",
+   "scholarly_commentaries"
+  ],
+  "note": "Excerpts arranged for disputation in schools."
+ },
+ {
+  "id": "chartered_university",
+  "requires_all": [
+   "great_house_schools",
+   "craft_guilds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "glossator_law_schools",
+   "sworn_town_commune",
+   "contrary_authorities_method",
+   "chartered_town_liberties"
+  ],
+  "note": "Masters and students sworn like a guild."
+ },
+ {
+  "id": "rival_tongue_translation_school",
+  "requires_all": [
+   "translation_bureaus",
+   "great_house_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "royal_house_of_learning",
+   "hard_word_glossaries",
+   "chartered_university"
+  ],
+  "conditions": {
+   "resources_known": [],
+   "environment": [],
+   "contact_required": true
+  },
+  "note": "Schools render a rival learned library."
+ },
+ {
+  "id": "teaching_licence_degree",
+  "requires_all": [
+   "chartered_university"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "certified_craft_competence",
+   "glossator_law_schools",
+   "ranked_priestly_hierarchy"
+  ],
+  "note": "The university licenses its own masters."
+ },
+ {
+  "id": "scholastic_question_method",
+  "requires_all": [
+   "contrary_authorities_method",
+   "chartered_university"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "collected_sentences_textbook",
+   "school_logic_primers",
+   "rival_tongue_translation_school"
+  ],
+  "note": "Yes-and-no method made the school form."
+ },
+ {
+  "id": "set_text_lectures",
+  "requires_all": [
+   "chartered_university",
+   "collected_sentences_textbook"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "scholarly_commentaries",
+   "teaching_licence_degree"
+  ],
+  "note": "Masters lecture on fixed texts."
+ },
+ {
+  "id": "merchant_digit_reckoning",
+  "requires_all": [
+   "nine_digits_and_zero",
+   "digit_reckoning_handbook"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "written_decimal_fractions",
+   "rival_tongue_translation_school",
+   "merchant_guild_monopoly",
+   "bills_of_exchange"
+  ],
+  "note": "Digit reckoning adapted to merchant problems."
+ },
+ {
+  "id": "automata_machine_book",
+  "requires_all": [
+   "mechanical_treatises",
+   "rival_tongue_translation_school"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cam_motion_design",
+   "piston_force_pumps",
+   "waterwheel_escapement_globe"
+  ],
+  "note": "Translated machine lore drawn and extended."
+ },
+ {
+  "id": "science_of_weights",
+  "requires_all": [
+   "lever_moments",
+   "rival_tongue_translation_school"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "scholastic_question_method",
+   "centers_of_mass"
+  ],
+  "note": "Translated lever proofs rebuilt as a school science."
+ },
+ {
+  "id": "alphabetical_concordance",
+  "requires_all": [
+   "abecedary_letter_order",
+   "paper_working_copies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chapter_contents_lists",
+   "author_subject_catalogues",
+   "set_text_lectures"
+  ],
+  "note": "Alphabetic order used to index set texts."
+ },
+ {
+  "id": "endowed_student_colleges",
+  "requires_all": [
+   "endowed_scholar_house",
+   "chartered_university"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "teaching_licence_degree"
+  ],
+  "note": "Scholar houses endowed inside the university."
+ },
+ {
+  "id": "district_rain_gauges",
+  "requires_all": [
+   "flood_height_gauges",
+   "graduated_measuring_rods"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "star_weather_almanac",
+   "snowpack_flow_forecast",
+   "paired_royal_envoys"
+  ],
+  "note": "Standard gauges report rainfall to the court."
+ },
+ {
+  "id": "stepwise_high_root_extraction",
+  "requires_all": [
+   "polynomial_term_algebra",
+   "binomial_coefficient_triangle"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "counting_board_abacus",
+   "geometric_cubic_solutions"
+  ],
+  "note": "Coefficient triangle drives stepwise root finding."
+ },
+ {
+  "id": "rented_exemplar_copying",
+  "requires_all": [
+   "chartered_university",
+   "paper_working_copies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "checked_master_copies",
+   "set_text_lectures",
+   "craft_guilds"
+  ],
+  "note": "University stationers rent checked sections."
+ },
+ {
+  "id": "experimental_science_program",
+  "requires_all": [
+   "darkened_room_optics",
+   "scholastic_question_method"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "observation_notebooks",
+   "science_of_weights",
+   "rival_tongue_translation_school"
+  ],
+  "note": "Trials set against school authority."
+ },
+ {
+  "id": "lodestone_pole_experiments",
+  "requires_all": [
+   "magnetic_declination_note",
+   "experimental_science_program"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "floating_needle_compass"
+  ],
+  "note": "Trials on a lodestone find its poles."
+ },
+ {
+  "id": "royal_sky_tables_commission",
+  "requires_all": [
+   "observed_table_revision",
+   "royal_house_of_learning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rival_tongue_translation_school",
+   "universal_astrolabe_plate",
+   "sky_model_doubts"
+  ],
+  "note": "The court funds a full recomputation."
+ },
+ {
+  "id": "school_perspective_optics",
+  "requires_all": [
+   "darkened_room_optics",
+   "set_text_lectures"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "experimental_science_program",
+   "geometric_optics_treatise"
+  ],
+  "note": "Optics of sight made a lectured subject."
+ },
+ {
+  "id": "optical_lenses",
+  "requires_all": [
+   "decolorized_clear_glass",
+   "gem_cutting_wheel",
+   "darkened_room_optics"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "school_perspective_optics",
+   "lathe_ground_cast_glass"
+  ],
+  "note": "Clear glass ground to convex form."
+ },
+ {
+  "id": "reckoning_schools",
+  "requires_all": [
+   "merchant_digit_reckoning",
+   "great_house_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "letter_writing_art",
+   "merchant_guild_monopoly",
+   "chartered_university"
+  ],
+  "note": "Masters teach merchant reckoning for fees."
+ },
+ {
+  "id": "verge_escapement_clock",
+  "requires_all": [
+   "astronomical_clock_tower",
+   "cog_and_lantern_gearing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "waterwheel_escapement_globe",
+   "pit_cast_bells"
+  ],
+  "note": "A weight and verge replace the water drive."
+ },
+ {
+  "id": "foliated_running_heads",
+  "requires_all": [
+   "alphabetical_concordance",
+   "paper_working_copies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chapter_contents_lists",
+   "rented_exemplar_copying"
+  ],
+  "note": "Indexes need numbered leaves to point to."
+ },
+ {
+  "id": "wooden_movable_type",
+  "requires_all": [
+   "movable_type_composition",
+   "rhyme_sound_dictionary"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "block_printed_books",
+   "printed_standard_classics"
+  ],
+  "note": "Carved type sorted by rhyme on turning tables."
+ },
+ {
+  "id": "mineral_acid_distillation",
+  "requires_all": [
+   "chemical_distillation",
+   "alum_works"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "salt_cementation_parting",
+   "sulfur_purification",
+   "glass_blowing"
+  ],
+  "note": "Salts and alum distilled to strong acids."
+ },
+ {
+  "id": "water_sphere_rainbow_test",
+  "requires_all": [
+   "experimental_science_program",
+   "school_perspective_optics"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "glass_blowing",
+   "optical_lenses"
+  ],
+  "note": "A water-filled sphere models the raindrop."
+ },
+ {
+  "id": "vernacular_learned_writing",
+  "requires_all": [
+   "chartered_university",
+   "hard_word_glossaries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "vernacular_allegory_epic",
+   "courtly_love_lyric",
+   "devotional_songs_common_tongue"
+  ],
+  "note": "School learning written in the common tongue."
+ },
+ {
+  "id": "striking_equal_hour_clock",
+  "requires_all": [
+   "verge_escapement_clock",
+   "pit_cast_bells"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "astronomical_clock_tower",
+   "communal_bell_hours",
+   "work_bell_hours"
+  ],
+  "note": "A verge clock strikes a tower bell."
+ },
+ {
+  "id": "mean_speed_rule",
+  "requires_all": [
+   "science_of_weights",
+   "scholastic_question_method"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "experimental_science_program",
+   "polynomial_term_algebra"
+  ],
+  "note": "Motion's quantities reasoned in the schools."
+ },
+ {
+  "id": "commonplace_books",
+  "requires_all": [
+   "paper_working_copies",
+   "observation_notebooks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "foliated_running_heads",
+   "alphabetical_concordance",
+   "paper_stamping_mills"
+  ],
+  "note": "Cheap paper makes private notebooks common."
+ },
+ {
+  "id": "impetus_theory",
+  "requires_all": [
+   "science_of_weights",
+   "scholastic_question_method"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mean_speed_rule",
+   "counterweight_engines"
+  ],
+  "note": "Projectile motion explained by imparted push."
+ },
+ {
+  "id": "quality_graphs",
+  "requires_all": [
+   "mean_speed_rule",
+   "coordinate_gazetteer_maps"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "impetus_theory",
+   "scaled_grid_mapping"
+  ],
+  "note": "Intensities plotted on grid coordinates."
+ },
+ {
+  "id": "regional_vicariates",
+  "requires_all": [
+   "rotated_appointed_prefects",
+   "provincial_governors"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "divided_provincial_powers",
+   "civil_military_separation"
+  ],
+  "note": "Provinces grouped under vicars above the governors."
+ },
+ {
+  "id": "bound_estate_tenants",
+  "requires_all": [
+   "land_bound_tenancy",
+   "head_land_tax_units"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sharecropping_tenancy"
+  ],
+  "note": "Head-and-land tax ties tenants to the estate roll."
+ },
+ {
+  "id": "register_of_dignities",
+  "requires_all": [
+   "nine_rank_official_grading",
+   "official_mandate_registers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "palace_department_registers",
+   "civil_military_separation"
+  ],
+  "note": "Ranked offices listed in one register."
+ },
+ {
+  "id": "ranked_priestly_hierarchy",
+  "requires_all": [
+   "temple_estates",
+   "congregation_hall_temples"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "regional_vicariates",
+   "provincial_governors",
+   "shrine_arbitration_courts"
+  ],
+  "note": "The god's house copies the provincial ladder."
+ },
+ {
+  "id": "promulgated_edict_code",
+  "requires_all": [
+   "compiled_rescript_code"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "written_law_code",
+   "public_law_stele",
+   "register_of_dignities"
+  ],
+  "note": "Rescript collections enacted as one code."
+ },
+ {
+  "id": "town_protector_office",
+  "requires_all": [
+   "town_advocate_for_poor"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "commoners_veto_tribunes",
+   "provincial_town_councils"
+  ],
+  "note": "The advocate made a standing town office."
+ },
+ {
+  "id": "written_customary_codes",
+  "requires_all": [
+   "customary_law",
+   "written_law_code"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "promulgated_edict_code",
+   "federate_settlement"
+  ],
+  "note": "Settled peoples write down their customs."
+ },
+ {
+  "id": "priest_overseer_town_leadership",
+  "requires_all": [
+   "ranked_priestly_hierarchy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_protector_office",
+   "village_self_rule_after_collapse",
+   "town_to_estate_drift"
+  ],
+  "note": "Overseers step in as civil offices fail."
+ },
+ {
+  "id": "personal_law_by_people",
+  "requires_all": [
+   "written_customary_codes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "foreigners_court",
+   "settler_estate_shares"
+  ],
+  "note": "Written codes let each people keep its law."
+ },
+ {
+  "id": "jurist_digest_codification",
+  "requires_all": [
+   "binding_jurist_opinions",
+   "promulgated_edict_code"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "legal_jurisconsults",
+   "collated_critical_editions"
+  ],
+  "note": "Jurists' opinions condensed beside the code."
+ },
+ {
+  "id": "official_law_primer",
+  "requires_all": [
+   "jurist_digest_codification"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seven_arts_manuals",
+   "state_official_academy"
+  ],
+  "note": "A teaching primer drawn from the digest."
+ },
+ {
+  "id": "district_counts",
+  "requires_all": [
+   "provincial_governors",
+   "regional_vicariates"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "personal_law_by_people",
+   "warrior_acclamation_assembly"
+  ],
+  "note": "District governors hold court in the ruler's name."
+ },
+ {
+  "id": "household_great_offices",
+  "requires_all": [
+   "palace_department_registers",
+   "register_of_dignities"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "throne_room_protocol",
+   "district_counts"
+  ],
+  "note": "Household servants become officers of state."
+ },
+ {
+  "id": "ordeal_by_the_god",
+  "requires_all": [
+   "ranked_priestly_hierarchy",
+   "sworn_trial_testimony"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "formal_oath_taking",
+   "written_customary_codes"
+  ],
+  "note": "The god's servants judge proof by ordeal."
+ },
+ {
+  "id": "three_department_ministries",
+  "requires_all": [
+   "divided_provincial_powers",
+   "register_of_dignities"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "palace_department_registers",
+   "nine_rank_official_grading"
+  ],
+  "note": "Ranked offices grouped into departments and ministries."
+ },
+ {
+  "id": "equal_field_allotment",
+  "requires_all": [
+   "graded_land_tax",
+   "household_tax_registers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "triennial_household_registers",
+   "measured_plot_allotment"
+  ],
+  "note": "Household registers let land be reallotted."
+ },
+ {
+  "id": "regular_merit_examinations",
+  "requires_all": [
+   "written_office_examinations",
+   "three_department_ministries"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "state_official_academy",
+   "merit_recommendation"
+  ],
+  "note": "Written tests held on a fixed cycle for the ministries."
+ },
+ {
+  "id": "military_frontier_provinces",
+  "requires_all": [
+   "provincial_governors",
+   "permanent_frontier_fortresses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "military_district_settlement",
+   "civil_military_separation",
+   "regional_vicariates"
+  ],
+  "note": "Frontier forts and province fused under one general."
+ },
+ {
+  "id": "witnessed_land_charters",
+  "requires_all": [
+   "witnessed_land_sales",
+   "parchment_record_preparation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "property_registers",
+   "oath_witness_registers"
+  ],
+  "note": "Grants written on parchment with witness lists."
+ },
+ {
+  "id": "impeaching_censorate",
+  "requires_all": [
+   "three_department_ministries",
+   "extortion_court"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "licensed_court_critics",
+   "circuit_inspectors"
+  ],
+  "note": "Censors check the ministries from outside."
+ },
+ {
+  "id": "palace_mayor_regency",
+  "requires_all": [
+   "household_great_offices"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "veiled_monarchy_offices",
+   "shared_co_rulers"
+  ],
+  "note": "The chief household officer rules for the king."
+ },
+ {
+  "id": "homage_commendation",
+  "requires_all": [
+   "vassal_loyalty_oaths",
+   "patron_protection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "landowner_patronage_tenancy",
+   "formal_oath_taking"
+  ],
+  "note": "Patronage sealed by a personal oath to a lord."
+ },
+ {
+  "id": "hereditary_military_governors",
+  "requires_all": [
+   "military_frontier_provinces",
+   "dynastic_succession"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "palace_mayor_regency"
+  ],
+  "note": "Frontier commands pass from father to son."
+ },
+ {
+  "id": "twice_yearly_coin_tax",
+  "requires_all": [
+   "annual_tax_budget",
+   "equal_field_allotment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "small_change_coins",
+   "household_tax_registers"
+  ],
+  "note": "Allotment-based dues commuted to coin."
+ },
+ {
+  "id": "palace_school_for_officials",
+  "requires_all": [
+   "state_official_academy",
+   "household_great_offices"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seven_arts_manuals",
+   "retreat_copying_rooms"
+  ],
+  "note": "The household trains its future officers."
+ },
+ {
+  "id": "spring_magnate_assembly",
+  "requires_all": [
+   "noble_council",
+   "district_counts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "warrior_acclamation_assembly",
+   "household_great_offices"
+  ],
+  "note": "Counts and magnates meet the ruler each spring."
+ },
+ {
+  "id": "compulsory_tithe",
+  "requires_all": [
+   "ranked_priestly_hierarchy",
+   "area_harvest_assessment"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "first_fruits_offering",
+   "temple_estates"
+  ],
+  "note": "Offerings made a law-enforced tenth."
+ },
+ {
+  "id": "paired_royal_envoys",
+  "requires_all": [
+   "circuit_inspectors",
+   "district_counts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "spring_magnate_assembly",
+   "mounted_messengers"
+  ],
+  "note": "Inspectors sent in pairs to check the counts."
+ },
+ {
+  "id": "numbered_article_decrees",
+  "requires_all": [
+   "promulgated_edict_code",
+   "spring_magnate_assembly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paired_royal_envoys",
+   "small_letter_book_hand"
+  ],
+  "note": "Assembly decrees issued as numbered articles."
+ },
+ {
+  "id": "overlord_crowned_by_high_priest",
+  "requires_all": [
+   "priestly_anointing",
+   "ranked_priestly_hierarchy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ceremonial_investiture"
+  ],
+  "note": "The head of the god's house anoints the overlord."
+ },
+ {
+  "id": "seigneurial_immunity_courts",
+  "requires_all": [
+   "district_counts",
+   "witnessed_land_charters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "homage_commendation",
+   "landowner_patronage_tenancy"
+  ],
+  "note": "Charters exempt estates from the count's court."
+ },
+ {
+  "id": "manor_court_customals",
+  "requires_all": [
+   "seigneurial_immunity_courts",
+   "written_customary_codes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "estate_survey_books",
+   "week_work_service"
+  ],
+  "note": "Immunity courts write down tenants' dues."
+ },
+ {
+  "id": "fief_tenure_for_service",
+  "requires_all": [
+   "homage_commendation",
+   "service_land_grants"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mounted_retinue_summons",
+   "land_for_service_tenure"
+  ],
+  "note": "Land granted to sworn men for armed service."
+ },
+ {
+  "id": "hereditary_fief_succession",
+  "requires_all": [
+   "fief_tenure_for_service",
+   "dynastic_succession"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hereditary_military_governors",
+   "blood_heir_rule"
+  ],
+  "note": "Fiefs pass to heirs of the body."
+ },
+ {
+  "id": "frontier_march_lords",
+  "requires_all": [
+   "fief_tenure_for_service",
+   "military_frontier_provinces"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "permanent_frontier_fortresses",
+   "castle_guard_rotations"
+  ],
+  "note": "Frontier commands held as great fiefs."
+ },
+ {
+  "id": "shire_reeve_courts",
+  "requires_all": [
+   "district_counts",
+   "regional_arbitration_circuits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "free_adult_assembly",
+   "paired_royal_envoys",
+   "numbered_article_decrees"
+  ],
+  "note": "Local assemblies sit under the ruler's reeve."
+ },
+ {
+  "id": "prefect_guild_rulebook",
+  "requires_all": [
+   "chartered_craft_associations",
+   "market_wardens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "licensed_guilds",
+   "city_supply_corporations"
+  ],
+  "note": "The town governor codifies the trade bodies."
+ },
+ {
+  "id": "itinerant_royal_court",
+  "requires_all": [
+   "household_great_offices",
+   "spring_magnate_assembly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "estate_carrying_services",
+   "seigneurial_immunity_courts"
+  ],
+  "note": "The household moves to consume its dues."
+ },
+ {
+  "id": "smallholder_protection_laws",
+  "requires_all": [
+   "promulgated_edict_code",
+   "bound_estate_tenants"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "debt_release_edicts",
+   "soldier_farmer_holdings"
+  ],
+  "note": "Decrees stop magnates buying out small holders."
+ },
+ {
+  "id": "raider_tribute_land_tax",
+  "requires_all": [
+   "hearth_tax_counts",
+   "shire_reeve_courts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "treaty_border_levies",
+   "graded_land_tax"
+  ],
+  "note": "Hearth counts assessed through the shires."
+ },
+ {
+  "id": "castellan_local_lordship",
+  "requires_all": [
+   "motte_and_bailey",
+   "seigneurial_immunity_courts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hereditary_fief_succession",
+   "river_toll_stations"
+  ],
+  "note": "Castles give immune lords local power."
+ },
+ {
+  "id": "sealed_royal_writs",
+  "requires_all": [
+   "shire_reeve_courts",
+   "numbered_article_decrees"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "small_letter_book_hand",
+   "standard_royal_letters"
+  ],
+  "note": "Short sealed orders sent to shire courts."
+ },
+ {
+  "id": "holy_truce_days",
+  "requires_all": [
+   "ranked_priestly_hierarchy",
+   "castellan_local_lordship"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "holy_servants_feast_year",
+   "holy_relic_shrines"
+  ],
+  "note": "The god's house curbs castellans' private war."
+ },
+ {
+  "id": "anonymous_copied_exam_scripts",
+  "requires_all": [
+   "regular_merit_examinations"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printed_standard_classics",
+   "scribal_copying_tests"
+  ],
+  "note": "Scripts recopied to hide candidates' hands."
+ },
+ {
+  "id": "treasury_paper_notes",
+  "requires_all": [
+   "remittance_certificates",
+   "printing_process"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paper_making",
+   "public_credit",
+   "district_royal_banks"
+  ],
+  "note": "Remittance slips printed as state paper money."
+ },
+ {
+  "id": "mutual_surety_tithings",
+  "requires_all": [
+   "shire_reeve_courts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bail_guarantors",
+   "gangs_of_ten",
+   "ward_residence_lists"
+  ],
+  "note": "The shire court holds tens of households to account."
+ },
+ {
+  "id": "merchant_guild_monopoly",
+  "requires_all": [
+   "licensed_merchant_houses",
+   "market_wardens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "prefect_guild_rulebook",
+   "seasonal_beach_emporia",
+   "municipal_charters"
+  ],
+  "note": "Merchants band together to hold the market."
+ },
+ {
+  "id": "closed_college_election",
+  "requires_all": [
+   "ranked_priestly_hierarchy",
+   "overlord_crowned_by_high_priest"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "majority_vote_assembly"
+  ],
+  "note": "Senior clergy alone choose the head."
+ },
+ {
+  "id": "royal_chancery_office",
+  "requires_all": [
+   "sealed_royal_writs",
+   "formal_archives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "small_letter_book_hand",
+   "diplomatic_letter_formulary",
+   "household_great_offices"
+  ],
+  "note": "Writs and archives under one keeper of the seal."
+ },
+ {
+  "id": "sworn_town_commune",
+  "requires_all": [
+   "merchant_guild_monopoly",
+   "formal_oath_taking"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_identity",
+   "mutual_surety_tithings",
+   "municipal_charters"
+  ],
+  "note": "Guild merchants swear the town together."
+ },
+ {
+  "id": "counting_table_audit",
+  "requires_all": [
+   "counting_board_abacus",
+   "shire_reeve_courts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "end_of_term_audits",
+   "sealed_royal_writs",
+   "digit_column_counting_board"
+  ],
+  "note": "Reeves' accounts reckoned on a chequered board."
+ },
+ {
+  "id": "craft_guilds",
+  "requires_all": [
+   "prefect_guild_rulebook",
+   "sworn_town_commune"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "apprentice_indentures",
+   "craft_quarter_streets",
+   "licensed_guilds"
+  ],
+  "note": "Trade rules taken over by sworn craft bodies."
+ },
+ {
+  "id": "elected_town_consuls",
+  "requires_all": [
+   "sworn_town_commune",
+   "annual_elected_magistrates"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "majority_vote_assembly"
+  ],
+  "note": "The commune elects annual consuls."
+ },
+ {
+  "id": "great_hall_of_justice",
+  "requires_all": [
+   "royal_appeal_court",
+   "household_great_offices"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "long_span_timber_halls",
+   "shire_reeve_courts"
+  ],
+  "note": "A great hall built for the ruler's court."
+ },
+ {
+  "id": "priestly_investiture_settlement",
+  "requires_all": [
+   "closed_college_election",
+   "fief_tenure_for_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "overlord_crowned_by_high_priest",
+   "sealed_royal_writs"
+  ],
+  "note": "Office and fief of the god's heads split."
+ },
+ {
+  "id": "chief_justiciar_viceroy",
+  "requires_all": [
+   "royal_chancery_office",
+   "household_great_offices"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "palace_mayor_regency",
+   "counting_table_audit"
+  ],
+  "note": "One officer runs chancery and courts for an absent ruler."
+ },
+ {
+  "id": "glossator_law_schools",
+  "requires_all": [
+   "jurist_digest_codification",
+   "great_house_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "contrary_authorities_method",
+   "official_law_primer"
+  ],
+  "note": "Schools teach and gloss the recovered digest."
+ },
+ {
+  "id": "chartered_town_liberties",
+  "requires_all": [
+   "municipal_charters",
+   "sworn_town_commune"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "witnessed_land_charters",
+   "elected_town_consuls"
+  ],
+  "note": "Communes buy written liberties."
+ },
+ {
+  "id": "annual_receipt_rolls",
+  "requires_all": [
+   "counting_table_audit",
+   "parchment_record_preparation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "provincial_accounts",
+   "royal_chancery_office"
+  ],
+  "note": "Audit results enrolled year by year."
+ },
+ {
+  "id": "public_notaries",
+  "requires_all": [
+   "glossator_law_schools",
+   "sealed_family_contracts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "notarized_work_contracts",
+   "witnessed_land_charters"
+  ],
+  "note": "Law-school training gives deeds public proof."
+ },
+ {
+  "id": "sacred_law_concordance",
+  "requires_all": [
+   "glossator_law_schools",
+   "contrary_authorities_method"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ranked_priestly_hierarchy",
+   "priestly_investiture_settlement"
+  ],
+  "note": "Contrary canons reconciled by the school method."
+ },
+ {
+  "id": "fair_merchant_courts",
+  "requires_all": [
+   "guarded_trade_fairs",
+   "merchant_guild_monopoly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "foreigners_court",
+   "merchant_safe_conducts"
+  ],
+  "note": "Fairs get quick courts of merchant custom."
+ },
+ {
+  "id": "royal_justice_circuits",
+  "requires_all": [
+   "regional_arbitration_circuits",
+   "sealed_royal_writs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paired_royal_envoys",
+   "chief_justiciar_viceroy",
+   "annual_receipt_rolls"
+  ],
+  "note": "Royal judges carry writs round the shires."
+ },
+ {
+  "id": "presenting_jury_of_neighbours",
+  "requires_all": [
+   "royal_justice_circuits",
+   "mutual_surety_tithings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sworn_trial_testimony",
+   "shire_reeve_courts"
+  ],
+  "note": "Tithings present suspects to circuit judges."
+ },
+ {
+  "id": "hired_outside_magistrate",
+  "requires_all": [
+   "elected_town_consuls",
+   "glossator_law_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "term_limit_laws",
+   "public_notaries"
+  ],
+  "note": "Faction-torn towns hire a trained outsider."
+ },
+ {
+  "id": "writ_forms_of_action",
+  "requires_all": [
+   "sealed_royal_writs",
+   "royal_chancery_office"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "royal_justice_circuits",
+   "written_court_procedure"
+  ],
+  "note": "Chancery fixes one writ per kind of claim."
+ },
+ {
+  "id": "salaried_royal_bailiffs",
+  "requires_all": [
+   "annual_receipt_rolls",
+   "royal_chancery_office"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "professional_service",
+   "service_money_commutation"
+  ],
+  "note": "Enrolled revenue pays local officers."
+ },
+ {
+  "id": "estates_assembly",
+  "requires_all": [
+   "spring_magnate_assembly",
+   "chartered_town_liberties"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sworn_town_commune",
+   "chief_justiciar_viceroy"
+  ],
+  "note": "Chartered towns join the magnates' assembly."
+ },
+ {
+  "id": "chancery_enrolment_rolls",
+  "requires_all": [
+   "royal_chancery_office",
+   "annual_receipt_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cross_referenced_archives",
+   "petition_registers"
+  ],
+  "note": "Chancery enrols outgoing letters like receipts."
+ },
+ {
+  "id": "fixed_capital_archives",
+  "requires_all": [
+   "chancery_enrolment_rolls",
+   "great_hall_of_justice"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "itinerant_royal_court",
+   "formal_archives",
+   "counting_table_audit"
+  ],
+  "note": "Rolls grow too heavy to travel; the court settles."
+ },
+ {
+  "id": "ordeal_abolition",
+  "requires_all": [
+   "ordeal_by_the_god",
+   "presenting_jury_of_neighbours"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sacred_law_concordance",
+   "glossator_law_schools"
+  ],
+  "note": "Juries replace the ordeal as proof."
+ },
+ {
+  "id": "great_liberties_charter",
+  "requires_all": [
+   "royal_covenant_charter",
+   "estates_assembly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chartered_town_liberties",
+   "hereditary_fief_succession"
+  ],
+  "note": "The estates bind the ruler by charter."
+ },
+ {
+  "id": "great_priestly_council_decrees",
+  "requires_all": [
+   "sacred_law_concordance",
+   "closed_college_election"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "priestly_investiture_settlement",
+   "estates_assembly"
+  ],
+  "note": "A general council legislates for the god's house."
+ },
+ {
+  "id": "petty_trial_jury",
+  "requires_all": [
+   "presenting_jury_of_neighbours",
+   "ordeal_abolition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "citizen_jury_courts"
+  ],
+  "note": "Sworn neighbours decide guilt once ordeal ends."
+ },
+ {
+  "id": "inquisitorial_written_procedure",
+  "requires_all": [
+   "ordeal_abolition",
+   "glossator_law_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "written_court_procedure",
+   "public_notaries",
+   "sacred_law_concordance"
+  ],
+  "note": "Learned judges investigate by written dossier."
+ },
+ {
+  "id": "revised_town_statute_books",
+  "requires_all": [
+   "chartered_town_liberties",
+   "elected_town_consuls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "prefect_guild_rulebook",
+   "public_notaries",
+   "paper_working_copies"
+  ],
+  "note": "Consuls revise the town's written statutes."
+ },
+ {
+  "id": "permanent_high_court",
+  "requires_all": [
+   "fixed_capital_archives",
+   "writ_forms_of_action"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "royal_appeal_court",
+   "great_hall_of_justice"
+  ],
+  "note": "Writ pleading seated in the fixed capital."
+ },
+ {
+  "id": "sworn_royal_council",
+  "requires_all": [
+   "noble_council",
+   "fixed_capital_archives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "professional_service",
+   "glossator_law_schools",
+   "chartered_university"
+  ],
+  "note": "A fixed capital keeps salaried councillors at hand."
+ },
+ {
+  "id": "funded_public_debt_shares",
+  "requires_all": [
+   "public_credit",
+   "chartered_town_liberties"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "treasury_paper_notes",
+   "bills_of_exchange",
+   "elected_town_consuls"
+  ],
+  "note": "Town loans funded as transferable shares."
+ },
+ {
+  "id": "revised_realm_law_code",
+  "requires_all": [
+   "promulgated_edict_code",
+   "glossator_law_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "written_customary_codes",
+   "great_liberties_charter",
+   "hard_word_glossaries"
+  ],
+  "note": "Learned law restated in the common tongue."
+ },
+ {
+  "id": "chartered_town_league",
+  "requires_all": [
+   "chartered_town_liberties",
+   "league_common_treasury"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "merchant_guild_monopoly",
+   "federal_proportional_league",
+   "sworn_town_commune"
+  ],
+  "note": "Chartered towns pool dues in a league."
+ },
+ {
+  "id": "branch_banking_houses",
+  "requires_all": [
+   "bills_of_exchange",
+   "licensed_merchant_houses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "salaried_trade_factors",
+   "deposit_transfer_orders",
+   "merchant_digit_reckoning"
+  ],
+  "note": "Merchant houses bank through salaried branches."
+ },
+ {
+  "id": "consented_taxation",
+  "requires_all": [
+   "estates_assembly",
+   "great_liberties_charter"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "assembly_petition_rights"
+  ],
+  "note": "The charter makes new taxes need the estates."
+ },
+ {
+  "id": "closed_hereditary_council",
+  "requires_all": [
+   "elected_town_consuls",
+   "noble_lineage_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chartered_town_liberties",
+   "hired_outside_magistrate"
+  ],
+  "note": "Council seats limited to enrolled lineages."
+ },
+ {
+  "id": "privy_seal_office",
+  "requires_all": [
+   "royal_chancery_office",
+   "chancery_enrolment_rolls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sworn_royal_council"
+  ],
+  "note": "A second seal for the ruler's own orders."
+ },
+ {
+  "id": "coronation_oath_to_realm",
+  "requires_all": [
+   "coronation_regalia_rite",
+   "great_liberties_charter"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "overlord_crowned_by_high_priest"
+  ],
+  "note": "The crowning rite adds an oath to the charter."
+ },
+ {
+  "id": "fixed_court_of_accounts",
+  "requires_all": [
+   "counting_table_audit",
+   "fixed_capital_archives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "annual_receipt_rolls"
+  ],
+  "note": "The audit board settles in the capital."
+ },
+ {
+  "id": "rank_sumptuary_laws",
+  "requires_all": [
+   "rank_dress_styles",
+   "numbered_article_decrees"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "heraldic_arms",
+   "knightly_conduct_code",
+   "chartered_town_liberties"
+  ],
+  "note": "Dress by rank enforced by decree."
+ },
+ {
+  "id": "double_entry_ledgers",
+  "requires_all": [
+   "merchant_digit_reckoning",
+   "branch_banking_houses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paper_working_copies",
+   "merchant_letter_accounts",
+   "written_decimal_fractions"
+  ],
+  "note": "Branch accounts balanced entry against entry."
+ },
+ {
+  "id": "scrutiny_lot_elections",
+  "requires_all": [
+   "elected_town_consuls",
+   "lot_chosen_council"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "closed_hereditary_council",
+   "craft_guilds"
+  ],
+  "note": "Consuls chosen by vetted lists and the lot."
+ },
+ {
+  "id": "keepers_of_the_peace",
+  "requires_all": [
+   "shire_reeve_courts",
+   "royal_justice_circuits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hue_and_cry",
+   "presenting_jury_of_neighbours",
+   "petty_trial_jury"
+  ],
+  "note": "Shire gentry keep the peace between circuits."
+ },
+ {
+  "id": "elector_college_charter",
+  "requires_all": [
+   "warrior_acclamation_assembly",
+   "closed_college_election"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "estates_assembly",
+   "coronation_oath_to_realm",
+   "great_liberties_charter"
+  ],
+  "note": "A closed college of electors replaces acclamation."
+ },
+ {
+  "id": "brush_writing_fine_art",
+  "requires_all": [
+   "cursive_document_hand",
+   "lampblack_capture"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "scribal_specialties",
+   "painted_panel_portraits"
+  ],
+  "note": "The flowing hand valued for its own beauty."
+ },
+ {
+  "id": "holy_tomb_pilgrimage",
+  "requires_all": [
+   "pilgrimage",
+   "holy_servant_lives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hero_tomb_offerings",
+   "road_stations"
+  ],
+  "note": "Lives of the god's servants draw pilgrims to tombs."
+ },
+ {
+  "id": "holy_relic_shrines",
+  "requires_all": [
+   "holy_tomb_pilgrimage"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "underground_burial_galleries",
+   "votive_figures"
+  ],
+  "note": "Relics moved from tombs into shrines."
+ },
+ {
+  "id": "confessional_autobiography",
+  "requires_all": [
+   "authored_prose_treatises",
+   "honored_ascetics"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "consolation_philosophies",
+   "paired_lives_biography"
+  ],
+  "note": "Ascetic self-scrutiny written as a life."
+ },
+ {
+  "id": "providential_world_history",
+  "requires_all": [
+   "comparative_chronicles",
+   "canonized_sacred_sayings"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "founding_era_annals",
+   "eponym_year_lists"
+  ],
+  "note": "Chronicles fitted to sacred scripture."
+ },
+ {
+  "id": "holy_servants_feast_year",
+  "requires_all": [
+   "calendar_feast_days",
+   "holy_servant_lives"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "holy_relic_shrines",
+   "weekly_rest_day"
+  ],
+  "note": "Each servant's day entered in the feast calendar."
+ },
+ {
+  "id": "rock_cut_cave_sanctuaries",
+  "requires_all": [
+   "iron_tool_rock_cutting",
+   "shrine_wall_painting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "honored_ascetics",
+   "holy_tomb_pilgrimage"
+  ],
+  "note": "Cliff caves cut and painted as shrines."
+ },
+ {
+  "id": "devotee_communities_under_rule",
+  "requires_all": [
+   "honored_ascetics",
+   "celibate_communities"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "contemplative_ascent_schools",
+   "philosophy_school_communities"
+  ],
+  "note": "Ascetic groups bound by a written rule."
+ },
+ {
+  "id": "official_ivory_diptychs",
+  "requires_all": [
+   "carved_ivory_panels",
+   "annual_elected_magistrates"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "register_of_dignities",
+   "inscribed_dedications"
+  ],
+  "note": "Office-holders mark their year with carved panels."
+ },
+ {
+  "id": "venerated_icons",
+  "requires_all": [
+   "painted_panel_portraits",
+   "holy_relic_shrines"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "ancestor_wax_masks",
+   "votive_figures"
+  ],
+  "note": "Portrait panels of servants venerated like relics."
+ },
+ {
+  "id": "great_domed_temple",
+  "requires_all": [
+   "pendentive_domes",
+   "congregation_hall_temples"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "domed_masonry_roofs",
+   "thin_brick_shell_vaults",
+   "glass_wall_mosaics",
+   "lead_sheet_roofing"
+  ],
+  "note": "The congregation hall roofed by a pendentive dome."
+ },
+ {
+  "id": "race_faction_parties",
+  "requires_all": [
+   "circus_race_factions"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chariot_race_games",
+   "civic_games"
+  ],
+  "note": "Race colours become political parties."
+ },
+ {
+  "id": "stanza_hymn_sermons",
+  "requires_all": [
+   "congregational_hymns",
+   "display_oratory"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "temple_choirs",
+   "canonized_sacred_sayings"
+  ],
+  "note": "Oratory sung as stanzas with a refrain."
+ },
+ {
+  "id": "peoples_origin_histories",
+  "requires_all": [
+   "comparative_chronicles",
+   "founder_story_recitation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "providential_world_history",
+   "written_customary_codes",
+   "federate_settlement"
+  ],
+  "note": "Each new people's founding written as history."
+ },
+ {
+  "id": "chant_schools",
+  "requires_all": [
+   "temple_choirs",
+   "devotee_communities_under_rule"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stanza_hymn_sermons",
+   "seven_arts_manuals"
+  ],
+  "note": "Ruled communities train choirs by rote."
+ },
+ {
+  "id": "strategy_board_war_game",
+  "requires_all": [
+   "board_race_games"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "generals_field_manual",
+   "combinatorics"
+  ],
+  "note": "Race boards turned into a game of war."
+ },
+ {
+  "id": "mead_hall_gift_feasts",
+  "requires_all": [
+   "elite_drinking_feasts",
+   "praise_songs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "long_span_timber_halls",
+   "fixed_meter_epic_bards"
+  ],
+  "note": "Lord's feasts with gifts and praise poetry."
+ },
+ {
+  "id": "lantern_festival_nights",
+  "requires_all": [
+   "new_year_festival",
+   "paper_making"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "festival_calendar",
+   "emblem_processions"
+  ],
+  "note": "Paper lanterns light the new-year festival."
+ },
+ {
+  "id": "devotional_songs_common_tongue",
+  "requires_all": [
+   "congregational_hymns",
+   "stanza_hymn_sermons"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "personal_lyric_poetry",
+   "hard_word_glossaries"
+  ],
+  "note": "Sung devotion moves into the everyday tongue."
+ },
+ {
+  "id": "warband_heroic_poems",
+  "requires_all": [
+   "fixed_meter_epic_bards",
+   "mead_hall_gift_feasts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "heroic_song_cycle",
+   "warrior_weapon_burials"
+  ],
+  "note": "Hall bards turn warband deeds to verse."
+ },
+ {
+  "id": "interlace_illuminated_books",
+  "requires_all": [
+   "illuminated_codices",
+   "retreat_copying_rooms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rounded_book_hand",
+   "membrane_beaten_gold_leaf"
+  ],
+  "note": "Copying rooms paint knotwork pages."
+ },
+ {
+  "id": "regulated_tonal_verse",
+  "requires_all": [
+   "rhyme_sound_dictionary",
+   "learned_allusive_poetry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "personal_lyric_poetry"
+  ],
+  "note": "Rhyme dictionaries fix tone and rhyme rules."
+ },
+ {
+  "id": "image_breaking_dispute",
+  "requires_all": [
+   "venerated_icons",
+   "ranked_priestly_hierarchy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "holy_relic_shrines",
+   "great_domed_temple"
+  ],
+  "note": "The hierarchy splits over venerated images."
+ },
+ {
+  "id": "court_learning_revival",
+  "requires_all": [
+   "palace_school_for_officials",
+   "retreat_copying_rooms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "small_letter_book_hand",
+   "seven_arts_manuals",
+   "interlace_illuminated_books"
+  ],
+  "note": "The palace school recovers old books."
+ },
+ {
+  "id": "carved_story_stones",
+  "requires_all": [
+   "stone_relief_carving",
+   "interlace_illuminated_books"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "memorial_cairn_marking",
+   "holy_servant_lives"
+  ],
+  "note": "Book ornament carved on standing stones."
+ },
+ {
+  "id": "terraced_temple_mountain",
+  "requires_all": [
+   "stepped_temple_towers",
+   "ashlar_retaining_terraces"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rock_cut_cave_sanctuaries",
+   "stone_relief_carving",
+   "great_tank_reservoirs"
+  ],
+  "note": "Stepped terraces built as the god's mountain."
+ },
+ {
+  "id": "neume_chant_notation",
+  "requires_all": [
+   "chant_schools",
+   "reading_marks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "small_letter_book_hand",
+   "string_ratio_harmonics"
+  ],
+  "note": "Reading accents grow into melody signs."
+ },
+ {
+  "id": "mirror_for_rulers",
+  "requires_all": [
+   "wisdom_instructions",
+   "court_learning_revival"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "authored_prose_treatises",
+   "character_portrait_writing"
+  ],
+  "note": "Revived learning written as advice to kings."
+ },
+ {
+  "id": "ruler_biography",
+  "requires_all": [
+   "paired_lives_biography",
+   "court_learning_revival"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "holy_servant_lives",
+   "mirror_for_rulers"
+  ],
+  "note": "Courtiers write the ruler's life on old models."
+ },
+ {
+  "id": "frame_story_collections",
+  "requires_all": [
+   "animal_fables",
+   "prose_romance_novel"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "winter_tale_nights",
+   "traveling_storyteller_exchange"
+  ],
+  "note": "Fables and tales set inside a frame story."
+ },
+ {
+  "id": "liturgical_drama",
+  "requires_all": [
+   "chant_schools",
+   "holy_servants_feast_year"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_theatre",
+   "neume_chant_notation"
+  ],
+  "note": "Feast-day chant acted as dialogue."
+ },
+ {
+  "id": "court_poetry_contests",
+  "requires_all": [
+   "personal_lyric_poetry",
+   "court_learning_revival"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "debate_poems",
+   "regulated_tonal_verse",
+   "choral_district_contests"
+  ],
+  "note": "The revived court judges poems in contest."
+ },
+ {
+  "id": "many_voice_singing",
+  "requires_all": [
+   "neume_chant_notation",
+   "chant_schools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "string_ratio_harmonics"
+  ],
+  "note": "Notated chant sung with added voices."
+ },
+ {
+  "id": "coronation_regalia_rite",
+  "requires_all": [
+   "overlord_crowned_by_high_priest",
+   "ceremonial_investiture"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "goldsmith_filigree",
+   "throne_room_protocol",
+   "wire_cell_enamel"
+  ],
+  "note": "The anointing rite written with its regalia."
+ },
+ {
+  "id": "great_pipe_organs",
+  "requires_all": [
+   "lead_sheet_rolling",
+   "paired_bag_bellows"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "piston_force_pumps",
+   "chant_schools",
+   "many_voice_singing"
+  ],
+  "note": "Bellows feed ranks of rolled-lead pipes."
+ },
+ {
+  "id": "printed_playing_cards",
+  "requires_all": [
+   "block_printed_books",
+   "board_race_games"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "printing_process",
+   "paper_sheet_pressing"
+  ],
+  "note": "Game boards turned into printed paper cards."
+ },
+ {
+  "id": "kin_memorial_stones",
+  "requires_all": [
+   "carved_story_stones"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "alphabetic_epitaphs",
+   "river_raiding_ships"
+  ],
+  "note": "Story stones raised for kin lost abroad."
+ },
+ {
+  "id": "shadow_puppet_theatre",
+  "requires_all": [
+   "leather_goods_patterning",
+   "lantern_festival_nights"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pantomime_dance_theatre",
+   "frame_story_collections"
+  ],
+  "note": "Cut leather figures played against lamplight."
+ },
+ {
+  "id": "court_psychological_novel",
+  "requires_all": [
+   "prose_romance_novel",
+   "court_poetry_contests"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "brush_writing_fine_art",
+   "frame_story_collections",
+   "paper_sheet_pressing"
+  ],
+  "note": "Court poetry culture yields the long novel."
+ },
+ {
+  "id": "book_of_kings_epic",
+  "requires_all": [
+   "commissioned_founding_epic",
+   "peoples_origin_histories"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "warband_heroic_poems",
+   "court_learning_revival"
+  ],
+  "note": "Origin histories versified as the realm's epic."
+ },
+ {
+  "id": "staff_line_notation",
+  "requires_all": [
+   "neume_chant_notation",
+   "lead_point_ruling"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "many_voice_singing",
+   "string_ratio_harmonics"
+  ],
+  "note": "Neumes placed on ruled lines for pitch."
+ },
+ {
+  "id": "monumental_landscape_painting",
+  "requires_all": [
+   "brush_writing_fine_art",
+   "painted_panel_portraits"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "leisure_gardens",
+   "illusion_wall_painting",
+   "paper_sheet_pressing"
+  ],
+  "note": "Brush art applied to vast landscapes."
+ },
+ {
+  "id": "round_arch_great_houses",
+  "requires_all": [
+   "vaulted_masonry_roofs",
+   "congregation_hall_temples"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "great_domed_temple",
+   "reused_stone_building",
+   "cross_vaults"
+  ],
+  "note": "Halls of the god rebuilt in thick vaulted stone."
+ },
+ {
+  "id": "embroidered_conquest_hangings",
+  "requires_all": [
+   "gold_thread_embroidery",
+   "narrative_victory_column"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "warband_heroic_poems",
+   "alum_mordant_dyeing",
+   "kite_shield_cavalry"
+  ],
+  "note": "A conquest told in stitched strip scenes."
+ },
+ {
+  "id": "pleasure_quarter_storytellers",
+  "requires_all": [
+   "frame_story_collections",
+   "craft_quarter_streets"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_theatre",
+   "shadow_puppet_theatre",
+   "printed_playing_cards"
+  ],
+  "note": "Town quarters host paid tellers and players."
+ },
+ {
+  "id": "pilgrim_road_badges",
+  "requires_all": [
+   "holy_tomb_pilgrimage",
+   "pewter_casting"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pass_hospices",
+   "holy_relic_shrines"
+  ],
+  "note": "Cast badges mark pilgrims on the roads."
+ },
+ {
+  "id": "armed_pilgrimage_preaching",
+  "requires_all": [
+   "pilgrim_road_badges",
+   "holy_truce_days"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mounted_retinue_summons",
+   "couched_lance_charge",
+   "stanza_hymn_sermons"
+  ],
+  "note": "The god's peace redirected into armed pilgrimage."
+ },
+ {
+  "id": "champion_deed_songs",
+  "requires_all": [
+   "warband_heroic_poems"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "book_of_kings_epic",
+   "armed_pilgrimage_preaching",
+   "fief_tenure_for_service"
+  ],
+  "note": "Warband poems narrowed to one champion."
+ },
+ {
+  "id": "courtly_love_lyric",
+  "requires_all": [
+   "personal_lyric_poetry",
+   "devotional_songs_common_tongue"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "love_elegy",
+   "champion_deed_songs",
+   "castellan_local_lordship"
+  ],
+  "note": "Love lyric sung in the common tongue at castles."
+ },
+ {
+  "id": "sculpted_portal_programs",
+  "requires_all": [
+   "round_arch_great_houses",
+   "stone_relief_carving"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "carved_sarcophagi",
+   "pilgrim_road_badges"
+  ],
+  "note": "Vaulted houses get carved teaching portals."
+ },
+ {
+  "id": "moralized_bestiaries",
+  "requires_all": [
+   "descriptive_natural_history",
+   "animal_fables"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "interlace_illuminated_books",
+   "stanza_hymn_sermons"
+  ],
+  "note": "Natural history retold as moral fables."
+ },
+ {
+  "id": "knightly_conduct_code",
+  "requires_all": [
+   "couched_lance_charge",
+   "holy_truce_days"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "champion_deed_songs",
+   "courtly_love_lyric",
+   "homage_commendation"
+  ],
+  "note": "Lance-armed riders bound by the god's peace."
+ },
+ {
+  "id": "heraldic_arms",
+  "requires_all": [
+   "hereditary_fief_succession",
+   "kite_shield_cavalry"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "household_lineage_tokens",
+   "unit_rally_standards",
+   "knightly_conduct_code"
+  ],
+  "note": "Shield emblems pass with the fief."
+ },
+ {
+  "id": "pointed_arch_glass_temples",
+  "requires_all": [
+   "rib_vaults",
+   "leaded_stained_glass"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pointed_arches",
+   "masonry_buttressing",
+   "round_arch_great_houses"
+  ],
+  "note": "Rib vaults free walls for coloured glass."
+ },
+ {
+  "id": "ink_wash_painting",
+  "requires_all": [
+   "monumental_landscape_painting",
+   "brush_writing_fine_art"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "contemplative_ascent_schools"
+  ],
+  "note": "Landscape brushwork reduced to ink tones."
+ },
+ {
+  "id": "beast_epic_satire",
+  "requires_all": [
+   "animal_fables",
+   "verse_satire"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "moralized_bestiaries",
+   "warband_heroic_poems"
+  ],
+  "note": "Fables stretched into mock epic."
+ },
+ {
+  "id": "poor_devout_dissent",
+  "requires_all": [
+   "devotee_communities_under_rule",
+   "stanza_hymn_sermons"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "devotional_songs_common_tongue",
+   "sworn_town_commune",
+   "compulsory_tithe"
+  ],
+  "note": "Lay poverty movements outside the hierarchy."
+ },
+ {
+  "id": "chivalric_romance",
+  "requires_all": [
+   "courtly_love_lyric",
+   "prose_romance_novel"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "champion_deed_songs",
+   "knightly_conduct_code",
+   "book_of_kings_epic"
+  ],
+  "note": "Love lyric and romance joined in quest tales."
+ },
+ {
+  "id": "polyphonic_choirbooks",
+  "requires_all": [
+   "many_voice_singing",
+   "staff_line_notation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pointed_arch_glass_temples",
+   "chant_schools"
+  ],
+  "note": "Staff notation makes large part-books possible."
+ },
+ {
+  "id": "wandering_scholar_songs",
+  "requires_all": [
+   "chartered_university",
+   "verse_satire"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "great_house_schools",
+   "courtly_love_lyric"
+  ],
+  "note": "Students turn satire on masters and clergy."
+ },
+ {
+  "id": "wandering_preacher_orders",
+  "requires_all": [
+   "poor_devout_dissent",
+   "devotee_communities_under_rule"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "stanza_hymn_sermons",
+   "sworn_town_commune",
+   "chartered_university"
+  ],
+  "note": "Poor preachers brought under a rule."
+ },
+ {
+  "id": "family_prose_sagas",
+  "requires_all": [
+   "warband_heroic_poems",
+   "peoples_origin_histories"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "written_customary_codes",
+   "champion_deed_songs",
+   "kin_memorial_stones"
+  ],
+  "note": "Family feuds told in prose."
+ },
+ {
+  "id": "sacred_world_maps",
+  "requires_all": [
+   "world_maps",
+   "providential_world_history"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "interlace_illuminated_books",
+   "itinerary_strip_maps"
+  ],
+  "note": "The world map drawn as sacred history."
+ },
+ {
+  "id": "carnival_misrule",
+  "requires_all": [
+   "moving_feast_reckoning",
+   "festival_calendar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "satirical_comedy",
+   "sworn_town_commune"
+  ],
+  "note": "Licensed disorder before the moving fast."
+ },
+ {
+  "id": "guild_patron_feasts",
+  "requires_all": [
+   "craft_guilds",
+   "holy_servants_feast_year"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "temple_festival_meals",
+   "guild_trade_monopoly"
+  ],
+  "note": "Each guild keeps its patron servant's day."
+ },
+ {
+  "id": "measured_rhythm_notation",
+  "requires_all": [
+   "staff_line_notation",
+   "polyphonic_choirbooks"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "string_ratio_harmonics",
+   "fractional_quantities"
+  ],
+  "note": "Note shapes fix durations for part-music."
+ },
+ {
+  "id": "recumbent_tomb_effigies",
+  "requires_all": [
+   "carved_sarcophagi",
+   "heraldic_arms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sculpted_portal_programs",
+   "pointed_arch_glass_temples"
+  ],
+  "note": "Armed lords carved lying on their tombs."
+ },
+ {
+  "id": "private_devotion_books",
+  "requires_all": [
+   "interlace_illuminated_books",
+   "rented_exemplar_copying"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wandering_preacher_orders",
+   "paper_working_copies"
+  ],
+  "note": "Commercial copying makes lay prayer books."
+ },
+ {
+  "id": "ruler_town_entries",
+  "requires_all": [
+   "chartered_town_liberties",
+   "victory_triumph_procession"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "itinerant_royal_court",
+   "guild_patron_feasts",
+   "heraldic_arms"
+  ],
+  "note": "Chartered towns stage the ruler's entry."
+ },
+ {
+  "id": "jubilee_pilgrimage_year",
+  "requires_all": [
+   "pilgrim_road_badges",
+   "great_priestly_council_decrees"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "holy_tomb_pilgrimage",
+   "sacred_epoch_year_count"
+  ],
+  "note": "The god's house proclaims a pardon year."
+ },
+ {
+  "id": "naturalistic_fresco_cycles",
+  "requires_all": [
+   "illusion_wall_painting",
+   "lime_mortar"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wandering_preacher_orders",
+   "school_perspective_optics",
+   "venerated_icons"
+  ],
+  "note": "Wet-lime painting with lifelike figures."
+ },
+ {
+  "id": "vernacular_allegory_epic",
+  "requires_all": [
+   "chivalric_romance",
+   "devotional_songs_common_tongue"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sacred_world_maps",
+   "scholastic_question_method",
+   "courtly_love_lyric"
+  ],
+  "note": "School doctrine told as a vernacular journey."
+ },
+ {
+  "id": "guild_cycle_plays",
+  "requires_all": [
+   "liturgical_drama",
+   "craft_guilds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "guild_patron_feasts",
+   "carnival_misrule"
+  ],
+  "note": "Rite plays taken over by the guilds."
+ },
+ {
+  "id": "vernacular_town_chronicles",
+  "requires_all": [
+   "chartered_town_liberties",
+   "providential_world_history"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "devotional_songs_common_tongue",
+   "paper_working_copies",
+   "vernacular_learned_writing"
+  ],
+  "note": "Towns keep their own chronicles."
+ },
+ {
+  "id": "chivalric_orders_insignia",
+  "requires_all": [
+   "knightly_conduct_code",
+   "heraldic_arms"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chivalric_romance",
+   "tournament_training"
+  ],
+  "note": "Rulers found orders with badges."
+ },
+ {
+  "id": "sonnet_sequences",
+  "requires_all": [
+   "courtly_love_lyric",
+   "vernacular_allegory_epic"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paper_working_copies",
+   "wandering_scholar_songs"
+  ],
+  "note": "Love lyric ordered as a sequence."
+ },
+ {
+  "id": "old_text_recovery",
+  "requires_all": [
+   "collated_critical_editions",
+   "chartered_university"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "paper_working_copies",
+   "rival_tongue_translation_school",
+   "vernacular_learned_writing"
+  ],
+  "note": "Scholars hunt lost texts to restore."
+ },
+ {
+  "id": "penitent_processions",
+  "requires_all": [
+   "poor_devout_dissent",
+   "bubo_plague_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "emblem_processions",
+   "wandering_preacher_orders"
+  ],
+  "note": "Lay penitents march against the pestilence."
+ },
+ {
+  "id": "townsfolk_tale_collections",
+  "requires_all": [
+   "frame_story_collections",
+   "vernacular_town_chronicles"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "pleasure_quarter_storytellers",
+   "beast_epic_satire",
+   "vernacular_learned_writing"
+  ],
+  "note": "Frame tales retold of townsfolk."
+ },
+ {
+  "id": "dance_of_death_images",
+  "requires_all": [
+   "naturalistic_fresco_cycles",
+   "bubo_plague_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "penitent_processions",
+   "quicklime_mass_graves"
+  ],
+  "note": "Wall painting turns to death after the plague."
+ },
+ {
+  "id": "city_supply_corporations",
+  "requires_all": [
+   "hereditary_trade_obligation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_grain_dole",
+   "state_bread_ovens",
+   "bakery_mill_workforces"
+  ],
+  "note": "Hereditary trades bound to feed the city."
+ },
+ {
+  "id": "improvement_leases",
+  "requires_all": [
+   "sharecropping_tenancy",
+   "witnessed_land_sales"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "staked_vine_training",
+   "deserted_land_grants"
+  ],
+  "note": "Share tenancy lengthened for tree and vine planting."
+ },
+ {
+  "id": "landowner_patronage_tenancy",
+  "requires_all": [
+   "land_bound_tenancy",
+   "patron_protection"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "head_land_tax_units"
+  ],
+  "note": "Bound tenants seek a magnate's shelter."
+ },
+ {
+  "id": "registered_state_artisans",
+  "requires_all": [
+   "state_manufactories",
+   "occupation_census"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "hereditary_trade_obligation",
+   "standard_kit_issue"
+  ],
+  "note": "State workshop hands enrolled for life."
+ },
+ {
+  "id": "fugitive_worker_returns",
+  "requires_all": [
+   "registered_state_artisans",
+   "land_bound_tenancy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "internal_passes",
+   "bound_estate_tenants"
+  ],
+  "note": "Registers let runaways be traced and returned."
+ },
+ {
+  "id": "convict_work_gangs",
+  "requires_all": [
+   "mine_lease_labor"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "soldier_work_details",
+   "public_levies"
+  ],
+  "note": "Condemned men sent to mines and works."
+ },
+ {
+  "id": "hereditary_waterworks_crews",
+  "requires_all": [
+   "conduit_maintenance_crews",
+   "hereditary_trade_obligation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "heated_public_baths",
+   "long_distance_conduits"
+  ],
+  "note": "Conduit crews made a hereditary corps."
+ },
+ {
+  "id": "communal_house_workshops",
+  "requires_all": [
+   "celibate_communities",
+   "devotee_communities_under_rule"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "household_workshops_with_hands",
+   "kitchen_gardens"
+  ],
+  "note": "Ruled communities work their own land and shops."
+ },
+ {
+  "id": "rotating_artisan_service",
+  "requires_all": [
+   "registered_state_artisans"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "rotating_named_gangs",
+   "specialist_rotation_ladders"
+  ],
+  "note": "Registered artisans serve the state by turns."
+ },
+ {
+  "id": "settled_bondsman_households",
+  "requires_all": [
+   "landowner_patronage_tenancy",
+   "home_farm_tenant_split"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "freed_person_status",
+   "term_limited_debt_labor"
+  ],
+  "note": "Bond-servants given plots like tenants."
+ },
+ {
+  "id": "estate_weaving_houses",
+  "requires_all": [
+   "palace_weaving_houses",
+   "home_farm_tenant_split"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "two_beam_upright_loom",
+   "settled_bondsman_households"
+  ],
+  "note": "Estate women weave in the lord's workshop."
+ },
+ {
+  "id": "vineyard_task_work",
+  "requires_all": [
+   "piece_rate_pay",
+   "staked_vine_training"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "improvement_leases",
+   "daily_task_norms"
+  ],
+  "note": "Vine work priced by the task."
+ },
+ {
+  "id": "week_work_service",
+  "requires_all": [
+   "home_farm_tenant_split",
+   "settled_bondsman_households"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "bound_estate_tenants",
+   "land_for_service_tenure"
+  ],
+  "note": "Settled bondsmen owe days on the home farm."
+ },
+ {
+  "id": "harvest_boon_work",
+  "requires_all": [
+   "week_work_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cooperative_harvest_gatherings",
+   "hired_harvest_hands"
+  ],
+  "note": "Extra harvest days on top of week-work."
+ },
+ {
+  "id": "estate_bound_craftsmen",
+  "requires_all": [
+   "week_work_service",
+   "full_time_specialists"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "estate_bailiffs",
+   "palace_specialist_workshops"
+  ],
+  "note": "Estate crafts held on service tenure."
+ },
+ {
+  "id": "reciprocal_work_days",
+  "requires_all": [
+   "mutual_aid_customs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cooperative_harvest_gatherings",
+   "village_self_rule_after_collapse"
+  ],
+  "note": "Neighbourly aid kept as a count of days owed."
+ },
+ {
+  "id": "yearly_grain_share_crafts",
+  "requires_all": [
+   "full_time_specialists",
+   "iron_farm_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "grain_levy_accounting",
+   "village_labor_quotas"
+  ],
+  "note": "Village crafts kept by a grain share."
+ },
+ {
+  "id": "load_paid_forest_crews",
+  "requires_all": [
+   "piece_rate_pay",
+   "covered_charcoal_clamps"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "charcoal_licensing",
+   "fixed_charcoal_hearths"
+  ],
+  "note": "Charcoal and wood paid for by the load."
+ },
+ {
+  "id": "estate_survey_books",
+  "requires_all": [
+   "estate_bailiffs",
+   "week_work_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "witnessed_land_charters",
+   "household_tax_registers"
+  ],
+  "note": "Bailiffs write down each tenant's service."
+ },
+ {
+  "id": "craft_quarter_streets",
+  "requires_all": [
+   "craft_quarters",
+   "licensed_guilds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "market_wardens"
+  ],
+  "note": "Licensed trades grouped by street."
+ },
+ {
+  "id": "increase_share_herding",
+  "requires_all": [
+   "sharecropping_tenancy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "people_herd_counts",
+   "summer_pasture_dairies"
+  ],
+  "note": "Share terms applied to young stock."
+ },
+ {
+  "id": "craft_render_quotas",
+  "requires_all": [
+   "estate_bound_craftsmen",
+   "workshop_quotas"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "estate_survey_books"
+  ],
+  "note": "Estate crafts owe a set yearly render."
+ },
+ {
+  "id": "estate_steward_audits",
+  "requires_all": [
+   "estate_bailiffs",
+   "estate_survey_books"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "end_of_term_audits",
+   "provincial_accounts"
+  ],
+  "note": "Stewards audited against the survey books."
+ },
+ {
+  "id": "communal_bell_hours",
+  "requires_all": [
+   "clock_timed_shifts",
+   "communal_house_workshops"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "outflow_water_clock",
+   "devotee_communities_under_rule"
+  ],
+  "note": "Community rule timed by bells."
+ },
+ {
+  "id": "shared_plough_teams",
+  "requires_all": [
+   "mouldboard_plough",
+   "reciprocal_work_days"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "coulter_plough",
+   "estate_survey_books"
+  ],
+  "note": "The heavy plough needs pooled oxen."
+ },
+ {
+  "id": "salaried_trade_factors",
+  "requires_all": [
+   "voyage_partnerships",
+   "merchant_letter_accounts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "licensed_merchant_houses",
+   "salaried_works_staff"
+  ],
+  "note": "Houses pay agents abroad by letter and salary."
+ },
+ {
+  "id": "sheaf_share_reaping",
+  "requires_all": [
+   "hired_harvest_hands",
+   "harvest_boon_work"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sharecropping_tenancy",
+   "increase_share_herding"
+  ],
+  "note": "Reapers take a sheaf share."
+ },
+ {
+  "id": "contracted_silk_reelers",
+  "requires_all": [
+   "sericulture_reeling",
+   "putting_out_spinning"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "surety_backed_work_contracts"
+  ],
+  "note": "Merchants put out reeling to households."
+ },
+ {
+  "id": "saltworks_shift_crews",
+  "requires_all": [
+   "brine_purification",
+   "clock_timed_shifts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "shift_overlap_briefings",
+   "salt_working"
+  ],
+  "note": "Brine pans kept boiling by shifts."
+ },
+ {
+  "id": "yearly_herdsman_hire",
+  "requires_all": [
+   "hired_labor_contracts",
+   "increase_share_herding"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "summer_shielings"
+  ],
+  "note": "Herdsmen hired on yearly terms."
+ },
+ {
+  "id": "mill_suit_obligation",
+  "requires_all": [
+   "water_mills",
+   "seigneurial_immunity_courts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mill_operator_trade",
+   "horizontal_wheel_mills"
+  ],
+  "note": "Immune lords force tenants to their mill."
+ },
+ {
+  "id": "catch_share_crews",
+  "requires_all": [
+   "communal_catch_limits",
+   "voyage_partnerships"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "increase_share_herding",
+   "sheaf_share_reaping"
+  ],
+  "note": "Fishing partners share the catch."
+ },
+ {
+  "id": "manumission_charters",
+  "requires_all": [
+   "settled_bondsman_households",
+   "witnessed_land_charters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "freed_person_status",
+   "freed_craftsman_obligations"
+  ],
+  "note": "Freedom granted by written charter."
+ },
+ {
+  "id": "migrant_harvest_crews",
+  "requires_all": [
+   "harvest_labor_migration",
+   "hired_harvest_hands"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sheaf_share_reaping",
+   "harvest_gang_contracts"
+  ],
+  "note": "Harvest gangs follow the ripening grain."
+ },
+ {
+  "id": "voyage_share_wages",
+  "requires_all": [
+   "voyage_partnerships",
+   "paid_rowing_crews"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "catch_share_crews",
+   "open_sea_cargo_ships"
+  ],
+  "note": "Seamen sign for wages or a share."
+ },
+ {
+  "id": "cloth_craft_chain",
+  "requires_all": [
+   "workshop_task_division",
+   "fullers_earth_finishing"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "two_beam_upright_loom",
+   "treadle_frame_loom",
+   "craft_quarter_streets"
+  ],
+  "note": "Clothmaking split among separate crafts."
+ },
+ {
+  "id": "clearance_dues_holiday",
+  "requires_all": [
+   "deserted_land_grants",
+   "manumission_charters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "improvement_leases",
+   "endowed_reclamation"
+  ],
+  "note": "Free settlers get dues-free years for clearing."
+ },
+ {
+  "id": "apprentice_indentures",
+  "requires_all": [
+   "apprentice_contracts",
+   "notarized_work_contracts"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "apprentice_quotas",
+   "craft_quarter_streets"
+  ],
+  "note": "Apprentice terms fixed in a written deed."
+ },
+ {
+  "id": "hired_labor_levy",
+  "requires_all": [
+   "labor_dues_commutation",
+   "levy_substitutes"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "raider_tribute_land_tax",
+   "public_work_tenders"
+  ],
+  "note": "Service commuted to a levy paying hired hands."
+ },
+ {
+  "id": "sworn_porter_guilds",
+  "requires_all": [
+   "porter_gangs",
+   "merchant_guild_monopoly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "licensed_guilds",
+   "formal_oath_taking"
+  ],
+  "note": "Porters sworn to the merchant market."
+ },
+ {
+  "id": "cottager_day_laborers",
+  "requires_all": [
+   "hired_labor_contracts",
+   "village_nucleation"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "uniform_day_rate",
+   "manumission_charters"
+  ],
+  "note": "Landless villagers hire out by the day."
+ },
+ {
+  "id": "mill_fulling_crews",
+  "requires_all": [
+   "fulling_mills",
+   "cloth_craft_chain"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "mill_operator_trade"
+  ],
+  "note": "Fulling mills replace foot fullers."
+ },
+ {
+  "id": "state_shipyard_workforce",
+  "requires_all": [
+   "naval_arsenals",
+   "salaried_works_staff"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "series_built_war_galleys",
+   "carvel_frame_construction"
+  ],
+  "note": "Arsenal work on one payroll."
+ },
+ {
+  "id": "guild_trade_monopoly",
+  "requires_all": [
+   "craft_guilds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "merchant_guild_monopoly",
+   "licensed_guilds",
+   "sworn_town_commune"
+  ],
+  "note": "Craft guilds shut out non-members."
+ },
+ {
+  "id": "yearly_farm_servants",
+  "requires_all": [
+   "hired_labor_contracts",
+   "cottager_day_laborers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "yearly_herdsman_hire"
+  ],
+  "note": "Farm hands hired and lodged by the year."
+ },
+ {
+  "id": "single_craft_rule",
+  "requires_all": [
+   "guild_trade_monopoly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "craft_quarter_streets",
+   "cloth_craft_chain"
+  ],
+  "note": "Monopoly guilds forbid mixed trades."
+ },
+ {
+  "id": "lay_brother_granges",
+  "requires_all": [
+   "communal_house_workshops",
+   "devotee_communities_under_rule"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "endowed_reclamation",
+   "estate_steward_audits"
+  ],
+  "note": "Lay brothers farm distant granges."
+ },
+ {
+  "id": "shearing_gangs",
+  "requires_all": [
+   "piece_rate_pay",
+   "spring_shears"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "migrant_harvest_crews",
+   "yearly_herdsman_hire"
+  ],
+  "note": "Shearers hired by the fleece."
+ },
+ {
+  "id": "town_residence_freedom",
+  "requires_all": [
+   "chartered_town_liberties",
+   "manumission_charters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sworn_town_commune",
+   "fugitive_worker_returns"
+  ],
+  "note": "Town charters free resident bond-servants."
+ },
+ {
+  "id": "guild_searchers",
+  "requires_all": [
+   "guild_trade_monopoly",
+   "market_wardens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "single_craft_rule",
+   "spoilage_inspection"
+  ],
+  "note": "Guild wardens inspect members' shops."
+ },
+ {
+  "id": "village_reeve_office",
+  "requires_all": [
+   "manor_court_customals",
+   "week_work_service"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "village_nucleation",
+   "trade_foremen"
+  ],
+  "note": "The manor court names a reeve for the works."
+ },
+ {
+  "id": "harvest_bylaws",
+  "requires_all": [
+   "village_reeve_office",
+   "manor_court_customals"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "three_field_rotation",
+   "common_fallow_grazing_rule"
+  ],
+  "note": "Village rules for reaping and gleaning."
+ },
+ {
+  "id": "guild_cloth_seals",
+  "requires_all": [
+   "guild_searchers",
+   "cloth_craft_chain"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "cargo_seals",
+   "workman_stamp_marks"
+  ],
+  "note": "Searched cloth sealed as passed."
+ },
+ {
+  "id": "journeyman_passes",
+  "requires_all": [
+   "journeyman_travel_circuits",
+   "craft_guilds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "sealed_travel_passes",
+   "apprentice_indentures"
+  ],
+  "note": "Guilds certify travelling journeymen."
+ },
+ {
+  "id": "dike_duty_lengths",
+  "requires_all": [
+   "estuary_embankments",
+   "village_reeve_office"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "wall_repair_levy",
+   "measured_length_contracts"
+  ],
+  "note": "Embankment upkeep assigned by length."
+ },
+ {
+  "id": "master_mason_retainers",
+  "requires_all": [
+   "master_builder_office",
+   "round_arch_great_houses"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "skill_graded_wages"
+  ],
+  "note": "Great stone houses retain a master mason."
+ },
+ {
+  "id": "guild_welfare_chests",
+  "requires_all": [
+   "craft_mutual_aid_clubs",
+   "craft_guilds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crew_sick_funds"
+  ],
+  "note": "Guilds keep a common chest for members."
+ },
+ {
+  "id": "seasonal_day_rates",
+  "requires_all": [
+   "uniform_day_rate",
+   "master_mason_retainers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "posted_wage_tables",
+   "decreed_wage_rates"
+  ],
+  "note": "Building wages differ by season."
+ },
+ {
+  "id": "purchased_freedom",
+  "requires_all": [
+   "manumission_charters"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "town_residence_freedom",
+   "labor_dues_commutation"
+  ],
+  "note": "Freedom bought for a set price."
+ },
+ {
+  "id": "masons_lodge_rules",
+  "requires_all": [
+   "master_mason_retainers",
+   "craft_guilds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "trade_hall_lodging"
+  ],
+  "note": "Site lodges keep masons' rules."
+ },
+ {
+  "id": "shop_size_limits",
+  "requires_all": [
+   "apprentice_quotas",
+   "guild_trade_monopoly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "single_craft_rule"
+  ],
+  "note": "Guilds cap each master's hands."
+ },
+ {
+  "id": "free_miner_companies",
+  "requires_all": [
+   "mine_lease_labor",
+   "chartered_town_liberties"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "water_ore_stamps",
+   "underground_shift_rotation"
+  ],
+  "note": "Chartered mining freedoms for prospectors."
+ },
+ {
+  "id": "carver_piece_rates",
+  "requires_all": [
+   "piece_rate_pay",
+   "master_mason_retainers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_day_rates",
+   "sculpted_portal_programs"
+  ],
+  "note": "Carving priced by the piece."
+ },
+ {
+  "id": "weekly_works_payrolls",
+  "requires_all": [
+   "public_work_accounts",
+   "seasonal_day_rates"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "master_mason_retainers",
+   "annual_receipt_rolls"
+  ],
+  "note": "A works clerk keeps weekly pay books."
+ },
+ {
+  "id": "masterpiece_trial",
+  "requires_all": [
+   "certified_craft_competence",
+   "craft_guilds"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "guild_searchers",
+   "journeyman_passes"
+  ],
+  "note": "Guilds test a piece before mastership."
+ },
+ {
+  "id": "guild_fixed_journey_rates",
+  "requires_all": [
+   "journeyman_passes",
+   "decreed_wage_rates"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "seasonal_day_rates",
+   "masterpiece_trial"
+  ],
+  "note": "Guild ordinance fixes journeymen's pay."
+ },
+ {
+  "id": "debt_bound_putting_out",
+  "requires_all": [
+   "putting_out_spinning",
+   "cloth_craft_chain"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "term_limited_debt_labor",
+   "spinning_wheels"
+  ],
+  "note": "Clothiers bind weavers by advances."
+ },
+ {
+  "id": "town_trade_statute_book",
+  "requires_all": [
+   "guild_trade_monopoly",
+   "revised_town_statute_books"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "masterpiece_trial",
+   "guild_searchers"
+  ],
+  "note": "Guild rules entered in the town statutes."
+ },
+ {
+  "id": "night_work_bans",
+  "requires_all": [
+   "guild_trade_monopoly",
+   "communal_bell_hours"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "monthly_rest_days",
+   "holy_truce_days"
+  ],
+  "note": "Guilds forbid work after the bell."
+ },
+ {
+  "id": "miners_relief_chest",
+  "requires_all": [
+   "crew_sick_funds",
+   "free_miner_companies"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "guild_welfare_chests"
+  ],
+  "note": "Miners' companies levy a relief chest."
+ },
+ {
+  "id": "womens_craft_guilds",
+  "requires_all": [
+   "craft_guilds",
+   "contracted_silk_reelers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "single_women_houses"
+  ],
+  "note": "Women's silk trades form guilds."
+ },
+ {
+  "id": "rented_loom_putting_out",
+  "requires_all": [
+   "debt_bound_putting_out",
+   "broad_treadle_loom"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "contracted_silk_reelers",
+   "cloth_craft_chain"
+  ],
+  "note": "Clothiers own the looms they rent out."
+ },
+ {
+  "id": "general_rent_commutation",
+  "requires_all": [
+   "labor_dues_commutation",
+   "hired_labor_levy"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "week_work_service",
+   "cottager_day_laborers"
+  ],
+  "note": "Week-work sold off for money rent."
+ },
+ {
+  "id": "weaver_walkouts",
+  "requires_all": [
+   "cloth_craft_chain",
+   "ration_work_stoppages"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "debt_bound_putting_out",
+   "journeyman_passes",
+   "crew_grievance_hearings"
+  ],
+  "note": "Dependent weavers strike."
+ },
+ {
+  "id": "guild_letter_schools",
+  "requires_all": [
+   "craft_guilds",
+   "letter_schools_for_citizens"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "reckoning_schools",
+   "apprentice_indentures"
+  ],
+  "note": "Guilds school their apprentices."
+ },
+ {
+  "id": "work_bell_hours",
+  "requires_all": [
+   "communal_bell_hours",
+   "pit_cast_bells"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "night_work_bans",
+   "belfry_town_halls"
+  ],
+  "note": "A town bell times the working day."
+ },
+ {
+  "id": "joint_rate_boards",
+  "requires_all": [
+   "weaver_walkouts",
+   "guild_fixed_journey_rates"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "crew_grievance_hearings",
+   "town_trade_statute_book"
+  ],
+  "note": "Rates settled by boards after walkouts."
+ },
+ {
+  "id": "rural_putting_out",
+  "requires_all": [
+   "putting_out_spinning",
+   "debt_bound_putting_out"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "guild_trade_monopoly",
+   "fulling_mills"
+  ],
+  "note": "Putting-out moves outside guild towns."
+ },
+ {
+  "id": "guild_almshouses",
+  "requires_all": [
+   "guild_welfare_chests"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "aged_almshouses",
+   "charity_hospitals"
+  ],
+  "note": "Guild chests found almshouses."
+ },
+ {
+  "id": "journeymen_brotherhoods",
+  "requires_all": [
+   "journeyman_passes",
+   "guild_welfare_chests"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "weaver_walkouts",
+   "trade_hall_lodging"
+  ],
+  "note": "Journeymen keep their own chests and lodgings."
+ },
+ {
+  "id": "closed_mastership",
+  "requires_all": [
+   "masterpiece_trial",
+   "guild_trade_monopoly"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "shop_size_limits",
+   "closed_hereditary_council"
+  ],
+  "note": "Mastership reserved to masters' families."
+ },
+ {
+  "id": "guild_council_seats",
+  "requires_all": [
+   "town_trade_statute_book",
+   "elected_town_consuls"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "chartered_town_league",
+   "closed_mastership"
+  ],
+  "note": "Guild masters join the consuls."
+ },
+ {
+  "id": "truck_pay_ban",
+  "requires_all": [
+   "coin_and_ration_wages",
+   "debt_bound_putting_out"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "joint_rate_boards",
+   "silver_wage_payment"
+  ],
+  "note": "Wages must be paid in coin."
+ },
+ {
+  "id": "hiring_fairs",
+  "requires_all": [
+   "yearly_farm_servants",
+   "guarded_trade_fairs"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "public_hiring_grounds"
+  ],
+  "note": "Yearly servants hired at fairs."
+ },
+ {
+  "id": "post_plague_labor_statutes",
+  "requires_all": [
+   "maximum_wage_edicts",
+   "bubo_plague_recognition"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "guild_fixed_journey_rates",
+   "keepers_of_the_peace"
+  ],
+  "note": "Wage caps revived after the great mortality."
+ },
+ {
+  "id": "laborer_mobility",
+  "requires_all": [
+   "post_plague_labor_statutes",
+   "cottager_day_laborers"
+  ],
+  "requires_any": [],
+  "precedents": [
+   "general_rent_commutation",
+   "hiring_fairs",
+   "deserted_village_pasture"
+  ],
+  "note": "Scarce hands leave for better wages."
+ }
+]
