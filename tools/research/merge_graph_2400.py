@@ -317,7 +317,8 @@ def main():
 
     before = dict(old)
     before.update({n["id"]: {k: (list(v) if isinstance(v, list) else v) for k, v in n.items()} for n in nodes})
-    identity_demotions = module_identities.demote_identity_edges(nodes, before)
+    identity_demotions = module_identities.demote_identity_edges(
+        nodes, before, module_identities.load_module_requires(ROOT, GAME_DIR if "GAME_DIR" in globals() else None))
     by_id = dict(old)
     by_id.update({n["id"]: n for n in nodes})
 

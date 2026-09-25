@@ -13,11 +13,11 @@
   ],
   "node_count": 964,
   "edge_counts": {
-   "hard": 1635,
+   "hard": 1647,
    "any": 22,
-   "precedent": 1161
+   "precedent": 1160
   },
-  "cross_block_edges": 1157,
+  "cross_block_edges": 1169,
   "demoted_links": [],
   "identity_demotions": [
    {
@@ -28,12 +28,20 @@
    {
     "dependent": "straightedge_compass",
     "parent": "squared_grid_drawings",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
    },
    {
     "dependent": "straightedge_compass",
     "parent": "geometric_survey",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "straightedge_compass",
+    "module_parent_added": "cordage"
+   },
+   {
+    "dependent": "straightedge_compass",
+    "module_parent_added": "standard_measures"
    },
    {
     "dependent": "string_ratio_harmonics",
@@ -48,17 +56,25 @@
    {
     "dependent": "ratio_proportion",
     "parent": "incommensurable_lengths",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
    },
    {
     "dependent": "similar_triangles",
     "parent": "demonstrated_geometry",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
    },
    {
     "dependent": "combinatorics",
     "parent": "counting_board_abacus",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "combinatorics",
+    "module_parent_added": "place_value"
+   },
+   {
+    "dependent": "combinatorics",
+    "module_parent_added": "tallies"
    },
    {
     "dependent": "axiomatic_geometry_compendium",
@@ -68,27 +84,60 @@
    {
     "dependent": "lever_moments",
     "parent": "axiomatic_geometry_compendium",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
    },
    {
     "dependent": "lever_moments",
     "parent": "balance_beam_weights",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "lever_moments",
+    "module_parent_added": "wedges_and_levers"
+   },
+   {
+    "dependent": "lever_moments",
+    "module_parent_added": "ratio_proportion"
    },
    {
     "dependent": "displacement_buoyancy",
     "parent": "axiomatic_geometry_compendium",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
    },
    {
     "dependent": "displacement_buoyancy",
     "parent": "balance_beam_weights",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "displacement_buoyancy",
+    "module_parent_added": "river_craft"
+   },
+   {
+    "dependent": "displacement_buoyancy",
+    "module_parent_added": "fractional_quantities"
    },
    {
     "dependent": "earth_circumference_measure",
     "parent": "similar_triangles",
     "direction": "main path on identity"
+   },
+   {
+    "dependent": "centers_of_mass",
+    "module_parent_added": "geometric_survey"
+   },
+   {
+    "dependent": "hydrostatic_pressure",
+    "parent": "displacement_buoyancy",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "hydrostatic_pressure",
+    "module_parent_added": "water_settling_basins"
+   },
+   {
+    "dependent": "hydrostatic_pressure",
+    "module_parent_added": "standard_measures"
    },
    {
     "dependent": "mineral_specific_gravity",
@@ -105,7 +154,11 @@
    {
     "dependent": "trigonometry",
     "parent": "square_root_tables",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "trigonometry",
+    "module_parent_added": "place_value"
    },
    {
     "dependent": "dioptra_survey",
@@ -154,6 +207,10 @@
     "dependent": "sky_tables_compendium",
     "parent": "trigonometry",
     "direction": "main path on identity"
+   },
+   {
+    "dependent": "compound_pulleys",
+    "module_parent_added": "rope_rigging"
    },
    {
     "dependent": "wooden_sheave_blocks",
@@ -8738,7 +8795,10 @@
    "band_high": 815,
    "research_years": 12.0,
    "key_threshold": false,
-   "requires_all": [],
+   "requires_all": [
+    "cordage",
+    "standard_measures"
+   ],
    "requires_any": [],
    "precedents": [
     "area_volume_rules",
@@ -8752,9 +8812,9 @@
     "contact_required": false
    },
    "note": "Survey and grid drafting become construction.",
-   "earliest_feasible_year": 12.0,
+   "earliest_feasible_year": 19.0,
    "serial_line_finish_year": 784.0,
-   "chain_depth": 0,
+   "chain_depth": 2,
    "serial_overrun": false
   },
   {
@@ -14955,8 +15015,8 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "ratio_proportion",
-    "straightedge_compass"
+    "straightedge_compass",
+    "ratio_proportion"
    ],
    "requires_any": [],
    "precedents": [
@@ -15073,7 +15133,10 @@
    "band_high": 932,
    "research_years": 10.0,
    "key_threshold": false,
-   "requires_all": [],
+   "requires_all": [
+    "place_value",
+    "tallies"
+   ],
    "requires_any": [],
    "precedents": [
     "syllogistic_logic",
@@ -15086,9 +15149,9 @@
     "contact_required": false
    },
    "note": "Counted arrangements of letters and tones.",
-   "earliest_feasible_year": 10.0,
+   "earliest_feasible_year": 138.5,
    "serial_line_finish_year": 985.0,
-   "chain_depth": 0,
+   "chain_depth": 14,
    "serial_overrun": true
   },
   {
@@ -16075,10 +16138,12 @@
    "band_high": 951,
    "research_years": 10.0,
    "key_threshold": false,
-   "requires_all": [],
+   "requires_all": [
+    "wedges_and_levers",
+    "ratio_proportion"
+   ],
    "requires_any": [],
    "precedents": [
-    "ratio_proportion",
     "axiomatic_geometry_compendium",
     "balance_beam_weights"
    ],
@@ -16088,9 +16153,9 @@
     "contact_required": false
    },
    "note": "Balance proven by proportion of arms.",
-   "earliest_feasible_year": 10.0,
+   "earliest_feasible_year": 138.5,
    "serial_line_finish_year": 1038.0,
-   "chain_depth": 0,
+   "chain_depth": 15,
    "serial_overrun": true
   },
   {
@@ -16133,6 +16198,7 @@
    "research_years": 6.0,
    "key_threshold": false,
    "requires_all": [
+    "rope_rigging",
     "lever_moments"
    ],
    "requires_any": [],
@@ -16145,9 +16211,9 @@
     "contact_required": false
    },
    "note": "Multiple sheaves multiply force, by the law of the lever; crane practice precedes.",
-   "earliest_feasible_year": 16.0,
+   "earliest_feasible_year": 144.5,
    "serial_line_finish_year": 1044.0,
-   "chain_depth": 1,
+   "chain_depth": 16,
    "serial_overrun": true
   },
   {
@@ -16189,7 +16255,10 @@
    "band_high": 953,
    "research_years": 8.0,
    "key_threshold": false,
-   "requires_all": [],
+   "requires_all": [
+    "river_craft",
+    "fractional_quantities"
+   ],
    "requires_any": [],
    "precedents": [
     "lever_moments",
@@ -16203,9 +16272,9 @@
     "contact_required": false
    },
    "note": "Weighing in water proven by displacement.",
-   "earliest_feasible_year": 8.0,
+   "earliest_feasible_year": 126.5,
    "serial_line_finish_year": 1046.0,
-   "chain_depth": 0,
+   "chain_depth": 14,
    "serial_overrun": true
   },
   {
@@ -16508,7 +16577,8 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "lever_moments"
+    "lever_moments",
+    "geometric_survey"
    ],
    "requires_any": [],
    "precedents": [
@@ -16520,9 +16590,9 @@
     "contact_required": false
    },
    "note": "Lever theory locates balance points of figures.",
-   "earliest_feasible_year": 18.0,
+   "earliest_feasible_year": 146.5,
    "serial_line_finish_year": 1066.0,
-   "chain_depth": 1,
+   "chain_depth": 16,
    "serial_overrun": true
   },
   {
@@ -16536,7 +16606,8 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "displacement_buoyancy"
+    "water_settling_basins",
+    "standard_measures"
    ],
    "requires_any": [],
    "precedents": [
@@ -16548,9 +16619,9 @@
     "contact_required": false
    },
    "note": "Buoyancy study extends to fluid pressure.",
-   "earliest_feasible_year": 16.0,
+   "earliest_feasible_year": 32.5,
    "serial_line_finish_year": 1074.0,
-   "chain_depth": 1,
+   "chain_depth": 7,
    "serial_overrun": true
   },
   {
@@ -18414,7 +18485,8 @@
    "research_years": 15.0,
    "key_threshold": true,
    "requires_all": [
-    "similar_triangles"
+    "similar_triangles",
+    "place_value"
    ],
    "requires_any": [],
    "precedents": [

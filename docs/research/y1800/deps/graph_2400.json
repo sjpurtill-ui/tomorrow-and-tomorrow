@@ -13,14 +13,14 @@
   ],
   "node_count": 1139,
   "edge_counts": {
-   "hard": 1819,
+   "hard": 1833,
    "any": 0,
-   "precedent": 2002
+   "precedent": 2000
   },
-  "cross_block_edges": 1568,
+  "cross_block_edges": 1587,
   "cross_block_edges_by_block": {
-   "y0_600": 121,
-   "y600_1200": 347,
+   "y0_600": 132,
+   "y600_1200": 355,
    "y1200_1800": 1100
   },
   "redated_into_block": [],
@@ -35,42 +35,70 @@
    {
     "dependent": "polynomial_equations",
     "parent": "geometric_cubic_solutions",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
    },
    {
     "dependent": "polynomial_equations",
     "parent": "polynomial_term_algebra",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "polynomial_equations",
+    "module_parent_dated_later_dropped": "symbolic_algebra"
    },
    {
     "dependent": "symbolic_algebra",
     "parent": "polynomial_term_algebra",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
    },
    {
     "dependent": "symbolic_algebra",
     "parent": "arithmetic_operation_signs",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "symbolic_algebra",
+    "module_parent_added": "place_value"
+   },
+   {
+    "dependent": "symbolic_algebra",
+    "module_parent_added": "fractional_quantities"
    },
    {
     "dependent": "measured_kinematics",
     "parent": "mean_speed_rule",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
    },
    {
     "dependent": "measured_kinematics",
     "parent": "impetus_theory",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "measured_kinematics",
+    "module_parent_added": "standard_measures"
+   },
+   {
+    "dependent": "measured_kinematics",
+    "module_parent_added": "tallies"
    },
    {
     "dependent": "logarithms",
     "parent": "written_decimal_fractions",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
    },
    {
     "dependent": "logarithms",
     "parent": "half_chord_sine_tables",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "logarithms",
+    "module_parent_added": "ratio_proportion"
+   },
+   {
+    "dependent": "logarithms",
+    "module_parent_added": "symbolic_algebra"
    },
    {
     "dependent": "decimal_log_tables",
@@ -83,6 +111,10 @@
     "direction": "main path on identity"
    },
    {
+    "dependent": "coordinate_geometry",
+    "module_parent_added": "straightedge_compass"
+   },
+   {
     "dependent": "mercury_barometer",
     "parent": "hydrostatic_pressure",
     "direction": "main path on identity"
@@ -93,8 +125,17 @@
    },
    {
     "dependent": "probability_theory",
+    "parent": "symbolic_algebra",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "probability_theory",
     "parent": "binomial_coefficient_triangle",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "probability_theory",
+    "module_parent_added": "fractional_quantities"
    },
    {
     "dependent": "pendulum_regulated_clock",
@@ -104,22 +145,73 @@
    {
     "dependent": "mechanical_oscillation",
     "parent": "pendulum_regulated_clock",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "mechanical_oscillation",
+    "module_parent_dated_later_dropped": "elastic_deformation"
+   },
+   {
+    "dependent": "numerical_root_finding",
+    "parent": "symbolic_algebra",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "numerical_root_finding",
+    "module_parent_added": "place_value"
+   },
+   {
+    "dependent": "differential_calculus",
+    "parent": "measured_kinematics",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "differential_calculus",
+    "module_parent_added": "polynomial_equations"
+   },
+   {
+    "dependent": "integral_calculus",
+    "parent": "differential_calculus",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "integral_calculus",
+    "module_parent_added": "coordinate_geometry"
+   },
+   {
+    "dependent": "integral_calculus",
+    "module_parent_added": "fractional_quantities"
    },
    {
     "dependent": "elastic_deformation",
     "parent": "mainspring_fusee_clocks",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
    },
    {
     "dependent": "elastic_deformation",
     "parent": "experimental_protocol_publication",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "elastic_deformation",
+    "module_parent_added": "standard_measures"
+   },
+   {
+    "dependent": "elastic_deformation",
+    "module_parent_added": "timber_grading"
+   },
+   {
+    "dependent": "stress_strain_relations",
+    "module_parent_added": "ratio_proportion"
    },
    {
     "dependent": "inertial_motion",
     "parent": "impetus_theory",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "inertial_motion",
+    "module_parent_dated_later_dropped": "friction_measurement"
    },
    {
     "dependent": "universal_gravitation",
@@ -132,9 +224,26 @@
     "direction": "main path on identity"
    },
    {
+    "dependent": "momentum_balance",
+    "module_parent_added": "ratio_proportion"
+   },
+   {
+    "dependent": "friction_measurement",
+    "parent": "inertial_motion",
+    "direction": "identity takes its module requirements"
+   },
+   {
     "dependent": "friction_measurement",
     "parent": "science_of_weights",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "friction_measurement",
+    "module_parent_added": "standard_measures"
+   },
+   {
+    "dependent": "friction_measurement",
+    "module_parent_dated_later_dropped": "experimental_controls"
    },
    {
     "dependent": "structural_load_testing",
@@ -148,14 +257,58 @@
     ]
    },
    {
+    "dependent": "flow_continuity",
+    "parent": "differential_calculus",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "flow_continuity",
+    "module_parent_added": "ratio_proportion"
+   },
+   {
     "dependent": "numerical_integration",
     "parent": "decimal_log_tables",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "numerical_integration",
+    "module_parent_added": "place_value"
+   },
+   {
+    "dependent": "column_buckling",
+    "parent": "differential_equations",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "column_buckling",
+    "module_parent_added": "similar_triangles"
+   },
+   {
+    "dependent": "rotational_dynamics",
+    "parent": "differential_equations",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "rotational_dynamics",
+    "module_parent_added": "centers_of_mass"
+   },
+   {
+    "dependent": "flywheel_smoothing",
+    "parent": "rotational_dynamics",
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "flywheel_smoothing",
+    "module_parent_added": "centers_of_mass"
    },
    {
     "dependent": "feedback_governors",
     "parent": "rotative_steam_engine",
-    "direction": "identity on main path"
+    "direction": "identity takes its module requirements"
+   },
+   {
+    "dependent": "feedback_governors",
+    "module_parent_added": "mechanical_oscillation"
    },
    {
     "dependent": "state_lottery_loans",
@@ -12173,7 +12326,10 @@
    "band_high": 2037,
    "research_years": 15.0,
    "key_threshold": true,
-   "requires_all": [],
+   "requires_all": [
+    "place_value",
+    "fractional_quantities"
+   ],
    "requires_any": [],
    "precedents": [
     "polynomial_equations",
@@ -12187,9 +12343,9 @@
     "contact_required": false
    },
    "note": "Letters for quantities, written with the new signs.",
-   "earliest_feasible_year": 15.0,
+   "earliest_feasible_year": 143.5,
    "serial_line_finish_year": 2406.0,
-   "chain_depth": 0,
+   "chain_depth": 14,
    "serial_overrun": true
   },
   {
@@ -13175,7 +13331,10 @@
    "band_high": 2053,
    "research_years": 15.0,
    "key_threshold": true,
-   "requires_all": [],
+   "requires_all": [
+    "standard_measures",
+    "tallies"
+   ],
    "requires_any": [],
    "precedents": [
     "experimental_science_program",
@@ -13189,9 +13348,9 @@
     "contact_required": false
    },
    "note": "The mean-speed rule tested on inclined planes.",
-   "earliest_feasible_year": 15.0,
+   "earliest_feasible_year": 22.0,
    "serial_line_finish_year": 2455.0,
-   "chain_depth": 0,
+   "chain_depth": 2,
    "serial_overrun": true
   },
   {
@@ -14204,11 +14363,13 @@
    "band_high": 2073,
    "research_years": 15.0,
    "key_threshold": true,
-   "requires_all": [],
+   "requires_all": [
+    "ratio_proportion",
+    "symbolic_algebra"
+   ],
    "requires_any": [],
    "precedents": [
     "printed_arithmetic_summa",
-    "symbolic_algebra",
     "printed_ephemerides",
     "written_decimal_fractions",
     "half_chord_sine_tables"
@@ -14219,9 +14380,9 @@
     "contact_required": false
    },
    "note": "Paired progressions turn sine-table products into sums.",
-   "earliest_feasible_year": 15.0,
+   "earliest_feasible_year": 158.5,
    "serial_line_finish_year": 2520.0,
-   "chain_depth": 0,
+   "chain_depth": 15,
    "serial_overrun": true
   },
   {
@@ -15930,7 +16091,8 @@
    "research_years": 15.0,
    "key_threshold": true,
    "requires_all": [
-    "symbolic_algebra"
+    "symbolic_algebra",
+    "straightedge_compass"
    ],
    "requires_any": [],
    "precedents": [
@@ -15944,9 +16106,9 @@
     "contact_required": false
    },
    "note": "Symbolic algebra applied to curves on coordinates.",
-   "earliest_feasible_year": 30.0,
+   "earliest_feasible_year": 158.5,
    "serial_line_finish_year": 2729.0,
-   "chain_depth": 1,
+   "chain_depth": 15,
    "serial_overrun": true
   },
   {
@@ -17137,8 +17299,8 @@
    "research_years": 10.0,
    "key_threshold": false,
    "requires_all": [
-    "symbolic_algebra",
-    "combinatorics"
+    "combinatorics",
+    "fractional_quantities"
    ],
    "requires_any": [],
    "precedents": [
@@ -17152,9 +17314,9 @@
     "contact_required": false
    },
    "note": "Games of chance reckoned by combination.",
-   "earliest_feasible_year": 25.0,
+   "earliest_feasible_year": 148.5,
    "serial_line_finish_year": 2785.0,
-   "chain_depth": 1,
+   "chain_depth": 15,
    "serial_overrun": true
   },
   {
@@ -17597,9 +17759,9 @@
     "contact_required": false
    },
    "note": "Pendulum and string periods measured against clocks.",
-   "earliest_feasible_year": 23.0,
+   "earliest_feasible_year": 30.0,
    "serial_line_finish_year": 2831.0,
-   "chain_depth": 1,
+   "chain_depth": 3,
    "serial_overrun": true
   },
   {
@@ -18668,8 +18830,8 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "symbolic_algebra",
-    "polynomial_equations"
+    "polynomial_equations",
+    "place_value"
    ],
    "requires_any": [],
    "precedents": [
@@ -18682,9 +18844,9 @@
     "contact_required": false
    },
    "note": "Successive approximation to roots.",
-   "earliest_feasible_year": 23.0,
+   "earliest_feasible_year": 136.5,
    "serial_line_finish_year": 2880.0,
-   "chain_depth": 1,
+   "chain_depth": 14,
    "serial_overrun": true
   },
   {
@@ -18817,7 +18979,7 @@
    "key_threshold": true,
    "requires_all": [
     "coordinate_geometry",
-    "measured_kinematics"
+    "polynomial_equations"
    ],
    "requires_any": [],
    "precedents": [
@@ -18831,9 +18993,9 @@
     "contact_required": false
    },
    "note": "Tangents on coordinates and rates of motion unified.",
-   "earliest_feasible_year": 50.0,
+   "earliest_feasible_year": 178.5,
    "serial_line_finish_year": 2900.0,
-   "chain_depth": 2,
+   "chain_depth": 16,
    "serial_overrun": true
   },
   {
@@ -19409,12 +19571,12 @@
    "research_years": 12.0,
    "key_threshold": false,
    "requires_all": [
-    "differential_calculus"
+    "coordinate_geometry",
+    "fractional_quantities"
    ],
    "requires_any": [],
    "precedents": [
-    "numerical_root_finding",
-    "coordinate_geometry"
+    "numerical_root_finding"
    ],
    "conditions": {
     "resources_known": [],
@@ -19422,9 +19584,9 @@
     "contact_required": false
    },
    "note": "Areas summed as the inverse of rates.",
-   "earliest_feasible_year": 62.0,
+   "earliest_feasible_year": 170.5,
    "serial_line_finish_year": 2930.0,
-   "chain_depth": 3,
+   "chain_depth": 16,
    "serial_overrun": true
   },
   {
@@ -19526,7 +19688,10 @@
    "band_high": 2187,
    "research_years": 6.0,
    "key_threshold": false,
-   "requires_all": [],
+   "requires_all": [
+    "standard_measures",
+    "timber_grading"
+   ],
    "requires_any": [],
    "precedents": [
     "air_spring_law",
@@ -19539,9 +19704,9 @@
     "contact_required": false
    },
    "note": "Springs stretch in proportion to load.",
-   "earliest_feasible_year": 6.0,
+   "earliest_feasible_year": 13.0,
    "serial_line_finish_year": 2946.0,
-   "chain_depth": 0,
+   "chain_depth": 2,
    "serial_overrun": true
   },
   {
@@ -19938,7 +20103,8 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "elastic_deformation"
+    "elastic_deformation",
+    "ratio_proportion"
    ],
    "requires_any": [],
    "precedents": [
@@ -19951,9 +20117,9 @@
     "contact_required": false
    },
    "note": "The spring law carried into beams.",
-   "earliest_feasible_year": 14.0,
+   "earliest_feasible_year": 136.5,
    "serial_line_finish_year": 2976.0,
-   "chain_depth": 1,
+   "chain_depth": 15,
    "serial_overrun": true
   },
   {
@@ -20603,9 +20769,9 @@
     "contact_required": false
    },
    "note": "Impetus replaced by motion that persists.",
-   "earliest_feasible_year": 23.0,
+   "earliest_feasible_year": 30.0,
    "serial_line_finish_year": 2984.0,
-   "chain_depth": 1,
+   "chain_depth": 3,
    "serial_overrun": true
   },
   {
@@ -20766,7 +20932,8 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "inertial_motion"
+    "inertial_motion",
+    "ratio_proportion"
    ],
    "requires_any": [],
    "precedents": [
@@ -20779,9 +20946,9 @@
     "contact_required": false
    },
    "note": "Collisions measured before the society.",
-   "earliest_feasible_year": 31.0,
+   "earliest_feasible_year": 136.5,
    "serial_line_finish_year": 3012.0,
-   "chain_depth": 2,
+   "chain_depth": 15,
    "serial_overrun": true
   },
   {
@@ -21103,9 +21270,9 @@
     "contact_required": false
    },
    "note": "Laws of motion written as equations of change.",
-   "earliest_feasible_year": 72.0,
+   "earliest_feasible_year": 188.5,
    "serial_line_finish_year": 3022.0,
-   "chain_depth": 4,
+   "chain_depth": 17,
    "serial_overrun": true
   },
   {
@@ -21998,7 +22165,7 @@
    "research_years": 6.0,
    "key_threshold": false,
    "requires_all": [
-    "inertial_motion"
+    "standard_measures"
    ],
    "requires_any": [],
    "precedents": [
@@ -22011,7 +22178,7 @@
     "contact_required": false
    },
    "note": "Friction taken as a fixed share of load.",
-   "earliest_feasible_year": 29.0,
+   "earliest_feasible_year": 13.0,
    "serial_line_finish_year": 3028.0,
    "chain_depth": 2,
    "serial_overrun": true
@@ -25409,7 +25576,7 @@
    "key_threshold": false,
    "requires_all": [
     "hydrostatic_pressure",
-    "differential_calculus"
+    "ratio_proportion"
    ],
    "requires_any": [],
    "precedents": [
@@ -25422,9 +25589,9 @@
     "contact_required": false
    },
    "note": "Calculus applied to water in pipes.",
-   "earliest_feasible_year": 60.0,
+   "earliest_feasible_year": 138.5,
    "serial_line_finish_year": 3089.0,
-   "chain_depth": 3,
+   "chain_depth": 15,
    "serial_overrun": true
   },
   {
@@ -25960,7 +26127,8 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "integral_calculus"
+    "integral_calculus",
+    "place_value"
    ],
    "requires_any": [],
    "precedents": [
@@ -25974,9 +26142,9 @@
     "contact_required": false
    },
    "note": "Stepwise sums for areas and orbits.",
-   "earliest_feasible_year": 70.0,
+   "earliest_feasible_year": 178.5,
    "serial_line_finish_year": 3097.0,
-   "chain_depth": 4,
+   "chain_depth": 17,
    "serial_overrun": true
   },
   {
@@ -26076,7 +26244,7 @@
    "key_threshold": false,
    "requires_all": [
     "stress_strain_relations",
-    "differential_equations"
+    "similar_triangles"
    ],
    "requires_any": [],
    "precedents": [
@@ -26088,9 +26256,9 @@
     "contact_required": false
    },
    "note": "The bowing load found by an equation of the bent column.",
-   "earliest_feasible_year": 78.0,
+   "earliest_feasible_year": 142.5,
    "serial_line_finish_year": 3103.0,
-   "chain_depth": 5,
+   "chain_depth": 16,
    "serial_overrun": true
   },
   {
@@ -28870,7 +29038,7 @@
    "key_threshold": false,
    "requires_all": [
     "momentum_balance",
-    "differential_equations"
+    "centers_of_mass"
    ],
    "requires_any": [],
    "precedents": [
@@ -28882,9 +29050,9 @@
     "contact_required": false
    },
    "note": "Spinning bodies and moments of inertia.",
-   "earliest_feasible_year": 80.0,
+   "earliest_feasible_year": 154.5,
    "serial_line_finish_year": 3180.0,
-   "chain_depth": 5,
+   "chain_depth": 17,
    "serial_overrun": true
   },
   {
@@ -30691,7 +30859,7 @@
    "research_years": 5.0,
    "key_threshold": false,
    "requires_all": [
-    "rotational_dynamics"
+    "centers_of_mass"
    ],
    "requires_any": [],
    "precedents": [
@@ -30703,9 +30871,9 @@
     "contact_required": false
    },
    "note": "Moment of inertia applied to smooth drives.",
-   "earliest_feasible_year": 85.0,
+   "earliest_feasible_year": 151.5,
    "serial_line_finish_year": 3203.0,
-   "chain_depth": 6,
+   "chain_depth": 17,
    "serial_overrun": true
   },
   {
@@ -31925,7 +32093,8 @@
    "research_years": 8.0,
    "key_threshold": false,
    "requires_all": [
-    "rotational_dynamics"
+    "rotational_dynamics",
+    "mechanical_oscillation"
    ],
    "requires_any": [],
    "precedents": [
@@ -31939,9 +32108,9 @@
     "contact_required": false
    },
    "note": "Spinning balls throttle the rotative engine.",
-   "earliest_feasible_year": 88.0,
+   "earliest_feasible_year": 162.5,
    "serial_line_finish_year": 3242.0,
-   "chain_depth": 6,
+   "chain_depth": 18,
    "serial_overrun": true
   },
   {

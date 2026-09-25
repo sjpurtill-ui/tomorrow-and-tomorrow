@@ -72,26 +72,29 @@ One hard edge is demoted to a precedent through `DEMOTE` in the merge tool:
 
 The game models the mechanics and mathematics identities (`scripts/mechanics_knowledge.gd`, 24 ids, and `scripts/mathematics_knowledge.gd`, 26 ids) as optional speed-ups. An item's practical route must stay open without them (`tests/test_mechanics_knowledge.gd`, `tests/test_mathematics_knowledge.gd`). The first bake of this block made them mainline. It broke 3 mechanics cases: two circular models (`grain_milling` through `flywheel_smoothing`, and `water_mills` through `flow_continuity`), plus targets that could not be reached without mechanics. It also widened the mathematics reachability case.
 
-Coordinator decision: keep the modules as they are, and fix the design. `tools/research/module_identities.py` holds the identity list and `demote_identity_edges()`. The rule runs in `merge_graph_1200.py`, `merge_graph_1800.py`, `merge_graph_2400.py` and `merge_graph_3000.py`, and each graph records it in `meta.identity_demotions`. Placement years are unchanged.
+Coordinator decision: keep the modules as they are, and fix the design. `tools/research/module_identities.py` holds the rule and runs in `merge_graph_1200.py`, `merge_graph_1800.py`, `merge_graph_2400.py` and `merge_graph_3000.py`. Each graph records it in `meta.identity_demotions`. Placement years are unchanged.
 
 1. **Main-path items on identities.** A main-path item keeps no identity as a hard parent. `requires_all` parents and `requires_any` members that are identities become precedents.
-   - If that leaves the item with no hard parent, its own non-identity precedents become its requirements.
-   - Failing that, a hand-named practical foundation, or the identities' nearest non-identity foundations.
-2. **Identities on main-path items.** An identity keeps only identities as hard parents. Its main-path parents become precedents, because otherwise the model sits downstream of the items it speeds up. That was the cause of the two circular models.
+   - If that leaves the item with no hard parent, a hand-named practical foundation (`PRACTICAL_FOUNDATIONS`) becomes its requirement.
+   - Failing that, its own non-identity precedents.
+   - Failing that, the identities' nearest non-identity foundations.
+2. **Identities take their module requirements.** Each identity takes the requirements its game module authors, read from `origin/codex/research-1200` or `--game-dir`. The design's other parents become precedents.
+   - A module parent dated after the identity is dropped. In this block that affects `polynomial_equations` ← `symbolic_algebra`, `mechanical_oscillation` ← `elastic_deformation`, `inertial_motion` ← `friction_measurement` and `friction_measurement` ← `experimental_controls`.
+   - This stops a model from sitting downstream of the items it speeds up, which is what caused the two circular models.
 3. **One identity link.** `probability_theory` ← `combinatorics` replaces the route through `binomial_coefficient_triangle`. It keeps the module's `foundation_for` contract.
 
-| graph | main path on identity | identity on main path | substituted requirements |
+| graph | main path on identity (demoted) | identities given module requirements | substituted requirements |
 |---|---:|---:|---|
-| 600–1200 | 15 | 10 | `mineral_specific_gravity` ← `iron_assaying`, `touchstone_testing`; `mechanical_treatises` ← `piston_force_pumps`, `geared_sky_calculator`, `mechanical_screw_presses` |
+| 600–1200 | 15 | 11 changed edges | `mineral_specific_gravity` ← `iron_assaying`, `touchstone_testing`; `mechanical_treatises` ← `piston_force_pumps`, `geared_sky_calculator`, `mechanical_screw_presses` |
 | 1200–1800 | 5 | 0 | `half_chord_sine_tables` ← `sky_tables_compendium`, `polygon_circle_estimation`, `nine_digits_and_zero` |
-| 1800–2400 | 14 | 16 | `structural_load_testing` ← `salaried_science_academy`; `navigators_log_scale` ← `traverse_course_tables` |
-| 2400–3000 | 78 | 6 | see `GRAPH_3000_REPORT.md` |
+| 1800–2400 | 14 | 25 changed edges | `structural_load_testing` ← `salaried_science_academy`; `navigators_log_scale` ← `traverse_course_tables` |
+| 2400–3000 | 78 | 15 changed edges | see `GRAPH_3000_REPORT.md` |
 
 The earlier blocks had to change as well. The 1800–2400 items `instrument_maker_workshops`, `mainspring_fusee_clocks` and `experimental_controls` reach back through the 600–1200 geometry and astronomy chain (`axiomatic_geometry_compendium` ← `similar_triangles`, `demonstrated_geometry` ← `straightedge_compass`). While those edges stayed hard, the reachability case could not recover.
 
 The 0–600 edge `outflow_water_clock` ← `fractional_quantities` is left as it is, because `research_600.json` is built separately. The 1800–2400 substitution for `structural_load_testing` avoids it.
 
-Some identities are now left with no hard parent: `straightedge_compass`, `combinatorics`, `lever_moments`, `displacement_buoyancy`, `polynomial_equations`, `symbolic_algebra`, `measured_kinematics`, `logarithms` and `elastic_deformation`. They still open only at their band_low.
+`polynomial_equations` has no hard parent left, because its module parent comes later. It opens only at its band_low.
 
 `merge_graph_1800.py` also now accepts that the game bake has already removed `ocean_sailing`'s 0–600 adoption.
 
