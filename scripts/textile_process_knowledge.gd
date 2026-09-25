@@ -31,9 +31,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Describe and compare yarn linear density through maintained conventions",
     "effects": {},
-    "production_items": [
-      "measured_yarn"
-    ],
+    "production_items": ["measured_yarn", "measured_drawloom_cloth"],
     "production_contract": "Sample and measure a declared yarn-count class using a maintained length reel and balance, consuming sample yarn, clay records and work. Measured Yarn supports matched-feed weaving; this does not certify every yarn property."
   },
   {
@@ -170,10 +168,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Select groups of warp threads for controlled figured weaving",
     "effects": {},
-    "production_items": [
-      "drawloom_figured_cloth",
-      "measured_drawloom_cloth"
-    ],
+    "production_items": ["drawloom_figured_cloth"],
     "production_contract": "Pay for a drawloom and manually select warp groups while consuming yarn and work to make Figured Cloth. Measured feed reduces modeled offcuts. Imported figured cloth can be sewn without teaching loom manufacture."
   },
   {

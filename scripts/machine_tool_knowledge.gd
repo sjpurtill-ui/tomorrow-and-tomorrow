@@ -34,7 +34,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "surface_plates"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "straightedge_scraping",
@@ -68,7 +68,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "scraped_straightedges"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "machine_way_scraping",
@@ -102,7 +102,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "scraped_machine_ways"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "lead_screw_cutting",
@@ -138,7 +138,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "machine_lead_screws"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "split_feed_nuts",
@@ -172,7 +172,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "machine_feed_nuts"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "cross_slide_assembly",
@@ -208,7 +208,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "machine_cross_slides"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "four_jaw_chucks",
@@ -242,7 +242,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "four_jaw_chucks"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "tailstock_fitting",
@@ -278,7 +278,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "lathe_tailstocks"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "toolbit_heat_treatment",
@@ -312,7 +312,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "steel_tool_bits"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "centre_lathe_assembly",
@@ -347,10 +347,8 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Aligned ways, a controlled slide, a gripping spindle and an opposing support form a machine for turning work about a stable axis.",
     "effects": {},
-    "production_items": [
-      "metalworking_lathes"
-    ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_items": ["metalworking_lathes", "friction_clutches", "fit_gauges_20"],
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "drill_bit_fluting",
@@ -384,7 +382,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "fluted_drill_bits"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "quill_feed_mechanisms",
@@ -420,7 +418,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "drill_quills"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "column_drilling_machines",
@@ -454,7 +452,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "column_drills"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "milling_cutter_relief",
@@ -488,7 +486,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "relieved_milling_cutters"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "milling_table_feeds",
@@ -522,7 +520,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "milling_tables"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "milling_spindle_heads",
@@ -558,7 +556,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "milling_spindle_heads"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "horizontal_milling_machines",
@@ -591,10 +589,8 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "A rigid bed joins controlled table movement to a supported horizontal cutting spindle, allowing repeated flat and shaped cuts.",
     "effects": {},
-    "production_items": [
-      "horizontal_mills"
-    ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_items": ["horizontal_mills", "ratchet_indexers"],
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "worm_dividing_heads",
@@ -628,7 +624,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "dividing_heads"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "drill_jig_bushings",
@@ -662,7 +658,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "drill_jig_bushings"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "drill_jig_layout",
@@ -698,7 +694,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "drill_jigs"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "gauge_block_lapping",
@@ -734,7 +730,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "gauge_blocks"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "bench_vise_screws",
@@ -770,7 +766,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "machine_bench_vises"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "basic_machine_shops",
@@ -806,7 +802,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "basic_machine_tool_sets"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "precision_toolrooms",
@@ -846,6 +842,6 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "precision_machine_tool_sets"
     ],
-    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine or global production bonus."
+    "production_contract": "Physical workshop batches consume actual materials, setup tooling and finite labor to create machine components. Complete tool sets must be installed with motors, commissioning work, operators and electricity before they provide powered workshop service. Knowledge alone grants no machine; its society-wide effect is a small era-scaled contribution, not a direct production bonus."
   }
 ]

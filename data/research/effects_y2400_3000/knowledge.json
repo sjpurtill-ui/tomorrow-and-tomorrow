@@ -106,7 +106,7 @@
     "standardization": 0.0033
    },
    "art": "res://assets/ui/research/paper/battery_bank_wiring.png",
-   "observation": "Needle galvanometers show the strength of a current and let one laboratory check another's work."
+   "observation": "Needle current meters show the strength of a current and let one laboratory check another's work."
   },
   "dimensional_analysis": {
    "effects": {
@@ -983,7 +983,11 @@
    "name": "Stored-program Computer",
    "observation": "An electronic machine of valves holds its own instructions in memory and runs any calculation it is given.",
    "ability_reason": "Calculation becomes a general-purpose machine; ballistics, weather, accounts and science are all rewritten.",
-   "social_consequence": "Clerks who once reckoned by hand find their work taken by a room-sized machine and its few attendants."
+   "social_consequence": "Clerks who once reckoned by hand find their work taken by a room-sized machine and its few attendants.",
+   "production_items": [
+    "stored_program_computers"
+   ],
+   "production_contract": "Finite workshop batches make Stored-Program Computers from logic modules, read-write memory, arithmetic-logic units, insulated cable and steel, using basic machine tool sets and steel. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "live_cell_time_lapse": {
    "effects": {
@@ -1212,7 +1216,11 @@
    "name": "Desk Computers",
    "observation": "Computers small enough for a desk come into offices and homes.",
    "ability_reason": "Calculation, writing and records move onto machines in ordinary offices and homes.",
-   "social_consequence": "Typists and bookkeepers are retrained or let go; the young know the machines better than their elders."
+   "social_consequence": "Typists and bookkeepers are retrained or let go; the young know the machines better than their elders.",
+   "production_items": [
+    "desk_computers"
+   ],
+   "production_contract": "Finite workshop batches make Desk Computers from arithmetic-logic units, read-write memory, memory decoders, transistors, insulated cable and steel sheets, using precision machine tool sets. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "cellular_telephony": {
    "effects": {

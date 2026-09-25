@@ -544,7 +544,11 @@
     "sanitation": 0.0024
    },
    "name": "Ash-and-Fat Soap",
-   "observation": "Fat boiled with wood-ash lye makes a soap that lifts grease from skin, wool and wounds."
+   "observation": "Fat boiled with wood-ash lye makes a soap that lifts grease from skin, wool and wounds.",
+   "production_items": [
+    "soft_fat_soap"
+   ],
+   "production_contract": "Finite workshop batches make Soft Soap from rendered animal fat, timber and freshwater, using clay and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "copper_razors": {
    "effects": {

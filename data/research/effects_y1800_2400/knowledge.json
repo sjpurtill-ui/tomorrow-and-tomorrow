@@ -501,7 +501,11 @@
    "art": "res://assets/ui/research/paper/compound_microscopy.png",
    "name": "Spyglass",
    "observation": "A spectacle-maker's spyglass brings a far ship's flags close, and captains and sky-watchers both demand one.",
-   "ability_reason": "A spyglass extends sight many times; watchmen and generals see an enemy sooner, and sky-watchers see what no eye has seen."
+   "ability_reason": "A spyglass extends sight many times; watchmen and generals see an enemy sooner, and sky-watchers see what no eye has seen.",
+   "production_items": [
+    "spyglasses"
+   ],
+   "production_contract": "Finite workshop batches make Spyglasses from optical lenses, brass and tanned leather, using timber and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "elliptical_planet_orbits": {
    "effects": {
@@ -697,7 +701,11 @@
    "art": "res://assets/ui/research/discovery-600/outflow_water_clock.png",
    "name": "Pendulum Clock",
    "observation": "A swinging pendulum governs the clock's wheels, and it keeps time to a few seconds a day instead of a quarter hour.",
-   "ability_reason": "A pendulum makes clocks accurate to seconds; observations can be timed, work regulated and later longitude pursued."
+   "ability_reason": "A pendulum makes clocks accurate to seconds; observations can be timed, work regulated and later longitude pursued.",
+   "production_items": [
+    "pendulum_clock_movements"
+   ],
+   "production_contract": "Finite workshop batches make Clock Movements from brass, steel and timber, using wrought iron and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "chartered_experimental_society": {
    "effects": {

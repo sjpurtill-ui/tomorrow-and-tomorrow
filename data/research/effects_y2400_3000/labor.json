@@ -13,7 +13,7 @@
     "legitimacy": 0.0003
    },
    "name": "First Factory Act",
-   "observation": "The new law is nailed to the mill gate: bound parish children may work no more than twelve hours, and must be taught their letters on the Sabbath.",
+   "observation": "The new law is nailed to the mill gate: bound parish children may work no more than twelve hours, and must be taught their letters on the rest day.",
    "ability_reason": "For the first time the realm reaches past the master's door and says a child's working day has an end, however long.",
    "social_consequence": "Parish apprentices gain a little sleep; mill masters grumble at a rule that, with no one sent to enforce it, they mostly ignore.",
    "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
@@ -129,7 +129,7 @@
     "mining_output": 0.003
    },
    "name": "Butty Gang System",
-   "observation": "The butty takes the stall at a price per ton from the owner, hires his own gang, and pays them on a Saturday night at his own beerhouse.",
+   "observation": "The butty takes the stall at a price per ton from the owner, hires his own gang, and pays them at the week's end at his own beerhouse.",
    "art": "res://assets/ui/research/subjects/mine_shoring-v1.png"
   },
   "coin_wages_act": {
@@ -204,7 +204,7 @@
     "trade_capacity": 0.0006
    },
    "name": "Cooperative Stores",
-   "observation": "Weavers pool a pound each to open a shop selling honest flour and tea; at the quarter they share the surplus by what each member bought.",
+   "observation": "Weavers pool a silver piece each to open a shop selling honest flour and tea; at the quarter they share the surplus by what each member bought.",
    "art": "res://assets/ui/research/subjects/public_stores-v1.png"
   },
   "half_time_schooling": {
@@ -249,14 +249,14 @@
    "social_consequence": "Skilled men win security and respect; the unskilled laborers beside them are shut out of the society and its wages.",
    "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
   },
-  "saturday_half_holiday": {
+  "weekly_half_holiday": {
    "effects": {
     "cohesion": 0.0002,
     "fatigue": -0.0015,
     "labor_demand": 0.0001
    },
-   "name": "Saturday Half-Holiday",
-   "observation": "At two on Saturday the workshops close; by three the playing fields and the excursion trains are crowded with clerks and mill hands.",
+   "name": "Weekly Half-Holiday",
+   "observation": "At two on the day before the rest day the workshops close; by three the playing fields and the excursion trains are crowded with clerks and mill hands.",
    "art": "res://assets/ui/research/subjects/civic_games-v2.png"
   },
   "district_rate_lists": {
@@ -266,7 +266,7 @@
     "task_coordination": 0.0007
    },
    "name": "District Rate Lists",
-   "observation": "A printed list pinned in every weaving shed of the district sets the same price for a piece of each width and pick, down to the farthing.",
+   "observation": "A printed list pinned in every weaving shed of the district sets the same price for a piece of each width and pick, down to the last copper.",
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png"
   },
   "sweated_home_work": {
@@ -323,7 +323,7 @@
     "labor_efficiency": -0.0023
    },
    "name": "Employer Lockouts",
-   "observation": "The gates of every engineering shop in the district are chained on the same Monday; the men are told to return when they drop the union.",
+   "observation": "The gates of every engineering shop in the district are chained on the same morning; the men are told to return when they drop the union.",
    "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
   },
   "union_legal_standing": {
@@ -368,7 +368,7 @@
     "labor_efficiency": -0.0011
    },
    "name": "Peaceful Picketing",
-   "observation": "Four strikers in their Sunday coats stand at the works gate with a placard, handing leaflets to anyone who would take their jobs.",
+   "observation": "Four strikers in their best coats stand at the works gate with a placard, handing leaflets to anyone who would take their jobs.",
    "art": "res://assets/ui/research/discovery-600/emblem_processions.png"
   },
   "trade_wide_employer_bargaining": {
@@ -755,7 +755,7 @@
     "labor_demand": 0.0002
    },
    "name": "Five-Day Week",
-   "observation": "The motor works closes on Saturdays as well as Sundays; workers spend the weekend on day trips, and the shopkeepers find them spending more.",
+   "observation": "The motor works closes on the day before the rest day as well as the rest day; workers spend the weekend on day trips, and the shopkeepers find them spending more.",
    "art": "res://assets/ui/research/subjects/festival_calendar-v1.png"
   },
   "work_group_morale_studies": {
@@ -924,7 +924,7 @@
     "trade_capacity": 0.0007
    },
    "name": "Negotiated Occupational Pensions",
-   "observation": "The contract now sets aside cents from every hour worked into a pension fund; retired machinists draw a monthly cheque beside the state pension.",
+   "observation": "The contract now sets aside a few coppers from every hour worked into a pension fund; retired machinists draw a monthly cheque beside the state pension.",
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png"
   },
   "public_sector_unions": {
@@ -1236,7 +1236,7 @@
     "labor_efficiency": 0.0009
    },
    "name": "Four-Day Week Trials",
-   "observation": "Seventy firms close every Friday for six months at full pay; most find output holds, and sick days and resignations fall.",
+   "observation": "Seventy firms close on the last workday for six months at full pay; most find output holds, and sick days and resignations fall.",
    "art": "res://assets/ui/research/subjects/labor_rotations-v2.png"
   },
   "paid_care_work": {
@@ -1434,11 +1434,6 @@
     "institutional_rigidity": 0.003,
     "knowledge_preservation": 0.0032,
     "task_coordination": 0.003
-   },
-   "saturday_half_holiday": {
-    "cohesion": 0.0014,
-    "fatigue": -0.004,
-    "labor_demand": 0.002
    },
    "district_rate_lists": {
     "adoption_rate": -0.001,
@@ -1990,6 +1985,11 @@
     "health_protection": 0.0014,
     "labor_demand": 0.001,
     "state_capacity": 0.001
+   },
+   "weekly_half_holiday": {
+    "cohesion": 0.0014,
+    "fatigue": -0.004,
+    "labor_demand": 0.002
    }
   }
  }

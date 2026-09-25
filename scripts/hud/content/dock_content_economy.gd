@@ -170,7 +170,7 @@ func _materials_blocks()->Array:
 			"name":ResourceSystem.display_name(String(resource_name)),
 			"sub":"","value":"%.0f" % amount if amount>=10.0 else "%.1f" % amount,
 			"value_color":Tokens.INK,"accent":Tokens.TEAL,
-			"tip":ResourceSystem.plain_language_description(String(resource_name)) if ResourceSystem.plain_language_description(String(resource_name))!="" else "Bulk units of %s held in settlement storage" % String(resource_name).to_lower(),
+			"tip":ResourceSystem.plain_language_description(String(resource_name)) if ResourceSystem.plain_language_description(String(resource_name))!="" else "Bulk units of %s held in settlement storage" % ResourceSystem.display_name(String(resource_name)).to_lower(),
 		})
 	var storage_block:Dictionary={"type":"rows","heading":"IN STORAGE","note":"%.0f of %.0f bulk used" % [stored,capacity],"items":storage_items} if not storage_items.is_empty() else {"type":"text","heading":"IN STORAGE","text":"Nothing is stockpiled. Extraction delivers materials into storage; food is tracked in FOOD & WATER."}
 	return [

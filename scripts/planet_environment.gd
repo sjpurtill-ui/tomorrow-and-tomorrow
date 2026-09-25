@@ -303,7 +303,9 @@ func _resource_potentials(position:Vector2,biome:String,temperature:float,precip
 		"Nickel Ore":clampf(igneous*mineral*weathering*.9,0.0,1.0),
 		"Bauxite":clampf(weathering*(igneous*.6+sediment*.4)*(0.4+temperature*.6)*(0.4+precipitation*.6),0.0,1.0),
 		"Rutile Ore":clampf(mineral*(igneous*.55+metamorphic*.45),0.0,1.0),
-		"Ochre Earth":clampf(weathering*(mineral*.45+igneous*.35+sediment*.2),0.0,1.0)
+		"Ochre Earth":clampf(weathering*(mineral*.45+igneous*.35+sediment*.2),0.0,1.0),
+		"Zinc Ore":clampf(mineral*(sediment*.5+metamorphic*.3+igneous*.2),0.0,1.0),
+		"Kaolin":clampf(weathering*igneous*(0.5+precipitation*.5),0.0,1.0)
 	}
 
 

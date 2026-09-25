@@ -3165,7 +3165,7 @@
 ]
 },
 {
-"id": "portland_cement_clinker",
+"id": "clinker_cement",
 "line": "infrastructure",
 "status": "catalog",
 "name": "Hydraulic Cement",
@@ -4823,7 +4823,7 @@
 "shared_with": []
 },
 {
-"id": "penny_daily_press",
+"id": "cheap_daily_press",
 "line": "culture",
 "status": "new",
 "name": "Cheap Daily Papers Sold on the Street",
@@ -5432,7 +5432,7 @@
 "min_year": 2471.0,
 "research_years": 5.0,
 "requires_all": [
-"penny_daily_press"
+"cheap_daily_press"
 ],
 "requires_any": [],
 "precedents": [
@@ -6292,7 +6292,7 @@
 "min_year": 2484.0,
 "research_years": 5.0,
 "requires_all": [
-"penny_daily_press",
+"cheap_daily_press",
 "stone_lithography"
 ],
 "requires_any": [],
@@ -7560,7 +7560,7 @@
 "requires_any": [],
 "precedents": [
 "decennial_apportionment_census",
-"penny_daily_press"
+"cheap_daily_press"
 ],
 "conditions": {},
 "shared_with": [],
@@ -7623,7 +7623,7 @@
 "precedents": [
 "national_flag_anthem",
 "national_civic_festivals",
-"penny_daily_press"
+"cheap_daily_press"
 ],
 "conditions": {},
 "shared_with": [],
@@ -7913,7 +7913,7 @@
 ],
 "requires_any": [],
 "precedents": [
-"penny_daily_press",
+"cheap_daily_press",
 "reading_circles"
 ],
 "conditions": {},
@@ -8602,7 +8602,7 @@
 ]
 },
 {
-"id": "saturday_half_holiday",
+"id": "weekly_half_holiday",
 "line": "labor",
 "status": "new",
 "name": "Saturday Half-holiday in Mills and Workshops",
@@ -8620,7 +8620,7 @@
 ],
 "requires_any": [],
 "precedents": [
-"saint_monday_custom"
+"idle_weekstart_custom"
 ],
 "conditions": {},
 "shared_with": [],
@@ -9206,7 +9206,7 @@
 "requires_any": [],
 "precedents": [
 "portrait_photo_studios",
-"penny_daily_press"
+"cheap_daily_press"
 ],
 "conditions": {},
 "shared_with": [],
@@ -11129,7 +11129,7 @@
 "requires_any": [],
 "precedents": [
 "gymnastics_grounds",
-"saturday_half_holiday",
+"weekly_half_holiday",
 "public_steam_railway"
 ],
 "conditions": {},
@@ -14953,7 +14953,7 @@
 "min_year": 2588.0,
 "research_years": 5.0,
 "requires_all": [
-"penny_daily_press"
+"cheap_daily_press"
 ],
 "requires_any": [],
 "precedents": [
@@ -15414,7 +15414,7 @@
 ],
 "requires_any": [],
 "precedents": [
-"saturday_half_holiday",
+"weekly_half_holiday",
 "ten_hour_day"
 ],
 "conditions": {},
@@ -15601,7 +15601,7 @@
 ],
 "requires_any": [],
 "precedents": [
-"living_mother_caesarean"
+"living_mother_incision_delivery"
 ],
 "conditions": {},
 "shared_with": [],
@@ -16154,9 +16154,9 @@
 ],
 "requires_any": [],
 "precedents": [
-"saturday_half_holiday",
+"weekly_half_holiday",
 "intercity_passenger_railway",
-"penny_daily_press"
+"cheap_daily_press"
 ],
 "conditions": {},
 "shared_with": [],
@@ -16210,7 +16210,7 @@
 "requires_all": [
 "structural_steel",
 "lime_mortar",
-"portland_cement_clinker"
+"clinker_cement"
 ],
 "requires_any": [],
 "precedents": [
@@ -18109,7 +18109,7 @@
 "research_years": 6.0,
 "requires_all": [
 "long_distance_conduits",
-"portland_cement_clinker"
+"clinker_cement"
 ],
 "requires_any": [],
 "precedents": [
@@ -19731,7 +19731,7 @@
 "min_year": 2642.0,
 "research_years": 6.0,
 "requires_all": [
-"penny_daily_press",
+"cheap_daily_press",
 "wood_pulp_paper"
 ],
 "requires_any": [],
@@ -20230,7 +20230,7 @@
 ],
 "requires_any": [],
 "precedents": [
-"portland_cement_clinker"
+"clinker_cement"
 ],
 "conditions": {},
 "shared_with": []
@@ -23307,7 +23307,7 @@
 "requires_all": [
 "isthmus_ship_canal",
 "electric_motors",
-"portland_cement_clinker"
+"clinker_cement"
 ],
 "requires_any": [],
 "precedents": [
@@ -24451,7 +24451,7 @@
 "research_years": 10.0,
 "requires_all": [
 "hydroelectric_stations",
-"portland_cement_clinker"
+"clinker_cement"
 ],
 "requires_any": [],
 "precedents": [
@@ -25498,7 +25498,7 @@
 "research_years": 5.0,
 "requires_all": [
 "concrete_mix_design",
-"portland_cement_clinker"
+"clinker_cement"
 ],
 "requires_any": [],
 "precedents": [
@@ -25831,7 +25831,7 @@
 "min_year": 2710.0,
 "research_years": 3.0,
 "requires_all": [
-"saturday_half_holiday",
+"weekly_half_holiday",
 "eight_hour_day_law"
 ],
 "requires_any": [],
@@ -45111,7 +45111,7 @@
 "min_year": 2965.0,
 "research_years": 5.0,
 "requires_all": [
-"portland_cement_clinker"
+"clinker_cement"
 ],
 "requires_any": [],
 "precedents": [

@@ -329,7 +329,8 @@
     "timber_pressure": 0.0019
    },
    "observation": "Trucks with flanged wheels are pushed along timber rails from the pit to the staithe, and one man moves what took four carriers.",
-   "art": "res://assets/ui/research/paper/wagonway_haulage.png"
+   "art": "res://assets/ui/research/paper/wagonway_haulage.png",
+   "production_contract": "Manufactures paid plank Wagonway Tubs for hand- and horse-drawn mine tracks. Gauge-matched rail wagons, wheelsets and track come with rail-gauge standards and rail-track foundations; engines and animals are not supplied by this discovery."
   },
   "escorted_ocean_fleets": {
    "effects": {

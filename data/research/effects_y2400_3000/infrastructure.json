@@ -78,7 +78,7 @@
    "ability_reason": "A single span across a wide navigable river joins roads the ferry once broke, without piers to block the shipping below.",
    "art": "res://assets/ui/research/subjects/timber_bridges-v1.png"
   },
-  "portland_cement_clinker": {
+  "clinker_cement": {
    "effects": {
     "construction_rate": 0.0131,
     "disaster_resilience": 0.0084,
@@ -1138,7 +1138,7 @@
     "pollution": -0.0008
    },
    "name": "Wind Farms",
-   "observation": "White three-bladed towers turn slowly along the ridge line, each taller than a church spire, humming in the evening wind.",
+   "observation": "White three-bladed towers turn slowly along the ridge line, each taller than a temple spire, humming in the evening wind.",
    "art": "res://assets/ui/research/subjects/water_mills-v1.png"
   },
   "storm_surge_barriers": {
@@ -1389,14 +1389,6 @@
     "injury_risk": 0.003,
     "labor_demand": 0.003,
     "route_speed": 0.0072
-   },
-   "portland_cement_clinker": {
-    "construction_rate": 0.0156,
-    "disaster_resilience": 0.0084,
-    "fuel_demand": 0.006,
-    "health_risk": 0.002,
-    "pollution": 0.006,
-    "standardization": 0.004
    },
    "cast_iron_street_fronts": {
     "construction_rate": 0.0052,
@@ -2084,6 +2076,14 @@
     "fuel_demand": -0.003,
     "fuel_efficiency": 0.0021,
     "pollution": -0.002
+   },
+   "clinker_cement": {
+    "construction_rate": 0.0156,
+    "disaster_resilience": 0.0084,
+    "fuel_demand": 0.006,
+    "health_risk": 0.002,
+    "pollution": 0.006,
+    "standardization": 0.004
    }
   }
  }

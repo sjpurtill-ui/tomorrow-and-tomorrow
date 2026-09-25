@@ -297,9 +297,7 @@ static func entries()->Array[Dictionary]:
 	      "electric_motors"
 	    ],
 	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone. Enables the named physical workshop components; batch materials, setup tooling and finite workshop work are consumed to create them.",
-	    "production_items": [
-	      "shaft_bearings"
-	    ]
+	    "production_items": ["bronze_bushed_bearings"]
 	  },
 	  {
 	    "id": "friction_measurement",

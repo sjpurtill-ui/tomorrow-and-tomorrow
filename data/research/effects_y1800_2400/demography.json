@@ -10,7 +10,7 @@
    },
    "art": "res://assets/ui/research/discovery-600/marriage_feasts.png",
    "name": "Remarriage After the Mortality",
-   "observation": "Widows and widowers remarry within months of the great mortality, and the next years bring more weddings and christenings than anyone remembers."
+   "observation": "Widows and widowers remarry within months of the great mortality, and the next years bring more weddings and naming feasts than anyone remembers."
   },
   "vacant_holding_migration": {
    "effects": {
@@ -321,13 +321,13 @@
    "name": "Mixed-Descent Standing",
    "observation": "Children of settlers and native mothers are given their own legal standing, with rights below the settlers' and above the natives'."
   },
-  "postmortem_caesarean_rule": {
+  "postmortem_incision_delivery": {
    "effects": {
     "legitimacy": 0.0001,
     "neonatal_survival": 0.0023
    },
    "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
-   "name": "Postmortem Caesarean",
+   "name": "Delivery by Incision after Death",
    "observation": "When a mother dies in labour, the midwife or surgeon is bound to cut the child from her body at once."
   },
   "weekly_mortality_bills": {
@@ -340,17 +340,17 @@
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Weekly Bills of Mortality",
-   "observation": "Each week the capital prints the numbers of burials and christenings in every parish, with the causes of death.",
+   "observation": "Each week the capital prints the numbers of burials and namings in every parish, with the causes of death.",
    "ability_reason": "The capital sees plague coming in the weekly bills; merchants read them to flee early and the council to act."
   },
-  "living_mother_caesarean": {
+  "living_mother_incision_delivery": {
    "effects": {
     "health_risk": 0.001,
     "maternal_safety": 0.0049,
     "neonatal_survival": 0.0023
    },
    "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
-   "name": "Caesarean with a Living Mother",
+   "name": "Incision Delivery with a Living Mother",
    "observation": "A surgeon cuts a child from a living mother whose birth cannot proceed, and now and then both survive."
   },
   "annual_soul_lists": {
@@ -467,7 +467,7 @@
    "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
    "name": "Political Arithmetic",
    "observation": "A merchant draws tables from years of the mortality bills and finds that births, deaths and the sexes follow steady proportions.",
-   "ability_reason": "Counting burials and christenings reveals regular laws of life and death, and the state can reckon its people from its records."
+   "ability_reason": "Counting burials and namings reveals regular laws of life and death, and the state can reckon its people from its records."
   },
   "colonist_bride_passages": {
    "effects": {
@@ -1156,10 +1156,6 @@
     "legitimacy": -0.001,
     "state_capacity": 0.0006
    },
-   "postmortem_caesarean_rule": {
-    "legitimacy": 0.001,
-    "neonatal_survival": 0.0023
-   },
    "weekly_mortality_bills": {
     "cohesion": -0.001,
     "disease_exposure": -0.002,
@@ -1495,6 +1491,10 @@
     "legitimacy": -0.001,
     "observation_rate": 0.0016,
     "state_capacity": 0.0012
+   },
+   "postmortem_incision_delivery": {
+    "legitimacy": 0.001,
+    "neonatal_survival": 0.0023
    }
   }
  }

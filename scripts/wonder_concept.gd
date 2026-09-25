@@ -20,7 +20,7 @@ const OUTCOMES:Array[String]=["triumph","success","flawed","collapse","abandoned
 const OUTCOME_PAY:={"triumph":1.35,"success":1.0,"flawed":.5,"collapse":0.0,"abandoned":0.0}
 const OUTCOME_CONDITION:={"triumph":1.0,"success":.9,"flawed":.6}
 const ERA_BY_TIER:=["founding","founding","classical","medieval","industrial","modern"]
-const TIER_MARKERS:=[[1,["masonry_bond_patterns","joinery","clay_shaping","framed_construction"]],[2,["voussoir_arch_assembly","domed_masonry_roofs","gravity_conduit_grade_control"]],[3,["masonry_buttressing","vaulted_masonry_roofs","hydraulic_lime_binders"]],[4,["portland_cement_clinker","steel_refining","heat_engine_cycles"]],[5,["concrete_mix_design","electrical_generators","stored_program_control"]]]
+const TIER_MARKERS:=[[1,["masonry_bond_patterns","joinery","clay_shaping","framed_construction"]],[2,["voussoir_arch_assembly","domed_masonry_roofs","gravity_conduit_grade_control"]],[3,["masonry_buttressing","vaulted_masonry_roofs","hydraulic_lime_binders"]],[4,["clinker_cement","steel_refining","heat_engine_cycles"]],[5,["concrete_mix_design","electrical_generators","stored_program_control"]]]
 ## Form: visual (map silhouette family), base work, any-of discoveries (empty =
 ## always), usable materials, water need, nouns, and heavy (extra demand).
 const FORMS:={
@@ -33,7 +33,7 @@ const FORMS:={
 	"granary":{"visual":"granary","work":7000,"requires":["public_stores"],"materials":["timber","brick","stone"],"nouns":["Granary","Storehouse","Bin-house"]},
 	"bridge":{"visual":"mound","work":9000,"requires":["voussoir_arch_assembly","steel_refining"],"materials":["stone","iron","concrete"],"nouns":["Bridge","Span","Crossing"],"water":true,"heavy":true},
 	"causeway":{"visual":"terrace","work":8000,"requires":["drainage"],"materials":["earth","stone"],"nouns":["Causeway","Road","Dyke"],"water":true},
-	"dam":{"visual":"basin","work":14000,"requires":["hydraulic_lime_binders","portland_cement_clinker","concrete_mix_design"],"materials":["stone","concrete"],"nouns":["Dam","Barrage","Weir"],"water":true,"heavy":true},
+	"dam":{"visual":"basin","work":14000,"requires":["hydraulic_lime_binders","clinker_cement","concrete_mix_design"],"materials":["stone","concrete"],"nouns":["Dam","Barrage","Weir"],"water":true,"heavy":true},
 	"colossus":{"visual":"mound","work":12000,"requires":["masonry_bond_patterns"],"materials":["stone","iron","brick"],"nouns":["Colossus","Giant","Watcher"],"heavy":true},
 	"garden":{"visual":"orchard","work":6000,"requires":["seed_selection"],"materials":["earth","timber","stone"],"nouns":["Garden","Grove","Orchard"]},
 	"observatory":{"visual":"terrace","work":7500,"requires":["seasonal_patterns","lens_centering"],"materials":["stone","brick"],"nouns":["Observatory","Star-stair","Sky-house"]},
@@ -49,7 +49,7 @@ const MATERIALS:={
 	"stone":{"cost":{"Stone":.85,"Timber":.15},"quality":.8,"requires":[],"word":"stone","noun":"stone"},
 	"brick":{"cost":{"Clay":.7,"Timber":.3},"quality":.75,"requires":["clay_shaping"],"word":"brick","noun":"brick"},
 	"iron":{"cost":{"Iron Ore":.6,"Coal":.3,"Stone":.1},"quality":.95,"requires":["steel_refining"],"word":"iron","noun":"iron"},
-	"concrete":{"cost":{"Stone":.6,"Clay":.2,"Coal":.2},"quality":1.0,"requires":["portland_cement_clinker","concrete_mix_design"],"word":"poured-stone","noun":"poured stone"},
+	"concrete":{"cost":{"Stone":.6,"Clay":.2,"Coal":.2},"quality":1.0,"requires":["clinker_cement","concrete_mix_design"],"word":"poured-stone","noun":"poured stone"},
 }
 ## Purpose: effect family and practical rewards (at "grand"/"success" = 1.0),
 ## local worker role, favored forms, and the words its names are made of.

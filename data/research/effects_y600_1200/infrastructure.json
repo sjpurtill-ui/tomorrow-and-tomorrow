@@ -357,7 +357,7 @@
    },
    "art": "res://assets/ui/research/paper/aggregate_road_foundations.png",
    "observation": "Big stones at the bottom, rubble and gravel above, and a paved or rammed top: the road carries loads through the wettest season.",
-   "production_contract": "Build a layered road bed of large stones, rubble, graded gravel and a paved or rammed surface, matched to the ground. Crews, stone and continuing repair are required; the discovery builds no road.",
+   "production_contract": "Build a layered road bed of large stones, rubble, graded gravel and a paved or rammed surface, matched to the ground. Crews, stone and continuing repair are required; the discovery builds no road. Workshop batches grade broken stone into Road Bed Aggregate.",
    "ability_reason": "A road built in layers spreads each load into the ground, so carts keep moving when a dirt track turns to mire."
   },
   "voussoir_arch_assembly": {
@@ -589,7 +589,11 @@
      "minimum_stock": 0.0,
      "sample_sufficient": true
     }
-   ]
+   ],
+   "production_items": [
+    "rubble_concrete"
+   ],
+   "production_contract": "Finite workshop batches make Concrete Dry Mix from pozzolanic binder, stone and fine sand, using timber and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "flushed_public_latrines": {
    "effects": {
@@ -630,7 +634,11 @@
     "water_access": 0.0018
    },
    "art": "res://assets/ui/research/paper/clay_pipe_socket_jointing.png",
-   "observation": "Lead sheet rolled round a rod and seamed makes pipes of fixed bore, each stamped with its maker's name."
+   "observation": "Lead sheet rolled round a rod and seamed makes pipes of fixed bore, each stamped with its maker's name.",
+   "production_items": [
+    "seamed_lead_pipes"
+   ],
+   "production_contract": "Finite workshop batches make Lead Pipes from lead sheets and charcoal, using timber and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "brick_faced_concrete": {
    "effects": {
@@ -679,7 +687,11 @@
     "housing_output": 0.0013
    },
    "art": "res://assets/ui/research/paper/building_shading_design.png",
-   "observation": "Small panes of greenish glass in bronze frames let light into the bath halls while keeping the heat in."
+   "observation": "Small panes of greenish glass in bronze frames let light into the bath halls while keeping the heat in.",
+   "production_items": [
+    "glazed_window_frames"
+   ],
+   "production_contract": "Finite workshop batches make Glazed Windows from window glass and timber, using stone and clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "harbor_dredging": {
    "effects": {

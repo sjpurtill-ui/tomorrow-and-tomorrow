@@ -11,6 +11,8 @@ const MAX_SURFACE_FRONTS_PER_RESOURCE:=24
 # These gates apply to unknown occurrences only; saved recognition is retained.
 const RECOGNITION_RULES={
 	"Ochre Earth":{"requires_all":["stone_sorting","clay_testing"]},
+	"Zinc Ore":{"requires_all":["ore_assaying"]},
+	"Kaolin":{"requires_all":["clay_testing"],"requires_any":[["high_fire_stoneware","pale_hard_fired_ware"]]},
 	"Rutile Ore":{"requires_all":["ore_assaying"]},
 	"Bauxite":{"requires_all":["ore_assaying"]},
 	"Nickel Ore":{"requires_all":["ore_assaying"]},
@@ -32,8 +34,9 @@ const FOUNDING_SURFACE_RESOURCES:=["Timber","Stone","Fertile Soil","Game","Fiber
 
 # Keep the simulation/save key stable while giving players a name that describes
 # the usable material rather than an unexplained class of plants.
+## The name the player's people use; ores keep a plain name until their metal is known.
 func display_name(resource_name:String)->String:
-	return "Plant Fiber" if resource_name=="Fiber Plants" else resource_name
+	return preload("res://scripts/resource_names.gd").label(resource_name)
 
 func plain_language_description(resource_name:String)->String:
 	if resource_name=="Stone": return "Loose surface stone can be gathered across rocky ground. Heavy blocks and deeper deposits still require better tools and access; gathered stone does not regrow."
@@ -87,7 +90,9 @@ var catalog := {
 	"Nickel Ore":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","nickel_metal_recovery"],"signals":["materials","crafting"],"base":0.0010},
 	"Bauxite":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","alumina_refining"],"signals":["materials","crafting"],"base":0.0012},
 	"Rutile Ore":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","industrial_catalyst_design"],"signals":["materials","crafting"],"base":0.0010},
-	"Ochre Earth":{"family":"Earth","renewable":false,"recognition_year":0,"access":["labor","containers"],"processing":["mineral_pigment_preparation"],"signals":["materials","survey"],"base":0.006}
+	"Ochre Earth":{"family":"Earth","renewable":false,"recognition_year":0,"access":["labor","containers"],"processing":["mineral_pigment_preparation"],"signals":["materials","survey"],"base":0.006},
+	"Zinc Ore":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","cementation_brass"],"signals":["materials","crafting"],"base":0.0014},
+	"Kaolin":{"family":"Earth","renewable":false,"recognition_year":0,"access":["labor","tools"],"processing":["clay_testing","kaolin_porcelain"],"signals":["materials","crafting"],"base":0.0020}
 }
 
 func initialize() -> void:

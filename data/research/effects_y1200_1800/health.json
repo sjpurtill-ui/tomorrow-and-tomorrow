@@ -669,7 +669,11 @@
    },
    "art": "res://assets/ui/research/paper/glass_blowing.png",
    "name": "Reading Spectacles",
-   "observation": "Two ground lenses riveted in a frame let the long-sighted old read and sew again."
+   "observation": "Two ground lenses riveted in a frame let the long-sighted old read and sew again.",
+   "production_items": [
+    "reading_spectacle_pairs"
+   ],
+   "production_contract": "Finite workshop batches make Reading Spectacles from optical lenses, timber and refined copper, using stone and timber. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "street_filth_ordinances": {
    "effects": {

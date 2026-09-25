@@ -68,7 +68,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "treadle_lathes"
     ],
-    "production_contract": "Pay for a foot-operated lathe frame and workholding, then spend manual workshop labor turning wooden axles for real carts. No electricity or universal workshop bonus is created."
+    "production_contract": "Pay for a foot-operated lathe frame and workholding, then spend manual workshop labor turning wooden axles for real carts. No electricity is created; the society-wide effect is a small era-scaled contribution, not a direct workshop bonus."
   },
   {
     "id": "water_powered_hammers",

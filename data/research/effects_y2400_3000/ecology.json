@@ -98,7 +98,7 @@
     "pollution": -0.002
    },
    "name": "Tall Works Chimneys",
-   "observation": "Works chimneys rise taller than any church tower, so that the smoke falls on someone else's fields.",
+   "observation": "Works chimneys rise taller than any temple tower, so that the smoke falls on someone else's fields.",
    "social_consequence": "The fumes fall on distant farms instead of the works' own street, and the quarrel moves with them.",
    "art": "res://assets/ui/research/subjects/coke_firing-v1.png"
   },

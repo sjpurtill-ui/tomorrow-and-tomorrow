@@ -541,7 +541,7 @@
    },
    "art": "res://assets/ui/research/subjects/fortified_stores-v1.png",
    "name": "Great Aisled Barns",
-   "observation": "Barns as long as a church, with aisles of great timber posts, hold the estate's grain and the tenants' dues.",
+   "observation": "Barns as long as a temple, with aisles of great timber posts, hold the estate's grain and the tenants' dues.",
    "social_consequence": "The great barn is where the lord's share is counted; the reeve keeps the tally at its doors."
   },
   "irrigated_husbandry_treatise": {
@@ -625,7 +625,7 @@
    "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png",
    "name": "Bread Assize",
    "observation": "A posted table fixes the weight of each loaf by the price of grain, and wardens weigh the bakers' bread.",
-   "ability_reason": "A penny now buys what it should in dear years and cheap, and the poor are not starved by short-weight bakers.",
+   "ability_reason": "A copper coin now buys what it should in dear years and cheap, and the poor are not starved by short-weight bakers.",
    "social_consequence": "Bakers who sell short are fined or pilloried; the bread warden's scale is feared in every bakehouse."
   },
   "long_aged_hard_cheese": {

@@ -31,9 +31,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Connect or release transmitted mechanical power through a qualified interface. Compatible drive, clutch, controls and maintenance.",
     "effects": {},
-    "production_items": [
-      "friction_clutches"
-    ],
+    "production_items": ["forged_dog_clutches"],
     "production_contract": "Finite civilian batches consume metals and existing tooling to make compatible drive components. Aligned indexing drives and generated gears are paid into a commissioned motor workshop; operators, electricity and replacement bearings/chains are required before mechanical assistance exists. Individually generated and hobbed gears are alternative production routes. Imported finished parts remain usable without mastering their manufacture. Quantities and work are game tuning, not engineering certification."
   },
   {
@@ -65,9 +63,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Permit indexed motion in a declared direction through a qualified locking arrangement. Suitable mechanism, load evidence and inspection.",
     "effects": {},
-    "production_items": [
-      "ratchet_indexers"
-    ],
+    "production_items": ["hand_filed_ratchets"],
     "production_contract": "Finite civilian batches consume metals and existing tooling to make compatible drive components. Aligned indexing drives and generated gears are paid into a commissioned motor workshop; operators, electricity and replacement bearings/chains are required before mechanical assistance exists. Individually generated and hobbed gears are alternative production routes. Imported finished parts remain usable without mastering their manufacture. Quantities and work are game tuning, not engineering certification."
   },
   {

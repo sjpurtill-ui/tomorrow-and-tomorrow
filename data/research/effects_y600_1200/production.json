@@ -107,7 +107,8 @@
     "wrought_iron"
    ],
    "ability_reason": "Iron ore is far commoner than copper and tin; a bloom can be won wherever ore, charcoal and a good blast meet.",
-   "social_consequence": "Iron frees smiths from the long tin trade, but every bloom eats a stack of charcoal and the woods around the smelters thin."
+   "social_consequence": "Iron frees smiths from the long tin trade, but every bloom eats a stack of charcoal and the woods around the smelters thin.",
+   "production_contract": "Finite workshop batches make Wrought Iron from iron ore and timber, using stone and clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "iron_assaying": {
    "effects": {
@@ -196,7 +197,11 @@
     "sanitation": 0.004
    },
    "art": "res://assets/ui/research/paper/hide_tanning.png",
-   "observation": "Water poured through wood ash comes out slippery and bitter, and it lifts grease from wool better than any clay."
+   "observation": "Water poured through wood ash comes out slippery and bitter, and it lifts grease from wool better than any clay.",
+   "production_items": [
+    "wood_ash_lye"
+   ],
+   "production_contract": "Finite workshop batches make Wood-Ash Lye from timber and freshwater, using clay and timber. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "surface_carburization": {
    "effects": {
@@ -205,7 +210,7 @@
     "warfare_readiness": 0.0005
    },
    "art": "res://assets/ui/research/paper/surface_carburization.png",
-   "production_contract": "Iron pieces are packed in sealed pots of charcoal and held at a steady red heat, gaining a hard steel skin while the core stays tough. Each batch consumes metal, charcoal, fuel, tooling and finite work; the discovery grants no stock."
+   "production_contract": "Iron edge tools are packed in sealed pots of charcoal and horn and held at a steady red heat, gaining a hard steel skin while the core stays tough. Each batch consumes metal, charcoal, fuel, tooling and finite work; the discovery grants no stock."
   },
   "hardened_edges": {
    "effects": {
@@ -338,7 +343,7 @@
    },
    "art": "res://assets/ui/research/paper/silver_cupellation.png",
    "observation": "Refined lead is cast on a bed of sand and beaten into broad sheet for roofs, tank linings and pipes.",
-   "production_contract": "Refined lead is cast into flat slabs and beaten or rolled thin into sheet. Each batch consumes refined lead, fuel, tooling and finite work; the discovery grants no stock."
+   "production_contract": "Refined lead is cast into flat sheets on a sanded bed and beaten thin. Each batch consumes refined lead, sand, fuel, tooling and finite work; the discovery grants no stock. Rolled electrode sheet comes later with lead-acid cells."
   },
   "argentiferous_lead_working": {
    "effects": {
@@ -362,7 +367,11 @@
    "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png",
    "observation": "Blanks of weighed silver are laid on an engraved anvil and struck with a punch, and each piece carries the city's badge.",
    "ability_reason": "A struck coin carries its guaranteed weight on its face, so trade no longer stops at the scales.",
-   "social_consequence": "Coin lets strangers trade at a glance; whoever strikes it gains a hand in every bargain and the temptation to thin the silver."
+   "social_consequence": "Coin lets strangers trade at a glance; whoever strikes it gains a hand in every bargain and the temptation to thin the silver.",
+   "production_items": [
+    "struck_silver_coins"
+   ],
+   "production_contract": "Finite workshop batches make Struck Silver Coins from refined silver and charcoal, using wrought iron and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "three_stage_gloss_firing": {
    "effects": {
@@ -435,7 +444,11 @@
      "minimum_stock": 0.0,
      "sample_sufficient": true
     }
-   ]
+   ],
+   "production_items": [
+    "liquid_cast_iron"
+   ],
+   "production_contract": "Finite workshop batches make Cast Iron from iron ore, charcoal and limestone, using refractory bricks and clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "stamped_capacity_amphorae": {
    "effects": {
@@ -461,7 +474,11 @@
      "minimum_stock": 0.0,
      "sample_sufficient": true
     }
-   ]
+   ],
+   "production_items": [
+    "tinned_copper_vessels"
+   ],
+   "production_contract": "Finite workshop batches make Tinned Copper Vessels from refined copper, refined tin and charcoal, using clay and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "sloped_climbing_kilns": {
    "effects": {
@@ -481,7 +498,11 @@
     "tool_quality": 0.0051
    },
    "art": "res://assets/ui/research/subjects/refractory_furnaces-v1.png",
-   "observation": "Brittle cast plough tips are held red-hot for days in a sealed pit and come out able to take a blow."
+   "observation": "Brittle cast plough tips are held red-hot for days in a sealed pit and come out able to take a blow.",
+   "production_items": [
+    "annealed_cast_ploughshares"
+   ],
+   "production_contract": "Finite workshop batches make Cast Iron Ploughshares from cast iron and charcoal, using refractory bricks and clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "gold_thread_embroidery": {
    "effects": {
@@ -547,7 +568,12 @@
      "minimum_stock": 0.0,
      "sample_sufficient": true
     }
-   ]
+   ],
+   "production_items": [
+    "crucible_steel_cakes",
+    "shaft_bearings"
+   ],
+   "production_contract": "Finite workshop batches make Steel from wrought iron and charcoal, using ceramic crucibles and refractory bricks; and Shaft Bearings from refined copper, steel and graphite, using steel and timber. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "resist_dyeing": {
    "effects": {
@@ -612,7 +638,11 @@
     "metal_yield": 0.004
    },
    "art": "res://assets/ui/research/subjects/blast_furnace-v1.png",
-   "observation": "Iron poured into sand moulds gives cooking cauldrons and ploughshares by the hundred, cheap enough for villages."
+   "observation": "Iron poured into sand moulds gives cooking cauldrons and ploughshares by the hundred, cheap enough for villages.",
+   "production_items": [
+    "cast_iron_cauldrons"
+   ],
+   "production_contract": "Finite workshop batches make Cast Iron Vessels from cast iron, prepared clay and charcoal, using refractory bricks and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "fullers_earth_finishing": {
    "effects": {
@@ -641,7 +671,11 @@
      "minimum_stock": 0.0,
      "sample_sufficient": true
     }
-   ]
+   ],
+   "production_items": [
+    "cementation_brass_ingots"
+   ],
+   "production_contract": "Finite workshop batches make Brass from refined copper, zinc ore and charcoal, using ceramic crucibles and refractory bricks. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "mechanical_screw_presses": {
    "effects": {
@@ -722,7 +756,11 @@
     "housing_output": 0.0008
    },
    "art": "res://assets/ui/research/paper/glass_batch_composition_control.png",
-   "observation": "Glass is poured and spread on a sanded table into small greenish panes, dim but enough to light a bath house."
+   "observation": "Glass is poured and spread on a sanded table into small greenish panes, dim but enough to light a bath house.",
+   "production_items": [
+    "cast_window_panes"
+   ],
+   "production_contract": "Finite workshop batches make Window Glass from glass, timber and fine sand, using refractory bricks and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "water_driven_bellows": {
    "effects": {
@@ -759,7 +797,11 @@
     "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/paper/glass_blowing.png",
-   "observation": "Hot lead poured into a thin glass bubble backs it with silver-grey, and a small round mirror shows a whole face."
+   "observation": "Hot lead poured into a thin glass bubble backs it with silver-grey, and a small round mirror shows a whole face.",
+   "production_items": [
+    "lead_backed_mirrors"
+   ],
+   "production_contract": "Finite workshop batches make Glass Mirrors from glass, refined lead and charcoal, using clay and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "steel_edge_inlaying": {
    "effects": {
@@ -812,7 +854,8 @@
    "production_items": [
     "handmade_paper"
    ],
-   "ability_reason": "Sheets formed from beaten fiber are lighter and cheaper than skins or tablets, so writing can go wherever a courier can carry it."
+   "ability_reason": "Sheets formed from beaten fiber are lighter and cheaper than skins or tablets, so writing can go wherever a courier can carry it.",
+   "production_contract": "Finite workshop batches make Paper from paper pulp and freshwater, using timber and fiber plants. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "water_powered_stone_saws": {
    "effects": {
@@ -848,7 +891,11 @@
     "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/copper_casting-v1.png",
-   "observation": "Tin with a little lead is poured into stone moulds, giving plates and cups that shine like silver at a tenth of the cost."
+   "observation": "Tin with a little lead is poured into stone moulds, giving plates and cups that shine like silver at a tenth of the cost.",
+   "production_items": [
+    "pewter_tableware"
+   ],
+   "production_contract": "Finite workshop batches make Pewter Ware from refined tin, refined lead and charcoal, using stone and clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "gold_glass_tesserae": {
    "effects": {
@@ -886,7 +933,11 @@
    },
    "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
    "observation": "Vapor rising from the heated flask cools in the still-head and runs down its spout into a separate vessel.",
-   "ability_reason": "A still separates what boils easily from what does not, giving purer waters, oils and medicines."
+   "ability_reason": "A still separates what boils easily from what does not, giving purer waters, oils and medicines.",
+   "production_items": [
+    "alembic_glassware"
+   ],
+   "production_contract": "Finite workshop batches make Laboratory Glassware from glass vessels, glass and timber, using wrought iron, clay and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "salted_hard_soap": {
    "effects": {
@@ -896,7 +947,11 @@
     "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/hide_tanning.png",
-   "observation": "Salt thrown into the boiling lye and fat brings up a hard cake of soap that keeps and travels."
+   "observation": "Salt thrown into the boiling lye and fat brings up a hard cake of soap that keeps and travels.",
+   "production_items": [
+    "lye_boiled_hard_soap"
+   ],
+   "production_contract": "Finite workshop batches make Laundry Soap from rendered animal fat, wood-ash lye, salt and freshwater, using clay and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "blown_cylinder_panes": {
    "effects": {
@@ -908,7 +963,11 @@
    },
    "art": "res://assets/ui/research/paper/glass_blowing.png",
    "observation": "A long bubble of glass is blown, slit along its side and flattened in the kiln into a clear sheet.",
-   "ability_reason": "Opening a blown cylinder gives larger, thinner and clearer panes than glass poured on a table."
+   "ability_reason": "Opening a blown cylinder gives larger, thinner and clearer panes than glass poured on a table.",
+   "production_items": [
+    "cylinder_window_panes"
+   ],
+   "production_contract": "Finite workshop batches make Window Glass from glass and timber, using wrought iron, refractory bricks and clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   }
  },
  "balance_3000": {

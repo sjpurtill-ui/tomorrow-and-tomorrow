@@ -469,11 +469,11 @@ static func debrief_lines(audience:Dictionary)->Array[Dictionary]:
 		# Home-district speech is woven into the sentences themselves (word
 		# choices, an opening interjection, one oath at the surprising part),
 		# never bolted on as a trailing catchphrase.
-		text=_weave(dialect,text,rng,index==0,index==oath_line)
+		text=_era_plain(_weave(dialect,text,rng,index==0,index==oath_line))
 		lines.append({"speaker":String(persona.name),"role":"official","person_id":int(speaker.get("person_id",0)),"civ_id":"player","text":text,"day":day,"aside":false})
 	_thin_address(lines,String(persona.address))
 	# A muttered aside, if the speaker is the sort.
-	var aside:=_aside(by,flags,persona,rng)
+	var aside:=_era_plain(_aside(by,flags,persona,rng))
 	if aside!="" and lines.size()<6:
 		lines.append({"speaker":String(persona.name),"role":"official","person_id":int(speaker.get("person_id",0)),"civ_id":"player","text":aside,"day":day,"aside":true})
 	return lines
@@ -593,6 +593,15 @@ static func _regex_escape(text:String)->String:
 		if c in ".^$*+?()[]{}|\\": out+="\\"
 		out+=c
 	return out
+
+
+static func _era_plain(text:String)->String:
+	## A scout names only what the home people can name: no carts before the
+	## wheel, no saddles before the pack saddle, no bullets before guns.
+	var voice:=_voice_script()
+	if voice==null or text=="": return text
+	var told:Variant=voice.call("era_plain_for",text,"player")
+	return String(told) if told is String else text
 
 
 static func _voice_script()->Script:
@@ -996,7 +1005,7 @@ static func _closing(by:Dictionary,flags:Dictionary,ctx:Dictionary,persona:Dicti
 	elif flags.get("empty",false):
 		worry=_pick(rng,["Good country for the taking, {addr}, if we've people to spare to take it.","Nobody's claimed it. That's either an opportunity or a warning, and I don't yet know which."])
 	elif flags.get("hungry",false):
-		worry=_pick(rng,["They could use food more than compliments, if you wanted a friend there.","A cartload of grain would buy more goodwill there than any speech."])
+		worry=_pick(rng,["They could use food more than compliments, if you wanted a friend there.","A few loads of food would buy more goodwill there than any speech."])
 	elif flags.get("rich",false):
 		worry=_pick(rng,["They've things worth having. Better to trade for them than wish for them.","I'd know them better, {addr}. People that busy are going somewhere."])
 	else:

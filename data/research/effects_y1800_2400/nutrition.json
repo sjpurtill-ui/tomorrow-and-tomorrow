@@ -414,7 +414,7 @@
    },
    "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
    "name": "Shipped Tea",
-   "observation": "Tea leaves come by ship from the far east in lined chests and are sold by the pound to those who can afford them."
+   "observation": "Tea leaves come by ship from the far east in lined chests and are sold by weight to those who can afford them."
   },
   "printed_grain_prices": {
    "effects": {
@@ -550,7 +550,7 @@
    },
    "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
    "name": "Cheap Juniper Spirit",
-   "observation": "Grain spirit flavoured with juniper is distilled so cheap that a labourer can be drunk for a penny.",
+   "observation": "Grain spirit flavoured with juniper is distilled so cheap that a labourer can be drunk for a copper.",
    "social_consequence": "Cheap spirit is sold in every cellar; mothers drink it, children are neglected, and preachers call it a plague."
   },
   "stall_winter_fattening": {

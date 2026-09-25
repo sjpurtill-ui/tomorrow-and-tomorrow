@@ -55,9 +55,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Separated electrolysis compartments recover chlorine, caustic soda and hydrogen from the same brine feed.",
 	    "effects": {},
-	    "production_items": [
-	      "chloralkali_batch"
-	    ],
+	    "production_items": ["chloralkali_batch", "laundry_soap"],
 	    "production_contract": "Enables a physical batch-production line with consumed feedstocks, installed tooling, shared Crafting labor and any specified electricity. Products exist only after completed work; quantities are abstract game batches."
 	  },
 	  {
@@ -117,9 +115,7 @@ static func entries()->Array[Dictionary]:
   ],
   "observation": "Controlled processing converts an existing plant oil and alkali into a cleaning material for supplied washing.",
   "effects": {},
-  "production_items": [
-    "laundry_soap"
-  ],
+  "production_items": ["oil_lye_soap"],
   "production_contract": "Completed civilian batches consume drying seed oil, caustic soda, water and fuel with paid vessels and labor. This implements the plant-oil route only. Laundry appliances consume the actual product; no animal fat, clinical qualification or global sanitation bonus is granted."
 }
 	]

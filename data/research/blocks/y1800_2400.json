@@ -12774,7 +12774,7 @@
 ]
 },
 {
-"id": "postmortem_caesarean_rule",
+"id": "postmortem_incision_delivery",
 "line": "demography",
 "status": "new",
 "name": "Dying Mothers' Children Saved by Cutting",
@@ -14325,7 +14325,7 @@
 ]
 },
 {
-"id": "living_mother_caesarean",
+"id": "living_mother_incision_delivery",
 "line": "demography",
 "status": "new",
 "name": "Birth by Cutting Survived by a Living Mother",
@@ -14339,7 +14339,7 @@
 "min_year": 1978.0,
 "research_years": 8.0,
 "requires_all": [
-"postmortem_caesarean_rule"
+"postmortem_incision_delivery"
 ],
 "requires_any": [],
 "precedents": [
@@ -16756,7 +16756,7 @@
 ],
 "requires_any": [],
 "precedents": [
-"living_mother_caesarean"
+"living_mother_incision_delivery"
 ],
 "conditions": {},
 "shared_with": [
@@ -25537,7 +25537,7 @@
 ]
 },
 {
-"id": "saint_monday_custom",
+"id": "idle_weekstart_custom",
 "line": "labor",
 "status": "new",
 "name": "Saint Monday",

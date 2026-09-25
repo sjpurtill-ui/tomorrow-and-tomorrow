@@ -96,7 +96,7 @@
     "legitimacy": 0.0001
    },
    "name": "Great Dome Without Centering",
-   "observation": "The masons lay the dome's bricks in herringbone, each course locking the last, and it rises over the great church with no timber frame beneath.",
+   "observation": "The masons lay the dome's bricks in herringbone, each course locking the last, and it rises over the great temple with no timber frame beneath.",
    "ability_reason": "Self-supporting brickwork lets a vault rise without scaffolding a forest, and builders learn that geometry can replace timber.",
    "art": "res://assets/ui/research/subjects/lime_mortar-v1.png"
   },
@@ -895,7 +895,11 @@
    },
    "observation": "A lathe with true iron slides, a screw feed and hardened bearings cuts parts that fit without the filer's endless trying.",
    "ability_reason": "Machines that guide the cutter truly let every part be made to measure, so engines and instruments can be built to fit.",
-   "art": "res://assets/ui/research/subjects/precision_machinery-v1.png"
+   "art": "res://assets/ui/research/subjects/precision_machinery-v1.png",
+   "production_items": [
+    "case_hardened_gears"
+   ],
+   "production_contract": "Case-hardened gear sets are packed in charcoal and held at red heat until a hard skin forms over a tough core. Batches pay iron, charcoal, fuel and work; learning grants no stock."
   },
   "rubble_mound_breakwaters": {
    "effects": {

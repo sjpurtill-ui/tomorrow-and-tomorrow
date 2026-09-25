@@ -92,6 +92,8 @@ func load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	WorldSimulation.flush_day()
 	var payload:=_read_payload(slot)
 	if payload.is_empty(): return {"error":"No readable save exists in that slot."}
+	# Research ids renamed since the save was written load under their current ids.
+	payload=preload("res://scripts/discovery_id_aliases.gd").migrate(payload)
 	if int(payload.get("version",-1))!=SAVE_VERSION: return {"error":"This save was written by an incompatible version."}
 	var metadata:Dictionary=payload.get("metadata",{})
 	# Older releases could lose this entire section after its popup was closed.

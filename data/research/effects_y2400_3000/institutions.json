@@ -778,7 +778,7 @@
    "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
    "name": "World Assembly of Realms",
    "observation": "All realms sit in a world assembly with a security council and specialized agencies.",
-   "ability_reason": "A standing forum where realms meet, and agencies for health, food and aid; generals read its conventions."
+   "ability_reason": "A standing council where realms meet, and agencies for health, food and aid; generals read its conventions."
   },
   "nationalized_core_industries": {
    "effects": {

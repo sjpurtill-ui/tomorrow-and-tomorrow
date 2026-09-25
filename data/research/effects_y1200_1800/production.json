@@ -10,7 +10,7 @@
     "tool_quality": 0.0013
    },
    "observation": "A hinged pawl drops into the teeth of the winch drum, and the load hangs safe when the men at the handles let go.",
-   "production_contract": "Finite workshop batches consume metal and existing tooling to make pawl-and-ratchet stops and indexing wheels for winches, windlasses and hand machines. The authored recipe's motor-workshop route stays a later option; learning grants no universal bonus.",
+   "production_contract": "Finite workshop batches file pawl-and-ratchet stops and indexing wheels from wrought iron for winches, windlasses and hand machines. Machine-milled indexers come later with horizontal milling; learning adds only a small era-scaled contribution, not a direct output bonus.",
    "art": "res://assets/ui/research/paper/compound_pulleys.png"
   },
   "iron_gall_ink": {
@@ -119,7 +119,11 @@
    "observation": "Trays of silkworms are fed fresh mulberry leaves day and night, and the cocoons are unwound in hot water into one gleaming thread.",
    "ability_reason": "Rearing silkworms at home and reeling their cocoons makes the costliest cloth of all a local product instead of a rare import.",
    "social_consequence": "Silk becomes a household trade, and the women and children who feed the worms through the night become the heart of a rich export.",
-   "art": "res://assets/ui/research/subjects/fiber_grading-v1.png"
+   "art": "res://assets/ui/research/subjects/fiber_grading-v1.png",
+   "production_items": [
+    "reeled_raw_silk"
+   ],
+   "production_contract": "Finite workshop batches make Raw Silk from fiber plants, freshwater and timber, using clay and timber. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "slit_silk_tapestry": {
    "effects": {
@@ -136,7 +140,11 @@
    },
    "name": "Roller Cotton Gin",
    "observation": "Bolls fed between two wooden rollers turned by a crank come out as lint on one side and seeds on the other.",
-   "art": "res://assets/ui/research/paper/seed_cleaning.png"
+   "art": "res://assets/ui/research/paper/seed_cleaning.png",
+   "production_items": [
+    "ginned_cotton_lint"
+   ],
+   "production_contract": "Finite workshop batches make Cotton Lint from fiber plants, using timber and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "bow_fibre_fluffing": {
    "effects": {
@@ -304,7 +312,8 @@
     "knowledge_preservation": 0.0004
    },
    "observation": "A stack of wet sheets between felts goes under the screw press, and the water streams out across the floor.",
-   "art": "res://assets/ui/research/subjects/paper_making-v1.png"
+   "art": "res://assets/ui/research/subjects/paper_making-v1.png",
+   "production_contract": "Enables physical workshop routes that press and dry paper sheets with paid tooling, fibers, water and work. Motor-driven pressing comes later with powered pulp beating. Paper can be consumed during collection study; learning creates neither paper nor free research."
   },
   "potash_forest_glass": {
    "effects": {
@@ -409,7 +418,11 @@
      "sample_sufficient": true
     }
    ],
-   "art": "res://assets/ui/research/paper/high_fire_stoneware.png"
+   "art": "res://assets/ui/research/paper/high_fire_stoneware.png",
+   "production_items": [
+    "kaolin_porcelain_wares"
+   ],
+   "production_contract": "Finite workshop batches make Porcelain Wares from kaolin, stone and timber, using refractory bricks and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "spinning_wheels": {
    "effects": {
@@ -483,7 +496,7 @@
     "tool_quality": 0.0026
    },
    "observation": "Pegs set round the turning shaft lift the heavy hammer and let it fall, again and again, for as long as the water flows.",
-   "production_contract": "Batches make trial-fitted cams and followers for water-driven hammers, ore stamps and fulling stocks. The authored recipe's motor-driven press route stays a later option; the manual press remains available, and learning grants no universal bonus.",
+   "production_contract": "Batches make trial-fitted cams and followers for water-driven hammers, ore stamps and fulling stocks. The authored recipe's motor-driven press route stays a later option; the manual press remains available, and learning adds only a small era-scaled contribution, not a direct output bonus.",
    "art": "res://assets/ui/research/paper/cam_motion_design.png"
   },
   "fulling_mills": {
@@ -624,7 +637,8 @@
     "trade_capacity": 0.0002
    },
    "observation": "Oil and lye boil for days in great copper cauldrons, and the soap is cut into bars and sold at every market.",
-   "art": "res://assets/ui/research/subjects/fermentation_control-v1.png"
+   "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
+   "production_contract": "Completed civilian batches boil drying seed oil with wood-ash lye, salt, water and fuel in paid copper cauldrons. Caustic-soda soap comes much later with chlor-alkali cells. Laundry appliances consume the actual product; learning grants no clinical qualification or free sanitation."
   },
   "clamp_fired_brick": {
    "effects": {
@@ -653,7 +667,11 @@
    },
    "name": "Fustian",
    "observation": "A strong linen warp carries a soft cotton weft, and fustian outwears either yarn alone.",
-   "art": "res://assets/ui/research/paper/plain_weaving.png"
+   "art": "res://assets/ui/research/paper/plain_weaving.png",
+   "production_items": [
+    "fustian_weave"
+   ],
+   "production_contract": "Finite workshop batches make Woven Cloth from spun yarn and cotton lint, using loom weights and timber. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "teasel_nap_shearing": {
    "effects": {
@@ -694,7 +712,11 @@
    },
    "name": "Alum Works",
    "observation": "The alum rock is roasted in heaps, soaked in pits and boiled, and the crystals sell to every dyer in the land.",
-   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png"
+   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
+   "production_items": [
+    "boiled_alum"
+   ],
+   "production_contract": "Finite workshop batches make Alum from stone, timber, wood-ash lye and freshwater, using clay and wrought iron. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "post_windmills": {
    "effects": {
@@ -876,7 +898,11 @@
      "sample_sufficient": true
     }
    ],
-   "art": "res://assets/ui/research/paper/tinplate_coating.png"
+   "art": "res://assets/ui/research/paper/tinplate_coating.png",
+   "production_items": [
+    "hand_dipped_tinplate"
+   ],
+   "production_contract": "Finite workshop batches make Tinplate from wrought iron, refined tin and charcoal, using clay, wrought iron and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "draw_lime_kilns": {
    "effects": {
@@ -916,7 +942,11 @@
    },
    "name": "Crown Glass",
    "observation": "A gather of glass spun on the rod flares into a flat round disc, bright and clear except for the thick knot at its centre.",
-   "art": "res://assets/ui/research/paper/glass_blowing.png"
+   "art": "res://assets/ui/research/paper/glass_blowing.png",
+   "production_items": [
+    "crown_window_panes"
+   ],
+   "production_contract": "Finite workshop batches make Window Glass from glass and timber, using wrought iron and refractory bricks. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "rag_chain_mine_pumps": {
    "effects": {
@@ -953,7 +983,11 @@
    "observation": "In the tall mill by the stream a great wheel of reels and spindles twists hundreds of silk threads at once, tended by a handful of children.",
    "ability_reason": "Water-driven frames twist hundreds of silk threads at once, making strong thread for weaving at a scale no household can match.",
    "social_consequence": "Silk throwing leaves the home for the mill, and a town guards the mill's secrets as jealously as its walls.",
-   "art": "res://assets/ui/research/paper/yarn_tension_control.png"
+   "art": "res://assets/ui/research/paper/yarn_tension_control.png",
+   "production_items": [
+    "thrown_silk_cloth"
+   ],
+   "production_contract": "Finite workshop batches make Silk Cloth from raw silk, using loom weights, timber and shaft bearings. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "assay_hallmarks": {
    "effects": {
@@ -1012,7 +1046,10 @@
    "observation": "The furnace is charged from the bridge every hour, and twice a day the tap is opened and liquid iron runs glowing into the sand beds.",
    "ability_reason": "Water-driven bellows keep a tall shaft furnace burning for weeks on end, pouring liquid iron in quantities no bloomery can reach.",
    "social_consequence": "Iron grows cheap enough for ploughshares and pots, and each furnace swallows a forest of charcoal and darkens its valley.",
-   "art": "res://assets/ui/research/subjects/blast_furnace-v1.png"
+   "art": "res://assets/ui/research/subjects/blast_furnace-v1.png",
+   "production_items": [
+    "charcoal_pig_iron"
+   ]
   },
   "fitted_tailoring": {
    "effects": {

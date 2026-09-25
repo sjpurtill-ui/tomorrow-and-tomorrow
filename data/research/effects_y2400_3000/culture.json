@@ -118,7 +118,7 @@
    "name": "Revival Meetings",
    "observation": "Preachers of the god hold great open-air meetings where crowds are moved to repentance."
   },
-  "penny_daily_press": {
+  "cheap_daily_press": {
    "effects": {
     "adoption_rate": 0.0032,
     "cohesion": 0.0002,
@@ -128,7 +128,7 @@
     "literacy": 0.0222
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
-   "name": "Penny Daily Press",
+   "name": "Cheap Daily Press",
    "observation": "Cheap daily papers are sold on every street corner and read by clerks and labourers.",
    "ability_reason": "News reaches ordinary people every day; public opinion becomes something ministers answer to.",
    "social_consequence": "Scandal sells papers; ministers are judged in print by people who never met them."
@@ -450,7 +450,7 @@
    "name": "Moving Pictures",
    "observation": "Moving pictures are shown to paying crowds in darkened halls.",
    "ability_reason": "Stories, news and customs reach whole populations through the same pictures.",
-   "social_consequence": "Picture palaces fill every Saturday; preachers warn of their influence on the young."
+   "social_consequence": "Picture palaces fill every rest-day eve; preachers warn of their influence on the young."
   },
   "revived_realm_games": {
    "effects": {
@@ -564,7 +564,11 @@
    "name": "Radio Broadcasting",
    "observation": "Radio broadcasts reach every home with news, music and the ruler's voice.",
    "ability_reason": "One voice can address the whole people at once; news spreads in minutes.",
-   "social_consequence": "The ruler speaks into every kitchen; rumour and propaganda travel as fast as news."
+   "social_consequence": "The ruler speaks into every kitchen; rumour and propaganda travel as fast as news.",
+   "production_items": [
+    "broadcast_radio_sets"
+   ],
+   "production_contract": "Finite workshop batches make Broadcast Radio Sets from triode valves, tuned circuits, variable capacitors, resistors, capacitors, telephone earpieces, insulated cable and timber, using timber and wrought iron. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "unknown_warrior_remembrance": {
    "effects": {
@@ -1107,13 +1111,6 @@
     "labor_demand": 0.0014,
     "legitimacy": 0.0028
    },
-   "penny_daily_press": {
-    "adoption_rate": 0.0032,
-    "cohesion": 0.0012,
-    "institutional_rigidity": -0.0012,
-    "knowledge_preservation": 0.0043,
-    "legitimacy": -0.0028
-   },
    "serialized_novels": {
     "adoption_rate": 0.0007,
     "cohesion": 0.0012,
@@ -1540,6 +1537,13 @@
    "shared_virtual_venues": {
     "adoption_rate": 0.0004,
     "cohesion": 0.0012
+   },
+   "cheap_daily_press": {
+    "adoption_rate": 0.0032,
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0012,
+    "knowledge_preservation": 0.0043,
+    "legitimacy": -0.0028
    }
   }
  }

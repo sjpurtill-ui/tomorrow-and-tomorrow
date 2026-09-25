@@ -134,9 +134,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "A controlled chemical process turns a recovered sulfur feed into an acid used to transform mineral materials.",
     "effects": {},
-    "production_items": [
-      "sulfuric_acid"
-    ],
+    "production_items": ["sulfuric_acid", "cement_gypsum"],
     "production_contract": "Manufactured inputs use finite stocks, installed tooling, shared Crafting labor and specified electricity. Fertilizer reaches crops only through local nutrient application and uptake; quantities are abstract game batches."
   },
   {

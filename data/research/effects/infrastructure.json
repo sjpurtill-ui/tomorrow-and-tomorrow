@@ -499,7 +499,11 @@
     "disaster_resilience": 0.0011,
     "housing_output": 0.0046
    },
-   "observation": "Gypsum burned at a low heat and mixed with water sets quickly between blocks and bricks."
+   "observation": "Gypsum burned at a low heat and mixed with water sets quickly between blocks and bricks.",
+   "production_items": [
+    "burned_gypsum"
+   ],
+   "production_contract": "Finite workshop batches make Gypsum from stone and timber, using stone and clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "dressed_stone_masonry": {
    "effects": {
@@ -559,14 +563,16 @@
    "art": "res://assets/ui/research/subjects/lime_mortar-v1.png",
    "production_items": [
     "slaked_lime",
-    "building_mortar"
+    "building_mortar",
+    "prepared_tanning_hides"
    ],
    "effects": {
     "construction_rate": 0.009,
     "disaster_resilience": 0.0117,
     "housing_output": 0.02,
     "state_capacity": 0.0029
-   }
+   },
+   "production_contract": "Finite workshop batches make Slaked Lime from quicklime and freshwater, using clay and timber; and Building Mortar from slaked lime, fine sand and freshwater, using timber and stone; and Prepared Tanning Hides from raw hides, salt, freshwater and slaked lime, using stone, timber and clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "wedge_brick_well_lining": {
    "effects": {
