@@ -133,6 +133,20 @@ A civilization that stalls on the written-law trunk loses most of the late insti
 2. **Gunpowder gate.** `hand_cannon` equipment and the `hand_cannoneer` unit are gated on `black_powder`. Re-gate both on `powder_artillery` so generals get no guns in this window.
 3. **`powder_artillery` requirements** (open for the 1800–2400 block). The catalog requires `black_powder`, `precision_machinery` (≈ 2370) and `military_staffs` (≈ 2200–2300), so it cannot open near its ≈ 1880–1920 target. The 1800–2400 dependency pass must drop or replace those two requirements.
 
+## Bake outcome on `codex/research-1200`
+
+- **`ocean_sailing`.** The adoption row is gone from `design_amendments_600.json`, so the rebuilt 0–600 block has 1,122 items (21 adopted). Its effect row moved from `data/research/effects/security.json` to `data/research/effects_y1200_1800/security.json` unchanged; the effects pass should re-scale it for 1692. Sailing-warship and convoy equipment still key on `ocean_sailing`, so they now open at 1662 (its band_low).
+- **Hand cannons.** `hand_cannoneer`, `EQUIPMENT_GATES.hand_cannon` and `military_equipment_extension.gd` `hand_cannon` are gated on `powder_artillery`.
+- **`powder_artillery` floor.** The re-gate alone was not enough. The game's catalog dates `powder_artillery` to historical 1350, which the curve puts at game ≈ 1792, inside this window, so its era gate was 1612. Its catalog foundations do not hold it either: `precision_machinery` (catalog 1350) and `military_staffs` (catalog 1326) are also dated inside the window in the game, and `blast_furnace` (1732) plus `black_powder` (1757) would let it open by about 1760–1790. The bake adds a `redate` floor of 1880 for `powder_artillery` in `design_amendments_600.json` (the low end of the registry's ≈ 1880–1920). With it, every gunpowder-era unit and equipment gate opens at 1800 or later. The 1800–2400 design replaces the floor when it places the item.
+- The build from `origin/codex/research-plausibility` (`648bd421`) passed on the first run after the `ocean_sailing` removal: 937 items, 1,999 cross-block references, one year adjustment.
+
+## For the 1800–2400 block
+
+- **`powder_artillery` requirements.** Drop or replace `military_staffs` and `precision_machinery` (see bake-time fix 3). Remove the 1880 redate floor once the block designs the item, or keep them consistent.
+- **`military_staffs` opens in the game at 1594.5.** It is dated inside this window by the catalog, and it gates the industrial-era `mountain_infantry` unit and `mountain_kit` equipment, plus the `staff_exercise` operation. The registry places it at ≈ 2200–2300. It needs a design placement or a redate floor.
+- **`precision_machinery` opens in the game at 1612.5** (it waits on `blast_furnace`, 1732). The registry places it at ≈ 2370.
+- **Gun gates at exactly 1800.** `matchlock_drill`, `mounted_firearms`, `naval_gunnery` and `rifled_barrels` open at the 1800 window floor. The registry suggests 1900–2000 for them (within ≈ 1830–2000). `naval_gunnery` also waits on `powder_artillery`, so it is held to 1880.
+
 ## Open items
 
 - **Serial queue pressure.** See *Pacing*. `research_years` totals exceed the window in 7 lines, and institutions exceeds it by 271 years.
