@@ -1,5 +1,1301 @@
 {
  "line": "health",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "vaccine_carrier_voyage": {
+   "effects": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.003,
+    "neonatal_survival": 0.001,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
+   "name": "Vaccine Voyage",
+   "observation": "Orphan boys are vaccinated one after another across the ocean so that the cowpox arrives alive in the colonies.",
+   "social_consequence": "The orphans who carry the lymph are never asked; the colonies receive vaccine and a new debt of fear."
+  },
+  "slow_sand_filtration": {
+   "effects": {
+    "disease_exposure": -0.007,
+    "labor_demand": 0.003,
+    "sanitation": 0.003,
+    "water_safety": 0.015
+   },
+   "art": "res://assets/ui/research/paper/water_settling_basins.png",
+   "observation": "Town water is run slowly through beds of fine sand, and it comes out clear and far less likely to carry fever.",
+   "ability_reason": "A whole town can drink filtered water from one works.",
+   "social_consequence": "The water company now answers to the town for the purity of what it sells."
+  },
+  "isolated_poppy_alkaloid": {
+   "effects": {
+    "fatigue": -0.001,
+    "health_protection": 0.002,
+    "health_risk": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Pure Opiate",
+   "observation": "The sleeping principle of opium is drawn out as a pure white salt and given by the grain.",
+   "social_consequence": "Pain is dulled by exact doses, and the pure drug makes its own slaves."
+  },
+  "public_vaccine_stations": {
+   "effects": {
+    "disease_exposure": -0.006,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.002,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
+   "name": "Vaccine Stations",
+   "observation": "Public stations keep the cowpox alive arm to arm and vaccinate the poor for nothing.",
+   "social_consequence": "A vaccinator is appointed in each district and keeps the register of the protected."
+  },
+  "planned_abdominal_operation": {
+   "effects": {
+    "health_protection": 0.001,
+    "health_risk": 0.001,
+    "knowledge_rate": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Abdominal Operation",
+   "observation": "A surgeon opens the belly by plan and removes a tumour the size of a child's head, and the patient lives."
+  },
+  "chest_listening_tube": {
+   "effects": {
+    "health_protection": 0.003,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/paper/clinical_pulse_assessment.png",
+   "name": "Listening Tube",
+   "observation": "A wooden tube laid on the chest lets the physician hear the lungs crackle and the heart murmur."
+  },
+  "human_blood_transfusion": {
+   "effects": {
+    "health_risk": 0.002,
+    "injury_risk": -0.001,
+    "maternal_safety": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Blood Transfusion",
+   "observation": "Blood is run from a donor's arm into a woman bleeding after childbirth, and sometimes she lives."
+  },
+  "fever_bark_alkaloid": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "health_protection": 0.002,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Pure Fever-bark Salt",
+   "observation": "The bitter principle of fever bark is purified and given by weight, and the intermittent fever breaks."
+  },
+  "iodine_goitre_treatment": {
+   "effects": {
+    "health_protection": 0.002,
+    "health_risk": 0.001,
+    "nutrition_quality": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Iodine for Goitre",
+   "observation": "Goitre shrinks under measured drops of iodine, though too much causes its own trouble."
+  },
+  "national_pharmacopoeia": {
+   "effects": {
+    "health_protection": 0.001,
+    "health_risk": -0.003,
+    "institutional_rigidity": 0.002,
+    "standardization": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "National Pharmacopoeia",
+   "observation": "One national book fixes the drugs, their preparation and their strengths, and every apothecary must follow it."
+  },
+  "hospital_medical_schools": {
+   "effects": {
+    "health_protection": 0.003,
+    "knowledge_preservation": 0.002,
+    "knowledge_rate": 0.001,
+    "labor_demand": 0.001
+   },
+   "art": "res://assets/ui/research/paper/clinical_observation_rounds.png",
+   "name": "Hospital Schools",
+   "observation": "Students walk the wards, dissect in the dead-house and sit examinations set by the hospital staff."
+  },
+  "croup_tracheotomy": {
+   "effects": {
+    "health_risk": 0.001,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Croup Tracheotomy",
+   "observation": "When a child chokes with croup the surgeon opens the windpipe below the throat and sets a silver tube."
+  },
+  "epidemic_house_visiting": {
+   "effects": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.004,
+    "labor_demand": 0.002,
+    "sanitation": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/contagion_mapping-v1.png",
+   "name": "House Visiting",
+   "observation": "In a purging-sickness year visitors go house to house, and cleansing orders are served on the filthiest courts.",
+   "social_consequence": "Visitors force their way into the courts; the poor resent the cleansing officers and hide the sick."
+  },
+  "intravenous_saline": {
+   "effects": {
+    "health_protection": 0.002,
+    "health_risk": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png",
+   "name": "Saline Infusion",
+   "observation": "Salt water is run into the veins of those dying of the purging sickness, and some rise from the bed."
+  },
+  "anatomy_body_supply_law": {
+   "effects": {
+    "cohesion": -0.003,
+    "health_protection": 0.001,
+    "knowledge_rate": 0.001,
+    "legitimacy": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Anatomy Law",
+   "observation": "By law the unclaimed dead of workhouses go to the anatomy schools, and grave-robbing stops.",
+   "social_consequence": "The poor dread dying on the parish, for then their bodies are cut open."
+  },
+  "numerical_treatment_method": {
+   "effects": {
+    "health_risk": -0.004,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
+   "name": "Counting Method",
+   "observation": "Physicians count cured and dead among numbered cases, and bleeding proves useless or worse.",
+   "social_consequence": "Old physicians lose face and custom as bleeding is abandoned."
+  },
+  "dental_surgery_licence": {
+   "effects": {
+    "health_protection": 0.001,
+    "health_risk": -0.001,
+    "institutional_rigidity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "name": "Dental Licence",
+   "observation": "Tooth-drawers must train at a dental school and hold a licence."
+  },
+  "sanitary_town_survey": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "observation_rate": 0.002,
+    "sanitation": 0.006,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/contagion_mapping-v1.png",
+   "name": "Sanitary Survey",
+   "observation": "A survey of the labouring towns shows fever thickest where filth, crowding and bad water meet.",
+   "social_consequence": "The survey names streets and landlords; the town's rich are shamed and angry."
+  },
+  "ether_anaesthesia": {
+   "effects": {
+    "health_protection": 0.004,
+    "health_risk": 0.002,
+    "injury_risk": -0.003,
+    "maternal_safety": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Ether Anaesthesia",
+   "observation": "The patient breathes ether vapour from a flask and feels nothing while the surgeon cuts.",
+   "ability_reason": "Surgeons can take their time; operations once impossible for pain become possible."
+  },
+  "chlorine_handwashing": {
+   "effects": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.002,
+    "maternal_safety": 0.008,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Chlorine Hand-washing",
+   "observation": "Students washing in chlorine water before the lying-in ward cut childbed fever to a tenth.",
+   "social_consequence": "Physicians take offence at being called carriers of death, and the practice is resisted for years."
+  },
+  "chloroform_anaesthesia": {
+   "effects": {
+    "health_protection": 0.002,
+    "health_risk": 0.002,
+    "maternal_safety": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Chloroform",
+   "observation": "Chloroform dropped on a cloth brings sleep for surgery and eases hard labour."
+  },
+  "central_board_of_health": {
+   "effects": {
+    "disease_exposure": -0.01,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.003,
+    "legitimacy": 0.001,
+    "sanitation": 0.016,
+    "state_capacity": 0.004,
+    "water_safety": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/covered_sewers-v1.png",
+   "name": "Board of Health",
+   "observation": "A central board of health with local boards can order drains laid, nuisances abated and water supplied.",
+   "ability_reason": "Towns now have a standing health authority with power over drains and water.",
+   "social_consequence": "Local boards and medical officers join the town council; property owners fight the rates."
+  },
+  "water_service_inspections": {
+   "effects": {
+    "disease_exposure": -0.003,
+    "labor_demand": 0.002,
+    "repair_capacity": 0.002,
+    "water_safety": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png",
+   "observation": "Inspectors test the supplies and trace every foul tap back to a cracked main or cross connection."
+  },
+  "compulsory_infant_vaccination": {
+   "effects": {
+    "cohesion": -0.003,
+    "disease_exposure": -0.008,
+    "legitimacy": -0.001,
+    "neonatal_survival": 0.004,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
+   "name": "Compulsory Vaccination",
+   "observation": "Every infant must be vaccinated within months of birth and a certificate kept by the registrar.",
+   "social_consequence": "Parents who refuse are fined; leagues against compulsion march in the streets."
+  },
+  "hypodermic_syringe": {
+   "effects": {
+    "health_protection": 0.002,
+    "health_risk": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Hypodermic Syringe",
+   "observation": "A hollow needle and syringe put a dose beneath the skin in a moment."
+  },
+  "contagion_mapping": {
+   "effects": {
+    "disease_exposure": -0.012,
+    "observation_rate": 0.003,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/contagion_mapping-v1.png",
+   "observation": "Cases are marked house by house on a street map, and a cluster round one pump shows the sickness comes in the water.",
+   "ability_reason": "Outbreaks can be traced to a source and stopped at it."
+  },
+  "nursing_care_organization": {
+   "effects": {
+    "disease_exposure": -0.003,
+    "health_protection": 0.006,
+    "labor_demand": 0.003,
+    "maternal_safety": 0.002,
+    "warfare_readiness": 0.001
+   },
+   "art": "res://assets/ui/research/paper/nursing_care_organization.png",
+   "observation": "Trained nurses in ranks under ward sisters keep military hospitals clean, fed and aired, and the death rate falls by half.",
+   "ability_reason": "Hospitals stop killing the patients sent to them.",
+   "social_consequence": "Nursing becomes a respectable calling for women, with its own ranks and matrons."
+  },
+  "medical_officer_of_health": {
+   "effects": {
+    "disease_exposure": -0.005,
+    "labor_demand": 0.001,
+    "sanitation": 0.005,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Medical Officer",
+   "observation": "Each district has a medical officer who reports its deaths and names its worst streets every year."
+  },
+  "cellular_pathology": {
+   "effects": {
+    "health_protection": 0.003,
+    "knowledge_rate": 0.002,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/paper/tissue_histology.png",
+   "name": "Cellular Pathology",
+   "observation": "Disease is seen under the microscope in the body's own cells."
+  },
+  "medical_practitioner_register": {
+   "effects": {
+    "health_protection": 0.001,
+    "health_risk": -0.004,
+    "institutional_rigidity": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "name": "Practitioner Register",
+   "observation": "One public register lists qualified practitioners; unlicensed healers may not hold public posts.",
+   "social_consequence": "Wise women and bonesetters lose standing; the register becomes a guild's gate."
+  },
+  "district_visiting_nurses": {
+   "effects": {
+    "cohesion": 0.001,
+    "health_protection": 0.003,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.002,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/paper/nursing_care_organization.png",
+   "name": "District Nurses",
+   "observation": "Nurses visit the sick poor in their own homes and teach families to wash, air and feed them."
+  },
+  "casualty_collection_posts": {
+   "effects": {
+    "injury_risk": -0.003,
+    "logistics_endurance": 0.001,
+    "warfare_readiness": 0.002
+   },
+   "art": "res://assets/ui/research/paper/litter_bearer_drill.png",
+   "observation": "Marked posts behind the line let bearers find the wounded and the wounded find the bearers."
+  },
+  "field_aid_stations": {
+   "effects": {
+    "injury_risk": -0.004,
+    "logistics_endurance": 0.002,
+    "warfare_readiness": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
+   "observation": "Surgeons work at aid stations just behind the fighting line, and wounds are dressed within hours."
+  },
+  "nurse_training_school": {
+   "effects": {
+    "health_protection": 0.004,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.002
+   },
+   "art": "res://assets/ui/research/paper/nursing_care_organization.png",
+   "name": "Nurse Training School",
+   "observation": "A training school takes probationers for a year of ward work and lectures before they may call themselves nurses."
+  },
+  "casualty_transfer_records": {
+   "effects": {
+    "injury_risk": -0.002,
+    "knowledge_preservation": 0.001,
+    "warfare_readiness": 0.001
+   },
+   "art": "res://assets/ui/research/paper/casualty_transfer_records.png",
+   "observation": "A tag and record follow each wounded man from the post to the base hospital."
+  },
+  "triage_registers": {
+   "effects": {
+    "injury_risk": -0.003,
+    "warfare_readiness": 0.002
+   },
+   "art": "res://assets/ui/research/paper/casualty_transfer_records.png",
+   "observation": "The wounded are sorted into those who can wait, those who must be treated now and those beyond help."
+  },
+  "evacuation_relays": {
+   "effects": {
+    "injury_risk": -0.003,
+    "logistics_endurance": 0.003,
+    "warfare_readiness": 0.002
+   },
+   "art": "res://assets/ui/research/paper/litter_bearer_drill.png",
+   "observation": "Relays of wagons and hospital trains carry the wounded back to base hospitals."
+  },
+  "neutral_wounded_convention": {
+   "effects": {
+    "cohesion": 0.001,
+    "injury_risk": -0.002,
+    "legitimacy": 0.002,
+    "warfare_readiness": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
+   "name": "Wounded Convention",
+   "observation": "Realms agree by treaty that field hospitals, their staff and their badge are not to be fired on.",
+   "social_consequence": "Generals must now respect the badge; breaking the treaty shames the realm abroad."
+  },
+  "pavilion_ward_hospitals": {
+   "effects": {
+    "construction_rate": -0.001,
+    "disease_exposure": -0.004,
+    "health_protection": 0.003,
+    "labor_demand": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Pavilion Hospitals",
+   "observation": "Hospitals are built as separate pavilions with windows on both sides, and the air of the wards stays fresh."
+  },
+  "antiseptic_surgery": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "health_protection": 0.004,
+    "health_risk": -0.012,
+    "injury_risk": -0.006,
+    "maternal_safety": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Antiseptic Surgery",
+   "observation": "Wounds, dressings and hands are washed in carbolic acid, and amputations stop festering.",
+   "ability_reason": "Surgery stops being a gamble with gangrene and hospital fever."
+  },
+  "germ_theory_of_disease": {
+   "effects": {
+    "disease_exposure": -0.032,
+    "health_protection": 0.01,
+    "knowledge_rate": 0.004,
+    "sanitation": 0.006,
+    "water_safety": 0.004
+   },
+   "art": "res://assets/ui/research/paper/microbial_isolation_methods.png",
+   "name": "Germ Theory",
+   "observation": "Specific living germs are grown in pure culture and shown to cause specific diseases.",
+   "ability_reason": "Every measure against disease can now aim at a known enemy: water, milk, wound, carrier.",
+   "social_consequence": "The old doctrine of bad airs falls; sanitation officers gain a science to command with."
+  },
+  "isolation_fever_hospitals": {
+   "effects": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.01,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Isolation Hospitals",
+   "observation": "Children with scarlet fever and diphtheria are carted to isolation hospitals outside the town.",
+   "social_consequence": "Families fear the fever van and hide their sick children."
+  },
+  "consumption_germ_identified": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "knowledge_rate": 0.001,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/paper/biological_staining.png",
+   "name": "Consumption Germ",
+   "observation": "A stain shows the slender germ of the wasting cough in the sputum of every consumptive."
+  },
+  "worker_sickness_insurance": {
+   "effects": {
+    "cohesion": 0.003,
+    "conception_support": -0.004,
+    "health_protection": 0.006,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.002,
+    "legitimacy": 0.004,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "name": "Sickness Insurance",
+   "observation": "Workers and employers pay into sickness funds that pay the doctor and a weekly sick pay.",
+   "ability_reason": "The sick worker no longer drags himself to the mill, and families are not ruined by one illness.",
+   "social_consequence": "Sickness funds become a pillar of the state; physicians fight the funds over fees."
+  },
+  "local_anaesthesia": {
+   "effects": {
+    "health_protection": 0.002,
+    "health_risk": 0.001,
+    "injury_risk": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Local Anaesthesia",
+   "observation": "A drug from the coca leaf numbs the eye or the skin, and small operations need no sleeping gas."
+  },
+  "attenuated_laboratory_vaccine": {
+   "effects": {
+    "disease_exposure": -0.003,
+    "health_protection": 0.002,
+    "knowledge_rate": 0.002
+   },
+   "art": "res://assets/ui/research/paper/microbial_isolation_methods.png",
+   "name": "Laboratory Vaccine",
+   "observation": "A germ weakened in the laboratory protects against the madness of dogs' bite."
+  },
+  "aseptic_operating_room": {
+   "effects": {
+    "health_protection": 0.003,
+    "health_risk": -0.008,
+    "injury_risk": -0.004,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.006
+   },
+   "art": "res://assets/ui/research/paper/instrument_sterilization.png",
+   "name": "Aseptic Surgery",
+   "observation": "Instruments, gowns and dressings are steamed sterile, and surgeons operate in gloves and masks."
+  },
+  "consumption_sanatoria": {
+   "effects": {
+    "disease_exposure": -0.003,
+    "health_protection": 0.002,
+    "labor_demand": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Sanatoria",
+   "observation": "Consumptives rest in the open air of mountain and seaside sanatoria, away from their families."
+  },
+  "disease_notification_law": {
+   "effects": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.007,
+    "institutional_rigidity": 0.001,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Notification Law",
+   "observation": "Physicians must notify the health office of every case of an infectious disease within a day."
+  },
+  "diphtheria_antitoxin": {
+   "effects": {
+    "disease_exposure": -0.012,
+    "health_protection": 0.003,
+    "neonatal_survival": 0.007
+   },
+   "art": "res://assets/ui/research/paper/microbial_isolation_methods.png",
+   "name": "Diphtheria Antitoxin",
+   "observation": "Serum from horses given the croup germ saves choking children when injected early.",
+   "ability_reason": "Childhood's cruellest killer now has a cure."
+  },
+  "port_sanitary_inspection": {
+   "effects": {
+    "disease_exposure": -0.005,
+    "state_capacity": 0.001,
+    "trade_capacity": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Port Inspection",
+   "observation": "Port doctors inspect each ship and isolate only the sick, instead of holding every ship for forty days."
+  },
+  "shared_death_cause_list": {
+   "effects": {
+    "knowledge_preservation": 0.002,
+    "observation_rate": 0.002,
+    "standardization": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Shared Cause List",
+   "observation": "Realms agree one list of causes of death, and their tables can be compared."
+  },
+  "bone_shadow_imaging": {
+   "effects": {
+    "health_protection": 0.003,
+    "health_risk": 0.001,
+    "injury_risk": -0.002
+   },
+   "art": "res://assets/ui/research/paper/compound_microscopy.png",
+   "name": "Bone Imaging",
+   "observation": "Invisible rays cast shadow pictures of bones and bullets through the flesh."
+  },
+  "enteric_fever_vaccine": {
+   "effects": {
+    "disease_exposure": -0.006,
+    "warfare_readiness": 0.002
+   },
+   "art": "res://assets/ui/research/paper/microbial_isolation_methods.png",
+   "name": "Enteric Vaccine",
+   "observation": "Soldiers are inoculated against enteric fever, and camp fevers no longer kill more than bullets."
+  },
+  "mosquito_fever_vector": {
+   "effects": {
+    "disease_exposure": -0.005,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/paper/microbial_observation.png",
+   "name": "Mosquito Vector",
+   "observation": "Marsh fever and yellow fever are shown to pass through the bite of certain mosquitoes."
+  },
+  "synthetic_willow_analgesic": {
+   "effects": {
+    "fatigue": -0.001,
+    "health_protection": 0.002,
+    "health_risk": 0.001
+   },
+   "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
+   "name": "Willow Powder",
+   "observation": "A synthetic powder from willow chemistry brings down fever and eases pain."
+  },
+  "blood_group_typing": {
+   "effects": {
+    "health_risk": -0.003,
+    "injury_risk": -0.002,
+    "maternal_safety": 0.003
+   },
+   "art": "res://assets/ui/research/paper/biological_staining.png",
+   "name": "Blood Groups",
+   "observation": "Blood is sorted into groups that can safely be mixed, and transfusion stops killing."
+  },
+  "mosquito_control_brigades": {
+   "effects": {
+    "disease_exposure": -0.01,
+    "ecology_recovery": -0.001,
+    "labor_demand": 0.003,
+    "sanitation": 0.003,
+    "water_pollution": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/drainage-v1.png",
+   "name": "Mosquito Brigades",
+   "observation": "Brigades drain pools, oil standing water and screen windows, and the marsh fever retreats."
+  },
+  "talking_cure": {
+   "effects": {
+    "cohesion": 0.001,
+    "health_protection": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "name": "Talking Cure",
+   "observation": "Disorders of the mind are treated by long conversation between patient and physician."
+  },
+  "radium_tumour_therapy": {
+   "effects": {
+    "health_protection": 0.002,
+    "health_risk": 0.003
+   },
+   "art": "res://assets/ui/research/paper/nuclear_magnetic_resonance_spectroscopy.png",
+   "name": "Radium Therapy",
+   "observation": "Radium and rays are turned on tumours; some shrink, and some healers burn."
+  },
+  "school_medical_inspection": {
+   "effects": {
+    "disease_exposure": -0.005,
+    "health_protection": 0.002,
+    "labor_demand": 0.001,
+    "neonatal_survival": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "School Inspection",
+   "observation": "Every pupil is examined at school for lice, bad eyes, bad teeth and infection."
+  },
+  "water_chlorination": {
+   "effects": {
+    "disease_exposure": -0.026,
+    "health_risk": 0.001,
+    "sanitation": 0.004,
+    "water_safety": 0.022
+   },
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png",
+   "name": "Water Chlorination",
+   "observation": "A measured dose of chlorine in town water kills its fever germs, and enteric fever nearly vanishes.",
+   "ability_reason": "Every tap in the town delivers water that does not carry fever."
+  },
+  "targeted_arsenical_drug": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "health_protection": 0.002,
+    "health_risk": 0.003
+   },
+   "art": "res://assets/ui/research/paper/biological_staining.png",
+   "name": "Targeted Arsenical",
+   "observation": "An arsenic compound made to seek out the pox germ cures many, though its doses are dangerous."
+  },
+  "laboratory_medical_schools": {
+   "effects": {
+    "health_protection": 0.004,
+    "health_risk": -0.003,
+    "institutional_rigidity": 0.002,
+    "knowledge_rate": 0.002
+   },
+   "art": "res://assets/ui/research/paper/aseptic_laboratory_practice.png",
+   "name": "Laboratory Schools",
+   "observation": "Medical schools are bound to laboratories and teaching hospitals, and the weak schools are closed."
+  },
+  "drug_label_purity_law": {
+   "effects": {
+    "health_risk": -0.005,
+    "institutional_rigidity": 0.001,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
+   "name": "Drug Purity Law",
+   "observation": "Drug labels must state what is in the bottle, and poisons and habit-forming drugs must be named."
+  },
+  "medical_resupply_packing": {
+   "effects": {
+    "injury_risk": -0.001,
+    "logistics_endurance": 0.003,
+    "warfare_readiness": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/supply_groups-v1.png",
+   "observation": "Dressings and drugs travel in standard sealed sets, so every aid post knows what it holds."
+  },
+  "convalescent_duty_reviews": {
+   "effects": {
+    "health_protection": 0.001,
+    "warfare_readiness": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
+   "observation": "Boards review convalescents and decide who returns to the line and who needs more care."
+  },
+  "reconstructive_surgery": {
+   "effects": {
+    "cohesion": 0.001,
+    "health_protection": 0.001,
+    "injury_risk": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Reconstructive Surgery",
+   "observation": "Surgeons rebuild faces and hands shattered in war with grafts of skin and bone."
+  },
+  "stored_citrated_blood": {
+   "effects": {
+    "injury_risk": -0.003,
+    "maternal_safety": 0.003,
+    "warfare_readiness": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Stored Blood",
+   "observation": "Blood kept from clotting with citrate is stored cold behind the lines and given to the wounded."
+  },
+  "pandemic_closure_orders": {
+   "effects": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.004,
+    "trade_capacity": -0.003
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Pandemic Closures",
+   "observation": "In a world pandemic the halls and schools are closed, masks worn and cases reported."
+  },
+  "consumption_vaccine": {
+   "effects": {
+    "disease_exposure": -0.006,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/paper/microbial_isolation_methods.png",
+   "name": "Consumption Vaccine",
+   "observation": "A weakened cattle germ given to infants guards against the wasting cough."
+  },
+  "insulin_therapy": {
+   "effects": {
+    "health_protection": 0.004,
+    "knowledge_rate": 0.002,
+    "neonatal_survival": 0.001
+   },
+   "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
+   "name": "Insulin",
+   "observation": "An extract of the pancreas keeps children with the sugar sickness alive and growing.",
+   "ability_reason": "A sure death becomes a lifelong condition."
+  },
+  "hospital_prepayment_plans": {
+   "effects": {
+    "cohesion": 0.001,
+    "health_protection": 0.003,
+    "labor_demand": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "name": "Hospital Prepayment",
+   "observation": "Groups of workers pay a small sum each month and are cared for in hospital when they need it."
+  },
+  "cancer_registries": {
+   "effects": {
+    "health_protection": 0.002,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Cancer Registries",
+   "observation": "Every cancer case is registered, and surgery and rays are combined by plan."
+  },
+  "sulfa_drugs": {
+   "effects": {
+    "disease_exposure": -0.02,
+    "health_protection": 0.004,
+    "health_risk": 0.002,
+    "maternal_safety": 0.026,
+    "neonatal_survival": 0.004
+   },
+   "art": "res://assets/ui/research/paper/aromatic_amine_hydrogenation.png",
+   "name": "Sulfa Drugs",
+   "observation": "A drug made from a red dye cures blood poisoning and childbed fever within days.",
+   "ability_reason": "Childbed fever and wound infection stop being death sentences."
+  },
+  "blood_bank": {
+   "effects": {
+    "injury_risk": -0.003,
+    "labor_demand": 0.001,
+    "maternal_safety": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "name": "Blood Bank",
+   "observation": "Donated blood is typed, stored and issued to any hospital that calls."
+  },
+  "mould_broth_antibiotic": {
+   "effects": {
+    "disease_exposure": -0.03,
+    "health_protection": 0.006,
+    "injury_risk": -0.004,
+    "maternal_safety": 0.01,
+    "neonatal_survival": 0.004
+   },
+   "art": "res://assets/ui/research/paper/microbial_growth_measurement.png",
+   "name": "Mould Antibiotic",
+   "observation": "A drug from a mould, grown in deep tanks, cures pneumonia, wound infections and the pox.",
+   "ability_reason": "Infections that killed at every age now yield to a course of injections."
+  },
+  "consumption_antibiotic": {
+   "effects": {
+    "disease_exposure": -0.012,
+    "health_protection": 0.002
+   },
+   "art": "res://assets/ui/research/paper/microbial_growth_measurement.png",
+   "name": "TB Antibiotic",
+   "observation": "A drug from a soil germ cures the wasting cough, and the sanatoria begin to empty."
+  },
+  "water_fluoridation": {
+   "effects": {
+    "cohesion": -0.001,
+    "health_protection": 0.002,
+    "water_safety": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png",
+   "name": "Fluoridation",
+   "observation": "A trace of fluoride is added to town water, and children's teeth decay far less."
+  },
+  "residual_house_spraying": {
+   "effects": {
+    "disease_exposure": -0.01,
+    "ecological_pressure": 0.002,
+    "pollution": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "House Spraying",
+   "observation": "Every house wall is sprayed with a lasting insecticide, and the marsh fever retreats from whole provinces."
+  },
+  "artificial_kidney_dialysis": {
+   "effects": {
+    "health_protection": 0.002,
+    "labor_demand": 0.001
+   },
+   "art": "res://assets/ui/research/paper/water_settling_basins.png",
+   "name": "Dialysis",
+   "observation": "A machine cleans the blood of patients whose kidneys have failed."
+  },
+  "inter_realm_health_council": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "observation_rate": 0.002,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Health Council",
+   "observation": "A council of realms pools disease reports and sets common standards for drugs and vaccines."
+  },
+  "national_health_service": {
+   "effects": {
+    "cohesion": 0.004,
+    "health_protection": 0.012,
+    "labor_demand": 0.005,
+    "legitimacy": 0.005,
+    "maternal_safety": 0.012,
+    "neonatal_survival": 0.006,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "National Health Service",
+   "observation": "One national service gives care free to everyone, paid for from taxes.",
+   "ability_reason": "Nobody goes without a doctor because they cannot pay.",
+   "social_consequence": "A national health ministry becomes the realm's largest employer; its budget is fought over every year."
+  },
+  "randomised_controlled_trial": {
+   "effects": {
+    "health_protection": 0.004,
+    "health_risk": -0.01,
+    "knowledge_rate": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
+   "name": "Controlled Trial",
+   "observation": "Patients are allotted by lot to the new treatment or the old, and the outcome decides.",
+   "ability_reason": "Treatments are proven or discarded by fair test, not authority."
+  },
+  "tobacco_cancer_evidence": {
+   "effects": {
+    "health_protection": 0.002,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
+   "name": "Tobacco Evidence",
+   "observation": "Studies of thousands of smokers prove that tobacco smoke causes cancer of the lung."
+  },
+  "antipsychotic_drugs": {
+   "effects": {
+    "cohesion": 0.002,
+    "health_protection": 0.002,
+    "health_risk": 0.001
+   },
+   "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
+   "name": "Calming Drugs",
+   "observation": "Calming drugs quiet the voices, and many asylum patients go home."
+  },
+  "combination_consumption_therapy": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "health_protection": 0.002
+   },
+   "art": "res://assets/ui/research/paper/microbial_growth_measurement.png",
+   "name": "Combined TB Therapy",
+   "observation": "Several drugs given together defeat the wasting cough germs that resist one drug alone."
+  },
+  "heart_lung_machine": {
+   "effects": {
+    "health_protection": 0.002,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/paper/precision_toolrooms.png",
+   "name": "Heart-lung Machine",
+   "observation": "A machine breathes and pumps for the patient while the heart is opened and repaired."
+  },
+  "intensive_care_units": {
+   "effects": {
+    "health_protection": 0.003,
+    "injury_risk": -0.002,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Intensive Care",
+   "observation": "Intensive care wards keep the gravely ill alive with breathing machines and constant nursing."
+  },
+  "organ_transplant": {
+   "effects": {
+    "health_protection": 0.001,
+    "knowledge_rate": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Organ Transplant",
+   "observation": "A kidney is transplanted from one twin to the other, and it works."
+  },
+  "paralysis_virus_vaccine": {
+   "effects": {
+    "disease_exposure": -0.006,
+    "health_protection": 0.002,
+    "neonatal_survival": 0.003
+   },
+   "art": "res://assets/ui/research/paper/cell_culture_methods.png",
+   "name": "Paralysis Vaccine",
+   "observation": "A killed-virus vaccine grown in cell culture protects children from the crippling summer paralysis.",
+   "ability_reason": "Summer no longer brings the fear of crippled children."
+  },
+  "cardiac_resuscitation": {
+   "effects": {
+    "health_protection": 0.002,
+    "injury_risk": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Resuscitation",
+   "observation": "Chest compression, rescue breathing and an electric shock bring back hearts that had stopped."
+  },
+  "drug_efficacy_approval": {
+   "effects": {
+    "health_risk": -0.008,
+    "institutional_rigidity": 0.002,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
+   "name": "Drug Approval",
+   "observation": "New drugs must prove safety and benefit in trials before they may be sold."
+  },
+  "community_mental_health": {
+   "effects": {
+    "cohesion": 0.002,
+    "health_protection": 0.001,
+    "labor_demand": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "name": "Community Mental Health",
+   "observation": "Community clinics replace the great asylums, and patients live among their neighbours."
+  },
+  "measles_vaccine": {
+   "effects": {
+    "disease_exposure": -0.008,
+    "neonatal_survival": 0.005
+   },
+   "art": "res://assets/ui/research/paper/cell_culture_methods.png",
+   "name": "Measles Vaccine",
+   "observation": "A live weakened measles vaccine protects children from the fever that killed many each winter."
+  },
+  "tobacco_control_laws": {
+   "effects": {
+    "health_protection": 0.003,
+    "legitimacy": -0.001,
+    "trade_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Tobacco Control",
+   "observation": "Tobacco packets carry warnings, taxes rise and advertising is limited."
+  },
+  "hospice_care": {
+   "effects": {
+    "cohesion": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Hospice Care",
+   "observation": "Hospices care for the dying and ease their pain at the end."
+  },
+  "oral_rehydration_salts": {
+   "effects": {
+    "disease_exposure": -0.006,
+    "health_protection": 0.003,
+    "neonatal_survival": 0.01
+   },
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png",
+   "name": "Oral Rehydration",
+   "observation": "A drink of clean water with sugar and salt, given by the mother, stops children dying of diarrhoea.",
+   "ability_reason": "The commonest killer of children can now be treated at home by anyone."
+  },
+  "body_slice_scanner": {
+   "effects": {
+    "health_protection": 0.002,
+    "observation_rate": 0.001
+   },
+   "art": "res://assets/ui/research/paper/compound_microscopy.png",
+   "name": "Slice Scanner",
+   "observation": "A rotating ray scanner draws slices through the body, and tumours and bleeds are found without cutting."
+  },
+  "expanded_immunisation_program": {
+   "effects": {
+    "disease_exposure": -0.007,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.005
+   },
+   "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
+   "name": "Immunisation Program",
+   "observation": "Every child's vaccinations are scheduled and tracked as one program."
+  },
+  "primary_health_care": {
+   "effects": {
+    "cohesion": 0.002,
+    "health_protection": 0.004,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.004,
+    "neonatal_survival": 0.004,
+    "sanitation": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Primary Care",
+   "observation": "Village health workers and clinics bring basic care within reach of every household."
+  },
+  "smallpox_eradication": {
+   "effects": {
+    "disease_exposure": -0.008,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
+   "name": "Smallpox Eradication",
+   "observation": "Vaccinators ring each case with vaccinated contacts until the last smallpox case is found and closed.",
+   "ability_reason": "An ancient killer is gone for good."
+  },
+  "magnetic_resonance_imaging": {
+   "effects": {
+    "health_protection": 0.002
+   },
+   "art": "res://assets/ui/research/paper/nuclear_magnetic_resonance_spectroscopy.png",
+   "name": "Magnetic Imaging",
+   "observation": "Magnets and radio waves picture the soft tissues of brain and joint."
+  },
+  "immune_virus_blood_test": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "health_risk": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Immune Virus Test",
+   "observation": "A blood test finds the wasting immune virus, and donated blood is screened."
+  },
+  "recombinant_vaccine": {
+   "effects": {
+    "disease_exposure": -0.003,
+    "neonatal_survival": 0.001
+   },
+   "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
+   "name": "Recombinant Vaccine",
+   "observation": "Yeast carrying one viral gene makes a safe vaccine against the liver virus."
+  },
+  "cholesterol_lowering_drugs": {
+   "effects": {
+    "health_protection": 0.003
+   },
+   "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
+   "name": "Cholesterol Drugs",
+   "observation": "Daily tablets lower the fat in the blood and prevent many heart attacks."
+  },
+  "systematic_review_medicine": {
+   "effects": {
+    "health_protection": 0.002,
+    "health_risk": -0.004
+   },
+   "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
+   "name": "Systematic Reviews",
+   "observation": "All trials of a treatment are gathered and pooled, and care follows the evidence."
+  },
+  "insecticide_bed_nets": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "neonatal_survival": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Bed Nets",
+   "observation": "Nets dipped in insecticide hang over sleeping children, and marsh-fever deaths fall."
+  },
+  "combination_antiviral_therapy": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "health_protection": 0.003,
+    "maternal_safety": 0.001
+   },
+   "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
+   "name": "Antiviral Therapy",
+   "observation": "Three drugs taken together hold the immune virus in check, and patients live for decades.",
+   "ability_reason": "A fatal plague of the young becomes a managed illness."
+  },
+  "monoclonal_antibody_drugs": {
+   "effects": {
+    "health_protection": 0.002
+   },
+   "art": "res://assets/ui/research/paper/cell_culture_methods.png",
+   "name": "Antibody Drugs",
+   "observation": "Engineered antibodies are made in cell culture as drugs against cancer and inflammation."
+  },
+  "antibiotic_stewardship": {
+   "effects": {
+    "disease_exposure": -0.003,
+    "health_risk": -0.003,
+    "labor_demand": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Antibiotic Stewardship",
+   "observation": "Antibiotics are rationed to real need, and resistant germs are watched in every hospital."
+  },
+  "artemisinin_combination_therapy": {
+   "effects": {
+    "disease_exposure": -0.003,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Wormwood Therapy",
+   "observation": "A drug from sweet wormwood, given with a partner drug, cures marsh fever that resists the old medicines."
+  },
+  "human_genome_reading": {
+   "effects": {
+    "health_protection": 0.001,
+    "knowledge_rate": 0.003
+   },
+   "art": "res://assets/ui/research/paper/cell_theory.png",
+   "name": "Genome Reading",
+   "observation": "The whole hereditary text of a human being is read letter by letter."
+  },
+  "tobacco_control_treaty": {
+   "effects": {
+    "health_protection": 0.002,
+    "trade_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Tobacco Treaty",
+   "observation": "Realms sign a treaty on tobacco, and smoking is banned indoors."
+  },
+  "inter_realm_health_rules": {
+   "effects": {
+    "disease_exposure": -0.003,
+    "state_capacity": 0.001,
+    "trade_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Outbreak Rules",
+   "observation": "Binding rules require every realm to report a new outbreak within a day."
+  },
+  "electronic_health_records": {
+   "effects": {
+    "health_protection": 0.002,
+    "health_risk": -0.002,
+    "knowledge_preservation": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
+   "name": "Electronic Records",
+   "observation": "Health records move with the patient between hospitals on electronic systems."
+  },
+  "immune_checkpoint_therapy": {
+   "effects": {
+    "health_protection": 0.002,
+    "health_risk": 0.001
+   },
+   "art": "res://assets/ui/research/paper/cell_culture_methods.png",
+   "name": "Checkpoint Therapy",
+   "observation": "Drugs release the immune system's brake, and some cancers melt away."
+  },
+  "engineered_immune_cell_therapy": {
+   "effects": {
+    "health_protection": 0.001
+   },
+   "art": "res://assets/ui/research/paper/cell_culture_methods.png",
+   "name": "Engineered Cell Therapy",
+   "observation": "A patient's own immune cells are re-engineered to kill a blood cancer."
+  },
+  "messenger_molecule_vaccine": {
+   "effects": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.006,
+    "health_protection": 0.002
+   },
+   "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
+   "name": "Message-molecule Vaccine",
+   "observation": "A vaccine is designed in days from the genetic text of a new virus and made by the million.",
+   "ability_reason": "A new pandemic can be met with a vaccine within a year.",
+   "social_consequence": "Vaccine doubts split households and quarrels reach the council chambers."
+  },
+  "pandemic_test_trace_orders": {
+   "effects": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.004,
+    "state_capacity": 0.002,
+    "trade_capacity": -0.003
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Test and Trace",
+   "observation": "In a pandemic the people are tested in their millions, contacts traced and districts locked down."
+  },
+  "malaria_vaccine": {
+   "effects": {
+    "disease_exposure": -0.002,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/paper/cell_culture_methods.png",
+   "name": "Malaria Vaccine",
+   "observation": "The first vaccine against marsh fever protects small children in fever country."
+  },
+  "gene_edited_blood_cure": {
+   "effects": {
+    "health_protection": 0.001
+   },
+   "art": "res://assets/ui/research/paper/cell_theory.png",
+   "name": "Gene-edited Blood Cure",
+   "observation": "A single gene-editing treatment cures inherited sickle-cell blood disease."
+  },
+  "machine_read_diagnostics": {
+   "effects": {
+    "health_protection": 0.002,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Machine Diagnostics",
+   "observation": "Machines read scans and slides and flag what a physician should check."
+  },
+  "gut_hormone_drugs": {
+   "effects": {
+    "health_protection": 0.003,
+    "nutrition_quality": 0.001
+   },
+   "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
+   "name": "Gut Hormone Drugs",
+   "observation": "Weekly injections of a gut hormone curb appetite and protect heart and kidneys."
+  },
+  "genome_guided_prescribing": {
+   "effects": {
+    "health_protection": 0.001,
+    "health_risk": -0.002
+   },
+   "art": "res://assets/ui/research/paper/cell_theory.png",
+   "name": "Genome-guided Prescribing",
+   "observation": "A patient's hereditary profile guides which drug and what dose."
+  },
+  "broad_virus_family_vaccines": {
+   "effects": {
+    "disaster_resilience": 0.002,
+    "disease_exposure": -0.002
+   },
+   "art": "res://assets/ui/research/paper/cell_culture_methods.png",
+   "name": "Broad Virus Vaccines",
+   "observation": "Broad vaccines against whole families of viruses are held ready for the next pandemic."
+  }
+ }
 }

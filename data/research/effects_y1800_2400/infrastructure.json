@@ -1,5 +1,952 @@
 {
  "line": "infrastructure",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "lierne_net_vaults": {
+   "effects": {
+    "housing_output": 0.0024,
+    "construction_rate": 0.002
+   },
+   "name": "Net Vaults",
+   "observation": "Short ribs cross and recross the vault in stars and nets, and the carved bosses where they meet glitter with gilt.",
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png"
+  },
+  "stepped_gable_brick_houses": {
+   "effects": {
+    "housing_output": 0.0032,
+    "disaster_resilience": 0.0014,
+    "disaster_risk": -0.002
+   },
+   "name": "Stepped-Gable Houses",
+   "observation": "Brick houses shoulder together along the canal, their stepped gables facing the water and a hoist beam at the top of each.",
+   "art": "res://assets/ui/research/discovery-600/mould_made_mudbricks.png"
+  },
+  "fan_vaults": {
+   "effects": {
+    "housing_output": 0.0016,
+    "legitimacy": 0.001,
+    "construction_rate": 0.002,
+    "labor_demand": 0.002
+   },
+   "name": "Fan Vaults",
+   "observation": "From each pier a cone of stone ribs spreads like a fan and meets its neighbour at the crown.",
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png"
+  },
+  "hammer_beam_roofs": {
+   "effects": {
+    "construction_rate": 0.008,
+    "housing_output": 0.0048,
+    "disaster_resilience": 0.0021,
+    "legitimacy": 0.001,
+    "timber_pressure": 0.003
+   },
+   "name": "Hammer-Beam Roofs",
+   "observation": "Oak brackets jut from the walls to carry the arched braces, and the great hall stands seventy feet wide with no beam across it.",
+   "ability_reason": "Short timbers braced from the walls span halls no single beam could cross; great rooms no longer wait on giant oaks.",
+   "art": "res://assets/ui/research/subjects/framed_construction-v1.png"
+  },
+  "regulated_cesspits": {
+   "effects": {
+    "sanitation": 0.005,
+    "water_safety": 0.003,
+    "disease_exposure": -0.002,
+    "labor_demand": 0.001
+   },
+   "name": "Regulated Cesspits",
+   "observation": "The cesspit must be lined with brick and dug a set distance from any well, and only licensed night-soil men may empty it.",
+   "art": "res://assets/ui/research/subjects/latrine_siting-v1.png"
+  },
+  "quadrangle_courts": {
+   "effects": {
+    "housing_output": 0.0032,
+    "cohesion": 0.0014
+   },
+   "name": "Quadrangle Courts",
+   "observation": "Lodgings, hall and chapel stand round a square lawn; the gate is locked at nine and the scholars answer to one porter.",
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png"
+  },
+  "drainage_windmills": {
+   "effects": {
+    "cultivation_yield": 0.004,
+    "disaster_resilience": 0.0056,
+    "water_access": 0.002,
+    "disease_exposure": -0.002,
+    "labor_demand": -0.002
+   },
+   "name": "Drainage Windmills",
+   "observation": "A row of windmills stands on the dike, each lifting the water a step higher, until the polder is dry enough to graze.",
+   "ability_reason": "Wind lifts water out of land that lies below the sea; marsh becomes meadow, and the dikes hold what the mills win.",
+   "art": "res://assets/ui/research/subjects/drainage-v1.png"
+  },
+  "reversing_gear_hoists": {
+   "effects": {
+    "construction_rate": 0.004,
+    "labor_efficiency": 0.001,
+    "injury_risk": -0.001
+   },
+   "name": "Reversing Hoists",
+   "observation": "The ox walks one way and the stone rises; a lever shifts the gear and the empty rope comes down without turning the ox.",
+   "art": "res://assets/ui/research/subjects/counterweight_cranes-v1.png"
+  },
+  "centerless_great_dome": {
+   "effects": {
+    "construction_rate": 0.008,
+    "legitimacy": 0.0017,
+    "housing_output": 0.0024,
+    "labor_demand": 0.004
+   },
+   "name": "Great Dome Without Centering",
+   "observation": "The masons lay the dome's bricks in herringbone, each course locking the last, and it rises over the great church with no timber frame beneath.",
+   "ability_reason": "Self-supporting brickwork lets a vault rise without scaffolding a forest, and builders learn that geometry can replace timber.",
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png"
+  },
+  "terracotta_facade_ornament": {
+   "effects": {
+    "housing_output": 0.0016,
+    "construction_rate": 0.002
+   },
+   "name": "Terracotta Ornament",
+   "observation": "Moulded garlands and heads come out of the kiln by the hundred and are set into brick fronts like carved stone.",
+   "art": "res://assets/ui/research/paper/fired_roof_tiles.png"
+  },
+  "courtyard_palace_block": {
+   "effects": {
+    "legitimacy": 0.0014,
+    "housing_output": 0.0024,
+    "labor_demand": 0.002
+   },
+   "name": "Courtyard Palace",
+   "observation": "Rough-cut stone below and smooth above, the palace turns its back on the street and opens only onto its arcaded court.",
+   "art": "res://assets/ui/research/subjects/curtain_wall_systems-v1.png"
+  },
+  "scale_plan_drawings": {
+   "effects": {
+    "construction_rate": 0.005,
+    "standardization": 0.0018,
+    "knowledge_preservation": 0.001,
+    "labor_demand": -0.002
+   },
+   "name": "Scale Plans",
+   "observation": "The architect draws plan, section and elevation to one scale, and the masons measure off the sheet instead of asking him daily.",
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png"
+  },
+  "classical_order_proportions": {
+   "effects": {
+    "housing_output": 0.0016,
+    "standardization": 0.0014
+   },
+   "name": "Classical Proportions",
+   "observation": "The column's height is so many diameters and the entablature a quarter of the column; the builder's book gives every order.",
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png"
+  },
+  "multi_flue_chimney_stacks": {
+   "effects": {
+    "health_protection": 0.004,
+    "housing_output": 0.0024,
+    "disaster_risk": -0.002
+   },
+   "name": "Chimney Stacks",
+   "observation": "Every hearth's flue runs up inside the brick stack, and six chimney pots stand where smoke once seeped through the thatch.",
+   "art": "res://assets/ui/research/paper/hearth_heat_retention.png"
+  },
+  "public_loggias": {
+   "effects": {
+    "trade_capacity": 0.001,
+    "cohesion": 0.0014
+   },
+   "name": "Public Loggias",
+   "observation": "Merchants and magistrates talk business under the open arches out of the rain, and the notary sets his table by a pillar.",
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png"
+  },
+  "mitre_lock_gates": {
+   "effects": {
+    "haul_capacity": 0.004,
+    "route_speed": 0.002,
+    "trade_capacity": 0.0015,
+    "water_access": 0.002,
+    "labor_demand": 0.002
+   },
+   "name": "Mitre Lock Gates",
+   "observation": "Two gates meet at an angle pointing upstream; the water presses them shut, and a boy can swing them open when the levels match.",
+   "ability_reason": "Gates that the water itself holds closed make locks quick and cheap, and canals can climb hills and carry trade inland.",
+   "art": "res://assets/ui/research/subjects/canal_locks-v2.png"
+  },
+  "street_suction_pumps": {
+   "effects": {
+    "water_access": 0.004,
+    "water_safety": 0.001,
+    "labor_demand": -0.001
+   },
+   "name": "Street Pumps",
+   "observation": "The iron handle of the parish pump creaks at dawn as the women fill their buckets from the covered well.",
+   "art": "res://assets/ui/research/subjects/well_siting-v1.png"
+  },
+  "tall_timber_tenements": {
+   "effects": {
+    "housing_output": 0.004,
+    "disaster_risk": 0.003,
+    "disease_exposure": 0.002,
+    "timber_pressure": 0.002
+   },
+   "name": "Timber Tenements",
+   "observation": "Five storeys of timber lean over the lane, a family to a room, and the stair is the only way out if fire comes.",
+   "social_consequence": "Crowded towns can house their incomers, at the cost of fire, damp and fever in the upper rooms.",
+   "art": "res://assets/ui/research/subjects/framed_construction-v1.png"
+  },
+  "mine_airways": {
+   "effects": {
+    "mine_safety": 0.006,
+    "mining_output": 0.002,
+    "health_risk": -0.001
+   },
+   "observation": "A door underground and a fire at the upcast shaft draw fresh air down one road and foul air up the other.",
+   "art": "res://assets/ui/research/paper/mine_airways.png"
+  },
+  "ornamental_plaster_ceilings": {
+   "effects": {
+    "housing_output": 0.0016,
+    "health_protection": 0.001
+   },
+   "name": "Plaster Ceilings",
+   "observation": "The plasterers run ribs across the parlour ceiling and hang pendants where they cross, all from moulds cut by the master.",
+   "art": "res://assets/ui/research/subjects/lime_burning-v1.png"
+  },
+  "pile_grid_foundations": {
+   "effects": {
+    "construction_rate": 0.004,
+    "disaster_resilience": 0.0021,
+    "housing_output": 0.0016,
+    "timber_pressure": 0.003
+   },
+   "name": "Pile Grid Foundations",
+   "observation": "Thousands of pine piles are rammed into the mud in rows, and the houses on the quay stand on them as on a buried forest.",
+   "art": "res://assets/ui/research/paper/timber_post_beam_connections.png"
+  },
+  "gable_hoist_warehouses": {
+   "effects": {
+    "dry_storage": 0.005,
+    "trade_capacity": 0.001,
+    "storage_loss": -0.002
+   },
+   "name": "Gable Hoist Warehouses",
+   "observation": "Grain sacks swing up from the barge on the gable hoist and in through the loft doors five storeys above the water.",
+   "art": "res://assets/ui/research/discovery-600/central_storehouses.png"
+  },
+  "open_well_staircases": {
+   "effects": {
+    "housing_output": 0.0016
+   },
+   "name": "Grand Staircases",
+   "observation": "The stair climbs round an open well with a landing at every turn, lit from a lantern in the roof.",
+   "art": "res://assets/ui/research/subjects/joinery-v2.png"
+  },
+  "symmetrical_villas": {
+   "effects": {
+    "housing_output": 0.0024
+   },
+   "name": "Symmetrical Villas",
+   "observation": "The villa's two wings mirror each other round a porticoed hall, and the farm buildings hide behind the kitchen garden.",
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png"
+  },
+  "fountain_squares": {
+   "effects": {
+    "water_access": 0.003,
+    "cohesion": 0.0014,
+    "sanitation": 0.001
+   },
+   "name": "Fountain Squares",
+   "observation": "The paved square before the town hall has a fountain at its centre, and the water carriers fill their casks at its basin.",
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "merchants_exchange_hall": {
+   "effects": {
+    "trade_capacity": 0.002
+   },
+   "name": "Exchange Hall",
+   "observation": "At noon the merchants gather in the exchange's arcaded court, each nation at its own pillar.",
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png"
+  },
+  "elliptical_arch_bridges": {
+   "effects": {
+    "route_speed": 0.003,
+    "haul_capacity": 0.002,
+    "disaster_resilience": 0.0028,
+    "construction_rate": 0.003,
+    "trade_capacity": 0.001
+   },
+   "name": "Elliptical Arch Bridges",
+   "observation": "Three flat arches carry the bridge across the river, and barges pass beneath without lowering their masts.",
+   "ability_reason": "Flatter arches span wide rivers on fewer piers; bridges stop damming the floods and let the boats through.",
+   "art": "res://assets/ui/research/subjects/timber_bridges-v1.png"
+  },
+  "truss_timber_bridges": {
+   "effects": {
+    "route_speed": 0.0015,
+    "haul_capacity": 0.001,
+    "construction_rate": 0.002,
+    "timber_pressure": 0.002
+   },
+   "name": "Truss Bridges",
+   "observation": "Triangles of timber carry the bridge across the gorge in one span, and no pier stands in the torrent.",
+   "art": "res://assets/ui/research/subjects/timber_bridges-v1.png"
+  },
+  "bridge_wheel_waterworks": {
+   "effects": {
+    "water_access": 0.012,
+    "sanitation": 0.004,
+    "water_safety": 0.003,
+    "disaster_resilience": 0.0021,
+    "labor_demand": 0.002
+   },
+   "name": "Bridge Waterworks",
+   "observation": "Wheels under the bridge's arches turn with the tide and pump river water up into the city's lead mains.",
+   "ability_reason": "The river's own current pumps water to the houses, and piped supply no longer depends on a spring above the town.",
+   "art": "res://assets/ui/research/subjects/water_mills-v1.png"
+  },
+  "cut_through_avenues": {
+   "effects": {
+    "route_speed": 0.002,
+    "sanitation": 0.001,
+    "cohesion": -0.0014
+   },
+   "name": "Cut-Through Avenues",
+   "observation": "The prince's surveyors drive a straight avenue through the old quarter, and pilgrims walk from one great square to the next.",
+   "social_consequence": "The city gains broad views and quick passage; the families of the demolished lanes are scattered.",
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "flushing_privy_cistern": {
+   "effects": {
+    "sanitation": 0.003,
+    "health_protection": 0.001
+   },
+   "name": "Flushing Privy",
+   "observation": "Pull the handle and water from the cistern above washes the pan clean; the courtier who built one has had it copied in two houses.",
+   "art": "res://assets/ui/research/subjects/latrine_siting-v1.png"
+  },
+  "fireproof_record_vaults": {
+   "effects": {
+    "knowledge_preservation": 0.002,
+    "state_capacity": 0.001,
+    "disaster_resilience": 0.0014
+   },
+   "name": "Fireproof Record Vaults",
+   "observation": "The realm's rolls are kept in brick-vaulted rooms with iron doors and no timber anywhere a spark could catch.",
+   "art": "res://assets/ui/research/subjects/formal_archives-v1.png"
+  },
+  "uniform_facade_squares": {
+   "effects": {
+    "housing_output": 0.0032
+   },
+   "name": "Uniform Squares",
+   "observation": "Every house round the square has the same arcade, the same windows and the same roofline, as the charter demanded.",
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "contour_water_cut": {
+   "effects": {
+    "water_access": 0.008,
+    "water_safety": 0.003,
+    "sanitation": 0.002,
+    "labor_demand": 0.003
+   },
+   "name": "Contour Water Cut",
+   "observation": "The new cut winds forty miles along the hillside, falling a few inches to the mile, and brings spring water to the town's round pond.",
+   "art": "res://assets/ui/research/discovery-600/river_supply_channels.png"
+  },
+  "tree_lined_promenades": {
+   "effects": {
+    "cohesion": 0.0014,
+    "health_protection": 0.001
+   },
+   "name": "Promenades",
+   "observation": "Where the old ramparts stood, four rows of limes shade a gravel walk, and the whole town takes the air on a holiday.",
+   "art": "res://assets/ui/research/paper/building_shading_design.png"
+  },
+  "drained_lake_polders": {
+   "effects": {
+    "cultivation_yield": 0.005,
+    "food_output": 0.004,
+    "disaster_resilience": 0.0028,
+    "labor_demand": 0.004,
+    "ecological_pressure": 0.003
+   },
+   "name": "Drained Lake Polders",
+   "observation": "A ring dike is thrown round the lake, forty mills pump for four years, and a new village is laid out on the old lake bed.",
+   "ability_reason": "Whole lakes become farmland, and the realm gains land without conquest.",
+   "art": "res://assets/ui/research/subjects/drainage-v1.png"
+  },
+  "scagliola_stucco": {
+   "effects": {
+    "housing_output": 0.0016
+   },
+   "name": "Scagliola",
+   "observation": "Plaster mixed with glue and colour is polished until it passes for marble, and a column costs a tenth of the stone.",
+   "art": "res://assets/ui/research/paper/mineral_pigment_preparation.png"
+  },
+  "mansard_roofs": {
+   "effects": {
+    "housing_output": 0.0032,
+    "construction_rate": 0.001
+   },
+   "name": "Mansard Roofs",
+   "observation": "The roof breaks steeply at the eaves, and the attic under it becomes a row of rooms with dormer windows.",
+   "art": "res://assets/ui/research/paper/roof_flashing_interfaces.png"
+  },
+  "fen_drainage_cuts": {
+   "effects": {
+    "cultivation_yield": 0.005,
+    "disaster_resilience": 0.0035,
+    "food_output": 0.003,
+    "haul_capacity": 0.001,
+    "labor_demand": 0.004,
+    "ecological_pressure": 0.004,
+    "cohesion": -0.0021
+   },
+   "name": "Fen Drainage Cuts",
+   "observation": "A straight cut twenty miles long carries the fen water to the sea, and the sluices keep the tide out.",
+   "ability_reason": "Great straight drains turn seasonal marsh into ploughland, and the realm's granary grows by whole districts.",
+   "social_consequence": "The drainers gain new farmland; the fenmen lose their fish, fowl and reed, and the drained peat begins to shrink.",
+   "art": "res://assets/ui/research/subjects/drainage-v1.png"
+  },
+  "alternating_bond_brickwork": {
+   "effects": {
+    "construction_rate": 0.003,
+    "disaster_resilience": 0.0014
+   },
+   "name": "Alternating Bond",
+   "observation": "Headers and stretchers alternate in every course, and the rubbed brick arches over the windows are cut to a hair's joint.",
+   "art": "res://assets/ui/research/discovery-600/mould_made_mudbricks.png"
+  },
+  "canal_ring_quarters": {
+   "effects": {
+    "housing_output": 0.0032,
+    "haul_capacity": 0.0015,
+    "trade_capacity": 0.0015,
+    "route_speed": 0.001,
+    "disease_exposure": 0.001
+   },
+   "name": "Canal Ring Quarters",
+   "observation": "The new quarters ring the old town in three canals, with quays for the barges and elms along the brick-paved streets.",
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "water_tower_cisterns": {
+   "effects": {
+    "water_access": 0.005,
+    "disaster_resilience": 0.0014,
+    "water_safety": 0.001
+   },
+   "name": "Water Towers",
+   "observation": "The force pump drives water up into the lead tank in the tower, and from there it runs down to the fountains and kitchens.",
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "axial_palace_gardens": {
+   "effects": {
+    "legitimacy": 0.0021,
+    "state_capacity": 0.002,
+    "construction_rate": 0.004,
+    "labor_demand": 0.006,
+    "cohesion": -0.0014
+   },
+   "name": "Axial Palace",
+   "observation": "Palace, forecourt and garden fall on one line to the horizon, and the court lodges in the wings at the prince's command.",
+   "ability_reason": "A seat of court built on one axis gathers the nobility under the prince's eye; state and spectacle become one place.",
+   "social_consequence": "The court glitters, the nobles are tamed by residence, and the realm pays for the fountains in taxes and labor drafts.",
+   "art": "res://assets/ui/research/discovery-600/shrine_terraces.png"
+  },
+  "cast_iron_water_mains": {
+   "effects": {
+    "water_access": 0.01,
+    "water_safety": 0.004,
+    "sanitation": 0.003,
+    "repair_capacity": 0.002,
+    "labor_demand": 0.002
+   },
+   "name": "Cast-Iron Mains",
+   "observation": "Cast-iron pipes flanged and bolted together carry the fountain water under pressure, where wooden mains would burst.",
+   "ability_reason": "Iron pipes hold pressure and last for generations, so water can be sent uphill and far.",
+   "art": "res://assets/ui/research/paper/clay_pipe_socket_jointing.png"
+  },
+  "fire_rebuilding_acts": {
+   "effects": {
+    "disaster_risk": -0.005,
+    "disaster_resilience": 0.0028,
+    "housing_output": 0.0016
+   },
+   "name": "Fire Rebuilding Acts",
+   "observation": "No timber fronts, brick walls of set thickness, four classes of house by the width of the street: the burned city is rebuilt to the act.",
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "street_lantern_lighting": {
+   "effects": {
+    "cohesion": 0.0014,
+    "injury_risk": -0.001,
+    "fuel_demand": 0.002
+   },
+   "name": "Street Lanterns",
+   "observation": "Oil lanterns hang over the streets from dusk to midnight, and the lamplighter's ladder is a familiar sight at evening.",
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png"
+  },
+  "sash_windows": {
+   "effects": {
+    "housing_output": 0.0024,
+    "health_protection": 0.002
+   },
+   "name": "Sash Windows",
+   "observation": "The lower sash slides up on its cords and hidden weights, and the room airs without the window swinging into the street.",
+   "art": "res://assets/ui/research/paper/building_shading_design.png"
+  },
+  "lock_staircases": {
+   "effects": {
+    "haul_capacity": 0.002,
+    "route_speed": 0.001,
+    "labor_demand": 0.002
+   },
+   "name": "Lock Staircases",
+   "observation": "Eight locks climb the hillside in one flight, each chamber's upper gate the next one's lower.",
+   "art": "res://assets/ui/research/subjects/canal_locks-v2.png"
+  },
+  "canal_tunnels": {
+   "effects": {
+    "haul_capacity": 0.002,
+    "route_speed": 0.0015,
+    "labor_demand": 0.003,
+    "injury_risk": 0.002
+   },
+   "name": "Canal Tunnels",
+   "observation": "Boatmen lie on their backs and walk the barge through the dark tunnel with their feet on the roof.",
+   "art": "res://assets/ui/research/subjects/quarry_reading-v1.png"
+  },
+  "water_lifting_machine": {
+   "effects": {
+    "water_access": 0.008,
+    "legitimacy": 0.0014,
+    "labor_demand": 0.004,
+    "repair_capacity": 0.001
+   },
+   "name": "Great Water Machine",
+   "observation": "Fourteen wheels in the river drive two hundred pumps up three stages of the hill, and the palace fountains play for the court.",
+   "ability_reason": "The river is made to climb a hill: machinery can lift water where no gravity would carry it.",
+   "art": "res://assets/ui/research/subjects/water_mills-v1.png"
+  },
+  "mirror_gallery_halls": {
+   "effects": {
+    "legitimacy": 0.0014
+   },
+   "name": "Hall of Mirrors",
+   "observation": "Seventeen arched mirrors face seventeen windows, and the candlelight of the ball is doubled down the gallery.",
+   "art": "res://assets/ui/research/paper/glass_annealing_schedules.png"
+  },
+  "speculative_terrace_rows": {
+   "effects": {
+    "housing_output": 0.0048,
+    "construction_rate": 0.004
+   },
+   "name": "Speculative Terraces",
+   "observation": "The builder leases a field, runs up forty brick houses to one plan and sells them before the plaster is dry.",
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "heated_orangeries": {
+   "effects": {
+    "cultivation_yield": 0.001,
+    "food_output": 0.001,
+    "fuel_demand": 0.002
+   },
+   "name": "Heated Orangeries",
+   "observation": "Behind the south-facing glass, flues in the back wall keep the orange trees alive through the frost.",
+   "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png"
+  },
+  "vaulted_brick_sewers": {
+   "effects": {
+    "sanitation": 0.008,
+    "disease_exposure": -0.003,
+    "water_safety": 0.002,
+    "labor_demand": 0.003,
+    "water_pollution": 0.002
+   },
+   "name": "Brick Sewers",
+   "observation": "A man can walk upright in the brick sewer under the high street, which carries the storm water and the house drains down to the river.",
+   "art": "res://assets/ui/research/subjects/covered_sewers-v1.png"
+  },
+  "turnpike_trust_roads": {
+   "effects": {
+    "route_speed": 0.005,
+    "haul_capacity": 0.003,
+    "trade_capacity": 0.002,
+    "repair_capacity": 0.002,
+    "labor_demand": 0.002
+   },
+   "name": "Turnpike Trusts",
+   "observation": "The trust sets a gate and a toll house every ten miles, and the tolls pay for gravel, ditches and a surveyor.",
+   "ability_reason": "Tolls pay for roads the parishes never kept, and coaches and wagons can run to a timetable.",
+   "art": "res://assets/ui/research/subjects/graded_roads-v1.png"
+  },
+  "enclosed_wet_docks": {
+   "effects": {
+    "naval_capacity": 0.006,
+    "haul_capacity": 0.003,
+    "trade_capacity": 0.0025,
+    "storage_loss": -0.003,
+    "labor_demand": 0.003
+   },
+   "name": "Wet Docks",
+   "observation": "Behind the dock gates the ships ride afloat at low tide, unloading straight onto the quays and into the bonded warehouses.",
+   "ability_reason": "Ships held afloat whatever the tide load and unload in days, and the port can handle a whole fleet at once.",
+   "art": "res://assets/ui/research/paper/dry_dock_services.png"
+  },
+  "bridge_road_engineer_corps": {
+   "effects": {
+    "route_speed": 0.003,
+    "construction_rate": 0.005,
+    "state_capacity": 0.002,
+    "standardization": 0.0014,
+    "haul_capacity": 0.0015
+   },
+   "name": "Bridge and Road Corps",
+   "observation": "The crown's engineers survey every royal road, plan every bridge and check the contractors' work with level and rod.",
+   "ability_reason": "A standing corps of engineers makes roads and bridges a service of the state, and keeps skill and standards across generations.",
+   "art": "res://assets/ui/research/subjects/professional_corps-v1.png"
+  },
+  "culverted_town_streams": {
+   "effects": {
+    "sanitation": 0.004,
+    "disease_exposure": -0.002,
+    "water_pollution": 0.001
+   },
+   "name": "Culverted Streams",
+   "observation": "The stinking brook is arched over with brick, and a street now runs on top where the tanners' ditch once lay.",
+   "art": "res://assets/ui/research/subjects/covered_sewers-v1.png"
+  },
+  "street_name_plates": {
+   "effects": {
+    "route_speed": 0.001,
+    "state_capacity": 0.001,
+    "task_coordination": 0.0012
+   },
+   "name": "Street Name Plates",
+   "observation": "Each corner bears a painted plate with the street's name, and strangers need no longer ask their way.",
+   "art": "res://assets/ui/research/discovery-600/town_identity.png"
+  },
+  "steam_waterworks": {
+   "effects": {
+    "water_access": 0.006,
+    "water_safety": 0.002,
+    "fuel_demand": 0.003,
+    "pollution": 0.002
+   },
+   "name": "Steam Waterworks",
+   "observation": "The engine house by the river pumps day and night, and water reaches the upper streets that no wheel could serve.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "stucco_rendered_facades": {
+   "effects": {
+    "housing_output": 0.0024
+   },
+   "name": "Stucco Facades",
+   "observation": "The brick front is rendered in stucco, lined out in false joints and painted to pass for stone.",
+   "art": "res://assets/ui/research/subjects/lime_mortar-v1.png"
+  },
+  "house_pattern_books": {
+   "effects": {
+    "standardization": 0.0018,
+    "construction_rate": 0.003,
+    "housing_output": 0.0016
+   },
+   "name": "House Pattern Books",
+   "observation": "The builder opens his pattern book at plate thirty and gives the carpenter the doorcase, cornice and stair, all to measure.",
+   "art": "res://assets/ui/research/discovery-600/written_apprentice_instructions.png"
+  },
+  "bridge_pier_caissons": {
+   "effects": {
+    "route_speed": 0.003,
+    "disaster_resilience": 0.0035,
+    "construction_rate": 0.004,
+    "haul_capacity": 0.0015,
+    "injury_risk": 0.002
+   },
+   "name": "Pier Caissons",
+   "observation": "A great timber box is floated to the pier site; the masons build inside it, and it sinks as the stone rises until it settles on the dredged bed.",
+   "ability_reason": "Piers founded in deep water make lasting bridges possible across the great rivers.",
+   "art": "res://assets/ui/research/subjects/counterweight_cranes-v1.png"
+  },
+  "horse_pile_drivers": {
+   "effects": {
+    "construction_rate": 0.004,
+    "labor_efficiency": 0.001,
+    "labor_demand": -0.002
+   },
+   "name": "Horse Pile Drivers",
+   "observation": "A horse walking round the gin lifts the iron ram, and it drops on the pile with a crash heard across the river.",
+   "art": "res://assets/ui/research/paper/compound_pulleys.png"
+  },
+  "iron_flue_stoves": {
+   "effects": {
+    "health_protection": 0.004,
+    "fuel_efficiency": 0.004,
+    "disaster_risk": -0.002,
+    "timber_pressure": -0.001
+   },
+   "name": "Iron Flue Stoves",
+   "observation": "The iron stove heats the room from one armful of wood, and its flue carries the smoke away through the wall.",
+   "art": "res://assets/ui/research/paper/hearth_heat_retention.png"
+  },
+  "dome_iron_chains": {
+   "effects": {
+    "disaster_resilience": 0.0021,
+    "repair_capacity": 0.003
+   },
+   "name": "Dome Iron Chains",
+   "observation": "Iron chains are forged round the cracked dome in rings, and the cracks stop spreading.",
+   "art": "res://assets/ui/research/subjects/forge_welding-v1.png"
+  },
+  "bridge_road_engineering_school": {
+   "effects": {
+    "knowledge_rate": 0.003,
+    "construction_rate": 0.003,
+    "knowledge_preservation": 0.001
+   },
+   "name": "Bridge and Road School",
+   "observation": "The young engineers study mechanics and drawing through the winter, and in summer they survey roads under the corps' inspectors.",
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png"
+  },
+  "building_line_regulation": {
+   "effects": {
+    "route_speed": 0.001,
+    "state_capacity": 0.001,
+    "sanitation": 0.001,
+    "disaster_risk": -0.001
+   },
+   "name": "Building Lines",
+   "observation": "The surveyor stakes the line, and no new house front may stand one inch forward of it.",
+   "art": "res://assets/ui/research/discovery-600/rod_and_cord_leveling.png"
+  },
+  "lightning_conductors": {
+   "effects": {
+    "disaster_resilience": 0.0028,
+    "disaster_risk": -0.003
+   },
+   "name": "Lightning Rods",
+   "observation": "A pointed iron rod on the steeple runs down to damp earth, and the powder magazine beside it no longer fears the storm.",
+   "art": "res://assets/ui/research/paper/steel_wire_drawing.png"
+  },
+  "braced_timber_cage_walls": {
+   "effects": {
+    "disaster_resilience": 0.0035,
+    "disaster_risk": -0.003,
+    "housing_output": 0.0016,
+    "timber_pressure": 0.001
+   },
+   "name": "Braced Timber Cages",
+   "observation": "After the earthquake, new houses are built on a cage of crossed timbers that sways instead of falling.",
+   "art": "res://assets/ui/research/paper/timber_lateral_bracing.png"
+  },
+  "concrete_mix_design": {
+   "effects": {
+    "construction_rate": 0.004,
+    "disaster_resilience": 0.0021
+   },
+   "observation": "The engineer tests lime from each quarry by whether it sets under water, and mixes his harbour concrete by measured parts.",
+   "art": "res://assets/ui/research/subjects/lime_burning-v1.png"
+  },
+  "dovetailed_rock_lighthouse": {
+   "effects": {
+    "naval_capacity": 0.006,
+    "route_speed": 0.0015,
+    "construction_rate": 0.003,
+    "trade_capacity": 0.001,
+    "disaster_risk": -0.003
+   },
+   "name": "Rock Lighthouse",
+   "observation": "Each granite block is dovetailed into the next, so the tower on the wave-swept rock stands as one stone, and its light shows twenty miles out.",
+   "ability_reason": "Stones locked together resist the sea: lights stand on the most dangerous rocks, and ships can keep the sea at night.",
+   "art": "res://assets/ui/research/subjects/quarry_reading-v1.png"
+  },
+  "puddled_clay_canal_lining": {
+   "effects": {
+    "haul_capacity": 0.0015,
+    "water_access": 0.002,
+    "repair_capacity": 0.002
+   },
+   "name": "Puddled Clay Lining",
+   "observation": "Diggers and cattle tread wet clay into the canal bed until it holds water like a pot.",
+   "art": "res://assets/ui/research/subjects/clay_tempering-v1.png"
+  },
+  "canal_river_aqueducts": {
+   "effects": {
+    "haul_capacity": 0.004,
+    "route_speed": 0.002,
+    "trade_capacity": 0.0015,
+    "construction_rate": 0.003,
+    "labor_demand": 0.003
+   },
+   "name": "Canal Aqueducts",
+   "observation": "The barges sail across the river on a stone aqueduct forty feet above the water.",
+   "ability_reason": "Canals can cross valleys on the level, and a network can join rivers instead of following them.",
+   "art": "res://assets/ui/research/subjects/canal_locks-v2.png"
+  },
+  "house_numbering": {
+   "effects": {
+    "state_capacity": 0.001
+   },
+   "name": "House Numbers",
+   "observation": "Every door is numbered, odd on one side and even on the other, and the letter carrier finds the house without asking.",
+   "art": "res://assets/ui/research/discovery-600/town_identity.png"
+  },
+  "curbed_footways": {
+   "effects": {
+    "route_speed": 0.001,
+    "injury_risk": -0.002,
+    "sanitation": 0.001
+   },
+   "name": "Curbed Footways",
+   "observation": "A raised stone pavement with a curb keeps walkers above the mud and out of the way of the carts.",
+   "art": "res://assets/ui/research/subjects/graded_roads-v1.png"
+  },
+  "planned_new_town_grid": {
+   "effects": {
+    "housing_output": 0.004,
+    "sanitation": 0.002,
+    "route_speed": 0.001
+   },
+   "name": "Planned New Town",
+   "observation": "Across the valley from the old town rise three straight streets and two squares, and the gentry move over the bridge.",
+   "social_consequence": "The well-off move to clean new streets, and the old town is left to the poor and its crowded closes.",
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "crescent_terraces": {
+   "effects": {
+    "housing_output": 0.0024,
+    "health_protection": 0.001
+   },
+   "name": "Crescent Terraces",
+   "observation": "Thirty houses sweep round a green in one curved front, as if they were a single palace.",
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "cylinder_boring": {
+   "effects": {
+    "tool_quality": 0.004,
+    "fuel_efficiency": 0.003,
+    "warfare_readiness": 0.001
+   },
+   "observation": "The boring bar, held at both ends, cuts the engine cylinder true to within the thickness of a thin coin.",
+   "art": "res://assets/ui/research/paper/cylinder_boring.png"
+  },
+  "layered_stone_road_beds": {
+   "effects": {
+    "route_speed": 0.005,
+    "haul_capacity": 0.003,
+    "repair_capacity": 0.003,
+    "labor_demand": 0.002
+   },
+   "name": "Layered Stone Roads",
+   "observation": "Stone broken small enough to fit a man's mouth is laid in layers on a cambered bed with ditches either side, and the wheels pack it hard.",
+   "ability_reason": "Dry, well-drained stone roads carry coaches in all weathers, and journey times fall by half.",
+   "art": "res://assets/ui/research/paper/aggregate_road_foundations.png"
+  },
+  "ministry_office_block": {
+   "effects": {
+    "state_capacity": 0.004,
+    "task_coordination": 0.0024,
+    "knowledge_preservation": 0.0015,
+    "institutional_rigidity": 0.0021
+   },
+   "name": "Ministry Offices",
+   "observation": "The ministries move from rented houses into one great block of offices by the river, with a clerk's desk in every window.",
+   "ability_reason": "Departments under one roof can coordinate; the realm's business runs from files and not from ministers' households.",
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png"
+  },
+  "s_trap_water_closets": {
+   "effects": {
+    "sanitation": 0.004,
+    "health_protection": 0.002,
+    "disease_exposure": -0.002
+   },
+   "name": "S-Bend Closets",
+   "observation": "The pipe bends in an S below the pan, and the water held in the bend stops the sewer air rising into the house.",
+   "art": "res://assets/ui/research/paper/building_drainage_coordination.png"
+  },
+  "cast_iron_arch_bridge": {
+   "effects": {
+    "route_speed": 0.003,
+    "haul_capacity": 0.002,
+    "construction_rate": 0.004,
+    "disaster_resilience": 0.0021,
+    "fuel_demand": 0.002
+   },
+   "name": "Cast-Iron Bridge",
+   "observation": "Five cast-iron ribs, jointed like carpentry, spring across the gorge, and people come from far away to walk on the iron bridge.",
+   "ability_reason": "Iron shows it can carry a bridge: here is the material for spans greater than timber or stone will allow.",
+   "art": "res://assets/ui/research/subjects/structural_steel-v1.png"
+  },
+  "concrete_formwork_systems": {
+   "effects": {
+    "construction_rate": 0.004,
+    "labor_demand": -0.001
+   },
+   "observation": "Reusable plank shutters are clamped on either side, the lime concrete rammed in, and the shutters moved up for the next course.",
+   "art": "res://assets/ui/research/paper/rammed_earth_construction.png"
+  },
+  "precision_machinery": {
+   "effects": {
+    "tool_quality": 0.012,
+    "craft_output": 0.0056,
+    "standardization": 0.0027,
+    "repair_capacity": 0.004,
+    "labor_demand": 0.002
+   },
+   "observation": "A lathe with true iron slides, a screw feed and hardened bearings cuts parts that fit without the filer's endless trying.",
+   "ability_reason": "Machines that guide the cutter truly let every part be made to measure, so engines and instruments can be built to fit.",
+   "art": "res://assets/ui/research/subjects/precision_machinery-v1.png"
+  },
+  "rubble_mound_breakwaters": {
+   "effects": {
+    "naval_capacity": 0.004,
+    "disaster_resilience": 0.0021,
+    "haul_capacity": 0.001,
+    "labor_demand": 0.003
+   },
+   "name": "Rubble Breakwaters",
+   "observation": "Barges drop a mile of broken stone into the roadstead until a long mound breaks the sea and the fleet can shelter behind it.",
+   "art": "res://assets/ui/research/subjects/quarry_reading-v1.png"
+  },
+  "road_rolling_maintenance": {
+   "effects": {
+    "route_speed": 0.0015,
+    "repair_capacity": 0.003,
+    "labor_demand": -0.001
+   },
+   "name": "Road Rolling",
+   "observation": "A heavy roller drawn by four horses packs the new stone, and the water cart follows to lay the dust.",
+   "art": "res://assets/ui/research/subjects/graded_roads-v1.png"
+  },
+  "iron_framed_fireproof_mill": {
+   "effects": {
+    "disaster_resilience": 0.0056,
+    "disaster_risk": -0.005,
+    "construction_rate": 0.005,
+    "craft_output": 0.0021,
+    "fuel_demand": 0.002
+   },
+   "name": "Iron-Framed Mill",
+   "observation": "Brick arches spring between cast-iron beams on iron columns, and not a board in the mill could catch from a lamp.",
+   "ability_reason": "Iron frames and brick vaults make buildings that cannot burn, and mills can rise many floors high.",
+   "art": "res://assets/ui/research/subjects/structural_steel-v1.png"
+  },
+  "narrow_throat_fireplace": {
+   "effects": {
+    "fuel_efficiency": 0.003,
+    "health_protection": 0.003
+   },
+   "name": "Narrow-Throat Fireplace",
+   "observation": "The fireplace is narrowed at the throat and its cheeks angled outward, so the room is warmed and the smoke goes up.",
+   "art": "res://assets/ui/research/paper/hearth_heat_retention.png"
+  },
+  "pressure_pipe_jointing": {
+   "effects": {
+    "water_access": 0.003,
+    "repair_capacity": 0.002,
+    "water_safety": 0.001
+   },
+   "observation": "Iron pipes are flanged and bolted on a lead gasket, or socketed and caulked, and the main holds under pressure.",
+   "art": "res://assets/ui/research/paper/clay_pipe_socket_jointing.png"
+  }
+ }
 }

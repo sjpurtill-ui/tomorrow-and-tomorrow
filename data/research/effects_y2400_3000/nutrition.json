@@ -1,5 +1,1378 @@
 {
  "line": "nutrition",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "carbonated_table_waters": {
+   "effects": {
+    "fuel_demand": 0.001,
+    "health_risk": 0.0005,
+    "nutrition_quality": 0.0005,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
+   "name": "Sparkling Waters",
+   "observation": "Spring water is bottled under gas and sold at table, and the stoneware bottles come back to be refilled."
+  },
+  "food_retorts": {
+   "effects": {
+    "food_spoilage": -0.0153,
+    "food_storage": 0.022,
+    "fuel_demand": 0.002,
+    "health_risk": 0.001,
+    "labor_demand": 0.002,
+    "logistics_endurance": 0.004,
+    "nutrition_quality": 0.002
+   },
+   "art": "res://assets/ui/research/paper/food_retorts.png",
+   "observation": "Meat and vegetables are sealed in jars and tin cases and boiled, and the ration opened a year later is still sound.",
+   "ability_reason": "An army or a ship can now carry a year of sound food instead of salt meat and biscuit alone.",
+   "production_items": [
+    "food_retort"
+   ]
+  },
+  "humidity_measurement": {
+   "effects": {
+    "food_spoilage": -0.0034,
+    "food_storage": 0.0022,
+    "observation_rate": 0.001
+   },
+   "art": "res://assets/ui/research/paper/grain_moisture_testing.png",
+   "observation": "Storekeepers hang hair gauges in the granary and know from the reading when grain will sweat and mould."
+  },
+  "root_beet_sugar": {
+   "effects": {
+    "cultivation_yield": 0.0036,
+    "food_output": 0.0078,
+    "fuel_demand": 0.003,
+    "labor_demand": 0.002,
+    "nutrition_quality": -0.001,
+    "soil_productivity": 0.0014,
+    "trade_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/paper/fruit_pulp_screening.png",
+   "name": "Beet Sugar",
+   "observation": "The pale field root is sliced, soaked and boiled down in factories, and sugar no longer comes only from hot lands across the sea.",
+   "ability_reason": "Cold lands grow their own sugar, and a luxury becomes an everyday food of the poor.",
+   "social_consequence": "Sugar enters every kitchen; teeth rot earlier and the beet factory decides what the district plants."
+  },
+  "farm_improvement_societies": {
+   "effects": {
+    "adoption_rate": 0.002,
+    "cohesion": 0.001,
+    "cultivation_yield": 0.0024
+   },
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+   "name": "Farm Societies",
+   "observation": "Farmers meet at shows to judge beasts and ploughing, and the prize-winner's methods are copied across the district."
+  },
+  "pedigree_herd_books": {
+   "effects": {
+    "food_output": 0.0052,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.001,
+    "nutrition_quality": 0.002,
+    "trade_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
+   "name": "Herd Books",
+   "observation": "Printed herd books record every sire and dam, and a pedigree bull sells for the price of a farm.",
+   "ability_reason": "Breeders can now fix a line of heavy, milky or woolly stock and prove it to buyers.",
+   "social_consequence": "Old local breeds are crossed out or lost; small farmers cannot afford the registered bull."
+  },
+  "pressed_bakers_yeast": {
+   "effects": {
+    "food_output": 0.0013,
+    "food_spoilage": -0.0017,
+    "nutrition_quality": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
+   "name": "Pressed Yeast",
+   "observation": "Distilleries press and sell fresh yeast in cakes, and town bakers raise a lighter, more even loaf."
+  },
+  "cocoa_press_chocolate": {
+   "effects": {
+    "food_storage": 0.0022,
+    "nutrition_quality": 0.0005,
+    "trade_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/curing_regimens-v1.png",
+   "name": "Eating Chocolate",
+   "observation": "Cocoa is pressed of its fat and moulded into bars that keep for months in the pocket."
+  },
+  "household_preserving_jars": {
+   "effects": {
+    "food_spoilage": -0.0068,
+    "food_storage": 0.011,
+    "health_risk": 0.0005,
+    "nutrition_quality": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
+   "name": "Preserving Jars",
+   "observation": "Cheap glass jars with screw lids let every kitchen put up fruit and beans for the winter.",
+   "social_consequence": "Autumn becomes preserving season; a badly sealed jar poisons a household now and then."
+  },
+  "vacuum_pan_sugar": {
+   "effects": {
+    "food_output": 0.0026,
+    "fuel_demand": 0.001,
+    "fuel_efficiency": 0.002,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/paper/fruit_pulp_screening.png",
+   "name": "Vacuum Pans",
+   "observation": "Sugar is boiled under a vacuum at low heat, and the crystals come out whiter and with less burnt syrup."
+  },
+  "oilcake_winter_feed": {
+   "effects": {
+    "food_output": 0.0039,
+    "soil_productivity": 0.0028,
+    "trade_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/paper/seed_oil_pressing.png",
+   "name": "Oil-cake Feed",
+   "observation": "Pressed cake left over from the oil mills is bought to fatten stock through the winter, and their dung enriches the fields."
+  },
+  "sheep_scab_dipping": {
+   "effects": {
+    "fiber_yield": 0.002,
+    "food_output": 0.0026,
+    "health_risk": 0.0005,
+    "water_pollution": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
+   "name": "Sheep Dipping",
+   "observation": "Flocks are driven through troughs of arsenic and sulphur wash against scab and ticks."
+  },
+  "mechanical_reaper": {
+   "effects": {
+    "cultivation_yield": 0.0024,
+    "fatigue": -0.002,
+    "food_output": 0.0078,
+    "injury_risk": 0.002,
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.004
+   },
+   "art": "res://assets/ui/research/paper/threshing_frames.png",
+   "name": "Mechanical Reaper",
+   "observation": "A horse-drawn machine cuts in a day what a gang of reapers cut in a week.",
+   "ability_reason": "Harvest no longer waits on hired hands, and a family farm can crop far more land.",
+   "social_consequence": "Harvest gangs lose their work; a slip at the knife bar costs a hand or a leg."
+  },
+  "steel_scouring_plough": {
+   "effects": {
+    "cultivation_yield": 0.0048,
+    "ecological_pressure": 0.002,
+    "food_output": 0.0026,
+    "labor_efficiency": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/crop_rotation-v1.png",
+   "name": "Steel Plough",
+   "observation": "A polished steel mouldboard scours clean through sticky prairie sod that clogs an iron plough."
+  },
+  "nutrient_response_trials": {
+   "effects": {
+    "cultivation_yield": 0.0084,
+    "knowledge_rate": 0.002,
+    "observation_rate": 0.002,
+    "soil_productivity": 0.007
+   },
+   "art": "res://assets/ui/research/paper/nutrient_response_trials.png",
+   "observation": "Side-by-side plots receive measured nitrogen, phosphorus and potash, and the yields show which each soil lacks.",
+   "ability_reason": "Farmers can now feed a field exactly what it lacks rather than guessing with dung and marl."
+  },
+  "soil_infiltration_trials": {
+   "effects": {
+    "observation_rate": 0.001,
+    "soil_productivity": 0.0028,
+    "water_access": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/soil_assays-v1.png",
+   "observation": "Water is poured into rings on the field, and the time it takes to sink tells whether to drain or mulch."
+  },
+  "seabird_guano_trade": {
+   "effects": {
+    "cohesion": -0.001,
+    "cultivation_yield": 0.006,
+    "ecological_pressure": 0.003,
+    "soil_productivity": 0.0084,
+    "trade_capacity": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/nitrate_cultivation-v1.png",
+   "name": "Guano Trade",
+   "observation": "Ships bring dried seabird dung from far rock islands, and a sack of it doubles a field's yield.",
+   "social_consequence": "Islands are stripped to bare rock, and labourers on them are held in hard bondage."
+  },
+  "mineral_nitrate_dressing": {
+   "effects": {
+    "cultivation_yield": 0.006,
+    "soil_productivity": 0.0042,
+    "trade_capacity": 0.002,
+    "water_pollution": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/nitrate_cultivation-v1.png",
+   "observation": "Mined nitrate from the dry coasts is spread on grain in spring, and the crop darkens and thickens.",
+   "production_items": [
+    "nitrate_fertilizer"
+   ]
+  },
+  "mulch_water_management": {
+   "effects": {
+    "cultivation_yield": 0.0012,
+    "soil_productivity": 0.0028,
+    "water_access": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "observation": "Straw mulch is laid at measured depths, and the deeper beds hold their moisture through the dry weeks."
+  },
+  "phosphate_dressing": {
+   "effects": {
+    "cultivation_yield": 0.0036,
+    "labor_demand": 0.001,
+    "soil_productivity": 0.0056
+   },
+   "art": "res://assets/ui/research/subjects/phosphate_dressing-v1.png",
+   "observation": "Ground phosphate rock is dressed on thin soils and on root crops, and the turnips swell.",
+   "production_items": [
+    "ground_phosphate_fertilizer"
+   ]
+  },
+  "experimental_farm_station": {
+   "effects": {
+    "cultivation_yield": 0.0084,
+    "knowledge_preservation": 0.003,
+    "knowledge_rate": 0.002,
+    "labor_demand": 0.002,
+    "soil_productivity": 0.0056,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/paper/nutrient_response_trials.png",
+   "name": "Experiment Station",
+   "observation": "A station keeps the same plots under the same treatments year after year and publishes the yields.",
+   "ability_reason": "Agriculture now has a standing laboratory, and each decade's methods are tested against the last.",
+   "social_consequence": "A salaried station director now advises the ministry and the farm societies."
+  },
+  "phosphate_solubilization": {
+   "effects": {
+    "cultivation_yield": 0.006,
+    "fuel_demand": 0.001,
+    "pollution": 0.003,
+    "soil_productivity": 0.007,
+    "water_pollution": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/phosphate_dressing-v1.png",
+   "observation": "Bones and phosphate rock are treated with vitriol in factories, and the soluble dressing acts in a single season.",
+   "production_items": [
+    "soluble_phosphate_fertilizer"
+   ]
+  },
+  "machine_tile_drainage": {
+   "effects": {
+    "cultivation_yield": 0.006,
+    "disaster_resilience": 0.002,
+    "ecology_recovery": -0.001,
+    "labor_demand": 0.002,
+    "soil_productivity": 0.0042
+   },
+   "art": "res://assets/ui/research/paper/clay_pipe_forming.png",
+   "name": "Tile Drainage",
+   "observation": "Machines extrude clay pipes by the thousand, and wet clay fields are laid with drains a yard deep.",
+   "social_consequence": "Wet meadows and marsh margins vanish under tile drains."
+  },
+  "famine_relief_works": {
+   "effects": {
+    "cohesion": -0.001,
+    "food_output": 0.0039,
+    "food_storage": 0.0066,
+    "labor_demand": 0.002,
+    "legitimacy": 0.001,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/regional_granaries-v1.png",
+   "name": "Famine Relief",
+   "observation": "In a blight famine the state buys foreign grain and puts the starving to work on roads for a ration.",
+   "social_consequence": "Relief comes late and is tied to hard labour; the famine is remembered against the rulers for generations."
+  },
+  "heated_glasshouses": {
+   "effects": {
+    "food_output": 0.0026,
+    "fuel_demand": 0.003,
+    "nutrition_quality": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png",
+   "name": "Heated Glasshouses",
+   "observation": "Glasshouses heated by hot-water pipes force grapes, cucumbers and early greens in winter."
+  },
+  "intensive_gardens": {
+   "effects": {
+    "disease_exposure": 0.001,
+    "ecological_pressure": 0.001,
+    "food_output": 0.0052,
+    "labor_demand": 0.002,
+    "nutrition_quality": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png",
+   "observation": "Market gardens near the towns crop four times a year on town manure to pay their high rents."
+  },
+  "steam_threshing_sets": {
+   "effects": {
+    "food_output": 0.0039,
+    "fuel_demand": 0.003,
+    "injury_risk": 0.001,
+    "labor_demand": -0.003,
+    "labor_efficiency": 0.003
+   },
+   "art": "res://assets/ui/research/paper/threshing_frames.png",
+   "name": "Steam Threshing",
+   "observation": "A steam engine and threshing drum travel from farm to farm, and a winter's flail work is done in days.",
+   "social_consequence": "Winter threshing work, long the landless labourer's living, disappears."
+  },
+  "food_adulteration_tests": {
+   "effects": {
+    "health_risk": -0.002,
+    "nutrition_quality": 0.003,
+    "observation_rate": 0.001
+   },
+   "art": "res://assets/ui/research/paper/biological_staining.png",
+   "name": "Adulteration Tests",
+   "observation": "The microscope and the chemist show chalk in bread, water in milk and leaves of hedges in tea."
+  },
+  "graded_grain_elevators": {
+   "effects": {
+    "food_spoilage": -0.0034,
+    "food_storage": 0.011,
+    "standardization": 0.002,
+    "trade_capacity": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/regional_granaries-v1.png",
+   "name": "Graded Elevators",
+   "observation": "Grain is dumped by bucket belt into bins and sold by the inspector's grade, not by the sack."
+  },
+  "chemical_baking_powder": {
+   "effects": {
+    "food_output": 0.0013,
+    "nutrition_quality": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/grain_milling-v1.png",
+   "name": "Baking Powder",
+   "observation": "A powder of soda and acid raises cakes and quick bread without waiting on yeast."
+  },
+  "condensed_milk": {
+   "effects": {
+    "food_spoilage": -0.0034,
+    "food_storage": 0.0088,
+    "logistics_endurance": 0.002,
+    "neonatal_survival": -0.001,
+    "nutrition_quality": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
+   "name": "Condensed Milk",
+   "observation": "Milk boiled down with sugar keeps in sealed tins, and soldiers and sailors carry it far from any cow.",
+   "social_consequence": "Poor mothers feed it thinned to infants, who fall behind the breast-fed."
+  },
+  "fermentation_starter_cultures": {
+   "effects": {
+    "food_output": 0.0013,
+    "food_spoilage": -0.0034,
+    "nutrition_quality": 0.002
+   },
+   "art": "res://assets/ui/research/paper/microbial_growth_measurement.png",
+   "observation": "Brewers and dairies keep pure cultures of one yeast or souring germ, and batches stop going wrong."
+  },
+  "plant_pathology_diagnosis": {
+   "effects": {
+    "cultivation_yield": 0.0072,
+    "disaster_resilience": 0.002,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/paper/plant_pathology_diagnosis.png",
+   "observation": "Growers learn that blights and rusts are living fungi and name each by its marks on leaf and stem.",
+   "ability_reason": "Crop disease can be named, traced and fought instead of blamed on weather and bad air."
+  },
+  "can_body_forming": {
+   "effects": {
+    "container_capacity": 0.002,
+    "craft_output": 0.002,
+    "food_storage": 0.0088
+   },
+   "art": "res://assets/ui/research/paper/tinplate_coating.png",
+   "observation": "Machines cut, roll and solder tin bodies by the hundred, and canned food falls within reach of the town poor.",
+   "production_items": [
+    "food_can_sets"
+   ]
+  },
+  "farm_colleges_ministry": {
+   "effects": {
+    "adoption_rate": 0.003,
+    "cultivation_yield": 0.0048,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.002,
+    "labor_demand": 0.001,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+   "name": "Farm Colleges",
+   "observation": "Chartered colleges teach farming as a science, and a ministry of agriculture speaks for the land in the cabinet.",
+   "ability_reason": "Farming has its own ministry and its own schooled professionals.",
+   "social_consequence": "A farm minister now sits at the council table; the countryside has a voice and a budget."
+  },
+  "gentle_heat_treatment": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "food_spoilage": -0.0136,
+    "food_storage": 0.0066,
+    "neonatal_survival": 0.005,
+    "nutrition_quality": 0.002
+   },
+   "art": "res://assets/ui/research/paper/microbial_growth_measurement.png",
+   "name": "Gentle Heat Treatment",
+   "observation": "Wine, beer and milk are warmed just short of boiling for a set time, and they no longer sour or carry fevers.",
+   "ability_reason": "Milk can be made safe for children, and wine and beer keep through long voyages."
+  },
+  "meat_extract_cubes": {
+   "effects": {
+    "food_storage": 0.0044,
+    "logistics_endurance": 0.001,
+    "nutrition_quality": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/curing_regimens-v1.png",
+   "name": "Meat Extract",
+   "observation": "Beef is boiled down to a dark paste and pressed into cubes that make a broth anywhere."
+  },
+  "beef_fat_margarine": {
+   "effects": {
+    "food_output": 0.0026,
+    "food_storage": 0.0022,
+    "nutrition_quality": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/curing_regimens-v1.png",
+   "name": "Margarine",
+   "observation": "A butter substitute is churned from beef fat and skim milk, cheap enough for the labourer's bread."
+  },
+  "roller_grain_milling": {
+   "effects": {
+    "food_output": 0.0039,
+    "food_storage": 0.0066,
+    "labor_efficiency": 0.002,
+    "nutrition_quality": -0.004
+   },
+   "art": "res://assets/ui/research/subjects/grain_milling-v1.png",
+   "observation": "Steel rollers grind flour whiter and faster than stones, and the germ and bran are sifted away.",
+   "ability_reason": "Mills can feed great cities with flour that keeps for months.",
+   "social_consequence": "White bread becomes everyone's bread, and the poor lose the germ and bran that fed them."
+  },
+  "twine_binding_harvester": {
+   "effects": {
+    "fiber_yield": -0.001,
+    "food_output": 0.0039,
+    "labor_demand": -0.002,
+    "labor_efficiency": 0.003
+   },
+   "art": "res://assets/ui/research/paper/threshing_frames.png",
+   "name": "Twine Binder",
+   "observation": "The harvester cuts the grain and ties every sheaf with twine, and one man follows where five bound by hand."
+  },
+  "food_adulteration_law": {
+   "effects": {
+    "disease_exposure": -0.002,
+    "health_risk": -0.004,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.001,
+    "nutrition_quality": 0.005,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
+   "name": "Adulteration Law",
+   "observation": "Public analysts test food bought on the open market, and a grocer who sells chalked flour is fined in open court.",
+   "ability_reason": "Food sold in the market is now what it claims to be, by law and by test.",
+   "social_consequence": "The public analyst is a new town officer; grocers call the law meddling."
+  },
+  "frozen_meat_trade": {
+   "effects": {
+    "food_output": 0.0078,
+    "food_storage": 0.0088,
+    "fuel_demand": 0.002,
+    "nutrition_quality": 0.003,
+    "trade_capacity": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/salt_working-v1.png",
+   "name": "Frozen Meat Trade",
+   "observation": "Refrigerated holds carry frozen carcasses across the ocean from grazing lands, and meat reaches the labourer's table weekly.",
+   "ability_reason": "Distant grasslands now feed the industrial towns with meat.",
+   "social_consequence": "Home graziers are undersold, and the grazing lands are shaped around the export ships."
+  },
+  "cream_separator": {
+   "effects": {
+    "food_output": 0.0026,
+    "food_spoilage": -0.0017,
+    "labor_efficiency": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
+   "name": "Cream Separator",
+   "observation": "A spinning bowl throws the cream from the milk in minutes, instead of skimming pans overnight."
+  },
+  "resistant_vine_rootstocks": {
+   "effects": {
+    "cultivation_yield": 0.0036,
+    "disaster_resilience": 0.002,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
+   "name": "Resistant Rootstocks",
+   "observation": "Vines are grafted onto wild roots that the root-louse cannot kill, and ruined vineyards are replanted."
+  },
+  "cooperative_creameries": {
+   "effects": {
+    "cohesion": 0.002,
+    "food_output": 0.0039,
+    "nutrition_quality": 0.002,
+    "trade_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "name": "Cooperative Creameries",
+   "observation": "Farmers pool their milk in a creamery they own together and share the butter money by the gallon."
+  },
+  "silage_towers": {
+   "effects": {
+    "food_output": 0.0052,
+    "food_spoilage": -0.0034,
+    "food_storage": 0.0066
+   },
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "name": "Silage",
+   "observation": "Chopped green fodder is packed into towers and pits, and it keeps cattle in milk through the winter."
+  },
+  "copper_lime_spray": {
+   "effects": {
+    "chemical_control": 0.003,
+    "cultivation_yield": 0.006,
+    "pollution": 0.001,
+    "water_pollution": 0.002
+   },
+   "art": "res://assets/ui/research/paper/plant_pathology_diagnosis.png",
+   "name": "Copper-lime Spray",
+   "observation": "Vines and potatoes are sprayed blue with copper and lime, and the mildew and blight are held off."
+  },
+  "double_seaming": {
+   "effects": {
+    "food_spoilage": -0.0034,
+    "food_storage": 0.0066,
+    "health_risk": -0.001
+   },
+   "art": "res://assets/ui/research/paper/tinplate_coating.png",
+   "observation": "Can lids are rolled onto the body in a double seam with no solder, and lead no longer taints the food.",
+   "production_items": [
+    "seaming_head"
+   ]
+  },
+  "bottled_town_milk": {
+   "effects": {
+    "disease_exposure": -0.003,
+    "labor_demand": 0.001,
+    "neonatal_survival": 0.006,
+    "nutrition_quality": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
+   "name": "Bottled Milk",
+   "observation": "Heat-treated milk is bottled and delivered to town doors each morning, and summer infant diarrhoea falls."
+  },
+  "butterfat_milk_test": {
+   "effects": {
+    "health_risk": -0.001,
+    "nutrition_quality": 0.002,
+    "standardization": 0.002,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
+   "name": "Butterfat Test",
+   "observation": "A simple acid test measures butterfat, and the dairy pays by the test instead of the gallon, ending watered milk."
+  },
+  "dietary_heat_units": {
+   "effects": {
+    "food_output": 0.0026,
+    "knowledge_rate": 0.002,
+    "nutrition_quality": 0.004,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
+   "name": "Diet Heat Units",
+   "observation": "Foods are burned in a closed vessel to measure their heat, and rations for soldiers and workhouses are costed by it.",
+   "ability_reason": "Diets can now be planned and costed by what they give the body, not only by weight.",
+   "social_consequence": "Workhouse and barracks rations are cut to the calculated minimum."
+  },
+  "deficiency_disease_discovery": {
+   "effects": {
+    "health_protection": 0.002,
+    "knowledge_rate": 0.001,
+    "nutrition_quality": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/grain_milling-v1.png",
+   "name": "Deficiency Diseases",
+   "observation": "Fowls fed on polished rice sicken and recover on the husk, and the old beriberi is shown to come from a missing part of food."
+  },
+  "chilled_fruit_shipping": {
+   "effects": {
+    "fuel_demand": 0.001,
+    "nutrition_quality": 0.002,
+    "trade_capacity": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
+   "name": "Chilled Fruit",
+   "observation": "Bananas and oranges come in cold ships from hot lands and are sold from barrows in winter."
+  },
+  "progeny_rows": {
+   "effects": {
+    "cultivation_yield": 0.0036,
+    "food_output": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
+   "observation": "Seed from single chosen plants is sown in its own row, and the true-breeding lines are kept."
+  },
+  "controlled_pollination": {
+   "effects": {
+    "cultivation_yield": 0.0036,
+    "knowledge_rate": 0.001
+   },
+   "art": "res://assets/ui/research/paper/heredity_experiments.png",
+   "observation": "Breeders bag the flowers and dust them by hand with pollen of the chosen father."
+  },
+  "field_variety_trials": {
+   "effects": {
+    "cultivation_yield": 0.0048,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/paper/germination_trials.png",
+   "observation": "Varieties are sown in replicated plots across the field, and the yields are compared with the reckoning of chance."
+  },
+  "heredity_experiments": {
+   "effects": {
+    "cultivation_yield": 0.0084,
+    "food_output": 0.0026,
+    "knowledge_rate": 0.003
+   },
+   "art": "res://assets/ui/research/paper/heredity_experiments.png",
+   "observation": "Crossing experiments show traits passing in fixed ratios, and breeders can plan a variety instead of hoping for one.",
+   "ability_reason": "Plant and animal breeding becomes a planned craft with predictable results."
+  },
+  "regional_seed_trials": {
+   "effects": {
+    "adoption_rate": 0.002,
+    "cultivation_yield": 0.0036
+   },
+   "art": "res://assets/ui/research/paper/germination_trials.png",
+   "observation": "Trial farms in each district name the varieties that do best in that soil and weather."
+  },
+  "school_meals": {
+   "effects": {
+    "cohesion": 0.002,
+    "labor_demand": 0.001,
+    "neonatal_survival": 0.001,
+    "nutrition_quality": 0.004,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "School Meals",
+   "observation": "Poor children are given a hot midday meal at school, and they grow and learn better for it.",
+   "social_consequence": "The school takes on a parent's duty; some call it charity that shames the household."
+  },
+  "plant_resistance_trait_trials": {
+   "effects": {
+    "cultivation_yield": 0.006,
+    "disaster_resilience": 0.002
+   },
+   "art": "res://assets/ui/research/paper/plant_resistance_trait_trials.png",
+   "observation": "Wheat and flax are bred from parents that stand up to rust and wilt, and the resistance is fixed in the line."
+  },
+  "food_acidity_measurement": {
+   "effects": {
+    "food_spoilage": -0.0034,
+    "health_risk": -0.002
+   },
+   "art": "res://assets/ui/research/paper/gas_composition_analysis.png",
+   "observation": "Preserved foods are tested for acidity, and low-acid foods get longer heating so they cannot breed the canning poison."
+  },
+  "clean_milk_ordinances": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.008,
+    "nutrition_quality": 0.002,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
+   "name": "Clean Milk Law",
+   "observation": "Dairies are licensed, herds tested for the wasting cough, and milk from diseased cows is poured away.",
+   "social_consequence": "Small cow-keepers in town yards are put out of business by the inspector."
+  },
+  "vitamin_factors": {
+   "effects": {
+    "health_protection": 0.004,
+    "knowledge_rate": 0.002,
+    "neonatal_survival": 0.003,
+    "nutrition_quality": 0.012
+   },
+   "art": "res://assets/ui/research/subjects/food_drying-v1.png",
+   "name": "Vitamins",
+   "observation": "Feeding trials show that tiny amounts of accessory factors in fresh food prevent scurvy, rickets and beriberi.",
+   "ability_reason": "Diet can now be judged by what it contains, not only by how much fills the belly."
+  },
+  "farm_extension_agents": {
+   "effects": {
+    "adoption_rate": 0.004,
+    "cultivation_yield": 0.006,
+    "labor_demand": 0.001,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+   "name": "Extension Agents",
+   "observation": "A salaried adviser drives from farm to farm with the station's results and demonstration plots."
+  },
+  "ammonium_sulfate_fertilizer": {
+   "effects": {
+    "cultivation_yield": 0.012,
+    "food_output": 0.0052,
+    "fuel_demand": 0.002,
+    "pollution": 0.002,
+    "soil_productivity": 0.0084,
+    "water_pollution": 0.004
+   },
+   "art": "res://assets/ui/research/paper/catalytic_ammonia_synthesis.png",
+   "observation": "Nitrogen fixed from the air in factories is sold as ammonium salt, and no field need go hungry for nitrogen again.",
+   "ability_reason": "Fertility no longer depends on dung, guano or mined nitrate; the fields can feed a far larger people.",
+   "social_consequence": "Runoff greens the rivers and ponds; the same plants make explosives in wartime.",
+   "production_items": [
+    "ammonium_sulfate"
+   ]
+  },
+  "farm_tractor": {
+   "effects": {
+    "cultivation_yield": 0.0024,
+    "fatigue": -0.003,
+    "food_output": 0.0065,
+    "fuel_demand": 0.004,
+    "injury_risk": 0.002,
+    "labor_demand": -0.005,
+    "labor_efficiency": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/precision_machinery-v1.png",
+   "name": "Farm Tractor",
+   "observation": "A light petrol tractor pulls the plough and binder, and the land kept for horse feed goes to food.",
+   "ability_reason": "One family can farm far more land, and horse pasture is freed for crops.",
+   "social_consequence": "Farm hands and horsemen leave for the towns; overturned tractors kill farmers."
+  },
+  "wartime_ration_cards": {
+   "effects": {
+    "cohesion": 0.003,
+    "food_storage": 0.011,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.002,
+    "legitimacy": 0.002,
+    "nutrition_quality": 0.003,
+    "state_capacity": 0.003,
+    "trade_capacity": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Ration Cards",
+   "observation": "In total war a food ministry issues ration cards, fixes prices and sets every household's share of meat, fat and sugar.",
+   "ability_reason": "The whole people can be fed fairly through blockade and war.",
+   "social_consequence": "A food ministry and ration offices stand in every town; black markets and informers follow."
+  },
+  "forced_air_grain_drying": {
+   "effects": {
+    "food_spoilage": -0.0051,
+    "food_storage": 0.0066,
+    "fuel_demand": 0.002
+   },
+   "art": "res://assets/ui/research/paper/fuel_air_drying.png",
+   "observation": "Fans blow heated air through the grain bins, and a wet harvest no longer rots in store."
+  },
+  "grain_moisture_testing": {
+   "effects": {
+    "food_spoilage": -0.0034,
+    "food_storage": 0.0022
+   },
+   "art": "res://assets/ui/research/paper/grain_moisture_testing.png",
+   "observation": "Grain is tested for moisture before it goes into the bin, and damp lots are dried first."
+  },
+  "thermal_process_validation": {
+   "effects": {
+    "food_spoilage": -0.0051,
+    "food_storage": 0.0044,
+    "health_risk": -0.002
+   },
+   "art": "res://assets/ui/research/paper/food_retorts.png",
+   "observation": "Heating times are proven for each can size by thermometers in the coldest spot, and canning poison nearly vanishes."
+  },
+  "rickets_prevention": {
+   "effects": {
+    "health_protection": 0.002,
+    "maternal_safety": 0.002,
+    "neonatal_survival": 0.004,
+    "nutrition_quality": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Rickets Cure",
+   "observation": "Children bent by rickets straighten on fish-liver oil and sunlight, and fewer girls grow up with narrowed pelvises."
+  },
+  "iodized_salt": {
+   "effects": {
+    "health_protection": 0.002,
+    "neonatal_survival": 0.002,
+    "nutrition_quality": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/salt_working-v1.png",
+   "name": "Iodized Salt",
+   "observation": "A trace of iodide added to table salt ends goitre and cretinism in the mountain valleys."
+  },
+  "hybrid_maize_seed": {
+   "effects": {
+    "cultivation_yield": 0.0096,
+    "food_output": 0.0052,
+    "institutional_rigidity": 0.001,
+    "trade_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/paper/heredity_experiments.png",
+   "name": "Hybrid Maize",
+   "observation": "Seed from crossed inbred lines yields a third more, but farmers must buy new seed every year.",
+   "ability_reason": "Grain yields rise sharply in maize country.",
+   "social_consequence": "Farmers depend on the seed company each spring; the old saved seed is abandoned."
+  },
+  "quick_frozen_foods": {
+   "effects": {
+    "food_spoilage": -0.0085,
+    "food_storage": 0.0132,
+    "fuel_demand": 0.002,
+    "nutrition_quality": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/food_drying-v1.png",
+   "name": "Quick-frozen Foods",
+   "observation": "Food is frozen fast between cold plates and sold in packets that taste nearly fresh."
+  },
+  "contour_cultivation": {
+   "effects": {
+    "disaster_resilience": 0.001,
+    "ecology_recovery": 0.002,
+    "soil_productivity": 0.0042
+   },
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "observation": "Furrows are ploughed along the slope instead of down it, and rain stays on the field."
+  },
+  "cover_crop_mixtures": {
+   "effects": {
+    "ecology_recovery": 0.002,
+    "soil_productivity": 0.0042
+   },
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "observation": "Rye and vetch are sown after harvest to hold the soil through the winter rains."
+  },
+  "strip_cropping": {
+   "effects": {
+    "disaster_resilience": 0.001,
+    "ecology_recovery": 0.002,
+    "soil_productivity": 0.0028
+   },
+   "art": "res://assets/ui/research/subjects/crop_rotation-v1.png",
+   "observation": "Strips of grain and grass alternate across the field, breaking the wind and the running water."
+  },
+  "household_refrigerator": {
+   "effects": {
+    "food_spoilage": -0.0136,
+    "food_storage": 0.0088,
+    "fuel_demand": 0.003,
+    "neonatal_survival": 0.002,
+    "nutrition_quality": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "name": "Household Refrigerator",
+   "observation": "An electric cold box in the kitchen keeps milk, meat and greens for a week."
+  },
+  "soil_conservation_service": {
+   "effects": {
+    "disaster_resilience": 0.002,
+    "ecology_recovery": 0.003,
+    "labor_demand": 0.002,
+    "soil_productivity": 0.007,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/soil_assays-v1.png",
+   "name": "Soil Conservation",
+   "observation": "After the dust storms a state service lays out terraces and shelter belts and pays farmers to rest eroded land.",
+   "social_consequence": "A soil service and district boards now tell farmers how to plough."
+  },
+  "hitch_tractor": {
+   "effects": {
+    "food_output": 0.0039,
+    "fuel_demand": 0.002,
+    "injury_risk": -0.001,
+    "labor_demand": -0.003,
+    "labor_efficiency": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/precision_machinery-v1.png",
+   "name": "Hitch Tractor",
+   "observation": "Rubber tyres, a power shaft and a three-point hitch let the tractor lift and drive every implement."
+  },
+  "combine_harvester": {
+   "effects": {
+    "food_output": 0.0052,
+    "food_spoilage": -0.0017,
+    "fuel_demand": 0.003,
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.005
+   },
+   "art": "res://assets/ui/research/paper/winnowing_practice.png",
+   "name": "Combine Harvester",
+   "observation": "One machine cuts, threshes and cleans the grain as it drives, and the harvest crew shrinks to two."
+  },
+  "recommended_daily_allowances": {
+   "effects": {
+    "health_protection": 0.002,
+    "nutrition_quality": 0.006,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
+   "name": "Daily Allowances",
+   "observation": "A board sets how much of each nutrient a person needs each day, and white flour is enriched with iron and vitamins."
+  },
+  "food_group_guides": {
+   "effects": {
+    "adoption_rate": 0.001,
+    "nutrition_quality": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "Food Guides",
+   "observation": "Posters in schools and clinics show the food groups every household should eat each day."
+  },
+  "synthetic_crop_insecticide": {
+   "effects": {
+    "chemical_control": 0.006,
+    "cultivation_yield": 0.0072,
+    "ecological_pressure": 0.004,
+    "health_risk": 0.002,
+    "pollution": 0.005,
+    "water_pollution": 0.003
+   },
+   "art": "res://assets/ui/research/paper/aromatic_nitration.png",
+   "name": "Synthetic Insecticide",
+   "observation": "A synthetic contact poison dusted on crops kills beetles and caterpillars for weeks.",
+   "social_consequence": "Birds and fish die along the sprayed fields, and the poison builds up in bodies."
+  },
+  "selective_hormone_herbicide": {
+   "effects": {
+    "chemical_control": 0.004,
+    "cultivation_yield": 0.006,
+    "ecological_pressure": 0.002,
+    "labor_demand": -0.002,
+    "labor_efficiency": 0.002,
+    "water_pollution": 0.002
+   },
+   "art": "res://assets/ui/research/paper/aromatic_amine_hydrogenation.png",
+   "name": "Hormone Weedkiller",
+   "observation": "A spray that kills broad-leaved weeds but spares the grain replaces weeks of hoeing."
+  },
+  "artificial_cattle_insemination": {
+   "effects": {
+    "food_output": 0.0052,
+    "nutrition_quality": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
+   "name": "Artificial Insemination",
+   "observation": "Frozen semen of proven bulls is carried to every farm, and one sire fathers thousands of calves."
+  },
+  "confinement_broiler_houses": {
+   "effects": {
+    "disease_exposure": 0.004,
+    "food_output": 0.0065,
+    "nutrition_quality": 0.001,
+    "pollution": 0.002,
+    "water_pollution": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
+   "name": "Broiler Houses",
+   "observation": "Chickens are raised by the thousand under lights on mill feed, and chicken becomes cheap weekday meat.",
+   "social_consequence": "Crowded flocks breed new fevers, and the sheds' waste fouls the streams."
+  },
+  "food_batch_traceability": {
+   "effects": {
+    "disease_exposure": -0.001,
+    "health_risk": -0.002,
+    "standardization": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "observation": "Every batch carries a code from farm to shop, and a tainted lot is recalled within days."
+  },
+  "postharvest_loss_measurement": {
+   "effects": {
+    "food_spoilage": -0.0068,
+    "food_storage": 0.0044
+   },
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "observation": "Losses between the field and the table are measured at each step and cut where they are worst."
+  },
+  "soil_moisture_scheduling": {
+   "effects": {
+    "cultivation_yield": 0.0036,
+    "water_access": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
+   "observation": "Irrigation is given when soil gauges show the root zone drying, not by habit."
+  },
+  "self_service_cold_stores": {
+   "effects": {
+    "food_spoilage": -0.0051,
+    "food_storage": 0.0066,
+    "fuel_demand": 0.002,
+    "nutrition_quality": 0.001,
+    "trade_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "name": "Self-service Stores",
+   "observation": "Shoppers take goods from open shelves and cold cabinets and pay at the door."
+  },
+  "centre_pivot_irrigation": {
+   "effects": {
+    "cultivation_yield": 0.0072,
+    "ecological_pressure": 0.005,
+    "food_output": 0.0039,
+    "fuel_demand": 0.002,
+    "water_access": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
+   "name": "Centre-pivot Irrigation",
+   "observation": "A pipe on wheels turns slowly round a well, watering a great green circle in dry country.",
+   "social_consequence": "Groundwater falls year by year under the circles."
+  },
+  "food_process_hazard_analysis": {
+   "effects": {
+    "disease_exposure": -0.003,
+    "food_spoilage": -0.0034,
+    "health_risk": -0.004,
+    "standardization": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "observation": "Each step of food processing is examined for what could go wrong, and a check is set at every critical point.",
+   "ability_reason": "Food poisoning from factory foods becomes rare."
+  },
+  "food_package_barrier_testing": {
+   "effects": {
+    "food_spoilage": -0.0034,
+    "food_storage": 0.0022
+   },
+   "art": "res://assets/ui/research/paper/polymer_film_extrusion.png",
+   "observation": "Wrapping films are tested for how much air and water pass through them."
+  },
+  "food_water_activity_measurement": {
+   "effects": {
+    "food_spoilage": -0.0034,
+    "health_risk": -0.001
+   },
+   "art": "res://assets/ui/research/paper/gas_composition_analysis.png",
+   "observation": "The free water in food is measured to set its shelf life safely."
+  },
+  "food_package_leak_detection": {
+   "effects": {
+    "food_spoilage": -0.0034,
+    "health_risk": -0.001
+   },
+   "art": "res://assets/ui/research/paper/polymer_blow_molding.png",
+   "observation": "Sealed packages are tested for leaks before they leave the plant."
+  },
+  "inter_realm_food_standards": {
+   "effects": {
+    "health_risk": -0.002,
+    "standardization": 0.002,
+    "trade_capacity": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
+   "name": "Food Standards Code",
+   "observation": "Realms agree one code of food standards, and food can cross borders without a new test at every port."
+  },
+  "drip_irrigation": {
+   "effects": {
+    "cultivation_yield": 0.0048,
+    "ecological_pressure": -0.001,
+    "water_access": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
+   "name": "Drip Irrigation",
+   "observation": "Thin lines drip water to each plant's roots, and a dry farm uses half the water."
+  },
+  "reduced_tillage": {
+   "effects": {
+    "ecology_recovery": 0.002,
+    "fuel_demand": -0.001,
+    "soil_productivity": 0.0042
+   },
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "observation": "The last crop's stubble is left on the field and the seed drilled through it, and the soil stops blowing."
+  },
+  "semi_dwarf_grain_package": {
+   "effects": {
+    "cultivation_yield": 0.0144,
+    "ecological_pressure": 0.004,
+    "food_output": 0.0104,
+    "food_storage": 0.0066,
+    "fuel_demand": 0.002,
+    "soil_productivity": -0.0042,
+    "water_pollution": 0.004
+   },
+   "art": "res://assets/ui/research/paper/heredity_experiments.png",
+   "name": "Semi-dwarf Grain",
+   "observation": "Short-strawed wheat and rice that do not fall over under heavy fertilizer double the harvest where there is water.",
+   "ability_reason": "Famine recedes from the crowded rice and wheat lands.",
+   "social_consequence": "Farmers need fertilizer, water and bought seed; old varieties vanish and the aquifers fall."
+  },
+  "food_banks": {
+   "effects": {
+    "cohesion": 0.002,
+    "food_output": 0.0013,
+    "nutrition_quality": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "name": "Food Banks",
+   "observation": "Volunteers gather surplus food from shops and farms and give it to families who run short."
+  },
+  "microwave_oven": {
+   "effects": {
+    "fatigue": -0.001,
+    "food_spoilage": -0.0017
+   },
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "name": "Microwave Oven",
+   "observation": "A box of invisible waves heats a meal in minutes."
+  },
+  "aseptic_carton_milk": {
+   "effects": {
+    "food_spoilage": -0.0051,
+    "food_storage": 0.0088,
+    "neonatal_survival": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
+   "name": "Carton Milk",
+   "observation": "Sterile milk sealed in layered cartons keeps for months without a cold room."
+  },
+  "integrated_pest_management": {
+   "effects": {
+    "chemical_control": 0.003,
+    "cultivation_yield": 0.0036,
+    "ecological_pressure": -0.002,
+    "pollution": -0.002,
+    "water_pollution": -0.002
+   },
+   "art": "res://assets/ui/research/paper/plant_pathology_diagnosis.png",
+   "name": "Integrated Pest Management",
+   "observation": "Scouts count pests in the field and spray only when a threshold is crossed."
+  },
+  "starch_sugar_syrup": {
+   "effects": {
+    "food_output": 0.0039,
+    "nutrition_quality": -0.004,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/grain_milling-v1.png",
+   "name": "Starch Syrup",
+   "observation": "Maize starch is turned by enzymes into a cheap syrup that sweetens drinks and bread.",
+   "social_consequence": "Cheap sweetness fills the diet; the poor grow fat and fall sick with the sugar sickness."
+  },
+  "net_pen_aquaculture": {
+   "effects": {
+    "disease_exposure": 0.001,
+    "ecological_pressure": 0.003,
+    "food_output": 0.0052,
+    "nutrition_quality": 0.002,
+    "water_pollution": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
+   "name": "Net-pen Fish Farms",
+   "observation": "Salmon and bream are fattened in floating net pens on pellets of fish meal.",
+   "social_consequence": "Lice and waste from the pens spread to the wild fish."
+  },
+  "national_dietary_goals": {
+   "effects": {
+    "health_protection": 0.002,
+    "nutrition_quality": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "Dietary Goals",
+   "observation": "The state sets goals against too much fat, salt and sugar in the national diet."
+  },
+  "hydroponic_glasshouses": {
+   "effects": {
+    "food_output": 0.0026,
+    "fuel_demand": 0.002,
+    "nutrition_quality": 0.001,
+    "water_access": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png",
+   "name": "Hydroponic Glasshouses",
+   "observation": "Tomatoes and peppers grow in channels of fed water under glass, without soil."
+  },
+  "famine_early_warning": {
+   "effects": {
+    "disaster_resilience": 0.003,
+    "food_storage": 0.0088,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
+   "name": "Famine Early Warning",
+   "observation": "Rainfall, market prices and images from above warn of a coming famine months ahead."
+  },
+  "nutrition_labels": {
+   "effects": {
+    "health_risk": -0.001,
+    "nutrition_quality": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
+   "name": "Nutrition Labels",
+   "observation": "Every packet carries a label of its energy, fat, salt and sugar."
+  },
+  "therapeutic_ready_food": {
+   "effects": {
+    "neonatal_survival": 0.004,
+    "nutrition_quality": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Therapeutic Paste",
+   "observation": "A paste of peanut, milk and vitamins lets starving children be treated at home instead of in a feeding ward."
+  },
+  "transgenic_crops": {
+   "effects": {
+    "chemical_control": 0.003,
+    "cohesion": -0.002,
+    "cultivation_yield": 0.0084,
+    "ecological_pressure": -0.001,
+    "institutional_rigidity": 0.002,
+    "labor_efficiency": 0.002
+   },
+   "art": "res://assets/ui/research/paper/heredity_experiments.png",
+   "name": "Transgenic Crops",
+   "observation": "Crops carrying a gene moved from another creature resist pests or survive the weedkiller.",
+   "ability_reason": "Farmers spray less insecticide and lose less of the crop.",
+   "social_consequence": "The seed is patented, and a great quarrel divides the people over what may be eaten."
+  },
+  "folic_acid_fortification": {
+   "effects": {
+    "maternal_safety": 0.001,
+    "neonatal_survival": 0.004,
+    "nutrition_quality": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/grain_milling-v1.png",
+   "name": "Folic Acid Flour",
+   "observation": "A vitamin added to flour prevents many children being born with open spines."
+  },
+  "precision_agriculture": {
+   "effects": {
+    "cultivation_yield": 0.0048,
+    "fuel_demand": -0.001,
+    "labor_efficiency": 0.003,
+    "water_pollution": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
+   "name": "Precision Agriculture",
+   "observation": "Tractors steered by signals from the sky vary seed and fertilizer yard by yard."
+  },
+  "marker_assisted_breeding": {
+   "effects": {
+    "cultivation_yield": 0.0048,
+    "knowledge_rate": 0.002
+   },
+   "art": "res://assets/ui/research/paper/heredity_experiments.png",
+   "name": "Marker-assisted Breeding",
+   "observation": "Breeders read hereditary markers in a seedling's leaf and keep only the plants that carry the wanted trait."
+  },
+  "biofortified_staples": {
+   "effects": {
+    "neonatal_survival": 0.002,
+    "nutrition_quality": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
+   "name": "Biofortified Staples",
+   "observation": "Orange sweet potato, iron beans and zinc wheat bring vitamins into the poorest diets."
+  },
+  "stress_tolerant_varieties": {
+   "effects": {
+    "cultivation_yield": 0.0048,
+    "disaster_resilience": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
+   "name": "Stress-tolerant Varieties",
+   "observation": "Rice that survives weeks under flood water and maize that sets seed in drought are bred for the poorest farms."
+  },
+  "sugar_drink_taxes": {
+   "effects": {
+    "legitimacy": -0.001,
+    "nutrition_quality": 0.003,
+    "trade_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Sugar Drink Tax",
+   "observation": "A tax on sugared drinks cuts how much children drink of them."
+  },
+  "gene_edited_crops": {
+   "effects": {
+    "cultivation_yield": 0.0072,
+    "disaster_resilience": 0.002,
+    "knowledge_rate": 0.001,
+    "nutrition_quality": 0.002
+   },
+   "art": "res://assets/ui/research/paper/heredity_experiments.png",
+   "name": "Gene-edited Crops",
+   "observation": "A crop's own genes are edited at one point, without carrying in a gene from another creature.",
+   "ability_reason": "Varieties can be changed in a few seasons rather than a breeder's lifetime."
+  },
+  "precision_fermented_proteins": {
+   "effects": {
+    "ecological_pressure": -0.001,
+    "food_output": 0.0026,
+    "fuel_demand": 0.001,
+    "nutrition_quality": 0.001
+   },
+   "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
+   "name": "Precision Fermentation",
+   "observation": "Microbes in steel tanks make milk and egg proteins without cows or hens."
+  },
+  "cultivated_cell_meat": {
+   "effects": {
+    "cohesion": -0.001,
+    "ecological_pressure": -0.001,
+    "food_output": 0.0013,
+    "fuel_demand": 0.001
+   },
+   "art": "res://assets/ui/research/paper/cell_culture_methods.png",
+   "name": "Cultivated Meat",
+   "observation": "Meat is grown from animal cells in tanks, though it is still dear and rare."
+  },
+  "nitrogen_fixing_seed_microbes": {
+   "effects": {
+    "cultivation_yield": 0.0036,
+    "soil_productivity": 0.0042,
+    "water_pollution": -0.002
+   },
+   "art": "res://assets/ui/research/paper/microbial_growth_measurement.png",
+   "name": "Nitrogen-fixing Seed Coats",
+   "observation": "Seed coated with nitrogen-fixing microbes needs less bought fertilizer."
+  },
+  "vertical_indoor_farms": {
+   "effects": {
+    "food_output": 0.0013,
+    "fuel_demand": 0.003,
+    "nutrition_quality": 0.001,
+    "water_access": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png",
+   "name": "Vertical Farms",
+   "observation": "Greens grow in stacked trays under electric light in city warehouses."
+  },
+  "climate_shift_crop_planning": {
+   "effects": {
+    "cultivation_yield": 0.0048,
+    "disaster_resilience": 0.004,
+    "food_storage": 0.0044,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+   "name": "Climate Crop Planning",
+   "observation": "District crop maps are redrawn as the climate shifts, moving varieties and sowing dates to follow the rain.",
+   "ability_reason": "Farming adapts to a warming climate before the failed harvests force it."
+  }
+ }
 }

@@ -1,5 +1,1038 @@
 {
  "line": "demography",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "equal_partible_inheritance": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": -0.006,
+    "institutional_rigidity": -0.001,
+    "soil_productivity": -0.0014
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Equal Inheritance",
+   "observation": "Under the civil code every child inherits an equal share, and peasant families have fewer children to keep the holding whole.",
+   "social_consequence": "Holdings are split smaller each generation; parents limit births to spare the land."
+  },
+  "vaccination_mortality_tables": {
+   "effects": {
+    "adoption_rate": 0.002,
+    "disease_exposure": -0.002,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
+   "name": "Vaccination Tables",
+   "observation": "The death tables show smallpox falling wherever vaccination is taken up, and doubters are answered with figures."
+  },
+  "soldier_family_allowances": {
+   "effects": {
+    "cohesion": 0.002,
+    "labor_demand": 0.001,
+    "neonatal_survival": 0.002,
+    "warfare_readiness": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Separation Allowances",
+   "observation": "The families of serving soldiers draw a separation allowance while the man is away."
+  },
+  "war_dependants_pensions": {
+   "effects": {
+    "cohesion": 0.002,
+    "conception_support": -0.002,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.001,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "name": "War Pensions",
+   "observation": "Widows and orphans of the fallen draw a pension from the treasury.",
+   "social_consequence": "A pensions office now keeps the rolls of the war dead's families."
+  },
+  "assisted_emigration": {
+   "effects": {
+    "cohesion": -0.002,
+    "disease_exposure": 0.002,
+    "food_output": 0.0013,
+    "housing_output": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
+   "name": "Assisted Emigration",
+   "observation": "The parish or the state pays the passage of paupers to new lands overseas.",
+   "social_consequence": "Emptying the poor-house by ship is called charity by some and banishment by others."
+  },
+  "age_specific_fertility_rates": {
+   "effects": {
+    "observation_rate": 0.002,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Age Fertility Rates",
+   "observation": "Births and marriages are reckoned for each age of women, and fertility can be compared across districts."
+  },
+  "mortality_table_insurance": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": -0.002,
+    "knowledge_preservation": 0.001,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "name": "Life Insurance Tables",
+   "observation": "Life insurance is priced from observed death tables, and a clerk can buy security for his widow."
+  },
+  "state_statistical_office": {
+   "effects": {
+    "knowledge_preservation": 0.002,
+    "labor_demand": 0.001,
+    "observation_rate": 0.002,
+    "state_capacity": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Statistical Office",
+   "observation": "A state office publishes tables of population, births, deaths and trade every year.",
+   "social_consequence": "A chief statistician now reports to the ministers."
+  },
+  "colony_land_sale_scheme": {
+   "effects": {
+    "cohesion": -0.001,
+    "conception_support": 0.002,
+    "disease_exposure": 0.001,
+    "housing_output": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Colony Land Scheme",
+   "observation": "Colony lands are sold in lots, and the money pays passage for young couples to farm them."
+  },
+  "cause_of_death_tables": {
+   "effects": {
+    "disease_exposure": -0.003,
+    "observation_rate": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Cause-of-death Tables",
+   "observation": "Registered deaths are tabulated by cause, age and district, and the killing streets stand out in the tables."
+  },
+  "household_schedule_census": {
+   "effects": {
+    "cohesion": -0.001,
+    "knowledge_preservation": 0.002,
+    "labor_demand": 0.002,
+    "observation_rate": 0.003,
+    "state_capacity": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Household Census",
+   "observation": "Every household fills a schedule of each member's name, age, trade and birthplace on one night.",
+   "ability_reason": "The state knows who lives where and what they do, household by household.",
+   "social_consequence": "Enumerators knock on every door; many fear the schedule is a tax or a draft in disguise."
+  },
+  "national_life_tables": {
+   "effects": {
+    "knowledge_preservation": 0.001,
+    "observation_rate": 0.002,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
+   "name": "Life Tables",
+   "observation": "Life tables for the whole realm show how long people of each age can expect to live."
+  },
+  "working_mothers_creches": {
+   "effects": {
+    "conception_support": -0.001,
+    "disease_exposure": 0.002,
+    "labor_efficiency": 0.001,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Crèches",
+   "observation": "Mill towns open crèches where working mothers leave their infants by day."
+  },
+  "emigrant_passenger_law": {
+   "effects": {
+    "cohesion": 0.001,
+    "disease_exposure": -0.002,
+    "institutional_rigidity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
+   "name": "Passenger Law",
+   "observation": "Emigrant ships are inspected for space, food and water, and captains are fined for overcrowding."
+  },
+  "steamship_mass_emigration": {
+   "effects": {
+    "cohesion": -0.003,
+    "conception_support": -0.004,
+    "disease_exposure": 0.005,
+    "food_output": 0.0026,
+    "housing_output": 0.004,
+    "trade_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png",
+   "name": "Mass Emigration",
+   "observation": "Steamships carry emigrants by the hundred thousand to distant lands in a fortnight.",
+   "ability_reason": "Crowded districts can shed their surplus people, and remittances flow home.",
+   "social_consequence": "Whole villages empty of their young; letters and money come back, and so does news of better wages."
+  },
+  "district_mortality_comparison": {
+   "effects": {
+    "disease_exposure": -0.002,
+    "observation_rate": 0.002,
+    "sanitation": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
+   "name": "District Mortality",
+   "observation": "Death rates are compared by district and by trade, and the deadliest occupations are named."
+  },
+  "childrens_hospitals": {
+   "effects": {
+    "health_protection": 0.002,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Children's Hospitals",
+   "observation": "Hospitals are built for sick children, with nurses and physicians who treat only the young."
+  },
+  "inter_realm_statistical_congress": {
+   "effects": {
+    "observation_rate": 0.002,
+    "standardization": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
+   "name": "Statistical Congress",
+   "observation": "Statisticians from many realms agree how people are to be counted and classed."
+  },
+  "rubber_sheaths": {
+   "effects": {
+    "cohesion": -0.001,
+    "conception_support": -0.012,
+    "disease_exposure": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "name": "Rubber Sheaths",
+   "observation": "Rubber sheaths for men are sold openly by chemists and barbers.",
+   "social_consequence": "Preachers denounce them, and their sale is prosecuted in some towns."
+  },
+  "civil_marriage_registrar": {
+   "effects": {
+    "cohesion": -0.001,
+    "conception_support": -0.002,
+    "institutional_rigidity": -0.001,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
+   "name": "Civil Marriage",
+   "observation": "Couples may marry before a registrar, with no shrine and no priest.",
+   "social_consequence": "The shrines lose their hold on marriage records; many still marry twice."
+  },
+  "orphan_boarding_out": {
+   "effects": {
+    "cohesion": 0.001,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Boarding Out",
+   "observation": "Orphans are boarded with foster families in the country instead of barrack asylums."
+  },
+  "homestead_land_grants": {
+   "effects": {
+    "cohesion": -0.002,
+    "conception_support": 0.004,
+    "ecological_pressure": 0.003,
+    "food_output": 0.0039,
+    "housing_output": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Homestead Grants",
+   "observation": "Free land is granted to settler families who live on it and farm it for five years.",
+   "ability_reason": "Families can found farms on open land, and the frontier fills.",
+   "social_consequence": "The land is taken from those who hunted and grazed it before; settler and native meet in bloodshed."
+  },
+  "manufactured_infant_food": {
+   "effects": {
+    "conception_support": 0.003,
+    "disease_exposure": 0.003,
+    "labor_efficiency": 0.001,
+    "neonatal_survival": -0.004
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Bottle Feeding",
+   "observation": "Tinned infant food and feeding bottles let mothers wean early and return to work.",
+   "social_consequence": "Bottle-fed babies die of summer diarrhoea; weaning early shortens the gap to the next birth."
+  },
+  "residence_naturalisation": {
+   "effects": {
+    "cohesion": 0.002,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Naturalisation",
+   "observation": "Foreigners may become citizens after years of residence."
+  },
+  "family_limitation": {
+   "effects": {
+    "cohesion": -0.002,
+    "conception_support": -0.07,
+    "maternal_safety": 0.004,
+    "neonatal_survival": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "name": "Family Limitation",
+   "observation": "Couples of every class plan fewer children, spacing births and stopping early by withdrawal and abstinence.",
+   "ability_reason": "Fertility falls on its own, and each child gets more of the household's care and food.",
+   "social_consequence": "Families of two or three become the rule; the old call it selfish, preachers call it sin."
+  },
+  "population_pyramid_charts": {
+   "effects": {
+    "observation_rate": 0.001,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Population Pyramids",
+   "observation": "Age and sex of the whole population are charted as a pyramid, showing the wars and famines as notches."
+  },
+  "premature_infant_incubator": {
+   "effects": {
+    "labor_demand": 0.001,
+    "neonatal_survival": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Incubators",
+   "observation": "Premature infants are kept warm in heated glass boxes, and many survive who would have died."
+  },
+  "antiseptic_maternity_wards": {
+   "effects": {
+    "disease_exposure": -0.002,
+    "maternal_safety": 0.014,
+    "neonatal_survival": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "name": "Antiseptic Maternity",
+   "observation": "Maternity wards use antiseptic washing and clean linen, and deaths of mothers in childbed fall sharply."
+  },
+  "sutured_surgical_birth": {
+   "effects": {
+    "health_risk": 0.001,
+    "maternal_safety": 0.008,
+    "neonatal_survival": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "name": "Sutured Surgical Birth",
+   "observation": "The surgeon sutures the womb after cutting the child out, and mother and child both live."
+  },
+  "raised_consent_age": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": -0.01,
+    "maternal_safety": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Consent Age Law",
+   "observation": "The age of consent and the lowest age of marriage are raised by law."
+  },
+  "settlement_houses": {
+   "effects": {
+    "cohesion": 0.002,
+    "housing_output": 0.002,
+    "neonatal_survival": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "name": "Settlement Houses",
+   "observation": "Educated young people live in settlement houses in the slums and run clubs and classes."
+  },
+  "household_poverty_surveys": {
+   "effects": {
+    "legitimacy": 0.001,
+    "observation_rate": 0.002,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Poverty Surveys",
+   "observation": "Investigators walk every street and class households by their poverty."
+  },
+  "room_overcrowding_census": {
+   "effects": {
+    "disease_exposure": -0.001,
+    "housing_output": 0.003,
+    "observation_rate": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Room Census",
+   "observation": "The census counts rooms and persons per room, and overcrowding becomes a measured evil."
+  },
+  "immigration_inspection_station": {
+   "effects": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.003,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Immigration Station",
+   "observation": "Arrivals are examined for health and papers at an island station before they may enter.",
+   "social_consequence": "The sick and the suspect are sent back across the ocean."
+  },
+  "infant_milk_depots": {
+   "effects": {
+    "disease_exposure": -0.003,
+    "labor_demand": 0.001,
+    "neonatal_survival": 0.01,
+    "nutrition_quality": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Milk Depots",
+   "observation": "Depots give out clean bottled milk for infants, weigh the babies and advise their mothers."
+  },
+  "child_growth_records": {
+   "effects": {
+    "neonatal_survival": 0.01,
+    "nutrition_quality": 0.003,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/child_growth_records-v1.png",
+   "observation": "Each child's weight and height are charted against age standards, and a faltering child is noticed early.",
+   "ability_reason": "A child who is failing to thrive is caught while there is still time."
+  },
+  "infant_mortality_index": {
+   "effects": {
+    "legitimacy": 0.001,
+    "neonatal_survival": 0.004,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
+   "name": "Infant Mortality Index",
+   "observation": "The infant death rate is published town by town as the measure of each town's health."
+  },
+  "registered_midwives": {
+   "effects": {
+    "institutional_rigidity": 0.002,
+    "maternal_safety": 0.016,
+    "neonatal_survival": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/trained_midwives-v1.png",
+   "name": "Registered Midwives",
+   "observation": "Midwives must be trained, examined and registered, and untrained women may not attend births for pay."
+  },
+  "newborn_health_visitors": {
+   "effects": {
+    "labor_demand": 0.002,
+    "maternal_safety": 0.002,
+    "neonatal_survival": 0.009
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Health Visitors",
+   "observation": "A health visitor calls on every newborn's household within days of the birth."
+  },
+  "child_protection_law": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": -0.003,
+    "neonatal_survival": 0.002,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Child Protection",
+   "observation": "Officers may remove neglected and beaten children from their homes."
+  },
+  "antenatal_clinics": {
+   "effects": {
+    "labor_demand": 0.002,
+    "maternal_safety": 0.016,
+    "neonatal_survival": 0.005
+   },
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "name": "Antenatal Clinics",
+   "observation": "Mothers are examined in clinics before the birth, and dangerous pregnancies are caught early."
+  },
+  "maternity_benefit": {
+   "effects": {
+    "conception_support": 0.001,
+    "labor_demand": 0.001,
+    "maternal_safety": 0.004,
+    "neonatal_survival": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "name": "Maternity Benefit",
+   "observation": "Sickness insurance pays a benefit to mothers for weeks around the birth."
+  },
+  "childrens_welfare_bureau": {
+   "effects": {
+    "neonatal_survival": 0.003,
+    "observation_rate": 0.001,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
+   "name": "Children's Bureau",
+   "observation": "A children's bureau studies why infants die and advises every town."
+  },
+  "birth_control_clinics": {
+   "effects": {
+    "cohesion": -0.002,
+    "conception_support": -0.07,
+    "maternal_safety": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "name": "Birth-control Clinics",
+   "observation": "Clinics fit married women with caps and give advice on spacing children.",
+   "ability_reason": "Women can choose when to bear children, not only whether to marry.",
+   "social_consequence": "The clinics are raided and their founders jailed before the law gives way."
+  },
+  "origin_immigration_quotas": {
+   "effects": {
+    "cohesion": -0.002,
+    "institutional_rigidity": 0.002,
+    "trade_capacity": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Immigration Quotas",
+   "observation": "Immigrants are admitted by quota according to their land of origin.",
+   "social_consequence": "Families are split at the border by the quota line."
+  },
+  "treaty_population_exchange": {
+   "effects": {
+    "cohesion": -0.004,
+    "conception_support": -0.003,
+    "disease_exposure": 0.003,
+    "housing_output": -0.002,
+    "legitimacy": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
+   "name": "Population Exchange",
+   "observation": "After a war two realms exchange their minorities by treaty, and a million are uprooted.",
+   "social_consequence": "Refugees arrive destitute; the lost homes are mourned for generations."
+  },
+  "widows_orphans_insurance": {
+   "effects": {
+    "cohesion": 0.002,
+    "conception_support": -0.006,
+    "labor_demand": 0.001,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "name": "Widows' Pensions",
+   "observation": "Contributory insurance pays pensions to widows and orphans."
+  },
+  "court_adoption_orders": {
+   "effects": {
+    "cohesion": 0.001,
+    "neonatal_survival": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Adoption Orders",
+   "observation": "Adoption becomes a court order, and the child's old records are sealed."
+  },
+  "demographic_transition_theory": {
+   "effects": {
+    "observation_rate": 0.002,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
+   "name": "Transition Theory",
+   "observation": "Demographers describe how death rates fall first and birth rates follow."
+  },
+  "maternal_death_inquiries": {
+   "effects": {
+    "maternal_safety": 0.014,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Maternal Death Inquiries",
+   "observation": "Every death of a mother in childbirth is investigated, and the avoidable cause is named."
+  },
+  "pronatalist_bonuses": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": 0.006,
+    "labor_demand": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Pronatalist Bonuses",
+   "observation": "Couples receive bonuses and marriage loans forgiven with each child.",
+   "social_consequence": "Women are pressed back into the home; births rise briefly and fall again."
+  },
+  "obstetric_flying_squads": {
+   "effects": {
+    "labor_demand": 0.002,
+    "maternal_safety": 0.012,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "name": "Obstetric Squads",
+   "observation": "A squad with blood, drugs and a surgeon drives out to home births that go wrong."
+  },
+  "child_evacuation_schemes": {
+   "effects": {
+    "cohesion": -0.002,
+    "disease_exposure": 0.001,
+    "neonatal_survival": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Child Evacuation",
+   "observation": "Children are sent by train from bombed towns to strangers in the country.",
+   "social_consequence": "Children are parted from parents for years; some never return home."
+  },
+  "cohort_population_projection": {
+   "effects": {
+    "observation_rate": 0.002,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
+   "name": "Cohort Projections",
+   "observation": "Future population is projected age group by age group from births, deaths and migration."
+  },
+  "displaced_persons_camps": {
+   "effects": {
+    "cohesion": -0.002,
+    "conception_support": -0.003,
+    "disease_exposure": 0.003,
+    "housing_output": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
+   "name": "Displaced Camps",
+   "observation": "After a world war millions live in camps and wait to be sent home or resettled."
+  },
+  "universal_family_allowances": {
+   "effects": {
+    "cohesion": 0.003,
+    "conception_support": 0.006,
+    "labor_demand": 0.002,
+    "legitimacy": 0.003,
+    "neonatal_survival": 0.004,
+    "nutrition_quality": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Family Allowances",
+   "observation": "The state pays a weekly allowance for every child in every family.",
+   "ability_reason": "No child goes without because the family is large.",
+   "social_consequence": "A family allowance office pays every mother; employers argue it holds down wages."
+  },
+  "birth_cohort_study": {
+   "effects": {
+    "neonatal_survival": 0.002,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/child_growth_records-v1.png",
+   "name": "Birth Cohort Study",
+   "observation": "Every child born in one week is followed from birth through life."
+  },
+  "refugee_convention": {
+   "effects": {
+    "cohesion": 0.001,
+    "disease_exposure": 0.001,
+    "legitimacy": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Refugee Convention",
+   "observation": "A treaty defines who is a refugee and forbids sending them back into danger.",
+   "ability_reason": "Those fleeing persecution have a legal claim to shelter abroad.",
+   "social_consequence": "Every realm now keeps an asylum office, and the numbers of claimants are a matter of fierce debate."
+  },
+  "hospital_birth_norm": {
+   "effects": {
+    "labor_demand": 0.002,
+    "maternal_safety": 0.014,
+    "neonatal_survival": 0.008
+   },
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "name": "Hospital Births",
+   "observation": "Nearly every birth takes place in hospital, with a surgeon and blood close by."
+  },
+  "guest_worker_programmes": {
+   "effects": {
+    "cohesion": -0.003,
+    "disease_exposure": 0.002,
+    "labor_efficiency": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
+   "name": "Guest Workers",
+   "observation": "Foreign workers are recruited on fixed contracts to fill the factories.",
+   "social_consequence": "The guests stay and send for families; the hosts never expected them to."
+  },
+  "household_residence_permits": {
+   "effects": {
+    "cohesion": -0.004,
+    "conception_support": -0.002,
+    "institutional_rigidity": 0.004,
+    "state_capacity": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Residence Permits",
+   "observation": "Every family is bound by permit to its town or village, and moving without leave is forbidden.",
+   "social_consequence": "Country people become second-class; millions live in towns without papers."
+  },
+  "oral_contraceptive_pill": {
+   "effects": {
+    "cohesion": -0.002,
+    "conception_support": -0.09,
+    "maternal_safety": 0.004
+   },
+   "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
+   "name": "Contraceptive Pill",
+   "observation": "A daily hormone pill prevents pregnancy, controlled by the woman herself.",
+   "ability_reason": "Women decide the number and timing of their children with near certainty.",
+   "social_consequence": "Marriage, schooling and work for women change within a generation; the shrines condemn the pill."
+  },
+  "retirement_communities": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": -0.001,
+    "housing_output": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "name": "Retirement Villages",
+   "observation": "Retirement villages and pensions give a long old age outside work."
+  },
+  "newborn_blood_screening": {
+   "effects": {
+    "neonatal_survival": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/child_growth_records-v1.png",
+   "name": "Newborn Screening",
+   "observation": "A spot of blood from every newborn's heel is tested for inherited disease."
+  },
+  "family_planning_fieldwork": {
+   "effects": {
+    "conception_support": -0.055,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.004,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "name": "Family-planning Fieldwork",
+   "observation": "Field workers carry coils and pills to villages and teach couples to space their children."
+  },
+  "neonatal_intensive_care": {
+   "effects": {
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.012
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Neonatal Intensive Care",
+   "observation": "Newborn intensive care nurseries keep tiny premature infants breathing and warm."
+  },
+  "rh_disease_prevention": {
+   "effects": {
+    "maternal_safety": 0.001,
+    "neonatal_survival": 0.005
+   },
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "name": "Rh Prevention",
+   "observation": "An antibody injection protects the next child of an Rh-negative mother."
+  },
+  "points_based_immigration": {
+   "effects": {
+    "cohesion": -0.001,
+    "labor_efficiency": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Points Immigration",
+   "observation": "Immigrants are admitted by points for skills and language."
+  },
+  "continuous_population_register": {
+   "effects": {
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.002,
+    "observation_rate": 0.002,
+    "state_capacity": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
+   "name": "Population Register",
+   "observation": "Every person carries an identity number on one register from birth to death."
+  },
+  "small_family_campaigns": {
+   "effects": {
+    "cohesion": -0.001,
+    "conception_support": -0.045
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "Small-family Campaigns",
+   "observation": "Posters and broadcasts urge two children as the right number for a family."
+  },
+  "no_fault_divorce": {
+   "effects": {
+    "cohesion": -0.002,
+    "conception_support": -0.006
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "No-fault Divorce",
+   "observation": "Couples may divorce without proving fault."
+  },
+  "equal_birth_status": {
+   "effects": {
+    "cohesion": 0.001,
+    "neonatal_survival": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Equal Birth Status",
+   "observation": "Children born outside marriage gain equal rights with those born within it."
+  },
+  "prenatal_ultrasound": {
+   "effects": {
+    "maternal_safety": 0.006,
+    "neonatal_survival": 0.004
+   },
+   "art": "res://assets/ui/research/paper/nuclear_magnetic_resonance_spectroscopy.png",
+   "name": "Prenatal Ultrasound",
+   "observation": "Sound-wave scans follow the unborn child and show twins, breech and troubles early."
+  },
+  "legal_pregnancy_termination": {
+   "effects": {
+    "cohesion": -0.003,
+    "conception_support": -0.035,
+    "maternal_safety": 0.01
+   },
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "name": "Legal Termination",
+   "observation": "Pregnancy may be ended safely in licensed clinics, and back-street deaths stop.",
+   "social_consequence": "The question divides the people bitterly for decades."
+  },
+  "inter_realm_population_conference": {
+   "effects": {
+    "conception_support": -0.008,
+    "observation_rate": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Population Conference",
+   "observation": "Realms meet on population and development and agree to put women's health and choice first."
+  },
+  "paid_parental_leave": {
+   "effects": {
+    "cohesion": 0.002,
+    "conception_support": 0.005,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Parental Leave",
+   "observation": "Mothers and fathers take paid leave after a birth."
+  },
+  "in_vitro_fertilisation": {
+   "effects": {
+    "cohesion": -0.001,
+    "conception_support": 0.006,
+    "knowledge_rate": 0.002
+   },
+   "art": "res://assets/ui/research/paper/cell_culture_methods.png",
+   "name": "Test-tube Conception",
+   "observation": "An egg is fertilised in a dish and returned to the womb, and a child is born.",
+   "ability_reason": "Couples who could not conceive can have children.",
+   "social_consequence": "Shrines and courts argue over who may use it and what becomes of spare embryos."
+  },
+  "skin_to_skin_newborn_care": {
+   "effects": {
+    "neonatal_survival": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Skin-to-skin Care",
+   "observation": "Small newborns are carried against the mother's skin, keeping them warm and fed without an incubator."
+  },
+  "state_birth_quotas": {
+   "effects": {
+    "cohesion": -0.01,
+    "conception_support": -0.03,
+    "institutional_rigidity": 0.006,
+    "legitimacy": -0.008,
+    "neonatal_survival": -0.002,
+    "state_capacity": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Birth Quotas",
+   "observation": "The state fixes how many children each couple may have, and officials enforce the quota.",
+   "social_consequence": "Forced procedures, missing daughters and a generation of only children; resentment and a lopsided population last for decades."
+  },
+  "register_based_census": {
+   "effects": {
+    "labor_demand": -0.002,
+    "observation_rate": 0.001,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
+   "name": "Register Census",
+   "observation": "The census is drawn from registers without enumerators going door to door."
+  },
+  "fertility_sample_surveys": {
+   "effects": {
+    "conception_support": -0.002,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
+   "name": "Fertility Surveys",
+   "observation": "Sample surveys across many realms measure fertility, contraception and child health."
+  },
+  "long_acting_contraception": {
+   "effects": {
+    "conception_support": -0.025,
+    "maternal_safety": 0.003
+   },
+   "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
+   "name": "Long-acting Contraception",
+   "observation": "Hormone implants and injections prevent pregnancy for months or years."
+  },
+  "surrogacy_contracts": {
+   "effects": {
+    "cohesion": -0.001,
+    "conception_support": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Surrogacy Contracts",
+   "observation": "Surrogate births are regulated by contract and law."
+  },
+  "registered_partnerships": {
+   "effects": {
+    "cohesion": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
+   "name": "Registered Partnerships",
+   "observation": "Unmarried couples may register a partnership with rights close to marriage."
+  },
+  "preimplantation_testing": {
+   "effects": {
+    "cohesion": -0.001,
+    "neonatal_survival": 0.002
+   },
+   "art": "res://assets/ui/research/paper/cell_theory.png",
+   "name": "Embryo Testing",
+   "observation": "Embryos are tested for inherited disease before one is placed in the womb."
+  },
+  "sex_selection_ban": {
+   "effects": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Sex-selection Ban",
+   "observation": "Scanning to learn the sex of the unborn in order to choose is banned."
+  },
+  "long_term_care_insurance": {
+   "effects": {
+    "cohesion": 0.003,
+    "conception_support": -0.002,
+    "health_protection": 0.002,
+    "labor_demand": 0.004,
+    "legitimacy": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "name": "Long-term Care Insurance",
+   "observation": "Insurance pays for the care of the frail old at home or in care homes.",
+   "ability_reason": "The long old age that medicine has won is cared for without ruining the family.",
+   "social_consequence": "A care ministry and a vast care workforce appear; the young pay more for the old each year."
+  },
+  "emergency_contraception": {
+   "effects": {
+    "conception_support": -0.006,
+    "maternal_safety": 0.001
+   },
+   "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
+   "name": "Emergency Contraception",
+   "observation": "A pill taken after intercourse prevents pregnancy and is sold over the counter."
+  },
+  "dual_citizenship": {
+   "effects": {
+    "cohesion": 0.001,
+    "trade_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Dual Citizenship",
+   "observation": "Citizens may hold the citizenship of another realm as well."
+  },
+  "dementia_care_units": {
+   "effects": {
+    "cohesion": 0.002,
+    "labor_demand": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Dementia Care",
+   "observation": "Memory clinics and dementia units care for the old who lose their minds."
+  },
+  "mobile_remittances": {
+   "effects": {
+    "cohesion": 0.001,
+    "food_output": 0.0013,
+    "trade_capacity": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/route_memory-v1.png",
+   "name": "Mobile Remittances",
+   "observation": "Migrants send wages home by mobile phone in minutes."
+  },
+  "indexed_pension_age": {
+   "effects": {
+    "labor_efficiency": 0.002,
+    "legitimacy": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "name": "Indexed Pension Age",
+   "observation": "The pension age rises with life expectancy."
+  },
+  "egg_freezing": {
+   "effects": {
+    "conception_support": -0.006
+   },
+   "art": "res://assets/ui/research/paper/cell_culture_methods.png",
+   "name": "Egg Freezing",
+   "observation": "Women freeze their eggs and delay childbearing into their late thirties."
+  },
+  "mobile_birth_registration": {
+   "effects": {
+    "neonatal_survival": 0.001,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
+   "name": "Mobile Birth Registration",
+   "observation": "Births in remote districts are registered by mobile phone."
+  },
+  "genetic_ancestry_testing": {
+   "effects": {
+    "cohesion": 0.001
+   },
+   "art": "res://assets/ui/research/paper/cell_theory.png",
+   "name": "Ancestry Testing",
+   "observation": "Ancestry is read from a swab of the cheek."
+  },
+  "excess_death_tracking": {
+   "effects": {
+    "disease_exposure": -0.002,
+    "observation_rate": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
+   "name": "Excess-death Tracking",
+   "observation": "Weekly excess deaths are tracked in a pandemic to see its true toll."
+  },
+  "remote_worker_visas": {
+   "effects": {
+    "trade_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/route_memory-v1.png",
+   "name": "Remote-worker Visas",
+   "observation": "Visas let remote workers live in one realm and work for another."
+  },
+  "low_fertility_family_package": {
+   "effects": {
+    "cohesion": 0.002,
+    "conception_support": 0.006,
+    "labor_demand": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Family Package",
+   "observation": "Guaranteed childcare places and baby bonuses try to halt the fall in births."
+  },
+  "climate_managed_resettlement": {
+   "effects": {
+    "cohesion": -0.003,
+    "disaster_resilience": 0.004,
+    "housing_output": 0.003,
+    "labor_demand": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
+   "name": "Managed Resettlement",
+   "observation": "Districts lost to rising seas and heat are resettled by plan before the disaster strikes.",
+   "ability_reason": "Whole districts move before the sea takes them, rather than fleeing after.",
+   "social_consequence": "Old homes and graves are abandoned; the resettled grieve and quarrel over compensation."
+  },
+  "artificial_womb_support": {
+   "effects": {
+    "neonatal_survival": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Womb Support",
+   "observation": "Extremely premature infants are supported in fluid-filled womb systems."
+  }
+ }
 }

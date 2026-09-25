@@ -1,5 +1,989 @@
 {
  "line": "logistics",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "slung_carriage_body": {
+   "effects": {
+    "travel_speed": 0.0034,
+    "injury_risk": -0.002,
+    "fatigue": -0.002
+   },
+   "name": "Slung Carriage Body",
+   "observation": "The carriage body hangs on leather straps from posts at each corner, and passengers no longer feel every stone in the road.",
+   "art": "res://assets/ui/research/paper/first300-cards/cart_running_gear.tres"
+  },
+  "armed_sounding_lead": {
+   "effects": {
+    "route_speed": 0.004,
+    "naval_capacity": 0.003,
+    "injury_risk": -0.002
+   },
+   "name": "Armed Sounding Lead",
+   "observation": "The leadsman fills the hollow of his lead with tallow, and the sand or shell it brings up tells the pilot where he is in fog.",
+   "art": "res://assets/ui/research/discovery-600/pilots_sea_lanes.png"
+  },
+  "two_masted_round_ships": {
+   "effects": {
+    "naval_capacity": 0.006,
+    "haul_capacity": 0.0045,
+    "trade_capacity": 0.003,
+    "timber_pressure": 0.002,
+    "logistics_endurance": 0.0025,
+    "container_capacity": 0.0026
+   },
+   "name": "Two-Masted Round Ships",
+   "observation": "A second, smaller mast aft carries a three-cornered sail, and the round ship now holds closer to the wind.",
+   "art": "res://assets/ui/research/paper/sail_seaming.png"
+  },
+  "tilt_covered_wagons": {
+   "effects": {
+    "storage_loss": -0.0042,
+    "haul_capacity": 0.0022,
+    "food_spoilage": -0.002,
+    "container_capacity": 0.0026,
+    "logistics_endurance": 0.0025,
+    "food_storage": 0.002
+   },
+   "name": "Tilt-Covered Wagons",
+   "observation": "Hooped canvas over the wagon bed keeps the carriers' cloth and grain dry through a wet week on the road.",
+   "art": "res://assets/ui/research/paper/first300-cards/cart_bed_framing.tres"
+  },
+  "full_rigged_three_master": {
+   "effects": {
+    "naval_capacity": 0.016,
+    "haul_capacity": 0.009,
+    "trade_capacity": 0.006,
+    "logistics_endurance": 0.005,
+    "timber_pressure": 0.004,
+    "labor_demand": 0.002,
+    "container_capacity": 0.0026
+   },
+   "name": "Full-Rigged Three-Master",
+   "observation": "Square sails on fore and main and a lateen on the mizzen let one hull run before the wind or work to windward as the voyage needs.",
+   "ability_reason": "An admiral can keep a squadron at sea in open water through changing winds, and a merchant house can send one hull on a voyage of a year.",
+   "social_consequence": "Shipwrights' yards grow into towns of their own, and the tallest coastal trees are marked for masts.",
+   "art": "res://assets/ui/research/paper/first300-cards/rope_rigging.tres"
+  },
+  "traverse_course_tables": {
+   "effects": {
+    "route_speed": 0.004,
+    "naval_capacity": 0.002,
+    "knowledge_preservation": 0.0006
+   },
+   "name": "Traverse Tables",
+   "observation": "The master reads the day's zig-zag tacks off a table and marks one line of distance made good on the chart.",
+   "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png"
+  },
+  "lateen_caravel": {
+   "effects": {
+    "naval_capacity": 0.006,
+    "trade_capacity": 0.003,
+    "survey_speed": 0.0018,
+    "injury_risk": 0.002,
+    "logistics_endurance": 0.0025
+   },
+   "name": "Lateen Caravel",
+   "observation": "A small lateen-rigged ship can beat home against the wind that carried it out, so captains dare to push farther along unknown coasts.",
+   "art": "res://assets/ui/research/subjects/coastal_watercraft-v1.png"
+  },
+  "fortified_trading_posts": {
+   "effects": {
+    "trade_capacity": 0.007,
+    "security_efficiency": 0.002,
+    "state_capacity": 0.002,
+    "disease_exposure": 0.002,
+    "labor_demand": 0.002,
+    "logistics_endurance": 0.0025,
+    "container_capacity": 0.0026
+   },
+   "name": "Fortified Trading Posts",
+   "observation": "Factors of the realm live and trade behind their own walls on far coasts, with a few guns over the landing.",
+   "social_consequence": "The factors live among strangers, and a quarrel over prices can turn a trading post into a siege.",
+   "art": "res://assets/ui/research/subjects/fortified_stores-v1.png"
+  },
+  "passenger_coach": {
+   "effects": {
+    "travel_speed": 0.0161,
+    "trade_capacity": 0.003,
+    "fatigue": -0.003,
+    "food_output": -0.002,
+    "labor_demand": 0.001,
+    "logistics_endurance": 0.0025
+   },
+   "name": "Passenger Coach",
+   "observation": "A light coach with a slung body, built in a coach-making town, carries six people and their bags at a trot.",
+   "ability_reason": "An official or a courier can cross the realm by coach in days instead of weeks, and people as well as letters now move between the towns.",
+   "social_consequence": "Travel between towns becomes ordinary for people of means, and coachmaking becomes a trade of its own.",
+   "art": "res://assets/ui/research/paper/first300-cards/cart_running_gear.tres"
+  },
+  "ocean_carrack": {
+   "effects": {
+    "naval_capacity": 0.018,
+    "haul_capacity": 0.0134,
+    "trade_capacity": 0.008,
+    "logistics_endurance": 0.0063,
+    "timber_pressure": 0.005,
+    "disease_exposure": 0.003,
+    "container_capacity": 0.0052,
+    "storage_loss": -0.0028
+   },
+   "name": "Ocean Carrack",
+   "observation": "A deep hold under high castles and three or four masts carries a year's cargo and a crew of a hundred across open ocean.",
+   "ability_reason": "An admiral can carry an army's stores and guns across an ocean in a few deep hulls, and the high castles hold off boarders.",
+   "art": "res://assets/ui/research/subjects/naval_logistics-v1.png"
+  },
+  "mariners_quadrant": {
+   "effects": {
+    "route_speed": 0.006,
+    "naval_capacity": 0.003,
+    "survey_speed": 0.0012
+   },
+   "name": "Mariner's Quadrant",
+   "observation": "On a pitching deck the pilot sights the pole star along the quadrant's edge and reads where the plumb line falls on the scale.",
+   "art": "res://assets/ui/research/discovery-600/star_hour_tables.png"
+  },
+  "topsail_rig": {
+   "effects": {
+    "naval_capacity": 0.006,
+    "travel_speed": 0.0023,
+    "labor_demand": 0.001
+   },
+   "name": "Topsails",
+   "observation": "Small sails set above the courses catch the wind higher up, and a ship keeps way in light airs that would have left it becalmed.",
+   "art": "res://assets/ui/research/paper/rope_laying.png"
+  },
+  "ocean_wind_circuit": {
+   "effects": {
+    "route_speed": 0.016,
+    "naval_capacity": 0.01,
+    "trade_capacity": 0.008,
+    "logistics_endurance": 0.005,
+    "disease_exposure": 0.002
+   },
+   "name": "Ocean Wind Circuit",
+   "observation": "Pilots stand far out to sea on the way home and find the steady winds that the coast-huggers never reach.",
+   "ability_reason": "An admiral can bring a fleet home from far southern coasts by standing out to sea for the prevailing winds instead of beating along the shore.",
+   "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png"
+  },
+  "latitude_sailing": {
+   "effects": {
+    "route_speed": 0.016,
+    "naval_capacity": 0.008,
+    "survey_speed": 0.0024,
+    "injury_risk": -0.002,
+    "logistics_endurance": 0.0025
+   },
+   "name": "Latitude Sailing",
+   "observation": "The pilot takes the noon sun, corrects it from his declination table, and runs down the parallel until the island rises ahead.",
+   "ability_reason": "A pilot can find a far island by running down its known latitude, so a fleet commander can set a meeting place across open ocean.",
+   "art": "res://assets/ui/research/paper/wayfinding_stars.png"
+  },
+  "ocean_victualling": {
+   "effects": {
+    "logistics_endurance": 0.008,
+    "food_storage": 0.005,
+    "storage_loss": -0.0056,
+    "container_capacity": 0.0039,
+    "health_risk": 0.002,
+    "food_spoilage": -0.002
+   },
+   "name": "Ocean Victualling",
+   "observation": "Biscuit baked twice, beef in brine and water in hooped casks are stowed for months; the crews still sicken with bleeding gums on the long runs.",
+   "art": "res://assets/ui/research/paper/sealed_vessels.png"
+  },
+  "transoceanic_contact_voyages": {
+   "effects": {
+    "trade_capacity": 0.018,
+    "naval_capacity": 0.01,
+    "survey_speed": 0.0036,
+    "disease_exposure": 0.006,
+    "injury_risk": 0.002
+   },
+   "name": "Transoceanic Voyages",
+   "observation": "Ships cross the western ocean to lands no one at home had heard of, and some of them come back.",
+   "ability_reason": "An admiral can sail to the lands across the western ocean and return, so the realm can meet, trade with and settle among peoples it never knew.",
+   "social_consequence": "Sailors bring home news, seeds and sickness from peoples no one knew existed, and carry sickness to them in return.",
+   "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png"
+  },
+  "dry_dock_services": {
+   "effects": {
+    "repair_capacity": 0.008,
+    "naval_capacity": 0.005,
+    "construction_rate": 0.002,
+    "labor_demand": 0.003
+   },
+   "observation": "A ship is floated into a stone basin, the gates are shut and the water is pumped out, and the shipwrights walk dry-shod under its keel.",
+   "art": "res://assets/ui/research/paper/dry_dock_services.png"
+  },
+  "ocean_house_of_trade": {
+   "effects": {
+    "trade_capacity": 0.006,
+    "state_capacity": 0.004,
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0012
+   },
+   "name": "House of Trade",
+   "observation": "Every ocean voyage is entered in the house of trade's books, with its cargo, crew and pilot, before the ship may sail.",
+   "social_consequence": "Merchants outside the chartered port complain that they are shut out of the ocean trade.",
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_contracts.png"
+  },
+  "master_pattern_chart": {
+   "effects": {
+    "route_speed": 0.006,
+    "survey_speed": 0.0024,
+    "knowledge_preservation": 0.0018
+   },
+   "name": "Master Chart",
+   "observation": "The chief pilot corrects the master chart from each returning pilot's log, and every new chart is copied from it.",
+   "art": "res://assets/ui/research/discovery-600/regional_maps.png"
+  },
+  "public_letter_post": {
+   "effects": {
+    "travel_speed": 0.0115,
+    "trade_capacity": 0.008,
+    "state_capacity": 0.006,
+    "cohesion": 0.002,
+    "labor_demand": 0.002,
+    "logistics_endurance": 0.0013
+   },
+   "name": "Public Letter Post",
+   "observation": "The realm post now carries anyone's letters for a fee, and the postmaster-general publishes the days the riders leave.",
+   "ability_reason": "Merchants' letters and a general's dispatches ride the same relays on fixed days, so news from a distant army reaches the capital within days.",
+   "social_consequence": "Families far apart write to one another, and the postmaster's clerks learn to open and reseal letters.",
+   "art": "res://assets/ui/research/discovery-600/messenger_relay_stations.png"
+  },
+  "examined_ocean_pilots": {
+   "effects": {
+    "route_speed": 0.005,
+    "injury_risk": -0.003,
+    "naval_capacity": 0.002,
+    "institutional_rigidity": 0.001,
+    "logistics_endurance": 0.0013
+   },
+   "name": "Examined Pilots",
+   "observation": "No pilot may take a ship across the ocean until the chief pilot has examined him on charts, stars and soundings.",
+   "art": "res://assets/ui/research/discovery-600/pilots_sea_lanes.png"
+  },
+  "buoyed_channel_corporation": {
+   "effects": {
+    "route_speed": 0.004,
+    "injury_risk": -0.003,
+    "trade_capacity": 0.003,
+    "labor_demand": 0.001
+   },
+   "name": "Buoyed Channels",
+   "observation": "The pilots' corporation moors buoys and keeps beacons on the harbor channel, and charges every ship that enters.",
+   "art": "res://assets/ui/research/paper/galley_navigation.png"
+  },
+  "whipstaff_steering": {
+   "effects": {
+    "naval_capacity": 0.004,
+    "haul_capacity": 0.0022
+   },
+   "name": "Whipstaff Steering",
+   "observation": "The helmsman below deck swings a long lever to move the tiller, so even a great ship answers to one man.",
+   "art": "res://assets/ui/research/paper/hull_condition_surveys.png"
+  },
+  "gimballed_compass": {
+   "effects": {
+    "route_speed": 0.005,
+    "injury_risk": -0.002
+   },
+   "name": "Gimballed Compass",
+   "observation": "The compass bowl hangs in two brass rings and stays level however the ship rolls.",
+   "art": "res://assets/ui/research/discovery-600/cross_bearing_confirmation.png"
+  },
+  "dished_wheels": {
+   "effects": {
+    "haul_capacity": 0.0067,
+    "travel_speed": 0.0023,
+    "repair_capacity": 0.002,
+    "logistics_endurance": 0.0025
+   },
+   "name": "Dished Wheels",
+   "observation": "The wheels are dished outward on splayed axles, and a heavy wagon no longer racks itself to pieces in the ruts.",
+   "art": "res://assets/ui/research/paper/felloe_jointing.png"
+  },
+  "ocean_galleon": {
+   "effects": {
+    "naval_capacity": 0.018,
+    "haul_capacity": 0.009,
+    "trade_capacity": 0.006,
+    "warfare_readiness": 0.004,
+    "timber_pressure": 0.005,
+    "labor_demand": 0.002,
+    "logistics_endurance": 0.005,
+    "container_capacity": 0.0026
+   },
+   "name": "Ocean Galleon",
+   "observation": "A long, low-castled hull carries both cargo and a row of guns, and sails better than the carrack it replaces.",
+   "ability_reason": "An admiral gets one ocean hull that can carry cargo home and fight its way through, so treasure fleets need fewer escorts.",
+   "art": "res://assets/ui/research/subjects/naval_arsenals-v1.png"
+  },
+  "wagonway_haulage": {
+   "effects": {
+    "haul_capacity": 0.0078,
+    "extraction_yield": 0.002,
+    "fatigue": -0.002,
+    "timber_pressure": 0.002,
+    "logistics_endurance": 0.0025
+   },
+   "observation": "Trucks with flanged wheels are pushed along timber rails from the pit to the staithe, and one man moves what took four carriers.",
+   "art": "res://assets/ui/research/paper/wagonway_haulage.png"
+  },
+  "escorted_ocean_fleets": {
+   "effects": {
+    "trade_capacity": 0.014,
+    "naval_capacity": 0.008,
+    "security_efficiency": 0.003,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.002,
+    "logistics_endurance": 0.005,
+    "storage_loss": -0.0028
+   },
+   "name": "Escorted Ocean Fleets",
+   "observation": "The merchant ships wait for the fleet and sail together twice a year under warships, and come home with bullion and goods.",
+   "ability_reason": "An admiral can shepherd a whole year's ocean trade in one guarded convoy, and raiders must now fight warships to take a prize.",
+   "social_consequence": "The ports empty and fill twice a year, and prices swing wildly between the fleets.",
+   "art": "res://assets/ui/research/discovery-600/pilots_sea_lanes.png"
+  },
+  "cross_ocean_galleon_run": {
+   "effects": {
+    "trade_capacity": 0.008,
+    "naval_capacity": 0.004,
+    "disease_exposure": 0.003,
+    "injury_risk": 0.002,
+    "logistics_endurance": 0.0037,
+    "container_capacity": 0.0026
+   },
+   "name": "Galleon Run",
+   "observation": "One great galleon a year crosses the widest ocean, carrying silver out and silk and porcelain back.",
+   "social_consequence": "Silver pours out and silk pours in, and prices in the ports rise year after year.",
+   "art": "res://assets/ui/research/subjects/naval_arsenals-v2.png"
+  },
+  "straight_course_projection_charts": {
+   "effects": {
+    "route_speed": 0.016,
+    "survey_speed": 0.0036,
+    "naval_capacity": 0.004,
+    "knowledge_preservation": 0.0018,
+    "logistics_endurance": 0.0025
+   },
+   "name": "Straight-Course Charts",
+   "observation": "The new chart stretches the lands toward the poles so that a compass course is a straight line drawn with a ruler.",
+   "ability_reason": "A fleet's pilot can lay one straight compass course across an ocean chart and hold it, so squadrons can be sent to distant stations with confidence.",
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png"
+  },
+  "log_and_line": {
+   "effects": {
+    "route_speed": 0.004,
+    "survey_speed": 0.0012
+   },
+   "name": "Log and Line",
+   "observation": "A board on a knotted line is thrown astern, and the knots that run out while the sandglass empties give the ship's speed.",
+   "art": "res://assets/ui/research/paper/rope_laying.png"
+  },
+  "printed_sea_atlases": {
+   "effects": {
+    "route_speed": 0.005,
+    "knowledge_preservation": 0.0024,
+    "adoption_rate": 0.002,
+    "survey_speed": 0.0012
+   },
+   "name": "Printed Sea Atlases",
+   "observation": "Charts and sailing directions for a whole coast are printed and bound together, and any master can buy them.",
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png"
+  },
+  "backstaff": {
+   "effects": {
+    "route_speed": 0.004,
+    "injury_risk": -0.001
+   },
+   "name": "Backstaff",
+   "observation": "The navigator stands with his back to the sun and lines up its shadow, and no longer ruins his eyes to take the noon height.",
+   "art": "res://assets/ui/research/discovery-600/shadow_clock.png"
+  },
+  "fluyt_bulk_carrier": {
+   "effects": {
+    "haul_capacity": 0.0179,
+    "trade_capacity": 0.01,
+    "naval_capacity": 0.004,
+    "labor_demand": -0.003,
+    "timber_pressure": 0.003,
+    "logistics_endurance": 0.0025,
+    "container_capacity": 0.0052,
+    "storage_loss": -0.0028
+   },
+   "name": "Bulk Carrier",
+   "observation": "A cheap, narrow-decked hull with simple rigging carries grain and timber with half the crew of older ships.",
+   "ability_reason": "Grain, timber and an army's bulk supplies can go by sea at half the old freight, with small crews.",
+   "social_consequence": "Rival ports lose their carrying trade to the cheap hulls, and old crews are paid off.",
+   "art": "res://assets/ui/research/subjects/naval_logistics-v1.png"
+  },
+  "company_merchant_fleets": {
+   "effects": {
+    "trade_capacity": 0.008,
+    "naval_capacity": 0.004,
+    "state_capacity": 0.002,
+    "institutional_rigidity": 0.002,
+    "cohesion": -0.002,
+    "container_capacity": 0.0026,
+    "storage_loss": -0.0028,
+    "logistics_endurance": 0.0025
+   },
+   "name": "Company Fleets",
+   "observation": "Chartered companies send their own fleets, keep factors and warehouses abroad and pay dividends to shareholders at home.",
+   "social_consequence": "The companies keep their own soldiers abroad and answer to their shareholders more than to the realm.",
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_contracts.png"
+  },
+  "entrepot_reexport_port": {
+   "effects": {
+    "trade_capacity": 0.008,
+    "storage_loss": -0.0028,
+    "container_capacity": 0.0039,
+    "food_storage": 0.002
+   },
+   "name": "Entrepot Port",
+   "observation": "Far-sea goods are landed, stored and shipped on again to every port along the coast.",
+   "art": "res://assets/ui/research/subjects/cargo_seals-v1.png"
+  },
+  "endorsed_bills": {
+   "effects": {
+    "trade_capacity": 0.007,
+    "state_capacity": 0.001
+   },
+   "name": "Endorsed Bills",
+   "observation": "A merchant signs the back of a bill of exchange and pays his own debt with it, and the bill passes through a dozen hands before it is paid.",
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_letters.png"
+  },
+  "ship_logbooks": {
+   "effects": {
+    "route_speed": 0.003,
+    "knowledge_preservation": 0.0018,
+    "survey_speed": 0.0012
+   },
+   "name": "Ship Logbooks",
+   "observation": "Course, speed, wind and weather are written in the ship's log every watch, and the owners read it when the ship comes home.",
+   "art": "res://assets/ui/research/paper/laboratory_notebooks.png"
+  },
+  "azimuth_variation_finding": {
+   "effects": {
+    "route_speed": 0.005,
+    "survey_speed": 0.0012
+   },
+   "name": "Compass Variation",
+   "observation": "The navigator takes the sun's bearing as it rises, and the difference from true east tells him how far his compass points wrong here.",
+   "art": "res://assets/ui/research/discovery-600/cross_bearing_confirmation.png"
+  },
+  "hackney_coaches": {
+   "effects": {
+    "travel_speed": 0.0046,
+    "trade_capacity": 0.002,
+    "food_output": -0.001,
+    "disease_exposure": 0.001
+   },
+   "name": "Hackney Coaches",
+   "observation": "Coaches stand for hire in the town streets, and anyone with the fare can ride across the city.",
+   "art": "res://assets/ui/research/paper/first300-cards/cart_running_gear.tres"
+  },
+  "navigators_log_scale": {
+   "effects": {
+    "route_speed": 0.004,
+    "survey_speed": 0.0012
+   },
+   "name": "Navigator's Scale",
+   "observation": "A ruled scale of logarithms lets the navigator work a course with a pair of dividers instead of long sums.",
+   "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png"
+  },
+  "victualling_yards": {
+   "effects": {
+    "logistics_endurance": 0.008,
+    "food_storage": 0.006,
+    "storage_loss": -0.0056,
+    "container_capacity": 0.0039,
+    "state_capacity": 0.002,
+    "labor_demand": 0.003,
+    "food_spoilage": -0.002
+   },
+   "name": "Victualling Yards",
+   "observation": "State yards bake biscuit, salt beef and brew beer by the shipload, and every cask is marked with its yard and year.",
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png"
+  },
+  "scheduled_passenger_barges": {
+   "effects": {
+    "travel_speed": 0.0057,
+    "trade_capacity": 0.002,
+    "fatigue": -0.002
+   },
+   "name": "Passenger Barges",
+   "observation": "Horse-drawn barges leave the town quay at fixed hours, and passengers sleep or read on the way.",
+   "art": "res://assets/ui/research/paper/river_craft.png"
+  },
+  "carriers_guide": {
+   "effects": {
+    "route_speed": 0.004,
+    "trade_capacity": 0.003,
+    "knowledge_preservation": 0.0006
+   },
+   "name": "Carriers' Guide",
+   "observation": "A printed guide lists every carrier, the inn he leaves from and the days he goes, for every town in the realm.",
+   "art": "res://assets/ui/research/paper/route_memory.png"
+  },
+  "distance_postage_rates": {
+   "effects": {
+    "trade_capacity": 0.004,
+    "state_capacity": 0.002,
+    "standardization": 0.002
+   },
+   "name": "Distance Postage",
+   "observation": "The post office prints its rates by distance, and a letter costs the same to send whoever sends it.",
+   "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png"
+  },
+  "staircase_summit_canal": {
+   "effects": {
+    "haul_capacity": 0.0179,
+    "trade_capacity": 0.008,
+    "route_speed": 0.004,
+    "labor_demand": 0.006,
+    "water_access": 0.002,
+    "disease_exposure": 0.002,
+    "logistics_endurance": 0.005,
+    "storage_loss": -0.0028
+   },
+   "name": "Summit Canal",
+   "observation": "Flights of locks lift barges over the watershed, and a reservoir on the summit feeds the locks through the dry season.",
+   "ability_reason": "Barges can cross the watershed between two river basins, so grain, timber and an army's stores move by water across the width of the realm.",
+   "art": "res://assets/ui/research/subjects/canal_locks-v1.png"
+  },
+  "scheduled_stage_wagons": {
+   "effects": {
+    "haul_capacity": 0.0056,
+    "trade_capacity": 0.003,
+    "route_speed": 0.002,
+    "logistics_endurance": 0.0025,
+    "container_capacity": 0.0026
+   },
+   "name": "Stage Wagons",
+   "observation": "Great wagons leave on fixed days between the towns, and carriers sell space by the hundredweight.",
+   "art": "res://assets/ui/research/paper/first300-cards/cart_bed_framing.tres"
+  },
+  "own_hull_navigation_law": {
+   "effects": {
+    "naval_capacity": 0.006,
+    "trade_capacity": -0.003,
+    "security_efficiency": 0.002,
+    "institutional_rigidity": 0.003
+   },
+   "name": "Navigation Law",
+   "observation": "The realm's cargoes may be carried only in the realm's own ships, crewed mostly by its own seamen.",
+   "social_consequence": "Foreign carriers are shut out, freight costs rise, and the realm's shipyards and seamen multiply.",
+   "art": "res://assets/ui/research/subjects/naval_arsenals-v1.png"
+  },
+  "long_route_stagecoaches": {
+   "effects": {
+    "travel_speed": 0.0184,
+    "route_speed": 0.006,
+    "trade_capacity": 0.004,
+    "food_output": -0.002,
+    "labor_demand": 0.002,
+    "disease_exposure": 0.002,
+    "logistics_endurance": 0.0025
+   },
+   "name": "Long-Route Stagecoaches",
+   "observation": "Stagecoaches run the long roads on a published timetable and change teams at an inn every stage.",
+   "ability_reason": "Officials, officers and couriers can cross the realm on a published schedule, so orders and reports reach a distant army in a fraction of the old time.",
+   "art": "res://assets/ui/research/discovery-600/messenger_relay_stations.png"
+  },
+  "river_navigation_commissions": {
+   "effects": {
+    "haul_capacity": 0.0067,
+    "route_speed": 0.004,
+    "labor_demand": 0.003,
+    "ecological_pressure": 0.002,
+    "logistics_endurance": 0.0025
+   },
+   "name": "River Commissions",
+   "observation": "Commissioners dredge the shoals, cut through the loops and build towpaths, and charge tolls on every barge.",
+   "art": "res://assets/ui/research/subjects/river_craft-v1.png"
+  },
+  "steel_leaf_springs": {
+   "effects": {
+    "travel_speed": 0.0046,
+    "repair_capacity": 0.001,
+    "fatigue": -0.002,
+    "injury_risk": -0.001
+   },
+   "name": "Leaf Springs",
+   "observation": "Stacked leaves of springy steel carry the coach body, and the ride is steadier at speed.",
+   "art": "res://assets/ui/research/paper/first300-cards/cart_running_gear.tres"
+  },
+  "broad_wheel_laws": {
+   "effects": {
+    "route_speed": 0.004,
+    "haul_capacity": 0.0022,
+    "institutional_rigidity": 0.002,
+    "legitimacy": -0.001
+   },
+   "name": "Broad-Wheel Laws",
+   "observation": "Heavy wagons must run on wheels a hand's breadth wide, which roll the road flat instead of cutting it.",
+   "art": "res://assets/ui/research/paper/graded_roads.png"
+  },
+  "printed_road_books": {
+   "effects": {
+    "route_speed": 0.005,
+    "survey_speed": 0.0012,
+    "knowledge_preservation": 0.0012
+   },
+   "name": "Printed Road Books",
+   "observation": "Strip maps show each road in measured miles, with every inn, bridge and turning marked.",
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png"
+  },
+  "two_sea_canal": {
+   "effects": {
+    "trade_capacity": 0.016,
+    "haul_capacity": 0.0112,
+    "route_speed": 0.006,
+    "labor_demand": 0.006,
+    "disease_exposure": 0.003,
+    "logistics_endurance": 0.005
+   },
+   "name": "Two-Sea Canal",
+   "observation": "A canal climbs over the land between two seas, and barges carry the through trade without the long voyage around the coast.",
+   "ability_reason": "Barges and a fleet's stores can pass between two seas inland, avoiding a long and dangerous voyage around the coast.",
+   "art": "res://assets/ui/research/subjects/canal_locks-v2.png"
+  },
+  "mail_packet_ships": {
+   "effects": {
+    "travel_speed": 0.0046,
+    "trade_capacity": 0.004,
+    "naval_capacity": 0.002,
+    "state_capacity": 0.001,
+    "logistics_endurance": 0.0013
+   },
+   "name": "Mail Packets",
+   "observation": "Fast small ships carry the mail across the sea on fixed sailing days, with or without a full cargo.",
+   "art": "res://assets/ui/research/paper/coastal_watercraft.png"
+  },
+  "underwriters_room": {
+   "effects": {
+    "trade_capacity": 0.006,
+    "disaster_resilience": 0.003,
+    "knowledge_preservation": 0.0006
+   },
+   "name": "Underwriters' Room",
+   "observation": "Underwriters meet in a coffee house, read the ship news together and each sign for a share of the risk.",
+   "social_consequence": "A loss at sea ruins a syndicate rather than a single house, and shipowners take bolder risks.",
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png"
+  },
+  "jib_staysail_rig": {
+   "effects": {
+    "naval_capacity": 0.005,
+    "travel_speed": 0.0023,
+    "labor_demand": -0.001
+   },
+   "name": "Jibs and Staysails",
+   "observation": "Triangular sails set on the stays between the masts help the ship go about quickly and point higher.",
+   "art": "res://assets/ui/research/paper/sail_seaming.png"
+  },
+  "builders_measure_tonnage": {
+   "effects": {
+    "standardization": 0.004,
+    "trade_capacity": 0.003,
+    "state_capacity": 0.002
+   },
+   "name": "Builder's Measure",
+   "observation": "A ship's tonnage is worked from its length and beam by a fixed rule, and its dues are charged on that.",
+   "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png"
+  },
+  "crossroad_fingerposts": {
+   "effects": {
+    "route_speed": 0.004,
+    "travel_speed": 0.0011
+   },
+   "name": "Fingerposts",
+   "observation": "The parish must set up a post at every crossroads with arms pointing to the next towns and their distances.",
+   "art": "res://assets/ui/research/discovery-600/boundary_sighting_marks.png"
+  },
+  "draft_horse_breeding": {
+   "effects": {
+    "haul_capacity": 0.008,
+    "food_output": -0.003,
+    "logistics_endurance": 0.0025
+   },
+   "name": "Draft Horse Breeding",
+   "observation": "Breeders select heavy horses for the freight wagons, and a team of six now pulls what eight could before.",
+   "art": "res://assets/ui/research/subjects/domesticated_mounts-v1.png"
+  },
+  "ships_steering_wheel": {
+   "effects": {
+    "naval_capacity": 0.004,
+    "injury_risk": -0.001,
+    "labor_demand": -0.001
+   },
+   "name": "Ship's Wheel",
+   "observation": "A wheel on deck works the tiller through ropes and blocks, and the helmsman can see the sails as he steers.",
+   "art": "res://assets/ui/research/paper/compound_pulleys.png"
+  },
+  "coasting_schooner": {
+   "effects": {
+    "naval_capacity": 0.005,
+    "trade_capacity": 0.005,
+    "haul_capacity": 0.0034,
+    "labor_demand": -0.001,
+    "logistics_endurance": 0.0025
+   },
+   "name": "Coasting Schooner",
+   "observation": "A fore-and-aft rigged schooner works along the coast with a handful of men and slips into small harbors.",
+   "art": "res://assets/ui/research/paper/coastal_watercraft.png"
+  },
+  "bonded_warehouses": {
+   "effects": {
+    "storage_loss": -0.008,
+    "container_capacity": 0.0078,
+    "trade_capacity": 0.004,
+    "state_capacity": 0.002,
+    "dry_storage": 0.003,
+    "food_storage": 0.002
+   },
+   "name": "Bonded Warehouses",
+   "observation": "Goods in transit sit under the customs lock without paying duty until they are taken out for sale at home.",
+   "art": "res://assets/ui/research/paper/public_stores.png"
+  },
+  "printed_cargo_forms": {
+   "effects": {
+    "trade_capacity": 0.004,
+    "standardization": 0.003,
+    "knowledge_preservation": 0.0012,
+    "storage_loss": -0.0028
+   },
+   "name": "Printed Cargo Forms",
+   "observation": "The manifest, the bill of lading and the charter are printed forms, and a clerk fills in the blanks.",
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_contracts.png"
+  },
+  "drawn_hull_plans": {
+   "effects": {
+    "naval_capacity": 0.006,
+    "standardization": 0.004,
+    "repair_capacity": 0.002,
+    "timber_pressure": -0.002
+   },
+   "name": "Drawn Hull Plans",
+   "observation": "The shipwright draws the body plan and carves a half-model before any timber is cut, and sister ships come out alike.",
+   "art": "res://assets/ui/research/paper/grown_frame_selection.png"
+  },
+  "post_chaise_hire": {
+   "effects": {
+    "travel_speed": 0.0057,
+    "food_output": -0.001
+   },
+   "name": "Post Chaises",
+   "observation": "A light chaise and fresh horses are hired at every posting inn, and a traveller in a hurry covers a hundred miles a day.",
+   "art": "res://assets/ui/research/paper/first300-cards/domesticated_mounts.tres"
+  },
+  "reflecting_octant": {
+   "effects": {
+    "route_speed": 0.014,
+    "naval_capacity": 0.006,
+    "injury_risk": -0.003,
+    "survey_speed": 0.0018,
+    "logistics_endurance": 0.0025
+   },
+   "name": "Reflecting Octant",
+   "observation": "Two mirrors bring the sun down to the horizon in one view, so the angle can be read even on a rolling deck.",
+   "ability_reason": "An admiral's position at sea is known to a few miles rather than to a day's sail, so fleets are lost on unknown shoals far less often.",
+   "art": "res://assets/ui/research/discovery-600/star_hour_tables.png"
+  },
+  "printed_shipping_lists": {
+   "effects": {
+    "trade_capacity": 0.004,
+    "knowledge_preservation": 0.0012,
+    "survey_speed": 0.0006
+   },
+   "name": "Shipping Lists",
+   "observation": "A printed list of every ship arrived, sailed or lost is sold twice a week at the exchange.",
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png"
+  },
+  "turnpike_milestones": {
+   "effects": {
+    "route_speed": 0.004,
+    "travel_speed": 0.0023,
+    "standardization": 0.002
+   },
+   "name": "Turnpike Milestones",
+   "observation": "A stone every mile along the turnpike gives the distance to the next towns, and the coaches keep time by them.",
+   "art": "res://assets/ui/research/discovery-600/boundary_sighting_marks.png"
+  },
+  "night_fly_wagons": {
+   "effects": {
+    "travel_speed": 0.0069,
+    "haul_capacity": 0.0034,
+    "injury_risk": 0.002,
+    "fatigue": 0.003,
+    "food_spoilage": -0.001
+   },
+   "name": "Night Fly Wagons",
+   "observation": "Fast wagons change horses and drivers and run through the night, and goods reach the capital in half the time.",
+   "art": "res://assets/ui/research/paper/first300-cards/cart_bed_framing.tres"
+  },
+  "coastal_hydrographic_survey": {
+   "effects": {
+    "route_speed": 0.006,
+    "survey_speed": 0.0036,
+    "injury_risk": -0.003,
+    "labor_demand": 0.002
+   },
+   "name": "Coastal Survey",
+   "observation": "Survey parties fix the headlands by triangles from the shore and sound the bays from boats.",
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png"
+  },
+  "sextant": {
+   "effects": {
+    "route_speed": 0.012,
+    "survey_speed": 0.0036,
+    "naval_capacity": 0.004
+   },
+   "name": "Sextant",
+   "observation": "The larger arc of the sextant measures the wide angle between the moon and a star.",
+   "ability_reason": "Navigators can measure the wide angles that lunar tables need, so a fleet can fix its longitude as well as its latitude.",
+   "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png"
+  },
+  "lunar_distance_longitude": {
+   "effects": {
+    "route_speed": 0.016,
+    "naval_capacity": 0.008,
+    "trade_capacity": 0.006,
+    "injury_risk": -0.004,
+    "survey_speed": 0.0024,
+    "logistics_endurance": 0.0025
+   },
+   "name": "Lunar Longitude",
+   "observation": "The navigator measures the moon's distance from a star, works the sum from the printed tables, and knows how far east or west he is.",
+   "ability_reason": "An admiral can fix his position east and west by the moon, so squadrons meet at rendezvous in open ocean and far coasts are no longer found by luck.",
+   "art": "res://assets/ui/research/paper/wayfinding_stars.png"
+  },
+  "contour_coal_canal": {
+   "effects": {
+    "haul_capacity": 0.02,
+    "trade_capacity": 0.008,
+    "timber_pressure": -0.004,
+    "pollution": 0.003,
+    "labor_demand": 0.006,
+    "logistics_endurance": 0.0025
+   },
+   "name": "Contour Coal Canal",
+   "observation": "A canal winds level along the hillside from the pit mouth to the city, and a barge of coal costs half what the carts charged.",
+   "ability_reason": "Coal and heavy goods move by barge at half the cart price, so a town's fuel and an arsenal's iron no longer wait on the roads.",
+   "art": "res://assets/ui/research/subjects/canal_locks-v1.png"
+  },
+  "nautical_almanac": {
+   "effects": {
+    "route_speed": 0.006,
+    "knowledge_preservation": 0.0024,
+    "survey_speed": 0.0012
+   },
+   "name": "Nautical Almanac",
+   "observation": "Each year a printed almanac gives the lunar distances worked out ahead, and the navigator no longer needs to be an astronomer.",
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png"
+  },
+  "iron_plated_wagonway_rails": {
+   "effects": {
+    "haul_capacity": 0.008,
+    "extraction_yield": 0.002,
+    "fuel_demand": 0.002,
+    "logistics_endurance": 0.0025
+   },
+   "name": "Iron-Plated Rails",
+   "observation": "Iron plates nailed along the timber rails carry heavier trucks and wear for years.",
+   "art": "res://assets/ui/research/paper/wagonway_haulage.png"
+  },
+  "marine_timekeeper": {
+   "effects": {
+    "route_speed": 0.016,
+    "naval_capacity": 0.006,
+    "injury_risk": -0.004,
+    "trade_capacity": 0.004,
+    "logistics_endurance": 0.0025
+   },
+   "name": "Marine Timekeeper",
+   "observation": "A clock that keeps the home port's time through heat, cold and rolling gives the longitude by comparison with local noon.",
+   "ability_reason": "A navigator knows his longitude from the clock at any noon, so an admiral can station ships and find islands without waiting for the moon.",
+   "art": "res://assets/ui/research/discovery-600/outflow_water_clock.png"
+  },
+  "copper_hull_sheathing": {
+   "effects": {
+    "naval_capacity": 0.008,
+    "repair_capacity": 0.004,
+    "logistics_endurance": 0.005,
+    "fuel_demand": 0.002
+   },
+   "name": "Copper Sheathing",
+   "observation": "Thin copper plates nailed over the hull keep out shipworm and weed, and a ship stays fast for years between refits.",
+   "art": "res://assets/ui/research/paper/hull_seam_caulking.png"
+  },
+  "canal_share_companies": {
+   "effects": {
+    "haul_capacity": 0.0067,
+    "trade_capacity": 0.006,
+    "state_capacity": 0.001,
+    "cohesion": -0.001
+   },
+   "name": "Canal Companies",
+   "observation": "A canal company sells shares, buys the land under its charter and charges tolls on every barge.",
+   "social_consequence": "Landowners and merchants buy canal shares, and a rush for them ruins some of the buyers.",
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png"
+  },
+  "trunk_canal_cross": {
+   "effects": {
+    "haul_capacity": 0.008,
+    "trade_capacity": 0.008,
+    "route_speed": 0.004,
+    "labor_demand": 0.005,
+    "ecological_pressure": 0.003,
+    "disease_exposure": 0.002,
+    "logistics_endurance": 0.005
+   },
+   "name": "Trunk Canal Cross",
+   "observation": "Trunk canals join four river systems, and a barge can cross the realm from any of its ports to any other.",
+   "art": "res://assets/ui/research/subjects/canal_locks-v2.png"
+  },
+  "timed_mail_coaches": {
+   "effects": {
+    "travel_speed": 0.0184,
+    "security_efficiency": 0.003,
+    "state_capacity": 0.004,
+    "food_output": -0.002,
+    "labor_demand": 0.002,
+    "logistics_endurance": 0.0025
+   },
+   "name": "Timed Mail Coaches",
+   "observation": "Mail coaches with an armed guard run to a timetable through the night, and the guard's watch is set and checked at each stage.",
+   "ability_reason": "Dispatches to a distant army arrive on a day that can be counted on, and valuables travel with a guard between the cities.",
+   "art": "res://assets/ui/research/discovery-600/messenger_relay_stations.png"
+  },
+  "hydrographic_office": {
+   "effects": {
+    "route_speed": 0.008,
+    "survey_speed": 0.0036,
+    "knowledge_preservation": 0.0024,
+    "state_capacity": 0.002,
+    "logistics_endurance": 0.0013
+   },
+   "name": "Hydrographic Office",
+   "observation": "A state office collects the surveys, engraves the charts and sells them to any master.",
+   "art": "res://assets/ui/research/discovery-600/regional_maps.png"
+  },
+  "trial_steam_paddle_boat": {
+   "effects": {
+    "travel_speed": 0.0023,
+    "haul_capacity": 0.0022,
+    "fuel_demand": 0.003,
+    "pollution": 0.002,
+    "disaster_risk": 0.002,
+    "injury_risk": 0.001
+   },
+   "name": "Trial Paddle Boat",
+   "observation": "A boiler and engine turn paddle wheels, and the boat creeps upstream against the current until something breaks.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  }
+ }
 }

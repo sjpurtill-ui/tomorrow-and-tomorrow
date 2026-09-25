@@ -1,5 +1,1369 @@
 {
  "line": "ecology",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "mineral_streak_tests": {
+   "effects": {
+    "survey_speed": 0.0018,
+    "extraction_yield": 0.0012,
+    "observation_rate": 0.0008
+   },
+   "observation": "Prospectors scratch a mineral across an unglazed tile and name it by the colour of its powder.",
+   "art": "res://assets/ui/research/paper/mineral_streak_tests.png"
+  },
+  "vegetation_zone_mapping": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "survey_speed": 0.0012,
+    "ecology_recovery": 0.0036
+   },
+   "name": "Vegetation Zones",
+   "observation": "Travelling naturalists chart how forest gives way to scrub, meadow and snow with height and with distance from the equator.",
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png"
+  },
+  "sediment_provenance": {
+   "effects": {
+    "survey_speed": 0.0018,
+    "extraction_yield": 0.0012,
+    "observation_rate": 0.0004
+   },
+   "observation": "Sand grains and pebbles in a river bar are matched to the hills they were worn from, and the prospector follows them upstream.",
+   "art": "res://assets/ui/research/paper/relative_stratigraphy.png"
+  },
+  "forestry_academy": {
+   "effects": {
+    "timber_pressure": -0.0192,
+    "timber_yield": 0.006,
+    "ecology_recovery": 0.0072,
+    "labor_demand": 0.002,
+    "foraging_yield": -0.002
+   },
+   "name": "Forestry Academy",
+   "observation": "Students at the forestry academy measure trunks and count rings to reckon how much wood a stand adds each year.",
+   "ability_reason": "Trained foresters measure how much wood a forest grows each year and cut no more than that, so timber can be planned across generations.",
+   "social_consequence": "Villagers lose their customary rights to gather wood and graze in forests run by the academy's graduates.",
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "comparative_mineral_hardness": {
+   "effects": {
+    "survey_speed": 0.0012,
+    "extraction_yield": 0.0012,
+    "tool_quality": 0.001
+   },
+   "observation": "A ladder of minerals, each scratching the one below, lets any prospector rank a stone's hardness in the field.",
+   "art": "res://assets/ui/research/paper/mineral_streak_tests.png"
+  },
+  "lithologic_correlation": {
+   "effects": {
+    "survey_speed": 0.0018,
+    "extraction_yield": 0.0012
+   },
+   "observation": "The same fossil shells in quarries a day's ride apart show that the beds are one stratum, and a coal seam can be followed underground.",
+   "art": "res://assets/ui/research/paper/relative_stratigraphy.png"
+  },
+  "geologic_cross_sections": {
+   "effects": {
+    "survey_speed": 0.0018,
+    "extraction_yield": 0.0018,
+    "mine_safety": 0.002
+   },
+   "observation": "Surveyors draw the strata as a slice through the hills, from what the mine shafts and canal cuttings expose.",
+   "art": "res://assets/ui/research/paper/relative_stratigraphy.png"
+  },
+  "structural_geologic_mapping": {
+   "effects": {
+    "survey_speed": 0.0048,
+    "extraction_yield": 0.0036,
+    "mining_output": 0.004,
+    "ecological_pressure": 0.002
+   },
+   "observation": "A great coloured map shows every stratum of the realm, bed by bed, from the coast to the mountains.",
+   "ability_reason": "A map of the whole realm's strata shows where coal, ore and water lie, so mines and wells are sunk where they will pay.",
+   "art": "res://assets/ui/research/paper/relative_stratigraphy.png"
+  },
+  "isotherm_maps": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "cultivation_yield": 0.001
+   },
+   "name": "Isotherm Maps",
+   "observation": "Lines drawn through places of equal mean warmth wander across the map, and the climates of distant lands can be compared.",
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png"
+  },
+  "tall_dispersal_stacks": {
+   "effects": {
+    "pollution": -0.002,
+    "ecological_pressure": 0.003,
+    "ecology_recovery": -0.0036,
+    "labor_demand": 0.001
+   },
+   "name": "Tall Works Chimneys",
+   "observation": "Works chimneys rise taller than any church tower, so that the smoke falls on someone else's fields.",
+   "social_consequence": "The fumes fall on distant farms instead of the works' own street, and the quarrel moves with them.",
+   "art": "res://assets/ui/research/subjects/coke_firing-v1.png"
+  },
+  "atmospheric_heat_retention": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "knowledge_rate": 0.0012
+   },
+   "name": "Heat-Holding Air",
+   "observation": "A natural philosopher argues that the air, like the glass of a hothouse, holds in the warmth the earth receives from the sun.",
+   "art": "res://assets/ui/research/paper/gas_composition_analysis.png"
+  },
+  "acid_fume_blight": {
+   "effects": {
+    "pollution": 0.006,
+    "cultivation_yield": -0.003,
+    "soil_productivity": -0.003,
+    "health_risk": 0.002,
+    "observation_rate": 0.0008
+   },
+   "name": "Acid Fume Blight",
+   "observation": "Downwind of the alkali works, hedges blacken and the wheat withers, and the farmers go to law.",
+   "social_consequence": "Farmers and works owners fight each other in the courts for a generation.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "state_forest_code": {
+   "effects": {
+    "timber_pressure": -0.008,
+    "ecology_recovery": 0.0072,
+    "foraging_yield": -0.003,
+    "legitimacy": -0.003,
+    "labor_demand": 0.002
+   },
+   "name": "State Forest Code",
+   "observation": "The forest code puts the village woods under state foresters, who mark each tree that may be felled.",
+   "social_consequence": "Villagers who gathered wood for generations are fined as thieves.",
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "developmental_stage_series": {
+   "effects": {
+    "observation_rate": 0.0012,
+    "knowledge_rate": 0.0012
+   },
+   "observation": "Embryos of fish, bird and beast laid side by side look alike at first and diverge stage by stage.",
+   "art": "res://assets/ui/research/paper/developmental_stage_series.png"
+  },
+  "gasworks_river_waste": {
+   "effects": {
+    "water_pollution": 0.006,
+    "water_safety": -0.003,
+    "disease_exposure": 0.002,
+    "hunting_yield": -0.002
+   },
+   "name": "Gasworks Waste",
+   "observation": "Tar and spent lime from the gasworks drain into the town river, and the fish float belly-up below the outfall.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "realm_geological_survey": {
+   "effects": {
+    "survey_speed": 0.0048,
+    "extraction_yield": 0.003,
+    "state_capacity": 0.003,
+    "labor_demand": 0.002,
+    "ecological_pressure": 0.002
+   },
+   "name": "Realm Geological Survey",
+   "observation": "A standing survey office sends its geologists into every district and publishes a sheet for each.",
+   "ability_reason": "A standing office maps coal, ore, clay and water for the whole realm, so the state knows its mineral wealth and where to dig.",
+   "art": "res://assets/ui/research/paper/relative_stratigraphy.png"
+  },
+  "soil_assays": {
+   "effects": {
+    "soil_productivity": 0.006,
+    "cultivation_yield": 0.004,
+    "observation_rate": 0.0008
+   },
+   "observation": "Chemists burn and weigh soils to find which plant foods they hold and which they lack.",
+   "art": "res://assets/ui/research/subjects/soil_assays-v1.png"
+  },
+  "ice_age_theory": {
+   "effects": {
+    "observation_rate": 0.0024,
+    "knowledge_rate": 0.0024,
+    "survey_speed": 0.0012
+   },
+   "name": "Ice Age Theory",
+   "observation": "Scratched bedrock and great boulders far from their home hills show that ice once covered the northern lands.",
+   "ability_reason": "Scholars learn that the climate has changed utterly in the past, so boulders, lakes and soils can be read as a record of ages of great cold.",
+   "art": "res://assets/ui/research/paper/relative_stratigraphy.png"
+  },
+  "colony_hunting_collapse": {
+   "effects": {
+    "ecology_recovery": -0.008,
+    "ecological_pressure": 0.006,
+    "hunting_yield": -0.004,
+    "foraging_yield": -0.002,
+    "observation_rate": 0.0004
+   },
+   "name": "Colony Collapse",
+   "observation": "The sealers and egg-gatherers return to the rookeries and find bare rock where millions once bred.",
+   "social_consequence": "Coastal families who lived by the harvest lose it for good.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "telegraphed_weather_maps": {
+   "effects": {
+    "disaster_risk": -0.012,
+    "observation_rate": 0.0024,
+    "disaster_resilience": 0.004,
+    "injury_risk": -0.002
+   },
+   "name": "Telegraphed Weather Maps",
+   "observation": "Readings telegraphed from a hundred stations at the same hour are drawn as one map, and the storm is seen as it forms.",
+   "ability_reason": "Reports telegraphed from many stations show storms as they form, so ports and farms can be warned before the weather arrives.",
+   "art": "res://assets/ui/research/discovery-600/weather_sign_reading.png"
+  },
+  "fish_hatcheries": {
+   "effects": {
+    "hunting_yield": 0.004,
+    "ecology_recovery": 0.0054,
+    "labor_demand": 0.002,
+    "ecological_pressure": 0.001
+   },
+   "name": "Fish Hatcheries",
+   "observation": "Spawn stripped from caught fish is hatched in troughs and the fry are released into rivers emptied by mills and nets.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "smoke_nuisance_ordinances": {
+   "effects": {
+    "pollution": -0.003,
+    "health_risk": -0.002,
+    "fuel_efficiency": 0.002,
+    "labor_demand": 0.002,
+    "craft_output": -0.001
+   },
+   "name": "Smoke Ordinances",
+   "observation": "Furnace inspectors walk the works streets and fine every chimney that pours black smoke for more than a few minutes.",
+   "art": "res://assets/ui/research/subjects/coke_firing-v1.png"
+  },
+  "acclimatization_societies": {
+   "effects": {
+    "ecological_pressure": 0.004,
+    "ecology_recovery": -0.0054,
+    "hunting_yield": 0.002,
+    "foraging_yield": 0.001
+   },
+   "name": "Acclimatization Societies",
+   "observation": "Gentlemen's societies release foreign songbirds, deer and trout into the countryside to improve on nature.",
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png"
+  },
+  "heat_trapping_gases": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "knowledge_rate": 0.0018
+   },
+   "name": "Heat-Trapping Gases",
+   "observation": "In the laboratory, a tube of carbonic acid gas and a tube of water vapour are shown to stop the passage of radiant heat.",
+   "art": "res://assets/ui/research/paper/gas_composition_analysis.png"
+  },
+  "invasive_species_spread": {
+   "effects": {
+    "ecological_pressure": 0.008,
+    "ecology_recovery": -0.008,
+    "soil_productivity": -0.004,
+    "food_output": -0.003,
+    "hunting_yield": 0.001
+   },
+   "name": "Invasive Species",
+   "observation": "Rabbits released for sport strip the pastures bare, and imported weeds choke fields across the new lands.",
+   "social_consequence": "Graziers are ruined in drought years, and bounties and poisons spread across the land.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "harbour_storm_warnings": {
+   "effects": {
+    "disaster_risk": -0.006,
+    "injury_risk": -0.003,
+    "naval_capacity": 0.001
+   },
+   "name": "Harbour Storm Warnings",
+   "observation": "A cone hoisted on the harbour mast warns fishermen of the gale the telegraph says is coming.",
+   "art": "res://assets/ui/research/discovery-600/weather_sign_reading.png"
+  },
+  "fume_works_inspectorate": {
+   "effects": {
+    "pollution": -0.005,
+    "health_risk": -0.003,
+    "chemical_control": 0.004,
+    "labor_demand": 0.003,
+    "craft_output": -0.002
+   },
+   "name": "Fume Works Inspectorate",
+   "observation": "Inspectors test the air at the chimneys of the acid works, and every works must pass its fumes through a condensing tower.",
+   "ability_reason": "Works must condense their acid fumes and inspectors can prove and stop the worst emissions, so the first industrial pollution is brought under control.",
+   "social_consequence": "Works owners resent the inspectors, and the cost of the towers is passed on in prices.",
+   "art": "res://assets/ui/research/paper/gas_composition_analysis.png"
+  },
+  "human_impact_treatise": {
+   "effects": {
+    "observation_rate": 0.0024,
+    "ecology_recovery": 0.0108,
+    "ecological_pressure": -0.012,
+    "timber_pressure": -0.0064,
+    "knowledge_rate": 0.0012,
+    "soil_productivity": 0.002
+   },
+   "name": "Treatise on Human Impact",
+   "observation": "A traveller's treatise shows how clearing, draining and grazing have turned green lands to desert and silted their harbours.",
+   "ability_reason": "Clearing, draining and grazing are shown to change climate, rivers and soil, so rulers and landowners can weigh the damage before they act.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "household_of_nature_science": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "knowledge_rate": 0.0012,
+    "ecology_recovery": 0.0036
+   },
+   "name": "Ecology Named",
+   "observation": "Naturalists name a new science for the study of living things in their household of soil, water, prey and rivals.",
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png"
+  },
+  "lichen_air_indicators": {
+   "effects": {
+    "observation_rate": 0.0012,
+    "pollution": -0.0005
+   },
+   "name": "Lichen Air Signs",
+   "observation": "Lichens that grow thickly on country walls are missing near the towns, and naturalists read their absence as a sign of foul air.",
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png"
+  },
+  "state_weather_service": {
+   "effects": {
+    "disaster_risk": -0.012,
+    "disaster_resilience": 0.004,
+    "cultivation_yield": 0.003,
+    "injury_risk": -0.002,
+    "state_capacity": 0.002,
+    "labor_demand": 0.002
+   },
+   "name": "State Weather Service",
+   "observation": "A state office prints the weather forecast each morning, and the newspapers carry it to every farm.",
+   "ability_reason": "Daily forecasts warn farmers, fishermen and generals alike of the next day's weather, so harvests and sailings can be timed to it.",
+   "art": "res://assets/ui/research/discovery-600/weather_sign_reading.png"
+  },
+  "reserved_nature_park": {
+   "effects": {
+    "ecology_recovery": 0.02,
+    "ecological_pressure": -0.016,
+    "hunting_yield": -0.003,
+    "foraging_yield": -0.002,
+    "timber_pressure": -0.0064
+   },
+   "name": "Great Nature Park",
+   "observation": "A great tract of geysers, forest and canyon is set apart by law, never to be sold or settled.",
+   "ability_reason": "Wild land is protected by law for ever, so its forests, herds and waters recover and remain a reservoir of wild life.",
+   "social_consequence": "The hunters and herders who used the land are removed from it.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "tree_planting_days": {
+   "effects": {
+    "ecology_recovery": 0.0072,
+    "timber_pressure": -0.008,
+    "disaster_resilience": 0.002,
+    "labor_demand": 0.001,
+    "cohesion": 0.001,
+    "soil_productivity": 0.003
+   },
+   "name": "Tree-Planting Days",
+   "observation": "On the treeless plains a day is set aside each spring when every school and farm plants trees and shelterbelts.",
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png"
+  },
+  "river_pollution_act": {
+   "effects": {
+    "water_pollution": -0.008,
+    "water_safety": 0.004,
+    "labor_demand": 0.002,
+    "craft_output": -0.001
+   },
+   "name": "River Pollution Act",
+   "observation": "A law forbids works and towns to pour solid and poisonous refuse into the rivers, though the fines are small.",
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "biogeographic_realms": {
+   "effects": {
+    "observation_rate": 0.0016
+   },
+   "name": "Animal Realms of the World",
+   "observation": "Naturalists divide the world into great realms by their animals and find a sharp line between two islands a strait apart.",
+   "art": "res://assets/ui/research/paper/biological_classification.png"
+  },
+  "fish_ladder_requirements": {
+   "effects": {
+    "ecology_recovery": 0.0072,
+    "hunting_yield": 0.002,
+    "construction_rate": -0.001,
+    "ecological_pressure": -0.004
+   },
+   "name": "Fish Ladders",
+   "observation": "Every new dam and weir must have a stepped ladder of pools so that the salmon can climb past it.",
+   "art": "res://assets/ui/research/subjects/water_mills-v1.png"
+  },
+  "smoke_damage_leaf_assays": {
+   "effects": {
+    "observation_rate": 0.0012,
+    "pollution": -0.001,
+    "legitimacy": 0.001
+   },
+   "name": "Smoke Damage Assays",
+   "observation": "Chemists measure the sulphur in the leaves of blighted trees, and the works that caused it pay damages in court.",
+   "art": "res://assets/ui/research/paper/gas_composition_analysis.png"
+  },
+  "volcanic_dust_cooling": {
+   "effects": {
+    "observation_rate": 0.0016
+   },
+   "name": "Volcanic Dust",
+   "observation": "After a great eruption the sunsets burn red around the world, and the following summer is cold.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "bird_protection_societies": {
+   "effects": {
+    "ecology_recovery": 0.0072,
+    "cohesion": 0.001,
+    "hunting_yield": -0.001,
+    "craft_output": -0.001,
+    "ecological_pressure": -0.004
+   },
+   "name": "Bird Protection Societies",
+   "observation": "Societies of ladies refuse to wear hats trimmed with egret plumes and campaign to end the plume trade.",
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png"
+  },
+  "relict_herd_protection": {
+   "effects": {
+    "ecology_recovery": 0.0072,
+    "ecological_pressure": -0.004,
+    "hunting_yield": -0.002
+   },
+   "name": "Relict Herd Protection",
+   "observation": "The last few hundred of the wild herds that once covered the plains are counted and guarded in a park.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "state_forest_reserves": {
+   "effects": {
+    "timber_pressure": -0.008,
+    "ecology_recovery": 0.0072,
+    "timber_yield": -0.002,
+    "legitimacy": -0.001
+   },
+   "name": "State Forest Reserves",
+   "observation": "Great tracts of mountain forest are withdrawn from sale and held by the state.",
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "irrigation_salinization": {
+   "effects": {
+    "soil_productivity": -0.006,
+    "cultivation_yield": -0.004,
+    "observation_rate": 0.0008
+   },
+   "name": "Salted Irrigation Land",
+   "observation": "Canal-watered fields turn white with salt as the water table rises, and harvests fall year by year.",
+   "social_consequence": "Farmers abandon land their grandfathers watered, and the canal districts shrink.",
+   "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png"
+  },
+  "game_warden_licences": {
+   "effects": {
+    "ecology_recovery": 0.0072,
+    "ecological_pressure": -0.004,
+    "hunting_yield": -0.002,
+    "state_capacity": 0.001
+   },
+   "name": "Game Wardens",
+   "observation": "Hunters buy a licence, keep to a season and a bag limit, and wardens enforce them in the woods.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "fossil_carbon_warming_estimate": {
+   "effects": {
+    "observation_rate": 0.0024,
+    "knowledge_rate": 0.0024
+   },
+   "name": "Coal Warming Estimate",
+   "observation": "A chemist works out by hand that the coal the world burns will, over centuries, warm it.",
+   "ability_reason": "Scholars calculate that burning coal adds enough gas to the air to warm the world, so the long cost of the steam age can at last be counted.",
+   "art": "res://assets/ui/research/paper/gas_composition_analysis.png"
+  },
+  "smoke_density_charts": {
+   "effects": {
+    "pollution": -0.001,
+    "observation_rate": 0.0008,
+    "standardization": 0.001
+   },
+   "name": "Smoke Density Charts",
+   "observation": "An inspector holds a printed card of greys up to a chimney and records the density of the smoke.",
+   "art": "res://assets/ui/research/subjects/coke_firing-v1.png"
+  },
+  "plant_succession": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "ecology_recovery": 0.0054
+   },
+   "name": "Plant Succession",
+   "observation": "On shifting dunes, a botanist traces how grasses give way to shrubs and then forest over the years.",
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png"
+  },
+  "systematic_channel_sampling": {
+   "effects": {
+    "extraction_yield": 0.0024,
+    "survey_speed": 0.0012
+   },
+   "observation": "Samplers cut measured channels across the ore face and assay each one, so the grade of the body can be mapped.",
+   "art": "res://assets/ui/research/subjects/ore_assaying-v1.png"
+  },
+  "wildlife_refuges": {
+   "effects": {
+    "ecology_recovery": 0.008,
+    "ecological_pressure": -0.004,
+    "hunting_yield": -0.002,
+    "timber_pressure": -0.0032
+   },
+   "name": "Wildlife Refuges",
+   "observation": "Islands, marshes and lakes are proclaimed refuges where no bird may be shot.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "state_forest_service": {
+   "effects": {
+    "timber_pressure": -0.0192,
+    "ecology_recovery": 0.0108,
+    "timber_yield": 0.004,
+    "disaster_resilience": 0.003,
+    "labor_demand": 0.003,
+    "state_capacity": 0.002,
+    "foraging_yield": -0.002
+   },
+   "name": "State Forest Service",
+   "observation": "Uniformed rangers patrol the state forests, fight fires and sell timber by plan.",
+   "ability_reason": "Rangers replant, fight fire and sell timber by plan, so the forests are harvested without being destroyed.",
+   "social_consequence": "Loggers and graziers resent the rangers' rules on land they had always used freely.",
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "resource_conservation_policy": {
+   "effects": {
+    "ecology_recovery": 0.0072,
+    "ecological_pressure": -0.008,
+    "timber_pressure": -0.008,
+    "state_capacity": 0.002,
+    "institutional_rigidity": 0.002,
+    "soil_productivity": 0.002
+   },
+   "name": "Conservation Policy",
+   "observation": "The governors of every province meet at the capital and agree that forests, soils, water and minerals must be husbanded.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "forest_fire_suppression": {
+   "effects": {
+    "disaster_resilience": 0.004,
+    "timber_yield": 0.002,
+    "disaster_risk": 0.004,
+    "ecology_recovery": -0.0036,
+    "labor_demand": 0.002
+   },
+   "name": "Total Fire Suppression",
+   "observation": "Every forest fire is to be put out by ten the next morning, and the fire crews are proud that none burns long.",
+   "social_consequence": "The undergrowth thickens year after year, and the fires that finally escape are worse than any before.",
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "pelagic_sealing_treaty": {
+   "effects": {
+    "ecology_recovery": 0.0072,
+    "hunting_yield": -0.002,
+    "legitimacy": 0.001,
+    "ecological_pressure": -0.004
+   },
+   "name": "Sealing Treaty",
+   "observation": "The realms agree to end the killing of seals on the open sea and to share the take on the breeding islands.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "continental_drift_hypothesis": {
+   "effects": {
+    "observation_rate": 0.0012
+   },
+   "name": "Drifting Continents",
+   "observation": "A scholar argues that the coasts on either side of the ocean fit like torn pages, and that the continents have moved apart.",
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png"
+  },
+  "human_caused_extinction": {
+   "effects": {
+    "ecology_recovery": -0.008,
+    "ecological_pressure": 0.004,
+    "hunting_yield": -0.003,
+    "observation_rate": 0.0008,
+    "cohesion": -0.001
+   },
+   "name": "Extinction by Hunting",
+   "observation": "The last bird of a kind that once darkened the sky dies in a menagerie, and naturalists admit that hunting did it.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "migratory_bird_treaty": {
+   "effects": {
+    "ecology_recovery": 0.0072,
+    "hunting_yield": -0.001,
+    "legitimacy": 0.001,
+    "ecological_pressure": -0.004
+   },
+   "name": "Migratory Bird Treaty",
+   "observation": "Realms on both ends of a flyway agree to protect the birds that winter in one and nest in the other.",
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png"
+  },
+  "park_service_office": {
+   "effects": {
+    "ecology_recovery": 0.0072,
+    "state_capacity": 0.002,
+    "labor_demand": 0.002,
+    "trade_capacity": 0.001,
+    "timber_pressure": -0.0032
+   },
+   "name": "Park Service",
+   "observation": "A park service with its own rangers runs the nature parks, their roads, lodges and campgrounds.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "range_carrying_capacity": {
+   "effects": {
+    "soil_productivity": 0.004,
+    "ecological_pressure": -0.008,
+    "food_output": -0.002
+   },
+   "name": "Range Carrying Capacity",
+   "observation": "Range surveyors measure how many head of stock each section of grassland can feed without being grazed bare.",
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png"
+  },
+  "population_dynamics_equations": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "knowledge_rate": 0.0012
+   },
+   "name": "Population Equations",
+   "observation": "Mathematicians write equations for how a population grows and how predators and prey rise and fall in turn.",
+   "art": "res://assets/ui/research/subjects/statistical_inference-v1.png"
+  },
+  "oil_discharge_limits": {
+   "effects": {
+    "water_pollution": -0.0064,
+    "water_safety": 0.002,
+    "trade_capacity": -0.001
+   },
+   "name": "Oil Discharge Limits",
+   "observation": "Ships may no longer pump oily bilge within sight of the coast.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "food_chain_pyramids": {
+   "effects": {
+    "observation_rate": 0.0012
+   },
+   "name": "Food Chain Pyramids",
+   "observation": "Ecologists count the plants, grazers and hunters in a pond and find each level far fewer than the one below.",
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png"
+  },
+  "plains_dust_storms": {
+   "effects": {
+    "soil_productivity": -0.008,
+    "cultivation_yield": -0.006,
+    "disaster_risk": 0.006,
+    "ecological_pressure": 0.006,
+    "food_output": -0.004,
+    "health_risk": 0.003
+   },
+   "name": "Dust Storms",
+   "observation": "Black clouds of topsoil roll off the dry-ploughed plains and bury farmhouses to the windowsills.",
+   "social_consequence": "Ruined farm families pack up what they own and head for the cities.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "public_grazing_districts": {
+   "effects": {
+    "soil_productivity": 0.006,
+    "ecological_pressure": -0.008,
+    "state_capacity": 0.002,
+    "legitimacy": -0.001
+   },
+   "name": "Grazing Districts",
+   "observation": "The public range is divided into grazing districts, with permits and a limit on the stock each may carry.",
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png"
+  },
+  "ecosystem_concept": {
+   "effects": {
+    "observation_rate": 0.0024,
+    "ecology_recovery": 0.0108,
+    "knowledge_rate": 0.0018,
+    "ecological_pressure": -0.008
+   },
+   "name": "The Ecosystem",
+   "observation": "An ecologist names the living things and their soil, water and air together as one system.",
+   "ability_reason": "Living things and their setting are understood as one system, so the knock-on effects of draining, spraying or damming can be predicted before they are done.",
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png"
+  },
+  "earthquake_magnitude_scale": {
+   "effects": {
+    "observation_rate": 0.0012,
+    "disaster_resilience": 0.002
+   },
+   "name": "Earthquake Magnitude",
+   "observation": "A seismologist grades every earthquake by the size of the trace it leaves on a standard instrument.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "measured_carbon_warming": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "disaster_risk": 0.004,
+    "cultivation_yield": -0.002
+   },
+   "name": "Measured Warming",
+   "observation": "Weather records from a hundred stations show the world has warmed as the burning of fuel has risen.",
+   "art": "res://assets/ui/research/paper/gas_composition_analysis.png"
+  },
+  "trophic_energy_flow": {
+   "effects": {
+    "observation_rate": 0.0012
+   },
+   "name": "Energy Flow",
+   "observation": "An ecologist measures how much of the sun's energy each feeding level of a lake passes to the next.",
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png"
+  },
+  "whaling_quota_commission": {
+   "effects": {
+    "hunting_yield": 0.001,
+    "ecology_recovery": 0.0018,
+    "ecological_pressure": 0.002,
+    "legitimacy": 0.001
+   },
+   "name": "Whaling Commission",
+   "observation": "A commission of realms sets yearly whaling quotas, though the quotas are set by the whaling nations and fall far short of protecting the whales.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "nature_union_red_lists": {
+   "effects": {
+    "observation_rate": 0.0012,
+    "ecology_recovery": 0.0036,
+    "ecological_pressure": -0.004
+   },
+   "name": "Red Lists",
+   "observation": "A union of naturalists from many realms keeps a list of every species in danger and how close it is to the end.",
+   "art": "res://assets/ui/research/paper/biological_classification.png"
+  },
+  "grade_tonnage_models": {
+   "effects": {
+    "extraction_yield": 0.0024,
+    "mining_output": 0.002
+   },
+   "observation": "Tables of grade against tonnage for known ore bodies show how much metal a new discovery is likely to hold.",
+   "art": "res://assets/ui/research/subjects/ore_assaying-v1.png"
+  },
+  "numerical_weather_prediction": {
+   "effects": {
+    "disaster_risk": -0.012,
+    "disaster_resilience": 0.004,
+    "cultivation_yield": 0.002,
+    "observation_rate": 0.0016
+   },
+   "name": "Computed Forecasts",
+   "observation": "An electronic calculating machine solves the equations of the atmosphere, and tomorrow's weather map is printed before tomorrow comes.",
+   "ability_reason": "Forecasts computed on electronic machines see days ahead, so harvests, shipping, airlifts and landings are timed to the weather with real confidence.",
+   "art": "res://assets/ui/research/paper/binary_adders.png"
+  },
+  "killer_smog_episode": {
+   "effects": {
+    "pollution": 0.008,
+    "health_risk": 0.006,
+    "disease_exposure": 0.003,
+    "observation_rate": 0.0008
+   },
+   "name": "Killing Smog",
+   "observation": "A still winter fog mixes with coal smoke over the capital; for five days no one can see across the street, and thousands die.",
+   "social_consequence": "The public finally demands clean air, and the coal hearth becomes a political question.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "sustainable_yield_fisheries": {
+   "effects": {
+    "hunting_yield": 0.004,
+    "ecology_recovery": 0.0036,
+    "ecological_pressure": 0.001,
+    "labor_demand": 0.001
+   },
+   "name": "Sustainable Yield",
+   "observation": "Fishery scientists calculate the largest catch a stock can bear year after year, and quotas are set to it, often too high.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "fallout_monitoring": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "health_risk": -0.001
+   },
+   "name": "Fallout Monitoring",
+   "observation": "Stations around the world collect rain and dust and count the radioactivity from the weapon tests.",
+   "art": "res://assets/ui/research/paper/gas_composition_analysis.png"
+  },
+  "clean_air_act": {
+   "effects": {
+    "pollution": -0.007,
+    "health_risk": -0.004,
+    "fuel_efficiency": 0.002,
+    "fuel_demand": 0.002,
+    "labor_demand": 0.002,
+    "craft_output": -0.002
+   },
+   "name": "Clean Air Act",
+   "observation": "Smokeless zones are declared in the towns, and coal fires in them must burn coke or be replaced.",
+   "ability_reason": "Smokeless zones and chimney controls clear the town air of coal smoke and winter smogs end, at the price of new fuels and new grates.",
+   "social_consequence": "Every household must buy smokeless fuel or new grates, and poor families feel the cost.",
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "industrial_mercury_poisoning": {
+   "effects": {
+    "water_pollution": 0.006,
+    "health_risk": 0.004,
+    "hunting_yield": -0.003,
+    "nutrition_quality": -0.002,
+    "observation_rate": 0.0008
+   },
+   "name": "Mercury Poisoning",
+   "observation": "Fishing families in a coastal town sicken and shake, and the cause is found in the mercury from a factory's waste pipe.",
+   "social_consequence": "The victims' long fight for compensation shames the firm and the officials who protected it.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "atmospheric_co2_record": {
+   "effects": {
+    "observation_rate": 0.0024,
+    "knowledge_rate": 0.0018
+   },
+   "name": "Carbon Dioxide Record",
+   "observation": "Instruments on a high mountain record the carbon dioxide in the air every hour, and the line climbs year by year.",
+   "ability_reason": "A continuous record shows carbon dioxide rising every year, so climate forcing is measured rather than guessed.",
+   "art": "res://assets/ui/research/paper/gas_composition_analysis.png"
+  },
+  "weather_satellites": {
+   "effects": {
+    "disaster_risk": -0.006,
+    "observation_rate": 0.0012
+   },
+   "name": "Weather Satellites",
+   "observation": "Satellites photograph the cloud over half the world at once, and no storm at sea goes unseen.",
+   "art": "res://assets/ui/research/discovery-600/weather_sign_reading.png"
+  },
+  "persistent_pesticide_warning": {
+   "effects": {
+    "ecology_recovery": 0.0108,
+    "chemical_control": -0.004,
+    "cultivation_yield": -0.003,
+    "water_pollution": -0.0048,
+    "health_risk": -0.002,
+    "observation_rate": 0.0012
+   },
+   "name": "Persistent Pesticide Warning",
+   "observation": "Songbirds vanish from the sprayed countryside, and the poisons are found in fish, eagles and mothers' milk.",
+   "ability_reason": "Persistent pesticides are shown to kill birds and build up in food chains; the worst are withdrawn, protecting wildlife and people at a cost to harvests.",
+   "social_consequence": "Farmers and chemical firms protest the loss of their cheapest sprays.",
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png"
+  },
+  "spatial_variograms": {
+   "effects": {
+    "extraction_yield": 0.0018,
+    "survey_speed": 0.0012
+   },
+   "observation": "Assays from drill holes are compared pair by pair to show how far apart two samples can be and still predict each other.",
+   "art": "res://assets/ui/research/subjects/ore_assaying-v1.png"
+  },
+  "resource_kriging": {
+   "effects": {
+    "extraction_yield": 0.0024
+   },
+   "observation": "Ore grades between drill holes are estimated by weighting nearby assays according to the variogram.",
+   "art": "res://assets/ui/research/subjects/ore_assaying-v1.png"
+  },
+  "orebody_block_models": {
+   "effects": {
+    "extraction_yield": 0.0024,
+    "mining_output": 0.002
+   },
+   "observation": "The ore body is divided into blocks on a computer, each with its estimated grade, and the mine plan follows them.",
+   "art": "res://assets/ui/research/paper/binary_adders.png"
+  },
+  "geochemical_baselines": {
+   "effects": {
+    "observation_rate": 0.0012,
+    "water_pollution": -0.0032,
+    "survey_speed": 0.0012,
+    "water_safety": 0.001
+   },
+   "observation": "Stream sediments and soils are sampled across the realm to record their natural metal content before new mines disturb it.",
+   "art": "res://assets/ui/research/subjects/soil_assays-v1.png"
+  },
+  "plate_tectonics": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "disaster_resilience": 0.002
+   },
+   "name": "Plate Tectonics",
+   "observation": "Magnetic stripes on the sea floor prove that the ocean crust spreads from the mid-ocean ridges and the continents ride on moving plates.",
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png"
+  },
+  "endangered_species_list": {
+   "effects": {
+    "ecology_recovery": 0.008,
+    "ecological_pressure": -0.008,
+    "construction_rate": -0.002
+   },
+   "name": "Endangered Species Law",
+   "observation": "The law lists every species in danger, and no public work may push one closer to extinction.",
+   "social_consequence": "A dam or a logging road halted for a small fish or an owl becomes a national quarrel.",
+   "art": "res://assets/ui/research/paper/biological_classification.png"
+  },
+  "island_biogeography": {
+   "effects": {
+    "observation_rate": 0.0012,
+    "ecology_recovery": 0.0036
+   },
+   "name": "Island Biogeography",
+   "observation": "Ecologists show that small, distant islands hold fewer species than large, near ones, and that reserves behave like islands.",
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png"
+  },
+  "oil_spill_response": {
+   "effects": {
+    "water_pollution": -0.0064,
+    "ecology_recovery": 0.0036,
+    "labor_demand": 0.002
+   },
+   "name": "Oil Spill Response",
+   "observation": "After a tanker breaks up on the rocks, booms, skimmers and volunteers try to save the beaches and birds.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "environmental_impact_review": {
+   "effects": {
+    "ecological_pressure": -0.016,
+    "ecology_recovery": 0.0072,
+    "construction_rate": -0.004,
+    "institutional_rigidity": 0.004,
+    "labor_demand": 0.002
+   },
+   "name": "Environmental Impact Review",
+   "observation": "Every road, dam and power station must first publish a study of the harm it will do to land, water and wildlife.",
+   "ability_reason": "Every public work must weigh its harm to land, water and wildlife before it begins, so the worst damage is avoided, though projects take years longer.",
+   "social_consequence": "Builders and councils complain of delay, and neighbours gain a voice against the roads and dams.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "environment_protection_agency": {
+   "effects": {
+    "pollution": -0.005,
+    "water_pollution": -0.016,
+    "state_capacity": 0.003,
+    "labor_demand": 0.003,
+    "institutional_rigidity": 0.003,
+    "craft_output": -0.002,
+    "water_safety": 0.004
+   },
+   "name": "Environmental Protection Agency",
+   "observation": "One agency sets limits for air, water and waste across the realm, and its inspectors can close a works that breaks them.",
+   "ability_reason": "One agency sets and enforces limits on air, water and waste pollution across the realm, backed by inspectors and fines.",
+   "social_consequence": "Industry pays for scrubbers and treatment plants, and some works close rather than comply.",
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "geochemical_anomaly_mapping": {
+   "effects": {
+    "extraction_yield": 0.0024,
+    "survey_speed": 0.0012
+   },
+   "observation": "Maps of metal traces in stream sediments show anomalies that lead the prospectors to buried ore.",
+   "art": "res://assets/ui/research/subjects/ore_assaying-v1.png"
+  },
+  "wetland_convention": {
+   "effects": {
+    "ecology_recovery": 0.0072,
+    "hunting_yield": 0.001,
+    "construction_rate": -0.001,
+    "water_safety": 0.001,
+    "disaster_risk": -0.003
+   },
+   "name": "Wetland Convention",
+   "observation": "The realms list their great marshes and estuaries and promise to keep them for the waterfowl.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "interrealm_environment_programme": {
+   "effects": {
+    "ecology_recovery": 0.0036,
+    "observation_rate": 0.0008,
+    "legitimacy": 0.001
+   },
+   "name": "Environment Programme",
+   "observation": "The world assembly sets up an environment programme to watch over the shared seas and air.",
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png"
+  },
+  "earth_observation_satellites": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "survey_speed": 0.0024
+   },
+   "name": "Earth Observation Satellites",
+   "observation": "Satellites image every field and forest on earth every few weeks, and the clearing of a forest can be watched from orbit.",
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png"
+  },
+  "endangered_trade_convention": {
+   "effects": {
+    "ecology_recovery": 0.0054,
+    "trade_capacity": -0.001,
+    "hunting_yield": -0.001,
+    "ecological_pressure": -0.004
+   },
+   "name": "Endangered Trade Convention",
+   "observation": "Ivory, furs and live animals of threatened kinds may cross borders only with a permit.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "ozone_depletion_theory": {
+   "effects": {
+    "observation_rate": 0.0016
+   },
+   "name": "Ozone Depletion Theory",
+   "observation": "Chemists show that the chlorinated gases used in refrigerators and spray cans rise to the upper air and destroy its ozone.",
+   "art": "res://assets/ui/research/paper/gas_composition_analysis.png"
+  },
+  "leaded_fuel_phaseout": {
+   "effects": {
+    "pollution": -0.003,
+    "health_risk": -0.004,
+    "fuel_demand": 0.001,
+    "craft_output": -0.001
+   },
+   "name": "Leaded Fuel Phase-Out",
+   "observation": "Petrol sold at the pump must be free of lead, and the lead in children's blood begins to fall.",
+   "art": "res://assets/ui/research/subjects/fuel_refining-v1.png"
+  },
+  "transboundary_acid_rain": {
+   "effects": {
+    "ecology_recovery": -0.0072,
+    "water_pollution": 0.004,
+    "soil_productivity": -0.003,
+    "timber_yield": -0.003,
+    "observation_rate": 0.0008
+   },
+   "name": "Acid Rain",
+   "observation": "The lakes of a neighbouring realm turn clear and lifeless, and their forests die back, from the smoke of power stations far away.",
+   "social_consequence": "The neighbouring realm demands that the polluters pay, and relations sour.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "climate_circulation_models": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "knowledge_rate": 0.0018,
+    "disaster_resilience": 0.001
+   },
+   "name": "Climate Models",
+   "observation": "Models of the air and oceans on large computers test what doubling carbon dioxide would do to the world.",
+   "art": "res://assets/ui/research/paper/binary_adders.png"
+  },
+  "transboundary_air_convention": {
+   "effects": {
+    "pollution": -0.002,
+    "legitimacy": 0.001,
+    "labor_demand": 0.001
+   },
+   "name": "Air Pollution Convention",
+   "observation": "The realms agree to measure and cut the smoke that crosses their borders.",
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png"
+  },
+  "polluter_pays_cleanup": {
+   "effects": {
+    "water_pollution": -0.008,
+    "soil_productivity": 0.002,
+    "health_risk": -0.002,
+    "labor_demand": 0.004,
+    "craft_output": -0.002,
+    "water_safety": 0.002
+   },
+   "name": "Polluter-Pays Cleanup",
+   "observation": "Leaking drums are dug out of a poisoned housing estate, and the firm that buried them is made to pay.",
+   "social_consequence": "Cleanups cost fortunes and take decades, and the firms fight every bill in court.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "whaling_moratorium": {
+   "effects": {
+    "ecology_recovery": 0.0072,
+    "hunting_yield": -0.002,
+    "ecological_pressure": -0.004
+   },
+   "name": "Whaling Moratorium",
+   "observation": "The whaling commission votes to end all commercial whaling, and the harpoon fleets are laid up.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "polar_ozone_hole": {
+   "effects": {
+    "health_risk": 0.004,
+    "cultivation_yield": -0.002,
+    "observation_rate": 0.0012
+   },
+   "name": "Polar Ozone Hole",
+   "observation": "Instruments at the pole show the ozone over it vanishing each spring, a hole larger than a continent.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "reactor_fallout_crisis": {
+   "effects": {
+    "health_risk": 0.006,
+    "soil_productivity": -0.004,
+    "cultivation_yield": -0.004,
+    "food_output": -0.003,
+    "legitimacy": -0.004,
+    "cohesion": -0.002
+   },
+   "name": "Reactor Fallout Crisis",
+   "observation": "A reactor explodes and spreads fallout across several realms, and whole districts are evacuated and fenced off.",
+   "social_consequence": "A district is abandoned for generations, and trust in the state's word collapses.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "ozone_protection_treaty": {
+   "effects": {
+    "health_risk": -0.006,
+    "pollution": -0.002,
+    "chemical_control": -0.002,
+    "craft_output": -0.001,
+    "legitimacy": 0.002
+   },
+   "name": "Ozone Protection Treaty",
+   "observation": "The realms agree to phase out the gases that destroy ozone and to pay poorer realms to switch.",
+   "ability_reason": "The gases thinning the ozone layer are phased out by treaty, so the shield against burning sunlight begins to recover; the substitute refrigerants cost more.",
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png"
+  },
+  "deep_ice_core_records": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "knowledge_rate": 0.0012
+   },
+   "name": "Deep Ice Cores",
+   "observation": "Cores drilled two miles into the polar ice hold bubbles of ancient air that record temperature and carbon dioxide for hundreds of thousands of years.",
+   "art": "res://assets/ui/research/paper/gas_composition_analysis.png"
+  },
+  "climate_assessment_panel": {
+   "effects": {
+    "observation_rate": 0.0024,
+    "knowledge_rate": 0.0024,
+    "state_capacity": 0.002,
+    "legitimacy": 0.001
+   },
+   "name": "Climate Assessment Panel",
+   "observation": "Scientists from every realm meet to sum up what is known about warming, and their report is agreed line by line with the governments.",
+   "ability_reason": "Scientists of every realm agree on what is known about warming, so rulers must answer for climate forcing on shared evidence.",
+   "art": "res://assets/ui/research/subjects/statistical_inference-v1.png"
+  },
+  "sulfur_allowance_trading": {
+   "effects": {
+    "pollution": -0.003,
+    "trade_capacity": 0.001,
+    "craft_output": -0.001
+   },
+   "name": "Sulphur Allowance Trading",
+   "observation": "Power stations are issued permits for their sulphur smoke and may sell what they do not use, and emissions fall faster than required.",
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png"
+  },
+  "climate_framework_convention": {
+   "effects": {
+    "pollution": -0.002,
+    "legitimacy": 0.003,
+    "state_capacity": 0.002,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.001
+   },
+   "name": "Climate Framework Convention",
+   "observation": "The realms sign a convention to stabilize the heat-trapping gases, but set no binding limits.",
+   "ability_reason": "The realms commit themselves to stabilizing the heat-trapping gases; it binds them to report and to act, but sets no limits, so warming continues.",
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png"
+  },
+  "biodiversity_convention": {
+   "effects": {
+    "ecology_recovery": 0.0072,
+    "ecological_pressure": -0.004,
+    "legitimacy": 0.001,
+    "timber_pressure": -0.0032
+   },
+   "name": "Biodiversity Convention",
+   "observation": "The realms agree to conserve their species and habitats and to share fairly what is gained from them.",
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png"
+  },
+  "predator_reintroduction": {
+   "effects": {
+    "ecology_recovery": 0.008,
+    "ecological_pressure": -0.008,
+    "hunting_yield": -0.001,
+    "food_output": -0.001,
+    "cohesion": -0.002
+   },
+   "name": "Predator Reintroduction",
+   "observation": "Wolves are released into a great park, and within a few years the elk move, the willows return and the rivers change course.",
+   "social_consequence": "Ranchers near the park hate the returned wolves and demand compensation for lost stock.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "binding_emission_targets": {
+   "effects": {
+    "pollution": -0.003,
+    "fuel_demand": -0.002,
+    "craft_output": -0.003,
+    "labor_demand": 0.002,
+    "legitimacy": -0.001
+   },
+   "name": "Binding Emission Targets",
+   "observation": "The rich realms accept binding cuts in their emissions, though the largest emitters stay outside.",
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png"
+  },
+  "ocean_plastic_gyres": {
+   "effects": {
+    "water_pollution": 0.006,
+    "ecology_recovery": -0.0072,
+    "hunting_yield": -0.002,
+    "observation_rate": 0.0008
+   },
+   "name": "Ocean Plastic Gyres",
+   "observation": "Sailors crossing a remote ocean find it littered for a thousand miles with floating plastic fragments.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "persistent_fluorochemicals": {
+   "effects": {
+    "water_pollution": 0.006,
+    "health_risk": 0.004,
+    "water_safety": -0.004,
+    "observation_rate": 0.0008
+   },
+   "name": "Forever Chemicals",
+   "observation": "Fluorinated chemicals from non-stick pans and firefighting foam are found in the blood of nearly everyone and in the water they drink.",
+   "social_consequence": "Towns near the factories sue, and water works must buy costly filters.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "microplastic_monitoring": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "water_pollution": -0.0016
+   },
+   "name": "Microplastic Monitoring",
+   "observation": "Samplers sieve seawater, soil and table salt and count plastic fragments smaller than a grain of sand.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "carbon_emission_market": {
+   "effects": {
+    "pollution": -0.004,
+    "fuel_demand": -0.004,
+    "craft_output": -0.003,
+    "trade_capacity": 0.002,
+    "state_capacity": 0.002,
+    "legitimacy": -0.001
+   },
+   "name": "Carbon Emission Market",
+   "observation": "Power stations and factories must hold an allowance for every ton of carbon dioxide they emit, bought and sold on a market.",
+   "ability_reason": "Every ton of carbon dioxide emitted needs an allowance, so industry pays for its climate forcing and the cheapest cuts are made first.",
+   "social_consequence": "Energy prices rise, and heavy industry threatens to move abroad.",
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png"
+  },
+  "environmental_dna_surveys": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "survey_speed": 0.0018,
+    "ecology_recovery": 0.0036
+   },
+   "name": "Environmental DNA Surveys",
+   "observation": "A bottle of river water holds enough traces of DNA to list the fish, frogs and otters living upstream.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "climate_adaptation_plans": {
+   "effects": {
+    "disaster_resilience": 0.006,
+    "disaster_risk": -0.006,
+    "labor_demand": 0.003,
+    "construction_rate": -0.002
+   },
+   "name": "Climate Adaptation Plans",
+   "observation": "Coastal towns raise their sea walls, cities plant shade trees and plan cooling centres against heatwaves.",
+   "social_consequence": "Money spent on sea walls and drains is money not spent on schools and housing.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "extreme_event_attribution": {
+   "effects": {
+    "observation_rate": 0.0016,
+    "disaster_risk": 0.004,
+    "cultivation_yield": -0.002
+   },
+   "name": "Extreme Event Attribution",
+   "observation": "Scientists calculate that a deadly heatwave was made several times more likely by the warming, and the toll of the forcing is counted.",
+   "art": "res://assets/ui/research/subjects/statistical_inference-v1.png"
+  },
+  "universal_climate_pledges": {
+   "effects": {
+    "pollution": -0.004,
+    "fuel_demand": -0.004,
+    "legitimacy": 0.003,
+    "craft_output": -0.003,
+    "labor_demand": 0.002
+   },
+   "name": "Universal Climate Pledges",
+   "observation": "Every realm pledges its own emission cuts and reports its progress every five years.",
+   "ability_reason": "Every realm pledges and reports its own cuts, so the whole world begins to reduce climate forcing, though the pledges fall short of what is needed.",
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png"
+  },
+  "net_zero_statutes": {
+   "effects": {
+    "pollution": -0.003,
+    "fuel_demand": -0.003,
+    "craft_output": -0.003,
+    "labor_demand": 0.002,
+    "institutional_rigidity": 0.002
+   },
+   "name": "Net-Zero Statutes",
+   "observation": "The realm writes into law a date by which it will emit no more carbon than it removes.",
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png"
+  },
+  "methane_plume_satellites": {
+   "effects": {
+    "pollution": -0.0015,
+    "observation_rate": 0.0012
+   },
+   "name": "Methane Plume Satellites",
+   "observation": "Satellites spot plumes of methane leaking from gas fields and landfills, and the operators are named.",
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png"
+  },
+  "thirty_percent_protection": {
+   "effects": {
+    "ecology_recovery": 0.008,
+    "ecological_pressure": -0.008,
+    "food_output": -0.003,
+    "timber_yield": -0.003,
+    "hunting_yield": -0.002,
+    "legitimacy": -0.001,
+    "timber_pressure": -0.0064
+   },
+   "name": "Thirty Percent Protection",
+   "observation": "The realms agree to set aside nearly a third of their land and sea as protected areas.",
+   "social_consequence": "Fishers and farmers at the edge of the new reserves lose ground and income.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "loss_damage_fund": {
+   "effects": {
+    "legitimacy": 0.002,
+    "disaster_resilience": 0.003,
+    "trade_capacity": -0.002
+   },
+   "name": "Loss and Damage Fund",
+   "observation": "The rich realms pay into a fund for the poorer realms hardest hit by storms, droughts and rising seas.",
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png"
+  },
+  "verified_carbon_removal": {
+   "effects": {
+    "pollution": -0.002,
+    "labor_demand": 0.003,
+    "fuel_demand": 0.002,
+    "craft_output": -0.001
+   },
+   "name": "Verified Carbon Removal",
+   "observation": "Carbon drawn from the air and buried deep underground is measured, verified and sold as a credit.",
+   "art": "res://assets/ui/research/ecology-v1.png"
+  },
+  "natural_capital_accounts": {
+   "effects": {
+    "ecology_recovery": 0.0054,
+    "state_capacity": 0.002,
+    "observation_rate": 0.0008
+   },
+   "name": "Natural Capital Accounts",
+   "observation": "The realm's ledgers count the value of its forests, wetlands and fisheries beside its roads and factories.",
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png"
+  },
+  "plastics_production_cap": {
+   "effects": {
+    "water_pollution": -0.0064,
+    "craft_output": -0.003,
+    "trade_capacity": -0.002
+   },
+   "name": "Plastics Production Cap",
+   "observation": "A treaty caps the making of new plastic, and firms scramble for substitutes.",
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png"
+  }
+ }
 }

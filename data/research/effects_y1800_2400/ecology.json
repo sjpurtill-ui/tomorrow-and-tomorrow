@@ -1,5 +1,1043 @@
 {
  "line": "ecology",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "great_drowning_flood_marks": {
+   "effects": {
+    "disaster_resilience": 0.004,
+    "disaster_risk": -0.003,
+    "observation_rate": 0.0012,
+    "soil_productivity": -0.004,
+    "cultivation_yield": -0.003,
+    "cohesion": 0.001
+   },
+   "name": "Great Drowning",
+   "observation": "The sea broke the dunes in one night and drowned whole parishes; the survivors cut the height of the water on the walls of the god's houses.",
+   "social_consequence": "The drowned parishes are never resettled, and their dues pass to the villages that survived.",
+   "art": "res://assets/ui/research/discovery-600/disaster_memory_markers.png"
+  },
+  "post_plague_woodland": {
+   "effects": {
+    "ecology_recovery": 0.008,
+    "timber_yield": 0.004,
+    "timber_pressure": -0.004,
+    "cultivation_yield": -0.003,
+    "hunting_yield": 0.002
+   },
+   "name": "Post-Plague Woodland",
+   "observation": "Woods creep back over ploughland left empty by the great dying, and the lords fence the new growth as their own.",
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "pine_seed_row_sowing": {
+   "effects": {
+    "ecology_recovery": 0.008,
+    "timber_yield": 0.004,
+    "timber_pressure": -0.005,
+    "labor_demand": 0.002
+   },
+   "name": "Row-Sown Pine",
+   "observation": "Foresters sow pine seed in rows on the cleared ground, and a young wood stands where the burners left bare earth.",
+   "art": "res://assets/ui/research/subjects/timber_seasoning-v1.png"
+  },
+  "salmon_conservators": {
+   "effects": {
+    "ecology_recovery": 0.0075,
+    "food_output": 0.002,
+    "ecological_pressure": -0.0066,
+    "state_capacity": 0.001,
+    "legitimacy": -0.001
+   },
+   "name": "Salmon Conservators",
+   "observation": "Conservators and their bailiffs watch the rivers in the spawning season and seize nets set across the runs.",
+   "art": "res://assets/ui/research/subjects/river_craft-v1.png"
+  },
+  "leased_fuel_blocks": {
+   "effects": {
+    "timber_pressure": -0.005,
+    "timber_yield": 0.003,
+    "fuel_demand": -0.002,
+    "labor_demand": 0.001
+   },
+   "name": "Leased Fuel Blocks",
+   "observation": "The town leases its woods to charcoal and glass burners by measured block, and each must stay inside his marks.",
+   "art": "res://assets/ui/research/paper/charcoal.png"
+  },
+  "yearly_felling_blocks": {
+   "effects": {
+    "timber_pressure": -0.006,
+    "ecology_recovery": 0.006,
+    "timber_yield": 0.003
+   },
+   "name": "Yearly Felling Blocks",
+   "observation": "The wood is cut in yearly blocks in strict rotation, and each block has grown back before the axes return.",
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "herring_shoal_shift": {
+   "effects": {
+    "food_output": -0.003,
+    "trade_capacity": -0.002,
+    "cohesion": -0.001,
+    "observation_rate": 0.0012
+   },
+   "name": "Herring Shift",
+   "observation": "The herring no longer come to the old grounds, and the boats sail two days farther to find them.",
+   "social_consequence": "The fishing towns that lived on the herring shrink, and their young people leave for the new grounds.",
+   "art": "res://assets/ui/research/discovery-600/weather_sign_reading.png"
+  },
+  "sheep_enclosure_depopulation": {
+   "effects": {
+    "fiber_yield": 0.006,
+    "food_output": -0.003,
+    "cultivation_yield": -0.003,
+    "cohesion": -0.004,
+    "legitimacy": -0.002,
+    "ecological_pressure": 0.002
+   },
+   "name": "Sheep Enclosures",
+   "observation": "Hedges go up around the ploughland, the tenants are turned out, and one shepherd and his dog keep a township's fields.",
+   "social_consequence": "Evicted tenants crowd the roads and towns while the landlords' flocks graze the old ploughland.",
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png"
+  },
+  "cold_margin_abandonment": {
+   "effects": {
+    "ecological_pressure": -0.008,
+    "ecology_recovery": 0.006,
+    "cultivation_yield": -0.003,
+    "food_output": -0.002,
+    "observation_rate": 0.0006
+   },
+   "name": "Cold Margin Retreat",
+   "observation": "In the cold decades the upland and ice-front farms fail harvest after harvest and are left to heath and snow.",
+   "social_consequence": "Upland families come down into crowded valleys, and the old hill farms become names in the tax rolls.",
+   "art": "res://assets/ui/research/paper/seasonal_patterns.png"
+  },
+  "replant_on_cut_licence": {
+   "effects": {
+    "timber_pressure": -0.006,
+    "ecology_recovery": 0.0075,
+    "labor_demand": 0.002
+   },
+   "name": "Replant-on-Cut Licence",
+   "observation": "A charcoal burner's licence binds him to replant what he cuts, and the forester checks the young trees the next spring.",
+   "art": "res://assets/ui/research/paper/charcoal.png"
+  },
+  "arsenal_oak_reserves": {
+   "effects": {
+    "timber_pressure": -0.012,
+    "timber_yield": 0.006,
+    "ecology_recovery": 0.006,
+    "legitimacy": -0.003,
+    "labor_demand": 0.002
+   },
+   "name": "Arsenal Oak Reserves",
+   "observation": "Every oak in the state reserves is counted and marked with the arsenal's sign, and none may be cut without its order.",
+   "ability_reason": "The arsenal can count on seasoned oak a generation ahead, so a lost fleet can be rebuilt.",
+   "social_consequence": "Villagers lose the right to cut or graze in the marked woods, and the arsenal's foresters are hated.",
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "smelter_fume_blight": {
+   "effects": {
+    "pollution": 0.004,
+    "ecological_pressure": 0.004,
+    "ecology_recovery": -0.003,
+    "observation_rate": 0.0006
+   },
+   "name": "Smelter Fume Blight",
+   "observation": "Roasting fumes drift over the hills around the smelters, and the trees die from the top down.",
+   "social_consequence": "Herders move their flocks away from the smelter hills, and the bare slopes wash into the streams.",
+   "art": "res://assets/ui/research/paper/silver_cupellation.png"
+  },
+  "nitre_earth_exhaustion": {
+   "effects": {
+    "ecological_pressure": 0.002,
+    "labor_demand": 0.003,
+    "observation_rate": 0.0006,
+    "soil_productivity": -0.001
+   },
+   "name": "Nitre Earth Exhaustion",
+   "observation": "The stable and cellar floors have been dug too often; the nitre men must lay new beds and wait years for them to ripen.",
+   "art": "res://assets/ui/research/subjects/nitrate_cultivation-v1.png"
+  },
+  "game_damage_compensation": {
+   "effects": {
+    "hunting_yield": 0.003,
+    "cultivation_yield": -0.003,
+    "legitimacy": 0.001,
+    "ecology_recovery": 0.003
+   },
+   "name": "Game Damage Payments",
+   "observation": "The lord's deer and boar still eat the peasants' crops, but now the damage is assessed and paid.",
+   "social_consequence": "The peasants are paid for what the deer eat, but they still may not kill them.",
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png"
+  },
+  "illegal_weir_removal": {
+   "effects": {
+    "ecology_recovery": 0.008,
+    "food_output": 0.002,
+    "ecological_pressure": -0.0066,
+    "labor_demand": 0.001,
+    "craft_output": -0.001
+   },
+   "name": "Weir Removal",
+   "observation": "Weirs built across the river without a gap for the fish are ordered pulled down, and the salmon run upstream again.",
+   "art": "res://assets/ui/research/subjects/water_mills-v1.png"
+  },
+  "tillage_protection_laws": {
+   "effects": {
+    "cultivation_yield": 0.008,
+    "food_output": 0.006,
+    "soil_productivity": 0.008,
+    "fiber_yield": -0.004,
+    "institutional_rigidity": 0.003,
+    "legitimacy": 0.002
+   },
+   "name": "Tillage Protection",
+   "observation": "The law forbids turning ploughland to pasture, and landlords who have done so must rebuild the farmhouses.",
+   "ability_reason": "Ploughland can no longer be emptied for sheep, so the realm keeps the farmers who grow its bread.",
+   "art": "res://assets/ui/research/discovery-600/ox_drawn_ard.png"
+  },
+  "wolf_extirpation": {
+   "effects": {
+    "food_output": 0.002,
+    "hunting_yield": -0.002,
+    "ecology_recovery": -0.004,
+    "ecological_pressure": 0.002,
+    "injury_risk": -0.001
+   },
+   "name": "Wolf Extirpation",
+   "observation": "Bounties and drives have killed the last wolves of the lowlands, and only a few packs remain in the mountains.",
+   "social_consequence": "Shepherds sleep easier, but the deer multiply in the woods without the wolves.",
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png"
+  },
+  "mine_tailings_silting": {
+   "effects": {
+    "water_pollution": 0.005,
+    "ecological_pressure": 0.004,
+    "soil_productivity": -0.003,
+    "food_output": -0.001
+   },
+   "name": "Tailings Silting",
+   "observation": "Crushed waste from the silver mines washes down into the river, and the meadows below are buried in grey silt after every flood.",
+   "art": "res://assets/ui/research/paper/silver_cupellation.png"
+  },
+  "home_fur_exhaustion": {
+   "effects": {
+    "hunting_yield": -0.004,
+    "fiber_yield": -0.002,
+    "ecological_pressure": 0.002
+   },
+   "name": "Home Fur Exhaustion",
+   "observation": "No beaver or otter is left on the home rivers, and the furriers buy their pelts from traders on the frontier.",
+   "art": "res://assets/ui/research/paper/hide_tanning.png"
+  },
+  "enclosure_by_agreement": {
+   "effects": {
+    "cultivation_yield": 0.01,
+    "soil_productivity": 0.016,
+    "food_output": 0.004,
+    "cohesion": -0.004,
+    "foraging_yield": -0.004,
+    "labor_demand": 0.002
+   },
+   "name": "Enclosure by Agreement",
+   "observation": "The open fields and common are divided by agreement into hedged farms, each man's land in one piece.",
+   "ability_reason": "An improving farmer can drain, manure and rotate his own hedged fields as he chooses, and the grain surplus grows.",
+   "social_consequence": "Cottagers lose the common where their cow and geese grazed.",
+   "art": "res://assets/ui/research/paper/first300-cards/contour_cultivation.tres"
+  },
+  "contact_species_exchange": {
+   "effects": {
+    "cultivation_yield": 0.012,
+    "food_output": 0.008,
+    "nutrition_quality": 0.004,
+    "ecological_pressure": 0.006,
+    "disease_exposure": 0.006,
+    "ecology_recovery": -0.004,
+    "soil_productivity": -0.002
+   },
+   "name": "Species Exchange",
+   "observation": "Seeds, weeds, pests and runaway livestock cross the ocean both ways, and neither shore looks as it did before contact.",
+   "ability_reason": "New crops and beasts from across the ocean can feed the realm, but strange weeds and pests arrive with them.",
+   "social_consequence": "Farmers try new plants from across the ocean, while new pests and diseases ruin some of the old crops.",
+   "art": "res://assets/ui/research/subjects/seed_selection-v1.png"
+  },
+  "dune_grass_laws": {
+   "effects": {
+    "disaster_risk": -0.004,
+    "ecological_pressure": -0.008,
+    "ecology_recovery": 0.006,
+    "food_output": -0.001
+   },
+   "name": "Dune Grass Laws",
+   "observation": "The coarse grass that binds the dunes is protected, and no beast may graze on them.",
+   "art": "res://assets/ui/research/paper/first300-cards/crop_residue_cover.tres"
+  },
+  "pressed_plant_herbaria": {
+   "effects": {
+    "observation_rate": 0.0036,
+    "knowledge_preservation": 0.0024,
+    "ecology_recovery": 0.0015
+   },
+   "name": "Herbaria",
+   "observation": "Plants are pressed flat, dried and glued into books with their names and the place they were gathered.",
+   "art": "res://assets/ui/research/paper/herbal_classification.png"
+  },
+  "comparative_anatomy": {
+   "effects": {
+    "observation_rate": 0.0036,
+    "knowledge_rate": 0.003,
+    "knowledge_preservation": 0.0012
+   },
+   "observation": "The bones of birds, beasts and people are laid side by side and compared bone for bone.",
+   "art": "res://assets/ui/research/paper/comparative_anatomy.png"
+  },
+  "mercury_amalgam_poisoning": {
+   "effects": {
+    "metal_yield": 0.003,
+    "water_pollution": 0.006,
+    "ecological_pressure": 0.004,
+    "health_risk": 0.004
+   },
+   "name": "Mercury Poisoning",
+   "observation": "Silver ore trodden with quicksilver gives up its metal, and the quicksilver soaks into the miners and the streams.",
+   "social_consequence": "Trembling hands and loose teeth mark the men who work the amalgamation yards.",
+   "art": "res://assets/ui/research/paper/silver_cupellation.png"
+  },
+  "statute_vermin_bounties": {
+   "effects": {
+    "cultivation_yield": 0.004,
+    "food_output": 0.002,
+    "hunting_yield": -0.002,
+    "ecology_recovery": -0.004,
+    "ecological_pressure": 0.002,
+    "labor_demand": 0.001
+   },
+   "name": "Vermin Bounties",
+   "observation": "Every parish pays a bounty on crows, kites, foxes and hedgehogs, and churchwardens count the heads.",
+   "art": "res://assets/ui/research/subjects/seed_reserves-v1.png"
+  },
+  "goat_woodland_bans": {
+   "effects": {
+    "ecology_recovery": 0.008,
+    "timber_pressure": -0.004,
+    "food_output": -0.002,
+    "legitimacy": -0.001
+   },
+   "name": "Goat Bans",
+   "observation": "Goats are barred from young woods, and a goat found browsing there is forfeit.",
+   "art": "res://assets/ui/research/paper/managed_fallow.png"
+  },
+  "island_forest_felling": {
+   "effects": {
+    "timber_yield": 0.008,
+    "timber_pressure": 0.006,
+    "ecological_pressure": 0.008,
+    "ecology_recovery": -0.006,
+    "disaster_risk": 0.003
+   },
+   "name": "Island Forest Felling",
+   "observation": "The great forests of far islands are cut for ship timber and to fuel the sugar boilers.",
+   "social_consequence": "On the far islands the streams dry up and the soil washes away within a lifetime.",
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "commercial_peat_cutting": {
+   "effects": {
+    "fuel_demand": -0.004,
+    "timber_pressure": -0.003,
+    "ecological_pressure": 0.005,
+    "ecology_recovery": -0.004,
+    "soil_productivity": -0.001,
+    "pollution": 0.003
+   },
+   "name": "Commercial Peat",
+   "observation": "Companies drain the raised bogs and cut peat by the boatload for the towns.",
+   "art": "res://assets/ui/research/subjects/peat_drying-v1.png"
+  },
+  "frozen_river_winters": {
+   "effects": {
+    "cultivation_yield": -0.003,
+    "food_output": -0.002,
+    "disaster_resilience": 0.002,
+    "observation_rate": 0.0012
+   },
+   "name": "Frozen River Winters",
+   "observation": "The great river freezes so hard that a fair is held on the ice, while the mills stand still and the poor go cold.",
+   "art": "res://assets/ui/research/paper/seasonal_patterns.png"
+  },
+  "far_land_specimen_voyages": {
+   "effects": {
+    "observation_rate": 0.0036,
+    "cultivation_yield": 0.003,
+    "knowledge_preservation": 0.0018,
+    "disease_exposure": 0.002
+   },
+   "name": "Specimen Voyages",
+   "observation": "Naturalists sail with the ships and bring back seeds, skins and dried plants from far lands.",
+   "art": "res://assets/ui/research/paper/biological_reference_collections.png"
+  },
+  "smelter_damage_payments": {
+   "effects": {
+    "pollution": -0.0036,
+    "ecological_pressure": -0.0044,
+    "legitimacy": 0.002,
+    "cohesion": 0.001
+   },
+   "name": "Smelter Damages",
+   "observation": "The smelter owners must pay for the woods and pastures their fumes have killed, and some raise their chimneys.",
+   "art": "res://assets/ui/research/paper/petition_registers.png"
+  },
+  "private_nuisance_law": {
+   "effects": {
+    "pollution": -0.0096,
+    "water_pollution": -0.0096,
+    "sanitation": 0.004,
+    "legitimacy": 0.002,
+    "craft_output": -0.002
+   },
+   "name": "Nuisance Law",
+   "observation": "A court orders a neighbour's smoke, stench or foul water stopped, and the tanners and boilers must move or mend.",
+   "ability_reason": "A householder can go to court and have a neighbour's smoke, stench or foul water stopped, so the worst trades move to the edge of town.",
+   "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png"
+  },
+  "whale_ground_depletion": {
+   "effects": {
+    "hunting_yield": -0.004,
+    "food_output": -0.002,
+    "ecological_pressure": 0.003,
+    "trade_capacity": -0.002,
+    "ecology_recovery": -0.003
+   },
+   "name": "Northern Whale Depletion",
+   "observation": "The whales of the northern ice are gone, and the fleets sail farther each year for fewer catches.",
+   "art": "res://assets/ui/research/paper/coastal_watercraft.png"
+  },
+  "floated_water_meadows": {
+   "effects": {
+    "food_output": 0.008,
+    "soil_productivity": 0.016,
+    "cultivation_yield": 0.004,
+    "ecology_recovery": 0.006,
+    "labor_demand": 0.004,
+    "water_access": 0.002
+   },
+   "name": "Water Meadows",
+   "observation": "Hatches let a thin sheet of river water over the meadow in winter, and the grass is green weeks before the spring.",
+   "ability_reason": "An early bite of grass lets farmers keep more sheep through the hungry spring, and so they have more dung for the fields.",
+   "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png"
+  },
+  "last_wild_cattle": {
+   "effects": {
+    "hunting_yield": -0.002,
+    "ecology_recovery": -0.003,
+    "observation_rate": 0.0012
+   },
+   "name": "Last Wild Cattle",
+   "observation": "The last of the wild cattle die in a keeper's park, and no one will see them again.",
+   "social_consequence": "People now know the wild cattle of the old songs only from the horns hanging in the halls.",
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png"
+  },
+  "fur_frontier_depletion": {
+   "effects": {
+    "hunting_yield": -0.004,
+    "trade_capacity": 0.003,
+    "ecological_pressure": 0.004,
+    "ecology_recovery": -0.004,
+    "cohesion": -0.001
+   },
+   "name": "Fur Frontier Depletion",
+   "observation": "The fur traders take every beaver from one river and move on to the next.",
+   "art": "res://assets/ui/research/paper/hide_tanning.png"
+  },
+  "plantation_soil_exhaustion": {
+   "effects": {
+    "soil_productivity": -0.006,
+    "ecological_pressure": 0.006,
+    "trade_capacity": 0.004,
+    "cultivation_yield": 0.002,
+    "ecology_recovery": -0.004
+   },
+   "name": "Plantation Exhaustion",
+   "observation": "Tobacco and cane wear out the soil in a few years, and the planters burn new ground and move on.",
+   "social_consequence": "Planters move on to new ground and leave worn-out fields behind them.",
+   "art": "res://assets/ui/research/paper/first300-cards/crop_residue_cover.tres"
+  },
+  "glacier_farm_remission": {
+   "effects": {
+    "cultivation_yield": -0.003,
+    "food_output": -0.002,
+    "state_capacity": 0.001,
+    "legitimacy": 0.002,
+    "observation_rate": 0.0012
+   },
+   "name": "Glacier Remission",
+   "observation": "The glacier has buried a farm in the valley head, and the crown remits the tax on land under ice.",
+   "art": "res://assets/ui/research/paper/seasonal_patterns.png"
+  },
+  "timber_import_dependence": {
+   "effects": {
+    "timber_pressure": -0.008,
+    "timber_yield": 0.004,
+    "trade_capacity": 0.002,
+    "security_efficiency": -0.002
+   },
+   "name": "Timber Imports",
+   "observation": "Home oak runs short, so building timber and masts come by sea from the far northern forests.",
+   "social_consequence": "The shipyards depend on a foreign timber trade, and a war in the north can stop them.",
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "instrumental_weather_registers": {
+   "effects": {
+    "observation_rate": 0.0048,
+    "knowledge_preservation": 0.0024,
+    "disaster_resilience": 0.002
+   },
+   "name": "Weather Registers",
+   "observation": "Thermometer and barometer are read at fixed hours and written in a register kept for years.",
+   "art": "res://assets/ui/research/discovery-600/weather_sign_reading.png"
+  },
+  "oak_planting_treatise": {
+   "effects": {
+    "ecology_recovery": 0.008,
+    "timber_pressure": -0.006,
+    "timber_yield": 0.004,
+    "labor_demand": 0.002
+   },
+   "name": "Oak Planting",
+   "observation": "A printed treatise urges every landowner to plant oak for the fleet, and many do so on poor ground.",
+   "art": "res://assets/ui/research/subjects/timber_seasoning-v1.png"
+  },
+  "coal_smoke_treatise": {
+   "effects": {
+    "pollution": -0.012,
+    "sanitation": 0.003,
+    "health_risk": -0.002,
+    "labor_demand": 0.001
+   },
+   "name": "Coal Smoke Treatise",
+   "observation": "A treatise on the capital's coal smoke proposes moving the brewers, lime burners and dyers out and planting gardens against the smoke.",
+   "ability_reason": "The ruler now has a reasoned case for moving the smoky trades out of the capital.",
+   "art": "res://assets/ui/research/subjects/coal_grading-v1.png"
+  },
+  "fossil_organic_origin": {
+   "effects": {
+    "observation_rate": 0.0036,
+    "knowledge_rate": 0.004,
+    "knowledge_preservation": 0.0012
+   },
+   "name": "Fossils as Remains",
+   "observation": "The shells and bones found in rock are shown to be the remains of once-living creatures, not tricks of the stone.",
+   "art": "res://assets/ui/research/paper/relative_stratigraphy.png"
+  },
+  "island_extinction_record": {
+   "effects": {
+    "observation_rate": 0.0024,
+    "ecology_recovery": -0.002,
+    "hunting_yield": -0.002
+   },
+   "name": "Island Extinction",
+   "observation": "A large flightless bird was killed and eaten by every passing crew, and within a lifetime none are left.",
+   "art": "res://assets/ui/research/paper/biological_reference_collections.png"
+  },
+  "realm_forest_ordinance": {
+   "effects": {
+    "timber_pressure": -0.016,
+    "ecology_recovery": 0.015,
+    "timber_yield": 0.006,
+    "state_capacity": 0.004,
+    "legitimacy": -0.003,
+    "labor_demand": 0.003,
+    "food_output": -0.002
+   },
+   "name": "Realm Forest Ordinance",
+   "observation": "One forest ordinance governs every wood in the realm, and a forest master in each district decides what may be cut.",
+   "ability_reason": "Forest masters can say how much timber the realm has and where, so arsenals, mines and towns are supplied without stripping the woods.",
+   "social_consequence": "Peasants lose their rights to litter, pannage and firewood under the forest masters' rules.",
+   "art": "res://assets/ui/research/subjects/timber_grading-v1.png"
+  },
+  "oyster_spat_relaying": {
+   "effects": {
+    "food_output": 0.003,
+    "ecology_recovery": 0.006,
+    "ecological_pressure": -0.0044,
+    "labor_demand": 0.002
+   },
+   "name": "Oyster Relaying",
+   "observation": "Young oysters are dredged from healthy beds and laid on the worn-out ones, and the beds are closed until they grow.",
+   "art": "res://assets/ui/research/paper/coastal_watercraft.png"
+  },
+  "relative_stratigraphy": {
+   "effects": {
+    "observation_rate": 0.0048,
+    "survey_speed": 0.006,
+    "extraction_yield": 0.004,
+    "knowledge_preservation": 0.0018
+   },
+   "observation": "Layers of rock are read in order down the cliff, and the lower layer is always the older.",
+   "ability_reason": "Surveyors can follow a coal or clay bed from one valley to the next by the layers above and below it.",
+   "art": "res://assets/ui/research/paper/relative_stratigraphy.png"
+  },
+  "property_game_qualification": {
+   "effects": {
+    "hunting_yield": 0.002,
+    "ecology_recovery": 0.0045,
+    "legitimacy": -0.004,
+    "cohesion": -0.003,
+    "food_output": -0.001
+   },
+   "name": "Game Qualification",
+   "observation": "Only a man who holds land of a set value may hunt, and the rest may not keep a gun or a dog for it.",
+   "social_consequence": "Poaching becomes a crime of the poor, and keepers and poachers fight in the woods at night.",
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png"
+  },
+  "covered_field_drains": {
+   "effects": {
+    "soil_productivity": 0.008,
+    "cultivation_yield": 0.006,
+    "labor_demand": 0.004,
+    "disaster_risk": -0.001
+   },
+   "name": "Covered Drains",
+   "observation": "Trenches packed with brush and stones are covered over, and wet clay fields dry out in time for spring sowing.",
+   "art": "res://assets/ui/research/subjects/drainage-v1.png"
+  },
+  "habitat_observation_records": {
+   "effects": {
+    "observation_rate": 0.0036,
+    "cultivation_yield": 0.003,
+    "knowledge_preservation": 0.0018
+   },
+   "observation": "A county's plants, beasts and soils are described from dated field notes, parish by parish.",
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png"
+  },
+  "peat_shrinkage_pumping": {
+   "effects": {
+    "soil_productivity": -0.003,
+    "labor_demand": 0.004,
+    "disaster_risk": 0.003,
+    "ecological_pressure": 0.003,
+    "cultivation_yield": -0.002
+   },
+   "name": "Peat Shrinkage",
+   "observation": "The drained fen peat dries and shrinks below the rivers, and every decade more mills are needed to keep it dry.",
+   "social_consequence": "Each generation of fen farmers must pay for more mills to keep the fields their parents won.",
+   "art": "res://assets/ui/research/paper/drainage.png"
+  },
+  "trade_wind_map": {
+   "effects": {
+    "observation_rate": 0.003,
+    "route_speed": 0.003,
+    "knowledge_preservation": 0.0012
+   },
+   "name": "Trade Wind Map",
+   "observation": "A world map shows the trade winds and the monsoons with arrows, drawn from many voyages.",
+   "art": "res://assets/ui/research/discovery-600/regional_maps.png"
+  },
+  "tall_chimney_orders": {
+   "effects": {
+    "pollution": -0.0072,
+    "sanitation": 0.002,
+    "labor_demand": 0.002
+   },
+   "name": "Tall Chimney Orders",
+   "observation": "Brewers and dyers must carry their smoke up tall chimneys above the neighbouring roofs.",
+   "art": "res://assets/ui/research/paper/refractory_brick_firing.png"
+  },
+  "pannage_decline": {
+   "effects": {
+    "ecology_recovery": 0.006,
+    "food_output": -0.003,
+    "cohesion": -0.002,
+    "ecological_pressure": -0.0044
+   },
+   "name": "End of Pannage",
+   "observation": "The woods are enclosed, the swine are penned and fed on scraps, and the autumn acorn feeding ends.",
+   "art": "res://assets/ui/research/paper/managed_fallow.png"
+  },
+  "storm_path_reconstruction": {
+   "effects": {
+    "observation_rate": 0.003,
+    "disaster_resilience": 0.004,
+    "knowledge_preservation": 0.0012
+   },
+   "name": "Storm Path Reconstruction",
+   "observation": "Letters from every county are gathered after the great storm, and its path and hour are pieced together across the realm.",
+   "art": "res://assets/ui/research/discovery-600/disaster_memory_markers.png"
+  },
+  "game_bird_close_seasons": {
+   "effects": {
+    "hunting_yield": 0.002,
+    "ecology_recovery": 0.006,
+    "ecological_pressure": -0.0044
+   },
+   "name": "Close Seasons",
+   "observation": "No partridge or grouse may be shot while they nest and rear their young.",
+   "art": "res://assets/ui/research/paper/seasonal_patterns.png"
+  },
+  "sustained_yield_forestry": {
+   "effects": {
+    "timber_pressure": -0.018,
+    "timber_yield": 0.008,
+    "ecology_recovery": 0.015,
+    "state_capacity": 0.002,
+    "labor_demand": 0.003
+   },
+   "name": "Sustained Yield",
+   "observation": "The forester measures the growth of each wood and cuts no more in a year than grows back.",
+   "ability_reason": "Fuel, ship timber and building timber can last for ever instead of running out, because each wood is cut only as fast as it regrows.",
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "cattle_plague_slaughter_orders": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "health_risk": -0.002,
+    "food_output": -0.004,
+    "legitimacy": -0.002,
+    "disaster_resilience": 0.004,
+    "state_capacity": 0.002
+   },
+   "name": "Cattle Plague Orders",
+   "observation": "When the cattle plague comes, sick herds are slaughtered and burned, no beast may be moved, and owners are paid for their losses.",
+   "social_consequence": "Farmers watch their herds burned, and some hide sick beasts rather than lose them.",
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png"
+  },
+  "cattle_health_passes": {
+   "effects": {
+    "disease_exposure": -0.003,
+    "state_capacity": 0.002,
+    "trade_capacity": -0.001,
+    "institutional_rigidity": 0.001
+   },
+   "name": "Cattle Health Passes",
+   "observation": "Drovers must carry a certificate that their cattle come from a clean parish.",
+   "art": "res://assets/ui/research/discovery-600/stamp_seals.png"
+  },
+  "hedgerow_timber_planting": {
+   "effects": {
+    "timber_yield": 0.004,
+    "timber_pressure": -0.004,
+    "ecology_recovery": 0.006,
+    "hunting_yield": 0.001
+   },
+   "name": "Hedgerow Timber",
+   "observation": "Oak and ash saplings are planted in the new enclosure hedges to grow into timber trees.",
+   "art": "res://assets/ui/research/paper/first300-cards/crop_residue_cover.tres"
+  },
+  "brown_rat_invasion": {
+   "effects": {
+    "storage_loss": 0.004,
+    "disease_exposure": 0.002,
+    "food_storage": -0.002,
+    "ecological_pressure": 0.002
+   },
+   "name": "Brown Rat Invasion",
+   "observation": "Bigger brown rats come ashore in the ports, drive out the black rat and spread into every barn and granary.",
+   "art": "res://assets/ui/research/subjects/regional_granaries-v1.png"
+  },
+  "plant_transpiration_measurement": {
+   "effects": {
+    "observation_rate": 0.003,
+    "cultivation_yield": 0.002,
+    "water_access": 0.002,
+    "knowledge_preservation": 0.0012
+   },
+   "observation": "A potted plant is weighed morning and evening, and the water it draws up and breathes out is measured.",
+   "art": "res://assets/ui/research/paper/plant_transpiration_measurement.png"
+  },
+  "caterpillar_nest_ordinance": {
+   "effects": {
+    "cultivation_yield": 0.003,
+    "timber_yield": 0.002,
+    "labor_demand": 0.002
+   },
+   "name": "Caterpillar Ordinance",
+   "observation": "Every householder must cut the caterpillar nests from his hedges and trees in winter and burn them.",
+   "art": "res://assets/ui/research/paper/plant_pathology_diagnosis.png"
+  },
+  "biological_classification": {
+   "effects": {
+    "observation_rate": 0.006,
+    "knowledge_preservation": 0.0036,
+    "knowledge_rate": 0.004,
+    "adoption_rate": 0.002
+   },
+   "observation": "Every plant and animal gets a two-part name and a place in a nested scheme of kinds.",
+   "ability_reason": "Naturalists everywhere can name the same plant or beast in the same way, so reports of crops, pests and useful species can be compared.",
+   "art": "res://assets/ui/research/paper/biological_classification.png"
+  },
+  "tree_ring_notes": {
+   "effects": {
+    "observation_rate": 0.0024,
+    "knowledge_preservation": 0.0012,
+    "disaster_resilience": 0.001
+   },
+   "name": "Tree Ring Notes",
+   "observation": "Rings on the stumps are counted back to date the wet and dry years.",
+   "art": "res://assets/ui/research/subjects/timber_seasoning-v1.png"
+  },
+  "pheasant_preserves": {
+   "effects": {
+    "hunting_yield": 0.003,
+    "ecology_recovery": -0.003,
+    "legitimacy": -0.002,
+    "ecological_pressure": 0.002
+   },
+   "name": "Pheasant Preserves",
+   "observation": "Keepers rear pheasants by the hundred for the guns and kill every hawk, owl and polecat on the estate.",
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png"
+  },
+  "dye_works_nuisance": {
+   "effects": {
+    "water_pollution": -0.008,
+    "water_safety": 0.003,
+    "craft_output": -0.002,
+    "legitimacy": 0.001
+   },
+   "name": "Dye Works Nuisance",
+   "observation": "The waste of the dye and bleach works is ruled a nuisance, and they must settle it in pits before it reaches the river.",
+   "art": "res://assets/ui/research/paper/textile_dye_extraction.png"
+  },
+  "tree_volume_tables": {
+   "effects": {
+    "timber_yield": 0.004,
+    "timber_pressure": -0.004,
+    "standardization": 0.002,
+    "survey_speed": 0.002
+   },
+   "name": "Tree Volume Tables",
+   "observation": "Tables give the timber in a standing tree from its girth and height, so a wood can be valued before felling.",
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "economy_of_nature": {
+   "effects": {
+    "ecology_recovery": 0.015,
+    "ecological_pressure": -0.0176,
+    "observation_rate": 0.0036,
+    "knowledge_rate": 0.002
+   },
+   "name": "Economy of Nature",
+   "observation": "Each creature is seen to have its place in a balance of eating and being eaten.",
+   "ability_reason": "Improvers can see that killing a hawk or draining a marsh changes what else lives there, so rules on woods, game and fisheries can look further ahead.",
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png"
+  },
+  "biological_reference_collections": {
+   "effects": {
+    "observation_rate": 0.0036,
+    "knowledge_preservation": 0.0036
+   },
+   "observation": "Named and numbered type specimens stand in a public cabinet, where anyone can compare a find against them.",
+   "art": "res://assets/ui/research/paper/biological_reference_collections.png"
+  },
+  "phenology_records": {
+   "effects": {
+    "observation_rate": 0.003,
+    "cultivation_yield": 0.002,
+    "knowledge_preservation": 0.0012
+   },
+   "name": "Phenology Records",
+   "observation": "The day of the first flowers and the first swallows is written down every year.",
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png"
+  },
+  "dune_pine_plantations": {
+   "effects": {
+    "disaster_risk": -0.006,
+    "ecology_recovery": 0.008,
+    "ecological_pressure": -0.008,
+    "timber_yield": 0.003,
+    "labor_demand": 0.003
+   },
+   "name": "Dune Pine Plantations",
+   "observation": "Marram grass and then pine are planted on the moving dunes, and the sand stops burying the farms behind them.",
+   "art": "res://assets/ui/research/paper/timber_grading.png"
+  },
+  "firebreak_rides": {
+   "effects": {
+    "disaster_risk": -0.005,
+    "disaster_resilience": 0.004,
+    "timber_pressure": -0.002,
+    "labor_demand": 0.002
+   },
+   "name": "Firebreak Rides",
+   "observation": "Wide rides cut through the pine plantations stop a fire from sweeping the whole forest.",
+   "art": "res://assets/ui/research/paper/timber_lateral_bracing.png"
+  },
+  "assembly_enclosure_acts": {
+   "effects": {
+    "cultivation_yield": 0.012,
+    "soil_productivity": 0.02,
+    "food_output": 0.006,
+    "cohesion": -0.006,
+    "legitimacy": -0.004,
+    "foraging_yield": -0.006,
+    "hunting_yield": -0.002
+   },
+   "name": "Enclosure Acts",
+   "observation": "Commissioners survey a parish's commons and open fields under an act of the assembly and reallot them as fenced farms.",
+   "ability_reason": "A whole parish can be reallotted into fenced farms in a few seasons, so improved husbandry spreads across the realm quickly.",
+   "social_consequence": "Commoners lose their grazing, fuel and gleaning rights; many become wage labourers or leave for the towns.",
+   "art": "res://assets/ui/research/paper/first300-cards/contour_cultivation.tres"
+  },
+  "veterinary_schools": {
+   "effects": {
+    "disease_exposure": -0.004,
+    "food_output": 0.003,
+    "health_risk": -0.001,
+    "observation_rate": 0.0018
+   },
+   "name": "Veterinary Schools",
+   "observation": "A school trains horse and cattle doctors in anatomy and the diseases of stock.",
+   "art": "res://assets/ui/research/subjects/domesticated_mounts-v1.png"
+  },
+  "desiccation_forest_reserves": {
+   "effects": {
+    "ecology_recovery": 0.018,
+    "timber_pressure": -0.01,
+    "ecological_pressure": -0.0176,
+    "water_access": 0.004,
+    "trade_capacity": -0.002,
+    "legitimacy": -0.001
+   },
+   "name": "Rain Forest Reserves",
+   "observation": "The hill forests of a far island are reserved because the settlers believe that cutting them brings drought.",
+   "ability_reason": "Governors of far islands can reserve the hill forests to keep the rains and springs, so colonies need not strip themselves bare.",
+   "art": "res://assets/ui/research/subjects/well_siting-v1.png"
+  },
+  "state_nitre_plantations": {
+   "effects": {
+    "chemical_control": 0.006,
+    "ecological_pressure": 0.003,
+    "pollution": 0.003,
+    "labor_demand": 0.003,
+    "state_capacity": 0.001
+   },
+   "name": "State Nitre Plantations",
+   "observation": "Nitre beds are laid out in rows under state inspectors, who test and buy the crop each year.",
+   "art": "res://assets/ui/research/subjects/nitrate_cultivation-v1.png"
+  },
+  "colonial_plant_transfers": {
+   "effects": {
+    "cultivation_yield": 0.006,
+    "food_output": 0.004,
+    "trade_capacity": 0.003,
+    "observation_rate": 0.0018,
+    "ecological_pressure": 0.002
+   },
+   "name": "Colonial Plant Transfers",
+   "observation": "State gardens carry useful plants from one far colony to another, and new crops take root on strange shores.",
+   "art": "res://assets/ui/research/subjects/seed_selection-v1.png"
+  },
+  "charcoal_wood_clearance": {
+   "effects": {
+    "timber_pressure": -0.008,
+    "cultivation_yield": 0.004,
+    "ecology_recovery": -0.004,
+    "pollution": 0.004
+   },
+   "name": "Charcoal Wood Clearance",
+   "observation": "Coal fires the furnaces now, so the old coppices are grubbed up and turned into farms.",
+   "art": "res://assets/ui/research/paper/charcoal.png"
+  },
+  "weather_observer_network": {
+   "effects": {
+    "observation_rate": 0.0072,
+    "disaster_resilience": 0.006,
+    "knowledge_preservation": 0.0024,
+    "cultivation_yield": 0.002
+   },
+   "name": "Weather Observer Network",
+   "observation": "Observers in many realms read matched instruments at the same hours and send their tables to one society.",
+   "ability_reason": "Observers can compare the same storm or frost from place to place, the first step toward foreseeing bad seasons.",
+   "art": "res://assets/ui/research/discovery-600/weather_sign_reading.png"
+  },
+  "mineral_cleavage": {
+   "effects": {
+    "observation_rate": 0.0024,
+    "extraction_yield": 0.004,
+    "survey_speed": 0.003
+   },
+   "observation": "Minerals are sorted by the way they split along smooth faces or break unevenly.",
+   "art": "res://assets/ui/research/paper/mineral_streak_tests.png"
+  },
+  "volcanic_dry_fog_year": {
+   "effects": {
+    "cultivation_yield": -0.006,
+    "food_output": -0.004,
+    "health_risk": 0.004,
+    "disaster_resilience": 0.002,
+    "observation_rate": 0.0012
+   },
+   "name": "Dry Fog Year",
+   "observation": "A dry fog from a distant eruption hangs over the summer, the crops wither and the parish registers fill with burials.",
+   "social_consequence": "A summer of fog, a failed harvest, and burials counted parish by parish.",
+   "art": "res://assets/ui/research/discovery-600/dated_omen_records.png"
+  },
+  "deep_time_geology": {
+   "effects": {
+    "observation_rate": 0.006,
+    "knowledge_rate": 0.006,
+    "survey_speed": 0.004,
+    "extraction_yield": 0.004
+   },
+   "name": "Deep Time",
+   "observation": "The slow laying-down of rock beds shows the earth to be far older than any chronicle.",
+   "ability_reason": "Surveyors reckon the earth in ages rather than generations, so they can read how rock beds, soils and coal were laid down and where to look for more.",
+   "art": "res://assets/ui/research/paper/relative_stratigraphy.png"
+  },
+  "ocean_whaling_depletion": {
+   "effects": {
+    "food_output": 0.003,
+    "trade_capacity": 0.004,
+    "ecological_pressure": 0.006,
+    "ecology_recovery": -0.006,
+    "hunting_yield": -0.003
+   },
+   "name": "Ocean Whaling",
+   "observation": "Whalers boil down the blubber in brick try-works on deck and stay out for years on every ocean.",
+   "art": "res://assets/ui/research/paper/coastal_watercraft.png"
+  },
+  "torrent_check_dams": {
+   "effects": {
+    "disaster_risk": -0.006,
+    "soil_productivity": 0.008,
+    "ecology_recovery": 0.008,
+    "labor_demand": 0.004,
+    "disaster_resilience": 0.003
+   },
+   "name": "Torrent Check Dams",
+   "observation": "Small dams of stone and wattle across the torrent beds and new trees on the slopes hold back the floods.",
+   "art": "res://assets/ui/research/subjects/drainage-v1.png"
+  },
+  "town_river_fish_kills": {
+   "effects": {
+    "water_pollution": 0.006,
+    "food_output": -0.002,
+    "ecological_pressure": 0.003,
+    "observation_rate": 0.0012,
+    "sanitation": -0.002
+   },
+   "name": "Town River Fouling",
+   "observation": "Fish float dead below the growing towns, and the fouling of the river is recorded year by year.",
+   "art": "res://assets/ui/research/paper/water_settling_basins.png"
+  },
+  "extinction_recognized": {
+   "effects": {
+    "observation_rate": 0.0036,
+    "knowledge_rate": 0.003,
+    "ecology_recovery": 0.003
+   },
+   "name": "Extinction Recognized",
+   "observation": "The bones of great beasts are shown to belong to kinds that live nowhere on earth now.",
+   "art": "res://assets/ui/research/paper/comparative_anatomy.png"
+  },
+  "condensing_smelter_flues": {
+   "effects": {
+    "pollution": -0.008,
+    "metal_yield": 0.004,
+    "ecology_recovery": 0.006,
+    "labor_demand": 0.002
+   },
+   "name": "Condensing Flues",
+   "observation": "Long flues running up the hillside cool the smelter fumes, and lead is scraped from their walls instead of falling on the pastures.",
+   "art": "res://assets/ui/research/paper/refractory_brick_firing.png"
+  }
+ }
 }

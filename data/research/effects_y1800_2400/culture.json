@@ -1,5 +1,1020 @@
 {
  "line": "culture",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "civic_humanism": {
+   "effects": {
+    "adoption_rate": 0.0006,
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0022,
+    "knowledge_rate": 0.0012,
+    "legitimacy": 0.0015
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "name": "Civic Humanism",
+   "observation": "The town chancellor writes letters in the old learned style, praising citizens who serve the republic over devotees who flee it.",
+   "ability_reason": "Letters in the old style praise active citizenship; learning becomes a training for public office, not only for the god's service."
+  },
+  "masked_spirit_drama": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/ritual_masks_costumes.png",
+   "name": "Masked Spirit Drama",
+   "observation": "A masked actor moves slowly across a bare stage as a ghost returned to the place of his grief."
+  },
+  "pilgrim_tale_cycle": {
+   "effects": {
+    "adoption_rate": 0.0013,
+    "cohesion": 0.0017,
+    "knowledge_preservation": 0.0013,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/traveling_storyteller_exchange.png",
+   "name": "Pilgrims' Tales",
+   "observation": "A company of pilgrims on the road tell tales in turn, and the knight, the miller and the widow each speak in their own voice.",
+   "ability_reason": "Tales in the everyday tongue give every rank a voice in one book; the common tongue becomes a language of literature."
+  },
+  "courtesy_manners_books": {
+   "effects": {
+    "cohesion": 0.0005,
+    "disease_exposure": -0.0005,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/rank_dress_styles.png",
+   "name": "Courtesy Books",
+   "observation": "A little book tells boys not to spit across the table or wipe their fingers on their coats."
+  },
+  "defence_of_women_book": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.0005
+   },
+   "art": "res://assets/ui/research/paper/household_councils.png",
+   "name": "Defence of Women",
+   "observation": "A widow who writes for her living builds in her book an allegorical city of worthy women, defending their worth by examples."
+  },
+  "inward_devotion_movement": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/hearth_shrine_offerings.png",
+   "name": "Inward Devotion",
+   "observation": "Lay brethren living in common copy books, teach boys and practise a plain devotion without vows."
+  },
+  "town_rhetoric_chambers": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/puzzle_riddle_contests.png",
+   "name": "Rhetoric Chambers",
+   "observation": "Each town's chamber of rhetoric enters a play in the contest, and the winning town carries home a silver prize."
+  },
+  "single_point_perspective_painting": {
+   "effects": {
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.001,
+    "legitimacy": 0.0012,
+    "observation_rate": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
+   "name": "Perspective Painting",
+   "observation": "The painted chapel wall seems to open into a vaulted room, every line running to one point at the eye's height.",
+   "ability_reason": "Painters build pictures on a single vanishing point; images become measured windows, and patrons compete for them."
+  },
+  "oil_glaze_painting": {
+   "effects": {
+    "cohesion": 0.001,
+    "craft_output": 0.0014,
+    "knowledge_preservation": 0.001,
+    "legitimacy": 0.0012
+   },
+   "art": "res://assets/ui/research/paper/mineral_pigment_preparation.png",
+   "name": "Oil Glaze Painting",
+   "observation": "Thin glazes of pigment in linseed oil give velvet, brass and skin a glow no egg paint could reach.",
+   "ability_reason": "Oil paint laid in glazes allows fine detail, depth and slow correction; painting becomes a trade of wealthy towns."
+  },
+  "burgher_portraiture": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/royal_stone_portraits.png",
+   "name": "Townsmen's Portraits",
+   "observation": "A merchant and his wife pose in their chamber, their mirror, fruit and little dog all painted to the life."
+  },
+  "freestanding_bronze_statuary": {
+   "effects": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0006,
+    "fuel_demand": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/copper_casting-v1.png",
+   "name": "Freestanding Bronzes",
+   "observation": "A bronze youth stands free in the courtyard, the first nude figure cast in the round since the old empire."
+  },
+  "court_dance_manuals": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/circle_dances.png",
+   "name": "Court Dance Manuals",
+   "observation": "A dancing master writes out the steps of each court dance with its music, so the same measures are danced in every palace."
+  },
+  "revived_philosophy_academy": {
+   "effects": {
+    "knowledge_preservation": 0.0006,
+    "knowledge_rate": 0.0008,
+    "legitimacy": -0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Revived Academy",
+   "observation": "In a villa outside the city, a banker's scholars translate the old philosopher and discuss the soul's ascent."
+  },
+  "printed_vernacular_romances": {
+   "effects": {
+    "adoption_rate": 0.0008,
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png",
+   "name": "Printed Romances",
+   "observation": "Printers sell romances of knights and fairies in the common tongue to every apprentice who can read."
+  },
+  "tea_hut_ceremony": {
+   "effects": {
+    "cohesion": 0.0006,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/shared_hearth_gatherings.png",
+   "name": "Tea Hut Rite",
+   "observation": "Guests stoop through a low door into a small hut, where the tea master whisks each bowl in silence."
+  },
+  "dignity_of_person_oration": {
+   "effects": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.0005,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Dignity of the Person",
+   "observation": "A young count writes that the maker gave man no fixed place, so that he might shape himself."
+  },
+  "soul_reckoning_morality_plays": {
+   "effects": {
+    "cohesion": 0.0006,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Morality Plays",
+   "observation": "Every soul is summoned by death, and one by one his friends, kin and goods abandon him on the cart stage."
+  },
+  "dry_contemplation_gardens": {
+   "effects": {
+    "cohesion": 0.0005,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/sacred_places.png",
+   "name": "Dry Rock Gardens",
+   "observation": "Raked white gravel and a few stones are placed so that no viewer can see them all at once."
+  },
+  "pedlar_chapbooks": {
+   "effects": {
+    "adoption_rate": 0.0008,
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/traveling_storyteller_exchange.png",
+   "name": "Chapbooks",
+   "observation": "The pedlar's pack holds cheap chapbooks of giant-killers, prophecies and murders for the village fair."
+  },
+  "printed_part_books": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0008
+   },
+   "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
+   "name": "Printed Part-books",
+   "observation": "Many-voice songs are printed in separate part-books, one for each singer."
+  },
+  "civic_marble_colossus": {
+   "effects": {
+    "cohesion": 0.0008,
+    "construction_rate": 0.003,
+    "labor_demand": 0.0009,
+    "legitimacy": 0.0007
+   },
+   "art": "res://assets/ui/research/discovery-600/stone_relief_carving.png",
+   "name": "Marble Colossus",
+   "observation": "A marble giant, a young slinger who felled a champion, stands before the town hall to warn tyrants."
+  },
+  "painted_vault_cycle": {
+   "effects": {
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.001,
+    "labor_demand": 0.0019,
+    "legitimacy": 0.0024
+   },
+   "art": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
+   "name": "Painted Vault",
+   "observation": "For four years a painter works on scaffolding under the vault, painting the making of the world.",
+   "ability_reason": "A great painted vault shows the god's story with the new skills; the god's house draws pilgrims and pride.",
+   "social_consequence": "The fees paid for it are among the grievances the reformers print"
+  },
+  "trickster_jest_books": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "legitimacy": -0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/scribal_songs_satires.png",
+   "name": "Jest Books",
+   "observation": "A wandering prankster tricks priests, innkeepers and burghers in every tale."
+  },
+  "praise_of_folly_satire": {
+   "effects": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.001,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/scribal_songs_satires.png",
+   "name": "Praise of Folly",
+   "observation": "Folly herself mounts the pulpit and praises the scholars, devotees and princes who serve her best."
+  },
+  "ideal_commonwealth_fiction": {
+   "effects": {
+    "institutional_rigidity": -0.001,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.0007
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Ideal Commonwealth",
+   "observation": "A traveller describes an island where property is common and the magistrates are elected."
+  },
+  "printed_reform_dispute": {
+   "effects": {
+    "adoption_rate": 0.0019,
+    "cohesion": -0.0034,
+    "institutional_rigidity": -0.004,
+    "knowledge_rate": 0.0012,
+    "legitimacy": -0.0045
+   },
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png",
+   "name": "Printed Reform Dispute",
+   "observation": "A preacher's theses against selling the god's pardons are printed in every town within weeks, and the god's house must answer in print.",
+   "ability_reason": "Printed attacks on the god's house reach every town before it can answer; authority must now argue in print.",
+   "social_consequence": "Towns and families split between the old rite and the reformed, and the dispute ends in wars"
+  },
+  "vernacular_scripture": {
+   "effects": {
+    "adoption_rate": 0.0026,
+    "cohesion": 0.0015,
+    "knowledge_preservation": 0.0019,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/sung_divine_narrative.png",
+   "name": "Scripture in the Common Tongue",
+   "observation": "The god's books are translated into the common tongue and printed small enough for every household.",
+   "ability_reason": "Scripture in the everyday tongue makes reading a household duty and fixes a common written language.",
+   "social_consequence": "Lay readers interpret for themselves, and preachers can no longer control the text"
+  },
+  "everyday_tongue_hymns": {
+   "effects": {
+    "cohesion": 0.0008,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/seasonal_hymn_cycles.png",
+   "name": "Common-tongue Hymns",
+   "observation": "The whole congregation sings plain hymns in the common tongue, to tunes the street already knows."
+  },
+  "courtier_ideal_book": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/rank_dress_styles.png",
+   "name": "The Perfect Courtier",
+   "observation": "A count describes the perfect courtier, graceful in arms, letters and speech, and doing it all with ease."
+  },
+  "emblem_books": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
+   "name": "Emblem Books",
+   "observation": "Each page pairs a woodcut, a motto and a verse; a tortoise under a sail means 'hasten slowly'."
+  },
+  "masked_stock_comedy": {
+   "effects": {
+    "cohesion": 0.0006,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/ritual_masks_costumes.png",
+   "name": "Masked Stock Comedy",
+   "observation": "Masked troupes improvise on the old miser, the braggart captain and the clever servant."
+  },
+  "artists_lives_history": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
+   "name": "Lives of the Artists",
+   "observation": "A painter writes the lives of the artists from the first masters to his own day."
+  },
+  "sorcery_panics": {
+   "effects": {
+    "cohesion": -0.0028,
+    "injury_risk": 0.001,
+    "institutional_rigidity": 0.0008,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/dream_interpretation.png",
+   "name": "Sorcery Panics",
+   "observation": "After a hailstorm, a village accuses a widow of sorcery, and the magistrates' handbook teaches them how to try her.",
+   "social_consequence": "Accusations spread from village to village, and hundreds die"
+  },
+  "drawing_academy": {
+   "effects": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0009,
+    "institutional_rigidity": -0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
+   "name": "Academy of Drawing",
+   "observation": "Painters found an academy of drawing and free themselves from the guild's rules."
+  },
+  "peasant_genre_painting": {
+   "effects": {
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/cooperative_harvest_gatherings.png",
+   "name": "Peasant Genre Painting",
+   "observation": "Peasants dance, eat and sleep under the painted trees of a harvest noon."
+  },
+  "voyage_national_epic": {
+   "effects": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "name": "Voyage Epic",
+   "observation": "An epic tells the realm's discovery of the sea road to the far east in the old heroic measure."
+  },
+  "public_playhouses": {
+   "effects": {
+    "adoption_rate": 0.001,
+    "cohesion": 0.002,
+    "disease_exposure": 0.0024,
+    "food_storage": -0.0008,
+    "legitimacy": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Public Playhouses",
+   "observation": "A round wooden playhouse across the river holds three thousand, and a labourer pays one small coin to stand in the yard.",
+   "ability_reason": "Paying crowds of every rank see the same plays; the theatre becomes a common school of speech and history.",
+   "social_consequence": "Preachers denounce the playhouses as nests of plague and vice"
+  },
+  "personal_essays": {
+   "effects": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.0005,
+    "knowledge_rate": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/curious_questioning_custom.png",
+   "name": "Essays",
+   "observation": "A retired magistrate writes about himself in a tower of books and doubts even his own judgment."
+  },
+  "court_ballet_spectacle": {
+   "effects": {
+    "cohesion": 0.0005,
+    "labor_demand": 0.0006,
+    "legitimacy": 0.0007
+   },
+   "art": "res://assets/ui/research/discovery-600/festival_dancers_acrobats.png",
+   "name": "Court Ballet",
+   "observation": "The ruler himself dances the sun in a spectacle of masks, machines and verse."
+  },
+  "realm_history_plays": {
+   "effects": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "History Plays",
+   "observation": "Plays of the realm's kings teach the groundlings their history and the price of civil war."
+  },
+  "chiaroscuro_painting": {
+   "effects": {
+    "cohesion": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
+   "name": "Light and Shadow Painting",
+   "observation": "A single hard light falls on a tavern table where a tax collector is called from his counting."
+  },
+  "sung_drama_opera": {
+   "effects": {
+    "cohesion": 0.0015,
+    "knowledge_preservation": 0.0006,
+    "labor_demand": 0.001,
+    "legitimacy": 0.0018
+   },
+   "art": "res://assets/ui/research/discovery-600/temple_singers_lamenters.png",
+   "name": "Opera",
+   "observation": "A court singer's story of the poet who went down to the dead is sung throughout, and the audience weeps.",
+   "ability_reason": "Drama sung throughout joins music, poetry and staging; courts and then towns build houses for it."
+  },
+  "figured_bass_monody": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
+   "name": "Solo Song",
+   "observation": "A single voice sings over a lute and a bass line written with figures."
+  },
+  "riverbank_dance_theatre": {
+   "effects": {
+    "cohesion": 0.0006,
+    "disease_exposure": 0.0005,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/festival_dancers_acrobats.png",
+   "name": "Riverbank Dance Theatre",
+   "observation": "A shrine dancer performs on the dry riverbed, and the townspeople crowd to see her."
+  },
+  "comic_knight_novel": {
+   "effects": {
+    "adoption_rate": 0.001,
+    "cohesion": 0.0015,
+    "knowledge_rate": 0.0012,
+    "legitimacy": -0.0011
+   },
+   "art": "res://assets/ui/research/discovery-600/traveling_storyteller_exchange.png",
+   "name": "Novel of a Deluded Knight",
+   "observation": "A poor gentleman who read too many romances rides out on his old horse to right wrongs that exist only in his books.",
+   "ability_reason": "A long prose fiction of ordinary life and delusion gives the novel its form, and readers learn to see through old ideals."
+  },
+  "salon_conversation": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.0005,
+    "knowledge_rate": 0.0008
+   },
+   "art": "res://assets/ui/research/discovery-600/shared_hearth_gatherings.png",
+   "name": "Salons",
+   "observation": "A marquise receives poets, scholars and nobles in her blue chamber, and conversation becomes an art."
+  },
+  "burgher_still_life": {
+   "effects": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0006,
+    "trade_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/first_fruits_offering.png",
+   "name": "Still-life Painting",
+   "observation": "A half-peeled lemon, an overturned cup and a lobster remind the burgher that all things pass."
+  },
+  "tongue_purity_academy": {
+   "effects": {
+    "institutional_rigidity": 0.0005,
+    "knowledge_preservation": 0.0008,
+    "standardization": 0.0011
+   },
+   "art": "res://assets/ui/research/discovery-600/standard_sign_lists.png",
+   "name": "Academy of the Tongue",
+   "observation": "Forty academicians begin a dictionary of the tongue, deciding which words are fit for polite writing."
+  },
+  "three_unities_tragedy": {
+   "effects": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Tragedy of the Three Unities",
+   "observation": "Tragedies keep to one action, one place and one day, and their heroes choose between love and duty."
+  },
+  "public_opera_house": {
+   "effects": {
+    "cohesion": 0.0008,
+    "disease_exposure": 0.0005,
+    "labor_demand": 0.0005,
+    "legitimacy": 0.0006,
+    "trade_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Public Opera House",
+   "observation": "The first public opera house opens for anyone who can pay, and the boxes are rented by the season."
+  },
+  "civic_group_portraits": {
+   "effects": {
+    "cohesion": 0.0006,
+    "legitimacy": 0.0006,
+    "warfare_readiness": 0.002
+   },
+   "art": "res://assets/ui/research/discovery-600/royal_stone_portraits.png",
+   "name": "Group Portraits",
+   "observation": "The militia company pays to be painted marching out, each member paying for his place."
+  },
+  "royal_art_academy": {
+   "effects": {
+    "craft_output": 0.0009,
+    "institutional_rigidity": 0.0005,
+    "legitimacy": 0.0006,
+    "standardization": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
+   "name": "Royal Art Academy",
+   "observation": "The royal academy teaches drawing from the model and judges each painting by its rank of subject."
+  },
+  "coffeehouse_public_talk": {
+   "effects": {
+    "adoption_rate": 0.0019,
+    "cohesion": 0.0015,
+    "institutional_rigidity": -0.0024,
+    "knowledge_rate": 0.0012,
+    "legitimacy": -0.0017,
+    "trade_capacity": 0.0013
+   },
+   "art": "res://assets/ui/research/discovery-600/shared_hearth_gatherings.png",
+   "name": "Coffee-house Talk",
+   "observation": "For a penny a man may sit, read the news sheets and argue politics with strangers over a dish of coffee.",
+   "ability_reason": "Coffee-houses become a public forum: news, trade and politics are argued by strangers, and opinion becomes a power.",
+   "social_consequence": "Rulers try to close them as seedbeds of sedition, and fail"
+  },
+  "perspective_scenery_stage": {
+   "effects": {
+    "cohesion": 0.0006,
+    "construction_rate": 0.0015,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Perspective Scenery Stage",
+   "observation": "Painted wings recede to a vanishing point, and women take the women's parts."
+  },
+  "royal_dance_academy": {
+   "effects": {
+    "cohesion": 0.0005,
+    "legitimacy": 0.0005,
+    "standardization": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/circle_dances.png",
+   "name": "Royal Academy of Dance",
+   "observation": "The ruler founds an academy to fix the rules and positions of dance."
+  },
+  "comedy_of_manners": {
+   "effects": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.001,
+    "legitimacy": -0.0007
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Comedy of Manners",
+   "observation": "A comedy of a pious hypocrite is banned by the god's party and then allowed by the ruler."
+  },
+  "first_fall_epic": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0008,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "name": "Epic of the First Fall",
+   "observation": "A blind poet dictates an epic of the first rebellion and the fall of the first man and woman."
+  },
+  "verse_fables": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": -0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/proverbs.png",
+   "name": "Fables in Verse",
+   "observation": "The fox, the crow and the ant speak in polished verse, and courtiers recognise themselves."
+  },
+  "pilgrim_allegory_prose": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0006,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/pilgrimage.png",
+   "name": "Pilgrim's Allegory",
+   "observation": "A tinker in prison writes how a pilgrim leaves his doomed city and struggles through bogs, fairs and giants' castles to the gate of heaven."
+  },
+  "public_collection_museum": {
+   "effects": {
+    "adoption_rate": 0.001,
+    "knowledge_preservation": 0.0026,
+    "knowledge_rate": 0.0012,
+    "legitimacy": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "name": "Public Museum",
+   "observation": "A founder's cabinets of coins, stones and stuffed animals open to the public in a university town.",
+   "ability_reason": "Collections open to the public make objects evidence; students and visitors can compare specimens and relics for themselves."
+  },
+  "floating_world_prints": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "disease_exposure": 0.0005
+   },
+   "art": "res://assets/ui/research/paper/textile_printing.png",
+   "name": "Prints of the Floating World",
+   "observation": "Cheap woodblock prints of actors and courtesans are sold in the pleasure quarter."
+  },
+  "ancients_moderns_quarrel": {
+   "effects": {
+    "institutional_rigidity": -0.001,
+    "knowledge_rate": 0.0008,
+    "legitimacy": -0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/debate_poems.png",
+   "name": "Ancients and Moderns",
+   "observation": "The academy splits over whether modern authors can equal the ancients."
+  },
+  "toleration_letter": {
+   "effects": {
+    "cohesion": 0.0008,
+    "institutional_rigidity": -0.0015,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/guest_friendship.png",
+   "name": "Letter on Toleration",
+   "observation": "A physician-philosopher writes that no magistrate can force belief, and that rites should be tolerated."
+  },
+  "puppet_duty_dramas": {
+   "effects": {
+    "cohesion": 0.0006,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/ritual_masks_costumes.png",
+   "name": "Chanted Puppet Dramas",
+   "observation": "Three puppeteers move each life-size doll while a chanter tells of lovers who choose death over dishonour."
+  },
+  "fairy_tale_collections": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0008
+   },
+   "art": "res://assets/ui/research/discovery-600/winter_tale_nights.png",
+   "name": "Fairy Tale Collections",
+   "observation": "A courtier writes down nurses' tales of wolves, ogres and clever cats, polished for the court."
+  },
+  "hammer_keyboard": {
+   "effects": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
+   "name": "Hammer Keyboard",
+   "observation": "A keyboard maker's instrument strikes the strings with hammers and plays both soft and loud."
+  },
+  "soloist_concertos": {
+   "effects": {
+    "cohesion": 0.0006,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
+   "name": "Concertos",
+   "observation": "A priest-composer writes concertos for the orphan girls of his hospital, who play behind a grille."
+  },
+  "periodical_essay_sheets": {
+   "effects": {
+    "adoption_rate": 0.0008,
+    "cohesion": 0.0005,
+    "knowledge_rate": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/seasonal_news_gathering.png",
+   "name": "Essay Sheets",
+   "observation": "A daily sheet of essays on manners and taste is read over breakfast and discussed at the coffee-house."
+  },
+  "bat_ball_wager_matches": {
+   "effects": {
+    "cohesion": 0.0008,
+    "injury_risk": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/festival_wrestling_races.png",
+   "name": "Bat-and-ball Matches",
+   "observation": "Village teams play bat-and-ball matches for a wager, and the gentry keep the score."
+  },
+  "fraternal_lodges": {
+   "effects": {
+    "cohesion": 0.0017,
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0012,
+    "trade_capacity": 0.0009
+   },
+   "art": "res://assets/ui/research/discovery-600/guest_host_reciprocity.png",
+   "name": "Brotherhood Lodges",
+   "observation": "Gentlemen meet in lodges of a builders' brotherhood, swear secret oaths and toast each other as brothers.",
+   "ability_reason": "Secret lodges bring men of different ranks and rites together as equals, and spread ideas of reform through their correspondence.",
+   "social_consequence": "Priests and princes suspect the lodges of conspiracy"
+  },
+  "castaway_realist_novel": {
+   "effects": {
+    "adoption_rate": 0.0006,
+    "cohesion": 0.0005,
+    "knowledge_rate": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/traveling_storyteller_exchange.png",
+   "name": "Castaway Novel",
+   "observation": "A mariner tells how he lived alone for decades on an island, and many readers believe it true."
+  },
+  "grand_tour_travel": {
+   "effects": {
+    "cohesion": 0.0005,
+    "disease_exposure": 0.0005,
+    "knowledge_preservation": 0.0005,
+    "trade_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/pilgrimage.png",
+   "name": "Grand Tour",
+   "observation": "Young nobles tour the old cities of the south with a tutor, and return with statues, paintings and debts."
+  },
+  "equal_temperament_tuning": {
+   "effects": {
+    "cohesion": 0.0005,
+    "standardization": 0.0008
+   },
+   "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
+   "name": "Equal Temperament",
+   "observation": "A choirmaster writes preludes in every key to show a keyboard tuned in equal steps."
+  },
+  "ballad_opera_satire": {
+   "effects": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.001,
+    "legitimacy": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Ballad Opera",
+   "observation": "A highwayman's opera sung to street tunes mocks the first minister, and the censors take note."
+  },
+  "playful_shell_ornament": {
+   "effects": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/inlaid_mosaic_panels.png",
+   "name": "Shell-and-scroll Ornament",
+   "observation": "Gilt shells, scrolls and flowers climb the salon walls and frame the mirrors."
+  },
+  "satirical_print_series": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "legitimacy": -0.0007
+   },
+   "art": "res://assets/ui/research/paper/rolling_intaglio_printing.png",
+   "name": "Satirical Print Series",
+   "observation": "An engraver's series follows a country girl from the coach to the brothel and a pauper's grave."
+  },
+  "epistolary_novel": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_letters.png",
+   "name": "Novel in Letters",
+   "observation": "A servant girl's letters to her parents tell how she resisted her master, and readers weep over her virtue."
+  },
+  "public_oratorio": {
+   "effects": {
+    "cohesion": 0.0008,
+    "legitimacy": 0.0007
+   },
+   "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
+   "name": "Public Oratorio",
+   "observation": "A sacred oratorio is sung in a concert hall to raise money for the foundling hospital."
+  },
+  "landscape_park_gardens": {
+   "effects": {
+    "cohesion": 0.0005,
+    "ecology_recovery": 0.0005,
+    "labor_demand": 0.0006,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/named_landmark_lore.png",
+   "name": "Landscape Parks",
+   "observation": "Walls are replaced by hidden ditches, and lakes, clumps of trees and temples are placed to look like wild nature.",
+   "social_consequence": "Villages that spoil the view are moved out of the park"
+  },
+  "buried_town_excavation": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.001,
+    "knowledge_rate": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/chamber_tombs.png",
+   "name": "Buried Towns Excavated",
+   "observation": "Diggers find a whole town buried under ash, with bread still in the ovens."
+  },
+  "realm_public_museum": {
+   "effects": {
+    "adoption_rate": 0.001,
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0026,
+    "legitimacy": 0.0015
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "name": "Realm Public Museum",
+   "observation": "The realm opens its museum free to the public, with a library and collections of antiquities and natural history.",
+   "ability_reason": "A national museum free to all makes heritage and learning a public possession rather than a princely one."
+  },
+  "neoclassical_revival": {
+   "effects": {
+    "cohesion": 0.0005,
+    "construction_rate": 0.0015,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0007
+   },
+   "art": "res://assets/ui/research/discovery-600/stone_relief_carving.png",
+   "name": "Neoclassical Revival",
+   "observation": "Grave columns, plain pediments and white marble replace the playful shells of the last generation."
+  },
+  "philosophical_satire_tale": {
+   "effects": {
+    "institutional_rigidity": -0.0015,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/scribal_songs_satires.png",
+   "name": "Philosophical Satire",
+   "observation": "A naive young man travels a world of wars and earthquakes and learns that all is not for the best."
+  },
+  "four_movement_symphony": {
+   "effects": {
+    "cohesion": 0.0017,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0015
+   },
+   "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
+   "name": "Symphony",
+   "observation": "An orchestra of forty plays a symphony in four movements for a prince, and then for a paying public.",
+   "ability_reason": "The symphony becomes the grand public form of music; orchestras and concert halls anchor civic pride."
+  },
+  "sentimental_novel": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/love_wedding_songs.png",
+   "name": "Novel of Feeling",
+   "observation": "Readers weep over a novel of feeling and write to its author as if the heroine lived."
+  },
+  "natural_education_treatise": {
+   "effects": {
+    "adoption_rate": 0.0006,
+    "cohesion": 0.0005,
+    "knowledge_rate": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/childrens_question_circles.png",
+   "name": "Natural Education",
+   "observation": "A treatise tells parents to let a child learn from nature and experience rather than books and the rod."
+  },
+  "ruined_castle_terror_tales": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/winter_tale_nights.png",
+   "name": "Tales of Terror",
+   "observation": "In a ruined castle, portraits walk, ghosts sigh in the vaults and a usurper's line is doomed."
+  },
+  "subscription_concerts": {
+   "effects": {
+    "cohesion": 0.0006,
+    "legitimacy": 0.0005,
+    "trade_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
+   "name": "Subscription Concerts",
+   "observation": "Concerts are sold by subscription in a public hall, and a boy prodigy plays the keyboard blindfold."
+  },
+  "annual_art_exhibition": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
+   "name": "Annual Exhibition",
+   "observation": "The academy's annual exhibition is hung frame to frame, and critics review it in the newspapers."
+  },
+  "string_quartet": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
+   "name": "String Quartet",
+   "observation": "Two violins, a viola and a cello converse as equals in a nobleman's music room."
+  },
+  "storm_passion_poetry": {
+   "effects": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.001,
+    "legitimacy": -0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/city_laments.png",
+   "name": "Storm and Passion",
+   "observation": "Young poets write of storms, suicide and the rights of feeling against the rules of the academies."
+  },
+  "folk_song_collections": {
+   "effects": {
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/communal_work_songs.png",
+   "name": "Folk Song Collections",
+   "observation": "A pastor collects the songs of the common people as the voice of each nation."
+  },
+  "dare_to_know_essay": {
+   "effects": {
+    "institutional_rigidity": -0.0015,
+    "knowledge_rate": 0.0008,
+    "legitimacy": -0.0007
+   },
+   "art": "res://assets/ui/research/discovery-600/curious_questioning_custom.png",
+   "name": "Dare to Know",
+   "observation": "A philosopher tells readers to leave their self-imposed tutelage and dare to use their own reason."
+  },
+  "servants_comic_opera": {
+   "effects": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.001,
+    "legitimacy": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Servants' Comic Opera",
+   "observation": "A servant and his bride outwit their count on their wedding day, and the censor bans the play before it is sung."
+  },
+  "national_civic_festivals": {
+   "effects": {
+    "cohesion": 0.0009,
+    "food_storage": -0.0005,
+    "labor_demand": 0.0006,
+    "legitimacy": 0.0007
+   },
+   "art": "res://assets/ui/research/discovery-600/new_year_festival.png",
+   "name": "Festivals of the Nation",
+   "observation": "On a great parade ground, delegates of every department swear an oath to the nation before a vast crowd."
+  },
+  "national_flag_anthem": {
+   "effects": {
+    "cohesion": 0.0009,
+    "legitimacy": 0.0007,
+    "warfare_readiness": 0.004
+   },
+   "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
+   "name": "Flag and Anthem",
+   "observation": "Soldiers march to a new song, and the new flag flies over every town hall.",
+   "social_consequence": "Old loyalties to lord and province give way to the nation, and to its wars"
+  },
+  "womens_rights_treatise": {
+   "effects": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.001,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.0005
+   },
+   "art": "res://assets/ui/research/paper/household_councils.png",
+   "name": "Rights of Women",
+   "observation": "A woman writer argues that women need education and rights, not only manners."
+  },
+  "plain_speech_nature_poetry": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/named_landmark_lore.png",
+   "name": "Plain-speech Poetry",
+   "observation": "Two poets publish ballads of shepherds and beggars in the plain speech of common men."
+  }
+ }
 }

@@ -1,5 +1,1307 @@
 {
  "line": "production",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "brass_battery_works": {
+   "effects": {
+    "metal_yield": 0.0039,
+    "craft_output": 0.0012,
+    "container_capacity": 0.003,
+    "trade_capacity": 0.001,
+    "fuel_demand": 0.002,
+    "water_pollution": 0.001
+   },
+   "name": "Brass Battery Works",
+   "observation": "Under the water-driven hammers a brass sheet is beaten into a basin in forty strokes, and the shed rings from dawn to dusk.",
+   "resource_requirements": [
+    {
+     "resource": "Copper Ore",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/paper/water_powered_hammers.png"
+  },
+  "salt_glazed_stoneware": {
+   "effects": {
+    "container_capacity": 0.005,
+    "food_spoilage": -0.002,
+    "trade_capacity": 0.001,
+    "fuel_demand": 0.002,
+    "pollution": 0.002
+   },
+   "name": "Salt-Glazed Stoneware",
+   "observation": "The potter throws a shovel of salt into the fire-mouth; a white cloud rolls out, and the jugs come out coated in hard, pitted glaze.",
+   "resource_requirements": [
+    {
+     "resource": "Clay",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/paper/high_fire_stoneware.png"
+  },
+  "gun_barrel_founding": {
+   "effects": {
+    "warfare_readiness": 0.002,
+    "metal_yield": 0.0026,
+    "fuel_demand": 0.002
+   },
+   "name": "Gun Barrel Founding",
+   "observation": "The founders pour bell bronze round a clay core, while in the next shed smiths hoop iron staves into a barrel like a cask.",
+   "art": "res://assets/ui/research/subjects/copper_casting-v1.png"
+  },
+  "high_warp_tapestry_workshops": {
+   "effects": {
+    "craft_output": 0.0016,
+    "trade_capacity": 0.0015,
+    "legitimacy": 0.001
+   },
+   "name": "High-Warp Tapestry",
+   "observation": "Six weavers sit behind the upright warp, working from the painted cartoon hung beside them; one hunting scene takes two years.",
+   "art": "res://assets/ui/research/paper/drawloom_pattern_control.png"
+  },
+  "drawn_cane_beads": {
+   "effects": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015,
+    "fuel_demand": 0.001
+   },
+   "name": "Drawn Cane Beads",
+   "observation": "Two glassmen walk apart down the long gallery, drawing a hot bubble into a hollow cane a hundred feet long, later chopped into beads.",
+   "art": "res://assets/ui/research/paper/glass_blowing.png"
+  },
+  "cast_iron_shot_firebacks": {
+   "effects": {
+    "metal_yield": 0.0052,
+    "container_capacity": 0.002,
+    "warfare_readiness": 0.0015,
+    "health_protection": 0.001,
+    "fuel_demand": 0.002
+   },
+   "name": "Cast-Iron Wares",
+   "observation": "The furnace pours straight into sand: round shot for the gunners, a fireback with the lord's arms, a three-legged pot for the kitchen.",
+   "resource_requirements": [
+    {
+     "resource": "Iron Ore",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/subjects/blast_furnace-v1.png"
+  },
+  "pewter_alloy_standards": {
+   "effects": {
+    "standardization": 0.002,
+    "container_capacity": 0.002,
+    "health_risk": -0.001
+   },
+   "name": "Pewter Standards",
+   "observation": "The pewterers' wardens assay every dish; fine metal takes the rose touch, and the lead-heavy lay metal is marked as lesser.",
+   "art": "res://assets/ui/research/subjects/ore_assaying-v1.png"
+  },
+  "gig_mill_napping": {
+   "effects": {
+    "craft_output": 0.0012,
+    "labor_demand": -0.002
+   },
+   "name": "Gig Mills",
+   "observation": "Water turns the drum of teasels against the wet cloth, and one man and a boy raise the nap that once took four.",
+   "art": "res://assets/ui/research/subjects/water_mills-v1.png"
+  },
+  "potash_saltpetre_works": {
+   "effects": {
+    "chemical_control": 0.004,
+    "warfare_readiness": 0.0015,
+    "timber_pressure": 0.002,
+    "fuel_demand": 0.002,
+    "water_pollution": 0.001
+   },
+   "name": "Saltpetre Works",
+   "observation": "The boilers pour wood-ash lye into the nitre liquor, and white crystals grow on the rods as the vats cool.",
+   "resource_requirements": [
+    {
+     "resource": "Nitrates",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png"
+  },
+  "corned_powder_mills": {
+   "effects": {
+    "warfare_readiness": 0.002,
+    "chemical_control": 0.002,
+    "disaster_risk": 0.002,
+    "injury_risk": 0.001
+   },
+   "name": "Corned Powder Mills",
+   "observation": "The damp powder cake is pressed through a sieve into grains, which burn fast and even and keep dry on the cart.",
+   "social_consequence": "Powder grows stronger and safer to carry, and now and then a stamping mill and its crew vanish in one flash.",
+   "art": "res://assets/ui/research/subjects/black_powder-v1.png"
+  },
+  "mainspring_fusee_clocks": {
+   "effects": {
+    "tool_quality": 0.0084,
+    "standardization": 0.002,
+    "craft_output": 0.0016,
+    "task_coordination": 0.0018
+   },
+   "name": "Spring-Driven Clocks",
+   "observation": "A coiled steel spring in a brass drum drives the little clock, and the cone-shaped fusee evens its pull from fully wound to run down.",
+   "ability_reason": "A coiled spring evened by the fusee lets a clock shrink to a table or a pocket; fine spring steel and small gears become a trade of their own.",
+   "art": "res://assets/ui/research/paper/gear_ratios.png"
+  },
+  "turpentine_rosin_distilling": {
+   "effects": {
+    "chemical_control": 0.003,
+    "naval_capacity": 0.002,
+    "trade_capacity": 0.001,
+    "timber_pressure": 0.002
+   },
+   "name": "Turpentine and Rosin",
+   "observation": "The pine gum is boiled in a copper still; turpentine drips from the worm, and rosin hardens in the pot.",
+   "art": "res://assets/ui/research/paper/wood_methanol_recovery.png"
+  },
+  "bolt_blank_forging": {
+   "effects": {
+    "standardization": 0.0015,
+    "tool_quality": 0.0028
+   },
+   "observation": "The smith heads a bolt blank in the swage and hands it on to be threaded; a hundred are made to one pattern.",
+   "art": "res://assets/ui/research/paper/bolt_blank_forging.png"
+  },
+  "clear_crystal_glass": {
+   "effects": {
+    "craft_output": 0.0032,
+    "trade_capacity": 0.003,
+    "container_capacity": 0.003,
+    "observation_rate": 0.003,
+    "fuel_demand": 0.003,
+    "timber_pressure": 0.002
+   },
+   "name": "Clear Crystal Glass",
+   "observation": "Purified plant ash and a pinch of manganese make a glass so clear that a goblet seems to hold the wine in air.",
+   "ability_reason": "Colourless glass carries fine lenses, mirrors and goblets; the glassmakers' secret becomes a treasury for the city that guards it.",
+   "resource_requirements": [
+    {
+     "resource": "Fine Sand",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/paper/glass_batch_composition_control.png"
+  },
+  "polychrome_tin_glaze": {
+   "effects": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015,
+    "container_capacity": 0.001,
+    "health_risk": 0.001
+   },
+   "name": "Polychrome Tin Glaze",
+   "observation": "On the white tin glaze the painter lays blue, green, yellow and orange, and the kiln fixes them bright.",
+   "art": "res://assets/ui/research/paper/ceramic_glaze_formulation.png"
+  },
+  "nut_blank_forging": {
+   "effects": {
+    "standardization": 0.0015,
+    "tool_quality": 0.0028
+   },
+   "observation": "Square and six-sided nut blanks are punched from hot bar, leaving iron enough round the hole for a spanner's bite.",
+   "art": "res://assets/ui/research/paper/nut_blank_forging.png"
+  },
+  "screw_tap_and_die": {
+   "effects": {
+    "tool_quality": 0.0056,
+    "standardization": 0.002,
+    "repair_capacity": 0.002
+   },
+   "name": "Taps and Dies",
+   "observation": "The die plate cuts the thread on the bolt and the tap cuts it in the nut, and any bolt from the box now fits any nut.",
+   "art": "res://assets/ui/research/paper/thread_die_cutting.png"
+  },
+  "liquation_silver_parting": {
+   "effects": {
+    "metal_yield": 0.0065,
+    "extraction_yield": 0.003,
+    "health_risk": 0.002,
+    "fuel_demand": 0.002,
+    "pollution": 0.002
+   },
+   "name": "Liquation Parting",
+   "observation": "Copper cakes laced with lead are heated slowly; the silver-bearing lead sweats out and runs into the channel below.",
+   "resource_requirements": [
+    {
+     "resource": "Copper Ore",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/paper/silver_cupellation.png"
+  },
+  "iron_plate_hammer_mills": {
+   "effects": {
+    "metal_yield": 0.0039,
+    "warfare_readiness": 0.001,
+    "fuel_demand": 0.002
+   },
+   "name": "Plate Hammer Mills",
+   "observation": "The trip hammer beats a glowing bloom out flat, and the plate goes to the armourer or the pan maker.",
+   "art": "res://assets/ui/research/paper/water_powered_hammers.png"
+  },
+  "needle_lace": {
+   "effects": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015,
+    "fatigue": 0.001
+   },
+   "name": "Needle Lace",
+   "observation": "With only a needle and linen thread the lacemaker builds a flower in the air, stitch on stitch, over a parchment pattern.",
+   "art": "res://assets/ui/research/paper/buttonhole_edge_reinforcement.png"
+  },
+  "mercury_tin_mirrors": {
+   "effects": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015,
+    "health_risk": 0.003
+   },
+   "name": "Mercury-Tin Mirrors",
+   "observation": "Tin foil is laid on a stone, flooded with quicksilver and the glass slid over it; the mirror-makers' hands shake by forty.",
+   "social_consequence": "Clear mirrors grace every fine house, and the silverers are slowly poisoned by the quicksilver.",
+   "art": "res://assets/ui/research/paper/glass_annealing_schedules.png"
+  },
+  "filigree_cane_glass": {
+   "effects": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015
+   },
+   "name": "Filigree Glass",
+   "observation": "White canes laid side by side are picked up on a hot bubble and twisted, so the goblet is laced with white spirals.",
+   "art": "res://assets/ui/research/paper/core_formed_glass.png"
+  },
+  "flyer_spinning": {
+   "effects": {
+    "fiber_yield": 0.0156,
+    "craft_output": 0.0016,
+    "labor_efficiency": 0.001
+   },
+   "observation": "The flyer twists the yarn and the bobbin winds it in one motion, and the treadle leaves both the spinner's hands free to draft.",
+   "ability_reason": "Spinning and winding at once doubles the yarn a spinner makes in a day; cloth waits less on the spinners.",
+   "art": "res://assets/ui/research/paper/spinning_wheels.png"
+  },
+  "cochineal_scarlet": {
+   "effects": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.002
+   },
+   "name": "Cochineal Scarlet",
+   "observation": "A pound of dried insects from the new lands dyes more scarlet than ten pounds of the old kermes grain.",
+   "art": "res://assets/ui/research/paper/textile_dye_extraction.png"
+  },
+  "rolled_metal_strip": {
+   "effects": {
+    "standardization": 0.0015,
+    "metal_yield": 0.0026
+   },
+   "name": "Rolled Metal Strip",
+   "observation": "Two hardened rolls turned by a crank press silver into strip of one thickness, ready for the coin blanks.",
+   "art": "res://assets/ui/research/paper/steel_wire_drawing.png"
+  },
+  "bobbin_lace": {
+   "effects": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015,
+    "fatigue": 0.001
+   },
+   "name": "Bobbin Lace",
+   "observation": "Forty bobbins click across the pillow as the lacemaker plaits her threads round the pins.",
+   "art": "res://assets/ui/research/paper/textile_braiding.png"
+  },
+  "flat_rod_mine_pumps": {
+   "effects": {
+    "extraction_yield": 0.008,
+    "mining_output": 0.008,
+    "metal_yield": 0.0078,
+    "mine_safety": 0.003,
+    "labor_demand": -0.003,
+    "timber_pressure": 0.002
+   },
+   "name": "Flat-Rod Pumps",
+   "observation": "A wheel in the valley rocks a line of wooden rods half a mile up the hill, and the pumps in the shaft draw water day and night.",
+   "ability_reason": "Water power carried by rods to the shaft keeps deep workings dry, and mines reach ore that bucket and horse could never drain.",
+   "art": "res://assets/ui/research/subjects/mine_drainage-v1.png"
+  },
+  "mercury_ore_amalgamation": {
+   "effects": {
+    "metal_yield": 0.0078,
+    "extraction_yield": 0.004,
+    "health_risk": 0.004,
+    "water_pollution": 0.003
+   },
+   "name": "Amalgamation Yards",
+   "observation": "Mules tread crushed silver ore with quicksilver and salt in open yards for weeks, until the silver is drawn into the amalgam.",
+   "social_consequence": "Poor silver ore becomes worth mining, and the yard hands and their mules breathe mercury.",
+   "resource_requirements": [
+    {
+     "resource": "Silver Ore",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/subjects/ore_assaying-v1.png"
+  },
+  "copperas_works": {
+   "effects": {
+    "chemical_control": 0.004,
+    "water_pollution": 0.003,
+    "pollution": 0.002
+   },
+   "name": "Copperas Works",
+   "observation": "Heaps of pyrite stones lie weathering in the rain, and the green liquor that runs from them is boiled down to copperas.",
+   "art": "res://assets/ui/research/paper/mineral_pigment_preparation.png"
+  },
+  "sugar_loaf_refining": {
+   "effects": {
+    "food_storage": 0.003,
+    "trade_capacity": 0.002,
+    "fuel_demand": 0.003,
+    "pollution": 0.001
+   },
+   "name": "Sugar Refining",
+   "observation": "Raw sugar is boiled with lime and ox blood, poured into clay cones and drained until the loaf comes out white.",
+   "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png"
+  },
+  "screw_cutting_lathe": {
+   "effects": {
+    "tool_quality": 0.007,
+    "standardization": 0.002
+   },
+   "name": "Screw-Cutting Lathe",
+   "observation": "The lead screw carries the cutter along the work, so each turn of the spindle cuts the thread one pitch farther.",
+   "art": "res://assets/ui/research/paper/lead_screw_cutting.png"
+  },
+  "soft_paste_porcelain": {
+   "effects": {
+    "container_capacity": 0.003,
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015,
+    "fuel_demand": 0.002
+   },
+   "name": "Soft-Paste Porcelain",
+   "observation": "White clay and ground glass fire into a translucent ware; it chips more easily than the eastern porcelain, but it is our own.",
+   "resource_requirements": [
+    {
+     "resource": "Clay",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/subjects/clay_testing-v1.png"
+  },
+  "kelp_alkali": {
+   "effects": {
+    "chemical_control": 0.003,
+    "ecological_pressure": 0.001,
+    "pollution": 0.001
+   },
+   "name": "Kelp Alkali",
+   "observation": "Along the shore the kelp burners rake seaweed in stone pits, and the fused grey cake goes to the glassmakers and soapmakers.",
+   "art": "res://assets/ui/research/subjects/salt_working-v1.png"
+  },
+  "stocking_knitting_frame": {
+   "effects": {
+    "craft_output": 0.0032,
+    "labor_efficiency": 0.0021,
+    "standardization": 0.002,
+    "labor_demand": -0.003,
+    "cohesion": -0.0014
+   },
+   "name": "Stocking Frame",
+   "observation": "The frame knits a whole row at once on hundreds of bearded needles; a stocking that took a week by hand is done in a day.",
+   "ability_reason": "A machine that knits whole rows at once proves that cloth can be made by mechanism; hosiery becomes a trade of rented frames.",
+   "social_consequence": "Stockings are cheap for all; hand knitters lose their living, and frame renters depend on the hosier.",
+   "art": "res://assets/ui/research/paper/yarn_tension_control.png"
+  },
+  "slitting_mills": {
+   "effects": {
+    "metal_yield": 0.0039,
+    "standardization": 0.0015,
+    "labor_demand": -0.001
+   },
+   "name": "Slitting Mills",
+   "observation": "Plate passes between grooved cutting rolls and comes out as a bundle of nail rods, which the nailers once split by hand.",
+   "art": "res://assets/ui/research/paper/water_powered_hammers.png"
+  },
+  "ribbon_engine_loom": {
+   "effects": {
+    "craft_output": 0.0016,
+    "labor_efficiency": 0.001,
+    "labor_demand": -0.002,
+    "cohesion": -0.0014
+   },
+   "name": "Ribbon Engine Loom",
+   "observation": "One weaver pulls the bar and sixteen ribbons are woven at once, and the ribbon weavers of the town petition to have the engine burned.",
+   "art": "res://assets/ui/research/paper/plain_weaving.png"
+  },
+  "indigo_vat_dyeing": {
+   "effects": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015,
+    "water_pollution": 0.002
+   },
+   "name": "Indigo Vat Dyeing",
+   "observation": "Indigo cakes from the new lands go into the fermenting vat, and the cloth comes out green and turns blue in the air.",
+   "art": "res://assets/ui/research/paper/textile_dye_fixation.png"
+  },
+  "cementation_blister_steel": {
+   "effects": {
+    "tool_quality": 0.0168,
+    "metal_yield": 0.0078,
+    "craft_output": 0.0016,
+    "fuel_demand": 0.006,
+    "timber_pressure": 0.002
+   },
+   "name": "Blister Steel",
+   "observation": "Bars of iron are packed in charcoal in stone chests and baked for a week; they come out blistered and hard enough for edge tools.",
+   "ability_reason": "Steel made by the chestful rather than by the smith's luck puts good edges on files, springs and blades everywhere.",
+   "resource_requirements": [
+    {
+     "resource": "Iron Ore",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/subjects/hardened_edges-v1.png"
+  },
+  "coal_fired_glass_furnace": {
+   "effects": {
+    "fuel_efficiency": 0.004,
+    "timber_pressure": -0.004,
+    "pollution": 0.004,
+    "health_risk": 0.001
+   },
+   "name": "Coal-Fired Glasshouses",
+   "observation": "When the woods ran short the glassmakers turned to coal, and they cover their pots so the soot never touches the glass.",
+   "art": "res://assets/ui/research/paper/glass_blowing.png"
+  },
+  "wooden_tub_bellows": {
+   "effects": {
+    "fuel_efficiency": 0.003,
+    "repair_capacity": 0.002,
+    "metal_yield": 0.0026
+   },
+   "name": "Wooden Tub Bellows",
+   "observation": "Two great wooden tubs rise and fall on the water wheel's cams, and they never crack or rot like the leather bellows.",
+   "art": "res://assets/ui/research/subjects/forge_welding-v1.png"
+  },
+  "blue_white_tin_glaze": {
+   "effects": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015,
+    "container_capacity": 0.001
+   },
+   "name": "Blue-and-White Tin Glaze",
+   "observation": "The painters copy the blue patterns of the eastern porcelain on white tin glaze, and the town's ware sells across the sea.",
+   "art": "res://assets/ui/research/paper/ceramic_glaze_formulation.png"
+  },
+  "tin_glazed_wall_tiles": {
+   "effects": {
+    "housing_output": 0.0016,
+    "health_protection": 0.001,
+    "trade_capacity": 0.001
+   },
+   "name": "Painted Wall Tiles",
+   "observation": "A workshop paints three thousand tiles a week, windmills and ships, to line the kitchens and hearths of the merchants' houses.",
+   "art": "res://assets/ui/research/paper/fired_roof_tiles.png"
+  },
+  "powder_rock_blasting": {
+   "effects": {
+    "extraction_yield": 0.006,
+    "mining_output": 0.006,
+    "injury_risk": 0.004,
+    "mine_safety": -0.002
+   },
+   "name": "Powder Blasting",
+   "observation": "The miner drills a hole into the face, charges it with powder and a straw fuse, and shouts before the rock splits.",
+   "art": "res://assets/ui/research/subjects/quarry_reading-v1.png"
+  },
+  "dark_bottle_glass": {
+   "effects": {
+    "container_capacity": 0.005,
+    "food_spoilage": -0.002,
+    "trade_capacity": 0.001,
+    "pollution": 0.002
+   },
+   "name": "Dark Bottle Glass",
+   "observation": "The coal-fired glasshouse turns out dark green bottles thick enough to be stacked on their sides in a cellar.",
+   "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png"
+  },
+  "carroted_fur_felting": {
+   "effects": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015,
+    "health_risk": 0.004
+   },
+   "name": "Carroted Fur Felt",
+   "observation": "The hatter brushes the fur with orange mercury salts so it felts tighter; in time the hatters' hands tremble and their minds wander.",
+   "social_consequence": "Fine hats for every head, and a trade whose masters are known for their shaking hands.",
+   "art": "res://assets/ui/research/paper/hide_tanning.png"
+  },
+  "recrystallised_saltpetre": {
+   "effects": {
+    "chemical_control": 0.004,
+    "warfare_readiness": 0.0015,
+    "fuel_demand": 0.002
+   },
+   "name": "Refined Saltpetre",
+   "observation": "The saltpetre is dissolved in hot water, skimmed and cooled three times, and each crop of crystals comes out whiter.",
+   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png"
+  },
+  "veneer_marquetry": {
+   "effects": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.001,
+    "timber_yield": 0.002,
+    "tool_quality": 0.0028
+   },
+   "name": "Veneer Marquetry",
+   "observation": "The saw cuts walnut into leaves as thin as card, and the cabinetmaker lays them into flowers of pale and dark wood.",
+   "art": "res://assets/ui/research/subjects/joinery-v2.png"
+  },
+  "stoved_varnish_ware": {
+   "effects": {
+    "container_capacity": 0.003,
+    "trade_capacity": 0.001,
+    "repair_capacity": 0.001,
+    "pollution": 0.001
+   },
+   "name": "Stoved Varnish Ware",
+   "observation": "Iron trays are painted with black varnish and baked in an oven, coat after coat, until they shine and never rust.",
+   "art": "res://assets/ui/research/paper/tinplate_coating.png"
+  },
+  "gear_cutting_engine": {
+   "effects": {
+    "tool_quality": 0.0056,
+    "standardization": 0.0025
+   },
+   "name": "Gear-Cutting Engine",
+   "observation": "The index plate turns the blank one tooth at a time under the rotary file, and every wheel in the clock has teeth alike.",
+   "art": "res://assets/ui/research/paper/worm_dividing_heads.png"
+  },
+  "mordant_printed_calico": {
+   "effects": {
+    "craft_output": 0.0016,
+    "trade_capacity": 0.0015,
+    "fiber_yield": 0.0013,
+    "water_pollution": 0.002
+   },
+   "name": "Mordant-Printed Calico",
+   "observation": "Printers stamp mordant patterns on cotton with wooden blocks, and the madder bath brings them up in fast red and purple.",
+   "art": "res://assets/ui/research/paper/textile_printing.png"
+  },
+  "lead_crystal_glass": {
+   "effects": {
+    "craft_output": 0.0032,
+    "trade_capacity": 0.003,
+    "observation_rate": 0.004,
+    "health_risk": 0.002,
+    "fuel_demand": 0.003
+   },
+   "name": "Lead Crystal",
+   "observation": "A dose of red lead in the batch makes a glass so heavy and bright that its cut facets flash like jewels.",
+   "ability_reason": "Lead-fluxed glass cuts, sparkles and bends light truly; the lens makers and the cutters both build on it.",
+   "resource_requirements": [
+    {
+     "resource": "Lead Ore",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/paper/glass_batch_composition_control.png"
+  },
+  "hollander_beater": {
+   "effects": {
+    "craft_output": 0.0016,
+    "knowledge_preservation": 0.0015,
+    "water_pollution": 0.001
+   },
+   "name": "Hollander Beater",
+   "observation": "A roll of knives turns in the long tub, and the rags become pulp in hours instead of the day the stampers took.",
+   "art": "res://assets/ui/research/paper/fiber_pulp_beating.png"
+  },
+  "coal_tar_pitch": {
+   "effects": {
+    "naval_capacity": 0.003,
+    "chemical_control": 0.002,
+    "repair_capacity": 0.002,
+    "pollution": 0.003,
+    "timber_pressure": -0.001
+   },
+   "name": "Coal Tar and Pitch",
+   "observation": "Coal smoulders in closed ovens, and the tar that runs off is boiled to pitch for the ships' seams.",
+   "art": "res://assets/ui/research/paper/coal_light_oil_recovery.png"
+  },
+  "cast_plate_glass": {
+   "effects": {
+    "craft_output": 0.0032,
+    "housing_output": 0.0032,
+    "trade_capacity": 0.0025,
+    "health_protection": 0.002,
+    "fuel_demand": 0.004,
+    "labor_demand": 0.002
+   },
+   "name": "Cast Plate Glass",
+   "observation": "The molten glass is poured on an iron table and rolled flat, and grinders and polishers work a month on one great pane.",
+   "ability_reason": "Glass poured and ground flat makes panes and mirrors of any size; windows fill rooms with light, and mirrors fill galleries.",
+   "resource_requirements": [
+    {
+     "resource": "Fine Sand",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/paper/glass_annealing_schedules.png"
+  },
+  "reverberatory_furnace": {
+   "effects": {
+    "fuel_efficiency": 0.006,
+    "metal_yield": 0.0065,
+    "timber_pressure": -0.003,
+    "pollution": 0.004
+   },
+   "name": "Reverberatory Furnace",
+   "observation": "The coal burns on its own grate, and the low arched roof throws the flame down on the ore, so the fuel never touches the metal.",
+   "resource_requirements": [
+    {
+     "resource": "Coal",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/subjects/refractory_furnaces-v1.png"
+  },
+  "coal_grading": {
+   "effects": {
+    "fuel_efficiency": 0.004,
+    "survey_speed": 0.002,
+    "standardization": 0.001
+   },
+   "observation": "The coalmaster sorts his seams: smokeless coal for the maltster, bright coal for the smith, dense and sulphur-poor coal for the furnace.",
+   "art": "res://assets/ui/research/subjects/coal_grading-v1.png"
+  },
+  "steam_suction_pump": {
+   "effects": {
+    "extraction_yield": 0.008,
+    "mining_output": 0.008,
+    "labor_demand": -0.002,
+    "fuel_demand": 0.006,
+    "pollution": 0.003
+   },
+   "name": "Fire Engine Pump",
+   "observation": "Steam fills the vessel, a dash of cold water condenses it, and the vacuum sucks the mine water up the pipe.",
+   "ability_reason": "Fire does the work of a team of horses at the mine: for the first time burning fuel lifts water directly.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "precipitated_iron_blue": {
+   "effects": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.001,
+    "chemical_control": 0.002
+   },
+   "name": "Iron Blue Pigment",
+   "observation": "A colour-maker's spoiled batch of blood-salt and iron left a deep blue powder, and now the painters buy it by the ounce.",
+   "art": "res://assets/ui/research/paper/mineral_pigment_preparation.png"
+  },
+  "sand_flask_casting": {
+   "effects": {
+    "metal_yield": 0.0039,
+    "container_capacity": 0.003,
+    "standardization": 0.0015
+   },
+   "name": "Sand Flask Casting",
+   "observation": "The moulder rams damp sand round a pattern in two iron boxes, lifts it out and pours a pot with walls as thin as a finger.",
+   "art": "res://assets/ui/research/paper/metal_casting_feed_design.png"
+  },
+  "coke_firing": {
+   "effects": {
+    "metal_yield": 0.0182,
+    "fuel_efficiency": 0.01,
+    "timber_pressure": -0.01,
+    "pollution": 0.008,
+    "health_risk": 0.002,
+    "fuel_demand": 0.004
+   },
+   "observation": "Coal is baked in heaps away from air until only grey coke is left, strong enough to carry the furnace charge without crushing.",
+   "ability_reason": "Coke frees ironmaking from the forests: furnaces grow larger, and iron can be made wherever coal lies.",
+   "art": "res://assets/ui/research/subjects/coke_firing-v1.png"
+  },
+  "atmospheric_beam_engine": {
+   "effects": {
+    "extraction_yield": 0.01,
+    "mining_output": 0.01,
+    "mine_safety": 0.003,
+    "labor_demand": -0.003,
+    "fuel_demand": 0.008,
+    "pollution": 0.004
+   },
+   "name": "Atmospheric Engine",
+   "observation": "The great beam nods twelve times a minute over the shaft, and each stroke lifts ten gallons of water from the deep workings.",
+   "ability_reason": "Air pressing on a piston gives the first dependable engine, and mines go deeper than any wheel can drain.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "refractory_furnaces": {
+   "effects": {
+    "fuel_efficiency": 0.005,
+    "metal_yield": 0.0052,
+    "repair_capacity": 0.002
+   },
+   "observation": "Linings of fireclay brick hold the furnace heat for months, so the blast need not stop for relining.",
+   "art": "res://assets/ui/research/paper/refractory_brick_firing.png"
+  },
+  "rolled_tinplate": {
+   "effects": {
+    "container_capacity": 0.005,
+    "food_storage": 0.002,
+    "metal_yield": 0.0026,
+    "trade_capacity": 0.001,
+    "fuel_demand": 0.002
+   },
+   "name": "Rolled Tinplate",
+   "observation": "Iron plate is rolled thin, pickled and dipped in molten tin, and the tinsmith makes it into pans, lanterns and boxes.",
+   "resource_requirements": [
+    {
+     "resource": "Iron Ore",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/paper/tinplate_coating.png"
+  },
+  "graphite_clay_crucibles": {
+   "effects": {
+    "metal_yield": 0.0039,
+    "fuel_efficiency": 0.002,
+    "repair_capacity": 0.002
+   },
+   "name": "Graphite Crucibles",
+   "observation": "Crucibles of fireclay mixed with plumbago stand the white heat of the brass melt twenty times before they crack.",
+   "resource_requirements": [
+    {
+     "resource": "Graphite",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    },
+    {
+     "resource": "Refractory Clay",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/subjects/graphite_crucibles-v1.png"
+  },
+  "flying_shuttles": {
+   "effects": {
+    "craft_output": 0.004,
+    "labor_efficiency": 0.0021,
+    "labor_demand": -0.003,
+    "cohesion": -0.0014
+   },
+   "observation": "The weaver jerks the picking cord and the shuttle flies across on its wheels; one man now weaves broadcloth alone.",
+   "ability_reason": "One weaver weaves twice as fast and twice as wide; yarn, not looms, becomes the bottleneck of the cloth trade.",
+   "art": "res://assets/ui/research/paper/plain_weaving.png"
+  },
+  "globe_oil_of_vitriol": {
+   "effects": {
+    "chemical_control": 0.005,
+    "pollution": 0.002,
+    "health_risk": 0.001
+   },
+   "name": "Vitriol in Glass Globes",
+   "observation": "Sulphur and nitre burn in a pan inside a great glass globe over water, and the fumes dissolve into oil of vitriol.",
+   "resource_requirements": [
+    {
+     "resource": "Sulfur",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png"
+  },
+  "zinc_retort_distillation": {
+   "effects": {
+    "metal_yield": 0.0052,
+    "pollution": 0.003,
+    "fuel_demand": 0.002
+   },
+   "name": "Zinc Distillation",
+   "observation": "Calamine and charcoal heated in sealed clay pots give off zinc vapour, which runs down an iron pipe into water.",
+   "art": "res://assets/ui/research/subjects/copper_smelting-v2.png"
+  },
+  "metal_casting_feed_design": {
+   "effects": {
+    "metal_yield": 0.0026,
+    "craft_output": 0.0012,
+    "standardization": 0.001
+   },
+   "observation": "The founder sets a riser over the thickest part of the mould, so the last metal to freeze draws from it and not from the casting.",
+   "art": "res://assets/ui/research/paper/metal_casting_feed_design.png"
+  },
+  "steel_refining": {
+   "effects": {
+    "tool_quality": 0.0196,
+    "metal_yield": 0.0078,
+    "standardization": 0.002,
+    "fuel_demand": 0.006
+   },
+   "observation": "Blister steel is melted in a closed clay crucible in a coke fire and poured into ingots of one temper throughout.",
+   "ability_reason": "Cast steel of even temper makes springs, razors and cutting tools reliable enough to build machines with.",
+   "art": "res://assets/ui/research/subjects/graphite_crucibles-v1.png"
+  },
+  "fused_silver_plate": {
+   "effects": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015,
+    "container_capacity": 0.001
+   },
+   "name": "Fused Silver Plate",
+   "observation": "A thin sheet of silver fused onto a copper ingot rolls out with it, so a candlestick looks like silver and costs a quarter as much.",
+   "art": "res://assets/ui/research/paper/silver_cupellation.png"
+  },
+  "plaster_mould_slip_casting": {
+   "effects": {
+    "standardization": 0.0025,
+    "container_capacity": 0.003
+   },
+   "name": "Slip Casting",
+   "observation": "Liquid clay poured into a plaster mould leaves a thin, even skin as the plaster drinks the water, and every teapot comes out alike.",
+   "art": "res://assets/ui/research/paper/ceramic_slip_casting.png"
+  },
+  "fantail_windmills": {
+   "effects": {
+    "food_output": 0.0016,
+    "labor_demand": -0.002
+   },
+   "name": "Fantail Windmills",
+   "observation": "A small wheel at the back of the cap turns the whole mill into the wind, and the miller need not climb out in a squall.",
+   "art": "res://assets/ui/research/subjects/grain_milling-v1.png"
+  },
+  "lead_chamber_acid": {
+   "effects": {
+    "chemical_control": 0.012,
+    "craft_output": 0.0016,
+    "pollution": 0.006,
+    "health_risk": 0.003,
+    "water_pollution": 0.002
+   },
+   "name": "Lead Chamber Acid",
+   "observation": "Sulphur and nitre burn in a room lined with lead sheet; the acid collects on the floor by the ton, at a tenth of the price of globe acid.",
+   "ability_reason": "Cheap acid by the ton opens bleaching, metal cleaning and new alkali trades.",
+   "resource_requirements": [
+    {
+     "resource": "Sulfur",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    },
+    {
+     "resource": "Lead Ore",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png"
+  },
+  "cylinder_carding": {
+   "effects": {
+    "fiber_yield": 0.0078,
+    "labor_efficiency": 0.001,
+    "labor_demand": -0.002,
+    "standardization": 0.001
+   },
+   "name": "Carding Engine",
+   "observation": "Toothed cylinders turn against each other and deliver an endless gauze of carded cotton, gathered into a soft rope.",
+   "art": "res://assets/ui/research/subjects/fiber_grading-v1.png"
+  },
+  "copperplate_calico": {
+   "effects": {
+    "craft_output": 0.0016,
+    "trade_capacity": 0.0015
+   },
+   "name": "Copperplate Calico",
+   "observation": "An engraved copper plate prints a whole pastoral scene on the cotton in lines finer than any wood block can cut.",
+   "art": "res://assets/ui/research/paper/rolling_intaglio_printing.png"
+  },
+  "transfer_printed_ware": {
+   "effects": {
+    "craft_output": 0.0016,
+    "standardization": 0.0015,
+    "trade_capacity": 0.0015
+   },
+   "name": "Transfer-Printed Ware",
+   "observation": "The engraving is printed on tissue, the tissue pressed on the fired ware, and the pattern stays when the paper is washed away.",
+   "art": "res://assets/ui/research/paper/burin_engraving.png"
+  },
+  "creamware": {
+   "effects": {
+    "container_capacity": 0.005,
+    "trade_capacity": 0.002,
+    "craft_output": 0.0012,
+    "fuel_demand": 0.002
+   },
+   "name": "Creamware",
+   "observation": "Pale, light earthenware under a cream glaze fills the tables of shopkeepers who could never afford porcelain.",
+   "resource_requirements": [
+    {
+     "resource": "Clay",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/subjects/clay_shaping-v1.png"
+  },
+  "vitriol_linen_sours": {
+   "effects": {
+    "fiber_yield": 0.0026,
+    "water_pollution": 0.002
+   },
+   "name": "Vitriol Sours",
+   "observation": "The bleachers sour the linen for a day in weak oil of vitriol instead of a week in buttermilk.",
+   "art": "res://assets/ui/research/paper/fiber_retting.png"
+  },
+  "wove_paper_moulds": {
+   "effects": {
+    "standardization": 0.0015,
+    "knowledge_preservation": 0.001
+   },
+   "name": "Wove Paper",
+   "observation": "A mould of woven brass wire leaves no laid lines, and the printer's finest type sits on a smooth, even sheet.",
+   "art": "res://assets/ui/research/subjects/paper_making-v1.png"
+  },
+  "tested_waterwheel_efficiency": {
+   "effects": {
+    "labor_efficiency": 0.001,
+    "knowledge_rate": 0.002
+   },
+   "name": "Tested Water Wheels",
+   "observation": "The engineer's model wheel turns in a trough under a measured head, and the breastshot wheel beats the undershot by half.",
+   "art": "res://assets/ui/research/subjects/water_mills-v1.png"
+  },
+  "iron_blowing_cylinders": {
+   "effects": {
+    "metal_yield": 0.0065,
+    "fuel_efficiency": 0.004,
+    "fuel_demand": 0.002
+   },
+   "name": "Blowing Cylinders",
+   "observation": "Bored iron cylinders worked by the wheel push a steady blast, and the furnace makes half again as much pig.",
+   "art": "res://assets/ui/research/paper/cylinder_boring.png"
+  },
+  "multi_spindle_spinning": {
+   "effects": {
+    "fiber_yield": 0.0156,
+    "labor_efficiency": 0.0021,
+    "craft_output": 0.0012,
+    "labor_demand": -0.003,
+    "cohesion": -0.0014
+   },
+   "observation": "A girl turns one wheel and draws the carriage back, and eight, then sixteen, spindles spin at once.",
+   "ability_reason": "One spinner working many spindles multiplies the yarn a cottage can make; weavers are fed at last.",
+   "art": "res://assets/ui/research/paper/spinning_wheels.png"
+  },
+  "fast_madder_red": {
+   "effects": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015,
+    "water_pollution": 0.002
+   },
+   "name": "Fast Madder Red",
+   "observation": "The cotton goes through oil, dung, alum and madder baths twenty times over a month, and comes out a red that never fades.",
+   "art": "res://assets/ui/research/paper/textile_dye_fixation.png"
+  },
+  "roller_water_frame": {
+   "effects": {
+    "fiber_yield": 0.02,
+    "craft_output": 0.0024,
+    "labor_efficiency": 0.0021,
+    "labor_demand": -0.004,
+    "cohesion": -0.0014
+   },
+   "name": "Water Frame",
+   "observation": "Pairs of rollers turning ever faster draw the roving thin, and flyers twist it into a hard warp; the frame runs on the stream.",
+   "ability_reason": "Machines spin warp as strong as any hand's, and spinning leaves the cottages for mills beside the water.",
+   "art": "res://assets/ui/research/subjects/water_mills-v1.png"
+  },
+  "separate_condenser_engine": {
+   "effects": {
+    "fuel_efficiency": 0.01,
+    "extraction_yield": 0.006,
+    "mining_output": 0.006,
+    "fuel_demand": 0.002,
+    "pollution": 0.002
+   },
+   "name": "Separate Condenser",
+   "observation": "The steam is led off to a cold vessel apart, so the cylinder stays hot, and the engine burns a quarter of the coal for the same work.",
+   "ability_reason": "Keeping the cylinder hot cuts the fuel by three quarters, so engines pay even where coal is dear.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "textile_calendering": {
+   "effects": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.001
+   },
+   "observation": "The cloth is wound between heavy heated rolls until it shines like glazed paper.",
+   "art": "res://assets/ui/research/paper/textile_calendering.png"
+  },
+  "spring_shutter_sails": {
+   "effects": {
+    "food_output": 0.0016,
+    "repair_capacity": 0.001
+   },
+   "name": "Spring Sails",
+   "observation": "The sail is a frame of shutters on springs; a gust opens them, and the miller no longer reefs canvas in the rain.",
+   "art": "res://assets/ui/research/subjects/grain_milling-v1.png"
+  },
+  "hard_tin_alloy": {
+   "effects": {
+    "container_capacity": 0.003,
+    "health_risk": -0.001
+   },
+   "name": "Hard Tin Alloy",
+   "observation": "Tin hardened with antimony is rolled and spun into teapots that shine like silver and hold no lead.",
+   "art": "res://assets/ui/research/paper/metal_spinning_forming.png"
+  },
+  "mule_spinning": {
+   "effects": {
+    "fiber_yield": 0.0182,
+    "craft_output": 0.0024,
+    "labor_efficiency": 0.0017,
+    "labor_demand": -0.004,
+    "cohesion": -0.0014
+   },
+   "observation": "The mule's carriage runs out drawing and twisting, then runs back winding, and its yarn is fine enough for muslin.",
+   "ability_reason": "Fine, strong yarn by machine lets the realm weave the sheerest cloth, once bought only from the East.",
+   "art": "res://assets/ui/research/paper/spinning_wheels.png"
+  },
+  "belt_power_transmission": {
+   "effects": {
+    "labor_efficiency": 0.001,
+    "craft_output": 0.0012,
+    "repair_capacity": 0.001
+   },
+   "observation": "Leather belts run from pulleys on the line shaft to each machine, and shifting a belt stops one without stopping all.",
+   "art": "res://assets/ui/research/paper/belt_power_transmission.png"
+  },
+  "rotative_steam_engine": {
+   "effects": {
+    "craft_output": 0.0032,
+    "labor_efficiency": 0.0021,
+    "labor_demand": -0.003,
+    "fuel_demand": 0.006,
+    "pollution": 0.004
+   },
+   "name": "Rotative Engine",
+   "observation": "Sun-and-planet wheels turn the beam's nodding into steady turning, and the engine drives a mill where there is no stream.",
+   "ability_reason": "Rotary steam power frees mills from rivers: works can stand beside the coal, the market and the hands.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "clay_pyrometer_gauge": {
+   "effects": {
+    "standardization": 0.002,
+    "fuel_efficiency": 0.002,
+    "container_capacity": 0.001
+   },
+   "name": "Clay Pyrometer",
+   "observation": "A clay cylinder shrinks in the kiln as the heat rises; the potter reads it in a brass gauge and knows his firing to a degree.",
+   "art": "res://assets/ui/research/subjects/kiln_control-v1.png"
+  },
+  "puddling_furnace": {
+   "effects": {
+    "metal_yield": 0.02,
+    "fuel_efficiency": 0.004,
+    "timber_pressure": -0.006,
+    "pollution": 0.006,
+    "fatigue": 0.003,
+    "health_risk": 0.003,
+    "fuel_demand": 0.004
+   },
+   "name": "Puddling Furnace",
+   "observation": "The puddler stirs the boiling pig iron with a long bar through the furnace door until it thickens into a spongy ball of wrought iron.",
+   "ability_reason": "Coal can now make bar iron as well as pig; wrought iron is freed from charcoal and made by the ton.",
+   "social_consequence": "Iron grows cheap and plentiful; the puddlers burn out by forty in the heat of the furnace door.",
+   "resource_requirements": [
+    {
+     "resource": "Iron Ore",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    },
+    {
+     "resource": "Coal",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/subjects/bloomery_smelting-v1.png"
+  },
+  "grooved_bar_rolls": {
+   "effects": {
+    "metal_yield": 0.0065,
+    "standardization": 0.002,
+    "labor_demand": -0.002
+   },
+   "name": "Grooved Bar Rolls",
+   "observation": "The puddled bloom is squeezed through grooved rolls, pass after pass, into bars of set size fifteen times faster than under the hammer.",
+   "art": "res://assets/ui/research/paper/steel_wire_drawing.png"
+  },
+  "chlorine_bleaching": {
+   "effects": {
+    "fiber_yield": 0.0052,
+    "craft_output": 0.0012,
+    "chemical_control": 0.004,
+    "labor_demand": -0.002,
+    "health_risk": 0.002,
+    "water_pollution": 0.002
+   },
+   "name": "Chlorine Bleach",
+   "observation": "Linen that lay for months on the bleaching green is white in a day in the chlorine liquor, though the bleach house stinks.",
+   "art": "res://assets/ui/research/paper/chloralkali_cells.png"
+  },
+  "roller_calico_printing": {
+   "effects": {
+    "craft_output": 0.002,
+    "standardization": 0.0015,
+    "trade_capacity": 0.0015,
+    "labor_demand": -0.002
+   },
+   "name": "Roller Printing",
+   "observation": "Engraved copper rollers print a continuous web of calico, and one machine does the work of forty block printers.",
+   "art": "res://assets/ui/research/paper/rolling_intaglio_printing.png"
+  },
+  "yarn_tension_control": {
+   "effects": {
+    "fiber_yield": 0.0026,
+    "standardization": 0.001
+   },
+   "observation": "Weights and brakes hold the warp at one tension as it is beamed, and the finished cloth lies flat.",
+   "art": "res://assets/ui/research/paper/yarn_tension_control.png"
+  },
+  "double_acting_engine": {
+   "effects": {
+    "craft_output": 0.0016,
+    "fuel_efficiency": 0.004,
+    "labor_efficiency": 0.001,
+    "fuel_demand": 0.003
+   },
+   "name": "Double-Acting Engine",
+   "observation": "Steam drives the piston both ways, and the parallel linkage keeps the rod true as the beam swings.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "jig_filed_gunlocks": {
+   "effects": {
+    "standardization": 0.0025,
+    "warfare_readiness": 0.0015,
+    "repair_capacity": 0.003,
+    "tool_quality": 0.0028
+   },
+   "name": "Jig-Filed Gunlocks",
+   "observation": "Each lock plate is filed to a hardened steel jig, so a tumbler from any lock fits any other of the same pattern.",
+   "art": "res://assets/ui/research/paper/drill_jig_layout.png"
+  },
+  "textile_braiding": {
+   "effects": {
+    "fiber_yield": 0.0013
+   },
+   "observation": "Bobbins circle the mandrel on the braiding table and lay a round cord for stays and laces.",
+   "art": "res://assets/ui/research/paper/textile_braiding.png"
+  },
+  "salt_cake_soda": {
+   "effects": {
+    "chemical_control": 0.01,
+    "craft_output": 0.002,
+    "trade_capacity": 0.001,
+    "pollution": 0.008,
+    "ecological_pressure": 0.003,
+    "health_risk": 0.003
+   },
+   "name": "Salt-Cake Soda",
+   "observation": "Salt and oil of vitriol make salt cake, roasted with chalk and coal into black ash and leached to soda; the acid fumes kill the fields downwind.",
+   "ability_reason": "Alkali from salt instead of plant ash frees soap and glass from the kelp shores, and chemistry becomes an industry.",
+   "social_consequence": "Soap and glass grow cheap; the works' acid smoke blights the country around them.",
+   "resource_requirements": [
+    {
+     "resource": "Sulfur",
+     "stage": "recognized",
+     "minimum_stock": 0.0,
+     "sample_sufficient": true
+    }
+   ],
+   "art": "res://assets/ui/research/paper/chloralkali_cells.png"
+  },
+  "bone_ash_porcelain": {
+   "effects": {
+    "container_capacity": 0.003,
+    "craft_output": 0.0012,
+    "trade_capacity": 0.001
+   },
+   "name": "Bone-Ash Porcelain",
+   "observation": "Calcined ox bone in the paste makes a white, strong, translucent ware that stands the kiln better than soft paste.",
+   "art": "res://assets/ui/research/paper/high_fire_stoneware.png"
+  },
+  "yarn_count_standards": {
+   "effects": {
+    "standardization": 0.0015,
+    "trade_capacity": 0.001,
+    "fiber_yield": 0.0013
+   },
+   "observation": "Yarn is sold by its count, how many hanks of set length weigh a pound, so spinner and weaver speak one language.",
+   "art": "res://assets/ui/research/paper/yarn_count_standards.png"
+  },
+  "metal_annealing_control": {
+   "effects": {
+    "tool_quality": 0.0042,
+    "metal_yield": 0.0026,
+    "standardization": 0.001
+   },
+   "observation": "The wire drawer anneals his coils in a closed pot for a set time, watching the colour, so the next draw does not snap.",
+   "art": "res://assets/ui/research/paper/metal_annealing_control.png"
+  },
+  "mechanical_clutches": {
+   "effects": {
+    "repair_capacity": 0.002,
+    "injury_risk": -0.001
+   },
+   "observation": "A lever slides the dog clutch out of mesh, and one machine stands still while the shaft keeps turning.",
+   "art": "res://assets/ui/research/paper/cam_motion_design.png"
+  },
+  "pressure_vessels": {
+   "effects": {
+    "mining_output": 0.002,
+    "fuel_efficiency": 0.002,
+    "standardization": 0.001,
+    "injury_risk": 0.002
+   },
+   "observation": "Boilermakers rivet wrought-iron plates into a vessel and test it with water pressure before any fire is lit.",
+   "art": "res://assets/ui/research/paper/hot_rivet_setting.png"
+  }
+ }
 }

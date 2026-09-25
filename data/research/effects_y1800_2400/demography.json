@@ -1,5 +1,979 @@
 {
  "line": "demography",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "post_mortality_remarriage": {
+   "effects": {
+    "cohesion": 0.002,
+    "conception_support": 0.006,
+    "housing_output": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/marriage_feasts.png",
+   "name": "Remarriage After the Mortality",
+   "observation": "Widows and widowers remarry within months of the great mortality, and the next years bring more weddings and christenings than anyone remembers."
+  },
+  "vacant_holding_migration": {
+   "effects": {
+    "cohesion": -0.001,
+    "cultivation_yield": 0.002,
+    "housing_output": 0.003,
+    "labor_efficiency": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "name": "Filling the Empty Holdings",
+   "observation": "Families leave poor hill farms to take up good land and town houses left empty by the dead."
+  },
+  "decennial_household_registers": {
+   "effects": {
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0026,
+    "labor_demand": 0.002,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0048
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Ten-Yearly Household Registers",
+   "observation": "Village heads renew the household registers every ten years, listing each member, their age and their land.",
+   "ability_reason": "Every household in the realm is on a register renewed each decade, so tax, labour service and relief follow real numbers.",
+   "social_consequence": "Families cannot move without leaving the register, and village heads grow powerful over who is listed and how."
+  },
+  "free_citizenship_grants": {
+   "effects": {
+    "cohesion": -0.001,
+    "housing_output": 0.003,
+    "trade_capacity": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Free Citizenship Grants",
+   "observation": "Towns emptied by the mortality grant citizenship without a fee to any incomer who will take up and repair an empty house."
+  },
+  "wage_seeking_migration": {
+   "effects": {
+    "cohesion": -0.002,
+    "conception_support": -0.001,
+    "disease_exposure": 0.002,
+    "institutional_rigidity": -0.002,
+    "labor_efficiency": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/route_memory-v1.png",
+   "name": "Wage-Seeking Migration",
+   "observation": "Labourers walk away from their home estates to wherever the pay is best, and lords cannot hold them.",
+   "social_consequence": "Lords pass laws fixing wages and binding workers to their parishes, and the roads fill with men the law calls vagrants."
+  },
+  "town_quarter_house_lists": {
+   "effects": {
+    "knowledge_preservation": 0.0008,
+    "labor_demand": 0.001,
+    "security_efficiency": 0.001,
+    "state_capacity": 0.0018
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Quarter House Lists",
+   "observation": "Each quarter of the town keeps a book listing its residents house by house, renewed at each quarter day."
+  },
+  "public_dowry_fund": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": 0.002,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Public Dowry Fund",
+   "observation": "Fathers deposit a sum with the town fund at a daughter's birth, and it pays out many times over when she marries."
+  },
+  "household_wealth_census": {
+   "effects": {
+    "cohesion": -0.002,
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0034,
+    "labor_demand": 0.004,
+    "legitimacy": -0.003,
+    "state_capacity": 0.006
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Household Wealth Census",
+   "observation": "Every household declares each person, hearth, field, beast and debt, and clerks write it into great books for the tax.",
+   "ability_reason": "The state knows every person and every asset in its territory, and tax falls where the wealth really is.",
+   "social_consequence": "Households understate their wealth and hide their sons, and neighbours denounce one another to the assessors."
+  },
+  "dowry_caps": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": 0.003,
+    "legitimacy": -0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/marriage_feasts.png",
+   "name": "Dowry Caps",
+   "observation": "The law caps the size of dowries, so more daughters of middling families can afford to marry."
+  },
+  "census_age_recording": {
+   "effects": {
+    "knowledge_preservation": 0.0017,
+    "state_capacity": 0.0018,
+    "warfare_readiness": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Ages in the Census",
+   "observation": "The census clerks write down each child's age, so the town knows how many will come of age for service and taxes."
+  },
+  "registered_foundling_hospital": {
+   "effects": {
+    "disease_exposure": 0.002,
+    "labor_demand": 0.003,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.0046,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Registered Foundling Hospital",
+   "observation": "The foundling hospital writes each child taken in into a register and keeps a token left with it, so a mother may one day reclaim her child.",
+   "ability_reason": "Abandoned infants are taken in with a written record, so a mother can reclaim her child and the town can count what it loses.",
+   "social_consequence": "The token cabinet fills with pleading notes; most infants still die in their first year, but the town feels it has done its part."
+  },
+  "health_office_death_registers": {
+   "effects": {
+    "disease_exposure": -0.001,
+    "knowledge_preservation": 0.0017,
+    "observation_rate": 0.0008,
+    "state_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Death Registers",
+   "observation": "The health office writes down every death in the town with the person's age and the cause named by the physician."
+  },
+  "foundling_wet_nurses": {
+   "effects": {
+    "disease_exposure": 0.001,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.0046
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Foundling Wet-Nurses",
+   "observation": "The foundling hospital pays country women to suckle its infants in their own cottages."
+  },
+  "town_orphanage": {
+   "effects": {
+    "cohesion": 0.002,
+    "labor_demand": 0.002,
+    "labor_efficiency": 0.001,
+    "legitimacy": 0.001,
+    "neonatal_survival": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Town Orphanage",
+   "observation": "The town's orphanage raises fatherless children, teaches them letters and binds them apprentice at twelve."
+  },
+  "women_refuge_houses": {
+   "effects": {
+    "cohesion": 0.002,
+    "disease_exposure": -0.0005,
+    "legitimacy": 0.001,
+    "maternal_safety": 0.0016
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "name": "Women's Refuge Houses",
+   "observation": "Refuge houses take in women leaving the street trade, and give them work and, for some, a dowry."
+  },
+  "pestilence_orphan_lists": {
+   "effects": {
+    "cohesion": 0.002,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.0011,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Plague Orphan Lists",
+   "observation": "After each outbreak the parish lists the orphans and widows the plague has left, and relief is paid by the list."
+  },
+  "lineage_genealogy_books": {
+   "effects": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0017
+   },
+   "art": "res://assets/ui/research/discovery-600/genealogical_recitation.png",
+   "name": "Lineage Books",
+   "observation": "Clans reprint their lineage books each generation, adding every son born, and the book decides who shares in the ancestral hall."
+  },
+  "expelled_community_refuge": {
+   "effects": {
+    "cohesion": -0.002,
+    "craft_output": 0.002,
+    "knowledge_rate": 0.001,
+    "trade_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
+   "name": "Refuge for the Expelled",
+   "observation": "A neighbouring realm takes in a community expelled from its homeland, under a charter guarding their quarter and their trades.",
+   "social_consequence": "The newcomers' skills enrich the realm, while townsfolk resent their privileges and their separate ways."
+  },
+  "emigrant_port_licences": {
+   "effects": {
+    "knowledge_preservation": 0.0008,
+    "labor_demand": 0.001,
+    "state_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Emigrant Licences",
+   "observation": "Everyone sailing for the lands across the ocean must be licensed and counted at the port before boarding."
+  },
+  "overseas_settler_colonies": {
+   "effects": {
+    "cohesion": -0.004,
+    "conception_support": 0.004,
+    "cultivation_yield": 0.003,
+    "disease_exposure": 0.003,
+    "housing_output": 0.005,
+    "labor_demand": 0.003,
+    "naval_capacity": 0.0021,
+    "trade_capacity": 0.0039
+   },
+   "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
+   "name": "Overseas Settler Colonies",
+   "observation": "Families cross the ocean with seed, tools and beasts and found farming colonies on newly found shores.",
+   "ability_reason": "Families take up land across the ocean, and the realm's people now grow on two shores.",
+   "social_consequence": "Colonists and native peoples meet over land, and the frontier becomes a place of raids, treaties and burning."
+  },
+  "printed_midwife_manual": {
+   "effects": {
+    "knowledge_preservation": 0.0017,
+    "maternal_safety": 0.0083,
+    "neonatal_survival": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "name": "Printed Midwives' Manual",
+   "observation": "A printed manual for midwives draws the child's positions in the womb and how to turn and deliver each."
+  },
+  "contact_epidemic_records": {
+   "effects": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.0005,
+    "knowledge_preservation": 0.0034,
+    "observation_rate": 0.0032,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Records of Contact Epidemics",
+   "observation": "Missionaries write down how newly met peoples sicken and die by the village of pox and fevers that the newcomers barely notice.",
+   "ability_reason": "The missions' registers show whole peoples dying of fevers and pox brought by strangers, and the pattern of crowd disease is written down.",
+   "social_consequence": "The newcomers read the deaths as fate or as a warning; the survivors among the newly met peoples remember who brought the sickness."
+  },
+  "shrine_vital_registers": {
+   "effects": {
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0043,
+    "labor_demand": 0.002,
+    "legitimacy": 0.002,
+    "state_capacity": 0.0042
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Shrine Registers",
+   "observation": "Every shrine keeps a register of each birth, marriage and burial among its people, and the book is checked at each visitation.",
+   "ability_reason": "Every person's birth, marriage and burial is written down where they live, so age, descent and inheritance can be proved."
+  },
+  "devotee_house_closure": {
+   "effects": {
+    "cohesion": -0.003,
+    "conception_support": 0.003,
+    "health_protection": -0.001,
+    "knowledge_preservation": -0.002,
+    "labor_efficiency": 0.002,
+    "legitimacy": -0.002
+   },
+   "art": "res://assets/ui/research/discovery-600/sacred_places.png",
+   "name": "Devotee Houses Closed",
+   "observation": "The houses of celibate devotees are closed, their lands sold, and their monks and nuns sent back into the world to marry and work.",
+   "social_consequence": "The faithful mourn the closed houses and the lost alms, and the poor lose the infirmaries the devotees kept."
+  },
+  "marriage_dissolution_courts": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": 0.001,
+    "institutional_rigidity": -0.001,
+    "maternal_safety": 0.0016
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Marriage Dissolution",
+   "observation": "Marriage courts may dissolve a marriage for desertion or adultery, and the innocent party may marry again."
+  },
+  "witnessed_marriage_rule": {
+   "effects": {
+    "cohesion": 0.002,
+    "conception_support": -0.002,
+    "institutional_rigidity": 0.003,
+    "legitimacy": 0.002,
+    "state_capacity": 0.0024
+   },
+   "art": "res://assets/ui/research/discovery-600/marriage_feasts.png",
+   "name": "Witnessed Marriage",
+   "observation": "A marriage is valid only when made in public before an officiant and two witnesses, and is written in the register.",
+   "ability_reason": "Marriage requires a public ceremony before witnesses, so it can be proved, registered and inherited under."
+  },
+  "mixed_descent_status": {
+   "effects": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.002,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/intermarriage_visiting_customs.png",
+   "name": "Mixed-Descent Standing",
+   "observation": "Children of settlers and native mothers are given their own legal standing, with rights below the settlers' and above the natives'."
+  },
+  "postmortem_caesarean_rule": {
+   "effects": {
+    "legitimacy": 0.001,
+    "neonatal_survival": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "name": "Postmortem Caesarean",
+   "observation": "When a mother dies in labour, the midwife or surgeon is bound to cut the child from her body at once."
+  },
+  "weekly_mortality_bills": {
+   "effects": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.002,
+    "knowledge_preservation": 0.0026,
+    "observation_rate": 0.0032,
+    "state_capacity": 0.0024
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Weekly Bills of Mortality",
+   "observation": "Each week the capital prints the numbers of burials and christenings in every parish, with the causes of death.",
+   "ability_reason": "The capital sees plague coming in the weekly bills; merchants read them to flee early and the council to act."
+  },
+  "living_mother_caesarean": {
+   "effects": {
+    "health_risk": 0.001,
+    "maternal_safety": 0.0049,
+    "neonatal_survival": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "name": "Caesarean with a Living Mother",
+   "observation": "A surgeon cuts a child from a living mother whose birth cannot proceed, and now and then both survive."
+  },
+  "annual_soul_lists": {
+   "effects": {
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0017,
+    "labor_demand": 0.001,
+    "state_capacity": 0.0024
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Soul Lists",
+   "observation": "Each year the shrine keeper goes house to house and writes down every resident, servant and lodger."
+  },
+  "headright_land_grants": {
+   "effects": {
+    "cohesion": -0.002,
+    "conception_support": 0.002,
+    "cultivation_yield": 0.002,
+    "ecological_pressure": 0.002,
+    "housing_output": 0.003,
+    "trade_capacity": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Headright Grants",
+   "observation": "Anyone who pays the passage of a settler across the ocean is granted a measure of land for each head brought.",
+   "social_consequence": "Planters grow rich by shipping servants, and the servants themselves get no land."
+  },
+  "secret_obstetric_forceps": {
+   "effects": {
+    "health_risk": 0.001,
+    "maternal_safety": 0.0049,
+    "neonatal_survival": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "name": "Secret Forceps",
+   "observation": "A family of man-midwives delivers stuck children with a hinged iron instrument they hide under the bedsheet and sell to no one.",
+   "social_consequence": "The secret saves the family's clients and makes its fortune, while other mothers die of the same births."
+  },
+  "soldier_marriage_limits": {
+   "effects": {
+    "cohesion": -0.002,
+    "conception_support": -0.002,
+    "logistics_endurance": 0.001,
+    "warfare_readiness": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/formation_drill-v1.png",
+   "name": "Soldiers' Marriage Limits",
+   "observation": "Only a few soldiers in each company may marry, and their wives and children follow the camp, washing and cooking for the regiment."
+  },
+  "man_midwives": {
+   "effects": {
+    "cohesion": -0.001,
+    "health_risk": 0.002,
+    "maternal_safety": 0.0049,
+    "neonatal_survival": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "name": "Man-Midwives",
+   "observation": "Town families call a man-midwife with instruments to hard births that the midwife cannot deliver.",
+   "social_consequence": "Midwives lose their best fees to the men, and some say the men use their hooks too soon."
+  },
+  "ship_passenger_lists": {
+   "effects": {
+    "knowledge_preservation": 0.0008,
+    "naval_capacity": 0.0007,
+    "state_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Passenger Lists",
+   "observation": "Every settlers' ship carries a list of passengers by name, age and trade, filed at both ends of the voyage."
+  },
+  "childbed_death_counts": {
+   "effects": {
+    "knowledge_preservation": 0.0008,
+    "maternal_safety": 0.0049,
+    "observation_rate": 0.0016
+   },
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "name": "Childbed Deaths Counted",
+   "observation": "The bills count the deaths of mothers in childbed apart, and physicians see how many die and where."
+  },
+  "strict_family_settlement": {
+   "effects": {
+    "cohesion": 0.002,
+    "conception_support": -0.003,
+    "housing_output": 0.001,
+    "institutional_rigidity": 0.006,
+    "labor_efficiency": -0.002,
+    "legitimacy": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Strict Family Settlement",
+   "observation": "Great estates are settled on the eldest son and his eldest son after him, and none may sell or divide them.",
+   "ability_reason": "Great estates are tied to the eldest line for generations, and cannot be sold or divided.",
+   "social_consequence": "Younger sons and daughters take portions in cash and leave, and the land market stiffens."
+  },
+  "burial_age_entries": {
+   "effects": {
+    "knowledge_preservation": 0.0017,
+    "observation_rate": 0.0016,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/burial_ground_separation.png",
+   "name": "Ages in the Burial Register",
+   "observation": "The burial registers note the age of each person buried, and the clerk can see how old the town's dead are."
+  },
+  "mortality_bill_arithmetic": {
+   "effects": {
+    "knowledge_preservation": 0.0017,
+    "knowledge_rate": 0.0025,
+    "observation_rate": 0.0032,
+    "state_capacity": 0.0036
+   },
+   "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
+   "name": "Political Arithmetic",
+   "observation": "A merchant draws tables from years of the mortality bills and finds that births, deaths and the sexes follow steady proportions.",
+   "ability_reason": "Counting burials and christenings reveals regular laws of life and death, and the state can reckon its people from its records."
+  },
+  "colonist_bride_passages": {
+   "effects": {
+    "cohesion": -0.001,
+    "conception_support": 0.003,
+    "housing_output": 0.002,
+    "legitimacy": -0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/marriage_feasts.png",
+   "name": "Colonist Brides",
+   "observation": "Young women are shipped out with dowries from the crown to marry the settlers of the colonies."
+  },
+  "large_family_tax_relief": {
+   "effects": {
+    "conception_support": 0.002,
+    "legitimacy": 0.001,
+    "state_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Large Family Tax Relief",
+   "observation": "Fathers of ten or more living children are freed from certain taxes."
+  },
+  "country_wet_nursing": {
+   "effects": {
+    "conception_support": 0.003,
+    "disease_exposure": 0.001,
+    "labor_efficiency": 0.001,
+    "neonatal_survival": -0.004
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Country Wet-Nursing",
+   "observation": "Town mothers send their newborns to wet-nurses in the country and go back to the shop and the next pregnancy.",
+   "social_consequence": "Town infants sent to the country die in numbers their mothers never learn."
+  },
+  "colonial_household_registers": {
+   "effects": {
+    "cohesion": -0.001,
+    "knowledge_preservation": 0.0008,
+    "labor_demand": 0.001,
+    "state_capacity": 0.0018
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Colonial Registers",
+   "observation": "Colonial governors register every household of settlers, servants and natives, with ranks written beside each name."
+  },
+  "separate_wife_property": {
+   "effects": {
+    "cohesion": 0.001,
+    "legitimacy": 0.001,
+    "maternal_safety": 0.0016,
+    "trade_capacity": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Wife's Separate Property",
+   "observation": "Marriage contracts keep a wife's own property apart from her husband's, safe from his creditors."
+  },
+  "populationist_policy": {
+   "effects": {
+    "conception_support": 0.003,
+    "institutional_rigidity": 0.002,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Populationist Policy",
+   "observation": "Ministers count people as the realm's wealth and reward marriage, large families and immigrants."
+  },
+  "faith_refugee_edict": {
+   "effects": {
+    "cohesion": -0.003,
+    "craft_output": 0.004,
+    "housing_output": 0.002,
+    "knowledge_rate": 0.0015,
+    "legitimacy": 0.001,
+    "trade_capacity": 0.0026
+   },
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
+   "name": "Faith Refugee Edict",
+   "observation": "The ruler invites refugees of a faith proscribed abroad, with land, years free of tax and the right to their own worship.",
+   "ability_reason": "Skilled refugees settle with land, tax years and their own worship, bringing trades the realm lacked.",
+   "social_consequence": "Old subjects grumble at the newcomers' privileges, and the shrine keepers of the old faith call it an insult to the god."
+  },
+  "tontine_annuities": {
+   "effects": {
+    "cohesion": -0.001,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Tontine",
+   "observation": "Subscribers buy shares in a fund whose yearly payments are divided among those still alive, until the last survivor takes all."
+  },
+  "register_life_table": {
+   "effects": {
+    "knowledge_rate": 0.0025,
+    "observation_rate": 0.0032,
+    "state_capacity": 0.0024,
+    "trade_capacity": 0.0013
+   },
+   "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
+   "name": "Life Table",
+   "observation": "A scholar reckons from a town's registers how many of a thousand born are still alive at each age.",
+   "ability_reason": "The chance of dying at each age is written from a town's own registers, and annuities and pensions can be priced honestly."
+  },
+  "vital_events_tax": {
+   "effects": {
+    "cohesion": -0.002,
+    "conception_support": -0.001,
+    "legitimacy": -0.003,
+    "state_capacity": 0.0018
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Vital Events Tax",
+   "observation": "A tax is charged on every birth, marriage and burial, and bachelors over twenty-five pay yearly."
+  },
+  "birth_multiplier_estimates": {
+   "effects": {
+    "knowledge_rate": 0.0005,
+    "observation_rate": 0.0008,
+    "state_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/discovery-600/tens_sixties_bundling.png",
+   "name": "Birth Multiplier",
+   "observation": "The number of people in a province is estimated by multiplying its yearly births by a fixed number."
+  },
+  "nominal_realm_census": {
+   "effects": {
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0034,
+    "labor_demand": 0.004,
+    "legitimacy": -0.002,
+    "state_capacity": 0.006,
+    "warfare_readiness": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Realm Census",
+   "observation": "On one set day every person in the realm is written down by name, age and household.",
+   "ability_reason": "For one set day every person in the realm is named and counted, and the state knows its full strength.",
+   "social_consequence": "Many fear the count means new taxes or a levy, and hide in the woods on census day."
+  },
+  "birth_sex_ratio": {
+   "effects": {
+    "knowledge_rate": 0.001,
+    "observation_rate": 0.0016
+   },
+   "art": "res://assets/ui/research/subjects/tallies-v1.png",
+   "name": "Birth Sex Ratio",
+   "observation": "Every year's registers show a few more boys than girls born, and scholars debate why."
+  },
+  "post_plague_colonization": {
+   "effects": {
+    "cohesion": -0.002,
+    "cultivation_yield": 0.003,
+    "housing_output": 0.004,
+    "labor_demand": 0.001,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Resettling Plague Districts",
+   "observation": "The state brings colonists to farm districts that plague has emptied, with seed, beasts and tax-free years."
+  },
+  "marriage_register_details": {
+   "effects": {
+    "knowledge_preservation": 0.0017,
+    "observation_rate": 0.0008,
+    "state_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Marriage Register Details",
+   "observation": "Marriage registers now record both partners' ages and birthplaces."
+  },
+  "convict_transportation": {
+   "effects": {
+    "cohesion": -0.002,
+    "housing_output": 0.001,
+    "legitimacy": -0.002,
+    "security_efficiency": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
+   "name": "Convict Transportation",
+   "observation": "Convicts are shipped to the overseas colonies to work out their sentences.",
+   "social_consequence": "Families never see their transported men again, and the colonists resent being made the realm's prison."
+  },
+  "midwife_birth_returns": {
+   "effects": {
+    "labor_demand": 0.001,
+    "maternal_safety": 0.0033,
+    "observation_rate": 0.0008,
+    "state_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "name": "Midwives' Birth Returns",
+   "observation": "Sworn midwives return to the clerk a count of every birth they attend, living and stillborn."
+  },
+  "military_orphanage": {
+   "effects": {
+    "labor_demand": 0.002,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.0011,
+    "warfare_readiness": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Military Orphanage",
+   "observation": "A soldiers' orphanage raises the children of the regiments, and many of the boys enlist as drummers."
+  },
+  "lodging_guest_registers": {
+   "effects": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.0005,
+    "security_efficiency": 0.003,
+    "state_capacity": 0.0012,
+    "trade_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
+   "name": "Lodging Registers",
+   "observation": "Every inn and lodging-house must register each guest and stranger with the watch."
+  },
+  "published_obstetric_forceps": {
+   "effects": {
+    "health_risk": 0.002,
+    "knowledge_preservation": 0.0017,
+    "maternal_safety": 0.0165,
+    "neonatal_survival": 0.0069
+   },
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "name": "Forceps Made Public",
+   "observation": "The hinged forceps are published and taught to midwives and surgeons, and every town has someone who can use them.",
+   "ability_reason": "Forceps are taught openly, and a stuck birth need no longer mean a dead mother or a crushed child.",
+   "social_consequence": "Clumsy hands use the forceps too often, and some mothers are torn who would have delivered alone."
+  },
+  "national_foundling_hospital": {
+   "effects": {
+    "conception_support": 0.001,
+    "disease_exposure": 0.003,
+    "labor_demand": 0.004,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.0023,
+    "state_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "National Foundling Hospital",
+   "observation": "A national foundling hospital takes infants from every part of the realm, carried to it in baskets by carriers.",
+   "social_consequence": "Carriers bring infants by the wagonload and many die on the road; the hospital is overwhelmed within a few years."
+  },
+  "divine_order_population_treatise": {
+   "effects": {
+    "cohesion": 0.001,
+    "knowledge_rate": 0.001,
+    "legitimacy": 0.002,
+    "observation_rate": 0.0008
+   },
+   "art": "res://assets/ui/research/discovery-600/wisdom_instructions.png",
+   "name": "Treatise on the Divine Order",
+   "observation": "A shrine scholar draws on the registers of many districts to show a steady order in births, marriages and deaths, and calls it the god's design."
+  },
+  "actuarial_widows_fund": {
+   "effects": {
+    "cohesion": 0.002,
+    "legitimacy": 0.001,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "name": "Widows' Fund",
+   "observation": "A fund for the widows of shrine keepers and teachers sets its payments by the life tables, and does not run dry."
+  },
+  "lying_in_hospital": {
+   "effects": {
+    "disease_exposure": 0.003,
+    "labor_demand": 0.003,
+    "legitimacy": 0.001,
+    "maternal_safety": 0.0099,
+    "neonatal_survival": 0.0046
+   },
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "name": "Lying-In Hospital",
+   "observation": "A hospital for poor mothers gives them a clean bed, a midwife and ten days' rest after the birth.",
+   "social_consequence": "Childbed fever sweeps the wards some winters, and the hospital becomes feared in its turn."
+  },
+  "population_tables_office": {
+   "effects": {
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0034,
+    "labor_demand": 0.003,
+    "observation_rate": 0.0032,
+    "state_capacity": 0.0048
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Population Tables Office",
+   "observation": "A standing office receives each district's yearly report of births, deaths and numbers, and prints the tables for the realm.",
+   "ability_reason": "Every district reports its births, deaths and numbers each year, and the state follows its people's growth as it happens."
+  },
+  "life_expectancy_tables": {
+   "effects": {
+    "knowledge_rate": 0.0015,
+    "observation_rate": 0.0016,
+    "trade_capacity": 0.0013
+   },
+   "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
+   "name": "Expectation of Life",
+   "observation": "Scholars reckon how many more years a person of each age may expect to live."
+  },
+  "settler_doubling_observation": {
+   "effects": {
+    "conception_support": 0.001,
+    "knowledge_rate": 0.001,
+    "observation_rate": 0.0016
+   },
+   "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
+   "name": "Settler Doubling",
+   "observation": "Observers notice that the settler colonies double their numbers every generation, where the old country barely grows."
+  },
+  "clandestine_marriage_ban": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": -0.002,
+    "institutional_rigidity": 0.002,
+    "legitimacy": 0.001,
+    "state_capacity": 0.0018
+   },
+   "art": "res://assets/ui/research/discovery-600/marriage_feasts.png",
+   "name": "Secret Marriages Void",
+   "observation": "Secret marriages are declared void; a couple needs a licence or banns and an entry in the register.",
+   "social_consequence": "Young couples who cannot win their parents' consent can no longer marry in secret, and more stay single."
+  },
+  "maternal_nursing_campaign": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": -0.002,
+    "maternal_safety": 0.0033,
+    "neonatal_survival": 0.0092
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Mothers Nurse Their Own",
+   "observation": "Physicians and writers urge mothers of every rank to nurse their own infants, and it becomes a fashion."
+  },
+  "inoculation_mortality_reckoning": {
+   "effects": {
+    "adoption_rate": 0.004,
+    "disease_exposure": -0.001,
+    "knowledge_rate": 0.0015,
+    "legitimacy": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Inoculation Reckoned",
+   "observation": "Scholars compare smallpox deaths among the inoculated and the uninoculated and publish the reckoning."
+  },
+  "frontier_colonist_recruitment": {
+   "effects": {
+    "cohesion": -0.003,
+    "conception_support": 0.002,
+    "cultivation_yield": 0.004,
+    "ecological_pressure": 0.003,
+    "housing_output": 0.005,
+    "labor_demand": 0.002,
+    "state_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Frontier Colonist Recruitment",
+   "observation": "State agents recruit farmers abroad for the empty frontier, promising free land, tax-free years and their own villages.",
+   "ability_reason": "The state fills its frontier with recruited colonists, who plough the steppe and hold it.",
+   "social_consequence": "The frontier peoples lose their pastures to the colonists' ploughs, and the old borderers resent the foreigners."
+  },
+  "manikin_midwife_schools": {
+   "effects": {
+    "knowledge_preservation": 0.0017,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.0132,
+    "neonatal_survival": 0.0057,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/trained_midwives-v1.png",
+   "name": "Midwife Schools with a Manikin",
+   "observation": "A travelling instructress teaches village midwives with a life-size cloth mother and child, and the state pays their fees."
+  },
+  "wet_nurse_bureau": {
+   "effects": {
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.0046,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Wet-Nurse Bureau",
+   "observation": "The city registers wet-nurses, checks their health and pays them through a bureau."
+  },
+  "pauper_marriage_bar": {
+   "effects": {
+    "cohesion": -0.003,
+    "conception_support": -0.004,
+    "institutional_rigidity": 0.003,
+    "legitimacy": -0.002,
+    "neonatal_survival": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Pauper Marriage Bar",
+   "observation": "Paupers who cannot show means are barred from marrying.",
+   "social_consequence": "Couples live together unwed and their children are born outside the law."
+  },
+  "emigrant_recruiting_agents": {
+   "effects": {
+    "cohesion": -0.002,
+    "conception_support": -0.001,
+    "housing_output": 0.002,
+    "labor_demand": -0.001,
+    "labor_efficiency": 0.001,
+    "trade_capacity": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
+   "name": "Emigrant Agents",
+   "observation": "Agents travel the villages recruiting whole farming families for the lands across the ocean."
+  },
+  "infant_death_causes": {
+   "effects": {
+    "knowledge_preservation": 0.0008,
+    "neonatal_survival": 0.0046,
+    "observation_rate": 0.0024
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Infant Deaths by Cause",
+   "observation": "Infant deaths are counted by cause and season, and summer fluxes are seen to kill most."
+  },
+  "marital_birth_limitation": {
+   "effects": {
+    "conception_support": -0.008,
+    "housing_output": 0.001,
+    "maternal_safety": 0.0066,
+    "nutrition_quality": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "name": "Deliberate Birth Limitation",
+   "observation": "Couples stop having children after two or three, on purpose, and raise those better.",
+   "ability_reason": "Couples who stop after two or three children feed and school them better, and mothers survive fewer childbeds.",
+   "social_consequence": "Shrine keepers denounce the practice, and it spreads anyway, first among townsfolk and small proprietors."
+  },
+  "secret_birth_house": {
+   "effects": {
+    "cohesion": 0.001,
+    "maternal_safety": 0.0033,
+    "neonatal_survival": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "name": "Secret Birth House",
+   "observation": "Unmarried mothers may deliver in a birth house without giving their names, and leave the child in care."
+  },
+  "foundling_nurse_inspection": {
+   "effects": {
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.0057,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "name": "Foundling Nurse Inspection",
+   "observation": "The foundling hospital counts its dead and sends inspectors to the country nurses."
+  },
+  "decennial_apportionment_census": {
+   "effects": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.003,
+    "legitimacy": 0.004,
+    "state_capacity": 0.0048
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Apportionment Census",
+   "observation": "Every ten years the people are counted and the assembly's seats shared among the districts by head count.",
+   "ability_reason": "Seats in the assembly follow the head count every ten years, and the census becomes the ground of lawful power."
+  },
+  "civil_vital_registration": {
+   "effects": {
+    "cohesion": -0.002,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.0034,
+    "labor_demand": 0.002,
+    "legitimacy": 0.001,
+    "state_capacity": 0.0042
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Civil Registration",
+   "observation": "Town officials, not shrine keepers, register every birth, marriage and death, whatever a person's faith.",
+   "ability_reason": "Every birth, marriage and death is recorded by the state itself, for all its people alike.",
+   "social_consequence": "Shrine keepers lose their oldest duty and fees, and the devout call the civil registers an insult to the god."
+  },
+  "civil_divorce": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": 0.001,
+    "institutional_rigidity": -0.002,
+    "legitimacy": -0.001,
+    "maternal_safety": 0.0016
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Civil Divorce",
+   "observation": "A couple may end their marriage by mutual consent before a civil officer."
+  },
+  "population_pressure_treatise": {
+   "effects": {
+    "conception_support": -0.001,
+    "knowledge_rate": 0.002,
+    "legitimacy": -0.001,
+    "observation_rate": 0.0016,
+    "state_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
+   "name": "Treatise on Population",
+   "observation": "A treatise argues that numbers grow faster than food unless war, famine, disease or restraint check them.",
+   "ability_reason": "Statesmen now weigh relief, marriage and food against the growth of numbers."
+  }
+ }
 }

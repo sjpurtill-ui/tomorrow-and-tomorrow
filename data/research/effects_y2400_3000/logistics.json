@@ -1,5 +1,1492 @@
 {
  "line": "logistics",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "canal_fly_boats": {
+   "effects": {
+    "haul_capacity": 0.0037,
+    "travel_speed": 0.003,
+    "route_speed": 0.0025,
+    "food_output": -0.001,
+    "labor_demand": 0.001
+   },
+   "name": "Canal Fly-Boats",
+   "observation": "Fly-boats change horses at every lock-house and run through the night, so a parcel crosses the shires in a day and a half.",
+   "art": "res://assets/ui/research/subjects/canal_locks-v2.png"
+  },
+  "public_plateway_hire": {
+   "effects": {
+    "haul_capacity": 0.0063,
+    "route_speed": 0.0025,
+    "trade_capacity": 0.0023,
+    "labor_demand": 0.001,
+    "logistics_endurance": 0.0016
+   },
+   "name": "Toll Plateways",
+   "observation": "Any carter who pays the toll may run his wagons on the iron plate rails, and one horse draws what took four on the road.",
+   "art": "res://assets/ui/research/paper/wagonway_haulage.png"
+  },
+  "scheduled_river_steamers": {
+   "effects": {
+    "route_speed": 0.01,
+    "travel_speed": 0.006,
+    "trade_capacity": 0.0069,
+    "haul_capacity": 0.005,
+    "fuel_demand": 0.004,
+    "pollution": 0.002,
+    "injury_risk": 0.002,
+    "logistics_endurance": 0.0031
+   },
+   "name": "Scheduled River Steamers",
+   "observation": "A paddle steamer thrashes upstream against the flood on a printed schedule, trailing wood smoke over the towpath.",
+   "ability_reason": "Boats now keep a timetable upstream against the current, so goods and news move up the rivers on a set day instead of waiting on wind and towing teams.",
+   "social_consequence": "Towpath haulers and horse-boat owners lose their trade to the steamers.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "passenger_canal_packets": {
+   "effects": {
+    "travel_speed": 0.0023,
+    "cohesion": 0.001,
+    "food_output": -0.001
+   },
+   "name": "Canal Passenger Packets",
+   "observation": "Long narrow packet boats carry travellers at a steady trot, with a cabin for the gentry and the deck for everyone else.",
+   "art": "res://assets/ui/research/subjects/river_craft-v1.png"
+  },
+  "steam_estuary_ferries": {
+   "effects": {
+    "travel_speed": 0.003,
+    "route_speed": 0.0037,
+    "trade_capacity": 0.0023,
+    "fuel_demand": 0.002
+   },
+   "name": "Steam Estuary Ferries",
+   "observation": "The ferry crosses the estuary on the hour whatever the tide, and the market towns on the two shores begin to trade as one.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "steam_harbour_tugs": {
+   "effects": {
+    "naval_capacity": 0.006,
+    "route_speed": 0.0037,
+    "injury_risk": -0.002,
+    "fuel_demand": 0.002
+   },
+   "name": "Steam Harbour Tugs",
+   "observation": "A squat steam tug takes a becalmed merchantman in tow and brings her through the harbour mouth against the wind.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "town_omnibus_routes": {
+   "effects": {
+    "travel_speed": 0.0023,
+    "labor_efficiency": 0.001,
+    "food_output": -0.001,
+    "disease_exposure": 0.001
+   },
+   "name": "Horse Omnibus Routes",
+   "observation": "Long horse omnibuses ply fixed routes through the great towns, and clerks begin to live a few miles from their desks.",
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "public_steam_railway": {
+   "effects": {
+    "haul_capacity": 0.0187,
+    "route_speed": 0.0125,
+    "travel_speed": 0.006,
+    "trade_capacity": 0.0092,
+    "logistics_endurance": 0.0124,
+    "fuel_demand": 0.006,
+    "pollution": 0.004,
+    "labor_demand": 0.003,
+    "injury_risk": 0.003,
+    "timber_pressure": 0.002
+   },
+   "name": "Public Steam Railway",
+   "observation": "A steam locomotive draws a line of coal wagons and a carriage of passengers along iron rails faster than a galloping horse.",
+   "ability_reason": "A locomotive hauls hundreds of tons at many times a horse's pace in any season, so coal, grain and goods move inland almost as cheaply as by water.",
+   "social_consequence": "Carriers, coaching inns and turnpike trusts fail along the line, and landowners fight the surveyors at their gates.",
+   "art": "res://assets/ui/research/paper/rail_track_foundations.png"
+  },
+  "multitube_locomotive_boilers": {
+   "effects": {
+    "haul_capacity": 0.005,
+    "travel_speed": 0.003,
+    "fuel_efficiency": 0.003,
+    "fuel_demand": 0.001
+   },
+   "name": "Many-Tubed Boilers",
+   "observation": "Flue tubes run through the boiler like reeds in a bundle, and the engine that carries them wins the trial by miles an hour.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "intercity_passenger_railway": {
+   "effects": {
+    "travel_speed": 0.009,
+    "route_speed": 0.01,
+    "trade_capacity": 0.0069,
+    "state_capacity": 0.004,
+    "cohesion": 0.002,
+    "labor_demand": 0.003,
+    "injury_risk": 0.002,
+    "pollution": 0.002,
+    "logistics_endurance": 0.0031
+   },
+   "name": "Intercity Railway",
+   "observation": "A double-tracked line runs between two great cities, with booked seats, timed departures and a station hall at each end.",
+   "ability_reason": "Travellers and mail cross between the great cities in hours, so officials, merchants and troops can be where they are needed the same day.",
+   "social_consequence": "Stagecoach lines close within a few years, and the country towns the railway bypasses decline.",
+   "art": "res://assets/ui/research/paper/rail_gauge_standards.png"
+  },
+  "rail_track_foundations": {
+   "effects": {
+    "haul_capacity": 0.0063,
+    "route_speed": 0.005,
+    "repair_capacity": 0.003,
+    "labor_demand": 0.002,
+    "timber_pressure": 0.002,
+    "logistics_endurance": 0.0031
+   },
+   "observation": "Rails fixed to timber sleepers and bedded in drained broken stone stay true under the heaviest trains.",
+   "art": "res://assets/ui/research/paper/rail_track_foundations.png"
+  },
+  "classed_freight_tariffs": {
+   "effects": {
+    "trade_capacity": 0.0046,
+    "standardization": 0.002,
+    "state_capacity": 0.001
+   },
+   "name": "Freight Classes",
+   "observation": "The railway prints its tariff: coal at one rate, grain at another, fine goods dearer, so every shipper knows the charge before he sends.",
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png"
+  },
+  "merchant_chronometer_issue": {
+   "effects": {
+    "route_speed": 0.005,
+    "naval_capacity": 0.003,
+    "injury_risk": -0.001
+   },
+   "name": "Merchant Chronometers",
+   "observation": "Even plain merchant ships now carry a chronometer, and any master can fix his longitude without a night of lunar tables.",
+   "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png"
+  },
+  "ocean_steamship_line": {
+   "effects": {
+    "naval_capacity": 0.015,
+    "trade_capacity": 0.0115,
+    "route_speed": 0.01,
+    "travel_speed": 0.0045,
+    "fuel_demand": 0.005,
+    "pollution": 0.003,
+    "disease_exposure": 0.002,
+    "logistics_endurance": 0.0062
+   },
+   "name": "Ocean Steamship Line",
+   "observation": "A steamship leaves port on the advertised day and arrives across the ocean within a fortnight, her sails furled most of the way.",
+   "ability_reason": "Ships cross the ocean on a fixed date whatever the wind, so trade, mail and emigrants cross on a schedule, and reinforcements for a distant general can be counted in days.",
+   "social_consequence": "Sailing packet crews are undercut, and whole villages empty onto the emigrant steamers.",
+   "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png"
+  },
+  "printed_railway_timetables": {
+   "effects": {
+    "task_coordination": 0.003,
+    "travel_speed": 0.0015,
+    "standardization": 0.002,
+    "knowledge_preservation": 0.001
+   },
+   "name": "Railway Timetables",
+   "observation": "A monthly railway guide lists every train in the realm, and people begin to set their watches by the station clock.",
+   "art": "res://assets/ui/research/paper/rail_gauge_standards.png"
+  },
+  "prepaid_stamp_postage": {
+   "effects": {
+    "trade_capacity": 0.0069,
+    "state_capacity": 0.004,
+    "task_coordination": 0.004,
+    "cohesion": 0.003,
+    "adoption_rate": 0.003,
+    "labor_demand": 0.001
+   },
+   "name": "Prepaid Stamp Post",
+   "observation": "A small gummed stamp pays for a letter to anywhere in the realm, and the mail sacks multiply beyond counting.",
+   "ability_reason": "A letter costs the same to every corner of the realm and is paid in advance, so ordinary people and small traders write; orders, prices and news circulate as never before.",
+   "social_consequence": "The post office becomes the largest civil employer in the realm, and families scattered by work stay in touch.",
+   "art": "res://assets/ui/research/discovery-600/messenger_relay_stations.png"
+  },
+  "screw_propeller_ships": {
+   "effects": {
+    "naval_capacity": 0.0075,
+    "fuel_efficiency": 0.002,
+    "route_speed": 0.0025,
+    "logistics_endurance": 0.0031
+   },
+   "name": "Screw Propellers",
+   "observation": "A screw turning beneath the stern drives the ship where the paddle boxes once caught every wave.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "steam_grain_elevators": {
+   "effects": {
+    "food_storage": 0.006,
+    "storage_loss": -0.0065,
+    "container_capacity": 0.0056,
+    "haul_capacity": 0.0037,
+    "labor_demand": -0.002,
+    "fuel_demand": 0.001
+   },
+   "name": "Steam Grain Elevators",
+   "observation": "Grain pours by chute from towering bins into railway cars, and a trainload is loaded in an hour without a single sack.",
+   "art": "res://assets/ui/research/subjects/regional_granaries-v1.png"
+  },
+  "iron_hulled_steamers": {
+   "effects": {
+    "naval_capacity": 0.008,
+    "container_capacity": 0.0042,
+    "timber_pressure": -0.003,
+    "fuel_demand": 0.002,
+    "logistics_endurance": 0.0031
+   },
+   "name": "Iron-Hulled Steamers",
+   "observation": "Iron hulls longer than any timber keel can bear carry holds that no wooden ship could ever hold together.",
+   "art": "res://assets/ui/research/paper/hull_condition_surveys.png"
+  },
+  "rail_express_parcels": {
+   "effects": {
+    "trade_capacity": 0.0046,
+    "travel_speed": 0.0015,
+    "storage_loss": -0.0039
+   },
+   "name": "Railway Express Parcels",
+   "observation": "Express carriers put parcels on the fast trains and deliver them door to door the next morning.",
+   "art": "res://assets/ui/research/subjects/cargo_seals-v1.png"
+  },
+  "rail_gauge_standards": {
+   "effects": {
+    "standardization": 0.008,
+    "haul_capacity": 0.0075,
+    "route_speed": 0.0075,
+    "trade_capacity": 0.0046,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.002
+   },
+   "observation": "The realm fixes one gauge for every railway, and the odd-gauge lines are relaid at their owners' cost.",
+   "ability_reason": "Every wagon runs on every line, so goods and troops cross the realm without unloading at the gauge breaks.",
+   "art": "res://assets/ui/research/paper/rail_gauge_standards.png"
+  },
+  "railway_clearing_house": {
+   "effects": {
+    "trade_capacity": 0.0046,
+    "task_coordination": 0.003,
+    "state_capacity": 0.001
+   },
+   "name": "Railway Clearing House",
+   "observation": "Clerks at the clearing house divide each through-fare among the companies whose rails the traveller used.",
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png"
+  },
+  "travelling_post_office_cars": {
+   "effects": {
+    "travel_speed": 0.0023,
+    "task_coordination": 0.002
+   },
+   "name": "Travelling Post Offices",
+   "observation": "Clerks sort letters in a moving mail car, and bags are snatched from trackside posts without the train slowing.",
+   "art": "res://assets/ui/research/discovery-600/messenger_relay_stations.png"
+  },
+  "fast_clipper_hulls": {
+   "effects": {
+    "naval_capacity": 0.006,
+    "travel_speed": 0.0023,
+    "trade_capacity": 0.0034,
+    "timber_pressure": 0.003
+   },
+   "name": "Clipper Hulls",
+   "observation": "Sharp-bowed clippers crowd on sail and race home with the first cargo of the season for the richest prices.",
+   "art": "res://assets/ui/research/paper/carvel_frame_construction.png"
+  },
+  "wind_current_passage_charts": {
+   "effects": {
+    "route_speed": 0.0075,
+    "logistics_endurance": 0.0031,
+    "injury_risk": -0.001
+   },
+   "name": "Wind and Current Charts",
+   "observation": "Charts compiled from thousands of logbooks show where the winds and currents run, and ocean passages shorten by weeks.",
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png"
+  },
+  "telegraph_train_dispatch": {
+   "effects": {
+    "task_coordination": 0.004,
+    "injury_risk": -0.003,
+    "haul_capacity": 0.0025
+   },
+   "name": "Telegraph Train Orders",
+   "observation": "A dispatcher telegraphs an order to hold one train in a siding while the other passes on the single line.",
+   "art": "res://assets/ui/research/paper/electromagnetic_relays.png"
+  },
+  "interlocked_rail_signals": {
+   "effects": {
+    "injury_risk": -0.004,
+    "task_coordination": 0.002,
+    "haul_capacity": 0.0025
+   },
+   "name": "Interlocked Signals",
+   "observation": "In the signal box the levers lock one another, so no signalman can set two trains onto the same stretch of line.",
+   "art": "res://assets/ui/research/paper/rail_vehicle_braking.png"
+  },
+  "sleeping_dining_cars": {
+   "effects": {
+    "travel_speed": 0.0015,
+    "fatigue": -0.002,
+    "logistics_endurance": 0.0031
+   },
+   "name": "Sleeping and Dining Cars",
+   "observation": "Passengers sleep in berths and dine at linen-covered tables while the long-distance train runs on through the night.",
+   "art": "res://assets/ui/research/paper/rail_gauge_standards.png"
+  },
+  "ocean_coaling_stations": {
+   "effects": {
+    "logistics_endurance": 0.008,
+    "naval_capacity": 0.006,
+    "fuel_demand": 0.002,
+    "legitimacy": -0.001
+   },
+   "name": "Coaling Stations",
+   "observation": "Coal heaps and lighters wait at island harbours along the ocean routes, so steamers need not carry fuel for the whole voyage.",
+   "social_consequence": "Island harbours become garrisoned coal depots, and their people become coal heavers.",
+   "art": "res://assets/ui/research/subjects/naval_logistics-v1.png"
+  },
+  "sea_collision_rules": {
+   "effects": {
+    "injury_risk": -0.004,
+    "naval_capacity": 0.003,
+    "standardization": 0.002
+   },
+   "name": "Rules of the Road at Sea",
+   "observation": "Every ship shows a red light to port and a green to starboard, and gives way to another by the same rule.",
+   "art": "res://assets/ui/research/discovery-600/pilots_sea_lanes.png"
+  },
+  "underground_town_railway": {
+   "effects": {
+    "travel_speed": 0.0037,
+    "housing_output": 0.002,
+    "disease_exposure": 0.002,
+    "labor_demand": 0.002,
+    "pollution": 0.001
+   },
+   "name": "Underground Railway",
+   "observation": "Trains run in covered cuttings beneath the streets of the great town, their tunnels thick with engine smoke.",
+   "art": "res://assets/ui/research/paper/rail_track_foundations.png"
+  },
+  "compound_marine_engines": {
+   "effects": {
+    "fuel_efficiency": 0.004,
+    "logistics_endurance": 0.0062,
+    "naval_capacity": 0.0045,
+    "fuel_demand": -0.002
+   },
+   "name": "Compound Marine Engines",
+   "observation": "Steam passes through a second, larger cylinder before it is spent, and a steamer crosses the ocean on half the coal.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "crude_oil_pipelines": {
+   "effects": {
+    "haul_capacity": 0.005,
+    "trade_capacity": 0.0034,
+    "water_pollution": 0.002,
+    "disaster_risk": 0.002,
+    "ecological_pressure": 0.001,
+    "logistics_endurance": 0.0047
+   },
+   "name": "Crude Oil Pipelines",
+   "observation": "Iron pipes carry crude oil from the wells to the railhead, and the barrel teamsters are out of work.",
+   "art": "res://assets/ui/research/subjects/fuel_refining-v1.png"
+  },
+  "rolled_steel_rails": {
+   "effects": {
+    "repair_capacity": 0.004,
+    "haul_capacity": 0.0037,
+    "route_speed": 0.0025,
+    "fuel_demand": 0.001
+   },
+   "name": "Steel Rails",
+   "observation": "Rails rolled from steel outlast iron rails many times over under the heaviest traffic.",
+   "art": "res://assets/ui/research/subjects/structural_steel-v1.png"
+  },
+  "continental_trunk_railway": {
+   "effects": {
+    "route_speed": 0.0125,
+    "haul_capacity": 0.01,
+    "trade_capacity": 0.0092,
+    "travel_speed": 0.0045,
+    "state_capacity": 0.005,
+    "ecological_pressure": 0.004,
+    "hunting_yield": -0.003,
+    "labor_demand": 0.004,
+    "injury_risk": 0.002,
+    "legitimacy": -0.002,
+    "logistics_endurance": 0.0093
+   },
+   "name": "Continental Railway",
+   "observation": "The last rail is laid where two lines built from opposite coasts meet among the mountains.",
+   "ability_reason": "A railway across the continent joins the two coasts, so settlers, troops and freight reach the far interior in a week instead of a season.",
+   "social_consequence": "The lands along the line are fenced and settled, and the herders and hunters who lived there are pushed off them.",
+   "art": "res://assets/ui/research/paper/rail_track_foundations.png"
+  },
+  "isthmus_ship_canal": {
+   "effects": {
+    "route_speed": 0.0125,
+    "trade_capacity": 0.0115,
+    "naval_capacity": 0.012,
+    "logistics_endurance": 0.0093,
+    "labor_demand": 0.006,
+    "disease_exposure": 0.004,
+    "disaster_risk": 0.001
+   },
+   "name": "Isthmus Ship Canal",
+   "observation": "A sea-level canal cut through a narrow isthmus lets ships pass between two seas without rounding a continent.",
+   "ability_reason": "Ships cut a continent's length from their voyages, and whoever holds the canal controls one of the great sea roads of the world.",
+   "social_consequence": "Thousands of labourers die of fever digging the cut.",
+   "art": "res://assets/ui/research/subjects/canal_locks-v1.png"
+  },
+  "rail_vehicle_braking": {
+   "effects": {
+    "injury_risk": -0.004,
+    "haul_capacity": 0.005,
+    "travel_speed": 0.0015
+   },
+   "observation": "Air brakes worked from the locomotive stop the whole train together, and long heavy trains become safe to run.",
+   "art": "res://assets/ui/research/paper/rail_vehicle_braking.png"
+  },
+  "mail_order_parcel_trade": {
+   "effects": {
+    "trade_capacity": 0.0057,
+    "adoption_rate": 0.002
+   },
+   "name": "Mail-Order Catalogues",
+   "observation": "Farm families order ploughs, cloth and stoves from a thick catalogue and collect them at the railway station.",
+   "social_consequence": "Village shopkeepers lose their customers to the catalogue houses.",
+   "art": "res://assets/ui/research/subjects/cargo_seals-v1.png"
+  },
+  "automatic_rail_couplers": {
+   "effects": {
+    "injury_risk": -0.004,
+    "haul_capacity": 0.0025,
+    "labor_efficiency": 0.001
+   },
+   "name": "Automatic Couplers",
+   "observation": "Wagons couple themselves when pushed together, and brakemen no longer lose their fingers between the buffers.",
+   "art": "res://assets/ui/research/paper/rail_vehicle_braking.png"
+  },
+  "interrealm_postal_union": {
+   "effects": {
+    "trade_capacity": 0.0069,
+    "task_coordination": 0.003,
+    "state_capacity": 0.002,
+    "legitimacy": 0.001
+   },
+   "name": "Postal Union of Realms",
+   "observation": "Envoys of many realms agree that a letter crossing a border pays one rate and is carried by each post in turn.",
+   "ability_reason": "Letters and parcels cross every border at one rate, so a merchant or envoy can deal with any realm by post.",
+   "art": "res://assets/ui/research/discovery-600/messenger_relay_stations.png"
+  },
+  "hull_load_lines": {
+   "effects": {
+    "injury_risk": -0.004,
+    "naval_capacity": 0.0015,
+    "trade_capacity": -0.0011
+   },
+   "name": "Load Lines",
+   "observation": "A mark painted on every hull shows how deep she may lie, and overloaded ships are held in port.",
+   "social_consequence": "Owners who sent rotten, overloaded ships to sea for the insurance are brought to account.",
+   "art": "res://assets/ui/research/paper/hull_condition_surveys.png"
+  },
+  "refrigerated_rail_cars": {
+   "effects": {
+    "food_storage": 0.006,
+    "storage_loss": -0.0078,
+    "food_spoilage": -0.004,
+    "trade_capacity": 0.0034,
+    "logistics_endurance": 0.0031,
+    "container_capacity": 0.0028
+   },
+   "name": "Refrigerated Rail Cars",
+   "observation": "Ice bunkers at each end of the car keep meat fresh from the stockyards to the coast.",
+   "art": "res://assets/ui/research/subjects/regional_granaries-v1.png"
+  },
+  "triple_expansion_freighters": {
+   "effects": {
+    "fuel_efficiency": 0.004,
+    "trade_capacity": 0.0046,
+    "haul_capacity": 0.005,
+    "fuel_demand": 0.001,
+    "logistics_endurance": 0.0047
+   },
+   "name": "Triple-Expansion Freighters",
+   "observation": "Three cylinders use the steam in turn, and a plain freighter carries grain across the ocean for pennies a sack.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "railway_standard_time": {
+   "effects": {
+    "task_coordination": 0.008,
+    "standardization": 0.006,
+    "travel_speed": 0.0015,
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.001
+   },
+   "name": "Railway Standard Time",
+   "observation": "Railway clocks across the realm are set to one standard hour, and the old town noon is forgotten.",
+   "ability_reason": "Every station in a zone keeps the same hour, so schedules, telegraphs and mobilization tables can be set to the minute across the realm.",
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png"
+  },
+  "chain_drive_bicycle": {
+   "effects": {
+    "travel_speed": 0.0023,
+    "labor_efficiency": 0.001
+   },
+   "name": "Safety Bicycle",
+   "observation": "A chain-driven bicycle with two equal wheels lets a clerk or a farm girl ride ten miles to work.",
+   "social_consequence": "Young women ride out without chaperones, to the alarm of their elders.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "motor_carriage": {
+   "effects": {
+    "travel_speed": 0.0045,
+    "haul_capacity": 0.0037,
+    "fuel_demand": 0.004,
+    "pollution": 0.003,
+    "injury_risk": 0.004
+   },
+   "name": "Motor Carriage",
+   "observation": "A petrol engine drives a carriage along the road without horses, frightening every animal it passes.",
+   "ability_reason": "A self-propelled carriage runs on any road without a horse; it is still costly and fragile, but it points to transport free of the rail and the stable.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "electric_street_tramways": {
+   "effects": {
+    "travel_speed": 0.0037,
+    "housing_output": 0.002,
+    "sanitation": 0.001,
+    "food_output": 0.001
+   },
+   "name": "Electric Tramways",
+   "observation": "Tramcars run on current from overhead wires, and the town streets are no longer ankle-deep in horse dung.",
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "pneumatic_tyres": {
+   "effects": {
+    "travel_speed": 0.0023,
+    "fatigue": -0.001,
+    "haul_capacity": 0.0013
+   },
+   "name": "Pneumatic Tyres",
+   "observation": "Air-filled rubber tyres take the jolts of the road, and wheels roll faster over rough setts.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "tramp_bulk_charters": {
+   "effects": {
+    "trade_capacity": 0.0069,
+    "haul_capacity": 0.005,
+    "container_capacity": 0.0028,
+    "logistics_endurance": 0.0031
+   },
+   "name": "Tramp Steamers",
+   "observation": "Tramp steamers go wherever a cargo waits, carrying coal outward and grain home.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "steam_turbine_ships": {
+   "effects": {
+    "naval_capacity": 0.006,
+    "travel_speed": 0.003,
+    "fuel_demand": 0.002
+   },
+   "name": "Turbine Ships",
+   "observation": "A turbine spins the shafts directly with steam, and the fast liners cut days from the ocean crossing.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "hump_marshalling_yards": {
+   "effects": {
+    "haul_capacity": 0.005,
+    "task_coordination": 0.002,
+    "injury_risk": 0.001
+   },
+   "name": "Hump Yards",
+   "observation": "Wagons pushed over a low hump roll by gravity into their sidings, and a whole train is sorted in an hour.",
+   "art": "res://assets/ui/research/paper/rail_vehicle_braking.png"
+  },
+  "hull_condition_surveys": {
+   "effects": {
+    "injury_risk": -0.004,
+    "naval_capacity": 0.0045,
+    "standardization": 0.002,
+    "labor_demand": 0.001
+   },
+   "observation": "Independent surveyors examine each hull at set intervals, and underwriters insure only ships that keep their class.",
+   "art": "res://assets/ui/research/paper/hull_condition_surveys.png"
+  },
+  "tar_bound_road_surfaces": {
+   "effects": {
+    "route_speed": 0.0063,
+    "travel_speed": 0.0023,
+    "pollution": 0.001,
+    "disease_exposure": -0.001
+   },
+   "name": "Tarred Roads",
+   "observation": "Tar sprayed over the broken stone lays the dust that motor traffic raised in choking clouds.",
+   "art": "res://assets/ui/research/paper/aggregate_road_foundations.png"
+  },
+  "driver_licensing": {
+   "effects": {
+    "injury_risk": -0.003,
+    "state_capacity": 0.002,
+    "labor_demand": 0.001
+   },
+   "name": "Driving Licences",
+   "observation": "Every motorist carries a licence and every car a registered number plate, so a reckless driver can be traced.",
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png"
+  },
+  "motor_freight_lorries": {
+   "effects": {
+    "haul_capacity": 0.0075,
+    "route_speed": 0.0037,
+    "fuel_demand": 0.004,
+    "pollution": 0.003,
+    "injury_risk": 0.002,
+    "logistics_endurance": 0.0047
+   },
+   "name": "Motor Lorries",
+   "observation": "Motor lorries carry freight from the railhead to farms and shops that no train reaches.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "motor_bus_routes": {
+   "effects": {
+    "travel_speed": 0.003,
+    "fuel_demand": 0.002,
+    "pollution": 0.002
+   },
+   "name": "Motor Buses",
+   "observation": "Motor buses replace the horse omnibus and run on to villages that never had a service.",
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "series_built_motor_car": {
+   "effects": {
+    "travel_speed": 0.0075,
+    "haul_capacity": 0.005,
+    "fuel_demand": 0.008,
+    "pollution": 0.006,
+    "injury_risk": 0.006,
+    "ecological_pressure": 0.003,
+    "housing_output": 0.002,
+    "cohesion": 0.001
+   },
+   "name": "Series-Built Motor Car",
+   "observation": "Motor cars come off a moving line in long series, cheap enough for a farmer or a clerk to buy.",
+   "ability_reason": "Ordinary households can own a car, so people and goods move door to door without rails, and towns spread out along the roads.",
+   "social_consequence": "Road deaths climb every year, and the streets are given over to machines.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "motor_road_fund": {
+   "effects": {
+    "route_speed": 0.005,
+    "state_capacity": 0.002,
+    "construction_rate": 0.002
+   },
+   "name": "Road Fund",
+   "observation": "A road board builds and mends motor roads from what motorists pay in fuel and licence taxes.",
+   "art": "res://assets/ui/research/subjects/graded_roads-v1.png"
+  },
+  "passenger_airships": {
+   "effects": {
+    "travel_speed": 0.0023,
+    "disaster_risk": 0.002,
+    "injury_risk": 0.002
+   },
+   "name": "Passenger Airships",
+   "observation": "A great gas-filled airship carries passengers across the sea on a schedule, until one burns at her mooring mast.",
+   "art": "res://assets/ui/research/subjects/powered_flight-v1.png"
+  },
+  "radio_direction_finding": {
+   "effects": {
+    "route_speed": 0.005,
+    "naval_capacity": 0.003,
+    "injury_risk": -0.002
+   },
+   "name": "Radio Direction-Finding",
+   "observation": "A ship takes bearings on two shore wireless stations and fixes her position through fog.",
+   "art": "res://assets/ui/research/paper/radio_telegraphy.png"
+  },
+  "heavy_oil_motor_ships": {
+   "effects": {
+    "fuel_efficiency": 0.004,
+    "logistics_endurance": 0.008,
+    "naval_capacity": 0.0045,
+    "water_pollution": 0.002,
+    "fuel_demand": 0.001
+   },
+   "name": "Motor Ships",
+   "observation": "Heavy-oil engines drive the new motor ships, which carry fuel for a voyage round the world and need no stokers.",
+   "art": "res://assets/ui/research/subjects/fuel_refining-v1.png"
+  },
+  "wireless_distress_watch": {
+   "effects": {
+    "injury_risk": -0.004,
+    "naval_capacity": 0.0015,
+    "labor_demand": 0.001
+   },
+   "name": "Wireless Distress Watch",
+   "observation": "Every passenger ship must keep a wireless operator listening day and night for a distress call.",
+   "art": "res://assets/ui/research/paper/radio_telegraphy.png"
+  },
+  "state_parcel_post": {
+   "effects": {
+    "trade_capacity": 0.0046,
+    "state_capacity": 0.002,
+    "logistics_endurance": 0.0016
+   },
+   "name": "Parcel Post",
+   "observation": "The state post carries parcels as well as letters, at one rate to every village in the realm.",
+   "art": "res://assets/ui/research/subjects/cargo_seals-v1.png"
+  },
+  "lock_ship_canal_divide": {
+   "effects": {
+    "route_speed": 0.0125,
+    "trade_capacity": 0.0092,
+    "naval_capacity": 0.009,
+    "labor_demand": 0.006,
+    "ecological_pressure": 0.004,
+    "disease_exposure": 0.003,
+    "legitimacy": -0.001
+   },
+   "name": "High-Lock Ship Canal",
+   "observation": "A flight of great locks lifts ocean ships over a mountain divide and lowers them into the other sea.",
+   "ability_reason": "Ocean ships are lifted over the divide and cross between oceans in a day, so fleets and cargoes can shift between seas at will.",
+   "social_consequence": "Fever camps and a foreign-held zone along the canal breed resentment for a generation.",
+   "art": "res://assets/ui/research/subjects/canal_locks-v2.png"
+  },
+  "electric_traffic_signals": {
+   "effects": {
+    "injury_risk": -0.003,
+    "task_coordination": 0.002
+   },
+   "name": "Traffic Signals",
+   "observation": "Red, amber and green lamps at the crossings replace the constable's white gloves.",
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "roadside_fuel_stations": {
+   "effects": {
+    "logistics_endurance": 0.0062,
+    "travel_speed": 0.0015,
+    "fuel_demand": 0.002,
+    "water_pollution": 0.001
+   },
+   "name": "Filling Stations",
+   "observation": "Pumps at the roadside fill a motor car's tank in minutes, and long journeys by road become ordinary.",
+   "art": "res://assets/ui/research/subjects/fuel_refining-v1.png"
+  },
+  "scheduled_air_mail": {
+   "effects": {
+    "travel_speed": 0.006,
+    "trade_capacity": 0.0046,
+    "injury_risk": 0.002,
+    "fuel_demand": 0.002
+   },
+   "name": "Scheduled Air Mail",
+   "observation": "Mail planes fly the length of the realm by day and by beacon-lit night, and a letter arrives the next morning.",
+   "ability_reason": "Letters cross the realm overnight by air, so a sealed order or a contract reaches a distant city in a day.",
+   "art": "res://assets/ui/research/subjects/powered_flight-v1.png"
+  },
+  "passenger_air_service": {
+   "effects": {
+    "travel_speed": 0.0037,
+    "trade_capacity": 0.0034,
+    "fuel_demand": 0.003,
+    "pollution": 0.002
+   },
+   "name": "Passenger Airlines",
+   "observation": "Airliners carry paying passengers between the capitals in hours, landing on grass fields outside the town.",
+   "art": "res://assets/ui/research/subjects/advanced_airframes-v1.png"
+  },
+  "state_railway_administration": {
+   "effects": {
+    "state_capacity": 0.004,
+    "standardization": 0.003,
+    "institutional_rigidity": 0.003,
+    "haul_capacity": 0.0025
+   },
+   "name": "State Railways",
+   "observation": "The state buys out the railway companies and runs every line from one administration.",
+   "social_consequence": "Railwaymen become servants of the state, and every rise in fares becomes a political quarrel.",
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png"
+  },
+  "limited_access_motorways": {
+   "effects": {
+    "route_speed": 0.0125,
+    "travel_speed": 0.006,
+    "haul_capacity": 0.0075,
+    "labor_demand": 0.004,
+    "ecological_pressure": 0.005,
+    "soil_productivity": -0.002,
+    "pollution": 0.003,
+    "fuel_demand": 0.004,
+    "logistics_endurance": 0.0062
+   },
+   "name": "Motorways",
+   "observation": "Divided motor roads with no level crossings or side turnings let traffic run at speed between the cities.",
+   "ability_reason": "Motor traffic runs at speed with no crossings or junction delays, so lorries and troops move between regions in hours.",
+   "social_consequence": "Farms and villages are cut in two by embankments with no crossing.",
+   "art": "res://assets/ui/research/paper/aggregate_road_foundations.png"
+  },
+  "tractor_trailer_rigs": {
+   "effects": {
+    "haul_capacity": 0.0075,
+    "trade_capacity": 0.0034,
+    "fuel_demand": 0.003,
+    "pollution": 0.002,
+    "logistics_endurance": 0.0031
+   },
+   "name": "Articulated Lorries",
+   "observation": "A tractor unit hauls a detachable trailer, and a single driver moves as much as a railway wagon.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "centralized_traffic_control": {
+   "effects": {
+    "task_coordination": 0.004,
+    "haul_capacity": 0.0037,
+    "labor_demand": -0.002
+   },
+   "name": "Centralized Traffic Control",
+   "observation": "One dispatcher sets every signal and switch across a district from a lit panel in the control room.",
+   "art": "res://assets/ui/research/paper/electromagnetic_relays.png"
+  },
+  "airway_radio_beacons": {
+   "effects": {
+    "route_speed": 0.005,
+    "injury_risk": -0.002
+   },
+   "name": "Airway Beacons",
+   "observation": "Radio beacons mark the night air routes, and a pilot follows the steady tone between them.",
+   "art": "res://assets/ui/research/paper/radio_telegraphy.png"
+  },
+  "airport_control_towers": {
+   "effects": {
+    "injury_risk": -0.003,
+    "task_coordination": 0.002
+   },
+   "name": "Control Towers",
+   "observation": "From a glass tower above the field, a controller clears each airplane to land or take off by radio.",
+   "art": "res://assets/ui/research/paper/radio_telegraphy.png"
+  },
+  "electrified_main_lines": {
+   "effects": {
+    "haul_capacity": 0.0063,
+    "travel_speed": 0.003,
+    "fuel_efficiency": 0.004,
+    "pollution": -0.003,
+    "fuel_demand": -0.002
+   },
+   "name": "Electrified Main Lines",
+   "observation": "Electric locomotives draw current from overhead wires and haul the heavy trains without smoke.",
+   "art": "res://assets/ui/research/paper/rail_gauge_standards.png"
+  },
+  "pallet_forklift_handling": {
+   "effects": {
+    "haul_capacity": 0.01,
+    "labor_efficiency": 0.006,
+    "container_capacity": 0.007,
+    "storage_loss": -0.0065,
+    "labor_demand": -0.004,
+    "injury_risk": 0.002,
+    "food_storage": 0.002
+   },
+   "name": "Pallets and Fork-Lifts",
+   "observation": "A small truck with steel forks lifts a whole pallet of cases, and one driver does the work of a gang of porters.",
+   "ability_reason": "Loads are lifted on standard pallets instead of carried sack by sack, so warehouses, depots and army supply dumps turn over their stock in a fraction of the time.",
+   "social_consequence": "Dock and warehouse gangs shrink as the fork-lifts take their work.",
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png"
+  },
+  "road_haulage_licensing": {
+   "effects": {
+    "state_capacity": 0.002,
+    "institutional_rigidity": 0.002,
+    "trade_capacity": -0.0011,
+    "injury_risk": -0.001
+   },
+   "name": "Haulage Licences",
+   "observation": "Every road haulier must hold a licence, and the number of lorries on each route is fixed by the board.",
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png"
+  },
+  "oil_electric_locomotives": {
+   "effects": {
+    "haul_capacity": 0.01,
+    "fuel_efficiency": 0.006,
+    "repair_capacity": 0.004,
+    "labor_demand": -0.004,
+    "pollution": -0.002,
+    "fuel_demand": 0.002
+   },
+   "name": "Oil-Electric Locomotives",
+   "observation": "Oil-engined locomotives with electric drive pull the expresses, and the engine sheds fall silent.",
+   "ability_reason": "Oil-electric engines run for days without coaling or watering stops, with a fraction of the crews that steam needed.",
+   "social_consequence": "Firemen and shed crews lose their trade, and the coal towns lose the railway's custom.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "metal_monoplane_airliners": {
+   "effects": {
+    "travel_speed": 0.0037,
+    "trade_capacity": 0.0034,
+    "fuel_demand": 0.003
+   },
+   "name": "Metal Airliners",
+   "observation": "All-metal monoplanes carry twenty passengers at a profit, and air travel stops needing a subsidy.",
+   "art": "res://assets/ui/research/subjects/advanced_airframes-v1.png"
+  },
+  "pressurized_airliner_cabins": {
+   "effects": {
+    "travel_speed": 0.0023,
+    "injury_risk": -0.002
+   },
+   "name": "Pressurized Cabins",
+   "observation": "The cabin is pressurized, and the airliner flies high above the storms where the air is smooth.",
+   "art": "res://assets/ui/research/subjects/advanced_airframes-v1.png"
+  },
+  "hyperbolic_radio_navigation": {
+   "effects": {
+    "route_speed": 0.0063,
+    "naval_capacity": 0.003
+   },
+   "name": "Radio Navigation Grids",
+   "observation": "A navigator reads the time difference between pulses from paired stations and finds his place on a lattice chart.",
+   "art": "res://assets/ui/research/paper/radio_telegraphy.png"
+  },
+  "civil_aviation_convention": {
+   "effects": {
+    "trade_capacity": 0.0046,
+    "standardization": 0.002,
+    "legitimacy": 0.001
+   },
+   "name": "Civil Aviation Convention",
+   "observation": "The realms agree who may fly over whose land and land where, and on one set of rules for the air.",
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png"
+  },
+  "radar_approach_control": {
+   "effects": {
+    "injury_risk": -0.003,
+    "task_coordination": 0.002
+   },
+   "name": "Radar Approach Control",
+   "observation": "A controller watching the radar screen talks each airliner down to the runway through cloud.",
+   "art": "res://assets/ui/research/paper/radio_telegraphy.png"
+  },
+  "sustained_airlift": {
+   "effects": {
+    "logistics_endurance": 0.008,
+    "haul_capacity": 0.005,
+    "fuel_demand": 0.004,
+    "state_capacity": 0.002
+   },
+   "name": "Sustained Airlift",
+   "observation": "Transport aircraft land every few minutes, day and night, and a blockaded city lives on what they bring.",
+   "art": "res://assets/ui/research/subjects/advanced_airframes-v1.png"
+  },
+  "jet_airliners": {
+   "effects": {
+    "travel_speed": 0.009,
+    "trade_capacity": 0.0069,
+    "fuel_demand": 0.006,
+    "pollution": 0.004,
+    "disease_exposure": 0.003,
+    "disaster_risk": 0.001
+   },
+   "name": "Jet Airliners",
+   "observation": "Jet airliners cross the ocean in an afternoon, high above the weather.",
+   "ability_reason": "Travellers cross oceans in hours, so envoys, experts and traders can meet in person anywhere in the world within a day.",
+   "social_consequence": "Distant epidemics arrive by air within days, and the ocean liners are laid up.",
+   "art": "res://assets/ui/research/subjects/jet_propulsion-v1.png"
+  },
+  "roll_on_roll_off_ferries": {
+   "effects": {
+    "haul_capacity": 0.005,
+    "travel_speed": 0.0023,
+    "injury_risk": 0.001
+   },
+   "name": "Roll-On Ferries",
+   "observation": "Lorries and cars drive aboard through the bow doors and drive off on the far shore.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "intermodal_shipping_containers": {
+   "effects": {
+    "haul_capacity": 0.015,
+    "trade_capacity": 0.0138,
+    "storage_loss": -0.0104,
+    "container_capacity": 0.0112,
+    "labor_efficiency": 0.004,
+    "labor_demand": -0.006,
+    "cohesion": -0.002,
+    "logistics_endurance": 0.0093,
+    "food_storage": 0.004
+   },
+   "name": "Shipping Containers",
+   "observation": "A steel box packed at an inland factory is lifted aboard ship and delivered unopened to a store across the ocean.",
+   "ability_reason": "Cargo moves from ship to lorry to train sealed in one steel box, and shipping becomes so cheap that goods are made wherever labour costs least.",
+   "social_consequence": "Dockside neighbourhoods and their gangs of stevedores vanish within a generation.",
+   "art": "res://assets/ui/research/subjects/cargo_seals-v1.png"
+  },
+  "national_highway_network": {
+   "effects": {
+    "route_speed": 0.0125,
+    "travel_speed": 0.0045,
+    "haul_capacity": 0.0075,
+    "state_capacity": 0.003,
+    "ecological_pressure": 0.005,
+    "pollution": 0.004,
+    "fuel_demand": 0.004,
+    "labor_demand": 0.003,
+    "logistics_endurance": 0.0062
+   },
+   "name": "National Motorway Network",
+   "observation": "A motorway grid paid from the fuel tax links every region of the realm.",
+   "ability_reason": "A motorway grid links every region, so goods, people and troops move by road anywhere in the realm in a day.",
+   "social_consequence": "Branch railways close and town centres empty as trade moves to the highway edges.",
+   "art": "res://assets/ui/research/paper/aggregate_road_foundations.png"
+  },
+  "orbital_satellite_launch": {
+   "effects": {
+    "route_speed": 0.0037,
+    "knowledge_rate": 0.004,
+    "state_capacity": 0.003,
+    "labor_demand": 0.004,
+    "fuel_demand": 0.002
+   },
+   "name": "First Satellite",
+   "observation": "A many-stage rocket lifts a small metal sphere into orbit, and its bleeping signal is heard around the world.",
+   "ability_reason": "Rockets can now place a machine in orbit, where it can relay signals and look down on the whole planet; the realm that does it first is noticed everywhere.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "very_large_tankers": {
+   "effects": {
+    "haul_capacity": 0.0075,
+    "fuel_efficiency": 0.003,
+    "water_pollution": 0.004,
+    "disaster_risk": 0.003,
+    "ecological_pressure": 0.002
+   },
+   "name": "Supertankers",
+   "observation": "Tankers longer than a town street carry a million barrels of oil around the capes.",
+   "social_consequence": "A single wreck spills enough oil to foul a hundred miles of coast.",
+   "art": "res://assets/ui/research/subjects/fuel_refining-v1.png"
+  },
+  "container_gantry_terminals": {
+   "effects": {
+    "haul_capacity": 0.0075,
+    "labor_efficiency": 0.003,
+    "labor_demand": -0.004,
+    "cohesion": -0.001
+   },
+   "name": "Container Terminals",
+   "observation": "Gantry cranes lift boxes straight from ship to lorry, and a ship is turned round in a day instead of a week.",
+   "art": "res://assets/ui/research/subjects/cargo_seals-v1.png"
+  },
+  "bulk_unit_trains": {
+   "effects": {
+    "haul_capacity": 0.0063,
+    "fuel_efficiency": 0.002,
+    "container_capacity": 0.0028
+   },
+   "name": "Unit Trains",
+   "observation": "One long train carries nothing but coal from the mine to the port, loading and unloading without stopping.",
+   "art": "res://assets/ui/research/paper/rail_vehicle_braking.png"
+  },
+  "dedicated_bulk_carriers": {
+   "effects": {
+    "haul_capacity": 0.0063,
+    "trade_capacity": 0.0034,
+    "container_capacity": 0.0042
+   },
+   "name": "Bulk Carriers",
+   "observation": "Ships built for one cargo, ore or grain, load by conveyor and unload by grab.",
+   "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
+  },
+  "computer_seat_reservations": {
+   "effects": {
+    "task_coordination": 0.003,
+    "trade_capacity": 0.0023
+   },
+   "name": "Computer Reservations",
+   "observation": "Booking clerks across the realm query one electronic machine and sell every seat on every flight without double booking.",
+   "art": "res://assets/ui/research/paper/binary_adders.png"
+  },
+  "crewed_orbital_flight": {
+   "effects": {
+    "knowledge_rate": 0.003,
+    "cohesion": 0.002,
+    "labor_demand": 0.003
+   },
+   "name": "Crewed Orbital Flight",
+   "observation": "A pilot circles the earth in a small capsule and comes home under a parachute.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "high_speed_rail_lines": {
+   "effects": {
+    "travel_speed": 0.0075,
+    "fuel_efficiency": 0.003,
+    "pollution": -0.002,
+    "labor_demand": 0.004
+   },
+   "name": "High-Speed Rail",
+   "observation": "Streamlined electric trains run on their own dedicated tracks at speeds that approach an airliner's.",
+   "ability_reason": "Passenger trains at nearly airliner speeds link the cities of a region, so the capital and the provinces share one working day.",
+   "art": "res://assets/ui/research/paper/rail_gauge_standards.png"
+  },
+  "satellite_ship_navigation": {
+   "effects": {
+    "route_speed": 0.0063,
+    "naval_capacity": 0.003,
+    "injury_risk": -0.002
+   },
+   "name": "Satellite Ship Navigation",
+   "observation": "Ships fix their position from the signals of passing satellites, in any weather, anywhere on the ocean.",
+   "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png"
+  },
+  "standard_container_sizes": {
+   "effects": {
+    "standardization": 0.006,
+    "trade_capacity": 0.0046,
+    "haul_capacity": 0.0037
+   },
+   "name": "Standard Container Sizes",
+   "observation": "The realms agree on the length, height and corner fittings of containers, so any crane can lift any box.",
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png"
+  },
+  "crewed_lunar_landing": {
+   "effects": {
+    "knowledge_rate": 0.004,
+    "cohesion": 0.004,
+    "legitimacy": 0.003,
+    "labor_demand": 0.004,
+    "state_capacity": 0.002
+   },
+   "name": "Moon Landing",
+   "observation": "Two crewmen step onto the moon's grey dust, plant a flag and come home with a box of stones.",
+   "ability_reason": "A crew lands on the moon and returns, a proof of reach and organization that raises the realm's standing everywhere, though it carries nothing that matters on earth.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "wide_body_hub_flights": {
+   "effects": {
+    "travel_speed": 0.0037,
+    "trade_capacity": 0.0057,
+    "fuel_demand": 0.004,
+    "pollution": 0.003
+   },
+   "name": "Wide-Body Airliners",
+   "observation": "Wide-bodied airliners carry hundreds at once to great hub airports, and flying becomes cheap enough for holidays.",
+   "art": "res://assets/ui/research/subjects/jet_propulsion-v1.png"
+  },
+  "automated_high_bay_warehouses": {
+   "effects": {
+    "container_capacity": 0.008,
+    "storage_loss": -0.0052,
+    "labor_efficiency": 0.003,
+    "labor_demand": -0.003,
+    "food_storage": 0.002
+   },
+   "name": "High-Bay Warehouses",
+   "observation": "Stacker cranes run between racks forty pallets high, storing and fetching goods by punched instruction.",
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png"
+  },
+  "overnight_air_express": {
+   "effects": {
+    "travel_speed": 0.0045,
+    "trade_capacity": 0.0069,
+    "task_coordination": 0.004,
+    "fuel_demand": 0.003,
+    "pollution": 0.002,
+    "logistics_endurance": 0.0047
+   },
+   "name": "Overnight Air Express",
+   "observation": "Parcels from every city fly to one hub at midnight, are sorted, and fly out again before dawn.",
+   "ability_reason": "Any parcel or spare part reaches any city by the next morning, so factories and field depots can hold less stock.",
+   "art": "res://assets/ui/research/subjects/cargo_seals-v1.png"
+  },
+  "scanned_product_barcodes": {
+   "effects": {
+    "task_coordination": 0.006,
+    "storage_loss": -0.0078,
+    "standardization": 0.004,
+    "labor_efficiency": 0.004,
+    "state_capacity": 0.001
+   },
+   "name": "Bar Codes",
+   "observation": "Every tin and packet carries a printed bar code, and the till reads the price and counts the stock.",
+   "ability_reason": "Every item scanned at the till and on the dock is counted, so stocks are known exactly and reordered before the shelves run bare.",
+   "art": "res://assets/ui/research/paper/binary_adders.png"
+  },
+  "just_in_time_supply": {
+   "effects": {
+    "storage_loss": -0.0052,
+    "labor_efficiency": 0.004,
+    "labor_demand": -0.002,
+    "logistics_endurance": -0.0062,
+    "disaster_risk": 0.002
+   },
+   "name": "Just-in-Time Supply",
+   "observation": "Parts arrive at the assembly line the hour they are needed, and the factory keeps almost no store.",
+   "social_consequence": "One late lorry can stop a whole assembly line.",
+   "art": "res://assets/ui/research/subjects/cargo_seals-v1.png"
+  },
+  "transport_deregulation": {
+   "effects": {
+    "trade_capacity": 0.0069,
+    "institutional_rigidity": -0.004,
+    "cohesion": -0.002,
+    "injury_risk": 0.001
+   },
+   "name": "Transport Deregulation",
+   "observation": "The licensing boards are abolished, and any carrier may run any route at any price.",
+   "social_consequence": "Old carriers go bankrupt, and small towns lose their services to cheaper routes elsewhere.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "double_stack_container_trains": {
+   "effects": {
+    "haul_capacity": 0.0075,
+    "fuel_efficiency": 0.002
+   },
+   "name": "Double-Stack Trains",
+   "observation": "Containers ride two high on long well-wagons, doubling what each train carries.",
+   "art": "res://assets/ui/research/paper/rail_vehicle_braking.png"
+  },
+  "electronic_shipping_documents": {
+   "effects": {
+    "task_coordination": 0.004,
+    "trade_capacity": 0.0034,
+    "knowledge_preservation": 0.002
+   },
+   "name": "Electronic Shipping Papers",
+   "observation": "Bills of lading and customs papers pass between firms as electronic messages, and cargo no longer waits for the post.",
+   "art": "res://assets/ui/research/paper/binary_adders.png"
+  },
+  "supply_chain_management": {
+   "effects": {
+    "task_coordination": 0.006,
+    "labor_efficiency": 0.004,
+    "storage_loss": -0.0039,
+    "logistics_endurance": -0.0047
+   },
+   "name": "Supply Chain Management",
+   "observation": "Suppliers, carriers and sellers plan one flow of goods together, sharing forecasts and stock counts.",
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png"
+  },
+  "low_cost_point_airlines": {
+   "effects": {
+    "travel_speed": 0.003,
+    "trade_capacity": 0.0034,
+    "fuel_demand": 0.004,
+    "pollution": 0.003
+   },
+   "name": "Low-Cost Airlines",
+   "observation": "Cheap airlines fly directly between secondary cities, and a weekend abroad costs less than a train fare.",
+   "art": "res://assets/ui/research/subjects/jet_propulsion-v1.png"
+  },
+  "open_satellite_positioning": {
+   "effects": {
+    "route_speed": 0.0125,
+    "survey_speed": 0.006,
+    "task_coordination": 0.004,
+    "injury_risk": -0.002
+   },
+   "name": "Open Satellite Positioning",
+   "observation": "A pocket receiver listening to a constellation of satellites tells anyone their place on earth to within a few paces.",
+   "ability_reason": "Anyone can fix position to within a few metres anywhere, so every driver, ship and survey party knows exactly where it is.",
+   "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png"
+  },
+  "online_order_parcel_tracking": {
+   "effects": {
+    "trade_capacity": 0.0092,
+    "task_coordination": 0.004,
+    "labor_demand": 0.002,
+    "pollution": 0.002,
+    "cohesion": -0.002
+   },
+   "name": "Online Orders and Tracking",
+   "observation": "A household orders from a seller in another city at midnight and watches its parcel cross the realm on a screen.",
+   "ability_reason": "Households order from any seller and follow the parcel to their door, so shops that cannot deliver lose their customers.",
+   "social_consequence": "High streets empty, and warehouse and delivery work multiplies at piece rates.",
+   "art": "res://assets/ui/research/subjects/cargo_seals-v1.png"
+  },
+  "shared_orbital_station": {
+   "effects": {
+    "knowledge_rate": 0.004,
+    "legitimacy": 0.002,
+    "labor_demand": 0.003
+   },
+   "name": "Shared Orbital Station",
+   "observation": "Crews from several realms live aboard a station in orbit all year round, relieved by visiting ships.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "automatic_ship_identification": {
+   "effects": {
+    "injury_risk": -0.003,
+    "naval_capacity": 0.003,
+    "security_efficiency": 0.001
+   },
+   "name": "Ship Identification Transponders",
+   "observation": "Every large ship broadcasts her name, course and speed, and the coast stations see the whole traffic on one screen.",
+   "art": "res://assets/ui/research/paper/radio_telegraphy.png"
+  },
+  "urban_congestion_charging": {
+   "effects": {
+    "travel_speed": 0.0015,
+    "pollution": -0.003,
+    "legitimacy": -0.002
+   },
+   "name": "Congestion Charges",
+   "observation": "Drivers pay a daily charge to enter the town centre, and traffic thins within a week.",
+   "social_consequence": "Tradesmen and suburban commuters protest a tax on getting to work.",
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png"
+  },
+  "rfid_pallet_tags": {
+   "effects": {
+    "storage_loss": -0.0052,
+    "task_coordination": 0.003
+   },
+   "name": "Radio Pallet Tags",
+   "observation": "Radio tags on every pallet are read as they pass through the warehouse door, without anyone scanning them.",
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png"
+  },
+  "in_car_satellite_routing": {
+   "effects": {
+    "route_speed": 0.005,
+    "travel_speed": 0.0015
+   },
+   "name": "Satellite Car Routing",
+   "observation": "A small screen on the dashboard speaks each turn, and drivers stop carrying road atlases.",
+   "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png"
+  },
+  "ultra_large_container_ships": {
+   "effects": {
+    "haul_capacity": 0.0075,
+    "fuel_efficiency": 0.003,
+    "trade_capacity": 0.0046,
+    "water_pollution": 0.002,
+    "disaster_risk": 0.002
+   },
+   "name": "Ultra-Large Container Ships",
+   "observation": "Container ships carrying twenty thousand boxes call at only a handful of giant ports.",
+   "social_consequence": "When one of these ships runs aground in a narrow channel, trade across half the world waits.",
+   "art": "res://assets/ui/research/subjects/cargo_seals-v1.png"
+  },
+  "live_traffic_mapping": {
+   "effects": {
+    "travel_speed": 0.0023,
+    "route_speed": 0.0037
+   },
+   "name": "Live Traffic Maps",
+   "observation": "Pocket telephones report their own speed, and the map shows every jam as it forms.",
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png"
+  },
+  "app_ride_hailing": {
+   "effects": {
+    "travel_speed": 0.0023,
+    "labor_efficiency": 0.001,
+    "cohesion": -0.002
+   },
+   "name": "Ride-Hailing",
+   "observation": "A pocket telephone summons a nearby driver in a private car, and the fare is settled without cash.",
+   "social_consequence": "Licensed cab drivers lose their trade to part-time drivers without guaranteed wages.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "warehouse_robot_fleets": {
+   "effects": {
+    "labor_efficiency": 0.006,
+    "container_capacity": 0.0042,
+    "labor_demand": -0.004,
+    "cohesion": -0.001
+   },
+   "name": "Warehouse Robots",
+   "observation": "Squat robots carry whole shelving racks to the pickers, and the warehouse aisles fill with machines.",
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png"
+  },
+  "mass_battery_electric_cars": {
+   "effects": {
+    "pollution": -0.006,
+    "fuel_demand": -0.004,
+    "fuel_efficiency": 0.004,
+    "travel_speed": 0.0015,
+    "ecological_pressure": 0.003
+   },
+   "name": "Battery-Electric Cars",
+   "observation": "Battery cars roll silently through the town, charging overnight from a plug in the wall.",
+   "ability_reason": "Cars run on stored electricity, so road transport no longer depends on imported oil and the town air clears; the cost moves to the mines for battery metals.",
+   "social_consequence": "The districts that mine battery metals bear the scars of the boom.",
+   "art": "res://assets/ui/research/paper/battery_bank_wiring.png"
+  },
+  "reusable_orbital_boosters": {
+   "effects": {
+    "knowledge_rate": 0.003,
+    "trade_capacity": 0.0023,
+    "labor_demand": -0.002
+   },
+   "name": "Reusable Boosters",
+   "observation": "The rocket's first stage flies back and lands upright on its own tail, ready to fly again.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "battery_electric_buses": {
+   "effects": {
+    "pollution": -0.004,
+    "fuel_demand": -0.002
+   },
+   "name": "Electric Buses",
+   "observation": "Battery buses charge at the depot overnight and run all day in near silence.",
+   "art": "res://assets/ui/research/paper/battery_bank_wiring.png"
+  },
+  "supply_chain_resilience_reviews": {
+   "effects": {
+    "logistics_endurance": 0.0078,
+    "disaster_resilience": 0.004,
+    "storage_loss": -0.0026,
+    "labor_demand": 0.002,
+    "trade_capacity": -0.0023
+   },
+   "name": "Supply Resilience Reviews",
+   "observation": "After shortages close the factories, firms and ministries map every supplier and lay in stocks of critical goods.",
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png"
+  },
+  "drone_parcel_delivery": {
+   "effects": {
+    "travel_speed": 0.0015,
+    "trade_capacity": 0.0023,
+    "labor_demand": -0.001,
+    "legitimacy": -0.001
+   },
+   "name": "Drone Parcel Delivery",
+   "observation": "Small drones drop parcels into gardens across licensed suburbs, to the complaints of the neighbours.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "low_carbon_ship_fuels": {
+   "effects": {
+    "pollution": -0.004,
+    "fuel_demand": 0.002,
+    "trade_capacity": -0.0023
+   },
+   "name": "Low-Carbon Ship Fuels",
+   "observation": "The first cargo ships burn methanol or ammonia, at a higher fuel bill, and their funnels emit little carbon.",
+   "art": "res://assets/ui/research/subjects/fuel_refining-v1.png"
+  },
+  "driverless_highway_freight": {
+   "effects": {
+    "haul_capacity": 0.01,
+    "task_coordination": 0.003,
+    "labor_demand": -0.004,
+    "injury_risk": -0.003,
+    "cohesion": -0.003
+   },
+   "name": "Driverless Freight",
+   "observation": "Lorries with no one at the wheel run the motorway corridors day and night.",
+   "ability_reason": "Lorries run the motorway corridors around the clock without drivers, so freight never waits on a rest break.",
+   "social_consequence": "Lorry driving, the largest trade in many districts, faces ruin.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "electric_air_taxis": {
+   "effects": {
+    "travel_speed": 0.0015,
+    "pollution": -0.001
+   },
+   "name": "Electric Air Taxis",
+   "observation": "Small electric craft lift four passengers from a rooftop pad and hop across the town.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  }
+ }
 }

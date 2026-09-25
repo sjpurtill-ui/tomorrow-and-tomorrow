@@ -1,5 +1,1033 @@
 {
  "line": "culture",
  "schema": "research_600_effects/1",
- "items": {}
+ "items": {
+  "panorama_rotundas": {
+   "effects": {
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0006,
+    "labor_demand": 0.0014
+   },
+   "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
+   "name": "Panorama Rotundas",
+   "observation": "Paying visitors stand in a round hall surrounded by a painted view of a far city or a famous battle."
+  },
+  "reading_circles": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0033
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "name": "Reading Circles",
+   "observation": "Clubs of the middling sort pool their money to buy and pass round books and papers."
+  },
+  "gymnastics_grounds": {
+   "effects": {
+    "cohesion": 0.0012,
+    "health_protection": 0.0006,
+    "injury_risk": 0.0006,
+    "warfare_readiness": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/civic_games-v2.png",
+   "name": "Gymnastics Grounds",
+   "observation": "Open grounds with bars and ropes train the young in strength and drill."
+  },
+  "historical_novel": {
+   "effects": {
+    "cohesion": 0.0018,
+    "knowledge_preservation": 0.0022,
+    "legitimacy": 0.0028
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "name": "Historical Novel",
+   "observation": "Long novels bring the realm's own past to life for ordinary readers."
+  },
+  "civic_concert_halls": {
+   "effects": {
+    "cohesion": 0.0012,
+    "construction_rate": 0.0006,
+    "labor_demand": 0.0027,
+    "legitimacy": 0.0014
+   },
+   "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
+   "name": "Civic Concert Halls",
+   "observation": "Public halls with paid orchestras give concerts to anyone with a ticket."
+  },
+  "home_art_songs": {
+   "effects": {
+    "cohesion": 0.0012
+   },
+   "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
+   "name": "Home Art Songs",
+   "observation": "Families sing songs for voice and piano in the parlour."
+  },
+  "comparative_philology": {
+   "effects": {
+    "knowledge_preservation": 0.0033,
+    "knowledge_rate": 0.0018
+   },
+   "art": "res://assets/ui/research/discovery-600/bilingual_sign_lists.png",
+   "name": "Comparative Philology",
+   "observation": "Scholars trace related tongues back to a common ancestor."
+  },
+  "temperance_societies": {
+   "effects": {
+    "cohesion": 0.0012,
+    "health_protection": 0.0006,
+    "labor_efficiency": 0.0006,
+    "legitimacy": -0.0014
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Temperance Societies",
+   "observation": "Societies preach against strong drink and gather pledges of abstinence.",
+   "social_consequence": "Drinkers and publicans resent the preachers; families quarrel over the pledge."
+  },
+  "grand_opera_houses": {
+   "effects": {
+    "cohesion": 0.0012,
+    "construction_rate": 0.0006,
+    "labor_demand": 0.0041,
+    "legitimacy": 0.0028
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Grand Opera Houses",
+   "observation": "Grand opera houses stage spectacles for the town public."
+  },
+  "national_tongue_revival": {
+   "effects": {
+    "cohesion": 0.0024,
+    "institutional_rigidity": 0.0006,
+    "knowledge_preservation": 0.0033,
+    "legitimacy": 0.0028
+   },
+   "art": "res://assets/ui/research/discovery-600/consonantal_alphabet.png",
+   "name": "National Tongue Revival",
+   "observation": "Scholars give the people's tongue a standard grammar and a literature of its own."
+  },
+  "god_revival_meetings": {
+   "effects": {
+    "cohesion": 0.0024,
+    "disease_exposure": 0.0006,
+    "labor_demand": 0.0014,
+    "legitimacy": 0.0028
+   },
+   "art": "res://assets/ui/research/discovery-600/pilgrimage.png",
+   "name": "Revival Meetings",
+   "observation": "Preachers of the god hold great open-air meetings where crowds are moved to repentance."
+  },
+  "penny_daily_press": {
+   "effects": {
+    "adoption_rate": 0.0032,
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0012,
+    "knowledge_preservation": 0.0043,
+    "legitimacy": -0.0028
+   },
+   "art": "res://assets/ui/research/paper/movable_type_composition.png",
+   "name": "Penny Daily Press",
+   "observation": "Cheap daily papers are sold on every street corner and read by clerks and labourers.",
+   "ability_reason": "News reaches ordinary people every day; public opinion becomes something ministers answer to.",
+   "social_consequence": "Scandal sells papers; ministers are judged in print by people who never met them."
+  },
+  "serialized_novels": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0011
+   },
+   "art": "res://assets/ui/research/paper/movable_type_composition.png",
+   "name": "Serialized Novels",
+   "observation": "Novels come out in weekly parts, and whole families wait for the next one."
+  },
+  "portrait_photo_studios": {
+   "effects": {
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0022
+   },
+   "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
+   "name": "Portrait Photo Studios",
+   "observation": "Studios take likenesses of ordinary families for a small fee."
+  },
+  "political_cartoon_weeklies": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0006,
+    "institutional_rigidity": -0.0012,
+    "legitimacy": -0.0028
+   },
+   "art": "res://assets/ui/research/paper/movable_type_composition.png",
+   "name": "Political Cartoon Weeklies",
+   "observation": "Satirical weeklies mock ministers with drawings anyone can understand."
+  },
+  "family_winter_feast": {
+   "effects": {
+    "cohesion": 0.0024,
+    "food_storage": -0.0006,
+    "trade_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/festival_calendar.png",
+   "name": "Family Winter Feast",
+   "observation": "Families gather for a winter feast with gifts, greeting cards and a lit tree."
+  },
+  "realist_novel": {
+   "effects": {
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0022,
+    "legitimacy": -0.0014
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "name": "Realist Novel",
+   "observation": "Novels depict the lives of ordinary people as they really are."
+  },
+  "common_ownership_doctrine": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "cohesion": -0.0018,
+    "legitimacy": -0.0042
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Common Ownership Doctrine",
+   "observation": "A doctrine says the workers should own the factories and the land in common.",
+   "social_consequence": "Owners fear revolution; workers organize around a promise of a different order."
+  },
+  "national_unity_movements": {
+   "effects": {
+    "cohesion": 0.0055,
+    "institutional_rigidity": 0.0012,
+    "legitimacy": 0.0042,
+    "security_efficiency": 0.0006,
+    "warfare_readiness": 0.0024
+   },
+   "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
+   "name": "National Unity Movements",
+   "observation": "Movements demand one realm for one people speaking one tongue.",
+   "ability_reason": "A people's shared tongue and history become the ground of loyalty; generals can call on national feeling.",
+   "social_consequence": "Minorities who speak other tongues are pressed to conform, or treated as foreigners."
+  },
+  "womens_rights_convention": {
+   "effects": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0012,
+    "legitimacy": 0.0014
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Women's Rights Convention",
+   "observation": "A convention declares that women are owed the same rights as men."
+  },
+  "sacred_text_criticism": {
+   "effects": {
+    "cohesion": -0.0006,
+    "knowledge_preservation": 0.0022,
+    "knowledge_rate": 0.0018,
+    "legitimacy": -0.0042
+   },
+   "art": "res://assets/ui/research/discovery-600/written_lore_tablets.png",
+   "name": "Sacred Text Criticism",
+   "observation": "Scholars study the sacred texts as documents with their own history.",
+   "social_consequence": "The faithful are shaken; some priests of the god lose their congregations."
+  },
+  "great_realms_exhibition": {
+   "effects": {
+    "adoption_rate": 0.0029,
+    "cohesion": 0.0018,
+    "labor_demand": 0.0041,
+    "legitimacy": 0.0042,
+    "trade_capacity": 0.0024
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Great Realms Exhibition",
+   "observation": "A great glass hall displays the works and machines of all realms to millions of visitors.",
+   "ability_reason": "Inventors, buyers and the public see the newest machines of every realm under one roof."
+  },
+  "excursion_tourism": {
+   "effects": {
+    "cohesion": 0.0012,
+    "trade_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/civic_games-v2.png",
+   "name": "Excursion Tourism",
+   "observation": "Trains take townspeople on cheap excursions to the seaside."
+  },
+  "war_photography": {
+   "effects": {
+    "knowledge_preservation": 0.0022,
+    "legitimacy": -0.0028,
+    "warfare_readiness": -0.0006
+   },
+   "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
+   "name": "War Photography",
+   "observation": "Photographs from the war reach the public at home.",
+   "social_consequence": "The dead on the field are seen by families at home, and war loses its glamour."
+  },
+  "mountain_climbing_clubs": {
+   "effects": {
+    "cohesion": 0.0006,
+    "injury_risk": 0.0006,
+    "survey_speed": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
+   "name": "Mountain Climbing Clubs",
+   "observation": "Clubs climb the high peaks for sport and map the routes."
+  },
+  "codified_ball_games": {
+   "effects": {
+    "cohesion": 0.0024,
+    "injury_risk": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/civic_games-v1.png",
+   "name": "Codified Ball Games",
+   "observation": "Field ball games are given written rules and governing associations."
+  },
+  "childrens_books": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0022
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "name": "Children's Books",
+   "observation": "Books are written for children to enjoy."
+  },
+  "national_history_lessons": {
+   "effects": {
+    "cohesion": 0.003,
+    "institutional_rigidity": 0.0006,
+    "legitimacy": 0.0042,
+    "warfare_readiness": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "National History Lessons",
+   "observation": "Every school teaches the nation's history from one approved textbook."
+  },
+  "layered_excavation": {
+   "effects": {
+    "knowledge_preservation": 0.0033,
+    "knowledge_rate": 0.0012,
+    "observation_rate": 0.0006
+   },
+   "art": "res://assets/ui/research/paper/relative_stratigraphy.png",
+   "name": "Layered Excavation",
+   "observation": "Excavators dig by layers and date what they find by its depth."
+  },
+  "open_air_light_painting": {
+   "effects": {
+    "cohesion": 0.0006,
+    "legitimacy": -0.0014
+   },
+   "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
+   "name": "Open-air Light Painting",
+   "observation": "Painters work outdoors to catch the passing light."
+  },
+  "variety_music_halls": {
+   "effects": {
+    "cohesion": 0.0018,
+    "disease_exposure": 0.0006,
+    "legitimacy": -0.0014
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Variety Music Halls",
+   "observation": "Music halls offer songs, comedians and acrobats for a cheap ticket."
+  },
+  "recorded_sound": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0018,
+    "knowledge_preservation": 0.0054
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Recorded Sound",
+   "observation": "Voices and music are recorded on cylinders and discs and played back at will.",
+   "ability_reason": "Performance can be kept and sold; music and speech travel without the performer."
+  },
+  "brand_advertising": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "cohesion": -0.0006,
+    "trade_capacity": 0.003
+   },
+   "art": "res://assets/ui/research/paper/movable_type_composition.png",
+   "name": "Brand Advertising",
+   "observation": "Firms sell branded goods through advertising agencies."
+  },
+  "monument_protection_law": {
+   "effects": {
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0043,
+    "legitimacy": 0.0028
+   },
+   "art": "res://assets/ui/research/discovery-600/memorial_cairn_marking.png",
+   "name": "Monument Protection Law",
+   "observation": "A law protects ancient monuments from destruction."
+  },
+  "endowed_town_libraries": {
+   "effects": {
+    "adoption_rate": 0.0014,
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0054,
+    "labor_demand": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "name": "Endowed Town Libraries",
+   "observation": "Free libraries are endowed in every town."
+  },
+  "professional_sport_leagues": {
+   "effects": {
+    "cohesion": 0.0024,
+    "injury_risk": 0.0006,
+    "trade_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/civic_games-v1.png",
+   "name": "Professional Sport Leagues",
+   "observation": "Professional players compete in leagues watched by great crowds."
+  },
+  "constructed_common_language": {
+   "effects": {
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/bilingual_sign_lists.png",
+   "name": "Constructed Common Language",
+   "observation": "A constructed language is offered as a common tongue for all peoples."
+  },
+  "handcraft_revival": {
+   "effects": {
+    "cohesion": 0.0012,
+    "craft_output": 0.0006,
+    "labor_efficiency": -0.0006
+   },
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "name": "Handcraft Revival",
+   "observation": "Artists revive hand crafts against the machine."
+  },
+  "workers_festival_day": {
+   "effects": {
+    "cohesion": 0.0024,
+    "labor_efficiency": -0.0006,
+    "legitimacy": -0.0014
+   },
+   "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
+   "name": "Workers' Festival Day",
+   "observation": "Workers march on their own festival day."
+  },
+  "mystery_fiction": {
+   "effects": {
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "name": "Mystery Fiction",
+   "observation": "Detective stories and mysteries are published in great numbers."
+  },
+  "open_air_folk_museum": {
+   "effects": {
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0043
+   },
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "name": "Open-air Folk Museum",
+   "observation": "Old farmhouses and workshops are rebuilt in open-air museums."
+  },
+  "moving_pictures": {
+   "effects": {
+    "adoption_rate": 0.0018,
+    "cohesion": 0.0036,
+    "disease_exposure": 0.0006,
+    "knowledge_preservation": 0.0033,
+    "legitimacy": 0.0028
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Moving Pictures",
+   "observation": "Moving pictures are shown to paying crowds in darkened halls.",
+   "ability_reason": "Stories, news and customs reach whole populations through the same pictures.",
+   "social_consequence": "Picture palaces fill every Saturday; preachers warn of their influence on the young."
+  },
+  "revived_realm_games": {
+   "effects": {
+    "cohesion": 0.0024,
+    "legitimacy": 0.0042,
+    "security_efficiency": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/civic_games-v2.png",
+   "name": "Revived Realm Games",
+   "observation": "Athletes of all realms meet at revived games every fourth year."
+  },
+  "peace_congresses": {
+   "effects": {
+    "cohesion": 0.0012,
+    "legitimacy": 0.0014,
+    "warfare_readiness": -0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
+   "name": "Peace Congresses",
+   "observation": "Congresses of citizens from many realms campaign for peace."
+  },
+  "million_reader_dailies": {
+   "effects": {
+    "adoption_rate": 0.0021,
+    "cohesion": 0.0018,
+    "legitimacy": -0.0028
+   },
+   "art": "res://assets/ui/research/paper/movable_type_composition.png",
+   "name": "Million-reader Dailies",
+   "observation": "Daily papers with a million readers shape public opinion.",
+   "social_consequence": "Press barons can make and unmake ministers."
+  },
+  "great_merit_prizes": {
+   "effects": {
+    "knowledge_rate": 0.0018,
+    "legitimacy": 0.0028
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "name": "Great Merit Prizes",
+   "observation": "Great prizes are awarded for science, letters and peace."
+  },
+  "abstract_painting": {
+   "effects": {
+    "cohesion": -0.0006,
+    "knowledge_preservation": 0.0011
+   },
+   "art": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
+   "name": "Abstract Painting",
+   "observation": "Painters abandon form and paint abstraction."
+  },
+  "youth_scouting": {
+   "effects": {
+    "cohesion": 0.0024,
+    "survey_speed": 0.0006,
+    "warfare_readiness": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
+   "name": "Youth Scouting",
+   "observation": "Youth scouting movements teach woodcraft and duty."
+  },
+  "syncopated_dance_music": {
+   "effects": {
+    "cohesion": 0.0018,
+    "legitimacy": -0.0014
+   },
+   "art": "res://assets/ui/research/discovery-600/bone_flutes_drums.png",
+   "name": "Syncopated Dance Music",
+   "observation": "Syncopated dance music from the port cities spreads to every dance hall."
+  },
+  "newspaper_puzzles": {
+   "effects": {
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/puzzle_riddle_contests.png",
+   "name": "Newspaper Puzzles",
+   "observation": "Crosswords and puzzles appear in the daily paper."
+  },
+  "war_newsreels_posters": {
+   "effects": {
+    "cohesion": 0.0036,
+    "knowledge_rate": -0.0006,
+    "legitimacy": 0.0042,
+    "warfare_readiness": 0.003
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "War Newsreels and Posters",
+   "observation": "War posters and newsreels rally the home front.",
+   "social_consequence": "Dissent is drowned out; enlistment surges and enemy peoples are painted as monsters."
+  },
+  "ethnographic_fieldwork": {
+   "effects": {
+    "knowledge_preservation": 0.0033,
+    "knowledge_rate": 0.0012,
+    "observation_rate": 0.0006
+   },
+   "art": "res://assets/ui/research/paper/habitat_observation_records.png",
+   "name": "Ethnographic Fieldwork",
+   "observation": "Scholars live among other peoples to record their ways."
+  },
+  "radio_broadcasting": {
+   "effects": {
+    "adoption_rate": 0.0032,
+    "cohesion": 0.0042,
+    "knowledge_preservation": 0.0033,
+    "legitimacy": 0.0056
+   },
+   "art": "res://assets/ui/research/paper/radio_telegraphy.png",
+   "name": "Radio Broadcasting",
+   "observation": "Radio broadcasts reach every home with news, music and the ruler's voice.",
+   "ability_reason": "One voice can address the whole people at once; news spreads in minutes.",
+   "social_consequence": "The ruler speaks into every kitchen; rumour and propaganda travel as fast as news."
+  },
+  "unknown_warrior_remembrance": {
+   "effects": {
+    "cohesion": 0.003,
+    "legitimacy": 0.0056,
+    "warfare_readiness": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/memorial_cairn_marking.png",
+   "name": "Unknown Warrior Remembrance",
+   "observation": "An unknown warrior is buried in a national tomb, and a day of remembrance is kept."
+  },
+  "inner_voice_novel": {
+   "effects": {
+    "cohesion": -0.0006,
+    "knowledge_preservation": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
+   "name": "Inner-voice Novel",
+   "observation": "Novels follow the inner stream of a character's thought."
+  },
+  "public_broadcasting_charter": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0024,
+    "institutional_rigidity": -0.0006,
+    "knowledge_preservation": 0.0033,
+    "legitimacy": 0.0042
+   },
+   "art": "res://assets/ui/research/paper/radio_telegraphy.png",
+   "name": "Public Broadcasting Charter",
+   "observation": "A public broadcasting corporation operates under a charter, independent of the government."
+  },
+  "film_studio_system": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0018,
+    "trade_capacity": 0.0018
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Film Studio System",
+   "observation": "Film studios make pictures for the whole world."
+  },
+  "sound_films": {
+   "effects": {
+    "adoption_rate": 0.0011,
+    "cohesion": 0.0024
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Sound Films",
+   "observation": "Films with synchronized sound replace silent pictures."
+  },
+  "world_ball_cup": {
+   "effects": {
+    "cohesion": 0.0024,
+    "legitimacy": 0.0028
+   },
+   "art": "res://assets/ui/research/subjects/civic_games-v1.png",
+   "name": "World Ball Cup",
+   "observation": "Realms compete for a world cup of field ball."
+  },
+  "leader_mass_rallies": {
+   "effects": {
+    "cohesion": 0.0024,
+    "institutional_rigidity": 0.0018,
+    "knowledge_rate": -0.0006,
+    "legitimacy": 0.0056,
+    "warfare_readiness": 0.0018
+   },
+   "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
+   "name": "Leader Mass Rallies",
+   "observation": "Choreographed mass rallies glorify the leader.",
+   "social_consequence": "Crowds chant in unison; those who stay home are noted."
+  },
+  "mass_paperbacks": {
+   "effects": {
+    "adoption_rate": 0.0014,
+    "knowledge_preservation": 0.0033
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "name": "Mass Paperbacks",
+   "observation": "Cheap paperback books are sold everywhere."
+  },
+  "picture_story_magazines": {
+   "effects": {
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0012
+   },
+   "art": "res://assets/ui/research/paper/movable_type_composition.png",
+   "name": "Picture-story Magazines",
+   "observation": "Picture-story magazines tell adventures in drawn panels."
+  },
+  "photo_news_magazines": {
+   "effects": {
+    "adoption_rate": 0.0011,
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0022
+   },
+   "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
+   "name": "Photo News Magazines",
+   "observation": "Picture magazines carry the week's news in photographs."
+  },
+  "television_broadcasting": {
+   "effects": {
+    "adoption_rate": 0.0032,
+    "cohesion": 0.0042,
+    "fatigue": -0.0006,
+    "legitimacy": 0.0056
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Television Broadcasting",
+   "observation": "Television broadcasts pictures and sound into the home.",
+   "ability_reason": "Every household sees the same news and entertainment at the same hour.",
+   "social_consequence": "Families gather around the set; evening life moves indoors."
+  },
+  "animated_features": {
+   "effects": {
+    "cohesion": 0.0012,
+    "trade_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
+   "name": "Animated Features",
+   "observation": "Feature-length animated films are made for all ages."
+  },
+  "long_play_records": {
+   "effects": {
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0022
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Long-play Records",
+   "observation": "Long-playing records hold a whole concert."
+  },
+  "broadcast_rites": {
+   "effects": {
+    "cohesion": 0.0024,
+    "legitimacy": 0.0056
+   },
+   "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
+   "name": "Broadcast Rites",
+   "observation": "The god's rites are broadcast into every home."
+  },
+  "televised_state_rites": {
+   "effects": {
+    "cohesion": 0.0024,
+    "legitimacy": 0.0069
+   },
+   "art": "res://assets/ui/research/discovery-600/royal_ancestor_offerings.png",
+   "name": "Televised State Rites",
+   "observation": "The rites of the seat of rule are televised to the whole realm."
+  },
+  "electric_youth_music": {
+   "effects": {
+    "cohesion": 0.0024,
+    "institutional_rigidity": -0.0012,
+    "legitimacy": -0.0028
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Electric Youth Music",
+   "observation": "The young play electric guitar music their elders cannot stand.",
+   "ability_reason": "A culture of the young spreads across realms through records and radio.",
+   "social_consequence": "Parents despair; the young take their own fashions and manners."
+  },
+  "mass_television_age": {
+   "effects": {
+    "adoption_rate": 0.0021,
+    "cohesion": 0.003,
+    "fatigue": -0.0006,
+    "labor_efficiency": -0.0006
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Mass Television Age",
+   "observation": "Television sits in most homes and fills the evenings."
+  },
+  "charter_flight_holidays": {
+   "effects": {
+    "cohesion": 0.0018,
+    "pollution": 0.0006,
+    "trade_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
+   "name": "Charter Flight Holidays",
+   "observation": "Charter flights take the many on holidays abroad."
+  },
+  "mass_image_art": {
+   "effects": {
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0011
+   },
+   "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
+   "name": "Mass Image Art",
+   "observation": "Artists make art from mass-produced images."
+  },
+  "televised_debates": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "cohesion": -0.0006,
+    "legitimacy": 0.0056
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Televised Debates",
+   "observation": "Candidates for office debate on television."
+  },
+  "nonviolent_rights_movements": {
+   "effects": {
+    "cohesion": 0.0042,
+    "institutional_rigidity": -0.0024,
+    "legitimacy": 0.0083
+   },
+   "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
+   "name": "Nonviolent Rights Movements",
+   "observation": "Mass nonviolent movements demand civil rights.",
+   "ability_reason": "Excluded groups win rights by marches and sit-ins rather than arms.",
+   "social_consequence": "Marchers face beatings and arrest; the realm is divided until the law changes."
+  },
+  "worldwide_live_broadcast": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0012
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Worldwide Live Broadcast",
+   "observation": "A live broadcast is shared by the whole world at once."
+  },
+  "youth_counterculture": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "cohesion": -0.0024,
+    "institutional_rigidity": -0.0024,
+    "legitimacy": -0.0042
+   },
+   "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
+   "name": "Youth Counterculture",
+   "observation": "Students protest and a youth counterculture rejects the old ways.",
+   "social_consequence": "Universities are occupied; parents and children no longer understand one another."
+  },
+  "womens_liberation_movement": {
+   "effects": {
+    "cohesion": 0.0018,
+    "institutional_rigidity": -0.0018,
+    "labor_efficiency": 0.0006,
+    "legitimacy": 0.0028
+   },
+   "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
+   "name": "Women's Liberation Movement",
+   "observation": "A women's liberation movement demands equality at work and at home."
+  },
+  "many_cultures_policy": {
+   "effects": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0006,
+    "legitimacy": 0.0028
+   },
+   "art": "res://assets/ui/research/discovery-600/guest_friendship.png",
+   "name": "Many Cultures Policy",
+   "observation": "Policy honours many cultures within one realm."
+  },
+  "electronic_games": {
+   "effects": {
+    "cohesion": 0.0012,
+    "fatigue": 0.0006,
+    "trade_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Electronic Games",
+   "observation": "Electronic games are played on screens."
+  },
+  "world_heritage_list": {
+   "effects": {
+    "knowledge_preservation": 0.0043,
+    "legitimacy": 0.0028
+   },
+   "art": "res://assets/ui/research/discovery-600/memorial_cairn_marking.png",
+   "name": "World Heritage List",
+   "observation": "A world list protects the great cultural sites."
+  },
+  "home_video_recording": {
+   "effects": {
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0022
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Home Video Recording",
+   "observation": "Families record television and their own films at home."
+  },
+  "portable_music_players": {
+   "effects": {
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0006
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Portable Music Players",
+   "observation": "Portable music players give each listener their own music."
+  },
+  "spoken_rhythm_music": {
+   "effects": {
+    "cohesion": 0.0018,
+    "legitimacy": -0.0014
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Spoken-rhythm Music",
+   "observation": "Spoken-rhythm music comes from the city streets."
+  },
+  "continuous_news_channels": {
+   "effects": {
+    "adoption_rate": 0.0014,
+    "cohesion": -0.0006,
+    "legitimacy": -0.0014
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Continuous News Channels",
+   "observation": "News channels broadcast around the clock."
+  },
+  "digital_music_discs": {
+   "effects": {
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0022
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Digital Music Discs",
+   "observation": "Music is sold on digital discs."
+  },
+  "benefit_broadcast_concerts": {
+   "effects": {
+    "cohesion": 0.0018,
+    "legitimacy": 0.0014,
+    "nutrition_quality": 0.0006
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Benefit Broadcast Concerts",
+   "observation": "Benefit concerts are broadcast around the world to raise money for the starving."
+  },
+  "online_forums": {
+   "effects": {
+    "adoption_rate": 0.0011,
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0022
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Online Forums",
+   "observation": "Online forums and personal web pages let anyone publish."
+  },
+  "file_sharing_networks": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "knowledge_preservation": 0.0022,
+    "legitimacy": -0.0014,
+    "trade_capacity": -0.0006
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "File Sharing Networks",
+   "observation": "Music and films are shared freely across networks."
+  },
+  "online_social_networks": {
+   "effects": {
+    "adoption_rate": 0.0029,
+    "cohesion": 0.0024,
+    "fatigue": 0.0012,
+    "legitimacy": -0.0042
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Online Social Networks",
+   "observation": "Online social networks link friends and strangers across the world.",
+   "ability_reason": "Every person can reach and be reached by thousands; opinion forms in hours.",
+   "social_consequence": "Private life becomes public; quarrels and rumours spread faster than the court can answer them."
+  },
+  "user_video_sharing": {
+   "effects": {
+    "adoption_rate": 0.0011,
+    "cohesion": 0.0006
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "User Video Sharing",
+   "observation": "Users share their own videos with the world."
+  },
+  "streaming_media": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0018
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Streaming Media",
+   "observation": "Music and films are streamed on demand."
+  },
+  "networked_protest_movements": {
+   "effects": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0018,
+    "legitimacy": -0.0042
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Networked Protest Movements",
+   "observation": "Protests are organized over networks within hours."
+  },
+  "algorithmic_feeds": {
+   "effects": {
+    "adoption_rate": 0.0011,
+    "cohesion": -0.0024,
+    "fatigue": 0.0012,
+    "legitimacy": -0.0028
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Algorithmic Feeds",
+   "observation": "Algorithmic feeds decide what each person sees.",
+   "social_consequence": "People see only what keeps them watching; neighbours stop sharing the same facts."
+  },
+  "networked_disinformation": {
+   "effects": {
+    "adoption_rate": -0.0007,
+    "cohesion": -0.003,
+    "legitimacy": -0.0083
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Networked Disinformation",
+   "observation": "Organized disinformation campaigns flood the networks.",
+   "social_consequence": "Trust in the court, the press and the physicians erodes; no report is believed without a fight."
+  },
+  "short_viral_video": {
+   "effects": {
+    "cohesion": 0.0006,
+    "fatigue": 0.0006
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Short Viral Video",
+   "observation": "Short videos and shared image jokes spread in hours."
+  },
+  "online_influencers": {
+   "effects": {
+    "cohesion": -0.0006,
+    "legitimacy": -0.0014,
+    "trade_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Online Influencers",
+   "observation": "Livestream performers and influencers gather millions of followers."
+  },
+  "remote_video_gatherings": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0012,
+    "disease_exposure": -0.0012,
+    "task_coordination": 0.0024
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Remote Video Gatherings",
+   "observation": "Work, worship and school are carried on by video call."
+  },
+  "generated_media": {
+   "effects": {
+    "adoption_rate": 0.0014,
+    "cohesion": -0.0012,
+    "legitimacy": -0.0042
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Generated Media",
+   "observation": "Learned models generate images and music on request.",
+   "ability_reason": "Anyone can make pictures, music and voices by asking a machine.",
+   "social_consequence": "No picture or recording can be trusted on sight; artists see their styles copied without payment."
+  },
+  "media_provenance_marks": {
+   "effects": {
+    "knowledge_preservation": 0.0022,
+    "legitimacy": 0.0042
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Media Provenance Marks",
+   "observation": "Photographs and recordings carry verified marks of where they came from."
+  },
+  "shared_virtual_venues": {
+   "effects": {
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0012
+   },
+   "art": "res://assets/ui/research/culture-v1.png",
+   "name": "Shared Virtual Venues",
+   "observation": "People gather in shared virtual venues for concerts and meetings."
+  }
+ }
 }
