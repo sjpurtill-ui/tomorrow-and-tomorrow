@@ -1143,7 +1143,7 @@ static func _envoy_string_lines(audience:Dictionary,string:Dictionary)->Array:
 	match String(string.get("type","")):
 		"debt":
 			var owed:=roundi(float(string.owed))
-			lines=["Understand me: with us a gift is a loan. %s will want %d %s back within the year." % [who,owed,res],
+			lines=["With us, a gift is a loan. %s will want %d %s back within the year." % [who,owed,res],
 				"%s counts every gift, and this one is counted: %d %s, back within the year." % [who,owed,res],
 				"Take it as a loan, not a gift. We will come for %d %s before the year is out." % [owed,res]]
 		"marriage":

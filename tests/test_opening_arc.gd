@@ -110,6 +110,30 @@ func test_the_fire_circle_asks_once_and_sets_the_founding_purpose()->void:
 	confirm.pressed.emit()
 	assert_str(PeopleDirection.ambition).is_equal(chosen)
 
+func test_the_fire_circle_is_a_few_cards_not_a_wall_of_text()->void:
+	var Plain:=preload("res://scripts/plain_speech.gd")
+	for id in Lines.ANSWERS:
+		var words:=String(Lines.LABELS[id]).split(" ",false).size()
+		assert_bool(words>=2 and words<=4).override_failure_message("card label for %s is %d words" % [id,words]).is_true()
+		assert_object(Lines.icon(String(id),Color.WHITE)).is_not_null()
+	for model in Lines.LINES:
+		for key in ["ask","name"]:
+			var line:=String(Lines.LINES[model][key])
+			assert_str(Plain.tag_opener(line)).override_failure_message("%s.%s opens with a label: %s" % [model,key,line]).is_empty()
+			assert_int(Plain.sentences(line).size()).override_failure_message("%s.%s is long: %s" % [model,key,line]).is_less_equal(2)
+	var screen:Control=auto_free(preload("res://scripts/hud/fire_circle_opening.gd").new())
+	add_child(screen)
+	await get_tree().process_frame
+	assert_bool(screen.more_grid.visible).is_false()
+	for button in screen.ambition_buttons:
+		assert_object(button.icon).is_not_null()
+		assert_bool(String(button.tooltip_text).length()>String(button.text).length()).is_true()
+	screen.more_button.pressed.emit()
+	assert_bool(screen.more_grid.visible).is_true()
+	assert_int(screen.ambition_buttons.filter(func(b:Button)->bool:return b.visible).size()).is_equal(PeopleDirection.AMBITIONS.size())
+	screen.more_button.pressed.emit()
+	assert_int(screen.ambition_buttons.filter(func(b:Button)->bool:return b.visible).size()).is_equal(4)
+
 func test_the_first_fire_names_the_home_in_voice()->void:
 	var screen:Control=auto_free(preload("res://scripts/hud/fire_circle_opening.gd").new())
 	screen.mode="name"

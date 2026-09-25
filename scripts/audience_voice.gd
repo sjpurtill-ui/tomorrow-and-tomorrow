@@ -2972,12 +2972,12 @@ const PITCH_OPEN:=[
 	"Let me describe it, {address}, and then tell me it isn't worth doing. {trigger}",
 ]
 const PITCH_CONCEPT:=[
-	"Picture it: {work}. A {form} to {purpose}, and nobody who sees it will ever mistake us for anyone else.",
+	"I can see it already. {work}. A {form} to {purpose}, and nobody who sees it will ever mistake us for anyone else.",
 	"I'd call it {work}, {address}: a {form}, raised to {purpose}. Our grandchildren will argue about who thought of it first. It was me.",
 	"{work}, {address}. A {form} to {purpose}, built the way only our people would build it.",
 ]
 const PITCH_CONCEPT_NOPURPOSE:=[
-	"Picture it: {work}, a {form} like nothing standing anywhere, and ours down to the last stone.",
+	"It would be {work}, a {form} like nothing standing anywhere, and ours down to the last stone.",
 	"I'd call it {work}, {address}: a {form} our grandchildren will argue about.",
 ]
 const PITCH_OTHERS:=[

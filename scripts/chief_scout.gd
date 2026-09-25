@@ -941,7 +941,7 @@ static func _beat_covet(facts:Array,by:Dictionary,flags:Dictionary,ctx:Dictionar
 	match String(persona.temperament):
 		"hungry": text=_pick(rng,["Now here's what I want, {addr}: {want}, {where}. Put a road to it and we'd never look back.","And I'll tell you what's worth the walk: {want}, {where}. I'd have it before anyone else thinks of it."])
 		"wary": text=_pick(rng,["There's {want}, {where}. Worth having — if we can hold the road to it.","We marked {want}, {where}. Useful. Far, though, and far things are hard to keep."])
-		_: text=_pick(rng,["And we found {want}, {where}. That's the bit I'd put in a song.","Best thing we found wasn't people: {want}, {where}.","Mark this: {want}, {where}. I've dreamt about it twice since."])
+		_: text=_pick(rng,["And we found {want}, {where}. That's the bit I'd put in a song.","Best thing we found wasn't people: {want}, {where}.","There's {want}, {where}. I've dreamt about it twice since."])
 	if resources.size()>1: text+=" "+_pick(rng,["That, and more besides — it's all on the chart.","There's more on the chart, but that's the prize."])
 	return _fill(text,ctx.merged({"want":want,"where":where}))
 
