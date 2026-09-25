@@ -5,6 +5,7 @@ extends Node3D
 ## once, each a handful of procedural meshes (no image assets, no lights).
 
 const LIVES_PATH:="res://scripts/court_lives.gd"
+const FIGURES:=preload("res://scripts/living_map.gd")
 const NODE_NAME:="RiteMarks"
 const UNIT:=0.001            ## one metre in map units
 const RING:=0.03             ## rites stand about 30 m from the camp centre
@@ -111,6 +112,8 @@ func _pyre(root:Node3D)->void:
 			_mesh(root,log_mesh,_material("wood",Color(0.36,0.25,0.16)),at,0.0 if layer%2==0 else PI*0.5)
 	var top:=Node3D.new(); top.position=Vector3(0,1.6*UNIT,0); root.add_child(top)
 	_fire(top,0.8)
+	# Mourners walk slowly around the pyre.
+	_walkers(root,6,7.0,true)
 
 func _cairn(root:Node3D)->void:
 	var radii:=[1.3,1.05,0.8,0.6,0.42]
@@ -128,20 +131,39 @@ func _stone(root:Node3D)->void:
 	_cairn(root)
 
 func _procession(root:Node3D)->void:
-	var ring:=Node3D.new(); ring.name="Walkers"; root.add_child(ring)
-	var walker:=CapsuleMesh.new(); walker.radius=0.26*UNIT; walker.height=1.7*UNIT; walker.radial_segments=6; walker.rings=2
-	for i in 12:
-		var a:=float(i)*TAU/12.0
-		var at:=Vector3(cos(a),0,sin(a))*14.0*UNIT
-		var h:=_height(root.position.x+at.x,root.position.z+at.z)-root.position.y
-		_mesh(ring,walker,_material("walker",Color(0.47,0.36,0.26)),at+Vector3(0,h+0.85*UNIT,0))
-	_rings.append(ring)
+	_walkers(root,12,14.0,false)
 	var torch:=Node3D.new(); torch.position=Vector3(0,0,0); root.add_child(torch)
 	_fire(torch,0.7)
+
+func _walkers(root:Node3D,count:int,radius_m:float,mourning:bool)->void:
+	## The people walk the circle: the living map's animated figures (one
+	## draw call), bowed and dark-clad when they mourn.
+	var ring:=Node3D.new(); ring.name="Walkers"; root.add_child(ring)
+	var multimesh:=MultiMesh.new()
+	multimesh.transform_format=MultiMesh.TRANSFORM_3D
+	multimesh.use_custom_data=true
+	multimesh.use_colors=true
+	multimesh.mesh=FIGURES.figure_mesh()
+	multimesh.instance_count=count
+	for i in count:
+		var a:=float(i)*TAU/float(count)
+		var at:=Vector3(cos(a),0,sin(a))*radius_m*UNIT
+		var h:=_height(root.position.x+at.x,root.position.z+at.z)-root.position.y
+		# The ring turns about +Y; each walker faces along that motion.
+		var heading:=Vector3(sin(a),0,-cos(a))
+		multimesh.set_instance_transform(i,Transform3D(Basis.looking_at(heading,Vector3.UP).scaled(Vector3.ONE*UNIT*FIGURES.FIGURE_SCALE),at+Vector3(0,h,0)))
+		multimesh.set_instance_custom_data(i,Color(float(i)*0.37,6.0 if mourning else 0.0,0.0,0.45 if mourning else 0.8))
+		multimesh.set_instance_color(i,Color(0.24,0.22,0.21) if mourning else Color(0.52,0.40,0.30).lerp(Color(0.60,0.52,0.40),float(i%3)*0.5))
+	var batch:=MultiMeshInstance3D.new(); batch.name="Figures"
+	batch.multimesh=multimesh; batch.material_override=FIGURES.figure_material()
+	batch.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	ring.add_child(batch)
+	_rings.append(ring)
 
 func _process(delta:float)->void:
 	if _flames.is_empty() and _rings.is_empty(): return
 	_clock+=delta
+	FIGURES.tick_clock(delta)
 	for i in _flames.size():
 		var flame:=_flames[i]
 		if not is_instance_valid(flame): continue
@@ -150,4 +172,4 @@ func _process(delta:float)->void:
 	for i in _glows.size():
 		if is_instance_valid(_glows[i]): _glows[i].scale=Vector3.ONE*(1.0+0.06*sin(_clock*11.0+float(i)*2.1))
 	for ring in _rings:
-		if is_instance_valid(ring): ring.rotation.y+=delta*0.08
+		if is_instance_valid(ring): ring.rotation.y+=delta*(0.05 if String(ring.get_parent().name).begins_with("Rite_pyre") else 0.08)

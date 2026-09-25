@@ -538,6 +538,7 @@ func _ready() -> void:
 	_scatter_trees()
 	_trace_load("landscape and resources")
 	_place_settlers()
+	preload("res://scripts/living_map.gd").open_on_people(self)
 	_settlement_model().ensure_founded()
 	_build_interface()
 	_present_next_foreign_alert()
@@ -1196,6 +1197,7 @@ func _commit_world_day(day_result:Dictionary)->void:
 	_refresh_discovered_resource_overlays()
 	_refresh_settlement_footprint()
 	preload("res://scripts/rite_marks.gd").refresh(self)
+	preload("res://scripts/living_map.gd").refresh(self)
 	if not progression_events.is_empty() and travel_status_label:
 		travel_status_label.text="CIVILIZATION MILESTONE: %s" % String(progression_events[0].name).to_upper()
 	elif not discoveries.is_empty() and travel_status_label:

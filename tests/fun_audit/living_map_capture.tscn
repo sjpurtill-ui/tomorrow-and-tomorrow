@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/fun_audit/living_map_capture.gd" id="1"]
+
+[node name="LivingMapCapture" type="Node"]
+script = ExtResource("1")
