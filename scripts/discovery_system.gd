@@ -7,6 +7,10 @@ const ResourceKnowledgeCatalog = preload("res://scripts/resource_knowledge_catal
 const SocietyKnowledgeCatalog = preload("res://scripts/society_knowledge_catalog.gd")
 const DiscoveryFrontierCatalog = preload("res://scripts/discovery_frontier_catalog.gd")
 const SocietyModelScript = preload("res://scripts/society_model.gd")
+const TechnologyEras=preload("res://scripts/technology_eras.gd")
+const Research600=preload("res://scripts/research_600_catalog.gd")
+## research_600: last day waiting observers were returned to reopened lines.
+var _research_600_return_day:=-100000
 var society_model = SocietyModelScript.new()
 
 var rng := RandomNumberGenerator.new()
@@ -19,6 +23,7 @@ var _candidate_index=preload("res://scripts/research_candidate_index.gd").new()
 var latest_context:Dictionary={}
 var established_threads_cache:Array[Dictionary]=[]
 var established_threads_signature:=""
+var era_by_id:Dictionary={}
 const BASE_DISCOVERY_COUNT:=31
 const FRONTIER_PATH_AVAILABILITY:=7200
 const EFFECT_DISPLAY_NAMES:Dictionary={
@@ -37,6 +42,7 @@ func reset_for_new_world()->void:
 	technology_limits.clear()
 	catalog_by_id.clear()
 	catalog_by_channel.clear()
+	era_by_id.clear()
 	_candidate_index=preload("res://scripts/research_candidate_index.gd").new()
 	latest_context.clear()
 	established_threads_cache.clear()
@@ -90,6 +96,7 @@ func initialize() -> void:
 		return
 	catalog_by_id.clear()
 	catalog_by_channel.clear()
+	era_by_id.clear()
 	_candidate_index=preload("res://scripts/research_candidate_index.gd").new()
 	rng.seed = WorldSimulation.state.world_seed ^ 0x6c8e9cf5
 	catalog.append_array(ResourceKnowledgeCatalog.entries())
@@ -166,6 +173,12 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/machine_process_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/metallurgy_process_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/settlement_fabric_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/early_practice_knowledge.gd").entries())
+	# --- research_600 (begin): register design discoveries the catalog lacks ---
+	var authored_ids:Dictionary={}
+	for authored:Dictionary in catalog: authored_ids[String(authored.get("id",""))]=true
+	catalog.append_array(Research600.new_entries(authored_ids))
+	# --- research_600 (end) ---
 	catalog.append_array(DiscoveryFrontierCatalog.entries())
 	for i in catalog.size():
 		catalog[i]=_classify_discovery(catalog[i])
@@ -173,6 +186,7 @@ func initialize() -> void:
 		catalog[i]=preload("res://scripts/technology_branch_rules.gd").apply(catalog[i])
 		catalog[i]=preload("res://scripts/mathematics_knowledge.gd").apply(catalog[i])
 		catalog[i]=preload("res://scripts/mechanics_knowledge.gd").apply(catalog[i])
+		catalog[i]=Research600.apply(catalog[i]) # research_600: design foundations and pace win
 		var discovery:Dictionary=catalog[i]
 		catalog_by_id[String(discovery.get("id",""))]=discovery
 		if not bool(discovery.get("frontier",false)): technology_catalog.append(discovery)
@@ -180,6 +194,7 @@ func initialize() -> void:
 		var channel:=_channel_key(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))
 		if not catalog_by_channel.has(channel): catalog_by_channel[channel]=[]
 		(catalog_by_channel[channel] as Array).append(discovery)
+	_assign_research_600_years() # research_600
 	# Candidate order depends only on the world seed and static definition, so
 	# sort each fixed research channel once instead of sorting the full frontier
 	# on every simulated day.
@@ -211,14 +226,16 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	society_model.process_day(catalog,effective_context)
 	var results: Array[Dictionary] = []
 	var current_day := int(floor(WorldSimulation.state.elapsed_days))
+	WorldSimulation.state.scholarship_level=scholarship_level()+scholarship_rate()*float(WorldSimulation.span)/365.0
 	_refresh_active_investigations()
 	for channel_variant in WorldSimulation.state.active_investigations.keys().duplicate():
 		var channel:=String(channel_variant)
 		var discovery_id:=String(WorldSimulation.state.active_investigations.get(channel,""))
 		var discovery:=discovery_definition(discovery_id)
 		if discovery.is_empty(): continue
-		var allocation:=_subcategory_allocation(String(discovery.dynamic),String(discovery.subcategory))
-		var research_capacity:=research_capacity_for(String(discovery.dynamic),String(discovery.subcategory))
+		var home:=_research_600_channel_home(channel) # research_600: foundation work is staffed by its channel
+		var allocation:=_subcategory_allocation(home[0],home[1])
+		var research_capacity:=research_capacity_for(home[0],home[1])
 		var attention:=float(research_capacity.get("progress_multiplier",0.0))
 		if attention<=0.0: continue
 		var activity := 0.65
@@ -311,10 +328,11 @@ func active_investigation_records()->Array[Dictionary]:
 		var discovery:=discovery_definition(id).duplicate(true)
 		if discovery.is_empty(): continue
 		var progress:=float(WorldSimulation.state.discovery_progress.get(id,0.0))
-		var allocation:=_subcategory_allocation(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))
+		var home:=_research_600_channel_home(String(channel)) # research_600
+		var allocation:=_subcategory_allocation(home[0],home[1])
 		var leader_factor:=_leader_factor(String(discovery.get("dynamic","")))
 		var material_evidence:=_resource_evidence(discovery.get("resource_requirements",[]))
-		var research_capacity:=research_capacity_for(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))
+		var research_capacity:=research_capacity_for(home[0],home[1])
 		var baseline_momentum:=float(discovery.get("chance",0.001))/research_difficulty(discovery,WorldSimulation.state.world_seed)*float(research_capacity.get("progress_multiplier",0.0))*material_evidence*leader_factor*WorldSimulation.consequences.discovery_multiplier()*(1.0+WorldSimulation.progression.effect("knowledge_rate"))*0.12
 		baseline_momentum*=Pathways.multiplier(discovery)*(.85 if Exchange.studying() else 1.0)
 		discovery["discovery_name"]=String(discovery.get("name","Undetermined discovery"))
@@ -373,6 +391,7 @@ func _investigation_bottleneck(discovery:Dictionary,allocation:int,leader_factor
 	var research_workforce:=float(research_capacity.get("researchers",0.0))
 	if research_workforce<1.0: return "RESEARCH WORKFORCE — this emphasis receives less than one full-time-equivalent researcher"
 	if material_evidence<0.78: return "MATERIAL BASIS — survey or work the required resource"
+	if era_cost_multiplier(discovery)>=2.0: return "AHEAD OF ITS AGE — broader scholarship must mature before this question can be answered quickly"
 	if leader_factor<0.72: return "LEADERSHIP — the responsible office is weak or vacant"
 	if float(research_capacity.get("support_multiplier",1.0))<0.82: return "RESEARCH SUPPORT — food, tools, records, or administration are constraining the program"
 	if progress<0.25: return "EARLY EVIDENCE — more repeated cases are required"
@@ -385,7 +404,7 @@ func _refresh_active_investigations()->void:
 		var channel:=String(channel_variant)
 		var id:=String(WorldSimulation.state.active_investigations.get(channel,""))
 		var discovery:=discovery_definition(id)
-		if discovery.is_empty() or channel!=_channel_key(String(discovery.get("dynamic","")),String(discovery.get("subcategory",""))) or _subcategory_allocation(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))<=0 or id in WorldSimulation.state.known_discoveries or not _discovery_is_eligible(discovery,current_day):
+		if discovery.is_empty() or not _research_600_investigation_placed(channel,discovery) or id in WorldSimulation.state.known_discoveries or not _discovery_is_eligible(discovery,current_day):
 			WorldSimulation.state.active_investigations.erase(channel)
 	# Attention is a strategic resource, not a queue of forty-eight tiny chores.
 	# When a line completes or temporarily runs out of evidence, keep the same
@@ -393,12 +412,14 @@ func _refresh_active_investigations()->void:
 	# redirect prefers the same broad domain, then the civilization's seeded focus,
 	# actual activity, leadership and material evidence decide the specific line.
 	_redistribute_stranded_attention(current_day)
+	_research_600_return_waiting_attention(current_day) # research_600: staffed lines come back when they reopen
 	for channel_data in _allocated_channels():
 		var dynamic_id:=String(channel_data.dynamic)
 		var subcategory:=String(channel_data.subcategory)
 		var channel:=_channel_key(dynamic_id,subcategory)
 		if String(WorldSimulation.state.active_investigations.get(channel,""))!="": continue
 		var candidate:=_best_candidate_for_channel(channel,current_day)
+		if candidate.is_empty(): candidate=_research_600_foundation_candidate(dynamic_id,current_day) # research_600
 		if not candidate.is_empty(): WorldSimulation.state.active_investigations[channel]=String(candidate.id)
 	WorldSimulation.state.active_observations.clear()
 	for record in active_investigation_records_shallow():
@@ -493,6 +514,7 @@ func _discovery_is_eligible(discovery:Dictionary,current_day:int,known:Variant=n
 	if known==null:known=WorldSimulation.state.known_discoveries
 	var id:=String(discovery.get("id",""))
 	if id in known or not _path_is_viable(discovery):return false
+	if not research_600_open(discovery,{},current_day):return false # research_600: era and design conditions
 	return OpeningOpportunities.ready(id) and Pathways.ready(discovery,current_day,known) and _resource_requirements_met(discovery.get("resource_requirements",[]))
 
 func _channel_has_candidate(channel:String,current_day:int)->bool:
@@ -557,6 +579,8 @@ func _candidate_score(discovery:Dictionary)->float:
 	# Once a society has invested in a viable tradition, its deeper methods have
 	# a modest continuity advantage, but other routes can still overtake it.
 	score+=float(discovery.get("stage_index",0))*3.5
+	# Work far beyond current scholarship is slow; lines prefer questions of their age.
+	score-=log(era_cost_multiplier(discovery))/log(2.0)*20.0
 	score+=Pathways.need(discovery)+(35.0 if not Pathways.evidence(id).is_empty() else 0.0)
 	return score
 
@@ -799,6 +823,10 @@ func refresh_operating_effects()->void:
 func adoption(discovery_id:String)->float:
 	return society_model.adoption(discovery_id)
 
+## research_600: adoption less specialization neglect (SocietyModel.practiced).
+func practiced(discovery_id:String)->float:
+	return society_model.practiced(discovery_id)
+
 func validate_catalog()->Array[String]:
 	initialize()
 	return society_model.validate_catalog(catalog)
@@ -975,7 +1003,9 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 				for resource:String in requirement.get("alternative_stocks",{}):alternative+=" or %.1f %s in stores" % [float(requirement.alternative_stocks[resource]),resource]
 				missing.append("%s: %s access%s" % [String(requirement.get("resource","material")),String(requirement.get("stage","recognized")),alternative])
 		if not OpeningOpportunities.ready(id):missing.append(OpeningOpportunities.remaining(id))
-		if OpeningOpportunities.ready(id) and Pathways.ready(entry,int(WorldSimulation.state.elapsed_days),known_index) and _resource_requirements_met(entry.get("resource_requirements",[])):missing.clear()
+		var design_missing:=research_600_missing(entry) # research_600
+		missing.append_array(design_missing)
+		if design_missing.is_empty() and OpeningOpportunities.ready(id) and Pathways.ready(entry,int(WorldSimulation.state.elapsed_days),known_index) and _resource_requirements_met(entry.get("resource_requirements",[])):missing.clear()
 		elif missing.is_empty():missing.append("A supported approach and its evidence are needed")
 		var known:=known_index.has(id)
 		row["ready"]=not known and missing.is_empty()
@@ -1010,8 +1040,62 @@ func select_research_target(discovery_id:String)->Dictionary:
 
 ## A stable seeded draw: saves/reloads never reroll the same technology.
 ## Bounded variance changes pace without bypassing any causal eligibility gate.
-func research_difficulty(discovery:Dictionary,civilization_seed:int)->float:
-	return 0.85+_research_draw(String(discovery.id),civilization_seed,"cost")*0.30
+## `known` (default: the acting society's discoveries) supplies design
+## precedents, which make research quicker but are never required.
+func research_difficulty(discovery:Dictionary,civilization_seed:int,level:float=NAN,known:Variant=null)->float:
+	if known==null: known=WorldSimulation.state.known_discoveries
+	return (0.85+_research_draw(String(discovery.id),civilization_seed,"cost")*0.30)*era_cost_multiplier(discovery,level)/Research600.precedent_factor(String(discovery.id),known)
+
+
+## Game-year equivalent of a discovery's historical period (TechnologyEras).
+## Undated entries inherit the latest era among their required foundations.
+func discovery_era(id:String,visiting:Dictionary={})->float:
+	if era_by_id.has(id): return float(era_by_id[id])
+	var era:=0.0
+	if TechnologyEras.HISTORICAL_YEAR.has(id):
+		era=TechnologyEras.game_year_for(float(TechnologyEras.HISTORICAL_YEAR[id]))
+	else:
+		var entry:Dictionary=catalog_by_id.get(id,{})
+		if entry.is_empty() or visiting.has(id): return 0.0
+		var path:=visiting.duplicate()
+		path[id]=true
+		for parent in entry.get("requires_all",entry.get("requires",[])): era=maxf(era,discovery_era(String(parent),path))
+	era_by_id[id]=era
+	return era
+
+
+## Inquiry beyond the society's accumulated scholarship costs exponentially
+## more. Nothing is granted by age: knowledge still needs its foundations,
+## evidence and researchers. `level` defaults to the acting society's own.
+func era_cost_multiplier(discovery:Dictionary,level:float=NAN)->float:
+	if is_nan(level): level=scholarship_level()
+	return TechnologyEras.cost_multiplier(discovery_era(String(discovery.get("id",""))),level)
+
+
+## Accumulated scholarship, in game-year equivalents on the pacing curve.
+## Saves from before this field existed start from the breadth of what the
+## society already knows, never beyond the time it has actually lived.
+func scholarship_level()->float:
+	var level:=float(WorldSimulation.state.scholarship_level)
+	if level>=0.0: return level
+	var eras:Array[float]=[]
+	for id in WorldSimulation.state.known_discoveries: eras.append(discovery_era(String(id)))
+	eras.sort()
+	var breadth:=eras[int(eras.size()*0.5)] if not eras.is_empty() else 0.0
+	level=minf(breadth,float(WorldSimulation.state.elapsed_days)/365.0)
+	WorldSimulation.state.scholarship_level=level
+	return level
+
+
+## Scholarship-years gained per year. A staffed, fed, literate research
+## program advances about one year per year; oral tradition alone about half.
+func scholarship_rate()->float:
+	var researchers:=maxf(0.0,float(WorldSimulation.state.effective_workers("Knowledge")))
+	var population:=maxf(1.0,float(WorldSimulation.state.population_total))
+	var staffing:=clampf(minf(researchers/6.0,researchers/population/0.03),0.0,1.0)
+	var education:=preload("res://scripts/civilization_indicators.gd").education_index(WorldSimulation.state)
+	var food:=clampf(float(WorldSimulation.state.food_security),0.0,1.0)
+	return (0.45+0.55*staffing)*lerpf(0.85,1.2,education)*lerpf(0.7,1.0,food)
 
 func research_affinity(discovery:Dictionary,civilization_seed:int,environment:Dictionary)->float:
 	var score:=_research_draw(String(discovery.id),civilization_seed,"affinity")*100.0
@@ -1031,8 +1115,10 @@ func rival_research_candidates(civ:Dictionary,domain:String)->Array[Dictionary]:
 	var environment:Dictionary=civ.get("environment_profile",{})
 	var resources:Dictionary=environment.get("resource_potentials",{})
 	var candidates:Array[Dictionary]=[]
+	var society:=research_600_rival_society(civ) # research_600: same gate as the player
 	for entry in technology_catalog:
 		if bool(entry.get("frontier",false)) or String(entry.dynamic)!=domain or String(entry.id) in known: continue
+		if not research_600_open(entry,society): continue
 		var viable:=false
 		for route:Dictionary in Pathways.routes_for(entry,known,{}):
 			if route.ready:viable=true;break
@@ -1180,3 +1266,196 @@ func military_training_multiplier(unit:String)->float:
 		var reduction:=clampf(float(definition.get("training_profile",{}).get(unit,0)),0,.25)
 		result*=1.0-reduction*adoption(id)
 	return maxf(.7,result)
+
+
+# --- research_600 (begin) -----------------------------------------------------
+# Era gate and design conditions from the 600-year research layer
+# (scripts/research_600_catalog.gd). They gate availability only: nothing here
+# grants or revokes knowledge. Player and rivals share research_600_open(); only
+# the society snapshot differs.
+
+## Registry ids take their design era; other entries are re-dated so none is
+## older than its required foundations; every live entry gets an earliest year.
+func _assign_research_600_years()->void:
+	for id:String in Research600.ids():
+		if catalog_by_id.has(id): era_by_id[id]=float(Research600.item(id).get("proposed_year",0.0))
+	for discovery:Dictionary in technology_catalog: _research_600_reconciled_era(String(discovery.get("id","")),{})
+	for discovery:Dictionary in technology_catalog:
+		if discovery.has("earliest_year"): continue
+		var id:=String(discovery.get("id",""))
+		discovery["earliest_year"]=Research600.earliest_year(discovery,discovery_era(id),TechnologyEras.HISTORICAL_YEAR.has(id))
+
+
+## TechnologyEras date (or 0 when undated), raised to the latest era among the
+## entry's required foundations, which may now carry later design years.
+func _research_600_reconciled_era(id:String,visiting:Dictionary)->float:
+	if era_by_id.has(id): return float(era_by_id[id])
+	var entry:Dictionary=catalog_by_id.get(id,{})
+	if entry.is_empty() or visiting.has(id): return 0.0
+	var era:=TechnologyEras.game_year_for(float(TechnologyEras.HISTORICAL_YEAR[id])) if TechnologyEras.HISTORICAL_YEAR.has(id) else 0.0
+	visiting[id]=true
+	for parent:Variant in entry.get("requires_all",entry.get("requires",[])): era=maxf(era,_research_600_reconciled_era(String(parent),visiting))
+	visiting.erase(id)
+	era_by_id[id]=era
+	return era
+
+
+## Earliest game year at which `discovery` can be researched (0 when ungated).
+func research_600_earliest_year(discovery:Dictionary)->float:
+	return float(discovery.get("earliest_year",0.0))
+
+
+## True when the calendar has reached the entry's age and its design conditions
+## hold for `society` (default: the acting player-side society). `day` (>=0)
+## evaluates the calendar at that simulated day instead of today.
+func research_600_open(discovery:Dictionary,society:Dictionary={},day:int=-1)->bool:
+	var year:=float(day)/365.0 if day>=0 else float(society.get("year",float(WorldSimulation.state.elapsed_days)/365.0))
+	if year<float(discovery.get("earliest_year",0.0)): return false
+	if (discovery.get("conditions",{}) as Dictionary).is_empty(): return true
+	return Research600.conditions_met(String(discovery.get("id","")),society if not society.is_empty() else research_600_player_society())
+
+
+## Player-facing reasons the era gate or design conditions still hold `discovery`.
+func research_600_missing(discovery:Dictionary,society:Dictionary={})->Array[String]:
+	var reasons:Array[String]=[]
+	var year:=float(society.get("year",float(WorldSimulation.state.elapsed_days)/365.0))
+	var earliest:=float(discovery.get("earliest_year",0.0))
+	if year<earliest: reasons.append("Its age has not come: not before year %d" % int(ceil(earliest)))
+	if not (discovery.get("conditions",{}) as Dictionary).is_empty():
+		reasons.append_array(Research600.unmet_conditions(String(discovery.get("id","")),society if not society.is_empty() else research_600_player_society()))
+	return reasons
+
+
+## The acting (player-side or owned) society as the design conditions see it.
+func research_600_player_society()->Dictionary:
+	var state:Node=WorldSimulation.state
+	var resources:Dictionary={}
+	for deposit:Dictionary in state.resource_deposits:
+		if _stage_rank(String(deposit.get("stage","unknown")))>=_stage_rank("recognized"): resources[String(deposit.get("resource",""))]=true
+	for resource_name:Variant in state.resource_stockpiles:
+		if float(state.resource_stockpiles[resource_name])>0.0: resources[String(resource_name)]=true
+	var environment:Dictionary={}
+	for settlement:Dictionary in state.player_settlements:
+		Research600.environment_tags(settlement.get("environment_profile",{}),environment)
+	if environment.is_empty() and WorldSimulation.food!=null: Research600.environment_tags(WorldSimulation.food.current_environment_profile(),environment)
+	if bool(state.water_metrics.get("source_accessible",false)): environment["river"]=true
+	var contact:=false
+	if WorldSimulation.world!=null:
+		for civ:Dictionary in WorldSimulation.world.civilizations:
+			if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))>=Research600.CONTACT_MET_LEVEL: contact=true;break
+	return {"year":float(state.elapsed_days)/365.0,"population":float(state.population_total),"settlements":maxi(1,state.player_settlements.size()),
+		"resources":resources,"environment":environment,"institutions":float(state.society_capacities.get("institutions",0.0)),"contact":contact}
+
+
+## A projected rival civilization as the design conditions see it. Materials are
+## landscape potentials at the floor rival research already uses.
+func research_600_rival_society(civ:Dictionary)->Dictionary:
+	var profile:Dictionary=civ.get("environment_profile",{})
+	var potentials:Dictionary=profile.get("resource_potentials",civ.get("resource_endowment",{}))
+	var resources:Dictionary={}
+	for resource_name:Variant in potentials:
+		if float(potentials[resource_name])>=Research600.RIVAL_RESOURCE_FLOOR: resources[String(resource_name)]=true
+	var contact:=int((civ.get("player_relation",{}) as Dictionary).get("rival_contact_level",0))>=Research600.CONTACT_MET_LEVEL
+	for relation_variant:Variant in (civ.get("relations",{}) as Dictionary).values():
+		var relation:Dictionary=relation_variant
+		if float(relation.get("trade",0.0))>0.0 or bool(relation.get("at_war",false)) or String(relation.get("treaty","none"))!="none": contact=true;break
+	return {"year":float(WorldSimulation.state.elapsed_days)/365.0,"population":float(civ.get("population",0.0)),"settlements":maxi(1,int(civ.get("settlement_count",1))),
+		"resources":resources,"environment":Research600.environment_tags(profile,{}),"institutions":float(civ.get("institutions",0.0)),"contact":contact}
+
+
+## Observers leave a line whose questions are all answered or not yet open
+## (_redistribute_stranded_attention) and previously never came back when a new
+## question opened there. Once a month, a line of a staffed domain that has
+## open work but nobody on it takes one observer back from the domain's most
+## crowded line (only from a line with two or more, so no running line stops).
+func _research_600_return_waiting_attention(current_day:int)->void:
+	if current_day<_research_600_return_day+30 and current_day>=_research_600_return_day: return
+	_research_600_return_day=current_day
+	var moved:=false
+	for dynamic_variant in WorldSimulation.state.research_subcategory_allocations:
+		var dynamic_id:=String(dynamic_variant)
+		var subcategories:Dictionary=WorldSimulation.state.research_subcategory_allocations[dynamic_variant]
+		for subcategory_variant in subcategories.keys():
+			if int(subcategories[subcategory_variant])>0: continue
+			var donor:Variant=null
+			for other_variant in subcategories:
+				if int(subcategories[other_variant])>=2 and (donor==null or int(subcategories[other_variant])>int(subcategories[donor])): donor=other_variant
+			if donor==null: break
+			if not _channel_has_candidate(_channel_key(dynamic_id,String(subcategory_variant)),current_day): continue
+			subcategories[donor]=int(subcategories[donor])-1
+			subcategories[subcategory_variant]=1
+			moved=true
+		WorldSimulation.state.research_subcategory_allocations[dynamic_variant]=subcategories
+	if moved: _rebuild_research_domain_totals()
+
+
+## A line whose domain has no open question of its own does foundation work:
+## it investigates an open prerequisite, from any line, of one of its domain's
+## era-open questions (the design has 534 cross-line foundations). Without this
+## an emphasis on a single line starved on foundations nobody researched. The
+## observers and emphasis stay with the chosen domain; only the question differs.
+var _research_600_foundation_cache:Dictionary={}
+
+func _research_600_channel_home(channel:String)->Array[String]:
+	var parts:=channel.split("::")
+	return [String(parts[0]),String(parts[1]) if parts.size()>1 else ""]
+
+
+func _research_600_investigation_placed(channel:String,discovery:Dictionary)->bool:
+	var home:=_research_600_channel_home(channel)
+	if _subcategory_allocation(home[0],home[1])<=0: return false
+	if channel==_channel_key(String(discovery.get("dynamic","")),String(discovery.get("subcategory",""))): return true
+	return String(discovery.get("id","")) in _research_600_foundation_ids(home[0],int(floor(WorldSimulation.state.elapsed_days)))
+
+
+func _research_600_foundation_candidate(dynamic_id:String,current_day:int)->Dictionary:
+	var active:Array=WorldSimulation.state.active_investigations.values()
+	for id:String in _research_600_foundation_ids(dynamic_id,current_day):
+		if not id in active: return discovery_definition(id)
+	return {}
+
+
+## Open prerequisites (followed down to ones that can be researched now) of the
+## domain's era-open unknown questions, earliest first.
+func _research_600_foundation_ids(dynamic_id:String,current_day:int)->Array[String]:
+	var key:="%s:%d:%d" % [dynamic_id,current_day,WorldSimulation.state.known_discoveries.size()]
+	if _research_600_foundation_cache.has(key): return _research_600_foundation_cache[key]
+	if _research_600_foundation_cache.size()>64: _research_600_foundation_cache.clear()
+	var known:Dictionary={}
+	for id:Variant in WorldSimulation.state.known_discoveries: known[String(id)]=true
+	var frontier:Array[String]=[]
+	for entry:Dictionary in technology_catalog:
+		if String(entry.get("dynamic",""))!=dynamic_id or known.has(String(entry.get("id",""))): continue
+		if research_600_open(entry,{},current_day): frontier.append_array(_research_600_missing_parents(entry,known))
+	var found:Dictionary={}
+	var visited:Dictionary={}
+	var depth:=0
+	while not frontier.is_empty() and depth<8:
+		var next:Array[String]=[]
+		for id:String in frontier:
+			if visited.has(id) or known.has(id): continue
+			visited[id]=true
+			var foundation:=discovery_definition(id)
+			if foundation.is_empty() or not research_600_open(foundation,{},current_day): continue
+			if _discovery_is_eligible(foundation,current_day,known): found[id]=int(foundation.get("day",0))
+			else: next.append_array(_research_600_missing_parents(foundation,known))
+		frontier=next
+		depth+=1
+	var ids:Array[String]=[]
+	for id:Variant in found: ids.append(String(id))
+	ids.sort_custom(func(a:String,b:String)->bool: return int(found[a])<int(found[b]))
+	_research_600_foundation_cache[key]=ids
+	return ids
+
+
+func _research_600_missing_parents(entry:Dictionary,known:Dictionary)->Array[String]:
+	var parents:Array[String]=[]
+	for parent:Variant in entry.get("requires_all",[]):
+		if not known.has(String(parent)): parents.append(String(parent))
+	for group:Variant in entry.get("requires_any",[]):
+		var satisfied:=false
+		for option:Variant in group:
+			if known.has(String(option)): satisfied=true
+		if not satisfied and not (group as Array).is_empty(): parents.append(String((group as Array)[0]))
+	return parents
+# --- research_600 (end) -------------------------------------------------------

@@ -1,0 +1,776 @@
+{
+ "schema": "benchmarks_600/1",
+ "description": "Historical plausibility ranges for the 600-year research window. Human source and reasoning: docs/research/BENCHMARKS_600.md. For each metric and game year: min/max bound what is historically plausible at all; low/typical/high are the values expected from poor, ordinary and best-documented (high-achieving) societies. 'better' says which direction is an improvement, so for 'lower' metrics the 'low' (poor-play) value is the larger number. 'probe_key' names the RC_ROW field of tests/research_600_campaign_probe.gd that measures it; null means reported qualitatively only.",
+ "game_years": {
+  "0": -5000,
+  "100": -4000,
+  "300": -3000,
+  "600": -1500
+ },
+ "founders": 120,
+ "metrics": {
+  "life_expectancy": {
+   "unit": "years at birth (e0)",
+   "better": "higher",
+   "probe_key": "life_expectancy",
+   "years": {
+    "0": {
+     "min": 18,
+     "low": 20,
+     "typical": 25,
+     "high": 30,
+     "max": 33
+    },
+    "100": {
+     "min": 18,
+     "low": 21,
+     "typical": 26,
+     "high": 31,
+     "max": 34
+    },
+    "300": {
+     "min": 18,
+     "low": 21,
+     "typical": 27,
+     "high": 33,
+     "max": 36
+    },
+    "600": {
+     "min": 18,
+     "low": 22,
+     "typical": 28,
+     "high": 35,
+     "max": 38
+    }
+   }
+  },
+  "infant_mortality": {
+   "unit": "deaths before age 1 per 1,000 live births",
+   "better": "lower",
+   "probe_key": "infant_mortality",
+   "years": {
+    "0": {
+     "min": 160,
+     "low": 330,
+     "typical": 260,
+     "high": 200,
+     "max": 400
+    },
+    "100": {
+     "min": 150,
+     "low": 320,
+     "typical": 250,
+     "high": 190,
+     "max": 400
+    },
+    "300": {
+     "min": 140,
+     "low": 310,
+     "typical": 240,
+     "high": 180,
+     "max": 400
+    },
+    "600": {
+     "min": 130,
+     "low": 300,
+     "typical": 220,
+     "high": 160,
+     "max": 380
+    }
+   }
+  },
+  "child_mortality_1_4": {
+   "unit": "deaths between ages 1 and 5 per 1,000 reaching age 1 (4q1)",
+   "better": "lower",
+   "probe_key": "child_mortality_1_4",
+   "years": {
+    "0": {
+     "min": 110,
+     "low": 260,
+     "typical": 200,
+     "high": 150,
+     "max": 330
+    },
+    "100": {
+     "min": 105,
+     "low": 250,
+     "typical": 190,
+     "high": 140,
+     "max": 330
+    },
+    "300": {
+     "min": 100,
+     "low": 240,
+     "typical": 180,
+     "high": 130,
+     "max": 320
+    },
+    "600": {
+     "min": 90,
+     "low": 230,
+     "typical": 170,
+     "high": 120,
+     "max": 300
+    }
+   }
+  },
+  "maternal_per_100k": {
+   "unit": "maternal deaths per 100,000 births (period average)",
+   "better": "lower",
+   "probe_key": "maternal_per_100k",
+   "years": {
+    "0": {
+     "min": 700,
+     "low": 2000,
+     "typical": 1400,
+     "high": 1000,
+     "max": 3000
+    },
+    "100": {
+     "min": 650,
+     "low": 1900,
+     "typical": 1300,
+     "high": 950,
+     "max": 3000
+    },
+    "300": {
+     "min": 600,
+     "low": 1800,
+     "typical": 1250,
+     "high": 900,
+     "max": 2900
+    },
+    "600": {
+     "min": 500,
+     "low": 1700,
+     "typical": 1150,
+     "high": 800,
+     "max": 2800
+    }
+   }
+  },
+  "tfr": {
+   "unit": "total fertility rate (births per woman over ages 15-45)",
+   "better": "neither",
+   "probe_key": "tfr",
+   "years": {
+    "0": {
+     "min": 3.5,
+     "low": 4.5,
+     "typical": 5.5,
+     "high": 6.5,
+     "max": 8.0
+    },
+    "100": {
+     "min": 3.5,
+     "low": 4.5,
+     "typical": 5.8,
+     "high": 6.8,
+     "max": 8.0
+    },
+    "300": {
+     "min": 3.5,
+     "low": 4.5,
+     "typical": 5.8,
+     "high": 6.8,
+     "max": 8.0
+    },
+    "600": {
+     "min": 3.5,
+     "low": 4.5,
+     "typical": 5.6,
+     "high": 6.5,
+     "max": 8.0
+    }
+   }
+  },
+  "cbr": {
+   "unit": "crude birth rate per 1,000 per year",
+   "better": "neither",
+   "probe_key": "cbr",
+   "years": {
+    "0": {
+     "min": 30,
+     "low": 38,
+     "typical": 44,
+     "high": 48,
+     "max": 55
+    },
+    "100": {
+     "min": 30,
+     "low": 38,
+     "typical": 44,
+     "high": 48,
+     "max": 55
+    },
+    "300": {
+     "min": 30,
+     "low": 38,
+     "typical": 43,
+     "high": 47,
+     "max": 55
+    },
+    "600": {
+     "min": 30,
+     "low": 37,
+     "typical": 42,
+     "high": 46,
+     "max": 55
+    }
+   }
+  },
+  "cdr": {
+   "unit": "crude death rate per 1,000 per year",
+   "better": "lower",
+   "probe_key": "cdr",
+   "years": {
+    "0": {
+     "min": 25,
+     "low": 48,
+     "typical": 40,
+     "high": 34,
+     "max": 65
+    },
+    "100": {
+     "min": 25,
+     "low": 46,
+     "typical": 39,
+     "high": 33,
+     "max": 65
+    },
+    "300": {
+     "min": 24,
+     "low": 45,
+     "typical": 38,
+     "high": 32,
+     "max": 65
+    },
+    "600": {
+     "min": 22,
+     "low": 44,
+     "typical": 37,
+     "high": 31,
+     "max": 65
+    }
+   }
+  },
+  "growth_pct": {
+   "unit": "population growth, % per game year, averaged since the previous checkpoint",
+   "better": "higher",
+   "probe_key": "growth_pct",
+   "years": {
+    "0": {
+     "min": -2.0,
+     "low": -0.5,
+     "typical": 0.4,
+     "high": 1.2,
+     "max": 2.0
+    },
+    "100": {
+     "min": -1.0,
+     "low": -0.3,
+     "typical": 0.5,
+     "high": 1.4,
+     "max": 1.8,
+     "note": "high = the benchmark's own best crude birth rate (48) minus its best crude death rate (33-34): a well-fed frontier population"
+    },
+    "300": {
+     "min": -1.0,
+     "low": -0.2,
+     "typical": 0.4,
+     "high": 1.0,
+     "max": 1.5
+    },
+    "600": {
+     "min": -1.0,
+     "low": -0.2,
+     "typical": 0.3,
+     "high": 0.8,
+     "max": 1.3
+    }
+   }
+  },
+  "population": {
+   "unit": "people in the founders' society (120 founders at year 0)",
+   "better": "higher",
+   "probe_key": "population",
+   "years": {
+    "0": {
+     "min": 100,
+     "low": 120,
+     "typical": 120,
+     "high": 120,
+     "max": 140
+    },
+    "100": {
+     "min": 30,
+     "low": 60,
+     "typical": 300,
+     "high": 900,
+     "max": 1500
+    },
+    "300": {
+     "min": 30,
+     "low": 80,
+     "typical": 1200,
+     "high": 6000,
+     "max": 15000
+    },
+    "600": {
+     "min": 30,
+     "low": 100,
+     "typical": 3500,
+     "high": 20000,
+     "max": 60000
+    }
+   }
+  },
+  "largest_settlement_historical": {
+   "unit": "people in the largest settlements of the era (historical record, not the founders' society)",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "0": {
+     "min": 50,
+     "low": 100,
+     "typical": 300,
+     "high": 3000,
+     "max": 8000
+    },
+    "100": {
+     "min": 50,
+     "low": 150,
+     "typical": 800,
+     "high": 5000,
+     "max": 15000
+    },
+    "300": {
+     "min": 80,
+     "low": 300,
+     "typical": 3000,
+     "high": 40000,
+     "max": 50000
+    },
+    "600": {
+     "min": 100,
+     "low": 500,
+     "typical": 5000,
+     "high": 60000,
+     "max": 80000
+    }
+   }
+  },
+  "settlement_density": {
+   "unit": "people per hectare of built settlement",
+   "better": "neither",
+   "probe_key": null,
+   "years": {
+    "0": {
+     "min": 30,
+     "low": 50,
+     "typical": 100,
+     "high": 200,
+     "max": 300
+    },
+    "100": {
+     "min": 30,
+     "low": 50,
+     "typical": 110,
+     "high": 200,
+     "max": 300
+    },
+    "300": {
+     "min": 50,
+     "low": 80,
+     "typical": 150,
+     "high": 250,
+     "max": 400
+    },
+    "600": {
+     "min": 50,
+     "low": 100,
+     "typical": 180,
+     "high": 300,
+     "max": 450
+    }
+   }
+  },
+  "food_labor_share": {
+   "unit": "% of the able workforce's labor time spent getting and processing food (game: Food allocation)",
+   "better": "lower",
+   "probe_key": "food_share",
+   "years": {
+    "0": {
+     "min": 40,
+     "low": 75,
+     "typical": 62,
+     "high": 52,
+     "max": 90
+    },
+    "100": {
+     "min": 38,
+     "low": 72,
+     "typical": 60,
+     "high": 50,
+     "max": 90
+    },
+    "300": {
+     "min": 35,
+     "low": 70,
+     "typical": 56,
+     "high": 45,
+     "max": 88
+    },
+    "600": {
+     "min": 32,
+     "low": 68,
+     "typical": 52,
+     "high": 40,
+     "max": 85
+    }
+   }
+  },
+  "non_food_population_share": {
+   "unit": "% of households not primarily producing food (historical)",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "0": {
+     "min": 0,
+     "low": 3,
+     "typical": 8,
+     "high": 12,
+     "max": 18
+    },
+    "100": {
+     "min": 0,
+     "low": 5,
+     "typical": 10,
+     "high": 15,
+     "max": 22
+    },
+    "300": {
+     "min": 2,
+     "low": 8,
+     "typical": 18,
+     "high": 32,
+     "max": 40
+    },
+    "600": {
+     "min": 3,
+     "low": 10,
+     "typical": 22,
+     "high": 38,
+     "max": 45
+    }
+   }
+  },
+  "grain_yield_ratio": {
+   "unit": "harvest per seed sown (x:1)",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "0": {
+     "min": 2,
+     "low": 3,
+     "typical": 5,
+     "high": 8,
+     "max": 10
+    },
+    "100": {
+     "min": 2,
+     "low": 4,
+     "typical": 6,
+     "high": 10,
+     "max": 12
+    },
+    "300": {
+     "min": 3,
+     "low": 5,
+     "typical": 10,
+     "high": 25,
+     "max": 30
+    },
+    "600": {
+     "min": 3,
+     "low": 5,
+     "typical": 10,
+     "high": 20,
+     "max": 30
+    }
+   }
+  },
+  "largest_structure_person_days": {
+   "unit": "labor in the largest single construction project (person-days, order of magnitude)",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "0": {
+     "min": 100,
+     "low": 500,
+     "typical": 3000,
+     "high": 20000,
+     "max": 50000
+    },
+    "100": {
+     "min": 300,
+     "low": 2000,
+     "typical": 20000,
+     "high": 200000,
+     "max": 500000
+    },
+    "300": {
+     "min": 1000,
+     "low": 5000,
+     "typical": 100000,
+     "high": 2000000,
+     "max": 5000000
+    },
+    "600": {
+     "min": 1000,
+     "low": 10000,
+     "typical": 300000,
+     "high": 10000000,
+     "max": 30000000
+    }
+   }
+  },
+  "discoveries_per_50_years": {
+   "unit": "share of the design registry's items targeted in each 50-year block that the society learns in that block (%)",
+   "better": "higher",
+   "probe_key": "per_50",
+   "years": {
+    "0": {
+     "min": 0,
+     "low": 25,
+     "typical": 65,
+     "high": 85,
+     "max": 110
+    },
+    "100": {
+     "min": 0,
+     "low": 25,
+     "typical": 70,
+     "high": 90,
+     "max": 115
+    },
+    "300": {
+     "min": 0,
+     "low": 25,
+     "typical": 70,
+     "high": 90,
+     "max": 115
+    },
+    "600": {
+     "min": 0,
+     "low": 25,
+     "typical": 70,
+     "high": 90,
+     "max": 115
+    }
+   },
+   "note": "A stagnating society, or one that researches only a few lines, may learn almost none of a block's registry items (min 0)."
+  },
+  "major_innovations_per_century": {
+   "unit": "historically major innovations appearing anywhere per century (writing, wheel, bronze, plough, sail...)",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "0": {
+     "min": 0,
+     "low": 0.5,
+     "typical": 1.5,
+     "high": 3,
+     "max": 4
+    },
+    "100": {
+     "min": 0,
+     "low": 1,
+     "typical": 2,
+     "high": 4,
+     "max": 6
+    },
+    "300": {
+     "min": 1,
+     "low": 2,
+     "typical": 4,
+     "high": 6,
+     "max": 8
+    },
+    "600": {
+     "min": 1,
+     "low": 2,
+     "typical": 3,
+     "high": 5,
+     "max": 7
+    }
+   }
+  },
+  "literacy_pct": {
+   "unit": "% of adults able to read and write",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "0": {
+     "min": 0,
+     "low": 0,
+     "typical": 0,
+     "high": 0,
+     "max": 0
+    },
+    "100": {
+     "min": 0,
+     "low": 0,
+     "typical": 0,
+     "high": 0,
+     "max": 0
+    },
+    "300": {
+     "min": 0,
+     "low": 0,
+     "typical": 0.1,
+     "high": 0.5,
+     "max": 1
+    },
+    "600": {
+     "min": 0,
+     "low": 0,
+     "typical": 0.5,
+     "high": 1,
+     "max": 2
+    }
+   }
+  },
+  "army_levy_size": {
+   "unit": "largest force a society fields (people)",
+   "better": "neither",
+   "probe_key": null,
+   "years": {
+    "0": {
+     "min": 5,
+     "low": 10,
+     "typical": 25,
+     "high": 60,
+     "max": 150
+    },
+    "100": {
+     "min": 10,
+     "low": 20,
+     "typical": 80,
+     "high": 300,
+     "max": 1000
+    },
+    "300": {
+     "min": 20,
+     "low": 100,
+     "typical": 600,
+     "high": 3000,
+     "max": 6000
+    },
+    "600": {
+     "min": 30,
+     "low": 300,
+     "typical": 2000,
+     "high": 20000,
+     "max": 40000
+    }
+   }
+  },
+  "defense_labor_share": {
+   "unit": "% of the able workforce under arms or on watch (game: Defense allocation)",
+   "better": "neither",
+   "probe_key": "defense_share",
+   "years": {
+    "0": {
+     "min": 0,
+     "low": 2,
+     "typical": 4,
+     "high": 8,
+     "max": 15
+    },
+    "100": {
+     "min": 0,
+     "low": 2,
+     "typical": 4,
+     "high": 8,
+     "max": 15
+    },
+    "300": {
+     "min": 0,
+     "low": 2,
+     "typical": 5,
+     "high": 10,
+     "max": 18
+    },
+    "600": {
+     "min": 0,
+     "low": 2,
+     "typical": 5,
+     "high": 10,
+     "max": 20
+    }
+   }
+  },
+  "trade_reach_km": {
+   "unit": "distance exotic goods travel to the society (km)",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "0": {
+     "min": 50,
+     "low": 150,
+     "typical": 400,
+     "high": 800,
+     "max": 1000
+    },
+    "100": {
+     "min": 50,
+     "low": 200,
+     "typical": 700,
+     "high": 1500,
+     "max": 2000
+    },
+    "300": {
+     "min": 100,
+     "low": 400,
+     "typical": 1500,
+     "high": 3000,
+     "max": 4000
+    },
+    "600": {
+     "min": 100,
+     "low": 500,
+     "typical": 2000,
+     "high": 4000,
+     "max": 5000
+    }
+   }
+  }
+ },
+ "milestones": {
+  "note": "Landing years are judged against each registry item's design band (data/research/research_600.json band_low..band_high).",
+  "ids": [
+   "copper_smelting",
+   "ox_drawn_ard",
+   "solid_wheel_assembly",
+   "pictographic_records",
+   "four_wheeled_wagons",
+   "sail_panel_cutting",
+   "standard_sign_lists",
+   "kiln_fired_bricks",
+   "bronze_alloying",
+   "phonetic_notation",
+   "formal_archives",
+   "place_value",
+   "spoked_wheel_assembly",
+   "consonantal_alphabet",
+   "written_law_code"
+  ]
+ },
+ "allowed_deviation": {
+  "milestone_early_fraction": 0.2,
+  "milestone_floor": "band_low",
+  "facet_over_high_fraction_of_typical_to_high_gap": 0.15,
+  "note": "A facet may exceed 'high' by at most 15% of |high-typical|; milestones may land up to 20% before the design year but never before band_low, and never after band_high. See BENCHMARKS_600.md 'Allowed lead over history'."
+ }
+}

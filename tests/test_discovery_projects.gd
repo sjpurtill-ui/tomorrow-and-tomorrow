@@ -67,6 +67,8 @@ func test_macro_research_priority_auto_allocates_only_inside_the_chosen_domain()
 
 
 func test_billion_population_does_not_create_additional_research_records()->void:
+	# A decade in, so early record-keeping questions are open (research_600 era gate).
+	GameState.reset_for_new_world(314159);GameState.elapsed_days=3650;DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
 	var fixed_catalog_size:=DiscoverySystem.catalog.size()
 	assert_int(fixed_catalog_size).is_greater_equal(4_608)
 	var small_capacity:=float(DiscoverySystem.research_capacity_for("knowledge","Preserved knowledge").progress_multiplier)
@@ -168,6 +170,8 @@ func test_established_library_consolidates_legacy_permutation_spam_into_one_know
 
 
 func test_emphasis_selects_the_live_frontier_without_exposing_hidden_catalog()->void:
+	# A decade in, so early record-keeping questions are open (research_600 era gate).
+	GameState.reset_for_new_world(314159);GameState.elapsed_days=3650;DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
 	for dynamic_id in GameState.research_subcategory_allocations:
 		for subcategory in (GameState.research_subcategory_allocations[dynamic_id] as Dictionary):
 			GameState.research_subcategory_allocations[dynamic_id][subcategory]=0

@@ -15,18 +15,19 @@ func test_charcoal_furnace_research_has_no_coal_dependency_but_needs_fuel()->voi
 		setup();var state=WorldSimulation.state;state.resource_deposits.clear();state.resource_stockpiles["Coal"]=0.0
 		state.known_discoveries.assign(["rope_rigging","charcoal","refractory_brick_firing","bloomery_smelting"])
 		var discovery=WorldSimulation.discovery;var entry:=discovery.discovery_definition("blast_furnace")
-		assert_bool(discovery._discovery_is_eligible(entry,0)).is_false()
+		var day:=int(ceil(discovery.research_600_earliest_year(entry)*365.0)) # once its era has come
+		assert_bool(discovery._discovery_is_eligible(entry,day)).is_false()
 		for row:Dictionary in discovery.technology_tree():
 			if row.id=="blast_furnace":assert_str("; ".join(PackedStringArray(row.missing))).contains("10.0 Charcoal in stores")
 		state.resource_stockpiles["Charcoal"]=9.0
-		assert_bool(discovery._discovery_is_eligible(entry,0)).is_false()
+		assert_bool(discovery._discovery_is_eligible(entry,day)).is_false()
 		state.resource_stockpiles["Charcoal"]=10.0
-		assert_bool(discovery._discovery_is_eligible(entry,0)).is_true()
-		assert_str(String(preload("res://scripts/knowledge_pathways.gd").chosen(entry,0).id)).is_equal("charcoal_furnace")
+		assert_bool(discovery._discovery_is_eligible(entry,day)).is_true()
+		assert_str(String(preload("res://scripts/knowledge_pathways.gd").chosen(entry,day).id)).is_equal("charcoal_furnace")
 		assert_dict(preload("res://scripts/research_materials.gd").needed("blast_furnace")).is_empty()
 		assert_float(discovery._resource_evidence(entry.resource_requirements)).is_greater_equal(.82)
 		state.known_discoveries.erase("refractory_brick_firing")
-		assert_bool(discovery._discovery_is_eligible(entry,0)).is_false()
+		assert_bool(discovery._discovery_is_eligible(entry,day)).is_false()
 	)
 func test_authored_contracts_and_missing_fuel_are_explicit()->void:
 	WorldSimulation.scoped("potter",func()->void:

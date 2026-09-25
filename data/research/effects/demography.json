@@ -1,0 +1,1073 @@
+{
+ "line": "demography",
+ "schema": "research_600_effects/1",
+ "items": {
+  "lactational_spacing_awareness": {
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "effects": {
+    "maternal_safety": 0.0062,
+    "neonatal_survival": 0.0052
+   }
+  },
+  "labor_position_customs": {
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "effects": {
+    "maternal_safety": 0.0093,
+    "neonatal_survival": 0.0052
+   }
+  },
+  "named_descent_lines": {
+   "effects": {
+    "cohesion": 0.0064,
+    "conception_support": 0.01,
+    "knowledge_preservation": 0.0026
+   },
+   "name": "Named Descent Lines",
+   "observation": "Every child is named into a line of mothers or fathers, and everyone knows whose kin they are and whom they may not marry.",
+   "social_consequence": "Descent decides who helps whom; a child with a named line always has somewhere to go."
+  },
+  "fever_watch_customs": {
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "effects": {
+    "disease_exposure": -0.0029,
+    "neonatal_survival": 0.0086
+   }
+  },
+  "sleeping_area_rotation": {
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "effects": {
+    "cohesion": 0.0031,
+    "health_protection": 0.0043
+   }
+  },
+  "infant_swaddling_practice": {
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "effects": {
+    "health_protection": 0.0023,
+    "injury_risk": -0.0067,
+    "neonatal_survival": 0.0103
+   }
+  },
+  "birth_spacing_customs": {
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "effects": {
+    "institutional_rigidity": 0.01,
+    "maternal_safety": 0.0093,
+    "neonatal_survival": 0.0069
+   }
+  },
+  "postpartum_seclusion_care": {
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "effects": {
+    "health_protection": 0.0046,
+    "labor_demand": 0.01,
+    "maternal_safety": 0.0093
+   }
+  },
+  "infant_carrying_slings": {
+   "effects": {
+    "injury_risk": -0.0014,
+    "labor_efficiency": 0.004,
+    "neonatal_survival": 0.0041
+   },
+   "name": "Carrying Slings and Cradleboards",
+   "observation": "An infant bound in a sling or on a cradleboard rides on its mother's back while she gathers, warm, fed and watched."
+  },
+  "shared_childcare": {
+   "ability_reason": "Children watched by kin while parents work are fed on time and kept from the fire and the water.",
+   "effects": {
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0124,
+    "neonatal_survival": 0.0172
+   }
+  },
+  "extended_family_room_division": {
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "effects": {
+    "cohesion": 0.0053,
+    "housing_output": 0.0063,
+    "labor_demand": 0.01
+   }
+  },
+  "lineage_exogamy": {
+   "effects": {
+    "cohesion": 0.0032,
+    "conception_support": 0.02,
+    "neonatal_survival": 0.0021
+   },
+   "name": "Marrying Outside the Line",
+   "observation": "Young people must marry outside their own descent line, and the children of such matches are seen to be sturdier.",
+   "social_consequence": "Every marriage ties two lines together; feuds cool when both sides have grandchildren in common."
+  },
+  "mouths_against_store": {
+   "effects": {
+    "food_storage": 0.0034,
+    "storage_loss": -0.0049,
+    "task_coordination": 0.003
+   },
+   "name": "Mouths Counted Against the Store",
+   "observation": "Before the winter the elders count the mouths against the baskets and pits, and rationing begins before hunger does."
+  },
+  "patrilocal_residence": {
+   "effects": {
+    "cohesion": 0.0043,
+    "labor_efficiency": 0.0025,
+    "maternal_safety": -0.004
+   },
+   "name": "Bride Joins Her Husband's Kin",
+   "observation": "A married woman moves to her husband's household, and his kin gain a worker while she leaves her own mother behind.",
+   "social_consequence": "Brothers stay together and hold their land; young wives arrive as strangers and bear their first children far from their own mothers."
+  },
+  "kin_care_widows_orphans": {
+   "effects": {
+    "cohesion": 0.0053,
+    "labor_demand": 0.004,
+    "neonatal_survival": 0.0041
+   },
+   "name": "Kin Care for Widows and Orphans",
+   "observation": "When a parent dies, kin take in the widow and the children, and orphans are fed at another hearth.",
+   "social_consequence": "No child is left without a hearth; kin obligations are remembered and repaid."
+  },
+  "maternal_recovery": {
+   "ability_reason": "A mother given food and lighter work after birth recovers, nurses and survives the next pregnancy.",
+   "effects": {
+    "conception_support": 0.035,
+    "labor_demand": 0.02,
+    "maternal_safety": 0.0248
+   }
+  },
+  "household_space_planning": {
+   "ability_reason": "Homes laid out for sleep, air and care crowd less and sicken less.",
+   "effects": {
+    "health_protection": 0.0085,
+    "housing_output": 0.0237
+   }
+  },
+  "village_marriage_alliances": {
+   "effects": {
+    "cohesion": 0.0014,
+    "conception_support": 0.02,
+    "security_efficiency": 0.0015,
+    "trade_capacity": 0.0007
+   },
+   "name": "Marriage Alliances Between Villages",
+   "observation": "Daughters and sons are married into neighbouring villages, and the villages feast, trade and fight side by side.",
+   "social_consequence": "Neighbours become in-laws; a raid on one village is an insult to the other's grandchildren."
+  },
+  "elder_care_by_children": {
+   "effects": {
+    "cohesion": 0.0017,
+    "conception_support": 0.008,
+    "knowledge_preservation": 0.0033
+   },
+   "name": "Elders Kept by Their Children",
+   "observation": "Grown children feed and house their aged parents, and the old keep their place at the hearth and in counsel.",
+   "social_consequence": "Children become the only sure provision for old age, and families want more of them."
+  },
+  "winter_herder_return": {
+   "effects": {
+    "cohesion": 0.0014,
+    "conception_support": 0.008,
+    "housing_output": 0.0016,
+    "mobile_shelter": 0.006
+   },
+   "name": "Herders Winter in the Village",
+   "observation": "Herders who follow the flocks all summer bring them home to the village for winter, and the families are together again."
+  },
+  "bride_wealth_gifts": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": 0.01,
+    "institutional_rigidity": 0.004,
+    "trade_capacity": 0.0005
+   },
+   "name": "Bride Gifts",
+   "observation": "A groom's kin give livestock and goods to the bride's family, and the marriage is sealed in public.",
+   "social_consequence": "Young men depend on their elders for bride wealth; marriage waits on the herd."
+  },
+  "captive_adoption": {
+   "effects": {
+    "cohesion": -0.004,
+    "conception_support": 0.008,
+    "labor_efficiency": 0.0011
+   },
+   "name": "Adopting Captives and Strays",
+   "observation": "Captured children and lost wanderers are taken into a lineage, named and raised as kin.",
+   "social_consequence": "The adopted are kin in name but remember where they came from; some rise, some stay bound."
+  },
+  "daughter_hamlets": {
+   "effects": {
+    "cohesion": -0.006,
+    "conception_support": 0.02,
+    "disease_exposure": -0.001,
+    "ecological_pressure": -0.0107,
+    "housing_output": 0.0064
+   },
+   "name": "Daughter Hamlets",
+   "observation": "When the village grows too crowded for its fields, a group of young families moves off to found a hamlet of its own.",
+   "social_consequence": "The parent village keeps its rites and its claim; the daughter hamlet owes it gifts and brides."
+  },
+  "lean_year_dispersal": {
+   "effects": {
+    "cohesion": -0.004,
+    "disaster_resilience": 0.02,
+    "neonatal_survival": 0.0016
+   },
+   "name": "Lean-Year Dispersal",
+   "observation": "In a bad year some families go to stay with kin in other valleys, and fewer mouths share the failing store."
+  },
+  "infant_feeding_schedules": {
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "effects": {
+    "neonatal_survival": 0.0065,
+    "nutrition_quality": 0.0025
+   }
+  },
+  "seasonal_conception_timing": {
+   "effects": {
+    "conception_support": 0.008,
+    "maternal_safety": 0.0052,
+    "neonatal_survival": 0.0052
+   },
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png"
+  },
+  "cord_afterbirth_handling": {
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "effects": {
+    "disease_exposure": -0.0018,
+    "maternal_safety": 0.0065
+   }
+  },
+  "room_allocation_by_size": {
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "effects": {
+    "cohesion": 0.0007,
+    "housing_output": 0.0032
+   }
+  },
+  "harvest_headcount": {
+   "effects": {
+    "food_storage": 0.0025,
+    "state_capacity": 0.0037,
+    "task_coordination": 0.0016
+   },
+   "name": "Harvest Headcount",
+   "observation": "At the harvest gathering every household is counted, so shares and stores match the people who need them."
+  },
+  "new_household_plots": {
+   "effects": {
+    "cohesion": 0.0007,
+    "conception_support": 0.02,
+    "housing_output": 0.0093
+   },
+   "name": "House Plots for New Households",
+   "observation": "A newly married couple is given a plot to build on, and young people marry sooner when a home is waiting.",
+   "social_consequence": "Land for a house becomes a right of marriage; who grants the plot gains a say over the match."
+  },
+  "newcomer_host_season": {
+   "effects": {
+    "adoption_rate": 0.006,
+    "cohesion": 0.0014,
+    "labor_efficiency": 0.0008
+   },
+   "name": "Newcomers Hosted for a Season",
+   "observation": "A newcomer family works a season under a host household before it is given land, and learns the village's ways."
+  },
+  "weaning_food_softening": {
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "effects": {
+    "disease_exposure": -0.001,
+    "neonatal_survival": 0.0028,
+    "nutrition_quality": 0.0024
+   }
+  },
+  "interval_weaning_practice": {
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "effects": {
+    "labor_demand": 0.01,
+    "neonatal_survival": 0.0028,
+    "nutrition_quality": 0.0024
+   }
+  },
+  "breech_repositioning_technique": {
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "effects": {
+    "fatigue": 0.01,
+    "maternal_safety": 0.011,
+    "neonatal_survival": 0.0028
+   }
+  },
+  "seasonal_sleeping_arrangements": {
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "effects": {
+    "fatigue": -0.0009,
+    "health_protection": 0.0027,
+    "housing_output": 0.0062
+   }
+  },
+  "newcomer_intermarriage": {
+   "effects": {
+    "adoption_rate": 0.005,
+    "cohesion": 0.0017,
+    "conception_support": 0.01
+   },
+   "name": "Newcomers Marry In",
+   "observation": "Newcomers wed into local households, and within a generation their children are simply villagers."
+  },
+  "satellite_hamlets": {
+   "effects": {
+    "ecological_pressure": -0.0039,
+    "housing_output": 0.0093,
+    "route_speed": 0.0026,
+    "security_efficiency": 0.0023
+   },
+   "name": "Satellite Hamlets",
+   "observation": "Small hamlets ring a central village, working outlying fields and gathering at the centre for rites and markets.",
+   "social_consequence": "The central village becomes a seat of elders and shrines; the hamlets owe it labour and gifts."
+  },
+  "hearth_hazard_proofing": {
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "effects": {
+    "injury_risk": -0.0023,
+    "neonatal_survival": 0.0018
+   }
+  },
+  "sibling_age_gap_norms": {
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "effects": {
+    "cohesion": 0.0008,
+    "neonatal_survival": 0.011
+   }
+  },
+  "obstructed_labor_recognition": {
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "effects": {
+    "disease_exposure": -0.0028,
+    "maternal_safety": 0.011
+   }
+  },
+  "seasonal_storage_sleeping_swap": {
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "effects": {
+    "food_storage": 0.0017,
+    "housing_output": 0.0113
+   }
+  },
+  "famine_refugee_hosting": {
+   "effects": {
+    "cohesion": 0.0013,
+    "disaster_resilience": 0.005,
+    "disease_exposure": 0.006,
+    "labor_efficiency": 0.0008,
+    "legitimacy": 0.005
+   },
+   "name": "Hosting Famine Refugees",
+   "observation": "Hungry families from failed lands are taken in by host villages, working for their keep until they can return or settle.",
+   "social_consequence": "Hosts gain workers and a debt of gratitude; the refugees bring fevers as well as hands."
+  },
+  "hearth_counts": {
+   "effects": {
+    "food_storage": 0.0009,
+    "state_capacity": 0.004,
+    "task_coordination": 0.002
+   },
+   "name": "Households Counted by Hearth",
+   "observation": "Households are counted by their hearths, and each hearth owes its share of labor and grain."
+  },
+  "carrying_capacity_awareness": {
+   "effects": {
+    "conception_support": -0.01,
+    "ecological_pressure": -0.004,
+    "ecology_recovery": 0.0021,
+    "food_storage": 0.0013
+   },
+   "name": "Knowing When the Land Is Full",
+   "observation": "The elders see that the fields and woods can feed no more mouths, and marriages and new hearths are held back until land is found.",
+   "social_consequence": "Young people wait longer to marry; some leave to find land elsewhere."
+  },
+  "kin_wards": {
+   "effects": {
+    "cohesion": 0.0021,
+    "construction_rate": 0.0016,
+    "housing_output": 0.0124
+   },
+   "name": "Kin Wards",
+   "observation": "A growing village divides into wards, each a cluster of related households sharing lanes, wells and a shrine."
+  },
+  "childhood_illness_recognition": {
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "effects": {
+    "disease_exposure": -0.0013,
+    "knowledge_preservation": 0.0024,
+    "neonatal_survival": 0.0062
+   }
+  },
+  "kin_fostering_networks": {
+   "effects": {
+    "cohesion": 0.0032,
+    "fatigue": -0.0027,
+    "neonatal_survival": 0.0017,
+    "task_coordination": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png"
+  },
+  "hemorrhage_control_herbs": {
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "effects": {
+    "health_protection": 0.0022,
+    "injury_risk": -0.0016,
+    "maternal_safety": 0.0099
+   }
+  },
+  "multigenerational_household_norms": {
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "effects": {
+    "cohesion": 0.0021,
+    "housing_output": 0.0124,
+    "institutional_rigidity": 0.01
+   }
+  },
+  "protective_birth_amulets": {
+   "effects": {
+    "cohesion": 0.0029,
+    "legitimacy": 0.0013,
+    "maternal_safety": 0.0005
+   },
+   "name": "Birth Amulets",
+   "observation": "Mothers wear amulets through pregnancy and birth, and the calm they give the mother is its own help in labor."
+  },
+  "rural_urban_migration": {
+   "effects": {
+    "cohesion": -0.01,
+    "conception_support": -0.01,
+    "craft_output": 0.0063,
+    "disease_exposure": 0.03,
+    "housing_output": 0.006,
+    "labor_efficiency": 0.0034
+   },
+   "name": "Towns Draw in Villagers",
+   "observation": "Work, markets and shrines draw villagers into the town, where they crowd close and fall sick more often than at home.",
+   "social_consequence": "The town grows by newcomers rather than by births; country kin and town kin drift apart."
+  },
+  "childhood_growth_milestones": {
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+   "effects": {
+    "knowledge_preservation": 0.0009,
+    "neonatal_survival": 0.0099
+   }
+  },
+  "grandmaternal_birth_counsel": {
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "effects": {
+    "knowledge_preservation": 0.0012,
+    "maternal_safety": 0.0033
+   }
+  },
+  "trained_midwife_referral": {
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+   "effects": {
+    "knowledge_preservation": 0.0012,
+    "maternal_safety": 0.0047
+   }
+  },
+  "elder_quarters_customs": {
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "effects": {
+    "cohesion": 0.0021,
+    "housing_output": 0.006
+   }
+  },
+  "people_herd_counts": {
+   "effects": {
+    "food_storage": 0.0006,
+    "state_capacity": 0.0033,
+    "task_coordination": 0.0032
+   },
+   "name": "Counts of People and Herds",
+   "observation": "At set intervals the officials count the people and the herds of every village and write down the totals."
+  },
+  "patron_protection": {
+   "effects": {
+    "cohesion": 0.0027,
+    "labor_efficiency": 0.0022,
+    "legitimacy": 0.0007,
+    "trade_capacity": 0.0012
+   },
+   "name": "Outsiders Under a Patron",
+   "observation": "A foreigner who takes a patron is protected by that house's name, and works and trades under it.",
+   "social_consequence": "Patrons gain clients and labour; outsiders gain safety, at the price of dependence."
+  },
+  "communal_child_supervision_rotas": {
+   "effects": {
+    "injury_risk": -0.0031,
+    "labor_demand": 0.01,
+    "neonatal_survival": 0.0025,
+    "task_coordination": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/shared_childcare-v1.png"
+  },
+  "marriage_age_norms": {
+   "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+   "effects": {
+    "institutional_rigidity": 0.01,
+    "maternal_safety": 0.0191,
+    "neonatal_survival": 0.0083
+   }
+  },
+  "household_partition_customs": {
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+   "effects": {
+    "cohesion": 0.0033,
+    "housing_output": 0.005,
+    "task_coordination": 0.0004
+   }
+  },
+  "midwife_apprenticeship_lines": {
+   "effects": {
+    "knowledge_preservation": 0.0032,
+    "labor_demand": 0.01,
+    "maternal_safety": 0.0095,
+    "neonatal_survival": 0.0068
+   },
+   "social_consequence": "Midwifery becomes a line passed from mother to daughter or mistress to apprentice, with its own standing.",
+   "art": "res://assets/ui/research/subjects/birth_attendants-v1.png"
+  },
+  "recorded_dowry": {
+   "effects": {
+    "cohesion": 0.0022,
+    "conception_support": 0.005,
+    "legitimacy": 0.0013,
+    "state_capacity": 0.0009
+   },
+   "name": "Recorded Dowry",
+   "observation": "Betrothal gifts and the bride's dowry are listed before witnesses, so the wife's portion can be claimed back."
+  },
+  "household_vital_lists": {
+   "effects": {
+    "knowledge_preservation": 0.0021,
+    "state_capacity": 0.0022,
+    "task_coordination": 0.0025
+   },
+   "name": "Births and Deaths Listed",
+   "observation": "Household lists record who is born and who dies, and the scribes see which seasons and quarters lose the most children."
+  },
+  "birth_stool_bricks": {
+   "effects": {
+    "maternal_safety": 0.0069,
+    "neonatal_survival": 0.005
+   },
+   "name": "Birth Stool and Birth Bricks",
+   "observation": "A mother squats on two birth bricks or a stool with an open seat, and the midwife can reach the child as it comes."
+  },
+  "ward_residence_lists": {
+   "effects": {
+    "housing_output": 0.01,
+    "state_capacity": 0.0029,
+    "task_coordination": 0.0031
+   },
+   "name": "Ward Residence Lists",
+   "observation": "The residents of each ward are listed by house, so labour, grain and levies fall on the people actually there."
+  },
+  "partible_inheritance": {
+   "effects": {
+    "cohesion": 0.0011,
+    "conception_support": 0.008,
+    "housing_output": 0.01,
+    "soil_productivity": -0.005
+   },
+   "name": "Shared Inheritance",
+   "observation": "An estate is divided among the children in set shares, and every heir gets land, though each generation's plots are smaller.",
+   "social_consequence": "Every child has a stake; fields shrink with each division and brothers quarrel over boundaries."
+  },
+  "named_year_ages": {
+   "effects": {
+    "knowledge_preservation": 0.0023,
+    "state_capacity": 0.0019,
+    "task_coordination": 0.0019
+   },
+   "name": "Ages by Named Years",
+   "observation": "Each year is named for a great event, and a person's age is told by the year of their birth."
+  },
+  "fraternal_joint_estates": {
+   "effects": {
+    "cohesion": 0.0011,
+    "conception_support": -0.005,
+    "labor_efficiency": 0.0009,
+    "soil_productivity": 0.006
+   },
+   "name": "Brothers' Joint Estates",
+   "observation": "Brothers hold their father's land together rather than dividing it, and work it as one household.",
+   "social_consequence": "The estate stays whole; younger brothers marry later or not at all."
+  },
+  "belonging_oaths": {
+   "effects": {
+    "cohesion": 0.0031,
+    "labor_efficiency": 0.0054,
+    "legitimacy": 0.0015
+   },
+   "name": "Oaths of Belonging",
+   "observation": "A settled outsider swears before the gods and the elders to keep the town's laws, and is counted among its people."
+  },
+  "wet_nurse_contracts": {
+   "effects": {
+    "conception_support": 0.008,
+    "neonatal_survival": 0.0059,
+    "state_capacity": 0.0011
+   },
+   "name": "Wet-Nurse Contracts",
+   "observation": "A wet nurse is hired by contract for a fixed payment of grain, oil and cloth to nurse a child for two or three years.",
+   "social_consequence": "Infants whose mothers die or cannot nurse now live; nursing becomes paid work."
+  },
+  "divorce_settlements": {
+   "effects": {
+    "cohesion": 0.001,
+    "conception_support": 0.004,
+    "legitimacy": 0.0011
+   },
+   "name": "Divorce Settlements",
+   "observation": "When a marriage ends the law returns the wife's dowry and sets who keeps the children."
+  },
+  "widow_portion_law": {
+   "effects": {
+    "cohesion": 0.0015,
+    "legitimacy": 0.0014,
+    "neonatal_survival": 0.0015
+   },
+   "name": "Widow's Portion by Law",
+   "observation": "The law secures a widow a portion of her husband's estate to live on and raise her children."
+  },
+  "contraceptive_pessaries": {
+   "effects": {
+    "conception_support": -0.03,
+    "maternal_safety": 0.0059,
+    "neonatal_survival": 0.0018
+   },
+   "name": "Pessaries to Delay Pregnancy",
+   "observation": "Lint soaked in honey and acacia gum placed before intercourse delays the next pregnancy, giving the mother time to recover.",
+   "social_consequence": "Women gain some say over when to bear children; fewer births, but more of them survive."
+  },
+  "three_year_nursing": {
+   "effects": {
+    "conception_support": -0.025,
+    "maternal_safety": 0.0029,
+    "neonatal_survival": 0.0044
+   },
+   "name": "Three-Year Nursing",
+   "observation": "Mothers nurse each child for three years by custom, and the next child comes later and stronger.",
+   "social_consequence": "Families grow more slowly, but fewer small graves are dug."
+  },
+  "levirate_marriage": {
+   "effects": {
+    "cohesion": 0.0011,
+    "conception_support": 0.01,
+    "institutional_rigidity": 0.006,
+    "neonatal_survival": 0.0012
+   },
+   "name": "Levirate Marriage",
+   "observation": "A widow is married to her dead husband's brother, keeping her and her children within the family and on its land."
+  },
+  "frontier_settler_grants": {
+   "effects": {
+    "conception_support": 0.02,
+    "ecological_pressure": 0.01,
+    "housing_output": 0.0254,
+    "security_efficiency": 0.0049,
+    "state_capacity": 0.0034
+   },
+   "name": "Frontier Land Grants",
+   "observation": "Soldiers and settlers are granted land on the frontier in return for service, and new villages rise along the border.",
+   "social_consequence": "Landless younger sons find a future on the frontier; the frontier fills with families loyal to the grantor."
+  }
+ },
+ "balance_600": {
+  "schema": "research_600_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_600.py; the loader reads only 'items'.",
+  "source": {
+   "shared_childcare": {
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.025,
+    "neonatal_survival": 0.05
+   },
+   "maternal_recovery": {
+    "conception_support": 0.035,
+    "labor_demand": 0.02,
+    "maternal_safety": 0.08
+   },
+   "household_space_planning": {
+    "health_protection": 0.035,
+    "housing_output": 0.075
+   },
+   "fever_watch_customs": {
+    "disease_exposure": -0.01,
+    "neonatal_survival": 0.025
+   },
+   "infant_swaddling_practice": {
+    "health_protection": 0.0095,
+    "injury_risk": -0.0189,
+    "neonatal_survival": 0.03
+   },
+   "infant_feeding_schedules": {
+    "neonatal_survival": 0.025,
+    "nutrition_quality": 0.02
+   },
+   "weaning_food_softening": {
+    "disease_exposure": -0.01,
+    "neonatal_survival": 0.03,
+    "nutrition_quality": 0.02
+   },
+   "hearth_hazard_proofing": {
+    "injury_risk": -0.0128,
+    "neonatal_survival": 0.02
+   },
+   "childhood_illness_recognition": {
+    "disease_exposure": -0.02,
+    "knowledge_preservation": 0.0051,
+    "neonatal_survival": 0.03
+   },
+   "childhood_growth_milestones": {
+    "knowledge_preservation": 0.0051,
+    "neonatal_survival": 0.02
+   },
+   "communal_child_supervision_rotas": {
+    "injury_risk": -0.0283,
+    "labor_demand": 0.01,
+    "neonatal_survival": 0.006,
+    "task_coordination": 0.0056
+   },
+   "lactational_spacing_awareness": {
+    "maternal_safety": 0.02,
+    "neonatal_survival": 0.015
+   },
+   "birth_spacing_customs": {
+    "institutional_rigidity": 0.01,
+    "maternal_safety": 0.03,
+    "neonatal_survival": 0.02
+   },
+   "seasonal_conception_timing": {
+    "conception_support": 0.008,
+    "maternal_safety": 0.02,
+    "neonatal_survival": 0.02
+   },
+   "interval_weaning_practice": {
+    "labor_demand": 0.01,
+    "neonatal_survival": 0.03,
+    "nutrition_quality": 0.02
+   },
+   "sibling_age_gap_norms": {
+    "cohesion": 0.0039,
+    "neonatal_survival": 0.02
+   },
+   "kin_fostering_networks": {
+    "cohesion": 0.0151,
+    "fatigue": -0.02,
+    "neonatal_survival": 0.008,
+    "task_coordination": 0.0056
+   },
+   "grandmaternal_birth_counsel": {
+    "knowledge_preservation": 0.0068,
+    "maternal_safety": 0.025
+   },
+   "marriage_age_norms": {
+    "institutional_rigidity": 0.01,
+    "maternal_safety": 0.03,
+    "neonatal_survival": 0.02
+   },
+   "labor_position_customs": {
+    "maternal_safety": 0.03,
+    "neonatal_survival": 0.015
+   },
+   "postpartum_seclusion_care": {
+    "health_protection": 0.019,
+    "labor_demand": 0.01,
+    "maternal_safety": 0.03
+   },
+   "cord_afterbirth_handling": {
+    "disease_exposure": -0.015,
+    "maternal_safety": 0.025
+   },
+   "breech_repositioning_technique": {
+    "fatigue": 0.01,
+    "maternal_safety": 0.04,
+    "neonatal_survival": 0.03
+   },
+   "obstructed_labor_recognition": {
+    "disease_exposure": -0.01,
+    "maternal_safety": 0.03
+   },
+   "hemorrhage_control_herbs": {
+    "health_protection": 0.019,
+    "injury_risk": -0.0094,
+    "maternal_safety": 0.04
+   },
+   "trained_midwife_referral": {
+    "knowledge_preservation": 0.0068,
+    "maternal_safety": 0.035
+   },
+   "midwife_apprenticeship_lines": {
+    "knowledge_preservation": 0.0151,
+    "labor_demand": 0.01,
+    "maternal_safety": 0.03,
+    "neonatal_survival": 0.01
+   },
+   "sleeping_area_rotation": {
+    "cohesion": 0.0058,
+    "health_protection": 0.0176
+   },
+   "extended_family_room_division": {
+    "cohesion": 0.01,
+    "housing_output": 0.02,
+    "labor_demand": 0.01
+   },
+   "room_allocation_by_size": {
+    "cohesion": 0.0039,
+    "housing_output": 0.02
+   },
+   "seasonal_sleeping_arrangements": {
+    "fatigue": -0.01,
+    "health_protection": 0.019,
+    "housing_output": 0.02
+   },
+   "seasonal_storage_sleeping_swap": {
+    "food_storage": 0.015,
+    "housing_output": 0.02
+   },
+   "multigenerational_household_norms": {
+    "cohesion": 0.01,
+    "housing_output": 0.03,
+    "institutional_rigidity": 0.01
+   },
+   "elder_quarters_customs": {
+    "cohesion": 0.0058,
+    "housing_output": 0.02
+   },
+   "household_partition_customs": {
+    "cohesion": 0.01,
+    "housing_output": 0.03,
+    "task_coordination": 0.0028
+   },
+   "named_descent_lines": {
+    "cohesion": 0.012,
+    "conception_support": 0.01,
+    "knowledge_preservation": 0.004
+   },
+   "infant_carrying_slings": {
+    "injury_risk": -0.004,
+    "labor_efficiency": 0.008,
+    "neonatal_survival": 0.012
+   },
+   "lineage_exogamy": {
+    "cohesion": 0.006,
+    "conception_support": 0.02,
+    "neonatal_survival": 0.006
+   },
+   "mouths_against_store": {
+    "food_storage": 0.008,
+    "storage_loss": -0.008,
+    "task_coordination": 0.006
+   },
+   "patrilocal_residence": {
+    "cohesion": 0.008,
+    "labor_efficiency": 0.005,
+    "maternal_safety": -0.004
+   },
+   "kin_care_widows_orphans": {
+    "cohesion": 0.01,
+    "labor_demand": 0.004,
+    "neonatal_survival": 0.012
+   },
+   "village_marriage_alliances": {
+    "cohesion": 0.008,
+    "conception_support": 0.02,
+    "security_efficiency": 0.006,
+    "trade_capacity": 0.005
+   },
+   "elder_care_by_children": {
+    "cohesion": 0.01,
+    "conception_support": 0.008,
+    "knowledge_preservation": 0.008
+   },
+   "winter_herder_return": {
+    "cohesion": 0.008,
+    "conception_support": 0.008,
+    "housing_output": 0.01,
+    "mobile_shelter": 0.006
+   },
+   "bride_wealth_gifts": {
+    "cohesion": 0.006,
+    "conception_support": 0.01,
+    "institutional_rigidity": 0.004,
+    "trade_capacity": 0.004
+   },
+   "captive_adoption": {
+    "cohesion": -0.004,
+    "conception_support": 0.008,
+    "labor_efficiency": 0.008
+   },
+   "daughter_hamlets": {
+    "cohesion": -0.006,
+    "conception_support": 0.02,
+    "disease_exposure": -0.008,
+    "ecological_pressure": -0.02,
+    "housing_output": 0.04
+   },
+   "lean_year_dispersal": {
+    "cohesion": -0.004,
+    "disaster_resilience": 0.02,
+    "neonatal_survival": 0.006
+   },
+   "harvest_headcount": {
+    "food_storage": 0.01,
+    "state_capacity": 0.008,
+    "task_coordination": 0.01
+   },
+   "new_household_plots": {
+    "cohesion": 0.004,
+    "conception_support": 0.02,
+    "housing_output": 0.03
+   },
+   "newcomer_host_season": {
+    "adoption_rate": 0.006,
+    "cohesion": 0.008,
+    "labor_efficiency": 0.008
+   },
+   "newcomer_intermarriage": {
+    "adoption_rate": 0.005,
+    "cohesion": 0.01,
+    "conception_support": 0.01
+   },
+   "satellite_hamlets": {
+    "ecological_pressure": -0.015,
+    "housing_output": 0.03,
+    "route_speed": 0.005,
+    "security_efficiency": 0.006
+   },
+   "famine_refugee_hosting": {
+    "cohesion": 0.006,
+    "disaster_resilience": 0.015,
+    "disease_exposure": 0.006,
+    "labor_efficiency": 0.005,
+    "legitimacy": 0.006
+   },
+   "hearth_counts": {
+    "food_storage": 0.008,
+    "state_capacity": 0.015,
+    "task_coordination": 0.008
+   },
+   "carrying_capacity_awareness": {
+    "conception_support": -0.01,
+    "ecological_pressure": -0.02,
+    "ecology_recovery": 0.01,
+    "food_storage": 0.012
+   },
+   "kin_wards": {
+    "cohesion": 0.01,
+    "construction_rate": 0.008,
+    "housing_output": 0.03
+   },
+   "protective_birth_amulets": {
+    "cohesion": 0.008,
+    "legitimacy": 0.003,
+    "maternal_safety": 0.004
+   },
+   "rural_urban_migration": {
+    "cohesion": -0.01,
+    "conception_support": -0.01,
+    "craft_output": 0.02,
+    "disease_exposure": 0.03,
+    "housing_output": 0.02,
+    "labor_efficiency": 0.025
+   },
+   "people_herd_counts": {
+    "food_storage": 0.008,
+    "state_capacity": 0.02,
+    "task_coordination": 0.01
+   },
+   "patron_protection": {
+    "cohesion": 0.008,
+    "labor_efficiency": 0.008,
+    "legitimacy": 0.004,
+    "trade_capacity": 0.006
+   },
+   "recorded_dowry": {
+    "cohesion": 0.006,
+    "conception_support": 0.005,
+    "legitimacy": 0.006,
+    "state_capacity": 0.006
+   },
+   "household_vital_lists": {
+    "knowledge_preservation": 0.01,
+    "state_capacity": 0.015,
+    "task_coordination": 0.006
+   },
+   "birth_stool_bricks": {
+    "maternal_safety": 0.015,
+    "neonatal_survival": 0.008
+   },
+   "ward_residence_lists": {
+    "housing_output": 0.01,
+    "state_capacity": 0.015,
+    "task_coordination": 0.008
+   },
+   "partible_inheritance": {
+    "cohesion": 0.006,
+    "conception_support": 0.008,
+    "housing_output": 0.01,
+    "soil_productivity": -0.005
+   },
+   "named_year_ages": {
+    "knowledge_preservation": 0.01,
+    "state_capacity": 0.01,
+    "task_coordination": 0.005
+   },
+   "fraternal_joint_estates": {
+    "cohesion": 0.006,
+    "conception_support": -0.005,
+    "labor_efficiency": 0.006,
+    "soil_productivity": 0.006
+   },
+   "belonging_oaths": {
+    "cohesion": 0.012,
+    "labor_efficiency": 0.006,
+    "legitimacy": 0.008
+   },
+   "wet_nurse_contracts": {
+    "conception_support": 0.008,
+    "neonatal_survival": 0.012,
+    "state_capacity": 0.004
+   },
+   "divorce_settlements": {
+    "cohesion": 0.004,
+    "conception_support": 0.004,
+    "legitimacy": 0.006
+   },
+   "widow_portion_law": {
+    "cohesion": 0.008,
+    "legitimacy": 0.008,
+    "neonatal_survival": 0.005
+   },
+   "contraceptive_pessaries": {
+    "conception_support": -0.03,
+    "maternal_safety": 0.012,
+    "neonatal_survival": 0.006
+   },
+   "three_year_nursing": {
+    "conception_support": -0.025,
+    "maternal_safety": 0.006,
+    "neonatal_survival": 0.015
+   },
+   "levirate_marriage": {
+    "cohesion": 0.006,
+    "conception_support": 0.01,
+    "institutional_rigidity": 0.006,
+    "neonatal_survival": 0.004
+   },
+   "frontier_settler_grants": {
+    "conception_support": 0.02,
+    "ecological_pressure": 0.01,
+    "housing_output": 0.04,
+    "security_efficiency": 0.015,
+    "state_capacity": 0.01
+   }
+  }
+ }
+}

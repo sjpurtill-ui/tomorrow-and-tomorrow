@@ -1,0 +1,340 @@
+{
+ "_doc": "Surrogate constants that cannot be parsed from the game (aggregate stand-ins for systems the surrogate omits) or that calibrate.py fits. Each entry names its source. Constants that CAN be parsed (effect limits, era ceilings, adoption pace, life table, cohort durations, early-care categories, conception rates, food yields, artifact constants...) are read live from GDScript by gamedata.py and are deliberately absent here. 'fit': true marks free constants calibrate.py adjusts; its results are written to the 'calibrated' section which overrides the defaults.",
+ "time": {
+  "substeps_per_month": {
+   "value": 2,
+   "source": "surrogate: demography/food sub-steps per month (game: daily)"
+  }
+ },
+ "site": {
+  "seasonality_c": {
+   "value": 12.0,
+   "source": "PlanetEnvironment.profile_at default (planet_environment.gd food_season_factor)"
+  },
+  "mean_temperature_c": {
+   "value": 11.0,
+   "source": "planet_environment.gd ambient_temperature_c default"
+  },
+  "disease_pressure": {
+   "value": 0.08,
+   "source": "environment hazards.disease (consequence_engine.gd Illness/health cost); headless probe profile",
+   "fit": true
+  },
+  "cold_pressure": {
+   "value": 0.15,
+   "source": "environment hazards.cold",
+   "fit": true
+  },
+  "fishing_access": {
+   "value": 1.0,
+   "source": "food_system.gd _food_resource_access freshwater (water <= 6 km)"
+  },
+  "access_game": {
+   "value": 0.0,
+   "source": "food_system.gd _food_resource_access game (retrievable game deposit)"
+  },
+  "access_fertile": {
+   "value": 0.0,
+   "source": "food_system.gd _food_resource_access fertile (fertile soil deposit)"
+  },
+  "coastal": {
+   "value": false,
+   "source": "Research600 environment tag"
+  }
+ },
+ "labor": {
+  "knowledge_effective_factor": {
+   "value": 1.0,
+   "source": "game_state.gd effective_workers(Knowledge): minus clinical care / microscopy / scholar-visit reservations (truth: effective = assigned in these runs)",
+   "fit": false
+  },
+  "food_buffer": {
+   "value": 1.1,
+   "source": "GovernmentPeopleSystem automatic work: food labor held above need (government_people_system.gd)",
+   "fit": true
+  },
+  "food_pct_min": {
+   "value": 18.0,
+   "source": "government_people_system.gd auto allocation floor (observed)"
+  },
+  "food_pct_max": {
+   "value": 70.0,
+   "source": "government_people_system.gd auto allocation ceiling (observed)"
+  },
+  "food_adjust_rate": {
+   "value": 0.35,
+   "source": "surrogate smoothing of automatic food labor (per month)",
+   "fit": true
+  }
+ },
+ "society": {
+  "shelter_bonus": {
+   "value": 0.17,
+   "source": "consequence_engine.gd health_target: Hearth Circle 0.05 + Lean-to Shelters 0.12 once built"
+  },
+  "health_offset": {
+   "value": 0.0,
+   "source": "residual of consequence_engine.gd health_target terms the surrogate omits (clinical care, exchange, policies)",
+   "fit": true
+  },
+  "cohesion_offset": {
+   "value": 0.0,
+   "source": "residual of cohesion_target omitted terms (values, economy, governance)",
+   "fit": true
+  },
+  "institution_offset": {
+   "value": 0.0,
+   "source": "SocietyModel.leadership_effect + values on institutions (society_model.gd)",
+   "fit": true
+  },
+  "education_offset": {
+   "value": 0.0,
+   "source": "leadership subcategory effect on Preserved knowledge / Communication (society_model.gd evaluate_subcategories)",
+   "fit": true
+  },
+  "housing_build_rate": {
+   "value": 0.015,
+   "source": "construction output -> housing capacity (settlement build system); housing places per builder-day",
+   "fit": true
+  },
+  "housing_target_ratio": {
+   "value": 1.08,
+   "source": "settlement auto-build keeps housing ahead of population (observed)"
+  },
+  "completed_per_year": {
+   "value": 8.0,
+   "source": "truth runs: all five founding works (Hearth Circle, Lean-to Shelters, Storage Pits, Open Work Area, Gathering Yard) finish within the first year"
+  },
+  "completed_max": {
+   "value": 10.0,
+   "source": "infrastructure capacity counts settlement_completed/10"
+  },
+  "storage_pits_year": {
+   "value": 0.6,
+   "source": "Storage Pits is one of the founding works finished in year 1 (settlement_construction.gd)",
+   "fit": false
+  },
+  "storage_base_rations": {
+   "value": 4050.0,
+   "source": "founding_manifest food_storage_rations (food_system.gd _food_storage_capacity)",
+   "fit": true
+  },
+  "settlement_population": {
+   "value": 5000.0,
+   "source": "people per additional settlement (auto settlement; truth runs stay at 1 settlement through year 100)"
+  },
+  "accessible_deposits_per_decade": {
+   "value": 1.0,
+   "source": "resource deposits reaching 'accessible' (resource system) for material_target",
+   "fit": true
+  },
+  "contact_year": {
+   "value": 40.0,
+   "source": "first contact_level >= 2 with another civilization (CivilizationSystem)",
+   "fit": true
+  },
+  "openness": {
+   "value": 0.5,
+   "source": "societal_values lived openness/pluralism (artifact_culture.gd allure values term)"
+  },
+  "works_allure": {
+   "value": 0.0,
+   "source": "undertaking_rewards attraction/reputation (artifact_culture.gd works term)"
+  },
+  "founding_works": {
+   "value": 5.0,
+   "source": "settlement_construction.gd works without discovery gates (Hearth Circle, Lean-to Shelters, Storage Pits, Open Work Area, Gathering Yard)"
+  },
+  "build_delay_years": {
+   "value": 2.0,
+   "source": "years from a work's discovery to its completion (build queue)"
+  },
+  "fresh_spoil_mult": {
+   "value": 0.5,
+   "source": "DiscoverySystem.food_storage_multipliers: preservation_profile reductions of known practices on fresh food (food_system.gd _spoilage_rates)",
+   "fit": true
+  },
+  "knowledge_gain_mult": {
+   "value": 1.0,
+   "source": "consequence_engine.gd knowledge_gain modifiers the surrogate omits (curious_youth, founding knowledge_gain, societal values, progression knowledge_rate)",
+   "fit": true
+  },
+  "other_mortality": {
+   "value": 0.001,
+   "source": "consequence_engine.gd mortality components not modeled individually (Work accidents, Dehydration, cold/heat exposure); annual rate",
+   "fit": true
+  }
+ },
+ "research": {
+  "throughput": {
+   "value": 0.65,
+   "source": "lumped leader factor x diplomacy x figures x direction x communities x consequences.discovery_multiplier x Pathways.multiplier (discovery_system.gd process_day)",
+   "fit": true
+  },
+  "throughput_growth": {
+   "value": -0.3,
+   "source": "log-linear drift of the lumped factor per century (officials' skill, communities)",
+   "fit": true
+  },
+  "opening_gate_delay_years": {
+   "value": 2.0,
+   "source": "OpeningOpportunities evidence days before gated items open (opening_opportunities.gd)"
+  },
+  "context": {
+   "value": {
+    "foraging": 1.0,
+    "food": 1.0,
+    "exploration": 0.5,
+    "travel": 0.1,
+    "fiber": 0.5,
+    "fire": 0.6,
+    "administration": 0.5,
+    "defense": 0.3,
+    "freshwater": 1.0,
+    "construction": 1.0,
+    "storage": 0.8,
+    "timber": 0.7,
+    "tools": 1.0,
+    "insight": 1.0
+   },
+   "source": "civilization_day.gd context(): default activity signals (+Hearth Circle)"
+  },
+  "signal_scale": {
+   "value": 1.0,
+   "source": "scale on context signals (field observations, military context add to them)",
+   "fit": true
+  },
+  "resource_known_year": {
+   "value": {
+    "Clay": 0,
+    "Stone": 0,
+    "Timber": 0,
+    "Fiber Plants": 0,
+    "Flint": 0,
+    "Freshwater": 0,
+    "Game": 0,
+    "Medicinal Plants": 2,
+    "Fertile Soil": 1,
+    "Salt": 15,
+    "Limestone": 25,
+    "Copper Ore": 20,
+    "Tin Ore": 120,
+    "Fine Sand": 60,
+    "Coal": 150,
+    "Iron Ore": 200,
+    "Peat": 30,
+    "Sulfur": 200,
+    "Nitrates": 300,
+    "Bitumen": 120,
+    "Deep Aquifer": 250
+   },
+   "source": "resource deposits recognized (resource system); scenario may override"
+  },
+  "resource_stage_lag": {
+   "value": {
+    "recognized": 0,
+    "surveyed": 5,
+    "accessible": 15,
+    "developed": 40
+   },
+   "source": "years from recognition to each deposit stage (resource system)"
+  },
+  "evidence_by_stage": {
+   "value": {
+    "recognized": 0.96,
+    "surveyed": 1.02,
+    "accessible": 1.08,
+    "developed": 1.15
+   },
+   "source": "discovery_system.gd _resource_evidence 0.65+stage/4*0.25+worked"
+  },
+  "resource_stage_year_override": {
+   "value": {
+    "Freshwater": {
+     "surveyed": 1000000000.0,
+     "accessible": 1000000000.0,
+     "developed": 1000000000.0
+    }
+   },
+   "source": "Observed in every headless truth run: the Freshwater deposit never passes 'recognized' (no terrain/hydrology deposit), so items needing Freshwater 'accessible' (wound_cleaning, clean_water, birth_attendants...) never open. Verify in the real game; set to years to model a mapped river site."
+  },
+  "resource_potential": {
+   "value": 0.5,
+   "source": "environment resource_potentials used by research_affinity (+15 x potential per requirement)"
+  }
+ },
+ "artifacts": {
+  "party_size": {
+   "value": 4.0,
+   "source": "scouting_staff.gd party size (2..80, share of the target)"
+  },
+  "trip_days": {
+   "value": 60.0,
+   "source": "civilization_system.gd SCOUT_DURATIONS typical trip"
+  },
+  "cells_per_trip": {
+   "value": 6.0,
+   "source": "new 24 km cells searched per trip (route novelty >= 0.38)",
+   "fit": false
+  },
+  "ground_density": {
+   "value": 0.3,
+   "source": "artifact_sites.gd density(ground): mean over scouted terrain (0.04-0.62)"
+  },
+  "explored_area_cells": {
+   "value": 2500.0,
+   "source": "reachable uncharted cells; searched ground is never re-searched at random"
+  },
+  "rival_claim_rate": {
+   "value": 0.004,
+   "source": "share of remaining sites/cells claimed by rival parties per year (site_claimed exclusivity)",
+   "fit": false
+  },
+  "legend_reach_cells": {
+   "value": 400.0,
+   "source": "legendary sites 160-2560 km from home; chance a trip passes one"
+  }
+ },
+ "calibrated": {
+  "disease_pressure": 0.15,
+  "storage_base_rations": 3341.25,
+  "knowledge_gain_mult": 2.75,
+  "_fitted": "2026-09-25 00:55 score 107.7 on 7 truth runs",
+  "fresh_spoil_mult": 0.675,
+  "other_mortality": 0.00345,
+  "throughput_growth": 0.19875,
+  "throughput": 0.53625,
+  "food_adjust_rate": 0.7175,
+  "cohesion_offset": 0.0,
+  "housing_build_rate": 0.0255,
+  "institution_offset": 0.1,
+  "accessible_deposits_per_decade": 2.05,
+  "signal_scale": 0.125,
+  "food_buffer": 1.485
+ },
+ "_formula_hashes": {
+  "scripts/discovery_system.gd::var probability: float = discovery.chance": "2cfcfb6316",
+  "scripts/discovery_system.gd::team_scale=researchers if": "bbcddf8a7c",
+  "scripts/discovery_system.gd::var support_multiplier:=": "ea46c43dc5",
+  "scripts/discovery_system.gd::return (0.45+0.55*staffing)": "94899d3878",
+  "scripts/discovery_system.gd::return (0.85+_research_draw": "4906352fb5",
+  "scripts/society_model.gd::var spread:=(0.00035+teaching+practice+directed)": "882c82810d",
+  "scripts/society_model.gd::var combined:=clampf(": "b5c2d68c2f",
+  "scripts/consequence_engine.gd::var food_security_target := clampf(": "fae8d061d4",
+  "scripts/consequence_engine.gd::var health_target := clampf(": "c4174cdea1",
+  "scripts/consequence_engine.gd::var cohesion_target := clampf(": "79c6a5db6f",
+  "scripts/consequence_engine.gd::var material_target := clampf(": "1e728709fc",
+  "scripts/consequence_engine.gd::var knowledge_gain := observers": "648299359f",
+  "scripts/consequence_engine.gd::mortality_components[\"Hunger\"]=maxf(": "afc1fb14bc",
+  "scripts/game_state.gd::var factor:=lerpf(0.12,1.08,health)": "2880437273",
+  "scripts/game_state.gd::var multiplier:=1.0+maxf(0.0,0.72-health)": "cc53241ad3",
+  "scripts/game_state.gd::var neonatal_rate:=clampf(": "becf7bd895",
+  "scripts/game_state.gd::var maternal_rate:=clampf(": "08d14e81e2",
+  "scripts/game_state.gd::var health_factor:=lerpf(1.90,0.64": "0f5cfd02e2",
+  "scripts/food_system.gd::result[\"Fresh plants\"]=workers*gathering_weight": "54ed5a9113",
+  "scripts/food_system.gd::var early:=clampf(0.06+": "98e46ed813",
+  "scripts/food_system.gd::var burden_target:=clampf(": "86ea4669e3",
+  "scripts/artifact_collection.gd::return {\"weight\":weight,\"total_weight\":total": "b06f2af677",
+  "scripts/artifact_culture.gd::var collection:=ALLURE_COLLECTION": "456d96ffc6"
+ }
+}

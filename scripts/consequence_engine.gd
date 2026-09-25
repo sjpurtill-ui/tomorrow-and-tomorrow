@@ -757,7 +757,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	WorldSimulation.state.simulation_metrics["annual_death_rate"]=annual_death_rate
 	WorldSimulation.state.simulation_metrics["mortality_components"]=mortality_components.duplicate(true)
 	WorldSimulation.state.death_progress+=population*annual_death_rate/365.0*span
-	var deaths_today:=floori(WorldSimulation.state.death_progress)
+	var deaths_today:=maxi(0,floori(WorldSimulation.state.death_progress)) # research_600: a named death already registered is a debt, never negative deaths
 	WorldSimulation.state.death_progress-=deaths_today
 	if WorldSimulation.state.population_total-deaths_today<1:
 		deaths_today=maxi(0,WorldSimulation.state.population_total-1)
@@ -775,8 +775,8 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		"conception_support":WorldSimulation.discovery.effect("conception_support")+policy_effect("conception_support")+WorldSimulation.state.founding_effect("conception_support")+WorldSimulation.progression.effect("conception_support"),
 		"maternal_safety":WorldSimulation.discovery.effect("maternal_safety"),"neonatal_survival":WorldSimulation.discovery.effect("neonatal_survival")+policy_effect("neonatal_survival"),
 		"conception_care":float(care.get("conception",1.0)),"pregnancy_care":float(care.get("pregnancy_risk",1.0)),
-		"neonatal_care":float(care.get("neonatal",1.0)),"maternal_care":float(care.get("maternal",1.0))
-	}
+		"neonatal_care":EARLY_CARE.neonatal_factor(care),"maternal_care":EARLY_CARE.maternal_factor(care)
+	} # research_600: neonatal/maternal care factors include the pre-modern burden
 	var reproduction:=WorldSimulation.state.process_reproduction_day(reproduction_context)
 	# Cohorts and gestation advance one real day at a time within a span.
 	for extra in WorldSimulation.span-1:

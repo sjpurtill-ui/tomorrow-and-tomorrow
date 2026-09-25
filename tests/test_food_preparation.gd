@@ -22,11 +22,11 @@ func after_test()->void:
 func test_closed_graph_contract_and_date_free_alternatives()->void:
 	var audit=preload("res://tools/technology-review/dormant_or_audit.gd")
 	assert_array(preload("res://scripts/technology_requirements.gd").validate(DiscoverySystem.technology_catalog,audit.pending(DiscoverySystem.technology_catalog))).is_empty()
+	# 600-year design: steaming vessels rest on fired, tempered pottery; no date gates the foundations.
 	var steam:=DiscoverySystem.discovery_definition("food_steaming_vessels")
-	for vessel:String in ["clay_shaping","basketry"]:
-		GameState.known_discoveries.assign(["hearth_roasting_control",vessel])
-		assert_bool(Paths.ready(steam,0)).is_true()
-	GameState.known_discoveries.assign(["basketry"])
+	GameState.known_discoveries.assign(["pit_firing","clay_tempering"])
+	assert_bool(Paths.ready(steam,0)).is_true()
+	GameState.known_discoveries.assign(["basketry","hearth_roasting_control"])
 	assert_bool(Paths.ready(steam,1000000)).is_false()
 
 func test_real_consumption_inputs_and_food_conservation()->void:
@@ -164,24 +164,28 @@ func test_foreign_study_keeps_common_and_alternative_foundations()->void:
 	var book:=Paths.book()
 	book.collections={"neighbor:steam":{"id":"neighbor:steam","kind":"knowledge","source_name":"Neighbor","discovery_id":"food_steaming_vessels"}}
 	book.evidence={"food_steaming_vessels":"neighbor:steam"}
-	GameState.known_discoveries.assign(["basketry"])
+	# 600-year design foundations: pit firing and clay tempering, both required.
+	GameState.known_discoveries.assign(["clay_tempering"])
 	assert_bool(Paths.ready(entry,0)).is_false()
-	GameState.known_discoveries.assign(["hearth_roasting_control"])
+	GameState.known_discoveries.assign(["pit_firing"])
 	assert_bool(Paths.ready(entry,0)).is_false()
-	GameState.known_discoveries.append("basketry")
+	GameState.known_discoveries.append("clay_tempering")
 	assert_bool(Paths.ready(entry,0)).is_true()
 	Paths.remember(entry,0)
-	assert_array(book.origins.food_steaming_vessels.requires).contains(["basketry","hearth_roasting_control"])
+	assert_array(book.origins.food_steaming_vessels.requires).contains(["pit_firing","clay_tempering"])
 
 func test_inspector_receives_operating_conditions_and_grouped_alternatives()->void:
-	GameState.known_discoveries.assign(["hearth_roasting_control","basketry"])
+	GameState.known_discoveries.assign(["pit_firing","clay_tempering"])
+	GameState.elapsed_days=ceil(DiscoverySystem.research_600_earliest_year(DiscoverySystem.discovery_definition("food_steaming_vessels"))*365.0)
 	var found:=false
 	for item:Dictionary in preload("res://scripts/hud/atlas_data.gd").inquiry():
 		if item.id!="food_steaming_vessels":continue
 		found=true
 		assert_bool(item.exposed).is_true()
 		assert_str(item.operating_summary).contains("Logistics")
-		assert_array(item.requires_any).is_equal([["clay_shaping","basketry"]])
+		# The 600-year design gives this entry common AND foundations only.
+		assert_array(DiscoverySystem.discovery_definition("food_steaming_vessels").requires_all).is_equal(["pit_firing","clay_tempering"])
+		assert_array(item.get("requires_any",[])).is_empty()
 	assert_bool(found).is_true()
 
 func test_optional_meals_preserve_known_craft_startup_timber()->void:

@@ -1,0 +1,1545 @@
+{
+ "line": "logistics",
+ "schema": "research_600_effects/1",
+ "items": {
+  "carried_load_balancing": {
+   "effects": {
+    "fatigue": -0.005,
+    "haul_capacity": 0.0036
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/woven_carriers.tres"
+  },
+  "landmark_route_naming": {
+   "effects": {
+    "knowledge_preservation": 0.0033,
+    "route_speed": 0.0056
+   },
+   "art": "res://assets/ui/research/paper/route_memory.png"
+  },
+  "paired_carrier_balancing": {
+   "effects": {
+    "fatigue": -0.005,
+    "haul_capacity": 0.0036
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/woven_carriers.tres"
+  },
+  "guest_host_reciprocity": {
+   "effects": {
+    "cohesion": 0.0021,
+    "trade_capacity": 0.0132
+   },
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "vermin_deterrent_placement": {
+   "effects": {
+    "food_storage": 0.0042,
+    "storage_loss": -0.0122
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/stock_rotation.tres"
+  },
+  "hide_floats": {
+   "effects": {
+    "haul_capacity": 0.0027,
+    "injury_risk": -0.0018,
+    "route_speed": 0.0056,
+    "travel_speed": 0.005
+   },
+   "art": "res://assets/ui/research/paper/hide_floats.png"
+  },
+  "dry_cache_siting": {
+   "effects": {
+    "dry_storage": 0.0108,
+    "food_storage": 0.0042,
+    "storage_loss": -0.0122
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/root_cellars.tres"
+  },
+  "carrying_poles": {
+   "effects": {
+    "fatigue": -0.0038,
+    "haul_capacity": 0.0054
+   },
+   "name": "Carrying Poles",
+   "observation": "A springy pole across the shoulder lets one carrier trot with two baskets of water or grain.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "trail_waymarking": {
+   "effects": {
+    "route_speed": 0.0083,
+    "travel_speed": 0.01
+   },
+   "art": "res://assets/ui/research/paper/route_memory.png"
+  },
+  "river_craft": {
+   "effects": {
+    "food_output": 0.0093,
+    "haul_capacity": 0.0072,
+    "route_speed": 0.0111,
+    "trade_capacity": 0.0132
+   },
+   "observation": "Hollowed logs driven by paddles run the river both ways; the current becomes a road.",
+   "art": "res://assets/ui/research/paper/river_craft.png"
+  },
+  "trade_partner_tokens": {
+   "effects": {
+    "cohesion": 0.0027,
+    "trade_capacity": 0.0132
+   },
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "sledges_travois": {
+   "effects": {
+    "fatigue": -0.0025,
+    "haul_capacity": 0.0072,
+    "mobile_shelter": 0.02
+   },
+   "name": "Sledges and Travois",
+   "observation": "Loads dragged on trailing poles or a runner sledge cross snow, grass and mud that would break a carrier's back.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "down_the_line_exchange": {
+   "effects": {
+    "cohesion": 0.0027,
+    "tool_quality": 0.0032,
+    "trade_capacity": 0.0266
+   },
+   "name": "Down-the-line Exchange",
+   "observation": "Flint, obsidian and shell pass hand to hand between neighbours until they reach people who never saw the source.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "load_lashing_knots": {
+   "effects": {
+    "haul_capacity": 0.0036,
+    "injury_risk": -0.0018,
+    "storage_loss": -0.0061
+   },
+   "name": "Load-lashing Knots",
+   "observation": "A few trusted hitches hold a bundle tight on a back or a raft and let go with one pull.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "route_food_caches": {
+   "effects": {
+    "food_storage": 0.0042,
+    "logistics_endurance": 0.04,
+    "travel_speed": 0.005
+   },
+   "name": "Route Food Caches",
+   "observation": "Dried food buried at known points lets a party travel light and eat on the way home.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "portage_paths": {
+   "effects": {
+    "haul_capacity": 0.0018,
+    "route_speed": 0.0083
+   },
+   "name": "Portage Paths",
+   "observation": "Cleared paths let a crew shoulder the boat around the falls and across to the next water.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "skis_snowshoes": {
+   "effects": {
+    "hunting_yield": 0.02,
+    "logistics_endurance": 0.01,
+    "travel_speed": 0.02
+   },
+   "name": "Skis and Snowshoes",
+   "observation": "Broad frames and long runners keep hunters on top of deep snow while the game flounders.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "brushwood_trackways": {
+   "effects": {
+    "injury_risk": -0.0018,
+    "route_speed": 0.0069,
+    "timber_pressure": 0.005
+   },
+   "name": "Brushwood Trackways",
+   "observation": "Mats of cut brushwood laid over bog and soft ground keep feet and loads out of the mire.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "load_backframes": {
+   "effects": {
+    "fatigue": -0.0025,
+    "haul_capacity": 0.0054
+   },
+   "name": "Load Backframes",
+   "observation": "A lashed wooden frame on the back carries firewood, hides and pots too bulky for any basket.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "boundary_exchange_sites": {
+   "effects": {
+    "cohesion": 0.0009,
+    "security_efficiency": 0.001,
+    "trade_capacity": 0.0027
+   },
+   "name": "Boundary Exchange Places",
+   "observation": "Partners from both sides meet at a known stone on the boundary, trade, and go home without entering each other's camps.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "reed_bundle_boats": {
+   "effects": {
+    "haul_capacity": 0.0021,
+    "route_speed": 0.0022,
+    "trade_capacity": 0.0009
+   },
+   "name": "Reed-bundle Boats",
+   "observation": "Reeds bound in tight bundles and coated with bitumen float cargo through marsh and shallow river.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "wayfinding_stars": {
+   "effects": {
+    "route_speed": 0.0061,
+    "survey_speed": 0.0064
+   },
+   "art": "res://assets/ui/research/paper/wayfinding_stars.png"
+  },
+  "rollers_and_runners": {
+   "effects": {
+    "construction_rate": 0.003,
+    "haul_capacity": 0.0031,
+    "stone_yield": 0.01
+   },
+   "name": "Rollers and Runners",
+   "observation": "Logs laid under a heavy trunk or stone let a dozen people move what fifty could not lift.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "seasonal_ford_timing": {
+   "effects": {
+    "injury_risk": -0.0018,
+    "route_speed": 0.0022
+   },
+   "art": "res://assets/ui/research/paper/river_craft.png"
+  },
+  "relay_carrying_shifts": {
+   "effects": {
+    "haul_capacity": 0.0021,
+    "logistics_endurance": 0.02
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/crew_handoffs.tres"
+  },
+  "oldest_first_marking": {
+   "effects": {
+    "food_storage": 0.0009,
+    "storage_loss": -0.0038
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/stock_rotation.tres"
+  },
+  "trade_partner_memory": {
+   "effects": {
+    "knowledge_preservation": 0.0014,
+    "trade_capacity": 0.0018
+   },
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "salt_shell_routes": {
+   "effects": {
+    "food_spoilage": -0.001,
+    "nutrition_quality": 0.0006,
+    "trade_capacity": 0.0036
+   },
+   "name": "Salt and Shell Routes",
+   "observation": "Salt cakes and bright shell travel regular paths inland, and the salt keeps meat through the lean months.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "river_landings": {
+   "effects": {
+    "haul_capacity": 0.0019,
+    "route_speed": 0.0056,
+    "trade_capacity": 0.0025
+   },
+   "name": "River Landings",
+   "observation": "Cleared and staked landings let boats come in to the same bank each trip and unload dry.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "hide_covered_boats": {
+   "effects": {
+    "haul_capacity": 0.0025,
+    "route_speed": 0.0056,
+    "trade_capacity": 0.0025
+   },
+   "name": "Hide-covered Boats",
+   "observation": "Hides stretched over a wicker frame make a light boat two people can carry and six can ride.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "stock_layering_method": {
+   "effects": {
+    "food_spoilage": -0.0154,
+    "storage_loss": -0.0032
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/stock_rotation.tres"
+  },
+  "seasonal_route_assessment": {
+   "effects": {
+    "disaster_risk": -0.0007,
+    "route_speed": 0.0056
+   },
+   "art": "res://assets/ui/research/paper/route_memory.png"
+  },
+  "barter_equivalence_custom": {
+   "effects": {
+    "task_coordination": 0.0005,
+    "trade_capacity": 0.0075
+   },
+   "art": "res://assets/ui/research/paper/standard_measures.png"
+  },
+  "ox_drawn_sledges": {
+   "effects": {
+    "construction_rate": 0.0032,
+    "fatigue": -0.0009,
+    "haul_capacity": 0.0062,
+    "labor_efficiency": 0.0009
+   },
+   "name": "Ox-drawn Sledges",
+   "observation": "A trained ox leans into a sledge rope and hauls stone and timber that once took the whole village.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "long_distance_axe_trade": {
+   "effects": {
+    "cohesion": 0.0009,
+    "legitimacy": 0.005,
+    "tool_quality": 0.0019,
+    "trade_capacity": 0.0075
+   },
+   "name": "Long-distance Axe Trade",
+   "observation": "Polished axes of a famous green stone pass through many hands and arrive as treasures, not tools.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "paired_ox_yoke": {
+   "effects": {
+    "cultivation_yield": 0.0015,
+    "haul_capacity": 0.0062,
+    "labor_efficiency": 0.0009
+   },
+   "name": "Paired-ox Yoke",
+   "observation": "A shaped beam across two necks makes a pair of oxen pull as one, on a sledge or a scratch plough.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "pack_animals": {
+   "effects": {
+    "fatigue": -0.0024,
+    "haul_capacity": 0.013,
+    "logistics_endurance": 0.0223,
+    "route_speed": 0.0056,
+    "trade_capacity": 0.0033
+   },
+   "observation": "Donkeys under pads and panniers carry a family's load day after day and ask only grazing and water.",
+   "ability_reason": "A donkey carries what three people could, so trips, trade and moves suddenly cost far less.",
+   "art": "res://assets/ui/research/paper/pack_animals.png"
+  },
+  "load_bundling_by_weight": {
+   "effects": {
+    "haul_capacity": 0.0026,
+    "labor_efficiency": 0.0011
+   },
+   "art": "res://assets/ui/research/paper/pack_animals.png"
+  },
+  "rest_stop_spacing_custom": {
+   "effects": {
+    "fatigue": -0.0024,
+    "route_speed": 0.0028
+   },
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "pest_barrier_maintenance": {
+   "effects": {
+    "disease_exposure": -0.0028,
+    "storage_loss": -0.0025
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/stock_rotation.tres"
+  },
+  "shared_trade_escort": {
+   "effects": {
+    "injury_risk": -0.0017,
+    "trade_capacity": 0.0017
+   },
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "pack_load_balancing": {
+   "effects": {
+    "haul_capacity": 0.0039,
+    "injury_risk": -0.0012
+   },
+   "art": "res://assets/ui/research/paper/pack_animals.png"
+  },
+  "pack_saddles": {
+   "effects": {
+    "haul_capacity": 0.0039,
+    "injury_risk": -0.0004,
+    "logistics_endurance": 0.0074
+   },
+   "name": "Wooden Pack Saddles",
+   "observation": "A padded wooden saddle keeps panniers off the spine, so a donkey carries more for longer without sores.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "plank_trackways": {
+   "effects": {
+    "haul_capacity": 0.0013,
+    "injury_risk": -0.0006,
+    "route_speed": 0.0074,
+    "timber_pressure": 0.01
+   },
+   "name": "Plank Trackways",
+   "observation": "Split planks pegged across the wetland carry people and sledges dry-shod to the far villages.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "sealed_store_doors": {
+   "effects": {
+    "food_storage": 0.0011,
+    "state_capacity": 0.0027,
+    "storage_loss": -0.0038
+   },
+   "name": "Sealed Store Doors",
+   "observation": "A lump of clay over the door latch, pressed with the keeper's seal, shows at a glance whether the store was opened.",
+   "social_consequence": "Someone now keeps count at the storehouse, and those who once took freely must ask.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "plank_extended_dugouts": {
+   "effects": {
+    "haul_capacity": 0.0035,
+    "naval_capacity": 0.02,
+    "route_speed": 0.0077
+   },
+   "name": "Plank-raised Dugouts",
+   "observation": "Planks sewn along a dugout's sides raise it high enough to carry cargo on open water.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "solid_wheel_assembly": {
+   "effects": {
+    "construction_rate": 0.0041,
+    "haul_capacity": 0.0069,
+    "route_speed": 0.0039,
+    "timber_pressure": 0.01
+   },
+   "ability_reason": "The first wheels turn a dragged load into a rolling one.",
+   "art": "res://assets/ui/research/paper/first300-cards/solid_wheel_assembly.tres"
+  },
+  "wooden_axle_shaping": {
+   "effects": {
+    "haul_capacity": 0.0017,
+    "repair_capacity": 0.01
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/wooden_axle_shaping.tres"
+  },
+  "linchpin_retention": {
+   "effects": {
+    "haul_capacity": 0.0011,
+    "repair_capacity": 0.015
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/cart_running_gear.tres"
+  },
+  "trade_colonies": {
+   "effects": {
+    "adoption_rate": 0.02,
+    "cohesion": -0.005,
+    "trade_capacity": 0.0115
+   },
+   "name": "Trade Outposts",
+   "observation": "Families settle in a distant river town to buy and ship for their kin at home.",
+   "social_consequence": "Some families now live among strangers for the trade, and come home speaking and dressing half like them.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "cart_bed_framing": {
+   "effects": {
+    "construction_rate": 0.0041,
+    "haul_capacity": 0.0092,
+    "labor_demand": 0.004,
+    "labor_efficiency": 0.0025,
+    "route_speed": 0.0077
+   },
+   "ability_reason": "An ox cart moves a harvest, a house frame or a quarry's stone in one trip.",
+   "art": "res://assets/ui/research/paper/first300-cards/cart_bed_framing.tres"
+  },
+  "cargo_stowage_sequencing": {
+   "effects": {
+    "haul_capacity": 0.0023,
+    "logistics_endurance": 0.0096
+   },
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "storage_humidity_judging": {
+   "effects": {
+    "food_spoilage": -0.012,
+    "storage_loss": -0.0042
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/stock_rotation.tres"
+  },
+  "market_timing_knowledge": {
+   "effects": {
+    "logistics_endurance": 0.0048,
+    "trade_capacity": 0.0058
+   },
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "crossing_point_survey": {
+   "effects": {
+    "injury_risk": -0.0022,
+    "route_speed": 0.0039
+   },
+   "art": "res://assets/ui/research/paper/river_craft.png"
+  },
+  "four_wheeled_wagons": {
+   "effects": {
+    "haul_capacity": 0.0068,
+    "labor_demand": 0.004,
+    "logistics_endurance": 0.0027,
+    "timber_pressure": 0.01
+   },
+   "name": "Four-wheeled Wagons",
+   "observation": "Two axles under one long bed carry a load no two-wheeled cart can balance.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "sail_panel_cutting": {
+   "effects": {
+    "haul_capacity": 0.0045,
+    "naval_capacity": 0.04,
+    "route_speed": 0.0115,
+    "trade_capacity": 0.0046
+   },
+   "ability_reason": "A square sail lets river boats go upstream on the wind instead of by the pole.",
+   "art": "res://assets/ui/research/paper/first300-cards/sail_panel_cutting.tres"
+  },
+  "waypoint_cargo_transfer": {
+   "effects": {
+    "haul_capacity": 0.0023,
+    "labor_demand": 0.0057,
+    "logistics_endurance": 0.0027
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/crew_handoffs.tres"
+  },
+  "alternate_route_scouting": {
+   "effects": {
+    "disaster_risk": -0.0008,
+    "route_speed": 0.0039
+   },
+   "art": "res://assets/ui/research/paper/route_memory.png"
+  },
+  "cache_capacity_accounting": {
+   "effects": {
+    "food_storage": 0.0066,
+    "task_coordination": 0.0006
+   },
+   "art": "res://assets/ui/research/paper/tallies.png"
+  },
+  "seasonal_trade_gathering": {
+   "effects": {
+    "task_coordination": 0.0004,
+    "trade_capacity": 0.0046
+   },
+   "art": "res://assets/ui/research/paper/festival_calendar.png"
+  },
+  "supply_groups": {
+   "effects": {
+    "food_storage": 0.0099,
+    "haul_capacity": 0.0079,
+    "labor_demand": 0.0086,
+    "logistics_endurance": 0.0137,
+    "warfare_readiness": 0.0051
+   },
+   "observation": "Carriers, cooks and scouts organized as one party can keep a band fed far from home for weeks.",
+   "art": "res://assets/ui/research/paper/supply_groups.png"
+  },
+  "cargo_seals": {
+   "effects": {
+    "state_capacity": 0.0042,
+    "storage_loss": -0.0128,
+    "trade_capacity": 0.0061
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/cargo_seals.tres"
+  },
+  "haul_harness_weaving": {
+   "effects": {
+    "fatigue": -0.0022,
+    "haul_capacity": 0.0034
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/haul_harness_weaving.tres"
+  },
+  "graded_roads": {
+   "effects": {
+    "construction_rate": 0.0065,
+    "ecological_pressure": 0.006,
+    "haul_capacity": 0.0087,
+    "labor_demand": 0.0143,
+    "route_speed": 0.0083
+   },
+   "observation": "Crowned and ditched road beds between towns stay firm through the rains and carry carts every season.",
+   "art": "res://assets/ui/research/paper/graded_roads.png"
+  },
+  "cart_running_gear": {
+   "effects": {
+    "haul_capacity": 0.0038,
+    "repair_capacity": 0.02,
+    "standardization": 0.01
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/cart_running_gear.tres"
+  },
+  "coastal_watercraft": {
+   "effects": {
+    "food_output": 0.01,
+    "haul_capacity": 0.005,
+    "naval_capacity": 0.0436,
+    "route_speed": 0.0034,
+    "trade_capacity": 0.0133
+   },
+   "ability_reason": "Plank boats reach the next coast; fish, trade and news come by sea.",
+   "art": "res://assets/ui/research/paper/coastal_watercraft.png"
+  },
+  "timber_bridges": {
+   "effects": {
+    "disaster_resilience": 0.0042,
+    "haul_capacity": 0.0063,
+    "route_speed": 0.0069,
+    "timber_pressure": 0.025
+   },
+   "observation": "Log beams laid on timber piers carry people and pack animals over streams that once cut the road in the rains.",
+   "art": "res://assets/ui/research/paper/first300-cards/timber_bridges.tres"
+  },
+  "rope_laying": {
+   "effects": {
+    "construction_rate": 0.0022,
+    "haul_capacity": 0.0025,
+    "naval_capacity": 0.0109
+   },
+   "observation": "Strands laid against their own twist make a long rope that holds a towed boat or a hoisted beam without unravelling.",
+   "art": "res://assets/ui/research/paper/rope_laying.png"
+  },
+  "caulking_fiber_preparation": {
+   "effects": {
+    "naval_capacity": 0.0082,
+    "storage_loss": -0.0015
+   },
+   "art": "res://assets/ui/research/paper/caulking_fiber_preparation.png"
+  },
+  "hull_seam_caulking": {
+   "effects": {
+    "haul_capacity": 0.0012,
+    "injury_risk": -0.0032,
+    "naval_capacity": 0.0164
+   },
+   "art": "res://assets/ui/research/paper/hull_seam_caulking.png"
+  },
+  "treenail_fastening": {
+   "effects": {
+    "construction_rate": 0.0022,
+    "naval_capacity": 0.0109
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/treenail_fastening.tres"
+  },
+  "towpaths": {
+   "effects": {
+    "haul_capacity": 0.0025,
+    "route_speed": 0.0021
+   },
+   "name": "Towpaths",
+   "observation": "A beaten path along the bank lets a team haul a laden boat upstream against the current.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "mast_making": {
+   "effects": {
+    "naval_capacity": 0.0164,
+    "route_speed": 0.0014
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/rope_rigging.tres"
+  },
+  "ferry_crossings": {
+   "effects": {
+    "injury_risk": -0.0006,
+    "route_speed": 0.0058,
+    "trade_capacity": 0.0014
+   },
+   "name": "Ferry Crossings",
+   "observation": "A ferryman keeps a boat at the crossing and takes people, goods and animals over for a fee.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "plank_spiling": {
+   "effects": {
+    "haul_capacity": 0.0006,
+    "naval_capacity": 0.009
+   },
+   "art": "res://assets/ui/research/paper/plank_spiling.png"
+  },
+  "central_storehouses": {
+   "effects": {
+    "container_capacity": 0.02,
+    "food_storage": 0.0125,
+    "labor_demand": 0.0057,
+    "state_capacity": 0.0044,
+    "storage_loss": -0.0064
+   },
+   "name": "Central Storehouses",
+   "observation": "Sealed rooms hold the settlement's grain and oil, and the keeper opens them on fixed issue days.",
+   "social_consequence": "Grain goes into the storehouse and comes out on issue days; the keeper's tally decides who eats first in a lean spring.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "convoy_load_distribution": {
+   "effects": {
+    "haul_capacity": 0.0017,
+    "logistics_endurance": 0.02
+   },
+   "art": "res://assets/ui/research/paper/pack_animals.png"
+  },
+  "store_airflow_arrangement": {
+   "effects": {
+    "food_spoilage": -0.0173,
+    "storage_loss": -0.004
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/raised_granaries.tres"
+  },
+  "trade_route_risk_assessment": {
+   "effects": {
+    "injury_risk": -0.0016,
+    "trade_capacity": 0.0027
+   },
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "waystation_spacing_judgment": {
+   "effects": {
+    "logistics_endurance": 0.02,
+    "route_speed": 0.0039
+   },
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "onager_hybrid_teams": {
+   "effects": {
+    "haul_capacity": 0.0023,
+    "route_speed": 0.0039,
+    "warfare_readiness": 0.0006
+   },
+   "name": "Onager-hybrid Teams",
+   "observation": "Crossbred asses, stronger than donkeys and tamer than wild onagers, draw the heavy four-wheeled wagons.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "paved_haul_roads": {
+   "effects": {
+    "construction_rate": 0.0027,
+    "haul_capacity": 0.0017,
+    "labor_demand": 0.0057,
+    "route_speed": 0.0097,
+    "stone_yield": 0.01
+   },
+   "name": "Paved Haul Roads",
+   "observation": "Flagstones laid from the quarry to the building site carry block-laden sledges in any weather.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "stone_jetty_harbors": {
+   "effects": {
+    "disaster_resilience": 0.0053,
+    "disease_exposure": 0.01,
+    "labor_demand": 0.0057,
+    "naval_capacity": 0.0133,
+    "storage_loss": -0.0061,
+    "trade_capacity": 0.0047
+   },
+   "name": "Stone-jetty Harbors",
+   "observation": "A stone arm built out into the bay gives ships still water to load and ride out a storm.",
+   "ability_reason": "A sheltered harbor turns scattered beach landings into a port.",
+   "social_consequence": "Ships from other coasts now tie up at the jetty; harbor people learn strangers' prices, and sometimes their fevers.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "wetted_track_sledging": {
+   "effects": {
+    "construction_rate": 0.0051,
+    "haul_capacity": 0.0045,
+    "stone_yield": 0.01
+   },
+   "name": "Wetted-track Sledging",
+   "observation": "Water poured before the runners on a timber track lets a gang drag a colossal stone on a sledge.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "navigation_canals": {
+   "effects": {
+    "disease_exposure": 0.01,
+    "haul_capacity": 0.0059,
+    "labor_demand": 0.0057,
+    "route_speed": 0.0045,
+    "trade_capacity": 0.0013,
+    "water_access": 0.014
+   },
+   "name": "Navigation Canals",
+   "observation": "Cuts between river branches let loaded boats reach fields and towns the river never touched.",
+   "social_consequence": "Standing canal water brings boats to the door, and with them the summer fevers.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "hogging_truss_hulls": {
+   "effects": {
+    "haul_capacity": 0.003,
+    "injury_risk": -0.001,
+    "naval_capacity": 0.01
+   },
+   "name": "Hogging-truss Hulls",
+   "observation": "A heavy rope twisted taut from stem to stern keeps a long hull from sagging and breaking in the sea.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "grain_barge_fleets": {
+   "effects": {
+    "food_storage": 0.0095,
+    "haul_capacity": 0.0059,
+    "logistics_endurance": 0.0057,
+    "state_capacity": 0.0015
+   },
+   "name": "Grain Barge Fleets",
+   "observation": "Barges travel the canals together at harvest and bring the outlying grain to the central stores.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "donkey_caravans": {
+   "effects": {
+    "haul_capacity": 0.0059,
+    "logistics_endurance": 0.0143,
+    "route_speed": 0.0022,
+    "trade_capacity": 0.0053
+   },
+   "name": "Donkey Caravans",
+   "observation": "Strings of a hundred donkeys set out each year on the same route, the same season, to the same distant markets.",
+   "ability_reason": "Regular caravans make distant metals and cloth a dependable supply, not a lucky find.",
+   "social_consequence": "Caravan families are away half the year; they bring back tin, cloth and news, and leave gaps at home.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "standard_transport_jars": {
+   "effects": {
+    "container_capacity": 0.05,
+    "standardization": 0.0054,
+    "storage_loss": -0.0061,
+    "trade_capacity": 0.0013
+   },
+   "name": "Standard Transport Jars",
+   "observation": "Jars of one size and shape stack in a hold and let a cargo of oil or wine be counted at a glance.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "road_stations": {
+   "effects": {
+    "fatigue": -0.0018,
+    "logistics_endurance": 0.0257,
+    "route_speed": 0.0096,
+    "state_capacity": 0.0019,
+    "travel_speed": 0.02
+   },
+   "name": "Road Stations",
+   "observation": "A well, a shelter and fodder a day's march apart let travellers and animals keep going on long roads.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "domesticated_mounts": {
+   "effects": {
+    "haul_capacity": 0.0132,
+    "route_speed": 0.0161,
+    "survey_speed": 0.0069,
+    "travel_speed": 0.08,
+    "warfare_readiness": 0.004
+   },
+   "observation": "Horses broken to the halter pull light carts and, at last, carry a rider faster than any runner.",
+   "ability_reason": "Horses change the speed of news, trade and war.",
+   "art": "res://assets/ui/research/paper/first300-cards/domesticated_mounts.tres"
+  },
+  "hired_carriers": {
+   "effects": {
+    "haul_capacity": 0.0132,
+    "labor_efficiency": 0.0015,
+    "state_capacity": 0.001,
+    "trade_capacity": 0.006
+   },
+   "name": "Hired Carriers and Boatmen",
+   "observation": "Carriers and boatmen agree a price for a load and a date, and are held to it before witnesses.",
+   "social_consequence": "Carrying becomes a paid trade; a carrier's household eats by contract rather than by kin.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "spoke_tenon_cutting": {
+   "effects": {
+    "haul_capacity": 0.0066,
+    "repair_capacity": 0.0073,
+    "tool_quality": 0.005
+   },
+   "art": "res://assets/ui/research/paper/felloe_jointing.png"
+  },
+  "spoked_wheel_assembly": {
+   "effects": {
+    "haul_capacity": 0.0189,
+    "route_speed": 0.0036,
+    "timber_pressure": -0.0014,
+    "travel_speed": 0.04,
+    "warfare_readiness": 0.0023
+   },
+   "ability_reason": "Light spoked wheels make carts fast enough to matter on the road and in war.",
+   "art": "res://assets/ui/research/paper/felloe_jointing.png"
+  },
+  "island_hopping_sailing": {
+   "effects": {
+    "injury_risk": 0.005,
+    "naval_capacity": 0.0367,
+    "route_speed": 0.0027,
+    "survey_speed": 0.0045,
+    "trade_capacity": 0.0067
+   },
+   "name": "Island-hopping Sailing",
+   "observation": "Sailing from island to island, always in sight of the next landfall, ships cross seas that once ended the world.",
+   "ability_reason": "Open-sea crossings reach whole new trading worlds.",
+   "social_consequence": "Sailors come home with foreign wives, foreign gods and stories of towns across the water.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "mountain_pack_trains": {
+   "effects": {
+    "logistics_endurance": 0.0257,
+    "metal_yield": 0.0087,
+    "trade_capacity": 0.0033
+   },
+   "name": "Mountain Pack Trains",
+   "observation": "Pack trains cross the high passes each summer carrying tin one way and cloth the other.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "merchant_quarters_abroad": {
+   "effects": {
+    "adoption_rate": 0.0034,
+    "cohesion": -0.005,
+    "trade_capacity": 0.005
+   },
+   "name": "Merchant Quarters Abroad",
+   "observation": "Our merchants keep houses, stores and their own elders in a quarter of a foreign town.",
+   "social_consequence": "The merchant families abroad grow rich and half foreign; at home some call them traitors, others envy them.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "pilots_sea_lanes": {
+   "effects": {
+    "injury_risk": -0.0034,
+    "naval_capacity": 0.0147,
+    "route_speed": 0.0027
+   },
+   "name": "Pilots and Sea Lanes",
+   "observation": "Pilots who know each reef and landmark guide ships along known lanes between the harbors.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "sailing_calendar": {
+   "effects": {
+    "disaster_risk": -0.0016,
+    "naval_capacity": 0.0257,
+    "trade_capacity": 0.0031
+   },
+   "name": "Sailing Calendar",
+   "observation": "Ships sail only in the settled months and lie up when the winter storms come.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "harbor_warehouses": {
+   "effects": {
+    "container_capacity": 0.03,
+    "food_storage": 0.008,
+    "storage_loss": -0.007,
+    "trade_capacity": 0.0062
+   },
+   "name": "Harbor Warehouses",
+   "observation": "Rows of storehouses behind the quay hold cargo between ships and keep grain for the town.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "consignment_lists": {
+   "effects": {
+    "knowledge_preservation": 0.0022,
+    "state_capacity": 0.0034,
+    "storage_loss": -0.0047,
+    "trade_capacity": 0.0047
+   },
+   "name": "Consignment Lists",
+   "observation": "A sealed tablet listing every jar and bale travels with the cargo and is checked on arrival.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "relay_team_stations": {
+   "effects": {
+    "logistics_endurance": 0.0114,
+    "route_speed": 0.0161,
+    "state_capacity": 0.0034,
+    "travel_speed": 0.032
+   },
+   "name": "Relay-team Stations",
+   "observation": "Fresh teams wait at stations along the main roads, so messengers and carts change animals and keep moving.",
+   "art": "res://assets/ui/research/logistics-v1.png"
+  },
+  "rope_rigging": {
+   "effects": {
+    "construction_rate": 0.0063,
+    "haul_capacity": 0.019,
+    "mine_safety": 0.04,
+    "naval_capacity": 0.0144
+   }
+  },
+  "common_path_alignment": {
+   "effects": {
+    "cohesion": 0.0027,
+    "route_speed": 0.0103
+   }
+  }
+ },
+ "art_proposals": {
+  "note": "Existing paintings proposed for NEW items once the Phase 1 art test allows them; not read by the loader.",
+  "items": {
+   "carrying_poles": "res://assets/ui/research/paper/first300-cards/woven_carriers.tres",
+   "sledges_travois": "res://assets/ui/research/paper/litter_bearer_drill.png",
+   "down_the_line_exchange": "res://assets/ui/research/paper/controlled_flaking.png",
+   "load_lashing_knots": "res://assets/ui/research/paper/cordage.png",
+   "route_food_caches": "res://assets/ui/research/paper/first300-cards/root_cellars.tres",
+   "portage_paths": "res://assets/ui/research/paper/river_craft.png",
+   "brushwood_trackways": "res://assets/ui/research/paper/graded_roads.png",
+   "load_backframes": "res://assets/ui/research/paper/first300-cards/woven_carriers.tres",
+   "boundary_exchange_sites": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
+   "reed_bundle_boats": "res://assets/ui/research/paper/first300-cards/bitumen_sealing.tres",
+   "rollers_and_runners": "res://assets/ui/research/paper/first300-cards/wedges_and_levers.tres",
+   "salt_shell_routes": "res://assets/ui/research/paper/first300-cards/salt_working.tres",
+   "river_landings": "res://assets/ui/research/paper/river_craft.png",
+   "hide_covered_boats": "res://assets/ui/research/paper/hide_floats.png",
+   "ox_drawn_sledges": "res://assets/ui/research/paper/animal_taming.png",
+   "long_distance_axe_trade": "res://assets/ui/research/paper/hafted_tools.png",
+   "paired_ox_yoke": "res://assets/ui/research/paper/first300-cards/haul_harness_weaving.tres",
+   "pack_saddles": "res://assets/ui/research/paper/pack_animals.png",
+   "plank_trackways": "res://assets/ui/research/paper/first300-cards/timber_bridges.tres",
+   "sealed_store_doors": "res://assets/ui/research/paper/first300-cards/cargo_seals.tres",
+   "plank_extended_dugouts": "res://assets/ui/research/paper/plank_spiling.png",
+   "four_wheeled_wagons": "res://assets/ui/research/paper/first300-cards/cart_running_gear.tres",
+   "towpaths": "res://assets/ui/research/paper/rope_laying.png",
+   "ferry_crossings": "res://assets/ui/research/paper/river_craft.png",
+   "central_storehouses": "res://assets/ui/research/paper/public_stores.png",
+   "onager_hybrid_teams": "res://assets/ui/research/paper/animal_taming.png",
+   "paved_haul_roads": "res://assets/ui/research/paper/aggregate_road_foundations.png",
+   "stone_jetty_harbors": "res://assets/ui/research/paper/coastal_watercraft.png",
+   "wetted_track_sledging": "res://assets/ui/research/paper/first300-cards/wedges_and_levers.tres",
+   "navigation_canals": "res://assets/ui/research/paper/first300-cards/gravity_conduit_grade_control.tres",
+   "hogging_truss_hulls": "res://assets/ui/research/paper/first300-cards/rope_rigging.tres",
+   "grain_barge_fleets": "res://assets/ui/research/paper/first300-cards/regional_granaries.tres",
+   "donkey_caravans": "res://assets/ui/research/paper/pack_animals.png",
+   "standard_transport_jars": "res://assets/ui/research/paper/sealed_vessels.png",
+   "road_stations": "res://assets/ui/research/paper/well_siting.png",
+   "hired_carriers": "res://assets/ui/research/paper/first300-cards/crew_handoffs.tres",
+   "island_hopping_sailing": "res://assets/ui/research/paper/galley_navigation.png",
+   "mountain_pack_trains": "res://assets/ui/research/paper/pack_animals.png",
+   "pilots_sea_lanes": "res://assets/ui/research/paper/wayfinding_stars.png",
+   "sailing_calendar": "res://assets/ui/research/paper/crop_calendars.png",
+   "harbor_warehouses": "res://assets/ui/research/paper/first300-cards/regional_granaries.tres",
+   "consignment_lists": "res://assets/ui/research/paper/first300-cards/clay_record_tablets.tres",
+   "relay_team_stations": "res://assets/ui/research/paper/first300-cards/domesticated_mounts.tres"
+  }
+ },
+ "balance_600": {
+  "schema": "research_600_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_600.py; the loader reads only 'items'.",
+  "source": {
+   "supply_groups": {
+    "food_storage": 0.03,
+    "haul_capacity": 0.0331,
+    "labor_demand": 0.0086,
+    "logistics_endurance": 0.1,
+    "warfare_readiness": 0.0242
+   },
+   "pack_animals": {
+    "fatigue": -0.02,
+    "haul_capacity": 0.0473,
+    "logistics_endurance": 0.06,
+    "route_speed": 0.0161,
+    "trade_capacity": 0.0267
+   },
+   "domesticated_mounts": {
+    "haul_capacity": 0.0142,
+    "route_speed": 0.0269,
+    "survey_speed": 0.02,
+    "travel_speed": 0.08,
+    "warfare_readiness": 0.0121
+   },
+   "hide_floats": {
+    "haul_capacity": 0.0071,
+    "injury_risk": -0.005,
+    "route_speed": 0.0108,
+    "travel_speed": 0.01
+   },
+   "river_craft": {
+    "food_output": 0.01,
+    "haul_capacity": 0.0189,
+    "route_speed": 0.0215,
+    "trade_capacity": 0.0133
+   },
+   "coastal_watercraft": {
+    "food_output": 0.01,
+    "haul_capacity": 0.0189,
+    "naval_capacity": 0.08,
+    "route_speed": 0.0269,
+    "trade_capacity": 0.04
+   },
+   "rope_rigging": {
+    "construction_rate": 0.07,
+    "haul_capacity": 0.16,
+    "mine_safety": 0.04,
+    "naval_capacity": 0.04
+   },
+   "graded_roads": {
+    "construction_rate": 0.03,
+    "ecological_pressure": 0.006,
+    "haul_capacity": 0.0331,
+    "labor_demand": 0.0143,
+    "route_speed": 0.0645
+   },
+   "timber_bridges": {
+    "disaster_resilience": 0.03,
+    "haul_capacity": 0.0237,
+    "route_speed": 0.0538,
+    "timber_pressure": 0.025
+   },
+   "wayfinding_stars": {
+    "route_speed": 0.0296,
+    "survey_speed": 0.055
+   },
+   "cargo_seals": {
+    "state_capacity": 0.025,
+    "storage_loss": -0.065,
+    "trade_capacity": 0.0267
+   },
+   "rope_laying": {
+    "construction_rate": 0.01,
+    "haul_capacity": 0.0095,
+    "naval_capacity": 0.02
+   },
+   "sail_panel_cutting": {
+    "haul_capacity": 0.0189,
+    "naval_capacity": 0.04,
+    "route_speed": 0.0323,
+    "trade_capacity": 0.02
+   },
+   "plank_spiling": {
+    "haul_capacity": 0.0047,
+    "naval_capacity": 0.025
+   },
+   "caulking_fiber_preparation": {
+    "naval_capacity": 0.015,
+    "storage_loss": -0.005
+   },
+   "treenail_fastening": {
+    "construction_rate": 0.01,
+    "naval_capacity": 0.02
+   },
+   "hull_seam_caulking": {
+    "haul_capacity": 0.0047,
+    "injury_risk": -0.005,
+    "naval_capacity": 0.03
+   },
+   "mast_making": {
+    "naval_capacity": 0.03,
+    "route_speed": 0.0108
+   },
+   "spoke_tenon_cutting": {
+    "haul_capacity": 0.0071,
+    "repair_capacity": 0.01,
+    "tool_quality": 0.005
+   },
+   "solid_wheel_assembly": {
+    "construction_rate": 0.02,
+    "haul_capacity": 0.0284,
+    "route_speed": 0.0054,
+    "timber_pressure": 0.01
+   },
+   "spoked_wheel_assembly": {
+    "haul_capacity": 0.0189,
+    "route_speed": 0.0215,
+    "timber_pressure": -0.005,
+    "travel_speed": 0.04,
+    "warfare_readiness": 0.0081
+   },
+   "wooden_axle_shaping": {
+    "haul_capacity": 0.0071,
+    "repair_capacity": 0.01
+   },
+   "linchpin_retention": {
+    "haul_capacity": 0.0047,
+    "repair_capacity": 0.015
+   },
+   "cart_bed_framing": {
+    "construction_rate": 0.02,
+    "haul_capacity": 0.0379,
+    "labor_demand": 0.004,
+    "labor_efficiency": 0.02,
+    "route_speed": 0.0108
+   },
+   "haul_harness_weaving": {
+    "fatigue": -0.01,
+    "haul_capacity": 0.0142
+   },
+   "cart_running_gear": {
+    "haul_capacity": 0.0142,
+    "repair_capacity": 0.02,
+    "standardization": 0.01
+   },
+   "common_path_alignment": {
+    "cohesion": 0.0051,
+    "route_speed": 0.02
+   },
+   "paired_carrier_balancing": {
+    "fatigue": -0.02,
+    "haul_capacity": 0.0095
+   },
+   "carried_load_balancing": {
+    "fatigue": -0.02,
+    "haul_capacity": 0.0095
+   },
+   "relay_carrying_shifts": {
+    "haul_capacity": 0.0095,
+    "logistics_endurance": 0.02
+   },
+   "load_bundling_by_weight": {
+    "haul_capacity": 0.0095,
+    "labor_efficiency": 0.007
+   },
+   "pack_load_balancing": {
+    "haul_capacity": 0.0142,
+    "injury_risk": -0.0094
+   },
+   "cargo_stowage_sequencing": {
+    "haul_capacity": 0.0095,
+    "logistics_endurance": 0.02
+   },
+   "waypoint_cargo_transfer": {
+    "haul_capacity": 0.0095,
+    "labor_demand": 0.0057,
+    "logistics_endurance": 0.02
+   },
+   "convoy_load_distribution": {
+    "haul_capacity": 0.0142,
+    "logistics_endurance": 0.02
+   },
+   "landmark_route_naming": {
+    "knowledge_preservation": 0.0051,
+    "route_speed": 0.0108
+   },
+   "trail_waymarking": {
+    "route_speed": 0.0161,
+    "travel_speed": 0.02
+   },
+   "seasonal_ford_timing": {
+    "injury_risk": -0.0172,
+    "route_speed": 0.0108
+   },
+   "seasonal_route_assessment": {
+    "disaster_risk": -0.0068,
+    "route_speed": 0.0108
+   },
+   "rest_stop_spacing_custom": {
+    "fatigue": -0.02,
+    "route_speed": 0.0081
+   },
+   "crossing_point_survey": {
+    "injury_risk": -0.0142,
+    "route_speed": 0.0108
+   },
+   "alternate_route_scouting": {
+    "disaster_risk": -0.0056,
+    "route_speed": 0.0108
+   },
+   "waystation_spacing_judgment": {
+    "logistics_endurance": 0.02,
+    "route_speed": 0.0108
+   },
+   "vermin_deterrent_placement": {
+    "food_storage": 0.01,
+    "storage_loss": -0.02
+   },
+   "dry_cache_siting": {
+    "dry_storage": 0.02,
+    "food_storage": 0.01,
+    "storage_loss": -0.02
+   },
+   "oldest_first_marking": {
+    "food_storage": 0.01,
+    "storage_loss": -0.02
+   },
+   "stock_layering_method": {
+    "food_spoilage": -0.02,
+    "storage_loss": -0.02
+   },
+   "pest_barrier_maintenance": {
+    "disease_exposure": -0.01,
+    "storage_loss": -0.02
+   },
+   "storage_humidity_judging": {
+    "food_spoilage": -0.02,
+    "storage_loss": -0.02
+   },
+   "cache_capacity_accounting": {
+    "food_storage": 0.02,
+    "task_coordination": 0.0046
+   },
+   "store_airflow_arrangement": {
+    "food_spoilage": -0.02,
+    "storage_loss": -0.025
+   },
+   "guest_host_reciprocity": {
+    "cohesion": 0.0039,
+    "trade_capacity": 0.0133
+   },
+   "trade_partner_tokens": {
+    "cohesion": 0.0051,
+    "trade_capacity": 0.0133
+   },
+   "trade_partner_memory": {
+    "knowledge_preservation": 0.0034,
+    "trade_capacity": 0.0133
+   },
+   "barter_equivalence_custom": {
+    "task_coordination": 0.0028,
+    "trade_capacity": 0.02
+   },
+   "shared_trade_escort": {
+    "injury_risk": -0.0128,
+    "trade_capacity": 0.0133
+   },
+   "market_timing_knowledge": {
+    "logistics_endurance": 0.01,
+    "trade_capacity": 0.02
+   },
+   "seasonal_trade_gathering": {
+    "task_coordination": 0.0031,
+    "trade_capacity": 0.02
+   },
+   "trade_route_risk_assessment": {
+    "injury_risk": -0.0142,
+    "trade_capacity": 0.0133
+   },
+   "carrying_poles": {
+    "fatigue": -0.015,
+    "haul_capacity": 0.0142
+   },
+   "sledges_travois": {
+    "fatigue": -0.01,
+    "haul_capacity": 0.0189,
+    "mobile_shelter": 0.02
+   },
+   "down_the_line_exchange": {
+    "cohesion": 0.005,
+    "tool_quality": 0.01,
+    "trade_capacity": 0.0267
+   },
+   "load_lashing_knots": {
+    "haul_capacity": 0.0095,
+    "injury_risk": -0.005,
+    "storage_loss": -0.01
+   },
+   "route_food_caches": {
+    "food_storage": 0.01,
+    "logistics_endurance": 0.04,
+    "travel_speed": 0.01
+   },
+   "portage_paths": {
+    "haul_capacity": 0.0047,
+    "route_speed": 0.0161
+   },
+   "skis_snowshoes": {
+    "hunting_yield": 0.02,
+    "logistics_endurance": 0.01,
+    "travel_speed": 0.04
+   },
+   "brushwood_trackways": {
+    "injury_risk": -0.005,
+    "route_speed": 0.0134,
+    "timber_pressure": 0.005
+   },
+   "load_backframes": {
+    "fatigue": -0.01,
+    "haul_capacity": 0.0142
+   },
+   "boundary_exchange_sites": {
+    "cohesion": 0.005,
+    "security_efficiency": 0.004,
+    "trade_capacity": 0.02
+   },
+   "reed_bundle_boats": {
+    "haul_capacity": 0.0095,
+    "route_speed": 0.0108,
+    "trade_capacity": 0.0067
+   },
+   "rollers_and_runners": {
+    "construction_rate": 0.02,
+    "haul_capacity": 0.0142,
+    "stone_yield": 0.01
+   },
+   "salt_shell_routes": {
+    "food_spoilage": -0.01,
+    "nutrition_quality": 0.005,
+    "trade_capacity": 0.0267
+   },
+   "river_landings": {
+    "haul_capacity": 0.0071,
+    "route_speed": 0.0108,
+    "trade_capacity": 0.0067
+   },
+   "hide_covered_boats": {
+    "haul_capacity": 0.0095,
+    "route_speed": 0.0108,
+    "trade_capacity": 0.0067
+   },
+   "ox_drawn_sledges": {
+    "construction_rate": 0.01,
+    "fatigue": -0.01,
+    "haul_capacity": 0.0237,
+    "labor_efficiency": 0.01
+   },
+   "long_distance_axe_trade": {
+    "cohesion": 0.005,
+    "legitimacy": 0.005,
+    "tool_quality": 0.01,
+    "trade_capacity": 0.02
+   },
+   "paired_ox_yoke": {
+    "cultivation_yield": 0.015,
+    "haul_capacity": 0.0237,
+    "labor_efficiency": 0.01
+   },
+   "pack_saddles": {
+    "haul_capacity": 0.0142,
+    "injury_risk": -0.003,
+    "logistics_endurance": 0.02
+   },
+   "plank_trackways": {
+    "haul_capacity": 0.0047,
+    "injury_risk": -0.005,
+    "route_speed": 0.0215,
+    "timber_pressure": 0.01
+   },
+   "sealed_store_doors": {
+    "food_storage": 0.01,
+    "state_capacity": 0.01,
+    "storage_loss": -0.03
+   },
+   "plank_extended_dugouts": {
+    "haul_capacity": 0.0142,
+    "naval_capacity": 0.02,
+    "route_speed": 0.0108
+   },
+   "trade_colonies": {
+    "adoption_rate": 0.02,
+    "cohesion": -0.005,
+    "trade_capacity": 0.04
+   },
+   "four_wheeled_wagons": {
+    "haul_capacity": 0.0284,
+    "labor_demand": 0.004,
+    "logistics_endurance": 0.02,
+    "timber_pressure": 0.01
+   },
+   "towpaths": {
+    "haul_capacity": 0.0095,
+    "route_speed": 0.0161
+   },
+   "ferry_crossings": {
+    "injury_risk": -0.005,
+    "route_speed": 0.0161,
+    "trade_capacity": 0.0067
+   },
+   "central_storehouses": {
+    "container_capacity": 0.02,
+    "food_storage": 0.05,
+    "labor_demand": 0.0057,
+    "state_capacity": 0.03,
+    "storage_loss": -0.04
+   },
+   "onager_hybrid_teams": {
+    "haul_capacity": 0.0189,
+    "route_speed": 0.0108,
+    "warfare_readiness": 0.004
+   },
+   "paved_haul_roads": {
+    "construction_rate": 0.03,
+    "haul_capacity": 0.0142,
+    "labor_demand": 0.0057,
+    "route_speed": 0.0269,
+    "stone_yield": 0.01
+   },
+   "stone_jetty_harbors": {
+    "disaster_resilience": 0.02,
+    "disease_exposure": 0.01,
+    "labor_demand": 0.0057,
+    "naval_capacity": 0.08,
+    "storage_loss": -0.02,
+    "trade_capacity": 0.0467
+   },
+   "wetted_track_sledging": {
+    "construction_rate": 0.03,
+    "haul_capacity": 0.0142,
+    "stone_yield": 0.01
+   },
+   "navigation_canals": {
+    "disease_exposure": 0.01,
+    "haul_capacity": 0.0189,
+    "labor_demand": 0.0057,
+    "route_speed": 0.0215,
+    "trade_capacity": 0.0133,
+    "water_access": 0.03
+   },
+   "hogging_truss_hulls": {
+    "haul_capacity": 0.0095,
+    "injury_risk": -0.005,
+    "naval_capacity": 0.06
+   },
+   "grain_barge_fleets": {
+    "food_storage": 0.02,
+    "haul_capacity": 0.0189,
+    "logistics_endurance": 0.02,
+    "state_capacity": 0.01
+   },
+   "donkey_caravans": {
+    "haul_capacity": 0.0189,
+    "logistics_endurance": 0.05,
+    "route_speed": 0.0108,
+    "trade_capacity": 0.0533
+   },
+   "standard_transport_jars": {
+    "container_capacity": 0.05,
+    "standardization": 0.03,
+    "storage_loss": -0.02,
+    "trade_capacity": 0.0133
+   },
+   "road_stations": {
+    "fatigue": -0.01,
+    "logistics_endurance": 0.04,
+    "route_speed": 0.0161,
+    "state_capacity": 0.01,
+    "travel_speed": 0.02
+   },
+   "hired_carriers": {
+    "haul_capacity": 0.0142,
+    "labor_efficiency": 0.01,
+    "state_capacity": 0.005,
+    "trade_capacity": 0.0133
+   },
+   "island_hopping_sailing": {
+    "injury_risk": 0.005,
+    "naval_capacity": 0.1,
+    "route_speed": 0.0161,
+    "survey_speed": 0.02,
+    "trade_capacity": 0.0533
+   },
+   "mountain_pack_trains": {
+    "logistics_endurance": 0.03,
+    "metal_yield": 0.01,
+    "trade_capacity": 0.0267
+   },
+   "merchant_quarters_abroad": {
+    "adoption_rate": 0.02,
+    "cohesion": -0.005,
+    "trade_capacity": 0.04
+   },
+   "pilots_sea_lanes": {
+    "injury_risk": -0.01,
+    "naval_capacity": 0.04,
+    "route_speed": 0.0161
+   },
+   "sailing_calendar": {
+    "disaster_risk": -0.0051,
+    "naval_capacity": 0.03,
+    "trade_capacity": 0.0133
+   },
+   "harbor_warehouses": {
+    "container_capacity": 0.03,
+    "food_storage": 0.02,
+    "storage_loss": -0.03,
+    "trade_capacity": 0.0267
+   },
+   "consignment_lists": {
+    "knowledge_preservation": 0.01,
+    "state_capacity": 0.01,
+    "storage_loss": -0.02,
+    "trade_capacity": 0.02
+   },
+   "relay_team_stations": {
+    "logistics_endurance": 0.02,
+    "route_speed": 0.0161,
+    "state_capacity": 0.01,
+    "travel_speed": 0.04
+   }
+  }
+ }
+}

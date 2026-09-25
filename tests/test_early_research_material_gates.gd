@@ -23,7 +23,7 @@ func test_alumina_cannot_jump_from_ore_assay_to_chemical_refining()->void:
 func test_tin_requires_actual_ore_but_can_be_studied_with_imported_material()->void:
 	WorldSimulation.scoped("research_gates",func()->void:
 		var entry:Dictionary=WorldSimulation.discovery.discovery_definition("tin_smelting")
-		learn(["ore_assaying","charcoal"])
+		learn(["ore_assaying","charcoal","copper_smelting"]) # 600-year design: tin follows copper smelting
 		assert_bool(Paths.ready(entry,0)).is_true()
 		WorldSimulation.state.resource_deposits=[]
 		WorldSimulation.state.resource_stockpiles["Tin Ore"]=0.0

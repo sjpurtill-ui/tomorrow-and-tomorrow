@@ -63,8 +63,10 @@ func test_mathematical_and_mechanical_routes_can_combine_without_repeated_bonuse
 func test_woven_hull_alternative_remains_available_without_joinery()->void:
 	var entry:=DiscoverySystem.discovery_definition("coastal_watercraft")
 	var ready:=false
-	for route:Dictionary in P.routes_for(entry,["river_craft","basketry"],{"fiber":2.0,"travel":2.0}):
+	# 600-year design foundations are common to every approach.
+	var design:Array=["plank_extended_dugouts","sail_panel_cutting"]
+	for route:Dictionary in P.routes_for(entry,design+["river_craft","basketry"],{"fiber":2.0,"travel":2.0}):
 		if route.id=="experimental" and route.ready:ready=true
 	assert_bool(ready).is_true()
-	for route:Dictionary in P.routes_for(entry,["river_craft","basketry","displacement_buoyancy"],{}):
+	for route:Dictionary in P.routes_for(entry,design+["river_craft","basketry","displacement_buoyancy"],{}):
 		if String(route.id).contains("experimental"):assert_bool(route.ready).is_false()

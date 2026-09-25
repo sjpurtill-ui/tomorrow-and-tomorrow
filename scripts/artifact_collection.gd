@@ -79,7 +79,18 @@ static func summary()->Dictionary:
 
 static func bonus(domain:String)->float:
 	var bonuses:Dictionary=WorldSimulation.state.society_exchange.get("artifact_bonuses",{})
-	return float(bonuses.get("culture" if domain=="culture" else "science",0))+float(bonuses.get("family_"+domain,0))
+	var raw:=float(bonuses.get("culture" if domain=="culture" else "science",0))+float(bonuses.get("family_"+domain,0))
+	return minf(raw,era_bonus_cap())
+
+## research_600 balance: a studied collection speeds research and culture by at
+## most ERA_BONUS_SHARE of the era's knowledge-rate ceiling (about 7% at year 0,
+## 17% at year 300, 30% at year 600), so no hoard of legendary finds makes a
+## society learn faster than its age allowed.
+const ERA_BONUS_SHARE:=1.0
+static func era_bonus_cap()->float:
+	var era:=float(WorldSimulation.state.elapsed_days)/365.0
+	if WorldSimulation.discovery!=null:era=float(WorldSimulation.discovery.society_model.ceiling_era)
+	return preload("res://scripts/society_model.gd").era_ceiling_for("knowledge_rate",era).y*ERA_BONUS_SHARE
 
 static func museum_ready()->bool:
 	return "public_libraries" in WorldSimulation.state.known_discoveries and "comparative_chronicles" in WorldSimulation.state.known_discoveries

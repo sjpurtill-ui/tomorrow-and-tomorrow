@@ -17,6 +17,9 @@ func test_catalogue_is_diverse_and_deterministic()->void:
 	assert_str(A.find_at(777,Vector2(25,1),1).id).is_equal(A.find_at(777,Vector2(47,5),10).id)
 
 func test_collections_appreciate_and_strengthen_research()->void:
+	# Early record-keeping opens after year 0 (research_600 era gate), so the
+	# opening redistribution can leave this channel unstaffed; staff it here.
+	GameState.research_subcategory_allocations.knowledge["Preserved knowledge"]=maxi(2,int(GameState.research_subcategory_allocations.knowledge.get("Preserved knowledge",0)))
 	var baseline:=DiscoverySystem.research_capacity_for("knowledge","Preserved knowledge")
 	var culture_before:float=DiscoverySystem.society_model.evaluate_capacities({}).culture
 	var record:=held();var initial:=A.price(record)

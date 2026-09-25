@@ -7,6 +7,8 @@ func entry(id:String,parents:Array)->Dictionary:
 	var item:Dictionary=WorldSimulation.discovery.discovery_definition("cordage").duplicate(true)
 	item.id=id;item.requires=parents;item.requires_all=parents;item.requires_any=[];item.resource_requirements=[]
 	item.learning_routes=[{"id":"local","requires_all":[]}]
+	# Synthetic graph nodes: no calendar age or design conditions of their own.
+	item.erase("earliest_year");item.erase("conditions")
 	return item
 func install(items:Array)->void:
 	WorldSimulation.discovery.technology_catalog.assign(items)

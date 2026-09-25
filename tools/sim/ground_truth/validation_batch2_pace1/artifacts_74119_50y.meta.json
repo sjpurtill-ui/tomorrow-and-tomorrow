@@ -1,0 +1,20 @@
+{
+ "spec": "artifacts:74119:50",
+ "commit": "bf861bb08f219922d07d3018c2d5725e483d1fc6",
+ "sources_at_launch": {
+  "scripts/discovery_system.gd": "55e37c81bd45",
+  "scripts/society_model.gd": "211cf8af83c2",
+  "scripts/game_state.gd": "bab3ff0149d4",
+  "scripts/early_life_conditions.gd": "2e10895c6958",
+  "scripts/food_system.gd": "0dfd3965c9c0",
+  "scripts/consequence_engine.gd": "b54e9f9f92a2",
+  "scripts/research_600_catalog.gd": "3e3cfe1e2d60",
+  "scripts/technology_eras.gd": "bf0b64921759",
+  "scripts/artifact_collection.gd": "75f61b42892e",
+  "data/research/research_600.json": "f065c17f69cb",
+  "data/research/effects/*.json": "3ec572a3eaf9"
+ },
+ "wall_seconds": 882.0,
+ "returncode": 0,
+ "generated": "2026-09-24 17:05:02"
+}

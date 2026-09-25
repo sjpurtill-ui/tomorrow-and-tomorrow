@@ -1,0 +1,1284 @@
+{
+ "line": "culture",
+ "schema": "research_600_effects/1",
+ "items": {
+  "shared_hearth_gatherings": {
+   "effects": {
+    "cohesion": 0.0011,
+    "fatigue": -0.0025
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png"
+  },
+  "communal_work_songs": {
+   "effects": {
+    "cohesion": 0.0014,
+    "fatigue": -0.0025,
+    "task_coordination": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png"
+  },
+  "oral_epics": {
+   "effects": {
+    "cohesion": 0.0112,
+    "knowledge_preservation": 0.0111
+   },
+   "ability_reason": "Trained reciters keep long accounts; the people's memory outlives any single teller."
+  },
+  "genealogical_recitation": {
+   "effects": {
+    "knowledge_preservation": 0.0031,
+    "legitimacy": 0.002
+   },
+   "name": "Elders Recite Each Household's Lineage",
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png"
+  },
+  "named_landmark_lore": {
+   "effects": {
+    "knowledge_preservation": 0.0014,
+    "travel_speed": 0.005
+   },
+   "name": "Every Notable Rock and Spring Has a Naming Story",
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png"
+  },
+  "curious_questioning_custom": {
+   "effects": {
+    "cohesion": 0.0011,
+    "knowledge_preservation": 0.0021
+   },
+   "name": "Children Praised for Asking Why",
+   "art": "res://assets/ui/research/subjects/civic_games-v2.png"
+  },
+  "bone_flutes_drums": {
+   "effects": {
+    "cohesion": 0.0021,
+    "fatigue": -0.0013
+   },
+   "observation": "A bone flute and a skin drum carry the song at gatherings, and the young learn the tunes of their elders.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "circle_dances": {
+   "effects": {
+    "cohesion": 0.0021,
+    "fatigue": -0.0013
+   },
+   "observation": "The whole camp joins a circle dance, and a quarrel is hard to keep up with a neighbor whose hand you hold.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "house_floor_burial": {
+   "effects": {
+    "cohesion": 0.0021,
+    "disease_exposure": 0.01,
+    "legitimacy": 0.002
+   },
+   "observation": "The dead are buried beneath the house floor, so the family lives on above its own ancestors.",
+   "social_consequence": "The dead stay close to the living, and so does their sickness",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "ochre_grave_goods": {
+   "effects": {
+    "cohesion": 0.0014,
+    "legitimacy": 0.002
+   },
+   "observation": "The dead are laid in red ochre with beads and tools for the journey after life.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "kin_body_ornament": {
+   "effects": {
+    "cohesion": 0.0021,
+    "trade_capacity": 0.002
+   },
+   "observation": "Paint, shells and beads mark which kin a person belongs to, so strangers are known at a glance.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "hearth_shrine_offerings": {
+   "effects": {
+    "cohesion": 0.0014,
+    "legitimacy": 0.0025
+   },
+   "observation": "Each household sets aside a share of its meal at the hearth-shrine for the living god.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "plastered_ancestor_skulls": {
+   "effects": {
+    "cohesion": 0.0021,
+    "disease_exposure": 0.005,
+    "knowledge_preservation": 0.0013,
+    "legitimacy": 0.002
+   },
+   "observation": "The skulls of honored ancestors are plastered with faces and kept in the house, where their names are spoken.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "mourning_days": {
+   "effects": {
+    "cohesion": 0.0021,
+    "fatigue": -0.0013,
+    "labor_efficiency": -0.005
+   },
+   "observation": "For set days after a death the household wails and fasts, and neighbors leave them to grieve.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "festival_calendar": {
+   "effects": {
+    "cohesion": 0.0165,
+    "task_coordination": 0.0089
+   },
+   "ability_reason": "Shared festivals gather scattered households at set seasons, binding them and timing their work together."
+  },
+  "reciprocal_gift_exchange": {
+   "effects": {
+    "cohesion": 0.0028,
+    "disaster_resilience": 0.005,
+    "trade_capacity": 0.0025
+   },
+   "observation": "A gift must be returned in time, and the chain of gifts binds households that would otherwise be strangers.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "origin_story": {
+   "effects": {
+    "cohesion": 0.0042,
+    "knowledge_preservation": 0.0021,
+    "legitimacy": 0.0025
+   },
+   "observation": "Reciters tell how the people and their god came to this land, and every child can tell it back.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "pottery_style_identity": {
+   "effects": {
+    "cohesion": 0.0021,
+    "craft_output": 0.0022,
+    "trade_capacity": 0.002
+   },
+   "observation": "Potters paint the motifs of their own people, and a sherd tells where it was made.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "ancestor_figurines": {
+   "effects": {
+    "cohesion": 0.0014,
+    "legitimacy": 0.002
+   },
+   "observation": "Small clay figures of ancestors stand in the house and receive a share of food on feast days.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "pit_pebble_game": {
+   "effects": {
+    "cohesion": 0.0011,
+    "knowledge_rate": 0.0036,
+    "observation_rate": 0.0051
+   },
+   "observation": "Children and elders sow pebbles around rows of pits and learn to count ahead to win.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "first_fruits_offering": {
+   "effects": {
+    "cohesion": 0.0014,
+    "food_storage": -0.005,
+    "legitimacy": 0.0025
+   },
+   "observation": "No one eats the new harvest until its first fruits have been given to the god.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "winter_tale_nights": {
+   "effects": {
+    "cohesion": 0.0021,
+    "fatigue": -0.0013,
+    "knowledge_preservation": 0.0031
+   },
+   "observation": "On long winter nights the old tales are told by the fire, and the young correct a teller who strays.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "named_star_figures": {
+   "effects": {
+    "knowledge_preservation": 0.0021,
+    "observation_rate": 0.0078,
+    "route_speed": 0.0026
+   },
+   "observation": "The stars are grouped into figures from the stories, and a traveler finds his way by the hunter and the plow.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "shrine_wall_painting": {
+   "effects": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0008,
+    "legitimacy": 0.002
+   },
+   "observation": "The walls of the shrine room are painted with the god's beasts and the people's hunts.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "ritual_masks_costumes": {
+   "effects": {
+    "cohesion": 0.0007,
+    "legitimacy": 0.002
+   },
+   "observation": "In mask and costume the dancers become the god's creatures for the length of the rite.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "sacred_places": {
+   "effects": {
+    "cohesion": 0.0007,
+    "ecology_recovery": 0.0081,
+    "legitimacy": 0.0025
+   },
+   "observation": "A spring, a grove and a high rock are set apart for the god; no one cuts, hunts or builds there.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "coming_of_age_rites": {
+   "effects": {
+    "adoption_rate": 0.0053,
+    "cohesion": 0.0009,
+    "warfare_readiness": 0.005
+   },
+   "observation": "Youths are taught the people's secrets and duties at a set rite, and return as adults.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "cooperative_harvest_gatherings": {
+   "effects": {
+    "cohesion": 0.0005,
+    "labor_efficiency": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png"
+  },
+  "household_lineage_tokens": {
+   "effects": {
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png"
+  },
+  "cross_craft_visiting": {
+   "effects": {
+    "craft_output": 0.002,
+    "knowledge_preservation": 0.0009
+   },
+   "name": "Crafters Spend a Season Watching Another Craft",
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+  },
+  "memorial_cairn_marking": {
+   "effects": {
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.002
+   },
+   "name": "Memorial Cairns at the Sites of Notable Events",
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png"
+  },
+  "marriage_feasts": {
+   "effects": {
+    "cohesion": 0.0009,
+    "food_storage": -0.005,
+    "trade_capacity": 0.0003
+   },
+   "observation": "A marriage is sealed with a feast where two lineages eat together and exchange gifts.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "mutual_aid_customs": {
+   "effects": {
+    "cohesion": 0.0007,
+    "disaster_resilience": 0.0031
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png"
+  },
+  "first_shrine_house": {
+   "effects": {
+    "cohesion": 0.0036,
+    "knowledge_preservation": 0.0021,
+    "labor_demand": 0.01,
+    "legitimacy": 0.018
+   },
+   "observation": "The people raise a house for the god, larger than any dwelling, where offerings and gatherings now take place.",
+   "ability_reason": "The god has a house: rites, offerings and gatherings gain a fixed center, and the people's devotion a visible form.",
+   "social_consequence": "The shrine's keepers become a new voice in the settlement, speaking for the god",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "praise_songs": {
+   "effects": {
+    "cohesion": 0.0007,
+    "legitimacy": 0.0025
+   },
+   "observation": "Songs of praise are sung to the god at set hours, and every voice knows the words.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "rattles_drums_pipes": {
+   "effects": {
+    "cohesion": 0.0004,
+    "fatigue": -0.0005,
+    "labor_efficiency": 0.0005
+   },
+   "observation": "Clay rattles, fired drums and reed pipes give work songs and festivals a fuller sound.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "traveling_storyteller_exchange": {
+   "effects": {
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0029
+   },
+   "name": "Traveling Storytellers Trade Tales for Lodging",
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png"
+  },
+  "graveside_libations": {
+   "effects": {
+    "cohesion": 0.0007,
+    "legitimacy": 0.002
+   },
+   "observation": "Families pour water and beer at the graves so the ancestors do not thirst.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "disaster_memory_markers": {
+   "effects": {
+    "disaster_risk": -0.0016,
+    "knowledge_preservation": 0.002
+   },
+   "name": "Flood-mark Stones and Their Stories",
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png"
+  },
+  "grief_support_customs": {
+   "effects": {
+    "cohesion": 0.0006,
+    "fatigue": -0.0012
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png"
+  },
+  "puzzle_riddle_contests": {
+   "effects": {
+    "cohesion": 0.0004,
+    "knowledge_preservation": 0.0013
+   },
+   "name": "Riddle and Puzzle Contests",
+   "art": "res://assets/ui/research/subjects/civic_games-v2.png"
+  },
+  "festival_wrestling_races": {
+   "effects": {
+    "cohesion": 0.0006,
+    "fatigue": -0.0006,
+    "warfare_readiness": 0.0049
+   },
+   "observation": "At festivals the young men wrestle and race, and the winners are praised in song.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "emblem_processions": {
+   "effects": {
+    "cohesion": 0.0011,
+    "legitimacy": 0.0021
+   },
+   "observation": "The god's emblem is carried around the fields in procession to bless the crops.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "proverbs": {
+   "effects": {
+    "adoption_rate": 0.008,
+    "cohesion": 0.0004,
+    "knowledge_preservation": 0.0037
+   },
+   "observation": "Short sayings carry hard-won counsel: plant after the second rain; do not trust a dry well.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "temple_festival_meals": {
+   "effects": {
+    "cohesion": 0.0014,
+    "food_storage": -0.01,
+    "legitimacy": 0.0017,
+    "nutrition_quality": 0.0031
+   },
+   "observation": "At the great festivals the god's house feeds the whole town from its stores.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "flood_origin_stories": {
+   "effects": {
+    "cohesion": 0.0006,
+    "disaster_resilience": 0.0077,
+    "knowledge_preservation": 0.0022
+   },
+   "observation": "Stories tell of the great flood and the first days, and of the ones who built high and survived.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "rank_inlay_ornament": {
+   "effects": {
+    "cohesion": -0.01,
+    "craft_output": 0.0017,
+    "legitimacy": 0.0014,
+    "trade_capacity": 0.0006
+   },
+   "observation": "Shell and stone inlay mark the high-ranking, and only they may wear it.",
+   "social_consequence": "Authority hardens into rank; order and reach improve, but households outside the ruling line lose their voice",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "naming_day_rites": {
+   "effects": {
+    "cohesion": 0.0009,
+    "legitimacy": 0.0014
+   },
+   "name": "Naming-day Rites",
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png"
+  },
+  "seasonal_commemoration_rites": {
+   "effects": {
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0022
+   },
+   "name": "A Yearly Rite on the Date of a Remembered Disaster",
+   "art": "res://assets/ui/research/subjects/oral_epics-v2.png"
+  },
+  "public_debate_custom": {
+   "effects": {
+    "knowledge_preservation": 0.0008,
+    "legitimacy": 0.0009
+   },
+   "name": "Rival Explanations Argued Before the Community",
+   "art": "res://assets/ui/research/subjects/civic_games-v2.png"
+  },
+  "rank_dress_styles": {
+   "effects": {
+    "cohesion": -0.005,
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.0009
+   },
+   "observation": "Hair and dress mark age and rank, and a man who dresses above his station is shamed.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "craft_lineage_naming": {
+   "effects": {
+    "craft_output": 0.0031,
+    "knowledge_preservation": 0.0006
+   },
+   "name": "Techniques Credited to the Teacher Who Began Them",
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+  },
+  "intermarriage_visiting_customs": {
+   "effects": {
+    "cohesion": 0.0009,
+    "trade_capacity": 0.0006
+   },
+   "name": "Visiting Customs Between Intermarried Villages",
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png"
+  },
+  "visiting_specialist_consultations": {
+   "effects": {
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0009
+   },
+   "name": "Respected Outsiders Consulted on Hard Disputes",
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+  },
+  "stone_relief_carving": {
+   "effects": {
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0009
+   },
+   "observation": "Carvers cut scenes of offering and victory into stone slabs that will outlast every painted wall.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "banded_procession_vessels": {
+   "effects": {
+    "cohesion": 0.0009,
+    "craft_output": 0.0016,
+    "legitimacy": 0.0009
+   },
+   "observation": "Tall vessels show the offering procession in bands, from the gift-bearers to the god himself.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "temple_singers_lamenters": {
+   "effects": {
+    "cohesion": 0.0014,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0011
+   },
+   "observation": "Singers and lamenters trained in the god's house keep its hymns and dirges exactly.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "guest_friendship": {
+   "effects": {
+    "cohesion": 0.0009,
+    "security_efficiency": 0.0015,
+    "trade_capacity": 0.0017
+   },
+   "observation": "Houses in different towns bind themselves as guest-friends, sheltering and helping each other's travelers.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "founder_story_recitation": {
+   "effects": {
+    "cohesion": 0.0013,
+    "knowledge_preservation": 0.0032,
+    "legitimacy": 0.0015
+   },
+   "observation": "At the turn of the year the founder's story is recited before the whole town.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "board_race_games": {
+   "effects": {
+    "cohesion": 0.0007,
+    "knowledge_rate": 0.0036,
+    "observation_rate": 0.0048
+   },
+   "observation": "Players race pieces around a marked board by the throw of sticks, and wager on the outcome.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "new_year_festival": {
+   "effects": {
+    "cohesion": 0.0066,
+    "food_storage": -0.01,
+    "legitimacy": 0.0075,
+    "task_coordination": 0.0045
+   },
+   "observation": "Each new year the god renews the land: the whole town gathers for days of rites, processions and feasting.",
+   "ability_reason": "The whole town renews itself with the god each year; loyalties are restated and the year's work begins together.",
+   "social_consequence": "The festival binds the town to its god and to the steward who presides over it",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "town_identity": {
+   "effects": {
+    "cohesion": 0.002,
+    "legitimacy": 0.0008,
+    "security_efficiency": 0.0012
+   },
+   "observation": "The town has its own name, emblem and patron festival, and its people call themselves by it.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "theophoric_names": {
+   "effects": {
+    "cohesion": 0.0009,
+    "legitimacy": 0.0004
+   },
+   "observation": "Parents name children for the god: the god-is-gracious, the god-has-given.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "shared_meal_obligations": {
+   "effects": {
+    "cohesion": 0.0013,
+    "labor_demand": 0.01,
+    "legitimacy": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png"
+  },
+  "votive_figures": {
+   "effects": {
+    "cohesion": 0.0009,
+    "craft_output": 0.0015,
+    "legitimacy": 0.0004
+   },
+   "observation": "Worshippers set carved figures of themselves before the god to pray without ceasing on their behalf.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "seasonal_hymn_cycles": {
+   "effects": {
+    "cohesion": 0.0009,
+    "knowledge_preservation": 0.0014,
+    "legitimacy": 0.0004
+   },
+   "observation": "Each season of the god's year has its own cycle of hymns, sung in order from first to last.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "harps_and_lyres": {
+   "effects": {
+    "cohesion": 0.0013,
+    "craft_output": 0.0015,
+    "knowledge_preservation": 0.0006
+   },
+   "observation": "Tuned harps and lyres, their frames joined and strung, accompany hymns and feasts.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "chamber_tombs": {
+   "effects": {
+    "cohesion": -0.01,
+    "institutional_rigidity": 0.0054,
+    "labor_demand": 0.02,
+    "legitimacy": 0.0006
+   },
+   "observation": "Leading lineages build stone chambers for their dead, filled with rich goods and sometimes servants.",
+   "social_consequence": "Great tombs proclaim the ruling line's permanence, and the labor to build them comes from everyone else",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "temple_choirs": {
+   "effects": {
+    "cohesion": 0.0017,
+    "legitimacy": 0.0004
+   },
+   "observation": "Choirs with drums and cymbals fill the god's courtyard on feast days.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "comparative_craft_gatherings": {
+   "effects": {
+    "craft_output": 0.0033,
+    "knowledge_preservation": 0.0014,
+    "labor_demand": 0.01
+   },
+   "name": "Craft Specialists Compare Methods on Market Days",
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
+  },
+  "inlaid_mosaic_panels": {
+   "effects": {
+    "craft_output": 0.0016,
+    "knowledge_preservation": 0.0004,
+    "legitimacy": 0.0004
+   },
+   "observation": "Panels of shell, stone and bitumen show feasts and processions in rows of tiny inlaid figures.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "wisdom_instructions": {
+   "effects": {
+    "adoption_rate": 0.0016,
+    "knowledge_preservation": 0.0014,
+    "legitimacy": 0.0004
+   },
+   "observation": "A father's instructions to his son are copied and taught: speak little, pay debts, respect the god.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "festival_dancers_acrobats": {
+   "effects": {
+    "cohesion": 0.0019,
+    "fatigue": -0.0005
+   },
+   "observation": "Dancers and acrobats perform at festivals before crowds from the whole district.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "officiant_vestments": {
+   "effects": {
+    "institutional_rigidity": 0.0027,
+    "legitimacy": 0.0004
+   },
+   "observation": "Officiants wear garments and headdresses no one else may wear, and the rite is not valid without them.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "envoy_reception": {
+   "effects": {
+    "food_storage": -0.005,
+    "legitimacy": 0.0004,
+    "security_efficiency": 0.0041,
+    "trade_capacity": 0.0007
+   },
+   "observation": "Foreign envoys are received with a feast and gifts, and send gifts back by the same road.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "calendar_feast_days": {
+   "effects": {
+    "cohesion": 0.0019,
+    "fatigue": -0.001,
+    "task_coordination": 0.0018
+   },
+   "observation": "Feast days are fixed to the months of the god's calendar, and work stops for them across the land.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "royal_mourning": {
+   "effects": {
+    "cohesion": 0.0007,
+    "labor_efficiency": -0.005,
+    "legitimacy": 0.0005
+   },
+   "observation": "When the ruler dies, the whole land laments for set days before the heir is acclaimed.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "royal_stone_portraits": {
+   "effects": {
+    "legitimacy": 0.0006
+   },
+   "observation": "Portraits of the ruler in stone stand in the temples, praying for him when he is absent.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "royal_wrestling_matches": {
+   "effects": {
+    "cohesion": 0.0005,
+    "legitimacy": 0.0004,
+    "warfare_readiness": 0.0033
+   },
+   "observation": "Wrestlers and boxers fight before the ruler, who rewards the champions.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "dream_interpretation": {
+   "effects": {
+    "cohesion": 0.0004,
+    "legitimacy": 0.0004,
+    "observation_rate": -0.005
+   },
+   "observation": "Dreams are told to the god's servants, who read them as messages and warnings.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "debate_poems": {
+   "effects": {
+    "adoption_rate": 0.0062,
+    "institutional_rigidity": -0.01,
+    "knowledge_rate": 0.0021
+   },
+   "observation": "Poems set two rivals arguing in verse, the hoe against the plow, summer against winter, and the audience judges.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "heroic_song_cycle": {
+   "effects": {
+    "cohesion": 0.0038,
+    "knowledge_preservation": 0.0023,
+    "legitimacy": 0.0026,
+    "warfare_readiness": 0.0033
+   },
+   "observation": "Songs of a great ruler's deeds are sung and written down as a cycle every child and soldier knows.",
+   "ability_reason": "The people share a written epic of their own greatness; memory, loyalty and courage are passed on together.",
+   "social_consequence": "The hero's glory lends luster to his heirs, whatever their own deeds",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "royal_ancestor_offerings": {
+   "effects": {
+    "cohesion": 0.0005,
+    "food_storage": -0.005,
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.0005
+   },
+   "observation": "Each month offerings are laid for the dead rulers, whose names are read out in order.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "love_wedding_songs": {
+   "effects": {
+    "cohesion": 0.001,
+    "fatigue": -0.0035
+   },
+   "observation": "Love songs and wedding songs are sung at every marriage, and the young learn them by heart.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "city_laments": {
+   "effects": {
+    "cohesion": 0.001,
+    "disaster_resilience": 0.01,
+    "knowledge_preservation": 0.0036
+   },
+   "observation": "Laments mourn a ruined town street by street, so its fall is never forgotten.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "offering_omens": {
+   "effects": {
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.0004,
+    "observation_rate": -0.005
+   },
+   "observation": "Diviners read the god's will in the entrails of offerings before any great decision.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "god_boat_procession": {
+   "effects": {
+    "cohesion": 0.001,
+    "legitimacy": 0.0005
+   },
+   "observation": "The god's image rides in a sacred boat carried through the streets and along the river.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "letters_to_the_god": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0007,
+    "legitimacy": 0.0004
+   },
+   "observation": "Petitioners write letters to the god and lay them before the shrine.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "palace_wall_painting": {
+   "effects": {
+    "craft_output": 0.0021,
+    "legitimacy": 0.0005
+   },
+   "observation": "The palace halls are painted with tribute, processions and the ruler's victories.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "scribal_songs_satires": {
+   "effects": {
+    "adoption_rate": 0.0016,
+    "institutional_rigidity": -0.01,
+    "knowledge_preservation": 0.0007
+   },
+   "observation": "Tablet-house students trade songs and satires about lazy pupils and cruel teachers.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "pilgrimage": {
+   "effects": {
+    "cohesion": 0.0015,
+    "disease_exposure": 0.01,
+    "legitimacy": 0.0004,
+    "trade_capacity": 0.0012
+   },
+   "observation": "Pilgrims come from distant towns to the god's great house for the new year, bringing gifts and news.",
+   "social_consequence": "Pilgrim roads spread news, trade and sickness alike",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "foreign_fashion_adoption": {
+   "effects": {
+    "adoption_rate": 0.0012,
+    "cohesion": -0.01,
+    "trade_capacity": 0.0012
+   },
+   "observation": "Foreign ornament and dress become fashionable among the wealthy, and the old styles look provincial.",
+   "social_consequence": "Openness to foreign ways brings new goods and ideas, and some who resent them",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "sung_divine_narrative": {
+   "effects": {
+    "cohesion": 0.0013,
+    "knowledge_preservation": 0.0014,
+    "legitimacy": 0.0007
+   },
+   "observation": "The god's deeds are sung as a long narrative with music at the great festivals.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "feast_of_the_dead": {
+   "effects": {
+    "cohesion": 0.0013,
+    "food_storage": -0.005,
+    "legitimacy": 0.0004
+   },
+   "observation": "Once a year every household feasts with its dead, setting places for them at the table.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "festival_bread_sharing": {
+   "effects": {
+    "cohesion": 0.0015,
+    "food_storage": -0.01,
+    "legitimacy": 0.0006,
+    "nutrition_quality": 0.005
+   },
+   "observation": "Bread baked from the god's grain is shared with every household at the festival.",
+   "art": "res://assets/ui/research/culture-v1.png"
+  }
+ },
+ "balance_600": {
+  "schema": "research_600_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_600.py; the loader reads only 'items'.",
+  "source": {
+   "festival_calendar": {
+    "cohesion": 0.031,
+    "task_coordination": 0.018
+   },
+   "oral_epics": {
+    "cohesion": 0.021,
+    "knowledge_preservation": 0.017
+   },
+   "named_landmark_lore": {
+    "knowledge_preservation": 0.0022,
+    "travel_speed": 0.01
+   },
+   "genealogical_recitation": {
+    "knowledge_preservation": 0.0048,
+    "legitimacy": 0.002
+   },
+   "household_lineage_tokens": {
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0033
+   },
+   "memorial_cairn_marking": {
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0048
+   },
+   "disaster_memory_markers": {
+    "disaster_risk": -0.015,
+    "knowledge_preservation": 0.0033
+   },
+   "seasonal_commemoration_rites": {
+    "cohesion": 0.0026,
+    "knowledge_preservation": 0.0048
+   },
+   "craft_lineage_naming": {
+    "craft_output": 0.01,
+    "knowledge_preservation": 0.0033
+   },
+   "curious_questioning_custom": {
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0032
+   },
+   "cross_craft_visiting": {
+    "craft_output": 0.02,
+    "knowledge_preservation": 0.0022
+   },
+   "traveling_storyteller_exchange": {
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0048
+   },
+   "puzzle_riddle_contests": {
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0022
+   },
+   "public_debate_custom": {
+    "knowledge_preservation": 0.0048,
+    "legitimacy": 0.002
+   },
+   "visiting_specialist_consultations": {
+    "knowledge_preservation": 0.0028,
+    "legitimacy": 0.002
+   },
+   "comparative_craft_gatherings": {
+    "craft_output": 0.02,
+    "knowledge_preservation": 0.0065,
+    "labor_demand": 0.01
+   },
+   "shared_hearth_gatherings": {
+    "cohesion": 0.002,
+    "fatigue": -0.01
+   },
+   "communal_work_songs": {
+    "cohesion": 0.0026,
+    "fatigue": -0.01,
+    "task_coordination": 0.0024
+   },
+   "cooperative_harvest_gatherings": {
+    "cohesion": 0.003,
+    "labor_efficiency": 0.0093
+   },
+   "mutual_aid_customs": {
+    "cohesion": 0.004,
+    "disaster_resilience": 0.02
+   },
+   "grief_support_customs": {
+    "cohesion": 0.003,
+    "fatigue": -0.01
+   },
+   "naming_day_rites": {
+    "cohesion": 0.004,
+    "legitimacy": 0.002
+   },
+   "intermarriage_visiting_customs": {
+    "cohesion": 0.0025,
+    "trade_capacity": 0.0025
+   },
+   "shared_meal_obligations": {
+    "cohesion": 0.004,
+    "labor_demand": 0.01,
+    "legitimacy": 0.002
+   },
+   "bone_flutes_drums": {
+    "cohesion": 0.0039,
+    "fatigue": -0.005
+   },
+   "circle_dances": {
+    "cohesion": 0.0039,
+    "fatigue": -0.005
+   },
+   "kin_body_ornament": {
+    "cohesion": 0.0039,
+    "trade_capacity": 0.002
+   },
+   "hearth_shrine_offerings": {
+    "cohesion": 0.0026,
+    "legitimacy": 0.0025
+   },
+   "house_floor_burial": {
+    "cohesion": 0.0039,
+    "disease_exposure": 0.01,
+    "legitimacy": 0.002
+   },
+   "mourning_days": {
+    "cohesion": 0.0039,
+    "fatigue": -0.005,
+    "labor_efficiency": -0.005
+   },
+   "ochre_grave_goods": {
+    "cohesion": 0.0026,
+    "legitimacy": 0.002
+   },
+   "plastered_ancestor_skulls": {
+    "cohesion": 0.0039,
+    "disease_exposure": 0.005,
+    "knowledge_preservation": 0.002,
+    "legitimacy": 0.002
+   },
+   "reciprocal_gift_exchange": {
+    "cohesion": 0.0052,
+    "disaster_resilience": 0.01,
+    "trade_capacity": 0.0025
+   },
+   "origin_story": {
+    "cohesion": 0.0079,
+    "knowledge_preservation": 0.0032,
+    "legitimacy": 0.0025
+   },
+   "pottery_style_identity": {
+    "cohesion": 0.0039,
+    "craft_output": 0.005,
+    "trade_capacity": 0.002
+   },
+   "ancestor_figurines": {
+    "cohesion": 0.0026,
+    "legitimacy": 0.002
+   },
+   "pit_pebble_game": {
+    "cohesion": 0.002,
+    "knowledge_rate": 0.0036,
+    "observation_rate": 0.0097
+   },
+   "first_fruits_offering": {
+    "cohesion": 0.0026,
+    "food_storage": -0.005,
+    "legitimacy": 0.0025
+   },
+   "winter_tale_nights": {
+    "cohesion": 0.0039,
+    "fatigue": -0.005,
+    "knowledge_preservation": 0.0048
+   },
+   "named_star_figures": {
+    "knowledge_preservation": 0.0032,
+    "observation_rate": 0.015,
+    "route_speed": 0.005
+   },
+   "shrine_wall_painting": {
+    "cohesion": 0.0026,
+    "knowledge_preservation": 0.002,
+    "legitimacy": 0.002
+   },
+   "ritual_masks_costumes": {
+    "cohesion": 0.0039,
+    "legitimacy": 0.002
+   },
+   "sacred_places": {
+    "cohesion": 0.0039,
+    "ecology_recovery": 0.01,
+    "legitimacy": 0.0025
+   },
+   "coming_of_age_rites": {
+    "adoption_rate": 0.0053,
+    "cohesion": 0.0052,
+    "warfare_readiness": 0.005
+   },
+   "marriage_feasts": {
+    "cohesion": 0.0052,
+    "food_storage": -0.005,
+    "trade_capacity": 0.002
+   },
+   "first_shrine_house": {
+    "cohesion": 0.021,
+    "knowledge_preservation": 0.0035,
+    "labor_demand": 0.01,
+    "legitimacy": 0.018
+   },
+   "praise_songs": {
+    "cohesion": 0.0039,
+    "legitimacy": 0.0025
+   },
+   "rattles_drums_pipes": {
+    "cohesion": 0.0026,
+    "fatigue": -0.005,
+    "labor_efficiency": 0.005
+   },
+   "graveside_libations": {
+    "cohesion": 0.0039,
+    "legitimacy": 0.002
+   },
+   "festival_wrestling_races": {
+    "cohesion": 0.0026,
+    "fatigue": -0.005,
+    "warfare_readiness": 0.01
+   },
+   "emblem_processions": {
+    "cohesion": 0.0052,
+    "legitimacy": 0.0025
+   },
+   "proverbs": {
+    "adoption_rate": 0.008,
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0064
+   },
+   "temple_festival_meals": {
+    "cohesion": 0.0066,
+    "food_storage": -0.01,
+    "legitimacy": 0.002,
+    "nutrition_quality": 0.005
+   },
+   "flood_origin_stories": {
+    "cohesion": 0.0026,
+    "disaster_resilience": 0.01,
+    "knowledge_preservation": 0.0048
+   },
+   "rank_inlay_ornament": {
+    "cohesion": -0.01,
+    "craft_output": 0.005,
+    "legitimacy": 0.002,
+    "trade_capacity": 0.002
+   },
+   "rank_dress_styles": {
+    "cohesion": -0.005,
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.002
+   },
+   "stone_relief_carving": {
+    "knowledge_preservation": 0.0032,
+    "legitimacy": 0.002
+   },
+   "banded_procession_vessels": {
+    "cohesion": 0.0026,
+    "craft_output": 0.005,
+    "legitimacy": 0.002
+   },
+   "temple_singers_lamenters": {
+    "cohesion": 0.0039,
+    "knowledge_preservation": 0.0032,
+    "legitimacy": 0.0025
+   },
+   "guest_friendship": {
+    "cohesion": 0.0026,
+    "security_efficiency": 0.005,
+    "trade_capacity": 0.0075
+   },
+   "founder_story_recitation": {
+    "cohesion": 0.0052,
+    "knowledge_preservation": 0.0032,
+    "legitimacy": 0.0037
+   },
+   "board_race_games": {
+    "cohesion": 0.0026,
+    "knowledge_rate": 0.0036,
+    "observation_rate": 0.0048
+   },
+   "new_year_festival": {
+    "cohesion": 0.026,
+    "food_storage": -0.01,
+    "legitimacy": 0.018,
+    "task_coordination": 0.014
+   },
+   "town_identity": {
+    "cohesion": 0.0079,
+    "legitimacy": 0.002,
+    "security_efficiency": 0.01
+   },
+   "theophoric_names": {
+    "cohesion": 0.0026,
+    "legitimacy": 0.002
+   },
+   "votive_figures": {
+    "cohesion": 0.0026,
+    "craft_output": 0.005,
+    "legitimacy": 0.002
+   },
+   "seasonal_hymn_cycles": {
+    "cohesion": 0.0026,
+    "knowledge_preservation": 0.0048,
+    "legitimacy": 0.002
+   },
+   "harps_and_lyres": {
+    "cohesion": 0.0039,
+    "craft_output": 0.005,
+    "knowledge_preservation": 0.002
+   },
+   "chamber_tombs": {
+    "cohesion": -0.01,
+    "institutional_rigidity": 0.0054,
+    "labor_demand": 0.02,
+    "legitimacy": 0.0031
+   },
+   "temple_choirs": {
+    "cohesion": 0.0052,
+    "legitimacy": 0.002
+   },
+   "inlaid_mosaic_panels": {
+    "craft_output": 0.01,
+    "knowledge_preservation": 0.002,
+    "legitimacy": 0.002
+   },
+   "wisdom_instructions": {
+    "adoption_rate": 0.011,
+    "knowledge_preservation": 0.0064,
+    "legitimacy": 0.002
+   },
+   "festival_dancers_acrobats": {
+    "cohesion": 0.0052,
+    "fatigue": -0.005
+   },
+   "officiant_vestments": {
+    "institutional_rigidity": 0.0027,
+    "legitimacy": 0.002
+   },
+   "envoy_reception": {
+    "food_storage": -0.005,
+    "legitimacy": 0.002,
+    "security_efficiency": 0.015,
+    "trade_capacity": 0.0075
+   },
+   "calendar_feast_days": {
+    "cohesion": 0.0052,
+    "fatigue": -0.01,
+    "task_coordination": 0.0042
+   },
+   "royal_mourning": {
+    "cohesion": 0.0039,
+    "labor_efficiency": -0.005,
+    "legitimacy": 0.0025
+   },
+   "royal_stone_portraits": {
+    "legitimacy": 0.0031
+   },
+   "royal_wrestling_matches": {
+    "cohesion": 0.0026,
+    "legitimacy": 0.002,
+    "warfare_readiness": 0.01
+   },
+   "dream_interpretation": {
+    "cohesion": 0.002,
+    "legitimacy": 0.002,
+    "observation_rate": -0.005
+   },
+   "debate_poems": {
+    "adoption_rate": 0.008,
+    "institutional_rigidity": -0.01,
+    "knowledge_rate": 0.014
+   },
+   "heroic_song_cycle": {
+    "cohesion": 0.021,
+    "knowledge_preservation": 0.01,
+    "legitimacy": 0.014,
+    "warfare_readiness": 0.01
+   },
+   "royal_ancestor_offerings": {
+    "cohesion": 0.002,
+    "food_storage": -0.005,
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.0025
+   },
+   "love_wedding_songs": {
+    "cohesion": 0.0039,
+    "fatigue": -0.005
+   },
+   "city_laments": {
+    "cohesion": 0.0039,
+    "disaster_resilience": 0.01,
+    "knowledge_preservation": 0.0048
+   },
+   "offering_omens": {
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.002,
+    "observation_rate": -0.005
+   },
+   "god_boat_procession": {
+    "cohesion": 0.0039,
+    "legitimacy": 0.0025
+   },
+   "letters_to_the_god": {
+    "adoption_rate": 0.0027,
+    "cohesion": 0.0026,
+    "legitimacy": 0.002
+   },
+   "palace_wall_painting": {
+    "craft_output": 0.005,
+    "legitimacy": 0.0025
+   },
+   "scribal_songs_satires": {
+    "adoption_rate": 0.011,
+    "institutional_rigidity": -0.01,
+    "knowledge_preservation": 0.0032
+   },
+   "pilgrimage": {
+    "cohesion": 0.0079,
+    "disease_exposure": 0.01,
+    "legitimacy": 0.0025,
+    "trade_capacity": 0.005
+   },
+   "foreign_fashion_adoption": {
+    "adoption_rate": 0.008,
+    "cohesion": -0.01,
+    "trade_capacity": 0.005
+   },
+   "sung_divine_narrative": {
+    "cohesion": 0.0066,
+    "knowledge_preservation": 0.0064,
+    "legitimacy": 0.0037
+   },
+   "feast_of_the_dead": {
+    "cohesion": 0.0066,
+    "food_storage": -0.005,
+    "legitimacy": 0.002
+   },
+   "festival_bread_sharing": {
+    "cohesion": 0.0079,
+    "food_storage": -0.01,
+    "legitimacy": 0.0031,
+    "nutrition_quality": 0.005
+   }
+  }
+ }
+}

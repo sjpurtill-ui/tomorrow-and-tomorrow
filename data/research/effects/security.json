@@ -1,0 +1,1175 @@
+{
+ "line": "security",
+ "schema": "research_600_effects/1",
+ "items": {
+  "watch_rotation": {
+   "effects": {
+    "fatigue": -0.005,
+    "labor_demand": 0.0114,
+    "security_efficiency": 0.0452,
+    "warfare_readiness": 0.0125
+   },
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "alarm_relay_signals": {
+   "effects": {
+    "security_efficiency": 0.0082,
+    "task_coordination": 0.0023
+   },
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "dawn_readiness_drill": {
+   "effects": {
+    "security_efficiency": 0.0082,
+    "warfare_readiness": 0.0062
+   },
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "emergency_food_caching": {
+   "effects": {
+    "disaster_risk": -0.0115,
+    "food_storage": 0.0084
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/root_cellars.tres"
+  },
+  "refuge_point_marking": {
+   "effects": {
+    "disaster_risk": -0.0076,
+    "security_efficiency": 0.0123
+   },
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "hafted_weapons": {
+   "effects": {
+    "craft_output": 0.0043,
+    "tool_quality": 0.0065,
+    "warfare_readiness": 0.0155
+   },
+   "art": "res://assets/ui/research/paper/hafted_weapons.png"
+  },
+  "hazard_memory_recitation": {
+   "effects": {
+    "disaster_risk": -0.0047,
+    "knowledge_preservation": 0.0045
+   },
+   "art": "res://assets/ui/research/paper/oral_epics.png"
+  },
+  "bow_craft": {
+   "effects": {
+    "craft_output": 0.0086,
+    "knowledge_rate": 0.02,
+    "warfare_readiness": 0.0218
+   },
+   "art": "res://assets/ui/research/paper/bow_craft.png"
+  },
+  "sparring_customs": {
+   "effects": {
+    "injury_risk": -0.0033,
+    "warfare_readiness": 0.0093
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/skirmish_pair_drill.tres"
+  },
+  "war_slings": {
+   "effects": {
+    "hunting_yield": 0.01,
+    "security_efficiency": 0.0041,
+    "warfare_readiness": 0.0093
+   },
+   "name": "War Slings",
+   "observation": "A braided sling and a pouch of chosen river stones reach an enemy beyond the throw of any spear.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "hide_wicker_shields": {
+   "effects": {
+    "injury_risk": -0.0035,
+    "warfare_readiness": 0.0062
+   },
+   "name": "Hide and Wicker Shields",
+   "observation": "Rawhide stretched over a wicker frame turns aside arrows and sling stones.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "throwing_spears": {
+   "effects": {
+    "hunting_yield": 0.01,
+    "warfare_readiness": 0.0078
+   },
+   "name": "Throwing Spears",
+   "observation": "Light spears thrown in a volley break a rush before it reaches the line.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "stone_maceheads": {
+   "effects": {
+    "legitimacy": 0.005,
+    "warfare_readiness": 0.0062
+   },
+   "name": "Stone Mace Heads",
+   "observation": "A drilled and polished stone on a stout haft is a weapon, and in a leader's hand a sign of rank.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "ambush_raids": {
+   "effects": {
+    "injury_risk": 0.005,
+    "warfare_readiness": 0.0093
+   },
+   "name": "Ambush and Dawn Raids",
+   "observation": "Raiders lie up in the dark and strike at first light, before the camp is awake.",
+   "social_consequence": "Young men win names by the dawn raid; the neighbours remember, and answer in kind.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "herd_recovery_pursuit": {
+   "effects": {
+    "food_output": 0.0046,
+    "security_efficiency": 0.0082,
+    "warfare_readiness": 0.0031
+   },
+   "name": "Herd Recovery Pursuit",
+   "observation": "When the herd is driven off, the young men run the tracks at once and bring it back before it is scattered.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "clay_sling_bullets": {
+   "effects": {
+    "craft_output": 0.0022,
+    "warfare_readiness": 0.0062
+   },
+   "name": "Clay Sling Bullets",
+   "observation": "Fired clay bullets of one weight fly truer than river stones and can be made by the basketful.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "raid_scouting": {
+   "effects": {
+    "injury_risk": -0.0018,
+    "survey_speed": 0.005,
+    "warfare_readiness": 0.0062
+   },
+   "name": "Raid Scouting",
+   "observation": "Scouts go a day ahead of the war party and come back with the lie of the land and the enemy's numbers.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "thorn_barriers": {
+   "effects": {
+    "food_output": 0.0046,
+    "security_efficiency": 0.0123
+   },
+   "name": "Thorn Barriers",
+   "observation": "A ring of cut thorn around the camp keeps out raiders at night and wolves from the herd.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "weapon_free_gatherings": {
+   "effects": {
+    "cohesion": 0.0017,
+    "injury_risk": -0.0016,
+    "trade_capacity": 0.0005
+   },
+   "name": "Weapon-free Gatherings",
+   "observation": "At the great gatherings spears are stacked at the edge of the ground, and quarrels wait for the elders.",
+   "social_consequence": "Feuding families can now meet, trade and marry at the gathering without blood.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "hostage_exchange": {
+   "effects": {
+    "cohesion": 0.0009,
+    "legitimacy": 0.005,
+    "security_efficiency": 0.0018
+   },
+   "name": "Hostage Exchange",
+   "observation": "Each side sends a son to live with the other as surety that the peace will hold.",
+   "social_consequence": "The peace holds as long as the hostages are well treated, and some grow up with two peoples.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "defensive_ditch_siting": {
+   "effects": {
+    "labor_demand": 0.0057,
+    "labor_efficiency": 0.0019,
+    "security_efficiency": 0.0061,
+    "warfare_readiness": 0.004
+   },
+   "ability_reason": "A ditch on the right line makes a village hard to rush.",
+   "art": "res://assets/ui/research/paper/field_fortifications.png"
+  },
+  "disaster_recovery_roles": {
+   "effects": {
+    "disaster_risk": -0.0012,
+    "task_coordination": 0.0011
+   },
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "truce_sanctuary": {
+   "effects": {
+    "cohesion": 0.0017,
+    "injury_risk": -0.0016,
+    "trade_capacity": 0.0005
+   },
+   "name": "Truce Seasons and Sanctuaries",
+   "observation": "In the holy months and at the sacred places, no blood may be shed, even between enemies.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "ditch_palisades": {
+   "effects": {
+    "labor_demand": 0.0057,
+    "security_efficiency": 0.0049,
+    "timber_pressure": 0.01
+   },
+   "name": "Ditch Palisades",
+   "observation": "A fence of sharpened stakes along the ditch bank turns a ditch into a wall.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "perimeter_patrol_customs": {
+   "effects": {
+    "injury_risk": -0.001,
+    "security_efficiency": 0.0036
+   },
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "barred_palisade_gates": {
+   "effects": {
+    "injury_risk": -0.0009,
+    "security_efficiency": 0.0046
+   },
+   "name": "Barred Palisade Gates",
+   "observation": "The gaps in the palisade become gates, barred with a beam at dusk.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "post_disaster_headcount_custom": {
+   "effects": {
+    "disaster_resilience": 0.0031,
+    "task_coordination": 0.001
+   },
+   "art": "res://assets/ui/research/paper/tallies.png"
+  },
+  "hilltop_refuges": {
+   "effects": {
+    "disaster_resilience": 0.0047,
+    "labor_demand": 0.0057,
+    "security_efficiency": 0.0037
+   },
+   "name": "Hilltop Refuges",
+   "observation": "A stone-walled enclosure on the hill above the village holds everyone and the herds when raiders or floods come.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "joint_hamlet_defense_pacts": {
+   "effects": {
+    "cohesion": 0.001,
+    "security_efficiency": 0.0037
+   },
+   "art": "res://assets/ui/research/paper/household_councils.png"
+  },
+  "signal_command_drill": {
+   "effects": {
+    "task_coordination": 0.0009,
+    "warfare_readiness": 0.0054
+   },
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "paired_veteran_mentoring": {
+   "effects": {
+    "labor_demand": 0.0057,
+    "warfare_readiness": 0.0036
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/skirmish_pair_drill.tres"
+  },
+  "cast_copper_weapons": {
+   "effects": {
+    "craft_output": 0.0016,
+    "legitimacy": 0.005,
+    "warfare_readiness": 0.0072
+   },
+   "name": "Cast Copper Weapons",
+   "observation": "Copper poured into stone moulds makes points and blades that hold an edge and can be recast when broken.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "neighbor_shelter_pledges": {
+   "effects": {
+    "cohesion": 0.0017,
+    "disaster_resilience": 0.0067
+   },
+   "art": "res://assets/ui/research/paper/household_councils.png"
+  },
+  "rotating_watch_captaincy": {
+   "effects": {
+    "cohesion": 0.0012,
+    "warfare_readiness": 0.004
+   },
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "fallback_route_marking": {
+   "effects": {
+    "injury_risk": -0.0017,
+    "security_efficiency": 0.0096
+   },
+   "art": "res://assets/ui/research/paper/route_memory.png"
+  },
+  "market_peacekeepers": {
+   "effects": {
+    "injury_risk": -0.0013,
+    "security_efficiency": 0.0096,
+    "trade_capacity": 0.0008
+   },
+   "name": "Market Peacekeepers",
+   "observation": "Armed men chosen by the elders keep order at the market and the festival, and break up fights before they become feuds.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "copper_maceheads": {
+   "effects": {
+    "legitimacy": 0.0083,
+    "warfare_readiness": 0.006
+   },
+   "name": "Copper Mace Heads",
+   "observation": "A cast copper mace head, bright as fire, crushes what stone would glance from.",
+   "social_consequence": "The copper mace marks the man who carries it; command begins to look like a thing one can hold.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "mutual_aid_pacts": {
+   "effects": {
+    "cohesion": 0.0032,
+    "disaster_risk": -0.0021
+   },
+   "art": "res://assets/ui/research/paper/household_councils.png"
+  },
+  "copper_daggers": {
+   "effects": {
+    "injury_risk": 0.005,
+    "legitimacy": 0.0035,
+    "warfare_readiness": 0.0081
+   },
+   "name": "Copper Daggers",
+   "observation": "A cast copper dagger is worn at the belt by every man of standing.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "rotating_command_practice": {
+   "effects": {
+    "cohesion": 0.0011,
+    "security_efficiency": 0.0041,
+    "warfare_readiness": 0.0121
+   },
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "coordinated_retreat_drill": {
+   "effects": {
+    "fatigue": 0.008,
+    "injury_risk": -0.0033,
+    "security_efficiency": 0.0062
+   },
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "gate_watchtowers": {
+   "effects": {
+    "labor_demand": 0.004,
+    "security_efficiency": 0.0083
+   },
+   "name": "Gate Watchtowers",
+   "observation": "A timber tower beside the gate lets the watch see raiders a long way off and shoot down on them.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "alarm_relay_customs": {
+   "effects": {
+    "disaster_risk": -0.0009,
+    "security_efficiency": 0.0062
+   },
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "night_gate_challenge": {
+   "effects": {
+    "security_efficiency": 0.0044,
+    "trade_capacity": -0.004
+   },
+   "name": "Night Gate Challenge",
+   "observation": "The gate shuts at dusk; a stranger who comes after must give his name and be vouched for.",
+   "social_consequence": "Strangers now wait outside the gate until someone answers for them.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "common_armory": {
+   "effects": {
+    "security_efficiency": 0.0015,
+    "state_capacity": 0.0017,
+    "warfare_readiness": 0.0034
+   },
+   "name": "Common Armory",
+   "observation": "Spears, shields and bows are kept in a common store and issued when the alarm is raised.",
+   "social_consequence": "Weapons belong to the store now, not the household; the keeper decides who is armed.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "multi_post_command_relay": {
+   "effects": {
+    "security_efficiency": 0.0044,
+    "task_coordination": 0.0004
+   },
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "rotating_relief_wardens": {
+   "effects": {
+    "disaster_resilience": 0.0096,
+    "task_coordination": 0.0004
+   },
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "combined_drill_musters": {
+   "effects": {
+    "task_coordination": 0.0004,
+    "warfare_readiness": 0.0025
+   },
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "household_muster": {
+   "effects": {
+    "labor_demand": 0.0057,
+    "state_capacity": 0.0017,
+    "warfare_readiness": 0.0043
+   },
+   "name": "Household Muster",
+   "observation": "Each household sends its able fighters when called, and the elders keep the count of who owes how many.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "formation_drill": {
+   "effects": {
+    "injury_risk": 0.01,
+    "labor_demand": 0.0114,
+    "security_efficiency": 0.0102,
+    "task_coordination": 0.0038,
+    "warfare_readiness": 0.0119
+   },
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "field_fortifications": {
+   "effects": {
+    "construction_rate": 0.0043,
+    "labor_demand": 0.0143,
+    "security_efficiency": 0.0036,
+    "warfare_readiness": 0.0129
+   },
+   "art": "res://assets/ui/research/paper/field_fortifications.png"
+  },
+  "fortified_stores": {
+   "effects": {
+    "disaster_resilience": 0.0085,
+    "food_storage": 0.0039,
+    "labor_demand": 0.0114,
+    "security_efficiency": 0.0048,
+    "state_capacity": 0.0049
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/fortified_stores.tres"
+  },
+  "shield_wall": {
+   "effects": {
+    "injury_risk": -0.0064,
+    "security_efficiency": 0.0024,
+    "task_coordination": 0.0095,
+    "warfare_readiness": 0.0129
+   },
+   "ability_reason": "A locked shield line lets ordinary villagers stand against a charge.",
+   "art": "res://assets/ui/research/paper/shield_wall.png"
+  },
+  "wall_missile_posts": {
+   "effects": {
+    "security_efficiency": 0.0042,
+    "warfare_readiness": 0.0043
+   },
+   "name": "Manned Wall Posts",
+   "observation": "Archers and slingers stand on the wall at fixed posts, each covering the ground below its stretch.",
+   "ability_reason": "A manned wall turns every raid into a costly assault.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "flanked_gate_complex": {
+   "effects": {
+    "labor_demand": 0.0057,
+    "legitimacy": 0.0021,
+    "security_efficiency": 0.003
+   },
+   "name": "Flanked Gate Complex",
+   "observation": "Towers either side of a gate passage catch attackers in a crossfire before they reach the doors.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "copper_battle_axes": {
+   "effects": {
+    "craft_output": 0.0015,
+    "warfare_readiness": 0.0025
+   },
+   "name": "Copper Battle-axes",
+   "observation": "A shaft-hole axe cast in copper splits shields that spears only scratch.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "layered_defense_coordination": {
+   "effects": {
+    "institutional_rigidity": 0.01,
+    "security_efficiency": 0.0081,
+    "warfare_readiness": 0.0012
+   },
+   "art": "res://assets/ui/research/paper/field_fortifications.png"
+  },
+  "palace_guard": {
+   "effects": {
+    "cohesion": -0.005,
+    "legitimacy": 0.0019,
+    "security_efficiency": 0.0061,
+    "state_capacity": 0.0015
+   },
+   "name": "Palace Guard",
+   "observation": "Armed retainers of the ruler's household guard the palace, the stores and the ruler's person.",
+   "social_consequence": "The ruler's retainers answer to the house, not the village; people feel both safer and watched.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "massed_formation_training": {
+   "effects": {
+    "labor_demand": 0.0057,
+    "security_efficiency": 0.0041,
+    "warfare_readiness": 0.0025
+   },
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "battle_wagons": {
+   "effects": {
+    "labor_demand": 0.0057,
+    "warfare_readiness": 0.0031
+   },
+   "name": "Battle Wagons",
+   "observation": "Heavy four-wheeled wagons drawn by onager crosses carry a driver and a javelin man into the enemy line.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "standing_relief_stores": {
+   "effects": {
+    "disaster_risk": -0.0018,
+    "food_storage": 0.005,
+    "institutional_rigidity": 0.01,
+    "state_capacity": 0.0024
+   },
+   "art": "res://assets/ui/research/paper/public_stores.png"
+  },
+  "bronze_weaponry": {
+   "effects": {
+    "craft_output": 0.0065,
+    "labor_demand": 0.0143,
+    "standardization": 0.0072,
+    "warfare_readiness": 0.011
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/bronze_alloying.tres"
+  },
+  "copper_helmets": {
+   "effects": {
+    "injury_risk": -0.003,
+    "warfare_readiness": 0.0017
+   },
+   "name": "Copper Helmets",
+   "observation": "Beaten copper helmets and cloaks studded with metal discs save the front rank from glancing blows.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "deep_phalanx": {
+   "effects": {
+    "labor_demand": 0.0057,
+    "security_efficiency": 0.0026,
+    "task_coordination": 0.0042,
+    "warfare_readiness": 0.0051
+   },
+   "name": "Deep Phalanx",
+   "observation": "Ranks many deep, with long spears and body-length shields, push forward as one block.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "scaling_ladders_rams": {
+   "effects": {
+    "warfare_readiness": 0.0034
+   },
+   "name": "Ladders and Battering Beams",
+   "observation": "Ladders against the wall and a beam swung at the gate let an army take a town it cannot starve.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "standing_paid_company": {
+   "effects": {
+    "labor_demand": 0.0114,
+    "legitimacy": -0.005,
+    "security_efficiency": 0.0065,
+    "state_capacity": 0.0029,
+    "warfare_readiness": 0.0068
+   },
+   "name": "Standing Paid Company",
+   "observation": "A company of fighters is fed and armed by the ruler all year and trains instead of farming.",
+   "ability_reason": "A year-round company is ready the day trouble comes.",
+   "social_consequence": "Men who fight for the ruler's grain owe nothing to their fathers' fields; the village loses sons and gains a garrison.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "socketed_spearheads": {
+   "effects": {
+    "repair_capacity": 0.0073,
+    "warfare_readiness": 0.004
+   },
+   "name": "Socketed Spearheads",
+   "observation": "A bronze spearhead cast with a socket slides onto the shaft and stays there through the fight.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "composite_bow": {
+   "effects": {
+    "craft_output": 0.0089,
+    "hunting_yield": 0.0112,
+    "warfare_readiness": 0.0095
+   },
+   "name": "Composite Bow",
+   "observation": "Horn, wood and sinew glued in layers make a short bow that shoots farther than any tall self bow.",
+   "ability_reason": "The composite bow outranges every older bow.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "sentry_watchwords": {
+   "effects": {
+    "security_efficiency": 0.0061,
+    "task_coordination": 0.0019
+   },
+   "name": "Sentry Watchwords",
+   "observation": "A word changed each night lets sentries tell a friend from a stranger in the dark.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "siege_ramps_mining": {
+   "effects": {
+    "labor_demand": 0.0057,
+    "warfare_readiness": 0.0054
+   },
+   "name": "Siege Ramps and Mining",
+   "observation": "Earth ramps raised against the wall and tunnels dug beneath it bring down defenses that ladders cannot.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "war_chariots": {
+   "effects": {
+    "labor_demand": 0.0057,
+    "legitimacy": 0.0019,
+    "task_coordination": 0.0106,
+    "travel_speed": 0.02,
+    "warfare_readiness": 0.0104
+   },
+   "name": "Light War Chariots",
+   "observation": "Light two-wheeled cars behind trained horses carry an archer across open ground faster than any runner.",
+   "ability_reason": "Chariots give a ruler striking speed and a new warrior elite.",
+   "art": "res://assets/ui/research/paper/first300-cards/war_chariots.tres"
+  },
+  "shield_equipment_fitting": {
+   "effects": {
+    "injury_risk": -0.0034,
+    "warfare_readiness": 0.0023
+   },
+   "observation": "Shields are shaped and strapped for the man who carries them, whether he stands in the line or rides the chariot.",
+   "art": "res://assets/ui/research/paper/shield_equipment_fitting.png"
+  },
+  "border_fortress_chains": {
+   "effects": {
+    "labor_demand": 0.0086,
+    "security_efficiency": 0.0135,
+    "state_capacity": 0.0028
+   },
+   "name": "Border Fortress Chain",
+   "observation": "Forts a signal's distance apart along the frontier pass warning by fire and smoke faster than raiders can ride.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "sickle_sword": {
+   "effects": {
+    "legitimacy": 0.0009,
+    "warfare_readiness": 0.0035
+   },
+   "name": "Sickle-sword",
+   "observation": "A curved bronze blade hooks a shield aside and cuts over it.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "chariot_crews": {
+   "effects": {
+    "task_coordination": 0.0071,
+    "warfare_readiness": 0.0058
+   },
+   "name": "Chariot Crews",
+   "observation": "Driver and archer train together for years until the car turns and the arrow flies as one.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "glacis_ramparts": {
+   "effects": {
+    "disaster_resilience": 0.01,
+    "security_efficiency": 0.009
+   },
+   "name": "Glacis Ramparts",
+   "observation": "A steep smooth bank of packed earth before the wall keeps rams and ladders off its foot.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "written_patrol_reports": {
+   "effects": {
+    "knowledge_preservation": 0.0037,
+    "security_efficiency": 0.0068,
+    "state_capacity": 0.0028
+   },
+   "name": "Written Patrol Reports",
+   "observation": "Border patrols send a tablet each day: who crossed, how many, and which way they went.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "allied_contingents": {
+   "effects": {
+    "cohesion": -0.005,
+    "warfare_readiness": 0.0037
+   },
+   "name": "Allied and Hired Contingents",
+   "observation": "Allies and hired bands march with our army under their own leaders.",
+   "social_consequence": "Foreign fighters march under our banner for pay or oath; they must be fed, and watched.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "casemate_walls": {
+   "effects": {
+    "container_capacity": 0.01,
+    "disaster_resilience": 0.0045,
+    "security_efficiency": 0.0079
+   },
+   "name": "Casemate Walls",
+   "observation": "Two parallel walls tied by cross-walls, their rooms used as stores, stand thick against rams.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "bronze_rapiers": {
+   "effects": {
+    "warfare_readiness": 0.0028
+   },
+   "name": "Bronze Rapiers",
+   "observation": "Long, narrow bronze blades reach past a shield rim to thrust.",
+   "art": "res://assets/ui/research/security-v1.png"
+  },
+  "scale_armor_attachment": {
+   "effects": {
+    "injury_risk": -0.0026,
+    "warfare_readiness": 0.0028
+   },
+   "observation": "Bronze scales sewn onto leather let a chariot crew take arrows that would have killed them.",
+   "art": "res://assets/ui/research/paper/scale_armor_attachment.png"
+  },
+  "field_armorer_teams": {
+   "effects": {
+    "logistics_endurance": 0.0057,
+    "repair_capacity": 0.0264,
+    "warfare_readiness": 0.0019
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/field_armorer_teams.tres"
+  },
+  "ocean_sailing": {
+   "effects": {
+    "task_coordination": 0.0049,
+    "warfare_readiness": 0.008
+   }
+  }
+ },
+ "art_proposals": {
+  "note": "Existing paintings proposed for NEW items once the Phase 1 art test allows them; not read by the loader.",
+  "items": {
+   "war_slings": "res://assets/ui/research/paper/first300-cards/woven_carriers.tres",
+   "hide_wicker_shields": "res://assets/ui/research/paper/shield_equipment_fitting.png",
+   "throwing_spears": "res://assets/ui/research/paper/hafted_weapons.png",
+   "stone_maceheads": "res://assets/ui/research/paper/controlled_flaking.png",
+   "herd_recovery_pursuit": "res://assets/ui/research/paper/animal_taming.png",
+   "clay_sling_bullets": "res://assets/ui/research/paper/pit_firing.png",
+   "raid_scouting": "res://assets/ui/research/paper/route_memory.png",
+   "weapon_free_gatherings": "res://assets/ui/research/paper/festival_calendar.png",
+   "truce_sanctuary": "res://assets/ui/research/paper/festival_calendar.png",
+   "ditch_palisades": "res://assets/ui/research/paper/field_fortifications.png",
+   "barred_palisade_gates": "res://assets/ui/research/paper/field_fortifications.png",
+   "cast_copper_weapons": "res://assets/ui/research/paper/first300-cards/copper_casting.tres",
+   "copper_maceheads": "res://assets/ui/research/paper/first300-cards/copper_casting.tres",
+   "copper_daggers": "res://assets/ui/research/paper/first300-cards/copper_casting.tres",
+   "gate_watchtowers": "res://assets/ui/research/paper/watch_rotation.png",
+   "night_gate_challenge": "res://assets/ui/research/paper/watch_rotation.png",
+   "common_armory": "res://assets/ui/research/paper/first300-cards/fortified_stores.tres",
+   "household_muster": "res://assets/ui/research/paper/first300-cards/public_levies.tres",
+   "wall_missile_posts": "res://assets/ui/research/paper/bow_craft.png",
+   "flanked_gate_complex": "res://assets/ui/research/paper/first300-cards/masonry_bond_patterns.tres",
+   "copper_battle_axes": "res://assets/ui/research/paper/first300-cards/copper_casting.tres",
+   "battle_wagons": "res://assets/ui/research/paper/first300-cards/war_chariots.tres",
+   "copper_helmets": "res://assets/ui/research/paper/scale_armor_attachment.png",
+   "deep_phalanx": "res://assets/ui/research/paper/shield_wall.png",
+   "scaling_ladders_rams": "res://assets/ui/research/paper/first300-cards/siege_crew_rehearsals.tres",
+   "standing_paid_company": "res://assets/ui/research/paper/first300-cards/professional_corps.tres",
+   "socketed_spearheads": "res://assets/ui/research/paper/first300-cards/bronze_alloying.tres",
+   "composite_bow": "res://assets/ui/research/paper/bow_craft.png",
+   "sentry_watchwords": "res://assets/ui/research/paper/watch_rotation.png",
+   "siege_ramps_mining": "res://assets/ui/research/paper/first300-cards/siege_engineering.tres",
+   "sickle_sword": "res://assets/ui/research/paper/first300-cards/bronze_alloying.tres",
+   "chariot_crews": "res://assets/ui/research/paper/first300-cards/war_chariots.tres",
+   "glacis_ramparts": "res://assets/ui/research/paper/field_fortifications.png",
+   "written_patrol_reports": "res://assets/ui/research/paper/first300-cards/clay_record_tablets.tres",
+   "allied_contingents": "res://assets/ui/research/paper/first300-cards/public_levies.tres",
+   "casemate_walls": "res://assets/ui/research/paper/first300-cards/masonry_bond_patterns.tres",
+   "bronze_rapiers": "res://assets/ui/research/paper/first300-cards/bronze_alloying.tres"
+  }
+ },
+ "balance_600": {
+  "schema": "research_600_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_600.py; the loader reads only 'items'.",
+  "source": {
+   "watch_rotation": {
+    "fatigue": -0.02,
+    "labor_demand": 0.0114,
+    "security_efficiency": 0.0529,
+    "warfare_readiness": 0.0162
+   },
+   "formation_drill": {
+    "injury_risk": 0.01,
+    "labor_demand": 0.0114,
+    "security_efficiency": 0.0336,
+    "task_coordination": 0.03,
+    "warfare_readiness": 0.0565
+   },
+   "hafted_weapons": {
+    "craft_output": 0.01,
+    "tool_quality": 0.02,
+    "warfare_readiness": 0.0202
+   },
+   "bow_craft": {
+    "craft_output": 0.02,
+    "knowledge_rate": 0.02,
+    "warfare_readiness": 0.0283
+   },
+   "shield_wall": {
+    "injury_risk": -0.01,
+    "security_efficiency": 0.0192,
+    "task_coordination": 0.03,
+    "warfare_readiness": 0.0363
+   },
+   "field_fortifications": {
+    "construction_rate": 0.02,
+    "labor_demand": 0.0143,
+    "security_efficiency": 0.0288,
+    "warfare_readiness": 0.0363
+   },
+   "fortified_stores": {
+    "disaster_resilience": 0.06,
+    "food_storage": 0.05,
+    "labor_demand": 0.0114,
+    "security_efficiency": 0.0384,
+    "state_capacity": 0.03
+   },
+   "bronze_weaponry": {
+    "craft_output": 0.04,
+    "labor_demand": 0.0143,
+    "standardization": 0.04,
+    "warfare_readiness": 0.0525
+   },
+   "war_chariots": {
+    "labor_demand": 0.0057,
+    "legitimacy": 0.01,
+    "task_coordination": 0.015,
+    "travel_speed": 0.02,
+    "warfare_readiness": 0.0363
+   },
+   "ocean_sailing": {
+    "task_coordination": 0.015,
+    "warfare_readiness": 0.035
+   },
+   "field_armorer_teams": {
+    "logistics_endurance": 0.01,
+    "repair_capacity": 0.03,
+    "warfare_readiness": 0.0081
+   },
+   "shield_equipment_fitting": {
+    "injury_risk": -0.01,
+    "warfare_readiness": 0.0081
+   },
+   "scale_armor_attachment": {
+    "injury_risk": -0.015,
+    "warfare_readiness": 0.0121
+   },
+   "emergency_food_caching": {
+    "disaster_risk": -0.0136,
+    "food_storage": 0.02
+   },
+   "hazard_memory_recitation": {
+    "disaster_risk": -0.0056,
+    "knowledge_preservation": 0.0068
+   },
+   "disaster_recovery_roles": {
+    "disaster_risk": -0.0136,
+    "task_coordination": 0.0056
+   },
+   "post_disaster_headcount_custom": {
+    "disaster_resilience": 0.02,
+    "task_coordination": 0.0061
+   },
+   "neighbor_shelter_pledges": {
+    "cohesion": 0.0078,
+    "disaster_resilience": 0.02
+   },
+   "mutual_aid_pacts": {
+    "cohesion": 0.0151,
+    "disaster_risk": -0.0136
+   },
+   "rotating_relief_wardens": {
+    "disaster_resilience": 0.03,
+    "task_coordination": 0.0031
+   },
+   "standing_relief_stores": {
+    "disaster_risk": -0.0181,
+    "food_storage": 0.02,
+    "institutional_rigidity": 0.01,
+    "state_capacity": 0.0165
+   },
+   "dawn_readiness_drill": {
+    "security_efficiency": 0.0096,
+    "warfare_readiness": 0.0081
+   },
+   "sparring_customs": {
+    "injury_risk": -0.0094,
+    "warfare_readiness": 0.0121
+   },
+   "signal_command_drill": {
+    "task_coordination": 0.0056,
+    "warfare_readiness": 0.0121
+   },
+   "paired_veteran_mentoring": {
+    "labor_demand": 0.0057,
+    "warfare_readiness": 0.0081
+   },
+   "rotating_watch_captaincy": {
+    "cohesion": 0.0058,
+    "warfare_readiness": 0.0081
+   },
+   "rotating_command_practice": {
+    "cohesion": 0.0051,
+    "security_efficiency": 0.0096,
+    "warfare_readiness": 0.0121
+   },
+   "combined_drill_musters": {
+    "task_coordination": 0.0031,
+    "warfare_readiness": 0.0121
+   },
+   "massed_formation_training": {
+    "labor_demand": 0.0057,
+    "security_efficiency": 0.0096,
+    "warfare_readiness": 0.0162
+   },
+   "alarm_relay_signals": {
+    "security_efficiency": 0.0096,
+    "task_coordination": 0.0046
+   },
+   "refuge_point_marking": {
+    "disaster_risk": -0.009,
+    "security_efficiency": 0.0144
+   },
+   "defensive_ditch_siting": {
+    "labor_demand": 0.0057,
+    "labor_efficiency": 0.0131,
+    "security_efficiency": 0.024,
+    "warfare_readiness": 0.004
+   },
+   "joint_hamlet_defense_pacts": {
+    "cohesion": 0.0058,
+    "security_efficiency": 0.0096
+   },
+   "fallback_route_marking": {
+    "injury_risk": -0.0128,
+    "security_efficiency": 0.0096
+   },
+   "coordinated_retreat_drill": {
+    "fatigue": 0.008,
+    "injury_risk": -0.0189,
+    "security_efficiency": 0.0144
+   },
+   "multi_post_command_relay": {
+    "security_efficiency": 0.0144,
+    "task_coordination": 0.0031
+   },
+   "layered_defense_coordination": {
+    "institutional_rigidity": 0.01,
+    "security_efficiency": 0.0192,
+    "warfare_readiness": 0.0081
+   },
+   "perimeter_patrol_customs": {
+    "injury_risk": -0.0094,
+    "security_efficiency": 0.0144
+   },
+   "alarm_relay_customs": {
+    "disaster_risk": -0.009,
+    "security_efficiency": 0.0144
+   },
+   "war_slings": {
+    "hunting_yield": 0.01,
+    "security_efficiency": 0.0048,
+    "warfare_readiness": 0.0121
+   },
+   "hide_wicker_shields": {
+    "injury_risk": -0.01,
+    "warfare_readiness": 0.0081
+   },
+   "throwing_spears": {
+    "hunting_yield": 0.01,
+    "warfare_readiness": 0.0101
+   },
+   "stone_maceheads": {
+    "legitimacy": 0.005,
+    "warfare_readiness": 0.0081
+   },
+   "ambush_raids": {
+    "injury_risk": 0.005,
+    "warfare_readiness": 0.0121
+   },
+   "herd_recovery_pursuit": {
+    "food_output": 0.005,
+    "security_efficiency": 0.0096,
+    "warfare_readiness": 0.004
+   },
+   "clay_sling_bullets": {
+    "craft_output": 0.005,
+    "warfare_readiness": 0.0081
+   },
+   "raid_scouting": {
+    "injury_risk": -0.005,
+    "survey_speed": 0.01,
+    "warfare_readiness": 0.0081
+   },
+   "thorn_barriers": {
+    "food_output": 0.005,
+    "security_efficiency": 0.0144
+   },
+   "weapon_free_gatherings": {
+    "cohesion": 0.01,
+    "injury_risk": -0.015,
+    "trade_capacity": 0.004
+   },
+   "hostage_exchange": {
+    "cohesion": 0.005,
+    "legitimacy": 0.005,
+    "security_efficiency": 0.0072
+   },
+   "truce_sanctuary": {
+    "cohesion": 0.01,
+    "injury_risk": -0.015,
+    "trade_capacity": 0.004
+   },
+   "ditch_palisades": {
+    "labor_demand": 0.0057,
+    "security_efficiency": 0.0192,
+    "timber_pressure": 0.01
+   },
+   "barred_palisade_gates": {
+    "injury_risk": -0.005,
+    "security_efficiency": 0.012
+   },
+   "hilltop_refuges": {
+    "disaster_resilience": 0.03,
+    "labor_demand": 0.0057,
+    "security_efficiency": 0.0096
+   },
+   "cast_copper_weapons": {
+    "craft_output": 0.01,
+    "legitimacy": 0.005,
+    "warfare_readiness": 0.0162
+   },
+   "market_peacekeepers": {
+    "injury_risk": -0.01,
+    "security_efficiency": 0.0096,
+    "trade_capacity": 0.0067
+   },
+   "copper_maceheads": {
+    "legitimacy": 0.01,
+    "warfare_readiness": 0.0121
+   },
+   "copper_daggers": {
+    "injury_risk": 0.005,
+    "legitimacy": 0.005,
+    "warfare_readiness": 0.0081
+   },
+   "gate_watchtowers": {
+    "labor_demand": 0.004,
+    "security_efficiency": 0.0192
+   },
+   "night_gate_challenge": {
+    "security_efficiency": 0.0144,
+    "trade_capacity": -0.004
+   },
+   "common_armory": {
+    "security_efficiency": 0.0048,
+    "state_capacity": 0.01,
+    "warfare_readiness": 0.0162
+   },
+   "household_muster": {
+    "labor_demand": 0.0057,
+    "state_capacity": 0.01,
+    "warfare_readiness": 0.0202
+   },
+   "wall_missile_posts": {
+    "security_efficiency": 0.0336,
+    "warfare_readiness": 0.0121
+   },
+   "flanked_gate_complex": {
+    "labor_demand": 0.0057,
+    "legitimacy": 0.005,
+    "security_efficiency": 0.024
+   },
+   "copper_battle_axes": {
+    "craft_output": 0.005,
+    "warfare_readiness": 0.0162
+   },
+   "palace_guard": {
+    "cohesion": -0.005,
+    "legitimacy": 0.01,
+    "security_efficiency": 0.0144,
+    "state_capacity": 0.01
+   },
+   "battle_wagons": {
+    "labor_demand": 0.0057,
+    "warfare_readiness": 0.0202
+   },
+   "copper_helmets": {
+    "injury_risk": -0.015,
+    "warfare_readiness": 0.0081
+   },
+   "deep_phalanx": {
+    "labor_demand": 0.0057,
+    "security_efficiency": 0.0096,
+    "task_coordination": 0.01,
+    "warfare_readiness": 0.0242
+   },
+   "scaling_ladders_rams": {
+    "warfare_readiness": 0.0162
+   },
+   "standing_paid_company": {
+    "labor_demand": 0.0114,
+    "legitimacy": -0.005,
+    "security_efficiency": 0.024,
+    "state_capacity": 0.02,
+    "warfare_readiness": 0.0323
+   },
+   "socketed_spearheads": {
+    "repair_capacity": 0.01,
+    "warfare_readiness": 0.0121
+   },
+   "composite_bow": {
+    "craft_output": 0.01,
+    "hunting_yield": 0.02,
+    "warfare_readiness": 0.0283
+   },
+   "sentry_watchwords": {
+    "security_efficiency": 0.0144,
+    "task_coordination": 0.005
+   },
+   "siege_ramps_mining": {
+    "labor_demand": 0.0057,
+    "warfare_readiness": 0.0162
+   },
+   "border_fortress_chains": {
+    "labor_demand": 0.0086,
+    "security_efficiency": 0.0288,
+    "state_capacity": 0.01
+   },
+   "sickle_sword": {
+    "legitimacy": 0.005,
+    "warfare_readiness": 0.0121
+   },
+   "chariot_crews": {
+    "task_coordination": 0.01,
+    "warfare_readiness": 0.0202
+   },
+   "glacis_ramparts": {
+    "disaster_resilience": 0.01,
+    "security_efficiency": 0.0192
+   },
+   "written_patrol_reports": {
+    "knowledge_preservation": 0.005,
+    "security_efficiency": 0.0144,
+    "state_capacity": 0.01
+   },
+   "allied_contingents": {
+    "cohesion": -0.005,
+    "warfare_readiness": 0.0162
+   },
+   "casemate_walls": {
+    "container_capacity": 0.01,
+    "disaster_resilience": 0.01,
+    "security_efficiency": 0.024
+   },
+   "bronze_rapiers": {
+    "warfare_readiness": 0.0121
+   }
+  }
+ }
+}

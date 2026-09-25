@@ -1,0 +1,279 @@
+{
+ "_doc": "Player-policy knobs for the surrogate. 'research' is the per-line emphasis (0-12, the research_emphasis order); 'focus' is the settlement focus (government_people_system.gd _allocations_for_focus); policies mirror the probe's repeating decrees. sensible/poor/research/ai/artifacts match tools/sim/truth_probe.gd so calibration compares like with like. max_<line> puts the full emphasis (12) on one line and none elsewhere; balanced spreads 2 on every line.",
+ "sites": {
+  "good": {
+   "forage": 0.62,
+   "game": 0.52,
+   "fertility": 0.58,
+   "growing_season": 0.62,
+   "water_access": 0.62,
+   "rainfall_variability": 0.3,
+   "precipitation": 0.55,
+   "ecological_resilience": 0.5,
+   "environment_tags": [
+    "river",
+    "woodland"
+   ]
+  },
+  "poor": {
+   "forage": 0.26,
+   "game": 0.22,
+   "fertility": 0.22,
+   "growing_season": 0.34,
+   "water_access": 0.12,
+   "rainfall_variability": 0.62,
+   "precipitation": 0.3,
+   "ecological_resilience": 0.4,
+   "environment_tags": [
+    "dry"
+   ]
+  }
+ },
+ "scenarios": {
+  "sensible": {
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "labor": {
+    "Food": 34.7,
+    "Survey": 6.6,
+    "Extraction": 9.1,
+    "Construction": 14.0,
+    "Crafting": 15.7,
+    "Logistics": 6.6,
+    "Knowledge": 5.2,
+    "Administration": 4.8,
+    "Defense": 3.3
+   }
+  },
+  "poor": {
+   "site": "poor",
+   "focus": "development",
+   "policies": [
+    "foraging_drive",
+    "labor_mobilization"
+   ],
+   "research": {
+    "demography": 0,
+    "nutrition": 0,
+    "health": 0,
+    "labor": 2,
+    "knowledge": 5,
+    "production": 6,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 0,
+    "institutions": 2,
+    "security": 5,
+    "culture": 1
+   },
+   "labor": {
+    "Food": 42.0,
+    "Survey": 5.5,
+    "Extraction": 11.0,
+    "Construction": 11.0,
+    "Crafting": 8.9,
+    "Logistics": 8.6,
+    "Knowledge": 6.3,
+    "Administration": 4.0,
+    "Defense": 2.7
+   }
+  },
+  "research": {
+   "site": "good",
+   "focus": "research",
+   "research": {
+    "demography": 1,
+    "nutrition": 2,
+    "health": 2,
+    "labor": 1,
+    "knowledge": 8,
+    "production": 4,
+    "infrastructure": 1,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 3,
+    "security": 0,
+    "culture": 2
+   },
+   "labor": {
+    "Food": 33.0,
+    "Survey": 10.3,
+    "Extraction": 8.7,
+    "Construction": 8.7,
+    "Crafting": 5.5,
+    "Logistics": 6.3,
+    "Knowledge": 17.6,
+    "Administration": 6.9,
+    "Defense": 3.2
+   }
+  },
+  "ai": {
+   "site": "good",
+   "ai": true,
+   "labor": {
+    "Food": 34.7,
+    "Survey": 6.6,
+    "Extraction": 9.1,
+    "Construction": 14.0,
+    "Crafting": 15.7,
+    "Logistics": 6.6,
+    "Knowledge": 5.2,
+    "Administration": 4.8,
+    "Defense": 3.3
+   }
+  },
+  "artifacts": {
+   "_doc": "Mirror of the truth probe: headless worlds have no terrain route planning, so scouting parties never depart (scouting_status stays 'Staff will organize parties'); finds come only from the legendary set + 2 site pieces placed at day 400. A non-player actor's study role is set by ArtifactCollection.advance to 1 while anything is unstudied.",
+   "site": "good",
+   "scouting": 0.0,
+   "study_weight": 1,
+   "seed_finds_day": 400,
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "labor": {
+    "Food": 34.7,
+    "Survey": 6.6,
+    "Extraction": 9.1,
+    "Construction": 14.0,
+    "Crafting": 15.7,
+    "Logistics": 6.6,
+    "Knowledge": 5.2,
+    "Administration": 4.8,
+    "Defense": 3.3
+   },
+   "study_rule": "ai"
+  },
+  "balanced": {
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 2,
+    "health": 2,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 2,
+    "infrastructure": 2,
+    "logistics": 2,
+    "ecology": 2,
+    "institutions": 2,
+    "security": 2,
+    "culture": 2
+   },
+   "labor": {
+    "Food": 34.7,
+    "Survey": 6.6,
+    "Extraction": 9.1,
+    "Construction": 14.0,
+    "Crafting": 15.7,
+    "Logistics": 6.6,
+    "Knowledge": 5.2,
+    "Administration": 4.8,
+    "Defense": 3.3
+   }
+  },
+  "scouting": {
+   "site": "good",
+   "scouting": 0.05,
+   "study_weight": 2,
+   "research": {
+    "demography": 2,
+    "nutrition": 2,
+    "health": 2,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 2,
+    "infrastructure": 2,
+    "logistics": 2,
+    "ecology": 2,
+    "institutions": 2,
+    "security": 2,
+    "culture": 2
+   },
+   "labor": {
+    "Food": 34.7,
+    "Survey": 6.6,
+    "Extraction": 9.1,
+    "Construction": 14.0,
+    "Crafting": 15.7,
+    "Logistics": 6.6,
+    "Knowledge": 5.2,
+    "Administration": 4.8,
+    "Defense": 3.3
+   }
+  },
+  "rc_research": {
+   "_doc": "tests/research_600_campaign_probe.gd 'research' scenario (differs from truth_probe 'research').",
+   "site": "good",
+   "focus": "research",
+   "research": {
+    "demography": 3,
+    "nutrition": 4,
+    "health": 4,
+    "labor": 3,
+    "knowledge": 6,
+    "production": 4,
+    "infrastructure": 3,
+    "logistics": 3,
+    "ecology": 2,
+    "institutions": 3,
+    "security": 2,
+    "culture": 2
+   },
+   "labor": {
+    "Food": 33.0,
+    "Survey": 10.3,
+    "Extraction": 8.7,
+    "Construction": 8.7,
+    "Crafting": 5.5,
+    "Logistics": 6.3,
+    "Knowledge": 17.6,
+    "Administration": 6.9,
+    "Defense": 3.2
+   }
+  }
+ },
+ "generated": {
+  "max_line": {
+   "_doc": "max_<line> for each of the 12 lines: that line at 12, others 0, sensible good-site play otherwise.",
+   "site": "good",
+   "weight": 12,
+   "labor": {
+    "Food": 34.7,
+    "Survey": 6.6,
+    "Extraction": 9.1,
+    "Construction": 14.0,
+    "Crafting": 15.7,
+    "Logistics": 6.6,
+    "Knowledge": 5.2,
+    "Administration": 4.8,
+    "Defense": 3.3
+   }
+  }
+ },
+ "_labor_doc": "'labor' = delegated role mix measured in the truth runs (auto focus + 'makers' ambition bias + leader skills); Food still rises through the survival guard when stores run short."
+}

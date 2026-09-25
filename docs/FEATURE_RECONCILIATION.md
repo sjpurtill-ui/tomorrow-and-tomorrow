@@ -2552,3 +2552,25 @@ Probes and suites:
 - test_government_people_system fails the same cases as the base.
 
 Save data sits under ForeignDiplomacy.audiences.court_persons; older saves load with it empty.
+
+### Research 0–600 overhaul and era-anchored balance (main)
+
+Fast-forwarded `codex/research-600` (776ef19f, with main 55521645 already merged in).
+
+What changed:
+- **Research catalogue.** Years 0–600 now draw on the 12-line research design: 1,122 items, with dependencies, effects and art. The loader is `scripts/research_600_catalog.gd`, the data is `data/research/research_600.json`, the effects are in `data/research/effects/`, and there are 182 paintings.
+- **Pacing.** Early research is paced to history: no year-16 bookbinding, iron from about year 660. Outcomes are held to the era through ceilings on what research can deliver, a carrying capacity, opportunity costs for research, specialist upkeep, era mortality, and a floor under a remnant band's survival.
+- **Named deaths.** A named person's death now replaces an expected death instead of adding one.
+- **Surrogate simulation.** `tools/sim` gains a Python surrogate with calibration, a line-max matrix and a strategy sweep, plus opt-in epochal shocks and civ emergence (`--shocks`).
+
+Results:
+- **Headless engine runs.**
+  - Sensible play reaches 150 people at year 100 and 448 at year 200, with life expectancy around 29 and infant mortality around 215.
+  - Research-heavy play reaches 298 people at year 150.
+  - Poor play stagnates at 25–45 people.
+- **Milestones.** 14 of 15 land inside their design bands. The written law code needs four settlements and never appears in the probes.
+- **Surrogate sweep.** 295 strategies were run. None dominates, and 1,610 of 1,770 strategy-centuries pass their focus benchmarks.
+
+Tests. test_research_600, test_early_life_conditions, test_research_visual_atlas and test_artifact_culture pass. early_consequences, responsive_decree, court, court_commands, court_summon and research_art_600 probes pass. Remaining suite failures match baseline.
+
+Known issues. The poor scenario sits near the minimum band and still has some death excess that isn't explained. The surrogate lacks scout losses. Later research blocks (600–3000), scout survival and civic evolution live on separate branches and are not yet in main.

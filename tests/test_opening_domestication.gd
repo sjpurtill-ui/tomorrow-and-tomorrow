@@ -3,6 +3,13 @@ extends GdUnitTestSuite
 const Opportunities=preload("res://scripts/opening_opportunities.gd")
 const Craft=preload("res://scripts/civilian_goods.gd")
 
+## research_600 balance: magnitudes come from the rebalanced catalog entries,
+## weighted by their operating factor and held under the era ceiling.
+func expected_effect(key:String,ids:Array[String],factor:float=-1.0)->float:
+	var total:=0.0
+	for id:String in ids:total+=float((DiscoverySystem.discovery_definition(id).get("effects",{}) as Dictionary).get(key,0.0))*(Craft.factor(id) if factor<0.0 else factor)
+	return minf(total,DiscoverySystem.society_model.era_ceiling(key).y)
+
 func before_test()->void:
 	WorldSimulation.clear()
 	GameState.reset_for_new_world(6421);DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
@@ -68,7 +75,8 @@ func test_animal_knowledge_has_no_effect_without_a_living_herd()->void:
 	advance(0,1)
 	DiscoverySystem.refresh_operating_effects()
 	assert_float(Craft.factor("animal_taming")).is_equal(1.0)
-	assert_float(DiscoverySystem.effect("food_output")).is_equal_approx(.004,.000001)
+	assert_float(DiscoverySystem.effect("food_output")).is_equal_approx(expected_effect("food_output",["animal_taming"]),.000001)
+	assert_float(DiscoverySystem.effect("food_output")).is_greater(0.0)
 	GameState.resource_deposits.clear();advance(1,1)
 	assert_float(Craft.factor("animal_taming")).is_equal(1.0)
 	GameState.food_stocks["Fresh food"]=0.0;GameState.food_stocks["Stored food"]=0.0;advance(2,1)

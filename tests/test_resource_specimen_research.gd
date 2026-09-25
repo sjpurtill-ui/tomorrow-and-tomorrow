@@ -14,9 +14,10 @@ func sample(subject:String)->Dictionary:
 func test_studied_foreign_ore_supports_assay_without_inventing_a_local_mine()->void:
 	var item:=sample("ore_assaying")
 	assert_bool(E.valid_item(item)).is_true()
-	GameState.known_discoveries.assign(["kiln_control","standard_measures"])
+	GameState.known_discoveries.assign(["kiln_control","standard_measures","native_copper_working"])
 	var entry:=DiscoverySystem.discovery_definition("ore_assaying")
-	assert_bool(DiscoverySystem._discovery_is_eligible(entry,10)).is_true()
+	# Evaluated once the 600-year design's age for assaying has come.
+	assert_bool(DiscoverySystem._discovery_is_eligible(entry,int(ceil(DiscoverySystem.research_600_earliest_year(entry)*365.0)))).is_true()
 	assert_array(GameState.resource_deposits).is_empty()
 	assert_dict(GameState.resource_stockpiles).is_empty()
 	assert_bool("ore_assaying" in GameState.known_discoveries).is_false()

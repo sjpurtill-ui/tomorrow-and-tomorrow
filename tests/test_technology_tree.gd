@@ -16,7 +16,9 @@ func test_playable_tree_is_finite_unique_and_has_every_domain()->void:
 		domains[String(entry.dynamic)]=true
 		assert_bool(bool(entry.get("frontier",false))).is_false()
 		for parent in entry.get("requires",[]): assert_bool(DiscoverySystem.catalog_by_id.has(String(parent))).is_true()
-		assert_int(DiscoverySystem.technology_depth(String(entry.id))).is_less(30)
+		# The 600-year design adds long, deliberate early chains (e.g. 17 links to
+		# scale armor); later catalog entries build on top of them.
+		assert_int(DiscoverySystem.technology_depth(String(entry.id))).is_less(48)
 	assert_int(ids.size()).is_greater(100)
 	assert_int(domains.size()).is_equal(12)
 func test_legacy_refinements_cannot_be_researched_again()->void:
@@ -54,7 +56,9 @@ func test_rival_paths_differ_but_only_choose_viable_technologies()->void:
 		for entry in DiscoverySystem.rival_research_candidates(civ,"production"): assert_bool(String(entry.id)=="bronze_alloying").is_false()
 	assert_int(choices.size()).is_greater(1)
 func test_explicit_target_preserves_unfinished_progress()->void:
-	GameState.elapsed_days=1000.0
+	# Once tallies' design age has come (research_600 era gate).
+	GameState.elapsed_days=maxf(1000.0,ceil(DiscoverySystem.research_600_earliest_year(DiscoverySystem.discovery_definition("tallies"))*365.0))
+	GameState.known_discoveries.append("counting_words") # 600-year design foundation of tallies
 	preload("res://scripts/opening_opportunities.gd").record("tallies",1000.0)
 	GameState.discovery_progress["tallies"]=0.43
 	assert_bool(bool(DiscoverySystem.select_research_target("tallies").ok)).is_true()

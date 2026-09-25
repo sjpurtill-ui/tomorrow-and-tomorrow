@@ -33,9 +33,8 @@ func test_fire_is_first_preserved_then_deliberately_recreated()->void:
 	assert_bool(Paths.ready(DiscoverySystem.discovery_definition("friction_fire_ignition"),0)).is_false()
 	assert_bool(Paths.ready(DiscoverySystem.discovery_definition("percussion_fire_ignition"),0)).is_false()
 	GameState.known_discoveries.append("ember_tending")
+	# 600-year design: both deliberate ignitions follow preserved fire directly.
 	assert_bool(Paths.ready(DiscoverySystem.discovery_definition("friction_fire_ignition"),0)).is_true()
-	assert_bool(Paths.ready(DiscoverySystem.discovery_definition("percussion_fire_ignition"),0)).is_false()
-	GameState.known_discoveries.append("stone_sorting")
 	assert_bool(Paths.ready(DiscoverySystem.discovery_definition("percussion_fire_ignition"),0)).is_true()
 
 func test_cooking_and_charcoal_cannot_precede_a_controlled_hearth()->void:
@@ -44,6 +43,9 @@ func test_cooking_and_charcoal_cannot_precede_a_controlled_hearth()->void:
 	assert_bool(Paths.ready(DiscoverySystem.discovery_definition("charcoal"),0)).is_false()
 	GameState.known_discoveries.append("hearth_heat_retention")
 	assert_bool(Paths.ready(DiscoverySystem.discovery_definition("hearth_roasting_control"),0)).is_true()
+	# 600-year design: charcoal is learned from earth-oven cooking over a kept hearth.
+	assert_bool(Paths.ready(DiscoverySystem.discovery_definition("charcoal"),0)).is_false()
+	GameState.known_discoveries.append("earth_oven_cooking")
 	assert_bool(Paths.ready(DiscoverySystem.discovery_definition("charcoal"),0)).is_true()
 
 func test_preservation_and_ceramics_keep_branches_without_bypassing_fire()->void:
@@ -53,15 +55,18 @@ func test_preservation_and_ceramics_keep_branches_without_bypassing_fire()->void
 	assert_bool(Paths.ready(smoking,0)).is_false()
 	assert_bool(Paths.ready(firing,0)).is_false()
 	GameState.known_discoveries.append("hearth_heat_retention")
-	assert_bool(Paths.ready(smoking,0)).is_true()
+	# 600-year design: smoking also rests on tended embers; firing on the kept hearth.
+	assert_bool(Paths.ready(smoking,0)).is_false()
 	assert_bool(Paths.ready(firing,0)).is_true()
+	GameState.known_discoveries.append("ember_tending")
+	assert_bool(Paths.ready(smoking,0)).is_true()
 	assert_str(String(Paths.chosen(smoking,0).id)).is_equal("local")
 	assert_str(String(Paths.chosen(firing,0).id)).is_equal("experimental")
 	GameState.known_discoveries.erase("food_drying")
 	GameState.known_discoveries.append("charcoal")
-	assert_bool(Paths.ready(smoking,0)).is_true()
+	# Charcoal remains an optional approach; it no longer replaces food drying.
+	assert_bool(Paths.ready(smoking,0)).is_false()
 	assert_bool(Paths.ready(firing,0)).is_true()
-	assert_str(String(Paths.chosen(smoking,0).id)).is_equal("charcoal")
 	assert_str(String(Paths.chosen(firing,0).id)).is_equal("local")
 
 func test_opening_fire_repairs_leave_the_live_graph_reachable()->void:

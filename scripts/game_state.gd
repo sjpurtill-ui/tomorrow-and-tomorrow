@@ -130,6 +130,8 @@ var research_notification_mode:="milestones"
 var discovery_log: Array[Dictionary] = []
 var active_observations: Array[String] = []
 var research_targets:Dictionary={}
+## Accumulated scholarship in game-year equivalents; -1 until established.
+var scholarship_level:=-1.0
 var active_investigations:Dictionary={}
 var discovery_progress:Dictionary={}
 var population_allocations := {"Food": 30, "Survey": 6, "Extraction": 8, "Construction": 8, "Crafting": 5, "Logistics": 5, "Knowledge": 4, "Administration": 3, "Defense": 3}
@@ -480,6 +482,7 @@ func reset_for_new_world(new_seed:int)->void:
 	discovery_log=[]
 	active_observations=[]
 	research_targets={}
+	scholarship_level=-1.0
 	active_investigations={}
 	discovery_progress={}
 	population_allocations={"Food":30,"Survey":6,"Extraction":8,"Construction":8,"Crafting":5,"Logistics":5,"Knowledge":4,"Administration":3,"Defense":3}
@@ -804,7 +807,9 @@ func _conception_condition_factor(context:Dictionary) -> float:
 	var food:=clampf(float(context.get("food_security",food_security)),0.0,1.0)
 	var housing:=clampf(float(context.get("housing_ratio",0.5)),0.0,1.0)
 	var cohesion:=clampf(float(context.get("cohesion",0.58)),0.0,1.0)
-	var factor:=lerpf(0.12,1.08,health)*lerpf(0.10,1.05,food)*lerpf(0.55,1.03,housing)*lerpf(0.82,1.04,cohesion)
+	# research_600 balance: chronic shortfall lowers conception less than famine
+	# does (sqrt response), so a hungry pre-modern society shrinks, not vanishes.
+	var factor:=lerpf(0.12,1.08,health)*lerpf(0.10,1.05,sqrt(food))*lerpf(0.55,1.03,housing)*lerpf(0.82,1.04,cohesion)
 	if bool(context.get("traveling",false)): factor*=0.62
 	if bool(context.get("birth_crisis",false)): factor*=0.06
 	factor*=1.0+clampf(float(context.get("conception_support",0.0)),-0.30,0.30)

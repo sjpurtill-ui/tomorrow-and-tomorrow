@@ -6,6 +6,13 @@ const SettlementModelScript=preload("res://scripts/settlement_model.gd")
 
 var model:Node
 
+## research_600 balance: magnitudes come from the rebalanced catalog entries,
+## weighted by their operating factor and held under the era ceiling.
+func expected_effect(key:String,ids:Array[String],factor:float=-1.0)->float:
+	var total:=0.0
+	for id:String in ids:total+=float((DiscoverySystem.discovery_definition(id).get("effects",{}) as Dictionary).get(key,0.0))*(Craft.factor(id) if factor<0.0 else factor)
+	return minf(total,DiscoverySystem.society_model.era_ceiling(key).y)
+
 func before_test()->void:
 	WorldSimulation.clear()
 	GameState.reset_for_new_world(8713)
@@ -97,8 +104,9 @@ func test_completed_staffed_hall_activates_bounded_effects()->void:
 	DiscoverySystem.refresh_operating_effects()
 	var coverage:=Craft.factor("framed_construction")
 	assert_float(coverage).is_between(0.50,1.0)
-	assert_float(DiscoverySystem.effect("housing_output")).is_equal_approx(0.10*coverage,0.000001)
-	assert_float(DiscoverySystem.effect("construction_rate")).is_equal_approx(0.08*coverage,0.000001)
+	assert_float(DiscoverySystem.effect("housing_output")).is_equal_approx(expected_effect("housing_output",["framed_construction"],coverage),0.000001)
+	assert_float(DiscoverySystem.effect("construction_rate")).is_equal_approx(expected_effect("construction_rate",["framed_construction"],coverage),0.000001)
+	assert_float(DiscoverySystem.effect("housing_output")).is_greater(0.0)
 
 func test_hall_condition_and_builder_withdrawal_scale_or_end_operation()->void:
 	assert_dict(_build_hall()).is_not_empty()
@@ -106,7 +114,8 @@ func test_hall_condition_and_builder_withdrawal_scale_or_end_operation()->void:
 	SettlementModel.city_form().condition=0.40
 	DiscoverySystem.refresh_operating_effects()
 	assert_float(Craft.factor("framed_construction")).is_equal_approx(0.40,0.000001)
-	assert_float(DiscoverySystem.effect("disaster_resilience")).is_equal_approx(0.012,0.000001)
+	assert_float(DiscoverySystem.effect("disaster_resilience")).is_equal_approx(expected_effect("disaster_resilience",["framed_construction"],0.40),0.000001)
+	assert_float(DiscoverySystem.effect("disaster_resilience")).is_greater(0.0)
 	GameState.population_allocations.Construction=0
 	DiscoverySystem.refresh_operating_effects()
 	assert_float(Craft.factor("framed_construction")).is_equal(0.0)

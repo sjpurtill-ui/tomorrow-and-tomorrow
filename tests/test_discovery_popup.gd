@@ -27,8 +27,11 @@ func test_new_discoveries_queue_once_without_pausing_simulation()->void:
 func test_popup_uses_actual_signed_effects_and_labels_tradeoffs()->void:
 	var f:=fixture();var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"food_drying","day":12,"name":"Obsolete name","effects":{"made_up_effect":1}}])
 	assert_str(popup.heading.text).is_equal("Food Drying")
-	assert_str(popup.effect_cards.food_storage.value.text).is_equal("+10%")
-	assert_str(popup.effect_cards.food_spoilage.value.text).is_equal("−10%")
+	# research_600 balance: magnitudes come from the rebalanced catalog entry.
+	var drying:Dictionary=DiscoverySystem.discovery_definition("food_drying").effects
+	assert_str(popup.effect_cards.food_storage.value.text).is_equal(DiscoveryPopup.percent(float(drying.food_storage)))
+	assert_str(popup.effect_cards.food_spoilage.value.text).is_equal(DiscoveryPopup.percent(float(drying.food_spoilage)))
+	assert_str(popup.effect_cards.food_spoilage.value.text).starts_with("−")
 	assert_bool(popup.effect_cards.food_spoilage.beneficial).is_true()
 	assert_bool(popup.effect_cards.labor_demand.beneficial).is_false()
 	assert_bool(popup.effect_cards.has("made_up_effect")).is_false()
@@ -69,8 +72,9 @@ func test_stone_selection_has_its_own_art_and_original_effects()->void:
 	assert_str(popup.heading.text).is_equal("Stone Selection")
 	assert_str(Art.source_texture(popup.hero.texture).resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")
 	assert_object(popup.hero.get_node_or_null("FieldIllustrationCaption")).is_null()
-	assert_str(popup.effect_cards.survey_speed.value.text).is_equal("+3%")
-	assert_str(popup.effect_cards.tool_quality.value.text).is_equal("+4%")
+	var sorting:Dictionary=DiscoverySystem.discovery_definition("stone_sorting").effects
+	assert_str(popup.effect_cards.survey_speed.value.text).is_equal(DiscoveryPopup.percent(float(sorting.survey_speed)))
+	assert_str(popup.effect_cards.tool_quality.value.text).is_equal(DiscoveryPopup.percent(float(sorting.tool_quality)))
 	popup.close()
 func test_subject_art_is_specific_and_hidden_questions_do_not_reveal_it()->void:
 	var Art=preload("res://scripts/hud/research_visuals.gd")

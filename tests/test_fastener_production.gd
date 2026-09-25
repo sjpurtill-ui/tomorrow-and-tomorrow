@@ -19,13 +19,14 @@ func test_thread_methods_reconverge_but_keep_shared_measurement_and_nut_foundati
 	WorldSimulation.scoped("fasteners",func()->void:
 		setup();var state=WorldSimulation.state;var discovery=WorldSimulation.discovery
 		var entry:=discovery.discovery_definition("matched_thread_inspection")
+		var day:=int(ceil(discovery.research_600_earliest_year(entry)*365.0)) # once its era has come
 		state.known_discoveries.erase("matched_thread_inspection")
 		state.known_discoveries.erase("external_thread_cutting");state.known_discoveries.erase("bolt_thread_rolling")
-		assert_bool(discovery._discovery_is_eligible(entry,0)).is_false()
-		state.known_discoveries.append("external_thread_cutting");assert_bool(discovery._discovery_is_eligible(entry,0)).is_true()
+		assert_bool(discovery._discovery_is_eligible(entry,day)).is_false()
+		state.known_discoveries.append("external_thread_cutting");assert_bool(discovery._discovery_is_eligible(entry,day)).is_true()
 		state.known_discoveries.erase("external_thread_cutting");state.known_discoveries.append("bolt_thread_rolling")
-		assert_bool(discovery._discovery_is_eligible(entry,0)).is_true()
-		state.known_discoveries.erase("thread_pitch_gauging");assert_bool(discovery._discovery_is_eligible(entry,0)).is_false()
+		assert_bool(discovery._discovery_is_eligible(entry,day)).is_true()
+		state.known_discoveries.erase("thread_pitch_gauging");assert_bool(discovery._discovery_is_eligible(entry,day)).is_false()
 		assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(K.entries(),discovery.technology_catalog)).is_empty()
 	)
 
