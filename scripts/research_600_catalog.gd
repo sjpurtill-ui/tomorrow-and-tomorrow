@@ -82,6 +82,11 @@ const STALE_ABANDON:=4.0
 ## only with spare attention, so a society with little to spare never learns
 ## many of them (they are abandoned once superseded).
 const DEAD_END_PENALTY:=200.0
+## Share of the registry's dead ends (outside key thresholds) a given world's
+## people ever meet: which dead-end practices a society encounters depends on its
+## land and history, so each world offers a seeded subset (DiscoverySystem
+## _path_is_viable). Key thresholds and every foundation stay open everywhere.
+const DEAD_END_VIABLE:=0.5
 static var _relevance:Dictionary={}
 ## Keys the design governs; Phase 2 effect files cannot override them.
 const PROTECTED_KEYS:=["id","dynamic","direction","requires","requires_all","requires_any","learning_routes","day","chance","research_600","earliest_year","design_year","precedents","conditions"]
@@ -300,6 +305,13 @@ static func deferred(id:String,society_era:float)->bool:
 	var relevance:=relevance_year(id)
 	if relevance<0.0: return false
 	return dead_end(id) or society_era-relevance>STALE_GRACE
+
+
+## research_3000: whether registry item `id` is among the dead ends this world
+## offers (`draw` is the world's 0..1 draw for the item).
+static func dead_end_offered(id:String,draw:float)->bool:
+	if not dead_end(id) or bool(item(id).get("key_threshold",false)): return true
+	return draw<DEAD_END_VIABLE
 
 
 ## research_3000: false once registry item `id` is abandoned as superseded.

@@ -561,6 +561,9 @@ func _path_is_viable(discovery:Dictionary,civilization_seed:int=0)->bool:
 	# Old generated maturity/lens entries remain readable for saved bonuses and
 	# history, but are retired from both player and rival research pools.
 	if bool(discovery.get("frontier",false)): return false
+	# research_3000: each world offers a seeded subset of the registry's dead ends.
+	var id:=String(discovery.get("id",""))
+	if Research600.has(id) and not Research600.dead_end_offered(id,_research_draw(id,civilization_seed if civilization_seed!=0 else int(WorldSimulation.state.world_seed),"dead_end")): return false
 	return true
 
 func _legacy_path_was_viable(discovery:Dictionary,civilization_seed:int=0)->bool:

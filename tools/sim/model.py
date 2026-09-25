@@ -88,7 +88,7 @@ FERTILITY_TRANSITION = "context.get(\"fertility_transition\"" in g.source("scrip
 PARALLEL = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True))
             for k in ("PARALLEL_POPULATION_REF", "PARALLEL_PER_DECADE", "PARALLEL_LITERACY")}
 # Research600.stale_factor (research_3000): superseded registry items.
-STALE = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True)) for k in ("STALE_GRACE", "STALE_DOUBLING", "STALE_ABANDON", "DEAD_END_PENALTY")}
+STALE = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True)) for k in ("STALE_GRACE", "STALE_DOUBLING", "STALE_ABANDON", "DEAD_END_PENALTY", "DEAD_END_VIABLE")}
 # FoodSystem technique levers and AgronomyKnowledge.factors (engine features the
 # 0-600 surrogate left out; they matter once fertilizer and breeding arrive).
 FOOD_TECHNIQUES = g.const("scripts/food_system.gd", "TECHNIQUES", default={}, optional=True)
@@ -204,6 +204,13 @@ class Surrogate:
         self.parallel_k = {**PARALLEL, **(params.get("tune_parallel") or {})}
         self.stale_k = {**STALE, **(params.get("tune_stale") or {})}
         self.relevance = np.where(cat.design_year >= 0, cat.design_year, -1.0) if params.get("tune_relevance") == "own" else cat.relevance_year
+        # Research600.dead_end_offered (research_3000): this world's seeded subset of
+        # dead ends (key thresholds and foundations always open).
+        self.offered = np.ones(n, dtype=bool)
+        if self.stale_k.get("DEAD_END_VIABLE"):
+            dead = cat.registry & (cat.relevance_year >= 0) & (cat.relevance_year <= cat.design_year + 0.5) & ~cat.key_threshold
+            draw = np.random.default_rng((seed * 2654435761 + 97) & 0xFFFFFFFF).random(n)
+            self.offered = ~dead | (draw < self.stale_k["DEAD_END_VIABLE"])
         if line_scale:
             scale = np.array([float(line_scale.get(line, 1.0)) for line in gd.LINES])[cat.line]
             self.E = cat.E * scale[:, None]
@@ -1190,7 +1197,7 @@ class Surrogate:
         staffing = clamp(min(researchers_total / 6.0, researchers_total / pop / 0.03), 0.0, 1.0)
         rate = (0.45 + 0.55 * staffing) * lerp(0.85, 1.2, self.education) * lerp(0.7, 1.0, self.food_security)
         self.scholarship += rate * days / YEAR
-        open_mask = self.ready & self.cond_ok & (cat.earliest <= year) & cat.channel_staffable[cat.channel]
+        open_mask = self.ready & self.cond_ok & (cat.earliest <= year) & cat.channel_staffable[cat.channel] & self.offered
         if self.stale_k.get("STALE_ABANDON"):
             # Research600.pursued (research_3000): superseded practices are abandoned.
             k = self.stale_k
