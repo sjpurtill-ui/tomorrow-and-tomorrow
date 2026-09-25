@@ -38,6 +38,8 @@ const FIGURE_MAX_VIEW:=2.2         ## camera.size (km) beyond which figures are 
 const SMOKE_MAX_VIEW:=6.5
 const OPENING_ALTITUDE_M:=200.0
 const WALK_MPS:=4.2                ## a brisk, time-lapsed walk
+const HEIGHT_CELL:=0.003           ## 3 m ground-height lattice for walking figures
+const HEIGHT_CACHE_MAX:=6000
 const POSES:={"walk":0,"gather":1,"chop":2,"fish":3,"fire":4,"talk":5,"mourn":6,"watch":7,"craft":8}
 ## What each labour role looks like when a representative does it.
 const ROLE_ACTIVITY:={"Survey":"survey","Extraction":"haul","Construction":"build","Crafting":"craft","Logistics":"carry","Knowledge":"fire","Administration":"council","Defense":"watch"}
@@ -85,6 +87,9 @@ var frame_usec:=0.0
 var day_usec:=0.0
 var smoke_signature:=""
 var relocated:=false
+var height_cache:Dictionary={}
+var land_signature:=""
+var land_spots:Dictionary={}
 
 # --------------------------------------------------------------------------
 # Hooks called by the map (two lines in local_terrain.gd)
@@ -164,6 +169,7 @@ func _day()->void:
 		position=anchor
 		site_signature=""
 		relocated=true
+		height_cache.clear()
 		for worker in workers: worker.erase("slot")
 	# On the march nobody goes out to work: the column needs no work sites.
 	if not settled and bool(terrain.get("travel_active")):
@@ -233,17 +239,24 @@ func _refresh_site()->void:
 			homes.append(Vector2(cos(a),sin(a))*(0.014+0.004*float(i%3)))
 	for i in mini(MAX_PLUMES-1,homes.size()): chimneys.append(homes[i])
 	var center:=Vector2(anchor.x,anchor.z)
-	var woods:=_ring_spots(center,[0.07,0.12,0.18],"woodland",6)
-	var open:=_ring_spots(center,[0.06,0.10,0.15],"open",6)
-	spots["gather"]=woods if not woods.is_empty() else open
-	spots["haul"]=_ring_spots(center,[0.10,0.16,0.22],"woodland",4)
-	if (spots.haul as Array).is_empty(): spots["haul"]=spots.gather
-	spots["hunt"]=_ring_spots(center,[0.24,0.30],"open",4)
-	spots["survey"]=_ring_spots(center,[0.32,0.38],"open",4)
-	spots["watch"]=_ring_spots(center,[0.07,0.085],"open",6)
-	spots["fish"]=_water_spots(center)
-	if (spots.fish as Array).is_empty(): spots["fish"]=spots.gather
-	spots["farm"]=fields if not fields.is_empty() else open
+	var land_key:="%s" % anchor
+	if land_key!=land_signature:
+		# The land around a site does not move: sample it once per site.
+		land_signature=land_key
+		var woods:=_ring_spots(center,[0.07,0.12,0.18],"woodland",6)
+		var open:=_ring_spots(center,[0.06,0.10,0.15],"open",6)
+		land_spots={"gather":woods if not woods.is_empty() else open,"open":open}
+		land_spots["haul"]=_ring_spots(center,[0.10,0.16,0.22],"woodland",4)
+		if (land_spots.haul as Array).is_empty(): land_spots["haul"]=land_spots.gather
+		land_spots["hunt"]=_ring_spots(center,[0.24,0.30],"open",4)
+		land_spots["survey"]=_ring_spots(center,[0.32,0.38],"open",4)
+		land_spots["watch"]=_ring_spots(center,[0.07,0.085],"open",6)
+		land_spots["fish"]=_water_spots(center)
+		if (land_spots.fish as Array).is_empty(): land_spots["fish"]=land_spots.gather
+		burial=_burial_ground(center)
+		_place_hearth()
+	for key in land_spots: spots[key]=land_spots[key]
+	spots["farm"]=fields if not fields.is_empty() else land_spots.open
 	spots["build"]=builds if not builds.is_empty() else homes.slice(0,4)
 	spots["craft"]=workshops if not workshops.is_empty() else homes.slice(0,3)
 	spots["carry"]=stores if not stores.is_empty() else [Vector2(0.006,-0.004)]
@@ -251,8 +264,6 @@ func _refresh_site()->void:
 	for i in 6: ring.append(Vector2(cos(float(i)*TAU/6.0),sin(float(i)*TAU/6.0))*0.0045)
 	spots["fire"]=ring
 	spots["council"]=ring
-	burial=_burial_ground(center)
-	_place_hearth()
 	if relocated:
 		# New ground: everyone sets out again from a home here.
 		relocated=false
@@ -430,11 +441,27 @@ func _set_path(worker:Dictionary,from:Vector2,to:Vector2)->void:
 	worker["dur"]=maxf(0.6,from.distance_to(to)/(WALK_MPS*UNIT*_pace()))
 
 func _local_height(local:Vector2)->float:
-	var world:=Vector2(anchor.x,anchor.z)+local
+	## Ground height under a figure, relative to the anchor. The rendered-surface
+	## sample costs a few hundred microseconds, so corners of a 3 m lattice are
+	## sampled once per site and interpolated: people walk the same paths daily.
+	var cell:=local/HEIGHT_CELL
+	var base:=Vector2i(floori(cell.x),floori(cell.y))
+	var f:=cell-Vector2(base)
+	var a:=_corner_height(base)
+	var b:=_corner_height(base+Vector2i(1,0))
+	var c:=_corner_height(base+Vector2i(0,1))
+	var d:=_corner_height(base+Vector2i(1,1))
+	return lerpf(lerpf(a,b,f.x),lerpf(c,d,f.x),f.y)+0.00012
+
+func _corner_height(corner:Vector2i)->float:
+	if height_cache.has(corner): return float(height_cache[corner])
+	if height_cache.size()>=HEIGHT_CACHE_MAX: height_cache.clear()
+	var world:=Vector2(anchor.x,anchor.z)+Vector2(corner)*HEIGHT_CELL
 	var h:=anchor.y
 	if terrain.has_method("_harvest_ground_height_at"): h=float(terrain.call("_harvest_ground_height_at",world))
 	elif terrain.has_method("_height_at"): h=float(terrain.call("_height_at",world.x,world.y))
-	return h-anchor.y+0.00012
+	height_cache[corner]=h-anchor.y
+	return h-anchor.y
 
 func _pace()->float:
 	if terrain==null: return 1.0
@@ -510,14 +537,17 @@ func _frame(delta:float)->void:
 	# The camp fire burns whenever the people stop, and at the settled hearth.
 	hearth_root.visible=size<=SMOKE_MAX_VIEW and near and not traveling
 	smoke_mm.visible=smoke_mm.visible and not traveling
-	if paused: return
-	for worker in workers:
-		if not traveling: _advance_worker(worker,delta)
-	_advance_events(delta)
-	_advance_flares(delta)
-	if flame and hearth_root.visible:
-		flame.scale=Vector3(1.0,1.0+0.14*sin(_clock*9.0)+0.07*sin(_clock*23.0),1.0)
+	if not paused:
+		for worker in workers:
+			if not traveling: _advance_worker(worker,delta)
+		_advance_events(delta)
+		_advance_flares(delta)
+		if flame and hearth_root.visible:
+			flame.scale=Vector3(1.0,1.0+0.14*sin(_clock*9.0)+0.07*sin(_clock*23.0),1.0)
+	# Paused, people hold still where they stand (the clock is stopped); they
+	# are still placed every visible frame, which costs a few microseconds.
 	if not figures_visible: return
+	var pace:=_pace()
 	var mm:=worker_mm.multimesh
 	for i in workers.size():
 		var worker:Dictionary=workers[i]
@@ -528,7 +558,7 @@ func _frame(delta:float)->void:
 		mm.set_instance_transform(i,_worker_transform(worker,traveling))
 		var pose:=POSES.walk if traveling else int(worker.pose)
 		var moving:=pose==POSES.walk
-		mm.set_instance_custom_data(i,Color(float(worker.phase),float(pose),1.0 if bool(worker.carry) or traveling else 0.0,_pace()*(1.0 if moving else 0.8)))
+		mm.set_instance_custom_data(i,Color(float(worker.phase),float(pose),1.0 if bool(worker.carry) or traveling else 0.0,pace*(1.0 if moving else 0.8)))
 	_draw_events()
 
 # --------------------------------------------------------------------------
@@ -717,11 +747,12 @@ func _advance_events(delta:float)->void:
 
 func _draw_events()->void:
 	var mm:=event_mm.multimesh
+	var pace:=_pace()
 	for i in events.size():
 		var walker:Dictionary=events[i]
 		var points:Array[Vector2]=walker.points
 		var heights:PackedFloat32Array=walker.heights
-		var distance:=maxf(0.0,float(walker.t))*WALK_MPS*UNIT*float(walker.pace)*_pace()
+		var distance:=maxf(0.0,float(walker.t))*WALK_MPS*UNIT*float(walker.pace)*pace
 		var at:=points[0]
 		var h:=heights[0]
 		var facing:=points[1]-points[0]
@@ -744,7 +775,7 @@ func _draw_events()->void:
 		mm.set_instance_transform(i,Transform3D(basis,Vector3(at.x,h,at.y)))
 		var pose:=int(walker.pose)
 		if arrived: pose=POSES.talk if String(walker.kind)=="party" else POSES.mourn+100
-		mm.set_instance_custom_data(i,Color(float(walker.phase),float(pose),1.0 if bool(walker.carry) and not arrived else 0.0,_pace()*float(walker.pace)))
+		mm.set_instance_custom_data(i,Color(float(walker.phase),float(pose),1.0 if bool(walker.carry) and not arrived else 0.0,pace*float(walker.pace)))
 		mm.set_instance_color(i,Color(0.24,0.22,0.21) if String(walker.kind)=="procession" else CLOTH[int(walker.cloth)])
 
 # --------------------------------------------------------------------------

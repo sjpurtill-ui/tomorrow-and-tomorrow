@@ -70,5 +70,7 @@ vec3 seasonal_terrain(vec3 base,float warmth,float rain,float amplitude,float la
 	float dusting=cold*snow_supply*sheltered*(1.0-woodland*0.6)*0.36*season_contrast;
 	float cover=clamp(max(snow*0.72,dusting)+hard_frost*0.20*mix(0.45,1.0,drift),0.0,0.76);
 	vec3 snow_colour=mix(vec3(0.66,0.69,0.68),vec3(0.82,0.84,0.82),drift);
+	// With seasonal cues on, fresh snow reads clean and cold rather than beige.
+	snow_colour=mix(snow_colour,vec3(0.90,0.92,0.95),0.55*season_contrast);
 	return mix(dormant_ground,snow_colour,cover);
 }

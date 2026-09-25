@@ -61,10 +61,11 @@ func _ready()->void:
 	# A scout party goes out now so that it is home in the second year.
 	var sent:Dictionary=CivilizationSystem.dispatch_scouts(90)
 	results["scouts_sent"]=str(sent).left(300)
-	# 3. Year 2: high summer, then deep winter at this latitude.
+	# 3. Year 2 (days 365-729): its high summer and its deep winter at this
+	# latitude, in calendar order.
 	var center:=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
 	var summer:=_extreme_day(365,730,center,true)
-	var winter:=_extreme_day(summer,summer+365,center,false)
+	var winter:=_extreme_day(365,730,center,false)
 	results["summer_day"]=summer;results["winter_day"]=winter
 	results["hemisphere_z"]=center.y
 	# What the seasonal shader sees here: mean warmth, rain and the swing.
@@ -72,16 +73,16 @@ func _ready()->void:
 	var amplitude:=PlanetEnvironment.seasonality_at(center)
 	var mean:=lerpf(-6.0,28.0,float(climate.temperature))
 	results["shader_climate"]={"rain":snappedf(float(climate.precipitation),0.01),"mean_c":snappedf(mean,0.1),"amplitude_c":snappedf(amplitude,0.1),"summer_c":snappedf(mean+amplitude*PlanetEnvironment.season_wave({"position":center},float(summer)),0.1),"winter_c":snappedf(mean+amplitude*PlanetEnvironment.season_wave({"position":center},float(winter)),0.1)}
-	await _advance_to(summer)
-	await _look_at_hearth(OPENING_FEET)
-	await _shot("04-year2-summer-hearth-200m")
-	await _look_at_hearth(10000.0)
-	await _shot("05-year2-summer-10000ft")
-	await _advance_to(winter)
-	await _look_at_hearth(OPENING_FEET)
-	await _shot("06-year2-winter-hearth-200m")
-	await _look_at_hearth(10000.0)
-	await _shot("07-year2-winter-10000ft")
+	var stops:=[[summer,"summer"],[winter,"winter"]]
+	if winter<summer:stops.reverse()
+	var index:=4
+	for stop in stops:
+		await _advance_to(int(stop[0]))
+		await _look_at_hearth(OPENING_FEET)
+		await _shot("%02d-year2-%s-hearth-200m" % [index,String(stop[1])])
+		await _look_at_hearth(10000.0)
+		await _shot("%02d-year2-%s-10000ft" % [index+1,String(stop[1])])
+		index+=2
 	# 4. A scout return: send a short party and wait for it.
 	scout_back=-1
 	var again:Dictionary=CivilizationSystem.dispatch_scouts(30)
@@ -151,7 +152,7 @@ func _look_at_party()->void:
 				if String((walkers[i] as Dictionary).kind)!="party":continue
 				var local:Vector3=(layer.get("event_mm") as MultiMeshInstance3D).multimesh.get_instance_transform(i).origin
 				# Keep the hearth in the frame too: look a little toward home.
-				target=(layer as Node3D).position+local*0.7
+				target=(layer as Node3D).position+local*0.9
 				break
 		terrain._set_camera_target(Vector3(target.x,terrain._height_at(target.x,target.z),target.z))
 		terrain._update_camera()
