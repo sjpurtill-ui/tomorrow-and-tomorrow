@@ -1475,15 +1475,56 @@ const RIVAL_TEMPLATES:={
 	"spread":{"title":"Spread Their Hunting Grounds","phrase":"spread their hunting grounds toward ours","clashes":["reach","settle"]},
 }
 
-static func _rival_template(civ:Dictionary)->String:
+const RIVALS_PATH:="res://scripts/rival_rulers.gd"
+
+static func _rival_view(civ_id:String)->Dictionary:
+	## The ruler as a character (rival_rulers.gd rival_character): trait,
+	## grudges, debts, bonds and generation. {} when that module is absent.
+	if civ_id=="" or not ResourceLoader.exists(RIVALS_PATH): return {}
+	var view=(load(RIVALS_PATH) as GDScript).call("rival_character",civ_id)
+	return view if view is Dictionary else {}
+
+static func _rival_template(civ:Dictionary,view:Dictionary={})->String:
+	## What a ruler swears follows who they are: an unforgotten wrong makes them
+	## want us humbled, a marriage or alliance wants us bound, a hunter covets
+	## grounds. Without a character, the people's own temper decides.
 	var civ_id:=String(civ.get("id",""))
 	var p:=PERSONALITY.foreign(int(GameState.world_seed),civ_id)
 	var rel:Dictionary=civ.get("player_relation",{})
 	var tension:=float(rel.get("border_tension",0.0))
+	var opinion:=float(rel.get("opinion",0.0))
+	if not view.is_empty():
+		var grudges:=float(view.get("grudge_weight",0.0))
+		if grudges>=0.5: return "humble"
+		for b in view.get("bonds",[]):
+			if b is Dictionary and String(b.get("kind","")) in ["marriage","ally"]: return "bond"
+		var owed:=false
+		for d in view.get("debts",[]):
+			if d is Dictionary and String(d.get("owed_by",""))=="player": owed=true
+		match String(view.get("trait","")):
+			"grudge": if grudges>0.0 or tension>=0.2: return "humble"
+			"bluffer": if tension>=0.2 or float(p.assertiveness)>0.55: return "humble"
+			"ledger": if owed: return "humble"
+			"matchmaker": if opinion> -0.3: return "bond"
+			"hunter": return "spread"
+			"magpie": if float(p.openness)>0.5: return "spread"
 	if float(p.assertiveness)>0.55 and tension>=0.3: return "humble"
-	if float(p.empathy)>0.6 and float(rel.get("opinion",0.0))> -0.1: return "bond"
+	if float(p.empathy)>0.6 and opinion> -0.1: return "bond"
 	if float(p.openness)>0.6: return "spread"
 	return "outnumber"
+
+static func _rival_why(view:Dictionary,template:String)->String:
+	## The ruler's own reason, from what they remember of us.
+	if view.is_empty(): return ""
+	if template=="humble":
+		var best:={}
+		for g in view.get("grudges",[]):
+			if g is Dictionary and (best.is_empty() or float(g.weight)>float(best.weight)): best=g
+		if not best.is_empty(): return ("They have not forgotten %s." % String((load(RIVALS_PATH) as GDScript).call("narrate",String(best.text)))).substr(0,200)
+	if template=="bond":
+		for b in view.get("bonds",[]):
+			if b is Dictionary and String(b.get("kind","")) in ["marriage","ally"]: return ("They hold to %s." % String(b.text)).substr(0,200)
+	return ""
 
 static func _yields_to(civ_id:String,since:int)->int:
 	var n:=0
@@ -1504,7 +1545,8 @@ static func _rival_progress(r:Dictionary)->float:
 
 static func _new_rival_aim(civ:Dictionary,day:int)->Dictionary:
 	var civ_id:=String(civ.id)
-	var template:=_rival_template(civ)
+	var view:=_rival_view(civ_id)
+	var template:=_rival_template(civ,view)
 	var rng:=_rng("rival:%s:%d" % [civ_id,day])
 	var years:=rng.randi_range(8,14)
 	var r:={"civ_id":civ_id,"civ_name":String(civ.get("name","")).substr(0,60),"template":template,"title":String((RIVAL_TEMPLATES[template] as Dictionary).title),"phrase":String((RIVAL_TEMPLATES[template] as Dictionary).phrase),
@@ -1521,8 +1563,32 @@ static func _new_rival_aim(civ:Dictionary,day:int)->Dictionary:
 		"spread":
 			var t:=float(civ.get("territory",0.0)); r.baseline=t; r.target=t*1.15+0.001
 	var leader:=ForeignDiplomacy.leader(civ_id)
-	r["leader"]=String(leader.get("name","their chief")).substr(0,60)
+	r["leader"]=String(view.get("name","")) if String(view.get("name",""))!="" else String(leader.get("name","their chief"))
+	r.leader=String(r.leader).substr(0,60)
+	if not view.is_empty():
+		r["gen"]=int(view.get("generation",1)); r["trait"]=String(view.get("trait",""))
+		var why:=_rival_why(view,template)
+		if why!="": r["why"]=why
 	return r
+
+static func _rival_heir(r:Dictionary,view:Dictionary)->void:
+	## A vow outlives the ruler who swore it: when their child takes the seat,
+	## the child takes up the vow.
+	if view.is_empty(): return
+	var gen:=int(view.get("generation",1))
+	if not r.has("gen"):
+		r["gen"]=gen; r["trait"]=String(view.get("trait",""))
+		return
+	if gen<=int(r.gen): return
+	var old:=String(r.get("leader",""))
+	r.gen=gen; r["trait"]=String(view.get("trait",""))
+	r.leader=String(view.get("name",old)).substr(0,60)
+	r["heirs"]=int(r.get("heirs",0))+1
+	if bool(r.get("known",false)):
+		Chronicle.record({"key":"aim:rival:heir:%s:%d:%d" % [String(r.civ_id),int(r.start_day),gen],"title":"%s Keeps the Vow" % String(r.leader),
+			"text":"%s is gone, but %s of %s takes up what was sworn: to %s." % [old.get_slice(" ",0),String(r.leader),_the(String(r.civ_name)),String(r.phrase)],
+			"tier":"notice","kind":"contact","domain":"culture","ledger":true})
+	_log("rival_heir",String(r.title),{"civ":String(r.civ_name),"from":old,"to":String(r.leader)})
 
 static func _rivals(day:int)->void:
 	var s:=state()
@@ -1538,15 +1604,17 @@ static func _rivals(day:int)->void:
 			if rivals.size()>=RIVALS_MAX and not rivals.has(civ_id): continue
 			r=_new_rival_aim(civ,day)
 			rivals[civ_id]=r
-			_log("rival_aim",String(r.title),{"civ":String(r.civ_name)})
+			_log("rival_aim",String(r.title),{"civ":String(r.civ_name),"trait":String(r.get("trait",""))})
+		else: _rival_heir(r,_rival_view(civ_id))
 		# Learned from their envoy: anyone who came to court since the vow.
 		if not bool(r.get("known",false)):
 			for entry in Hall.ledger():
 				if String(entry.get("civ_id",""))==civ_id and int(entry.get("day",0))>=int(r.start_day):
 					r.known=true
 					var clash:=_clashes(r)
+					var why:=(" "+String(r.why)) if String(r.get("why",""))!="" else ""
 					Chronicle.record({"key":"aim:rival:known:%s:%d" % [civ_id,int(r.start_day)],"title":"What %s Has Sworn" % String(r.leader),
-						"text":"Their messenger let it slip: %s of %s has sworn to %s.%s" % [String(r.leader),_the(String(r.civ_name)),String(r.phrase),(" It crosses our own aim: %s." % String((s.active as Dictionary).get("title",""))) if clash else ""],
+						"text":"Their messenger let it slip: %s of %s has sworn to %s.%s%s" % [String(r.leader),_the(String(r.civ_name)),String(r.phrase),why,(" It crosses our own aim: %s." % String((s.active as Dictionary).get("title",""))) if clash else ""],
 						"tier":"notice","kind":"contact","domain":"culture","ledger":true})
 					_log("rival_known",String(r.title),{"civ":String(r.civ_name),"clash":clash})
 					break
@@ -1619,7 +1687,7 @@ static func board_model()->Dictionary:
 	for civ_id in s.rivals:
 		var r:Dictionary=s.rivals[civ_id]
 		if not bool(r.get("known",false)) or String(r.get("status",""))!="active": continue
-		(out.rivals as Array).append({"civ_id":String(civ_id),"civ_name":String(r.civ_name),"people":_the(String(r.civ_name)),"leader":String(r.leader),"title":String(r.title),"phrase":String(r.phrase),"progress":float(r.get("progress",0.0)),"clash":_clashes(r)})
+		(out.rivals as Array).append({"civ_id":String(civ_id),"civ_name":String(r.civ_name),"people":_the(String(r.civ_name)),"leader":String(r.leader),"title":String(r.title),"phrase":String(r.phrase),"progress":float(r.get("progress",0.0)),"clash":_clashes(r),"why":String(r.get("why","")),"heirs":int(r.get("heirs",0))})
 	for entry in s.legacies:
 		if (out.legacies as Array).size()>=4: break
 		(out.legacies as Array).append((entry as Dictionary).duplicate())

@@ -69,6 +69,7 @@ func _ready()->void:
 	_test_halfway()
 	_test_typed()
 	_test_rivals()
+	_test_rival_characters()
 	_test_save_and_visions()
 	_finish()
 
@@ -257,6 +258,43 @@ func _test_rivals()->void:
 	for t in _chronicle_titles(): told=told or t.begins_with("What ")
 	_check(told,"the Chronicle tells what the rival has sworn")
 	_check(not Aims.board_model().rivals.is_empty(),"the board shows known rival aims")
+
+func _test_rival_characters()->void:
+	## Vows follow the ruler as a character (rival_rulers.gd rival_character):
+	## an unforgotten wrong swears us humbled, and a vow passes to an heir.
+	const RIVALS_PATH:="res://scripts/rival_rulers.gd"
+	if not ResourceLoader.exists(RIVALS_PATH): return
+	var Rivals:=load(RIVALS_PATH) as GDScript
+	var rivals:Dictionary=Aims.state().rivals
+	# The heir of Varrow's ruler takes up the vow.
+	var vow:Dictionary=rivals.get("rival_b",{})
+	if not vow.is_empty() and String(vow.get("status",""))=="active":
+		var before:=String(vow.leader)
+		Rivals.call("_succeed","rival_b",int(GameState.elapsed_days))
+		var heir:=String((Rivals.call("rival_character","rival_b") as Dictionary).get("name",""))
+		_advance(int(GameState.elapsed_days)+31)
+		vow=rivals.get("rival_b",{})
+		_check(String(vow.get("leader",""))==heir and heir!=before,"the heir takes up the vow (%s -> %s, heir %s)" % [before,String(vow.get("leader","")),heir])
+		_check(int(vow.get("heirs",0))==1,"the vow records that it passed to an heir")
+		var kept:=false
+		for t in _chronicle_titles(): kept=kept or t.ends_with("Keeps the Vow")
+		_check(kept,"the Chronicle tells that the heir keeps the vow")
+		if kept: transcript.append("HEIR %s keeps the vow: %s" % [heir,String(vow.phrase)])
+	# A ruler who has not forgotten a wrong swears to make us yield.
+	var other:=""
+	for civ_id in rivals:
+		if String(civ_id)!="rival_b": other=String(civ_id); break
+	if other=="": _check(false,"a second rival people to test a grudge"); return
+	Rivals.call("grudge",other,"how you refused our gift and shamed our envoy",0.9,"probe")
+	var r:Dictionary=rivals[other]
+	r.status="failed"; r.rest_until=0
+	var day:=int(GameState.elapsed_days)
+	_advance(day+30-day%30+1)
+	r=rivals[other]
+	_check(String(r.get("template",""))=="humble","a grudge-bearing ruler swears to make us yield (%s)" % String(r.get("template","")))
+	_check(String(r.get("why","")).contains("not forgotten"),"the vow carries the ruler's own grievance (%s)" % String(r.get("why","")))
+	_check(String(r.get("trait",""))==String((Rivals.call("rival_character",other) as Dictionary).get("trait","")) and String(r.get("trait",""))!="","the vow records the ruler's trait")
+	if not String(r.get("why","")).is_empty(): transcript.append("GRUDGE %s: %s %s" % [String(r.leader),String(r.phrase),String(r.why)])
 
 func _test_save_and_visions()->void:
 	var save:=PeopleDirection.export_state()

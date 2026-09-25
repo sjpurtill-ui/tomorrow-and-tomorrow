@@ -65,8 +65,11 @@ func _build_aims()->void:
 	elif waiting!="":
 		Kit.serif(stack,"The people want an aim. Summon %s to hear it." % waiting,16,T.INK,true).name="AimWaiting"
 	for rival:Dictionary in rivals:
-		var row:=Kit.label(stack,"%s of %s has sworn to %s%s" % [String(rival.get("leader","")),String(rival.get("people","")),String(rival.get("phrase","")),(" (against our aim)" if bool(rival.get("clash",false)) else "")],12,T.TEXT_SOFT,false)
+		var row:=Kit.label(stack,"%s of %s has sworn to %s%s%s" % [String(rival.get("leader","")),String(rival.get("people","")),String(rival.get("phrase","")),(", as the ruler before swore" if int(rival.get("heirs",0))>0 else ""),(" (against our aim)" if bool(rival.get("clash",false)) else "")],12,T.TEXT_SOFT,false)
 		row.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;row.name="Vow_"+String(rival.get("civ_id","")).validate_node_name()
+		if String(rival.get("why",""))!="":
+			var why:=Kit.serif(stack,String(rival.why),12,T.MUTED,true);why.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+			why.name="VowWhy_"+String(rival.get("civ_id","")).validate_node_name()
 	for legacy:Dictionary in legacies:
 		var remembered:=Kit.serif(stack,"Remembered: %s, year %d" % [String(legacy.get("name","")),int(int(legacy.get("day",0))/365.0)+1],13,T.BODY,true)
 		remembered.name="Legacy_%d" % int(legacy.get("day",0))
