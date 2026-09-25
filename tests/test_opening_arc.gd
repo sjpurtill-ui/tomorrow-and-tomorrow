@@ -164,3 +164,9 @@ func test_the_chief_at_the_opening_fire_is_the_one_later_seated()->void:
 		GovernmentPeopleSystem.initialize()
 		var seated:=GovernmentPeopleSystem.officeholder("Steward")
 		assert_str(String(seated.get("name",""))).override_failure_message("seed %d previewed %s but seated %s" % [seed_value,String(preview.name),String(seated.get("name",""))]).is_equal(String(preview.name))
+
+func test_a_court_childs_name_takes_no_epithet_or_place_from_the_parent()->void:
+	var EraNames=preload("res://scripts/era_names.gd")
+	assert_str(EraNames.family_of({"name":"Tilla of Stonewash","family":""})).is_equal("")
+	assert_str(EraNames.family_of({"name":"Ysa Stone-Hand","family":""})).is_equal("")
+	assert_str(EraNames.family_of({"name":"Mara Voss","family":"Voss"})).is_equal("Voss")

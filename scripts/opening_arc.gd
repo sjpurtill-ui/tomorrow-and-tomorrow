@@ -214,7 +214,9 @@ static func _child(day:int)->Dictionary:
 	for offset in pool.size():
 		if not taken.has(String(pool[(start+offset)%pool.size()])): given=String(pool[(start+offset)%pool.size()]); break
 	var parent_name:=String(parent.get("name",""))
-	var family:=parent_name.get_slice(" ",1) if parent_name.get_slice_count(" ")>1 else ""
+	# Only a real family name passes to the child: never an epithet ("Stone-Hand")
+	# or a place ("of Stonewash"), which belong to the parent (era_names.gd).
+	var family:=preload("res://scripts/era_names.gd").family_of(parent)
 	var child_name:=given+(" "+family if family!="" else "")
 	var daughter:=rng.randf()<0.5
 	var record:={"day":day,"name":child_name,"parent_id":int(parent.person_id),"parent_name":parent_name,"daughter":daughter}
