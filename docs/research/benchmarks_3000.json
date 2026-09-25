@@ -1,0 +1,2245 @@
+{
+ "schema": "benchmarks_3000/1",
+ "description": "Historical plausibility ranges for the 2400-3000 research window (the mechanized era: steam and rail, the electric and chemical age, total war, and the late welfare and information era; about 1800 to 2030 on TechnologyEras.CURVE). Same schema as benchmarks_1200.json; human source and reasoning: docs/research/BENCHMARKS_3000.md. For each metric and game year: min/max bound what is historically plausible at all; low/typical/high are the floor (poor play), typical and best-plausible (best-documented societies of the era) values. 'better' says which direction is an improvement, so for 'lower' metrics the 'low' value is the larger number. Year 2400 is the join with benchmarks_2400.json: it must repeat that file's 2400 row exactly for every shared metric (this build: copied from benchmarks_2400.json for 29 metrics), so the files can be merged by taking the union of each metric's 'years'. 'probe_key' names the facet/RC_ROW field that measures it; null means reported qualitatively only. Metrics introduced by benchmarks_2400.json (state_revenue_pct_output, message_speed_km_per_day, energy_capture_kcal_per_capita_day, cavalry_share_of_force_pct) are continued to 3000; metrics new in this window (manufacturing_labor_share_pct, communication_reach_pct) also carry a year-2400 row. discoveries_known is provisional until registry blocks after 1200 exist.",
+ "continues": "docs/research/benchmarks_2400.json",
+ "join_2400": {
+  "source": "benchmarks_2400.json",
+  "status": "copied from benchmarks_2400.json for 29 metrics",
+  "note": "Year 2400 copies benchmarks_2400.json's 2400 row for every metric listed in copied_from_previous; metrics in own_row are new here and use this window's derived 2400 row. If the earlier file changes, rerun the generator (the earlier file wins).",
+  "copied_from_previous": [
+   "life_expectancy",
+   "infant_mortality",
+   "child_mortality_1_4",
+   "maternal_per_100k",
+   "tfr",
+   "cbr",
+   "cdr",
+   "growth_pct",
+   "population",
+   "largest_settlement_historical",
+   "settlement_density",
+   "food_labor_share",
+   "non_food_population_share",
+   "grain_yield_ratio",
+   "largest_structure_person_days",
+   "discoveries_per_50_years",
+   "major_innovations_per_century",
+   "literacy_pct",
+   "army_levy_size",
+   "defense_labor_share",
+   "trade_reach_km",
+   "discoveries_known",
+   "urban_share_pct",
+   "army_share_of_population_pct",
+   "institutional_reach_km",
+   "state_revenue_pct_output",
+   "message_speed_km_per_day",
+   "energy_capture_kcal_per_capita_day",
+   "cavalry_share_of_force_pct"
+  ],
+  "own_row": [
+   "manufacturing_labor_share_pct",
+   "communication_reach_pct"
+  ]
+ },
+ "game_years": {
+  "2400": 1800,
+  "2500": 1838,
+  "2600": 1875,
+  "2700": 1912,
+  "2800": 1950,
+  "2900": 1990,
+  "3000": 2030
+ },
+ "founders": 120,
+ "metrics": {
+  "life_expectancy": {
+   "unit": "years at birth (e0)",
+   "better": "higher",
+   "probe_key": "life_expectancy",
+   "years": {
+    "2400": {
+     "min": 18,
+     "low": 24,
+     "typical": 34,
+     "high": 41,
+     "max": 47
+    },
+    "2500": {
+     "min": 20,
+     "low": 26,
+     "typical": 36,
+     "high": 43,
+     "max": 48
+    },
+    "2600": {
+     "min": 22,
+     "low": 28,
+     "typical": 38,
+     "high": 46,
+     "max": 51
+    },
+    "2700": {
+     "min": 25,
+     "low": 32,
+     "typical": 45,
+     "high": 55,
+     "max": 60
+    },
+    "2800": {
+     "min": 30,
+     "low": 42,
+     "typical": 58,
+     "high": 69,
+     "max": 72
+    },
+    "2900": {
+     "min": 40,
+     "low": 55,
+     "typical": 70,
+     "high": 77,
+     "max": 80
+    },
+    "3000": {
+     "min": 45,
+     "low": 62,
+     "typical": 77,
+     "high": 82,
+     "max": 86
+    }
+   }
+  },
+  "infant_mortality": {
+   "unit": "deaths before age 1 per 1,000 live births",
+   "better": "lower",
+   "probe_key": "infant_mortality",
+   "years": {
+    "2400": {
+     "min": 90,
+     "low": 280,
+     "typical": 185,
+     "high": 125,
+     "max": 360
+    },
+    "2500": {
+     "min": 85,
+     "low": 270,
+     "typical": 180,
+     "high": 120,
+     "max": 350
+    },
+    "2600": {
+     "min": 75,
+     "low": 260,
+     "typical": 170,
+     "high": 105,
+     "max": 340
+    },
+    "2700": {
+     "min": 50,
+     "low": 220,
+     "typical": 130,
+     "high": 70,
+     "max": 300
+    },
+    "2800": {
+     "min": 18,
+     "low": 150,
+     "typical": 70,
+     "high": 30,
+     "max": 250
+    },
+    "2900": {
+     "min": 4,
+     "low": 90,
+     "typical": 30,
+     "high": 8,
+     "max": 160
+    },
+    "3000": {
+     "min": 1.5,
+     "low": 40,
+     "typical": 8,
+     "high": 3,
+     "max": 90
+    }
+   }
+  },
+  "child_mortality_1_4": {
+   "unit": "deaths between ages 1 and 5 per 1,000 reaching age 1 (4q1)",
+   "better": "lower",
+   "probe_key": "child_mortality_1_4",
+   "years": {
+    "2400": {
+     "min": 60,
+     "low": 210,
+     "typical": 140,
+     "high": 85,
+     "max": 290
+    },
+    "2500": {
+     "min": 55,
+     "low": 200,
+     "typical": 135,
+     "high": 80,
+     "max": 285
+    },
+    "2600": {
+     "min": 50,
+     "low": 195,
+     "typical": 125,
+     "high": 70,
+     "max": 280
+    },
+    "2700": {
+     "min": 25,
+     "low": 150,
+     "typical": 80,
+     "high": 35,
+     "max": 240
+    },
+    "2800": {
+     "min": 4,
+     "low": 60,
+     "typical": 20,
+     "high": 6,
+     "max": 150
+    },
+    "2900": {
+     "min": 1,
+     "low": 25,
+     "typical": 6,
+     "high": 1.5,
+     "max": 70
+    },
+    "3000": {
+     "min": 0.4,
+     "low": 10,
+     "typical": 2,
+     "high": 0.7,
+     "max": 40
+    }
+   }
+  },
+  "maternal_per_100k": {
+   "unit": "maternal deaths per 100,000 births (period average)",
+   "better": "lower",
+   "probe_key": "maternal_per_100k",
+   "years": {
+    "2400": {
+     "min": 300,
+     "low": 1300,
+     "typical": 750,
+     "high": 450,
+     "max": 2300
+    },
+    "2500": {
+     "min": 280,
+     "low": 1250,
+     "typical": 720,
+     "high": 430,
+     "max": 2200
+    },
+    "2600": {
+     "min": 250,
+     "low": 1150,
+     "typical": 650,
+     "high": 380,
+     "max": 2000
+    },
+    "2700": {
+     "min": 150,
+     "low": 900,
+     "typical": 500,
+     "high": 250,
+     "max": 1600
+    },
+    "2800": {
+     "min": 25,
+     "low": 500,
+     "typical": 150,
+     "high": 40,
+     "max": 1200
+    },
+    "2900": {
+     "min": 3,
+     "low": 250,
+     "typical": 40,
+     "high": 7,
+     "max": 900
+    },
+    "3000": {
+     "min": 2,
+     "low": 120,
+     "typical": 15,
+     "high": 4,
+     "max": 600
+    }
+   }
+  },
+  "tfr": {
+   "unit": "total fertility rate (births per woman over ages 15-45)",
+   "better": "neither",
+   "probe_key": "tfr",
+   "years": {
+    "2400": {
+     "min": 2.7,
+     "low": 3.8,
+     "typical": 5.0,
+     "high": 6.4,
+     "max": 8.4
+    },
+    "2500": {
+     "min": 2.6,
+     "low": 3.8,
+     "typical": 4.9,
+     "high": 6.2,
+     "max": 8.0
+    },
+    "2600": {
+     "min": 2.4,
+     "low": 3.5,
+     "typical": 4.5,
+     "high": 5.9,
+     "max": 7.5
+    },
+    "2700": {
+     "min": 2.0,
+     "low": 2.8,
+     "typical": 3.8,
+     "high": 5.2,
+     "max": 7.2
+    },
+    "2800": {
+     "min": 1.6,
+     "low": 2.2,
+     "typical": 3.0,
+     "high": 4.8,
+     "max": 7.0
+    },
+    "2900": {
+     "min": 1.3,
+     "low": 1.7,
+     "typical": 2.3,
+     "high": 3.6,
+     "max": 6.5
+    },
+    "3000": {
+     "min": 0.8,
+     "low": 1.3,
+     "typical": 1.7,
+     "high": 2.3,
+     "max": 5.0
+    }
+   }
+  },
+  "cbr": {
+   "unit": "crude birth rate per 1,000 per year",
+   "better": "neither",
+   "probe_key": "cbr",
+   "years": {
+    "2400": {
+     "min": 24,
+     "low": 31,
+     "typical": 38,
+     "high": 45,
+     "max": 56
+    },
+    "2500": {
+     "min": 22,
+     "low": 29,
+     "typical": 34.5,
+     "high": 42,
+     "max": 52
+    },
+    "2600": {
+     "min": 19,
+     "low": 25,
+     "typical": 31,
+     "high": 39,
+     "max": 48
+    },
+    "2700": {
+     "min": 14,
+     "low": 18,
+     "typical": 24,
+     "high": 34,
+     "max": 46
+    },
+    "2800": {
+     "min": 11,
+     "low": 14,
+     "typical": 18,
+     "high": 28,
+     "max": 45
+    },
+    "2900": {
+     "min": 8,
+     "low": 10,
+     "typical": 14,
+     "high": 24,
+     "max": 42
+    },
+    "3000": {
+     "min": 6,
+     "low": 8,
+     "typical": 10.5,
+     "high": 16,
+     "max": 36
+    }
+   }
+  },
+  "cdr": {
+   "unit": "crude death rate per 1,000 per year",
+   "better": "lower",
+   "probe_key": "cdr",
+   "years": {
+    "2400": {
+     "min": 17,
+     "low": 40,
+     "typical": 34,
+     "high": 25,
+     "max": 58
+    },
+    "2500": {
+     "min": 16,
+     "low": 38,
+     "typical": 31,
+     "high": 23,
+     "max": 55
+    },
+    "2600": {
+     "min": 14,
+     "low": 35,
+     "typical": 27,
+     "high": 20,
+     "max": 52
+    },
+    "2700": {
+     "min": 10,
+     "low": 28,
+     "typical": 19,
+     "high": 13,
+     "max": 45
+    },
+    "2800": {
+     "min": 7,
+     "low": 20,
+     "typical": 12,
+     "high": 9,
+     "max": 40
+    },
+    "2900": {
+     "min": 5,
+     "low": 13,
+     "typical": 8.5,
+     "high": 6,
+     "max": 25
+    },
+    "3000": {
+     "min": 4,
+     "low": 13,
+     "typical": 9,
+     "high": 7,
+     "max": 20
+    }
+   }
+  },
+  "growth_pct": {
+   "unit": "population growth, % per game year, averaged since the previous checkpoint",
+   "better": "higher",
+   "probe_key": "growth_pct",
+   "years": {
+    "2400": {
+     "min": -1.0,
+     "low": -0.1,
+     "typical": 0.35,
+     "high": 0.8,
+     "max": 1.4
+    },
+    "2500": {
+     "min": -1.0,
+     "low": -0.1,
+     "typical": 0.35,
+     "high": 0.6,
+     "max": 1.4
+    },
+    "2600": {
+     "min": -1.0,
+     "low": -0.1,
+     "typical": 0.4,
+     "high": 0.6,
+     "max": 1.4
+    },
+    "2700": {
+     "min": -1.0,
+     "low": -0.1,
+     "typical": 0.45,
+     "high": 0.6,
+     "max": 1.5
+    },
+    "2800": {
+     "min": -1.0,
+     "low": -0.2,
+     "typical": 0.45,
+     "high": 0.55,
+     "max": 1.5
+    },
+    "2900": {
+     "min": -0.8,
+     "low": 0.0,
+     "typical": 0.5,
+     "high": 0.7,
+     "max": 1.6
+    },
+    "3000": {
+     "min": -0.8,
+     "low": -0.3,
+     "typical": 0.2,
+     "high": 0.35,
+     "max": 1.0
+    }
+   }
+  },
+  "population": {
+   "unit": "people in the founders' society (120 founders at year 0)",
+   "better": "higher",
+   "probe_key": "population",
+   "years": {
+    "2400": {
+     "min": 30,
+     "low": 120,
+     "typical": 170000,
+     "high": 22000000,
+     "max": 60000000
+    },
+    "2500": {
+     "min": 30,
+     "low": 120,
+     "typical": 241000,
+     "high": 40100000,
+     "max": 120000000
+    },
+    "2600": {
+     "min": 30,
+     "low": 150,
+     "typical": 360000,
+     "high": 73000000,
+     "max": 250000000
+    },
+    "2700": {
+     "min": 30,
+     "low": 200,
+     "typical": 564000,
+     "high": 133000000,
+     "max": 450000000
+    },
+    "2800": {
+     "min": 30,
+     "low": 250,
+     "typical": 885000,
+     "high": 231000000,
+     "max": 700000000
+    },
+    "2900": {
+     "min": 30,
+     "low": 300,
+     "typical": 1460000,
+     "high": 465000000,
+     "max": 1200000000
+    },
+    "3000": {
+     "min": 30,
+     "low": 300,
+     "typical": 1780000,
+     "high": 660000000,
+     "max": 1500000000
+    }
+   }
+  },
+  "largest_settlement_historical": {
+   "unit": "people in the largest settlements of the era (historical record, not the founders' society)",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 100,
+     "low": 1000,
+     "typical": 25000,
+     "high": 1100000,
+     "max": 1500000
+    },
+    "2500": {
+     "min": 100,
+     "low": 1200,
+     "typical": 35000,
+     "high": 1800000,
+     "max": 2200000
+    },
+    "2600": {
+     "min": 100,
+     "low": 1500,
+     "typical": 60000,
+     "high": 4000000,
+     "max": 4500000
+    },
+    "2700": {
+     "min": 100,
+     "low": 2000,
+     "typical": 120000,
+     "high": 7000000,
+     "max": 8000000
+    },
+    "2800": {
+     "min": 100,
+     "low": 3000,
+     "typical": 300000,
+     "high": 12000000,
+     "max": 14000000
+    },
+    "2900": {
+     "min": 100,
+     "low": 5000,
+     "typical": 800000,
+     "high": 30000000,
+     "max": 33000000
+    },
+    "3000": {
+     "min": 100,
+     "low": 5000,
+     "typical": 1500000,
+     "high": 37000000,
+     "max": 42000000
+    }
+   }
+  },
+  "settlement_density": {
+   "unit": "people per hectare of built settlement",
+   "better": "neither",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 50,
+     "low": 100,
+     "typical": 200,
+     "high": 400,
+     "max": 600
+    },
+    "2500": {
+     "min": 50,
+     "low": 100,
+     "typical": 200,
+     "high": 400,
+     "max": 800
+    },
+    "2600": {
+     "min": 40,
+     "low": 100,
+     "typical": 200,
+     "high": 450,
+     "max": 1000
+    },
+    "2700": {
+     "min": 30,
+     "low": 80,
+     "typical": 150,
+     "high": 400,
+     "max": 1200
+    },
+    "2800": {
+     "min": 15,
+     "low": 40,
+     "typical": 90,
+     "high": 250,
+     "max": 800
+    },
+    "2900": {
+     "min": 10,
+     "low": 25,
+     "typical": 60,
+     "high": 200,
+     "max": 700
+    },
+    "3000": {
+     "min": 10,
+     "low": 25,
+     "typical": 60,
+     "high": 200,
+     "max": 700
+    }
+   }
+  },
+  "food_labor_share": {
+   "unit": "% of the able workforce's labor time spent getting and processing food (game: Food allocation)",
+   "better": "lower",
+   "probe_key": "food_share",
+   "years": {
+    "2400": {
+     "min": 18,
+     "low": 58,
+     "typical": 38,
+     "high": 25,
+     "max": 85
+    },
+    "2500": {
+     "min": 15,
+     "low": 56,
+     "typical": 36,
+     "high": 22,
+     "max": 85
+    },
+    "2600": {
+     "min": 12,
+     "low": 53,
+     "typical": 33,
+     "high": 18,
+     "max": 85
+    },
+    "2700": {
+     "min": 8,
+     "low": 48,
+     "typical": 28,
+     "high": 13,
+     "max": 80
+    },
+    "2800": {
+     "min": 5,
+     "low": 42,
+     "typical": 22,
+     "high": 9,
+     "max": 75
+    },
+    "2900": {
+     "min": 3,
+     "low": 33,
+     "typical": 13,
+     "high": 5,
+     "max": 70
+    },
+    "3000": {
+     "min": 2,
+     "low": 26,
+     "typical": 8,
+     "high": 3,
+     "max": 65
+    }
+   }
+  },
+  "non_food_population_share": {
+   "unit": "% of households not primarily producing food (historical)",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 3,
+     "low": 15,
+     "typical": 35,
+     "high": 58,
+     "max": 68
+    },
+    "2500": {
+     "min": 3,
+     "low": 16,
+     "typical": 38,
+     "high": 66,
+     "max": 76
+    },
+    "2600": {
+     "min": 4,
+     "low": 18,
+     "typical": 42,
+     "high": 78,
+     "max": 86
+    },
+    "2700": {
+     "min": 5,
+     "low": 22,
+     "typical": 50,
+     "high": 88,
+     "max": 92
+    },
+    "2800": {
+     "min": 8,
+     "low": 30,
+     "typical": 62,
+     "high": 93,
+     "max": 96
+    },
+    "2900": {
+     "min": 15,
+     "low": 45,
+     "typical": 78,
+     "high": 96,
+     "max": 98
+    },
+    "3000": {
+     "min": 20,
+     "low": 55,
+     "typical": 86,
+     "high": 98,
+     "max": 99
+    }
+   }
+  },
+  "grain_yield_ratio": {
+   "unit": "harvest per seed sown (x:1; wheat-equivalent)",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 3,
+     "low": 5,
+     "typical": 10,
+     "high": 20,
+     "max": 32
+    },
+    "2500": {
+     "min": 3,
+     "low": 5,
+     "typical": 10,
+     "high": 20,
+     "max": 32
+    },
+    "2600": {
+     "min": 3,
+     "low": 6,
+     "typical": 11,
+     "high": 22,
+     "max": 34
+    },
+    "2700": {
+     "min": 3,
+     "low": 6,
+     "typical": 12,
+     "high": 24,
+     "max": 36
+    },
+    "2800": {
+     "min": 3,
+     "low": 7,
+     "typical": 14,
+     "high": 28,
+     "max": 40
+    },
+    "2900": {
+     "min": 4,
+     "low": 10,
+     "typical": 25,
+     "high": 45,
+     "max": 60
+    },
+    "3000": {
+     "min": 4,
+     "low": 12,
+     "typical": 30,
+     "high": 55,
+     "max": 70
+    }
+   }
+  },
+  "largest_structure_person_days": {
+   "unit": "labor in the largest single construction project (person-days, order of magnitude)",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 3000,
+     "low": 60000,
+     "typical": 3000000,
+     "high": 80000000,
+     "max": 300000000
+    },
+    "2500": {
+     "min": 3000,
+     "low": 60000,
+     "typical": 4000000,
+     "high": 100000000,
+     "max": 300000000
+    },
+    "2600": {
+     "min": 3000,
+     "low": 80000,
+     "typical": 5000000,
+     "high": 150000000,
+     "max": 400000000
+    },
+    "2700": {
+     "min": 3000,
+     "low": 100000,
+     "typical": 8000000,
+     "high": 200000000,
+     "max": 600000000
+    },
+    "2800": {
+     "min": 3000,
+     "low": 100000,
+     "typical": 15000000,
+     "high": 400000000,
+     "max": 1200000000
+    },
+    "2900": {
+     "min": 3000,
+     "low": 200000,
+     "typical": 20000000,
+     "high": 500000000,
+     "max": 2000000000
+    },
+    "3000": {
+     "min": 3000,
+     "low": 200000,
+     "typical": 20000000,
+     "high": 500000000,
+     "max": 2000000000
+    }
+   }
+  },
+  "discoveries_per_50_years": {
+   "unit": "share of the design registry's items targeted in each 50-year block that the society learns in that block (%)",
+   "better": "higher",
+   "probe_key": "per_50",
+   "years": {
+    "2400": {
+     "min": 20,
+     "low": 35,
+     "typical": 70,
+     "high": 90,
+     "max": 115
+    },
+    "2500": {
+     "min": 20,
+     "low": 35,
+     "typical": 70,
+     "high": 90,
+     "max": 115
+    },
+    "2600": {
+     "min": 20,
+     "low": 35,
+     "typical": 70,
+     "high": 90,
+     "max": 115
+    },
+    "2700": {
+     "min": 20,
+     "low": 35,
+     "typical": 70,
+     "high": 90,
+     "max": 115
+    },
+    "2800": {
+     "min": 20,
+     "low": 35,
+     "typical": 70,
+     "high": 90,
+     "max": 115
+    },
+    "2900": {
+     "min": 20,
+     "low": 35,
+     "typical": 70,
+     "high": 90,
+     "max": 115
+    },
+    "3000": {
+     "min": 20,
+     "low": 35,
+     "typical": 70,
+     "high": 90,
+     "max": 115
+    }
+   }
+  },
+  "major_innovations_per_century": {
+   "unit": "historically major innovations appearing anywhere per game century (steam power, railways, telegraph, electric grid, antibiotics...)",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 2,
+     "low": 4,
+     "typical": 8,
+     "high": 11,
+     "max": 15
+    },
+    "2500": {
+     "min": 2,
+     "low": 4,
+     "typical": 8,
+     "high": 11,
+     "max": 15
+    },
+    "2600": {
+     "min": 2,
+     "low": 4,
+     "typical": 9,
+     "high": 12,
+     "max": 16
+    },
+    "2700": {
+     "min": 2,
+     "low": 5,
+     "typical": 9,
+     "high": 13,
+     "max": 18
+    },
+    "2800": {
+     "min": 2,
+     "low": 5,
+     "typical": 9,
+     "high": 13,
+     "max": 18
+    },
+    "2900": {
+     "min": 2,
+     "low": 5,
+     "typical": 9,
+     "high": 13,
+     "max": 18
+    },
+    "3000": {
+     "min": 2,
+     "low": 4,
+     "typical": 8,
+     "high": 12,
+     "max": 16
+    }
+   }
+  },
+  "literacy_pct": {
+   "unit": "% of adults able to read and write",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 0,
+     "low": 4,
+     "typical": 22,
+     "high": 55,
+     "max": 80
+    },
+    "2500": {
+     "min": 0,
+     "low": 5,
+     "typical": 28,
+     "high": 68,
+     "max": 85
+    },
+    "2600": {
+     "min": 1,
+     "low": 8,
+     "typical": 40,
+     "high": 85,
+     "max": 92
+    },
+    "2700": {
+     "min": 2,
+     "low": 15,
+     "typical": 55,
+     "high": 95,
+     "max": 98
+    },
+    "2800": {
+     "min": 5,
+     "low": 25,
+     "typical": 70,
+     "high": 97,
+     "max": 99
+    },
+    "2900": {
+     "min": 10,
+     "low": 45,
+     "typical": 85,
+     "high": 99,
+     "max": 99.5
+    },
+    "3000": {
+     "min": 20,
+     "low": 60,
+     "typical": 92,
+     "high": 99,
+     "max": 99.9
+    }
+   }
+  },
+  "army_levy_size": {
+   "unit": "largest force a society fields (people)",
+   "better": "neither",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 100,
+     "low": 2000,
+     "typical": 30000,
+     "high": 600000,
+     "max": 1500000
+    },
+    "2500": {
+     "min": 100,
+     "low": 2000,
+     "typical": 30000,
+     "high": 600000,
+     "max": 1500000
+    },
+    "2600": {
+     "min": 100,
+     "low": 2000,
+     "typical": 35000,
+     "high": 1200000,
+     "max": 2500000
+    },
+    "2700": {
+     "min": 100,
+     "low": 3000,
+     "typical": 60000,
+     "high": 5000000,
+     "max": 13000000
+    },
+    "2800": {
+     "min": 100,
+     "low": 3000,
+     "typical": 80000,
+     "high": 10000000,
+     "max": 15000000
+    },
+    "2900": {
+     "min": 100,
+     "low": 2000,
+     "typical": 40000,
+     "high": 4000000,
+     "max": 6000000
+    },
+    "3000": {
+     "min": 100,
+     "low": 2000,
+     "typical": 30000,
+     "high": 2500000,
+     "max": 4000000
+    }
+   }
+  },
+  "defense_labor_share": {
+   "unit": "% of the able workforce under arms or on watch (game: Defense allocation)",
+   "better": "neither",
+   "probe_key": "defense_share",
+   "years": {
+    "2400": {
+     "min": 0,
+     "low": 2,
+     "typical": 5,
+     "high": 11,
+     "max": 22
+    },
+    "2500": {
+     "min": 0,
+     "low": 1.5,
+     "typical": 4,
+     "high": 9,
+     "max": 20
+    },
+    "2600": {
+     "min": 0,
+     "low": 1.5,
+     "typical": 4,
+     "high": 9,
+     "max": 20
+    },
+    "2700": {
+     "min": 0,
+     "low": 2,
+     "typical": 4.5,
+     "high": 10,
+     "max": 25
+    },
+    "2800": {
+     "min": 0,
+     "low": 2,
+     "typical": 5,
+     "high": 12,
+     "max": 30
+    },
+    "2900": {
+     "min": 0,
+     "low": 1.5,
+     "typical": 3,
+     "high": 7,
+     "max": 18
+    },
+    "3000": {
+     "min": 0,
+     "low": 1,
+     "typical": 2.5,
+     "high": 5,
+     "max": 15
+    }
+   }
+  },
+  "trade_reach_km": {
+   "unit": "distance exotic goods travel to the society (km, route distance)",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 300,
+     "low": 1500,
+     "typical": 10000,
+     "high": 22000,
+     "max": 25000
+    },
+    "2500": {
+     "min": 300,
+     "low": 1500,
+     "typical": 12000,
+     "high": 22000,
+     "max": 25000
+    },
+    "2600": {
+     "min": 300,
+     "low": 2000,
+     "typical": 14000,
+     "high": 22000,
+     "max": 25000
+    },
+    "2700": {
+     "min": 300,
+     "low": 2500,
+     "typical": 15000,
+     "high": 22000,
+     "max": 25000
+    },
+    "2800": {
+     "min": 300,
+     "low": 2500,
+     "typical": 15000,
+     "high": 22000,
+     "max": 25000
+    },
+    "2900": {
+     "min": 400,
+     "low": 3000,
+     "typical": 17000,
+     "high": 22000,
+     "max": 25000
+    },
+    "3000": {
+     "min": 400,
+     "low": 3000,
+     "typical": 18000,
+     "high": 22000,
+     "max": 25000
+    }
+   }
+  },
+  "discoveries_known": {
+   "unit": "registry discoveries the society knows in total (PROVISIONAL: continues benchmarks_2400.json's assumed 4,104 targeted by 2400 at about 180 registry items per game century, i.e. 5,184 by 3000; recompute from the real blocks)",
+   "better": "higher",
+   "probe_key": "known",
+   "years": {
+    "2400": {
+     "min": 615,
+     "low": 1435,
+     "typical": 2875,
+     "high": 3695,
+     "max": 4104
+    },
+    "2500": {
+     "min": 645,
+     "low": 1500,
+     "typical": 3000,
+     "high": 3855,
+     "max": 4284
+    },
+    "2600": {
+     "min": 670,
+     "low": 1560,
+     "typical": 3125,
+     "high": 4020,
+     "max": 4464
+    },
+    "2700": {
+     "min": 695,
+     "low": 1625,
+     "typical": 3250,
+     "high": 4180,
+     "max": 4644
+    },
+    "2800": {
+     "min": 725,
+     "low": 1690,
+     "typical": 3375,
+     "high": 4340,
+     "max": 4824
+    },
+    "2900": {
+     "min": 750,
+     "low": 1750,
+     "typical": 3505,
+     "high": 4505,
+     "max": 5004
+    },
+    "3000": {
+     "min": 780,
+     "low": 1815,
+     "typical": 3630,
+     "high": 4665,
+     "max": 5184
+    }
+   }
+  },
+  "urban_share_pct": {
+   "unit": "% of the society's people living in settlements of 5,000 or more",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 0,
+     "low": 3,
+     "typical": 13,
+     "high": 38,
+     "max": 48
+    },
+    "2500": {
+     "min": 0,
+     "low": 4,
+     "typical": 16,
+     "high": 45,
+     "max": 55
+    },
+    "2600": {
+     "min": 1,
+     "low": 5,
+     "typical": 20,
+     "high": 55,
+     "max": 65
+    },
+    "2700": {
+     "min": 2,
+     "low": 8,
+     "typical": 27,
+     "high": 65,
+     "max": 75
+    },
+    "2800": {
+     "min": 3,
+     "low": 12,
+     "typical": 38,
+     "high": 75,
+     "max": 85
+    },
+    "2900": {
+     "min": 5,
+     "low": 22,
+     "typical": 60,
+     "high": 82,
+     "max": 95
+    },
+    "3000": {
+     "min": 8,
+     "low": 30,
+     "typical": 70,
+     "high": 88,
+     "max": 98
+    }
+   }
+  },
+  "army_share_of_population_pct": {
+   "unit": "% of the whole population under arms at the society's peak mobilization in the century",
+   "better": "neither",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 0,
+     "low": 0.5,
+     "typical": 2,
+     "high": 5,
+     "max": 14
+    },
+    "2500": {
+     "min": 0,
+     "low": 0.5,
+     "typical": 1.5,
+     "high": 4,
+     "max": 10
+    },
+    "2600": {
+     "min": 0,
+     "low": 0.5,
+     "typical": 2,
+     "high": 5,
+     "max": 12
+    },
+    "2700": {
+     "min": 0,
+     "low": 1,
+     "typical": 4,
+     "high": 12,
+     "max": 20
+    },
+    "2800": {
+     "min": 0,
+     "low": 1,
+     "typical": 5,
+     "high": 13,
+     "max": 22
+    },
+    "2900": {
+     "min": 0,
+     "low": 0.3,
+     "typical": 1.5,
+     "high": 5,
+     "max": 10
+    },
+    "3000": {
+     "min": 0,
+     "low": 0.3,
+     "typical": 1,
+     "high": 4,
+     "max": 8
+    }
+   }
+  },
+  "institutional_reach_km": {
+   "unit": "radius (km) from the seat of government within which it registers people, collects dues and has its rulings enforced",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 5,
+     "low": 40,
+     "typical": 300,
+     "high": 5000,
+     "max": 18000
+    },
+    "2500": {
+     "min": 5,
+     "low": 40,
+     "typical": 300,
+     "high": 5000,
+     "max": 18000
+    },
+    "2600": {
+     "min": 5,
+     "low": 50,
+     "typical": 350,
+     "high": 5000,
+     "max": 18000
+    },
+    "2700": {
+     "min": 5,
+     "low": 60,
+     "typical": 400,
+     "high": 5000,
+     "max": 18000
+    },
+    "2800": {
+     "min": 5,
+     "low": 80,
+     "typical": 500,
+     "high": 4500,
+     "max": 18000
+    },
+    "2900": {
+     "min": 5,
+     "low": 100,
+     "typical": 500,
+     "high": 4000,
+     "max": 10000
+    },
+    "3000": {
+     "min": 5,
+     "low": 100,
+     "typical": 500,
+     "high": 4000,
+     "max": 10000
+    }
+   }
+  },
+  "state_revenue_pct_output": {
+   "unit": "central government revenue as % of the society's total output in an ordinary (non-war) year",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 0.5,
+     "low": 2,
+     "typical": 7,
+     "high": 15,
+     "max": 24
+    },
+    "2500": {
+     "min": 0.5,
+     "low": 2,
+     "typical": 8,
+     "high": 15,
+     "max": 22
+    },
+    "2600": {
+     "min": 1,
+     "low": 3,
+     "typical": 9,
+     "high": 16,
+     "max": 22
+    },
+    "2700": {
+     "min": 1,
+     "low": 4,
+     "typical": 11,
+     "high": 20,
+     "max": 30
+    },
+    "2800": {
+     "min": 2,
+     "low": 8,
+     "typical": 22,
+     "high": 35,
+     "max": 60
+    },
+    "2900": {
+     "min": 3,
+     "low": 12,
+     "typical": 28,
+     "high": 48,
+     "max": 60
+    },
+    "3000": {
+     "min": 3,
+     "low": 14,
+     "typical": 32,
+     "high": 46,
+     "max": 60
+    }
+   }
+  },
+  "message_speed_km_per_day": {
+   "unit": "distance an official message travels per day on the society's best regular service (km/day; 40,000 = effectively instantaneous anywhere on the globe)",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 12,
+     "low": 40,
+     "typical": 80,
+     "high": 250,
+     "max": 3000
+    },
+    "2500": {
+     "min": 15,
+     "low": 50,
+     "typical": 150,
+     "high": 1500,
+     "max": 10000
+    },
+    "2600": {
+     "min": 20,
+     "low": 100,
+     "typical": 1000,
+     "high": 20000,
+     "max": 40000
+    },
+    "2700": {
+     "min": 30,
+     "low": 300,
+     "typical": 10000,
+     "high": 40000,
+     "max": 40000
+    },
+    "2800": {
+     "min": 50,
+     "low": 1000,
+     "typical": 20000,
+     "high": 40000,
+     "max": 40000
+    },
+    "2900": {
+     "min": 100,
+     "low": 5000,
+     "typical": 40000,
+     "high": 40000,
+     "max": 40000
+    },
+    "3000": {
+     "min": 200,
+     "low": 10000,
+     "typical": 40000,
+     "high": 40000,
+     "max": 40000
+    }
+   }
+  },
+  "energy_capture_kcal_per_capita_day": {
+   "unit": "energy captured per person per day, kcal (food, fodder, fuel, wind and water power, raw materials; Morris's social-development measure). 1 GJ per person per year = 655 kcal per day",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 9000,
+     "low": 16000,
+     "typical": 27000,
+     "high": 38000,
+     "max": 45000
+    },
+    "2500": {
+     "min": 9000,
+     "low": 16000,
+     "typical": 30000,
+     "high": 55000,
+     "max": 75000
+    },
+    "2600": {
+     "min": 9000,
+     "low": 17000,
+     "typical": 36000,
+     "high": 80000,
+     "max": 110000
+    },
+    "2700": {
+     "min": 9000,
+     "low": 18000,
+     "typical": 45000,
+     "high": 110000,
+     "max": 150000
+    },
+    "2800": {
+     "min": 9000,
+     "low": 20000,
+     "typical": 55000,
+     "high": 150000,
+     "max": 200000
+    },
+    "2900": {
+     "min": 10000,
+     "low": 22000,
+     "typical": 75000,
+     "high": 210000,
+     "max": 300000
+    },
+    "3000": {
+     "min": 10000,
+     "low": 25000,
+     "typical": 85000,
+     "high": 200000,
+     "max": 450000
+    }
+   }
+  },
+  "cavalry_share_of_force_pct": {
+   "unit": "% of the largest force fielded that fights mounted",
+   "better": "neither",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 0,
+     "low": 5,
+     "typical": 15,
+     "high": 25,
+     "max": 100
+    },
+    "2500": {
+     "min": 0,
+     "low": 4,
+     "typical": 13,
+     "high": 22,
+     "max": 100
+    },
+    "2600": {
+     "min": 0,
+     "low": 3,
+     "typical": 10,
+     "high": 18,
+     "max": 80
+    },
+    "2700": {
+     "min": 0,
+     "low": 2,
+     "typical": 7,
+     "high": 15,
+     "max": 50
+    },
+    "2800": {
+     "min": 0,
+     "low": 0,
+     "typical": 2,
+     "high": 8,
+     "max": 25
+    },
+    "2900": {
+     "min": 0,
+     "low": 0,
+     "typical": 0,
+     "high": 1,
+     "max": 5
+    },
+    "3000": {
+     "min": 0,
+     "low": 0,
+     "typical": 0,
+     "high": 0.5,
+     "max": 3
+    }
+   }
+  },
+  "manufacturing_labor_share_pct": {
+   "unit": "% of the workforce in manufacturing, mining and construction (the secondary sector)",
+   "better": "neither",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 2,
+     "low": 6,
+     "typical": 12,
+     "high": 28,
+     "max": 35
+    },
+    "2500": {
+     "min": 2,
+     "low": 7,
+     "typical": 15,
+     "high": 35,
+     "max": 42
+    },
+    "2600": {
+     "min": 3,
+     "low": 8,
+     "typical": 20,
+     "high": 42,
+     "max": 50
+    },
+    "2700": {
+     "min": 3,
+     "low": 10,
+     "typical": 25,
+     "high": 45,
+     "max": 52
+    },
+    "2800": {
+     "min": 4,
+     "low": 12,
+     "typical": 30,
+     "high": 48,
+     "max": 55
+    },
+    "2900": {
+     "min": 5,
+     "low": 15,
+     "typical": 28,
+     "high": 40,
+     "max": 50
+    },
+    "3000": {
+     "min": 5,
+     "low": 14,
+     "typical": 22,
+     "high": 32,
+     "max": 45
+    }
+   }
+  },
+  "communication_reach_pct": {
+   "unit": "% of households reached at least weekly by printed, wired or broadcast news",
+   "better": "higher",
+   "probe_key": null,
+   "years": {
+    "2400": {
+     "min": 0,
+     "low": 0.5,
+     "typical": 3,
+     "high": 15,
+     "max": 25
+    },
+    "2500": {
+     "min": 0,
+     "low": 1,
+     "typical": 5,
+     "high": 25,
+     "max": 35
+    },
+    "2600": {
+     "min": 0,
+     "low": 2,
+     "typical": 12,
+     "high": 45,
+     "max": 55
+    },
+    "2700": {
+     "min": 0,
+     "low": 5,
+     "typical": 30,
+     "high": 75,
+     "max": 85
+    },
+    "2800": {
+     "min": 1,
+     "low": 15,
+     "typical": 60,
+     "high": 95,
+     "max": 98
+    },
+    "2900": {
+     "min": 5,
+     "low": 40,
+     "typical": 85,
+     "high": 99,
+     "max": 99.5
+    },
+    "3000": {
+     "min": 20,
+     "low": 60,
+     "typical": 92,
+     "high": 99.5,
+     "max": 99.9
+    }
+   }
+  }
+ },
+ "milestones": {
+  "note": "Provisional. No 2400-3000 design registry block exists yet, so these are existing catalog ids from scripts/technology_eras.gd HISTORICAL_YEAR whose calibration year falls in the window (game years on CURVE: steam_propulsion 2464, electromagnetic_induction 2483, cell_theory 2504, rail_track_foundations 2523, electrical_telegraphy 2533, preventive_inoculation 2544, contagion_mapping 2544, steel_refining 2549, electromagnetic_wave_theory 2571, internal_combustion 2603, aseptic_laboratory_practice 2613, structural_steel 2627, reinforced_concrete 2627, telephone_circuits 2659, powered_flight 2675, triode_valves 2683, catalytic_ammonia_synthesis 2701, nuclear_fission 2768, jet_propulsion 2771, bipolar_junction_transistors 2803, stored_program_control 2838, packet_switching 2848). Landing years are judged against each item's design band once the block exists (band_low..band_high); until then they cannot be checked. Chosen items have no resource or environment gate that we know of and are historically major; replace any the registry re-dates or gates.",
+  "ids": [
+   "steam_propulsion",
+   "electromagnetic_induction",
+   "cell_theory",
+   "rail_track_foundations",
+   "electrical_telegraphy",
+   "preventive_inoculation",
+   "contagion_mapping",
+   "steel_refining",
+   "electromagnetic_wave_theory",
+   "internal_combustion",
+   "aseptic_laboratory_practice",
+   "structural_steel",
+   "reinforced_concrete",
+   "telephone_circuits",
+   "powered_flight",
+   "triode_valves",
+   "catalytic_ammonia_synthesis",
+   "nuclear_fission",
+   "jet_propulsion",
+   "bipolar_junction_transistors",
+   "stored_program_control",
+   "packet_switching"
+  ]
+ },
+ "allowed_deviation": {
+  "milestone_early_fraction": 0.02,
+  "milestone_floor": "band_low",
+  "facet_over_high_fraction_of_typical_to_high_gap": 0.15,
+  "per_metric_over_high_fraction_of_typical_to_high_gap": {
+   "life_expectancy": 0.15,
+   "infant_mortality": 0.15,
+   "child_mortality_1_4": 0.15,
+   "maternal_per_100k": 0.15,
+   "tfr": 0.0,
+   "cbr": 0.0,
+   "cdr": 0.15,
+   "growth_pct": 0.1,
+   "population": 0.1,
+   "largest_settlement_historical": 0.15,
+   "settlement_density": 0.0,
+   "food_labor_share": 0.15,
+   "non_food_population_share": 0.15,
+   "grain_yield_ratio": 0.15,
+   "largest_structure_person_days": 0.25,
+   "discoveries_per_50_years": 0.15,
+   "major_innovations_per_century": 0.25,
+   "literacy_pct": 0.2,
+   "army_levy_size": 0.0,
+   "defense_labor_share": 0.0,
+   "trade_reach_km": 0.25,
+   "discoveries_known": 0.1,
+   "urban_share_pct": 0.15,
+   "army_share_of_population_pct": 0.0,
+   "institutional_reach_km": 0.2,
+   "state_revenue_pct_output": 0.15,
+   "message_speed_km_per_day": 0.25,
+   "energy_capture_kcal_per_capita_day": 0.15,
+   "cavalry_share_of_force_pct": 0.0,
+   "manufacturing_labor_share_pct": 0.0,
+   "communication_reach_pct": 0.15
+  },
+  "note": "Default: a facet may exceed 'high' by at most 15% of |high-typical|; per_metric_over_high_fraction_of_typical_to_high_gap overrides that per metric (0 = must stay inside low..high; 'neither' metrics always 0). Milestones may land up to 2% of their design year early (48-60 game years, about 20 historical years, the same as one design band) but never before band_low, and never after band_high. The fraction is smaller than benchmarks_1200.json's 0.05 because design years here are 2400-3000, where 5% would allow 120-150 game years (about 50 historical years) of lead. See BENCHMARKS_3000.md 'Allowed lead over history'."
+ },
+ "shock_widening": {
+  "note": "How far a shock recorded in the run's shock log may push a metric below its 'low' (and 'min') value for the window after it. Only apply to the century checkpoint(s) whose window overlaps the shock and its recovery; a shock-free run is judged on the plain bands. Keys are <field>_mult (scale) or <field>_add (add), field in min/low/typical/high/max; signs are written so the band moves toward the worse outcome (for 'neither' metrics: in the direction the shock pushes the society). Several concurrent shocks compose (multiply the mults, sum the adds), but never past the 'hard_floor' entries. Base rates per game century come from tools/sim/shocks/catalog.py (HISTORICAL_BASE_RATES, 'modern' band); pandemic_ge_1pct, total_war and depression are new hazard keys of this window; upheaval (revolutions and civil wars) and invasion_migration continue benchmarks_2400.json's keys. One game century here is about 38-40 historical years.",
+  "hazard_per_game_century": {
+   "collapse": [
+    0.03,
+    0.2
+   ],
+   "pandemic_ge_1pct": [
+    0.3,
+    1.2
+   ],
+   "pandemic_ge_5pct": [
+    0.0,
+    0.3
+   ],
+   "pandemic_ge_25pct": [
+    0.0,
+    0.03
+   ],
+   "famine_ge_2pct": [
+    0.05,
+    0.6
+   ],
+   "economic_crisis": [
+    0.8,
+    2.5
+   ],
+   "depression": [
+    0.1,
+    0.4
+   ],
+   "general_war": [
+    0.2,
+    0.8
+   ],
+   "total_war": [
+    0.0,
+    0.6
+   ],
+   "upheaval": [
+    0.2,
+    0.7
+   ],
+   "invasion_migration": [
+    0.0,
+    0.15
+   ]
+  },
+  "types": {
+   "pestilence": {
+    "description": "Pandemic waves carried by steam shipping, rail and later air travel: water-borne epidemics in crowded towns early in the window, respiratory pandemics later. Most waves kill 0.5-3 % of people within 1-3 years; modern medicine and sanitation cap the toll late in the window.",
+    "peak_risk_game_years": [
+     2400,
+     2780
+    ],
+    "recovery_game_years": [
+     5,
+     30
+    ],
+    "metrics": {
+     "population": {
+      "low_mult": 0.95,
+      "min_mult": 0.97
+     },
+     "growth_pct": {
+      "low_add": -0.3,
+      "min_add": -0.4
+     },
+     "life_expectancy": {
+      "low_add": -5,
+      "min_add": -3
+     },
+     "cdr": {
+      "low_add": 6,
+      "max_add": 10
+     },
+     "infant_mortality": {
+      "low_add": 20
+     },
+     "child_mortality_1_4": {
+      "low_add": 20
+     },
+     "urban_share_pct": {
+      "low_mult": 0.95
+     }
+    }
+   },
+   "famine": {
+    "description": "Crop blight, drought or war on the fields in a society that still lives mostly off its own harvest, or a famine made by requisitioning. Can take 5-15 % of people early in the window; rare once food moves by rail and ship and relief is organised.",
+    "peak_risk_game_years": [
+     2400,
+     2900
+    ],
+    "recovery_game_years": [
+     10,
+     40
+    ],
+    "metrics": {
+     "population": {
+      "low_mult": 0.85,
+      "min_mult": 0.9
+     },
+     "growth_pct": {
+      "low_add": -0.4,
+      "min_add": -0.6
+     },
+     "life_expectancy": {
+      "low_add": -4
+     },
+     "infant_mortality": {
+      "low_add": 40
+     },
+     "child_mortality_1_4": {
+      "low_add": 40
+     },
+     "food_labor_share": {
+      "low_add": 5
+     },
+     "tfr": {
+      "low_mult": 0.85
+     },
+     "cbr": {
+      "low_add": -4
+     }
+    }
+   },
+   "credit_crisis": {
+    "description": "A bank run, stock-market crash or sovereign default: credit freezes, building stops and firms fail for a few years.",
+    "peak_risk_game_years": [
+     2400,
+     3000
+    ],
+    "recovery_game_years": [
+     3,
+     15
+    ],
+    "metrics": {
+     "non_food_population_share": {
+      "low_mult": 0.95
+     },
+     "largest_structure_person_days": {
+      "low_mult": 0.5
+     },
+     "trade_reach_km": {
+      "low_mult": 0.85
+     },
+     "energy_capture_kcal_per_capita_day": {
+      "low_mult": 0.92
+     },
+     "manufacturing_labor_share_pct": {
+      "low_mult": 0.9
+     },
+     "growth_pct": {
+      "low_add": -0.1
+     }
+    }
+   },
+   "depression": {
+    "description": "A prolonged slump after a financial collapse: a quarter of the workforce idle, trade and output down by a third for several years, births postponed.",
+    "peak_risk_game_years": [
+     2700,
+     2800
+    ],
+    "recovery_game_years": [
+     10,
+     30
+    ],
+    "metrics": {
+     "non_food_population_share": {
+      "low_mult": 0.9
+     },
+     "trade_reach_km": {
+      "low_mult": 0.6
+     },
+     "energy_capture_kcal_per_capita_day": {
+      "low_mult": 0.8
+     },
+     "manufacturing_labor_share_pct": {
+      "low_mult": 0.75
+     },
+     "tfr": {
+      "low_mult": 0.85
+     },
+     "cbr": {
+      "low_add": -3
+     },
+     "growth_pct": {
+      "low_add": -0.2
+     },
+     "largest_structure_person_days": {
+      "low_mult": 0.6
+     }
+    }
+   },
+   "war": {
+    "description": "A general war between states with mass conscript armies but without full mobilization of the economy.",
+    "peak_risk_game_years": [
+     2400,
+     3000
+    ],
+    "recovery_game_years": [
+     5,
+     25
+    ],
+    "metrics": {
+     "population": {
+      "low_mult": 0.93
+     },
+     "army_share_of_population_pct": {
+      "high_add": 3,
+      "max_add": 3
+     },
+     "defense_labor_share": {
+      "high_add": 5,
+      "max_add": 5
+     },
+     "trade_reach_km": {
+      "low_mult": 0.8
+     },
+     "life_expectancy": {
+      "low_add": -2
+     }
+    }
+   },
+   "total_war": {
+    "description": "Total war with mechanized mobilization: 10-20 % of all people in uniform, the economy converted to war production, bombing and blockade of civilians, and 2-15 % of the population dead. Possible once railways, mass conscription and factory output exist (from about game 2600); peak risk about game 2700-2790.",
+    "peak_risk_game_years": [
+     2690,
+     2800
+    ],
+    "recovery_game_years": [
+     15,
+     50
+    ],
+    "metrics": {
+     "population": {
+      "low_mult": 0.8,
+      "min_mult": 0.85
+     },
+     "growth_pct": {
+      "low_add": -0.5,
+      "min_add": -0.8
+     },
+     "life_expectancy": {
+      "low_add": -6,
+      "min_add": -5
+     },
+     "cdr": {
+      "low_add": 8,
+      "max_add": 15
+     },
+     "infant_mortality": {
+      "low_add": 20
+     },
+     "army_share_of_population_pct": {
+      "high_add": 8,
+      "max_add": 5
+     },
+     "defense_labor_share": {
+      "high_add": 15,
+      "max_add": 15
+     },
+     "army_levy_size": {
+      "high_mult": 1.5,
+      "max_mult": 1.3
+     },
+     "largest_settlement_historical": {
+      "low_mult": 0.7
+     },
+     "trade_reach_km": {
+      "low_mult": 0.5
+     },
+     "food_labor_share": {
+      "low_add": 5
+     },
+     "tfr": {
+      "low_mult": 0.8
+     },
+     "cbr": {
+      "low_add": -4
+     },
+     "manufacturing_labor_share_pct": {
+      "high_add": 8,
+      "max_add": 5
+     },
+     "energy_capture_kcal_per_capita_day": {
+      "low_mult": 0.8
+     }
+    }
+   },
+   "revolution": {
+    "description": "A revolution or civil war that overturns the regime: the old administration is purged, property is seized, and trade and building stop for years.",
+    "peak_risk_game_years": [
+     2400,
+     2850
+    ],
+    "recovery_game_years": [
+     10,
+     40
+    ],
+    "metrics": {
+     "population": {
+      "low_mult": 0.9
+     },
+     "growth_pct": {
+      "low_add": -0.3
+     },
+     "institutional_reach_km": {
+      "low_mult": 0.6
+     },
+     "trade_reach_km": {
+      "low_mult": 0.7
+     },
+     "largest_structure_person_days": {
+      "low_mult": 0.5
+     },
+     "life_expectancy": {
+      "low_add": -3
+     },
+     "non_food_population_share": {
+      "low_mult": 0.9
+     },
+     "energy_capture_kcal_per_capita_day": {
+      "low_mult": 0.85
+     },
+     "defense_labor_share": {
+      "high_add": 5
+     }
+    }
+   },
+   "collapse": {
+    "description": "Systemic failure of a planned or over-extended state: the currency and supply chains fail, factories close, the state fragments; e0 falls by several years, births collapse and energy use and output fall by a third or more.",
+    "peak_risk_game_years": [
+     2850,
+     2950
+    ],
+    "recovery_game_years": [
+     15,
+     60
+    ],
+    "metrics": {
+     "life_expectancy": {
+      "low_add": -6,
+      "min_add": -4
+     },
+     "population": {
+      "low_mult": 0.9
+     },
+     "growth_pct": {
+      "low_add": -0.6,
+      "min_add": -0.6
+     },
+     "energy_capture_kcal_per_capita_day": {
+      "low_mult": 0.6
+     },
+     "manufacturing_labor_share_pct": {
+      "low_mult": 0.6
+     },
+     "largest_structure_person_days": {
+      "low_mult": 0.2
+     },
+     "institutional_reach_km": {
+      "low_mult": 0.5
+     },
+     "tfr": {
+      "low_mult": 0.7
+     },
+     "cbr": {
+      "low_add": -4
+     },
+     "infant_mortality": {
+      "low_add": 15
+     },
+     "cdr": {
+      "low_add": 5
+     }
+    }
+   }
+  },
+  "hard_floor": {
+   "life_expectancy": 15,
+   "population": 30,
+   "growth_pct": -3.0,
+   "cdr": 90
+  }
+ }
+}
