@@ -60,6 +60,38 @@ func _ready()->void:
 	_expect(not Aims.is_yield("request","debt_call","grant"),"repaying a debt counts as yielding")
 	_expect(not Aims.is_yield("request","aid_request","grant"),"feeding the hungry counts as yielding")
 	_expect(Aims.is_yield("threat","tribute_demand","pay"),"paying tribute does not count as yielding")
+	# Contradictions and rival warnings ----------------------------------------
+	var world:Node=preload("res://tests/audience_modal_probe.gd").new()
+	world._setup_world()
+	world.free()
+	PeopleDirection.reset_for_new_world(); PeopleDirection.ensure()
+	var civ:Dictionary={}
+	for c in CivilizationSystem.civilizations:
+		if c is Dictionary: civ=c; break
+	if not civ.is_empty():
+		var civ_id:=String(civ.id)
+		(civ.player_relation as Dictionary)["treaty"]="exchange"
+		var clash:=Aims.contradiction({"template":"fear","subject":civ_id,"subject_name":String(civ.name)})
+		print("CONTRADICTION | %s" % clash)
+		_expect(clash!="","a fear aim against a people we keep a pact with is not flagged")
+		(civ.player_relation as Dictionary)["treaty"]=""
+		var r:Dictionary={"civ_id":civ_id,"civ_name":String(civ.name),"template":"humble","title":"Make the God's People Yield","phrase":"make us yield to them","start_day":0,"deadline":99999,"years":10,"status":"active","known":false,"progress":0.5,"leader":"Oskel","target":2.0,"baseline":0.0}
+		(Aims.state().rivals as Dictionary)[civ_id]=r
+		Aims._rival_warn(r,int(GameState.elapsed_days))
+		var warned:=false
+		for entry in Aims.state().log:
+			if String((entry as Dictionary).get("kind",""))=="rival_warned": warned=true
+		_expect(warned and bool(r.known),"a rival vow near completion was not told")
+		var options:Array[Dictionary]=[{"id":"grant","sub":"Give it."}]
+		Aims.annotate_options({"civ_id":civ_id,"kind":"request","situation":{"type":"debt_call"}},options)
+		var tribute:Array[Dictionary]=[{"id":"pay","sub":"Pay it."}]
+		Aims.annotate_options({"civ_id":civ_id,"kind":"threat","situation":{"type":"tribute_demand"}},tribute)
+		options.append(tribute[0])
+		print("ANNOTATED | %s | %s" % [String(options[0].sub),String(options[1].sub)])
+		_expect(String(options[0].sub).contains("not yielding"),"repaying a debt is not marked as not yielding")
+		_expect(String(options[1].sub).contains("yielding ("),"paying tribute is not marked as yielding")
+	else:
+		failures.append("no neighbour in the probe world")
 	# Miracles -----------------------------------------------------------
 	var sets:Dictionary={}
 	for text in MIRACLES:
