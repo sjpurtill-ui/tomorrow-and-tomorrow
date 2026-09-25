@@ -126,9 +126,7 @@ static func entries()->Array[Dictionary]:
 	    "effects": {},
 	    "foundation_for": [
 	      "ratio_proportion",
-	      "symbolic_algebra",
-	      "integral_calculus",
-	      "probability_theory"
+	      "outflow_water_clock"
 	    ],
 	    "production_contract": "Provides the named mathematical foundations for downstream knowledge and model-assisted investigations. It creates no physical equipment and does not replace practical foundations."
 	  },
@@ -153,7 +151,6 @@ static func entries()->Array[Dictionary]:
 	    "effects": {},
 	    "foundation_for": [
 	      "similar_triangles",
-	      "logarithms",
 	      "dimensional_analysis"
 	    ],
 	    "production_contract": "Provides the named mathematical foundations for downstream knowledge and model-assisted investigations. It creates no physical equipment and does not replace practical foundations."
@@ -181,7 +178,7 @@ static func entries()->Array[Dictionary]:
 	    "effects": {},
 	    "foundation_for": [
 	      "similar_triangles",
-	      "coordinate_geometry"
+	      "demonstrated_geometry"
 	    ],
 	    "production_contract": "Provides the named mathematical foundations for downstream knowledge and model-assisted investigations. It creates no physical equipment and does not replace practical foundations."
 	  },
@@ -262,8 +259,6 @@ static func entries()->Array[Dictionary]:
 	    "observation": "Unknown quantities are represented and manipulated while preserving the equality of expressions.",
 	    "effects": {},
 	    "foundation_for": [
-	      "polynomial_equations",
-	      "logarithms",
 	      "coordinate_geometry",
 	      "matrix_algebra",
 	      "dimensional_analysis"
@@ -290,7 +285,6 @@ static func entries()->Array[Dictionary]:
 	    "observation": "Powers of unknown quantities are organized into equations whose roots describe possible solutions.",
 	    "effects": {},
 	    "foundation_for": [
-	      "differential_calculus",
 	      "complex_numbers",
 	      "numerical_root_finding"
 	    ],
@@ -345,7 +339,6 @@ static func entries()->Array[Dictionary]:
 	    "effects": {},
 	    "foundation_for": [
 	      "differential_calculus",
-	      "integral_calculus",
 	      "vector_analysis",
 	      "regional_maps",
 	      "crystallography"
@@ -539,7 +532,7 @@ static func entries()->Array[Dictionary]:
 	    "observation": "Arrangements and selections are counted without listing every possibility.",
 	    "effects": {},
 	    "foundation_for": [
-	      "probability_theory"
+	      "binomial_coefficient_triangle"
 	    ],
 	    "production_contract": "Provides the named mathematical foundations for downstream knowledge and model-assisted investigations. It creates no physical equipment and does not replace practical foundations."
 	  },

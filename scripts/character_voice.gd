@@ -154,8 +154,18 @@ const ERA_GATES:={
 		"words":"temple|temples|priest|priests|priestess|priesthood|saint|saints|saintly|deacon|deacons|cantor|cantors|church|churches|cathedral|cathedrals|monk|monks|monastery|abbot|bishop|bishops|magister|guild|guilds|school|schools|schoolroom|university|lawyer|lawyers|jury|juries|courtroom|lawcourt|magistrate|magistrates"},
 	"candles":{"ids":["rendered_leather_fat","sealed_vessels","curing_regimens"],"label":"candles and wax",
 		"words":"candle|candles|candlelight|candlewright|wax|taper|tapers"},
-	"gunpowder":{"ids":["black_powder"],"label":"gunpowder and guns",
-		"words":"gun|guns|gunpowder|musket|muskets|cannon|cannons|pistol|pistols|rifle|rifles|bullet|bullets"},
+	# Powder is chemistry first (black_powder 1787); the words for guns wait
+	# for the weapons themselves (1800-2400 design).
+	"gunpowder":{"ids":["black_powder"],"label":"gunpowder",
+		"words":"gunpowder"},
+	"guns":{"ids":["hand_gun_tubes"],"label":"guns and cannon",
+		"words":"gun|guns|cannon|cannons|bullet|bullets"},
+	"muskets":{"ids":["matchlock_drill"],"label":"muskets",
+		"words":"musket|muskets"},
+	"pistols":{"ids":["mounted_firearms"],"label":"pistols",
+		"words":"pistol|pistols"},
+	"rifles":{"ids":["rifled_barrels"],"label":"rifles",
+		"words":"rifle|rifles"},
 }
 const ERA_WORDS:=[
 	"the old stone world: hunters and gatherers of fire, stone, bone, hide, cord, wood and wild food",

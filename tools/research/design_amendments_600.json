@@ -45,7 +45,6 @@
   "grain_milling": {"earliest_year": 800, "note": "Rotary milling; the saddle quern covers the early step."},
   "germination_trials": {"earliest_year": 900, "note": "Measured germination trials."},
   "fiber_pulp_beating": {"earliest_year": 1080, "note": "The paper-pulp step (about 100 CE)."},
-  "ceramic_slip_casting": {"earliest_year": 2300, "note": "An 18th-century CE method."},
-  "powder_artillery": {"earliest_year": 1880, "note": "Gunpowder weapons (bombards, hand cannons) follow the 1200-1800 design, where black powder is chemistry only at 1787; the registry places bombards at about 1880-1920. The 1800-2400 design replaces this floor."}
+  "ceramic_slip_casting": {"earliest_year": 2300, "note": "An 18th-century CE method."}
  }
 }

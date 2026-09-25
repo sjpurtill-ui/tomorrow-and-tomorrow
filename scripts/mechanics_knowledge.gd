@@ -150,8 +150,6 @@ static func entries()->Array[Dictionary]:
 	    "observation": "Suspension and balance trials locate the effective point at which a body\u2019s weight acts.",
 	    "effects": {},
 	    "foundation_for": [
-	      "flywheel_smoothing",
-	      "rotational_dynamics",
 	      "counterweight_cranes"
 	    ],
 	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone."
@@ -206,8 +204,6 @@ static func entries()->Array[Dictionary]:
 	    "effects": {},
 	    "foundation_for": [
 	      "crank_linkages",
-	      "flywheel_smoothing",
-	      "rotational_dynamics",
 	      "water_mills"
 	    ],
 	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone. Enables the named physical workshop components; batch materials, setup tooling and finite workshop work are consumed to create them.",
@@ -237,7 +233,6 @@ static func entries()->Array[Dictionary]:
 	    "observation": "Pinned links convert continuous rotation into a controlled reciprocating stroke.",
 	    "effects": {},
 	    "foundation_for": [
-	      "feedback_governors",
 	      "precision_machinery",
 	      "mine_drainage"
 	    ],
@@ -329,8 +324,7 @@ static func entries()->Array[Dictionary]:
 	    "effects": {},
 	    "foundation_for": [
 	      "lubrication_regimes",
-	      "viscous_resistance",
-	      "inertial_motion"
+	      "viscous_resistance"
 	    ],
 	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone."
 	  },
@@ -492,7 +486,6 @@ static func entries()->Array[Dictionary]:
 	    "effects": {},
 	    "foundation_for": [
 	      "stress_strain_relations",
-	      "mechanical_oscillation",
 	      "advanced_airframes"
 	    ],
 	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone."
@@ -735,7 +728,6 @@ static func entries()->Array[Dictionary]:
 	    "observation": "Pendulums and spring-loaded bodies reveal repeatable periods and damping.",
 	    "effects": {},
 	    "foundation_for": [
-	      "feedback_governors",
 	      "safety_lifts"
 	    ],
 	    "production_contract": "Provides a distinct mechanical method for the named downstream investigations. Relevant model-assisted routes gain 15% research throughput; practical routes remain. No machine, workforce or operating output is created by knowledge alone."

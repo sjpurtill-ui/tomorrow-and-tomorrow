@@ -313,6 +313,15 @@ func test_paid_civic_studies_require_foundations_and_local_examination()->void:
 		assert_float(P.multiplier(entry)).is_equal(2.5)
 		assert_dict(GovernmentPeopleSystem.administration_records.mandates).is_empty()
 
+## A research design block may own the subject and replace the module's
+## authored foundations; know the live definition's foundations as well.
+func _know_live_foundations(subject:String)->void:
+	var live:=DiscoverySystem.discovery_definition(subject)
+	for parent:Variant in live.get("requires_all",[]):
+		if not String(parent) in GameState.known_discoveries:GameState.known_discoveries.append(String(parent))
+	for alternatives:Variant in live.get("requires_any",[]):
+		if not String((alternatives as Array)[-1]) in GameState.known_discoveries:GameState.known_discoveries.append(String((alternatives as Array)[-1]))
+
 func test_botany_purchase_requires_paid_delivery_and_local_study_without_seed_or_mastery()->void:
 	for entry:Dictionary in preload("res://scripts/field_botany_knowledge.gd").entries():
 		before_test();prepare()
@@ -320,6 +329,7 @@ func test_botany_purchase_requires_paid_delivery_and_local_study_without_seed_or
 		for parent:String in entry.requires_all:GameState.known_discoveries.append(parent)
 		for alternatives:Array in entry.requires_any:
 			GameState.known_discoveries.append(String(alternatives[-1]))
+		_know_live_foundations(subject)
 		var peer:=E.owner_state("neighbor")
 		peer.known_discoveries.append(subject);peer.discovery_adoption[subject]=1.0
 		var before:=float(GameState.resource_stockpiles.Stone)
@@ -345,6 +355,7 @@ func test_microscopy_purchase_requires_paid_delivery_and_local_study_without_app
 		for parent:String in entry.requires_all:GameState.known_discoveries.append(parent)
 		for alternatives:Array in entry.requires_any:
 			GameState.known_discoveries.append(String(alternatives[-1]))
+		_know_live_foundations(subject)
 		var peer:=E.owner_state("neighbor")
 		peer.known_discoveries.append(subject);peer.discovery_adoption[subject]=1.0
 		var before:=float(GameState.resource_stockpiles.Stone)

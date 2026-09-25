@@ -100,7 +100,7 @@ const ARCHETYPES:Dictionary={
 		"branch": "siege_fires",
 		"lineage": "siege_engineer",
 		"era": "gunpowder",
-		"gate": "powder_artillery",
+		"gate": "regimental_light_guns",
 		"training_days": 60,
 		"equipment": [
 			"field_gun"
@@ -516,7 +516,7 @@ const ARCHETYPES:Dictionary={
 		"branch": "mounted",
 		"lineage": "field_artillery",
 		"era": "gunpowder",
-		"gate": "mounted_firearms",
+		"gate": "galloping_horse_artillery",
 		"equipment": [
 			"horse_gun"
 		],
@@ -564,7 +564,7 @@ const ARCHETYPES:Dictionary={
 		"branch": "heavy_infantry",
 		"lineage": "crossbowman",
 		"era": "gunpowder",
-		"gate": "powder_artillery",
+		"gate": "hand_gun_tubes",
 		"equipment": [
 			"hand_cannon"
 		],
@@ -596,7 +596,7 @@ const ARCHETYPES:Dictionary={
 		"branch": "heavy_infantry",
 		"lineage": "musketeer",
 		"era": "gunpowder",
-		"gate": "matchlock_drill",
+		"gate": "grenadier_companies",
 		"equipment": [
 			"grenadier_kit"
 		],
@@ -832,7 +832,7 @@ const EQUIPMENT_GATES:Dictionary={
 	"sword_shield": "bronze_weaponry",
 	"lance": "domesticated_mounts",
 	"siege_kit": "siege_engineering",
-	"field_gun": "powder_artillery",
+	"field_gun": "regimental_light_guns",
 	"service_rifle": "metallic_cartridges",
 	"machine_gun": "automatic_actions",
 	"motorized_kit": "internal_combustion",
@@ -853,12 +853,12 @@ const EQUIPMENT_GATES:Dictionary={
 	"catapult": "siege_engineering",
 	"trebuchet": "counterweight_engines",
 	"bombard": "powder_artillery",
-	"horse_gun": "mounted_firearms",
+	"horse_gun": "galloping_horse_artillery",
 	"mortar": "indirect_fire",
 	"rocket_launcher": "indirect_fire",
-	"hand_cannon": "powder_artillery",
+	"hand_cannon": "hand_gun_tubes",
 	"musket": "matchlock_drill",
-	"grenadier_kit": "matchlock_drill",
+	"grenadier_kit": "grenadier_companies",
 	"marksman_rifle": "rifled_barrels",
 	"assault_kit": "automatic_actions",
 	"marine_kit": "amphibious_operations",

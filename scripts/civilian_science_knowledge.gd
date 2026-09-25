@@ -32,8 +32,8 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "optical_lenses",
-	      "precision_thermometry"
+	      "crucible_glass_melting",
+	      "ceramic_glaze_formulation"
 	    ]
 	  },
 	  {
@@ -66,7 +66,8 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "experimental_optics"
+	      "two_lens_tube_microscope",
+	      "two_lens_telescope"
 	    ]
 	  },
 	  {

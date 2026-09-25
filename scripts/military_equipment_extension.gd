@@ -271,7 +271,7 @@ const ITEMS:Dictionary={
 	},
 	"horse_gun": {
 		"name": "Horse Artillery equipment",
-		"gate": "mounted_firearms",
+		"gate": "galloping_horse_artillery",
 		"materials": {
 			"Timber": 3.2,
 			"Stone": 0.8
@@ -323,7 +323,7 @@ const ITEMS:Dictionary={
 	},
 	"hand_cannon": {
 		"name": "Hand Cannoneers equipment",
-		"gate": "powder_artillery",
+		"gate": "hand_gun_tubes",
 		"materials": {
 			"Timber": 0.8,
 			"Stone": 0.2
@@ -357,7 +357,7 @@ const ITEMS:Dictionary={
 	},
 	"grenadier_kit": {
 		"name": "Grenadiers equipment",
-		"gate": "matchlock_drill",
+		"gate": "grenadier_companies",
 		"materials": {
 			"Timber": 0.8,
 			"Stone": 0.2

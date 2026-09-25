@@ -33,7 +33,6 @@ static func entries()->Array[Dictionary]:
     "effects": {},
     "foundation_for": [
       "timed_signal_sequences",
-      "shutter_signal_frames",
       "punched_message_tape",
       "message_framing"
     ],

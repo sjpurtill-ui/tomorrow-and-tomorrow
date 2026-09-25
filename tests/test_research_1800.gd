@@ -70,10 +70,11 @@ func test_blast_furnace_is_closed_at_year_1200()->void:
 func test_black_powder_does_not_unlock_hand_cannons()->void:
 	assert_str(Catalog.block_of("black_powder")).is_equal("y1200_1800")
 	assert_float(DiscoverySystem.research_600_earliest_year(_entry("black_powder"))).is_greater(1750.0)
-	# Hand cannons wait for a gunpowder weapon, not the chemistry.
-	assert_str(Land.gate_for("hand_cannoneer")).is_equal("powder_artillery")
-	assert_str(String(Land.EQUIPMENT_GATES.hand_cannon)).is_equal("powder_artillery")
-	assert_str(String(Extension.ITEMS.hand_cannon.gate)).is_equal("powder_artillery")
+	# Hand cannons wait for a gunpowder weapon (the 1800-2400 design's hand-gun
+	# tubes), not the chemistry.
+	assert_str(Land.gate_for("hand_cannoneer")).is_equal("hand_gun_tubes")
+	assert_str(String(Land.EQUIPMENT_GATES.hand_cannon)).is_equal("hand_gun_tubes")
+	assert_str(String(Extension.ITEMS.hand_cannon.gate)).is_equal("hand_gun_tubes")
 	for unit:String in Land.ARCHETYPES:
 		assert_str(Land.gate_for(unit)).override_failure_message(unit).is_not_equal("black_powder")
 	for item:String in Land.EQUIPMENT_GATES:
@@ -86,21 +87,20 @@ func test_black_powder_does_not_unlock_hand_cannons()->void:
 	GameState.discovery_adoption["black_powder"]=1.0
 	assert_bool(bool(MilitaryCampaign._knowledge_gate(Land.gate_for("hand_cannoneer"),0.10).unlocked)).is_false()
 	assert_bool(bool(MilitaryCampaign._knowledge_gate(String(Land.EQUIPMENT_GATES.hand_cannon),0.08).unlocked)).is_false()
-	# powder_artillery itself stays outside this window. The catalog dates it
-	# inside (historical 1350), so a redate floor (design_amendments_600.json)
-	# holds it back until the 1800-2400 design places it.
+	# powder_artillery itself stays outside this window: the 1800-2400 design
+	# places it (1848, band from 1818), which replaced the old redate floor.
 	var artillery:=_entry("powder_artillery")
-	assert_bool(Catalog.has("powder_artillery")).is_false()
-	assert_bool((artillery.get("requires_all",artillery.get("requires",[])) as Array).has("black_powder")).is_true()
-	assert_float(Catalog.redate("powder_artillery")).is_greater_equal(1800.0)
+	assert_str(Catalog.block_of("powder_artillery")).is_equal("y1800_2400")
 	assert_float(DiscoverySystem.research_600_earliest_year(artillery)).is_greater_equal(1800.0)
 	GameState.known_discoveries.assign(artillery.get("requires_all",artillery.get("requires",[])))
 	assert_bool(_eligible_at(artillery,1799.0)).is_false()
-	# No land unit or equipment that fires powder opens before 1800.
+	# No land unit or equipment that fires powder opens before black powder's
+	# design year. The earliest, hand-gun tubes, has band 1792-1852.
+	var powder:=float(Catalog.item("black_powder").proposed_year)
 	for unit:String in Land.ARCHETYPES:
 		if String(Land.archetype(unit).get("era",""))!="gunpowder":continue
 		var gate:=Land.gate_for(unit)
-		assert_float(DiscoverySystem.research_600_earliest_year(_entry(gate))).override_failure_message("%s <- %s" % [unit,gate]).is_greater_equal(1800.0)
+		assert_float(DiscoverySystem.research_600_earliest_year(_entry(gate))).override_failure_message("%s <- %s" % [unit,gate]).is_greater(powder)
 
 func test_ocean_sailing_is_not_available_at_year_560()->void:
 	var sailing:=_entry("ocean_sailing")

@@ -23,11 +23,14 @@ func day()->void:
 func test_authored_catalog_contracts_and_peaceful_reachability()->void:
 	assert_int(Knowledge.entries().size()).is_equal(14)
 	assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(Knowledge.entries(),DiscoverySystem.technology_catalog)).is_empty()
+	# As in test_civilian_science: the 0-600 design's communal defence customs
+	# underlie chiefdom and kingship; every other security entry counts as military.
+	var Catalog:=preload("res://scripts/research_600_catalog.gd")
 	var known:Array=[];var changed:=true
 	while changed:
 		changed=false
 		for entry:Dictionary in DiscoverySystem.technology_catalog:
-			if entry.dynamic=="security" or entry.id in known:continue
+			if (entry.dynamic=="security" and Catalog.block_of(String(entry.id))!="y0_600") or entry.id in known:continue
 			for route:Dictionary in P.routes_for(entry,known,{}):
 				if route.ready:known.append(entry.id);changed=true;break
 	assert_bool("photovoltaic_power" in known).is_true()

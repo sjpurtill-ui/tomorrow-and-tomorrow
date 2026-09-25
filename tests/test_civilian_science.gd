@@ -24,8 +24,13 @@ func test_science_contracts_have_real_downstream_uses()->void:
 
 func test_peaceful_graph_reaches_modern_civilian_capabilities()->void:
 	var peaceful:Array=[]
+	# The 0-600 design makes communal defence customs (musters, raid scouting,
+	# hamlet defence pacts) foundations of chiefdom and kingship, and every later
+	# institution and science rests on that trunk. They are not weapons or army
+	# research; every other security entry still counts as military.
+	var Catalog:=preload("res://scripts/research_600_catalog.gd")
 	for entry:Dictionary in DiscoverySystem.technology_catalog:
-		if entry.dynamic!="security":peaceful.append(entry)
+		if entry.dynamic!="security" or Catalog.block_of(String(entry.id))=="y0_600":peaceful.append(entry)
 	var known:Array=[]
 	var changed:=true
 	while changed:

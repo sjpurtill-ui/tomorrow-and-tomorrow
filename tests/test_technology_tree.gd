@@ -16,10 +16,10 @@ func test_playable_tree_is_finite_unique_and_has_every_domain()->void:
 		domains[String(entry.dynamic)]=true
 		assert_bool(bool(entry.get("frontier",false))).is_false()
 		for parent in entry.get("requires",[]): assert_bool(DiscoverySystem.catalog_by_id.has(String(parent))).is_true()
-		# The design blocks (0-600, 600-1200, 1200-1800) add long, deliberate
-		# chains (e.g. 17 links to scale armor, 30 to the petty jury); later
-		# catalog entries build on top of them (deepest today: 51).
-		assert_int(DiscoverySystem.technology_depth(String(entry.id))).is_less(56)
+		# The design blocks (0-600 to 1800-2400) add long, deliberate chains
+		# (e.g. 17 links to scale armor, 30 to the petty jury, 35 to factory
+		# villages); later catalog entries build on top of them (deepest today: 79).
+		assert_int(DiscoverySystem.technology_depth(String(entry.id))).is_less(84)
 	assert_int(ids.size()).is_greater(100)
 	assert_int(domains.size()).is_equal(12)
 func test_legacy_refinements_cannot_be_researched_again()->void:

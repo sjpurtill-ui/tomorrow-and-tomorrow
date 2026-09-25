@@ -30950,7 +30950,6 @@
 "grain_milling": 800.0,
 "germination_trials": 900.0,
 "fiber_pulp_beating": 1080.0,
-"ceramic_slip_casting": 2300.0,
-"powder_artillery": 1880.0
+"ceramic_slip_casting": 2300.0
 }
 }
