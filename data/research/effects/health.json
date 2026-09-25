@@ -7,7 +7,7 @@
    "effects": {
     "health_protection": 0.0121,
     "injury_risk": -0.0319,
-    "labor_demand": 0.008,
+    "labor_demand": 0.003,
     "maternal_safety": 0.0062
    }
   },
@@ -70,14 +70,14 @@
    "effects": {
     "health_protection": 0.0046,
     "injury_risk": -0.01,
-    "labor_demand": 0.01
+    "labor_demand": 0.0037
    }
   },
   "dietary_healing_regimens": {
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
    "effects": {
     "health_protection": 0.0069,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0037,
     "nutrition_quality": 0.011
    }
   },
@@ -85,7 +85,7 @@
    "ability_reason": "No mother labors alone; difficult births are met by women who have seen them before.",
    "effects": {
     "knowledge_preservation": 0.0131,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0037,
     "maternal_safety": 0.031,
     "neonatal_survival": 0.0207
    }
@@ -118,7 +118,7 @@
    "ability_reason": "Drinking upstream of washing and herds ends much of the summer sickness that kills children.",
    "effects": {
     "disease_exposure": -0.0375,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0037,
     "maternal_safety": 0.0124,
     "neonatal_survival": 0.0103,
     "water_safety": 0.0596
@@ -182,7 +182,7 @@
     "cohesion": 0.0064,
     "health_protection": 0.0012,
     "knowledge_preservation": 0.0039,
-    "labor_demand": 0.008
+    "labor_demand": 0.003
    },
    "name": "Care for the Lame",
    "observation": "Kin feed and carry those who can no longer walk or hunt, and the lame live on for years.",
@@ -201,7 +201,7 @@
   "refuse_removal": {
    "effects": {
     "disease_exposure": -0.0018,
-    "labor_demand": 0.004,
+    "labor_demand": 0.0004,
     "sanitation": 0.03
    },
    "name": "Refuse Out of the Dwelling",
@@ -306,7 +306,7 @@
    "effects": {
     "disease_exposure": -0.003,
     "health_protection": 0.0027,
-    "labor_demand": 0.01
+    "labor_demand": 0.0005
    }
   },
   "symptom_triage_customs": {
@@ -414,7 +414,7 @@
    "art": "res://assets/ui/research/subjects/clean_water-v1.png",
    "effects": {
     "disease_exposure": -0.0013,
-    "labor_demand": 0.01,
+    "labor_demand": 0.001,
     "water_safety": 0.006
    }
   },
@@ -494,7 +494,7 @@
    "social_consequence": "Where people may relieve themselves becomes a rule of the settlement, enforced by neighbours.",
    "effects": {
     "disease_exposure": -0.004,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "sanitation": 0.0068,
     "water_safety": 0.0039
    }
@@ -503,7 +503,7 @@
    "ability_reason": "Settled water is clearer and brings less sickness.",
    "art": "res://assets/ui/research/paper/water_settling_basins.png",
    "effects": {
-    "labor_demand": 0.005,
+    "labor_demand": 0.0003,
     "water_safety": 0.0019
    }
   },
@@ -513,18 +513,19 @@
     "cohesion": -0.015,
     "disease_exposure": -0.005,
     "health_protection": 0.0095,
-    "labor_demand": 0.03
+    "labor_demand": 0.0015
    }
   },
   "woven_dressings": {
    "ability_reason": "Clean woven linen for dressings keeps wounds covered and dry.",
-   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png"
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "effects": {}
   },
   "protected_wellheads": {
    "ability_reason": "A covered wellhead keeps dung, animals and runoff out of the water.",
    "art": "res://assets/ui/research/subjects/clean_water-v1.png",
    "effects": {
-    "labor_demand": 0.005,
+    "labor_demand": 0.0003,
     "water_safety": 0.0034
    }
   },
@@ -532,7 +533,7 @@
    "ability_reason": "Drinking water kept apart from washing water stays fit to drink.",
    "art": "res://assets/ui/research/subjects/clean_water-v1.png",
    "effects": {
-    "labor_demand": 0.005,
+    "labor_demand": 0.0003,
     "water_safety": 0.0029
    }
   },
@@ -570,7 +571,7 @@
    "effects": {
     "health_protection": 0.0042,
     "knowledge_preservation": 0.003,
-    "labor_demand": 0.01
+    "labor_demand": 0.0005
    }
   },
   "protective_gear_customs": {
@@ -578,14 +579,14 @@
    "effects": {
     "health_protection": 0.0021,
     "injury_risk": -0.0031,
-    "labor_demand": 0.01
+    "labor_demand": 0.0005
    }
   },
   "sanitation_inspection_customs": {
    "art": "res://assets/ui/research/subjects/clean_water-v1.png",
    "effects": {
     "disease_exposure": -0.0029,
-    "institutional_rigidity": 0.01,
+    "institutional_rigidity": 0.0033,
     "sanitation": 0.0062
    }
   },
@@ -614,7 +615,7 @@
     "construction_rate": 0.0034,
     "disease_exposure": -0.004,
     "health_protection": 0.0074,
-    "labor_demand": 0.025,
+    "labor_demand": 0.0013,
     "sanitation": 0.006
    }
   },
@@ -678,7 +679,7 @@
     "health_protection": 0.0077,
     "knowledge_preservation": 0.0114,
     "knowledge_rate": 0.0091,
-    "labor_demand": 0.015
+    "labor_demand": 0.0008
    }
   },
   "skin_disease_exclusion": {
@@ -711,7 +712,7 @@
   },
   "healer_fee_law": {
    "effects": {
-    "institutional_rigidity": 0.006,
+    "institutional_rigidity": 0.001,
     "legitimacy": 0.0014,
     "state_capacity": 0.002
    },
@@ -1187,6 +1188,120 @@
     "adoption_rate": 0.012,
     "knowledge_preservation": 0.03,
     "observation_rate": 0.006
+   }
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "wound_cleaning": {
+    "health_protection": 0.0121,
+    "injury_risk": -0.0319,
+    "labor_demand": 0.008,
+    "maternal_safety": 0.0062
+   },
+   "splint_and_bracing_technique": {
+    "health_protection": 0.0046,
+    "injury_risk": -0.01,
+    "labor_demand": 0.01
+   },
+   "dietary_healing_regimens": {
+    "health_protection": 0.0069,
+    "labor_demand": 0.01,
+    "nutrition_quality": 0.011
+   },
+   "birth_attendants": {
+    "knowledge_preservation": 0.0131,
+    "labor_demand": 0.01,
+    "maternal_safety": 0.031,
+    "neonatal_survival": 0.0207
+   },
+   "clean_water": {
+    "disease_exposure": -0.0375,
+    "labor_demand": 0.01,
+    "maternal_safety": 0.0124,
+    "neonatal_survival": 0.0103,
+    "water_safety": 0.0596
+   },
+   "disability_care": {
+    "cohesion": 0.0064,
+    "health_protection": 0.0012,
+    "knowledge_preservation": 0.0039,
+    "labor_demand": 0.008
+   },
+   "refuse_removal": {
+    "disease_exposure": -0.0018,
+    "labor_demand": 0.004,
+    "sanitation": 0.03
+   },
+   "sickroom_isolation_practice": {
+    "disease_exposure": -0.003,
+    "health_protection": 0.0027,
+    "labor_demand": 0.01
+   },
+   "seasonal_well_flushing": {
+    "disease_exposure": -0.0013,
+    "labor_demand": 0.01,
+    "water_safety": 0.006
+   },
+   "latrine_siting": {
+    "disease_exposure": -0.004,
+    "labor_demand": 0.01,
+    "sanitation": 0.0068,
+    "water_safety": 0.0039
+   },
+   "water_settling_basins": {
+    "labor_demand": 0.005,
+    "water_safety": 0.0019
+   },
+   "isolation_practice": {
+    "cohesion": -0.015,
+    "disease_exposure": -0.005,
+    "health_protection": 0.0095,
+    "labor_demand": 0.03
+   },
+   "woven_dressings": {},
+   "protected_wellheads": {
+    "labor_demand": 0.005,
+    "water_safety": 0.0034
+   },
+   "separate_clean_water_storage": {
+    "labor_demand": 0.005,
+    "water_safety": 0.0029
+   },
+   "healer_specialization_customs": {
+    "health_protection": 0.0042,
+    "knowledge_preservation": 0.003,
+    "labor_demand": 0.01
+   },
+   "protective_gear_customs": {
+    "health_protection": 0.0021,
+    "injury_risk": -0.0031,
+    "labor_demand": 0.01
+   },
+   "sanitation_inspection_customs": {
+    "disease_exposure": -0.0029,
+    "institutional_rigidity": 0.01,
+    "sanitation": 0.0062
+   },
+   "public_baths": {
+    "construction_rate": 0.0034,
+    "disease_exposure": -0.004,
+    "health_protection": 0.0074,
+    "labor_demand": 0.025,
+    "sanitation": 0.006
+   },
+   "case_records": {
+    "health_protection": 0.0077,
+    "knowledge_preservation": 0.0114,
+    "knowledge_rate": 0.0091,
+    "labor_demand": 0.015
+   },
+   "healer_fee_law": {
+    "institutional_rigidity": 0.006,
+    "legitimacy": 0.0014,
+    "state_capacity": 0.002
    }
   }
  }

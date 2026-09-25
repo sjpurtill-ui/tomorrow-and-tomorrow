@@ -4,9 +4,9 @@
  "items": {
   "post_mortality_remarriage": {
    "effects": {
-    "cohesion": 0.002,
-    "conception_support": 0.006,
-    "housing_output": 0.001
+    "cohesion": 0.0001,
+    "conception_support": 0.0011,
+    "housing_output": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/marriage_feasts.png",
    "name": "Remarriage After the Mortality",
@@ -14,10 +14,10 @@
   },
   "vacant_holding_migration": {
    "effects": {
-    "cohesion": -0.001,
-    "cultivation_yield": 0.002,
-    "housing_output": 0.003,
-    "labor_efficiency": 0.002
+    "cohesion": -0.0002,
+    "cultivation_yield": 0.0006,
+    "housing_output": 0.0008,
+    "labor_efficiency": 0.0008
    },
    "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
    "name": "Filling the Empty Holdings",
@@ -25,11 +25,11 @@
   },
   "decennial_household_registers": {
    "effects": {
-    "institutional_rigidity": 0.003,
-    "knowledge_preservation": 0.0026,
-    "labor_demand": 0.002,
+    "institutional_rigidity": 0.0005,
+    "knowledge_preservation": 0.0007,
+    "labor_demand": 0.0001,
     "legitimacy": -0.001,
-    "state_capacity": 0.0048
+    "state_capacity": 0.0011
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Ten-Yearly Household Registers",
@@ -39,9 +39,9 @@
   },
   "free_citizenship_grants": {
    "effects": {
-    "cohesion": -0.001,
-    "housing_output": 0.003,
-    "trade_capacity": 0.0013
+    "cohesion": -0.0002,
+    "housing_output": 0.0008,
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Free Citizenship Grants",
@@ -49,11 +49,11 @@
   },
   "wage_seeking_migration": {
    "effects": {
-    "cohesion": -0.002,
+    "cohesion": -0.0003,
     "conception_support": -0.001,
     "disease_exposure": 0.002,
-    "institutional_rigidity": -0.002,
-    "labor_efficiency": 0.003
+    "institutional_rigidity": -0.0001,
+    "labor_efficiency": 0.0012
    },
    "art": "res://assets/ui/research/subjects/route_memory-v1.png",
    "name": "Wage-Seeking Migration",
@@ -62,10 +62,10 @@
   },
   "town_quarter_house_lists": {
    "effects": {
-    "knowledge_preservation": 0.0008,
-    "labor_demand": 0.001,
-    "security_efficiency": 0.001,
-    "state_capacity": 0.0018
+    "knowledge_preservation": 0.0002,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0003,
+    "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Quarter House Lists",
@@ -73,10 +73,10 @@
   },
   "public_dowry_fund": {
    "effects": {
-    "cohesion": 0.001,
-    "conception_support": 0.002,
-    "state_capacity": 0.0006,
-    "trade_capacity": 0.0013
+    "cohesion": 0.0001,
+    "conception_support": 0.0004,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
    "name": "Public Dowry Fund",
@@ -84,12 +84,12 @@
   },
   "household_wealth_census": {
    "effects": {
-    "cohesion": -0.002,
-    "institutional_rigidity": 0.002,
-    "knowledge_preservation": 0.0034,
-    "labor_demand": 0.004,
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0003,
+    "knowledge_preservation": 0.0004,
+    "labor_demand": 0.0002,
     "legitimacy": -0.003,
-    "state_capacity": 0.006
+    "state_capacity": 0.0014
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Household Wealth Census",
@@ -99,8 +99,8 @@
   },
   "dowry_caps": {
    "effects": {
-    "cohesion": 0.001,
-    "conception_support": 0.003,
+    "cohesion": 0.0001,
+    "conception_support": 0.0006,
     "legitimacy": -0.001
    },
    "art": "res://assets/ui/research/discovery-600/marriage_feasts.png",
@@ -109,9 +109,9 @@
   },
   "census_age_recording": {
    "effects": {
-    "knowledge_preservation": 0.0017,
-    "state_capacity": 0.0018,
-    "warfare_readiness": 0.001
+    "knowledge_preservation": 0.0002,
+    "state_capacity": 0.0004,
+    "warfare_readiness": 0.0002
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Ages in the Census",
@@ -120,10 +120,10 @@
   "registered_foundling_hospital": {
    "effects": {
     "disease_exposure": 0.002,
-    "labor_demand": 0.003,
-    "legitimacy": 0.002,
-    "neonatal_survival": 0.0046,
-    "state_capacity": 0.0006
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001,
+    "neonatal_survival": 0.0038,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
    "name": "Registered Foundling Hospital",
@@ -133,10 +133,10 @@
   },
   "health_office_death_registers": {
    "effects": {
-    "disease_exposure": -0.001,
-    "knowledge_preservation": 0.0017,
-    "observation_rate": 0.0008,
-    "state_capacity": 0.0012
+    "disease_exposure": -0.0007,
+    "knowledge_preservation": 0.0002,
+    "observation_rate": 0.0005,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Death Registers",
@@ -145,8 +145,8 @@
   "foundling_wet_nurses": {
    "effects": {
     "disease_exposure": 0.001,
-    "labor_demand": 0.002,
-    "neonatal_survival": 0.0046
+    "labor_demand": 0.0001,
+    "neonatal_survival": 0.0038
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
    "name": "Foundling Wet-Nurses",
@@ -154,11 +154,11 @@
   },
   "town_orphanage": {
    "effects": {
-    "cohesion": 0.002,
-    "labor_demand": 0.002,
-    "labor_efficiency": 0.001,
-    "legitimacy": 0.001,
-    "neonatal_survival": 0.0011
+    "cohesion": 0.0001,
+    "labor_demand": 0.0001,
+    "labor_efficiency": 0.0006,
+    "legitimacy": 0.0001,
+    "neonatal_survival": 0.0009
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
    "name": "Town Orphanage",
@@ -166,9 +166,9 @@
   },
   "women_refuge_houses": {
    "effects": {
-    "cohesion": 0.002,
-    "disease_exposure": -0.0005,
-    "legitimacy": 0.001,
+    "cohesion": 0.0001,
+    "disease_exposure": -0.0003,
+    "legitimacy": 0.0001,
     "maternal_safety": 0.0016
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
@@ -177,10 +177,10 @@
   },
   "pestilence_orphan_lists": {
    "effects": {
-    "cohesion": 0.002,
-    "legitimacy": 0.002,
-    "neonatal_survival": 0.0011,
-    "state_capacity": 0.0006
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "neonatal_survival": 0.0009,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Plague Orphan Lists",
@@ -188,9 +188,9 @@
   },
   "lineage_genealogy_books": {
    "effects": {
-    "cohesion": 0.002,
-    "institutional_rigidity": 0.002,
-    "knowledge_preservation": 0.0017
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/genealogical_recitation.png",
    "name": "Lineage Books",
@@ -198,10 +198,10 @@
   },
   "expelled_community_refuge": {
    "effects": {
-    "cohesion": -0.002,
-    "craft_output": 0.002,
+    "cohesion": -0.0001,
+    "craft_output": 0.0011,
     "knowledge_rate": 0.001,
-    "trade_capacity": 0.002
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
    "name": "Refuge for the Expelled",
@@ -210,9 +210,9 @@
   },
   "emigrant_port_licences": {
    "effects": {
-    "knowledge_preservation": 0.0008,
-    "labor_demand": 0.001,
-    "state_capacity": 0.0012
+    "knowledge_preservation": 0.0001,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Emigrant Licences",
@@ -220,14 +220,14 @@
   },
   "overseas_settler_colonies": {
    "effects": {
-    "cohesion": -0.004,
-    "conception_support": 0.004,
-    "cultivation_yield": 0.003,
+    "cohesion": -0.0003,
+    "conception_support": 0.0011,
+    "cultivation_yield": 0.0007,
     "disease_exposure": 0.003,
-    "housing_output": 0.005,
-    "labor_demand": 0.003,
-    "naval_capacity": 0.0021,
-    "trade_capacity": 0.0039
+    "housing_output": 0.0022,
+    "labor_demand": 0.0002,
+    "naval_capacity": 0.0004,
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
    "name": "Overseas Settler Colonies",
@@ -237,7 +237,7 @@
   },
   "printed_midwife_manual": {
    "effects": {
-    "knowledge_preservation": 0.0017,
+    "knowledge_preservation": 0.0003,
     "maternal_safety": 0.0083,
     "neonatal_survival": 0.0023
    },
@@ -247,11 +247,11 @@
   },
   "contact_epidemic_records": {
    "effects": {
-    "cohesion": -0.002,
-    "disease_exposure": -0.0005,
-    "knowledge_preservation": 0.0034,
-    "observation_rate": 0.0032,
-    "state_capacity": 0.0006
+    "cohesion": -0.0001,
+    "disease_exposure": -0.0002,
+    "knowledge_preservation": 0.0006,
+    "observation_rate": 0.0029,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
    "name": "Records of Contact Epidemics",
@@ -261,11 +261,11 @@
   },
   "shrine_vital_registers": {
    "effects": {
-    "institutional_rigidity": 0.002,
-    "knowledge_preservation": 0.0043,
-    "labor_demand": 0.002,
-    "legitimacy": 0.002,
-    "state_capacity": 0.0042
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.0007,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Shrine Registers",
@@ -274,11 +274,11 @@
   },
   "devotee_house_closure": {
    "effects": {
-    "cohesion": -0.003,
-    "conception_support": 0.003,
+    "cohesion": -0.0003,
+    "conception_support": 0.0008,
     "health_protection": -0.001,
     "knowledge_preservation": -0.002,
-    "labor_efficiency": 0.002,
+    "labor_efficiency": 0.0009,
     "legitimacy": -0.002
    },
    "art": "res://assets/ui/research/discovery-600/sacred_places.png",
@@ -288,9 +288,9 @@
   },
   "marriage_dissolution_courts": {
    "effects": {
-    "cohesion": 0.001,
-    "conception_support": 0.001,
-    "institutional_rigidity": -0.001,
+    "cohesion": 0.0001,
+    "conception_support": 0.0003,
+    "institutional_rigidity": -0.0001,
     "maternal_safety": 0.0016
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
@@ -299,11 +299,11 @@
   },
   "witnessed_marriage_rule": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0001,
     "conception_support": -0.002,
-    "institutional_rigidity": 0.003,
-    "legitimacy": 0.002,
-    "state_capacity": 0.0024
+    "institutional_rigidity": 0.0004,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/discovery-600/marriage_feasts.png",
    "name": "Witnessed Marriage",
@@ -312,10 +312,10 @@
   },
   "mixed_descent_status": {
    "effects": {
-    "cohesion": 0.002,
-    "institutional_rigidity": 0.002,
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0002,
     "legitimacy": -0.001,
-    "state_capacity": 0.0006
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/intermarriage_visiting_customs.png",
    "name": "Mixed-Descent Standing",
@@ -323,7 +323,7 @@
   },
   "postmortem_caesarean_rule": {
    "effects": {
-    "legitimacy": 0.001,
+    "legitimacy": 0.0001,
     "neonatal_survival": 0.0023
    },
    "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
@@ -332,11 +332,11 @@
   },
   "weekly_mortality_bills": {
    "effects": {
-    "cohesion": -0.001,
-    "disease_exposure": -0.002,
-    "knowledge_preservation": 0.0026,
-    "observation_rate": 0.0032,
-    "state_capacity": 0.0024
+    "cohesion": -0.0001,
+    "disease_exposure": -0.0009,
+    "knowledge_preservation": 0.0006,
+    "observation_rate": 0.0008,
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Weekly Bills of Mortality",
@@ -355,10 +355,10 @@
   },
   "annual_soul_lists": {
    "effects": {
-    "institutional_rigidity": 0.002,
-    "knowledge_preservation": 0.0017,
-    "labor_demand": 0.001,
-    "state_capacity": 0.0024
+    "institutional_rigidity": 0.0003,
+    "knowledge_preservation": 0.0004,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Soul Lists",
@@ -366,12 +366,12 @@
   },
   "headright_land_grants": {
    "effects": {
-    "cohesion": -0.002,
-    "conception_support": 0.002,
-    "cultivation_yield": 0.002,
+    "cohesion": -0.0003,
+    "conception_support": 0.0011,
+    "cultivation_yield": 0.0011,
     "ecological_pressure": 0.002,
     "housing_output": 0.003,
-    "trade_capacity": 0.0007
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Headright Grants",
@@ -380,8 +380,8 @@
   },
   "secret_obstetric_forceps": {
    "effects": {
-    "health_risk": 0.001,
-    "maternal_safety": 0.0049,
+    "health_risk": 0.0005,
+    "maternal_safety": 0.0048,
     "neonatal_survival": 0.0023
    },
    "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
@@ -391,10 +391,10 @@
   },
   "soldier_marriage_limits": {
    "effects": {
-    "cohesion": -0.002,
+    "cohesion": -0.0004,
     "conception_support": -0.002,
-    "logistics_endurance": 0.001,
-    "warfare_readiness": 0.002
+    "logistics_endurance": 0.0003,
+    "warfare_readiness": 0.0005
    },
    "art": "res://assets/ui/research/subjects/formation_drill-v1.png",
    "name": "Soldiers' Marriage Limits",
@@ -402,9 +402,9 @@
   },
   "man_midwives": {
    "effects": {
-    "cohesion": -0.001,
-    "health_risk": 0.002,
-    "maternal_safety": 0.0049,
+    "cohesion": -0.0002,
+    "health_risk": 0.001,
+    "maternal_safety": 0.0048,
     "neonatal_survival": 0.0011
    },
    "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
@@ -414,9 +414,9 @@
   },
   "ship_passenger_lists": {
    "effects": {
-    "knowledge_preservation": 0.0008,
-    "naval_capacity": 0.0007,
-    "state_capacity": 0.0012
+    "knowledge_preservation": 0.0006,
+    "naval_capacity": 0.0004,
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Passenger Lists",
@@ -424,9 +424,9 @@
   },
   "childbed_death_counts": {
    "effects": {
-    "knowledge_preservation": 0.0008,
-    "maternal_safety": 0.0049,
-    "observation_rate": 0.0016
+    "knowledge_preservation": 0.0006,
+    "maternal_safety": 0.0048,
+    "observation_rate": 0.0011
    },
    "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
    "name": "Childbed Deaths Counted",
@@ -434,12 +434,12 @@
   },
   "strict_family_settlement": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0002,
     "conception_support": -0.003,
-    "housing_output": 0.001,
-    "institutional_rigidity": 0.006,
+    "housing_output": 0.0009,
+    "institutional_rigidity": 0.0008,
     "labor_efficiency": -0.002,
-    "legitimacy": 0.002
+    "legitimacy": 0.0002
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Strict Family Settlement",
@@ -449,9 +449,9 @@
   },
   "burial_age_entries": {
    "effects": {
-    "knowledge_preservation": 0.0017,
-    "observation_rate": 0.0016,
-    "state_capacity": 0.0006
+    "knowledge_preservation": 0.0004,
+    "observation_rate": 0.0002,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/burial_ground_separation.png",
    "name": "Ages in the Burial Register",
@@ -459,10 +459,10 @@
   },
   "mortality_bill_arithmetic": {
    "effects": {
-    "knowledge_preservation": 0.0017,
-    "knowledge_rate": 0.0025,
-    "observation_rate": 0.0032,
-    "state_capacity": 0.0036
+    "knowledge_preservation": 0.0004,
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.0004,
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
    "name": "Political Arithmetic",
@@ -471,10 +471,10 @@
   },
   "colonist_bride_passages": {
    "effects": {
-    "cohesion": -0.001,
-    "conception_support": 0.003,
-    "housing_output": 0.002,
-    "legitimacy": -0.001
+    "cohesion": -0.0001,
+    "conception_support": 0.0004,
+    "housing_output": 0.0017,
+    "legitimacy": -0.0003
    },
    "art": "res://assets/ui/research/discovery-600/marriage_feasts.png",
    "name": "Colonist Brides",
@@ -482,8 +482,8 @@
   },
   "large_family_tax_relief": {
    "effects": {
-    "conception_support": 0.002,
-    "legitimacy": 0.001,
+    "conception_support": 0.0003,
+    "legitimacy": 0.0001,
     "state_capacity": -0.001
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
@@ -492,7 +492,7 @@
   },
   "country_wet_nursing": {
    "effects": {
-    "conception_support": 0.003,
+    "conception_support": 0.0004,
     "disease_exposure": 0.001,
     "labor_efficiency": 0.001,
     "neonatal_survival": -0.004
@@ -504,10 +504,10 @@
   },
   "colonial_household_registers": {
    "effects": {
-    "cohesion": -0.001,
-    "knowledge_preservation": 0.0008,
-    "labor_demand": 0.001,
-    "state_capacity": 0.0018
+    "cohesion": -0.0001,
+    "knowledge_preservation": 0.0002,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Colonial Registers",
@@ -515,10 +515,10 @@
   },
   "separate_wife_property": {
    "effects": {
-    "cohesion": 0.001,
-    "legitimacy": 0.001,
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
     "maternal_safety": 0.0016,
-    "trade_capacity": 0.0007
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Wife's Separate Property",
@@ -526,10 +526,10 @@
   },
   "populationist_policy": {
    "effects": {
-    "conception_support": 0.003,
-    "institutional_rigidity": 0.002,
-    "legitimacy": -0.001,
-    "state_capacity": 0.0012
+    "conception_support": 0.0011,
+    "institutional_rigidity": 0.0005,
+    "legitimacy": -0.0002,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
    "name": "Populationist Policy",
@@ -537,12 +537,12 @@
   },
   "faith_refugee_edict": {
    "effects": {
-    "cohesion": -0.003,
-    "craft_output": 0.004,
-    "housing_output": 0.002,
-    "knowledge_rate": 0.0015,
-    "legitimacy": 0.001,
-    "trade_capacity": 0.0026
+    "cohesion": -0.0004,
+    "craft_output": 0.0022,
+    "housing_output": 0.0009,
+    "knowledge_rate": 0.0004,
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
    "name": "Faith Refugee Edict",
@@ -552,9 +552,9 @@
   },
   "tontine_annuities": {
    "effects": {
-    "cohesion": -0.001,
-    "state_capacity": 0.0012,
-    "trade_capacity": 0.0013
+    "cohesion": -0.0001,
+    "state_capacity": 0.0003,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
    "name": "Tontine",
@@ -562,10 +562,10 @@
   },
   "register_life_table": {
    "effects": {
-    "knowledge_rate": 0.0025,
-    "observation_rate": 0.0032,
-    "state_capacity": 0.0024,
-    "trade_capacity": 0.0013
+    "knowledge_rate": 0.0007,
+    "observation_rate": 0.0008,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
    "name": "Life Table",
@@ -574,10 +574,10 @@
   },
   "vital_events_tax": {
    "effects": {
-    "cohesion": -0.002,
+    "cohesion": -0.0003,
     "conception_support": -0.001,
-    "legitimacy": -0.003,
-    "state_capacity": 0.0018
+    "legitimacy": -0.0005,
+    "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
    "name": "Vital Events Tax",
@@ -585,9 +585,9 @@
   },
   "birth_multiplier_estimates": {
    "effects": {
-    "knowledge_rate": 0.0005,
-    "observation_rate": 0.0008,
-    "state_capacity": 0.0012
+    "knowledge_rate": 0.0001,
+    "observation_rate": 0.0002,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/tens_sixties_bundling.png",
    "name": "Birth Multiplier",
@@ -595,12 +595,12 @@
   },
   "nominal_realm_census": {
    "effects": {
-    "institutional_rigidity": 0.002,
-    "knowledge_preservation": 0.0034,
-    "labor_demand": 0.004,
-    "legitimacy": -0.002,
-    "state_capacity": 0.006,
-    "warfare_readiness": 0.002
+    "institutional_rigidity": 0.0008,
+    "knowledge_preservation": 0.0015,
+    "labor_demand": 0.0002,
+    "legitimacy": -0.0003,
+    "state_capacity": 0.0012,
+    "warfare_readiness": 0.0005
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Realm Census",
@@ -611,7 +611,7 @@
   "birth_sex_ratio": {
    "effects": {
     "knowledge_rate": 0.001,
-    "observation_rate": 0.0016
+    "observation_rate": 0.001
    },
    "art": "res://assets/ui/research/subjects/tallies-v1.png",
    "name": "Birth Sex Ratio",
@@ -619,11 +619,11 @@
   },
   "post_plague_colonization": {
    "effects": {
-    "cohesion": -0.002,
-    "cultivation_yield": 0.003,
-    "housing_output": 0.004,
-    "labor_demand": 0.001,
-    "state_capacity": 0.0006
+    "cohesion": -0.0003,
+    "cultivation_yield": 0.0009,
+    "housing_output": 0.0034,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Resettling Plague Districts",
@@ -631,9 +631,9 @@
   },
   "marriage_register_details": {
    "effects": {
-    "knowledge_preservation": 0.0017,
-    "observation_rate": 0.0008,
-    "state_capacity": 0.0012
+    "knowledge_preservation": 0.0008,
+    "observation_rate": 0.0005,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Marriage Register Details",
@@ -641,10 +641,10 @@
   },
   "convict_transportation": {
    "effects": {
-    "cohesion": -0.002,
-    "housing_output": 0.001,
-    "legitimacy": -0.002,
-    "security_efficiency": 0.002
+    "cohesion": -0.0003,
+    "housing_output": 0.0009,
+    "legitimacy": -0.0003,
+    "security_efficiency": 0.0008
    },
    "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
    "name": "Convict Transportation",
@@ -653,10 +653,10 @@
   },
   "midwife_birth_returns": {
    "effects": {
-    "labor_demand": 0.001,
+    "labor_demand": 0.0001,
     "maternal_safety": 0.0033,
-    "observation_rate": 0.0008,
-    "state_capacity": 0.0012
+    "observation_rate": 0.0005,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
    "name": "Midwives' Birth Returns",
@@ -664,10 +664,10 @@
   },
   "military_orphanage": {
    "effects": {
-    "labor_demand": 0.002,
-    "legitimacy": 0.002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0004,
     "neonatal_survival": 0.0011,
-    "warfare_readiness": 0.002
+    "warfare_readiness": 0.0005
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
    "name": "Military Orphanage",
@@ -675,10 +675,10 @@
   },
   "lodging_guest_registers": {
    "effects": {
-    "cohesion": -0.001,
-    "disease_exposure": -0.0005,
-    "security_efficiency": 0.003,
-    "state_capacity": 0.0012,
+    "cohesion": -0.0009,
+    "disease_exposure": -0.0004,
+    "security_efficiency": 0.0007,
+    "state_capacity": 0.0004,
     "trade_capacity": -0.001
    },
    "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
@@ -687,10 +687,11 @@
   },
   "published_obstetric_forceps": {
    "effects": {
-    "health_risk": 0.002,
-    "knowledge_preservation": 0.0017,
-    "maternal_safety": 0.0165,
-    "neonatal_survival": 0.0069
+    "health_risk": 0.0004,
+    "knowledge_preservation": 0.0004,
+    "maternal_safety": 0.0061,
+    "modern_survival": 0.002,
+    "neonatal_survival": 0.0062
    },
    "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
    "name": "Forceps Made Public",
@@ -702,10 +703,11 @@
    "effects": {
     "conception_support": 0.001,
     "disease_exposure": 0.003,
-    "labor_demand": 0.004,
-    "legitimacy": 0.002,
-    "neonatal_survival": 0.0023,
-    "state_capacity": 0.0012
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0002,
+    "modern_survival": 0.002,
+    "neonatal_survival": 0.0021,
+    "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
    "name": "National Foundling Hospital",
@@ -714,10 +716,10 @@
   },
   "divine_order_population_treatise": {
    "effects": {
-    "cohesion": 0.001,
-    "knowledge_rate": 0.001,
-    "legitimacy": 0.002,
-    "observation_rate": 0.0008
+    "cohesion": 0.0001,
+    "knowledge_rate": 0.0003,
+    "legitimacy": 0.0002,
+    "observation_rate": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/wisdom_instructions.png",
    "name": "Treatise on the Divine Order",
@@ -725,10 +727,10 @@
   },
   "actuarial_widows_fund": {
    "effects": {
-    "cohesion": 0.002,
-    "legitimacy": 0.001,
-    "state_capacity": 0.0006,
-    "trade_capacity": 0.0013
+    "cohesion": 0.0002,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0002,
+    "trade_capacity": 0.001
    },
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
    "name": "Widows' Fund",
@@ -737,10 +739,10 @@
   "lying_in_hospital": {
    "effects": {
     "disease_exposure": 0.003,
-    "labor_demand": 0.003,
-    "legitimacy": 0.001,
-    "maternal_safety": 0.0099,
-    "neonatal_survival": 0.0046
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001,
+    "maternal_safety": 0.0037,
+    "neonatal_survival": 0.0041
    },
    "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
    "name": "Lying-In Hospital",
@@ -749,11 +751,11 @@
   },
   "population_tables_office": {
    "effects": {
-    "institutional_rigidity": 0.003,
-    "knowledge_preservation": 0.0034,
-    "labor_demand": 0.003,
-    "observation_rate": 0.0032,
-    "state_capacity": 0.0048
+    "institutional_rigidity": 0.0014,
+    "knowledge_preservation": 0.0008,
+    "labor_demand": 0.0002,
+    "observation_rate": 0.0007,
+    "state_capacity": 0.0018
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Population Tables Office",
@@ -762,9 +764,9 @@
   },
   "life_expectancy_tables": {
    "effects": {
-    "knowledge_rate": 0.0015,
-    "observation_rate": 0.0016,
-    "trade_capacity": 0.0013
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.0004,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
    "name": "Expectation of Life",
@@ -772,9 +774,9 @@
   },
   "settler_doubling_observation": {
    "effects": {
-    "conception_support": 0.001,
-    "knowledge_rate": 0.001,
-    "observation_rate": 0.0016
+    "conception_support": 0.0004,
+    "knowledge_rate": 0.0004,
+    "observation_rate": 0.0004
    },
    "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
    "name": "Settler Doubling",
@@ -782,11 +784,11 @@
   },
   "clandestine_marriage_ban": {
    "effects": {
-    "cohesion": 0.001,
+    "cohesion": 0.0001,
     "conception_support": -0.002,
-    "institutional_rigidity": 0.002,
-    "legitimacy": 0.001,
-    "state_capacity": 0.0018
+    "institutional_rigidity": 0.0004,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/discovery-600/marriage_feasts.png",
    "name": "Secret Marriages Void",
@@ -795,10 +797,11 @@
   },
   "maternal_nursing_campaign": {
    "effects": {
-    "cohesion": 0.001,
+    "cohesion": 0.0001,
     "conception_support": -0.002,
-    "maternal_safety": 0.0033,
-    "neonatal_survival": 0.0092
+    "maternal_safety": 0.0009,
+    "modern_survival": 0.0013,
+    "neonatal_survival": 0.0012
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
    "name": "Mothers Nurse Their Own",
@@ -806,10 +809,11 @@
   },
   "inoculation_mortality_reckoning": {
    "effects": {
-    "adoption_rate": 0.004,
-    "disease_exposure": -0.001,
-    "knowledge_rate": 0.0015,
-    "legitimacy": 0.001
+    "adoption_rate": 0.0009,
+    "disease_exposure": -0.0002,
+    "knowledge_rate": 0.0006,
+    "legitimacy": 0.0001,
+    "modern_survival": 0.0013
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Inoculation Reckoned",
@@ -817,13 +821,13 @@
   },
   "frontier_colonist_recruitment": {
    "effects": {
-    "cohesion": -0.003,
-    "conception_support": 0.002,
-    "cultivation_yield": 0.004,
+    "cohesion": -0.0002,
+    "conception_support": 0.0008,
+    "cultivation_yield": 0.0004,
     "ecological_pressure": 0.003,
-    "housing_output": 0.005,
-    "labor_demand": 0.002,
-    "state_capacity": 0.0012
+    "housing_output": 0.0031,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Frontier Colonist Recruitment",
@@ -833,11 +837,12 @@
   },
   "manikin_midwife_schools": {
    "effects": {
-    "knowledge_preservation": 0.0017,
-    "labor_demand": 0.002,
-    "maternal_safety": 0.0132,
-    "neonatal_survival": 0.0057,
-    "state_capacity": 0.0006
+    "knowledge_preservation": 0.0003,
+    "labor_demand": 0.0001,
+    "maternal_safety": 0.0037,
+    "modern_survival": 0.0013,
+    "neonatal_survival": 0.0007,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/trained_midwives-v1.png",
    "name": "Midwife Schools with a Manikin",
@@ -845,9 +850,9 @@
   },
   "wet_nurse_bureau": {
    "effects": {
-    "labor_demand": 0.002,
-    "neonatal_survival": 0.0046,
-    "state_capacity": 0.0006
+    "labor_demand": 0.0001,
+    "neonatal_survival": 0.0006,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
    "name": "Wet-Nurse Bureau",
@@ -855,10 +860,10 @@
   },
   "pauper_marriage_bar": {
    "effects": {
-    "cohesion": -0.003,
+    "cohesion": -0.0002,
     "conception_support": -0.004,
-    "institutional_rigidity": 0.003,
-    "legitimacy": -0.002,
+    "institutional_rigidity": 0.0005,
+    "legitimacy": -0.0002,
     "neonatal_survival": -0.001
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
@@ -868,12 +873,12 @@
   },
   "emigrant_recruiting_agents": {
    "effects": {
-    "cohesion": -0.002,
+    "cohesion": -0.0001,
     "conception_support": -0.001,
-    "housing_output": 0.002,
-    "labor_demand": -0.001,
-    "labor_efficiency": 0.001,
-    "trade_capacity": 0.0013
+    "housing_output": 0.0017,
+    "labor_demand": -0.0001,
+    "labor_efficiency": 0.0001,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
    "name": "Emigrant Agents",
@@ -881,9 +886,10 @@
   },
   "infant_death_causes": {
    "effects": {
-    "knowledge_preservation": 0.0008,
-    "neonatal_survival": 0.0046,
-    "observation_rate": 0.0024
+    "knowledge_preservation": 0.0002,
+    "modern_survival": 0.0013,
+    "neonatal_survival": 0.0009,
+    "observation_rate": 0.0004
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Infant Deaths by Cause",
@@ -892,9 +898,10 @@
   "marital_birth_limitation": {
    "effects": {
     "conception_support": -0.008,
-    "housing_output": 0.001,
-    "maternal_safety": 0.0066,
-    "nutrition_quality": 0.002
+    "housing_output": 0.0009,
+    "maternal_safety": 0.0027,
+    "modern_survival": 0.0013,
+    "nutrition_quality": 0.0006
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Deliberate Birth Limitation",
@@ -904,9 +911,9 @@
   },
   "secret_birth_house": {
    "effects": {
-    "cohesion": 0.001,
-    "maternal_safety": 0.0033,
-    "neonatal_survival": 0.0023
+    "cohesion": 0.0001,
+    "maternal_safety": 0.0013,
+    "neonatal_survival": 0.0004
    },
    "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
    "name": "Secret Birth House",
@@ -914,9 +921,9 @@
   },
   "foundling_nurse_inspection": {
    "effects": {
-    "labor_demand": 0.002,
-    "neonatal_survival": 0.0057,
-    "state_capacity": 0.0006
+    "labor_demand": 0.0001,
+    "neonatal_survival": 0.0011,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
    "name": "Foundling Nurse Inspection",
@@ -924,11 +931,11 @@
   },
   "decennial_apportionment_census": {
    "effects": {
-    "cohesion": 0.002,
-    "institutional_rigidity": 0.002,
-    "labor_demand": 0.003,
-    "legitimacy": 0.004,
-    "state_capacity": 0.0048
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0002,
+    "state_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Apportionment Census",
@@ -937,12 +944,12 @@
   },
   "civil_vital_registration": {
    "effects": {
-    "cohesion": -0.002,
-    "institutional_rigidity": 0.001,
-    "knowledge_preservation": 0.0034,
-    "labor_demand": 0.002,
-    "legitimacy": 0.001,
-    "state_capacity": 0.0042
+    "cohesion": -0.0001,
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Civil Registration",
@@ -952,11 +959,11 @@
   },
   "civil_divorce": {
    "effects": {
-    "cohesion": 0.001,
+    "cohesion": 0.0001,
     "conception_support": 0.001,
-    "institutional_rigidity": -0.002,
-    "legitimacy": -0.001,
-    "maternal_safety": 0.0016
+    "institutional_rigidity": -0.0001,
+    "legitimacy": -0.0001,
+    "maternal_safety": 0.0006
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Civil Divorce",
@@ -965,15 +972,530 @@
   "population_pressure_treatise": {
    "effects": {
     "conception_support": -0.001,
-    "knowledge_rate": 0.002,
-    "legitimacy": -0.001,
-    "observation_rate": 0.0016,
-    "state_capacity": 0.0012
+    "knowledge_rate": 0.0006,
+    "legitimacy": -0.0001,
+    "observation_rate": 0.0003,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
    "name": "Treatise on Population",
    "observation": "A treatise argues that numbers grow faster than food unless war, famine, disease or restraint check them.",
    "ability_reason": "Statesmen now weigh relief, marriage and food against the growth of numbers."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "post_mortality_remarriage": {
+    "cohesion": 0.002,
+    "conception_support": 0.006,
+    "housing_output": 0.001
+   },
+   "vacant_holding_migration": {
+    "cohesion": -0.001,
+    "cultivation_yield": 0.002,
+    "housing_output": 0.003,
+    "labor_efficiency": 0.002
+   },
+   "decennial_household_registers": {
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0026,
+    "labor_demand": 0.002,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0048
+   },
+   "free_citizenship_grants": {
+    "cohesion": -0.001,
+    "housing_output": 0.003,
+    "trade_capacity": 0.0013
+   },
+   "wage_seeking_migration": {
+    "cohesion": -0.002,
+    "conception_support": -0.001,
+    "disease_exposure": 0.002,
+    "institutional_rigidity": -0.002,
+    "labor_efficiency": 0.003
+   },
+   "town_quarter_house_lists": {
+    "knowledge_preservation": 0.0008,
+    "labor_demand": 0.001,
+    "security_efficiency": 0.001,
+    "state_capacity": 0.0018
+   },
+   "public_dowry_fund": {
+    "cohesion": 0.001,
+    "conception_support": 0.002,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.0013
+   },
+   "household_wealth_census": {
+    "cohesion": -0.002,
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0034,
+    "labor_demand": 0.004,
+    "legitimacy": -0.003,
+    "state_capacity": 0.006
+   },
+   "dowry_caps": {
+    "cohesion": 0.001,
+    "conception_support": 0.003,
+    "legitimacy": -0.001
+   },
+   "census_age_recording": {
+    "knowledge_preservation": 0.0017,
+    "state_capacity": 0.0018,
+    "warfare_readiness": 0.001
+   },
+   "registered_foundling_hospital": {
+    "disease_exposure": 0.002,
+    "labor_demand": 0.003,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.0046,
+    "state_capacity": 0.0006
+   },
+   "health_office_death_registers": {
+    "disease_exposure": -0.001,
+    "knowledge_preservation": 0.0017,
+    "observation_rate": 0.0008,
+    "state_capacity": 0.0012
+   },
+   "foundling_wet_nurses": {
+    "disease_exposure": 0.001,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.0046
+   },
+   "town_orphanage": {
+    "cohesion": 0.002,
+    "labor_demand": 0.002,
+    "labor_efficiency": 0.001,
+    "legitimacy": 0.001,
+    "neonatal_survival": 0.0011
+   },
+   "women_refuge_houses": {
+    "cohesion": 0.002,
+    "disease_exposure": -0.0005,
+    "legitimacy": 0.001,
+    "maternal_safety": 0.0016
+   },
+   "pestilence_orphan_lists": {
+    "cohesion": 0.002,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.0011,
+    "state_capacity": 0.0006
+   },
+   "lineage_genealogy_books": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0017
+   },
+   "expelled_community_refuge": {
+    "cohesion": -0.002,
+    "craft_output": 0.002,
+    "knowledge_rate": 0.001,
+    "trade_capacity": 0.002
+   },
+   "emigrant_port_licences": {
+    "knowledge_preservation": 0.0008,
+    "labor_demand": 0.001,
+    "state_capacity": 0.0012
+   },
+   "overseas_settler_colonies": {
+    "cohesion": -0.004,
+    "conception_support": 0.004,
+    "cultivation_yield": 0.003,
+    "disease_exposure": 0.003,
+    "housing_output": 0.005,
+    "labor_demand": 0.003,
+    "naval_capacity": 0.0021,
+    "trade_capacity": 0.0039
+   },
+   "printed_midwife_manual": {
+    "knowledge_preservation": 0.0017,
+    "maternal_safety": 0.0083,
+    "neonatal_survival": 0.0023
+   },
+   "contact_epidemic_records": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.0005,
+    "knowledge_preservation": 0.0034,
+    "observation_rate": 0.0032,
+    "state_capacity": 0.0006
+   },
+   "shrine_vital_registers": {
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0043,
+    "labor_demand": 0.002,
+    "legitimacy": 0.002,
+    "state_capacity": 0.0042
+   },
+   "devotee_house_closure": {
+    "cohesion": -0.003,
+    "conception_support": 0.003,
+    "health_protection": -0.001,
+    "knowledge_preservation": -0.002,
+    "labor_efficiency": 0.002,
+    "legitimacy": -0.002
+   },
+   "marriage_dissolution_courts": {
+    "cohesion": 0.001,
+    "conception_support": 0.001,
+    "institutional_rigidity": -0.001,
+    "maternal_safety": 0.0016
+   },
+   "witnessed_marriage_rule": {
+    "cohesion": 0.002,
+    "conception_support": -0.002,
+    "institutional_rigidity": 0.003,
+    "legitimacy": 0.002,
+    "state_capacity": 0.0024
+   },
+   "mixed_descent_status": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.002,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0006
+   },
+   "postmortem_caesarean_rule": {
+    "legitimacy": 0.001,
+    "neonatal_survival": 0.0023
+   },
+   "weekly_mortality_bills": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.002,
+    "knowledge_preservation": 0.0026,
+    "observation_rate": 0.0032,
+    "state_capacity": 0.0024
+   },
+   "annual_soul_lists": {
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0017,
+    "labor_demand": 0.001,
+    "state_capacity": 0.0024
+   },
+   "headright_land_grants": {
+    "cohesion": -0.002,
+    "conception_support": 0.002,
+    "cultivation_yield": 0.002,
+    "ecological_pressure": 0.002,
+    "housing_output": 0.003,
+    "trade_capacity": 0.0007
+   },
+   "secret_obstetric_forceps": {
+    "health_risk": 0.001,
+    "maternal_safety": 0.0049,
+    "neonatal_survival": 0.0023
+   },
+   "soldier_marriage_limits": {
+    "cohesion": -0.002,
+    "conception_support": -0.002,
+    "logistics_endurance": 0.001,
+    "warfare_readiness": 0.002
+   },
+   "man_midwives": {
+    "cohesion": -0.001,
+    "health_risk": 0.002,
+    "maternal_safety": 0.0049,
+    "neonatal_survival": 0.0011
+   },
+   "ship_passenger_lists": {
+    "knowledge_preservation": 0.0008,
+    "naval_capacity": 0.0007,
+    "state_capacity": 0.0012
+   },
+   "childbed_death_counts": {
+    "knowledge_preservation": 0.0008,
+    "maternal_safety": 0.0049,
+    "observation_rate": 0.0016
+   },
+   "strict_family_settlement": {
+    "cohesion": 0.002,
+    "conception_support": -0.003,
+    "housing_output": 0.001,
+    "institutional_rigidity": 0.006,
+    "labor_efficiency": -0.002,
+    "legitimacy": 0.002
+   },
+   "burial_age_entries": {
+    "knowledge_preservation": 0.0017,
+    "observation_rate": 0.0016,
+    "state_capacity": 0.0006
+   },
+   "mortality_bill_arithmetic": {
+    "knowledge_preservation": 0.0017,
+    "knowledge_rate": 0.0025,
+    "observation_rate": 0.0032,
+    "state_capacity": 0.0036
+   },
+   "colonist_bride_passages": {
+    "cohesion": -0.001,
+    "conception_support": 0.003,
+    "housing_output": 0.002,
+    "legitimacy": -0.001
+   },
+   "large_family_tax_relief": {
+    "conception_support": 0.002,
+    "legitimacy": 0.001,
+    "state_capacity": -0.001
+   },
+   "country_wet_nursing": {
+    "conception_support": 0.003,
+    "disease_exposure": 0.001,
+    "labor_efficiency": 0.001,
+    "neonatal_survival": -0.004
+   },
+   "colonial_household_registers": {
+    "cohesion": -0.001,
+    "knowledge_preservation": 0.0008,
+    "labor_demand": 0.001,
+    "state_capacity": 0.0018
+   },
+   "separate_wife_property": {
+    "cohesion": 0.001,
+    "legitimacy": 0.001,
+    "maternal_safety": 0.0016,
+    "trade_capacity": 0.0007
+   },
+   "populationist_policy": {
+    "conception_support": 0.003,
+    "institutional_rigidity": 0.002,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0012
+   },
+   "faith_refugee_edict": {
+    "cohesion": -0.003,
+    "craft_output": 0.004,
+    "housing_output": 0.002,
+    "knowledge_rate": 0.0015,
+    "legitimacy": 0.001,
+    "trade_capacity": 0.0026
+   },
+   "tontine_annuities": {
+    "cohesion": -0.001,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.0013
+   },
+   "register_life_table": {
+    "knowledge_rate": 0.0025,
+    "observation_rate": 0.0032,
+    "state_capacity": 0.0024,
+    "trade_capacity": 0.0013
+   },
+   "vital_events_tax": {
+    "cohesion": -0.002,
+    "conception_support": -0.001,
+    "legitimacy": -0.003,
+    "state_capacity": 0.0018
+   },
+   "birth_multiplier_estimates": {
+    "knowledge_rate": 0.0005,
+    "observation_rate": 0.0008,
+    "state_capacity": 0.0012
+   },
+   "nominal_realm_census": {
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0034,
+    "labor_demand": 0.004,
+    "legitimacy": -0.002,
+    "state_capacity": 0.006,
+    "warfare_readiness": 0.002
+   },
+   "birth_sex_ratio": {
+    "knowledge_rate": 0.001,
+    "observation_rate": 0.0016
+   },
+   "post_plague_colonization": {
+    "cohesion": -0.002,
+    "cultivation_yield": 0.003,
+    "housing_output": 0.004,
+    "labor_demand": 0.001,
+    "state_capacity": 0.0006
+   },
+   "marriage_register_details": {
+    "knowledge_preservation": 0.0017,
+    "observation_rate": 0.0008,
+    "state_capacity": 0.0012
+   },
+   "convict_transportation": {
+    "cohesion": -0.002,
+    "housing_output": 0.001,
+    "legitimacy": -0.002,
+    "security_efficiency": 0.002
+   },
+   "midwife_birth_returns": {
+    "labor_demand": 0.001,
+    "maternal_safety": 0.0033,
+    "observation_rate": 0.0008,
+    "state_capacity": 0.0012
+   },
+   "military_orphanage": {
+    "labor_demand": 0.002,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.0011,
+    "warfare_readiness": 0.002
+   },
+   "lodging_guest_registers": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.0005,
+    "security_efficiency": 0.003,
+    "state_capacity": 0.0012,
+    "trade_capacity": -0.001
+   },
+   "published_obstetric_forceps": {
+    "health_risk": 0.002,
+    "knowledge_preservation": 0.0017,
+    "maternal_safety": 0.0165,
+    "neonatal_survival": 0.0069
+   },
+   "national_foundling_hospital": {
+    "conception_support": 0.001,
+    "disease_exposure": 0.003,
+    "labor_demand": 0.004,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.0023,
+    "state_capacity": 0.0012
+   },
+   "divine_order_population_treatise": {
+    "cohesion": 0.001,
+    "knowledge_rate": 0.001,
+    "legitimacy": 0.002,
+    "observation_rate": 0.0008
+   },
+   "actuarial_widows_fund": {
+    "cohesion": 0.002,
+    "legitimacy": 0.001,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.0013
+   },
+   "lying_in_hospital": {
+    "disease_exposure": 0.003,
+    "labor_demand": 0.003,
+    "legitimacy": 0.001,
+    "maternal_safety": 0.0099,
+    "neonatal_survival": 0.0046
+   },
+   "population_tables_office": {
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0034,
+    "labor_demand": 0.003,
+    "observation_rate": 0.0032,
+    "state_capacity": 0.0048
+   },
+   "life_expectancy_tables": {
+    "knowledge_rate": 0.0015,
+    "observation_rate": 0.0016,
+    "trade_capacity": 0.0013
+   },
+   "settler_doubling_observation": {
+    "conception_support": 0.001,
+    "knowledge_rate": 0.001,
+    "observation_rate": 0.0016
+   },
+   "clandestine_marriage_ban": {
+    "cohesion": 0.001,
+    "conception_support": -0.002,
+    "institutional_rigidity": 0.002,
+    "legitimacy": 0.001,
+    "state_capacity": 0.0018
+   },
+   "maternal_nursing_campaign": {
+    "cohesion": 0.001,
+    "conception_support": -0.002,
+    "maternal_safety": 0.0033,
+    "neonatal_survival": 0.0092
+   },
+   "inoculation_mortality_reckoning": {
+    "adoption_rate": 0.004,
+    "disease_exposure": -0.001,
+    "knowledge_rate": 0.0015,
+    "legitimacy": 0.001
+   },
+   "frontier_colonist_recruitment": {
+    "cohesion": -0.003,
+    "conception_support": 0.002,
+    "cultivation_yield": 0.004,
+    "ecological_pressure": 0.003,
+    "housing_output": 0.005,
+    "labor_demand": 0.002,
+    "state_capacity": 0.0012
+   },
+   "manikin_midwife_schools": {
+    "knowledge_preservation": 0.0017,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.0132,
+    "neonatal_survival": 0.0057,
+    "state_capacity": 0.0006
+   },
+   "wet_nurse_bureau": {
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.0046,
+    "state_capacity": 0.0006
+   },
+   "pauper_marriage_bar": {
+    "cohesion": -0.003,
+    "conception_support": -0.004,
+    "institutional_rigidity": 0.003,
+    "legitimacy": -0.002,
+    "neonatal_survival": -0.001
+   },
+   "emigrant_recruiting_agents": {
+    "cohesion": -0.002,
+    "conception_support": -0.001,
+    "housing_output": 0.002,
+    "labor_demand": -0.001,
+    "labor_efficiency": 0.001,
+    "trade_capacity": 0.0013
+   },
+   "infant_death_causes": {
+    "knowledge_preservation": 0.0008,
+    "neonatal_survival": 0.0046,
+    "observation_rate": 0.0024
+   },
+   "marital_birth_limitation": {
+    "conception_support": -0.008,
+    "housing_output": 0.001,
+    "maternal_safety": 0.0066,
+    "nutrition_quality": 0.002
+   },
+   "secret_birth_house": {
+    "cohesion": 0.001,
+    "maternal_safety": 0.0033,
+    "neonatal_survival": 0.0023
+   },
+   "foundling_nurse_inspection": {
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.0057,
+    "state_capacity": 0.0006
+   },
+   "decennial_apportionment_census": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.003,
+    "legitimacy": 0.004,
+    "state_capacity": 0.0048
+   },
+   "civil_vital_registration": {
+    "cohesion": -0.002,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.0034,
+    "labor_demand": 0.002,
+    "legitimacy": 0.001,
+    "state_capacity": 0.0042
+   },
+   "civil_divorce": {
+    "cohesion": 0.001,
+    "conception_support": 0.001,
+    "institutional_rigidity": -0.002,
+    "legitimacy": -0.001,
+    "maternal_safety": 0.0016
+   },
+   "population_pressure_treatise": {
+    "conception_support": -0.001,
+    "knowledge_rate": 0.002,
+    "legitimacy": -0.001,
+    "observation_rate": 0.0016,
+    "state_capacity": 0.0012
+   }
   }
  }
 }

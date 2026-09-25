@@ -50,7 +50,39 @@ const DAILY_SCALE:=0.12
 ## a large population behind each line, so the pace factor falls with the
 ## item's design year. Calibrated with tools/sim so milestones land inside their
 ## design bands (docs/research/BENCHMARKS_600.md).
-const PACE_BY_YEAR:Array=[[0.0,7.0],[100.0,5.5],[200.0,2.4],[300.0,1.0],[450.0,0.7],[600.0,0.65]]
+## research_3000: the curve continues through every design block to 3000.
+const PACE_BY_YEAR:Array=[[0.0,7.0],[100.0,5.5],[200.0,2.4],[300.0,1.0],[450.0,0.7],[600.0,0.65],[700.0,0.30],[1200.0,0.20],[1800.0,0.16],[2400.0,0.10],[3000.0,0.05]]
+## research_3000 parallel research capacity. A band of a few hundred works one
+## question per staffed channel; a large, literate, well-governed society runs
+## many investigations at once (academies, universities, laboratories), so a
+## staffed channel's progress multiplies with the society's size beyond
+## PARALLEL_POPULATION_REF, scaled by its institutions and literacy. It is 1 for
+## every society below the reference (the whole 0-600 window as calibrated).
+const PARALLEL_POPULATION_REF:=4000.0
+## Extra parallel teams per tenfold population beyond the reference.
+const PARALLEL_PER_DECADE:=0.25
+const PARALLEL_LITERACY:=1.0
+## research_3000 superseded practice: a registry item whose relevance the
+## society's era has left more than STALE_GRACE years behind is slower to take
+## up (nobody works the old way any more; the society adopts what replaced it),
+## doubling its difficulty every STALE_DOUBLING years. An item stays relevant
+## while any later registry item still builds on it (relevance_year: the latest
+## design year among the item and everything that transitively requires it), so
+## foundations of current questions never go stale; only dead-end practices do.
+## A typical society therefore never learns about a third of the registry
+## (benchmarks' discoveries_known), and no strategy catches up the whole backlog.
+const STALE_GRACE:=60.0
+const STALE_DOUBLING:=30.0
+## Past this difficulty multiplier a superseded practice is abandoned: no
+## channel takes it up (an investigation already running on it pauses and keeps
+## its progress). Foundations of current questions are never abandoned.
+const STALE_ABANDON:=4.0
+## Candidate-score penalty for a dead-end registry item (nothing later builds on
+## it): lines take up questions that open further work first, and a dead end
+## only with spare attention, so a society with little to spare never learns
+## many of them (they are abandoned once superseded).
+const DEAD_END_PENALTY:=200.0
+static var _relevance:Dictionary={}
 ## Keys the design governs; Phase 2 effect files cannot override them.
 const PROTECTED_KEYS:=["id","dynamic","direction","requires","requires_all","requires_any","learning_routes","day","chance","research_600","earliest_year","design_year","precedents","conditions"]
 ## Safe minimal consequence per line for NEW entries until Phase 2 authors them.
@@ -81,7 +113,7 @@ static var _manifest_path:=MANIFEST_PATH
 static func ensure_loaded()->void:
 	if _loaded: return
 	_loaded=true
-	_items.clear();_ids.clear();_effects.clear();_meta.clear();_redates.clear()
+	_items.clear();_ids.clear();_effects.clear();_meta.clear();_redates.clear();_relevance.clear()
 	_blocks.clear();_block_of.clear();_block_ids.clear()
 	for block:Dictionary in _manifest_blocks():
 		_load_block(block)
@@ -227,6 +259,77 @@ static func effect_row(id:String)->Dictionary:
 
 static func chance_for(research_years:float,design_year:float=0.0)->float:
 	return pace_for(design_year)/(DAILY_SCALE*365.0*maxf(0.25,research_years))
+
+
+## research_3000: parallel research capacity (>= 1) for a society of
+## `population` with institutions capacity and literacy (both 0..1).
+static func parallel_capacity(population:float,institutions:float,literacy:float)->float:
+	var decades:=maxf(0.0,log(maxf(1.0,population)/PARALLEL_POPULATION_REF)/log(10.0))
+	return 1.0+PARALLEL_PER_DECADE*decades*lerpf(0.6,1.2,clampf(institutions,0.0,1.0))*(1.0+PARALLEL_LITERACY*clampf(literacy,0.0,1.0))
+
+
+## research_3000: difficulty multiplier for registry item `id` in a society of
+## era `society_era` (1 until its relevance is STALE_GRACE years behind; 1 for
+## entries outside the registry).
+static func stale_factor(id:String,society_era:float)->float:
+	var relevance:=relevance_year(id)
+	if relevance<0.0: return 1.0
+	return pow(2.0,minf(20.0,maxf(0.0,society_era-relevance-STALE_GRACE)/STALE_DOUBLING))
+
+
+## research_3000: how long (in STALE_DOUBLING units) registry item `id` has been
+## left behind by the society's era; lines prefer questions of their age, so a
+## channel takes up the current frontier before older leftovers (0 outside the
+## registry and for foundations of current questions).
+static func staleness(id:String,society_era:float)->float:
+	var relevance:=relevance_year(id)
+	if relevance<0.0: return 0.0
+	return maxf(0.0,society_era-relevance)/STALE_DOUBLING
+
+
+## research_3000: true for a registry item no later registry item builds on.
+static func dead_end(id:String)->bool:
+	var relevance:=relevance_year(id)
+	return relevance>=0.0 and relevance<=float(item(id).get("proposed_year",0.0))+0.5
+
+
+## research_3000: false once registry item `id` is abandoned as superseded.
+static func pursued(id:String,society_era:float)->bool:
+	return stale_factor(id,society_era)<=STALE_ABANDON
+
+
+## Latest design year among registry item `id` and every registry item that
+## requires it, directly or through others (requires_all and requires_any); -1
+## outside the registry.
+static func relevance_year(id:String)->float:
+	ensure_loaded()
+	if _relevance.is_empty() and not _items.is_empty(): _build_relevance()
+	return float(_relevance.get(id,-1.0))
+
+
+static func _build_relevance()->void:
+	var children:Dictionary={}
+	for id:String in _ids:
+		var item:Dictionary=_items[id]
+		_relevance[id]=float(item.get("proposed_year",0.0))
+		var parents:Array=(item.get("requires_all",[]) as Array).duplicate()
+		for group:Variant in item.get("requires_any",[]):
+			if group is Array: parents.append_array(group)
+		for parent:Variant in parents:
+			if not children.has(String(parent)): children[String(parent)]=[]
+			(children[String(parent)] as Array).append(id)
+	# Latest design year first: every dependent is final before its parents.
+	var order:Array[String]=_ids.duplicate()
+	order.sort_custom(func(a:String,b:String)->bool: return float(_items[a].get("proposed_year",0.0))>float(_items[b].get("proposed_year",0.0)))
+	for _pass in 3:
+		var changed:=false
+		for id:String in order:
+			var best:=float(_relevance[id])
+			for child:Variant in children.get(id,[]):best=maxf(best,float(_relevance.get(String(child),-1.0)))
+			if best>float(_relevance[id]):
+				_relevance[id]=best
+				changed=true
+		if not changed: break
 
 
 ## Research pace for an item of `design_year` (PACE_BY_YEAR, linear between points).

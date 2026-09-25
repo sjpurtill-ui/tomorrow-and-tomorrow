@@ -1108,6 +1108,7 @@ func process_reproduction_day(context:Dictionary) -> Dictionary:
 	var baseline_annual:=float(population_cohorts.get("youth",0.0))*0.45*0.23+float(population_cohorts.get("early_adults",0.0))*0.50*0.285+float(population_cohorts.get("established_adults",0.0))*0.45*0.18+float(population_cohorts.get("mature_adults",0.0))*0.16*0.040
 	var availability:=clampf(eligible/maxf(1.0,reproductive_population),0.0,1.0)
 	var annual_conceptions:=baseline_annual*_conception_condition_factor(context)*availability*clampf(float(context.get("conception_care",1.0)),0.3,2.0)
+	annual_conceptions*=1.0-clampf(float(context.get("fertility_transition",0.0)),0.0,0.85) # research_3000: births couples choose not to have
 	var conceptions_exact:=annual_conceptions/365.0
 	var risk:=_pregnancy_risk_multiplier(context)*clampf(float(context.get("pregnancy_care",1.0)),0.5,2.5)
 	var first:=float(pregnancy_cohorts.get("first_trimester",0.0))
@@ -1122,9 +1123,11 @@ func process_reproduction_day(context:Dictionary) -> Dictionary:
 	var stillbirth_rate:=clampf(0.018+(risk-1.0)*0.018,0.010,0.14)
 	var stillbirths_exact:=deliveries*stillbirth_rate
 	var live_births_exact:=maxf(0.0,deliveries-stillbirths_exact)
-	var neonatal_rate:=clampf((0.018+(risk-1.0)*0.025)*(1.0-clampf(float(context.get("neonatal_survival",0.0)),-0.50,0.60))*clampf(float(context.get("neonatal_care",1.0)),0.5,4.0),0.004,0.18)
+	# research_3000: modern care (EarlyLifeConditions.modern_factors) may bring
+	# newborn and maternal deaths down to modern rates, below the old floors.
+	var neonatal_rate:=clampf((0.018+(risk-1.0)*0.025)*(1.0-clampf(float(context.get("neonatal_survival",0.0)),-0.50,0.60))*clampf(float(context.get("neonatal_care",1.0)),0.1,4.0),0.0008,0.18)
 	var neonatal_deaths_exact:=live_births_exact*neonatal_rate
-	var maternal_rate:=clampf((0.0045+(risk-1.0)*0.0065)*(1.0-clampf(float(context.get("maternal_safety",0.0)),0.0,0.65))*clampf(float(context.get("maternal_care",1.0)),0.5,4.0),0.0008,0.055)
+	var maternal_rate:=clampf((0.0045+(risk-1.0)*0.0065)*(1.0-clampf(float(context.get("maternal_safety",0.0)),0.0,0.65))*clampf(float(context.get("maternal_care",1.0)),0.02,4.0),0.00002,0.055)
 	var maternal_deaths_exact:=deliveries*maternal_rate
 	pregnancy_cohorts["first_trimester"]=maxf(0.0,first+conceptions_exact-first_losses-to_second)
 	pregnancy_cohorts["second_trimester"]=maxf(0.0,second+to_second-second_losses-to_third)

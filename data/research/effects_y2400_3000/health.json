@@ -4,10 +4,11 @@
  "items": {
   "vaccine_carrier_voyage": {
    "effects": {
-    "cohesion": -0.001,
-    "disease_exposure": -0.003,
+    "cohesion": -0.0002,
+    "disease_exposure": -0.002,
+    "modern_survival": 0.0008,
     "neonatal_survival": 0.001,
-    "trade_capacity": 0.001
+    "trade_capacity": 0.0008
    },
    "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
    "name": "Vaccine Voyage",
@@ -16,10 +17,11 @@
   },
   "slow_sand_filtration": {
    "effects": {
-    "disease_exposure": -0.007,
-    "labor_demand": 0.003,
+    "disease_exposure": -0.0048,
+    "labor_demand": 0.0002,
+    "modern_survival": 0.0038,
     "sanitation": 0.003,
-    "water_safety": 0.015
+    "water_safety": 0.0118
    },
    "art": "res://assets/ui/research/paper/water_settling_basins.png",
    "observation": "Town water is run slowly through beds of fine sand, and it comes out clear and far less likely to carry fever.",
@@ -28,9 +30,10 @@
   },
   "isolated_poppy_alkaloid": {
    "effects": {
-    "fatigue": -0.001,
+    "fatigue": -0.0009,
     "health_protection": 0.002,
-    "health_risk": 0.003
+    "health_risk": 0.0009,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
    "name": "Pure Opiate",
@@ -39,10 +42,11 @@
   },
   "public_vaccine_stations": {
    "effects": {
-    "disease_exposure": -0.006,
-    "labor_demand": 0.002,
+    "disease_exposure": -0.0041,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0038,
     "neonatal_survival": 0.002,
-    "state_capacity": 0.001
+    "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
    "name": "Vaccine Stations",
@@ -52,8 +56,9 @@
   "planned_abdominal_operation": {
    "effects": {
     "health_protection": 0.001,
-    "health_risk": 0.001,
-    "knowledge_rate": 0.001
+    "health_risk": 0.0003,
+    "knowledge_rate": 0.0008,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
    "name": "Abdominal Operation",
@@ -62,7 +67,8 @@
   "chest_listening_tube": {
    "effects": {
     "health_protection": 0.003,
-    "observation_rate": 0.002
+    "modern_survival": 0.0008,
+    "observation_rate": 0.0011
    },
    "art": "res://assets/ui/research/paper/clinical_pulse_assessment.png",
    "name": "Listening Tube",
@@ -70,9 +76,10 @@
   },
   "human_blood_transfusion": {
    "effects": {
-    "health_risk": 0.002,
-    "injury_risk": -0.001,
-    "maternal_safety": 0.002
+    "health_risk": 0.0006,
+    "injury_risk": -0.0009,
+    "maternal_safety": 0.002,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
    "name": "Blood Transfusion",
@@ -81,8 +88,9 @@
   "fever_bark_alkaloid": {
    "effects": {
     "disease_exposure": -0.004,
-    "health_protection": 0.002,
-    "trade_capacity": 0.001
+    "health_protection": 0.0017,
+    "modern_survival": 0.0008,
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
    "name": "Pure Fever-bark Salt",
@@ -90,8 +98,9 @@
   },
   "iodine_goitre_treatment": {
    "effects": {
-    "health_protection": 0.002,
-    "health_risk": 0.001,
+    "health_protection": 0.0017,
+    "health_risk": 0.0003,
+    "modern_survival": 0.0008,
     "nutrition_quality": 0.001
    },
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
@@ -100,10 +109,11 @@
   },
   "national_pharmacopoeia": {
    "effects": {
-    "health_protection": 0.001,
-    "health_risk": -0.003,
-    "institutional_rigidity": 0.002,
-    "standardization": 0.002
+    "health_protection": 0.0009,
+    "health_risk": -0.0019,
+    "institutional_rigidity": 0.0006,
+    "modern_survival": 0.0008,
+    "standardization": 0.0009
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
    "name": "National Pharmacopoeia",
@@ -111,10 +121,11 @@
   },
   "hospital_medical_schools": {
    "effects": {
-    "health_protection": 0.003,
-    "knowledge_preservation": 0.002,
-    "knowledge_rate": 0.001,
-    "labor_demand": 0.001
+    "health_protection": 0.0026,
+    "knowledge_preservation": 0.0012,
+    "knowledge_rate": 0.0006,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/paper/clinical_observation_rounds.png",
    "name": "Hospital Schools",
@@ -122,7 +133,8 @@
   },
   "croup_tracheotomy": {
    "effects": {
-    "health_risk": 0.001,
+    "health_risk": 0.0003,
+    "modern_survival": 0.0008,
     "neonatal_survival": 0.002
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
@@ -131,9 +143,10 @@
   },
   "epidemic_house_visiting": {
    "effects": {
-    "cohesion": -0.001,
+    "cohesion": -0.0003,
     "disease_exposure": -0.004,
-    "labor_demand": 0.002,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0008,
     "sanitation": 0.003
    },
    "art": "res://assets/ui/research/subjects/contagion_mapping-v1.png",
@@ -143,8 +156,9 @@
   },
   "intravenous_saline": {
    "effects": {
-    "health_protection": 0.002,
-    "health_risk": 0.001
+    "health_protection": 0.0017,
+    "health_risk": 0.0003,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/clean_water-v1.png",
    "name": "Saline Infusion",
@@ -152,10 +166,11 @@
   },
   "anatomy_body_supply_law": {
    "effects": {
-    "cohesion": -0.003,
-    "health_protection": 0.001,
-    "knowledge_rate": 0.001,
-    "legitimacy": -0.002
+    "cohesion": -0.0009,
+    "health_protection": 0.0009,
+    "knowledge_rate": 0.0006,
+    "legitimacy": -0.0005,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
    "name": "Anatomy Law",
@@ -164,8 +179,9 @@
   },
   "numerical_treatment_method": {
    "effects": {
-    "health_risk": -0.004,
-    "observation_rate": 0.002
+    "health_risk": -0.0025,
+    "modern_survival": 0.0008,
+    "observation_rate": 0.0008
    },
    "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
    "name": "Counting Method",
@@ -174,9 +190,10 @@
   },
   "dental_surgery_licence": {
    "effects": {
-    "health_protection": 0.001,
-    "health_risk": -0.001,
-    "institutional_rigidity": 0.001
+    "health_protection": 0.0004,
+    "health_risk": -0.0006,
+    "institutional_rigidity": 0.0003,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/professional_service-v1.png",
    "name": "Dental Licence",
@@ -184,10 +201,11 @@
   },
   "sanitary_town_survey": {
    "effects": {
-    "disease_exposure": -0.004,
-    "observation_rate": 0.002,
-    "sanitation": 0.006,
-    "state_capacity": 0.002
+    "disease_exposure": -0.0011,
+    "modern_survival": 0.0008,
+    "observation_rate": 0.0009,
+    "sanitation": 0.0059,
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/contagion_mapping-v1.png",
    "name": "Sanitary Survey",
@@ -196,10 +214,11 @@
   },
   "ether_anaesthesia": {
    "effects": {
-    "health_protection": 0.004,
-    "health_risk": 0.002,
-    "injury_risk": -0.003,
-    "maternal_safety": 0.001
+    "health_protection": 0.0017,
+    "health_risk": 0.0006,
+    "injury_risk": -0.0011,
+    "maternal_safety": 0.001,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
    "name": "Ether Anaesthesia",
@@ -208,9 +227,10 @@
   },
   "chlorine_handwashing": {
    "effects": {
-    "cohesion": -0.001,
-    "disease_exposure": -0.002,
+    "cohesion": -0.0002,
+    "disease_exposure": -0.0005,
     "maternal_safety": 0.008,
+    "modern_survival": 0.0039,
     "neonatal_survival": 0.002
    },
    "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
@@ -220,9 +240,10 @@
   },
   "chloroform_anaesthesia": {
    "effects": {
-    "health_protection": 0.002,
-    "health_risk": 0.002,
-    "maternal_safety": 0.002
+    "health_protection": 0.0008,
+    "health_risk": 0.0006,
+    "maternal_safety": 0.002,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
    "name": "Chloroform",
@@ -230,12 +251,13 @@
   },
   "central_board_of_health": {
    "effects": {
-    "disease_exposure": -0.01,
-    "institutional_rigidity": 0.002,
-    "labor_demand": 0.003,
-    "legitimacy": 0.001,
-    "sanitation": 0.016,
-    "state_capacity": 0.004,
+    "disease_exposure": -0.0026,
+    "institutional_rigidity": 0.0006,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001,
+    "modern_survival": 0.0008,
+    "sanitation": 0.0157,
+    "state_capacity": 0.0013,
     "water_safety": 0.004
    },
    "art": "res://assets/ui/research/subjects/covered_sewers-v1.png",
@@ -246,8 +268,9 @@
   },
   "water_service_inspections": {
    "effects": {
-    "disease_exposure": -0.003,
-    "labor_demand": 0.002,
+    "disease_exposure": -0.0008,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0008,
     "repair_capacity": 0.002,
     "water_safety": 0.006
    },
@@ -256,11 +279,12 @@
   },
   "compulsory_infant_vaccination": {
    "effects": {
-    "cohesion": -0.003,
-    "disease_exposure": -0.008,
-    "legitimacy": -0.001,
+    "cohesion": -0.0005,
+    "disease_exposure": -0.0021,
+    "legitimacy": -0.0002,
+    "modern_survival": 0.0052,
     "neonatal_survival": 0.004,
-    "state_capacity": 0.002
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
    "name": "Compulsory Vaccination",
@@ -269,8 +293,9 @@
   },
   "hypodermic_syringe": {
    "effects": {
-    "health_protection": 0.002,
-    "health_risk": 0.001
+    "health_protection": 0.0008,
+    "health_risk": 0.0003,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
    "name": "Hypodermic Syringe",
@@ -278,9 +303,10 @@
   },
   "contagion_mapping": {
    "effects": {
-    "disease_exposure": -0.012,
-    "observation_rate": 0.003,
-    "state_capacity": 0.002
+    "disease_exposure": -0.0032,
+    "modern_survival": 0.0008,
+    "observation_rate": 0.0014,
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/contagion_mapping-v1.png",
    "observation": "Cases are marked house by house on a street map, and a cluster round one pump shows the sickness comes in the water.",
@@ -288,11 +314,12 @@
   },
   "nursing_care_organization": {
    "effects": {
-    "disease_exposure": -0.003,
-    "health_protection": 0.006,
-    "labor_demand": 0.003,
+    "disease_exposure": -0.0008,
+    "health_protection": 0.0025,
+    "labor_demand": 0.0002,
     "maternal_safety": 0.002,
-    "warfare_readiness": 0.001
+    "modern_survival": 0.0008,
+    "warfare_readiness": 0.0009
    },
    "art": "res://assets/ui/research/paper/nursing_care_organization.png",
    "observation": "Trained nurses in ranks under ward sisters keep military hospitals clean, fed and aired, and the death rate falls by half.",
@@ -301,10 +328,11 @@
   },
   "medical_officer_of_health": {
    "effects": {
-    "disease_exposure": -0.005,
-    "labor_demand": 0.001,
-    "sanitation": 0.005,
-    "state_capacity": 0.002
+    "disease_exposure": -0.0013,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0008,
+    "sanitation": 0.0049,
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
    "name": "Medical Officer",
@@ -312,9 +340,10 @@
   },
   "cellular_pathology": {
    "effects": {
-    "health_protection": 0.003,
-    "knowledge_rate": 0.002,
-    "observation_rate": 0.002
+    "health_protection": 0.0011,
+    "knowledge_rate": 0.0013,
+    "modern_survival": 0.0014,
+    "observation_rate": 0.001
    },
    "art": "res://assets/ui/research/paper/tissue_histology.png",
    "name": "Cellular Pathology",
@@ -322,9 +351,10 @@
   },
   "medical_practitioner_register": {
    "effects": {
-    "health_protection": 0.001,
-    "health_risk": -0.004,
-    "institutional_rigidity": 0.003
+    "health_protection": 0.0004,
+    "health_risk": -0.001,
+    "institutional_rigidity": 0.0006,
+    "modern_survival": 0.0014
    },
    "art": "res://assets/ui/research/subjects/professional_service-v1.png",
    "name": "Practitioner Register",
@@ -333,10 +363,11 @@
   },
   "district_visiting_nurses": {
    "effects": {
-    "cohesion": 0.001,
-    "health_protection": 0.003,
-    "labor_demand": 0.002,
+    "cohesion": 0.0002,
+    "health_protection": 0.0011,
+    "labor_demand": 0.0001,
     "maternal_safety": 0.002,
+    "modern_survival": 0.0014,
     "neonatal_survival": 0.002
    },
    "art": "res://assets/ui/research/paper/nursing_care_organization.png",
@@ -345,27 +376,28 @@
   },
   "casualty_collection_posts": {
    "effects": {
-    "injury_risk": -0.003,
-    "logistics_endurance": 0.001,
-    "warfare_readiness": 0.002
+    "injury_risk": -0.0005,
+    "logistics_endurance": 0.0003,
+    "warfare_readiness": 0.0007
    },
    "art": "res://assets/ui/research/paper/litter_bearer_drill.png",
    "observation": "Marked posts behind the line let bearers find the wounded and the wounded find the bearers."
   },
   "field_aid_stations": {
    "effects": {
-    "injury_risk": -0.004,
-    "logistics_endurance": 0.002,
-    "warfare_readiness": 0.003
+    "injury_risk": -0.0007,
+    "logistics_endurance": 0.0006,
+    "warfare_readiness": 0.0011
    },
    "art": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
    "observation": "Surgeons work at aid stations just behind the fighting line, and wounds are dressed within hours."
   },
   "nurse_training_school": {
    "effects": {
-    "health_protection": 0.004,
-    "labor_demand": 0.002,
-    "maternal_safety": 0.002
+    "health_protection": 0.0015,
+    "labor_demand": 0.0001,
+    "maternal_safety": 0.002,
+    "modern_survival": 0.0014
    },
    "art": "res://assets/ui/research/paper/nursing_care_organization.png",
    "name": "Nurse Training School",
@@ -373,36 +405,37 @@
   },
   "casualty_transfer_records": {
    "effects": {
-    "injury_risk": -0.002,
-    "knowledge_preservation": 0.001,
-    "warfare_readiness": 0.001
+    "injury_risk": -0.0003,
+    "knowledge_preservation": 0.0005,
+    "warfare_readiness": 0.0004
    },
    "art": "res://assets/ui/research/paper/casualty_transfer_records.png",
    "observation": "A tag and record follow each wounded man from the post to the base hospital."
   },
   "triage_registers": {
    "effects": {
-    "injury_risk": -0.003,
-    "warfare_readiness": 0.002
+    "injury_risk": -0.0005,
+    "warfare_readiness": 0.0007
    },
    "art": "res://assets/ui/research/paper/casualty_transfer_records.png",
    "observation": "The wounded are sorted into those who can wait, those who must be treated now and those beyond help."
   },
   "evacuation_relays": {
    "effects": {
-    "injury_risk": -0.003,
-    "logistics_endurance": 0.003,
-    "warfare_readiness": 0.002
+    "injury_risk": -0.0005,
+    "logistics_endurance": 0.0008,
+    "warfare_readiness": 0.0007
    },
    "art": "res://assets/ui/research/paper/litter_bearer_drill.png",
    "observation": "Relays of wagons and hospital trains carry the wounded back to base hospitals."
   },
   "neutral_wounded_convention": {
    "effects": {
-    "cohesion": 0.001,
-    "injury_risk": -0.002,
-    "legitimacy": 0.002,
-    "warfare_readiness": 0.001
+    "cohesion": 0.0002,
+    "injury_risk": -0.0003,
+    "legitimacy": 0.0004,
+    "modern_survival": 0.0014,
+    "warfare_readiness": 0.0004
    },
    "art": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
    "name": "Wounded Convention",
@@ -412,9 +445,10 @@
   "pavilion_ward_hospitals": {
    "effects": {
     "construction_rate": -0.001,
-    "disease_exposure": -0.004,
-    "health_protection": 0.003,
-    "labor_demand": 0.002
+    "disease_exposure": -0.0023,
+    "health_protection": 0.0011,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0014
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
    "name": "Pavilion Hospitals",
@@ -422,11 +456,12 @@
   },
   "antiseptic_surgery": {
    "effects": {
-    "disease_exposure": -0.004,
-    "health_protection": 0.004,
-    "health_risk": -0.012,
-    "injury_risk": -0.006,
-    "maternal_safety": 0.006
+    "disease_exposure": -0.0023,
+    "health_protection": 0.0015,
+    "health_risk": -0.003,
+    "injury_risk": -0.001,
+    "maternal_safety": 0.006,
+    "modern_survival": 0.007
    },
    "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
    "name": "Antiseptic Surgery",
@@ -435,10 +470,11 @@
   },
   "germ_theory_of_disease": {
    "effects": {
-    "disease_exposure": -0.032,
-    "health_protection": 0.01,
+    "disease_exposure": -0.0058,
+    "health_protection": 0.0023,
     "knowledge_rate": 0.004,
-    "sanitation": 0.006,
+    "modern_survival": 0.0182,
+    "sanitation": 0.0059,
     "water_safety": 0.004
    },
    "art": "res://assets/ui/research/paper/microbial_isolation_methods.png",
@@ -449,9 +485,10 @@
   },
   "isolation_fever_hospitals": {
    "effects": {
-    "cohesion": -0.001,
-    "disease_exposure": -0.01,
-    "labor_demand": 0.002,
+    "cohesion": -0.0003,
+    "disease_exposure": -0.0018,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0018,
     "neonatal_survival": 0.002
    },
    "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
@@ -461,9 +498,10 @@
   },
   "consumption_germ_identified": {
    "effects": {
-    "disease_exposure": -0.004,
+    "disease_exposure": -0.0007,
     "knowledge_rate": 0.001,
-    "observation_rate": 0.002
+    "modern_survival": 0.0018,
+    "observation_rate": 0.0016
    },
    "art": "res://assets/ui/research/paper/biological_staining.png",
    "name": "Consumption Germ",
@@ -471,13 +509,14 @@
   },
   "worker_sickness_insurance": {
    "effects": {
-    "cohesion": 0.003,
-    "conception_support": -0.004,
-    "health_protection": 0.006,
-    "institutional_rigidity": 0.002,
-    "labor_demand": 0.002,
-    "legitimacy": 0.004,
-    "state_capacity": 0.002
+    "cohesion": 0.0004,
+    "conception_support": -0.002,
+    "health_protection": 0.0014,
+    "institutional_rigidity": 0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0009,
+    "modern_survival": 0.0018,
+    "state_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
    "name": "Sickness Insurance",
@@ -487,9 +526,10 @@
   },
   "local_anaesthesia": {
    "effects": {
-    "health_protection": 0.002,
-    "health_risk": 0.001,
-    "injury_risk": -0.001
+    "health_protection": 0.0005,
+    "health_risk": 0.0002,
+    "injury_risk": -0.0006,
+    "modern_survival": 0.0018
    },
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
    "name": "Local Anaesthesia",
@@ -497,9 +537,10 @@
   },
   "attenuated_laboratory_vaccine": {
    "effects": {
-    "disease_exposure": -0.003,
-    "health_protection": 0.002,
-    "knowledge_rate": 0.002
+    "disease_exposure": -0.0005,
+    "health_protection": 0.0005,
+    "knowledge_rate": 0.002,
+    "modern_survival": 0.0018
    },
    "art": "res://assets/ui/research/paper/microbial_isolation_methods.png",
    "name": "Laboratory Vaccine",
@@ -507,11 +548,12 @@
   },
   "aseptic_operating_room": {
    "effects": {
-    "health_protection": 0.003,
-    "health_risk": -0.008,
-    "injury_risk": -0.004,
-    "labor_demand": 0.002,
-    "maternal_safety": 0.006
+    "health_protection": 0.0007,
+    "health_risk": -0.0034,
+    "injury_risk": -0.0026,
+    "labor_demand": 0.0001,
+    "maternal_safety": 0.006,
+    "modern_survival": 0.0061
    },
    "art": "res://assets/ui/research/paper/instrument_sterilization.png",
    "name": "Aseptic Surgery",
@@ -519,9 +561,10 @@
   },
   "consumption_sanatoria": {
    "effects": {
-    "disease_exposure": -0.003,
-    "health_protection": 0.002,
-    "labor_demand": 0.001
+    "disease_exposure": -0.0005,
+    "health_protection": 0.0005,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0018
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
    "name": "Sanatoria",
@@ -529,10 +572,11 @@
   },
   "disease_notification_law": {
    "effects": {
-    "cohesion": -0.001,
-    "disease_exposure": -0.007,
-    "institutional_rigidity": 0.001,
-    "state_capacity": 0.002
+    "cohesion": -0.0003,
+    "disease_exposure": -0.0013,
+    "institutional_rigidity": 0.0002,
+    "modern_survival": 0.0018,
+    "state_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
    "name": "Notification Law",
@@ -540,8 +584,9 @@
   },
   "diphtheria_antitoxin": {
    "effects": {
-    "disease_exposure": -0.012,
-    "health_protection": 0.003,
+    "disease_exposure": -0.0022,
+    "health_protection": 0.0007,
+    "modern_survival": 0.0121,
     "neonatal_survival": 0.007
    },
    "art": "res://assets/ui/research/paper/microbial_isolation_methods.png",
@@ -551,9 +596,10 @@
   },
   "port_sanitary_inspection": {
    "effects": {
-    "disease_exposure": -0.005,
-    "state_capacity": 0.001,
-    "trade_capacity": 0.004
+    "disease_exposure": -0.0009,
+    "modern_survival": 0.0018,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.002
    },
    "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
    "name": "Port Inspection",
@@ -561,9 +607,10 @@
   },
   "shared_death_cause_list": {
    "effects": {
-    "knowledge_preservation": 0.002,
-    "observation_rate": 0.002,
-    "standardization": 0.001
+    "knowledge_preservation": 0.0008,
+    "modern_survival": 0.0018,
+    "observation_rate": 0.0016,
+    "standardization": 0.0004
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
    "name": "Shared Cause List",
@@ -571,9 +618,10 @@
   },
   "bone_shadow_imaging": {
    "effects": {
-    "health_protection": 0.003,
-    "health_risk": 0.001,
-    "injury_risk": -0.002
+    "health_protection": 0.0013,
+    "health_risk": 0.0001,
+    "injury_risk": -0.0009,
+    "modern_survival": 0.0013
    },
    "art": "res://assets/ui/research/paper/compound_microscopy.png",
    "name": "Bone Imaging",
@@ -581,8 +629,9 @@
   },
   "enteric_fever_vaccine": {
    "effects": {
-    "disease_exposure": -0.006,
-    "warfare_readiness": 0.002
+    "disease_exposure": -0.0016,
+    "modern_survival": 0.0013,
+    "warfare_readiness": 0.0015
    },
    "art": "res://assets/ui/research/paper/microbial_isolation_methods.png",
    "name": "Enteric Vaccine",
@@ -590,8 +639,9 @@
   },
   "mosquito_fever_vector": {
    "effects": {
-    "disease_exposure": -0.005,
-    "observation_rate": 0.002
+    "disease_exposure": -0.0014,
+    "modern_survival": 0.0013,
+    "observation_rate": 0.0008
    },
    "art": "res://assets/ui/research/paper/microbial_observation.png",
    "name": "Mosquito Vector",
@@ -600,8 +650,9 @@
   "synthetic_willow_analgesic": {
    "effects": {
     "fatigue": -0.001,
-    "health_protection": 0.002,
-    "health_risk": 0.001
+    "health_protection": 0.0009,
+    "health_risk": 0.0001,
+    "modern_survival": 0.0013
    },
    "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
    "name": "Willow Powder",
@@ -609,9 +660,10 @@
   },
   "blood_group_typing": {
    "effects": {
-    "health_risk": -0.003,
-    "injury_risk": -0.002,
-    "maternal_safety": 0.003
+    "health_risk": -0.0011,
+    "injury_risk": -0.0009,
+    "maternal_safety": 0.003,
+    "modern_survival": 0.0013
    },
    "art": "res://assets/ui/research/paper/biological_staining.png",
    "name": "Blood Groups",
@@ -619,9 +671,10 @@
   },
   "mosquito_control_brigades": {
    "effects": {
-    "disease_exposure": -0.01,
+    "disease_exposure": -0.0027,
     "ecology_recovery": -0.001,
-    "labor_demand": 0.003,
+    "labor_demand": 0.0002,
+    "modern_survival": 0.0013,
     "sanitation": 0.003,
     "water_pollution": 0.001
    },
@@ -631,8 +684,9 @@
   },
   "talking_cure": {
    "effects": {
-    "cohesion": 0.001,
-    "health_protection": 0.001
+    "cohesion": 0.0002,
+    "health_protection": 0.0004,
+    "modern_survival": 0.0013
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Talking Cure",
@@ -640,8 +694,9 @@
   },
   "radium_tumour_therapy": {
    "effects": {
-    "health_protection": 0.002,
-    "health_risk": 0.003
+    "health_protection": 0.0009,
+    "health_risk": 0.0004,
+    "modern_survival": 0.0013
    },
    "art": "res://assets/ui/research/paper/nuclear_magnetic_resonance_spectroscopy.png",
    "name": "Radium Therapy",
@@ -649,10 +704,11 @@
   },
   "school_medical_inspection": {
    "effects": {
-    "disease_exposure": -0.005,
-    "health_protection": 0.002,
-    "labor_demand": 0.001,
-    "neonatal_survival": 0.001
+    "disease_exposure": -0.0014,
+    "health_protection": 0.0009,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0013,
+    "neonatal_survival": 0.0007
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "School Inspection",
@@ -660,10 +716,11 @@
   },
   "water_chlorination": {
    "effects": {
-    "disease_exposure": -0.026,
-    "health_risk": 0.001,
+    "disease_exposure": -0.0071,
+    "health_risk": 0.0001,
+    "modern_survival": 0.0131,
     "sanitation": 0.004,
-    "water_safety": 0.022
+    "water_safety": 0.0207
    },
    "art": "res://assets/ui/research/subjects/clean_water-v1.png",
    "name": "Water Chlorination",
@@ -672,9 +729,10 @@
   },
   "targeted_arsenical_drug": {
    "effects": {
-    "disease_exposure": -0.004,
-    "health_protection": 0.002,
-    "health_risk": 0.003
+    "disease_exposure": -0.0011,
+    "health_protection": 0.0009,
+    "health_risk": 0.0004,
+    "modern_survival": 0.0013
    },
    "art": "res://assets/ui/research/paper/biological_staining.png",
    "name": "Targeted Arsenical",
@@ -682,10 +740,11 @@
   },
   "laboratory_medical_schools": {
    "effects": {
-    "health_protection": 0.004,
-    "health_risk": -0.003,
-    "institutional_rigidity": 0.002,
-    "knowledge_rate": 0.002
+    "health_protection": 0.0018,
+    "health_risk": -0.0011,
+    "institutional_rigidity": 0.0004,
+    "knowledge_rate": 0.0013,
+    "modern_survival": 0.0013
    },
    "art": "res://assets/ui/research/paper/aseptic_laboratory_practice.png",
    "name": "Laboratory Schools",
@@ -693,9 +752,10 @@
   },
   "drug_label_purity_law": {
    "effects": {
-    "health_risk": -0.005,
-    "institutional_rigidity": 0.001,
-    "state_capacity": 0.001
+    "health_risk": -0.0018,
+    "institutional_rigidity": 0.0002,
+    "modern_survival": 0.0013,
+    "state_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
    "name": "Drug Purity Law",
@@ -703,26 +763,27 @@
   },
   "medical_resupply_packing": {
    "effects": {
-    "injury_risk": -0.001,
+    "injury_risk": -0.0006,
     "logistics_endurance": 0.003,
-    "warfare_readiness": 0.002
+    "warfare_readiness": 0.0008
    },
    "art": "res://assets/ui/research/subjects/supply_groups-v1.png",
    "observation": "Dressings and drugs travel in standard sealed sets, so every aid post knows what it holds."
   },
   "convalescent_duty_reviews": {
    "effects": {
-    "health_protection": 0.001,
-    "warfare_readiness": 0.002
+    "health_protection": 0.0007,
+    "warfare_readiness": 0.0008
    },
    "art": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
    "observation": "Boards review convalescents and decide who returns to the line and who needs more care."
   },
   "reconstructive_surgery": {
    "effects": {
-    "cohesion": 0.001,
-    "health_protection": 0.001,
-    "injury_risk": -0.002
+    "cohesion": 0.0002,
+    "health_protection": 0.0007,
+    "injury_risk": -0.0011,
+    "modern_survival": 0.015
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
    "name": "Reconstructive Surgery",
@@ -730,9 +791,10 @@
   },
   "stored_citrated_blood": {
    "effects": {
-    "injury_risk": -0.003,
+    "injury_risk": -0.0017,
     "maternal_safety": 0.003,
-    "warfare_readiness": 0.002
+    "modern_survival": 0.015,
+    "warfare_readiness": 0.0008
    },
    "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
    "name": "Stored Blood",
@@ -740,8 +802,9 @@
   },
   "pandemic_closure_orders": {
    "effects": {
-    "cohesion": -0.002,
+    "cohesion": -0.0002,
     "disease_exposure": -0.004,
+    "modern_survival": 0.015,
     "trade_capacity": -0.003
    },
    "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
@@ -751,6 +814,7 @@
   "consumption_vaccine": {
    "effects": {
     "disease_exposure": -0.006,
+    "modern_survival": 0.015,
     "neonatal_survival": 0.002
    },
    "art": "res://assets/ui/research/paper/microbial_isolation_methods.png",
@@ -759,8 +823,9 @@
   },
   "insulin_therapy": {
    "effects": {
-    "health_protection": 0.004,
+    "health_protection": 0.003,
     "knowledge_rate": 0.002,
+    "modern_survival": 0.025,
     "neonatal_survival": 0.001
    },
    "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
@@ -770,9 +835,10 @@
   },
   "hospital_prepayment_plans": {
    "effects": {
-    "cohesion": 0.001,
-    "health_protection": 0.003,
-    "labor_demand": 0.001
+    "cohesion": 0.0002,
+    "health_protection": 0.0022,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.015
    },
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
    "name": "Hospital Prepayment",
@@ -780,7 +846,8 @@
   },
   "cancer_registries": {
    "effects": {
-    "health_protection": 0.002,
+    "health_protection": 0.0009,
+    "modern_survival": 0.0034,
     "observation_rate": 0.002
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
@@ -789,10 +856,11 @@
   },
   "sulfa_drugs": {
    "effects": {
-    "disease_exposure": -0.02,
-    "health_protection": 0.004,
-    "health_risk": 0.002,
-    "maternal_safety": 0.026,
+    "disease_exposure": -0.0074,
+    "health_protection": 0.0018,
+    "health_risk": 0.0002,
+    "maternal_safety": 0.0153,
+    "modern_survival": 0.0227,
     "neonatal_survival": 0.004
    },
    "art": "res://assets/ui/research/paper/aromatic_amine_hydrogenation.png",
@@ -802,9 +870,10 @@
   },
   "blood_bank": {
    "effects": {
-    "injury_risk": -0.003,
-    "labor_demand": 0.001,
-    "maternal_safety": 0.006
+    "injury_risk": -0.002,
+    "labor_demand": 0.0001,
+    "maternal_safety": 0.0035,
+    "modern_survival": 0.0034
    },
    "art": "res://assets/ui/research/subjects/public_stores-v1.png",
    "name": "Blood Bank",
@@ -812,10 +881,11 @@
   },
   "mould_broth_antibiotic": {
    "effects": {
-    "disease_exposure": -0.03,
-    "health_protection": 0.006,
-    "injury_risk": -0.004,
-    "maternal_safety": 0.01,
+    "disease_exposure": -0.0111,
+    "health_protection": 0.0027,
+    "injury_risk": -0.0026,
+    "maternal_safety": 0.0059,
+    "modern_survival": 0.0341,
     "neonatal_survival": 0.004
    },
    "art": "res://assets/ui/research/paper/microbial_growth_measurement.png",
@@ -825,8 +895,9 @@
   },
   "consumption_antibiotic": {
    "effects": {
-    "disease_exposure": -0.012,
-    "health_protection": 0.002
+    "disease_exposure": -0.0044,
+    "health_protection": 0.0009,
+    "modern_survival": 0.017
    },
    "art": "res://assets/ui/research/paper/microbial_growth_measurement.png",
    "name": "TB Antibiotic",
@@ -834,8 +905,9 @@
   },
   "water_fluoridation": {
    "effects": {
-    "cohesion": -0.001,
-    "health_protection": 0.002,
+    "cohesion": -0.0002,
+    "health_protection": 0.0009,
+    "modern_survival": 0.0034,
     "water_safety": 0.001
    },
    "art": "res://assets/ui/research/subjects/clean_water-v1.png",
@@ -844,8 +916,9 @@
   },
   "residual_house_spraying": {
    "effects": {
-    "disease_exposure": -0.01,
+    "disease_exposure": -0.0037,
     "ecological_pressure": 0.002,
+    "modern_survival": 0.0034,
     "pollution": 0.003
    },
    "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
@@ -854,8 +927,9 @@
   },
   "artificial_kidney_dialysis": {
    "effects": {
-    "health_protection": 0.002,
-    "labor_demand": 0.001
+    "health_protection": 0.0009,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0034
    },
    "art": "res://assets/ui/research/paper/water_settling_basins.png",
    "name": "Dialysis",
@@ -863,7 +937,8 @@
   },
   "inter_realm_health_council": {
    "effects": {
-    "disease_exposure": -0.004,
+    "disease_exposure": -0.0015,
+    "modern_survival": 0.0034,
     "observation_rate": 0.002,
     "trade_capacity": 0.001
    },
@@ -873,13 +948,14 @@
   },
   "national_health_service": {
    "effects": {
-    "cohesion": 0.004,
-    "health_protection": 0.012,
-    "labor_demand": 0.005,
-    "legitimacy": 0.005,
-    "maternal_safety": 0.012,
+    "cohesion": 0.0005,
+    "health_protection": 0.0054,
+    "labor_demand": 0.0003,
+    "legitimacy": 0.0009,
+    "maternal_safety": 0.0071,
+    "modern_survival": 0.0034,
     "neonatal_survival": 0.006,
-    "state_capacity": 0.002
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
    "name": "National Health Service",
@@ -889,9 +965,10 @@
   },
   "randomised_controlled_trial": {
    "effects": {
-    "health_protection": 0.004,
+    "health_protection": 0.0018,
     "health_risk": -0.01,
-    "knowledge_rate": 0.003
+    "knowledge_rate": 0.0019,
+    "modern_survival": 0.0034
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Controlled Trial",
@@ -900,8 +977,9 @@
   },
   "tobacco_cancer_evidence": {
    "effects": {
-    "health_protection": 0.002,
-    "observation_rate": 0.002
+    "health_protection": 0.0015,
+    "modern_survival": 0.0027,
+    "observation_rate": 0.0019
    },
    "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
    "name": "Tobacco Evidence",
@@ -909,9 +987,10 @@
   },
   "antipsychotic_drugs": {
    "effects": {
-    "cohesion": 0.002,
-    "health_protection": 0.002,
-    "health_risk": 0.001
+    "cohesion": 0.0004,
+    "health_protection": 0.0015,
+    "health_risk": 0.0002,
+    "modern_survival": 0.0027
    },
    "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
    "name": "Calming Drugs",
@@ -919,8 +998,9 @@
   },
   "combination_consumption_therapy": {
    "effects": {
-    "disease_exposure": -0.004,
-    "health_protection": 0.002
+    "disease_exposure": -0.0037,
+    "health_protection": 0.0015,
+    "modern_survival": 0.0027
    },
    "art": "res://assets/ui/research/paper/microbial_growth_measurement.png",
    "name": "Combined TB Therapy",
@@ -928,8 +1008,9 @@
   },
   "heart_lung_machine": {
    "effects": {
-    "health_protection": 0.002,
-    "neonatal_survival": 0.002
+    "health_protection": 0.0015,
+    "modern_survival": 0.0027,
+    "neonatal_survival": 0.0018
    },
    "art": "res://assets/ui/research/paper/precision_toolrooms.png",
    "name": "Heart-lung Machine",
@@ -937,10 +1018,11 @@
   },
   "intensive_care_units": {
    "effects": {
-    "health_protection": 0.003,
+    "health_protection": 0.0022,
     "injury_risk": -0.002,
-    "labor_demand": 0.002,
-    "maternal_safety": 0.003
+    "labor_demand": 0.0001,
+    "maternal_safety": 0.003,
+    "modern_survival": 0.0027
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
    "name": "Intensive Care",
@@ -948,8 +1030,9 @@
   },
   "organ_transplant": {
    "effects": {
-    "health_protection": 0.001,
-    "knowledge_rate": 0.001
+    "health_protection": 0.0007,
+    "knowledge_rate": 0.0006,
+    "modern_survival": 0.0027
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
    "name": "Organ Transplant",
@@ -957,9 +1040,10 @@
   },
   "paralysis_virus_vaccine": {
    "effects": {
-    "disease_exposure": -0.006,
-    "health_protection": 0.002,
-    "neonatal_survival": 0.003
+    "disease_exposure": -0.0056,
+    "health_protection": 0.0015,
+    "modern_survival": 0.009,
+    "neonatal_survival": 0.0027
    },
    "art": "res://assets/ui/research/paper/cell_culture_methods.png",
    "name": "Paralysis Vaccine",
@@ -968,8 +1052,9 @@
   },
   "cardiac_resuscitation": {
    "effects": {
-    "health_protection": 0.002,
-    "injury_risk": -0.002
+    "health_protection": 0.0015,
+    "injury_risk": -0.002,
+    "modern_survival": 0.0027
    },
    "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
    "name": "Resuscitation",
@@ -977,9 +1062,10 @@
   },
   "drug_efficacy_approval": {
    "effects": {
-    "health_risk": -0.008,
-    "institutional_rigidity": 0.002,
-    "state_capacity": 0.001
+    "health_risk": -0.0026,
+    "institutional_rigidity": 0.0006,
+    "modern_survival": 0.0027,
+    "state_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Drug Approval",
@@ -987,9 +1073,10 @@
   },
   "community_mental_health": {
    "effects": {
-    "cohesion": 0.002,
-    "health_protection": 0.001,
-    "labor_demand": 0.001
+    "cohesion": 0.0004,
+    "health_protection": 0.0007,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0027
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Community Mental Health",
@@ -997,8 +1084,9 @@
   },
   "measles_vaccine": {
    "effects": {
-    "disease_exposure": -0.008,
-    "neonatal_survival": 0.005
+    "disease_exposure": -0.0075,
+    "modern_survival": 0.0135,
+    "neonatal_survival": 0.0045
    },
    "art": "res://assets/ui/research/paper/cell_culture_methods.png",
    "name": "Measles Vaccine",
@@ -1006,8 +1094,9 @@
   },
   "tobacco_control_laws": {
    "effects": {
-    "health_protection": 0.003,
-    "legitimacy": -0.001,
+    "health_protection": 0.0022,
+    "legitimacy": -0.0002,
+    "modern_survival": 0.0027,
     "trade_capacity": -0.001
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
@@ -1016,7 +1105,8 @@
   },
   "hospice_care": {
    "effects": {
-    "cohesion": 0.002
+    "cohesion": 0.0004,
+    "modern_survival": 0.0027
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
    "name": "Hospice Care",
@@ -1024,9 +1114,10 @@
   },
   "oral_rehydration_salts": {
    "effects": {
-    "disease_exposure": -0.006,
-    "health_protection": 0.003,
-    "neonatal_survival": 0.01
+    "disease_exposure": -0.0056,
+    "health_protection": 0.0022,
+    "modern_survival": 0.018,
+    "neonatal_survival": 0.009
    },
    "art": "res://assets/ui/research/subjects/clean_water-v1.png",
    "name": "Oral Rehydration",
@@ -1036,6 +1127,7 @@
   "body_slice_scanner": {
    "effects": {
     "health_protection": 0.002,
+    "modern_survival": 0.0049,
     "observation_rate": 0.001
    },
    "art": "res://assets/ui/research/paper/compound_microscopy.png",
@@ -1045,7 +1137,8 @@
   "expanded_immunisation_program": {
    "effects": {
     "disease_exposure": -0.007,
-    "labor_demand": 0.002,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0327,
     "neonatal_survival": 0.005
    },
    "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
@@ -1054,10 +1147,11 @@
   },
   "primary_health_care": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0007,
     "health_protection": 0.004,
-    "labor_demand": 0.002,
+    "labor_demand": 0.0001,
     "maternal_safety": 0.004,
+    "modern_survival": 0.0049,
     "neonatal_survival": 0.004,
     "sanitation": 0.003
    },
@@ -1068,7 +1162,8 @@
   "smallpox_eradication": {
    "effects": {
     "disease_exposure": -0.008,
-    "legitimacy": 0.002,
+    "legitimacy": 0.0006,
+    "modern_survival": 0.0163,
     "neonatal_survival": 0.002
    },
    "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
@@ -1078,7 +1173,8 @@
   },
   "magnetic_resonance_imaging": {
    "effects": {
-    "health_protection": 0.002
+    "health_protection": 0.002,
+    "modern_survival": 0.0049
    },
    "art": "res://assets/ui/research/paper/nuclear_magnetic_resonance_spectroscopy.png",
    "name": "Magnetic Imaging",
@@ -1087,7 +1183,8 @@
   "immune_virus_blood_test": {
    "effects": {
     "disease_exposure": -0.004,
-    "health_risk": -0.002
+    "health_risk": -0.0007,
+    "modern_survival": 0.0049
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
    "name": "Immune Virus Test",
@@ -1096,6 +1193,7 @@
   "recombinant_vaccine": {
    "effects": {
     "disease_exposure": -0.003,
+    "modern_survival": 0.0082,
     "neonatal_survival": 0.001
    },
    "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
@@ -1104,7 +1202,8 @@
   },
   "cholesterol_lowering_drugs": {
    "effects": {
-    "health_protection": 0.003
+    "health_protection": 0.003,
+    "modern_survival": 0.0049
    },
    "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
    "name": "Cholesterol Drugs",
@@ -1113,7 +1212,8 @@
   "systematic_review_medicine": {
    "effects": {
     "health_protection": 0.002,
-    "health_risk": -0.004
+    "health_risk": -0.003,
+    "modern_survival": 0.0073
    },
    "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
    "name": "Systematic Reviews",
@@ -1122,6 +1222,7 @@
   "insecticide_bed_nets": {
    "effects": {
     "disease_exposure": -0.004,
+    "modern_survival": 0.0073,
     "neonatal_survival": 0.003
    },
    "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
@@ -1132,7 +1233,8 @@
    "effects": {
     "disease_exposure": -0.004,
     "health_protection": 0.003,
-    "maternal_safety": 0.001
+    "maternal_safety": 0.001,
+    "modern_survival": 0.0073
    },
    "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
    "name": "Antiviral Therapy",
@@ -1141,7 +1243,8 @@
   },
   "monoclonal_antibody_drugs": {
    "effects": {
-    "health_protection": 0.002
+    "health_protection": 0.002,
+    "modern_survival": 0.0073
    },
    "art": "res://assets/ui/research/paper/cell_culture_methods.png",
    "name": "Antibody Drugs",
@@ -1150,8 +1253,9 @@
   "antibiotic_stewardship": {
    "effects": {
     "disease_exposure": -0.003,
-    "health_risk": -0.003,
-    "labor_demand": 0.001
+    "health_risk": -0.0023,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0073
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
    "name": "Antibiotic Stewardship",
@@ -1160,6 +1264,7 @@
   "artemisinin_combination_therapy": {
    "effects": {
     "disease_exposure": -0.003,
+    "modern_survival": 0.0073,
     "neonatal_survival": 0.002
    },
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
@@ -1169,7 +1274,8 @@
   "human_genome_reading": {
    "effects": {
     "health_protection": 0.001,
-    "knowledge_rate": 0.003
+    "knowledge_rate": 0.003,
+    "modern_survival": 0.0073
    },
    "art": "res://assets/ui/research/paper/cell_theory.png",
    "name": "Genome Reading",
@@ -1178,6 +1284,7 @@
   "tobacco_control_treaty": {
    "effects": {
     "health_protection": 0.002,
+    "modern_survival": 0.0073,
     "trade_capacity": -0.001
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
@@ -1187,7 +1294,8 @@
   "inter_realm_health_rules": {
    "effects": {
     "disease_exposure": -0.003,
-    "state_capacity": 0.001,
+    "modern_survival": 0.0073,
+    "state_capacity": 0.0008,
     "trade_capacity": -0.001
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
@@ -1197,8 +1305,9 @@
   "electronic_health_records": {
    "effects": {
     "health_protection": 0.002,
-    "health_risk": -0.002,
-    "knowledge_preservation": 0.002
+    "health_risk": -0.0015,
+    "knowledge_preservation": 0.0008,
+    "modern_survival": 0.0073
    },
    "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
    "name": "Electronic Records",
@@ -1207,7 +1316,8 @@
   "immune_checkpoint_therapy": {
    "effects": {
     "health_protection": 0.002,
-    "health_risk": 0.001
+    "health_risk": 0.001,
+    "modern_survival": 0.0069
    },
    "art": "res://assets/ui/research/paper/cell_culture_methods.png",
    "name": "Checkpoint Therapy",
@@ -1215,7 +1325,8 @@
   },
   "engineered_immune_cell_therapy": {
    "effects": {
-    "health_protection": 0.001
+    "health_protection": 0.001,
+    "modern_survival": 0.0069
    },
    "art": "res://assets/ui/research/paper/cell_culture_methods.png",
    "name": "Engineered Cell Therapy",
@@ -1223,9 +1334,10 @@
   },
   "messenger_molecule_vaccine": {
    "effects": {
-    "cohesion": -0.001,
+    "cohesion": -0.0002,
     "disease_exposure": -0.006,
-    "health_protection": 0.002
+    "health_protection": 0.002,
+    "modern_survival": 0.0115
    },
    "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
    "name": "Message-molecule Vaccine",
@@ -1235,8 +1347,9 @@
   },
   "pandemic_test_trace_orders": {
    "effects": {
-    "cohesion": -0.002,
+    "cohesion": -0.0004,
     "disease_exposure": -0.004,
+    "modern_survival": 0.0069,
     "state_capacity": 0.002,
     "trade_capacity": -0.003
    },
@@ -1247,6 +1360,7 @@
   "malaria_vaccine": {
    "effects": {
     "disease_exposure": -0.002,
+    "modern_survival": 0.0069,
     "neonatal_survival": 0.002
    },
    "art": "res://assets/ui/research/paper/cell_culture_methods.png",
@@ -1255,7 +1369,8 @@
   },
   "gene_edited_blood_cure": {
    "effects": {
-    "health_protection": 0.001
+    "health_protection": 0.001,
+    "modern_survival": 0.0069
    },
    "art": "res://assets/ui/research/paper/cell_theory.png",
    "name": "Gene-edited Blood Cure",
@@ -1264,6 +1379,7 @@
   "machine_read_diagnostics": {
    "effects": {
     "health_protection": 0.002,
+    "modern_survival": 0.0069,
     "observation_rate": 0.002
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
@@ -1273,6 +1389,7 @@
   "gut_hormone_drugs": {
    "effects": {
     "health_protection": 0.003,
+    "modern_survival": 0.0069,
     "nutrition_quality": 0.001
    },
    "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
@@ -1282,7 +1399,8 @@
   "genome_guided_prescribing": {
    "effects": {
     "health_protection": 0.001,
-    "health_risk": -0.002
+    "health_risk": -0.002,
+    "modern_survival": 0.0069
    },
    "art": "res://assets/ui/research/paper/cell_theory.png",
    "name": "Genome-guided Prescribing",
@@ -1290,12 +1408,656 @@
   },
   "broad_virus_family_vaccines": {
    "effects": {
-    "disaster_resilience": 0.002,
-    "disease_exposure": -0.002
+    "disaster_resilience": 0.0013,
+    "disease_exposure": -0.002,
+    "modern_survival": 0.0069
    },
    "art": "res://assets/ui/research/paper/cell_culture_methods.png",
    "name": "Broad Virus Vaccines",
    "observation": "Broad vaccines against whole families of viruses are held ready for the next pandemic."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "vaccine_carrier_voyage": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.003,
+    "neonatal_survival": 0.001,
+    "trade_capacity": 0.001
+   },
+   "slow_sand_filtration": {
+    "disease_exposure": -0.007,
+    "labor_demand": 0.003,
+    "sanitation": 0.003,
+    "water_safety": 0.015
+   },
+   "isolated_poppy_alkaloid": {
+    "fatigue": -0.001,
+    "health_protection": 0.002,
+    "health_risk": 0.003
+   },
+   "public_vaccine_stations": {
+    "disease_exposure": -0.006,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.002,
+    "state_capacity": 0.001
+   },
+   "planned_abdominal_operation": {
+    "health_protection": 0.001,
+    "health_risk": 0.001,
+    "knowledge_rate": 0.001
+   },
+   "chest_listening_tube": {
+    "health_protection": 0.003,
+    "observation_rate": 0.002
+   },
+   "human_blood_transfusion": {
+    "health_risk": 0.002,
+    "injury_risk": -0.001,
+    "maternal_safety": 0.002
+   },
+   "fever_bark_alkaloid": {
+    "disease_exposure": -0.004,
+    "health_protection": 0.002,
+    "trade_capacity": 0.001
+   },
+   "iodine_goitre_treatment": {
+    "health_protection": 0.002,
+    "health_risk": 0.001,
+    "nutrition_quality": 0.001
+   },
+   "national_pharmacopoeia": {
+    "health_protection": 0.001,
+    "health_risk": -0.003,
+    "institutional_rigidity": 0.002,
+    "standardization": 0.002
+   },
+   "croup_tracheotomy": {
+    "health_risk": 0.001,
+    "neonatal_survival": 0.002
+   },
+   "hospital_medical_schools": {
+    "health_protection": 0.003,
+    "knowledge_preservation": 0.002,
+    "knowledge_rate": 0.001,
+    "labor_demand": 0.001
+   },
+   "epidemic_house_visiting": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.004,
+    "labor_demand": 0.002,
+    "sanitation": 0.003
+   },
+   "intravenous_saline": {
+    "health_protection": 0.002,
+    "health_risk": 0.001
+   },
+   "anatomy_body_supply_law": {
+    "cohesion": -0.003,
+    "health_protection": 0.001,
+    "knowledge_rate": 0.001,
+    "legitimacy": -0.002
+   },
+   "numerical_treatment_method": {
+    "health_risk": -0.004,
+    "observation_rate": 0.002
+   },
+   "dental_surgery_licence": {
+    "health_protection": 0.001,
+    "health_risk": -0.001,
+    "institutional_rigidity": 0.001
+   },
+   "sanitary_town_survey": {
+    "disease_exposure": -0.004,
+    "observation_rate": 0.002,
+    "sanitation": 0.006,
+    "state_capacity": 0.002
+   },
+   "ether_anaesthesia": {
+    "health_protection": 0.004,
+    "health_risk": 0.002,
+    "injury_risk": -0.003,
+    "maternal_safety": 0.001
+   },
+   "chlorine_handwashing": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.002,
+    "maternal_safety": 0.008,
+    "neonatal_survival": 0.002
+   },
+   "chloroform_anaesthesia": {
+    "health_protection": 0.002,
+    "health_risk": 0.002,
+    "maternal_safety": 0.002
+   },
+   "central_board_of_health": {
+    "disease_exposure": -0.01,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.003,
+    "legitimacy": 0.001,
+    "sanitation": 0.016,
+    "state_capacity": 0.004,
+    "water_safety": 0.004
+   },
+   "water_service_inspections": {
+    "disease_exposure": -0.003,
+    "labor_demand": 0.002,
+    "repair_capacity": 0.002,
+    "water_safety": 0.006
+   },
+   "compulsory_infant_vaccination": {
+    "cohesion": -0.003,
+    "disease_exposure": -0.008,
+    "legitimacy": -0.001,
+    "neonatal_survival": 0.004,
+    "state_capacity": 0.002
+   },
+   "hypodermic_syringe": {
+    "health_protection": 0.002,
+    "health_risk": 0.001
+   },
+   "contagion_mapping": {
+    "disease_exposure": -0.012,
+    "observation_rate": 0.003,
+    "state_capacity": 0.002
+   },
+   "nursing_care_organization": {
+    "disease_exposure": -0.003,
+    "health_protection": 0.006,
+    "labor_demand": 0.003,
+    "maternal_safety": 0.002,
+    "warfare_readiness": 0.001
+   },
+   "medical_officer_of_health": {
+    "disease_exposure": -0.005,
+    "labor_demand": 0.001,
+    "sanitation": 0.005,
+    "state_capacity": 0.002
+   },
+   "cellular_pathology": {
+    "health_protection": 0.003,
+    "knowledge_rate": 0.002,
+    "observation_rate": 0.002
+   },
+   "medical_practitioner_register": {
+    "health_protection": 0.001,
+    "health_risk": -0.004,
+    "institutional_rigidity": 0.003
+   },
+   "district_visiting_nurses": {
+    "cohesion": 0.001,
+    "health_protection": 0.003,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.002,
+    "neonatal_survival": 0.002
+   },
+   "casualty_collection_posts": {
+    "injury_risk": -0.003,
+    "logistics_endurance": 0.001,
+    "warfare_readiness": 0.002
+   },
+   "field_aid_stations": {
+    "injury_risk": -0.004,
+    "logistics_endurance": 0.002,
+    "warfare_readiness": 0.003
+   },
+   "nurse_training_school": {
+    "health_protection": 0.004,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.002
+   },
+   "casualty_transfer_records": {
+    "injury_risk": -0.002,
+    "knowledge_preservation": 0.001,
+    "warfare_readiness": 0.001
+   },
+   "triage_registers": {
+    "injury_risk": -0.003,
+    "warfare_readiness": 0.002
+   },
+   "evacuation_relays": {
+    "injury_risk": -0.003,
+    "logistics_endurance": 0.003,
+    "warfare_readiness": 0.002
+   },
+   "neutral_wounded_convention": {
+    "cohesion": 0.001,
+    "injury_risk": -0.002,
+    "legitimacy": 0.002,
+    "warfare_readiness": 0.001
+   },
+   "pavilion_ward_hospitals": {
+    "construction_rate": -0.001,
+    "disease_exposure": -0.004,
+    "health_protection": 0.003,
+    "labor_demand": 0.002
+   },
+   "antiseptic_surgery": {
+    "disease_exposure": -0.004,
+    "health_protection": 0.004,
+    "health_risk": -0.012,
+    "injury_risk": -0.006,
+    "maternal_safety": 0.006
+   },
+   "germ_theory_of_disease": {
+    "disease_exposure": -0.032,
+    "health_protection": 0.01,
+    "knowledge_rate": 0.004,
+    "sanitation": 0.006,
+    "water_safety": 0.004
+   },
+   "isolation_fever_hospitals": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.01,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.002
+   },
+   "consumption_germ_identified": {
+    "disease_exposure": -0.004,
+    "knowledge_rate": 0.001,
+    "observation_rate": 0.002
+   },
+   "worker_sickness_insurance": {
+    "cohesion": 0.003,
+    "conception_support": -0.004,
+    "health_protection": 0.006,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.002,
+    "legitimacy": 0.004,
+    "state_capacity": 0.002
+   },
+   "local_anaesthesia": {
+    "health_protection": 0.002,
+    "health_risk": 0.001,
+    "injury_risk": -0.001
+   },
+   "attenuated_laboratory_vaccine": {
+    "disease_exposure": -0.003,
+    "health_protection": 0.002,
+    "knowledge_rate": 0.002
+   },
+   "aseptic_operating_room": {
+    "health_protection": 0.003,
+    "health_risk": -0.008,
+    "injury_risk": -0.004,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.006
+   },
+   "consumption_sanatoria": {
+    "disease_exposure": -0.003,
+    "health_protection": 0.002,
+    "labor_demand": 0.001
+   },
+   "disease_notification_law": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.007,
+    "institutional_rigidity": 0.001,
+    "state_capacity": 0.002
+   },
+   "diphtheria_antitoxin": {
+    "disease_exposure": -0.012,
+    "health_protection": 0.003,
+    "neonatal_survival": 0.007
+   },
+   "port_sanitary_inspection": {
+    "disease_exposure": -0.005,
+    "state_capacity": 0.001,
+    "trade_capacity": 0.004
+   },
+   "shared_death_cause_list": {
+    "knowledge_preservation": 0.002,
+    "observation_rate": 0.002,
+    "standardization": 0.001
+   },
+   "bone_shadow_imaging": {
+    "health_protection": 0.003,
+    "health_risk": 0.001,
+    "injury_risk": -0.002
+   },
+   "enteric_fever_vaccine": {
+    "disease_exposure": -0.006,
+    "warfare_readiness": 0.002
+   },
+   "mosquito_fever_vector": {
+    "disease_exposure": -0.005,
+    "observation_rate": 0.002
+   },
+   "synthetic_willow_analgesic": {
+    "fatigue": -0.001,
+    "health_protection": 0.002,
+    "health_risk": 0.001
+   },
+   "blood_group_typing": {
+    "health_risk": -0.003,
+    "injury_risk": -0.002,
+    "maternal_safety": 0.003
+   },
+   "mosquito_control_brigades": {
+    "disease_exposure": -0.01,
+    "ecology_recovery": -0.001,
+    "labor_demand": 0.003,
+    "sanitation": 0.003,
+    "water_pollution": 0.001
+   },
+   "talking_cure": {
+    "cohesion": 0.001,
+    "health_protection": 0.001
+   },
+   "radium_tumour_therapy": {
+    "health_protection": 0.002,
+    "health_risk": 0.003
+   },
+   "school_medical_inspection": {
+    "disease_exposure": -0.005,
+    "health_protection": 0.002,
+    "labor_demand": 0.001,
+    "neonatal_survival": 0.001
+   },
+   "water_chlorination": {
+    "disease_exposure": -0.026,
+    "health_risk": 0.001,
+    "sanitation": 0.004,
+    "water_safety": 0.022
+   },
+   "targeted_arsenical_drug": {
+    "disease_exposure": -0.004,
+    "health_protection": 0.002,
+    "health_risk": 0.003
+   },
+   "laboratory_medical_schools": {
+    "health_protection": 0.004,
+    "health_risk": -0.003,
+    "institutional_rigidity": 0.002,
+    "knowledge_rate": 0.002
+   },
+   "drug_label_purity_law": {
+    "health_risk": -0.005,
+    "institutional_rigidity": 0.001,
+    "state_capacity": 0.001
+   },
+   "medical_resupply_packing": {
+    "injury_risk": -0.001,
+    "logistics_endurance": 0.003,
+    "warfare_readiness": 0.002
+   },
+   "convalescent_duty_reviews": {
+    "health_protection": 0.001,
+    "warfare_readiness": 0.002
+   },
+   "reconstructive_surgery": {
+    "cohesion": 0.001,
+    "health_protection": 0.001,
+    "injury_risk": -0.002
+   },
+   "stored_citrated_blood": {
+    "injury_risk": -0.003,
+    "maternal_safety": 0.003,
+    "warfare_readiness": 0.002
+   },
+   "pandemic_closure_orders": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.004,
+    "trade_capacity": -0.003
+   },
+   "consumption_vaccine": {
+    "disease_exposure": -0.006,
+    "neonatal_survival": 0.002
+   },
+   "insulin_therapy": {
+    "health_protection": 0.004,
+    "knowledge_rate": 0.002,
+    "neonatal_survival": 0.001
+   },
+   "hospital_prepayment_plans": {
+    "cohesion": 0.001,
+    "health_protection": 0.003,
+    "labor_demand": 0.001
+   },
+   "cancer_registries": {
+    "health_protection": 0.002,
+    "observation_rate": 0.002
+   },
+   "sulfa_drugs": {
+    "disease_exposure": -0.02,
+    "health_protection": 0.004,
+    "health_risk": 0.002,
+    "maternal_safety": 0.026,
+    "neonatal_survival": 0.004
+   },
+   "blood_bank": {
+    "injury_risk": -0.003,
+    "labor_demand": 0.001,
+    "maternal_safety": 0.006
+   },
+   "mould_broth_antibiotic": {
+    "disease_exposure": -0.03,
+    "health_protection": 0.006,
+    "injury_risk": -0.004,
+    "maternal_safety": 0.01,
+    "neonatal_survival": 0.004
+   },
+   "consumption_antibiotic": {
+    "disease_exposure": -0.012,
+    "health_protection": 0.002
+   },
+   "water_fluoridation": {
+    "cohesion": -0.001,
+    "health_protection": 0.002,
+    "water_safety": 0.001
+   },
+   "residual_house_spraying": {
+    "disease_exposure": -0.01,
+    "ecological_pressure": 0.002,
+    "pollution": 0.003
+   },
+   "artificial_kidney_dialysis": {
+    "health_protection": 0.002,
+    "labor_demand": 0.001
+   },
+   "inter_realm_health_council": {
+    "disease_exposure": -0.004,
+    "observation_rate": 0.002,
+    "trade_capacity": 0.001
+   },
+   "national_health_service": {
+    "cohesion": 0.004,
+    "health_protection": 0.012,
+    "labor_demand": 0.005,
+    "legitimacy": 0.005,
+    "maternal_safety": 0.012,
+    "neonatal_survival": 0.006,
+    "state_capacity": 0.002
+   },
+   "randomised_controlled_trial": {
+    "health_protection": 0.004,
+    "health_risk": -0.01,
+    "knowledge_rate": 0.003
+   },
+   "tobacco_cancer_evidence": {
+    "health_protection": 0.002,
+    "observation_rate": 0.002
+   },
+   "antipsychotic_drugs": {
+    "cohesion": 0.002,
+    "health_protection": 0.002,
+    "health_risk": 0.001
+   },
+   "combination_consumption_therapy": {
+    "disease_exposure": -0.004,
+    "health_protection": 0.002
+   },
+   "heart_lung_machine": {
+    "health_protection": 0.002,
+    "neonatal_survival": 0.002
+   },
+   "intensive_care_units": {
+    "health_protection": 0.003,
+    "injury_risk": -0.002,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.003
+   },
+   "organ_transplant": {
+    "health_protection": 0.001,
+    "knowledge_rate": 0.001
+   },
+   "paralysis_virus_vaccine": {
+    "disease_exposure": -0.006,
+    "health_protection": 0.002,
+    "neonatal_survival": 0.003
+   },
+   "cardiac_resuscitation": {
+    "health_protection": 0.002,
+    "injury_risk": -0.002
+   },
+   "drug_efficacy_approval": {
+    "health_risk": -0.008,
+    "institutional_rigidity": 0.002,
+    "state_capacity": 0.001
+   },
+   "community_mental_health": {
+    "cohesion": 0.002,
+    "health_protection": 0.001,
+    "labor_demand": 0.001
+   },
+   "measles_vaccine": {
+    "disease_exposure": -0.008,
+    "neonatal_survival": 0.005
+   },
+   "tobacco_control_laws": {
+    "health_protection": 0.003,
+    "legitimacy": -0.001,
+    "trade_capacity": -0.001
+   },
+   "hospice_care": {
+    "cohesion": 0.002
+   },
+   "oral_rehydration_salts": {
+    "disease_exposure": -0.006,
+    "health_protection": 0.003,
+    "neonatal_survival": 0.01
+   },
+   "body_slice_scanner": {
+    "health_protection": 0.002,
+    "observation_rate": 0.001
+   },
+   "expanded_immunisation_program": {
+    "disease_exposure": -0.007,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.005
+   },
+   "primary_health_care": {
+    "cohesion": 0.002,
+    "health_protection": 0.004,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.004,
+    "neonatal_survival": 0.004,
+    "sanitation": 0.003
+   },
+   "smallpox_eradication": {
+    "disease_exposure": -0.008,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.002
+   },
+   "magnetic_resonance_imaging": {
+    "health_protection": 0.002
+   },
+   "immune_virus_blood_test": {
+    "disease_exposure": -0.004,
+    "health_risk": -0.002
+   },
+   "recombinant_vaccine": {
+    "disease_exposure": -0.003,
+    "neonatal_survival": 0.001
+   },
+   "cholesterol_lowering_drugs": {
+    "health_protection": 0.003
+   },
+   "systematic_review_medicine": {
+    "health_protection": 0.002,
+    "health_risk": -0.004
+   },
+   "insecticide_bed_nets": {
+    "disease_exposure": -0.004,
+    "neonatal_survival": 0.003
+   },
+   "combination_antiviral_therapy": {
+    "disease_exposure": -0.004,
+    "health_protection": 0.003,
+    "maternal_safety": 0.001
+   },
+   "monoclonal_antibody_drugs": {
+    "health_protection": 0.002
+   },
+   "antibiotic_stewardship": {
+    "disease_exposure": -0.003,
+    "health_risk": -0.003,
+    "labor_demand": 0.001
+   },
+   "artemisinin_combination_therapy": {
+    "disease_exposure": -0.003,
+    "neonatal_survival": 0.002
+   },
+   "human_genome_reading": {
+    "health_protection": 0.001,
+    "knowledge_rate": 0.003
+   },
+   "tobacco_control_treaty": {
+    "health_protection": 0.002,
+    "trade_capacity": -0.001
+   },
+   "inter_realm_health_rules": {
+    "disease_exposure": -0.003,
+    "state_capacity": 0.001,
+    "trade_capacity": -0.001
+   },
+   "electronic_health_records": {
+    "health_protection": 0.002,
+    "health_risk": -0.002,
+    "knowledge_preservation": 0.002
+   },
+   "immune_checkpoint_therapy": {
+    "health_protection": 0.002,
+    "health_risk": 0.001
+   },
+   "engineered_immune_cell_therapy": {
+    "health_protection": 0.001
+   },
+   "messenger_molecule_vaccine": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.006,
+    "health_protection": 0.002
+   },
+   "pandemic_test_trace_orders": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.004,
+    "state_capacity": 0.002,
+    "trade_capacity": -0.003
+   },
+   "malaria_vaccine": {
+    "disease_exposure": -0.002,
+    "neonatal_survival": 0.002
+   },
+   "gene_edited_blood_cure": {
+    "health_protection": 0.001
+   },
+   "machine_read_diagnostics": {
+    "health_protection": 0.002,
+    "observation_rate": 0.002
+   },
+   "gut_hormone_drugs": {
+    "health_protection": 0.003,
+    "nutrition_quality": 0.001
+   },
+   "genome_guided_prescribing": {
+    "health_protection": 0.001,
+    "health_risk": -0.002
+   },
+   "broad_virus_family_vaccines": {
+    "disaster_resilience": 0.002,
+    "disease_exposure": -0.002
+   }
   }
  }
 }

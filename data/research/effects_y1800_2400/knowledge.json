@@ -5,8 +5,8 @@
   "fractional_ratio_powers": {
    "effects": {
     "knowledge_rate": 0.0013,
-    "standardization": 0.0012,
-    "survey_speed": 0.001
+    "standardization": 0.0007,
+    "survey_speed": 0.0006
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "name": "Fractional Powers of Ratios",
@@ -24,12 +24,13 @@
   },
   "ruler_founded_universities": {
    "effects": {
-    "adoption_rate": 0.0032,
-    "institutional_rigidity": 0.001,
-    "knowledge_preservation": 0.0034,
+    "adoption_rate": 0.002,
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.001,
     "knowledge_rate": 0.0035,
-    "labor_demand": 0.0018,
-    "state_capacity": 0.0028
+    "labor_demand": 0.0001,
+    "literacy": 0.006,
+    "state_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Rulers' Own Universities",
@@ -39,11 +40,11 @@
   },
   "graticule_world_maps": {
    "effects": {
-    "naval_capacity": 0.0012,
+    "naval_capacity": 0.0008,
     "observation_rate": 0.0011,
-    "route_speed": 0.0063,
-    "survey_speed": 0.0098,
-    "trade_capacity": 0.0018
+    "route_speed": 0.0041,
+    "survey_speed": 0.0054,
+    "trade_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
    "name": "World on a Grid of Degrees",
@@ -52,10 +53,10 @@
   },
   "mirror_grid_perspective": {
    "effects": {
-    "construction_rate": 0.0022,
+    "construction_rate": 0.0014,
     "craft_output": 0.0014,
     "observation_rate": 0.0022,
-    "standardization": 0.0018
+    "standardization": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
    "name": "Perspective Proved by Mirror",
@@ -64,11 +65,12 @@
   },
   "old_tongue_grammar_schools": {
    "effects": {
-    "adoption_rate": 0.0024,
-    "institutional_rigidity": 0.0005,
-    "knowledge_preservation": 0.0017,
-    "knowledge_rate": 0.0009,
-    "labor_demand": 0.0012
+    "adoption_rate": 0.0003,
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0002,
+    "knowledge_rate": 0.0008,
+    "labor_demand": 0.0001,
+    "literacy": 0.0025
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Old-tongue Grammar Schools",
@@ -77,20 +79,20 @@
   },
   "burin_engraving": {
    "effects": {
-    "adoption_rate": 0.0016,
-    "craft_output": 0.0014,
-    "knowledge_preservation": 0.0017,
-    "labor_demand": 0.0006
+    "adoption_rate": 0.0002,
+    "craft_output": 0.0007,
+    "knowledge_preservation": 0.0002,
+    "labor_demand": 0.0001
    },
    "art": "res://assets/ui/research/paper/burin_engraving.png",
    "observation": "A goldsmith pushes a lozenge-pointed graver through copper, and the furrow holds ink finer than any carved block."
   },
   "copperplate_preparation": {
    "effects": {
-    "craft_output": 0.0014,
-    "fuel_demand": 0.001,
-    "labor_demand": 0.0006,
-    "standardization": 0.0012
+    "craft_output": 0.0007,
+    "fuel_demand": 0.0002,
+    "labor_demand": 0.0001,
+    "standardization": 0.0002
    },
    "art": "res://assets/ui/research/paper/burin_engraving.png",
    "name": "Prepared Copper Plates",
@@ -98,10 +100,10 @@
   },
   "remeasured_star_catalogue": {
    "effects": {
-    "knowledge_preservation": 0.0017,
-    "labor_demand": 0.0006,
-    "observation_rate": 0.0018,
-    "survey_speed": 0.002
+    "knowledge_preservation": 0.0002,
+    "labor_demand": 0.0001,
+    "observation_rate": 0.0011,
+    "survey_speed": 0.0009
    },
    "art": "res://assets/ui/research/discovery-600/star_hour_tables.png",
    "name": "Re-measured Star Catalogue",
@@ -109,9 +111,9 @@
   },
   "philological_forgery_critique": {
    "effects": {
-    "institutional_rigidity": -0.002,
-    "knowledge_preservation": 0.0017,
-    "knowledge_rate": 0.0017,
+    "institutional_rigidity": -0.0004,
+    "knowledge_preservation": 0.0002,
+    "knowledge_rate": 0.0014,
     "legitimacy": -0.003
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
@@ -121,13 +123,14 @@
   },
   "screw_press_printing": {
    "effects": {
-    "adoption_rate": 0.0111,
-    "knowledge_preservation": 0.0057,
-    "knowledge_rate": 0.0022,
-    "labor_demand": 0.0024,
-    "standardization": 0.0029,
+    "adoption_rate": 0.0015,
+    "knowledge_preservation": 0.0006,
+    "knowledge_rate": 0.0019,
+    "labor_demand": 0.0001,
+    "literacy": 0.0075,
+    "standardization": 0.0006,
     "timber_pressure": 0.002,
-    "trade_capacity": 0.0027
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/paper/mechanical_screw_presses.png",
    "name": "Screw Press Printing",
@@ -137,10 +140,10 @@
   },
   "oil_based_printing_inks": {
    "effects": {
-    "adoption_rate": 0.0024,
-    "craft_output": 0.0009,
-    "fuel_demand": 0.001,
-    "knowledge_preservation": 0.0017
+    "adoption_rate": 0.0003,
+    "craft_output": 0.0005,
+    "fuel_demand": 0.0002,
+    "knowledge_preservation": 0.0002
    },
    "art": "res://assets/ui/research/paper/metal_type_casting.png",
    "name": "Oil Printing Inks",
@@ -148,10 +151,10 @@
   },
   "hand_relief_printing": {
    "effects": {
-    "adoption_rate": 0.0032,
+    "adoption_rate": 0.0004,
     "fatigue": 0.001,
-    "knowledge_preservation": 0.0011,
-    "labor_demand": 0.0012
+    "knowledge_preservation": 0.0001,
+    "labor_demand": 0.0001
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
    "name": "Hand-pulled Relief Printing",
@@ -159,13 +162,13 @@
   },
   "metal_type_casting": {
    "effects": {
-    "adoption_rate": 0.0079,
-    "craft_output": 0.0018,
+    "adoption_rate": 0.001,
+    "craft_output": 0.0009,
     "health_risk": 0.001,
-    "knowledge_preservation": 0.0046,
-    "knowledge_rate": 0.0013,
-    "labor_demand": 0.0018,
-    "standardization": 0.0047
+    "knowledge_preservation": 0.0005,
+    "knowledge_rate": 0.0011,
+    "labor_demand": 0.0001,
+    "standardization": 0.0009
    },
    "art": "res://assets/ui/research/paper/metal_type_casting.png",
    "name": "Cast Metal Type",
@@ -175,11 +178,12 @@
   },
   "printed_scripture_folio": {
    "effects": {
-    "adoption_rate": 0.0016,
-    "cohesion": 0.0012,
-    "knowledge_preservation": 0.0029,
-    "labor_demand": 0.0006,
-    "legitimacy": 0.0037
+    "adoption_rate": 0.0002,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0003,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0002,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/printing_process-v1.png",
    "name": "Printed Scripture Folio",
@@ -187,10 +191,11 @@
   },
   "printed_broadsides": {
    "effects": {
-    "adoption_rate": 0.0039,
-    "cohesion": -0.0014,
-    "knowledge_rate": 0.0005,
-    "legitimacy": -0.002
+    "adoption_rate": 0.0005,
+    "cohesion": -0.0001,
+    "knowledge_rate": 0.0004,
+    "legitimacy": -0.002,
+    "literacy": 0.0025
    },
    "art": "res://assets/ui/research/discovery-600/seasonal_news_gathering.png",
    "name": "Street Broadsides",
@@ -199,13 +204,14 @@
   },
   "town_printing_houses": {
    "effects": {
-    "adoption_rate": 0.0095,
-    "institutional_rigidity": -0.002,
-    "knowledge_preservation": 0.0046,
-    "knowledge_rate": 0.0022,
-    "labor_demand": 0.0018,
+    "adoption_rate": 0.0012,
+    "institutional_rigidity": -0.0004,
+    "knowledge_preservation": 0.0005,
+    "knowledge_rate": 0.0019,
+    "labor_demand": 0.0001,
+    "literacy": 0.005,
     "timber_pressure": 0.002,
-    "trade_capacity": 0.0036
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/printing_process-v1.png",
    "name": "Printing Houses in Every Town",
@@ -215,10 +221,11 @@
   },
   "printed_ephemerides": {
    "effects": {
-    "naval_capacity": 0.0012,
-    "observation_rate": 0.0015,
-    "standardization": 0.0012,
-    "survey_speed": 0.0029
+    "literacy": 0.001,
+    "naval_capacity": 0.0001,
+    "observation_rate": 0.0009,
+    "standardization": 0.0002,
+    "survey_speed": 0.0014
    },
    "art": "res://assets/ui/research/discovery-600/star_hour_tables.png",
    "name": "Printed Sky Tables",
@@ -226,10 +233,11 @@
   },
   "printed_engraved_maps": {
    "effects": {
-    "knowledge_preservation": 0.0023,
-    "route_speed": 0.0031,
-    "survey_speed": 0.0049,
-    "trade_capacity": 0.0018
+    "knowledge_preservation": 0.0002,
+    "literacy": 0.001,
+    "route_speed": 0.0007,
+    "survey_speed": 0.0023,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
    "name": "Printed Copper Maps",
@@ -238,10 +246,11 @@
   "printed_arithmetic_summa": {
    "effects": {
     "knowledge_rate": 0.0022,
-    "standardization": 0.0047,
-    "state_capacity": 0.0028,
-    "task_coordination": 0.004,
-    "trade_capacity": 0.0089
+    "literacy": 0.001,
+    "standardization": 0.0023,
+    "state_capacity": 0.0004,
+    "task_coordination": 0.0006,
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
    "name": "Printed Summa of Reckoning",
@@ -250,9 +259,9 @@
   },
   "drypoint_printmaking": {
    "effects": {
-    "adoption_rate": 0.0008,
-    "craft_output": 0.0009,
-    "knowledge_preservation": 0.0006
+    "adoption_rate": 0.0003,
+    "craft_output": 0.0005,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/paper/burin_engraving.png",
    "name": "Drypoint",
@@ -260,10 +269,10 @@
   },
   "instrument_maker_workshops": {
    "effects": {
-    "craft_output": 0.0018,
-    "labor_demand": 0.0012,
-    "observation_rate": 0.0018,
-    "survey_speed": 0.0039,
+    "craft_output": 0.0009,
+    "labor_demand": 0.0001,
+    "observation_rate": 0.0016,
+    "survey_speed": 0.0012,
     "tool_quality": 0.002
    },
    "art": "res://assets/ui/research/subjects/precision_machinery-v1.png",
@@ -272,10 +281,11 @@
   },
   "printed_alphabet_primers": {
    "effects": {
-    "adoption_rate": 0.0047,
-    "cohesion": 0.0012,
-    "knowledge_preservation": 0.0011,
-    "legitimacy": 0.0012
+    "adoption_rate": 0.0017,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0002,
+    "legitimacy": 0.0001,
+    "literacy": 0.005
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Printed Primers",
@@ -284,10 +294,10 @@
   },
   "triangulation_survey": {
    "effects": {
-    "construction_rate": 0.0011,
-    "labor_demand": 0.0012,
-    "state_capacity": 0.0028,
-    "survey_speed": 0.0078
+    "construction_rate": 0.0006,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0004,
+    "survey_speed": 0.0023
    },
    "art": "res://assets/ui/research/discovery-600/landmark_triangulation.png",
    "name": "Triangulation Survey",
@@ -295,11 +305,11 @@
   },
   "sun_centred_system": {
    "effects": {
-    "institutional_rigidity": -0.003,
-    "knowledge_rate": 0.0031,
+    "institutional_rigidity": -0.0002,
+    "knowledge_rate": 0.001,
     "legitimacy": -0.004,
-    "observation_rate": 0.0037,
-    "survey_speed": 0.002
+    "observation_rate": 0.001,
+    "survey_speed": 0.0009
    },
    "art": "res://assets/ui/research/discovery-600/named_star_figures.png",
    "name": "Sun-centred System",
@@ -309,10 +319,10 @@
   },
   "polynomial_equations": {
    "effects": {
-    "knowledge_rate": 0.0044,
-    "standardization": 0.0023,
-    "survey_speed": 0.002,
-    "trade_capacity": 0.0027
+    "knowledge_rate": 0.0014,
+    "standardization": 0.0004,
+    "survey_speed": 0.0009,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/worked_problem_tablets.png",
    "name": "Cubic and Quartic Rules",
@@ -321,9 +331,10 @@
   },
   "arithmetic_operation_signs": {
    "effects": {
-    "adoption_rate": 0.0016,
-    "knowledge_rate": 0.0017,
-    "standardization": 0.0023
+    "adoption_rate": 0.001,
+    "knowledge_rate": 0.0005,
+    "literacy": 0.0035,
+    "standardization": 0.0004
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "name": "Signs for Plus, Minus and Equals",
@@ -331,10 +342,10 @@
   },
   "merchant_newsletters": {
    "effects": {
-    "adoption_rate": 0.0024,
-    "knowledge_preservation": 0.0011,
-    "state_capacity": 0.0009,
-    "trade_capacity": 0.0045
+    "adoption_rate": 0.0014,
+    "knowledge_preservation": 0.0002,
+    "state_capacity": 0.0003,
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/sealed_tablet_letters.png",
    "name": "Merchant Newsletters",
@@ -342,10 +353,10 @@
   },
   "graphite_marking": {
    "effects": {
-    "craft_output": 0.0014,
-    "knowledge_rate": 0.0009,
-    "standardization": 0.0018,
-    "state_capacity": 0.0009
+    "craft_output": 0.0008,
+    "knowledge_rate": 0.0003,
+    "standardization": 0.0003,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/graphite_marking-v1.png",
    "name": "Graphite Pencils",
@@ -353,8 +364,8 @@
   },
   "complex_numbers": {
    "effects": {
-    "knowledge_rate": 0.0017,
-    "standardization": 0.0006
+    "knowledge_rate": 0.0005,
+    "standardization": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/square_root_tables.png",
    "name": "Roots of Negatives",
@@ -362,10 +373,10 @@
   },
   "new_star_parallax_test": {
    "effects": {
-    "institutional_rigidity": -0.002,
-    "knowledge_rate": 0.0013,
+    "institutional_rigidity": -0.0001,
+    "knowledge_rate": 0.0004,
     "legitimacy": -0.002,
-    "observation_rate": 0.0018
+    "observation_rate": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/star_rise_markers.png",
    "name": "New Star Shows Heavens Change",
@@ -373,11 +384,11 @@
   },
   "precision_naked_eye_observatory": {
    "effects": {
-    "knowledge_preservation": 0.0029,
-    "labor_demand": 0.003,
-    "observation_rate": 0.0051,
+    "knowledge_preservation": 0.0005,
+    "labor_demand": 0.0002,
+    "observation_rate": 0.0013,
     "state_capacity": -0.0009,
-    "survey_speed": 0.0039
+    "survey_speed": 0.0017
    },
    "art": "res://assets/ui/research/discovery-600/star_hour_tables.png",
    "name": "Island Observatory",
@@ -387,11 +398,11 @@
   },
   "reformed_solar_calendar": {
    "effects": {
-    "cohesion": -0.0014,
-    "legitimacy": 0.0012,
-    "observation_rate": 0.0007,
-    "standardization": 0.0035,
-    "task_coordination": 0.0054
+    "cohesion": -0.0001,
+    "legitimacy": 0.0001,
+    "observation_rate": 0.0002,
+    "standardization": 0.0005,
+    "task_coordination": 0.0014
    },
    "art": "res://assets/ui/research/discovery-600/solar_year_reckoning.png",
    "name": "Reformed Calendar",
@@ -400,10 +411,10 @@
   },
   "symbolic_algebra": {
    "effects": {
-    "knowledge_rate": 0.0052,
-    "observation_rate": 0.0007,
-    "standardization": 0.0029,
-    "trade_capacity": 0.0018
+    "knowledge_rate": 0.0016,
+    "observation_rate": 0.0002,
+    "standardization": 0.0004,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/worked_problem_tablets.png",
    "name": "Symbolic Algebra",
@@ -412,9 +423,9 @@
   },
   "two_lens_tube_microscope": {
    "effects": {
-    "craft_output": 0.0005,
-    "knowledge_rate": 0.0009,
-    "observation_rate": 0.0018
+    "craft_output": 0.0003,
+    "knowledge_rate": 0.0003,
+    "observation_rate": 0.0005
    },
    "art": "res://assets/ui/research/paper/compound_microscopy.png",
    "name": "Two-lens Microscope",
@@ -422,12 +433,13 @@
   },
   "graded_class_colleges": {
    "effects": {
-    "adoption_rate": 0.0032,
-    "institutional_rigidity": 0.001,
-    "knowledge_preservation": 0.0011,
-    "knowledge_rate": 0.0017,
-    "labor_demand": 0.0012,
-    "standardization": 0.0012
+    "adoption_rate": 0.0019,
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0002,
+    "knowledge_rate": 0.0005,
+    "labor_demand": 0.0001,
+    "literacy": 0.0035,
+    "standardization": 0.0002
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Graded Classes",
@@ -435,10 +447,10 @@
   },
   "rolling_intaglio_printing": {
    "effects": {
-    "adoption_rate": 0.0032,
-    "craft_output": 0.0014,
-    "knowledge_preservation": 0.0023,
-    "labor_demand": 0.0006
+    "adoption_rate": 0.0012,
+    "craft_output": 0.0007,
+    "knowledge_preservation": 0.0005,
+    "labor_demand": 0.0001
    },
    "art": "res://assets/ui/research/paper/rolling_intaglio_printing.png",
    "name": "Rolling Plate Press",
@@ -446,10 +458,10 @@
   },
   "earth_magnet_treatise": {
    "effects": {
-    "knowledge_rate": 0.0013,
-    "naval_capacity": 0.0006,
-    "observation_rate": 0.0015,
-    "survey_speed": 0.001
+    "knowledge_rate": 0.0005,
+    "naval_capacity": 0.0002,
+    "observation_rate": 0.0004,
+    "survey_speed": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/cross_bearing_confirmation.png",
    "name": "The Earth as a Magnet",
@@ -457,10 +469,10 @@
   },
   "measured_kinematics": {
    "effects": {
-    "craft_output": 0.0009,
-    "knowledge_rate": 0.0039,
-    "observation_rate": 0.0026,
-    "security_efficiency": 0.0006
+    "craft_output": 0.0005,
+    "knowledge_rate": 0.0014,
+    "observation_rate": 0.0006,
+    "security_efficiency": 0.0002
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Timed Falling Bodies",
@@ -469,10 +481,11 @@
   },
   "printed_weekly_news": {
    "effects": {
-    "adoption_rate": 0.0039,
-    "cohesion": -0.0007,
-    "state_capacity": 0.0009,
-    "trade_capacity": 0.0018
+    "adoption_rate": 0.0014,
+    "cohesion": -0.0001,
+    "literacy": 0.0021,
+    "state_capacity": 0.0003,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/seasonal_news_gathering.png",
    "name": "Weekly News Sheets",
@@ -480,10 +493,10 @@
   },
   "two_lens_telescope": {
    "effects": {
-    "naval_capacity": 0.0012,
-    "observation_rate": 0.0044,
-    "security_efficiency": 0.0017,
-    "survey_speed": 0.002
+    "naval_capacity": 0.0005,
+    "observation_rate": 0.0011,
+    "security_efficiency": 0.0007,
+    "survey_speed": 0.0006
    },
    "art": "res://assets/ui/research/paper/compound_microscopy.png",
    "name": "Spyglass",
@@ -492,10 +505,10 @@
   },
   "elliptical_planet_orbits": {
    "effects": {
-    "knowledge_rate": 0.0035,
+    "knowledge_rate": 0.0012,
     "legitimacy": -0.002,
-    "observation_rate": 0.0029,
-    "survey_speed": 0.002
+    "observation_rate": 0.0007,
+    "survey_speed": 0.0006
    },
    "art": "res://assets/ui/research/discovery-600/named_star_figures.png",
    "name": "Elliptical Orbits",
@@ -504,10 +517,10 @@
   },
   "telescopic_sky_discoveries": {
    "effects": {
-    "institutional_rigidity": -0.001,
-    "knowledge_rate": 0.0013,
+    "institutional_rigidity": -0.0001,
+    "knowledge_rate": 0.0005,
     "legitimacy": -0.002,
-    "observation_rate": 0.0022
+    "observation_rate": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/named_star_figures.png",
    "name": "What the Spyglass Showed",
@@ -515,9 +528,9 @@
   },
   "lens_centering": {
    "effects": {
-    "craft_output": 0.0014,
-    "observation_rate": 0.0007,
-    "tool_quality": 0.002
+    "craft_output": 0.0007,
+    "observation_rate": 0.0002,
+    "tool_quality": 0.0007
    },
    "art": "res://assets/ui/research/paper/compound_microscopy.png",
    "name": "Centred Lenses",
@@ -525,11 +538,11 @@
   },
   "logarithms": {
    "effects": {
-    "knowledge_rate": 0.0044,
-    "labor_demand": -0.002,
-    "naval_capacity": 0.0018,
-    "survey_speed": 0.0049,
-    "trade_capacity": 0.0036
+    "knowledge_rate": 0.0016,
+    "labor_demand": -0.0002,
+    "naval_capacity": 0.0007,
+    "survey_speed": 0.0014,
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "name": "Logarithms",
@@ -538,10 +551,10 @@
   },
   "decimal_log_tables": {
    "effects": {
-    "knowledge_rate": 0.0009,
-    "naval_capacity": 0.0006,
-    "standardization": 0.0023,
-    "survey_speed": 0.0039
+    "knowledge_rate": 0.0003,
+    "naval_capacity": 0.0002,
+    "standardization": 0.0011,
+    "survey_speed": 0.0011
    },
    "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
    "name": "Common Log Tables",
@@ -549,12 +562,13 @@
   },
   "compulsory_parish_schooling": {
    "effects": {
-    "adoption_rate": 0.0055,
-    "cohesion": 0.0012,
-    "institutional_rigidity": 0.0005,
-    "knowledge_preservation": 0.0017,
-    "labor_demand": 0.0018,
-    "state_capacity": 0.0019
+    "adoption_rate": 0.002,
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0004,
+    "labor_demand": 0.0001,
+    "literacy": 0.0159,
+    "state_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Compulsory Parish Schooling",
@@ -563,10 +577,10 @@
   },
   "inductive_method_program": {
    "effects": {
-    "adoption_rate": 0.0024,
-    "institutional_rigidity": -0.003,
-    "knowledge_rate": 0.0044,
-    "observation_rate": 0.0029
+    "adoption_rate": 0.0009,
+    "institutional_rigidity": -0.0004,
+    "knowledge_rate": 0.0016,
+    "observation_rate": 0.0007
    },
    "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
    "name": "Method of Induction",
@@ -575,10 +589,10 @@
   },
   "logarithmic_slide_rule": {
    "effects": {
-    "craft_output": 0.0014,
-    "naval_capacity": 0.0012,
-    "survey_speed": 0.0039,
-    "task_coordination": 0.0027
+    "craft_output": 0.0007,
+    "naval_capacity": 0.0005,
+    "survey_speed": 0.0011,
+    "task_coordination": 0.0005
    },
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
    "name": "Slide Rule",
@@ -588,7 +602,8 @@
    "effects": {
     "construction_rate": 0.0011,
     "craft_output": 0.0009,
-    "knowledge_rate": 0.0048,
+    "knowledge_rate": 0.0027,
+    "literacy": 0.006,
     "survey_speed": 0.0049
    },
    "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
@@ -598,8 +613,8 @@
   },
   "systematic_doubt_method": {
    "effects": {
-    "institutional_rigidity": -0.002,
-    "knowledge_rate": 0.0022,
+    "institutional_rigidity": -0.0003,
+    "knowledge_rate": 0.0012,
     "legitimacy": -0.002
    },
    "art": "res://assets/ui/research/discovery-600/curious_questioning_custom.png",
@@ -608,10 +623,10 @@
   },
   "geared_adding_machine": {
    "effects": {
-    "knowledge_rate": 0.0005,
-    "standardization": 0.0012,
-    "task_coordination": 0.004,
-    "trade_capacity": 0.0018
+    "knowledge_rate": 0.0003,
+    "standardization": 0.0011,
+    "task_coordination": 0.0016,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/paper/gear_ratios.png",
    "name": "Adding Machine",
@@ -621,7 +636,7 @@
    "effects": {
     "adoption_rate": 0.0008,
     "craft_output": 0.0009,
-    "knowledge_preservation": 0.0011
+    "knowledge_preservation": 0.0008
    },
    "art": "res://assets/ui/research/paper/rolling_intaglio_printing.png",
    "name": "Mezzotint",
@@ -629,9 +644,9 @@
   },
   "mercury_barometer": {
    "effects": {
-    "disaster_resilience": 0.0012,
-    "knowledge_rate": 0.0022,
-    "observation_rate": 0.0044
+    "disaster_resilience": 0.0006,
+    "knowledge_rate": 0.0012,
+    "observation_rate": 0.0031
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Mercury Barometer",
@@ -640,10 +655,10 @@
   },
   "vacuum_pumps": {
    "effects": {
-    "craft_output": 0.0009,
-    "knowledge_rate": 0.0026,
-    "labor_demand": 0.0018,
-    "observation_rate": 0.0037
+    "craft_output": 0.0005,
+    "knowledge_rate": 0.0006,
+    "labor_demand": 0.0001,
+    "observation_rate": 0.0004
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Air Pump",
@@ -652,10 +667,10 @@
   },
   "probability_theory": {
    "effects": {
-    "knowledge_rate": 0.0022,
-    "standardization": 0.0012,
-    "state_capacity": 0.0019,
-    "trade_capacity": 0.0027
+    "knowledge_rate": 0.0005,
+    "standardization": 0.0004,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
    "name": "Reckoning of Chances",
@@ -663,9 +678,9 @@
   },
   "vacuum_experiments": {
    "effects": {
-    "knowledge_rate": 0.0017,
-    "labor_demand": 0.0006,
-    "observation_rate": 0.0022
+    "knowledge_rate": 0.0004,
+    "labor_demand": 0.0001,
+    "observation_rate": 0.0003
    },
    "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
    "name": "Trials in Emptied Vessels",
@@ -674,10 +689,10 @@
   "pendulum_regulated_clock": {
    "effects": {
     "labor_efficiency": 0.0012,
-    "naval_capacity": 0.0012,
-    "observation_rate": 0.0022,
-    "standardization": 0.0035,
-    "task_coordination": 0.0134
+    "naval_capacity": 0.0004,
+    "observation_rate": 0.0003,
+    "standardization": 0.0012,
+    "task_coordination": 0.0022
    },
    "art": "res://assets/ui/research/discovery-600/outflow_water_clock.png",
    "name": "Pendulum Clock",
@@ -686,12 +701,12 @@
   },
   "chartered_experimental_society": {
    "effects": {
-    "adoption_rate": 0.0032,
-    "institutional_rigidity": -0.003,
-    "knowledge_preservation": 0.0029,
-    "knowledge_rate": 0.0044,
-    "labor_demand": 0.0012,
-    "observation_rate": 0.0029
+    "adoption_rate": 0.002,
+    "institutional_rigidity": -0.0002,
+    "knowledge_preservation": 0.0006,
+    "knowledge_rate": 0.001,
+    "labor_demand": 0.0001,
+    "observation_rate": 0.0003
    },
    "art": "res://assets/ui/research/paper/experimental_protocol_publication.png",
    "name": "Society for Experiment",
@@ -700,9 +715,9 @@
   },
   "mechanical_oscillation": {
    "effects": {
-    "knowledge_rate": 0.0013,
-    "observation_rate": 0.0015,
-    "standardization": 0.0012
+    "knowledge_rate": 0.0003,
+    "observation_rate": 0.0002,
+    "standardization": 0.0004
    },
    "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
    "name": "Pendulums and Strings Measured",
@@ -710,9 +725,9 @@
   },
   "air_spring_law": {
    "effects": {
-    "craft_output": 0.0005,
-    "knowledge_rate": 0.0017,
-    "observation_rate": 0.0015
+    "craft_output": 0.0003,
+    "knowledge_rate": 0.0004,
+    "observation_rate": 0.0002
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Spring of the Air",
@@ -720,9 +735,9 @@
   },
   "laboratory_notebooks": {
    "effects": {
-    "knowledge_preservation": 0.0023,
-    "observation_rate": 0.0011,
-    "standardization": 0.0012
+    "knowledge_preservation": 0.0005,
+    "observation_rate": 0.0001,
+    "standardization": 0.0004
    },
    "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
    "name": "Dated Trial Notebooks",
@@ -730,10 +745,11 @@
   },
   "experimental_protocol_publication": {
    "effects": {
-    "adoption_rate": 0.0032,
-    "institutional_rigidity": -0.001,
-    "knowledge_preservation": 0.0029,
-    "knowledge_rate": 0.0013
+    "adoption_rate": 0.002,
+    "institutional_rigidity": -0.0001,
+    "knowledge_preservation": 0.0006,
+    "knowledge_rate": 0.0003,
+    "literacy": 0.0082
    },
    "art": "res://assets/ui/research/paper/experimental_protocol_publication.png",
    "name": "Society Journal",
@@ -741,9 +757,10 @@
   },
   "microscope_drawing_atlas": {
    "effects": {
-    "adoption_rate": 0.0016,
-    "knowledge_preservation": 0.0017,
-    "observation_rate": 0.0018
+    "adoption_rate": 0.001,
+    "knowledge_preservation": 0.0004,
+    "literacy": 0.0082,
+    "observation_rate": 0.0002
    },
    "art": "res://assets/ui/research/paper/microscopic_cell_observation.png",
    "name": "Microscope Drawings",
@@ -751,12 +768,13 @@
   },
   "salaried_science_academy": {
    "effects": {
-    "institutional_rigidity": 0.0005,
-    "knowledge_preservation": 0.0017,
-    "knowledge_rate": 0.0026,
-    "labor_demand": 0.0012,
-    "observation_rate": 0.0015,
-    "state_capacity": 0.0019
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0004,
+    "knowledge_rate": 0.0006,
+    "labor_demand": 0.0001,
+    "literacy": 0.0082,
+    "observation_rate": 0.0002,
+    "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/paper/experimental_protocol_publication.png",
    "name": "Salaried Academy",
@@ -764,9 +782,9 @@
   },
   "numerical_root_finding": {
    "effects": {
-    "craft_output": 0.0005,
-    "knowledge_rate": 0.0013,
-    "survey_speed": 0.002
+    "craft_output": 0.0003,
+    "knowledge_rate": 0.0003,
+    "survey_speed": 0.0013
    },
    "art": "res://assets/ui/research/discovery-600/square_root_tables.png",
    "name": "Successive Approximation",
@@ -774,10 +792,10 @@
   },
   "differential_calculus": {
    "effects": {
-    "craft_output": 0.0009,
-    "knowledge_rate": 0.0057,
-    "observation_rate": 0.0011,
-    "survey_speed": 0.0029
+    "craft_output": 0.0005,
+    "knowledge_rate": 0.0013,
+    "observation_rate": 0.0001,
+    "survey_speed": 0.0019
    },
    "art": "res://assets/ui/research/discovery-600/worked_problem_tablets.png",
    "name": "Differential Calculus",
@@ -787,9 +805,9 @@
   },
   "experimental_optics": {
    "effects": {
-    "craft_output": 0.0005,
-    "knowledge_rate": 0.0017,
-    "observation_rate": 0.0018
+    "craft_output": 0.0003,
+    "knowledge_rate": 0.0004,
+    "observation_rate": 0.0002
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Prism Optics",
@@ -797,9 +815,9 @@
   },
   "mirror_telescope": {
    "effects": {
-    "craft_output": 0.0009,
-    "observation_rate": 0.0018,
-    "security_efficiency": 0.0006
+    "craft_output": 0.0005,
+    "observation_rate": 0.0002,
+    "security_efficiency": 0.0001
    },
    "art": "res://assets/ui/research/paper/compound_microscopy.png",
    "name": "Mirror Telescope",
@@ -808,8 +826,8 @@
   "integral_calculus": {
    "effects": {
     "construction_rate": 0.0011,
-    "knowledge_rate": 0.0026,
-    "survey_speed": 0.0029
+    "knowledge_rate": 0.0008,
+    "survey_speed": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/area_volume_rules.png",
    "name": "Integral Calculus",
@@ -817,11 +835,11 @@
   },
   "realm_longitude_observatory": {
    "effects": {
-    "labor_demand": 0.0018,
-    "naval_capacity": 0.0024,
-    "observation_rate": 0.0022,
-    "route_speed": 0.0031,
-    "survey_speed": 0.0039
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.0008,
+    "observation_rate": 0.0005,
+    "route_speed": 0.0009,
+    "survey_speed": 0.0014
    },
    "art": "res://assets/ui/research/discovery-600/star_hour_tables.png",
    "name": "Realm Longitude Observatory",
@@ -830,8 +848,8 @@
   "elastic_deformation": {
    "effects": {
     "construction_rate": 0.0016,
-    "craft_output": 0.0009,
-    "knowledge_rate": 0.0009
+    "craft_output": 0.0005,
+    "knowledge_rate": 0.0003
    },
    "art": "res://assets/ui/research/paper/coil_spring_tempering.png",
    "name": "Stretch in Proportion to Load",
@@ -839,8 +857,8 @@
   },
   "light_speed_from_eclipses": {
    "effects": {
-    "knowledge_rate": 0.0013,
-    "observation_rate": 0.0015
+    "knowledge_rate": 0.0004,
+    "observation_rate": 0.0004
    },
    "art": "res://assets/ui/research/discovery-600/named_star_figures.png",
    "name": "Speed of Light Found",
@@ -848,9 +866,9 @@
   },
   "animalcule_microscope": {
    "effects": {
-    "knowledge_rate": 0.0009,
-    "legitimacy": -0.001,
-    "observation_rate": 0.0022
+    "knowledge_rate": 0.0003,
+    "legitimacy": -0.0002,
+    "observation_rate": 0.0005
    },
    "art": "res://assets/ui/research/paper/microbial_observation.png",
    "name": "Single-lens Microscope",
@@ -858,8 +876,8 @@
   },
   "eyepiece_design": {
    "effects": {
-    "craft_output": 0.0009,
-    "observation_rate": 0.0011
+    "craft_output": 0.0005,
+    "observation_rate": 0.0003
    },
    "art": "res://assets/ui/research/paper/compound_microscopy.png",
    "name": "Wide-field Eyepieces",
@@ -868,8 +886,8 @@
   "stress_strain_relations": {
    "effects": {
     "construction_rate": 0.0022,
-    "craft_output": 0.0009,
-    "knowledge_rate": 0.0009
+    "craft_output": 0.0005,
+    "knowledge_rate": 0.0003
    },
    "art": "res://assets/ui/research/paper/residual_stress_assessment.png",
    "name": "Stress and Strain in Beams",
@@ -877,8 +895,8 @@
   },
   "inertial_motion": {
    "effects": {
-    "knowledge_rate": 0.0022,
-    "observation_rate": 0.0007
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.0002
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Inertia",
@@ -886,11 +904,11 @@
   },
   "universal_gravitation": {
    "effects": {
-    "knowledge_rate": 0.0061,
-    "legitimacy": -0.002,
-    "naval_capacity": 0.0018,
-    "observation_rate": 0.0022,
-    "survey_speed": 0.0029
+    "knowledge_rate": 0.0018,
+    "legitimacy": -0.0003,
+    "naval_capacity": 0.0006,
+    "observation_rate": 0.0005,
+    "survey_speed": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/named_star_figures.png",
    "name": "Universal Gravitation",
@@ -900,9 +918,9 @@
   },
   "momentum_balance": {
    "effects": {
-    "craft_output": 0.0005,
-    "knowledge_rate": 0.0013,
-    "observation_rate": 0.0007
+    "craft_output": 0.0003,
+    "knowledge_rate": 0.0004,
+    "observation_rate": 0.0002
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Quantity of Motion Conserved",
@@ -911,8 +929,8 @@
   "differential_equations": {
    "effects": {
     "construction_rate": 0.0005,
-    "knowledge_rate": 0.0022,
-    "survey_speed": 0.002
+    "knowledge_rate": 0.0006,
+    "survey_speed": 0.0007
    },
    "art": "res://assets/ui/research/discovery-600/worked_problem_tablets.png",
    "name": "Differential Equations",
@@ -921,7 +939,7 @@
   "friction_measurement": {
    "effects": {
     "construction_rate": 0.0011,
-    "craft_output": 0.0014,
+    "craft_output": 0.0008,
     "labor_efficiency": 0.0012
    },
    "art": "res://assets/ui/research/paper/compound_pulleys.png",
@@ -930,11 +948,12 @@
   },
   "daily_printed_newspaper": {
    "effects": {
-    "adoption_rate": 0.0047,
-    "cohesion": -0.0014,
-    "legitimacy": -0.002,
-    "state_capacity": 0.0009,
-    "trade_capacity": 0.0027
+    "adoption_rate": 0.0028,
+    "cohesion": -0.0002,
+    "legitimacy": -0.0003,
+    "literacy": 0.0417,
+    "state_capacity": 0.0002,
+    "trade_capacity": 0.0006
    },
    "art": "res://assets/ui/research/discovery-600/seasonal_news_gathering.png",
    "name": "Daily Newspaper",
@@ -944,8 +963,8 @@
   "comet_return_prediction": {
    "effects": {
     "knowledge_rate": 0.0017,
-    "legitimacy": -0.002,
-    "observation_rate": 0.0018
+    "legitimacy": -0.0003,
+    "observation_rate": 0.0011
    },
    "art": "res://assets/ui/research/discovery-600/dated_omen_records.png",
    "name": "Comet's Return Predicted",
@@ -955,7 +974,7 @@
   "friction_electric_machine": {
    "effects": {
     "knowledge_rate": 0.0013,
-    "observation_rate": 0.0015
+    "observation_rate": 0.0009
    },
    "art": "res://assets/ui/research/paper/foil_capacitors.png",
    "name": "Friction Electric Machine",
@@ -963,9 +982,9 @@
   },
   "precision_thermometry": {
    "effects": {
-    "health_protection": 0.0007,
-    "observation_rate": 0.0018,
-    "standardization": 0.0023
+    "health_protection": 0.0004,
+    "observation_rate": 0.0011,
+    "standardization": 0.0008
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Sealed Thermometers",
@@ -973,8 +992,8 @@
   },
   "public_experiment_lectures": {
    "effects": {
-    "adoption_rate": 0.0039,
-    "cohesion": 0.0006,
+    "adoption_rate": 0.0024,
+    "cohesion": 0.0001,
     "knowledge_rate": 0.0009
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
@@ -983,10 +1002,10 @@
   },
   "structural_load_testing": {
    "effects": {
-    "construction_rate": 0.0022,
-    "craft_output": 0.0009,
-    "disaster_resilience": 0.0012,
-    "labor_demand": 0.0006
+    "construction_rate": 0.0009,
+    "craft_output": 0.0007,
+    "disaster_resilience": 0.0009,
+    "labor_demand": 0.0001
    },
    "art": "res://assets/ui/research/paper/residual_stress_assessment.png",
    "name": "Beams Tested to Breaking",
@@ -994,9 +1013,10 @@
   },
   "subscription_libraries": {
    "effects": {
-    "adoption_rate": 0.0032,
-    "cohesion": 0.0006,
-    "knowledge_preservation": 0.0029
+    "adoption_rate": 0.0012,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0006,
+    "literacy": 0.0292
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Subscription Libraries",
@@ -1004,8 +1024,8 @@
   },
   "flow_continuity": {
    "effects": {
-    "construction_rate": 0.0011,
-    "knowledge_rate": 0.0013,
+    "construction_rate": 0.0005,
+    "knowledge_rate": 0.0004,
     "water_access": 0.0013
    },
    "art": "res://assets/ui/research/discovery-600/river_supply_channels.png",
@@ -1014,9 +1034,9 @@
   },
   "numerical_integration": {
    "effects": {
-    "knowledge_rate": 0.0013,
-    "observation_rate": 0.0005,
-    "survey_speed": 0.002
+    "knowledge_rate": 0.0004,
+    "observation_rate": 0.0001,
+    "survey_speed": 0.0018
    },
    "art": "res://assets/ui/research/discovery-600/worked_problem_tablets.png",
    "name": "Stepwise Sums",
@@ -1024,9 +1044,9 @@
   },
   "column_buckling": {
    "effects": {
-    "construction_rate": 0.0022,
-    "disaster_resilience": 0.0006,
-    "knowledge_rate": 0.0009
+    "construction_rate": 0.0009,
+    "disaster_resilience": 0.0004,
+    "knowledge_rate": 0.0003
    },
    "art": "res://assets/ui/research/paper/building_wind_load_assessment.png",
    "name": "Buckling of Columns",
@@ -1035,8 +1055,8 @@
   "charge_storing_jar": {
    "effects": {
     "injury_risk": 0.001,
-    "knowledge_rate": 0.0013,
-    "observation_rate": 0.0015
+    "knowledge_rate": 0.0004,
+    "observation_rate": 0.0003
    },
    "art": "res://assets/ui/research/paper/foil_capacitors.png",
    "name": "Charge-storing Jar",
@@ -1044,11 +1064,11 @@
   },
   "experimental_controls": {
    "effects": {
-    "health_protection": 0.0013,
-    "institutional_rigidity": -0.002,
-    "knowledge_rate": 0.0035,
-    "observation_rate": 0.0044,
-    "standardization": 0.0023
+    "health_protection": 0.0002,
+    "institutional_rigidity": -0.0002,
+    "knowledge_rate": 0.001,
+    "observation_rate": 0.001,
+    "standardization": 0.0007
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Controlled Trials",
@@ -1057,13 +1077,13 @@
   },
   "reasoned_trades_encyclopedia": {
    "effects": {
-    "adoption_rate": 0.0079,
-    "craft_output": 0.0014,
-    "institutional_rigidity": -0.003,
-    "knowledge_preservation": 0.0069,
-    "knowledge_rate": 0.0022,
-    "labor_demand": 0.0012,
-    "legitimacy": -0.002
+    "adoption_rate": 0.0019,
+    "craft_output": 0.0006,
+    "institutional_rigidity": -0.0002,
+    "knowledge_preservation": 0.0012,
+    "knowledge_rate": 0.0009,
+    "labor_demand": 0.0001,
+    "legitimacy": -0.0002
    },
    "art": "res://assets/ui/research/paper/experimental_protocol_publication.png",
    "name": "Reasoned Encyclopedia",
@@ -1073,9 +1093,9 @@
   },
   "lightning_electricity_trial": {
    "effects": {
-    "disaster_resilience": 0.0018,
-    "knowledge_rate": 0.0013,
-    "observation_rate": 0.0015
+    "disaster_resilience": 0.0004,
+    "knowledge_rate": 0.0005,
+    "observation_rate": 0.0004
    },
    "art": "res://assets/ui/research/discovery-600/weather_sign_reading.png",
    "name": "Lightning Shown Electric",
@@ -1083,9 +1103,9 @@
   },
   "standard_tongue_dictionary": {
    "effects": {
-    "adoption_rate": 0.0016,
-    "knowledge_preservation": 0.0029,
-    "standardization": 0.0029
+    "adoption_rate": 0.0004,
+    "knowledge_preservation": 0.0005,
+    "standardization": 0.0009
    },
    "art": "res://assets/ui/research/discovery-600/standard_sign_lists.png",
    "name": "Great Dictionary",
@@ -1093,10 +1113,10 @@
   },
   "coordinated_transit_expeditions": {
    "effects": {
-    "labor_demand": 0.0018,
-    "naval_capacity": 0.0012,
-    "observation_rate": 0.0022,
-    "survey_speed": 0.0039
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.0003,
+    "observation_rate": 0.0006,
+    "survey_speed": 0.0015
    },
    "art": "res://assets/ui/research/discovery-600/star_rise_markers.png",
    "name": "Transit Expeditions",
@@ -1104,10 +1124,11 @@
   },
   "mining_engineering_academies": {
    "effects": {
-    "adoption_rate": 0.0024,
+    "adoption_rate": 0.0006,
     "extraction_yield": 0.003,
-    "knowledge_rate": 0.0013,
-    "labor_demand": 0.0012,
+    "knowledge_rate": 0.0005,
+    "labor_demand": 0.0001,
+    "literacy": 0.02,
     "mine_safety": 0.002
    },
    "art": "res://assets/ui/research/subjects/mine_drainage-v1.png",
@@ -1116,8 +1137,8 @@
   },
   "rotational_dynamics": {
    "effects": {
-    "craft_output": 0.0009,
-    "knowledge_rate": 0.0013
+    "craft_output": 0.0004,
+    "knowledge_rate": 0.0005
    },
    "art": "res://assets/ui/research/paper/gear_ratios.png",
    "name": "Dynamics of Spinning Bodies",
@@ -1126,9 +1147,9 @@
   "isolated_airs_chemistry": {
    "effects": {
     "chemical_control": 0.004,
-    "health_risk": 0.001,
-    "knowledge_rate": 0.0017,
-    "observation_rate": 0.0022,
+    "health_risk": 0.0002,
+    "knowledge_rate": 0.0007,
+    "observation_rate": 0.0006,
     "pollution": 0.001
    },
    "art": "res://assets/ui/research/paper/gas_composition_analysis.png",
@@ -1138,8 +1159,8 @@
   "calorimetry": {
    "effects": {
     "fuel_efficiency": 0.001,
-    "knowledge_rate": 0.0013,
-    "observation_rate": 0.0015
+    "knowledge_rate": 0.0004,
+    "observation_rate": 0.0003
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Heat Measured by Ice",
@@ -1147,8 +1168,8 @@
   },
   "flywheel_smoothing": {
    "effects": {
-    "craft_output": 0.0014,
-    "labor_efficiency": 0.0012
+    "craft_output": 0.0004,
+    "labor_efficiency": 0.0001
    },
    "art": "res://assets/ui/research/paper/gear_ratios.png",
    "name": "Flywheels",
@@ -1157,10 +1178,10 @@
   "oxygen_combustion_theory": {
    "effects": {
     "chemical_control": 0.008,
-    "health_protection": 0.0013,
-    "knowledge_rate": 0.0044,
-    "legitimacy": -0.001,
-    "observation_rate": 0.0018
+    "health_protection": 0.0002,
+    "knowledge_rate": 0.0013,
+    "legitimacy": -0.0001,
+    "observation_rate": 0.0003
    },
    "art": "res://assets/ui/research/paper/gas_composition_analysis.png",
    "name": "Burning as Union with an Air",
@@ -1169,8 +1190,8 @@
   },
   "torsion_balance_force_law": {
    "effects": {
-    "knowledge_rate": 0.0013,
-    "observation_rate": 0.0015
+    "knowledge_rate": 0.0004,
+    "observation_rate": 0.0003
    },
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
    "name": "Torsion Balance",
@@ -1179,8 +1200,8 @@
   "systematic_chemical_names": {
    "effects": {
     "chemical_control": 0.003,
-    "knowledge_preservation": 0.0023,
-    "standardization": 0.0029
+    "knowledge_preservation": 0.0007,
+    "standardization": 0.0004
    },
    "art": "res://assets/ui/research/paper/gas_composition_analysis.png",
    "name": "Chemical Names by Composition",
@@ -1188,9 +1209,9 @@
   },
   "feedback_governors": {
    "effects": {
-    "craft_output": 0.0014,
-    "labor_efficiency": 0.0018,
-    "task_coordination": 0.0027
+    "craft_output": 0.0004,
+    "labor_efficiency": 0.0002,
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/paper/gear_ratios.png",
    "name": "Spinning-weight Governors",
@@ -1198,12 +1219,12 @@
   },
   "decimal_earth_measures": {
    "effects": {
-    "adoption_rate": 0.0016,
-    "cohesion": -0.0014,
-    "institutional_rigidity": -0.002,
-    "standardization": 0.0082,
-    "state_capacity": 0.0037,
-    "trade_capacity": 0.0045
+    "adoption_rate": 0.0003,
+    "cohesion": -0.0001,
+    "institutional_rigidity": -0.0001,
+    "standardization": 0.0011,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
    "name": "Decimal Measures",
@@ -1213,11 +1234,11 @@
   },
   "shutter_signal_frames": {
    "effects": {
-    "labor_demand": 0.0018,
-    "route_speed": 0.008,
-    "security_efficiency": 0.0022,
-    "state_capacity": 0.0037,
-    "task_coordination": 0.0027
+    "labor_demand": 0.0001,
+    "route_speed": 0.0018,
+    "security_efficiency": 0.0006,
+    "state_capacity": 0.0004,
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/discovery-600/prearranged_beacon_chains.png",
    "name": "Shutter Telegraph",
@@ -1225,12 +1246,13 @@
   },
   "state_polytechnic_school": {
    "effects": {
-    "adoption_rate": 0.0032,
-    "construction_rate": 0.0016,
-    "institutional_rigidity": -0.001,
-    "knowledge_rate": 0.0022,
-    "labor_demand": 0.0012,
-    "state_capacity": 0.0019
+    "adoption_rate": 0.0006,
+    "construction_rate": 0.0008,
+    "institutional_rigidity": -0.0001,
+    "knowledge_rate": 0.0007,
+    "labor_demand": 0.0001,
+    "literacy": 0.0139,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "State Polytechnic School",
@@ -1238,13 +1260,665 @@
   },
   "stone_lithography": {
    "effects": {
-    "adoption_rate": 0.0024,
-    "craft_output": 0.0009,
-    "knowledge_preservation": 0.0011
+    "adoption_rate": 0.0004,
+    "craft_output": 0.0002,
+    "knowledge_preservation": 0.0003,
+    "literacy": 0.0139
    },
    "art": "res://assets/ui/research/paper/mineral_pigment_preparation.png",
    "name": "Lithography",
    "observation": "A drawing made with greasy crayon on limestone is wetted and inked, and prints where the grease took."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "fractional_ratio_powers": {
+    "knowledge_rate": 0.0013,
+    "standardization": 0.0012,
+    "survey_speed": 0.001
+   },
+   "ruler_founded_universities": {
+    "adoption_rate": 0.0032,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.0034,
+    "knowledge_rate": 0.0035,
+    "labor_demand": 0.0018,
+    "state_capacity": 0.0028
+   },
+   "graticule_world_maps": {
+    "naval_capacity": 0.0012,
+    "observation_rate": 0.0011,
+    "route_speed": 0.0063,
+    "survey_speed": 0.0098,
+    "trade_capacity": 0.0018
+   },
+   "mirror_grid_perspective": {
+    "construction_rate": 0.0022,
+    "craft_output": 0.0014,
+    "observation_rate": 0.0022,
+    "standardization": 0.0018
+   },
+   "old_tongue_grammar_schools": {
+    "adoption_rate": 0.0024,
+    "institutional_rigidity": 0.0005,
+    "knowledge_preservation": 0.0017,
+    "knowledge_rate": 0.0009,
+    "labor_demand": 0.0012
+   },
+   "burin_engraving": {
+    "adoption_rate": 0.0016,
+    "craft_output": 0.0014,
+    "knowledge_preservation": 0.0017,
+    "labor_demand": 0.0006
+   },
+   "copperplate_preparation": {
+    "craft_output": 0.0014,
+    "fuel_demand": 0.001,
+    "labor_demand": 0.0006,
+    "standardization": 0.0012
+   },
+   "remeasured_star_catalogue": {
+    "knowledge_preservation": 0.0017,
+    "labor_demand": 0.0006,
+    "observation_rate": 0.0018,
+    "survey_speed": 0.002
+   },
+   "philological_forgery_critique": {
+    "institutional_rigidity": -0.002,
+    "knowledge_preservation": 0.0017,
+    "knowledge_rate": 0.0017,
+    "legitimacy": -0.003
+   },
+   "screw_press_printing": {
+    "adoption_rate": 0.0111,
+    "knowledge_preservation": 0.0057,
+    "knowledge_rate": 0.0022,
+    "labor_demand": 0.0024,
+    "standardization": 0.0029,
+    "timber_pressure": 0.002,
+    "trade_capacity": 0.0027
+   },
+   "oil_based_printing_inks": {
+    "adoption_rate": 0.0024,
+    "craft_output": 0.0009,
+    "fuel_demand": 0.001,
+    "knowledge_preservation": 0.0017
+   },
+   "hand_relief_printing": {
+    "adoption_rate": 0.0032,
+    "fatigue": 0.001,
+    "knowledge_preservation": 0.0011,
+    "labor_demand": 0.0012
+   },
+   "metal_type_casting": {
+    "adoption_rate": 0.0079,
+    "craft_output": 0.0018,
+    "health_risk": 0.001,
+    "knowledge_preservation": 0.0046,
+    "knowledge_rate": 0.0013,
+    "labor_demand": 0.0018,
+    "standardization": 0.0047
+   },
+   "printed_scripture_folio": {
+    "adoption_rate": 0.0016,
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0029,
+    "labor_demand": 0.0006,
+    "legitimacy": 0.0037
+   },
+   "printed_broadsides": {
+    "adoption_rate": 0.0039,
+    "cohesion": -0.0014,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.002
+   },
+   "town_printing_houses": {
+    "adoption_rate": 0.0095,
+    "institutional_rigidity": -0.002,
+    "knowledge_preservation": 0.0046,
+    "knowledge_rate": 0.0022,
+    "labor_demand": 0.0018,
+    "timber_pressure": 0.002,
+    "trade_capacity": 0.0036
+   },
+   "printed_ephemerides": {
+    "naval_capacity": 0.0012,
+    "observation_rate": 0.0015,
+    "standardization": 0.0012,
+    "survey_speed": 0.0029
+   },
+   "printed_engraved_maps": {
+    "knowledge_preservation": 0.0023,
+    "route_speed": 0.0031,
+    "survey_speed": 0.0049,
+    "trade_capacity": 0.0018
+   },
+   "printed_arithmetic_summa": {
+    "knowledge_rate": 0.0022,
+    "standardization": 0.0047,
+    "state_capacity": 0.0028,
+    "task_coordination": 0.004,
+    "trade_capacity": 0.0089
+   },
+   "drypoint_printmaking": {
+    "adoption_rate": 0.0008,
+    "craft_output": 0.0009,
+    "knowledge_preservation": 0.0006
+   },
+   "instrument_maker_workshops": {
+    "craft_output": 0.0018,
+    "labor_demand": 0.0012,
+    "observation_rate": 0.0018,
+    "survey_speed": 0.0039,
+    "tool_quality": 0.002
+   },
+   "printed_alphabet_primers": {
+    "adoption_rate": 0.0047,
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0011,
+    "legitimacy": 0.0012
+   },
+   "triangulation_survey": {
+    "construction_rate": 0.0011,
+    "labor_demand": 0.0012,
+    "state_capacity": 0.0028,
+    "survey_speed": 0.0078
+   },
+   "sun_centred_system": {
+    "institutional_rigidity": -0.003,
+    "knowledge_rate": 0.0031,
+    "legitimacy": -0.004,
+    "observation_rate": 0.0037,
+    "survey_speed": 0.002
+   },
+   "polynomial_equations": {
+    "knowledge_rate": 0.0044,
+    "standardization": 0.0023,
+    "survey_speed": 0.002,
+    "trade_capacity": 0.0027
+   },
+   "arithmetic_operation_signs": {
+    "adoption_rate": 0.0016,
+    "knowledge_rate": 0.0017,
+    "standardization": 0.0023
+   },
+   "merchant_newsletters": {
+    "adoption_rate": 0.0024,
+    "knowledge_preservation": 0.0011,
+    "state_capacity": 0.0009,
+    "trade_capacity": 0.0045
+   },
+   "graphite_marking": {
+    "craft_output": 0.0014,
+    "knowledge_rate": 0.0009,
+    "standardization": 0.0018,
+    "state_capacity": 0.0009
+   },
+   "complex_numbers": {
+    "knowledge_rate": 0.0017,
+    "standardization": 0.0006
+   },
+   "new_star_parallax_test": {
+    "institutional_rigidity": -0.002,
+    "knowledge_rate": 0.0013,
+    "legitimacy": -0.002,
+    "observation_rate": 0.0018
+   },
+   "precision_naked_eye_observatory": {
+    "knowledge_preservation": 0.0029,
+    "labor_demand": 0.003,
+    "observation_rate": 0.0051,
+    "state_capacity": -0.0009,
+    "survey_speed": 0.0039
+   },
+   "reformed_solar_calendar": {
+    "cohesion": -0.0014,
+    "legitimacy": 0.0012,
+    "observation_rate": 0.0007,
+    "standardization": 0.0035,
+    "task_coordination": 0.0054
+   },
+   "symbolic_algebra": {
+    "knowledge_rate": 0.0052,
+    "observation_rate": 0.0007,
+    "standardization": 0.0029,
+    "trade_capacity": 0.0018
+   },
+   "two_lens_tube_microscope": {
+    "craft_output": 0.0005,
+    "knowledge_rate": 0.0009,
+    "observation_rate": 0.0018
+   },
+   "graded_class_colleges": {
+    "adoption_rate": 0.0032,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.0011,
+    "knowledge_rate": 0.0017,
+    "labor_demand": 0.0012,
+    "standardization": 0.0012
+   },
+   "rolling_intaglio_printing": {
+    "adoption_rate": 0.0032,
+    "craft_output": 0.0014,
+    "knowledge_preservation": 0.0023,
+    "labor_demand": 0.0006
+   },
+   "earth_magnet_treatise": {
+    "knowledge_rate": 0.0013,
+    "naval_capacity": 0.0006,
+    "observation_rate": 0.0015,
+    "survey_speed": 0.001
+   },
+   "measured_kinematics": {
+    "craft_output": 0.0009,
+    "knowledge_rate": 0.0039,
+    "observation_rate": 0.0026,
+    "security_efficiency": 0.0006
+   },
+   "printed_weekly_news": {
+    "adoption_rate": 0.0039,
+    "cohesion": -0.0007,
+    "state_capacity": 0.0009,
+    "trade_capacity": 0.0018
+   },
+   "two_lens_telescope": {
+    "naval_capacity": 0.0012,
+    "observation_rate": 0.0044,
+    "security_efficiency": 0.0017,
+    "survey_speed": 0.002
+   },
+   "elliptical_planet_orbits": {
+    "knowledge_rate": 0.0035,
+    "legitimacy": -0.002,
+    "observation_rate": 0.0029,
+    "survey_speed": 0.002
+   },
+   "telescopic_sky_discoveries": {
+    "institutional_rigidity": -0.001,
+    "knowledge_rate": 0.0013,
+    "legitimacy": -0.002,
+    "observation_rate": 0.0022
+   },
+   "lens_centering": {
+    "craft_output": 0.0014,
+    "observation_rate": 0.0007,
+    "tool_quality": 0.002
+   },
+   "logarithms": {
+    "knowledge_rate": 0.0044,
+    "labor_demand": -0.002,
+    "naval_capacity": 0.0018,
+    "survey_speed": 0.0049,
+    "trade_capacity": 0.0036
+   },
+   "decimal_log_tables": {
+    "knowledge_rate": 0.0009,
+    "naval_capacity": 0.0006,
+    "standardization": 0.0023,
+    "survey_speed": 0.0039
+   },
+   "compulsory_parish_schooling": {
+    "adoption_rate": 0.0055,
+    "cohesion": 0.0012,
+    "institutional_rigidity": 0.0005,
+    "knowledge_preservation": 0.0017,
+    "labor_demand": 0.0018,
+    "state_capacity": 0.0019
+   },
+   "inductive_method_program": {
+    "adoption_rate": 0.0024,
+    "institutional_rigidity": -0.003,
+    "knowledge_rate": 0.0044,
+    "observation_rate": 0.0029
+   },
+   "logarithmic_slide_rule": {
+    "craft_output": 0.0014,
+    "naval_capacity": 0.0012,
+    "survey_speed": 0.0039,
+    "task_coordination": 0.0027
+   },
+   "coordinate_geometry": {
+    "construction_rate": 0.0011,
+    "craft_output": 0.0009,
+    "knowledge_rate": 0.0048,
+    "survey_speed": 0.0049
+   },
+   "systematic_doubt_method": {
+    "institutional_rigidity": -0.002,
+    "knowledge_rate": 0.0022,
+    "legitimacy": -0.002
+   },
+   "geared_adding_machine": {
+    "knowledge_rate": 0.0005,
+    "standardization": 0.0012,
+    "task_coordination": 0.004,
+    "trade_capacity": 0.0018
+   },
+   "mezzotint_printmaking": {
+    "adoption_rate": 0.0008,
+    "craft_output": 0.0009,
+    "knowledge_preservation": 0.0011
+   },
+   "mercury_barometer": {
+    "disaster_resilience": 0.0012,
+    "knowledge_rate": 0.0022,
+    "observation_rate": 0.0044
+   },
+   "vacuum_pumps": {
+    "craft_output": 0.0009,
+    "knowledge_rate": 0.0026,
+    "labor_demand": 0.0018,
+    "observation_rate": 0.0037
+   },
+   "probability_theory": {
+    "knowledge_rate": 0.0022,
+    "standardization": 0.0012,
+    "state_capacity": 0.0019,
+    "trade_capacity": 0.0027
+   },
+   "vacuum_experiments": {
+    "knowledge_rate": 0.0017,
+    "labor_demand": 0.0006,
+    "observation_rate": 0.0022
+   },
+   "pendulum_regulated_clock": {
+    "labor_efficiency": 0.0012,
+    "naval_capacity": 0.0012,
+    "observation_rate": 0.0022,
+    "standardization": 0.0035,
+    "task_coordination": 0.0134
+   },
+   "chartered_experimental_society": {
+    "adoption_rate": 0.0032,
+    "institutional_rigidity": -0.003,
+    "knowledge_preservation": 0.0029,
+    "knowledge_rate": 0.0044,
+    "labor_demand": 0.0012,
+    "observation_rate": 0.0029
+   },
+   "mechanical_oscillation": {
+    "knowledge_rate": 0.0013,
+    "observation_rate": 0.0015,
+    "standardization": 0.0012
+   },
+   "air_spring_law": {
+    "craft_output": 0.0005,
+    "knowledge_rate": 0.0017,
+    "observation_rate": 0.0015
+   },
+   "laboratory_notebooks": {
+    "knowledge_preservation": 0.0023,
+    "observation_rate": 0.0011,
+    "standardization": 0.0012
+   },
+   "experimental_protocol_publication": {
+    "adoption_rate": 0.0032,
+    "institutional_rigidity": -0.001,
+    "knowledge_preservation": 0.0029,
+    "knowledge_rate": 0.0013
+   },
+   "microscope_drawing_atlas": {
+    "adoption_rate": 0.0016,
+    "knowledge_preservation": 0.0017,
+    "observation_rate": 0.0018
+   },
+   "salaried_science_academy": {
+    "institutional_rigidity": 0.0005,
+    "knowledge_preservation": 0.0017,
+    "knowledge_rate": 0.0026,
+    "labor_demand": 0.0012,
+    "observation_rate": 0.0015,
+    "state_capacity": 0.0019
+   },
+   "numerical_root_finding": {
+    "craft_output": 0.0005,
+    "knowledge_rate": 0.0013,
+    "survey_speed": 0.002
+   },
+   "differential_calculus": {
+    "craft_output": 0.0009,
+    "knowledge_rate": 0.0057,
+    "observation_rate": 0.0011,
+    "survey_speed": 0.0029
+   },
+   "experimental_optics": {
+    "craft_output": 0.0005,
+    "knowledge_rate": 0.0017,
+    "observation_rate": 0.0018
+   },
+   "mirror_telescope": {
+    "craft_output": 0.0009,
+    "observation_rate": 0.0018,
+    "security_efficiency": 0.0006
+   },
+   "integral_calculus": {
+    "construction_rate": 0.0011,
+    "knowledge_rate": 0.0026,
+    "survey_speed": 0.0029
+   },
+   "realm_longitude_observatory": {
+    "labor_demand": 0.0018,
+    "naval_capacity": 0.0024,
+    "observation_rate": 0.0022,
+    "route_speed": 0.0031,
+    "survey_speed": 0.0039
+   },
+   "elastic_deformation": {
+    "construction_rate": 0.0016,
+    "craft_output": 0.0009,
+    "knowledge_rate": 0.0009
+   },
+   "light_speed_from_eclipses": {
+    "knowledge_rate": 0.0013,
+    "observation_rate": 0.0015
+   },
+   "animalcule_microscope": {
+    "knowledge_rate": 0.0009,
+    "legitimacy": -0.001,
+    "observation_rate": 0.0022
+   },
+   "eyepiece_design": {
+    "craft_output": 0.0009,
+    "observation_rate": 0.0011
+   },
+   "stress_strain_relations": {
+    "construction_rate": 0.0022,
+    "craft_output": 0.0009,
+    "knowledge_rate": 0.0009
+   },
+   "inertial_motion": {
+    "knowledge_rate": 0.0022,
+    "observation_rate": 0.0007
+   },
+   "universal_gravitation": {
+    "knowledge_rate": 0.0061,
+    "legitimacy": -0.002,
+    "naval_capacity": 0.0018,
+    "observation_rate": 0.0022,
+    "survey_speed": 0.0029
+   },
+   "momentum_balance": {
+    "craft_output": 0.0005,
+    "knowledge_rate": 0.0013,
+    "observation_rate": 0.0007
+   },
+   "differential_equations": {
+    "construction_rate": 0.0005,
+    "knowledge_rate": 0.0022,
+    "survey_speed": 0.002
+   },
+   "friction_measurement": {
+    "construction_rate": 0.0011,
+    "craft_output": 0.0014,
+    "labor_efficiency": 0.0012
+   },
+   "daily_printed_newspaper": {
+    "adoption_rate": 0.0047,
+    "cohesion": -0.0014,
+    "legitimacy": -0.002,
+    "state_capacity": 0.0009,
+    "trade_capacity": 0.0027
+   },
+   "comet_return_prediction": {
+    "knowledge_rate": 0.0017,
+    "legitimacy": -0.002,
+    "observation_rate": 0.0018
+   },
+   "friction_electric_machine": {
+    "knowledge_rate": 0.0013,
+    "observation_rate": 0.0015
+   },
+   "precision_thermometry": {
+    "health_protection": 0.0007,
+    "observation_rate": 0.0018,
+    "standardization": 0.0023
+   },
+   "public_experiment_lectures": {
+    "adoption_rate": 0.0039,
+    "cohesion": 0.0006,
+    "knowledge_rate": 0.0009
+   },
+   "structural_load_testing": {
+    "construction_rate": 0.0022,
+    "craft_output": 0.0009,
+    "disaster_resilience": 0.0012,
+    "labor_demand": 0.0006
+   },
+   "subscription_libraries": {
+    "adoption_rate": 0.0032,
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0029
+   },
+   "flow_continuity": {
+    "construction_rate": 0.0011,
+    "knowledge_rate": 0.0013,
+    "water_access": 0.0013
+   },
+   "numerical_integration": {
+    "knowledge_rate": 0.0013,
+    "observation_rate": 0.0005,
+    "survey_speed": 0.002
+   },
+   "column_buckling": {
+    "construction_rate": 0.0022,
+    "disaster_resilience": 0.0006,
+    "knowledge_rate": 0.0009
+   },
+   "charge_storing_jar": {
+    "injury_risk": 0.001,
+    "knowledge_rate": 0.0013,
+    "observation_rate": 0.0015
+   },
+   "experimental_controls": {
+    "health_protection": 0.0013,
+    "institutional_rigidity": -0.002,
+    "knowledge_rate": 0.0035,
+    "observation_rate": 0.0044,
+    "standardization": 0.0023
+   },
+   "reasoned_trades_encyclopedia": {
+    "adoption_rate": 0.0079,
+    "craft_output": 0.0014,
+    "institutional_rigidity": -0.003,
+    "knowledge_preservation": 0.0069,
+    "knowledge_rate": 0.0022,
+    "labor_demand": 0.0012,
+    "legitimacy": -0.002
+   },
+   "lightning_electricity_trial": {
+    "disaster_resilience": 0.0018,
+    "knowledge_rate": 0.0013,
+    "observation_rate": 0.0015
+   },
+   "standard_tongue_dictionary": {
+    "adoption_rate": 0.0016,
+    "knowledge_preservation": 0.0029,
+    "standardization": 0.0029
+   },
+   "coordinated_transit_expeditions": {
+    "labor_demand": 0.0018,
+    "naval_capacity": 0.0012,
+    "observation_rate": 0.0022,
+    "survey_speed": 0.0039
+   },
+   "mining_engineering_academies": {
+    "adoption_rate": 0.0024,
+    "extraction_yield": 0.003,
+    "knowledge_rate": 0.0013,
+    "labor_demand": 0.0012,
+    "mine_safety": 0.002
+   },
+   "rotational_dynamics": {
+    "craft_output": 0.0009,
+    "knowledge_rate": 0.0013
+   },
+   "isolated_airs_chemistry": {
+    "chemical_control": 0.004,
+    "health_risk": 0.001,
+    "knowledge_rate": 0.0017,
+    "observation_rate": 0.0022,
+    "pollution": 0.001
+   },
+   "calorimetry": {
+    "fuel_efficiency": 0.001,
+    "knowledge_rate": 0.0013,
+    "observation_rate": 0.0015
+   },
+   "flywheel_smoothing": {
+    "craft_output": 0.0014,
+    "labor_efficiency": 0.0012
+   },
+   "oxygen_combustion_theory": {
+    "chemical_control": 0.008,
+    "health_protection": 0.0013,
+    "knowledge_rate": 0.0044,
+    "legitimacy": -0.001,
+    "observation_rate": 0.0018
+   },
+   "torsion_balance_force_law": {
+    "knowledge_rate": 0.0013,
+    "observation_rate": 0.0015
+   },
+   "systematic_chemical_names": {
+    "chemical_control": 0.003,
+    "knowledge_preservation": 0.0023,
+    "standardization": 0.0029
+   },
+   "feedback_governors": {
+    "craft_output": 0.0014,
+    "labor_efficiency": 0.0018,
+    "task_coordination": 0.0027
+   },
+   "decimal_earth_measures": {
+    "adoption_rate": 0.0016,
+    "cohesion": -0.0014,
+    "institutional_rigidity": -0.002,
+    "standardization": 0.0082,
+    "state_capacity": 0.0037,
+    "trade_capacity": 0.0045
+   },
+   "shutter_signal_frames": {
+    "labor_demand": 0.0018,
+    "route_speed": 0.008,
+    "security_efficiency": 0.0022,
+    "state_capacity": 0.0037,
+    "task_coordination": 0.0027
+   },
+   "state_polytechnic_school": {
+    "adoption_rate": 0.0032,
+    "construction_rate": 0.0016,
+    "institutional_rigidity": -0.001,
+    "knowledge_rate": 0.0022,
+    "labor_demand": 0.0012,
+    "state_capacity": 0.0019
+   },
+   "stone_lithography": {
+    "adoption_rate": 0.0024,
+    "craft_output": 0.0009,
+    "knowledge_preservation": 0.0011
+   }
   }
  }
 }

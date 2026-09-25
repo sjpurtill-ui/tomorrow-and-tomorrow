@@ -4,10 +4,10 @@
  "items": {
   "hilltop_citadel_towns": {
    "effects": {
-    "security_efficiency": 0.0036,
-    "disaster_resilience": 0.002,
-    "labor_demand": 0.002,
+    "disaster_resilience": 0.0008,
     "housing_output": -0.002,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0005,
     "trade_capacity": -0.001
    },
    "name": "Hilltop Citadel Towns",
@@ -17,10 +17,10 @@
   },
   "triple_line_land_walls": {
    "effects": {
-    "security_efficiency": 0.0126,
-    "warfare_readiness": 0.003,
-    "disaster_resilience": 0.003,
-    "labor_demand": 0.006
+    "disaster_resilience": 0.0012,
+    "labor_demand": 0.0003,
+    "security_efficiency": 0.0017,
+    "warfare_readiness": 0.0011
    },
    "name": "Triple Land Walls",
    "observation": "A moat, a low outer wall and a tall towered inner wall stand one behind another across the landward side.",
@@ -29,10 +29,10 @@
   },
   "pass_command_garrisons": {
    "effects": {
-    "security_efficiency": 0.0036,
-    "state_capacity": 0.001,
-    "trade_capacity": 0.001,
-    "labor_demand": 0.001
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0005,
+    "state_capacity": 0.0002,
+    "trade_capacity": 0.0006
    },
    "name": "Pass Commanders",
    "observation": "A pass commander with a small garrison holds each mountain pass and questions everyone who crosses.",
@@ -40,12 +40,12 @@
   },
   "military_district_settlement": {
    "effects": {
-    "warfare_readiness": 0.0075,
-    "security_efficiency": 0.0054,
-    "state_capacity": 0.003,
-    "food_output": 0.002,
-    "institutional_rigidity": 0.002,
-    "labor_demand": -0.002
+    "food_output": 0.0007,
+    "institutional_rigidity": 0.0001,
+    "labor_demand": -0.0004,
+    "security_efficiency": 0.0007,
+    "state_capacity": 0.0006,
+    "warfare_readiness": 0.0028
    },
    "name": "Military District Settlement",
    "observation": "Soldiers are given farms in the frontier districts, and their sons inherit both the land and the duty to serve.",
@@ -55,18 +55,18 @@
   },
   "mounted_remount_school": {
    "effects": {
-    "warfare_readiness": 0.0045,
+    "food_output": -0.002,
+    "logistics_endurance": 0.0008,
     "travel_speed": 0.002,
-    "logistics_endurance": 0.002,
-    "food_output": -0.002
+    "warfare_readiness": 0.0013
    },
    "observation": "The state's studs breed and school cavalry horses, and each squadron draws its remounts from them.",
    "art": "res://assets/ui/research/subjects/domesticated_mounts-v1.png"
   },
   "bow_and_lance_cavalry": {
    "effects": {
-    "warfare_readiness": 0.0037,
-    "task_coordination": 0.0014
+    "task_coordination": 0.0003,
+    "warfare_readiness": 0.001
    },
    "name": "Bow-and-Lance Cavalry",
    "observation": "The same rider shoots from the saddle at a distance and then charges home with the lance.",
@@ -74,8 +74,8 @@
   },
   "harbor_chain_booms": {
    "effects": {
-    "security_efficiency": 0.0036,
-    "naval_capacity": 0.002,
+    "naval_capacity": 0.0013,
+    "security_efficiency": 0.0017,
     "trade_capacity": -0.001
    },
    "name": "Harbor Chain Booms",
@@ -84,10 +84,10 @@
   },
   "generals_field_manual": {
    "effects": {
-    "task_coordination": 0.0056,
-    "warfare_readiness": 0.006,
-    "knowledge_preservation": 0.003,
-    "injury_risk": -0.0016
+    "injury_risk": -0.0013,
+    "knowledge_preservation": 0.0003,
+    "task_coordination": 0.0012,
+    "warfare_readiness": 0.0017
    },
    "name": "Generals' Field Manual",
    "observation": "A manual sets down for commanders how to order a march, pitch a camp, draw up the lines and deceive the enemy.",
@@ -96,9 +96,9 @@
   },
   "paired_stirrups": {
    "effects": {
-    "warfare_readiness": 0.009,
-    "injury_risk": -0.0024,
-    "task_coordination": 0.0014
+    "injury_risk": -0.0005,
+    "task_coordination": 0.0002,
+    "warfare_readiness": 0.0015
    },
    "name": "Paired Stirrups",
    "observation": "A stirrup hangs on each side of the saddle, so the rider can stand and brace in the charge without being unseated.",
@@ -107,8 +107,8 @@
   },
   "high_bow_war_saddle": {
    "effects": {
-    "warfare_readiness": 0.003,
-    "injury_risk": -0.0016
+    "injury_risk": -0.0003,
+    "warfare_readiness": 0.0005
    },
    "name": "High-Bow War Saddle",
    "observation": "A war saddle with high boards before and behind holds the rider in his seat when a lance strikes him.",
@@ -116,10 +116,10 @@
   },
   "raid_season_refuges": {
    "effects": {
-    "security_efficiency": 0.0036,
-    "food_storage": 0.003,
-    "disaster_resilience": 0.002,
-    "labor_demand": 0.002
+    "disaster_resilience": 0.0007,
+    "food_storage": 0.0012,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0013
    },
    "name": "Raid-Season Refuges",
    "observation": "In the raiding season the villagers drive their beasts and carry their grain into a walled enclosure on the hill.",
@@ -127,10 +127,10 @@
   },
   "arms_export_bans": {
    "effects": {
-    "security_efficiency": 0.0027,
-    "warfare_readiness": 0.0008,
-    "state_capacity": 0.001,
-    "trade_capacity": -0.002
+    "security_efficiency": 0.001,
+    "state_capacity": 0.0002,
+    "trade_capacity": -0.002,
+    "warfare_readiness": 0.0001
    },
    "name": "Arms Export Bans",
    "observation": "No sword, mail or warhorse may be sold across the frontier, and the border guards search the carts.",
@@ -138,7 +138,7 @@
   },
   "lugged_war_spears": {
    "effects": {
-    "warfare_readiness": 0.0023
+    "warfare_readiness": 0.0004
    },
    "name": "Lugged War Spears",
    "observation": "Lugs below the spear blade stop it sinking too deep to pull free.",
@@ -146,11 +146,11 @@
   },
   "siphoned_liquid_fire": {
    "effects": {
-    "naval_capacity": 0.008,
-    "warfare_readiness": 0.006,
-    "security_efficiency": 0.0018,
     "disaster_risk": 0.004,
-    "injury_risk": 0.0016
+    "injury_risk": 0.0016,
+    "naval_capacity": 0.0019,
+    "security_efficiency": 0.0007,
+    "warfare_readiness": 0.001
    },
    "name": "Siphoned Liquid Fire",
    "observation": "A bronze siphon in the warship's bow sprays burning oil that water cannot put out.",
@@ -159,10 +159,10 @@
   },
   "spur_prow_galleys": {
    "effects": {
-    "naval_capacity": 0.005,
-    "warfare_readiness": 0.0023,
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.0008,
     "timber_pressure": 0.003,
-    "labor_demand": 0.002
+    "warfare_readiness": 0.0005
    },
    "name": "Spur-Prow Galleys",
    "observation": "War galleys with a spur above the waterline to smash oars, and a lateen sail for the passage, form the fleet's backbone.",
@@ -170,10 +170,10 @@
   },
   "muster_rolls": {
    "effects": {
-    "security_efficiency": 0.0027,
-    "task_coordination": 0.0021,
-    "state_capacity": 0.002,
-    "legitimacy": -0.001
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0008,
+    "state_capacity": 0.0005,
+    "task_coordination": 0.0005
    },
    "name": "Muster Rolls",
    "observation": "The roll lists each holding's armed men, their horses and their gear, and the captain checks it at every muster.",
@@ -181,9 +181,9 @@
   },
   "river_raiding_ships": {
    "effects": {
-    "warfare_readiness": 0.0037,
-    "naval_capacity": 0.003,
-    "travel_speed": 0.001
+    "naval_capacity": 0.0005,
+    "travel_speed": 0.0008,
+    "warfare_readiness": 0.0008
    },
    "name": "River Raiding Ships",
    "observation": "Long shallow ships row far up the rivers, strike a town and are gone before the levy can gather.",
@@ -192,12 +192,12 @@
   },
   "mounted_retinue_summons": {
    "effects": {
-    "warfare_readiness": 0.009,
-    "security_efficiency": 0.0036,
-    "state_capacity": 0.002,
-    "labor_demand": 0.002,
+    "cohesion": -0.0004,
+    "labor_demand": 0.0001,
     "legitimacy": -0.002,
-    "cohesion": -0.002
+    "security_efficiency": 0.0011,
+    "state_capacity": 0.0005,
+    "warfare_readiness": 0.0019
    },
    "name": "Summoned Mounted Retinues",
    "observation": "Each lord answers the ruler's summons with his retinue of heavily armed horsemen, armed at his own cost.",
@@ -207,9 +207,9 @@
   },
   "castle_guard_rotations": {
    "effects": {
-    "security_efficiency": 0.0036,
-    "labor_demand": 0.002,
-    "fatigue": -0.001
+    "fatigue": -0.0006,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0003
    },
    "name": "Castle-Guard Rotations",
    "observation": "Paid knights take turns guarding the border castles, a set number of weeks each.",
@@ -217,9 +217,9 @@
   },
   "fortified_river_bridges": {
    "effects": {
-    "security_efficiency": 0.0045,
-    "route_speed": 0.001,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "route_speed": 0.0003,
+    "security_efficiency": 0.0004
    },
    "name": "Fortified River Bridges",
    "observation": "A bridge with towers at each end closes the river to raiders' ships and holds the crossing.",
@@ -227,9 +227,9 @@
   },
   "realm_beacon_chain": {
    "effects": {
-    "security_efficiency": 0.0045,
-    "task_coordination": 0.0021,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0004,
+    "task_coordination": 0.0003
    },
    "name": "Realm Beacon Chain",
    "observation": "Fires lit from hill to hill carry warning of a raid from the frontier to the court in a single night.",
@@ -237,9 +237,9 @@
   },
   "foreign_household_guard": {
    "effects": {
-    "security_efficiency": 0.0036,
+    "cohesion": -0.0002,
     "legitimacy": -0.002,
-    "cohesion": -0.001
+    "security_efficiency": 0.0003
    },
    "name": "Foreign Household Guard",
    "observation": "The ruler's guard are foreigners sworn to him alone, with no kin in the realm to be bought.",
@@ -247,10 +247,10 @@
   },
   "captive_trained_corps": {
    "effects": {
-    "warfare_readiness": 0.0045,
-    "task_coordination": 0.0014,
+    "cohesion": -0.0004,
     "legitimacy": -0.002,
-    "cohesion": -0.002
+    "task_coordination": 0.0002,
+    "warfare_readiness": 0.0012
    },
    "name": "Captive-Trained Corps",
    "observation": "Captive boys are bought, trained from youth and bound to the ruler as soldiers.",
@@ -259,11 +259,11 @@
   },
   "burgh_defense_network": {
    "effects": {
-    "security_efficiency": 0.0108,
-    "disaster_resilience": 0.004,
-    "state_capacity": 0.003,
-    "trade_capacity": 0.002,
-    "labor_demand": 0.005
+    "disaster_resilience": 0.0012,
+    "labor_demand": 0.0003,
+    "security_efficiency": 0.001,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0003
    },
    "name": "Burgh Defense Network",
    "observation": "Fortified towns stand a day's march apart, and each length of wall is manned by men from lands assigned to it.",
@@ -272,9 +272,9 @@
   },
   "rotating_half_levy": {
    "effects": {
-    "warfare_readiness": 0.003,
-    "food_output": 0.002,
-    "labor_demand": -0.002
+    "food_output": 0.0002,
+    "labor_demand": -0.0015,
+    "warfare_readiness": 0.0008
    },
    "name": "Rotating Half-Levy",
    "observation": "Half the levy serves in the field while the other half farms, and they change places at set times.",
@@ -282,9 +282,9 @@
   },
   "shadowing_raid_defense": {
    "effects": {
-    "security_efficiency": 0.0045,
-    "warfare_readiness": 0.0023,
-    "task_coordination": 0.0014
+    "security_efficiency": 0.0006,
+    "task_coordination": 0.0004,
+    "warfare_readiness": 0.0012
    },
    "name": "Shadowing the Raiders",
    "observation": "Rather than meet raiders head on, the local levies follow them, pick off stragglers and strike when they turn home laden.",
@@ -292,8 +292,8 @@
   },
   "planned_ring_forts": {
    "effects": {
-    "security_efficiency": 0.0054,
-    "labor_demand": 0.003,
+    "labor_demand": 0.0002,
+    "security_efficiency": 0.0007,
     "timber_pressure": 0.002
    },
    "name": "Planned Ring Forts",
@@ -302,8 +302,8 @@
   },
   "twin_gate_passage": {
    "effects": {
-    "security_efficiency": 0.0036,
-    "labor_demand": 0.001
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0005
    },
    "name": "Twin-Gate Passage",
    "observation": "The gate is a stone tower with a passage and a barred door at each end, so attackers who force one are trapped at the next.",
@@ -311,11 +311,11 @@
   },
   "motte_and_bailey": {
    "effects": {
-    "security_efficiency": 0.009,
-    "warfare_readiness": 0.003,
-    "labor_demand": 0.004,
+    "labor_demand": 0.0002,
+    "legitimacy": -0.002,
+    "security_efficiency": 0.0012,
     "timber_pressure": 0.003,
-    "legitimacy": -0.002
+    "warfare_readiness": 0.0015
    },
    "name": "Motte and Bailey",
    "observation": "A heaped earth mound crowned with a timber tower rises over a fenced yard, and it can be raised in a few weeks.",
@@ -325,8 +325,8 @@
   },
   "kite_shield_cavalry": {
    "effects": {
-    "warfare_readiness": 0.0037,
-    "injury_risk": -0.0016
+    "injury_risk": -0.0004,
+    "warfare_readiness": 0.0019
    },
    "name": "Kite-Shield Cavalry",
    "observation": "Riders in mail carry long shields that cover the left side from shoulder to shin.",
@@ -334,10 +334,10 @@
   },
   "couched_lance_charge": {
    "effects": {
-    "warfare_readiness": 0.0105,
-    "task_coordination": 0.0021,
+    "food_output": -0.002,
     "injury_risk": 0.0016,
-    "food_output": -0.002
+    "task_coordination": 0.0018,
+    "warfare_readiness": 0.004
    },
    "name": "Couched Lance Charge",
    "observation": "Riders tuck the lance under the arm and charge knee to knee, so the horse's weight drives the point home.",
@@ -346,11 +346,11 @@
   },
   "stone_keep_towers": {
    "effects": {
-    "security_efficiency": 0.0108,
-    "disaster_resilience": 0.003,
-    "state_capacity": 0.002,
-    "labor_demand": 0.005,
-    "legitimacy": -0.001
+    "disaster_resilience": 0.0017,
+    "labor_demand": 0.0003,
+    "legitimacy": -0.001,
+    "security_efficiency": 0.002,
+    "state_capacity": 0.0007
    },
    "name": "Stone Keep Towers",
    "observation": "A square stone tower several floors high holds the lord's hall, his stores and his last defense.",
@@ -359,7 +359,7 @@
   },
   "wall_top_hoardings": {
    "effects": {
-    "security_efficiency": 0.0036,
+    "security_efficiency": 0.0007,
     "timber_pressure": 0.002
    },
    "name": "Wall-Top Hoardings",
@@ -368,9 +368,9 @@
   },
   "hearth_cover_curfew": {
    "effects": {
-    "disaster_risk": -0.004,
-    "disaster_resilience": 0.002,
-    "cohesion": -0.001
+    "cohesion": -0.0002,
+    "disaster_resilience": 0.0011,
+    "disaster_risk": -0.0007
    },
    "name": "Hearth-Cover Curfew",
    "observation": "At the evening bell every hearth in the town must be covered with its lid, against fire in the night.",
@@ -378,10 +378,10 @@
   },
   "keep_cistern_stores": {
    "effects": {
-    "security_efficiency": 0.0036,
-    "water_access": 0.002,
-    "food_storage": 0.002,
-    "disaster_resilience": 0.002
+    "disaster_resilience": 0.0005,
+    "food_storage": 0.0018,
+    "security_efficiency": 0.0007,
+    "water_access": 0.002
    },
    "name": "Keep Cisterns",
    "observation": "Deep wells and cisterns inside the keep give the garrison water for a siege of many months.",
@@ -389,8 +389,8 @@
   },
   "stirrup_cocked_crossbow": {
    "effects": {
-    "warfare_readiness": 0.0037,
-    "fatigue": -0.001
+    "fatigue": -0.0005,
+    "warfare_readiness": 0.0011
    },
    "name": "Stirrup-Cocked Crossbow",
    "observation": "An iron stirrup at the crossbow's nose lets the bowman stand on it and draw the string with both arms.",
@@ -398,8 +398,8 @@
   },
   "curtain_wall_flanking_towers": {
    "effects": {
-    "security_efficiency": 0.0063,
-    "labor_demand": 0.003
+    "labor_demand": 0.0002,
+    "security_efficiency": 0.0013
    },
    "name": "Flanking Towers",
    "observation": "Square towers jut out from the stone curtain wall, so archers can shoot along its face.",
@@ -407,12 +407,12 @@
   },
   "series_built_war_galleys": {
    "effects": {
-    "naval_capacity": 0.012,
-    "warfare_readiness": 0.0045,
-    "standardization": 0.003,
-    "state_capacity": 0.002,
+    "labor_demand": 0.0002,
+    "naval_capacity": 0.003,
+    "standardization": 0.0008,
+    "state_capacity": 0.0002,
     "timber_pressure": 0.005,
-    "labor_demand": 0.004
+    "warfare_readiness": 0.0013
    },
    "name": "Arsenal-Built War Galleys",
    "observation": "The state arsenal builds war galleys one after another to one pattern, from timber cut and seasoned in advance.",
@@ -421,8 +421,8 @@
   },
   "mail_underpadding": {
    "effects": {
-    "injury_risk": -0.0024,
-    "warfare_readiness": 0.0015
+    "injury_risk": -0.0006,
+    "warfare_readiness": 0.0004
    },
    "name": "Padding Under Mail",
    "observation": "A quilted coat under the mail spreads the force of a blow that the rings have stopped.",
@@ -430,10 +430,10 @@
   },
   "hue_and_cry": {
    "effects": {
-    "security_efficiency": 0.0045,
-    "cohesion": 0.001,
-    "legitimacy": 0.001,
-    "labor_demand": 0.001
+    "cohesion": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0009
    },
    "name": "Hue and Cry",
    "observation": "When a crime is cried, every household must leave its work and join the chase of the felon.",
@@ -441,8 +441,8 @@
   },
   "hybrid_counterweight_engine": {
    "effects": {
-    "warfare_readiness": 0.0037,
-    "labor_demand": 0.001
+    "labor_demand": 0.0001,
+    "warfare_readiness": 0.0006
    },
    "name": "Hybrid Counterweight Engine",
    "observation": "A box of stones hung on the throwing arm adds its weight to the crew hauling on the ropes.",
@@ -450,11 +450,11 @@
   },
   "service_money_commutation": {
    "effects": {
-    "warfare_readiness": 0.003,
-    "state_capacity": 0.003,
-    "labor_demand": -0.003,
+    "cohesion": -0.0002,
+    "labor_demand": -0.0009,
     "legitimacy": -0.001,
-    "cohesion": -0.001
+    "state_capacity": 0.0004,
+    "warfare_readiness": 0.0005
    },
    "name": "Service Money",
    "observation": "Holders who would rather stay at home pay money in place of service, and the ruler hires soldiers with it.",
@@ -462,11 +462,11 @@
   },
   "sworn_frontier_brotherhoods": {
    "effects": {
-    "security_efficiency": 0.0054,
-    "warfare_readiness": 0.0023,
-    "cohesion": 0.001,
-    "institutional_rigidity": 0.001,
-    "legitimacy": -0.001
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0013,
+    "warfare_readiness": 0.0004
    },
    "name": "Sworn Frontier Brotherhoods",
    "observation": "Brotherhoods of warriors sworn to a rule hold the frontier castles and answer to their own masters.",
@@ -474,10 +474,10 @@
   },
   "full_mail_harness": {
    "effects": {
-    "injury_risk": -0.0032,
-    "warfare_readiness": 0.003,
     "fatigue": 0.002,
-    "fuel_demand": 0.002
+    "fuel_demand": 0.0016,
+    "injury_risk": -0.0006,
+    "warfare_readiness": 0.0005
    },
    "name": "Full Mail Harness",
    "observation": "Mail covers the rider from head to foot: a hood, mittens and leggings.",
@@ -485,10 +485,10 @@
   },
   "siege_counter_forts": {
    "effects": {
-    "warfare_readiness": 0.0037,
-    "security_efficiency": 0.0009,
-    "labor_demand": 0.003,
-    "timber_pressure": 0.002
+    "labor_demand": 0.0002,
+    "security_efficiency": 0.0002,
+    "timber_pressure": 0.002,
+    "warfare_readiness": 0.0006
    },
    "name": "Siege Counter-Forts",
    "observation": "The besiegers build forts of their own facing the town's gates, so no one goes in or out.",
@@ -496,9 +496,9 @@
   },
   "mounted_crossbowmen": {
    "effects": {
-    "warfare_readiness": 0.003,
-    "security_efficiency": 0.0018,
-    "survey_speed": 0.001
+    "security_efficiency": 0.0004,
+    "survey_speed": 0.0004,
+    "warfare_readiness": 0.0005
    },
    "name": "Mounted Crossbowmen",
    "observation": "Crossbowmen ride to the fight, dismount to shoot and remount to scout.",
@@ -506,10 +506,10 @@
   },
   "tournament_training": {
    "effects": {
-    "warfare_readiness": 0.0037,
-    "task_coordination": 0.0014,
-    "legitimacy": 0.001,
-    "injury_risk": 0.0016
+    "injury_risk": 0.0016,
+    "legitimacy": 0.0001,
+    "task_coordination": 0.0004,
+    "warfare_readiness": 0.0006
    },
    "name": "Tournament Training",
    "observation": "Knights fight mock battles, team against team, and learn to charge and rally together.",
@@ -517,8 +517,8 @@
   },
   "round_flanking_towers": {
    "effects": {
-    "security_efficiency": 0.0054,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0014
    },
    "name": "Round Flanking Towers",
    "observation": "Round and half-round towers turn aside the ram and have no corners for miners to undermine.",
@@ -526,8 +526,8 @@
   },
   "fireproof_roof_ordinance": {
    "effects": {
-    "disaster_risk": -0.005,
-    "disaster_resilience": 0.003,
+    "disaster_resilience": 0.0006,
+    "disaster_risk": -0.0007,
     "housing_output": -0.002
    },
    "name": "Fireproof Roof Ordinance",
@@ -537,9 +537,9 @@
   },
   "counterweight_engines": {
    "effects": {
-    "warfare_readiness": 0.0105,
-    "labor_demand": 0.003,
-    "timber_pressure": 0.003
+    "labor_demand": 0.0002,
+    "timber_pressure": 0.003,
+    "warfare_readiness": 0.0015
    },
    "observation": "A great beam swung by a falling box of earth and stone throws stones heavier than a man against the walls.",
    "ability_reason": "A besieging general can batter down a stone wall from beyond bowshot, and no curtain wall is safe any longer.",
@@ -547,11 +547,11 @@
   },
   "decimal_army_organization": {
    "effects": {
-    "task_coordination": 0.007,
-    "warfare_readiness": 0.0075,
-    "state_capacity": 0.003,
-    "labor_demand": 0.002,
-    "legitimacy": -0.002
+    "labor_demand": 0.0001,
+    "legitimacy": -0.002,
+    "state_capacity": 0.0004,
+    "task_coordination": 0.0011,
+    "warfare_readiness": 0.0011
    },
    "name": "Decimal Army",
    "observation": "The army is ordered in tens, hundreds, thousands and ten-thousands, each under a commander answerable to the next.",
@@ -560,10 +560,10 @@
   },
   "multi_remount_riders": {
    "effects": {
-    "travel_speed": 0.004,
-    "warfare_readiness": 0.003,
-    "logistics_endurance": 0.003,
-    "food_output": -0.002
+    "food_output": -0.002,
+    "logistics_endurance": 0.0005,
+    "travel_speed": 0.0031,
+    "warfare_readiness": 0.0004
    },
    "name": "Riders with Remount Strings",
    "observation": "Each rider leads several spare horses and changes mount as each tires, covering great distances at speed.",
@@ -571,9 +571,9 @@
   },
   "great_helm": {
    "effects": {
-    "injury_risk": -0.0024,
-    "warfare_readiness": 0.0015,
-    "task_coordination": -0.0007
+    "injury_risk": -0.0005,
+    "task_coordination": -0.0007,
+    "warfare_readiness": 0.0002
    },
    "name": "Great Helm",
    "observation": "A flat-topped iron helmet encloses the whole head, with slits for the eyes and holes for breath.",
@@ -581,13 +581,13 @@
   },
   "ocean_sailing": {
    "effects": {
-    "naval_capacity": 0.016,
-    "warfare_readiness": 0.012,
-    "logistics_endurance": 0.006,
-    "task_coordination": 0.0049,
     "disease_exposure": 0.003,
+    "labor_demand": 0.0001,
+    "logistics_endurance": 0.001,
+    "naval_capacity": 0.002,
+    "task_coordination": 0.0008,
     "timber_pressure": 0.003,
-    "labor_demand": 0.002
+    "warfare_readiness": 0.0017
    },
    "observation": "Fleets and troop convoys cross the open sea out of sight of land, steered by compass and kept in company by signal.",
    "ability_reason": "An admiral can carry an army across open sea, land it on a far shore and keep it supplied there by convoy.",
@@ -595,8 +595,8 @@
   },
   "stone_machicolations": {
    "effects": {
-    "security_efficiency": 0.0045,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0011
    },
    "name": "Stone Machicolations",
    "observation": "Stone galleries corbelled out over the gates let defenders drop stones through openings in the floor.",
@@ -604,8 +604,8 @@
   },
   "ship_fighting_castles": {
    "effects": {
-    "naval_capacity": 0.004,
-    "warfare_readiness": 0.0023
+    "naval_capacity": 0.0009,
+    "warfare_readiness": 0.0004
    },
    "name": "Ship Fighting Castles",
    "observation": "Wooden towers built at bow and stern of a merchant ship give archers a height to shoot from.",
@@ -613,9 +613,9 @@
   },
   "captured_engineer_corps": {
    "effects": {
-    "warfare_readiness": 0.0037,
-    "task_coordination": 0.0014,
-    "legitimacy": -0.001
+    "legitimacy": -0.001,
+    "task_coordination": 0.0002,
+    "warfare_readiness": 0.0006
    },
    "name": "Captured Engineer Corps",
    "observation": "Engineers taken from conquered cities build the army's siege engines, and are well paid to do it.",
@@ -623,10 +623,10 @@
   },
   "compulsory_archery_practice": {
    "effects": {
-    "warfare_readiness": 0.0037,
-    "security_efficiency": 0.0018,
-    "cohesion": 0.001,
-    "labor_demand": 0.002
+    "cohesion": 0.0001,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0002,
+    "warfare_readiness": 0.0006
    },
    "name": "Compulsory Archery Practice",
    "observation": "On rest days every commoner must shoot at the village butts, and each household must keep a bow.",
@@ -634,10 +634,10 @@
   },
   "ward_night_watch": {
    "effects": {
-    "security_efficiency": 0.0045,
-    "disaster_risk": -0.001,
-    "labor_demand": 0.002,
-    "fatigue": 0.001
+    "disaster_risk": -0.0001,
+    "fatigue": 0.001,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0005
    },
    "name": "Ward Night Watch",
    "observation": "Each ward of the town keeps its own night watch of citizens with lanterns and staves.",
@@ -645,10 +645,10 @@
   },
   "pressed_merchant_fleets": {
    "effects": {
-    "naval_capacity": 0.005,
-    "warfare_readiness": 0.0015,
+    "legitimacy": -0.001,
+    "naval_capacity": 0.0011,
     "trade_capacity": -0.003,
-    "legitimacy": -0.001
+    "warfare_readiness": 0.0003
    },
    "name": "Pressed Merchant Fleets",
    "observation": "In war, merchant ships are seized, fitted with fighting castles and manned for the fleet.",
@@ -657,11 +657,11 @@
   },
   "concentric_castles": {
    "effects": {
-    "security_efficiency": 0.0126,
-    "warfare_readiness": 0.003,
-    "state_capacity": 0.002,
-    "labor_demand": 0.006,
-    "legitimacy": -0.001
+    "labor_demand": 0.0003,
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0014,
+    "state_capacity": 0.0001,
+    "warfare_readiness": 0.0005
    },
    "name": "Concentric Castles",
    "observation": "An inner ward of tall towers rises inside a lower outer ward, so defenders on both walls can shoot at once.",
@@ -670,8 +670,8 @@
   },
   "springald_wall_engines": {
    "effects": {
-    "security_efficiency": 0.0045,
-    "warfare_readiness": 0.0015
+    "security_efficiency": 0.0005,
+    "warfare_readiness": 0.0003
    },
    "name": "Springald Wall Engines",
    "observation": "Great crossbows mounted on the towers shoot heavy bolts at the besiegers' engines and their crews.",
@@ -679,10 +679,10 @@
   },
   "roadside_brush_clearance": {
    "effects": {
-    "security_efficiency": 0.0036,
-    "travel_speed": 0.001,
-    "labor_demand": 0.002,
-    "timber_pressure": 0.001
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0004,
+    "timber_pressure": 0.001,
+    "travel_speed": 0.0002
    },
    "name": "Roadside Brush Clearance",
    "observation": "Brush and trees are cleared a bowshot back from the high roads, so robbers have no cover.",
@@ -690,9 +690,9 @@
   },
   "coat_of_plates": {
    "effects": {
-    "warfare_readiness": 0.006,
-    "injury_risk": -0.0048,
-    "fuel_demand": 0.002
+    "fuel_demand": 0.0004,
+    "injury_risk": -0.0005,
+    "warfare_readiness": 0.001
    },
    "name": "Coat of Plates",
    "observation": "Iron plates riveted inside a cloth coat guard the body beneath the mail.",
@@ -701,7 +701,7 @@
   },
   "armor_breaking_maces": {
    "effects": {
-    "warfare_readiness": 0.003
+    "warfare_readiness": 0.0005
    },
    "name": "Armor-Breaking Maces",
    "observation": "Flanged maces and war hammers crush through mail and plate where a sword would glance off.",
@@ -709,8 +709,8 @@
   },
   "belt_hook_spanning": {
    "effects": {
-    "warfare_readiness": 0.003,
-    "fatigue": -0.001
+    "fatigue": -0.0006,
+    "warfare_readiness": 0.0005
    },
    "name": "Belt-Hook Spanning",
    "observation": "A hook on the crossbowman's belt lets him span the bow by straightening his back.",
@@ -718,11 +718,11 @@
   },
   "militia_pike_hedge": {
    "effects": {
-    "warfare_readiness": 0.0075,
-    "security_efficiency": 0.0036,
-    "cohesion": 0.003,
-    "legitimacy": 0.002,
-    "injury_risk": 0.0016
+    "cohesion": 0.0002,
+    "injury_risk": 0.0016,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0009,
+    "warfare_readiness": 0.0011
    },
    "name": "Militia Pike Hedge",
    "observation": "Town militia stand shoulder to shoulder in a hedge of long spears that horses will not charge into.",
@@ -732,7 +732,7 @@
   },
   "infantry_polearms": {
    "effects": {
-    "warfare_readiness": 0.0037
+    "warfare_readiness": 0.0006
    },
    "name": "Infantry Polearms",
    "observation": "Long-hafted bills and axes let a foot soldier hook a rider from the saddle and cut him down.",
@@ -740,9 +740,9 @@
   },
   "nitre_incendiary_mixtures": {
    "effects": {
-    "warfare_readiness": 0.0023,
     "chemical_control": 0.002,
-    "disaster_risk": 0.003
+    "disaster_risk": 0.003,
+    "warfare_readiness": 0.0003
    },
    "name": "Nitre Incendiaries",
    "observation": "Nitre stirred into pitch and sulfur makes fire pots and fire arrows that flare fiercely and are hard to smother.",
@@ -750,9 +750,9 @@
   },
   "massed_longbow_volleys": {
    "effects": {
-    "warfare_readiness": 0.009,
-    "task_coordination": 0.0021,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "task_coordination": 0.0003,
+    "warfare_readiness": 0.0014
    },
    "name": "Massed Longbow Volleys",
    "observation": "Ranks of archers loose their long bows together, and the arrows fall on the enemy like hail.",
@@ -761,9 +761,9 @@
   },
   "plate_limb_defences": {
    "effects": {
-    "injury_risk": -0.0032,
-    "warfare_readiness": 0.003,
-    "fuel_demand": 0.001
+    "fuel_demand": 0.0002,
+    "injury_risk": -0.0003,
+    "warfare_readiness": 0.0005
    },
    "name": "Plate Limb Defences",
    "observation": "Plates of iron shaped to arm and leg guard the limbs that mail left bruised and broken.",
@@ -771,8 +771,8 @@
   },
   "windlass_crossbow": {
    "effects": {
-    "warfare_readiness": 0.0037,
-    "fatigue": 0.001
+    "fatigue": 0.001,
+    "warfare_readiness": 0.0006
    },
    "name": "Windlass Crossbow",
    "observation": "A crank-wound windlass draws a heavy crossbow that no man could span with his arms alone.",
@@ -780,8 +780,8 @@
   },
   "visored_helmet": {
    "effects": {
-    "injury_risk": -0.0024,
-    "warfare_readiness": 0.0015
+    "injury_risk": -0.0002,
+    "warfare_readiness": 0.0002
    },
    "name": "Visored Helmet",
    "observation": "A pointed visor hinged to the helmet closes over the face and lifts when the fighting pauses.",
@@ -790,9 +790,9 @@
   "black_powder": {
    "effects": {
     "chemical_control": 0.008,
-    "observation_rate": 0.002,
     "disaster_risk": 0.004,
-    "injury_risk": 0.0016
+    "injury_risk": 0.0016,
+    "observation_rate": 0.0003
    },
    "observation": "Nitre, sulfur and charcoal ground together burn with a flash and a roar that the men who grind them learn to fear.",
    "ability_reason": "The mixture is known only as a dangerous curiosity: no one can yet make it throw a stone, and it gives no general a new weapon.",
@@ -800,11 +800,11 @@
   },
   "free_mercenary_companies": {
    "effects": {
-    "warfare_readiness": 0.0045,
-    "labor_demand": -0.002,
-    "security_efficiency": -0.0018,
+    "cohesion": -0.0001,
+    "labor_demand": -0.0003,
     "legitimacy": -0.003,
-    "cohesion": -0.002
+    "security_efficiency": -0.0018,
+    "warfare_readiness": 0.0007
    },
    "name": "Free Companies",
    "observation": "Bands of soldiers under contract captains sell their service to any paymaster, and plunder when they are unpaid.",
@@ -813,13 +813,433 @@
   },
   "dispatch_code_lists": {
    "effects": {
-    "security_efficiency": 0.0027,
-    "task_coordination": 0.0014,
-    "knowledge_preservation": 0.001
+    "knowledge_preservation": 0.0001,
+    "security_efficiency": 0.0007,
+    "task_coordination": 0.0002
    },
    "name": "Dispatch Code Lists",
    "observation": "Lists of code words replace names and places in dispatches, so a captured letter tells the enemy little.",
    "art": "res://assets/ui/research/discovery-600/agreed_signal_codes.png"
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "hilltop_citadel_towns": {
+    "disaster_resilience": 0.002,
+    "housing_output": -0.002,
+    "labor_demand": 0.002,
+    "security_efficiency": 0.0036,
+    "trade_capacity": -0.001
+   },
+   "triple_line_land_walls": {
+    "disaster_resilience": 0.003,
+    "labor_demand": 0.006,
+    "security_efficiency": 0.0126,
+    "warfare_readiness": 0.003
+   },
+   "pass_command_garrisons": {
+    "labor_demand": 0.001,
+    "security_efficiency": 0.0036,
+    "state_capacity": 0.001,
+    "trade_capacity": 0.001
+   },
+   "military_district_settlement": {
+    "food_output": 0.002,
+    "institutional_rigidity": 0.002,
+    "labor_demand": -0.002,
+    "security_efficiency": 0.0054,
+    "state_capacity": 0.003,
+    "warfare_readiness": 0.0075
+   },
+   "mounted_remount_school": {
+    "food_output": -0.002,
+    "logistics_endurance": 0.002,
+    "travel_speed": 0.002,
+    "warfare_readiness": 0.0045
+   },
+   "bow_and_lance_cavalry": {
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.0037
+   },
+   "harbor_chain_booms": {
+    "naval_capacity": 0.002,
+    "security_efficiency": 0.0036,
+    "trade_capacity": -0.001
+   },
+   "generals_field_manual": {
+    "injury_risk": -0.0016,
+    "knowledge_preservation": 0.003,
+    "task_coordination": 0.0056,
+    "warfare_readiness": 0.006
+   },
+   "paired_stirrups": {
+    "injury_risk": -0.0024,
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.009
+   },
+   "high_bow_war_saddle": {
+    "injury_risk": -0.0016,
+    "warfare_readiness": 0.003
+   },
+   "raid_season_refuges": {
+    "disaster_resilience": 0.002,
+    "food_storage": 0.003,
+    "labor_demand": 0.002,
+    "security_efficiency": 0.0036
+   },
+   "arms_export_bans": {
+    "security_efficiency": 0.0027,
+    "state_capacity": 0.001,
+    "trade_capacity": -0.002,
+    "warfare_readiness": 0.0008
+   },
+   "lugged_war_spears": {
+    "warfare_readiness": 0.0023
+   },
+   "siphoned_liquid_fire": {
+    "disaster_risk": 0.004,
+    "injury_risk": 0.0016,
+    "naval_capacity": 0.008,
+    "security_efficiency": 0.0018,
+    "warfare_readiness": 0.006
+   },
+   "spur_prow_galleys": {
+    "labor_demand": 0.002,
+    "naval_capacity": 0.005,
+    "timber_pressure": 0.003,
+    "warfare_readiness": 0.0023
+   },
+   "muster_rolls": {
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0027,
+    "state_capacity": 0.002,
+    "task_coordination": 0.0021
+   },
+   "river_raiding_ships": {
+    "naval_capacity": 0.003,
+    "travel_speed": 0.001,
+    "warfare_readiness": 0.0037
+   },
+   "mounted_retinue_summons": {
+    "cohesion": -0.002,
+    "labor_demand": 0.002,
+    "legitimacy": -0.002,
+    "security_efficiency": 0.0036,
+    "state_capacity": 0.002,
+    "warfare_readiness": 0.009
+   },
+   "castle_guard_rotations": {
+    "fatigue": -0.001,
+    "labor_demand": 0.002,
+    "security_efficiency": 0.0036
+   },
+   "fortified_river_bridges": {
+    "labor_demand": 0.002,
+    "route_speed": 0.001,
+    "security_efficiency": 0.0045
+   },
+   "realm_beacon_chain": {
+    "labor_demand": 0.002,
+    "security_efficiency": 0.0045,
+    "task_coordination": 0.0021
+   },
+   "foreign_household_guard": {
+    "cohesion": -0.001,
+    "legitimacy": -0.002,
+    "security_efficiency": 0.0036
+   },
+   "captive_trained_corps": {
+    "cohesion": -0.002,
+    "legitimacy": -0.002,
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.0045
+   },
+   "burgh_defense_network": {
+    "disaster_resilience": 0.004,
+    "labor_demand": 0.005,
+    "security_efficiency": 0.0108,
+    "state_capacity": 0.003,
+    "trade_capacity": 0.002
+   },
+   "rotating_half_levy": {
+    "food_output": 0.002,
+    "labor_demand": -0.002,
+    "warfare_readiness": 0.003
+   },
+   "shadowing_raid_defense": {
+    "security_efficiency": 0.0045,
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.0023
+   },
+   "planned_ring_forts": {
+    "labor_demand": 0.003,
+    "security_efficiency": 0.0054,
+    "timber_pressure": 0.002
+   },
+   "twin_gate_passage": {
+    "labor_demand": 0.001,
+    "security_efficiency": 0.0036
+   },
+   "motte_and_bailey": {
+    "labor_demand": 0.004,
+    "legitimacy": -0.002,
+    "security_efficiency": 0.009,
+    "timber_pressure": 0.003,
+    "warfare_readiness": 0.003
+   },
+   "kite_shield_cavalry": {
+    "injury_risk": -0.0016,
+    "warfare_readiness": 0.0037
+   },
+   "couched_lance_charge": {
+    "food_output": -0.002,
+    "injury_risk": 0.0016,
+    "task_coordination": 0.0021,
+    "warfare_readiness": 0.0105
+   },
+   "stone_keep_towers": {
+    "disaster_resilience": 0.003,
+    "labor_demand": 0.005,
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0108,
+    "state_capacity": 0.002
+   },
+   "wall_top_hoardings": {
+    "security_efficiency": 0.0036,
+    "timber_pressure": 0.002
+   },
+   "hearth_cover_curfew": {
+    "cohesion": -0.001,
+    "disaster_resilience": 0.002,
+    "disaster_risk": -0.004
+   },
+   "keep_cistern_stores": {
+    "disaster_resilience": 0.002,
+    "food_storage": 0.002,
+    "security_efficiency": 0.0036,
+    "water_access": 0.002
+   },
+   "stirrup_cocked_crossbow": {
+    "fatigue": -0.001,
+    "warfare_readiness": 0.0037
+   },
+   "curtain_wall_flanking_towers": {
+    "labor_demand": 0.003,
+    "security_efficiency": 0.0063
+   },
+   "series_built_war_galleys": {
+    "labor_demand": 0.004,
+    "naval_capacity": 0.012,
+    "standardization": 0.003,
+    "state_capacity": 0.002,
+    "timber_pressure": 0.005,
+    "warfare_readiness": 0.0045
+   },
+   "mail_underpadding": {
+    "injury_risk": -0.0024,
+    "warfare_readiness": 0.0015
+   },
+   "hue_and_cry": {
+    "cohesion": 0.001,
+    "labor_demand": 0.001,
+    "legitimacy": 0.001,
+    "security_efficiency": 0.0045
+   },
+   "hybrid_counterweight_engine": {
+    "labor_demand": 0.001,
+    "warfare_readiness": 0.0037
+   },
+   "service_money_commutation": {
+    "cohesion": -0.001,
+    "labor_demand": -0.003,
+    "legitimacy": -0.001,
+    "state_capacity": 0.003,
+    "warfare_readiness": 0.003
+   },
+   "sworn_frontier_brotherhoods": {
+    "cohesion": 0.001,
+    "institutional_rigidity": 0.001,
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0054,
+    "warfare_readiness": 0.0023
+   },
+   "full_mail_harness": {
+    "fatigue": 0.002,
+    "fuel_demand": 0.002,
+    "injury_risk": -0.0032,
+    "warfare_readiness": 0.003
+   },
+   "siege_counter_forts": {
+    "labor_demand": 0.003,
+    "security_efficiency": 0.0009,
+    "timber_pressure": 0.002,
+    "warfare_readiness": 0.0037
+   },
+   "mounted_crossbowmen": {
+    "security_efficiency": 0.0018,
+    "survey_speed": 0.001,
+    "warfare_readiness": 0.003
+   },
+   "tournament_training": {
+    "injury_risk": 0.0016,
+    "legitimacy": 0.001,
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.0037
+   },
+   "round_flanking_towers": {
+    "labor_demand": 0.002,
+    "security_efficiency": 0.0054
+   },
+   "fireproof_roof_ordinance": {
+    "disaster_resilience": 0.003,
+    "disaster_risk": -0.005,
+    "housing_output": -0.002
+   },
+   "counterweight_engines": {
+    "labor_demand": 0.003,
+    "timber_pressure": 0.003,
+    "warfare_readiness": 0.0105
+   },
+   "decimal_army_organization": {
+    "labor_demand": 0.002,
+    "legitimacy": -0.002,
+    "state_capacity": 0.003,
+    "task_coordination": 0.007,
+    "warfare_readiness": 0.0075
+   },
+   "multi_remount_riders": {
+    "food_output": -0.002,
+    "logistics_endurance": 0.003,
+    "travel_speed": 0.004,
+    "warfare_readiness": 0.003
+   },
+   "great_helm": {
+    "injury_risk": -0.0024,
+    "task_coordination": -0.0007,
+    "warfare_readiness": 0.0015
+   },
+   "ocean_sailing": {
+    "disease_exposure": 0.003,
+    "labor_demand": 0.002,
+    "logistics_endurance": 0.006,
+    "naval_capacity": 0.016,
+    "task_coordination": 0.0049,
+    "timber_pressure": 0.003,
+    "warfare_readiness": 0.012
+   },
+   "stone_machicolations": {
+    "labor_demand": 0.002,
+    "security_efficiency": 0.0045
+   },
+   "ship_fighting_castles": {
+    "naval_capacity": 0.004,
+    "warfare_readiness": 0.0023
+   },
+   "captured_engineer_corps": {
+    "legitimacy": -0.001,
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.0037
+   },
+   "compulsory_archery_practice": {
+    "cohesion": 0.001,
+    "labor_demand": 0.002,
+    "security_efficiency": 0.0018,
+    "warfare_readiness": 0.0037
+   },
+   "ward_night_watch": {
+    "disaster_risk": -0.001,
+    "fatigue": 0.001,
+    "labor_demand": 0.002,
+    "security_efficiency": 0.0045
+   },
+   "pressed_merchant_fleets": {
+    "legitimacy": -0.001,
+    "naval_capacity": 0.005,
+    "trade_capacity": -0.003,
+    "warfare_readiness": 0.0015
+   },
+   "concentric_castles": {
+    "labor_demand": 0.006,
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0126,
+    "state_capacity": 0.002,
+    "warfare_readiness": 0.003
+   },
+   "springald_wall_engines": {
+    "security_efficiency": 0.0045,
+    "warfare_readiness": 0.0015
+   },
+   "roadside_brush_clearance": {
+    "labor_demand": 0.002,
+    "security_efficiency": 0.0036,
+    "timber_pressure": 0.001,
+    "travel_speed": 0.001
+   },
+   "coat_of_plates": {
+    "fuel_demand": 0.002,
+    "injury_risk": -0.0048,
+    "warfare_readiness": 0.006
+   },
+   "armor_breaking_maces": {
+    "warfare_readiness": 0.003
+   },
+   "belt_hook_spanning": {
+    "fatigue": -0.001,
+    "warfare_readiness": 0.003
+   },
+   "militia_pike_hedge": {
+    "cohesion": 0.003,
+    "injury_risk": 0.0016,
+    "legitimacy": 0.002,
+    "security_efficiency": 0.0036,
+    "warfare_readiness": 0.0075
+   },
+   "infantry_polearms": {
+    "warfare_readiness": 0.0037
+   },
+   "nitre_incendiary_mixtures": {
+    "chemical_control": 0.002,
+    "disaster_risk": 0.003,
+    "warfare_readiness": 0.0023
+   },
+   "massed_longbow_volleys": {
+    "labor_demand": 0.002,
+    "task_coordination": 0.0021,
+    "warfare_readiness": 0.009
+   },
+   "plate_limb_defences": {
+    "fuel_demand": 0.001,
+    "injury_risk": -0.0032,
+    "warfare_readiness": 0.003
+   },
+   "windlass_crossbow": {
+    "fatigue": 0.001,
+    "warfare_readiness": 0.0037
+   },
+   "visored_helmet": {
+    "injury_risk": -0.0024,
+    "warfare_readiness": 0.0015
+   },
+   "black_powder": {
+    "chemical_control": 0.008,
+    "disaster_risk": 0.004,
+    "injury_risk": 0.0016,
+    "observation_rate": 0.002
+   },
+   "free_mercenary_companies": {
+    "cohesion": -0.002,
+    "labor_demand": -0.002,
+    "legitimacy": -0.003,
+    "security_efficiency": -0.0018,
+    "warfare_readiness": 0.0045
+   },
+   "dispatch_code_lists": {
+    "knowledge_preservation": 0.001,
+    "security_efficiency": 0.0027,
+    "task_coordination": 0.0014
+   }
   }
  }
 }

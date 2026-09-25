@@ -4,9 +4,9 @@
  "items": {
   "all_arms_army_corps": {
    "effects": {
-    "warfare_readiness": 0.009,
-    "task_coordination": 0.0068,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "task_coordination": 0.0029,
+    "warfare_readiness": 0.0053
    },
    "name": "Army Corps",
    "observation": "Two or three divisions, each with its own guns and horse, march on separate roads under one corps commander and meet for battle.",
@@ -15,12 +15,12 @@
   },
   "class_year_conscription": {
    "effects": {
-    "warfare_readiness": 0.009,
-    "security_efficiency": 0.004,
-    "labor_demand": 0.008,
+    "cohesion": -0.0004,
+    "labor_demand": 0.0004,
     "labor_efficiency": -0.002,
-    "legitimacy": -0.004,
-    "cohesion": -0.002
+    "legitimacy": -0.0015,
+    "security_efficiency": 0.0027,
+    "warfare_readiness": 0.0053
    },
    "name": "Class-Year Conscription",
    "observation": "Every young man of the year's class is entered on the rolls, drawn, examined and sent to his regiment.",
@@ -30,8 +30,8 @@
   },
   "rifle_skirmisher_battalions": {
    "effects": {
-    "warfare_readiness": 0.0037,
-    "task_coordination": 0.0017
+    "task_coordination": 0.0007,
+    "warfare_readiness": 0.0022
    },
    "name": "Rifle Skirmishers",
    "observation": "Green-coated riflemen spread out in pairs ahead of the line and pick off officers at long range.",
@@ -39,8 +39,8 @@
   },
   "spherical_case_shot": {
    "effects": {
-    "warfare_readiness": 0.0037,
-    "injury_risk": 0.001
+    "injury_risk": 0.001,
+    "warfare_readiness": 0.0022
    },
    "name": "Case Shot",
    "observation": "A hollow ball packed with musket balls bursts in the air over the enemy ranks, timed by a cut fuse.",
@@ -48,10 +48,10 @@
   },
   "economic_blockade_decrees": {
    "effects": {
-    "warfare_readiness": 0.0023,
+    "legitimacy": -0.0004,
     "naval_capacity": 0.0016,
     "trade_capacity": -0.004,
-    "legitimacy": -0.001
+    "warfare_readiness": 0.0013
    },
    "name": "Blockade Decrees",
    "observation": "A decree closes every port of the continent to the enemy's ships and goods.",
@@ -60,11 +60,11 @@
   },
   "guerrilla_band_warfare": {
    "effects": {
-    "security_efficiency": 0.004,
-    "warfare_readiness": 0.0023,
-    "cohesion": 0.001,
+    "cohesion": 0.0002,
     "injury_risk": 0.002,
-    "legitimacy": -0.001
+    "legitimacy": -0.0004,
+    "security_efficiency": 0.0027,
+    "warfare_readiness": 0.0013
    },
    "name": "Guerrilla Bands",
    "observation": "Bands of peasants and deserters ambush the occupier's couriers and convoys and vanish into the hills.",
@@ -73,11 +73,11 @@
   },
   "staff_war_college": {
    "effects": {
-    "task_coordination": 0.0085,
-    "warfare_readiness": 0.006,
-    "knowledge_rate": 0.002,
-    "state_capacity": 0.002,
-    "institutional_rigidity": 0.002
+    "institutional_rigidity": 0.0006,
+    "knowledge_rate": 0.0016,
+    "state_capacity": 0.0008,
+    "task_coordination": 0.0036,
+    "warfare_readiness": 0.0035
    },
    "name": "Staff War College",
    "observation": "Selected officers spend two years at the war college, studying past campaigns, maps, railways and supply.",
@@ -95,9 +95,9 @@
   },
   "coast_guard_service": {
    "effects": {
-    "security_efficiency": 0.005,
-    "injury_risk": -0.002,
-    "state_capacity": 0.002
+    "injury_risk": -0.0009,
+    "security_efficiency": 0.0024,
+    "state_capacity": 0.0008
    },
    "name": "Coast Guard",
    "observation": "Coast guard stations watch every cove for smugglers and wrecks, with a boat and a rocket line ready.",
@@ -115,9 +115,9 @@
   },
   "volunteer_lifeboat_rescue": {
    "effects": {
-    "injury_risk": -0.004,
+    "cohesion": 0.0003,
     "disaster_resilience": 0.003,
-    "cohesion": 0.002
+    "injury_risk": -0.0018
    },
    "name": "Lifeboat Crews",
    "observation": "Fishermen launch the lifeboat into a gale at the sound of the maroon and row out to the wreck.",
@@ -125,9 +125,9 @@
   },
   "masonry_casemate_forts": {
    "effects": {
-    "security_efficiency": 0.006,
+    "labor_demand": 0.0002,
     "naval_capacity": 0.0016,
-    "labor_demand": 0.003
+    "security_efficiency": 0.0029
    },
    "name": "Casemate Forts",
    "observation": "Tiers of guns in vaulted granite casemates cover the harbour mouth from a fort on the shoal.",
@@ -135,11 +135,11 @@
   },
   "uniformed_beat_police": {
    "effects": {
-    "security_efficiency": 0.012,
-    "state_capacity": 0.004,
-    "injury_risk": -0.002,
-    "labor_demand": 0.003,
-    "cohesion": 0.001
+    "cohesion": 0.0002,
+    "injury_risk": -0.0009,
+    "labor_demand": 0.0002,
+    "security_efficiency": 0.0057,
+    "state_capacity": 0.0017
    },
    "name": "Uniformed Police",
    "observation": "Constables in blue coats walk fixed beats day and night, each timed to pass the same corner every quarter hour.",
@@ -149,9 +149,9 @@
   },
   "paddle_steam_warships": {
    "effects": {
+    "fuel_demand": 0.0003,
     "naval_capacity": 0.004,
-    "warfare_readiness": 0.0015,
-    "fuel_demand": 0.002
+    "warfare_readiness": 0.0015
    },
    "name": "Paddle Warships",
    "observation": "A paddle frigate tows the ships of the line into position against the wind.",
@@ -159,9 +159,9 @@
   },
   "war_as_policy_doctrine": {
    "effects": {
-    "task_coordination": 0.0034,
-    "warfare_readiness": 0.0023,
-    "state_capacity": 0.001
+    "state_capacity": 0.0004,
+    "task_coordination": 0.0024,
+    "warfare_readiness": 0.0023
    },
    "name": "War as Policy",
    "observation": "Staff lecturers teach that war serves the aims of the state, and that a general who forgets the aim can win battles and lose the war.",
@@ -169,9 +169,9 @@
   },
   "rural_constabulary": {
    "effects": {
-    "security_efficiency": 0.006,
-    "state_capacity": 0.002,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0029,
+    "state_capacity": 0.0008
    },
    "name": "County Constabulary",
    "observation": "County police in every market town patrol the lanes and farms the old parish constable could never reach.",
@@ -188,10 +188,10 @@
   },
   "detached_fort_rings": {
    "effects": {
+    "housing_output": -0.001,
+    "labor_demand": 0.0002,
     "security_efficiency": 0.008,
-    "warfare_readiness": 0.0015,
-    "labor_demand": 0.004,
-    "housing_output": -0.001
+    "warfare_readiness": 0.0014
    },
    "name": "Detached Fort Rings",
    "observation": "A ring of separate forts, miles out from the old walls, keeps an enemy's siege guns out of range of the town.",
@@ -199,7 +199,7 @@
   },
   "needle_breech_rifle": {
    "effects": {
-    "warfare_readiness": 0.006
+    "warfare_readiness": 0.0057
    },
    "name": "Needle Rifle",
    "observation": "Soldiers load the needle rifle at the breech while lying down, firing five shots to the muzzle-loader's one.",
@@ -207,9 +207,9 @@
   },
   "detective_branch": {
    "effects": {
+    "legitimacy": -0.0002,
     "security_efficiency": 0.004,
-    "state_capacity": 0.001,
-    "legitimacy": -0.001
+    "state_capacity": 0.0003
    },
    "name": "Detectives",
    "observation": "Plain-clothes officers investigate crimes after the fact, keep records of known thieves and follow suspects.",
@@ -217,9 +217,9 @@
   },
   "screw_steam_warships": {
    "effects": {
+    "fuel_demand": 0.0003,
     "naval_capacity": 0.0048,
-    "warfare_readiness": 0.0023,
-    "fuel_demand": 0.002
+    "warfare_readiness": 0.0022
    },
    "name": "Screw Warships",
    "observation": "Warships driven by a screw below the waterline keep their full broadside and can steam against the wind.",
@@ -227,8 +227,8 @@
   },
   "expanding_base_bullet": {
    "effects": {
-    "warfare_readiness": 0.009,
-    "injury_risk": 0.002
+    "injury_risk": 0.002,
+    "warfare_readiness": 0.0085
    },
    "name": "Expanding-Base Bullet",
    "observation": "An elongated bullet with a hollow base drops easily down the rifled barrel and expands on firing to grip the grooves.",
@@ -237,25 +237,25 @@
   },
   "engineer_demonstration_ranges": {
    "effects": {
-    "warfare_readiness": 0.0023,
-    "task_coordination": 0.0017,
-    "knowledge_rate": 0.001
+    "knowledge_rate": 0.0009,
+    "task_coordination": 0.0005,
+    "warfare_readiness": 0.0022
    },
    "observation": "At the engineers' ranges new charges, bridges and entrenchments are tested in front of the officers who will use them.",
    "art": "res://assets/ui/research/subjects/field_fortifications-v1.png"
   },
   "range_estimation_drill": {
    "effects": {
-    "warfare_readiness": 0.003,
-    "task_coordination": 0.0017
+    "task_coordination": 0.0005,
+    "warfare_readiness": 0.0028
    },
    "observation": "A musketry school drills rifle companies to judge distance, set their sights and fire only aimed shots.",
    "art": "res://assets/ui/research/subjects/matchlock_drill-v1.png"
   },
   "field_telegraph_trains": {
    "effects": {
-    "task_coordination": 0.0051,
-    "warfare_readiness": 0.0023
+    "task_coordination": 0.0016,
+    "warfare_readiness": 0.0022
    },
    "name": "Field Telegraph",
    "observation": "Wagons unreel telegraph wire behind the advancing army, and headquarters talks to every corps within the hour.",
@@ -263,10 +263,10 @@
   },
   "armored_hulls": {
    "effects": {
-    "naval_capacity": 0.0096,
-    "warfare_readiness": 0.0045,
-    "fuel_demand": 0.003,
-    "labor_demand": 0.002
+    "fuel_demand": 0.0006,
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.0057,
+    "warfare_readiness": 0.0016
    },
    "observation": "Steam warships clad in iron plate take the enemy's shot and shell without harm.",
    "ability_reason": "An admiral's ironclads shrug off shot that would sink wooden ships, so wooden fleets become obsolete in a single action.",
@@ -274,10 +274,10 @@
   },
   "railway_mobilization": {
    "effects": {
-    "warfare_readiness": 0.009,
-    "logistics_endurance": 0.006,
-    "task_coordination": 0.0051,
-    "trade_capacity": -0.002
+    "logistics_endurance": 0.0017,
+    "task_coordination": 0.0023,
+    "trade_capacity": -0.002,
+    "warfare_readiness": 0.0032
    },
    "name": "Railway Mobilization",
    "observation": "Troop trains leave the depots by timetable, and whole army corps reach the frontier in days.",
@@ -287,7 +287,7 @@
   },
   "rifled_breech_artillery": {
    "effects": {
-    "warfare_readiness": 0.006
+    "warfare_readiness": 0.0022
    },
    "name": "Rifled Breech-Loaders",
    "observation": "Rifled guns load at the breech and throw pointed shells farther and truer than any smoothbore.",
@@ -295,8 +295,8 @@
   },
   "metallic_cartridges": {
    "effects": {
-    "warfare_readiness": 0.009,
-    "logistics_endurance": 0.002
+    "logistics_endurance": 0.0006,
+    "warfare_readiness": 0.0032
    },
    "observation": "A brass case holds powder, primer and bullet together, sealed against the weather.",
    "ability_reason": "Soldiers carry sealed cartridges that keep dry and load in a moment, so breech-loaders and repeaters fire as fast as a man can work the action.",
@@ -304,8 +304,8 @@
   },
   "magazine_repeating_rifles": {
    "effects": {
-    "warfare_readiness": 0.0045,
-    "logistics_endurance": -0.001
+    "logistics_endurance": -0.001,
+    "warfare_readiness": 0.0016
    },
    "name": "Repeating Rifles",
    "observation": "A lever throws a fresh cartridge from the tube magazine into the chamber, and a rifleman fires a dozen shots without reloading.",
@@ -313,8 +313,8 @@
   },
   "revolving_gun_turrets": {
    "effects": {
-    "naval_capacity": 0.0048,
-    "warfare_readiness": 0.0015
+    "naval_capacity": 0.0029,
+    "warfare_readiness": 0.0005
    },
    "name": "Gun Turrets",
    "observation": "A low-sided warship carries her heavy guns in an armoured turret that turns to fire in any direction.",
@@ -322,9 +322,9 @@
   },
   "field_army_war_rules": {
    "effects": {
-    "legitimacy": 0.003,
-    "injury_risk": -0.001,
-    "cohesion": 0.001
+    "cohesion": 0.0002,
+    "injury_risk": -0.0002,
+    "legitimacy": 0.0006
    },
    "name": "Rules of War",
    "observation": "Every officer receives printed orders on how prisoners, the wounded and civilians in occupied country must be treated.",
@@ -333,9 +333,9 @@
   "steam_fire_brigades": {
    "effects": {
     "disaster_resilience": 0.008,
-    "disaster_risk": -0.004,
-    "injury_risk": -0.002,
-    "labor_demand": 0.002
+    "disaster_risk": -0.0005,
+    "injury_risk": -0.0003,
+    "labor_demand": 0.0001
    },
    "name": "Steam Fire Brigades",
    "observation": "A paid brigade gallops to the fire with a steam pump that throws water over a four-storey roof.",
@@ -343,7 +343,7 @@
   },
   "crank_volley_guns": {
    "effects": {
-    "warfare_readiness": 0.0037
+    "warfare_readiness": 0.0013
    },
    "name": "Volley Guns",
    "observation": "A soldier turns a crank and a ring of barrels fires in turn, faster than a company of riflemen.",
@@ -351,19 +351,19 @@
   },
   "naval_torpedoes": {
    "effects": {
-    "naval_capacity": 0.0048,
-    "warfare_readiness": 0.003
+    "naval_capacity": 0.0029,
+    "warfare_readiness": 0.0011
    },
    "observation": "A self-propelled torpedo runs beneath the surface and bursts against the hull below the armour.",
    "art": "res://assets/ui/research/subjects/naval_torpedoes-v1.png"
   },
   "stable_blasting_explosive": {
    "effects": {
-    "warfare_readiness": 0.0045,
     "construction_rate": 0.006,
-    "mining_output": 0.004,
+    "disaster_risk": 0.002,
     "injury_risk": 0.003,
-    "disaster_risk": 0.002
+    "mining_output": 0.004,
+    "warfare_readiness": 0.0016
    },
    "name": "Stable High Explosive",
    "observation": "Nitroglycerine soaked into earth and rolled into sticks can be carried and dropped, and still blows rock apart.",
@@ -372,11 +372,11 @@
   },
   "reserve_mobilization_plans": {
    "effects": {
-    "warfare_readiness": 0.009,
-    "task_coordination": 0.0034,
-    "labor_demand": 0.004,
-    "legitimacy": -0.002,
-    "cohesion": -0.001
+    "cohesion": -0.0002,
+    "labor_demand": 0.0002,
+    "legitimacy": -0.0006,
+    "task_coordination": 0.0015,
+    "warfare_readiness": 0.0032
    },
    "name": "Reserve Mobilization",
    "observation": "Every reservist keeps his papers at home, and a single telegram sends him to his depot on a fixed day of the mobilization.",
@@ -385,10 +385,10 @@
   },
   "examined_officer_commissions": {
    "effects": {
-    "task_coordination": 0.0026,
-    "warfare_readiness": 0.0023,
-    "legitimacy": 0.002,
-    "institutional_rigidity": -0.001
+    "institutional_rigidity": -0.0007,
+    "legitimacy": 0.0004,
+    "task_coordination": 0.0012,
+    "warfare_readiness": 0.0008
    },
    "name": "Examined Commissions",
    "observation": "Commissions are no longer bought; candidates sit written examinations and are ranked by merit.",
@@ -396,11 +396,11 @@
   },
   "political_police_bureau": {
    "effects": {
+    "cohesion": -0.0014,
+    "knowledge_rate": -0.001,
+    "legitimacy": -0.0018,
     "security_efficiency": 0.006,
-    "state_capacity": 0.002,
-    "legitimacy": -0.006,
-    "cohesion": -0.004,
-    "knowledge_rate": -0.001
+    "state_capacity": 0.0009
    },
    "name": "Political Police",
    "observation": "A bureau of the police opens letters, pays informers and keeps files on every dissenter.",
@@ -420,7 +420,7 @@
   "naval_war_college": {
    "effects": {
     "naval_capacity": 0.0024,
-    "task_coordination": 0.0034
+    "task_coordination": 0.0012
    },
    "name": "Naval War College",
    "observation": "Captains study fleet actions of the past and fight war games on the floor of the naval college.",
@@ -438,9 +438,9 @@
   },
   "sea_power_doctrine": {
    "effects": {
+    "labor_demand": 0.0001,
     "naval_capacity": 0.004,
-    "trade_capacity": 0.002,
-    "labor_demand": 0.002
+    "trade_capacity": 0.001
    },
    "name": "Sea Power Doctrine",
    "observation": "A naval scholar argues from history that whoever commands the sea decides the war and the trade.",
@@ -458,7 +458,7 @@
   "fingerprint_identification": {
    "effects": {
     "security_efficiency": 0.005,
-    "state_capacity": 0.001
+    "state_capacity": 0.0005
    },
    "name": "Fingerprints",
    "observation": "A print left on a window sill is matched to a card in the police files, and the burglar is hanged by his fingertips.",
@@ -466,7 +466,7 @@
   },
   "recoil_absorbing_field_gun": {
    "effects": {
-    "warfare_readiness": 0.009
+    "warfare_readiness": 0.0065
    },
    "name": "Quick-Firing Field Gun",
    "observation": "The barrel recoils on a cylinder of oil and springs back into place, and the gun stays laid on its target.",
@@ -475,8 +475,8 @@
   },
   "indirect_fire": {
    "effects": {
-    "warfare_readiness": 0.009,
-    "task_coordination": 0.0034
+    "task_coordination": 0.0012,
+    "warfare_readiness": 0.0065
    },
    "observation": "Batteries behind a hill fire on map coordinates, corrected by an observer who can see the target.",
    "ability_reason": "Batteries shell targets they cannot see, directed by observers and maps, so a general can mass fire from hidden guns on any point of the front.",
@@ -484,9 +484,9 @@
   },
   "barbed_wire_entanglements": {
    "effects": {
+    "injury_risk": 0.002,
     "security_efficiency": 0.004,
-    "warfare_readiness": 0.003,
-    "injury_risk": 0.002
+    "warfare_readiness": 0.0022
    },
    "name": "Barbed Wire",
    "observation": "Belts of barbed wire staked in front of the trenches hold attackers under fire.",
@@ -494,8 +494,8 @@
   },
   "land_war_conventions": {
    "effects": {
-    "legitimacy": 0.004,
-    "injury_risk": -0.002
+    "injury_risk": -0.0009,
+    "legitimacy": 0.0009
    },
    "name": "Land War Conventions",
    "observation": "The realms sign conventions on how prisoners, the wounded and occupied towns must be treated in war.",
@@ -503,9 +503,9 @@
   },
   "submersible_hulls": {
    "effects": {
-    "naval_capacity": 0.0096,
-    "warfare_readiness": 0.003,
-    "trade_capacity": -0.002
+    "naval_capacity": 0.0078,
+    "trade_capacity": -0.002,
+    "warfare_readiness": 0.0022
    },
    "observation": "A submarine dives, runs unseen beneath the surface and surfaces to recharge.",
    "ability_reason": "An admiral's submarines can strike warships and merchantmen unseen, so no sea lane is safe without escorts.",
@@ -513,8 +513,8 @@
   },
   "field_telephone_lines": {
    "effects": {
-    "task_coordination": 0.0034,
-    "warfare_readiness": 0.003
+    "task_coordination": 0.0012,
+    "warfare_readiness": 0.0022
    },
    "name": "Field Telephones",
    "observation": "A forward observer telephones corrections to the battery, and the next shell lands on the target.",
@@ -522,19 +522,19 @@
   },
   "naval_fire_control": {
    "effects": {
-    "naval_capacity": 0.0048,
-    "warfare_readiness": 0.0023
+    "naval_capacity": 0.0039,
+    "warfare_readiness": 0.0017
    },
    "observation": "Range-finders and a plotting table in the fire-control room aim every gun of the ship at a target miles away.",
    "art": "res://assets/ui/research/subjects/naval_fire_control-v1.png"
   },
   "all_big_gun_battleships": {
    "effects": {
-    "naval_capacity": 0.0112,
-    "warfare_readiness": 0.003,
-    "labor_demand": 0.006,
-    "fuel_demand": 0.004,
-    "trade_capacity": -0.002
+    "fuel_demand": 0.0004,
+    "labor_demand": 0.0003,
+    "naval_capacity": 0.0091,
+    "trade_capacity": -0.002,
+    "warfare_readiness": 0.0022
    },
    "name": "Battleships",
    "observation": "A turbine battleship with ten great guns outranges and outruns every ship built before her.",
@@ -544,8 +544,8 @@
   },
   "machine_gun_companies": {
    "effects": {
-    "warfare_readiness": 0.0045,
-    "injury_risk": 0.002
+    "injury_risk": 0.002,
+    "warfare_readiness": 0.0033
    },
    "name": "Machine-Gun Companies",
    "observation": "Every regiment gets a company of machine guns, sited to sweep the ground before its trenches.",
@@ -553,9 +553,9 @@
   },
   "state_intelligence_service": {
    "effects": {
+    "legitimacy": -0.0006,
     "security_efficiency": 0.006,
-    "state_capacity": 0.002,
-    "legitimacy": -0.002
+    "state_capacity": 0.001
    },
    "name": "Intelligence Service",
    "observation": "A secret bureau runs agents abroad and reports only to the ruler.",
@@ -563,18 +563,18 @@
   },
   "naval_aviation": {
    "effects": {
-    "naval_capacity": 0.0048,
-    "warfare_readiness": 0.0023
+    "naval_capacity": 0.0039,
+    "warfare_readiness": 0.0017
    },
    "observation": "Seaplanes scout ahead of the fleet and report the enemy's course by wireless.",
    "art": "res://assets/ui/research/subjects/naval_aviation-v1.png"
   },
   "aerial_bombardment": {
    "effects": {
-    "warfare_readiness": 0.0045,
+    "cohesion": -0.0012,
     "injury_risk": 0.003,
-    "legitimacy": -0.003,
-    "cohesion": -0.002
+    "legitimacy": -0.0009,
+    "warfare_readiness": 0.0033
    },
    "observation": "Airplanes drop bombs on the enemy's trenches, railheads and depots.",
    "ability_reason": "A general may bomb enemy armies, fleets and works in the field on his own authority; bombing a city needs the ruler's spoken decision in the Court.",
@@ -583,12 +583,12 @@
   },
   "continuous_trench_systems": {
    "effects": {
-    "security_efficiency": 0.01,
-    "warfare_readiness": 0.0045,
-    "disease_exposure": 0.004,
+    "cohesion": -0.0002,
+    "disease_exposure": 0.0037,
     "injury_risk": 0.004,
-    "labor_demand": 0.006,
-    "cohesion": -0.002
+    "labor_demand": 0.0003,
+    "security_efficiency": 0.0091,
+    "warfare_readiness": 0.0019
    },
    "name": "Continuous Trenches",
    "observation": "Trench lines with dugouts and wire run unbroken from the sea to the mountains.",
@@ -598,26 +598,26 @@
   },
   "fighter_tactics": {
    "effects": {
-    "warfare_readiness": 0.0045
+    "warfare_readiness": 0.0019
    },
    "observation": "Fighter pilots fly in pairs and dive out of the sun at the enemy's spotting planes.",
    "art": "res://assets/ui/research/subjects/fighter_tactics-v1.png"
   },
   "mountain_field_school": {
    "effects": {
-    "warfare_readiness": 0.003,
-    "injury_risk": -0.001
+    "injury_risk": -0.0006,
+    "warfare_readiness": 0.0012
    },
    "observation": "Mountain troops learn to climb, ski and haul guns through high passes.",
    "art": "res://assets/ui/research/subjects/military_staffs-v1.png"
   },
   "chemical_gas_warfare": {
    "effects": {
-    "legitimacy": -0.006,
-    "cohesion": -0.004,
-    "health_risk": 0.004,
-    "pollution": 0.003,
-    "labor_demand": 0.003
+    "cohesion": -0.0004,
+    "health_risk": 0.0007,
+    "labor_demand": 0.0002,
+    "legitimacy": -0.0008,
+    "pollution": 0.003
    },
    "name": "War Gases",
    "observation": "Clouds of choking gas drift from cylinders across no-man's-land; within weeks every soldier carries a gas mask.",
@@ -627,8 +627,8 @@
   },
   "armored_vehicles": {
    "effects": {
-    "warfare_readiness": 0.0105,
-    "fuel_demand": 0.003
+    "fuel_demand": 0.0003,
+    "warfare_readiness": 0.0044
    },
    "observation": "Tracked, armoured vehicles with guns crawl over the wire and across the trenches.",
    "ability_reason": "Tracked armoured vehicles cross wire and trenches under fire, so a general can break a trench deadlock where infantry alone would die.",
@@ -636,15 +636,15 @@
   },
   "armor_piercing_weapons": {
    "effects": {
-    "warfare_readiness": 0.0045
+    "warfare_readiness": 0.0019
    },
    "observation": "Hardened-core rounds and rifles for infantry pierce the plate of an armoured vehicle.",
    "art": "res://assets/ui/research/security-v1.png"
   },
   "sound_flash_ranging": {
    "effects": {
-    "warfare_readiness": 0.003,
-    "task_coordination": 0.0017
+    "task_coordination": 0.0005,
+    "warfare_readiness": 0.0012
    },
    "name": "Sound and Flash Ranging",
    "observation": "Microphones and observers timing the flash and bang of each enemy gun plot its hidden position.",
@@ -652,9 +652,9 @@
   },
   "carrier_aviation": {
    "effects": {
+    "labor_demand": 0.0002,
     "naval_capacity": 0.008,
-    "warfare_readiness": 0.003,
-    "labor_demand": 0.003
+    "warfare_readiness": 0.0012
    },
    "observation": "Aircraft take off from and land on a flat-decked ship far out at sea.",
    "social_consequence": "The admirals of the battleships fight the new service for every ton of steel.",
@@ -673,9 +673,9 @@
   },
   "infiltration_storm_squads": {
    "effects": {
-    "warfare_readiness": 0.0045,
-    "task_coordination": 0.0017,
-    "injury_risk": 0.002
+    "injury_risk": 0.002,
+    "task_coordination": 0.0005,
+    "warfare_readiness": 0.0019
    },
    "name": "Storm Squads",
    "observation": "Small squads with light machine guns and grenades slip through weak points and bypass the strongholds.",
@@ -683,24 +683,24 @@
   },
   "engineer_infantry_security": {
    "effects": {
-    "warfare_readiness": 0.0023,
-    "security_efficiency": 0.002
+    "security_efficiency": 0.0018,
+    "warfare_readiness": 0.001
    },
    "observation": "Engineers and infantry clear mines, bridge rivers and hold the crossings together.",
    "art": "res://assets/ui/research/subjects/field_fortifications-v1.png"
   },
   "infantry_tank_cooperation": {
    "effects": {
-    "warfare_readiness": 0.0045,
-    "task_coordination": 0.0026
+    "task_coordination": 0.0008,
+    "warfare_readiness": 0.0019
    },
    "observation": "Infantry advance behind the tanks and clear the machine-gun nests the tanks point out.",
    "art": "res://assets/ui/research/security-v1.png"
   },
   "mechanized_crew_school": {
    "effects": {
-    "warfare_readiness": 0.003,
-    "repair_capacity": 0.002
+    "repair_capacity": 0.002,
+    "warfare_readiness": 0.0012
    },
    "observation": "Crews learn to drive, maintain and fight their vehicles as one team.",
    "art": "res://assets/ui/research/subjects/professional_corps-v1.png"
@@ -708,7 +708,7 @@
   "underwater_sound_ranging": {
    "effects": {
     "naval_capacity": 0.004,
-    "security_efficiency": 0.001
+    "security_efficiency": 0.0009
    },
    "name": "Underwater Sound Ranging",
    "observation": "An escort sends out pings and hears their echo from a submarine hiding below.",
@@ -716,10 +716,10 @@
   },
   "independent_air_arm": {
    "effects": {
-    "warfare_readiness": 0.003,
-    "state_capacity": 0.001,
-    "labor_demand": 0.002,
-    "institutional_rigidity": 0.001
+    "institutional_rigidity": 0.0001,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0003,
+    "warfare_readiness": 0.0012
    },
    "name": "Independent Air Arm",
    "observation": "The airmen become a service of their own beside the army and navy, with their own ministry and doctrine.",
@@ -727,9 +727,9 @@
   },
   "naval_arms_limitation": {
    "effects": {
-    "naval_capacity": -0.0032,
     "labor_demand": -0.004,
-    "legitimacy": 0.003
+    "legitimacy": 0.0005,
+    "naval_capacity": -0.0032
    },
    "name": "Naval Arms Limitation",
    "observation": "The realms agree on a ratio of battleships each may keep, and half-built hulls are scrapped on the slips.",
@@ -737,9 +737,9 @@
   },
   "gas_germ_weapon_ban": {
    "effects": {
-    "legitimacy": 0.004,
+    "cohesion": 0.0002,
     "health_risk": -0.002,
-    "cohesion": 0.001
+    "legitimacy": 0.0006
    },
    "name": "Gas and Germ Weapon Ban",
    "observation": "The realms sign a treaty never to use gas or germs in war, though many keep stocks to answer in kind.",
@@ -747,8 +747,8 @@
   },
   "mobile_radio_command": {
    "effects": {
-    "task_coordination": 0.0068,
-    "warfare_readiness": 0.0045
+    "task_coordination": 0.0022,
+    "warfare_readiness": 0.0019
    },
    "name": "Radio Command Nets",
    "observation": "Every tank and command car carries a radio, and the commander speaks to his whole division on the move.",
@@ -756,8 +756,8 @@
   },
   "rotor_cipher_machines": {
    "effects": {
-    "security_efficiency": 0.004,
-    "task_coordination": 0.0017
+    "security_efficiency": 0.0037,
+    "task_coordination": 0.0005
    },
    "name": "Rotor Cipher Machines",
    "observation": "A typewriter-like machine with turning rotors scrambles every letter, a new setting each day.",
@@ -765,19 +765,19 @@
   },
   "rotary_wing": {
    "effects": {
-    "warfare_readiness": 0.0023,
+    "injury_risk": -0.0007,
     "logistics_endurance": 0.002,
-    "injury_risk": -0.001
+    "warfare_readiness": 0.0012
    },
    "observation": "A machine lifted by turning blades rises straight up, hovers and lands in a clearing.",
    "art": "res://assets/ui/research/subjects/rotary_wing-v1.png"
   },
   "radio_detection_ranging": {
    "effects": {
-    "security_efficiency": 0.012,
+    "disaster_risk": -0.0016,
     "naval_capacity": 0.0032,
-    "warfare_readiness": 0.003,
-    "disaster_risk": -0.002
+    "security_efficiency": 0.0049,
+    "warfare_readiness": 0.0015
    },
    "name": "Radar",
    "observation": "Radio echoes reveal aircraft and ships far beyond sight, day and night, through cloud and fog.",
@@ -786,9 +786,9 @@
   },
   "radio_patrol_emergency_line": {
    "effects": {
-    "security_efficiency": 0.006,
-    "injury_risk": -0.002,
-    "disaster_resilience": 0.002
+    "disaster_resilience": 0.0015,
+    "injury_risk": -0.0013,
+    "security_efficiency": 0.0024
    },
    "name": "Radio Patrols and Emergency Line",
    "observation": "A caller dials one short number, and a radio patrol car is sent to the address within minutes.",
@@ -796,10 +796,10 @@
   },
   "civil_air_defence": {
    "effects": {
-    "disaster_resilience": 0.006,
-    "injury_risk": -0.002,
-    "labor_demand": 0.003,
-    "cohesion": 0.002
+    "cohesion": 0.0003,
+    "disaster_resilience": 0.0045,
+    "injury_risk": -0.0013,
+    "labor_demand": 0.0002
    },
    "name": "Civil Air Defence",
    "observation": "Wardens enforce the blackout, sirens sound the raid and families file into shelters.",
@@ -807,9 +807,9 @@
   },
   "armoured_division": {
    "effects": {
-    "warfare_readiness": 0.012,
-    "task_coordination": 0.0034,
-    "fuel_demand": 0.006
+    "fuel_demand": 0.0005,
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.0061
    },
    "name": "Armoured Division",
    "observation": "Tanks, motorized infantry and self-propelled guns train and fight together as one division.",
@@ -818,10 +818,10 @@
   },
   "integrated_air_defence": {
    "effects": {
-    "security_efficiency": 0.012,
-    "warfare_readiness": 0.003,
-    "task_coordination": 0.0034,
-    "labor_demand": 0.003
+    "labor_demand": 0.0002,
+    "security_efficiency": 0.0049,
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.0015
    },
    "name": "Integrated Air Defence",
    "observation": "Radar stations report to plotting rooms, where controllers direct each fighter squadron onto the incoming raid.",
@@ -830,23 +830,23 @@
   },
   "airborne_operations": {
    "effects": {
-    "warfare_readiness": 0.0045
+    "warfare_readiness": 0.0023
    },
    "observation": "Parachute troops and gliders land behind the enemy's lines to seize bridges and crossroads.",
    "art": "res://assets/ui/research/subjects/airborne_operations-v1.png"
   },
   "infantry_antitank_coordination": {
    "effects": {
-    "warfare_readiness": 0.0037
+    "warfare_readiness": 0.0019
    },
    "observation": "Infantry with antitank guns and rockets hold their ground as the tanks come on.",
    "art": "res://assets/ui/research/security-v1.png"
   },
   "machine_cryptanalysis": {
    "effects": {
-    "security_efficiency": 0.006,
-    "warfare_readiness": 0.0023,
-    "knowledge_rate": 0.001
+    "knowledge_rate": 0.0006,
+    "security_efficiency": 0.0024,
+    "warfare_readiness": 0.0012
    },
    "name": "Machine Codebreaking",
    "observation": "Rooms of whirring electromechanical machines test cipher settings until the enemy's daily key is broken.",
@@ -862,8 +862,8 @@
   },
   "amphibious_landing_doctrine": {
    "effects": {
-    "warfare_readiness": 0.0045,
-    "naval_capacity": 0.0024
+    "naval_capacity": 0.0024,
+    "warfare_readiness": 0.0023
    },
    "name": "Amphibious Landings",
    "observation": "Landing craft run up the beach, drop their ramps and put tanks and infantry ashore under covering fire.",
@@ -871,16 +871,16 @@
   },
   "guided_weapons": {
    "effects": {
-    "warfare_readiness": 0.0045
+    "warfare_readiness": 0.0023
    },
    "observation": "A missile steered by radio or by its own seeker homes on its target.",
    "art": "res://assets/ui/research/subjects/guided_weapons-v1.png"
   },
   "ballistic_rocket_bombardment": {
    "effects": {
-    "warfare_readiness": 0.0023,
-    "legitimacy": -0.002,
-    "cohesion": -0.002
+    "cohesion": -0.0004,
+    "legitimacy": -0.0004,
+    "warfare_readiness": 0.0012
    },
    "name": "Long-Range Rockets",
    "observation": "Rockets fall from the upper air on a distant city without warning; they are too inaccurate to hit anything smaller.",
@@ -889,12 +889,12 @@
   },
   "fission_weapon": {
    "effects": {
-    "legitimacy": -0.006,
-    "cohesion": -0.004,
-    "health_risk": 0.003,
-    "pollution": 0.004,
+    "cohesion": -0.0008,
     "disaster_risk": 0.006,
-    "labor_demand": 0.008
+    "health_risk": 0.0003,
+    "labor_demand": 0.0004,
+    "legitimacy": -0.0013,
+    "pollution": 0.004
    },
    "name": "Fission Bomb",
    "observation": "One bomb destroys a whole city in a flash of light, and the scientists who built it fall silent.",
@@ -904,9 +904,9 @@
   },
   "unified_defence_ministry": {
    "effects": {
-    "task_coordination": 0.0051,
-    "state_capacity": 0.003,
-    "institutional_rigidity": 0.002
+    "institutional_rigidity": 0.0003,
+    "state_capacity": 0.001,
+    "task_coordination": 0.0021
    },
    "name": "Defence Ministry",
    "observation": "Army, navy and air force answer to one minister of defence and one joint staff.",
@@ -914,10 +914,10 @@
   },
   "standing_alliance_command": {
    "effects": {
-    "security_efficiency": 0.006,
-    "warfare_readiness": 0.003,
-    "task_coordination": 0.0026,
-    "legitimacy": -0.001
+    "legitimacy": -0.0002,
+    "security_efficiency": 0.0024,
+    "task_coordination": 0.0011,
+    "warfare_readiness": 0.0015
    },
    "name": "Alliance Command",
    "observation": "Allied realms appoint a standing joint commander in peacetime, with a shared headquarters and plans.",
@@ -925,8 +925,8 @@
   },
   "swept_wing_jet_fighters": {
    "effects": {
-    "warfare_readiness": 0.0045,
-    "fuel_demand": 0.003
+    "fuel_demand": 0.0005,
+    "warfare_readiness": 0.0045
    },
    "name": "Jet Fighters",
    "observation": "Swept-wing jet fighters with radar gunsights fly near the speed of sound.",
@@ -934,12 +934,12 @@
   },
   "thermonuclear_weapon": {
    "effects": {
-    "legitimacy": -0.008,
-    "cohesion": -0.006,
-    "health_risk": 0.004,
-    "pollution": 0.004,
+    "cohesion": -0.0006,
     "disaster_risk": 0.008,
-    "labor_demand": 0.008
+    "health_risk": 0.001,
+    "labor_demand": 0.0004,
+    "legitimacy": -0.0016,
+    "pollution": 0.004
    },
    "name": "Thermonuclear Weapon",
    "observation": "A test weapon a thousand times the fission bomb's power erases an island from the map.",
@@ -958,7 +958,7 @@
   },
   "surface_to_air_missiles": {
    "effects": {
-    "security_efficiency": 0.006,
+    "security_efficiency": 0.0045,
     "warfare_readiness": 0.003
    },
    "name": "Surface-to-Air Missiles",
@@ -967,9 +967,9 @@
   },
   "nuclear_civil_defence": {
    "effects": {
-    "disaster_resilience": 0.006,
-    "labor_demand": 0.003,
-    "cohesion": -0.002
+    "cohesion": -0.0002,
+    "disaster_resilience": 0.0052,
+    "labor_demand": 0.0002
    },
    "name": "Nuclear Civil Defence",
    "observation": "Shelters are dug, evacuation routes signposted, and children drill hiding under their desks.",
@@ -978,9 +978,9 @@
   },
   "interrealm_peacekeepers": {
    "effects": {
-    "legitimacy": 0.003,
-    "security_efficiency": 0.002,
-    "labor_demand": 0.001
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0005,
+    "security_efficiency": 0.0015
    },
    "name": "Peacekeepers",
    "observation": "Lightly armed soldiers of many realms, in the world assembly's colours, stand between two armies along a ceasefire line.",
@@ -988,9 +988,9 @@
   },
   "continuity_of_government": {
    "effects": {
-    "state_capacity": 0.004,
-    "disaster_resilience": 0.004,
-    "labor_demand": 0.002
+    "disaster_resilience": 0.0035,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0036
    },
    "name": "Continuity of Government",
    "observation": "A second seat of rule is hollowed out under a mountain, with its own power, water and radio.",
@@ -998,10 +998,10 @@
   },
   "intercontinental_missiles": {
    "effects": {
-    "legitimacy": -0.006,
-    "cohesion": -0.006,
+    "cohesion": -0.0006,
     "disaster_risk": 0.008,
-    "labor_demand": 0.008
+    "labor_demand": 0.0004,
+    "legitimacy": -0.0012
    },
    "name": "Intercontinental Missiles",
    "observation": "Missiles in hardened silos can reach any city on earth within half an hour of launch.",
@@ -1011,8 +1011,8 @@
   },
   "reconnaissance_satellites": {
    "effects": {
-    "security_efficiency": 0.01,
-    "observation_rate": 0.004,
+    "observation_rate": 0.0038,
+    "security_efficiency": 0.0075,
     "warfare_readiness": 0.0023
    },
    "name": "Reconnaissance Satellites",
@@ -1022,9 +1022,9 @@
   },
   "deterrence_doctrine": {
    "effects": {
-    "security_efficiency": 0.008,
-    "labor_demand": 0.003,
-    "cohesion": -0.003
+    "cohesion": -0.0003,
+    "labor_demand": 0.0002,
+    "security_efficiency": 0.006
    },
    "name": "Deterrence Doctrine",
    "observation": "Strategists argue that the bomb is for never using, and that a hardened command able to answer any attack keeps the peace.",
@@ -1033,10 +1033,10 @@
   },
   "missile_submarine_patrols": {
    "effects": {
-    "legitimacy": -0.004,
-    "cohesion": -0.003,
+    "cohesion": -0.0003,
     "disaster_risk": 0.004,
-    "labor_demand": 0.006
+    "labor_demand": 0.0003,
+    "legitimacy": -0.0008
    },
    "name": "Missile Submarines",
    "observation": "Submarines carrying ballistic missiles slip out to sea and stay hidden for months, beyond the reach of any first strike.",
@@ -1053,9 +1053,9 @@
   },
   "rival_capital_hotline": {
    "effects": {
-    "disaster_risk": -0.006,
-    "legitimacy": 0.002,
-    "security_efficiency": 0.002
+    "disaster_risk": -0.0012,
+    "legitimacy": 0.0003,
+    "security_efficiency": 0.0015
    },
    "name": "Crisis Hotline",
    "observation": "A direct line links the two rival capitals, so the rulers can speak before a mistake becomes a war.",
@@ -1063,11 +1063,11 @@
   },
   "nuclear_test_ban_treaties": {
    "effects": {
-    "pollution": -0.006,
-    "health_risk": -0.004,
-    "disaster_risk": -0.006,
-    "legitimacy": 0.004,
-    "security_efficiency": 0.004
+    "disaster_risk": -0.0012,
+    "health_risk": -0.0013,
+    "legitimacy": 0.0007,
+    "pollution": -0.0025,
+    "security_efficiency": 0.003
    },
    "name": "Test-Ban Treaties",
    "observation": "The realms agree to test no more weapons in the open air, at sea or in space, and not to hand the bomb to others.",
@@ -1076,9 +1076,9 @@
   },
   "helicopter_air_assault": {
    "effects": {
-    "warfare_readiness": 0.0045,
+    "fuel_demand": 0.0003,
     "logistics_endurance": 0.002,
-    "fuel_demand": 0.002
+    "warfare_readiness": 0.0045
    },
    "name": "Helicopter Air Assault",
    "observation": "Helicopters carry a battalion over the jungle and set it down in a clearing behind the enemy.",
@@ -1094,8 +1094,8 @@
   },
   "launch_warning_satellites": {
    "effects": {
-    "security_efficiency": 0.006,
-    "disaster_risk": -0.004
+    "disaster_risk": -0.0009,
+    "security_efficiency": 0.006
    },
    "name": "Launch Warning Satellites",
    "observation": "Satellites watching for the heat of a rocket's exhaust give the capital half an hour's warning of any launch.",
@@ -1112,9 +1112,9 @@
   },
   "biological_weapons_ban": {
    "effects": {
-    "legitimacy": 0.004,
-    "health_risk": -0.002,
-    "disaster_risk": -0.002
+    "disaster_risk": -0.0004,
+    "health_risk": -0.0007,
+    "legitimacy": 0.0011
    },
    "name": "Germ Weapons Ban",
    "observation": "The realms bind themselves never to make or stockpile germ weapons and to destroy what they hold.",
@@ -1131,10 +1131,10 @@
   },
   "disaster_management_agency": {
    "effects": {
-    "disaster_resilience": 0.008,
-    "disaster_risk": -0.004,
-    "state_capacity": 0.002,
-    "labor_demand": 0.002
+    "disaster_resilience": 0.0062,
+    "disaster_risk": -0.0009,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0015
    },
    "name": "Disaster Management Agency",
    "observation": "A standing agency plans for floods, quakes and fires and runs the relief when they come.",
@@ -1151,8 +1151,8 @@
   },
   "stealth_aircraft": {
    "effects": {
-    "warfare_readiness": 0.006,
-    "labor_demand": 0.003
+    "labor_demand": 0.0002,
+    "warfare_readiness": 0.006
    },
    "name": "Stealth Aircraft",
    "observation": "A black, angular aircraft reflects almost no radar echo and strikes before the defences know it is there.",
@@ -1160,7 +1160,7 @@
   },
   "tactical_data_links": {
    "effects": {
-    "task_coordination": 0.0068,
+    "task_coordination": 0.0024,
     "warfare_readiness": 0.0045
    },
    "name": "Tactical Data Links",
@@ -1169,10 +1169,10 @@
   },
   "onsite_arms_inspection": {
    "effects": {
-    "legitimacy": 0.004,
-    "disaster_risk": -0.004,
-    "security_efficiency": 0.002,
-    "labor_demand": 0.001
+    "disaster_risk": -0.0009,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0011,
+    "security_efficiency": 0.002
    },
    "name": "On-Site Inspection",
    "observation": "Inspectors from the rival realm watch the missiles cut apart and count those that remain.",
@@ -1190,10 +1190,10 @@
   },
   "chemical_weapons_convention": {
    "effects": {
-    "legitimacy": 0.004,
-    "health_risk": -0.002,
     "disaster_risk": -0.002,
-    "labor_demand": 0.002
+    "health_risk": -0.0015,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0017
    },
    "name": "Chemical Weapons Convention",
    "observation": "The realms agree to destroy every stock of war gas under inspection, and the old shells are burned in special furnaces.",
@@ -1201,9 +1201,9 @@
   },
   "town_camera_surveillance": {
    "effects": {
-    "security_efficiency": 0.006,
-    "legitimacy": -0.003,
-    "cohesion": -0.002
+    "cohesion": -0.0005,
+    "legitimacy": -0.0006,
+    "security_efficiency": 0.0039
    },
    "name": "Street Cameras",
    "observation": "Cameras on every corner of the town centre feed screens in a police control room.",
@@ -1212,10 +1212,10 @@
   },
   "antipersonnel_mine_ban": {
    "effects": {
-    "legitimacy": 0.004,
     "injury_risk": -0.004,
-    "warfare_readiness": -0.0015,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0017,
+    "warfare_readiness": -0.0015
    },
    "name": "Mine Ban",
    "observation": "The realms ban the mines that maim farmers long after the war, and demining teams clear the fields.",
@@ -1223,11 +1223,11 @@
   },
   "mass_signals_surveillance": {
    "effects": {
-    "security_efficiency": 0.012,
-    "state_capacity": 0.003,
-    "legitimacy": -0.008,
-    "cohesion": -0.004,
-    "knowledge_rate": -0.001
+    "cohesion": -0.0009,
+    "knowledge_rate": -0.001,
+    "legitimacy": -0.0015,
+    "security_efficiency": 0.0078,
+    "state_capacity": 0.0025
    },
    "name": "Mass Signals Surveillance",
    "observation": "The state copies every call and message crossing the cables and sifts them with computers.",
@@ -1237,9 +1237,9 @@
   },
   "armed_remote_strike": {
    "effects": {
-    "warfare_readiness": 0.0045,
-    "legitimacy": -0.004,
-    "cohesion": -0.002
+    "cohesion": -0.0005,
+    "legitimacy": -0.0007,
+    "warfare_readiness": 0.0045
    },
    "name": "Armed Remote Strike",
    "observation": "A pilot thousands of miles away fires a missile from a circling unmanned aircraft.",
@@ -1248,9 +1248,9 @@
   },
   "biometric_border_documents": {
    "effects": {
-    "security_efficiency": 0.006,
-    "state_capacity": 0.002,
-    "legitimacy": -0.001,
+    "legitimacy": -0.0002,
+    "security_efficiency": 0.0039,
+    "state_capacity": 0.0017,
     "travel_speed": -0.001
    },
    "name": "Biometric Borders",
@@ -1259,11 +1259,11 @@
   },
   "cyber_defence_command": {
    "effects": {
-    "security_efficiency": 0.012,
     "disaster_resilience": 0.004,
-    "task_coordination": 0.0026,
-    "state_capacity": 0.002,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0078,
+    "state_capacity": 0.0017,
+    "task_coordination": 0.0011
    },
    "name": "Cyber Defence Command",
    "observation": "A command of programmers defends the realm's networks and can reach into an enemy's.",
@@ -1272,9 +1272,9 @@
   },
   "public_alert_broadcasts": {
    "effects": {
-    "disaster_resilience": 0.006,
-    "injury_risk": -0.002,
-    "disaster_risk": -0.002
+    "disaster_resilience": 0.0039,
+    "disaster_risk": -0.0013,
+    "injury_risk": -0.002
    },
    "name": "Phone Alerts",
    "observation": "Every pocket telephone in the district shrieks at once with a warning of flood or fire.",
@@ -1282,10 +1282,10 @@
   },
   "hypersonic_glide_vehicles": {
    "effects": {
-    "legitimacy": -0.004,
-    "cohesion": -0.004,
+    "cohesion": -0.0007,
     "disaster_risk": 0.006,
-    "labor_demand": 0.006
+    "labor_demand": 0.0003,
+    "legitimacy": -0.0007
    },
    "name": "Hypersonic Glide Vehicles",
    "observation": "A warhead glides through the upper air at many times the speed of sound, weaving past the defences.",
@@ -1304,10 +1304,10 @@
   },
   "machine_assisted_targeting": {
    "effects": {
-    "task_coordination": 0.0034,
-    "warfare_readiness": 0.003,
     "institutional_rigidity": 0.003,
-    "legitimacy": -0.001
+    "legitimacy": -0.0002,
+    "task_coordination": 0.002,
+    "warfare_readiness": 0.003
    },
    "name": "Machine-Assisted Targeting",
    "observation": "A machine sorts the camera feeds and proposes targets, and a named officer signs off each strike.",
@@ -1316,12 +1316,592 @@
   },
   "directed_energy_point_defence": {
    "effects": {
-    "security_efficiency": 0.006,
-    "fuel_demand": 0.002
+    "fuel_demand": 0.0004,
+    "security_efficiency": 0.006
    },
    "name": "Directed-Energy Defence",
    "observation": "A beam of light burns incoming drones out of the sky for the cost of the power it draws.",
    "art": "res://assets/ui/research/security-v1.png"
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "all_arms_army_corps": {
+    "labor_demand": 0.002,
+    "task_coordination": 0.0068,
+    "warfare_readiness": 0.009
+   },
+   "class_year_conscription": {
+    "cohesion": -0.002,
+    "labor_demand": 0.008,
+    "labor_efficiency": -0.002,
+    "legitimacy": -0.004,
+    "security_efficiency": 0.004,
+    "warfare_readiness": 0.009
+   },
+   "rifle_skirmisher_battalions": {
+    "task_coordination": 0.0017,
+    "warfare_readiness": 0.0037
+   },
+   "spherical_case_shot": {
+    "injury_risk": 0.001,
+    "warfare_readiness": 0.0037
+   },
+   "economic_blockade_decrees": {
+    "legitimacy": -0.001,
+    "naval_capacity": 0.0016,
+    "trade_capacity": -0.004,
+    "warfare_readiness": 0.0023
+   },
+   "guerrilla_band_warfare": {
+    "cohesion": 0.001,
+    "injury_risk": 0.002,
+    "legitimacy": -0.001,
+    "security_efficiency": 0.004,
+    "warfare_readiness": 0.0023
+   },
+   "staff_war_college": {
+    "institutional_rigidity": 0.002,
+    "knowledge_rate": 0.002,
+    "state_capacity": 0.002,
+    "task_coordination": 0.0085,
+    "warfare_readiness": 0.006
+   },
+   "coast_guard_service": {
+    "injury_risk": -0.002,
+    "security_efficiency": 0.005,
+    "state_capacity": 0.002
+   },
+   "volunteer_lifeboat_rescue": {
+    "cohesion": 0.002,
+    "disaster_resilience": 0.003,
+    "injury_risk": -0.004
+   },
+   "masonry_casemate_forts": {
+    "labor_demand": 0.003,
+    "naval_capacity": 0.0016,
+    "security_efficiency": 0.006
+   },
+   "uniformed_beat_police": {
+    "cohesion": 0.001,
+    "injury_risk": -0.002,
+    "labor_demand": 0.003,
+    "security_efficiency": 0.012,
+    "state_capacity": 0.004
+   },
+   "paddle_steam_warships": {
+    "fuel_demand": 0.002,
+    "naval_capacity": 0.004,
+    "warfare_readiness": 0.0015
+   },
+   "war_as_policy_doctrine": {
+    "state_capacity": 0.001,
+    "task_coordination": 0.0034,
+    "warfare_readiness": 0.0023
+   },
+   "rural_constabulary": {
+    "labor_demand": 0.002,
+    "security_efficiency": 0.006,
+    "state_capacity": 0.002
+   },
+   "detached_fort_rings": {
+    "housing_output": -0.001,
+    "labor_demand": 0.004,
+    "security_efficiency": 0.008,
+    "warfare_readiness": 0.0015
+   },
+   "needle_breech_rifle": {
+    "warfare_readiness": 0.006
+   },
+   "detective_branch": {
+    "legitimacy": -0.001,
+    "security_efficiency": 0.004,
+    "state_capacity": 0.001
+   },
+   "screw_steam_warships": {
+    "fuel_demand": 0.002,
+    "naval_capacity": 0.0048,
+    "warfare_readiness": 0.0023
+   },
+   "expanding_base_bullet": {
+    "injury_risk": 0.002,
+    "warfare_readiness": 0.009
+   },
+   "engineer_demonstration_ranges": {
+    "knowledge_rate": 0.001,
+    "task_coordination": 0.0017,
+    "warfare_readiness": 0.0023
+   },
+   "range_estimation_drill": {
+    "task_coordination": 0.0017,
+    "warfare_readiness": 0.003
+   },
+   "field_telegraph_trains": {
+    "task_coordination": 0.0051,
+    "warfare_readiness": 0.0023
+   },
+   "armored_hulls": {
+    "fuel_demand": 0.003,
+    "labor_demand": 0.002,
+    "naval_capacity": 0.0096,
+    "warfare_readiness": 0.0045
+   },
+   "railway_mobilization": {
+    "logistics_endurance": 0.006,
+    "task_coordination": 0.0051,
+    "trade_capacity": -0.002,
+    "warfare_readiness": 0.009
+   },
+   "rifled_breech_artillery": {
+    "warfare_readiness": 0.006
+   },
+   "metallic_cartridges": {
+    "logistics_endurance": 0.002,
+    "warfare_readiness": 0.009
+   },
+   "magazine_repeating_rifles": {
+    "logistics_endurance": -0.001,
+    "warfare_readiness": 0.0045
+   },
+   "revolving_gun_turrets": {
+    "naval_capacity": 0.0048,
+    "warfare_readiness": 0.0015
+   },
+   "field_army_war_rules": {
+    "cohesion": 0.001,
+    "injury_risk": -0.001,
+    "legitimacy": 0.003
+   },
+   "steam_fire_brigades": {
+    "disaster_resilience": 0.008,
+    "disaster_risk": -0.004,
+    "injury_risk": -0.002,
+    "labor_demand": 0.002
+   },
+   "crank_volley_guns": {
+    "warfare_readiness": 0.0037
+   },
+   "naval_torpedoes": {
+    "naval_capacity": 0.0048,
+    "warfare_readiness": 0.003
+   },
+   "stable_blasting_explosive": {
+    "construction_rate": 0.006,
+    "disaster_risk": 0.002,
+    "injury_risk": 0.003,
+    "mining_output": 0.004,
+    "warfare_readiness": 0.0045
+   },
+   "reserve_mobilization_plans": {
+    "cohesion": -0.001,
+    "labor_demand": 0.004,
+    "legitimacy": -0.002,
+    "task_coordination": 0.0034,
+    "warfare_readiness": 0.009
+   },
+   "examined_officer_commissions": {
+    "institutional_rigidity": -0.001,
+    "legitimacy": 0.002,
+    "task_coordination": 0.0026,
+    "warfare_readiness": 0.0023
+   },
+   "political_police_bureau": {
+    "cohesion": -0.004,
+    "knowledge_rate": -0.001,
+    "legitimacy": -0.006,
+    "security_efficiency": 0.006,
+    "state_capacity": 0.002
+   },
+   "naval_war_college": {
+    "naval_capacity": 0.0024,
+    "task_coordination": 0.0034
+   },
+   "sea_power_doctrine": {
+    "labor_demand": 0.002,
+    "naval_capacity": 0.004,
+    "trade_capacity": 0.002
+   },
+   "fingerprint_identification": {
+    "security_efficiency": 0.005,
+    "state_capacity": 0.001
+   },
+   "recoil_absorbing_field_gun": {
+    "warfare_readiness": 0.009
+   },
+   "indirect_fire": {
+    "task_coordination": 0.0034,
+    "warfare_readiness": 0.009
+   },
+   "barbed_wire_entanglements": {
+    "injury_risk": 0.002,
+    "security_efficiency": 0.004,
+    "warfare_readiness": 0.003
+   },
+   "land_war_conventions": {
+    "injury_risk": -0.002,
+    "legitimacy": 0.004
+   },
+   "submersible_hulls": {
+    "naval_capacity": 0.0096,
+    "trade_capacity": -0.002,
+    "warfare_readiness": 0.003
+   },
+   "field_telephone_lines": {
+    "task_coordination": 0.0034,
+    "warfare_readiness": 0.003
+   },
+   "naval_fire_control": {
+    "naval_capacity": 0.0048,
+    "warfare_readiness": 0.0023
+   },
+   "all_big_gun_battleships": {
+    "fuel_demand": 0.004,
+    "labor_demand": 0.006,
+    "naval_capacity": 0.0112,
+    "trade_capacity": -0.002,
+    "warfare_readiness": 0.003
+   },
+   "machine_gun_companies": {
+    "injury_risk": 0.002,
+    "warfare_readiness": 0.0045
+   },
+   "state_intelligence_service": {
+    "legitimacy": -0.002,
+    "security_efficiency": 0.006,
+    "state_capacity": 0.002
+   },
+   "naval_aviation": {
+    "naval_capacity": 0.0048,
+    "warfare_readiness": 0.0023
+   },
+   "aerial_bombardment": {
+    "cohesion": -0.002,
+    "injury_risk": 0.003,
+    "legitimacy": -0.003,
+    "warfare_readiness": 0.0045
+   },
+   "continuous_trench_systems": {
+    "cohesion": -0.002,
+    "disease_exposure": 0.004,
+    "injury_risk": 0.004,
+    "labor_demand": 0.006,
+    "security_efficiency": 0.01,
+    "warfare_readiness": 0.0045
+   },
+   "fighter_tactics": {
+    "warfare_readiness": 0.0045
+   },
+   "mountain_field_school": {
+    "injury_risk": -0.001,
+    "warfare_readiness": 0.003
+   },
+   "chemical_gas_warfare": {
+    "cohesion": -0.004,
+    "health_risk": 0.004,
+    "labor_demand": 0.003,
+    "legitimacy": -0.006,
+    "pollution": 0.003
+   },
+   "armored_vehicles": {
+    "fuel_demand": 0.003,
+    "warfare_readiness": 0.0105
+   },
+   "armor_piercing_weapons": {
+    "warfare_readiness": 0.0045
+   },
+   "sound_flash_ranging": {
+    "task_coordination": 0.0017,
+    "warfare_readiness": 0.003
+   },
+   "carrier_aviation": {
+    "labor_demand": 0.003,
+    "naval_capacity": 0.008,
+    "warfare_readiness": 0.003
+   },
+   "infiltration_storm_squads": {
+    "injury_risk": 0.002,
+    "task_coordination": 0.0017,
+    "warfare_readiness": 0.0045
+   },
+   "engineer_infantry_security": {
+    "security_efficiency": 0.002,
+    "warfare_readiness": 0.0023
+   },
+   "infantry_tank_cooperation": {
+    "task_coordination": 0.0026,
+    "warfare_readiness": 0.0045
+   },
+   "mechanized_crew_school": {
+    "repair_capacity": 0.002,
+    "warfare_readiness": 0.003
+   },
+   "underwater_sound_ranging": {
+    "naval_capacity": 0.004,
+    "security_efficiency": 0.001
+   },
+   "independent_air_arm": {
+    "institutional_rigidity": 0.001,
+    "labor_demand": 0.002,
+    "state_capacity": 0.001,
+    "warfare_readiness": 0.003
+   },
+   "naval_arms_limitation": {
+    "labor_demand": -0.004,
+    "legitimacy": 0.003,
+    "naval_capacity": -0.0032
+   },
+   "gas_germ_weapon_ban": {
+    "cohesion": 0.001,
+    "health_risk": -0.002,
+    "legitimacy": 0.004
+   },
+   "mobile_radio_command": {
+    "task_coordination": 0.0068,
+    "warfare_readiness": 0.0045
+   },
+   "rotor_cipher_machines": {
+    "security_efficiency": 0.004,
+    "task_coordination": 0.0017
+   },
+   "rotary_wing": {
+    "injury_risk": -0.001,
+    "logistics_endurance": 0.002,
+    "warfare_readiness": 0.0023
+   },
+   "radio_detection_ranging": {
+    "disaster_risk": -0.002,
+    "naval_capacity": 0.0032,
+    "security_efficiency": 0.012,
+    "warfare_readiness": 0.003
+   },
+   "radio_patrol_emergency_line": {
+    "disaster_resilience": 0.002,
+    "injury_risk": -0.002,
+    "security_efficiency": 0.006
+   },
+   "civil_air_defence": {
+    "cohesion": 0.002,
+    "disaster_resilience": 0.006,
+    "injury_risk": -0.002,
+    "labor_demand": 0.003
+   },
+   "armoured_division": {
+    "fuel_demand": 0.006,
+    "task_coordination": 0.0034,
+    "warfare_readiness": 0.012
+   },
+   "integrated_air_defence": {
+    "labor_demand": 0.003,
+    "security_efficiency": 0.012,
+    "task_coordination": 0.0034,
+    "warfare_readiness": 0.003
+   },
+   "airborne_operations": {
+    "warfare_readiness": 0.0045
+   },
+   "infantry_antitank_coordination": {
+    "warfare_readiness": 0.0037
+   },
+   "machine_cryptanalysis": {
+    "knowledge_rate": 0.001,
+    "security_efficiency": 0.006,
+    "warfare_readiness": 0.0023
+   },
+   "amphibious_landing_doctrine": {
+    "naval_capacity": 0.0024,
+    "warfare_readiness": 0.0045
+   },
+   "guided_weapons": {
+    "warfare_readiness": 0.0045
+   },
+   "ballistic_rocket_bombardment": {
+    "cohesion": -0.002,
+    "legitimacy": -0.002,
+    "warfare_readiness": 0.0023
+   },
+   "fission_weapon": {
+    "cohesion": -0.004,
+    "disaster_risk": 0.006,
+    "health_risk": 0.003,
+    "labor_demand": 0.008,
+    "legitimacy": -0.006,
+    "pollution": 0.004
+   },
+   "unified_defence_ministry": {
+    "institutional_rigidity": 0.002,
+    "state_capacity": 0.003,
+    "task_coordination": 0.0051
+   },
+   "standing_alliance_command": {
+    "legitimacy": -0.001,
+    "security_efficiency": 0.006,
+    "task_coordination": 0.0026,
+    "warfare_readiness": 0.003
+   },
+   "swept_wing_jet_fighters": {
+    "fuel_demand": 0.003,
+    "warfare_readiness": 0.0045
+   },
+   "thermonuclear_weapon": {
+    "cohesion": -0.006,
+    "disaster_risk": 0.008,
+    "health_risk": 0.004,
+    "labor_demand": 0.008,
+    "legitimacy": -0.008,
+    "pollution": 0.004
+   },
+   "surface_to_air_missiles": {
+    "security_efficiency": 0.006,
+    "warfare_readiness": 0.003
+   },
+   "nuclear_civil_defence": {
+    "cohesion": -0.002,
+    "disaster_resilience": 0.006,
+    "labor_demand": 0.003
+   },
+   "interrealm_peacekeepers": {
+    "labor_demand": 0.001,
+    "legitimacy": 0.003,
+    "security_efficiency": 0.002
+   },
+   "continuity_of_government": {
+    "disaster_resilience": 0.004,
+    "labor_demand": 0.002,
+    "state_capacity": 0.004
+   },
+   "intercontinental_missiles": {
+    "cohesion": -0.006,
+    "disaster_risk": 0.008,
+    "labor_demand": 0.008,
+    "legitimacy": -0.006
+   },
+   "reconnaissance_satellites": {
+    "observation_rate": 0.004,
+    "security_efficiency": 0.01,
+    "warfare_readiness": 0.0023
+   },
+   "deterrence_doctrine": {
+    "cohesion": -0.003,
+    "labor_demand": 0.003,
+    "security_efficiency": 0.008
+   },
+   "missile_submarine_patrols": {
+    "cohesion": -0.003,
+    "disaster_risk": 0.004,
+    "labor_demand": 0.006,
+    "legitimacy": -0.004
+   },
+   "rival_capital_hotline": {
+    "disaster_risk": -0.006,
+    "legitimacy": 0.002,
+    "security_efficiency": 0.002
+   },
+   "nuclear_test_ban_treaties": {
+    "disaster_risk": -0.006,
+    "health_risk": -0.004,
+    "legitimacy": 0.004,
+    "pollution": -0.006,
+    "security_efficiency": 0.004
+   },
+   "helicopter_air_assault": {
+    "fuel_demand": 0.002,
+    "logistics_endurance": 0.002,
+    "warfare_readiness": 0.0045
+   },
+   "launch_warning_satellites": {
+    "disaster_risk": -0.004,
+    "security_efficiency": 0.006
+   },
+   "biological_weapons_ban": {
+    "disaster_risk": -0.002,
+    "health_risk": -0.002,
+    "legitimacy": 0.004
+   },
+   "disaster_management_agency": {
+    "disaster_resilience": 0.008,
+    "disaster_risk": -0.004,
+    "labor_demand": 0.002,
+    "state_capacity": 0.002
+   },
+   "stealth_aircraft": {
+    "labor_demand": 0.003,
+    "warfare_readiness": 0.006
+   },
+   "tactical_data_links": {
+    "task_coordination": 0.0068,
+    "warfare_readiness": 0.0045
+   },
+   "onsite_arms_inspection": {
+    "disaster_risk": -0.004,
+    "labor_demand": 0.001,
+    "legitimacy": 0.004,
+    "security_efficiency": 0.002
+   },
+   "chemical_weapons_convention": {
+    "disaster_risk": -0.002,
+    "health_risk": -0.002,
+    "labor_demand": 0.002,
+    "legitimacy": 0.004
+   },
+   "town_camera_surveillance": {
+    "cohesion": -0.002,
+    "legitimacy": -0.003,
+    "security_efficiency": 0.006
+   },
+   "antipersonnel_mine_ban": {
+    "injury_risk": -0.004,
+    "labor_demand": 0.002,
+    "legitimacy": 0.004,
+    "warfare_readiness": -0.0015
+   },
+   "mass_signals_surveillance": {
+    "cohesion": -0.004,
+    "knowledge_rate": -0.001,
+    "legitimacy": -0.008,
+    "security_efficiency": 0.012,
+    "state_capacity": 0.003
+   },
+   "armed_remote_strike": {
+    "cohesion": -0.002,
+    "legitimacy": -0.004,
+    "warfare_readiness": 0.0045
+   },
+   "biometric_border_documents": {
+    "legitimacy": -0.001,
+    "security_efficiency": 0.006,
+    "state_capacity": 0.002,
+    "travel_speed": -0.001
+   },
+   "cyber_defence_command": {
+    "disaster_resilience": 0.004,
+    "labor_demand": 0.002,
+    "security_efficiency": 0.012,
+    "state_capacity": 0.002,
+    "task_coordination": 0.0026
+   },
+   "public_alert_broadcasts": {
+    "disaster_resilience": 0.006,
+    "disaster_risk": -0.002,
+    "injury_risk": -0.002
+   },
+   "hypersonic_glide_vehicles": {
+    "cohesion": -0.004,
+    "disaster_risk": 0.006,
+    "labor_demand": 0.006,
+    "legitimacy": -0.004
+   },
+   "machine_assisted_targeting": {
+    "institutional_rigidity": 0.003,
+    "legitimacy": -0.001,
+    "task_coordination": 0.0034,
+    "warfare_readiness": 0.003
+   },
+   "directed_energy_point_defence": {
+    "fuel_demand": 0.002,
+    "security_efficiency": 0.006
+   }
   }
  }
 }

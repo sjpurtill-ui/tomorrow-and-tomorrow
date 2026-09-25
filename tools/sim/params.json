@@ -163,6 +163,24 @@
    "value": 0.001,
    "source": "consequence_engine.gd mortality components not modeled individually (Work accidents, Dehydration, cold/heat exposure); annual rate",
    "fit": true
+  },
+  "ai_settlement_until": {
+   "value": 360.0,
+   "source": "AI seats found about one daughter settlement per 30 years; the surrogate stops that rule at 12 settlements (year 360) and follows population afterwards (research_3000).",
+   "fit": false
+  },
+  "expansion_environment": {
+   "value": {
+    "coast": 2,
+    "dry": 4
+   },
+   "source": "research_3000: territory settlements at which a growing realm's daughter settlements reach the coast and dry country (Research600 environment tags are any settlement's); not applied with headless_world",
+   "fit": false
+  },
+  "headless_world": {
+   "value": false,
+   "source": "research_3000: true mirrors the headless truth-probe world (calibrate.py/check.py set it): no Freshwater deposit past recognized, one site's environment",
+   "fit": false
   }
  },
  "research": {
@@ -226,9 +244,23 @@
     "Sulfur": 200,
     "Nitrates": 300,
     "Bitumen": 120,
-    "Deep Aquifer": 250
+    "Deep Aquifer": 250,
+    "Gold Ore": 150,
+    "Lead Ore": 200,
+    "Silver Ore": 250,
+    "Refractory Clay": 1000,
+    "Graphite": 2050,
+    "Crude Oil": 2440,
+    "Phosphate Rock": 2460,
+    "Nickel Ore": 2470,
+    "Bauxite": 2560,
+    "Uranium Ore": 2600,
+    "Narrow PEG DP10 Standards": 2850,
+    "Narrow PEG DP40 Standards": 2850,
+    "Narrow PEG DP160 Standards": 2850,
+    "Qualified Aqueous SEC Packing": 2850
    },
-   "source": "resource deposits recognized (resource system); scenario may override"
+   "source": "resource deposits recognized (resource system); scenario may override; research_3000 adds the later deposits a growing realm finds or trades for (lead, silver and gold ores early; graphite, oil, phosphate, nickel, bauxite and uranium with industry)"
   },
   "resource_stage_lag": {
    "value": {
@@ -256,11 +288,21 @@
      "developed": 1000000000.0
     }
    },
-   "source": "Observed in every headless truth run: the Freshwater deposit never passes 'recognized' (no terrain/hydrology deposit), so items needing Freshwater 'accessible' (wound_cleaning, clean_water, birth_attendants...) never open. Verify in the real game; set to years to model a mapped river site."
+   "source": "Observed in every headless truth run: the Freshwater deposit never passes 'recognized' (no terrain/hydrology deposit), so items needing Freshwater 'accessible' (wound_cleaning, clean_water, birth_attendants...) never open. Verify in the real game; set to years to model a mapped river site. research_3000: applied only with headless_world (calibration runs against the headless truth); benchmark runs model a mapped river site."
   },
   "resource_potential": {
    "value": 0.5,
    "source": "environment resource_potentials used by research_affinity (+15 x potential per requirement)"
+  },
+  "throughput_growth_until": {
+   "value": 100.0,
+   "source": "years over which the fitted throughput drift applies (the truth runs' horizon); constant afterwards. A later-era real-engine spot check (ground_truth/*_start*) measures the lumped factor there as throughput_late.",
+   "fit": false
+  },
+  "goods_coverage": {
+   "value": 0.8,
+   "source": "CivilianGoods.coverage() (stock / target) that scales FoodSystem technique levers; the surrogate has no goods stocks, so a lumped share (research_3000). Checked by the later-era spot check.",
+   "fit": false
   }
  },
  "artifacts": {

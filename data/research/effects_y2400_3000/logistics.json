@@ -4,11 +4,11 @@
  "items": {
   "canal_fly_boats": {
    "effects": {
-    "haul_capacity": 0.0037,
-    "travel_speed": 0.003,
-    "route_speed": 0.0025,
     "food_output": -0.001,
-    "labor_demand": 0.001
+    "haul_capacity": 0.0037,
+    "labor_demand": 0.0001,
+    "route_speed": 0.0022,
+    "travel_speed": 0.0029
    },
    "name": "Canal Fly-Boats",
    "observation": "Fly-boats change horses at every lock-house and run through the night, so a parcel crosses the shires in a day and a half.",
@@ -17,10 +17,10 @@
   "public_plateway_hire": {
    "effects": {
     "haul_capacity": 0.0063,
-    "route_speed": 0.0025,
-    "trade_capacity": 0.0023,
-    "labor_demand": 0.001,
-    "logistics_endurance": 0.0016
+    "labor_demand": 0.0001,
+    "logistics_endurance": 0.0016,
+    "route_speed": 0.0022,
+    "trade_capacity": 0.0018
    },
    "name": "Toll Plateways",
    "observation": "Any carter who pays the toll may run his wagons on the iron plate rails, and one horse draws what took four on the road.",
@@ -28,14 +28,14 @@
   },
   "scheduled_river_steamers": {
    "effects": {
-    "route_speed": 0.01,
-    "travel_speed": 0.006,
-    "trade_capacity": 0.0069,
+    "fuel_demand": 0.0006,
     "haul_capacity": 0.005,
-    "fuel_demand": 0.004,
-    "pollution": 0.002,
     "injury_risk": 0.002,
-    "logistics_endurance": 0.0031
+    "logistics_endurance": 0.0031,
+    "pollution": 0.002,
+    "route_speed": 0.0089,
+    "trade_capacity": 0.0055,
+    "travel_speed": 0.0059
    },
    "name": "Scheduled River Steamers",
    "observation": "A paddle steamer thrashes upstream against the flood on a printed schedule, trailing wood smoke over the towpath.",
@@ -45,9 +45,9 @@
   },
   "passenger_canal_packets": {
    "effects": {
-    "travel_speed": 0.0023,
-    "cohesion": 0.001,
-    "food_output": -0.001
+    "cohesion": 0.0002,
+    "food_output": -0.001,
+    "travel_speed": 0.0023
    },
    "name": "Canal Passenger Packets",
    "observation": "Long narrow packet boats carry travellers at a steady trot, with a cabin for the gentry and the deck for everyone else.",
@@ -55,10 +55,10 @@
   },
   "steam_estuary_ferries": {
    "effects": {
-    "travel_speed": 0.003,
-    "route_speed": 0.0037,
-    "trade_capacity": 0.0023,
-    "fuel_demand": 0.002
+    "fuel_demand": 0.0003,
+    "route_speed": 0.0033,
+    "trade_capacity": 0.0018,
+    "travel_speed": 0.0029
    },
    "name": "Steam Estuary Ferries",
    "observation": "The ferry crosses the estuary on the hour whatever the tide, and the market towns on the two shores begin to trade as one.",
@@ -66,10 +66,10 @@
   },
   "steam_harbour_tugs": {
    "effects": {
+    "fuel_demand": 0.0003,
+    "injury_risk": -0.0018,
     "naval_capacity": 0.006,
-    "route_speed": 0.0037,
-    "injury_risk": -0.002,
-    "fuel_demand": 0.002
+    "route_speed": 0.0033
    },
    "name": "Steam Harbour Tugs",
    "observation": "A squat steam tug takes a becalmed merchantman in tow and brings her through the harbour mouth against the wind.",
@@ -77,10 +77,10 @@
   },
   "town_omnibus_routes": {
    "effects": {
-    "travel_speed": 0.0023,
-    "labor_efficiency": 0.001,
+    "disease_exposure": 0.001,
     "food_output": -0.001,
-    "disease_exposure": 0.001
+    "labor_efficiency": 0.0005,
+    "travel_speed": 0.0016
    },
    "name": "Horse Omnibus Routes",
    "observation": "Long horse omnibuses ply fixed routes through the great towns, and clerks begin to live a few miles from their desks.",
@@ -88,16 +88,16 @@
   },
   "public_steam_railway": {
    "effects": {
-    "haul_capacity": 0.0187,
-    "route_speed": 0.0125,
-    "travel_speed": 0.006,
-    "trade_capacity": 0.0092,
-    "logistics_endurance": 0.0124,
-    "fuel_demand": 0.006,
-    "pollution": 0.004,
-    "labor_demand": 0.003,
+    "fuel_demand": 0.0008,
+    "haul_capacity": 0.0118,
     "injury_risk": 0.003,
-    "timber_pressure": 0.002
+    "labor_demand": 0.0002,
+    "logistics_endurance": 0.0124,
+    "pollution": 0.004,
+    "route_speed": 0.0049,
+    "timber_pressure": 0.002,
+    "trade_capacity": 0.0044,
+    "travel_speed": 0.0041
    },
    "name": "Public Steam Railway",
    "observation": "A steam locomotive draws a line of coal wagons and a carriage of passengers along iron rails faster than a galloping horse.",
@@ -107,10 +107,10 @@
   },
   "multitube_locomotive_boilers": {
    "effects": {
-    "haul_capacity": 0.005,
-    "travel_speed": 0.003,
+    "fuel_demand": 0.0001,
     "fuel_efficiency": 0.003,
-    "fuel_demand": 0.001
+    "haul_capacity": 0.0032,
+    "travel_speed": 0.0021
    },
    "name": "Many-Tubed Boilers",
    "observation": "Flue tubes run through the boiler like reeds in a bundle, and the engine that carries them wins the trial by miles an hour.",
@@ -118,15 +118,15 @@
   },
   "intercity_passenger_railway": {
    "effects": {
-    "travel_speed": 0.009,
-    "route_speed": 0.01,
-    "trade_capacity": 0.0069,
-    "state_capacity": 0.004,
-    "cohesion": 0.002,
-    "labor_demand": 0.003,
+    "cohesion": 0.0003,
     "injury_risk": 0.002,
+    "labor_demand": 0.0002,
+    "logistics_endurance": 0.0031,
     "pollution": 0.002,
-    "logistics_endurance": 0.0031
+    "route_speed": 0.0039,
+    "state_capacity": 0.0017,
+    "trade_capacity": 0.0033,
+    "travel_speed": 0.0062
    },
    "name": "Intercity Railway",
    "observation": "A double-tracked line runs between two great cities, with booked seats, timed departures and a station hall at each end.",
@@ -136,21 +136,21 @@
   },
   "rail_track_foundations": {
    "effects": {
-    "haul_capacity": 0.0063,
-    "route_speed": 0.005,
+    "haul_capacity": 0.004,
+    "labor_demand": 0.0001,
+    "logistics_endurance": 0.0031,
     "repair_capacity": 0.003,
-    "labor_demand": 0.002,
-    "timber_pressure": 0.002,
-    "logistics_endurance": 0.0031
+    "route_speed": 0.0019,
+    "timber_pressure": 0.002
    },
    "observation": "Rails fixed to timber sleepers and bedded in drained broken stone stay true under the heaviest trains.",
    "art": "res://assets/ui/research/paper/rail_track_foundations.png"
   },
   "classed_freight_tariffs": {
    "effects": {
-    "trade_capacity": 0.0046,
-    "standardization": 0.002,
-    "state_capacity": 0.001
+    "standardization": 0.0009,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0022
    },
    "name": "Freight Classes",
    "observation": "The railway prints its tariff: coal at one rate, grain at another, fine goods dearer, so every shipper knows the charge before he sends.",
@@ -158,9 +158,9 @@
   },
   "merchant_chronometer_issue": {
    "effects": {
-    "route_speed": 0.005,
+    "injury_risk": -0.0005,
     "naval_capacity": 0.003,
-    "injury_risk": -0.001
+    "route_speed": 0.0019
    },
    "name": "Merchant Chronometers",
    "observation": "Even plain merchant ships now carry a chronometer, and any master can fix his longitude without a night of lunar tables.",
@@ -168,14 +168,14 @@
   },
   "ocean_steamship_line": {
    "effects": {
-    "naval_capacity": 0.015,
-    "trade_capacity": 0.0115,
-    "route_speed": 0.01,
-    "travel_speed": 0.0045,
-    "fuel_demand": 0.005,
-    "pollution": 0.003,
     "disease_exposure": 0.002,
-    "logistics_endurance": 0.0062
+    "fuel_demand": 0.0007,
+    "logistics_endurance": 0.0058,
+    "naval_capacity": 0.015,
+    "pollution": 0.003,
+    "route_speed": 0.0075,
+    "trade_capacity": 0.0034,
+    "travel_speed": 0.0045
    },
    "name": "Ocean Steamship Line",
    "observation": "A steamship leaves port on the advertised day and arrives across the ocean within a fortnight, her sails furled most of the way.",
@@ -185,10 +185,10 @@
   },
   "printed_railway_timetables": {
    "effects": {
-    "task_coordination": 0.003,
-    "travel_speed": 0.0015,
-    "standardization": 0.002,
-    "knowledge_preservation": 0.001
+    "knowledge_preservation": 0.0005,
+    "standardization": 0.0008,
+    "task_coordination": 0.001,
+    "travel_speed": 0.0015
    },
    "name": "Railway Timetables",
    "observation": "A monthly railway guide lists every train in the realm, and people begin to set their watches by the station clock.",
@@ -196,12 +196,12 @@
   },
   "prepaid_stamp_postage": {
    "effects": {
-    "trade_capacity": 0.0069,
-    "state_capacity": 0.004,
-    "task_coordination": 0.004,
-    "cohesion": 0.003,
     "adoption_rate": 0.003,
-    "labor_demand": 0.001
+    "cohesion": 0.0005,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0013,
+    "task_coordination": 0.0013,
+    "trade_capacity": 0.0021
    },
    "name": "Prepaid Stamp Post",
    "observation": "A small gummed stamp pays for a letter to anywhere in the realm, and the mail sacks multiply beyond counting.",
@@ -211,10 +211,10 @@
   },
   "screw_propeller_ships": {
    "effects": {
-    "naval_capacity": 0.0075,
     "fuel_efficiency": 0.002,
-    "route_speed": 0.0025,
-    "logistics_endurance": 0.0031
+    "logistics_endurance": 0.0029,
+    "naval_capacity": 0.0075,
+    "route_speed": 0.0019
    },
    "name": "Screw Propellers",
    "observation": "A screw turning beneath the stern drives the ship where the paddle boxes once caught every wave.",
@@ -222,12 +222,12 @@
   },
   "steam_grain_elevators": {
    "effects": {
-    "food_storage": 0.006,
-    "storage_loss": -0.0065,
     "container_capacity": 0.0056,
+    "food_storage": 0.0057,
+    "fuel_demand": 0.0001,
     "haul_capacity": 0.0037,
-    "labor_demand": -0.002,
-    "fuel_demand": 0.001
+    "labor_demand": -0.0012,
+    "storage_loss": -0.0065
    },
    "name": "Steam Grain Elevators",
    "observation": "Grain pours by chute from towering bins into railway cars, and a trainload is loaded in an hour without a single sack.",
@@ -235,11 +235,11 @@
   },
   "iron_hulled_steamers": {
    "effects": {
-    "naval_capacity": 0.008,
     "container_capacity": 0.0042,
-    "timber_pressure": -0.003,
-    "fuel_demand": 0.002,
-    "logistics_endurance": 0.0031
+    "fuel_demand": 0.0003,
+    "logistics_endurance": 0.0029,
+    "naval_capacity": 0.008,
+    "timber_pressure": -0.003
    },
    "name": "Iron-Hulled Steamers",
    "observation": "Iron hulls longer than any timber keel can bear carry holds that no wooden ship could ever hold together.",
@@ -247,9 +247,9 @@
   },
   "rail_express_parcels": {
    "effects": {
-    "trade_capacity": 0.0046,
-    "travel_speed": 0.0015,
-    "storage_loss": -0.0039
+    "storage_loss": -0.0039,
+    "trade_capacity": 0.0014,
+    "travel_speed": 0.0015
    },
    "name": "Railway Express Parcels",
    "observation": "Express carriers put parcels on the fast trains and deliver them door to door the next morning.",
@@ -257,12 +257,12 @@
   },
   "rail_gauge_standards": {
    "effects": {
-    "standardization": 0.008,
     "haul_capacity": 0.0075,
-    "route_speed": 0.0075,
-    "trade_capacity": 0.0046,
-    "institutional_rigidity": 0.002,
-    "labor_demand": 0.002
+    "institutional_rigidity": 0.0006,
+    "labor_demand": 0.0001,
+    "route_speed": 0.0056,
+    "standardization": 0.0032,
+    "trade_capacity": 0.0014
    },
    "observation": "The realm fixes one gauge for every railway, and the odd-gauge lines are relaid at their owners' cost.",
    "ability_reason": "Every wagon runs on every line, so goods and troops cross the realm without unloading at the gauge breaks.",
@@ -270,9 +270,9 @@
   },
   "railway_clearing_house": {
    "effects": {
-    "trade_capacity": 0.0046,
-    "task_coordination": 0.003,
-    "state_capacity": 0.001
+    "state_capacity": 0.0003,
+    "task_coordination": 0.001,
+    "trade_capacity": 0.0014
    },
    "name": "Railway Clearing House",
    "observation": "Clerks at the clearing house divide each through-fare among the companies whose rails the traveller used.",
@@ -280,8 +280,8 @@
   },
   "travelling_post_office_cars": {
    "effects": {
-    "travel_speed": 0.0023,
-    "task_coordination": 0.002
+    "task_coordination": 0.0006,
+    "travel_speed": 0.0023
    },
    "name": "Travelling Post Offices",
    "observation": "Clerks sort letters in a moving mail car, and bags are snatched from trackside posts without the train slowing.",
@@ -290,9 +290,9 @@
   "fast_clipper_hulls": {
    "effects": {
     "naval_capacity": 0.006,
-    "travel_speed": 0.0023,
-    "trade_capacity": 0.0034,
-    "timber_pressure": 0.003
+    "timber_pressure": 0.003,
+    "trade_capacity": 0.001,
+    "travel_speed": 0.0023
    },
    "name": "Clipper Hulls",
    "observation": "Sharp-bowed clippers crowd on sail and race home with the first cargo of the season for the richest prices.",
@@ -300,9 +300,9 @@
   },
   "wind_current_passage_charts": {
    "effects": {
-    "route_speed": 0.0075,
-    "logistics_endurance": 0.0031,
-    "injury_risk": -0.001
+    "injury_risk": -0.0004,
+    "logistics_endurance": 0.0029,
+    "route_speed": 0.0056
    },
    "name": "Wind and Current Charts",
    "observation": "Charts compiled from thousands of logbooks show where the winds and currents run, and ocean passages shorten by weeks.",
@@ -310,9 +310,9 @@
   },
   "telegraph_train_dispatch": {
    "effects": {
-    "task_coordination": 0.004,
-    "injury_risk": -0.003,
-    "haul_capacity": 0.0025
+    "haul_capacity": 0.0025,
+    "injury_risk": -0.0011,
+    "task_coordination": 0.0013
    },
    "name": "Telegraph Train Orders",
    "observation": "A dispatcher telegraphs an order to hold one train in a siding while the other passes on the single line.",
@@ -320,9 +320,9 @@
   },
   "interlocked_rail_signals": {
    "effects": {
-    "injury_risk": -0.004,
-    "task_coordination": 0.002,
-    "haul_capacity": 0.0025
+    "haul_capacity": 0.0025,
+    "injury_risk": -0.0015,
+    "task_coordination": 0.0006
    },
    "name": "Interlocked Signals",
    "observation": "In the signal box the levers lock one another, so no signalman can set two trains onto the same stretch of line.",
@@ -330,9 +330,9 @@
   },
   "sleeping_dining_cars": {
    "effects": {
-    "travel_speed": 0.0015,
     "fatigue": -0.002,
-    "logistics_endurance": 0.0031
+    "logistics_endurance": 0.0009,
+    "travel_speed": 0.0015
    },
    "name": "Sleeping and Dining Cars",
    "observation": "Passengers sleep in berths and dine at linen-covered tables while the long-distance train runs on through the night.",
@@ -340,10 +340,10 @@
   },
   "ocean_coaling_stations": {
    "effects": {
-    "logistics_endurance": 0.008,
-    "naval_capacity": 0.006,
-    "fuel_demand": 0.002,
-    "legitimacy": -0.001
+    "fuel_demand": 0.0004,
+    "legitimacy": -0.0003,
+    "logistics_endurance": 0.0023,
+    "naval_capacity": 0.0036
    },
    "name": "Coaling Stations",
    "observation": "Coal heaps and lighters wait at island harbours along the ocean routes, so steamers need not carry fuel for the whole voyage.",
@@ -352,9 +352,9 @@
   },
   "sea_collision_rules": {
    "effects": {
-    "injury_risk": -0.004,
-    "naval_capacity": 0.003,
-    "standardization": 0.002
+    "injury_risk": -0.0007,
+    "naval_capacity": 0.0018,
+    "standardization": 0.001
    },
    "name": "Rules of the Road at Sea",
    "observation": "Every ship shows a red light to port and a green to starboard, and gives way to another by the same rule.",
@@ -362,11 +362,11 @@
   },
   "underground_town_railway": {
    "effects": {
-    "travel_speed": 0.0037,
+    "disease_exposure": 0.0017,
     "housing_output": 0.002,
-    "disease_exposure": 0.002,
-    "labor_demand": 0.002,
-    "pollution": 0.001
+    "labor_demand": 0.0001,
+    "pollution": 0.001,
+    "travel_speed": 0.0037
    },
    "name": "Underground Railway",
    "observation": "Trains run in covered cuttings beneath the streets of the great town, their tunnels thick with engine smoke.",
@@ -374,10 +374,10 @@
   },
   "compound_marine_engines": {
    "effects": {
+    "fuel_demand": -0.002,
     "fuel_efficiency": 0.004,
-    "logistics_endurance": 0.0062,
-    "naval_capacity": 0.0045,
-    "fuel_demand": -0.002
+    "logistics_endurance": 0.0018,
+    "naval_capacity": 0.0027
    },
    "name": "Compound Marine Engines",
    "observation": "Steam passes through a second, larger cylinder before it is spent, and a steamer crosses the ocean on half the coal.",
@@ -385,12 +385,12 @@
   },
   "crude_oil_pipelines": {
    "effects": {
-    "haul_capacity": 0.005,
-    "trade_capacity": 0.0034,
-    "water_pollution": 0.002,
     "disaster_risk": 0.002,
     "ecological_pressure": 0.001,
-    "logistics_endurance": 0.0047
+    "haul_capacity": 0.0033,
+    "logistics_endurance": 0.0013,
+    "trade_capacity": 0.0012,
+    "water_pollution": 0.002
    },
    "name": "Crude Oil Pipelines",
    "observation": "Iron pipes carry crude oil from the wells to the railhead, and the barrel teamsters are out of work.",
@@ -398,10 +398,10 @@
   },
   "rolled_steel_rails": {
    "effects": {
+    "fuel_demand": 0.0002,
+    "haul_capacity": 0.0024,
     "repair_capacity": 0.004,
-    "haul_capacity": 0.0037,
-    "route_speed": 0.0025,
-    "fuel_demand": 0.001
+    "route_speed": 0.0012
    },
    "name": "Steel Rails",
    "observation": "Rails rolled from steel outlast iron rails many times over under the heaviest traffic.",
@@ -409,17 +409,17 @@
   },
   "continental_trunk_railway": {
    "effects": {
-    "route_speed": 0.0125,
-    "haul_capacity": 0.01,
-    "trade_capacity": 0.0092,
-    "travel_speed": 0.0045,
-    "state_capacity": 0.005,
     "ecological_pressure": 0.004,
+    "haul_capacity": 0.0065,
     "hunting_yield": -0.003,
-    "labor_demand": 0.004,
     "injury_risk": 0.002,
-    "legitimacy": -0.002,
-    "logistics_endurance": 0.0093
+    "labor_demand": 0.0002,
+    "legitimacy": -0.0006,
+    "logistics_endurance": 0.0026,
+    "route_speed": 0.006,
+    "state_capacity": 0.0029,
+    "trade_capacity": 0.0032,
+    "travel_speed": 0.0045
    },
    "name": "Continental Railway",
    "observation": "The last rail is laid where two lines built from opposite coasts meet among the mountains.",
@@ -429,13 +429,13 @@
   },
   "isthmus_ship_canal": {
    "effects": {
-    "route_speed": 0.0125,
-    "trade_capacity": 0.0115,
-    "naval_capacity": 0.012,
-    "logistics_endurance": 0.0093,
-    "labor_demand": 0.006,
-    "disease_exposure": 0.004,
-    "disaster_risk": 0.001
+    "disaster_risk": 0.001,
+    "disease_exposure": 0.0033,
+    "labor_demand": 0.0003,
+    "logistics_endurance": 0.0026,
+    "naval_capacity": 0.0071,
+    "route_speed": 0.006,
+    "trade_capacity": 0.0041
    },
    "name": "Isthmus Ship Canal",
    "observation": "A sea-level canal cut through a narrow isthmus lets ships pass between two seas without rounding a continent.",
@@ -445,8 +445,8 @@
   },
   "rail_vehicle_braking": {
    "effects": {
-    "injury_risk": -0.004,
-    "haul_capacity": 0.005,
+    "haul_capacity": 0.0033,
+    "injury_risk": -0.0007,
     "travel_speed": 0.0015
    },
    "observation": "Air brakes worked from the locomotive stop the whole train together, and long heavy trains become safe to run.",
@@ -454,8 +454,8 @@
   },
   "mail_order_parcel_trade": {
    "effects": {
-    "trade_capacity": 0.0057,
-    "adoption_rate": 0.002
+    "adoption_rate": 0.002,
+    "trade_capacity": 0.002
    },
    "name": "Mail-Order Catalogues",
    "observation": "Farm families order ploughs, cloth and stoves from a thick catalogue and collect them at the railway station.",
@@ -464,8 +464,8 @@
   },
   "automatic_rail_couplers": {
    "effects": {
-    "injury_risk": -0.004,
-    "haul_capacity": 0.0025,
+    "haul_capacity": 0.0016,
+    "injury_risk": -0.0007,
     "labor_efficiency": 0.001
    },
    "name": "Automatic Couplers",
@@ -474,10 +474,10 @@
   },
   "interrealm_postal_union": {
    "effects": {
-    "trade_capacity": 0.0069,
-    "task_coordination": 0.003,
-    "state_capacity": 0.002,
-    "legitimacy": 0.001
+    "legitimacy": 0.0002,
+    "state_capacity": 0.0011,
+    "task_coordination": 0.0013,
+    "trade_capacity": 0.0024
    },
    "name": "Postal Union of Realms",
    "observation": "Envoys of many realms agree that a letter crossing a border pays one rate and is carried by each post in turn.",
@@ -486,7 +486,7 @@
   },
   "hull_load_lines": {
    "effects": {
-    "injury_risk": -0.004,
+    "injury_risk": -0.0026,
     "naval_capacity": 0.0015,
     "trade_capacity": -0.0011
    },
@@ -497,12 +497,12 @@
   },
   "refrigerated_rail_cars": {
    "effects": {
-    "food_storage": 0.006,
-    "storage_loss": -0.0078,
+    "container_capacity": 0.0028,
     "food_spoilage": -0.004,
-    "trade_capacity": 0.0034,
+    "food_storage": 0.006,
     "logistics_endurance": 0.0031,
-    "container_capacity": 0.0028
+    "storage_loss": -0.0078,
+    "trade_capacity": 0.0017
    },
    "name": "Refrigerated Rail Cars",
    "observation": "Ice bunkers at each end of the car keep meat fresh from the stockyards to the coast.",
@@ -510,11 +510,11 @@
   },
   "triple_expansion_freighters": {
    "effects": {
+    "fuel_demand": 0.0001,
     "fuel_efficiency": 0.004,
-    "trade_capacity": 0.0046,
-    "haul_capacity": 0.005,
-    "fuel_demand": 0.001,
-    "logistics_endurance": 0.0047
+    "haul_capacity": 0.0049,
+    "logistics_endurance": 0.0047,
+    "trade_capacity": 0.0024
    },
    "name": "Triple-Expansion Freighters",
    "observation": "Three cylinders use the steam in turn, and a plain freighter carries grain across the ocean for pennies a sack.",
@@ -522,11 +522,11 @@
   },
   "railway_standard_time": {
    "effects": {
-    "task_coordination": 0.008,
-    "standardization": 0.006,
-    "travel_speed": 0.0015,
-    "cohesion": 0.002,
-    "institutional_rigidity": 0.001
+    "cohesion": 0.0003,
+    "institutional_rigidity": 0.0002,
+    "standardization": 0.0024,
+    "task_coordination": 0.0027,
+    "travel_speed": 0.0015
    },
    "name": "Railway Standard Time",
    "observation": "Railway clocks across the realm are set to one standard hour, and the old town noon is forgotten.",
@@ -535,8 +535,8 @@
   },
   "chain_drive_bicycle": {
    "effects": {
-    "travel_speed": 0.0023,
-    "labor_efficiency": 0.001
+    "labor_efficiency": 0.0009,
+    "travel_speed": 0.0023
    },
    "name": "Safety Bicycle",
    "observation": "A chain-driven bicycle with two equal wheels lets a clerk or a farm girl ride ten miles to work.",
@@ -545,11 +545,11 @@
   },
   "motor_carriage": {
    "effects": {
-    "travel_speed": 0.0045,
+    "fuel_demand": 0.0004,
     "haul_capacity": 0.0037,
-    "fuel_demand": 0.004,
+    "injury_risk": 0.004,
     "pollution": 0.003,
-    "injury_risk": 0.004
+    "travel_speed": 0.0045
    },
    "name": "Motor Carriage",
    "observation": "A petrol engine drives a carriage along the road without horses, frightening every animal it passes.",
@@ -558,10 +558,10 @@
   },
   "electric_street_tramways": {
    "effects": {
-    "travel_speed": 0.0037,
-    "housing_output": 0.002,
+    "food_output": 0.001,
+    "housing_output": 0.0014,
     "sanitation": 0.001,
-    "food_output": 0.001
+    "travel_speed": 0.0037
    },
    "name": "Electric Tramways",
    "observation": "Tramcars run on current from overhead wires, and the town streets are no longer ankle-deep in horse dung.",
@@ -579,10 +579,10 @@
   },
   "tramp_bulk_charters": {
    "effects": {
-    "trade_capacity": 0.0069,
-    "haul_capacity": 0.005,
     "container_capacity": 0.0028,
-    "logistics_endurance": 0.0031
+    "haul_capacity": 0.0049,
+    "logistics_endurance": 0.0031,
+    "trade_capacity": 0.0035
    },
    "name": "Tramp Steamers",
    "observation": "Tramp steamers go wherever a cargo waits, carrying coal outward and grain home.",
@@ -590,9 +590,9 @@
   },
   "steam_turbine_ships": {
    "effects": {
-    "naval_capacity": 0.006,
-    "travel_speed": 0.003,
-    "fuel_demand": 0.002
+    "fuel_demand": 0.0002,
+    "naval_capacity": 0.0049,
+    "travel_speed": 0.003
    },
    "name": "Turbine Ships",
    "observation": "A turbine spins the shafts directly with steam, and the fast liners cut days from the ocean crossing.",
@@ -601,8 +601,8 @@
   "hump_marshalling_yards": {
    "effects": {
     "haul_capacity": 0.005,
-    "task_coordination": 0.002,
-    "injury_risk": 0.001
+    "injury_risk": 0.001,
+    "task_coordination": 0.0007
    },
    "name": "Hump Yards",
    "observation": "Wagons pushed over a low hump roll by gravity into their sidings, and a whole train is sorted in an hour.",
@@ -610,20 +610,20 @@
   },
   "hull_condition_surveys": {
    "effects": {
-    "injury_risk": -0.004,
-    "naval_capacity": 0.0045,
-    "standardization": 0.002,
-    "labor_demand": 0.001
+    "injury_risk": -0.0018,
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.0037,
+    "standardization": 0.0008
    },
    "observation": "Independent surveyors examine each hull at set intervals, and underwriters insure only ships that keep their class.",
    "art": "res://assets/ui/research/paper/hull_condition_surveys.png"
   },
   "tar_bound_road_surfaces": {
    "effects": {
-    "route_speed": 0.0063,
-    "travel_speed": 0.0023,
+    "disease_exposure": -0.0003,
     "pollution": 0.001,
-    "disease_exposure": -0.001
+    "route_speed": 0.0063,
+    "travel_speed": 0.0023
    },
    "name": "Tarred Roads",
    "observation": "Tar sprayed over the broken stone lays the dust that motor traffic raised in choking clouds.",
@@ -631,9 +631,9 @@
   },
   "driver_licensing": {
    "effects": {
-    "injury_risk": -0.003,
-    "state_capacity": 0.002,
-    "labor_demand": 0.001
+    "injury_risk": -0.0014,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.001
    },
    "name": "Driving Licences",
    "observation": "Every motorist carries a licence and every car a registered number plate, so a reckless driver can be traced.",
@@ -641,12 +641,12 @@
   },
   "motor_freight_lorries": {
    "effects": {
+    "fuel_demand": 0.0004,
     "haul_capacity": 0.0075,
-    "route_speed": 0.0037,
-    "fuel_demand": 0.004,
-    "pollution": 0.003,
     "injury_risk": 0.002,
-    "logistics_endurance": 0.0047
+    "logistics_endurance": 0.0047,
+    "pollution": 0.003,
+    "route_speed": 0.0037
    },
    "name": "Motor Lorries",
    "observation": "Motor lorries carry freight from the railhead to farms and shops that no train reaches.",
@@ -654,9 +654,9 @@
   },
   "motor_bus_routes": {
    "effects": {
-    "travel_speed": 0.003,
-    "fuel_demand": 0.002,
-    "pollution": 0.002
+    "fuel_demand": 0.0002,
+    "pollution": 0.002,
+    "travel_speed": 0.003
    },
    "name": "Motor Buses",
    "observation": "Motor buses replace the horse omnibus and run on to villages that never had a service.",
@@ -664,14 +664,14 @@
   },
   "series_built_motor_car": {
    "effects": {
-    "travel_speed": 0.0075,
-    "haul_capacity": 0.005,
-    "fuel_demand": 0.008,
-    "pollution": 0.006,
-    "injury_risk": 0.006,
+    "cohesion": 0.0002,
     "ecological_pressure": 0.003,
+    "fuel_demand": 0.0008,
+    "haul_capacity": 0.005,
     "housing_output": 0.002,
-    "cohesion": 0.001
+    "injury_risk": 0.006,
+    "pollution": 0.006,
+    "travel_speed": 0.0075
    },
    "name": "Series-Built Motor Car",
    "observation": "Motor cars come off a moving line in long series, cheap enough for a farmer or a clerk to buy.",
@@ -681,9 +681,9 @@
   },
   "motor_road_fund": {
    "effects": {
+    "construction_rate": 0.002,
     "route_speed": 0.005,
-    "state_capacity": 0.002,
-    "construction_rate": 0.002
+    "state_capacity": 0.001
    },
    "name": "Road Fund",
    "observation": "A road board builds and mends motor roads from what motorists pay in fuel and licence taxes.",
@@ -701,9 +701,9 @@
   },
   "radio_direction_finding": {
    "effects": {
-    "route_speed": 0.005,
-    "naval_capacity": 0.003,
-    "injury_risk": -0.002
+    "injury_risk": -0.0009,
+    "naval_capacity": 0.0024,
+    "route_speed": 0.005
    },
    "name": "Radio Direction-Finding",
    "observation": "A ship takes bearings on two shore wireless stations and fixes her position through fog.",
@@ -711,11 +711,11 @@
   },
   "heavy_oil_motor_ships": {
    "effects": {
+    "fuel_demand": 0.0001,
     "fuel_efficiency": 0.004,
     "logistics_endurance": 0.008,
-    "naval_capacity": 0.0045,
-    "water_pollution": 0.002,
-    "fuel_demand": 0.001
+    "naval_capacity": 0.0037,
+    "water_pollution": 0.002
    },
    "name": "Motor Ships",
    "observation": "Heavy-oil engines drive the new motor ships, which carry fuel for a voyage round the world and need no stokers.",
@@ -723,9 +723,9 @@
   },
   "wireless_distress_watch": {
    "effects": {
-    "injury_risk": -0.004,
-    "naval_capacity": 0.0015,
-    "labor_demand": 0.001
+    "injury_risk": -0.0023,
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.0015
    },
    "name": "Wireless Distress Watch",
    "observation": "Every passenger ship must keep a wireless operator listening day and night for a distress call.",
@@ -733,9 +733,9 @@
   },
   "state_parcel_post": {
    "effects": {
-    "trade_capacity": 0.0046,
-    "state_capacity": 0.002,
-    "logistics_endurance": 0.0016
+    "logistics_endurance": 0.0016,
+    "state_capacity": 0.0007,
+    "trade_capacity": 0.0046
    },
    "name": "Parcel Post",
    "observation": "The state post carries parcels as well as letters, at one rate to every village in the realm.",
@@ -743,13 +743,13 @@
   },
   "lock_ship_canal_divide": {
    "effects": {
-    "route_speed": 0.0125,
-    "trade_capacity": 0.0092,
-    "naval_capacity": 0.009,
-    "labor_demand": 0.006,
+    "disease_exposure": 0.0028,
     "ecological_pressure": 0.004,
-    "disease_exposure": 0.003,
-    "legitimacy": -0.001
+    "labor_demand": 0.0003,
+    "legitimacy": -0.0001,
+    "naval_capacity": 0.009,
+    "route_speed": 0.0125,
+    "trade_capacity": 0.0092
    },
    "name": "High-Lock Ship Canal",
    "observation": "A flight of great locks lifts ocean ships over a mountain divide and lowers them into the other sea.",
@@ -759,8 +759,8 @@
   },
   "electric_traffic_signals": {
    "effects": {
-    "injury_risk": -0.003,
-    "task_coordination": 0.002
+    "injury_risk": -0.0017,
+    "task_coordination": 0.0006
    },
    "name": "Traffic Signals",
    "observation": "Red, amber and green lamps at the crossings replace the constable's white gloves.",
@@ -768,9 +768,9 @@
   },
   "roadside_fuel_stations": {
    "effects": {
+    "fuel_demand": 0.0002,
     "logistics_endurance": 0.0062,
     "travel_speed": 0.0015,
-    "fuel_demand": 0.002,
     "water_pollution": 0.001
    },
    "name": "Filling Stations",
@@ -779,10 +779,10 @@
   },
   "scheduled_air_mail": {
    "effects": {
-    "travel_speed": 0.006,
-    "trade_capacity": 0.0046,
+    "fuel_demand": 0.0002,
     "injury_risk": 0.002,
-    "fuel_demand": 0.002
+    "trade_capacity": 0.0046,
+    "travel_speed": 0.006
    },
    "name": "Scheduled Air Mail",
    "observation": "Mail planes fly the length of the realm by day and by beacon-lit night, and a letter arrives the next morning.",
@@ -791,10 +791,10 @@
   },
   "passenger_air_service": {
    "effects": {
-    "travel_speed": 0.0037,
+    "fuel_demand": 0.0003,
+    "pollution": 0.002,
     "trade_capacity": 0.0034,
-    "fuel_demand": 0.003,
-    "pollution": 0.002
+    "travel_speed": 0.0037
    },
    "name": "Passenger Airlines",
    "observation": "Airliners carry paying passengers between the capitals in hours, landing on grass fields outside the town.",
@@ -802,10 +802,10 @@
   },
   "state_railway_administration": {
    "effects": {
-    "state_capacity": 0.004,
-    "standardization": 0.003,
-    "institutional_rigidity": 0.003,
-    "haul_capacity": 0.0025
+    "haul_capacity": 0.0025,
+    "institutional_rigidity": 0.0003,
+    "standardization": 0.0023,
+    "state_capacity": 0.0013
    },
    "name": "State Railways",
    "observation": "The state buys out the railway companies and runs every line from one administration.",
@@ -814,15 +814,15 @@
   },
   "limited_access_motorways": {
    "effects": {
-    "route_speed": 0.0125,
-    "travel_speed": 0.006,
-    "haul_capacity": 0.0075,
-    "labor_demand": 0.004,
     "ecological_pressure": 0.005,
-    "soil_productivity": -0.002,
+    "fuel_demand": 0.0004,
+    "haul_capacity": 0.0075,
+    "labor_demand": 0.0002,
+    "logistics_endurance": 0.0062,
     "pollution": 0.003,
-    "fuel_demand": 0.004,
-    "logistics_endurance": 0.0062
+    "route_speed": 0.0125,
+    "soil_productivity": -0.002,
+    "travel_speed": 0.006
    },
    "name": "Motorways",
    "observation": "Divided motor roads with no level crossings or side turnings let traffic run at speed between the cities.",
@@ -832,11 +832,11 @@
   },
   "tractor_trailer_rigs": {
    "effects": {
+    "fuel_demand": 0.0003,
     "haul_capacity": 0.0075,
-    "trade_capacity": 0.0034,
-    "fuel_demand": 0.003,
+    "logistics_endurance": 0.0031,
     "pollution": 0.002,
-    "logistics_endurance": 0.0031
+    "trade_capacity": 0.0034
    },
    "name": "Articulated Lorries",
    "observation": "A tractor unit hauls a detachable trailer, and a single driver moves as much as a railway wagon.",
@@ -844,9 +844,9 @@
   },
   "centralized_traffic_control": {
    "effects": {
-    "task_coordination": 0.004,
     "haul_capacity": 0.0037,
-    "labor_demand": -0.002
+    "labor_demand": -0.002,
+    "task_coordination": 0.0013
    },
    "name": "Centralized Traffic Control",
    "observation": "One dispatcher sets every signal and switch across a district from a lit panel in the control room.",
@@ -854,8 +854,8 @@
   },
   "airway_radio_beacons": {
    "effects": {
-    "route_speed": 0.005,
-    "injury_risk": -0.002
+    "injury_risk": -0.0011,
+    "route_speed": 0.005
    },
    "name": "Airway Beacons",
    "observation": "Radio beacons mark the night air routes, and a pilot follows the steady tone between them.",
@@ -863,8 +863,8 @@
   },
   "airport_control_towers": {
    "effects": {
-    "injury_risk": -0.003,
-    "task_coordination": 0.002
+    "injury_risk": -0.0017,
+    "task_coordination": 0.0006
    },
    "name": "Control Towers",
    "observation": "From a glass tower above the field, a controller clears each airplane to land or take off by radio.",
@@ -884,13 +884,13 @@
   },
   "pallet_forklift_handling": {
    "effects": {
-    "haul_capacity": 0.01,
-    "labor_efficiency": 0.006,
     "container_capacity": 0.007,
-    "storage_loss": -0.0065,
-    "labor_demand": -0.004,
+    "food_storage": 0.002,
+    "haul_capacity": 0.0097,
     "injury_risk": 0.002,
-    "food_storage": 0.002
+    "labor_demand": -0.0021,
+    "labor_efficiency": 0.0049,
+    "storage_loss": -0.0065
    },
    "name": "Pallets and Fork-Lifts",
    "observation": "A small truck with steel forks lifts a whole pallet of cases, and one driver does the work of a gang of porters.",
@@ -900,10 +900,10 @@
   },
   "road_haulage_licensing": {
    "effects": {
-    "state_capacity": 0.002,
-    "institutional_rigidity": 0.002,
-    "trade_capacity": -0.0011,
-    "injury_risk": -0.001
+    "injury_risk": -0.0007,
+    "institutional_rigidity": 0.0003,
+    "state_capacity": 0.0007,
+    "trade_capacity": -0.0011
    },
    "name": "Haulage Licences",
    "observation": "Every road haulier must hold a licence, and the number of lorries on each route is fixed by the board.",
@@ -911,12 +911,12 @@
   },
   "oil_electric_locomotives": {
    "effects": {
-    "haul_capacity": 0.01,
+    "fuel_demand": 0.0002,
     "fuel_efficiency": 0.006,
-    "repair_capacity": 0.004,
-    "labor_demand": -0.004,
+    "haul_capacity": 0.0097,
+    "labor_demand": -0.0021,
     "pollution": -0.002,
-    "fuel_demand": 0.002
+    "repair_capacity": 0.004
    },
    "name": "Oil-Electric Locomotives",
    "observation": "Oil-engined locomotives with electric drive pull the expresses, and the engine sheds fall silent.",
@@ -926,9 +926,9 @@
   },
   "metal_monoplane_airliners": {
    "effects": {
-    "travel_speed": 0.0037,
+    "fuel_demand": 0.0003,
     "trade_capacity": 0.0034,
-    "fuel_demand": 0.003
+    "travel_speed": 0.0037
    },
    "name": "Metal Airliners",
    "observation": "All-metal monoplanes carry twenty passengers at a profit, and air travel stops needing a subsidy.",
@@ -936,8 +936,8 @@
   },
   "pressurized_airliner_cabins": {
    "effects": {
-    "travel_speed": 0.0023,
-    "injury_risk": -0.002
+    "injury_risk": -0.0013,
+    "travel_speed": 0.0023
    },
    "name": "Pressurized Cabins",
    "observation": "The cabin is pressurized, and the airliner flies high above the storms where the air is smooth.",
@@ -954,9 +954,9 @@
   },
   "civil_aviation_convention": {
    "effects": {
-    "trade_capacity": 0.0046,
-    "standardization": 0.002,
-    "legitimacy": 0.001
+    "legitimacy": 0.0002,
+    "standardization": 0.001,
+    "trade_capacity": 0.0046
    },
    "name": "Civil Aviation Convention",
    "observation": "The realms agree who may fly over whose land and land where, and on one set of rules for the air.",
@@ -964,8 +964,8 @@
   },
   "radar_approach_control": {
    "effects": {
-    "injury_risk": -0.003,
-    "task_coordination": 0.002
+    "injury_risk": -0.002,
+    "task_coordination": 0.0008
    },
    "name": "Radar Approach Control",
    "observation": "A controller watching the radar screen talks each airliner down to the runway through cloud.",
@@ -973,10 +973,10 @@
   },
   "sustained_airlift": {
    "effects": {
+    "fuel_demand": 0.0004,
+    "haul_capacity": 0.0049,
     "logistics_endurance": 0.008,
-    "haul_capacity": 0.005,
-    "fuel_demand": 0.004,
-    "state_capacity": 0.002
+    "state_capacity": 0.0007
    },
    "name": "Sustained Airlift",
    "observation": "Transport aircraft land every few minutes, day and night, and a blockaded city lives on what they bring.",
@@ -984,12 +984,12 @@
   },
   "jet_airliners": {
    "effects": {
-    "travel_speed": 0.009,
-    "trade_capacity": 0.0069,
-    "fuel_demand": 0.006,
+    "disaster_risk": 0.001,
+    "disease_exposure": 0.0016,
+    "fuel_demand": 0.001,
     "pollution": 0.004,
-    "disease_exposure": 0.003,
-    "disaster_risk": 0.001
+    "trade_capacity": 0.0048,
+    "travel_speed": 0.009
    },
    "name": "Jet Airliners",
    "observation": "Jet airliners cross the ocean in an afternoon, high above the weather.",
@@ -999,9 +999,9 @@
   },
   "roll_on_roll_off_ferries": {
    "effects": {
-    "haul_capacity": 0.005,
-    "travel_speed": 0.0023,
-    "injury_risk": 0.001
+    "haul_capacity": 0.0026,
+    "injury_risk": 0.001,
+    "travel_speed": 0.0023
    },
    "name": "Roll-On Ferries",
    "observation": "Lorries and cars drive aboard through the bow doors and drive off on the far shore.",
@@ -1009,15 +1009,15 @@
   },
   "intermodal_shipping_containers": {
    "effects": {
-    "haul_capacity": 0.015,
-    "trade_capacity": 0.0138,
-    "storage_loss": -0.0104,
+    "cohesion": -0.0002,
     "container_capacity": 0.0112,
-    "labor_efficiency": 0.004,
-    "labor_demand": -0.006,
-    "cohesion": -0.002,
+    "food_storage": 0.004,
+    "haul_capacity": 0.0078,
+    "labor_demand": -0.0018,
+    "labor_efficiency": 0.0026,
     "logistics_endurance": 0.0093,
-    "food_storage": 0.004
+    "storage_loss": -0.0104,
+    "trade_capacity": 0.0096
    },
    "name": "Shipping Containers",
    "observation": "A steel box packed at an inland factory is lifted aboard ship and delivered unopened to a store across the ocean.",
@@ -1027,15 +1027,15 @@
   },
   "national_highway_network": {
    "effects": {
-    "route_speed": 0.0125,
-    "travel_speed": 0.0045,
-    "haul_capacity": 0.0075,
-    "state_capacity": 0.003,
     "ecological_pressure": 0.005,
+    "fuel_demand": 0.0007,
+    "haul_capacity": 0.0039,
+    "labor_demand": 0.0002,
+    "logistics_endurance": 0.0062,
     "pollution": 0.004,
-    "fuel_demand": 0.004,
-    "labor_demand": 0.003,
-    "logistics_endurance": 0.0062
+    "route_speed": 0.0125,
+    "state_capacity": 0.0027,
+    "travel_speed": 0.0045
    },
    "name": "National Motorway Network",
    "observation": "A motorway grid paid from the fuel tax links every region of the realm.",
@@ -1045,11 +1045,11 @@
   },
   "orbital_satellite_launch": {
    "effects": {
+    "fuel_demand": 0.0003,
+    "knowledge_rate": 0.0025,
+    "labor_demand": 0.0002,
     "route_speed": 0.0037,
-    "knowledge_rate": 0.004,
-    "state_capacity": 0.003,
-    "labor_demand": 0.004,
-    "fuel_demand": 0.002
+    "state_capacity": 0.0027
    },
    "name": "First Satellite",
    "observation": "A many-stage rocket lifts a small metal sphere into orbit, and its bleeping signal is heard around the world.",
@@ -1058,11 +1058,11 @@
   },
   "very_large_tankers": {
    "effects": {
-    "haul_capacity": 0.0075,
-    "fuel_efficiency": 0.003,
-    "water_pollution": 0.004,
     "disaster_risk": 0.003,
-    "ecological_pressure": 0.002
+    "ecological_pressure": 0.002,
+    "fuel_efficiency": 0.003,
+    "haul_capacity": 0.0039,
+    "water_pollution": 0.004
    },
    "name": "Supertankers",
    "observation": "Tankers longer than a town street carry a million barrels of oil around the capes.",
@@ -1071,10 +1071,10 @@
   },
   "container_gantry_terminals": {
    "effects": {
-    "haul_capacity": 0.0075,
-    "labor_efficiency": 0.003,
-    "labor_demand": -0.004,
-    "cohesion": -0.001
+    "cohesion": -0.0001,
+    "haul_capacity": 0.0039,
+    "labor_demand": -0.0012,
+    "labor_efficiency": 0.002
    },
    "name": "Container Terminals",
    "observation": "Gantry cranes lift boxes straight from ship to lorry, and a ship is turned round in a day instead of a week.",
@@ -1082,9 +1082,9 @@
   },
   "bulk_unit_trains": {
    "effects": {
-    "haul_capacity": 0.0063,
+    "container_capacity": 0.0028,
     "fuel_efficiency": 0.002,
-    "container_capacity": 0.0028
+    "haul_capacity": 0.0033
    },
    "name": "Unit Trains",
    "observation": "One long train carries nothing but coal from the mine to the port, loading and unloading without stopping.",
@@ -1092,9 +1092,9 @@
   },
   "dedicated_bulk_carriers": {
    "effects": {
-    "haul_capacity": 0.0063,
-    "trade_capacity": 0.0034,
-    "container_capacity": 0.0042
+    "container_capacity": 0.0042,
+    "haul_capacity": 0.0033,
+    "trade_capacity": 0.0024
    },
    "name": "Bulk Carriers",
    "observation": "Ships built for one cargo, ore or grain, load by conveyor and unload by grab.",
@@ -1102,8 +1102,8 @@
   },
   "computer_seat_reservations": {
    "effects": {
-    "task_coordination": 0.003,
-    "trade_capacity": 0.0023
+    "task_coordination": 0.0011,
+    "trade_capacity": 0.0016
    },
    "name": "Computer Reservations",
    "observation": "Booking clerks across the realm query one electronic machine and sell every seat on every flight without double booking.",
@@ -1111,9 +1111,9 @@
   },
   "crewed_orbital_flight": {
    "effects": {
-    "knowledge_rate": 0.003,
-    "cohesion": 0.002,
-    "labor_demand": 0.003
+    "cohesion": 0.0004,
+    "knowledge_rate": 0.0019,
+    "labor_demand": 0.0002
    },
    "name": "Crewed Orbital Flight",
    "observation": "A pilot circles the earth in a small capsule and comes home under a parachute.",
@@ -1121,10 +1121,10 @@
   },
   "high_speed_rail_lines": {
    "effects": {
-    "travel_speed": 0.0075,
     "fuel_efficiency": 0.003,
-    "pollution": -0.002,
-    "labor_demand": 0.004
+    "labor_demand": 0.0002,
+    "pollution": -0.0008,
+    "travel_speed": 0.0075
    },
    "name": "High-Speed Rail",
    "observation": "Streamlined electric trains run on their own dedicated tracks at speeds that approach an airliner's.",
@@ -1143,9 +1143,9 @@
   },
   "standard_container_sizes": {
    "effects": {
-    "standardization": 0.006,
-    "trade_capacity": 0.0046,
-    "haul_capacity": 0.0037
+    "haul_capacity": 0.0019,
+    "standardization": 0.0017,
+    "trade_capacity": 0.0032
    },
    "name": "Standard Container Sizes",
    "observation": "The realms agree on the length, height and corner fittings of containers, so any crane can lift any box.",
@@ -1153,11 +1153,11 @@
   },
   "crewed_lunar_landing": {
    "effects": {
-    "knowledge_rate": 0.004,
-    "cohesion": 0.004,
-    "legitimacy": 0.003,
-    "labor_demand": 0.004,
-    "state_capacity": 0.002
+    "cohesion": 0.0008,
+    "knowledge_rate": 0.0025,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0018
    },
    "name": "Moon Landing",
    "observation": "Two crewmen step onto the moon's grey dust, plant a flag and come home with a box of stones.",
@@ -1166,10 +1166,10 @@
   },
   "wide_body_hub_flights": {
    "effects": {
-    "travel_speed": 0.0037,
-    "trade_capacity": 0.0057,
-    "fuel_demand": 0.004,
-    "pollution": 0.003
+    "fuel_demand": 0.0016,
+    "pollution": 0.003,
+    "trade_capacity": 0.0035,
+    "travel_speed": 0.0037
    },
    "name": "Wide-Body Airliners",
    "observation": "Wide-bodied airliners carry hundreds at once to great hub airports, and flying becomes cheap enough for holidays.",
@@ -1178,10 +1178,10 @@
   "automated_high_bay_warehouses": {
    "effects": {
     "container_capacity": 0.008,
-    "storage_loss": -0.0052,
-    "labor_efficiency": 0.003,
-    "labor_demand": -0.003,
-    "food_storage": 0.002
+    "food_storage": 0.002,
+    "labor_demand": -0.0011,
+    "labor_efficiency": 0.0019,
+    "storage_loss": -0.0052
    },
    "name": "High-Bay Warehouses",
    "observation": "Stacker cranes run between racks forty pallets high, storing and fetching goods by punched instruction.",
@@ -1189,12 +1189,12 @@
   },
   "overnight_air_express": {
    "effects": {
-    "travel_speed": 0.0045,
-    "trade_capacity": 0.0069,
-    "task_coordination": 0.004,
-    "fuel_demand": 0.003,
+    "fuel_demand": 0.0012,
+    "logistics_endurance": 0.0047,
     "pollution": 0.002,
-    "logistics_endurance": 0.0047
+    "task_coordination": 0.0014,
+    "trade_capacity": 0.0042,
+    "travel_speed": 0.0045
    },
    "name": "Overnight Air Express",
    "observation": "Parcels from every city fly to one hub at midnight, are sorted, and fly out again before dawn.",
@@ -1203,11 +1203,11 @@
   },
   "scanned_product_barcodes": {
    "effects": {
-    "task_coordination": 0.006,
-    "storage_loss": -0.0078,
+    "labor_efficiency": 0.0025,
     "standardization": 0.004,
-    "labor_efficiency": 0.004,
-    "state_capacity": 0.001
+    "state_capacity": 0.0008,
+    "storage_loss": -0.0078,
+    "task_coordination": 0.0021
    },
    "name": "Bar Codes",
    "observation": "Every tin and packet carries a printed bar code, and the till reads the price and counts the stock.",
@@ -1216,11 +1216,11 @@
   },
   "just_in_time_supply": {
    "effects": {
-    "storage_loss": -0.0052,
-    "labor_efficiency": 0.004,
-    "labor_demand": -0.002,
+    "disaster_risk": 0.002,
+    "labor_demand": -0.0008,
+    "labor_efficiency": 0.0025,
     "logistics_endurance": -0.0062,
-    "disaster_risk": 0.002
+    "storage_loss": -0.0052
    },
    "name": "Just-in-Time Supply",
    "observation": "Parts arrive at the assembly line the hour they are needed, and the factory keeps almost no store.",
@@ -1229,10 +1229,10 @@
   },
   "transport_deregulation": {
    "effects": {
-    "trade_capacity": 0.0069,
+    "cohesion": -0.0003,
+    "injury_risk": 0.001,
     "institutional_rigidity": -0.004,
-    "cohesion": -0.002,
-    "injury_risk": 0.001
+    "trade_capacity": 0.0042
    },
    "name": "Transport Deregulation",
    "observation": "The licensing boards are abolished, and any carrier may run any route at any price.",
@@ -1250,9 +1250,9 @@
   },
   "electronic_shipping_documents": {
    "effects": {
-    "task_coordination": 0.004,
-    "trade_capacity": 0.0034,
-    "knowledge_preservation": 0.002
+    "knowledge_preservation": 0.0011,
+    "task_coordination": 0.0014,
+    "trade_capacity": 0.0021
    },
    "name": "Electronic Shipping Papers",
    "observation": "Bills of lading and customs papers pass between firms as electronic messages, and cargo no longer waits for the post.",
@@ -1260,10 +1260,10 @@
   },
   "supply_chain_management": {
    "effects": {
-    "task_coordination": 0.006,
-    "labor_efficiency": 0.004,
+    "labor_efficiency": 0.0025,
+    "logistics_endurance": -0.0047,
     "storage_loss": -0.0039,
-    "logistics_endurance": -0.0047
+    "task_coordination": 0.0021
    },
    "name": "Supply Chain Management",
    "observation": "Suppliers, carriers and sellers plan one flow of goods together, sharing forecasts and stock counts.",
@@ -1271,10 +1271,10 @@
   },
   "low_cost_point_airlines": {
    "effects": {
-    "travel_speed": 0.003,
-    "trade_capacity": 0.0034,
-    "fuel_demand": 0.004,
-    "pollution": 0.003
+    "fuel_demand": 0.0029,
+    "pollution": 0.003,
+    "trade_capacity": 0.0016,
+    "travel_speed": 0.003
    },
    "name": "Low-Cost Airlines",
    "observation": "Cheap airlines fly directly between secondary cities, and a weekend abroad costs less than a train fare.",
@@ -1282,10 +1282,10 @@
   },
   "open_satellite_positioning": {
    "effects": {
+    "injury_risk": -0.002,
     "route_speed": 0.0125,
     "survey_speed": 0.006,
-    "task_coordination": 0.004,
-    "injury_risk": -0.002
+    "task_coordination": 0.0017
    },
    "name": "Open Satellite Positioning",
    "observation": "A pocket receiver listening to a constellation of satellites tells anyone their place on earth to within a few paces.",
@@ -1294,11 +1294,11 @@
   },
   "online_order_parcel_tracking": {
    "effects": {
-    "trade_capacity": 0.0092,
-    "task_coordination": 0.004,
-    "labor_demand": 0.002,
+    "cohesion": -0.0005,
+    "labor_demand": 0.0001,
     "pollution": 0.002,
-    "cohesion": -0.002
+    "task_coordination": 0.0017,
+    "trade_capacity": 0.0042
    },
    "name": "Online Orders and Tracking",
    "observation": "A household orders from a seller in another city at midnight and watches its parcel cross the realm on a screen.",
@@ -1309,8 +1309,8 @@
   "shared_orbital_station": {
    "effects": {
     "knowledge_rate": 0.004,
-    "legitimacy": 0.002,
-    "labor_demand": 0.003
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0009
    },
    "name": "Shared Orbital Station",
    "observation": "Crews from several realms live aboard a station in orbit all year round, relieved by visiting ships.",
@@ -1320,7 +1320,7 @@
    "effects": {
     "injury_risk": -0.003,
     "naval_capacity": 0.003,
-    "security_efficiency": 0.001
+    "security_efficiency": 0.0007
    },
    "name": "Ship Identification Transponders",
    "observation": "Every large ship broadcasts her name, course and speed, and the coast stations see the whole traffic on one screen.",
@@ -1328,9 +1328,9 @@
   },
   "urban_congestion_charging": {
    "effects": {
-    "travel_speed": 0.0015,
-    "pollution": -0.003,
-    "legitimacy": -0.002
+    "legitimacy": -0.0004,
+    "pollution": -0.0008,
+    "travel_speed": 0.0015
    },
    "name": "Congestion Charges",
    "observation": "Drivers pay a daily charge to enter the town centre, and traffic thins within a week.",
@@ -1340,7 +1340,7 @@
   "rfid_pallet_tags": {
    "effects": {
     "storage_loss": -0.0052,
-    "task_coordination": 0.003
+    "task_coordination": 0.0013
    },
    "name": "Radio Pallet Tags",
    "observation": "Radio tags on every pallet are read as they pass through the warehouse door, without anyone scanning them.",
@@ -1357,11 +1357,11 @@
   },
   "ultra_large_container_ships": {
    "effects": {
-    "haul_capacity": 0.0075,
+    "disaster_risk": 0.002,
     "fuel_efficiency": 0.003,
-    "trade_capacity": 0.0046,
-    "water_pollution": 0.002,
-    "disaster_risk": 0.002
+    "haul_capacity": 0.0075,
+    "trade_capacity": 0.0021,
+    "water_pollution": 0.002
    },
    "name": "Ultra-Large Container Ships",
    "observation": "Container ships carrying twenty thousand boxes call at only a handful of giant ports.",
@@ -1379,9 +1379,9 @@
   },
   "app_ride_hailing": {
    "effects": {
-    "travel_speed": 0.0023,
-    "labor_efficiency": 0.001,
-    "cohesion": -0.002
+    "cohesion": -0.0004,
+    "labor_efficiency": 0.0008,
+    "travel_speed": 0.0023
    },
    "name": "Ride-Hailing",
    "observation": "A pocket telephone summons a nearby driver in a private car, and the fare is settled without cash.",
@@ -1390,10 +1390,10 @@
   },
   "warehouse_robot_fleets": {
    "effects": {
-    "labor_efficiency": 0.006,
+    "cohesion": -0.0002,
     "container_capacity": 0.0042,
-    "labor_demand": -0.004,
-    "cohesion": -0.001
+    "labor_demand": -0.0023,
+    "labor_efficiency": 0.0047
    },
    "name": "Warehouse Robots",
    "observation": "Squat robots carry whole shelving racks to the pickers, and the warehouse aisles fill with machines.",
@@ -1401,11 +1401,11 @@
   },
   "mass_battery_electric_cars": {
    "effects": {
-    "pollution": -0.006,
+    "ecological_pressure": 0.003,
     "fuel_demand": -0.004,
     "fuel_efficiency": 0.004,
-    "travel_speed": 0.0015,
-    "ecological_pressure": 0.003
+    "pollution": -0.0005,
+    "travel_speed": 0.0015
    },
    "name": "Battery-Electric Cars",
    "observation": "Battery cars roll silently through the town, charging overnight from a plug in the wall.",
@@ -1416,8 +1416,8 @@
   "reusable_orbital_boosters": {
    "effects": {
     "knowledge_rate": 0.003,
-    "trade_capacity": 0.0023,
-    "labor_demand": -0.002
+    "labor_demand": -0.0011,
+    "trade_capacity": 0.0023
    },
    "name": "Reusable Boosters",
    "observation": "The rocket's first stage flies back and lands upright on its own tail, ready to fly again.",
@@ -1425,8 +1425,8 @@
   },
   "battery_electric_buses": {
    "effects": {
-    "pollution": -0.004,
-    "fuel_demand": -0.002
+    "fuel_demand": -0.002,
+    "pollution": -0.0004
    },
    "name": "Electric Buses",
    "observation": "Battery buses charge at the depot overnight and run all day in near silence.",
@@ -1434,10 +1434,10 @@
   },
   "supply_chain_resilience_reviews": {
    "effects": {
+    "disaster_resilience": 0.0026,
+    "labor_demand": 0.0001,
     "logistics_endurance": 0.0078,
-    "disaster_resilience": 0.004,
     "storage_loss": -0.0026,
-    "labor_demand": 0.002,
     "trade_capacity": -0.0023
    },
    "name": "Supply Resilience Reviews",
@@ -1446,10 +1446,10 @@
   },
   "drone_parcel_delivery": {
    "effects": {
-    "travel_speed": 0.0015,
+    "labor_demand": -0.0006,
+    "legitimacy": -0.0002,
     "trade_capacity": 0.0023,
-    "labor_demand": -0.001,
-    "legitimacy": -0.001
+    "travel_speed": 0.0015
    },
    "name": "Drone Parcel Delivery",
    "observation": "Small drones drop parcels into gardens across licensed suburbs, to the complaints of the neighbours.",
@@ -1457,8 +1457,8 @@
   },
   "low_carbon_ship_fuels": {
    "effects": {
-    "pollution": -0.004,
-    "fuel_demand": 0.002,
+    "fuel_demand": 0.0004,
+    "pollution": -0.0004,
     "trade_capacity": -0.0023
    },
    "name": "Low-Carbon Ship Fuels",
@@ -1467,11 +1467,11 @@
   },
   "driverless_highway_freight": {
    "effects": {
+    "cohesion": -0.0005,
     "haul_capacity": 0.01,
-    "task_coordination": 0.003,
-    "labor_demand": -0.004,
     "injury_risk": -0.003,
-    "cohesion": -0.003
+    "labor_demand": -0.0023,
+    "task_coordination": 0.0018
    },
    "name": "Driverless Freight",
    "observation": "Lorries with no one at the wheel run the motorway corridors day and night.",
@@ -1481,12 +1481,772 @@
   },
   "electric_air_taxis": {
    "effects": {
-    "travel_speed": 0.0015,
-    "pollution": -0.001
+    "pollution": -0.0001,
+    "travel_speed": 0.0015
    },
    "name": "Electric Air Taxis",
    "observation": "Small electric craft lift four passengers from a rooftop pad and hop across the town.",
    "art": "res://assets/ui/research/logistics-v1.png"
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "canal_fly_boats": {
+    "food_output": -0.001,
+    "haul_capacity": 0.0037,
+    "labor_demand": 0.001,
+    "route_speed": 0.0025,
+    "travel_speed": 0.003
+   },
+   "public_plateway_hire": {
+    "haul_capacity": 0.0063,
+    "labor_demand": 0.001,
+    "logistics_endurance": 0.0016,
+    "route_speed": 0.0025,
+    "trade_capacity": 0.0023
+   },
+   "scheduled_river_steamers": {
+    "fuel_demand": 0.004,
+    "haul_capacity": 0.005,
+    "injury_risk": 0.002,
+    "logistics_endurance": 0.0031,
+    "pollution": 0.002,
+    "route_speed": 0.01,
+    "trade_capacity": 0.0069,
+    "travel_speed": 0.006
+   },
+   "passenger_canal_packets": {
+    "cohesion": 0.001,
+    "food_output": -0.001,
+    "travel_speed": 0.0023
+   },
+   "steam_estuary_ferries": {
+    "fuel_demand": 0.002,
+    "route_speed": 0.0037,
+    "trade_capacity": 0.0023,
+    "travel_speed": 0.003
+   },
+   "steam_harbour_tugs": {
+    "fuel_demand": 0.002,
+    "injury_risk": -0.002,
+    "naval_capacity": 0.006,
+    "route_speed": 0.0037
+   },
+   "town_omnibus_routes": {
+    "disease_exposure": 0.001,
+    "food_output": -0.001,
+    "labor_efficiency": 0.001,
+    "travel_speed": 0.0023
+   },
+   "public_steam_railway": {
+    "fuel_demand": 0.006,
+    "haul_capacity": 0.0187,
+    "injury_risk": 0.003,
+    "labor_demand": 0.003,
+    "logistics_endurance": 0.0124,
+    "pollution": 0.004,
+    "route_speed": 0.0125,
+    "timber_pressure": 0.002,
+    "trade_capacity": 0.0092,
+    "travel_speed": 0.006
+   },
+   "multitube_locomotive_boilers": {
+    "fuel_demand": 0.001,
+    "fuel_efficiency": 0.003,
+    "haul_capacity": 0.005,
+    "travel_speed": 0.003
+   },
+   "intercity_passenger_railway": {
+    "cohesion": 0.002,
+    "injury_risk": 0.002,
+    "labor_demand": 0.003,
+    "logistics_endurance": 0.0031,
+    "pollution": 0.002,
+    "route_speed": 0.01,
+    "state_capacity": 0.004,
+    "trade_capacity": 0.0069,
+    "travel_speed": 0.009
+   },
+   "rail_track_foundations": {
+    "haul_capacity": 0.0063,
+    "labor_demand": 0.002,
+    "logistics_endurance": 0.0031,
+    "repair_capacity": 0.003,
+    "route_speed": 0.005,
+    "timber_pressure": 0.002
+   },
+   "classed_freight_tariffs": {
+    "standardization": 0.002,
+    "state_capacity": 0.001,
+    "trade_capacity": 0.0046
+   },
+   "merchant_chronometer_issue": {
+    "injury_risk": -0.001,
+    "naval_capacity": 0.003,
+    "route_speed": 0.005
+   },
+   "ocean_steamship_line": {
+    "disease_exposure": 0.002,
+    "fuel_demand": 0.005,
+    "logistics_endurance": 0.0062,
+    "naval_capacity": 0.015,
+    "pollution": 0.003,
+    "route_speed": 0.01,
+    "trade_capacity": 0.0115,
+    "travel_speed": 0.0045
+   },
+   "printed_railway_timetables": {
+    "knowledge_preservation": 0.001,
+    "standardization": 0.002,
+    "task_coordination": 0.003,
+    "travel_speed": 0.0015
+   },
+   "prepaid_stamp_postage": {
+    "adoption_rate": 0.003,
+    "cohesion": 0.003,
+    "labor_demand": 0.001,
+    "state_capacity": 0.004,
+    "task_coordination": 0.004,
+    "trade_capacity": 0.0069
+   },
+   "screw_propeller_ships": {
+    "fuel_efficiency": 0.002,
+    "logistics_endurance": 0.0031,
+    "naval_capacity": 0.0075,
+    "route_speed": 0.0025
+   },
+   "steam_grain_elevators": {
+    "container_capacity": 0.0056,
+    "food_storage": 0.006,
+    "fuel_demand": 0.001,
+    "haul_capacity": 0.0037,
+    "labor_demand": -0.002,
+    "storage_loss": -0.0065
+   },
+   "iron_hulled_steamers": {
+    "container_capacity": 0.0042,
+    "fuel_demand": 0.002,
+    "logistics_endurance": 0.0031,
+    "naval_capacity": 0.008,
+    "timber_pressure": -0.003
+   },
+   "rail_express_parcels": {
+    "storage_loss": -0.0039,
+    "trade_capacity": 0.0046,
+    "travel_speed": 0.0015
+   },
+   "rail_gauge_standards": {
+    "haul_capacity": 0.0075,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.002,
+    "route_speed": 0.0075,
+    "standardization": 0.008,
+    "trade_capacity": 0.0046
+   },
+   "railway_clearing_house": {
+    "state_capacity": 0.001,
+    "task_coordination": 0.003,
+    "trade_capacity": 0.0046
+   },
+   "travelling_post_office_cars": {
+    "task_coordination": 0.002,
+    "travel_speed": 0.0023
+   },
+   "fast_clipper_hulls": {
+    "naval_capacity": 0.006,
+    "timber_pressure": 0.003,
+    "trade_capacity": 0.0034,
+    "travel_speed": 0.0023
+   },
+   "wind_current_passage_charts": {
+    "injury_risk": -0.001,
+    "logistics_endurance": 0.0031,
+    "route_speed": 0.0075
+   },
+   "telegraph_train_dispatch": {
+    "haul_capacity": 0.0025,
+    "injury_risk": -0.003,
+    "task_coordination": 0.004
+   },
+   "interlocked_rail_signals": {
+    "haul_capacity": 0.0025,
+    "injury_risk": -0.004,
+    "task_coordination": 0.002
+   },
+   "sleeping_dining_cars": {
+    "fatigue": -0.002,
+    "logistics_endurance": 0.0031,
+    "travel_speed": 0.0015
+   },
+   "ocean_coaling_stations": {
+    "fuel_demand": 0.002,
+    "legitimacy": -0.001,
+    "logistics_endurance": 0.008,
+    "naval_capacity": 0.006
+   },
+   "sea_collision_rules": {
+    "injury_risk": -0.004,
+    "naval_capacity": 0.003,
+    "standardization": 0.002
+   },
+   "underground_town_railway": {
+    "disease_exposure": 0.002,
+    "housing_output": 0.002,
+    "labor_demand": 0.002,
+    "pollution": 0.001,
+    "travel_speed": 0.0037
+   },
+   "compound_marine_engines": {
+    "fuel_demand": -0.002,
+    "fuel_efficiency": 0.004,
+    "logistics_endurance": 0.0062,
+    "naval_capacity": 0.0045
+   },
+   "crude_oil_pipelines": {
+    "disaster_risk": 0.002,
+    "ecological_pressure": 0.001,
+    "haul_capacity": 0.005,
+    "logistics_endurance": 0.0047,
+    "trade_capacity": 0.0034,
+    "water_pollution": 0.002
+   },
+   "rolled_steel_rails": {
+    "fuel_demand": 0.001,
+    "haul_capacity": 0.0037,
+    "repair_capacity": 0.004,
+    "route_speed": 0.0025
+   },
+   "continental_trunk_railway": {
+    "ecological_pressure": 0.004,
+    "haul_capacity": 0.01,
+    "hunting_yield": -0.003,
+    "injury_risk": 0.002,
+    "labor_demand": 0.004,
+    "legitimacy": -0.002,
+    "logistics_endurance": 0.0093,
+    "route_speed": 0.0125,
+    "state_capacity": 0.005,
+    "trade_capacity": 0.0092,
+    "travel_speed": 0.0045
+   },
+   "isthmus_ship_canal": {
+    "disaster_risk": 0.001,
+    "disease_exposure": 0.004,
+    "labor_demand": 0.006,
+    "logistics_endurance": 0.0093,
+    "naval_capacity": 0.012,
+    "route_speed": 0.0125,
+    "trade_capacity": 0.0115
+   },
+   "rail_vehicle_braking": {
+    "haul_capacity": 0.005,
+    "injury_risk": -0.004,
+    "travel_speed": 0.0015
+   },
+   "mail_order_parcel_trade": {
+    "adoption_rate": 0.002,
+    "trade_capacity": 0.0057
+   },
+   "automatic_rail_couplers": {
+    "haul_capacity": 0.0025,
+    "injury_risk": -0.004,
+    "labor_efficiency": 0.001
+   },
+   "interrealm_postal_union": {
+    "legitimacy": 0.001,
+    "state_capacity": 0.002,
+    "task_coordination": 0.003,
+    "trade_capacity": 0.0069
+   },
+   "hull_load_lines": {
+    "injury_risk": -0.004,
+    "naval_capacity": 0.0015,
+    "trade_capacity": -0.0011
+   },
+   "refrigerated_rail_cars": {
+    "container_capacity": 0.0028,
+    "food_spoilage": -0.004,
+    "food_storage": 0.006,
+    "logistics_endurance": 0.0031,
+    "storage_loss": -0.0078,
+    "trade_capacity": 0.0034
+   },
+   "triple_expansion_freighters": {
+    "fuel_demand": 0.001,
+    "fuel_efficiency": 0.004,
+    "haul_capacity": 0.005,
+    "logistics_endurance": 0.0047,
+    "trade_capacity": 0.0046
+   },
+   "railway_standard_time": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.001,
+    "standardization": 0.006,
+    "task_coordination": 0.008,
+    "travel_speed": 0.0015
+   },
+   "chain_drive_bicycle": {
+    "labor_efficiency": 0.001,
+    "travel_speed": 0.0023
+   },
+   "motor_carriage": {
+    "fuel_demand": 0.004,
+    "haul_capacity": 0.0037,
+    "injury_risk": 0.004,
+    "pollution": 0.003,
+    "travel_speed": 0.0045
+   },
+   "electric_street_tramways": {
+    "food_output": 0.001,
+    "housing_output": 0.002,
+    "sanitation": 0.001,
+    "travel_speed": 0.0037
+   },
+   "tramp_bulk_charters": {
+    "container_capacity": 0.0028,
+    "haul_capacity": 0.005,
+    "logistics_endurance": 0.0031,
+    "trade_capacity": 0.0069
+   },
+   "steam_turbine_ships": {
+    "fuel_demand": 0.002,
+    "naval_capacity": 0.006,
+    "travel_speed": 0.003
+   },
+   "hump_marshalling_yards": {
+    "haul_capacity": 0.005,
+    "injury_risk": 0.001,
+    "task_coordination": 0.002
+   },
+   "hull_condition_surveys": {
+    "injury_risk": -0.004,
+    "labor_demand": 0.001,
+    "naval_capacity": 0.0045,
+    "standardization": 0.002
+   },
+   "tar_bound_road_surfaces": {
+    "disease_exposure": -0.001,
+    "pollution": 0.001,
+    "route_speed": 0.0063,
+    "travel_speed": 0.0023
+   },
+   "driver_licensing": {
+    "injury_risk": -0.003,
+    "labor_demand": 0.001,
+    "state_capacity": 0.002
+   },
+   "motor_freight_lorries": {
+    "fuel_demand": 0.004,
+    "haul_capacity": 0.0075,
+    "injury_risk": 0.002,
+    "logistics_endurance": 0.0047,
+    "pollution": 0.003,
+    "route_speed": 0.0037
+   },
+   "motor_bus_routes": {
+    "fuel_demand": 0.002,
+    "pollution": 0.002,
+    "travel_speed": 0.003
+   },
+   "series_built_motor_car": {
+    "cohesion": 0.001,
+    "ecological_pressure": 0.003,
+    "fuel_demand": 0.008,
+    "haul_capacity": 0.005,
+    "housing_output": 0.002,
+    "injury_risk": 0.006,
+    "pollution": 0.006,
+    "travel_speed": 0.0075
+   },
+   "motor_road_fund": {
+    "construction_rate": 0.002,
+    "route_speed": 0.005,
+    "state_capacity": 0.002
+   },
+   "radio_direction_finding": {
+    "injury_risk": -0.002,
+    "naval_capacity": 0.003,
+    "route_speed": 0.005
+   },
+   "heavy_oil_motor_ships": {
+    "fuel_demand": 0.001,
+    "fuel_efficiency": 0.004,
+    "logistics_endurance": 0.008,
+    "naval_capacity": 0.0045,
+    "water_pollution": 0.002
+   },
+   "wireless_distress_watch": {
+    "injury_risk": -0.004,
+    "labor_demand": 0.001,
+    "naval_capacity": 0.0015
+   },
+   "state_parcel_post": {
+    "logistics_endurance": 0.0016,
+    "state_capacity": 0.002,
+    "trade_capacity": 0.0046
+   },
+   "lock_ship_canal_divide": {
+    "disease_exposure": 0.003,
+    "ecological_pressure": 0.004,
+    "labor_demand": 0.006,
+    "legitimacy": -0.001,
+    "naval_capacity": 0.009,
+    "route_speed": 0.0125,
+    "trade_capacity": 0.0092
+   },
+   "electric_traffic_signals": {
+    "injury_risk": -0.003,
+    "task_coordination": 0.002
+   },
+   "roadside_fuel_stations": {
+    "fuel_demand": 0.002,
+    "logistics_endurance": 0.0062,
+    "travel_speed": 0.0015,
+    "water_pollution": 0.001
+   },
+   "scheduled_air_mail": {
+    "fuel_demand": 0.002,
+    "injury_risk": 0.002,
+    "trade_capacity": 0.0046,
+    "travel_speed": 0.006
+   },
+   "passenger_air_service": {
+    "fuel_demand": 0.003,
+    "pollution": 0.002,
+    "trade_capacity": 0.0034,
+    "travel_speed": 0.0037
+   },
+   "state_railway_administration": {
+    "haul_capacity": 0.0025,
+    "institutional_rigidity": 0.003,
+    "standardization": 0.003,
+    "state_capacity": 0.004
+   },
+   "limited_access_motorways": {
+    "ecological_pressure": 0.005,
+    "fuel_demand": 0.004,
+    "haul_capacity": 0.0075,
+    "labor_demand": 0.004,
+    "logistics_endurance": 0.0062,
+    "pollution": 0.003,
+    "route_speed": 0.0125,
+    "soil_productivity": -0.002,
+    "travel_speed": 0.006
+   },
+   "tractor_trailer_rigs": {
+    "fuel_demand": 0.003,
+    "haul_capacity": 0.0075,
+    "logistics_endurance": 0.0031,
+    "pollution": 0.002,
+    "trade_capacity": 0.0034
+   },
+   "centralized_traffic_control": {
+    "haul_capacity": 0.0037,
+    "labor_demand": -0.002,
+    "task_coordination": 0.004
+   },
+   "airway_radio_beacons": {
+    "injury_risk": -0.002,
+    "route_speed": 0.005
+   },
+   "airport_control_towers": {
+    "injury_risk": -0.003,
+    "task_coordination": 0.002
+   },
+   "pallet_forklift_handling": {
+    "container_capacity": 0.007,
+    "food_storage": 0.002,
+    "haul_capacity": 0.01,
+    "injury_risk": 0.002,
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.006,
+    "storage_loss": -0.0065
+   },
+   "road_haulage_licensing": {
+    "injury_risk": -0.001,
+    "institutional_rigidity": 0.002,
+    "state_capacity": 0.002,
+    "trade_capacity": -0.0011
+   },
+   "oil_electric_locomotives": {
+    "fuel_demand": 0.002,
+    "fuel_efficiency": 0.006,
+    "haul_capacity": 0.01,
+    "labor_demand": -0.004,
+    "pollution": -0.002,
+    "repair_capacity": 0.004
+   },
+   "metal_monoplane_airliners": {
+    "fuel_demand": 0.003,
+    "trade_capacity": 0.0034,
+    "travel_speed": 0.0037
+   },
+   "pressurized_airliner_cabins": {
+    "injury_risk": -0.002,
+    "travel_speed": 0.0023
+   },
+   "civil_aviation_convention": {
+    "legitimacy": 0.001,
+    "standardization": 0.002,
+    "trade_capacity": 0.0046
+   },
+   "radar_approach_control": {
+    "injury_risk": -0.003,
+    "task_coordination": 0.002
+   },
+   "sustained_airlift": {
+    "fuel_demand": 0.004,
+    "haul_capacity": 0.005,
+    "logistics_endurance": 0.008,
+    "state_capacity": 0.002
+   },
+   "jet_airliners": {
+    "disaster_risk": 0.001,
+    "disease_exposure": 0.003,
+    "fuel_demand": 0.006,
+    "pollution": 0.004,
+    "trade_capacity": 0.0069,
+    "travel_speed": 0.009
+   },
+   "roll_on_roll_off_ferries": {
+    "haul_capacity": 0.005,
+    "injury_risk": 0.001,
+    "travel_speed": 0.0023
+   },
+   "intermodal_shipping_containers": {
+    "cohesion": -0.002,
+    "container_capacity": 0.0112,
+    "food_storage": 0.004,
+    "haul_capacity": 0.015,
+    "labor_demand": -0.006,
+    "labor_efficiency": 0.004,
+    "logistics_endurance": 0.0093,
+    "storage_loss": -0.0104,
+    "trade_capacity": 0.0138
+   },
+   "national_highway_network": {
+    "ecological_pressure": 0.005,
+    "fuel_demand": 0.004,
+    "haul_capacity": 0.0075,
+    "labor_demand": 0.003,
+    "logistics_endurance": 0.0062,
+    "pollution": 0.004,
+    "route_speed": 0.0125,
+    "state_capacity": 0.003,
+    "travel_speed": 0.0045
+   },
+   "orbital_satellite_launch": {
+    "fuel_demand": 0.002,
+    "knowledge_rate": 0.004,
+    "labor_demand": 0.004,
+    "route_speed": 0.0037,
+    "state_capacity": 0.003
+   },
+   "very_large_tankers": {
+    "disaster_risk": 0.003,
+    "ecological_pressure": 0.002,
+    "fuel_efficiency": 0.003,
+    "haul_capacity": 0.0075,
+    "water_pollution": 0.004
+   },
+   "container_gantry_terminals": {
+    "cohesion": -0.001,
+    "haul_capacity": 0.0075,
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.003
+   },
+   "bulk_unit_trains": {
+    "container_capacity": 0.0028,
+    "fuel_efficiency": 0.002,
+    "haul_capacity": 0.0063
+   },
+   "dedicated_bulk_carriers": {
+    "container_capacity": 0.0042,
+    "haul_capacity": 0.0063,
+    "trade_capacity": 0.0034
+   },
+   "computer_seat_reservations": {
+    "task_coordination": 0.003,
+    "trade_capacity": 0.0023
+   },
+   "crewed_orbital_flight": {
+    "cohesion": 0.002,
+    "knowledge_rate": 0.003,
+    "labor_demand": 0.003
+   },
+   "high_speed_rail_lines": {
+    "fuel_efficiency": 0.003,
+    "labor_demand": 0.004,
+    "pollution": -0.002,
+    "travel_speed": 0.0075
+   },
+   "standard_container_sizes": {
+    "haul_capacity": 0.0037,
+    "standardization": 0.006,
+    "trade_capacity": 0.0046
+   },
+   "crewed_lunar_landing": {
+    "cohesion": 0.004,
+    "knowledge_rate": 0.004,
+    "labor_demand": 0.004,
+    "legitimacy": 0.003,
+    "state_capacity": 0.002
+   },
+   "wide_body_hub_flights": {
+    "fuel_demand": 0.004,
+    "pollution": 0.003,
+    "trade_capacity": 0.0057,
+    "travel_speed": 0.0037
+   },
+   "automated_high_bay_warehouses": {
+    "container_capacity": 0.008,
+    "food_storage": 0.002,
+    "labor_demand": -0.003,
+    "labor_efficiency": 0.003,
+    "storage_loss": -0.0052
+   },
+   "overnight_air_express": {
+    "fuel_demand": 0.003,
+    "logistics_endurance": 0.0047,
+    "pollution": 0.002,
+    "task_coordination": 0.004,
+    "trade_capacity": 0.0069,
+    "travel_speed": 0.0045
+   },
+   "scanned_product_barcodes": {
+    "labor_efficiency": 0.004,
+    "standardization": 0.004,
+    "state_capacity": 0.001,
+    "storage_loss": -0.0078,
+    "task_coordination": 0.006
+   },
+   "just_in_time_supply": {
+    "disaster_risk": 0.002,
+    "labor_demand": -0.002,
+    "labor_efficiency": 0.004,
+    "logistics_endurance": -0.0062,
+    "storage_loss": -0.0052
+   },
+   "transport_deregulation": {
+    "cohesion": -0.002,
+    "injury_risk": 0.001,
+    "institutional_rigidity": -0.004,
+    "trade_capacity": 0.0069
+   },
+   "electronic_shipping_documents": {
+    "knowledge_preservation": 0.002,
+    "task_coordination": 0.004,
+    "trade_capacity": 0.0034
+   },
+   "supply_chain_management": {
+    "labor_efficiency": 0.004,
+    "logistics_endurance": -0.0047,
+    "storage_loss": -0.0039,
+    "task_coordination": 0.006
+   },
+   "low_cost_point_airlines": {
+    "fuel_demand": 0.004,
+    "pollution": 0.003,
+    "trade_capacity": 0.0034,
+    "travel_speed": 0.003
+   },
+   "open_satellite_positioning": {
+    "injury_risk": -0.002,
+    "route_speed": 0.0125,
+    "survey_speed": 0.006,
+    "task_coordination": 0.004
+   },
+   "online_order_parcel_tracking": {
+    "cohesion": -0.002,
+    "labor_demand": 0.002,
+    "pollution": 0.002,
+    "task_coordination": 0.004,
+    "trade_capacity": 0.0092
+   },
+   "shared_orbital_station": {
+    "knowledge_rate": 0.004,
+    "labor_demand": 0.003,
+    "legitimacy": 0.002
+   },
+   "automatic_ship_identification": {
+    "injury_risk": -0.003,
+    "naval_capacity": 0.003,
+    "security_efficiency": 0.001
+   },
+   "urban_congestion_charging": {
+    "legitimacy": -0.002,
+    "pollution": -0.003,
+    "travel_speed": 0.0015
+   },
+   "rfid_pallet_tags": {
+    "storage_loss": -0.0052,
+    "task_coordination": 0.003
+   },
+   "ultra_large_container_ships": {
+    "disaster_risk": 0.002,
+    "fuel_efficiency": 0.003,
+    "haul_capacity": 0.0075,
+    "trade_capacity": 0.0046,
+    "water_pollution": 0.002
+   },
+   "app_ride_hailing": {
+    "cohesion": -0.002,
+    "labor_efficiency": 0.001,
+    "travel_speed": 0.0023
+   },
+   "warehouse_robot_fleets": {
+    "cohesion": -0.001,
+    "container_capacity": 0.0042,
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.006
+   },
+   "mass_battery_electric_cars": {
+    "ecological_pressure": 0.003,
+    "fuel_demand": -0.004,
+    "fuel_efficiency": 0.004,
+    "pollution": -0.006,
+    "travel_speed": 0.0015
+   },
+   "reusable_orbital_boosters": {
+    "knowledge_rate": 0.003,
+    "labor_demand": -0.002,
+    "trade_capacity": 0.0023
+   },
+   "battery_electric_buses": {
+    "fuel_demand": -0.002,
+    "pollution": -0.004
+   },
+   "supply_chain_resilience_reviews": {
+    "disaster_resilience": 0.004,
+    "labor_demand": 0.002,
+    "logistics_endurance": 0.0078,
+    "storage_loss": -0.0026,
+    "trade_capacity": -0.0023
+   },
+   "drone_parcel_delivery": {
+    "labor_demand": -0.001,
+    "legitimacy": -0.001,
+    "trade_capacity": 0.0023,
+    "travel_speed": 0.0015
+   },
+   "low_carbon_ship_fuels": {
+    "fuel_demand": 0.002,
+    "pollution": -0.004,
+    "trade_capacity": -0.0023
+   },
+   "driverless_highway_freight": {
+    "cohesion": -0.003,
+    "haul_capacity": 0.01,
+    "injury_risk": -0.003,
+    "labor_demand": -0.004,
+    "task_coordination": 0.003
+   },
+   "electric_air_taxis": {
+    "pollution": -0.001,
+    "travel_speed": 0.0015
+   }
   }
  }
 }

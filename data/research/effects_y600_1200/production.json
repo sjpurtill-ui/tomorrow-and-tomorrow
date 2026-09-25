@@ -5,25 +5,25 @@
   "bronze_scrap_remelting": {
    "effects": {
     "fuel_demand": 0.002,
-    "metal_yield": 0.006,
-    "repair_capacity": 0.003
+    "metal_yield": 0.0029,
+    "repair_capacity": 0.0028
    },
    "art": "res://assets/ui/research/subjects/bronze_alloying-v1.png",
    "observation": "Broken axes and cracked cauldrons are sorted by color and ring, and each heap goes back into its own crucible."
   },
   "glass_ingot_casting": {
    "effects": {
-    "craft_output": 0.0014,
-    "standardization": 0.004,
-    "trade_capacity": 0.0017
+    "craft_output": 0.0002,
+    "standardization": 0.0015,
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/paper/core_formed_glass.png",
    "observation": "Blue glass is poured into round clay moulds, and the cakes travel by ship to workshops that cannot melt their own."
   },
   "mandrel_wound_beads": {
    "effects": {
-    "craft_output": 0.0021,
-    "trade_capacity": 0.0014
+    "craft_output": 0.0003,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/paper/core_formed_glass.png",
    "observation": "A thread of hot glass wound on a copper rod cools into a bead, and a practiced hand makes a hundred before noon."
@@ -39,9 +39,9 @@
   },
   "shellfish_purple_dye": {
    "effects": {
-    "craft_output": 0.0014,
-    "legitimacy": 0.003,
-    "trade_capacity": 0.0028,
+    "craft_output": 0.0002,
+    "legitimacy": 0.0004,
+    "trade_capacity": 0.0006,
     "water_pollution": 0.004
    },
    "art": "res://assets/ui/research/paper/textile_dye_extraction.png",
@@ -50,18 +50,18 @@
   },
   "inlay_carving": {
    "effects": {
-    "craft_output": 0.0021,
-    "legitimacy": 0.002,
-    "trade_capacity": 0.001
+    "craft_output": 0.0003,
+    "legitimacy": 0.0003,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/mineral_pigment_preparation.png",
    "observation": "Carvers set slivers of ivory and shell into a chair back until the wood hardly shows."
   },
   "fine_linen_counts": {
    "effects": {
-    "craft_output": 0.0021,
+    "craft_output": 0.0003,
     "fiber_yield": 0.003,
-    "trade_capacity": 0.0017
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/paper/plain_weaving.png",
    "observation": "The finest linen holds so many threads to a finger's breadth that a folded sheet passes through a ring."
@@ -69,7 +69,7 @@
   "clay_tuyere_draft": {
    "effects": {
     "fuel_efficiency": 0.006,
-    "metal_yield": 0.008
+    "metal_yield": 0.0039
    },
    "art": "res://assets/ui/research/subjects/copper_smelting-v2.png",
    "observation": "A clay nozzle set in the furnace wall carries the bellows' breath straight into the heart of the charcoal."
@@ -78,7 +78,7 @@
    "effects": {
     "extraction_yield": 0.004,
     "health_risk": 0.002,
-    "metal_yield": 0.007,
+    "metal_yield": 0.0034,
     "pollution": 0.004
    },
    "art": "res://assets/ui/research/subjects/ore_assaying-v1.png",
@@ -95,9 +95,9 @@
   },
   "bloomery_smelting": {
    "effects": {
-    "craft_output": 0.0042,
+    "craft_output": 0.0017,
     "fuel_demand": 0.012,
-    "metal_yield": 0.02,
+    "metal_yield": 0.003,
     "pollution": 0.006,
     "timber_pressure": 0.01,
     "tool_quality": 0.0102
@@ -112,7 +112,7 @@
   "iron_assaying": {
    "effects": {
     "extraction_yield": 0.003,
-    "metal_yield": 0.006,
+    "metal_yield": 0.0009,
     "survey_speed": 0.006
    },
    "art": "res://assets/ui/research/subjects/iron_assaying-v1.png"
@@ -120,14 +120,14 @@
   "bloomery_charge_control": {
    "effects": {
     "fuel_efficiency": 0.006,
-    "metal_yield": 0.008
+    "metal_yield": 0.0012
    },
    "art": "res://assets/ui/research/subjects/bloomery_smelting-v1.png"
   },
   "bloom_consolidation": {
    "effects": {
     "fuel_demand": 0.003,
-    "metal_yield": 0.006,
+    "metal_yield": 0.0009,
     "tool_quality": 0.0043
    },
    "art": "res://assets/ui/research/subjects/forge_welding-v1.png",
@@ -137,15 +137,15 @@
    "effects": {
     "construction_rate": 0.0024,
     "fuel_demand": 0.004,
-    "repair_capacity": 0.012,
+    "repair_capacity": 0.0016,
     "tool_quality": 0.0127
    },
    "art": "res://assets/ui/research/subjects/forge_welding-v1.png"
   },
   "smithing_tool_sets": {
    "effects": {
-    "craft_output": 0.0028,
-    "repair_capacity": 0.006,
+    "craft_output": 0.0011,
+    "repair_capacity": 0.0008,
     "tool_quality": 0.0068
    },
    "art": "res://assets/ui/research/subjects/forge_welding-v1.png",
@@ -154,7 +154,7 @@
   "slag_tapping": {
    "effects": {
     "fuel_efficiency": 0.004,
-    "metal_yield": 0.008,
+    "metal_yield": 0.0012,
     "pollution": 0.002
    },
    "art": "res://assets/ui/research/subjects/refractory_furnaces-v1.png",
@@ -162,8 +162,8 @@
   },
   "bloom_fracture_grading": {
    "effects": {
-    "metal_yield": 0.002,
-    "standardization": 0.005,
+    "metal_yield": 0.0003,
+    "standardization": 0.0014,
     "tool_quality": 0.0034
    },
    "art": "res://assets/ui/research/subjects/iron_assaying-v1.png",
@@ -171,8 +171,8 @@
   },
   "iron_farm_tools": {
    "effects": {
-    "cultivation_yield": 0.008,
-    "labor_efficiency": 0.005,
+    "cultivation_yield": 0.0013,
+    "labor_efficiency": 0.0004,
     "soil_productivity": 0.003,
     "tool_quality": 0.0034
    },
@@ -182,8 +182,8 @@
   },
   "mine_drainage": {
    "effects": {
-    "labor_demand": 0.004,
-    "metal_yield": 0.006,
+    "labor_demand": 0.0002,
+    "metal_yield": 0.0032,
     "mine_safety": 0.008,
     "mining_output": 0.008
    },
@@ -191,8 +191,8 @@
   },
   "ash_lye_cleansers": {
    "effects": {
-    "craft_output": 0.0014,
-    "health_protection": 0.002,
+    "craft_output": 0.0006,
+    "health_protection": 0.0012,
     "sanitation": 0.004
    },
    "art": "res://assets/ui/research/paper/hide_tanning.png",
@@ -202,7 +202,7 @@
    "effects": {
     "fuel_demand": 0.004,
     "tool_quality": 0.0127,
-    "warfare_readiness": 0.006
+    "warfare_readiness": 0.0005
    },
    "art": "res://assets/ui/research/paper/surface_carburization.png",
    "production_contract": "Iron pieces are packed in sealed pots of charcoal and held at a steady red heat, gaining a hard steel skin while the core stays tough. Each batch consumes metal, charcoal, fuel, tooling and finite work; the discovery grants no stock."
@@ -211,21 +211,21 @@
    "effects": {
     "extraction_yield": 0.006,
     "tool_quality": 0.017,
-    "warfare_readiness": 0.008
+    "warfare_readiness": 0.0007
    },
    "art": "res://assets/ui/research/subjects/hardened_edges-v1.png",
    "ability_reason": "A carburized edge plunged into water becomes hard enough to outcut bronze and hold its edge far longer."
   },
   "wire_drawing": {
    "effects": {
-    "craft_output": 0.0028,
-    "trade_capacity": 0.001
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/paper/steel_wire_drawing.png"
   },
   "edge_tempering": {
    "effects": {
-    "repair_capacity": 0.004,
+    "repair_capacity": 0.001,
     "tool_quality": 0.008
    },
    "art": "res://assets/ui/research/subjects/hardened_edges-v1.png",
@@ -233,25 +233,25 @@
   },
   "piled_blade_welding": {
    "effects": {
-    "craft_output": 0.0014,
+    "craft_output": 0.0006,
     "tool_quality": 0.0051,
-    "warfare_readiness": 0.006
+    "warfare_readiness": 0.0005
    },
    "art": "res://assets/ui/research/subjects/forge_welding-v1.png",
    "observation": "Strips of soft and hard iron are stacked, welded and drawn out together into one tough blade."
   },
   "forged_iron_nails": {
    "effects": {
-    "construction_rate": 0.0036,
-    "housing_output": 0.004,
-    "repair_capacity": 0.003
+    "construction_rate": 0.001,
+    "housing_output": 0.0021,
+    "repair_capacity": 0.0008
    },
    "art": "res://assets/ui/research/subjects/joinery-v2.png",
    "observation": "A smith heads iron nails by the hundred in a nail plate, and the shipwright clenches them over iron washers."
   },
   "iron_stone_chisels": {
    "effects": {
-    "construction_rate": 0.0024,
+    "construction_rate": 0.0006,
     "stone_yield": 0.008,
     "tool_quality": 0.0026
    },
@@ -260,8 +260,8 @@
   },
   "iron_files_rasps": {
    "effects": {
-    "repair_capacity": 0.005,
-    "standardization": 0.003,
+    "repair_capacity": 0.0013,
+    "standardization": 0.0017,
     "tool_quality": 0.0043
    },
    "art": "res://assets/ui/research/subjects/hafted_tools-v1.png",
@@ -270,34 +270,34 @@
   "paired_bag_bellows": {
    "effects": {
     "fuel_efficiency": 0.006,
-    "metal_yield": 0.008
+    "metal_yield": 0.0043
    },
    "art": "res://assets/ui/research/subjects/copper_smelting-v2.png",
    "observation": "Two goatskin bags worked in turn keep the blast from ever pausing, and the furnace holds its white heat."
   },
   "tablet_weaving": {
    "effects": {
-    "craft_output": 0.0021,
+    "craft_output": 0.0004,
     "fiber_yield": 0.002,
-    "trade_capacity": 0.0007
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/paper/plain_weaving.png",
    "observation": "Square tablets threaded at their corners are turned together, and a patterned band grows as long as the warp."
   },
   "glazed_relief_bricks": {
    "effects": {
-    "craft_output": 0.0021,
-    "disaster_resilience": 0.002,
+    "craft_output": 0.0004,
+    "disaster_resilience": 0.0007,
     "fuel_demand": 0.003,
-    "legitimacy": 0.005
+    "legitimacy": 0.0003
    },
    "art": "res://assets/ui/research/paper/ceramic_glaze_formulation.png",
    "observation": "Brightly glazed bricks, each moulded with part of a beast, fit together into a lion striding along the gate wall."
   },
   "reduction_vat_blue_dye": {
    "effects": {
-    "craft_output": 0.0021,
-    "trade_capacity": 0.0017,
+    "craft_output": 0.0004,
+    "trade_capacity": 0.0002,
     "water_pollution": 0.003
    },
    "art": "res://assets/ui/research/paper/textile_dye_fixation.png",
@@ -306,16 +306,16 @@
   "spring_shears": {
    "effects": {
     "fiber_yield": 0.008,
-    "labor_efficiency": 0.003
+    "labor_efficiency": 0.0005
    },
    "art": "res://assets/ui/research/subjects/fiber_grading-v1.png",
    "observation": "Iron shears that spring open by themselves clip a fleece whole where plucking once tore it."
   },
   "pole_lathe_turning": {
    "effects": {
-    "craft_output": 0.0028,
-    "repair_capacity": 0.003,
-    "standardization": 0.003
+    "craft_output": 0.0005,
+    "repair_capacity": 0.0023,
+    "standardization": 0.0006
    },
    "art": "res://assets/ui/research/paper/bow_drill_drive.png",
    "observation": "A cord from a springy pole wraps the work, and the treadle spins bowls and chair legs round and true."
@@ -323,18 +323,18 @@
   "fused_cane_glass": {
    "effects": {
     "container_capacity": 0.002,
-    "craft_output": 0.0021,
-    "trade_capacity": 0.0017
+    "craft_output": 0.0004,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/core_formed_glass.png",
    "observation": "Slices of colored glass rod are packed over a mould and slumped in the kiln into a bowl of flowers."
   },
   "lead_sheet_rolling": {
    "effects": {
-    "construction_rate": 0.0018,
-    "craft_output": 0.0021,
+    "construction_rate": 0.0003,
+    "craft_output": 0.0004,
     "health_risk": 0.002,
-    "water_access": 0.003
+    "water_access": 0.0003
    },
    "art": "res://assets/ui/research/paper/silver_cupellation.png",
    "observation": "Refined lead is cast on a bed of sand and beaten into broad sheet for roofs, tank linings and pipes.",
@@ -343,10 +343,10 @@
   "argentiferous_lead_working": {
    "effects": {
     "health_risk": 0.004,
-    "metal_yield": 0.008,
+    "metal_yield": 0.0075,
     "pollution": 0.006,
     "timber_pressure": 0.004,
-    "trade_capacity": 0.0028
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/paper/silver_cupellation.png",
    "observation": "The miners follow the lead veins for the silver in them, and the smelting hearths leave the hillside grey and bare.",
@@ -354,10 +354,10 @@
   },
   "die_struck_coinage": {
    "effects": {
-    "legitimacy": 0.004,
-    "standardization": 0.01,
-    "state_capacity": 0.006,
-    "trade_capacity": 0.007
+    "legitimacy": 0.0002,
+    "standardization": 0.0022,
+    "state_capacity": 0.0008,
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png",
    "observation": "Blanks of weighed silver are laid on an engraved anvil and struck with a punch, and each piece carries the city's badge.",
@@ -367,9 +367,9 @@
   "three_stage_gloss_firing": {
    "effects": {
     "container_capacity": 0.003,
-    "craft_output": 0.0028,
+    "craft_output": 0.0005,
     "fuel_demand": 0.002,
-    "trade_capacity": 0.0017
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/kiln_control-v1.png",
    "observation": "The kiln is fired bright, then choked with green wood, then cleared again, and the pots come out red and glossy black."
@@ -377,24 +377,24 @@
   "iron_tyre_fitting": {
    "effects": {
     "haul_capacity": 0.006,
-    "repair_capacity": 0.004,
-    "route_speed": 0.003
+    "repair_capacity": 0.0014,
+    "route_speed": 0.0009
    },
    "art": "res://assets/ui/research/paper/felloe_jointing.png"
   },
   "knotted_pile_rugs": {
    "effects": {
-    "craft_output": 0.0021,
-    "housing_output": 0.002,
-    "trade_capacity": 0.0017
+    "craft_output": 0.0003,
+    "housing_output": 0.0006,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/warp_weighted_looms.png",
    "observation": "Wool tufts knotted row by row around the warp make a rug thick enough to sleep on through a mountain winter."
   },
   "decolorized_clear_glass": {
    "effects": {
-    "craft_output": 0.0028,
-    "trade_capacity": 0.0014
+    "craft_output": 0.0004,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/glass_batch_composition_control.png",
    "observation": "A pinch of a dark mineral in the batch clears the green from the glass, and the cup shows the wine's true color.",
@@ -409,18 +409,18 @@
   },
   "moulded_terracotta_series": {
    "effects": {
-    "construction_rate": 0.0018,
-    "craft_output": 0.0021,
-    "standardization": 0.006
+    "construction_rate": 0.0004,
+    "craft_output": 0.0003,
+    "standardization": 0.0005
    },
    "art": "res://assets/ui/research/subjects/clay_shaping-v1.png",
    "observation": "Roof ornaments and votive figures are pressed from the same two-piece moulds, a hundred alike from each."
   },
   "liquid_iron_furnaces": {
    "effects": {
-    "craft_output": 0.0056,
+    "craft_output": 0.0008,
     "fuel_demand": 0.012,
-    "metal_yield": 0.02,
+    "metal_yield": 0.0075,
     "pollution": 0.008,
     "timber_pressure": 0.01
    },
@@ -440,8 +440,8 @@
   "stamped_capacity_amphorae": {
    "effects": {
     "container_capacity": 0.004,
-    "standardization": 0.006,
-    "trade_capacity": 0.0017
+    "standardization": 0.0005,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
    "observation": "Each transport jar is stamped at the handle with its potter and its measure, and merchants stop re-measuring the cargo."
@@ -449,7 +449,7 @@
   "vessel_tinning": {
    "effects": {
     "container_capacity": 0.003,
-    "craft_output": 0.0014,
+    "craft_output": 0.0002,
     "health_risk": -0.002
    },
    "art": "res://assets/ui/research/subjects/bronze_alloying-v1.png",
@@ -466,7 +466,7 @@
   "sloped_climbing_kilns": {
    "effects": {
     "container_capacity": 0.004,
-    "craft_output": 0.0042,
+    "craft_output": 0.0013,
     "fuel_efficiency": 0.006,
     "timber_pressure": 0.004
    },
@@ -475,7 +475,7 @@
   },
   "cast_iron_annealing": {
    "effects": {
-    "cultivation_yield": 0.003,
+    "cultivation_yield": 0.0004,
     "fuel_demand": 0.004,
     "metal_yield": 0.004,
     "tool_quality": 0.0051
@@ -485,9 +485,9 @@
   },
   "gold_thread_embroidery": {
    "effects": {
-    "craft_output": 0.0014,
-    "legitimacy": 0.004,
-    "trade_capacity": 0.0014
+    "craft_output": 0.0004,
+    "legitimacy": 0.0002,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/textile_braiding.png",
    "observation": "Gold beaten thin and wound around a thread is couched onto a robe, and the wearer glitters at every step."
@@ -495,9 +495,9 @@
   "mercury_fire_gilding": {
    "effects": {
     "health_risk": 0.006,
-    "legitimacy": 0.004,
+    "legitimacy": 0.0002,
     "pollution": 0.003,
-    "trade_capacity": 0.001
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/paper/silver_cupellation.png",
    "observation": "Gold dissolved in quicksilver is brushed onto bronze, and the fire drives off the poison vapor and leaves the gold behind.",
@@ -513,19 +513,19 @@
   },
   "gem_cutting_wheel": {
    "effects": {
-    "craft_output": 0.0021,
-    "trade_capacity": 0.0014
+    "craft_output": 0.0007,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/bow_drill_drive.png",
    "observation": "A spinning copper wheel fed with emery grit cuts facets and seal designs into stones too hard for any graver."
   },
   "water_mills": {
    "effects": {
-    "craft_output": 0.0056,
+    "craft_output": 0.0017,
     "ecological_pressure": 0.004,
-    "food_output": 0.015,
-    "labor_demand": -0.008,
-    "labor_efficiency": 0.01
+    "food_output": 0.0021,
+    "labor_demand": -0.0005,
+    "labor_efficiency": 0.0016
    },
    "art": "res://assets/ui/research/subjects/water_mills-v1.png",
    "ability_reason": "A wheel in the stream turns the millstones all day and night, freeing the hands that ground grain every morning."
@@ -534,8 +534,8 @@
    "effects": {
     "fuel_demand": 0.006,
     "tool_quality": 0.017,
-    "trade_capacity": 0.0021,
-    "warfare_readiness": 0.012
+    "trade_capacity": 0.0003,
+    "warfare_readiness": 0.0013
    },
    "art": "res://assets/ui/research/paper/ceramic_crucibles.png",
    "observation": "Iron and charred leaves sealed in clay pots are melted for a day, and the cakes forge into blades with a rippled sheen.",
@@ -551,8 +551,8 @@
   },
   "resist_dyeing": {
    "effects": {
-    "craft_output": 0.0021,
-    "trade_capacity": 0.0014,
+    "craft_output": 0.0006,
+    "trade_capacity": 0.0001,
     "water_pollution": 0.002
    },
    "art": "res://assets/ui/research/paper/resist_dye_patterning.png",
@@ -560,7 +560,7 @@
   },
   "mine_drainage_screws": {
    "effects": {
-    "labor_demand": 0.004,
+    "labor_demand": 0.0002,
     "metal_yield": 0.004,
     "mine_safety": 0.006,
     "mining_output": 0.008
@@ -570,35 +570,35 @@
   },
   "moulded_glass_gems": {
    "effects": {
-    "standardization": 0.003,
-    "trade_capacity": 0.0014
+    "standardization": 0.0004,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/paper/core_formed_glass.png",
    "observation": "Colored glass pressed into gem moulds turns out seal stones by the tray for buyers who cannot afford real ones."
   },
   "drawloom_pattern_control": {
    "effects": {
-    "craft_output": 0.0056,
+    "craft_output": 0.0016,
     "fiber_yield": 0.002,
-    "labor_demand": 0.003,
-    "trade_capacity": 0.0035
+    "labor_demand": 0.0002,
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/paper/drawloom_pattern_control.png",
    "observation": "A helper perched above the loom pulls the pattern cords in turn, and figured beasts march across the cloth."
   },
   "treadle_frame_loom": {
    "effects": {
-    "craft_output": 0.0028,
+    "craft_output": 0.0008,
     "fiber_yield": 0.005,
-    "labor_efficiency": 0.005
+    "labor_efficiency": 0.0011
    },
    "art": "res://assets/ui/research/paper/plain_weaving.png",
    "observation": "The weaver's feet work the heddles while both hands throw the shuttle, and cloth grows twice as fast."
   },
   "lathe_ground_cast_glass": {
    "effects": {
-    "craft_output": 0.0021,
-    "trade_capacity": 0.0014
+    "craft_output": 0.0005,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/core_formed_glass.png",
    "observation": "Thick cast bowls are mounted on the lathe and ground with wet sand until the walls are thin and even."
@@ -606,8 +606,8 @@
   "cast_iron_vessels": {
    "effects": {
     "container_capacity": 0.004,
-    "cultivation_yield": 0.004,
-    "food_output": 0.002,
+    "cultivation_yield": 0.0012,
+    "food_output": 0.0003,
     "fuel_demand": 0.004,
     "metal_yield": 0.004
    },
@@ -616,9 +616,9 @@
   },
   "fullers_earth_finishing": {
    "effects": {
-    "craft_output": 0.0028,
+    "craft_output": 0.0007,
     "fiber_yield": 0.004,
-    "trade_capacity": 0.001,
+    "trade_capacity": 0.0002,
     "water_pollution": 0.003
    },
    "art": "res://assets/ui/research/paper/layered_clothing_design.png",
@@ -629,8 +629,8 @@
     "fuel_demand": 0.004,
     "metal_yield": 0.01,
     "pollution": 0.004,
-    "standardization": 0.004,
-    "trade_capacity": 0.0035
+    "standardization": 0.0005,
+    "trade_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/bronze_alloying-v1.png",
    "observation": "Copper granules sealed in a crucible with a crushed pale ore and charcoal come out golden, and the mint strikes coins from them.",
@@ -645,10 +645,10 @@
   },
   "mechanical_screw_presses": {
    "effects": {
-    "craft_output": 0.0035,
+    "craft_output": 0.0009,
     "fiber_yield": 0.002,
-    "food_output": 0.003,
-    "trade_capacity": 0.0021
+    "food_output": 0.0004,
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/paper/mechanical_screw_presses.png",
    "observation": "A cut wooden screw turned by a bar presses olives, grapes and folded cloth harder than any weighted beam.",
@@ -657,8 +657,8 @@
   "lead_glazed_ware": {
    "effects": {
     "container_capacity": 0.005,
-    "craft_output": 0.0021,
-    "food_spoilage": -0.004,
+    "craft_output": 0.0005,
+    "food_spoilage": -0.0018,
     "health_risk": 0.004
    },
    "art": "res://assets/ui/research/paper/ceramic_glaze_formulation.png",
@@ -666,9 +666,9 @@
   },
   "mould_stamped_gloss_ware": {
    "effects": {
-    "craft_output": 0.0035,
-    "standardization": 0.008,
-    "trade_capacity": 0.0021
+    "craft_output": 0.0006,
+    "standardization": 0.0006,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/clay_shaping-v1.png",
    "observation": "Red tableware is thrown inside decorated moulds, and the same bowl is sold at every port on the sea."
@@ -676,10 +676,10 @@
   "glass_blowing": {
    "effects": {
     "container_capacity": 0.012,
-    "craft_output": 0.0056,
-    "food_spoilage": -0.004,
+    "craft_output": 0.001,
+    "food_spoilage": -0.0018,
     "fuel_demand": 0.004,
-    "trade_capacity": 0.0035
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/paper/glass_blowing.png",
    "ability_reason": "A breath through a pipe turns a gather into a vessel in minutes; glass becomes a household ware, not a jewel."
@@ -687,18 +687,18 @@
   "mold_blown_glass": {
    "effects": {
     "container_capacity": 0.006,
-    "standardization": 0.006,
-    "trade_capacity": 0.0014
+    "standardization": 0.0005,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/glass_blowing.png"
   },
   "industrial_pottery_kilns": {
    "effects": {
     "container_capacity": 0.006,
-    "craft_output": 0.0056,
+    "craft_output": 0.001,
     "fuel_demand": 0.008,
     "pollution": 0.004,
-    "standardization": 0.004,
+    "standardization": 0.0003,
     "timber_pressure": 0.008
    },
    "art": "res://assets/ui/research/subjects/kiln_control-v1.png",
@@ -707,19 +707,19 @@
   },
   "layered_cameo_glass": {
    "effects": {
-    "craft_output": 0.0014,
-    "legitimacy": 0.003,
-    "trade_capacity": 0.0014
+    "craft_output": 0.0002,
+    "legitimacy": 0.0002,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/glass_blowing.png",
    "observation": "A white glass skin over dark blue is carved away like a gem, leaving white figures standing on a night-blue ground."
   },
   "cast_window_glass": {
    "effects": {
-    "craft_output": 0.0014,
+    "craft_output": 0.0002,
     "fuel_demand": 0.002,
-    "health_protection": 0.002,
-    "housing_output": 0.006
+    "health_protection": 0.0006,
+    "housing_output": 0.0008
    },
    "art": "res://assets/ui/research/paper/glass_batch_composition_control.png",
    "observation": "Glass is poured and spread on a sanded table into small greenish panes, dim but enough to light a bath house."
@@ -728,7 +728,7 @@
    "effects": {
     "fuel_demand": 0.004,
     "fuel_efficiency": 0.006,
-    "labor_demand": -0.004,
+    "labor_demand": -0.0003,
     "metal_yield": 0.008
    },
    "art": "res://assets/ui/research/subjects/water_mills-v1.png",
@@ -736,35 +736,35 @@
   },
   "iron_bladed_planes": {
    "effects": {
-    "construction_rate": 0.0018,
-    "craft_output": 0.0028,
-    "standardization": 0.003
+    "construction_rate": 0.0003,
+    "craft_output": 0.0005,
+    "standardization": 0.0002
    },
    "art": "res://assets/ui/research/subjects/joinery-v2.png",
    "observation": "An iron blade wedged in a wooden stock shaves a board flat and true that an adze could only rough out."
   },
   "two_beam_upright_loom": {
    "effects": {
-    "craft_output": 0.0028,
+    "craft_output": 0.0014,
     "fiber_yield": 0.005,
-    "labor_efficiency": 0.003
+    "labor_efficiency": 0.0006
    },
    "art": "res://assets/ui/research/discovery-600/warp_weighted_looms.png",
    "observation": "With a beam at top and bottom the weaver sits and rolls the cloth down, and a single web can be as wide as a room."
   },
   "lead_backed_glass_mirrors": {
    "effects": {
-    "craft_output": 0.0014,
+    "craft_output": 0.0007,
     "health_risk": 0.002,
-    "trade_capacity": 0.0014
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/paper/glass_blowing.png",
    "observation": "Hot lead poured into a thin glass bubble backs it with silver-grey, and a small round mirror shows a whole face."
   },
   "steel_edge_inlaying": {
    "effects": {
-    "metal_yield": 0.003,
-    "repair_capacity": 0.004,
+    "metal_yield": 0.002,
+    "repair_capacity": 0.0021,
     "tool_quality": 0.008
    },
    "art": "res://assets/ui/research/subjects/forge_welding-v1.png",
@@ -773,10 +773,10 @@
   "high_fire_stoneware": {
    "effects": {
     "container_capacity": 0.012,
-    "food_spoilage": -0.008,
+    "food_spoilage": -0.0021,
     "fuel_demand": 0.008,
     "timber_pressure": 0.006,
-    "water_safety": 0.004
+    "water_safety": 0.0027
    },
    "art": "res://assets/ui/research/paper/high_fire_stoneware.png",
    "observation": "Fired hotter than any pot before it, the grey body rings like a bell and holds brine and wine without a lead glaze.",
@@ -784,28 +784,29 @@
   },
   "textile_rag_pulping": {
    "effects": {
-    "craft_output": 0.0014,
+    "craft_output": 0.0007,
     "fiber_yield": 0.002,
-    "knowledge_preservation": 0.004
+    "knowledge_preservation": 0.0003
    },
    "art": "res://assets/ui/research/paper/fiber_pulp_beating.png",
    "production_contract": "Worn plant-fiber cloth is sorted, cut, soaked and beaten back into pulp in a workshop with paid tooling, water and work. Learning creates neither pulp, paper nor free research."
   },
   "water_powered_hammers": {
    "effects": {
-    "labor_demand": -0.004,
-    "labor_efficiency": 0.004,
-    "metal_yield": 0.008,
+    "labor_demand": -0.0013,
+    "labor_efficiency": 0.0008,
+    "metal_yield": 0.0055,
     "tool_quality": 0.0051
    },
    "art": "res://assets/ui/research/paper/water_powered_hammers.png"
   },
   "paper_making": {
    "effects": {
-    "adoption_rate": 0.012,
-    "knowledge_preservation": 0.02,
-    "state_capacity": 0.006,
-    "trade_capacity": 0.0014
+    "adoption_rate": 0.0021,
+    "knowledge_preservation": 0.0016,
+    "literacy": 0.0075,
+    "state_capacity": 0.001,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/paper_making-v1.png",
    "production_items": [
@@ -815,8 +816,8 @@
   },
   "water_powered_stone_saws": {
    "effects": {
-    "construction_rate": 0.0024,
-    "labor_demand": -0.003,
+    "construction_rate": 0.0015,
+    "labor_demand": -0.0003,
     "stone_yield": 0.008
    },
    "art": "res://assets/ui/research/subjects/water_mills-v1.png",
@@ -825,7 +826,7 @@
   "annealing_chamber_furnaces": {
    "effects": {
     "container_capacity": 0.003,
-    "craft_output": 0.0028,
+    "craft_output": 0.0008,
     "fuel_efficiency": 0.004
    },
    "art": "res://assets/ui/research/paper/glass_annealing_schedules.png",
@@ -833,9 +834,9 @@
   },
   "pattern_welded_blades": {
    "effects": {
-    "legitimacy": 0.003,
+    "legitimacy": 0.0002,
     "tool_quality": 0.0034,
-    "warfare_readiness": 0.008
+    "warfare_readiness": 0.0044
    },
    "art": "res://assets/ui/research/subjects/forge_welding-v1.png",
    "observation": "Twisted rods of iron and steel are welded side by side and ground bright, and the blade shows a pattern like running water."
@@ -844,34 +845,34 @@
    "effects": {
     "container_capacity": 0.004,
     "health_risk": 0.003,
-    "trade_capacity": 0.001
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/copper_casting-v1.png",
    "observation": "Tin with a little lead is poured into stone moulds, giving plates and cups that shine like silver at a tenth of the cost."
   },
   "gold_glass_tesserae": {
    "effects": {
-    "craft_output": 0.0014,
-    "legitimacy": 0.005,
-    "trade_capacity": 0.0007
+    "craft_output": 0.0004,
+    "legitimacy": 0.0003,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/core_formed_glass.png",
    "observation": "Gold leaf sealed between two layers of glass is cut into small cubes, and a whole apse glows with them."
   },
   "champleve_enamel": {
    "effects": {
-    "craft_output": 0.0014,
-    "legitimacy": 0.002,
-    "trade_capacity": 0.0014
+    "craft_output": 0.0004,
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/paper/ceramic_glaze_formulation.png",
    "observation": "Hollows cut in a bronze brooch are filled with powdered glass and fired until the colors fuse in place."
   },
   "weft_faced_compound_weave": {
    "effects": {
-    "craft_output": 0.0028,
-    "legitimacy": 0.002,
-    "trade_capacity": 0.0021
+    "craft_output": 0.0027,
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/paper/drawloom_pattern_control.png",
    "observation": "Hidden warps bind two colors of weft, and the pattern stands clear on both faces of the heavy cloth."
@@ -880,8 +881,8 @@
    "effects": {
     "chemical_control": 0.008,
     "fuel_demand": 0.002,
-    "health_protection": 0.002,
-    "knowledge_rate": 0.003
+    "health_protection": 0.0003,
+    "knowledge_rate": 0.001
    },
    "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
    "observation": "Vapor rising from the heated flask cools in the still-head and runs down its spout into a separate vessel.",
@@ -889,25 +890,506 @@
   },
   "salted_hard_soap": {
    "effects": {
-    "disease_exposure": -0.004,
-    "health_protection": 0.004,
+    "disease_exposure": -0.0007,
+    "health_protection": 0.0006,
     "sanitation": 0.006,
-    "trade_capacity": 0.0007
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/hide_tanning.png",
    "observation": "Salt thrown into the boiling lye and fat brings up a hard cake of soap that keeps and travels."
   },
   "blown_cylinder_panes": {
    "effects": {
+    "craft_output": 0.0027,
+    "fuel_demand": 0.004,
+    "health_protection": 0.0006,
+    "housing_output": 0.0019,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/paper/glass_blowing.png",
+   "observation": "A long bubble of glass is blown, slit along its side and flattened in the kiln into a clear sheet.",
+   "ability_reason": "Opening a blown cylinder gives larger, thinner and clearer panes than glass poured on a table."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "bronze_scrap_remelting": {
+    "fuel_demand": 0.002,
+    "metal_yield": 0.006,
+    "repair_capacity": 0.003
+   },
+   "glass_ingot_casting": {
+    "craft_output": 0.0014,
+    "standardization": 0.004,
+    "trade_capacity": 0.0017
+   },
+   "mandrel_wound_beads": {
+    "craft_output": 0.0021,
+    "trade_capacity": 0.0014
+   },
+   "shellfish_purple_dye": {
+    "craft_output": 0.0014,
+    "legitimacy": 0.003,
+    "trade_capacity": 0.0028,
+    "water_pollution": 0.004
+   },
+   "inlay_carving": {
+    "craft_output": 0.0021,
+    "legitimacy": 0.002,
+    "trade_capacity": 0.001
+   },
+   "fine_linen_counts": {
+    "craft_output": 0.0021,
+    "fiber_yield": 0.003,
+    "trade_capacity": 0.0017
+   },
+   "clay_tuyere_draft": {
+    "fuel_efficiency": 0.006,
+    "metal_yield": 0.008
+   },
+   "ore_roasting": {
+    "extraction_yield": 0.004,
+    "health_risk": 0.002,
+    "metal_yield": 0.007,
+    "pollution": 0.004
+   },
+   "bloomery_smelting": {
+    "craft_output": 0.0042,
+    "fuel_demand": 0.012,
+    "metal_yield": 0.02,
+    "pollution": 0.006,
+    "timber_pressure": 0.01,
+    "tool_quality": 0.0102
+   },
+   "iron_assaying": {
+    "extraction_yield": 0.003,
+    "metal_yield": 0.006,
+    "survey_speed": 0.006
+   },
+   "bloomery_charge_control": {
+    "fuel_efficiency": 0.006,
+    "metal_yield": 0.008
+   },
+   "bloom_consolidation": {
+    "fuel_demand": 0.003,
+    "metal_yield": 0.006,
+    "tool_quality": 0.0043
+   },
+   "forge_welding": {
+    "construction_rate": 0.0024,
+    "fuel_demand": 0.004,
+    "repair_capacity": 0.012,
+    "tool_quality": 0.0127
+   },
+   "smithing_tool_sets": {
+    "craft_output": 0.0028,
+    "repair_capacity": 0.006,
+    "tool_quality": 0.0068
+   },
+   "slag_tapping": {
+    "fuel_efficiency": 0.004,
+    "metal_yield": 0.008,
+    "pollution": 0.002
+   },
+   "bloom_fracture_grading": {
+    "metal_yield": 0.002,
+    "standardization": 0.005,
+    "tool_quality": 0.0034
+   },
+   "iron_farm_tools": {
+    "cultivation_yield": 0.008,
+    "labor_efficiency": 0.005,
+    "soil_productivity": 0.003,
+    "tool_quality": 0.0034
+   },
+   "mine_drainage": {
+    "labor_demand": 0.004,
+    "metal_yield": 0.006,
+    "mine_safety": 0.008,
+    "mining_output": 0.008
+   },
+   "ash_lye_cleansers": {
+    "craft_output": 0.0014,
+    "health_protection": 0.002,
+    "sanitation": 0.004
+   },
+   "surface_carburization": {
+    "fuel_demand": 0.004,
+    "tool_quality": 0.0127,
+    "warfare_readiness": 0.006
+   },
+   "hardened_edges": {
+    "extraction_yield": 0.006,
+    "tool_quality": 0.017,
+    "warfare_readiness": 0.008
+   },
+   "wire_drawing": {
+    "craft_output": 0.0028,
+    "trade_capacity": 0.001
+   },
+   "edge_tempering": {
+    "repair_capacity": 0.004,
+    "tool_quality": 0.008
+   },
+   "piled_blade_welding": {
+    "craft_output": 0.0014,
+    "tool_quality": 0.0051,
+    "warfare_readiness": 0.006
+   },
+   "forged_iron_nails": {
+    "construction_rate": 0.0036,
+    "housing_output": 0.004,
+    "repair_capacity": 0.003
+   },
+   "iron_stone_chisels": {
+    "construction_rate": 0.0024,
+    "stone_yield": 0.008,
+    "tool_quality": 0.0026
+   },
+   "iron_files_rasps": {
+    "repair_capacity": 0.005,
+    "standardization": 0.003,
+    "tool_quality": 0.0043
+   },
+   "paired_bag_bellows": {
+    "fuel_efficiency": 0.006,
+    "metal_yield": 0.008
+   },
+   "tablet_weaving": {
+    "craft_output": 0.0021,
+    "fiber_yield": 0.002,
+    "trade_capacity": 0.0007
+   },
+   "glazed_relief_bricks": {
+    "craft_output": 0.0021,
+    "disaster_resilience": 0.002,
+    "fuel_demand": 0.003,
+    "legitimacy": 0.005
+   },
+   "reduction_vat_blue_dye": {
+    "craft_output": 0.0021,
+    "trade_capacity": 0.0017,
+    "water_pollution": 0.003
+   },
+   "spring_shears": {
+    "fiber_yield": 0.008,
+    "labor_efficiency": 0.003
+   },
+   "pole_lathe_turning": {
+    "craft_output": 0.0028,
+    "repair_capacity": 0.003,
+    "standardization": 0.003
+   },
+   "fused_cane_glass": {
+    "container_capacity": 0.002,
+    "craft_output": 0.0021,
+    "trade_capacity": 0.0017
+   },
+   "lead_sheet_rolling": {
+    "construction_rate": 0.0018,
+    "craft_output": 0.0021,
+    "health_risk": 0.002,
+    "water_access": 0.003
+   },
+   "argentiferous_lead_working": {
+    "health_risk": 0.004,
+    "metal_yield": 0.008,
+    "pollution": 0.006,
+    "timber_pressure": 0.004,
+    "trade_capacity": 0.0028
+   },
+   "die_struck_coinage": {
+    "legitimacy": 0.004,
+    "standardization": 0.01,
+    "state_capacity": 0.006,
+    "trade_capacity": 0.007
+   },
+   "three_stage_gloss_firing": {
+    "container_capacity": 0.003,
+    "craft_output": 0.0028,
+    "fuel_demand": 0.002,
+    "trade_capacity": 0.0017
+   },
+   "iron_tyre_fitting": {
+    "haul_capacity": 0.006,
+    "repair_capacity": 0.004,
+    "route_speed": 0.003
+   },
+   "knotted_pile_rugs": {
+    "craft_output": 0.0021,
+    "housing_output": 0.002,
+    "trade_capacity": 0.0017
+   },
+   "decolorized_clear_glass": {
+    "craft_output": 0.0028,
+    "trade_capacity": 0.0014
+   },
+   "moulded_terracotta_series": {
+    "construction_rate": 0.0018,
+    "craft_output": 0.0021,
+    "standardization": 0.006
+   },
+   "liquid_iron_furnaces": {
+    "craft_output": 0.0056,
+    "fuel_demand": 0.012,
+    "metal_yield": 0.02,
+    "pollution": 0.008,
+    "timber_pressure": 0.01
+   },
+   "stamped_capacity_amphorae": {
+    "container_capacity": 0.004,
+    "standardization": 0.006,
+    "trade_capacity": 0.0017
+   },
+   "vessel_tinning": {
+    "container_capacity": 0.003,
+    "craft_output": 0.0014,
+    "health_risk": -0.002
+   },
+   "sloped_climbing_kilns": {
+    "container_capacity": 0.004,
+    "craft_output": 0.0042,
+    "fuel_efficiency": 0.006,
+    "timber_pressure": 0.004
+   },
+   "cast_iron_annealing": {
+    "cultivation_yield": 0.003,
+    "fuel_demand": 0.004,
+    "metal_yield": 0.004,
+    "tool_quality": 0.0051
+   },
+   "gold_thread_embroidery": {
+    "craft_output": 0.0014,
+    "legitimacy": 0.004,
+    "trade_capacity": 0.0014
+   },
+   "mercury_fire_gilding": {
+    "health_risk": 0.006,
+    "legitimacy": 0.004,
+    "pollution": 0.003,
+    "trade_capacity": 0.001
+   },
+   "gem_cutting_wheel": {
+    "craft_output": 0.0021,
+    "trade_capacity": 0.0014
+   },
+   "water_mills": {
+    "craft_output": 0.0056,
+    "ecological_pressure": 0.004,
+    "food_output": 0.015,
+    "labor_demand": -0.008,
+    "labor_efficiency": 0.01
+   },
+   "crucible_steel_cakes": {
+    "fuel_demand": 0.006,
+    "tool_quality": 0.017,
+    "trade_capacity": 0.0021,
+    "warfare_readiness": 0.012
+   },
+   "resist_dyeing": {
+    "craft_output": 0.0021,
+    "trade_capacity": 0.0014,
+    "water_pollution": 0.002
+   },
+   "mine_drainage_screws": {
+    "labor_demand": 0.004,
+    "metal_yield": 0.004,
+    "mine_safety": 0.006,
+    "mining_output": 0.008
+   },
+   "moulded_glass_gems": {
+    "standardization": 0.003,
+    "trade_capacity": 0.0014
+   },
+   "drawloom_pattern_control": {
+    "craft_output": 0.0056,
+    "fiber_yield": 0.002,
+    "labor_demand": 0.003,
+    "trade_capacity": 0.0035
+   },
+   "treadle_frame_loom": {
+    "craft_output": 0.0028,
+    "fiber_yield": 0.005,
+    "labor_efficiency": 0.005
+   },
+   "lathe_ground_cast_glass": {
+    "craft_output": 0.0021,
+    "trade_capacity": 0.0014
+   },
+   "cast_iron_vessels": {
+    "container_capacity": 0.004,
+    "cultivation_yield": 0.004,
+    "food_output": 0.002,
+    "fuel_demand": 0.004,
+    "metal_yield": 0.004
+   },
+   "fullers_earth_finishing": {
+    "craft_output": 0.0028,
+    "fiber_yield": 0.004,
+    "trade_capacity": 0.001,
+    "water_pollution": 0.003
+   },
+   "cementation_brass": {
+    "fuel_demand": 0.004,
+    "metal_yield": 0.01,
+    "pollution": 0.004,
+    "standardization": 0.004,
+    "trade_capacity": 0.0035
+   },
+   "mechanical_screw_presses": {
+    "craft_output": 0.0035,
+    "fiber_yield": 0.002,
+    "food_output": 0.003,
+    "trade_capacity": 0.0021
+   },
+   "lead_glazed_ware": {
+    "container_capacity": 0.005,
+    "craft_output": 0.0021,
+    "food_spoilage": -0.004,
+    "health_risk": 0.004
+   },
+   "mould_stamped_gloss_ware": {
+    "craft_output": 0.0035,
+    "standardization": 0.008,
+    "trade_capacity": 0.0021
+   },
+   "glass_blowing": {
+    "container_capacity": 0.012,
+    "craft_output": 0.0056,
+    "food_spoilage": -0.004,
+    "fuel_demand": 0.004,
+    "trade_capacity": 0.0035
+   },
+   "mold_blown_glass": {
+    "container_capacity": 0.006,
+    "standardization": 0.006,
+    "trade_capacity": 0.0014
+   },
+   "industrial_pottery_kilns": {
+    "container_capacity": 0.006,
+    "craft_output": 0.0056,
+    "fuel_demand": 0.008,
+    "pollution": 0.004,
+    "standardization": 0.004,
+    "timber_pressure": 0.008
+   },
+   "layered_cameo_glass": {
+    "craft_output": 0.0014,
+    "legitimacy": 0.003,
+    "trade_capacity": 0.0014
+   },
+   "cast_window_glass": {
+    "craft_output": 0.0014,
+    "fuel_demand": 0.002,
+    "health_protection": 0.002,
+    "housing_output": 0.006
+   },
+   "water_driven_bellows": {
+    "fuel_demand": 0.004,
+    "fuel_efficiency": 0.006,
+    "labor_demand": -0.004,
+    "metal_yield": 0.008
+   },
+   "iron_bladed_planes": {
+    "construction_rate": 0.0018,
+    "craft_output": 0.0028,
+    "standardization": 0.003
+   },
+   "two_beam_upright_loom": {
+    "craft_output": 0.0028,
+    "fiber_yield": 0.005,
+    "labor_efficiency": 0.003
+   },
+   "lead_backed_glass_mirrors": {
+    "craft_output": 0.0014,
+    "health_risk": 0.002,
+    "trade_capacity": 0.0014
+   },
+   "steel_edge_inlaying": {
+    "metal_yield": 0.003,
+    "repair_capacity": 0.004,
+    "tool_quality": 0.008
+   },
+   "high_fire_stoneware": {
+    "container_capacity": 0.012,
+    "food_spoilage": -0.008,
+    "fuel_demand": 0.008,
+    "timber_pressure": 0.006,
+    "water_safety": 0.004
+   },
+   "textile_rag_pulping": {
+    "craft_output": 0.0014,
+    "fiber_yield": 0.002,
+    "knowledge_preservation": 0.004
+   },
+   "water_powered_hammers": {
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.004,
+    "metal_yield": 0.008,
+    "tool_quality": 0.0051
+   },
+   "paper_making": {
+    "adoption_rate": 0.012,
+    "knowledge_preservation": 0.02,
+    "state_capacity": 0.006,
+    "trade_capacity": 0.0014
+   },
+   "water_powered_stone_saws": {
+    "construction_rate": 0.0024,
+    "labor_demand": -0.003,
+    "stone_yield": 0.008
+   },
+   "annealing_chamber_furnaces": {
+    "container_capacity": 0.003,
+    "craft_output": 0.0028,
+    "fuel_efficiency": 0.004
+   },
+   "pattern_welded_blades": {
+    "legitimacy": 0.003,
+    "tool_quality": 0.0034,
+    "warfare_readiness": 0.008
+   },
+   "pewter_casting": {
+    "container_capacity": 0.004,
+    "health_risk": 0.003,
+    "trade_capacity": 0.001
+   },
+   "gold_glass_tesserae": {
+    "craft_output": 0.0014,
+    "legitimacy": 0.005,
+    "trade_capacity": 0.0007
+   },
+   "champleve_enamel": {
+    "craft_output": 0.0014,
+    "legitimacy": 0.002,
+    "trade_capacity": 0.0014
+   },
+   "weft_faced_compound_weave": {
+    "craft_output": 0.0028,
+    "legitimacy": 0.002,
+    "trade_capacity": 0.0021
+   },
+   "alembic_distillation": {
+    "chemical_control": 0.008,
+    "fuel_demand": 0.002,
+    "health_protection": 0.002,
+    "knowledge_rate": 0.003
+   },
+   "salted_hard_soap": {
+    "disease_exposure": -0.004,
+    "health_protection": 0.004,
+    "sanitation": 0.006,
+    "trade_capacity": 0.0007
+   },
+   "blown_cylinder_panes": {
     "craft_output": 0.0028,
     "fuel_demand": 0.004,
     "health_protection": 0.004,
     "housing_output": 0.01,
     "trade_capacity": 0.001
-   },
-   "art": "res://assets/ui/research/paper/glass_blowing.png",
-   "observation": "A long bubble of glass is blown, slit along its side and flattened in the kiln into a clear sheet.",
-   "ability_reason": "Opening a blown cylinder gives larger, thinner and clearer panes than glass poured on a table."
+   }
   }
  }
 }

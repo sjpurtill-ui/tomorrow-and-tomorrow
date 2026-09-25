@@ -280,7 +280,7 @@
    "effects": {
     "cohesion": 0.0036,
     "knowledge_preservation": 0.0021,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "legitimacy": 0.018
    },
    "observation": "The people raise a house for the god, larger than any dwelling, where offerings and gatherings now take place.",
@@ -436,7 +436,8 @@
   "craft_lineage_naming": {
    "effects": {
     "craft_output": 0.0031,
-    "knowledge_preservation": 0.0006
+    "knowledge_preservation": 0.0006,
+    "literacy": 0.0014
    },
    "name": "Techniques Credited to the Teacher Who Began Them",
    "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
@@ -542,7 +543,7 @@
   "shared_meal_obligations": {
    "effects": {
     "cohesion": 0.0013,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "legitimacy": 0.0004
    },
    "art": "res://assets/ui/research/subjects/festival_calendar-v1.png"
@@ -577,8 +578,8 @@
   "chamber_tombs": {
    "effects": {
     "cohesion": -0.01,
-    "institutional_rigidity": 0.0054,
-    "labor_demand": 0.02,
+    "institutional_rigidity": 0.0018,
+    "labor_demand": 0.001,
     "legitimacy": 0.0006
    },
    "observation": "Leading lineages build stone chambers for their dead, filled with rich goods and sometimes servants.",
@@ -597,7 +598,7 @@
    "effects": {
     "craft_output": 0.0033,
     "knowledge_preservation": 0.0014,
-    "labor_demand": 0.01
+    "labor_demand": 0.0005
    },
    "name": "Craft Specialists Compare Methods on Market Days",
    "art": "res://assets/ui/research/subjects/craft_guilds-v1.png"
@@ -630,7 +631,7 @@
   },
   "officiant_vestments": {
    "effects": {
-    "institutional_rigidity": 0.0027,
+    "institutional_rigidity": 0.0004,
     "legitimacy": 0.0004
    },
    "observation": "Officiants wear garments and headdresses no one else may wear, and the rite is not valid without them.",
@@ -714,7 +715,7 @@
    "effects": {
     "cohesion": 0.0005,
     "food_storage": -0.005,
-    "institutional_rigidity": 0.0054,
+    "institutional_rigidity": 0.0015,
     "legitimacy": 0.0005
    },
    "observation": "Each month offerings are laid for the dead rulers, whose names are read out in order.",
@@ -739,7 +740,7 @@
   },
   "offering_omens": {
    "effects": {
-    "institutional_rigidity": 0.0054,
+    "institutional_rigidity": 0.0015,
     "legitimacy": 0.0004,
     "observation_rate": -0.005
    },
@@ -821,9 +822,9 @@
   },
   "festival_bread_sharing": {
    "effects": {
-    "cohesion": 0.0015,
+    "cohesion": 0.0002,
     "food_storage": -0.01,
-    "legitimacy": 0.0006,
+    "legitimacy": 0.0001,
     "nutrition_quality": 0.005
    },
    "observation": "Bread baked from the god's grain is shared with every household at the festival.",
@@ -1277,6 +1278,59 @@
     "cohesion": 0.0079,
     "food_storage": -0.01,
     "legitimacy": 0.0031,
+    "nutrition_quality": 0.005
+   }
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "first_shrine_house": {
+    "cohesion": 0.0036,
+    "knowledge_preservation": 0.0021,
+    "labor_demand": 0.01,
+    "legitimacy": 0.018
+   },
+   "craft_lineage_naming": {
+    "craft_output": 0.0031,
+    "knowledge_preservation": 0.0006
+   },
+   "shared_meal_obligations": {
+    "cohesion": 0.0013,
+    "labor_demand": 0.01,
+    "legitimacy": 0.0004
+   },
+   "chamber_tombs": {
+    "cohesion": -0.01,
+    "institutional_rigidity": 0.0054,
+    "labor_demand": 0.02,
+    "legitimacy": 0.0006
+   },
+   "comparative_craft_gatherings": {
+    "craft_output": 0.0033,
+    "knowledge_preservation": 0.0014,
+    "labor_demand": 0.01
+   },
+   "officiant_vestments": {
+    "institutional_rigidity": 0.0027,
+    "legitimacy": 0.0004
+   },
+   "royal_ancestor_offerings": {
+    "cohesion": 0.0005,
+    "food_storage": -0.005,
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.0005
+   },
+   "offering_omens": {
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.0004,
+    "observation_rate": -0.005
+   },
+   "festival_bread_sharing": {
+    "cohesion": 0.0015,
+    "food_storage": -0.01,
+    "legitimacy": 0.0006,
     "nutrition_quality": 0.005
    }
   }

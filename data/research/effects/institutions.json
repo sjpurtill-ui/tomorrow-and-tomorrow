@@ -60,7 +60,7 @@
   "household_councils": {
    "effects": {
     "cohesion": 0.0197,
-    "labor_demand": 0.015,
+    "labor_demand": 0.0055,
     "legitimacy": 0.014,
     "state_capacity": 0.0097
    },
@@ -150,7 +150,7 @@
     "cohesion": 0.0042,
     "container_capacity": 0.0248,
     "food_storage": 0.0547,
-    "labor_demand": 0.02,
+    "labor_demand": 0.0074,
     "state_capacity": 0.014
    }
   },
@@ -234,7 +234,7 @@
   },
   "trial_custom_periods": {
    "effects": {
-    "labor_demand": 0.008,
+    "labor_demand": 0.0007,
     "legitimacy": 0.002,
     "task_coordination": 0.0005
    },
@@ -252,7 +252,7 @@
   },
   "rotating_stewardship": {
    "effects": {
-    "labor_demand": 0.008,
+    "labor_demand": 0.0004,
     "state_capacity": 0.0015,
     "task_coordination": 0.0004
    },
@@ -282,7 +282,7 @@
   },
   "boundary_marker_surveys": {
    "effects": {
-    "labor_demand": 0.008,
+    "labor_demand": 0.0004,
     "legitimacy": 0.002,
     "state_capacity": 0.0022
    },
@@ -338,7 +338,7 @@
   },
   "shared_labor_registers": {
    "effects": {
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "state_capacity": 0.0009
    },
    "name": "Shared-labor Registers",
@@ -450,7 +450,7 @@
   "regional_arbitration_circuits": {
    "effects": {
     "cohesion": 0.0006,
-    "labor_demand": 0.01,
+    "labor_demand": 0.001,
     "state_capacity": 0.0025
    },
    "name": "Arbiters Travel a Circuit of Villages",
@@ -539,7 +539,7 @@
    "effects": {
     "institutional_rigidity": 0.011,
     "knowledge_preservation": 0.0017,
-    "labor_demand": 0.025,
+    "labor_demand": 0.0015,
     "state_capacity": 0.0053,
     "task_coordination": 0.0044
    },
@@ -549,7 +549,7 @@
    "effects": {
     "cohesion": -0.01,
     "construction_rate": 0.0108,
-    "labor_demand": 0.035,
+    "labor_demand": 0.0018,
     "legitimacy": 0.0029,
     "state_capacity": 0.0058
    },
@@ -598,7 +598,7 @@
   },
   "cross_settlement_registries": {
    "effects": {
-    "institutional_rigidity": 0.0054,
+    "institutional_rigidity": 0.0018,
     "legitimacy": 0.0004,
     "state_capacity": 0.0007
    },
@@ -608,7 +608,7 @@
   "kingship": {
    "effects": {
     "cohesion": -0.01,
-    "institutional_rigidity": 0.021,
+    "institutional_rigidity": 0.0069,
     "legitimacy": 0.0034,
     "state_capacity": 0.0038,
     "task_coordination": 0.0029,
@@ -621,7 +621,7 @@
   },
   "ceremonial_investiture": {
    "effects": {
-    "institutional_rigidity": 0.0054,
+    "institutional_rigidity": 0.0018,
     "legitimacy": 0.0006,
     "state_capacity": 0.0005
    },
@@ -630,7 +630,7 @@
   },
   "assembly_petition_rights": {
    "effects": {
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "legitimacy": 0.0004,
     "state_capacity": 0.0005
    },
@@ -639,7 +639,7 @@
   },
   "provincial_governors": {
    "effects": {
-    "institutional_rigidity": 0.0054,
+    "institutional_rigidity": 0.0018,
     "security_efficiency": 0.0084,
     "state_capacity": 0.0018,
     "task_coordination": 0.0008
@@ -659,7 +659,7 @@
   },
   "codified_tribute_schedules": {
    "effects": {
-    "institutional_rigidity": 0.008,
+    "institutional_rigidity": 0.0011,
     "legitimacy": 0.0004,
     "state_capacity": 0.001
    },
@@ -668,8 +668,8 @@
   },
   "specialized_courts": {
    "effects": {
-    "institutional_rigidity": 0.018,
-    "labor_demand": 0.025,
+    "institutional_rigidity": 0.0025,
+    "labor_demand": 0.0013,
     "legitimacy": 0.006,
     "state_capacity": 0.0038,
     "trade_capacity": 0.0036
@@ -689,7 +689,7 @@
   "dynastic_succession": {
    "effects": {
     "cohesion": 0.001,
-    "institutional_rigidity": 0.016,
+    "institutional_rigidity": 0.0022,
     "legitimacy": 0.0011,
     "state_capacity": 0.0009
    },
@@ -699,7 +699,7 @@
   },
   "precedent_review_councils": {
    "effects": {
-    "institutional_rigidity": 0.0054,
+    "institutional_rigidity": 0.0007,
     "legitimacy": 0.0005,
     "state_capacity": 0.0005
    },
@@ -750,7 +750,7 @@
     "cohesion": -0.01,
     "cultivation_yield": 0.0157,
     "food_storage": 0.0042,
-    "institutional_rigidity": 0.0054,
+    "institutional_rigidity": 0.001,
     "state_capacity": 0.0011
    },
    "observation": "Tenants and dependents work the god's estates for a share, and the harvest fills the temple stores.",
@@ -778,9 +778,10 @@
   "written_law_code": {
    "effects": {
     "cohesion": 0.0029,
-    "institutional_rigidity": 0.028,
+    "institutional_rigidity": 0.0051,
     "knowledge_preservation": 0.0016,
     "legitimacy": 0.0046,
+    "literacy": 0.001,
     "security_efficiency": 0.0127,
     "state_capacity": 0.0036
    },
@@ -802,6 +803,7 @@
    "effects": {
     "knowledge_preservation": 0.0007,
     "legitimacy": 0.0007,
+    "literacy": 0.001,
     "security_efficiency": 0.0063
    },
    "observation": "Witnesses swear their testimony, and scribes write it down for the judges to weigh.",
@@ -810,7 +812,7 @@
   "provincial_accounts": {
    "effects": {
     "knowledge_preservation": 0.0036,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "state_capacity": 0.0033,
     "task_coordination": 0.004
    },
@@ -838,7 +840,7 @@
   "property_registers": {
    "effects": {
     "cohesion": -0.015,
-    "institutional_rigidity": 0.013,
+    "institutional_rigidity": 0.0037,
     "legitimacy": 0.0007,
     "state_capacity": 0.0044,
     "trade_capacity": 0.0029
@@ -865,7 +867,7 @@
   "price_wage_schedules": {
    "effects": {
     "cohesion": 0.0005,
-    "institutional_rigidity": 0.011,
+    "institutional_rigidity": 0.0031,
     "legitimacy": 0.0004,
     "standardization": 0.0033,
     "trade_capacity": 0.0006
@@ -876,7 +878,7 @@
   },
   "licensed_merchant_houses": {
    "effects": {
-    "institutional_rigidity": 0.0054,
+    "institutional_rigidity": 0.0015,
     "state_capacity": 0.0008,
     "trade_capacity": 0.0019
    },
@@ -887,7 +889,7 @@
    "effects": {
     "adoption_rate": 0.0019,
     "cohesion": 0.003,
-    "institutional_rigidity": 0.014,
+    "institutional_rigidity": 0.0024,
     "legitimacy": 0.0038,
     "state_capacity": 0.0033
    },
@@ -909,7 +911,7 @@
   "jurisdiction_boundaries": {
    "effects": {
     "cohesion": 0.0005,
-    "institutional_rigidity": 0.0054,
+    "institutional_rigidity": 0.0009,
     "legitimacy": 0.0007,
     "state_capacity": 0.0034
    },
@@ -945,8 +947,8 @@
   },
   "service_land_registers": {
    "effects": {
-    "legitimacy": 0.0004,
-    "state_capacity": 0.0027,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0007,
     "warfare_readiness": 0.0023
    },
    "observation": "Registers of service land are checked against the census, so no holder escapes his duty.",
@@ -1480,6 +1482,178 @@
     "legitimacy": 0.002,
     "state_capacity": 0.008,
     "warfare_readiness": 0.01
+   }
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "household_councils": {
+    "cohesion": 0.0197,
+    "labor_demand": 0.015,
+    "legitimacy": 0.014,
+    "state_capacity": 0.0097
+   },
+   "public_stores": {
+    "cohesion": 0.0042,
+    "container_capacity": 0.0248,
+    "food_storage": 0.0547,
+    "labor_demand": 0.02,
+    "state_capacity": 0.014
+   },
+   "trial_custom_periods": {
+    "labor_demand": 0.008,
+    "legitimacy": 0.002,
+    "task_coordination": 0.0005
+   },
+   "rotating_stewardship": {
+    "labor_demand": 0.008,
+    "state_capacity": 0.0015,
+    "task_coordination": 0.0004
+   },
+   "boundary_marker_surveys": {
+    "labor_demand": 0.008,
+    "legitimacy": 0.002,
+    "state_capacity": 0.0022
+   },
+   "shared_labor_registers": {
+    "labor_demand": 0.01,
+    "state_capacity": 0.0009
+   },
+   "regional_arbitration_circuits": {
+    "cohesion": 0.0006,
+    "labor_demand": 0.01,
+    "state_capacity": 0.0025
+   },
+   "census_rolls": {
+    "institutional_rigidity": 0.011,
+    "knowledge_preservation": 0.0017,
+    "labor_demand": 0.025,
+    "state_capacity": 0.0053,
+    "task_coordination": 0.0044
+   },
+   "public_levies": {
+    "cohesion": -0.01,
+    "construction_rate": 0.0108,
+    "labor_demand": 0.035,
+    "legitimacy": 0.0029,
+    "state_capacity": 0.0058
+   },
+   "cross_settlement_registries": {
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0007
+   },
+   "kingship": {
+    "cohesion": -0.01,
+    "institutional_rigidity": 0.021,
+    "legitimacy": 0.0034,
+    "state_capacity": 0.0038,
+    "task_coordination": 0.0029,
+    "warfare_readiness": 0.0062
+   },
+   "ceremonial_investiture": {
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.0006,
+    "state_capacity": 0.0005
+   },
+   "assembly_petition_rights": {
+    "labor_demand": 0.01,
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0005
+   },
+   "provincial_governors": {
+    "institutional_rigidity": 0.0054,
+    "security_efficiency": 0.0084,
+    "state_capacity": 0.0018,
+    "task_coordination": 0.0008
+   },
+   "codified_tribute_schedules": {
+    "institutional_rigidity": 0.008,
+    "legitimacy": 0.0004,
+    "state_capacity": 0.001
+   },
+   "specialized_courts": {
+    "institutional_rigidity": 0.018,
+    "labor_demand": 0.025,
+    "legitimacy": 0.006,
+    "state_capacity": 0.0038,
+    "trade_capacity": 0.0036
+   },
+   "dynastic_succession": {
+    "cohesion": 0.001,
+    "institutional_rigidity": 0.016,
+    "legitimacy": 0.0011,
+    "state_capacity": 0.0009
+   },
+   "precedent_review_councils": {
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0005
+   },
+   "temple_estates": {
+    "cohesion": -0.01,
+    "cultivation_yield": 0.0157,
+    "food_storage": 0.0042,
+    "institutional_rigidity": 0.0054,
+    "state_capacity": 0.0011
+   },
+   "written_law_code": {
+    "cohesion": 0.0029,
+    "institutional_rigidity": 0.028,
+    "knowledge_preservation": 0.0016,
+    "legitimacy": 0.0046,
+    "security_efficiency": 0.0127,
+    "state_capacity": 0.0036
+   },
+   "sworn_trial_testimony": {
+    "knowledge_preservation": 0.0007,
+    "legitimacy": 0.0007,
+    "security_efficiency": 0.0063
+   },
+   "provincial_accounts": {
+    "knowledge_preservation": 0.0036,
+    "labor_demand": 0.01,
+    "state_capacity": 0.0033,
+    "task_coordination": 0.004
+   },
+   "property_registers": {
+    "cohesion": -0.015,
+    "institutional_rigidity": 0.013,
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0044,
+    "trade_capacity": 0.0029
+   },
+   "price_wage_schedules": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": 0.011,
+    "legitimacy": 0.0004,
+    "standardization": 0.0033,
+    "trade_capacity": 0.0006
+   },
+   "licensed_merchant_houses": {
+    "institutional_rigidity": 0.0054,
+    "state_capacity": 0.0008,
+    "trade_capacity": 0.0019
+   },
+   "public_law_stele": {
+    "adoption_rate": 0.0019,
+    "cohesion": 0.003,
+    "institutional_rigidity": 0.014,
+    "legitimacy": 0.0038,
+    "state_capacity": 0.0033
+   },
+   "jurisdiction_boundaries": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": 0.0054,
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0034
+   },
+   "service_land_registers": {
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0027,
+    "warfare_readiness": 0.0023
    }
   }
  }

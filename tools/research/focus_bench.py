@@ -86,7 +86,7 @@ FACET_TO_METRIC = {"life_expectancy": "life_expectancy", "infant_mortality": "in
                    "child_mortality_1_4": "child_mortality_1_4", "maternal_per_100k": "maternal_per_100k", "tfr": "tfr",
                    "cbr": "cbr", "cdr": "cdr", "growth_pct": "growth_pct", "population": "population",
                    "food_share": "food_labor_share", "per_50": "discoveries_per_50_years", "defense_share": "defense_labor_share",
-                   "known": "discoveries_known"}
+                   "known": "discoveries_known", "literacy": "literacy_pct", "urban_share": "urban_share_pct"}
 # Surrogate facet directions (True = higher is better) for the relative checks,
 # used only when tools/sim/facets.py cannot be imported.
 FACET_BETTER_FALLBACK = {"population": True, "life_expectancy": True, "infant_mortality": False, "child_mortality_1_4": False,
@@ -95,7 +95,7 @@ FACET_BETTER_FALLBACK = {"population": True, "life_expectancy": True, "infant_mo
                          "tool_quality": True, "cap_infrastructure": True, "housing_ratio": True, "construction_rate": True,
                          "cap_logistics": True, "trade_capacity": True, "ecology": True, "ground_health": True, "cap_institutions": True,
                          "legitimacy": True, "state_capacity": True, "cap_security": True, "warfare_readiness": True, "cap_culture": True,
-                         "cohesion": True, "known": True, "per_century": True, "per_50": True, "education": True, "allure": True,
+                         "cohesion": True, "known": True, "per_century": True, "per_50": True, "education": True, "allure": True, "literacy": True, "urban_share": True,
                          "growth_pct": True}
 # Real places, peoples and periods that must not appear in the JSON (game data
 # rule: alternative history; real names only in the markdown calibration notes).

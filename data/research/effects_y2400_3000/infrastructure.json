@@ -17,11 +17,11 @@
   },
   "steam_pumped_waterworks": {
    "effects": {
-    "water_access": 0.008,
-    "water_safety": 0.007,
-    "fuel_demand": 0.004,
+    "fuel_demand": 0.0006,
+    "labor_demand": 0.0001,
     "pollution": 0.002,
-    "labor_demand": 0.002
+    "water_access": 0.008,
+    "water_safety": 0.0055
    },
    "name": "Steam Pumped Waterworks",
    "observation": "A beam engine in a tall brick house thumps day and night, lifting river water to a hilltop reservoir from which iron mains run down every street.",
@@ -29,12 +29,12 @@
   },
   "gas_lit_streets": {
    "effects": {
-    "security_efficiency": 0.008,
-    "legitimacy": 0.003,
+    "disaster_risk": 0.002,
+    "fuel_demand": 0.001,
     "labor_efficiency": 0.002,
-    "fuel_demand": 0.006,
+    "legitimacy": 0.0005,
     "pollution": 0.005,
-    "disaster_risk": 0.002
+    "security_efficiency": 0.0054
    },
    "name": "Gas-Lit Streets",
    "observation": "At dusk the lamplighter walks his round with a ladder and pole, and one by one the iron posts bloom with a steady yellow flame.",
@@ -44,10 +44,10 @@
   "iron_roof_trusses": {
    "effects": {
     "construction_rate": 0.0052,
-    "craft_output": 0.001,
+    "craft_output": 0.0007,
     "disaster_resilience": 0.0028,
-    "timber_pressure": -0.002,
-    "fuel_demand": 0.001
+    "fuel_demand": 0.0002,
+    "timber_pressure": -0.0007
    },
    "name": "Iron Roof Trusses",
    "observation": "Slender iron ties and struts bolted into triangles span the new shed wall to wall, with no forest of posts on the floor below.",
@@ -55,11 +55,11 @@
   },
   "iron_roofed_market_halls": {
    "effects": {
-    "trade_capacity": 0.003,
+    "construction_rate": 0.0022,
     "food_spoilage": -0.003,
-    "legitimacy": 0.0012,
-    "construction_rate": 0.0026,
-    "labor_demand": 0.001
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0002,
+    "trade_capacity": 0.0014
    },
    "name": "Covered Market Halls",
    "observation": "Under a roof of iron ribs and glass the stalls stand dry in the rain, and the smell of fish and oranges fills the whole bright nave.",
@@ -67,11 +67,11 @@
   },
   "chain_suspension_bridges": {
    "effects": {
-    "route_speed": 0.0072,
-    "haul_capacity": 0.0048,
-    "construction_rate": 0.0039,
-    "labor_demand": 0.003,
-    "injury_risk": 0.003
+    "construction_rate": 0.0033,
+    "haul_capacity": 0.003,
+    "injury_risk": 0.003,
+    "labor_demand": 0.0002,
+    "route_speed": 0.0028
    },
    "name": "Chain Suspension Bridges",
    "observation": "Two stone towers carry great chains of wrought-iron links across the river, and the roadway hangs from them on iron rods high above the masts.",
@@ -80,12 +80,12 @@
   },
   "portland_cement_clinker": {
    "effects": {
-    "construction_rate": 0.0156,
+    "construction_rate": 0.0131,
     "disaster_resilience": 0.0084,
-    "standardization": 0.004,
-    "fuel_demand": 0.006,
+    "fuel_demand": 0.0008,
+    "health_risk": 0.0005,
     "pollution": 0.006,
-    "health_risk": 0.002
+    "standardization": 0.0019
    },
    "name": "Clinker Cement",
    "observation": "Burned hot enough to half melt, chalk and clay come out of the kiln as grey clinker; ground fine, it sets hard as rock even under water.",
@@ -94,10 +94,10 @@
   },
   "cast_iron_street_fronts": {
    "effects": {
-    "construction_rate": 0.0052,
-    "trade_capacity": 0.002,
-    "standardization": 0.003,
-    "fuel_demand": 0.002
+    "construction_rate": 0.0044,
+    "fuel_demand": 0.0003,
+    "standardization": 0.0014,
+    "trade_capacity": 0.0009
    },
    "name": "Cast-Iron Fronts",
    "observation": "Whole shop fronts arrive from the foundry in numbered pieces, columns and arches bolted up in a week and painted to look like carved stone.",
@@ -105,12 +105,12 @@
   },
   "tunnelling_shield": {
    "effects": {
-    "route_speed": 0.0048,
-    "haul_capacity": 0.0036,
-    "construction_rate": 0.0052,
-    "injury_risk": 0.005,
+    "construction_rate": 0.0044,
     "disaster_risk": 0.002,
-    "labor_demand": 0.003
+    "haul_capacity": 0.0023,
+    "injury_risk": 0.005,
+    "labor_demand": 0.0002,
+    "route_speed": 0.0019
    },
    "name": "Tunnelling Shield",
    "observation": "Miners work in iron cells at the face of the drift, digging a hand's breadth ahead while jacks push the whole frame forward through the river mud.",
@@ -119,11 +119,11 @@
   },
   "light_stud_frame_houses": {
    "effects": {
-    "housing_output": 0.008,
-    "construction_rate": 0.0052,
-    "timber_pressure": 0.004,
+    "construction_rate": 0.0044,
     "disaster_risk": 0.002,
-    "labor_demand": -0.002
+    "housing_output": 0.008,
+    "labor_demand": -0.0013,
+    "timber_pressure": 0.004
    },
    "name": "Light Stud Framing",
    "observation": "Two men with machine-sawn studs and a keg of cut nails raise a house frame in days, with no mortise and no master joiner.",
@@ -131,11 +131,11 @@
   },
   "brick_arch_viaducts": {
    "effects": {
-    "route_speed": 0.003,
-    "haul_capacity": 0.0024,
-    "construction_rate": 0.0026,
-    "labor_demand": 0.003,
-    "fuel_demand": 0.002
+    "construction_rate": 0.0022,
+    "fuel_demand": 0.0003,
+    "haul_capacity": 0.0015,
+    "labor_demand": 0.0002,
+    "route_speed": 0.0012
    },
    "name": "Brick Arch Viaducts",
    "observation": "Forty brick arches stride across the valley floor, each the twin of the last, carrying the level line over the farms and mill leats below.",
@@ -143,11 +143,11 @@
   },
   "model_worker_dwellings": {
    "effects": {
-    "housing_output": 0.008,
-    "sanitation": 0.006,
     "disease_exposure": -0.003,
-    "legitimacy": 0.0012,
-    "labor_demand": 0.001
+    "housing_output": 0.008,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0002,
+    "sanitation": 0.006
    },
    "name": "Model Dwellings",
    "observation": "The new block has a tap and a water closet on every stair landing, whitewashed walls, and a window that opens in every room.",
@@ -155,10 +155,11 @@
   },
   "egg_shaped_sewers": {
    "effects": {
-    "sanitation": 0.008,
-    "disease_exposure": -0.003,
-    "construction_rate": 0.0013,
-    "labor_demand": 0.002,
+    "construction_rate": 0.0011,
+    "disease_exposure": -0.0008,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0013,
+    "sanitation": 0.0078,
     "water_pollution": 0.003
    },
    "name": "Egg-Shaped Sewers",
@@ -167,11 +168,11 @@
   },
   "riveted_box_girder_bridges": {
    "effects": {
-    "haul_capacity": 0.003,
-    "route_speed": 0.0024,
     "disaster_resilience": 0.0028,
+    "fuel_demand": 0.0003,
+    "haul_capacity": 0.003,
     "injury_risk": 0.002,
-    "fuel_demand": 0.002
+    "route_speed": 0.0018
    },
    "name": "Box-Girder Bridges",
    "observation": "The bridge is a great iron tube of riveted plates, so stiff that a loaded train rolls through it with barely a tremor.",
@@ -179,11 +180,11 @@
   },
   "prefabricated_iron_glass_halls": {
    "effects": {
-    "construction_rate": 0.0156,
-    "standardization": 0.008,
-    "legitimacy": 0.0024,
+    "construction_rate": 0.0135,
     "craft_output": 0.0015,
-    "fuel_demand": 0.003
+    "fuel_demand": 0.0004,
+    "legitimacy": 0.0003,
+    "standardization": 0.0032
    },
    "name": "Iron-and-Glass Halls",
    "observation": "Thousands of identical panes, columns and gutters come off the works by rail, and in a single season a glass hall rises taller than the elms beside it.",
@@ -192,8 +193,8 @@
   },
   "timber_lateral_bracing": {
    "effects": {
+    "construction_rate": 0.0023,
     "disaster_resilience": 0.0056,
-    "construction_rate": 0.0026,
     "housing_output": 0.0024,
     "timber_pressure": 0.001
    },
@@ -202,11 +203,11 @@
   },
   "compressed_air_systems": {
    "effects": {
+    "fuel_demand": 0.0004,
+    "labor_demand": 0.0001,
     "labor_efficiency": 0.0015,
-    "mining_output": 0.003,
     "mine_safety": 0.002,
-    "fuel_demand": 0.003,
-    "labor_demand": 0.001
+    "mining_output": 0.003
    },
    "observation": "An engine-driven compressor fills a riveted receiver, and iron pipes carry the hissing air to drills and hoists far down the workings.",
    "art": "res://assets/ui/research/paper/pneumatic_pressing.png"
@@ -214,21 +215,21 @@
   "mechanical_refrigeration": {
    "effects": {
     "food_spoilage": -0.006,
-    "food_storage": 0.004,
-    "trade_capacity": 0.002,
-    "fuel_demand": 0.004,
-    "health_risk": 0.001
+    "food_storage": 0.0038,
+    "fuel_demand": 0.0006,
+    "health_risk": 0.0003,
+    "trade_capacity": 0.0006
    },
    "observation": "In the cold store the compressor thuds behind a wall, and frost furs the pipes over carcasses hung in rows in the middle of summer.",
    "art": "res://assets/ui/research/paper/food_retorts.png"
   },
   "safety_lifts": {
    "effects": {
-    "housing_output": 0.02,
+    "construction_rate": 0.0034,
+    "fuel_demand": 0.0003,
     "haul_capacity": 0.0024,
-    "construction_rate": 0.0039,
-    "injury_risk": -0.002,
-    "fuel_demand": 0.002
+    "housing_output": 0.02,
+    "injury_risk": -0.0007
    },
    "observation": "The builder rides his lift to the top floor, has the rope cut before the crowd, and the car jolts to a stop, gripped by its toothed catches.",
    "ability_reason": "A car that cannot fall if its rope parts makes upper floors as valuable as lower ones, so buildings can climb well past the stair limit.",
@@ -236,10 +237,10 @@
   },
   "rolled_iron_floor_beams": {
    "effects": {
-    "construction_rate": 0.0052,
+    "construction_rate": 0.0045,
     "disaster_resilience": 0.0056,
-    "standardization": 0.002,
-    "fuel_demand": 0.002
+    "fuel_demand": 0.0003,
+    "standardization": 0.0008
    },
    "name": "Rolled Iron Beams",
    "observation": "Iron beams shaped like a capital I come from the rolling mill in stock lengths, and shallow brick arches spring between them to make floors fire cannot drop.",
@@ -247,9 +248,9 @@
   },
   "radiator_central_heating": {
    "effects": {
-    "health_protection": 0.0075,
+    "fuel_demand": 0.0003,
     "fuel_efficiency": 0.001,
-    "fuel_demand": 0.002,
+    "health_protection": 0.0032,
     "housing_output": 0.0024,
     "timber_pressure": -0.001
    },
@@ -259,12 +260,13 @@
   },
   "intercepting_sewers": {
    "effects": {
-    "sanitation": 0.02,
-    "disease_exposure": -0.008,
-    "water_safety": 0.02,
-    "health_protection": 0.01,
-    "labor_demand": 0.005,
-    "water_pollution": 0.002
+    "disease_exposure": -0.0047,
+    "health_protection": 0.0038,
+    "labor_demand": 0.0003,
+    "modern_survival": 0.0093,
+    "sanitation": 0.0091,
+    "water_pollution": 0.002,
+    "water_safety": 0.02
    },
    "name": "Intercepting Sewers",
    "observation": "Great brick tunnels run along the riverbanks, catching every old outfall and carrying the town's waste miles downstream before it meets the water.",
@@ -286,13 +288,14 @@
   },
   "boulevard_reconstruction": {
    "effects": {
-    "route_speed": 0.0048,
-    "sanitation": 0.0105,
-    "legitimacy": 0.0036,
-    "security_efficiency": 0.005,
+    "cohesion": -0.0008,
     "housing_output": -0.0072,
-    "cohesion": -0.004,
-    "labor_demand": 0.004
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0007,
+    "modern_survival": 0.0023,
+    "route_speed": 0.0023,
+    "sanitation": 0.0048,
+    "security_efficiency": 0.005
    },
    "name": "Grand Boulevards",
    "observation": "Wreckers tear straight through the old lanes; behind them come broad tree-lined avenues, and under the paving run sewers, water mains and gas.",
@@ -302,11 +305,12 @@
   },
   "sewer_rodding_service": {
    "effects": {
-    "sanitation": 0.0045,
+    "disease_exposure": -0.0006,
+    "health_risk": 0.0002,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0023,
     "repair_capacity": 0.003,
-    "disease_exposure": -0.001,
-    "labor_demand": 0.002,
-    "health_risk": 0.001
+    "sanitation": 0.002
    },
    "name": "Sewer Rodding Crews",
    "observation": "A crew lifts the iron cover, screws rod to rod down the manhole, and twists until the choke breaks and the flow gurgles free.",
@@ -315,10 +319,10 @@
   "pneumatic_caissons": {
    "effects": {
     "construction_rate": 0.0039,
-    "route_speed": 0.0012,
     "disaster_resilience": 0.0028,
+    "health_risk": 0.0006,
     "injury_risk": 0.004,
-    "health_risk": 0.003
+    "route_speed": 0.0006
    },
    "name": "Pneumatic Caissons",
    "observation": "Men dig the riverbed in a sealed iron chamber under pressed air, and some come up bent double with cramps no doctor can explain.",
@@ -326,11 +330,11 @@
   },
   "rock_drill_tunnelling": {
    "effects": {
-    "route_speed": 0.003,
-    "haul_capacity": 0.0018,
-    "mining_output": 0.002,
+    "haul_capacity": 0.0012,
+    "health_risk": 0.0006,
     "injury_risk": 0.004,
-    "health_risk": 0.003
+    "mining_output": 0.002,
+    "route_speed": 0.0014
    },
    "name": "Rock Drill Tunnels",
    "observation": "The air drills hammer six holes at once into the mountain face, the powder goes in, and the whole gang retreats before the rumble.",
@@ -338,11 +342,11 @@
   },
   "steel_long_span_bridges": {
    "effects": {
-    "haul_capacity": 0.0072,
-    "route_speed": 0.006,
     "disaster_resilience": 0.0056,
+    "fuel_demand": 0.0006,
+    "haul_capacity": 0.0047,
     "injury_risk": 0.004,
-    "fuel_demand": 0.003
+    "route_speed": 0.0029
    },
    "name": "Steel Long-Span Bridges",
    "observation": "Two steel cantilevers reach out from their piers across the firth, a gang riveting at each tip, until the arms meet in midair.",
@@ -351,11 +355,11 @@
   },
   "asphalt_street_paving": {
    "effects": {
-    "route_speed": 0.0024,
-    "sanitation": 0.003,
     "construction_rate": 0.0013,
+    "fuel_demand": 0.0002,
     "pollution": 0.002,
-    "fuel_demand": 0.001
+    "route_speed": 0.0012,
+    "sanitation": 0.0014
    },
    "name": "Asphalt Paving",
    "observation": "A gang rakes steaming black asphalt over the concrete bed, and the roller leaves a street that is quiet under wheels and washes clean in rain.",
@@ -363,12 +367,12 @@
   },
   "building_codes": {
    "effects": {
-    "disaster_risk": -0.004,
-    "disease_exposure": -0.003,
-    "health_protection": 0.005,
-    "institutional_rigidity": 0.003,
+    "disaster_risk": -0.0005,
+    "disease_exposure": -0.0017,
+    "health_protection": 0.0019,
     "housing_output": -0.0048,
-    "state_capacity": 0.002
+    "institutional_rigidity": 0.0006,
+    "state_capacity": 0.0011
    },
    "name": "Building Codes",
    "observation": "The inspector measures the stair width and counts windows against his printed rules, and the builder's half-finished row fails the check.",
@@ -376,10 +380,10 @@
   },
   "hydraulic_power_mains": {
    "effects": {
-    "haul_capacity": 0.0024,
-    "labor_efficiency": 0.0015,
-    "labor_demand": -0.002,
-    "fuel_demand": 0.002
+    "fuel_demand": 0.0004,
+    "haul_capacity": 0.0016,
+    "labor_demand": -0.0012,
+    "labor_efficiency": 0.0015
    },
    "name": "Hydraulic Power Mains",
    "observation": "Water pumped to great pressure runs through mains under the docks, and at a turned valve a crane lifts a bale or a swing bridge opens.",
@@ -387,10 +391,10 @@
   },
   "water_towers": {
    "effects": {
-    "water_access": 0.008,
     "disaster_resilience": 0.0042,
-    "disaster_risk": -0.002,
-    "labor_demand": 0.001
+    "disaster_risk": -0.0002,
+    "labor_demand": 0.0001,
+    "water_access": 0.008
    },
    "name": "Water Towers",
    "observation": "An iron tank on brick legs stands above the rooftops, and the firemen's hose at the hydrant now throws water clear over the eaves.",
@@ -398,10 +402,10 @@
   },
   "piped_hot_water_bathrooms": {
    "effects": {
-    "sanitation": 0.0075,
-    "health_protection": 0.0075,
-    "disease_exposure": -0.002,
-    "fuel_demand": 0.003,
+    "disease_exposure": -0.0004,
+    "fuel_demand": 0.0003,
+    "health_protection": 0.0018,
+    "sanitation": 0.0073,
     "water_access": 0.0022
    },
    "name": "Piped Bathrooms",
@@ -410,10 +414,10 @@
   },
   "hollow_tile_fireproof_floors": {
    "effects": {
-    "disaster_risk": -0.004,
+    "construction_rate": 0.0019,
     "disaster_resilience": 0.0042,
-    "construction_rate": 0.0026,
-    "fuel_demand": 0.001
+    "disaster_risk": -0.0016,
+    "fuel_demand": 0.0001
    },
    "name": "Hollow Tile Floors",
    "observation": "Between the iron beams the masons set flat arches of hollow fired-clay blocks, light enough to span wide and proof against the fiercest blaze.",
@@ -421,11 +425,11 @@
   },
   "electric_street_lighting": {
    "effects": {
-    "security_efficiency": 0.004,
-    "labor_efficiency": 0.0015,
-    "legitimacy": 0.0012,
+    "fuel_demand": 0.0003,
+    "labor_efficiency": 0.0013,
+    "legitimacy": 0.0003,
     "pollution": -0.001,
-    "fuel_demand": 0.003
+    "security_efficiency": 0.004
    },
    "name": "Electric Street Lamps",
    "observation": "The arc lamps sputter into life over the square with a white glare that turns the gas mantles yellow and dim by comparison.",
@@ -433,12 +437,12 @@
   },
   "central_power_stations": {
    "effects": {
+    "craft_output": 0.0021,
+    "fuel_demand": 0.0008,
     "fuel_efficiency": 0.0035,
-    "labor_efficiency": 0.004,
-    "craft_output": 0.003,
-    "fuel_demand": 0.008,
-    "pollution": 0.007,
-    "labor_demand": 0.003
+    "labor_demand": 0.0002,
+    "labor_efficiency": 0.0034,
+    "pollution": 0.007
    },
    "name": "Central Power Stations",
    "observation": "Coal barges tie up by the new station, where rows of dynamos hum, and copper wire carries their current to every lamp and motor in the district.",
@@ -448,11 +452,11 @@
   },
   "refuse_destructors": {
    "effects": {
-    "sanitation": 0.0075,
-    "disease_exposure": -0.003,
-    "labor_demand": 0.002,
+    "disease_exposure": -0.0005,
+    "ecological_pressure": -0.001,
+    "labor_demand": 0.0001,
     "pollution": 0.004,
-    "ecological_pressure": -0.001
+    "sanitation": 0.0073
    },
    "name": "Refuse Destructors",
    "observation": "The dust carts come on fixed days now, and at the depot the town's rubbish is shovelled into furnaces whose heat raises steam for the pumps.",
@@ -460,11 +464,11 @@
   },
   "wire_cable_suspension_bridges": {
    "effects": {
-    "route_speed": 0.006,
-    "haul_capacity": 0.0048,
-    "construction_rate": 0.0039,
+    "construction_rate": 0.0029,
+    "haul_capacity": 0.0047,
     "injury_risk": 0.004,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "route_speed": 0.006
    },
    "name": "Wire-Cable Suspension",
    "observation": "Spinning wheels shuttle back and forth over the towers laying wire after wire, until the bundled cables are thick as a man and hold a mile of roadway.",
@@ -473,11 +477,11 @@
   },
   "structural_steel": {
    "effects": {
-    "construction_rate": 0.0182,
-    "housing_output": 0.02,
+    "construction_rate": 0.0135,
     "disaster_resilience": 0.0056,
-    "injury_risk": 0.004,
-    "fuel_demand": 0.003
+    "fuel_demand": 0.0003,
+    "housing_output": 0.0137,
+    "injury_risk": 0.004
    },
    "name": "Steel Skeleton Frames",
    "observation": "Ironworkers walk bare girders ten storeys up, catching red-hot rivets in buckets, while the masons below hang thin walls on a frame that carries itself.",
@@ -486,12 +490,12 @@
   },
   "reinforced_concrete": {
    "effects": {
-    "construction_rate": 0.0182,
+    "construction_rate": 0.0135,
     "disaster_resilience": 0.014,
-    "disaster_risk": -0.003,
-    "fuel_demand": 0.004,
-    "pollution": 0.003,
-    "labor_demand": 0.002
+    "disaster_risk": -0.0012,
+    "fuel_demand": 0.0004,
+    "labor_demand": 0.0001,
+    "pollution": 0.003
    },
    "observation": "Carpenters build a wooden mould, fitters lay a cage of iron rods inside it, and the wet concrete poured around them sets into beams that neither burn nor rot.",
    "ability_reason": "Steel taking tension and concrete taking compression gives a cheap, fireproof, mouldable material for floors, piers, tanks and bridges.",
@@ -499,21 +503,21 @@
   },
   "wound_transformers": {
    "effects": {
-    "fuel_efficiency": 0.0014,
-    "craft_output": 0.001,
-    "standardization": 0.002,
+    "craft_output": 0.0007,
     "fuel_demand": -0.001,
-    "metal_yield": -0.001
+    "fuel_efficiency": 0.0014,
+    "metal_yield": -0.001,
+    "standardization": 0.0008
    },
    "observation": "A squat iron case full of oil and copper windings hums softly on its pole, stepping the station's high pressure down to what a lamp can bear.",
    "art": "res://assets/ui/research/paper/wound_transformers.png"
   },
   "plate_glass_shopfronts": {
    "effects": {
-    "trade_capacity": 0.003,
-    "craft_output": 0.001,
-    "construction_rate": 0.0013,
-    "fuel_demand": 0.001
+    "construction_rate": 0.001,
+    "craft_output": 0.0007,
+    "fuel_demand": 0.0001,
+    "trade_capacity": 0.0015
    },
    "name": "Plate-Glass Shopfronts",
    "observation": "Whole panes taller than a man frame the draper's window, and passers-by stop to stare at goods laid out as if in a lit room.",
@@ -521,12 +525,12 @@
   },
   "skeleton_frame_towers": {
    "effects": {
-    "housing_output": 0.02,
-    "construction_rate": 0.0078,
-    "trade_capacity": 0.004,
-    "state_capacity": 0.003,
-    "fuel_demand": 0.004,
-    "disaster_risk": 0.002
+    "construction_rate": 0.0058,
+    "disaster_risk": 0.002,
+    "fuel_demand": 0.0004,
+    "housing_output": 0.0137,
+    "state_capacity": 0.0013,
+    "trade_capacity": 0.002
    },
    "name": "Skeleton-Frame Towers",
    "observation": "The new office block rises twenty storeys on its steel cage, electric lifts humming in their shafts and clerks filing into every floor by eight.",
@@ -535,10 +539,10 @@
   },
   "street_utility_ducts": {
    "effects": {
-    "disaster_risk": -0.003,
-    "repair_capacity": 0.003,
-    "labor_demand": 0.002,
-    "construction_rate": 0.0013
+    "construction_rate": 0.001,
+    "disaster_risk": -0.0012,
+    "labor_demand": 0.0001,
+    "repair_capacity": 0.003
    },
    "name": "Underground Utility Ducts",
    "observation": "The forest of poles and sagging wires comes down; linesmen pull the cables through brick ducts beneath the pavement instead.",
@@ -546,12 +550,12 @@
   },
   "alternating_current_grids": {
    "effects": {
+    "craft_output": 0.0018,
+    "ecological_pressure": 0.003,
     "fuel_efficiency": 0.0042,
-    "labor_efficiency": 0.003,
-    "craft_output": 0.0025,
-    "state_capacity": 0.003,
-    "labor_demand": 0.003,
-    "ecological_pressure": 0.003
+    "labor_demand": 0.0002,
+    "labor_efficiency": 0.0026,
+    "state_capacity": 0.0013
    },
    "name": "Alternating-Current Grids",
    "observation": "Steel towers march across the fields carrying bare wires at killing pressure, and a works forty miles from any coalfield runs its motors from them.",
@@ -560,10 +564,10 @@
   },
   "mountain_gravity_aqueducts": {
    "effects": {
+    "ecological_pressure": 0.003,
+    "labor_demand": 0.0001,
     "water_access": 0.008,
-    "water_safety": 0.008,
-    "labor_demand": 0.002,
-    "ecological_pressure": 0.003
+    "water_safety": 0.0075
    },
    "name": "Mountain Aqueducts",
    "observation": "Clear upland water runs a hundred miles downhill through tunnels and siphons, never pumped once, and pours from the city's taps cold and sweet.",
@@ -571,11 +575,11 @@
   },
   "hydroelectric_stations": {
    "effects": {
-    "fuel_efficiency": 0.0035,
-    "fuel_demand": -0.006,
-    "craft_output": 0.002,
+    "craft_output": 0.0016,
     "ecological_pressure": 0.006,
-    "labor_demand": 0.002
+    "fuel_demand": -0.006,
+    "fuel_efficiency": 0.0035,
+    "labor_demand": 0.0001
    },
    "name": "Hydroelectric Stations",
    "observation": "Water drops from the weir through steel pipes into turbines, and the power house hums with no coal pile and no smoke.",
@@ -584,10 +588,10 @@
   },
   "battery_bank_wiring": {
    "effects": {
-    "fuel_efficiency": 0.001,
     "disaster_resilience": 0.0028,
-    "labor_demand": 0.001,
-    "health_risk": 0.002
+    "fuel_efficiency": 0.001,
+    "health_risk": 0.0003,
+    "labor_demand": 0.0001
    },
    "name": "Station Battery Rooms",
    "observation": "Rows of glass jars of lead plates and acid fill the battery room, fizzing as they charge by night and carrying the evening lamps when the dynamos falter.",
@@ -595,10 +599,10 @@
   },
   "concrete_compaction_practice": {
    "effects": {
-    "disaster_resilience": 0.0042,
     "construction_rate": 0.0026,
-    "standardization": 0.002,
-    "labor_demand": 0.001
+    "disaster_resilience": 0.0042,
+    "labor_demand": 0.0001,
+    "standardization": 0.0008
    },
    "name": "Concrete Compaction",
    "observation": "Labourers ram rods up and down in the fresh pour and tap the forms with mallets until the air bubbles stop rising.",
@@ -606,9 +610,9 @@
   },
   "concrete_curing_control": {
    "effects": {
-    "disaster_resilience": 0.0042,
-    "standardization": 0.002,
     "construction_rate": -0.0013,
+    "disaster_resilience": 0.0042,
+    "standardization": 0.0008,
     "water_access": -0.0022
    },
    "name": "Concrete Curing",
@@ -617,10 +621,10 @@
   },
   "refrigerated_air_conditioning": {
    "effects": {
-    "health_protection": 0.0075,
-    "craft_output": 0.001,
-    "labor_efficiency": 0.001,
-    "fuel_demand": 0.004,
+    "craft_output": 0.0008,
+    "fuel_demand": 0.0004,
+    "health_protection": 0.0033,
+    "labor_efficiency": 0.0006,
     "pollution": 0.001
    },
    "name": "Refrigerated Cooling",
@@ -631,9 +635,9 @@
    "effects": {
     "construction_rate": 0.0039,
     "disaster_resilience": 0.0028,
-    "injury_risk": -0.001,
-    "labor_demand": 0.001,
-    "fuel_demand": 0.001
+    "fuel_demand": 0.0001,
+    "injury_risk": -0.0005,
+    "labor_demand": 0.0001
    },
    "name": "Sheet-Pile Cofferdams",
    "observation": "The steam hammer drives interlocking steel piles in a ring through the river, and within days pumps have the enclosed bed dry for the masons.",
@@ -641,11 +645,11 @@
   },
   "reinforced_concrete_bridges": {
    "effects": {
-    "route_speed": 0.0024,
-    "haul_capacity": 0.0024,
     "disaster_resilience": 0.0028,
+    "fuel_demand": 0.0002,
+    "haul_capacity": 0.0024,
     "repair_capacity": 0.001,
-    "fuel_demand": 0.002
+    "route_speed": 0.0024
    },
    "name": "Concrete Bridges",
    "observation": "A single flat concrete arch leaps the gorge, poured over a timber centring, and needs no paint and no riveters once the forms come down.",
@@ -653,12 +657,12 @@
   },
   "activated_sludge_treatment": {
    "effects": {
-    "water_pollution": -0.006,
-    "water_safety": 0.008,
+    "ecology_recovery": 0.0018,
+    "fuel_demand": 0.0003,
+    "labor_demand": 0.0001,
     "sanitation": 0.0045,
-    "ecology_recovery": 0.002,
-    "fuel_demand": 0.003,
-    "labor_demand": 0.002
+    "water_pollution": -0.006,
+    "water_safety": 0.008
    },
    "name": "Activated Sludge Works",
    "observation": "Air bubbles up through long concrete tanks of sewage, the brown froth settles, and the water spilling over the far weir runs almost clear.",
@@ -666,12 +670,12 @@
   },
   "zoning_ordinances": {
    "effects": {
-    "health_protection": 0.0075,
+    "cohesion": -0.0001,
     "disaster_risk": -0.002,
-    "state_capacity": 0.002,
-    "institutional_rigidity": 0.003,
+    "health_protection": 0.0055,
     "housing_output": -0.0048,
-    "cohesion": -0.001
+    "institutional_rigidity": 0.0003,
+    "state_capacity": 0.0007
    },
    "name": "Zoning Ordinances",
    "observation": "The planning office hangs a coloured map: red for works, yellow for shops, green for houses, and no new tannery may open beside a school.",
@@ -679,12 +683,12 @@
   },
   "concrete_arch_dams": {
    "effects": {
-    "water_access": 0.02,
-    "fuel_efficiency": 0.0021,
     "disaster_resilience": 0.007,
-    "ecological_pressure": 0.008,
     "disaster_risk": 0.003,
-    "labor_demand": 0.003
+    "ecological_pressure": 0.008,
+    "fuel_efficiency": 0.0021,
+    "labor_demand": 0.0002,
+    "water_access": 0.02
    },
    "name": "Concrete Dams",
    "observation": "The concrete wall curves between the valley's rock sides, three hundred feet high, and behind it a lake fills where villages and orchards stood.",
@@ -694,10 +698,10 @@
   },
   "shallow_foundation_assessment": {
    "effects": {
-    "disaster_resilience": 0.0042,
     "construction_rate": 0.0026,
+    "disaster_resilience": 0.0042,
     "disaster_risk": -0.002,
-    "labor_demand": 0.001
+    "labor_demand": 0.0001
    },
    "name": "Soil Bearing Tests",
    "observation": "Surveyors dig trial pits, load a plate with iron weights and watch it sink, then size the footings to what the clay will bear.",
@@ -716,13 +720,13 @@
   },
   "public_housing_estates": {
    "effects": {
-    "housing_output": 0.02,
-    "sanitation": 0.009,
     "disease_exposure": -0.004,
-    "legitimacy": 0.0036,
-    "state_capacity": 0.003,
-    "labor_demand": 0.003,
-    "institutional_rigidity": 0.003
+    "housing_output": 0.02,
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0006,
+    "sanitation": 0.009,
+    "state_capacity": 0.001
    },
    "name": "Public Housing Estates",
    "observation": "Rows of brick cottages with gardens, indoor lavatories and gas cookers stand where the slum courts were, let at rents the town sets itself.",
@@ -732,10 +736,10 @@
   },
   "water_cement_ratio_design": {
    "effects": {
-    "standardization": 0.004,
-    "disaster_resilience": 0.0042,
     "construction_rate": 0.0026,
-    "knowledge_preservation": 0.001
+    "disaster_resilience": 0.0042,
+    "knowledge_preservation": 0.001,
+    "standardization": 0.0031
    },
    "name": "Water-Cement Ratio",
    "observation": "The engineer weighs the water as carefully as the cement, casts sample cubes from each batch, and crushes them in a press after a month.",
@@ -744,10 +748,10 @@
   "thin_concrete_shell_roofs": {
    "effects": {
     "construction_rate": 0.0039,
+    "craft_output": 0.0009,
+    "fuel_demand": 0.0001,
     "housing_output": 0.0024,
-    "craft_output": 0.001,
-    "timber_pressure": -0.001,
-    "fuel_demand": 0.001
+    "timber_pressure": -0.001
    },
    "name": "Thin Shell Roofs",
    "observation": "A curved concrete skin no thicker than a hand spans the whole hangar, with no column to break the floor beneath it.",
@@ -755,12 +759,12 @@
   },
   "rural_electrification": {
    "effects": {
-    "labor_efficiency": 0.004,
+    "cohesion": 0.0006,
     "food_spoilage": -0.004,
-    "legitimacy": 0.0036,
-    "cohesion": 0.003,
-    "fuel_demand": 0.004,
-    "labor_demand": 0.003
+    "fuel_demand": 0.0004,
+    "labor_demand": 0.0002,
+    "labor_efficiency": 0.002,
+    "legitimacy": 0.0006
    },
    "name": "Rural Electrification",
    "observation": "The poles reach the last farm on the ridge, and the family gather in the kitchen to watch the first bulb glow over the table.",
@@ -770,10 +774,10 @@
   },
   "buried_pipe_load_assessment": {
    "effects": {
-    "repair_capacity": 0.002,
     "disaster_risk": -0.002,
-    "water_access": 0.0022,
-    "standardization": 0.002
+    "repair_capacity": 0.002,
+    "standardization": 0.0015,
+    "water_access": 0.0022
    },
    "name": "Buried Pipe Loading",
    "observation": "Engineers load lengths of pipe in a trench of packed gravel until they crack, then set the cover depth under every road crossing by the results.",
@@ -783,8 +787,8 @@
    "effects": {
     "disaster_resilience": 0.0028,
     "disaster_risk": -0.002,
-    "repair_capacity": 0.001,
-    "labor_demand": 0.001
+    "labor_demand": 0.0001,
+    "repair_capacity": 0.001
    },
    "name": "Settlement Monitoring",
    "observation": "Twice a year the surveyor levels brass studs set in the tower's base, and his ledger shows the north corner sinking a hair each season.",
@@ -792,12 +796,12 @@
   },
   "river_basin_works": {
    "effects": {
-    "water_access": 0.02,
-    "fuel_efficiency": 0.0028,
-    "disaster_resilience": 0.0084,
-    "state_capacity": 0.005,
+    "cohesion": -0.0004,
+    "disaster_resilience": 0.0063,
     "ecological_pressure": 0.008,
-    "cohesion": -0.002
+    "fuel_efficiency": 0.0028,
+    "state_capacity": 0.0017,
+    "water_access": 0.02
    },
    "name": "River-Basin Authority",
    "observation": "From the headwaters to the delta a single authority rules the river: a stair of dams, locks and power houses, and floods that no longer come.",
@@ -808,11 +812,11 @@
   "prestressed_concrete": {
    "effects": {
     "construction_rate": 0.013,
-    "disaster_resilience": 0.0084,
-    "haul_capacity": 0.0024,
-    "standardization": 0.003,
-    "fuel_demand": 0.003,
-    "injury_risk": 0.002
+    "disaster_resilience": 0.0063,
+    "fuel_demand": 0.0003,
+    "haul_capacity": 0.0023,
+    "injury_risk": 0.002,
+    "standardization": 0.0015
    },
    "name": "Prestressed Concrete",
    "observation": "Jacks stretch steel tendons through the beam before it takes any load, so it arches faintly upward and carries twice the span without cracking.",
@@ -821,10 +825,10 @@
   },
   "pumped_storage_hydro": {
    "effects": {
-    "fuel_efficiency": 0.0014,
-    "disaster_resilience": 0.0028,
+    "disaster_resilience": 0.0021,
     "ecological_pressure": 0.003,
-    "fuel_demand": 0.001
+    "fuel_demand": 0.0001,
+    "fuel_efficiency": 0.0014
    },
    "name": "Pumped Storage",
    "observation": "At night the machines run backward and pump the lower lake uphill; at supper time the water rushes down again to meet the grid's peak.",
@@ -832,9 +836,9 @@
   },
   "building_wind_load_assessment": {
    "effects": {
-    "disaster_resilience": 0.0056,
-    "disaster_risk": -0.002,
     "construction_rate": 0.0013,
+    "disaster_resilience": 0.0042,
+    "disaster_risk": -0.0016,
     "knowledge_preservation": 0.001
    },
    "name": "Wind-Load Design",
@@ -844,10 +848,10 @@
   "engineered_wood_lamination": {
    "effects": {
     "construction_rate": 0.0039,
-    "timber_yield": 0.003,
-    "craft_output": 0.001,
+    "craft_output": 0.0008,
+    "health_risk": 0.0001,
     "timber_pressure": -0.001,
-    "health_risk": 0.001
+    "timber_yield": 0.003
    },
    "name": "Glued Laminated Timber",
    "observation": "Short planks glued and clamped layer on layer become a great curved arch, far longer and truer than any single tree could give.",
@@ -855,11 +859,11 @@
   },
   "reactor_engineering": {
    "effects": {
+    "disaster_risk": 0.004,
     "fuel_efficiency": 0.0035,
-    "knowledge_rate": 0.006,
-    "task_coordination": 0.004,
-    "health_risk": 0.004,
-    "disaster_risk": 0.004
+    "health_risk": 0.0004,
+    "knowledge_rate": 0.0039,
+    "task_coordination": 0.0016
    },
    "name": "Controlled Reactors",
    "observation": "In the concrete hall control rods creep out a finger's width at a time, the counters' clicking quickens, and the needles settle at a steady heat.",
@@ -868,11 +872,11 @@
   },
   "fluorescent_lighting": {
    "effects": {
-    "labor_efficiency": 0.0015,
-    "fuel_efficiency": 0.001,
-    "fuel_demand": -0.001,
     "fatigue": 0.001,
-    "health_risk": 0.001
+    "fuel_demand": -0.001,
+    "fuel_efficiency": 0.001,
+    "health_risk": 0.0001,
+    "labor_efficiency": 0.0012
    },
    "name": "Fluorescent Lighting",
    "observation": "Long white tubes flicker and catch across the drawing office ceiling, casting an even shadowless light over every desk at a third of the cost.",
@@ -881,10 +885,10 @@
   "welded_steel_frames": {
    "effects": {
     "construction_rate": 0.0052,
-    "labor_demand": -0.002,
-    "standardization": 0.002,
-    "health_risk": 0.001,
-    "injury_risk": -0.001
+    "health_risk": 0.0001,
+    "injury_risk": -0.0007,
+    "labor_demand": -0.001,
+    "standardization": 0.001
    },
    "name": "Welded Steel Frames",
    "observation": "No rivet gangs and no hammering now; a welder in a dark mask runs a blue-white bead round each joint and the frame goes up quietly.",
@@ -893,10 +897,10 @@
   "climbing_tower_cranes": {
    "effects": {
     "construction_rate": 0.0065,
+    "fuel_demand": 0.0001,
     "haul_capacity": 0.0012,
-    "labor_demand": -0.002,
     "injury_risk": 0.002,
-    "fuel_demand": 0.001
+    "labor_demand": -0.001
    },
    "name": "Climbing Tower Cranes",
    "observation": "The slim crane jacks itself up inside the lift shaft as the floors rise, swinging steel and concrete skips over the city from forty storeys.",
@@ -904,10 +908,10 @@
   },
   "building_capillary_breaks": {
    "effects": {
-    "health_protection": 0.005,
-    "disaster_resilience": 0.0028,
-    "repair_capacity": 0.002,
-    "housing_output": 0.0024
+    "disaster_resilience": 0.0024,
+    "health_protection": 0.0037,
+    "housing_output": 0.0024,
+    "repair_capacity": 0.002
    },
    "name": "Damp-Proof Courses",
    "observation": "A strip of bitumen felt laid under the first course of bricks, and a sheet under the slab, keep the ground's damp from climbing the parlour walls.",
@@ -915,10 +919,11 @@
   },
   "conduit_infiltration_testing": {
    "effects": {
-    "sanitation": 0.003,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0045,
     "repair_capacity": 0.002,
-    "water_pollution": -0.001,
-    "labor_demand": 0.001
+    "sanitation": 0.003,
+    "water_pollution": -0.0007
    },
    "name": "Sewer Infiltration Tests",
    "observation": "The crew plugs both ends of a sewer run, fills it to the mark, and times how fast the level falls to find where groundwater leaks in.",
@@ -926,9 +931,9 @@
   },
   "timber_moisture_movement_design": {
    "effects": {
-    "disaster_resilience": 0.0028,
-    "repair_capacity": 0.002,
     "construction_rate": 0.0013,
+    "disaster_resilience": 0.0024,
+    "repair_capacity": 0.002,
     "timber_pressure": -0.001
    },
    "name": "Timber Movement Joints",
@@ -938,9 +943,9 @@
   "slipformed_concrete_cores": {
    "effects": {
     "construction_rate": 0.0052,
-    "labor_efficiency": 0.001,
     "fatigue": 0.002,
-    "labor_demand": 0.001
+    "labor_demand": 0.0001,
+    "labor_efficiency": 0.0007
    },
    "name": "Slipformed Cores",
    "observation": "The steel form climbs a few inches an hour on its jacks, day and night, and the grain silo rises from the prairie as one seamless concrete tube.",
@@ -949,9 +954,9 @@
   "curtain_wall_systems": {
    "effects": {
     "construction_rate": 0.0065,
+    "fuel_demand": 0.0005,
     "housing_output": 0.0048,
-    "standardization": 0.002,
-    "fuel_demand": 0.003
+    "standardization": 0.0006
    },
    "name": "Glazed Curtain Walls",
    "observation": "Aluminium mullions and sheets of glass are clipped to the frame floor by floor, and the tower becomes a mirror for the clouds.",
@@ -959,12 +964,12 @@
   },
   "nuclear_power_stations": {
    "effects": {
-    "fuel_efficiency": 0.0049,
-    "fuel_demand": -0.008,
-    "pollution": -0.002,
     "disaster_risk": 0.005,
-    "health_risk": 0.003,
-    "legitimacy": -0.0012
+    "fuel_demand": -0.008,
+    "fuel_efficiency": 0.0049,
+    "health_risk": 0.0007,
+    "legitimacy": -0.0002,
+    "pollution": -0.0008
    },
    "name": "Nuclear Power Stations",
    "observation": "A domed concrete containment and a tall cooling tower stand by the estuary, feeding the grid day and night with no smoke from the chimney.",
@@ -974,10 +979,10 @@
   },
   "cable_stayed_bridges": {
    "effects": {
-    "route_speed": 0.0024,
-    "haul_capacity": 0.0018,
     "construction_rate": 0.0026,
-    "fuel_demand": 0.001
+    "fuel_demand": 0.0002,
+    "haul_capacity": 0.0009,
+    "route_speed": 0.0024
    },
    "name": "Cable-Stayed Bridges",
    "observation": "Fans of straight cables run from a single tall pylon to the deck, and the bridge is built outward segment by segment without falsework in the river.",
@@ -985,10 +990,10 @@
   },
   "rainscreen_wall_assemblies": {
    "effects": {
-    "disaster_resilience": 0.0028,
-    "repair_capacity": 0.002,
-    "health_protection": 0.0025,
-    "construction_rate": 0.0013
+    "construction_rate": 0.0013,
+    "disaster_resilience": 0.0024,
+    "health_protection": 0.0018,
+    "repair_capacity": 0.002
    },
    "name": "Rainscreen Walls",
    "observation": "The cladding panels hang an inch clear of the wall on battens, so wind-driven rain runs down the cavity and drains out at the base.",
@@ -996,11 +1001,11 @@
   },
   "precast_panel_housing": {
    "effects": {
-    "housing_output": 0.008,
+    "cohesion": -0.0002,
     "construction_rate": 0.0052,
-    "standardization": 0.003,
-    "cohesion": -0.002,
-    "disaster_risk": 0.001
+    "disaster_risk": 0.001,
+    "housing_output": 0.008,
+    "standardization": 0.0009
    },
    "name": "Precast Panel Housing",
    "observation": "Lorries bring whole walls, windows already set, from the panel works, and a crane stacks a nine-storey block in weeks like a child's box of cards.",
@@ -1009,11 +1014,11 @@
   },
   "seawater_desalination": {
    "effects": {
-    "water_access": 0.008,
-    "water_safety": 0.008,
-    "fuel_demand": 0.005,
     "ecological_pressure": 0.003,
-    "water_pollution": 0.001
+    "fuel_demand": 0.0009,
+    "water_access": 0.008,
+    "water_pollution": 0.001,
+    "water_safety": 0.008
    },
    "name": "Seawater Desalination",
    "observation": "Seawater is forced through bundles of membranes at great pressure, fresh water trickling out one side and bitter brine piped back to sea.",
@@ -1021,11 +1026,11 @@
   },
   "tunnel_boring_machines": {
    "effects": {
-    "route_speed": 0.003,
     "construction_rate": 0.0039,
+    "fuel_demand": 0.0003,
     "injury_risk": -0.002,
-    "labor_demand": -0.002,
-    "fuel_demand": 0.002
+    "labor_demand": -0.0006,
+    "route_speed": 0.003
    },
    "name": "Tunnel Boring Machines",
    "observation": "A cutter wheel wider than a house grinds forward under the city, lining the bore with concrete rings behind it, while traffic rolls unaware above.",
@@ -1033,10 +1038,10 @@
   },
   "direct_current_links": {
    "effects": {
+    "disaster_resilience": 0.0024,
+    "ecological_pressure": 0.001,
     "fuel_efficiency": 0.0014,
-    "trade_capacity": 0.002,
-    "disaster_resilience": 0.0028,
-    "ecological_pressure": 0.001
+    "trade_capacity": 0.0014
    },
    "name": "Direct-Current Links",
    "observation": "A cable laid along the seabed joins two grids a hundred miles apart, the converter halls at each end humming with rectifier valves.",
@@ -1044,11 +1049,11 @@
   },
   "framed_tube_supertall": {
    "effects": {
-    "housing_output": 0.008,
     "construction_rate": 0.0039,
-    "trade_capacity": 0.002,
-    "fuel_demand": 0.003,
-    "disaster_risk": 0.001
+    "disaster_risk": 0.001,
+    "fuel_demand": 0.0005,
+    "housing_output": 0.008,
+    "trade_capacity": 0.0014
    },
    "name": "Framed-Tube Towers",
    "observation": "Closely spaced outer columns make the whole face of the tower one stiff tube, and it climbs past a hundred storeys above the harbour.",
@@ -1056,10 +1061,10 @@
   },
   "cable_net_membrane_roofs": {
    "effects": {
+    "cohesion": 0.0003,
     "construction_rate": 0.0026,
-    "legitimacy": 0.0012,
-    "cohesion": 0.001,
-    "fuel_demand": 0.001
+    "fuel_demand": 0.0004,
+    "legitimacy": 0.0003
    },
    "name": "Cable-Net Roofs",
    "observation": "A translucent membrane stretched over a net of steel cables floats above the stadium stands like a sail pinned to the sky.",
@@ -1067,10 +1072,10 @@
   },
   "ductile_seismic_codes": {
    "effects": {
-    "disaster_resilience": 0.008,
-    "disaster_risk": -0.004,
-    "institutional_rigidity": 0.002,
-    "construction_rate": -0.0013
+    "construction_rate": -0.0013,
+    "disaster_resilience": 0.0062,
+    "disaster_risk": -0.0009,
+    "institutional_rigidity": 0.0007
    },
    "name": "Seismic Design Codes",
    "observation": "After the last quake the new rules demand tied columns and closely hooped steel, so frames bend and hold instead of shattering.",
@@ -1078,10 +1083,10 @@
   },
   "seismic_base_isolation": {
    "effects": {
-    "disaster_resilience": 0.007,
-    "disaster_risk": -0.003,
-    "health_protection": 0.0025,
-    "fuel_demand": 0.001
+    "disaster_resilience": 0.0054,
+    "disaster_risk": -0.0006,
+    "fuel_demand": 0.0004,
+    "health_protection": 0.0025
    },
    "name": "Seismic Base Isolation",
    "observation": "The hospital sits on rubber and lead bearings; in the tremor the ground lurches while the wards above sway slowly and the patients sleep on.",
@@ -1089,11 +1094,11 @@
   },
   "nutrient_removal_treatment": {
    "effects": {
-    "water_pollution": -0.005,
-    "ecology_recovery": 0.004,
-    "water_safety": 0.007,
-    "fuel_demand": 0.002,
-    "labor_demand": 0.001
+    "ecology_recovery": 0.0031,
+    "fuel_demand": 0.0008,
+    "labor_demand": 0.0001,
+    "water_pollution": -0.0008,
+    "water_safety": 0.007
    },
    "name": "Nutrient Removal",
    "observation": "Extra tanks strip the nitrogen and phosphorus from the treated flow, and within a few summers the estuary's green scum and dead fish are gone.",
@@ -1101,10 +1106,11 @@
   },
   "trenchless_pipe_relining": {
    "effects": {
+    "health_risk": 0.0004,
+    "labor_demand": -0.0004,
+    "modern_survival": 0.0082,
     "repair_capacity": 0.004,
-    "sanitation": 0.003,
-    "labor_demand": -0.001,
-    "health_risk": 0.001
+    "sanitation": 0.003
    },
    "name": "Trenchless Relining",
    "observation": "A resin-soaked felt sleeve is pushed through the century-old sewer and cured hot inside it, making a new pipe without opening the street.",
@@ -1112,11 +1118,11 @@
   },
   "photovoltaic_power": {
    "effects": {
-    "fuel_efficiency": 0.0035,
-    "fuel_demand": -0.006,
-    "pollution": -0.002,
     "ecological_pressure": 0.003,
-    "labor_demand": 0.002
+    "fuel_demand": -0.006,
+    "fuel_efficiency": 0.0035,
+    "labor_demand": 0.0001,
+    "pollution": -0.0006
    },
    "name": "Solar Power Plants",
    "observation": "Rank on rank of dark glass panels tilt toward the sun across what was scrubland, and inverters in small huts feed the midday current to the grid.",
@@ -1125,11 +1131,11 @@
   },
   "wind_turbine_farms": {
    "effects": {
-    "fuel_efficiency": 0.0021,
-    "fuel_demand": -0.004,
-    "pollution": -0.003,
+    "cohesion": -0.0002,
     "ecological_pressure": 0.002,
-    "cohesion": -0.001
+    "fuel_demand": -0.004,
+    "fuel_efficiency": 0.0021,
+    "pollution": -0.0008
    },
    "name": "Wind Farms",
    "observation": "White three-bladed towers turn slowly along the ridge line, each taller than a church spire, humming in the evening wind.",
@@ -1137,10 +1143,10 @@
   },
   "storm_surge_barriers": {
    "effects": {
-    "disaster_resilience": 0.008,
-    "disaster_risk": -0.004,
+    "disaster_resilience": 0.0062,
+    "disaster_risk": -0.0009,
     "ecological_pressure": 0.002,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001
    },
    "name": "Storm-Surge Barriers",
    "observation": "When the storm warning comes the great steel gates swing up from the estuary bed and the surge breaks against them while the city stays dry.",
@@ -1149,9 +1155,9 @@
   "building_management_systems": {
    "effects": {
     "fuel_efficiency": 0.0014,
-    "labor_demand": -0.002,
-    "repair_capacity": 0.002,
-    "health_protection": 0.0025
+    "health_protection": 0.0025,
+    "labor_demand": -0.0008,
+    "repair_capacity": 0.002
    },
    "name": "Building Management Systems",
    "observation": "A screen in the basement shows every floor's heat and airflow; the computer dims empty offices and warns the caretaker before a pump fails.",
@@ -1159,10 +1165,10 @@
   },
   "accessible_building_rules": {
    "effects": {
-    "legitimacy": 0.0018,
-    "cohesion": 0.003,
+    "cohesion": 0.001,
     "construction_rate": -0.0013,
-    "institutional_rigidity": 0.001
+    "institutional_rigidity": 0.0003,
+    "legitimacy": 0.0005
    },
    "name": "Accessible Buildings",
    "observation": "Ramps now rise beside the courthouse steps, doors open wide at a button, and a wheelchair user takes the lift to the public gallery unaided.",
@@ -1170,11 +1176,11 @@
   },
   "low_energy_building_codes": {
    "effects": {
-    "fuel_efficiency": 0.0017,
-    "fuel_demand": -0.003,
-    "pollution": -0.002,
     "construction_rate": -0.0013,
-    "institutional_rigidity": 0.002
+    "fuel_demand": -0.003,
+    "fuel_efficiency": 0.0017,
+    "institutional_rigidity": 0.0014,
+    "pollution": -0.0006
    },
    "name": "Energy Building Codes",
    "observation": "The inspector checks insulation depth, triple glazing and airtight seals; the new houses are warmed in winter mostly by their occupants and appliances.",
@@ -1182,10 +1188,10 @@
   },
   "combined_cycle_stations": {
    "effects": {
-    "fuel_efficiency": 0.0021,
-    "pollution": -0.002,
+    "ecological_pressure": 0.001,
     "fuel_demand": -0.002,
-    "ecological_pressure": 0.001
+    "fuel_efficiency": 0.0021,
+    "pollution": -0.0006
    },
    "name": "Combined-Cycle Stations",
    "observation": "Gas burns in a turbine, and its hot exhaust boils water for a second steam turbine, so the station gets twice the work from every cubic foot.",
@@ -1204,11 +1210,11 @@
   },
   "green_cool_roofs": {
    "effects": {
-    "health_protection": 0.005,
-    "ecology_recovery": 0.003,
     "disaster_resilience": 0.0028,
+    "ecology_recovery": 0.0026,
     "fuel_demand": -0.002,
-    "labor_demand": 0.001
+    "health_protection": 0.005,
+    "labor_demand": 0.0001
    },
    "name": "Green and Cool Roofs",
    "observation": "Sedum and grasses cover the warehouse roofs, pale coatings the rest, and in the heatwave the district stays several degrees cooler than its neighbours.",
@@ -1216,11 +1222,11 @@
   },
   "smart_grid_metering": {
    "effects": {
+    "cohesion": -0.0002,
     "fuel_efficiency": 0.0017,
-    "task_coordination": 0.003,
     "knowledge_rate": 0.001,
     "labor_demand": -0.002,
-    "cohesion": -0.001
+    "task_coordination": 0.0013
    },
    "name": "Smart Grid Metering",
    "observation": "Meters report each household's use every few minutes, and at the evening peak the grid quietly shifts water heaters and car chargers to later hours.",
@@ -1228,10 +1234,10 @@
   },
   "rooftop_solar_home_batteries": {
    "effects": {
-    "fuel_efficiency": 0.0014,
+    "disaster_resilience": 0.0018,
     "fuel_demand": -0.003,
-    "disaster_resilience": 0.0028,
-    "pollution": -0.001,
+    "fuel_efficiency": 0.0014,
+    "pollution": -0.0001,
     "state_capacity": -0.001
    },
    "name": "Rooftop Solar",
@@ -1240,11 +1246,11 @@
   },
   "offshore_wind_farms": {
    "effects": {
-    "fuel_efficiency": 0.0021,
-    "fuel_demand": -0.004,
-    "pollution": -0.002,
     "ecological_pressure": 0.002,
-    "labor_demand": 0.002
+    "fuel_demand": -0.004,
+    "fuel_efficiency": 0.0021,
+    "labor_demand": 0.0001,
+    "pollution": -0.0002
    },
    "name": "Offshore Wind Farms",
    "observation": "Far out past the sandbanks hundreds of giant turbines stand on steel legs and floating hulls, their blades longer than a ship.",
@@ -1254,7 +1260,7 @@
    "effects": {
     "construction_rate": 0.0052,
     "housing_output": 0.0048,
-    "pollution": -0.001,
+    "pollution": -0.0001,
     "timber_pressure": 0.003
    },
    "name": "Mass Timber Towers",
@@ -1263,11 +1269,11 @@
   },
   "grid_scale_batteries": {
    "effects": {
-    "fuel_efficiency": 0.0035,
-    "disaster_resilience": 0.0084,
-    "fuel_demand": -0.004,
+    "disaster_resilience": 0.0055,
+    "disaster_risk": 0.002,
     "ecological_pressure": 0.004,
-    "disaster_risk": 0.002
+    "fuel_demand": -0.004,
+    "fuel_efficiency": 0.0035
    },
    "name": "Grid-Scale Batteries",
    "observation": "Rows of white containers packed with cells fill an old coal yard, soaking up the noon sun's surplus and returning it to the grid after dark.",
@@ -1276,11 +1282,11 @@
   },
   "sponge_districts": {
    "effects": {
-    "disaster_resilience": 0.007,
-    "disaster_risk": -0.003,
+    "disaster_resilience": 0.0046,
+    "disaster_risk": -0.002,
     "ecology_recovery": 0.003,
-    "water_access": 0.0044,
-    "housing_output": -0.0024
+    "housing_output": -0.0024,
+    "water_access": 0.0044
    },
    "name": "Sponge Districts",
    "observation": "After the cloudburst the sunken park fills like a pond, porous pavements drink the rest, and the streets that always flooded stay passable.",
@@ -1288,11 +1294,11 @@
   },
   "heat_pump_district_networks": {
    "effects": {
-    "fuel_efficiency": 0.0021,
-    "pollution": -0.002,
     "fuel_demand": -0.002,
+    "fuel_efficiency": 0.0021,
     "health_protection": 0.0025,
-    "labor_demand": 0.001
+    "labor_demand": 0.0001,
+    "pollution": -0.0002
    },
    "name": "Heat Pump Networks",
    "observation": "Gas boilers come out of every flat; warm water drawn from the river and lifted by great heat pumps now runs through insulated pipes to every radiator.",
@@ -1300,10 +1306,10 @@
   },
   "printed_concrete_houses": {
    "effects": {
-    "housing_output": 0.008,
+    "cohesion": -0.0002,
     "construction_rate": 0.0039,
-    "labor_demand": -0.002,
-    "cohesion": -0.001,
+    "housing_output": 0.008,
+    "labor_demand": -0.0011,
     "pollution": 0.001
    },
    "name": "Printed Concrete Houses",
@@ -1312,11 +1318,11 @@
   },
   "near_zero_energy_retrofits": {
    "effects": {
-    "fuel_efficiency": 0.0017,
     "fuel_demand": -0.003,
+    "fuel_efficiency": 0.0017,
     "health_protection": 0.005,
-    "pollution": -0.002,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "pollution": -0.0002
    },
    "name": "Near-Zero Retrofits",
    "observation": "Scaffolds wrap the old brick blocks in thick insulation and new windows, and the tenants' heating bills fall to a fraction of last winter's.",
@@ -1324,9 +1330,9 @@
   },
   "low_carbon_cement": {
    "effects": {
-    "pollution": -0.002,
     "construction_rate": 0.0013,
-    "fuel_demand": 0.002
+    "fuel_demand": 0.0004,
+    "pollution": -0.0002
    },
    "name": "Low-Carbon Cement",
    "observation": "The kiln burns less clinker blended with slag and calcined clay, and a capture plant strips the stack's gas before it reaches the sky.",
@@ -1334,14 +1340,751 @@
   },
   "small_modular_reactors": {
    "effects": {
-    "fuel_efficiency": 0.0021,
+    "disaster_risk": 0.002,
     "fuel_demand": -0.003,
-    "pollution": -0.002,
-    "disaster_risk": 0.002
+    "fuel_efficiency": 0.0021,
+    "pollution": -0.0002
    },
    "name": "Small Modular Reactors",
    "observation": "The reactor arrives by barge in a single factory-built module, sunk into a pit beside the old coal station and connected to its switchyard.",
    "art": "res://assets/ui/research/paper/hardwired_sequence_control.png"
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "steam_pumped_waterworks": {
+    "fuel_demand": 0.004,
+    "labor_demand": 0.002,
+    "pollution": 0.002,
+    "water_access": 0.008,
+    "water_safety": 0.007
+   },
+   "gas_lit_streets": {
+    "disaster_risk": 0.002,
+    "fuel_demand": 0.006,
+    "labor_efficiency": 0.002,
+    "legitimacy": 0.003,
+    "pollution": 0.005,
+    "security_efficiency": 0.008
+   },
+   "iron_roof_trusses": {
+    "construction_rate": 0.0052,
+    "craft_output": 0.001,
+    "disaster_resilience": 0.0028,
+    "fuel_demand": 0.001,
+    "timber_pressure": -0.002
+   },
+   "iron_roofed_market_halls": {
+    "construction_rate": 0.0026,
+    "food_spoilage": -0.003,
+    "labor_demand": 0.001,
+    "legitimacy": 0.0012,
+    "trade_capacity": 0.003
+   },
+   "chain_suspension_bridges": {
+    "construction_rate": 0.0039,
+    "haul_capacity": 0.0048,
+    "injury_risk": 0.003,
+    "labor_demand": 0.003,
+    "route_speed": 0.0072
+   },
+   "portland_cement_clinker": {
+    "construction_rate": 0.0156,
+    "disaster_resilience": 0.0084,
+    "fuel_demand": 0.006,
+    "health_risk": 0.002,
+    "pollution": 0.006,
+    "standardization": 0.004
+   },
+   "cast_iron_street_fronts": {
+    "construction_rate": 0.0052,
+    "fuel_demand": 0.002,
+    "standardization": 0.003,
+    "trade_capacity": 0.002
+   },
+   "tunnelling_shield": {
+    "construction_rate": 0.0052,
+    "disaster_risk": 0.002,
+    "haul_capacity": 0.0036,
+    "injury_risk": 0.005,
+    "labor_demand": 0.003,
+    "route_speed": 0.0048
+   },
+   "light_stud_frame_houses": {
+    "construction_rate": 0.0052,
+    "disaster_risk": 0.002,
+    "housing_output": 0.008,
+    "labor_demand": -0.002,
+    "timber_pressure": 0.004
+   },
+   "brick_arch_viaducts": {
+    "construction_rate": 0.0026,
+    "fuel_demand": 0.002,
+    "haul_capacity": 0.0024,
+    "labor_demand": 0.003,
+    "route_speed": 0.003
+   },
+   "model_worker_dwellings": {
+    "disease_exposure": -0.003,
+    "housing_output": 0.008,
+    "labor_demand": 0.001,
+    "legitimacy": 0.0012,
+    "sanitation": 0.006
+   },
+   "egg_shaped_sewers": {
+    "construction_rate": 0.0013,
+    "disease_exposure": -0.003,
+    "labor_demand": 0.002,
+    "sanitation": 0.008,
+    "water_pollution": 0.003
+   },
+   "riveted_box_girder_bridges": {
+    "disaster_resilience": 0.0028,
+    "fuel_demand": 0.002,
+    "haul_capacity": 0.003,
+    "injury_risk": 0.002,
+    "route_speed": 0.0024
+   },
+   "prefabricated_iron_glass_halls": {
+    "construction_rate": 0.0156,
+    "craft_output": 0.0015,
+    "fuel_demand": 0.003,
+    "legitimacy": 0.0024,
+    "standardization": 0.008
+   },
+   "timber_lateral_bracing": {
+    "construction_rate": 0.0026,
+    "disaster_resilience": 0.0056,
+    "housing_output": 0.0024,
+    "timber_pressure": 0.001
+   },
+   "compressed_air_systems": {
+    "fuel_demand": 0.003,
+    "labor_demand": 0.001,
+    "labor_efficiency": 0.0015,
+    "mine_safety": 0.002,
+    "mining_output": 0.003
+   },
+   "mechanical_refrigeration": {
+    "food_spoilage": -0.006,
+    "food_storage": 0.004,
+    "fuel_demand": 0.004,
+    "health_risk": 0.001,
+    "trade_capacity": 0.002
+   },
+   "safety_lifts": {
+    "construction_rate": 0.0039,
+    "fuel_demand": 0.002,
+    "haul_capacity": 0.0024,
+    "housing_output": 0.02,
+    "injury_risk": -0.002
+   },
+   "rolled_iron_floor_beams": {
+    "construction_rate": 0.0052,
+    "disaster_resilience": 0.0056,
+    "fuel_demand": 0.002,
+    "standardization": 0.002
+   },
+   "radiator_central_heating": {
+    "fuel_demand": 0.002,
+    "fuel_efficiency": 0.001,
+    "health_protection": 0.0075,
+    "housing_output": 0.0024,
+    "timber_pressure": -0.001
+   },
+   "intercepting_sewers": {
+    "disease_exposure": -0.008,
+    "health_protection": 0.01,
+    "labor_demand": 0.005,
+    "sanitation": 0.02,
+    "water_pollution": 0.002,
+    "water_safety": 0.02
+   },
+   "boulevard_reconstruction": {
+    "cohesion": -0.004,
+    "housing_output": -0.0072,
+    "labor_demand": 0.004,
+    "legitimacy": 0.0036,
+    "route_speed": 0.0048,
+    "sanitation": 0.0105,
+    "security_efficiency": 0.005
+   },
+   "sewer_rodding_service": {
+    "disease_exposure": -0.001,
+    "health_risk": 0.001,
+    "labor_demand": 0.002,
+    "repair_capacity": 0.003,
+    "sanitation": 0.0045
+   },
+   "pneumatic_caissons": {
+    "construction_rate": 0.0039,
+    "disaster_resilience": 0.0028,
+    "health_risk": 0.003,
+    "injury_risk": 0.004,
+    "route_speed": 0.0012
+   },
+   "rock_drill_tunnelling": {
+    "haul_capacity": 0.0018,
+    "health_risk": 0.003,
+    "injury_risk": 0.004,
+    "mining_output": 0.002,
+    "route_speed": 0.003
+   },
+   "steel_long_span_bridges": {
+    "disaster_resilience": 0.0056,
+    "fuel_demand": 0.003,
+    "haul_capacity": 0.0072,
+    "injury_risk": 0.004,
+    "route_speed": 0.006
+   },
+   "asphalt_street_paving": {
+    "construction_rate": 0.0013,
+    "fuel_demand": 0.001,
+    "pollution": 0.002,
+    "route_speed": 0.0024,
+    "sanitation": 0.003
+   },
+   "building_codes": {
+    "disaster_risk": -0.004,
+    "disease_exposure": -0.003,
+    "health_protection": 0.005,
+    "housing_output": -0.0048,
+    "institutional_rigidity": 0.003,
+    "state_capacity": 0.002
+   },
+   "hydraulic_power_mains": {
+    "fuel_demand": 0.002,
+    "haul_capacity": 0.0024,
+    "labor_demand": -0.002,
+    "labor_efficiency": 0.0015
+   },
+   "water_towers": {
+    "disaster_resilience": 0.0042,
+    "disaster_risk": -0.002,
+    "labor_demand": 0.001,
+    "water_access": 0.008
+   },
+   "piped_hot_water_bathrooms": {
+    "disease_exposure": -0.002,
+    "fuel_demand": 0.003,
+    "health_protection": 0.0075,
+    "sanitation": 0.0075,
+    "water_access": 0.0022
+   },
+   "hollow_tile_fireproof_floors": {
+    "construction_rate": 0.0026,
+    "disaster_resilience": 0.0042,
+    "disaster_risk": -0.004,
+    "fuel_demand": 0.001
+   },
+   "electric_street_lighting": {
+    "fuel_demand": 0.003,
+    "labor_efficiency": 0.0015,
+    "legitimacy": 0.0012,
+    "pollution": -0.001,
+    "security_efficiency": 0.004
+   },
+   "central_power_stations": {
+    "craft_output": 0.003,
+    "fuel_demand": 0.008,
+    "fuel_efficiency": 0.0035,
+    "labor_demand": 0.003,
+    "labor_efficiency": 0.004,
+    "pollution": 0.007
+   },
+   "refuse_destructors": {
+    "disease_exposure": -0.003,
+    "ecological_pressure": -0.001,
+    "labor_demand": 0.002,
+    "pollution": 0.004,
+    "sanitation": 0.0075
+   },
+   "wire_cable_suspension_bridges": {
+    "construction_rate": 0.0039,
+    "haul_capacity": 0.0048,
+    "injury_risk": 0.004,
+    "labor_demand": 0.002,
+    "route_speed": 0.006
+   },
+   "structural_steel": {
+    "construction_rate": 0.0182,
+    "disaster_resilience": 0.0056,
+    "fuel_demand": 0.003,
+    "housing_output": 0.02,
+    "injury_risk": 0.004
+   },
+   "reinforced_concrete": {
+    "construction_rate": 0.0182,
+    "disaster_resilience": 0.014,
+    "disaster_risk": -0.003,
+    "fuel_demand": 0.004,
+    "labor_demand": 0.002,
+    "pollution": 0.003
+   },
+   "wound_transformers": {
+    "craft_output": 0.001,
+    "fuel_demand": -0.001,
+    "fuel_efficiency": 0.0014,
+    "metal_yield": -0.001,
+    "standardization": 0.002
+   },
+   "plate_glass_shopfronts": {
+    "construction_rate": 0.0013,
+    "craft_output": 0.001,
+    "fuel_demand": 0.001,
+    "trade_capacity": 0.003
+   },
+   "skeleton_frame_towers": {
+    "construction_rate": 0.0078,
+    "disaster_risk": 0.002,
+    "fuel_demand": 0.004,
+    "housing_output": 0.02,
+    "state_capacity": 0.003,
+    "trade_capacity": 0.004
+   },
+   "street_utility_ducts": {
+    "construction_rate": 0.0013,
+    "disaster_risk": -0.003,
+    "labor_demand": 0.002,
+    "repair_capacity": 0.003
+   },
+   "alternating_current_grids": {
+    "craft_output": 0.0025,
+    "ecological_pressure": 0.003,
+    "fuel_efficiency": 0.0042,
+    "labor_demand": 0.003,
+    "labor_efficiency": 0.003,
+    "state_capacity": 0.003
+   },
+   "mountain_gravity_aqueducts": {
+    "ecological_pressure": 0.003,
+    "labor_demand": 0.002,
+    "water_access": 0.008,
+    "water_safety": 0.008
+   },
+   "hydroelectric_stations": {
+    "craft_output": 0.002,
+    "ecological_pressure": 0.006,
+    "fuel_demand": -0.006,
+    "fuel_efficiency": 0.0035,
+    "labor_demand": 0.002
+   },
+   "battery_bank_wiring": {
+    "disaster_resilience": 0.0028,
+    "fuel_efficiency": 0.001,
+    "health_risk": 0.002,
+    "labor_demand": 0.001
+   },
+   "concrete_compaction_practice": {
+    "construction_rate": 0.0026,
+    "disaster_resilience": 0.0042,
+    "labor_demand": 0.001,
+    "standardization": 0.002
+   },
+   "concrete_curing_control": {
+    "construction_rate": -0.0013,
+    "disaster_resilience": 0.0042,
+    "standardization": 0.002,
+    "water_access": -0.0022
+   },
+   "refrigerated_air_conditioning": {
+    "craft_output": 0.001,
+    "fuel_demand": 0.004,
+    "health_protection": 0.0075,
+    "labor_efficiency": 0.001,
+    "pollution": 0.001
+   },
+   "steel_sheet_pile_cofferdams": {
+    "construction_rate": 0.0039,
+    "disaster_resilience": 0.0028,
+    "fuel_demand": 0.001,
+    "injury_risk": -0.001,
+    "labor_demand": 0.001
+   },
+   "reinforced_concrete_bridges": {
+    "disaster_resilience": 0.0028,
+    "fuel_demand": 0.002,
+    "haul_capacity": 0.0024,
+    "repair_capacity": 0.001,
+    "route_speed": 0.0024
+   },
+   "activated_sludge_treatment": {
+    "ecology_recovery": 0.002,
+    "fuel_demand": 0.003,
+    "labor_demand": 0.002,
+    "sanitation": 0.0045,
+    "water_pollution": -0.006,
+    "water_safety": 0.008
+   },
+   "zoning_ordinances": {
+    "cohesion": -0.001,
+    "disaster_risk": -0.002,
+    "health_protection": 0.0075,
+    "housing_output": -0.0048,
+    "institutional_rigidity": 0.003,
+    "state_capacity": 0.002
+   },
+   "concrete_arch_dams": {
+    "disaster_resilience": 0.007,
+    "disaster_risk": 0.003,
+    "ecological_pressure": 0.008,
+    "fuel_efficiency": 0.0021,
+    "labor_demand": 0.003,
+    "water_access": 0.02
+   },
+   "shallow_foundation_assessment": {
+    "construction_rate": 0.0026,
+    "disaster_resilience": 0.0042,
+    "disaster_risk": -0.002,
+    "labor_demand": 0.001
+   },
+   "public_housing_estates": {
+    "disease_exposure": -0.004,
+    "housing_output": 0.02,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0036,
+    "sanitation": 0.009,
+    "state_capacity": 0.003
+   },
+   "water_cement_ratio_design": {
+    "construction_rate": 0.0026,
+    "disaster_resilience": 0.0042,
+    "knowledge_preservation": 0.001,
+    "standardization": 0.004
+   },
+   "thin_concrete_shell_roofs": {
+    "construction_rate": 0.0039,
+    "craft_output": 0.001,
+    "fuel_demand": 0.001,
+    "housing_output": 0.0024,
+    "timber_pressure": -0.001
+   },
+   "rural_electrification": {
+    "cohesion": 0.003,
+    "food_spoilage": -0.004,
+    "fuel_demand": 0.004,
+    "labor_demand": 0.003,
+    "labor_efficiency": 0.004,
+    "legitimacy": 0.0036
+   },
+   "buried_pipe_load_assessment": {
+    "disaster_risk": -0.002,
+    "repair_capacity": 0.002,
+    "standardization": 0.002,
+    "water_access": 0.0022
+   },
+   "foundation_settlement_monitoring": {
+    "disaster_resilience": 0.0028,
+    "disaster_risk": -0.002,
+    "labor_demand": 0.001,
+    "repair_capacity": 0.001
+   },
+   "river_basin_works": {
+    "cohesion": -0.002,
+    "disaster_resilience": 0.0084,
+    "ecological_pressure": 0.008,
+    "fuel_efficiency": 0.0028,
+    "state_capacity": 0.005,
+    "water_access": 0.02
+   },
+   "prestressed_concrete": {
+    "construction_rate": 0.013,
+    "disaster_resilience": 0.0084,
+    "fuel_demand": 0.003,
+    "haul_capacity": 0.0024,
+    "injury_risk": 0.002,
+    "standardization": 0.003
+   },
+   "pumped_storage_hydro": {
+    "disaster_resilience": 0.0028,
+    "ecological_pressure": 0.003,
+    "fuel_demand": 0.001,
+    "fuel_efficiency": 0.0014
+   },
+   "building_wind_load_assessment": {
+    "construction_rate": 0.0013,
+    "disaster_resilience": 0.0056,
+    "disaster_risk": -0.002,
+    "knowledge_preservation": 0.001
+   },
+   "engineered_wood_lamination": {
+    "construction_rate": 0.0039,
+    "craft_output": 0.001,
+    "health_risk": 0.001,
+    "timber_pressure": -0.001,
+    "timber_yield": 0.003
+   },
+   "reactor_engineering": {
+    "disaster_risk": 0.004,
+    "fuel_efficiency": 0.0035,
+    "health_risk": 0.004,
+    "knowledge_rate": 0.006,
+    "task_coordination": 0.004
+   },
+   "fluorescent_lighting": {
+    "fatigue": 0.001,
+    "fuel_demand": -0.001,
+    "fuel_efficiency": 0.001,
+    "health_risk": 0.001,
+    "labor_efficiency": 0.0015
+   },
+   "welded_steel_frames": {
+    "construction_rate": 0.0052,
+    "health_risk": 0.001,
+    "injury_risk": -0.001,
+    "labor_demand": -0.002,
+    "standardization": 0.002
+   },
+   "climbing_tower_cranes": {
+    "construction_rate": 0.0065,
+    "fuel_demand": 0.001,
+    "haul_capacity": 0.0012,
+    "injury_risk": 0.002,
+    "labor_demand": -0.002
+   },
+   "building_capillary_breaks": {
+    "disaster_resilience": 0.0028,
+    "health_protection": 0.005,
+    "housing_output": 0.0024,
+    "repair_capacity": 0.002
+   },
+   "conduit_infiltration_testing": {
+    "labor_demand": 0.001,
+    "repair_capacity": 0.002,
+    "sanitation": 0.003,
+    "water_pollution": -0.001
+   },
+   "timber_moisture_movement_design": {
+    "construction_rate": 0.0013,
+    "disaster_resilience": 0.0028,
+    "repair_capacity": 0.002,
+    "timber_pressure": -0.001
+   },
+   "slipformed_concrete_cores": {
+    "construction_rate": 0.0052,
+    "fatigue": 0.002,
+    "labor_demand": 0.001,
+    "labor_efficiency": 0.001
+   },
+   "curtain_wall_systems": {
+    "construction_rate": 0.0065,
+    "fuel_demand": 0.003,
+    "housing_output": 0.0048,
+    "standardization": 0.002
+   },
+   "nuclear_power_stations": {
+    "disaster_risk": 0.005,
+    "fuel_demand": -0.008,
+    "fuel_efficiency": 0.0049,
+    "health_risk": 0.003,
+    "legitimacy": -0.0012,
+    "pollution": -0.002
+   },
+   "cable_stayed_bridges": {
+    "construction_rate": 0.0026,
+    "fuel_demand": 0.001,
+    "haul_capacity": 0.0018,
+    "route_speed": 0.0024
+   },
+   "rainscreen_wall_assemblies": {
+    "construction_rate": 0.0013,
+    "disaster_resilience": 0.0028,
+    "health_protection": 0.0025,
+    "repair_capacity": 0.002
+   },
+   "precast_panel_housing": {
+    "cohesion": -0.002,
+    "construction_rate": 0.0052,
+    "disaster_risk": 0.001,
+    "housing_output": 0.008,
+    "standardization": 0.003
+   },
+   "seawater_desalination": {
+    "ecological_pressure": 0.003,
+    "fuel_demand": 0.005,
+    "water_access": 0.008,
+    "water_pollution": 0.001,
+    "water_safety": 0.008
+   },
+   "tunnel_boring_machines": {
+    "construction_rate": 0.0039,
+    "fuel_demand": 0.002,
+    "injury_risk": -0.002,
+    "labor_demand": -0.002,
+    "route_speed": 0.003
+   },
+   "direct_current_links": {
+    "disaster_resilience": 0.0028,
+    "ecological_pressure": 0.001,
+    "fuel_efficiency": 0.0014,
+    "trade_capacity": 0.002
+   },
+   "framed_tube_supertall": {
+    "construction_rate": 0.0039,
+    "disaster_risk": 0.001,
+    "fuel_demand": 0.003,
+    "housing_output": 0.008,
+    "trade_capacity": 0.002
+   },
+   "cable_net_membrane_roofs": {
+    "cohesion": 0.001,
+    "construction_rate": 0.0026,
+    "fuel_demand": 0.001,
+    "legitimacy": 0.0012
+   },
+   "ductile_seismic_codes": {
+    "construction_rate": -0.0013,
+    "disaster_resilience": 0.008,
+    "disaster_risk": -0.004,
+    "institutional_rigidity": 0.002
+   },
+   "seismic_base_isolation": {
+    "disaster_resilience": 0.007,
+    "disaster_risk": -0.003,
+    "fuel_demand": 0.001,
+    "health_protection": 0.0025
+   },
+   "nutrient_removal_treatment": {
+    "ecology_recovery": 0.004,
+    "fuel_demand": 0.002,
+    "labor_demand": 0.001,
+    "water_pollution": -0.005,
+    "water_safety": 0.007
+   },
+   "trenchless_pipe_relining": {
+    "health_risk": 0.001,
+    "labor_demand": -0.001,
+    "repair_capacity": 0.004,
+    "sanitation": 0.003
+   },
+   "photovoltaic_power": {
+    "ecological_pressure": 0.003,
+    "fuel_demand": -0.006,
+    "fuel_efficiency": 0.0035,
+    "labor_demand": 0.002,
+    "pollution": -0.002
+   },
+   "wind_turbine_farms": {
+    "cohesion": -0.001,
+    "ecological_pressure": 0.002,
+    "fuel_demand": -0.004,
+    "fuel_efficiency": 0.0021,
+    "pollution": -0.003
+   },
+   "storm_surge_barriers": {
+    "disaster_resilience": 0.008,
+    "disaster_risk": -0.004,
+    "ecological_pressure": 0.002,
+    "labor_demand": 0.002
+   },
+   "building_management_systems": {
+    "fuel_efficiency": 0.0014,
+    "health_protection": 0.0025,
+    "labor_demand": -0.002,
+    "repair_capacity": 0.002
+   },
+   "accessible_building_rules": {
+    "cohesion": 0.003,
+    "construction_rate": -0.0013,
+    "institutional_rigidity": 0.001,
+    "legitimacy": 0.0018
+   },
+   "low_energy_building_codes": {
+    "construction_rate": -0.0013,
+    "fuel_demand": -0.003,
+    "fuel_efficiency": 0.0017,
+    "institutional_rigidity": 0.002,
+    "pollution": -0.002
+   },
+   "combined_cycle_stations": {
+    "ecological_pressure": 0.001,
+    "fuel_demand": -0.002,
+    "fuel_efficiency": 0.0021,
+    "pollution": -0.002
+   },
+   "green_cool_roofs": {
+    "disaster_resilience": 0.0028,
+    "ecology_recovery": 0.003,
+    "fuel_demand": -0.002,
+    "health_protection": 0.005,
+    "labor_demand": 0.001
+   },
+   "smart_grid_metering": {
+    "cohesion": -0.001,
+    "fuel_efficiency": 0.0017,
+    "knowledge_rate": 0.001,
+    "labor_demand": -0.002,
+    "task_coordination": 0.003
+   },
+   "rooftop_solar_home_batteries": {
+    "disaster_resilience": 0.0028,
+    "fuel_demand": -0.003,
+    "fuel_efficiency": 0.0014,
+    "pollution": -0.001,
+    "state_capacity": -0.001
+   },
+   "offshore_wind_farms": {
+    "ecological_pressure": 0.002,
+    "fuel_demand": -0.004,
+    "fuel_efficiency": 0.0021,
+    "labor_demand": 0.002,
+    "pollution": -0.002
+   },
+   "mass_timber_towers": {
+    "construction_rate": 0.0052,
+    "housing_output": 0.0048,
+    "pollution": -0.001,
+    "timber_pressure": 0.003
+   },
+   "grid_scale_batteries": {
+    "disaster_resilience": 0.0084,
+    "disaster_risk": 0.002,
+    "ecological_pressure": 0.004,
+    "fuel_demand": -0.004,
+    "fuel_efficiency": 0.0035
+   },
+   "sponge_districts": {
+    "disaster_resilience": 0.007,
+    "disaster_risk": -0.003,
+    "ecology_recovery": 0.003,
+    "housing_output": -0.0024,
+    "water_access": 0.0044
+   },
+   "heat_pump_district_networks": {
+    "fuel_demand": -0.002,
+    "fuel_efficiency": 0.0021,
+    "health_protection": 0.0025,
+    "labor_demand": 0.001,
+    "pollution": -0.002
+   },
+   "printed_concrete_houses": {
+    "cohesion": -0.001,
+    "construction_rate": 0.0039,
+    "housing_output": 0.008,
+    "labor_demand": -0.002,
+    "pollution": 0.001
+   },
+   "near_zero_energy_retrofits": {
+    "fuel_demand": -0.003,
+    "fuel_efficiency": 0.0017,
+    "health_protection": 0.005,
+    "labor_demand": 0.002,
+    "pollution": -0.002
+   },
+   "low_carbon_cement": {
+    "construction_rate": 0.0013,
+    "fuel_demand": 0.002,
+    "pollution": -0.002
+   },
+   "small_modular_reactors": {
+    "disaster_risk": 0.002,
+    "fuel_demand": -0.003,
+    "fuel_efficiency": 0.0021,
+    "pollution": -0.002
+   }
   }
  }
 }

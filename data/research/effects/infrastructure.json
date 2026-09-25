@@ -21,7 +21,7 @@
     "disaster_resilience": 0.0201,
     "disease_exposure": -0.0144,
     "health_protection": 0.0097,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0037,
     "sanitation": 0.012
    },
    "art": "res://assets/ui/research/subjects/drainage-v1.png"
@@ -37,7 +37,7 @@
    "art": "res://assets/ui/research/subjects/framed_construction-v1.png",
    "effects": {
     "construction_rate": 0.0058,
-    "labor_demand": 0.01
+    "labor_demand": 0.0037
    }
   },
   "joinery": {
@@ -53,7 +53,7 @@
    "effects": {
     "construction_rate": 0.0058,
     "health_protection": 0.0121,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0037,
     "water_access": 0.021,
     "water_safety": 0.0335
    },
@@ -206,7 +206,7 @@
     "cohesion": 0.0017,
     "construction_rate": 0.0007,
     "haul_capacity": 0.0044,
-    "labor_demand": 0.02,
+    "labor_demand": 0.0018,
     "legitimacy": 0.012,
     "task_coordination": 0.0015
    },
@@ -217,7 +217,7 @@
    "art": "res://assets/ui/research/subjects/graded_roads-v1.png",
    "effects": {
     "disaster_risk": -0.001,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0009,
     "task_coordination": 0.0012
    }
   },
@@ -234,7 +234,7 @@
   "river_supply_channels": {
    "effects": {
     "cultivation_yield": 0.0015,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "water_access": 0.042
    },
    "observation": "A channel dug from the river bank brings water to the edge of the settlement and the gardens along its way."
@@ -250,7 +250,7 @@
    "art": "res://assets/ui/research/subjects/labor_rotations-v2.png",
    "effects": {
     "construction_rate": 0.0065,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "labor_efficiency": 0.0012
    }
   },
@@ -258,7 +258,7 @@
    "art": "res://assets/ui/research/paper/building_shading_design.png",
    "effects": {
     "construction_rate": 0.0065,
-    "labor_demand": 0.01
+    "labor_demand": 0.0005
    }
   },
   "storm_response_drill": {
@@ -273,7 +273,7 @@
     "cohesion": 0.0009,
     "cultivation_yield": 0.001,
     "disaster_resilience": 0.007,
-    "labor_demand": 0.02
+    "labor_demand": 0.001
    },
    "observation": "Banks of earth thrown up along the river and mended every dry season keep the flood off the fields and houses.",
    "social_consequence": "Whole villages turn out each year to raise and mend the dykes; the floodplain becomes safe to farm, and its keepers become powerful."
@@ -282,7 +282,7 @@
    "effects": {
     "cohesion": 0.0021,
     "construction_rate": 0.0018,
-    "labor_demand": 0.02,
+    "labor_demand": 0.001,
     "legitimacy": 0.015,
     "state_capacity": 0.0016
    },
@@ -341,7 +341,7 @@
   "rainwater_cisterns": {
    "effects": {
     "disaster_resilience": 0.0058,
-    "labor_demand": 0.005,
+    "labor_demand": 0.0005,
     "water_access": 0.035,
     "water_safety": 0.0024
    },
@@ -377,7 +377,7 @@
    "art": "res://assets/ui/research/subjects/lime_mortar-v1.png",
    "effects": {
     "construction_rate": 0.0062,
-    "labor_demand": 0.01
+    "labor_demand": 0.001
    }
   },
   "ground_bearing_assessment": {
@@ -423,7 +423,7 @@
    "effects": {
     "construction_rate": 0.0115,
     "disaster_risk": -0.0022,
-    "labor_demand": 0.01
+    "labor_demand": 0.0006
    }
   },
   "shared_work_crew_rotation": {
@@ -431,7 +431,7 @@
    "effects": {
     "cohesion": 0.0028,
     "construction_rate": 0.0115,
-    "labor_demand": 0.01
+    "labor_demand": 0.0006
    }
   },
   "corbelled_vaults": {
@@ -456,7 +456,7 @@
     "cultivation_yield": 0.0156,
     "disaster_resilience": 0.0048,
     "ecological_pressure": 0.01,
-    "labor_demand": 0.02,
+    "labor_demand": 0.0012,
     "water_access": 0.042
    },
    "observation": "A bank of rubble across the stream turns its water into a basin that holds through the dry months."
@@ -466,7 +466,7 @@
     "cohesion": 0.0013,
     "construction_rate": 0.0003,
     "disaster_resilience": 0.0032,
-    "labor_demand": 0.02,
+    "labor_demand": 0.001,
     "security_efficiency": 0.005,
     "state_capacity": 0.002
    },
@@ -505,7 +505,7 @@
    "effects": {
     "construction_rate": 0.0007,
     "disaster_resilience": 0.0044,
-    "labor_demand": 0.02,
+    "labor_demand": 0.001,
     "legitimacy": 0.0022,
     "stone_yield": 0.02
    },
@@ -524,7 +524,7 @@
    "effects": {
     "construction_rate": 0.0005,
     "haul_capacity": 0.0036,
-    "labor_demand": 0.03,
+    "labor_demand": 0.0015,
     "legitimacy": 0.0034,
     "state_capacity": 0.0018,
     "task_coordination": 0.0021
@@ -535,7 +535,7 @@
   "public_works_priority_review": {
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
    "effects": {
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "state_capacity": 0.0024,
     "task_coordination": 0.0008
    }
@@ -545,7 +545,7 @@
    "effects": {
     "construction_rate": 0.0018,
     "disaster_risk": -0.0017,
-    "labor_demand": 0.01
+    "labor_demand": 0.0005
    }
   },
   "seasonal_hazard_calendar": {
@@ -580,7 +580,7 @@
    "effects": {
     "cultivation_yield": 0.01,
     "disaster_resilience": 0.0044,
-    "labor_demand": 0.02,
+    "labor_demand": 0.001,
     "water_access": 0.0212
    },
    "observation": "A dam of rubble faced with stone blocks across the dry valley catches the flash floods and shields the town below."
@@ -616,7 +616,7 @@
    "effects": {
     "construction_rate": 0.0051,
     "disease_exposure": -0.006,
-    "labor_demand": 0.04,
+    "labor_demand": 0.002,
     "sanitation": 0.009,
     "water_safety": 0.0101
    }
@@ -648,7 +648,7 @@
    "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
    "effects": {
     "construction_rate": 0.0137,
-    "institutional_rigidity": 0.02,
+    "institutional_rigidity": 0.0027,
     "route_speed": 0.0104,
     "sanitation": 0.002,
     "state_capacity": 0.0059
@@ -701,7 +701,7 @@
     "cohesion": 0.0018,
     "construction_rate": 0.0019,
     "disaster_resilience": 0.0051,
-    "labor_demand": 0.03,
+    "labor_demand": 0.0015,
     "legitimacy": 0.0044,
     "state_capacity": 0.0023
    },
@@ -796,11 +796,11 @@
   },
   "colonnaded_porticoes": {
    "effects": {
-    "cohesion": 0.001,
-    "construction_rate": 0.0024,
-    "housing_output": 0.0038,
-    "legitimacy": 0.0011,
-    "trade_capacity": 0.0014
+    "cohesion": 0.0001,
+    "construction_rate": 0.0015,
+    "housing_output": 0.0018,
+    "legitimacy": 0.0002,
+    "trade_capacity": 0.0003
    },
    "observation": "A row of timber columns on stone bases carries a shady roof along the court, where people meet, wait and trade."
   }
@@ -1311,6 +1311,165 @@
     "housing_output": 0.006,
     "legitimacy": 0.006,
     "trade_capacity": 0.006
+   }
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "drainage": {
+    "disaster_resilience": 0.0201,
+    "disease_exposure": -0.0144,
+    "health_protection": 0.0097,
+    "labor_demand": 0.01,
+    "sanitation": 0.012
+   },
+   "site_clearing_assessment": {
+    "construction_rate": 0.0058,
+    "labor_demand": 0.01
+   },
+   "well_siting": {
+    "construction_rate": 0.0058,
+    "health_protection": 0.0121,
+    "labor_demand": 0.01,
+    "water_access": 0.021,
+    "water_safety": 0.0335
+   },
+   "megalith_raising": {
+    "cohesion": 0.0017,
+    "construction_rate": 0.0007,
+    "haul_capacity": 0.0044,
+    "labor_demand": 0.02,
+    "legitimacy": 0.012,
+    "task_coordination": 0.0015
+   },
+   "seasonal_path_maintenance": {
+    "disaster_risk": -0.001,
+    "labor_demand": 0.01,
+    "task_coordination": 0.0012
+   },
+   "river_supply_channels": {
+    "cultivation_yield": 0.0015,
+    "labor_demand": 0.01,
+    "water_access": 0.042
+   },
+   "communal_upkeep_scheduling": {
+    "construction_rate": 0.0065,
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0012
+   },
+   "dwelling_site_orientation": {
+    "construction_rate": 0.0065,
+    "labor_demand": 0.01
+   },
+   "flood_levees": {
+    "cohesion": 0.0009,
+    "cultivation_yield": 0.001,
+    "disaster_resilience": 0.007,
+    "labor_demand": 0.02
+   },
+   "shrine_terraces": {
+    "cohesion": 0.0021,
+    "construction_rate": 0.0018,
+    "labor_demand": 0.02,
+    "legitimacy": 0.015,
+    "state_capacity": 0.0016
+   },
+   "rainwater_cisterns": {
+    "disaster_resilience": 0.0058,
+    "labor_demand": 0.005,
+    "water_access": 0.035,
+    "water_safety": 0.0024
+   },
+   "course_leveling_practice": {
+    "construction_rate": 0.0062,
+    "labor_demand": 0.01
+   },
+   "load_path_reading": {
+    "construction_rate": 0.0115,
+    "disaster_risk": -0.0022,
+    "labor_demand": 0.01
+   },
+   "shared_work_crew_rotation": {
+    "cohesion": 0.0028,
+    "construction_rate": 0.0115,
+    "labor_demand": 0.01
+   },
+   "diversion_dams": {
+    "cultivation_yield": 0.0156,
+    "disaster_resilience": 0.0048,
+    "ecological_pressure": 0.01,
+    "labor_demand": 0.02,
+    "water_access": 0.042
+   },
+   "town_enclosure_walls": {
+    "cohesion": 0.0013,
+    "construction_rate": 0.0003,
+    "disaster_resilience": 0.0032,
+    "labor_demand": 0.02,
+    "security_efficiency": 0.005,
+    "state_capacity": 0.002
+   },
+   "dressed_stone_masonry": {
+    "construction_rate": 0.0007,
+    "disaster_resilience": 0.0044,
+    "labor_demand": 0.02,
+    "legitimacy": 0.0022,
+    "stone_yield": 0.02
+   },
+   "stepped_stone_tombs": {
+    "construction_rate": 0.0005,
+    "haul_capacity": 0.0036,
+    "labor_demand": 0.03,
+    "legitimacy": 0.0034,
+    "state_capacity": 0.0018,
+    "task_coordination": 0.0021
+   },
+   "public_works_priority_review": {
+    "labor_demand": 0.01,
+    "state_capacity": 0.0024,
+    "task_coordination": 0.0008
+   },
+   "structural_repair_triage": {
+    "construction_rate": 0.0018,
+    "disaster_risk": -0.0017,
+    "labor_demand": 0.01
+   },
+   "wadi_dams": {
+    "cultivation_yield": 0.01,
+    "disaster_resilience": 0.0044,
+    "labor_demand": 0.02,
+    "water_access": 0.0212
+   },
+   "covered_sewers": {
+    "construction_rate": 0.0051,
+    "disease_exposure": -0.006,
+    "labor_demand": 0.04,
+    "sanitation": 0.009,
+    "water_safety": 0.0101
+   },
+   "urban_street_plans": {
+    "construction_rate": 0.0137,
+    "institutional_rigidity": 0.02,
+    "route_speed": 0.0104,
+    "sanitation": 0.002,
+    "state_capacity": 0.0059
+   },
+   "stepped_temple_towers": {
+    "cohesion": 0.0018,
+    "construction_rate": 0.0019,
+    "disaster_resilience": 0.0051,
+    "labor_demand": 0.03,
+    "legitimacy": 0.0044,
+    "state_capacity": 0.0023
+   },
+   "colonnaded_porticoes": {
+    "cohesion": 0.001,
+    "construction_rate": 0.0024,
+    "housing_output": 0.0038,
+    "legitimacy": 0.0011,
+    "trade_capacity": 0.0014
    }
   }
  }

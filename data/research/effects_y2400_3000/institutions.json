@@ -4,11 +4,11 @@
  "items": {
   "appointed_department_prefects": {
    "effects": {
-    "cohesion": -0.0012,
-    "institutional_rigidity": 0.0016,
-    "labor_demand": 0.0029,
-    "security_efficiency": 0.003,
-    "state_capacity": 0.0058
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0005,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.002,
+    "state_capacity": 0.0022
    },
    "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
    "name": "Department Prefects",
@@ -16,9 +16,9 @@
   },
   "civil_merit_order": {
    "effects": {
-    "cohesion": 0.0023,
-    "institutional_rigidity": -0.0008,
-    "legitimacy": 0.0023
+    "cohesion": 0.0004,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0004
    },
    "art": "res://assets/ui/research/subjects/professional_service-v1.png",
    "name": "Order of Civil Merit",
@@ -26,12 +26,12 @@
   },
   "universal_civil_code": {
    "effects": {
-    "institutional_rigidity": 0.0024,
-    "labor_demand": 0.0029,
-    "legitimacy": 0.0023,
-    "standardization": 0.0077,
-    "state_capacity": 0.0092,
-    "trade_capacity": 0.0024
+    "institutional_rigidity": 0.0008,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0004,
+    "standardization": 0.0026,
+    "state_capacity": 0.0035,
+    "trade_capacity": 0.0019
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Universal Civil Code",
@@ -41,10 +41,10 @@
   },
   "administrative_courts": {
    "effects": {
-    "institutional_rigidity": -0.0016,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0031,
-    "state_capacity": 0.0023
+    "institutional_rigidity": -0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Administrative Courts",
@@ -52,9 +52,9 @@
   },
   "commercial_code": {
    "effects": {
-    "standardization": 0.0038,
-    "state_capacity": 0.0012,
-    "trade_capacity": 0.003
+    "standardization": 0.0013,
+    "state_capacity": 0.0005,
+    "trade_capacity": 0.0024
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
    "name": "Commercial Code",
@@ -62,9 +62,9 @@
   },
   "assembly_ombudsman": {
    "effects": {
-    "institutional_rigidity": -0.0016,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0023
+    "institutional_rigidity": -0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0004
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
    "name": "Assembly Ombudsman",
@@ -72,10 +72,10 @@
   },
   "single_minister_departments": {
    "effects": {
-    "institutional_rigidity": 0.0008,
-    "labor_demand": 0.0029,
-    "state_capacity": 0.0058,
-    "task_coordination": 0.0024
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0022,
+    "task_coordination": 0.001
    },
    "art": "res://assets/ui/research/subjects/professional_service-v1.png",
    "name": "Single-minister Departments",
@@ -83,11 +83,12 @@
   },
   "granted_constitution": {
    "effects": {
-    "cohesion": 0.0035,
-    "institutional_rigidity": -0.0024,
-    "labor_demand": 0.0029,
-    "legitimacy": 0.0061,
-    "state_capacity": 0.0046
+    "cohesion": 0.0006,
+    "institutional_rigidity": -0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.001,
+    "literacy": 0.0091,
+    "state_capacity": 0.0018
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Granted Constitution",
@@ -97,9 +98,9 @@
   },
   "great_realm_conference": {
    "effects": {
-    "legitimacy": 0.0015,
-    "security_efficiency": 0.0045,
-    "trade_capacity": 0.0012
+    "legitimacy": 0.0002,
+    "security_efficiency": 0.0031,
+    "trade_capacity": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
    "name": "Great Realm Conference",
@@ -107,10 +108,10 @@
   },
   "annual_budget_vote": {
    "effects": {
-    "institutional_rigidity": -0.0008,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0031,
-    "state_capacity": 0.0035
+    "institutional_rigidity": -0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0013
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
    "name": "Annual Budget Vote",
@@ -118,12 +119,12 @@
   },
   "penitentiary_sentences": {
    "effects": {
-    "cohesion": 0.0012,
+    "cohesion": 0.0002,
     "food_storage": -0.0008,
-    "injury_risk": -0.0008,
-    "labor_demand": 0.0029,
-    "legitimacy": 0.0015,
-    "security_efficiency": 0.0045
+    "injury_risk": -0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003,
+    "security_efficiency": 0.0021
    },
    "art": "res://assets/ui/research/subjects/watch_rotation-v1.png",
    "name": "Penitentiary Sentences",
@@ -132,10 +133,12 @@
   "public_instruction_ministry": {
    "effects": {
     "adoption_rate": 0.0032,
-    "institutional_rigidity": 0.0008,
-    "knowledge_preservation": 0.0032,
-    "labor_demand": 0.0029,
-    "state_capacity": 0.0035
+    "fertility_transition": 0.045,
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.0019,
+    "labor_demand": 0.0001,
+    "literacy": 0.0296,
+    "state_capacity": 0.0015
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Ministry of Public Instruction",
@@ -143,9 +146,9 @@
   },
   "householder_franchise": {
    "effects": {
-    "cohesion": 0.0047,
-    "institutional_rigidity": -0.0024,
-    "legitimacy": 0.0069,
+    "cohesion": 0.0007,
+    "institutional_rigidity": -0.0013,
+    "legitimacy": 0.0012,
     "state_capacity": -0.0012
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
@@ -156,11 +159,11 @@
   },
   "customs_union": {
    "effects": {
-    "cohesion": 0.0023,
-    "legitimacy": -0.0008,
-    "standardization": 0.0038,
-    "state_capacity": 0.0035,
-    "trade_capacity": 0.0073
+    "cohesion": 0.0004,
+    "legitimacy": -0.0002,
+    "standardization": 0.0018,
+    "state_capacity": 0.0015,
+    "trade_capacity": 0.0035
    },
    "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
    "name": "Customs Union",
@@ -170,12 +173,12 @@
   },
   "poor_law_boards": {
    "effects": {
-    "cohesion": -0.0023,
+    "cohesion": -0.0007,
     "food_storage": 0.0008,
-    "health_protection": 0.0008,
-    "labor_demand": 0.0029,
-    "legitimacy": -0.0008,
-    "state_capacity": 0.0046
+    "health_protection": 0.0007,
+    "labor_demand": 0.0001,
+    "legitimacy": -0.0002,
+    "state_capacity": 0.0019
    },
    "art": "res://assets/ui/research/subjects/public_stores-v1.png",
    "name": "Poor-law Boards",
@@ -184,10 +187,10 @@
   },
   "examined_patent_office": {
    "effects": {
-    "craft_output": 0.0016,
-    "institutional_rigidity": 0.0008,
-    "knowledge_rate": 0.0024,
-    "trade_capacity": 0.0006
+    "craft_output": 0.0011,
+    "institutional_rigidity": 0.0002,
+    "knowledge_rate": 0.0015,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
    "name": "Examined Patent Office",
@@ -195,10 +198,10 @@
   },
   "responsible_ministry": {
    "effects": {
-    "cohesion": 0.0012,
-    "institutional_rigidity": -0.0024,
-    "legitimacy": 0.0069,
-    "state_capacity": 0.0035
+    "cohesion": 0.0002,
+    "institutional_rigidity": -0.0011,
+    "legitimacy": 0.0009,
+    "state_capacity": 0.0012
    },
    "art": "res://assets/ui/research/paper/public_office_handover.png",
    "name": "Responsible Ministry",
@@ -208,10 +211,10 @@
   },
   "central_note_monopoly": {
    "effects": {
-    "institutional_rigidity": 0.0008,
-    "standardization": 0.0026,
-    "state_capacity": 0.0046,
-    "trade_capacity": 0.003
+    "institutional_rigidity": 0.0002,
+    "standardization": 0.001,
+    "state_capacity": 0.0015,
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
    "name": "Central Note Monopoly",
@@ -219,9 +222,9 @@
   },
   "bankruptcy_discharge": {
    "effects": {
-    "cohesion": 0.0012,
-    "legitimacy": 0.0015,
-    "trade_capacity": 0.0018
+    "cohesion": 0.0002,
+    "legitimacy": 0.0002,
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
    "name": "Bankruptcy Discharge",
@@ -229,10 +232,10 @@
   },
   "grain_tariff_repeal": {
    "effects": {
-    "cohesion": -0.0012,
-    "legitimacy": 0.0008,
+    "cohesion": -0.0002,
+    "legitimacy": 0.0001,
     "nutrition_quality": 0.0008,
-    "trade_capacity": 0.003
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/regional_granaries-v1.png",
    "name": "Grain Tariff Repeal",
@@ -241,9 +244,9 @@
   },
   "manhood_suffrage": {
    "effects": {
-    "cohesion": 0.0058,
-    "institutional_rigidity": -0.0024,
-    "legitimacy": 0.0077,
+    "cohesion": 0.0009,
+    "institutional_rigidity": -0.0011,
+    "legitimacy": 0.001,
     "state_capacity": -0.0012
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
@@ -255,9 +258,10 @@
   "mass_political_parties": {
    "effects": {
     "adoption_rate": 0.0024,
-    "cohesion": -0.0023,
-    "labor_demand": 0.0029,
-    "legitimacy": 0.0046
+    "cohesion": -0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0006,
+    "literacy": 0.0185
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
    "name": "Mass Political Parties",
@@ -267,10 +271,10 @@
   },
   "ruler_plebiscite": {
    "effects": {
-    "cohesion": -0.0012,
-    "institutional_rigidity": 0.0016,
-    "legitimacy": 0.0038,
-    "state_capacity": 0.0023
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0005,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0008
    },
    "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
    "name": "Ruler's Plebiscite",
@@ -279,11 +283,11 @@
   },
   "competitive_civil_service": {
    "effects": {
-    "institutional_rigidity": 0.0008,
-    "labor_demand": 0.0029,
-    "legitimacy": 0.0023,
-    "standardization": 0.0051,
-    "state_capacity": 0.0127
+    "institutional_rigidity": 0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003,
+    "standardization": 0.002,
+    "state_capacity": 0.0042
    },
    "art": "res://assets/ui/research/subjects/professional_service-v1.png",
    "name": "Competitive Civil Service",
@@ -294,8 +298,8 @@
   "limited_liability_registration": {
    "effects": {
     "craft_output": 0.0024,
-    "legitimacy": -0.0008,
-    "trade_capacity": 0.0036
+    "legitimacy": -0.0001,
+    "trade_capacity": 0.0011
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
    "name": "Limited Liability Registration",
@@ -303,9 +307,10 @@
   },
   "secret_printed_ballot": {
    "effects": {
-    "cohesion": 0.0023,
-    "institutional_rigidity": -0.0016,
-    "legitimacy": 0.0038
+    "cohesion": 0.0004,
+    "institutional_rigidity": -0.0007,
+    "legitimacy": 0.0005,
+    "literacy": 0.0185
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
    "name": "Secret Printed Ballot",
@@ -313,9 +318,10 @@
   },
   "civil_divorce_courts": {
    "effects": {
-    "cohesion": -0.0012,
-    "institutional_rigidity": -0.0008,
-    "legitimacy": 0.0008
+    "cohesion": -0.0002,
+    "fertility_transition": 0.0098,
+    "institutional_rigidity": -0.0005,
+    "legitimacy": 0.0002
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Civil Divorce Courts",
@@ -324,10 +330,10 @@
   },
   "dependencies_ministry": {
    "effects": {
-    "labor_demand": 0.0029,
-    "legitimacy": -0.0008,
-    "state_capacity": 0.0035,
-    "trade_capacity": 0.0018
+    "labor_demand": 0.0001,
+    "legitimacy": -0.0002,
+    "state_capacity": 0.002,
+    "trade_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
    "name": "Dependencies Ministry",
@@ -335,10 +341,10 @@
   },
   "rural_district_assemblies": {
    "effects": {
-    "cohesion": 0.0035,
-    "institutional_rigidity": -0.0008,
-    "legitimacy": 0.0031,
-    "state_capacity": 0.0012
+    "cohesion": 0.0006,
+    "institutional_rigidity": -0.0005,
+    "legitimacy": 0.0006,
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
    "name": "Rural District Assemblies",
@@ -346,10 +352,10 @@
   },
   "independent_audit_office": {
    "effects": {
-    "institutional_rigidity": -0.0016,
-    "legitimacy": 0.0023,
-    "state_capacity": 0.0046,
-    "trade_capacity": 0.0006
+    "institutional_rigidity": -0.0011,
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0026,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
    "name": "Independent Audit Office",
@@ -358,8 +364,8 @@
   "lender_of_last_resort": {
    "effects": {
     "disaster_resilience": 0.0016,
-    "state_capacity": 0.0023,
-    "trade_capacity": 0.003
+    "state_capacity": 0.0013,
+    "trade_capacity": 0.0011
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
    "name": "Lender of Last Resort",
@@ -367,9 +373,9 @@
   },
   "ceremonial_crown": {
    "effects": {
-    "cohesion": 0.0035,
-    "institutional_rigidity": -0.0008,
-    "legitimacy": 0.0038
+    "cohesion": 0.0006,
+    "institutional_rigidity": -0.0005,
+    "legitimacy": 0.0007
    },
    "art": "res://assets/ui/research/discovery-600/royal_ancestor_offerings.png",
    "name": "Ceremonial Crown",
@@ -377,10 +383,10 @@
   },
   "career_diplomatic_service": {
    "effects": {
-    "labor_demand": 0.0015,
+    "labor_demand": 0.0001,
     "security_efficiency": 0.0045,
-    "state_capacity": 0.0023,
-    "trade_capacity": 0.0012
+    "state_capacity": 0.0013,
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
    "name": "Career Diplomatic Service",
@@ -388,9 +394,9 @@
   },
   "interrealm_arbitration": {
    "effects": {
-    "legitimacy": 0.0015,
+    "legitimacy": 0.0003,
     "security_efficiency": 0.0045,
-    "trade_capacity": 0.0012
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
    "name": "Interrealm Arbitration",
@@ -399,8 +405,8 @@
   "gold_standard_link": {
    "effects": {
     "disaster_resilience": -0.0008,
-    "standardization": 0.0038,
-    "trade_capacity": 0.0036
+    "standardization": 0.0019,
+    "trade_capacity": 0.0013
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
    "name": "Gold Standard",
@@ -409,9 +415,9 @@
   },
   "municipal_utilities": {
    "effects": {
-    "cohesion": 0.0023,
-    "labor_demand": 0.0029,
-    "state_capacity": 0.0035,
+    "cohesion": 0.0003,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0015,
     "water_safety": 0.0016
    },
    "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
@@ -420,9 +426,9 @@
   },
   "probation_parole": {
    "effects": {
-    "cohesion": 0.0023,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0015,
+    "cohesion": 0.0003,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003,
     "security_efficiency": 0.0015
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
@@ -431,9 +437,10 @@
   },
   "married_women_property": {
    "effects": {
-    "cohesion": 0.0023,
-    "legitimacy": 0.0023,
-    "trade_capacity": 0.0006
+    "cohesion": 0.0003,
+    "fertility_transition": 0.0088,
+    "legitimacy": 0.0005,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Married Women's Property",
@@ -442,10 +449,10 @@
   },
   "audited_company_accounts": {
    "effects": {
-    "labor_demand": 0.0015,
-    "standardization": 0.0038,
-    "state_capacity": 0.0012,
-    "trade_capacity": 0.0024
+    "labor_demand": 0.0001,
+    "standardization": 0.0015,
+    "state_capacity": 0.0005,
+    "trade_capacity": 0.0012
    },
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
    "name": "Audited Company Accounts",
@@ -453,9 +460,9 @@
   },
   "elected_county_councils": {
    "effects": {
-    "cohesion": 0.0023,
-    "legitimacy": 0.0023,
-    "state_capacity": 0.0023
+    "cohesion": 0.0003,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
    "name": "Elected County Councils",
@@ -463,12 +470,13 @@
   },
   "old_age_pensions": {
    "effects": {
-    "cohesion": 0.0058,
-    "health_protection": 0.0016,
-    "labor_demand": 0.0029,
+    "cohesion": 0.0008,
+    "fertility_transition": 0.0176,
+    "health_protection": 0.0004,
+    "labor_demand": 0.0001,
     "labor_efficiency": -0.0008,
-    "legitimacy": 0.0031,
-    "state_capacity": 0.0012
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
    "name": "Old-age Pensions",
@@ -478,9 +486,9 @@
   "antimonopoly_law": {
    "effects": {
     "institutional_rigidity": -0.0008,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0015,
-    "trade_capacity": 0.0024
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003,
+    "trade_capacity": 0.0012
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Antimonopoly Law",
@@ -488,9 +496,10 @@
   },
   "womens_suffrage": {
    "effects": {
-    "cohesion": 0.0058,
+    "cohesion": 0.0008,
+    "fertility_transition": 0.0088,
     "institutional_rigidity": -0.0016,
-    "legitimacy": 0.0069
+    "legitimacy": 0.0016
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
    "name": "Women's Suffrage",
@@ -500,9 +509,9 @@
   },
   "initiative_referendum": {
    "effects": {
-    "cohesion": 0.0012,
+    "cohesion": 0.0002,
     "institutional_rigidity": -0.0008,
-    "legitimacy": 0.0023,
+    "legitimacy": 0.0005,
     "state_capacity": -0.0012
    },
    "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
@@ -511,9 +520,9 @@
   },
   "juvenile_courts": {
    "effects": {
-    "cohesion": 0.0023,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0015,
+    "cohesion": 0.0005,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003,
     "security_efficiency": 0.0015
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
@@ -522,8 +531,8 @@
   },
   "proportional_representation": {
    "effects": {
-    "cohesion": 0.0023,
-    "legitimacy": 0.0038,
+    "cohesion": 0.0005,
+    "legitimacy": 0.0009,
     "state_capacity": -0.0012
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
@@ -533,9 +542,9 @@
   },
   "rate_regulation_commissions": {
    "effects": {
-    "institutional_rigidity": 0.0008,
-    "labor_demand": 0.0015,
-    "state_capacity": 0.0035,
+    "institutional_rigidity": 0.0001,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0018,
     "trade_capacity": 0.0018
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
@@ -544,11 +553,11 @@
   },
   "unemployment_insurance": {
    "effects": {
-    "cohesion": 0.0058,
-    "labor_demand": 0.0029,
+    "cohesion": 0.0012,
+    "labor_demand": 0.0001,
     "labor_efficiency": -0.0008,
-    "legitimacy": 0.0031,
-    "state_capacity": 0.0012
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
    "name": "Unemployment Insurance",
@@ -557,8 +566,8 @@
   "upper_chamber_curbed": {
    "effects": {
     "institutional_rigidity": -0.0016,
-    "legitimacy": 0.0031,
-    "state_capacity": 0.0012
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0006
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
    "name": "Upper Chamber Curbed",
@@ -566,13 +575,13 @@
   },
   "war_economy_boards": {
    "effects": {
-    "cohesion": -0.0023,
-    "institutional_rigidity": 0.0024,
-    "labor_demand": 0.0058,
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0002,
+    "labor_demand": 0.0003,
     "labor_efficiency": -0.0008,
-    "state_capacity": 0.0104,
-    "task_coordination": 0.004,
-    "warfare_readiness": 0.0064
+    "state_capacity": 0.0034,
+    "task_coordination": 0.0013,
+    "warfare_readiness": 0.0027
    },
    "art": "res://assets/ui/research/subjects/military_staffs-v1.png",
    "name": "War Economy Boards",
@@ -582,9 +591,9 @@
   },
   "frontier_passport_control": {
    "effects": {
-    "labor_demand": 0.0015,
-    "security_efficiency": 0.006,
-    "state_capacity": 0.0023,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0055,
+    "state_capacity": 0.0008,
     "trade_capacity": -0.0012
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
@@ -593,12 +602,12 @@
   },
   "one_party_state": {
    "effects": {
-    "cohesion": -0.0058,
-    "institutional_rigidity": 0.0064,
+    "cohesion": -0.0005,
+    "institutional_rigidity": 0.0006,
     "knowledge_rate": -0.0016,
-    "legitimacy": -0.0061,
-    "security_efficiency": 0.0074,
-    "state_capacity": 0.0092
+    "legitimacy": -0.0009,
+    "security_efficiency": 0.0068,
+    "state_capacity": 0.003
    },
    "art": "res://assets/ui/research/institutions-v1.png",
    "name": "One-party State",
@@ -608,9 +617,9 @@
   },
   "league_of_realms": {
    "effects": {
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0031,
-    "security_efficiency": 0.0074,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0005,
+    "security_efficiency": 0.0068,
     "trade_capacity": 0.0018
    },
    "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
@@ -620,10 +629,10 @@
   },
   "constitutional_court": {
    "effects": {
-    "cohesion": 0.0023,
+    "cohesion": 0.0004,
     "institutional_rigidity": -0.0032,
-    "legitimacy": 0.0069,
-    "state_capacity": 0.0023
+    "legitimacy": 0.0011,
+    "state_capacity": 0.0008
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Constitutional Court",
@@ -632,8 +641,8 @@
   },
   "interrealm_permanent_court": {
    "effects": {
-    "legitimacy": 0.0023,
-    "security_efficiency": 0.003,
+    "legitimacy": 0.0004,
+    "security_efficiency": 0.0027,
     "trade_capacity": 0.0012
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
@@ -642,10 +651,10 @@
   },
   "corporatist_chambers": {
    "effects": {
-    "cohesion": 0.0012,
-    "institutional_rigidity": 0.0024,
-    "legitimacy": -0.0008,
-    "state_capacity": 0.0035,
+    "cohesion": 0.0002,
+    "institutional_rigidity": 0.0002,
+    "legitimacy": -0.0001,
+    "state_capacity": 0.0012,
     "trade_capacity": -0.0006
    },
    "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
@@ -654,14 +663,14 @@
   },
   "central_five_year_plan": {
    "effects": {
-    "cohesion": -0.0023,
-    "craft_output": 0.0048,
-    "institutional_rigidity": 0.0048,
-    "labor_demand": 0.0044,
-    "legitimacy": -0.0015,
+    "cohesion": -0.0002,
+    "craft_output": 0.0043,
+    "institutional_rigidity": 0.0004,
+    "labor_demand": 0.0002,
+    "legitimacy": -0.0002,
     "nutrition_quality": -0.0016,
-    "state_capacity": 0.0115,
-    "task_coordination": 0.004
+    "state_capacity": 0.0038,
+    "task_coordination": 0.0013
    },
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
    "name": "Central Five-year Plan",
@@ -671,11 +680,11 @@
   },
   "emergency_decree_rule": {
    "effects": {
-    "cohesion": -0.0035,
-    "institutional_rigidity": 0.004,
-    "legitimacy": -0.0046,
-    "security_efficiency": 0.006,
-    "state_capacity": 0.0046
+    "cohesion": -0.0003,
+    "institutional_rigidity": 0.0004,
+    "legitimacy": -0.0006,
+    "security_efficiency": 0.0055,
+    "state_capacity": 0.0015
    },
    "art": "res://assets/ui/research/institutions-v1.png",
    "name": "Emergency Decree Rule",
@@ -684,8 +693,8 @@
   },
   "deposit_insurance": {
    "effects": {
-    "cohesion": 0.0023,
-    "disaster_resilience": 0.0016,
+    "cohesion": 0.0003,
+    "disaster_resilience": 0.0012,
     "trade_capacity": 0.0018
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
@@ -695,11 +704,11 @@
   "state_propaganda_ministry": {
    "effects": {
     "adoption_rate": -0.0008,
-    "cohesion": 0.0047,
-    "institutional_rigidity": 0.0032,
+    "cohesion": 0.0006,
+    "institutional_rigidity": 0.0005,
     "knowledge_rate": -0.0016,
-    "legitimacy": 0.0015,
-    "warfare_readiness": 0.0024
+    "legitimacy": 0.0003,
+    "warfare_readiness": 0.0012
    },
    "art": "res://assets/ui/research/institutions-v1.png",
    "name": "State Propaganda Ministry",
@@ -709,8 +718,8 @@
   "national_income_accounts": {
    "effects": {
     "knowledge_preservation": 0.0016,
-    "standardization": 0.0038,
-    "state_capacity": 0.0058
+    "standardization": 0.0019,
+    "state_capacity": 0.002
    },
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
    "name": "National Income Accounts",
@@ -718,9 +727,9 @@
   },
   "securities_commission": {
    "effects": {
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0015,
-    "standardization": 0.0013,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003,
+    "standardization": 0.0006,
     "trade_capacity": 0.0024
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
@@ -729,9 +738,9 @@
   },
   "countercyclical_spending": {
    "effects": {
-    "cohesion": 0.0035,
-    "disaster_resilience": 0.0016,
-    "state_capacity": 0.0035,
+    "cohesion": 0.0005,
+    "disaster_resilience": 0.0012,
+    "state_capacity": 0.0012,
     "trade_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
@@ -740,8 +749,8 @@
   },
   "fixed_exchange_accord": {
    "effects": {
-    "disaster_resilience": 0.0016,
-    "standardization": 0.0026,
+    "disaster_resilience": 0.0012,
+    "standardization": 0.0013,
     "trade_capacity": 0.0042
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
@@ -750,9 +759,9 @@
   },
   "atrocity_tribunals": {
    "effects": {
-    "cohesion": 0.0012,
-    "legitimacy": 0.0031,
-    "security_efficiency": 0.003
+    "cohesion": 0.0002,
+    "legitimacy": 0.0006,
+    "security_efficiency": 0.0012
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Atrocity Tribunals",
@@ -760,10 +769,10 @@
   },
   "world_assembly_of_realms": {
    "effects": {
-    "health_protection": 0.0008,
-    "labor_demand": 0.0029,
-    "legitimacy": 0.0038,
-    "security_efficiency": 0.0089,
+    "health_protection": 0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0007,
+    "security_efficiency": 0.0036,
     "trade_capacity": 0.0024
    },
    "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
@@ -773,10 +782,10 @@
   },
   "nationalized_core_industries": {
    "effects": {
-    "craft_output": 0.0016,
-    "institutional_rigidity": 0.0032,
-    "labor_demand": 0.0029,
-    "state_capacity": 0.0058,
+    "craft_output": 0.0013,
+    "institutional_rigidity": 0.0005,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.002,
     "trade_capacity": -0.0012
    },
    "art": "res://assets/ui/research/subjects/blast_furnace-v1.png",
@@ -785,13 +794,14 @@
   },
   "welfare_state": {
    "effects": {
-    "cohesion": 0.0117,
-    "health_protection": 0.0032,
-    "labor_demand": 0.0073,
+    "cohesion": 0.0016,
+    "fertility_transition": 0.0233,
+    "health_protection": 0.0014,
+    "labor_demand": 0.0004,
     "labor_efficiency": -0.0016,
-    "legitimacy": 0.0061,
-    "nutrition_quality": 0.0016,
-    "state_capacity": 0.0046
+    "legitimacy": 0.0012,
+    "nutrition_quality": 0.0009,
+    "state_capacity": 0.0016
    },
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
    "name": "Welfare State",
@@ -801,9 +811,9 @@
   },
   "universal_rights_declaration": {
    "effects": {
-    "cohesion": 0.0023,
+    "cohesion": 0.0003,
     "institutional_rigidity": -0.0008,
-    "legitimacy": 0.0031
+    "legitimacy": 0.0006
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Universal Rights Declaration",
@@ -812,7 +822,7 @@
   "regional_rights_court": {
    "effects": {
     "institutional_rigidity": -0.0016,
-    "legitimacy": 0.0031
+    "legitimacy": 0.0005
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Regional Rights Court",
@@ -820,8 +830,8 @@
   },
   "value_added_tax": {
    "effects": {
-    "labor_demand": 0.0015,
-    "state_capacity": 0.0069,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0062,
     "trade_capacity": -0.0006
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
@@ -830,11 +840,11 @@
   },
   "common_market_union": {
    "effects": {
-    "cohesion": 0.0012,
-    "legitimacy": -0.0008,
-    "standardization": 0.0051,
-    "state_capacity": 0.0023,
-    "trade_capacity": 0.0073
+    "cohesion": 0.0002,
+    "legitimacy": -0.0002,
+    "standardization": 0.0015,
+    "state_capacity": 0.0021,
+    "trade_capacity": 0.0051
    },
    "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
    "name": "Common Market Union",
@@ -844,8 +854,8 @@
   },
   "dependency_self_rule": {
    "effects": {
-    "cohesion": 0.0023,
-    "legitimacy": 0.0038,
+    "cohesion": 0.0005,
+    "legitimacy": 0.0006,
     "state_capacity": -0.0023,
     "trade_capacity": -0.0012
    },
@@ -857,9 +867,9 @@
   },
   "public_defenders": {
    "effects": {
-    "cohesion": 0.0012,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0023
+    "cohesion": 0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0004
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Public Defenders",
@@ -867,9 +877,9 @@
   },
   "civil_rights_law": {
    "effects": {
-    "cohesion": 0.0058,
+    "cohesion": 0.0012,
     "institutional_rigidity": -0.0024,
-    "legitimacy": 0.0061
+    "legitimacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Civil Rights Law",
@@ -879,8 +889,8 @@
   },
   "death_penalty_abolition": {
    "effects": {
-    "cohesion": 0.0012,
-    "legitimacy": 0.0023,
+    "cohesion": 0.0002,
+    "legitimacy": 0.0004,
     "security_efficiency": -0.0015
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
@@ -890,9 +900,9 @@
   "freedom_of_information": {
    "effects": {
     "institutional_rigidity": -0.0016,
-    "knowledge_preservation": 0.0008,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0031
+    "knowledge_preservation": 0.0006,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0005
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
    "name": "Freedom of Information",
@@ -901,8 +911,8 @@
   "ombudsman_network": {
    "effects": {
     "institutional_rigidity": -0.0016,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0023
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0004
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
    "name": "Ombudsman Network",
@@ -911,8 +921,8 @@
   "floating_fiat_currency": {
    "effects": {
     "disaster_resilience": -0.0008,
-    "state_capacity": 0.0012,
-    "trade_capacity": 0.0024
+    "state_capacity": 0.0009,
+    "trade_capacity": 0.0015
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
    "name": "Floating Fiat Currency",
@@ -920,9 +930,9 @@
   },
   "personal_data_protection": {
    "effects": {
-    "cohesion": 0.0012,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0023,
+    "cohesion": 0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0006,
     "trade_capacity": -0.0006
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
@@ -932,9 +942,9 @@
   "anticorruption_commission": {
    "effects": {
     "institutional_rigidity": -0.0016,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0038,
-    "state_capacity": 0.0023
+    "labor_demand": 0.0001,
+    "legitimacy": 0.001,
+    "state_capacity": 0.0018
    },
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
    "name": "Anticorruption Commission",
@@ -942,10 +952,10 @@
   },
   "state_enterprise_privatization": {
    "effects": {
-    "cohesion": -0.0035,
+    "cohesion": -0.0005,
     "craft_output": 0.0024,
     "state_capacity": -0.0012,
-    "trade_capacity": 0.003
+    "trade_capacity": 0.0018
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
    "name": "State Enterprise Privatization",
@@ -954,8 +964,8 @@
   },
   "truth_commissions": {
    "effects": {
-    "cohesion": 0.0035,
-    "legitimacy": 0.0031
+    "cohesion": 0.0012,
+    "legitimacy": 0.0009
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
    "name": "Truth Commissions",
@@ -963,9 +973,9 @@
   },
   "participatory_budgets": {
    "effects": {
-    "cohesion": 0.0035,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0023
+    "cohesion": 0.0012,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0006
    },
    "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
    "name": "Participatory Budgets",
@@ -975,8 +985,8 @@
    "effects": {
     "disaster_resilience": 0.0016,
     "standardization": 0.0026,
-    "state_capacity": 0.0012,
-    "trade_capacity": 0.0024
+    "state_capacity": 0.001,
+    "trade_capacity": 0.0011
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
    "name": "Inflation Targeting",
@@ -985,7 +995,7 @@
   "electoral_commissions": {
    "effects": {
     "institutional_rigidity": -0.0008,
-    "legitimacy": 0.0038
+    "legitimacy": 0.0016
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
    "name": "Electoral Commissions",
@@ -993,8 +1003,8 @@
   },
   "trade_dispute_panels": {
    "effects": {
-    "legitimacy": 0.0008,
-    "trade_capacity": 0.0036
+    "legitimacy": 0.0003,
+    "trade_capacity": 0.0016
    },
    "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
    "name": "Trade Dispute Panels",
@@ -1003,9 +1013,9 @@
   "single_currency_union": {
    "effects": {
     "disaster_resilience": -0.0008,
-    "legitimacy": -0.0008,
+    "legitimacy": -0.0001,
     "standardization": 0.0038,
-    "trade_capacity": 0.0048
+    "trade_capacity": 0.0022
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
    "name": "Single Currency Union",
@@ -1016,8 +1026,8 @@
    "effects": {
     "adoption_rate": 0.0024,
     "labor_demand": -0.0029,
-    "state_capacity": 0.0069,
-    "task_coordination": 0.0024
+    "state_capacity": 0.0057,
+    "task_coordination": 0.001
    },
    "art": "res://assets/ui/research/institutions-v1.png",
    "name": "Online Government Services",
@@ -1025,9 +1035,9 @@
   },
   "equal_marriage_law": {
    "effects": {
-    "cohesion": 0.0023,
+    "cohesion": 0.0012,
     "institutional_rigidity": -0.0016,
-    "legitimacy": 0.0023
+    "legitimacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Equal Marriage Law",
@@ -1036,10 +1046,10 @@
   },
   "digital_identity_register": {
    "effects": {
-    "legitimacy": -0.0008,
-    "security_efficiency": 0.003,
-    "state_capacity": 0.0058,
-    "task_coordination": 0.0016
+    "legitimacy": -0.0001,
+    "security_efficiency": 0.002,
+    "state_capacity": 0.0048,
+    "task_coordination": 0.0007
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
    "name": "Digital Identity Register",
@@ -1048,8 +1058,8 @@
   },
   "permanent_atrocity_court": {
    "effects": {
-    "legitimacy": 0.0023,
-    "security_efficiency": 0.0015
+    "legitimacy": 0.001,
+    "security_efficiency": 0.001
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Permanent Atrocity Court",
@@ -1058,8 +1068,8 @@
   "bank_stress_tests": {
    "effects": {
     "disaster_resilience": 0.0024,
-    "state_capacity": 0.0012,
-    "trade_capacity": 0.0018
+    "state_capacity": 0.001,
+    "trade_capacity": 0.0008
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
    "name": "Bank Stress Tests",
@@ -1070,7 +1080,7 @@
     "adoption_rate": 0.0024,
     "institutional_rigidity": -0.0008,
     "knowledge_preservation": 0.0024,
-    "legitimacy": 0.0015
+    "legitimacy": 0.0008
    },
    "art": "res://assets/ui/research/institutions-v1.png",
    "name": "Open Government Data",
@@ -1079,7 +1089,7 @@
   "lobbying_register": {
    "effects": {
     "institutional_rigidity": -0.0008,
-    "legitimacy": 0.0023
+    "legitimacy": 0.0012
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
    "name": "Lobbying Register",
@@ -1087,9 +1097,9 @@
   },
   "comprehensive_data_rights": {
    "effects": {
-    "cohesion": 0.0012,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0023,
+    "cohesion": 0.0008,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0012,
     "trade_capacity": -0.0012
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
@@ -1108,8 +1118,8 @@
   "learned_machine_law": {
    "effects": {
     "institutional_rigidity": 0.0016,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0023,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0012,
     "state_capacity": 0.0023
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
@@ -1119,8 +1129,8 @@
   "algorithmic_decision_audits": {
    "effects": {
     "institutional_rigidity": -0.0008,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0023,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0012,
     "state_capacity": 0.0023
    },
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
@@ -1129,7 +1139,7 @@
   },
   "central_bank_digital_currency": {
    "effects": {
-    "legitimacy": -0.0008,
+    "legitimacy": -0.0001,
     "security_efficiency": 0.0015,
     "state_capacity": 0.0035,
     "trade_capacity": 0.0024
@@ -1137,6 +1147,595 @@
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
    "name": "Central-bank Digital Currency",
    "observation": "The central bank issues digital money held directly by citizens."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "appointed_department_prefects": {
+    "cohesion": -0.0012,
+    "institutional_rigidity": 0.0016,
+    "labor_demand": 0.0029,
+    "security_efficiency": 0.003,
+    "state_capacity": 0.0058
+   },
+   "civil_merit_order": {
+    "cohesion": 0.0023,
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0023
+   },
+   "universal_civil_code": {
+    "institutional_rigidity": 0.0024,
+    "labor_demand": 0.0029,
+    "legitimacy": 0.0023,
+    "standardization": 0.0077,
+    "state_capacity": 0.0092,
+    "trade_capacity": 0.0024
+   },
+   "administrative_courts": {
+    "institutional_rigidity": -0.0016,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0031,
+    "state_capacity": 0.0023
+   },
+   "commercial_code": {
+    "standardization": 0.0038,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.003
+   },
+   "assembly_ombudsman": {
+    "institutional_rigidity": -0.0016,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023
+   },
+   "single_minister_departments": {
+    "institutional_rigidity": 0.0008,
+    "labor_demand": 0.0029,
+    "state_capacity": 0.0058,
+    "task_coordination": 0.0024
+   },
+   "granted_constitution": {
+    "cohesion": 0.0035,
+    "institutional_rigidity": -0.0024,
+    "labor_demand": 0.0029,
+    "legitimacy": 0.0061,
+    "state_capacity": 0.0046
+   },
+   "great_realm_conference": {
+    "legitimacy": 0.0015,
+    "security_efficiency": 0.0045,
+    "trade_capacity": 0.0012
+   },
+   "annual_budget_vote": {
+    "institutional_rigidity": -0.0008,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0031,
+    "state_capacity": 0.0035
+   },
+   "penitentiary_sentences": {
+    "cohesion": 0.0012,
+    "food_storage": -0.0008,
+    "injury_risk": -0.0008,
+    "labor_demand": 0.0029,
+    "legitimacy": 0.0015,
+    "security_efficiency": 0.0045
+   },
+   "public_instruction_ministry": {
+    "adoption_rate": 0.0032,
+    "institutional_rigidity": 0.0008,
+    "knowledge_preservation": 0.0032,
+    "labor_demand": 0.0029,
+    "state_capacity": 0.0035
+   },
+   "householder_franchise": {
+    "cohesion": 0.0047,
+    "institutional_rigidity": -0.0024,
+    "legitimacy": 0.0069,
+    "state_capacity": -0.0012
+   },
+   "customs_union": {
+    "cohesion": 0.0023,
+    "legitimacy": -0.0008,
+    "standardization": 0.0038,
+    "state_capacity": 0.0035,
+    "trade_capacity": 0.0073
+   },
+   "poor_law_boards": {
+    "cohesion": -0.0023,
+    "food_storage": 0.0008,
+    "health_protection": 0.0008,
+    "labor_demand": 0.0029,
+    "legitimacy": -0.0008,
+    "state_capacity": 0.0046
+   },
+   "examined_patent_office": {
+    "craft_output": 0.0016,
+    "institutional_rigidity": 0.0008,
+    "knowledge_rate": 0.0024,
+    "trade_capacity": 0.0006
+   },
+   "responsible_ministry": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0024,
+    "legitimacy": 0.0069,
+    "state_capacity": 0.0035
+   },
+   "central_note_monopoly": {
+    "institutional_rigidity": 0.0008,
+    "standardization": 0.0026,
+    "state_capacity": 0.0046,
+    "trade_capacity": 0.003
+   },
+   "bankruptcy_discharge": {
+    "cohesion": 0.0012,
+    "legitimacy": 0.0015,
+    "trade_capacity": 0.0018
+   },
+   "grain_tariff_repeal": {
+    "cohesion": -0.0012,
+    "legitimacy": 0.0008,
+    "nutrition_quality": 0.0008,
+    "trade_capacity": 0.003
+   },
+   "manhood_suffrage": {
+    "cohesion": 0.0058,
+    "institutional_rigidity": -0.0024,
+    "legitimacy": 0.0077,
+    "state_capacity": -0.0012
+   },
+   "mass_political_parties": {
+    "adoption_rate": 0.0024,
+    "cohesion": -0.0023,
+    "labor_demand": 0.0029,
+    "legitimacy": 0.0046
+   },
+   "ruler_plebiscite": {
+    "cohesion": -0.0012,
+    "institutional_rigidity": 0.0016,
+    "legitimacy": 0.0038,
+    "state_capacity": 0.0023
+   },
+   "competitive_civil_service": {
+    "institutional_rigidity": 0.0008,
+    "labor_demand": 0.0029,
+    "legitimacy": 0.0023,
+    "standardization": 0.0051,
+    "state_capacity": 0.0127
+   },
+   "limited_liability_registration": {
+    "craft_output": 0.0024,
+    "legitimacy": -0.0008,
+    "trade_capacity": 0.0036
+   },
+   "secret_printed_ballot": {
+    "cohesion": 0.0023,
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0038
+   },
+   "civil_divorce_courts": {
+    "cohesion": -0.0012,
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0008
+   },
+   "dependencies_ministry": {
+    "labor_demand": 0.0029,
+    "legitimacy": -0.0008,
+    "state_capacity": 0.0035,
+    "trade_capacity": 0.0018
+   },
+   "rural_district_assemblies": {
+    "cohesion": 0.0035,
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0031,
+    "state_capacity": 0.0012
+   },
+   "independent_audit_office": {
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0023,
+    "state_capacity": 0.0046,
+    "trade_capacity": 0.0006
+   },
+   "lender_of_last_resort": {
+    "disaster_resilience": 0.0016,
+    "state_capacity": 0.0023,
+    "trade_capacity": 0.003
+   },
+   "ceremonial_crown": {
+    "cohesion": 0.0035,
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0038
+   },
+   "career_diplomatic_service": {
+    "labor_demand": 0.0015,
+    "security_efficiency": 0.0045,
+    "state_capacity": 0.0023,
+    "trade_capacity": 0.0012
+   },
+   "interrealm_arbitration": {
+    "legitimacy": 0.0015,
+    "security_efficiency": 0.0045,
+    "trade_capacity": 0.0012
+   },
+   "gold_standard_link": {
+    "disaster_resilience": -0.0008,
+    "standardization": 0.0038,
+    "trade_capacity": 0.0036
+   },
+   "municipal_utilities": {
+    "cohesion": 0.0023,
+    "labor_demand": 0.0029,
+    "state_capacity": 0.0035,
+    "water_safety": 0.0016
+   },
+   "probation_parole": {
+    "cohesion": 0.0023,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0015,
+    "security_efficiency": 0.0015
+   },
+   "married_women_property": {
+    "cohesion": 0.0023,
+    "legitimacy": 0.0023,
+    "trade_capacity": 0.0006
+   },
+   "audited_company_accounts": {
+    "labor_demand": 0.0015,
+    "standardization": 0.0038,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.0024
+   },
+   "elected_county_councils": {
+    "cohesion": 0.0023,
+    "legitimacy": 0.0023,
+    "state_capacity": 0.0023
+   },
+   "old_age_pensions": {
+    "cohesion": 0.0058,
+    "health_protection": 0.0016,
+    "labor_demand": 0.0029,
+    "labor_efficiency": -0.0008,
+    "legitimacy": 0.0031,
+    "state_capacity": 0.0012
+   },
+   "antimonopoly_law": {
+    "institutional_rigidity": -0.0008,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0015,
+    "trade_capacity": 0.0024
+   },
+   "womens_suffrage": {
+    "cohesion": 0.0058,
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0069
+   },
+   "initiative_referendum": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0023,
+    "state_capacity": -0.0012
+   },
+   "juvenile_courts": {
+    "cohesion": 0.0023,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0015,
+    "security_efficiency": 0.0015
+   },
+   "proportional_representation": {
+    "cohesion": 0.0023,
+    "legitimacy": 0.0038,
+    "state_capacity": -0.0012
+   },
+   "rate_regulation_commissions": {
+    "institutional_rigidity": 0.0008,
+    "labor_demand": 0.0015,
+    "state_capacity": 0.0035,
+    "trade_capacity": 0.0018
+   },
+   "unemployment_insurance": {
+    "cohesion": 0.0058,
+    "labor_demand": 0.0029,
+    "labor_efficiency": -0.0008,
+    "legitimacy": 0.0031,
+    "state_capacity": 0.0012
+   },
+   "upper_chamber_curbed": {
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0031,
+    "state_capacity": 0.0012
+   },
+   "war_economy_boards": {
+    "cohesion": -0.0023,
+    "institutional_rigidity": 0.0024,
+    "labor_demand": 0.0058,
+    "labor_efficiency": -0.0008,
+    "state_capacity": 0.0104,
+    "task_coordination": 0.004,
+    "warfare_readiness": 0.0064
+   },
+   "frontier_passport_control": {
+    "labor_demand": 0.0015,
+    "security_efficiency": 0.006,
+    "state_capacity": 0.0023,
+    "trade_capacity": -0.0012
+   },
+   "one_party_state": {
+    "cohesion": -0.0058,
+    "institutional_rigidity": 0.0064,
+    "knowledge_rate": -0.0016,
+    "legitimacy": -0.0061,
+    "security_efficiency": 0.0074,
+    "state_capacity": 0.0092
+   },
+   "league_of_realms": {
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0031,
+    "security_efficiency": 0.0074,
+    "trade_capacity": 0.0018
+   },
+   "constitutional_court": {
+    "cohesion": 0.0023,
+    "institutional_rigidity": -0.0032,
+    "legitimacy": 0.0069,
+    "state_capacity": 0.0023
+   },
+   "interrealm_permanent_court": {
+    "legitimacy": 0.0023,
+    "security_efficiency": 0.003,
+    "trade_capacity": 0.0012
+   },
+   "corporatist_chambers": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": 0.0024,
+    "legitimacy": -0.0008,
+    "state_capacity": 0.0035,
+    "trade_capacity": -0.0006
+   },
+   "central_five_year_plan": {
+    "cohesion": -0.0023,
+    "craft_output": 0.0048,
+    "institutional_rigidity": 0.0048,
+    "labor_demand": 0.0044,
+    "legitimacy": -0.0015,
+    "nutrition_quality": -0.0016,
+    "state_capacity": 0.0115,
+    "task_coordination": 0.004
+   },
+   "emergency_decree_rule": {
+    "cohesion": -0.0035,
+    "institutional_rigidity": 0.004,
+    "legitimacy": -0.0046,
+    "security_efficiency": 0.006,
+    "state_capacity": 0.0046
+   },
+   "deposit_insurance": {
+    "cohesion": 0.0023,
+    "disaster_resilience": 0.0016,
+    "trade_capacity": 0.0018
+   },
+   "state_propaganda_ministry": {
+    "adoption_rate": -0.0008,
+    "cohesion": 0.0047,
+    "institutional_rigidity": 0.0032,
+    "knowledge_rate": -0.0016,
+    "legitimacy": 0.0015,
+    "warfare_readiness": 0.0024
+   },
+   "national_income_accounts": {
+    "knowledge_preservation": 0.0016,
+    "standardization": 0.0038,
+    "state_capacity": 0.0058
+   },
+   "securities_commission": {
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0015,
+    "standardization": 0.0013,
+    "trade_capacity": 0.0024
+   },
+   "countercyclical_spending": {
+    "cohesion": 0.0035,
+    "disaster_resilience": 0.0016,
+    "state_capacity": 0.0035,
+    "trade_capacity": 0.0006
+   },
+   "fixed_exchange_accord": {
+    "disaster_resilience": 0.0016,
+    "standardization": 0.0026,
+    "trade_capacity": 0.0042
+   },
+   "atrocity_tribunals": {
+    "cohesion": 0.0012,
+    "legitimacy": 0.0031,
+    "security_efficiency": 0.003
+   },
+   "world_assembly_of_realms": {
+    "health_protection": 0.0008,
+    "labor_demand": 0.0029,
+    "legitimacy": 0.0038,
+    "security_efficiency": 0.0089,
+    "trade_capacity": 0.0024
+   },
+   "nationalized_core_industries": {
+    "craft_output": 0.0016,
+    "institutional_rigidity": 0.0032,
+    "labor_demand": 0.0029,
+    "state_capacity": 0.0058,
+    "trade_capacity": -0.0012
+   },
+   "welfare_state": {
+    "cohesion": 0.0117,
+    "health_protection": 0.0032,
+    "labor_demand": 0.0073,
+    "labor_efficiency": -0.0016,
+    "legitimacy": 0.0061,
+    "nutrition_quality": 0.0016,
+    "state_capacity": 0.0046
+   },
+   "universal_rights_declaration": {
+    "cohesion": 0.0023,
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0031
+   },
+   "regional_rights_court": {
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0031
+   },
+   "value_added_tax": {
+    "labor_demand": 0.0015,
+    "state_capacity": 0.0069,
+    "trade_capacity": -0.0006
+   },
+   "common_market_union": {
+    "cohesion": 0.0012,
+    "legitimacy": -0.0008,
+    "standardization": 0.0051,
+    "state_capacity": 0.0023,
+    "trade_capacity": 0.0073
+   },
+   "dependency_self_rule": {
+    "cohesion": 0.0023,
+    "legitimacy": 0.0038,
+    "state_capacity": -0.0023,
+    "trade_capacity": -0.0012
+   },
+   "public_defenders": {
+    "cohesion": 0.0012,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023
+   },
+   "civil_rights_law": {
+    "cohesion": 0.0058,
+    "institutional_rigidity": -0.0024,
+    "legitimacy": 0.0061
+   },
+   "death_penalty_abolition": {
+    "cohesion": 0.0012,
+    "legitimacy": 0.0023,
+    "security_efficiency": -0.0015
+   },
+   "freedom_of_information": {
+    "institutional_rigidity": -0.0016,
+    "knowledge_preservation": 0.0008,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0031
+   },
+   "ombudsman_network": {
+    "institutional_rigidity": -0.0016,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023
+   },
+   "floating_fiat_currency": {
+    "disaster_resilience": -0.0008,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.0024
+   },
+   "personal_data_protection": {
+    "cohesion": 0.0012,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023,
+    "trade_capacity": -0.0006
+   },
+   "anticorruption_commission": {
+    "institutional_rigidity": -0.0016,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0038,
+    "state_capacity": 0.0023
+   },
+   "state_enterprise_privatization": {
+    "cohesion": -0.0035,
+    "craft_output": 0.0024,
+    "state_capacity": -0.0012,
+    "trade_capacity": 0.003
+   },
+   "truth_commissions": {
+    "cohesion": 0.0035,
+    "legitimacy": 0.0031
+   },
+   "participatory_budgets": {
+    "cohesion": 0.0035,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023
+   },
+   "inflation_targeting": {
+    "disaster_resilience": 0.0016,
+    "standardization": 0.0026,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.0024
+   },
+   "electoral_commissions": {
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0038
+   },
+   "trade_dispute_panels": {
+    "legitimacy": 0.0008,
+    "trade_capacity": 0.0036
+   },
+   "single_currency_union": {
+    "disaster_resilience": -0.0008,
+    "legitimacy": -0.0008,
+    "standardization": 0.0038,
+    "trade_capacity": 0.0048
+   },
+   "online_government_services": {
+    "adoption_rate": 0.0024,
+    "labor_demand": -0.0029,
+    "state_capacity": 0.0069,
+    "task_coordination": 0.0024
+   },
+   "equal_marriage_law": {
+    "cohesion": 0.0023,
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0023
+   },
+   "digital_identity_register": {
+    "legitimacy": -0.0008,
+    "security_efficiency": 0.003,
+    "state_capacity": 0.0058,
+    "task_coordination": 0.0016
+   },
+   "permanent_atrocity_court": {
+    "legitimacy": 0.0023,
+    "security_efficiency": 0.0015
+   },
+   "bank_stress_tests": {
+    "disaster_resilience": 0.0024,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.0018
+   },
+   "open_government_data": {
+    "adoption_rate": 0.0024,
+    "institutional_rigidity": -0.0008,
+    "knowledge_preservation": 0.0024,
+    "legitimacy": 0.0015
+   },
+   "lobbying_register": {
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0023
+   },
+   "comprehensive_data_rights": {
+    "cohesion": 0.0012,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023,
+    "trade_capacity": -0.0012
+   },
+   "learned_machine_law": {
+    "institutional_rigidity": 0.0016,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023,
+    "state_capacity": 0.0023
+   },
+   "algorithmic_decision_audits": {
+    "institutional_rigidity": -0.0008,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023,
+    "state_capacity": 0.0023
+   },
+   "central_bank_digital_currency": {
+    "legitimacy": -0.0008,
+    "security_efficiency": 0.0015,
+    "state_capacity": 0.0035,
+    "trade_capacity": 0.0024
+   }
   }
  }
 }

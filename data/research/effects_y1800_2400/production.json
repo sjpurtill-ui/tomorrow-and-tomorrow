@@ -4,11 +4,11 @@
  "items": {
   "brass_battery_works": {
    "effects": {
-    "metal_yield": 0.0039,
-    "craft_output": 0.0012,
     "container_capacity": 0.003,
-    "trade_capacity": 0.001,
-    "fuel_demand": 0.002,
+    "craft_output": 0.0012,
+    "fuel_demand": 0.0004,
+    "metal_yield": 0.0033,
+    "trade_capacity": 0.0004,
     "water_pollution": 0.001
    },
    "name": "Brass Battery Works",
@@ -26,10 +26,10 @@
   "salt_glazed_stoneware": {
    "effects": {
     "container_capacity": 0.005,
-    "food_spoilage": -0.002,
-    "trade_capacity": 0.001,
-    "fuel_demand": 0.002,
-    "pollution": 0.002
+    "food_spoilage": -0.0005,
+    "fuel_demand": 0.0004,
+    "pollution": 0.002,
+    "trade_capacity": 0.0004
    },
    "name": "Salt-Glazed Stoneware",
    "observation": "The potter throws a shovel of salt into the fire-mouth; a white cloud rolls out, and the jugs come out coated in hard, pitted glaze.",
@@ -45,9 +45,9 @@
   },
   "gun_barrel_founding": {
    "effects": {
-    "warfare_readiness": 0.002,
-    "metal_yield": 0.0026,
-    "fuel_demand": 0.002
+    "fuel_demand": 0.0004,
+    "metal_yield": 0.0022,
+    "warfare_readiness": 0.0004
    },
    "name": "Gun Barrel Founding",
    "observation": "The founders pour bell bronze round a clay core, while in the next shed smiths hoop iron staves into a barrel like a cask.",
@@ -56,8 +56,8 @@
   "high_warp_tapestry_workshops": {
    "effects": {
     "craft_output": 0.0016,
-    "trade_capacity": 0.0015,
-    "legitimacy": 0.001
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0006
    },
    "name": "High-Warp Tapestry",
    "observation": "Six weavers sit behind the upright warp, working from the painted cartoon hung beside them; one hunting scene takes two years.",
@@ -66,8 +66,8 @@
   "drawn_cane_beads": {
    "effects": {
     "craft_output": 0.0012,
-    "trade_capacity": 0.0015,
-    "fuel_demand": 0.001
+    "fuel_demand": 0.0002,
+    "trade_capacity": 0.0006
    },
    "name": "Drawn Cane Beads",
    "observation": "Two glassmen walk apart down the long gallery, drawing a hot bubble into a hollow cane a hundred feet long, later chopped into beads.",
@@ -75,11 +75,11 @@
   },
   "cast_iron_shot_firebacks": {
    "effects": {
-    "metal_yield": 0.0052,
     "container_capacity": 0.002,
-    "warfare_readiness": 0.0015,
-    "health_protection": 0.001,
-    "fuel_demand": 0.002
+    "fuel_demand": 0.0004,
+    "health_protection": 0.0006,
+    "metal_yield": 0.0044,
+    "warfare_readiness": 0.0003
    },
    "name": "Cast-Iron Wares",
    "observation": "The furnace pours straight into sand: round shot for the gunners, a fireback with the lord's arms, a three-legged pot for the kitchen.",
@@ -95,9 +95,9 @@
   },
   "pewter_alloy_standards": {
    "effects": {
-    "standardization": 0.002,
     "container_capacity": 0.002,
-    "health_risk": -0.001
+    "health_risk": -0.0006,
+    "standardization": 0.0011
    },
    "name": "Pewter Standards",
    "observation": "The pewterers' wardens assay every dish; fine metal takes the rose touch, and the lead-heavy lay metal is marked as lesser.",
@@ -106,7 +106,7 @@
   "gig_mill_napping": {
    "effects": {
     "craft_output": 0.0012,
-    "labor_demand": -0.002
+    "labor_demand": -0.0004
    },
    "name": "Gig Mills",
    "observation": "Water turns the drum of teasels against the wet cloth, and one man and a boy raise the nap that once took four.",
@@ -115,9 +115,9 @@
   "potash_saltpetre_works": {
    "effects": {
     "chemical_control": 0.004,
-    "warfare_readiness": 0.0015,
+    "fuel_demand": 0.0004,
     "timber_pressure": 0.002,
-    "fuel_demand": 0.002,
+    "warfare_readiness": 0.0003,
     "water_pollution": 0.001
    },
    "name": "Saltpetre Works",
@@ -134,10 +134,10 @@
   },
   "corned_powder_mills": {
    "effects": {
-    "warfare_readiness": 0.002,
     "chemical_control": 0.002,
     "disaster_risk": 0.002,
-    "injury_risk": 0.001
+    "injury_risk": 0.001,
+    "warfare_readiness": 0.0004
    },
    "name": "Corned Powder Mills",
    "observation": "The damp powder cake is pressed through a sieve into grains, which burn fast and even and keep dry on the cart.",
@@ -146,10 +146,10 @@
   },
   "mainspring_fusee_clocks": {
    "effects": {
-    "tool_quality": 0.0084,
-    "standardization": 0.002,
-    "craft_output": 0.0016,
-    "task_coordination": 0.0018
+    "craft_output": 0.0008,
+    "standardization": 0.0004,
+    "task_coordination": 0.0004,
+    "tool_quality": 0.0052
    },
    "name": "Spring-Driven Clocks",
    "observation": "A coiled steel spring in a brass drum drives the little clock, and the cone-shaped fusee evens its pull from fully wound to run down.",
@@ -159,9 +159,9 @@
   "turpentine_rosin_distilling": {
    "effects": {
     "chemical_control": 0.003,
-    "naval_capacity": 0.002,
-    "trade_capacity": 0.001,
-    "timber_pressure": 0.002
+    "naval_capacity": 0.0002,
+    "timber_pressure": 0.002,
+    "trade_capacity": 0.0001
    },
    "name": "Turpentine and Rosin",
    "observation": "The pine gum is boiled in a copper still; turpentine drips from the worm, and rosin hardens in the pot.",
@@ -169,20 +169,20 @@
   },
   "bolt_blank_forging": {
    "effects": {
-    "standardization": 0.0015,
-    "tool_quality": 0.0028
+    "standardization": 0.0003,
+    "tool_quality": 0.0017
    },
    "observation": "The smith heads a bolt blank in the swage and hands it on to be threaded; a hundred are made to one pattern.",
    "art": "res://assets/ui/research/paper/bolt_blank_forging.png"
   },
   "clear_crystal_glass": {
    "effects": {
-    "craft_output": 0.0032,
-    "trade_capacity": 0.003,
     "container_capacity": 0.003,
-    "observation_rate": 0.003,
-    "fuel_demand": 0.003,
-    "timber_pressure": 0.002
+    "craft_output": 0.0016,
+    "fuel_demand": 0.0007,
+    "observation_rate": 0.0018,
+    "timber_pressure": 0.002,
+    "trade_capacity": 0.0003
    },
    "name": "Clear Crystal Glass",
    "observation": "Purified plant ash and a pinch of manganese make a glass so clear that a goblet seems to hold the wine in air.",
@@ -199,10 +199,10 @@
   },
   "polychrome_tin_glaze": {
    "effects": {
-    "craft_output": 0.0012,
-    "trade_capacity": 0.0015,
     "container_capacity": 0.001,
-    "health_risk": 0.001
+    "craft_output": 0.0006,
+    "health_risk": 0.001,
+    "trade_capacity": 0.0002
    },
    "name": "Polychrome Tin Glaze",
    "observation": "On the white tin glaze the painter lays blue, green, yellow and orange, and the kiln fixes them bright.",
@@ -210,17 +210,17 @@
   },
   "nut_blank_forging": {
    "effects": {
-    "standardization": 0.0015,
-    "tool_quality": 0.0028
+    "standardization": 0.0003,
+    "tool_quality": 0.0017
    },
    "observation": "Square and six-sided nut blanks are punched from hot bar, leaving iron enough round the hole for a spanner's bite.",
    "art": "res://assets/ui/research/paper/nut_blank_forging.png"
   },
   "screw_tap_and_die": {
    "effects": {
-    "tool_quality": 0.0056,
-    "standardization": 0.002,
-    "repair_capacity": 0.002
+    "repair_capacity": 0.002,
+    "standardization": 0.0004,
+    "tool_quality": 0.0035
    },
    "name": "Taps and Dies",
    "observation": "The die plate cuts the thread on the bolt and the tap cuts it in the nut, and any bolt from the box now fits any nut.",
@@ -228,10 +228,10 @@
   },
   "liquation_silver_parting": {
    "effects": {
-    "metal_yield": 0.0065,
     "extraction_yield": 0.003,
+    "fuel_demand": 0.0005,
     "health_risk": 0.002,
-    "fuel_demand": 0.002,
+    "metal_yield": 0.0065,
     "pollution": 0.002
    },
    "name": "Liquation Parting",
@@ -248,9 +248,9 @@
   },
   "iron_plate_hammer_mills": {
    "effects": {
+    "fuel_demand": 0.0007,
     "metal_yield": 0.0039,
-    "warfare_readiness": 0.001,
-    "fuel_demand": 0.002
+    "warfare_readiness": 0.0001
    },
    "name": "Plate Hammer Mills",
    "observation": "The trip hammer beats a glowing bloom out flat, and the plate goes to the armourer or the pan maker.",
@@ -258,9 +258,9 @@
   },
   "needle_lace": {
    "effects": {
-    "craft_output": 0.0012,
-    "trade_capacity": 0.0015,
-    "fatigue": 0.001
+    "craft_output": 0.0006,
+    "fatigue": 0.001,
+    "trade_capacity": 0.0002
    },
    "name": "Needle Lace",
    "observation": "With only a needle and linen thread the lacemaker builds a flower in the air, stitch on stitch, over a parchment pattern.",
@@ -268,9 +268,9 @@
   },
   "mercury_tin_mirrors": {
    "effects": {
-    "craft_output": 0.0012,
-    "trade_capacity": 0.0015,
-    "health_risk": 0.003
+    "craft_output": 0.0006,
+    "health_risk": 0.003,
+    "trade_capacity": 0.0002
    },
    "name": "Mercury-Tin Mirrors",
    "observation": "Tin foil is laid on a stone, flooded with quicksilver and the glass slid over it; the mirror-makers' hands shake by forty.",
@@ -279,8 +279,8 @@
   },
   "filigree_cane_glass": {
    "effects": {
-    "craft_output": 0.0012,
-    "trade_capacity": 0.0015
+    "craft_output": 0.0006,
+    "trade_capacity": 0.0002
    },
    "name": "Filigree Glass",
    "observation": "White canes laid side by side are picked up on a hot bubble and twisted, so the goblet is laced with white spirals.",
@@ -288,8 +288,8 @@
   },
   "flyer_spinning": {
    "effects": {
+    "craft_output": 0.0008,
     "fiber_yield": 0.0156,
-    "craft_output": 0.0016,
     "labor_efficiency": 0.001
    },
    "observation": "The flyer twists the yarn and the bobbin winds it in one motion, and the treadle leaves both the spinner's hands free to draft.",
@@ -298,8 +298,8 @@
   },
   "cochineal_scarlet": {
    "effects": {
-    "craft_output": 0.0012,
-    "trade_capacity": 0.002
+    "craft_output": 0.0006,
+    "trade_capacity": 0.0002
    },
    "name": "Cochineal Scarlet",
    "observation": "A pound of dried insects from the new lands dyes more scarlet than ten pounds of the old kermes grain.",
@@ -307,8 +307,8 @@
   },
   "rolled_metal_strip": {
    "effects": {
-    "standardization": 0.0015,
-    "metal_yield": 0.0026
+    "metal_yield": 0.0015,
+    "standardization": 0.0002
    },
    "name": "Rolled Metal Strip",
    "observation": "Two hardened rolls turned by a crank press silver into strip of one thickness, ready for the coin blanks.",
@@ -316,9 +316,9 @@
   },
   "bobbin_lace": {
    "effects": {
-    "craft_output": 0.0012,
-    "trade_capacity": 0.0015,
-    "fatigue": 0.001
+    "craft_output": 0.0007,
+    "fatigue": 0.001,
+    "trade_capacity": 0.0002
    },
    "name": "Bobbin Lace",
    "observation": "Forty bobbins click across the pillow as the lacemaker plaits her threads round the pins.",
@@ -327,11 +327,11 @@
   "flat_rod_mine_pumps": {
    "effects": {
     "extraction_yield": 0.008,
-    "mining_output": 0.008,
-    "metal_yield": 0.0078,
+    "labor_demand": -0.0002,
+    "metal_yield": 0.0044,
     "mine_safety": 0.003,
-    "labor_demand": -0.003,
-    "timber_pressure": 0.002
+    "mining_output": 0.008,
+    "timber_pressure": 0.0019
    },
    "name": "Flat-Rod Pumps",
    "observation": "A wheel in the valley rocks a line of wooden rods half a mile up the hill, and the pumps in the shaft draw water day and night.",
@@ -340,9 +340,9 @@
   },
   "mercury_ore_amalgamation": {
    "effects": {
-    "metal_yield": 0.0078,
     "extraction_yield": 0.004,
     "health_risk": 0.004,
+    "metal_yield": 0.0044,
     "water_pollution": 0.003
    },
    "name": "Amalgamation Yards",
@@ -371,9 +371,9 @@
   "sugar_loaf_refining": {
    "effects": {
     "food_storage": 0.003,
-    "trade_capacity": 0.002,
-    "fuel_demand": 0.003,
-    "pollution": 0.001
+    "fuel_demand": 0.0013,
+    "pollution": 0.001,
+    "trade_capacity": 0.0002
    },
    "name": "Sugar Refining",
    "observation": "Raw sugar is boiled with lime and ox blood, poured into clay cones and drained until the loaf comes out white.",
@@ -381,8 +381,8 @@
   },
   "screw_cutting_lathe": {
    "effects": {
-    "tool_quality": 0.007,
-    "standardization": 0.002
+    "standardization": 0.0003,
+    "tool_quality": 0.007
    },
    "name": "Screw-Cutting Lathe",
    "observation": "The lead screw carries the cutter along the work, so each turn of the spindle cuts the thread one pitch farther.",
@@ -391,9 +391,9 @@
   "soft_paste_porcelain": {
    "effects": {
     "container_capacity": 0.003,
-    "craft_output": 0.0012,
-    "trade_capacity": 0.0015,
-    "fuel_demand": 0.002
+    "craft_output": 0.0007,
+    "fuel_demand": 0.0009,
+    "trade_capacity": 0.0002
    },
    "name": "Soft-Paste Porcelain",
    "observation": "White clay and ground glass fire into a translucent ware; it chips more easily than the eastern porcelain, but it is our own.",
@@ -419,11 +419,11 @@
   },
   "stocking_knitting_frame": {
    "effects": {
-    "craft_output": 0.0032,
-    "labor_efficiency": 0.0021,
-    "standardization": 0.002,
-    "labor_demand": -0.003,
-    "cohesion": -0.0014
+    "cohesion": -0.0001,
+    "craft_output": 0.0019,
+    "labor_demand": -0.0002,
+    "labor_efficiency": 0.001,
+    "standardization": 0.0003
    },
    "name": "Stocking Frame",
    "observation": "The frame knits a whole row at once on hundreds of bearded needles; a stocking that took a week by hand is done in a day.",
@@ -433,9 +433,9 @@
   },
   "slitting_mills": {
    "effects": {
-    "metal_yield": 0.0039,
-    "standardization": 0.0015,
-    "labor_demand": -0.001
+    "labor_demand": -0.0001,
+    "metal_yield": 0.0022,
+    "standardization": 0.0002
    },
    "name": "Slitting Mills",
    "observation": "Plate passes between grooved cutting rolls and comes out as a bundle of nail rods, which the nailers once split by hand.",
@@ -443,10 +443,10 @@
   },
   "ribbon_engine_loom": {
    "effects": {
-    "craft_output": 0.0016,
-    "labor_efficiency": 0.001,
-    "labor_demand": -0.002,
-    "cohesion": -0.0014
+    "cohesion": -0.0002,
+    "craft_output": 0.0009,
+    "labor_demand": -0.0002,
+    "labor_efficiency": 0.001
    },
    "name": "Ribbon Engine Loom",
    "observation": "One weaver pulls the bar and sixteen ribbons are woven at once, and the ribbon weavers of the town petition to have the engine burned.",
@@ -454,8 +454,8 @@
   },
   "indigo_vat_dyeing": {
    "effects": {
-    "craft_output": 0.0012,
-    "trade_capacity": 0.0015,
+    "craft_output": 0.0006,
+    "trade_capacity": 0.0002,
     "water_pollution": 0.002
    },
    "name": "Indigo Vat Dyeing",
@@ -464,11 +464,11 @@
   },
   "cementation_blister_steel": {
    "effects": {
-    "tool_quality": 0.0168,
-    "metal_yield": 0.0078,
-    "craft_output": 0.0016,
-    "fuel_demand": 0.006,
-    "timber_pressure": 0.002
+    "craft_output": 0.0009,
+    "fuel_demand": 0.003,
+    "metal_yield": 0.0075,
+    "timber_pressure": 0.002,
+    "tool_quality": 0.0063
    },
    "name": "Blister Steel",
    "observation": "Bars of iron are packed in charcoal in stone chests and baked for a week; they come out blistered and hard enough for edge tools.",
@@ -486,9 +486,9 @@
   "coal_fired_glass_furnace": {
    "effects": {
     "fuel_efficiency": 0.004,
-    "timber_pressure": -0.004,
+    "health_risk": 0.001,
     "pollution": 0.004,
-    "health_risk": 0.001
+    "timber_pressure": -0.0022
    },
    "name": "Coal-Fired Glasshouses",
    "observation": "When the woods ran short the glassmakers turned to coal, and they cover their pots so the soot never touches the glass.",
@@ -497,8 +497,8 @@
   "wooden_tub_bellows": {
    "effects": {
     "fuel_efficiency": 0.003,
-    "repair_capacity": 0.002,
-    "metal_yield": 0.0026
+    "metal_yield": 0.0025,
+    "repair_capacity": 0.002
    },
    "name": "Wooden Tub Bellows",
    "observation": "Two great wooden tubs rise and fall on the water wheel's cams, and they never crack or rot like the leather bellows.",
@@ -506,9 +506,9 @@
   },
   "blue_white_tin_glaze": {
    "effects": {
-    "craft_output": 0.0012,
-    "trade_capacity": 0.0015,
-    "container_capacity": 0.001
+    "container_capacity": 0.001,
+    "craft_output": 0.0006,
+    "trade_capacity": 0.0002
    },
    "name": "Blue-and-White Tin Glaze",
    "observation": "The painters copy the blue patterns of the eastern porcelain on white tin glaze, and the town's ware sells across the sea.",
@@ -516,9 +516,9 @@
   },
   "tin_glazed_wall_tiles": {
    "effects": {
+    "health_protection": 0.0002,
     "housing_output": 0.0016,
-    "health_protection": 0.001,
-    "trade_capacity": 0.001
+    "trade_capacity": 0.0002
    },
    "name": "Painted Wall Tiles",
    "observation": "A workshop paints three thousand tiles a week, windmills and ships, to line the kitchens and hearths of the merchants' houses.",
@@ -539,8 +539,8 @@
    "effects": {
     "container_capacity": 0.005,
     "food_spoilage": -0.002,
-    "trade_capacity": 0.001,
-    "pollution": 0.002
+    "pollution": 0.002,
+    "trade_capacity": 0.0002
    },
    "name": "Dark Bottle Glass",
    "observation": "The coal-fired glasshouse turns out dark green bottles thick enough to be stacked on their sides in a cellar.",
@@ -549,8 +549,8 @@
   "carroted_fur_felting": {
    "effects": {
     "craft_output": 0.0012,
-    "trade_capacity": 0.0015,
-    "health_risk": 0.004
+    "health_risk": 0.0019,
+    "trade_capacity": 0.0003
    },
    "name": "Carroted Fur Felt",
    "observation": "The hatter brushes the fur with orange mercury salts so it felts tighter; in time the hatters' hands tremble and their minds wander.",
@@ -560,8 +560,8 @@
   "recrystallised_saltpetre": {
    "effects": {
     "chemical_control": 0.004,
-    "warfare_readiness": 0.0015,
-    "fuel_demand": 0.002
+    "fuel_demand": 0.0017,
+    "warfare_readiness": 0.0004
    },
    "name": "Refined Saltpetre",
    "observation": "The saltpetre is dissolved in hot water, skimmed and cooled three times, and each crop of crystals comes out whiter.",
@@ -570,9 +570,9 @@
   "veneer_marquetry": {
    "effects": {
     "craft_output": 0.0012,
-    "trade_capacity": 0.001,
     "timber_yield": 0.002,
-    "tool_quality": 0.0028
+    "tool_quality": 0.0028,
+    "trade_capacity": 0.0002
    },
    "name": "Veneer Marquetry",
    "observation": "The saw cuts walnut into leaves as thin as card, and the cabinetmaker lays them into flowers of pale and dark wood.",
@@ -581,9 +581,9 @@
   "stoved_varnish_ware": {
    "effects": {
     "container_capacity": 0.003,
-    "trade_capacity": 0.001,
+    "pollution": 0.001,
     "repair_capacity": 0.001,
-    "pollution": 0.001
+    "trade_capacity": 0.0003
    },
    "name": "Stoved Varnish Ware",
    "observation": "Iron trays are painted with black varnish and baked in an oven, coat after coat, until they shine and never rust.",
@@ -591,8 +591,8 @@
   },
   "gear_cutting_engine": {
    "effects": {
-    "tool_quality": 0.0056,
-    "standardization": 0.0025
+    "standardization": 0.0009,
+    "tool_quality": 0.0056
    },
    "name": "Gear-Cutting Engine",
    "observation": "The index plate turns the blank one tooth at a time under the rotary file, and every wheel in the clock has teeth alike.",
@@ -600,9 +600,9 @@
   },
   "mordant_printed_calico": {
    "effects": {
-    "craft_output": 0.0016,
-    "trade_capacity": 0.0015,
+    "craft_output": 0.001,
     "fiber_yield": 0.0013,
+    "trade_capacity": 0.0005,
     "water_pollution": 0.002
    },
    "name": "Mordant-Printed Calico",
@@ -611,11 +611,11 @@
   },
   "lead_crystal_glass": {
    "effects": {
-    "craft_output": 0.0032,
-    "trade_capacity": 0.003,
-    "observation_rate": 0.004,
-    "health_risk": 0.002,
-    "fuel_demand": 0.003
+    "craft_output": 0.0019,
+    "fuel_demand": 0.0015,
+    "health_risk": 0.0003,
+    "observation_rate": 0.0005,
+    "trade_capacity": 0.001
    },
    "name": "Lead Crystal",
    "observation": "A dose of red lead in the batch makes a glass so heavy and bright that its cut facets flash like jewels.",
@@ -632,8 +632,8 @@
   },
   "hollander_beater": {
    "effects": {
-    "craft_output": 0.0016,
-    "knowledge_preservation": 0.0015,
+    "craft_output": 0.0009,
+    "knowledge_preservation": 0.0006,
     "water_pollution": 0.001
    },
    "name": "Hollander Beater",
@@ -642,11 +642,11 @@
   },
   "coal_tar_pitch": {
    "effects": {
-    "naval_capacity": 0.003,
     "chemical_control": 0.002,
-    "repair_capacity": 0.002,
+    "naval_capacity": 0.001,
     "pollution": 0.003,
-    "timber_pressure": -0.001
+    "repair_capacity": 0.002,
+    "timber_pressure": -0.0005
    },
    "name": "Coal Tar and Pitch",
    "observation": "Coal smoulders in closed ovens, and the tar that runs off is boiled to pitch for the ships' seams.",
@@ -654,12 +654,12 @@
   },
   "cast_plate_glass": {
    "effects": {
-    "craft_output": 0.0032,
-    "housing_output": 0.0032,
-    "trade_capacity": 0.0025,
-    "health_protection": 0.002,
-    "fuel_demand": 0.004,
-    "labor_demand": 0.002
+    "craft_output": 0.0018,
+    "fuel_demand": 0.0009,
+    "health_protection": 0.0005,
+    "housing_output": 0.0015,
+    "labor_demand": 0.0001,
+    "trade_capacity": 0.0003
    },
    "name": "Cast Plate Glass",
    "observation": "The molten glass is poured on an iron table and rolled flat, and grinders and polishers work a month on one great pane.",
@@ -678,8 +678,8 @@
    "effects": {
     "fuel_efficiency": 0.006,
     "metal_yield": 0.0065,
-    "timber_pressure": -0.003,
-    "pollution": 0.004
+    "pollution": 0.004,
+    "timber_pressure": -0.0016
    },
    "name": "Reverberatory Furnace",
    "observation": "The coal burns on its own grate, and the low arched roof throws the flame down on the ore, so the fuel never touches the metal.",
@@ -696,8 +696,8 @@
   "coal_grading": {
    "effects": {
     "fuel_efficiency": 0.004,
-    "survey_speed": 0.002,
-    "standardization": 0.001
+    "standardization": 0.001,
+    "survey_speed": 0.0007
    },
    "observation": "The coalmaster sorts his seams: smokeless coal for the maltster, bright coal for the smith, dense and sulphur-poor coal for the furnace.",
    "art": "res://assets/ui/research/subjects/coal_grading-v1.png"
@@ -705,9 +705,9 @@
   "steam_suction_pump": {
    "effects": {
     "extraction_yield": 0.008,
+    "fuel_demand": 0.0014,
+    "labor_demand": -0.0009,
     "mining_output": 0.008,
-    "labor_demand": -0.002,
-    "fuel_demand": 0.006,
     "pollution": 0.003
    },
    "name": "Fire Engine Pump",
@@ -717,9 +717,9 @@
   },
   "precipitated_iron_blue": {
    "effects": {
+    "chemical_control": 0.002,
     "craft_output": 0.0012,
-    "trade_capacity": 0.001,
-    "chemical_control": 0.002
+    "trade_capacity": 0.0002
    },
    "name": "Iron Blue Pigment",
    "observation": "A colour-maker's spoiled batch of blood-salt and iron left a deep blue powder, and now the painters buy it by the ounce.",
@@ -727,9 +727,9 @@
   },
   "sand_flask_casting": {
    "effects": {
-    "metal_yield": 0.0039,
     "container_capacity": 0.003,
-    "standardization": 0.0015
+    "metal_yield": 0.0039,
+    "standardization": 0.0005
    },
    "name": "Sand Flask Casting",
    "observation": "The moulder rams damp sand round a pattern in two iron boxes, lifts it out and pours a pot with walls as thin as a finger.",
@@ -737,12 +737,12 @@
   },
   "coke_firing": {
    "effects": {
-    "metal_yield": 0.0182,
+    "fuel_demand": 0.0007,
     "fuel_efficiency": 0.01,
-    "timber_pressure": -0.01,
+    "health_risk": 0.0005,
+    "metal_yield": 0.0182,
     "pollution": 0.008,
-    "health_risk": 0.002,
-    "fuel_demand": 0.004
+    "timber_pressure": -0.0006
    },
    "observation": "Coal is baked in heaps away from air until only grey coke is left, strong enough to carry the furnace charge without crushing.",
    "ability_reason": "Coke frees ironmaking from the forests: furnaces grow larger, and iron can be made wherever coal lies.",
@@ -751,10 +751,10 @@
   "atmospheric_beam_engine": {
    "effects": {
     "extraction_yield": 0.01,
-    "mining_output": 0.01,
+    "fuel_demand": 0.0015,
+    "labor_demand": -0.0004,
     "mine_safety": 0.003,
-    "labor_demand": -0.003,
-    "fuel_demand": 0.008,
+    "mining_output": 0.01,
     "pollution": 0.004
    },
    "name": "Atmospheric Engine",
@@ -774,10 +774,10 @@
   "rolled_tinplate": {
    "effects": {
     "container_capacity": 0.005,
-    "food_storage": 0.002,
+    "food_storage": 0.0015,
+    "fuel_demand": 0.0004,
     "metal_yield": 0.0026,
-    "trade_capacity": 0.001,
-    "fuel_demand": 0.002
+    "trade_capacity": 0.0002
    },
    "name": "Rolled Tinplate",
    "observation": "Iron plate is rolled thin, pickled and dipped in molten tin, and the tinsmith makes it into pans, lanterns and boxes.",
@@ -793,8 +793,8 @@
   },
   "graphite_clay_crucibles": {
    "effects": {
-    "metal_yield": 0.0039,
     "fuel_efficiency": 0.002,
+    "metal_yield": 0.0027,
     "repair_capacity": 0.002
    },
    "name": "Graphite Crucibles",
@@ -817,10 +817,10 @@
   },
   "flying_shuttles": {
    "effects": {
-    "craft_output": 0.004,
-    "labor_efficiency": 0.0021,
-    "labor_demand": -0.003,
-    "cohesion": -0.0014
+    "cohesion": -0.0013,
+    "craft_output": 0.0031,
+    "labor_demand": -0.0003,
+    "labor_efficiency": 0.0008
    },
    "observation": "The weaver jerks the picking cord and the shuttle flies across on its wheels; one man now weaves broadcloth alone.",
    "ability_reason": "One weaver weaves twice as fast and twice as wide; yarn, not looms, becomes the bottleneck of the cloth trade.",
@@ -829,8 +829,8 @@
   "globe_oil_of_vitriol": {
    "effects": {
     "chemical_control": 0.005,
-    "pollution": 0.002,
-    "health_risk": 0.001
+    "health_risk": 0.0002,
+    "pollution": 0.002
    },
    "name": "Vitriol in Glass Globes",
    "observation": "Sulphur and nitre burn in a pan inside a great glass globe over water, and the fumes dissolve into oil of vitriol.",
@@ -846,9 +846,9 @@
   },
   "zinc_retort_distillation": {
    "effects": {
-    "metal_yield": 0.0052,
-    "pollution": 0.003,
-    "fuel_demand": 0.002
+    "fuel_demand": 0.0006,
+    "metal_yield": 0.0036,
+    "pollution": 0.003
    },
    "name": "Zinc Distillation",
    "observation": "Calamine and charcoal heated in sealed clay pots give off zinc vapour, which runs down an iron pipe into water.",
@@ -856,19 +856,19 @@
   },
   "metal_casting_feed_design": {
    "effects": {
-    "metal_yield": 0.0026,
-    "craft_output": 0.0012,
-    "standardization": 0.001
+    "craft_output": 0.0009,
+    "metal_yield": 0.0018,
+    "standardization": 0.0003
    },
    "observation": "The founder sets a riser over the thickest part of the mould, so the last metal to freeze draws from it and not from the casting.",
    "art": "res://assets/ui/research/paper/metal_casting_feed_design.png"
   },
   "steel_refining": {
    "effects": {
-    "tool_quality": 0.0196,
-    "metal_yield": 0.0078,
-    "standardization": 0.002,
-    "fuel_demand": 0.006
+    "fuel_demand": 0.0019,
+    "metal_yield": 0.0054,
+    "standardization": 0.0006,
+    "tool_quality": 0.0125
    },
    "observation": "Blister steel is melted in a closed clay crucible in a coke fire and poured into ingots of one temper throughout.",
    "ability_reason": "Cast steel of even temper makes springs, razors and cutting tools reliable enough to build machines with.",
@@ -876,9 +876,9 @@
   },
   "fused_silver_plate": {
    "effects": {
-    "craft_output": 0.0012,
-    "trade_capacity": 0.0015,
-    "container_capacity": 0.001
+    "container_capacity": 0.001,
+    "craft_output": 0.0009,
+    "trade_capacity": 0.0012
    },
    "name": "Fused Silver Plate",
    "observation": "A thin sheet of silver fused onto a copper ingot rolls out with it, so a candlestick looks like silver and costs a quarter as much.",
@@ -886,8 +886,8 @@
   },
   "plaster_mould_slip_casting": {
    "effects": {
-    "standardization": 0.0025,
-    "container_capacity": 0.003
+    "container_capacity": 0.003,
+    "standardization": 0.0007
    },
    "name": "Slip Casting",
    "observation": "Liquid clay poured into a plaster mould leaves a thin, even skin as the plaster drinks the water, and every teapot comes out alike.",
@@ -895,8 +895,8 @@
   },
   "fantail_windmills": {
    "effects": {
-    "food_output": 0.0016,
-    "labor_demand": -0.002
+    "food_output": 0.001,
+    "labor_demand": -0.0002
    },
    "name": "Fantail Windmills",
    "observation": "A small wheel at the back of the cap turns the whole mill into the wind, and the miller need not climb out in a squall.",
@@ -905,9 +905,9 @@
   "lead_chamber_acid": {
    "effects": {
     "chemical_control": 0.012,
-    "craft_output": 0.0016,
+    "craft_output": 0.0012,
+    "health_risk": 0.0007,
     "pollution": 0.006,
-    "health_risk": 0.003,
     "water_pollution": 0.002
    },
    "name": "Lead Chamber Acid",
@@ -932,9 +932,9 @@
   "cylinder_carding": {
    "effects": {
     "fiber_yield": 0.0078,
-    "labor_efficiency": 0.001,
-    "labor_demand": -0.002,
-    "standardization": 0.001
+    "labor_demand": -0.0002,
+    "labor_efficiency": 0.0004,
+    "standardization": 0.0003
    },
    "name": "Carding Engine",
    "observation": "Toothed cylinders turn against each other and deliver an endless gauze of carded cotton, gathered into a soft rope.",
@@ -942,8 +942,8 @@
   },
   "copperplate_calico": {
    "effects": {
-    "craft_output": 0.0016,
-    "trade_capacity": 0.0015
+    "craft_output": 0.0007,
+    "trade_capacity": 0.0003
    },
    "name": "Copperplate Calico",
    "observation": "An engraved copper plate prints a whole pastoral scene on the cotton in lines finer than any wood block can cut.",
@@ -951,9 +951,9 @@
   },
   "transfer_printed_ware": {
    "effects": {
-    "craft_output": 0.0016,
-    "standardization": 0.0015,
-    "trade_capacity": 0.0015
+    "craft_output": 0.0007,
+    "standardization": 0.0004,
+    "trade_capacity": 0.0003
    },
    "name": "Transfer-Printed Ware",
    "observation": "The engraving is printed on tissue, the tissue pressed on the fired ware, and the pattern stays when the paper is washed away.",
@@ -962,9 +962,9 @@
   "creamware": {
    "effects": {
     "container_capacity": 0.005,
-    "trade_capacity": 0.002,
-    "craft_output": 0.0012,
-    "fuel_demand": 0.002
+    "craft_output": 0.0006,
+    "fuel_demand": 0.0006,
+    "trade_capacity": 0.0004
    },
    "name": "Creamware",
    "observation": "Pale, light earthenware under a cream glaze fills the tables of shopkeepers who could never afford porcelain.",
@@ -989,8 +989,8 @@
   },
   "wove_paper_moulds": {
    "effects": {
-    "standardization": 0.0015,
-    "knowledge_preservation": 0.001
+    "knowledge_preservation": 0.0002,
+    "standardization": 0.0004
    },
    "name": "Wove Paper",
    "observation": "A mould of woven brass wire leaves no laid lines, and the printer's finest type sits on a smooth, even sheet.",
@@ -998,8 +998,8 @@
   },
   "tested_waterwheel_efficiency": {
    "effects": {
-    "labor_efficiency": 0.001,
-    "knowledge_rate": 0.002
+    "knowledge_rate": 0.0008,
+    "labor_efficiency": 0.0003
    },
    "name": "Tested Water Wheels",
    "observation": "The engineer's model wheel turns in a trough under a measured head, and the breastshot wheel beats the undershot by half.",
@@ -1007,9 +1007,9 @@
   },
   "iron_blowing_cylinders": {
    "effects": {
-    "metal_yield": 0.0065,
+    "fuel_demand": 0.0006,
     "fuel_efficiency": 0.004,
-    "fuel_demand": 0.002
+    "metal_yield": 0.0065
    },
    "name": "Blowing Cylinders",
    "observation": "Bored iron cylinders worked by the wheel push a steady blast, and the furnace makes half again as much pig.",
@@ -1017,11 +1017,11 @@
   },
   "multi_spindle_spinning": {
    "effects": {
+    "cohesion": -0.0001,
+    "craft_output": 0.0006,
     "fiber_yield": 0.0156,
-    "labor_efficiency": 0.0021,
-    "craft_output": 0.0012,
-    "labor_demand": -0.003,
-    "cohesion": -0.0014
+    "labor_demand": -0.0006,
+    "labor_efficiency": 0.0006
    },
    "observation": "A girl turns one wheel and draws the carriage back, and eight, then sixteen, spindles spin at once.",
    "ability_reason": "One spinner working many spindles multiplies the yarn a cottage can make; weavers are fed at last.",
@@ -1029,8 +1029,8 @@
   },
   "fast_madder_red": {
    "effects": {
-    "craft_output": 0.0012,
-    "trade_capacity": 0.0015,
+    "craft_output": 0.0006,
+    "trade_capacity": 0.0003,
     "water_pollution": 0.002
    },
    "name": "Fast Madder Red",
@@ -1039,11 +1039,11 @@
   },
   "roller_water_frame": {
    "effects": {
+    "cohesion": -0.0001,
+    "craft_output": 0.0011,
     "fiber_yield": 0.02,
-    "craft_output": 0.0024,
-    "labor_efficiency": 0.0021,
-    "labor_demand": -0.004,
-    "cohesion": -0.0014
+    "labor_demand": -0.0008,
+    "labor_efficiency": 0.0006
    },
    "name": "Water Frame",
    "observation": "Pairs of rollers turning ever faster draw the roving thin, and flyers twist it into a hard warp; the frame runs on the stream.",
@@ -1052,10 +1052,10 @@
   },
   "separate_condenser_engine": {
    "effects": {
-    "fuel_efficiency": 0.01,
     "extraction_yield": 0.006,
+    "fuel_demand": 0.0006,
+    "fuel_efficiency": 0.01,
     "mining_output": 0.006,
-    "fuel_demand": 0.002,
     "pollution": 0.002
    },
    "name": "Separate Condenser",
@@ -1065,15 +1065,15 @@
   },
   "textile_calendering": {
    "effects": {
-    "craft_output": 0.0012,
-    "trade_capacity": 0.001
+    "craft_output": 0.0006,
+    "trade_capacity": 0.0002
    },
    "observation": "The cloth is wound between heavy heated rolls until it shines like glazed paper.",
    "art": "res://assets/ui/research/paper/textile_calendering.png"
   },
   "spring_shutter_sails": {
    "effects": {
-    "food_output": 0.0016,
+    "food_output": 0.0002,
     "repair_capacity": 0.001
    },
    "name": "Spring Sails",
@@ -1083,7 +1083,7 @@
   "hard_tin_alloy": {
    "effects": {
     "container_capacity": 0.003,
-    "health_risk": -0.001
+    "health_risk": -0.0002
    },
    "name": "Hard Tin Alloy",
    "observation": "Tin hardened with antimony is rolled and spun into teapots that shine like silver and hold no lead.",
@@ -1091,11 +1091,11 @@
   },
   "mule_spinning": {
    "effects": {
+    "cohesion": -0.0001,
+    "craft_output": 0.0006,
     "fiber_yield": 0.0182,
-    "craft_output": 0.0024,
-    "labor_efficiency": 0.0017,
-    "labor_demand": -0.004,
-    "cohesion": -0.0014
+    "labor_demand": -0.0003,
+    "labor_efficiency": 0.0002
    },
    "observation": "The mule's carriage runs out drawing and twisting, then runs back winding, and its yarn is fine enough for muslin.",
    "ability_reason": "Fine, strong yarn by machine lets the realm weave the sheerest cloth, once bought only from the East.",
@@ -1103,8 +1103,8 @@
   },
   "belt_power_transmission": {
    "effects": {
-    "labor_efficiency": 0.001,
-    "craft_output": 0.0012,
+    "craft_output": 0.0003,
+    "labor_efficiency": 0.0001,
     "repair_capacity": 0.001
    },
    "observation": "Leather belts run from pulleys on the line shaft to each machine, and shifting a belt stops one without stopping all.",
@@ -1112,10 +1112,10 @@
   },
   "rotative_steam_engine": {
    "effects": {
-    "craft_output": 0.0032,
-    "labor_efficiency": 0.0021,
-    "labor_demand": -0.003,
-    "fuel_demand": 0.006,
+    "craft_output": 0.0008,
+    "fuel_demand": 0.001,
+    "labor_demand": -0.0002,
+    "labor_efficiency": 0.0002,
     "pollution": 0.004
    },
    "name": "Rotative Engine",
@@ -1125,9 +1125,9 @@
   },
   "clay_pyrometer_gauge": {
    "effects": {
-    "standardization": 0.002,
+    "container_capacity": 0.001,
     "fuel_efficiency": 0.002,
-    "container_capacity": 0.001
+    "standardization": 0.0003
    },
    "name": "Clay Pyrometer",
    "observation": "A clay cylinder shrinks in the kiln as the heat rises; the potter reads it in a brass gauge and knows his firing to a degree.",
@@ -1135,13 +1135,13 @@
   },
   "puddling_furnace": {
    "effects": {
-    "metal_yield": 0.02,
-    "fuel_efficiency": 0.004,
-    "timber_pressure": -0.006,
-    "pollution": 0.006,
     "fatigue": 0.003,
-    "health_risk": 0.003,
-    "fuel_demand": 0.004
+    "fuel_demand": 0.0006,
+    "fuel_efficiency": 0.004,
+    "health_risk": 0.0004,
+    "metal_yield": 0.0082,
+    "pollution": 0.006,
+    "timber_pressure": -0.0008
    },
    "name": "Puddling Furnace",
    "observation": "The puddler stirs the boiling pig iron with a long bar through the furnace door until it thickens into a spongy ball of wrought iron.",
@@ -1165,9 +1165,9 @@
   },
   "grooved_bar_rolls": {
    "effects": {
-    "metal_yield": 0.0065,
-    "standardization": 0.002,
-    "labor_demand": -0.002
+    "labor_demand": -0.0001,
+    "metal_yield": 0.0027,
+    "standardization": 0.0003
    },
    "name": "Grooved Bar Rolls",
    "observation": "The puddled bloom is squeezed through grooved rolls, pass after pass, into bars of set size fifteen times faster than under the hammer.",
@@ -1175,11 +1175,11 @@
   },
   "chlorine_bleaching": {
    "effects": {
-    "fiber_yield": 0.0052,
-    "craft_output": 0.0012,
     "chemical_control": 0.004,
-    "labor_demand": -0.002,
-    "health_risk": 0.002,
+    "craft_output": 0.0003,
+    "fiber_yield": 0.0052,
+    "health_risk": 0.0002,
+    "labor_demand": -0.0001,
     "water_pollution": 0.002
    },
    "name": "Chlorine Bleach",
@@ -1188,10 +1188,10 @@
   },
   "roller_calico_printing": {
    "effects": {
-    "craft_output": 0.002,
-    "standardization": 0.0015,
-    "trade_capacity": 0.0015,
-    "labor_demand": -0.002
+    "craft_output": 0.0005,
+    "labor_demand": -0.0001,
+    "standardization": 0.0002,
+    "trade_capacity": 0.0003
    },
    "name": "Roller Printing",
    "observation": "Engraved copper rollers print a continuous web of calico, and one machine does the work of forty block printers.",
@@ -1200,17 +1200,17 @@
   "yarn_tension_control": {
    "effects": {
     "fiber_yield": 0.0026,
-    "standardization": 0.001
+    "standardization": 0.0001
    },
    "observation": "Weights and brakes hold the warp at one tension as it is beamed, and the finished cloth lies flat.",
    "art": "res://assets/ui/research/paper/yarn_tension_control.png"
   },
   "double_acting_engine": {
    "effects": {
-    "craft_output": 0.0016,
+    "craft_output": 0.0004,
+    "fuel_demand": 0.0005,
     "fuel_efficiency": 0.004,
-    "labor_efficiency": 0.001,
-    "fuel_demand": 0.003
+    "labor_efficiency": 0.0001
    },
    "name": "Double-Acting Engine",
    "observation": "Steam drives the piston both ways, and the parallel linkage keeps the rod true as the beam swings.",
@@ -1218,10 +1218,10 @@
   },
   "jig_filed_gunlocks": {
    "effects": {
-    "standardization": 0.0025,
-    "warfare_readiness": 0.0015,
     "repair_capacity": 0.003,
-    "tool_quality": 0.0028
+    "standardization": 0.0003,
+    "tool_quality": 0.0012,
+    "warfare_readiness": 0.0002
    },
    "name": "Jig-Filed Gunlocks",
    "observation": "Each lock plate is filed to a hardened steel jig, so a tumbler from any lock fits any other of the same pattern.",
@@ -1237,11 +1237,11 @@
   "salt_cake_soda": {
    "effects": {
     "chemical_control": 0.01,
-    "craft_output": 0.002,
-    "trade_capacity": 0.001,
-    "pollution": 0.008,
+    "craft_output": 0.0005,
     "ecological_pressure": 0.003,
-    "health_risk": 0.003
+    "health_risk": 0.0004,
+    "pollution": 0.008,
+    "trade_capacity": 0.0002
    },
    "name": "Salt-Cake Soda",
    "observation": "Salt and oil of vitriol make salt cake, roasted with chalk and coal into black ash and leached to soda; the acid fumes kill the fields downwind.",
@@ -1260,8 +1260,8 @@
   "bone_ash_porcelain": {
    "effects": {
     "container_capacity": 0.003,
-    "craft_output": 0.0012,
-    "trade_capacity": 0.001
+    "craft_output": 0.0003,
+    "trade_capacity": 0.0002
    },
    "name": "Bone-Ash Porcelain",
    "observation": "Calcined ox bone in the paste makes a white, strong, translucent ware that stands the kiln better than soft paste.",
@@ -1269,39 +1269,609 @@
   },
   "yarn_count_standards": {
    "effects": {
-    "standardization": 0.0015,
-    "trade_capacity": 0.001,
-    "fiber_yield": 0.0013
+    "fiber_yield": 0.0013,
+    "standardization": 0.0002,
+    "trade_capacity": 0.0002
    },
    "observation": "Yarn is sold by its count, how many hanks of set length weigh a pound, so spinner and weaver speak one language.",
    "art": "res://assets/ui/research/paper/yarn_count_standards.png"
   },
   "metal_annealing_control": {
    "effects": {
-    "tool_quality": 0.0042,
-    "metal_yield": 0.0026,
-    "standardization": 0.001
+    "metal_yield": 0.0011,
+    "standardization": 0.0001,
+    "tool_quality": 0.0019
    },
    "observation": "The wire drawer anneals his coils in a closed pot for a set time, watching the colour, so the next draw does not snap.",
    "art": "res://assets/ui/research/paper/metal_annealing_control.png"
   },
   "mechanical_clutches": {
    "effects": {
-    "repair_capacity": 0.002,
-    "injury_risk": -0.001
+    "injury_risk": -0.0004,
+    "repair_capacity": 0.002
    },
    "observation": "A lever slides the dog clutch out of mesh, and one machine stands still while the shaft keeps turning.",
    "art": "res://assets/ui/research/paper/cam_motion_design.png"
   },
   "pressure_vessels": {
    "effects": {
-    "mining_output": 0.002,
     "fuel_efficiency": 0.002,
-    "standardization": 0.001,
-    "injury_risk": 0.002
+    "injury_risk": 0.002,
+    "mining_output": 0.002,
+    "standardization": 0.0001
    },
    "observation": "Boilermakers rivet wrought-iron plates into a vessel and test it with water pressure before any fire is lit.",
    "art": "res://assets/ui/research/paper/hot_rivet_setting.png"
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "brass_battery_works": {
+    "container_capacity": 0.003,
+    "craft_output": 0.0012,
+    "fuel_demand": 0.002,
+    "metal_yield": 0.0039,
+    "trade_capacity": 0.001,
+    "water_pollution": 0.001
+   },
+   "salt_glazed_stoneware": {
+    "container_capacity": 0.005,
+    "food_spoilage": -0.002,
+    "fuel_demand": 0.002,
+    "pollution": 0.002,
+    "trade_capacity": 0.001
+   },
+   "gun_barrel_founding": {
+    "fuel_demand": 0.002,
+    "metal_yield": 0.0026,
+    "warfare_readiness": 0.002
+   },
+   "high_warp_tapestry_workshops": {
+    "craft_output": 0.0016,
+    "legitimacy": 0.001,
+    "trade_capacity": 0.0015
+   },
+   "drawn_cane_beads": {
+    "craft_output": 0.0012,
+    "fuel_demand": 0.001,
+    "trade_capacity": 0.0015
+   },
+   "cast_iron_shot_firebacks": {
+    "container_capacity": 0.002,
+    "fuel_demand": 0.002,
+    "health_protection": 0.001,
+    "metal_yield": 0.0052,
+    "warfare_readiness": 0.0015
+   },
+   "pewter_alloy_standards": {
+    "container_capacity": 0.002,
+    "health_risk": -0.001,
+    "standardization": 0.002
+   },
+   "gig_mill_napping": {
+    "craft_output": 0.0012,
+    "labor_demand": -0.002
+   },
+   "potash_saltpetre_works": {
+    "chemical_control": 0.004,
+    "fuel_demand": 0.002,
+    "timber_pressure": 0.002,
+    "warfare_readiness": 0.0015,
+    "water_pollution": 0.001
+   },
+   "corned_powder_mills": {
+    "chemical_control": 0.002,
+    "disaster_risk": 0.002,
+    "injury_risk": 0.001,
+    "warfare_readiness": 0.002
+   },
+   "mainspring_fusee_clocks": {
+    "craft_output": 0.0016,
+    "standardization": 0.002,
+    "task_coordination": 0.0018,
+    "tool_quality": 0.0084
+   },
+   "turpentine_rosin_distilling": {
+    "chemical_control": 0.003,
+    "naval_capacity": 0.002,
+    "timber_pressure": 0.002,
+    "trade_capacity": 0.001
+   },
+   "bolt_blank_forging": {
+    "standardization": 0.0015,
+    "tool_quality": 0.0028
+   },
+   "clear_crystal_glass": {
+    "container_capacity": 0.003,
+    "craft_output": 0.0032,
+    "fuel_demand": 0.003,
+    "observation_rate": 0.003,
+    "timber_pressure": 0.002,
+    "trade_capacity": 0.003
+   },
+   "polychrome_tin_glaze": {
+    "container_capacity": 0.001,
+    "craft_output": 0.0012,
+    "health_risk": 0.001,
+    "trade_capacity": 0.0015
+   },
+   "nut_blank_forging": {
+    "standardization": 0.0015,
+    "tool_quality": 0.0028
+   },
+   "screw_tap_and_die": {
+    "repair_capacity": 0.002,
+    "standardization": 0.002,
+    "tool_quality": 0.0056
+   },
+   "liquation_silver_parting": {
+    "extraction_yield": 0.003,
+    "fuel_demand": 0.002,
+    "health_risk": 0.002,
+    "metal_yield": 0.0065,
+    "pollution": 0.002
+   },
+   "iron_plate_hammer_mills": {
+    "fuel_demand": 0.002,
+    "metal_yield": 0.0039,
+    "warfare_readiness": 0.001
+   },
+   "needle_lace": {
+    "craft_output": 0.0012,
+    "fatigue": 0.001,
+    "trade_capacity": 0.0015
+   },
+   "mercury_tin_mirrors": {
+    "craft_output": 0.0012,
+    "health_risk": 0.003,
+    "trade_capacity": 0.0015
+   },
+   "filigree_cane_glass": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015
+   },
+   "flyer_spinning": {
+    "craft_output": 0.0016,
+    "fiber_yield": 0.0156,
+    "labor_efficiency": 0.001
+   },
+   "cochineal_scarlet": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.002
+   },
+   "rolled_metal_strip": {
+    "metal_yield": 0.0026,
+    "standardization": 0.0015
+   },
+   "bobbin_lace": {
+    "craft_output": 0.0012,
+    "fatigue": 0.001,
+    "trade_capacity": 0.0015
+   },
+   "flat_rod_mine_pumps": {
+    "extraction_yield": 0.008,
+    "labor_demand": -0.003,
+    "metal_yield": 0.0078,
+    "mine_safety": 0.003,
+    "mining_output": 0.008,
+    "timber_pressure": 0.002
+   },
+   "mercury_ore_amalgamation": {
+    "extraction_yield": 0.004,
+    "health_risk": 0.004,
+    "metal_yield": 0.0078,
+    "water_pollution": 0.003
+   },
+   "sugar_loaf_refining": {
+    "food_storage": 0.003,
+    "fuel_demand": 0.003,
+    "pollution": 0.001,
+    "trade_capacity": 0.002
+   },
+   "screw_cutting_lathe": {
+    "standardization": 0.002,
+    "tool_quality": 0.007
+   },
+   "soft_paste_porcelain": {
+    "container_capacity": 0.003,
+    "craft_output": 0.0012,
+    "fuel_demand": 0.002,
+    "trade_capacity": 0.0015
+   },
+   "stocking_knitting_frame": {
+    "cohesion": -0.0014,
+    "craft_output": 0.0032,
+    "labor_demand": -0.003,
+    "labor_efficiency": 0.0021,
+    "standardization": 0.002
+   },
+   "slitting_mills": {
+    "labor_demand": -0.001,
+    "metal_yield": 0.0039,
+    "standardization": 0.0015
+   },
+   "ribbon_engine_loom": {
+    "cohesion": -0.0014,
+    "craft_output": 0.0016,
+    "labor_demand": -0.002,
+    "labor_efficiency": 0.001
+   },
+   "indigo_vat_dyeing": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015,
+    "water_pollution": 0.002
+   },
+   "cementation_blister_steel": {
+    "craft_output": 0.0016,
+    "fuel_demand": 0.006,
+    "metal_yield": 0.0078,
+    "timber_pressure": 0.002,
+    "tool_quality": 0.0168
+   },
+   "coal_fired_glass_furnace": {
+    "fuel_efficiency": 0.004,
+    "health_risk": 0.001,
+    "pollution": 0.004,
+    "timber_pressure": -0.004
+   },
+   "wooden_tub_bellows": {
+    "fuel_efficiency": 0.003,
+    "metal_yield": 0.0026,
+    "repair_capacity": 0.002
+   },
+   "blue_white_tin_glaze": {
+    "container_capacity": 0.001,
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015
+   },
+   "tin_glazed_wall_tiles": {
+    "health_protection": 0.001,
+    "housing_output": 0.0016,
+    "trade_capacity": 0.001
+   },
+   "dark_bottle_glass": {
+    "container_capacity": 0.005,
+    "food_spoilage": -0.002,
+    "pollution": 0.002,
+    "trade_capacity": 0.001
+   },
+   "carroted_fur_felting": {
+    "craft_output": 0.0012,
+    "health_risk": 0.004,
+    "trade_capacity": 0.0015
+   },
+   "recrystallised_saltpetre": {
+    "chemical_control": 0.004,
+    "fuel_demand": 0.002,
+    "warfare_readiness": 0.0015
+   },
+   "veneer_marquetry": {
+    "craft_output": 0.0012,
+    "timber_yield": 0.002,
+    "tool_quality": 0.0028,
+    "trade_capacity": 0.001
+   },
+   "stoved_varnish_ware": {
+    "container_capacity": 0.003,
+    "pollution": 0.001,
+    "repair_capacity": 0.001,
+    "trade_capacity": 0.001
+   },
+   "gear_cutting_engine": {
+    "standardization": 0.0025,
+    "tool_quality": 0.0056
+   },
+   "mordant_printed_calico": {
+    "craft_output": 0.0016,
+    "fiber_yield": 0.0013,
+    "trade_capacity": 0.0015,
+    "water_pollution": 0.002
+   },
+   "lead_crystal_glass": {
+    "craft_output": 0.0032,
+    "fuel_demand": 0.003,
+    "health_risk": 0.002,
+    "observation_rate": 0.004,
+    "trade_capacity": 0.003
+   },
+   "hollander_beater": {
+    "craft_output": 0.0016,
+    "knowledge_preservation": 0.0015,
+    "water_pollution": 0.001
+   },
+   "coal_tar_pitch": {
+    "chemical_control": 0.002,
+    "naval_capacity": 0.003,
+    "pollution": 0.003,
+    "repair_capacity": 0.002,
+    "timber_pressure": -0.001
+   },
+   "cast_plate_glass": {
+    "craft_output": 0.0032,
+    "fuel_demand": 0.004,
+    "health_protection": 0.002,
+    "housing_output": 0.0032,
+    "labor_demand": 0.002,
+    "trade_capacity": 0.0025
+   },
+   "reverberatory_furnace": {
+    "fuel_efficiency": 0.006,
+    "metal_yield": 0.0065,
+    "pollution": 0.004,
+    "timber_pressure": -0.003
+   },
+   "coal_grading": {
+    "fuel_efficiency": 0.004,
+    "standardization": 0.001,
+    "survey_speed": 0.002
+   },
+   "steam_suction_pump": {
+    "extraction_yield": 0.008,
+    "fuel_demand": 0.006,
+    "labor_demand": -0.002,
+    "mining_output": 0.008,
+    "pollution": 0.003
+   },
+   "precipitated_iron_blue": {
+    "chemical_control": 0.002,
+    "craft_output": 0.0012,
+    "trade_capacity": 0.001
+   },
+   "sand_flask_casting": {
+    "container_capacity": 0.003,
+    "metal_yield": 0.0039,
+    "standardization": 0.0015
+   },
+   "coke_firing": {
+    "fuel_demand": 0.004,
+    "fuel_efficiency": 0.01,
+    "health_risk": 0.002,
+    "metal_yield": 0.0182,
+    "pollution": 0.008,
+    "timber_pressure": -0.01
+   },
+   "atmospheric_beam_engine": {
+    "extraction_yield": 0.01,
+    "fuel_demand": 0.008,
+    "labor_demand": -0.003,
+    "mine_safety": 0.003,
+    "mining_output": 0.01,
+    "pollution": 0.004
+   },
+   "rolled_tinplate": {
+    "container_capacity": 0.005,
+    "food_storage": 0.002,
+    "fuel_demand": 0.002,
+    "metal_yield": 0.0026,
+    "trade_capacity": 0.001
+   },
+   "graphite_clay_crucibles": {
+    "fuel_efficiency": 0.002,
+    "metal_yield": 0.0039,
+    "repair_capacity": 0.002
+   },
+   "flying_shuttles": {
+    "cohesion": -0.0014,
+    "craft_output": 0.004,
+    "labor_demand": -0.003,
+    "labor_efficiency": 0.0021
+   },
+   "globe_oil_of_vitriol": {
+    "chemical_control": 0.005,
+    "health_risk": 0.001,
+    "pollution": 0.002
+   },
+   "zinc_retort_distillation": {
+    "fuel_demand": 0.002,
+    "metal_yield": 0.0052,
+    "pollution": 0.003
+   },
+   "metal_casting_feed_design": {
+    "craft_output": 0.0012,
+    "metal_yield": 0.0026,
+    "standardization": 0.001
+   },
+   "steel_refining": {
+    "fuel_demand": 0.006,
+    "metal_yield": 0.0078,
+    "standardization": 0.002,
+    "tool_quality": 0.0196
+   },
+   "fused_silver_plate": {
+    "container_capacity": 0.001,
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015
+   },
+   "plaster_mould_slip_casting": {
+    "container_capacity": 0.003,
+    "standardization": 0.0025
+   },
+   "fantail_windmills": {
+    "food_output": 0.0016,
+    "labor_demand": -0.002
+   },
+   "lead_chamber_acid": {
+    "chemical_control": 0.012,
+    "craft_output": 0.0016,
+    "health_risk": 0.003,
+    "pollution": 0.006,
+    "water_pollution": 0.002
+   },
+   "cylinder_carding": {
+    "fiber_yield": 0.0078,
+    "labor_demand": -0.002,
+    "labor_efficiency": 0.001,
+    "standardization": 0.001
+   },
+   "copperplate_calico": {
+    "craft_output": 0.0016,
+    "trade_capacity": 0.0015
+   },
+   "transfer_printed_ware": {
+    "craft_output": 0.0016,
+    "standardization": 0.0015,
+    "trade_capacity": 0.0015
+   },
+   "creamware": {
+    "container_capacity": 0.005,
+    "craft_output": 0.0012,
+    "fuel_demand": 0.002,
+    "trade_capacity": 0.002
+   },
+   "wove_paper_moulds": {
+    "knowledge_preservation": 0.001,
+    "standardization": 0.0015
+   },
+   "tested_waterwheel_efficiency": {
+    "knowledge_rate": 0.002,
+    "labor_efficiency": 0.001
+   },
+   "iron_blowing_cylinders": {
+    "fuel_demand": 0.002,
+    "fuel_efficiency": 0.004,
+    "metal_yield": 0.0065
+   },
+   "multi_spindle_spinning": {
+    "cohesion": -0.0014,
+    "craft_output": 0.0012,
+    "fiber_yield": 0.0156,
+    "labor_demand": -0.003,
+    "labor_efficiency": 0.0021
+   },
+   "fast_madder_red": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.0015,
+    "water_pollution": 0.002
+   },
+   "roller_water_frame": {
+    "cohesion": -0.0014,
+    "craft_output": 0.0024,
+    "fiber_yield": 0.02,
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.0021
+   },
+   "separate_condenser_engine": {
+    "extraction_yield": 0.006,
+    "fuel_demand": 0.002,
+    "fuel_efficiency": 0.01,
+    "mining_output": 0.006,
+    "pollution": 0.002
+   },
+   "textile_calendering": {
+    "craft_output": 0.0012,
+    "trade_capacity": 0.001
+   },
+   "spring_shutter_sails": {
+    "food_output": 0.0016,
+    "repair_capacity": 0.001
+   },
+   "hard_tin_alloy": {
+    "container_capacity": 0.003,
+    "health_risk": -0.001
+   },
+   "mule_spinning": {
+    "cohesion": -0.0014,
+    "craft_output": 0.0024,
+    "fiber_yield": 0.0182,
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.0017
+   },
+   "belt_power_transmission": {
+    "craft_output": 0.0012,
+    "labor_efficiency": 0.001,
+    "repair_capacity": 0.001
+   },
+   "rotative_steam_engine": {
+    "craft_output": 0.0032,
+    "fuel_demand": 0.006,
+    "labor_demand": -0.003,
+    "labor_efficiency": 0.0021,
+    "pollution": 0.004
+   },
+   "clay_pyrometer_gauge": {
+    "container_capacity": 0.001,
+    "fuel_efficiency": 0.002,
+    "standardization": 0.002
+   },
+   "puddling_furnace": {
+    "fatigue": 0.003,
+    "fuel_demand": 0.004,
+    "fuel_efficiency": 0.004,
+    "health_risk": 0.003,
+    "metal_yield": 0.02,
+    "pollution": 0.006,
+    "timber_pressure": -0.006
+   },
+   "grooved_bar_rolls": {
+    "labor_demand": -0.002,
+    "metal_yield": 0.0065,
+    "standardization": 0.002
+   },
+   "chlorine_bleaching": {
+    "chemical_control": 0.004,
+    "craft_output": 0.0012,
+    "fiber_yield": 0.0052,
+    "health_risk": 0.002,
+    "labor_demand": -0.002,
+    "water_pollution": 0.002
+   },
+   "roller_calico_printing": {
+    "craft_output": 0.002,
+    "labor_demand": -0.002,
+    "standardization": 0.0015,
+    "trade_capacity": 0.0015
+   },
+   "yarn_tension_control": {
+    "fiber_yield": 0.0026,
+    "standardization": 0.001
+   },
+   "double_acting_engine": {
+    "craft_output": 0.0016,
+    "fuel_demand": 0.003,
+    "fuel_efficiency": 0.004,
+    "labor_efficiency": 0.001
+   },
+   "jig_filed_gunlocks": {
+    "repair_capacity": 0.003,
+    "standardization": 0.0025,
+    "tool_quality": 0.0028,
+    "warfare_readiness": 0.0015
+   },
+   "salt_cake_soda": {
+    "chemical_control": 0.01,
+    "craft_output": 0.002,
+    "ecological_pressure": 0.003,
+    "health_risk": 0.003,
+    "pollution": 0.008,
+    "trade_capacity": 0.001
+   },
+   "bone_ash_porcelain": {
+    "container_capacity": 0.003,
+    "craft_output": 0.0012,
+    "trade_capacity": 0.001
+   },
+   "yarn_count_standards": {
+    "fiber_yield": 0.0013,
+    "standardization": 0.0015,
+    "trade_capacity": 0.001
+   },
+   "metal_annealing_control": {
+    "metal_yield": 0.0026,
+    "standardization": 0.001,
+    "tool_quality": 0.0042
+   },
+   "mechanical_clutches": {
+    "injury_risk": -0.001,
+    "repair_capacity": 0.002
+   },
+   "pressure_vessels": {
+    "fuel_efficiency": 0.002,
+    "injury_risk": 0.002,
+    "mining_output": 0.002,
+    "standardization": 0.001
+   }
   }
  }
 }

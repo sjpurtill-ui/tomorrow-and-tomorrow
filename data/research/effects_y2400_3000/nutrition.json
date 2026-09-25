@@ -4,10 +4,10 @@
  "items": {
   "carbonated_table_waters": {
    "effects": {
-    "fuel_demand": 0.001,
-    "health_risk": 0.0005,
+    "fuel_demand": 0.0002,
+    "health_risk": 0.0002,
     "nutrition_quality": 0.0005,
-    "trade_capacity": 0.001
+    "trade_capacity": 0.0008
    },
    "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
    "name": "Sparkling Waters",
@@ -15,11 +15,11 @@
   },
   "food_retorts": {
    "effects": {
-    "food_spoilage": -0.0153,
-    "food_storage": 0.022,
-    "fuel_demand": 0.002,
-    "health_risk": 0.001,
-    "labor_demand": 0.002,
+    "food_spoilage": -0.01,
+    "food_storage": 0.0207,
+    "fuel_demand": 0.0003,
+    "health_risk": 0.0003,
+    "labor_demand": 0.0001,
     "logistics_endurance": 0.004,
     "nutrition_quality": 0.002
    },
@@ -32,9 +32,9 @@
   },
   "humidity_measurement": {
    "effects": {
-    "food_spoilage": -0.0034,
-    "food_storage": 0.0022,
-    "observation_rate": 0.001
+    "food_spoilage": -0.0022,
+    "food_storage": 0.0021,
+    "observation_rate": 0.0006
    },
    "art": "res://assets/ui/research/paper/grain_moisture_testing.png",
    "observation": "Storekeepers hang hair gauges in the granary and know from the reading when grain will sweat and mould."
@@ -43,11 +43,11 @@
    "effects": {
     "cultivation_yield": 0.0036,
     "food_output": 0.0078,
-    "fuel_demand": 0.003,
-    "labor_demand": 0.002,
+    "fuel_demand": 0.0005,
+    "labor_demand": 0.0001,
     "nutrition_quality": -0.001,
     "soil_productivity": 0.0014,
-    "trade_capacity": 0.002
+    "trade_capacity": 0.0016
    },
    "art": "res://assets/ui/research/paper/fruit_pulp_screening.png",
    "name": "Beet Sugar",
@@ -57,9 +57,10 @@
   },
   "farm_improvement_societies": {
    "effects": {
-    "adoption_rate": 0.002,
-    "cohesion": 0.001,
-    "cultivation_yield": 0.0024
+    "adoption_rate": 0.0014,
+    "cohesion": 0.0002,
+    "cultivation_yield": 0.0024,
+    "farm_mechanization": 0.06
    },
    "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
    "name": "Farm Societies",
@@ -67,11 +68,11 @@
   },
   "pedigree_herd_books": {
    "effects": {
-    "food_output": 0.0052,
-    "institutional_rigidity": 0.001,
-    "knowledge_preservation": 0.001,
+    "food_output": 0.0045,
+    "institutional_rigidity": 0.0003,
+    "knowledge_preservation": 0.0006,
     "nutrition_quality": 0.002,
-    "trade_capacity": 0.002
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
    "name": "Herd Books",
@@ -81,7 +82,7 @@
   },
   "pressed_bakers_yeast": {
    "effects": {
-    "food_output": 0.0013,
+    "food_output": 0.0011,
     "food_spoilage": -0.0017,
     "nutrition_quality": 0.001
    },
@@ -93,7 +94,7 @@
    "effects": {
     "food_storage": 0.0022,
     "nutrition_quality": 0.0005,
-    "trade_capacity": 0.002
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/curing_regimens-v1.png",
    "name": "Eating Chocolate",
@@ -103,7 +104,7 @@
    "effects": {
     "food_spoilage": -0.0068,
     "food_storage": 0.011,
-    "health_risk": 0.0005,
+    "health_risk": 0.0001,
     "nutrition_quality": 0.002
    },
    "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
@@ -113,10 +114,10 @@
   },
   "vacuum_pan_sugar": {
    "effects": {
-    "food_output": 0.0026,
-    "fuel_demand": 0.001,
+    "food_output": 0.0023,
+    "fuel_demand": 0.0001,
     "fuel_efficiency": 0.002,
-    "trade_capacity": 0.001
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/paper/fruit_pulp_screening.png",
    "name": "Vacuum Pans",
@@ -124,9 +125,9 @@
   },
   "oilcake_winter_feed": {
    "effects": {
-    "food_output": 0.0039,
+    "food_output": 0.0034,
     "soil_productivity": 0.0028,
-    "trade_capacity": 0.002
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/paper/seed_oil_pressing.png",
    "name": "Oil-cake Feed",
@@ -135,8 +136,8 @@
   "sheep_scab_dipping": {
    "effects": {
     "fiber_yield": 0.002,
-    "food_output": 0.0026,
-    "health_risk": 0.0005,
+    "food_output": 0.0023,
+    "health_risk": 0.0001,
     "water_pollution": 0.001
    },
    "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
@@ -146,11 +147,12 @@
   "mechanical_reaper": {
    "effects": {
     "cultivation_yield": 0.0024,
-    "fatigue": -0.002,
-    "food_output": 0.0078,
+    "farm_mechanization": 0.06,
+    "fatigue": -0.0014,
+    "food_output": 0.0068,
     "injury_risk": 0.002,
-    "labor_demand": -0.004,
-    "labor_efficiency": 0.004
+    "labor_demand": -0.0026,
+    "labor_efficiency": 0.0018
    },
    "art": "res://assets/ui/research/paper/threshing_frames.png",
    "name": "Mechanical Reaper",
@@ -162,8 +164,9 @@
    "effects": {
     "cultivation_yield": 0.0048,
     "ecological_pressure": 0.002,
-    "food_output": 0.0026,
-    "labor_efficiency": 0.002
+    "farm_mechanization": 0.03,
+    "food_output": 0.0023,
+    "labor_efficiency": 0.0009
    },
    "art": "res://assets/ui/research/subjects/crop_rotation-v1.png",
    "name": "Steel Plough",
@@ -171,10 +174,11 @@
   },
   "nutrient_response_trials": {
    "effects": {
-    "cultivation_yield": 0.0084,
-    "knowledge_rate": 0.002,
-    "observation_rate": 0.002,
-    "soil_productivity": 0.007
+    "cultivation_yield": 0.0058,
+    "farm_mechanization": 0.0064,
+    "knowledge_rate": 0.0019,
+    "observation_rate": 0.0009,
+    "soil_productivity": 0.006
    },
    "art": "res://assets/ui/research/paper/nutrient_response_trials.png",
    "observation": "Side-by-side plots receive measured nitrogen, phosphorus and potash, and the yields show which each soil lacks.",
@@ -182,8 +186,10 @@
   },
   "soil_infiltration_trials": {
    "effects": {
-    "observation_rate": 0.001,
-    "soil_productivity": 0.0028,
+    "farm_mechanization": 0.0064,
+    "modern_survival": 0.0013,
+    "observation_rate": 0.0005,
+    "soil_productivity": 0.0024,
     "water_access": 0.002
    },
    "art": "res://assets/ui/research/subjects/soil_assays-v1.png",
@@ -191,11 +197,12 @@
   },
   "seabird_guano_trade": {
    "effects": {
-    "cohesion": -0.001,
-    "cultivation_yield": 0.006,
+    "cohesion": -0.0002,
+    "cultivation_yield": 0.0042,
     "ecological_pressure": 0.003,
-    "soil_productivity": 0.0084,
-    "trade_capacity": 0.003
+    "farm_mechanization": 0.0214,
+    "soil_productivity": 0.0072,
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/nitrate_cultivation-v1.png",
    "name": "Guano Trade",
@@ -204,9 +211,10 @@
   },
   "mineral_nitrate_dressing": {
    "effects": {
-    "cultivation_yield": 0.006,
-    "soil_productivity": 0.0042,
-    "trade_capacity": 0.002,
+    "cultivation_yield": 0.0042,
+    "farm_mechanization": 0.0214,
+    "soil_productivity": 0.0036,
+    "trade_capacity": 0.0006,
     "water_pollution": 0.002
    },
    "art": "res://assets/ui/research/subjects/nitrate_cultivation-v1.png",
@@ -217,8 +225,8 @@
   },
   "mulch_water_management": {
    "effects": {
-    "cultivation_yield": 0.0012,
-    "soil_productivity": 0.0028,
+    "cultivation_yield": 0.0008,
+    "soil_productivity": 0.0024,
     "water_access": 0.002
    },
    "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
@@ -226,9 +234,9 @@
   },
   "phosphate_dressing": {
    "effects": {
-    "cultivation_yield": 0.0036,
-    "labor_demand": 0.001,
-    "soil_productivity": 0.0056
+    "cultivation_yield": 0.0025,
+    "labor_demand": 0.0001,
+    "soil_productivity": 0.0048
    },
    "art": "res://assets/ui/research/subjects/phosphate_dressing-v1.png",
    "observation": "Ground phosphate rock is dressed on thin soils and on root crops, and the turnips swell.",
@@ -238,12 +246,12 @@
   },
   "experimental_farm_station": {
    "effects": {
-    "cultivation_yield": 0.0084,
-    "knowledge_preservation": 0.003,
-    "knowledge_rate": 0.002,
-    "labor_demand": 0.002,
-    "soil_productivity": 0.0056,
-    "state_capacity": 0.001
+    "cultivation_yield": 0.0058,
+    "knowledge_preservation": 0.0014,
+    "knowledge_rate": 0.0019,
+    "labor_demand": 0.0001,
+    "soil_productivity": 0.0048,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/paper/nutrient_response_trials.png",
    "name": "Experiment Station",
@@ -253,10 +261,10 @@
   },
   "phosphate_solubilization": {
    "effects": {
-    "cultivation_yield": 0.006,
-    "fuel_demand": 0.001,
+    "cultivation_yield": 0.0042,
+    "fuel_demand": 0.0001,
     "pollution": 0.003,
-    "soil_productivity": 0.007,
+    "soil_productivity": 0.006,
     "water_pollution": 0.002
    },
    "art": "res://assets/ui/research/subjects/phosphate_dressing-v1.png",
@@ -267,11 +275,12 @@
   },
   "machine_tile_drainage": {
    "effects": {
-    "cultivation_yield": 0.006,
+    "cultivation_yield": 0.0042,
     "disaster_resilience": 0.002,
     "ecology_recovery": -0.001,
-    "labor_demand": 0.002,
-    "soil_productivity": 0.0042
+    "farm_mechanization": 0.0214,
+    "labor_demand": 0.0001,
+    "soil_productivity": 0.0036
    },
    "art": "res://assets/ui/research/paper/clay_pipe_forming.png",
    "name": "Tile Drainage",
@@ -280,12 +289,12 @@
   },
   "famine_relief_works": {
    "effects": {
-    "cohesion": -0.001,
-    "food_output": 0.0039,
-    "food_storage": 0.0066,
-    "labor_demand": 0.002,
-    "legitimacy": 0.001,
-    "state_capacity": 0.002
+    "cohesion": -0.0002,
+    "food_output": 0.0036,
+    "food_storage": 0.0063,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/regional_granaries-v1.png",
    "name": "Famine Relief",
@@ -294,8 +303,9 @@
   },
   "heated_glasshouses": {
    "effects": {
-    "food_output": 0.0026,
-    "fuel_demand": 0.003,
+    "farm_mechanization": 0.0064,
+    "food_output": 0.0024,
+    "fuel_demand": 0.0004,
     "nutrition_quality": 0.002
    },
    "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png",
@@ -306,8 +316,8 @@
    "effects": {
     "disease_exposure": 0.001,
     "ecological_pressure": 0.001,
-    "food_output": 0.0052,
-    "labor_demand": 0.002,
+    "food_output": 0.0048,
+    "labor_demand": 0.0001,
     "nutrition_quality": 0.003
    },
    "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png",
@@ -315,10 +325,11 @@
   },
   "steam_threshing_sets": {
    "effects": {
-    "food_output": 0.0039,
-    "fuel_demand": 0.003,
+    "farm_mechanization": 0.0214,
+    "food_output": 0.0036,
+    "fuel_demand": 0.0004,
     "injury_risk": 0.001,
-    "labor_demand": -0.003,
+    "labor_demand": -0.0018,
     "labor_efficiency": 0.003
    },
    "art": "res://assets/ui/research/paper/threshing_frames.png",
@@ -328,9 +339,9 @@
   },
   "food_adulteration_tests": {
    "effects": {
-    "health_risk": -0.002,
+    "health_risk": -0.0012,
     "nutrition_quality": 0.003,
-    "observation_rate": 0.001
+    "observation_rate": 0.0005
    },
    "art": "res://assets/ui/research/paper/biological_staining.png",
    "name": "Adulteration Tests",
@@ -339,9 +350,9 @@
   "graded_grain_elevators": {
    "effects": {
     "food_spoilage": -0.0034,
-    "food_storage": 0.011,
-    "standardization": 0.002,
-    "trade_capacity": 0.003
+    "food_storage": 0.0105,
+    "standardization": 0.0008,
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/regional_granaries-v1.png",
    "name": "Graded Elevators",
@@ -349,7 +360,7 @@
   },
   "chemical_baking_powder": {
    "effects": {
-    "food_output": 0.0013,
+    "food_output": 0.0012,
     "nutrition_quality": 0.001
    },
    "art": "res://assets/ui/research/subjects/grain_milling-v1.png",
@@ -359,8 +370,8 @@
   "condensed_milk": {
    "effects": {
     "food_spoilage": -0.0034,
-    "food_storage": 0.0088,
-    "logistics_endurance": 0.002,
+    "food_storage": 0.0084,
+    "logistics_endurance": 0.0019,
     "neonatal_survival": -0.001,
     "nutrition_quality": -0.001
    },
@@ -372,7 +383,7 @@
   "fermentation_starter_cultures": {
    "effects": {
     "food_output": 0.0013,
-    "food_spoilage": -0.0034,
+    "food_spoilage": -0.0032,
     "nutrition_quality": 0.002
    },
    "art": "res://assets/ui/research/paper/microbial_growth_measurement.png",
@@ -382,7 +393,8 @@
    "effects": {
     "cultivation_yield": 0.0072,
     "disaster_resilience": 0.002,
-    "observation_rate": 0.002
+    "farm_mechanization": 0.0175,
+    "observation_rate": 0.001
    },
    "art": "res://assets/ui/research/paper/plant_pathology_diagnosis.png",
    "observation": "Growers learn that blights and rusts are living fungi and name each by its marks on leaf and stem.",
@@ -391,8 +403,8 @@
   "can_body_forming": {
    "effects": {
     "container_capacity": 0.002,
-    "craft_output": 0.002,
-    "food_storage": 0.0088
+    "craft_output": 0.0013,
+    "food_storage": 0.0075
    },
    "art": "res://assets/ui/research/paper/tinplate_coating.png",
    "observation": "Machines cut, roll and solder tin bodies by the hundred, and canned food falls within reach of the town poor.",
@@ -404,10 +416,10 @@
    "effects": {
     "adoption_rate": 0.003,
     "cultivation_yield": 0.0048,
-    "institutional_rigidity": 0.001,
-    "knowledge_preservation": 0.002,
-    "labor_demand": 0.001,
-    "state_capacity": 0.002
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.001,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0011
    },
    "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
    "name": "Farm Colleges",
@@ -417,9 +429,10 @@
   },
   "gentle_heat_treatment": {
    "effects": {
-    "disease_exposure": -0.004,
-    "food_spoilage": -0.0136,
-    "food_storage": 0.0066,
+    "disease_exposure": -0.0023,
+    "food_spoilage": -0.0128,
+    "food_storage": 0.0056,
+    "modern_survival": 0.0023,
     "neonatal_survival": 0.005,
     "nutrition_quality": 0.002
    },
@@ -430,8 +443,8 @@
   },
   "meat_extract_cubes": {
    "effects": {
-    "food_storage": 0.0044,
-    "logistics_endurance": 0.001,
+    "food_storage": 0.0037,
+    "logistics_endurance": 0.0003,
     "nutrition_quality": 0.001
    },
    "art": "res://assets/ui/research/subjects/curing_regimens-v1.png",
@@ -441,7 +454,7 @@
   "beef_fat_margarine": {
    "effects": {
     "food_output": 0.0026,
-    "food_storage": 0.0022,
+    "food_storage": 0.0019,
     "nutrition_quality": -0.001
    },
    "art": "res://assets/ui/research/subjects/curing_regimens-v1.png",
@@ -451,7 +464,7 @@
   "roller_grain_milling": {
    "effects": {
     "food_output": 0.0039,
-    "food_storage": 0.0066,
+    "food_storage": 0.0056,
     "labor_efficiency": 0.002,
     "nutrition_quality": -0.004
    },
@@ -462,9 +475,10 @@
   },
   "twine_binding_harvester": {
    "effects": {
+    "farm_mechanization": 0.0875,
     "fiber_yield": -0.001,
     "food_output": 0.0039,
-    "labor_demand": -0.002,
+    "labor_demand": -0.0012,
     "labor_efficiency": 0.003
    },
    "art": "res://assets/ui/research/paper/threshing_frames.png",
@@ -473,12 +487,12 @@
   },
   "food_adulteration_law": {
    "effects": {
-    "disease_exposure": -0.002,
-    "health_risk": -0.004,
-    "institutional_rigidity": 0.002,
-    "labor_demand": 0.001,
-    "nutrition_quality": 0.005,
-    "state_capacity": 0.002
+    "disease_exposure": -0.0004,
+    "health_risk": -0.0017,
+    "institutional_rigidity": 0.0004,
+    "labor_demand": 0.0001,
+    "nutrition_quality": 0.0047,
+    "state_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
    "name": "Adulteration Law",
@@ -490,9 +504,9 @@
    "effects": {
     "food_output": 0.0078,
     "food_storage": 0.0088,
-    "fuel_demand": 0.002,
-    "nutrition_quality": 0.003,
-    "trade_capacity": 0.004
+    "fuel_demand": 0.0002,
+    "nutrition_quality": 0.0028,
+    "trade_capacity": 0.002
    },
    "art": "res://assets/ui/research/subjects/salt_working-v1.png",
    "name": "Frozen Meat Trade",
@@ -504,7 +518,7 @@
    "effects": {
     "food_output": 0.0026,
     "food_spoilage": -0.0017,
-    "labor_efficiency": 0.002
+    "labor_efficiency": 0.0017
    },
    "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
    "name": "Cream Separator",
@@ -514,7 +528,7 @@
    "effects": {
     "cultivation_yield": 0.0036,
     "disaster_resilience": 0.002,
-    "trade_capacity": 0.001
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
    "name": "Resistant Rootstocks",
@@ -522,10 +536,10 @@
   },
   "cooperative_creameries": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0003,
     "food_output": 0.0039,
-    "nutrition_quality": 0.002,
-    "trade_capacity": 0.002
+    "nutrition_quality": 0.0019,
+    "trade_capacity": 0.001
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Cooperative Creameries",
@@ -556,7 +570,7 @@
    "effects": {
     "food_spoilage": -0.0034,
     "food_storage": 0.0066,
-    "health_risk": -0.001
+    "health_risk": -0.0004
    },
    "art": "res://assets/ui/research/paper/tinplate_coating.png",
    "observation": "Can lids are rolled onto the body in a double seam with no solder, and lead no longer taints the food.",
@@ -566,10 +580,10 @@
   },
   "bottled_town_milk": {
    "effects": {
-    "disease_exposure": -0.003,
-    "labor_demand": 0.001,
+    "disease_exposure": -0.0005,
+    "labor_demand": 0.0001,
     "neonatal_survival": 0.006,
-    "nutrition_quality": 0.002
+    "nutrition_quality": 0.0019
    },
    "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
    "name": "Bottled Milk",
@@ -577,10 +591,10 @@
   },
   "butterfat_milk_test": {
    "effects": {
-    "health_risk": -0.001,
-    "nutrition_quality": 0.002,
-    "standardization": 0.002,
-    "trade_capacity": 0.001
+    "health_risk": -0.0004,
+    "nutrition_quality": 0.0019,
+    "standardization": 0.0008,
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
    "name": "Butterfat Test",
@@ -589,9 +603,9 @@
   "dietary_heat_units": {
    "effects": {
     "food_output": 0.0026,
-    "knowledge_rate": 0.002,
-    "nutrition_quality": 0.004,
-    "state_capacity": 0.001
+    "knowledge_rate": 0.0013,
+    "nutrition_quality": 0.0011,
+    "state_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Diet Heat Units",
@@ -601,9 +615,9 @@
   },
   "deficiency_disease_discovery": {
    "effects": {
-    "health_protection": 0.002,
-    "knowledge_rate": 0.001,
-    "nutrition_quality": 0.004
+    "health_protection": 0.0009,
+    "knowledge_rate": 0.0006,
+    "nutrition_quality": 0.0011
    },
    "art": "res://assets/ui/research/subjects/grain_milling-v1.png",
    "name": "Deficiency Diseases",
@@ -611,8 +625,8 @@
   },
   "chilled_fruit_shipping": {
    "effects": {
-    "fuel_demand": 0.001,
-    "nutrition_quality": 0.002,
+    "fuel_demand": 0.0001,
+    "nutrition_quality": 0.0005,
     "trade_capacity": 0.003
    },
    "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
@@ -630,7 +644,7 @@
   "controlled_pollination": {
    "effects": {
     "cultivation_yield": 0.0036,
-    "knowledge_rate": 0.001
+    "knowledge_rate": 0.0006
    },
    "art": "res://assets/ui/research/paper/heredity_experiments.png",
    "observation": "Breeders bag the flowers and dust them by hand with pollen of the chosen father."
@@ -638,7 +652,7 @@
   "field_variety_trials": {
    "effects": {
     "cultivation_yield": 0.0048,
-    "observation_rate": 0.002
+    "observation_rate": 0.0008
    },
    "art": "res://assets/ui/research/paper/germination_trials.png",
    "observation": "Varieties are sown in replicated plots across the field, and the yields are compared with the reckoning of chance."
@@ -647,7 +661,7 @@
    "effects": {
     "cultivation_yield": 0.0084,
     "food_output": 0.0026,
-    "knowledge_rate": 0.003
+    "knowledge_rate": 0.0019
    },
    "art": "res://assets/ui/research/paper/heredity_experiments.png",
    "observation": "Crossing experiments show traits passing in fixed ratios, and breeders can plan a variety instead of hoping for one.",
@@ -656,18 +670,20 @@
   "regional_seed_trials": {
    "effects": {
     "adoption_rate": 0.002,
-    "cultivation_yield": 0.0036
+    "cultivation_yield": 0.0036,
+    "farm_mechanization": 0.06
    },
    "art": "res://assets/ui/research/paper/germination_trials.png",
    "observation": "Trial farms in each district name the varieties that do best in that soil and weather."
   },
   "school_meals": {
    "effects": {
-    "cohesion": 0.002,
-    "labor_demand": 0.001,
-    "neonatal_survival": 0.001,
-    "nutrition_quality": 0.004,
-    "state_capacity": 0.001
+    "cohesion": 0.0004,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0022,
+    "neonatal_survival": 0.0007,
+    "nutrition_quality": 0.0011,
+    "state_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "School Meals",
@@ -677,7 +693,8 @@
   "plant_resistance_trait_trials": {
    "effects": {
     "cultivation_yield": 0.006,
-    "disaster_resilience": 0.002
+    "disaster_resilience": 0.002,
+    "farm_mechanization": 0.06
    },
    "art": "res://assets/ui/research/paper/plant_resistance_trait_trials.png",
    "observation": "Wheat and flax are bred from parents that stand up to rust and wilt, and the resistance is fixed in the line."
@@ -685,19 +702,19 @@
   "food_acidity_measurement": {
    "effects": {
     "food_spoilage": -0.0034,
-    "health_risk": -0.002
+    "health_risk": -0.0007
    },
    "art": "res://assets/ui/research/paper/gas_composition_analysis.png",
    "observation": "Preserved foods are tested for acidity, and low-acid foods get longer heating so they cannot breed the canning poison."
   },
   "clean_milk_ordinances": {
    "effects": {
-    "disease_exposure": -0.004,
-    "institutional_rigidity": 0.002,
-    "labor_demand": 0.002,
-    "neonatal_survival": 0.008,
-    "nutrition_quality": 0.002,
-    "state_capacity": 0.002
+    "disease_exposure": -0.0011,
+    "institutional_rigidity": 0.0004,
+    "labor_demand": 0.0001,
+    "neonatal_survival": 0.0056,
+    "nutrition_quality": 0.0005,
+    "state_capacity": 0.001
    },
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
    "name": "Clean Milk Law",
@@ -706,10 +723,11 @@
   },
   "vitamin_factors": {
    "effects": {
-    "health_protection": 0.004,
-    "knowledge_rate": 0.002,
-    "neonatal_survival": 0.003,
-    "nutrition_quality": 0.012
+    "health_protection": 0.0018,
+    "knowledge_rate": 0.0013,
+    "modern_survival": 0.0044,
+    "neonatal_survival": 0.0021,
+    "nutrition_quality": 0.0032
    },
    "art": "res://assets/ui/research/subjects/food_drying-v1.png",
    "name": "Vitamins",
@@ -719,9 +737,9 @@
   "farm_extension_agents": {
    "effects": {
     "adoption_rate": 0.004,
-    "cultivation_yield": 0.006,
-    "labor_demand": 0.001,
-    "state_capacity": 0.001
+    "cultivation_yield": 0.0045,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
    "name": "Extension Agents",
@@ -729,9 +747,10 @@
   },
   "ammonium_sulfate_fertilizer": {
    "effects": {
-    "cultivation_yield": 0.012,
+    "cultivation_yield": 0.009,
+    "farm_mechanization": 0.0655,
     "food_output": 0.0052,
-    "fuel_demand": 0.002,
+    "fuel_demand": 0.0002,
     "pollution": 0.002,
     "soil_productivity": 0.0084,
     "water_pollution": 0.004
@@ -746,13 +765,14 @@
   },
   "farm_tractor": {
    "effects": {
-    "cultivation_yield": 0.0024,
-    "fatigue": -0.003,
+    "cultivation_yield": 0.0018,
+    "farm_mechanization": 0.1966,
+    "fatigue": -0.0019,
     "food_output": 0.0065,
-    "fuel_demand": 0.004,
+    "fuel_demand": 0.0004,
     "injury_risk": 0.002,
     "labor_demand": -0.005,
-    "labor_efficiency": 0.006
+    "labor_efficiency": 0.003
    },
    "art": "res://assets/ui/research/subjects/precision_machinery-v1.png",
    "name": "Farm Tractor",
@@ -762,13 +782,13 @@
   },
   "wartime_ration_cards": {
    "effects": {
-    "cohesion": 0.003,
+    "cohesion": 0.0006,
     "food_storage": 0.011,
-    "institutional_rigidity": 0.003,
-    "labor_demand": 0.002,
-    "legitimacy": 0.002,
-    "nutrition_quality": 0.003,
-    "state_capacity": 0.003,
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003,
+    "nutrition_quality": 0.0021,
+    "state_capacity": 0.001,
     "trade_capacity": -0.002
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
@@ -781,7 +801,7 @@
    "effects": {
     "food_spoilage": -0.0051,
     "food_storage": 0.0066,
-    "fuel_demand": 0.002
+    "fuel_demand": 0.0002
    },
    "art": "res://assets/ui/research/paper/fuel_air_drying.png",
    "observation": "Fans blow heated air through the grain bins, and a wet harvest no longer rots in store."
@@ -805,10 +825,10 @@
   },
   "rickets_prevention": {
    "effects": {
-    "health_protection": 0.002,
+    "health_protection": 0.0015,
     "maternal_safety": 0.002,
     "neonatal_survival": 0.004,
-    "nutrition_quality": 0.004
+    "nutrition_quality": 0.0028
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
    "name": "Rickets Cure",
@@ -816,9 +836,9 @@
   },
   "iodized_salt": {
    "effects": {
-    "health_protection": 0.002,
+    "health_protection": 0.0015,
     "neonatal_survival": 0.002,
-    "nutrition_quality": 0.004
+    "nutrition_quality": 0.0028
    },
    "art": "res://assets/ui/research/subjects/salt_working-v1.png",
    "name": "Iodized Salt",
@@ -826,9 +846,10 @@
   },
   "hybrid_maize_seed": {
    "effects": {
-    "cultivation_yield": 0.0096,
+    "cultivation_yield": 0.0072,
+    "farm_mechanization": 0.1311,
     "food_output": 0.0052,
-    "institutional_rigidity": 0.001,
+    "institutional_rigidity": 0.0001,
     "trade_capacity": 0.002
    },
    "art": "res://assets/ui/research/paper/heredity_experiments.png",
@@ -841,8 +862,8 @@
    "effects": {
     "food_spoilage": -0.0085,
     "food_storage": 0.0132,
-    "fuel_demand": 0.002,
-    "nutrition_quality": 0.002
+    "fuel_demand": 0.0002,
+    "nutrition_quality": 0.0014
    },
    "art": "res://assets/ui/research/subjects/food_drying-v1.png",
    "name": "Quick-frozen Foods",
@@ -851,7 +872,7 @@
   "contour_cultivation": {
    "effects": {
     "disaster_resilience": 0.001,
-    "ecology_recovery": 0.002,
+    "ecology_recovery": 0.0018,
     "soil_productivity": 0.0042
    },
    "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
@@ -859,7 +880,8 @@
   },
   "cover_crop_mixtures": {
    "effects": {
-    "ecology_recovery": 0.002,
+    "ecology_recovery": 0.0018,
+    "farm_mechanization": 0.0197,
     "soil_productivity": 0.0042
    },
    "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
@@ -867,8 +889,9 @@
   },
   "strip_cropping": {
    "effects": {
-    "disaster_resilience": 0.001,
-    "ecology_recovery": 0.002,
+    "disaster_resilience": 0.0008,
+    "ecology_recovery": 0.0017,
+    "farm_mechanization": 0.0165,
     "soil_productivity": 0.0028
    },
    "art": "res://assets/ui/research/subjects/crop_rotation-v1.png",
@@ -878,9 +901,9 @@
    "effects": {
     "food_spoilage": -0.0136,
     "food_storage": 0.0088,
-    "fuel_demand": 0.003,
+    "fuel_demand": 0.0003,
     "neonatal_survival": 0.002,
-    "nutrition_quality": 0.003
+    "nutrition_quality": 0.0017
    },
    "art": "res://assets/ui/research/subjects/public_stores-v1.png",
    "name": "Household Refrigerator",
@@ -888,11 +911,11 @@
   },
   "soil_conservation_service": {
    "effects": {
-    "disaster_resilience": 0.002,
-    "ecology_recovery": 0.003,
-    "labor_demand": 0.002,
+    "disaster_resilience": 0.0015,
+    "ecology_recovery": 0.0025,
+    "labor_demand": 0.0001,
     "soil_productivity": 0.007,
-    "state_capacity": 0.002
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/soil_assays-v1.png",
    "name": "Soil Conservation",
@@ -901,11 +924,12 @@
   },
   "hitch_tractor": {
    "effects": {
+    "farm_mechanization": 0.0827,
     "food_output": 0.0039,
-    "fuel_demand": 0.002,
-    "injury_risk": -0.001,
-    "labor_demand": -0.003,
-    "labor_efficiency": 0.004
+    "fuel_demand": 0.0002,
+    "injury_risk": -0.0007,
+    "labor_demand": -0.0016,
+    "labor_efficiency": 0.0033
    },
    "art": "res://assets/ui/research/subjects/precision_machinery-v1.png",
    "name": "Hitch Tractor",
@@ -913,11 +937,12 @@
   },
   "combine_harvester": {
    "effects": {
+    "farm_mechanization": 0.1654,
     "food_output": 0.0052,
     "food_spoilage": -0.0017,
-    "fuel_demand": 0.003,
-    "labor_demand": -0.004,
-    "labor_efficiency": 0.005
+    "fuel_demand": 0.0003,
+    "labor_demand": -0.0021,
+    "labor_efficiency": 0.0041
    },
    "art": "res://assets/ui/research/paper/winnowing_practice.png",
    "name": "Combine Harvester",
@@ -925,9 +950,9 @@
   },
   "recommended_daily_allowances": {
    "effects": {
-    "health_protection": 0.002,
-    "nutrition_quality": 0.006,
-    "state_capacity": 0.001
+    "health_protection": 0.0009,
+    "nutrition_quality": 0.0033,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
    "name": "Daily Allowances",
@@ -936,7 +961,7 @@
   "food_group_guides": {
    "effects": {
     "adoption_rate": 0.001,
-    "nutrition_quality": 0.004
+    "nutrition_quality": 0.0022
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Food Guides",
@@ -947,7 +972,8 @@
     "chemical_control": 0.006,
     "cultivation_yield": 0.0072,
     "ecological_pressure": 0.004,
-    "health_risk": 0.002,
+    "farm_mechanization": 0.0551,
+    "health_risk": 0.0002,
     "pollution": 0.005,
     "water_pollution": 0.003
    },
@@ -961,8 +987,9 @@
     "chemical_control": 0.004,
     "cultivation_yield": 0.006,
     "ecological_pressure": 0.002,
-    "labor_demand": -0.002,
-    "labor_efficiency": 0.002,
+    "farm_mechanization": 0.0551,
+    "labor_demand": -0.001,
+    "labor_efficiency": 0.0016,
     "water_pollution": 0.002
    },
    "art": "res://assets/ui/research/paper/aromatic_amine_hydrogenation.png",
@@ -972,7 +999,7 @@
   "artificial_cattle_insemination": {
    "effects": {
     "food_output": 0.0052,
-    "nutrition_quality": 0.001
+    "nutrition_quality": 0.0006
    },
    "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
    "name": "Artificial Insemination",
@@ -980,7 +1007,7 @@
   },
   "confinement_broiler_houses": {
    "effects": {
-    "disease_exposure": 0.004,
+    "disease_exposure": 0.0022,
     "food_output": 0.0065,
     "nutrition_quality": 0.001,
     "pollution": 0.002,
@@ -993,15 +1020,16 @@
   },
   "food_batch_traceability": {
    "effects": {
-    "disease_exposure": -0.001,
-    "health_risk": -0.002,
-    "standardization": 0.002
+    "disease_exposure": -0.0009,
+    "health_risk": -0.0006,
+    "standardization": 0.0006
    },
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
    "observation": "Every batch carries a code from farm to shop, and a tainted lot is recalled within days."
   },
   "postharvest_loss_measurement": {
    "effects": {
+    "farm_mechanization": 0.0296,
     "food_spoilage": -0.0068,
     "food_storage": 0.0044
    },
@@ -1011,6 +1039,7 @@
   "soil_moisture_scheduling": {
    "effects": {
     "cultivation_yield": 0.0036,
+    "farm_mechanization": 0.0296,
     "water_access": 0.003
    },
    "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
@@ -1020,9 +1049,9 @@
    "effects": {
     "food_spoilage": -0.0051,
     "food_storage": 0.0066,
-    "fuel_demand": 0.002,
+    "fuel_demand": 0.0003,
     "nutrition_quality": 0.001,
-    "trade_capacity": 0.002
+    "trade_capacity": 0.0014
    },
    "art": "res://assets/ui/research/subjects/public_stores-v1.png",
    "name": "Self-service Stores",
@@ -1032,8 +1061,9 @@
    "effects": {
     "cultivation_yield": 0.0072,
     "ecological_pressure": 0.005,
+    "farm_mechanization": 0.0988,
     "food_output": 0.0039,
-    "fuel_demand": 0.002,
+    "fuel_demand": 0.0003,
     "water_access": 0.003
    },
    "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
@@ -1043,10 +1073,10 @@
   },
   "food_process_hazard_analysis": {
    "effects": {
-    "disease_exposure": -0.003,
+    "disease_exposure": -0.0028,
     "food_spoilage": -0.0034,
-    "health_risk": -0.004,
-    "standardization": 0.002
+    "health_risk": -0.0013,
+    "standardization": 0.0006
    },
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
    "observation": "Each step of food processing is examined for what could go wrong, and a check is set at every critical point.",
@@ -1063,7 +1093,7 @@
   "food_water_activity_measurement": {
    "effects": {
     "food_spoilage": -0.0034,
-    "health_risk": -0.001
+    "health_risk": -0.0003
    },
    "art": "res://assets/ui/research/paper/gas_composition_analysis.png",
    "observation": "The free water in food is measured to set its shelf life safely."
@@ -1071,16 +1101,16 @@
   "food_package_leak_detection": {
    "effects": {
     "food_spoilage": -0.0034,
-    "health_risk": -0.001
+    "health_risk": -0.0003
    },
    "art": "res://assets/ui/research/paper/polymer_blow_molding.png",
    "observation": "Sealed packages are tested for leaks before they leave the plant."
   },
   "inter_realm_food_standards": {
    "effects": {
-    "health_risk": -0.002,
-    "standardization": 0.002,
-    "trade_capacity": 0.004
+    "health_risk": -0.0006,
+    "standardization": 0.0006,
+    "trade_capacity": 0.0028
    },
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
    "name": "Food Standards Code",
@@ -1089,7 +1119,8 @@
   "drip_irrigation": {
    "effects": {
     "cultivation_yield": 0.0048,
-    "ecological_pressure": -0.001,
+    "ecological_pressure": -0.0006,
+    "farm_mechanization": 0.0494,
     "water_access": 0.004
    },
    "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
@@ -1098,7 +1129,7 @@
   },
   "reduced_tillage": {
    "effects": {
-    "ecology_recovery": 0.002,
+    "ecology_recovery": 0.0011,
     "fuel_demand": -0.001,
     "soil_productivity": 0.0042
    },
@@ -1109,9 +1140,10 @@
    "effects": {
     "cultivation_yield": 0.0144,
     "ecological_pressure": 0.004,
+    "farm_mechanization": 0.1976,
     "food_output": 0.0104,
     "food_storage": 0.0066,
-    "fuel_demand": 0.002,
+    "fuel_demand": 0.0003,
     "soil_productivity": -0.0042,
     "water_pollution": 0.004
    },
@@ -1123,7 +1155,7 @@
   },
   "food_banks": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0004,
     "food_output": 0.0013,
     "nutrition_quality": 0.001
    },
@@ -1144,7 +1176,8 @@
    "effects": {
     "food_spoilage": -0.0051,
     "food_storage": 0.0088,
-    "neonatal_survival": 0.001
+    "modern_survival": 0.0045,
+    "neonatal_survival": 0.0009
    },
    "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
    "name": "Carton Milk",
@@ -1155,8 +1188,9 @@
     "chemical_control": 0.003,
     "cultivation_yield": 0.0036,
     "ecological_pressure": -0.002,
-    "pollution": -0.002,
-    "water_pollution": -0.002
+    "farm_mechanization": 0.06,
+    "pollution": -0.0006,
+    "water_pollution": -0.0003
    },
    "art": "res://assets/ui/research/paper/plant_pathology_diagnosis.png",
    "name": "Integrated Pest Management",
@@ -1166,7 +1200,7 @@
    "effects": {
     "food_output": 0.0039,
     "nutrition_quality": -0.004,
-    "trade_capacity": 0.001
+    "trade_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/grain_milling-v1.png",
    "name": "Starch Syrup",
@@ -1197,8 +1231,9 @@
   },
   "hydroponic_glasshouses": {
    "effects": {
+    "farm_mechanization": 0.06,
     "food_output": 0.0026,
-    "fuel_demand": 0.002,
+    "fuel_demand": 0.0008,
     "nutrition_quality": 0.001,
     "water_access": 0.002
    },
@@ -1208,9 +1243,9 @@
   },
   "famine_early_warning": {
    "effects": {
-    "disaster_resilience": 0.003,
+    "disaster_resilience": 0.0023,
     "food_storage": 0.0088,
-    "state_capacity": 0.002
+    "state_capacity": 0.0015
    },
    "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
    "name": "Famine Early Warning",
@@ -1218,7 +1253,7 @@
   },
   "nutrition_labels": {
    "effects": {
-    "health_risk": -0.001,
+    "health_risk": -0.0008,
     "nutrition_quality": 0.003
    },
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
@@ -1227,6 +1262,7 @@
   },
   "therapeutic_ready_food": {
    "effects": {
+    "modern_survival": 0.0121,
     "neonatal_survival": 0.004,
     "nutrition_quality": 0.003
    },
@@ -1237,11 +1273,12 @@
   "transgenic_crops": {
    "effects": {
     "chemical_control": 0.003,
-    "cohesion": -0.002,
+    "cohesion": -0.0005,
     "cultivation_yield": 0.0084,
     "ecological_pressure": -0.001,
-    "institutional_rigidity": 0.002,
-    "labor_efficiency": 0.002
+    "farm_mechanization": 0.1,
+    "institutional_rigidity": 0.0014,
+    "labor_efficiency": 0.0017
    },
    "art": "res://assets/ui/research/paper/heredity_experiments.png",
    "name": "Transgenic Crops",
@@ -1263,7 +1300,7 @@
    "effects": {
     "cultivation_yield": 0.0048,
     "fuel_demand": -0.001,
-    "labor_efficiency": 0.003,
+    "labor_efficiency": 0.0025,
     "water_pollution": -0.002
    },
    "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
@@ -1273,6 +1310,7 @@
   "marker_assisted_breeding": {
    "effects": {
     "cultivation_yield": 0.0048,
+    "farm_mechanization": 0.1,
     "knowledge_rate": 0.002
    },
    "art": "res://assets/ui/research/paper/heredity_experiments.png",
@@ -1291,7 +1329,7 @@
   "stress_tolerant_varieties": {
    "effects": {
     "cultivation_yield": 0.0048,
-    "disaster_resilience": 0.003
+    "disaster_resilience": 0.002
    },
    "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
    "name": "Stress-tolerant Varieties",
@@ -1299,7 +1337,7 @@
   },
   "sugar_drink_taxes": {
    "effects": {
-    "legitimacy": -0.001,
+    "legitimacy": -0.0002,
     "nutrition_quality": 0.003,
     "trade_capacity": -0.001
    },
@@ -1310,7 +1348,8 @@
   "gene_edited_crops": {
    "effects": {
     "cultivation_yield": 0.0072,
-    "disaster_resilience": 0.002,
+    "disaster_resilience": 0.0013,
+    "farm_mechanization": 0.06,
     "knowledge_rate": 0.001,
     "nutrition_quality": 0.002
    },
@@ -1323,7 +1362,7 @@
    "effects": {
     "ecological_pressure": -0.001,
     "food_output": 0.0026,
-    "fuel_demand": 0.001,
+    "fuel_demand": 0.0002,
     "nutrition_quality": 0.001
    },
    "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
@@ -1332,10 +1371,10 @@
   },
   "cultivated_cell_meat": {
    "effects": {
-    "cohesion": -0.001,
+    "cohesion": -0.0002,
     "ecological_pressure": -0.001,
     "food_output": 0.0013,
-    "fuel_demand": 0.001
+    "fuel_demand": 0.0002
    },
    "art": "res://assets/ui/research/paper/cell_culture_methods.png",
    "name": "Cultivated Meat",
@@ -1344,8 +1383,9 @@
   "nitrogen_fixing_seed_microbes": {
    "effects": {
     "cultivation_yield": 0.0036,
+    "farm_mechanization": 0.06,
     "soil_productivity": 0.0042,
-    "water_pollution": -0.002
+    "water_pollution": -0.0016
    },
    "art": "res://assets/ui/research/paper/microbial_growth_measurement.png",
    "name": "Nitrogen-fixing Seed Coats",
@@ -1354,7 +1394,7 @@
   "vertical_indoor_farms": {
    "effects": {
     "food_output": 0.0013,
-    "fuel_demand": 0.003,
+    "fuel_demand": 0.0006,
     "nutrition_quality": 0.001,
     "water_access": 0.002
    },
@@ -1365,7 +1405,8 @@
   "climate_shift_crop_planning": {
    "effects": {
     "cultivation_yield": 0.0048,
-    "disaster_resilience": 0.004,
+    "disaster_resilience": 0.0026,
+    "farm_mechanization": 0.06,
     "food_storage": 0.0044,
     "state_capacity": 0.002
    },
@@ -1373,6 +1414,674 @@
    "name": "Climate Crop Planning",
    "observation": "District crop maps are redrawn as the climate shifts, moving varieties and sowing dates to follow the rain.",
    "ability_reason": "Farming adapts to a warming climate before the failed harvests force it."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "carbonated_table_waters": {
+    "fuel_demand": 0.001,
+    "health_risk": 0.0005,
+    "nutrition_quality": 0.0005,
+    "trade_capacity": 0.001
+   },
+   "food_retorts": {
+    "food_spoilage": -0.0153,
+    "food_storage": 0.022,
+    "fuel_demand": 0.002,
+    "health_risk": 0.001,
+    "labor_demand": 0.002,
+    "logistics_endurance": 0.004,
+    "nutrition_quality": 0.002
+   },
+   "humidity_measurement": {
+    "food_spoilage": -0.0034,
+    "food_storage": 0.0022,
+    "observation_rate": 0.001
+   },
+   "root_beet_sugar": {
+    "cultivation_yield": 0.0036,
+    "food_output": 0.0078,
+    "fuel_demand": 0.003,
+    "labor_demand": 0.002,
+    "nutrition_quality": -0.001,
+    "soil_productivity": 0.0014,
+    "trade_capacity": 0.002
+   },
+   "farm_improvement_societies": {
+    "adoption_rate": 0.002,
+    "cohesion": 0.001,
+    "cultivation_yield": 0.0024
+   },
+   "pedigree_herd_books": {
+    "food_output": 0.0052,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.001,
+    "nutrition_quality": 0.002,
+    "trade_capacity": 0.002
+   },
+   "pressed_bakers_yeast": {
+    "food_output": 0.0013,
+    "food_spoilage": -0.0017,
+    "nutrition_quality": 0.001
+   },
+   "cocoa_press_chocolate": {
+    "food_storage": 0.0022,
+    "nutrition_quality": 0.0005,
+    "trade_capacity": 0.002
+   },
+   "household_preserving_jars": {
+    "food_spoilage": -0.0068,
+    "food_storage": 0.011,
+    "health_risk": 0.0005,
+    "nutrition_quality": 0.002
+   },
+   "vacuum_pan_sugar": {
+    "food_output": 0.0026,
+    "fuel_demand": 0.001,
+    "fuel_efficiency": 0.002,
+    "trade_capacity": 0.001
+   },
+   "oilcake_winter_feed": {
+    "food_output": 0.0039,
+    "soil_productivity": 0.0028,
+    "trade_capacity": 0.002
+   },
+   "sheep_scab_dipping": {
+    "fiber_yield": 0.002,
+    "food_output": 0.0026,
+    "health_risk": 0.0005,
+    "water_pollution": 0.001
+   },
+   "mechanical_reaper": {
+    "cultivation_yield": 0.0024,
+    "fatigue": -0.002,
+    "food_output": 0.0078,
+    "injury_risk": 0.002,
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.004
+   },
+   "steel_scouring_plough": {
+    "cultivation_yield": 0.0048,
+    "ecological_pressure": 0.002,
+    "food_output": 0.0026,
+    "labor_efficiency": 0.002
+   },
+   "nutrient_response_trials": {
+    "cultivation_yield": 0.0084,
+    "knowledge_rate": 0.002,
+    "observation_rate": 0.002,
+    "soil_productivity": 0.007
+   },
+   "soil_infiltration_trials": {
+    "observation_rate": 0.001,
+    "soil_productivity": 0.0028,
+    "water_access": 0.002
+   },
+   "seabird_guano_trade": {
+    "cohesion": -0.001,
+    "cultivation_yield": 0.006,
+    "ecological_pressure": 0.003,
+    "soil_productivity": 0.0084,
+    "trade_capacity": 0.003
+   },
+   "mineral_nitrate_dressing": {
+    "cultivation_yield": 0.006,
+    "soil_productivity": 0.0042,
+    "trade_capacity": 0.002,
+    "water_pollution": 0.002
+   },
+   "mulch_water_management": {
+    "cultivation_yield": 0.0012,
+    "soil_productivity": 0.0028,
+    "water_access": 0.002
+   },
+   "phosphate_dressing": {
+    "cultivation_yield": 0.0036,
+    "labor_demand": 0.001,
+    "soil_productivity": 0.0056
+   },
+   "experimental_farm_station": {
+    "cultivation_yield": 0.0084,
+    "knowledge_preservation": 0.003,
+    "knowledge_rate": 0.002,
+    "labor_demand": 0.002,
+    "soil_productivity": 0.0056,
+    "state_capacity": 0.001
+   },
+   "phosphate_solubilization": {
+    "cultivation_yield": 0.006,
+    "fuel_demand": 0.001,
+    "pollution": 0.003,
+    "soil_productivity": 0.007,
+    "water_pollution": 0.002
+   },
+   "machine_tile_drainage": {
+    "cultivation_yield": 0.006,
+    "disaster_resilience": 0.002,
+    "ecology_recovery": -0.001,
+    "labor_demand": 0.002,
+    "soil_productivity": 0.0042
+   },
+   "famine_relief_works": {
+    "cohesion": -0.001,
+    "food_output": 0.0039,
+    "food_storage": 0.0066,
+    "labor_demand": 0.002,
+    "legitimacy": 0.001,
+    "state_capacity": 0.002
+   },
+   "heated_glasshouses": {
+    "food_output": 0.0026,
+    "fuel_demand": 0.003,
+    "nutrition_quality": 0.002
+   },
+   "intensive_gardens": {
+    "disease_exposure": 0.001,
+    "ecological_pressure": 0.001,
+    "food_output": 0.0052,
+    "labor_demand": 0.002,
+    "nutrition_quality": 0.003
+   },
+   "steam_threshing_sets": {
+    "food_output": 0.0039,
+    "fuel_demand": 0.003,
+    "injury_risk": 0.001,
+    "labor_demand": -0.003,
+    "labor_efficiency": 0.003
+   },
+   "food_adulteration_tests": {
+    "health_risk": -0.002,
+    "nutrition_quality": 0.003,
+    "observation_rate": 0.001
+   },
+   "graded_grain_elevators": {
+    "food_spoilage": -0.0034,
+    "food_storage": 0.011,
+    "standardization": 0.002,
+    "trade_capacity": 0.003
+   },
+   "chemical_baking_powder": {
+    "food_output": 0.0013,
+    "nutrition_quality": 0.001
+   },
+   "condensed_milk": {
+    "food_spoilage": -0.0034,
+    "food_storage": 0.0088,
+    "logistics_endurance": 0.002,
+    "neonatal_survival": -0.001,
+    "nutrition_quality": -0.001
+   },
+   "fermentation_starter_cultures": {
+    "food_output": 0.0013,
+    "food_spoilage": -0.0034,
+    "nutrition_quality": 0.002
+   },
+   "plant_pathology_diagnosis": {
+    "cultivation_yield": 0.0072,
+    "disaster_resilience": 0.002,
+    "observation_rate": 0.002
+   },
+   "can_body_forming": {
+    "container_capacity": 0.002,
+    "craft_output": 0.002,
+    "food_storage": 0.0088
+   },
+   "farm_colleges_ministry": {
+    "adoption_rate": 0.003,
+    "cultivation_yield": 0.0048,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.002,
+    "labor_demand": 0.001,
+    "state_capacity": 0.002
+   },
+   "gentle_heat_treatment": {
+    "disease_exposure": -0.004,
+    "food_spoilage": -0.0136,
+    "food_storage": 0.0066,
+    "neonatal_survival": 0.005,
+    "nutrition_quality": 0.002
+   },
+   "meat_extract_cubes": {
+    "food_storage": 0.0044,
+    "logistics_endurance": 0.001,
+    "nutrition_quality": 0.001
+   },
+   "beef_fat_margarine": {
+    "food_output": 0.0026,
+    "food_storage": 0.0022,
+    "nutrition_quality": -0.001
+   },
+   "roller_grain_milling": {
+    "food_output": 0.0039,
+    "food_storage": 0.0066,
+    "labor_efficiency": 0.002,
+    "nutrition_quality": -0.004
+   },
+   "twine_binding_harvester": {
+    "fiber_yield": -0.001,
+    "food_output": 0.0039,
+    "labor_demand": -0.002,
+    "labor_efficiency": 0.003
+   },
+   "food_adulteration_law": {
+    "disease_exposure": -0.002,
+    "health_risk": -0.004,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.001,
+    "nutrition_quality": 0.005,
+    "state_capacity": 0.002
+   },
+   "frozen_meat_trade": {
+    "food_output": 0.0078,
+    "food_storage": 0.0088,
+    "fuel_demand": 0.002,
+    "nutrition_quality": 0.003,
+    "trade_capacity": 0.004
+   },
+   "cream_separator": {
+    "food_output": 0.0026,
+    "food_spoilage": -0.0017,
+    "labor_efficiency": 0.002
+   },
+   "resistant_vine_rootstocks": {
+    "cultivation_yield": 0.0036,
+    "disaster_resilience": 0.002,
+    "trade_capacity": 0.001
+   },
+   "cooperative_creameries": {
+    "cohesion": 0.002,
+    "food_output": 0.0039,
+    "nutrition_quality": 0.002,
+    "trade_capacity": 0.002
+   },
+   "double_seaming": {
+    "food_spoilage": -0.0034,
+    "food_storage": 0.0066,
+    "health_risk": -0.001
+   },
+   "bottled_town_milk": {
+    "disease_exposure": -0.003,
+    "labor_demand": 0.001,
+    "neonatal_survival": 0.006,
+    "nutrition_quality": 0.002
+   },
+   "butterfat_milk_test": {
+    "health_risk": -0.001,
+    "nutrition_quality": 0.002,
+    "standardization": 0.002,
+    "trade_capacity": 0.001
+   },
+   "dietary_heat_units": {
+    "food_output": 0.0026,
+    "knowledge_rate": 0.002,
+    "nutrition_quality": 0.004,
+    "state_capacity": 0.001
+   },
+   "deficiency_disease_discovery": {
+    "health_protection": 0.002,
+    "knowledge_rate": 0.001,
+    "nutrition_quality": 0.004
+   },
+   "chilled_fruit_shipping": {
+    "fuel_demand": 0.001,
+    "nutrition_quality": 0.002,
+    "trade_capacity": 0.003
+   },
+   "controlled_pollination": {
+    "cultivation_yield": 0.0036,
+    "knowledge_rate": 0.001
+   },
+   "field_variety_trials": {
+    "cultivation_yield": 0.0048,
+    "observation_rate": 0.002
+   },
+   "heredity_experiments": {
+    "cultivation_yield": 0.0084,
+    "food_output": 0.0026,
+    "knowledge_rate": 0.003
+   },
+   "school_meals": {
+    "cohesion": 0.002,
+    "labor_demand": 0.001,
+    "neonatal_survival": 0.001,
+    "nutrition_quality": 0.004,
+    "state_capacity": 0.001
+   },
+   "food_acidity_measurement": {
+    "food_spoilage": -0.0034,
+    "health_risk": -0.002
+   },
+   "clean_milk_ordinances": {
+    "disease_exposure": -0.004,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.008,
+    "nutrition_quality": 0.002,
+    "state_capacity": 0.002
+   },
+   "vitamin_factors": {
+    "health_protection": 0.004,
+    "knowledge_rate": 0.002,
+    "neonatal_survival": 0.003,
+    "nutrition_quality": 0.012
+   },
+   "farm_extension_agents": {
+    "adoption_rate": 0.004,
+    "cultivation_yield": 0.006,
+    "labor_demand": 0.001,
+    "state_capacity": 0.001
+   },
+   "ammonium_sulfate_fertilizer": {
+    "cultivation_yield": 0.012,
+    "food_output": 0.0052,
+    "fuel_demand": 0.002,
+    "pollution": 0.002,
+    "soil_productivity": 0.0084,
+    "water_pollution": 0.004
+   },
+   "farm_tractor": {
+    "cultivation_yield": 0.0024,
+    "fatigue": -0.003,
+    "food_output": 0.0065,
+    "fuel_demand": 0.004,
+    "injury_risk": 0.002,
+    "labor_demand": -0.005,
+    "labor_efficiency": 0.006
+   },
+   "wartime_ration_cards": {
+    "cohesion": 0.003,
+    "food_storage": 0.011,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.002,
+    "legitimacy": 0.002,
+    "nutrition_quality": 0.003,
+    "state_capacity": 0.003,
+    "trade_capacity": -0.002
+   },
+   "forced_air_grain_drying": {
+    "food_spoilage": -0.0051,
+    "food_storage": 0.0066,
+    "fuel_demand": 0.002
+   },
+   "rickets_prevention": {
+    "health_protection": 0.002,
+    "maternal_safety": 0.002,
+    "neonatal_survival": 0.004,
+    "nutrition_quality": 0.004
+   },
+   "iodized_salt": {
+    "health_protection": 0.002,
+    "neonatal_survival": 0.002,
+    "nutrition_quality": 0.004
+   },
+   "hybrid_maize_seed": {
+    "cultivation_yield": 0.0096,
+    "food_output": 0.0052,
+    "institutional_rigidity": 0.001,
+    "trade_capacity": 0.002
+   },
+   "quick_frozen_foods": {
+    "food_spoilage": -0.0085,
+    "food_storage": 0.0132,
+    "fuel_demand": 0.002,
+    "nutrition_quality": 0.002
+   },
+   "contour_cultivation": {
+    "disaster_resilience": 0.001,
+    "ecology_recovery": 0.002,
+    "soil_productivity": 0.0042
+   },
+   "cover_crop_mixtures": {
+    "ecology_recovery": 0.002,
+    "soil_productivity": 0.0042
+   },
+   "strip_cropping": {
+    "disaster_resilience": 0.001,
+    "ecology_recovery": 0.002,
+    "soil_productivity": 0.0028
+   },
+   "household_refrigerator": {
+    "food_spoilage": -0.0136,
+    "food_storage": 0.0088,
+    "fuel_demand": 0.003,
+    "neonatal_survival": 0.002,
+    "nutrition_quality": 0.003
+   },
+   "soil_conservation_service": {
+    "disaster_resilience": 0.002,
+    "ecology_recovery": 0.003,
+    "labor_demand": 0.002,
+    "soil_productivity": 0.007,
+    "state_capacity": 0.002
+   },
+   "hitch_tractor": {
+    "food_output": 0.0039,
+    "fuel_demand": 0.002,
+    "injury_risk": -0.001,
+    "labor_demand": -0.003,
+    "labor_efficiency": 0.004
+   },
+   "combine_harvester": {
+    "food_output": 0.0052,
+    "food_spoilage": -0.0017,
+    "fuel_demand": 0.003,
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.005
+   },
+   "recommended_daily_allowances": {
+    "health_protection": 0.002,
+    "nutrition_quality": 0.006,
+    "state_capacity": 0.001
+   },
+   "food_group_guides": {
+    "adoption_rate": 0.001,
+    "nutrition_quality": 0.004
+   },
+   "synthetic_crop_insecticide": {
+    "chemical_control": 0.006,
+    "cultivation_yield": 0.0072,
+    "ecological_pressure": 0.004,
+    "health_risk": 0.002,
+    "pollution": 0.005,
+    "water_pollution": 0.003
+   },
+   "selective_hormone_herbicide": {
+    "chemical_control": 0.004,
+    "cultivation_yield": 0.006,
+    "ecological_pressure": 0.002,
+    "labor_demand": -0.002,
+    "labor_efficiency": 0.002,
+    "water_pollution": 0.002
+   },
+   "artificial_cattle_insemination": {
+    "food_output": 0.0052,
+    "nutrition_quality": 0.001
+   },
+   "confinement_broiler_houses": {
+    "disease_exposure": 0.004,
+    "food_output": 0.0065,
+    "nutrition_quality": 0.001,
+    "pollution": 0.002,
+    "water_pollution": 0.003
+   },
+   "food_batch_traceability": {
+    "disease_exposure": -0.001,
+    "health_risk": -0.002,
+    "standardization": 0.002
+   },
+   "self_service_cold_stores": {
+    "food_spoilage": -0.0051,
+    "food_storage": 0.0066,
+    "fuel_demand": 0.002,
+    "nutrition_quality": 0.001,
+    "trade_capacity": 0.002
+   },
+   "centre_pivot_irrigation": {
+    "cultivation_yield": 0.0072,
+    "ecological_pressure": 0.005,
+    "food_output": 0.0039,
+    "fuel_demand": 0.002,
+    "water_access": 0.003
+   },
+   "food_process_hazard_analysis": {
+    "disease_exposure": -0.003,
+    "food_spoilage": -0.0034,
+    "health_risk": -0.004,
+    "standardization": 0.002
+   },
+   "food_water_activity_measurement": {
+    "food_spoilage": -0.0034,
+    "health_risk": -0.001
+   },
+   "food_package_leak_detection": {
+    "food_spoilage": -0.0034,
+    "health_risk": -0.001
+   },
+   "inter_realm_food_standards": {
+    "health_risk": -0.002,
+    "standardization": 0.002,
+    "trade_capacity": 0.004
+   },
+   "drip_irrigation": {
+    "cultivation_yield": 0.0048,
+    "ecological_pressure": -0.001,
+    "water_access": 0.004
+   },
+   "reduced_tillage": {
+    "ecology_recovery": 0.002,
+    "fuel_demand": -0.001,
+    "soil_productivity": 0.0042
+   },
+   "semi_dwarf_grain_package": {
+    "cultivation_yield": 0.0144,
+    "ecological_pressure": 0.004,
+    "food_output": 0.0104,
+    "food_storage": 0.0066,
+    "fuel_demand": 0.002,
+    "soil_productivity": -0.0042,
+    "water_pollution": 0.004
+   },
+   "food_banks": {
+    "cohesion": 0.002,
+    "food_output": 0.0013,
+    "nutrition_quality": 0.001
+   },
+   "aseptic_carton_milk": {
+    "food_spoilage": -0.0051,
+    "food_storage": 0.0088,
+    "neonatal_survival": 0.001
+   },
+   "integrated_pest_management": {
+    "chemical_control": 0.003,
+    "cultivation_yield": 0.0036,
+    "ecological_pressure": -0.002,
+    "pollution": -0.002,
+    "water_pollution": -0.002
+   },
+   "starch_sugar_syrup": {
+    "food_output": 0.0039,
+    "nutrition_quality": -0.004,
+    "trade_capacity": 0.001
+   },
+   "hydroponic_glasshouses": {
+    "food_output": 0.0026,
+    "fuel_demand": 0.002,
+    "nutrition_quality": 0.001,
+    "water_access": 0.002
+   },
+   "famine_early_warning": {
+    "disaster_resilience": 0.003,
+    "food_storage": 0.0088,
+    "state_capacity": 0.002
+   },
+   "nutrition_labels": {
+    "health_risk": -0.001,
+    "nutrition_quality": 0.003
+   },
+   "therapeutic_ready_food": {
+    "neonatal_survival": 0.004,
+    "nutrition_quality": 0.003
+   },
+   "transgenic_crops": {
+    "chemical_control": 0.003,
+    "cohesion": -0.002,
+    "cultivation_yield": 0.0084,
+    "ecological_pressure": -0.001,
+    "institutional_rigidity": 0.002,
+    "labor_efficiency": 0.002
+   },
+   "precision_agriculture": {
+    "cultivation_yield": 0.0048,
+    "fuel_demand": -0.001,
+    "labor_efficiency": 0.003,
+    "water_pollution": -0.002
+   },
+   "stress_tolerant_varieties": {
+    "cultivation_yield": 0.0048,
+    "disaster_resilience": 0.003
+   },
+   "sugar_drink_taxes": {
+    "legitimacy": -0.001,
+    "nutrition_quality": 0.003,
+    "trade_capacity": -0.001
+   },
+   "gene_edited_crops": {
+    "cultivation_yield": 0.0072,
+    "disaster_resilience": 0.002,
+    "knowledge_rate": 0.001,
+    "nutrition_quality": 0.002
+   },
+   "precision_fermented_proteins": {
+    "ecological_pressure": -0.001,
+    "food_output": 0.0026,
+    "fuel_demand": 0.001,
+    "nutrition_quality": 0.001
+   },
+   "cultivated_cell_meat": {
+    "cohesion": -0.001,
+    "ecological_pressure": -0.001,
+    "food_output": 0.0013,
+    "fuel_demand": 0.001
+   },
+   "nitrogen_fixing_seed_microbes": {
+    "cultivation_yield": 0.0036,
+    "soil_productivity": 0.0042,
+    "water_pollution": -0.002
+   },
+   "vertical_indoor_farms": {
+    "food_output": 0.0013,
+    "fuel_demand": 0.003,
+    "nutrition_quality": 0.001,
+    "water_access": 0.002
+   },
+   "climate_shift_crop_planning": {
+    "cultivation_yield": 0.0048,
+    "disaster_resilience": 0.004,
+    "food_storage": 0.0044,
+    "state_capacity": 0.002
+   },
+   "regional_seed_trials": {
+    "adoption_rate": 0.002,
+    "cultivation_yield": 0.0036
+   },
+   "plant_resistance_trait_trials": {
+    "cultivation_yield": 0.006,
+    "disaster_resilience": 0.002
+   },
+   "postharvest_loss_measurement": {
+    "food_spoilage": -0.0068,
+    "food_storage": 0.0044
+   },
+   "soil_moisture_scheduling": {
+    "cultivation_yield": 0.0036,
+    "water_access": 0.003
+   },
+   "marker_assisted_breeding": {
+    "cultivation_yield": 0.0048,
+    "knowledge_rate": 0.002
+   }
   }
  }
 }

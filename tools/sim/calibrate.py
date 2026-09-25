@@ -93,7 +93,9 @@ def metric(row: dict, key: str):
 def simulate_truth(args) -> dict:
     """Worker: surrogate runs for one truth spec (scenario, years) averaged over seeds."""
     scenario, years, seeds, overrides = args
-    p = simlib.params(overrides)
+    # Truth runs are headless probe worlds: no hydrology deposit, one site's
+    # environment (research_3000 keeps these only for calibration runs).
+    p = simlib.params({"headless_world": True, **(overrides or {})})
     results = [simlib.run(scenario, 1000 + s, years, p) for s in range(seeds)]
     return {"rows": [r["rows"] for r in results], "discoveries": [r["discoveries"] for r in results]}
 

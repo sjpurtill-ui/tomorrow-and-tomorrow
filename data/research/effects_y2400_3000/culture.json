@@ -4,9 +4,9 @@
  "items": {
   "panorama_rotundas": {
    "effects": {
-    "adoption_rate": 0.0004,
-    "cohesion": 0.0006,
-    "labor_demand": 0.0014
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0001,
+    "labor_demand": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
    "name": "Panorama Rotundas",
@@ -14,9 +14,10 @@
   },
   "reading_circles": {
    "effects": {
-    "adoption_rate": 0.0007,
-    "cohesion": 0.0006,
-    "knowledge_preservation": 0.0033
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0015,
+    "literacy": 0.0227
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Reading Circles",
@@ -24,10 +25,10 @@
   },
   "gymnastics_grounds": {
    "effects": {
-    "cohesion": 0.0012,
+    "cohesion": 0.0002,
     "health_protection": 0.0006,
     "injury_risk": 0.0006,
-    "warfare_readiness": 0.0006
+    "warfare_readiness": 0.0004
    },
    "art": "res://assets/ui/research/subjects/civic_games-v2.png",
    "name": "Gymnastics Grounds",
@@ -35,9 +36,9 @@
   },
   "historical_novel": {
    "effects": {
-    "cohesion": 0.0018,
-    "knowledge_preservation": 0.0022,
-    "legitimacy": 0.0028
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.001,
+    "legitimacy": 0.0005
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "name": "Historical Novel",
@@ -45,10 +46,10 @@
   },
   "civic_concert_halls": {
    "effects": {
-    "cohesion": 0.0012,
+    "cohesion": 0.0002,
     "construction_rate": 0.0006,
-    "labor_demand": 0.0027,
-    "legitimacy": 0.0014
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
    "name": "Civic Concert Halls",
@@ -56,7 +57,7 @@
   },
   "home_art_songs": {
    "effects": {
-    "cohesion": 0.0012
+    "cohesion": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
    "name": "Home Art Songs",
@@ -64,8 +65,8 @@
   },
   "comparative_philology": {
    "effects": {
-    "knowledge_preservation": 0.0033,
-    "knowledge_rate": 0.0018
+    "knowledge_preservation": 0.0015,
+    "knowledge_rate": 0.0015
    },
    "art": "res://assets/ui/research/discovery-600/bilingual_sign_lists.png",
    "name": "Comparative Philology",
@@ -73,10 +74,10 @@
   },
   "temperance_societies": {
    "effects": {
-    "cohesion": 0.0012,
-    "health_protection": 0.0006,
-    "labor_efficiency": 0.0006,
-    "legitimacy": -0.0014
+    "cohesion": 0.0002,
+    "health_protection": 0.0005,
+    "labor_efficiency": 0.0003,
+    "legitimacy": -0.0004
    },
    "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
    "name": "Temperance Societies",
@@ -85,10 +86,10 @@
   },
   "grand_opera_houses": {
    "effects": {
-    "cohesion": 0.0012,
-    "construction_rate": 0.0006,
-    "labor_demand": 0.0041,
-    "legitimacy": 0.0028
+    "cohesion": 0.0002,
+    "construction_rate": 0.0005,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0005
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Grand Opera Houses",
@@ -96,10 +97,11 @@
   },
   "national_tongue_revival": {
    "effects": {
-    "cohesion": 0.0024,
-    "institutional_rigidity": 0.0006,
-    "knowledge_preservation": 0.0033,
-    "legitimacy": 0.0028
+    "cohesion": 0.0004,
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.002,
+    "legitimacy": 0.0005,
+    "literacy": 0.0059
    },
    "art": "res://assets/ui/research/discovery-600/consonantal_alphabet.png",
    "name": "National Tongue Revival",
@@ -107,10 +109,10 @@
   },
   "god_revival_meetings": {
    "effects": {
-    "cohesion": 0.0024,
+    "cohesion": 0.0004,
     "disease_exposure": 0.0006,
-    "labor_demand": 0.0014,
-    "legitimacy": 0.0028
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/pilgrimage.png",
    "name": "Revival Meetings",
@@ -119,10 +121,11 @@
   "penny_daily_press": {
    "effects": {
     "adoption_rate": 0.0032,
-    "cohesion": 0.0012,
-    "institutional_rigidity": -0.0012,
-    "knowledge_preservation": 0.0043,
-    "legitimacy": -0.0028
+    "cohesion": 0.0002,
+    "institutional_rigidity": -0.0006,
+    "knowledge_preservation": 0.0026,
+    "legitimacy": -0.0008,
+    "literacy": 0.0222
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
    "name": "Penny Daily Press",
@@ -133,8 +136,9 @@
   "serialized_novels": {
    "effects": {
     "adoption_rate": 0.0007,
-    "cohesion": 0.0012,
-    "knowledge_preservation": 0.0011
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.0007,
+    "literacy": 0.0059
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
    "name": "Serialized Novels",
@@ -142,8 +146,8 @@
   },
   "portrait_photo_studios": {
    "effects": {
-    "cohesion": 0.0012,
-    "knowledge_preservation": 0.0022
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.001
    },
    "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
    "name": "Portrait Photo Studios",
@@ -152,9 +156,9 @@
   "political_cartoon_weeklies": {
    "effects": {
     "adoption_rate": 0.0007,
-    "cohesion": 0.0006,
-    "institutional_rigidity": -0.0012,
-    "legitimacy": -0.0028
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0005,
+    "legitimacy": -0.0005
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
    "name": "Political Cartoon Weeklies",
@@ -162,9 +166,9 @@
   },
   "family_winter_feast": {
    "effects": {
-    "cohesion": 0.0024,
+    "cohesion": 0.0004,
     "food_storage": -0.0006,
-    "trade_capacity": 0.0006
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/festival_calendar.png",
    "name": "Family Winter Feast",
@@ -172,9 +176,9 @@
   },
   "realist_novel": {
    "effects": {
-    "cohesion": 0.0012,
-    "knowledge_preservation": 0.0022,
-    "legitimacy": -0.0014
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.001,
+    "legitimacy": -0.0002
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "name": "Realist Novel",
@@ -183,8 +187,8 @@
   "common_ownership_doctrine": {
    "effects": {
     "adoption_rate": 0.0007,
-    "cohesion": -0.0018,
-    "legitimacy": -0.0042
+    "cohesion": -0.0003,
+    "legitimacy": -0.0007
    },
    "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
    "name": "Common Ownership Doctrine",
@@ -193,11 +197,11 @@
   },
   "national_unity_movements": {
    "effects": {
-    "cohesion": 0.0055,
-    "institutional_rigidity": 0.0012,
-    "legitimacy": 0.0042,
+    "cohesion": 0.0009,
+    "institutional_rigidity": 0.0004,
+    "legitimacy": 0.0005,
     "security_efficiency": 0.0006,
-    "warfare_readiness": 0.0024
+    "warfare_readiness": 0.0023
    },
    "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
    "name": "National Unity Movements",
@@ -207,9 +211,10 @@
   },
   "womens_rights_convention": {
    "effects": {
-    "cohesion": 0.0012,
-    "institutional_rigidity": -0.0012,
-    "legitimacy": 0.0014
+    "cohesion": 0.0002,
+    "fertility_transition": 0.0279,
+    "institutional_rigidity": -0.0005,
+    "legitimacy": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
    "name": "Women's Rights Convention",
@@ -217,10 +222,10 @@
   },
   "sacred_text_criticism": {
    "effects": {
-    "cohesion": -0.0006,
-    "knowledge_preservation": 0.0022,
-    "knowledge_rate": 0.0018,
-    "legitimacy": -0.0042
+    "cohesion": -0.0001,
+    "knowledge_preservation": 0.001,
+    "knowledge_rate": 0.0017,
+    "legitimacy": -0.0007
    },
    "art": "res://assets/ui/research/discovery-600/written_lore_tablets.png",
    "name": "Sacred Text Criticism",
@@ -230,10 +235,10 @@
   "great_realms_exhibition": {
    "effects": {
     "adoption_rate": 0.0029,
-    "cohesion": 0.0018,
-    "labor_demand": 0.0041,
-    "legitimacy": 0.0042,
-    "trade_capacity": 0.0024
+    "cohesion": 0.0003,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0005,
+    "trade_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Great Realms Exhibition",
@@ -242,8 +247,8 @@
   },
   "excursion_tourism": {
    "effects": {
-    "cohesion": 0.0012,
-    "trade_capacity": 0.0006
+    "cohesion": 0.0002,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/civic_games-v2.png",
    "name": "Excursion Tourism",
@@ -251,8 +256,8 @@
   },
   "war_photography": {
    "effects": {
-    "knowledge_preservation": 0.0022,
-    "legitimacy": -0.0028,
+    "knowledge_preservation": 0.001,
+    "legitimacy": -0.0005,
     "warfare_readiness": -0.0006
    },
    "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
@@ -262,7 +267,7 @@
   },
   "mountain_climbing_clubs": {
    "effects": {
-    "cohesion": 0.0006,
+    "cohesion": 0.0001,
     "injury_risk": 0.0006,
     "survey_speed": 0.0006
    },
@@ -272,8 +277,9 @@
   },
   "codified_ball_games": {
    "effects": {
-    "cohesion": 0.0024,
-    "injury_risk": 0.0006
+    "cohesion": 0.0004,
+    "injury_risk": 0.0006,
+    "literacy": 0.0046
    },
    "art": "res://assets/ui/research/subjects/civic_games-v1.png",
    "name": "Codified Ball Games",
@@ -282,8 +288,9 @@
   "childrens_books": {
    "effects": {
     "adoption_rate": 0.0007,
-    "cohesion": 0.0006,
-    "knowledge_preservation": 0.0022
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0011,
+    "literacy": 0.0116
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Children's Books",
@@ -291,10 +298,12 @@
   },
   "national_history_lessons": {
    "effects": {
-    "cohesion": 0.003,
-    "institutional_rigidity": 0.0006,
-    "legitimacy": 0.0042,
-    "warfare_readiness": 0.0006
+    "cohesion": 0.0005,
+    "fertility_transition": 0.0098,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0008,
+    "literacy": 0.0046,
+    "warfare_readiness": 0.0002
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "National History Lessons",
@@ -302,9 +311,9 @@
   },
   "layered_excavation": {
    "effects": {
-    "knowledge_preservation": 0.0033,
-    "knowledge_rate": 0.0012,
-    "observation_rate": 0.0006
+    "knowledge_preservation": 0.0017,
+    "knowledge_rate": 0.0008,
+    "observation_rate": 0.0003
    },
    "art": "res://assets/ui/research/paper/relative_stratigraphy.png",
    "name": "Layered Excavation",
@@ -312,8 +321,8 @@
   },
   "open_air_light_painting": {
    "effects": {
-    "cohesion": 0.0006,
-    "legitimacy": -0.0014
+    "cohesion": 0.0001,
+    "legitimacy": -0.0004
    },
    "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
    "name": "Open-air Light Painting",
@@ -321,9 +330,9 @@
   },
   "variety_music_halls": {
    "effects": {
-    "cohesion": 0.0018,
+    "cohesion": 0.0002,
     "disease_exposure": 0.0006,
-    "legitimacy": -0.0014
+    "legitimacy": -0.0004
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Variety Music Halls",
@@ -332,8 +341,8 @@
   "recorded_sound": {
    "effects": {
     "adoption_rate": 0.0007,
-    "cohesion": 0.0018,
-    "knowledge_preservation": 0.0054
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.0022
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Recorded Sound",
@@ -343,8 +352,8 @@
   "brand_advertising": {
    "effects": {
     "adoption_rate": 0.0007,
-    "cohesion": -0.0006,
-    "trade_capacity": 0.003
+    "cohesion": -0.0002,
+    "trade_capacity": 0.0015
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
    "name": "Brand Advertising",
@@ -352,9 +361,9 @@
   },
   "monument_protection_law": {
    "effects": {
-    "cohesion": 0.0006,
-    "knowledge_preservation": 0.0043,
-    "legitimacy": 0.0028
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0018,
+    "legitimacy": 0.0006
    },
    "art": "res://assets/ui/research/discovery-600/memorial_cairn_marking.png",
    "name": "Monument Protection Law",
@@ -363,9 +372,10 @@
   "endowed_town_libraries": {
    "effects": {
     "adoption_rate": 0.0014,
-    "cohesion": 0.0006,
-    "knowledge_preservation": 0.0054,
-    "labor_demand": 0.0014
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0022,
+    "labor_demand": 0.0001,
+    "literacy": 0.049
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Endowed Town Libraries",
@@ -373,9 +383,9 @@
   },
   "professional_sport_leagues": {
    "effects": {
-    "cohesion": 0.0024,
+    "cohesion": 0.0003,
     "injury_risk": 0.0006,
-    "trade_capacity": 0.0006
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/civic_games-v1.png",
    "name": "Professional Sport Leagues",
@@ -384,7 +394,7 @@
   "constructed_common_language": {
    "effects": {
     "adoption_rate": 0.0004,
-    "cohesion": 0.0006
+    "cohesion": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/bilingual_sign_lists.png",
    "name": "Constructed Common Language",
@@ -392,8 +402,8 @@
   },
   "handcraft_revival": {
    "effects": {
-    "cohesion": 0.0012,
-    "craft_output": 0.0006,
+    "cohesion": 0.0002,
+    "craft_output": 0.0004,
     "labor_efficiency": -0.0006
    },
    "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
@@ -402,9 +412,9 @@
   },
   "workers_festival_day": {
    "effects": {
-    "cohesion": 0.0024,
+    "cohesion": 0.0003,
     "labor_efficiency": -0.0006,
-    "legitimacy": -0.0014
+    "legitimacy": -0.0004
    },
    "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
    "name": "Workers' Festival Day",
@@ -413,7 +423,7 @@
   "mystery_fiction": {
    "effects": {
     "adoption_rate": 0.0004,
-    "cohesion": 0.0006
+    "cohesion": 0.0001
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "name": "Mystery Fiction",
@@ -421,8 +431,8 @@
   },
   "open_air_folk_museum": {
    "effects": {
-    "cohesion": 0.0012,
-    "knowledge_preservation": 0.0043
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.0018
    },
    "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
    "name": "Open-air Folk Museum",
@@ -431,10 +441,10 @@
   "moving_pictures": {
    "effects": {
     "adoption_rate": 0.0018,
-    "cohesion": 0.0036,
+    "cohesion": 0.0007,
     "disease_exposure": 0.0006,
-    "knowledge_preservation": 0.0033,
-    "legitimacy": 0.0028
+    "knowledge_preservation": 0.0032,
+    "legitimacy": 0.0006
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Moving Pictures",
@@ -444,8 +454,8 @@
   },
   "revived_realm_games": {
    "effects": {
-    "cohesion": 0.0024,
-    "legitimacy": 0.0042,
+    "cohesion": 0.0005,
+    "legitimacy": 0.0009,
     "security_efficiency": 0.0006
    },
    "art": "res://assets/ui/research/subjects/civic_games-v2.png",
@@ -454,8 +464,8 @@
   },
   "peace_congresses": {
    "effects": {
-    "cohesion": 0.0012,
-    "legitimacy": 0.0014,
+    "cohesion": 0.0002,
+    "legitimacy": 0.0003,
     "warfare_readiness": -0.0006
    },
    "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
@@ -465,8 +475,9 @@
   "million_reader_dailies": {
    "effects": {
     "adoption_rate": 0.0021,
-    "cohesion": 0.0018,
-    "legitimacy": -0.0028
+    "cohesion": 0.0004,
+    "legitimacy": -0.0009,
+    "literacy": 0.049
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
    "name": "Million-reader Dailies",
@@ -475,8 +486,8 @@
   },
   "great_merit_prizes": {
    "effects": {
-    "knowledge_rate": 0.0018,
-    "legitimacy": 0.0028
+    "knowledge_rate": 0.0012,
+    "legitimacy": 0.0006
    },
    "art": "res://assets/ui/research/subjects/professional_service-v1.png",
    "name": "Great Merit Prizes",
@@ -484,7 +495,7 @@
   },
   "abstract_painting": {
    "effects": {
-    "cohesion": -0.0006,
+    "cohesion": -0.0004,
     "knowledge_preservation": 0.0011
    },
    "art": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
@@ -493,9 +504,9 @@
   },
   "youth_scouting": {
    "effects": {
-    "cohesion": 0.0024,
+    "cohesion": 0.0005,
     "survey_speed": 0.0006,
-    "warfare_readiness": 0.0006
+    "warfare_readiness": 0.0004
    },
    "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
    "name": "Youth Scouting",
@@ -503,8 +514,8 @@
   },
   "syncopated_dance_music": {
    "effects": {
-    "cohesion": 0.0018,
-    "legitimacy": -0.0014
+    "cohesion": 0.0004,
+    "legitimacy": -0.0004
    },
    "art": "res://assets/ui/research/discovery-600/bone_flutes_drums.png",
    "name": "Syncopated Dance Music",
@@ -513,7 +524,8 @@
   "newspaper_puzzles": {
    "effects": {
     "adoption_rate": 0.0004,
-    "cohesion": 0.0006
+    "cohesion": 0.0001,
+    "literacy": 0.0147
    },
    "art": "res://assets/ui/research/discovery-600/puzzle_riddle_contests.png",
    "name": "Newspaper Puzzles",
@@ -521,10 +533,10 @@
   },
   "war_newsreels_posters": {
    "effects": {
-    "cohesion": 0.0036,
+    "cohesion": 0.0007,
     "knowledge_rate": -0.0006,
-    "legitimacy": 0.0042,
-    "warfare_readiness": 0.003
+    "legitimacy": 0.0007,
+    "warfare_readiness": 0.0012
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "War Newsreels and Posters",
@@ -544,9 +556,9 @@
   "radio_broadcasting": {
    "effects": {
     "adoption_rate": 0.0032,
-    "cohesion": 0.0042,
+    "cohesion": 0.0008,
     "knowledge_preservation": 0.0033,
-    "legitimacy": 0.0056
+    "legitimacy": 0.0009
    },
    "art": "res://assets/ui/research/paper/radio_telegraphy.png",
    "name": "Radio Broadcasting",
@@ -556,9 +568,9 @@
   },
   "unknown_warrior_remembrance": {
    "effects": {
-    "cohesion": 0.003,
-    "legitimacy": 0.0056,
-    "warfare_readiness": 0.0006
+    "cohesion": 0.0006,
+    "legitimacy": 0.0009,
+    "warfare_readiness": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/memorial_cairn_marking.png",
    "name": "Unknown Warrior Remembrance",
@@ -566,7 +578,7 @@
   },
   "inner_voice_novel": {
    "effects": {
-    "cohesion": -0.0006,
+    "cohesion": -0.0001,
     "knowledge_preservation": 0.0011
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
@@ -576,10 +588,10 @@
   "public_broadcasting_charter": {
    "effects": {
     "adoption_rate": 0.0007,
-    "cohesion": 0.0024,
+    "cohesion": 0.0005,
     "institutional_rigidity": -0.0006,
     "knowledge_preservation": 0.0033,
-    "legitimacy": 0.0042
+    "legitimacy": 0.0007
    },
    "art": "res://assets/ui/research/paper/radio_telegraphy.png",
    "name": "Public Broadcasting Charter",
@@ -588,7 +600,7 @@
   "film_studio_system": {
    "effects": {
     "adoption_rate": 0.0007,
-    "cohesion": 0.0018,
+    "cohesion": 0.0003,
     "trade_capacity": 0.0018
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
@@ -598,7 +610,7 @@
   "sound_films": {
    "effects": {
     "adoption_rate": 0.0011,
-    "cohesion": 0.0024
+    "cohesion": 0.0005
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Sound Films",
@@ -606,8 +618,8 @@
   },
   "world_ball_cup": {
    "effects": {
-    "cohesion": 0.0024,
-    "legitimacy": 0.0028
+    "cohesion": 0.0005,
+    "legitimacy": 0.0004
    },
    "art": "res://assets/ui/research/subjects/civic_games-v1.png",
    "name": "World Ball Cup",
@@ -615,11 +627,11 @@
   },
   "leader_mass_rallies": {
    "effects": {
-    "cohesion": 0.0024,
-    "institutional_rigidity": 0.0018,
+    "cohesion": 0.0003,
+    "institutional_rigidity": 0.0003,
     "knowledge_rate": -0.0006,
-    "legitimacy": 0.0056,
-    "warfare_readiness": 0.0018
+    "legitimacy": 0.0011,
+    "warfare_readiness": 0.0009
    },
    "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
    "name": "Leader Mass Rallies",
@@ -629,7 +641,8 @@
   "mass_paperbacks": {
    "effects": {
     "adoption_rate": 0.0014,
-    "knowledge_preservation": 0.0033
+    "knowledge_preservation": 0.0033,
+    "literacy": 0.0021
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Mass Paperbacks",
@@ -638,7 +651,7 @@
   "picture_story_magazines": {
    "effects": {
     "adoption_rate": 0.0004,
-    "cohesion": 0.0012
+    "cohesion": 0.0002
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
    "name": "Picture-story Magazines",
@@ -647,7 +660,7 @@
   "photo_news_magazines": {
    "effects": {
     "adoption_rate": 0.0011,
-    "cohesion": 0.0012,
+    "cohesion": 0.0002,
     "knowledge_preservation": 0.0022
    },
    "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
@@ -657,9 +670,9 @@
   "television_broadcasting": {
    "effects": {
     "adoption_rate": 0.0032,
-    "cohesion": 0.0042,
+    "cohesion": 0.0006,
     "fatigue": -0.0006,
-    "legitimacy": 0.0056
+    "legitimacy": 0.0011
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Television Broadcasting",
@@ -669,7 +682,7 @@
   },
   "animated_features": {
    "effects": {
-    "cohesion": 0.0012,
+    "cohesion": 0.0002,
     "trade_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
@@ -678,7 +691,7 @@
   },
   "long_play_records": {
    "effects": {
-    "cohesion": 0.0012,
+    "cohesion": 0.0002,
     "knowledge_preservation": 0.0022
    },
    "art": "res://assets/ui/research/culture-v1.png",
@@ -687,8 +700,8 @@
   },
   "broadcast_rites": {
    "effects": {
-    "cohesion": 0.0024,
-    "legitimacy": 0.0056
+    "cohesion": 0.0005,
+    "legitimacy": 0.0009
    },
    "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
    "name": "Broadcast Rites",
@@ -696,8 +709,8 @@
   },
   "televised_state_rites": {
    "effects": {
-    "cohesion": 0.0024,
-    "legitimacy": 0.0069
+    "cohesion": 0.0005,
+    "legitimacy": 0.0012
    },
    "art": "res://assets/ui/research/discovery-600/royal_ancestor_offerings.png",
    "name": "Televised State Rites",
@@ -705,9 +718,9 @@
   },
   "electric_youth_music": {
    "effects": {
-    "cohesion": 0.0024,
+    "cohesion": 0.0005,
     "institutional_rigidity": -0.0012,
-    "legitimacy": -0.0028
+    "legitimacy": -0.0005
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Electric Youth Music",
@@ -718,7 +731,7 @@
   "mass_television_age": {
    "effects": {
     "adoption_rate": 0.0021,
-    "cohesion": 0.003,
+    "cohesion": 0.0006,
     "fatigue": -0.0006,
     "labor_efficiency": -0.0006
    },
@@ -728,9 +741,9 @@
   },
   "charter_flight_holidays": {
    "effects": {
-    "cohesion": 0.0018,
+    "cohesion": 0.0004,
     "pollution": 0.0006,
-    "trade_capacity": 0.0012
+    "trade_capacity": 0.0008
    },
    "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
    "name": "Charter Flight Holidays",
@@ -738,8 +751,8 @@
   },
   "mass_image_art": {
    "effects": {
-    "cohesion": 0.0006,
-    "knowledge_preservation": 0.0011
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0009
    },
    "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
    "name": "Mass Image Art",
@@ -748,8 +761,8 @@
   "televised_debates": {
    "effects": {
     "adoption_rate": 0.0007,
-    "cohesion": -0.0006,
-    "legitimacy": 0.0056
+    "cohesion": -0.0001,
+    "legitimacy": 0.0009
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Televised Debates",
@@ -757,9 +770,9 @@
   },
   "nonviolent_rights_movements": {
    "effects": {
-    "cohesion": 0.0042,
+    "cohesion": 0.0008,
     "institutional_rigidity": -0.0024,
-    "legitimacy": 0.0083
+    "legitimacy": 0.0014
    },
    "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
    "name": "Nonviolent Rights Movements",
@@ -770,7 +783,7 @@
   "worldwide_live_broadcast": {
    "effects": {
     "adoption_rate": 0.0007,
-    "cohesion": 0.0012
+    "cohesion": 0.0002
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Worldwide Live Broadcast",
@@ -779,9 +792,9 @@
   "youth_counterculture": {
    "effects": {
     "adoption_rate": 0.0007,
-    "cohesion": -0.0024,
+    "cohesion": -0.0003,
     "institutional_rigidity": -0.0024,
-    "legitimacy": -0.0042
+    "legitimacy": -0.0008
    },
    "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
    "name": "Youth Counterculture",
@@ -790,10 +803,11 @@
   },
   "womens_liberation_movement": {
    "effects": {
-    "cohesion": 0.0018,
+    "cohesion": 0.0006,
+    "fertility_transition": 0.021,
     "institutional_rigidity": -0.0018,
-    "labor_efficiency": 0.0006,
-    "legitimacy": 0.0028
+    "labor_efficiency": 0.0004,
+    "legitimacy": 0.0008
    },
    "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
    "name": "Women's Liberation Movement",
@@ -801,9 +815,9 @@
   },
   "many_cultures_policy": {
    "effects": {
-    "cohesion": 0.0012,
+    "cohesion": 0.0004,
     "institutional_rigidity": -0.0006,
-    "legitimacy": 0.0028
+    "legitimacy": 0.0008
    },
    "art": "res://assets/ui/research/discovery-600/guest_friendship.png",
    "name": "Many Cultures Policy",
@@ -811,9 +825,9 @@
   },
   "electronic_games": {
    "effects": {
-    "cohesion": 0.0012,
+    "cohesion": 0.0004,
     "fatigue": 0.0006,
-    "trade_capacity": 0.0006
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Electronic Games",
@@ -821,8 +835,8 @@
   },
   "world_heritage_list": {
    "effects": {
-    "knowledge_preservation": 0.0043,
-    "legitimacy": 0.0028
+    "knowledge_preservation": 0.0024,
+    "legitimacy": 0.0008
    },
    "art": "res://assets/ui/research/discovery-600/memorial_cairn_marking.png",
    "name": "World Heritage List",
@@ -830,8 +844,8 @@
   },
   "home_video_recording": {
    "effects": {
-    "cohesion": 0.0006,
-    "knowledge_preservation": 0.0022
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.0012
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Home Video Recording",
@@ -840,7 +854,7 @@
   "portable_music_players": {
    "effects": {
     "adoption_rate": 0.0004,
-    "cohesion": 0.0006
+    "cohesion": 0.0002
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Portable Music Players",
@@ -848,8 +862,8 @@
   },
   "spoken_rhythm_music": {
    "effects": {
-    "cohesion": 0.0018,
-    "legitimacy": -0.0014
+    "cohesion": 0.0006,
+    "legitimacy": -0.0005
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Spoken-rhythm Music",
@@ -858,8 +872,8 @@
   "continuous_news_channels": {
    "effects": {
     "adoption_rate": 0.0014,
-    "cohesion": -0.0006,
-    "legitimacy": -0.0014
+    "cohesion": -0.0001,
+    "legitimacy": -0.0005
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Continuous News Channels",
@@ -867,8 +881,8 @@
   },
   "digital_music_discs": {
    "effects": {
-    "cohesion": 0.0006,
-    "knowledge_preservation": 0.0022
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.0012
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Digital Music Discs",
@@ -876,8 +890,8 @@
   },
   "benefit_broadcast_concerts": {
    "effects": {
-    "cohesion": 0.0018,
-    "legitimacy": 0.0014,
+    "cohesion": 0.0006,
+    "legitimacy": 0.0004,
     "nutrition_quality": 0.0006
    },
    "art": "res://assets/ui/research/culture-v1.png",
@@ -887,8 +901,8 @@
   "online_forums": {
    "effects": {
     "adoption_rate": 0.0011,
-    "cohesion": 0.0006,
-    "knowledge_preservation": 0.0022
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0009
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Online Forums",
@@ -897,8 +911,8 @@
   "file_sharing_networks": {
    "effects": {
     "adoption_rate": 0.0007,
-    "knowledge_preservation": 0.0022,
-    "legitimacy": -0.0014,
+    "knowledge_preservation": 0.0009,
+    "legitimacy": -0.0003,
     "trade_capacity": -0.0006
    },
    "art": "res://assets/ui/research/culture-v1.png",
@@ -908,9 +922,9 @@
   "online_social_networks": {
    "effects": {
     "adoption_rate": 0.0029,
-    "cohesion": 0.0024,
+    "cohesion": 0.0012,
     "fatigue": 0.0012,
-    "legitimacy": -0.0042
+    "legitimacy": -0.0008
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Online Social Networks",
@@ -921,7 +935,7 @@
   "user_video_sharing": {
    "effects": {
     "adoption_rate": 0.0011,
-    "cohesion": 0.0006
+    "cohesion": 0.0003
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "User Video Sharing",
@@ -930,7 +944,7 @@
   "streaming_media": {
    "effects": {
     "adoption_rate": 0.0007,
-    "cohesion": 0.0018
+    "cohesion": 0.0009
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Streaming Media",
@@ -938,9 +952,9 @@
   },
   "networked_protest_movements": {
    "effects": {
-    "cohesion": 0.0012,
+    "cohesion": 0.0008,
     "institutional_rigidity": -0.0018,
-    "legitimacy": -0.0042
+    "legitimacy": -0.0007
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Networked Protest Movements",
@@ -949,9 +963,9 @@
   "algorithmic_feeds": {
    "effects": {
     "adoption_rate": 0.0011,
-    "cohesion": -0.0024,
+    "cohesion": -0.0004,
     "fatigue": 0.0012,
-    "legitimacy": -0.0028
+    "legitimacy": -0.0005
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Algorithmic Feeds",
@@ -961,8 +975,8 @@
   "networked_disinformation": {
    "effects": {
     "adoption_rate": -0.0007,
-    "cohesion": -0.003,
-    "legitimacy": -0.0083
+    "cohesion": -0.0005,
+    "legitimacy": -0.0015
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Networked Disinformation",
@@ -971,7 +985,7 @@
   },
   "short_viral_video": {
    "effects": {
-    "cohesion": 0.0006,
+    "cohesion": 0.0004,
     "fatigue": 0.0006
    },
    "art": "res://assets/ui/research/culture-v1.png",
@@ -980,8 +994,8 @@
   },
   "online_influencers": {
    "effects": {
-    "cohesion": -0.0006,
-    "legitimacy": -0.0014,
+    "cohesion": -0.0001,
+    "legitimacy": -0.0002,
     "trade_capacity": 0.0012
    },
    "art": "res://assets/ui/research/culture-v1.png",
@@ -991,9 +1005,10 @@
   "remote_video_gatherings": {
    "effects": {
     "adoption_rate": 0.0007,
-    "cohesion": 0.0012,
+    "cohesion": 0.0008,
     "disease_exposure": -0.0012,
-    "task_coordination": 0.0024
+    "literacy": 0.0049,
+    "task_coordination": 0.0014
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Remote Video Gatherings",
@@ -1002,8 +1017,8 @@
   "generated_media": {
    "effects": {
     "adoption_rate": 0.0014,
-    "cohesion": -0.0012,
-    "legitimacy": -0.0042
+    "cohesion": -0.0002,
+    "legitimacy": -0.0007
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Generated Media",
@@ -1014,7 +1029,7 @@
   "media_provenance_marks": {
    "effects": {
     "knowledge_preservation": 0.0022,
-    "legitimacy": 0.0042
+    "legitimacy": 0.0022
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Media Provenance Marks",
@@ -1023,11 +1038,509 @@
   "shared_virtual_venues": {
    "effects": {
     "adoption_rate": 0.0004,
-    "cohesion": 0.0012
+    "cohesion": 0.0008
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Shared Virtual Venues",
    "observation": "People gather in shared virtual venues for concerts and meetings."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "panorama_rotundas": {
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0006,
+    "labor_demand": 0.0014
+   },
+   "reading_circles": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0033
+   },
+   "gymnastics_grounds": {
+    "cohesion": 0.0012,
+    "health_protection": 0.0006,
+    "injury_risk": 0.0006,
+    "warfare_readiness": 0.0006
+   },
+   "historical_novel": {
+    "cohesion": 0.0018,
+    "knowledge_preservation": 0.0022,
+    "legitimacy": 0.0028
+   },
+   "civic_concert_halls": {
+    "cohesion": 0.0012,
+    "construction_rate": 0.0006,
+    "labor_demand": 0.0027,
+    "legitimacy": 0.0014
+   },
+   "home_art_songs": {
+    "cohesion": 0.0012
+   },
+   "comparative_philology": {
+    "knowledge_preservation": 0.0033,
+    "knowledge_rate": 0.0018
+   },
+   "temperance_societies": {
+    "cohesion": 0.0012,
+    "health_protection": 0.0006,
+    "labor_efficiency": 0.0006,
+    "legitimacy": -0.0014
+   },
+   "grand_opera_houses": {
+    "cohesion": 0.0012,
+    "construction_rate": 0.0006,
+    "labor_demand": 0.0041,
+    "legitimacy": 0.0028
+   },
+   "national_tongue_revival": {
+    "cohesion": 0.0024,
+    "institutional_rigidity": 0.0006,
+    "knowledge_preservation": 0.0033,
+    "legitimacy": 0.0028
+   },
+   "god_revival_meetings": {
+    "cohesion": 0.0024,
+    "disease_exposure": 0.0006,
+    "labor_demand": 0.0014,
+    "legitimacy": 0.0028
+   },
+   "penny_daily_press": {
+    "adoption_rate": 0.0032,
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0012,
+    "knowledge_preservation": 0.0043,
+    "legitimacy": -0.0028
+   },
+   "serialized_novels": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0011
+   },
+   "portrait_photo_studios": {
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0022
+   },
+   "political_cartoon_weeklies": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0006,
+    "institutional_rigidity": -0.0012,
+    "legitimacy": -0.0028
+   },
+   "family_winter_feast": {
+    "cohesion": 0.0024,
+    "food_storage": -0.0006,
+    "trade_capacity": 0.0006
+   },
+   "realist_novel": {
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0022,
+    "legitimacy": -0.0014
+   },
+   "common_ownership_doctrine": {
+    "adoption_rate": 0.0007,
+    "cohesion": -0.0018,
+    "legitimacy": -0.0042
+   },
+   "national_unity_movements": {
+    "cohesion": 0.0055,
+    "institutional_rigidity": 0.0012,
+    "legitimacy": 0.0042,
+    "security_efficiency": 0.0006,
+    "warfare_readiness": 0.0024
+   },
+   "womens_rights_convention": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0012,
+    "legitimacy": 0.0014
+   },
+   "sacred_text_criticism": {
+    "cohesion": -0.0006,
+    "knowledge_preservation": 0.0022,
+    "knowledge_rate": 0.0018,
+    "legitimacy": -0.0042
+   },
+   "great_realms_exhibition": {
+    "adoption_rate": 0.0029,
+    "cohesion": 0.0018,
+    "labor_demand": 0.0041,
+    "legitimacy": 0.0042,
+    "trade_capacity": 0.0024
+   },
+   "excursion_tourism": {
+    "cohesion": 0.0012,
+    "trade_capacity": 0.0006
+   },
+   "war_photography": {
+    "knowledge_preservation": 0.0022,
+    "legitimacy": -0.0028,
+    "warfare_readiness": -0.0006
+   },
+   "mountain_climbing_clubs": {
+    "cohesion": 0.0006,
+    "injury_risk": 0.0006,
+    "survey_speed": 0.0006
+   },
+   "codified_ball_games": {
+    "cohesion": 0.0024,
+    "injury_risk": 0.0006
+   },
+   "childrens_books": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0022
+   },
+   "national_history_lessons": {
+    "cohesion": 0.003,
+    "institutional_rigidity": 0.0006,
+    "legitimacy": 0.0042,
+    "warfare_readiness": 0.0006
+   },
+   "layered_excavation": {
+    "knowledge_preservation": 0.0033,
+    "knowledge_rate": 0.0012,
+    "observation_rate": 0.0006
+   },
+   "open_air_light_painting": {
+    "cohesion": 0.0006,
+    "legitimacy": -0.0014
+   },
+   "variety_music_halls": {
+    "cohesion": 0.0018,
+    "disease_exposure": 0.0006,
+    "legitimacy": -0.0014
+   },
+   "recorded_sound": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0018,
+    "knowledge_preservation": 0.0054
+   },
+   "brand_advertising": {
+    "adoption_rate": 0.0007,
+    "cohesion": -0.0006,
+    "trade_capacity": 0.003
+   },
+   "monument_protection_law": {
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0043,
+    "legitimacy": 0.0028
+   },
+   "endowed_town_libraries": {
+    "adoption_rate": 0.0014,
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0054,
+    "labor_demand": 0.0014
+   },
+   "professional_sport_leagues": {
+    "cohesion": 0.0024,
+    "injury_risk": 0.0006,
+    "trade_capacity": 0.0006
+   },
+   "constructed_common_language": {
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0006
+   },
+   "handcraft_revival": {
+    "cohesion": 0.0012,
+    "craft_output": 0.0006,
+    "labor_efficiency": -0.0006
+   },
+   "workers_festival_day": {
+    "cohesion": 0.0024,
+    "labor_efficiency": -0.0006,
+    "legitimacy": -0.0014
+   },
+   "mystery_fiction": {
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0006
+   },
+   "open_air_folk_museum": {
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0043
+   },
+   "moving_pictures": {
+    "adoption_rate": 0.0018,
+    "cohesion": 0.0036,
+    "disease_exposure": 0.0006,
+    "knowledge_preservation": 0.0033,
+    "legitimacy": 0.0028
+   },
+   "revived_realm_games": {
+    "cohesion": 0.0024,
+    "legitimacy": 0.0042,
+    "security_efficiency": 0.0006
+   },
+   "peace_congresses": {
+    "cohesion": 0.0012,
+    "legitimacy": 0.0014,
+    "warfare_readiness": -0.0006
+   },
+   "million_reader_dailies": {
+    "adoption_rate": 0.0021,
+    "cohesion": 0.0018,
+    "legitimacy": -0.0028
+   },
+   "great_merit_prizes": {
+    "knowledge_rate": 0.0018,
+    "legitimacy": 0.0028
+   },
+   "abstract_painting": {
+    "cohesion": -0.0006,
+    "knowledge_preservation": 0.0011
+   },
+   "youth_scouting": {
+    "cohesion": 0.0024,
+    "survey_speed": 0.0006,
+    "warfare_readiness": 0.0006
+   },
+   "syncopated_dance_music": {
+    "cohesion": 0.0018,
+    "legitimacy": -0.0014
+   },
+   "newspaper_puzzles": {
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0006
+   },
+   "war_newsreels_posters": {
+    "cohesion": 0.0036,
+    "knowledge_rate": -0.0006,
+    "legitimacy": 0.0042,
+    "warfare_readiness": 0.003
+   },
+   "radio_broadcasting": {
+    "adoption_rate": 0.0032,
+    "cohesion": 0.0042,
+    "knowledge_preservation": 0.0033,
+    "legitimacy": 0.0056
+   },
+   "unknown_warrior_remembrance": {
+    "cohesion": 0.003,
+    "legitimacy": 0.0056,
+    "warfare_readiness": 0.0006
+   },
+   "inner_voice_novel": {
+    "cohesion": -0.0006,
+    "knowledge_preservation": 0.0011
+   },
+   "public_broadcasting_charter": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0024,
+    "institutional_rigidity": -0.0006,
+    "knowledge_preservation": 0.0033,
+    "legitimacy": 0.0042
+   },
+   "film_studio_system": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0018,
+    "trade_capacity": 0.0018
+   },
+   "sound_films": {
+    "adoption_rate": 0.0011,
+    "cohesion": 0.0024
+   },
+   "world_ball_cup": {
+    "cohesion": 0.0024,
+    "legitimacy": 0.0028
+   },
+   "leader_mass_rallies": {
+    "cohesion": 0.0024,
+    "institutional_rigidity": 0.0018,
+    "knowledge_rate": -0.0006,
+    "legitimacy": 0.0056,
+    "warfare_readiness": 0.0018
+   },
+   "mass_paperbacks": {
+    "adoption_rate": 0.0014,
+    "knowledge_preservation": 0.0033
+   },
+   "picture_story_magazines": {
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0012
+   },
+   "photo_news_magazines": {
+    "adoption_rate": 0.0011,
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0022
+   },
+   "television_broadcasting": {
+    "adoption_rate": 0.0032,
+    "cohesion": 0.0042,
+    "fatigue": -0.0006,
+    "legitimacy": 0.0056
+   },
+   "animated_features": {
+    "cohesion": 0.0012,
+    "trade_capacity": 0.0006
+   },
+   "long_play_records": {
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0022
+   },
+   "broadcast_rites": {
+    "cohesion": 0.0024,
+    "legitimacy": 0.0056
+   },
+   "televised_state_rites": {
+    "cohesion": 0.0024,
+    "legitimacy": 0.0069
+   },
+   "electric_youth_music": {
+    "cohesion": 0.0024,
+    "institutional_rigidity": -0.0012,
+    "legitimacy": -0.0028
+   },
+   "mass_television_age": {
+    "adoption_rate": 0.0021,
+    "cohesion": 0.003,
+    "fatigue": -0.0006,
+    "labor_efficiency": -0.0006
+   },
+   "charter_flight_holidays": {
+    "cohesion": 0.0018,
+    "pollution": 0.0006,
+    "trade_capacity": 0.0012
+   },
+   "mass_image_art": {
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0011
+   },
+   "televised_debates": {
+    "adoption_rate": 0.0007,
+    "cohesion": -0.0006,
+    "legitimacy": 0.0056
+   },
+   "nonviolent_rights_movements": {
+    "cohesion": 0.0042,
+    "institutional_rigidity": -0.0024,
+    "legitimacy": 0.0083
+   },
+   "worldwide_live_broadcast": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0012
+   },
+   "youth_counterculture": {
+    "adoption_rate": 0.0007,
+    "cohesion": -0.0024,
+    "institutional_rigidity": -0.0024,
+    "legitimacy": -0.0042
+   },
+   "womens_liberation_movement": {
+    "cohesion": 0.0018,
+    "institutional_rigidity": -0.0018,
+    "labor_efficiency": 0.0006,
+    "legitimacy": 0.0028
+   },
+   "many_cultures_policy": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0006,
+    "legitimacy": 0.0028
+   },
+   "electronic_games": {
+    "cohesion": 0.0012,
+    "fatigue": 0.0006,
+    "trade_capacity": 0.0006
+   },
+   "world_heritage_list": {
+    "knowledge_preservation": 0.0043,
+    "legitimacy": 0.0028
+   },
+   "home_video_recording": {
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0022
+   },
+   "portable_music_players": {
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0006
+   },
+   "spoken_rhythm_music": {
+    "cohesion": 0.0018,
+    "legitimacy": -0.0014
+   },
+   "continuous_news_channels": {
+    "adoption_rate": 0.0014,
+    "cohesion": -0.0006,
+    "legitimacy": -0.0014
+   },
+   "digital_music_discs": {
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0022
+   },
+   "benefit_broadcast_concerts": {
+    "cohesion": 0.0018,
+    "legitimacy": 0.0014,
+    "nutrition_quality": 0.0006
+   },
+   "online_forums": {
+    "adoption_rate": 0.0011,
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0022
+   },
+   "file_sharing_networks": {
+    "adoption_rate": 0.0007,
+    "knowledge_preservation": 0.0022,
+    "legitimacy": -0.0014,
+    "trade_capacity": -0.0006
+   },
+   "online_social_networks": {
+    "adoption_rate": 0.0029,
+    "cohesion": 0.0024,
+    "fatigue": 0.0012,
+    "legitimacy": -0.0042
+   },
+   "user_video_sharing": {
+    "adoption_rate": 0.0011,
+    "cohesion": 0.0006
+   },
+   "streaming_media": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0018
+   },
+   "networked_protest_movements": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0018,
+    "legitimacy": -0.0042
+   },
+   "algorithmic_feeds": {
+    "adoption_rate": 0.0011,
+    "cohesion": -0.0024,
+    "fatigue": 0.0012,
+    "legitimacy": -0.0028
+   },
+   "networked_disinformation": {
+    "adoption_rate": -0.0007,
+    "cohesion": -0.003,
+    "legitimacy": -0.0083
+   },
+   "short_viral_video": {
+    "cohesion": 0.0006,
+    "fatigue": 0.0006
+   },
+   "online_influencers": {
+    "cohesion": -0.0006,
+    "legitimacy": -0.0014,
+    "trade_capacity": 0.0012
+   },
+   "remote_video_gatherings": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0012,
+    "disease_exposure": -0.0012,
+    "task_coordination": 0.0024
+   },
+   "generated_media": {
+    "adoption_rate": 0.0014,
+    "cohesion": -0.0012,
+    "legitimacy": -0.0042
+   },
+   "media_provenance_marks": {
+    "knowledge_preservation": 0.0022,
+    "legitimacy": 0.0042
+   },
+   "shared_virtual_venues": {
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0012
+   }
   }
  }
 }

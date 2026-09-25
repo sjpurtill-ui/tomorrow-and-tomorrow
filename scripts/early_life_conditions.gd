@@ -100,7 +100,9 @@ const BURDEN_OVERLAP_FLOOR:=0.35
 ## growth settles near the capacity and follows it as methods, fields and
 ## daughter settlements extend it (booms and busts come from harvests).
 ## Capacity per settlement by game year (people, before improvements).
-const TERRITORY_CAPACITY:Array=[[0.0,320.0],[100.0,420.0],[200.0,650.0],[300.0,880.0],[600.0,2600.0],[1500.0,9000.0],[2800.0,60000.0]]
+## research_3000: extended to 3000 (industrial farming, rail and steam shipping
+## let each territory feed far more people after 2400).
+const TERRITORY_CAPACITY:Array=[[0.0,320.0],[100.0,420.0],[200.0,650.0],[300.0,880.0],[600.0,2600.0],[1200.0,5200.0],[1800.0,8000.0],[2400.0,12000.0],[2600.0,17000.0],[2800.0,24000.0],[3000.0,30000.0]]
 const CROWDING_ONSET:=0.6
 const CROWDING_MORTALITY:=0.3
 const CROWDING_CONCEPTION:=1.2
@@ -112,6 +114,55 @@ const SPARE_LAND_CONCEPTION:=2.0
 ## Crowd diseases need numbers: a remnant band sheds part of the era's excess
 ## mortality burden (about -18% at 37 people, -30% for a handful).
 const SPARE_LAND_HEALTH:=1.0
+
+## --- research_3000 modern transition (Phase 4 balance) ---
+## The baseline life table is the floor of pre-modern survival; research only
+## lifted the pre-modern burden above it. Modern medicine and public health
+## (vaccination, clean piped water and sewers, antisepsis, germ theory,
+## antitoxins and antibiotics, maternal and infant clinics) lower the table
+## itself: the era-capped modern_survival total removes that share of every
+## band's hazard, weighted by band (children gain most, the old least).
+## Benchmarks: docs/research/BENCHMARKS_3000.md (e0 about 77, IMR about 8 by 3000).
+## Mortality falls first: the first MODERN_BURDEN_LIFT of modern_survival clears
+## the pre-modern burden (sanitation and vaccination end the endemic killers);
+## past MODERN_TABLE_ONSET it also lowers the baseline table itself, reaching
+## MODERN_TABLE_DEPTH at MODERN_TABLE_FULL (a society near the era's best).
+const MODERN_SURVIVAL_WEIGHT:={"under5":1.0,"child":1.0,"adult":0.9,"elder":0.75,"neonatal":0.85,"maternal":1.0}
+const MODERN_BURDEN_LIFT:=0.22
+const MODERN_TABLE_ONSET:=0.15
+const MODERN_TABLE_FULL:=0.55
+const MODERN_TABLE_DEPTH:=0.92
+const MODERN_SURVIVAL_LIMIT:=0.85
+## The fertility transition: couples choose fewer births once children go to
+## school instead of work, old age rests on pensions, women work and vote, and
+## contraception exists (the era-capped fertility_transition total from
+## culture, labor, institutions and demography), and as towns and schooling
+## spread (urban share past URBAN_ONSET, literacy past LITERACY_ONSET). The
+## share of conceptions not sought applies after every other fertility factor,
+## beyond conception_support's clamp. Benchmarks: TFR about 1.7 by 3000.
+const TRANSITION_URBAN:=0.30
+const URBAN_ONSET:=0.25
+const TRANSITION_SCHOOLING:=0.25
+const LITERACY_ONSET:=0.55
+const TRANSITION_MAX:=0.80
+
+## Share of conceptions a society's couples choose not to have (0..TRANSITION_MAX).
+static func fertility_transition(state:Node,discovery:Node)->float:
+	var urban:=preload("res://scripts/civilization_indicators.gd").urban_share(state)
+	var literacy:=clampf(discovery.effect("literacy"),0.0,1.0)
+	return clampf(discovery.effect("fertility_transition")+TRANSITION_URBAN*maxf(0.0,urban-URBAN_ONSET)+TRANSITION_SCHOOLING*maxf(0.0,literacy-LITERACY_ONSET),0.0,TRANSITION_MAX)
+
+## Per-band multipliers on the baseline hazard from modern medicine (1 = none).
+static func modern_factors(discovery:Node)->Dictionary:
+	var survival:=clampf(discovery.effect("modern_survival"),0.0,MODERN_SURVIVAL_LIMIT)
+	var depth:=clampf((survival-MODERN_TABLE_ONSET)/(MODERN_TABLE_FULL-MODERN_TABLE_ONSET),0.0,1.0)*MODERN_TABLE_DEPTH
+	var result:Dictionary={}
+	for band:String in MODERN_SURVIVAL_WEIGHT:result[band]=1.0-depth*float(MODERN_SURVIVAL_WEIGHT[band])
+	return result
+
+## Share (0..1) of the pre-modern burden that modern medicine has cleared.
+static func modern_burden_lift(discovery:Node)->float:
+	return clampf(discovery.effect("modern_survival")/MODERN_BURDEN_LIFT,0.0,1.0)
 
 ## People the society's settled land can carry now: territory by era and
 ## settlement count, raised by (era-capped) cultivation, soil and storage
@@ -230,7 +281,8 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 	var result:={"blend":blend,"diet":diet,"nutrition_factor":nutrition,"overwork":overwork,"infant_loss":infant_loss,"categories":categories}
 	for key:String in raw:result[key]=lerpf(1.0,float(raw[key]),blend)
 	result["conception"]=lerpf(1.0,conception,blend)
-	var relief:=burden_relief(discovery)
+	# research_3000: modern medicine clears the burden on top of general knowledge.
+	var relief:=1.0-(1.0-burden_relief(discovery))*(1.0-modern_burden_lift(discovery))
 	var capacity:=carrying_capacity(state,discovery)
 	var crowding:=maxf(0.0,float(state.population_exact)/maxf(1.0,capacity)-CROWDING_ONSET)
 	# Spare land rescues only a remnant: it is judged against the founding
@@ -251,6 +303,11 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 	for key:String in EXCESS_WEIGHT:weights[key]=lerpf(1.0,float(EXCESS_WEIGHT[key]),blend)
 	result["burden"]=burden
 	result["excess_weight"]=weights
+	# research_3000: modern medicine lowers the life table; couples choose fewer births.
+	var modern:=modern_factors(discovery)
+	for key:String in modern:modern[key]=lerpf(1.0,float(modern[key]),blend)
+	result["modern"]=modern
+	result["fertility_transition"]=fertility_transition(state,discovery)*blend
 	result["burden_relief"]=relief
 	result["pregnancy_risk"]=lerpf(1.0,1.0+overwork*0.35+maxf(0.0,0.5-diet)*0.6,blend)
 	return result
@@ -288,16 +345,17 @@ static func age_multiplier(care:Dictionary,age:int,condition_factor:float=GOOD_C
 	# Hunger, exposure and sickness in the condition factor are largely the same
 	# endemic killers, so the burden overlaps them just as missing practices do.
 	var era_burden:=1.0+(float(burden.get("elder" if age>=45 else band,1.0))-1.0)*maxf(BURDEN_OVERLAP_FLOOR,overlap)
-	return era_burden*(1.0+(excess-1.0)*weight)
+	var modern:=float((care.get("modern",{}) as Dictionary).get("elder" if age>=45 else band,1.0))
+	return era_burden*(1.0+(excess-1.0)*weight)*modern
 
 ## Newborn and maternal death multipliers including the pre-modern burden. The
 ## burden adds to the missing-care excess rather than compounding it: the same
 ## untended births are not lost twice.
 static func neonatal_factor(care:Dictionary)->float:
-	return float(care.get("neonatal",1.0))+float((care.get("burden",{}) as Dictionary).get("neonatal",1.0))-1.0
+	return (float(care.get("neonatal",1.0))+float((care.get("burden",{}) as Dictionary).get("neonatal",1.0))-1.0)*float((care.get("modern",{}) as Dictionary).get("neonatal",1.0))
 
 static func maternal_factor(care:Dictionary)->float:
-	return float(care.get("maternal",1.0))+float((care.get("burden",{}) as Dictionary).get("maternal",1.0))-1.0
+	return (float(care.get("maternal",1.0))+float((care.get("burden",{}) as Dictionary).get("maternal",1.0))-1.0)*float((care.get("modern",{}) as Dictionary).get("maternal",1.0))
 
 ## Player-facing lines for the health view: what protects life, what is missing.
 static func explanation(care:Dictionary)->Array[Dictionary]:

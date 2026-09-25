@@ -14,10 +14,10 @@
   },
   "pitched_oil_jars": {
    "effects": {
-    "food_spoilage": -0.006,
-    "food_storage": 0.0028,
+    "food_spoilage": -0.0013,
+    "food_storage": 0.0007,
     "fuel_demand": 0.002,
-    "trade_capacity": 0.0044
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
    "name": "Pitch-lined Transport Jars",
@@ -25,9 +25,9 @@
   },
   "cured_pork_sides": {
    "effects": {
-    "food_spoilage": -0.008,
-    "food_storage": 0.0066,
-    "logistics_endurance": 0.006,
+    "food_spoilage": -0.0017,
+    "food_storage": 0.0017,
+    "logistics_endurance": 0.0054,
     "nutrition_quality": 0.0008
    },
    "art": "res://assets/ui/research/subjects/salt_working-v1.png",
@@ -36,7 +36,7 @@
   },
   "barley_type_choice": {
    "effects": {
-    "cultivation_yield": 0.0019,
+    "cultivation_yield": 0.0006,
     "food_output": 0.0012
    },
    "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
@@ -45,9 +45,9 @@
   },
   "terraced_orchards": {
    "effects": {
-    "cultivation_yield": 0.0019,
-    "ecology_recovery": 0.004,
-    "labor_demand": 0.006,
+    "cultivation_yield": 0.0006,
+    "ecology_recovery": 0.0029,
+    "labor_demand": 0.0007,
     "soil_productivity": 0.0021
    },
    "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png",
@@ -67,9 +67,9 @@
   },
   "spelt_cultivation": {
    "effects": {
-    "cultivation_yield": 0.0019,
-    "food_storage": 0.0022,
-    "labor_demand": 0.003
+    "cultivation_yield": 0.0006,
+    "food_storage": 0.0006,
+    "labor_demand": 0.0003
    },
    "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
    "name": "Spelt",
@@ -77,7 +77,7 @@
   },
   "must_syrup": {
    "effects": {
-    "food_storage": 0.0033,
+    "food_storage": 0.0009,
     "health_risk": 0.004,
     "nutrition_quality": 0.0011
    },
@@ -88,9 +88,9 @@
   },
   "summer_millet_catch_crop": {
    "effects": {
-    "cultivation_yield": 0.0019,
+    "cultivation_yield": 0.0003,
     "food_output": 0.0016,
-    "labor_demand": 0.004,
+    "labor_demand": 0.0002,
     "soil_productivity": -0.003
    },
    "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
@@ -99,8 +99,8 @@
   },
   "rennet_curdling": {
    "effects": {
-    "food_spoilage": -0.005,
-    "food_storage": 0.0055,
+    "food_spoilage": -0.0029,
+    "food_storage": 0.0013,
     "nutrition_quality": 0.0011
    },
    "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
@@ -109,9 +109,9 @@
   },
   "iron_ard_shares": {
    "effects": {
-    "cultivation_yield": 0.013,
+    "cultivation_yield": 0.0021,
     "ecological_pressure": 0.006,
-    "labor_efficiency": 0.0044,
+    "labor_efficiency": 0.0004,
     "soil_productivity": 0.0057
    },
    "art": "res://assets/ui/research/discovery-600/ox_drawn_ard.png",
@@ -122,10 +122,10 @@
   },
   "vintage_wine_aging": {
    "effects": {
-    "cohesion": 0.003,
-    "food_storage": 0.0022,
+    "cohesion": 0.0002,
+    "food_storage": 0.0005,
     "health_risk": 0.002,
-    "trade_capacity": 0.0035
+    "trade_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
    "name": "Vintage Wine",
@@ -134,9 +134,9 @@
   "fermented_fish_sauce": {
    "effects": {
     "disease_exposure": 0.002,
-    "food_storage": 0.0033,
+    "food_storage": 0.0008,
     "nutrition_quality": 0.0017,
-    "trade_capacity": 0.0035
+    "trade_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/salt_working-v1.png",
    "name": "Fish Sauce",
@@ -144,7 +144,7 @@
   },
   "wall_hive_apiaries": {
    "effects": {
-    "cultivation_yield": 0.0007,
+    "cultivation_yield": 0.0001,
     "food_output": 0.0016,
     "nutrition_quality": 0.0008
    },
@@ -154,11 +154,11 @@
   },
   "crop_rotation": {
    "effects": {
-    "cultivation_yield": 0.0148,
-    "ecology_recovery": 0.012,
-    "labor_demand": 0.004,
+    "cultivation_yield": 0.0021,
+    "ecology_recovery": 0.0014,
+    "labor_demand": 0.0002,
     "soil_productivity": 0.0171,
-    "task_coordination": 0.005
+    "task_coordination": 0.0007
    },
    "ability_reason": "Alternating grain with beans and vetch rests the soil without leaving it idle, so the same fields feed more mouths year after year."
   },
@@ -166,16 +166,16 @@
    "effects": {
     "food_output": 0.003,
     "fuel_demand": 0.003,
-    "nutrition_quality": 0.0053
+    "nutrition_quality": 0.0033
    },
    "art": "res://assets/ui/research/paper/earth_oven_cooking.png",
    "ability_reason": "Raised bread is lighter and keeps for days, and it stretches the same flour further than flat cakes."
   },
   "green_manure_crops": {
    "effects": {
-    "cultivation_yield": 0.0019,
-    "ecology_recovery": 0.008,
-    "labor_demand": 0.004,
+    "cultivation_yield": 0.0003,
+    "ecology_recovery": 0.0009,
+    "labor_demand": 0.0002,
     "soil_productivity": 0.0089
    },
    "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
@@ -186,7 +186,7 @@
     "ecological_pressure": 0.004,
     "food_output": 0.0031,
     "neonatal_survival": 0.0016,
-    "nutrition_quality": 0.0014
+    "nutrition_quality": 0.0009
    },
    "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
    "name": "Milk Flock Breeding",
@@ -196,8 +196,8 @@
    "effects": {
     "ecological_pressure": 0.004,
     "food_output": 0.0019,
-    "food_storage": 0.0044,
-    "labor_demand": 0.004
+    "food_storage": 0.0008,
+    "labor_demand": 0.0002
    },
    "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
    "name": "Summer Pasture Dairies",
@@ -205,9 +205,9 @@
   },
   "staked_vine_training": {
    "effects": {
-    "cultivation_yield": 0.0014,
-    "labor_demand": 0.004,
-    "trade_capacity": 0.0022
+    "cultivation_yield": 0.0002,
+    "labor_demand": 0.0002,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png",
    "name": "Staked Vines",
@@ -215,10 +215,10 @@
   },
   "nut_orchards": {
    "effects": {
-    "ecology_recovery": 0.002,
+    "ecology_recovery": 0.0002,
     "food_output": 0.0019,
-    "food_storage": 0.0022,
-    "nutrition_quality": 0.0014
+    "food_storage": 0.0004,
+    "nutrition_quality": 0.0009
    },
    "art": "res://assets/ui/research/paper/nut_kernel_shelling.png",
    "name": "Nut Orchards",
@@ -228,8 +228,8 @@
    "effects": {
     "fatigue": 0.003,
     "food_output": 0.0019,
-    "food_storage": 0.0033,
-    "labor_demand": 0.006
+    "food_storage": 0.0006,
+    "labor_demand": 0.0003
    },
    "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
    "name": "Hay Meadows",
@@ -237,9 +237,9 @@
   },
   "cured_table_olives": {
    "effects": {
-    "food_spoilage": -0.003,
-    "food_storage": 0.0033,
-    "nutrition_quality": 0.0011
+    "food_spoilage": -0.0029,
+    "food_storage": 0.0006,
+    "nutrition_quality": 0.0007
    },
    "art": "res://assets/ui/research/paper/seed_oil_pressing.png",
    "name": "Cured Table Olives",
@@ -248,8 +248,8 @@
   "capon_fattening": {
    "effects": {
     "food_output": 0.0019,
-    "labor_demand": 0.002,
-    "nutrition_quality": 0.0006
+    "labor_demand": 0.0001,
+    "nutrition_quality": 0.0004
    },
    "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
    "name": "Capons and Fattened Geese",
@@ -257,10 +257,10 @@
   },
   "rock_cut_silos": {
    "effects": {
-    "food_spoilage": -0.005,
-    "food_storage": 0.0077,
-    "labor_demand": 0.004,
-    "storage_loss": -0.008
+    "food_spoilage": -0.0021,
+    "food_storage": 0.0026,
+    "labor_demand": 0.0002,
+    "storage_loss": -0.0024
    },
    "art": "res://assets/ui/research/subjects/regional_granaries-v1.png",
    "name": "Rock-cut Silos",
@@ -268,10 +268,10 @@
   },
   "free_threshing_wheat": {
    "effects": {
-    "cultivation_yield": 0.0093,
+    "cultivation_yield": 0.0019,
     "food_storage": -0.004,
-    "labor_efficiency": 0.0044,
-    "nutrition_quality": 0.0027
+    "labor_efficiency": 0.0008,
+    "nutrition_quality": 0.0008
    },
    "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
    "name": "Free-threshing Wheat",
@@ -281,10 +281,10 @@
   },
   "field_ration_measures": {
    "effects": {
-    "food_spoilage": -0.002,
-    "logistics_endurance": 0.012,
-    "state_capacity": 0.0012,
-    "warfare_readiness": 0.006
+    "food_spoilage": -0.0008,
+    "logistics_endurance": 0.0021,
+    "state_capacity": 0.0002,
+    "warfare_readiness": 0.001
    },
    "art": "res://assets/ui/research/subjects/supply_groups-v1.png",
    "name": "Measured Field Rations",
@@ -292,9 +292,9 @@
   },
   "mead_brewing": {
    "effects": {
-    "cohesion": 0.003,
-    "food_storage": 0.0017,
-    "nutrition_quality": 0.0006
+    "cohesion": 0.0002,
+    "food_storage": 0.0006,
+    "nutrition_quality": 0.0002
    },
    "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
    "name": "Mead",
@@ -302,10 +302,10 @@
   },
   "trenched_garden_beds": {
    "effects": {
-    "cultivation_yield": 0.0019,
+    "cultivation_yield": 0.0004,
     "fatigue": 0.003,
-    "food_output": 0.0019,
-    "labor_demand": 0.005
+    "food_output": 0.0013,
+    "labor_demand": 0.0003
    },
    "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png",
    "name": "Trenched Garden Beds",
@@ -313,9 +313,9 @@
   },
   "sowing_almanac_verses": {
    "effects": {
-    "adoption_rate": 0.004,
-    "cultivation_yield": 0.0014,
-    "knowledge_preservation": 0.0021
+    "adoption_rate": 0.0015,
+    "cultivation_yield": 0.0003,
+    "knowledge_preservation": 0.0004
    },
    "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
    "name": "Farmer's Almanac in Verse",
@@ -324,7 +324,7 @@
   "mast_fed_swine": {
    "effects": {
     "ecological_pressure": 0.006,
-    "food_output": 0.0025,
+    "food_output": 0.0017,
     "foraging_yield": 0.004,
     "timber_pressure": 0.003
    },
@@ -334,20 +334,20 @@
   },
   "grain_milling": {
    "effects": {
-    "fatigue": -0.01,
-    "food_output": 0.006,
+    "fatigue": -0.0008,
+    "food_output": 0.001,
     "injury_risk": 0.004,
-    "labor_efficiency": 0.0087,
-    "nutrition_quality": 0.0013
+    "labor_efficiency": 0.0006,
+    "nutrition_quality": 0.0006
    },
    "ability_reason": "A handle turning an upper stone grinds in an hour what a woman kneeling at the saddle stone ground in a morning."
   },
   "lever_hopper_mill": {
    "effects": {
-    "craft_output": 0.003,
-    "fatigue": -0.005,
-    "food_output": 0.0012,
-    "labor_efficiency": 0.0027
+    "craft_output": 0.0004,
+    "fatigue": -0.0004,
+    "food_output": 0.0002,
+    "labor_efficiency": 0.0002
    },
    "art": "res://assets/ui/research/subjects/grain_milling-v1.png",
    "name": "Lever Hopper Mill",
@@ -355,10 +355,10 @@
   },
   "olive_crushing_mill": {
    "effects": {
-    "fatigue": -0.003,
-    "food_output": 0.0019,
-    "labor_efficiency": 0.0016,
-    "trade_capacity": 0.0026
+    "fatigue": -0.0002,
+    "food_output": 0.0003,
+    "labor_efficiency": 0.0001,
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/paper/seed_oil_pressing.png",
    "name": "Olive Crushing Mill",
@@ -366,12 +366,12 @@
   },
   "town_grain_dole": {
    "effects": {
-    "cohesion": 0.01,
-    "food_storage": 0.0088,
-    "institutional_rigidity": 0.008,
-    "labor_demand": 0.006,
-    "legitimacy": 0.012,
-    "state_capacity": 0.0039
+    "cohesion": 0.0005,
+    "food_storage": 0.0033,
+    "institutional_rigidity": 0.0013,
+    "labor_demand": 0.0003,
+    "legitimacy": 0.0006,
+    "state_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/public_stores-v1.png",
    "name": "Town Grain Dole",
@@ -381,9 +381,9 @@
   },
   "pomace_small_wine": {
    "effects": {
-    "food_output": 0.0006,
-    "nutrition_quality": 0.0006,
-    "water_safety": 0.003
+    "food_output": 0.0001,
+    "nutrition_quality": 0.0003,
+    "water_safety": 0.0027
    },
    "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
    "name": "Pomace Small Wine",
@@ -391,10 +391,10 @@
   },
   "alfalfa_fodder": {
    "effects": {
-    "cultivation_yield": 0.0007,
-    "food_output": 0.0012,
+    "cultivation_yield": 0.0003,
+    "food_output": 0.0002,
     "soil_productivity": 0.0028,
-    "warfare_readiness": 0.004
+    "warfare_readiness": 0.0009
    },
    "art": "res://assets/ui/research/subjects/pack_animals-v1.png",
    "name": "Alfalfa Fodder",
@@ -402,10 +402,10 @@
   },
   "street_bakeries": {
    "effects": {
-    "food_output": 0.0019,
+    "food_output": 0.0003,
     "fuel_demand": 0.006,
-    "labor_efficiency": 0.0016,
-    "nutrition_quality": 0.0011,
+    "labor_efficiency": 0.0001,
+    "nutrition_quality": 0.0005,
     "pollution": 0.003
    },
    "art": "res://assets/ui/research/paper/earth_oven_cooking.png",
@@ -415,10 +415,10 @@
   },
   "flooded_paddy_fields": {
    "effects": {
-    "cultivation_yield": 0.0046,
+    "cultivation_yield": 0.0022,
     "disease_exposure": 0.01,
-    "food_output": 0.0025,
-    "labor_demand": 0.01
+    "food_output": 0.0004,
+    "labor_demand": 0.0005
    },
    "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
    "name": "Flooded Paddy Fields",
@@ -427,7 +427,7 @@
   },
   "small_game_pens": {
    "effects": {
-    "food_output": 0.0012,
+    "food_output": 0.0002,
     "hunting_yield": 0.004
    },
    "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
@@ -436,9 +436,9 @@
   },
   "seed_drill_funnel": {
    "effects": {
-    "cultivation_yield": 0.0035,
-    "food_storage": 0.0017,
-    "labor_efficiency": 0.0011
+    "cultivation_yield": 0.0005,
+    "food_storage": 0.0007,
+    "labor_efficiency": 0.0002
    },
    "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
    "name": "Funnel Seed Drill",
@@ -446,11 +446,11 @@
   },
   "husbandry_handbooks": {
    "effects": {
-    "adoption_rate": 0.008,
-    "cultivation_yield": 0.0056,
-    "knowledge_preservation": 0.0069,
-    "soil_productivity": 0.0034,
-    "task_coordination": 0.006
+    "adoption_rate": 0.0013,
+    "cultivation_yield": 0.0008,
+    "knowledge_preservation": 0.0006,
+    "soil_productivity": 0.0033,
+    "task_coordination": 0.0008
    },
    "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
    "name": "Estate Husbandry Handbooks",
@@ -460,9 +460,9 @@
   "shore_salting_vats": {
    "effects": {
     "ecological_pressure": 0.004,
-    "food_spoilage": -0.004,
-    "food_storage": 0.0055,
-    "trade_capacity": 0.0044
+    "food_spoilage": -0.0033,
+    "food_storage": 0.0022,
+    "trade_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/salt_working-v1.png",
    "name": "Shore Salting Vats",
@@ -470,8 +470,8 @@
   },
   "dried_noodle_strips": {
    "effects": {
-    "food_spoilage": -0.003,
-    "food_storage": 0.0033
+    "food_spoilage": -0.0025,
+    "food_storage": 0.0013
    },
    "art": "res://assets/ui/research/subjects/food_drying-v1.png",
    "name": "Dried Dough Strips",
@@ -479,9 +479,9 @@
   },
   "named_fruit_cultivars": {
    "effects": {
-    "food_output": 0.0016,
-    "nutrition_quality": 0.0011,
-    "trade_capacity": 0.0013
+    "food_output": 0.0002,
+    "nutrition_quality": 0.0004,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png",
    "name": "Named Fruit Cultivars",
@@ -489,8 +489,8 @@
   },
   "bean_paste_fermentation": {
    "effects": {
-    "food_storage": 0.0028,
-    "nutrition_quality": 0.0017
+    "food_storage": 0.0011,
+    "nutrition_quality": 0.0006
    },
    "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
    "name": "Fermented Bean Paste",
@@ -498,10 +498,10 @@
   },
   "hourglass_animal_mill": {
    "effects": {
-    "fatigue": -0.006,
-    "food_output": 0.0019,
-    "labor_demand": -0.004,
-    "labor_efficiency": 0.0027
+    "fatigue": -0.001,
+    "food_output": 0.0009,
+    "labor_demand": -0.0012,
+    "labor_efficiency": 0.0006
    },
    "art": "res://assets/ui/research/subjects/grain_milling-v1.png",
    "name": "Donkey Mill",
@@ -509,11 +509,11 @@
   },
   "villa_press_rooms": {
    "effects": {
-    "cultivation_yield": 0.0012,
-    "food_storage": 0.0044,
-    "institutional_rigidity": 0.004,
-    "labor_demand": 0.005,
-    "trade_capacity": 0.0044
+    "cultivation_yield": 0.0004,
+    "food_storage": 0.0026,
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0003,
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/paper/seed_oil_pressing.png",
    "name": "Estate Press Rooms",
@@ -522,8 +522,8 @@
   },
   "olive_pruning_rules": {
    "effects": {
-    "cultivation_yield": 0.0014,
-    "knowledge_preservation": 0.0011
+    "cultivation_yield": 0.0004,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png",
    "name": "Olive Pruning Rules",
@@ -531,8 +531,8 @@
   },
   "vine_rootstock_grafting": {
    "effects": {
-    "cultivation_yield": 0.0014,
-    "trade_capacity": 0.0013
+    "cultivation_yield": 0.0004,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png",
    "name": "Vine Rootstock Grafting",
@@ -540,9 +540,9 @@
   },
   "stone_fruit_orchards": {
    "effects": {
-    "food_output": 0.0012,
-    "nutrition_quality": 0.0011,
-    "trade_capacity": 0.0009
+    "food_output": 0.0006,
+    "nutrition_quality": 0.0005,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png",
    "name": "Stone Fruit Orchards",
@@ -551,8 +551,8 @@
   "brackish_fish_farming": {
    "effects": {
     "ecological_pressure": 0.003,
-    "food_output": 0.0025,
-    "trade_capacity": 0.0017
+    "food_output": 0.0012,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/river_craft-v1.png",
    "name": "Lagoon Fish Farms",
@@ -561,8 +561,8 @@
   "oyster_bed_culture": {
    "effects": {
     "disease_exposure": 0.002,
-    "food_output": 0.0016,
-    "nutrition_quality": 0.0008
+    "food_output": 0.0007,
+    "nutrition_quality": 0.0004
    },
    "art": "res://assets/ui/research/subjects/river_craft-v1.png",
    "name": "Oyster Beds",
@@ -570,9 +570,9 @@
   },
   "enclosed_game_parks": {
    "effects": {
-    "cohesion": -0.003,
+    "cohesion": -0.0005,
     "ecological_pressure": 0.003,
-    "food_output": 0.0009,
+    "food_output": 0.0004,
     "hunting_yield": 0.006
    },
    "art": "res://assets/ui/research/subjects/hafted_weapons-v1.png",
@@ -581,8 +581,8 @@
   },
   "poultry_breed_selection": {
    "effects": {
-    "food_output": 0.0019,
-    "nutrition_quality": 0.0008
+    "food_output": 0.0003,
+    "nutrition_quality": 0.0004
    },
    "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
    "name": "Poultry Breeding",
@@ -590,10 +590,10 @@
   },
   "fodder_crop_fallow": {
    "effects": {
-    "cultivation_yield": 0.0009,
-    "ecology_recovery": 0.004,
-    "food_output": 0.0019,
-    "soil_productivity": 0.0043
+    "cultivation_yield": 0.0003,
+    "ecology_recovery": 0.0015,
+    "food_output": 0.0003,
+    "soil_productivity": 0.0034
    },
    "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
    "name": "Fodder on the Fallow",
@@ -602,9 +602,9 @@
   "periurban_market_gardens": {
    "effects": {
     "disease_exposure": 0.008,
-    "food_output": 0.0031,
-    "nutrition_quality": 0.0017,
-    "soil_productivity": 0.0021,
+    "food_output": 0.0004,
+    "nutrition_quality": 0.0009,
+    "soil_productivity": 0.0016,
     "water_pollution": 0.004
    },
    "art": "res://assets/ui/research/subjects/intensive_gardens-v1.png",
@@ -614,8 +614,8 @@
   },
   "smoke_loft_wine": {
    "effects": {
-    "food_storage": 0.0017,
-    "trade_capacity": 0.0017
+    "food_storage": 0.0005,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/smoking-v1.png",
    "name": "Smoke-loft Wine",
@@ -623,9 +623,9 @@
   },
   "granary_fumigation": {
    "effects": {
-    "food_spoilage": -0.006,
+    "food_spoilage": -0.0027,
     "health_risk": 0.002,
-    "storage_loss": -0.01
+    "storage_loss": -0.0029
    },
    "art": "res://assets/ui/research/subjects/regional_granaries-v1.png",
    "name": "Granary Fumigation",
@@ -633,9 +633,9 @@
   },
   "stamped_loaves": {
    "effects": {
-    "food_output": 0.0006,
-    "legitimacy": 0.003,
-    "standardization": 0.006
+    "food_output": 0.0001,
+    "legitimacy": 0.0002,
+    "standardization": 0.0008
    },
    "art": "res://assets/ui/research/paper/earth_oven_cooking.png",
    "name": "Stamped Loaves",
@@ -643,9 +643,9 @@
   },
   "graded_flour_bolting": {
    "effects": {
-    "nutrition_quality": 0.0006,
-    "standardization": 0.004,
-    "trade_capacity": 0.0013
+    "nutrition_quality": 0.0003,
+    "standardization": 0.0005,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/grain_milling-v1.png",
    "name": "Graded Flour",
@@ -654,9 +654,9 @@
   },
   "cased_sausages": {
    "effects": {
-    "food_output": 0.0009,
-    "food_spoilage": -0.003,
-    "food_storage": 0.0033
+    "food_output": 0.0001,
+    "food_spoilage": -0.0013,
+    "food_storage": 0.001
    },
    "art": "res://assets/ui/research/subjects/salt_working-v1.png",
    "name": "Cased Sausages",
@@ -665,10 +665,10 @@
   "overshot_mill_wheels": {
    "effects": {
     "ecological_pressure": 0.003,
-    "fatigue": -0.008,
-    "food_output": 0.005,
-    "labor_demand": -0.005,
-    "labor_efficiency": 0.0087
+    "fatigue": -0.0011,
+    "food_output": 0.0018,
+    "labor_demand": -0.0004,
+    "labor_efficiency": 0.0013
    },
    "art": "res://assets/ui/research/subjects/water_mills-v1.png",
    "name": "Overshot Mill Wheels",
@@ -677,9 +677,9 @@
   },
   "campaign_rations": {
    "effects": {
-    "food_storage": 0.0022,
-    "logistics_endurance": 0.015,
-    "warfare_readiness": 0.006
+    "food_storage": 0.0007,
+    "logistics_endurance": 0.0027,
+    "warfare_readiness": 0.0008
    },
    "art": "res://assets/ui/research/subjects/supply_groups-v1.png",
    "name": "Campaign Rations",
@@ -687,9 +687,9 @@
   },
   "food_qualities_lore": {
    "effects": {
-    "health_protection": 0.0008,
-    "knowledge_preservation": 0.0011,
-    "nutrition_quality": 0.0011
+    "health_protection": 0.0002,
+    "knowledge_preservation": 0.0007,
+    "nutrition_quality": 0.0003
    },
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
    "name": "Food Qualities Lore",
@@ -697,9 +697,9 @@
   },
   "paddy_fish_rearing": {
    "effects": {
-    "disease_exposure": -0.002,
-    "food_output": 0.0019,
-    "nutrition_quality": 0.0011
+    "disease_exposure": -0.0003,
+    "food_output": 0.0007,
+    "nutrition_quality": 0.0003
    },
    "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
    "name": "Paddy Fish",
@@ -707,8 +707,8 @@
   },
   "honey_fruit_preserves": {
    "effects": {
-    "food_storage": 0.0028,
-    "nutrition_quality": 0.0008
+    "food_storage": 0.0009,
+    "nutrition_quality": 0.0002
    },
    "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
    "name": "Fruit in Honey",
@@ -716,8 +716,8 @@
   },
   "ox_header_reaper": {
    "effects": {
-    "fatigue": -0.004,
-    "labor_efficiency": 0.0027,
+    "fatigue": -0.0005,
+    "labor_efficiency": 0.0005,
     "storage_loss": 0.003
    },
    "art": "res://assets/ui/research/paper/threshing_frames.png",
@@ -726,9 +726,9 @@
   },
   "herb_bittered_beer": {
    "effects": {
-    "food_spoilage": -0.003,
-    "food_storage": 0.0017,
-    "nutrition_quality": 0.0006
+    "food_spoilage": -0.0008,
+    "food_storage": 0.0008,
+    "nutrition_quality": 0.0001
    },
    "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
    "name": "Herb-bittered Beer",
@@ -736,9 +736,9 @@
   },
   "oat_field_crop": {
    "effects": {
-    "cultivation_yield": 0.0019,
-    "food_output": 0.0012,
-    "warfare_readiness": 0.002
+    "cultivation_yield": 0.0004,
+    "food_output": 0.0006,
+    "warfare_readiness": 0.0015
    },
    "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
    "name": "Field Oats",
@@ -746,8 +746,8 @@
   },
   "rye_cultivation": {
    "effects": {
-    "cultivation_yield": 0.0019,
-    "food_storage": 0.0017,
+    "cultivation_yield": 0.0004,
+    "food_storage": 0.0008,
     "health_risk": 0.003
    },
    "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
@@ -757,8 +757,8 @@
   },
   "cave_aged_cheese": {
    "effects": {
-    "food_storage": 0.0033,
-    "trade_capacity": 0.0022
+    "food_storage": 0.0016,
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
    "name": "Cave-aged Cheese",
@@ -766,9 +766,9 @@
   },
   "pond_carp_rearing": {
    "effects": {
-    "food_output": 0.0022,
-    "labor_demand": 0.003,
-    "nutrition_quality": 0.0008
+    "food_output": 0.0011,
+    "labor_demand": 0.0002,
+    "nutrition_quality": 0.0002
    },
    "art": "res://assets/ui/research/subjects/river_craft-v1.png",
    "name": "Carp Ponds",
@@ -776,11 +776,11 @@
   },
   "coulter_plough": {
    "effects": {
-    "cultivation_yield": 0.0148,
+    "cultivation_yield": 0.0027,
     "ecological_pressure": 0.008,
-    "labor_demand": 0.006,
-    "labor_efficiency": 0.0026,
-    "soil_productivity": 0.0057
+    "labor_demand": 0.0003,
+    "labor_efficiency": 0.0012,
+    "soil_productivity": 0.0021
    },
    "art": "res://assets/ui/research/discovery-600/ox_drawn_ard.png",
    "name": "Wheeled Coulter Plough",
@@ -790,9 +790,9 @@
   },
   "chestnut_flour_groves": {
    "effects": {
-    "ecology_recovery": 0.003,
-    "food_output": 0.0019,
-    "food_storage": 0.0022
+    "ecology_recovery": 0.0004,
+    "food_output": 0.0003,
+    "food_storage": 0.0016
    },
    "art": "res://assets/ui/research/paper/nut_kernel_shelling.png",
    "name": "Chestnut Flour Groves",
@@ -800,10 +800,10 @@
   },
   "irrigated_winter_wheat": {
    "effects": {
-    "cultivation_yield": 0.0035,
+    "cultivation_yield": 0.0006,
     "disease_exposure": 0.002,
-    "food_output": 0.0016,
-    "labor_demand": 0.006,
+    "food_output": 0.0003,
+    "labor_demand": 0.0003,
     "soil_productivity": -0.004
    },
    "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
@@ -812,8 +812,8 @@
   },
   "recipe_collections": {
    "effects": {
-    "cohesion": 0.002,
-    "knowledge_preservation": 0.0014,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0003,
     "nutrition_quality": 0.0008
    },
    "art": "res://assets/ui/research/paper/hearth_roasting_control.png",
@@ -822,8 +822,8 @@
   },
   "preserved_herb_salts": {
    "effects": {
-    "food_spoilage": -0.004,
-    "food_storage": 0.0017,
+    "food_spoilage": -0.0029,
+    "food_storage": 0.0013,
     "nutrition_quality": 0.0008
    },
    "art": "res://assets/ui/research/subjects/salt_working-v1.png",
@@ -832,9 +832,9 @@
   },
   "hand_crank_winnower": {
    "effects": {
-    "fatigue": -0.003,
+    "fatigue": -0.0006,
     "labor_efficiency": 0.0016,
-    "storage_loss": -0.004
+    "storage_loss": -0.0018
    },
    "art": "res://assets/ui/research/paper/winnowing_practice.png",
    "name": "Crank Winnower",
@@ -842,9 +842,9 @@
   },
   "soy_curd_pressing": {
    "effects": {
-    "food_output": 0.0012,
+    "food_output": 0.0005,
     "fuel_demand": 0.003,
-    "nutrition_quality": 0.0017
+    "nutrition_quality": 0.0008
    },
    "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
    "name": "Bean Curd",
@@ -852,12 +852,12 @@
   },
   "state_bread_ovens": {
    "effects": {
-    "cohesion": 0.006,
-    "food_output": 0.0012,
+    "cohesion": 0.0003,
+    "food_output": 0.0005,
     "fuel_demand": 0.006,
-    "institutional_rigidity": 0.006,
-    "labor_demand": 0.006,
-    "legitimacy": 0.006
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0003,
+    "legitimacy": 0.0003
    },
    "art": "res://assets/ui/research/paper/earth_oven_cooking.png",
    "name": "Public Bread Ovens",
@@ -866,10 +866,10 @@
   },
   "double_crop_calendar": {
    "effects": {
-    "cultivation_yield": 0.0042,
+    "cultivation_yield": 0.004,
     "fatigue": 0.004,
-    "food_output": 0.0019,
-    "labor_demand": 0.008,
+    "food_output": 0.0009,
+    "labor_demand": 0.0004,
     "soil_productivity": -0.008
    },
    "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
@@ -879,16 +879,470 @@
   },
   "cane_sugar_crystals": {
    "effects": {
-    "food_storage": 0.0035,
+    "food_storage": 0.0027,
     "fuel_demand": 0.006,
     "health_risk": 0.002,
-    "nutrition_quality": 0.0018,
-    "trade_capacity": 0.0084
+    "nutrition_quality": 0.0009,
+    "trade_capacity": 0.002
    },
    "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
    "name": "Crystal Sugar",
    "observation": "Cane juice is boiled and cooled until it forms hard sweet grains, prized by healers and rich households.",
    "ability_reason": "Sugar that keeps for years and travels far becomes a costly trade good and a sweetener for medicines."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "pitched_oil_jars": {
+    "food_spoilage": -0.006,
+    "food_storage": 0.0028,
+    "fuel_demand": 0.002,
+    "trade_capacity": 0.0044
+   },
+   "cured_pork_sides": {
+    "food_spoilage": -0.008,
+    "food_storage": 0.0066,
+    "logistics_endurance": 0.006,
+    "nutrition_quality": 0.0008
+   },
+   "barley_type_choice": {
+    "cultivation_yield": 0.0019,
+    "food_output": 0.0012
+   },
+   "terraced_orchards": {
+    "cultivation_yield": 0.0019,
+    "ecology_recovery": 0.004,
+    "labor_demand": 0.006,
+    "soil_productivity": 0.0021
+   },
+   "spelt_cultivation": {
+    "cultivation_yield": 0.0019,
+    "food_storage": 0.0022,
+    "labor_demand": 0.003
+   },
+   "must_syrup": {
+    "food_storage": 0.0033,
+    "health_risk": 0.004,
+    "nutrition_quality": 0.0011
+   },
+   "summer_millet_catch_crop": {
+    "cultivation_yield": 0.0019,
+    "food_output": 0.0016,
+    "labor_demand": 0.004,
+    "soil_productivity": -0.003
+   },
+   "rennet_curdling": {
+    "food_spoilage": -0.005,
+    "food_storage": 0.0055,
+    "nutrition_quality": 0.0011
+   },
+   "iron_ard_shares": {
+    "cultivation_yield": 0.013,
+    "ecological_pressure": 0.006,
+    "labor_efficiency": 0.0044,
+    "soil_productivity": 0.0057
+   },
+   "vintage_wine_aging": {
+    "cohesion": 0.003,
+    "food_storage": 0.0022,
+    "health_risk": 0.002,
+    "trade_capacity": 0.0035
+   },
+   "fermented_fish_sauce": {
+    "disease_exposure": 0.002,
+    "food_storage": 0.0033,
+    "nutrition_quality": 0.0017,
+    "trade_capacity": 0.0035
+   },
+   "wall_hive_apiaries": {
+    "cultivation_yield": 0.0007,
+    "food_output": 0.0016,
+    "nutrition_quality": 0.0008
+   },
+   "crop_rotation": {
+    "cultivation_yield": 0.0148,
+    "ecology_recovery": 0.012,
+    "labor_demand": 0.004,
+    "soil_productivity": 0.0171,
+    "task_coordination": 0.005
+   },
+   "dough_leavening": {
+    "food_output": 0.003,
+    "fuel_demand": 0.003,
+    "nutrition_quality": 0.0053
+   },
+   "green_manure_crops": {
+    "cultivation_yield": 0.0019,
+    "ecology_recovery": 0.008,
+    "labor_demand": 0.004,
+    "soil_productivity": 0.0089
+   },
+   "milk_flock_breeding": {
+    "ecological_pressure": 0.004,
+    "food_output": 0.0031,
+    "neonatal_survival": 0.0016,
+    "nutrition_quality": 0.0014
+   },
+   "summer_pasture_dairies": {
+    "ecological_pressure": 0.004,
+    "food_output": 0.0019,
+    "food_storage": 0.0044,
+    "labor_demand": 0.004
+   },
+   "staked_vine_training": {
+    "cultivation_yield": 0.0014,
+    "labor_demand": 0.004,
+    "trade_capacity": 0.0022
+   },
+   "nut_orchards": {
+    "ecology_recovery": 0.002,
+    "food_output": 0.0019,
+    "food_storage": 0.0022,
+    "nutrition_quality": 0.0014
+   },
+   "hay_meadow_mowing": {
+    "fatigue": 0.003,
+    "food_output": 0.0019,
+    "food_storage": 0.0033,
+    "labor_demand": 0.006
+   },
+   "cured_table_olives": {
+    "food_spoilage": -0.003,
+    "food_storage": 0.0033,
+    "nutrition_quality": 0.0011
+   },
+   "capon_fattening": {
+    "food_output": 0.0019,
+    "labor_demand": 0.002,
+    "nutrition_quality": 0.0006
+   },
+   "rock_cut_silos": {
+    "food_spoilage": -0.005,
+    "food_storage": 0.0077,
+    "labor_demand": 0.004,
+    "storage_loss": -0.008
+   },
+   "free_threshing_wheat": {
+    "cultivation_yield": 0.0093,
+    "food_storage": -0.004,
+    "labor_efficiency": 0.0044,
+    "nutrition_quality": 0.0027
+   },
+   "field_ration_measures": {
+    "food_spoilage": -0.002,
+    "logistics_endurance": 0.012,
+    "state_capacity": 0.0012,
+    "warfare_readiness": 0.006
+   },
+   "mead_brewing": {
+    "cohesion": 0.003,
+    "food_storage": 0.0017,
+    "nutrition_quality": 0.0006
+   },
+   "trenched_garden_beds": {
+    "cultivation_yield": 0.0019,
+    "fatigue": 0.003,
+    "food_output": 0.0019,
+    "labor_demand": 0.005
+   },
+   "sowing_almanac_verses": {
+    "adoption_rate": 0.004,
+    "cultivation_yield": 0.0014,
+    "knowledge_preservation": 0.0021
+   },
+   "mast_fed_swine": {
+    "ecological_pressure": 0.006,
+    "food_output": 0.0025,
+    "foraging_yield": 0.004,
+    "timber_pressure": 0.003
+   },
+   "grain_milling": {
+    "fatigue": -0.01,
+    "food_output": 0.006,
+    "injury_risk": 0.004,
+    "labor_efficiency": 0.0087,
+    "nutrition_quality": 0.0013
+   },
+   "lever_hopper_mill": {
+    "craft_output": 0.003,
+    "fatigue": -0.005,
+    "food_output": 0.0012,
+    "labor_efficiency": 0.0027
+   },
+   "olive_crushing_mill": {
+    "fatigue": -0.003,
+    "food_output": 0.0019,
+    "labor_efficiency": 0.0016,
+    "trade_capacity": 0.0026
+   },
+   "town_grain_dole": {
+    "cohesion": 0.01,
+    "food_storage": 0.0088,
+    "institutional_rigidity": 0.008,
+    "labor_demand": 0.006,
+    "legitimacy": 0.012,
+    "state_capacity": 0.0039
+   },
+   "pomace_small_wine": {
+    "food_output": 0.0006,
+    "nutrition_quality": 0.0006,
+    "water_safety": 0.003
+   },
+   "alfalfa_fodder": {
+    "cultivation_yield": 0.0007,
+    "food_output": 0.0012,
+    "soil_productivity": 0.0028,
+    "warfare_readiness": 0.004
+   },
+   "street_bakeries": {
+    "food_output": 0.0019,
+    "fuel_demand": 0.006,
+    "labor_efficiency": 0.0016,
+    "nutrition_quality": 0.0011,
+    "pollution": 0.003
+   },
+   "flooded_paddy_fields": {
+    "cultivation_yield": 0.0046,
+    "disease_exposure": 0.01,
+    "food_output": 0.0025,
+    "labor_demand": 0.01
+   },
+   "small_game_pens": {
+    "food_output": 0.0012,
+    "hunting_yield": 0.004
+   },
+   "seed_drill_funnel": {
+    "cultivation_yield": 0.0035,
+    "food_storage": 0.0017,
+    "labor_efficiency": 0.0011
+   },
+   "husbandry_handbooks": {
+    "adoption_rate": 0.008,
+    "cultivation_yield": 0.0056,
+    "knowledge_preservation": 0.0069,
+    "soil_productivity": 0.0034,
+    "task_coordination": 0.006
+   },
+   "shore_salting_vats": {
+    "ecological_pressure": 0.004,
+    "food_spoilage": -0.004,
+    "food_storage": 0.0055,
+    "trade_capacity": 0.0044
+   },
+   "dried_noodle_strips": {
+    "food_spoilage": -0.003,
+    "food_storage": 0.0033
+   },
+   "named_fruit_cultivars": {
+    "food_output": 0.0016,
+    "nutrition_quality": 0.0011,
+    "trade_capacity": 0.0013
+   },
+   "bean_paste_fermentation": {
+    "food_storage": 0.0028,
+    "nutrition_quality": 0.0017
+   },
+   "hourglass_animal_mill": {
+    "fatigue": -0.006,
+    "food_output": 0.0019,
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.0027
+   },
+   "villa_press_rooms": {
+    "cultivation_yield": 0.0012,
+    "food_storage": 0.0044,
+    "institutional_rigidity": 0.004,
+    "labor_demand": 0.005,
+    "trade_capacity": 0.0044
+   },
+   "olive_pruning_rules": {
+    "cultivation_yield": 0.0014,
+    "knowledge_preservation": 0.0011
+   },
+   "vine_rootstock_grafting": {
+    "cultivation_yield": 0.0014,
+    "trade_capacity": 0.0013
+   },
+   "stone_fruit_orchards": {
+    "food_output": 0.0012,
+    "nutrition_quality": 0.0011,
+    "trade_capacity": 0.0009
+   },
+   "brackish_fish_farming": {
+    "ecological_pressure": 0.003,
+    "food_output": 0.0025,
+    "trade_capacity": 0.0017
+   },
+   "oyster_bed_culture": {
+    "disease_exposure": 0.002,
+    "food_output": 0.0016,
+    "nutrition_quality": 0.0008
+   },
+   "enclosed_game_parks": {
+    "cohesion": -0.003,
+    "ecological_pressure": 0.003,
+    "food_output": 0.0009,
+    "hunting_yield": 0.006
+   },
+   "poultry_breed_selection": {
+    "food_output": 0.0019,
+    "nutrition_quality": 0.0008
+   },
+   "fodder_crop_fallow": {
+    "cultivation_yield": 0.0009,
+    "ecology_recovery": 0.004,
+    "food_output": 0.0019,
+    "soil_productivity": 0.0043
+   },
+   "periurban_market_gardens": {
+    "disease_exposure": 0.008,
+    "food_output": 0.0031,
+    "nutrition_quality": 0.0017,
+    "soil_productivity": 0.0021,
+    "water_pollution": 0.004
+   },
+   "smoke_loft_wine": {
+    "food_storage": 0.0017,
+    "trade_capacity": 0.0017
+   },
+   "granary_fumigation": {
+    "food_spoilage": -0.006,
+    "health_risk": 0.002,
+    "storage_loss": -0.01
+   },
+   "stamped_loaves": {
+    "food_output": 0.0006,
+    "legitimacy": 0.003,
+    "standardization": 0.006
+   },
+   "graded_flour_bolting": {
+    "nutrition_quality": 0.0006,
+    "standardization": 0.004,
+    "trade_capacity": 0.0013
+   },
+   "cased_sausages": {
+    "food_output": 0.0009,
+    "food_spoilage": -0.003,
+    "food_storage": 0.0033
+   },
+   "overshot_mill_wheels": {
+    "ecological_pressure": 0.003,
+    "fatigue": -0.008,
+    "food_output": 0.005,
+    "labor_demand": -0.005,
+    "labor_efficiency": 0.0087
+   },
+   "campaign_rations": {
+    "food_storage": 0.0022,
+    "logistics_endurance": 0.015,
+    "warfare_readiness": 0.006
+   },
+   "food_qualities_lore": {
+    "health_protection": 0.0008,
+    "knowledge_preservation": 0.0011,
+    "nutrition_quality": 0.0011
+   },
+   "paddy_fish_rearing": {
+    "disease_exposure": -0.002,
+    "food_output": 0.0019,
+    "nutrition_quality": 0.0011
+   },
+   "honey_fruit_preserves": {
+    "food_storage": 0.0028,
+    "nutrition_quality": 0.0008
+   },
+   "ox_header_reaper": {
+    "fatigue": -0.004,
+    "labor_efficiency": 0.0027,
+    "storage_loss": 0.003
+   },
+   "herb_bittered_beer": {
+    "food_spoilage": -0.003,
+    "food_storage": 0.0017,
+    "nutrition_quality": 0.0006
+   },
+   "oat_field_crop": {
+    "cultivation_yield": 0.0019,
+    "food_output": 0.0012,
+    "warfare_readiness": 0.002
+   },
+   "rye_cultivation": {
+    "cultivation_yield": 0.0019,
+    "food_storage": 0.0017,
+    "health_risk": 0.003
+   },
+   "cave_aged_cheese": {
+    "food_storage": 0.0033,
+    "trade_capacity": 0.0022
+   },
+   "pond_carp_rearing": {
+    "food_output": 0.0022,
+    "labor_demand": 0.003,
+    "nutrition_quality": 0.0008
+   },
+   "coulter_plough": {
+    "cultivation_yield": 0.0148,
+    "ecological_pressure": 0.008,
+    "labor_demand": 0.006,
+    "labor_efficiency": 0.0026,
+    "soil_productivity": 0.0057
+   },
+   "chestnut_flour_groves": {
+    "ecology_recovery": 0.003,
+    "food_output": 0.0019,
+    "food_storage": 0.0022
+   },
+   "irrigated_winter_wheat": {
+    "cultivation_yield": 0.0035,
+    "disease_exposure": 0.002,
+    "food_output": 0.0016,
+    "labor_demand": 0.006,
+    "soil_productivity": -0.004
+   },
+   "recipe_collections": {
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0014,
+    "nutrition_quality": 0.0008
+   },
+   "preserved_herb_salts": {
+    "food_spoilage": -0.004,
+    "food_storage": 0.0017,
+    "nutrition_quality": 0.0008
+   },
+   "hand_crank_winnower": {
+    "fatigue": -0.003,
+    "labor_efficiency": 0.0016,
+    "storage_loss": -0.004
+   },
+   "soy_curd_pressing": {
+    "food_output": 0.0012,
+    "fuel_demand": 0.003,
+    "nutrition_quality": 0.0017
+   },
+   "state_bread_ovens": {
+    "cohesion": 0.006,
+    "food_output": 0.0012,
+    "fuel_demand": 0.006,
+    "institutional_rigidity": 0.006,
+    "labor_demand": 0.006,
+    "legitimacy": 0.006
+   },
+   "double_crop_calendar": {
+    "cultivation_yield": 0.0042,
+    "fatigue": 0.004,
+    "food_output": 0.0019,
+    "labor_demand": 0.008,
+    "soil_productivity": -0.008
+   },
+   "cane_sugar_crystals": {
+    "food_storage": 0.0035,
+    "fuel_demand": 0.006,
+    "health_risk": 0.002,
+    "nutrition_quality": 0.0018,
+    "trade_capacity": 0.0084
+   }
   }
  }
 }

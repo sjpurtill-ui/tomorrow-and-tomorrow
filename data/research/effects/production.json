@@ -43,7 +43,7 @@
    "effects": {
     "construction_rate": 0.0115,
     "haul_capacity": 0.0303,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0037,
     "mobile_shelter": 0.08,
     "tool_quality": 0.0065
    }
@@ -204,7 +204,7 @@
    "art": "res://assets/ui/research/subjects/charcoal-v1.png",
    "effects": {
     "fuel_efficiency": 0.105,
-    "labor_demand": 0.015,
+    "labor_demand": 0.0055,
     "metal_yield": 0.03,
     "pollution": 0.018,
     "timber_pressure": 0.07
@@ -660,7 +660,11 @@
    "production_contract": "Cassiterite, charcoal and furnace work produce refined tin; tin ore is rare, so most tin must be found far off or traded for."
   },
   "graded_tool_retirement": {
-   "art": "res://assets/ui/research/subjects/hafted_tools-v1.png"
+   "art": "res://assets/ui/research/subjects/hafted_tools-v1.png",
+   "effects": {
+    "repair_capacity": 0.02,
+    "tool_quality": 0.02
+   }
   },
   "bronze_alloying": {
    "art": "res://assets/ui/research/subjects/bronze_alloying-v1.png",
@@ -683,7 +687,7 @@
   "cross_settlement_measure_agreement": {
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
    "effects": {
-    "institutional_rigidity": 0.01,
+    "institutional_rigidity": 0.0033,
     "standardization": 0.0111,
     "trade_capacity": 0.0041
    }
@@ -786,7 +790,7 @@
    "effects": {
     "craft_output": 0.0071,
     "fiber_yield": 0.01,
-    "institutional_rigidity": 0.01,
+    "institutional_rigidity": 0.0018,
     "standardization": 0.0024,
     "state_capacity": 0.0023,
     "trade_capacity": 0.0054
@@ -826,7 +830,11 @@
    "observation": "Copper is cast into ingots of a fixed weight and shape, so a load of metal can be counted rather than weighed."
   },
   "sulfur_purification": {
-   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png"
+   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
+   "effects": {
+    "chemical_control": 0.08,
+    "health_risk": 0.01
+   }
   },
   "shaft_furnaces": {
    "effects": {
@@ -900,8 +908,8 @@
   "refractory_brick_firing": {
    "effects": {
     "fuel_efficiency": 0.02,
-    "metal_yield": 0.0055,
-    "repair_capacity": 0.0088
+    "metal_yield": 0.0027,
+    "repair_capacity": 0.0083
    },
    "art": "res://assets/ui/research/paper/refractory_brick_firing.png"
   }
@@ -1448,6 +1456,52 @@
     "craft_output": 0.004,
     "legitimacy": 0.003,
     "trade_capacity": 0.009
+   }
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "cordage": {
+    "construction_rate": 0.0115,
+    "haul_capacity": 0.0303,
+    "labor_demand": 0.01,
+    "mobile_shelter": 0.08,
+    "tool_quality": 0.0065
+   },
+   "charcoal": {
+    "fuel_efficiency": 0.105,
+    "labor_demand": 0.015,
+    "metal_yield": 0.03,
+    "pollution": 0.018,
+    "timber_pressure": 0.07
+   },
+   "graded_tool_retirement": {
+    "repair_capacity": 0.02,
+    "tool_quality": 0.02
+   },
+   "cross_settlement_measure_agreement": {
+    "institutional_rigidity": 0.01,
+    "standardization": 0.0111,
+    "trade_capacity": 0.0041
+   },
+   "palace_weaving_houses": {
+    "craft_output": 0.0071,
+    "fiber_yield": 0.01,
+    "institutional_rigidity": 0.01,
+    "standardization": 0.0024,
+    "state_capacity": 0.0023,
+    "trade_capacity": 0.0054
+   },
+   "sulfur_purification": {
+    "chemical_control": 0.08,
+    "health_risk": 0.01
+   },
+   "refractory_brick_firing": {
+    "fuel_efficiency": 0.02,
+    "metal_yield": 0.0055,
+    "repair_capacity": 0.0088
    }
   }
  }

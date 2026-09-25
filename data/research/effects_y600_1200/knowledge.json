@@ -4,8 +4,8 @@
  "items": {
   "thematic_word_lists": {
    "effects": {
-    "adoption_rate": 0.0008,
-    "knowledge_preservation": 0.0019,
+    "adoption_rate": 0.0007,
+    "knowledge_preservation": 0.0013,
     "knowledge_rate": 0.0008
    },
    "art": "res://assets/ui/research/subjects/pictographic_records-v1.png",
@@ -13,20 +13,21 @@
   },
   "diplomatic_letter_formulary": {
    "effects": {
-    "knowledge_preservation": 0.0006,
-    "legitimacy": 0.0004,
-    "state_capacity": 0.0013,
-    "trade_capacity": 0.0026
+    "knowledge_preservation": 0.0004,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
    "observation": "Letters between courts open with fixed greetings, gift lists and titles, so no ruler is slighted by a careless word."
   },
   "court_lingua_franca": {
    "effects": {
-    "adoption_rate": 0.0024,
-    "labor_demand": 0.003,
-    "state_capacity": 0.0013,
-    "trade_capacity": 0.0052
+    "adoption_rate": 0.002,
+    "labor_demand": 0.0003,
+    "literacy": 0.001,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0011
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
    "observation": "Palace scribes of many lands learn one court tongue, and letters pass between rulers without interpreters.",
@@ -34,47 +35,49 @@
   },
   "omen_compendia": {
    "effects": {
-    "institutional_rigidity": 0.003,
-    "knowledge_preservation": 0.0016,
-    "legitimacy": 0.0004,
-    "observation_rate": 0.0031
+    "institutional_rigidity": 0.0003,
+    "knowledge_preservation": 0.0011,
+    "legitimacy": 0.0001,
+    "observation_rate": 0.0022
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Omens are collected by sign, the liver, the sky, a strange birth, each written with what followed it."
   },
   "abecedary_letter_order": {
    "effects": {
-    "adoption_rate": 0.0024,
-    "knowledge_preservation": 0.0013,
-    "knowledge_rate": 0.0008
+    "adoption_rate": 0.002,
+    "knowledge_preservation": 0.0009,
+    "knowledge_rate": 0.0008,
+    "literacy": 0.0013
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
    "observation": "Children recite the letters in a fixed row, and the row itself becomes a way to number and file."
   },
   "squared_grid_drawings": {
    "effects": {
-    "construction_rate": 0.0023,
-    "craft_output": 0.0046,
-    "standardization": 0.004
+    "construction_rate": 0.0014,
+    "craft_output": 0.0006,
+    "standardization": 0.0015
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Painters rule a grid over a small sketch and a larger one on the wall, and copy it square by square."
   },
   "wax_writing_boards": {
    "effects": {
-    "adoption_rate": 0.0012,
+    "adoption_rate": 0.001,
     "knowledge_rate": 0.0017,
-    "labor_demand": 0.0015,
-    "task_coordination": 0.0009
+    "labor_demand": 0.0002,
+    "literacy": 0.0013,
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
    "observation": "Hinged boards coated with wax take a stylus note, and a warmed blade smooths them for the next."
   },
   "graduated_measuring_rods": {
    "effects": {
-    "construction_rate": 0.0029,
-    "craft_output": 0.0023,
-    "standardization": 0.008,
+    "construction_rate": 0.0018,
+    "craft_output": 0.0003,
+    "standardization": 0.0031,
     "survey_speed": 0.0029
    },
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
@@ -82,74 +85,74 @@
   },
   "planet_cycle_tables": {
    "effects": {
-    "knowledge_preservation": 0.0013,
-    "labor_demand": 0.0023,
-    "legitimacy": 0.0004,
-    "observation_rate": 0.0041
+    "knowledge_preservation": 0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "observation_rate": 0.0029
    },
    "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
    "observation": "Watchers record when the bright wandering star vanishes into the dawn and when it returns, year after year."
   },
   "sherd_ink_notes": {
    "effects": {
-    "knowledge_preservation": 0.0013,
-    "state_capacity": 0.0013,
-    "task_coordination": 0.0016,
-    "trade_capacity": 0.002
+    "knowledge_preservation": 0.0004,
+    "state_capacity": 0.0003,
+    "task_coordination": 0.0002,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
    "observation": "Broken pots take quick ink notes: a ration issued, a debt owed, a man sent to the fields."
   },
   "weight_conversion_tables": {
    "effects": {
-    "standardization": 0.006,
-    "storage_loss": -0.003,
-    "trade_capacity": 0.0079
+    "standardization": 0.0017,
+    "storage_loss": -0.0029,
+    "trade_capacity": 0.0013
    },
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
    "observation": "Merchants keep tables that turn one land's weights into another's, and fewer bargains end in quarrels."
   },
   "ink_on_hide_scrolls": {
    "effects": {
-    "knowledge_preservation": 0.0032,
+    "knowledge_preservation": 0.0009,
     "knowledge_rate": 0.0011,
-    "labor_demand": 0.003
+    "labor_demand": 0.0002
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
    "observation": "Reed pen and ink on scraped hide make rolls that travel and keep, lighter than any tablet."
   },
   "eponym_year_lists": {
    "effects": {
-    "institutional_rigidity": 0.0015,
-    "knowledge_preservation": 0.0022,
-    "legitimacy": 0.0004,
-    "state_capacity": 0.0013
+    "institutional_rigidity": 0.0006,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
    "observation": "Each year is named for the official who held it, and the list of names becomes the town's reckoning of time."
   },
   "adapted_alphabet_borrowing": {
    "effects": {
-    "adoption_rate": 0.0048,
+    "adoption_rate": 0.0009,
     "knowledge_rate": 0.0017,
-    "trade_capacity": 0.0026
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
    "observation": "Traders take a neighbour's letters and fit them to their own tongue, adding signs where sounds are missing."
   },
   "eclipse_records": {
    "effects": {
-    "knowledge_preservation": 0.0013,
-    "legitimacy": 0.0004,
-    "observation_rate": 0.0041
+    "knowledge_preservation": 0.0004,
+    "legitimacy": 0.0001,
+    "observation_rate": 0.0016
    },
    "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
    "observation": "Every darkening of sun and moon is written down with its day, its watch and the omen feared from it."
   },
   "star_transit_sighting": {
    "effects": {
-    "observation_rate": 0.0031,
-    "route_speed": 0.0019,
+    "observation_rate": 0.0012,
+    "route_speed": 0.0014,
     "survey_speed": 0.0036
    },
    "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
@@ -158,29 +161,32 @@
   "merchant_letter_accounts": {
    "effects": {
     "institutional_rigidity": -0.003,
-    "knowledge_preservation": 0.001,
-    "trade_capacity": 0.0066
+    "knowledge_preservation": 0.0003,
+    "literacy": 0.0025,
+    "trade_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
    "observation": "Traders no longer wait on palace scribes; they keep their own accounts in the new letters."
   },
   "sky_watch_reports": {
    "effects": {
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0009,
-    "observation_rate": 0.002,
-    "state_capacity": 0.0018
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.0025,
+    "observation_rate": 0.0008,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
    "observation": "Watchers in each town send the court a written report of what the sky showed, and what it may mean."
   },
   "full_vowel_alphabet": {
    "effects": {
-    "adoption_rate": 0.0217,
+    "adoption_rate": 0.0041,
     "institutional_rigidity": -0.006,
-    "knowledge_preservation": 0.0069,
+    "knowledge_preservation": 0.0023,
     "knowledge_rate": 0.0091,
-    "task_coordination": 0.0034
+    "literacy": 0.0061,
+    "task_coordination": 0.0005
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
    "observation": "With signs for the vowels, any word can be written as it is spoken and read aloud by a stranger.",
@@ -189,27 +195,28 @@
   },
   "written_craft_recipes": {
    "effects": {
-    "craft_output": 0.0077,
-    "knowledge_preservation": 0.0019,
-    "standardization": 0.004
+    "craft_output": 0.0014,
+    "knowledge_preservation": 0.0004,
+    "literacy": 0.0024,
+    "standardization": 0.0009
    },
    "art": "res://assets/ui/research/subjects/workshop_standards-v1.png",
    "observation": "Glass, dye and glaze recipes are written down step by step, with weights and firings, so a workshop outlives its master."
   },
   "astronomical_diaries": {
    "effects": {
-    "knowledge_preservation": 0.0019,
-    "labor_demand": 0.003,
-    "observation_rate": 0.0051
+    "knowledge_preservation": 0.0004,
+    "labor_demand": 0.0002,
+    "observation_rate": 0.0018
    },
    "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
    "observation": "Every night the watchers note the moon, the wandering stars, the weather, the river's height and the price of grain."
   },
   "straightedge_compass": {
    "effects": {
-    "construction_rate": 0.0046,
-    "craft_output": 0.0031,
-    "knowledge_rate": 0.0011,
+    "construction_rate": 0.0008,
+    "craft_output": 0.0006,
+    "knowledge_rate": 0.001,
     "survey_speed": 0.0043
    },
    "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
@@ -217,30 +224,31 @@
   },
   "world_maps": {
    "effects": {
-    "knowledge_rate": 0.0008,
-    "route_speed": 0.0038,
+    "knowledge_rate": 0.0007,
+    "route_speed": 0.0014,
     "survey_speed": 0.0029,
-    "trade_capacity": 0.0033
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
    "observation": "A bronze tablet shows the whole known world with the rivers and the sea around it, carried to argue for a war or a voyage."
   },
   "string_ratio_harmonics": {
    "effects": {
-    "cohesion": 0.002,
-    "knowledge_rate": 0.0014,
-    "observation_rate": 0.001
+    "cohesion": 0.0001,
+    "knowledge_rate": 0.0013,
+    "observation_rate": 0.0003
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Halve the string and it sounds the same note higher; two to three sounds the fifth, and number is heard in music."
   },
   "natural_philosophy_schools": {
    "effects": {
-    "adoption_rate": 0.0072,
-    "knowledge_rate": 0.0177,
-    "labor_demand": 0.0045,
+    "adoption_rate": 0.0012,
+    "knowledge_rate": 0.0026,
+    "labor_demand": 0.0002,
     "legitimacy": -0.0041,
-    "observation_rate": 0.0137
+    "literacy": 0.001,
+    "observation_rate": 0.0014
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Teachers and their pupils argue openly about what the world is made of and why it changes, and every answer invites a rival.",
@@ -249,19 +257,20 @@
   },
   "eclipse_cycle_prediction": {
    "effects": {
-    "knowledge_preservation": 0.001,
-    "legitimacy": 0.0013,
-    "observation_rate": 0.0041
+    "knowledge_preservation": 0.0002,
+    "legitimacy": 0.0001,
+    "observation_rate": 0.0004
    },
    "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
    "observation": "Knowing the long cycle, the watchers warn the court months ahead when the sun will darken."
   },
   "letter_schools_for_citizens": {
    "effects": {
-    "adoption_rate": 0.0072,
-    "knowledge_rate": 0.0022,
-    "labor_demand": 0.0075,
-    "task_coordination": 0.0013
+    "adoption_rate": 0.0012,
+    "knowledge_rate": 0.0003,
+    "labor_demand": 0.0004,
+    "literacy": 0.0051,
+    "task_coordination": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "observation": "Ordinary children learn letters and sums from a paid teacher in the shade of the market.",
@@ -269,8 +278,8 @@
   },
   "demonstrated_geometry": {
    "effects": {
-    "construction_rate": 0.0023,
-    "knowledge_rate": 0.0034,
+    "construction_rate": 0.0005,
+    "knowledge_rate": 0.0005,
     "survey_speed": 0.0029
    },
    "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
@@ -278,55 +287,55 @@
   },
   "authored_prose_treatises": {
    "effects": {
-    "adoption_rate": 0.0016,
-    "knowledge_preservation": 0.0026,
-    "knowledge_rate": 0.0028
+    "adoption_rate": 0.0003,
+    "knowledge_preservation": 0.0005,
+    "knowledge_rate": 0.0004
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Writers set their own names to prose books on nature, healing and the heavens, and answer each other by name."
   },
   "star_weather_almanac": {
    "effects": {
-    "cultivation_yield": 0.0023,
-    "observation_rate": 0.0025,
-    "task_coordination": 0.0013
+    "cultivation_yield": 0.0011,
+    "observation_rate": 0.0003,
+    "task_coordination": 0.0001
    },
    "art": "res://assets/ui/research/subjects/seasonal_patterns-v1.png",
    "observation": "A stone slab in the square lists the star risings with a peg moved each day, and the weather each one brings."
   },
   "nineteen_year_cycle": {
    "effects": {
-    "legitimacy": 0.0007,
-    "standardization": 0.006,
-    "state_capacity": 0.0009,
-    "task_coordination": 0.0019
+    "legitimacy": 0.0001,
+    "standardization": 0.0005,
+    "state_capacity": 0.0001,
+    "task_coordination": 0.0002
    },
    "art": "res://assets/ui/research/subjects/seasonal_patterns-v1.png",
    "observation": "Seven extra months set into nineteen years keep the moon's months in step with the sun's seasons."
   },
   "seasonal_hour_sundial": {
    "effects": {
-    "craft_output": 0.0015,
-    "standardization": 0.004,
-    "task_coordination": 0.0019
+    "craft_output": 0.0002,
+    "standardization": 0.0003,
+    "task_coordination": 0.0002
    },
    "art": "res://assets/ui/research/subjects/seasonal_patterns-v1.png",
    "observation": "Curved lines on the dial give twelve hours of daylight in every season, long in summer and short in winter."
   },
   "incommensurable_lengths": {
    "effects": {
-    "knowledge_rate": 0.0022,
-    "observation_rate": 0.0015
+    "knowledge_rate": 0.0003,
+    "observation_rate": 0.0002
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "observation": "The diagonal of a square is shown to share no measure with its side, however small the unit is made."
   },
   "rhetoric_handbooks": {
    "effects": {
-    "adoption_rate": 0.0024,
-    "cohesion": -0.003,
-    "legitimacy": 0.0009,
-    "state_capacity": 0.0013
+    "adoption_rate": 0.0004,
+    "cohesion": -0.0004,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Handbooks teach how to arrange a speech, move a jury and answer an opponent's strongest point.",
@@ -334,29 +343,29 @@
   },
   "letter_substitution_cipher": {
    "effects": {
-    "labor_demand": 0.0015,
-    "security_efficiency": 0.01,
-    "warfare_readiness": 0.004
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.001,
+    "warfare_readiness": 0.0004
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
    "observation": "Commanders write dispatches with every letter shifted along the row, so a captured messenger betrays nothing."
   },
   "pigeon_message_post": {
    "effects": {
-    "labor_demand": 0.0023,
-    "security_efficiency": 0.0033,
-    "state_capacity": 0.0013,
-    "task_coordination": 0.0019
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0003,
+    "state_capacity": 0.0004,
+    "task_coordination": 0.0003
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Birds bred at the capital carry thin rolled notes home from distant posts within a day."
   },
   "syllogistic_logic": {
    "effects": {
-    "adoption_rate": 0.0043,
-    "institutional_rigidity": 0.003,
-    "knowledge_preservation": 0.0035,
-    "knowledge_rate": 0.0126
+    "adoption_rate": 0.0007,
+    "institutional_rigidity": 0.0009,
+    "knowledge_preservation": 0.0003,
+    "knowledge_rate": 0.0012
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Teachers set out which forms of argument must give a true conclusion from true premises, and which only seem to.",
@@ -364,46 +373,46 @@
   },
   "descriptive_natural_history": {
    "effects": {
-    "cultivation_yield": 0.0017,
-    "knowledge_preservation": 0.0019,
-    "observation_rate": 0.0061
+    "cultivation_yield": 0.0002,
+    "knowledge_preservation": 0.0002,
+    "observation_rate": 0.0019
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Plants and animals are described by their parts, habits and uses, and sorted into kinds and families."
   },
   "counting_board_abacus": {
    "effects": {
-    "knowledge_rate": 0.0008,
-    "state_capacity": 0.0022,
-    "task_coordination": 0.0013,
-    "trade_capacity": 0.0052
+    "knowledge_rate": 0.0001,
+    "state_capacity": 0.0006,
+    "task_coordination": 0.0002,
+    "trade_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "observation": "Pebbles on a ruled board let a merchant add and take away large sums faster than any scribe."
   },
   "geometric_optics_treatise": {
    "effects": {
-    "construction_rate": 0.0012,
-    "knowledge_rate": 0.0017,
-    "observation_rate": 0.0025
+    "construction_rate": 0.0002,
+    "knowledge_rate": 0.0002,
+    "observation_rate": 0.0008
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "A treatise shows that sight runs in straight lines, and works out shadows and the angles of mirrors by geometry."
   },
   "ratio_proportion": {
    "effects": {
-    "construction_rate": 0.0023,
-    "knowledge_rate": 0.0022,
-    "standardization": 0.004,
-    "trade_capacity": 0.002
+    "construction_rate": 0.0004,
+    "knowledge_rate": 0.0002,
+    "standardization": 0.0034,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "observation": "Proportion lets a builder scale a model up to a temple, or partners share a profit by their stakes."
   },
   "similar_triangles": {
    "effects": {
-    "construction_rate": 0.0023,
-    "knowledge_rate": 0.0011,
+    "construction_rate": 0.0004,
+    "knowledge_rate": 0.0001,
     "survey_speed": 0.0071
    },
    "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
@@ -411,19 +420,20 @@
   },
   "combinatorics": {
    "effects": {
-    "knowledge_rate": 0.0017,
-    "observation_rate": 0.001,
-    "state_capacity": 0.0009
+    "knowledge_rate": 0.0002,
+    "observation_rate": 0.0003,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "observation": "Scholars count how many ways letters, verses or lots can be arranged and chosen."
   },
   "axiomatic_geometry_compendium": {
    "effects": {
-    "adoption_rate": 0.0043,
-    "construction_rate": 0.008,
-    "knowledge_preservation": 0.0069,
-    "knowledge_rate": 0.0151,
+    "adoption_rate": 0.0007,
+    "construction_rate": 0.0014,
+    "knowledge_preservation": 0.0006,
+    "knowledge_rate": 0.0014,
+    "literacy": 0.0015,
     "survey_speed": 0.008
    },
    "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
@@ -432,12 +442,12 @@
   },
   "endowed_scholar_house": {
    "effects": {
-    "institutional_rigidity": 0.003,
-    "knowledge_preservation": 0.0104,
-    "knowledge_rate": 0.0151,
-    "labor_demand": 0.009,
-    "legitimacy": 0.0016,
-    "observation_rate": 0.0073
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.0009,
+    "knowledge_rate": 0.0026,
+    "labor_demand": 0.0004,
+    "legitimacy": 0.0001,
+    "observation_rate": 0.0028
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "Salaried readers live, study and teach at the ruler's expense beside a great collection of books.",
@@ -446,18 +456,19 @@
   },
   "author_subject_catalogues": {
    "effects": {
-    "adoption_rate": 0.0012,
-    "knowledge_preservation": 0.0032,
-    "knowledge_rate": 0.0014
+    "adoption_rate": 0.0006,
+    "knowledge_preservation": 0.0003,
+    "knowledge_rate": 0.0002,
+    "literacy": 0.0023
    },
    "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
    "observation": "Every roll in the collection is listed by author and subject, with its opening words and its length."
   },
   "lever_moments": {
    "effects": {
-    "construction_rate": 0.0046,
-    "haul_capacity": 0.006,
-    "knowledge_rate": 0.0008,
+    "construction_rate": 0.0009,
+    "haul_capacity": 0.001,
+    "knowledge_rate": 0.0001,
     "tool_quality": 0.004
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
@@ -465,37 +476,37 @@
   },
   "displacement_buoyancy": {
    "effects": {
-    "craft_output": 0.0015,
-    "knowledge_rate": 0.0011,
-    "naval_capacity": 0.004,
-    "standardization": 0.003
+    "craft_output": 0.0004,
+    "knowledge_rate": 0.0002,
+    "naval_capacity": 0.0012,
+    "standardization": 0.0004
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "A body in water is pressed upward by the weight of the water it pushes aside."
   },
   "earth_circumference_measure": {
    "effects": {
-    "knowledge_rate": 0.0017,
-    "route_speed": 0.0029,
-    "survey_speed": 0.0043
+    "knowledge_rate": 0.0003,
+    "route_speed": 0.0009,
+    "survey_speed": 0.0036
    },
    "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
    "observation": "Noon shadows at two towns a known distance apart give the size of the whole earth."
   },
   "centers_of_mass": {
    "effects": {
-    "construction_rate": 0.0029,
-    "haul_capacity": 0.004,
-    "knowledge_rate": 0.0008
+    "construction_rate": 0.0006,
+    "haul_capacity": 0.0007,
+    "knowledge_rate": 0.0001
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Every body balances on one point, and builders and shipwrights find it before they lift or load."
   },
   "hydrostatic_pressure": {
    "effects": {
-    "construction_rate": 0.0017,
-    "knowledge_rate": 0.0008,
-    "water_access": 0.004
+    "construction_rate": 0.0003,
+    "knowledge_rate": 0.0001,
+    "water_access": 0.0007
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Water presses harder the deeper it stands, so cisterns and dams are built thicker at the base."
@@ -503,38 +514,38 @@
   "mineral_specific_gravity": {
    "effects": {
     "extraction_yield": 0.003,
-    "knowledge_rate": 0.0008,
-    "standardization": 0.004,
-    "trade_capacity": 0.0026
+    "knowledge_rate": 0.0001,
+    "standardization": 0.0006,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
    "observation": "Weighed in air and then in water, an ingot shows whether its gold has been thinned with silver."
   },
   "exhaustion_area_method": {
    "effects": {
-    "construction_rate": 0.0017,
-    "knowledge_rate": 0.0028,
-    "survey_speed": 0.0021
+    "construction_rate": 0.0003,
+    "knowledge_rate": 0.0005,
+    "survey_speed": 0.0017
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "observation": "Curved areas and volumes are hemmed in by ever finer straight-sided figures until no gap remains."
   },
   "collated_critical_editions": {
    "effects": {
-    "knowledge_preservation": 0.0045,
-    "knowledge_rate": 0.0011,
-    "labor_demand": 0.003
+    "knowledge_preservation": 0.0004,
+    "knowledge_rate": 0.0002,
+    "labor_demand": 0.0002
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "Editors compare many copies of an old poem line by line, and mark every reading they doubt."
   },
   "liberal_curriculum": {
    "effects": {
-    "adoption_rate": 0.004,
-    "institutional_rigidity": 0.0045,
-    "knowledge_rate": 0.0022,
-    "labor_demand": 0.003,
-    "legitimacy": 0.0007
+    "adoption_rate": 0.0019,
+    "institutional_rigidity": 0.0003,
+    "knowledge_rate": 0.0004,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "observation": "Free-born boys pass through a fixed course: grammar, speaking, number, music and the sky.",
@@ -542,10 +553,10 @@
   },
   "parchment_record_preparation": {
    "effects": {
-    "knowledge_preservation": 0.0173,
-    "labor_demand": 0.0045,
-    "state_capacity": 0.0048,
-    "task_coordination": 0.0023
+    "knowledge_preservation": 0.0014,
+    "labor_demand": 0.0002,
+    "state_capacity": 0.0005,
+    "task_coordination": 0.0022
    },
    "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
    "observation": "Hides scraped thin under tension take ink on both sides and outlast any roll of reed or tablet of clay.",
@@ -553,38 +564,39 @@
   },
   "reading_marks": {
    "effects": {
-    "adoption_rate": 0.0024,
-    "knowledge_preservation": 0.0013,
-    "knowledge_rate": 0.0006
+    "adoption_rate": 0.0012,
+    "knowledge_preservation": 0.0001,
+    "knowledge_rate": 0.0001,
+    "literacy": 0.0028
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
    "observation": "Small marks over the letters show stress, breath and pause, so a stranger reads the verse as its poet meant."
   },
   "counting_rod_decimals": {
    "effects": {
-    "knowledge_rate": 0.0011,
-    "state_capacity": 0.0027,
-    "task_coordination": 0.0009,
-    "trade_capacity": 0.0033
+    "knowledge_rate": 0.0002,
+    "state_capacity": 0.0003,
+    "task_coordination": 0.0008,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "observation": "Rods laid in columns, with a blank left for nothing, reckon harvests and taxes in tens."
   },
   "armillary_sphere": {
    "effects": {
-    "knowledge_rate": 0.0011,
-    "observation_rate": 0.0041,
-    "route_speed": 0.0019
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.001,
+    "route_speed": 0.0005
    },
    "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
    "observation": "Nested bronze rings model the circles of the sky; sighted through, they give a star's place in degrees."
   },
   "trigonometry": {
    "effects": {
-    "knowledge_rate": 0.0061,
-    "observation_rate": 0.0055,
-    "route_speed": 0.004,
-    "survey_speed": 0.025
+    "knowledge_rate": 0.0035,
+    "observation_rate": 0.0014,
+    "route_speed": 0.0011,
+    "survey_speed": 0.0024
    },
    "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
    "observation": "Tables of chords turn angles into lengths, and distances nobody can walk are found by reckoning.",
@@ -592,87 +604,89 @@
   },
   "dioptra_survey": {
    "effects": {
-    "construction_rate": 0.0035,
-    "labor_demand": 0.0015,
-    "survey_speed": 0.0086,
-    "water_access": 0.004
+    "construction_rate": 0.0011,
+    "labor_demand": 0.0001,
+    "survey_speed": 0.0008,
+    "water_access": 0.0004
    },
    "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
    "observation": "A sighting table on a stand levels an aqueduct's fall and sights across a hill to set a tunnel's line."
   },
   "torch_alphabet_signals": {
    "effects": {
-    "security_efficiency": 0.0083,
-    "task_coordination": 0.0009,
-    "warfare_readiness": 0.004
+    "literacy": 0.0017,
+    "security_efficiency": 0.0018,
+    "task_coordination": 0.0002,
+    "warfare_readiness": 0.0006
    },
    "art": "res://assets/ui/research/subjects/watch_rotation-v1.png",
    "observation": "Torches raised behind two screens spell letters by row and column from hill to hill."
   },
   "latitude_zones": {
    "effects": {
-    "cultivation_yield": 0.0017,
-    "knowledge_rate": 0.0011,
-    "route_speed": 0.0019,
-    "survey_speed": 0.0029
+    "cultivation_yield": 0.0005,
+    "knowledge_rate": 0.0006,
+    "route_speed": 0.0005,
+    "survey_speed": 0.0003
    },
    "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
    "observation": "Lands are ranked by their longest day, and each zone's climate and crops are described."
   },
   "star_position_catalogue": {
    "effects": {
-    "knowledge_preservation": 0.0019,
-    "observation_rate": 0.0051,
-    "route_speed": 0.0029
+    "knowledge_preservation": 0.0011,
+    "observation_rate": 0.0013,
+    "route_speed": 0.0008
    },
    "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
    "observation": "Stars are listed by position and brightness, so a new star or one that has moved can be noticed."
   },
   "written_grammar": {
    "effects": {
-    "adoption_rate": 0.0016,
-    "institutional_rigidity": 0.0037,
-    "knowledge_preservation": 0.0026,
-    "standardization": 0.003
+    "adoption_rate": 0.0009,
+    "institutional_rigidity": 0.0005,
+    "knowledge_preservation": 0.0015,
+    "literacy": 0.0022,
+    "standardization": 0.0004
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "observation": "Grammarians set out the parts of speech and the correct forms, and schoolmasters punish every other."
   },
   "groma_grid_survey": {
    "effects": {
-    "construction_rate": 0.0023,
-    "cultivation_yield": 0.0023,
-    "state_capacity": 0.0022,
-    "survey_speed": 0.01
+    "construction_rate": 0.0007,
+    "cultivation_yield": 0.0007,
+    "state_capacity": 0.0003,
+    "survey_speed": 0.001
    },
    "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
    "observation": "Surveyors with a cross-staff lay new land out in square lots, each with its boundary stones and number."
   },
   "geared_sky_calculator": {
    "effects": {
-    "craft_output": 0.0031,
-    "knowledge_rate": 0.0017,
-    "labor_demand": 0.0023,
-    "observation_rate": 0.0031
+    "craft_output": 0.0008,
+    "knowledge_rate": 0.001,
+    "labor_demand": 0.0001,
+    "observation_rate": 0.0008
    },
    "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
    "observation": "A hand-turned box of bronze gears shows the moon's phase, the wandering stars and coming eclipses on its dials."
   },
   "dictation_shorthand": {
    "effects": {
-    "knowledge_preservation": 0.0013,
-    "labor_demand": 0.0015,
-    "state_capacity": 0.0027,
-    "task_coordination": 0.0019
+    "knowledge_preservation": 0.0008,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0003,
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
    "observation": "Trained clerks take down a speech word for word in quick signs and write it out fair by nightfall."
   },
   "public_clock_tower": {
    "effects": {
-    "labor_demand": 0.003,
-    "standardization": 0.004,
-    "task_coordination": 0.0031
+    "labor_demand": 0.0002,
+    "standardization": 0.0003,
+    "task_coordination": 0.0006
    },
    "art": "res://assets/ui/research/subjects/seasonal_patterns-v1.png",
    "observation": "An eight-sided tower shows the hour from a water-clock inside and the wind from a vane on its roof."
@@ -680,20 +694,20 @@
   "posted_public_notices": {
    "effects": {
     "adoption_rate": 0.0032,
-    "cohesion": 0.002,
-    "legitimacy": 0.0009,
-    "state_capacity": 0.0018
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Each day the officials post the council's acts, trials and news on whitened boards in the square."
   },
   "leap_year_solar_calendar": {
    "effects": {
-    "cultivation_yield": 0.004,
-    "legitimacy": 0.0024,
-    "standardization": 0.01,
-    "state_capacity": 0.0064,
-    "task_coordination": 0.0079
+    "cultivation_yield": 0.0017,
+    "legitimacy": 0.0001,
+    "standardization": 0.0008,
+    "state_capacity": 0.0006,
+    "task_coordination": 0.0016
    },
    "art": "res://assets/ui/research/subjects/seasonal_patterns-v1.png",
    "observation": "The year is fixed at 365 days, with one day added every fourth year, and the months never drift again.",
@@ -701,8 +715,8 @@
   },
   "hodometer_distance_count": {
    "effects": {
-    "route_speed": 0.0038,
-    "state_capacity": 0.0009,
+    "route_speed": 0.0013,
+    "state_capacity": 0.0001,
     "survey_speed": 0.0043
    },
    "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
@@ -711,56 +725,58 @@
   "red_black_rod_negatives": {
    "effects": {
     "knowledge_rate": 0.0011,
-    "state_capacity": 0.0018,
-    "trade_capacity": 0.0026
+    "state_capacity": 0.0002,
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "observation": "Red rods for gain and black rods for debt let a reckoner carry what is owed through a sum."
   },
   "mechanical_treatises": {
    "effects": {
-    "construction_rate": 0.0023,
-    "craft_output": 0.0046,
-    "knowledge_rate": 0.0022,
-    "water_access": 0.003
+    "construction_rate": 0.001,
+    "craft_output": 0.0023,
+    "knowledge_rate": 0.002,
+    "water_access": 0.0012
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Engineers write treatises on siphons, pumps, air-driven devices, throwing engines and lifting machines."
   },
   "encyclopedic_compendia": {
    "effects": {
-    "adoption_rate": 0.0032,
-    "knowledge_preservation": 0.0038,
-    "knowledge_rate": 0.0011,
-    "labor_demand": 0.003
+    "adoption_rate": 0.0006,
+    "knowledge_preservation": 0.0003,
+    "knowledge_rate": 0.001,
+    "labor_demand": 0.0002
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "One great work gathers farming, healing, building, war and the other known arts into many books."
   },
   "salaried_public_teachers": {
    "effects": {
-    "adoption_rate": 0.004,
-    "knowledge_rate": 0.0014,
-    "labor_demand": 0.0045,
-    "legitimacy": 0.0007
+    "adoption_rate": 0.0007,
+    "knowledge_rate": 0.0012,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001,
+    "literacy": 0.0057
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "observation": "Towns pay teachers of speech and letters from public funds, and the posts are fiercely competed for."
   },
   "number_theory_treatise": {
    "effects": {
-    "knowledge_preservation": 0.0006,
-    "knowledge_rate": 0.0022
+    "knowledge_preservation": 0.0001,
+    "knowledge_rate": 0.002
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "observation": "A treatise sets out the kinds of numbers, prime, perfect, square and oblong, and proves their properties."
   },
   "bookbinding_assemblies": {
    "effects": {
-    "adoption_rate": 0.0087,
-    "knowledge_preservation": 0.0115,
-    "knowledge_rate": 0.004,
-    "task_coordination": 0.0023
+    "adoption_rate": 0.0015,
+    "knowledge_preservation": 0.0009,
+    "knowledge_rate": 0.0036,
+    "literacy": 0.0015,
+    "task_coordination": 0.0013
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "Leaves are stacked, folded and sewn at the spine, and a whole work opens at any page.",
@@ -768,29 +784,29 @@
   },
   "ground_tremor_detector": {
    "effects": {
-    "disaster_resilience": 0.006,
+    "disaster_resilience": 0.0014,
     "observation_rate": 0.002,
-    "state_capacity": 0.0018
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "A bronze jar drops a ball from a beast's mouth toward the quarter where the earth has shaken."
   },
   "coordinate_gazetteer_maps": {
    "effects": {
-    "route_speed": 0.0058,
-    "state_capacity": 0.0018,
+    "route_speed": 0.0018,
+    "state_capacity": 0.0003,
     "survey_speed": 0.0071,
-    "trade_capacity": 0.002
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
    "observation": "Towns and river mouths are listed by two numbers, so any mapmaker can place them on the same grid."
   },
   "sky_tables_compendium": {
    "effects": {
-    "knowledge_preservation": 0.0069,
-    "knowledge_rate": 0.004,
-    "observation_rate": 0.0183,
-    "route_speed": 0.006
+    "knowledge_preservation": 0.0013,
+    "knowledge_rate": 0.0018,
+    "observation_rate": 0.0039,
+    "route_speed": 0.0019
    },
    "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
    "observation": "One compendium models every moving light in the sky, with tables to compute where each will stand.",
@@ -798,9 +814,9 @@
   },
   "lead_point_ruling": {
    "effects": {
-    "craft_output": 0.0015,
-    "knowledge_preservation": 0.0013,
-    "standardization": 0.003
+    "craft_output": 0.0004,
+    "knowledge_preservation": 0.0002,
+    "standardization": 0.0018
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "Scribes rule faint lines with a lead point before writing, and every page keeps the same layout."
@@ -808,8 +824,8 @@
   "cursive_document_hand": {
    "effects": {
     "knowledge_preservation": -0.0008,
-    "state_capacity": 0.0027,
-    "task_coordination": 0.0019
+    "state_capacity": 0.0004,
+    "task_coordination": 0.0006
    },
    "art": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
    "observation": "Clerks write joined letters at speed; documents multiply, though later readers struggle with the hand."
@@ -817,45 +833,46 @@
   "chapter_contents_lists": {
    "effects": {
     "adoption_rate": 0.002,
-    "knowledge_preservation": 0.0019,
-    "knowledge_rate": 0.0006
+    "knowledge_preservation": 0.0004,
+    "knowledge_rate": 0.0003
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "Books are divided into numbered chapters, with a list of the contents at the front."
   },
   "scaled_grid_mapping": {
    "effects": {
-    "route_speed": 0.0058,
-    "state_capacity": 0.0018,
-    "survey_speed": 0.0071,
-    "warfare_readiness": 0.003
+    "route_speed": 0.0017,
+    "state_capacity": 0.0002,
+    "survey_speed": 0.0049,
+    "warfare_readiness": 0.0009
    },
    "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
    "observation": "Maps drawn to scale on a grid, with measured bearings between towns, guide armies and road-builders."
   },
   "syncopated_algebra": {
    "effects": {
-    "knowledge_rate": 0.0028,
-    "trade_capacity": 0.0013
+    "knowledge_rate": 0.0009,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "observation": "Problems are written with short signs for the unknown and its powers, and solved in fewer lines."
   },
   "polygon_circle_estimation": {
    "effects": {
-    "construction_rate": 0.0017,
-    "knowledge_rate": 0.0017,
-    "standardization": 0.002
+    "construction_rate": 0.0008,
+    "knowledge_rate": 0.0006,
+    "standardization": 0.0008
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "observation": "Doubling a polygon's sides inside and outside a circle hems in the circle's ratio ever more closely."
   },
   "scholarly_commentaries": {
    "effects": {
-    "adoption_rate": 0.0016,
-    "institutional_rigidity": 0.006,
-    "knowledge_preservation": 0.0032,
-    "knowledge_rate": 0.0006
+    "adoption_rate": 0.0009,
+    "institutional_rigidity": 0.0003,
+    "knowledge_preservation": 0.0005,
+    "knowledge_rate": 0.0002,
+    "literacy": 0.0012
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "Commentators explain the old treatises line by line, and new thought increasingly takes the form of notes.",
@@ -863,20 +880,21 @@
   },
   "translation_bureaus": {
    "effects": {
-    "adoption_rate": 0.0032,
-    "knowledge_rate": 0.0034,
-    "labor_demand": 0.003,
-    "trade_capacity": 0.0026
+    "adoption_rate": 0.0019,
+    "knowledge_rate": 0.0012,
+    "labor_demand": 0.0002,
+    "literacy": 0.0012,
+    "trade_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "Paid translators render foreign books on healing, number and the sky into the home tongue."
   },
   "epitome_digests": {
    "effects": {
-    "adoption_rate": 0.004,
+    "adoption_rate": 0.0024,
     "knowledge_preservation": -0.0033,
     "knowledge_rate": -0.0007,
-    "labor_demand": -0.003
+    "labor_demand": -0.0002
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "Short digests replace the long works they summarize, and the long works are no longer copied.",
@@ -884,12 +902,524 @@
   },
   "excerpt_anthologies": {
    "effects": {
-    "adoption_rate": 0.002,
-    "cohesion": 0.002,
-    "knowledge_preservation": 0.0013
+    "adoption_rate": 0.0012,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0002
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "Collectors copy the best passages of many authors into one volume, and much survives only there."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "thematic_word_lists": {
+    "adoption_rate": 0.0008,
+    "knowledge_preservation": 0.0019,
+    "knowledge_rate": 0.0008
+   },
+   "diplomatic_letter_formulary": {
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0013,
+    "trade_capacity": 0.0026
+   },
+   "court_lingua_franca": {
+    "adoption_rate": 0.0024,
+    "labor_demand": 0.003,
+    "state_capacity": 0.0013,
+    "trade_capacity": 0.0052
+   },
+   "omen_compendia": {
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0016,
+    "legitimacy": 0.0004,
+    "observation_rate": 0.0031
+   },
+   "abecedary_letter_order": {
+    "adoption_rate": 0.0024,
+    "knowledge_preservation": 0.0013,
+    "knowledge_rate": 0.0008
+   },
+   "squared_grid_drawings": {
+    "construction_rate": 0.0023,
+    "craft_output": 0.0046,
+    "standardization": 0.004
+   },
+   "wax_writing_boards": {
+    "adoption_rate": 0.0012,
+    "knowledge_rate": 0.0017,
+    "labor_demand": 0.0015,
+    "task_coordination": 0.0009
+   },
+   "graduated_measuring_rods": {
+    "construction_rate": 0.0029,
+    "craft_output": 0.0023,
+    "standardization": 0.008,
+    "survey_speed": 0.0029
+   },
+   "planet_cycle_tables": {
+    "knowledge_preservation": 0.0013,
+    "labor_demand": 0.0023,
+    "legitimacy": 0.0004,
+    "observation_rate": 0.0041
+   },
+   "sherd_ink_notes": {
+    "knowledge_preservation": 0.0013,
+    "state_capacity": 0.0013,
+    "task_coordination": 0.0016,
+    "trade_capacity": 0.002
+   },
+   "weight_conversion_tables": {
+    "standardization": 0.006,
+    "storage_loss": -0.003,
+    "trade_capacity": 0.0079
+   },
+   "ink_on_hide_scrolls": {
+    "knowledge_preservation": 0.0032,
+    "knowledge_rate": 0.0011,
+    "labor_demand": 0.003
+   },
+   "eponym_year_lists": {
+    "institutional_rigidity": 0.0015,
+    "knowledge_preservation": 0.0022,
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0013
+   },
+   "adapted_alphabet_borrowing": {
+    "adoption_rate": 0.0048,
+    "knowledge_rate": 0.0017,
+    "trade_capacity": 0.0026
+   },
+   "eclipse_records": {
+    "knowledge_preservation": 0.0013,
+    "legitimacy": 0.0004,
+    "observation_rate": 0.0041
+   },
+   "star_transit_sighting": {
+    "observation_rate": 0.0031,
+    "route_speed": 0.0019,
+    "survey_speed": 0.0036
+   },
+   "merchant_letter_accounts": {
+    "institutional_rigidity": -0.003,
+    "knowledge_preservation": 0.001,
+    "trade_capacity": 0.0066
+   },
+   "sky_watch_reports": {
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0009,
+    "observation_rate": 0.002,
+    "state_capacity": 0.0018
+   },
+   "full_vowel_alphabet": {
+    "adoption_rate": 0.0217,
+    "institutional_rigidity": -0.006,
+    "knowledge_preservation": 0.0069,
+    "knowledge_rate": 0.0091,
+    "task_coordination": 0.0034
+   },
+   "written_craft_recipes": {
+    "craft_output": 0.0077,
+    "knowledge_preservation": 0.0019,
+    "standardization": 0.004
+   },
+   "astronomical_diaries": {
+    "knowledge_preservation": 0.0019,
+    "labor_demand": 0.003,
+    "observation_rate": 0.0051
+   },
+   "straightedge_compass": {
+    "construction_rate": 0.0046,
+    "craft_output": 0.0031,
+    "knowledge_rate": 0.0011,
+    "survey_speed": 0.0043
+   },
+   "world_maps": {
+    "knowledge_rate": 0.0008,
+    "route_speed": 0.0038,
+    "survey_speed": 0.0029,
+    "trade_capacity": 0.0033
+   },
+   "string_ratio_harmonics": {
+    "cohesion": 0.002,
+    "knowledge_rate": 0.0014,
+    "observation_rate": 0.001
+   },
+   "natural_philosophy_schools": {
+    "adoption_rate": 0.0072,
+    "knowledge_rate": 0.0177,
+    "labor_demand": 0.0045,
+    "legitimacy": -0.0041,
+    "observation_rate": 0.0137
+   },
+   "eclipse_cycle_prediction": {
+    "knowledge_preservation": 0.001,
+    "legitimacy": 0.0013,
+    "observation_rate": 0.0041
+   },
+   "letter_schools_for_citizens": {
+    "adoption_rate": 0.0072,
+    "knowledge_rate": 0.0022,
+    "labor_demand": 0.0075,
+    "task_coordination": 0.0013
+   },
+   "demonstrated_geometry": {
+    "construction_rate": 0.0023,
+    "knowledge_rate": 0.0034,
+    "survey_speed": 0.0029
+   },
+   "authored_prose_treatises": {
+    "adoption_rate": 0.0016,
+    "knowledge_preservation": 0.0026,
+    "knowledge_rate": 0.0028
+   },
+   "star_weather_almanac": {
+    "cultivation_yield": 0.0023,
+    "observation_rate": 0.0025,
+    "task_coordination": 0.0013
+   },
+   "nineteen_year_cycle": {
+    "legitimacy": 0.0007,
+    "standardization": 0.006,
+    "state_capacity": 0.0009,
+    "task_coordination": 0.0019
+   },
+   "seasonal_hour_sundial": {
+    "craft_output": 0.0015,
+    "standardization": 0.004,
+    "task_coordination": 0.0019
+   },
+   "incommensurable_lengths": {
+    "knowledge_rate": 0.0022,
+    "observation_rate": 0.0015
+   },
+   "rhetoric_handbooks": {
+    "adoption_rate": 0.0024,
+    "cohesion": -0.003,
+    "legitimacy": 0.0009,
+    "state_capacity": 0.0013
+   },
+   "letter_substitution_cipher": {
+    "labor_demand": 0.0015,
+    "security_efficiency": 0.01,
+    "warfare_readiness": 0.004
+   },
+   "pigeon_message_post": {
+    "labor_demand": 0.0023,
+    "security_efficiency": 0.0033,
+    "state_capacity": 0.0013,
+    "task_coordination": 0.0019
+   },
+   "syllogistic_logic": {
+    "adoption_rate": 0.0043,
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0035,
+    "knowledge_rate": 0.0126
+   },
+   "descriptive_natural_history": {
+    "cultivation_yield": 0.0017,
+    "knowledge_preservation": 0.0019,
+    "observation_rate": 0.0061
+   },
+   "counting_board_abacus": {
+    "knowledge_rate": 0.0008,
+    "state_capacity": 0.0022,
+    "task_coordination": 0.0013,
+    "trade_capacity": 0.0052
+   },
+   "geometric_optics_treatise": {
+    "construction_rate": 0.0012,
+    "knowledge_rate": 0.0017,
+    "observation_rate": 0.0025
+   },
+   "ratio_proportion": {
+    "construction_rate": 0.0023,
+    "knowledge_rate": 0.0022,
+    "standardization": 0.004,
+    "trade_capacity": 0.002
+   },
+   "similar_triangles": {
+    "construction_rate": 0.0023,
+    "knowledge_rate": 0.0011,
+    "survey_speed": 0.0071
+   },
+   "combinatorics": {
+    "knowledge_rate": 0.0017,
+    "observation_rate": 0.001,
+    "state_capacity": 0.0009
+   },
+   "axiomatic_geometry_compendium": {
+    "adoption_rate": 0.0043,
+    "construction_rate": 0.008,
+    "knowledge_preservation": 0.0069,
+    "knowledge_rate": 0.0151,
+    "survey_speed": 0.008
+   },
+   "endowed_scholar_house": {
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0104,
+    "knowledge_rate": 0.0151,
+    "labor_demand": 0.009,
+    "legitimacy": 0.0016,
+    "observation_rate": 0.0073
+   },
+   "author_subject_catalogues": {
+    "adoption_rate": 0.0012,
+    "knowledge_preservation": 0.0032,
+    "knowledge_rate": 0.0014
+   },
+   "lever_moments": {
+    "construction_rate": 0.0046,
+    "haul_capacity": 0.006,
+    "knowledge_rate": 0.0008,
+    "tool_quality": 0.004
+   },
+   "displacement_buoyancy": {
+    "craft_output": 0.0015,
+    "knowledge_rate": 0.0011,
+    "naval_capacity": 0.004,
+    "standardization": 0.003
+   },
+   "earth_circumference_measure": {
+    "knowledge_rate": 0.0017,
+    "route_speed": 0.0029,
+    "survey_speed": 0.0043
+   },
+   "centers_of_mass": {
+    "construction_rate": 0.0029,
+    "haul_capacity": 0.004,
+    "knowledge_rate": 0.0008
+   },
+   "hydrostatic_pressure": {
+    "construction_rate": 0.0017,
+    "knowledge_rate": 0.0008,
+    "water_access": 0.004
+   },
+   "mineral_specific_gravity": {
+    "extraction_yield": 0.003,
+    "knowledge_rate": 0.0008,
+    "standardization": 0.004,
+    "trade_capacity": 0.0026
+   },
+   "exhaustion_area_method": {
+    "construction_rate": 0.0017,
+    "knowledge_rate": 0.0028,
+    "survey_speed": 0.0021
+   },
+   "collated_critical_editions": {
+    "knowledge_preservation": 0.0045,
+    "knowledge_rate": 0.0011,
+    "labor_demand": 0.003
+   },
+   "liberal_curriculum": {
+    "adoption_rate": 0.004,
+    "institutional_rigidity": 0.0045,
+    "knowledge_rate": 0.0022,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0007
+   },
+   "parchment_record_preparation": {
+    "knowledge_preservation": 0.0173,
+    "labor_demand": 0.0045,
+    "state_capacity": 0.0048,
+    "task_coordination": 0.0023
+   },
+   "reading_marks": {
+    "adoption_rate": 0.0024,
+    "knowledge_preservation": 0.0013,
+    "knowledge_rate": 0.0006
+   },
+   "counting_rod_decimals": {
+    "knowledge_rate": 0.0011,
+    "state_capacity": 0.0027,
+    "task_coordination": 0.0009,
+    "trade_capacity": 0.0033
+   },
+   "armillary_sphere": {
+    "knowledge_rate": 0.0011,
+    "observation_rate": 0.0041,
+    "route_speed": 0.0019
+   },
+   "trigonometry": {
+    "knowledge_rate": 0.0061,
+    "observation_rate": 0.0055,
+    "route_speed": 0.004,
+    "survey_speed": 0.025
+   },
+   "dioptra_survey": {
+    "construction_rate": 0.0035,
+    "labor_demand": 0.0015,
+    "survey_speed": 0.0086,
+    "water_access": 0.004
+   },
+   "torch_alphabet_signals": {
+    "security_efficiency": 0.0083,
+    "task_coordination": 0.0009,
+    "warfare_readiness": 0.004
+   },
+   "latitude_zones": {
+    "cultivation_yield": 0.0017,
+    "knowledge_rate": 0.0011,
+    "route_speed": 0.0019,
+    "survey_speed": 0.0029
+   },
+   "star_position_catalogue": {
+    "knowledge_preservation": 0.0019,
+    "observation_rate": 0.0051,
+    "route_speed": 0.0029
+   },
+   "written_grammar": {
+    "adoption_rate": 0.0016,
+    "institutional_rigidity": 0.0037,
+    "knowledge_preservation": 0.0026,
+    "standardization": 0.003
+   },
+   "groma_grid_survey": {
+    "construction_rate": 0.0023,
+    "cultivation_yield": 0.0023,
+    "state_capacity": 0.0022,
+    "survey_speed": 0.01
+   },
+   "geared_sky_calculator": {
+    "craft_output": 0.0031,
+    "knowledge_rate": 0.0017,
+    "labor_demand": 0.0023,
+    "observation_rate": 0.0031
+   },
+   "dictation_shorthand": {
+    "knowledge_preservation": 0.0013,
+    "labor_demand": 0.0015,
+    "state_capacity": 0.0027,
+    "task_coordination": 0.0019
+   },
+   "public_clock_tower": {
+    "labor_demand": 0.003,
+    "standardization": 0.004,
+    "task_coordination": 0.0031
+   },
+   "posted_public_notices": {
+    "adoption_rate": 0.0032,
+    "cohesion": 0.002,
+    "legitimacy": 0.0009,
+    "state_capacity": 0.0018
+   },
+   "leap_year_solar_calendar": {
+    "cultivation_yield": 0.004,
+    "legitimacy": 0.0024,
+    "standardization": 0.01,
+    "state_capacity": 0.0064,
+    "task_coordination": 0.0079
+   },
+   "hodometer_distance_count": {
+    "route_speed": 0.0038,
+    "state_capacity": 0.0009,
+    "survey_speed": 0.0043
+   },
+   "red_black_rod_negatives": {
+    "knowledge_rate": 0.0011,
+    "state_capacity": 0.0018,
+    "trade_capacity": 0.0026
+   },
+   "mechanical_treatises": {
+    "construction_rate": 0.0023,
+    "craft_output": 0.0046,
+    "knowledge_rate": 0.0022,
+    "water_access": 0.003
+   },
+   "encyclopedic_compendia": {
+    "adoption_rate": 0.0032,
+    "knowledge_preservation": 0.0038,
+    "knowledge_rate": 0.0011,
+    "labor_demand": 0.003
+   },
+   "salaried_public_teachers": {
+    "adoption_rate": 0.004,
+    "knowledge_rate": 0.0014,
+    "labor_demand": 0.0045,
+    "legitimacy": 0.0007
+   },
+   "number_theory_treatise": {
+    "knowledge_preservation": 0.0006,
+    "knowledge_rate": 0.0022
+   },
+   "bookbinding_assemblies": {
+    "adoption_rate": 0.0087,
+    "knowledge_preservation": 0.0115,
+    "knowledge_rate": 0.004,
+    "task_coordination": 0.0023
+   },
+   "ground_tremor_detector": {
+    "disaster_resilience": 0.006,
+    "observation_rate": 0.002,
+    "state_capacity": 0.0018
+   },
+   "coordinate_gazetteer_maps": {
+    "route_speed": 0.0058,
+    "state_capacity": 0.0018,
+    "survey_speed": 0.0071,
+    "trade_capacity": 0.002
+   },
+   "sky_tables_compendium": {
+    "knowledge_preservation": 0.0069,
+    "knowledge_rate": 0.004,
+    "observation_rate": 0.0183,
+    "route_speed": 0.006
+   },
+   "lead_point_ruling": {
+    "craft_output": 0.0015,
+    "knowledge_preservation": 0.0013,
+    "standardization": 0.003
+   },
+   "cursive_document_hand": {
+    "knowledge_preservation": -0.0008,
+    "state_capacity": 0.0027,
+    "task_coordination": 0.0019
+   },
+   "chapter_contents_lists": {
+    "adoption_rate": 0.002,
+    "knowledge_preservation": 0.0019,
+    "knowledge_rate": 0.0006
+   },
+   "scaled_grid_mapping": {
+    "route_speed": 0.0058,
+    "state_capacity": 0.0018,
+    "survey_speed": 0.0071,
+    "warfare_readiness": 0.003
+   },
+   "syncopated_algebra": {
+    "knowledge_rate": 0.0028,
+    "trade_capacity": 0.0013
+   },
+   "polygon_circle_estimation": {
+    "construction_rate": 0.0017,
+    "knowledge_rate": 0.0017,
+    "standardization": 0.002
+   },
+   "scholarly_commentaries": {
+    "adoption_rate": 0.0016,
+    "institutional_rigidity": 0.006,
+    "knowledge_preservation": 0.0032,
+    "knowledge_rate": 0.0006
+   },
+   "translation_bureaus": {
+    "adoption_rate": 0.0032,
+    "knowledge_rate": 0.0034,
+    "labor_demand": 0.003,
+    "trade_capacity": 0.0026
+   },
+   "epitome_digests": {
+    "adoption_rate": 0.004,
+    "knowledge_preservation": -0.0033,
+    "knowledge_rate": -0.0007,
+    "labor_demand": -0.003
+   },
+   "excerpt_anthologies": {
+    "adoption_rate": 0.002,
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0013
+   }
   }
  }
 }

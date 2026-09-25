@@ -4,10 +4,10 @@
  "items": {
   "regional_vicariates": {
    "effects": {
-    "institutional_rigidity": 0.0009,
-    "labor_demand": 0.0018,
-    "security_efficiency": 0.0004,
-    "state_capacity": 0.0012
+    "institutional_rigidity": 0.0001,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0001,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
    "name": "Regional Vicars",
@@ -15,12 +15,12 @@
   },
   "bound_estate_tenants": {
    "effects": {
-    "cohesion": -0.0021,
-    "cultivation_yield": 0.0014,
-    "food_storage": 0.0037,
+    "cohesion": -0.0012,
+    "cultivation_yield": 0.0003,
+    "food_storage": 0.0019,
     "labor_efficiency": -0.0014,
     "legitimacy": -0.001,
-    "state_capacity": 0.0004
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Bound Estate Tenants",
@@ -29,10 +29,10 @@
   },
   "register_of_dignities": {
    "effects": {
-    "institutional_rigidity": 0.0014,
-    "labor_demand": 0.0018,
-    "legitimacy": 0.0004,
-    "state_capacity": 0.0012
+    "institutional_rigidity": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
    "name": "Register of Dignities",
@@ -40,11 +40,11 @@
   },
   "ranked_priestly_hierarchy": {
    "effects": {
-    "cohesion": 0.0042,
-    "institutional_rigidity": 0.0029,
-    "labor_demand": 0.0028,
-    "legitimacy": 0.005,
-    "state_capacity": 0.0013
+    "cohesion": 0.0002,
+    "institutional_rigidity": 0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/officiant_vestments.png",
    "name": "The God's House Ranked",
@@ -54,12 +54,12 @@
   },
   "promulgated_edict_code": {
    "effects": {
-    "institutional_rigidity": 0.0029,
-    "labor_demand": 0.0028,
-    "legitimacy": 0.0031,
-    "security_efficiency": 0.0019,
-    "standardization": 0.0034,
-    "state_capacity": 0.0045
+    "institutional_rigidity": 0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0002,
+    "security_efficiency": 0.0002,
+    "standardization": 0.0014,
+    "state_capacity": 0.001
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Official Edict Code",
@@ -68,10 +68,10 @@
   },
   "town_protector_office": {
    "effects": {
-    "cohesion": 0.0016,
-    "legitimacy": 0.0012,
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
     "state_capacity": -0.0005,
-    "trade_capacity": 0.0005
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
    "name": "Town Protector",
@@ -80,10 +80,11 @@
   },
   "written_customary_codes": {
    "effects": {
-    "cohesion": 0.0016,
-    "institutional_rigidity": 0.0009,
-    "legitimacy": 0.0016,
-    "security_efficiency": 0.0008
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.001,
+    "security_efficiency": 0.0004
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Written Customary Codes",
@@ -91,9 +92,9 @@
   },
   "priest_overseer_town_leadership": {
    "effects": {
-    "cohesion": 0.0016,
-    "disaster_resilience": 0.0028,
-    "legitimacy": 0.0008,
+    "cohesion": 0.0001,
+    "disaster_resilience": 0.0007,
+    "legitimacy": 0.0001,
     "state_capacity": -0.001
    },
    "art": "res://assets/ui/research/discovery-600/officiant_vestments.png",
@@ -103,11 +104,11 @@
   },
   "personal_law_by_people": {
    "effects": {
-    "cohesion": 0.0016,
-    "institutional_rigidity": 0.0009,
-    "legitimacy": 0.0008,
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001,
     "state_capacity": -0.0005,
-    "trade_capacity": 0.0005
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Each People Under Its Own Law",
@@ -115,12 +116,12 @@
   },
   "jurist_digest_codification": {
    "effects": {
-    "institutional_rigidity": 0.0036,
-    "knowledge_preservation": 0.0024,
-    "labor_demand": 0.0042,
-    "legitimacy": 0.0025,
-    "standardization": 0.0034,
-    "state_capacity": 0.0039
+    "institutional_rigidity": 0.0006,
+    "knowledge_preservation": 0.0003,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001,
+    "standardization": 0.001,
+    "state_capacity": 0.001
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Grand Digest",
@@ -129,10 +130,11 @@
   },
   "official_law_primer": {
    "effects": {
-    "adoption_rate": 0.0014,
-    "institutional_rigidity": 0.0005,
-    "knowledge_preservation": 0.0009,
-    "state_capacity": 0.0008
+    "adoption_rate": 0.0012,
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "literacy": 0.001,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Official Law Primer",
@@ -140,11 +142,11 @@
   },
   "district_counts": {
    "effects": {
-    "cohesion": -0.0005,
-    "institutional_rigidity": 0.0005,
-    "security_efficiency": 0.0012,
-    "state_capacity": 0.0016,
-    "warfare_readiness": 0.0014
+    "cohesion": -0.0001,
+    "institutional_rigidity": 0.0001,
+    "security_efficiency": 0.0006,
+    "state_capacity": 0.0004,
+    "warfare_readiness": 0.0004
    },
    "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
    "name": "District Counts",
@@ -152,12 +154,12 @@
   },
   "household_great_offices": {
    "effects": {
-    "food_storage": 0.0039,
-    "institutional_rigidity": 0.0022,
-    "labor_demand": 0.0028,
-    "legitimacy": 0.0019,
-    "state_capacity": 0.0032,
-    "task_coordination": 0.0047
+    "food_storage": 0.0016,
+    "institutional_rigidity": 0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0006,
+    "task_coordination": 0.0008
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Household Great Offices",
@@ -166,11 +168,11 @@
   },
   "ordeal_by_the_god": {
    "effects": {
-    "cohesion": 0.0005,
+    "cohesion": 0.0001,
     "injury_risk": 0.0014,
-    "institutional_rigidity": 0.0014,
-    "legitimacy": 0.0012,
-    "security_efficiency": 0.0008
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0003
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Trial by Ordeal",
@@ -179,11 +181,11 @@
   },
   "three_department_ministries": {
    "effects": {
-    "institutional_rigidity": 0.0044,
-    "labor_demand": 0.0056,
-    "standardization": 0.0034,
-    "state_capacity": 0.0065,
-    "task_coordination": 0.0059
+    "institutional_rigidity": 0.0004,
+    "labor_demand": 0.0003,
+    "standardization": 0.0012,
+    "state_capacity": 0.0011,
+    "task_coordination": 0.001
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
    "name": "Three Departments, Six Ministries",
@@ -192,12 +194,12 @@
   },
   "equal_field_allotment": {
    "effects": {
-    "cohesion": 0.0011,
-    "cultivation_yield": 0.0021,
-    "food_storage": 0.0025,
-    "institutional_rigidity": 0.0009,
-    "labor_demand": 0.0018,
-    "state_capacity": 0.0008
+    "cohesion": 0.0001,
+    "cultivation_yield": 0.0005,
+    "food_storage": 0.001,
+    "institutional_rigidity": 0.0001,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Equal Field Allotments",
@@ -205,11 +207,11 @@
   },
   "regular_merit_examinations": {
    "effects": {
-    "adoption_rate": 0.0014,
-    "institutional_rigidity": 0.0014,
-    "labor_demand": 0.0018,
-    "legitimacy": 0.0012,
-    "state_capacity": 0.0016
+    "adoption_rate": 0.0012,
+    "institutional_rigidity": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/professional_service-v1.png",
    "name": "Regular Merit Examinations",
@@ -217,11 +219,11 @@
   },
   "military_frontier_provinces": {
    "effects": {
-    "cohesion": -0.0011,
+    "cohesion": -0.0002,
     "legitimacy": -0.0005,
-    "security_efficiency": 0.0015,
-    "state_capacity": 0.0004,
-    "warfare_readiness": 0.0028
+    "security_efficiency": 0.0006,
+    "state_capacity": 0.0001,
+    "warfare_readiness": 0.0005
    },
    "art": "res://assets/ui/research/subjects/watch_rotation-v1.png",
    "name": "Military Frontier Provinces",
@@ -229,10 +231,10 @@
   },
   "witnessed_land_charters": {
    "effects": {
-    "knowledge_preservation": 0.0009,
-    "legitimacy": 0.0008,
-    "state_capacity": 0.0004,
-    "trade_capacity": 0.0005
+    "knowledge_preservation": 0.0002,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Witnessed Land Charters",
@@ -241,9 +243,9 @@
   "impeaching_censorate": {
    "effects": {
     "institutional_rigidity": -0.0014,
-    "labor_demand": 0.0018,
-    "legitimacy": 0.0012,
-    "state_capacity": 0.0012
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
    "name": "Impeaching Censors",
@@ -251,10 +253,10 @@
   },
   "palace_mayor_regency": {
    "effects": {
-    "cohesion": -0.0011,
+    "cohesion": -0.0002,
     "legitimacy": -0.0015,
-    "security_efficiency": 0.0004,
-    "state_capacity": 0.0008
+    "security_efficiency": 0.0001,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Palace Mayor",
@@ -263,12 +265,12 @@
   },
   "homage_commendation": {
    "effects": {
-    "cohesion": 0.0034,
-    "institutional_rigidity": 0.0022,
-    "legitimacy": 0.0019,
-    "security_efficiency": 0.0037,
+    "cohesion": 0.0002,
+    "institutional_rigidity": 0.0005,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0011,
     "state_capacity": -0.0024,
-    "warfare_readiness": 0.0045
+    "warfare_readiness": 0.0009
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Homage",
@@ -278,11 +280,11 @@
   },
   "hereditary_military_governors": {
    "effects": {
-    "institutional_rigidity": 0.0009,
+    "institutional_rigidity": 0.0002,
     "legitimacy": -0.001,
-    "security_efficiency": 0.0012,
+    "security_efficiency": 0.0004,
     "state_capacity": -0.002,
-    "warfare_readiness": 0.0014
+    "warfare_readiness": 0.0003
    },
    "art": "res://assets/ui/research/subjects/military_staffs-v1.png",
    "name": "Hereditary Military Governors",
@@ -291,10 +293,10 @@
   },
   "twice_yearly_coin_tax": {
    "effects": {
-    "cohesion": -0.0011,
-    "labor_demand": 0.0009,
-    "state_capacity": 0.002,
-    "trade_capacity": 0.0011
+    "cohesion": -0.0002,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0005,
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
    "name": "Twice-yearly Coin Tax",
@@ -302,12 +304,13 @@
   },
   "palace_school_for_officials": {
    "effects": {
-    "adoption_rate": 0.0014,
-    "institutional_rigidity": 0.0005,
-    "knowledge_preservation": 0.0006,
-    "labor_demand": 0.0018,
-    "legitimacy": 0.0004,
-    "state_capacity": 0.0012
+    "adoption_rate": 0.0003,
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.001,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Palace School",
@@ -315,10 +318,10 @@
   },
   "spring_magnate_assembly": {
    "effects": {
-    "cohesion": 0.0011,
-    "institutional_rigidity": 0.0005,
-    "legitimacy": 0.0016,
-    "state_capacity": 0.0008
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Spring Assembly of Magnates",
@@ -326,10 +329,10 @@
   },
   "compulsory_tithe": {
    "effects": {
-    "cohesion": -0.0011,
-    "food_storage": 0.0037,
-    "knowledge_preservation": 0.0003,
-    "legitimacy": 0.0012
+    "cohesion": -0.0002,
+    "food_storage": 0.0025,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
    "name": "Compulsory Tithe",
@@ -338,11 +341,11 @@
   },
   "paired_royal_envoys": {
    "effects": {
-    "institutional_rigidity": -0.0015,
-    "labor_demand": 0.0028,
-    "legitimacy": 0.0025,
-    "security_efficiency": 0.0012,
-    "state_capacity": 0.0045
+    "institutional_rigidity": -0.0012,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0001,
+    "state_capacity": 0.0006
    },
    "art": "res://assets/ui/research/paper/public_office_handover.png",
    "name": "Paired Royal Envoys",
@@ -351,9 +354,9 @@
   },
   "numbered_article_decrees": {
    "effects": {
-    "knowledge_preservation": 0.0006,
-    "standardization": 0.0014,
-    "state_capacity": 0.0012
+    "knowledge_preservation": 0.0001,
+    "standardization": 0.0005,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
    "name": "Numbered Decrees",
@@ -361,10 +364,10 @@
   },
   "overlord_crowned_by_high_priest": {
    "effects": {
-    "cohesion": 0.0034,
-    "institutional_rigidity": 0.0022,
-    "legitimacy": 0.0063,
-    "state_capacity": 0.0013
+    "cohesion": 0.0002,
+    "institutional_rigidity": 0.0003,
+    "legitimacy": 0.0003,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/royal_ancestor_offerings.png",
    "name": "Crowned by the God's High Servant",
@@ -374,10 +377,10 @@
   },
   "seigneurial_immunity_courts": {
    "effects": {
-    "cohesion": -0.0005,
-    "institutional_rigidity": 0.0014,
+    "cohesion": -0.0001,
+    "institutional_rigidity": 0.0002,
     "legitimacy": -0.001,
-    "security_efficiency": 0.0012,
+    "security_efficiency": 0.0001,
     "state_capacity": -0.002
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
@@ -387,10 +390,11 @@
   },
   "manor_court_customals": {
    "effects": {
-    "cohesion": 0.0016,
-    "food_storage": 0.0012,
-    "knowledge_preservation": 0.0009,
-    "legitimacy": 0.0008
+    "cohesion": 0.0001,
+    "food_storage": 0.0007,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Manor Customals",
@@ -398,11 +402,11 @@
   },
   "fief_tenure_for_service": {
    "effects": {
-    "cohesion": -0.0017,
-    "institutional_rigidity": 0.0029,
-    "security_efficiency": 0.0031,
-    "state_capacity": 0.0019,
-    "warfare_readiness": 0.009
+    "cohesion": -0.0004,
+    "institutional_rigidity": 0.0004,
+    "security_efficiency": 0.0003,
+    "state_capacity": 0.0002,
+    "warfare_readiness": 0.0023
    },
    "art": "res://assets/ui/research/subjects/armored_riding-v1.png",
    "name": "Fiefs",
@@ -412,11 +416,11 @@
   },
   "hereditary_fief_succession": {
    "effects": {
-    "cohesion": 0.0016,
-    "institutional_rigidity": 0.0014,
-    "legitimacy": 0.0008,
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0002,
+    "legitimacy": 0.0001,
     "state_capacity": -0.0015,
-    "warfare_readiness": 0.0007
+    "warfare_readiness": 0.0002
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Hereditary Fiefs",
@@ -425,9 +429,9 @@
   "frontier_march_lords": {
    "effects": {
     "legitimacy": -0.0005,
-    "security_efficiency": 0.0015,
+    "security_efficiency": 0.0001,
     "state_capacity": -0.0005,
-    "warfare_readiness": 0.0021
+    "warfare_readiness": 0.0005
    },
    "art": "res://assets/ui/research/subjects/watch_rotation-v1.png",
    "name": "March Lords",
@@ -435,10 +439,10 @@
   },
   "shire_reeve_courts": {
    "effects": {
-    "cohesion": 0.0005,
-    "legitimacy": 0.0012,
-    "security_efficiency": 0.0008,
-    "state_capacity": 0.0016
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0001,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Shire Courts",
@@ -446,11 +450,11 @@
   },
   "prefect_guild_rulebook": {
    "effects": {
-    "craft_output": 0.0021,
-    "institutional_rigidity": 0.0014,
-    "standardization": 0.0028,
-    "state_capacity": 0.0004,
-    "trade_capacity": 0.0005
+    "craft_output": 0.0005,
+    "institutional_rigidity": 0.0003,
+    "standardization": 0.0007,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
    "name": "Guild Rulebook",
@@ -458,12 +462,12 @@
   },
   "itinerant_royal_court": {
    "effects": {
-    "cohesion": 0.0025,
+    "cohesion": 0.0001,
     "food_storage": -0.0058,
-    "labor_demand": 0.0028,
-    "legitimacy": 0.0038,
-    "state_capacity": 0.0019,
-    "task_coordination": 0.0012
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0002,
+    "state_capacity": 0.0003,
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Itinerant Court",
@@ -473,10 +477,10 @@
   },
   "smallholder_protection_laws": {
    "effects": {
-    "cohesion": 0.0021,
-    "cultivation_yield": 0.0007,
-    "legitimacy": 0.0012,
-    "state_capacity": 0.0004
+    "cohesion": 0.0001,
+    "cultivation_yield": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Smallholder Protection",
@@ -484,10 +488,10 @@
   },
   "raider_tribute_land_tax": {
    "effects": {
-    "cohesion": -0.0016,
+    "cohesion": -0.0004,
     "food_storage": -0.0009,
-    "security_efficiency": 0.0012,
-    "state_capacity": 0.002
+    "security_efficiency": 0.0002,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
    "name": "Raider Tribute Tax",
@@ -495,9 +499,9 @@
   },
   "castellan_local_lordship": {
    "effects": {
-    "institutional_rigidity": 0.0009,
+    "institutional_rigidity": 0.0002,
     "legitimacy": -0.001,
-    "security_efficiency": 0.0015,
+    "security_efficiency": 0.0003,
     "state_capacity": -0.0015,
     "trade_capacity": -0.0011
    },
@@ -508,10 +512,10 @@
   },
   "sealed_royal_writs": {
    "effects": {
-    "institutional_rigidity": -0.0005,
-    "knowledge_preservation": 0.0006,
-    "state_capacity": 0.002,
-    "task_coordination": 0.0015
+    "institutional_rigidity": -0.0001,
+    "knowledge_preservation": 0.0001,
+    "state_capacity": 0.0007,
+    "task_coordination": 0.0013
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
    "name": "Sealed Writs",
@@ -519,9 +523,9 @@
   },
   "holy_truce_days": {
    "effects": {
-    "cohesion": 0.0016,
-    "legitimacy": 0.0012,
-    "security_efficiency": 0.0015,
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0003,
     "warfare_readiness": -0.0014
    },
    "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
@@ -531,10 +535,11 @@
   },
   "anonymous_copied_exam_scripts": {
    "effects": {
-    "institutional_rigidity": -0.0005,
-    "labor_demand": 0.0018,
-    "legitimacy": 0.0012,
-    "state_capacity": 0.0012
+    "institutional_rigidity": -0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.001,
+    "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/professional_service-v1.png",
    "name": "Anonymous Examination Scripts",
@@ -543,8 +548,9 @@
   "treasury_paper_notes": {
    "effects": {
     "legitimacy": -0.001,
-    "state_capacity": 0.0012,
-    "trade_capacity": 0.0027
+    "literacy": 0.001,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
    "name": "Treasury Paper Notes",
@@ -552,10 +558,10 @@
   },
   "mutual_surety_tithings": {
    "effects": {
-    "cohesion": 0.0011,
-    "institutional_rigidity": 0.0009,
-    "security_efficiency": 0.0015,
-    "state_capacity": 0.0008
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0002,
+    "security_efficiency": 0.0003,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/watch_rotation-v1.png",
    "name": "Surety Groups of Ten",
@@ -563,10 +569,10 @@
   },
   "merchant_guild_monopoly": {
    "effects": {
-    "cohesion": -0.0011,
-    "craft_output": 0.0014,
-    "institutional_rigidity": 0.0014,
-    "trade_capacity": 0.0021
+    "cohesion": -0.0002,
+    "craft_output": 0.0005,
+    "institutional_rigidity": 0.0002,
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
    "name": "Merchant Guild Monopoly",
@@ -575,9 +581,9 @@
   },
   "closed_college_election": {
    "effects": {
-    "cohesion": 0.0011,
-    "institutional_rigidity": 0.0009,
-    "legitimacy": 0.0016
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/officiant_vestments.png",
    "name": "Closed College Election",
@@ -585,12 +591,12 @@
   },
   "royal_chancery_office": {
    "effects": {
-    "institutional_rigidity": 0.0022,
-    "knowledge_preservation": 0.0024,
-    "labor_demand": 0.0042,
-    "legitimacy": 0.0013,
-    "state_capacity": 0.0052,
-    "task_coordination": 0.0047
+    "institutional_rigidity": 0.0004,
+    "knowledge_preservation": 0.0006,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0005,
+    "task_coordination": 0.0007
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
    "name": "Chancery",
@@ -599,12 +605,12 @@
   },
   "sworn_town_commune": {
    "effects": {
-    "cohesion": 0.0068,
-    "institutional_rigidity": -0.0022,
-    "legitimacy": 0.0019,
-    "security_efficiency": 0.0019,
+    "cohesion": 0.0003,
+    "institutional_rigidity": -0.0003,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0004,
     "state_capacity": -0.0016,
-    "trade_capacity": 0.0051
+    "trade_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
    "name": "Sworn Commune",
@@ -614,12 +620,12 @@
   },
   "counting_table_audit": {
    "effects": {
-    "institutional_rigidity": 0.0015,
-    "labor_demand": 0.0028,
-    "legitimacy": 0.0019,
-    "state_capacity": 0.0052,
+    "institutional_rigidity": 0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0005,
     "storage_loss": -0.0022,
-    "trade_capacity": 0.0017
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
    "name": "Counting-table Audit",
@@ -628,22 +634,22 @@
   },
   "craft_guilds": {
    "effects": {
-    "adoption_rate": 0.0014,
-    "cohesion": 0.0005,
-    "craft_output": 0.0042,
-    "institutional_rigidity": 0.0018,
-    "standardization": 0.0035,
-    "trade_capacity": 0.0011
+    "adoption_rate": 0.0013,
+    "cohesion": 0.0001,
+    "craft_output": 0.0013,
+    "institutional_rigidity": 0.0003,
+    "standardization": 0.001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
    "observation": "The masters of each craft set standards, prices and apprenticeships, and fine those who break them."
   },
   "elected_town_consuls": {
    "effects": {
-    "cohesion": 0.0011,
-    "institutional_rigidity": -0.0009,
-    "legitimacy": 0.0016,
-    "state_capacity": 0.0012
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Elected Consuls",
@@ -651,10 +657,10 @@
   },
   "great_hall_of_justice": {
    "effects": {
-    "construction_rate": 0.0007,
-    "labor_demand": 0.0026,
-    "legitimacy": 0.002,
-    "state_capacity": 0.0008
+    "construction_rate": 0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Great Hall of Justice",
@@ -662,10 +668,10 @@
   },
   "priestly_investiture_settlement": {
    "effects": {
-    "cohesion": 0.0016,
-    "institutional_rigidity": 0.0005,
-    "legitimacy": 0.0016,
-    "state_capacity": 0.0004
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/officiant_vestments.png",
    "name": "Investiture Settlement",
@@ -673,9 +679,9 @@
   },
   "chief_justiciar_viceroy": {
    "effects": {
-    "legitimacy": 0.0004,
-    "security_efficiency": 0.0008,
-    "state_capacity": 0.0016
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0002,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/public_office_handover.png",
    "name": "Chief Justiciar",
@@ -683,12 +689,13 @@
   },
   "glossator_law_schools": {
    "effects": {
-    "institutional_rigidity": 0.0029,
-    "knowledge_preservation": 0.0024,
-    "knowledge_rate": 0.0045,
-    "labor_demand": 0.0042,
-    "legitimacy": 0.0019,
-    "state_capacity": 0.0032
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.0003,
+    "knowledge_rate": 0.0008,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001,
+    "literacy": 0.0016,
+    "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Law Schools",
@@ -697,12 +704,12 @@
   },
   "chartered_town_liberties": {
    "effects": {
-    "cohesion": 0.0042,
-    "craft_output": 0.0022,
-    "institutional_rigidity": -0.0015,
-    "legitimacy": 0.0025,
+    "cohesion": 0.0002,
+    "craft_output": 0.0007,
+    "institutional_rigidity": -0.0002,
+    "legitimacy": 0.0001,
     "state_capacity": -0.0008,
-    "trade_capacity": 0.006
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
    "name": "Chartered Town Liberties",
@@ -712,10 +719,10 @@
   },
   "annual_receipt_rolls": {
    "effects": {
-    "knowledge_preservation": 0.0009,
-    "labor_demand": 0.0009,
-    "state_capacity": 0.002,
-    "trade_capacity": 0.0005
+    "knowledge_preservation": 0.0001,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0003,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
    "name": "Annual Receipt Rolls",
@@ -723,10 +730,10 @@
   },
   "public_notaries": {
    "effects": {
-    "knowledge_preservation": 0.0009,
-    "legitimacy": 0.0008,
-    "state_capacity": 0.0004,
-    "trade_capacity": 0.0021
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Public Notaries",
@@ -734,10 +741,11 @@
   },
   "sacred_law_concordance": {
    "effects": {
-    "cohesion": 0.0005,
-    "institutional_rigidity": 0.0014,
-    "knowledge_preservation": 0.0009,
-    "legitimacy": 0.0016
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.0016
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Concordance of the God's Law",
@@ -745,9 +753,9 @@
   },
   "fair_merchant_courts": {
    "effects": {
-    "legitimacy": 0.0008,
-    "security_efficiency": 0.0004,
-    "trade_capacity": 0.0027
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0001,
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
    "name": "Fair Courts",
@@ -755,11 +763,11 @@
   },
   "royal_justice_circuits": {
    "effects": {
-    "cohesion": 0.0017,
-    "labor_demand": 0.0042,
-    "legitimacy": 0.0031,
-    "security_efficiency": 0.0031,
-    "state_capacity": 0.0045
+    "cohesion": 0.0001,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0002,
+    "security_efficiency": 0.0008,
+    "state_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Royal Justice Circuits",
@@ -768,9 +776,9 @@
   },
   "presenting_jury_of_neighbours": {
    "effects": {
-    "cohesion": 0.0011,
-    "legitimacy": 0.0008,
-    "security_efficiency": 0.0015
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0004
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Presenting Jury",
@@ -778,11 +786,11 @@
   },
   "hired_outside_magistrate": {
    "effects": {
-    "cohesion": 0.0011,
-    "institutional_rigidity": -0.0005,
-    "legitimacy": 0.0012,
-    "security_efficiency": 0.0012,
-    "state_capacity": 0.0004
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0003,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/paper/public_office_handover.png",
    "name": "Outside Magistrate",
@@ -790,10 +798,11 @@
   },
   "writ_forms_of_action": {
    "effects": {
-    "institutional_rigidity": 0.0018,
-    "knowledge_preservation": 0.0003,
-    "standardization": 0.0021,
-    "state_capacity": 0.0012
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "literacy": 0.0021,
+    "standardization": 0.0003,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
    "name": "Forms of Action",
@@ -801,11 +810,11 @@
   },
   "salaried_royal_bailiffs": {
    "effects": {
-    "cohesion": -0.0005,
-    "labor_demand": 0.0018,
-    "legitimacy": 0.0004,
-    "security_efficiency": 0.0008,
-    "state_capacity": 0.0024
+    "cohesion": -0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0002,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/professional_service-v1.png",
    "name": "Salaried Bailiffs",
@@ -813,11 +822,11 @@
   },
   "estates_assembly": {
    "effects": {
-    "cohesion": 0.0042,
-    "institutional_rigidity": -0.0015,
-    "legitimacy": 0.0056,
-    "state_capacity": 0.0026,
-    "trade_capacity": 0.0009
+    "cohesion": 0.0002,
+    "institutional_rigidity": -0.0002,
+    "legitimacy": 0.0003,
+    "state_capacity": 0.0003,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Estates Summoned",
@@ -827,9 +836,9 @@
   },
   "chancery_enrolment_rolls": {
    "effects": {
-    "knowledge_preservation": 0.0015,
-    "labor_demand": 0.0009,
-    "state_capacity": 0.0012
+    "knowledge_preservation": 0.0001,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
    "name": "Chancery Enrolment Rolls",
@@ -837,12 +846,12 @@
   },
   "fixed_capital_archives": {
    "effects": {
-    "institutional_rigidity": 0.0015,
-    "knowledge_preservation": 0.0029,
-    "legitimacy": 0.0013,
-    "state_capacity": 0.0058,
-    "task_coordination": 0.0047,
-    "trade_capacity": 0.0017
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0007,
+    "task_coordination": 0.0008,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
    "name": "The Court Stops Travelling",
@@ -851,10 +860,10 @@
   },
   "ordeal_abolition": {
    "effects": {
-    "injury_risk": -0.0014,
-    "institutional_rigidity": -0.0009,
-    "legitimacy": 0.0016,
-    "security_efficiency": 0.0012
+    "injury_risk": -0.0003,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0003
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Ordeals Abolished",
@@ -862,11 +871,11 @@
   },
   "great_liberties_charter": {
    "effects": {
-    "cohesion": 0.0042,
-    "institutional_rigidity": -0.0022,
-    "legitimacy": 0.0056,
+    "cohesion": 0.0002,
+    "institutional_rigidity": -0.0003,
+    "legitimacy": 0.0003,
     "state_capacity": -0.0016,
-    "trade_capacity": 0.0017
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
    "name": "Great Charter",
@@ -876,10 +885,10 @@
   },
   "great_priestly_council_decrees": {
    "effects": {
-    "cohesion": 0.0016,
-    "institutional_rigidity": 0.0014,
-    "legitimacy": 0.0016,
-    "standardization": 0.0007
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001,
+    "standardization": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/officiant_vestments.png",
    "name": "Great Council Decrees",
@@ -887,10 +896,10 @@
   },
   "petty_trial_jury": {
    "effects": {
-    "cohesion": 0.0011,
-    "institutional_rigidity": -0.0005,
-    "legitimacy": 0.002,
-    "security_efficiency": 0.0012
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0003
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Trial Jury",
@@ -898,11 +907,12 @@
   },
   "inquisitorial_written_procedure": {
    "effects": {
-    "cohesion": -0.0011,
-    "institutional_rigidity": 0.0014,
-    "knowledge_preservation": 0.0006,
-    "security_efficiency": 0.0015,
-    "state_capacity": 0.0012
+    "cohesion": -0.0004,
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "literacy": 0.0021,
+    "security_efficiency": 0.0004,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
    "name": "Written Inquisition",
@@ -911,10 +921,11 @@
   },
   "revised_town_statute_books": {
    "effects": {
-    "institutional_rigidity": -0.0005,
-    "legitimacy": 0.0012,
-    "standardization": 0.0014,
-    "trade_capacity": 0.0016
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.0021,
+    "standardization": 0.0001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Revised Town Statutes",
@@ -922,12 +933,12 @@
   },
   "permanent_high_court": {
    "effects": {
-    "institutional_rigidity": 0.0022,
-    "labor_demand": 0.0028,
-    "legitimacy": 0.0031,
-    "security_efficiency": 0.0019,
-    "standardization": 0.0022,
-    "state_capacity": 0.0045
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0002,
+    "security_efficiency": 0.0002,
+    "standardization": 0.0002,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Permanent High Court",
@@ -936,11 +947,11 @@
   },
   "sworn_royal_council": {
    "effects": {
-    "institutional_rigidity": 0.0015,
-    "labor_demand": 0.0042,
-    "legitimacy": 0.0019,
-    "state_capacity": 0.0052,
-    "task_coordination": 0.0059
+    "institutional_rigidity": 0.0002,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0004,
+    "task_coordination": 0.0008
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Sworn Royal Council",
@@ -949,11 +960,11 @@
   },
   "funded_public_debt_shares": {
    "effects": {
-    "construction_rate": 0.0028,
-    "institutional_rigidity": 0.0005,
+    "construction_rate": 0.001,
+    "institutional_rigidity": 0.0001,
     "legitimacy": -0.0005,
-    "state_capacity": 0.0012,
-    "trade_capacity": 0.0021
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
    "name": "Funded Public Debt",
@@ -961,11 +972,12 @@
   },
   "revised_realm_law_code": {
    "effects": {
-    "adoption_rate": 0.0034,
-    "institutional_rigidity": -0.0015,
-    "legitimacy": 0.0044,
-    "standardization": 0.0045,
-    "state_capacity": 0.0039
+    "adoption_rate": 0.0007,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0002,
+    "literacy": 0.0021,
+    "standardization": 0.0004,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Realm Code in the Common Tongue",
@@ -974,10 +986,10 @@
   },
   "chartered_town_league": {
    "effects": {
-    "cohesion": 0.0011,
-    "security_efficiency": 0.0012,
+    "cohesion": 0.0001,
+    "security_efficiency": 0.0001,
     "state_capacity": -0.0005,
-    "trade_capacity": 0.0027
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
    "name": "League of Chartered Towns",
@@ -985,10 +997,10 @@
   },
   "branch_banking_houses": {
    "effects": {
-    "cohesion": -0.0005,
-    "construction_rate": 0.0014,
-    "state_capacity": 0.0004,
-    "trade_capacity": 0.0032
+    "cohesion": -0.0001,
+    "construction_rate": 0.0005,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/public_credit-v1.png",
    "name": "Branch Banking Houses",
@@ -996,9 +1008,9 @@
   },
   "consented_taxation": {
    "effects": {
-    "cohesion": 0.0016,
-    "institutional_rigidity": -0.0005,
-    "legitimacy": 0.002,
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001,
     "state_capacity": -0.001
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
@@ -1007,10 +1019,10 @@
   },
   "closed_hereditary_council": {
    "effects": {
-    "cohesion": -0.0016,
-    "institutional_rigidity": 0.0023,
+    "cohesion": -0.0001,
+    "institutional_rigidity": 0.0001,
     "legitimacy": -0.0015,
-    "state_capacity": 0.0012
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Closed Hereditary Council",
@@ -1019,9 +1031,9 @@
   },
   "privy_seal_office": {
    "effects": {
-    "institutional_rigidity": 0.0005,
-    "state_capacity": 0.0016,
-    "task_coordination": 0.0015
+    "institutional_rigidity": 0.0001,
+    "state_capacity": 0.0002,
+    "task_coordination": 0.0002
    },
    "art": "res://assets/ui/research/paper/official_mandate_registers.png",
    "name": "Privy Seal Office",
@@ -1029,9 +1041,9 @@
   },
   "coronation_oath_to_realm": {
    "effects": {
-    "cohesion": 0.0016,
-    "institutional_rigidity": -0.0005,
-    "legitimacy": 0.002
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/institutions-v1.png",
    "name": "Coronation Oath",
@@ -1039,11 +1051,11 @@
   },
   "fixed_court_of_accounts": {
    "effects": {
-    "institutional_rigidity": 0.0009,
-    "labor_demand": 0.0018,
-    "legitimacy": 0.0008,
-    "state_capacity": 0.002,
-    "storage_loss": -0.0014
+    "institutional_rigidity": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0002,
+    "storage_loss": -0.001
    },
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
    "name": "Court of Accounts",
@@ -1051,9 +1063,9 @@
   },
   "rank_sumptuary_laws": {
    "effects": {
-    "cohesion": -0.0016,
-    "institutional_rigidity": 0.0018,
-    "legitimacy": 0.0012,
+    "cohesion": -0.0001,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001,
     "trade_capacity": -0.0011
    },
    "art": "res://assets/ui/research/discovery-600/rank_dress_styles.png",
@@ -1063,10 +1075,10 @@
   },
   "double_entry_ledgers": {
    "effects": {
-    "standardization": 0.0021,
-    "state_capacity": 0.0012,
-    "storage_loss": -0.0014,
-    "trade_capacity": 0.0037
+    "standardization": 0.0003,
+    "state_capacity": 0.0001,
+    "storage_loss": -0.001,
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
    "name": "Double-entry Ledgers",
@@ -1074,10 +1086,10 @@
   },
   "scrutiny_lot_elections": {
    "effects": {
-    "cohesion": 0.0011,
-    "institutional_rigidity": -0.0009,
-    "legitimacy": 0.0012,
-    "state_capacity": 0.0004
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Scrutiny and Lot",
@@ -1085,10 +1097,10 @@
   },
   "keepers_of_the_peace": {
    "effects": {
-    "cohesion": 0.0005,
-    "labor_demand": 0.0009,
-    "security_efficiency": 0.0019,
-    "state_capacity": 0.0012
+    "cohesion": 0.0001,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0005,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/watch_rotation-v1.png",
    "name": "Keepers of the Peace",
@@ -1096,16 +1108,622 @@
   },
   "elector_college_charter": {
    "effects": {
-    "cohesion": 0.0025,
-    "institutional_rigidity": 0.0022,
-    "legitimacy": 0.0044,
-    "security_efficiency": 0.0012,
-    "state_capacity": 0.0026
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0002,
+    "security_efficiency": 0.0003,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/paper/petition_registers.png",
    "name": "Electors' Charter",
    "observation": "A sealed charter names the electors who choose the overlord and fixes where and how they vote.",
    "ability_reason": "A sealed charter fixes the electors of the overlord and the rules of the vote; succession stops being settled by war."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "regional_vicariates": {
+    "institutional_rigidity": 0.0009,
+    "labor_demand": 0.0018,
+    "security_efficiency": 0.0004,
+    "state_capacity": 0.0012
+   },
+   "bound_estate_tenants": {
+    "cohesion": -0.0021,
+    "cultivation_yield": 0.0014,
+    "food_storage": 0.0037,
+    "labor_efficiency": -0.0014,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0004
+   },
+   "register_of_dignities": {
+    "institutional_rigidity": 0.0014,
+    "labor_demand": 0.0018,
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0012
+   },
+   "ranked_priestly_hierarchy": {
+    "cohesion": 0.0042,
+    "institutional_rigidity": 0.0029,
+    "labor_demand": 0.0028,
+    "legitimacy": 0.005,
+    "state_capacity": 0.0013
+   },
+   "promulgated_edict_code": {
+    "institutional_rigidity": 0.0029,
+    "labor_demand": 0.0028,
+    "legitimacy": 0.0031,
+    "security_efficiency": 0.0019,
+    "standardization": 0.0034,
+    "state_capacity": 0.0045
+   },
+   "town_protector_office": {
+    "cohesion": 0.0016,
+    "legitimacy": 0.0012,
+    "state_capacity": -0.0005,
+    "trade_capacity": 0.0005
+   },
+   "written_customary_codes": {
+    "cohesion": 0.0016,
+    "institutional_rigidity": 0.0009,
+    "legitimacy": 0.0016,
+    "security_efficiency": 0.0008
+   },
+   "priest_overseer_town_leadership": {
+    "cohesion": 0.0016,
+    "disaster_resilience": 0.0028,
+    "legitimacy": 0.0008,
+    "state_capacity": -0.001
+   },
+   "personal_law_by_people": {
+    "cohesion": 0.0016,
+    "institutional_rigidity": 0.0009,
+    "legitimacy": 0.0008,
+    "state_capacity": -0.0005,
+    "trade_capacity": 0.0005
+   },
+   "jurist_digest_codification": {
+    "institutional_rigidity": 0.0036,
+    "knowledge_preservation": 0.0024,
+    "labor_demand": 0.0042,
+    "legitimacy": 0.0025,
+    "standardization": 0.0034,
+    "state_capacity": 0.0039
+   },
+   "official_law_primer": {
+    "adoption_rate": 0.0014,
+    "institutional_rigidity": 0.0005,
+    "knowledge_preservation": 0.0009,
+    "state_capacity": 0.0008
+   },
+   "district_counts": {
+    "cohesion": -0.0005,
+    "institutional_rigidity": 0.0005,
+    "security_efficiency": 0.0012,
+    "state_capacity": 0.0016,
+    "warfare_readiness": 0.0014
+   },
+   "household_great_offices": {
+    "food_storage": 0.0039,
+    "institutional_rigidity": 0.0022,
+    "labor_demand": 0.0028,
+    "legitimacy": 0.0019,
+    "state_capacity": 0.0032,
+    "task_coordination": 0.0047
+   },
+   "ordeal_by_the_god": {
+    "cohesion": 0.0005,
+    "injury_risk": 0.0014,
+    "institutional_rigidity": 0.0014,
+    "legitimacy": 0.0012,
+    "security_efficiency": 0.0008
+   },
+   "three_department_ministries": {
+    "institutional_rigidity": 0.0044,
+    "labor_demand": 0.0056,
+    "standardization": 0.0034,
+    "state_capacity": 0.0065,
+    "task_coordination": 0.0059
+   },
+   "equal_field_allotment": {
+    "cohesion": 0.0011,
+    "cultivation_yield": 0.0021,
+    "food_storage": 0.0025,
+    "institutional_rigidity": 0.0009,
+    "labor_demand": 0.0018,
+    "state_capacity": 0.0008
+   },
+   "regular_merit_examinations": {
+    "adoption_rate": 0.0014,
+    "institutional_rigidity": 0.0014,
+    "labor_demand": 0.0018,
+    "legitimacy": 0.0012,
+    "state_capacity": 0.0016
+   },
+   "military_frontier_provinces": {
+    "cohesion": -0.0011,
+    "legitimacy": -0.0005,
+    "security_efficiency": 0.0015,
+    "state_capacity": 0.0004,
+    "warfare_readiness": 0.0028
+   },
+   "witnessed_land_charters": {
+    "knowledge_preservation": 0.0009,
+    "legitimacy": 0.0008,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0005
+   },
+   "impeaching_censorate": {
+    "institutional_rigidity": -0.0014,
+    "labor_demand": 0.0018,
+    "legitimacy": 0.0012,
+    "state_capacity": 0.0012
+   },
+   "palace_mayor_regency": {
+    "cohesion": -0.0011,
+    "legitimacy": -0.0015,
+    "security_efficiency": 0.0004,
+    "state_capacity": 0.0008
+   },
+   "homage_commendation": {
+    "cohesion": 0.0034,
+    "institutional_rigidity": 0.0022,
+    "legitimacy": 0.0019,
+    "security_efficiency": 0.0037,
+    "state_capacity": -0.0024,
+    "warfare_readiness": 0.0045
+   },
+   "hereditary_military_governors": {
+    "institutional_rigidity": 0.0009,
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0012,
+    "state_capacity": -0.002,
+    "warfare_readiness": 0.0014
+   },
+   "twice_yearly_coin_tax": {
+    "cohesion": -0.0011,
+    "labor_demand": 0.0009,
+    "state_capacity": 0.002,
+    "trade_capacity": 0.0011
+   },
+   "palace_school_for_officials": {
+    "adoption_rate": 0.0014,
+    "institutional_rigidity": 0.0005,
+    "knowledge_preservation": 0.0006,
+    "labor_demand": 0.0018,
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0012
+   },
+   "spring_magnate_assembly": {
+    "cohesion": 0.0011,
+    "institutional_rigidity": 0.0005,
+    "legitimacy": 0.0016,
+    "state_capacity": 0.0008
+   },
+   "compulsory_tithe": {
+    "cohesion": -0.0011,
+    "food_storage": 0.0037,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": 0.0012
+   },
+   "paired_royal_envoys": {
+    "institutional_rigidity": -0.0015,
+    "labor_demand": 0.0028,
+    "legitimacy": 0.0025,
+    "security_efficiency": 0.0012,
+    "state_capacity": 0.0045
+   },
+   "numbered_article_decrees": {
+    "knowledge_preservation": 0.0006,
+    "standardization": 0.0014,
+    "state_capacity": 0.0012
+   },
+   "overlord_crowned_by_high_priest": {
+    "cohesion": 0.0034,
+    "institutional_rigidity": 0.0022,
+    "legitimacy": 0.0063,
+    "state_capacity": 0.0013
+   },
+   "seigneurial_immunity_courts": {
+    "cohesion": -0.0005,
+    "institutional_rigidity": 0.0014,
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0012,
+    "state_capacity": -0.002
+   },
+   "manor_court_customals": {
+    "cohesion": 0.0016,
+    "food_storage": 0.0012,
+    "knowledge_preservation": 0.0009,
+    "legitimacy": 0.0008
+   },
+   "fief_tenure_for_service": {
+    "cohesion": -0.0017,
+    "institutional_rigidity": 0.0029,
+    "security_efficiency": 0.0031,
+    "state_capacity": 0.0019,
+    "warfare_readiness": 0.009
+   },
+   "hereditary_fief_succession": {
+    "cohesion": 0.0016,
+    "institutional_rigidity": 0.0014,
+    "legitimacy": 0.0008,
+    "state_capacity": -0.0015,
+    "warfare_readiness": 0.0007
+   },
+   "frontier_march_lords": {
+    "legitimacy": -0.0005,
+    "security_efficiency": 0.0015,
+    "state_capacity": -0.0005,
+    "warfare_readiness": 0.0021
+   },
+   "shire_reeve_courts": {
+    "cohesion": 0.0005,
+    "legitimacy": 0.0012,
+    "security_efficiency": 0.0008,
+    "state_capacity": 0.0016
+   },
+   "prefect_guild_rulebook": {
+    "craft_output": 0.0021,
+    "institutional_rigidity": 0.0014,
+    "standardization": 0.0028,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0005
+   },
+   "itinerant_royal_court": {
+    "cohesion": 0.0025,
+    "food_storage": -0.0058,
+    "labor_demand": 0.0028,
+    "legitimacy": 0.0038,
+    "state_capacity": 0.0019,
+    "task_coordination": 0.0012
+   },
+   "smallholder_protection_laws": {
+    "cohesion": 0.0021,
+    "cultivation_yield": 0.0007,
+    "legitimacy": 0.0012,
+    "state_capacity": 0.0004
+   },
+   "raider_tribute_land_tax": {
+    "cohesion": -0.0016,
+    "food_storage": -0.0009,
+    "security_efficiency": 0.0012,
+    "state_capacity": 0.002
+   },
+   "castellan_local_lordship": {
+    "institutional_rigidity": 0.0009,
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0015,
+    "state_capacity": -0.0015,
+    "trade_capacity": -0.0011
+   },
+   "sealed_royal_writs": {
+    "institutional_rigidity": -0.0005,
+    "knowledge_preservation": 0.0006,
+    "state_capacity": 0.002,
+    "task_coordination": 0.0015
+   },
+   "holy_truce_days": {
+    "cohesion": 0.0016,
+    "legitimacy": 0.0012,
+    "security_efficiency": 0.0015,
+    "warfare_readiness": -0.0014
+   },
+   "anonymous_copied_exam_scripts": {
+    "institutional_rigidity": -0.0005,
+    "labor_demand": 0.0018,
+    "legitimacy": 0.0012,
+    "state_capacity": 0.0012
+   },
+   "treasury_paper_notes": {
+    "legitimacy": -0.001,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.0027
+   },
+   "mutual_surety_tithings": {
+    "cohesion": 0.0011,
+    "institutional_rigidity": 0.0009,
+    "security_efficiency": 0.0015,
+    "state_capacity": 0.0008
+   },
+   "merchant_guild_monopoly": {
+    "cohesion": -0.0011,
+    "craft_output": 0.0014,
+    "institutional_rigidity": 0.0014,
+    "trade_capacity": 0.0021
+   },
+   "closed_college_election": {
+    "cohesion": 0.0011,
+    "institutional_rigidity": 0.0009,
+    "legitimacy": 0.0016
+   },
+   "royal_chancery_office": {
+    "institutional_rigidity": 0.0022,
+    "knowledge_preservation": 0.0024,
+    "labor_demand": 0.0042,
+    "legitimacy": 0.0013,
+    "state_capacity": 0.0052,
+    "task_coordination": 0.0047
+   },
+   "sworn_town_commune": {
+    "cohesion": 0.0068,
+    "institutional_rigidity": -0.0022,
+    "legitimacy": 0.0019,
+    "security_efficiency": 0.0019,
+    "state_capacity": -0.0016,
+    "trade_capacity": 0.0051
+   },
+   "counting_table_audit": {
+    "institutional_rigidity": 0.0015,
+    "labor_demand": 0.0028,
+    "legitimacy": 0.0019,
+    "state_capacity": 0.0052,
+    "storage_loss": -0.0022,
+    "trade_capacity": 0.0017
+   },
+   "craft_guilds": {
+    "adoption_rate": 0.0014,
+    "cohesion": 0.0005,
+    "craft_output": 0.0042,
+    "institutional_rigidity": 0.0018,
+    "standardization": 0.0035,
+    "trade_capacity": 0.0011
+   },
+   "elected_town_consuls": {
+    "cohesion": 0.0011,
+    "institutional_rigidity": -0.0009,
+    "legitimacy": 0.0016,
+    "state_capacity": 0.0012
+   },
+   "great_hall_of_justice": {
+    "construction_rate": 0.0007,
+    "labor_demand": 0.0026,
+    "legitimacy": 0.002,
+    "state_capacity": 0.0008
+   },
+   "priestly_investiture_settlement": {
+    "cohesion": 0.0016,
+    "institutional_rigidity": 0.0005,
+    "legitimacy": 0.0016,
+    "state_capacity": 0.0004
+   },
+   "chief_justiciar_viceroy": {
+    "legitimacy": 0.0004,
+    "security_efficiency": 0.0008,
+    "state_capacity": 0.0016
+   },
+   "glossator_law_schools": {
+    "institutional_rigidity": 0.0029,
+    "knowledge_preservation": 0.0024,
+    "knowledge_rate": 0.0045,
+    "labor_demand": 0.0042,
+    "legitimacy": 0.0019,
+    "state_capacity": 0.0032
+   },
+   "chartered_town_liberties": {
+    "cohesion": 0.0042,
+    "craft_output": 0.0022,
+    "institutional_rigidity": -0.0015,
+    "legitimacy": 0.0025,
+    "state_capacity": -0.0008,
+    "trade_capacity": 0.006
+   },
+   "annual_receipt_rolls": {
+    "knowledge_preservation": 0.0009,
+    "labor_demand": 0.0009,
+    "state_capacity": 0.002,
+    "trade_capacity": 0.0005
+   },
+   "public_notaries": {
+    "knowledge_preservation": 0.0009,
+    "legitimacy": 0.0008,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0021
+   },
+   "sacred_law_concordance": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": 0.0014,
+    "knowledge_preservation": 0.0009,
+    "legitimacy": 0.0016
+   },
+   "fair_merchant_courts": {
+    "legitimacy": 0.0008,
+    "security_efficiency": 0.0004,
+    "trade_capacity": 0.0027
+   },
+   "royal_justice_circuits": {
+    "cohesion": 0.0017,
+    "labor_demand": 0.0042,
+    "legitimacy": 0.0031,
+    "security_efficiency": 0.0031,
+    "state_capacity": 0.0045
+   },
+   "presenting_jury_of_neighbours": {
+    "cohesion": 0.0011,
+    "legitimacy": 0.0008,
+    "security_efficiency": 0.0015
+   },
+   "hired_outside_magistrate": {
+    "cohesion": 0.0011,
+    "institutional_rigidity": -0.0005,
+    "legitimacy": 0.0012,
+    "security_efficiency": 0.0012,
+    "state_capacity": 0.0004
+   },
+   "writ_forms_of_action": {
+    "institutional_rigidity": 0.0018,
+    "knowledge_preservation": 0.0003,
+    "standardization": 0.0021,
+    "state_capacity": 0.0012
+   },
+   "salaried_royal_bailiffs": {
+    "cohesion": -0.0005,
+    "labor_demand": 0.0018,
+    "legitimacy": 0.0004,
+    "security_efficiency": 0.0008,
+    "state_capacity": 0.0024
+   },
+   "estates_assembly": {
+    "cohesion": 0.0042,
+    "institutional_rigidity": -0.0015,
+    "legitimacy": 0.0056,
+    "state_capacity": 0.0026,
+    "trade_capacity": 0.0009
+   },
+   "chancery_enrolment_rolls": {
+    "knowledge_preservation": 0.0015,
+    "labor_demand": 0.0009,
+    "state_capacity": 0.0012
+   },
+   "fixed_capital_archives": {
+    "institutional_rigidity": 0.0015,
+    "knowledge_preservation": 0.0029,
+    "legitimacy": 0.0013,
+    "state_capacity": 0.0058,
+    "task_coordination": 0.0047,
+    "trade_capacity": 0.0017
+   },
+   "ordeal_abolition": {
+    "injury_risk": -0.0014,
+    "institutional_rigidity": -0.0009,
+    "legitimacy": 0.0016,
+    "security_efficiency": 0.0012
+   },
+   "great_liberties_charter": {
+    "cohesion": 0.0042,
+    "institutional_rigidity": -0.0022,
+    "legitimacy": 0.0056,
+    "state_capacity": -0.0016,
+    "trade_capacity": 0.0017
+   },
+   "great_priestly_council_decrees": {
+    "cohesion": 0.0016,
+    "institutional_rigidity": 0.0014,
+    "legitimacy": 0.0016,
+    "standardization": 0.0007
+   },
+   "petty_trial_jury": {
+    "cohesion": 0.0011,
+    "institutional_rigidity": -0.0005,
+    "legitimacy": 0.002,
+    "security_efficiency": 0.0012
+   },
+   "inquisitorial_written_procedure": {
+    "cohesion": -0.0011,
+    "institutional_rigidity": 0.0014,
+    "knowledge_preservation": 0.0006,
+    "security_efficiency": 0.0015,
+    "state_capacity": 0.0012
+   },
+   "revised_town_statute_books": {
+    "institutional_rigidity": -0.0005,
+    "legitimacy": 0.0012,
+    "standardization": 0.0014,
+    "trade_capacity": 0.0016
+   },
+   "permanent_high_court": {
+    "institutional_rigidity": 0.0022,
+    "labor_demand": 0.0028,
+    "legitimacy": 0.0031,
+    "security_efficiency": 0.0019,
+    "standardization": 0.0022,
+    "state_capacity": 0.0045
+   },
+   "sworn_royal_council": {
+    "institutional_rigidity": 0.0015,
+    "labor_demand": 0.0042,
+    "legitimacy": 0.0019,
+    "state_capacity": 0.0052,
+    "task_coordination": 0.0059
+   },
+   "funded_public_debt_shares": {
+    "construction_rate": 0.0028,
+    "institutional_rigidity": 0.0005,
+    "legitimacy": -0.0005,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.0021
+   },
+   "revised_realm_law_code": {
+    "adoption_rate": 0.0034,
+    "institutional_rigidity": -0.0015,
+    "legitimacy": 0.0044,
+    "standardization": 0.0045,
+    "state_capacity": 0.0039
+   },
+   "chartered_town_league": {
+    "cohesion": 0.0011,
+    "security_efficiency": 0.0012,
+    "state_capacity": -0.0005,
+    "trade_capacity": 0.0027
+   },
+   "branch_banking_houses": {
+    "cohesion": -0.0005,
+    "construction_rate": 0.0014,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0032
+   },
+   "consented_taxation": {
+    "cohesion": 0.0016,
+    "institutional_rigidity": -0.0005,
+    "legitimacy": 0.002,
+    "state_capacity": -0.001
+   },
+   "closed_hereditary_council": {
+    "cohesion": -0.0016,
+    "institutional_rigidity": 0.0023,
+    "legitimacy": -0.0015,
+    "state_capacity": 0.0012
+   },
+   "privy_seal_office": {
+    "institutional_rigidity": 0.0005,
+    "state_capacity": 0.0016,
+    "task_coordination": 0.0015
+   },
+   "coronation_oath_to_realm": {
+    "cohesion": 0.0016,
+    "institutional_rigidity": -0.0005,
+    "legitimacy": 0.002
+   },
+   "fixed_court_of_accounts": {
+    "institutional_rigidity": 0.0009,
+    "labor_demand": 0.0018,
+    "legitimacy": 0.0008,
+    "state_capacity": 0.002,
+    "storage_loss": -0.0014
+   },
+   "rank_sumptuary_laws": {
+    "cohesion": -0.0016,
+    "institutional_rigidity": 0.0018,
+    "legitimacy": 0.0012,
+    "trade_capacity": -0.0011
+   },
+   "double_entry_ledgers": {
+    "standardization": 0.0021,
+    "state_capacity": 0.0012,
+    "storage_loss": -0.0014,
+    "trade_capacity": 0.0037
+   },
+   "scrutiny_lot_elections": {
+    "cohesion": 0.0011,
+    "institutional_rigidity": -0.0009,
+    "legitimacy": 0.0012,
+    "state_capacity": 0.0004
+   },
+   "keepers_of_the_peace": {
+    "cohesion": 0.0005,
+    "labor_demand": 0.0009,
+    "security_efficiency": 0.0019,
+    "state_capacity": 0.0012
+   },
+   "elector_college_charter": {
+    "cohesion": 0.0025,
+    "institutional_rigidity": 0.0022,
+    "legitimacy": 0.0044,
+    "security_efficiency": 0.0012,
+    "state_capacity": 0.0026
+   }
   }
  }
 }

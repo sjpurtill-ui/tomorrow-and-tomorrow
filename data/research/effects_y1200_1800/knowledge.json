@@ -4,9 +4,10 @@
  "items": {
   "rounded_book_hand": {
    "effects": {
-    "adoption_rate": 0.0009,
-    "knowledge_preservation": 0.0038,
-    "labor_demand": 0.001
+    "adoption_rate": 0.0007,
+    "knowledge_preservation": 0.0006,
+    "labor_demand": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
    "name": "Rounded Book Hand",
@@ -14,10 +15,10 @@
   },
   "devised_script_for_new_tongue": {
    "effects": {
-    "adoption_rate": 0.0035,
-    "knowledge_preservation": 0.0029,
-    "labor_demand": 0.001,
-    "trade_capacity": 0.0028
+    "adoption_rate": 0.0029,
+    "knowledge_preservation": 0.0005,
+    "labor_demand": 0.0001,
+    "trade_capacity": 0.0016
    },
    "art": "res://assets/ui/research/discovery-600/consonantal_alphabet.png",
    "name": "Script for a Neighbour Tongue",
@@ -25,10 +26,10 @@
   },
   "itinerary_strip_maps": {
    "effects": {
-    "logistics_endurance": 0.001,
-    "route_speed": 0.008,
-    "security_efficiency": 0.001,
-    "survey_speed": 0.0052
+    "logistics_endurance": 0.0005,
+    "route_speed": 0.0029,
+    "security_efficiency": 0.0001,
+    "survey_speed": 0.0045
    },
    "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
    "name": "Strip Road Maps",
@@ -36,11 +37,12 @@
   },
   "seven_arts_manuals": {
    "effects": {
-    "adoption_rate": 0.0017,
-    "institutional_rigidity": 0.001,
-    "knowledge_preservation": 0.0029,
+    "adoption_rate": 0.0014,
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0005,
     "knowledge_rate": 0.0025,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Seven Arts Manuals",
@@ -48,10 +50,10 @@
   },
   "moving_feast_reckoning": {
    "effects": {
-    "legitimacy": 0.001,
+    "legitimacy": 0.0001,
     "observation_rate": 0.0019,
-    "standardization": 0.0036,
-    "task_coordination": 0.0024
+    "standardization": 0.0014,
+    "task_coordination": 0.0013
    },
    "art": "res://assets/ui/research/discovery-600/intercalated_calendar.png",
    "name": "Moving Feast Tables",
@@ -59,9 +61,9 @@
   },
   "hard_word_glossaries": {
    "effects": {
-    "adoption_rate": 0.0026,
-    "knowledge_preservation": 0.0019,
-    "knowledge_rate": 0.0008
+    "adoption_rate": 0.0023,
+    "knowledge_preservation": 0.0002,
+    "knowledge_rate": 0.0007
    },
    "art": "res://assets/ui/research/discovery-600/bilingual_sign_lists.png",
    "name": "Hard-word Glossaries",
@@ -69,11 +71,11 @@
   },
   "nine_digits_and_zero": {
    "effects": {
-    "knowledge_rate": 0.0066,
-    "standardization": 0.0061,
-    "state_capacity": 0.0048,
-    "task_coordination": 0.0036,
-    "trade_capacity": 0.0069
+    "knowledge_rate": 0.0059,
+    "standardization": 0.0019,
+    "state_capacity": 0.0012,
+    "task_coordination": 0.0008,
+    "trade_capacity": 0.0016
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "name": "Nine Digits and Zero",
@@ -83,9 +85,9 @@
   },
   "half_chord_sine_tables": {
    "effects": {
-    "knowledge_rate": 0.0008,
-    "observation_rate": 0.0019,
-    "survey_speed": 0.008
+    "knowledge_rate": 0.0007,
+    "observation_rate": 0.0014,
+    "survey_speed": 0.0045
    },
    "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
    "name": "Half-chord Sine Tables",
@@ -93,9 +95,9 @@
   },
   "sacred_epoch_year_count": {
    "effects": {
-    "knowledge_preservation": 0.0029,
-    "legitimacy": 0.002,
-    "standardization": 0.0036
+    "knowledge_preservation": 0.0003,
+    "legitimacy": 0.0001,
+    "standardization": 0.0011
    },
    "art": "res://assets/ui/research/discovery-600/formal_chronicle_keeping.png",
    "name": "Years from the Sacred Epoch",
@@ -103,11 +105,12 @@
   },
   "retreat_copying_rooms": {
    "effects": {
-    "adoption_rate": 0.0017,
-    "institutional_rigidity": 0.002,
-    "knowledge_preservation": 0.0134,
-    "knowledge_rate": 0.0025,
-    "labor_demand": 0.004
+    "adoption_rate": 0.0015,
+    "institutional_rigidity": 0.0003,
+    "knowledge_preservation": 0.0014,
+    "knowledge_rate": 0.0022,
+    "labor_demand": 0.0002,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Retreat Copying Rooms",
@@ -117,11 +120,12 @@
   },
   "school_logic_primers": {
    "effects": {
-    "adoption_rate": 0.0009,
-    "institutional_rigidity": 0.001,
-    "knowledge_preservation": 0.0019,
-    "knowledge_rate": 0.0025,
-    "labor_demand": 0.001
+    "adoption_rate": 0.0008,
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0004,
+    "knowledge_rate": 0.0013,
+    "labor_demand": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "School Logic Primers",
@@ -129,9 +133,9 @@
   },
   "rhyme_sound_dictionary": {
    "effects": {
-    "adoption_rate": 0.0017,
-    "knowledge_preservation": 0.0029,
-    "standardization": 0.0036
+    "adoption_rate": 0.0014,
+    "knowledge_preservation": 0.0006,
+    "standardization": 0.0013
    },
    "art": "res://assets/ui/research/discovery-600/standard_sign_lists.png",
    "name": "Rhyme Dictionary",
@@ -139,9 +143,10 @@
   },
   "zero_negative_rules": {
    "effects": {
-    "knowledge_rate": 0.0033,
-    "standardization": 0.0024,
-    "trade_capacity": 0.0055
+    "knowledge_rate": 0.0017,
+    "literacy": 0.001,
+    "standardization": 0.0008,
+    "trade_capacity": 0.0016
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "name": "Rules for Zero and Debts",
@@ -149,10 +154,10 @@
   },
   "word_origin_encyclopedia": {
    "effects": {
-    "institutional_rigidity": 0.001,
-    "knowledge_preservation": 0.0048,
-    "knowledge_rate": 0.0017,
-    "labor_demand": 0.001
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0009,
+    "knowledge_rate": 0.0009,
+    "labor_demand": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Word-origin Encyclopedia",
@@ -160,10 +165,10 @@
   },
   "planispheric_astrolabe": {
    "effects": {
-    "craft_output": 0.0013,
-    "observation_rate": 0.0047,
-    "survey_speed": 0.0069,
-    "travel_speed": 0.002
+    "craft_output": 0.0006,
+    "observation_rate": 0.0024,
+    "survey_speed": 0.0045,
+    "travel_speed": 0.0008
    },
    "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
    "name": "Planispheric Astrolabe",
@@ -171,23 +176,25 @@
   },
   "relief_block_cutting": {
    "effects": {
-    "adoption_rate": 0.0026,
-    "craft_output": 0.004,
-    "knowledge_preservation": 0.0029,
-    "labor_demand": 0.002,
-    "standardization": 0.0024
+    "adoption_rate": 0.0006,
+    "craft_output": 0.0016,
+    "knowledge_preservation": 0.0005,
+    "labor_demand": 0.0001,
+    "literacy": 0.0013,
+    "standardization": 0.0008
    },
    "art": "res://assets/ui/research/subjects/printing_process-v1.png",
    "observation": "Carvers cut the page's letters in reverse on a smoothed block of pear wood, leaving them standing in relief."
   },
   "printing_process": {
    "effects": {
-    "adoption_rate": 0.0104,
+    "adoption_rate": 0.0025,
     "institutional_rigidity": -0.002,
-    "knowledge_preservation": 0.0076,
-    "knowledge_rate": 0.0041,
-    "labor_demand": 0.003,
-    "standardization": 0.0048,
+    "knowledge_preservation": 0.0013,
+    "knowledge_rate": 0.0036,
+    "labor_demand": 0.0002,
+    "literacy": 0.005,
+    "standardization": 0.0016,
     "timber_pressure": 0.001
    },
    "art": "res://assets/ui/research/subjects/printing_process-v1.png",
@@ -198,8 +205,9 @@
   },
   "word_spacing": {
    "effects": {
-    "adoption_rate": 0.0026,
-    "knowledge_preservation": 0.0019
+    "adoption_rate": 0.0006,
+    "knowledge_preservation": 0.0003,
+    "literacy": 0.0013
    },
    "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
    "name": "Word Spacing",
@@ -207,10 +215,10 @@
   },
   "meridian_shadow_stations": {
    "effects": {
-    "labor_demand": 0.003,
-    "observation_rate": 0.0028,
-    "state_capacity": 0.0016,
-    "survey_speed": 0.008
+    "labor_demand": 0.0002,
+    "observation_rate": 0.0017,
+    "state_capacity": 0.0004,
+    "survey_speed": 0.0036
    },
    "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
    "name": "Meridian Shadow Stations",
@@ -218,11 +226,11 @@
   },
   "waterwheel_escapement_globe": {
    "effects": {
-    "craft_output": 0.0013,
-    "knowledge_rate": 0.0017,
-    "labor_demand": 0.003,
-    "observation_rate": 0.0028,
-    "task_coordination": 0.0024
+    "craft_output": 0.0005,
+    "knowledge_rate": 0.0015,
+    "labor_demand": 0.0002,
+    "observation_rate": 0.0017,
+    "task_coordination": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/outflow_water_clock.png",
    "name": "Escapement Sky Globe",
@@ -231,9 +239,9 @@
   "lunar_tide_reckoning": {
    "effects": {
     "disaster_resilience": 0.001,
-    "naval_capacity": 0.002,
-    "observation_rate": 0.0019,
-    "route_speed": 0.006
+    "naval_capacity": 0.0003,
+    "observation_rate": 0.0011,
+    "route_speed": 0.0016
    },
    "art": "res://assets/ui/research/subjects/galley_navigation-v1.png",
    "name": "Moon-age Tide Tables",
@@ -241,9 +249,10 @@
   },
   "small_letter_book_hand": {
    "effects": {
-    "adoption_rate": 0.0035,
-    "knowledge_preservation": 0.0038,
-    "standardization": 0.0024
+    "adoption_rate": 0.0008,
+    "knowledge_preservation": 0.0006,
+    "literacy": 0.001,
+    "standardization": 0.0008
    },
    "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
    "name": "Small-letter Book Hand",
@@ -252,21 +261,21 @@
   "chemical_distillation": {
    "effects": {
     "chemical_control": 0.003,
-    "craft_output": 0.004,
+    "craft_output": 0.0012,
     "fuel_demand": 0.003,
     "health_risk": 0.001,
-    "knowledge_rate": 0.0017,
-    "observation_rate": 0.0028
+    "knowledge_rate": 0.0003,
+    "observation_rate": 0.0007
    },
    "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
    "observation": "A still with a cooled head draws off rose water, oils and strong waters, drop by drop, from what is heated below."
   },
   "digit_reckoning_handbook": {
    "effects": {
-    "adoption_rate": 0.0035,
-    "standardization": 0.0024,
-    "state_capacity": 0.0032,
-    "trade_capacity": 0.0041
+    "adoption_rate": 0.0008,
+    "standardization": 0.0008,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "name": "Digit Reckoning Handbook",
@@ -274,10 +283,10 @@
   },
   "restoration_balancing_algebra": {
    "effects": {
-    "knowledge_rate": 0.0075,
-    "state_capacity": 0.0032,
-    "survey_speed": 0.0052,
-    "trade_capacity": 0.0041
+    "knowledge_rate": 0.0014,
+    "state_capacity": 0.0004,
+    "survey_speed": 0.0023,
+    "trade_capacity": 0.0007
    },
    "art": "res://assets/ui/research/discovery-600/worked_problem_tablets.png",
    "name": "Algebra by Restoring and Balancing",
@@ -286,13 +295,14 @@
   },
   "royal_house_of_learning": {
    "effects": {
-    "adoption_rate": 0.0035,
-    "institutional_rigidity": 0.002,
-    "knowledge_preservation": 0.0057,
-    "knowledge_rate": 0.0083,
-    "labor_demand": 0.005,
-    "legitimacy": 0.002,
-    "observation_rate": 0.0057
+    "adoption_rate": 0.0008,
+    "institutional_rigidity": 0.0003,
+    "knowledge_preservation": 0.0007,
+    "knowledge_rate": 0.0016,
+    "labor_demand": 0.0003,
+    "legitimacy": 0.0001,
+    "literacy": 0.001,
+    "observation_rate": 0.0014
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Court House of Learning",
@@ -302,11 +312,11 @@
   },
   "fixed_instrument_observatory": {
    "effects": {
-    "construction_rate": 0.0018,
-    "labor_demand": 0.003,
-    "observation_rate": 0.0057,
-    "standardization": 0.0024,
-    "survey_speed": 0.0052
+    "construction_rate": 0.0006,
+    "labor_demand": 0.0002,
+    "observation_rate": 0.0014,
+    "standardization": 0.0008,
+    "survey_speed": 0.0023
    },
    "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
    "name": "Great-instrument Observatory",
@@ -314,9 +324,9 @@
   },
   "letter_frequency_codebreaking": {
    "effects": {
-    "knowledge_rate": 0.0008,
-    "security_efficiency": 0.004,
-    "state_capacity": 0.0032
+    "knowledge_rate": 0.0001,
+    "security_efficiency": 0.0004,
+    "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/discovery-600/agreed_signal_codes.png",
    "name": "Frequency Codebreaking",
@@ -324,10 +334,10 @@
   },
   "timed_beacon_code": {
    "effects": {
-    "labor_demand": 0.002,
-    "security_efficiency": 0.004,
-    "task_coordination": 0.0036,
-    "warfare_readiness": 0.002
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0004,
+    "task_coordination": 0.0005,
+    "warfare_readiness": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/prearranged_beacon_chains.png",
    "name": "Clock-keyed Beacon Code",
@@ -335,11 +345,12 @@
   },
   "block_printed_books": {
    "effects": {
-    "adoption_rate": 0.0052,
-    "craft_output": 0.0013,
-    "knowledge_preservation": 0.0057,
-    "knowledge_rate": 0.0025,
-    "labor_demand": 0.002,
+    "adoption_rate": 0.0012,
+    "craft_output": 0.0004,
+    "knowledge_preservation": 0.0007,
+    "knowledge_rate": 0.0005,
+    "labor_demand": 0.0001,
+    "literacy": 0.001,
     "timber_pressure": 0.001
    },
    "art": "res://assets/ui/research/subjects/printing_process-v1.png",
@@ -348,10 +359,11 @@
   },
   "printed_almanacs": {
    "effects": {
-    "adoption_rate": 0.0043,
-    "cultivation_yield": 0.002,
-    "standardization": 0.0012,
-    "task_coordination": 0.0024
+    "adoption_rate": 0.001,
+    "cultivation_yield": 0.0002,
+    "literacy": 0.001,
+    "standardization": 0.0004,
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
    "name": "Printed Almanacs",
@@ -359,10 +371,10 @@
   },
   "observed_table_revision": {
    "effects": {
-    "institutional_rigidity": -0.001,
-    "knowledge_rate": 0.0025,
-    "observation_rate": 0.0057,
-    "survey_speed": 0.0035
+    "institutional_rigidity": -0.0003,
+    "knowledge_rate": 0.0008,
+    "observation_rate": 0.0011,
+    "survey_speed": 0.0009
    },
    "art": "res://assets/ui/research/discovery-600/star_hour_tables.png",
    "name": "Sky Tables Revised",
@@ -370,9 +382,9 @@
   },
   "horary_quadrant": {
    "effects": {
-    "construction_rate": 0.0036,
-    "observation_rate": 0.0019,
-    "survey_speed": 0.008
+    "construction_rate": 0.0035,
+    "observation_rate": 0.0004,
+    "survey_speed": 0.0021
    },
    "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
    "name": "Horary Quadrant",
@@ -380,11 +392,12 @@
   },
   "printed_standard_classics": {
    "effects": {
-    "adoption_rate": 0.0052,
-    "institutional_rigidity": 0.003,
-    "knowledge_preservation": 0.0038,
-    "standardization": 0.0061,
-    "state_capacity": 0.0032
+    "adoption_rate": 0.0014,
+    "institutional_rigidity": 0.0006,
+    "knowledge_preservation": 0.0009,
+    "literacy": 0.001,
+    "standardization": 0.0015,
+    "state_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Printed Standard Classics",
@@ -393,10 +406,10 @@
   },
   "scholarly_question_letters": {
    "effects": {
-    "adoption_rate": 0.0017,
-    "knowledge_rate": 0.0033,
-    "observation_rate": 0.0028,
-    "trade_capacity": 0.0014
+    "adoption_rate": 0.0005,
+    "knowledge_rate": 0.0011,
+    "observation_rate": 0.0005,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/sealed_tablet_letters.png",
    "name": "Scholars' Letters Between Realms",
@@ -404,10 +417,11 @@
   },
   "written_decimal_fractions": {
    "effects": {
-    "knowledge_rate": 0.0025,
-    "standardization": 0.0036,
-    "survey_speed": 0.0035,
-    "trade_capacity": 0.0041
+    "knowledge_rate": 0.0008,
+    "literacy": 0.001,
+    "standardization": 0.0009,
+    "survey_speed": 0.0009,
+    "trade_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/place_value-v1.png",
    "name": "Decimal Fractions",
@@ -415,9 +429,10 @@
   },
   "illustrated_star_atlas": {
    "effects": {
-    "knowledge_preservation": 0.0029,
-    "observation_rate": 0.0038,
-    "route_speed": 0.002
+    "knowledge_preservation": 0.0007,
+    "literacy": 0.001,
+    "observation_rate": 0.0007,
+    "route_speed": 0.0007
    },
    "art": "res://assets/ui/research/discovery-600/named_star_figures.png",
    "name": "Illustrated Star Atlas",
@@ -425,10 +440,10 @@
   },
   "digit_column_counting_board": {
    "effects": {
-    "adoption_rate": 0.0009,
-    "state_capacity": 0.0048,
-    "task_coordination": 0.0024,
-    "trade_capacity": 0.0041
+    "adoption_rate": 0.0002,
+    "state_capacity": 0.0008,
+    "task_coordination": 0.0007,
+    "trade_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
    "name": "Digit-column Counting Board",
@@ -436,11 +451,12 @@
   },
   "great_house_schools": {
    "effects": {
-    "adoption_rate": 0.0035,
-    "knowledge_preservation": 0.0029,
-    "knowledge_rate": 0.0025,
-    "labor_demand": 0.003,
-    "legitimacy": 0.002
+    "adoption_rate": 0.0009,
+    "knowledge_preservation": 0.0007,
+    "knowledge_rate": 0.0008,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Great-house Schools",
@@ -448,8 +464,8 @@
   },
   "polynomial_term_algebra": {
    "effects": {
-    "knowledge_rate": 0.0041,
-    "survey_speed": 0.0035
+    "knowledge_rate": 0.0013,
+    "survey_speed": 0.003
    },
    "art": "res://assets/ui/research/discovery-600/worked_problem_tablets.png",
    "name": "Algebra of Powers",
@@ -457,10 +473,10 @@
   },
   "darkened_room_optics": {
    "effects": {
-    "adoption_rate": 0.0017,
-    "institutional_rigidity": -0.002,
-    "knowledge_rate": 0.0058,
-    "observation_rate": 0.0094
+    "adoption_rate": 0.0005,
+    "institutional_rigidity": -0.0003,
+    "knowledge_rate": 0.0019,
+    "observation_rate": 0.0023
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Darkened-room Optics",
@@ -469,10 +485,11 @@
   },
   "sky_model_doubts": {
    "effects": {
-    "institutional_rigidity": -0.002,
-    "knowledge_rate": 0.0025,
+    "institutional_rigidity": -0.0003,
+    "knowledge_rate": 0.0008,
     "legitimacy": -0.001,
-    "observation_rate": 0.0019
+    "literacy": 0.001,
+    "observation_rate": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/star_hour_tables.png",
    "name": "Doubts on the Sky Models",
@@ -480,18 +497,18 @@
   },
   "movable_type_composition": {
    "effects": {
-    "adoption_rate": 0.0043,
-    "craft_output": 0.004,
-    "knowledge_preservation": 0.0029,
-    "labor_demand": 0.003
+    "adoption_rate": 0.0012,
+    "craft_output": 0.0014,
+    "knowledge_preservation": 0.0004,
+    "labor_demand": 0.0002
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
    "observation": "Each character is pressed in clay, fired hard, and set in an iron frame with wax so that a page can be printed and then broken up."
   },
   "guest_star_records": {
    "effects": {
-    "knowledge_preservation": 0.0029,
-    "observation_rate": 0.0038
+    "knowledge_preservation": 0.0004,
+    "observation_rate": 0.0009
    },
    "art": "res://assets/ui/research/discovery-600/dated_omen_records.png",
    "name": "Guest-star Records",
@@ -499,8 +516,8 @@
   },
   "binomial_coefficient_triangle": {
    "effects": {
-    "knowledge_rate": 0.0033,
-    "survey_speed": 0.0017
+    "knowledge_rate": 0.0011,
+    "survey_speed": 0.0015
    },
    "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
    "name": "Coefficient Triangle",
@@ -508,9 +525,9 @@
   },
   "universal_astrolabe_plate": {
    "effects": {
-    "observation_rate": 0.0019,
+    "observation_rate": 0.0009,
     "route_speed": 0.004,
-    "survey_speed": 0.0069
+    "survey_speed": 0.0045
    },
    "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
    "name": "Universal Astrolabe Plate",
@@ -518,7 +535,7 @@
   },
   "geometric_cubic_solutions": {
    "effects": {
-    "construction_rate": 0.0018,
+    "construction_rate": 0.0004,
     "knowledge_rate": 0.0033
    },
    "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
@@ -528,10 +545,11 @@
   "letter_writing_art": {
    "effects": {
     "adoption_rate": 0.0009,
-    "knowledge_preservation": 0.0019,
-    "state_capacity": 0.0064,
-    "task_coordination": 0.0024,
-    "trade_capacity": 0.0041
+    "knowledge_preservation": 0.0005,
+    "literacy": 0.001,
+    "state_capacity": 0.0007,
+    "task_coordination": 0.0004,
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/sealed_tablet_letters.png",
    "name": "Art of Letter-writing",
@@ -539,12 +557,12 @@
   },
   "astronomical_clock_tower": {
    "effects": {
-    "construction_rate": 0.0018,
-    "craft_output": 0.0027,
-    "labor_demand": 0.004,
-    "legitimacy": 0.003,
-    "observation_rate": 0.0028,
-    "task_coordination": 0.0047
+    "construction_rate": 0.0004,
+    "craft_output": 0.0008,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0002,
+    "observation_rate": 0.0013,
+    "task_coordination": 0.0007
    },
    "art": "res://assets/ui/research/discovery-600/outflow_water_clock.png",
    "name": "Astronomical Clock Tower",
@@ -552,9 +570,9 @@
   },
   "observation_notebooks": {
    "effects": {
-    "knowledge_preservation": 0.0019,
+    "knowledge_preservation": 0.0005,
     "knowledge_rate": 0.0025,
-    "observation_rate": 0.0047
+    "observation_rate": 0.0023
    },
    "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
    "name": "Notebooks of Curiosities",
@@ -562,9 +580,9 @@
   },
   "contrary_authorities_method": {
    "effects": {
-    "adoption_rate": 0.0017,
-    "institutional_rigidity": -0.002,
-    "knowledge_rate": 0.0041,
+    "adoption_rate": 0.0003,
+    "institutional_rigidity": -0.0003,
+    "knowledge_rate": 0.0008,
     "legitimacy": -0.001
    },
    "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
@@ -573,9 +591,9 @@
   },
   "magnetic_declination_note": {
    "effects": {
-    "naval_capacity": 0.001,
-    "route_speed": 0.006,
-    "survey_speed": 0.0052
+    "naval_capacity": 0.0007,
+    "route_speed": 0.0014,
+    "survey_speed": 0.0023
    },
    "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
    "name": "Needle Drift Recorded",
@@ -583,10 +601,11 @@
   },
   "paper_working_copies": {
    "effects": {
-    "adoption_rate": 0.0035,
-    "knowledge_preservation": 0.0038,
-    "labor_demand": 0.001,
-    "state_capacity": 0.0032
+    "adoption_rate": 0.0006,
+    "knowledge_preservation": 0.0005,
+    "labor_demand": 0.0001,
+    "literacy": 0.0016,
+    "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/paper_making-v1.png",
    "name": "Paper Working Copies",
@@ -594,10 +613,11 @@
   },
   "collected_sentences_textbook": {
    "effects": {
-    "adoption_rate": 0.0026,
-    "institutional_rigidity": 0.002,
-    "knowledge_rate": 0.0025,
-    "standardization": 0.0036
+    "adoption_rate": 0.0004,
+    "institutional_rigidity": 0.0002,
+    "knowledge_rate": 0.0005,
+    "literacy": 0.0016,
+    "standardization": 0.0004
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Book of Sentences",
@@ -605,14 +625,15 @@
   },
   "chartered_university": {
    "effects": {
-    "adoption_rate": 0.0052,
-    "cohesion": -0.001,
-    "institutional_rigidity": 0.003,
-    "knowledge_preservation": 0.0067,
-    "knowledge_rate": 0.0099,
-    "labor_demand": 0.006,
-    "legitimacy": 0.003,
-    "state_capacity": 0.0048
+    "adoption_rate": 0.0009,
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0003,
+    "knowledge_preservation": 0.001,
+    "knowledge_rate": 0.0018,
+    "labor_demand": 0.0003,
+    "legitimacy": 0.0002,
+    "literacy": 0.002,
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Chartered University",
@@ -622,12 +643,13 @@
   },
   "rival_tongue_translation_school": {
    "effects": {
-    "adoption_rate": 0.0035,
-    "knowledge_preservation": 0.0076,
-    "knowledge_rate": 0.0083,
-    "labor_demand": 0.004,
+    "adoption_rate": 0.0006,
+    "knowledge_preservation": 0.0011,
+    "knowledge_rate": 0.0015,
+    "labor_demand": 0.0002,
     "legitimacy": -0.002,
-    "observation_rate": 0.0038
+    "literacy": 0.0016,
+    "observation_rate": 0.0027
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Translation School",
@@ -637,10 +659,11 @@
   },
   "teaching_licence_degree": {
    "effects": {
-    "adoption_rate": 0.0035,
-    "institutional_rigidity": 0.002,
-    "legitimacy": 0.001,
-    "standardization": 0.0036
+    "adoption_rate": 0.0006,
+    "institutional_rigidity": 0.0002,
+    "legitimacy": 0.0001,
+    "literacy": 0.0016,
+    "standardization": 0.0004
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Licence to Teach",
@@ -648,11 +671,12 @@
   },
   "scholastic_question_method": {
    "effects": {
-    "adoption_rate": 0.0026,
-    "institutional_rigidity": 0.003,
-    "knowledge_preservation": 0.0019,
-    "knowledge_rate": 0.0075,
-    "legitimacy": 0.001
+    "adoption_rate": 0.0007,
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.0002,
+    "knowledge_rate": 0.0024,
+    "legitimacy": 0.0001,
+    "literacy": 0.0021
    },
    "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
    "name": "Scholastic Method",
@@ -662,10 +686,11 @@
   },
   "set_text_lectures": {
    "effects": {
-    "adoption_rate": 0.0026,
-    "institutional_rigidity": 0.002,
-    "knowledge_preservation": 0.0038,
-    "standardization": 0.0024
+    "adoption_rate": 0.0007,
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.0003,
+    "literacy": 0.0021,
+    "standardization": 0.0003
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Set-text Lectures",
@@ -673,11 +698,12 @@
   },
   "merchant_digit_reckoning": {
    "effects": {
-    "adoption_rate": 0.0035,
-    "knowledge_rate": 0.0017,
-    "standardization": 0.0061,
-    "state_capacity": 0.0048,
-    "trade_capacity": 0.0138
+    "adoption_rate": 0.0009,
+    "knowledge_rate": 0.0005,
+    "literacy": 0.0021,
+    "standardization": 0.0009,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.0015
    },
    "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
    "name": "Merchants' Reckoning Book",
@@ -687,10 +713,11 @@
   },
   "automata_machine_book": {
    "effects": {
-    "craft_output": 0.004,
-    "knowledge_rate": 0.0017,
+    "craft_output": 0.0012,
+    "knowledge_rate": 0.0005,
+    "literacy": 0.0021,
     "repair_capacity": 0.002,
-    "water_access": 0.002
+    "water_access": 0.0007
    },
    "art": "res://assets/ui/research/subjects/water_mills-v1.png",
    "name": "Book of Machines",
@@ -698,9 +725,9 @@
   },
   "science_of_weights": {
    "effects": {
-    "construction_rate": 0.0054,
-    "craft_output": 0.0013,
-    "knowledge_rate": 0.0033
+    "construction_rate": 0.0009,
+    "craft_output": 0.0004,
+    "knowledge_rate": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/balance_beam_weights.png",
    "name": "Science of Weights",
@@ -708,9 +735,10 @@
   },
   "alphabetical_concordance": {
    "effects": {
-    "adoption_rate": 0.0026,
-    "knowledge_preservation": 0.0048,
-    "knowledge_rate": 0.0017
+    "adoption_rate": 0.0007,
+    "knowledge_preservation": 0.0004,
+    "knowledge_rate": 0.0005,
+    "literacy": 0.0021
    },
    "art": "res://assets/ui/research/discovery-600/cross_referenced_archives.png",
    "name": "Concordances and Indexes",
@@ -718,11 +746,11 @@
   },
   "endowed_student_colleges": {
    "effects": {
-    "adoption_rate": 0.0035,
-    "knowledge_preservation": 0.0019,
-    "knowledge_rate": 0.0033,
-    "labor_demand": 0.003,
-    "legitimacy": 0.001
+    "adoption_rate": 0.0007,
+    "knowledge_preservation": 0.0002,
+    "knowledge_rate": 0.0007,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Endowed Colleges",
@@ -730,11 +758,11 @@
   },
   "district_rain_gauges": {
    "effects": {
-    "cultivation_yield": 0.002,
-    "disaster_resilience": 0.002,
-    "labor_demand": 0.001,
-    "observation_rate": 0.0038,
-    "state_capacity": 0.0016
+    "cultivation_yield": 0.001,
+    "disaster_resilience": 0.0006,
+    "labor_demand": 0.0001,
+    "observation_rate": 0.0004,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/seasonal_patterns-v1.png",
    "name": "District Rain Gauges",
@@ -742,8 +770,8 @@
   },
   "stepwise_high_root_extraction": {
    "effects": {
-    "knowledge_rate": 0.0033,
-    "survey_speed": 0.0035
+    "knowledge_rate": 0.0007,
+    "survey_speed": 0.0025
    },
    "art": "res://assets/ui/research/discovery-600/square_root_tables.png",
    "name": "Stepwise Root Extraction",
@@ -751,10 +779,10 @@
   },
   "rented_exemplar_copying": {
    "effects": {
-    "adoption_rate": 0.0035,
-    "knowledge_preservation": 0.0048,
-    "labor_demand": 0.001,
-    "standardization": 0.0036
+    "adoption_rate": 0.0007,
+    "knowledge_preservation": 0.0005,
+    "labor_demand": 0.0001,
+    "standardization": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/checked_master_copies.png",
    "name": "Rented Exemplars",
@@ -762,12 +790,12 @@
   },
   "experimental_science_program": {
    "effects": {
-    "adoption_rate": 0.0026,
-    "institutional_rigidity": -0.004,
-    "knowledge_rate": 0.0075,
-    "labor_demand": 0.002,
+    "adoption_rate": 0.0005,
+    "institutional_rigidity": -0.0004,
+    "knowledge_rate": 0.0016,
+    "labor_demand": 0.0001,
     "legitimacy": -0.002,
-    "observation_rate": 0.0113
+    "observation_rate": 0.0011
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Program of Trials",
@@ -777,9 +805,9 @@
   },
   "lodestone_pole_experiments": {
    "effects": {
-    "knowledge_rate": 0.0025,
-    "observation_rate": 0.0038,
-    "route_speed": 0.002
+    "knowledge_rate": 0.0005,
+    "observation_rate": 0.0004,
+    "route_speed": 0.0007
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Lodestone Poles",
@@ -787,11 +815,11 @@
   },
   "royal_sky_tables_commission": {
    "effects": {
-    "labor_demand": 0.003,
-    "observation_rate": 0.0038,
-    "standardization": 0.0024,
-    "state_capacity": 0.0032,
-    "survey_speed": 0.0052
+    "labor_demand": 0.0002,
+    "observation_rate": 0.0004,
+    "standardization": 0.0002,
+    "state_capacity": 0.0002,
+    "survey_speed": 0.0037
    },
    "art": "res://assets/ui/research/discovery-600/star_hour_tables.png",
    "name": "Royal Sky Tables",
@@ -799,10 +827,11 @@
   },
   "school_perspective_optics": {
    "effects": {
-    "construction_rate": 0.0036,
-    "craft_output": 0.0013,
-    "knowledge_rate": 0.0017,
-    "observation_rate": 0.0028
+    "construction_rate": 0.0013,
+    "craft_output": 0.0002,
+    "knowledge_rate": 0.0004,
+    "literacy": 0.0021,
+    "observation_rate": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
    "name": "Perspective Optics",
@@ -810,9 +839,9 @@
   },
   "optical_lenses": {
    "effects": {
-    "craft_output": 0.0027,
-    "labor_efficiency": 0.002,
-    "observation_rate": 0.0047,
+    "craft_output": 0.0004,
+    "labor_efficiency": 0.0003,
+    "observation_rate": 0.0005,
     "tool_quality": 0.001
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
@@ -820,10 +849,11 @@
   },
   "reckoning_schools": {
    "effects": {
-    "adoption_rate": 0.0035,
-    "labor_demand": 0.002,
-    "standardization": 0.0024,
-    "trade_capacity": 0.0069
+    "adoption_rate": 0.0007,
+    "labor_demand": 0.0001,
+    "literacy": 0.0021,
+    "standardization": 0.0002,
+    "trade_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Reckoning Schools",
@@ -831,12 +861,12 @@
   },
   "verge_escapement_clock": {
    "effects": {
-    "craft_output": 0.004,
+    "craft_output": 0.0007,
     "fatigue": 0.001,
-    "labor_demand": 0.003,
-    "observation_rate": 0.0038,
-    "standardization": 0.0061,
-    "task_coordination": 0.0095
+    "labor_demand": 0.0002,
+    "observation_rate": 0.0004,
+    "standardization": 0.0005,
+    "task_coordination": 0.0013
    },
    "art": "res://assets/ui/research/discovery-600/outflow_water_clock.png",
    "name": "Verge Escapement Clock",
@@ -845,8 +875,9 @@
   },
   "foliated_running_heads": {
    "effects": {
-    "adoption_rate": 0.0017,
-    "knowledge_preservation": 0.0038
+    "adoption_rate": 0.0003,
+    "knowledge_preservation": 0.0004,
+    "literacy": 0.0021
    },
    "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
    "name": "Numbered Leaves",
@@ -854,10 +885,10 @@
   },
   "wooden_movable_type": {
    "effects": {
-    "adoption_rate": 0.0043,
-    "craft_output": 0.004,
-    "knowledge_preservation": 0.0029,
-    "labor_demand": 0.002,
+    "adoption_rate": 0.0008,
+    "craft_output": 0.0007,
+    "knowledge_preservation": 0.0003,
+    "labor_demand": 0.0001,
     "timber_pressure": 0.001
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
@@ -866,10 +897,10 @@
   "mineral_acid_distillation": {
    "effects": {
     "chemical_control": 0.005,
-    "craft_output": 0.004,
+    "craft_output": 0.0011,
     "health_risk": 0.002,
-    "metal_yield": 0.002,
-    "observation_rate": 0.0019,
+    "metal_yield": 0.0015,
+    "observation_rate": 0.0003,
     "pollution": 0.003,
     "water_pollution": 0.001
    },
@@ -879,8 +910,8 @@
   },
   "water_sphere_rainbow_test": {
    "effects": {
-    "knowledge_rate": 0.0025,
-    "observation_rate": 0.0047
+    "knowledge_rate": 0.0005,
+    "observation_rate": 0.0007
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Rainbow in a Glass Globe",
@@ -888,11 +919,12 @@
   },
   "vernacular_learned_writing": {
    "effects": {
-    "adoption_rate": 0.0052,
-    "cohesion": 0.002,
-    "institutional_rigidity": -0.002,
-    "knowledge_rate": 0.0025,
-    "legitimacy": -0.001
+    "adoption_rate": 0.0009,
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0002,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.001,
+    "literacy": 0.0049
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Learning in the Common Tongue",
@@ -901,11 +933,11 @@
   "striking_equal_hour_clock": {
    "effects": {
     "fatigue": 0.003,
-    "labor_demand": 0.002,
-    "labor_efficiency": 0.004,
-    "legitimacy": 0.002,
-    "standardization": 0.0048,
-    "task_coordination": 0.0118
+    "labor_demand": 0.0001,
+    "labor_efficiency": 0.0005,
+    "legitimacy": 0.0001,
+    "standardization": 0.0008,
+    "task_coordination": 0.0014
    },
    "art": "res://assets/ui/research/discovery-600/shadow_clock.png",
    "name": "Striking Town Clock",
@@ -915,8 +947,8 @@
   },
   "mean_speed_rule": {
    "effects": {
-    "knowledge_rate": 0.0033,
-    "observation_rate": 0.0019
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/worked_problem_tablets.png",
    "name": "Mean-speed Rule",
@@ -924,9 +956,10 @@
   },
   "commonplace_books": {
    "effects": {
-    "adoption_rate": 0.0026,
-    "knowledge_preservation": 0.0038,
-    "knowledge_rate": 0.0017
+    "adoption_rate": 0.0005,
+    "knowledge_preservation": 0.0005,
+    "knowledge_rate": 0.0003,
+    "literacy": 0.0049
    },
    "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
    "name": "Commonplace Books",
@@ -934,8 +967,8 @@
   },
   "impetus_theory": {
    "effects": {
-    "knowledge_rate": 0.0033,
-    "observation_rate": 0.0019
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.0003
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Impetus",
@@ -943,13 +976,529 @@
   },
   "quality_graphs": {
    "effects": {
-    "knowledge_rate": 0.0033,
-    "observation_rate": 0.0028,
-    "survey_speed": 0.0017
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.0004,
+    "survey_speed": 0.0013
    },
    "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
    "name": "Qualities Drawn as Graphs",
    "observation": "A master draws how heat or speed grows along a line as a figure of rising heights."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "rounded_book_hand": {
+    "adoption_rate": 0.0009,
+    "knowledge_preservation": 0.0038,
+    "labor_demand": 0.001
+   },
+   "devised_script_for_new_tongue": {
+    "adoption_rate": 0.0035,
+    "knowledge_preservation": 0.0029,
+    "labor_demand": 0.001,
+    "trade_capacity": 0.0028
+   },
+   "itinerary_strip_maps": {
+    "logistics_endurance": 0.001,
+    "route_speed": 0.008,
+    "security_efficiency": 0.001,
+    "survey_speed": 0.0052
+   },
+   "seven_arts_manuals": {
+    "adoption_rate": 0.0017,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.0029,
+    "knowledge_rate": 0.0025,
+    "labor_demand": 0.002
+   },
+   "moving_feast_reckoning": {
+    "legitimacy": 0.001,
+    "observation_rate": 0.0019,
+    "standardization": 0.0036,
+    "task_coordination": 0.0024
+   },
+   "hard_word_glossaries": {
+    "adoption_rate": 0.0026,
+    "knowledge_preservation": 0.0019,
+    "knowledge_rate": 0.0008
+   },
+   "nine_digits_and_zero": {
+    "knowledge_rate": 0.0066,
+    "standardization": 0.0061,
+    "state_capacity": 0.0048,
+    "task_coordination": 0.0036,
+    "trade_capacity": 0.0069
+   },
+   "half_chord_sine_tables": {
+    "knowledge_rate": 0.0008,
+    "observation_rate": 0.0019,
+    "survey_speed": 0.008
+   },
+   "sacred_epoch_year_count": {
+    "knowledge_preservation": 0.0029,
+    "legitimacy": 0.002,
+    "standardization": 0.0036
+   },
+   "retreat_copying_rooms": {
+    "adoption_rate": 0.0017,
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0134,
+    "knowledge_rate": 0.0025,
+    "labor_demand": 0.004
+   },
+   "school_logic_primers": {
+    "adoption_rate": 0.0009,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.0019,
+    "knowledge_rate": 0.0025,
+    "labor_demand": 0.001
+   },
+   "rhyme_sound_dictionary": {
+    "adoption_rate": 0.0017,
+    "knowledge_preservation": 0.0029,
+    "standardization": 0.0036
+   },
+   "zero_negative_rules": {
+    "knowledge_rate": 0.0033,
+    "standardization": 0.0024,
+    "trade_capacity": 0.0055
+   },
+   "word_origin_encyclopedia": {
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.0048,
+    "knowledge_rate": 0.0017,
+    "labor_demand": 0.001
+   },
+   "planispheric_astrolabe": {
+    "craft_output": 0.0013,
+    "observation_rate": 0.0047,
+    "survey_speed": 0.0069,
+    "travel_speed": 0.002
+   },
+   "relief_block_cutting": {
+    "adoption_rate": 0.0026,
+    "craft_output": 0.004,
+    "knowledge_preservation": 0.0029,
+    "labor_demand": 0.002,
+    "standardization": 0.0024
+   },
+   "printing_process": {
+    "adoption_rate": 0.0104,
+    "institutional_rigidity": -0.002,
+    "knowledge_preservation": 0.0076,
+    "knowledge_rate": 0.0041,
+    "labor_demand": 0.003,
+    "standardization": 0.0048,
+    "timber_pressure": 0.001
+   },
+   "word_spacing": {
+    "adoption_rate": 0.0026,
+    "knowledge_preservation": 0.0019
+   },
+   "meridian_shadow_stations": {
+    "labor_demand": 0.003,
+    "observation_rate": 0.0028,
+    "state_capacity": 0.0016,
+    "survey_speed": 0.008
+   },
+   "waterwheel_escapement_globe": {
+    "craft_output": 0.0013,
+    "knowledge_rate": 0.0017,
+    "labor_demand": 0.003,
+    "observation_rate": 0.0028,
+    "task_coordination": 0.0024
+   },
+   "lunar_tide_reckoning": {
+    "disaster_resilience": 0.001,
+    "naval_capacity": 0.002,
+    "observation_rate": 0.0019,
+    "route_speed": 0.006
+   },
+   "small_letter_book_hand": {
+    "adoption_rate": 0.0035,
+    "knowledge_preservation": 0.0038,
+    "standardization": 0.0024
+   },
+   "chemical_distillation": {
+    "chemical_control": 0.003,
+    "craft_output": 0.004,
+    "fuel_demand": 0.003,
+    "health_risk": 0.001,
+    "knowledge_rate": 0.0017,
+    "observation_rate": 0.0028
+   },
+   "digit_reckoning_handbook": {
+    "adoption_rate": 0.0035,
+    "standardization": 0.0024,
+    "state_capacity": 0.0032,
+    "trade_capacity": 0.0041
+   },
+   "restoration_balancing_algebra": {
+    "knowledge_rate": 0.0075,
+    "state_capacity": 0.0032,
+    "survey_speed": 0.0052,
+    "trade_capacity": 0.0041
+   },
+   "royal_house_of_learning": {
+    "adoption_rate": 0.0035,
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0057,
+    "knowledge_rate": 0.0083,
+    "labor_demand": 0.005,
+    "legitimacy": 0.002,
+    "observation_rate": 0.0057
+   },
+   "fixed_instrument_observatory": {
+    "construction_rate": 0.0018,
+    "labor_demand": 0.003,
+    "observation_rate": 0.0057,
+    "standardization": 0.0024,
+    "survey_speed": 0.0052
+   },
+   "letter_frequency_codebreaking": {
+    "knowledge_rate": 0.0008,
+    "security_efficiency": 0.004,
+    "state_capacity": 0.0032
+   },
+   "timed_beacon_code": {
+    "labor_demand": 0.002,
+    "security_efficiency": 0.004,
+    "task_coordination": 0.0036,
+    "warfare_readiness": 0.002
+   },
+   "block_printed_books": {
+    "adoption_rate": 0.0052,
+    "craft_output": 0.0013,
+    "knowledge_preservation": 0.0057,
+    "knowledge_rate": 0.0025,
+    "labor_demand": 0.002,
+    "timber_pressure": 0.001
+   },
+   "printed_almanacs": {
+    "adoption_rate": 0.0043,
+    "cultivation_yield": 0.002,
+    "standardization": 0.0012,
+    "task_coordination": 0.0024
+   },
+   "observed_table_revision": {
+    "institutional_rigidity": -0.001,
+    "knowledge_rate": 0.0025,
+    "observation_rate": 0.0057,
+    "survey_speed": 0.0035
+   },
+   "horary_quadrant": {
+    "construction_rate": 0.0036,
+    "observation_rate": 0.0019,
+    "survey_speed": 0.008
+   },
+   "printed_standard_classics": {
+    "adoption_rate": 0.0052,
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0038,
+    "standardization": 0.0061,
+    "state_capacity": 0.0032
+   },
+   "scholarly_question_letters": {
+    "adoption_rate": 0.0017,
+    "knowledge_rate": 0.0033,
+    "observation_rate": 0.0028,
+    "trade_capacity": 0.0014
+   },
+   "written_decimal_fractions": {
+    "knowledge_rate": 0.0025,
+    "standardization": 0.0036,
+    "survey_speed": 0.0035,
+    "trade_capacity": 0.0041
+   },
+   "illustrated_star_atlas": {
+    "knowledge_preservation": 0.0029,
+    "observation_rate": 0.0038,
+    "route_speed": 0.002
+   },
+   "digit_column_counting_board": {
+    "adoption_rate": 0.0009,
+    "state_capacity": 0.0048,
+    "task_coordination": 0.0024,
+    "trade_capacity": 0.0041
+   },
+   "great_house_schools": {
+    "adoption_rate": 0.0035,
+    "knowledge_preservation": 0.0029,
+    "knowledge_rate": 0.0025,
+    "labor_demand": 0.003,
+    "legitimacy": 0.002
+   },
+   "polynomial_term_algebra": {
+    "knowledge_rate": 0.0041,
+    "survey_speed": 0.0035
+   },
+   "darkened_room_optics": {
+    "adoption_rate": 0.0017,
+    "institutional_rigidity": -0.002,
+    "knowledge_rate": 0.0058,
+    "observation_rate": 0.0094
+   },
+   "sky_model_doubts": {
+    "institutional_rigidity": -0.002,
+    "knowledge_rate": 0.0025,
+    "legitimacy": -0.001,
+    "observation_rate": 0.0019
+   },
+   "movable_type_composition": {
+    "adoption_rate": 0.0043,
+    "craft_output": 0.004,
+    "knowledge_preservation": 0.0029,
+    "labor_demand": 0.003
+   },
+   "guest_star_records": {
+    "knowledge_preservation": 0.0029,
+    "observation_rate": 0.0038
+   },
+   "binomial_coefficient_triangle": {
+    "knowledge_rate": 0.0033,
+    "survey_speed": 0.0017
+   },
+   "universal_astrolabe_plate": {
+    "observation_rate": 0.0019,
+    "route_speed": 0.004,
+    "survey_speed": 0.0069
+   },
+   "geometric_cubic_solutions": {
+    "construction_rate": 0.0018,
+    "knowledge_rate": 0.0033
+   },
+   "letter_writing_art": {
+    "adoption_rate": 0.0009,
+    "knowledge_preservation": 0.0019,
+    "state_capacity": 0.0064,
+    "task_coordination": 0.0024,
+    "trade_capacity": 0.0041
+   },
+   "astronomical_clock_tower": {
+    "construction_rate": 0.0018,
+    "craft_output": 0.0027,
+    "labor_demand": 0.004,
+    "legitimacy": 0.003,
+    "observation_rate": 0.0028,
+    "task_coordination": 0.0047
+   },
+   "observation_notebooks": {
+    "knowledge_preservation": 0.0019,
+    "knowledge_rate": 0.0025,
+    "observation_rate": 0.0047
+   },
+   "contrary_authorities_method": {
+    "adoption_rate": 0.0017,
+    "institutional_rigidity": -0.002,
+    "knowledge_rate": 0.0041,
+    "legitimacy": -0.001
+   },
+   "magnetic_declination_note": {
+    "naval_capacity": 0.001,
+    "route_speed": 0.006,
+    "survey_speed": 0.0052
+   },
+   "paper_working_copies": {
+    "adoption_rate": 0.0035,
+    "knowledge_preservation": 0.0038,
+    "labor_demand": 0.001,
+    "state_capacity": 0.0032
+   },
+   "collected_sentences_textbook": {
+    "adoption_rate": 0.0026,
+    "institutional_rigidity": 0.002,
+    "knowledge_rate": 0.0025,
+    "standardization": 0.0036
+   },
+   "chartered_university": {
+    "adoption_rate": 0.0052,
+    "cohesion": -0.001,
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0067,
+    "knowledge_rate": 0.0099,
+    "labor_demand": 0.006,
+    "legitimacy": 0.003,
+    "state_capacity": 0.0048
+   },
+   "rival_tongue_translation_school": {
+    "adoption_rate": 0.0035,
+    "knowledge_preservation": 0.0076,
+    "knowledge_rate": 0.0083,
+    "labor_demand": 0.004,
+    "legitimacy": -0.002,
+    "observation_rate": 0.0038
+   },
+   "teaching_licence_degree": {
+    "adoption_rate": 0.0035,
+    "institutional_rigidity": 0.002,
+    "legitimacy": 0.001,
+    "standardization": 0.0036
+   },
+   "scholastic_question_method": {
+    "adoption_rate": 0.0026,
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0019,
+    "knowledge_rate": 0.0075,
+    "legitimacy": 0.001
+   },
+   "set_text_lectures": {
+    "adoption_rate": 0.0026,
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0038,
+    "standardization": 0.0024
+   },
+   "merchant_digit_reckoning": {
+    "adoption_rate": 0.0035,
+    "knowledge_rate": 0.0017,
+    "standardization": 0.0061,
+    "state_capacity": 0.0048,
+    "trade_capacity": 0.0138
+   },
+   "automata_machine_book": {
+    "craft_output": 0.004,
+    "knowledge_rate": 0.0017,
+    "repair_capacity": 0.002,
+    "water_access": 0.002
+   },
+   "science_of_weights": {
+    "construction_rate": 0.0054,
+    "craft_output": 0.0013,
+    "knowledge_rate": 0.0033
+   },
+   "alphabetical_concordance": {
+    "adoption_rate": 0.0026,
+    "knowledge_preservation": 0.0048,
+    "knowledge_rate": 0.0017
+   },
+   "endowed_student_colleges": {
+    "adoption_rate": 0.0035,
+    "knowledge_preservation": 0.0019,
+    "knowledge_rate": 0.0033,
+    "labor_demand": 0.003,
+    "legitimacy": 0.001
+   },
+   "district_rain_gauges": {
+    "cultivation_yield": 0.002,
+    "disaster_resilience": 0.002,
+    "labor_demand": 0.001,
+    "observation_rate": 0.0038,
+    "state_capacity": 0.0016
+   },
+   "stepwise_high_root_extraction": {
+    "knowledge_rate": 0.0033,
+    "survey_speed": 0.0035
+   },
+   "rented_exemplar_copying": {
+    "adoption_rate": 0.0035,
+    "knowledge_preservation": 0.0048,
+    "labor_demand": 0.001,
+    "standardization": 0.0036
+   },
+   "experimental_science_program": {
+    "adoption_rate": 0.0026,
+    "institutional_rigidity": -0.004,
+    "knowledge_rate": 0.0075,
+    "labor_demand": 0.002,
+    "legitimacy": -0.002,
+    "observation_rate": 0.0113
+   },
+   "lodestone_pole_experiments": {
+    "knowledge_rate": 0.0025,
+    "observation_rate": 0.0038,
+    "route_speed": 0.002
+   },
+   "royal_sky_tables_commission": {
+    "labor_demand": 0.003,
+    "observation_rate": 0.0038,
+    "standardization": 0.0024,
+    "state_capacity": 0.0032,
+    "survey_speed": 0.0052
+   },
+   "school_perspective_optics": {
+    "construction_rate": 0.0036,
+    "craft_output": 0.0013,
+    "knowledge_rate": 0.0017,
+    "observation_rate": 0.0028
+   },
+   "optical_lenses": {
+    "craft_output": 0.0027,
+    "labor_efficiency": 0.002,
+    "observation_rate": 0.0047,
+    "tool_quality": 0.001
+   },
+   "reckoning_schools": {
+    "adoption_rate": 0.0035,
+    "labor_demand": 0.002,
+    "standardization": 0.0024,
+    "trade_capacity": 0.0069
+   },
+   "verge_escapement_clock": {
+    "craft_output": 0.004,
+    "fatigue": 0.001,
+    "labor_demand": 0.003,
+    "observation_rate": 0.0038,
+    "standardization": 0.0061,
+    "task_coordination": 0.0095
+   },
+   "foliated_running_heads": {
+    "adoption_rate": 0.0017,
+    "knowledge_preservation": 0.0038
+   },
+   "wooden_movable_type": {
+    "adoption_rate": 0.0043,
+    "craft_output": 0.004,
+    "knowledge_preservation": 0.0029,
+    "labor_demand": 0.002,
+    "timber_pressure": 0.001
+   },
+   "mineral_acid_distillation": {
+    "chemical_control": 0.005,
+    "craft_output": 0.004,
+    "health_risk": 0.002,
+    "metal_yield": 0.002,
+    "observation_rate": 0.0019,
+    "pollution": 0.003,
+    "water_pollution": 0.001
+   },
+   "water_sphere_rainbow_test": {
+    "knowledge_rate": 0.0025,
+    "observation_rate": 0.0047
+   },
+   "vernacular_learned_writing": {
+    "adoption_rate": 0.0052,
+    "cohesion": 0.002,
+    "institutional_rigidity": -0.002,
+    "knowledge_rate": 0.0025,
+    "legitimacy": -0.001
+   },
+   "striking_equal_hour_clock": {
+    "fatigue": 0.003,
+    "labor_demand": 0.002,
+    "labor_efficiency": 0.004,
+    "legitimacy": 0.002,
+    "standardization": 0.0048,
+    "task_coordination": 0.0118
+   },
+   "mean_speed_rule": {
+    "knowledge_rate": 0.0033,
+    "observation_rate": 0.0019
+   },
+   "commonplace_books": {
+    "adoption_rate": 0.0026,
+    "knowledge_preservation": 0.0038,
+    "knowledge_rate": 0.0017
+   },
+   "impetus_theory": {
+    "knowledge_rate": 0.0033,
+    "observation_rate": 0.0019
+   },
+   "quality_graphs": {
+    "knowledge_rate": 0.0033,
+    "observation_rate": 0.0028,
+    "survey_speed": 0.0017
+   }
   }
  }
 }

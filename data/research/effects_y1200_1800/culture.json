@@ -4,10 +4,11 @@
  "items": {
   "brush_writing_fine_art": {
    "effects": {
-    "cohesion": 0.0005,
-    "craft_output": 0.0005,
-    "knowledge_preservation": 0.0006,
-    "legitimacy": 0.0003
+    "cohesion": 0.0001,
+    "craft_output": 0.0003,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/scribal_specialties.png",
    "name": "Brush-writing as Fine Art",
@@ -15,10 +16,10 @@
   },
   "holy_tomb_pilgrimage": {
    "effects": {
-    "cohesion": 0.001,
+    "cohesion": 0.0001,
     "disease_exposure": 0.001,
-    "legitimacy": 0.0008,
-    "trade_capacity": 0.001,
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0006,
     "travel_speed": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/pilgrimage.png",
@@ -27,9 +28,9 @@
   },
   "holy_relic_shrines": {
    "effects": {
-    "cohesion": 0.0008,
-    "legitimacy": 0.0011,
-    "trade_capacity": 0.0005
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/sacred_places.png",
    "name": "Relic Shrines",
@@ -37,9 +38,9 @@
   },
   "confessional_autobiography": {
    "effects": {
-    "cohesion": 0.0003,
-    "knowledge_preservation": 0.0006,
-    "legitimacy": 0.0003
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Confessional Life",
@@ -47,9 +48,9 @@
   },
   "providential_world_history": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0009,
-    "legitimacy": 0.0008
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
    "name": "World History as the God's Plan",
@@ -57,10 +58,10 @@
   },
   "holy_servants_feast_year": {
    "effects": {
-    "cohesion": 0.001,
+    "cohesion": 0.0001,
     "food_storage": -0.001,
     "labor_efficiency": -0.0005,
-    "legitimacy": 0.0006
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
    "name": "Feast Year of the God's Servants",
@@ -68,10 +69,10 @@
   },
   "rock_cut_cave_sanctuaries": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0006,
-    "labor_demand": 0.0015,
-    "legitimacy": 0.0008
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
    "name": "Cave Sanctuaries",
@@ -79,12 +80,13 @@
   },
   "devotee_communities_under_rule": {
    "effects": {
-    "cohesion": 0.0024,
-    "cultivation_yield": 0.0016,
-    "food_storage": 0.0024,
-    "knowledge_preservation": 0.0038,
-    "labor_demand": 0.0024,
-    "legitimacy": 0.0018
+    "cohesion": 0.0001,
+    "cultivation_yield": 0.0008,
+    "food_storage": 0.0007,
+    "knowledge_preservation": 0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/first_shrine_house.png",
    "name": "Devotees Under a Rule",
@@ -94,9 +96,9 @@
   },
   "official_ivory_diptychs": {
    "effects": {
-    "craft_output": 0.0005,
-    "legitimacy": 0.0008,
-    "state_capacity": 0.0005
+    "craft_output": 0.0004,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/stone_relief_carving.png",
    "name": "Ivory Office Panels",
@@ -104,8 +106,8 @@
   },
   "venerated_icons": {
    "effects": {
-    "cohesion": 0.0008,
-    "legitimacy": 0.0011
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
    "name": "Venerated Icons",
@@ -113,11 +115,11 @@
   },
   "race_faction_parties": {
    "effects": {
-    "cohesion": -0.001,
+    "cohesion": -0.0002,
     "injury_risk": 0.001,
     "legitimacy": -0.0007,
     "security_efficiency": -0.001,
-    "trade_capacity": 0.0005
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/civic_games-v2.png",
    "name": "Race Factions Sway Rulers",
@@ -126,9 +128,9 @@
   },
   "stanza_hymn_sermons": {
    "effects": {
-    "cohesion": 0.0008,
-    "knowledge_preservation": 0.0003,
-    "legitimacy": 0.0006
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/seasonal_hymn_cycles.png",
    "name": "Sung Stanza Sermons",
@@ -136,11 +138,11 @@
   },
   "great_domed_temple": {
    "effects": {
-    "cohesion": 0.0024,
-    "construction_rate": 0.0037,
+    "cohesion": 0.0001,
+    "construction_rate": 0.001,
     "fuel_demand": 0.0008,
-    "labor_demand": 0.0048,
-    "legitimacy": 0.0054,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0003,
     "timber_pressure": 0.0016
    },
    "art": "res://assets/ui/research/discovery-600/first_shrine_house.png",
@@ -151,9 +153,9 @@
   },
   "peoples_origin_histories": {
    "effects": {
-    "cohesion": 0.001,
-    "knowledge_preservation": 0.0009,
-    "legitimacy": 0.0006
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0002,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
    "name": "Origin Histories of Peoples",
@@ -161,10 +163,11 @@
   },
   "chant_schools": {
    "effects": {
-    "cohesion": 0.0008,
-    "knowledge_preservation": 0.0006,
-    "labor_demand": 0.0005,
-    "legitimacy": 0.0006
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
    "name": "Chant Schools",
@@ -172,9 +175,9 @@
   },
   "strategy_board_war_game": {
    "effects": {
-    "cohesion": 0.0003,
-    "knowledge_rate": 0.0009,
-    "warfare_readiness": 0.0017
+    "cohesion": 0.0001,
+    "knowledge_rate": 0.0005,
+    "warfare_readiness": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/board_race_games.png",
    "name": "War Board Game",
@@ -182,10 +185,10 @@
   },
   "mead_hall_gift_feasts": {
    "effects": {
-    "cohesion": 0.001,
+    "cohesion": 0.0001,
     "food_storage": -0.0015,
-    "legitimacy": 0.0006,
-    "warfare_readiness": 0.0011
+    "legitimacy": 0.0001,
+    "warfare_readiness": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/shared_hearth_gatherings.png",
    "name": "Hall Gift Feasts",
@@ -193,10 +196,10 @@
   },
   "lantern_festival_nights": {
    "effects": {
-    "cohesion": 0.001,
+    "cohesion": 0.0001,
     "food_storage": -0.0005,
     "fuel_demand": 0.0005,
-    "trade_capacity": 0.0005
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
    "name": "Lantern Festival",
@@ -204,10 +207,10 @@
   },
   "devotional_songs_common_tongue": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.001,
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
     "institutional_rigidity": -0.0005,
-    "legitimacy": 0.0006
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/seasonal_hymn_cycles.png",
    "name": "Devotional Songs",
@@ -215,9 +218,9 @@
   },
   "warband_heroic_poems": {
    "effects": {
-    "cohesion": 0.001,
-    "knowledge_preservation": 0.0006,
-    "warfare_readiness": 0.0017
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "warfare_readiness": 0.0004
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "name": "Warband Heroic Poems",
@@ -225,10 +228,11 @@
   },
   "interlace_illuminated_books": {
    "effects": {
-    "craft_output": 0.0005,
-    "knowledge_preservation": 0.0009,
-    "labor_demand": 0.001,
-    "legitimacy": 0.0006
+    "craft_output": 0.0002,
+    "knowledge_preservation": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
    "name": "Interlace Illumination",
@@ -236,9 +240,9 @@
   },
   "regulated_tonal_verse": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0006,
-    "standardization": 0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "standardization": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/debate_poems.png",
    "name": "Regulated Tonal Verse",
@@ -246,9 +250,9 @@
   },
   "image_breaking_dispute": {
    "effects": {
-    "cohesion": -0.0017,
-    "institutional_rigidity": -0.001,
-    "knowledge_rate": 0.0009,
+    "cohesion": -0.0004,
+    "institutional_rigidity": -0.0008,
+    "knowledge_rate": 0.0002,
     "legitimacy": -0.001
    },
    "art": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
@@ -258,11 +262,11 @@
   },
   "court_learning_revival": {
    "effects": {
-    "adoption_rate": 0.0022,
-    "knowledge_preservation": 0.0038,
-    "knowledge_rate": 0.0074,
-    "labor_demand": 0.0016,
-    "legitimacy": 0.0013
+    "adoption_rate": 0.0005,
+    "knowledge_preservation": 0.0005,
+    "knowledge_rate": 0.0014,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Court Revival of Learning",
@@ -271,10 +275,10 @@
   },
   "carved_story_stones": {
    "effects": {
-    "cohesion": 0.0008,
-    "knowledge_preservation": 0.0006,
-    "labor_demand": 0.0005,
-    "legitimacy": 0.0006
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/stone_relief_carving.png",
    "name": "Carved Story Stones",
@@ -282,10 +286,10 @@
   },
   "terraced_temple_mountain": {
    "effects": {
-    "cohesion": 0.001,
-    "construction_rate": 0.0012,
-    "labor_demand": 0.003,
-    "legitimacy": 0.0022,
+    "cohesion": 0.0001,
+    "construction_rate": 0.0004,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001,
     "timber_pressure": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/shrine_terraces.png",
@@ -294,10 +298,11 @@
   },
   "neume_chant_notation": {
    "effects": {
-    "adoption_rate": 0.0015,
-    "cohesion": 0.0012,
-    "knowledge_preservation": 0.0034,
-    "standardization": 0.0024
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0004,
+    "literacy": 0.001,
+    "standardization": 0.0008
    },
    "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
    "name": "Neume Notation",
@@ -306,9 +311,10 @@
   },
   "mirror_for_rulers": {
    "effects": {
-    "cohesion": 0.0003,
-    "legitimacy": 0.0008,
-    "state_capacity": 0.001
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.001,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Mirror for Rulers",
@@ -316,8 +322,9 @@
   },
   "ruler_biography": {
    "effects": {
-    "knowledge_preservation": 0.0006,
-    "legitimacy": 0.0008
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
    "name": "Life of the Ruler",
@@ -325,9 +332,9 @@
   },
   "frame_story_collections": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0009
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/winter_tale_nights.png",
    "name": "Frame-story Collections",
@@ -335,9 +342,9 @@
   },
   "liturgical_drama": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0008,
-    "legitimacy": 0.0006
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Plays Within the Rites",
@@ -345,9 +352,9 @@
   },
   "court_poetry_contests": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0003,
-    "legitimacy": 0.0006
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/puzzle_riddle_contests.png",
    "name": "Court Poetry Contests",
@@ -355,8 +362,8 @@
   },
   "many_voice_singing": {
    "effects": {
-    "cohesion": 0.0008,
-    "legitimacy": 0.0003
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
    "name": "Many-voice Singing",
@@ -364,10 +371,11 @@
   },
   "coronation_regalia_rite": {
    "effects": {
-    "cohesion": 0.0016,
-    "institutional_rigidity": 0.0016,
-    "legitimacy": 0.0045,
-    "state_capacity": 0.0016
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0003,
+    "legitimacy": 0.0002,
+    "literacy": 0.001,
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/officiant_vestments.png",
    "name": "Crowning Rite and Regalia",
@@ -376,10 +384,10 @@
   },
   "great_pipe_organs": {
    "effects": {
-    "cohesion": 0.0005,
-    "craft_output": 0.001,
-    "labor_demand": 0.001,
-    "legitimacy": 0.0008
+    "cohesion": 0.0001,
+    "craft_output": 0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
    "name": "Great Pipe Organs",
@@ -387,10 +395,11 @@
   },
   "printed_playing_cards": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0005,
-    "craft_output": 0.0005,
-    "labor_efficiency": -0.0005
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "craft_output": 0.0001,
+    "labor_efficiency": -0.0005,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/printing_process-v1.png",
    "name": "Playing Cards",
@@ -398,9 +407,9 @@
   },
   "kin_memorial_stones": {
    "effects": {
-    "cohesion": 0.0008,
-    "knowledge_preservation": 0.0006,
-    "legitimacy": 0.0003
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/memorial_cairn_marking.png",
    "name": "Kin Memorial Stones",
@@ -408,9 +417,9 @@
   },
   "shadow_puppet_theatre": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0008,
-    "knowledge_preservation": 0.0006
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Shadow Puppets",
@@ -418,9 +427,9 @@
   },
   "court_psychological_novel": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0009
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Court Novel",
@@ -428,10 +437,11 @@
   },
   "book_of_kings_epic": {
    "effects": {
-    "adoption_rate": 0.0015,
-    "cohesion": 0.0036,
-    "knowledge_preservation": 0.0029,
-    "legitimacy": 0.0027
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0004,
+    "legitimacy": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "name": "Book of Kings",
@@ -440,10 +450,11 @@
   },
   "staff_line_notation": {
    "effects": {
-    "adoption_rate": 0.0029,
-    "cohesion": 0.0008,
-    "knowledge_preservation": 0.0038,
-    "standardization": 0.0024
+    "adoption_rate": 0.0008,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0005,
+    "literacy": 0.001,
+    "standardization": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
    "name": "Staff Notation",
@@ -452,9 +463,9 @@
   },
   "monumental_landscape_painting": {
    "effects": {
-    "cohesion": 0.0005,
-    "craft_output": 0.0005,
-    "legitimacy": 0.0006
+    "cohesion": 0.0001,
+    "craft_output": 0.0002,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Landscape Scrolls",
@@ -462,11 +473,11 @@
   },
   "round_arch_great_houses": {
    "effects": {
-    "cohesion": 0.002,
-    "construction_rate": 0.0046,
+    "cohesion": 0.0001,
+    "construction_rate": 0.0024,
     "fuel_demand": 0.0008,
-    "labor_demand": 0.0056,
-    "legitimacy": 0.004,
+    "labor_demand": 0.0003,
+    "legitimacy": 0.0002,
     "timber_pressure": 0.0024
    },
    "art": "res://assets/ui/research/subjects/lime_mortar-v1.png",
@@ -476,10 +487,10 @@
   },
   "embroidered_conquest_hangings": {
    "effects": {
-    "cohesion": 0.0005,
-    "craft_output": 0.0005,
-    "knowledge_preservation": 0.0006,
-    "legitimacy": 0.0008
+    "cohesion": 0.0001,
+    "craft_output": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Conquest Hangings",
@@ -487,10 +498,10 @@
   },
   "pleasure_quarter_storytellers": {
    "effects": {
-    "cohesion": 0.0008,
+    "cohesion": 0.0001,
     "disease_exposure": 0.0005,
-    "knowledge_preservation": 0.0003,
-    "trade_capacity": 0.001
+    "knowledge_preservation": 0.0001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Pleasure-quarter Storytellers",
@@ -498,11 +509,11 @@
   },
   "pilgrim_road_badges": {
    "effects": {
-    "cohesion": 0.0008,
-    "craft_output": 0.0005,
+    "cohesion": 0.0001,
+    "craft_output": 0.0001,
     "disease_exposure": 0.001,
     "route_speed": 0.001,
-    "trade_capacity": 0.0015
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/pilgrimage.png",
    "name": "Pilgrim Roads and Badges",
@@ -510,11 +521,11 @@
   },
   "armed_pilgrimage_preaching": {
    "effects": {
-    "cohesion": 0.0008,
+    "cohesion": 0.0001,
     "injury_risk": 0.0015,
-    "legitimacy": 0.0011,
+    "legitimacy": 0.0001,
     "trade_capacity": -0.0005,
-    "warfare_readiness": 0.0028
+    "warfare_readiness": 0.0008
    },
    "art": "res://assets/ui/research/subjects/armored_riding-v1.png",
    "name": "Armed Pilgrimage",
@@ -523,9 +534,9 @@
   },
   "champion_deed_songs": {
    "effects": {
-    "cohesion": 0.001,
-    "knowledge_preservation": 0.0006,
-    "warfare_readiness": 0.0011
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "warfare_readiness": 0.0003
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "name": "Champion Songs",
@@ -533,11 +544,11 @@
   },
   "courtly_love_lyric": {
    "effects": {
-    "adoption_rate": 0.0029,
-    "cohesion": 0.0024,
-    "institutional_rigidity": -0.0016,
-    "knowledge_preservation": 0.0014,
-    "legitimacy": 0.0009
+    "adoption_rate": 0.0028,
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0002,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/love_wedding_songs.png",
    "name": "Courtly Love Songs",
@@ -546,10 +557,10 @@
   },
   "sculpted_portal_programs": {
    "effects": {
-    "cohesion": 0.0008,
-    "knowledge_preservation": 0.0003,
-    "labor_demand": 0.001,
-    "legitimacy": 0.0011
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/stone_relief_carving.png",
    "name": "Carved Portals",
@@ -557,9 +568,10 @@
   },
   "moralized_bestiaries": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0006,
-    "observation_rate": 0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "literacy": 0.0016,
+    "observation_rate": 0.0004
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Moral Bestiaries",
@@ -567,12 +579,12 @@
   },
   "knightly_conduct_code": {
    "effects": {
-    "cohesion": 0.002,
-    "injury_risk": -0.0008,
-    "institutional_rigidity": 0.0016,
-    "legitimacy": 0.0018,
-    "security_efficiency": 0.0024,
-    "warfare_readiness": 0.0053
+    "cohesion": 0.0001,
+    "injury_risk": -0.0002,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0006,
+    "warfare_readiness": 0.0009
    },
    "art": "res://assets/ui/research/subjects/armored_riding-v1.png",
    "name": "Knightly Code",
@@ -581,11 +593,11 @@
   },
   "heraldic_arms": {
    "effects": {
-    "cohesion": 0.002,
-    "institutional_rigidity": 0.0016,
-    "knowledge_preservation": 0.0014,
-    "legitimacy": 0.0027,
-    "warfare_readiness": 0.0027
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0002,
+    "legitimacy": 0.0001,
+    "warfare_readiness": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/household_lineage_tokens.png",
    "name": "Heraldic Arms",
@@ -594,12 +606,12 @@
   },
   "pointed_arch_glass_temples": {
    "effects": {
-    "cohesion": 0.0024,
-    "construction_rate": 0.0065,
-    "craft_output": 0.0016,
-    "fuel_demand": 0.0024,
-    "labor_demand": 0.0064,
-    "legitimacy": 0.0045,
+    "cohesion": 0.0001,
+    "construction_rate": 0.001,
+    "craft_output": 0.0005,
+    "fuel_demand": 0.0019,
+    "labor_demand": 0.0003,
+    "legitimacy": 0.0002,
     "timber_pressure": 0.0024
    },
    "art": "res://assets/ui/research/subjects/counterweight_cranes-v1.png",
@@ -610,9 +622,9 @@
   },
   "ink_wash_painting": {
    "effects": {
-    "cohesion": 0.0005,
-    "craft_output": 0.0005,
-    "knowledge_preservation": 0.0003
+    "cohesion": 0.0001,
+    "craft_output": 0.0002,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Ink-wash Painting",
@@ -620,9 +632,9 @@
   },
   "beast_epic_satire": {
    "effects": {
-    "cohesion": 0.0003,
-    "institutional_rigidity": -0.0015,
-    "knowledge_preservation": 0.0003,
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0002,
+    "knowledge_preservation": 0.0001,
     "legitimacy": -0.0007
    },
    "art": "res://assets/ui/research/culture-v1.png",
@@ -631,9 +643,9 @@
   },
   "poor_devout_dissent": {
    "effects": {
-    "cohesion": -0.001,
-    "disaster_resilience": 0.0005,
-    "institutional_rigidity": -0.0015,
+    "cohesion": -0.0002,
+    "disaster_resilience": 0.0001,
+    "institutional_rigidity": -0.0002,
     "legitimacy": -0.001
    },
    "art": "res://assets/ui/research/discovery-600/shared_meal_obligations.png",
@@ -643,10 +655,10 @@
   },
   "chivalric_romance": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.001,
-    "knowledge_preservation": 0.0006,
-    "warfare_readiness": 0.0006
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "warfare_readiness": 0.0001
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "name": "Chivalric Romance",
@@ -654,9 +666,9 @@
   },
   "polyphonic_choirbooks": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0012,
-    "legitimacy": 0.0006
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
    "name": "Polyphonic Choirbooks",
@@ -664,9 +676,9 @@
   },
   "wandering_scholar_songs": {
    "effects": {
-    "cohesion": 0.0003,
-    "institutional_rigidity": -0.001,
-    "knowledge_preservation": 0.0003,
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "knowledge_preservation": 0.0001,
     "legitimacy": -0.0003
    },
    "art": "res://assets/ui/research/discovery-600/scribal_songs_satires.png",
@@ -675,12 +687,12 @@
   },
   "wandering_preacher_orders": {
    "effects": {
-    "adoption_rate": 0.0022,
-    "cohesion": 0.0024,
-    "institutional_rigidity": 0.0016,
-    "knowledge_preservation": 0.0014,
-    "knowledge_rate": 0.003,
-    "legitimacy": 0.0031
+    "adoption_rate": 0.0006,
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "knowledge_rate": 0.001,
+    "legitimacy": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
    "name": "Preaching Orders",
@@ -690,8 +702,8 @@
   },
   "family_prose_sagas": {
    "effects": {
-    "cohesion": 0.0008,
-    "knowledge_preservation": 0.0012
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "name": "Family Sagas",
@@ -699,8 +711,8 @@
   },
   "sacred_world_maps": {
    "effects": {
-    "knowledge_preservation": 0.0006,
-    "legitimacy": 0.0008
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
    "name": "World Maps of the God's Order",
@@ -708,7 +720,7 @@
   },
   "carnival_misrule": {
    "effects": {
-    "cohesion": 0.0013,
+    "cohesion": 0.0001,
     "food_storage": -0.0015,
     "injury_risk": 0.001,
     "security_efficiency": -0.0005
@@ -720,10 +732,10 @@
   },
   "guild_patron_feasts": {
    "effects": {
-    "cohesion": 0.001,
-    "craft_output": 0.0005,
+    "cohesion": 0.0001,
+    "craft_output": 0.0001,
     "food_storage": -0.001,
-    "legitimacy": 0.0003
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
    "name": "Guild Patron Feasts",
@@ -731,9 +743,10 @@
   },
   "measured_rhythm_notation": {
    "effects": {
-    "cohesion": 0.0003,
-    "knowledge_preservation": 0.0012,
-    "standardization": 0.001
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "literacy": 0.0021,
+    "standardization": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
    "name": "Measured Rhythm Notation",
@@ -741,9 +754,9 @@
   },
   "recumbent_tomb_effigies": {
    "effects": {
-    "cohesion": 0.0005,
-    "labor_demand": 0.0005,
-    "legitimacy": 0.0008
+    "cohesion": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/royal_stone_portraits.png",
    "name": "Tomb Effigies",
@@ -751,10 +764,11 @@
   },
   "private_devotion_books": {
    "effects": {
-    "adoption_rate": 0.0009,
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0006,
-    "legitimacy": 0.0008
+    "adoption_rate": 0.0002,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.0021
    },
    "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
    "name": "Books of Hours",
@@ -762,10 +776,10 @@
   },
   "ruler_town_entries": {
    "effects": {
-    "cohesion": 0.0008,
+    "cohesion": 0.0001,
     "food_storage": -0.0005,
-    "legitimacy": 0.0011,
-    "trade_capacity": 0.0005
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
    "name": "Royal Entries",
@@ -773,11 +787,11 @@
   },
   "jubilee_pilgrimage_year": {
    "effects": {
-    "cohesion": 0.0008,
+    "cohesion": 0.0001,
     "disease_exposure": 0.0015,
     "food_storage": -0.0005,
-    "legitimacy": 0.0011,
-    "trade_capacity": 0.001
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/pilgrimage.png",
    "name": "Jubilee Year",
@@ -785,10 +799,10 @@
   },
   "naturalistic_fresco_cycles": {
    "effects": {
-    "cohesion": 0.0024,
-    "knowledge_preservation": 0.0014,
-    "legitimacy": 0.0022,
-    "observation_rate": 0.0016
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0002,
+    "legitimacy": 0.0001,
+    "observation_rate": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
    "name": "Lifelike Fresco Cycles",
@@ -797,11 +811,11 @@
   },
   "vernacular_allegory_epic": {
    "effects": {
-    "adoption_rate": 0.0029,
-    "cohesion": 0.0028,
-    "institutional_rigidity": -0.0016,
-    "knowledge_preservation": 0.0024,
-    "legitimacy": 0.0013
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Allegorical Journey Poem",
@@ -810,10 +824,10 @@
   },
   "guild_cycle_plays": {
    "effects": {
-    "cohesion": 0.0013,
-    "craft_output": 0.0005,
+    "cohesion": 0.0001,
+    "craft_output": 0.0001,
     "food_storage": -0.0005,
-    "legitimacy": 0.0006
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Guild Cycle Plays",
@@ -821,9 +835,9 @@
   },
   "vernacular_town_chronicles": {
    "effects": {
-    "cohesion": 0.0008,
-    "knowledge_preservation": 0.0012,
-    "state_capacity": 0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "state_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
    "name": "Town Chronicles",
@@ -831,10 +845,10 @@
   },
   "chivalric_orders_insignia": {
    "effects": {
-    "cohesion": 0.0008,
-    "institutional_rigidity": 0.001,
-    "legitimacy": 0.0011,
-    "warfare_readiness": 0.0011
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001,
+    "warfare_readiness": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/rank_inlay_ornament.png",
    "name": "Knightly Orders",
@@ -842,8 +856,8 @@
   },
   "sonnet_sequences": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0006
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "name": "Sonnet Sequences",
@@ -851,9 +865,10 @@
   },
   "old_text_recovery": {
    "effects": {
-    "adoption_rate": 0.0009,
-    "knowledge_preservation": 0.0018,
-    "knowledge_rate": 0.0028
+    "adoption_rate": 0.0002,
+    "knowledge_preservation": 0.0002,
+    "knowledge_rate": 0.0005,
+    "literacy": 0.0049
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Recovery of Old Texts",
@@ -861,11 +876,11 @@
   },
   "penitent_processions": {
    "effects": {
-    "cohesion": 0.0008,
+    "cohesion": 0.0001,
     "disease_exposure": 0.002,
     "food_storage": -0.0005,
     "labor_efficiency": -0.0005,
-    "legitimacy": 0.0006
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
    "name": "Penitent Processions",
@@ -874,10 +889,10 @@
   },
   "townsfolk_tale_collections": {
    "effects": {
-    "adoption_rate": 0.0009,
-    "cohesion": 0.0008,
-    "institutional_rigidity": -0.0005,
-    "knowledge_preservation": 0.0006
+    "adoption_rate": 0.0002,
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/winter_tale_nights.png",
    "name": "Hundred Tales",
@@ -885,13 +900,485 @@
   },
   "dance_of_death_images": {
    "effects": {
-    "cohesion": 0.0008,
-    "disaster_resilience": 0.0015,
+    "cohesion": 0.0001,
+    "disaster_resilience": 0.0003,
     "legitimacy": -0.0003
    },
    "art": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
    "name": "Dance of Death",
    "observation": "A painted wall shows death leading the ruler, the merchant and the ploughman alike in one dance."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "brush_writing_fine_art": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0005,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0003
+   },
+   "holy_tomb_pilgrimage": {
+    "cohesion": 0.001,
+    "disease_exposure": 0.001,
+    "legitimacy": 0.0008,
+    "trade_capacity": 0.001,
+    "travel_speed": 0.0005
+   },
+   "holy_relic_shrines": {
+    "cohesion": 0.0008,
+    "legitimacy": 0.0011,
+    "trade_capacity": 0.0005
+   },
+   "confessional_autobiography": {
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0003
+   },
+   "providential_world_history": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0009,
+    "legitimacy": 0.0008
+   },
+   "holy_servants_feast_year": {
+    "cohesion": 0.001,
+    "food_storage": -0.001,
+    "labor_efficiency": -0.0005,
+    "legitimacy": 0.0006
+   },
+   "rock_cut_cave_sanctuaries": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0006,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0008
+   },
+   "devotee_communities_under_rule": {
+    "cohesion": 0.0024,
+    "cultivation_yield": 0.0016,
+    "food_storage": 0.0024,
+    "knowledge_preservation": 0.0038,
+    "labor_demand": 0.0024,
+    "legitimacy": 0.0018
+   },
+   "official_ivory_diptychs": {
+    "craft_output": 0.0005,
+    "legitimacy": 0.0008,
+    "state_capacity": 0.0005
+   },
+   "venerated_icons": {
+    "cohesion": 0.0008,
+    "legitimacy": 0.0011
+   },
+   "race_faction_parties": {
+    "cohesion": -0.001,
+    "injury_risk": 0.001,
+    "legitimacy": -0.0007,
+    "security_efficiency": -0.001,
+    "trade_capacity": 0.0005
+   },
+   "stanza_hymn_sermons": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": 0.0006
+   },
+   "great_domed_temple": {
+    "cohesion": 0.0024,
+    "construction_rate": 0.0037,
+    "fuel_demand": 0.0008,
+    "labor_demand": 0.0048,
+    "legitimacy": 0.0054,
+    "timber_pressure": 0.0016
+   },
+   "peoples_origin_histories": {
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0009,
+    "legitimacy": 0.0006
+   },
+   "chant_schools": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0006,
+    "labor_demand": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "strategy_board_war_game": {
+    "cohesion": 0.0003,
+    "knowledge_rate": 0.0009,
+    "warfare_readiness": 0.0017
+   },
+   "mead_hall_gift_feasts": {
+    "cohesion": 0.001,
+    "food_storage": -0.0015,
+    "legitimacy": 0.0006,
+    "warfare_readiness": 0.0011
+   },
+   "lantern_festival_nights": {
+    "cohesion": 0.001,
+    "food_storage": -0.0005,
+    "fuel_demand": 0.0005,
+    "trade_capacity": 0.0005
+   },
+   "devotional_songs_common_tongue": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.001,
+    "institutional_rigidity": -0.0005,
+    "legitimacy": 0.0006
+   },
+   "warband_heroic_poems": {
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0006,
+    "warfare_readiness": 0.0017
+   },
+   "interlace_illuminated_books": {
+    "craft_output": 0.0005,
+    "knowledge_preservation": 0.0009,
+    "labor_demand": 0.001,
+    "legitimacy": 0.0006
+   },
+   "regulated_tonal_verse": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0006,
+    "standardization": 0.0005
+   },
+   "image_breaking_dispute": {
+    "cohesion": -0.0017,
+    "institutional_rigidity": -0.001,
+    "knowledge_rate": 0.0009,
+    "legitimacy": -0.001
+   },
+   "court_learning_revival": {
+    "adoption_rate": 0.0022,
+    "knowledge_preservation": 0.0038,
+    "knowledge_rate": 0.0074,
+    "labor_demand": 0.0016,
+    "legitimacy": 0.0013
+   },
+   "carved_story_stones": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0006,
+    "labor_demand": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "terraced_temple_mountain": {
+    "cohesion": 0.001,
+    "construction_rate": 0.0012,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0022,
+    "timber_pressure": 0.0005
+   },
+   "neume_chant_notation": {
+    "adoption_rate": 0.0015,
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.0034,
+    "standardization": 0.0024
+   },
+   "mirror_for_rulers": {
+    "cohesion": 0.0003,
+    "legitimacy": 0.0008,
+    "state_capacity": 0.001
+   },
+   "ruler_biography": {
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0008
+   },
+   "frame_story_collections": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0009
+   },
+   "liturgical_drama": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0008,
+    "legitimacy": 0.0006
+   },
+   "court_poetry_contests": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": 0.0006
+   },
+   "many_voice_singing": {
+    "cohesion": 0.0008,
+    "legitimacy": 0.0003
+   },
+   "coronation_regalia_rite": {
+    "cohesion": 0.0016,
+    "institutional_rigidity": 0.0016,
+    "legitimacy": 0.0045,
+    "state_capacity": 0.0016
+   },
+   "great_pipe_organs": {
+    "cohesion": 0.0005,
+    "craft_output": 0.001,
+    "labor_demand": 0.001,
+    "legitimacy": 0.0008
+   },
+   "printed_playing_cards": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "craft_output": 0.0005,
+    "labor_efficiency": -0.0005
+   },
+   "kin_memorial_stones": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0003
+   },
+   "shadow_puppet_theatre": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0006
+   },
+   "court_psychological_novel": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0009
+   },
+   "book_of_kings_epic": {
+    "adoption_rate": 0.0015,
+    "cohesion": 0.0036,
+    "knowledge_preservation": 0.0029,
+    "legitimacy": 0.0027
+   },
+   "staff_line_notation": {
+    "adoption_rate": 0.0029,
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0038,
+    "standardization": 0.0024
+   },
+   "monumental_landscape_painting": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "round_arch_great_houses": {
+    "cohesion": 0.002,
+    "construction_rate": 0.0046,
+    "fuel_demand": 0.0008,
+    "labor_demand": 0.0056,
+    "legitimacy": 0.004,
+    "timber_pressure": 0.0024
+   },
+   "embroidered_conquest_hangings": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0005,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0008
+   },
+   "pleasure_quarter_storytellers": {
+    "cohesion": 0.0008,
+    "disease_exposure": 0.0005,
+    "knowledge_preservation": 0.0003,
+    "trade_capacity": 0.001
+   },
+   "pilgrim_road_badges": {
+    "cohesion": 0.0008,
+    "craft_output": 0.0005,
+    "disease_exposure": 0.001,
+    "route_speed": 0.001,
+    "trade_capacity": 0.0015
+   },
+   "armed_pilgrimage_preaching": {
+    "cohesion": 0.0008,
+    "injury_risk": 0.0015,
+    "legitimacy": 0.0011,
+    "trade_capacity": -0.0005,
+    "warfare_readiness": 0.0028
+   },
+   "champion_deed_songs": {
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0006,
+    "warfare_readiness": 0.0011
+   },
+   "courtly_love_lyric": {
+    "adoption_rate": 0.0029,
+    "cohesion": 0.0024,
+    "institutional_rigidity": -0.0016,
+    "knowledge_preservation": 0.0014,
+    "legitimacy": 0.0009
+   },
+   "sculpted_portal_programs": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0003,
+    "labor_demand": 0.001,
+    "legitimacy": 0.0011
+   },
+   "moralized_bestiaries": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0006,
+    "observation_rate": 0.0005
+   },
+   "knightly_conduct_code": {
+    "cohesion": 0.002,
+    "injury_risk": -0.0008,
+    "institutional_rigidity": 0.0016,
+    "legitimacy": 0.0018,
+    "security_efficiency": 0.0024,
+    "warfare_readiness": 0.0053
+   },
+   "heraldic_arms": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.0016,
+    "knowledge_preservation": 0.0014,
+    "legitimacy": 0.0027,
+    "warfare_readiness": 0.0027
+   },
+   "pointed_arch_glass_temples": {
+    "cohesion": 0.0024,
+    "construction_rate": 0.0065,
+    "craft_output": 0.0016,
+    "fuel_demand": 0.0024,
+    "labor_demand": 0.0064,
+    "legitimacy": 0.0045,
+    "timber_pressure": 0.0024
+   },
+   "ink_wash_painting": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0005,
+    "knowledge_preservation": 0.0003
+   },
+   "beast_epic_satire": {
+    "cohesion": 0.0003,
+    "institutional_rigidity": -0.0015,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": -0.0007
+   },
+   "poor_devout_dissent": {
+    "cohesion": -0.001,
+    "disaster_resilience": 0.0005,
+    "institutional_rigidity": -0.0015,
+    "legitimacy": -0.001
+   },
+   "chivalric_romance": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0006,
+    "warfare_readiness": 0.0006
+   },
+   "polyphonic_choirbooks": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0012,
+    "legitimacy": 0.0006
+   },
+   "wandering_scholar_songs": {
+    "cohesion": 0.0003,
+    "institutional_rigidity": -0.001,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": -0.0003
+   },
+   "wandering_preacher_orders": {
+    "adoption_rate": 0.0022,
+    "cohesion": 0.0024,
+    "institutional_rigidity": 0.0016,
+    "knowledge_preservation": 0.0014,
+    "knowledge_rate": 0.003,
+    "legitimacy": 0.0031
+   },
+   "family_prose_sagas": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0012
+   },
+   "sacred_world_maps": {
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0008
+   },
+   "carnival_misrule": {
+    "cohesion": 0.0013,
+    "food_storage": -0.0015,
+    "injury_risk": 0.001,
+    "security_efficiency": -0.0005
+   },
+   "guild_patron_feasts": {
+    "cohesion": 0.001,
+    "craft_output": 0.0005,
+    "food_storage": -0.001,
+    "legitimacy": 0.0003
+   },
+   "measured_rhythm_notation": {
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0012,
+    "standardization": 0.001
+   },
+   "recumbent_tomb_effigies": {
+    "cohesion": 0.0005,
+    "labor_demand": 0.0005,
+    "legitimacy": 0.0008
+   },
+   "private_devotion_books": {
+    "adoption_rate": 0.0009,
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0008
+   },
+   "ruler_town_entries": {
+    "cohesion": 0.0008,
+    "food_storage": -0.0005,
+    "legitimacy": 0.0011,
+    "trade_capacity": 0.0005
+   },
+   "jubilee_pilgrimage_year": {
+    "cohesion": 0.0008,
+    "disease_exposure": 0.0015,
+    "food_storage": -0.0005,
+    "legitimacy": 0.0011,
+    "trade_capacity": 0.001
+   },
+   "naturalistic_fresco_cycles": {
+    "cohesion": 0.0024,
+    "knowledge_preservation": 0.0014,
+    "legitimacy": 0.0022,
+    "observation_rate": 0.0016
+   },
+   "vernacular_allegory_epic": {
+    "adoption_rate": 0.0029,
+    "cohesion": 0.0028,
+    "institutional_rigidity": -0.0016,
+    "knowledge_preservation": 0.0024,
+    "legitimacy": 0.0013
+   },
+   "guild_cycle_plays": {
+    "cohesion": 0.0013,
+    "craft_output": 0.0005,
+    "food_storage": -0.0005,
+    "legitimacy": 0.0006
+   },
+   "vernacular_town_chronicles": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0012,
+    "state_capacity": 0.0005
+   },
+   "chivalric_orders_insignia": {
+    "cohesion": 0.0008,
+    "institutional_rigidity": 0.001,
+    "legitimacy": 0.0011,
+    "warfare_readiness": 0.0011
+   },
+   "sonnet_sequences": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0006
+   },
+   "old_text_recovery": {
+    "adoption_rate": 0.0009,
+    "knowledge_preservation": 0.0018,
+    "knowledge_rate": 0.0028
+   },
+   "penitent_processions": {
+    "cohesion": 0.0008,
+    "disease_exposure": 0.002,
+    "food_storage": -0.0005,
+    "labor_efficiency": -0.0005,
+    "legitimacy": 0.0006
+   },
+   "townsfolk_tale_collections": {
+    "adoption_rate": 0.0009,
+    "cohesion": 0.0008,
+    "institutional_rigidity": -0.0005,
+    "knowledge_preservation": 0.0006
+   },
+   "dance_of_death_images": {
+    "cohesion": 0.0008,
+    "disaster_resilience": 0.0015,
+    "legitimacy": -0.0003
+   }
   }
  }
 }

@@ -4,11 +4,11 @@
  "items": {
   "civic_humanism": {
    "effects": {
-    "adoption_rate": 0.0006,
-    "cohesion": 0.001,
-    "knowledge_preservation": 0.0022,
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0006,
     "knowledge_rate": 0.0012,
-    "legitimacy": 0.0015
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Civic Humanism",
@@ -17,9 +17,9 @@
   },
   "masked_spirit_drama": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0005,
-    "legitimacy": 0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/ritual_masks_costumes.png",
    "name": "Masked Spirit Drama",
@@ -27,10 +27,10 @@
   },
   "pilgrim_tale_cycle": {
    "effects": {
-    "adoption_rate": 0.0013,
-    "cohesion": 0.0017,
-    "knowledge_preservation": 0.0013,
-    "legitimacy": 0.0006
+    "adoption_rate": 0.0008,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0004,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/traveling_storyteller_exchange.png",
    "name": "Pilgrims' Tales",
@@ -39,9 +39,10 @@
   },
   "courtesy_manners_books": {
    "effects": {
-    "cohesion": 0.0005,
-    "disease_exposure": -0.0005,
-    "legitimacy": 0.0005
+    "cohesion": 0.0001,
+    "disease_exposure": -0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.006
    },
    "art": "res://assets/ui/research/discovery-600/rank_dress_styles.png",
    "name": "Courtesy Books",
@@ -49,9 +50,10 @@
   },
   "defence_of_women_book": {
    "effects": {
-    "cohesion": 0.0005,
+    "cohesion": 0.0001,
     "knowledge_rate": 0.0005,
-    "legitimacy": -0.0005
+    "legitimacy": -0.0005,
+    "literacy": 0.006
    },
    "art": "res://assets/ui/research/paper/household_councils.png",
    "name": "Defence of Women",
@@ -59,10 +61,10 @@
   },
   "inward_devotion_movement": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0008,
-    "knowledge_preservation": 0.0005,
-    "legitimacy": 0.0006
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/hearth_shrine_offerings.png",
    "name": "Inward Devotion",
@@ -70,9 +72,9 @@
   },
   "town_rhetoric_chambers": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0008,
-    "knowledge_preservation": 0.0005
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/puzzle_riddle_contests.png",
    "name": "Rhetoric Chambers",
@@ -80,10 +82,10 @@
   },
   "single_point_perspective_painting": {
    "effects": {
-    "cohesion": 0.0012,
-    "knowledge_preservation": 0.001,
-    "legitimacy": 0.0012,
-    "observation_rate": 0.001
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001,
+    "observation_rate": 0.0006
    },
    "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
    "name": "Perspective Painting",
@@ -92,10 +94,10 @@
   },
   "oil_glaze_painting": {
    "effects": {
-    "cohesion": 0.001,
-    "craft_output": 0.0014,
-    "knowledge_preservation": 0.001,
-    "legitimacy": 0.0012
+    "cohesion": 0.0001,
+    "craft_output": 0.0007,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/paper/mineral_pigment_preparation.png",
    "name": "Oil Glaze Painting",
@@ -104,9 +106,9 @@
   },
   "burgher_portraiture": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0005,
-    "legitimacy": 0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/royal_stone_portraits.png",
    "name": "Townsmen's Portraits",
@@ -114,10 +116,10 @@
   },
   "freestanding_bronze_statuary": {
    "effects": {
-    "cohesion": 0.0005,
-    "craft_output": 0.0006,
-    "fuel_demand": 0.0005,
-    "legitimacy": 0.0006
+    "cohesion": 0.0001,
+    "craft_output": 0.0003,
+    "fuel_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/copper_casting-v1.png",
    "name": "Freestanding Bronzes",
@@ -125,8 +127,9 @@
   },
   "court_dance_manuals": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/circle_dances.png",
    "name": "Court Dance Manuals",
@@ -134,9 +137,10 @@
   },
   "revived_philosophy_academy": {
    "effects": {
-    "knowledge_preservation": 0.0006,
-    "knowledge_rate": 0.0008,
-    "legitimacy": -0.0005
+    "knowledge_preservation": 0.0001,
+    "knowledge_rate": 0.0007,
+    "legitimacy": -0.0005,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
    "name": "Revived Academy",
@@ -144,9 +148,10 @@
   },
   "printed_vernacular_romances": {
    "effects": {
-    "adoption_rate": 0.0008,
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0005
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/printing_process-v1.png",
    "name": "Printed Romances",
@@ -154,8 +159,8 @@
   },
   "tea_hut_ceremony": {
    "effects": {
-    "cohesion": 0.0006,
-    "legitimacy": 0.0006
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/shared_hearth_gatherings.png",
    "name": "Tea Hut Rite",
@@ -163,8 +168,8 @@
   },
   "dignity_of_person_oration": {
    "effects": {
-    "cohesion": 0.0005,
-    "institutional_rigidity": -0.0005,
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
     "knowledge_rate": 0.0005,
     "legitimacy": -0.0005
    },
@@ -174,8 +179,8 @@
   },
   "soul_reckoning_morality_plays": {
    "effects": {
-    "cohesion": 0.0006,
-    "legitimacy": 0.0006
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Morality Plays",
@@ -183,8 +188,8 @@
   },
   "dry_contemplation_gardens": {
    "effects": {
-    "cohesion": 0.0005,
-    "legitimacy": 0.0005
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/sacred_places.png",
    "name": "Dry Rock Gardens",
@@ -192,9 +197,9 @@
   },
   "pedlar_chapbooks": {
    "effects": {
-    "adoption_rate": 0.0008,
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0005
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/traveling_storyteller_exchange.png",
    "name": "Chapbooks",
@@ -202,9 +207,10 @@
   },
   "printed_part_books": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0008
+    "adoption_rate": 0.0002,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
    "name": "Printed Part-books",
@@ -212,10 +218,10 @@
   },
   "civic_marble_colossus": {
    "effects": {
-    "cohesion": 0.0008,
-    "construction_rate": 0.003,
-    "labor_demand": 0.0009,
-    "legitimacy": 0.0007
+    "cohesion": 0.0001,
+    "construction_rate": 0.0017,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/stone_relief_carving.png",
    "name": "Marble Colossus",
@@ -223,10 +229,10 @@
   },
   "painted_vault_cycle": {
    "effects": {
-    "cohesion": 0.0012,
-    "knowledge_preservation": 0.001,
-    "labor_demand": 0.0019,
-    "legitimacy": 0.0024
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
    "name": "Painted Vault",
@@ -236,9 +242,10 @@
   },
   "trickster_jest_books": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0005,
-    "legitimacy": -0.0005
+    "adoption_rate": 0.0002,
+    "cohesion": 0.0001,
+    "legitimacy": -0.0005,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/scribal_songs_satires.png",
    "name": "Jest Books",
@@ -246,8 +253,8 @@
   },
   "praise_of_folly_satire": {
    "effects": {
-    "cohesion": 0.0005,
-    "institutional_rigidity": -0.001,
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0002,
     "knowledge_rate": 0.0005,
     "legitimacy": -0.001
    },
@@ -257,7 +264,7 @@
   },
   "ideal_commonwealth_fiction": {
    "effects": {
-    "institutional_rigidity": -0.001,
+    "institutional_rigidity": -0.0002,
     "knowledge_rate": 0.0005,
     "legitimacy": -0.0007
    },
@@ -267,11 +274,12 @@
   },
   "printed_reform_dispute": {
    "effects": {
-    "adoption_rate": 0.0019,
-    "cohesion": -0.0034,
-    "institutional_rigidity": -0.004,
+    "adoption_rate": 0.0007,
+    "cohesion": -0.0002,
+    "institutional_rigidity": -0.0006,
     "knowledge_rate": 0.0012,
-    "legitimacy": -0.0045
+    "legitimacy": -0.0045,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/subjects/printing_process-v1.png",
    "name": "Printed Reform Dispute",
@@ -281,10 +289,11 @@
   },
   "vernacular_scripture": {
    "effects": {
-    "adoption_rate": 0.0026,
-    "cohesion": 0.0015,
-    "knowledge_preservation": 0.0019,
-    "legitimacy": 0.0006
+    "adoption_rate": 0.0009,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/sung_divine_narrative.png",
    "name": "Scripture in the Common Tongue",
@@ -294,8 +303,8 @@
   },
   "everyday_tongue_hymns": {
    "effects": {
-    "cohesion": 0.0008,
-    "legitimacy": 0.0006
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/seasonal_hymn_cycles.png",
    "name": "Common-tongue Hymns",
@@ -303,9 +312,10 @@
   },
   "courtier_ideal_book": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0005,
-    "legitimacy": 0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/rank_dress_styles.png",
    "name": "The Perfect Courtier",
@@ -313,9 +323,10 @@
   },
   "emblem_books": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0005
+    "adoption_rate": 0.0002,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "literacy": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
    "name": "Emblem Books",
@@ -323,8 +334,8 @@
   },
   "masked_stock_comedy": {
    "effects": {
-    "cohesion": 0.0006,
-    "legitimacy": 0.0005
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/ritual_masks_costumes.png",
    "name": "Masked Stock Comedy",
@@ -332,8 +343,9 @@
   },
   "artists_lives_history": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0008
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "literacy": 0.0035
    },
    "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
    "name": "Lives of the Artists",
@@ -341,10 +353,10 @@
   },
   "sorcery_panics": {
    "effects": {
-    "cohesion": -0.0028,
+    "cohesion": -0.0002,
     "injury_risk": 0.001,
-    "institutional_rigidity": 0.0008,
-    "legitimacy": 0.0005
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/dream_interpretation.png",
    "name": "Sorcery Panics",
@@ -353,9 +365,10 @@
   },
   "drawing_academy": {
    "effects": {
-    "cohesion": 0.0005,
-    "craft_output": 0.0009,
-    "institutional_rigidity": -0.001
+    "cohesion": 0.0001,
+    "craft_output": 0.0005,
+    "institutional_rigidity": -0.0001,
+    "literacy": 0.0035
    },
    "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
    "name": "Academy of Drawing",
@@ -363,8 +376,8 @@
   },
   "peasant_genre_painting": {
    "effects": {
-    "cohesion": 0.0006,
-    "knowledge_preservation": 0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/cooperative_harvest_gatherings.png",
    "name": "Peasant Genre Painting",
@@ -372,9 +385,9 @@
   },
   "voyage_national_epic": {
    "effects": {
-    "cohesion": 0.0008,
-    "knowledge_preservation": 0.0006,
-    "legitimacy": 0.0007
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "name": "Voyage Epic",
@@ -382,11 +395,11 @@
   },
   "public_playhouses": {
    "effects": {
-    "adoption_rate": 0.001,
-    "cohesion": 0.002,
+    "adoption_rate": 0.0006,
+    "cohesion": 0.0001,
     "disease_exposure": 0.0024,
     "food_storage": -0.0008,
-    "legitimacy": 0.0012
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Public Playhouses",
@@ -396,9 +409,9 @@
   },
   "personal_essays": {
    "effects": {
-    "cohesion": 0.0005,
-    "institutional_rigidity": -0.0005,
-    "knowledge_rate": 0.0005
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "knowledge_rate": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/curious_questioning_custom.png",
    "name": "Essays",
@@ -406,9 +419,9 @@
   },
   "court_ballet_spectacle": {
    "effects": {
-    "cohesion": 0.0005,
-    "labor_demand": 0.0006,
-    "legitimacy": 0.0007
+    "cohesion": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/festival_dancers_acrobats.png",
    "name": "Court Ballet",
@@ -416,9 +429,9 @@
   },
   "realm_history_plays": {
    "effects": {
-    "cohesion": 0.0008,
-    "knowledge_preservation": 0.0005,
-    "legitimacy": 0.0007
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "History Plays",
@@ -426,8 +439,8 @@
   },
   "chiaroscuro_painting": {
    "effects": {
-    "cohesion": 0.0005,
-    "legitimacy": 0.0006
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/shrine_wall_painting.png",
    "name": "Light and Shadow Painting",
@@ -435,10 +448,10 @@
   },
   "sung_drama_opera": {
    "effects": {
-    "cohesion": 0.0015,
-    "knowledge_preservation": 0.0006,
-    "labor_demand": 0.001,
-    "legitimacy": 0.0018
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/temple_singers_lamenters.png",
    "name": "Opera",
@@ -447,8 +460,8 @@
   },
   "figured_bass_monody": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
    "name": "Solo Song",
@@ -456,9 +469,9 @@
   },
   "riverbank_dance_theatre": {
    "effects": {
-    "cohesion": 0.0006,
+    "cohesion": 0.0001,
     "disease_exposure": 0.0005,
-    "legitimacy": 0.0005
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/festival_dancers_acrobats.png",
    "name": "Riverbank Dance Theatre",
@@ -466,9 +479,9 @@
   },
   "comic_knight_novel": {
    "effects": {
-    "adoption_rate": 0.001,
-    "cohesion": 0.0015,
-    "knowledge_rate": 0.0012,
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0001,
+    "knowledge_rate": 0.0004,
     "legitimacy": -0.0011
    },
    "art": "res://assets/ui/research/discovery-600/traveling_storyteller_exchange.png",
@@ -478,10 +491,10 @@
   },
   "salon_conversation": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0005,
-    "institutional_rigidity": -0.0005,
-    "knowledge_rate": 0.0008
+    "adoption_rate": 0.0002,
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "knowledge_rate": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/shared_hearth_gatherings.png",
    "name": "Salons",
@@ -489,9 +502,9 @@
   },
   "burgher_still_life": {
    "effects": {
-    "cohesion": 0.0005,
-    "craft_output": 0.0006,
-    "trade_capacity": 0.0005
+    "cohesion": 0.0001,
+    "craft_output": 0.0003,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/first_fruits_offering.png",
    "name": "Still-life Painting",
@@ -499,9 +512,10 @@
   },
   "tongue_purity_academy": {
    "effects": {
-    "institutional_rigidity": 0.0005,
-    "knowledge_preservation": 0.0008,
-    "standardization": 0.0011
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.0006,
+    "literacy": 0.006,
+    "standardization": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/standard_sign_lists.png",
    "name": "Academy of the Tongue",
@@ -509,9 +523,9 @@
   },
   "three_unities_tragedy": {
    "effects": {
-    "cohesion": 0.0005,
-    "institutional_rigidity": 0.0005,
-    "legitimacy": 0.0006
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0002,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Tragedy of the Three Unities",
@@ -519,11 +533,11 @@
   },
   "public_opera_house": {
    "effects": {
-    "cohesion": 0.0008,
+    "cohesion": 0.0001,
     "disease_exposure": 0.0005,
-    "labor_demand": 0.0005,
-    "legitimacy": 0.0006,
-    "trade_capacity": 0.0006
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Public Opera House",
@@ -531,9 +545,9 @@
   },
   "civic_group_portraits": {
    "effects": {
-    "cohesion": 0.0006,
-    "legitimacy": 0.0006,
-    "warfare_readiness": 0.002
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "warfare_readiness": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/royal_stone_portraits.png",
    "name": "Group Portraits",
@@ -542,9 +556,10 @@
   "royal_art_academy": {
    "effects": {
     "craft_output": 0.0009,
-    "institutional_rigidity": 0.0005,
-    "legitimacy": 0.0006,
-    "standardization": 0.0006
+    "institutional_rigidity": 0.0002,
+    "legitimacy": 0.0001,
+    "literacy": 0.006,
+    "standardization": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
    "name": "Royal Art Academy",
@@ -552,12 +567,12 @@
   },
   "coffeehouse_public_talk": {
    "effects": {
-    "adoption_rate": 0.0019,
-    "cohesion": 0.0015,
-    "institutional_rigidity": -0.0024,
-    "knowledge_rate": 0.0012,
-    "legitimacy": -0.0017,
-    "trade_capacity": 0.0013
+    "adoption_rate": 0.0012,
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0002,
+    "knowledge_rate": 0.0003,
+    "legitimacy": -0.0005,
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/discovery-600/shared_hearth_gatherings.png",
    "name": "Coffee-house Talk",
@@ -567,9 +582,9 @@
   },
   "perspective_scenery_stage": {
    "effects": {
-    "cohesion": 0.0006,
+    "cohesion": 0.0001,
     "construction_rate": 0.0015,
-    "legitimacy": 0.0005
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Perspective Scenery Stage",
@@ -577,9 +592,10 @@
   },
   "royal_dance_academy": {
    "effects": {
-    "cohesion": 0.0005,
-    "legitimacy": 0.0005,
-    "standardization": 0.0006
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.0082,
+    "standardization": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/circle_dances.png",
    "name": "Royal Academy of Dance",
@@ -587,9 +603,9 @@
   },
   "comedy_of_manners": {
    "effects": {
-    "cohesion": 0.0005,
-    "institutional_rigidity": -0.001,
-    "legitimacy": -0.0007
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": -0.0002
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Comedy of Manners",
@@ -597,9 +613,9 @@
   },
   "first_fall_epic": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0008,
-    "legitimacy": 0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0002,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "name": "Epic of the First Fall",
@@ -607,9 +623,9 @@
   },
   "verse_fables": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0005,
-    "legitimacy": -0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": -0.0001
    },
    "art": "res://assets/ui/research/discovery-600/proverbs.png",
    "name": "Fables in Verse",
@@ -617,9 +633,9 @@
   },
   "pilgrim_allegory_prose": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0006,
-    "legitimacy": 0.0006
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/pilgrimage.png",
    "name": "Pilgrim's Allegory",
@@ -627,10 +643,10 @@
   },
   "public_collection_museum": {
    "effects": {
-    "adoption_rate": 0.001,
-    "knowledge_preservation": 0.0026,
-    "knowledge_rate": 0.0012,
-    "legitimacy": 0.0012
+    "adoption_rate": 0.0007,
+    "knowledge_preservation": 0.0011,
+    "knowledge_rate": 0.0004,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Public Museum",
@@ -639,9 +655,10 @@
   },
   "floating_world_prints": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0005,
-    "disease_exposure": 0.0005
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0001,
+    "disease_exposure": 0.0005,
+    "literacy": 0.02
    },
    "art": "res://assets/ui/research/paper/textile_printing.png",
    "name": "Prints of the Floating World",
@@ -649,9 +666,9 @@
   },
   "ancients_moderns_quarrel": {
    "effects": {
-    "institutional_rigidity": -0.001,
-    "knowledge_rate": 0.0008,
-    "legitimacy": -0.0005
+    "institutional_rigidity": -0.0001,
+    "knowledge_rate": 0.0002,
+    "legitimacy": -0.0001
    },
    "art": "res://assets/ui/research/discovery-600/debate_poems.png",
    "name": "Ancients and Moderns",
@@ -659,9 +676,9 @@
   },
   "toleration_letter": {
    "effects": {
-    "cohesion": 0.0008,
-    "institutional_rigidity": -0.0015,
-    "legitimacy": 0.0005
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/guest_friendship.png",
    "name": "Letter on Toleration",
@@ -669,8 +686,8 @@
   },
   "puppet_duty_dramas": {
    "effects": {
-    "cohesion": 0.0006,
-    "legitimacy": 0.0005
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/ritual_masks_costumes.png",
    "name": "Chanted Puppet Dramas",
@@ -678,8 +695,8 @@
   },
   "fairy_tale_collections": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0008
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/winter_tale_nights.png",
    "name": "Fairy Tale Collections",
@@ -687,7 +704,7 @@
   },
   "hammer_keyboard": {
    "effects": {
-    "cohesion": 0.0005,
+    "cohesion": 0.0001,
     "craft_output": 0.0006
    },
    "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
@@ -696,8 +713,8 @@
   },
   "soloist_concertos": {
    "effects": {
-    "cohesion": 0.0006,
-    "legitimacy": 0.0005
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
    "name": "Concertos",
@@ -705,8 +722,8 @@
   },
   "periodical_essay_sheets": {
    "effects": {
-    "adoption_rate": 0.0008,
-    "cohesion": 0.0005,
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0001,
     "knowledge_rate": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/seasonal_news_gathering.png",
@@ -715,7 +732,7 @@
   },
   "bat_ball_wager_matches": {
    "effects": {
-    "cohesion": 0.0008,
+    "cohesion": 0.0001,
     "injury_risk": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/festival_wrestling_races.png",
@@ -724,10 +741,10 @@
   },
   "fraternal_lodges": {
    "effects": {
-    "cohesion": 0.0017,
-    "institutional_rigidity": -0.0016,
-    "legitimacy": 0.0012,
-    "trade_capacity": 0.0009
+    "cohesion": 0.0002,
+    "institutional_rigidity": -0.0003,
+    "legitimacy": 0.0002,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/guest_host_reciprocity.png",
    "name": "Brotherhood Lodges",
@@ -737,8 +754,8 @@
   },
   "castaway_realist_novel": {
    "effects": {
-    "adoption_rate": 0.0006,
-    "cohesion": 0.0005,
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0001,
     "knowledge_rate": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/traveling_storyteller_exchange.png",
@@ -747,10 +764,10 @@
   },
   "grand_tour_travel": {
    "effects": {
-    "cohesion": 0.0005,
+    "cohesion": 0.0001,
     "disease_exposure": 0.0005,
-    "knowledge_preservation": 0.0005,
-    "trade_capacity": 0.0005
+    "knowledge_preservation": 0.0002,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/pilgrimage.png",
    "name": "Grand Tour",
@@ -758,8 +775,8 @@
   },
   "equal_temperament_tuning": {
    "effects": {
-    "cohesion": 0.0005,
-    "standardization": 0.0008
+    "cohesion": 0.0001,
+    "standardization": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
    "name": "Equal Temperament",
@@ -767,9 +784,9 @@
   },
   "ballad_opera_satire": {
    "effects": {
-    "cohesion": 0.0005,
-    "institutional_rigidity": -0.001,
-    "legitimacy": -0.001
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": -0.0003
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Ballad Opera",
@@ -777,8 +794,8 @@
   },
   "playful_shell_ornament": {
    "effects": {
-    "cohesion": 0.0005,
-    "craft_output": 0.0006
+    "cohesion": 0.0001,
+    "craft_output": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/inlaid_mosaic_panels.png",
    "name": "Shell-and-scroll Ornament",
@@ -786,9 +803,9 @@
   },
   "satirical_print_series": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0005,
-    "legitimacy": -0.0007
+    "adoption_rate": 0.0002,
+    "cohesion": 0.0001,
+    "legitimacy": -0.0002
    },
    "art": "res://assets/ui/research/paper/rolling_intaglio_printing.png",
    "name": "Satirical Print Series",
@@ -796,8 +813,8 @@
   },
   "epistolary_novel": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0005
+    "adoption_rate": 0.0002,
+    "cohesion": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/sealed_tablet_letters.png",
    "name": "Novel in Letters",
@@ -805,8 +822,8 @@
   },
   "public_oratorio": {
    "effects": {
-    "cohesion": 0.0008,
-    "legitimacy": 0.0007
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
    "name": "Public Oratorio",
@@ -814,10 +831,10 @@
   },
   "landscape_park_gardens": {
    "effects": {
-    "cohesion": 0.0005,
-    "ecology_recovery": 0.0005,
-    "labor_demand": 0.0006,
-    "legitimacy": 0.0005
+    "cohesion": 0.0001,
+    "ecology_recovery": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/named_landmark_lore.png",
    "name": "Landscape Parks",
@@ -826,9 +843,9 @@
   },
   "buried_town_excavation": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.001,
-    "knowledge_rate": 0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0002,
+    "knowledge_rate": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/chamber_tombs.png",
    "name": "Buried Towns Excavated",
@@ -836,10 +853,10 @@
   },
   "realm_public_museum": {
    "effects": {
-    "adoption_rate": 0.001,
-    "cohesion": 0.001,
-    "knowledge_preservation": 0.0026,
-    "legitimacy": 0.0015
+    "adoption_rate": 0.0002,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0002
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "name": "Realm Public Museum",
@@ -848,10 +865,10 @@
   },
   "neoclassical_revival": {
    "effects": {
-    "cohesion": 0.0005,
-    "construction_rate": 0.0015,
-    "knowledge_preservation": 0.0005,
-    "legitimacy": 0.0007
+    "cohesion": 0.0001,
+    "construction_rate": 0.0007,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/stone_relief_carving.png",
    "name": "Neoclassical Revival",
@@ -859,9 +876,9 @@
   },
   "philosophical_satire_tale": {
    "effects": {
-    "institutional_rigidity": -0.0015,
-    "knowledge_rate": 0.0005,
-    "legitimacy": -0.001
+    "institutional_rigidity": -0.0001,
+    "knowledge_rate": 0.0002,
+    "legitimacy": -0.0001
    },
    "art": "res://assets/ui/research/discovery-600/scribal_songs_satires.png",
    "name": "Philosophical Satire",
@@ -869,9 +886,9 @@
   },
   "four_movement_symphony": {
    "effects": {
-    "cohesion": 0.0017,
-    "knowledge_preservation": 0.0006,
-    "legitimacy": 0.0015
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
    "name": "Symphony",
@@ -880,8 +897,8 @@
   },
   "sentimental_novel": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0005
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/love_wedding_songs.png",
    "name": "Novel of Feeling",
@@ -889,9 +906,9 @@
   },
   "natural_education_treatise": {
    "effects": {
-    "adoption_rate": 0.0006,
-    "cohesion": 0.0005,
-    "knowledge_rate": 0.0005
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "knowledge_rate": 0.0002
    },
    "art": "res://assets/ui/research/discovery-600/childrens_question_circles.png",
    "name": "Natural Education",
@@ -899,8 +916,8 @@
   },
   "ruined_castle_terror_tales": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0005
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/winter_tale_nights.png",
    "name": "Tales of Terror",
@@ -908,9 +925,9 @@
   },
   "subscription_concerts": {
    "effects": {
-    "cohesion": 0.0006,
-    "legitimacy": 0.0005,
-    "trade_capacity": 0.0005
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/temple_choirs.png",
    "name": "Subscription Concerts",
@@ -918,9 +935,10 @@
   },
   "annual_art_exhibition": {
    "effects": {
-    "adoption_rate": 0.0005,
-    "cohesion": 0.0005,
-    "legitimacy": 0.0006
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.02
    },
    "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
    "name": "Annual Exhibition",
@@ -928,8 +946,8 @@
   },
   "string_quartet": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
    "name": "String Quartet",
@@ -937,9 +955,9 @@
   },
   "storm_passion_poetry": {
    "effects": {
-    "cohesion": 0.0005,
-    "institutional_rigidity": -0.001,
-    "legitimacy": -0.0005
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": -0.0001
    },
    "art": "res://assets/ui/research/discovery-600/city_laments.png",
    "name": "Storm and Passion",
@@ -947,8 +965,8 @@
   },
   "folk_song_collections": {
    "effects": {
-    "cohesion": 0.0006,
-    "knowledge_preservation": 0.001
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0003
    },
    "art": "res://assets/ui/research/discovery-600/communal_work_songs.png",
    "name": "Folk Song Collections",
@@ -956,9 +974,9 @@
   },
   "dare_to_know_essay": {
    "effects": {
-    "institutional_rigidity": -0.0015,
-    "knowledge_rate": 0.0008,
-    "legitimacy": -0.0007
+    "institutional_rigidity": -0.0001,
+    "knowledge_rate": 0.0002,
+    "legitimacy": -0.0001
    },
    "art": "res://assets/ui/research/discovery-600/curious_questioning_custom.png",
    "name": "Dare to Know",
@@ -966,9 +984,9 @@
   },
   "servants_comic_opera": {
    "effects": {
-    "cohesion": 0.0005,
-    "institutional_rigidity": -0.001,
-    "legitimacy": -0.001
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": -0.0001
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "name": "Servants' Comic Opera",
@@ -976,10 +994,10 @@
   },
   "national_civic_festivals": {
    "effects": {
-    "cohesion": 0.0009,
+    "cohesion": 0.0001,
     "food_storage": -0.0005,
-    "labor_demand": 0.0006,
-    "legitimacy": 0.0007
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/new_year_festival.png",
    "name": "Festivals of the Nation",
@@ -987,9 +1005,9 @@
   },
   "national_flag_anthem": {
    "effects": {
-    "cohesion": 0.0009,
-    "legitimacy": 0.0007,
-    "warfare_readiness": 0.004
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "warfare_readiness": 0.0005
    },
    "art": "res://assets/ui/research/discovery-600/emblem_processions.png",
    "name": "Flag and Anthem",
@@ -998,10 +1016,10 @@
   },
   "womens_rights_treatise": {
    "effects": {
-    "cohesion": 0.0005,
-    "institutional_rigidity": -0.001,
-    "knowledge_rate": 0.0005,
-    "legitimacy": -0.0005
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "knowledge_rate": 0.0001,
+    "legitimacy": -0.0001
    },
    "art": "res://assets/ui/research/paper/household_councils.png",
    "name": "Rights of Women",
@@ -1009,12 +1027,518 @@
   },
   "plain_speech_nature_poetry": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/discovery-600/named_landmark_lore.png",
    "name": "Plain-speech Poetry",
    "observation": "Two poets publish ballads of shepherds and beggars in the plain speech of common men."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "civic_humanism": {
+    "adoption_rate": 0.0006,
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0022,
+    "knowledge_rate": 0.0012,
+    "legitimacy": 0.0015
+   },
+   "masked_spirit_drama": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0005
+   },
+   "pilgrim_tale_cycle": {
+    "adoption_rate": 0.0013,
+    "cohesion": 0.0017,
+    "knowledge_preservation": 0.0013,
+    "legitimacy": 0.0006
+   },
+   "courtesy_manners_books": {
+    "cohesion": 0.0005,
+    "disease_exposure": -0.0005,
+    "legitimacy": 0.0005
+   },
+   "defence_of_women_book": {
+    "cohesion": 0.0005,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.0005
+   },
+   "inward_devotion_movement": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "town_rhetoric_chambers": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0005
+   },
+   "single_point_perspective_painting": {
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.001,
+    "legitimacy": 0.0012,
+    "observation_rate": 0.001
+   },
+   "oil_glaze_painting": {
+    "cohesion": 0.001,
+    "craft_output": 0.0014,
+    "knowledge_preservation": 0.001,
+    "legitimacy": 0.0012
+   },
+   "burgher_portraiture": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0005
+   },
+   "freestanding_bronze_statuary": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0006,
+    "fuel_demand": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "court_dance_manuals": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005
+   },
+   "revived_philosophy_academy": {
+    "knowledge_preservation": 0.0006,
+    "knowledge_rate": 0.0008,
+    "legitimacy": -0.0005
+   },
+   "printed_vernacular_romances": {
+    "adoption_rate": 0.0008,
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005
+   },
+   "tea_hut_ceremony": {
+    "cohesion": 0.0006,
+    "legitimacy": 0.0006
+   },
+   "dignity_of_person_oration": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.0005,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.0005
+   },
+   "soul_reckoning_morality_plays": {
+    "cohesion": 0.0006,
+    "legitimacy": 0.0006
+   },
+   "dry_contemplation_gardens": {
+    "cohesion": 0.0005,
+    "legitimacy": 0.0005
+   },
+   "pedlar_chapbooks": {
+    "adoption_rate": 0.0008,
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005
+   },
+   "printed_part_books": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0008
+   },
+   "civic_marble_colossus": {
+    "cohesion": 0.0008,
+    "construction_rate": 0.003,
+    "labor_demand": 0.0009,
+    "legitimacy": 0.0007
+   },
+   "painted_vault_cycle": {
+    "cohesion": 0.0012,
+    "knowledge_preservation": 0.001,
+    "labor_demand": 0.0019,
+    "legitimacy": 0.0024
+   },
+   "trickster_jest_books": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "legitimacy": -0.0005
+   },
+   "praise_of_folly_satire": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.001,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.001
+   },
+   "ideal_commonwealth_fiction": {
+    "institutional_rigidity": -0.001,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.0007
+   },
+   "printed_reform_dispute": {
+    "adoption_rate": 0.0019,
+    "cohesion": -0.0034,
+    "institutional_rigidity": -0.004,
+    "knowledge_rate": 0.0012,
+    "legitimacy": -0.0045
+   },
+   "vernacular_scripture": {
+    "adoption_rate": 0.0026,
+    "cohesion": 0.0015,
+    "knowledge_preservation": 0.0019,
+    "legitimacy": 0.0006
+   },
+   "everyday_tongue_hymns": {
+    "cohesion": 0.0008,
+    "legitimacy": 0.0006
+   },
+   "courtier_ideal_book": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0005
+   },
+   "emblem_books": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005
+   },
+   "masked_stock_comedy": {
+    "cohesion": 0.0006,
+    "legitimacy": 0.0005
+   },
+   "artists_lives_history": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0008
+   },
+   "sorcery_panics": {
+    "cohesion": -0.0028,
+    "injury_risk": 0.001,
+    "institutional_rigidity": 0.0008,
+    "legitimacy": 0.0005
+   },
+   "drawing_academy": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0009,
+    "institutional_rigidity": -0.001
+   },
+   "peasant_genre_painting": {
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.0005
+   },
+   "voyage_national_epic": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0007
+   },
+   "public_playhouses": {
+    "adoption_rate": 0.001,
+    "cohesion": 0.002,
+    "disease_exposure": 0.0024,
+    "food_storage": -0.0008,
+    "legitimacy": 0.0012
+   },
+   "personal_essays": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.0005,
+    "knowledge_rate": 0.0005
+   },
+   "court_ballet_spectacle": {
+    "cohesion": 0.0005,
+    "labor_demand": 0.0006,
+    "legitimacy": 0.0007
+   },
+   "realm_history_plays": {
+    "cohesion": 0.0008,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0007
+   },
+   "chiaroscuro_painting": {
+    "cohesion": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "sung_drama_opera": {
+    "cohesion": 0.0015,
+    "knowledge_preservation": 0.0006,
+    "labor_demand": 0.001,
+    "legitimacy": 0.0018
+   },
+   "figured_bass_monody": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005
+   },
+   "riverbank_dance_theatre": {
+    "cohesion": 0.0006,
+    "disease_exposure": 0.0005,
+    "legitimacy": 0.0005
+   },
+   "comic_knight_novel": {
+    "adoption_rate": 0.001,
+    "cohesion": 0.0015,
+    "knowledge_rate": 0.0012,
+    "legitimacy": -0.0011
+   },
+   "salon_conversation": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.0005,
+    "knowledge_rate": 0.0008
+   },
+   "burgher_still_life": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0006,
+    "trade_capacity": 0.0005
+   },
+   "tongue_purity_academy": {
+    "institutional_rigidity": 0.0005,
+    "knowledge_preservation": 0.0008,
+    "standardization": 0.0011
+   },
+   "three_unities_tragedy": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "public_opera_house": {
+    "cohesion": 0.0008,
+    "disease_exposure": 0.0005,
+    "labor_demand": 0.0005,
+    "legitimacy": 0.0006,
+    "trade_capacity": 0.0006
+   },
+   "civic_group_portraits": {
+    "cohesion": 0.0006,
+    "legitimacy": 0.0006,
+    "warfare_readiness": 0.002
+   },
+   "royal_art_academy": {
+    "craft_output": 0.0009,
+    "institutional_rigidity": 0.0005,
+    "legitimacy": 0.0006,
+    "standardization": 0.0006
+   },
+   "coffeehouse_public_talk": {
+    "adoption_rate": 0.0019,
+    "cohesion": 0.0015,
+    "institutional_rigidity": -0.0024,
+    "knowledge_rate": 0.0012,
+    "legitimacy": -0.0017,
+    "trade_capacity": 0.0013
+   },
+   "perspective_scenery_stage": {
+    "cohesion": 0.0006,
+    "construction_rate": 0.0015,
+    "legitimacy": 0.0005
+   },
+   "royal_dance_academy": {
+    "cohesion": 0.0005,
+    "legitimacy": 0.0005,
+    "standardization": 0.0006
+   },
+   "comedy_of_manners": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.001,
+    "legitimacy": -0.0007
+   },
+   "first_fall_epic": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0008,
+    "legitimacy": 0.0005
+   },
+   "verse_fables": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": -0.0005
+   },
+   "pilgrim_allegory_prose": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0006,
+    "legitimacy": 0.0006
+   },
+   "public_collection_museum": {
+    "adoption_rate": 0.001,
+    "knowledge_preservation": 0.0026,
+    "knowledge_rate": 0.0012,
+    "legitimacy": 0.0012
+   },
+   "floating_world_prints": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "disease_exposure": 0.0005
+   },
+   "ancients_moderns_quarrel": {
+    "institutional_rigidity": -0.001,
+    "knowledge_rate": 0.0008,
+    "legitimacy": -0.0005
+   },
+   "toleration_letter": {
+    "cohesion": 0.0008,
+    "institutional_rigidity": -0.0015,
+    "legitimacy": 0.0005
+   },
+   "puppet_duty_dramas": {
+    "cohesion": 0.0006,
+    "legitimacy": 0.0005
+   },
+   "fairy_tale_collections": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0008
+   },
+   "hammer_keyboard": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0006
+   },
+   "soloist_concertos": {
+    "cohesion": 0.0006,
+    "legitimacy": 0.0005
+   },
+   "periodical_essay_sheets": {
+    "adoption_rate": 0.0008,
+    "cohesion": 0.0005,
+    "knowledge_rate": 0.0005
+   },
+   "bat_ball_wager_matches": {
+    "cohesion": 0.0008,
+    "injury_risk": 0.001
+   },
+   "fraternal_lodges": {
+    "cohesion": 0.0017,
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0012,
+    "trade_capacity": 0.0009
+   },
+   "castaway_realist_novel": {
+    "adoption_rate": 0.0006,
+    "cohesion": 0.0005,
+    "knowledge_rate": 0.0005
+   },
+   "grand_tour_travel": {
+    "cohesion": 0.0005,
+    "disease_exposure": 0.0005,
+    "knowledge_preservation": 0.0005,
+    "trade_capacity": 0.0005
+   },
+   "equal_temperament_tuning": {
+    "cohesion": 0.0005,
+    "standardization": 0.0008
+   },
+   "ballad_opera_satire": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.001,
+    "legitimacy": -0.001
+   },
+   "playful_shell_ornament": {
+    "cohesion": 0.0005,
+    "craft_output": 0.0006
+   },
+   "satirical_print_series": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "legitimacy": -0.0007
+   },
+   "epistolary_novel": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005
+   },
+   "public_oratorio": {
+    "cohesion": 0.0008,
+    "legitimacy": 0.0007
+   },
+   "landscape_park_gardens": {
+    "cohesion": 0.0005,
+    "ecology_recovery": 0.0005,
+    "labor_demand": 0.0006,
+    "legitimacy": 0.0005
+   },
+   "buried_town_excavation": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.001,
+    "knowledge_rate": 0.0005
+   },
+   "realm_public_museum": {
+    "adoption_rate": 0.001,
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0026,
+    "legitimacy": 0.0015
+   },
+   "neoclassical_revival": {
+    "cohesion": 0.0005,
+    "construction_rate": 0.0015,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0007
+   },
+   "philosophical_satire_tale": {
+    "institutional_rigidity": -0.0015,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.001
+   },
+   "four_movement_symphony": {
+    "cohesion": 0.0017,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0015
+   },
+   "sentimental_novel": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005
+   },
+   "natural_education_treatise": {
+    "adoption_rate": 0.0006,
+    "cohesion": 0.0005,
+    "knowledge_rate": 0.0005
+   },
+   "ruined_castle_terror_tales": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005
+   },
+   "subscription_concerts": {
+    "cohesion": 0.0006,
+    "legitimacy": 0.0005,
+    "trade_capacity": 0.0005
+   },
+   "annual_art_exhibition": {
+    "adoption_rate": 0.0005,
+    "cohesion": 0.0005,
+    "legitimacy": 0.0006
+   },
+   "string_quartet": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005
+   },
+   "storm_passion_poetry": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.001,
+    "legitimacy": -0.0005
+   },
+   "folk_song_collections": {
+    "cohesion": 0.0006,
+    "knowledge_preservation": 0.001
+   },
+   "dare_to_know_essay": {
+    "institutional_rigidity": -0.0015,
+    "knowledge_rate": 0.0008,
+    "legitimacy": -0.0007
+   },
+   "servants_comic_opera": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.001,
+    "legitimacy": -0.001
+   },
+   "national_civic_festivals": {
+    "cohesion": 0.0009,
+    "food_storage": -0.0005,
+    "labor_demand": 0.0006,
+    "legitimacy": 0.0007
+   },
+   "national_flag_anthem": {
+    "cohesion": 0.0009,
+    "legitimacy": 0.0007,
+    "warfare_readiness": 0.004
+   },
+   "womens_rights_treatise": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.001,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.0005
+   },
+   "plain_speech_nature_poetry": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0005
+   }
   }
  }
 }

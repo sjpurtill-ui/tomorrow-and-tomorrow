@@ -4,12 +4,13 @@
  "items": {
   "first_factory_act": {
    "effects": {
-    "fatigue": -0.012,
-    "injury_risk": -0.006,
+    "fatigue": -0.0111,
+    "fertility_transition": 0.045,
     "health_risk": -0.004,
-    "legitimacy": 0.0016,
-    "labor_demand": 0.004,
-    "institutional_rigidity": 0.003
+    "injury_risk": -0.0054,
+    "institutional_rigidity": 0.001,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0003
    },
    "name": "First Factory Act",
    "observation": "The new law is nailed to the mill gate: bound parish children may work no more than twelve hours, and must be taught their letters on the Sabbath.",
@@ -19,11 +20,11 @@
   },
   "overlookers_foremen": {
    "effects": {
-    "task_coordination": 0.0037,
-    "labor_efficiency": 0.0034,
+    "cohesion": -0.0003,
     "fatigue": 0.004,
-    "cohesion": -0.0014,
-    "injury_risk": 0.001
+    "injury_risk": 0.001,
+    "labor_efficiency": 0.0034,
+    "task_coordination": 0.0016
    },
    "name": "Overlookers and Foremen",
    "observation": "The overlooker walks the aisles between the frames with a strap in his belt, fining any piecer caught idle or late back from the privy.",
@@ -31,9 +32,9 @@
   },
   "weavers_minimum_rate_petition": {
    "effects": {
-    "cohesion": 0.0014,
-    "legitimacy": -0.0016,
-    "fatigue": 0.002
+    "cohesion": 0.0003,
+    "fatigue": 0.002,
+    "legitimacy": -0.0006
    },
    "name": "Weavers' Rate Petition",
    "observation": "Thirty thousand hand weavers set their marks to a petition for a legal minimum rate; the council reads it, thanks them, and refuses.",
@@ -41,10 +42,10 @@
   },
   "secret_trade_societies": {
    "effects": {
-    "cohesion": 0.0018,
-    "task_coordination": 0.0015,
-    "legitimacy": -0.0012,
-    "institutional_rigidity": -0.002
+    "cohesion": 0.0003,
+    "institutional_rigidity": -0.0003,
+    "legitimacy": -0.0005,
+    "task_coordination": 0.0006
    },
    "name": "Secret Trade Societies",
    "observation": "The knitters meet by candle in an upstairs tavern room, swear an oath on the holy book with the door barred, and pass the box for the tramping men.",
@@ -52,11 +53,11 @@
   },
   "handloom_weaver_distress": {
    "effects": {
-    "craft_output": 0.002,
-    "labor_demand": -0.006,
-    "cohesion": -0.0027,
+    "cohesion": -0.0005,
+    "craft_output": 0.0015,
     "fatigue": 0.004,
-    "health_risk": 0.002
+    "health_risk": 0.0006,
+    "labor_demand": -0.0017
    },
    "name": "Hand-Loom Weavers' Distress",
    "observation": "A weaver who once earned a gold coin a week now sits sixteen hours at his loom for a quarter of it, his children winding bobbins beside him.",
@@ -65,9 +66,9 @@
   },
   "spinners_federation": {
    "effects": {
-    "cohesion": 0.0018,
-    "task_coordination": 0.0023,
-    "adoption_rate": -0.002
+    "adoption_rate": -0.002,
+    "cohesion": 0.0003,
+    "task_coordination": 0.001
    },
    "name": "Spinners' Federation",
    "observation": "Delegates from a dozen mill towns crowd a public-house room and agree one fund, one list of prices, and one strike if any town is cut.",
@@ -75,9 +76,9 @@
   },
   "union_tramping_cards": {
    "effects": {
-    "task_coordination": 0.0023,
-    "labor_efficiency": 0.0023,
-    "cohesion": 0.0014
+    "cohesion": 0.0002,
+    "labor_efficiency": 0.001,
+    "task_coordination": 0.0017
    },
    "name": "Union Tramping Cards",
    "observation": "A journeyman out of work walks into a strange town, shows his society card at the club-house inn, and is given a bed, a meal and word of a job.",
@@ -85,10 +86,10 @@
   },
   "mechanics_institutes": {
    "effects": {
-    "knowledge_preservation": 0.004,
-    "knowledge_rate": 0.003,
-    "tool_quality": 0.002,
-    "fatigue": 0.001
+    "fatigue": 0.001,
+    "knowledge_preservation": 0.0024,
+    "knowledge_rate": 0.0019,
+    "tool_quality": 0.002
    },
    "name": "Mechanics' Institutes",
    "observation": "After the day shift, forty men in their work coats sit on benches while a lecturer demonstrates the lever and the steam gauge by lamplight.",
@@ -96,11 +97,11 @@
   },
   "combination_ban_repeal": {
    "effects": {
-    "cohesion": 0.0036,
-    "legitimacy": 0.0024,
-    "task_coordination": 0.003,
     "adoption_rate": -0.004,
-    "institutional_rigidity": 0.002
+    "cohesion": 0.0006,
+    "institutional_rigidity": 0.0006,
+    "legitimacy": 0.0004,
+    "task_coordination": 0.0022
    },
    "name": "Combination Ban Repealed",
    "observation": "The clause making it a crime for workmen to combine is struck from the statute book, and trade clubs hang their banners openly over tavern doors.",
@@ -110,11 +111,11 @@
   },
   "master_servant_penalties": {
    "effects": {
-    "task_coordination": 0.0023,
-    "labor_efficiency": 0.0023,
-    "legitimacy": -0.0016,
-    "cohesion": -0.0018,
-    "institutional_rigidity": 0.003
+    "cohesion": -0.0005,
+    "institutional_rigidity": 0.0009,
+    "labor_efficiency": 0.001,
+    "legitimacy": -0.0004,
+    "task_coordination": 0.0017
    },
    "name": "Master and Servant Penalties",
    "observation": "A collier who walked off before his yearly bond expired stands in the dock; the magistrate gives him three months' hard labor.",
@@ -122,10 +123,10 @@
   },
   "mine_butty_gangs": {
    "effects": {
-    "labor_efficiency": 0.0034,
-    "mining_output": 0.003,
+    "fatigue": 0.004,
     "injury_risk": 0.004,
-    "fatigue": 0.004
+    "labor_efficiency": 0.0015,
+    "mining_output": 0.003
    },
    "name": "Butty Gang System",
    "observation": "The butty takes the stall at a price per ton from the owner, hires his own gang, and pays them on a Saturday night at his own beerhouse.",
@@ -133,10 +134,10 @@
   },
   "coin_wages_act": {
    "effects": {
-    "legitimacy": 0.0016,
-    "cohesion": 0.0014,
-    "trade_capacity": 0.002,
-    "nutrition_quality": 0.001
+    "cohesion": 0.0002,
+    "legitimacy": 0.0003,
+    "nutrition_quality": 0.001,
+    "trade_capacity": 0.0009
    },
    "name": "Coin Wages Act",
    "observation": "Paymasters now count out coin at the pay window; the tokens that were good only at the company shop are swept into a bucket and melted.",
@@ -144,12 +145,12 @@
   },
   "factory_inspectorate": {
    "effects": {
-    "injury_risk": -0.008,
-    "fatigue": -0.008,
-    "state_capacity": 0.006,
-    "legitimacy": 0.0016,
-    "labor_demand": 0.004,
-    "institutional_rigidity": 0.003
+    "fatigue": -0.0056,
+    "injury_risk": -0.0036,
+    "institutional_rigidity": 0.0009,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0003,
+    "state_capacity": 0.0025
    },
    "name": "Factory Inspectorate",
    "observation": "A gentleman in a travelling coat arrives unannounced, asks for the register of ages, and sends the nine-year-olds home from the carding room.",
@@ -158,12 +159,12 @@
   },
   "chattel_bondage_abolition": {
    "effects": {
-    "legitimacy": 0.0048,
-    "cohesion": 0.0036,
-    "labor_efficiency": 0.0046,
-    "trade_capacity": -0.004,
-    "institutional_rigidity": -0.003,
-    "state_capacity": 0.003
+    "cohesion": 0.0006,
+    "institutional_rigidity": -0.0016,
+    "labor_efficiency": 0.0021,
+    "legitimacy": 0.0009,
+    "state_capacity": 0.0013,
+    "trade_capacity": -0.004
    },
    "name": "Bondage Abolished",
    "observation": "At midnight the bells ring on the plantation islands; by dawn the field gangs are free, though bound for years more as unpaid apprentices.",
@@ -173,12 +174,12 @@
   },
   "indentured_contract_migration": {
    "effects": {
-    "labor_demand": -0.004,
-    "trade_capacity": 0.003,
-    "cultivation_yield": 0.002,
-    "legitimacy": -0.0016,
-    "cohesion": -0.0014,
-    "disease_exposure": 0.003
+    "cohesion": -0.0002,
+    "cultivation_yield": 0.0014,
+    "disease_exposure": 0.003,
+    "labor_demand": -0.0024,
+    "legitimacy": -0.0003,
+    "trade_capacity": 0.0009
    },
    "name": "Indentured Contract Migration",
    "observation": "Hundreds of contract laborers, each marked with a number on a tin ticket, climb from the depot to a ship bound for cane fields half the world away.",
@@ -187,9 +188,9 @@
   },
   "underground_work_limits": {
    "effects": {
-    "injury_risk": -0.004,
-    "health_risk": -0.003,
-    "labor_demand": 0.004,
+    "health_risk": -0.0018,
+    "injury_risk": -0.0015,
+    "labor_demand": 0.0002,
     "mine_safety": 0.002
    },
    "name": "Underground Work Limits",
@@ -198,9 +199,9 @@
   },
   "consumer_cooperatives": {
    "effects": {
-    "cohesion": 0.0023,
+    "cohesion": 0.0004,
     "nutrition_quality": 0.002,
-    "trade_capacity": 0.002
+    "trade_capacity": 0.0006
    },
    "name": "Cooperative Stores",
    "observation": "Weavers pool a pound each to open a shop selling honest flour and tea; at the quarter they share the surplus by what each member bought.",
@@ -208,9 +209,11 @@
   },
   "half_time_schooling": {
    "effects": {
-    "knowledge_preservation": 0.004,
-    "fatigue": -0.003,
-    "labor_demand": 0.003
+    "fatigue": -0.0011,
+    "fertility_transition": 0.0279,
+    "knowledge_preservation": 0.0018,
+    "labor_demand": 0.0002,
+    "literacy": 0.0463
    },
    "name": "Half-Time Schooling",
    "observation": "Mill children work the morning shift, eat their bread, and file into the schoolroom at one, many nodding asleep over their slates.",
@@ -218,12 +221,12 @@
   },
   "ten_hour_day": {
    "effects": {
-    "fatigue": -0.014,
-    "injury_risk": -0.004,
-    "labor_demand": 0.006,
-    "legitimacy": 0.002,
-    "cohesion": 0.0018,
-    "labor_efficiency": -0.0023
+    "cohesion": 0.0003,
+    "fatigue": -0.0053,
+    "injury_risk": -0.0015,
+    "labor_demand": 0.0003,
+    "labor_efficiency": -0.0023,
+    "legitimacy": 0.0003
    },
    "name": "Ten-Hour Day",
    "observation": "The engine is stopped at six in the evening; women and youths stream out in daylight, and the men's day is shortened with theirs.",
@@ -233,12 +236,12 @@
   },
   "amalgamated_craft_unions": {
    "effects": {
-    "cohesion": 0.0027,
-    "knowledge_preservation": 0.0032,
-    "task_coordination": 0.003,
-    "health_protection": 0.0021,
     "adoption_rate": -0.003,
-    "institutional_rigidity": 0.003
+    "cohesion": 0.0004,
+    "health_protection": 0.0009,
+    "institutional_rigidity": 0.0009,
+    "knowledge_preservation": 0.0015,
+    "task_coordination": 0.001
    },
    "name": "Amalgamated Craft Unions",
    "observation": "The society's head office keeps ledgers of sick pay, tool insurance and funeral benefit for fifty thousand engineers, run by a paid secretary.",
@@ -248,9 +251,9 @@
   },
   "saturday_half_holiday": {
    "effects": {
-    "fatigue": -0.004,
-    "cohesion": 0.0014,
-    "labor_demand": 0.002
+    "cohesion": 0.0002,
+    "fatigue": -0.0015,
+    "labor_demand": 0.0001
    },
    "name": "Saturday Half-Holiday",
    "observation": "At two on Saturday the workshops close; by three the playing fields and the excursion trains are crowded with clerks and mill hands.",
@@ -258,9 +261,9 @@
   },
   "district_rate_lists": {
    "effects": {
-    "standardization": 0.004,
-    "task_coordination": 0.0023,
-    "adoption_rate": -0.001
+    "adoption_rate": -0.001,
+    "standardization": 0.0016,
+    "task_coordination": 0.0007
    },
    "name": "District Rate Lists",
    "observation": "A printed list pinned in every weaving shed of the district sets the same price for a piece of each width and pick, down to the farthing.",
@@ -268,12 +271,12 @@
   },
   "sweated_home_work": {
    "effects": {
-    "craft_output": 0.004,
-    "labor_demand": -0.002,
+    "cohesion": -0.0003,
+    "craft_output": 0.0025,
+    "disease_exposure": 0.0017,
     "fatigue": 0.006,
-    "health_risk": 0.004,
-    "disease_exposure": 0.002,
-    "cohesion": -0.0014
+    "health_risk": 0.0008,
+    "labor_demand": -0.0012
    },
    "name": "Sweated Home Work",
    "observation": "In a single garret a widow and three daughters stitch trousers at a sewing machine by candlelight for the middleman's pittance per dozen.",
@@ -282,10 +285,10 @@
   },
   "company_towns": {
    "effects": {
-    "task_coordination": 0.0023,
     "housing_output": 0.003,
-    "legitimacy": -0.0012,
-    "institutional_rigidity": 0.004
+    "institutional_rigidity": 0.0008,
+    "legitimacy": -0.0004,
+    "task_coordination": 0.001
    },
    "name": "Company Towns",
    "observation": "Every house in the row, the chapel, the store and the reading room belong to the works; a man who strikes loses his roof the same week.",
@@ -293,11 +296,11 @@
   },
   "railway_staff_hierarchy": {
    "effects": {
-    "task_coordination": 0.0037,
-    "standardization": 0.003,
-    "route_speed": 0.002,
-    "institutional_rigidity": 0.003,
-    "fatigue": 0.002
+    "fatigue": 0.002,
+    "institutional_rigidity": 0.0006,
+    "route_speed": 0.001,
+    "standardization": 0.0015,
+    "task_coordination": 0.0016
    },
    "name": "Railway Staff Hierarchy",
    "observation": "Porters, guards, signalmen and stationmasters wear numbered caps and brass buttons, and each carries a rule book he must know by heart.",
@@ -305,8 +308,8 @@
   },
   "worker_owned_workshops": {
    "effects": {
-    "cohesion": 0.0018,
-    "craft_output": 0.002,
+    "cohesion": 0.0003,
+    "craft_output": 0.0013,
     "labor_efficiency": 0.0011
    },
    "name": "Worker-Owned Workshops",
@@ -315,9 +318,9 @@
   },
   "employer_lockouts": {
    "effects": {
-    "cohesion": -0.0027,
-    "labor_efficiency": -0.0023,
-    "fatigue": 0.002
+    "cohesion": -0.0006,
+    "fatigue": 0.002,
+    "labor_efficiency": -0.0023
    },
    "name": "Employer Lockouts",
    "observation": "The gates of every engineering shop in the district are chained on the same Monday; the men are told to return when they drop the union.",
@@ -325,11 +328,11 @@
   },
   "union_legal_standing": {
    "effects": {
-    "cohesion": 0.0036,
-    "legitimacy": 0.0024,
-    "task_coordination": 0.003,
     "adoption_rate": -0.003,
-    "institutional_rigidity": 0.003
+    "cohesion": 0.0007,
+    "institutional_rigidity": 0.0006,
+    "legitimacy": 0.0005,
+    "task_coordination": 0.0013
    },
    "name": "Unions Given Legal Standing",
    "observation": "A union treasurer who absconded with the funds is now prosecuted like any other thief, and the courts no longer treat a strike as conspiracy.",
@@ -338,10 +341,10 @@
   },
   "machine_guarding_rules": {
    "effects": {
-    "injury_risk": -0.007,
+    "injury_risk": -0.0012,
+    "labor_demand": 0.0001,
     "labor_efficiency": -0.0011,
-    "repair_capacity": 0.001,
-    "labor_demand": 0.001
+    "repair_capacity": 0.001
    },
    "name": "Machine Guarding Rules",
    "observation": "Wooden casings now box in every shaft and gear wheel under seven feet, and the inspector notes each unfenced belt in his book.",
@@ -349,10 +352,10 @@
   },
   "conciliation_boards": {
    "effects": {
-    "cohesion": 0.0018,
-    "task_coordination": 0.0023,
+    "cohesion": 0.0003,
     "fatigue": -0.001,
-    "institutional_rigidity": 0.002
+    "institutional_rigidity": 0.0004,
+    "task_coordination": 0.001
    },
    "name": "Conciliation Boards",
    "observation": "Six masters and six workmen sit across a long table with a neutral chairman, arguing over the price of a gross of nails until they agree.",
@@ -360,9 +363,9 @@
   },
   "peaceful_picketing": {
    "effects": {
-    "cohesion": 0.0018,
-    "labor_efficiency": -0.0011,
-    "adoption_rate": -0.001
+    "adoption_rate": -0.001,
+    "cohesion": 0.0003,
+    "labor_efficiency": -0.0011
    },
    "name": "Peaceful Picketing",
    "observation": "Four strikers in their Sunday coats stand at the works gate with a placard, handing leaflets to anyone who would take their jobs.",
@@ -370,9 +373,9 @@
   },
   "trade_wide_employer_bargaining": {
    "effects": {
-    "standardization": 0.004,
-    "task_coordination": 0.003,
-    "institutional_rigidity": 0.003
+    "institutional_rigidity": 0.0007,
+    "standardization": 0.0016,
+    "task_coordination": 0.001
    },
    "name": "Trade-Wide Bargaining",
    "observation": "The ironmasters' association and the union executive sign one agreement binding every foundry in the trade for a year.",
@@ -381,10 +384,10 @@
   "rail_harvest_gangs": {
    "effects": {
     "cultivation_yield": 0.003,
-    "labor_efficiency": 0.0023,
-    "task_coordination": 0.0015,
     "disease_exposure": 0.002,
-    "fatigue": 0.003
+    "fatigue": 0.003,
+    "labor_efficiency": 0.002,
+    "task_coordination": 0.0005
    },
    "name": "Rail Harvest Gangs",
    "observation": "Special trains carry gangs of reapers south to north as the grain ripens, each gang sleeping in barns and moving on when the field is cut.",
@@ -392,10 +395,10 @@
   },
   "labor_statistics_bureau": {
    "effects": {
-    "state_capacity": 0.004,
+    "knowledge_preservation": 0.0007,
     "knowledge_rate": 0.002,
-    "task_coordination": 0.0015,
-    "knowledge_preservation": 0.0016
+    "state_capacity": 0.0018,
+    "task_coordination": 0.0005
    },
    "name": "Labor Statistics Bureau",
    "observation": "Clerks tabulate returns from every county: weekly wages, hours, strikes begun and settled, and the price of bread against them.",
@@ -403,9 +406,9 @@
   },
   "employer_liability_law": {
    "effects": {
-    "injury_risk": -0.004,
-    "legitimacy": 0.0012,
-    "institutional_rigidity": 0.002
+    "injury_risk": -0.0026,
+    "institutional_rigidity": 0.0004,
+    "legitimacy": 0.0003
    },
    "name": "Employer Liability Law",
    "observation": "A brakeman who lost his arm to a faulty coupling sues the railway and wins, though the lawyers take a third of the award.",
@@ -413,9 +416,10 @@
   },
   "women_office_clerks": {
    "effects": {
-    "labor_efficiency": 0.0034,
-    "task_coordination": 0.0023,
-    "knowledge_preservation": 0.0016
+    "fertility_transition": 0.0088,
+    "knowledge_preservation": 0.0007,
+    "labor_efficiency": 0.0029,
+    "task_coordination": 0.0008
    },
    "name": "Women Office Clerks",
    "observation": "Rows of young women in white blouses sit at typewriting machines in the insurance office, where only men in frock coats wrote before.",
@@ -424,8 +428,8 @@
   "shop_hours_limits": {
    "effects": {
     "fatigue": -0.004,
-    "trade_capacity": -0.001,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "trade_capacity": -0.001
    },
    "name": "Shop Hours Limits",
    "observation": "Shop assistants who stood behind counters until midnight now pull the shutters at eight, and one weekday afternoon the high street is closed.",
@@ -433,10 +437,10 @@
   },
   "blacklists_and_no_union_pledges": {
    "effects": {
-    "cohesion": -0.0023,
-    "legitimacy": -0.0012,
-    "task_coordination": 0.0015,
-    "institutional_rigidity": 0.003
+    "cohesion": -0.0008,
+    "institutional_rigidity": 0.0007,
+    "legitimacy": -0.0004,
+    "task_coordination": 0.0005
    },
    "name": "Blacklists and Pledges",
    "observation": "Before he is taken on, each man must sign a paper swearing he belongs to no union; the organiser's name circulates to every mill office in the valley.",
@@ -444,9 +448,9 @@
   },
   "profit_sharing_schemes": {
    "effects": {
-    "cohesion": 0.0014,
-    "labor_efficiency": 0.0023,
-    "adoption_rate": -0.001
+    "adoption_rate": -0.001,
+    "cohesion": 0.0002,
+    "labor_efficiency": 0.002
    },
    "name": "Profit-Sharing Schemes",
    "observation": "At the year's end each gasworker receives a bonus certificate in the company, payable only if he has stayed loyal and struck no work.",
@@ -454,12 +458,12 @@
   },
   "accident_insurance": {
    "effects": {
-    "health_protection": 0.0056,
-    "cohesion": 0.0027,
-    "legitimacy": 0.0024,
-    "state_capacity": 0.004,
-    "injury_risk": -0.003,
-    "institutional_rigidity": 0.003
+    "cohesion": 0.0004,
+    "health_protection": 0.0013,
+    "injury_risk": -0.0019,
+    "institutional_rigidity": 0.0007,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0018
    },
    "name": "Accident Insurance",
    "observation": "A millwright crushed under a falling beam draws a weekly allowance from the trade insurance fund within a month, without ever seeing a lawyer.",
@@ -469,10 +473,10 @@
   },
   "time_clock_recording": {
    "effects": {
-    "task_coordination": 0.003,
-    "standardization": 0.002,
-    "labor_efficiency": 0.0023,
-    "fatigue": 0.001
+    "fatigue": 0.001,
+    "labor_efficiency": 0.002,
+    "standardization": 0.0008,
+    "task_coordination": 0.001
    },
    "name": "Time Clock Recording",
    "observation": "Each worker drops his brass check into the clock at the gate, and the machine stamps the minute of his arrival on a paper card.",
@@ -480,9 +484,9 @@
   },
   "eight_hour_campaign": {
    "effects": {
-    "cohesion": 0.0023,
-    "fatigue": -0.001,
-    "adoption_rate": -0.001
+    "adoption_rate": -0.001,
+    "cohesion": 0.0003,
+    "fatigue": -0.001
    },
    "name": "Eight-Hour Campaign",
    "observation": "On the first of the spring month a hundred thousand workers march behind banners reading eight hours for work, eight for sleep, eight for what we will.",
@@ -490,9 +494,9 @@
   },
   "general_unions": {
    "effects": {
-    "cohesion": 0.0023,
-    "task_coordination": 0.0023,
-    "labor_efficiency": -0.0011
+    "cohesion": 0.0003,
+    "labor_efficiency": -0.0011,
+    "task_coordination": 0.0008
    },
    "name": "General Unions",
    "observation": "Casual dockers who fought each other at the call-on gate for a half-day's work now carry one union card and strike as one port.",
@@ -500,10 +504,10 @@
   },
   "job_cost_accounting": {
    "effects": {
-    "task_coordination": 0.003,
-    "standardization": 0.003,
-    "state_capacity": 0.001,
-    "institutional_rigidity": 0.002
+    "institutional_rigidity": 0.0004,
+    "standardization": 0.0012,
+    "state_capacity": 0.0004,
+    "task_coordination": 0.001
    },
    "name": "Job Cost Accounting",
    "observation": "A clerk tallies every hour of labor and every pound of iron against the job ticket, so the works knows the true cost of each engine.",
@@ -511,12 +515,13 @@
   },
   "child_labor_prohibition": {
    "effects": {
-    "knowledge_preservation": 0.008,
-    "health_protection": 0.0035,
-    "legitimacy": 0.002,
-    "labor_demand": 0.006,
-    "cohesion": 0.0014,
-    "craft_output": -0.002
+    "cohesion": 0.0002,
+    "craft_output": -0.002,
+    "fertility_transition": 0.0221,
+    "health_protection": 0.0008,
+    "knowledge_preservation": 0.0033,
+    "labor_demand": 0.0003,
+    "legitimacy": 0.0005
    },
    "name": "Child Labor Forbidden",
    "observation": "The bobbin boys and half-timers are gone from the mill; at nine each morning they sit in the board school until their fourteenth birthday.",
@@ -526,9 +531,9 @@
   },
   "premium_bonus_pay": {
    "effects": {
-    "labor_efficiency": 0.0034,
-    "task_coordination": 0.0015,
-    "fatigue": 0.003
+    "fatigue": 0.003,
+    "labor_efficiency": 0.0021,
+    "task_coordination": 0.0005
    },
    "name": "Premium Bonus Pay",
    "observation": "The rate-fixer sets eight hours for a cylinder head; the turner who finishes in six is paid for half the time he saved.",
@@ -536,13 +541,13 @@
   },
   "minimum_wage_boards": {
    "effects": {
-    "cohesion": 0.0036,
-    "legitimacy": 0.0024,
-    "nutrition_quality": 0.004,
+    "cohesion": 0.0007,
     "fatigue": -0.004,
-    "labor_demand": 0.003,
-    "trade_capacity": -0.002,
-    "institutional_rigidity": 0.003
+    "institutional_rigidity": 0.0005,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0005,
+    "nutrition_quality": 0.0011,
+    "trade_capacity": -0.002
    },
    "name": "Minimum Wage Boards",
    "observation": "The chainmakers' board fixes a legal minimum per hundredweight, and women hammering links at backyard forges see their pay nearly double.",
@@ -551,11 +556,11 @@
   },
   "examined_trade_apprenticeships": {
    "effects": {
-    "knowledge_preservation": 0.004,
-    "tool_quality": 0.002,
-    "standardization": 0.002,
-    "craft_output": 0.002,
-    "labor_demand": 0.001
+    "craft_output": 0.0016,
+    "knowledge_preservation": 0.0039,
+    "labor_demand": 0.0001,
+    "standardization": 0.0008,
+    "tool_quality": 0.0017
    },
    "name": "Examined Apprenticeships",
    "observation": "The apprentice fitter files a dovetail joint to three thousandths of an inch while an examiner watches, then sits a written paper on drawing.",
@@ -563,11 +568,11 @@
   },
   "industrial_arbitration_courts": {
    "effects": {
-    "cohesion": 0.0018,
-    "state_capacity": 0.003,
-    "task_coordination": 0.0015,
-    "institutional_rigidity": 0.004,
-    "adoption_rate": -0.001
+    "adoption_rate": -0.001,
+    "cohesion": 0.0004,
+    "institutional_rigidity": 0.0007,
+    "state_capacity": 0.0015,
+    "task_coordination": 0.0005
    },
    "name": "Industrial Arbitration Courts",
    "observation": "A judge in a plain courtroom hears the shearers and the pastoralists for three weeks, then hands down a wage award binding on both.",
@@ -576,18 +581,18 @@
   "work_rest_limits": {
    "effects": {
     "fatigue": -0.006,
-    "injury_risk": -0.004,
-    "labor_efficiency": 0.0011,
-    "labor_demand": 0.002
+    "injury_risk": -0.0018,
+    "labor_demand": 0.0001,
+    "labor_efficiency": 0.0007
    },
    "observation": "Investigators time the shell-turners hour by hour and find the twelfth hour yields more spoiled work than the first, so shifts are cut and breaks fixed.",
    "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png"
   },
   "scheduled_occupational_diseases": {
    "effects": {
-    "health_risk": -0.004,
-    "health_protection": 0.0028,
-    "institutional_rigidity": 0.001
+    "health_protection": 0.0012,
+    "health_risk": -0.0014,
+    "institutional_rigidity": 0.0002
    },
    "name": "Scheduled Industrial Diseases",
    "observation": "A printed schedule now lists lead palsy, phossy jaw, anthrax and miners' eye; a worker who shows the signs is paid as if he had been injured.",
@@ -595,11 +600,11 @@
   },
   "general_strike": {
    "effects": {
-    "cohesion": 0.0018,
-    "legitimacy": -0.0016,
+    "cohesion": 0.0004,
     "labor_efficiency": -0.0034,
-    "trade_capacity": -0.002,
-    "security_efficiency": -0.001
+    "legitimacy": -0.0005,
+    "security_efficiency": -0.001,
+    "trade_capacity": -0.002
    },
    "name": "General Strike",
    "observation": "No tram runs, no bread is baked and no gas lamps are lit; the city's streets fill with idle crowds and mounted police.",
@@ -608,10 +613,10 @@
   },
   "public_labor_exchanges": {
    "effects": {
-    "task_coordination": 0.0037,
-    "labor_efficiency": 0.0023,
-    "state_capacity": 0.003,
-    "fatigue": -0.001
+    "fatigue": -0.001,
+    "labor_efficiency": 0.0014,
+    "state_capacity": 0.0015,
+    "task_coordination": 0.0013
    },
    "name": "Public Labor Exchanges",
    "observation": "Men who once walked from gate to gate queue at a counter where a clerk reads out vacancies chalked on a board from firms across the district.",
@@ -619,12 +624,12 @@
   },
   "work_motion_studies": {
    "effects": {
-    "labor_efficiency": 0.0138,
-    "task_coordination": 0.006,
-    "standardization": 0.006,
+    "adoption_rate": -0.002,
+    "cohesion": -0.0011,
     "fatigue": 0.004,
-    "cohesion": -0.0018,
-    "adoption_rate": -0.002
+    "labor_efficiency": 0.0084,
+    "standardization": 0.0024,
+    "task_coordination": 0.0022
    },
    "name": "Time and Motion Study",
    "observation": "A man with a stopwatch and clipboard times every stoop and lift of the shovel gang, then issues one standard shovel and one standard time for each load.",
@@ -634,11 +639,11 @@
   },
   "labor_ministry": {
    "effects": {
-    "state_capacity": 0.01,
-    "legitimacy": 0.0024,
-    "task_coordination": 0.003,
-    "cohesion": 0.0014,
-    "institutional_rigidity": 0.004
+    "cohesion": 0.0003,
+    "institutional_rigidity": 0.0004,
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0033,
+    "task_coordination": 0.001
    },
    "name": "Ministry of Labor",
    "observation": "The new minister for labor, once a boilermaker, takes his chair at the council table with a staff of inspectors, statisticians and conciliators.",
@@ -647,13 +652,13 @@
   },
   "moving_assembly_line": {
    "effects": {
-    "labor_efficiency": 0.0161,
-    "craft_output": 0.012,
-    "standardization": 0.01,
-    "task_coordination": 0.0045,
+    "cohesion": -0.0002,
+    "craft_output": 0.0108,
     "fatigue": 0.008,
-    "cohesion": -0.0023,
-    "injury_risk": 0.003
+    "injury_risk": 0.003,
+    "labor_efficiency": 0.008,
+    "standardization": 0.0077,
+    "task_coordination": 0.0014
    },
    "name": "Moving Assembly Line",
    "observation": "A rope winch drags each motor chassis slowly past the men; each tightens the same few nuts all day, and a car rolls off every few minutes.",
@@ -663,9 +668,9 @@
   },
   "domestic_service_decline": {
    "effects": {
-    "labor_demand": -0.003,
-    "craft_output": 0.001,
-    "fatigue": -0.001
+    "craft_output": 0.0009,
+    "fatigue": -0.0006,
+    "labor_demand": -0.003
    },
    "name": "Domestic Service Decline",
    "observation": "Girls who would have gone into service as maids now take jobs in the telephone exchange and the shop; advertisements for a cook go unanswered.",
@@ -673,11 +678,11 @@
   },
   "high_day_wage": {
    "effects": {
-    "labor_efficiency": 0.0046,
-    "cohesion": 0.0014,
-    "task_coordination": 0.0015,
-    "nutrition_quality": 0.002,
-    "institutional_rigidity": 0.001
+    "cohesion": 0.0003,
+    "institutional_rigidity": 0.0001,
+    "labor_efficiency": 0.0023,
+    "nutrition_quality": 0.0014,
+    "task_coordination": 0.0005
    },
    "name": "High Day Wage",
    "observation": "A crowd of ten thousand men stands in the snow outside the motor works the morning after it announces double the going day wage.",
@@ -685,11 +690,11 @@
   },
   "industrial_welfare_departments": {
    "effects": {
-    "health_protection": 0.0028,
-    "cohesion": 0.0014,
-    "nutrition_quality": 0.002,
-    "fatigue": -0.002,
-    "labor_demand": 0.001
+    "cohesion": 0.0003,
+    "fatigue": -0.0013,
+    "health_protection": 0.0021,
+    "labor_demand": 0.0001,
+    "nutrition_quality": 0.0014
    },
    "name": "Industrial Welfare Departments",
    "observation": "The works now has a canteen serving hot dinners, a nurse in a white apron in the first-aid room, and a sports club sponsored by the firm.",
@@ -697,10 +702,10 @@
   },
   "employment_departments": {
    "effects": {
-    "task_coordination": 0.003,
+    "institutional_rigidity": 0.0002,
     "knowledge_preservation": 0.0016,
-    "labor_efficiency": 0.0023,
-    "institutional_rigidity": 0.002
+    "labor_efficiency": 0.0011,
+    "task_coordination": 0.001
    },
    "name": "Employment Departments",
    "observation": "Foremen no longer hire at the gate; a department with card files records each worker's trade, wage, lateness and training.",
@@ -708,12 +713,12 @@
   },
   "eight_hour_day_law": {
    "effects": {
-    "fatigue": -0.014,
-    "injury_risk": -0.004,
-    "labor_demand": 0.008,
-    "legitimacy": 0.0024,
-    "cohesion": 0.0023,
-    "health_protection": 0.0021
+    "cohesion": 0.0004,
+    "fatigue": -0.009,
+    "health_protection": 0.0016,
+    "injury_risk": -0.0023,
+    "labor_demand": 0.0004,
+    "legitimacy": 0.0004
    },
    "name": "Eight-Hour Day Law",
    "observation": "The factory whistle now blows at four in the afternoon; the long day that ran from dawn to dark is gone by law across every trade.",
@@ -723,10 +728,10 @@
   },
   "standing_labor_conference": {
    "effects": {
-    "standardization": 0.003,
-    "legitimacy": 0.0012,
-    "state_capacity": 0.002,
-    "institutional_rigidity": 0.002
+    "institutional_rigidity": 0.0002,
+    "legitimacy": 0.0002,
+    "standardization": 0.0023,
+    "state_capacity": 0.0007
    },
    "name": "Standing Labor Conference",
    "observation": "Delegates of governments, employers and unions from many realms sit together each year and vote conventions on hours, night work and child labor.",
@@ -734,9 +739,9 @@
   },
   "works_councils": {
    "effects": {
-    "cohesion": 0.0018,
-    "task_coordination": 0.0023,
-    "institutional_rigidity": 0.002
+    "cohesion": 0.0003,
+    "institutional_rigidity": 0.0002,
+    "task_coordination": 0.0007
    },
    "name": "Works Councils",
    "observation": "The employees of the chemical works elect a council of nine who meet management each month about dismissals, hours and the canteen.",
@@ -744,10 +749,10 @@
   },
   "five_day_week": {
    "effects": {
-    "fatigue": -0.005,
-    "cohesion": 0.0014,
-    "health_protection": 0.0014,
-    "labor_demand": 0.003
+    "cohesion": 0.0003,
+    "fatigue": -0.0032,
+    "health_protection": 0.001,
+    "labor_demand": 0.0002
    },
    "name": "Five-Day Week",
    "observation": "The motor works closes on Saturdays as well as Sundays; workers spend the weekend on day trips, and the shopkeepers find them spending more.",
@@ -755,10 +760,10 @@
   },
   "work_group_morale_studies": {
    "effects": {
-    "cohesion": 0.0018,
-    "labor_efficiency": 0.0034,
-    "task_coordination": 0.0015,
-    "knowledge_rate": 0.001
+    "cohesion": 0.0003,
+    "knowledge_rate": 0.001,
+    "labor_efficiency": 0.0017,
+    "task_coordination": 0.0005
    },
    "name": "Work Group Morale Studies",
    "observation": "Researchers watching a small room of relay assemblers find output rising whatever the lighting, because the women feel noticed and work as a team.",
@@ -766,10 +771,10 @@
   },
   "slump_hunger_marches": {
    "effects": {
-    "cohesion": -0.0018,
-    "legitimacy": -0.002,
-    "health_risk": 0.003,
-    "fatigue": 0.002
+    "cohesion": -0.0002,
+    "fatigue": 0.002,
+    "health_risk": 0.0006,
+    "legitimacy": -0.0003
    },
    "name": "Hunger Marches",
    "observation": "Unemployed shipyard men walk three hundred miles to the capital in worn boots, sleeping in workhouses, to hand the council a petition.",
@@ -777,12 +782,12 @@
   },
   "public_relief_works": {
    "effects": {
+    "cohesion": 0.0002,
     "construction_rate": 0.004,
-    "legitimacy": 0.0016,
-    "cohesion": 0.0014,
-    "state_capacity": 0.002,
-    "labor_demand": 0.002,
-    "ecological_pressure": 0.002
+    "ecological_pressure": 0.002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003,
+    "state_capacity": 0.0007
    },
    "name": "Public Relief Works",
    "observation": "Thousands of jobless men swing picks on a new highway and pour concrete for a river dam, each paid a relief wage by the week.",
@@ -790,9 +795,9 @@
   },
   "industrial_unions": {
    "effects": {
-    "cohesion": 0.0027,
-    "task_coordination": 0.0023,
-    "adoption_rate": -0.002
+    "adoption_rate": -0.002,
+    "cohesion": 0.0004,
+    "task_coordination": 0.0009
    },
    "name": "Industrial Unions",
    "observation": "Machinists, sweepers and assemblers at the steel works all carry the same card; one union now bargains for every man in the mill.",
@@ -800,12 +805,12 @@
   },
   "collective_bargaining_law": {
    "effects": {
-    "cohesion": 0.0045,
-    "legitimacy": 0.0032,
-    "task_coordination": 0.003,
-    "state_capacity": 0.003,
     "adoption_rate": -0.004,
-    "institutional_rigidity": 0.004
+    "cohesion": 0.0006,
+    "institutional_rigidity": 0.0006,
+    "legitimacy": 0.0006,
+    "state_capacity": 0.001,
+    "task_coordination": 0.0012
    },
    "name": "Collective Bargaining Law",
    "observation": "Workers vote by secret ballot under a board's supervision, and the company is bound by law to sit down with the union that wins.",
@@ -815,9 +820,9 @@
   },
   "sit_down_strikes": {
    "effects": {
-    "cohesion": 0.0018,
-    "legitimacy": -0.0012,
+    "cohesion": 0.0002,
     "labor_efficiency": -0.0034,
+    "legitimacy": -0.0003,
     "security_efficiency": -0.001
    },
    "name": "Sit-Down Strikes",
@@ -826,10 +831,10 @@
   },
   "paid_annual_holidays": {
    "effects": {
-    "fatigue": -0.005,
-    "cohesion": 0.0018,
-    "health_protection": 0.0014,
-    "labor_demand": 0.002
+    "cohesion": 0.0002,
+    "fatigue": -0.0048,
+    "health_protection": 0.0006,
+    "labor_demand": 0.0001
    },
    "name": "Paid Annual Holidays",
    "observation": "For the first time, mill families take a week at the seaside with pay; the holiday trains leave town packed with buckets and cases.",
@@ -837,12 +842,12 @@
   },
   "penal_labor_camps": {
    "effects": {
+    "cohesion": -0.0005,
     "construction_rate": 0.003,
     "extraction_yield": 0.002,
-    "legitimacy": -0.0032,
-    "cohesion": -0.0027,
-    "health_risk": 0.004,
-    "injury_risk": 0.004
+    "health_risk": 0.0004,
+    "injury_risk": 0.004,
+    "legitimacy": -0.0007
    },
    "name": "Penal Labor Camps",
    "observation": "Columns of prisoners in padded jackets march under guard to dig a canal through frozen ground; many do not come back.",
@@ -851,13 +856,13 @@
   },
   "national_minimum_wage": {
    "effects": {
-    "cohesion": 0.0036,
-    "legitimacy": 0.0024,
-    "nutrition_quality": 0.004,
-    "fatigue": -0.006,
-    "labor_demand": 0.004,
-    "trade_capacity": -0.002,
-    "institutional_rigidity": 0.003
+    "cohesion": 0.0005,
+    "fatigue": -0.0057,
+    "institutional_rigidity": 0.0005,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0005,
+    "nutrition_quality": 0.0022,
+    "trade_capacity": -0.002
    },
    "name": "National Minimum Wage",
    "observation": "Posters in every workplace announce a legal floor of pay per hour and a forty-hour week, with overtime at time and a half beyond it.",
@@ -867,11 +872,11 @@
   },
   "total_labor_mobilization": {
    "effects": {
-    "craft_output": 0.005,
-    "labor_efficiency": 0.0034,
-    "warfare_readiness": 0.002,
+    "craft_output": 0.0041,
     "fatigue": 0.006,
-    "injury_risk": 0.003
+    "injury_risk": 0.003,
+    "labor_efficiency": 0.0028,
+    "warfare_readiness": 0.001
    },
    "name": "Total Labor Mobilization",
    "observation": "Women in headscarves rivet aircraft wings and turn shell cases on the night shift, while directed workers are sent wherever the ministry needs them.",
@@ -880,9 +885,9 @@
   },
   "wartime_wage_controls": {
    "effects": {
-    "state_capacity": 0.004,
-    "task_coordination": 0.0023,
-    "institutional_rigidity": 0.003
+    "institutional_rigidity": 0.0005,
+    "state_capacity": 0.0014,
+    "task_coordination": 0.0009
    },
    "name": "Wartime Wage Controls",
    "observation": "A war labor board freezes pay scales across industry; union leaders sign a pledge of no strikes until the peace, though wildcat walkouts still flare.",
@@ -890,10 +895,10 @@
   },
   "tripartite_wage_bargaining": {
    "effects": {
-    "cohesion": 0.0023,
-    "task_coordination": 0.003,
-    "state_capacity": 0.003,
-    "institutional_rigidity": 0.004
+    "cohesion": 0.0003,
+    "institutional_rigidity": 0.0006,
+    "state_capacity": 0.001,
+    "task_coordination": 0.0012
    },
    "name": "Tripartite Wage Bargaining",
    "observation": "Each spring the union federation, the employers' confederation and the finance minister agree one pay rise for the whole economy.",
@@ -901,11 +906,11 @@
   },
   "board_level_codetermination": {
    "effects": {
-    "cohesion": 0.0023,
-    "legitimacy": 0.0012,
-    "task_coordination": 0.0015,
-    "institutional_rigidity": 0.003,
-    "adoption_rate": -0.001
+    "adoption_rate": -0.001,
+    "cohesion": 0.0005,
+    "institutional_rigidity": 0.0009,
+    "legitimacy": 0.0002,
+    "task_coordination": 0.0006
    },
    "name": "Board-Level Codetermination",
    "observation": "A steelworker in his best suit takes his seat among the bankers on the company's supervisory board and votes on the new rolling mill.",
@@ -913,10 +918,10 @@
   },
   "negotiated_occupational_pensions": {
    "effects": {
-    "cohesion": 0.0018,
-    "health_protection": 0.0014,
-    "trade_capacity": 0.001,
-    "institutional_rigidity": 0.002
+    "cohesion": 0.0004,
+    "health_protection": 0.001,
+    "institutional_rigidity": 0.0006,
+    "trade_capacity": 0.0007
    },
    "name": "Negotiated Occupational Pensions",
    "observation": "The contract now sets aside cents from every hour worked into a pension fund; retired machinists draw a monthly cheque beside the state pension.",
@@ -924,9 +929,9 @@
   },
   "public_sector_unions": {
    "effects": {
-    "cohesion": 0.0018,
-    "state_capacity": -0.002,
-    "institutional_rigidity": 0.004
+    "cohesion": 0.0004,
+    "institutional_rigidity": 0.0012,
+    "state_capacity": -0.002
    },
    "name": "Public Sector Unions",
    "observation": "Teachers, sanitation men and postal clerks win the right to bargain; the first municipal strike leaves rubbish piled on every corner.",
@@ -934,9 +939,9 @@
   },
   "quality_circles": {
    "effects": {
-    "standardization": 0.004,
-    "craft_output": 0.003,
-    "task_coordination": 0.0023
+    "craft_output": 0.0019,
+    "standardization": 0.0011,
+    "task_coordination": 0.0009
    },
    "name": "Quality Circles",
    "observation": "Once a week eight line workers gather round a flip chart in the canteen, tallying defects by cause and proposing their own fixes.",
@@ -944,10 +949,10 @@
   },
   "automation_retraining": {
    "effects": {
-    "knowledge_preservation": 0.0032,
-    "cohesion": 0.0014,
-    "labor_efficiency": 0.0023,
-    "state_capacity": 0.001
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0026,
+    "labor_efficiency": 0.0015,
+    "state_capacity": 0.0009
    },
    "name": "Automation Retraining",
    "observation": "Men whose jobs went to the new automatic transfer machines sit in a classroom learning to read wiring diagrams and repair control cabinets.",
@@ -955,10 +960,11 @@
   },
   "equal_pay_law": {
    "effects": {
-    "cohesion": 0.0036,
-    "legitimacy": 0.0024,
-    "labor_efficiency": 0.0046,
-    "institutional_rigidity": 0.002,
+    "cohesion": 0.0007,
+    "fertility_transition": 0.0058,
+    "institutional_rigidity": 0.0006,
+    "labor_efficiency": 0.003,
+    "legitimacy": 0.0004,
     "trade_capacity": -0.001
    },
    "name": "Equal Pay Law",
@@ -970,7 +976,7 @@
   "flexible_working_hours": {
    "effects": {
     "fatigue": -0.003,
-    "labor_efficiency": 0.0011
+    "labor_efficiency": 0.0007
    },
    "name": "Flexible Working Hours",
    "observation": "Clerks swipe a card at any time between seven and ten, so long as they are at their desks from ten to three and make up their hours by the month.",
@@ -978,12 +984,12 @@
   },
   "lean_production": {
    "effects": {
-    "craft_output": 0.01,
-    "standardization": 0.008,
-    "task_coordination": 0.006,
-    "labor_efficiency": 0.0069,
+    "craft_output": 0.0062,
+    "fatigue": 0.004,
+    "labor_efficiency": 0.0046,
+    "standardization": 0.0023,
     "storage_loss": -0.004,
-    "fatigue": 0.004
+    "task_coordination": 0.0023
    },
    "name": "Lean Production",
    "observation": "Parts arrive in small bins as a card is sent back for more, and any worker who spots a fault pulls a cord that stops the whole line.",
@@ -993,13 +999,13 @@
   },
   "occupational_safety_agency": {
    "effects": {
+    "craft_output": -0.001,
+    "health_risk": -0.0029,
     "injury_risk": -0.012,
-    "health_risk": -0.008,
-    "state_capacity": 0.004,
-    "legitimacy": 0.0016,
-    "labor_demand": 0.003,
-    "institutional_rigidity": 0.004,
-    "craft_output": -0.001
+    "institutional_rigidity": 0.0013,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0031
    },
    "name": "Occupational Safety Agency",
    "observation": "An inspector with a noise meter and dust sampler writes up the foundry for exceeding the exposure limit, and the fine comes with a deadline.",
@@ -1008,9 +1014,9 @@
   },
   "age_discrimination_ban": {
    "effects": {
-    "cohesion": 0.0014,
-    "knowledge_preservation": 0.0016,
-    "institutional_rigidity": 0.001
+    "cohesion": 0.0005,
+    "institutional_rigidity": 0.0003,
+    "knowledge_preservation": 0.0009
    },
    "name": "Age Discrimination Ban",
    "observation": "Job advertisements may no longer ask for men under thirty-five; a fifty-year-old draughtsman laid off sues and wins his post back.",
@@ -1018,9 +1024,9 @@
   },
   "redundancy_pay": {
    "effects": {
-    "cohesion": 0.0018,
-    "labor_demand": 0.001,
-    "adoption_rate": -0.002
+    "adoption_rate": -0.002,
+    "cohesion": 0.0006,
+    "labor_demand": 0.0001
    },
    "name": "Redundancy Pay",
    "observation": "The shipyard closes with ninety days' notice; each riveter leaves with a lump sum of a week's pay for every year he served.",
@@ -1029,11 +1035,11 @@
   },
   "service_economy_shift": {
    "effects": {
-    "labor_efficiency": 0.0023,
-    "injury_risk": -0.003,
+    "cohesion": -0.0002,
     "craft_output": -0.002,
-    "cohesion": -0.0014,
-    "trade_capacity": 0.002
+    "injury_risk": -0.003,
+    "labor_efficiency": 0.0015,
+    "trade_capacity": 0.0012
    },
    "name": "Service Economy Shift",
    "observation": "The old mill is now a shopping centre, and the grandchildren of weavers work tills, hospital wards, offices and hotel kitchens.",
@@ -1041,9 +1047,9 @@
   },
   "temporary_agency_work": {
    "effects": {
-    "labor_efficiency": 0.0034,
-    "cohesion": -0.0018,
-    "fatigue": 0.002
+    "cohesion": -0.0003,
+    "fatigue": 0.002,
+    "labor_efficiency": 0.0022
    },
    "name": "Temporary Agency Work",
    "observation": "Half the packers in the warehouse wear agency tabards, hired week by week at lower rates than the permanent staff beside them.",
@@ -1051,12 +1057,12 @@
   },
   "labor_market_deregulation": {
    "effects": {
-    "labor_efficiency": 0.0034,
-    "trade_capacity": 0.002,
-    "cohesion": -0.0027,
-    "legitimacy": -0.0012,
+    "cohesion": -0.0004,
+    "fatigue": 0.002,
     "institutional_rigidity": -0.004,
-    "fatigue": 0.002
+    "labor_efficiency": 0.0022,
+    "legitimacy": -0.0004,
+    "trade_capacity": 0.0012
    },
    "name": "Labor Market Deregulation",
    "observation": "Closed-shop agreements are voided and strike ballots made compulsory; union offices that once filled a street now share a single floor.",
@@ -1065,11 +1071,11 @@
   },
   "desktop_office_work": {
    "effects": {
-    "labor_efficiency": 0.0057,
-    "knowledge_preservation": 0.0032,
-    "task_coordination": 0.003,
-    "labor_demand": -0.003,
-    "health_risk": 0.001
+    "health_risk": 0.0004,
+    "knowledge_preservation": 0.0018,
+    "labor_demand": -0.0011,
+    "labor_efficiency": 0.0036,
+    "task_coordination": 0.0011
    },
    "name": "Desktop Office Work",
    "observation": "The typing pool is gone; every clerk has a humming desk computer with a green-lit screen, and the ledgers become spreadsheets.",
@@ -1077,9 +1083,9 @@
   },
   "workplace_harassment_rules": {
    "effects": {
-    "cohesion": 0.0018,
-    "health_risk": -0.001,
-    "institutional_rigidity": 0.002
+    "cohesion": 0.0006,
+    "health_risk": -0.0004,
+    "institutional_rigidity": 0.0007
    },
    "name": "Workplace Harassment Rules",
    "observation": "A secretary who was groped by her manager files a complaint, and the tribunal awards damages; the firm sends every supervisor to training.",
@@ -1087,12 +1093,12 @@
   },
   "offshored_work": {
    "effects": {
+    "cohesion": -0.0003,
     "craft_output": 0.004,
-    "trade_capacity": 0.003,
-    "labor_demand": -0.004,
-    "cohesion": -0.0023,
-    "fuel_demand": 0.002,
-    "pollution": 0.002
+    "fuel_demand": 0.0008,
+    "labor_demand": -0.0015,
+    "pollution": 0.002,
+    "trade_capacity": 0.0018
    },
    "name": "Offshored Work",
    "observation": "The shoe factory's machines are crated and shipped abroad; the shoes return in containers stamped with a distant port's mark, cheaper than ever.",
@@ -1101,9 +1107,9 @@
   },
   "disability_accommodation": {
    "effects": {
-    "labor_efficiency": 0.0023,
-    "cohesion": 0.0018,
-    "construction_rate": -0.001
+    "cohesion": 0.0009,
+    "construction_rate": -0.001,
+    "labor_efficiency": 0.002
    },
    "name": "Disability Accommodation",
    "observation": "The office installs a ramp, a lowered desk and screen-reading software, and a wheelchair-using accountant joins the audit team.",
@@ -1111,10 +1117,10 @@
   },
   "call_centre_work": {
    "effects": {
-    "task_coordination": 0.003,
-    "labor_efficiency": 0.0034,
     "fatigue": 0.004,
-    "health_risk": 0.002
+    "health_risk": 0.0014,
+    "labor_efficiency": 0.0029,
+    "task_coordination": 0.0013
    },
    "name": "Call-Centre Work",
    "observation": "Rows of headset-wearing agents take call after call as a wall board shows the queue; each second of wrap time is logged against their name.",
@@ -1123,9 +1129,9 @@
   "common_working_time_rules": {
    "effects": {
     "fatigue": -0.004,
-    "standardization": 0.003,
-    "labor_demand": 0.002,
-    "institutional_rigidity": 0.003
+    "institutional_rigidity": 0.0021,
+    "labor_demand": 0.0001,
+    "standardization": 0.003
    },
    "name": "Common Working-Time Rules",
    "observation": "Junior doctors across the allied realms can no longer be rostered past forty-eight hours a week, with eleven hours of rest between shifts.",
@@ -1133,9 +1139,9 @@
   },
   "networked_telework": {
    "effects": {
-    "labor_efficiency": 0.0046,
     "fatigue": -0.002,
-    "fuel_demand": -0.002
+    "fuel_demand": -0.002,
+    "labor_efficiency": 0.0039
    },
    "name": "Networked Telework",
    "observation": "Half the insurance staff log in from their kitchen tables; the office tower's lifts run near empty and the commuter trains thin out.",
@@ -1143,9 +1149,9 @@
   },
   "zero_hours_contracts": {
    "effects": {
-    "labor_efficiency": 0.0023,
-    "cohesion": -0.0018,
-    "fatigue": 0.002
+    "cohesion": -0.0004,
+    "fatigue": 0.002,
+    "labor_efficiency": 0.002
    },
    "name": "Zero-Hours Contracts",
    "observation": "A care worker checks her phone each night to learn whether she has shifts tomorrow; some weeks she has forty hours, some weeks none.",
@@ -1153,10 +1159,10 @@
   },
   "living_wage_indexing": {
    "effects": {
-    "cohesion": 0.0023,
+    "cohesion": 0.0012,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0005,
     "nutrition_quality": 0.002,
-    "legitimacy": 0.0012,
-    "labor_demand": 0.001,
     "trade_capacity": -0.001
    },
    "name": "Indexed Living Wage",
@@ -1165,13 +1171,13 @@
   },
   "platform_gig_work": {
    "effects": {
-    "labor_efficiency": 0.0069,
-    "task_coordination": 0.006,
-    "trade_capacity": 0.003,
-    "cohesion": -0.0027,
-    "legitimacy": -0.0012,
+    "cohesion": -0.0006,
+    "fatigue": 0.003,
     "injury_risk": 0.003,
-    "fatigue": 0.003
+    "labor_efficiency": 0.0059,
+    "legitimacy": -0.0002,
+    "task_coordination": 0.0026,
+    "trade_capacity": 0.0014
    },
    "name": "Platform Gig Work",
    "observation": "Riders with square insulated bags weave through traffic, their phones pinging a new delivery the instant the last one is handed over.",
@@ -1181,11 +1187,11 @@
   },
   "algorithmic_management": {
    "effects": {
-    "task_coordination": 0.0037,
-    "labor_efficiency": 0.0034,
+    "cohesion": -0.0003,
     "fatigue": 0.004,
     "health_risk": 0.002,
-    "cohesion": -0.0018
+    "labor_efficiency": 0.0027,
+    "task_coordination": 0.0022
    },
    "name": "Algorithmic Management",
    "observation": "A warehouse picker's handheld scanner counts down the seconds to the next shelf, and a low rate triggers an automatic warning, then dismissal.",
@@ -1202,11 +1208,11 @@
   },
   "platform_worker_status": {
    "effects": {
-    "cohesion": 0.0023,
-    "legitimacy": 0.0012,
+    "cohesion": 0.0015,
     "health_protection": 0.0014,
+    "labor_demand": 0.0001,
     "labor_efficiency": -0.0011,
-    "labor_demand": 0.001
+    "legitimacy": 0.0006
    },
    "name": "Platform Worker Status",
    "observation": "The court rules the drivers are workers, not independent contractors; they gain holiday pay, a minimum wage and a pension pot that follows them.",
@@ -1214,7 +1220,7 @@
   },
   "worker_monitoring_limits": {
    "effects": {
-    "cohesion": 0.0014,
+    "cohesion": 0.0009,
     "fatigue": -0.002
    },
    "name": "Worker Monitoring Limits",
@@ -1223,11 +1229,11 @@
   },
   "four_day_week_trials": {
    "effects": {
+    "cohesion": 0.0009,
     "fatigue": -0.005,
     "health_protection": 0.0014,
-    "cohesion": 0.0014,
-    "labor_efficiency": 0.0011,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "labor_efficiency": 0.0009
    },
    "name": "Four-Day Week Trials",
    "observation": "Seventy firms close every Friday for six months at full pay; most find output holds, and sick days and resignations fall.",
@@ -1235,10 +1241,10 @@
   },
   "paid_care_work": {
    "effects": {
-    "cohesion": 0.0023,
+    "cohesion": 0.0015,
     "health_protection": 0.0021,
-    "maternal_safety": 0.002,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "maternal_safety": 0.002
    },
    "name": "Paid Care Work",
    "observation": "A daughter caring for her father at home now draws carers' leave from her job and earns pension credits for the years she spends nursing him.",
@@ -1246,11 +1252,11 @@
   },
   "heat_stress_work_limits": {
    "effects": {
+    "construction_rate": -0.002,
+    "fatigue": -0.002,
     "health_risk": -0.004,
     "injury_risk": -0.002,
-    "fatigue": -0.002,
-    "construction_rate": -0.002,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001
    },
    "name": "Heat Stress Limits",
    "observation": "When the thermometer on the site passes forty degrees, the foreman sounds the horn and the scaffolders come down to shade and water until evening.",
@@ -1258,12 +1264,12 @@
   },
   "machine_assistant_desk_work": {
    "effects": {
-    "labor_efficiency": 0.0138,
+    "cohesion": -0.0005,
+    "fuel_demand": 0.0006,
     "knowledge_rate": 0.006,
-    "task_coordination": 0.0045,
-    "labor_demand": -0.008,
-    "cohesion": -0.0027,
-    "fuel_demand": 0.003
+    "labor_demand": -0.0046,
+    "labor_efficiency": 0.0108,
+    "task_coordination": 0.0027
    },
    "name": "Machine Assistant Desk Work",
    "observation": "The junior analyst types a request in plain words; in seconds the assistant drafts the contract, summarizes the report and writes the code.",
@@ -1283,15 +1289,708 @@
   },
   "basic_income_pilots": {
    "effects": {
-    "cohesion": 0.0018,
-    "health_protection": 0.0014,
+    "cohesion": 0.0012,
     "fatigue": -0.002,
-    "labor_demand": 0.001,
+    "health_protection": 0.0014,
+    "labor_demand": 0.0001,
     "state_capacity": 0.001
    },
    "name": "Basic Income Pilots",
    "observation": "Two thousand households receive a monthly sum with no conditions; researchers find most keep working, while some return to study or care.",
    "art": "res://assets/ui/research/subjects/public_levies-v1.png"
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "first_factory_act": {
+    "fatigue": -0.012,
+    "health_risk": -0.004,
+    "injury_risk": -0.006,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.004,
+    "legitimacy": 0.0016
+   },
+   "overlookers_foremen": {
+    "cohesion": -0.0014,
+    "fatigue": 0.004,
+    "injury_risk": 0.001,
+    "labor_efficiency": 0.0034,
+    "task_coordination": 0.0037
+   },
+   "weavers_minimum_rate_petition": {
+    "cohesion": 0.0014,
+    "fatigue": 0.002,
+    "legitimacy": -0.0016
+   },
+   "secret_trade_societies": {
+    "cohesion": 0.0018,
+    "institutional_rigidity": -0.002,
+    "legitimacy": -0.0012,
+    "task_coordination": 0.0015
+   },
+   "handloom_weaver_distress": {
+    "cohesion": -0.0027,
+    "craft_output": 0.002,
+    "fatigue": 0.004,
+    "health_risk": 0.002,
+    "labor_demand": -0.006
+   },
+   "spinners_federation": {
+    "adoption_rate": -0.002,
+    "cohesion": 0.0018,
+    "task_coordination": 0.0023
+   },
+   "union_tramping_cards": {
+    "cohesion": 0.0014,
+    "labor_efficiency": 0.0023,
+    "task_coordination": 0.0023
+   },
+   "mechanics_institutes": {
+    "fatigue": 0.001,
+    "knowledge_preservation": 0.004,
+    "knowledge_rate": 0.003,
+    "tool_quality": 0.002
+   },
+   "combination_ban_repeal": {
+    "adoption_rate": -0.004,
+    "cohesion": 0.0036,
+    "institutional_rigidity": 0.002,
+    "legitimacy": 0.0024,
+    "task_coordination": 0.003
+   },
+   "master_servant_penalties": {
+    "cohesion": -0.0018,
+    "institutional_rigidity": 0.003,
+    "labor_efficiency": 0.0023,
+    "legitimacy": -0.0016,
+    "task_coordination": 0.0023
+   },
+   "mine_butty_gangs": {
+    "fatigue": 0.004,
+    "injury_risk": 0.004,
+    "labor_efficiency": 0.0034,
+    "mining_output": 0.003
+   },
+   "coin_wages_act": {
+    "cohesion": 0.0014,
+    "legitimacy": 0.0016,
+    "nutrition_quality": 0.001,
+    "trade_capacity": 0.002
+   },
+   "factory_inspectorate": {
+    "fatigue": -0.008,
+    "injury_risk": -0.008,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.004,
+    "legitimacy": 0.0016,
+    "state_capacity": 0.006
+   },
+   "chattel_bondage_abolition": {
+    "cohesion": 0.0036,
+    "institutional_rigidity": -0.003,
+    "labor_efficiency": 0.0046,
+    "legitimacy": 0.0048,
+    "state_capacity": 0.003,
+    "trade_capacity": -0.004
+   },
+   "indentured_contract_migration": {
+    "cohesion": -0.0014,
+    "cultivation_yield": 0.002,
+    "disease_exposure": 0.003,
+    "labor_demand": -0.004,
+    "legitimacy": -0.0016,
+    "trade_capacity": 0.003
+   },
+   "underground_work_limits": {
+    "health_risk": -0.003,
+    "injury_risk": -0.004,
+    "labor_demand": 0.004,
+    "mine_safety": 0.002
+   },
+   "consumer_cooperatives": {
+    "cohesion": 0.0023,
+    "nutrition_quality": 0.002,
+    "trade_capacity": 0.002
+   },
+   "half_time_schooling": {
+    "fatigue": -0.003,
+    "knowledge_preservation": 0.004,
+    "labor_demand": 0.003
+   },
+   "ten_hour_day": {
+    "cohesion": 0.0018,
+    "fatigue": -0.014,
+    "injury_risk": -0.004,
+    "labor_demand": 0.006,
+    "labor_efficiency": -0.0023,
+    "legitimacy": 0.002
+   },
+   "amalgamated_craft_unions": {
+    "adoption_rate": -0.003,
+    "cohesion": 0.0027,
+    "health_protection": 0.0021,
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0032,
+    "task_coordination": 0.003
+   },
+   "saturday_half_holiday": {
+    "cohesion": 0.0014,
+    "fatigue": -0.004,
+    "labor_demand": 0.002
+   },
+   "district_rate_lists": {
+    "adoption_rate": -0.001,
+    "standardization": 0.004,
+    "task_coordination": 0.0023
+   },
+   "sweated_home_work": {
+    "cohesion": -0.0014,
+    "craft_output": 0.004,
+    "disease_exposure": 0.002,
+    "fatigue": 0.006,
+    "health_risk": 0.004,
+    "labor_demand": -0.002
+   },
+   "company_towns": {
+    "housing_output": 0.003,
+    "institutional_rigidity": 0.004,
+    "legitimacy": -0.0012,
+    "task_coordination": 0.0023
+   },
+   "railway_staff_hierarchy": {
+    "fatigue": 0.002,
+    "institutional_rigidity": 0.003,
+    "route_speed": 0.002,
+    "standardization": 0.003,
+    "task_coordination": 0.0037
+   },
+   "worker_owned_workshops": {
+    "cohesion": 0.0018,
+    "craft_output": 0.002,
+    "labor_efficiency": 0.0011
+   },
+   "employer_lockouts": {
+    "cohesion": -0.0027,
+    "fatigue": 0.002,
+    "labor_efficiency": -0.0023
+   },
+   "union_legal_standing": {
+    "adoption_rate": -0.003,
+    "cohesion": 0.0036,
+    "institutional_rigidity": 0.003,
+    "legitimacy": 0.0024,
+    "task_coordination": 0.003
+   },
+   "machine_guarding_rules": {
+    "injury_risk": -0.007,
+    "labor_demand": 0.001,
+    "labor_efficiency": -0.0011,
+    "repair_capacity": 0.001
+   },
+   "conciliation_boards": {
+    "cohesion": 0.0018,
+    "fatigue": -0.001,
+    "institutional_rigidity": 0.002,
+    "task_coordination": 0.0023
+   },
+   "peaceful_picketing": {
+    "adoption_rate": -0.001,
+    "cohesion": 0.0018,
+    "labor_efficiency": -0.0011
+   },
+   "trade_wide_employer_bargaining": {
+    "institutional_rigidity": 0.003,
+    "standardization": 0.004,
+    "task_coordination": 0.003
+   },
+   "rail_harvest_gangs": {
+    "cultivation_yield": 0.003,
+    "disease_exposure": 0.002,
+    "fatigue": 0.003,
+    "labor_efficiency": 0.0023,
+    "task_coordination": 0.0015
+   },
+   "labor_statistics_bureau": {
+    "knowledge_preservation": 0.0016,
+    "knowledge_rate": 0.002,
+    "state_capacity": 0.004,
+    "task_coordination": 0.0015
+   },
+   "employer_liability_law": {
+    "injury_risk": -0.004,
+    "institutional_rigidity": 0.002,
+    "legitimacy": 0.0012
+   },
+   "women_office_clerks": {
+    "knowledge_preservation": 0.0016,
+    "labor_efficiency": 0.0034,
+    "task_coordination": 0.0023
+   },
+   "shop_hours_limits": {
+    "fatigue": -0.004,
+    "labor_demand": 0.002,
+    "trade_capacity": -0.001
+   },
+   "blacklists_and_no_union_pledges": {
+    "cohesion": -0.0023,
+    "institutional_rigidity": 0.003,
+    "legitimacy": -0.0012,
+    "task_coordination": 0.0015
+   },
+   "profit_sharing_schemes": {
+    "adoption_rate": -0.001,
+    "cohesion": 0.0014,
+    "labor_efficiency": 0.0023
+   },
+   "accident_insurance": {
+    "cohesion": 0.0027,
+    "health_protection": 0.0056,
+    "injury_risk": -0.003,
+    "institutional_rigidity": 0.003,
+    "legitimacy": 0.0024,
+    "state_capacity": 0.004
+   },
+   "time_clock_recording": {
+    "fatigue": 0.001,
+    "labor_efficiency": 0.0023,
+    "standardization": 0.002,
+    "task_coordination": 0.003
+   },
+   "eight_hour_campaign": {
+    "adoption_rate": -0.001,
+    "cohesion": 0.0023,
+    "fatigue": -0.001
+   },
+   "general_unions": {
+    "cohesion": 0.0023,
+    "labor_efficiency": -0.0011,
+    "task_coordination": 0.0023
+   },
+   "job_cost_accounting": {
+    "institutional_rigidity": 0.002,
+    "standardization": 0.003,
+    "state_capacity": 0.001,
+    "task_coordination": 0.003
+   },
+   "child_labor_prohibition": {
+    "cohesion": 0.0014,
+    "craft_output": -0.002,
+    "health_protection": 0.0035,
+    "knowledge_preservation": 0.008,
+    "labor_demand": 0.006,
+    "legitimacy": 0.002
+   },
+   "premium_bonus_pay": {
+    "fatigue": 0.003,
+    "labor_efficiency": 0.0034,
+    "task_coordination": 0.0015
+   },
+   "minimum_wage_boards": {
+    "cohesion": 0.0036,
+    "fatigue": -0.004,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0024,
+    "nutrition_quality": 0.004,
+    "trade_capacity": -0.002
+   },
+   "examined_trade_apprenticeships": {
+    "craft_output": 0.002,
+    "knowledge_preservation": 0.004,
+    "labor_demand": 0.001,
+    "standardization": 0.002,
+    "tool_quality": 0.002
+   },
+   "industrial_arbitration_courts": {
+    "adoption_rate": -0.001,
+    "cohesion": 0.0018,
+    "institutional_rigidity": 0.004,
+    "state_capacity": 0.003,
+    "task_coordination": 0.0015
+   },
+   "work_rest_limits": {
+    "fatigue": -0.006,
+    "injury_risk": -0.004,
+    "labor_demand": 0.002,
+    "labor_efficiency": 0.0011
+   },
+   "scheduled_occupational_diseases": {
+    "health_protection": 0.0028,
+    "health_risk": -0.004,
+    "institutional_rigidity": 0.001
+   },
+   "general_strike": {
+    "cohesion": 0.0018,
+    "labor_efficiency": -0.0034,
+    "legitimacy": -0.0016,
+    "security_efficiency": -0.001,
+    "trade_capacity": -0.002
+   },
+   "public_labor_exchanges": {
+    "fatigue": -0.001,
+    "labor_efficiency": 0.0023,
+    "state_capacity": 0.003,
+    "task_coordination": 0.0037
+   },
+   "work_motion_studies": {
+    "adoption_rate": -0.002,
+    "cohesion": -0.0018,
+    "fatigue": 0.004,
+    "labor_efficiency": 0.0138,
+    "standardization": 0.006,
+    "task_coordination": 0.006
+   },
+   "labor_ministry": {
+    "cohesion": 0.0014,
+    "institutional_rigidity": 0.004,
+    "legitimacy": 0.0024,
+    "state_capacity": 0.01,
+    "task_coordination": 0.003
+   },
+   "moving_assembly_line": {
+    "cohesion": -0.0023,
+    "craft_output": 0.012,
+    "fatigue": 0.008,
+    "injury_risk": 0.003,
+    "labor_efficiency": 0.0161,
+    "standardization": 0.01,
+    "task_coordination": 0.0045
+   },
+   "domestic_service_decline": {
+    "craft_output": 0.001,
+    "fatigue": -0.001,
+    "labor_demand": -0.003
+   },
+   "high_day_wage": {
+    "cohesion": 0.0014,
+    "institutional_rigidity": 0.001,
+    "labor_efficiency": 0.0046,
+    "nutrition_quality": 0.002,
+    "task_coordination": 0.0015
+   },
+   "industrial_welfare_departments": {
+    "cohesion": 0.0014,
+    "fatigue": -0.002,
+    "health_protection": 0.0028,
+    "labor_demand": 0.001,
+    "nutrition_quality": 0.002
+   },
+   "employment_departments": {
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0016,
+    "labor_efficiency": 0.0023,
+    "task_coordination": 0.003
+   },
+   "eight_hour_day_law": {
+    "cohesion": 0.0023,
+    "fatigue": -0.014,
+    "health_protection": 0.0021,
+    "injury_risk": -0.004,
+    "labor_demand": 0.008,
+    "legitimacy": 0.0024
+   },
+   "standing_labor_conference": {
+    "institutional_rigidity": 0.002,
+    "legitimacy": 0.0012,
+    "standardization": 0.003,
+    "state_capacity": 0.002
+   },
+   "works_councils": {
+    "cohesion": 0.0018,
+    "institutional_rigidity": 0.002,
+    "task_coordination": 0.0023
+   },
+   "five_day_week": {
+    "cohesion": 0.0014,
+    "fatigue": -0.005,
+    "health_protection": 0.0014,
+    "labor_demand": 0.003
+   },
+   "work_group_morale_studies": {
+    "cohesion": 0.0018,
+    "knowledge_rate": 0.001,
+    "labor_efficiency": 0.0034,
+    "task_coordination": 0.0015
+   },
+   "slump_hunger_marches": {
+    "cohesion": -0.0018,
+    "fatigue": 0.002,
+    "health_risk": 0.003,
+    "legitimacy": -0.002
+   },
+   "public_relief_works": {
+    "cohesion": 0.0014,
+    "construction_rate": 0.004,
+    "ecological_pressure": 0.002,
+    "labor_demand": 0.002,
+    "legitimacy": 0.0016,
+    "state_capacity": 0.002
+   },
+   "industrial_unions": {
+    "adoption_rate": -0.002,
+    "cohesion": 0.0027,
+    "task_coordination": 0.0023
+   },
+   "collective_bargaining_law": {
+    "adoption_rate": -0.004,
+    "cohesion": 0.0045,
+    "institutional_rigidity": 0.004,
+    "legitimacy": 0.0032,
+    "state_capacity": 0.003,
+    "task_coordination": 0.003
+   },
+   "sit_down_strikes": {
+    "cohesion": 0.0018,
+    "labor_efficiency": -0.0034,
+    "legitimacy": -0.0012,
+    "security_efficiency": -0.001
+   },
+   "paid_annual_holidays": {
+    "cohesion": 0.0018,
+    "fatigue": -0.005,
+    "health_protection": 0.0014,
+    "labor_demand": 0.002
+   },
+   "penal_labor_camps": {
+    "cohesion": -0.0027,
+    "construction_rate": 0.003,
+    "extraction_yield": 0.002,
+    "health_risk": 0.004,
+    "injury_risk": 0.004,
+    "legitimacy": -0.0032
+   },
+   "national_minimum_wage": {
+    "cohesion": 0.0036,
+    "fatigue": -0.006,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.004,
+    "legitimacy": 0.0024,
+    "nutrition_quality": 0.004,
+    "trade_capacity": -0.002
+   },
+   "total_labor_mobilization": {
+    "craft_output": 0.005,
+    "fatigue": 0.006,
+    "injury_risk": 0.003,
+    "labor_efficiency": 0.0034,
+    "warfare_readiness": 0.002
+   },
+   "wartime_wage_controls": {
+    "institutional_rigidity": 0.003,
+    "state_capacity": 0.004,
+    "task_coordination": 0.0023
+   },
+   "tripartite_wage_bargaining": {
+    "cohesion": 0.0023,
+    "institutional_rigidity": 0.004,
+    "state_capacity": 0.003,
+    "task_coordination": 0.003
+   },
+   "board_level_codetermination": {
+    "adoption_rate": -0.001,
+    "cohesion": 0.0023,
+    "institutional_rigidity": 0.003,
+    "legitimacy": 0.0012,
+    "task_coordination": 0.0015
+   },
+   "negotiated_occupational_pensions": {
+    "cohesion": 0.0018,
+    "health_protection": 0.0014,
+    "institutional_rigidity": 0.002,
+    "trade_capacity": 0.001
+   },
+   "public_sector_unions": {
+    "cohesion": 0.0018,
+    "institutional_rigidity": 0.004,
+    "state_capacity": -0.002
+   },
+   "quality_circles": {
+    "craft_output": 0.003,
+    "standardization": 0.004,
+    "task_coordination": 0.0023
+   },
+   "automation_retraining": {
+    "cohesion": 0.0014,
+    "knowledge_preservation": 0.0032,
+    "labor_efficiency": 0.0023,
+    "state_capacity": 0.001
+   },
+   "equal_pay_law": {
+    "cohesion": 0.0036,
+    "institutional_rigidity": 0.002,
+    "labor_efficiency": 0.0046,
+    "legitimacy": 0.0024,
+    "trade_capacity": -0.001
+   },
+   "flexible_working_hours": {
+    "fatigue": -0.003,
+    "labor_efficiency": 0.0011
+   },
+   "lean_production": {
+    "craft_output": 0.01,
+    "fatigue": 0.004,
+    "labor_efficiency": 0.0069,
+    "standardization": 0.008,
+    "storage_loss": -0.004,
+    "task_coordination": 0.006
+   },
+   "occupational_safety_agency": {
+    "craft_output": -0.001,
+    "health_risk": -0.008,
+    "injury_risk": -0.012,
+    "institutional_rigidity": 0.004,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0016,
+    "state_capacity": 0.004
+   },
+   "age_discrimination_ban": {
+    "cohesion": 0.0014,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.0016
+   },
+   "redundancy_pay": {
+    "adoption_rate": -0.002,
+    "cohesion": 0.0018,
+    "labor_demand": 0.001
+   },
+   "service_economy_shift": {
+    "cohesion": -0.0014,
+    "craft_output": -0.002,
+    "injury_risk": -0.003,
+    "labor_efficiency": 0.0023,
+    "trade_capacity": 0.002
+   },
+   "temporary_agency_work": {
+    "cohesion": -0.0018,
+    "fatigue": 0.002,
+    "labor_efficiency": 0.0034
+   },
+   "labor_market_deregulation": {
+    "cohesion": -0.0027,
+    "fatigue": 0.002,
+    "institutional_rigidity": -0.004,
+    "labor_efficiency": 0.0034,
+    "legitimacy": -0.0012,
+    "trade_capacity": 0.002
+   },
+   "desktop_office_work": {
+    "health_risk": 0.001,
+    "knowledge_preservation": 0.0032,
+    "labor_demand": -0.003,
+    "labor_efficiency": 0.0057,
+    "task_coordination": 0.003
+   },
+   "workplace_harassment_rules": {
+    "cohesion": 0.0018,
+    "health_risk": -0.001,
+    "institutional_rigidity": 0.002
+   },
+   "offshored_work": {
+    "cohesion": -0.0023,
+    "craft_output": 0.004,
+    "fuel_demand": 0.002,
+    "labor_demand": -0.004,
+    "pollution": 0.002,
+    "trade_capacity": 0.003
+   },
+   "disability_accommodation": {
+    "cohesion": 0.0018,
+    "construction_rate": -0.001,
+    "labor_efficiency": 0.0023
+   },
+   "call_centre_work": {
+    "fatigue": 0.004,
+    "health_risk": 0.002,
+    "labor_efficiency": 0.0034,
+    "task_coordination": 0.003
+   },
+   "common_working_time_rules": {
+    "fatigue": -0.004,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.002,
+    "standardization": 0.003
+   },
+   "networked_telework": {
+    "fatigue": -0.002,
+    "fuel_demand": -0.002,
+    "labor_efficiency": 0.0046
+   },
+   "zero_hours_contracts": {
+    "cohesion": -0.0018,
+    "fatigue": 0.002,
+    "labor_efficiency": 0.0023
+   },
+   "living_wage_indexing": {
+    "cohesion": 0.0023,
+    "labor_demand": 0.001,
+    "legitimacy": 0.0012,
+    "nutrition_quality": 0.002,
+    "trade_capacity": -0.001
+   },
+   "platform_gig_work": {
+    "cohesion": -0.0027,
+    "fatigue": 0.003,
+    "injury_risk": 0.003,
+    "labor_efficiency": 0.0069,
+    "legitimacy": -0.0012,
+    "task_coordination": 0.006,
+    "trade_capacity": 0.003
+   },
+   "algorithmic_management": {
+    "cohesion": -0.0018,
+    "fatigue": 0.004,
+    "health_risk": 0.002,
+    "labor_efficiency": 0.0034,
+    "task_coordination": 0.0037
+   },
+   "platform_worker_status": {
+    "cohesion": 0.0023,
+    "health_protection": 0.0014,
+    "labor_demand": 0.001,
+    "labor_efficiency": -0.0011,
+    "legitimacy": 0.0012
+   },
+   "worker_monitoring_limits": {
+    "cohesion": 0.0014,
+    "fatigue": -0.002
+   },
+   "four_day_week_trials": {
+    "cohesion": 0.0014,
+    "fatigue": -0.005,
+    "health_protection": 0.0014,
+    "labor_demand": 0.002,
+    "labor_efficiency": 0.0011
+   },
+   "paid_care_work": {
+    "cohesion": 0.0023,
+    "health_protection": 0.0021,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.002
+   },
+   "heat_stress_work_limits": {
+    "construction_rate": -0.002,
+    "fatigue": -0.002,
+    "health_risk": -0.004,
+    "injury_risk": -0.002,
+    "labor_demand": 0.002
+   },
+   "machine_assistant_desk_work": {
+    "cohesion": -0.0027,
+    "fuel_demand": 0.003,
+    "knowledge_rate": 0.006,
+    "labor_demand": -0.008,
+    "labor_efficiency": 0.0138,
+    "task_coordination": 0.0045
+   },
+   "basic_income_pilots": {
+    "cohesion": 0.0018,
+    "fatigue": -0.002,
+    "health_protection": 0.0014,
+    "labor_demand": 0.001,
+    "state_capacity": 0.001
+   }
   }
  }
 }

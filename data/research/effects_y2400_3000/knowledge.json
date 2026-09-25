@@ -5,9 +5,9 @@
   "electrochemical_cells": {
    "effects": {
     "chemical_control": 0.002,
-    "knowledge_rate": 0.0072,
-    "labor_demand": 0.0016,
-    "observation_rate": 0.0069,
+    "knowledge_rate": 0.0059,
+    "labor_demand": 0.0001,
+    "observation_rate": 0.0039,
     "pollution": 0.001
    },
    "art": "res://assets/ui/research/paper/battery_bank_wiring.png",
@@ -17,9 +17,9 @@
   "statistical_inference": {
    "effects": {
     "health_protection": 0.0016,
-    "knowledge_rate": 0.0036,
-    "observation_rate": 0.0057,
-    "state_capacity": 0.0054
+    "knowledge_rate": 0.003,
+    "observation_rate": 0.0032,
+    "state_capacity": 0.0021
    },
    "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
    "observation": "Registers of births, deaths and errors are weighed together to say which cause is probable."
@@ -27,8 +27,8 @@
   "atomic_combining_weights": {
    "effects": {
     "chemical_control": 0.003,
-    "knowledge_rate": 0.0036,
-    "observation_rate": 0.0034
+    "knowledge_rate": 0.003,
+    "observation_rate": 0.0019
    },
    "art": "res://assets/ui/research/paper/gas_composition_analysis.png",
    "name": "Combining Weights",
@@ -36,18 +36,18 @@
   },
   "optical_telegraphy": {
    "effects": {
-    "labor_demand": 0.0032,
-    "state_capacity": 0.0054,
-    "task_coordination": 0.0016,
-    "trade_capacity": 0.0018
+    "labor_demand": 0.0002,
+    "state_capacity": 0.0021,
+    "task_coordination": 0.0007,
+    "trade_capacity": 0.0014
    },
    "art": "res://assets/ui/research/discovery-600/prearranged_beacon_chains.png",
    "observation": "Towers with swinging arms pass coded signals from hill to hill across the realm in minutes."
   },
   "least_squares_estimation": {
    "effects": {
-    "observation_rate": 0.0034,
-    "standardization": 0.0024,
+    "observation_rate": 0.0019,
+    "standardization": 0.0008,
     "survey_speed": 0.002
    },
    "art": "res://assets/ui/research/discovery-600/worked_problem_tablets.png",
@@ -55,8 +55,8 @@
   },
   "dimensional_metrology": {
    "effects": {
-    "craft_output": 0.0044,
-    "standardization": 0.0118,
+    "craft_output": 0.0032,
+    "standardization": 0.004,
     "tool_quality": 0.001
    },
    "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png",
@@ -64,19 +64,20 @@
   },
   "measurement_uncertainty": {
    "effects": {
-    "observation_rate": 0.0034,
-    "standardization": 0.0047
+    "observation_rate": 0.0019,
+    "standardization": 0.0016
    },
    "art": "res://assets/ui/research/discovery-600/checked_master_copies.png",
    "observation": "No measurement is written down now without its stated error beside it."
   },
   "research_university": {
    "effects": {
-    "adoption_rate": 0.0053,
-    "institutional_rigidity": -0.001,
-    "knowledge_preservation": 0.0112,
-    "knowledge_rate": 0.0099,
-    "labor_demand": 0.0064
+    "adoption_rate": 0.0038,
+    "institutional_rigidity": -0.0002,
+    "knowledge_preservation": 0.0051,
+    "knowledge_rate": 0.0082,
+    "labor_demand": 0.0003,
+    "literacy": 0.0091
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Research University",
@@ -86,11 +87,12 @@
   },
   "cylinder_press_printing": {
    "effects": {
-    "adoption_rate": 0.0176,
-    "fuel_demand": 0.001,
-    "knowledge_preservation": 0.0112,
-    "labor_demand": 0.0032,
-    "trade_capacity": 0.0035
+    "adoption_rate": 0.0126,
+    "fuel_demand": 0.0002,
+    "knowledge_preservation": 0.0051,
+    "labor_demand": 0.0002,
+    "literacy": 0.0227,
+    "trade_capacity": 0.0028
    },
    "art": "res://assets/ui/research/paper/rolling_intaglio_printing.png",
    "observation": "A steam-driven cylinder press prints thousands of sheets an hour, and papers and books grow cheap.",
@@ -99,61 +101,61 @@
   },
   "electrical_measurement": {
    "effects": {
-    "knowledge_rate": 0.0018,
-    "observation_rate": 0.0046,
-    "standardization": 0.0071
+    "knowledge_rate": 0.0012,
+    "observation_rate": 0.0017,
+    "standardization": 0.0033
    },
    "art": "res://assets/ui/research/paper/battery_bank_wiring.png",
    "observation": "Needle galvanometers show the strength of a current and let one laboratory check another's work."
   },
   "dimensional_analysis": {
    "effects": {
-    "knowledge_rate": 0.0027,
-    "observation_rate": 0.0011
+    "knowledge_rate": 0.0017,
+    "observation_rate": 0.0004
    },
    "art": "res://assets/ui/research/discovery-600/area_volume_rules.png",
    "observation": "Every quantity is checked by its units; a formula whose measures disagree is known to be wrong."
   },
   "harmonic_analysis": {
    "effects": {
-    "knowledge_rate": 0.0027,
-    "observation_rate": 0.0023
+    "knowledge_rate": 0.0017,
+    "observation_rate": 0.0009
    },
    "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
    "observation": "Any wave, of heat or sound, is written as a sum of simple waves."
   },
   "viscous_resistance": {
    "effects": {
-    "craft_output": 0.0022,
-    "knowledge_rate": 0.0018,
-    "observation_rate": 0.0011
+    "craft_output": 0.0015,
+    "knowledge_rate": 0.0012,
+    "observation_rate": 0.0004
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "The drag of thick fluids in pipes and bearings is measured and reckoned."
   },
   "heat_engine_cycles": {
    "effects": {
-    "craft_output": 0.0044,
+    "craft_output": 0.003,
     "fuel_demand": -0.001,
-    "knowledge_rate": 0.0027
+    "knowledge_rate": 0.0017
    },
    "art": "res://assets/ui/research/paper/gear_ratios.png",
    "observation": "The ideal cycle shows how much work any heat engine can yield from its fire, and engineers stop chasing the impossible."
   },
   "mechanical_work_energy": {
    "effects": {
-    "craft_output": 0.0022,
-    "knowledge_rate": 0.0027,
-    "standardization": 0.0024
+    "craft_output": 0.0015,
+    "knowledge_rate": 0.0017,
+    "standardization": 0.0011
    },
    "art": "res://assets/ui/research/paper/compound_pulleys.png",
    "observation": "Work, whether of horse, water or steam, is given one measure and one price."
   },
   "compound_microscopy": {
    "effects": {
-    "health_protection": 0.0016,
-    "knowledge_rate": 0.0027,
-    "observation_rate": 0.0092
+    "health_protection": 0.0014,
+    "knowledge_rate": 0.0017,
+    "observation_rate": 0.0035
    },
    "art": "res://assets/ui/research/paper/compound_microscopy.png",
    "observation": "The colour-corrected microscope shows clear detail at high power without coloured fringes.",
@@ -161,48 +163,48 @@
   },
   "fine_focus_stages": {
    "effects": {
-    "observation_rate": 0.0023
+    "observation_rate": 0.0009
    },
    "art": "res://assets/ui/research/paper/compound_microscopy.png",
    "observation": "A fine screw brings the specimen into focus at the highest powers."
   },
   "illumination_apertures": {
    "effects": {
-    "observation_rate": 0.0023
+    "observation_rate": 0.0009
    },
    "art": "res://assets/ui/research/paper/compound_microscopy.png",
    "observation": "A condenser and a stop under the stage gather and govern the light."
   },
   "microbial_observation": {
    "effects": {
-    "health_protection": 0.0032,
-    "knowledge_rate": 0.0009,
-    "observation_rate": 0.0046
+    "health_protection": 0.0028,
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.0017
    },
    "art": "res://assets/ui/research/paper/microbial_observation.png",
    "observation": "Tiny living things in water, milk and wounds are watched and drawn."
   },
   "microscopic_cell_observation": {
    "effects": {
-    "knowledge_rate": 0.0018,
-    "observation_rate": 0.0034
+    "knowledge_rate": 0.0012,
+    "observation_rate": 0.0013
    },
    "art": "res://assets/ui/research/paper/microscopic_cell_observation.png",
    "observation": "Every leaf and every scrap of flesh under the lens shows walls of little chambers."
   },
   "specimen_slide_mounting": {
    "effects": {
-    "knowledge_preservation": 0.0022,
-    "observation_rate": 0.0023
+    "knowledge_preservation": 0.0013,
+    "observation_rate": 0.0009
    },
    "art": "res://assets/ui/research/paper/specimen_slide_mounting.png",
    "observation": "Specimens sealed on glass slides under a cover glass keep for years and travel between laboratories."
   },
   "electromagnetic_induction": {
    "effects": {
-    "craft_output": 0.0044,
-    "knowledge_rate": 0.0063,
-    "observation_rate": 0.0046
+    "craft_output": 0.003,
+    "knowledge_rate": 0.0041,
+    "observation_rate": 0.0017
    },
    "art": "res://assets/ui/research/paper/wound_transformers.png",
    "observation": "A magnet moved through a coil makes a current; motion can now be turned into electricity.",
@@ -210,26 +212,26 @@
   },
   "electromagnet_sounders": {
    "effects": {
-    "task_coordination": 0.0011,
-    "trade_capacity": 0.0018
+    "task_coordination": 0.0008,
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/paper/electromagnetic_relays.png",
    "observation": "An electromagnet pulls an iron bar to click out a signal sent from far away."
   },
   "timed_signal_sequences": {
    "effects": {
-    "knowledge_preservation": 0.0022,
-    "standardization": 0.0047,
-    "task_coordination": 0.0016
+    "knowledge_preservation": 0.0013,
+    "standardization": 0.0022,
+    "task_coordination": 0.0011
    },
    "art": "res://assets/ui/research/discovery-600/agreed_signal_codes.png",
    "observation": "Letters are sent as short and long pulses, and a trained clerk reads them by ear."
   },
   "cell_theory": {
    "effects": {
-    "health_protection": 0.0032,
-    "knowledge_rate": 0.0072,
-    "observation_rate": 0.0057
+    "health_protection": 0.0013,
+    "knowledge_rate": 0.0067,
+    "observation_rate": 0.0026
    },
    "art": "res://assets/ui/research/paper/cell_theory.png",
    "observation": "Every plant and animal body is built of cells, and cells come only from cells.",
@@ -237,10 +239,10 @@
   },
   "electrical_telegraphy": {
    "effects": {
-    "labor_demand": 0.0048,
-    "state_capacity": 0.0108,
-    "task_coordination": 0.0053,
-    "trade_capacity": 0.0105
+    "labor_demand": 0.0002,
+    "state_capacity": 0.0036,
+    "task_coordination": 0.0017,
+    "trade_capacity": 0.0031
    },
    "art": "res://assets/ui/research/paper/electromagnetic_relays.png",
    "observation": "Wires on poles beside the railways carry coded messages between towns in minutes.",
@@ -249,8 +251,8 @@
   },
   "tissue_histology": {
    "effects": {
-    "health_protection": 0.0016,
-    "observation_rate": 0.0034
+    "health_protection": 0.0007,
+    "observation_rate": 0.0016
    },
    "art": "res://assets/ui/research/paper/tissue_histology.png",
    "observation": "Tissues are sorted and named by the kinds of cells they are made of."
@@ -258,10 +260,10 @@
   "fixed_light_images": {
    "effects": {
     "chemical_control": 0.001,
-    "cohesion": 0.001,
-    "health_risk": 0.001,
-    "knowledge_preservation": 0.0135,
-    "observation_rate": 0.0046
+    "cohesion": 0.0002,
+    "health_risk": 0.0003,
+    "knowledge_preservation": 0.0062,
+    "observation_rate": 0.0021
    },
    "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
    "name": "Light-fixed Images",
@@ -270,24 +272,24 @@
   },
   "telegraph_keys": {
    "effects": {
-    "task_coordination": 0.0011
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/paper/electromagnetic_relays.png",
    "observation": "A spring-loaded key lets a clerk tap out pulses quickly and cleanly."
   },
   "line_insulators": {
    "effects": {
-    "labor_demand": 0.0016,
-    "task_coordination": 0.0011
+    "labor_demand": 0.0001,
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/paper/glass_blowing.png",
    "observation": "Glass and porcelain knobs keep the line's current from leaking down the poles in the rain."
   },
   "energy_conservation_law": {
    "effects": {
-    "knowledge_rate": 0.0081,
-    "observation_rate": 0.0023,
-    "standardization": 0.0047
+    "knowledge_rate": 0.0075,
+    "observation_rate": 0.0011,
+    "standardization": 0.0019
    },
    "art": "res://assets/ui/research/paper/gear_ratios.png",
    "name": "Conservation of Energy",
@@ -297,15 +299,15 @@
   "telegraph_return_circuits": {
    "effects": {
     "craft_output": 0.0022,
-    "task_coordination": 0.0011
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/paper/electromagnetic_relays.png",
    "observation": "An earthed plate at each end lets the ground carry the return current, and one wire serves."
   },
   "entropy_second_law": {
    "effects": {
-    "knowledge_rate": 0.0036,
-    "observation_rate": 0.0011
+    "knowledge_rate": 0.0033,
+    "observation_rate": 0.0005
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Second Law of Heat",
@@ -313,8 +315,8 @@
   },
   "polarized_telegraph_relays": {
    "effects": {
-    "task_coordination": 0.0016,
-    "trade_capacity": 0.0018
+    "task_coordination": 0.0005,
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/paper/electromagnetic_relays.png",
    "observation": "Relays at every station renew the weak current so a message can cross the realm."
@@ -322,16 +324,16 @@
   "biological_staining": {
    "effects": {
     "chemical_control": 0.001,
-    "health_protection": 0.0016,
-    "observation_rate": 0.0046
+    "health_protection": 0.0006,
+    "observation_rate": 0.0022
    },
    "art": "res://assets/ui/research/paper/biological_staining.png",
    "observation": "Dyes taken up by some parts of a cell and not others show what the eye could not."
   },
   "matrix_algebra": {
    "effects": {
-    "knowledge_rate": 0.0027,
-    "standardization": 0.0024
+    "knowledge_rate": 0.0018,
+    "standardization": 0.0012
    },
    "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
    "observation": "Whole arrays of numbers are added and multiplied as one quantity."
@@ -339,18 +341,18 @@
   "spectroscopy": {
    "effects": {
     "chemical_control": 0.002,
-    "knowledge_rate": 0.0027,
-    "observation_rate": 0.0069
+    "knowledge_rate": 0.0018,
+    "observation_rate": 0.0033
    },
    "art": "res://assets/ui/research/paper/nuclear_magnetic_resonance_spectroscopy.png",
    "observation": "Light split through a prism shows bright lines that name the elements, even in the sun and stars."
   },
   "descent_by_selection": {
    "effects": {
-    "cohesion": -0.001,
-    "knowledge_rate": 0.0081,
-    "legitimacy": -0.003,
-    "observation_rate": 0.0046
+    "cohesion": -0.0002,
+    "knowledge_rate": 0.0053,
+    "legitimacy": -0.0009,
+    "observation_rate": 0.0022
    },
    "art": "res://assets/ui/research/paper/developmental_stage_series.png",
    "name": "Descent by Selection",
@@ -360,17 +362,17 @@
   },
   "cyclic_fatigue": {
    "effects": {
-    "craft_output": 0.0044,
-    "injury_risk": -0.001,
-    "standardization": 0.0024
+    "craft_output": 0.0028,
+    "injury_risk": -0.0002,
+    "standardization": 0.0012
    },
    "art": "res://assets/ui/research/paper/metal_fracture_toughness_testing.png",
    "observation": "Iron axles break under loads far below their strength when the load comes again and again."
   },
   "electromagnetic_wave_theory": {
    "effects": {
-    "knowledge_rate": 0.0072,
-    "observation_rate": 0.0034
+    "knowledge_rate": 0.0047,
+    "observation_rate": 0.0016
    },
    "art": "res://assets/ui/research/paper/wound_transformers.png",
    "observation": "Light is shown to be a wave of electricity and magnetism, and slower waves of the same kind are foretold.",
@@ -378,10 +380,10 @@
   },
   "undersea_telegraph_cable": {
    "effects": {
-    "labor_demand": 0.0048,
-    "state_capacity": 0.0054,
-    "task_coordination": 0.0027,
-    "trade_capacity": 0.0123
+    "labor_demand": 0.0002,
+    "state_capacity": 0.0031,
+    "task_coordination": 0.0012,
+    "trade_capacity": 0.0043
    },
    "art": "res://assets/ui/research/paper/electromagnetic_relays.png",
    "name": "Undersea Telegraph Cable",
@@ -391,8 +393,8 @@
   "periodic_element_table": {
    "effects": {
     "chemical_control": 0.004,
-    "knowledge_rate": 0.0081,
-    "observation_rate": 0.0046
+    "knowledge_rate": 0.0053,
+    "observation_rate": 0.0022
    },
    "art": "res://assets/ui/research/paper/material_phase_diagrams.png",
    "name": "Periodic Table of Elements",
@@ -402,12 +404,14 @@
   "compulsory_elementary_schooling": {
    "effects": {
     "adoption_rate": 0.0212,
-    "cohesion": 0.003,
-    "knowledge_preservation": 0.018,
-    "knowledge_rate": 0.0036,
-    "labor_demand": 0.0129,
+    "cohesion": 0.0005,
+    "fertility_transition": 0.039,
+    "knowledge_preservation": 0.0093,
+    "knowledge_rate": 0.0023,
+    "labor_demand": 0.0006,
     "labor_efficiency": -0.001,
-    "legitimacy": 0.002
+    "legitimacy": 0.0004,
+    "literacy": 0.0578
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Compulsory Elementary Schooling",
@@ -417,42 +421,43 @@
   },
   "punched_message_tape": {
    "effects": {
-    "knowledge_preservation": 0.0045,
-    "task_coordination": 0.0011
+    "knowledge_preservation": 0.0023,
+    "literacy": 0.0046,
+    "task_coordination": 0.0005
    },
    "art": "res://assets/ui/research/paper/punched_card_loom_control.png",
    "observation": "Messages punched into paper tape are stored and sent at machine speed."
   },
   "cell_division_observation": {
    "effects": {
-    "knowledge_rate": 0.0009,
-    "observation_rate": 0.0034
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.0016
    },
    "art": "res://assets/ui/research/paper/cell_division_observation.png",
    "observation": "Stained cells are watched splitting in two, stage by stage, with threads dividing between them."
   },
   "photoconductivity": {
    "effects": {
-    "knowledge_rate": 0.0009,
-    "observation_rate": 0.0023
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.0011
    },
    "art": "res://assets/ui/research/paper/photovoltaic_power.png",
    "observation": "Light falling on certain crystals lowers their resistance to a current."
   },
   "duplex_telegraphy": {
    "effects": {
-    "task_coordination": 0.0011,
-    "trade_capacity": 0.0018
+    "task_coordination": 0.0005,
+    "trade_capacity": 0.0006
    },
    "art": "res://assets/ui/research/paper/electromagnetic_relays.png",
    "observation": "Two messages pass along one wire in opposite directions at once."
   },
   "typewriter": {
    "effects": {
-    "knowledge_preservation": 0.0067,
-    "labor_efficiency": 0.001,
-    "standardization": 0.0095,
-    "task_coordination": 0.0016
+    "knowledge_preservation": 0.0028,
+    "labor_efficiency": 0.0009,
+    "standardization": 0.0039,
+    "task_coordination": 0.0005
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
    "name": "Typewriter",
@@ -461,32 +466,32 @@
   },
   "acoustic_diaphragms": {
    "effects": {
-    "observation_rate": 0.0011,
-    "task_coordination": 0.0005
+    "observation_rate": 0.0009,
+    "task_coordination": 0.0002
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "A thin plate vibrates with the voice and can pass its motion to a current."
   },
   "electromagnetic_earpieces": {
    "effects": {
-    "task_coordination": 0.0005
+    "task_coordination": 0.0002
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "A magnet and a thin iron disc turn a varying current back into sound."
   },
   "instrument_sterilization": {
    "effects": {
-    "disease_exposure": -0.003,
-    "health_protection": 0.0097
+    "disease_exposure": -0.0005,
+    "health_protection": 0.0023
    },
    "art": "res://assets/ui/research/paper/instrument_sterilization.png",
    "observation": "Instruments are boiled or baked before use and wounds stop festering under the surgeon's hand."
   },
   "microbial_isolation_methods": {
    "effects": {
-    "health_protection": 0.0081,
+    "health_protection": 0.0019,
     "knowledge_rate": 0.0018,
-    "observation_rate": 0.0046
+    "observation_rate": 0.0037
    },
    "art": "res://assets/ui/research/paper/microbial_isolation_methods.png",
    "observation": "Single kinds of germ are grown apart on jelly plates and each tied to its own disease."
@@ -494,7 +499,7 @@
   "cathode_ray_discharge_tubes": {
    "effects": {
     "knowledge_rate": 0.0027,
-    "observation_rate": 0.0057
+    "observation_rate": 0.0045
    },
    "art": "res://assets/ui/research/paper/glass_blowing.png",
    "name": "Cathode Ray Tubes",
@@ -502,10 +507,10 @@
   },
   "industrial_research_laboratory": {
    "effects": {
-    "craft_output": 0.0067,
+    "craft_output": 0.0048,
     "knowledge_rate": 0.0072,
-    "labor_demand": 0.0048,
-    "observation_rate": 0.0023
+    "labor_demand": 0.0002,
+    "observation_rate": 0.0018
    },
    "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
    "name": "Industrial Research Laboratory",
@@ -514,10 +519,10 @@
   },
   "telephone_circuits": {
    "effects": {
-    "labor_demand": 0.0032,
-    "state_capacity": 0.0036,
-    "task_coordination": 0.0043,
-    "trade_capacity": 0.007
+    "labor_demand": 0.0002,
+    "state_capacity": 0.0016,
+    "task_coordination": 0.0015,
+    "trade_capacity": 0.0036
    },
    "art": "res://assets/ui/research/paper/electromagnetic_relays.png",
    "observation": "The voice itself travels along the wire, and merchants speak across the town.",
@@ -525,16 +530,16 @@
   },
   "carbon_microphones": {
    "effects": {
-    "task_coordination": 0.0011
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "A button of carbon grains makes the telephone voice loud and clear."
   },
   "manual_switchboards": {
    "effects": {
-    "labor_demand": 0.0032,
-    "task_coordination": 0.0016,
-    "trade_capacity": 0.0018
+    "labor_demand": 0.0002,
+    "task_coordination": 0.0005,
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Operators at a board of plugs connect any caller to any other.",
@@ -542,9 +547,9 @@
   },
   "aseptic_laboratory_practice": {
    "effects": {
-    "disease_exposure": -0.002,
-    "health_protection": 0.0065,
-    "observation_rate": 0.0023
+    "disease_exposure": -0.0004,
+    "health_protection": 0.0015,
+    "observation_rate": 0.0018
    },
    "art": "res://assets/ui/research/paper/aseptic_laboratory_practice.png",
    "observation": "Flamed loops, sealed flasks and clean benches keep stray germs out of the cultures."
@@ -558,14 +563,14 @@
   },
   "balanced_conductor_pairs": {
    "effects": {
-    "task_coordination": 0.0011
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Twisted pairs of wire cancel the hum picked up along the route."
   },
   "lubrication_regimes": {
    "effects": {
-    "craft_output": 0.0044,
+    "craft_output": 0.0031,
     "repair_capacity": 0.002,
     "tool_quality": 0.001
    },
@@ -574,10 +579,10 @@
   },
   "punched_card_tabulation": {
    "effects": {
-    "knowledge_preservation": 0.009,
-    "labor_demand": 0.0016,
-    "standardization": 0.0118,
-    "state_capacity": 0.0126
+    "knowledge_preservation": 0.0037,
+    "labor_demand": 0.0001,
+    "standardization": 0.0048,
+    "state_capacity": 0.0055
    },
    "art": "res://assets/ui/research/paper/punched_card_loom_control.png",
    "name": "Punched-card Tabulation",
@@ -586,40 +591,40 @@
   },
   "electron_physics": {
    "effects": {
-    "knowledge_rate": 0.0054,
-    "observation_rate": 0.0046
+    "knowledge_rate": 0.0035,
+    "observation_rate": 0.0018
    },
    "art": "res://assets/ui/research/paper/gas_composition_analysis.png",
    "observation": "The cathode ray is a stream of tiny charged particles far lighter than any atom."
   },
   "radiation_measurement": {
    "effects": {
-    "health_risk": 0.001,
-    "observation_rate": 0.0046
+    "health_risk": 0.0001,
+    "observation_rate": 0.0018
    },
    "art": "res://assets/ui/research/paper/gas_composition_analysis.png",
    "observation": "Counters and electroscopes measure the invisible rays given off by certain ores."
   },
   "thermionic_emission": {
    "effects": {
-    "knowledge_rate": 0.0009,
-    "observation_rate": 0.0023
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.0009
    },
    "art": "res://assets/ui/research/paper/glass_blowing.png",
    "observation": "A heated wire in a vacuum gives off a stream of charge."
   },
   "inductive_line_loading": {
    "effects": {
-    "task_coordination": 0.0011
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Coils spaced along the line let the voice carry much farther."
   },
   "radio_telegraphy": {
    "effects": {
-    "knowledge_rate": 0.0018,
-    "state_capacity": 0.0054,
-    "task_coordination": 0.0048,
+    "knowledge_rate": 0.0012,
+    "state_capacity": 0.0027,
+    "task_coordination": 0.0017,
     "trade_capacity": 0.007
    },
    "art": "res://assets/ui/research/paper/radio_telegraphy.png",
@@ -628,56 +633,56 @@
   },
   "aerodynamics": {
    "effects": {
-    "knowledge_rate": 0.0027,
-    "observation_rate": 0.0023
+    "knowledge_rate": 0.0018,
+    "observation_rate": 0.0009
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "The lift and drag of shaped surfaces are measured and reckoned."
   },
   "microbial_growth_measurement": {
    "effects": {
-    "health_protection": 0.0016,
-    "observation_rate": 0.0023
+    "health_protection": 0.0007,
+    "observation_rate": 0.0009
    },
    "art": "res://assets/ui/research/paper/microbial_growth_measurement.png",
    "observation": "Germs are counted as they multiply, and how fast they grow is measured."
   },
   "resonant_tuned_circuits": {
    "effects": {
-    "task_coordination": 0.0011
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "A coil and a condenser tuned together pick out one signal among many."
   },
   "statistical_sampling": {
    "effects": {
-    "observation_rate": 0.0034,
-    "standardization": 0.0047,
-    "state_capacity": 0.0072
+    "observation_rate": 0.0013,
+    "standardization": 0.0019,
+    "state_capacity": 0.0036
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "observation": "A small sample chosen by chance speaks for the whole realm."
   },
   "variable_air_capacitors": {
    "effects": {
-    "task_coordination": 0.0005
+    "task_coordination": 0.0002
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Turning plates tune the receiver across the band."
   },
   "wind_tunnel_testing": {
    "effects": {
-    "knowledge_rate": 0.0009,
-    "labor_demand": 0.0016,
-    "observation_rate": 0.0034
+    "knowledge_rate": 0.0006,
+    "labor_demand": 0.0001,
+    "observation_rate": 0.0013
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Model wings are tried in a tube of forced air before anything is built."
   },
   "energy_quanta": {
    "effects": {
-    "knowledge_rate": 0.0054,
-    "observation_rate": 0.0023
+    "knowledge_rate": 0.0035,
+    "observation_rate": 0.0009
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Energy Quanta",
@@ -686,9 +691,9 @@
   "refereed_journals": {
    "effects": {
     "adoption_rate": 0.0053,
-    "institutional_rigidity": 0.001,
-    "knowledge_preservation": 0.009,
-    "knowledge_rate": 0.0045
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.0087,
+    "knowledge_rate": 0.0029
    },
    "art": "res://assets/ui/research/paper/experimental_protocol_publication.png",
    "name": "Refereed Journals",
@@ -697,23 +702,23 @@
   "crystal_radio_detection": {
    "effects": {
     "adoption_rate": 0.0018,
-    "task_coordination": 0.0005
+    "task_coordination": 0.0002
    },
    "art": "res://assets/ui/research/paper/radio_telegraphy.png",
    "observation": "A crystal and a fine wire detect a radio signal without a battery."
   },
   "vacuum_diodes": {
    "effects": {
-    "knowledge_rate": 0.0009,
-    "task_coordination": 0.0005
+    "knowledge_rate": 0.0006,
+    "task_coordination": 0.0002
    },
    "art": "res://assets/ui/research/paper/glass_blowing.png",
    "observation": "A heated filament and a plate in an evacuated bulb let current pass one way only."
   },
   "relative_spacetime": {
    "effects": {
-    "knowledge_rate": 0.0054,
-    "observation_rate": 0.0011
+    "knowledge_rate": 0.0035,
+    "observation_rate": 0.0004
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Relative Space and Time",
@@ -721,7 +726,7 @@
   },
   "automatic_telegraphy": {
    "effects": {
-    "task_coordination": 0.0011,
+    "task_coordination": 0.0004,
     "trade_capacity": 0.0018
    },
    "art": "res://assets/ui/research/paper/electromagnetic_relays.png",
@@ -729,18 +734,18 @@
   },
   "teleprinter_mechanisms": {
    "effects": {
-    "knowledge_preservation": 0.0022,
-    "standardization": 0.0024,
-    "task_coordination": 0.0016
+    "knowledge_preservation": 0.0021,
+    "standardization": 0.001,
+    "task_coordination": 0.0006
    },
    "art": "res://assets/ui/research/paper/movable_type_composition.png",
    "observation": "A typing machine at one end prints the same words on a machine at the other."
   },
   "triode_valves": {
    "effects": {
-    "knowledge_rate": 0.0027,
-    "observation_rate": 0.0023,
-    "task_coordination": 0.0027
+    "knowledge_rate": 0.0018,
+    "observation_rate": 0.0009,
+    "task_coordination": 0.001
    },
    "art": "res://assets/ui/research/paper/glass_blowing.png",
    "observation": "A grid inside the valve lets a small signal control a large current; weak sounds can be made loud.",
@@ -748,9 +753,9 @@
   },
   "cell_culture_methods": {
    "effects": {
-    "health_protection": 0.0032,
-    "knowledge_rate": 0.0018,
-    "observation_rate": 0.0046
+    "health_protection": 0.0014,
+    "knowledge_rate": 0.0012,
+    "observation_rate": 0.0018
    },
    "art": "res://assets/ui/research/paper/cell_culture_methods.png",
    "observation": "Living cells taken from the body are kept alive and dividing in glass dishes."
@@ -758,15 +763,15 @@
   "tuned_radio_reception": {
    "effects": {
     "adoption_rate": 0.0018,
-    "task_coordination": 0.0011
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/paper/radio_telegraphy.png",
    "observation": "Receivers tuned to one wavelength shut out the others."
   },
   "atomic_physics": {
    "effects": {
-    "knowledge_rate": 0.0045,
-    "observation_rate": 0.0046
+    "knowledge_rate": 0.0029,
+    "observation_rate": 0.0018
    },
    "art": "res://assets/ui/research/paper/gas_composition_analysis.png",
    "observation": "The atom has a small heavy nucleus with light charged particles around it."
@@ -774,7 +779,7 @@
   "amplitude_modulation": {
    "effects": {
     "adoption_rate": 0.0035,
-    "task_coordination": 0.0016
+    "task_coordination": 0.0006
    },
    "art": "res://assets/ui/research/paper/radio_telegraphy.png",
    "observation": "The strength of a carrier wave is shaped by a voice, and speech and music go out by wireless."
@@ -782,22 +787,22 @@
   "crystallography": {
    "effects": {
     "chemical_control": 0.002,
-    "craft_output": 0.0022,
-    "observation_rate": 0.0046
+    "craft_output": 0.0018,
+    "observation_rate": 0.0018
    },
    "art": "res://assets/ui/research/paper/material_phase_diagrams.png",
    "observation": "Rays bent by a crystal show how its atoms are laid out in rows."
   },
   "feedback_radio_oscillators": {
    "effects": {
-    "task_coordination": 0.0011
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/paper/radio_telegraphy.png",
    "observation": "Part of a valve's output fed back into it holds a steady wave."
   },
   "telephone_repeaters": {
    "effects": {
-    "task_coordination": 0.0016,
+    "task_coordination": 0.0005,
     "trade_capacity": 0.0018
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
@@ -805,14 +810,14 @@
   },
   "frequency_conversion": {
    "effects": {
-    "task_coordination": 0.0005
+    "task_coordination": 0.0002
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Signals are shifted to a fixed frequency where they are easier to amplify."
   },
   "aerial_matching": {
    "effects": {
-    "task_coordination": 0.0005
+    "task_coordination": 0.0002
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Aerials matched to the set send and receive with little loss."
@@ -820,15 +825,15 @@
   "superheterodyne_reception": {
    "effects": {
     "adoption_rate": 0.0018,
-    "task_coordination": 0.0011
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/paper/radio_telegraphy.png",
    "observation": "The superheterodyne receiver brings in distant stations clearly and selectively."
   },
   "frequency_stabilization": {
    "effects": {
-    "standardization": 0.0024,
-    "task_coordination": 0.0005
+    "standardization": 0.0018,
+    "task_coordination": 0.0002
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "A quartz crystal holds the transmitter to its frequency."
@@ -847,7 +852,7 @@
   "signal_sampling": {
    "effects": {
     "knowledge_rate": 0.0009,
-    "task_coordination": 0.0011
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "A signal measured often enough can be rebuilt exactly from the samples."
@@ -863,7 +868,7 @@
   },
   "band_theory": {
    "effects": {
-    "craft_output": 0.0022,
+    "craft_output": 0.002,
     "knowledge_rate": 0.0027
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
@@ -871,7 +876,7 @@
   },
   "solid_state_physics": {
    "effects": {
-    "craft_output": 0.0022,
+    "craft_output": 0.002,
     "knowledge_rate": 0.0027,
     "observation_rate": 0.0023
    },
@@ -881,15 +886,15 @@
   "frequency_modulation": {
    "effects": {
     "adoption_rate": 0.0018,
-    "task_coordination": 0.0011
+    "task_coordination": 0.0005
    },
    "art": "res://assets/ui/research/paper/radio_telegraphy.png",
    "observation": "Varying the frequency instead of the strength gives broadcast sound almost free of static."
   },
   "computability_theory": {
    "effects": {
-    "knowledge_rate": 0.0081,
-    "standardization": 0.0047
+    "knowledge_rate": 0.0053,
+    "standardization": 0.0023
    },
    "art": "res://assets/ui/research/discovery-600/worked_problem_tablets.png",
    "name": "Computability Theory",
@@ -898,8 +903,8 @@
   },
   "neutron_moderation": {
    "effects": {
-    "health_risk": 0.001,
-    "knowledge_rate": 0.0018,
+    "health_risk": 0.0001,
+    "knowledge_rate": 0.0012,
     "observation_rate": 0.0034
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
@@ -907,9 +912,9 @@
   },
   "nuclear_fission": {
    "effects": {
-    "health_risk": 0.003,
-    "knowledge_rate": 0.009,
-    "legitimacy": -0.001,
+    "health_risk": 0.0003,
+    "knowledge_rate": 0.0058,
+    "legitimacy": -0.0002,
     "observation_rate": 0.0046
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
@@ -919,20 +924,20 @@
   },
   "constrained_optimization": {
    "effects": {
-    "craft_output": 0.0044,
-    "standardization": 0.0024,
-    "state_capacity": 0.0054
+    "craft_output": 0.0036,
+    "standardization": 0.0012,
+    "state_capacity": 0.0018
    },
    "art": "res://assets/ui/research/discovery-600/worked_problem_tablets.png",
    "observation": "The best use of limited means is found by exact calculation."
   },
   "state_great_laboratories": {
    "effects": {
-    "institutional_rigidity": 0.001,
-    "knowledge_rate": 0.0072,
-    "labor_demand": 0.0064,
+    "institutional_rigidity": 0.0002,
+    "knowledge_rate": 0.0047,
+    "labor_demand": 0.0003,
     "observation_rate": 0.0046,
-    "state_capacity": 0.0054
+    "state_capacity": 0.0018
    },
    "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
    "name": "State Great Laboratories",
@@ -942,10 +947,12 @@
   "universal_secondary_schooling": {
    "effects": {
     "adoption_rate": 0.0141,
-    "cohesion": 0.002,
+    "cohesion": 0.0003,
+    "fertility_transition": 0.0467,
     "knowledge_preservation": 0.0135,
-    "knowledge_rate": 0.0045,
-    "labor_demand": 0.0112
+    "knowledge_rate": 0.0029,
+    "labor_demand": 0.0006,
+    "literacy": 0.0126
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Universal Secondary Schooling",
@@ -954,9 +961,9 @@
   },
   "information_theory": {
    "effects": {
-    "knowledge_rate": 0.0063,
-    "standardization": 0.0071,
-    "task_coordination": 0.0027
+    "knowledge_rate": 0.0041,
+    "standardization": 0.0035,
+    "task_coordination": 0.0011
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Information Theory",
@@ -965,12 +972,12 @@
   },
   "stored_program_computer": {
    "effects": {
-    "fuel_demand": 0.002,
-    "knowledge_rate": 0.0108,
-    "labor_demand": 0.0064,
-    "standardization": 0.0071,
-    "state_capacity": 0.0108,
-    "task_coordination": 0.0032
+    "fuel_demand": 0.0002,
+    "knowledge_rate": 0.007,
+    "labor_demand": 0.0003,
+    "standardization": 0.0035,
+    "state_capacity": 0.0036,
+    "task_coordination": 0.0013
    },
    "art": "res://assets/ui/research/paper/binary_adders.png",
    "name": "Stored-program Computer",
@@ -980,17 +987,17 @@
   },
   "live_cell_time_lapse": {
    "effects": {
-    "knowledge_rate": 0.0009,
-    "observation_rate": 0.0034
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.0032
    },
    "art": "res://assets/ui/research/paper/live_cell_time_lapse.png",
    "observation": "Films taken frame by frame show living cells moving and dividing."
   },
   "pn_junctions": {
    "effects": {
-    "craft_output": 0.0067,
-    "knowledge_rate": 0.0054,
-    "task_coordination": 0.0011
+    "craft_output": 0.0041,
+    "knowledge_rate": 0.0034,
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/paper/diode_control_stores.png",
    "observation": "Where two kinds of doped crystal meet, current flows one way only; the transistor follows.",
@@ -999,17 +1006,17 @@
   "semiconductor_doping": {
    "effects": {
     "chemical_control": 0.001,
-    "craft_output": 0.0067,
-    "standardization": 0.0047
+    "craft_output": 0.0041,
+    "standardization": 0.0013
    },
    "art": "res://assets/ui/research/paper/diode_control_stores.png",
    "observation": "Traces of impurity added to pure crystal set how it carries current."
   },
   "hereditary_double_helix": {
    "effects": {
-    "health_protection": 0.0016,
-    "knowledge_rate": 0.0054,
-    "observation_rate": 0.0034
+    "health_protection": 0.0012,
+    "knowledge_rate": 0.0034,
+    "observation_rate": 0.0032
    },
    "art": "res://assets/ui/research/paper/heredity_experiments.png",
    "name": "Double Helix",
@@ -1017,25 +1024,25 @@
   },
   "photovoltaic_conversion": {
    "effects": {
-    "ecology_recovery": 0.001,
-    "knowledge_rate": 0.0009,
-    "observation_rate": 0.0023
+    "ecology_recovery": 0.0006,
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.0022
    },
    "art": "res://assets/ui/research/paper/photovoltaic_power.png",
    "observation": "Light falling on a junction produces a current directly."
   },
   "microinstruction_sequencing": {
    "effects": {
-    "standardization": 0.0024,
-    "task_coordination": 0.0011
+    "standardization": 0.0007,
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/paper/hardwired_sequence_control.png",
    "observation": "Each machine instruction is carried out as a stored sequence of smaller steps."
   },
   "pulse_code_modulation": {
    "effects": {
-    "standardization": 0.0047,
-    "task_coordination": 0.0021
+    "standardization": 0.0013,
+    "task_coordination": 0.0008
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Voices are sampled and sent as numbers, arriving clean however far they go."
@@ -1043,8 +1050,8 @@
   "formula_programming_languages": {
    "effects": {
     "adoption_rate": 0.0053,
-    "knowledge_rate": 0.0045,
-    "standardization": 0.0095
+    "knowledge_rate": 0.0028,
+    "standardization": 0.0027
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Formula Programming Languages",
@@ -1052,46 +1059,46 @@
   },
   "arithmetic_logic_units": {
    "effects": {
-    "standardization": 0.0024,
-    "task_coordination": 0.0011
+    "standardization": 0.0007,
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/paper/binary_adders.png",
    "observation": "One unit adds, compares and shifts numbers inside the machine."
   },
   "automatic_repeat_request": {
    "effects": {
-    "task_coordination": 0.0011
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "A garbled block of data is sent again automatically until it arrives whole."
   },
   "data_modems": {
    "effects": {
-    "task_coordination": 0.0016,
-    "trade_capacity": 0.0018
+    "task_coordination": 0.0006,
+    "trade_capacity": 0.0013
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Machines speak to one another over ordinary telephone lines."
   },
   "diode_control_stores": {
    "effects": {
-    "standardization": 0.0024,
-    "task_coordination": 0.0005
+    "standardization": 0.0007,
+    "task_coordination": 0.0002
    },
    "art": "res://assets/ui/research/paper/diode_control_stores.png",
    "observation": "Rows of diodes hold the machine's fixed control patterns."
   },
   "error_detection_codes": {
    "effects": {
-    "knowledge_preservation": 0.0045,
-    "task_coordination": 0.0011
+    "knowledge_preservation": 0.0036,
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Extra check digits reveal and correct errors in stored and sent data."
   },
   "message_framing": {
    "effects": {
-    "task_coordination": 0.0011
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Data is sent in marked frames that the receiver can check."
@@ -1099,9 +1106,9 @@
   "relay_satellites": {
    "effects": {
     "adoption_rate": 0.0053,
-    "labor_demand": 0.0032,
-    "task_coordination": 0.0032,
-    "trade_capacity": 0.007
+    "labor_demand": 0.0002,
+    "task_coordination": 0.0012,
+    "trade_capacity": 0.0049
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Relay Satellites",
@@ -1110,11 +1117,13 @@
   "mass_higher_education": {
    "effects": {
     "adoption_rate": 0.0124,
-    "cohesion": -0.001,
-    "knowledge_preservation": 0.009,
-    "knowledge_rate": 0.0054,
-    "labor_demand": 0.008,
-    "legitimacy": -0.001
+    "cohesion": -0.0001,
+    "fertility_transition": 0.0058,
+    "knowledge_preservation": 0.0072,
+    "knowledge_rate": 0.0034,
+    "labor_demand": 0.0004,
+    "legitimacy": -0.0002,
+    "literacy": 0.0049
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Mass Higher Education",
@@ -1123,25 +1132,25 @@
   },
   "microprogrammed_machine_control": {
    "effects": {
-    "standardization": 0.0024,
-    "task_coordination": 0.0011
+    "standardization": 0.0007,
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/paper/hardwired_sequence_control.png",
    "observation": "The machine's control is stored as a small program and can be changed without rewiring."
   },
   "packet_routers": {
    "effects": {
-    "task_coordination": 0.0016,
-    "trade_capacity": 0.0018
+    "task_coordination": 0.0006,
+    "trade_capacity": 0.0013
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Machines at every junction pass packets of data along the best free path."
   },
   "packet_switching": {
    "effects": {
-    "disaster_resilience": 0.002,
-    "knowledge_preservation": 0.0045,
-    "task_coordination": 0.0027
+    "disaster_resilience": 0.0017,
+    "knowledge_preservation": 0.0036,
+    "task_coordination": 0.001
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Messages are broken into small packets that find their own way and are reassembled at the end.",
@@ -1149,17 +1158,17 @@
   },
   "store_forward_archives": {
    "effects": {
-    "knowledge_preservation": 0.0067,
-    "task_coordination": 0.0011
+    "knowledge_preservation": 0.0054,
+    "task_coordination": 0.0004
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "observation": "Messages are held at each station and passed on when the next link is free."
   },
   "relational_databases": {
    "effects": {
-    "knowledge_preservation": 0.009,
+    "knowledge_preservation": 0.0051,
     "standardization": 0.0071,
-    "state_capacity": 0.0072
+    "state_capacity": 0.0055
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Relational Databases",
@@ -1168,9 +1177,9 @@
   "recombinant_dna": {
    "effects": {
     "health_protection": 0.0065,
-    "health_risk": 0.002,
+    "health_risk": 0.0007,
     "knowledge_rate": 0.0072,
-    "legitimacy": -0.001,
+    "legitimacy": -0.0003,
     "observation_rate": 0.0034
    },
    "art": "res://assets/ui/research/paper/heredity_experiments.png",
@@ -1181,9 +1190,9 @@
   },
   "public_key_ciphers": {
    "effects": {
-    "knowledge_preservation": 0.0022,
-    "task_coordination": 0.0016,
-    "trade_capacity": 0.0053
+    "knowledge_preservation": 0.0012,
+    "task_coordination": 0.0006,
+    "trade_capacity": 0.0032
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Public-key Ciphers",
@@ -1193,11 +1202,11 @@
    "effects": {
     "adoption_rate": 0.0141,
     "fatigue": 0.001,
-    "knowledge_preservation": 0.009,
-    "labor_demand": 0.0032,
-    "labor_efficiency": 0.003,
-    "state_capacity": 0.0054,
-    "task_coordination": 0.0037
+    "knowledge_preservation": 0.0051,
+    "labor_demand": 0.0002,
+    "labor_efficiency": 0.0019,
+    "state_capacity": 0.0042,
+    "task_coordination": 0.0013
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Desk Computers",
@@ -1208,8 +1217,8 @@
   "cellular_telephony": {
    "effects": {
     "adoption_rate": 0.0053,
-    "task_coordination": 0.0027,
-    "trade_capacity": 0.0053
+    "task_coordination": 0.001,
+    "trade_capacity": 0.0032
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Cellular Telephony",
@@ -1217,9 +1226,9 @@
   },
   "internetworking_protocols": {
    "effects": {
-    "knowledge_preservation": 0.0067,
-    "task_coordination": 0.0043,
-    "trade_capacity": 0.007
+    "knowledge_preservation": 0.0038,
+    "task_coordination": 0.0015,
+    "trade_capacity": 0.0042
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Internetworking Protocols",
@@ -1229,10 +1238,10 @@
   "world_hypertext_web": {
    "effects": {
     "adoption_rate": 0.0212,
-    "cohesion": -0.002,
-    "knowledge_preservation": 0.0135,
+    "cohesion": -0.0005,
+    "knowledge_preservation": 0.0053,
     "knowledge_rate": 0.0027,
-    "trade_capacity": 0.0088
+    "trade_capacity": 0.004
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "World Hypertext Web",
@@ -1252,8 +1261,8 @@
   "ranked_search_indexes": {
    "effects": {
     "adoption_rate": 0.0106,
-    "knowledge_preservation": 0.009,
-    "trade_capacity": 0.0035
+    "knowledge_preservation": 0.0035,
+    "trade_capacity": 0.0016
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Ranked Search Indexes",
@@ -1262,8 +1271,9 @@
   "volunteer_open_encyclopedia": {
    "effects": {
     "adoption_rate": 0.0071,
-    "cohesion": 0.001,
-    "knowledge_preservation": 0.0135
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0053,
+    "literacy": 0.0098
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Open Encyclopedia",
@@ -1271,9 +1281,9 @@
   },
   "cloud_data_halls": {
    "effects": {
-    "fuel_demand": 0.003,
-    "knowledge_preservation": 0.009,
-    "task_coordination": 0.0021,
+    "fuel_demand": 0.0022,
+    "knowledge_preservation": 0.0035,
+    "task_coordination": 0.0009,
     "water_pollution": 0.001
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
@@ -1283,10 +1293,10 @@
   "pocket_networked_computers": {
    "effects": {
     "adoption_rate": 0.0141,
-    "cohesion": -0.002,
+    "cohesion": -0.0005,
     "fatigue": 0.002,
-    "task_coordination": 0.0032,
-    "trade_capacity": 0.007
+    "task_coordination": 0.0014,
+    "trade_capacity": 0.0032
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Pocket Networked Computers",
@@ -1295,7 +1305,7 @@
   },
   "deep_learning_networks": {
    "effects": {
-    "fuel_demand": 0.002,
+    "fuel_demand": 0.0004,
     "knowledge_rate": 0.0063,
     "observation_rate": 0.0046
    },
@@ -1315,12 +1325,12 @@
   "large_language_models": {
    "effects": {
     "adoption_rate": 0.0106,
-    "cohesion": -0.001,
-    "fuel_demand": 0.003,
+    "cohesion": -0.0002,
+    "fuel_demand": 0.0006,
     "knowledge_rate": 0.0081,
-    "labor_efficiency": 0.002,
-    "legitimacy": -0.002,
-    "task_coordination": 0.0021
+    "labor_efficiency": 0.0016,
+    "legitimacy": -0.0004,
+    "task_coordination": 0.0013
    },
    "art": "res://assets/ui/research/knowledge-v1.png",
    "name": "Large Language Models",
@@ -1330,7 +1340,7 @@
   },
   "error_corrected_quantum_processors": {
    "effects": {
-    "fuel_demand": 0.001,
+    "fuel_demand": 0.0002,
     "knowledge_rate": 0.0036,
     "observation_rate": 0.0023
    },
@@ -1340,14 +1350,683 @@
   },
   "automated_discovery_labs": {
    "effects": {
-    "fuel_demand": 0.002,
+    "fuel_demand": 0.0004,
     "knowledge_rate": 0.0063,
-    "labor_demand": -0.0016,
+    "labor_demand": -0.0009,
     "observation_rate": 0.0046
    },
    "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
    "name": "Automated Discovery Labs",
    "observation": "Learned models plan experiments and robotic benches run them day and night."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "electrochemical_cells": {
+    "chemical_control": 0.002,
+    "knowledge_rate": 0.0072,
+    "labor_demand": 0.0016,
+    "observation_rate": 0.0069,
+    "pollution": 0.001
+   },
+   "statistical_inference": {
+    "health_protection": 0.0016,
+    "knowledge_rate": 0.0036,
+    "observation_rate": 0.0057,
+    "state_capacity": 0.0054
+   },
+   "atomic_combining_weights": {
+    "chemical_control": 0.003,
+    "knowledge_rate": 0.0036,
+    "observation_rate": 0.0034
+   },
+   "optical_telegraphy": {
+    "labor_demand": 0.0032,
+    "state_capacity": 0.0054,
+    "task_coordination": 0.0016,
+    "trade_capacity": 0.0018
+   },
+   "least_squares_estimation": {
+    "observation_rate": 0.0034,
+    "standardization": 0.0024,
+    "survey_speed": 0.002
+   },
+   "dimensional_metrology": {
+    "craft_output": 0.0044,
+    "standardization": 0.0118,
+    "tool_quality": 0.001
+   },
+   "measurement_uncertainty": {
+    "observation_rate": 0.0034,
+    "standardization": 0.0047
+   },
+   "research_university": {
+    "adoption_rate": 0.0053,
+    "institutional_rigidity": -0.001,
+    "knowledge_preservation": 0.0112,
+    "knowledge_rate": 0.0099,
+    "labor_demand": 0.0064
+   },
+   "cylinder_press_printing": {
+    "adoption_rate": 0.0176,
+    "fuel_demand": 0.001,
+    "knowledge_preservation": 0.0112,
+    "labor_demand": 0.0032,
+    "trade_capacity": 0.0035
+   },
+   "electrical_measurement": {
+    "knowledge_rate": 0.0018,
+    "observation_rate": 0.0046,
+    "standardization": 0.0071
+   },
+   "dimensional_analysis": {
+    "knowledge_rate": 0.0027,
+    "observation_rate": 0.0011
+   },
+   "harmonic_analysis": {
+    "knowledge_rate": 0.0027,
+    "observation_rate": 0.0023
+   },
+   "viscous_resistance": {
+    "craft_output": 0.0022,
+    "knowledge_rate": 0.0018,
+    "observation_rate": 0.0011
+   },
+   "heat_engine_cycles": {
+    "craft_output": 0.0044,
+    "fuel_demand": -0.001,
+    "knowledge_rate": 0.0027
+   },
+   "mechanical_work_energy": {
+    "craft_output": 0.0022,
+    "knowledge_rate": 0.0027,
+    "standardization": 0.0024
+   },
+   "compound_microscopy": {
+    "health_protection": 0.0016,
+    "knowledge_rate": 0.0027,
+    "observation_rate": 0.0092
+   },
+   "fine_focus_stages": {
+    "observation_rate": 0.0023
+   },
+   "illumination_apertures": {
+    "observation_rate": 0.0023
+   },
+   "microbial_observation": {
+    "health_protection": 0.0032,
+    "knowledge_rate": 0.0009,
+    "observation_rate": 0.0046
+   },
+   "microscopic_cell_observation": {
+    "knowledge_rate": 0.0018,
+    "observation_rate": 0.0034
+   },
+   "specimen_slide_mounting": {
+    "knowledge_preservation": 0.0022,
+    "observation_rate": 0.0023
+   },
+   "electromagnetic_induction": {
+    "craft_output": 0.0044,
+    "knowledge_rate": 0.0063,
+    "observation_rate": 0.0046
+   },
+   "electromagnet_sounders": {
+    "task_coordination": 0.0011,
+    "trade_capacity": 0.0018
+   },
+   "timed_signal_sequences": {
+    "knowledge_preservation": 0.0022,
+    "standardization": 0.0047,
+    "task_coordination": 0.0016
+   },
+   "cell_theory": {
+    "health_protection": 0.0032,
+    "knowledge_rate": 0.0072,
+    "observation_rate": 0.0057
+   },
+   "electrical_telegraphy": {
+    "labor_demand": 0.0048,
+    "state_capacity": 0.0108,
+    "task_coordination": 0.0053,
+    "trade_capacity": 0.0105
+   },
+   "fixed_light_images": {
+    "chemical_control": 0.001,
+    "cohesion": 0.001,
+    "health_risk": 0.001,
+    "knowledge_preservation": 0.0135,
+    "observation_rate": 0.0046
+   },
+   "tissue_histology": {
+    "health_protection": 0.0016,
+    "observation_rate": 0.0034
+   },
+   "telegraph_keys": {
+    "task_coordination": 0.0011
+   },
+   "line_insulators": {
+    "labor_demand": 0.0016,
+    "task_coordination": 0.0011
+   },
+   "energy_conservation_law": {
+    "knowledge_rate": 0.0081,
+    "observation_rate": 0.0023,
+    "standardization": 0.0047
+   },
+   "telegraph_return_circuits": {
+    "craft_output": 0.0022,
+    "task_coordination": 0.0011
+   },
+   "entropy_second_law": {
+    "knowledge_rate": 0.0036,
+    "observation_rate": 0.0011
+   },
+   "polarized_telegraph_relays": {
+    "task_coordination": 0.0016,
+    "trade_capacity": 0.0018
+   },
+   "biological_staining": {
+    "chemical_control": 0.001,
+    "health_protection": 0.0016,
+    "observation_rate": 0.0046
+   },
+   "matrix_algebra": {
+    "knowledge_rate": 0.0027,
+    "standardization": 0.0024
+   },
+   "descent_by_selection": {
+    "cohesion": -0.001,
+    "knowledge_rate": 0.0081,
+    "legitimacy": -0.003,
+    "observation_rate": 0.0046
+   },
+   "spectroscopy": {
+    "chemical_control": 0.002,
+    "knowledge_rate": 0.0027,
+    "observation_rate": 0.0069
+   },
+   "cyclic_fatigue": {
+    "craft_output": 0.0044,
+    "injury_risk": -0.001,
+    "standardization": 0.0024
+   },
+   "electromagnetic_wave_theory": {
+    "knowledge_rate": 0.0072,
+    "observation_rate": 0.0034
+   },
+   "undersea_telegraph_cable": {
+    "labor_demand": 0.0048,
+    "state_capacity": 0.0054,
+    "task_coordination": 0.0027,
+    "trade_capacity": 0.0123
+   },
+   "periodic_element_table": {
+    "chemical_control": 0.004,
+    "knowledge_rate": 0.0081,
+    "observation_rate": 0.0046
+   },
+   "cell_division_observation": {
+    "knowledge_rate": 0.0009,
+    "observation_rate": 0.0034
+   },
+   "compulsory_elementary_schooling": {
+    "adoption_rate": 0.0212,
+    "cohesion": 0.003,
+    "knowledge_preservation": 0.018,
+    "knowledge_rate": 0.0036,
+    "labor_demand": 0.0129,
+    "labor_efficiency": -0.001,
+    "legitimacy": 0.002
+   },
+   "punched_message_tape": {
+    "knowledge_preservation": 0.0045,
+    "task_coordination": 0.0011
+   },
+   "photoconductivity": {
+    "knowledge_rate": 0.0009,
+    "observation_rate": 0.0023
+   },
+   "duplex_telegraphy": {
+    "task_coordination": 0.0011,
+    "trade_capacity": 0.0018
+   },
+   "typewriter": {
+    "knowledge_preservation": 0.0067,
+    "labor_efficiency": 0.001,
+    "standardization": 0.0095,
+    "task_coordination": 0.0016
+   },
+   "acoustic_diaphragms": {
+    "observation_rate": 0.0011,
+    "task_coordination": 0.0005
+   },
+   "cathode_ray_discharge_tubes": {
+    "knowledge_rate": 0.0027,
+    "observation_rate": 0.0057
+   },
+   "electromagnetic_earpieces": {
+    "task_coordination": 0.0005
+   },
+   "industrial_research_laboratory": {
+    "craft_output": 0.0067,
+    "knowledge_rate": 0.0072,
+    "labor_demand": 0.0048,
+    "observation_rate": 0.0023
+   },
+   "instrument_sterilization": {
+    "disease_exposure": -0.003,
+    "health_protection": 0.0097
+   },
+   "microbial_isolation_methods": {
+    "health_protection": 0.0081,
+    "knowledge_rate": 0.0018,
+    "observation_rate": 0.0046
+   },
+   "telephone_circuits": {
+    "labor_demand": 0.0032,
+    "state_capacity": 0.0036,
+    "task_coordination": 0.0043,
+    "trade_capacity": 0.007
+   },
+   "carbon_microphones": {
+    "task_coordination": 0.0011
+   },
+   "manual_switchboards": {
+    "labor_demand": 0.0032,
+    "task_coordination": 0.0016,
+    "trade_capacity": 0.0018
+   },
+   "aseptic_laboratory_practice": {
+    "disease_exposure": -0.002,
+    "health_protection": 0.0065,
+    "observation_rate": 0.0023
+   },
+   "balanced_conductor_pairs": {
+    "task_coordination": 0.0011
+   },
+   "lubrication_regimes": {
+    "craft_output": 0.0044,
+    "repair_capacity": 0.002,
+    "tool_quality": 0.001
+   },
+   "punched_card_tabulation": {
+    "knowledge_preservation": 0.009,
+    "labor_demand": 0.0016,
+    "standardization": 0.0118,
+    "state_capacity": 0.0126
+   },
+   "electron_physics": {
+    "knowledge_rate": 0.0054,
+    "observation_rate": 0.0046
+   },
+   "radiation_measurement": {
+    "health_risk": 0.001,
+    "observation_rate": 0.0046
+   },
+   "thermionic_emission": {
+    "knowledge_rate": 0.0009,
+    "observation_rate": 0.0023
+   },
+   "inductive_line_loading": {
+    "task_coordination": 0.0011
+   },
+   "radio_telegraphy": {
+    "knowledge_rate": 0.0018,
+    "state_capacity": 0.0054,
+    "task_coordination": 0.0048,
+    "trade_capacity": 0.007
+   },
+   "aerodynamics": {
+    "knowledge_rate": 0.0027,
+    "observation_rate": 0.0023
+   },
+   "energy_quanta": {
+    "knowledge_rate": 0.0054,
+    "observation_rate": 0.0023
+   },
+   "microbial_growth_measurement": {
+    "health_protection": 0.0016,
+    "observation_rate": 0.0023
+   },
+   "refereed_journals": {
+    "adoption_rate": 0.0053,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.009,
+    "knowledge_rate": 0.0045
+   },
+   "resonant_tuned_circuits": {
+    "task_coordination": 0.0011
+   },
+   "statistical_sampling": {
+    "observation_rate": 0.0034,
+    "standardization": 0.0047,
+    "state_capacity": 0.0072
+   },
+   "variable_air_capacitors": {
+    "task_coordination": 0.0005
+   },
+   "wind_tunnel_testing": {
+    "knowledge_rate": 0.0009,
+    "labor_demand": 0.0016,
+    "observation_rate": 0.0034
+   },
+   "crystal_radio_detection": {
+    "adoption_rate": 0.0018,
+    "task_coordination": 0.0005
+   },
+   "vacuum_diodes": {
+    "knowledge_rate": 0.0009,
+    "task_coordination": 0.0005
+   },
+   "relative_spacetime": {
+    "knowledge_rate": 0.0054,
+    "observation_rate": 0.0011
+   },
+   "automatic_telegraphy": {
+    "task_coordination": 0.0011,
+    "trade_capacity": 0.0018
+   },
+   "teleprinter_mechanisms": {
+    "knowledge_preservation": 0.0022,
+    "standardization": 0.0024,
+    "task_coordination": 0.0016
+   },
+   "triode_valves": {
+    "knowledge_rate": 0.0027,
+    "observation_rate": 0.0023,
+    "task_coordination": 0.0027
+   },
+   "cell_culture_methods": {
+    "health_protection": 0.0032,
+    "knowledge_rate": 0.0018,
+    "observation_rate": 0.0046
+   },
+   "tuned_radio_reception": {
+    "adoption_rate": 0.0018,
+    "task_coordination": 0.0011
+   },
+   "atomic_physics": {
+    "knowledge_rate": 0.0045,
+    "observation_rate": 0.0046
+   },
+   "amplitude_modulation": {
+    "adoption_rate": 0.0035,
+    "task_coordination": 0.0016
+   },
+   "crystallography": {
+    "chemical_control": 0.002,
+    "craft_output": 0.0022,
+    "observation_rate": 0.0046
+   },
+   "feedback_radio_oscillators": {
+    "task_coordination": 0.0011
+   },
+   "telephone_repeaters": {
+    "task_coordination": 0.0016,
+    "trade_capacity": 0.0018
+   },
+   "frequency_conversion": {
+    "task_coordination": 0.0005
+   },
+   "aerial_matching": {
+    "task_coordination": 0.0005
+   },
+   "superheterodyne_reception": {
+    "adoption_rate": 0.0018,
+    "task_coordination": 0.0011
+   },
+   "frequency_stabilization": {
+    "standardization": 0.0024,
+    "task_coordination": 0.0005
+   },
+   "signal_sampling": {
+    "knowledge_rate": 0.0009,
+    "task_coordination": 0.0011
+   },
+   "band_theory": {
+    "craft_output": 0.0022,
+    "knowledge_rate": 0.0027
+   },
+   "solid_state_physics": {
+    "craft_output": 0.0022,
+    "knowledge_rate": 0.0027,
+    "observation_rate": 0.0023
+   },
+   "frequency_modulation": {
+    "adoption_rate": 0.0018,
+    "task_coordination": 0.0011
+   },
+   "computability_theory": {
+    "knowledge_rate": 0.0081,
+    "standardization": 0.0047
+   },
+   "neutron_moderation": {
+    "health_risk": 0.001,
+    "knowledge_rate": 0.0018,
+    "observation_rate": 0.0034
+   },
+   "nuclear_fission": {
+    "health_risk": 0.003,
+    "knowledge_rate": 0.009,
+    "legitimacy": -0.001,
+    "observation_rate": 0.0046
+   },
+   "constrained_optimization": {
+    "craft_output": 0.0044,
+    "standardization": 0.0024,
+    "state_capacity": 0.0054
+   },
+   "state_great_laboratories": {
+    "institutional_rigidity": 0.001,
+    "knowledge_rate": 0.0072,
+    "labor_demand": 0.0064,
+    "observation_rate": 0.0046,
+    "state_capacity": 0.0054
+   },
+   "universal_secondary_schooling": {
+    "adoption_rate": 0.0141,
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0135,
+    "knowledge_rate": 0.0045,
+    "labor_demand": 0.0112
+   },
+   "information_theory": {
+    "knowledge_rate": 0.0063,
+    "standardization": 0.0071,
+    "task_coordination": 0.0027
+   },
+   "stored_program_computer": {
+    "fuel_demand": 0.002,
+    "knowledge_rate": 0.0108,
+    "labor_demand": 0.0064,
+    "standardization": 0.0071,
+    "state_capacity": 0.0108,
+    "task_coordination": 0.0032
+   },
+   "live_cell_time_lapse": {
+    "knowledge_rate": 0.0009,
+    "observation_rate": 0.0034
+   },
+   "pn_junctions": {
+    "craft_output": 0.0067,
+    "knowledge_rate": 0.0054,
+    "task_coordination": 0.0011
+   },
+   "semiconductor_doping": {
+    "chemical_control": 0.001,
+    "craft_output": 0.0067,
+    "standardization": 0.0047
+   },
+   "hereditary_double_helix": {
+    "health_protection": 0.0016,
+    "knowledge_rate": 0.0054,
+    "observation_rate": 0.0034
+   },
+   "photovoltaic_conversion": {
+    "ecology_recovery": 0.001,
+    "knowledge_rate": 0.0009,
+    "observation_rate": 0.0023
+   },
+   "microinstruction_sequencing": {
+    "standardization": 0.0024,
+    "task_coordination": 0.0011
+   },
+   "pulse_code_modulation": {
+    "standardization": 0.0047,
+    "task_coordination": 0.0021
+   },
+   "formula_programming_languages": {
+    "adoption_rate": 0.0053,
+    "knowledge_rate": 0.0045,
+    "standardization": 0.0095
+   },
+   "arithmetic_logic_units": {
+    "standardization": 0.0024,
+    "task_coordination": 0.0011
+   },
+   "automatic_repeat_request": {
+    "task_coordination": 0.0011
+   },
+   "data_modems": {
+    "task_coordination": 0.0016,
+    "trade_capacity": 0.0018
+   },
+   "diode_control_stores": {
+    "standardization": 0.0024,
+    "task_coordination": 0.0005
+   },
+   "error_detection_codes": {
+    "knowledge_preservation": 0.0045,
+    "task_coordination": 0.0011
+   },
+   "message_framing": {
+    "task_coordination": 0.0011
+   },
+   "relay_satellites": {
+    "adoption_rate": 0.0053,
+    "labor_demand": 0.0032,
+    "task_coordination": 0.0032,
+    "trade_capacity": 0.007
+   },
+   "mass_higher_education": {
+    "adoption_rate": 0.0124,
+    "cohesion": -0.001,
+    "knowledge_preservation": 0.009,
+    "knowledge_rate": 0.0054,
+    "labor_demand": 0.008,
+    "legitimacy": -0.001
+   },
+   "microprogrammed_machine_control": {
+    "standardization": 0.0024,
+    "task_coordination": 0.0011
+   },
+   "packet_routers": {
+    "task_coordination": 0.0016,
+    "trade_capacity": 0.0018
+   },
+   "packet_switching": {
+    "disaster_resilience": 0.002,
+    "knowledge_preservation": 0.0045,
+    "task_coordination": 0.0027
+   },
+   "store_forward_archives": {
+    "knowledge_preservation": 0.0067,
+    "task_coordination": 0.0011
+   },
+   "relational_databases": {
+    "knowledge_preservation": 0.009,
+    "standardization": 0.0071,
+    "state_capacity": 0.0072
+   },
+   "recombinant_dna": {
+    "health_protection": 0.0065,
+    "health_risk": 0.002,
+    "knowledge_rate": 0.0072,
+    "legitimacy": -0.001,
+    "observation_rate": 0.0034
+   },
+   "public_key_ciphers": {
+    "knowledge_preservation": 0.0022,
+    "task_coordination": 0.0016,
+    "trade_capacity": 0.0053
+   },
+   "desk_computers": {
+    "adoption_rate": 0.0141,
+    "fatigue": 0.001,
+    "knowledge_preservation": 0.009,
+    "labor_demand": 0.0032,
+    "labor_efficiency": 0.003,
+    "state_capacity": 0.0054,
+    "task_coordination": 0.0037
+   },
+   "cellular_telephony": {
+    "adoption_rate": 0.0053,
+    "task_coordination": 0.0027,
+    "trade_capacity": 0.0053
+   },
+   "internetworking_protocols": {
+    "knowledge_preservation": 0.0067,
+    "task_coordination": 0.0043,
+    "trade_capacity": 0.007
+   },
+   "world_hypertext_web": {
+    "adoption_rate": 0.0212,
+    "cohesion": -0.002,
+    "knowledge_preservation": 0.0135,
+    "knowledge_rate": 0.0027,
+    "trade_capacity": 0.0088
+   },
+   "ranked_search_indexes": {
+    "adoption_rate": 0.0106,
+    "knowledge_preservation": 0.009,
+    "trade_capacity": 0.0035
+   },
+   "volunteer_open_encyclopedia": {
+    "adoption_rate": 0.0071,
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0135
+   },
+   "cloud_data_halls": {
+    "fuel_demand": 0.003,
+    "knowledge_preservation": 0.009,
+    "task_coordination": 0.0021,
+    "water_pollution": 0.001
+   },
+   "pocket_networked_computers": {
+    "adoption_rate": 0.0141,
+    "cohesion": -0.002,
+    "fatigue": 0.002,
+    "task_coordination": 0.0032,
+    "trade_capacity": 0.007
+   },
+   "deep_learning_networks": {
+    "fuel_demand": 0.002,
+    "knowledge_rate": 0.0063,
+    "observation_rate": 0.0046
+   },
+   "large_language_models": {
+    "adoption_rate": 0.0106,
+    "cohesion": -0.001,
+    "fuel_demand": 0.003,
+    "knowledge_rate": 0.0081,
+    "labor_efficiency": 0.002,
+    "legitimacy": -0.002,
+    "task_coordination": 0.0021
+   },
+   "error_corrected_quantum_processors": {
+    "fuel_demand": 0.001,
+    "knowledge_rate": 0.0036,
+    "observation_rate": 0.0023
+   },
+   "automated_discovery_labs": {
+    "fuel_demand": 0.002,
+    "knowledge_rate": 0.0063,
+    "labor_demand": -0.0016,
+    "observation_rate": 0.0046
+   }
   }
  }
 }

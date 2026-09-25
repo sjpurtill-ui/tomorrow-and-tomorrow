@@ -92,6 +92,11 @@ class Constants:
     conception: list          # youth w, youth rate, early w, early rate, established w, rate, mature w, rate
     reproductive_weights: list
     art: dict = field(default_factory=dict)
+    # SocietyModel TECH_KEYS / TECH_RISE (0-600) and the research_3000 later curves.
+    tech_keys: list = field(default_factory=list)
+    tech_rise: list = field(default_factory=list)
+    tech_later_rise: list = field(default_factory=list)
+    own_later_rise: dict = field(default_factory=dict)
 
 
 def load_constants() -> Constants:
@@ -161,29 +166,64 @@ def load_constants() -> Constants:
         conception=g.line_numbers(gs, "var baseline_annual:=", expect=8, default=[0.45, 0.23, 0.50, 0.285, 0.45, 0.18, 0.16, 0.040]),
         reproductive_weights=g.line_numbers(gs, "return float(population_cohorts.get(\"youth\",0.0))*0.45", expect=4, default=[0.45, 0.50, 0.45, 0.16]),
         art=art,
+        tech_keys=g.const(sm, "TECH_KEYS", default=[], optional=True),
+        tech_rise=g.const(sm, "TECH_RISE", default=[], optional=True),
+        tech_later_rise=g.const(sm, "TECH_LATER_RISE", default=[], optional=True),
+        own_later_rise=g.const(sm, "OWN_LATER_RISE", default={}, optional=True),
     )
+
+
+def manifest_blocks() -> list[dict]:
+    """Research600._manifest_blocks: rows of data/research/blocks.json (res:// paths
+    made repository-relative), else the original 0-600 block."""
+    rows = []
+    if g.game_file_exists("data/research/blocks.json"):
+        try:
+            doc = json.loads(g.read_game_file("data/research/blocks.json"))
+            rows = [r for r in doc.get("blocks", []) if r.get("data")]
+        except (FileNotFoundError, OSError, ValueError):
+            rows = []
+    strip = lambda path: str(path).replace("res://", "")
+    if rows:
+        return [{"id": r.get("id", r["data"]), "data": strip(r["data"]), "effects_dir": strip(r.get("effects_dir", "res://data/research/effects")),
+                 "window_start": float(r.get("window_start", 0.0)), "window_end": float(r.get("window_end", 600.0))} for r in rows]
+    return [{"id": "y0_600", "data": "data/research/research_600.json", "effects_dir": "data/research/effects", "window_start": 0.0, "window_end": 600.0}]
 
 
 class Catalog:
     """Live research catalog as numpy arrays (one row per live discovery)."""
 
     def __init__(self, constants: Constants):
-        design = json.loads(g.read_game_file("data/research/research_600.json"))
-        self.design_meta = design.get("meta", {})
-        registry = {row["id"]: row for row in design["items"]}
-        # Phase 3 re-dated earliest years of live entries outside the registry
-        # (Research600.earliest_year reads research_600.json "redates").
-        self.redates = {k: float(v) for k, v in (design.get("redates") or {}).items()}
-        effect_rows = {}
-        for line in design.get("lines", LINES):
-            try:
-                text = g.read_game_file(f"data/research/effects/{line}.json")
-            except FileNotFoundError:
-                continue
-            if text:
-                for rid, row in json.loads(text).get("items", {}).items():
-                    if rid in registry and isinstance(row, dict):
-                        effect_rows[rid] = row
+        # Research600 design blocks (data/research/blocks.json, manifest order;
+        # without a manifest, the single 0-600 block). First block wins an id; a
+        # block's effect files only author that block's own ids; a later block's
+        # redates win (Research600._load_block).
+        registry, effect_rows, self.redates, self.blocks = {}, {}, {}, []
+        self.block_of = {}
+        for block in manifest_blocks():
+            design = json.loads(g.read_game_file(block["data"]))
+            if not self.blocks:
+                self.design_meta = design.get("meta", {})
+            self.blocks.append({k: block[k] for k in ("id", "window_start", "window_end")})
+            self.redates.update({k: float(v) for k, v in (design.get("redates") or {}).items()})
+            own = set()
+            for row in design["items"]:
+                if row["id"] not in registry:
+                    registry[row["id"]] = row
+                    own.add(row["id"])
+                    self.block_of[row["id"]] = block["id"]
+            for line in design.get("lines", LINES):
+                if not g.game_file_exists(f"{block['effects_dir']}/{line}.json"):
+                    continue
+                try:
+                    text = g.read_game_file(f"{block['effects_dir']}/{line}.json")
+                except (FileNotFoundError, OSError):
+                    continue
+                if text:
+                    for rid, row in json.loads(text).get("items", {}).items():
+                        if rid in own and isinstance(row, dict):
+                            effect_rows[rid] = row
+        self.window_end = max(b["window_end"] for b in self.blocks)
         cache = json.loads(CACHE.read_text(encoding="utf-8")) if CACHE.exists() else {"rows": [], "subcategories": {}}
         self.cache_generated = cache.get("generated_unix")
         self.cache_source_commit = cache.get("research_600_meta", {}).get("source_commit")
@@ -271,6 +311,27 @@ class Catalog:
         # SocietyModel.society_era: design year, else earliest_year / 0.9.
         self.ceiling_era = np.where(self.design_year >= 0, self.design_year, self.earliest / 0.9)
         self.registry = np.array([bool(r.get("registry")) for r in self.rows])
+        # Research600.relevance_year (research_3000): the latest design year among a
+        # registry item and every registry item that (transitively) requires it.
+        children: dict = {}
+        for r in self.rows:
+            if not r.get("registry"):
+                continue
+            parents = list(r.get("requires_all", [])) + [p for gp in r.get("requires_any", []) for p in gp]
+            for p in parents:
+                children.setdefault(p, []).append(r["id"])
+        rel = {r["id"]: float(r["design_year"]) for r in self.rows if r.get("registry")}
+        order = sorted(rel, key=lambda i: -rel[i])
+        for _ in range(3):
+            changed = False
+            for i in order:
+                best = max([rel[i]] + [rel.get(ch, -1.0) for ch in children.get(i, [])])
+                if best > rel[i]:
+                    rel[i] = best
+                    changed = True
+            if not changed:
+                break
+        self.relevance_year = np.array([rel.get(r["id"], -1.0) for r in self.rows])
         self.key_threshold = np.array([bool(r.get("key_threshold")) for r in self.rows])
 
         def pad(lists, sentinel):
@@ -355,10 +416,16 @@ def era_bounds(cat: Catalog, c: Constants, era: float) -> tuple[np.ndarray, np.n
     """SocietyModel.era_ceiling_for for every effect key at once."""
     if not c.era_ceiling_600:  # before Phase 3 era caps: flat modern limits
         return cat.limit_lo, cat.limit_hi
-    share = np.where(cat.early_mature, rise(c.early_mature_rise, era), rise(c.era_rise, era))
+    tech = np.array([k in c.tech_keys for k in cat.effect_keys]) if c.tech_keys else np.zeros(len(cat.effect_keys), dtype=bool)
+    early = rise(c.tech_rise, era) if c.tech_rise else rise(c.era_rise, era)
+    share = np.where(cat.early_mature, rise(c.early_mature_rise, era), np.where(tech, early, rise(c.era_rise, era)))
     bound = cat.anchor * share
     if era > 600.0:
-        bound = cat.anchor + (cat.modern - cat.anchor) * rise(c.later_rise, era)
+        later = np.where(tech, rise(c.tech_later_rise or c.later_rise, era), rise(c.later_rise, era))
+        for k, curve in (c.own_later_rise or {}).items():
+            if k in cat.effect_index:
+                later[cat.effect_index[k]] = rise(curve, era)
+        bound = cat.anchor + (cat.modern - cat.anchor) * later
     lo = np.where(cat.lower_better, -bound, cat.limit_lo)
     hi = np.where(cat.lower_better, cat.limit_hi, bound)
     return lo, hi

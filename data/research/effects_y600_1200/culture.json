@@ -4,18 +4,18 @@
  "items": {
   "funeral_masks": {
    "effects": {
-    "cohesion": 0.0002,
-    "craft_output": 0.0003,
-    "legitimacy": 0.0005
+    "cohesion": 0.0001,
+    "craft_output": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "The ruling dead are buried with hammered gold faces, so they meet the god as they looked in life."
   },
   "elite_drinking_feasts": {
    "effects": {
-    "cohesion": 0.0002,
+    "cohesion": 0.0001,
     "food_storage": -0.0016,
-    "legitimacy": 0.0003
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
    "observation": "The great houses keep feasting halls where drinking sets are shared among allies and retainers."
@@ -23,44 +23,44 @@
   "throne_room_protocol": {
    "effects": {
     "cohesion": -0.0002,
-    "legitimacy": 0.0007,
-    "state_capacity": 0.002
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0006
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Every visitor to the throne room knows where to stand, when to bow and when to speak."
   },
   "daily_life_tomb_painting": {
    "effects": {
-    "cohesion": 0.0002,
-    "craft_output": 0.0003,
-    "knowledge_preservation": 0.0004
+    "cohesion": 0.0001,
+    "craft_output": 0.0001,
+    "knowledge_preservation": 0.0003
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Tomb walls show ploughing, fishing and feasting, so the dead keep their daily life beyond death."
   },
   "guardian_beast_gateways": {
    "effects": {
-    "labor_demand": 0.0016,
-    "legitimacy": 0.0005,
-    "security_efficiency": 0.002
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0008
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Carved beasts flank the town gate and stare down every stranger who enters."
   },
   "carved_ivory_panels": {
    "effects": {
-    "craft_output": 0.001,
-    "legitimacy": 0.0002,
-    "trade_capacity": 0.0008
+    "craft_output": 0.0001,
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Carvers cut ivory panels with hunts and battles for the furniture and caskets of the great."
   },
   "chariot_race_games": {
    "effects": {
-    "cohesion": 0.0005,
+    "cohesion": 0.0001,
     "injury_risk": 0.0008,
-    "legitimacy": 0.0003,
+    "legitimacy": 0.0001,
     "warfare_readiness": 0.0013
    },
    "art": "res://assets/ui/research/subjects/civic_games-v2.png",
@@ -68,36 +68,36 @@
   },
   "voyage_offerings": {
    "effects": {
-    "cohesion": 0.0003,
-    "disaster_resilience": 0.0018
+    "cohesion": 0.0001,
+    "disaster_resilience": 0.0003
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Before a voyage the crew pours offerings to the god and vows a gift if they come home."
   },
   "sketch_sherd_humor": {
    "effects": {
-    "cohesion": 0.0003,
-    "fatigue": -0.001
+    "cohesion": 0.0001,
+    "fatigue": -0.0004
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Workmen scratch jokes on sherds: a cat serving mice, an overseer asleep at his post."
   },
   "cremation_urn_cemeteries": {
    "effects": {
-    "cohesion": 0.0005,
-    "disease_exposure": -0.004,
+    "cohesion": 0.0001,
+    "disease_exposure": -0.0003,
     "fuel_demand": 0.0008,
-    "knowledge_preservation": 0.0002
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "The dead are burned and their ashes buried in urns, row upon row in shared fields."
   },
   "lost_age_remembrance": {
    "effects": {
-    "cohesion": 0.0052,
-    "disaster_resilience": 0.01,
-    "knowledge_preservation": 0.0038,
-    "legitimacy": 0.001
+    "cohesion": 0.0003,
+    "disaster_resilience": 0.0015,
+    "knowledge_preservation": 0.0011,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "observation": "Singers lament the burned palaces and tell of the heroes who lived when kings were great.",
@@ -105,56 +105,56 @@
   },
   "warrior_weapon_burials": {
    "effects": {
-    "cohesion": 0.0002,
-    "legitimacy": 0.0003,
-    "warfare_readiness": 0.0009
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "warfare_readiness": 0.0002
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Iron swords are bent and buried with the warriors who carried them."
   },
   "fixed_meter_epic_bards": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0009,
-    "legitimacy": 0.0002
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "observation": "Bards recite thousands of lines in one fixed meter, with set phrases that carry the tale."
   },
   "armed_youth_dances": {
    "effects": {
-    "cohesion": 0.0003,
+    "cohesion": 0.0001,
     "fatigue": 0.0008,
-    "warfare_readiness": 0.0027
+    "warfare_readiness": 0.0002
    },
    "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
    "observation": "Young men dance in armour to the pipes, leaping and striking their shields in time."
   },
   "hero_tomb_offerings": {
    "effects": {
-    "cohesion": 0.0005,
+    "cohesion": 0.0001,
     "food_storage": -0.0012,
-    "legitimacy": 0.0003
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Families bring offerings to the old tombs, believing the heroes of the lost age lie there."
   },
   "geometric_funeral_vases": {
    "effects": {
-    "craft_output": 0.001,
-    "knowledge_preservation": 0.0002,
-    "trade_capacity": 0.0006
+    "craft_output": 0.0004,
+    "knowledge_preservation": 0.0001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Great vases painted with bands and mourners mark the graves of the rich families."
   },
   "oracle_consultation": {
    "effects": {
-    "cohesion": 0.0026,
-    "institutional_rigidity": 0.0024,
-    "legitimacy": 0.0049,
-    "state_capacity": 0.006,
-    "trade_capacity": 0.0024
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0003,
+    "legitimacy": 0.0002,
+    "state_capacity": 0.0008,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "At the shrine the god's chosen speaker answers questions of war, founding and law, and the answer is carried home.",
@@ -163,21 +163,21 @@
   },
   "inscribed_dedications": {
    "effects": {
-    "adoption_rate": 0.0003,
-    "knowledge_preservation": 0.0004,
-    "legitimacy": 0.0003
+    "adoption_rate": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Letters cut on a bowl or a statue say who gave it to the god, and why."
   },
   "shrine_festival_games": {
    "effects": {
-    "cohesion": 0.0052,
+    "cohesion": 0.0003,
     "food_storage": -0.0024,
-    "labor_demand": 0.0016,
-    "legitimacy": 0.0029,
-    "security_efficiency": 0.004,
-    "trade_capacity": 0.0036
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0007,
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/civic_games-v2.png",
    "observation": "Towns send athletes to games at the shared shrine, and a sacred truce protects them on the road even in war.",
@@ -186,40 +186,42 @@
   },
   "alphabetic_epitaphs": {
    "effects": {
-    "adoption_rate": 0.0003,
-    "cohesion": 0.0002,
-    "knowledge_preservation": 0.0005
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "literacy": 0.0024
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Grave stones name the dead in letters: who they were, and who set up the stone."
   },
   "civic_games": {
    "effects": {
-    "cohesion": 0.0012,
+    "cohesion": 0.0001,
     "food_storage": -0.0016,
-    "labor_demand": 0.0012,
-    "legitimacy": 0.0007,
-    "warfare_readiness": 0.0018
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "warfare_readiness": 0.0003
    },
    "art": "res://assets/ui/research/subjects/civic_games-v2.png",
    "observation": "Every town holds its own games under agreed rules, and its victors are honoured at home."
   },
   "origin_order_poem": {
    "effects": {
-    "cohesion": 0.0003,
-    "institutional_rigidity": 0.0012,
-    "knowledge_preservation": 0.0004,
-    "legitimacy": 0.0007
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0004,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "observation": "A poem sets out the world's beginnings in order, every power in its place under the god."
   },
   "written_epic": {
    "effects": {
-    "adoption_rate": 0.0025,
-    "cohesion": 0.0026,
-    "knowledge_preservation": 0.0068,
-    "legitimacy": 0.0015
+    "adoption_rate": 0.0009,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0014,
+    "legitimacy": 0.0001,
+    "literacy": 0.0024
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "observation": "The great epic is written down in letters, one fixed text for every teacher and reciter.",
@@ -227,8 +229,8 @@
   },
   "symposium_song_circles": {
    "effects": {
-    "cohesion": 0.0003,
-    "fatigue": -0.0007,
+    "cohesion": 0.0001,
+    "fatigue": -0.0001,
     "food_storage": -0.0012
    },
    "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
@@ -236,28 +238,28 @@
   },
   "personal_lyric_poetry": {
    "effects": {
-    "adoption_rate": 0.0003,
-    "cohesion": 0.0003,
-    "knowledge_preservation": 0.0003
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Poets sing of their own loves, fears and griefs, in their own voices."
   },
   "lifesize_stone_statues": {
    "effects": {
-    "craft_output": 0.001,
-    "labor_demand": 0.0016,
-    "legitimacy": 0.0005
+    "craft_output": 0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Life-size stone youths stand at graves and in the god's house, one foot forward."
   },
   "columned_stone_temple": {
    "effects": {
-    "cohesion": 0.0026,
-    "construction_rate": 0.006,
-    "labor_demand": 0.0048,
-    "legitimacy": 0.0049,
+    "cohesion": 0.0001,
+    "construction_rate": 0.001,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0002,
     "timber_pressure": 0.0016
    },
    "art": "res://assets/ui/research/culture-v1.png",
@@ -267,49 +269,49 @@
   },
   "animal_fables": {
    "effects": {
-    "adoption_rate": 0.0003,
-    "cohesion": 0.0003,
-    "knowledge_preservation": 0.0003
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Fables of the fox, the crow and the lion carry a moral any child remembers."
   },
   "initiation_mysteries": {
    "effects": {
-    "cohesion": 0.0009,
+    "cohesion": 0.0001,
     "food_storage": -0.0008,
-    "legitimacy": 0.0003
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Initiates are led through secret rites at night and promised a better lot after death."
   },
   "civic_coin_emblems": {
    "effects": {
-    "cohesion": 0.0005,
-    "legitimacy": 0.0005,
-    "trade_capacity": 0.0008
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Each town stamps its own emblem, a beast, a plant or a wheel, on the coins it strikes."
   },
   "choral_district_contests": {
    "effects": {
-    "cohesion": 0.0007,
+    "cohesion": 0.0001,
     "food_storage": -0.0008,
-    "labor_demand": 0.0008,
-    "legitimacy": 0.0002
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
    "observation": "Each district trains a chorus of men and boys, and they compete at the festival for a bronze prize."
   },
   "public_theatre": {
    "effects": {
-    "adoption_rate": 0.0042,
-    "cohesion": 0.0047,
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0002,
     "food_storage": -0.0012,
-    "knowledge_rate": 0.0019,
-    "labor_demand": 0.0024,
-    "legitimacy": 0.0015
+    "knowledge_rate": 0.0003,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "observation": "The whole town sits on a hillside to watch actors and chorus perform the old stories.",
@@ -318,29 +320,29 @@
   },
   "narrative_figure_pottery": {
    "effects": {
-    "craft_output": 0.0014,
-    "knowledge_preservation": 0.0002,
-    "trade_capacity": 0.0012
+    "craft_output": 0.0002,
+    "knowledge_preservation": 0.0001,
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Painted figures on vases tell the stories of gods and heroes, and the vases sell overseas."
   },
   "tragic_drama_contests": {
    "effects": {
-    "adoption_rate": 0.0006,
-    "cohesion": 0.0009,
-    "knowledge_preservation": 0.0003,
-    "legitimacy": 0.0003
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "observation": "Poets compete with tragedies of old heroes whose pride brings ruin, and the town judges."
   },
   "comparative_chronicles": {
    "effects": {
-    "institutional_rigidity": -0.006,
-    "knowledge_preservation": 0.0054,
-    "knowledge_rate": 0.0028,
-    "observation_rate": 0.008
+    "institutional_rigidity": -0.002,
+    "knowledge_preservation": 0.001,
+    "knowledge_rate": 0.0004,
+    "observation_rate": 0.0008
    },
    "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
    "observation": "Historians travel, question witnesses and weigh rival accounts, and write down why wars began.",
@@ -348,17 +350,17 @@
   },
   "public_funeral_orations": {
    "effects": {
-    "cohesion": 0.0009,
-    "legitimacy": 0.0005,
-    "warfare_readiness": 0.0018
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "warfare_readiness": 0.0004
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Each year a chosen speaker praises the town's war dead before their families."
   },
   "satirical_comedy": {
    "effects": {
-    "cohesion": 0.0003,
-    "institutional_rigidity": -0.0023,
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0008,
     "legitimacy": -0.0004
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
@@ -367,10 +369,11 @@
   },
   "paid_wandering_teachers": {
    "effects": {
-    "adoption_rate": 0.0011,
-    "cohesion": -0.0002,
-    "knowledge_rate": 0.0006,
-    "legitimacy": -0.0004
+    "adoption_rate": 0.0002,
+    "cohesion": -0.0001,
+    "knowledge_rate": 0.0001,
+    "legitimacy": -0.0004,
+    "literacy": 0.0013
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "observation": "Travelling teachers charge fees to teach young men to argue either side of a case.",
@@ -378,18 +381,18 @@
   },
   "proportion_canon_sculpture": {
    "effects": {
-    "craft_output": 0.001,
-    "legitimacy": 0.0002,
-    "standardization": 0.004
+    "craft_output": 0.0001,
+    "legitimacy": 0.0001,
+    "standardization": 0.0003
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Sculptors follow a canon in which each part of the body is a fixed fraction of the whole."
   },
   "public_ethical_dialogue": {
    "effects": {
-    "adoption_rate": 0.0006,
-    "institutional_rigidity": -0.0023,
-    "knowledge_rate": 0.0009,
+    "adoption_rate": 0.0001,
+    "institutional_rigidity": -0.0008,
+    "knowledge_rate": 0.0001,
     "legitimacy": -0.0004
    },
    "art": "res://assets/ui/research/culture-v1.png",
@@ -398,21 +401,22 @@
   },
   "painted_public_colonnades": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0002,
-    "legitimacy": 0.0003
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Long colonnades painted with battles and myths serve as the town's meeting place."
   },
   "philosophy_school_communities": {
    "effects": {
-    "adoption_rate": 0.0025,
-    "cohesion": 0.001,
-    "knowledge_preservation": 0.0033,
-    "knowledge_rate": 0.0083,
-    "labor_demand": 0.0024,
-    "legitimacy": -0.0013
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0003,
+    "knowledge_rate": 0.0008,
+    "labor_demand": 0.0001,
+    "legitimacy": -0.0013,
+    "literacy": 0.0015
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "Schools of philosophy hold their own grounds and heads, and teaching passes from each head to the next.",
@@ -421,38 +425,40 @@
   },
   "stone_theatre_building": {
    "effects": {
-    "cohesion": 0.0007,
-    "construction_rate": 0.002,
+    "cohesion": 0.0001,
+    "construction_rate": 0.0004,
     "disease_exposure": 0.0008,
-    "labor_demand": 0.0032
+    "labor_demand": 0.0002
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "observation": "Stone seats rise in a great half-bowl, and ten thousand hear an actor's whisper."
   },
   "character_portrait_writing": {
    "effects": {
-    "adoption_rate": 0.0003,
-    "cohesion": 0.0002,
-    "knowledge_preservation": 0.0004
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "literacy": 0.0015
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Writers sketch human types, the flatterer, the miser, the boor, in short, sharp portraits."
   },
   "portrait_likeness_sculpture": {
    "effects": {
-    "craft_output": 0.0007,
-    "knowledge_preservation": 0.0002,
-    "legitimacy": 0.0005
+    "craft_output": 0.0002,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Sculptors carve rulers and thinkers as they truly look, wrinkles and all."
   },
   "public_libraries": {
    "effects": {
-    "adoption_rate": 0.005,
-    "knowledge_preservation": 0.0054,
-    "knowledge_rate": 0.0093,
-    "labor_demand": 0.0024
+    "adoption_rate": 0.0008,
+    "knowledge_preservation": 0.0005,
+    "knowledge_rate": 0.0009,
+    "labor_demand": 0.0001,
+    "literacy": 0.0015
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "Great collections of books are opened to readers from beyond the court, who copy and argue over them.",
@@ -460,28 +466,28 @@
   },
   "figured_floor_mosaics": {
    "effects": {
-    "craft_output": 0.001,
-    "legitimacy": 0.0002,
-    "trade_capacity": 0.0004
+    "craft_output": 0.0003,
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Floors of small set stones show hunts, sea creatures and scenes from the plays."
   },
   "consolation_philosophies": {
    "effects": {
-    "cohesion": 0.0005,
-    "disaster_resilience": 0.0037,
-    "fatigue": -0.0014
+    "cohesion": 0.0001,
+    "disaster_resilience": 0.0007,
+    "fatigue": -0.0002
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Teachers counsel calm: what cannot be controlled should not be feared."
   },
   "colossal_city_statue": {
    "effects": {
-    "cohesion": 0.0005,
-    "labor_demand": 0.004,
-    "legitimacy": 0.001,
-    "trade_capacity": 0.0006
+    "cohesion": 0.0001,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "A bronze giant of the town's patron stands over the harbour, cast in sections over twelve years.",
@@ -489,72 +495,72 @@
   },
   "pastoral_poetry": {
    "effects": {
-    "cohesion": 0.0003,
-    "fatigue": -0.0007
+    "cohesion": 0.0001,
+    "fatigue": -0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Poets sing of shepherds, flocks and love in a gentle, idealized countryside."
   },
   "translated_foreign_drama": {
    "effects": {
-    "adoption_rate": 0.0008,
-    "cohesion": 0.0002,
-    "knowledge_rate": 0.0003,
-    "trade_capacity": 0.0008
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0001,
+    "knowledge_rate": 0.0001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
    "observation": "Foreign plays and epics are translated into the home tongue and staged at the festivals."
   },
   "learned_allusive_poetry": {
    "effects": {
-    "cohesion": -0.0002,
-    "knowledge_preservation": 0.0004,
-    "knowledge_rate": 0.0003
+    "cohesion": -0.0001,
+    "knowledge_preservation": 0.0001,
+    "knowledge_rate": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "Court poets write short, learned verse full of rare myths that only scholars catch."
   },
   "funeral_combat_spectacles": {
    "effects": {
-    "cohesion": 0.0003,
+    "cohesion": 0.0001,
     "injury_risk": 0.0016,
-    "legitimacy": 0.0005,
-    "warfare_readiness": 0.0009
+    "legitimacy": 0.0001,
+    "warfare_readiness": 0.0006
    },
    "art": "res://assets/ui/research/subjects/civic_games-v2.png",
    "observation": "At great funerals, pairs of armed men fight in honour of the dead."
   },
   "ancestor_wax_masks": {
    "effects": {
-    "cohesion": 0.0003,
-    "institutional_rigidity": 0.0016,
-    "legitimacy": 0.0005
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Wax masks of ancestors who held office hang in the hall, and walk again at family funerals."
   },
   "emotional_realism_sculpture": {
    "effects": {
-    "cohesion": 0.0003,
-    "craft_output": 0.0007
+    "cohesion": 0.0001,
+    "craft_output": 0.0002
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Sculptors carve agony and struggle: a dying warrior, a drunken old woman, a boxer resting."
   },
   "victory_triumph_procession": {
    "effects": {
-    "cohesion": 0.0003,
+    "cohesion": 0.0001,
     "food_storage": -0.0016,
-    "legitimacy": 0.001,
-    "warfare_readiness": 0.0027
+    "legitimacy": 0.0001,
+    "warfare_readiness": 0.0004
    },
    "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
    "observation": "The victorious general parades his army, spoils and captives through the town to the god's house."
   },
   "verse_satire": {
    "effects": {
-    "cohesion": 0.0002,
-    "institutional_rigidity": -0.0015,
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
     "legitimacy": -0.0002
    },
    "art": "res://assets/ui/research/culture-v1.png",
@@ -562,36 +568,36 @@
   },
   "leisure_gardens": {
    "effects": {
-    "fatigue": -0.0014,
-    "health_protection": 0.002,
-    "knowledge_rate": 0.0006
+    "fatigue": -0.0007,
+    "health_protection": 0.0003,
+    "knowledge_rate": 0.0003
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Schools and wealthy men keep gardens with shaded walks for study and talk."
   },
   "illusion_wall_painting": {
    "effects": {
-    "craft_output": 0.001,
-    "legitimacy": 0.0002
+    "craft_output": 0.0003,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Painted columns and windows open imaginary vistas on the walls of the great houses."
   },
   "founding_era_annals": {
    "effects": {
-    "cohesion": 0.0003,
-    "knowledge_preservation": 0.0011,
-    "legitimacy": 0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0007,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
    "observation": "Years are counted from the town's founding, and every event is set in one unbroken reckoning."
   },
   "public_bath_sociability": {
    "effects": {
-    "cohesion": 0.0009,
+    "cohesion": 0.0001,
     "disease_exposure": 0.0024,
-    "fatigue": -0.0014,
-    "health_protection": 0.002
+    "fatigue": -0.0002,
+    "health_protection": 0.0006
    },
    "art": "res://assets/ui/research/subjects/public_baths-v1.png",
    "observation": "Men of every rank meet at the baths to wash, exercise, talk business and trade gossip.",
@@ -599,18 +605,18 @@
   },
   "love_elegy": {
    "effects": {
-    "cohesion": 0.0002,
-    "knowledge_preservation": 0.0002
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Poets write elegies to a single beloved, and a book of them makes a name."
   },
   "commissioned_founding_epic": {
    "effects": {
-    "cohesion": 0.0031,
-    "institutional_rigidity": 0.0024,
-    "knowledge_preservation": 0.0022,
-    "legitimacy": 0.0061
+    "cohesion": 0.0002,
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.0013,
+    "legitimacy": 0.0003
    },
    "art": "res://assets/ui/research/subjects/oral_epics-v2.png",
    "observation": "The ruler's poet sings the town's founding by the god's will, and every schoolboy learns the new epic.",
@@ -619,8 +625,8 @@
   },
   "pantomime_dance_theatre": {
    "effects": {
-    "cohesion": 0.0005,
-    "fatigue": -0.0007,
+    "cohesion": 0.0001,
+    "fatigue": -0.0001,
     "food_storage": -0.0008
    },
    "art": "res://assets/ui/research/subjects/public_theatre-v1.png",
@@ -628,18 +634,18 @@
   },
   "crossroads_shrine_clubs": {
    "effects": {
-    "cohesion": 0.0009,
-    "legitimacy": 0.0003,
-    "security_efficiency": 0.002
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0008
    },
    "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
    "observation": "Neighbours form clubs to keep the crossroads shrine, hold its feast and elect its officers."
   },
   "circus_race_factions": {
    "effects": {
-    "cohesion": 0.0005,
+    "cohesion": 0.0001,
     "injury_risk": 0.0012,
-    "legitimacy": 0.0005,
+    "legitimacy": 0.0001,
     "security_efficiency": -0.004
    },
    "art": "res://assets/ui/research/subjects/civic_games-v2.png",
@@ -648,12 +654,12 @@
   },
   "amphitheatre_spectacles": {
    "effects": {
-    "cohesion": 0.0003,
+    "cohesion": 0.0001,
     "ecological_pressure": 0.0024,
     "food_storage": -0.0012,
     "injury_risk": 0.0016,
-    "labor_demand": 0.0024,
-    "legitimacy": 0.0008
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/civic_games-v2.png",
    "observation": "In the amphitheatre, beasts brought from distant lands are hunted before the crowd.",
@@ -661,61 +667,61 @@
   },
   "triumphal_arch": {
    "effects": {
-    "labor_demand": 0.0024,
-    "legitimacy": 0.0008
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "A stone arch carved with the victory spans the road the army marched in on."
   },
   "published_letter_collections": {
    "effects": {
-    "adoption_rate": 0.0003,
-    "cohesion": 0.0002,
-    "knowledge_preservation": 0.0005
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "A statesman's letters are collected and published, and read as models of style."
   },
   "prose_romance_novel": {
    "effects": {
-    "adoption_rate": 0.0006,
-    "cohesion": 0.0003,
-    "knowledge_preservation": 0.0002
+    "adoption_rate": 0.0001,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Long prose tales of parted lovers, pirates and shipwrecks are read aloud in households."
   },
   "painted_panel_portraits": {
    "effects": {
-    "cohesion": 0.0002,
-    "craft_output": 0.0007,
-    "knowledge_preservation": 0.0004
+    "cohesion": 0.0001,
+    "craft_output": 0.0004,
+    "knowledge_preservation": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "A painted wooden panel of the dead person's face is bound over the wrapped body."
   },
   "paired_lives_biography": {
    "effects": {
-    "adoption_rate": 0.0004,
-    "knowledge_preservation": 0.0005,
-    "legitimacy": 0.0002
+    "adoption_rate": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
    "observation": "Lives of great men are written in pairs, one from each of two peoples, and compared."
   },
   "narrative_victory_column": {
    "effects": {
-    "knowledge_preservation": 0.0004,
-    "labor_demand": 0.0024,
-    "legitimacy": 0.0008
+    "knowledge_preservation": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "A carved band winds up a tall column, telling a whole campaign scene by scene."
   },
   "monument_travel_guides": {
    "effects": {
-    "knowledge_preservation": 0.0004,
-    "trade_capacity": 0.0008,
+    "knowledge_preservation": 0.0001,
+    "trade_capacity": 0.0002,
     "travel_speed": 0.002
    },
    "art": "res://assets/ui/research/culture-v1.png",
@@ -724,36 +730,37 @@
   "display_oratory": {
    "effects": {
     "adoption_rate": 0.0006,
-    "cohesion": 0.0002,
-    "legitimacy": 0.0003
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Famous speakers give display orations to packed halls, and are paid like champion athletes."
   },
   "carved_sarcophagi": {
    "effects": {
-    "craft_output": 0.0007,
-    "knowledge_preservation": 0.0002,
-    "legitimacy": 0.0003
+    "craft_output": 0.0002,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Stone coffins carved with myths of death and return hold the wealthy dead."
   },
   "glass_wall_mosaics": {
    "effects": {
-    "craft_output": 0.0007,
+    "craft_output": 0.0002,
     "fuel_demand": 0.0012,
-    "legitimacy": 0.0007
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Walls and vaults glitter with glass cubes, gold sealed behind glass catching the lamplight."
   },
   "contemplative_ascent_schools": {
    "effects": {
-    "cohesion": 0.0005,
-    "fatigue": -0.0007,
+    "cohesion": 0.0001,
+    "fatigue": -0.0001,
     "knowledge_rate": -0.0008,
-    "legitimacy": 0.0003
+    "legitimacy": 0.0001,
+    "literacy": 0.0012
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Schools teach that the soul rises by contemplation toward union with the god.",
@@ -761,34 +768,35 @@
   },
   "underground_burial_galleries": {
    "effects": {
-    "cohesion": 0.0007,
-    "labor_demand": 0.0016
+    "cohesion": 0.0001,
+    "labor_demand": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Burial clubs dig long galleries under the town where members lie side by side in niches."
   },
   "holy_servant_lives": {
    "effects": {
-    "cohesion": 0.0005,
-    "knowledge_preservation": 0.0004,
-    "legitimacy": 0.0005
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.0012
    },
    "art": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
    "observation": "Lives of the god's devoted servants are written as models and read aloud on their feast days."
   },
   "congregational_hymns": {
    "effects": {
-    "cohesion": 0.001,
-    "legitimacy": 0.0003
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
    "observation": "The whole congregation sings hymns together in the god's house, not the choir alone."
   },
   "honored_ascetics": {
    "effects": {
-    "cohesion": 0.0003,
+    "cohesion": 0.0001,
     "labor_efficiency": -0.0016,
-    "legitimacy": 0.0007
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/culture-v1.png",
    "observation": "Solitary men who live on bread and water in the wilderness are sought out as close to the god.",
@@ -796,10 +804,10 @@
   },
   "weekly_rest_day": {
    "effects": {
-    "cohesion": 0.0007,
-    "fatigue": -0.0041,
+    "cohesion": 0.0001,
+    "fatigue": -0.0009,
     "labor_efficiency": -0.0016,
-    "legitimacy": 0.0003
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
    "observation": "Every seventh day work stops for the god, and markets, courts and workshops close.",
@@ -807,11 +815,12 @@
   },
   "canonized_sacred_sayings": {
    "effects": {
-    "adoption_rate": 0.0017,
-    "cohesion": 0.0037,
-    "institutional_rigidity": 0.0056,
-    "knowledge_preservation": 0.0038,
-    "legitimacy": 0.0049
+    "adoption_rate": 0.001,
+    "cohesion": 0.0002,
+    "institutional_rigidity": 0.0003,
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0002,
+    "literacy": 0.0012
    },
    "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
    "observation": "The god's sayings are gathered and fixed in one book, and every other version is set aside.",
@@ -820,10 +829,10 @@
   },
   "congregation_hall_temples": {
    "effects": {
-    "cohesion": 0.0052,
-    "construction_rate": 0.004,
-    "labor_demand": 0.004,
-    "legitimacy": 0.0024,
+    "cohesion": 0.0003,
+    "construction_rate": 0.0018,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001,
     "timber_pressure": 0.0024
    },
    "art": "res://assets/ui/research/culture-v1.png",
@@ -833,13 +842,485 @@
   },
   "illuminated_codices": {
    "effects": {
+    "craft_output": 0.0005,
+    "knowledge_preservation": 0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "observation": "Books are painted with pictures of the story, framed on the page beside the text."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "funeral_masks": {
+    "cohesion": 0.0002,
+    "craft_output": 0.0003,
+    "legitimacy": 0.0005
+   },
+   "elite_drinking_feasts": {
+    "cohesion": 0.0002,
+    "food_storage": -0.0016,
+    "legitimacy": 0.0003
+   },
+   "throne_room_protocol": {
+    "cohesion": -0.0002,
+    "legitimacy": 0.0007,
+    "state_capacity": 0.002
+   },
+   "daily_life_tomb_painting": {
+    "cohesion": 0.0002,
+    "craft_output": 0.0003,
+    "knowledge_preservation": 0.0004
+   },
+   "guardian_beast_gateways": {
+    "labor_demand": 0.0016,
+    "legitimacy": 0.0005,
+    "security_efficiency": 0.002
+   },
+   "carved_ivory_panels": {
+    "craft_output": 0.001,
+    "legitimacy": 0.0002,
+    "trade_capacity": 0.0008
+   },
+   "chariot_race_games": {
+    "cohesion": 0.0005,
+    "injury_risk": 0.0008,
+    "legitimacy": 0.0003,
+    "warfare_readiness": 0.0013
+   },
+   "voyage_offerings": {
+    "cohesion": 0.0003,
+    "disaster_resilience": 0.0018
+   },
+   "sketch_sherd_humor": {
+    "cohesion": 0.0003,
+    "fatigue": -0.001
+   },
+   "cremation_urn_cemeteries": {
+    "cohesion": 0.0005,
+    "disease_exposure": -0.004,
+    "fuel_demand": 0.0008,
+    "knowledge_preservation": 0.0002
+   },
+   "lost_age_remembrance": {
+    "cohesion": 0.0052,
+    "disaster_resilience": 0.01,
+    "knowledge_preservation": 0.0038,
+    "legitimacy": 0.001
+   },
+   "warrior_weapon_burials": {
+    "cohesion": 0.0002,
+    "legitimacy": 0.0003,
+    "warfare_readiness": 0.0009
+   },
+   "fixed_meter_epic_bards": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0009,
+    "legitimacy": 0.0002
+   },
+   "armed_youth_dances": {
+    "cohesion": 0.0003,
+    "fatigue": 0.0008,
+    "warfare_readiness": 0.0027
+   },
+   "hero_tomb_offerings": {
+    "cohesion": 0.0005,
+    "food_storage": -0.0012,
+    "legitimacy": 0.0003
+   },
+   "geometric_funeral_vases": {
+    "craft_output": 0.001,
+    "knowledge_preservation": 0.0002,
+    "trade_capacity": 0.0006
+   },
+   "oracle_consultation": {
+    "cohesion": 0.0026,
+    "institutional_rigidity": 0.0024,
+    "legitimacy": 0.0049,
+    "state_capacity": 0.006,
+    "trade_capacity": 0.0024
+   },
+   "inscribed_dedications": {
+    "adoption_rate": 0.0003,
+    "knowledge_preservation": 0.0004,
+    "legitimacy": 0.0003
+   },
+   "shrine_festival_games": {
+    "cohesion": 0.0052,
+    "food_storage": -0.0024,
+    "labor_demand": 0.0016,
+    "legitimacy": 0.0029,
+    "security_efficiency": 0.004,
+    "trade_capacity": 0.0036
+   },
+   "alphabetic_epitaphs": {
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.0005
+   },
+   "civic_games": {
+    "cohesion": 0.0012,
+    "food_storage": -0.0016,
+    "labor_demand": 0.0012,
+    "legitimacy": 0.0007,
+    "warfare_readiness": 0.0018
+   },
+   "origin_order_poem": {
+    "cohesion": 0.0003,
+    "institutional_rigidity": 0.0012,
+    "knowledge_preservation": 0.0004,
+    "legitimacy": 0.0007
+   },
+   "written_epic": {
+    "adoption_rate": 0.0025,
+    "cohesion": 0.0026,
+    "knowledge_preservation": 0.0068,
+    "legitimacy": 0.0015
+   },
+   "symposium_song_circles": {
+    "cohesion": 0.0003,
+    "fatigue": -0.0007,
+    "food_storage": -0.0012
+   },
+   "personal_lyric_poetry": {
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0003
+   },
+   "lifesize_stone_statues": {
+    "craft_output": 0.001,
+    "labor_demand": 0.0016,
+    "legitimacy": 0.0005
+   },
+   "columned_stone_temple": {
+    "cohesion": 0.0026,
+    "construction_rate": 0.006,
+    "labor_demand": 0.0048,
+    "legitimacy": 0.0049,
+    "timber_pressure": 0.0016
+   },
+   "animal_fables": {
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0003
+   },
+   "initiation_mysteries": {
+    "cohesion": 0.0009,
+    "food_storage": -0.0008,
+    "legitimacy": 0.0003
+   },
+   "civic_coin_emblems": {
+    "cohesion": 0.0005,
+    "legitimacy": 0.0005,
+    "trade_capacity": 0.0008
+   },
+   "choral_district_contests": {
+    "cohesion": 0.0007,
+    "food_storage": -0.0008,
+    "labor_demand": 0.0008,
+    "legitimacy": 0.0002
+   },
+   "public_theatre": {
+    "adoption_rate": 0.0042,
+    "cohesion": 0.0047,
+    "food_storage": -0.0012,
+    "knowledge_rate": 0.0019,
+    "labor_demand": 0.0024,
+    "legitimacy": 0.0015
+   },
+   "narrative_figure_pottery": {
+    "craft_output": 0.0014,
+    "knowledge_preservation": 0.0002,
+    "trade_capacity": 0.0012
+   },
+   "tragic_drama_contests": {
+    "adoption_rate": 0.0006,
+    "cohesion": 0.0009,
+    "knowledge_preservation": 0.0003,
+    "legitimacy": 0.0003
+   },
+   "comparative_chronicles": {
+    "institutional_rigidity": -0.006,
+    "knowledge_preservation": 0.0054,
+    "knowledge_rate": 0.0028,
+    "observation_rate": 0.008
+   },
+   "public_funeral_orations": {
+    "cohesion": 0.0009,
+    "legitimacy": 0.0005,
+    "warfare_readiness": 0.0018
+   },
+   "satirical_comedy": {
+    "cohesion": 0.0003,
+    "institutional_rigidity": -0.0023,
+    "legitimacy": -0.0004
+   },
+   "paid_wandering_teachers": {
+    "adoption_rate": 0.0011,
+    "cohesion": -0.0002,
+    "knowledge_rate": 0.0006,
+    "legitimacy": -0.0004
+   },
+   "proportion_canon_sculpture": {
+    "craft_output": 0.001,
+    "legitimacy": 0.0002,
+    "standardization": 0.004
+   },
+   "public_ethical_dialogue": {
+    "adoption_rate": 0.0006,
+    "institutional_rigidity": -0.0023,
+    "knowledge_rate": 0.0009,
+    "legitimacy": -0.0004
+   },
+   "painted_public_colonnades": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0002,
+    "legitimacy": 0.0003
+   },
+   "philosophy_school_communities": {
+    "adoption_rate": 0.0025,
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0033,
+    "knowledge_rate": 0.0083,
+    "labor_demand": 0.0024,
+    "legitimacy": -0.0013
+   },
+   "stone_theatre_building": {
+    "cohesion": 0.0007,
+    "construction_rate": 0.002,
+    "disease_exposure": 0.0008,
+    "labor_demand": 0.0032
+   },
+   "character_portrait_writing": {
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.0004
+   },
+   "portrait_likeness_sculpture": {
+    "craft_output": 0.0007,
+    "knowledge_preservation": 0.0002,
+    "legitimacy": 0.0005
+   },
+   "public_libraries": {
+    "adoption_rate": 0.005,
+    "knowledge_preservation": 0.0054,
+    "knowledge_rate": 0.0093,
+    "labor_demand": 0.0024
+   },
+   "figured_floor_mosaics": {
+    "craft_output": 0.001,
+    "legitimacy": 0.0002,
+    "trade_capacity": 0.0004
+   },
+   "consolation_philosophies": {
+    "cohesion": 0.0005,
+    "disaster_resilience": 0.0037,
+    "fatigue": -0.0014
+   },
+   "colossal_city_statue": {
+    "cohesion": 0.0005,
+    "labor_demand": 0.004,
+    "legitimacy": 0.001,
+    "trade_capacity": 0.0006
+   },
+   "pastoral_poetry": {
+    "cohesion": 0.0003,
+    "fatigue": -0.0007
+   },
+   "translated_foreign_drama": {
+    "adoption_rate": 0.0008,
+    "cohesion": 0.0002,
+    "knowledge_rate": 0.0003,
+    "trade_capacity": 0.0008
+   },
+   "learned_allusive_poetry": {
+    "cohesion": -0.0002,
+    "knowledge_preservation": 0.0004,
+    "knowledge_rate": 0.0003
+   },
+   "funeral_combat_spectacles": {
+    "cohesion": 0.0003,
+    "injury_risk": 0.0016,
+    "legitimacy": 0.0005,
+    "warfare_readiness": 0.0009
+   },
+   "ancestor_wax_masks": {
+    "cohesion": 0.0003,
+    "institutional_rigidity": 0.0016,
+    "legitimacy": 0.0005
+   },
+   "emotional_realism_sculpture": {
+    "cohesion": 0.0003,
+    "craft_output": 0.0007
+   },
+   "victory_triumph_procession": {
+    "cohesion": 0.0003,
+    "food_storage": -0.0016,
+    "legitimacy": 0.001,
+    "warfare_readiness": 0.0027
+   },
+   "verse_satire": {
+    "cohesion": 0.0002,
+    "institutional_rigidity": -0.0015,
+    "legitimacy": -0.0002
+   },
+   "leisure_gardens": {
+    "fatigue": -0.0014,
+    "health_protection": 0.002,
+    "knowledge_rate": 0.0006
+   },
+   "illusion_wall_painting": {
+    "craft_output": 0.001,
+    "legitimacy": 0.0002
+   },
+   "founding_era_annals": {
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0011,
+    "legitimacy": 0.0005
+   },
+   "public_bath_sociability": {
+    "cohesion": 0.0009,
+    "disease_exposure": 0.0024,
+    "fatigue": -0.0014,
+    "health_protection": 0.002
+   },
+   "love_elegy": {
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.0002
+   },
+   "commissioned_founding_epic": {
+    "cohesion": 0.0031,
+    "institutional_rigidity": 0.0024,
+    "knowledge_preservation": 0.0022,
+    "legitimacy": 0.0061
+   },
+   "pantomime_dance_theatre": {
+    "cohesion": 0.0005,
+    "fatigue": -0.0007,
+    "food_storage": -0.0008
+   },
+   "crossroads_shrine_clubs": {
+    "cohesion": 0.0009,
+    "legitimacy": 0.0003,
+    "security_efficiency": 0.002
+   },
+   "circus_race_factions": {
+    "cohesion": 0.0005,
+    "injury_risk": 0.0012,
+    "legitimacy": 0.0005,
+    "security_efficiency": -0.004
+   },
+   "amphitheatre_spectacles": {
+    "cohesion": 0.0003,
+    "ecological_pressure": 0.0024,
+    "food_storage": -0.0012,
+    "injury_risk": 0.0016,
+    "labor_demand": 0.0024,
+    "legitimacy": 0.0008
+   },
+   "triumphal_arch": {
+    "labor_demand": 0.0024,
+    "legitimacy": 0.0008
+   },
+   "published_letter_collections": {
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.0005
+   },
+   "prose_romance_novel": {
+    "adoption_rate": 0.0006,
+    "cohesion": 0.0003,
+    "knowledge_preservation": 0.0002
+   },
+   "painted_panel_portraits": {
+    "cohesion": 0.0002,
+    "craft_output": 0.0007,
+    "knowledge_preservation": 0.0004
+   },
+   "paired_lives_biography": {
+    "adoption_rate": 0.0004,
+    "knowledge_preservation": 0.0005,
+    "legitimacy": 0.0002
+   },
+   "narrative_victory_column": {
+    "knowledge_preservation": 0.0004,
+    "labor_demand": 0.0024,
+    "legitimacy": 0.0008
+   },
+   "monument_travel_guides": {
+    "knowledge_preservation": 0.0004,
+    "trade_capacity": 0.0008,
+    "travel_speed": 0.002
+   },
+   "display_oratory": {
+    "adoption_rate": 0.0006,
+    "cohesion": 0.0002,
+    "legitimacy": 0.0003
+   },
+   "carved_sarcophagi": {
+    "craft_output": 0.0007,
+    "knowledge_preservation": 0.0002,
+    "legitimacy": 0.0003
+   },
+   "glass_wall_mosaics": {
+    "craft_output": 0.0007,
+    "fuel_demand": 0.0012,
+    "legitimacy": 0.0007
+   },
+   "contemplative_ascent_schools": {
+    "cohesion": 0.0005,
+    "fatigue": -0.0007,
+    "knowledge_rate": -0.0008,
+    "legitimacy": 0.0003
+   },
+   "underground_burial_galleries": {
+    "cohesion": 0.0007,
+    "labor_demand": 0.0016
+   },
+   "holy_servant_lives": {
+    "cohesion": 0.0005,
+    "knowledge_preservation": 0.0004,
+    "legitimacy": 0.0005
+   },
+   "congregational_hymns": {
+    "cohesion": 0.001,
+    "legitimacy": 0.0003
+   },
+   "honored_ascetics": {
+    "cohesion": 0.0003,
+    "labor_efficiency": -0.0016,
+    "legitimacy": 0.0007
+   },
+   "weekly_rest_day": {
+    "cohesion": 0.0007,
+    "fatigue": -0.0041,
+    "labor_efficiency": -0.0016,
+    "legitimacy": 0.0003
+   },
+   "canonized_sacred_sayings": {
+    "adoption_rate": 0.0017,
+    "cohesion": 0.0037,
+    "institutional_rigidity": 0.0056,
+    "knowledge_preservation": 0.0038,
+    "legitimacy": 0.0049
+   },
+   "congregation_hall_temples": {
+    "cohesion": 0.0052,
+    "construction_rate": 0.004,
+    "labor_demand": 0.004,
+    "legitimacy": 0.0024,
+    "timber_pressure": 0.0024
+   },
+   "illuminated_codices": {
     "craft_output": 0.0007,
     "knowledge_preservation": 0.0005,
     "labor_demand": 0.0008,
     "legitimacy": 0.0002
-   },
-   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
-   "observation": "Books are painted with pictures of the story, framed on the page beside the text."
+   }
   }
  }
 }

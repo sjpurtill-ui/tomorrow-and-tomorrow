@@ -4,8 +4,8 @@
  "items": {
   "composite_stone_anchors": {
    "effects": {
-    "naval_capacity": 0.0029,
-    "injury_risk": -0.0016
+    "injury_risk": -0.0005,
+    "naval_capacity": 0.0029
    },
    "name": "Composite Stone Anchors",
    "observation": "A stone stock with wooden stakes driven through it bites into the sand where a plain stone would drag.",
@@ -13,8 +13,8 @@
   },
   "harbor_dues_by_cargo": {
    "effects": {
-    "state_capacity": 0.004,
-    "disaster_resilience": 0.0016,
+    "disaster_resilience": 0.0003,
+    "state_capacity": 0.0011,
     "trade_capacity": -0.0008
    },
    "name": "Harbor Dues by Cargo",
@@ -24,10 +24,10 @@
   },
   "brailed_square_sail": {
    "effects": {
-    "naval_capacity": 0.012,
+    "injury_risk": -0.0003,
+    "naval_capacity": 0.0024,
     "route_speed": 0.0048,
-    "trade_capacity": 0.0025,
-    "injury_risk": -0.0024
+    "trade_capacity": 0.0004
    },
    "name": "Brailed Square Sail",
    "observation": "Lines run from the yard down to the deck, so the crew can shorten sail in a squall without climbing aloft.",
@@ -37,14 +37,14 @@
   "axle_sleeve_fitting": {
    "effects": {
     "haul_capacity": 0.0032,
-    "repair_capacity": 0.008
+    "repair_capacity": 0.0011
    },
    "art": "res://assets/ui/research/paper/first300-cards/wooden_axle_shaping.tres"
   },
   "traveling_balance_kits": {
    "effects": {
-    "trade_capacity": 0.0025,
-    "standardization": 0.0032
+    "standardization": 0.0009,
+    "trade_capacity": 0.0004
    },
    "name": "Traveling Balance and Weights",
    "observation": "Merchants carry a folding balance and a case of nested weights, and settle each bargain on the spot.",
@@ -65,10 +65,10 @@
   },
   "rutted_rock_roadbeds": {
    "effects": {
-    "route_speed": 0.0048,
     "haul_capacity": 0.0032,
-    "injury_risk": -0.0008,
-    "labor_demand": 0.0024
+    "injury_risk": -0.0001,
+    "labor_demand": 0.0001,
+    "route_speed": 0.0048
    },
    "name": "Rock-cut Road Ruts",
    "observation": "Through the passes the road is cut into the living rock, and the wheels run in grooves worn deeper every year.",
@@ -76,20 +76,20 @@
   },
   "launching_cradles": {
    "effects": {
-    "naval_capacity": 0.0024,
     "construction_rate": 0.0024,
-    "injury_risk": -0.0008
+    "injury_risk": -0.0001,
+    "naval_capacity": 0.0005
    },
    "art": "res://assets/ui/research/paper/coastal_watercraft.png"
   },
   "deep_hold_merchantmen": {
    "effects": {
-    "naval_capacity": 0.0144,
-    "trade_capacity": 0.0059,
-    "haul_capacity": 0.0048,
     "container_capacity": 0.0048,
+    "disease_exposure": 0.0016,
+    "haul_capacity": 0.0048,
+    "naval_capacity": 0.0026,
     "timber_pressure": 0.0048,
-    "disease_exposure": 0.0016
+    "trade_capacity": 0.0007
    },
    "name": "Deep-hold Merchantmen",
    "observation": "Broad, round-bellied ships carry a village's worth of grain and jars in a single hold.",
@@ -98,33 +98,33 @@
   },
   "keel_scarfing": {
    "effects": {
-    "naval_capacity": 0.0029,
-    "repair_capacity": 0.0032
+    "naval_capacity": 0.0005,
+    "repair_capacity": 0.0008
    },
    "art": "res://assets/ui/research/paper/timber_splice_connections.png"
   },
   "grown_frame_selection": {
    "effects": {
-    "naval_capacity": 0.0024,
-    "construction_rate": 0.0016,
+    "construction_rate": 0.0004,
+    "naval_capacity": 0.0004,
     "timber_pressure": 0.0016
    },
    "art": "res://assets/ui/research/paper/grown_frame_selection.png"
   },
   "frame_moulding": {
    "effects": {
-    "naval_capacity": 0.0024,
-    "standardization": 0.004,
-    "construction_rate": 0.0024
+    "construction_rate": 0.0006,
+    "naval_capacity": 0.0004,
+    "standardization": 0.0023
    },
    "art": "res://assets/ui/research/paper/grown_frame_selection.png"
   },
   "camel_caravans": {
    "effects": {
     "haul_capacity": 0.0096,
-    "logistics_endurance": 0.016,
-    "trade_capacity": 0.0051,
-    "route_speed": 0.0032
+    "logistics_endurance": 0.0039,
+    "route_speed": 0.0023,
+    "trade_capacity": 0.0006
    },
    "name": "Camel Caravans",
    "observation": "Camels that drink once in many days carry their loads across the waterless country between the wells.",
@@ -133,10 +133,10 @@
   },
   "desert_water_stages": {
    "effects": {
-    "logistics_endurance": 0.008,
-    "route_speed": 0.0032,
-    "water_access": 0.0032,
-    "labor_demand": 0.0016
+    "labor_demand": 0.0001,
+    "logistics_endurance": 0.0019,
+    "route_speed": 0.0023,
+    "water_access": 0.0017
    },
    "name": "Desert Water Stages",
    "observation": "Cisterns cut a day's march apart let caravans cross the dry country without carrying all their water.",
@@ -144,9 +144,9 @@
   },
   "mule_breeding": {
    "effects": {
+    "fatigue": -0.0005,
     "haul_capacity": 0.008,
-    "logistics_endurance": 0.0048,
-    "fatigue": -0.0016
+    "logistics_endurance": 0.0012
    },
    "name": "Mule Breeding",
    "observation": "Mares put to donkey stallions foal mules, stronger than asses and surer-footed than horses on the mountain tracks.",
@@ -154,9 +154,9 @@
   },
   "mounted_messengers": {
    "effects": {
-    "travel_speed": 0.008,
-    "route_speed": 0.0032,
-    "state_capacity": 0.0024
+    "route_speed": 0.0023,
+    "state_capacity": 0.0003,
+    "travel_speed": 0.0054
    },
    "name": "Mounted Messengers",
    "observation": "Riders carry sealed letters along set routes, changing horses where the stations keep them.",
@@ -164,9 +164,9 @@
   },
   "merchant_ship_convoys": {
    "effects": {
-    "naval_capacity": 0.0029,
-    "trade_capacity": 0.0021,
-    "injury_risk": -0.0016
+    "injury_risk": -0.0002,
+    "naval_capacity": 0.0005,
+    "trade_capacity": 0.0002
    },
    "name": "Seasonal Merchant Convoys",
    "observation": "Merchant ships sail together when the season opens, so no lone hull meets raiders or a storm by itself.",
@@ -174,8 +174,8 @@
   },
   "weighed_silver_payment": {
    "effects": {
-    "trade_capacity": 0.0051,
-    "state_capacity": 0.0016
+    "state_capacity": 0.0002,
+    "trade_capacity": 0.0006
    },
    "name": "Weighed Silver Payment",
    "observation": "Cut pieces of silver weighed on the merchant's balance settle debts between strangers who have no goods to swap.",
@@ -183,10 +183,10 @@
   },
   "coastal_trading_colonies": {
    "effects": {
-    "trade_capacity": 0.0042,
-    "naval_capacity": 0.0019,
-    "adoption_rate": 0.0032,
-    "cohesion": -0.0032
+    "adoption_rate": 0.0006,
+    "cohesion": -0.0008,
+    "naval_capacity": 0.0003,
+    "trade_capacity": 0.0005
    },
    "name": "Coastal Trading Colonies",
    "observation": "Our people found small towns on far coasts to buy, store and ship for the home harbor.",
@@ -195,10 +195,10 @@
   },
   "forward_supply_depots": {
    "effects": {
-    "logistics_endurance": 0.008,
-    "food_storage": 0.0032,
-    "warfare_readiness": 0.0024,
-    "labor_demand": 0.0024
+    "food_storage": 0.0011,
+    "labor_demand": 0.0001,
+    "logistics_endurance": 0.0014,
+    "warfare_readiness": 0.0004
    },
    "name": "Forward Supply Depots",
    "observation": "Before an army marches, grain and fodder are carried ahead and stored in guarded depots along its road.",
@@ -206,10 +206,10 @@
   },
   "paved_ship_haulway": {
    "effects": {
-    "route_speed": 0.004,
-    "naval_capacity": 0.0019,
-    "trade_capacity": 0.0013,
-    "labor_demand": 0.0024
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.0007,
+    "route_speed": 0.0015,
+    "trade_capacity": 0.0002
    },
    "name": "Ship Haulway",
    "observation": "A paved track across the neck of land lets crews drag ships on greased runners from one sea to the other.",
@@ -217,9 +217,9 @@
   },
   "paired_quarter_rudders": {
    "effects": {
-    "naval_capacity": 0.0038,
-    "route_speed": 0.0016,
-    "injury_risk": -0.0016
+    "injury_risk": -0.0003,
+    "naval_capacity": 0.0013,
+    "route_speed": 0.0006
    },
    "name": "Paired Quarter Rudders",
    "observation": "Two steering oars hung at the stern and joined by a bar let one helmsman hold a heavy ship on course.",
@@ -227,8 +227,8 @@
   },
   "money_changers": {
    "effects": {
-    "trade_capacity": 0.0042,
-    "standardization": 0.0016
+    "standardization": 0.0003,
+    "trade_capacity": 0.0005
    },
    "name": "Money Changers",
    "observation": "At the harbor and the market, changers sit at their tables and swap one town's silver and coin for another's, at a fee.",
@@ -236,9 +236,9 @@
   },
   "coin_count_trade": {
    "effects": {
-    "trade_capacity": 0.0085,
-    "state_capacity": 0.0024,
-    "task_coordination": 0.0016
+    "state_capacity": 0.0003,
+    "task_coordination": 0.0002,
+    "trade_capacity": 0.0012
    },
    "name": "Coins Taken by Count",
    "observation": "Stamped coins of known weight pass from hand to hand by count, and no one unpacks a balance at every stall.",
@@ -248,17 +248,17 @@
   "sleeved_cart_assembly": {
    "effects": {
     "haul_capacity": 0.0048,
-    "repair_capacity": 0.0048,
-    "standardization": 0.0024
+    "repair_capacity": 0.0017,
+    "standardization": 0.0002
    },
    "art": "res://assets/ui/research/paper/first300-cards/cart_running_gear.tres"
   },
   "trunk_road_courier_relay": {
    "effects": {
-    "travel_speed": 0.016,
-    "route_speed": 0.0064,
-    "state_capacity": 0.0048,
-    "labor_demand": 0.0024
+    "labor_demand": 0.0001,
+    "route_speed": 0.0019,
+    "state_capacity": 0.0006,
+    "travel_speed": 0.0028
    },
    "name": "Courier Relay on the Trunk Road",
    "observation": "Riders hand the dispatch bag on at fixed day-stages, and news crosses the realm in days instead of weeks.",
@@ -268,8 +268,8 @@
   "framed_camel_saddle": {
    "effects": {
     "haul_capacity": 0.0048,
-    "logistics_endurance": 0.0032,
-    "warfare_readiness": 0.0016
+    "logistics_endurance": 0.001,
+    "warfare_readiness": 0.0003
    },
    "name": "Framed Camel Saddle",
    "observation": "A wooden frame over the hump spreads the load, so a camel carries more and a rider can sit and fight from its back.",
@@ -277,13 +277,13 @@
   },
   "trunk_canals": {
    "effects": {
-    "haul_capacity": 0.008,
-    "route_speed": 0.0048,
-    "trade_capacity": 0.0025,
-    "water_access": 0.0032,
-    "labor_demand": 0.004,
     "disease_exposure": 0.0032,
-    "ecological_pressure": 0.0024
+    "ecological_pressure": 0.0024,
+    "haul_capacity": 0.008,
+    "labor_demand": 0.0002,
+    "route_speed": 0.0014,
+    "trade_capacity": 0.0003,
+    "water_access": 0.0016
    },
    "name": "Trunk Canals",
    "observation": "Long canals join one river system to the next, and barges carry grain between basins that never met.",
@@ -292,8 +292,8 @@
   },
   "touchstone_testing": {
    "effects": {
-    "trade_capacity": 0.0017,
-    "standardization": 0.0024
+    "standardization": 0.0002,
+    "trade_capacity": 0.0002
    },
    "name": "Touchstone Testing",
    "observation": "A streak of metal drawn across the black stone shows a trained eye whether the gold or silver is good.",
@@ -301,9 +301,9 @@
   },
   "sounding_lead": {
    "effects": {
-    "naval_capacity": 0.0029,
-    "survey_speed": 0.0016,
-    "injury_risk": -0.0024
+    "injury_risk": -0.0007,
+    "naval_capacity": 0.0011,
+    "survey_speed": 0.0016
    },
    "name": "Sounding Lead",
    "observation": "A lead weight armed with tallow is dropped overboard, and the sand or shell it brings up tells the pilot where he is.",
@@ -311,8 +311,8 @@
   },
   "small_change_coins": {
    "effects": {
-    "trade_capacity": 0.003,
-    "cohesion": -0.0016
+    "cohesion": -0.0002,
+    "trade_capacity": 0.0004
    },
    "name": "Small Change Coins",
    "observation": "Little bronze coins buy a loaf or a cup, so the poorest can trade with money instead of favors.",
@@ -321,10 +321,10 @@
   },
   "written_sailing_directions": {
    "effects": {
-    "naval_capacity": 0.0038,
-    "route_speed": 0.0024,
-    "knowledge_preservation": 0.0024,
-    "injury_risk": -0.0016
+    "injury_risk": -0.0001,
+    "knowledge_preservation": 0.0002,
+    "naval_capacity": 0.0014,
+    "route_speed": 0.0008
    },
    "name": "Written Sailing Directions",
    "observation": "Scrolls list each harbor, its landmarks, its water and the days of sailing to the next.",
@@ -332,9 +332,9 @@
   },
   "written_freight_contracts": {
    "effects": {
-    "trade_capacity": 0.0025,
-    "state_capacity": 0.0016,
-    "storage_loss": -0.0024
+    "state_capacity": 0.0004,
+    "storage_loss": -0.0024,
+    "trade_capacity": 0.0003
    },
    "name": "Written Freight Contracts",
    "observation": "A written contract names the cargo, the day of delivery and the penalty if the shipper fails.",
@@ -342,10 +342,10 @@
   },
   "harbor_masters": {
    "effects": {
-    "trade_capacity": 0.0021,
-    "naval_capacity": 0.0019,
-    "task_coordination": 0.0024,
-    "state_capacity": 0.0016
+    "naval_capacity": 0.0007,
+    "state_capacity": 0.0004,
+    "task_coordination": 0.0003,
+    "trade_capacity": 0.0003
    },
    "name": "Harbor Masters",
    "observation": "A harbor master gives each ship its berth and its turn to load, and the quays stop clogging.",
@@ -353,8 +353,8 @@
   },
   "voyage_partnerships": {
    "effects": {
-    "trade_capacity": 0.0025,
-    "disaster_resilience": 0.0024
+    "disaster_resilience": 0.0006,
+    "trade_capacity": 0.0003
    },
    "name": "Voyage Partnerships",
    "observation": "Several merchants share one ship's cargo, profit and risk, so no single wreck ruins a house.",
@@ -362,9 +362,9 @@
   },
   "tide_reckoning": {
    "effects": {
-    "naval_capacity": 0.0024,
-    "route_speed": 0.0016,
-    "injury_risk": -0.0016
+    "injury_risk": -0.0001,
+    "naval_capacity": 0.0009,
+    "route_speed": 0.0005
    },
    "name": "Tide Reckoning",
    "observation": "Pilots reckon the tide by the moon and bring deep ships over the bar only at high water.",
@@ -372,9 +372,9 @@
   },
   "deposit_transfer_orders": {
    "effects": {
-    "trade_capacity": 0.0064,
-    "state_capacity": 0.0024,
-    "knowledge_preservation": 0.0016
+    "knowledge_preservation": 0.0001,
+    "state_capacity": 0.0007,
+    "trade_capacity": 0.0009
    },
    "name": "Deposit Transfer Orders",
    "observation": "A merchant leaves his silver with a banker and pays others by written order, and no coin changes hands.",
@@ -383,9 +383,9 @@
   },
   "general_average_jettison": {
    "effects": {
-    "trade_capacity": 0.0017,
-    "disaster_resilience": 0.0024,
-    "cohesion": 0.0008
+    "cohesion": 0.0001,
+    "disaster_resilience": 0.0005,
+    "trade_capacity": 0.0002
    },
    "name": "Shared Jettison Losses",
    "observation": "When cargo is thrown overboard to save a ship, every owner aboard bears a share of the loss.",
@@ -393,9 +393,9 @@
   },
   "breast_strap_harness": {
    "effects": {
-    "haul_capacity": 0.008,
-    "route_speed": 0.0016,
-    "fatigue": -0.0024
+    "fatigue": -0.0004,
+    "haul_capacity": 0.0014,
+    "route_speed": 0.0005
    },
    "name": "Breast-strap Harness",
    "observation": "A strap across the chest instead of the throat lets a horse pull hard without choking.",
@@ -403,8 +403,8 @@
   },
   "lead_hull_sheathing": {
    "effects": {
-    "naval_capacity": 0.0029,
-    "repair_capacity": 0.0032,
+    "naval_capacity": 0.0009,
+    "repair_capacity": 0.0025,
     "water_pollution": 0.0008
    },
    "name": "Lead Hull Sheathing",
@@ -413,26 +413,26 @@
   },
   "standing_running_rigging": {
    "effects": {
-    "naval_capacity": 0.0038,
-    "route_speed": 0.0016,
-    "injury_risk": -0.0008
+    "injury_risk": -0.0006,
+    "naval_capacity": 0.0012,
+    "route_speed": 0.0005
    },
    "art": "res://assets/ui/research/paper/first300-cards/rope_rigging.tres"
   },
   "wooden_sheave_blocks": {
    "effects": {
-    "naval_capacity": 0.0019,
-    "haul_capacity": 0.0032,
-    "construction_rate": 0.0024
+    "construction_rate": 0.0005,
+    "haul_capacity": 0.0005,
+    "naval_capacity": 0.0006
    },
    "art": "res://assets/ui/research/paper/compound_pulleys.png"
   },
   "grain_receipt_banks": {
    "effects": {
-    "food_storage": 0.0048,
-    "trade_capacity": 0.0021,
-    "state_capacity": 0.0024,
-    "storage_loss": -0.0024
+    "food_storage": 0.0028,
+    "state_capacity": 0.0002,
+    "storage_loss": -0.0011,
+    "trade_capacity": 0.0002
    },
    "name": "Grain Receipts",
    "observation": "Farmers deposit grain in the state stores and pay their debts with the sealed receipt instead of the sacks.",
@@ -440,9 +440,9 @@
   },
   "flash_lock_gates": {
    "effects": {
-    "route_speed": 0.0032,
-    "haul_capacity": 0.0032,
-    "injury_risk": 0.0016
+    "haul_capacity": 0.0005,
+    "injury_risk": 0.0016,
+    "route_speed": 0.001
    },
    "name": "Flash-lock Gates",
    "observation": "A gate in the weir is opened, and boats ride the rush of water down or are hauled up against it.",
@@ -450,10 +450,10 @@
   },
   "duty_free_harbor": {
    "effects": {
-    "trade_capacity": 0.0042,
-    "naval_capacity": 0.0014,
+    "disease_exposure": 0.0016,
+    "naval_capacity": 0.0004,
     "state_capacity": -0.0024,
-    "disease_exposure": 0.0016
+    "trade_capacity": 0.0007
    },
    "name": "Duty-free Harbor",
    "observation": "A harbor that takes no dues draws ships from every coast, and the town grows rich on what their crews spend.",
@@ -462,10 +462,10 @@
   },
   "transcontinental_relay_trade": {
    "effects": {
-    "trade_capacity": 0.0076,
-    "adoption_rate": 0.0032,
+    "adoption_rate": 0.0018,
+    "cohesion": -0.0004,
     "disease_exposure": 0.004,
-    "cohesion": -0.0016
+    "trade_capacity": 0.0013
    },
    "name": "Long Relay Trade",
    "observation": "Goods pass from people to people along one great road, and cloth woven beyond the farthest mountains reaches our markets.",
@@ -474,8 +474,8 @@
   },
   "raked_bow_foresail": {
    "effects": {
-    "naval_capacity": 0.0029,
-    "route_speed": 0.0016
+    "naval_capacity": 0.0009,
+    "route_speed": 0.0004
    },
    "name": "Bow Foresail",
    "observation": "A small sail on a mast raked out over the bow helps the helmsman bring the ship's head round.",
@@ -483,9 +483,9 @@
   },
   "frontier_customs_posts": {
    "effects": {
-    "state_capacity": 0.0048,
-    "trade_capacity": -0.0017,
-    "legitimacy": -0.0008
+    "legitimacy": -0.0008,
+    "state_capacity": 0.0006,
+    "trade_capacity": -0.0017
    },
    "name": "Frontier Customs Posts",
    "observation": "At the border, officials open the bales and take a share of every cargo that crosses.",
@@ -494,9 +494,9 @@
   },
   "district_road_crews": {
    "effects": {
-    "route_speed": 0.0048,
-    "disaster_resilience": 0.0016,
-    "labor_demand": 0.0032
+    "disaster_resilience": 0.0003,
+    "labor_demand": 0.0002,
+    "route_speed": 0.0013
    },
    "name": "District Road Crews",
    "observation": "Each district must keep its own stretch of road, and crews fill the ruts before the rains.",
@@ -505,10 +505,10 @@
   },
   "seasonal_wind_crossings": {
    "effects": {
-    "naval_capacity": 0.012,
-    "trade_capacity": 0.0059,
+    "disease_exposure": 0.0016,
     "injury_risk": 0.0032,
-    "disease_exposure": 0.0016
+    "naval_capacity": 0.0037,
+    "trade_capacity": 0.001
    },
    "name": "Seasonal-wind Crossings",
    "observation": "Pilots who know the winds that turn with the seasons sail straight across open ocean and back within the year.",
@@ -517,9 +517,9 @@
   },
   "pivoting_front_axle": {
    "effects": {
-    "haul_capacity": 0.0064,
-    "route_speed": 0.0016,
-    "injury_risk": -0.0008
+    "haul_capacity": 0.0055,
+    "injury_risk": -0.0001,
+    "route_speed": 0.0004
    },
    "name": "Pivoting Front Axle",
    "observation": "The wagon's front axle turns on a pin, so a long loaded wagon can take a bend in the road.",
@@ -527,9 +527,9 @@
   },
   "ship_bilge_pumps": {
    "effects": {
-    "naval_capacity": 0.0029,
-    "storage_loss": -0.0016,
-    "injury_risk": -0.0024
+    "injury_risk": -0.0005,
+    "naval_capacity": 0.0006,
+    "storage_loss": -0.0007
    },
    "name": "Bilge Pumps",
    "observation": "A pump worked by the crew clears the bilge, and a leaking ship stays afloat to reach harbor.",
@@ -537,9 +537,9 @@
   },
   "stage_animal_hire": {
    "effects": {
-    "haul_capacity": 0.0048,
-    "travel_speed": 0.0048,
-    "trade_capacity": 0.0013
+    "haul_capacity": 0.001,
+    "trade_capacity": 0.0002,
+    "travel_speed": 0.0019
    },
    "name": "Stage Animal Hire",
    "observation": "At each road station a traveler can hire a fresh mule or cart by the day and hand it in at the next.",
@@ -547,11 +547,11 @@
   },
   "raised_floor_warehouses": {
    "effects": {
-    "food_storage": 0.0064,
     "container_capacity": 0.0048,
-    "storage_loss": -0.0048,
-    "food_spoilage": -0.0024,
-    "labor_demand": 0.0016
+    "food_spoilage": -0.0011,
+    "food_storage": 0.0019,
+    "labor_demand": 0.0001,
+    "storage_loss": -0.0022
    },
    "name": "Raised-floor Warehouses",
    "observation": "Great public warehouses stand on raised floors with vented walls, and grain keeps dry through a wet year.",
@@ -559,12 +559,12 @@
   },
   "great_bulk_freighters": {
    "effects": {
-    "naval_capacity": 0.012,
-    "haul_capacity": 0.0096,
-    "trade_capacity": 0.0042,
     "container_capacity": 0.0048,
+    "haul_capacity": 0.0021,
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.0024,
     "timber_pressure": 0.0064,
-    "labor_demand": 0.0016
+    "trade_capacity": 0.0006
    },
    "name": "Great Bulk Freighters",
    "observation": "Huge freighters, each carrying the grain of a whole province, sail between the great harbors.",
@@ -574,11 +574,11 @@
   },
   "state_post_passes": {
    "effects": {
-    "travel_speed": 0.012,
-    "state_capacity": 0.008,
-    "route_speed": 0.0032,
-    "labor_demand": 0.0024,
-    "legitimacy": -0.0024
+    "labor_demand": 0.0001,
+    "legitimacy": -0.0024,
+    "route_speed": 0.0011,
+    "state_capacity": 0.0008,
+    "travel_speed": 0.0047
    },
    "name": "State Post and Travel Passes",
    "observation": "Officials carrying a sealed pass may claim fresh mounts, food and lodging at every station on the road.",
@@ -588,10 +588,10 @@
   },
   "state_grain_fleets": {
    "effects": {
-    "food_storage": 0.0064,
-    "naval_capacity": 0.0029,
-    "haul_capacity": 0.0032,
-    "state_capacity": 0.0032
+    "food_storage": 0.0019,
+    "haul_capacity": 0.0007,
+    "naval_capacity": 0.0006,
+    "state_capacity": 0.0003
    },
    "name": "State Grain Fleets",
    "observation": "Shipowners sail on contract to carry the state's grain to the capital, and are paid for every sack delivered.",
@@ -599,10 +599,10 @@
   },
   "iron_hoof_boots": {
    "effects": {
-    "haul_capacity": 0.0032,
-    "logistics_endurance": 0.0024,
-    "route_speed": 0.0016,
-    "fatigue": -0.0016
+    "fatigue": -0.0002,
+    "haul_capacity": 0.0007,
+    "logistics_endurance": 0.0004,
+    "route_speed": 0.0006
    },
    "name": "Iron Hoof Boots",
    "observation": "An iron sole strapped over the hoof keeps a draft animal sound on stone roads.",
@@ -610,10 +610,10 @@
   },
   "treadwheel_quay_cranes": {
    "effects": {
-    "haul_capacity": 0.0048,
-    "trade_capacity": 0.0013,
-    "construction_rate": 0.0024,
-    "injury_risk": -0.0008
+    "construction_rate": 0.0004,
+    "haul_capacity": 0.001,
+    "injury_risk": -0.0002,
+    "trade_capacity": 0.0002
    },
    "name": "Quay Treadwheel Cranes",
    "observation": "Men walking inside a great wheel lift loads from the hold onto the quay, and a ship is emptied in a day.",
@@ -621,9 +621,9 @@
   },
   "lighter_transshipment": {
    "effects": {
-    "haul_capacity": 0.004,
-    "trade_capacity": 0.0017,
-    "labor_demand": 0.0024
+    "haul_capacity": 0.0026,
+    "labor_demand": 0.0001,
+    "trade_capacity": 0.0004
    },
    "name": "Lighter Transshipment",
    "observation": "Where the river mouth is too shallow, small lighters carry the freighter's cargo up to the city wharves.",
@@ -631,9 +631,9 @@
   },
   "painted_cargo_labels": {
    "effects": {
-    "storage_loss": -0.0024,
-    "trade_capacity": 0.0013,
-    "knowledge_preservation": 0.0016
+    "knowledge_preservation": 0.0001,
+    "storage_loss": -0.0013,
+    "trade_capacity": 0.0003
    },
    "name": "Painted Cargo Labels",
    "observation": "Every jar bears painted marks naming its contents, its weight, its shipper and the year.",
@@ -641,10 +641,10 @@
   },
   "post_horse_studs": {
    "effects": {
-    "travel_speed": 0.0064,
-    "logistics_endurance": 0.0032,
-    "warfare_readiness": 0.0016,
-    "labor_demand": 0.0024
+    "labor_demand": 0.0001,
+    "logistics_endurance": 0.0014,
+    "travel_speed": 0.0014,
+    "warfare_readiness": 0.0012
    },
    "name": "Post-horse Studs",
    "observation": "State stud farms breed and rest horses, so the post stations never lack a fresh mount.",
@@ -652,8 +652,8 @@
   },
   "strap_suspended_carriages": {
    "effects": {
-    "travel_speed": 0.0032,
-    "fatigue": -0.0024
+    "fatigue": -0.0003,
+    "travel_speed": 0.0007
    },
    "name": "Strap-hung Carriages",
    "observation": "The carriage body hangs from leather straps on its frame, and travelers ride long days without bruising.",
@@ -661,9 +661,9 @@
   },
   "common_trade_coin": {
    "effects": {
-    "trade_capacity": 0.0059,
-    "standardization": 0.004,
-    "state_capacity": 0.0024
+    "standardization": 0.0023,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0014
    },
    "name": "Common Trade Coin",
    "observation": "One coin of known weight and face passes in every province and among many foreign peoples.",
@@ -671,10 +671,10 @@
   },
   "oasis_caravan_cities": {
    "effects": {
-    "trade_capacity": 0.0034,
-    "logistics_endurance": 0.0048,
-    "food_storage": 0.0016,
-    "security_efficiency": 0.0016
+    "food_storage": 0.0008,
+    "logistics_endurance": 0.0021,
+    "security_efficiency": 0.0005,
+    "trade_capacity": 0.0008
    },
    "name": "Oasis Caravan Cities",
    "observation": "Walled cities at the oases shelter and supply the caravans, and grow rich on the traffic.",
@@ -683,8 +683,8 @@
   "coopered_cargo_casks": {
    "effects": {
     "container_capacity": 0.008,
-    "storage_loss": -0.0032,
-    "haul_capacity": 0.0024,
+    "haul_capacity": 0.0016,
+    "storage_loss": -0.0017,
     "timber_pressure": 0.0016
    },
    "name": "Coopered Casks",
@@ -693,10 +693,10 @@
   },
   "single_wheel_barrow": {
    "effects": {
-    "haul_capacity": 0.0048,
-    "construction_rate": 0.0024,
-    "labor_efficiency": 0.0016,
-    "fatigue": -0.0024
+    "construction_rate": 0.0015,
+    "fatigue": -0.0004,
+    "haul_capacity": 0.0033,
+    "labor_efficiency": 0.0008
    },
    "name": "Wheelbarrow",
    "observation": "One wheel and two handles let a single carrier move a load that took two with a litter.",
@@ -704,9 +704,9 @@
   },
   "road_itineraries": {
    "effects": {
-    "route_speed": 0.0032,
-    "logistics_endurance": 0.0032,
-    "knowledge_preservation": 0.0016
+    "knowledge_preservation": 0.0003,
+    "logistics_endurance": 0.0011,
+    "route_speed": 0.001
    },
    "name": "Road Itineraries",
    "observation": "Written lists give every station along the realm's roads and the distance between them.",
@@ -714,9 +714,9 @@
   },
   "graded_wagon_classes": {
    "effects": {
-    "haul_capacity": 0.0032,
-    "route_speed": 0.0024,
-    "standardization": 0.0032
+    "haul_capacity": 0.0022,
+    "route_speed": 0.0008,
+    "standardization": 0.0019
    },
    "name": "Wagon Classes by Load",
    "observation": "Wagons are graded by the load they may carry, and the heaviest are kept off the soft roads.",
@@ -724,9 +724,9 @@
   },
   "transit_bond_seals": {
    "effects": {
-    "trade_capacity": 0.003,
-    "state_capacity": 0.0016,
-    "storage_loss": -0.0016
+    "state_capacity": 0.0002,
+    "storage_loss": -0.0009,
+    "trade_capacity": 0.0008
    },
    "name": "Transit Bond Seals",
    "observation": "Goods sealed at one frontier cross the realm under bond and pay no duty until they are sold.",
@@ -734,8 +734,8 @@
   },
   "distant_payment_letters": {
    "effects": {
-    "trade_capacity": 0.0042,
-    "knowledge_preservation": 0.0016
+    "knowledge_preservation": 0.0003,
+    "trade_capacity": 0.0011
    },
    "name": "Distant Payment Letters",
    "observation": "A merchant's letter orders his agent in a far market to pay the bearer, and no silver travels the road.",
@@ -743,9 +743,9 @@
   },
   "canal_boat_slipways": {
    "effects": {
-    "route_speed": 0.0032,
     "haul_capacity": 0.0032,
-    "labor_demand": 0.0016
+    "labor_demand": 0.0001,
+    "route_speed": 0.0009
    },
    "name": "Canal Slipways",
    "observation": "Boats are hauled up a paved slope from one canal level to the next by oxen at a windlass.",
@@ -754,8 +754,8 @@
   "fore_and_aft_sail": {
    "effects": {
     "naval_capacity": 0.0096,
-    "route_speed": 0.0048,
-    "trade_capacity": 0.0025
+    "route_speed": 0.0014,
+    "trade_capacity": 0.0006
    },
    "name": "Fore-and-aft Sail",
    "observation": "A triangular sail set along the ship's length lets it work close into the wind instead of waiting for a fair one.",
@@ -764,9 +764,9 @@
   },
   "strip_route_maps": {
    "effects": {
-    "route_speed": 0.0032,
-    "survey_speed": 0.0024,
-    "knowledge_preservation": 0.0016
+    "knowledge_preservation": 0.0002,
+    "route_speed": 0.0009,
+    "survey_speed": 0.0017
    },
    "name": "Strip Route Maps",
    "observation": "A long strip map shows each road as a line, with its towns, stations and rivers marked in order.",
@@ -774,14 +774,414 @@
   },
   "river_toll_stations": {
    "effects": {
-    "state_capacity": 0.0032,
-    "security_efficiency": 0.0016,
-    "trade_capacity": 0.0008,
-    "legitimacy": -0.0008
+    "legitimacy": -0.0008,
+    "security_efficiency": 0.0001,
+    "state_capacity": 0.0003,
+    "trade_capacity": 0.0002
    },
    "name": "River Patrol and Toll Stations",
    "observation": "Patrol boats at the toll stations keep the barges moving and take the river's due from each.",
    "art": "res://assets/ui/research/paper/river_craft.png"
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "composite_stone_anchors": {
+    "injury_risk": -0.0016,
+    "naval_capacity": 0.0029
+   },
+   "harbor_dues_by_cargo": {
+    "disaster_resilience": 0.0016,
+    "state_capacity": 0.004,
+    "trade_capacity": -0.0008
+   },
+   "brailed_square_sail": {
+    "injury_risk": -0.0024,
+    "naval_capacity": 0.012,
+    "route_speed": 0.0048,
+    "trade_capacity": 0.0025
+   },
+   "axle_sleeve_fitting": {
+    "haul_capacity": 0.0032,
+    "repair_capacity": 0.008
+   },
+   "traveling_balance_kits": {
+    "standardization": 0.0032,
+    "trade_capacity": 0.0025
+   },
+   "rutted_rock_roadbeds": {
+    "haul_capacity": 0.0032,
+    "injury_risk": -0.0008,
+    "labor_demand": 0.0024,
+    "route_speed": 0.0048
+   },
+   "launching_cradles": {
+    "construction_rate": 0.0024,
+    "injury_risk": -0.0008,
+    "naval_capacity": 0.0024
+   },
+   "deep_hold_merchantmen": {
+    "container_capacity": 0.0048,
+    "disease_exposure": 0.0016,
+    "haul_capacity": 0.0048,
+    "naval_capacity": 0.0144,
+    "timber_pressure": 0.0048,
+    "trade_capacity": 0.0059
+   },
+   "keel_scarfing": {
+    "naval_capacity": 0.0029,
+    "repair_capacity": 0.0032
+   },
+   "grown_frame_selection": {
+    "construction_rate": 0.0016,
+    "naval_capacity": 0.0024,
+    "timber_pressure": 0.0016
+   },
+   "frame_moulding": {
+    "construction_rate": 0.0024,
+    "naval_capacity": 0.0024,
+    "standardization": 0.004
+   },
+   "camel_caravans": {
+    "haul_capacity": 0.0096,
+    "logistics_endurance": 0.016,
+    "route_speed": 0.0032,
+    "trade_capacity": 0.0051
+   },
+   "desert_water_stages": {
+    "labor_demand": 0.0016,
+    "logistics_endurance": 0.008,
+    "route_speed": 0.0032,
+    "water_access": 0.0032
+   },
+   "mule_breeding": {
+    "fatigue": -0.0016,
+    "haul_capacity": 0.008,
+    "logistics_endurance": 0.0048
+   },
+   "mounted_messengers": {
+    "route_speed": 0.0032,
+    "state_capacity": 0.0024,
+    "travel_speed": 0.008
+   },
+   "merchant_ship_convoys": {
+    "injury_risk": -0.0016,
+    "naval_capacity": 0.0029,
+    "trade_capacity": 0.0021
+   },
+   "weighed_silver_payment": {
+    "state_capacity": 0.0016,
+    "trade_capacity": 0.0051
+   },
+   "coastal_trading_colonies": {
+    "adoption_rate": 0.0032,
+    "cohesion": -0.0032,
+    "naval_capacity": 0.0019,
+    "trade_capacity": 0.0042
+   },
+   "forward_supply_depots": {
+    "food_storage": 0.0032,
+    "labor_demand": 0.0024,
+    "logistics_endurance": 0.008,
+    "warfare_readiness": 0.0024
+   },
+   "paved_ship_haulway": {
+    "labor_demand": 0.0024,
+    "naval_capacity": 0.0019,
+    "route_speed": 0.004,
+    "trade_capacity": 0.0013
+   },
+   "paired_quarter_rudders": {
+    "injury_risk": -0.0016,
+    "naval_capacity": 0.0038,
+    "route_speed": 0.0016
+   },
+   "money_changers": {
+    "standardization": 0.0016,
+    "trade_capacity": 0.0042
+   },
+   "coin_count_trade": {
+    "state_capacity": 0.0024,
+    "task_coordination": 0.0016,
+    "trade_capacity": 0.0085
+   },
+   "sleeved_cart_assembly": {
+    "haul_capacity": 0.0048,
+    "repair_capacity": 0.0048,
+    "standardization": 0.0024
+   },
+   "trunk_road_courier_relay": {
+    "labor_demand": 0.0024,
+    "route_speed": 0.0064,
+    "state_capacity": 0.0048,
+    "travel_speed": 0.016
+   },
+   "framed_camel_saddle": {
+    "haul_capacity": 0.0048,
+    "logistics_endurance": 0.0032,
+    "warfare_readiness": 0.0016
+   },
+   "trunk_canals": {
+    "disease_exposure": 0.0032,
+    "ecological_pressure": 0.0024,
+    "haul_capacity": 0.008,
+    "labor_demand": 0.004,
+    "route_speed": 0.0048,
+    "trade_capacity": 0.0025,
+    "water_access": 0.0032
+   },
+   "touchstone_testing": {
+    "standardization": 0.0024,
+    "trade_capacity": 0.0017
+   },
+   "sounding_lead": {
+    "injury_risk": -0.0024,
+    "naval_capacity": 0.0029,
+    "survey_speed": 0.0016
+   },
+   "small_change_coins": {
+    "cohesion": -0.0016,
+    "trade_capacity": 0.003
+   },
+   "written_sailing_directions": {
+    "injury_risk": -0.0016,
+    "knowledge_preservation": 0.0024,
+    "naval_capacity": 0.0038,
+    "route_speed": 0.0024
+   },
+   "written_freight_contracts": {
+    "state_capacity": 0.0016,
+    "storage_loss": -0.0024,
+    "trade_capacity": 0.0025
+   },
+   "harbor_masters": {
+    "naval_capacity": 0.0019,
+    "state_capacity": 0.0016,
+    "task_coordination": 0.0024,
+    "trade_capacity": 0.0021
+   },
+   "voyage_partnerships": {
+    "disaster_resilience": 0.0024,
+    "trade_capacity": 0.0025
+   },
+   "tide_reckoning": {
+    "injury_risk": -0.0016,
+    "naval_capacity": 0.0024,
+    "route_speed": 0.0016
+   },
+   "deposit_transfer_orders": {
+    "knowledge_preservation": 0.0016,
+    "state_capacity": 0.0024,
+    "trade_capacity": 0.0064
+   },
+   "general_average_jettison": {
+    "cohesion": 0.0008,
+    "disaster_resilience": 0.0024,
+    "trade_capacity": 0.0017
+   },
+   "breast_strap_harness": {
+    "fatigue": -0.0024,
+    "haul_capacity": 0.008,
+    "route_speed": 0.0016
+   },
+   "lead_hull_sheathing": {
+    "naval_capacity": 0.0029,
+    "repair_capacity": 0.0032,
+    "water_pollution": 0.0008
+   },
+   "standing_running_rigging": {
+    "injury_risk": -0.0008,
+    "naval_capacity": 0.0038,
+    "route_speed": 0.0016
+   },
+   "wooden_sheave_blocks": {
+    "construction_rate": 0.0024,
+    "haul_capacity": 0.0032,
+    "naval_capacity": 0.0019
+   },
+   "grain_receipt_banks": {
+    "food_storage": 0.0048,
+    "state_capacity": 0.0024,
+    "storage_loss": -0.0024,
+    "trade_capacity": 0.0021
+   },
+   "flash_lock_gates": {
+    "haul_capacity": 0.0032,
+    "injury_risk": 0.0016,
+    "route_speed": 0.0032
+   },
+   "duty_free_harbor": {
+    "disease_exposure": 0.0016,
+    "naval_capacity": 0.0014,
+    "state_capacity": -0.0024,
+    "trade_capacity": 0.0042
+   },
+   "transcontinental_relay_trade": {
+    "adoption_rate": 0.0032,
+    "cohesion": -0.0016,
+    "disease_exposure": 0.004,
+    "trade_capacity": 0.0076
+   },
+   "raked_bow_foresail": {
+    "naval_capacity": 0.0029,
+    "route_speed": 0.0016
+   },
+   "frontier_customs_posts": {
+    "legitimacy": -0.0008,
+    "state_capacity": 0.0048,
+    "trade_capacity": -0.0017
+   },
+   "district_road_crews": {
+    "disaster_resilience": 0.0016,
+    "labor_demand": 0.0032,
+    "route_speed": 0.0048
+   },
+   "seasonal_wind_crossings": {
+    "disease_exposure": 0.0016,
+    "injury_risk": 0.0032,
+    "naval_capacity": 0.012,
+    "trade_capacity": 0.0059
+   },
+   "pivoting_front_axle": {
+    "haul_capacity": 0.0064,
+    "injury_risk": -0.0008,
+    "route_speed": 0.0016
+   },
+   "ship_bilge_pumps": {
+    "injury_risk": -0.0024,
+    "naval_capacity": 0.0029,
+    "storage_loss": -0.0016
+   },
+   "stage_animal_hire": {
+    "haul_capacity": 0.0048,
+    "trade_capacity": 0.0013,
+    "travel_speed": 0.0048
+   },
+   "raised_floor_warehouses": {
+    "container_capacity": 0.0048,
+    "food_spoilage": -0.0024,
+    "food_storage": 0.0064,
+    "labor_demand": 0.0016,
+    "storage_loss": -0.0048
+   },
+   "great_bulk_freighters": {
+    "container_capacity": 0.0048,
+    "haul_capacity": 0.0096,
+    "labor_demand": 0.0016,
+    "naval_capacity": 0.012,
+    "timber_pressure": 0.0064,
+    "trade_capacity": 0.0042
+   },
+   "state_post_passes": {
+    "labor_demand": 0.0024,
+    "legitimacy": -0.0024,
+    "route_speed": 0.0032,
+    "state_capacity": 0.008,
+    "travel_speed": 0.012
+   },
+   "state_grain_fleets": {
+    "food_storage": 0.0064,
+    "haul_capacity": 0.0032,
+    "naval_capacity": 0.0029,
+    "state_capacity": 0.0032
+   },
+   "iron_hoof_boots": {
+    "fatigue": -0.0016,
+    "haul_capacity": 0.0032,
+    "logistics_endurance": 0.0024,
+    "route_speed": 0.0016
+   },
+   "treadwheel_quay_cranes": {
+    "construction_rate": 0.0024,
+    "haul_capacity": 0.0048,
+    "injury_risk": -0.0008,
+    "trade_capacity": 0.0013
+   },
+   "lighter_transshipment": {
+    "haul_capacity": 0.004,
+    "labor_demand": 0.0024,
+    "trade_capacity": 0.0017
+   },
+   "painted_cargo_labels": {
+    "knowledge_preservation": 0.0016,
+    "storage_loss": -0.0024,
+    "trade_capacity": 0.0013
+   },
+   "post_horse_studs": {
+    "labor_demand": 0.0024,
+    "logistics_endurance": 0.0032,
+    "travel_speed": 0.0064,
+    "warfare_readiness": 0.0016
+   },
+   "strap_suspended_carriages": {
+    "fatigue": -0.0024,
+    "travel_speed": 0.0032
+   },
+   "common_trade_coin": {
+    "standardization": 0.004,
+    "state_capacity": 0.0024,
+    "trade_capacity": 0.0059
+   },
+   "oasis_caravan_cities": {
+    "food_storage": 0.0016,
+    "logistics_endurance": 0.0048,
+    "security_efficiency": 0.0016,
+    "trade_capacity": 0.0034
+   },
+   "coopered_cargo_casks": {
+    "container_capacity": 0.008,
+    "haul_capacity": 0.0024,
+    "storage_loss": -0.0032,
+    "timber_pressure": 0.0016
+   },
+   "single_wheel_barrow": {
+    "construction_rate": 0.0024,
+    "fatigue": -0.0024,
+    "haul_capacity": 0.0048,
+    "labor_efficiency": 0.0016
+   },
+   "road_itineraries": {
+    "knowledge_preservation": 0.0016,
+    "logistics_endurance": 0.0032,
+    "route_speed": 0.0032
+   },
+   "graded_wagon_classes": {
+    "haul_capacity": 0.0032,
+    "route_speed": 0.0024,
+    "standardization": 0.0032
+   },
+   "transit_bond_seals": {
+    "state_capacity": 0.0016,
+    "storage_loss": -0.0016,
+    "trade_capacity": 0.003
+   },
+   "distant_payment_letters": {
+    "knowledge_preservation": 0.0016,
+    "trade_capacity": 0.0042
+   },
+   "canal_boat_slipways": {
+    "haul_capacity": 0.0032,
+    "labor_demand": 0.0016,
+    "route_speed": 0.0032
+   },
+   "fore_and_aft_sail": {
+    "naval_capacity": 0.0096,
+    "route_speed": 0.0048,
+    "trade_capacity": 0.0025
+   },
+   "strip_route_maps": {
+    "knowledge_preservation": 0.0016,
+    "route_speed": 0.0032,
+    "survey_speed": 0.0024
+   },
+   "river_toll_stations": {
+    "legitimacy": -0.0008,
+    "security_efficiency": 0.0016,
+    "state_capacity": 0.0032,
+    "trade_capacity": 0.0008
+   }
   }
  }
 }

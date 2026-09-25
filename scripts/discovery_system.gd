@@ -523,6 +523,7 @@ func _discovery_is_eligible(discovery:Dictionary,current_day:int,known:Variant=n
 	var id:=String(discovery.get("id",""))
 	if id in known or not _path_is_viable(discovery):return false
 	if not research_600_open(discovery,{},current_day):return false # research_600: era and design conditions
+	if not Research600.pursued(id,society_model.ceiling_era):return false # research_3000: superseded practice abandoned
 	return OpeningOpportunities.ready(id) and Pathways.ready(discovery,current_day,known) and _resource_requirements_met(discovery.get("resource_requirements",[]))
 
 func _channel_has_candidate(channel:String,current_day:int)->bool:
@@ -589,6 +590,9 @@ func _candidate_score(discovery:Dictionary)->float:
 	score+=float(discovery.get("stage_index",0))*3.5
 	# Work far beyond current scholarship is slow; lines prefer questions of their age.
 	score-=log(era_cost_multiplier(discovery))/log(2.0)*20.0
+	# research_3000: and they take up the current frontier before older leftovers.
+	score-=Research600.staleness(id,society_model.ceiling_era)*20.0
+	if Research600.dead_end(id): score-=Research600.DEAD_END_PENALTY
 	score+=Pathways.need(discovery)+(35.0 if not Pathways.evidence(id).is_empty() else 0.0)
 	return score
 
@@ -908,11 +912,13 @@ func research_capacity_for(dynamic_id:String,subcategory:String)->Dictionary:
 	var institutional_capacity:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.25)),0.0,1.0)
 	var education:=preload("res://scripts/civilization_indicators.gd").education_index()
 	var support_multiplier:=food_support*material_support*lerpf(0.78,1.18,institutional_capacity)*lerpf(0.55,1.45,education)
+	# research_3000: a large, literate, well-governed society runs many investigations at once.
+	var parallel:=preload("res://scripts/research_600_catalog.gd").parallel_capacity(float(WorldSimulation.state.population_exact),institutional_capacity,effect("literacy"))
 	return {
 		"weight":weight,"total_weight":total_weight,"total_researchers":total_researchers,
 		"workforce_share":workforce_share,"researchers":researchers,"team_scale":team_scale,
-		"education":education,"science_capacity":researchers*education,
-		"support_multiplier":support_multiplier,"progress_multiplier":team_scale*support_multiplier*(1.0+preload("res://scripts/artifact_collection.gd").bonus(dynamic_id))
+		"education":education,"science_capacity":researchers*education,"parallel":parallel,
+		"support_multiplier":support_multiplier,"progress_multiplier":team_scale*support_multiplier*parallel*(1.0+preload("res://scripts/artifact_collection.gd").bonus(dynamic_id))
 	}
 
 
@@ -1051,8 +1057,10 @@ func select_research_target(discovery_id:String)->Dictionary:
 ## `known` (default: the acting society's discoveries) supplies design
 ## precedents, which make research quicker but are never required.
 func research_difficulty(discovery:Dictionary,civilization_seed:int,level:float=NAN,known:Variant=null)->float:
+	# research_3000: the society's own superseded practices are slower to take up.
+	var stale:=Research600.stale_factor(String(discovery.get("id","")),society_model.ceiling_era) if known==null else 1.0
 	if known==null: known=WorldSimulation.state.known_discoveries
-	return (0.85+_research_draw(String(discovery.id),civilization_seed,"cost")*0.30)*era_cost_multiplier(discovery,level)/Research600.precedent_factor(String(discovery.id),known)
+	return (0.85+_research_draw(String(discovery.id),civilization_seed,"cost")*0.30)*era_cost_multiplier(discovery,level)/Research600.precedent_factor(String(discovery.id),known)*stale
 
 
 ## Game-year equivalent of a discovery's historical period (TechnologyEras).

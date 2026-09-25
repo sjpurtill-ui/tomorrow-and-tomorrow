@@ -4,9 +4,9 @@
  "items": {
   "long_distance_conduits": {
    "effects": {
-    "water_access": 0.008,
-    "water_safety": 0.003,
-    "labor_demand": 0.004
+    "labor_demand": 0.0002,
+    "water_access": 0.0015,
+    "water_safety": 0.002
    },
    "name": "Long-Distance Conduits",
    "observation": "The new conduit taps springs two days' walk away, tunnels through two ridges and crosses the valley on a double tier of arches.",
@@ -15,9 +15,9 @@
   },
   "reused_stone_building": {
    "effects": {
-    "construction_rate": 0.005,
-    "stone_yield": 0.003,
-    "labor_demand": -0.001
+    "construction_rate": 0.0039,
+    "labor_demand": -0.0002,
+    "stone_yield": 0.003
    },
    "name": "Stone Reuse",
    "observation": "The old hall's columns and dressed blocks are carted off to build the new walls, and the ruins shrink year by year.",
@@ -25,9 +25,9 @@
   },
   "reservoir_valve_pits": {
    "effects": {
-    "water_access": 0.004,
-    "disaster_resilience": 0.002,
-    "cultivation_yield": 0.002
+    "cultivation_yield": 0.0004,
+    "disaster_resilience": 0.0008,
+    "water_access": 0.0008
    },
    "name": "Reservoir Valve Pits",
    "observation": "A stone-lined pit at the foot of the dam holds a bronze valve, and the keeper opens it by measure in the dry months.",
@@ -35,11 +35,11 @@
   },
   "open_town_cisterns": {
    "effects": {
-    "water_access": 0.005,
-    "disaster_resilience": 0.003,
-    "labor_demand": 0.002,
+    "disaster_resilience": 0.0012,
     "disease_exposure": 0.001,
-    "water_safety": 0.001
+    "labor_demand": 0.0001,
+    "water_access": 0.001,
+    "water_safety": 0.0007
    },
    "name": "Open Town Cisterns",
    "observation": "A walled basin the size of a field holds enough water inside the town to outlast a summer siege.",
@@ -47,10 +47,10 @@
   },
   "great_tank_reservoirs": {
    "effects": {
-    "water_access": 0.008,
-    "cultivation_yield": 0.004,
-    "labor_demand": 0.004,
-    "disease_exposure": 0.001
+    "cultivation_yield": 0.0008,
+    "disease_exposure": 0.001,
+    "labor_demand": 0.0002,
+    "water_access": 0.0015
    },
    "name": "Great Tanks",
    "observation": "An earthen bank a mile long holds back the rainy-season run-off, and channels carry it to fields three villages away.",
@@ -59,10 +59,10 @@
   },
   "lead_sheet_roofing": {
    "effects": {
-    "housing_output": 0.004,
-    "disaster_resilience": 0.003,
-    "repair_capacity": 0.001,
-    "health_risk": 0.001
+    "disaster_resilience": 0.0008,
+    "health_risk": 0.001,
+    "housing_output": 0.0007,
+    "repair_capacity": 0.001
    },
    "name": "Lead Roofing",
    "observation": "Sheets of cast lead are laid over the dome's timbers, lapped and rolled at the seams, and shed the rain for a century.",
@@ -70,10 +70,10 @@
   },
   "thin_brick_shell_vaults": {
    "effects": {
-    "construction_rate": 0.004,
-    "housing_output": 0.005,
-    "timber_pressure": -0.002,
-    "disaster_resilience": 0.002
+    "construction_rate": 0.0011,
+    "disaster_resilience": 0.0005,
+    "housing_output": 0.0008,
+    "timber_pressure": -0.0009
    },
    "name": "Thin Brick Vaults",
    "observation": "Flat bricks laid in quick-setting mortar climb in leaning courses until the vault closes, without a stick of centring.",
@@ -81,11 +81,11 @@
   },
   "pendentive_domes": {
    "effects": {
-    "housing_output": 0.006,
-    "legitimacy": 0.0035,
-    "construction_rate": 0.004,
-    "disaster_resilience": 0.003,
-    "labor_demand": 0.005
+    "construction_rate": 0.0011,
+    "disaster_resilience": 0.0008,
+    "housing_output": 0.001,
+    "labor_demand": 0.0003,
+    "legitimacy": 0.0002
    },
    "name": "Pendentive Domes",
    "observation": "Four curved triangles of brick rise from the corners of the square bay and meet in a ring, and the dome sits on the ring as if floating.",
@@ -95,10 +95,10 @@
   },
   "buttressing_half_domes": {
    "effects": {
-    "disaster_resilience": 0.004,
-    "housing_output": 0.003,
-    "construction_rate": 0.002,
-    "labor_demand": 0.002
+    "construction_rate": 0.0006,
+    "disaster_resilience": 0.001,
+    "housing_output": 0.0005,
+    "labor_demand": 0.0001
    },
    "name": "Half-Dome Buttressing",
    "observation": "Two half-domes lean against the great dome from east and west, catching its thrust and carrying it down to the ground.",
@@ -106,10 +106,10 @@
   },
   "stepwells": {
    "effects": {
-    "water_access": 0.007,
-    "disaster_resilience": 0.002,
-    "cohesion": 0.002,
-    "labor_demand": 0.003,
+    "cohesion": 0.0001,
+    "disaster_resilience": 0.0007,
+    "labor_demand": 0.0002,
+    "water_access": 0.004,
     "water_safety": -0.001
    },
    "name": "Stepwells",
@@ -118,12 +118,12 @@
   },
   "open_spandrel_arch_bridges": {
    "effects": {
-    "route_speed": 0.006,
-    "disaster_resilience": 0.005,
-    "haul_capacity": 0.003,
-    "construction_rate": 0.002,
-    "trade_capacity": 0.0013,
-    "labor_demand": 0.003
+    "construction_rate": 0.0014,
+    "disaster_resilience": 0.0017,
+    "haul_capacity": 0.0005,
+    "labor_demand": 0.0002,
+    "route_speed": 0.005,
+    "trade_capacity": 0.0004
    },
    "name": "Open-Spandrel Bridges",
    "observation": "One long, flat arch leaps the river, and small arches pierced through its shoulders let the floodwater pass instead of pushing it over.",
@@ -132,8 +132,8 @@
   },
   "bracket_set_timber_towers": {
    "effects": {
-    "disaster_resilience": 0.004,
-    "construction_rate": 0.003,
+    "construction_rate": 0.0021,
+    "disaster_resilience": 0.0014,
     "timber_pressure": 0.003
    },
    "name": "Bracket-Set Towers",
@@ -142,10 +142,10 @@
   },
   "plank_walled_timber_halls": {
    "effects": {
-    "housing_output": 0.004,
-    "construction_rate": 0.003,
-    "timber_pressure": 0.003,
-    "disaster_risk": 0.001
+    "construction_rate": 0.0021,
+    "disaster_risk": 0.001,
+    "housing_output": 0.002,
+    "timber_pressure": 0.003
    },
    "name": "Plank-Walled Halls",
    "observation": "Great posts sunk in the ground carry the roof, and split planks set upright between them wall in the chief's long hall.",
@@ -154,8 +154,8 @@
   "horseshoe_arches": {
    "effects": {
     "construction_rate": 0.002,
-    "housing_output": 0.003,
-    "disaster_resilience": 0.002
+    "disaster_resilience": 0.002,
+    "housing_output": 0.0012
    },
    "name": "Horseshoe Arches",
    "observation": "The arch swells wider than its opening before closing at the top, resting on columns carried from older buildings.",
@@ -163,11 +163,11 @@
   },
   "domed_steam_baths": {
    "effects": {
-    "sanitation": 0.004,
-    "health_protection": 0.002,
-    "cohesion": 0.002,
+    "cohesion": 0.0001,
     "disease_exposure": 0.002,
-    "fuel_demand": 0.003
+    "fuel_demand": 0.003,
+    "health_protection": 0.0011,
+    "sanitation": 0.004
    },
    "name": "Steam Baths",
    "observation": "Light falls through star-shaped holes in the dome onto bathers sweating on hot marble, while a furnace below heats the floor.",
@@ -175,10 +175,10 @@
   },
   "channelled_garden_courts": {
    "effects": {
-    "water_access": 0.002,
-    "cultivation_yield": 0.002,
-    "legitimacy": 0.0014,
-    "health_protection": 0.001
+    "cultivation_yield": 0.0004,
+    "health_protection": 0.0005,
+    "legitimacy": 0.0001,
+    "water_access": 0.0008
    },
    "name": "Channelled Gardens",
    "observation": "Narrow stone channels cross the court, and water from the fountain where they meet runs out to every flower bed.",
@@ -186,11 +186,11 @@
   },
   "river_diversion_weirs": {
    "effects": {
-    "water_access": 0.008,
-    "cultivation_yield": 0.005,
-    "labor_demand": 0.003,
+    "cultivation_yield": 0.0009,
     "disaster_risk": 0.001,
-    "ecological_pressure": 0.002
+    "ecological_pressure": 0.002,
+    "labor_demand": 0.0002,
+    "water_access": 0.0032
    },
    "name": "Diversion Weirs",
    "observation": "A low weir of stone and brushwood across the river lifts the water just enough to spill it into the canal mouth.",
@@ -198,9 +198,9 @@
   },
   "carved_stucco": {
    "effects": {
-    "housing_output": 0.002,
-    "legitimacy": 0.0014,
-    "construction_rate": 0.001
+    "construction_rate": 0.001,
+    "housing_output": 0.0008,
+    "legitimacy": 0.0001
    },
    "name": "Carved Stucco",
    "observation": "Wet plaster over the brick is carved into vines and lettering before it sets, and the hall looks as if hung with lace.",
@@ -208,10 +208,10 @@
   },
   "cross_domed_halls": {
    "effects": {
-    "housing_output": 0.004,
-    "construction_rate": 0.003,
-    "disaster_resilience": 0.002,
-    "labor_demand": 0.002
+    "construction_rate": 0.0011,
+    "disaster_resilience": 0.0006,
+    "housing_output": 0.0013,
+    "labor_demand": 0.0001
    },
    "name": "Cross-Domed Halls",
    "observation": "Four barrel vaults meet under a central dome on four piers, and the plan of the hall is a cross within a square.",
@@ -219,9 +219,9 @@
   },
   "pointed_arches": {
    "effects": {
-    "construction_rate": 0.006,
-    "disaster_resilience": 0.005,
-    "housing_output": 0.004
+    "construction_rate": 0.0021,
+    "disaster_resilience": 0.0015,
+    "housing_output": 0.0013
    },
    "name": "Pointed Arches",
    "observation": "The mason sets two curves of stone leaning together, and the arch stands higher and presses less on its walls.",
@@ -230,10 +230,10 @@
   },
   "corbelled_spire_towers": {
    "effects": {
-    "legitimacy": 0.0014,
-    "construction_rate": 0.002,
-    "security_efficiency": 0.001,
-    "labor_demand": 0.002
+    "construction_rate": 0.0007,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0001
    },
    "name": "Corbelled Spires",
    "observation": "Each course of stone juts a little inward over the one below, until the tower closes in a tall curved peak.",
@@ -241,10 +241,10 @@
   },
   "wind_catchers": {
    "effects": {
-    "health_protection": 0.003,
-    "housing_output": 0.003,
-    "fatigue": -0.002,
-    "food_storage": 0.001
+    "fatigue": -0.0012,
+    "food_storage": 0.0006,
+    "health_protection": 0.0005,
+    "housing_output": 0.001
    },
    "name": "Wind Catchers",
    "observation": "A tower on the roof with openings toward the wind draws the breeze down into the rooms and across a pool of water.",
@@ -252,10 +252,10 @@
   },
   "marsh_causeways": {
    "effects": {
-    "route_speed": 0.005,
-    "haul_capacity": 0.002,
-    "disaster_resilience": 0.003,
-    "labor_demand": 0.003
+    "disaster_resilience": 0.0009,
+    "haul_capacity": 0.0007,
+    "labor_demand": 0.0002,
+    "route_speed": 0.0013
    },
    "name": "Marsh Causeways",
    "observation": "Timber piles driven into the bog carry a paved road, and carts cross the marsh where men once waded to the waist.",
@@ -263,9 +263,9 @@
   },
   "intersecting_rib_domes": {
    "effects": {
-    "construction_rate": 0.003,
-    "housing_output": 0.003,
-    "legitimacy": 0.0014
+    "construction_rate": 0.0011,
+    "housing_output": 0.001,
+    "legitimacy": 0.0001
    },
    "name": "Ribbed Domes",
    "observation": "Arches cross each other under the dome in a star, and the thin shell between them rests on their ribs.",
@@ -273,10 +273,10 @@
   },
   "brick_stair_towers": {
    "effects": {
-    "security_efficiency": 0.002,
     "construction_rate": 0.002,
-    "legitimacy": 0.0014,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0003
    },
    "name": "Brick Stair Towers",
    "observation": "A stair inside the tall brick tower winds up to a gallery, where a crier can be heard across the whole town.",
@@ -284,11 +284,11 @@
   },
   "mill_leats": {
    "effects": {
-    "water_access": 0.004,
-    "labor_efficiency": 0.003,
-    "food_output": 0.002,
-    "labor_demand": 0.003,
-    "ecological_pressure": 0.002
+    "ecological_pressure": 0.002,
+    "food_output": 0.0003,
+    "labor_demand": 0.0002,
+    "labor_efficiency": 0.0004,
+    "water_access": 0.0016
    },
    "name": "Mill Leats",
    "observation": "A dam across the stream feeds a dug channel to the wheel, and a tail-race returns the water to the stream below the mill.",
@@ -296,9 +296,9 @@
   },
   "cutwater_pier_bridges": {
    "effects": {
-    "route_speed": 0.004,
-    "disaster_resilience": 0.003,
-    "haul_capacity": 0.002,
+    "disaster_resilience": 0.0011,
+    "haul_capacity": 0.0007,
+    "route_speed": 0.0013,
     "timber_pressure": 0.002
    },
    "name": "Cutwater Bridges",
@@ -307,13 +307,13 @@
   },
   "canal_locks": {
    "effects": {
-    "haul_capacity": 0.008,
-    "trade_capacity": 0.0039,
-    "route_speed": 0.004,
-    "water_access": 0.002,
-    "state_capacity": 0.0016,
-    "labor_demand": 0.004,
-    "disease_exposure": 0.001
+    "disease_exposure": 0.001,
+    "haul_capacity": 0.0029,
+    "labor_demand": 0.0002,
+    "route_speed": 0.0013,
+    "state_capacity": 0.0003,
+    "trade_capacity": 0.0007,
+    "water_access": 0.0008
    },
    "observation": "The lock keeper shuts the lower gates and opens the sluice above, and the barge rises slowly in its stone chamber to the next reach.",
    "ability_reason": "A chamber with gates at both ends lifts boats between water levels without the rush of a flash lock, so canals can climb hills.",
@@ -322,10 +322,10 @@
   },
   "estuary_embankments": {
    "effects": {
-    "disaster_resilience": 0.006,
-    "cultivation_yield": 0.004,
-    "food_output": 0.002,
-    "labor_demand": 0.004
+    "cultivation_yield": 0.0005,
+    "disaster_resilience": 0.0023,
+    "food_output": 0.0003,
+    "labor_demand": 0.0002
    },
    "name": "Estuary Embankments",
    "observation": "A bank of clay and turf holds back the spring tides, and the salt marsh behind it becomes sheep pasture and then plough land.",
@@ -334,9 +334,9 @@
   },
   "newel_spiral_stairs": {
    "effects": {
-    "construction_rate": 0.003,
-    "housing_output": 0.002,
-    "security_efficiency": 0.001
+    "construction_rate": 0.0016,
+    "housing_output": 0.0011,
+    "security_efficiency": 0.0002
    },
    "name": "Newel Stairs",
    "observation": "Each stone step carries its own slice of the central post, and the stair winds up the tower in a space no wider than a man's arms.",
@@ -344,10 +344,10 @@
   },
   "percussion_drilled_wells": {
    "effects": {
-    "water_access": 0.004,
     "extraction_yield": 0.004,
-    "food_storage": 0.002,
-    "labor_demand": 0.003
+    "food_storage": 0.0015,
+    "labor_demand": 0.0002,
+    "water_access": 0.004
    },
    "name": "Percussion-Drilled Wells",
    "observation": "A heavy iron bit on a cane cable is lifted and dropped for months, and the brine rises from hundreds of feet below.",
@@ -355,11 +355,11 @@
   },
   "crib_work_quays": {
    "effects": {
-    "naval_capacity": 0.004,
-    "trade_capacity": 0.002,
-    "haul_capacity": 0.002,
+    "haul_capacity": 0.0006,
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.0008,
     "timber_pressure": 0.003,
-    "labor_demand": 0.002
+    "trade_capacity": 0.0003
    },
    "name": "Crib-Work Quays",
    "observation": "Log boxes sunk along the waterline and filled with stones make a quay where ships can tie up and unload directly.",
@@ -367,9 +367,9 @@
   },
   "honeycomb_corbel_vaults": {
    "effects": {
-    "legitimacy": 0.0014,
-    "housing_output": 0.002,
-    "construction_rate": 0.001
+    "construction_rate": 0.0005,
+    "housing_output": 0.0011,
+    "legitimacy": 0.0001
    },
    "name": "Honeycomb Vaults",
    "observation": "Tiers of small niches, each corbelled out over the last, fill the corners of the vault like the cells of a comb.",
@@ -377,9 +377,9 @@
   },
   "four_hall_courtyards": {
    "effects": {
-    "housing_output": 0.004,
-    "cohesion": 0.002,
-    "legitimacy": 0.0014
+    "cohesion": 0.0001,
+    "housing_output": 0.0022,
+    "legitimacy": 0.0001
    },
    "name": "Four-Hall Courtyards",
    "observation": "On each side of the court a great vaulted hall opens to the air, for teaching, for prayer and for shade.",
@@ -387,18 +387,18 @@
   },
   "masonry_buttressing": {
    "effects": {
-    "disaster_resilience": 0.005,
-    "construction_rate": 0.003,
-    "housing_output": 0.002
+    "construction_rate": 0.0007,
+    "disaster_resilience": 0.0012,
+    "housing_output": 0.0009
    },
    "observation": "Piers of stone built out from the wall where each vault presses against it keep the wall from leaning outward.",
    "art": "res://assets/ui/research/subjects/curtain_wall_systems-v1.png"
   },
   "vaulted_cloister_walks": {
    "effects": {
-    "housing_output": 0.003,
-    "cohesion": 0.002,
-    "knowledge_preservation": 0.001
+    "cohesion": 0.0001,
+    "housing_output": 0.0014,
+    "knowledge_preservation": 0.0002
    },
    "name": "Vaulted Cloisters",
    "observation": "A covered walk round the garden lets the brothers read and work in the dry, even in the long rains.",
@@ -406,10 +406,10 @@
   },
   "double_shell_domes": {
    "effects": {
-    "legitimacy": 0.0028,
-    "disaster_resilience": 0.002,
-    "construction_rate": 0.002,
-    "labor_demand": 0.003
+    "construction_rate": 0.0005,
+    "disaster_resilience": 0.0005,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001
    },
    "name": "Double-Shell Domes",
    "observation": "A tall outer dome rises over a low inner one, so the dome looks grand from the city and well proportioned from within.",
@@ -417,11 +417,11 @@
   },
   "rib_vaults": {
    "effects": {
-    "construction_rate": 0.006,
-    "housing_output": 0.005,
-    "disaster_resilience": 0.004,
-    "labor_demand": 0.002,
-    "timber_pressure": -0.002
+    "construction_rate": 0.0015,
+    "disaster_resilience": 0.0009,
+    "housing_output": 0.0023,
+    "labor_demand": 0.0001,
+    "timber_pressure": -0.0002
    },
    "name": "Rib Vaults",
    "observation": "The masons build the stone ribs first on light centring, then fill the panels between them with thin stone that needs no support of its own.",
@@ -430,10 +430,10 @@
   },
   "self_closing_tide_gates": {
    "effects": {
-    "disaster_resilience": 0.004,
-    "cultivation_yield": 0.003,
-    "water_access": 0.002,
-    "labor_demand": -0.001
+    "cultivation_yield": 0.0005,
+    "disaster_resilience": 0.0009,
+    "labor_demand": -0.0001,
+    "water_access": 0.002
    },
    "name": "Self-Closing Tide Gates",
    "observation": "Hinged doors in the sluice swing open to drain the fields at low tide and are pushed shut by the rising sea.",
@@ -441,10 +441,10 @@
   },
   "glazed_tile_domes": {
    "effects": {
-    "legitimacy": 0.0021,
-    "disaster_resilience": 0.002,
-    "repair_capacity": 0.001,
-    "fuel_demand": 0.002
+    "disaster_resilience": 0.0005,
+    "fuel_demand": 0.002,
+    "legitimacy": 0.0001,
+    "repair_capacity": 0.001
    },
    "name": "Tile-Faced Domes",
    "observation": "Blue and turquoise tiles cover the dome, shedding the rain and flashing in the sun a day's ride away.",
@@ -452,10 +452,10 @@
   },
   "latrine_chute_towers": {
    "effects": {
+    "disease_exposure": -0.0012,
     "sanitation": 0.006,
-    "disease_exposure": -0.003,
     "water_pollution": 0.002,
-    "water_safety": 0.002
+    "water_safety": 0.0019
    },
    "name": "Latrine Towers",
    "observation": "Privies in a tower at the end of the dormitory drop into a chute over the stream, well away from the well and the kitchens.",
@@ -463,10 +463,10 @@
   },
   "roof_treadwheel_cranes": {
    "effects": {
-    "construction_rate": 0.005,
-    "haul_capacity": 0.002,
-    "injury_risk": -0.001,
-    "labor_demand": -0.001
+    "construction_rate": 0.0008,
+    "haul_capacity": 0.0006,
+    "injury_risk": -0.0002,
+    "labor_demand": -0.0003
    },
    "name": "Roof Treadwheel Cranes",
    "observation": "Two men walking inside a great wheel in the roof space raise the vault stones up through a hole in the floor.",
@@ -474,9 +474,9 @@
   },
   "putlog_scaffolding": {
    "effects": {
-    "construction_rate": 0.005,
-    "injury_risk": -0.002,
-    "timber_pressure": -0.001
+    "construction_rate": 0.0008,
+    "injury_risk": -0.0004,
+    "timber_pressure": -0.0002
    },
    "name": "Putlog Scaffolding",
    "observation": "Poles slotted into square holes left in the wall carry the scaffold, and the holes are filled when the work comes down.",
@@ -484,11 +484,11 @@
   },
   "piped_town_conduits": {
    "effects": {
-    "water_access": 0.008,
-    "water_safety": 0.005,
+    "disease_exposure": -0.0008,
+    "labor_demand": 0.0001,
     "sanitation": 0.003,
-    "disease_exposure": -0.002,
-    "labor_demand": 0.002
+    "water_access": 0.004,
+    "water_safety": 0.0048
    },
    "name": "Piped Town Conduits",
    "observation": "Lead pipes carry spring water from the hill to a fountain in the market, where anyone may fill a bucket for free.",
@@ -496,9 +496,9 @@
   },
   "clustered_piers": {
    "effects": {
-    "construction_rate": 0.003,
-    "housing_output": 0.002,
-    "disaster_resilience": 0.003
+    "construction_rate": 0.0005,
+    "disaster_resilience": 0.0007,
+    "housing_output": 0.0003
    },
    "name": "Clustered Piers",
    "observation": "Slender shafts bundled round each pier rise straight into the ribs of the vault, and the arcade stands taller than any before.",
@@ -506,10 +506,10 @@
   },
   "vaulted_undercrofts": {
    "effects": {
+    "disaster_resilience": 0.0002,
     "dry_storage": 0.005,
-    "food_storage": 0.003,
-    "storage_loss": -0.002,
-    "disaster_resilience": 0.001
+    "food_storage": 0.0008,
+    "storage_loss": -0.001
    },
    "name": "Vaulted Undercrofts",
    "observation": "Under the merchant's hall a stone-vaulted cellar keeps wine and wool cool, dry and safe from fire.",
@@ -517,12 +517,12 @@
   },
   "wall_chimneys": {
    "effects": {
-    "health_protection": 0.006,
-    "housing_output": 0.005,
+    "disaster_risk": -0.0007,
+    "disease_exposure": -0.0008,
     "fuel_efficiency": 0.003,
-    "health_risk": -0.003,
-    "disease_exposure": -0.002,
-    "disaster_risk": -0.002
+    "health_protection": 0.0009,
+    "health_risk": -0.0005,
+    "housing_output": 0.0007
    },
    "name": "Wall Chimneys",
    "observation": "A hooded fireplace in the wall draws the smoke up a flue, and for the first time the upper room is warm and the rafters are not black with soot.",
@@ -532,11 +532,11 @@
   },
   "flying_buttresses": {
    "effects": {
-    "construction_rate": 0.006,
-    "disaster_resilience": 0.005,
-    "housing_output": 0.004,
-    "legitimacy": 0.0028,
-    "labor_demand": 0.004
+    "construction_rate": 0.0009,
+    "disaster_resilience": 0.0012,
+    "housing_output": 0.0006,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001
    },
    "name": "Flying Buttresses",
    "observation": "Half-arches leap from the outer piers over the aisle roofs and press against the high wall just where the vault pushes out.",
@@ -546,10 +546,10 @@
   },
   "bored_log_mains": {
    "effects": {
-    "water_access": 0.007,
-    "water_safety": 0.003,
     "sanitation": 0.002,
-    "timber_pressure": 0.003
+    "timber_pressure": 0.003,
+    "water_access": 0.0025,
+    "water_safety": 0.0008
    },
    "name": "Bored-Log Mains",
    "observation": "Elm logs bored end to end and tapered to fit are laid under the streets, carrying water to houses and cisterns.",
@@ -557,8 +557,8 @@
   },
   "buttress_pinnacles": {
    "effects": {
-    "disaster_resilience": 0.003,
-    "construction_rate": 0.001
+    "construction_rate": 0.0002,
+    "disaster_resilience": 0.0006
    },
    "name": "Buttress Pinnacles",
    "observation": "A heavy stone pinnacle on top of each buttress presses down on it, turning the vault's push into a steadier load.",
@@ -566,11 +566,11 @@
   },
   "inhabited_bridges": {
    "effects": {
-    "trade_capacity": 0.002,
-    "housing_output": 0.003,
-    "route_speed": 0.002,
-    "labor_demand": 0.002,
-    "disaster_risk": 0.002
+    "disaster_risk": 0.002,
+    "housing_output": 0.0008,
+    "labor_demand": 0.0001,
+    "route_speed": 0.001,
+    "trade_capacity": 0.0002
    },
    "name": "Inhabited Bridges",
    "observation": "Shops and houses crowd both sides of the stone bridge, and their rents pay for its repair.",
@@ -579,20 +579,20 @@
   },
   "roof_flashing_interfaces": {
    "effects": {
-    "disaster_resilience": 0.003,
-    "repair_capacity": 0.002,
-    "housing_output": 0.001,
-    "health_risk": 0.001
+    "disaster_resilience": 0.0006,
+    "health_risk": 0.001,
+    "housing_output": 0.0003,
+    "repair_capacity": 0.002
    },
    "observation": "Strips of lead are dressed into the joints where the roof meets the chimney and the wall, and the rain no longer creeps inside.",
    "art": "res://assets/ui/research/paper/roof_flashing_interfaces.png"
   },
   "moulded_brick_architecture": {
    "effects": {
-    "construction_rate": 0.005,
-    "housing_output": 0.003,
-    "legitimacy": 0.0014,
-    "fuel_demand": 0.003
+    "construction_rate": 0.0009,
+    "fuel_demand": 0.0026,
+    "housing_output": 0.0008,
+    "legitimacy": 0.0001
    },
    "name": "Moulded Brick",
    "observation": "Bricks pressed in carved moulds make tracery and cornices without a stone carver, and glazed ones gleam green and black in the wall.",
@@ -600,18 +600,18 @@
   },
   "masonry_repointing": {
    "effects": {
-    "repair_capacity": 0.004,
-    "disaster_resilience": 0.003,
-    "housing_output": 0.001
+    "disaster_resilience": 0.0006,
+    "housing_output": 0.0003,
+    "repair_capacity": 0.004
    },
    "observation": "The masons rake the crumbling mortar out of the old joints and press in new, and the wall stands another century.",
    "art": "res://assets/ui/research/subjects/lime_mortar-v1.png"
   },
   "crown_post_roofs": {
    "effects": {
-    "housing_output": 0.004,
-    "construction_rate": 0.003,
-    "disaster_resilience": 0.003,
+    "construction_rate": 0.0005,
+    "disaster_resilience": 0.0006,
+    "housing_output": 0.0011,
     "timber_pressure": 0.002
    },
    "name": "Crown-Post Roofs",
@@ -620,7 +620,7 @@
   },
   "carved_rain_spouts": {
    "effects": {
-    "disaster_resilience": 0.002,
+    "disaster_resilience": 0.0004,
     "repair_capacity": 0.002,
     "sanitation": 0.002
    },
@@ -630,18 +630,18 @@
   },
   "mortar_compatibility_assessment": {
    "effects": {
-    "repair_capacity": 0.003,
-    "disaster_resilience": 0.002
+    "disaster_resilience": 0.0004,
+    "repair_capacity": 0.003
    },
    "observation": "The master tests the old mortar's colour and softness before mixing the new, so the repair gives way before the stone does.",
    "art": "res://assets/ui/research/subjects/lime_mortar-v1.png"
   },
   "lead_rain_gutters": {
    "effects": {
-    "disaster_resilience": 0.003,
-    "sanitation": 0.003,
+    "disaster_resilience": 0.0006,
+    "health_risk": 0.001,
     "repair_capacity": 0.001,
-    "health_risk": 0.001
+    "sanitation": 0.003
    },
    "name": "Lead Gutters",
    "observation": "Lead gutters along the eaves feed downpipes to the drains, and the lane below stays dry in a storm.",
@@ -649,11 +649,11 @@
   },
   "bar_tracery_windows": {
    "effects": {
-    "housing_output": 0.005,
-    "legitimacy": 0.0028,
-    "construction_rate": 0.003,
-    "health_protection": 0.002,
-    "labor_demand": 0.002
+    "construction_rate": 0.0005,
+    "health_protection": 0.0008,
+    "housing_output": 0.0013,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "name": "Bar Tracery",
    "observation": "Slender stone bars cut to the template branch into circles and trefoils, and the glaziers fill every opening with glass.",
@@ -662,9 +662,9 @@
   },
   "tracing_floor_templates": {
    "effects": {
-    "construction_rate": 0.004,
-    "standardization": 0.004,
-    "knowledge_preservation": 0.002
+    "construction_rate": 0.0007,
+    "knowledge_preservation": 0.0002,
+    "standardization": 0.0006
    },
    "name": "Tracing Floors",
    "observation": "The master scratches the full-size window into the plaster floor, and the carpenters cut wooden templates from his lines.",
@@ -672,10 +672,10 @@
   },
   "stone_merchant_houses": {
    "effects": {
-    "housing_output": 0.005,
-    "trade_capacity": 0.002,
+    "disaster_risk": -0.0001,
     "dry_storage": 0.002,
-    "disaster_risk": -0.002
+    "housing_output": 0.0009,
+    "trade_capacity": 0.0002
    },
    "name": "Stone Merchant Houses",
    "observation": "The merchant lives above a vaulted stone shop with a door on the street, and his goods are safe when the timber houses burn.",
@@ -683,10 +683,10 @@
   },
   "rose_windows": {
    "effects": {
-    "legitimacy": 0.0028,
-    "cohesion": 0.002,
-    "housing_output": 0.001,
-    "labor_demand": 0.002
+    "cohesion": 0.0001,
+    "housing_output": 0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
    },
    "name": "Rose Windows",
    "observation": "Tracery spokes radiate from the centre like the petals of a flower, and the great round window glows over the west door.",
@@ -694,10 +694,10 @@
   },
   "covered_cloth_halls": {
    "effects": {
-    "trade_capacity": 0.0026,
     "dry_storage": 0.003,
-    "storage_loss": -0.002,
-    "standardization": 0.001
+    "standardization": 0.0001,
+    "storage_loss": -0.0007,
+    "trade_capacity": 0.0002
    },
    "name": "Cloth Halls",
    "observation": "The cloth hall is a long covered building where every bolt is laid out, measured and sealed before it is sold.",
@@ -705,10 +705,10 @@
   },
   "jettied_timber_houses": {
    "effects": {
-    "housing_output": 0.006,
-    "construction_rate": 0.003,
+    "construction_rate": 0.0011,
     "disaster_risk": 0.004,
     "disease_exposure": 0.002,
+    "housing_output": 0.001,
     "timber_pressure": 0.003
    },
    "name": "Jettied Houses",
@@ -718,11 +718,11 @@
   },
   "belfry_town_halls": {
    "effects": {
-    "state_capacity": 0.004,
-    "legitimacy": 0.0035,
-    "cohesion": 0.004,
-    "task_coordination": 0.003,
-    "labor_demand": 0.002
+    "cohesion": 0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0002,
+    "state_capacity": 0.0003,
+    "task_coordination": 0.0004
    },
    "name": "Belfry Town Halls",
    "observation": "The council meets above the market hall under a tall belfry, and the charters sit in an iron chest in the tower strongroom.",
@@ -732,10 +732,10 @@
   },
   "stone_party_walls": {
    "effects": {
-    "disaster_resilience": 0.004,
-    "disaster_risk": -0.004,
-    "housing_output": 0.002,
-    "labor_demand": 0.001
+    "disaster_resilience": 0.0013,
+    "disaster_risk": -0.0002,
+    "housing_output": 0.0003,
+    "labor_demand": 0.0001
    },
    "name": "Stone Party Walls",
    "observation": "By ordinance every new house must share a stone wall with its neighbour, so a fire stops at the wall instead of taking the street.",
@@ -743,10 +743,10 @@
   },
   "tiled_stoves": {
    "effects": {
-    "health_protection": 0.004,
     "fuel_efficiency": 0.004,
-    "housing_output": 0.004,
-    "health_risk": -0.002
+    "health_protection": 0.0007,
+    "health_risk": -0.0003,
+    "housing_output": 0.0013
    },
    "name": "Tiled Stoves",
    "observation": "A great stove of glazed tiles in the corner of the room stores the heat of a small fire and gives it back all night, without smoke.",
@@ -754,10 +754,10 @@
   },
   "toll_paved_streets": {
    "effects": {
-    "sanitation": 0.005,
-    "route_speed": 0.003,
+    "disease_exposure": -0.0001,
     "haul_capacity": 0.002,
-    "disease_exposure": -0.002
+    "route_speed": 0.0006,
+    "sanitation": 0.0009
    },
    "name": "Paved Streets",
    "observation": "Tolls on carts at the gates pay for cobbles, and the main streets no longer turn to mud and dung in the rain.",
@@ -766,9 +766,9 @@
   "geometric_design_rules": {
    "effects": {
     "construction_rate": 0.004,
-    "disaster_resilience": 0.004,
-    "standardization": 0.003,
-    "knowledge_preservation": 0.002
+    "disaster_resilience": 0.0008,
+    "knowledge_preservation": 0.0002,
+    "standardization": 0.0005
    },
    "name": "Geometric Design Rules",
    "observation": "The master sets out each pier with compass and square from the width of the hall, and the proportions hold as the building rises.",
@@ -776,9 +776,9 @@
   },
   "house_glass_windows": {
    "effects": {
-    "housing_output": 0.005,
-    "health_protection": 0.003,
-    "fuel_efficiency": 0.002
+    "fuel_efficiency": 0.002,
+    "health_protection": 0.0006,
+    "housing_output": 0.0016
    },
    "name": "Glazed House Windows",
    "observation": "Small diamond panes set in lead let light into the merchant's parlour while keeping out the wind and rain.",
@@ -786,10 +786,10 @@
   },
   "arcaded_market_squares": {
    "effects": {
-    "trade_capacity": 0.0026,
-    "housing_output": 0.002,
-    "cohesion": 0.002,
-    "dry_storage": 0.001
+    "cohesion": 0.0001,
+    "dry_storage": 0.001,
+    "housing_output": 0.0006,
+    "trade_capacity": 0.0003
    },
    "name": "Arcaded Squares",
    "observation": "Arcades on all four sides of the square keep buyers and sellers dry, and the market goes on through the rain.",
@@ -797,15 +797,452 @@
   },
   "flat_segmental_bridges": {
    "effects": {
-    "route_speed": 0.005,
+    "disaster_resilience": 0.0006,
     "haul_capacity": 0.003,
-    "disaster_resilience": 0.003,
-    "trade_capacity": 0.0013,
-    "labor_demand": 0.003
+    "labor_demand": 0.0002,
+    "route_speed": 0.001,
+    "trade_capacity": 0.0002
    },
    "name": "Flat Segmental Bridges",
    "observation": "Three wide, shallow arches span the river where five narrow ones stood before, and barges pass beneath with room to spare.",
    "art": "res://assets/ui/research/subjects/timber_bridges-v1.png"
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "long_distance_conduits": {
+    "labor_demand": 0.004,
+    "water_access": 0.008,
+    "water_safety": 0.003
+   },
+   "reused_stone_building": {
+    "construction_rate": 0.005,
+    "labor_demand": -0.001,
+    "stone_yield": 0.003
+   },
+   "reservoir_valve_pits": {
+    "cultivation_yield": 0.002,
+    "disaster_resilience": 0.002,
+    "water_access": 0.004
+   },
+   "open_town_cisterns": {
+    "disaster_resilience": 0.003,
+    "disease_exposure": 0.001,
+    "labor_demand": 0.002,
+    "water_access": 0.005,
+    "water_safety": 0.001
+   },
+   "great_tank_reservoirs": {
+    "cultivation_yield": 0.004,
+    "disease_exposure": 0.001,
+    "labor_demand": 0.004,
+    "water_access": 0.008
+   },
+   "lead_sheet_roofing": {
+    "disaster_resilience": 0.003,
+    "health_risk": 0.001,
+    "housing_output": 0.004,
+    "repair_capacity": 0.001
+   },
+   "thin_brick_shell_vaults": {
+    "construction_rate": 0.004,
+    "disaster_resilience": 0.002,
+    "housing_output": 0.005,
+    "timber_pressure": -0.002
+   },
+   "pendentive_domes": {
+    "construction_rate": 0.004,
+    "disaster_resilience": 0.003,
+    "housing_output": 0.006,
+    "labor_demand": 0.005,
+    "legitimacy": 0.0035
+   },
+   "buttressing_half_domes": {
+    "construction_rate": 0.002,
+    "disaster_resilience": 0.004,
+    "housing_output": 0.003,
+    "labor_demand": 0.002
+   },
+   "stepwells": {
+    "cohesion": 0.002,
+    "disaster_resilience": 0.002,
+    "labor_demand": 0.003,
+    "water_access": 0.007,
+    "water_safety": -0.001
+   },
+   "open_spandrel_arch_bridges": {
+    "construction_rate": 0.002,
+    "disaster_resilience": 0.005,
+    "haul_capacity": 0.003,
+    "labor_demand": 0.003,
+    "route_speed": 0.006,
+    "trade_capacity": 0.0013
+   },
+   "bracket_set_timber_towers": {
+    "construction_rate": 0.003,
+    "disaster_resilience": 0.004,
+    "timber_pressure": 0.003
+   },
+   "plank_walled_timber_halls": {
+    "construction_rate": 0.003,
+    "disaster_risk": 0.001,
+    "housing_output": 0.004,
+    "timber_pressure": 0.003
+   },
+   "horseshoe_arches": {
+    "construction_rate": 0.002,
+    "disaster_resilience": 0.002,
+    "housing_output": 0.003
+   },
+   "domed_steam_baths": {
+    "cohesion": 0.002,
+    "disease_exposure": 0.002,
+    "fuel_demand": 0.003,
+    "health_protection": 0.002,
+    "sanitation": 0.004
+   },
+   "channelled_garden_courts": {
+    "cultivation_yield": 0.002,
+    "health_protection": 0.001,
+    "legitimacy": 0.0014,
+    "water_access": 0.002
+   },
+   "river_diversion_weirs": {
+    "cultivation_yield": 0.005,
+    "disaster_risk": 0.001,
+    "ecological_pressure": 0.002,
+    "labor_demand": 0.003,
+    "water_access": 0.008
+   },
+   "carved_stucco": {
+    "construction_rate": 0.001,
+    "housing_output": 0.002,
+    "legitimacy": 0.0014
+   },
+   "cross_domed_halls": {
+    "construction_rate": 0.003,
+    "disaster_resilience": 0.002,
+    "housing_output": 0.004,
+    "labor_demand": 0.002
+   },
+   "pointed_arches": {
+    "construction_rate": 0.006,
+    "disaster_resilience": 0.005,
+    "housing_output": 0.004
+   },
+   "corbelled_spire_towers": {
+    "construction_rate": 0.002,
+    "labor_demand": 0.002,
+    "legitimacy": 0.0014,
+    "security_efficiency": 0.001
+   },
+   "wind_catchers": {
+    "fatigue": -0.002,
+    "food_storage": 0.001,
+    "health_protection": 0.003,
+    "housing_output": 0.003
+   },
+   "marsh_causeways": {
+    "disaster_resilience": 0.003,
+    "haul_capacity": 0.002,
+    "labor_demand": 0.003,
+    "route_speed": 0.005
+   },
+   "intersecting_rib_domes": {
+    "construction_rate": 0.003,
+    "housing_output": 0.003,
+    "legitimacy": 0.0014
+   },
+   "brick_stair_towers": {
+    "construction_rate": 0.002,
+    "labor_demand": 0.002,
+    "legitimacy": 0.0014,
+    "security_efficiency": 0.002
+   },
+   "mill_leats": {
+    "ecological_pressure": 0.002,
+    "food_output": 0.002,
+    "labor_demand": 0.003,
+    "labor_efficiency": 0.003,
+    "water_access": 0.004
+   },
+   "cutwater_pier_bridges": {
+    "disaster_resilience": 0.003,
+    "haul_capacity": 0.002,
+    "route_speed": 0.004,
+    "timber_pressure": 0.002
+   },
+   "canal_locks": {
+    "disease_exposure": 0.001,
+    "haul_capacity": 0.008,
+    "labor_demand": 0.004,
+    "route_speed": 0.004,
+    "state_capacity": 0.0016,
+    "trade_capacity": 0.0039,
+    "water_access": 0.002
+   },
+   "estuary_embankments": {
+    "cultivation_yield": 0.004,
+    "disaster_resilience": 0.006,
+    "food_output": 0.002,
+    "labor_demand": 0.004
+   },
+   "newel_spiral_stairs": {
+    "construction_rate": 0.003,
+    "housing_output": 0.002,
+    "security_efficiency": 0.001
+   },
+   "percussion_drilled_wells": {
+    "extraction_yield": 0.004,
+    "food_storage": 0.002,
+    "labor_demand": 0.003,
+    "water_access": 0.004
+   },
+   "crib_work_quays": {
+    "haul_capacity": 0.002,
+    "labor_demand": 0.002,
+    "naval_capacity": 0.004,
+    "timber_pressure": 0.003,
+    "trade_capacity": 0.002
+   },
+   "honeycomb_corbel_vaults": {
+    "construction_rate": 0.001,
+    "housing_output": 0.002,
+    "legitimacy": 0.0014
+   },
+   "four_hall_courtyards": {
+    "cohesion": 0.002,
+    "housing_output": 0.004,
+    "legitimacy": 0.0014
+   },
+   "masonry_buttressing": {
+    "construction_rate": 0.003,
+    "disaster_resilience": 0.005,
+    "housing_output": 0.002
+   },
+   "vaulted_cloister_walks": {
+    "cohesion": 0.002,
+    "housing_output": 0.003,
+    "knowledge_preservation": 0.001
+   },
+   "double_shell_domes": {
+    "construction_rate": 0.002,
+    "disaster_resilience": 0.002,
+    "labor_demand": 0.003,
+    "legitimacy": 0.0028
+   },
+   "rib_vaults": {
+    "construction_rate": 0.006,
+    "disaster_resilience": 0.004,
+    "housing_output": 0.005,
+    "labor_demand": 0.002,
+    "timber_pressure": -0.002
+   },
+   "self_closing_tide_gates": {
+    "cultivation_yield": 0.003,
+    "disaster_resilience": 0.004,
+    "labor_demand": -0.001,
+    "water_access": 0.002
+   },
+   "glazed_tile_domes": {
+    "disaster_resilience": 0.002,
+    "fuel_demand": 0.002,
+    "legitimacy": 0.0021,
+    "repair_capacity": 0.001
+   },
+   "latrine_chute_towers": {
+    "disease_exposure": -0.003,
+    "sanitation": 0.006,
+    "water_pollution": 0.002,
+    "water_safety": 0.002
+   },
+   "roof_treadwheel_cranes": {
+    "construction_rate": 0.005,
+    "haul_capacity": 0.002,
+    "injury_risk": -0.001,
+    "labor_demand": -0.001
+   },
+   "putlog_scaffolding": {
+    "construction_rate": 0.005,
+    "injury_risk": -0.002,
+    "timber_pressure": -0.001
+   },
+   "piped_town_conduits": {
+    "disease_exposure": -0.002,
+    "labor_demand": 0.002,
+    "sanitation": 0.003,
+    "water_access": 0.008,
+    "water_safety": 0.005
+   },
+   "clustered_piers": {
+    "construction_rate": 0.003,
+    "disaster_resilience": 0.003,
+    "housing_output": 0.002
+   },
+   "vaulted_undercrofts": {
+    "disaster_resilience": 0.001,
+    "dry_storage": 0.005,
+    "food_storage": 0.003,
+    "storage_loss": -0.002
+   },
+   "wall_chimneys": {
+    "disaster_risk": -0.002,
+    "disease_exposure": -0.002,
+    "fuel_efficiency": 0.003,
+    "health_protection": 0.006,
+    "health_risk": -0.003,
+    "housing_output": 0.005
+   },
+   "flying_buttresses": {
+    "construction_rate": 0.006,
+    "disaster_resilience": 0.005,
+    "housing_output": 0.004,
+    "labor_demand": 0.004,
+    "legitimacy": 0.0028
+   },
+   "bored_log_mains": {
+    "sanitation": 0.002,
+    "timber_pressure": 0.003,
+    "water_access": 0.007,
+    "water_safety": 0.003
+   },
+   "buttress_pinnacles": {
+    "construction_rate": 0.001,
+    "disaster_resilience": 0.003
+   },
+   "inhabited_bridges": {
+    "disaster_risk": 0.002,
+    "housing_output": 0.003,
+    "labor_demand": 0.002,
+    "route_speed": 0.002,
+    "trade_capacity": 0.002
+   },
+   "roof_flashing_interfaces": {
+    "disaster_resilience": 0.003,
+    "health_risk": 0.001,
+    "housing_output": 0.001,
+    "repair_capacity": 0.002
+   },
+   "moulded_brick_architecture": {
+    "construction_rate": 0.005,
+    "fuel_demand": 0.003,
+    "housing_output": 0.003,
+    "legitimacy": 0.0014
+   },
+   "masonry_repointing": {
+    "disaster_resilience": 0.003,
+    "housing_output": 0.001,
+    "repair_capacity": 0.004
+   },
+   "crown_post_roofs": {
+    "construction_rate": 0.003,
+    "disaster_resilience": 0.003,
+    "housing_output": 0.004,
+    "timber_pressure": 0.002
+   },
+   "carved_rain_spouts": {
+    "disaster_resilience": 0.002,
+    "repair_capacity": 0.002,
+    "sanitation": 0.002
+   },
+   "mortar_compatibility_assessment": {
+    "disaster_resilience": 0.002,
+    "repair_capacity": 0.003
+   },
+   "lead_rain_gutters": {
+    "disaster_resilience": 0.003,
+    "health_risk": 0.001,
+    "repair_capacity": 0.001,
+    "sanitation": 0.003
+   },
+   "bar_tracery_windows": {
+    "construction_rate": 0.003,
+    "health_protection": 0.002,
+    "housing_output": 0.005,
+    "labor_demand": 0.002,
+    "legitimacy": 0.0028
+   },
+   "tracing_floor_templates": {
+    "construction_rate": 0.004,
+    "knowledge_preservation": 0.002,
+    "standardization": 0.004
+   },
+   "stone_merchant_houses": {
+    "disaster_risk": -0.002,
+    "dry_storage": 0.002,
+    "housing_output": 0.005,
+    "trade_capacity": 0.002
+   },
+   "rose_windows": {
+    "cohesion": 0.002,
+    "housing_output": 0.001,
+    "labor_demand": 0.002,
+    "legitimacy": 0.0028
+   },
+   "covered_cloth_halls": {
+    "dry_storage": 0.003,
+    "standardization": 0.001,
+    "storage_loss": -0.002,
+    "trade_capacity": 0.0026
+   },
+   "jettied_timber_houses": {
+    "construction_rate": 0.003,
+    "disaster_risk": 0.004,
+    "disease_exposure": 0.002,
+    "housing_output": 0.006,
+    "timber_pressure": 0.003
+   },
+   "belfry_town_halls": {
+    "cohesion": 0.004,
+    "labor_demand": 0.002,
+    "legitimacy": 0.0035,
+    "state_capacity": 0.004,
+    "task_coordination": 0.003
+   },
+   "stone_party_walls": {
+    "disaster_resilience": 0.004,
+    "disaster_risk": -0.004,
+    "housing_output": 0.002,
+    "labor_demand": 0.001
+   },
+   "tiled_stoves": {
+    "fuel_efficiency": 0.004,
+    "health_protection": 0.004,
+    "health_risk": -0.002,
+    "housing_output": 0.004
+   },
+   "toll_paved_streets": {
+    "disease_exposure": -0.002,
+    "haul_capacity": 0.002,
+    "route_speed": 0.003,
+    "sanitation": 0.005
+   },
+   "geometric_design_rules": {
+    "construction_rate": 0.004,
+    "disaster_resilience": 0.004,
+    "knowledge_preservation": 0.002,
+    "standardization": 0.003
+   },
+   "house_glass_windows": {
+    "fuel_efficiency": 0.002,
+    "health_protection": 0.003,
+    "housing_output": 0.005
+   },
+   "arcaded_market_squares": {
+    "cohesion": 0.002,
+    "dry_storage": 0.001,
+    "housing_output": 0.002,
+    "trade_capacity": 0.0026
+   },
+   "flat_segmental_bridges": {
+    "disaster_resilience": 0.003,
+    "haul_capacity": 0.003,
+    "labor_demand": 0.003,
+    "route_speed": 0.005,
+    "trade_capacity": 0.0013
+   }
   }
  }
 }

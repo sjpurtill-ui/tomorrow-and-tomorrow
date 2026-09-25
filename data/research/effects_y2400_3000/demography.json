@@ -4,9 +4,10 @@
  "items": {
   "equal_partible_inheritance": {
    "effects": {
-    "cohesion": 0.001,
+    "cohesion": 0.0002,
     "conception_support": -0.006,
-    "institutional_rigidity": -0.001,
+    "institutional_rigidity": -0.0002,
+    "modern_survival": 0.0013,
     "soil_productivity": -0.0014
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
@@ -16,9 +17,10 @@
   },
   "vaccination_mortality_tables": {
    "effects": {
-    "adoption_rate": 0.002,
-    "disease_exposure": -0.002,
-    "observation_rate": 0.002
+    "adoption_rate": 0.0014,
+    "disease_exposure": -0.0014,
+    "modern_survival": 0.0013,
+    "observation_rate": 0.0011
    },
    "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
    "name": "Vaccination Tables",
@@ -26,10 +28,10 @@
   },
   "soldier_family_allowances": {
    "effects": {
-    "cohesion": 0.002,
-    "labor_demand": 0.001,
+    "cohesion": 0.0004,
+    "labor_demand": 0.0001,
     "neonatal_survival": 0.002,
-    "warfare_readiness": 0.001
+    "warfare_readiness": 0.0006
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
    "name": "Separation Allowances",
@@ -37,11 +39,11 @@
   },
   "war_dependants_pensions": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0004,
     "conception_support": -0.002,
-    "legitimacy": 0.002,
+    "legitimacy": 0.0003,
     "neonatal_survival": 0.001,
-    "state_capacity": 0.001
+    "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
    "name": "War Pensions",
@@ -50,9 +52,9 @@
   },
   "assisted_emigration": {
    "effects": {
-    "cohesion": -0.002,
+    "cohesion": -0.0006,
     "disease_exposure": 0.002,
-    "food_output": 0.0013,
+    "food_output": 0.0011,
     "housing_output": 0.002
    },
    "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
@@ -62,8 +64,8 @@
   },
   "age_specific_fertility_rates": {
    "effects": {
-    "observation_rate": 0.002,
-    "state_capacity": 0.001
+    "observation_rate": 0.0008,
+    "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Age Fertility Rates",
@@ -71,10 +73,10 @@
   },
   "mortality_table_insurance": {
    "effects": {
-    "cohesion": 0.001,
+    "cohesion": 0.0002,
     "conception_support": -0.002,
-    "knowledge_preservation": 0.001,
-    "trade_capacity": 0.001
+    "knowledge_preservation": 0.0006,
+    "trade_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
    "name": "Life Insurance Tables",
@@ -82,10 +84,10 @@
   },
   "state_statistical_office": {
    "effects": {
-    "knowledge_preservation": 0.002,
-    "labor_demand": 0.001,
-    "observation_rate": 0.002,
-    "state_capacity": 0.004
+    "knowledge_preservation": 0.0012,
+    "labor_demand": 0.0001,
+    "observation_rate": 0.0008,
+    "state_capacity": 0.0017
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Statistical Office",
@@ -94,7 +96,7 @@
   },
   "colony_land_sale_scheme": {
    "effects": {
-    "cohesion": -0.001,
+    "cohesion": -0.0003,
     "conception_support": 0.002,
     "disease_exposure": 0.001,
     "housing_output": 0.001
@@ -105,8 +107,8 @@
   },
   "cause_of_death_tables": {
    "effects": {
-    "disease_exposure": -0.003,
-    "observation_rate": 0.003
+    "disease_exposure": -0.0008,
+    "observation_rate": 0.0014
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
    "name": "Cause-of-death Tables",
@@ -114,11 +116,11 @@
   },
   "household_schedule_census": {
    "effects": {
-    "cohesion": -0.001,
-    "knowledge_preservation": 0.002,
-    "labor_demand": 0.002,
-    "observation_rate": 0.003,
-    "state_capacity": 0.006
+    "cohesion": -0.0002,
+    "knowledge_preservation": 0.0009,
+    "labor_demand": 0.0001,
+    "observation_rate": 0.0014,
+    "state_capacity": 0.002
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Household Census",
@@ -128,9 +130,9 @@
   },
   "national_life_tables": {
    "effects": {
-    "knowledge_preservation": 0.001,
-    "observation_rate": 0.002,
-    "trade_capacity": 0.001
+    "knowledge_preservation": 0.0005,
+    "observation_rate": 0.0009,
+    "trade_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
    "name": "Life Tables",
@@ -140,7 +142,9 @@
    "effects": {
     "conception_support": -0.001,
     "disease_exposure": 0.002,
+    "fertility_transition": 0.0139,
     "labor_efficiency": 0.001,
+    "modern_survival": 0.0013,
     "neonatal_survival": 0.002
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
@@ -149,9 +153,9 @@
   },
   "emigrant_passenger_law": {
    "effects": {
-    "cohesion": 0.001,
-    "disease_exposure": -0.002,
-    "institutional_rigidity": 0.001
+    "cohesion": 0.0002,
+    "disease_exposure": -0.0005,
+    "institutional_rigidity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
    "name": "Passenger Law",
@@ -159,12 +163,12 @@
   },
   "steamship_mass_emigration": {
    "effects": {
-    "cohesion": -0.003,
+    "cohesion": -0.0005,
     "conception_support": -0.004,
     "disease_exposure": 0.005,
-    "food_output": 0.0026,
+    "food_output": 0.0024,
     "housing_output": 0.004,
-    "trade_capacity": 0.002
+    "trade_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png",
    "name": "Mass Emigration",
@@ -174,8 +178,8 @@
   },
   "district_mortality_comparison": {
    "effects": {
-    "disease_exposure": -0.002,
-    "observation_rate": 0.002,
+    "disease_exposure": -0.0005,
+    "observation_rate": 0.0009,
     "sanitation": 0.001
    },
    "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
@@ -184,8 +188,9 @@
   },
   "childrens_hospitals": {
    "effects": {
-    "health_protection": 0.002,
-    "labor_demand": 0.002,
+    "health_protection": 0.0008,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0013,
     "neonatal_survival": 0.004
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
@@ -194,8 +199,8 @@
   },
   "inter_realm_statistical_congress": {
    "effects": {
-    "observation_rate": 0.002,
-    "standardization": 0.001
+    "observation_rate": 0.0009,
+    "standardization": 0.0004
    },
    "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
    "name": "Statistical Congress",
@@ -203,9 +208,10 @@
   },
   "rubber_sheaths": {
    "effects": {
-    "cohesion": -0.001,
+    "cohesion": -0.0002,
     "conception_support": -0.012,
-    "disease_exposure": -0.001
+    "disease_exposure": -0.0003,
+    "fertility_transition": 0.0279
    },
    "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
    "name": "Rubber Sheaths",
@@ -214,10 +220,10 @@
   },
   "civil_marriage_registrar": {
    "effects": {
-    "cohesion": -0.001,
+    "cohesion": -0.0002,
     "conception_support": -0.002,
-    "institutional_rigidity": -0.001,
-    "state_capacity": 0.002
+    "institutional_rigidity": -0.0007,
+    "state_capacity": 0.0011
    },
    "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
    "name": "Civil Marriage",
@@ -226,7 +232,7 @@
   },
   "orphan_boarding_out": {
    "effects": {
-    "cohesion": 0.001,
+    "cohesion": 0.0002,
     "neonatal_survival": 0.002
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
@@ -235,7 +241,7 @@
   },
   "homestead_land_grants": {
    "effects": {
-    "cohesion": -0.002,
+    "cohesion": -0.0004,
     "conception_support": 0.004,
     "ecological_pressure": 0.003,
     "food_output": 0.0039,
@@ -250,8 +256,9 @@
   "manufactured_infant_food": {
    "effects": {
     "conception_support": 0.003,
-    "disease_exposure": 0.003,
+    "disease_exposure": 0.0025,
     "labor_efficiency": 0.001,
+    "modern_survival": 0.0023,
     "neonatal_survival": -0.004
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
@@ -261,8 +268,8 @@
   },
   "residence_naturalisation": {
    "effects": {
-    "cohesion": 0.002,
-    "trade_capacity": 0.001
+    "cohesion": 0.0004,
+    "trade_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Naturalisation",
@@ -270,8 +277,9 @@
   },
   "family_limitation": {
    "effects": {
-    "cohesion": -0.002,
+    "cohesion": -0.0004,
     "conception_support": -0.07,
+    "fertility_transition": 0.039,
     "maternal_safety": 0.004,
     "neonatal_survival": 0.003
    },
@@ -283,8 +291,8 @@
   },
   "population_pyramid_charts": {
    "effects": {
-    "observation_rate": 0.001,
-    "state_capacity": 0.001
+    "observation_rate": 0.0005,
+    "state_capacity": 0.0006
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Population Pyramids",
@@ -292,7 +300,8 @@
   },
   "premature_infant_incubator": {
    "effects": {
-    "labor_demand": 0.001,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.003,
     "neonatal_survival": 0.006
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
@@ -301,8 +310,9 @@
   },
   "antiseptic_maternity_wards": {
    "effects": {
-    "disease_exposure": -0.002,
+    "disease_exposure": -0.0004,
     "maternal_safety": 0.014,
+    "modern_survival": 0.0121,
     "neonatal_survival": 0.004
    },
    "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
@@ -311,7 +321,7 @@
   },
   "sutured_surgical_birth": {
    "effects": {
-    "health_risk": 0.001,
+    "health_risk": 0.0002,
     "maternal_safety": 0.008,
     "neonatal_survival": 0.004
    },
@@ -321,8 +331,9 @@
   },
   "raised_consent_age": {
    "effects": {
-    "cohesion": 0.001,
-    "conception_support": -0.01,
+    "cohesion": 0.0001,
+    "conception_support": -0.0051,
+    "fertility_transition": 0.0088,
     "maternal_safety": 0.003
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
@@ -331,8 +342,8 @@
   },
   "settlement_houses": {
    "effects": {
-    "cohesion": 0.002,
-    "housing_output": 0.002,
+    "cohesion": 0.0003,
+    "housing_output": 0.0014,
     "neonatal_survival": 0.001
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
@@ -341,9 +352,9 @@
   },
   "household_poverty_surveys": {
    "effects": {
-    "legitimacy": 0.001,
-    "observation_rate": 0.002,
-    "state_capacity": 0.001
+    "legitimacy": 0.0002,
+    "observation_rate": 0.0016,
+    "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Poverty Surveys",
@@ -351,9 +362,9 @@
   },
   "room_overcrowding_census": {
    "effects": {
-    "disease_exposure": -0.001,
-    "housing_output": 0.003,
-    "observation_rate": 0.001
+    "disease_exposure": -0.0002,
+    "housing_output": 0.0021,
+    "observation_rate": 0.0008
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Room Census",
@@ -361,9 +372,9 @@
   },
   "immigration_inspection_station": {
    "effects": {
-    "cohesion": -0.001,
-    "disease_exposure": -0.003,
-    "state_capacity": 0.002
+    "cohesion": -0.0003,
+    "disease_exposure": -0.0005,
+    "state_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
    "name": "Immigration Station",
@@ -372,10 +383,11 @@
   },
   "infant_milk_depots": {
    "effects": {
-    "disease_exposure": -0.003,
-    "labor_demand": 0.001,
-    "neonatal_survival": 0.01,
-    "nutrition_quality": 0.002
+    "disease_exposure": -0.0008,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0065,
+    "neonatal_survival": 0.007,
+    "nutrition_quality": 0.0005
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
    "name": "Milk Depots",
@@ -383,9 +395,10 @@
   },
   "child_growth_records": {
    "effects": {
-    "neonatal_survival": 0.01,
-    "nutrition_quality": 0.003,
-    "observation_rate": 0.002
+    "modern_survival": 0.0022,
+    "neonatal_survival": 0.007,
+    "nutrition_quality": 0.0008,
+    "observation_rate": 0.0008
    },
    "art": "res://assets/ui/research/subjects/child_growth_records-v1.png",
    "observation": "Each child's weight and height are charted against age standards, and a faltering child is noticed early.",
@@ -393,9 +406,10 @@
   },
   "infant_mortality_index": {
    "effects": {
-    "legitimacy": 0.001,
-    "neonatal_survival": 0.004,
-    "observation_rate": 0.002
+    "legitimacy": 0.0002,
+    "modern_survival": 0.0022,
+    "neonatal_survival": 0.0028,
+    "observation_rate": 0.0008
    },
    "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
    "name": "Infant Mortality Index",
@@ -403,9 +417,10 @@
   },
   "registered_midwives": {
    "effects": {
-    "institutional_rigidity": 0.002,
+    "institutional_rigidity": 0.0004,
     "maternal_safety": 0.016,
-    "neonatal_survival": 0.006
+    "modern_survival": 0.0022,
+    "neonatal_survival": 0.0042
    },
    "art": "res://assets/ui/research/subjects/trained_midwives-v1.png",
    "name": "Registered Midwives",
@@ -413,9 +428,10 @@
   },
   "newborn_health_visitors": {
    "effects": {
-    "labor_demand": 0.002,
+    "labor_demand": 0.0001,
     "maternal_safety": 0.002,
-    "neonatal_survival": 0.009
+    "modern_survival": 0.0065,
+    "neonatal_survival": 0.0063
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
    "name": "Health Visitors",
@@ -423,10 +439,11 @@
   },
   "child_protection_law": {
    "effects": {
-    "cohesion": 0.001,
-    "conception_support": -0.003,
-    "neonatal_survival": 0.002,
-    "state_capacity": 0.001
+    "cohesion": 0.0002,
+    "conception_support": -0.0026,
+    "modern_survival": 0.0022,
+    "neonatal_survival": 0.0014,
+    "state_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Child Protection",
@@ -434,9 +451,10 @@
   },
   "antenatal_clinics": {
    "effects": {
-    "labor_demand": 0.002,
+    "labor_demand": 0.0001,
     "maternal_safety": 0.016,
-    "neonatal_survival": 0.005
+    "modern_survival": 0.0065,
+    "neonatal_survival": 0.0035
    },
    "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
    "name": "Antenatal Clinics",
@@ -445,9 +463,10 @@
   "maternity_benefit": {
    "effects": {
     "conception_support": 0.001,
-    "labor_demand": 0.001,
+    "labor_demand": 0.0001,
     "maternal_safety": 0.004,
-    "neonatal_survival": 0.003
+    "modern_survival": 0.0022,
+    "neonatal_survival": 0.0021
    },
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
    "name": "Maternity Benefit",
@@ -455,9 +474,10 @@
   },
   "childrens_welfare_bureau": {
    "effects": {
-    "neonatal_survival": 0.003,
-    "observation_rate": 0.001,
-    "state_capacity": 0.002
+    "modern_survival": 0.0022,
+    "neonatal_survival": 0.0021,
+    "observation_rate": 0.0004,
+    "state_capacity": 0.001
    },
    "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
    "name": "Children's Bureau",
@@ -465,8 +485,9 @@
   },
   "birth_control_clinics": {
    "effects": {
-    "cohesion": -0.002,
-    "conception_support": -0.07,
+    "cohesion": -0.0002,
+    "conception_support": -0.0035,
+    "fertility_transition": 0.1,
     "maternal_safety": 0.006
    },
    "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
@@ -477,8 +498,8 @@
   },
   "origin_immigration_quotas": {
    "effects": {
-    "cohesion": -0.002,
-    "institutional_rigidity": 0.002,
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0002,
     "trade_capacity": -0.002
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
@@ -488,11 +509,11 @@
   },
   "treaty_population_exchange": {
    "effects": {
-    "cohesion": -0.004,
-    "conception_support": -0.003,
-    "disease_exposure": 0.003,
+    "cohesion": -0.0004,
+    "conception_support": -0.0002,
+    "disease_exposure": 0.0028,
     "housing_output": -0.002,
-    "legitimacy": -0.002
+    "legitimacy": -0.0003
    },
    "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
    "name": "Population Exchange",
@@ -501,9 +522,10 @@
   },
   "widows_orphans_insurance": {
    "effects": {
-    "cohesion": 0.002,
-    "conception_support": -0.006,
-    "labor_demand": 0.001,
+    "cohesion": 0.0004,
+    "conception_support": -0.0003,
+    "fertility_transition": 0.025,
+    "labor_demand": 0.0001,
     "neonatal_survival": 0.002
    },
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
@@ -512,7 +534,7 @@
   },
   "court_adoption_orders": {
    "effects": {
-    "cohesion": 0.001,
+    "cohesion": 0.0002,
     "neonatal_survival": 0.001
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
@@ -522,7 +544,7 @@
   "demographic_transition_theory": {
    "effects": {
     "observation_rate": 0.002,
-    "state_capacity": 0.001
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
    "name": "Transition Theory",
@@ -530,7 +552,7 @@
   },
   "maternal_death_inquiries": {
    "effects": {
-    "maternal_safety": 0.014,
+    "maternal_safety": 0.0082,
     "observation_rate": 0.002
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
@@ -539,9 +561,10 @@
   },
   "pronatalist_bonuses": {
    "effects": {
-    "cohesion": 0.001,
+    "cohesion": 0.0001,
     "conception_support": 0.006,
-    "labor_demand": 0.001
+    "fertility_transition": -0.05,
+    "labor_demand": 0.0001
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
    "name": "Pronatalist Bonuses",
@@ -550,8 +573,9 @@
   },
   "obstetric_flying_squads": {
    "effects": {
-    "labor_demand": 0.002,
-    "maternal_safety": 0.012,
+    "labor_demand": 0.0001,
+    "maternal_safety": 0.0071,
+    "modern_survival": 0.0057,
     "neonatal_survival": 0.002
    },
    "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
@@ -560,8 +584,9 @@
   },
   "child_evacuation_schemes": {
    "effects": {
-    "cohesion": -0.002,
+    "cohesion": -0.0004,
     "disease_exposure": 0.001,
+    "modern_survival": 0.0057,
     "neonatal_survival": 0.001
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
@@ -572,7 +597,7 @@
   "cohort_population_projection": {
    "effects": {
     "observation_rate": 0.002,
-    "state_capacity": 0.001
+    "state_capacity": 0.0003
    },
    "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
    "name": "Cohort Projections",
@@ -580,8 +605,8 @@
   },
   "displaced_persons_camps": {
    "effects": {
-    "cohesion": -0.002,
-    "conception_support": -0.003,
+    "cohesion": -0.0004,
+    "conception_support": -0.0013,
     "disease_exposure": 0.003,
     "housing_output": -0.001
    },
@@ -591,12 +616,13 @@
   },
   "universal_family_allowances": {
    "effects": {
-    "cohesion": 0.003,
+    "cohesion": 0.0004,
     "conception_support": 0.006,
-    "labor_demand": 0.002,
-    "legitimacy": 0.003,
+    "fertility_transition": -0.025,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0006,
     "neonatal_survival": 0.004,
-    "nutrition_quality": 0.002
+    "nutrition_quality": 0.0011
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
    "name": "Family Allowances",
@@ -615,9 +641,9 @@
   },
   "refugee_convention": {
    "effects": {
-    "cohesion": 0.001,
-    "disease_exposure": 0.001,
-    "legitimacy": 0.002
+    "cohesion": 0.0002,
+    "disease_exposure": 0.0005,
+    "legitimacy": 0.0003
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Refugee Convention",
@@ -627,9 +653,10 @@
   },
   "hospital_birth_norm": {
    "effects": {
-    "labor_demand": 0.002,
+    "labor_demand": 0.0001,
     "maternal_safety": 0.014,
-    "neonatal_survival": 0.008
+    "modern_survival": 0.009,
+    "neonatal_survival": 0.0072
    },
    "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
    "name": "Hospital Births",
@@ -637,9 +664,9 @@
   },
   "guest_worker_programmes": {
    "effects": {
-    "cohesion": -0.003,
-    "disease_exposure": 0.002,
-    "labor_efficiency": 0.002
+    "cohesion": -0.0003,
+    "disease_exposure": 0.0011,
+    "labor_efficiency": 0.0013
    },
    "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
    "name": "Guest Workers",
@@ -648,10 +675,10 @@
   },
   "household_residence_permits": {
    "effects": {
-    "cohesion": -0.004,
-    "conception_support": -0.002,
-    "institutional_rigidity": 0.004,
-    "state_capacity": 0.003
+    "cohesion": -0.0004,
+    "conception_support": -0.0001,
+    "institutional_rigidity": 0.0012,
+    "state_capacity": 0.0027
    },
    "art": "res://assets/ui/research/subjects/property_registers-v1.png",
    "name": "Residence Permits",
@@ -660,8 +687,9 @@
   },
   "oral_contraceptive_pill": {
    "effects": {
-    "cohesion": -0.002,
-    "conception_support": -0.09,
+    "cohesion": -0.0002,
+    "conception_support": -0.0045,
+    "fertility_transition": 0.0175,
     "maternal_safety": 0.004
    },
    "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
@@ -672,8 +700,8 @@
   },
   "retirement_communities": {
    "effects": {
-    "cohesion": 0.001,
-    "conception_support": -0.001,
+    "cohesion": 0.0002,
+    "conception_support": -0.0001,
     "housing_output": 0.002
    },
    "art": "res://assets/ui/research/subjects/household_space_planning-v1.png",
@@ -682,7 +710,8 @@
   },
   "newborn_blood_screening": {
    "effects": {
-    "neonatal_survival": 0.004
+    "modern_survival": 0.0045,
+    "neonatal_survival": 0.0036
    },
    "art": "res://assets/ui/research/subjects/child_growth_records-v1.png",
    "name": "Newborn Screening",
@@ -690,10 +719,11 @@
   },
   "family_planning_fieldwork": {
    "effects": {
-    "conception_support": -0.055,
-    "labor_demand": 0.002,
+    "conception_support": -0.0028,
+    "fertility_transition": 0.0117,
+    "labor_demand": 0.0001,
     "maternal_safety": 0.004,
-    "neonatal_survival": 0.002
+    "neonatal_survival": 0.0018
    },
    "art": "res://assets/ui/research/subjects/household_councils-v1.png",
    "name": "Family-planning Fieldwork",
@@ -701,8 +731,9 @@
   },
   "neonatal_intensive_care": {
    "effects": {
-    "labor_demand": 0.002,
-    "neonatal_survival": 0.012
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0135,
+    "neonatal_survival": 0.0108
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
    "name": "Neonatal Intensive Care",
@@ -711,7 +742,7 @@
   "rh_disease_prevention": {
    "effects": {
     "maternal_safety": 0.001,
-    "neonatal_survival": 0.005
+    "neonatal_survival": 0.0045
    },
    "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
    "name": "Rh Prevention",
@@ -719,8 +750,8 @@
   },
   "points_based_immigration": {
    "effects": {
-    "cohesion": -0.001,
-    "labor_efficiency": 0.002
+    "cohesion": -0.0001,
+    "labor_efficiency": 0.0013
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "Points Immigration",
@@ -728,10 +759,10 @@
   },
   "continuous_population_register": {
    "effects": {
-    "institutional_rigidity": 0.001,
-    "knowledge_preservation": 0.002,
-    "observation_rate": 0.002,
-    "state_capacity": 0.004
+    "institutional_rigidity": 0.0003,
+    "knowledge_preservation": 0.0016,
+    "observation_rate": 0.0019,
+    "state_capacity": 0.0036
    },
    "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
    "name": "Population Register",
@@ -739,8 +770,9 @@
   },
   "small_family_campaigns": {
    "effects": {
-    "cohesion": -0.001,
-    "conception_support": -0.045
+    "cohesion": -0.0001,
+    "conception_support": -0.0022,
+    "fertility_transition": 0.0117
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "Small-family Campaigns",
@@ -748,8 +780,8 @@
   },
   "no_fault_divorce": {
    "effects": {
-    "cohesion": -0.002,
-    "conception_support": -0.006
+    "cohesion": -0.0002,
+    "conception_support": -0.0003
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
    "name": "No-fault Divorce",
@@ -757,7 +789,8 @@
   },
   "equal_birth_status": {
    "effects": {
-    "cohesion": 0.001,
+    "cohesion": 0.0003,
+    "modern_survival": 0.0082,
     "neonatal_survival": 0.001
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
@@ -775,8 +808,9 @@
   },
   "legal_pregnancy_termination": {
    "effects": {
-    "cohesion": -0.003,
-    "conception_support": -0.035,
+    "cohesion": -0.0005,
+    "conception_support": -0.0018,
+    "fertility_transition": 0.0105,
     "maternal_safety": 0.01
    },
    "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
@@ -786,7 +820,7 @@
   },
   "inter_realm_population_conference": {
    "effects": {
-    "conception_support": -0.008,
+    "conception_support": -0.0004,
     "observation_rate": 0.001
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
@@ -795,9 +829,9 @@
   },
   "paid_parental_leave": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0007,
     "conception_support": 0.005,
-    "labor_demand": 0.002,
+    "labor_demand": 0.0001,
     "neonatal_survival": 0.003
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
@@ -806,7 +840,7 @@
   },
   "in_vitro_fertilisation": {
    "effects": {
-    "cohesion": -0.001,
+    "cohesion": -0.0002,
     "conception_support": 0.006,
     "knowledge_rate": 0.002
    },
@@ -818,6 +852,7 @@
   },
   "skin_to_skin_newborn_care": {
    "effects": {
+    "modern_survival": 0.0082,
     "neonatal_survival": 0.004
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
@@ -826,12 +861,12 @@
   },
   "state_birth_quotas": {
    "effects": {
-    "cohesion": -0.01,
-    "conception_support": -0.03,
-    "institutional_rigidity": 0.006,
-    "legitimacy": -0.008,
+    "cohesion": -0.0015,
+    "conception_support": -0.0015,
+    "institutional_rigidity": 0.002,
+    "legitimacy": -0.0026,
     "neonatal_survival": -0.002,
-    "state_capacity": 0.003
+    "state_capacity": 0.0023
    },
    "art": "res://assets/ui/research/subjects/public_levies-v1.png",
    "name": "Birth Quotas",
@@ -840,9 +875,9 @@
   },
   "register_based_census": {
    "effects": {
-    "labor_demand": -0.002,
+    "labor_demand": -0.0008,
     "observation_rate": 0.001,
-    "state_capacity": 0.002
+    "state_capacity": 0.0015
    },
    "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
    "name": "Register Census",
@@ -850,7 +885,7 @@
   },
   "fertility_sample_surveys": {
    "effects": {
-    "conception_support": -0.002,
+    "conception_support": -0.0001,
     "observation_rate": 0.002
    },
    "art": "res://assets/ui/research/subjects/statistical_inference-v1.png",
@@ -859,7 +894,8 @@
   },
   "long_acting_contraception": {
    "effects": {
-    "conception_support": -0.025,
+    "conception_support": -0.0013,
+    "fertility_transition": 0.021,
     "maternal_safety": 0.003
    },
    "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
@@ -868,7 +904,7 @@
   },
   "surrogacy_contracts": {
    "effects": {
-    "cohesion": -0.001,
+    "cohesion": -0.0002,
     "conception_support": 0.002
    },
    "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
@@ -877,7 +913,7 @@
   },
   "registered_partnerships": {
    "effects": {
-    "cohesion": 0.001
+    "cohesion": 0.0003
    },
    "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
    "name": "Registered Partnerships",
@@ -885,7 +921,7 @@
   },
   "preimplantation_testing": {
    "effects": {
-    "cohesion": -0.001,
+    "cohesion": -0.0002,
     "neonatal_survival": 0.002
    },
    "art": "res://assets/ui/research/paper/cell_theory.png",
@@ -894,8 +930,8 @@
   },
   "sex_selection_ban": {
    "effects": {
-    "cohesion": 0.002,
-    "institutional_rigidity": 0.001
+    "cohesion": 0.001,
+    "institutional_rigidity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Sex-selection Ban",
@@ -903,11 +939,11 @@
   },
   "long_term_care_insurance": {
    "effects": {
-    "cohesion": 0.003,
-    "conception_support": -0.002,
+    "cohesion": 0.0015,
+    "conception_support": -0.0001,
     "health_protection": 0.002,
-    "labor_demand": 0.004,
-    "legitimacy": 0.002
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0009
    },
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
    "name": "Long-term Care Insurance",
@@ -917,7 +953,8 @@
   },
   "emergency_contraception": {
    "effects": {
-    "conception_support": -0.006,
+    "conception_support": -0.0003,
+    "fertility_transition": 0.025,
     "maternal_safety": 0.001
    },
    "art": "res://assets/ui/research/paper/enzyme_catalysis.png",
@@ -926,8 +963,8 @@
   },
   "dual_citizenship": {
    "effects": {
-    "cohesion": 0.001,
-    "trade_capacity": 0.002
+    "cohesion": 0.0005,
+    "trade_capacity": 0.0009
    },
    "art": "res://assets/ui/research/subjects/customary_law-v1.png",
    "name": "Dual Citizenship",
@@ -935,8 +972,8 @@
   },
   "dementia_care_units": {
    "effects": {
-    "cohesion": 0.002,
-    "labor_demand": 0.002
+    "cohesion": 0.001,
+    "labor_demand": 0.0001
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
    "name": "Dementia Care",
@@ -944,9 +981,9 @@
   },
   "mobile_remittances": {
    "effects": {
-    "cohesion": 0.001,
+    "cohesion": 0.0005,
     "food_output": 0.0013,
-    "trade_capacity": 0.003
+    "trade_capacity": 0.0014
    },
    "art": "res://assets/ui/research/subjects/route_memory-v1.png",
    "name": "Mobile Remittances",
@@ -954,8 +991,8 @@
   },
   "indexed_pension_age": {
    "effects": {
-    "labor_efficiency": 0.002,
-    "legitimacy": -0.002
+    "labor_efficiency": 0.0017,
+    "legitimacy": -0.0004
    },
    "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
    "name": "Indexed Pension Age",
@@ -963,7 +1000,7 @@
   },
   "egg_freezing": {
    "effects": {
-    "conception_support": -0.006
+    "conception_support": -0.0021
    },
    "art": "res://assets/ui/research/paper/cell_culture_methods.png",
    "name": "Egg Freezing",
@@ -980,7 +1017,7 @@
   },
   "genetic_ancestry_testing": {
    "effects": {
-    "cohesion": 0.001
+    "cohesion": 0.0006
    },
    "art": "res://assets/ui/research/paper/cell_theory.png",
    "name": "Ancestry Testing",
@@ -1005,9 +1042,10 @@
   },
   "low_fertility_family_package": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0013,
     "conception_support": 0.006,
-    "labor_demand": 0.003
+    "fertility_transition": -0.01,
+    "labor_demand": 0.0002
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
    "name": "Family Package",
@@ -1015,10 +1053,10 @@
   },
   "climate_managed_resettlement": {
    "effects": {
-    "cohesion": -0.003,
-    "disaster_resilience": 0.004,
+    "cohesion": -0.0005,
+    "disaster_resilience": 0.0026,
     "housing_output": 0.003,
-    "labor_demand": 0.002
+    "labor_demand": 0.0001
    },
    "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
    "name": "Managed Resettlement",
@@ -1028,11 +1066,493 @@
   },
   "artificial_womb_support": {
    "effects": {
+    "modern_survival": 0.0115,
     "neonatal_survival": 0.003
    },
    "art": "res://assets/ui/research/subjects/shared_childcare-v1.png",
    "name": "Womb Support",
    "observation": "Extremely premature infants are supported in fluid-filled womb systems."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "equal_partible_inheritance": {
+    "cohesion": 0.001,
+    "conception_support": -0.006,
+    "institutional_rigidity": -0.001,
+    "soil_productivity": -0.0014
+   },
+   "vaccination_mortality_tables": {
+    "adoption_rate": 0.002,
+    "disease_exposure": -0.002,
+    "observation_rate": 0.002
+   },
+   "soldier_family_allowances": {
+    "cohesion": 0.002,
+    "labor_demand": 0.001,
+    "neonatal_survival": 0.002,
+    "warfare_readiness": 0.001
+   },
+   "war_dependants_pensions": {
+    "cohesion": 0.002,
+    "conception_support": -0.002,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.001,
+    "state_capacity": 0.001
+   },
+   "assisted_emigration": {
+    "cohesion": -0.002,
+    "disease_exposure": 0.002,
+    "food_output": 0.0013,
+    "housing_output": 0.002
+   },
+   "age_specific_fertility_rates": {
+    "observation_rate": 0.002,
+    "state_capacity": 0.001
+   },
+   "mortality_table_insurance": {
+    "cohesion": 0.001,
+    "conception_support": -0.002,
+    "knowledge_preservation": 0.001,
+    "trade_capacity": 0.001
+   },
+   "state_statistical_office": {
+    "knowledge_preservation": 0.002,
+    "labor_demand": 0.001,
+    "observation_rate": 0.002,
+    "state_capacity": 0.004
+   },
+   "colony_land_sale_scheme": {
+    "cohesion": -0.001,
+    "conception_support": 0.002,
+    "disease_exposure": 0.001,
+    "housing_output": 0.001
+   },
+   "cause_of_death_tables": {
+    "disease_exposure": -0.003,
+    "observation_rate": 0.003
+   },
+   "household_schedule_census": {
+    "cohesion": -0.001,
+    "knowledge_preservation": 0.002,
+    "labor_demand": 0.002,
+    "observation_rate": 0.003,
+    "state_capacity": 0.006
+   },
+   "national_life_tables": {
+    "knowledge_preservation": 0.001,
+    "observation_rate": 0.002,
+    "trade_capacity": 0.001
+   },
+   "working_mothers_creches": {
+    "conception_support": -0.001,
+    "disease_exposure": 0.002,
+    "labor_efficiency": 0.001,
+    "neonatal_survival": 0.002
+   },
+   "emigrant_passenger_law": {
+    "cohesion": 0.001,
+    "disease_exposure": -0.002,
+    "institutional_rigidity": 0.001
+   },
+   "steamship_mass_emigration": {
+    "cohesion": -0.003,
+    "conception_support": -0.004,
+    "disease_exposure": 0.005,
+    "food_output": 0.0026,
+    "housing_output": 0.004,
+    "trade_capacity": 0.002
+   },
+   "district_mortality_comparison": {
+    "disease_exposure": -0.002,
+    "observation_rate": 0.002,
+    "sanitation": 0.001
+   },
+   "childrens_hospitals": {
+    "health_protection": 0.002,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.004
+   },
+   "inter_realm_statistical_congress": {
+    "observation_rate": 0.002,
+    "standardization": 0.001
+   },
+   "rubber_sheaths": {
+    "cohesion": -0.001,
+    "conception_support": -0.012,
+    "disease_exposure": -0.001
+   },
+   "civil_marriage_registrar": {
+    "cohesion": -0.001,
+    "conception_support": -0.002,
+    "institutional_rigidity": -0.001,
+    "state_capacity": 0.002
+   },
+   "orphan_boarding_out": {
+    "cohesion": 0.001,
+    "neonatal_survival": 0.002
+   },
+   "homestead_land_grants": {
+    "cohesion": -0.002,
+    "conception_support": 0.004,
+    "ecological_pressure": 0.003,
+    "food_output": 0.0039,
+    "housing_output": 0.006
+   },
+   "manufactured_infant_food": {
+    "conception_support": 0.003,
+    "disease_exposure": 0.003,
+    "labor_efficiency": 0.001,
+    "neonatal_survival": -0.004
+   },
+   "residence_naturalisation": {
+    "cohesion": 0.002,
+    "trade_capacity": 0.001
+   },
+   "family_limitation": {
+    "cohesion": -0.002,
+    "conception_support": -0.07,
+    "maternal_safety": 0.004,
+    "neonatal_survival": 0.003
+   },
+   "population_pyramid_charts": {
+    "observation_rate": 0.001,
+    "state_capacity": 0.001
+   },
+   "premature_infant_incubator": {
+    "labor_demand": 0.001,
+    "neonatal_survival": 0.006
+   },
+   "antiseptic_maternity_wards": {
+    "disease_exposure": -0.002,
+    "maternal_safety": 0.014,
+    "neonatal_survival": 0.004
+   },
+   "sutured_surgical_birth": {
+    "health_risk": 0.001,
+    "maternal_safety": 0.008,
+    "neonatal_survival": 0.004
+   },
+   "raised_consent_age": {
+    "cohesion": 0.001,
+    "conception_support": -0.01,
+    "maternal_safety": 0.003
+   },
+   "settlement_houses": {
+    "cohesion": 0.002,
+    "housing_output": 0.002,
+    "neonatal_survival": 0.001
+   },
+   "household_poverty_surveys": {
+    "legitimacy": 0.001,
+    "observation_rate": 0.002,
+    "state_capacity": 0.001
+   },
+   "room_overcrowding_census": {
+    "disease_exposure": -0.001,
+    "housing_output": 0.003,
+    "observation_rate": 0.001
+   },
+   "immigration_inspection_station": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.003,
+    "state_capacity": 0.002
+   },
+   "infant_milk_depots": {
+    "disease_exposure": -0.003,
+    "labor_demand": 0.001,
+    "neonatal_survival": 0.01,
+    "nutrition_quality": 0.002
+   },
+   "child_growth_records": {
+    "neonatal_survival": 0.01,
+    "nutrition_quality": 0.003,
+    "observation_rate": 0.002
+   },
+   "infant_mortality_index": {
+    "legitimacy": 0.001,
+    "neonatal_survival": 0.004,
+    "observation_rate": 0.002
+   },
+   "registered_midwives": {
+    "institutional_rigidity": 0.002,
+    "maternal_safety": 0.016,
+    "neonatal_survival": 0.006
+   },
+   "newborn_health_visitors": {
+    "labor_demand": 0.002,
+    "maternal_safety": 0.002,
+    "neonatal_survival": 0.009
+   },
+   "child_protection_law": {
+    "cohesion": 0.001,
+    "conception_support": -0.003,
+    "neonatal_survival": 0.002,
+    "state_capacity": 0.001
+   },
+   "antenatal_clinics": {
+    "labor_demand": 0.002,
+    "maternal_safety": 0.016,
+    "neonatal_survival": 0.005
+   },
+   "maternity_benefit": {
+    "conception_support": 0.001,
+    "labor_demand": 0.001,
+    "maternal_safety": 0.004,
+    "neonatal_survival": 0.003
+   },
+   "childrens_welfare_bureau": {
+    "neonatal_survival": 0.003,
+    "observation_rate": 0.001,
+    "state_capacity": 0.002
+   },
+   "birth_control_clinics": {
+    "cohesion": -0.002,
+    "conception_support": -0.07,
+    "maternal_safety": 0.006
+   },
+   "origin_immigration_quotas": {
+    "cohesion": -0.002,
+    "institutional_rigidity": 0.002,
+    "trade_capacity": -0.002
+   },
+   "treaty_population_exchange": {
+    "cohesion": -0.004,
+    "conception_support": -0.003,
+    "disease_exposure": 0.003,
+    "housing_output": -0.002,
+    "legitimacy": -0.002
+   },
+   "widows_orphans_insurance": {
+    "cohesion": 0.002,
+    "conception_support": -0.006,
+    "labor_demand": 0.001,
+    "neonatal_survival": 0.002
+   },
+   "court_adoption_orders": {
+    "cohesion": 0.001,
+    "neonatal_survival": 0.001
+   },
+   "demographic_transition_theory": {
+    "observation_rate": 0.002,
+    "state_capacity": 0.001
+   },
+   "maternal_death_inquiries": {
+    "maternal_safety": 0.014,
+    "observation_rate": 0.002
+   },
+   "pronatalist_bonuses": {
+    "cohesion": 0.001,
+    "conception_support": 0.006,
+    "labor_demand": 0.001
+   },
+   "obstetric_flying_squads": {
+    "labor_demand": 0.002,
+    "maternal_safety": 0.012,
+    "neonatal_survival": 0.002
+   },
+   "child_evacuation_schemes": {
+    "cohesion": -0.002,
+    "disease_exposure": 0.001,
+    "neonatal_survival": 0.001
+   },
+   "cohort_population_projection": {
+    "observation_rate": 0.002,
+    "state_capacity": 0.001
+   },
+   "displaced_persons_camps": {
+    "cohesion": -0.002,
+    "conception_support": -0.003,
+    "disease_exposure": 0.003,
+    "housing_output": -0.001
+   },
+   "universal_family_allowances": {
+    "cohesion": 0.003,
+    "conception_support": 0.006,
+    "labor_demand": 0.002,
+    "legitimacy": 0.003,
+    "neonatal_survival": 0.004,
+    "nutrition_quality": 0.002
+   },
+   "refugee_convention": {
+    "cohesion": 0.001,
+    "disease_exposure": 0.001,
+    "legitimacy": 0.002
+   },
+   "hospital_birth_norm": {
+    "labor_demand": 0.002,
+    "maternal_safety": 0.014,
+    "neonatal_survival": 0.008
+   },
+   "guest_worker_programmes": {
+    "cohesion": -0.003,
+    "disease_exposure": 0.002,
+    "labor_efficiency": 0.002
+   },
+   "household_residence_permits": {
+    "cohesion": -0.004,
+    "conception_support": -0.002,
+    "institutional_rigidity": 0.004,
+    "state_capacity": 0.003
+   },
+   "oral_contraceptive_pill": {
+    "cohesion": -0.002,
+    "conception_support": -0.09,
+    "maternal_safety": 0.004
+   },
+   "retirement_communities": {
+    "cohesion": 0.001,
+    "conception_support": -0.001,
+    "housing_output": 0.002
+   },
+   "newborn_blood_screening": {
+    "neonatal_survival": 0.004
+   },
+   "family_planning_fieldwork": {
+    "conception_support": -0.055,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.004,
+    "neonatal_survival": 0.002
+   },
+   "neonatal_intensive_care": {
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.012
+   },
+   "rh_disease_prevention": {
+    "maternal_safety": 0.001,
+    "neonatal_survival": 0.005
+   },
+   "points_based_immigration": {
+    "cohesion": -0.001,
+    "labor_efficiency": 0.002
+   },
+   "continuous_population_register": {
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.002,
+    "observation_rate": 0.002,
+    "state_capacity": 0.004
+   },
+   "small_family_campaigns": {
+    "cohesion": -0.001,
+    "conception_support": -0.045
+   },
+   "no_fault_divorce": {
+    "cohesion": -0.002,
+    "conception_support": -0.006
+   },
+   "equal_birth_status": {
+    "cohesion": 0.001,
+    "neonatal_survival": 0.001
+   },
+   "legal_pregnancy_termination": {
+    "cohesion": -0.003,
+    "conception_support": -0.035,
+    "maternal_safety": 0.01
+   },
+   "inter_realm_population_conference": {
+    "conception_support": -0.008,
+    "observation_rate": 0.001
+   },
+   "paid_parental_leave": {
+    "cohesion": 0.002,
+    "conception_support": 0.005,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.003
+   },
+   "in_vitro_fertilisation": {
+    "cohesion": -0.001,
+    "conception_support": 0.006,
+    "knowledge_rate": 0.002
+   },
+   "skin_to_skin_newborn_care": {
+    "neonatal_survival": 0.004
+   },
+   "state_birth_quotas": {
+    "cohesion": -0.01,
+    "conception_support": -0.03,
+    "institutional_rigidity": 0.006,
+    "legitimacy": -0.008,
+    "neonatal_survival": -0.002,
+    "state_capacity": 0.003
+   },
+   "register_based_census": {
+    "labor_demand": -0.002,
+    "observation_rate": 0.001,
+    "state_capacity": 0.002
+   },
+   "fertility_sample_surveys": {
+    "conception_support": -0.002,
+    "observation_rate": 0.002
+   },
+   "long_acting_contraception": {
+    "conception_support": -0.025,
+    "maternal_safety": 0.003
+   },
+   "surrogacy_contracts": {
+    "cohesion": -0.001,
+    "conception_support": 0.002
+   },
+   "registered_partnerships": {
+    "cohesion": 0.001
+   },
+   "preimplantation_testing": {
+    "cohesion": -0.001,
+    "neonatal_survival": 0.002
+   },
+   "sex_selection_ban": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.001
+   },
+   "long_term_care_insurance": {
+    "cohesion": 0.003,
+    "conception_support": -0.002,
+    "health_protection": 0.002,
+    "labor_demand": 0.004,
+    "legitimacy": 0.002
+   },
+   "emergency_contraception": {
+    "conception_support": -0.006,
+    "maternal_safety": 0.001
+   },
+   "dual_citizenship": {
+    "cohesion": 0.001,
+    "trade_capacity": 0.002
+   },
+   "dementia_care_units": {
+    "cohesion": 0.002,
+    "labor_demand": 0.002
+   },
+   "mobile_remittances": {
+    "cohesion": 0.001,
+    "food_output": 0.0013,
+    "trade_capacity": 0.003
+   },
+   "indexed_pension_age": {
+    "labor_efficiency": 0.002,
+    "legitimacy": -0.002
+   },
+   "egg_freezing": {
+    "conception_support": -0.006
+   },
+   "genetic_ancestry_testing": {
+    "cohesion": 0.001
+   },
+   "low_fertility_family_package": {
+    "cohesion": 0.002,
+    "conception_support": 0.006,
+    "labor_demand": 0.003
+   },
+   "climate_managed_resettlement": {
+    "cohesion": -0.003,
+    "disaster_resilience": 0.004,
+    "housing_output": 0.003,
+    "labor_demand": 0.002
+   },
+   "artificial_womb_support": {
+    "neonatal_survival": 0.003
+   }
   }
  }
 }

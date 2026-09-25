@@ -4,9 +4,9 @@
  "items": {
   "council_plague_treatises": {
    "effects": {
-    "disease_exposure": -0.0005,
-    "health_protection": 0.002,
-    "knowledge_preservation": 0.0017
+    "disease_exposure": -0.0001,
+    "health_protection": 0.0012,
+    "knowledge_preservation": 0.0005
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
    "name": "Council Plague Treatises",
@@ -14,11 +14,11 @@
   },
   "forty_day_quarantine": {
    "effects": {
-    "cohesion": -0.001,
-    "disease_exposure": -0.006,
-    "institutional_rigidity": 0.002,
-    "labor_demand": 0.002,
-    "state_capacity": 0.0018,
+    "cohesion": -0.0002,
+    "disease_exposure": -0.0013,
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0004,
     "trade_capacity": -0.008,
     "travel_speed": -0.004
    },
@@ -30,9 +30,9 @@
   },
   "health_passes": {
    "effects": {
-    "disease_exposure": -0.002,
-    "institutional_rigidity": 0.001,
-    "state_capacity": 0.0012,
+    "disease_exposure": -0.0004,
+    "institutional_rigidity": 0.0002,
+    "state_capacity": 0.0003,
     "trade_capacity": -0.002
    },
    "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
@@ -41,11 +41,11 @@
   },
   "quarantine_island_station": {
    "effects": {
-    "cohesion": -0.002,
-    "disease_exposure": -0.005,
-    "health_protection": 0.003,
-    "labor_demand": 0.004,
-    "state_capacity": 0.0012,
+    "cohesion": -0.0003,
+    "disease_exposure": -0.0011,
+    "health_protection": 0.0018,
+    "labor_demand": 0.0002,
+    "state_capacity": 0.0003,
     "trade_capacity": -0.003
    },
    "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
@@ -56,9 +56,9 @@
   },
   "leper_house_conversion": {
    "effects": {
-    "cohesion": -0.001,
-    "disease_exposure": -0.0015,
-    "health_protection": 0.001
+    "cohesion": -0.0001,
+    "disease_exposure": -0.001,
+    "health_protection": 0.0003
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
    "name": "Plague Houses from Leper Houses",
@@ -66,8 +66,8 @@
   },
   "pestilence_market_seals": {
    "effects": {
-    "disease_exposure": -0.0015,
-    "health_risk": -0.001,
+    "disease_exposure": -0.001,
+    "health_risk": -0.0006,
     "legitimacy": -0.001,
     "trade_capacity": -0.002
    },
@@ -77,9 +77,9 @@
   },
   "concave_spectacles": {
    "effects": {
-    "craft_output": 0.001,
-    "knowledge_rate": 0.0005,
-    "labor_efficiency": 0.002
+    "craft_output": 0.0005,
+    "knowledge_rate": 0.0004,
+    "labor_efficiency": 0.0012
    },
    "art": "res://assets/ui/research/paper/glass_blowing.png",
    "name": "Spectacles for the Short-Sighted",
@@ -88,9 +88,9 @@
   "incurables_hospital": {
    "effects": {
     "disease_exposure": 0.001,
-    "health_protection": 0.004,
-    "labor_demand": 0.003,
-    "legitimacy": 0.002
+    "health_protection": 0.0012,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
    "name": "Hospital for Incurables",
@@ -98,9 +98,9 @@
   },
   "printed_plague_regimens": {
    "effects": {
-    "adoption_rate": 0.002,
-    "disease_exposure": -0.001,
-    "health_protection": 0.002,
+    "adoption_rate": 0.0003,
+    "disease_exposure": -0.0007,
+    "health_protection": 0.0006,
     "health_risk": 0.001
    },
    "art": "res://assets/ui/research/subjects/printing_process-v1.png",
@@ -109,9 +109,9 @@
   },
   "printed_dissection_manual": {
    "effects": {
-    "health_protection": 0.001,
-    "injury_risk": -0.0026,
-    "knowledge_preservation": 0.0026
+    "health_protection": 0.0003,
+    "injury_risk": -0.0008,
+    "knowledge_preservation": 0.0003
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
    "name": "Printed Dissection Manual",
@@ -119,9 +119,9 @@
   },
   "sweating_fever_record": {
    "effects": {
-    "health_protection": 0.001,
-    "knowledge_preservation": 0.0017,
-    "observation_rate": 0.0016
+    "health_protection": 0.0002,
+    "knowledge_preservation": 0.0003,
+    "observation_rate": 0.0015
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
    "name": "Sweating Fever Recorded",
@@ -129,13 +129,13 @@
   },
   "standing_health_magistracy": {
    "effects": {
-    "disease_exposure": -0.005,
-    "health_protection": 0.003,
-    "institutional_rigidity": 0.003,
-    "labor_demand": 0.003,
+    "disease_exposure": -0.0017,
+    "health_protection": 0.0007,
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0002,
     "legitimacy": -0.001,
-    "sanitation": 0.0108,
-    "state_capacity": 0.003
+    "sanitation": 0.0093,
+    "state_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
    "name": "Standing Health Magistracy",
@@ -145,9 +145,9 @@
   },
   "field_surgery_handbook": {
    "effects": {
-    "injury_risk": -0.0052,
-    "knowledge_preservation": 0.0008,
-    "warfare_readiness": 0.002
+    "injury_risk": -0.0005,
+    "knowledge_preservation": 0.0001,
+    "warfare_readiness": 0.0003
    },
    "art": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
    "name": "Field Surgery Handbook",
@@ -155,9 +155,9 @@
   },
   "great_pox_recognition": {
    "effects": {
-    "cohesion": -0.002,
-    "disease_exposure": -0.002,
-    "health_protection": 0.002,
+    "cohesion": -0.0001,
+    "disease_exposure": -0.0007,
+    "health_protection": 0.0005,
     "health_risk": 0.004
    },
    "art": "res://assets/ui/research/subjects/curing_regimens-v1.png",
@@ -168,8 +168,8 @@
   },
   "ship_bills_of_health": {
    "effects": {
-    "disease_exposure": -0.002,
-    "state_capacity": 0.0012,
+    "disease_exposure": -0.0007,
+    "state_capacity": 0.0002,
     "trade_capacity": -0.001
    },
    "art": "res://assets/ui/research/subjects/cargo_seals-v1.png",
@@ -178,8 +178,8 @@
   },
   "bathhouse_closures": {
    "effects": {
-    "cohesion": -0.002,
-    "disease_exposure": -0.0015,
+    "cohesion": -0.0001,
+    "disease_exposure": -0.0005,
     "health_protection": -0.001,
     "sanitation": -0.003
    },
@@ -190,12 +190,12 @@
   },
   "college_of_physicians": {
    "effects": {
-    "health_protection": 0.004,
-    "health_risk": -0.005,
-    "institutional_rigidity": 0.004,
-    "labor_demand": 0.001,
-    "legitimacy": 0.001,
-    "state_capacity": 0.0012
+    "health_protection": 0.001,
+    "health_risk": -0.0005,
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/professional_corps-v1.png",
    "name": "College of Physicians",
@@ -205,9 +205,9 @@
   },
   "guaiac_pox_remedy": {
    "effects": {
-    "health_protection": 0.001,
-    "health_risk": -0.002,
-    "trade_capacity": 0.0013
+    "health_protection": 0.0002,
+    "health_risk": -0.0002,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
    "name": "Guaiac Wood Remedy",
@@ -215,9 +215,9 @@
   },
   "from_life_printed_herbals": {
    "effects": {
-    "health_protection": 0.001,
-    "health_risk": -0.003,
-    "knowledge_preservation": 0.0026
+    "health_protection": 0.0002,
+    "health_risk": -0.0003,
+    "knowledge_preservation": 0.0004
    },
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
    "name": "Herbals Drawn from Life",
@@ -225,10 +225,10 @@
   },
   "gentle_gunshot_dressing": {
    "effects": {
-    "health_protection": 0.002,
-    "health_risk": -0.003,
-    "injury_risk": -0.0104,
-    "warfare_readiness": 0.003
+    "health_protection": 0.0005,
+    "health_risk": -0.0003,
+    "injury_risk": -0.0009,
+    "warfare_readiness": 0.0004
    },
    "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
    "name": "Mild Gunshot Dressing",
@@ -237,10 +237,10 @@
   },
   "dissection_anatomy_atlas": {
    "effects": {
-    "health_risk": -0.002,
-    "injury_risk": -0.0052,
-    "knowledge_preservation": 0.0051,
-    "knowledge_rate": 0.002,
+    "health_risk": -0.0002,
+    "injury_risk": -0.0004,
+    "knowledge_preservation": 0.0009,
+    "knowledge_rate": 0.0006,
     "legitimacy": -0.001
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
@@ -251,10 +251,10 @@
   },
   "faculty_physic_garden": {
    "effects": {
-    "ecology_recovery": 0.001,
-    "health_protection": 0.001,
-    "health_risk": -0.002,
-    "knowledge_preservation": 0.0017
+    "ecology_recovery": 0.0003,
+    "health_protection": 0.0004,
+    "health_risk": -0.0002,
+    "knowledge_preservation": 0.0003
    },
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
    "name": "Physic Garden",
@@ -262,10 +262,10 @@
   },
   "contagion_seeds_treatise": {
    "effects": {
-    "disease_exposure": -0.003,
-    "health_protection": 0.002,
-    "knowledge_rate": 0.0015,
-    "sanitation": 0.0036
+    "disease_exposure": -0.002,
+    "health_protection": 0.0008,
+    "knowledge_rate": 0.0005,
+    "sanitation": 0.0013
    },
    "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
    "name": "Seeds of Contagion",
@@ -274,9 +274,9 @@
   },
   "spotted_fever_distinction": {
    "effects": {
-    "disease_exposure": -0.0005,
-    "health_protection": 0.002,
-    "observation_rate": 0.0008
+    "disease_exposure": -0.0003,
+    "health_protection": 0.0008,
+    "observation_rate": 0.0002
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
    "name": "Spotted Fever Named",
@@ -284,10 +284,10 @@
   },
   "printed_city_pharmacopoeia": {
    "effects": {
-    "health_risk": -0.004,
-    "institutional_rigidity": 0.001,
-    "standardization": 0.002,
-    "state_capacity": 0.0006
+    "health_risk": -0.0005,
+    "institutional_rigidity": 0.0001,
+    "standardization": 0.0003,
+    "state_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
    "name": "City Pharmacopoeia",
@@ -296,9 +296,9 @@
   "chemical_medicine_school": {
    "effects": {
     "chemical_control": 0.002,
-    "health_protection": 0.002,
+    "health_protection": 0.0008,
     "health_risk": 0.004,
-    "knowledge_rate": 0.0015
+    "knowledge_rate": 0.0005
    },
    "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
    "name": "Chemical Medicine",
@@ -307,9 +307,9 @@
   },
   "amputation_ligature": {
    "effects": {
-    "health_risk": -0.002,
-    "injury_risk": -0.0065,
-    "warfare_readiness": 0.001
+    "health_risk": -0.0002,
+    "injury_risk": -0.0005,
+    "warfare_readiness": 0.0002
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
    "name": "Tied Arteries",
@@ -317,9 +317,9 @@
   },
   "jointed_artificial_limbs": {
    "effects": {
-    "cohesion": 0.001,
-    "injury_risk": -0.0013,
-    "labor_efficiency": 0.001
+    "cohesion": 0.0001,
+    "injury_risk": -0.0001,
+    "labor_efficiency": 0.0005
    },
    "art": "res://assets/ui/research/subjects/workshop_standards-v1.png",
    "name": "Jointed Iron Limbs",
@@ -328,10 +328,10 @@
   "army_field_hospitals": {
    "effects": {
     "disease_exposure": 0.002,
-    "injury_risk": -0.0065,
-    "labor_demand": 0.003,
-    "logistics_endurance": 0.002,
-    "warfare_readiness": 0.004
+    "injury_risk": -0.0005,
+    "labor_demand": 0.0002,
+    "logistics_endurance": 0.0004,
+    "warfare_readiness": 0.0006
    },
    "art": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
    "name": "Army Field Hospitals",
@@ -339,10 +339,10 @@
   },
   "corpse_searchers": {
    "effects": {
-    "disease_exposure": -0.0015,
-    "knowledge_preservation": 0.0008,
-    "labor_demand": 0.001,
-    "state_capacity": 0.0012
+    "disease_exposure": -0.001,
+    "knowledge_preservation": 0.0001,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0004
    },
    "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
    "name": "Corpse Searchers",
@@ -350,9 +350,9 @@
   },
   "tiered_anatomy_theatre": {
    "effects": {
-    "injury_risk": -0.0026,
-    "knowledge_preservation": 0.0017,
-    "knowledge_rate": 0.0015,
+    "injury_risk": -0.0002,
+    "knowledge_preservation": 0.0003,
+    "knowledge_rate": 0.0005,
     "legitimacy": -0.001
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
@@ -361,9 +361,9 @@
   },
   "arm_flap_nose_repair": {
    "effects": {
-    "cohesion": 0.001,
-    "health_protection": 0.001,
-    "injury_risk": -0.0026
+    "cohesion": 0.0001,
+    "health_protection": 0.0004,
+    "injury_risk": -0.0002
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
    "name": "Nose Repair from the Arm",
@@ -371,8 +371,8 @@
   },
   "folk_variolation": {
    "effects": {
-    "cohesion": 0.001,
-    "disease_exposure": -0.004,
+    "cohesion": 0.0001,
+    "disease_exposure": -0.0019,
     "health_risk": 0.004,
     "neonatal_survival": 0.0046
    },
@@ -383,10 +383,10 @@
   },
   "lemon_juice_scurvy": {
    "effects": {
-    "health_protection": 0.003,
-    "logistics_endurance": 0.003,
-    "naval_capacity": 0.0014,
-    "trade_capacity": 0.0007
+    "health_protection": 0.0018,
+    "logistics_endurance": 0.0019,
+    "naval_capacity": 0.0005,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/paper/fruit_pulp_screening.png",
    "name": "Lemon Juice Against Scurvy",
@@ -394,10 +394,10 @@
   },
   "shut_up_plague_houses": {
    "effects": {
-    "cohesion": -0.004,
-    "disease_exposure": -0.002,
+    "cohesion": -0.0006,
+    "disease_exposure": -0.0009,
     "health_risk": 0.002,
-    "labor_demand": 0.002,
+    "labor_demand": 0.0001,
     "legitimacy": -0.002
    },
    "art": "res://assets/ui/research/subjects/watch_rotation-v1.png",
@@ -407,10 +407,10 @@
   },
   "sea_surgeons_chest": {
    "effects": {
-    "health_protection": 0.002,
-    "injury_risk": -0.0039,
-    "logistics_endurance": 0.002,
-    "naval_capacity": 0.0014
+    "health_protection": 0.0012,
+    "injury_risk": -0.0016,
+    "logistics_endurance": 0.0012,
+    "naval_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
    "name": "Sea Surgeon's Chest",
@@ -418,10 +418,10 @@
   },
   "chartered_apothecary_company": {
    "effects": {
-    "health_risk": -0.003,
-    "institutional_rigidity": 0.002,
-    "standardization": 0.002,
-    "trade_capacity": 0.0007
+    "health_risk": -0.0008,
+    "institutional_rigidity": 0.0003,
+    "standardization": 0.001,
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
    "name": "Apothecaries' Company",
@@ -429,10 +429,10 @@
   },
   "blood_circulation": {
    "effects": {
-    "health_protection": 0.002,
-    "health_risk": -0.001,
-    "knowledge_preservation": 0.0034,
-    "knowledge_rate": 0.003
+    "health_protection": 0.0004,
+    "health_risk": -0.0004,
+    "knowledge_preservation": 0.0024,
+    "knowledge_rate": 0.0017
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
    "name": "Circulation of the Blood",
@@ -442,10 +442,10 @@
   },
   "charity_nursing_sisters": {
    "effects": {
-    "cohesion": 0.002,
-    "health_protection": 0.005,
-    "labor_demand": 0.003,
-    "legitimacy": 0.002,
+    "cohesion": 0.0001,
+    "health_protection": 0.0009,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0003,
     "neonatal_survival": 0.0011
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
@@ -454,10 +454,10 @@
   },
   "university_clinical_wards": {
    "effects": {
-    "health_protection": 0.004,
-    "health_risk": -0.002,
-    "knowledge_rate": 0.0015,
-    "labor_demand": 0.002
+    "health_protection": 0.0007,
+    "health_risk": -0.0009,
+    "knowledge_rate": 0.0008,
+    "labor_demand": 0.0001
    },
    "art": "res://assets/ui/research/paper/clinical_observation_rounds.png",
    "name": "Clinical Wards",
@@ -466,10 +466,10 @@
   "cinchona_fever_bark": {
    "effects": {
     "disease_exposure": -0.0025,
-    "health_protection": 0.008,
-    "health_risk": 0.001,
+    "health_protection": 0.0014,
+    "health_risk": 0.0005,
     "labor_efficiency": 0.002,
-    "trade_capacity": 0.0013
+    "trade_capacity": 0.0002
    },
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
    "name": "Fever Bark",
@@ -478,13 +478,13 @@
   },
   "general_confinement_hospital": {
    "effects": {
-    "cohesion": -0.003,
+    "cohesion": -0.0003,
     "disease_exposure": 0.003,
-    "health_protection": 0.004,
-    "institutional_rigidity": 0.003,
-    "labor_demand": 0.004,
-    "legitimacy": -0.001,
-    "state_capacity": 0.0024
+    "health_protection": 0.0014,
+    "institutional_rigidity": 0.0004,
+    "labor_demand": 0.0002,
+    "legitimacy": -0.0003,
+    "state_capacity": 0.0005
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
    "name": "General Hospital",
@@ -494,9 +494,9 @@
   },
   "opium_tincture": {
    "effects": {
-    "health_protection": 0.003,
-    "health_risk": 0.004,
-    "injury_risk": -0.0013
+    "health_protection": 0.0011,
+    "health_risk": 0.0005,
+    "injury_risk": -0.0008
    },
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
    "name": "Opium Tincture",
@@ -505,8 +505,8 @@
   },
   "capillary_observation": {
    "effects": {
-    "knowledge_preservation": 0.0008,
-    "knowledge_rate": 0.0015
+    "knowledge_preservation": 0.0002,
+    "knowledge_rate": 0.0003
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Capillaries Seen",
@@ -514,8 +514,8 @@
   },
   "transfusion_ban": {
    "effects": {
-    "health_risk": -0.003,
-    "institutional_rigidity": 0.001,
+    "health_risk": -0.0008,
+    "institutional_rigidity": 0.0001,
     "knowledge_rate": -0.001
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
@@ -524,11 +524,11 @@
   },
   "invalid_soldiers_hospital": {
    "effects": {
-    "cohesion": 0.002,
-    "health_protection": 0.001,
-    "labor_demand": 0.003,
-    "legitimacy": 0.003,
-    "warfare_readiness": 0.003
+    "cohesion": 0.0002,
+    "health_protection": 0.0004,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0003,
+    "warfare_readiness": 0.0005
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
    "name": "Invalid Soldiers' Hospital",
@@ -538,8 +538,8 @@
   "epidemic_season_records": {
    "effects": {
     "disease_exposure": -0.001,
-    "knowledge_preservation": 0.0017,
-    "observation_rate": 0.0024
+    "knowledge_preservation": 0.0004,
+    "observation_rate": 0.0003
    },
    "art": "res://assets/ui/research/subjects/seasonal_patterns-v1.png",
    "name": "Epidemic Season Records",
@@ -549,8 +549,8 @@
    "effects": {
     "disease_exposure": -0.001,
     "food_output": -0.001,
-    "health_risk": -0.006,
-    "nutrition_quality": 0.002
+    "health_risk": -0.0005,
+    "nutrition_quality": 0.0006
    },
    "art": "res://assets/ui/research/paper/seed_cleaning.png",
    "name": "Ergot Named",
@@ -559,10 +559,10 @@
   },
   "regimental_surgeons": {
    "effects": {
-    "health_protection": 0.001,
-    "injury_risk": -0.0052,
-    "labor_demand": 0.002,
-    "warfare_readiness": 0.003
+    "health_protection": 0.0002,
+    "injury_risk": -0.0025,
+    "labor_demand": 0.0001,
+    "warfare_readiness": 0.0008
    },
    "art": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
    "name": "Regimental Surgeons",
@@ -570,12 +570,12 @@
   },
   "state_medical_collegium": {
    "effects": {
-    "health_protection": 0.004,
-    "health_risk": -0.006,
-    "institutional_rigidity": 0.004,
-    "labor_demand": 0.002,
+    "health_protection": 0.001,
+    "health_risk": -0.0005,
+    "institutional_rigidity": 0.0009,
+    "labor_demand": 0.0001,
     "maternal_safety": 0.0033,
-    "state_capacity": 0.003
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/professional_corps-v1.png",
    "name": "State Medical College",
@@ -584,10 +584,10 @@
   },
   "ipecac_flux_remedy": {
    "effects": {
-    "health_protection": 0.003,
+    "health_protection": 0.0007,
     "health_risk": 0.001,
     "neonatal_survival": 0.0011,
-    "trade_capacity": 0.0007
+    "trade_capacity": 0.0001
    },
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
    "name": "Flux Root",
@@ -595,10 +595,10 @@
   },
   "medical_case_journals": {
    "effects": {
-    "adoption_rate": 0.003,
-    "health_risk": -0.001,
-    "knowledge_preservation": 0.0017,
-    "knowledge_rate": 0.0015
+    "adoption_rate": 0.002,
+    "health_risk": -0.0001,
+    "knowledge_preservation": 0.0007,
+    "knowledge_rate": 0.0004
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
    "name": "Medical Journals",
@@ -606,9 +606,9 @@
   },
   "spa_town_physicians": {
    "effects": {
-    "cohesion": 0.001,
-    "health_protection": 0.002,
-    "trade_capacity": 0.0013,
+    "cohesion": 0.0001,
+    "health_protection": 0.0005,
+    "trade_capacity": 0.0002,
     "water_safety": 0.0015
    },
    "art": "res://assets/ui/research/subjects/public_baths-v1.png",
@@ -617,8 +617,8 @@
   },
   "trade_diseases_treatise": {
    "effects": {
-    "health_protection": 0.002,
-    "injury_risk": -0.0039,
+    "health_protection": 0.0013,
+    "injury_risk": -0.001,
     "labor_efficiency": 0.001,
     "mine_safety": 0.003
    },
@@ -628,8 +628,8 @@
   },
   "pulse_watch": {
    "effects": {
-    "health_protection": 0.002,
-    "observation_rate": 0.0016
+    "health_protection": 0.0013,
+    "observation_rate": 0.001
    },
    "art": "res://assets/ui/research/paper/clinical_pulse_assessment.png",
    "name": "Pulse Watch",
@@ -637,8 +637,8 @@
   },
   "screw_tourniquet": {
    "effects": {
-    "injury_risk": -0.0052,
-    "warfare_readiness": 0.001
+    "injury_risk": -0.0013,
+    "warfare_readiness": 0.0003
    },
    "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
    "name": "Screw Tourniquet",
@@ -646,11 +646,11 @@
   },
   "frontier_sanitary_cordon": {
    "effects": {
-    "cohesion": -0.002,
-    "disease_exposure": -0.005,
-    "labor_demand": 0.005,
-    "security_efficiency": 0.002,
-    "state_capacity": 0.0018,
+    "cohesion": -0.0003,
+    "disease_exposure": -0.0027,
+    "labor_demand": 0.0003,
+    "security_efficiency": 0.0008,
+    "state_capacity": 0.0004,
     "trade_capacity": -0.005,
     "travel_speed": -0.003
    },
@@ -662,10 +662,10 @@
   },
   "variolation_trials": {
    "effects": {
-    "disease_exposure": -0.003,
-    "health_risk": 0.003,
+    "disease_exposure": -0.0016,
+    "health_risk": 0.0007,
     "knowledge_rate": 0.001,
-    "legitimacy": -0.001,
+    "legitimacy": -0.0002,
     "neonatal_survival": 0.0046
    },
    "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
@@ -676,11 +676,12 @@
   },
   "subscription_hospitals": {
    "effects": {
-    "cohesion": 0.002,
+    "cohesion": 0.0002,
     "disease_exposure": 0.002,
-    "health_protection": 0.005,
-    "labor_demand": 0.003,
-    "legitimacy": 0.002
+    "health_protection": 0.0008,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0002,
+    "modern_survival": 0.0012
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
    "name": "Subscription Hospitals",
@@ -688,9 +689,10 @@
   },
   "lateral_lithotomy": {
    "effects": {
-    "health_protection": 0.001,
-    "health_risk": -0.002,
-    "injury_risk": -0.0026
+    "health_protection": 0.0002,
+    "health_risk": -0.0004,
+    "injury_risk": -0.0005,
+    "modern_survival": 0.0012
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
    "name": "Lateral Lithotomy",
@@ -698,9 +700,10 @@
   },
   "dental_surgery": {
    "effects": {
-    "health_protection": 0.002,
-    "health_risk": 0.001,
-    "nutrition_quality": 0.001
+    "health_protection": 0.0003,
+    "health_risk": 0.0002,
+    "modern_survival": 0.0012,
+    "nutrition_quality": 0.0004
    },
    "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
    "name": "Dental Surgery",
@@ -708,9 +711,10 @@
   },
   "anatomical_wax_models": {
    "effects": {
-    "knowledge_preservation": 0.0026,
-    "knowledge_rate": 0.0005,
-    "maternal_safety": 0.0016
+    "knowledge_preservation": 0.0006,
+    "knowledge_rate": 0.0001,
+    "maternal_safety": 0.0006,
+    "modern_survival": 0.0012
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
    "name": "Anatomical Wax Models",
@@ -718,9 +722,10 @@
   },
   "maize_skin_sickness": {
    "effects": {
-    "health_risk": -0.002,
-    "nutrition_quality": 0.003,
-    "observation_rate": 0.0008
+    "health_risk": -0.0004,
+    "modern_survival": 0.0012,
+    "nutrition_quality": 0.0011,
+    "observation_rate": 0.0002
    },
    "art": "res://assets/ui/research/subjects/case_records-v1.png",
    "name": "Maize Skin Sickness",
@@ -728,10 +733,11 @@
   },
   "ventilator_bellows": {
    "effects": {
-    "disease_exposure": -0.002,
-    "health_protection": 0.001,
-    "labor_demand": 0.001,
-    "naval_capacity": 0.0007
+    "disease_exposure": -0.0017,
+    "health_protection": 0.0002,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0012,
+    "naval_capacity": 0.0006
    },
    "art": "res://assets/ui/research/paper/mine_airways.png",
    "name": "Ventilator Bellows",
@@ -739,10 +745,11 @@
   },
   "surgeons_college": {
    "effects": {
-    "health_risk": -0.002,
-    "injury_risk": -0.0052,
-    "institutional_rigidity": 0.002,
-    "knowledge_preservation": 0.0017
+    "health_risk": -0.0004,
+    "injury_risk": -0.0009,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.0004,
+    "modern_survival": 0.0012
    },
    "art": "res://assets/ui/research/subjects/professional_corps-v1.png",
    "name": "Surgeons' College",
@@ -750,10 +757,11 @@
   },
   "smallpox_hospital": {
    "effects": {
-    "disease_exposure": -0.002,
-    "health_protection": 0.002,
-    "labor_demand": 0.002,
-    "neonatal_survival": 0.0023
+    "disease_exposure": -0.0017,
+    "health_protection": 0.0003,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0012,
+    "neonatal_survival": 0.0021
    },
    "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
    "name": "Smallpox Hospital",
@@ -761,11 +769,12 @@
   },
   "scurvy_controlled_trial": {
    "effects": {
-    "health_protection": 0.004,
-    "knowledge_rate": 0.002,
-    "logistics_endurance": 0.004,
-    "naval_capacity": 0.0021,
-    "nutrition_quality": 0.002
+    "health_protection": 0.0006,
+    "knowledge_rate": 0.0006,
+    "logistics_endurance": 0.0029,
+    "modern_survival": 0.0012,
+    "naval_capacity": 0.0017,
+    "nutrition_quality": 0.0007
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Scurvy Trial",
@@ -774,9 +783,10 @@
   },
   "cataract_extraction": {
    "effects": {
-    "health_protection": 0.002,
-    "health_risk": 0.001,
-    "labor_efficiency": 0.001
+    "health_protection": 0.0003,
+    "health_risk": 0.0002,
+    "labor_efficiency": 0.0004,
+    "modern_survival": 0.0012
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
    "name": "Cataract Extraction",
@@ -784,12 +794,13 @@
   },
   "preventive_inoculation": {
    "effects": {
-    "disease_exposure": -0.007,
-    "health_risk": 0.004,
-    "labor_demand": 0.002,
-    "legitimacy": -0.002,
-    "neonatal_survival": 0.0092,
-    "state_capacity": 0.0018
+    "disease_exposure": -0.0017,
+    "health_risk": 0.0008,
+    "labor_demand": 0.0001,
+    "legitimacy": -0.0002,
+    "modern_survival": 0.0025,
+    "neonatal_survival": 0.0012,
+    "state_capacity": 0.0007
    },
    "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
    "name": "Organized Inoculation",
@@ -799,8 +810,9 @@
   },
   "gastric_digestion_experiments": {
    "effects": {
-    "knowledge_rate": 0.0015,
-    "nutrition_quality": 0.001
+    "knowledge_rate": 0.0006,
+    "modern_survival": 0.0008,
+    "nutrition_quality": 0.0002
    },
    "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
    "name": "Digestion Experiments",
@@ -808,9 +820,10 @@
   },
   "bedside_thermometer": {
    "effects": {
-    "health_protection": 0.002,
-    "observation_rate": 0.0024,
-    "standardization": 0.001
+    "health_protection": 0.0004,
+    "modern_survival": 0.0008,
+    "observation_rate": 0.0007,
+    "standardization": 0.0003
    },
    "art": "res://assets/ui/research/paper/clinical_pulse_assessment.png",
    "name": "Bedside Thermometer",
@@ -818,8 +831,9 @@
   },
   "chest_percussion": {
    "effects": {
-    "health_protection": 0.003,
-    "observation_rate": 0.0016
+    "health_protection": 0.0007,
+    "modern_survival": 0.0008,
+    "observation_rate": 0.0004
    },
    "art": "res://assets/ui/research/paper/clinical_observation_rounds.png",
    "name": "Chest Percussion",
@@ -827,10 +841,11 @@
   },
   "organ_seat_pathology": {
    "effects": {
-    "health_protection": 0.003,
-    "health_risk": -0.002,
-    "knowledge_preservation": 0.0026,
-    "knowledge_rate": 0.003
+    "health_protection": 0.0007,
+    "health_risk": -0.0003,
+    "knowledge_preservation": 0.0005,
+    "knowledge_rate": 0.0012,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
    "name": "Seats of Disease",
@@ -839,10 +854,11 @@
   },
   "deaf_sign_school": {
    "effects": {
-    "cohesion": 0.002,
-    "knowledge_preservation": 0.0008,
-    "labor_efficiency": 0.001,
-    "legitimacy": 0.001
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.0001,
+    "labor_efficiency": 0.0003,
+    "legitimacy": 0.0001,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "School for the Deaf",
@@ -850,11 +866,12 @@
   },
   "mass_shallow_inoculation": {
    "effects": {
-    "disease_exposure": -0.004,
-    "health_risk": -0.002,
-    "labor_demand": 0.002,
-    "legitimacy": 0.001,
-    "neonatal_survival": 0.0057
+    "disease_exposure": -0.0009,
+    "health_risk": -0.0003,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "modern_survival": 0.0008,
+    "neonatal_survival": 0.0007
    },
    "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
    "name": "Village Inoculation",
@@ -862,9 +879,10 @@
   },
   "drowning_rescue_societies": {
    "effects": {
-    "cohesion": 0.002,
-    "health_protection": 0.001,
-    "injury_risk": -0.0026
+    "cohesion": 0.0002,
+    "health_protection": 0.0002,
+    "injury_risk": -0.0004,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/river_craft-v1.png",
    "name": "Rescue Societies",
@@ -872,10 +890,11 @@
   },
   "outpatient_dispensaries": {
    "effects": {
-    "health_protection": 0.005,
-    "labor_demand": 0.003,
-    "legitimacy": 0.002,
-    "neonatal_survival": 0.0023
+    "health_protection": 0.0011,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0002,
+    "modern_survival": 0.0008,
+    "neonatal_survival": 0.0003
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
    "name": "Dispensaries",
@@ -883,10 +902,11 @@
   },
   "prison_hygiene_reform": {
    "effects": {
-    "disease_exposure": -0.002,
-    "labor_demand": 0.002,
-    "legitimacy": 0.001,
-    "sanitation": 0.0054
+    "disease_exposure": -0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "modern_survival": 0.0008,
+    "sanitation": 0.0019
    },
    "art": "res://assets/ui/research/subjects/latrine_siting-v1.png",
    "name": "Prison Hygiene",
@@ -894,13 +914,14 @@
   },
   "medical_police_code": {
    "effects": {
-    "disease_exposure": -0.004,
-    "health_protection": 0.003,
-    "institutional_rigidity": 0.004,
-    "labor_demand": 0.003,
-    "legitimacy": -0.001,
-    "sanitation": 0.0144,
-    "state_capacity": 0.003,
+    "disease_exposure": -0.0008,
+    "health_protection": 0.0004,
+    "institutional_rigidity": 0.0006,
+    "labor_demand": 0.0002,
+    "legitimacy": -0.0001,
+    "modern_survival": 0.0008,
+    "sanitation": 0.0052,
+    "state_capacity": 0.0003,
     "water_safety": 0.0045
    },
    "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
@@ -911,9 +932,10 @@
   },
   "blind_reading_school": {
    "effects": {
-    "cohesion": 0.002,
-    "knowledge_preservation": 0.0008,
-    "legitimacy": 0.001
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0002,
+    "legitimacy": 0.0001,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/public_schools-v1.png",
    "name": "School for the Blind",
@@ -921,9 +943,10 @@
   },
   "foxglove_dropsy": {
    "effects": {
-    "health_protection": 0.003,
-    "health_risk": 0.002,
-    "knowledge_rate": 0.0005
+    "health_protection": 0.0004,
+    "health_risk": 0.0002,
+    "knowledge_rate": 0.0001,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
    "name": "Foxglove for Dropsy",
@@ -931,10 +954,11 @@
   },
   "town_fever_houses": {
    "effects": {
-    "cohesion": -0.001,
-    "disease_exposure": -0.0025,
-    "health_protection": 0.002,
-    "labor_demand": 0.002
+    "cohesion": -0.0001,
+    "disease_exposure": -0.0005,
+    "health_protection": 0.0003,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
    "name": "Fever Houses",
@@ -942,11 +966,12 @@
   },
   "moral_treatment_asylums": {
    "effects": {
-    "cohesion": 0.003,
-    "health_protection": 0.002,
-    "institutional_rigidity": -0.001,
-    "labor_demand": 0.002,
-    "legitimacy": 0.002
+    "cohesion": 0.0002,
+    "health_protection": 0.0003,
+    "institutional_rigidity": -0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "modern_survival": 0.0008
    },
    "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
    "name": "Moral Treatment",
@@ -955,9 +980,9 @@
   },
   "litter_bearer_drill": {
    "effects": {
-    "injury_risk": -0.0052,
-    "labor_demand": 0.001,
-    "warfare_readiness": 0.003
+    "injury_risk": -0.0021,
+    "labor_demand": 0.0001,
+    "warfare_readiness": 0.0004
    },
    "art": "res://assets/ui/research/paper/litter_bearer_drill.png",
    "name": "Litter Bearer Drill",
@@ -965,10 +990,11 @@
   },
   "fleet_citrus_ration": {
    "effects": {
-    "health_protection": 0.004,
-    "labor_demand": 0.001,
-    "logistics_endurance": 0.004,
-    "naval_capacity": 0.0028,
+    "health_protection": 0.0005,
+    "labor_demand": 0.0001,
+    "logistics_endurance": 0.0009,
+    "modern_survival": 0.0008,
+    "naval_capacity": 0.0009,
     "trade_capacity": -0.001
    },
    "art": "res://assets/ui/research/paper/fruit_pulp_screening.png",
@@ -977,17 +1003,541 @@
   },
   "cowpox_vaccination": {
    "effects": {
-    "cohesion": -0.001,
-    "disease_exposure": -0.008,
-    "health_protection": 0.004,
-    "health_risk": -0.004,
-    "neonatal_survival": 0.0115
+    "cohesion": -0.0001,
+    "disease_exposure": -0.0016,
+    "health_protection": 0.0005,
+    "health_risk": -0.0007,
+    "modern_survival": 0.005,
+    "neonatal_survival": 0.0022
    },
    "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
    "name": "Cowpox Vaccination",
    "observation": "Matter from the cowpox of a milkmaid's hand is scratched into a child's arm, and the child cannot then take the smallpox.",
    "ability_reason": "A cowpox scratch protects against smallpox without the danger of the smallpox itself, so everyone can be protected safely.",
    "social_consequence": "Caricaturists draw the vaccinated growing horns, and the old inoculators fight the new method for their trade."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "council_plague_treatises": {
+    "disease_exposure": -0.0005,
+    "health_protection": 0.002,
+    "knowledge_preservation": 0.0017
+   },
+   "forty_day_quarantine": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.006,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.002,
+    "state_capacity": 0.0018,
+    "trade_capacity": -0.008,
+    "travel_speed": -0.004
+   },
+   "health_passes": {
+    "disease_exposure": -0.002,
+    "institutional_rigidity": 0.001,
+    "state_capacity": 0.0012,
+    "trade_capacity": -0.002
+   },
+   "quarantine_island_station": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.005,
+    "health_protection": 0.003,
+    "labor_demand": 0.004,
+    "state_capacity": 0.0012,
+    "trade_capacity": -0.003
+   },
+   "leper_house_conversion": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.0015,
+    "health_protection": 0.001
+   },
+   "pestilence_market_seals": {
+    "disease_exposure": -0.0015,
+    "health_risk": -0.001,
+    "legitimacy": -0.001,
+    "trade_capacity": -0.002
+   },
+   "concave_spectacles": {
+    "craft_output": 0.001,
+    "knowledge_rate": 0.0005,
+    "labor_efficiency": 0.002
+   },
+   "incurables_hospital": {
+    "disease_exposure": 0.001,
+    "health_protection": 0.004,
+    "labor_demand": 0.003,
+    "legitimacy": 0.002
+   },
+   "printed_plague_regimens": {
+    "adoption_rate": 0.002,
+    "disease_exposure": -0.001,
+    "health_protection": 0.002,
+    "health_risk": 0.001
+   },
+   "printed_dissection_manual": {
+    "health_protection": 0.001,
+    "injury_risk": -0.0026,
+    "knowledge_preservation": 0.0026
+   },
+   "sweating_fever_record": {
+    "health_protection": 0.001,
+    "knowledge_preservation": 0.0017,
+    "observation_rate": 0.0016
+   },
+   "standing_health_magistracy": {
+    "disease_exposure": -0.005,
+    "health_protection": 0.003,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.003,
+    "legitimacy": -0.001,
+    "sanitation": 0.0108,
+    "state_capacity": 0.003
+   },
+   "field_surgery_handbook": {
+    "injury_risk": -0.0052,
+    "knowledge_preservation": 0.0008,
+    "warfare_readiness": 0.002
+   },
+   "great_pox_recognition": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.002,
+    "health_protection": 0.002,
+    "health_risk": 0.004
+   },
+   "ship_bills_of_health": {
+    "disease_exposure": -0.002,
+    "state_capacity": 0.0012,
+    "trade_capacity": -0.001
+   },
+   "bathhouse_closures": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.0015,
+    "health_protection": -0.001,
+    "sanitation": -0.003
+   },
+   "college_of_physicians": {
+    "health_protection": 0.004,
+    "health_risk": -0.005,
+    "institutional_rigidity": 0.004,
+    "labor_demand": 0.001,
+    "legitimacy": 0.001,
+    "state_capacity": 0.0012
+   },
+   "guaiac_pox_remedy": {
+    "health_protection": 0.001,
+    "health_risk": -0.002,
+    "trade_capacity": 0.0013
+   },
+   "from_life_printed_herbals": {
+    "health_protection": 0.001,
+    "health_risk": -0.003,
+    "knowledge_preservation": 0.0026
+   },
+   "gentle_gunshot_dressing": {
+    "health_protection": 0.002,
+    "health_risk": -0.003,
+    "injury_risk": -0.0104,
+    "warfare_readiness": 0.003
+   },
+   "dissection_anatomy_atlas": {
+    "health_risk": -0.002,
+    "injury_risk": -0.0052,
+    "knowledge_preservation": 0.0051,
+    "knowledge_rate": 0.002,
+    "legitimacy": -0.001
+   },
+   "faculty_physic_garden": {
+    "ecology_recovery": 0.001,
+    "health_protection": 0.001,
+    "health_risk": -0.002,
+    "knowledge_preservation": 0.0017
+   },
+   "contagion_seeds_treatise": {
+    "disease_exposure": -0.003,
+    "health_protection": 0.002,
+    "knowledge_rate": 0.0015,
+    "sanitation": 0.0036
+   },
+   "spotted_fever_distinction": {
+    "disease_exposure": -0.0005,
+    "health_protection": 0.002,
+    "observation_rate": 0.0008
+   },
+   "printed_city_pharmacopoeia": {
+    "health_risk": -0.004,
+    "institutional_rigidity": 0.001,
+    "standardization": 0.002,
+    "state_capacity": 0.0006
+   },
+   "chemical_medicine_school": {
+    "chemical_control": 0.002,
+    "health_protection": 0.002,
+    "health_risk": 0.004,
+    "knowledge_rate": 0.0015
+   },
+   "amputation_ligature": {
+    "health_risk": -0.002,
+    "injury_risk": -0.0065,
+    "warfare_readiness": 0.001
+   },
+   "jointed_artificial_limbs": {
+    "cohesion": 0.001,
+    "injury_risk": -0.0013,
+    "labor_efficiency": 0.001
+   },
+   "army_field_hospitals": {
+    "disease_exposure": 0.002,
+    "injury_risk": -0.0065,
+    "labor_demand": 0.003,
+    "logistics_endurance": 0.002,
+    "warfare_readiness": 0.004
+   },
+   "corpse_searchers": {
+    "disease_exposure": -0.0015,
+    "knowledge_preservation": 0.0008,
+    "labor_demand": 0.001,
+    "state_capacity": 0.0012
+   },
+   "tiered_anatomy_theatre": {
+    "injury_risk": -0.0026,
+    "knowledge_preservation": 0.0017,
+    "knowledge_rate": 0.0015,
+    "legitimacy": -0.001
+   },
+   "arm_flap_nose_repair": {
+    "cohesion": 0.001,
+    "health_protection": 0.001,
+    "injury_risk": -0.0026
+   },
+   "folk_variolation": {
+    "cohesion": 0.001,
+    "disease_exposure": -0.004,
+    "health_risk": 0.004,
+    "neonatal_survival": 0.0046
+   },
+   "lemon_juice_scurvy": {
+    "health_protection": 0.003,
+    "logistics_endurance": 0.003,
+    "naval_capacity": 0.0014,
+    "trade_capacity": 0.0007
+   },
+   "shut_up_plague_houses": {
+    "cohesion": -0.004,
+    "disease_exposure": -0.002,
+    "health_risk": 0.002,
+    "labor_demand": 0.002,
+    "legitimacy": -0.002
+   },
+   "sea_surgeons_chest": {
+    "health_protection": 0.002,
+    "injury_risk": -0.0039,
+    "logistics_endurance": 0.002,
+    "naval_capacity": 0.0014
+   },
+   "chartered_apothecary_company": {
+    "health_risk": -0.003,
+    "institutional_rigidity": 0.002,
+    "standardization": 0.002,
+    "trade_capacity": 0.0007
+   },
+   "blood_circulation": {
+    "health_protection": 0.002,
+    "health_risk": -0.001,
+    "knowledge_preservation": 0.0034,
+    "knowledge_rate": 0.003
+   },
+   "charity_nursing_sisters": {
+    "cohesion": 0.002,
+    "health_protection": 0.005,
+    "labor_demand": 0.003,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.0011
+   },
+   "university_clinical_wards": {
+    "health_protection": 0.004,
+    "health_risk": -0.002,
+    "knowledge_rate": 0.0015,
+    "labor_demand": 0.002
+   },
+   "cinchona_fever_bark": {
+    "disease_exposure": -0.0025,
+    "health_protection": 0.008,
+    "health_risk": 0.001,
+    "labor_efficiency": 0.002,
+    "trade_capacity": 0.0013
+   },
+   "general_confinement_hospital": {
+    "cohesion": -0.003,
+    "disease_exposure": 0.003,
+    "health_protection": 0.004,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.004,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0024
+   },
+   "opium_tincture": {
+    "health_protection": 0.003,
+    "health_risk": 0.004,
+    "injury_risk": -0.0013
+   },
+   "capillary_observation": {
+    "knowledge_preservation": 0.0008,
+    "knowledge_rate": 0.0015
+   },
+   "transfusion_ban": {
+    "health_risk": -0.003,
+    "institutional_rigidity": 0.001,
+    "knowledge_rate": -0.001
+   },
+   "invalid_soldiers_hospital": {
+    "cohesion": 0.002,
+    "health_protection": 0.001,
+    "labor_demand": 0.003,
+    "legitimacy": 0.003,
+    "warfare_readiness": 0.003
+   },
+   "epidemic_season_records": {
+    "disease_exposure": -0.001,
+    "knowledge_preservation": 0.0017,
+    "observation_rate": 0.0024
+   },
+   "ergot_cause_identified": {
+    "disease_exposure": -0.001,
+    "food_output": -0.001,
+    "health_risk": -0.006,
+    "nutrition_quality": 0.002
+   },
+   "regimental_surgeons": {
+    "health_protection": 0.001,
+    "injury_risk": -0.0052,
+    "labor_demand": 0.002,
+    "warfare_readiness": 0.003
+   },
+   "state_medical_collegium": {
+    "health_protection": 0.004,
+    "health_risk": -0.006,
+    "institutional_rigidity": 0.004,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.0033,
+    "state_capacity": 0.003
+   },
+   "ipecac_flux_remedy": {
+    "health_protection": 0.003,
+    "health_risk": 0.001,
+    "neonatal_survival": 0.0011,
+    "trade_capacity": 0.0007
+   },
+   "medical_case_journals": {
+    "adoption_rate": 0.003,
+    "health_risk": -0.001,
+    "knowledge_preservation": 0.0017,
+    "knowledge_rate": 0.0015
+   },
+   "spa_town_physicians": {
+    "cohesion": 0.001,
+    "health_protection": 0.002,
+    "trade_capacity": 0.0013,
+    "water_safety": 0.0015
+   },
+   "trade_diseases_treatise": {
+    "health_protection": 0.002,
+    "injury_risk": -0.0039,
+    "labor_efficiency": 0.001,
+    "mine_safety": 0.003
+   },
+   "pulse_watch": {
+    "health_protection": 0.002,
+    "observation_rate": 0.0016
+   },
+   "screw_tourniquet": {
+    "injury_risk": -0.0052,
+    "warfare_readiness": 0.001
+   },
+   "frontier_sanitary_cordon": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.005,
+    "labor_demand": 0.005,
+    "security_efficiency": 0.002,
+    "state_capacity": 0.0018,
+    "trade_capacity": -0.005,
+    "travel_speed": -0.003
+   },
+   "variolation_trials": {
+    "disease_exposure": -0.003,
+    "health_risk": 0.003,
+    "knowledge_rate": 0.001,
+    "legitimacy": -0.001,
+    "neonatal_survival": 0.0046
+   },
+   "subscription_hospitals": {
+    "cohesion": 0.002,
+    "disease_exposure": 0.002,
+    "health_protection": 0.005,
+    "labor_demand": 0.003,
+    "legitimacy": 0.002
+   },
+   "lateral_lithotomy": {
+    "health_protection": 0.001,
+    "health_risk": -0.002,
+    "injury_risk": -0.0026
+   },
+   "dental_surgery": {
+    "health_protection": 0.002,
+    "health_risk": 0.001,
+    "nutrition_quality": 0.001
+   },
+   "anatomical_wax_models": {
+    "knowledge_preservation": 0.0026,
+    "knowledge_rate": 0.0005,
+    "maternal_safety": 0.0016
+   },
+   "maize_skin_sickness": {
+    "health_risk": -0.002,
+    "nutrition_quality": 0.003,
+    "observation_rate": 0.0008
+   },
+   "ventilator_bellows": {
+    "disease_exposure": -0.002,
+    "health_protection": 0.001,
+    "labor_demand": 0.001,
+    "naval_capacity": 0.0007
+   },
+   "surgeons_college": {
+    "health_risk": -0.002,
+    "injury_risk": -0.0052,
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0017
+   },
+   "smallpox_hospital": {
+    "disease_exposure": -0.002,
+    "health_protection": 0.002,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.0023
+   },
+   "scurvy_controlled_trial": {
+    "health_protection": 0.004,
+    "knowledge_rate": 0.002,
+    "logistics_endurance": 0.004,
+    "naval_capacity": 0.0021,
+    "nutrition_quality": 0.002
+   },
+   "cataract_extraction": {
+    "health_protection": 0.002,
+    "health_risk": 0.001,
+    "labor_efficiency": 0.001
+   },
+   "preventive_inoculation": {
+    "disease_exposure": -0.007,
+    "health_risk": 0.004,
+    "labor_demand": 0.002,
+    "legitimacy": -0.002,
+    "neonatal_survival": 0.0092,
+    "state_capacity": 0.0018
+   },
+   "gastric_digestion_experiments": {
+    "knowledge_rate": 0.0015,
+    "nutrition_quality": 0.001
+   },
+   "bedside_thermometer": {
+    "health_protection": 0.002,
+    "observation_rate": 0.0024,
+    "standardization": 0.001
+   },
+   "chest_percussion": {
+    "health_protection": 0.003,
+    "observation_rate": 0.0016
+   },
+   "organ_seat_pathology": {
+    "health_protection": 0.003,
+    "health_risk": -0.002,
+    "knowledge_preservation": 0.0026,
+    "knowledge_rate": 0.003
+   },
+   "deaf_sign_school": {
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0008,
+    "labor_efficiency": 0.001,
+    "legitimacy": 0.001
+   },
+   "mass_shallow_inoculation": {
+    "disease_exposure": -0.004,
+    "health_risk": -0.002,
+    "labor_demand": 0.002,
+    "legitimacy": 0.001,
+    "neonatal_survival": 0.0057
+   },
+   "drowning_rescue_societies": {
+    "cohesion": 0.002,
+    "health_protection": 0.001,
+    "injury_risk": -0.0026
+   },
+   "outpatient_dispensaries": {
+    "health_protection": 0.005,
+    "labor_demand": 0.003,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.0023
+   },
+   "prison_hygiene_reform": {
+    "disease_exposure": -0.002,
+    "labor_demand": 0.002,
+    "legitimacy": 0.001,
+    "sanitation": 0.0054
+   },
+   "medical_police_code": {
+    "disease_exposure": -0.004,
+    "health_protection": 0.003,
+    "institutional_rigidity": 0.004,
+    "labor_demand": 0.003,
+    "legitimacy": -0.001,
+    "sanitation": 0.0144,
+    "state_capacity": 0.003,
+    "water_safety": 0.0045
+   },
+   "blind_reading_school": {
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0008,
+    "legitimacy": 0.001
+   },
+   "foxglove_dropsy": {
+    "health_protection": 0.003,
+    "health_risk": 0.002,
+    "knowledge_rate": 0.0005
+   },
+   "town_fever_houses": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.0025,
+    "health_protection": 0.002,
+    "labor_demand": 0.002
+   },
+   "moral_treatment_asylums": {
+    "cohesion": 0.003,
+    "health_protection": 0.002,
+    "institutional_rigidity": -0.001,
+    "labor_demand": 0.002,
+    "legitimacy": 0.002
+   },
+   "litter_bearer_drill": {
+    "injury_risk": -0.0052,
+    "labor_demand": 0.001,
+    "warfare_readiness": 0.003
+   },
+   "fleet_citrus_ration": {
+    "health_protection": 0.004,
+    "labor_demand": 0.001,
+    "logistics_endurance": 0.004,
+    "naval_capacity": 0.0028,
+    "trade_capacity": -0.001
+   },
+   "cowpox_vaccination": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.008,
+    "health_protection": 0.004,
+    "health_risk": -0.004,
+    "neonatal_survival": 0.0115
+   }
   }
  }
 }

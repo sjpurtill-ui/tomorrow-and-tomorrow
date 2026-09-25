@@ -4,9 +4,9 @@
  "items": {
   "quarter_session_wage_hearings": {
    "effects": {
-    "state_capacity": 0.0015,
-    "legitimacy": 0.0012,
-    "institutional_rigidity": 0.0021
+    "institutional_rigidity": 0.0004,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0003
    },
    "name": "Quarter-Session Wage Hearings",
    "observation": "Four times a year the justices sit at the county town, and a carter paid short may stand before them beside his master.",
@@ -14,8 +14,8 @@
   },
   "cloth_workers_guild_demand": {
    "effects": {
-    "cohesion": 0.0014,
-    "institutional_rigidity": 0.0014
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0002
    },
    "name": "Cloth Workers' Guild Demand",
    "observation": "The carders and dyers march behind a borrowed banner to the town hall and ask for a hall, a warden and a seal of their own.",
@@ -24,12 +24,12 @@
   },
   "tenant_leagues_against_bondage": {
    "effects": {
-    "cohesion": 0.0042,
-    "adoption_rate": 0.004,
-    "labor_efficiency": 0.002,
-    "state_capacity": -0.002,
-    "institutional_rigidity": -0.0042,
-    "legitimacy": -0.0018
+    "adoption_rate": 0.0025,
+    "cohesion": 0.0002,
+    "institutional_rigidity": -0.0003,
+    "labor_efficiency": 0.0008,
+    "legitimacy": -0.0018,
+    "state_capacity": -0.002
    },
    "name": "Tenant Leagues",
    "observation": "Tenants of twenty villages swear together at the crossroads: no more days at the lord's plough, only a fixed rent in coin.",
@@ -47,7 +47,7 @@
   },
   "journeymen_town_boycotts": {
    "effects": {
-    "cohesion": 0.0014
+    "cohesion": 0.0001
    },
    "name": "Journeymen's Boycotts",
    "observation": "No journeyman saddler will work in the town until the masters raise the day rate, and the brotherhood's letters warn every other town away.",
@@ -56,9 +56,9 @@
   },
   "begging_licence_badges": {
    "effects": {
-    "state_capacity": 0.001,
-    "labor_demand": -0.002,
-    "cohesion": -0.0014
+    "cohesion": -0.0002,
+    "labor_demand": -0.0004,
+    "state_capacity": 0.0002
    },
    "name": "Beggars' Badges",
    "observation": "The blind and the lame wear the town's pewter badge at the temple door; a sturdy man without one is marched to the ditch works.",
@@ -67,9 +67,9 @@
   },
   "roll_copy_tenure": {
    "effects": {
-    "labor_efficiency": 0.0012,
-    "cultivation_yield": 0.001,
-    "adoption_rate": 0.001
+    "adoption_rate": 0.0006,
+    "cultivation_yield": 0.0003,
+    "labor_efficiency": 0.0005
    },
    "name": "Copyhold Tenure",
    "observation": "The widow keeps her copy of the manor roll in a box: it shows her strips owe four shillings a year and no days at the plough.",
@@ -77,7 +77,7 @@
   },
   "demesne_leasing_to_farmers": {
    "effects": {
-    "cultivation_yield": 0.0015
+    "cultivation_yield": 0.0005
    },
    "name": "Leased Home Farms",
    "observation": "The lord's home farm is let to a yeoman for twenty years, and the yeoman hires his own ploughmen by the year.",
@@ -85,11 +85,11 @@
   },
   "mining_ordinances": {
    "effects": {
-    "mining_output": 0.003,
-    "task_coordination": 0.0018,
+    "institutional_rigidity": 0.0002,
     "mine_safety": 0.002,
-    "state_capacity": 0.001,
-    "institutional_rigidity": 0.0014
+    "mining_output": 0.003,
+    "state_capacity": 0.0002,
+    "task_coordination": 0.0018
    },
    "name": "Mining Ordinances",
    "observation": "The mine master reads the ordinance at the shaft head: eight hours a shift, pay every second week, props renewed before any hewing.",
@@ -97,9 +97,9 @@
   },
   "mandatory_wander_years": {
    "effects": {
-    "knowledge_preservation": 0.001,
-    "tool_quality": 0.002,
-    "adoption_rate": 0.002
+    "adoption_rate": 0.0003,
+    "knowledge_preservation": 0.0001,
+    "tool_quality": 0.0012
    },
    "name": "Wander Years",
    "observation": "The young cooper shoulders his bundle and walks south; he may not ask for mastership until he has worked in three towns.",
@@ -107,10 +107,10 @@
   },
   "eight_hour_mine_shifts": {
    "effects": {
-    "fatigue": -0.0023,
-    "injury_risk": -0.002,
-    "mining_output": 0.002,
-    "labor_demand": 0.001
+    "fatigue": -0.0012,
+    "injury_risk": -0.0006,
+    "labor_demand": 0.0001,
+    "mining_output": 0.002
    },
    "name": "Eight-Hour Mine Shifts",
    "observation": "A bell at the shaft head calls the shift up after eight hours; the next crew is already waiting in the changing house.",
@@ -118,8 +118,8 @@
   },
   "dawn_hiring_squares": {
    "effects": {
-    "task_coordination": 0.0012,
-    "labor_demand": -0.002
+    "labor_demand": -0.0002,
+    "task_coordination": 0.0003
    },
    "name": "Dawn Hiring Squares",
    "observation": "Before sunrise the day men stand by the fountain with their spades; the builders' foremen pick the strongest and the rest go home.",
@@ -128,12 +128,12 @@
   },
   "arsenal_sequence_fitting": {
    "effects": {
-    "naval_capacity": 0.012,
-    "task_coordination": 0.0048,
-    "construction_rate": 0.004,
-    "warfare_readiness": 0.002,
-    "labor_efficiency": 0.0016,
-    "timber_pressure": 0.003
+    "construction_rate": 0.0011,
+    "labor_efficiency": 0.0009,
+    "naval_capacity": 0.0011,
+    "task_coordination": 0.0011,
+    "timber_pressure": 0.003,
+    "warfare_readiness": 0.0004
    },
    "name": "Arsenal Sequence Fitting",
    "observation": "Hulls are towed along the arsenal basin, and from each warehouse window a gang hands down oars, cordage, biscuit or guns in turn.",
@@ -142,11 +142,11 @@
   },
   "convict_galley_oarsmen": {
    "effects": {
-    "naval_capacity": 0.003,
-    "labor_demand": -0.002,
     "health_risk": 0.0021,
     "injury_risk": 0.002,
-    "legitimacy": -0.0012
+    "labor_demand": -0.0002,
+    "legitimacy": -0.0012,
+    "naval_capacity": 0.0003
    },
    "name": "Convict Oarsmen",
    "observation": "Thieves and captives sit chained three to a bench; the galley master counts them at dawn and again at dusk.",
@@ -155,10 +155,10 @@
   },
   "off_season_cottage_weaving": {
    "effects": {
-    "craft_output": 0.0012,
+    "craft_output": 0.0006,
+    "fatigue": 0.0015,
     "fiber_yield": 0.002,
-    "labor_demand": -0.001,
-    "fatigue": 0.0015
+    "labor_demand": -0.0001
    },
    "name": "Winter Cottage Weaving",
    "observation": "When the ploughing is done the whole household sits at wheel and loom, and the merchant's cart comes for the cloth at the turn of the year.",
@@ -166,9 +166,9 @@
   },
   "statutory_work_hours": {
    "effects": {
-    "fatigue": -0.0023,
-    "task_coordination": 0.0012,
-    "institutional_rigidity": 0.0014
+    "fatigue": -0.0012,
+    "institutional_rigidity": 0.0002,
+    "task_coordination": 0.0003
    },
    "name": "Statutory Work Hours",
    "observation": "From spring to autumn the working day runs dawn to dusk, with half an hour for breakfast and an hour for dinner, and the town bell marks both.",
@@ -176,9 +176,9 @@
   },
   "lump_sum_building_contracts": {
    "effects": {
-    "construction_rate": 0.004,
-    "task_coordination": 0.0012,
-    "injury_risk": 0.001
+    "construction_rate": 0.0011,
+    "injury_risk": 0.001,
+    "task_coordination": 0.0003
    },
    "name": "Lump-Sum Building Contracts",
    "observation": "The master builder signs for the whole guildhall at a fixed price, then hires the masons, carpenters and tilers himself.",
@@ -186,9 +186,9 @@
   },
   "permanent_journeymen": {
    "effects": {
-    "labor_demand": -0.002,
-    "cohesion": -0.0021,
-    "institutional_rigidity": 0.0014
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0002,
+    "labor_demand": -0.0002
    },
    "name": "Permanent Journeymen",
    "observation": "At forty the journeyman still sleeps in the master's loft; the mastership fee is more than he will earn in ten years.",
@@ -197,9 +197,9 @@
   },
   "shareholder_wage_miners": {
    "effects": {
+    "cohesion": -0.0001,
     "mining_output": 0.004,
-    "trade_capacity": 0.001,
-    "cohesion": -0.0014
+    "trade_capacity": 0.0001
    },
    "name": "Shareholders' Wage Miners",
    "observation": "The townsmen who own the mine shares never go down it; the free miners who once worked their own veins now draw a weekly wage.",
@@ -207,8 +207,8 @@
   },
   "wage_books": {
    "effects": {
-    "task_coordination": 0.0018,
-    "standardization": 0.0012
+    "standardization": 0.0002,
+    "task_coordination": 0.0004
    },
    "name": "Wage Books",
    "observation": "Each Saturday the clerk rules a line under the week: days worked, pieces made, pence paid, and the hand makes his mark.",
@@ -216,9 +216,9 @@
   },
   "printing_house_crews": {
    "effects": {
-    "knowledge_preservation": 0.002,
-    "task_coordination": 0.0018,
-    "standardization": 0.0012
+    "knowledge_preservation": 0.0002,
+    "standardization": 0.0002,
+    "task_coordination": 0.0004
    },
    "name": "Printing-House Crews",
    "observation": "The compositor sets the page, the pressmen pull and ink, the corrector reads the wet proof; two thousand sheets a day leave the house.",
@@ -226,14 +226,14 @@
   },
   "export_estate_labor_dues": {
    "effects": {
-    "food_output": 0.006,
-    "trade_capacity": 0.002,
-    "labor_demand": -0.006,
+    "adoption_rate": -0.003,
+    "cohesion": -0.0003,
     "fatigue": 0.0045,
-    "cohesion": -0.0042,
+    "food_output": 0.0022,
+    "institutional_rigidity": 0.0006,
+    "labor_demand": -0.0007,
     "legitimacy": -0.0024,
-    "institutional_rigidity": 0.0042,
-    "adoption_rate": -0.003
+    "trade_capacity": 0.0002
    },
    "name": "Export Estate Labor Dues",
    "observation": "The grain ships wait at the river mouth, and on the estates the bailiff demands four days a week at the lord's plough, unpaid.",
@@ -243,8 +243,8 @@
   },
   "tramping_relief": {
    "effects": {
-    "cohesion": 0.0014,
-    "adoption_rate": 0.001
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0001
    },
    "name": "Tramping Relief",
    "observation": "The tramping blacksmith shows his club card at the inn and gets a bed, a supper and word of which town is hiring.",
@@ -252,10 +252,10 @@
   },
   "furnace_campaign_crews": {
    "effects": {
-    "metal_yield": 0.003,
-    "task_coordination": 0.0018,
     "fatigue": 0.0015,
-    "injury_risk": 0.001
+    "injury_risk": 0.001,
+    "metal_yield": 0.003,
+    "task_coordination": 0.0003
    },
    "name": "Furnace Campaign Crews",
    "observation": "For forty weeks the blast never stops: founders by the hearth, fillers at the throat, colliers in the woods and carters on the roads between.",
@@ -263,12 +263,12 @@
   },
   "vagrancy_return_laws": {
    "effects": {
-    "state_capacity": 0.001,
-    "labor_demand": -0.001,
-    "cohesion": -0.0021,
+    "adoption_rate": -0.001,
+    "cohesion": -0.0001,
+    "institutional_rigidity": 0.0002,
+    "labor_demand": -0.0001,
     "legitimacy": -0.0012,
-    "institutional_rigidity": 0.0021,
-    "adoption_rate": -0.001
+    "state_capacity": 0.0002
    },
    "name": "Vagrancy Return Laws",
    "observation": "The constable whips the wanderer at the parish boundary and hands him a pass naming the road home and the days allowed.",
@@ -277,8 +277,8 @@
   },
   "putting_out_ledgers": {
    "effects": {
-    "craft_output": 0.0012,
-    "task_coordination": 0.0012
+    "craft_output": 0.0006,
+    "task_coordination": 0.0002
    },
    "name": "Putting-Out Ledgers",
    "observation": "The clothier's book lists two hundred spinners by name, the wool weighed out to each and the yarn weighed back.",
@@ -295,9 +295,9 @@
   },
   "guild_loom_exclusion": {
    "effects": {
-    "institutional_rigidity": 0.0021,
-    "labor_demand": 0.001,
-    "adoption_rate": -0.001
+    "adoption_rate": -0.001,
+    "institutional_rigidity": 0.0002,
+    "labor_demand": 0.0001
    },
    "name": "Guild Loom Exclusion",
    "observation": "The weavers' ordinance lets a master's widow keep his loom for a year and a day; any other woman found weaving is fined.",
@@ -306,9 +306,9 @@
   },
   "public_work_relief": {
    "effects": {
-    "construction_rate": 0.003,
-    "labor_demand": -0.002,
-    "cohesion": 0.0014
+    "cohesion": 0.0001,
+    "construction_rate": 0.0017,
+    "labor_demand": -0.0003
    },
    "name": "Public Work Relief",
    "observation": "In the hard winter the council sets the idle men to cleaning the moat and paving the market, at a penny under the day rate.",
@@ -316,9 +316,9 @@
   },
   "clothier_household_workshops": {
    "effects": {
-    "craft_output": 0.0016,
-    "task_coordination": 0.0018,
-    "standardization": 0.0012
+    "craft_output": 0.0008,
+    "standardization": 0.0006,
+    "task_coordination": 0.0003
    },
    "name": "Clothiers' Household Workshops",
    "observation": "The great clothier's house has a hundred looms in its long rooms, and his carders and spinners sleep under the same roof.",
@@ -326,13 +326,13 @@
   },
   "overseas_bound_estate_labor": {
    "effects": {
-    "food_output": 0.005,
-    "trade_capacity": 0.003,
-    "labor_demand": -0.006,
+    "cohesion": -0.0002,
+    "food_output": 0.0006,
     "health_risk": 0.0042,
-    "cohesion": -0.0035,
+    "institutional_rigidity": 0.0002,
+    "labor_demand": -0.0008,
     "legitimacy": -0.003,
-    "institutional_rigidity": 0.0028
+    "trade_capacity": 0.0003
    },
    "name": "Overseas Bound Labor",
    "observation": "The ships carry bound laborers to the new estates by the hundred; the ledgers count them like cargo, and many die before the first harvest.",
@@ -342,10 +342,10 @@
   },
   "fewer_holy_days": {
    "effects": {
-    "labor_efficiency": 0.0012,
-    "food_output": 0.002,
+    "cohesion": -0.0001,
     "fatigue": 0.0023,
-    "cohesion": -0.0014
+    "food_output": 0.0002,
+    "labor_efficiency": 0.0012
    },
    "name": "Fewer Holy Days",
    "observation": "The new calendar strikes eleven feast days; the ploughman who kept them now works, and the fiddler on the green has fewer dances to play.",
@@ -354,7 +354,7 @@
   },
   "compositor_strikes": {
    "effects": {
-    "cohesion": 0.0014
+    "cohesion": 0.0001
    },
    "name": "Compositors' Strikes",
    "observation": "The compositors leave their cases standing half set until the masters grant bread money and a limit on apprentices.",
@@ -362,13 +362,13 @@
   },
   "plantation_gang_labor": {
    "effects": {
-    "food_output": 0.004,
-    "trade_capacity": 0.0025,
-    "task_coordination": 0.0018,
+    "cohesion": -0.0002,
+    "food_output": 0.0005,
     "health_risk": 0.0042,
     "injury_risk": 0.003,
-    "cohesion": -0.0028,
-    "legitimacy": -0.0024
+    "legitimacy": -0.0024,
+    "task_coordination": 0.0005,
+    "trade_capacity": 0.0003
    },
    "name": "Plantation Gangs",
    "observation": "Under the overseer's whip the gang cuts cane in a line from first light to dark, and the boiling house runs all night.",
@@ -377,11 +377,11 @@
   },
   "correction_workhouses": {
    "effects": {
-    "labor_demand": -0.002,
-    "state_capacity": 0.001,
+    "cohesion": -0.0001,
     "fiber_yield": 0.001,
-    "cohesion": -0.0014,
-    "health_risk": 0.0014
+    "health_risk": 0.0014,
+    "labor_demand": -0.0002,
+    "state_capacity": 0.0003
    },
    "name": "Houses of Correction",
    "observation": "Idle men and loose women beat hemp in the house of correction, and the keeper may whip any who will not work.",
@@ -389,13 +389,13 @@
   },
   "rotating_mine_drafts": {
    "effects": {
-    "mining_output": 0.005,
-    "metal_yield": 0.004,
-    "labor_demand": -0.003,
-    "injury_risk": 0.004,
+    "cohesion": -0.0002,
     "health_risk": 0.0035,
-    "cohesion": -0.0028,
-    "legitimacy": -0.0018
+    "injury_risk": 0.004,
+    "labor_demand": -0.0002,
+    "legitimacy": -0.0018,
+    "metal_yield": 0.0023,
+    "mining_output": 0.005
    },
    "name": "Rotating Mine Drafts",
    "observation": "Each year one man in seven from the subject villages walks to the silver mountain for his draft, and many do not walk back.",
@@ -404,13 +404,13 @@
   },
   "realm_artisan_statute": {
    "effects": {
-    "standardization": 0.0048,
-    "state_capacity": 0.003,
-    "tool_quality": 0.004,
-    "knowledge_preservation": 0.002,
-    "institutional_rigidity": 0.0056,
     "adoption_rate": -0.004,
-    "cohesion": 0.0014
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0007,
+    "knowledge_preservation": 0.0004,
+    "standardization": 0.0007,
+    "state_capacity": 0.0009,
+    "tool_quality": 0.004
    },
    "name": "Artisans' Statute",
    "observation": "Every trade in the realm now asks seven years' apprenticeship, and each spring the justices post the wage for mason, thatcher and ploughman.",
@@ -420,11 +420,11 @@
   },
   "compulsory_poor_rate": {
    "effects": {
-    "cohesion": 0.0028,
-    "health_risk": -0.0014,
-    "state_capacity": 0.001,
-    "legitimacy": 0.0012,
-    "labor_demand": 0.001
+    "cohesion": 0.0001,
+    "health_risk": -0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0003
    },
    "name": "Compulsory Poor Rate",
    "observation": "Every householder pays the poor rate by the value of his house, and the overseers carry it door to door to the widows and the lame.",
@@ -432,9 +432,9 @@
   },
   "acre_rate_harvest_gangs": {
    "effects": {
-    "food_output": 0.003,
-    "labor_efficiency": 0.0012,
-    "fatigue": 0.0023
+    "fatigue": 0.0023,
+    "food_output": 0.0004,
+    "labor_efficiency": 0.0005
    },
    "name": "Acre-Rate Harvest Gangs",
    "observation": "The reapers take the forty acres at a shilling each and work by moonlight to finish before the weather breaks.",
@@ -442,12 +442,12 @@
   },
   "bound_colliers": {
    "effects": {
-    "mining_output": 0.004,
-    "labor_demand": -0.002,
-    "institutional_rigidity": 0.0028,
-    "cohesion": -0.0028,
+    "adoption_rate": -0.002,
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0003,
+    "labor_demand": -0.0002,
     "legitimacy": -0.0012,
-    "adoption_rate": -0.002
+    "mining_output": 0.004
    },
    "name": "Bound Colliers",
    "observation": "A child born at the pit is bound to it, and a collier who leaves may be hauled back like a stolen horse.",
@@ -456,14 +456,14 @@
   },
   "central_manufactory": {
    "effects": {
-    "craft_output": 0.004,
-    "labor_efficiency": 0.0032,
-    "standardization": 0.0036,
-    "task_coordination": 0.0036,
-    "labor_demand": -0.004,
+    "cohesion": -0.0002,
+    "craft_output": 0.0024,
     "fatigue": 0.003,
-    "cohesion": -0.0021,
-    "health_risk": 0.0014
+    "health_risk": 0.0014,
+    "labor_demand": -0.0003,
+    "labor_efficiency": 0.0014,
+    "standardization": 0.0006,
+    "task_coordination": 0.0009
    },
    "name": "Central Manufactory",
    "observation": "Under one long roof a hundred hands card, spin, weave and shear in turn, each at one step, and the cloth never leaves the building until it is sold.",
@@ -473,14 +473,14 @@
   },
   "parish_poor_law": {
    "effects": {
-    "state_capacity": 0.004,
-    "cohesion": 0.0028,
-    "health_risk": -0.0021,
-    "labor_demand": -0.003,
-    "task_coordination": 0.0024,
-    "institutional_rigidity": 0.0042,
-    "legitimacy": 0.0018,
-    "adoption_rate": -0.002
+    "adoption_rate": -0.002,
+    "cohesion": 0.0001,
+    "health_risk": -0.0005,
+    "institutional_rigidity": 0.0007,
+    "labor_demand": -0.0003,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0012,
+    "task_coordination": 0.0005
    },
    "name": "Parish Poor Law",
    "observation": "Overseers in every parish collect the rate, set the able poor to spinning, feed the helpless and bind pauper children out to masters.",
@@ -490,8 +490,8 @@
   },
   "company_servant_terms": {
    "effects": {
-    "trade_capacity": 0.002,
-    "task_coordination": 0.0012
+    "task_coordination": 0.0002,
+    "trade_capacity": 0.0003
    },
    "name": "Company Servants",
    "observation": "The factor signs for seven years at the company's house overseas, on a fixed salary and a promise not to trade on his own account.",
@@ -499,8 +499,8 @@
   },
   "poor_work_stock": {
    "effects": {
-    "labor_demand": -0.002,
-    "fiber_yield": 0.002
+    "fiber_yield": 0.002,
+    "labor_demand": -0.0002
    },
    "name": "Poor Work Stock",
    "observation": "The overseers keep a loft of hemp and flax, and any pauper who asks for bread is given a bundle to spin first.",
@@ -508,10 +508,10 @@
   },
   "gang_master_harvest_crews": {
    "effects": {
-    "food_output": 0.003,
-    "labor_demand": -0.003,
+    "cohesion": -0.0002,
     "disease_exposure": 0.002,
-    "cohesion": -0.0014
+    "food_output": 0.0009,
+    "labor_demand": -0.0003
    },
    "name": "Gang-Master Harvest Crews",
    "observation": "Every harvest the gang master brings forty reapers over the border hills, and takes a tenth of their pay for the finding.",
@@ -519,10 +519,10 @@
   },
   "printed_wage_assessments": {
    "effects": {
-    "standardization": 0.0018,
-    "state_capacity": 0.001,
-    "task_coordination": 0.0012,
-    "institutional_rigidity": 0.0014
+    "institutional_rigidity": 0.0002,
+    "standardization": 0.0009,
+    "state_capacity": 0.0003,
+    "task_coordination": 0.0002
    },
    "name": "Printed Wage Assessments",
    "observation": "The printed sheet on the market house door lists the day rate for every trade, with meat and drink and without.",
@@ -530,11 +530,11 @@
   },
   "indentured_passage": {
    "effects": {
-    "labor_demand": -0.003,
-    "trade_capacity": 0.0015,
-    "food_output": 0.002,
+    "cohesion": -0.0002,
+    "food_output": 0.0006,
     "health_risk": 0.0028,
-    "cohesion": -0.0014
+    "labor_demand": -0.0003,
+    "trade_capacity": 0.0002
    },
    "name": "Indentured Passage",
    "observation": "The young weaver signs for four years' service beyond the ocean, and the captain sells his indenture on the quay the day they land.",
@@ -543,10 +543,10 @@
   },
   "lace_schools": {
    "effects": {
-    "craft_output": 0.0012,
-    "trade_capacity": 0.001,
+    "craft_output": 0.0006,
+    "fatigue": 0.0015,
     "health_risk": 0.0021,
-    "fatigue": 0.0015
+    "trade_capacity": 0.0001
    },
    "name": "Lace Schools",
    "observation": "Twenty small girls sit at their pillows in the dame's cottage from six years old, and she counts their pins before they may eat.",
@@ -555,9 +555,9 @@
   },
   "dockyard_task_work": {
    "effects": {
+    "construction_rate": 0.002,
     "labor_efficiency": 0.0016,
-    "naval_capacity": 0.003,
-    "construction_rate": 0.002
+    "naval_capacity": 0.0015
    },
    "name": "Dockyard Task Work",
    "observation": "The yard measurer reckons each gang's planking by the foot, and the shipwrights who work fastest take home the most.",
@@ -565,7 +565,7 @@
   },
   "commoner_hedge_riots": {
    "effects": {
-    "cohesion": 0.0021,
+    "cohesion": 0.0001,
     "legitimacy": -0.0018,
     "state_capacity": -0.001
    },
@@ -586,8 +586,8 @@
   },
   "frame_rent_knitters": {
    "effects": {
+    "cohesion": -0.0003,
     "craft_output": 0.0012,
-    "cohesion": -0.0014,
     "fatigue": 0.0015
    },
    "name": "Frame-Rent Knitters",
@@ -598,9 +598,9 @@
   "freeborn_labor_debates": {
    "effects": {
     "adoption_rate": 0.003,
-    "cohesion": 0.0014,
-    "legitimacy": -0.0012,
-    "institutional_rigidity": -0.0014
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0002,
+    "legitimacy": -0.0012
    },
    "name": "Free-Born Debates",
    "observation": "In the camp tents soldiers and apprentices argue whether a free-born man may be bound to a master, or taxed without his voice.",
@@ -608,8 +608,8 @@
   },
   "seamens_articles": {
    "effects": {
-    "naval_capacity": 0.003,
-    "task_coordination": 0.0012
+    "naval_capacity": 0.0011,
+    "task_coordination": 0.0002
    },
    "name": "Seamen's Articles",
    "observation": "Before the ship sails each man signs the articles: his wage by the month, his biscuit and beer by the day, his discharge at the home port.",
@@ -617,8 +617,8 @@
   },
   "licensed_numbered_carters": {
    "effects": {
-    "haul_capacity": 0.003,
-    "task_coordination": 0.0012
+    "haul_capacity": 0.0018,
+    "task_coordination": 0.0002
    },
    "name": "Licensed Carters",
    "observation": "Each cart bears a painted number, and a merchant cheated on the quay can name it to the clerk.",
@@ -626,10 +626,10 @@
   },
   "settlement_removal_laws": {
    "effects": {
-    "state_capacity": 0.001,
     "adoption_rate": -0.002,
-    "cohesion": -0.0014,
-    "institutional_rigidity": 0.0021
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0003,
+    "state_capacity": 0.0002
    },
    "name": "Settlement Removal Laws",
    "observation": "Two justices sign the order, and the pregnant stranger is carted back over the parish line before her child can be born on its rates.",
@@ -638,13 +638,13 @@
   },
   "privileged_crown_manufactories": {
    "effects": {
-    "craft_output": 0.0032,
+    "craft_output": 0.0019,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0002,
+    "standardization": 0.0011,
+    "state_capacity": 0.0003,
     "tool_quality": 0.005,
-    "trade_capacity": 0.0025,
-    "standardization": 0.003,
-    "legitimacy": 0.0018,
-    "state_capacity": 0.0015,
-    "institutional_rigidity": -0.0014
+    "trade_capacity": 0.0008
    },
    "name": "Crown Manufactories",
    "observation": "The crown's tapestry and mirror works hire foreign masters and local lads alike, and no guild warden may pass its gate.",
@@ -654,9 +654,9 @@
   },
   "rebuild_trade_opening": {
    "effects": {
+    "adoption_rate": 0.0013,
     "construction_rate": 0.004,
-    "adoption_rate": 0.002,
-    "institutional_rigidity": -0.0014,
+    "institutional_rigidity": -0.0001,
     "labor_demand": -0.001
    },
    "name": "Open Rebuilding Trades",
@@ -665,8 +665,8 @@
   },
   "pay_ticket_wages": {
    "effects": {
-    "task_coordination": 0.0012,
-    "cohesion": -0.0014
+    "cohesion": -0.0002,
+    "task_coordination": 0.0002
    },
    "name": "Pay Tickets",
    "observation": "The yard pays in tickets redeemable at quarter day, and the hungry sell theirs to the ticket brokers at a third off.",
@@ -674,9 +674,9 @@
   },
   "houses_of_call": {
    "effects": {
-    "task_coordination": 0.0018,
-    "labor_demand": -0.001,
-    "cohesion": 0.0014
+    "cohesion": 0.0001,
+    "labor_demand": -0.0004,
+    "task_coordination": 0.0014
    },
    "name": "Houses of Call",
    "observation": "A master tailor short of hands sends his boy to the house of call, where the journeymen sit waiting their turn on the book.",
@@ -684,7 +684,7 @@
   },
   "customary_perquisites": {
    "effects": {
-    "cohesion": 0.0014,
+    "cohesion": 0.0001,
     "timber_pressure": 0.001
    },
    "name": "Customary Perquisites",
@@ -693,10 +693,10 @@
   },
   "crown_works_settlements": {
    "effects": {
-    "housing_output": 0.003,
-    "cohesion": 0.0014,
-    "state_capacity": 0.001,
-    "institutional_rigidity": 0.0014
+    "cohesion": 0.0001,
+    "housing_output": 0.0014,
+    "institutional_rigidity": 0.0003,
+    "state_capacity": 0.0002
    },
    "name": "Crown Works Settlements",
    "observation": "Beside the royal glassworks stand rows of workers' lodgings, a bakehouse and a school, all paid from the works' account.",
@@ -704,8 +704,8 @@
   },
   "recruited_foreign_craftsmen": {
    "effects": {
-    "tool_quality": 0.003,
-    "adoption_rate": 0.003
+    "adoption_rate": 0.002,
+    "tool_quality": 0.003
    },
    "name": "Recruited Foreign Craftsmen",
    "observation": "The company pays the passage of twelve foreign glass grinders and houses them on a street the townsfolk soon name for their tongue.",
@@ -713,8 +713,8 @@
   },
   "friendly_society_boxes": {
    "effects": {
-    "cohesion": 0.0028,
-    "health_risk": -0.0014
+    "cohesion": 0.0002,
+    "health_risk": -0.0001
    },
    "name": "Friendly Society Boxes",
    "observation": "Every Saturday night at the inn each member drops his pennies into the box with three locks, and a sick member draws from it.",
@@ -722,8 +722,8 @@
   },
   "seamens_hospital_levy": {
    "effects": {
-    "health_protection": 0.003,
-    "naval_capacity": 0.002
+    "health_protection": 0.0007,
+    "naval_capacity": 0.0007
    },
    "name": "Seamen's Hospital Levy",
    "observation": "Sixpence a month comes off every sailor's pay for the great hospital by the river, where the crippled of the fleet end their days.",
@@ -731,10 +731,10 @@
   },
   "coal_river_strikes": {
    "effects": {
-    "cohesion": 0.0021,
-    "trade_capacity": -0.001,
-    "legitimacy": -0.0012,
-    "mining_output": -0.001
+    "cohesion": 0.0003,
+    "legitimacy": -0.0002,
+    "mining_output": -0.001,
+    "trade_capacity": -0.001
    },
    "name": "Coal River Strikes",
    "observation": "The keelmen moor their boats across the river, and no coal goes down to the ships until the fitters raise the rate.",
@@ -743,7 +743,7 @@
   "spinning_schools": {
    "effects": {
     "fiber_yield": 0.002,
-    "health_risk": 0.0014
+    "health_risk": 0.0003
    },
    "name": "Spinning Schools",
    "observation": "The parish spinning school takes pauper children at seven; they spin from six to six and are fed on what their yarn earns.",
@@ -752,10 +752,10 @@
   },
   "family_moulder_gangs": {
    "effects": {
-    "construction_rate": 0.003,
     "clay_yield": 0.002,
-    "health_risk": 0.0014,
-    "fatigue": 0.0015
+    "construction_rate": 0.003,
+    "fatigue": 0.0015,
+    "health_risk": 0.0003
    },
    "name": "Family Moulder Gangs",
    "observation": "The moulder is paid by the thousand; his wife tempers the clay and his children carry the wet bricks to the drying hacks.",
@@ -764,8 +764,8 @@
   "loom_shop_cottages": {
    "effects": {
     "craft_output": 0.0012,
-    "housing_output": 0.002,
-    "health_protection": 0.001
+    "health_protection": 0.0006,
+    "housing_output": 0.0017
    },
    "name": "Loom-Shop Cottages",
    "observation": "The weaver's cottage has a long window upstairs to light three looms, and the family lives in the room below.",
@@ -773,15 +773,15 @@
   },
   "mill_hand_workforce": {
    "effects": {
-    "fiber_yield": 0.008,
+    "cohesion": -0.0004,
     "craft_output": 0.0032,
-    "labor_efficiency": 0.0032,
-    "task_coordination": 0.0036,
-    "labor_demand": -0.006,
     "fatigue": 0.0045,
-    "health_risk": 0.0028,
+    "fiber_yield": 0.008,
+    "health_risk": 0.0007,
     "injury_risk": 0.003,
-    "cohesion": -0.0028
+    "labor_demand": -0.0007,
+    "labor_efficiency": 0.0032,
+    "task_coordination": 0.001
    },
    "name": "Mill Hands",
    "observation": "When the mill bell rings, three hundred hands file in to tend the water-driven throwing machines, and the gate shuts behind the last.",
@@ -791,10 +791,10 @@
   },
   "artisan_emigration_bans": {
    "effects": {
-    "tool_quality": 0.002,
-    "knowledge_preservation": 0.001,
     "adoption_rate": -0.002,
-    "institutional_rigidity": 0.0014
+    "institutional_rigidity": 0.0006,
+    "knowledge_preservation": 0.0004,
+    "tool_quality": 0.002
    },
    "name": "Artisan Emigration Bans",
    "observation": "A clockmaker caught on a foreign-bound ship with his tools is fined and sent home, and his tools are forfeit.",
@@ -802,11 +802,11 @@
   },
   "workhouse_test": {
    "effects": {
-    "labor_demand": -0.002,
-    "state_capacity": 0.001,
-    "health_risk": 0.0021,
-    "cohesion": -0.0021,
-    "legitimacy": -0.0012
+    "cohesion": -0.0003,
+    "health_risk": 0.0005,
+    "labor_demand": -0.0002,
+    "legitimacy": -0.0002,
+    "state_capacity": 0.0002
    },
    "name": "Workhouse Test",
    "observation": "The overseers offer relief only inside the workhouse; most of the hungry look at its gate and go back to the road.",
@@ -815,9 +815,9 @@
   },
   "town_wide_combinations": {
    "effects": {
-    "cohesion": 0.0021,
-    "legitimacy": -0.0012,
-    "adoption_rate": 0.001
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0002,
+    "legitimacy": -0.0003
    },
    "name": "Town-Wide Combinations",
    "observation": "The journeymen of every tailor's shop in town meet at one tavern and send a single petition: a shilling more and an hour less.",
@@ -825,9 +825,9 @@
   },
   "saint_monday_custom": {
    "effects": {
+    "cohesion": 0.0001,
     "fatigue": -0.0023,
-    "labor_efficiency": -0.0012,
-    "cohesion": 0.0014
+    "labor_efficiency": -0.0012
    },
    "name": "Idle Monday",
    "observation": "On Monday the cutlers' wheels stand still; the grinders drink and play at skittles, and make up the week by working all Friday night.",
@@ -835,8 +835,8 @@
   },
   "servant_register_offices": {
    "effects": {
-    "task_coordination": 0.0012,
-    "labor_demand": -0.001
+    "labor_demand": -0.0001,
+    "task_coordination": 0.0004
    },
    "name": "Servant Register Offices",
    "observation": "For a shilling the register office writes down a cook's character and her last place, and sends her to a lady who needs one.",
@@ -844,8 +844,8 @@
   },
   "gauged_piece_tickets": {
    "effects": {
-    "standardization": 0.0024,
-    "task_coordination": 0.0012
+    "standardization": 0.0007,
+    "task_coordination": 0.0004
    },
    "name": "Gauged Piece Tickets",
    "observation": "The nailer's work is checked against the brass gauge before the ticket is written, and short nails are paid at half.",
@@ -853,9 +853,9 @@
   },
   "mine_shift_registers": {
    "effects": {
+    "mine_safety": 0.002,
     "mining_output": 0.002,
-    "task_coordination": 0.0018,
-    "mine_safety": 0.002
+    "task_coordination": 0.0006
    },
    "name": "Mine Shift Registers",
    "observation": "The overman writes in the daily book who went down, which heading each worked and how many tubs came up.",
@@ -863,7 +863,7 @@
   },
   "perquisite_strikes": {
    "effects": {
-    "cohesion": 0.0014,
+    "cohesion": 0.0001,
     "naval_capacity": -0.002
    },
    "name": "Chip Strikes",
@@ -872,10 +872,10 @@
   },
   "pin_shop_division": {
    "effects": {
-    "labor_efficiency": 0.0024,
-    "craft_output": 0.0016,
-    "standardization": 0.0018,
-    "fatigue": 0.0015
+    "craft_output": 0.0012,
+    "fatigue": 0.0015,
+    "labor_efficiency": 0.0009,
+    "standardization": 0.0005
    },
    "name": "Pin Shop Division",
    "observation": "One man draws the wire, another straightens it, a third cuts, a fourth points, and ten together make pins by the tens of thousands a day.",
@@ -883,10 +883,10 @@
   },
   "yearly_pitmen_bond": {
    "effects": {
-    "mining_output": 0.003,
-    "labor_demand": -0.001,
-    "institutional_rigidity": 0.0014,
-    "cohesion": -0.0014
+    "cohesion": -0.0001,
+    "institutional_rigidity": 0.0003,
+    "labor_demand": -0.0002,
+    "mining_output": 0.003
    },
    "name": "Yearly Pitmen's Bond",
    "observation": "On binding day each pitman takes the bounty money and signs for a year; he may not leave the colliery until the next binding.",
@@ -894,11 +894,11 @@
   },
   "navvy_gangs": {
    "effects": {
-    "construction_rate": 0.005,
-    "haul_capacity": 0.002,
-    "injury_risk": 0.002,
-    "cohesion": -0.0014,
-    "disease_exposure": 0.001
+    "cohesion": -0.0001,
+    "construction_rate": 0.0022,
+    "disease_exposure": 0.001,
+    "haul_capacity": 0.0006,
+    "injury_risk": 0.002
    },
    "name": "Travelling Diggers",
    "observation": "The diggers come with their barrows and planks and camp by the new cut, and the villages bar their doors when the gang is paid.",
@@ -906,7 +906,7 @@
   },
   "strike_funds": {
    "effects": {
-    "cohesion": 0.0021
+    "cohesion": 0.0002
    },
    "name": "Strike Funds",
    "observation": "Each weaver pays a penny a week into the common box, and when the masters cut the price the box keeps the looms idle for a month.",
@@ -914,11 +914,11 @@
   },
   "wage_assessment_lapse": {
    "effects": {
-    "adoption_rate": 0.003,
-    "labor_efficiency": 0.0012,
-    "institutional_rigidity": -0.0028,
-    "state_capacity": -0.001,
-    "cohesion": -0.0014
+    "adoption_rate": 0.0007,
+    "cohesion": -0.0001,
+    "institutional_rigidity": -0.0002,
+    "labor_efficiency": 0.0003,
+    "state_capacity": -0.001
    },
    "name": "Wage Assessments Lapse",
    "observation": "The justices no longer post a wage; the farmer and the mower settle it between them at the gate.",
@@ -926,15 +926,15 @@
   },
   "factory_shift_system": {
    "effects": {
-    "fiber_yield": 0.008,
-    "craft_output": 0.0032,
-    "labor_efficiency": 0.0024,
-    "task_coordination": 0.003,
+    "cohesion": -0.0002,
+    "craft_output": 0.0015,
     "fatigue": 0.006,
-    "health_risk": 0.0028,
+    "fiber_yield": 0.008,
+    "fuel_demand": 0.0003,
+    "health_risk": 0.0005,
     "injury_risk": 0.003,
-    "cohesion": -0.0028,
-    "fuel_demand": 0.001
+    "labor_efficiency": 0.0006,
+    "task_coordination": 0.0007
    },
    "name": "Factory Shifts",
    "observation": "The mill clock rings at six in the morning and six at night; one shift leaves the frames warm for the next, and the wheel never stops.",
@@ -944,14 +944,14 @@
   },
   "landless_wage_laborers": {
    "effects": {
-    "labor_efficiency": 0.0024,
-    "cultivation_yield": 0.0025,
-    "food_output": 0.004,
-    "cohesion": -0.0042,
-    "health_risk": 0.0028,
-    "nutrition_quality": -0.004,
-    "legitimacy": -0.0018,
-    "fatigue": 0.0023
+    "cohesion": -0.0003,
+    "cultivation_yield": 0.0003,
+    "fatigue": 0.0023,
+    "food_output": 0.0005,
+    "health_risk": 0.0005,
+    "labor_efficiency": 0.0006,
+    "legitimacy": -0.0002,
+    "nutrition_quality": -0.004
    },
    "name": "Landless Laborers",
    "observation": "The common is hedged and the cottager's cow is sold; now he and his sons take whatever work the farmer offers, by the day.",
@@ -961,10 +961,10 @@
   },
   "statutory_price_lists": {
    "effects": {
-    "standardization": 0.0018,
-    "cohesion": 0.0014,
-    "institutional_rigidity": 0.0021,
-    "adoption_rate": -0.001
+    "adoption_rate": -0.001,
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0004,
+    "standardization": 0.0005
    },
    "name": "Statutory Price Lists",
    "observation": "The justices seal the weavers' list: so much for a plain piece of forty yards, so much more for a figured one, throughout the valley.",
@@ -972,11 +972,11 @@
   },
   "factory_villages": {
    "effects": {
-    "housing_output": 0.004,
-    "cohesion": 0.0014,
-    "health_protection": 0.002,
-    "institutional_rigidity": 0.0014,
-    "labor_demand": -0.001
+    "cohesion": 0.0001,
+    "health_protection": 0.0003,
+    "housing_output": 0.0034,
+    "institutional_rigidity": 0.0002,
+    "labor_demand": -0.0001
    },
    "name": "Factory Villages",
    "observation": "The mill owner builds three rows of stone cottages, a chapel and a shop that takes his own tokens.",
@@ -985,13 +985,13 @@
   },
   "trade_freedom_edict": {
    "effects": {
-    "adoption_rate": 0.01,
-    "labor_efficiency": 0.0024,
-    "craft_output": 0.0016,
-    "institutional_rigidity": -0.0084,
-    "cohesion": -0.0028,
-    "legitimacy": -0.0012,
-    "state_capacity": 0.001
+    "adoption_rate": 0.0018,
+    "cohesion": -0.0002,
+    "craft_output": 0.0004,
+    "institutional_rigidity": -0.0004,
+    "labor_efficiency": 0.0003,
+    "legitimacy": -0.0002,
+    "state_capacity": 0.0001
    },
    "name": "Trade Freedom Edict",
    "observation": "The edict is read in every guildhall: any man may take up any trade, and the wardens' seals are void.",
@@ -1001,10 +1001,10 @@
   },
   "division_of_labor_doctrine": {
    "effects": {
-    "labor_efficiency": 0.0012,
-    "task_coordination": 0.0012,
-    "knowledge_rate": 0.002,
-    "adoption_rate": 0.002
+    "adoption_rate": 0.0004,
+    "knowledge_rate": 0.0006,
+    "labor_efficiency": 0.0001,
+    "task_coordination": 0.0002
    },
    "name": "Division of Labor Doctrine",
    "observation": "The professor's book argues that the realm grows rich not by hoarding gold but by splitting work into many small, practised tasks.",
@@ -1012,11 +1012,11 @@
   },
   "pauper_mill_apprentices": {
    "effects": {
+    "cohesion": -0.0002,
     "fiber_yield": 0.003,
-    "labor_demand": -0.002,
-    "health_risk": 0.0028,
-    "cohesion": -0.0021,
-    "legitimacy": -0.0012
+    "health_risk": 0.0003,
+    "labor_demand": -0.0001,
+    "legitimacy": -0.0002
    },
    "name": "Pauper Mill Apprentices",
    "observation": "A wagon carries twenty parish children up the valley to the mill, bound until twenty-one, and the parish is glad to be rid of the cost.",
@@ -1025,10 +1025,10 @@
   },
   "machine_breaking_riots": {
    "effects": {
-    "cohesion": 0.0021,
-    "craft_output": -0.0012,
     "adoption_rate": -0.003,
-    "legitimacy": -0.0018
+    "cohesion": 0.0001,
+    "craft_output": -0.0012,
+    "legitimacy": -0.0002
    },
    "name": "Machine Breaking",
    "observation": "Masked shearmen break into the finishing shop at night and smash the new shearing frames with great hammers.",
@@ -1037,11 +1037,11 @@
   },
   "worker_pass_books": {
    "effects": {
-    "state_capacity": 0.0015,
-    "task_coordination": 0.0012,
     "adoption_rate": -0.002,
-    "cohesion": -0.0014,
-    "institutional_rigidity": 0.0021
+    "cohesion": -0.0001,
+    "institutional_rigidity": 0.0003,
+    "state_capacity": 0.0002,
+    "task_coordination": 0.0002
    },
    "name": "Workers' Pass-Books",
    "observation": "No master may hire a journeyman whose book lacks his last master's signature and the date he left.",
@@ -1049,10 +1049,10 @@
   },
   "factory_fine_rules": {
    "effects": {
-    "labor_efficiency": 0.0012,
-    "task_coordination": 0.0012,
+    "cohesion": -0.0002,
     "fatigue": 0.0015,
-    "cohesion": -0.0021
+    "labor_efficiency": 0.0001,
+    "task_coordination": 0.0002
    },
    "name": "Mill Fine Rules",
    "observation": "The board by the gate lists the fines: a penny for talking, twopence for an open window, a morning's pay for coming after the bell.",
@@ -1060,11 +1060,11 @@
   },
   "bound_labor_abolition_movement": {
    "effects": {
-    "legitimacy": 0.0036,
-    "cohesion": 0.0042,
-    "adoption_rate": 0.004,
-    "trade_capacity": -0.002,
-    "institutional_rigidity": -0.0028
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0002,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0002,
+    "trade_capacity": -0.002
    },
    "name": "Abolition Societies",
    "observation": "The society's petition carries eighty thousand names, and its pamphlets print the plan of a ship packed with bound captives.",
@@ -1074,14 +1074,14 @@
   },
   "estate_bondage_abolition": {
    "effects": {
-    "labor_efficiency": 0.0032,
-    "adoption_rate": 0.006,
-    "cohesion": 0.0042,
-    "cultivation_yield": 0.002,
-    "institutional_rigidity": -0.007,
-    "state_capacity": -0.001,
-    "legitimacy": 0.0024,
-    "fatigue": -0.0023
+    "adoption_rate": 0.0011,
+    "cohesion": 0.0002,
+    "cultivation_yield": 0.0004,
+    "fatigue": -0.0023,
+    "institutional_rigidity": -0.0004,
+    "labor_efficiency": 0.0004,
+    "legitimacy": 0.0001,
+    "state_capacity": -0.001
    },
    "name": "Bondage Abolished",
    "observation": "The decree is read at the manor gate: no more days at the lord's plough, and any tenant may marry, move or learn a trade without leave.",
@@ -1091,9 +1091,9 @@
   },
   "registered_friendly_societies": {
    "effects": {
-    "cohesion": 0.0021,
-    "health_risk": -0.0014,
-    "legitimacy": 0.0012
+    "cohesion": 0.0001,
+    "health_risk": -0.0002,
+    "legitimacy": 0.0001
    },
    "name": "Registered Friendly Societies",
    "observation": "The society's rules are lodged with the clerk of the peace, and a treasurer who runs off with the box can now be sued.",
@@ -1101,9 +1101,9 @@
   },
   "bread_scale_wage_supplements": {
    "effects": {
-    "nutrition_quality": 0.003,
-    "health_risk": -0.0014,
-    "labor_efficiency": -0.0012
+    "health_risk": -0.0002,
+    "labor_efficiency": -0.0012,
+    "nutrition_quality": 0.0009
    },
    "name": "Bread-Scale Supplements",
    "observation": "The justices' table sets what a laborer with three children needs by the price of the loaf, and the parish pays the gap.",
@@ -1112,11 +1112,11 @@
   },
   "general_combination_ban": {
    "effects": {
-    "state_capacity": 0.0015,
-    "cohesion": -0.0028,
-    "legitimacy": -0.0018,
     "adoption_rate": -0.001,
-    "institutional_rigidity": 0.0028
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0005,
+    "legitimacy": -0.0002,
+    "state_capacity": 0.0002
    },
    "name": "Combination Ban",
    "observation": "Two journeymen who meet to talk of wages may now be jailed for three months on one justice's word.",
@@ -1125,15 +1125,596 @@
   },
   "collier_bond_release": {
    "effects": {
-    "cohesion": 0.0021,
-    "adoption_rate": 0.002,
-    "institutional_rigidity": -0.0028,
-    "mining_output": 0.001,
-    "legitimacy": 0.0012
+    "adoption_rate": 0.0004,
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001,
+    "mining_output": 0.001
    },
    "name": "Colliers Released",
    "observation": "The statute is read at the pit head: colliers' children are born free, and no collier may be hauled back to a pit he has left.",
    "art": "res://assets/ui/research/subjects/mine_shoring-v1.png"
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "quarter_session_wage_hearings": {
+    "institutional_rigidity": 0.0021,
+    "legitimacy": 0.0012,
+    "state_capacity": 0.0015
+   },
+   "cloth_workers_guild_demand": {
+    "cohesion": 0.0014,
+    "institutional_rigidity": 0.0014
+   },
+   "tenant_leagues_against_bondage": {
+    "adoption_rate": 0.004,
+    "cohesion": 0.0042,
+    "institutional_rigidity": -0.0042,
+    "labor_efficiency": 0.002,
+    "legitimacy": -0.0018,
+    "state_capacity": -0.002
+   },
+   "journeymen_town_boycotts": {
+    "cohesion": 0.0014
+   },
+   "begging_licence_badges": {
+    "cohesion": -0.0014,
+    "labor_demand": -0.002,
+    "state_capacity": 0.001
+   },
+   "roll_copy_tenure": {
+    "adoption_rate": 0.001,
+    "cultivation_yield": 0.001,
+    "labor_efficiency": 0.0012
+   },
+   "demesne_leasing_to_farmers": {
+    "cultivation_yield": 0.0015
+   },
+   "mining_ordinances": {
+    "institutional_rigidity": 0.0014,
+    "mine_safety": 0.002,
+    "mining_output": 0.003,
+    "state_capacity": 0.001,
+    "task_coordination": 0.0018
+   },
+   "mandatory_wander_years": {
+    "adoption_rate": 0.002,
+    "knowledge_preservation": 0.001,
+    "tool_quality": 0.002
+   },
+   "eight_hour_mine_shifts": {
+    "fatigue": -0.0023,
+    "injury_risk": -0.002,
+    "labor_demand": 0.001,
+    "mining_output": 0.002
+   },
+   "dawn_hiring_squares": {
+    "labor_demand": -0.002,
+    "task_coordination": 0.0012
+   },
+   "arsenal_sequence_fitting": {
+    "construction_rate": 0.004,
+    "labor_efficiency": 0.0016,
+    "naval_capacity": 0.012,
+    "task_coordination": 0.0048,
+    "timber_pressure": 0.003,
+    "warfare_readiness": 0.002
+   },
+   "convict_galley_oarsmen": {
+    "health_risk": 0.0021,
+    "injury_risk": 0.002,
+    "labor_demand": -0.002,
+    "legitimacy": -0.0012,
+    "naval_capacity": 0.003
+   },
+   "off_season_cottage_weaving": {
+    "craft_output": 0.0012,
+    "fatigue": 0.0015,
+    "fiber_yield": 0.002,
+    "labor_demand": -0.001
+   },
+   "statutory_work_hours": {
+    "fatigue": -0.0023,
+    "institutional_rigidity": 0.0014,
+    "task_coordination": 0.0012
+   },
+   "lump_sum_building_contracts": {
+    "construction_rate": 0.004,
+    "injury_risk": 0.001,
+    "task_coordination": 0.0012
+   },
+   "permanent_journeymen": {
+    "cohesion": -0.0021,
+    "institutional_rigidity": 0.0014,
+    "labor_demand": -0.002
+   },
+   "shareholder_wage_miners": {
+    "cohesion": -0.0014,
+    "mining_output": 0.004,
+    "trade_capacity": 0.001
+   },
+   "wage_books": {
+    "standardization": 0.0012,
+    "task_coordination": 0.0018
+   },
+   "printing_house_crews": {
+    "knowledge_preservation": 0.002,
+    "standardization": 0.0012,
+    "task_coordination": 0.0018
+   },
+   "export_estate_labor_dues": {
+    "adoption_rate": -0.003,
+    "cohesion": -0.0042,
+    "fatigue": 0.0045,
+    "food_output": 0.006,
+    "institutional_rigidity": 0.0042,
+    "labor_demand": -0.006,
+    "legitimacy": -0.0024,
+    "trade_capacity": 0.002
+   },
+   "tramping_relief": {
+    "adoption_rate": 0.001,
+    "cohesion": 0.0014
+   },
+   "furnace_campaign_crews": {
+    "fatigue": 0.0015,
+    "injury_risk": 0.001,
+    "metal_yield": 0.003,
+    "task_coordination": 0.0018
+   },
+   "vagrancy_return_laws": {
+    "adoption_rate": -0.001,
+    "cohesion": -0.0021,
+    "institutional_rigidity": 0.0021,
+    "labor_demand": -0.001,
+    "legitimacy": -0.0012,
+    "state_capacity": 0.001
+   },
+   "putting_out_ledgers": {
+    "craft_output": 0.0012,
+    "task_coordination": 0.0012
+   },
+   "guild_loom_exclusion": {
+    "adoption_rate": -0.001,
+    "institutional_rigidity": 0.0021,
+    "labor_demand": 0.001
+   },
+   "public_work_relief": {
+    "cohesion": 0.0014,
+    "construction_rate": 0.003,
+    "labor_demand": -0.002
+   },
+   "clothier_household_workshops": {
+    "craft_output": 0.0016,
+    "standardization": 0.0012,
+    "task_coordination": 0.0018
+   },
+   "overseas_bound_estate_labor": {
+    "cohesion": -0.0035,
+    "food_output": 0.005,
+    "health_risk": 0.0042,
+    "institutional_rigidity": 0.0028,
+    "labor_demand": -0.006,
+    "legitimacy": -0.003,
+    "trade_capacity": 0.003
+   },
+   "fewer_holy_days": {
+    "cohesion": -0.0014,
+    "fatigue": 0.0023,
+    "food_output": 0.002,
+    "labor_efficiency": 0.0012
+   },
+   "compositor_strikes": {
+    "cohesion": 0.0014
+   },
+   "plantation_gang_labor": {
+    "cohesion": -0.0028,
+    "food_output": 0.004,
+    "health_risk": 0.0042,
+    "injury_risk": 0.003,
+    "legitimacy": -0.0024,
+    "task_coordination": 0.0018,
+    "trade_capacity": 0.0025
+   },
+   "correction_workhouses": {
+    "cohesion": -0.0014,
+    "fiber_yield": 0.001,
+    "health_risk": 0.0014,
+    "labor_demand": -0.002,
+    "state_capacity": 0.001
+   },
+   "rotating_mine_drafts": {
+    "cohesion": -0.0028,
+    "health_risk": 0.0035,
+    "injury_risk": 0.004,
+    "labor_demand": -0.003,
+    "legitimacy": -0.0018,
+    "metal_yield": 0.004,
+    "mining_output": 0.005
+   },
+   "realm_artisan_statute": {
+    "adoption_rate": -0.004,
+    "cohesion": 0.0014,
+    "institutional_rigidity": 0.0056,
+    "knowledge_preservation": 0.002,
+    "standardization": 0.0048,
+    "state_capacity": 0.003,
+    "tool_quality": 0.004
+   },
+   "compulsory_poor_rate": {
+    "cohesion": 0.0028,
+    "health_risk": -0.0014,
+    "labor_demand": 0.001,
+    "legitimacy": 0.0012,
+    "state_capacity": 0.001
+   },
+   "acre_rate_harvest_gangs": {
+    "fatigue": 0.0023,
+    "food_output": 0.003,
+    "labor_efficiency": 0.0012
+   },
+   "bound_colliers": {
+    "adoption_rate": -0.002,
+    "cohesion": -0.0028,
+    "institutional_rigidity": 0.0028,
+    "labor_demand": -0.002,
+    "legitimacy": -0.0012,
+    "mining_output": 0.004
+   },
+   "central_manufactory": {
+    "cohesion": -0.0021,
+    "craft_output": 0.004,
+    "fatigue": 0.003,
+    "health_risk": 0.0014,
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.0032,
+    "standardization": 0.0036,
+    "task_coordination": 0.0036
+   },
+   "parish_poor_law": {
+    "adoption_rate": -0.002,
+    "cohesion": 0.0028,
+    "health_risk": -0.0021,
+    "institutional_rigidity": 0.0042,
+    "labor_demand": -0.003,
+    "legitimacy": 0.0018,
+    "state_capacity": 0.004,
+    "task_coordination": 0.0024
+   },
+   "company_servant_terms": {
+    "task_coordination": 0.0012,
+    "trade_capacity": 0.002
+   },
+   "poor_work_stock": {
+    "fiber_yield": 0.002,
+    "labor_demand": -0.002
+   },
+   "gang_master_harvest_crews": {
+    "cohesion": -0.0014,
+    "disease_exposure": 0.002,
+    "food_output": 0.003,
+    "labor_demand": -0.003
+   },
+   "printed_wage_assessments": {
+    "institutional_rigidity": 0.0014,
+    "standardization": 0.0018,
+    "state_capacity": 0.001,
+    "task_coordination": 0.0012
+   },
+   "indentured_passage": {
+    "cohesion": -0.0014,
+    "food_output": 0.002,
+    "health_risk": 0.0028,
+    "labor_demand": -0.003,
+    "trade_capacity": 0.0015
+   },
+   "lace_schools": {
+    "craft_output": 0.0012,
+    "fatigue": 0.0015,
+    "health_risk": 0.0021,
+    "trade_capacity": 0.001
+   },
+   "dockyard_task_work": {
+    "construction_rate": 0.002,
+    "labor_efficiency": 0.0016,
+    "naval_capacity": 0.003
+   },
+   "commoner_hedge_riots": {
+    "cohesion": 0.0021,
+    "legitimacy": -0.0018,
+    "state_capacity": -0.001
+   },
+   "frame_rent_knitters": {
+    "cohesion": -0.0014,
+    "craft_output": 0.0012,
+    "fatigue": 0.0015
+   },
+   "freeborn_labor_debates": {
+    "adoption_rate": 0.003,
+    "cohesion": 0.0014,
+    "institutional_rigidity": -0.0014,
+    "legitimacy": -0.0012
+   },
+   "seamens_articles": {
+    "naval_capacity": 0.003,
+    "task_coordination": 0.0012
+   },
+   "licensed_numbered_carters": {
+    "haul_capacity": 0.003,
+    "task_coordination": 0.0012
+   },
+   "settlement_removal_laws": {
+    "adoption_rate": -0.002,
+    "cohesion": -0.0014,
+    "institutional_rigidity": 0.0021,
+    "state_capacity": 0.001
+   },
+   "privileged_crown_manufactories": {
+    "craft_output": 0.0032,
+    "institutional_rigidity": -0.0014,
+    "legitimacy": 0.0018,
+    "standardization": 0.003,
+    "state_capacity": 0.0015,
+    "tool_quality": 0.005,
+    "trade_capacity": 0.0025
+   },
+   "rebuild_trade_opening": {
+    "adoption_rate": 0.002,
+    "construction_rate": 0.004,
+    "institutional_rigidity": -0.0014,
+    "labor_demand": -0.001
+   },
+   "pay_ticket_wages": {
+    "cohesion": -0.0014,
+    "task_coordination": 0.0012
+   },
+   "houses_of_call": {
+    "cohesion": 0.0014,
+    "labor_demand": -0.001,
+    "task_coordination": 0.0018
+   },
+   "customary_perquisites": {
+    "cohesion": 0.0014,
+    "timber_pressure": 0.001
+   },
+   "crown_works_settlements": {
+    "cohesion": 0.0014,
+    "housing_output": 0.003,
+    "institutional_rigidity": 0.0014,
+    "state_capacity": 0.001
+   },
+   "recruited_foreign_craftsmen": {
+    "adoption_rate": 0.003,
+    "tool_quality": 0.003
+   },
+   "friendly_society_boxes": {
+    "cohesion": 0.0028,
+    "health_risk": -0.0014
+   },
+   "seamens_hospital_levy": {
+    "health_protection": 0.003,
+    "naval_capacity": 0.002
+   },
+   "coal_river_strikes": {
+    "cohesion": 0.0021,
+    "legitimacy": -0.0012,
+    "mining_output": -0.001,
+    "trade_capacity": -0.001
+   },
+   "spinning_schools": {
+    "fiber_yield": 0.002,
+    "health_risk": 0.0014
+   },
+   "family_moulder_gangs": {
+    "clay_yield": 0.002,
+    "construction_rate": 0.003,
+    "fatigue": 0.0015,
+    "health_risk": 0.0014
+   },
+   "loom_shop_cottages": {
+    "craft_output": 0.0012,
+    "health_protection": 0.001,
+    "housing_output": 0.002
+   },
+   "mill_hand_workforce": {
+    "cohesion": -0.0028,
+    "craft_output": 0.0032,
+    "fatigue": 0.0045,
+    "fiber_yield": 0.008,
+    "health_risk": 0.0028,
+    "injury_risk": 0.003,
+    "labor_demand": -0.006,
+    "labor_efficiency": 0.0032,
+    "task_coordination": 0.0036
+   },
+   "artisan_emigration_bans": {
+    "adoption_rate": -0.002,
+    "institutional_rigidity": 0.0014,
+    "knowledge_preservation": 0.001,
+    "tool_quality": 0.002
+   },
+   "workhouse_test": {
+    "cohesion": -0.0021,
+    "health_risk": 0.0021,
+    "labor_demand": -0.002,
+    "legitimacy": -0.0012,
+    "state_capacity": 0.001
+   },
+   "town_wide_combinations": {
+    "adoption_rate": 0.001,
+    "cohesion": 0.0021,
+    "legitimacy": -0.0012
+   },
+   "saint_monday_custom": {
+    "cohesion": 0.0014,
+    "fatigue": -0.0023,
+    "labor_efficiency": -0.0012
+   },
+   "servant_register_offices": {
+    "labor_demand": -0.001,
+    "task_coordination": 0.0012
+   },
+   "gauged_piece_tickets": {
+    "standardization": 0.0024,
+    "task_coordination": 0.0012
+   },
+   "mine_shift_registers": {
+    "mine_safety": 0.002,
+    "mining_output": 0.002,
+    "task_coordination": 0.0018
+   },
+   "perquisite_strikes": {
+    "cohesion": 0.0014,
+    "naval_capacity": -0.002
+   },
+   "pin_shop_division": {
+    "craft_output": 0.0016,
+    "fatigue": 0.0015,
+    "labor_efficiency": 0.0024,
+    "standardization": 0.0018
+   },
+   "yearly_pitmen_bond": {
+    "cohesion": -0.0014,
+    "institutional_rigidity": 0.0014,
+    "labor_demand": -0.001,
+    "mining_output": 0.003
+   },
+   "navvy_gangs": {
+    "cohesion": -0.0014,
+    "construction_rate": 0.005,
+    "disease_exposure": 0.001,
+    "haul_capacity": 0.002,
+    "injury_risk": 0.002
+   },
+   "strike_funds": {
+    "cohesion": 0.0021
+   },
+   "wage_assessment_lapse": {
+    "adoption_rate": 0.003,
+    "cohesion": -0.0014,
+    "institutional_rigidity": -0.0028,
+    "labor_efficiency": 0.0012,
+    "state_capacity": -0.001
+   },
+   "factory_shift_system": {
+    "cohesion": -0.0028,
+    "craft_output": 0.0032,
+    "fatigue": 0.006,
+    "fiber_yield": 0.008,
+    "fuel_demand": 0.001,
+    "health_risk": 0.0028,
+    "injury_risk": 0.003,
+    "labor_efficiency": 0.0024,
+    "task_coordination": 0.003
+   },
+   "landless_wage_laborers": {
+    "cohesion": -0.0042,
+    "cultivation_yield": 0.0025,
+    "fatigue": 0.0023,
+    "food_output": 0.004,
+    "health_risk": 0.0028,
+    "labor_efficiency": 0.0024,
+    "legitimacy": -0.0018,
+    "nutrition_quality": -0.004
+   },
+   "statutory_price_lists": {
+    "adoption_rate": -0.001,
+    "cohesion": 0.0014,
+    "institutional_rigidity": 0.0021,
+    "standardization": 0.0018
+   },
+   "factory_villages": {
+    "cohesion": 0.0014,
+    "health_protection": 0.002,
+    "housing_output": 0.004,
+    "institutional_rigidity": 0.0014,
+    "labor_demand": -0.001
+   },
+   "trade_freedom_edict": {
+    "adoption_rate": 0.01,
+    "cohesion": -0.0028,
+    "craft_output": 0.0016,
+    "institutional_rigidity": -0.0084,
+    "labor_efficiency": 0.0024,
+    "legitimacy": -0.0012,
+    "state_capacity": 0.001
+   },
+   "division_of_labor_doctrine": {
+    "adoption_rate": 0.002,
+    "knowledge_rate": 0.002,
+    "labor_efficiency": 0.0012,
+    "task_coordination": 0.0012
+   },
+   "pauper_mill_apprentices": {
+    "cohesion": -0.0021,
+    "fiber_yield": 0.003,
+    "health_risk": 0.0028,
+    "labor_demand": -0.002,
+    "legitimacy": -0.0012
+   },
+   "machine_breaking_riots": {
+    "adoption_rate": -0.003,
+    "cohesion": 0.0021,
+    "craft_output": -0.0012,
+    "legitimacy": -0.0018
+   },
+   "worker_pass_books": {
+    "adoption_rate": -0.002,
+    "cohesion": -0.0014,
+    "institutional_rigidity": 0.0021,
+    "state_capacity": 0.0015,
+    "task_coordination": 0.0012
+   },
+   "factory_fine_rules": {
+    "cohesion": -0.0021,
+    "fatigue": 0.0015,
+    "labor_efficiency": 0.0012,
+    "task_coordination": 0.0012
+   },
+   "bound_labor_abolition_movement": {
+    "adoption_rate": 0.004,
+    "cohesion": 0.0042,
+    "institutional_rigidity": -0.0028,
+    "legitimacy": 0.0036,
+    "trade_capacity": -0.002
+   },
+   "estate_bondage_abolition": {
+    "adoption_rate": 0.006,
+    "cohesion": 0.0042,
+    "cultivation_yield": 0.002,
+    "fatigue": -0.0023,
+    "institutional_rigidity": -0.007,
+    "labor_efficiency": 0.0032,
+    "legitimacy": 0.0024,
+    "state_capacity": -0.001
+   },
+   "registered_friendly_societies": {
+    "cohesion": 0.0021,
+    "health_risk": -0.0014,
+    "legitimacy": 0.0012
+   },
+   "bread_scale_wage_supplements": {
+    "health_risk": -0.0014,
+    "labor_efficiency": -0.0012,
+    "nutrition_quality": 0.003
+   },
+   "general_combination_ban": {
+    "adoption_rate": -0.001,
+    "cohesion": -0.0028,
+    "institutional_rigidity": 0.0028,
+    "legitimacy": -0.0018,
+    "state_capacity": 0.0015
+   },
+   "collier_bond_release": {
+    "adoption_rate": 0.002,
+    "cohesion": 0.0021,
+    "institutional_rigidity": -0.0028,
+    "legitimacy": 0.0012,
+    "mining_output": 0.001
+   }
   }
  }
 }

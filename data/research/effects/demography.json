@@ -60,7 +60,7 @@
    "art": "res://assets/ui/research/subjects/birth_attendants-v1.png",
    "effects": {
     "health_protection": 0.0046,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0037,
     "maternal_safety": 0.0093
    }
   },
@@ -76,7 +76,7 @@
   "shared_childcare": {
    "ability_reason": "Children watched by kin while parents work are fed on time and kept from the fire and the water.",
    "effects": {
-    "labor_demand": 0.01,
+    "labor_demand": 0.0037,
     "labor_efficiency": 0.0124,
     "neonatal_survival": 0.0172
    }
@@ -86,7 +86,7 @@
    "effects": {
     "cohesion": 0.0053,
     "housing_output": 0.0063,
-    "labor_demand": 0.01
+    "labor_demand": 0.0037
    }
   },
   "lineage_exogamy": {
@@ -121,7 +121,7 @@
   "kin_care_widows_orphans": {
    "effects": {
     "cohesion": 0.0053,
-    "labor_demand": 0.004,
+    "labor_demand": 0.0015,
     "neonatal_survival": 0.0041
    },
    "name": "Kin Care for Widows and Orphans",
@@ -132,7 +132,7 @@
    "ability_reason": "A mother given food and lighter work after birth recovers, nurses and survives the next pregnancy.",
    "effects": {
     "conception_support": 0.035,
-    "labor_demand": 0.02,
+    "labor_demand": 0.0074,
     "maternal_safety": 0.0248
    }
   },
@@ -284,7 +284,7 @@
   "interval_weaning_practice": {
    "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
    "effects": {
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "neonatal_survival": 0.0028,
     "nutrition_quality": 0.0024
    }
@@ -500,7 +500,7 @@
   "communal_child_supervision_rotas": {
    "effects": {
     "injury_risk": -0.0031,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "neonatal_survival": 0.0025,
     "task_coordination": 0.0008
    },
@@ -509,7 +509,7 @@
   "marriage_age_norms": {
    "art": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
    "effects": {
-    "institutional_rigidity": 0.01,
+    "institutional_rigidity": 0.0033,
     "maternal_safety": 0.0191,
     "neonatal_survival": 0.0083
    }
@@ -525,7 +525,7 @@
   "midwife_apprenticeship_lines": {
    "effects": {
     "knowledge_preservation": 0.0032,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "maternal_safety": 0.0095,
     "neonatal_survival": 0.0068
    },
@@ -660,7 +660,7 @@
    "effects": {
     "cohesion": 0.0011,
     "conception_support": 0.01,
-    "institutional_rigidity": 0.006,
+    "institutional_rigidity": 0.001,
     "neonatal_survival": 0.0012
    },
    "name": "Levirate Marriage",
@@ -1067,6 +1067,65 @@
     "housing_output": 0.04,
     "security_efficiency": 0.015,
     "state_capacity": 0.01
+   }
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "postpartum_seclusion_care": {
+    "health_protection": 0.0046,
+    "labor_demand": 0.01,
+    "maternal_safety": 0.0093
+   },
+   "shared_childcare": {
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0124,
+    "neonatal_survival": 0.0172
+   },
+   "extended_family_room_division": {
+    "cohesion": 0.0053,
+    "housing_output": 0.0063,
+    "labor_demand": 0.01
+   },
+   "kin_care_widows_orphans": {
+    "cohesion": 0.0053,
+    "labor_demand": 0.004,
+    "neonatal_survival": 0.0041
+   },
+   "maternal_recovery": {
+    "conception_support": 0.035,
+    "labor_demand": 0.02,
+    "maternal_safety": 0.0248
+   },
+   "interval_weaning_practice": {
+    "labor_demand": 0.01,
+    "neonatal_survival": 0.0028,
+    "nutrition_quality": 0.0024
+   },
+   "communal_child_supervision_rotas": {
+    "injury_risk": -0.0031,
+    "labor_demand": 0.01,
+    "neonatal_survival": 0.0025,
+    "task_coordination": 0.0008
+   },
+   "marriage_age_norms": {
+    "institutional_rigidity": 0.01,
+    "maternal_safety": 0.0191,
+    "neonatal_survival": 0.0083
+   },
+   "midwife_apprenticeship_lines": {
+    "knowledge_preservation": 0.0032,
+    "labor_demand": 0.01,
+    "maternal_safety": 0.0095,
+    "neonatal_survival": 0.0068
+   },
+   "levirate_marriage": {
+    "cohesion": 0.0011,
+    "conception_support": 0.01,
+    "institutional_rigidity": 0.006,
+    "neonatal_survival": 0.0012
    }
   }
  }

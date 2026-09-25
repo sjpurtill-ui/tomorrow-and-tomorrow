@@ -4,12 +4,12 @@
  "items": {
   "punched_card_loom_control": {
    "effects": {
-    "craft_output": 0.006,
+    "cohesion": -0.0006,
+    "craft_output": 0.0044,
     "fiber_yield": 0.0096,
-    "standardization": 0.0042,
+    "labor_demand": -0.0011,
     "labor_efficiency": 0.0014,
-    "labor_demand": -0.004,
-    "cohesion": -0.003
+    "standardization": 0.0014
    },
    "observation": "A long chain of pierced pasteboard cards clacks over the loom head, and a boy's work of calling out the pattern threads is done by the holes themselves.",
    "ability_reason": "Figured silk no longer needs a second weaver pulling cords; any loom fitted with the card head can repeat an intricate pattern without error.",
@@ -18,12 +18,12 @@
   },
   "high_pressure_steam_engines": {
    "effects": {
-    "craft_output": 0.007,
-    "labor_efficiency": 0.0021,
+    "craft_output": 0.0052,
+    "fuel_demand": 0.0011,
     "fuel_efficiency": 0.004,
-    "fuel_demand": 0.0068,
-    "pollution": 0.009,
-    "injury_risk": 0.003
+    "injury_risk": 0.003,
+    "labor_efficiency": 0.0021,
+    "pollution": 0.009
    },
    "name": "High-Pressure Engines",
    "observation": "The new engine stands no taller than a man and needs no great beam house; its boiler hisses at several atmospheres and the whole mill shakes with its beat.",
@@ -33,10 +33,10 @@
   },
   "continuous_paper_machine": {
    "effects": {
-    "knowledge_preservation": 0.004,
-    "craft_output": 0.0015,
-    "standardization": 0.001,
-    "labor_demand": -0.002,
+    "craft_output": 0.0011,
+    "knowledge_preservation": 0.0018,
+    "labor_demand": -0.0006,
+    "standardization": 0.0003,
     "water_pollution": 0.001
    },
    "name": "Paper Machine",
@@ -45,11 +45,11 @@
   },
   "machine_block_line": {
    "effects": {
-    "standardization": 0.0026,
-    "craft_output": 0.0015,
+    "cohesion": -0.0004,
+    "craft_output": 0.0011,
+    "labor_demand": -0.0008,
     "labor_efficiency": 0.001,
-    "labor_demand": -0.003,
-    "cohesion": -0.002
+    "standardization": 0.0009
    },
    "name": "Machine-Made Pulley Blocks",
    "observation": "A row of iron machines saws, bores, mortises and shapes each pulley block in turn, and a handful of unskilled men do the work of a hundred block-makers.",
@@ -58,11 +58,11 @@
   },
   "coal_gas_works": {
    "effects": {
+    "craft_output": 0.0007,
+    "disaster_risk": 0.002,
     "fuel_efficiency": 0.004,
-    "craft_output": 0.001,
     "pollution": 0.0075,
-    "water_pollution": 0.002,
-    "disaster_risk": 0.002
+    "water_pollution": 0.002
    },
    "name": "Coal Gas Works",
    "observation": "Red-hot iron retorts breathe out a stinking gas that is washed, piped into a great floating gasholder, and burned in jets that light the mill floor after dark.",
@@ -70,11 +70,11 @@
   },
   "interchangeable_component_fits": {
    "effects": {
-    "standardization": 0.0094,
+    "craft_output": 0.0022,
+    "institutional_rigidity": 0.001,
     "repair_capacity": 0.0064,
-    "craft_output": 0.003,
-    "tool_quality": 0.0052,
-    "institutional_rigidity": 0.003
+    "standardization": 0.0032,
+    "tool_quality": 0.0052
    },
    "name": "Interchangeable Parts",
    "observation": "The inspector drops a lock plate from one crate into the stock of a musket from another; it seats without a file stroke, and he chalks the gauge as passed.",
@@ -84,12 +84,12 @@
   },
   "iron_power_loom_sheds": {
    "effects": {
+    "cohesion": -0.0008,
+    "craft_output": 0.0018,
+    "fatigue": 0.003,
     "fiber_yield": 0.008,
-    "craft_output": 0.0025,
-    "labor_demand": -0.004,
-    "cohesion": -0.004,
     "injury_risk": 0.003,
-    "fatigue": 0.003
+    "labor_demand": -0.0011
    },
    "name": "Power Loom Sheds",
    "observation": "Row after row of iron looms bang under one long skylit roof, the overhead shafting slapping belts, and a single girl minds four looms at once.",
@@ -98,22 +98,22 @@
   },
   "steam_propulsion": {
    "effects": {
-    "haul_capacity": 0.005,
-    "route_speed": 0.004,
+    "fuel_demand": 0.0006,
+    "haul_capacity": 0.0032,
     "naval_capacity": 0.004,
-    "fuel_demand": 0.0043,
-    "warfare_readiness": 0.002,
-    "pollution": 0.003
+    "pollution": 0.003,
+    "route_speed": 0.0016,
+    "warfare_readiness": 0.002
    },
    "observation": "A paddle steamer thrashes upstream against the current with no wind in its sails, trailing black smoke over the reed beds.",
    "art": "res://assets/ui/research/subjects/steam_propulsion-v1.png"
   },
   "friction_matches": {
    "effects": {
-    "craft_output": 0.001,
+    "craft_output": 0.0007,
+    "disaster_risk": 0.002,
     "fuel_efficiency": 0.001,
-    "health_risk": 0.0015,
-    "disaster_risk": 0.002
+    "health_risk": 0.0004
    },
    "name": "Friction Matches",
    "observation": "A splint tipped with a dab of paste flares with a sharp smell of sulphur when drawn across the rough side of the box.",
@@ -122,21 +122,21 @@
   },
   "plunger_pressed_glass": {
    "effects": {
-    "craft_output": 0.0015,
     "container_capacity": 0.006,
-    "standardization": 0.001,
-    "fuel_demand": 0.0017,
-    "injury_risk": 0.001
+    "craft_output": 0.001,
+    "fuel_demand": 0.0002,
+    "injury_risk": 0.001,
+    "standardization": 0.0005
    },
    "observation": "A man lays a gob of hot glass in an iron mould, pulls a lever, and a patterned tumbler comes out with a pressed cut-glass look in seconds.",
    "art": "res://assets/ui/research/paper/glass_blowing.png"
   },
   "ring_spinning_systems": {
    "effects": {
+    "craft_output": 0.001,
     "fiber_yield": 0.008,
-    "craft_output": 0.0015,
-    "labor_demand": -0.002,
-    "injury_risk": 0.001
+    "injury_risk": 0.001,
+    "labor_demand": -0.0013
    },
    "name": "Ring Spinning",
    "observation": "A small steel traveller races around each ring, twisting and winding the yarn without pause, and the frame hums faster than any mule.",
@@ -144,11 +144,11 @@
   },
   "hot_blast_smelting": {
    "effects": {
-    "metal_yield": 0.008,
-    "fuel_efficiency": 0.006,
     "extraction_yield": 0.006,
-    "pollution": 0.0045,
-    "fuel_demand": 0.0017
+    "fuel_demand": 0.0002,
+    "fuel_efficiency": 0.006,
+    "metal_yield": 0.008,
+    "pollution": 0.0045
    },
    "name": "Hot Blast Smelting",
    "observation": "The blast now passes through red-hot iron pipes before reaching the tuyeres, and the furnace makes as much iron on half the coal.",
@@ -156,18 +156,18 @@
   },
   "three_plate_lapping": {
    "effects": {
-    "tool_quality": 0.0052,
-    "standardization": 0.0016,
-    "labor_demand": 0.001
+    "labor_demand": 0.0001,
+    "standardization": 0.0007,
+    "tool_quality": 0.0052
    },
    "observation": "Three iron plates are rubbed against one another in turn with red ochre, scraped, and rubbed again until each bears evenly on the other two.",
    "art": "res://assets/ui/research/paper/three_plate_lapping.png"
   },
   "graphite_crucibles": {
    "effects": {
-    "metal_yield": 0.008,
-    "craft_output": 0.001,
-    "fuel_demand": 0.0017
+    "craft_output": 0.0007,
+    "fuel_demand": 0.0002,
+    "metal_yield": 0.008
    },
    "observation": "A grey crucible of clay mixed with black lead comes out of the steel melt unscarred and goes back in for another heat, and another.",
    "art": "res://assets/ui/research/subjects/graphite_crucibles-v1.png"
@@ -184,9 +184,9 @@
   "wood_methanol_recovery": {
    "effects": {
     "chemical_control": 0.001,
-    "craft_output": 0.001,
-    "timber_pressure": 0.002,
-    "health_risk": 0.001
+    "craft_output": 0.0007,
+    "health_risk": 0.0003,
+    "timber_pressure": 0.002
    },
    "name": "Wood Spirit Recovery",
    "observation": "Retort vapours cool in a coiled pipe and drip into vats; the watery spirit is boiled again and smells sharp enough to sting the eyes.",
@@ -194,11 +194,11 @@
   },
   "electrical_generators": {
    "effects": {
-    "fuel_efficiency": 0.01,
-    "knowledge_rate": 0.0013,
-    "craft_output": 0.004,
     "chemical_control": 0.001,
-    "fuel_demand": 0.0026
+    "craft_output": 0.0027,
+    "fuel_demand": 0.0004,
+    "fuel_efficiency": 0.01,
+    "knowledge_rate": 0.0008
    },
    "observation": "A hand-cranked disc spins between the jaws of a magnet, and a wire touched to its rim makes the needle of the galvanometer swing and hold.",
    "ability_reason": "Current no longer comes only from jars of acid; any turning shaft can now be made to yield it, which opens the whole electrical trade.",
@@ -207,9 +207,9 @@
   "fractional_distillation": {
    "effects": {
     "chemical_control": 0.0017,
-    "fuel_efficiency": 0.002,
-    "craft_output": 0.001,
-    "fuel_demand": 0.0017
+    "craft_output": 0.0007,
+    "fuel_demand": 0.0002,
+    "fuel_efficiency": 0.002
    },
    "observation": "Vapour climbs a tall column of trays, and at each height a spout draws off a different clear liquid, lighter ones nearest the top.",
    "art": "res://assets/ui/research/paper/coal_light_oil_recovery.png"
@@ -217,17 +217,17 @@
   "water_electrolysis": {
    "effects": {
     "chemical_control": 0.001,
-    "fuel_demand": 0.0017,
-    "disaster_risk": 0.001
+    "disaster_risk": 0.001,
+    "fuel_demand": 0.0002
    },
    "observation": "Bubbles stream from two wires in a trough of water, and the gas collected over one of them burns with a pale popping flame.",
    "art": "res://assets/ui/research/paper/chloralkali_cells.png"
   },
   "gear_tooth_generation": {
    "effects": {
-    "tool_quality": 0.0039,
-    "standardization": 0.0016,
-    "fuel_efficiency": 0.001
+    "fuel_efficiency": 0.001,
+    "standardization": 0.0007,
+    "tool_quality": 0.0039
    },
    "name": "Generated Gear Teeth",
    "observation": "The gear blank and the cutter turn together as if meshing, and the teeth come off shaped to roll smoothly rather than knock.",
@@ -235,9 +235,9 @@
   },
   "straightedge_scraping": {
    "effects": {
-    "tool_quality": 0.0039,
-    "standardization": 0.001,
-    "labor_demand": 0.001
+    "labor_demand": 0.0001,
+    "standardization": 0.0005,
+    "tool_quality": 0.0039
    },
    "observation": "A fitter lays the blued master straightedge on the iron bar, lifts it, and scrapes away every spot that shows a shiny mark.",
    "art": "res://assets/ui/research/paper/straightedge_scraping.png"
@@ -245,21 +245,21 @@
   "aromatic_nitration": {
    "effects": {
     "chemical_control": 0.0014,
-    "craft_output": 0.001,
-    "health_risk": 0.0015,
-    "water_pollution": 0.0015,
-    "disaster_risk": 0.002
+    "craft_output": 0.0007,
+    "disaster_risk": 0.002,
+    "health_risk": 0.0004,
+    "water_pollution": 0.0015
    },
    "observation": "Oily benzene is trickled into cold mixed acids in a lead-lined pan; a yellow oil smelling of bitter almonds separates at the bottom.",
    "art": "res://assets/ui/research/paper/aromatic_nitration.png"
   },
   "electric_motors": {
    "effects": {
-    "labor_efficiency": 0.0042,
-    "craft_output": 0.006,
-    "tool_quality": 0.0039,
-    "fuel_demand": 0.0026,
-    "injury_risk": 0.002
+    "craft_output": 0.004,
+    "fuel_demand": 0.0004,
+    "injury_risk": 0.002,
+    "labor_efficiency": 0.0019,
+    "tool_quality": 0.0039
    },
    "observation": "Current from a bank of cells turns a wheel of coiled iron between magnet poles, and it spins on with no steam, no belt, no horse.",
    "ability_reason": "Motion that can be sent down a wire means power can later be divided and delivered to each machine instead of one engine driving a whole shed.",
@@ -267,8 +267,8 @@
   },
   "electromagnetic_relays": {
    "effects": {
-    "task_coordination": 0.003,
-    "labor_demand": 0.001
+    "labor_demand": 0.0001,
+    "task_coordination": 0.0022
    },
    "observation": "A faint current from a distant line pulls down a little iron armature, which closes a second, stronger circuit with a crisp click.",
    "art": "res://assets/ui/research/paper/electromagnetic_relays.png"
@@ -276,9 +276,9 @@
   "electroplating": {
    "effects": {
     "craft_output": 0.0015,
+    "health_risk": 0.0004,
     "tool_quality": 0.0026,
-    "trade_capacity": 0.001,
-    "health_risk": 0.0015,
+    "trade_capacity": 0.0003,
     "water_pollution": 0.0015
    },
    "name": "Electroplating",
@@ -287,21 +287,21 @@
   },
   "machine_way_scraping": {
    "effects": {
-    "tool_quality": 0.0039,
-    "standardization": 0.001,
-    "labor_demand": 0.001
+    "labor_demand": 0.0001,
+    "standardization": 0.0004,
+    "tool_quality": 0.0039
    },
    "observation": "The carriage is slid along the lathe bed, lifted off, and the scraper chips away at each blue-marked high spot until the marks spread evenly.",
    "art": "res://assets/ui/research/paper/machine_way_scraping.png"
   },
   "sulphur_cured_rubber": {
    "effects": {
-    "craft_output": 0.005,
     "container_capacity": 0.01,
-    "tool_quality": 0.0039,
+    "craft_output": 0.005,
+    "ecological_pressure": 0.003,
+    "health_risk": 0.0003,
     "repair_capacity": 0.0024,
-    "health_risk": 0.001,
-    "ecological_pressure": 0.003
+    "tool_quality": 0.0039
    },
    "name": "Cured Rubber",
    "observation": "Gum heated with sulphur no longer turns sticky in summer or brittle in frost; it springs back from a pinch however often it is stretched.",
@@ -311,11 +311,11 @@
   },
   "steam_hammer_forging": {
    "effects": {
-    "metal_yield": 0.008,
     "craft_output": 0.002,
-    "tool_quality": 0.0026,
-    "fuel_demand": 0.0026,
-    "injury_risk": 0.003
+    "fuel_demand": 0.0004,
+    "injury_risk": 0.003,
+    "metal_yield": 0.008,
+    "tool_quality": 0.0026
    },
    "name": "Steam Hammer Forging",
    "observation": "A great ram falls onto a white-hot shaft with a thud that shakes the floor, yet the driver can let it merely crack an egg in a glass.",
@@ -323,11 +323,11 @@
   },
   "sewing_machine_mechanisms": {
    "effects": {
+    "cohesion": -0.0003,
     "craft_output": 0.0025,
-    "labor_efficiency": 0.001,
-    "fiber_yield": 0.0024,
     "fatigue": 0.003,
-    "cohesion": -0.002
+    "fiber_yield": 0.0024,
+    "labor_efficiency": 0.001
    },
    "name": "Sewing Machines",
    "observation": "The needle with its eye at the point dips and rises faster than the eye can follow, and a seam that took an hour is done in minutes.",
@@ -336,11 +336,11 @@
   },
   "cable_insulation": {
    "effects": {
-    "knowledge_rate": 0.001,
-    "repair_capacity": 0.0016,
     "craft_output": 0.001,
-    "injury_risk": -0.001,
-    "ecological_pressure": 0.001
+    "ecological_pressure": 0.001,
+    "injury_risk": -0.0004,
+    "knowledge_rate": 0.0009,
+    "repair_capacity": 0.0016
    },
    "observation": "Copper wire is wrapped in tarred yarn and a sheath of gum, then dropped in a tub of water to show whether any current leaks through.",
    "art": "res://assets/ui/research/paper/battery_bank_wiring.png"
@@ -348,9 +348,9 @@
   "leather_thickness_skiving": {
    "effects": {
     "craft_output": 0.001,
-    "standardization": 0.001,
     "fiber_yield": 0.0024,
-    "labor_demand": -0.001
+    "labor_demand": -0.0006,
+    "standardization": 0.0004
    },
    "name": "Machine Leather Skiving",
    "observation": "A leather strap passes under a revolving bell knife and comes out pared to one even thickness, its edges thinned for a neat fold.",
@@ -360,8 +360,8 @@
    "effects": {
     "chemical_control": 0.0014,
     "fuel_efficiency": 0.002,
-    "water_pollution": 0.0015,
-    "health_risk": 0.001
+    "health_risk": 0.0003,
+    "water_pollution": 0.0015
    },
    "name": "Coal Light Oils",
    "observation": "The black tar from the gasworks, once dumped in the river, is distilled; a clear sweet-smelling light oil runs off first into its own drum.",
@@ -377,7 +377,7 @@
   "rivet_blank_heading": {
    "effects": {
     "craft_output": 0.001,
-    "standardization": 0.001
+    "standardization": 0.0004
    },
    "observation": "Soft iron rod is fed into a header, and each stroke cuts a slug and upsets one round head on it, leaving the shank long for the second.",
    "art": "res://assets/ui/research/paper/rivet_blank_heading.png"
@@ -396,8 +396,8 @@
   },
   "lead_screw_cutting": {
    "effects": {
-    "tool_quality": 0.0052,
-    "standardization": 0.0021
+    "standardization": 0.0008,
+    "tool_quality": 0.0052
    },
    "observation": "The master screw is cut, measured against a brass rule a yard long, and its small errors corrected turn by turn with a patient file.",
    "art": "res://assets/ui/research/paper/lead_screw_cutting.png"
@@ -411,9 +411,9 @@
   },
   "cross_slide_assembly": {
    "effects": {
-    "tool_quality": 0.0039,
-    "standardization": 0.001,
-    "injury_risk": -0.001
+    "injury_risk": -0.0004,
+    "standardization": 0.0004,
+    "tool_quality": 0.0039
    },
    "observation": "The cutting tool is held in an iron slide and fed across the work by a small handwheel, not pressed by the turner's aching arms.",
    "art": "res://assets/ui/research/paper/cross_slide_assembly.png"
@@ -427,9 +427,9 @@
   },
   "steelplate_engraving": {
    "effects": {
-    "knowledge_preservation": 0.003,
     "craft_output": 0.001,
-    "trade_capacity": 0.001
+    "knowledge_preservation": 0.0014,
+    "trade_capacity": 0.0003
    },
    "name": "Steel Plate Engraving",
    "observation": "An engraving cut into a softened steel plate, then hardened, prints ten thousand crisp banknotes and book plates before it wears.",
@@ -437,13 +437,13 @@
   },
   "pneumatic_steel_converter": {
    "effects": {
-    "metal_yield": 0.02,
-    "craft_output": 0.004,
-    "standardization": 0.0021,
+    "craft_output": 0.0025,
     "fuel_efficiency": 0.004,
-    "pollution": 0.0105,
     "injury_risk": 0.004,
-    "labor_demand": -0.003
+    "labor_demand": -0.0018,
+    "metal_yield": 0.02,
+    "pollution": 0.0105,
+    "standardization": 0.001
    },
    "name": "Pneumatic Steel Converter",
    "observation": "Air roars up through a tilted vessel of molten iron; a fountain of sparks and flame lights the whole shed, and twenty minutes later it pours steel.",
@@ -453,8 +453,8 @@
   },
   "four_jaw_chucks": {
    "effects": {
-    "tool_quality": 0.0026,
-    "repair_capacity": 0.0016
+    "repair_capacity": 0.0016,
+    "tool_quality": 0.0013
    },
    "observation": "Four jaws are screwed in one at a time until the lopsided casting spins with its bore dead on centre.",
    "art": "res://assets/ui/research/paper/four_jaw_chucks.png"
@@ -462,11 +462,11 @@
   "coal_tar_dyes": {
    "effects": {
     "chemical_control": 0.0042,
-    "craft_output": 0.003,
-    "trade_capacity": 0.003,
+    "craft_output": 0.0019,
     "fiber_yield": 0.0048,
-    "water_pollution": 0.0035,
-    "health_risk": 0.002
+    "health_risk": 0.0004,
+    "trade_capacity": 0.0011,
+    "water_pollution": 0.0035
    },
    "name": "Coal-Tar Dyes",
    "observation": "A black sludge from coal tar dissolves in spirit to a brilliant purple that stains silk more vividly than any shell or root ever did.",
@@ -476,16 +476,16 @@
   },
   "thread_pitch_gauging": {
    "effects": {
-    "standardization": 0.0016,
-    "tool_quality": 0.0013
+    "standardization": 0.0008,
+    "tool_quality": 0.0006
    },
    "observation": "A thin steel leaf with notched teeth is laid along a bolt; only the leaf of the right pitch sits snug in every groove.",
    "art": "res://assets/ui/research/paper/thread_pitch_gauging.png"
   },
   "lead_oxide_preparation": {
    "effects": {
-    "craft_output": 0.001,
-    "health_risk": 0.002,
+    "craft_output": 0.0006,
+    "health_risk": 0.0004,
     "pollution": 0.003
    },
    "observation": "Molten lead is stirred in a reverberatory hearth until it crusts yellow, then roasted longer until the powder turns bright orange-red.",
@@ -494,24 +494,24 @@
   },
   "sheet_steel_rolling": {
    "effects": {
-    "metal_yield": 0.006,
-    "craft_output": 0.0015,
     "container_capacity": 0.004,
-    "fuel_demand": 0.0017,
-    "injury_risk": 0.002
+    "craft_output": 0.001,
+    "fuel_demand": 0.0004,
+    "injury_risk": 0.002,
+    "metal_yield": 0.006
    },
    "observation": "A glowing slab goes back and forth through the rolls, thinner each pass, until two men carry off a wide flexible sheet.",
    "art": "res://assets/ui/research/paper/roll_formed_sections.png"
   },
   "fuel_refining": {
    "effects": {
-    "fuel_efficiency": 0.01,
     "chemical_control": 0.0017,
-    "trade_capacity": 0.003,
-    "fuel_demand": 0.0034,
+    "disaster_risk": 0.003,
+    "fuel_demand": 0.0007,
+    "fuel_efficiency": 0.01,
     "pollution": 0.006,
-    "water_pollution": 0.002,
-    "disaster_risk": 0.003
+    "trade_capacity": 0.0011,
+    "water_pollution": 0.002
    },
    "name": "Rock Oil Refining",
    "observation": "Crude rock oil is boiled in iron stills; the clear middle cut burns clean in a lamp, and the heavy residue is sold for grease.",
@@ -529,16 +529,16 @@
   },
   "washer_punching": {
    "effects": {
-    "standardization": 0.001
+    "standardization": 0.0005
    },
    "observation": "One stroke of the press punches the hole and the rim together, and flat washers drop into the bin by the hundred.",
    "art": "res://assets/ui/research/paper/washer_punching.png"
   },
   "abrasive_grinding_control": {
    "effects": {
-    "tool_quality": 0.0052,
-    "standardization": 0.001,
-    "health_risk": 0.001
+    "health_risk": 0.0002,
+    "standardization": 0.0005,
+    "tool_quality": 0.0026
    },
    "name": "Graded Grinding Wheels",
    "observation": "Emery grit sifted to a single size is bonded into a wheel and marked by grade; the grinder knows before starting how fast it will cut.",
@@ -547,8 +547,8 @@
   "tinplate_coating": {
    "effects": {
     "container_capacity": 0.008,
-    "craft_output": 0.001,
-    "food_storage": 0.002,
+    "craft_output": 0.0006,
+    "food_storage": 0.0017,
     "pollution": 0.0015
    },
    "observation": "Iron sheets pass through a pot of molten tin between rollers and come out with a thin even silver skin that will not rust.",
@@ -565,18 +565,18 @@
   },
   "milling_table_feeds": {
    "effects": {
-    "tool_quality": 0.0026
+    "tool_quality": 0.0013
    },
    "observation": "A screw geared to the spindle creeps the table forward under the cutter, and the finished face comes up even from end to end.",
    "art": "res://assets/ui/research/paper/milling_table_feeds.png"
   },
   "wood_pulp_paper": {
    "effects": {
-    "knowledge_preservation": 0.004,
-    "craft_output": 0.0015,
+    "craft_output": 0.001,
+    "knowledge_preservation": 0.0021,
+    "pollution": 0.0015,
     "timber_pressure": 0.004,
-    "water_pollution": 0.002,
-    "pollution": 0.0015
+    "water_pollution": 0.002
    },
    "name": "Wood Pulp Paper",
    "observation": "Spruce logs are ground against a wet millstone and cooked in sulphite liquor; the paper is cheap, if it yellows within a few years.",
@@ -585,12 +585,12 @@
   },
   "open_hearth_steel": {
    "effects": {
+    "craft_output": 0.0013,
+    "fuel_demand": 0.0011,
+    "injury_risk": 0.003,
     "metal_yield": 0.02,
-    "standardization": 0.0031,
-    "craft_output": 0.002,
-    "fuel_demand": 0.0051,
     "pollution": 0.0075,
-    "injury_risk": 0.003
+    "standardization": 0.0015
    },
    "name": "Open Hearth Steel",
    "observation": "Waste heat stored in checkerwork brick chambers warms the incoming gas and air; the shallow bath of pig and scrap is sampled and adjusted for hours.",
@@ -599,8 +599,8 @@
   },
   "toolbit_heat_treatment": {
    "effects": {
-    "tool_quality": 0.0052,
-    "fuel_demand": 0.0013
+    "fuel_demand": 0.0003,
+    "tool_quality": 0.0026
    },
    "name": "Tool Bit Heat Treatment",
    "observation": "Each tool bit is heated to a cherry red, quenched in brine, and drawn back until a straw colour creeps along the polished edge.",
@@ -608,7 +608,7 @@
   },
   "drill_bit_fluting": {
    "effects": {
-    "tool_quality": 0.0039
+    "tool_quality": 0.0019
    },
    "observation": "Round steel rod is milled with two spiral grooves; the finished twist drill throws its chips clear up the flutes as it bores.",
    "art": "res://assets/ui/research/paper/drill_bit_fluting.png"
@@ -616,10 +616,10 @@
   "ammonia_soda_process": {
    "effects": {
     "chemical_control": 0.0017,
-    "craft_output": 0.0015,
-    "pollution": -0.003,
-    "water_pollution": 0.0015,
-    "fuel_efficiency": 0.001
+    "craft_output": 0.001,
+    "fuel_efficiency": 0.001,
+    "pollution": -0.0019,
+    "water_pollution": 0.0015
    },
    "name": "Ammonia-Soda Process",
    "observation": "Brine saturated with ammonia meets carbonic gas in a tall tower, and fine white soda settles out without the choking acid fumes of the old works.",
@@ -627,86 +627,86 @@
   },
   "centre_lathe_assembly": {
    "effects": {
-    "tool_quality": 0.0052,
-    "craft_output": 0.0015,
-    "standardization": 0.0016,
-    "repair_capacity": 0.0016
+    "craft_output": 0.001,
+    "repair_capacity": 0.0016,
+    "standardization": 0.0008,
+    "tool_quality": 0.0026
    },
    "observation": "Bed, headstock, carriage and tailstock from separate benches are bolted together, and the new lathe turns a test bar parallel within a hair.",
    "art": "res://assets/ui/research/paper/centre_lathe_assembly.png"
   },
   "quill_feed_mechanisms": {
    "effects": {
-    "tool_quality": 0.0026,
-    "injury_risk": -0.001
+    "injury_risk": -0.0002,
+    "tool_quality": 0.0013
    },
    "observation": "A rack cut on the spindle sleeve lets the drill be lowered by a handwheel, steady and square, with no weight leaned on a brace.",
    "art": "res://assets/ui/research/paper/quill_feed_mechanisms.png"
   },
   "steel_wire_drawing": {
    "effects": {
-    "metal_yield": 0.006,
-    "craft_output": 0.0015,
-    "haul_capacity": 0.002,
-    "injury_risk": 0.002
+    "craft_output": 0.001,
+    "haul_capacity": 0.0013,
+    "injury_risk": 0.002,
+    "metal_yield": 0.006
    },
    "observation": "Steel rod is dragged through a series of shrinking holes in hardened plates, coming out as bright wire strong enough for cable and springs.",
    "art": "res://assets/ui/research/paper/steel_wire_drawing.png"
   },
   "column_drilling_machines": {
    "effects": {
-    "craft_output": 0.0015,
-    "tool_quality": 0.0013,
-    "injury_risk": 0.001
+    "craft_output": 0.001,
+    "injury_risk": 0.001,
+    "tool_quality": 0.0006
    },
    "observation": "A tall iron column carries the drill head, and a power feed carries the bit down through an inch of plate while the operator clamps the next piece.",
    "art": "res://assets/ui/research/paper/column_drilling_machines.png"
   },
   "nut_bore_drilling": {
    "effects": {
-    "standardization": 0.001
+    "standardization": 0.0005
    },
    "observation": "The nut blanks are drilled on a fixture so each hole is centred and exactly the size the tap requires.",
    "art": "res://assets/ui/research/paper/nut_bore_drilling.png"
   },
   "thread_tap_cutting": {
    "effects": {
-    "tool_quality": 0.0026,
-    "standardization": 0.001
+    "standardization": 0.0005,
+    "tool_quality": 0.0013
    },
    "observation": "A hardened steel tap with fluted threads is turned into a hole, cutting a clean internal thread with every quarter turn.",
    "art": "res://assets/ui/research/paper/thread_tap_cutting.png"
   },
   "bench_vise_screws": {
    "effects": {
-    "repair_capacity": 0.0016,
-    "injury_risk": -0.001
+    "injury_risk": -0.0002,
+    "repair_capacity": 0.0016
    },
    "observation": "A cast-iron vice bolted to the bench grips the work with a screw so tight that the fitter's two hands are both free for the file.",
    "art": "res://assets/ui/research/paper/bench_vise_screws.png"
   },
   "thread_die_cutting": {
    "effects": {
-    "standardization": 0.001,
-    "tool_quality": 0.0013
+    "standardization": 0.0005,
+    "tool_quality": 0.0006
    },
    "observation": "An adjustable split die in its stock is screwed down a rod, and a clean thread follows it that matches every nut in the tray.",
    "art": "res://assets/ui/research/paper/thread_die_cutting.png"
   },
   "milling_spindle_heads": {
    "effects": {
-    "tool_quality": 0.0026,
-    "craft_output": 0.001
+    "craft_output": 0.0006,
+    "tool_quality": 0.0013
    },
    "observation": "A lever shifts the gears in the head, and the milling spindle turns slow for heavy cuts or fast for a fine finish.",
    "art": "res://assets/ui/research/paper/milling_spindle_heads.png"
   },
   "celluloid_moulding": {
    "effects": {
-    "craft_output": 0.0015,
     "container_capacity": 0.002,
-    "trade_capacity": 0.001,
-    "disaster_risk": 0.003
+    "craft_output": 0.001,
+    "disaster_risk": 0.003,
+    "trade_capacity": 0.0004
    },
    "name": "Celluloid Moulding",
    "observation": "Nitrated cotton kneaded with camphor softens into a horny mass pressed into imitation ivory combs and collars, which flare fiercely if dropped near a flame.",
@@ -714,22 +714,22 @@
   },
   "external_thread_cutting": {
    "effects": {
-    "standardization": 0.001,
-    "tool_quality": 0.0013
+    "standardization": 0.0005,
+    "tool_quality": 0.0006
    },
    "observation": "The lathe's change gears are set for the standard pitch and the single-point tool follows the same groove on every pass.",
    "art": "res://assets/ui/research/paper/external_thread_cutting.png"
   },
   "internal_thread_tapping": {
    "effects": {
-    "standardization": 0.001
+    "standardization": 0.0005
    },
    "observation": "Drilled holes in an engine casting are tapped one after another, so any standard stud from the stores will screw home.",
    "art": "res://assets/ui/research/paper/internal_thread_tapping.png"
   },
   "milling_cutter_relief": {
    "effects": {
-    "tool_quality": 0.0026
+    "tool_quality": 0.0013
    },
    "name": "Relieved Milling Cutters",
    "observation": "Each cutter tooth is backed off behind its edge so the face can be ground again and again without spoiling its shape.",
@@ -737,18 +737,18 @@
   },
   "horizontal_milling_machines": {
    "effects": {
-    "craft_output": 0.0015,
-    "tool_quality": 0.0026,
-    "labor_demand": -0.001,
-    "injury_risk": 0.002
+    "craft_output": 0.001,
+    "injury_risk": 0.002,
+    "labor_demand": -0.0006,
+    "tool_quality": 0.0013
    },
    "observation": "Cutters stacked on a long arbor plane the whole top and sides of a casting in one pass as the table creeps along.",
    "art": "res://assets/ui/research/paper/horizontal_milling_machines.png"
   },
   "matched_thread_inspection": {
    "effects": {
-    "standardization": 0.0016,
-    "institutional_rigidity": 0.001
+    "institutional_rigidity": 0.0002,
+    "standardization": 0.0008
    },
    "name": "Go and No-Go Gauges",
    "observation": "The inspector tries each bolt in two ring gauges: it must enter the first and must not enter the second, or it goes to scrap.",
@@ -756,8 +756,8 @@
   },
   "reamed_bore_finishing": {
    "effects": {
-    "tool_quality": 0.0026,
-    "standardization": 0.001
+    "standardization": 0.0005,
+    "tool_quality": 0.0013
    },
    "name": "Reamed Bores",
    "observation": "A fluted reamer is drawn through the drilled bore and leaves it round, smooth and exactly to size for the pin.",
@@ -765,20 +765,20 @@
   },
   "worm_dividing_heads": {
    "effects": {
-    "tool_quality": 0.0026,
-    "standardization": 0.001
+    "standardization": 0.0005,
+    "tool_quality": 0.0013
    },
    "observation": "Forty turns of a worm crank make one turn of the spindle, and the index plate pins let a gear blank be split into any number of teeth.",
    "art": "res://assets/ui/research/paper/worm_dividing_heads.png"
   },
   "basic_machine_shops": {
    "effects": {
-    "craft_output": 0.005,
-    "repair_capacity": 0.0064,
-    "tool_quality": 0.0078,
-    "standardization": 0.0021,
+    "craft_output": 0.0032,
+    "fuel_demand": 0.0004,
     "injury_risk": 0.003,
-    "fuel_demand": 0.0017
+    "repair_capacity": 0.0064,
+    "standardization": 0.001,
+    "tool_quality": 0.0039
    },
    "name": "Machine Shops",
    "observation": "Lathes, planers and drills stand in rows under a line of overhead shafting, and the shop can build another engine, or another lathe, from bar and casting.",
@@ -787,15 +787,15 @@
   },
   "spring_wire_coiling": {
    "effects": {
-    "craft_output": 0.001,
-    "tool_quality": 0.0013
+    "craft_output": 0.0006,
+    "tool_quality": 0.0006
    },
    "observation": "Wire feeds onto a turning arbor and wraps itself into a tight close coil, cut off springy and even at every length.",
    "art": "res://assets/ui/research/paper/spring_wire_coiling.png"
   },
   "reciprocating_profile_slotting": {
    "effects": {
-    "tool_quality": 0.0026
+    "tool_quality": 0.0013
    },
    "name": "Slotting Machines",
    "observation": "A vertical ram strokes up and down, cutting a keyway inside a pulley hub a shaving at a time.",
@@ -803,16 +803,16 @@
   },
   "coil_spring_tempering": {
    "effects": {
-    "tool_quality": 0.0026,
-    "standardization": 0.001
+    "standardization": 0.0005,
+    "tool_quality": 0.0013
    },
    "observation": "Hardened springs are tempered in hot oil and then pressed flat under a weight; those that fail to spring back to height are rejected.",
    "art": "res://assets/ui/research/paper/coil_spring_tempering.png"
   },
   "progressive_profile_broaching": {
    "effects": {
-    "standardization": 0.001,
-    "tool_quality": 0.0013
+    "standardization": 0.0005,
+    "tool_quality": 0.0006
    },
    "name": "Broaching",
    "observation": "A long bar with teeth each a little taller than the last is pushed through a round hole and leaves it cut square in one stroke.",
@@ -820,8 +820,8 @@
   },
   "metal_spinning_forming": {
    "effects": {
-    "craft_output": 0.001,
     "container_capacity": 0.004,
+    "craft_output": 0.0007,
     "injury_risk": 0.001
    },
    "name": "Metal Spinning",
@@ -830,7 +830,7 @@
   },
   "glass_batch_composition_control": {
    "effects": {
-    "standardization": 0.0016
+    "standardization": 0.0006
    },
    "name": "Weighed Glass Batches",
    "observation": "Sand, soda and lime are weighed out to a written formula for each pot, and the glass comes out the same clear shade week after week.",
@@ -838,11 +838,11 @@
   },
   "internal_combustion": {
    "effects": {
+    "craft_output": 0.0021,
+    "fuel_demand": 0.0004,
     "fuel_efficiency": 0.008,
-    "craft_output": 0.003,
-    "labor_efficiency": 0.0014,
     "haul_capacity": 0.003,
-    "fuel_demand": 0.0043,
+    "labor_efficiency": 0.0012,
     "pollution": 0.006,
     "warfare_readiness": 0.002
    },
@@ -853,36 +853,36 @@
   },
   "cylindrical_grinding": {
    "effects": {
-    "tool_quality": 0.0039,
-    "standardization": 0.0016,
-    "health_risk": 0.002
+    "health_risk": 0.0004,
+    "standardization": 0.0006,
+    "tool_quality": 0.0039
    },
    "observation": "A hardened spindle turns slowly against a fast wheel under a stream of water, and the micrometer shows it round and true to size.",
    "art": "res://assets/ui/research/paper/cylindrical_grinding.png"
   },
   "surface_grinding": {
    "effects": {
-    "tool_quality": 0.0039,
-    "standardization": 0.001,
-    "health_risk": 0.002
+    "health_risk": 0.0004,
+    "standardization": 0.0004,
+    "tool_quality": 0.0039
    },
    "observation": "A hardened steel plate traverses under a whirling wheel, and its face comes up flat and grey-bright with no warping from heat.",
    "art": "res://assets/ui/research/paper/surface_grinding.png"
   },
   "glass_tube_drawing": {
    "effects": {
-    "craft_output": 0.001
+    "craft_output": 0.0007
    },
    "observation": "Two men walk apart from the furnace mouth drawing a gather of glass into a hollow tube the length of the shed, to be cut when cool.",
    "art": "res://assets/ui/research/paper/glass_blowing.png"
   },
   "filament_lamp_works": {
    "effects": {
-    "craft_output": 0.002,
-    "labor_efficiency": 0.001,
+    "craft_output": 0.0014,
+    "fuel_demand": 0.0002,
     "fuel_efficiency": 0.002,
-    "health_risk": 0.001,
-    "fuel_demand": 0.0017
+    "health_risk": 0.0002,
+    "labor_efficiency": 0.0009
    },
    "name": "Filament Lamp Works",
    "observation": "Carbonized threads are sealed into glass bulbs, the air pumped out, and each lamp is tested on the line until its filament glows orange and steady.",
@@ -901,8 +901,8 @@
   "shaft_alignment_methods": {
    "effects": {
     "fuel_efficiency": 0.002,
-    "repair_capacity": 0.0016,
-    "injury_risk": -0.001
+    "injury_risk": -0.0006,
+    "repair_capacity": 0.0016
    },
    "name": "Shaft Alignment",
    "observation": "Millwrights stretch a fine wire along the shop and check each hanger with a level and a dial so the long line-shaft runs without shaking.",
@@ -910,8 +910,8 @@
   },
   "roll_formed_sections": {
    "effects": {
-    "construction_rate": 0.002,
-    "craft_output": 0.001,
+    "construction_rate": 0.0015,
+    "craft_output": 0.0007,
     "metal_yield": 0.002
    },
    "observation": "Flat strip passes through a series of shaped rolls and emerges bent into a long channel of the same section along its whole length.",
@@ -948,10 +948,10 @@
   },
   "steam_turbines": {
    "effects": {
+    "craft_output": 0.0021,
+    "fuel_demand": 0.0004,
     "fuel_efficiency": 0.012,
-    "craft_output": 0.003,
     "naval_capacity": 0.003,
-    "fuel_demand": 0.0043,
     "pollution": 0.006
    },
    "name": "Steam Turbines",
@@ -961,7 +961,7 @@
   },
   "resistance_welding": {
    "effects": {
-    "craft_output": 0.001,
+    "craft_output": 0.0007,
     "injury_risk": 0.001
    },
    "observation": "Two sheets are squeezed between copper jaws, a heavy current passes, and they are fused at a glowing spot without rivet or solder.",
@@ -979,7 +979,7 @@
   },
   "snap_fastener_closures": {
    "effects": {
-    "craft_output": 0.001
+    "craft_output": 0.0007
    },
    "name": "Snap Fasteners",
    "observation": "Two small pressed-metal caps click shut on a glove cuff, and a machine sets them in a dozen garments a minute.",
@@ -987,12 +987,12 @@
   },
   "aluminum_electrolysis": {
    "effects": {
-    "metal_yield": 0.02,
     "chemical_control": 0.0021,
-    "craft_output": 0.002,
-    "fuel_demand": 0.0059,
-    "pollution": 0.006,
-    "health_risk": 0.001
+    "craft_output": 0.0014,
+    "fuel_demand": 0.0006,
+    "health_risk": 0.0002,
+    "metal_yield": 0.02,
+    "pollution": 0.006
    },
    "name": "Aluminium Smelting",
    "observation": "White alumina is stirred into a bath of molten salts, and heavy current through carbon blocks gathers a pool of silver metal at the bottom.",
@@ -1002,11 +1002,11 @@
   },
   "induction_motors": {
    "effects": {
-    "labor_efficiency": 0.0017,
-    "craft_output": 0.002,
+    "craft_output": 0.0014,
+    "fuel_demand": 0.0002,
     "fuel_efficiency": 0.003,
-    "repair_capacity": 0.0016,
-    "fuel_demand": 0.0017
+    "labor_efficiency": 0.0014,
+    "repair_capacity": 0.0016
    },
    "name": "Induction Motors",
    "observation": "A motor with no brushes and no sparking commutator turns steadily on alternating current, needing little more than a drop of oil a week.",
@@ -1014,8 +1014,8 @@
   },
   "cutting_fluid_management": {
    "effects": {
-    "tool_quality": 0.0026,
-    "health_risk": 0.001
+    "health_risk": 0.0002,
+    "tool_quality": 0.0026
    },
    "name": "Cutting Fluids",
    "observation": "A thin stream of soapy water and oil splashes over the cut from a pump, and the tool edge stays cool and keen for twice as long.",
@@ -1023,19 +1023,19 @@
   },
   "arc_welding_processes": {
    "effects": {
-    "craft_output": 0.0015,
-    "repair_capacity": 0.0024,
+    "craft_output": 0.0011,
+    "health_risk": 0.0003,
+    "injury_risk": 0.002,
     "metal_yield": 0.002,
-    "health_risk": 0.0015,
-    "injury_risk": 0.002
+    "repair_capacity": 0.0024
    },
    "observation": "A carbon rod drawn from the joint strikes a blinding blue arc, and the welder behind his dark glass fuses the plates in a bead of molten metal.",
    "art": "res://assets/ui/research/paper/arc_welding_processes.png"
   },
   "relay_logic": {
    "effects": {
-    "task_coordination": 0.004,
-    "injury_risk": -0.001
+    "injury_risk": -0.0006,
+    "task_coordination": 0.0014
    },
    "observation": "Racks of clicking relays in the signal cabin will not let a lever clear the track unless the set of points behind it is locked in place.",
    "art": "res://assets/ui/research/paper/electromagnetic_relays.png"
@@ -1043,11 +1043,11 @@
   "chloralkali_cells": {
    "effects": {
     "chemical_control": 0.0017,
-    "craft_output": 0.001,
-    "water_safety": 0.001,
-    "health_risk": 0.0015,
+    "craft_output": 0.0007,
+    "fuel_demand": 0.0002,
+    "health_risk": 0.0003,
     "water_pollution": 0.001,
-    "fuel_demand": 0.0017
+    "water_safety": 0.001
    },
    "name": "Chlor-Alkali Cells",
    "observation": "Current through tanks of brine sends greenish choking gas up one pipe and leaves strong caustic lye in the other side of the cell.",
@@ -1063,7 +1063,7 @@
   "hydrogen_chloride_synthesis": {
    "effects": {
     "chemical_control": 0.001,
-    "health_risk": 0.001
+    "health_risk": 0.0002
    },
    "observation": "Hydrogen burns quietly in a chlorine atmosphere inside a silica chamber, and the fumes are absorbed into water as pure strong acid.",
    "art": "res://assets/ui/research/paper/chloralkali_cells.png"
@@ -1071,18 +1071,18 @@
   "lead_acid_cells": {
    "effects": {
     "fuel_efficiency": 0.002,
-    "repair_capacity": 0.0016,
-    "health_risk": 0.0015
+    "health_risk": 0.0003,
+    "repair_capacity": 0.0016
    },
    "observation": "A row of glass jars holding grey and brown lead plates in acid stores the dynamo's current overnight and gives it back in the morning.",
    "art": "res://assets/ui/research/paper/battery_bank_wiring.png"
   },
   "regenerated_cellulose_fibre": {
    "effects": {
+    "craft_output": 0.0008,
     "fiber_yield": 0.008,
-    "craft_output": 0.001,
+    "health_risk": 0.0002,
     "trade_capacity": 0.001,
-    "health_risk": 0.0015,
     "water_pollution": 0.0015
    },
    "name": "Artificial Silk",
@@ -1092,10 +1092,10 @@
   },
   "compression_ignition_engines": {
    "effects": {
+    "craft_output": 0.0012,
+    "fuel_demand": 0.0002,
     "fuel_efficiency": 0.006,
     "haul_capacity": 0.003,
-    "craft_output": 0.0015,
-    "fuel_demand": 0.0026,
     "pollution": 0.0045
    },
    "name": "Heavy-Oil Engines",
@@ -1105,16 +1105,16 @@
   "sulfur_dioxide_recovery": {
    "effects": {
     "chemical_control": 0.001,
-    "pollution": -0.0045,
-    "ecology_recovery": 0.001
+    "ecology_recovery": 0.0003,
+    "pollution": -0.0041
    },
    "observation": "The smelter's choking fumes, which once killed the trees for miles downwind, are drawn off through towers and turned to acid.",
    "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png"
   },
   "drill_jig_bushings": {
    "effects": {
-    "standardization": 0.0016,
-    "tool_quality": 0.0013
+    "standardization": 0.0006,
+    "tool_quality": 0.0011
    },
    "observation": "Hardened steel bushings set in the jig plate guide the drill, so the hundredth hole lands exactly where the first did.",
    "art": "res://assets/ui/research/paper/drill_jig_bushings.png"
@@ -1122,10 +1122,10 @@
   "sulfuric_acid_production": {
    "effects": {
     "chemical_control": 0.0049,
-    "craft_output": 0.002,
-    "soil_productivity": 0.003,
+    "craft_output": 0.0016,
+    "health_risk": 0.0002,
     "pollution": 0.006,
-    "health_risk": 0.0015,
+    "soil_productivity": 0.003,
     "water_pollution": 0.001
    },
    "name": "Contact Sulphuric Acid",
@@ -1135,26 +1135,26 @@
   },
   "drill_jig_layout": {
    "effects": {
-    "standardization": 0.001,
-    "task_coordination": 0.001,
-    "tool_quality": 0.0013
+    "standardization": 0.0004,
+    "task_coordination": 0.0004,
+    "tool_quality": 0.0011
    },
    "observation": "The toolmaker measures every hole position in the jig from the same two finished faces rather than from each other, so errors do not pile up.",
    "art": "res://assets/ui/research/paper/drill_jig_layout.png"
   },
   "gear_hobbing": {
    "effects": {
-    "standardization": 0.0016,
-    "craft_output": 0.001,
+    "cohesion": -0.0006,
+    "craft_output": 0.0008,
     "labor_demand": -0.001,
-    "cohesion": -0.001
+    "standardization": 0.0006
    },
    "observation": "A worm-shaped cutter turns in step with the gear blank and cuts all its teeth in one continuous revolution, with no indexing between teeth.",
    "art": "res://assets/ui/research/paper/gear_power_skiving.png"
   },
   "carbon_resistors": {
    "effects": {
-    "knowledge_rate": 0.001
+    "knowledge_rate": 0.0006
    },
    "observation": "Little rods of pressed carbon are tested on a bridge and marked with their value, so a circuit can be built to a known current.",
    "art": "res://assets/ui/research/paper/foil_capacitors.png"
@@ -1163,7 +1163,7 @@
    "effects": {
     "chemical_control": 0.001,
     "food_storage": 0.002,
-    "nutrition_quality": 0.001
+    "nutrition_quality": 0.0003
    },
    "observation": "A cell-free juice pressed from yeast still turns sugar into spirit, and the brewers begin to buy their ferments by measured strength.",
    "art": "res://assets/ui/research/paper/enzyme_catalysis.png"
@@ -1179,17 +1179,17 @@
   },
   "rivet_hole_alignment": {
    "effects": {
-    "standardization": 0.001,
     "construction_rate": 0.001,
-    "disaster_resilience": 0.001
+    "disaster_resilience": 0.001,
+    "standardization": 0.0004
    },
    "observation": "Plates are clamped together, drifted until the holes line up, and reamed through as one so every rivet fills its hole.",
    "art": "res://assets/ui/research/paper/rivet_hole_alignment.png"
   },
   "gear_shaping_generation": {
    "effects": {
-    "standardization": 0.001,
-    "tool_quality": 0.0026
+    "standardization": 0.0004,
+    "tool_quality": 0.0022
    },
    "name": "Gear Shaping",
    "observation": "A cutter shaped like a gear strokes up and down while both turn slowly, generating teeth even on an internal gear ring.",
@@ -1206,34 +1206,34 @@
   },
   "nickel_metal_recovery": {
    "effects": {
+    "health_risk": 0.0001,
     "metal_yield": 0.006,
-    "pollution": 0.0045,
-    "health_risk": 0.001
+    "pollution": 0.0045
    },
    "observation": "Matte from the sulphide ore is roasted and treated with a gas that carries the nickel away and lays it down again as pure bright pellets.",
    "art": "res://assets/ui/research/paper/nickel_metal_recovery.png"
   },
   "cold_rivet_setting": {
    "effects": {
-    "craft_output": 0.001,
-    "injury_risk": -0.001
+    "craft_output": 0.0008,
+    "injury_risk": -0.0005
    },
    "observation": "A foot press squeezes small copper rivets cold through a harness strap, heading them neatly with no forge anywhere near.",
    "art": "res://assets/ui/research/paper/cold_rivet_setting.png"
   },
   "glass_annealing_schedules": {
    "effects": {
-    "craft_output": 0.001,
-    "standardization": 0.001,
-    "fuel_efficiency": 0.001
+    "craft_output": 0.0008,
+    "fuel_efficiency": 0.001,
+    "standardization": 0.0004
    },
    "observation": "Ware travels slowly down a long lehr, its heat lowered by a written schedule, and the old losses to cracking in the cold store almost vanish.",
    "art": "res://assets/ui/research/paper/glass_annealing_schedules.png"
   },
   "thread_rolling_die_making": {
    "effects": {
-    "tool_quality": 0.0026,
-    "standardization": 0.001
+    "standardization": 0.0004,
+    "tool_quality": 0.0022
    },
    "name": "Thread-Rolling Dies",
    "observation": "Flat steel dies are grooved with the thread form, hardened, and ground until a test blank rolled between them gauges true.",
@@ -1241,11 +1241,11 @@
   },
   "high_speed_tool_steel": {
    "effects": {
-    "tool_quality": 0.0078,
-    "craft_output": 0.002,
-    "labor_efficiency": 0.001,
+    "craft_output": 0.0016,
+    "fuel_demand": 0.0002,
+    "labor_efficiency": 0.0006,
     "metal_yield": 0.002,
-    "fuel_demand": 0.0017
+    "tool_quality": 0.0066
    },
    "name": "High-Speed Tool Steel",
    "observation": "The new tool bites into the steel shaft so fast that the chips come off blue and the tip glows dull red, yet it keeps its edge.",
@@ -1253,10 +1253,10 @@
   },
   "bolt_thread_rolling": {
    "effects": {
-    "standardization": 0.001,
-    "craft_output": 0.001,
+    "craft_output": 0.0008,
+    "labor_demand": -0.001,
     "metal_yield": 0.002,
-    "labor_demand": -0.001
+    "standardization": 0.0004
    },
    "observation": "A plain bolt blank rolls between two moving dies and comes out threaded, with no chips on the floor and a thread stronger than a cut one.",
    "art": "res://assets/ui/research/paper/bolt_thread_rolling.png"
@@ -1271,12 +1271,12 @@
   },
   "electric_arc_furnaces": {
    "effects": {
-    "metal_yield": 0.02,
     "chemical_control": 0.0021,
-    "standardization": 0.0021,
-    "fuel_demand": 0.0051,
+    "fuel_demand": 0.0005,
+    "injury_risk": 0.003,
+    "metal_yield": 0.02,
     "pollution": 0.0045,
-    "injury_risk": 0.003
+    "standardization": 0.0008
    },
    "observation": "Three thick carbon rods lower into a charge of scrap; with a roar and a violet glare the arc melts it, with no fuel smoke fouling the bath.",
    "ability_reason": "Heat without combustion gases makes clean alloy and tool steels possible and lets scrap be remelted wherever power is plentiful.",
@@ -1284,17 +1284,17 @@
   },
   "abrasive_belt_finishing": {
    "effects": {
-    "craft_output": 0.001,
-    "health_risk": 0.001
+    "craft_output": 0.0008,
+    "health_risk": 0.0001
    },
    "observation": "A moving belt of glued emery cloth follows the curve of a handle as the worker presses it on, polishing where a rigid wheel cannot reach.",
    "art": "res://assets/ui/research/paper/abrasive_belt_finishing.png"
   },
   "gauge_block_lapping": {
    "effects": {
-    "standardization": 0.0026,
-    "tool_quality": 0.0039,
-    "institutional_rigidity": 0.001
+    "institutional_rigidity": 0.0002,
+    "standardization": 0.001,
+    "tool_quality": 0.0033
    },
    "name": "Gauge Blocks",
    "observation": "Two lapped steel blocks slid together cling as if glued, and a small wooden case of them can build up any length to a ten-thousandth.",
@@ -1302,12 +1302,12 @@
   },
   "powered_flight": {
    "effects": {
+    "fuel_demand": 0.0002,
+    "injury_risk": 0.003,
+    "knowledge_rate": 0.0008,
     "route_speed": 0.006,
     "survey_speed": 0.006,
-    "knowledge_rate": 0.0013,
-    "warfare_readiness": 0.002,
-    "fuel_demand": 0.0017,
-    "injury_risk": 0.003
+    "warfare_readiness": 0.0015
    },
    "observation": "A frame of spruce and muslin with a clattering engine lifts off a level field and flies, wobbling, for longer than a minute before it settles.",
    "ability_reason": "Controlled flight proves the air can be a road; engines, fabrics and light metals will now be pushed to meet its demands.",
@@ -1316,12 +1316,12 @@
   },
   "precision_toolrooms": {
    "effects": {
-    "standardization": 0.0062,
-    "tool_quality": 0.0104,
+    "craft_output": 0.0016,
+    "institutional_rigidity": 0.0005,
+    "labor_demand": 0.0001,
     "repair_capacity": 0.0032,
-    "craft_output": 0.002,
-    "institutional_rigidity": 0.003,
-    "labor_demand": 0.002
+    "standardization": 0.0025,
+    "tool_quality": 0.0089
    },
    "observation": "Behind a glass partition, toolmakers at quiet grinders turn out jigs, fixtures and gauges for the production floor, each checked against gauge blocks.",
    "ability_reason": "A dedicated toolroom lets unskilled operators repeat skilled work in volume, which is what makes mass production possible.",
@@ -1331,10 +1331,10 @@
   "cryogenic_air_separation": {
    "effects": {
     "chemical_control": 0.0014,
-    "metal_yield": 0.004,
-    "craft_output": 0.001,
-    "fuel_demand": 0.0017,
-    "disaster_risk": 0.001
+    "craft_output": 0.0008,
+    "disaster_risk": 0.001,
+    "fuel_demand": 0.0002,
+    "metal_yield": 0.004
    },
    "name": "Liquid Air Separation",
    "observation": "Air compressed, cooled and expanded again and again drips into a flask as a pale blue liquid that boils off nitrogen first and leaves oxygen behind.",
@@ -1342,35 +1342,35 @@
   },
   "electric_power_looms": {
    "effects": {
+    "craft_output": 0.0008,
     "fiber_yield": 0.0072,
-    "labor_efficiency": 0.001,
-    "craft_output": 0.001,
-    "injury_risk": -0.002,
-    "fuel_demand": 0.0017
+    "fuel_demand": 0.0002,
+    "injury_risk": -0.0009,
+    "labor_efficiency": 0.0006
    },
    "observation": "Each loom has its own small motor, and with the overhead shafting and flapping belts gone the weaving shed is lighter, quieter and safer.",
    "art": "res://assets/ui/research/paper/drawloom_pattern_control.png"
   },
   "electric_pulp_beating": {
    "effects": {
-    "craft_output": 0.001,
-    "knowledge_preservation": 0.001,
-    "fuel_demand": 0.0017
+    "craft_output": 0.0008,
+    "fuel_demand": 0.0002,
+    "knowledge_preservation": 0.001
    },
    "observation": "The beater's heavy roll is now turned by a motor on the floor beside it, churning pulp in the oval tub at a steady speed day and night.",
    "art": "res://assets/ui/research/paper/fiber_pulp_beating.png"
   },
   "foil_capacitors": {
    "effects": {
-    "knowledge_rate": 0.001
+    "knowledge_rate": 0.0006
    },
    "observation": "Strips of tinfoil and waxed paper are rolled up tight into a small tube that stores a spark for the telephone and wireless circuits.",
    "art": "res://assets/ui/research/paper/foil_capacitors.png"
   },
   "castellated_nut_slotting": {
    "effects": {
-    "repair_capacity": 0.0016,
-    "injury_risk": -0.001
+    "injury_risk": -0.0005,
+    "repair_capacity": 0.0016
    },
    "name": "Castellated Nuts",
    "observation": "A saw cuts six slots across the top of each nut, turning it into a little crowned tower that a pin can lock in place.",
@@ -1378,9 +1378,9 @@
   },
   "split_pin_locking": {
    "effects": {
-    "repair_capacity": 0.0016,
     "disaster_resilience": 0.001,
-    "injury_risk": -0.001
+    "injury_risk": -0.0005,
+    "repair_capacity": 0.0016
    },
    "observation": "The fitter slips a split pin through the bolt and the nut's slot and bends its legs back; no amount of shaking will back the nut off now.",
    "art": "res://assets/ui/research/paper/split_pin_locking.png"
@@ -1403,27 +1403,27 @@
   },
   "resistive_sensing": {
    "effects": {
-    "knowledge_rate": 0.001,
-    "standardization": 0.001
+    "knowledge_rate": 0.0006,
+    "standardization": 0.0004
    },
    "observation": "A coil of fine platinum wire sits in the furnace flue, and a needle on the office wall tells the foreman how hot the fire runs.",
    "art": "res://assets/ui/research/paper/wound_transformers.png"
   },
   "rotary_swaging": {
    "effects": {
-    "craft_output": 0.001,
-    "tool_quality": 0.0026,
-    "metal_yield": 0.004,
+    "craft_output": 0.0008,
     "injury_risk": 0.001,
-    "labor_demand": 0.001
+    "labor_demand": 0.0001,
+    "metal_yield": 0.004,
+    "tool_quality": 0.0022
    },
    "observation": "Hammer dies spin around the copper rod in a deafening blur, and the pin comes out slimmer and harder with no chips on the floor.",
    "art": "res://assets/ui/research/paper/rivet_blank_heading.png"
   },
   "silicon_smelting": {
    "effects": {
+    "fuel_demand": 0.0003,
     "metal_yield": 0.006,
-    "fuel_demand": 0.0034,
     "pollution": 0.0045
    },
    "observation": "Carbon electrodes glow in a pit of quartz sand and coke, and the tappers draw off a grey, glittering metal that is not quite a metal.",
@@ -1431,10 +1431,10 @@
   },
   "steel_normalizing_control": {
    "effects": {
+    "fuel_demand": 0.0002,
     "metal_yield": 0.004,
-    "tool_quality": 0.0039,
-    "standardization": 0.001,
-    "fuel_demand": 0.0017
+    "standardization": 0.0004,
+    "tool_quality": 0.0033
    },
    "observation": "Shafts come out of the furnace and cool in still air on the rack; a polished slice under the lens shows a fine, even grain.",
    "art": "res://assets/ui/research/paper/steel_normalizing_control.png"
@@ -1442,9 +1442,9 @@
   "industrial_catalyst_design": {
    "effects": {
     "chemical_control": 0.0021,
-    "fuel_efficiency": 0.002,
     "extraction_yield": 0.006,
-    "health_risk": 0.001,
+    "fuel_efficiency": 0.002,
+    "health_risk": 0.0001,
     "water_pollution": 0.001
    },
    "observation": "Chemists bake pellets of alumina soaked in metal salts, pack them into test tubes of hot gas, and weigh what comes out the far end.",
@@ -1452,32 +1452,32 @@
   },
   "standard_fastener_kitting": {
    "effects": {
-    "standardization": 0.001,
-    "task_coordination": 0.001
+    "standardization": 0.0004,
+    "task_coordination": 0.0004
    },
    "observation": "Each machine arrives at the bench with a paper-wrapped packet of bolts, nuts and washers, counted and matched, and no one hunts through bins.",
    "art": "res://assets/ui/research/paper/standard_fastener_kitting.png"
   },
   "directional_air_valves": {
    "effects": {
-    "craft_output": 0.001
+    "craft_output": 0.0008
    },
    "observation": "A brass spool slides with a click and a hiss, and the air line that pushed the clamp forward now pulls it back.",
    "art": "res://assets/ui/research/paper/pneumatic_pressing.png"
   },
   "honed_bore_finishing": {
    "effects": {
-    "tool_quality": 0.0039,
-    "standardization": 0.001,
     "fuel_efficiency": 0.001,
-    "labor_demand": 0.001
+    "labor_demand": 0.0001,
+    "standardization": 0.0004,
+    "tool_quality": 0.0033
    },
    "observation": "Stones on a spinning, plunging head leave a fine crosshatch inside the cylinder, and the gauge finds it round to a hair.",
    "art": "res://assets/ui/research/paper/honed_bore_finishing.png"
   },
   "pneumatic_cylinders": {
    "effects": {
-    "craft_output": 0.001,
+    "craft_output": 0.0008,
     "injury_risk": 0.001
    },
    "observation": "A polished rod shoots out of an iron tube with a sigh of air and holds the casting fast while the drill comes down.",
@@ -1485,27 +1485,27 @@
   },
   "pneumatic_pressing": {
    "effects": {
-    "craft_output": 0.0015,
-    "injury_risk": 0.002,
-    "fuel_demand": 0.0017
+    "craft_output": 0.0012,
+    "fuel_demand": 0.0002,
+    "injury_risk": 0.002
    },
    "observation": "The press drops on a hiss of air, not a swung sledge, and a girl at the pedal sets rivets all day at the same stroke.",
    "art": "res://assets/ui/research/paper/pneumatic_pressing.png"
   },
   "textile_durability_testing": {
    "effects": {
-    "standardization": 0.001,
-    "fiber_yield": 0.0024
+    "fiber_yield": 0.0024,
+    "standardization": 0.0004
    },
    "observation": "Swatches of uniform cloth are rubbed, washed and wrung by machine five times over, and the clerk notes each thin patch in a ledger.",
    "art": "res://assets/ui/research/paper/yarn_count_standards.png"
   },
   "mechanical_washing_machines": {
    "effects": {
-    "labor_efficiency": 0.001,
     "fatigue": -0.003,
+    "fuel_demand": 0.0002,
+    "labor_efficiency": 0.0006,
     "sanitation": 0.002,
-    "fuel_demand": 0.0026,
     "water_pollution": 0.001
    },
    "name": "Powered Washing Machines",
@@ -1516,7 +1516,7 @@
   "formaldehyde_synthesis": {
    "effects": {
     "chemical_control": 0.001,
-    "health_risk": 0.0015,
+    "health_risk": 0.0002,
     "water_pollution": 0.001
    },
    "observation": "Wood spirit vapor passes over a hot silver gauze, and the water it bubbles through takes on a sharp, eye-stinging smell.",
@@ -1524,11 +1524,11 @@
   },
   "phenolic_resin_moulding": {
    "effects": {
-    "craft_output": 0.006,
-    "standardization": 0.0031,
-    "container_capacity": 0.006,
     "chemical_control": 0.0014,
-    "health_risk": 0.002,
+    "container_capacity": 0.006,
+    "craft_output": 0.0048,
+    "health_risk": 0.0003,
+    "standardization": 0.0012,
     "water_pollution": 0.0015
    },
    "name": "Phenolic Resin Moulding",
@@ -1541,7 +1541,7 @@
    "effects": {
     "chemical_control": 0.001,
     "extraction_yield": 0.003,
-    "health_risk": 0.0015,
+    "health_risk": 0.0003,
     "water_pollution": 0.001
    },
    "observation": "Hydrogen hisses into a steel autoclave of yellow nitro oil over powdered nickel, and the oil comes out pale, ready for the dye house.",
@@ -1558,11 +1558,11 @@
   },
   "stainless_steel": {
    "effects": {
+    "fuel_demand": 0.0002,
     "metal_yield": 0.008,
-    "tool_quality": 0.0052,
     "repair_capacity": 0.0024,
     "sanitation": 0.002,
-    "fuel_demand": 0.0017
+    "tool_quality": 0.0052
    },
    "name": "Stainless Steel",
    "observation": "Cutlery forged from a chromium steel lies a month in vinegar and salt water and comes out as bright as the day it was polished.",
@@ -1586,10 +1586,10 @@
   },
   "welding_metallurgy": {
    "effects": {
-    "tool_quality": 0.0026,
-    "repair_capacity": 0.0024,
     "construction_rate": 0.002,
-    "injury_risk": -0.001
+    "injury_risk": -0.0006,
+    "repair_capacity": 0.0024,
+    "tool_quality": 0.0026
    },
    "observation": "An etched cross-section of a welded strap shows the coarse, brittle band beside the seam, and the welders change their heat to shrink it.",
    "art": "res://assets/ui/research/paper/welding_metallurgy.png"
@@ -1598,10 +1598,11 @@
    "effects": {
     "chemical_control": 0.0056,
     "extraction_yield": 0.018,
-    "fuel_demand": 0.0068,
+    "farm_mechanization": 0.1966,
+    "fuel_demand": 0.0006,
+    "health_risk": 0.0002,
     "pollution": 0.006,
-    "health_risk": 0.001,
-    "warfare_readiness": 0.002
+    "warfare_readiness": 0.0008
    },
    "observation": "Tall steel columns thrum at two hundred atmospheres, and a stream of pungent liquid drawn from nothing but air and water fills the tanks.",
    "ability_reason": "Fixing nitrogen from the air ends the dependence on guano and nitrate mines and puts fertilizer and industrial nitrogen within reach of every nation with coal and power.",
@@ -1611,9 +1612,9 @@
   "hydrocarbon_steam_cracking": {
    "effects": {
     "chemical_control": 0.0014,
-    "fuel_efficiency": 0.002,
     "extraction_yield": 0.006,
-    "fuel_demand": 0.0034,
+    "fuel_demand": 0.0003,
+    "fuel_efficiency": 0.002,
     "pollution": 0.0045
    },
    "observation": "Oil vapor and steam rush through red-hot tubes and are quenched at once; the gas that bubbles off smells sweet and burns bright.",
@@ -1621,7 +1622,7 @@
   },
   "zipper_chain_closures": {
    "effects": {
-    "craft_output": 0.001
+    "craft_output": 0.0009
    },
    "name": "Slide Fasteners",
    "observation": "A small metal slider runs up two rows of teeth and locks a coat front shut in a single pull, where there were once nine buttons.",
@@ -1629,22 +1630,22 @@
   },
   "centrifugal_tube_casting": {
    "effects": {
+    "craft_output": 0.0009,
+    "fuel_demand": 0.0002,
+    "injury_risk": 0.002,
     "metal_yield": 0.006,
-    "craft_output": 0.001,
-    "water_access": 0.001,
-    "fuel_demand": 0.0017,
-    "injury_risk": 0.002
+    "water_access": 0.001
    },
    "observation": "Molten iron is poured into a spinning mould and flung against the wall; the pipe comes out sound with no core to pull.",
    "art": "res://assets/ui/research/paper/centrifugal_tube_casting.png"
   },
   "centerless_grinding": {
    "effects": {
-    "tool_quality": 0.0039,
-    "standardization": 0.0016,
-    "craft_output": 0.001,
+    "craft_output": 0.0009,
+    "health_risk": 0.0002,
     "labor_demand": -0.001,
-    "health_risk": 0.001
+    "standardization": 0.0012,
+    "tool_quality": 0.0039
    },
    "observation": "Pins roll between two wheels and slide out the far side by the thousand, each one round within the width of a thread.",
    "art": "res://assets/ui/research/paper/centerless_grinding.png"
@@ -1660,18 +1661,18 @@
   },
   "vacuum_metal_melting": {
    "effects": {
+    "fuel_demand": 0.0002,
     "metal_yield": 0.006,
-    "tool_quality": 0.0026,
-    "fuel_demand": 0.0026
+    "tool_quality": 0.0026
    },
    "observation": "Copper melts in a sealed pot while pumps draw out the air, and the ingots come out without the bubbles that used to crack the wire.",
    "art": "res://assets/ui/research/paper/vacuum_metal_melting.png"
   },
   "garment_size_grading": {
    "effects": {
-    "standardization": 0.0016,
-    "craft_output": 0.001,
-    "fiber_yield": 0.0024
+    "craft_output": 0.0009,
+    "fiber_yield": 0.0024,
+    "standardization": 0.0012
    },
    "observation": "Paper patterns hang on the cutter's rail in a row of numbered sizes, taken from the measurements of a thousand workers and recruits.",
    "art": "res://assets/ui/research/paper/garment_pattern_cutting.png"
@@ -1680,7 +1681,8 @@
    "effects": {
     "chemical_control": 0.0014,
     "extraction_yield": 0.006,
-    "fuel_demand": 0.0026,
+    "farm_mechanization": 0.0655,
+    "fuel_demand": 0.0002,
     "water_pollution": 0.001
    },
    "observation": "Ammonia and carbon dioxide meet in a hot pressure vessel, and white prills pile up in the store, rich in nitrogen and easy to bag.",
@@ -1688,11 +1690,11 @@
   },
   "cemented_carbide_tools": {
    "effects": {
-    "tool_quality": 0.0078,
-    "craft_output": 0.002,
+    "craft_output": 0.0018,
+    "health_risk": 0.0002,
+    "labor_demand": -0.002,
     "metal_yield": 0.004,
-    "health_risk": 0.001,
-    "labor_demand": -0.002
+    "tool_quality": 0.0078
    },
    "name": "Cemented Carbide Tools",
    "observation": "A small grey tip brazed to the tool shank cuts hardened steel red-hot, and the lathe runs three times faster without a pause to regrind.",
@@ -1702,7 +1704,7 @@
    "effects": {
     "chemical_control": 0.001,
     "extraction_yield": 0.003,
-    "fuel_demand": 0.0017
+    "fuel_demand": 0.0002
    },
    "observation": "Cracked gas runs through towers of chilled columns until the ethylene left behind is pure enough that the reactor no longer stalls.",
    "art": "res://assets/ui/research/subjects/fuel_refining-v1.png"
@@ -1710,9 +1712,9 @@
   "radical_chain_polymerization": {
    "effects": {
     "chemical_control": 0.0014,
-    "craft_output": 0.0015,
     "container_capacity": 0.004,
-    "fuel_demand": 0.0017,
+    "craft_output": 0.0013,
+    "fuel_demand": 0.0002,
     "injury_risk": 0.002
    },
    "observation": "Ethylene is squeezed to a thousand atmospheres with a trace of oxygen, and a waxy white solid collects in the vessel.",
@@ -1721,8 +1723,8 @@
   "additive_step_polymerization": {
    "effects": {
     "chemical_control": 0.001,
-    "craft_output": 0.001,
-    "health_risk": 0.001
+    "craft_output": 0.0009,
+    "health_risk": 0.0002
    },
    "name": "Addition Step Polymers",
    "observation": "Two syrups poured together warm and thicken, and by evening the cloth-backed web has set into a tough drive belt.",
@@ -1731,7 +1733,7 @@
   "brazed_joint_qualification": {
    "effects": {
     "repair_capacity": 0.0016,
-    "standardization": 0.001,
+    "standardization": 0.0008,
     "tool_quality": 0.0013
    },
    "observation": "Brazed fittings are sawn open and bent to breaking; the inspector passes a batch only when the steel tears before the joint does.",
@@ -1740,9 +1742,9 @@
   "condensative_step_polymerization": {
    "effects": {
     "chemical_control": 0.001,
-    "craft_output": 0.001,
-    "housing_output": 0.001,
-    "health_risk": 0.001
+    "craft_output": 0.0009,
+    "health_risk": 0.0002,
+    "housing_output": 0.001
    },
    "name": "Condensation Polymers",
    "observation": "Urea and formaldehyde simmer together, shedding water as steam, and the syrup left behind glues plywood panels that will not come apart.",
@@ -1751,9 +1753,9 @@
   "polymer_solution_processing": {
    "effects": {
     "chemical_control": 0.001,
-    "craft_output": 0.001,
+    "craft_output": 0.0009,
     "fiber_yield": 0.0024,
-    "health_risk": 0.001
+    "health_risk": 0.0002
    },
    "observation": "A polymer dissolved in the vat is spread thin and dried in warm air, leaving a film or a binder where there was only a clear syrup.",
    "art": "res://assets/ui/research/paper/polymer_solution_processing.png"
@@ -1761,27 +1763,27 @@
   "ethylene_oxide_synthesis": {
    "effects": {
     "chemical_control": 0.0014,
+    "disaster_risk": 0.001,
     "extraction_yield": 0.003,
-    "health_risk": 0.0015,
-    "disaster_risk": 0.001
+    "health_risk": 0.0003
    },
    "observation": "Ethylene and oxygen pass over silver on alumina pellets, and a sweet-smelling gas is drawn off that burns fiercely and poisons quietly.",
    "art": "res://assets/ui/research/paper/ethylene_oxide_synthesis.png"
   },
   "electrochemical_machining": {
    "effects": {
+    "craft_output": 0.0008,
+    "fuel_demand": 0.0001,
     "tool_quality": 0.0039,
-    "craft_output": 0.001,
-    "water_pollution": 0.001,
-    "fuel_demand": 0.0017
+    "water_pollution": 0.001
    },
    "observation": "Salt water and heavy current flow between a copper tool and a turbine blade, and the hard alloy melts away into sludge with no tool wear.",
    "art": "res://assets/ui/research/paper/electrochemical_machining.png"
   },
   "residual_stress_assessment": {
    "effects": {
-    "standardization": 0.001,
-    "disaster_resilience": 0.002,
+    "disaster_resilience": 0.0015,
+    "standardization": 0.0005,
     "tool_quality": 0.0013
    },
    "observation": "A slit is sawn into a forged bar and the gauges glued beside it twitch as the locked-in stress springs the metal apart.",
@@ -1806,13 +1808,13 @@
   },
   "synthetic_rubber": {
    "effects": {
-    "craft_output": 0.0025,
-    "haul_capacity": 0.003,
     "chemical_control": 0.001,
-    "trade_capacity": 0.002,
+    "craft_output": 0.0021,
+    "haul_capacity": 0.0029,
+    "health_risk": 0.0001,
     "pollution": 0.0045,
-    "health_risk": 0.001,
-    "warfare_readiness": 0.002
+    "trade_capacity": 0.002,
+    "warfare_readiness": 0.001
    },
    "name": "Synthetic Rubber",
    "observation": "Butadiene and styrene are stirred in soapy water until a milky latex forms; coagulated and rolled, it becomes tire rubber from no plantation.",
@@ -1820,22 +1822,22 @@
   },
   "induction_surface_hardening": {
    "effects": {
-    "tool_quality": 0.0039,
-    "craft_output": 0.001,
+    "craft_output": 0.0008,
+    "fuel_demand": 0.0001,
     "fuel_efficiency": 0.001,
-    "fuel_demand": 0.0017
+    "tool_quality": 0.0039
    },
    "observation": "A copper coil hums, the shaft's skin glows cherry in seconds while its core stays dark, and a water spray freezes the hardness in.",
    "art": "res://assets/ui/research/paper/induction_surface_hardening.png"
   },
   "thermoplastic_processing": {
    "effects": {
-    "craft_output": 0.007,
-    "container_capacity": 0.012,
-    "standardization": 0.0026,
     "chemical_control": 0.001,
-    "fuel_demand": 0.0034,
-    "ecological_pressure": 0.004
+    "container_capacity": 0.012,
+    "craft_output": 0.0058,
+    "ecological_pressure": 0.004,
+    "fuel_demand": 0.0003,
+    "standardization": 0.0013
    },
    "observation": "Pellets pour into a heated barrel, soften, and are pressed into combs, cups and cable sheaths; the scrap is chopped and melted again.",
    "ability_reason": "Plastics that melt and reset repeatedly allow cheap, fast shaping of everyday goods and insulation, opening the whole family of moulding and extrusion trades.",
@@ -1844,11 +1846,11 @@
   },
   "advanced_airframes": {
    "effects": {
-    "route_speed": 0.003,
-    "haul_capacity": 0.002,
+    "fuel_demand": 0.0002,
+    "haul_capacity": 0.0019,
     "metal_yield": 0.002,
-    "warfare_readiness": 0.002,
-    "fuel_demand": 0.0026
+    "route_speed": 0.003,
+    "warfare_readiness": 0.001
    },
    "name": "Stressed-Skin Airframes",
    "observation": "The new machines are all metal, their skins riveted smooth over ribs, and they carry passengers and mail above the weather.",
@@ -1857,7 +1859,7 @@
   "polymer_melt_rheology": {
    "effects": {
     "chemical_control": 0.001,
-    "standardization": 0.001
+    "standardization": 0.0005
    },
    "observation": "Molten polymer is forced through a narrow steel die at set heat and pressure, and the flow per minute is written on every lot ticket.",
    "art": "res://assets/ui/research/paper/polymer_melt_rheology.png"
@@ -1865,8 +1867,8 @@
   "polymer_additive_formulation": {
    "effects": {
     "chemical_control": 0.001,
-    "craft_output": 0.001,
-    "health_risk": 0.001
+    "craft_output": 0.0008,
+    "health_risk": 0.0001
    },
    "observation": "A dash of plasticizer, a pinch of stabilizer and a little carbon black, and the same resin becomes a garden hose instead of a brittle rod.",
    "art": "res://assets/ui/research/paper/polymer_additive_formulation.png"
@@ -1874,33 +1876,33 @@
   "polymer_film_extrusion": {
    "effects": {
     "container_capacity": 0.008,
-    "food_spoilage": -0.002,
-    "craft_output": 0.001,
-    "ecological_pressure": 0.003
+    "craft_output": 0.0008,
+    "ecological_pressure": 0.003,
+    "food_spoilage": -0.002
    },
    "observation": "A bubble of warm plastic tall as a house rises from the ring die, cools, and is flattened onto rolls of thin clear wrapping.",
    "art": "res://assets/ui/research/paper/polymer_film_extrusion.png"
   },
   "polymer_injection_molding": {
    "effects": {
-    "craft_output": 0.0025,
-    "standardization": 0.0021,
-    "labor_demand": -0.002,
-    "fuel_demand": 0.0017,
-    "ecological_pressure": 0.002
+    "craft_output": 0.0021,
+    "ecological_pressure": 0.002,
+    "fuel_demand": 0.0001,
+    "labor_demand": -0.001,
+    "standardization": 0.001
    },
    "observation": "The mould snaps shut, the screw shoves molten plastic in, and every twenty seconds a finished bucket drops onto the belt.",
    "art": "res://assets/ui/research/paper/polymer_injection_molding.png"
   },
   "polyamide_synthetic_fibre": {
    "effects": {
-    "fiber_yield": 0.02,
-    "craft_output": 0.0025,
-    "trade_capacity": 0.003,
     "chemical_control": 0.0014,
-    "fuel_demand": 0.0034,
-    "water_pollution": 0.0015,
-    "cohesion": -0.002
+    "cohesion": -0.0004,
+    "craft_output": 0.0021,
+    "fiber_yield": 0.02,
+    "fuel_demand": 0.0003,
+    "trade_capacity": 0.003,
+    "water_pollution": 0.0015
    },
    "name": "Polyamide Fibre",
    "observation": "A molten resin is squirted through tiny holes and drawn out cold into a thread finer than silk and stronger than any cotton.",
@@ -1910,8 +1912,8 @@
   },
   "binary_adders": {
    "effects": {
-    "knowledge_rate": 0.001,
-    "task_coordination": 0.001
+    "knowledge_rate": 0.0006,
+    "task_coordination": 0.0004
    },
    "observation": "Rows of relays click in chorus, and two numbers set on the switches come back as their sum in winking lamps.",
    "art": "res://assets/ui/research/paper/binary_adders.png"
@@ -1919,8 +1921,8 @@
   "isocyanate_synthesis": {
    "effects": {
     "chemical_control": 0.001,
-    "health_risk": 0.002,
-    "disaster_risk": 0.002
+    "disaster_risk": 0.002,
+    "health_risk": 0.0002
    },
    "observation": "A deadly gas is fed into the amine in a sealed plant under constant watch, and out comes the reactive liquid that makes foams and varnish.",
    "art": "res://assets/ui/research/paper/isocyanate_synthesis.png"
@@ -1928,7 +1930,7 @@
   "polymer_blow_molding": {
    "effects": {
     "container_capacity": 0.008,
-    "craft_output": 0.001,
+    "craft_output": 0.0008,
     "ecological_pressure": 0.003
    },
    "observation": "A hanging tube of soft plastic is caught in a split mould and blown out with air into a light bottle that will not break when dropped.",
@@ -1936,17 +1938,17 @@
   },
   "relay_registers": {
    "effects": {
-    "knowledge_rate": 0.001,
     "knowledge_preservation": 0.001,
-    "task_coordination": 0.001
+    "knowledge_rate": 0.0006,
+    "task_coordination": 0.0004
    },
    "observation": "A rack of relays holds a row of set and unset contacts, and the number stays there, clicking faintly, until the next word replaces it.",
    "art": "res://assets/ui/research/paper/electromagnetic_relays.png"
   },
   "adhesive_bond_design": {
    "effects": {
-    "craft_output": 0.001,
     "construction_rate": 0.001,
+    "craft_output": 0.0008,
     "repair_capacity": 0.0016
    },
    "observation": "Aluminium panels are glued rather than riveted, and when the test rig pulls them apart the metal tears first.",
@@ -1954,11 +1956,11 @@
   },
   "catalytic_cracking": {
    "effects": {
-    "fuel_efficiency": 0.005,
-    "extraction_yield": 0.008,
     "chemical_control": 0.001,
-    "pollution": 0.0045,
-    "fuel_demand": 0.0017
+    "extraction_yield": 0.008,
+    "fuel_demand": 0.0001,
+    "fuel_efficiency": 0.005,
+    "pollution": 0.0045
    },
    "name": "Catalytic Cracking",
    "observation": "Hot oil vapor meets a bed of clay catalyst, and far more of each barrel comes out as high-grade motor spirit instead of heavy tar.",
@@ -1974,12 +1976,12 @@
   },
   "jet_propulsion": {
    "effects": {
+    "fuel_demand": 0.0006,
+    "haul_capacity": 0.0039,
+    "pollution": 0.006,
     "route_speed": 0.012,
     "travel_speed": 0.006,
-    "haul_capacity": 0.004,
-    "fuel_demand": 0.0068,
-    "pollution": 0.006,
-    "warfare_readiness": 0.004
+    "warfare_readiness": 0.002
    },
    "observation": "There is no propeller, only a howl and a shimmer of heat behind the wing, and the machine climbs faster than any bird has flown.",
    "ability_reason": "The gas turbine breaks the propeller's speed ceiling, and in time shrinks continents for mail, passengers and urgent freight.",
@@ -1989,8 +1991,8 @@
   "textile_waterproofing": {
    "effects": {
     "fiber_yield": 0.0048,
+    "health_protection": 0.0004,
     "mobile_shelter": 0.002,
-    "health_protection": 0.001,
     "water_pollution": 0.001
    },
    "observation": "Woven polyamide cloth is drawn through a rubbery coating bath and dried; the rain shell sheds a bucket of water and still folds into a pocket.",
@@ -1999,15 +2001,15 @@
   "ionic_chain_polymerization": {
    "effects": {
     "chemical_control": 0.001,
-    "craft_output": 0.001
+    "craft_output": 0.0008
    },
    "observation": "In a chilled reactor a trace of acid catalyst turns clear butene gas into a sticky rubber in the time it takes to stir it.",
    "art": "res://assets/ui/research/paper/coordination_polymerization.png"
   },
   "garment_seam_sealing": {
    "effects": {
-    "mobile_shelter": 0.002,
-    "health_protection": 0.001
+    "health_protection": 0.0004,
+    "mobile_shelter": 0.002
    },
    "observation": "A hot roller presses a strip of tape over every stitched seam of the rain shell, and the leak tank no longer finds a single drip.",
    "art": "res://assets/ui/research/paper/textile_waterproofing.png"
@@ -2026,7 +2028,7 @@
   "polymer_molecular_weight_control": {
    "effects": {
     "chemical_control": 0.001,
-    "standardization": 0.001
+    "standardization": 0.0005
    },
    "observation": "The chemist adds a little chain stopper to the batch, and the plastic that used to vary from lot to lot now flows the same every time.",
    "art": "res://assets/ui/research/paper/polymer_molecular_weight_control.png"
@@ -2034,9 +2036,9 @@
   "polymer_reaction_heat_management": {
    "effects": {
     "chemical_control": 0.001,
-    "disaster_risk": -0.002,
-    "injury_risk": -0.001,
-    "fuel_efficiency": 0.001
+    "disaster_risk": -0.0016,
+    "fuel_efficiency": 0.001,
+    "injury_risk": -0.0007
    },
    "observation": "Cooling jackets and a watched thermometer keep the reactor from running away; the old scorched, half-melted batches become rare.",
    "art": "res://assets/ui/research/paper/polymer_reaction_heat_management.png"
@@ -2044,18 +2046,18 @@
   "polymer_solvent_recovery": {
    "effects": {
     "chemical_control": 0.001,
-    "water_pollution": -0.001,
+    "fuel_demand": 0.0001,
     "pollution": -0.0015,
-    "fuel_demand": 0.0013
+    "water_pollution": -0.001
    },
    "observation": "Solvent that once vented off the drying lines is condensed in chilled towers and pumped back into the tank for another day's work.",
    "art": "res://assets/ui/research/paper/polymer_solvent_recovery.png"
   },
   "sinker_electrical_discharge_machining": {
    "effects": {
-    "tool_quality": 0.0039,
-    "craft_output": 0.001,
-    "fuel_demand": 0.0013
+    "craft_output": 0.0008,
+    "fuel_demand": 0.0001,
+    "tool_quality": 0.0039
    },
    "name": "Spark Die Sinking",
    "observation": "A graphite electrode crackles in a bath of oil, eating its own shape into hardened die steel no cutter could touch.",
@@ -2064,9 +2066,9 @@
   "chlorosilane_purification": {
    "effects": {
     "chemical_control": 0.001,
-    "metal_yield": 0.004,
-    "health_risk": 0.001,
-    "fuel_demand": 0.0026
+    "fuel_demand": 0.0002,
+    "health_risk": 0.0001,
+    "metal_yield": 0.004
    },
    "observation": "Silicon is turned into a fuming liquid, distilled again and again, then laid back down on hot rods as metal purer than any before it.",
    "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png"
@@ -2074,17 +2076,17 @@
   "single_crystal_growth": {
    "effects": {
     "chemical_control": 0.001,
-    "metal_yield": 0.002,
-    "fuel_demand": 0.0017
+    "fuel_demand": 0.0001,
+    "metal_yield": 0.002
    },
    "observation": "A seed crystal dipped in molten silicon is turned and slowly raised, drawing out a single flawless grey ingot the length of a forearm.",
    "art": "res://assets/ui/research/paper/vacuum_metal_melting.png"
   },
   "tube_rotary_draw_bending": {
    "effects": {
-    "craft_output": 0.001,
-    "standardization": 0.001,
-    "haul_capacity": 0.001
+    "craft_output": 0.0008,
+    "haul_capacity": 0.001,
+    "standardization": 0.0005
    },
    "name": "Draw-Bent Tubing",
    "observation": "A mandrel inside and a turning die outside wrap steel tube round a tight bend without a kink or a flattened wall.",
@@ -2092,8 +2094,8 @@
   },
   "nuclear_magnetic_resonance_spectroscopy": {
    "effects": {
-    "knowledge_rate": 0.001,
     "chemical_control": 0.001,
+    "knowledge_rate": 0.0006,
     "observation_rate": 0.001
    },
    "name": "Magnetic Resonance Spectra",
@@ -2102,8 +2104,8 @@
   },
   "ultrasonic_abrasive_machining": {
    "effects": {
-    "tool_quality": 0.0026,
-    "health_risk": 0.001
+    "health_risk": 0.0001,
+    "tool_quality": 0.0026
    },
    "observation": "A buzzing tool nearly silent to the ear drives a slurry of grit into glass and ceramic, cutting square holes with no cracks.",
    "art": "res://assets/ui/research/paper/ultrasonic_abrasive_machining.png"
@@ -2111,7 +2113,7 @@
   "polymer_thermoforming": {
    "effects": {
     "container_capacity": 0.006,
-    "craft_output": 0.001,
+    "craft_output": 0.0008,
     "ecological_pressure": 0.002
    },
    "observation": "A sheet of plastic sags under the heaters, then is sucked down over a mould into a row of trays, lids and cups.",
@@ -2119,28 +2121,28 @@
   },
   "textile_moisture_transport": {
    "effects": {
-    "fiber_yield": 0.0024,
     "fatigue": -0.001,
-    "health_protection": 0.001
+    "fiber_yield": 0.0024,
+    "health_protection": 0.0004
    },
    "observation": "Wear-testers run on a track in the new knit and come back dry at the skin, the sweat wicked out to the outer face.",
    "art": "res://assets/ui/research/paper/layered_clothing_design.png"
   },
   "continuous_metal_casting": {
    "effects": {
-    "metal_yield": 0.008,
+    "craft_output": 0.0009,
     "fuel_efficiency": 0.004,
-    "craft_output": 0.0015,
-    "labor_demand": -0.002,
-    "injury_risk": 0.002
+    "injury_risk": 0.002,
+    "labor_demand": -0.0006,
+    "metal_yield": 0.008
    },
    "observation": "Steel pours from the ladle into a water-cooled copper mould and emerges below as a glowing endless slab, never set down as an ingot.",
    "art": "res://assets/ui/research/paper/continuous_metal_casting.png"
   },
   "machine_tool_stiffness_assessment": {
    "effects": {
-    "tool_quality": 0.0026,
-    "standardization": 0.001
+    "standardization": 0.0003,
+    "tool_quality": 0.0026
    },
    "observation": "Weights hung on the spindle and dial gauges on the column show how far the machine springs, and the ribs are thickened where it yields.",
    "art": "res://assets/ui/research/paper/machine_tool_stiffness_assessment.png"
@@ -2155,12 +2157,12 @@
   },
   "bipolar_junction_transistors": {
    "effects": {
-    "knowledge_rate": 0.004,
-    "craft_output": 0.002,
-    "fuel_efficiency": 0.004,
-    "standardization": 0.0016,
     "chemical_control": 0.001,
-    "health_risk": 0.001
+    "craft_output": 0.0012,
+    "fuel_efficiency": 0.004,
+    "health_risk": 0.0002,
+    "knowledge_rate": 0.0025,
+    "standardization": 0.0005
    },
    "name": "Junction Transistors",
    "observation": "A sliver of doped crystal no bigger than a grain of rice amplifies a signal that needed a warm, fragile glass valve the size of a thumb.",
@@ -2170,22 +2172,22 @@
   },
   "memory_address_decoding": {
    "effects": {
-    "knowledge_rate": 0.001,
-    "knowledge_preservation": 0.001,
-    "task_coordination": 0.001
+    "knowledge_preservation": 0.0008,
+    "knowledge_rate": 0.0006,
+    "task_coordination": 0.0004
    },
    "observation": "A pattern set on a few wires lights one lamp among a hundred, and only that storage cell answers the call.",
    "art": "res://assets/ui/research/paper/diode_control_stores.png"
   },
   "oxygen_steelmaking": {
    "effects": {
-    "metal_yield": 0.02,
+    "cohesion": -0.0002,
+    "craft_output": 0.0019,
     "fuel_efficiency": 0.006,
-    "craft_output": 0.003,
-    "labor_demand": -0.004,
-    "pollution": 0.0075,
     "injury_risk": 0.002,
-    "cohesion": -0.002
+    "labor_demand": -0.0012,
+    "metal_yield": 0.02,
+    "pollution": 0.0075
    },
    "name": "Oxygen Steelmaking",
    "observation": "A water-cooled lance roars pure oxygen onto molten iron in a tilting vessel, and in forty minutes a heat of steel is ready to tap.",
@@ -2195,9 +2197,9 @@
   },
   "read_write_memory": {
    "effects": {
-    "knowledge_rate": 0.001,
-    "knowledge_preservation": 0.002,
-    "task_coordination": 0.001
+    "knowledge_preservation": 0.0016,
+    "knowledge_rate": 0.0006,
+    "task_coordination": 0.0004
    },
    "name": "Read-Write Memory",
    "observation": "A lattice of tiny iron rings strung on fine wires holds a stored word that the machine can read or overwrite in a millionth of a minute.",
@@ -2205,9 +2207,9 @@
   },
   "transistor_amplifiers": {
    "effects": {
-    "knowledge_rate": 0.001,
-    "craft_output": 0.001,
-    "fuel_efficiency": 0.001
+    "craft_output": 0.0006,
+    "fuel_efficiency": 0.001,
+    "knowledge_rate": 0.0006
    },
    "observation": "A radio the size of a book plays on a small battery for weeks, with no warm-up hum and no glowing valves.",
    "art": "res://assets/ui/research/paper/radio_telegraphy.png"
@@ -2215,25 +2217,25 @@
   "coordination_polymerization": {
    "effects": {
     "chemical_control": 0.0014,
-    "craft_output": 0.0015,
     "container_capacity": 0.004,
-    "fuel_demand": 0.0017
+    "craft_output": 0.0009,
+    "fuel_demand": 0.0003
    },
    "observation": "A metal catalyst at ordinary pressure orders the chains so neatly that the new plastic is stiff enough for pipes and crates.",
    "art": "res://assets/ui/research/paper/coordination_polymerization.png"
   },
   "transistor_inverters": {
    "effects": {
-    "knowledge_rate": 0.001,
-    "task_coordination": 0.001
+    "knowledge_rate": 0.0006,
+    "task_coordination": 0.0004
    },
    "observation": "Put a high voltage on the base and the output falls low, crisp and clean, ready to drive the next stage without fading.",
    "art": "res://assets/ui/research/paper/binary_adders.png"
   },
   "bistable_multivibrators": {
    "effects": {
-    "knowledge_rate": 0.001,
-    "knowledge_preservation": 0.001
+    "knowledge_preservation": 0.0008,
+    "knowledge_rate": 0.0006
    },
    "name": "Flip-Flop Circuits",
    "observation": "Two transistors hold each other in check, and a lamp stays lit or dark until a single pulse flips the pair the other way.",
@@ -2241,49 +2243,49 @@
   },
   "binary_counters": {
    "effects": {
-    "knowledge_rate": 0.001,
-    "task_coordination": 0.001
+    "knowledge_rate": 0.0006,
+    "task_coordination": 0.0004
    },
    "observation": "Pulses from a counting tube ripple down a chain of flip-flops, and the lamps above spell out in ones and zeros how many parts have passed.",
    "art": "res://assets/ui/research/paper/binary_adders.png"
   },
   "shift_registers": {
    "effects": {
-    "knowledge_rate": 0.001,
-    "task_coordination": 0.001
+    "knowledge_rate": 0.0006,
+    "task_coordination": 0.0004
    },
    "observation": "With each tick of the clock a pattern of bits steps one place along the row of lamps, like beads slid along a wire.",
    "art": "res://assets/ui/research/paper/binary_adders.png"
   },
   "parallel_register_banks": {
    "effects": {
-    "knowledge_rate": 0.001,
-    "knowledge_preservation": 0.001
+    "knowledge_preservation": 0.0008,
+    "knowledge_rate": 0.0006
    },
    "observation": "A card cage holds eight registers side by side, each word reachable on its own set of wires without disturbing the others.",
    "art": "res://assets/ui/research/paper/diode_control_stores.png"
   },
   "instruction_registers": {
    "effects": {
-    "knowledge_rate": 0.001,
-    "task_coordination": 0.001
+    "knowledge_rate": 0.0006,
+    "task_coordination": 0.0004
    },
    "observation": "The machine fetches a word from memory and holds it in one special register while the control board decides what it orders.",
    "art": "res://assets/ui/research/paper/diode_control_stores.png"
   },
   "conditional_branch_circuits": {
    "effects": {
-    "knowledge_rate": 0.001,
-    "task_coordination": 0.001
+    "knowledge_rate": 0.0006,
+    "task_coordination": 0.0004
    },
    "observation": "If the last sum came out negative the machine jumps to another part of its program; the operators call it the machine's first choice.",
    "art": "res://assets/ui/research/paper/diode_control_stores.png"
   },
   "wafer_sawing": {
    "effects": {
+    "health_risk": 0.0002,
     "metal_yield": 0.004,
-    "standardization": 0.001,
-    "health_risk": 0.001,
+    "standardization": 0.0003,
     "water_pollution": 0.001
    },
    "name": "Wafer Sawing",
@@ -2292,15 +2294,15 @@
   },
   "program_counters": {
    "effects": {
-    "knowledge_rate": 0.001,
-    "task_coordination": 0.001
+    "knowledge_rate": 0.0006,
+    "task_coordination": 0.0004
    },
    "observation": "A register steps forward one address after each instruction, and the machine walks through its program without an operator at the switches.",
    "art": "res://assets/ui/research/paper/diode_control_stores.png"
   },
   "ultrasonic_metal_joining": {
    "effects": {
-    "craft_output": 0.001,
+    "craft_output": 0.0006,
     "fuel_efficiency": 0.001
    },
    "observation": "A horn buzzes against aluminium foil for half a second, and the wire lead is bonded fast with no flame, flux or solder.",
@@ -2316,8 +2318,8 @@
   },
   "polymer_weathering_trials": {
    "effects": {
-    "standardization": 0.001,
-    "ecological_pressure": -0.001
+    "ecological_pressure": -0.0006,
+    "standardization": 0.0003
    },
    "observation": "Racks of plastic strips face the southern sky on the test-house roof, and the ones that chalk and crack by autumn are struck from the list.",
    "art": "res://assets/ui/research/paper/polymer_weathering_trials.png"
@@ -2332,9 +2334,9 @@
   },
   "lost_foam_casting": {
    "effects": {
-    "craft_output": 0.001,
+    "craft_output": 0.0006,
+    "labor_demand": -0.0003,
     "metal_yield": 0.002,
-    "labor_demand": -0.001,
     "pollution": 0.003
    },
    "observation": "A foam pattern of an engine block is packed in loose sand, and poured aluminium burns the foam away and takes its exact shape.",
@@ -2349,30 +2351,30 @@
   },
   "diode_logic": {
    "effects": {
-    "knowledge_rate": 0.001
+    "knowledge_rate": 0.0006
    },
    "observation": "A cluster of small diodes lets a signal through only when every input is high, a gate built from wires and crystal crumbs.",
    "art": "res://assets/ui/research/paper/diode_control_stores.png"
   },
   "electronic_machine_control": {
    "effects": {
-    "labor_efficiency": 0.001,
-    "standardization": 0.001,
-    "craft_output": 0.001,
-    "labor_demand": -0.001
+    "craft_output": 0.0006,
+    "labor_demand": -0.0003,
+    "labor_efficiency": 0.0007,
+    "standardization": 0.0003
    },
    "observation": "A photocell watches the edge of the web, and an amplifier nudges the roller the moment the paper wanders off true.",
    "art": "res://assets/ui/research/paper/hardwired_sequence_control.png"
   },
   "integrated_circuits": {
    "effects": {
-    "knowledge_rate": 0.0053,
-    "craft_output": 0.002,
-    "standardization": 0.0021,
-    "fuel_efficiency": 0.003,
     "chemical_control": 0.001,
-    "water_pollution": 0.0015,
-    "health_risk": 0.001
+    "craft_output": 0.0012,
+    "fuel_efficiency": 0.003,
+    "health_risk": 0.0002,
+    "knowledge_rate": 0.0033,
+    "standardization": 0.0006,
+    "water_pollution": 0.0015
    },
    "name": "Integrated Circuits",
    "observation": "Under the microscope a single chip of silicon holds transistors, resistors and their wiring all at once, printed like a photograph.",
@@ -2382,11 +2384,11 @@
   },
   "numerical_machine_control": {
    "effects": {
-    "standardization": 0.0062,
-    "craft_output": 0.004,
-    "tool_quality": 0.0078,
-    "labor_demand": -0.004,
-    "cohesion": -0.002
+    "cohesion": -0.0002,
+    "craft_output": 0.0025,
+    "labor_demand": -0.0012,
+    "standardization": 0.0018,
+    "tool_quality": 0.0078
    },
    "observation": "A paper tape feeds through the reader, and the milling machine carves a curved wing spar by itself while the machinist watches.",
    "ability_reason": "Machines that follow recorded numbers make complex parts repeatable without a master machinist's hand at every cut.",
@@ -2395,11 +2397,11 @@
   },
   "float_glass": {
    "effects": {
-    "craft_output": 0.002,
-    "housing_output": 0.003,
     "construction_rate": 0.002,
-    "fuel_demand": 0.0034,
-    "labor_demand": -0.002
+    "craft_output": 0.0012,
+    "fuel_demand": 0.0006,
+    "housing_output": 0.003,
+    "labor_demand": -0.0006
    },
    "name": "Float Glass",
    "observation": "A ribbon of molten glass spreads on a bath of liquid tin and comes off flat and bright on both faces, needing no grinding or polishing.",
@@ -2407,10 +2409,10 @@
   },
   "hardwired_sequence_control": {
    "effects": {
-    "labor_efficiency": 0.001,
-    "standardization": 0.001,
-    "task_coordination": 0.001,
-    "labor_demand": -0.001
+    "labor_demand": -0.0003,
+    "labor_efficiency": 0.0007,
+    "standardization": 0.0003,
+    "task_coordination": 0.0004
    },
    "name": "Hardwired Sequencers",
    "observation": "A cabinet of relays and cams steps the bottling line through fill, cap and label, and rewiring it for a new bottle takes a week.",
@@ -2418,13 +2420,13 @@
   },
   "industrial_robots": {
    "effects": {
-    "labor_efficiency": 0.0042,
-    "standardization": 0.0031,
-    "craft_output": 0.003,
+    "cohesion": -0.0004,
+    "craft_output": 0.0019,
+    "fuel_demand": 0.0003,
     "injury_risk": -0.003,
-    "labor_demand": -0.006,
-    "cohesion": -0.004,
-    "fuel_demand": 0.0017
+    "labor_demand": -0.0018,
+    "labor_efficiency": 0.0028,
+    "standardization": 0.0009
    },
    "name": "Industrial Robots",
    "observation": "A hydraulic arm swings a spot-welding gun from seam to seam on the car body, tirelessly repeating the motions taught to it on the first day.",
@@ -2434,7 +2436,7 @@
   },
   "gear_power_skiving": {
    "effects": {
-    "craft_output": 0.001,
+    "craft_output": 0.0006,
     "tool_quality": 0.0026
    },
    "observation": "Cutter and blank whirl together on crossed axes, and the inner gear's teeth appear in one continuous pass instead of slow strokes.",
@@ -2442,17 +2444,17 @@
   },
   "machine_condition_monitoring": {
    "effects": {
-    "repair_capacity": 0.0024,
-    "disaster_risk": -0.001,
-    "labor_demand": -0.001
+    "disaster_risk": -0.0002,
+    "labor_demand": -0.0003,
+    "repair_capacity": 0.0024
    },
    "observation": "A vibration pickup on the bearing housing shows the fault climbing week by week, and the pump is rebuilt before it seizes.",
    "art": "res://assets/ui/research/paper/machine_condition_monitoring.png"
   },
   "metal_fracture_toughness_testing": {
    "effects": {
-    "disaster_resilience": 0.002,
-    "standardization": 0.001,
+    "disaster_resilience": 0.0017,
+    "standardization": 0.0003,
     "tool_quality": 0.0013
    },
    "observation": "A notched and pre-cracked steel block is pulled until it snaps, and plates that fail too easily are kept off pressure vessels and hulls.",
@@ -2460,8 +2462,8 @@
   },
   "solar_cell_fabrication": {
    "effects": {
+    "fuel_demand": 0.0003,
     "fuel_efficiency": 0.003,
-    "fuel_demand": 0.0017,
     "water_pollution": 0.002
    },
    "observation": "Blue wafers with silver finger lines are tested under a lamp, and each one gives a trickle of current from nothing but light.",
@@ -2476,11 +2478,11 @@
   },
   "stored_program_control": {
    "effects": {
-    "task_coordination": 0.005,
-    "labor_efficiency": 0.001,
-    "standardization": 0.0016,
-    "labor_demand": -0.002,
-    "cohesion": -0.001
+    "cohesion": -0.0001,
+    "labor_demand": -0.0006,
+    "labor_efficiency": 0.0007,
+    "standardization": 0.0005,
+    "task_coordination": 0.0019
    },
    "name": "Programmable Controllers",
    "observation": "A grey box on the wall runs the line from a stored program, and the change for a new product is keyed in over lunch.",
@@ -2488,11 +2490,11 @@
   },
   "carbon_fibre_composites": {
    "effects": {
-    "craft_output": 0.002,
-    "haul_capacity": 0.003,
+    "craft_output": 0.0012,
+    "ecological_pressure": 0.002,
+    "fuel_demand": 0.0003,
     "fuel_efficiency": 0.003,
-    "fuel_demand": 0.0017,
-    "ecological_pressure": 0.002
+    "haul_capacity": 0.0016
    },
    "name": "Carbon Fibre Composites",
    "observation": "Black cloth soaked in resin is laid in a mould and baked, and the part weighs half as much as aluminium yet bends far less.",
@@ -2500,16 +2502,16 @@
   },
   "incremental_sheet_forming": {
    "effects": {
-    "craft_output": 0.001
+    "craft_output": 0.0006
    },
    "observation": "A round-nosed stylus traces spiral after spiral over clamped sheet metal, and a one-off panel rises without any die at all.",
    "art": "res://assets/ui/research/paper/incremental_sheet_forming.png"
   },
   "rotor_spinning_systems": {
    "effects": {
+    "cohesion": -0.0001,
     "fiber_yield": 0.008,
-    "labor_demand": -0.002,
-    "cohesion": -0.001
+    "labor_demand": -0.0006
    },
    "name": "Open-End Spinning",
    "observation": "Fibres fly into a spinning cup and leave as yarn at many times the old spindle speed, with no bobbins to change all shift.",
@@ -2517,9 +2519,9 @@
   },
   "wire_electrical_discharge_machining": {
    "effects": {
-    "tool_quality": 0.0039,
-    "standardization": 0.001,
-    "fuel_demand": 0.0013
+    "fuel_demand": 0.0002,
+    "standardization": 0.0003,
+    "tool_quality": 0.0039
    },
    "name": "Wire Spark Cutting",
    "observation": "A thin brass wire flickers through hardened die steel under water, tracing the programmed outline to a hundredth of a hair.",
@@ -2528,20 +2530,20 @@
   "abrasive_waterjet_cutting": {
    "effects": {
     "craft_output": 0.001,
-    "tool_quality": 0.0013,
-    "fuel_demand": 0.0013
+    "fuel_demand": 0.0005,
+    "tool_quality": 0.0013
    },
    "observation": "A needle of water laced with garnet sand screams through stone, glass and armour plate without heat, fumes or scorched edges.",
    "art": "res://assets/ui/research/paper/abrasive_waterjet_cutting.png"
   },
   "single_chip_processors": {
    "effects": {
+    "cohesion": -0.0003,
     "knowledge_rate": 0.0046,
-    "task_coordination": 0.006,
+    "labor_demand": -0.0011,
+    "labor_efficiency": 0.0006,
     "standardization": 0.0021,
-    "labor_efficiency": 0.001,
-    "labor_demand": -0.003,
-    "cohesion": -0.002
+    "task_coordination": 0.0021
    },
    "name": "Microprocessors",
    "observation": "A whole calculating engine that once filled a room now sits on a chip smaller than a thumbnail, sold for the price of a meal.",
@@ -2551,11 +2553,11 @@
   },
   "scrap_steel_minimills": {
    "effects": {
-    "metal_yield": 0.008,
-    "ecology_recovery": 0.002,
+    "ecology_recovery": 0.0015,
+    "fuel_demand": 0.0013,
     "fuel_efficiency": 0.002,
-    "fuel_demand": 0.0034,
-    "labor_demand": -0.002,
+    "labor_demand": -0.0008,
+    "metal_yield": 0.008,
     "pollution": 0.0015
    },
    "name": "Scrap Steel Minimills",
@@ -2564,11 +2566,11 @@
   },
   "computer_aided_design": {
    "effects": {
-    "standardization": 0.0026,
-    "knowledge_rate": 0.0013,
+    "cohesion": -0.0002,
     "craft_output": 0.0015,
-    "labor_demand": -0.002,
-    "cohesion": -0.001
+    "knowledge_rate": 0.0013,
+    "labor_demand": -0.0008,
+    "standardization": 0.0026
    },
    "name": "Computer-Aided Design",
    "observation": "The drafting boards are pushed to the wall; engineers turn a wireframe part on a green screen and check its fit before any metal is cut.",
@@ -2576,11 +2578,11 @@
   },
   "flexible_machining_cells": {
    "effects": {
+    "cohesion": -0.0002,
     "craft_output": 0.002,
-    "standardization": 0.0016,
-    "labor_efficiency": 0.001,
-    "labor_demand": -0.003,
-    "cohesion": -0.001
+    "labor_demand": -0.0011,
+    "labor_efficiency": 0.0006,
+    "standardization": 0.0016
    },
    "name": "Flexible Machining Cells",
    "observation": "Carts glide between four machining centres, swapping pallets and tools unattended through the night shift, and a new part needs no retooling.",
@@ -2597,10 +2599,10 @@
   },
   "surface_mount_assembly": {
    "effects": {
+    "cohesion": -0.0002,
     "craft_output": 0.0025,
-    "standardization": 0.0021,
-    "labor_demand": -0.003,
-    "cohesion": -0.001
+    "labor_demand": -0.0011,
+    "standardization": 0.0021
    },
    "name": "Surface-Mount Assembly",
    "observation": "A pick-and-place head darts over the board faster than the eye can follow, setting parts no bigger than a grain of sand onto dabs of solder paste.",
@@ -2609,9 +2611,9 @@
   "additive_manufacturing": {
    "effects": {
     "craft_output": 0.0015,
+    "fuel_demand": 0.0007,
     "repair_capacity": 0.0024,
-    "tool_quality": 0.0026,
-    "fuel_demand": 0.0017
+    "tool_quality": 0.0026
    },
    "name": "Layer Printing",
    "observation": "A laser traces a shape in a vat of resin, the platform drops a hair, and by morning a part stands in the liquid, grown from the bottom up.",
@@ -2619,10 +2621,10 @@
   },
   "statistical_quality_programs": {
    "effects": {
-    "standardization": 0.0026,
-    "task_coordination": 0.003,
     "craft_output": 0.001,
-    "institutional_rigidity": 0.002
+    "institutional_rigidity": 0.0007,
+    "standardization": 0.0026,
+    "task_coordination": 0.0011
    },
    "name": "Zero-Defect Quality",
    "observation": "Control charts hang at every station, and the line stops for a defect rate the old inspectors would have called perfect.",
@@ -2630,13 +2632,13 @@
   },
   "lithium_ion_cells": {
    "effects": {
-    "fuel_efficiency": 0.014,
-    "knowledge_rate": 0.0013,
-    "haul_capacity": 0.004,
     "chemical_control": 0.0014,
     "disaster_risk": 0.002,
     "ecological_pressure": 0.004,
-    "health_risk": 0.001
+    "fuel_efficiency": 0.014,
+    "haul_capacity": 0.004,
+    "health_risk": 0.0007,
+    "knowledge_rate": 0.0013
    },
    "name": "Lithium-Ion Cells",
    "observation": "A cell the size of a finger holds enough charge to run a telephone for a day, and it can be refilled from the wall a thousand times.",
@@ -2657,10 +2659,10 @@
   },
   "deep_submicron_lithography": {
    "effects": {
-    "knowledge_rate": 0.0017,
     "chemical_control": 0.001,
+    "fuel_demand": 0.0012,
+    "knowledge_rate": 0.0017,
     "standardization": 0.001,
-    "fuel_demand": 0.0017,
     "water_pollution": 0.001
    },
    "name": "Deep Sub-Micron Lithography",
@@ -2679,9 +2681,9 @@
   },
   "selective_polymer_depolymerization": {
    "effects": {
-    "ecology_recovery": 0.004,
     "ecological_pressure": -0.003,
-    "fuel_demand": 0.0017
+    "ecology_recovery": 0.0035,
+    "fuel_demand": 0.0012
    },
    "name": "Plastic Depolymerization",
    "observation": "Shredded bottles are stirred with a solvent and catalyst, and clean monomer is distilled off to be made into new bottles.",
@@ -2700,10 +2702,10 @@
   "metal_powder_printing": {
    "effects": {
     "craft_output": 0.0015,
-    "tool_quality": 0.0039,
-    "repair_capacity": 0.0016,
+    "fuel_demand": 0.0012,
     "metal_yield": 0.002,
-    "fuel_demand": 0.0017
+    "repair_capacity": 0.0016,
+    "tool_quality": 0.0039
    },
    "name": "Metal Powder Printing",
    "observation": "A laser flickers across a bed of fine steel powder, layer by layer, until a lattice-hollowed bracket no mill could carve is lifted from the dust.",
@@ -2711,8 +2713,8 @@
   },
   "wide_bandgap_power_chips": {
    "effects": {
-    "fuel_efficiency": 0.005,
-    "fuel_demand": 0.0017
+    "fuel_demand": 0.0004,
+    "fuel_efficiency": 0.005
    },
    "name": "Wide-Bandgap Power Chips",
    "observation": "Chargers shrink to the size of a matchbox and run cool to the touch, their silicon-carbide switches wasting almost nothing as heat.",
@@ -2720,12 +2722,12 @@
   },
   "collaborative_robots": {
    "effects": {
-    "labor_efficiency": 0.0014,
+    "cohesion": -0.0002,
     "fatigue": -0.002,
     "injury_risk": -0.002,
-    "task_coordination": 0.002,
-    "labor_demand": -0.002,
-    "cohesion": -0.001
+    "labor_demand": -0.0011,
+    "labor_efficiency": 0.0011,
+    "task_coordination": 0.0012
    },
    "name": "Collaborative Robots",
    "observation": "A slim arm with no cage hands screws to a fitter at her bench, and stops dead the moment her elbow brushes it.",
@@ -2743,11 +2745,11 @@
   },
   "digital_twin_plants": {
    "effects": {
-    "task_coordination": 0.004,
+    "disaster_risk": -0.0007,
+    "fuel_demand": 0.0003,
+    "labor_demand": -0.0006,
     "repair_capacity": 0.0024,
-    "disaster_risk": -0.001,
-    "labor_demand": -0.001,
-    "fuel_demand": 0.0013
+    "task_coordination": 0.0024
    },
    "name": "Digital Twin Plants",
    "observation": "On the control-room wall a living model of the plant runs a step ahead of the real one, and warns of a clogging heat exchanger days early.",
@@ -2755,10 +2757,10 @@
   },
   "extreme_ultraviolet_lithography": {
    "effects": {
-    "knowledge_rate": 0.0046,
     "chemical_control": 0.0014,
+    "fuel_demand": 0.0011,
+    "knowledge_rate": 0.0046,
     "standardization": 0.0016,
-    "fuel_demand": 0.0051,
     "water_pollution": 0.001
    },
    "name": "Extreme Ultraviolet Lithography",
@@ -2769,9 +2771,9 @@
   },
   "iron_phosphate_cells": {
    "effects": {
-    "fuel_efficiency": 0.004,
-    "disaster_risk": -0.002,
+    "disaster_risk": -0.0013,
     "ecological_pressure": 0.002,
+    "fuel_efficiency": 0.004,
     "haul_capacity": 0.002
    },
    "name": "Iron-Phosphate Cells",
@@ -2781,9 +2783,9 @@
   "green_hydrogen_electrolysis": {
    "effects": {
     "chemical_control": 0.001,
+    "fuel_demand": 0.0007,
     "fuel_efficiency": 0.002,
-    "pollution": -0.003,
-    "fuel_demand": 0.0034,
+    "pollution": -0.0003,
     "water_access": -0.001
    },
    "name": "Clean Hydrogen Electrolysis",
@@ -2794,9 +2796,9 @@
    "effects": {
     "chemical_control": 0.0014,
     "craft_output": 0.001,
+    "disaster_risk": 0.001,
     "nutrition_quality": 0.001,
-    "pollution": -0.0015,
-    "disaster_risk": 0.001
+    "pollution": -0.0001
    },
    "name": "Engineered Microbe Chemicals",
    "observation": "Steel tanks of engineered yeast bubble gently, and out come fragrances, proteins and plastic feedstocks once cooked from oil.",
@@ -2804,11 +2806,11 @@
   },
   "hydrogen_reduced_iron": {
    "effects": {
-    "metal_yield": 0.012,
-    "pollution": -0.018,
-    "fuel_demand": 0.0051,
     "ecological_pressure": -0.004,
-    "fuel_efficiency": 0.002
+    "fuel_demand": 0.0011,
+    "fuel_efficiency": 0.002,
+    "metal_yield": 0.012,
+    "pollution": -0.0016
    },
    "name": "Hydrogen-Reduced Iron",
    "observation": "Ore pellets sink through a shaft furnace against a rising stream of hydrogen, and the stack breathes out steam instead of coal smoke.",
@@ -2828,14 +2830,1394 @@
   },
   "solid_state_battery_cells": {
    "effects": {
+    "disaster_risk": -0.0007,
+    "ecological_pressure": 0.002,
     "fuel_efficiency": 0.004,
-    "disaster_risk": -0.001,
-    "haul_capacity": 0.002,
-    "ecological_pressure": 0.002
+    "haul_capacity": 0.002
    },
    "name": "Solid-State Batteries",
    "observation": "The first cars on the pilot cells charge in a coffee break, their hard ceramic separators leaving nothing inside to leak or burn.",
    "art": "res://assets/ui/research/paper/battery_bank_wiring.png"
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "punched_card_loom_control": {
+    "cohesion": -0.003,
+    "craft_output": 0.006,
+    "fiber_yield": 0.0096,
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.0014,
+    "standardization": 0.0042
+   },
+   "high_pressure_steam_engines": {
+    "craft_output": 0.007,
+    "fuel_demand": 0.0068,
+    "fuel_efficiency": 0.004,
+    "injury_risk": 0.003,
+    "labor_efficiency": 0.0021,
+    "pollution": 0.009
+   },
+   "continuous_paper_machine": {
+    "craft_output": 0.0015,
+    "knowledge_preservation": 0.004,
+    "labor_demand": -0.002,
+    "standardization": 0.001,
+    "water_pollution": 0.001
+   },
+   "machine_block_line": {
+    "cohesion": -0.002,
+    "craft_output": 0.0015,
+    "labor_demand": -0.003,
+    "labor_efficiency": 0.001,
+    "standardization": 0.0026
+   },
+   "coal_gas_works": {
+    "craft_output": 0.001,
+    "disaster_risk": 0.002,
+    "fuel_efficiency": 0.004,
+    "pollution": 0.0075,
+    "water_pollution": 0.002
+   },
+   "interchangeable_component_fits": {
+    "craft_output": 0.003,
+    "institutional_rigidity": 0.003,
+    "repair_capacity": 0.0064,
+    "standardization": 0.0094,
+    "tool_quality": 0.0052
+   },
+   "iron_power_loom_sheds": {
+    "cohesion": -0.004,
+    "craft_output": 0.0025,
+    "fatigue": 0.003,
+    "fiber_yield": 0.008,
+    "injury_risk": 0.003,
+    "labor_demand": -0.004
+   },
+   "steam_propulsion": {
+    "fuel_demand": 0.0043,
+    "haul_capacity": 0.005,
+    "naval_capacity": 0.004,
+    "pollution": 0.003,
+    "route_speed": 0.004,
+    "warfare_readiness": 0.002
+   },
+   "friction_matches": {
+    "craft_output": 0.001,
+    "disaster_risk": 0.002,
+    "fuel_efficiency": 0.001,
+    "health_risk": 0.0015
+   },
+   "plunger_pressed_glass": {
+    "container_capacity": 0.006,
+    "craft_output": 0.0015,
+    "fuel_demand": 0.0017,
+    "injury_risk": 0.001,
+    "standardization": 0.001
+   },
+   "ring_spinning_systems": {
+    "craft_output": 0.0015,
+    "fiber_yield": 0.008,
+    "injury_risk": 0.001,
+    "labor_demand": -0.002
+   },
+   "hot_blast_smelting": {
+    "extraction_yield": 0.006,
+    "fuel_demand": 0.0017,
+    "fuel_efficiency": 0.006,
+    "metal_yield": 0.008,
+    "pollution": 0.0045
+   },
+   "three_plate_lapping": {
+    "labor_demand": 0.001,
+    "standardization": 0.0016,
+    "tool_quality": 0.0052
+   },
+   "graphite_crucibles": {
+    "craft_output": 0.001,
+    "fuel_demand": 0.0017,
+    "metal_yield": 0.008
+   },
+   "wood_methanol_recovery": {
+    "chemical_control": 0.001,
+    "craft_output": 0.001,
+    "health_risk": 0.001,
+    "timber_pressure": 0.002
+   },
+   "electrical_generators": {
+    "chemical_control": 0.001,
+    "craft_output": 0.004,
+    "fuel_demand": 0.0026,
+    "fuel_efficiency": 0.01,
+    "knowledge_rate": 0.0013
+   },
+   "fractional_distillation": {
+    "chemical_control": 0.0017,
+    "craft_output": 0.001,
+    "fuel_demand": 0.0017,
+    "fuel_efficiency": 0.002
+   },
+   "water_electrolysis": {
+    "chemical_control": 0.001,
+    "disaster_risk": 0.001,
+    "fuel_demand": 0.0017
+   },
+   "gear_tooth_generation": {
+    "fuel_efficiency": 0.001,
+    "standardization": 0.0016,
+    "tool_quality": 0.0039
+   },
+   "straightedge_scraping": {
+    "labor_demand": 0.001,
+    "standardization": 0.001,
+    "tool_quality": 0.0039
+   },
+   "aromatic_nitration": {
+    "chemical_control": 0.0014,
+    "craft_output": 0.001,
+    "disaster_risk": 0.002,
+    "health_risk": 0.0015,
+    "water_pollution": 0.0015
+   },
+   "electric_motors": {
+    "craft_output": 0.006,
+    "fuel_demand": 0.0026,
+    "injury_risk": 0.002,
+    "labor_efficiency": 0.0042,
+    "tool_quality": 0.0039
+   },
+   "electromagnetic_relays": {
+    "labor_demand": 0.001,
+    "task_coordination": 0.003
+   },
+   "electroplating": {
+    "craft_output": 0.0015,
+    "health_risk": 0.0015,
+    "tool_quality": 0.0026,
+    "trade_capacity": 0.001,
+    "water_pollution": 0.0015
+   },
+   "machine_way_scraping": {
+    "labor_demand": 0.001,
+    "standardization": 0.001,
+    "tool_quality": 0.0039
+   },
+   "sulphur_cured_rubber": {
+    "container_capacity": 0.01,
+    "craft_output": 0.005,
+    "ecological_pressure": 0.003,
+    "health_risk": 0.001,
+    "repair_capacity": 0.0024,
+    "tool_quality": 0.0039
+   },
+   "steam_hammer_forging": {
+    "craft_output": 0.002,
+    "fuel_demand": 0.0026,
+    "injury_risk": 0.003,
+    "metal_yield": 0.008,
+    "tool_quality": 0.0026
+   },
+   "sewing_machine_mechanisms": {
+    "cohesion": -0.002,
+    "craft_output": 0.0025,
+    "fatigue": 0.003,
+    "fiber_yield": 0.0024,
+    "labor_efficiency": 0.001
+   },
+   "cable_insulation": {
+    "craft_output": 0.001,
+    "ecological_pressure": 0.001,
+    "injury_risk": -0.001,
+    "knowledge_rate": 0.001,
+    "repair_capacity": 0.0016
+   },
+   "leather_thickness_skiving": {
+    "craft_output": 0.001,
+    "fiber_yield": 0.0024,
+    "labor_demand": -0.001,
+    "standardization": 0.001
+   },
+   "coal_light_oil_recovery": {
+    "chemical_control": 0.0014,
+    "fuel_efficiency": 0.002,
+    "health_risk": 0.001,
+    "water_pollution": 0.0015
+   },
+   "rivet_blank_heading": {
+    "craft_output": 0.001,
+    "standardization": 0.001
+   },
+   "lead_screw_cutting": {
+    "standardization": 0.0021,
+    "tool_quality": 0.0052
+   },
+   "cross_slide_assembly": {
+    "injury_risk": -0.001,
+    "standardization": 0.001,
+    "tool_quality": 0.0039
+   },
+   "steelplate_engraving": {
+    "craft_output": 0.001,
+    "knowledge_preservation": 0.003,
+    "trade_capacity": 0.001
+   },
+   "pneumatic_steel_converter": {
+    "craft_output": 0.004,
+    "fuel_efficiency": 0.004,
+    "injury_risk": 0.004,
+    "labor_demand": -0.003,
+    "metal_yield": 0.02,
+    "pollution": 0.0105,
+    "standardization": 0.0021
+   },
+   "four_jaw_chucks": {
+    "repair_capacity": 0.0016,
+    "tool_quality": 0.0026
+   },
+   "coal_tar_dyes": {
+    "chemical_control": 0.0042,
+    "craft_output": 0.003,
+    "fiber_yield": 0.0048,
+    "health_risk": 0.002,
+    "trade_capacity": 0.003,
+    "water_pollution": 0.0035
+   },
+   "thread_pitch_gauging": {
+    "standardization": 0.0016,
+    "tool_quality": 0.0013
+   },
+   "lead_oxide_preparation": {
+    "craft_output": 0.001,
+    "health_risk": 0.002,
+    "pollution": 0.003
+   },
+   "sheet_steel_rolling": {
+    "container_capacity": 0.004,
+    "craft_output": 0.0015,
+    "fuel_demand": 0.0017,
+    "injury_risk": 0.002,
+    "metal_yield": 0.006
+   },
+   "fuel_refining": {
+    "chemical_control": 0.0017,
+    "disaster_risk": 0.003,
+    "fuel_demand": 0.0034,
+    "fuel_efficiency": 0.01,
+    "pollution": 0.006,
+    "trade_capacity": 0.003,
+    "water_pollution": 0.002
+   },
+   "washer_punching": {
+    "standardization": 0.001
+   },
+   "abrasive_grinding_control": {
+    "health_risk": 0.001,
+    "standardization": 0.001,
+    "tool_quality": 0.0052
+   },
+   "tinplate_coating": {
+    "container_capacity": 0.008,
+    "craft_output": 0.001,
+    "food_storage": 0.002,
+    "pollution": 0.0015
+   },
+   "milling_table_feeds": {
+    "tool_quality": 0.0026
+   },
+   "wood_pulp_paper": {
+    "craft_output": 0.0015,
+    "knowledge_preservation": 0.004,
+    "pollution": 0.0015,
+    "timber_pressure": 0.004,
+    "water_pollution": 0.002
+   },
+   "open_hearth_steel": {
+    "craft_output": 0.002,
+    "fuel_demand": 0.0051,
+    "injury_risk": 0.003,
+    "metal_yield": 0.02,
+    "pollution": 0.0075,
+    "standardization": 0.0031
+   },
+   "toolbit_heat_treatment": {
+    "fuel_demand": 0.0013,
+    "tool_quality": 0.0052
+   },
+   "drill_bit_fluting": {
+    "tool_quality": 0.0039
+   },
+   "ammonia_soda_process": {
+    "chemical_control": 0.0017,
+    "craft_output": 0.0015,
+    "fuel_efficiency": 0.001,
+    "pollution": -0.003,
+    "water_pollution": 0.0015
+   },
+   "centre_lathe_assembly": {
+    "craft_output": 0.0015,
+    "repair_capacity": 0.0016,
+    "standardization": 0.0016,
+    "tool_quality": 0.0052
+   },
+   "quill_feed_mechanisms": {
+    "injury_risk": -0.001,
+    "tool_quality": 0.0026
+   },
+   "steel_wire_drawing": {
+    "craft_output": 0.0015,
+    "haul_capacity": 0.002,
+    "injury_risk": 0.002,
+    "metal_yield": 0.006
+   },
+   "column_drilling_machines": {
+    "craft_output": 0.0015,
+    "injury_risk": 0.001,
+    "tool_quality": 0.0013
+   },
+   "nut_bore_drilling": {
+    "standardization": 0.001
+   },
+   "thread_tap_cutting": {
+    "standardization": 0.001,
+    "tool_quality": 0.0026
+   },
+   "bench_vise_screws": {
+    "injury_risk": -0.001,
+    "repair_capacity": 0.0016
+   },
+   "thread_die_cutting": {
+    "standardization": 0.001,
+    "tool_quality": 0.0013
+   },
+   "milling_spindle_heads": {
+    "craft_output": 0.001,
+    "tool_quality": 0.0026
+   },
+   "celluloid_moulding": {
+    "container_capacity": 0.002,
+    "craft_output": 0.0015,
+    "disaster_risk": 0.003,
+    "trade_capacity": 0.001
+   },
+   "external_thread_cutting": {
+    "standardization": 0.001,
+    "tool_quality": 0.0013
+   },
+   "internal_thread_tapping": {
+    "standardization": 0.001
+   },
+   "milling_cutter_relief": {
+    "tool_quality": 0.0026
+   },
+   "horizontal_milling_machines": {
+    "craft_output": 0.0015,
+    "injury_risk": 0.002,
+    "labor_demand": -0.001,
+    "tool_quality": 0.0026
+   },
+   "matched_thread_inspection": {
+    "institutional_rigidity": 0.001,
+    "standardization": 0.0016
+   },
+   "reamed_bore_finishing": {
+    "standardization": 0.001,
+    "tool_quality": 0.0026
+   },
+   "worm_dividing_heads": {
+    "standardization": 0.001,
+    "tool_quality": 0.0026
+   },
+   "basic_machine_shops": {
+    "craft_output": 0.005,
+    "fuel_demand": 0.0017,
+    "injury_risk": 0.003,
+    "repair_capacity": 0.0064,
+    "standardization": 0.0021,
+    "tool_quality": 0.0078
+   },
+   "spring_wire_coiling": {
+    "craft_output": 0.001,
+    "tool_quality": 0.0013
+   },
+   "reciprocating_profile_slotting": {
+    "tool_quality": 0.0026
+   },
+   "coil_spring_tempering": {
+    "standardization": 0.001,
+    "tool_quality": 0.0026
+   },
+   "progressive_profile_broaching": {
+    "standardization": 0.001,
+    "tool_quality": 0.0013
+   },
+   "metal_spinning_forming": {
+    "container_capacity": 0.004,
+    "craft_output": 0.001,
+    "injury_risk": 0.001
+   },
+   "glass_batch_composition_control": {
+    "standardization": 0.0016
+   },
+   "internal_combustion": {
+    "craft_output": 0.003,
+    "fuel_demand": 0.0043,
+    "fuel_efficiency": 0.008,
+    "haul_capacity": 0.003,
+    "labor_efficiency": 0.0014,
+    "pollution": 0.006,
+    "warfare_readiness": 0.002
+   },
+   "cylindrical_grinding": {
+    "health_risk": 0.002,
+    "standardization": 0.0016,
+    "tool_quality": 0.0039
+   },
+   "surface_grinding": {
+    "health_risk": 0.002,
+    "standardization": 0.001,
+    "tool_quality": 0.0039
+   },
+   "glass_tube_drawing": {
+    "craft_output": 0.001
+   },
+   "filament_lamp_works": {
+    "craft_output": 0.002,
+    "fuel_demand": 0.0017,
+    "fuel_efficiency": 0.002,
+    "health_risk": 0.001,
+    "labor_efficiency": 0.001
+   },
+   "shaft_alignment_methods": {
+    "fuel_efficiency": 0.002,
+    "injury_risk": -0.001,
+    "repair_capacity": 0.0016
+   },
+   "roll_formed_sections": {
+    "construction_rate": 0.002,
+    "craft_output": 0.001,
+    "metal_yield": 0.002
+   },
+   "steam_turbines": {
+    "craft_output": 0.003,
+    "fuel_demand": 0.0043,
+    "fuel_efficiency": 0.012,
+    "naval_capacity": 0.003,
+    "pollution": 0.006
+   },
+   "resistance_welding": {
+    "craft_output": 0.001,
+    "injury_risk": 0.001
+   },
+   "snap_fastener_closures": {
+    "craft_output": 0.001
+   },
+   "aluminum_electrolysis": {
+    "chemical_control": 0.0021,
+    "craft_output": 0.002,
+    "fuel_demand": 0.0059,
+    "health_risk": 0.001,
+    "metal_yield": 0.02,
+    "pollution": 0.006
+   },
+   "induction_motors": {
+    "craft_output": 0.002,
+    "fuel_demand": 0.0017,
+    "fuel_efficiency": 0.003,
+    "labor_efficiency": 0.0017,
+    "repair_capacity": 0.0016
+   },
+   "cutting_fluid_management": {
+    "health_risk": 0.001,
+    "tool_quality": 0.0026
+   },
+   "arc_welding_processes": {
+    "craft_output": 0.0015,
+    "health_risk": 0.0015,
+    "injury_risk": 0.002,
+    "metal_yield": 0.002,
+    "repair_capacity": 0.0024
+   },
+   "relay_logic": {
+    "injury_risk": -0.001,
+    "task_coordination": 0.004
+   },
+   "chloralkali_cells": {
+    "chemical_control": 0.0017,
+    "craft_output": 0.001,
+    "fuel_demand": 0.0017,
+    "health_risk": 0.0015,
+    "water_pollution": 0.001,
+    "water_safety": 0.001
+   },
+   "hydrogen_chloride_synthesis": {
+    "chemical_control": 0.001,
+    "health_risk": 0.001
+   },
+   "lead_acid_cells": {
+    "fuel_efficiency": 0.002,
+    "health_risk": 0.0015,
+    "repair_capacity": 0.0016
+   },
+   "regenerated_cellulose_fibre": {
+    "craft_output": 0.001,
+    "fiber_yield": 0.008,
+    "health_risk": 0.0015,
+    "trade_capacity": 0.001,
+    "water_pollution": 0.0015
+   },
+   "compression_ignition_engines": {
+    "craft_output": 0.0015,
+    "fuel_demand": 0.0026,
+    "fuel_efficiency": 0.006,
+    "haul_capacity": 0.003,
+    "pollution": 0.0045
+   },
+   "sulfur_dioxide_recovery": {
+    "chemical_control": 0.001,
+    "ecology_recovery": 0.001,
+    "pollution": -0.0045
+   },
+   "drill_jig_bushings": {
+    "standardization": 0.0016,
+    "tool_quality": 0.0013
+   },
+   "sulfuric_acid_production": {
+    "chemical_control": 0.0049,
+    "craft_output": 0.002,
+    "health_risk": 0.0015,
+    "pollution": 0.006,
+    "soil_productivity": 0.003,
+    "water_pollution": 0.001
+   },
+   "drill_jig_layout": {
+    "standardization": 0.001,
+    "task_coordination": 0.001,
+    "tool_quality": 0.0013
+   },
+   "gear_hobbing": {
+    "cohesion": -0.001,
+    "craft_output": 0.001,
+    "labor_demand": -0.001,
+    "standardization": 0.0016
+   },
+   "carbon_resistors": {
+    "knowledge_rate": 0.001
+   },
+   "enzyme_catalysis": {
+    "chemical_control": 0.001,
+    "food_storage": 0.002,
+    "nutrition_quality": 0.001
+   },
+   "rivet_hole_alignment": {
+    "construction_rate": 0.001,
+    "disaster_resilience": 0.001,
+    "standardization": 0.001
+   },
+   "gear_shaping_generation": {
+    "standardization": 0.001,
+    "tool_quality": 0.0026
+   },
+   "nickel_metal_recovery": {
+    "health_risk": 0.001,
+    "metal_yield": 0.006,
+    "pollution": 0.0045
+   },
+   "cold_rivet_setting": {
+    "craft_output": 0.001,
+    "injury_risk": -0.001
+   },
+   "glass_annealing_schedules": {
+    "craft_output": 0.001,
+    "fuel_efficiency": 0.001,
+    "standardization": 0.001
+   },
+   "thread_rolling_die_making": {
+    "standardization": 0.001,
+    "tool_quality": 0.0026
+   },
+   "high_speed_tool_steel": {
+    "craft_output": 0.002,
+    "fuel_demand": 0.0017,
+    "labor_efficiency": 0.001,
+    "metal_yield": 0.002,
+    "tool_quality": 0.0078
+   },
+   "bolt_thread_rolling": {
+    "craft_output": 0.001,
+    "labor_demand": -0.001,
+    "metal_yield": 0.002,
+    "standardization": 0.001
+   },
+   "electric_arc_furnaces": {
+    "chemical_control": 0.0021,
+    "fuel_demand": 0.0051,
+    "injury_risk": 0.003,
+    "metal_yield": 0.02,
+    "pollution": 0.0045,
+    "standardization": 0.0021
+   },
+   "abrasive_belt_finishing": {
+    "craft_output": 0.001,
+    "health_risk": 0.001
+   },
+   "gauge_block_lapping": {
+    "institutional_rigidity": 0.001,
+    "standardization": 0.0026,
+    "tool_quality": 0.0039
+   },
+   "powered_flight": {
+    "fuel_demand": 0.0017,
+    "injury_risk": 0.003,
+    "knowledge_rate": 0.0013,
+    "route_speed": 0.006,
+    "survey_speed": 0.006,
+    "warfare_readiness": 0.002
+   },
+   "precision_toolrooms": {
+    "craft_output": 0.002,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.002,
+    "repair_capacity": 0.0032,
+    "standardization": 0.0062,
+    "tool_quality": 0.0104
+   },
+   "cryogenic_air_separation": {
+    "chemical_control": 0.0014,
+    "craft_output": 0.001,
+    "disaster_risk": 0.001,
+    "fuel_demand": 0.0017,
+    "metal_yield": 0.004
+   },
+   "electric_power_looms": {
+    "craft_output": 0.001,
+    "fiber_yield": 0.0072,
+    "fuel_demand": 0.0017,
+    "injury_risk": -0.002,
+    "labor_efficiency": 0.001
+   },
+   "electric_pulp_beating": {
+    "craft_output": 0.001,
+    "fuel_demand": 0.0017,
+    "knowledge_preservation": 0.001
+   },
+   "foil_capacitors": {
+    "knowledge_rate": 0.001
+   },
+   "castellated_nut_slotting": {
+    "injury_risk": -0.001,
+    "repair_capacity": 0.0016
+   },
+   "split_pin_locking": {
+    "disaster_resilience": 0.001,
+    "injury_risk": -0.001,
+    "repair_capacity": 0.0016
+   },
+   "resistive_sensing": {
+    "knowledge_rate": 0.001,
+    "standardization": 0.001
+   },
+   "rotary_swaging": {
+    "craft_output": 0.001,
+    "injury_risk": 0.001,
+    "labor_demand": 0.001,
+    "metal_yield": 0.004,
+    "tool_quality": 0.0026
+   },
+   "silicon_smelting": {
+    "fuel_demand": 0.0034,
+    "metal_yield": 0.006,
+    "pollution": 0.0045
+   },
+   "steel_normalizing_control": {
+    "fuel_demand": 0.0017,
+    "metal_yield": 0.004,
+    "standardization": 0.001,
+    "tool_quality": 0.0039
+   },
+   "industrial_catalyst_design": {
+    "chemical_control": 0.0021,
+    "extraction_yield": 0.006,
+    "fuel_efficiency": 0.002,
+    "health_risk": 0.001,
+    "water_pollution": 0.001
+   },
+   "standard_fastener_kitting": {
+    "standardization": 0.001,
+    "task_coordination": 0.001
+   },
+   "directional_air_valves": {
+    "craft_output": 0.001
+   },
+   "honed_bore_finishing": {
+    "fuel_efficiency": 0.001,
+    "labor_demand": 0.001,
+    "standardization": 0.001,
+    "tool_quality": 0.0039
+   },
+   "pneumatic_cylinders": {
+    "craft_output": 0.001,
+    "injury_risk": 0.001
+   },
+   "pneumatic_pressing": {
+    "craft_output": 0.0015,
+    "fuel_demand": 0.0017,
+    "injury_risk": 0.002
+   },
+   "textile_durability_testing": {
+    "fiber_yield": 0.0024,
+    "standardization": 0.001
+   },
+   "mechanical_washing_machines": {
+    "fatigue": -0.003,
+    "fuel_demand": 0.0026,
+    "labor_efficiency": 0.001,
+    "sanitation": 0.002,
+    "water_pollution": 0.001
+   },
+   "formaldehyde_synthesis": {
+    "chemical_control": 0.001,
+    "health_risk": 0.0015,
+    "water_pollution": 0.001
+   },
+   "phenolic_resin_moulding": {
+    "chemical_control": 0.0014,
+    "container_capacity": 0.006,
+    "craft_output": 0.006,
+    "health_risk": 0.002,
+    "standardization": 0.0031,
+    "water_pollution": 0.0015
+   },
+   "aromatic_amine_hydrogenation": {
+    "chemical_control": 0.001,
+    "extraction_yield": 0.003,
+    "health_risk": 0.0015,
+    "water_pollution": 0.001
+   },
+   "stainless_steel": {
+    "fuel_demand": 0.0017,
+    "metal_yield": 0.008,
+    "repair_capacity": 0.0024,
+    "sanitation": 0.002,
+    "tool_quality": 0.0052
+   },
+   "welding_metallurgy": {
+    "construction_rate": 0.002,
+    "injury_risk": -0.001,
+    "repair_capacity": 0.0024,
+    "tool_quality": 0.0026
+   },
+   "catalytic_ammonia_synthesis": {
+    "chemical_control": 0.0056,
+    "extraction_yield": 0.018,
+    "fuel_demand": 0.0068,
+    "health_risk": 0.001,
+    "pollution": 0.006,
+    "warfare_readiness": 0.002
+   },
+   "hydrocarbon_steam_cracking": {
+    "chemical_control": 0.0014,
+    "extraction_yield": 0.006,
+    "fuel_demand": 0.0034,
+    "fuel_efficiency": 0.002,
+    "pollution": 0.0045
+   },
+   "zipper_chain_closures": {
+    "craft_output": 0.001
+   },
+   "centrifugal_tube_casting": {
+    "craft_output": 0.001,
+    "fuel_demand": 0.0017,
+    "injury_risk": 0.002,
+    "metal_yield": 0.006,
+    "water_access": 0.001
+   },
+   "centerless_grinding": {
+    "craft_output": 0.001,
+    "health_risk": 0.001,
+    "labor_demand": -0.001,
+    "standardization": 0.0016,
+    "tool_quality": 0.0039
+   },
+   "vacuum_metal_melting": {
+    "fuel_demand": 0.0026,
+    "metal_yield": 0.006,
+    "tool_quality": 0.0026
+   },
+   "garment_size_grading": {
+    "craft_output": 0.001,
+    "fiber_yield": 0.0024,
+    "standardization": 0.0016
+   },
+   "urea_synthesis": {
+    "chemical_control": 0.0014,
+    "extraction_yield": 0.006,
+    "fuel_demand": 0.0026,
+    "water_pollution": 0.001
+   },
+   "cemented_carbide_tools": {
+    "craft_output": 0.002,
+    "health_risk": 0.001,
+    "labor_demand": -0.002,
+    "metal_yield": 0.004,
+    "tool_quality": 0.0078
+   },
+   "polymer_monomer_purification": {
+    "chemical_control": 0.001,
+    "extraction_yield": 0.003,
+    "fuel_demand": 0.0017
+   },
+   "radical_chain_polymerization": {
+    "chemical_control": 0.0014,
+    "container_capacity": 0.004,
+    "craft_output": 0.0015,
+    "fuel_demand": 0.0017,
+    "injury_risk": 0.002
+   },
+   "additive_step_polymerization": {
+    "chemical_control": 0.001,
+    "craft_output": 0.001,
+    "health_risk": 0.001
+   },
+   "brazed_joint_qualification": {
+    "repair_capacity": 0.0016,
+    "standardization": 0.001,
+    "tool_quality": 0.0013
+   },
+   "condensative_step_polymerization": {
+    "chemical_control": 0.001,
+    "craft_output": 0.001,
+    "health_risk": 0.001,
+    "housing_output": 0.001
+   },
+   "polymer_solution_processing": {
+    "chemical_control": 0.001,
+    "craft_output": 0.001,
+    "fiber_yield": 0.0024,
+    "health_risk": 0.001
+   },
+   "ethylene_oxide_synthesis": {
+    "chemical_control": 0.0014,
+    "disaster_risk": 0.001,
+    "extraction_yield": 0.003,
+    "health_risk": 0.0015
+   },
+   "electrochemical_machining": {
+    "craft_output": 0.001,
+    "fuel_demand": 0.0017,
+    "tool_quality": 0.0039,
+    "water_pollution": 0.001
+   },
+   "residual_stress_assessment": {
+    "disaster_resilience": 0.002,
+    "standardization": 0.001,
+    "tool_quality": 0.0013
+   },
+   "synthetic_rubber": {
+    "chemical_control": 0.001,
+    "craft_output": 0.0025,
+    "haul_capacity": 0.003,
+    "health_risk": 0.001,
+    "pollution": 0.0045,
+    "trade_capacity": 0.002,
+    "warfare_readiness": 0.002
+   },
+   "induction_surface_hardening": {
+    "craft_output": 0.001,
+    "fuel_demand": 0.0017,
+    "fuel_efficiency": 0.001,
+    "tool_quality": 0.0039
+   },
+   "thermoplastic_processing": {
+    "chemical_control": 0.001,
+    "container_capacity": 0.012,
+    "craft_output": 0.007,
+    "ecological_pressure": 0.004,
+    "fuel_demand": 0.0034,
+    "standardization": 0.0026
+   },
+   "advanced_airframes": {
+    "fuel_demand": 0.0026,
+    "haul_capacity": 0.002,
+    "metal_yield": 0.002,
+    "route_speed": 0.003,
+    "warfare_readiness": 0.002
+   },
+   "polymer_melt_rheology": {
+    "chemical_control": 0.001,
+    "standardization": 0.001
+   },
+   "polymer_additive_formulation": {
+    "chemical_control": 0.001,
+    "craft_output": 0.001,
+    "health_risk": 0.001
+   },
+   "polymer_film_extrusion": {
+    "container_capacity": 0.008,
+    "craft_output": 0.001,
+    "ecological_pressure": 0.003,
+    "food_spoilage": -0.002
+   },
+   "polymer_injection_molding": {
+    "craft_output": 0.0025,
+    "ecological_pressure": 0.002,
+    "fuel_demand": 0.0017,
+    "labor_demand": -0.002,
+    "standardization": 0.0021
+   },
+   "polyamide_synthetic_fibre": {
+    "chemical_control": 0.0014,
+    "cohesion": -0.002,
+    "craft_output": 0.0025,
+    "fiber_yield": 0.02,
+    "fuel_demand": 0.0034,
+    "trade_capacity": 0.003,
+    "water_pollution": 0.0015
+   },
+   "binary_adders": {
+    "knowledge_rate": 0.001,
+    "task_coordination": 0.001
+   },
+   "isocyanate_synthesis": {
+    "chemical_control": 0.001,
+    "disaster_risk": 0.002,
+    "health_risk": 0.002
+   },
+   "polymer_blow_molding": {
+    "container_capacity": 0.008,
+    "craft_output": 0.001,
+    "ecological_pressure": 0.003
+   },
+   "relay_registers": {
+    "knowledge_preservation": 0.001,
+    "knowledge_rate": 0.001,
+    "task_coordination": 0.001
+   },
+   "adhesive_bond_design": {
+    "construction_rate": 0.001,
+    "craft_output": 0.001,
+    "repair_capacity": 0.0016
+   },
+   "catalytic_cracking": {
+    "chemical_control": 0.001,
+    "extraction_yield": 0.008,
+    "fuel_demand": 0.0017,
+    "fuel_efficiency": 0.005,
+    "pollution": 0.0045
+   },
+   "jet_propulsion": {
+    "fuel_demand": 0.0068,
+    "haul_capacity": 0.004,
+    "pollution": 0.006,
+    "route_speed": 0.012,
+    "travel_speed": 0.006,
+    "warfare_readiness": 0.004
+   },
+   "textile_waterproofing": {
+    "fiber_yield": 0.0048,
+    "health_protection": 0.001,
+    "mobile_shelter": 0.002,
+    "water_pollution": 0.001
+   },
+   "ionic_chain_polymerization": {
+    "chemical_control": 0.001,
+    "craft_output": 0.001
+   },
+   "garment_seam_sealing": {
+    "health_protection": 0.001,
+    "mobile_shelter": 0.002
+   },
+   "polymer_molecular_weight_control": {
+    "chemical_control": 0.001,
+    "standardization": 0.001
+   },
+   "polymer_reaction_heat_management": {
+    "chemical_control": 0.001,
+    "disaster_risk": -0.002,
+    "fuel_efficiency": 0.001,
+    "injury_risk": -0.001
+   },
+   "polymer_solvent_recovery": {
+    "chemical_control": 0.001,
+    "fuel_demand": 0.0013,
+    "pollution": -0.0015,
+    "water_pollution": -0.001
+   },
+   "sinker_electrical_discharge_machining": {
+    "craft_output": 0.001,
+    "fuel_demand": 0.0013,
+    "tool_quality": 0.0039
+   },
+   "chlorosilane_purification": {
+    "chemical_control": 0.001,
+    "fuel_demand": 0.0026,
+    "health_risk": 0.001,
+    "metal_yield": 0.004
+   },
+   "single_crystal_growth": {
+    "chemical_control": 0.001,
+    "fuel_demand": 0.0017,
+    "metal_yield": 0.002
+   },
+   "tube_rotary_draw_bending": {
+    "craft_output": 0.001,
+    "haul_capacity": 0.001,
+    "standardization": 0.001
+   },
+   "nuclear_magnetic_resonance_spectroscopy": {
+    "chemical_control": 0.001,
+    "knowledge_rate": 0.001,
+    "observation_rate": 0.001
+   },
+   "ultrasonic_abrasive_machining": {
+    "health_risk": 0.001,
+    "tool_quality": 0.0026
+   },
+   "polymer_thermoforming": {
+    "container_capacity": 0.006,
+    "craft_output": 0.001,
+    "ecological_pressure": 0.002
+   },
+   "textile_moisture_transport": {
+    "fatigue": -0.001,
+    "fiber_yield": 0.0024,
+    "health_protection": 0.001
+   },
+   "continuous_metal_casting": {
+    "craft_output": 0.0015,
+    "fuel_efficiency": 0.004,
+    "injury_risk": 0.002,
+    "labor_demand": -0.002,
+    "metal_yield": 0.008
+   },
+   "machine_tool_stiffness_assessment": {
+    "standardization": 0.001,
+    "tool_quality": 0.0026
+   },
+   "bipolar_junction_transistors": {
+    "chemical_control": 0.001,
+    "craft_output": 0.002,
+    "fuel_efficiency": 0.004,
+    "health_risk": 0.001,
+    "knowledge_rate": 0.004,
+    "standardization": 0.0016
+   },
+   "memory_address_decoding": {
+    "knowledge_preservation": 0.001,
+    "knowledge_rate": 0.001,
+    "task_coordination": 0.001
+   },
+   "oxygen_steelmaking": {
+    "cohesion": -0.002,
+    "craft_output": 0.003,
+    "fuel_efficiency": 0.006,
+    "injury_risk": 0.002,
+    "labor_demand": -0.004,
+    "metal_yield": 0.02,
+    "pollution": 0.0075
+   },
+   "read_write_memory": {
+    "knowledge_preservation": 0.002,
+    "knowledge_rate": 0.001,
+    "task_coordination": 0.001
+   },
+   "transistor_amplifiers": {
+    "craft_output": 0.001,
+    "fuel_efficiency": 0.001,
+    "knowledge_rate": 0.001
+   },
+   "coordination_polymerization": {
+    "chemical_control": 0.0014,
+    "container_capacity": 0.004,
+    "craft_output": 0.0015,
+    "fuel_demand": 0.0017
+   },
+   "transistor_inverters": {
+    "knowledge_rate": 0.001,
+    "task_coordination": 0.001
+   },
+   "bistable_multivibrators": {
+    "knowledge_preservation": 0.001,
+    "knowledge_rate": 0.001
+   },
+   "binary_counters": {
+    "knowledge_rate": 0.001,
+    "task_coordination": 0.001
+   },
+   "shift_registers": {
+    "knowledge_rate": 0.001,
+    "task_coordination": 0.001
+   },
+   "parallel_register_banks": {
+    "knowledge_preservation": 0.001,
+    "knowledge_rate": 0.001
+   },
+   "instruction_registers": {
+    "knowledge_rate": 0.001,
+    "task_coordination": 0.001
+   },
+   "conditional_branch_circuits": {
+    "knowledge_rate": 0.001,
+    "task_coordination": 0.001
+   },
+   "wafer_sawing": {
+    "health_risk": 0.001,
+    "metal_yield": 0.004,
+    "standardization": 0.001,
+    "water_pollution": 0.001
+   },
+   "program_counters": {
+    "knowledge_rate": 0.001,
+    "task_coordination": 0.001
+   },
+   "ultrasonic_metal_joining": {
+    "craft_output": 0.001,
+    "fuel_efficiency": 0.001
+   },
+   "polymer_weathering_trials": {
+    "ecological_pressure": -0.001,
+    "standardization": 0.001
+   },
+   "lost_foam_casting": {
+    "craft_output": 0.001,
+    "labor_demand": -0.001,
+    "metal_yield": 0.002,
+    "pollution": 0.003
+   },
+   "diode_logic": {
+    "knowledge_rate": 0.001
+   },
+   "electronic_machine_control": {
+    "craft_output": 0.001,
+    "labor_demand": -0.001,
+    "labor_efficiency": 0.001,
+    "standardization": 0.001
+   },
+   "integrated_circuits": {
+    "chemical_control": 0.001,
+    "craft_output": 0.002,
+    "fuel_efficiency": 0.003,
+    "health_risk": 0.001,
+    "knowledge_rate": 0.0053,
+    "standardization": 0.0021,
+    "water_pollution": 0.0015
+   },
+   "numerical_machine_control": {
+    "cohesion": -0.002,
+    "craft_output": 0.004,
+    "labor_demand": -0.004,
+    "standardization": 0.0062,
+    "tool_quality": 0.0078
+   },
+   "float_glass": {
+    "construction_rate": 0.002,
+    "craft_output": 0.002,
+    "fuel_demand": 0.0034,
+    "housing_output": 0.003,
+    "labor_demand": -0.002
+   },
+   "hardwired_sequence_control": {
+    "labor_demand": -0.001,
+    "labor_efficiency": 0.001,
+    "standardization": 0.001,
+    "task_coordination": 0.001
+   },
+   "industrial_robots": {
+    "cohesion": -0.004,
+    "craft_output": 0.003,
+    "fuel_demand": 0.0017,
+    "injury_risk": -0.003,
+    "labor_demand": -0.006,
+    "labor_efficiency": 0.0042,
+    "standardization": 0.0031
+   },
+   "gear_power_skiving": {
+    "craft_output": 0.001,
+    "tool_quality": 0.0026
+   },
+   "machine_condition_monitoring": {
+    "disaster_risk": -0.001,
+    "labor_demand": -0.001,
+    "repair_capacity": 0.0024
+   },
+   "metal_fracture_toughness_testing": {
+    "disaster_resilience": 0.002,
+    "standardization": 0.001,
+    "tool_quality": 0.0013
+   },
+   "solar_cell_fabrication": {
+    "fuel_demand": 0.0017,
+    "fuel_efficiency": 0.003,
+    "water_pollution": 0.002
+   },
+   "stored_program_control": {
+    "cohesion": -0.001,
+    "labor_demand": -0.002,
+    "labor_efficiency": 0.001,
+    "standardization": 0.0016,
+    "task_coordination": 0.005
+   },
+   "carbon_fibre_composites": {
+    "craft_output": 0.002,
+    "ecological_pressure": 0.002,
+    "fuel_demand": 0.0017,
+    "fuel_efficiency": 0.003,
+    "haul_capacity": 0.003
+   },
+   "incremental_sheet_forming": {
+    "craft_output": 0.001
+   },
+   "rotor_spinning_systems": {
+    "cohesion": -0.001,
+    "fiber_yield": 0.008,
+    "labor_demand": -0.002
+   },
+   "wire_electrical_discharge_machining": {
+    "fuel_demand": 0.0013,
+    "standardization": 0.001,
+    "tool_quality": 0.0039
+   },
+   "abrasive_waterjet_cutting": {
+    "craft_output": 0.001,
+    "fuel_demand": 0.0013,
+    "tool_quality": 0.0013
+   },
+   "single_chip_processors": {
+    "cohesion": -0.002,
+    "knowledge_rate": 0.0046,
+    "labor_demand": -0.003,
+    "labor_efficiency": 0.001,
+    "standardization": 0.0021,
+    "task_coordination": 0.006
+   },
+   "scrap_steel_minimills": {
+    "ecology_recovery": 0.002,
+    "fuel_demand": 0.0034,
+    "fuel_efficiency": 0.002,
+    "labor_demand": -0.002,
+    "metal_yield": 0.008,
+    "pollution": 0.0015
+   },
+   "computer_aided_design": {
+    "cohesion": -0.001,
+    "craft_output": 0.0015,
+    "knowledge_rate": 0.0013,
+    "labor_demand": -0.002,
+    "standardization": 0.0026
+   },
+   "flexible_machining_cells": {
+    "cohesion": -0.001,
+    "craft_output": 0.002,
+    "labor_demand": -0.003,
+    "labor_efficiency": 0.001,
+    "standardization": 0.0016
+   },
+   "surface_mount_assembly": {
+    "cohesion": -0.001,
+    "craft_output": 0.0025,
+    "labor_demand": -0.003,
+    "standardization": 0.0021
+   },
+   "additive_manufacturing": {
+    "craft_output": 0.0015,
+    "fuel_demand": 0.0017,
+    "repair_capacity": 0.0024,
+    "tool_quality": 0.0026
+   },
+   "statistical_quality_programs": {
+    "craft_output": 0.001,
+    "institutional_rigidity": 0.002,
+    "standardization": 0.0026,
+    "task_coordination": 0.003
+   },
+   "lithium_ion_cells": {
+    "chemical_control": 0.0014,
+    "disaster_risk": 0.002,
+    "ecological_pressure": 0.004,
+    "fuel_efficiency": 0.014,
+    "haul_capacity": 0.004,
+    "health_risk": 0.001,
+    "knowledge_rate": 0.0013
+   },
+   "deep_submicron_lithography": {
+    "chemical_control": 0.001,
+    "fuel_demand": 0.0017,
+    "knowledge_rate": 0.0017,
+    "standardization": 0.001,
+    "water_pollution": 0.001
+   },
+   "selective_polymer_depolymerization": {
+    "ecological_pressure": -0.003,
+    "ecology_recovery": 0.004,
+    "fuel_demand": 0.0017
+   },
+   "metal_powder_printing": {
+    "craft_output": 0.0015,
+    "fuel_demand": 0.0017,
+    "metal_yield": 0.002,
+    "repair_capacity": 0.0016,
+    "tool_quality": 0.0039
+   },
+   "wide_bandgap_power_chips": {
+    "fuel_demand": 0.0017,
+    "fuel_efficiency": 0.005
+   },
+   "collaborative_robots": {
+    "cohesion": -0.001,
+    "fatigue": -0.002,
+    "injury_risk": -0.002,
+    "labor_demand": -0.002,
+    "labor_efficiency": 0.0014,
+    "task_coordination": 0.002
+   },
+   "digital_twin_plants": {
+    "disaster_risk": -0.001,
+    "fuel_demand": 0.0013,
+    "labor_demand": -0.001,
+    "repair_capacity": 0.0024,
+    "task_coordination": 0.004
+   },
+   "extreme_ultraviolet_lithography": {
+    "chemical_control": 0.0014,
+    "fuel_demand": 0.0051,
+    "knowledge_rate": 0.0046,
+    "standardization": 0.0016,
+    "water_pollution": 0.001
+   },
+   "iron_phosphate_cells": {
+    "disaster_risk": -0.002,
+    "ecological_pressure": 0.002,
+    "fuel_efficiency": 0.004,
+    "haul_capacity": 0.002
+   },
+   "green_hydrogen_electrolysis": {
+    "chemical_control": 0.001,
+    "fuel_demand": 0.0034,
+    "fuel_efficiency": 0.002,
+    "pollution": -0.003,
+    "water_access": -0.001
+   },
+   "engineered_microbe_chemicals": {
+    "chemical_control": 0.0014,
+    "craft_output": 0.001,
+    "disaster_risk": 0.001,
+    "nutrition_quality": 0.001,
+    "pollution": -0.0015
+   },
+   "hydrogen_reduced_iron": {
+    "ecological_pressure": -0.004,
+    "fuel_demand": 0.0051,
+    "fuel_efficiency": 0.002,
+    "metal_yield": 0.012,
+    "pollution": -0.018
+   },
+   "solid_state_battery_cells": {
+    "disaster_risk": -0.001,
+    "ecological_pressure": 0.002,
+    "fuel_efficiency": 0.004,
+    "haul_capacity": 0.002
+   }
   }
  }
 }
