@@ -248,3 +248,66 @@ func test_a_finished_work_is_announced_once_with_a_way_to_attend()->void:
 	assert_str(String((told[0].action as Dictionary).kind)).is_equal("ceremony")
 	assert_str(String((told[0].action as Dictionary).work_id)).is_equal("legacy_test_ring")
 	assert_bool(is_instance_valid(director.ceremony)).is_false()
+
+func _beat(kind:String,day:int,title:String,refs:Dictionary={})->Dictionary:
+	return {"id":"opening_%s_%d" % [kind,day],"kind":kind,"tier":"moment","day":day,"title":title,"text":title+", as the people saw it.","refs":refs}
+
+func _fill_moments(day:int)->void:
+	for i in Chronicle.MOMENTS_PER_WINDOW:Chronicle.record({"title":"Busy moment %d" % i,"tier":"moment","kind":"omen","day":day})
+
+func test_opening_beats_that_repeat_a_first_are_told_once()->void:
+	# The first birth and a court member's child born that same day are one birth.
+	GameState.elapsed_days=60.0
+	Chronicle.record_first("first_birth",{"title":"The first child born at Home","kind":"birth","tier":"moment"})
+	Chronicle.record_beat(_beat("named_child",60,"A child at the hearth chief's hearth",{"parent_id":4,"child_name":"Ama"}))
+	var births:=Chronicle.entries().filter(func(e:Dictionary)->bool:return String(e.kind)=="birth")
+	assert_int(births.size()).is_equal(1)
+	assert_str(String(births[0].title)).is_equal("A child at the hearth chief's hearth")
+	assert_int(int(((births[0].action as Dictionary).focus as Dictionary).person_id)).is_equal(4)
+	# The band the scouts saw and the smoke they brought home the same day.
+	GameState.elapsed_days=80.0
+	Chronicle.record_first("band_sighted",{"title":"Other people walk this land","kind":"contact","tier":"notice"})
+	Chronicle.record_beat(_beat("first_signs",80,"Smoke on the horizon"))
+	var signs:=Chronicle.entries().filter(func(e:Dictionary)->bool:return String(e.get("key",""))=="first:band_sighted")
+	assert_int(signs.size()).is_equal(1)
+	assert_str(String(signs[0].title)).is_equal("Smoke on the horizon")
+	assert_str(String(signs[0].tier)).is_equal("moment")
+	# The first discovery keeps its name and gains the scene at the fire.
+	Chronicle.record({"key":"discovery:wood_joinery","title":"Wood Joinery","tier":"moment","kind":"discovery","day":90})
+	Chronicle.record_beat(_beat("first_discovery",90,"The first discovery: Wood Joinery",{"discovery_id":"wood_joinery"}))
+	var found:=Chronicle.entries().filter(func(e:Dictionary)->bool:return String(e.kind)=="discovery")
+	assert_int(found.size()).is_equal(1)
+	assert_str(String(found[0].title)).is_equal("Wood Joinery")
+	assert_str(String(found[0].text)).contains("as the people saw it")
+	assert_int(Chronicle.entries().size()).is_equal(3)
+
+func test_a_child_on_another_day_is_its_own_story()->void:
+	GameState.elapsed_days=30.0
+	Chronicle.record_first("first_birth",{"title":"The first child born at Home","kind":"birth","tier":"moment"})
+	GameState.elapsed_days=75.0
+	Chronicle.record_beat(_beat("named_child",75,"A child at the hearth chief's hearth",{"parent_id":4}))
+	assert_int(Chronicle.entries().filter(func(e:Dictionary)->bool:return String(e.kind)=="birth").size()).is_equal(2)
+
+func test_first_winter_and_first_contact_are_never_buried_by_the_moment_cap()->void:
+	GameState.elapsed_days=200.0
+	_fill_moments(200)
+	Chronicle.record_beat(_beat("first_winter",200,"The first winter",{"person_id":3}))
+	# The season's own first-winter line then has nothing new to tell.
+	Chronicle.record_first("first_winter",{"title":"The first winter at Home is behind us","kind":"hearth_count","tier":"notice"})
+	var winter:=Chronicle.entries().filter(func(e:Dictionary)->bool:return String(e.get("key",""))=="first:first_winter")
+	assert_int(winter.size()).is_equal(1)
+	assert_str(String(winter[0].title)).is_equal("The first winter")
+	assert_str(String(winter[0].tier)).is_equal("moment")
+	# First contact from the ledger, then its beat: one moment, with the beat's words.
+	GameState.simulation_events.push_front({"day":201,"title":"First contact — Varrow","description":"Scouts met the Varrow.","domain":"diplomacy","severity":"major","kind":"first_contact","civ_id":"rival_b"})
+	GameState.elapsed_days=201.0
+	Chronicle.ingest_day({"discoveries":[],"progression":[]})
+	Chronicle.record_beat(_beat("first_contact",201,"Strangers at the fire",{"civ_id":"rival_b"}))
+	var met:=Chronicle.entries().filter(func(e:Dictionary)->bool:return String(e.kind)=="contact")
+	assert_int(met.size()).is_equal(1)
+	assert_str(String(met[0].tier)).is_equal("moment")
+	assert_str(String(met[0].title)).is_equal("Strangers at the fire")
+	assert_str(String(((met[0].action as Dictionary).focus as Dictionary).civ_id)).is_equal("rival_b")
+	# An ordinary beat in a crowded month waits as a notice.
+	var crowded:=Chronicle.record_beat(_beat("headcount_130",202,"130 of us"))
+	assert_str(String(crowded.tier)).is_equal("notice")

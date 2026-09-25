@@ -8,8 +8,9 @@ extends RefCounted
 ## the first discovery was made, a people was met — and marks it as a beat:
 ##
 ##   * a "moment": pushed to GameState.simulation_events with kind
-##     "opening_beat" and tier "moment", and emitted on
-##     PeopleDirection.opening_beat(beat) for the Chronicle to hook;
+##     "opening_beat" and tier "moment", told in the Chronicle
+##     (Chronicle.record_beat, merged with its own firsts) and emitted on
+##     PeopleDirection.opening_beat(beat);
 ##   * sometimes also a waiting court matter (the Hearth Chief's first-winter
 ##     petition). Matters wait for the ruler, as all court business does.
 ##
@@ -22,6 +23,7 @@ extends RefCounted
 ## without it starts an empty arc and simply records beats from then on.
 
 const Hall:=preload("res://scripts/audience_hall.gd")
+const Chronicle:=preload("res://scripts/chronicle.gd")
 const WINDOW_DAYS:=3650
 const BEATS_MAX:=40
 const CHILD_GAP_DAYS:=270
@@ -309,7 +311,9 @@ static func _discovery(day:int,terrain:Node)->Dictionary:
 	var who:=String(finder.get("name","One of our people"))
 	var scene:="At the evening fire %s showed everyone what they had worked out: %s. People passed it from hand to hand until the fire burned low." % [who,name.to_lower()]
 	event["scene"]=scene
-	if is_instance_valid(terrain) and "hud" in terrain and is_instance_valid(terrain.hud):
+	# When the Chronicle already tells this discovery as a moment, its card
+	# carries the scene (Chronicle.record_beat); a popup would tell it twice.
+	if not Chronicle.discovery_is_moment(id) and is_instance_valid(terrain) and "hud" in terrain and is_instance_valid(terrain.hud):
 		preload("res://scripts/hud/discovery_popup.gd").announce(terrain,terrain.hud,[event])
 	return _emit("first_discovery",day,"The first discovery: %s" % name,scene,{"discovery_id":id,"person_id":int(finder.get("person_id",0))})
 
@@ -324,8 +328,11 @@ static func _emit(kind:String,day:int,title:String,text:String,refs:Dictionary)-
 	var list:Array=arc.beats
 	list.append(beat)
 	while list.size()>BEATS_MAX: list.pop_front()
-	GameState.simulation_events.push_front({"id":String(beat.id),"day":day,"title":title,"description":text,"domain":"society","severity":"major","kind":"opening_beat","tier":"moment","beat":kind})
+	# The Chronicle tells the beat itself (once, merged with its own firsts),
+	# so its daily ledger scan skips this line.
+	GameState.simulation_events.push_front({"id":String(beat.id),"day":day,"title":title,"description":text,"domain":"society","severity":"major","kind":"opening_beat","tier":"moment","beat":kind,"chronicle":Chronicle.active()})
 	if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
+	Chronicle.record_beat(beat)
 	PeopleDirection.opening_beat.emit(beat.duplicate(true))
 	return beat
 

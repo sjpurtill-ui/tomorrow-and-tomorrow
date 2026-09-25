@@ -21,8 +21,15 @@ extends RefCounted
 ##       | {"kind":"section","section":id,"sub":n}), "ledger" (default true: a
 ##       notice or moment also appears in the event ledger), "domain".
 ##       Returns the stored entry (its "tier" says what it became), or {}.
+##       "priority" (true: a moment that the monthly cap never downgrades,
+##       for first contact and the first winter).
 ##   Chronicle.record_first(key:String, moment:Dictionary)->Dictionary
 ##       Records only the first time `key` is seen for this people.
+##   Chronicle.record_beat(beat:Dictionary)->Dictionary
+##       Tells an Opening Arc beat (opening_arc.gd). A beat that is the same
+##       event as an entry already told (the first birth, the first winter,
+##       the first sign of strangers, a first contact, a first discovery, a
+##       headcount) enriches that entry instead of adding a second one.
 ##   Chronicle.entries(min_tier:String="whisper", limit:int=0)->Array
 ##   Chronicle.latest_headline()->String   newest moment/notice, era-voiced
 ##   Chronicle.voice()->Dictionary          era wording (tally-marks / annals)
@@ -98,7 +105,7 @@ static func record(moment:Dictionary)->Dictionary:
 	var tier:=String(moment.get("tier",""))
 	if tier not in TIERS:tier=grade(moment)
 	var downgraded:=false
-	if tier=="moment" and not _moment_room(c,day):
+	if tier=="moment" and not bool(moment.get("priority",false)) and not _moment_room(c,day):
 		tier="notice";downgraded=true
 	var entry:Dictionary={"key":key,"day":day,"tier":tier,"kind":String(moment.get("kind","story")),"title":title,"text":String(moment.get("text","")).strip_edges()}
 	if downgraded:entry["crowded"]=true
@@ -126,6 +133,109 @@ static func record_first(first_key:String,moment:Dictionary)->Dictionary:
 	if not copy.has("key"):copy["key"]="first:"+first_key
 	copy["first"]=true
 	return record(copy)
+
+
+## Rewrites a told entry (and its card, if it has not yet been shown) with a
+## fuller telling of the same event. A notice may become a moment; a moment is
+## never lowered. Returns the entry, or {} when `key` was never told.
+static func amend(key:String,fields:Dictionary)->Dictionary:
+	if not active() or key.is_empty():return {}
+	var c:=data()
+	for e in c.entries:
+		var entry:Dictionary=e
+		if String(entry.get("key",""))!=key:continue
+		for field in ["title","text","kind","art","action","domain"]:
+			if fields.has(field):entry[field]=fields[field].duplicate(true) if fields[field] is Dictionary else fields[field]
+		var shown:=false
+		for card in pending_cards:
+			if String(card.get("key",""))==key:
+				card.merge(entry,true);shown=true
+		if String(fields.get("tier",""))=="moment" and String(entry.get("tier",""))!="moment" and (bool(fields.get("priority",false)) or _moment_room(c,int(entry.get("day",0)))):
+			entry["tier"]="moment";entry.erase("crowded")
+			var days:Array=c.moment_days
+			days.push_front(int(entry.get("day",0)))
+			if days.size()>12:days.resize(12)
+			if not shown:
+				pending_cards.append(entry.duplicate(true))
+				if pending_cards.size()>6:pending_cards.pop_front()
+		return entry
+	return {}
+
+
+static func _find(predicate:Callable)->Dictionary:
+	for e in data().entries:
+		if predicate.call(e):return e
+	return {}
+
+
+## Beat kinds that are the same news as one of the Chronicle's own firsts.
+const BEAT_FIRSTS:={"first_winter":"first_winter","first_signs":"band_sighted","named_child":"first_birth"}
+## Beats that must never be buried by the monthly moment cap.
+const PRIORITY_BEATS:=["first_contact","first_winter"]
+
+static func record_beat(beat:Dictionary)->Dictionary:
+	if not active():return {}
+	var kind:=String(beat.get("kind",""))
+	var day:=int(beat.get("day",int(GameState.elapsed_days)))
+	var refs:Dictionary=beat.get("refs",{}) if beat.get("refs") is Dictionary else {}
+	var civ_id:=String(refs.get("civ_id",""))
+	var contact:=kind=="first_contact" or kind.begins_with("met_")
+	var told:={"key":"beat:"+String(beat.get("id",kind)),"day":day,"title":String(beat.get("title","")),"text":String(beat.get("text","")),
+		"tier":String(beat.get("tier","moment")),"kind":_beat_kind(kind),"domain":"opening","priority":contact or kind in PRIORITY_BEATS,
+		# The beat keeps its own line in the event ledger.
+		"ledger":false}
+	if contact and civ_id!="":told["action"]={"kind":"court","focus":{"civ_id":civ_id}}
+	elif int(refs.get("person_id",refs.get("parent_id",0)))>0:told["action"]={"kind":"court","focus":{"person_id":int(refs.get("person_id",refs.get("parent_id",0)))}}
+	elif kind=="first_discovery":
+		told["action"]={"kind":"section","section":"inquiry","sub":0}
+		told["art"]={"discovery_id":String(refs.get("discovery_id","")),"domain":_dynamic_of(String(refs.get("discovery_id","")))}
+	var c:=data()
+	var firsts:Dictionary=c.firsts
+	# The same event, already told: tell it more fully instead of twice.
+	var same:Dictionary={}
+	if BEAT_FIRSTS.has(kind):
+		var first_key:=String(BEAT_FIRSTS[kind])
+		if firsts.has(first_key):
+			# The first birth is this child only if born the same day; the first
+			# sign of strangers is this sign only if the same party brought it.
+			if kind=="first_winter" or int(firsts[first_key])==day:same=_find(func(e:Dictionary)->bool:return String(e.get("key",""))=="first:"+first_key)
+			if same.is_empty() and kind=="first_winter":return {}
+		else:
+			firsts[first_key]=day
+			told["key"]="first:"+first_key
+			told["first"]=true
+	elif contact and civ_id!="":
+		same=_find(func(e:Dictionary)->bool:return String(e.get("source",""))=="civ:"+civ_id and String(e.get("kind",""))=="contact")
+	elif kind=="first_discovery":
+		same=_find(func(e:Dictionary)->bool:return String(e.get("key",""))=="discovery:"+String(refs.get("discovery_id","")))
+	elif kind.begins_with("headcount_") and PEOPLE_MILESTONES.has(int(kind.trim_prefix("headcount_"))):
+		var people_key:="people:"+kind.trim_prefix("headcount_")
+		if firsts.has(people_key):
+			same=_find(func(e:Dictionary)->bool:return String(e.get("key",""))=="first:"+people_key)
+			# Passed silently (at founding, or in one leap past several marks).
+			if same.is_empty():return {}
+		else:
+			firsts[people_key]=day
+			told["key"]="first:"+people_key
+			told["first"]=true
+	if not same.is_empty():
+		var fields:=told.duplicate(true)
+		fields.erase("key");fields.erase("day")
+		# A first discovery keeps its field's name in the title.
+		if kind=="first_discovery":fields.erase("title")
+		return amend(String(same.key),fields)
+	return record(told)
+
+
+static func _beat_kind(kind:String)->String:
+	if kind=="first_contact" or kind.begins_with("met_") or kind.begins_with("regard_") or kind.begins_with("tension_") or kind.begins_with("hunger_"):return "contact"
+	if kind.begins_with("war_") or kind.begins_with("strife_") or kind.begins_with("peace_"):return "war"
+	if kind=="first_signs" or kind.begins_with("signs_"):return "scout"
+	if kind.begins_with("named_child") or kind.begins_with("child_year"):return "birth"
+	if kind.begins_with("child_lost"):return "death"
+	if kind=="first_discovery":return "discovery"
+	if kind=="first_winter":return "court"
+	return "milestone"
 
 
 static func has_first(first_key:String)->bool:
@@ -298,7 +408,12 @@ static func _scan_ledger(c:Dictionary)->void:
 			if day-int(seen.get(condition,-100000))<CONDITION_QUIET_DAYS:tier="whisper"
 			seen[condition]=day
 			c["conditions"]=seen
-		record({"key":String(pair[0]),"day":int(ev.get("day",int(GameState.elapsed_days))),"title":String(told[0]),"text":String(told[1]),"tier":tier,"kind":kind_of(ev),"ledger":false,"domain":String(ev.get("domain",""))})
+		var told_entry:={"key":String(pair[0]),"day":int(ev.get("day",int(GameState.elapsed_days))),"title":String(told[0]),"text":String(told[1]),"tier":tier,"kind":kind_of(ev),"ledger":false,"domain":String(ev.get("domain",""))}
+		# First contact is never buried by the moment cap, and remembers whom it met.
+		if String(ev.get("kind",""))=="first_contact":
+			told_entry["priority"]=true
+			if String(ev.get("civ_id",""))!="":told_entry["source"]="civ:"+String(ev.civ_id)
+		record(told_entry)
 	c["scan_day"]=int(GameState.elapsed_days)
 
 
