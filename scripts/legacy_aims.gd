@@ -412,9 +412,11 @@ static func _cand_learn(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	var learned:=maxi(0,GameState.known_discoveries.size()-10)
 	# The field's share of what the people learn (smoothed: a young people's
 	# first finds say little), times their pace of learning.
-	var share:=float(known_in(domain)+1)/float(learned+12)
+	var share:=float(known_in(domain)+2)/float(learned+12)
 	var rate:=learning_pace()*share*(1.15 if _focus_aligned("learn") else 1.0)
-	var gain:=clampi(roundi(rate*float(years)),3,12)
+	# A field under inquiry learns fastest at first; half a new way a year is
+	# the least a mastery asks.
+	var gain:=clampi(maxi(roundi(rate*float(years)),ceili(float(years)*0.5)),3,12)
 	var c:=_base("learn",by,years)
 	c.subject=domain; c.subject_name=String(DOMAIN_WORDS[domain])
 	c.first=String(half.id)
