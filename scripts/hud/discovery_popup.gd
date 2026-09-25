@@ -89,6 +89,8 @@ func render()->void:
 	Art.label(label_row,"Year %d · Day %d" % [int(current.get("day",0))/365+1,int(current.get("day",0))%365+1],11,T.MUTED).custom_minimum_size.x=112
 	heading=Art.label(discovery_summary,String(current.get("name","New discovery")),28,T.INK,true)
 	Art.label(discovery_summary,String(current.get("description","")),16,T.BODY,true)
+	# The Opening Arc tells the first discovery as the people saw it.
+	if String(current.get("scene",""))!="":Art.label(discovery_summary,String(current.scene),15,T.GOLD,true)
 	var effects:Dictionary=current.get("effects",{})
 	if not effects.is_empty():
 		Art.label(body,"WHAT CHANGES",11,T.GOLD)

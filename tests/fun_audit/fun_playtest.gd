@@ -23,6 +23,9 @@ var seen_feed:Dictionary={}
 var last_status:=""
 var rng:=RandomNumberGenerator.new()
 var counts:Dictionary={}
+var seen_matters:Dictionary={}
+var handled_audiences:Dictionary={}
+var known_logged:Dictionary={}
 
 func _arg(n:String,f:String)->String:
 	for a in OS.get_cmdline_user_args():
@@ -35,7 +38,7 @@ func w(kind:String,data:Dictionary)->void:
 	counts[kind]=int(counts.get(kind,0))+1
 
 func _ready()->void:
-	if not OS.get_user_data_dir().get_file().begins_with("TomorrowFun"):
+	if not OS.get_user_data_dir().ends_with("Tests"):
 		push_error("needs isolated userdata");get_tree().quit(2);return
 	var years:=float(_arg("years","30"))
 	var seed_value:=int(_arg("seed","424242"))
@@ -55,6 +58,8 @@ func _ready()->void:
 	await get_tree().process_frame
 	w("after_ambition",{"speed":terrain.game_speed,"focus":GameState.founding_focus,"journey":GameState.founding_journey.get("duration_days",-1)})
 	quiet=QuietPopup.new();terrain.hud.add_child(quiet);terrain.hud.set_meta("discovery_popup",quiet)
+	if PeopleDirection.has_signal("opening_beat"):
+		PeopleDirection.connect("opening_beat",_on_beat)
 	terrain._set_game_speed(5)
 	var total_days:=int(years*365.0)
 	var settled_try:=0
@@ -96,6 +101,9 @@ func _ready()->void:
 	print("FUN_PLAYTEST DONE ",counts)
 	get_tree().quit(0)
 
+func _on_beat(beat:Dictionary)->void:
+	w("beat",{"kind":String(beat.get("kind","")),"title":String(beat.get("title","")),"text":String(beat.get("text","")).left(400)})
+
 func _year_row(y:int,ms:int)->void:
 	var civ_contacts:=0
 	for c in CivilizationSystem.civilizations:
@@ -113,6 +121,14 @@ func _collect()->void:
 		if seen_inbox.has(k):continue
 		seen_inbox[k]=true
 		w("council",{"title":String(item.get("advisor",""))+" / "+String(item.get("office",""))+" / "+String(item.get("topic","")),"body":String(item.get("text","")).left(300),"kind":String(item.get("condition_key",""))})
+	for m in Hall.state().get("matters",[]):
+		if not m is Dictionary or seen_matters.has(String(m.get("id",""))+str(m.get("day",""))):continue
+		seen_matters[String(m.get("id",""))+str(m.get("day",""))]=true
+		w("matter",{"holder":String((m.get("holder",{}) as Dictionary).get("title",""))+" "+String((m.get("holder",{}) as Dictionary).get("name","")),"kind":String(m.get("kind","")),"situation":String(m.get("situation_type","")),"summary":String(m.get("summary","")).left(300),"urgency":float(m.get("urgency",0))})
+	for id in GameState.known_discoveries:
+		if known_logged.has(String(id)):continue
+		known_logged[String(id)]=true
+		if GameState.elapsed_days>1:w("discovery",{"id":String(id),"name":String(DiscoverySystem.player_facing_discovery_event({"id":String(id)}).get("name",id))})
 	for d in quiet.log:w("discovery_popup",d)
 	quiet.log.clear()
 	if terrain.travel_status_label and terrain.travel_status_label.text!=last_status:
@@ -144,6 +160,8 @@ func _handle_court()->void:
 		if not Hall.waiting().is_empty():w("waiting_unopened",{"n":Hall.waiting().size()})
 		return
 	var id:String=String(dir.modal.audience_id)
+	if handled_audiences.has(id):return
+	handled_audiences[id]=true
 	var a:=Hall.find(id)
 	var opts:=Hall.options(id)
 	var enabled:Array=[]
@@ -151,7 +169,7 @@ func _handle_court()->void:
 		if bool(o.get("enabled",true)):enabled.append(o)
 	var pick:Dictionary=enabled[rng.randi()%enabled.size()] if not enabled.is_empty() else {}
 	var lines:Array=[]
-	w("audience",{"kind":String(a.get("kind","")),"situation":String(a.get("situation","")),"origin":String(a.get("origin","")),"civ":String(a.get("civ_id","")),"title":String(a.get("title",a.get("headline",""))),"facts":str(a.get("facts","")).left(300),"options":opts.map(func(o):return String(o.get("id",""))+":"+String(o.get("label",""))),"pick":String(pick.get("id",""))})
+	w("audience",{"kind":String(a.get("kind","")),"situation":String((a.get("situation",{}) as Dictionary).get("type","")) if a.get("situation") is Dictionary else str(a.get("situation","")),"speaker":str((a.get("speaker",{}) as Dictionary).get("name","")) if a.get("speaker") is Dictionary else "","origin":String(a.get("origin","")),"civ":String(a.get("civ_id","")),"title":String(a.get("title",a.get("headline",""))),"facts":str(a.get("facts","")).left(300),"options":opts.map(func(o):return String(o.get("id",""))+":"+String(o.get("label",""))),"pick":String(pick.get("id",""))})
 	if not pick.is_empty():
 		var r:=Hall.resolve(id,String(pick.id))
 		w("audience_result",{"outcome":String(r.get("outcome",r.get("message",""))).left(300)})
