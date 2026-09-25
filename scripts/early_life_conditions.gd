@@ -86,9 +86,9 @@ const RELIEF_POWER:=2.5
 const PREMODERN_FECUNDITY_KNEE:=0.8
 ## research_600: an infant's death ends nursing and shortens the next birth
 ## interval; each point of first-year loss above the reference adds this much
-## to conception (1.6: about +24% at 250 infant deaths per 1,000, which keeps
+## to conception (1.3: about +20% at 250 infant deaths per 1,000, which keeps
 ## crude birth rates inside the benchmark's 44-48 instead of past 50).
-const INFANT_LOSS_REPLACEMENT:=1.6
+const INFANT_LOSS_REPLACEMENT:=1.3
 const PREMODERN_FECUNDITY_SLOPE:=0.4
 ## Hunger and sickness absorb at most this share of the burden (see age_multiplier).
 const BURDEN_OVERLAP_FLOOR:=0.35
@@ -107,7 +107,7 @@ const CROWDING_CONCEPTION:=1.2
 ## Far below capacity land is plentiful: couples marry earlier (the preventive
 ## check relaxes), so a thinned-out society recovers instead of dying out.
 const SPARE_LAND_ONSET:=0.3
-const SPARE_LAND_CONCEPTION:=1.2
+const SPARE_LAND_CONCEPTION:=2.0
 
 ## People the society's settled land can carry now: territory by era and
 ## settlement count, raised by (era-capped) cultivation, soil and storage

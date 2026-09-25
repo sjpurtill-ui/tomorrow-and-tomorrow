@@ -38,7 +38,7 @@ TOLERANCES = {
     "food_days": ("rel", 0.35, 25.0),
     "food_security": ("abs", 0.08, 0),
     "health": ("abs", 0.08, 0),
-    "known": ("rel", 0.25, 12.0),
+    "known": ("rel", 0.25, 20.0),   # floor: the first decade's handful of discoveries is Poisson noise
     "scholarship": ("rel", 0.15, 2.0),
     "education": ("abs", 0.10, 0),
     # Discovery mix: sum |surrogate - real| over real total. Engine seed-to-seed
@@ -146,6 +146,9 @@ KNOWN_GAPS = {
     ("ai", "education"): "the rival controller's first-decade labor and records choices are not modelled; converges by year 20",
     ("poor", "population"): "poor-site population falls ~20% faster than the engine's (monthly labor re-planning vs daily); populations < 60 are noisy",
     ("poor", "decades_total"): "follows the poor-site population gap (fewer researchers)",
+    ("poor", "known"): "follows the poor-site population gap (fewer researchers)",
+    ("poor", "lines_total"): "follows the poor-site population gap (fewer researchers)",
+    ("poor", "food_security"): "the poor site's food-labor floor surplus (GovernmentPeopleSystem._apply_food_labor_floor) is not carried into the surrogate's coarse poor-site harvest; the engine's food security runs ~0.1 higher",
     ("*", "food_days"): "timing of Storage Pits / Public Stores builds (settlement construction queue) is approximated",
 }
 

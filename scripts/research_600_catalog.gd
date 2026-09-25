@@ -43,7 +43,7 @@ const DAILY_SCALE:=0.12
 ## a large population behind each line, so the pace factor falls with the
 ## item's design year. Calibrated with tools/sim so milestones land inside their
 ## design bands (docs/research/BENCHMARKS_600.md).
-const PACE_BY_YEAR:Array=[[0.0,4.0],[100.0,3.0],[200.0,1.3],[300.0,0.75],[450.0,0.65],[600.0,0.65]]
+const PACE_BY_YEAR:Array=[[0.0,7.0],[100.0,5.5],[200.0,2.4],[300.0,1.0],[450.0,0.7],[600.0,0.65]]
 ## Keys the design governs; Phase 2 effect files cannot override them.
 const PROTECTED_KEYS:=["id","dynamic","direction","requires","requires_all","requires_any","learning_routes","day","chance","research_600","earliest_year","design_year","precedents","conditions"]
 ## Safe minimal consequence per line for NEW entries until Phase 2 authors them.
