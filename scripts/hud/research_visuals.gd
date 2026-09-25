@@ -52,9 +52,15 @@ static var first300_cards:Dictionary={}
 static var textures:Dictionary={}
 static var art600:Dictionary={}
 static func art600_manifest()->Dictionary:
-	if art600.is_empty() and FileAccess.file_exists(ART_600):
-		var parsed:Variant=JSON.parse_string(FileAccess.get_file_as_string(ART_600))
-		if parsed is Dictionary:art600=parsed.get("items",{})
+	# One art manifest per research design block (data/research/blocks.json), merged in order.
+	if art600.is_empty():
+		for path:String in preload("res://scripts/research_600_catalog.gd").art_manifests():
+			if not FileAccess.file_exists(path):continue
+			var parsed:Variant=JSON.parse_string(FileAccess.get_file_as_string(path))
+			if not parsed is Dictionary:continue
+			var items:Dictionary=(parsed as Dictionary).get("items",{})
+			for id:Variant in items:
+				if not art600.has(id):art600[id]=items[id]
 	return art600
 static func manifest()->Dictionary:
 	if assignments.is_empty():assignments=JSON.parse_string(FileAccess.get_file_as_string(ART_MANIFEST))

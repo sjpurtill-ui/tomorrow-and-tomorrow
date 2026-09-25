@@ -1,0 +1,22 @@
+{
+ "schema": "research_blocks/1",
+ "description": "Test fixture: the real 0-600 block plus a synthetic 600-1200 block (tests/test_research_blocks.gd).",
+ "blocks": [
+  {
+   "id": "y0_600",
+   "data": "res://data/research/research_600.json",
+   "effects_dir": "res://data/research/effects",
+   "art": "res://data/research/art_600.json",
+   "window_start": 0.0,
+   "window_end": 600.0
+  },
+  {
+   "id": "y600_1200",
+   "data": "res://tests/fixtures/research_blocks/y600_1200.json",
+   "effects_dir": "res://tests/fixtures/research_blocks/effects_y600_1200",
+   "art": "res://tests/fixtures/research_blocks/art_y600_1200.json",
+   "window_start": 600.0,
+   "window_end": 1200.0
+  }
+ ]
+}

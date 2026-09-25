@@ -30,8 +30,8 @@ func test_loader_registers_all_1101_design_discoveries()->void:
 	# The approved design has 1,101 items; Phase 3 adopts the in-window catalog
 	# entries it never listed (tools/research/design_amendments_600.json).
 	assert_int(int(Catalog.meta().get("design_node_count",0))).is_equal(1101)
-	assert_int(Catalog.ids().size()).is_equal(1101+int(Catalog.meta().get("adopted_count",0)))
-	assert_int(int(Catalog.meta().get("node_count",0))).is_equal(Catalog.ids().size())
+	assert_int(Catalog.block_ids("y0_600").size()).is_equal(1101+int(Catalog.meta().get("adopted_count",0)))
+	assert_int(int(Catalog.meta().get("node_count",0))).is_equal(Catalog.block_ids("y0_600").size())
 	var live:Dictionary={}
 	for entry:Dictionary in DiscoverySystem.technology_catalog:live[String(entry.id)]=true
 	var missing:Array[String]=[]
@@ -45,7 +45,7 @@ func test_loader_registers_all_1101_design_discoveries()->void:
 func test_new_design_items_use_the_catalog_format_and_a_valid_channel()->void:
 	var channels:Dictionary=preload("res://scripts/discovery_frontier_catalog.gd").SUBCATEGORIES
 	var count:=0
-	for id:String in Catalog.ids():
+	for id:String in Catalog.block_ids("y0_600"):
 		if String(Catalog.item(id).status)!="new":continue
 		count+=1
 		var entry:=_entry(id)
@@ -196,7 +196,7 @@ func test_design_graph_is_acyclic()->void:
 func test_every_design_item_is_reachable_by_year_600_and_the_live_graph_validates()->void:
 	var first:=Probe.earliest_years(DiscoverySystem,600.0,5.0)
 	var unreachable:Array[String]=[]
-	for id:String in Catalog.ids():
+	for id:String in Catalog.block_ids("y0_600"):
 		if not first.has(id):unreachable.append(id)
 	assert_array(unreachable).is_empty()
 	var graph:Array=[]

@@ -1,0 +1,13 @@
+{
+ "schema": "research_blocks/1",
+ "blocks": [
+  {
+   "id": "y0_600",
+   "data": "res://data/research/research_600.json",
+   "effects_dir": "res://data/research/effects",
+   "art": "res://data/research/art_600.json",
+   "window_start": 0.0,
+   "window_end": 600.0
+  }
+ ]
+}

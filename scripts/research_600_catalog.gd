@@ -18,10 +18,17 @@ extends RefCounted
 ## `society` snapshot passed in differs (see DiscoverySystem.research_600_*).
 ## Source data: tools/research/build_research_600.py -> research_600.json.
 
+## Design blocks (one approved design window each), merged in manifest order:
+## {"blocks":[{"id","data","effects_dir","art","window_start","window_end"}]}.
+## A later block may use earlier-block ids as foundations and precedents.
+## Built by tools/research/build_research_block.py.
+const MANIFEST_PATH:="res://data/research/blocks.json"
 const DATA_PATH:="res://data/research/research_600.json"
 const EFFECTS_DIR:="res://data/research/effects"
-## Game year at which the design window ends. Undated entries outside the
-## registry are conservatively held until then.
+const ART_PATH:="res://data/research/art_600.json"
+## Game year at which the FIRST design window ends. Gating uses
+## window_end_year(), the end of the latest block loaded: undated entries
+## outside every registry are conservatively held until then.
 const WINDOW_END_YEAR:=600.0
 ## Dated entries outside the registry open at this fraction of their era year,
 ## the same relative margin the design bands allow (roughly -10%).
@@ -61,36 +68,74 @@ static var _meta:Dictionary={}
 ## Phase 3 amendments: earliest years of live entries left outside the registry.
 static var _redates:Dictionary={}
 static var _loaded:=false
+## Loaded blocks in order (manifest rows plus their "meta"); id -> block id.
+static var _blocks:Array[Dictionary]=[]
+static var _block_of:Dictionary={}
+static var _block_ids:Dictionary={}
+## Tests point the loader at a fixture manifest (see use_manifest).
+static var _manifest_path:=MANIFEST_PATH
 
 
 static func ensure_loaded()->void:
 	if _loaded: return
 	_loaded=true
 	_items.clear();_ids.clear();_effects.clear();_meta.clear();_redates.clear()
-	var text:=FileAccess.get_file_as_string(DATA_PATH)
-	var parsed:Variant=JSON.parse_string(text)
+	_blocks.clear();_block_of.clear();_block_ids.clear()
+	for block:Dictionary in _manifest_blocks():
+		_load_block(block)
+	if not _blocks.is_empty(): _meta=_blocks[0].get("meta",{})
+
+
+## Manifest rows; without a manifest, the single original 0-600 block.
+static func _manifest_blocks()->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	if FileAccess.file_exists(_manifest_path):
+		var parsed:Variant=JSON.parse_string(FileAccess.get_file_as_string(_manifest_path))
+		if parsed is Dictionary:
+			for row:Variant in (parsed as Dictionary).get("blocks",[]):
+				if row is Dictionary and not String((row as Dictionary).get("data","")).is_empty(): result.append((row as Dictionary).duplicate(true))
+		if not result.is_empty(): return result
+		push_error("Research600: cannot read "+_manifest_path)
+	result.append({"id":"y0_600","data":DATA_PATH,"effects_dir":EFFECTS_DIR,"art":ART_PATH,"window_start":0.0,"window_end":WINDOW_END_YEAR})
+	return result
+
+
+static func _load_block(block:Dictionary)->void:
+	var data_path:=String(block.get("data",""))
+	var parsed:Variant=JSON.parse_string(FileAccess.get_file_as_string(data_path))
 	if not parsed is Dictionary:
-		push_error("Research600: cannot read "+DATA_PATH)
+		push_error("Research600: cannot read "+data_path)
 		return
-	_meta=(parsed as Dictionary).get("meta",{})
+	var block_id:=String(block.get("id",data_path))
+	block["meta"]=(parsed as Dictionary).get("meta",{})
+	_blocks.append(block)
+	var own:Array[String]=[]
+	# A later block's redates win; a designed item always wins over a redate.
 	var redates:Variant=(parsed as Dictionary).get("redates",{})
-	if redates is Dictionary: _redates=(redates as Dictionary).duplicate()
+	if redates is Dictionary:
+		for redate_id:Variant in redates: _redates[String(redate_id)]=redates[redate_id]
 	for row:Variant in (parsed as Dictionary).get("items",[]):
 		if not row is Dictionary: continue
 		var item:Dictionary=row
 		var id:=String(item.get("id",""))
+		# First block wins; the build tool rejects cross-block duplicates.
 		if id.is_empty() or _items.has(id): continue
 		_items[id]=item
 		_ids.append(id)
+		_block_of[id]=block_id
+		own.append(id)
+	_block_ids[block_id]=own
+	var effects_dir:=String(block.get("effects_dir",EFFECTS_DIR))
 	for line:Variant in (parsed as Dictionary).get("lines",[]):
-		var path:="%s/%s.json" % [EFFECTS_DIR,String(line)]
+		var path:="%s/%s.json" % [effects_dir,String(line)]
 		if not FileAccess.file_exists(path): continue
 		var effects_file:Variant=JSON.parse_string(FileAccess.get_file_as_string(path))
 		if not effects_file is Dictionary: continue
 		var rows:Variant=(effects_file as Dictionary).get("items",{})
 		if not rows is Dictionary: continue
+		# A block's effect files only author that block's own ids.
 		for effect_id:Variant in rows:
-			if rows[effect_id] is Dictionary and _items.has(String(effect_id)): _effects[String(effect_id)]=rows[effect_id]
+			if rows[effect_id] is Dictionary and String(_block_of.get(String(effect_id),""))==block_id: _effects[String(effect_id)]=rows[effect_id]
 
 
 ## Drops the cached data (tests, or after regenerating the JSON).
@@ -99,9 +144,63 @@ static func reload()->void:
 	ensure_loaded()
 
 
+## Loads another block manifest ("" restores the game's own). Tests only.
+static func use_manifest(path:String)->void:
+	_manifest_path=path if not path.is_empty() else MANIFEST_PATH
+	reload()
+
+
+## Meta of the first (0-600) block; block_meta() gives the others.
 static func meta()->Dictionary:
 	ensure_loaded()
 	return _meta
+
+
+## Loaded block ids, in manifest order.
+static func blocks()->Array[String]:
+	ensure_loaded()
+	var result:Array[String]=[]
+	for block:Dictionary in _blocks: result.append(String(block.get("id","")))
+	return result
+
+
+static func block_meta(block_id:String)->Dictionary:
+	ensure_loaded()
+	for block:Dictionary in _blocks:
+		if String(block.get("id",""))==block_id: return block.get("meta",{})
+	return {}
+
+
+## Ids designed by one block, in its order.
+static func block_ids(block_id:String)->Array[String]:
+	ensure_loaded()
+	var result:Array[String]=[]
+	result.assign(_block_ids.get(block_id,[]))
+	return result
+
+
+## Block that designs `id`, or "".
+static func block_of(id:String)->String:
+	ensure_loaded()
+	return String(_block_of.get(id,""))
+
+
+## Art manifests (res:// paths) of the loaded blocks, in order.
+static func art_manifests()->Array[String]:
+	ensure_loaded()
+	var result:Array[String]=[]
+	for block:Dictionary in _blocks:
+		var path:=String(block.get("art",""))
+		if not path.is_empty(): result.append(path)
+	return result
+
+
+## End year of the latest design window loaded (600 with only the first block).
+static func window_end_year()->float:
+	ensure_loaded()
+	var end:=0.0
+	for block:Dictionary in _blocks: end=maxf(end,float(block.get("window_end",WINDOW_END_YEAR)))
+	return end if end>0.0 else WINDOW_END_YEAR
 
 
 static func ids()->Array[String]:
@@ -212,10 +311,16 @@ static func earliest_year(entry:Dictionary,era:float,dated:bool)->float:
 	var id:=String(entry.get("id",""))
 	if has(id): return float(item(id).get("min_year",0.0))
 	if _redates.has(id): return float(_redates[id])
-	# An entry dated after the window never opens inside it (the 0.9 margin
-	# alone let year-660 iron open at 594).
-	if dated: return era*ERA_BAND_FRACTION if era<=WINDOW_END_YEAR else maxf(WINDOW_END_YEAR,era*ERA_BAND_FRACTION)
-	return maxf(WINDOW_END_YEAR,era*ERA_BAND_FRACTION)
+	# An entry dated after a design window never opens inside it (the 0.9
+	# margin alone let year-660 iron open at 594): every loaded window that
+	# ends before the entry's era is a floor.
+	if dated:
+		var floor_year:=0.0
+		for block:Dictionary in _blocks:
+			var end:=float(block.get("window_end",WINDOW_END_YEAR))
+			if end<era: floor_year=maxf(floor_year,end)
+		return maxf(floor_year,era*ERA_BAND_FRACTION)
+	return maxf(window_end_year(),era*ERA_BAND_FRACTION)
 
 
 ## Phase 3 re-dated earliest year of a live entry outside the registry, or -1.
