@@ -821,8 +821,8 @@ class Surrogate:
             crowding = max(0.0, self.population / max(1.0, self.carrying_capacity) - CROWDING_ONSET)
         self.crowding = crowding
         care["burden"] = {k: (1.0 + (float(v) - 1.0) * scale * (1.0 - relief)) * ((1.0 + crowding * CROWDING_MORTALITY) if k in ("under5", "child", "adult", "elder") else 1.0) for k, v in ERA_BURDEN.items()}
-        home = getattr(self, "carrying_capacity", 1e9) / (1.0 + math.sqrt(max(0, int(self.territory_settlements) - 1)) * 1.6)
-        spare = max(0.0, SPARE_LAND_ONSET - self.population / max(1.0, home)) if TERRITORY_CAPACITY else 0.0
+        # engine: spare land is judged against the founding territory only
+        spare = max(0.0, SPARE_LAND_ONSET - self.population / float(TERRITORY_CAPACITY[0][1])) if TERRITORY_CAPACITY else 0.0
         care["conception"] *= max(0.3, 1.0 - crowding * CROWDING_CONCEPTION) * (1.0 + spare * SPARE_LAND_CONCEPTION)
         care["excess_weight"] = {k: float(v) for k, v in EXCESS_WEIGHT.items()}
         care["coverage"] = cover

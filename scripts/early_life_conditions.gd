@@ -104,8 +104,9 @@ const TERRITORY_CAPACITY:Array=[[0.0,320.0],[100.0,420.0],[200.0,650.0],[300.0,8
 const CROWDING_ONSET:=0.6
 const CROWDING_MORTALITY:=0.3
 const CROWDING_CONCEPTION:=1.2
-## Far below capacity land is plentiful: couples marry earlier (the preventive
-## check relaxes), so a thinned-out society recovers instead of dying out.
+## A remnant far below the founding territory's capacity finds land plentiful:
+## couples marry earlier (the preventive check relaxes), so a thinned-out band
+## recovers instead of dying out.
 const SPARE_LAND_ONSET:=0.3
 const SPARE_LAND_CONCEPTION:=2.0
 
@@ -233,10 +234,11 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 	for key:String in ERA_BURDEN:
 		var crowd:=1.0+crowding*CROWDING_MORTALITY if key in ["under5","child","adult","elder"] else 1.0
 		burden[key]=lerpf(1.0,(1.0+(float(ERA_BURDEN[key])-1.0)*(1.0-relief))*crowd,blend)
-	# Spare land is judged against the home territory alone, so settling new
-	# land spreads people out instead of raising births everywhere.
-	var home:=capacity/(1.0+sqrt(float(maxi(1,(state.player_settlements as Array).size())-1))*1.6)
-	var spare:=maxf(0.0,SPARE_LAND_ONSET-float(state.population_exact)/maxf(1.0,home))
+	# Spare land rescues only a remnant: it is judged against the founding
+	# territory (not later capacity), so a band thinned below a few score
+	# people recovers while a large but slow-growing society gets no boost.
+	var founding:=float((TERRITORY_CAPACITY[0] as Array)[1])
+	var spare:=maxf(0.0,SPARE_LAND_ONSET-float(state.population_exact)/founding)
 	result["conception"]=float(result.conception)*lerpf(1.0,maxf(0.3,1.0-crowding*CROWDING_CONCEPTION)*(1.0+spare*SPARE_LAND_CONCEPTION),blend)
 	result["carrying_capacity"]=capacity
 	result["crowding"]=crowding
