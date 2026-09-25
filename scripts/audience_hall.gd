@@ -42,10 +42,11 @@ const WORK_KINDS:=["great_work","wonder_proposal"]
 const GREAT_WORKS_PATH:="res://scripts/great_works_audience.gd"
 const REPORT_SOURCES:=["scouts","envoys","expedition"]
 const REPORT_FACTS_MAX:=24
-const TOPICS:=["food","health","housing","security","grievance","ambition","introduction","follow_up","war","summons","mourning","callback","omen","aim"]
+const TOPICS:=["food","health","housing","security","grievance","ambition","introduction","follow_up","war","summons","mourning","callback","omen","aim","campaign"]
 const LIVES_PATH:="res://scripts/court_lives.gd"
 const AIMS_PATH:="res://scripts/legacy_aims.gd"
 const RIVALS_PATH:="res://scripts/rival_rulers.gd"
+const WAR_PATH:="res://scripts/war_loop.gd"
 const REACTIONS:=["delighted","pleased","neutral","offended","furious"]
 const VERSION:=3
 const EXPIRY_DAYS:=20
@@ -123,6 +124,7 @@ const SITUATIONS:={
 	"callback":{"kind":"petition","headline":"brings word of an old order","mechanic":"court_lives.gd; what really changed since the order"},
 	"omen":{"kind":"petition","headline":"comes about the sign","mechanic":"court_lives.gd; the real weather or health agreed with the god's word"},
 	"aim":{"kind":"petition","headline":"speaks of what we should strive for","mechanic":"legacy_aims.gd; a generational aim measured against the real simulation"},
+	"war_campaign":{"kind":"petition","headline":"comes about the fighting","mechanic":"war_loop.gd; the war leader runs the operation, the combat simulator resolves it"},
 	"dread_tribute":{"kind":"gift","headline":"brings tribute, fearing your wrath","mechanic":"civilization_exchange take/receive between real ledgers"},
 	"debt_call":{"kind":"request","headline":"comes to collect a debt","mechanic":"rival_rulers.gd debts; player stores debited"},
 	"redress_demand":{"kind":"threat","headline":"demands redress for an old wrong","mechanic":"rival_rulers.gd grudges; stores debited or ForeignDiplomacy.apply_conversation_reaction"},
@@ -238,6 +240,11 @@ static func _rivals()->GDScript:
 	## (rival_rulers.gd); loaded lazily because it reaches back into this one.
 	return load(RIVALS_PATH) as GDScript
 
+static func _war()->GDScript:
+	## Raids, reprisals and general-led war in the living world (war_loop.gd);
+	## loaded lazily because it reaches back into this one.
+	return load(WAR_PATH) as GDScript
+
 static func _great_works()->GDScript:
 	## Great Works audiences (architects, rival races, forecasts); loaded lazily
 	## because that module reaches back into this one.
@@ -320,6 +327,7 @@ static func daily(day:int)->Array[Dictionary]:
 	_lives().call("daily",day)
 	_aims().call("daily",day)
 	_rivals().call("daily",day)
+	_war().call("daily",day)
 	# The court never comes on its own: its occasions become matters, held by
 	# the official until the ruler summons them.
 	for occasion in (s.occasions as Array).duplicate():
@@ -427,7 +435,7 @@ static func _matter_urgency(audience:Dictionary)->float:
 			return float({"decision":0.85,"outcome":0.8,"event":0.7,"forecast":0.7,"news":0.3}.get(mode,0.5))
 	var occasion:Dictionary=situation.get("occasion",{}) if situation.get("occasion") is Dictionary else {}
 	if bool(occasion.get("crisis",false)): return 0.9
-	return float({"crisis_petition":0.6,"war_council":0.9,"grievance":0.5,"promise_followup":0.5,"introduction":0.3,"ambition":0.2}.get(_situation_type(audience),0.3))
+	return float({"crisis_petition":0.6,"war_council":0.9,"war_campaign":0.9,"grievance":0.5,"promise_followup":0.5,"introduction":0.3,"ambition":0.2}.get(_situation_type(audience),0.3))
 
 static func _matter_summary(audience:Dictionary)->String:
 	match String(audience.get("kind","")):
@@ -544,6 +552,7 @@ static func open_matter(matter_id:String)->Dictionary:
 			if prefilled[index] is Dictionary: append_line(String(stored.id),prefilled[index])
 		_lives().call("on_open",stored)
 		_aims().call("on_open",stored)
+		_war().call("on_open",stored)
 		return stored
 	return {}
 
@@ -1840,6 +1849,8 @@ static func _generate_court_occasion(occasion:Dictionary,day:int)->Dictionary:
 	var type:=String(occasion.get("type",""))
 	var data:Dictionary=occasion.get("data",{}) if occasion.get("data") is Dictionary else {}
 	var person:=_official(int(occasion.get("person_id",0)))
+	# A war the war leader already carries needs no second, generic war petition.
+	if type=="war_council" and bool(_war().call("has_campaign",String(occasion.get("civ_id","")))): return {}
 	if person.is_empty() and type in ["condition","war_council"]:
 		person=_relevant_official(TOPIC_OFFICES.get(String(data.get("topic","security")),["Marshal"]))
 	if person.is_empty(): return {}
@@ -2057,6 +2068,8 @@ static func options(id:String)->Array[Dictionary]:
 					for lives_option:Dictionary in _lives().call("options",audience): result.append(lives_option)
 				"aim":
 					for aim_option:Dictionary in _aims().call("options",audience): result.append(aim_option)
+				"campaign":
+					for war_option:Dictionary in _war().call("options",audience): result.append(war_option)
 				"follow_up":
 					result.append(_option("decree","Issue it now","\"%s\"" % decree,"warm",decree!="","Nothing was promised."))
 					result.append(_option("patience","Ask for patience","Admit it waits; promise nothing new.","neutral"))
@@ -2122,7 +2135,7 @@ static func _proposal_options(audience:Dictionary)->Array[Dictionary]:
 			result.append(_option("decline","Decline","Stay outside any league for now.","neutral"))
 		"war_support":
 			var enemy_name:=String(situation.get("enemy_name","their enemy"))
-			result.append(_option("stand","Stand with %s" % name,"Warmer with %s; %s will count you an enemy's friend." % [name,enemy_name],"warm"))
+			result.append(_option("stand","Stand with %s" % name,String(_war().call("stand_words",civ_id,String(situation.get("enemy","")),name,enemy_name)),"warm"))
 			result.append(_option("counsel_peace","Counsel peace","Urge both sides to stop; neither will thank you much.","neutral"))
 			result.append(_option("abstain","Stay out of it","Tell them it is not your war.","hostile"))
 		"peace_feeler":
@@ -2205,7 +2218,9 @@ static func resolve(id:String,option_id:String)->Dictionary:
 	elif audience.kind=="report": result=_resolve_report(audience,option_id)
 	else: result=_resolve_petition(audience,option_id)
 	if result.has("error"): return {"ok":false,"outcome":String(result.error),"reaction":"neutral"}
-	if String(audience.get("origin",""))=="foreign": result=_rivals().call("after_answer",audience,option_id,result)
+	if String(audience.get("origin",""))=="foreign":
+		result=_rivals().call("after_answer",audience,option_id,result)
+		_war().call("after_answer",audience,option_id)
 	audience.status="resolved"
 	audience.outcome=String(result.outcome)
 	audience.option_id=option_id
@@ -2504,7 +2519,7 @@ static func _resolve_proposal(audience:Dictionary,option_id:String)->Dictionary:
 					_shift_relation(enemy,-0.07,0.07)
 					ForeignDiplomacy.remember(enemy,"The ruler declared for %s in its war against us." % name)
 				reaction="delighted"
-				outcome="You declared for %s in its war with %s. %s warms to you; %s will not forget it. No troops were promised." % [name,String(situation.get("enemy_name","its enemy")),name,String(situation.get("enemy_name","its enemy"))]
+				outcome="You declared for %s in its war with %s. %s warms to you; %s will not forget it." % [name,String(situation.get("enemy_name","its enemy")),name,String(situation.get("enemy_name","its enemy"))]
 				memory="The ruler stood with us against %s." % String(situation.get("enemy_name","our enemy"))
 			"war_support:counsel_peace":
 				var enemy2:=String(situation.get("enemy",""))
@@ -2623,6 +2638,7 @@ static func _posture_words(actual:String,name:String)->String:
 static func _resolve_petition(audience:Dictionary,option_id:String)->Dictionary:
 	if String((audience.get("petition",{}) as Dictionary).get("topic","")) in ["mourning","callback","omen"]: return _lives().call("resolve",audience,option_id)
 	if String((audience.get("petition",{}) as Dictionary).get("topic",""))=="aim": return _aims().call("resolve",audience,option_id)
+	if String((audience.get("petition",{}) as Dictionary).get("topic",""))=="campaign": return _war().call("resolve",audience,option_id)
 	var pid:=int(audience.speaker.person_id)
 	var person:=_official(pid)
 	var name:=String(audience.speaker.name)
@@ -3402,6 +3418,7 @@ static func validate_state(data:Variant)->bool:
 	if data.has("last_speaker") and (not data.last_speaker is String or String(data.last_speaker).length()>120): return false
 	if data.has("divine") and not DIVINE.valid_state(data.divine): return false
 	if data.has("lives") and not bool(_lives().call("valid_state",data.lives)): return false
+	if data.has("war") and not bool(_war().call("valid_state",data.war)): return false
 	if data.has("court_persons"):
 		var persons:GDScript=load("res://scripts/court_persons.gd")
 		if persons==null or not bool(persons.call("valid_state",data.court_persons)): return false
