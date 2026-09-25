@@ -168,7 +168,7 @@ static func _winter(day:int)->Dictionary:
 	if not lean:
 		match String(arc.get("country","")):
 			"coast":weather="Spray freezes on the rocks at the shore" if cold<=0.5 else "The wind off the sea has turned cold and wet"
-			"hills":weather="Snow lies on the heights above the camp" if cold<=0.5 else "The wind on the hillside cuts through every hide"
+			"hills":weather="There is snow on the heights above the camp now" if cold<=0.5 else "The wind on the hillside cuts through every hide"
 			"dry":weather="The days are still dry, but the nights are bitter" if cold<6.0 else "The dry wind has turned cold"
 			"forest_edge":weather="The wood drips all day, and the nights are bitter" if cold<6.0 else "Cold rain drips from the wood all day"
 			"river":weather="Ice rims the river shallows at dawn" if cold<=0.5 else "Cold mist lies on the river every morning"
