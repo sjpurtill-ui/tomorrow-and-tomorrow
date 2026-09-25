@@ -51,7 +51,7 @@ const FOREIGN_SIGHTING_LIMIT:=32
 const CIVILIZATION_WORLD_RADIUS_X_KM:=18000.0
 const CIVILIZATION_WORLD_RADIUS_Z_KM:=9000.0
 const FOREIGN_SCOUT_GOLDEN_ANGLE:=2.399963229728653
-const FOREIGN_SCOUT_MIN_RANGE_KM:=180.0
+const FOREIGN_SCOUT_MIN_RANGE_KM:=110.0
 const FOREIGN_SCOUT_MAX_RANGE_KM:=18500.0
 const FOREIGN_SCOUT_REPLACEMENT_DAYS:=45
 const CAPTURED_SCOUT_COHORT_LIMIT:=MAX_RIVAL_CIVILIZATIONS
@@ -1776,7 +1776,9 @@ func _foreign_scout_operational_range(civ:Dictionary)->float:
 	var logistics:=clampf(float(civ.get("logistics",0.10)),0.0,1.0)
 	var knowledge:=clampf(float(civ.get("knowledge",0.10)),0.0,1.0)
 	var institutional_support:=0.58+population_scale*0.20+logistics*0.14+knowledge*0.08
-	return clampf(FOREIGN_SCOUT_MIN_RANGE_KM+pow(reach,0.82)*CIVILIZATION_WORLD_RADIUS_X_KM*institutional_support,FOREIGN_SCOUT_MIN_RANGE_KM,FOREIGN_SCOUT_MAX_RANGE_KM)
+	# Known country grows about as the player's does (scout_known_reach_km):
+	# a few hundred kilometres in the first decades, continents only later.
+	return clampf(FOREIGN_SCOUT_MIN_RANGE_KM+reach*CIVILIZATION_WORLD_RADIUS_X_KM*institutional_support,FOREIGN_SCOUT_MIN_RANGE_KM,FOREIGN_SCOUT_MAX_RANGE_KM)
 
 
 func _foreign_information_reach_km(civ:Dictionary)->float:
@@ -3076,7 +3078,27 @@ func scout_one_way_range(duration_days:int)->float:
 	var logistics:=clampf(float(WorldSimulation.state.simulation_metrics.get("logistics",0.16)),0.0,1.0)
 	var travel_knowledge:=clampf(WorldSimulation.discovery.effect("route_speed")+WorldSimulation.progression.effect("route_speed"),0.0,0.60)
 	var mount_bonus:=1.0+WorldSimulation.discovery.adoption("mounted_scouts")*0.50
-	return float(duration_days)*14.0*(0.72+logistics*0.28)*(1.0+travel_knowledge)*mount_bonus
+	return minf(float(duration_days)*14.0*(0.72+logistics*0.28)*(1.0+travel_knowledge)*mount_bonus,scout_known_reach_km())
+
+
+## How far from home a party can find its way and its food. Walking pace is
+## not the limit for a young people: parties go out along country someone has
+## already walked, and each year of hunting, trading and scouting pushes that
+## known country outward. Route knowledge and mounts push it faster. Peoples
+## already met can always be reached again. The same rule holds for every seat.
+const SCOUT_KNOWN_REACH_START_KM:=110.0
+const SCOUT_KNOWN_REACH_KM_PER_YEAR:=18.0
+func scout_known_reach_km()->float:
+	var founded:=maxi(0,int(WorldSimulation.state.settlement_founded_day))
+	var years:=maxf(0.0,(float(WorldSimulation.state.elapsed_days)-float(founded))/365.0)
+	var travel_knowledge:=clampf(WorldSimulation.discovery.effect("route_speed")+WorldSimulation.progression.effect("route_speed"),0.0,0.60)
+	var mount_bonus:=1.0+WorldSimulation.discovery.adoption("mounted_scouts")*0.50
+	var reach:=(SCOUT_KNOWN_REACH_START_KM+years*SCOUT_KNOWN_REACH_KM_PER_YEAR*(1.0+travel_knowledge*1.5))*mount_bonus
+	if WorldSimulation.actor_id=="player":
+		for civ:Dictionary in civilizations:
+			if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))>=2:
+				reach=maxf(reach,player_world_origin.distance_to(_civilization_world_position(civ))*1.35)
+	return reach
 
 
 func _resolve_route_military_sightings(mission:Dictionary,route:Array,day:int)->Array[String]:

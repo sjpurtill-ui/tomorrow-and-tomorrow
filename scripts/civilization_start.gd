@@ -2,15 +2,18 @@ extends RefCounted
 ## Every seat uses the same seeded planet sampling and viability search. No
 ## distance calculation is relative to the human player's selected location.
 ##
-## Seats come in regional groups. Early peoples did not live alone on a
-## continent: each group's first seat is placed anywhere on the planet, and its
-## other seats settle within a few days' walk of it on connected land. Every
-## seat (the player's included) is placed by the same rule, so the regions are
-## part of the seeded world, not arranged around the player.
+## Seats come in loose regional groups. Early peoples did not live alone on a
+## continent, but neither did they live within sight of each other's smoke:
+## each group's first seat is placed anywhere on the planet, and its other
+## seats settle a few weeks' walk away (250-600 km) on connected land. The
+## other groups are elsewhere on the planet, often continents away. Every seat
+## (the player's included) is placed by the same rule, so the regions are part
+## of the seeded world, not arranged around the player. Worlds already made
+## keep their stored positions; this only shapes new worlds.
 const REGION_SEATS:=3
-const NEIGHBOR_MIN_KM:=95.0
-const NEIGHBOR_MAX_KM:=210.0
-const NEIGHBOR_SEPARATION_KM:=80.0
+const NEIGHBOR_MIN_KM:=250.0
+const NEIGHBOR_MAX_KM:=600.0
+const NEIGHBOR_SEPARATION_KM:=220.0
 
 static func candidate(seed_value:int,seat:int)->Vector2:
 	var anchor_seat:=seat-posmod(seat,REGION_SEATS)
@@ -19,7 +22,22 @@ static func candidate(seed_value:int,seat:int)->Vector2:
 	var siblings:Array[Vector2]=[anchor]
 	for earlier in range(anchor_seat+1,seat):siblings.append(candidate(seed_value,earlier))
 	var neighbor:=_regional_candidate(seed_value,seat,siblings)
+	# An anchor on an island or a narrow coast has no walkable ring: its
+	# neighbours then live across the water, a little farther out.
+	if not is_finite(neighbor.x):neighbor=_across_water_candidate(seed_value,seat,siblings)
 	return neighbor if is_finite(neighbor.x) else _planet_candidate(seed_value,seat)
+
+static func _across_water_candidate(seed_value:int,seat:int,siblings:Array[Vector2])->Vector2:
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=seed_value^((seat+1)*49979687)
+	for attempt in 160:
+		var point:Vector2=siblings[0]+Vector2.from_angle(rng.randf_range(-PI,PI))*rng.randf_range(NEIGHBOR_MIN_KM,NEIGHBOR_MAX_KM*1.5)
+		if absf(point.x)>PlanetEnvironment.PLANET_WIDTH_KM*.49 or absf(point.y)>PlanetEnvironment.PLANET_DEPTH_KM*.49:continue
+		var apart:=true
+		for other in siblings:
+			if other.distance_to(point)<NEIGHBOR_SEPARATION_KM:apart=false;break
+		if apart and supports_founders(PlanetEnvironment.profile_at(point)):return point
+	return Vector2.INF
 
 static func _regional_candidate(seed_value:int,seat:int,siblings:Array[Vector2])->Vector2:
 	var anchor:=siblings[0]
@@ -37,12 +55,12 @@ static func _regional_candidate(seed_value:int,seat:int,siblings:Array[Vector2])
 		if apart and supports_founders(PlanetEnvironment.profile_at(point)):return point
 	return Vector2.INF
 
-const REGION_CELL_KM:=12.0
-const REGION_WATER_CELLS:=2
+const REGION_CELL_KM:=20.0
+const REGION_WATER_CELLS:=1
 
 static func _reachable_ring(anchor:Vector2)->Array[Vector2]:
 	## Land a band could walk to from the anchor: a bounded grid flood fill that
-	## may cross at most two cells (about 24 km) of water at a time, as over a
+	## may cross at most one cell (about 20 km) of water at a time, as over a
 	## strait or a wide river. Returns land cells in the neighbour window.
 	var limit:=ceili(NEIGHBOR_MAX_KM/REGION_CELL_KM)
 	var best_run:Dictionary={Vector2i.ZERO:0}

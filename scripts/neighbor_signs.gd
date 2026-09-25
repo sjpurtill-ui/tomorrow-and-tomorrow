@@ -13,9 +13,11 @@ const ENCOUNTER_KM:=58.0
 const WALK_KM_PER_DAY:=25.0
 
 static func range_km(civ:Dictionary)->float:
-	## How far a people's traces carry: their hunting and gathering range plus
-	## the smoke of their fires, growing slowly with their numbers.
-	return clampf(70.0+sqrt(maxf(1.0,float(civ.get("population",120.0))))*3.0,90.0,160.0)
+	## How far a people's traces carry: their hunting and gathering range, their
+	## seasonal camps and the smoke of their fires, growing slowly with their
+	## numbers. Signs reach well beyond the distance at which people are met,
+	## so a people is usually heard of years before it is met.
+	return clampf(120.0+sqrt(maxf(1.0,float(civ.get("population",120.0))))*4.0,150.0,240.0)
 
 static func read_route(world:Node,route:Array,day:int)->Array[Dictionary]:
 	var signs:Array[Dictionary]=[]
@@ -46,6 +48,9 @@ static func _card(world:Node,civ:Dictionary,seen_at:Vector2,home:Vector2,distanc
 	if distance<90.0:
 		text=String(["Fresh tracks of many feet crossed our trail, and saplings had been cut with stone, not teeth. They lead %s. Whoever made them lives perhaps %s beyond." % [bearing,walk],
 			"We found a cold hearth ringed with stones, the ash still soft, and bones cracked for marrow. The trail from it runs %s, perhaps %s." % [bearing,walk]][rng.randi_range(0,1)])
+	elif distance>=150.0:
+		text=String(["Far out in the %s country we came on a hunting camp of strangers, lately left: shelters of bent poles, a drying rack, a spear point of a make we do not know. Their home must lie beyond, perhaps %s." % [bearing,walk],
+			"We found a butchered carcass and a cache of dried meat, hidden with care by people who are not ours. Their trail runs %s; their fires must be %s off." % [bearing,walk]][rng.randi_range(0,1)])
 	else:
 		text=String(["Smoke rose at dusk far off to the %s, more than one fire. It is someone's home, perhaps %s from where we stood." % [bearing,walk],
 			"From a rise we saw smoke hanging over the %s country, too steady for a wildfire. Perhaps %s off." % [bearing,walk]][rng.randi_range(0,1)])

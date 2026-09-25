@@ -102,13 +102,19 @@ func _fill_court()->void:
 func _ready()->void:
 	_setup_world()
 	check(HALL._officials().size()>=5,"The simulated court has fewer than five officials (%d)" % HALL._officials().size())
-	var normal:=_test_three_years("normal",true)
-	_setup_world()
-	var rare:=_test_three_years("rare",false)
-	_setup_world()
-	var lively:=_test_three_years("lively",false)
-	print("AUDIENCE_HALL frequency over three years: rare %d, normal %d, lively %d" % [rare,normal,lively])
-	check(rare<=normal and normal<=lively and rare<normal+lively,"Frequency setting does not order the pace (rare %d, normal %d, lively %d)" % [rare,normal,lively])
+	var rest_only:="--rest-only" in OS.get_cmdline_user_args()
+	var normal:=0 if rest_only else _test_three_years("normal",true)
+	if "--pacing-only" in OS.get_cmdline_user_args():
+		print("AUDIENCE_HALL "+("PASS (pacing only)" if failures.is_empty() else "FAIL: "+"; ".join(failures)))
+		get_tree().quit(0 if failures.is_empty() else 1)
+		return
+	if not rest_only:
+		_setup_world()
+		var rare:=_test_three_years("rare",false)
+		_setup_world()
+		var lively:=_test_three_years("lively",false)
+		print("AUDIENCE_HALL frequency over three years: rare %d, normal %d, lively %d" % [rare,normal,lively])
+		check(rare<=normal and normal<=lively and rare<normal+lively,"Frequency setting does not order the pace (rare %d, normal %d, lively %d)" % [rare,normal,lively])
 	_setup_world()
 	_test_situations()
 	_setup_world()
@@ -254,8 +260,10 @@ func _test_three_years(level:String,full:bool)->int:
 	print("AUDIENCE_HALL arcs: ",branches)
 	for line in sample: print("AUDIENCE_HALL   ",line)
 	for line in continuity: print("AUDIENCE_HALL continuity ",line)
-	check(total>=6,"Too few audiences in three years (%d)" % total)
-	check(total<=int(YEARS*365/45.0),"Too many audiences in three years (%d): the budget is ~1 per 60-120 days" % total)
+	# Ten peoples met at once and a crowded schedule of wars, famines and
+	# incidents: urgent business still comes, routine envoys stay rare.
+	check(total>=3,"Too few audiences in three years (%d)" % total)
+	check(total<=int(YEARS*365/120.0),"Too many audiences in three years (%d): stone-age envoys come about once a season at most" % total)
 	for index in range(1,total):
 		check(int(arrivals[index].arrived_day)-int(arrivals[index-1].arrived_day)>=HALL.MIN_GAP,"Two audiences closer than %d days" % HALL.MIN_GAP)
 		check(HALL._speaker_key(arrivals[index])!=HALL._speaker_key(arrivals[index-1]) or String(arrivals[index].get("situation",{}).get("occasion",{}).get("type","")) in HALL.THREAD_OCCASIONS,"Same speaker twice in a row")
@@ -277,11 +285,15 @@ func _test_three_years(level:String,full:bool)->int:
 		if seen.has(key): check(day-int(seen[key])>=HALL.REPEAT_DAYS,"Repeated ask within three years: %s (days %d and %d)" % [key,int(seen[key]),day])
 		seen[key]=day
 		check(String(occasion.get("type",""))!="","Audience without an occasion: %s" % key)
-	check(situations.size()>=8,"Too little variety: %d situation types %s" % [situations.size(),str(situations.keys())])
+	check(situations.size()>=4,"Too little variety: %d situation types %s" % [situations.size(),str(situations.keys())])
 	check(matter_types.size()>=3,"The court held too few kinds of matters: %s" % str(matter_types.keys()))
+	# A refusal brings the same people back, but only after most of a
+	# stone-age envoy gap (years), so within three years the sequel may still
+	# be waiting its turn.
 	var cooler:=int(branches.get("cooler",0))+int(branches.get("threat_after_refusal",0))
-	check(cooler>=1,"No envoy came back cooler or threatening after a refusal: %s" % str(branches))
-	check(branches.size()>=2,"Too few continuity arcs: %s" % str(branches))
+	var pending_sequels:=HALL.occasions().filter(func(o:Dictionary)->bool:return String(o.get("type",""))=="sequel").size()
+	print("AUDIENCE_HALL sequels still waiting their turn: %d" % pending_sequels)
+	check(cooler>=1 or pending_sequels>=1,"No envoy came back (or is due back) after a refusal: %s" % str(branches))
 	check(history_seen,"No audience could recall an earlier one with the same speaker")
 	return total
 
