@@ -1,0 +1,1741 @@
+{
+ "line": "institutions",
+ "schema": "research_600_effects/1",
+ "items": {
+  "appointed_department_prefects": {
+   "effects": {
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0005,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.002,
+    "state_capacity": 0.0022
+   },
+   "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
+   "name": "Department Prefects",
+   "observation": "A prefect named by the capital runs each uniform department, and the old provinces lose their assemblies."
+  },
+  "civil_merit_order": {
+   "effects": {
+    "cohesion": 0.0004,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "name": "Order of Civil Merit",
+   "observation": "A ribboned order of merit is given to commoners for service, not for birth."
+  },
+  "universal_civil_code": {
+   "effects": {
+    "institutional_rigidity": 0.0008,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0004,
+    "standardization": 0.0026,
+    "state_capacity": 0.0035,
+    "trade_capacity": 0.0019
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Universal Civil Code",
+   "observation": "One code of law governs every person's property, contracts, marriage and inheritance.",
+   "ability_reason": "Every court applies the same written rules; the patchwork of local customs ends.",
+   "social_consequence": "Estate privileges and local customs vanish from the courts; the father's authority in the household is written into law."
+  },
+  "administrative_courts": {
+   "effects": {
+    "institutional_rigidity": -0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0009
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Administrative Courts",
+   "observation": "Special courts hear complaints against the state's own officials and can overturn their acts."
+  },
+  "commercial_code": {
+   "effects": {
+    "standardization": 0.0013,
+    "state_capacity": 0.0005,
+    "trade_capacity": 0.0024
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Commercial Code",
+   "observation": "A code sets the rules for merchants, bills of exchange and trading companies."
+  },
+  "assembly_ombudsman": {
+   "effects": {
+    "institutional_rigidity": -0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0004
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Assembly Ombudsman",
+   "observation": "An officer of the assembly hears complaints against officials and reports them to the chamber."
+  },
+  "single_minister_departments": {
+   "effects": {
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0022,
+    "task_coordination": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "name": "Single-minister Departments",
+   "observation": "Each department answers to one minister for its whole field, instead of a board."
+  },
+  "granted_constitution": {
+   "effects": {
+    "cohesion": 0.0006,
+    "institutional_rigidity": -0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.001,
+    "literacy": 0.0126,
+    "state_capacity": 0.0018
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Granted Constitution",
+   "observation": "The ruler grants a written constitution under the god: an elected chamber, fixed rights and a limit on his own power.",
+   "ability_reason": "Rule is now bound by written law; ministers, chamber and ruler each know their part.",
+   "social_consequence": "The ruler accepts limits in writing; nobles and burghers now argue in the chamber rather than at court."
+  },
+  "great_realm_conference": {
+   "effects": {
+    "legitimacy": 0.0002,
+    "security_efficiency": 0.0031,
+    "trade_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
+   "name": "Great Realm Conference",
+   "observation": "The great realms send ministers to standing conferences that settle borders and disputes."
+  },
+  "annual_budget_vote": {
+   "effects": {
+    "institutional_rigidity": -0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Annual Budget Vote",
+   "observation": "Every year the chamber votes the budget, line by line, and no tax is collected without it."
+  },
+  "penitentiary_sentences": {
+   "effects": {
+    "cohesion": 0.0002,
+    "food_storage": -0.0008,
+    "injury_risk": -0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003,
+    "security_efficiency": 0.0021
+   },
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png",
+   "name": "Penitentiary Sentences",
+   "observation": "Prisons with cells and labour replace hanging for most crimes."
+  },
+  "public_instruction_ministry": {
+   "effects": {
+    "adoption_rate": 0.0032,
+    "fertility_transition": 0.039,
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.0019,
+    "labor_demand": 0.0001,
+    "literacy": 0.041,
+    "state_capacity": 0.0015
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "Ministry of Public Instruction",
+   "observation": "A ministry inspects schools, trains teachers and sets one course of study for the realm."
+  },
+  "householder_franchise": {
+   "effects": {
+    "cohesion": 0.0007,
+    "institutional_rigidity": -0.0013,
+    "legitimacy": 0.0012,
+    "state_capacity": -0.0012
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Householder Franchise",
+   "observation": "The vote is widened from great landowners to the middling householders of the towns.",
+   "ability_reason": "The chamber now speaks for the towns' middling sort, and ministers must win their votes.",
+   "social_consequence": "The old landed families lose their hold on the chamber; shopkeepers and masters now matter."
+  },
+  "customs_union": {
+   "effects": {
+    "cohesion": 0.0004,
+    "legitimacy": -0.0002,
+    "standardization": 0.0018,
+    "state_capacity": 0.0015,
+    "trade_capacity": 0.0035
+   },
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
+   "name": "Customs Union",
+   "observation": "Member realms abolish the tolls between them and share one outer tariff.",
+   "ability_reason": "One market spans many realms; goods cross old borders without paying at every river.",
+   "social_consequence": "Small toll-collecting lords and frontier towns lose their income; the realms' merchants learn to think as one market."
+  },
+  "poor_law_boards": {
+   "effects": {
+    "cohesion": -0.0007,
+    "food_storage": 0.0008,
+    "health_protection": 0.0007,
+    "labor_demand": 0.0001,
+    "legitimacy": -0.0002,
+    "state_capacity": 0.0019
+   },
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "name": "Poor-law Boards",
+   "observation": "A central board groups parishes into unions, each with a workhouse for the destitute.",
+   "social_consequence": "Relief is given only inside the hard workhouse; the poor dread it more than hunger."
+  },
+  "examined_patent_office": {
+   "effects": {
+    "craft_output": 0.0011,
+    "institutional_rigidity": 0.0002,
+    "knowledge_rate": 0.0015,
+    "trade_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Examined Patent Office",
+   "observation": "Examiners check each invention before granting its inventor sole rights for a term of years."
+  },
+  "responsible_ministry": {
+   "effects": {
+    "cohesion": 0.0002,
+    "institutional_rigidity": -0.0011,
+    "legitimacy": 0.0009,
+    "state_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/paper/public_office_handover.png",
+   "name": "Responsible Ministry",
+   "observation": "Ministers resign when they lose a vote of confidence in the elected chamber.",
+   "ability_reason": "Government changes hands without a coup; the chamber can dismiss those who rule badly.",
+   "social_consequence": "The ruler's favour no longer keeps a minister in office."
+  },
+  "central_note_monopoly": {
+   "effects": {
+    "institutional_rigidity": 0.0002,
+    "standardization": 0.001,
+    "state_capacity": 0.0015,
+    "trade_capacity": 0.0009
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Central Note Monopoly",
+   "observation": "The central bank alone may issue notes, and other banks' notes are withdrawn."
+  },
+  "bankruptcy_discharge": {
+   "effects": {
+    "cohesion": 0.0002,
+    "legitimacy": 0.0002,
+    "trade_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Bankruptcy Discharge",
+   "observation": "Honest bankrupts are discharged from their debts; the debtors' prisons close."
+  },
+  "grain_tariff_repeal": {
+   "effects": {
+    "cohesion": -0.0002,
+    "legitimacy": 0.0001,
+    "nutrition_quality": 0.0008,
+    "trade_capacity": 0.0009
+   },
+   "art": "res://assets/ui/research/subjects/regional_granaries-v1.png",
+   "name": "Grain Tariff Repeal",
+   "observation": "The duties on imported grain are repealed, and bread grows cheaper.",
+   "social_consequence": "Landowners lose protected prices; the towns' workers gain cheaper bread."
+  },
+  "manhood_suffrage": {
+   "effects": {
+    "cohesion": 0.0009,
+    "institutional_rigidity": -0.0011,
+    "legitimacy": 0.001,
+    "state_capacity": -0.0012
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Manhood Suffrage",
+   "observation": "Every grown man may vote for the chamber, whatever his property.",
+   "ability_reason": "Government must win the consent of the many; the chamber becomes the people's voice.",
+   "social_consequence": "Labourers vote beside masters; parties must speak to the poor."
+  },
+  "mass_political_parties": {
+   "effects": {
+    "adoption_rate": 0.0024,
+    "cohesion": -0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0006,
+    "literacy": 0.0185
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Mass Political Parties",
+   "observation": "Parties with platforms, clubs, dues and newspapers organise voters across the realm.",
+   "ability_reason": "Voters are organized into lasting parties that carry policies from one chamber to the next.",
+   "social_consequence": "Politics becomes a career and a loyalty; families and villages divide by party."
+  },
+  "ruler_plebiscite": {
+   "effects": {
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0005,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0008
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Ruler's Plebiscite",
+   "observation": "The whole people vote yes or no on the ruler's rule, and the count is announced as a mandate.",
+   "social_consequence": "Opponents are shouted down as enemies of the people's vote."
+  },
+  "competitive_civil_service": {
+   "effects": {
+    "institutional_rigidity": 0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003,
+    "standardization": 0.002,
+    "state_capacity": 0.0042
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "name": "Competitive Civil Service",
+   "observation": "Posts in the civil service are filled by open competitive examination instead of patronage.",
+   "ability_reason": "Offices are staffed by trained, examined officials; the state becomes capable of running great programmes.",
+   "social_consequence": "Graduates rise by merit; the patronage of great families weakens."
+  },
+  "limited_liability_registration": {
+   "effects": {
+    "craft_output": 0.0024,
+    "legitimacy": -0.0001,
+    "trade_capacity": 0.0011
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Limited Liability Registration",
+   "observation": "Any company can register with limited liability; shareholders risk only what they put in."
+  },
+  "secret_printed_ballot": {
+   "effects": {
+    "cohesion": 0.0004,
+    "institutional_rigidity": -0.0007,
+    "legitimacy": 0.0005,
+    "literacy": 0.0185
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Secret Printed Ballot",
+   "observation": "Voters mark a printed ballot in a closed booth; bribes and threats lose their force."
+  },
+  "civil_divorce_courts": {
+   "effects": {
+    "cohesion": -0.0002,
+    "fertility_transition": 0.0085,
+    "institutional_rigidity": -0.0005,
+    "legitimacy": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Civil Divorce Courts",
+   "observation": "Divorce is granted by civil courts, not by the priests of the god.",
+   "social_consequence": "Unhappy marriages can end; preachers call it the ruin of the family."
+  },
+  "dependencies_ministry": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "legitimacy": -0.0002,
+    "state_capacity": 0.002,
+    "trade_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
+   "name": "Dependencies Ministry",
+   "observation": "A ministry governs the distant dependencies and their trade."
+  },
+  "rural_district_assemblies": {
+   "effects": {
+    "cohesion": 0.0006,
+    "institutional_rigidity": -0.0005,
+    "legitimacy": 0.0006,
+    "state_capacity": 0.0007
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Rural District Assemblies",
+   "observation": "Elected assemblies govern roads, schools and relief in rural districts."
+  },
+  "independent_audit_office": {
+   "effects": {
+    "institutional_rigidity": -0.0011,
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0026,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "name": "Independent Audit Office",
+   "observation": "The audit office reports to the chamber, not to the ministers it audits."
+  },
+  "lender_of_last_resort": {
+   "effects": {
+    "disaster_resilience": 0.0016,
+    "state_capacity": 0.0013,
+    "trade_capacity": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Lender of Last Resort",
+   "observation": "In a panic the central bank lends freely against good security, and runs on banks stop spreading."
+  },
+  "ceremonial_crown": {
+   "effects": {
+    "cohesion": 0.0006,
+    "institutional_rigidity": -0.0005,
+    "legitimacy": 0.0007
+   },
+   "art": "res://assets/ui/research/discovery-600/royal_ancestor_offerings.png",
+   "name": "Ceremonial Crown",
+   "observation": "The crown reigns and ministers govern; the ruler becomes the realm's symbol above party."
+  },
+  "career_diplomatic_service": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0045,
+    "state_capacity": 0.0013,
+    "trade_capacity": 0.0004
+   },
+   "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
+   "name": "Career Diplomatic Service",
+   "observation": "Trained career envoys staff embassies in every realm."
+  },
+  "interrealm_arbitration": {
+   "effects": {
+    "legitimacy": 0.0003,
+    "security_efficiency": 0.0045,
+    "trade_capacity": 0.0004
+   },
+   "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
+   "name": "Interrealm Arbitration",
+   "observation": "Realms submit disputes to standing arbitrators instead of war."
+  },
+  "gold_standard_link": {
+   "effects": {
+    "disaster_resilience": -0.0008,
+    "standardization": 0.0019,
+    "trade_capacity": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Gold Standard",
+   "observation": "Trading realms tie their money to gold at fixed rates.",
+   "social_consequence": "Slumps spread from realm to realm, and wages must fall to defend the rate."
+  },
+  "municipal_utilities": {
+   "effects": {
+    "cohesion": 0.0003,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0015,
+    "water_safety": 0.0016
+   },
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
+   "name": "Municipal Utilities",
+   "observation": "Towns own their water, gas and tramways and run them for the public."
+  },
+  "probation_parole": {
+   "effects": {
+    "cohesion": 0.0003,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003,
+    "security_efficiency": 0.0015
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Probation and Parole",
+   "observation": "Offenders serve part of their sentence under supervision outside prison."
+  },
+  "married_women_property": {
+   "effects": {
+    "cohesion": 0.0003,
+    "fertility_transition": 0.0076,
+    "legitimacy": 0.0005,
+    "trade_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Married Women's Property",
+   "observation": "Married women keep their own property and wages.",
+   "social_consequence": "Wives gain means of their own; husbands lose control of their wives' earnings."
+  },
+  "audited_company_accounts": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "standardization": 0.0015,
+    "state_capacity": 0.0005,
+    "trade_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "name": "Audited Company Accounts",
+   "observation": "Public companies must publish yearly accounts checked by an auditor."
+  },
+  "elected_county_councils": {
+   "effects": {
+    "cohesion": 0.0003,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Elected County Councils",
+   "observation": "Elected councils take over the counties from appointed gentlemen."
+  },
+  "old_age_pensions": {
+   "effects": {
+    "cohesion": 0.0008,
+    "fertility_transition": 0.0153,
+    "health_protection": 0.0004,
+    "labor_demand": 0.0001,
+    "labor_efficiency": -0.0008,
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "name": "Old-age Pensions",
+   "observation": "The state pays a pension to the old.",
+   "social_consequence": "The old are no longer wholly dependent on their children; the young pay for their elders through taxes."
+  },
+  "antimonopoly_law": {
+   "effects": {
+    "institutional_rigidity": -0.0008,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003,
+    "trade_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Antimonopoly Law",
+   "observation": "A law forbids monopolies and price rings, and courts can break up trusts."
+  },
+  "womens_suffrage": {
+   "effects": {
+    "cohesion": 0.0008,
+    "fertility_transition": 0.0076,
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0016
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Women's Suffrage",
+   "observation": "Women vote for the chamber on the same terms as men.",
+   "ability_reason": "Half the people gain a voice in government; health, schooling and family law gain weight in the chamber.",
+   "social_consequence": "Women enter politics and the professions in growing numbers; old household roles are questioned."
+  },
+  "initiative_referendum": {
+   "effects": {
+    "cohesion": 0.0002,
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0005,
+    "state_capacity": -0.0012
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Initiative and Referendum",
+   "observation": "Citizens can put a law to a vote of the whole people."
+  },
+  "juvenile_courts": {
+   "effects": {
+    "cohesion": 0.0005,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003,
+    "security_efficiency": 0.0015
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Juvenile Courts",
+   "observation": "Children are tried apart from adults and sent to reform rather than prison."
+  },
+  "proportional_representation": {
+   "effects": {
+    "cohesion": 0.0005,
+    "legitimacy": 0.0009,
+    "state_capacity": -0.0012
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Proportional Representation",
+   "observation": "Seats in the chamber are shared among party lists by their share of the vote.",
+   "social_consequence": "Small parties gain seats; governments become coalitions that bargain for every bill."
+  },
+  "rate_regulation_commissions": {
+   "effects": {
+    "institutional_rigidity": 0.0001,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0018,
+    "trade_capacity": 0.0018
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Rate Regulation Commissions",
+   "observation": "Commissions set the rates charged by railways, gas, power and water companies."
+  },
+  "unemployment_insurance": {
+   "effects": {
+    "cohesion": 0.0012,
+    "labor_demand": 0.0001,
+    "labor_efficiency": -0.0008,
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "name": "Unemployment Insurance",
+   "observation": "Workers and employers pay into a fund that supports the jobless."
+  },
+  "upper_chamber_curbed": {
+   "effects": {
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Upper Chamber Curbed",
+   "observation": "The hereditary upper chamber loses its veto over money bills."
+  },
+  "war_economy_boards": {
+   "effects": {
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0002,
+    "labor_demand": 0.0003,
+    "labor_efficiency": -0.0008,
+    "state_capacity": 0.0034,
+    "task_coordination": 0.0013,
+    "warfare_readiness": 0.0027
+   },
+   "art": "res://assets/ui/research/subjects/military_staffs-v1.png",
+   "name": "War Economy Boards",
+   "observation": "Boards direct factories, labour and raw materials to the war effort.",
+   "ability_reason": "The state can turn the whole economy to supplying its generals; the field army is fed shells and men at unheard-of scale.",
+   "social_consequence": "Workers are directed to war work, goods are rationed and strikes are forbidden for the duration."
+  },
+  "frontier_passport_control": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0055,
+    "state_capacity": 0.0008,
+    "trade_capacity": -0.0012
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Frontier Passport Control",
+   "observation": "Every traveller needs a passport and a visa to cross a frontier."
+  },
+  "one_party_state": {
+   "effects": {
+    "cohesion": -0.0005,
+    "institutional_rigidity": 0.0006,
+    "knowledge_rate": -0.0016,
+    "legitimacy": -0.0009,
+    "security_efficiency": 0.0068,
+    "state_capacity": 0.003
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "name": "One-party State",
+   "observation": "The ruling party fuses with the state; other parties are banned and the chamber applauds.",
+   "ability_reason": "The state can mobilize every office and every person without opposition, and without correction.",
+   "social_consequence": "Opponents are imprisoned or silent; neighbours inform on neighbours, and truth is what the party says."
+  },
+  "league_of_realms": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0005,
+    "security_efficiency": 0.0068,
+    "trade_capacity": 0.0018
+   },
+   "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
+   "name": "League of Realms",
+   "observation": "The realms found a league with a standing assembly, a council and a secretariat to keep the peace.",
+   "ability_reason": "Realms have a permanent place to settle disputes; war needs a reason others will accept."
+  },
+  "constitutional_court": {
+   "effects": {
+    "cohesion": 0.0004,
+    "institutional_rigidity": -0.0032,
+    "legitimacy": 0.0011,
+    "state_capacity": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Constitutional Court",
+   "observation": "A constitutional court can strike down laws that break the constitution.",
+   "ability_reason": "Even the chamber is under the law; rights cannot be voted away by a passing majority."
+  },
+  "interrealm_permanent_court": {
+   "effects": {
+    "legitimacy": 0.0004,
+    "security_efficiency": 0.0027,
+    "trade_capacity": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Interrealm Permanent Court",
+   "observation": "A standing court judges disputes between realms."
+  },
+  "corporatist_chambers": {
+   "effects": {
+    "cohesion": 0.0002,
+    "institutional_rigidity": 0.0002,
+    "legitimacy": -0.0001,
+    "state_capacity": 0.0012,
+    "trade_capacity": -0.0006
+   },
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "name": "Corporatist Chambers",
+   "observation": "Chambers of trades and employers sit inside the state and bargain wages and prices."
+  },
+  "central_five_year_plan": {
+   "effects": {
+    "cohesion": -0.0002,
+    "craft_output": 0.0043,
+    "institutional_rigidity": 0.0004,
+    "labor_demand": 0.0002,
+    "legitimacy": -0.0002,
+    "nutrition_quality": -0.0016,
+    "state_capacity": 0.0038,
+    "task_coordination": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "name": "Central Five-year Plan",
+   "observation": "A planning office sets five-year targets for every factory and farm in the realm.",
+   "ability_reason": "The state can drive heavy industry at forced pace; shortages follow wherever the plan errs.",
+   "social_consequence": "Peasants are forced onto collective farms; queues and shortages are part of daily life."
+  },
+  "emergency_decree_rule": {
+   "effects": {
+    "cohesion": -0.0003,
+    "institutional_rigidity": 0.0004,
+    "legitimacy": -0.0006,
+    "security_efficiency": 0.0055,
+    "state_capacity": 0.0015
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "name": "Emergency Decree Rule",
+   "observation": "Emergency decrees suspend the chamber and rule by the executive's signature.",
+   "social_consequence": "Rights are suspended in the name of order, and the suspension rarely ends."
+  },
+  "deposit_insurance": {
+   "effects": {
+    "cohesion": 0.0003,
+    "disaster_resilience": 0.0012,
+    "trade_capacity": 0.0018
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Deposit Insurance",
+   "observation": "Small savers' deposits are guaranteed by the state, and bank runs cease."
+  },
+  "state_propaganda_ministry": {
+   "effects": {
+    "adoption_rate": -0.0008,
+    "cohesion": 0.0006,
+    "institutional_rigidity": 0.0005,
+    "knowledge_rate": -0.0016,
+    "legitimacy": 0.0003,
+    "warfare_readiness": 0.0012
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "name": "State Propaganda Ministry",
+   "observation": "A ministry commands press, radio and film and tells the people what to believe.",
+   "social_consequence": "Every newspaper says the same thing; private doubt becomes dangerous to speak."
+  },
+  "national_income_accounts": {
+   "effects": {
+    "knowledge_preservation": 0.0016,
+    "standardization": 0.0019,
+    "state_capacity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "name": "National Income Accounts",
+   "observation": "National accounts measure the realm's total output and income each year."
+  },
+  "securities_commission": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003,
+    "standardization": 0.0006,
+    "trade_capacity": 0.0024
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Securities Commission",
+   "observation": "A commission polices share markets against fraud and insider dealing."
+  },
+  "countercyclical_spending": {
+   "effects": {
+    "cohesion": 0.0005,
+    "disaster_resilience": 0.0012,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Countercyclical Spending",
+   "observation": "The state spends more in the slump and less in the boom to steady employment."
+  },
+  "fixed_exchange_accord": {
+   "effects": {
+    "disaster_resilience": 0.0012,
+    "standardization": 0.0013,
+    "trade_capacity": 0.0042
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Fixed Exchange Accord",
+   "observation": "The realms fix their currencies to one another and found a world monetary fund."
+  },
+  "atrocity_tribunals": {
+   "effects": {
+    "cohesion": 0.0002,
+    "legitimacy": 0.0006,
+    "security_efficiency": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Atrocity Tribunals",
+   "observation": "Tribunals try leaders for crimes against whole peoples."
+  },
+  "world_assembly_of_realms": {
+   "effects": {
+    "health_protection": 0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0007,
+    "security_efficiency": 0.0036,
+    "trade_capacity": 0.0024
+   },
+   "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
+   "name": "World Assembly of Realms",
+   "observation": "All realms sit in a world assembly with a security council and specialized agencies.",
+   "ability_reason": "A standing council where realms meet, and agencies for health, food and aid; generals read its conventions."
+  },
+  "nationalized_core_industries": {
+   "effects": {
+    "craft_output": 0.0013,
+    "institutional_rigidity": 0.0005,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.002,
+    "trade_capacity": -0.0012
+   },
+   "art": "res://assets/ui/research/subjects/blast_furnace-v1.png",
+   "name": "Nationalized Core Industries",
+   "observation": "Coal, steel, rail and power are taken into state ownership."
+  },
+  "welfare_state": {
+   "effects": {
+    "cohesion": 0.0016,
+    "fertility_transition": 0.0173,
+    "health_protection": 0.0014,
+    "labor_demand": 0.0004,
+    "labor_efficiency": -0.0016,
+    "legitimacy": 0.0012,
+    "nutrition_quality": 0.0009,
+    "state_capacity": 0.0016
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "name": "Welfare State",
+   "observation": "One social insurance and assistance office cares for the citizen from cradle to grave.",
+   "ability_reason": "Every citizen is protected against sickness, old age, unemployment and want.",
+   "social_consequence": "Taxes rise to pay for it; no one starves, but many depend on the state."
+  },
+  "universal_rights_declaration": {
+   "effects": {
+    "cohesion": 0.0003,
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Universal Rights Declaration",
+   "observation": "The realms agree on a declaration of rights belonging to every person."
+  },
+  "regional_rights_court": {
+   "effects": {
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Regional Rights Court",
+   "observation": "Citizens of the member realms can take their own state to a regional rights court."
+  },
+  "value_added_tax": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0062,
+    "trade_capacity": -0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Value-added Tax",
+   "observation": "A tax on the value added at every stage of production brings in steady revenue."
+  },
+  "common_market_union": {
+   "effects": {
+    "cohesion": 0.0002,
+    "legitimacy": -0.0002,
+    "standardization": 0.0015,
+    "state_capacity": 0.0021,
+    "trade_capacity": 0.0051
+   },
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
+   "name": "Common Market Union",
+   "observation": "Neighbouring realms form a common market with shared rules for goods, capital and labour.",
+   "ability_reason": "Firms sell across many realms as one market; common rules replace border checks.",
+   "social_consequence": "Farmers and small firms face competition from across old borders; some regions boom and others fade."
+  },
+  "dependency_self_rule": {
+   "effects": {
+    "cohesion": 0.0005,
+    "legitimacy": 0.0006,
+    "state_capacity": -0.0023,
+    "trade_capacity": -0.0012
+   },
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
+   "name": "Self-rule for Dependencies",
+   "observation": "The distant dependencies are granted self-rule and become realms of their own.",
+   "ability_reason": "The empire becomes a commonwealth of free realms; old revenues and garrisons are given up.",
+   "social_consequence": "Settlers and officials come home; the metropolis loses its sense of greatness."
+  },
+  "public_defenders": {
+   "effects": {
+    "cohesion": 0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Public Defenders",
+   "observation": "The state pays lawyers to defend accused people who cannot afford one."
+  },
+  "civil_rights_law": {
+   "effects": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0024,
+    "legitimacy": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Civil Rights Law",
+   "observation": "The law forbids discrimination by descent, faith or sex in work, housing and the vote.",
+   "ability_reason": "Excluded groups gain full legal equality and a claim on the courts.",
+   "social_consequence": "Old hierarchies are broken; those who benefited from them resist and resent it."
+  },
+  "death_penalty_abolition": {
+   "effects": {
+    "cohesion": 0.0002,
+    "legitimacy": 0.0004,
+    "security_efficiency": -0.0015
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Death Penalty Abolition",
+   "observation": "The death penalty is abolished for all crimes."
+  },
+  "freedom_of_information": {
+   "effects": {
+    "institutional_rigidity": -0.0016,
+    "knowledge_preservation": 0.0006,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0005
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Freedom of Information",
+   "observation": "Citizens can demand the release of government records."
+  },
+  "ombudsman_network": {
+   "effects": {
+    "institutional_rigidity": -0.0016,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0004
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Ombudsman Network",
+   "observation": "Ombudsmen hear complaints against every ministry and town."
+  },
+  "floating_fiat_currency": {
+   "effects": {
+    "disaster_resilience": -0.0008,
+    "state_capacity": 0.0009,
+    "trade_capacity": 0.0015
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Floating Fiat Currency",
+   "observation": "Currencies float freely, backed only by the state's credit."
+  },
+  "personal_data_protection": {
+   "effects": {
+    "cohesion": 0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0006,
+    "trade_capacity": -0.0006
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Personal Data Protection",
+   "observation": "A law governs what records may be kept about a person and who may see them."
+  },
+  "anticorruption_commission": {
+   "effects": {
+    "institutional_rigidity": -0.0016,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.001,
+    "state_capacity": 0.0018
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "name": "Anticorruption Commission",
+   "observation": "An independent commission investigates corruption in public office."
+  },
+  "state_enterprise_privatization": {
+   "effects": {
+    "cohesion": -0.0005,
+    "craft_output": 0.0024,
+    "state_capacity": -0.0012,
+    "trade_capacity": 0.0018
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "State Enterprise Privatization",
+   "observation": "State enterprises are sold to shareholders.",
+   "social_consequence": "Workers in old state industries lose secure jobs; new owners cut and modernize."
+  },
+  "truth_commissions": {
+   "effects": {
+    "cohesion": 0.0012,
+    "legitimacy": 0.0009
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Truth Commissions",
+   "observation": "Truth commissions hear the victims of past rule by force."
+  },
+  "participatory_budgets": {
+   "effects": {
+    "cohesion": 0.0012,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Participatory Budgets",
+   "observation": "Neighbourhood assemblies decide part of the town budget."
+  },
+  "inflation_targeting": {
+   "effects": {
+    "disaster_resilience": 0.0016,
+    "standardization": 0.0026,
+    "state_capacity": 0.001,
+    "trade_capacity": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Inflation Targeting",
+   "observation": "An independent central bank sets interest rates to hold inflation to a target."
+  },
+  "electoral_commissions": {
+   "effects": {
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0016
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Electoral Commissions",
+   "observation": "Independent commissions draw districts and run elections."
+  },
+  "trade_dispute_panels": {
+   "effects": {
+    "legitimacy": 0.0003,
+    "trade_capacity": 0.0016
+   },
+   "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
+   "name": "Trade Dispute Panels",
+   "observation": "A world trade body settles disputes between realms before panels."
+  },
+  "single_currency_union": {
+   "effects": {
+    "disaster_resilience": -0.0008,
+    "legitimacy": -0.0001,
+    "standardization": 0.0038,
+    "trade_capacity": 0.0022
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Single Currency Union",
+   "observation": "Many realms share one currency and one central bank.",
+   "social_consequence": "Realms give up their own money; a crisis in one strains all."
+  },
+  "online_government_services": {
+   "effects": {
+    "adoption_rate": 0.0024,
+    "labor_demand": -0.0029,
+    "state_capacity": 0.0057,
+    "task_coordination": 0.001
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "name": "Online Government Services",
+   "observation": "Taxes, licences and benefits can be handled online."
+  },
+  "equal_marriage_law": {
+   "effects": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Equal Marriage Law",
+   "observation": "Marriage is open to any two adults, whatever their sex.",
+   "social_consequence": "Preachers of the god protest; many families celebrate weddings once forbidden."
+  },
+  "digital_identity_register": {
+   "effects": {
+    "legitimacy": -0.0001,
+    "security_efficiency": 0.002,
+    "state_capacity": 0.0048,
+    "task_coordination": 0.0007
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Digital Identity Register",
+   "observation": "Every citizen has a digital identity for signing and using public services.",
+   "social_consequence": "Every transaction leaves a record; citizens fear the state sees everything."
+  },
+  "permanent_atrocity_court": {
+   "effects": {
+    "legitimacy": 0.001,
+    "security_efficiency": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Permanent Atrocity Court",
+   "observation": "A permanent court tries crimes against whole peoples."
+  },
+  "bank_stress_tests": {
+   "effects": {
+    "disaster_resilience": 0.0024,
+    "state_capacity": 0.001,
+    "trade_capacity": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Bank Stress Tests",
+   "observation": "Banks are tested against imagined crises and wound up in order if they fail."
+  },
+  "open_government_data": {
+   "effects": {
+    "adoption_rate": 0.0024,
+    "institutional_rigidity": -0.0008,
+    "knowledge_preservation": 0.0024,
+    "legitimacy": 0.0008
+   },
+   "art": "res://assets/ui/research/institutions-v1.png",
+   "name": "Open Government Data",
+   "observation": "Government statistics and records are published openly by default."
+  },
+  "lobbying_register": {
+   "effects": {
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0012
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Lobbying Register",
+   "observation": "Lobbyists register, and officials declare their interests."
+  },
+  "comprehensive_data_rights": {
+   "effects": {
+    "cohesion": 0.0008,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0012,
+    "trade_capacity": -0.0012
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Comprehensive Data Rights",
+   "observation": "A comprehensive law gives each person rights over data about them."
+  },
+  "global_minimum_tax": {
+   "effects": {
+    "state_capacity": 0.0046,
+    "trade_capacity": -0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Global Minimum Tax",
+   "observation": "The realms agree on a minimum tax on large firms."
+  },
+  "learned_machine_law": {
+   "effects": {
+    "institutional_rigidity": 0.0016,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0012,
+    "state_capacity": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Learned Machine Law",
+   "observation": "Learned-machine systems are licensed and restricted by the risk they pose."
+  },
+  "algorithmic_decision_audits": {
+   "effects": {
+    "institutional_rigidity": -0.0008,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0012,
+    "state_capacity": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "name": "Algorithmic Decision Audits",
+   "observation": "Machines that decide benefits or licences in public offices are audited for errors and bias."
+  },
+  "central_bank_digital_currency": {
+   "effects": {
+    "legitimacy": -0.0001,
+    "security_efficiency": 0.0015,
+    "state_capacity": 0.0035,
+    "trade_capacity": 0.0024
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Central-bank Digital Currency",
+   "observation": "The central bank issues digital money held directly by citizens."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "appointed_department_prefects": {
+    "cohesion": -0.0012,
+    "institutional_rigidity": 0.0016,
+    "labor_demand": 0.0029,
+    "security_efficiency": 0.003,
+    "state_capacity": 0.0058
+   },
+   "civil_merit_order": {
+    "cohesion": 0.0023,
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0023
+   },
+   "universal_civil_code": {
+    "institutional_rigidity": 0.0024,
+    "labor_demand": 0.0029,
+    "legitimacy": 0.0023,
+    "standardization": 0.0077,
+    "state_capacity": 0.0092,
+    "trade_capacity": 0.0024
+   },
+   "administrative_courts": {
+    "institutional_rigidity": -0.0016,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0031,
+    "state_capacity": 0.0023
+   },
+   "commercial_code": {
+    "standardization": 0.0038,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.003
+   },
+   "assembly_ombudsman": {
+    "institutional_rigidity": -0.0016,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023
+   },
+   "single_minister_departments": {
+    "institutional_rigidity": 0.0008,
+    "labor_demand": 0.0029,
+    "state_capacity": 0.0058,
+    "task_coordination": 0.0024
+   },
+   "granted_constitution": {
+    "cohesion": 0.0035,
+    "institutional_rigidity": -0.0024,
+    "labor_demand": 0.0029,
+    "legitimacy": 0.0061,
+    "state_capacity": 0.0046
+   },
+   "great_realm_conference": {
+    "legitimacy": 0.0015,
+    "security_efficiency": 0.0045,
+    "trade_capacity": 0.0012
+   },
+   "annual_budget_vote": {
+    "institutional_rigidity": -0.0008,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0031,
+    "state_capacity": 0.0035
+   },
+   "penitentiary_sentences": {
+    "cohesion": 0.0012,
+    "food_storage": -0.0008,
+    "injury_risk": -0.0008,
+    "labor_demand": 0.0029,
+    "legitimacy": 0.0015,
+    "security_efficiency": 0.0045
+   },
+   "public_instruction_ministry": {
+    "adoption_rate": 0.0032,
+    "institutional_rigidity": 0.0008,
+    "knowledge_preservation": 0.0032,
+    "labor_demand": 0.0029,
+    "state_capacity": 0.0035
+   },
+   "householder_franchise": {
+    "cohesion": 0.0047,
+    "institutional_rigidity": -0.0024,
+    "legitimacy": 0.0069,
+    "state_capacity": -0.0012
+   },
+   "customs_union": {
+    "cohesion": 0.0023,
+    "legitimacy": -0.0008,
+    "standardization": 0.0038,
+    "state_capacity": 0.0035,
+    "trade_capacity": 0.0073
+   },
+   "poor_law_boards": {
+    "cohesion": -0.0023,
+    "food_storage": 0.0008,
+    "health_protection": 0.0008,
+    "labor_demand": 0.0029,
+    "legitimacy": -0.0008,
+    "state_capacity": 0.0046
+   },
+   "examined_patent_office": {
+    "craft_output": 0.0016,
+    "institutional_rigidity": 0.0008,
+    "knowledge_rate": 0.0024,
+    "trade_capacity": 0.0006
+   },
+   "responsible_ministry": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0024,
+    "legitimacy": 0.0069,
+    "state_capacity": 0.0035
+   },
+   "central_note_monopoly": {
+    "institutional_rigidity": 0.0008,
+    "standardization": 0.0026,
+    "state_capacity": 0.0046,
+    "trade_capacity": 0.003
+   },
+   "bankruptcy_discharge": {
+    "cohesion": 0.0012,
+    "legitimacy": 0.0015,
+    "trade_capacity": 0.0018
+   },
+   "grain_tariff_repeal": {
+    "cohesion": -0.0012,
+    "legitimacy": 0.0008,
+    "nutrition_quality": 0.0008,
+    "trade_capacity": 0.003
+   },
+   "manhood_suffrage": {
+    "cohesion": 0.0058,
+    "institutional_rigidity": -0.0024,
+    "legitimacy": 0.0077,
+    "state_capacity": -0.0012
+   },
+   "mass_political_parties": {
+    "adoption_rate": 0.0024,
+    "cohesion": -0.0023,
+    "labor_demand": 0.0029,
+    "legitimacy": 0.0046
+   },
+   "ruler_plebiscite": {
+    "cohesion": -0.0012,
+    "institutional_rigidity": 0.0016,
+    "legitimacy": 0.0038,
+    "state_capacity": 0.0023
+   },
+   "competitive_civil_service": {
+    "institutional_rigidity": 0.0008,
+    "labor_demand": 0.0029,
+    "legitimacy": 0.0023,
+    "standardization": 0.0051,
+    "state_capacity": 0.0127
+   },
+   "limited_liability_registration": {
+    "craft_output": 0.0024,
+    "legitimacy": -0.0008,
+    "trade_capacity": 0.0036
+   },
+   "secret_printed_ballot": {
+    "cohesion": 0.0023,
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0038
+   },
+   "civil_divorce_courts": {
+    "cohesion": -0.0012,
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0008
+   },
+   "dependencies_ministry": {
+    "labor_demand": 0.0029,
+    "legitimacy": -0.0008,
+    "state_capacity": 0.0035,
+    "trade_capacity": 0.0018
+   },
+   "rural_district_assemblies": {
+    "cohesion": 0.0035,
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0031,
+    "state_capacity": 0.0012
+   },
+   "independent_audit_office": {
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0023,
+    "state_capacity": 0.0046,
+    "trade_capacity": 0.0006
+   },
+   "lender_of_last_resort": {
+    "disaster_resilience": 0.0016,
+    "state_capacity": 0.0023,
+    "trade_capacity": 0.003
+   },
+   "ceremonial_crown": {
+    "cohesion": 0.0035,
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0038
+   },
+   "career_diplomatic_service": {
+    "labor_demand": 0.0015,
+    "security_efficiency": 0.0045,
+    "state_capacity": 0.0023,
+    "trade_capacity": 0.0012
+   },
+   "interrealm_arbitration": {
+    "legitimacy": 0.0015,
+    "security_efficiency": 0.0045,
+    "trade_capacity": 0.0012
+   },
+   "gold_standard_link": {
+    "disaster_resilience": -0.0008,
+    "standardization": 0.0038,
+    "trade_capacity": 0.0036
+   },
+   "municipal_utilities": {
+    "cohesion": 0.0023,
+    "labor_demand": 0.0029,
+    "state_capacity": 0.0035,
+    "water_safety": 0.0016
+   },
+   "probation_parole": {
+    "cohesion": 0.0023,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0015,
+    "security_efficiency": 0.0015
+   },
+   "married_women_property": {
+    "cohesion": 0.0023,
+    "legitimacy": 0.0023,
+    "trade_capacity": 0.0006
+   },
+   "audited_company_accounts": {
+    "labor_demand": 0.0015,
+    "standardization": 0.0038,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.0024
+   },
+   "elected_county_councils": {
+    "cohesion": 0.0023,
+    "legitimacy": 0.0023,
+    "state_capacity": 0.0023
+   },
+   "old_age_pensions": {
+    "cohesion": 0.0058,
+    "health_protection": 0.0016,
+    "labor_demand": 0.0029,
+    "labor_efficiency": -0.0008,
+    "legitimacy": 0.0031,
+    "state_capacity": 0.0012
+   },
+   "antimonopoly_law": {
+    "institutional_rigidity": -0.0008,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0015,
+    "trade_capacity": 0.0024
+   },
+   "womens_suffrage": {
+    "cohesion": 0.0058,
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0069
+   },
+   "initiative_referendum": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0023,
+    "state_capacity": -0.0012
+   },
+   "juvenile_courts": {
+    "cohesion": 0.0023,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0015,
+    "security_efficiency": 0.0015
+   },
+   "proportional_representation": {
+    "cohesion": 0.0023,
+    "legitimacy": 0.0038,
+    "state_capacity": -0.0012
+   },
+   "rate_regulation_commissions": {
+    "institutional_rigidity": 0.0008,
+    "labor_demand": 0.0015,
+    "state_capacity": 0.0035,
+    "trade_capacity": 0.0018
+   },
+   "unemployment_insurance": {
+    "cohesion": 0.0058,
+    "labor_demand": 0.0029,
+    "labor_efficiency": -0.0008,
+    "legitimacy": 0.0031,
+    "state_capacity": 0.0012
+   },
+   "upper_chamber_curbed": {
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0031,
+    "state_capacity": 0.0012
+   },
+   "war_economy_boards": {
+    "cohesion": -0.0023,
+    "institutional_rigidity": 0.0024,
+    "labor_demand": 0.0058,
+    "labor_efficiency": -0.0008,
+    "state_capacity": 0.0104,
+    "task_coordination": 0.004,
+    "warfare_readiness": 0.0064
+   },
+   "frontier_passport_control": {
+    "labor_demand": 0.0015,
+    "security_efficiency": 0.006,
+    "state_capacity": 0.0023,
+    "trade_capacity": -0.0012
+   },
+   "one_party_state": {
+    "cohesion": -0.0058,
+    "institutional_rigidity": 0.0064,
+    "knowledge_rate": -0.0016,
+    "legitimacy": -0.0061,
+    "security_efficiency": 0.0074,
+    "state_capacity": 0.0092
+   },
+   "league_of_realms": {
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0031,
+    "security_efficiency": 0.0074,
+    "trade_capacity": 0.0018
+   },
+   "constitutional_court": {
+    "cohesion": 0.0023,
+    "institutional_rigidity": -0.0032,
+    "legitimacy": 0.0069,
+    "state_capacity": 0.0023
+   },
+   "interrealm_permanent_court": {
+    "legitimacy": 0.0023,
+    "security_efficiency": 0.003,
+    "trade_capacity": 0.0012
+   },
+   "corporatist_chambers": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": 0.0024,
+    "legitimacy": -0.0008,
+    "state_capacity": 0.0035,
+    "trade_capacity": -0.0006
+   },
+   "central_five_year_plan": {
+    "cohesion": -0.0023,
+    "craft_output": 0.0048,
+    "institutional_rigidity": 0.0048,
+    "labor_demand": 0.0044,
+    "legitimacy": -0.0015,
+    "nutrition_quality": -0.0016,
+    "state_capacity": 0.0115,
+    "task_coordination": 0.004
+   },
+   "emergency_decree_rule": {
+    "cohesion": -0.0035,
+    "institutional_rigidity": 0.004,
+    "legitimacy": -0.0046,
+    "security_efficiency": 0.006,
+    "state_capacity": 0.0046
+   },
+   "deposit_insurance": {
+    "cohesion": 0.0023,
+    "disaster_resilience": 0.0016,
+    "trade_capacity": 0.0018
+   },
+   "state_propaganda_ministry": {
+    "adoption_rate": -0.0008,
+    "cohesion": 0.0047,
+    "institutional_rigidity": 0.0032,
+    "knowledge_rate": -0.0016,
+    "legitimacy": 0.0015,
+    "warfare_readiness": 0.0024
+   },
+   "national_income_accounts": {
+    "knowledge_preservation": 0.0016,
+    "standardization": 0.0038,
+    "state_capacity": 0.0058
+   },
+   "securities_commission": {
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0015,
+    "standardization": 0.0013,
+    "trade_capacity": 0.0024
+   },
+   "countercyclical_spending": {
+    "cohesion": 0.0035,
+    "disaster_resilience": 0.0016,
+    "state_capacity": 0.0035,
+    "trade_capacity": 0.0006
+   },
+   "fixed_exchange_accord": {
+    "disaster_resilience": 0.0016,
+    "standardization": 0.0026,
+    "trade_capacity": 0.0042
+   },
+   "atrocity_tribunals": {
+    "cohesion": 0.0012,
+    "legitimacy": 0.0031,
+    "security_efficiency": 0.003
+   },
+   "world_assembly_of_realms": {
+    "health_protection": 0.0008,
+    "labor_demand": 0.0029,
+    "legitimacy": 0.0038,
+    "security_efficiency": 0.0089,
+    "trade_capacity": 0.0024
+   },
+   "nationalized_core_industries": {
+    "craft_output": 0.0016,
+    "institutional_rigidity": 0.0032,
+    "labor_demand": 0.0029,
+    "state_capacity": 0.0058,
+    "trade_capacity": -0.0012
+   },
+   "welfare_state": {
+    "cohesion": 0.0117,
+    "health_protection": 0.0032,
+    "labor_demand": 0.0073,
+    "labor_efficiency": -0.0016,
+    "legitimacy": 0.0061,
+    "nutrition_quality": 0.0016,
+    "state_capacity": 0.0046
+   },
+   "universal_rights_declaration": {
+    "cohesion": 0.0023,
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0031
+   },
+   "regional_rights_court": {
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0031
+   },
+   "value_added_tax": {
+    "labor_demand": 0.0015,
+    "state_capacity": 0.0069,
+    "trade_capacity": -0.0006
+   },
+   "common_market_union": {
+    "cohesion": 0.0012,
+    "legitimacy": -0.0008,
+    "standardization": 0.0051,
+    "state_capacity": 0.0023,
+    "trade_capacity": 0.0073
+   },
+   "dependency_self_rule": {
+    "cohesion": 0.0023,
+    "legitimacy": 0.0038,
+    "state_capacity": -0.0023,
+    "trade_capacity": -0.0012
+   },
+   "public_defenders": {
+    "cohesion": 0.0012,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023
+   },
+   "civil_rights_law": {
+    "cohesion": 0.0058,
+    "institutional_rigidity": -0.0024,
+    "legitimacy": 0.0061
+   },
+   "death_penalty_abolition": {
+    "cohesion": 0.0012,
+    "legitimacy": 0.0023,
+    "security_efficiency": -0.0015
+   },
+   "freedom_of_information": {
+    "institutional_rigidity": -0.0016,
+    "knowledge_preservation": 0.0008,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0031
+   },
+   "ombudsman_network": {
+    "institutional_rigidity": -0.0016,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023
+   },
+   "floating_fiat_currency": {
+    "disaster_resilience": -0.0008,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.0024
+   },
+   "personal_data_protection": {
+    "cohesion": 0.0012,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023,
+    "trade_capacity": -0.0006
+   },
+   "anticorruption_commission": {
+    "institutional_rigidity": -0.0016,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0038,
+    "state_capacity": 0.0023
+   },
+   "state_enterprise_privatization": {
+    "cohesion": -0.0035,
+    "craft_output": 0.0024,
+    "state_capacity": -0.0012,
+    "trade_capacity": 0.003
+   },
+   "truth_commissions": {
+    "cohesion": 0.0035,
+    "legitimacy": 0.0031
+   },
+   "participatory_budgets": {
+    "cohesion": 0.0035,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023
+   },
+   "inflation_targeting": {
+    "disaster_resilience": 0.0016,
+    "standardization": 0.0026,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.0024
+   },
+   "electoral_commissions": {
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0038
+   },
+   "trade_dispute_panels": {
+    "legitimacy": 0.0008,
+    "trade_capacity": 0.0036
+   },
+   "single_currency_union": {
+    "disaster_resilience": -0.0008,
+    "legitimacy": -0.0008,
+    "standardization": 0.0038,
+    "trade_capacity": 0.0048
+   },
+   "online_government_services": {
+    "adoption_rate": 0.0024,
+    "labor_demand": -0.0029,
+    "state_capacity": 0.0069,
+    "task_coordination": 0.0024
+   },
+   "equal_marriage_law": {
+    "cohesion": 0.0023,
+    "institutional_rigidity": -0.0016,
+    "legitimacy": 0.0023
+   },
+   "digital_identity_register": {
+    "legitimacy": -0.0008,
+    "security_efficiency": 0.003,
+    "state_capacity": 0.0058,
+    "task_coordination": 0.0016
+   },
+   "permanent_atrocity_court": {
+    "legitimacy": 0.0023,
+    "security_efficiency": 0.0015
+   },
+   "bank_stress_tests": {
+    "disaster_resilience": 0.0024,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.0018
+   },
+   "open_government_data": {
+    "adoption_rate": 0.0024,
+    "institutional_rigidity": -0.0008,
+    "knowledge_preservation": 0.0024,
+    "legitimacy": 0.0015
+   },
+   "lobbying_register": {
+    "institutional_rigidity": -0.0008,
+    "legitimacy": 0.0023
+   },
+   "comprehensive_data_rights": {
+    "cohesion": 0.0012,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023,
+    "trade_capacity": -0.0012
+   },
+   "learned_machine_law": {
+    "institutional_rigidity": 0.0016,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023,
+    "state_capacity": 0.0023
+   },
+   "algorithmic_decision_audits": {
+    "institutional_rigidity": -0.0008,
+    "labor_demand": 0.0015,
+    "legitimacy": 0.0023,
+    "state_capacity": 0.0023
+   },
+   "central_bank_digital_currency": {
+    "legitimacy": -0.0008,
+    "security_efficiency": 0.0015,
+    "state_capacity": 0.0035,
+    "trade_capacity": 0.0024
+   }
+  }
+ }
+}

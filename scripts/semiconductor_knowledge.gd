@@ -77,8 +77,7 @@ static func entries()->Array[Dictionary]:
 	    "observation": "Allowed and forbidden electronic energy ranges explain contrasting conducting behavior.",
 	    "effects": {},
 	    "foundation_for": [
-	      "semiconductor_doping",
-	      "pn_junctions"
+	      "semiconductor_doping"
 	    ],
 	    "production_contract": "Provides the stated scientific foundation for semiconductor_doping, pn_junctions. Understanding alone supplies no equipment or operating service."
 	  },

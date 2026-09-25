@@ -1,0 +1,1818 @@
+{
+ "line": "institutions",
+ "schema": "research_600_effects/1",
+ "items": {
+  "quarter_session_justices": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0003,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Justices at Quarter Sessions",
+   "observation": "Four times a year the country gentlemen sit as justices, try thefts and brawls, and fix the wages of labourers."
+  },
+  "two_chamber_estates": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0003,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/discovery-600/problem_council_sessions.png",
+   "name": "Two-chamber Estates",
+   "observation": "The lords now sit in their own hall, and the knights and townsmen deliberate apart before bringing their answer.",
+   "ability_reason": "Lords and commons sit apart; the commons gain a voice of their own on taxes and grievances that the ruler must hear.",
+   "social_consequence": "The commons learn to bargain grants of money for the redress of grievances"
+  },
+  "town_league_diet": {
+   "effects": {
+    "cohesion": 0.0001,
+    "security_efficiency": 0.0002,
+    "state_capacity": -0.0005,
+    "trade_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/town_identity.png",
+   "name": "League Diet",
+   "observation": "Delegates of the league towns meet in the chief port and bind every member to a trade embargo."
+  },
+  "commons_speaker_office": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Speaker of the Commons",
+   "observation": "The commons choose one of their number to carry their grievances to the throne, and he kneels to speak for all."
+  },
+  "estates_impeachment": {
+   "effects": {
+    "institutional_rigidity": -0.0002,
+    "legitimacy": 0.0001,
+    "state_capacity": -0.0005
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Impeachment of Ministers",
+   "observation": "The commons accuse the chancellor before the lords, and a minister falls for his peculation."
+  },
+  "hereditary_town_signory": {
+   "effects": {
+    "cohesion": -0.0003,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0003,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/royal_stone_portraits.png",
+   "name": "Hereditary Town Lordship",
+   "observation": "Tired of faction, the commune hands its rule to one captain, and his son inherits the town.",
+   "social_consequence": "Old commune families are exiled or bought off"
+  },
+  "poll_tax_per_head": {
+   "effects": {
+    "cohesion": -0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": -0.0015,
+    "state_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Poll Tax",
+   "observation": "Every head over fifteen pays the same coin, and the villagers who hide their daughters are fined.",
+   "social_consequence": "The same tax on rich and poor provokes risings in the villages"
+  },
+  "regency_council": {
+   "effects": {
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": -0.0005
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "name": "Regency Council",
+   "observation": "A council of uncles and high priests governs for the child ruler until he comes of age."
+  },
+  "pleaded_case_reports": {
+   "effects": {
+    "knowledge_preservation": 0.0007,
+    "standardization": 0.001,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Case Reports",
+   "observation": "Clerks write down the pleadings and judgments of each term, and lawyers cite last year's cases in court."
+  },
+  "municipal_exchange_bank": {
+   "effects": {
+    "food_storage": 0.0003,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Town Exchange Bank",
+   "observation": "The town guarantees the deposits of its exchange bank, and merchants pay each other by a transfer in its books."
+  },
+  "lawyers_training_inns": {
+   "effects": {
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0004,
+    "labor_demand": 0.0001,
+    "standardization": 0.001,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Lawyers' Inns",
+   "observation": "Young men live, dine and argue moots together in the lawyers' inns before they are called to plead."
+  },
+  "creditor_debt_house": {
+   "effects": {
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "House of Creditors",
+   "observation": "The city's creditors run its debt as a house of their own, with shares that pass by sale or inheritance."
+  },
+  "conciliar_supremacy": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/problem_council_sessions.png",
+   "name": "Great Councils Above the Head",
+   "observation": "A great council of the god's house deposes rival heads and declares itself above any single one."
+  },
+  "equity_conscience_court": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0004,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Court of Conscience",
+   "observation": "When the hard letter of the law would ruin a widow, the chancellor's court may order what conscience requires."
+  },
+  "salt_and_drink_excise": {
+   "effects": {
+    "cohesion": -0.0001,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0002,
+    "trade_capacity": -0.0005
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Salt and Drink Excise",
+   "observation": "Gaugers measure every cask and salt pan, and the tax rides on what the poor eat and drink.",
+   "social_consequence": "Smuggling becomes a village trade"
+  },
+  "banker_family_signory": {
+   "effects": {
+    "cohesion": -0.0001,
+    "legitimacy": -0.0015,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Banker Family Rule",
+   "observation": "The councils still meet, but every office goes to friends of the great banking house, which lends to the town and to princes."
+  },
+  "permanent_army_tax": {
+   "effects": {
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0002,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0004,
+    "state_capacity": 0.0005,
+    "warfare_readiness": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Permanent Army Tax",
+   "observation": "The estates grant a yearly tax without term to pay companies of horse and foot in the ruler's service.",
+   "ability_reason": "A standing force paid from a permanent tax gives generals trained companies all year instead of levies raised for each war.",
+   "social_consequence": "Townsmen resent soldiers billeted among them, and the estates lose their hold over war"
+  },
+  "resident_ambassadors": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0002,
+    "state_capacity": 0.0003,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
+   "name": "Resident Ambassadors",
+   "observation": "A resident envoy lives at the foreign court with his household and writes home every week.",
+   "ability_reason": "Permanent envoys give the ruler steady news and a standing channel for treaties, so wars can be foreseen and bargained away."
+  },
+  "balance_of_power_league": {
+   "effects": {
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0002,
+    "state_capacity": 0.0001,
+    "warfare_readiness": -0.0006
+   },
+   "art": "res://assets/ui/research/discovery-600/guest_friendship.png",
+   "name": "Balance-of-power League",
+   "observation": "Five realms swear a league for twenty-five years that none shall be allowed to swallow the rest."
+  },
+  "envoy_credentials_immunity": {
+   "effects": {
+    "security_efficiency": 0.0001,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
+   "name": "Credentials and Immunity",
+   "observation": "The envoy presents sealed letters of credence, and his person and his house are not to be touched."
+  },
+  "charitable_pawn_banks": {
+   "effects": {
+    "cohesion": 0.0001,
+    "food_storage": 0.0002,
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "name": "Charitable Pawn Banks",
+   "observation": "Mendicant preachers found pawn banks lending to the poor at low interest against a cloak or a pot."
+  },
+  "composite_realm_union": {
+   "effects": {
+    "cohesion": -0.0001,
+    "legitimacy": -0.0005,
+    "security_efficiency": 0.0001,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/intermarriage_visiting_customs.png",
+   "name": "Union of Realms by Marriage",
+   "observation": "Two crowns rest on one head, but each realm keeps its own estates, coins and laws."
+  },
+  "town_brotherhood_police": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "route_speed": 0.0003,
+    "security_efficiency": 0.0002,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png",
+   "name": "Brotherhood Road Police",
+   "observation": "Each hundred households pays for mounted brothers who hunt highwaymen on the roads."
+  },
+  "orthodoxy_tribunal": {
+   "effects": {
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0003,
+    "knowledge_rate": -0.001,
+    "legitimacy": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Tribunal for Dissenters",
+   "observation": "The tribunal's familiars take a converted merchant for questioning, and his goods are sequestered in the meantime.",
+   "social_consequence": "Neighbours denounce neighbours, and learned men write more carefully"
+  },
+  "specialized_royal_councils": {
+   "effects": {
+    "institutional_rigidity": 0.0001,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0002,
+    "state_capacity": 0.0003,
+    "task_coordination": 0.0006
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Councils for Finance and War",
+   "observation": "The great council divides into councils for finance, war, the provinces and the sea, each with its own secretaries.",
+   "ability_reason": "Specialized councils give each field of government its own expertise and records, so policy no longer waits on one crowded table."
+  },
+  "prerogative_council_court": {
+   "effects": {
+    "institutional_rigidity": 0.0001,
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0002,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Council as Court",
+   "observation": "Great men who overawe juries are tried in the ruler's council chamber, where there is no jury to overawe."
+  },
+  "poor_petition_court": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Court of Requests",
+   "observation": "A poor man's petition is heard for free by a master of requests, without the long pleadings of the common courts."
+  },
+  "perpetual_public_peace": {
+   "effects": {
+    "cohesion": 0.0001,
+    "injury_risk": -0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0003,
+    "warfare_readiness": -0.0006
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Perpetual Public Peace",
+   "observation": "Private feud is banned forever, and a realm court is founded to judge the quarrels of princes and knights."
+  },
+  "regional_peace_circles": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0002,
+    "state_capacity": 0.0001,
+    "warfare_readiness": 0.0002
+   },
+   "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
+   "name": "Peace Circles",
+   "observation": "The realm is divided into circles, each bound to raise a contingent and enforce the peace inside its borders."
+  },
+  "secretaries_of_state": {
+   "effects": {
+    "knowledge_preservation": 0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0003,
+    "task_coordination": 0.0006
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Secretaries of State",
+   "observation": "Two secretaries sign the ruler's letters and keep his papers, and every minister's business passes through their office.",
+   "ability_reason": "Secretaries who sign for the ruler turn the household into a ministry; business moves by letter at the ruler's pace, not the court's."
+  },
+  "venal_office_sales": {
+   "effects": {
+    "cohesion": -0.0001,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": -0.0015,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "name": "Sold Offices",
+   "observation": "Judgeships and tax offices are sold for life and may be passed to a son on payment of a yearly fee.",
+   "social_consequence": "Merchants' sons buy their way into the robe, and offices become family property"
+  },
+  "reason_of_state_treatise": {
+   "effects": {
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0001,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Reason of State",
+   "observation": "A former secretary writes that the prince may do what the safety of the state requires, whatever his priest says."
+  },
+  "realm_criminal_code": {
+   "effects": {
+    "cohesion": -0.0001,
+    "institutional_rigidity": 0.0001,
+    "security_efficiency": 0.0006,
+    "standardization": 0.0024,
+    "state_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Realm Criminal Code",
+   "observation": "One code sets the crimes, the procedure and the penalties for the whole realm, from the capital to the far march.",
+   "ability_reason": "One written criminal code and procedure makes justice predictable and the ruler's courts reach every province.",
+   "social_consequence": "The code allows torture to obtain confession, and local customs of composition vanish"
+  },
+  "crown_seizes_temple_lands": {
+   "effects": {
+    "cohesion": -0.0001,
+    "knowledge_preservation": -0.001,
+    "legitimacy": -0.002,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Crown Takes the God's House Lands",
+   "observation": "Commissioners take the retreat houses' lands for the crown and sell them to courtiers; the ruler now names the god's high priests.",
+   "social_consequence": "Retreat devotees are turned out, and their libraries and almshouses scattered"
+  },
+  "overseas_viceroyalties": {
+   "effects": {
+    "cohesion": -0.0001,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0001,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Overseas Viceroyalties",
+   "observation": "A viceroy governs the far provinces with his own high court, and appeals take a year to reach the capital."
+  },
+  "press_licensing_censors": {
+   "effects": {
+    "adoption_rate": -0.0015,
+    "cohesion": -0.0001,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.001
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Press Licensing",
+   "observation": "No book may be printed without a licence, and the censor reads every sheet before it goes to press.",
+   "social_consequence": "Forbidden books are printed abroad and smuggled in bales of cloth"
+  },
+  "privy_council_minutes": {
+   "effects": {
+    "knowledge_preservation": 0.0004,
+    "literacy": 0.0021,
+    "state_capacity": 0.0002,
+    "task_coordination": 0.0004
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Privy Council Minutes",
+   "observation": "A clerk sits at the foot of the privy council table and writes down every decision and who was present."
+  },
+  "ruler_chooses_rite": {
+   "effects": {
+    "cohesion": 0.0001,
+    "disease_exposure": -0.0005,
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/officiant_vestments.png",
+   "name": "Each Ruler Sets the Rite",
+   "observation": "The peace of the realm allows each prince to set the rite of his own lands; dissenters may sell up and move.",
+   "social_consequence": "Minority families must convert or migrate across the border"
+  },
+  "tax_farming_leases": {
+   "effects": {
+    "cohesion": -0.0002,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0002,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Tax Farming",
+   "observation": "Financiers pay the crown in advance for the right to collect the customs, and take what they can.",
+   "social_consequence": "Tax farmers grow rich and are hated in every market"
+  },
+  "sovereignty_doctrine": {
+   "effects": {
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Undivided Sovereignty",
+   "observation": "A jurist writes that in every state there must be one power that gives the law and receives it from none."
+  },
+  "provincial_union_estates": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0002,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0003,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/discovery-600/problem_council_sessions.png",
+   "name": "Union of Provinces",
+   "observation": "The united provinces send deputies to a joint assembly that raises taxes, fits out fleets and makes war.",
+   "ability_reason": "A union governed by joint estates can raise credit and fleets on the consent of the provinces, without a crowned head.",
+   "social_consequence": "Each province keeps its veto, and every decision must be bargained town by town"
+  },
+  "deposition_of_tyrant": {
+   "effects": {
+    "cohesion": -0.0001,
+    "institutional_rigidity": -0.0002,
+    "legitimacy": -0.002
+   },
+   "art": "res://assets/ui/research/discovery-600/problem_council_sessions.png",
+   "name": "Deposition of a Tyrant",
+   "observation": "The estates declare that the ruler has broken his compact and is no longer their lord."
+  },
+  "rite_toleration_edict": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0002,
+    "legitimacy": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/officiant_vestments.png",
+   "name": "Edict of Toleration",
+   "observation": "An edict allows the minority rite to worship in named towns and gives its members access to office."
+  },
+  "joint_stock_company": {
+   "effects": {
+    "cohesion": -0.0001,
+    "legitimacy": -0.0008,
+    "naval_capacity": 0.001,
+    "state_capacity": 0.0002,
+    "trade_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Joint-stock Company",
+   "observation": "Merchants buy shares in a chartered company that sends fleets to the far seas and pays dividends from the cargoes.",
+   "ability_reason": "Pooled capital in transferable shares funds voyages too large and risky for any single house.",
+   "social_consequence": "Shareholders who never sail grow rich or ruined by distant cargoes"
+  },
+  "share_exchange_bourse": {
+   "effects": {
+    "cohesion": -0.0001,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Share Exchange",
+   "observation": "Shares of the great company change hands every noon in the courtyard of the merchants' exchange."
+  },
+  "city_exchange_bank": {
+   "effects": {
+    "standardization": 0.0009,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "City Exchange Bank",
+   "observation": "The city bank's money of account never changes weight, and bills across the continent are settled in it."
+  },
+  "free_seas_doctrine": {
+   "effects": {
+    "naval_capacity": 0.0003,
+    "security_efficiency": -0.0005,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/pilots_sea_lanes.png",
+   "name": "Freedom of the Seas",
+   "observation": "A jurist argues that the sea, like the air, belongs to no one and may be sailed by all."
+  },
+  "settler_self_government_compact": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0002,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/guest_friendship.png",
+   "name": "Settlers' Compact",
+   "observation": "Before landing, the settlers sign a compact to form a civil body and obey the laws they make together."
+  },
+  "invention_patent_statute": {
+   "effects": {
+    "craft_output": 0.0007,
+    "institutional_rigidity": -0.0002,
+    "knowledge_rate": 0.0003,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Patents for Inventions",
+   "observation": "Monopolies are forbidden except for the true inventor of a new manufacture, who may hold it for fourteen years."
+  },
+  "law_of_war_and_peace": {
+   "effects": {
+    "cohesion": 0.0001,
+    "injury_risk": -0.0007,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0004
+   },
+   "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
+   "name": "Law of War and Peace",
+   "observation": "A jurist in exile sets out when war is just, how prisoners must be treated, and how treaties bind."
+  },
+  "petition_of_right": {
+   "effects": {
+    "institutional_rigidity": -0.0003,
+    "legitimacy": 0.0001,
+    "state_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Petition of Right",
+   "observation": "The commons force the ruler to accept that no man may be taxed without their consent or imprisoned without cause shown."
+  },
+  "provincial_intendants": {
+   "effects": {
+    "cohesion": -0.0004,
+    "institutional_rigidity": 0.0005,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0006,
+    "state_capacity": 0.0013,
+    "task_coordination": 0.001
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Royal Intendants",
+   "observation": "Commissioners sent from the capital oversee taxes, police and justice in each province and can be recalled at will.",
+   "ability_reason": "Revocable commissioners carry the ruler's will into every province, bypassing the hereditary officers.",
+   "social_consequence": "Provincial nobles and office-holders lose their say, and resent it"
+  },
+  "cameral_domain_chambers": {
+   "effects": {
+    "extraction_yield": 0.0014,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "name": "Treasury Chambers",
+   "observation": "Treasury chambers audit the crown's forests, mines and farms and keep them in profit."
+  },
+  "sovereign_realms_congress": {
+   "effects": {
+    "cohesion": 0.0001,
+    "legitimacy": 0.0003,
+    "security_efficiency": 0.0011,
+    "state_capacity": 0.0006,
+    "warfare_readiness": -0.0019
+   },
+   "art": "res://assets/ui/research/discovery-600/envoy_reception.png",
+   "name": "Peace Congress",
+   "observation": "After thirty years of war, envoys of every realm meet in two towns and agree borders that each will respect.",
+   "ability_reason": "Realms recognize each other's borders and sovereignty; wars end by treaty, and a common diplomacy of equals begins."
+  },
+  "estates_rule_without_ruler": {
+   "effects": {
+    "cohesion": -0.0002,
+    "institutional_rigidity": -0.0003,
+    "legitimacy": -0.0015,
+    "state_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/discovery-600/problem_council_sessions.png",
+   "name": "Estates Rule Alone",
+   "observation": "The ruler is beheaded, and the estates govern by committees and a council of state."
+  },
+  "written_frame_of_government": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0003,
+    "legitimacy": 0.0002,
+    "literacy": 0.0075,
+    "state_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Written Frame of Government",
+   "observation": "A single written instrument sets out who governs, how the estates are elected and what no ruler may do.",
+   "ability_reason": "A written frame of government fixes the powers of each office, so succession and taxation no longer depend on one ruler's word."
+  },
+  "restoration_amnesty": {
+   "effects": {
+    "cohesion": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/grief_support_customs.png",
+   "name": "Restoration with Pardon",
+   "observation": "The heir returns to the throne, and an act of pardon covers all but those who signed his father's death."
+  },
+  "personal_rule_ministers": {
+   "effects": {
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001,
+    "task_coordination": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "name": "Personal Rule",
+   "observation": "The ruler abolishes the chief minister's post and works at his desk through secretaries each morning."
+  },
+  "mercantile_trade_council": {
+   "effects": {
+    "craft_output": 0.001,
+    "institutional_rigidity": 0.0001,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "name": "Council of Trade",
+   "observation": "A council of trade sets tariffs, founds royal glass and cloth works and inspects the weaving towns."
+  },
+  "treasury_commission_board": {
+   "effects": {
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001,
+    "task_coordination": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "name": "Treasury Board",
+   "observation": "The treasury is put in commission, and five lords audit together what one treasurer once hid."
+  },
+  "war_ministry_bureaus": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "logistics_endurance": 0.0006,
+    "security_efficiency": 0.0002,
+    "state_capacity": 0.0001,
+    "warfare_readiness": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/military_staffs-v1.png",
+   "name": "War Ministry Bureaus",
+   "observation": "Bureaus for pay, bread, quarters and arms keep registers of every company, so generals are supplied without looting."
+  },
+  "test_oath_for_office": {
+   "effects": {
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0002,
+    "legitimacy": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/officiant_vestments.png",
+   "name": "Test Oath",
+   "observation": "Every office-holder must take the realm rite's sacrament and swear against the rival doctrine.",
+   "social_consequence": "Dissenters are shut out of office, the universities and the town corporations"
+  },
+  "habeas_writ": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.0188
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Writ Against Imprisonment",
+   "observation": "A judge's writ orders the jailer to bring the prisoner and the cause of his arrest before the court."
+  },
+  "estates_parties": {
+   "effects": {
+    "cohesion": -0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Parties in the Estates",
+   "observation": "The estates split into two named factions, each with its clubs, pamphleteers and toasts."
+  },
+  "grand_palace_court": {
+   "effects": {
+    "cohesion": -0.0003,
+    "food_storage": -0.0022,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0002,
+    "state_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
+   "name": "Grand Palace Court",
+   "observation": "The court moves to a vast palace in the country, where nobles who once raised armies now compete to hand the ruler his shirt.",
+   "ability_reason": "Drawing the high nobility into a ritual court keeps them from their provinces and their private armies.",
+   "social_consequence": "Nobles ruin themselves on court dress, while the capital's crowds feel the ruler has left them"
+  },
+  "conditional_crown_settlement": {
+   "effects": {
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Crown Settled on Conditions",
+   "observation": "The estates offer the crown to a new couple on the condition that they rule by the laws the estates declare."
+  },
+  "realm_bill_of_rights": {
+   "effects": {
+    "cohesion": 0.0002,
+    "institutional_rigidity": -0.0003,
+    "legitimacy": 0.0003,
+    "security_efficiency": 0.0001,
+    "state_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Bill of Rights",
+   "observation": "A statute declares that no army may be kept in peace, and no tax raised, without the consent of the estates.",
+   "ability_reason": "Army and taxes need the estates' consent; the ruler's credit rises because his promises are backed by law."
+  },
+  "appropriated_annual_budget": {
+   "effects": {
+    "institutional_rigidity": -0.0001,
+    "state_capacity": 0.0002,
+    "task_coordination": 0.0008,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "name": "Annual Appropriated Budget",
+   "observation": "The estates vote the money each year for named purposes, and the treasury must account for each head."
+  },
+  "state_lottery_loans": {
+   "effects": {
+    "cohesion": -0.0001,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Lottery Loans",
+   "observation": "The crown sells lottery tickets that pay a small annuity and a chance at a great prize."
+  },
+  "chartered_central_bank": {
+   "effects": {
+    "institutional_rigidity": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Chartered Central Bank",
+   "observation": "A chartered bank lends the whole of its capital to the crown and issues notes that pass as coin.",
+   "ability_reason": "A bank lending to the state and issuing notes lets the realm borrow cheaply and pay armies and fleets on credit.",
+   "social_consequence": "Bankers and fundholders gain a stake in the government's survival"
+  },
+  "fixed_term_estates": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/problem_council_sessions.png",
+   "name": "Fixed-term Estates",
+   "observation": "Elections to the estates must be held at least every three years, whatever the ruler wishes."
+  },
+  "press_licence_lapse": {
+   "effects": {
+    "adoption_rate": 0.0012,
+    "institutional_rigidity": -0.0001,
+    "knowledge_rate": 0.0001,
+    "legitimacy": -0.0001
+   },
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png",
+   "name": "End of Press Licensing",
+   "observation": "The licensing act is not renewed, and printers may print without a censor's leave, answering only for libel."
+  },
+  "trade_and_colonies_board": {
+   "effects": {
+    "knowledge_preservation": 0.0002,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Board of Trade and Colonies",
+   "observation": "A board of trade and colonies collects reports from every overseas governor and advises on trade laws."
+  },
+  "foreign_affairs_office": {
+   "effects": {
+    "knowledge_preservation": 0.0009,
+    "security_efficiency": 0.0002,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/formal_archives-v1.png",
+   "name": "Foreign Office and Archive",
+   "observation": "The foreign office keeps its own archive of treaties and dispatches, and trains young clerks in ciphers."
+  },
+  "realm_union_treaty": {
+   "effects": {
+    "cohesion": -0.0001,
+    "legitimacy": -0.0001,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/discovery-600/intermarriage_visiting_customs.png",
+   "name": "Union of Estates",
+   "observation": "Two realms dissolve their estates into one, keeping only their separate courts and god's houses."
+  },
+  "governing_senate_colleges": {
+   "effects": {
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0002,
+    "task_coordination": 0.0004
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Senate and Colleges",
+   "observation": "A governing senate oversees ministries run as boards of equal members, on a foreign model."
+  },
+  "justice_ombudsman": {
+   "effects": {
+    "institutional_rigidity": -0.0003,
+    "legitimacy": 0.0002,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Chancellor of Justice",
+   "observation": "A chancellor of justice may investigate any official and bring him before a court."
+  },
+  "succession_sanction": {
+   "effects": {
+    "cohesion": 0.0001,
+    "legitimacy": 0.0002,
+    "security_efficiency": 0.0002
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Fixed Succession Rule",
+   "observation": "A fixed rule of succession, accepted by every province, lets the ruler's daughter inherit all his lands."
+  },
+  "debt_sinking_fund": {
+   "effects": {
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Sinking Fund",
+   "observation": "A fixed sum is set aside each year to buy back the realm's debt, and the fund's accounts are published."
+  },
+  "cadastral_tax_survey": {
+   "effects": {
+    "cohesion": -0.0001,
+    "cultivation_yield": 0.0002,
+    "labor_demand": 0.0001,
+    "standardization": 0.0006,
+    "state_capacity": 0.0002,
+    "survey_speed": 0.0028
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Cadastral Survey",
+   "observation": "Surveyors map every parcel with its owner and soil, and tax follows the map instead of the lord's word.",
+   "social_consequence": "Hidden fields come to light, and the privileged lose their exemptions"
+  },
+  "bubble_company_law": {
+   "effects": {
+    "institutional_rigidity": 0.0003,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001,
+    "trade_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "name": "Bubble Law",
+   "observation": "After the great crash, no company may sell shares without a charter."
+  },
+  "cabinet_first_minister": {
+   "effects": {
+    "institutional_rigidity": -0.0005,
+    "legitimacy": 0.0004,
+    "state_capacity": 0.0004,
+    "task_coordination": 0.0009
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "name": "Cabinet and First Minister",
+   "observation": "A first minister leads a cabinet that must keep a majority in the estates or resign.",
+   "ability_reason": "A cabinet answerable to the estates ties government to the tax-granting body, so policy and money move together."
+  },
+  "table_of_service_ranks": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0004,
+    "security_efficiency": 0.0002,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "name": "Table of Ranks",
+   "observation": "Fourteen ranks of service, civil, military and court, and reaching the eighth makes a man noble.",
+   "social_consequence": "Old nobles must now serve to keep their standing"
+  },
+  "police_ordinance_science": {
+   "effects": {
+    "institutional_rigidity": 0.0003,
+    "sanitation": 0.0014,
+    "state_capacity": 0.0002,
+    "trade_capacity": 0.0004
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Police Science",
+   "observation": "Ordinances govern markets, street lamps, fire buckets and the burial of the dead, and inspectors enforce them."
+  },
+  "cameral_science_chairs": {
+   "effects": {
+    "adoption_rate": 0.0008,
+    "institutional_rigidity": -0.0001,
+    "knowledge_rate": 0.0007,
+    "labor_demand": 0.0001,
+    "literacy": 0.0107,
+    "state_capacity": 0.0009,
+    "task_coordination": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "Chairs of Cameral Science",
+   "observation": "University chairs teach finance, agriculture and police to young men who will serve as officials.",
+   "ability_reason": "Officials trained at university in finance and administration carry a common method into every chamber of the state."
+  },
+  "servant_ruler_doctrine": {
+   "effects": {
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "First Servant of the State",
+   "observation": "The ruler writes that he is only the first servant of the state, and he works at his papers from dawn."
+  },
+  "separation_of_powers": {
+   "effects": {
+    "cohesion": 0.0002,
+    "institutional_rigidity": -0.0007,
+    "legitimacy": 0.0003,
+    "state_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Separation of Powers",
+   "observation": "A magistrate's book argues that liberty lasts only where the power to make law, to execute it and to judge are held apart.",
+   "ability_reason": "Separating lawmaking, execution and judgment checks every office by another, making government less arbitrary."
+  },
+  "compiled_civil_code": {
+   "effects": {
+    "institutional_rigidity": 0.0001,
+    "standardization": 0.0011,
+    "state_capacity": 0.0002,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "Civil Code",
+   "observation": "Jurists compile a civil code of persons, property and contracts for the whole realm."
+  },
+  "free_grain_trade_doctrine": {
+   "effects": {
+    "cohesion": -0.0001,
+    "food_storage": -0.0014,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/discovery-600/grain_levy_accounting.png",
+   "name": "Free Grain Trade",
+   "observation": "A physician's economic table shows the net product of the land and argues that grain should move without tolls.",
+   "social_consequence": "In a bad year, crowds seize grain carts leaving for distant markets"
+  },
+  "social_contract_doctrine": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0002,
+    "legitimacy": -0.0002
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Social Contract",
+   "observation": "A wandering philosopher argues that rule is legitimate only when it follows the general will of the people."
+  },
+  "penal_reform_no_torture": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+   "name": "Penal Reform",
+   "observation": "A treatise argues that punishment should be certain and proportionate, and princes abolish torture."
+  },
+  "press_freedom_statute": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "institutional_rigidity": -0.0001,
+    "knowledge_rate": 0.0004,
+    "legitimacy": -0.0001
+   },
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png",
+   "name": "Press Freedom",
+   "observation": "A statute abolishes censorship and gives the public access to official records."
+  },
+  "cameral_service_examinations": {
+   "effects": {
+    "institutional_rigidity": -0.0001,
+    "standardization": 0.0005,
+    "state_capacity": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "name": "Merit Examinations",
+   "observation": "Candidates for the treasury chambers must pass a written examination before appointment."
+  },
+  "declaration_of_rights": {
+   "effects": {
+    "cohesion": 0.0002,
+    "institutional_rigidity": -0.0003,
+    "legitimacy": 0.0002,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/petition_registers.png",
+   "name": "Declaration of Rights",
+   "observation": "An assembly declares that men are born free and equal in rights, and that sovereignty rests in the nation.",
+   "ability_reason": "Rights declared for all subjects bind every office; the law, not birth or favour, now defines the citizen.",
+   "social_consequence": "Nobles and priests lose privileges, and some flee abroad"
+  },
+  "constituent_convention": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001,
+    "literacy": 0.0125,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/problem_council_sessions.png",
+   "name": "Constituent Convention",
+   "observation": "An elected convention drafts a constitution and sends it to the people for ratification."
+  },
+  "federal_written_constitution": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0002,
+    "legitimacy": 0.0002,
+    "state_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/paper/official_mandate_registers.png",
+   "name": "Federal Constitution",
+   "observation": "A federal constitution sets an elected head, two chambers and a supreme court over the member states.",
+   "ability_reason": "A federal frame shares power between the union and its members; taxes, armies and courts rest on a written contract."
+  },
+  "abolition_of_estate_privileges": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": -0.0001,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "name": "Privileges Abolished",
+   "observation": "In one night's session, the nobles and priests surrender their dues, tithes and exemptions.",
+   "social_consequence": "Peasants burn the old manor rolls, and lords lose their dues without compensation"
+  },
+  "single_national_assembly": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0003,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/problem_council_sessions.png",
+   "name": "National Assembly",
+   "observation": "The three estates merge into one national assembly and vote by head, not by order.",
+   "ability_reason": "One assembly voting by head gives the commons a majority; the old estates of noble and priest lose their separate veto."
+  },
+  "elected_municipal_councils": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/town_identity.png",
+   "name": "Elected Town Councils",
+   "observation": "Every town and village elects a council and a mayor."
+  },
+  "uniform_departments": {
+   "effects": {
+    "cohesion": -0.0001,
+    "institutional_rigidity": -0.0001,
+    "standardization": 0.0004,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
+   "name": "Uniform Departments",
+   "observation": "The old provinces are replaced by departments of equal size, each with its seat a day's ride from every village.",
+   "social_consequence": "Old provincial loyalties and privileges are erased from the map"
+  },
+  "realm_republic": {
+   "effects": {
+    "cohesion": -0.0001,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": -0.0002,
+    "warfare_readiness": 0.0002
+   },
+   "art": "res://assets/ui/research/discovery-600/problem_council_sessions.png",
+   "name": "Republic Proclaimed",
+   "observation": "The ruler is deposed, the crown is abolished and the realm is proclaimed a republic."
+  },
+  "emergency_safety_committee": {
+   "effects": {
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0002,
+    "legitimacy": -0.0003,
+    "security_efficiency": 0.0004,
+    "state_capacity": 0.0001,
+    "warfare_readiness": 0.0003
+   },
+   "art": "res://assets/ui/research/discovery-600/problem_council_sessions.png",
+   "name": "Committee of Public Safety",
+   "observation": "A committee of twelve rules by decree, and suspects go before revolutionary tribunals.",
+   "social_consequence": "Terror stills opposition but leaves every household afraid"
+  },
+  "general_land_code": {
+   "effects": {
+    "institutional_rigidity": 0.0001,
+    "security_efficiency": 0.0002,
+    "standardization": 0.0004,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "name": "General Land Law",
+   "observation": "A general code sets the rights and duties of every subject, estate and trade in nineteen thousand articles."
+  },
+  "graduated_income_tax": {
+   "effects": {
+    "cohesion": -0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001,
+    "trade_capacity": -0.0005
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Graduated Income Tax",
+   "observation": "To pay for the war, every income is taxed at rising rates.",
+   "social_consequence": "Assessors pry into every household's books"
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "quarter_session_justices": {
+    "labor_demand": 0.0005,
+    "legitimacy": 0.0005,
+    "security_efficiency": 0.0012,
+    "state_capacity": 0.0005
+   },
+   "two_chamber_estates": {
+    "cohesion": 0.0025,
+    "institutional_rigidity": -0.0034,
+    "labor_demand": 0.0013,
+    "legitimacy": 0.0029,
+    "state_capacity": 0.0012
+   },
+   "town_league_diet": {
+    "cohesion": 0.0008,
+    "security_efficiency": 0.0006,
+    "state_capacity": -0.0005,
+    "trade_capacity": 0.0012
+   },
+   "commons_speaker_office": {
+    "cohesion": 0.0008,
+    "institutional_rigidity": -0.0014,
+    "legitimacy": 0.0007
+   },
+   "estates_impeachment": {
+    "institutional_rigidity": -0.0021,
+    "legitimacy": 0.0007,
+    "state_capacity": -0.0005
+   },
+   "hereditary_town_signory": {
+    "cohesion": -0.0015,
+    "institutional_rigidity": 0.0007,
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0012,
+    "state_capacity": 0.0005
+   },
+   "poll_tax_per_head": {
+    "cohesion": -0.0024,
+    "labor_demand": 0.0005,
+    "legitimacy": -0.0015,
+    "state_capacity": 0.0007
+   },
+   "regency_council": {
+    "cohesion": 0.0008,
+    "legitimacy": 0.0007,
+    "state_capacity": -0.0005
+   },
+   "pleaded_case_reports": {
+    "knowledge_preservation": 0.0026,
+    "standardization": 0.0018,
+    "state_capacity": 0.0005
+   },
+   "municipal_exchange_bank": {
+    "food_storage": 0.0007,
+    "state_capacity": 0.0005,
+    "trade_capacity": 0.0015
+   },
+   "lawyers_training_inns": {
+    "institutional_rigidity": 0.0007,
+    "knowledge_preservation": 0.0015,
+    "labor_demand": 0.0005,
+    "standardization": 0.0018,
+    "state_capacity": 0.0005
+   },
+   "creditor_debt_house": {
+    "institutional_rigidity": 0.0007,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.0012
+   },
+   "conciliar_supremacy": {
+    "cohesion": 0.0008,
+    "institutional_rigidity": -0.0014,
+    "legitimacy": 0.0007
+   },
+   "equity_conscience_court": {
+    "cohesion": 0.0008,
+    "institutional_rigidity": -0.0021,
+    "legitimacy": 0.0009,
+    "state_capacity": 0.0005
+   },
+   "salt_and_drink_excise": {
+    "cohesion": -0.0015,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0009,
+    "trade_capacity": -0.0005
+   },
+   "banker_family_signory": {
+    "cohesion": -0.001,
+    "legitimacy": -0.0015,
+    "state_capacity": 0.0005,
+    "trade_capacity": 0.001
+   },
+   "permanent_army_tax": {
+    "cohesion": -0.0024,
+    "institutional_rigidity": 0.0011,
+    "labor_demand": 0.002,
+    "security_efficiency": 0.0025,
+    "state_capacity": 0.0021,
+    "warfare_readiness": 0.0075
+   },
+   "resident_ambassadors": {
+    "labor_demand": 0.0007,
+    "legitimacy": 0.0007,
+    "security_efficiency": 0.0015,
+    "state_capacity": 0.0014,
+    "trade_capacity": 0.0016
+   },
+   "balance_of_power_league": {
+    "legitimacy": 0.0005,
+    "security_efficiency": 0.0012,
+    "state_capacity": 0.0005,
+    "warfare_readiness": -0.0006
+   },
+   "envoy_credentials_immunity": {
+    "security_efficiency": 0.0006,
+    "state_capacity": 0.0005,
+    "trade_capacity": 0.0005
+   },
+   "charitable_pawn_banks": {
+    "cohesion": 0.0016,
+    "food_storage": 0.0007,
+    "legitimacy": 0.0005,
+    "trade_capacity": 0.0005
+   },
+   "composite_realm_union": {
+    "cohesion": -0.001,
+    "legitimacy": -0.0005,
+    "security_efficiency": 0.0006,
+    "state_capacity": 0.0005
+   },
+   "town_brotherhood_police": {
+    "labor_demand": 0.0005,
+    "route_speed": 0.0014,
+    "security_efficiency": 0.0015,
+    "state_capacity": 0.0005
+   },
+   "orthodoxy_tribunal": {
+    "cohesion": -0.0029,
+    "institutional_rigidity": 0.0018,
+    "knowledge_rate": -0.001,
+    "legitimacy": 0.0007
+   },
+   "specialized_royal_councils": {
+    "institutional_rigidity": 0.0011,
+    "labor_demand": 0.002,
+    "security_efficiency": 0.0015,
+    "state_capacity": 0.0021,
+    "task_coordination": 0.0041
+   },
+   "prerogative_council_court": {
+    "institutional_rigidity": 0.001,
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0015,
+    "state_capacity": 0.0005
+   },
+   "poor_petition_court": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0007,
+    "labor_demand": 0.0005,
+    "legitimacy": 0.0009
+   },
+   "perpetual_public_peace": {
+    "cohesion": 0.0012,
+    "injury_risk": -0.0014,
+    "legitimacy": 0.0005,
+    "security_efficiency": 0.0018,
+    "warfare_readiness": -0.0006
+   },
+   "regional_peace_circles": {
+    "labor_demand": 0.0005,
+    "security_efficiency": 0.0015,
+    "state_capacity": 0.0005,
+    "warfare_readiness": 0.0012
+   },
+   "secretaries_of_state": {
+    "knowledge_preservation": 0.0025,
+    "labor_demand": 0.0013,
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0021,
+    "task_coordination": 0.0041
+   },
+   "venal_office_sales": {
+    "cohesion": -0.001,
+    "institutional_rigidity": 0.0014,
+    "legitimacy": -0.0015,
+    "state_capacity": 0.0006
+   },
+   "reason_of_state_treatise": {
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0006,
+    "state_capacity": 0.0005
+   },
+   "realm_criminal_code": {
+    "cohesion": -0.0008,
+    "institutional_rigidity": 0.0017,
+    "security_efficiency": 0.0039,
+    "standardization": 0.0049,
+    "state_capacity": 0.0012
+   },
+   "crown_seizes_temple_lands": {
+    "cohesion": -0.002,
+    "knowledge_preservation": -0.001,
+    "legitimacy": -0.002,
+    "state_capacity": 0.0009,
+    "trade_capacity": 0.0005
+   },
+   "overseas_viceroyalties": {
+    "cohesion": -0.001,
+    "labor_demand": 0.0008,
+    "security_efficiency": 0.0006,
+    "state_capacity": 0.0007,
+    "trade_capacity": 0.001
+   },
+   "press_licensing_censors": {
+    "adoption_rate": -0.0015,
+    "cohesion": -0.0005,
+    "institutional_rigidity": 0.0014,
+    "legitimacy": 0.0007
+   },
+   "privy_council_minutes": {
+    "knowledge_preservation": 0.0021,
+    "state_capacity": 0.0006,
+    "task_coordination": 0.0015
+   },
+   "ruler_chooses_rite": {
+    "cohesion": 0.0016,
+    "disease_exposure": -0.0007,
+    "institutional_rigidity": 0.0007,
+    "legitimacy": 0.0007
+   },
+   "tax_farming_leases": {
+    "cohesion": -0.002,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0007,
+    "trade_capacity": 0.0005
+   },
+   "sovereignty_doctrine": {
+    "institutional_rigidity": 0.0007,
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0007
+   },
+   "provincial_union_estates": {
+    "cohesion": 0.0025,
+    "institutional_rigidity": -0.0034,
+    "legitimacy": 0.0025,
+    "state_capacity": 0.001,
+    "trade_capacity": 0.0016
+   },
+   "deposition_of_tyrant": {
+    "cohesion": -0.001,
+    "institutional_rigidity": -0.0021,
+    "legitimacy": -0.002
+   },
+   "rite_toleration_edict": {
+    "cohesion": 0.0024,
+    "institutional_rigidity": -0.0021,
+    "legitimacy": 0.0005
+   },
+   "joint_stock_company": {
+    "cohesion": -0.0008,
+    "legitimacy": -0.0008,
+    "naval_capacity": 0.0027,
+    "state_capacity": 0.0007,
+    "trade_capacity": 0.0048
+   },
+   "share_exchange_bourse": {
+    "cohesion": -0.0005,
+    "state_capacity": 0.0005,
+    "trade_capacity": 0.0015
+   },
+   "city_exchange_bank": {
+    "standardization": 0.0018,
+    "state_capacity": 0.0005,
+    "trade_capacity": 0.0017
+   },
+   "free_seas_doctrine": {
+    "naval_capacity": 0.0008,
+    "security_efficiency": -0.0005,
+    "trade_capacity": 0.001
+   },
+   "settler_self_government_compact": {
+    "cohesion": 0.002,
+    "institutional_rigidity": -0.0014,
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0005
+   },
+   "invention_patent_statute": {
+    "craft_output": 0.0013,
+    "institutional_rigidity": -0.0014,
+    "knowledge_rate": 0.0009,
+    "trade_capacity": 0.0007
+   },
+   "law_of_war_and_peace": {
+    "cohesion": 0.0005,
+    "injury_risk": -0.0007,
+    "legitimacy": 0.0007,
+    "security_efficiency": 0.0012
+   },
+   "petition_of_right": {
+    "institutional_rigidity": -0.0021,
+    "legitimacy": 0.0009,
+    "state_capacity": -0.001
+   },
+   "provincial_intendants": {
+    "cohesion": -0.0016,
+    "institutional_rigidity": 0.0011,
+    "labor_demand": 0.0013,
+    "security_efficiency": 0.002,
+    "state_capacity": 0.0024,
+    "task_coordination": 0.0025
+   },
+   "cameral_domain_chambers": {
+    "extraction_yield": 0.0014,
+    "labor_demand": 0.0005,
+    "state_capacity": 0.0007,
+    "trade_capacity": 0.0005
+   },
+   "sovereign_realms_congress": {
+    "cohesion": 0.0019,
+    "legitimacy": 0.0018,
+    "security_efficiency": 0.0034,
+    "state_capacity": 0.001,
+    "warfare_readiness": -0.0019
+   },
+   "estates_rule_without_ruler": {
+    "cohesion": -0.001,
+    "institutional_rigidity": -0.0021,
+    "legitimacy": -0.0015,
+    "state_capacity": 0.0005
+   },
+   "written_frame_of_government": {
+    "cohesion": 0.0013,
+    "institutional_rigidity": -0.0045,
+    "legitimacy": 0.0025,
+    "state_capacity": 0.0012
+   },
+   "restoration_amnesty": {
+    "cohesion": 0.0016,
+    "legitimacy": 0.0009,
+    "security_efficiency": 0.0005
+   },
+   "personal_rule_ministers": {
+    "institutional_rigidity": 0.0007,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0007,
+    "task_coordination": 0.0015
+   },
+   "mercantile_trade_council": {
+    "craft_output": 0.0017,
+    "institutional_rigidity": 0.0007,
+    "state_capacity": 0.0005,
+    "trade_capacity": 0.0012
+   },
+   "treasury_commission_board": {
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0007,
+    "task_coordination": 0.001
+   },
+   "war_ministry_bureaus": {
+    "labor_demand": 0.0008,
+    "logistics_endurance": 0.0018,
+    "security_efficiency": 0.0009,
+    "state_capacity": 0.0005,
+    "warfare_readiness": 0.0035
+   },
+   "test_oath_for_office": {
+    "cohesion": -0.002,
+    "institutional_rigidity": 0.0014,
+    "legitimacy": 0.0005
+   },
+   "habeas_writ": {
+    "cohesion": 0.0008,
+    "institutional_rigidity": -0.0021,
+    "legitimacy": 0.0009
+   },
+   "estates_parties": {
+    "cohesion": -0.001,
+    "institutional_rigidity": -0.0014,
+    "legitimacy": 0.0005
+   },
+   "grand_palace_court": {
+    "cohesion": -0.0024,
+    "food_storage": -0.0022,
+    "labor_demand": 0.0027,
+    "legitimacy": 0.0029,
+    "state_capacity": 0.001
+   },
+   "conditional_crown_settlement": {
+    "institutional_rigidity": -0.0014,
+    "legitimacy": 0.0011,
+    "state_capacity": 0.0005
+   },
+   "realm_bill_of_rights": {
+    "cohesion": 0.0025,
+    "institutional_rigidity": -0.0045,
+    "legitimacy": 0.0033,
+    "security_efficiency": 0.0005,
+    "state_capacity": 0.001
+   },
+   "appropriated_annual_budget": {
+    "institutional_rigidity": -0.0007,
+    "state_capacity": 0.0007,
+    "task_coordination": 0.001,
+    "trade_capacity": 0.0005
+   },
+   "state_lottery_loans": {
+    "cohesion": -0.0005,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.0005
+   },
+   "chartered_central_bank": {
+    "institutional_rigidity": 0.0006,
+    "legitimacy": 0.0007,
+    "state_capacity": 0.0019,
+    "trade_capacity": 0.004
+   },
+   "fixed_term_estates": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.0014,
+    "legitimacy": 0.0009
+   },
+   "press_licence_lapse": {
+    "adoption_rate": 0.0018,
+    "institutional_rigidity": -0.0021,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.0005
+   },
+   "trade_and_colonies_board": {
+    "knowledge_preservation": 0.0005,
+    "state_capacity": 0.0005,
+    "trade_capacity": 0.0012
+   },
+   "foreign_affairs_office": {
+    "knowledge_preservation": 0.0021,
+    "security_efficiency": 0.0006,
+    "state_capacity": 0.0007
+   },
+   "realm_union_treaty": {
+    "cohesion": -0.001,
+    "legitimacy": -0.0005,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.001
+   },
+   "governing_senate_colleges": {
+    "institutional_rigidity": 0.0007,
+    "labor_demand": 0.0008,
+    "state_capacity": 0.0009,
+    "task_coordination": 0.0015
+   },
+   "justice_ombudsman": {
+    "institutional_rigidity": -0.0014,
+    "legitimacy": 0.0009,
+    "state_capacity": 0.0005
+   },
+   "succession_sanction": {
+    "cohesion": 0.0008,
+    "legitimacy": 0.0009,
+    "security_efficiency": 0.0005
+   },
+   "debt_sinking_fund": {
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.0007
+   },
+   "cadastral_tax_survey": {
+    "cohesion": -0.001,
+    "cultivation_yield": 0.0005,
+    "labor_demand": 0.0008,
+    "standardization": 0.0018,
+    "state_capacity": 0.0012,
+    "survey_speed": 0.0028
+   },
+   "bubble_company_law": {
+    "institutional_rigidity": 0.0007,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.0005,
+    "trade_capacity": -0.001
+   },
+   "cabinet_first_minister": {
+    "institutional_rigidity": -0.0022,
+    "legitimacy": 0.0022,
+    "state_capacity": 0.0019,
+    "task_coordination": 0.0033
+   },
+   "table_of_service_ranks": {
+    "cohesion": 0.0008,
+    "institutional_rigidity": 0.001,
+    "security_efficiency": 0.0006,
+    "state_capacity": 0.0006
+   },
+   "cameral_science_chairs": {
+    "adoption_rate": 0.0022,
+    "institutional_rigidity": -0.0011,
+    "knowledge_rate": 0.0022,
+    "labor_demand": 0.0007,
+    "state_capacity": 0.0024,
+    "task_coordination": 0.0025
+   },
+   "police_ordinance_science": {
+    "institutional_rigidity": 0.0007,
+    "sanitation": 0.0014,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.0005
+   },
+   "servant_ruler_doctrine": {
+    "institutional_rigidity": -0.0007,
+    "legitimacy": 0.0011,
+    "state_capacity": 0.0005
+   },
+   "separation_of_powers": {
+    "cohesion": 0.0019,
+    "institutional_rigidity": -0.0078,
+    "legitimacy": 0.0029,
+    "state_capacity": 0.0005
+   },
+   "compiled_civil_code": {
+    "institutional_rigidity": 0.0007,
+    "standardization": 0.0037,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.0005
+   },
+   "free_grain_trade_doctrine": {
+    "cohesion": -0.001,
+    "food_storage": -0.0014,
+    "trade_capacity": 0.0012
+   },
+   "social_contract_doctrine": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0028,
+    "legitimacy": -0.002
+   },
+   "penal_reform_no_torture": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0021,
+    "legitimacy": 0.0009,
+    "security_efficiency": 0.0005
+   },
+   "press_freedom_statute": {
+    "adoption_rate": 0.0023,
+    "institutional_rigidity": -0.0021,
+    "knowledge_rate": 0.0009,
+    "legitimacy": -0.0005
+   },
+   "cameral_service_examinations": {
+    "institutional_rigidity": -0.0007,
+    "standardization": 0.0018,
+    "state_capacity": 0.0009
+   },
+   "declaration_of_rights": {
+    "cohesion": 0.0031,
+    "institutional_rigidity": -0.0056,
+    "legitimacy": 0.0033,
+    "state_capacity": 0.0005
+   },
+   "constituent_convention": {
+    "cohesion": 0.0005,
+    "institutional_rigidity": -0.0021,
+    "legitimacy": 0.0011,
+    "state_capacity": 0.0005
+   },
+   "federal_written_constitution": {
+    "cohesion": 0.0025,
+    "institutional_rigidity": -0.0045,
+    "legitimacy": 0.0033,
+    "state_capacity": 0.0017
+   },
+   "abolition_of_estate_privileges": {
+    "cohesion": 0.0016,
+    "institutional_rigidity": -0.0028,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0005
+   },
+   "single_national_assembly": {
+    "cohesion": 0.0025,
+    "institutional_rigidity": -0.0056,
+    "legitimacy": 0.0029,
+    "state_capacity": 0.001
+   },
+   "elected_municipal_councils": {
+    "cohesion": 0.0012,
+    "institutional_rigidity": -0.0014,
+    "legitimacy": 0.0009,
+    "state_capacity": 0.0005
+   },
+   "uniform_departments": {
+    "cohesion": -0.001,
+    "institutional_rigidity": -0.0014,
+    "standardization": 0.0031,
+    "state_capacity": 0.0009
+   },
+   "realm_republic": {
+    "cohesion": -0.0015,
+    "institutional_rigidity": -0.0028,
+    "legitimacy": -0.0015,
+    "warfare_readiness": 0.0012
+   },
+   "emergency_safety_committee": {
+    "cohesion": -0.0029,
+    "institutional_rigidity": 0.001,
+    "legitimacy": -0.002,
+    "security_efficiency": 0.0015,
+    "state_capacity": 0.0005,
+    "warfare_readiness": 0.0024
+   },
+   "general_land_code": {
+    "institutional_rigidity": 0.0007,
+    "security_efficiency": 0.0006,
+    "standardization": 0.0031,
+    "state_capacity": 0.0005
+   },
+   "graduated_income_tax": {
+    "cohesion": -0.001,
+    "legitimacy": 0.0005,
+    "state_capacity": 0.001,
+    "trade_capacity": -0.0005
+   }
+  }
+ }
+}

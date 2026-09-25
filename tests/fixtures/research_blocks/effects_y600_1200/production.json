@@ -1,0 +1,8 @@
+{
+ "line": "production",
+ "schema": "research_600_effects/1",
+ "items": {
+  "fx_bloom_hearths": {"effects": {"metal_yield": 0.012, "fuel_demand": 0.004}, "observation": "Iron comes out of the clay hearth as a spongy bloom."},
+  "copper_smelting": {"effects": {"metal_yield": 0.5}}
+ }
+}

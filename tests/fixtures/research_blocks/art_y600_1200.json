@@ -1,0 +1,8 @@
+{
+ "schema": "research_art_600/1",
+ "description": "Test fixture art manifest for the synthetic 600-1200 block.",
+ "items": {
+  "fx_bloom_hearths": {"path": "res://assets/ui/research/discovery-600/agreed_signal_codes.png"},
+  "agreed_signal_codes": {"path": "res://tests/fixtures/research_blocks/never_used.png"}
+ }
+}

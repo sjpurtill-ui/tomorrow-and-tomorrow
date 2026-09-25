@@ -1340,7 +1340,18 @@ func _apply_survival_guard(weights:Dictionary)->Dictionary:
 		for role:String in weights:
 			if role!="Food":other+=maxf(0.0,float(weights[role]))
 		weights.Food=maxf(float(weights.get("Food",0)),other*needed/maxf(.01,1.0-needed))
+		# research_3000: once food workers comfortably out-produce the need and
+		# the stores hold, the planned food labor comes down to what is needed
+		# (with a margin); _apply_food_labor_floor still holds the era's floor.
+		if not bool(guard.food) and float(metrics.get("food_projected_days",0.0))>=SURPLUS_RELEASE_DAYS:
+			var released:=clampf(needed*SURPLUS_RELEASE_MARGIN,0.0,ceiling)
+			weights.Food=minf(float(weights.get("Food",0)),other*released/maxf(.01,1.0-released))
 	return guard
+
+## research_3000: stores (days) and margin over the needed share at which
+## planners move surplus food workers to other work.
+const SURPLUS_RELEASE_DAYS:=45.0
+const SURPLUS_RELEASE_MARGIN:=1.15
 
 
 ## research_600 balance: getting, grinding, cooking and storing food took most
@@ -1349,7 +1360,9 @@ func _apply_survival_guard(weights:Dictionary)->Dictionary:
 ## share on food; the surplus fills the stores. A society focused on food and
 ## labor research needs less (up to a quarter), and decrees that claim labor
 ## (care rotas, watches, levies) leave less time for everything, so food takes more.
-const FOOD_LABOR_FLOOR:Array=[[0.0,0.62],[100.0,0.60],[300.0,0.56],[600.0,0.52],[1500.0,0.35],[2800.0,0.05]]
+## research_3000: the floor follows the benchmark's typical share of labor on
+## food through 3000 (docs/research/benchmarks_*.json food_labor_share).
+const FOOD_LABOR_FLOOR:Array=[[0.0,0.62],[100.0,0.60],[300.0,0.56],[600.0,0.52],[1200.0,0.47],[1800.0,0.45],[2400.0,0.38],[2500.0,0.36],[2600.0,0.33],[2700.0,0.28],[2800.0,0.22],[2900.0,0.13],[3000.0,0.08]]
 
 func _apply_food_labor_floor(weights:Dictionary)->void:
 	var year:=float(WorldSimulation.state.elapsed_days)/365.0

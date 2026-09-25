@@ -35,9 +35,15 @@ const EFFECT_DISPLAY_NAMES:Dictionary={
 	"security_efficiency":"security efficiency","warfare_readiness":"military readiness","cohesion":"social cohesion","adoption_rate":"spread of new practices"
 }
 
+## Pristine copies of the base entries: initialize() replaces them with
+## design-applied versions, which must not survive into another world or
+## research block manifest.
+var _base_entries:Array[Dictionary]=[]
+
 func reset_for_new_world()->void:
 	initialized=false
 	catalog.resize(BASE_DISCOVERY_COUNT)
+	for i in mini(_base_entries.size(),BASE_DISCOVERY_COUNT): catalog[i]=_base_entries[i].duplicate(true)
 	technology_catalog.clear()
 	technology_limits.clear()
 	catalog_by_id.clear()
@@ -81,7 +87,7 @@ var catalog: Array[Dictionary] = [
 	# cavalry gate has always demanded, and the transformative stride for
 	# scouting range.
 	{"id":"animal_taming","name":"Animal Taming","dynamic":"ecology","subcategory":"Resource sustainability","direction":"ecology","chance":0.005,"day":90,"requires":["seasonal_patterns"],"signals":["foraging","exploration"],"resource_requirements":[{"resource":"Game","stage":"recognized"}],"observation":"Orphaned young of herd animals raised beside the settlement stay, breed, and follow.","effects":{"food_output":0.004},"production_contract":"A small group is removed from a suitable recognized wild population, then consumes finite plant food under daily settled handling for sixty qualifying days. Benefits and downstream animal practices scale with the maintained living herd."},
-	{"id":"pack_animals","name":"Pack Animal Husbandry","dynamic":"logistics","subcategory":"Carrying capacity","direction":"logistics","chance":0.004,"day":220,"requires":["animal_taming"],"signals":["logistics","travel"],"observation":"Tamed beasts under saddle-frames carry loads no human team matches, day after day.","effects":{"haul_capacity":0.008,"route_speed":0.004}},
+	{"id":"pack_animals","name":"Pack Animal Husbandry","dynamic":"logistics","subcategory":"Carrying capacity","direction":"logistics","chance":0.004,"day":220,"requires":["animal_taming"],"signals":["logistics","travel"],"observation":"Tamed beasts under pack-frames carry loads no human team matches, day after day.","effects":{"haul_capacity":0.008,"route_speed":0.004}},
 	{"id":"domesticated_mounts","name":"Domesticated Mounts","dynamic":"logistics","subcategory":"Route quality","direction":"logistics","chance":0.003,"day":400,"requires":["pack_animals"],"signals":["travel","defense"],"observation":"Selected bloodlines accept riders. A mounted person moves like weather, not like walking.","effects":{"route_speed":0.010}},
 	{"id":"mounted_scouts","name":"Mounted Scouting","dynamic":"logistics","subcategory":"Route quality","direction":"logistics","chance":0.004,"day":460,"requires":["domesticated_mounts"],"signals":["exploration","travel"],"observation":"Riders range in days across country that costs walkers weeks, and return fresh enough to tell it.","effects":{"route_speed":0.012}},
 	# — Watercraft line. From river floats to coastal passage; open water stops
@@ -94,6 +100,8 @@ var catalog: Array[Dictionary] = [
 func initialize() -> void:
 	if initialized:
 		return
+	if _base_entries.is_empty():
+		for i in mini(catalog.size(),BASE_DISCOVERY_COUNT): _base_entries.append(catalog[i].duplicate(true))
 	catalog_by_id.clear()
 	catalog_by_channel.clear()
 	era_by_id.clear()
@@ -420,6 +428,10 @@ func _refresh_active_investigations()->void:
 		if String(WorldSimulation.state.active_investigations.get(channel,""))!="": continue
 		var candidate:=_best_candidate_for_channel(channel,current_day)
 		if candidate.is_empty(): candidate=_research_600_foundation_candidate(dynamic_id,current_day) # research_600
+		elif Research600.deferred(String(candidate.get("id","")),society_model.ceiling_era):
+			# research_3000: foundations of current questions before a dead end or leftover.
+			var foundation:=_research_600_foundation_candidate(dynamic_id,current_day)
+			if not foundation.is_empty(): candidate=foundation
 		if not candidate.is_empty(): WorldSimulation.state.active_investigations[channel]=String(candidate.id)
 	WorldSimulation.state.active_observations.clear()
 	for record in active_investigation_records_shallow():
@@ -515,6 +527,7 @@ func _discovery_is_eligible(discovery:Dictionary,current_day:int,known:Variant=n
 	var id:=String(discovery.get("id",""))
 	if id in known or not _path_is_viable(discovery):return false
 	if not research_600_open(discovery,{},current_day):return false # research_600: era and design conditions
+	if not Research600.pursued(id,society_model.ceiling_era):return false # research_3000: superseded practice abandoned
 	return OpeningOpportunities.ready(id) and Pathways.ready(discovery,current_day,known) and _resource_requirements_met(discovery.get("resource_requirements",[]))
 
 func _channel_has_candidate(channel:String,current_day:int)->bool:
@@ -548,6 +561,9 @@ func _path_is_viable(discovery:Dictionary,civilization_seed:int=0)->bool:
 	# Old generated maturity/lens entries remain readable for saved bonuses and
 	# history, but are retired from both player and rival research pools.
 	if bool(discovery.get("frontier",false)): return false
+	# research_3000: each world offers a seeded subset of the registry's dead ends.
+	var id:=String(discovery.get("id",""))
+	if Research600.has(id) and not Research600.dead_end_offered(id,_research_draw(id,civilization_seed if civilization_seed!=0 else int(WorldSimulation.state.world_seed),"dead_end")): return false
 	return true
 
 func _legacy_path_was_viable(discovery:Dictionary,civilization_seed:int=0)->bool:
@@ -581,6 +597,9 @@ func _candidate_score(discovery:Dictionary)->float:
 	score+=float(discovery.get("stage_index",0))*3.5
 	# Work far beyond current scholarship is slow; lines prefer questions of their age.
 	score-=log(era_cost_multiplier(discovery))/log(2.0)*20.0
+	# research_3000: and they take up the current frontier before older leftovers.
+	score-=Research600.staleness(id,society_model.ceiling_era)*20.0
+	if Research600.dead_end(id): score-=Research600.DEAD_END_PENALTY
 	score+=Pathways.need(discovery)+(35.0 if not Pathways.evidence(id).is_empty() else 0.0)
 	return score
 
@@ -894,17 +913,21 @@ func research_capacity_for(dynamic_id:String,subcategory:String)->Dictionary:
 	var team_scale:=0.0
 	if researchers>0.0:
 		team_scale=researchers if researchers<1.0 else 1.0+log(researchers)/log(10.0)*0.78
+	elif weight==0 and subcategory==_diffusion_subcategory(dynamic_id):
+		team_scale=Research600.DIFFUSION_TEAM # research_3000: diffusion
 	var food_support:=lerpf(0.62,1.08,clampf(float(WorldSimulation.state.food_security),0.0,1.0))
 	var material_capacity:=clampf(float(WorldSimulation.state.simulation_metrics.get("material_capacity",WorldSimulation.state.society_capacities.get("production",0.12))),0.0,1.2)
 	var material_support:=lerpf(0.72,1.12,material_capacity/1.2)
 	var institutional_capacity:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.25)),0.0,1.0)
 	var education:=preload("res://scripts/civilization_indicators.gd").education_index()
 	var support_multiplier:=food_support*material_support*lerpf(0.78,1.18,institutional_capacity)*lerpf(0.55,1.45,education)
+	# research_3000: a large, literate, well-governed society runs many investigations at once.
+	var parallel:=preload("res://scripts/research_600_catalog.gd").parallel_capacity(float(WorldSimulation.state.population_exact),institutional_capacity,effect("literacy"))
 	return {
 		"weight":weight,"total_weight":total_weight,"total_researchers":total_researchers,
 		"workforce_share":workforce_share,"researchers":researchers,"team_scale":team_scale,
-		"education":education,"science_capacity":researchers*education,
-		"support_multiplier":support_multiplier,"progress_multiplier":team_scale*support_multiplier*(1.0+preload("res://scripts/artifact_collection.gd").bonus(dynamic_id))
+		"education":education,"science_capacity":researchers*education,"parallel":parallel,
+		"support_multiplier":support_multiplier,"progress_multiplier":team_scale*support_multiplier*parallel*(1.0+preload("res://scripts/artifact_collection.gd").bonus(dynamic_id))
 	}
 
 
@@ -941,7 +964,19 @@ func _allocated_channels()->Array[Dictionary]:
 		var subcategories:Dictionary=WorldSimulation.state.research_subcategory_allocations[dynamic_id]
 		for subcategory in subcategories:
 			if int(subcategories[subcategory])>0: result.append({"dynamic":dynamic_id,"subcategory":subcategory})
+		# research_3000: an unemphasized line still takes up questions by diffusion.
+		var diffusion:=_diffusion_subcategory(String(dynamic_id))
+		if not diffusion.is_empty(): result.append({"dynamic":dynamic_id,"subcategory":diffusion,"diffusion":true})
 	return result
+
+## research_3000: the channel through which a line with no emphasis learns by
+## diffusion (its first subcategory), or "" when the line has emphasis.
+func _diffusion_subcategory(dynamic_id:String)->String:
+	var subcategories:Dictionary=WorldSimulation.state.research_subcategory_allocations.get(dynamic_id,{})
+	if subcategories.is_empty(): return ""
+	for value:Variant in subcategories.values():
+		if int(value)>0: return ""
+	return String(subcategories.keys()[0])
 
 func _classify_discovery(source:Dictionary)->Dictionary:
 	var discovery:=source.duplicate(true)
@@ -1043,8 +1078,10 @@ func select_research_target(discovery_id:String)->Dictionary:
 ## `known` (default: the acting society's discoveries) supplies design
 ## precedents, which make research quicker but are never required.
 func research_difficulty(discovery:Dictionary,civilization_seed:int,level:float=NAN,known:Variant=null)->float:
+	# research_3000: the society's own superseded practices are slower to take up.
+	var stale:=Research600.stale_factor(String(discovery.get("id","")),society_model.ceiling_era) if known==null else 1.0
 	if known==null: known=WorldSimulation.state.known_discoveries
-	return (0.85+_research_draw(String(discovery.id),civilization_seed,"cost")*0.30)*era_cost_multiplier(discovery,level)/Research600.precedent_factor(String(discovery.id),known)
+	return (0.85+_research_draw(String(discovery.id),civilization_seed,"cost")*0.30)*era_cost_multiplier(discovery,level)/Research600.precedent_factor(String(discovery.id),known)*stale
 
 
 ## Game-year equivalent of a discovery's historical period (TechnologyEras).
@@ -1403,7 +1440,7 @@ func _research_600_channel_home(channel:String)->Array[String]:
 
 func _research_600_investigation_placed(channel:String,discovery:Dictionary)->bool:
 	var home:=_research_600_channel_home(channel)
-	if _subcategory_allocation(home[0],home[1])<=0: return false
+	if _subcategory_allocation(home[0],home[1])<=0 and home[1]!=_diffusion_subcategory(home[0]): return false
 	if channel==_channel_key(String(discovery.get("dynamic","")),String(discovery.get("subcategory",""))): return true
 	return String(discovery.get("id","")) in _research_600_foundation_ids(home[0],int(floor(WorldSimulation.state.elapsed_days)))
 
@@ -1426,7 +1463,7 @@ func _research_600_foundation_ids(dynamic_id:String,current_day:int)->Array[Stri
 	var frontier:Array[String]=[]
 	for entry:Dictionary in technology_catalog:
 		if String(entry.get("dynamic",""))!=dynamic_id or known.has(String(entry.get("id",""))): continue
-		if research_600_open(entry,{},current_day): frontier.append_array(_research_600_missing_parents(entry,known))
+		if research_600_open(entry,{},current_day) and Research600.pursued(String(entry.get("id","")),society_model.ceiling_era): frontier.append_array(_research_600_missing_parents(entry,known)) # research_3000: only questions still pursued
 	var found:Dictionary={}
 	var visited:Dictionary={}
 	var depth:=0

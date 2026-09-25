@@ -26,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "research"))
 import facets  # noqa: E402
 import focus_bench  # noqa: E402  (per-focus benchmark profiles)
+import shock_bench  # noqa: E402  (shock keys and widened bands, research_3000)
 import gamedata as gd  # noqa: E402
 import simlib  # noqa: E402
 
@@ -51,7 +52,20 @@ def _run(args):
     # so the artifact facets are comparable; poor keeps its own site and decrees.
     result = simlib.run(scenario, seed, years, simlib.params(), scenario_override={"scouting": 0.03, "study_weight": 2}, shocks=shocks)
     constants, cat = simlib.data()
-    return scenario, facets.century_facets(result, cat, years, step=50)
+    era = {int(round(r["year"])): r.get("ceiling_era", r["year"]) for r in result["rows"]}
+    episodes = shock_bench.player_episodes(result["shocks"], era) if shocks else []
+    return scenario, facets.century_facets(result, cat, years, step=50), episodes
+
+
+class WidenedBench(focus_bench.FocusBench):
+    """FocusBench judging against the shock-widened bands of ``episodes`` (shock_bench.py)."""
+
+    def __init__(self, episodes):
+        super().__init__()
+        self.episodes = episodes
+
+    def judge(self, focus, metric, year, value):
+        return shock_bench.judge(super(), focus, metric, year, value, self.episodes)
 
 
 def better(facet: str, delta: float) -> float:
@@ -78,9 +92,10 @@ def main() -> int:
     t0 = time.time()
     with ProcessPoolExecutor(max_workers=args.jobs) as pool:
         outs = list(pool.map(_run, [(s, 1 + k, args.years, args.shocks) for s in scenarios for k in range(args.seeds)]))
-    by = {}
-    for scenario, fac in outs:
+    by, eps = {}, {}
+    for scenario, fac, ep in outs:
         by.setdefault(scenario, []).append(fac)
+        eps.setdefault(scenario, []).extend(ep)
     mean = {s: facets.mean_facets(v) for s, v in by.items()}
     centuries = [c for c in range(100, args.years + 1, 100)]
     names = list(facets.FACETS) + [f"line_{l}" for l in gd.LINES]
@@ -119,7 +134,8 @@ def main() -> int:
             if c not in mean[s] or c not in base:
                 continue
             focus = fs.classify({"research": research}, c)
-            chk = fs.check_run(focus, {c: mean[s][c]}, balanced=None if s == "balanced" else {c: base[c]})
+            jfs = WidenedBench(eps.get(s, [])) if args.shocks else fs
+            chk = jfs.check_run(focus, {c: mean[s][c]}, balanced=None if s == "balanced" else {c: base[c]})
             above = [f"{a['flag']} {a['metric']}" for a in chk["flags"] if a["flag"] in ("ABOVE FOCUS HIGH", "OUT OF BOUNDS")]
             unpaid = [f for f, v in chk["costs"].get(float(c), {}).items() if v["status"] == "UNPAID"]
             free = [f for f, v in chk["relative"].get(float(c), {}).items() if v["status"] == "FREE LUNCH"]
@@ -178,11 +194,12 @@ def main() -> int:
     md += ["", f"{len(low)} value(s) fall below the era's poor-society level (listed per scenario below, marked ▼).", ""]
     md += ["## Detail by scenario", "", "Each cell: value (Δ vs balanced). ▲ = ABOVE HIGH (past the allowed deviation), △ = above high but within the allowance, ▼ = below low, ✗ = out of bounds.", ""]
     for s in scenarios:
-        md += [f"### {s}", "", "| facet | " + " | ".join(str(c) for c in centuries) + " |", "|---|" + "---:|" * len(centuries)]
+        cols = centuries if args.years <= 600 else [c for c in centuries if c % 300 == 0]   # long runs: every third century
+        md += [f"### {s}", "", "| facet | " + " | ".join(str(c) for c in cols) + " |", "|---|" + "---:|" * len(cols)]
         for f in names:
             label, fmt, _dir = facets.FACETS.get(f, (f.replace("line_", "discoveries/century: "), "{:.0f}", None))
             cells = []
-            for c in centuries:
+            for c in cols:
                 v = mean[s].get(c, {}).get(f)
                 if v is None:
                     cells.append("")

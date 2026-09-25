@@ -30,9 +30,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Produce repeatable durable printing characters through qualified casting",
     "effects": {},
-    "production_items": [
-      "cast_metal_type_sets"
-    ],
+    "production_items": ["cast_metal_type_sets", "composed_metal_type_forms"],
     "production_contract": "Paid casting produces selected bronze type sets with rejected material and finishing work. Composition allocates actual metal or wooden type to forms, with spacing material, proof paper, ink and finite work. Installed forms feed existing printing and study; no text, discovered knowledge or arbitrary glyph inventory is created. Compatible repertoire and corrected proofs are abstracted by paid production work."
   },
   {
@@ -67,10 +65,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Arrange reusable characters into a qualified page form",
     "effects": {},
-    "production_items": [
-      "composed_metal_type_forms",
-      "composed_wood_type_forms"
-    ],
+    "production_items": ["fired_clay_type_forms"],
     "production_contract": "Paid casting produces selected bronze type sets with rejected material and finishing work. Composition allocates actual metal or wooden type to forms, with spacing material, proof paper, ink and finite work. Installed forms feed existing printing and study; no text, discovered knowledge or arbitrary glyph inventory is created. Compatible repertoire and corrected proofs are abstracted by paid production work."
   }
 ]

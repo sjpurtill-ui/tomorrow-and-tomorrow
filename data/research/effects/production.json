@@ -43,7 +43,7 @@
    "effects": {
     "construction_rate": 0.0115,
     "haul_capacity": 0.0303,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0037,
     "mobile_shelter": 0.08,
     "tool_quality": 0.0065
    }
@@ -135,7 +135,8 @@
     "cohesion": 0.0013,
     "craft_output": 0.0009
    },
-   "art": "res://assets/ui/research/paper/mineral_pigment_preparation.png"
+   "art": "res://assets/ui/research/paper/mineral_pigment_preparation.png",
+   "production_contract": "Finite selected feed, grinding equipment, actual water, work and trial material make levigated and finely ground earth pigments. Ochre is a nonrenewable observed occurrence; generic clay or iron ore cannot substitute. Printing inks and printed sheets from these pigments need later printing knowledge. No imported output grants local mastery or a universal pigment rating."
   },
   "pit_firing": {
    "art": "res://assets/ui/research/subjects/pit_firing-v1.png",
@@ -204,7 +205,7 @@
    "art": "res://assets/ui/research/subjects/charcoal-v1.png",
    "effects": {
     "fuel_efficiency": 0.105,
-    "labor_demand": 0.015,
+    "labor_demand": 0.0055,
     "metal_yield": 0.03,
     "pollution": 0.018,
     "timber_pressure": 0.07
@@ -253,7 +254,8 @@
     "construction_rate": 0.012,
     "health_protection": 0.0031,
     "soil_productivity": 0.005
-   }
+   },
+   "production_contract": "Finite workshop batches make Quicklime from limestone, using stone and clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "scrap_reclamation_habits": {
    "art": "res://assets/ui/research/stone-selection-v1.png",
@@ -344,7 +346,8 @@
     "pollution": 0.01,
     "tool_quality": 0.0155,
     "trade_capacity": 0.0054
-   }
+   },
+   "production_contract": "Finite workshop batches make Refined Copper from copper ore and timber, using stone and clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "haft_fit_checking": {
    "art": "res://assets/ui/research/subjects/hafted_tools-v1.png",
@@ -363,12 +366,11 @@
    },
    "art": "res://assets/ui/research/paper/hide_tanning.png",
    "production_items": [
-    "bated_vegetable_leather",
     "rendered_leather_fat",
-    "prepared_tanning_hides",
     "plant_tannin_extract",
     "vegetable_tanned_leather",
-    "finished_flexible_leather"
+    "finished_flexible_leather",
+    "ash_prepared_hides"
    ]
   },
   "copper_casting": {
@@ -660,7 +662,11 @@
    "production_contract": "Cassiterite, charcoal and furnace work produce refined tin; tin ore is rare, so most tin must be found far off or traded for."
   },
   "graded_tool_retirement": {
-   "art": "res://assets/ui/research/subjects/hafted_tools-v1.png"
+   "art": "res://assets/ui/research/subjects/hafted_tools-v1.png",
+   "effects": {
+    "repair_capacity": 0.02,
+    "tool_quality": 0.02
+   }
   },
   "bronze_alloying": {
    "art": "res://assets/ui/research/subjects/bronze_alloying-v1.png",
@@ -683,7 +689,7 @@
   "cross_settlement_measure_agreement": {
    "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
    "effects": {
-    "institutional_rigidity": 0.01,
+    "institutional_rigidity": 0.0033,
     "standardization": 0.0111,
     "trade_capacity": 0.0041
    }
@@ -786,7 +792,7 @@
    "effects": {
     "craft_output": 0.0071,
     "fiber_yield": 0.01,
-    "institutional_rigidity": 0.01,
+    "institutional_rigidity": 0.0018,
     "standardization": 0.0024,
     "state_capacity": 0.0023,
     "trade_capacity": 0.0054
@@ -826,7 +832,11 @@
    "observation": "Copper is cast into ingots of a fixed weight and shape, so a load of metal can be counted rather than weighed."
   },
   "sulfur_purification": {
-   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png"
+   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
+   "effects": {
+    "chemical_control": 0.08,
+    "health_risk": 0.01
+   }
   },
   "shaft_furnaces": {
    "effects": {
@@ -846,7 +856,11 @@
     "craft_output": 0.0017,
     "trade_capacity": 0.0015
    },
-   "observation": "Wool boiled first in alum water takes madder and weld deep and fast, and the colour no longer washes out."
+   "observation": "Wool boiled first in alum water takes madder and weld deep and fast, and the colour no longer washes out.",
+   "production_items": [
+    "gathered_alum"
+   ],
+   "production_contract": "Finite workshop batches make Alum from stone and freshwater, using clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
   },
   "ceramic_glaze_formulation": {
    "effects": {
@@ -857,7 +871,8 @@
     "water_safety": 0.0052
    },
    "art": "res://assets/ui/research/paper/ceramic_glaze_formulation.png",
-   "social_consequence": "Glazed jars keep oil and wine without seeping; fine glazed wares become a mark of a well-off household."
+   "social_consequence": "Glazed jars keep oil and wine without seeping; fine glazed wares become a mark of a well-off household.",
+   "production_contract": "Finite workshop batches fit a glassy glaze to prepared earthenware, paying clay, ground glass, fuel and work. Glazed stoneware needs high-fire stoneware; these are bounded compatible material classes, not arbitrary glaze mixing."
   },
   "refractory_body_trials": {
    "effects": {
@@ -900,8 +915,8 @@
   "refractory_brick_firing": {
    "effects": {
     "fuel_efficiency": 0.02,
-    "metal_yield": 0.0055,
-    "repair_capacity": 0.0088
+    "metal_yield": 0.0027,
+    "repair_capacity": 0.0083
    },
    "art": "res://assets/ui/research/paper/refractory_brick_firing.png"
   }
@@ -1448,6 +1463,52 @@
     "craft_output": 0.004,
     "legitimacy": 0.003,
     "trade_capacity": 0.009
+   }
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "cordage": {
+    "construction_rate": 0.0115,
+    "haul_capacity": 0.0303,
+    "labor_demand": 0.01,
+    "mobile_shelter": 0.08,
+    "tool_quality": 0.0065
+   },
+   "charcoal": {
+    "fuel_efficiency": 0.105,
+    "labor_demand": 0.015,
+    "metal_yield": 0.03,
+    "pollution": 0.018,
+    "timber_pressure": 0.07
+   },
+   "graded_tool_retirement": {
+    "repair_capacity": 0.02,
+    "tool_quality": 0.02
+   },
+   "cross_settlement_measure_agreement": {
+    "institutional_rigidity": 0.01,
+    "standardization": 0.0111,
+    "trade_capacity": 0.0041
+   },
+   "palace_weaving_houses": {
+    "craft_output": 0.0071,
+    "fiber_yield": 0.01,
+    "institutional_rigidity": 0.01,
+    "standardization": 0.0024,
+    "state_capacity": 0.0023,
+    "trade_capacity": 0.0054
+   },
+   "sulfur_purification": {
+    "chemical_control": 0.08,
+    "health_risk": 0.01
+   },
+   "refractory_brick_firing": {
+    "fuel_efficiency": 0.02,
+    "metal_yield": 0.0055,
+    "repair_capacity": 0.0088
    }
   }
  }

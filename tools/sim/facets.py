@@ -51,6 +51,8 @@ FACETS = {
     "per_century": ("Discoveries this century", "{:.0f}", True),
     "per_50": ("Registry items of the block learned in it %", "{:.0f}", True),
     "education": ("Education index", "{:.2f}", True),
+    "literacy": ("Literacy %", "{:.1f}", True),
+    "urban_share": ("Urban share %", "{:.1f}", True),
     "art_found": ("Artifacts held", "{:.1f}", True),
     "art_studied": ("Artifacts studied", "{:.1f}", True),
     "art_bonus": ("Artifact research bonus", "{:.3f}", True),
@@ -59,17 +61,40 @@ FACETS = {
 BENCH_KEYS = {"life_expectancy": "life_expectancy", "infant_mortality": "infant_mortality", "child_mortality_1_4": "child_mortality_1_4",
               "maternal_per_100k": "maternal_per_100k", "tfr": "tfr", "cbr": "cbr", "cdr": "cdr", "growth_pct": "growth_pct",
               "population": "population", "food_share": "food_labor_share", "per_50": "discoveries_per_50_years",
-              "defense_share": "defense_labor_share"}
+              "defense_share": "defense_labor_share", "known": "discoveries_known", "literacy": "literacy_pct",
+              "urban_share": "urban_share_pct"}
 
 
 def benchmarks() -> dict:
-    """R3's benchmarks_600.json when present, else tools/sim/benchmarks.json."""
-    for path in (BENCH_PATH, SIM_BENCH):
-        if path.exists():
-            data = json.loads(path.read_text(encoding="utf-8"))
-            data["_source"] = str(path.relative_to(ROOT)).replace("\\", "/")
+    """Every base benchmark window (docs/research/benchmarks_600.json ... _3000.json)
+    merged by year: each metric takes the union of its years, and a shared join year
+    keeps the EARLIER window's row (the files repeat it exactly). allowed_deviation,
+    milestones and the rest come from the 0-600 file; shock_widening is kept per
+    window under "shock_widening_by_window". Falls back to tools/sim/benchmarks.json."""
+    paths = sorted(BENCH_PATH.parent.glob("benchmarks_[0-9]*.json"), key=lambda p: int(p.stem.split("_")[1]))
+    if not paths:
+        if SIM_BENCH.exists():
+            data = json.loads(SIM_BENCH.read_text(encoding="utf-8"))
+            data["_source"] = str(SIM_BENCH.relative_to(ROOT)).replace("\\", "/")
             return data
-    return {"metrics": {}, "milestones": {"ids": []}, "_source": "none"}
+        return {"metrics": {}, "milestones": {"ids": []}, "_source": "none"}
+    merged: dict = {}
+    widening = {}
+    for path in paths:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if not merged:
+            merged = {k: v for k, v in data.items() if k != "metrics"}
+            merged["metrics"] = {}
+        for name, metric in data.get("metrics", {}).items():
+            slot = merged["metrics"].setdefault(name, {k: v for k, v in metric.items() if k != "years"})
+            years = slot.setdefault("years", {})
+            for year, row in metric.get("years", {}).items():
+                years.setdefault(year, row)
+        if data.get("shock_widening"):
+            widening[path.stem] = data["shock_widening"]
+    merged["shock_widening_by_window"] = widening
+    merged["_source"] = ", ".join(str(p.relative_to(ROOT)).replace("\\", "/") for p in paths)
+    return merged
 
 
 def bench_at(bench: dict, metric: str, year: float) -> dict | None:
@@ -77,6 +102,8 @@ def bench_at(bench: dict, metric: str, year: float) -> dict | None:
     if not m or "years" not in m:
         return None
     pts = sorted((float(y), v) for y, v in m["years"].items())
+    if year < pts[0][0] - 1e-6 or year > pts[-1][0] + 1e-6:
+        return None   # outside the years the benchmark covers
     if year <= pts[0][0]:
         return dict(pts[0][1])
     for (y0, v0), (y1, v1) in zip(pts, pts[1:]):
@@ -149,10 +176,18 @@ def century_facets(result: dict, cat, years: int, step: int = 100) -> dict:
             "art_found": r["artifacts"]["count"], "art_studied": r["artifacts"]["studied"], "art_bonus": r["artifacts"]["research_bonus"],
             "allure": r["artifacts"]["allure"],
         }
-        # per_50 for the block ending at this century (benchmark definition).
+        # CivilizationIndicators.literacy_pct / urban_share_pct (absent before the 3000 rebalance).
+        if r.get("literacy") is not None:
+            f["literacy"] = r["literacy"]
+        if r.get("urban_share") is not None:
+            f["urban_share"] = r["urban_share"]
+        # per_50 for the block ending at this century: share of the registry items
+        # targeted in [c-50, c) that the society knows by the block's end (items
+        # learned ahead of their block count; research_3000 reading of the
+        # benchmark, which otherwise penalizes a society for being early).
         block = (c - 50, c)
         targeted = [rid for rid, y in design.items() if block[0] <= y < block[1]]
-        learned = {rid for y, rid in found if block[0] <= y < block[1]}
+        learned = {rid for y, rid in found if y < block[1]}
         f["per_50"] = 100.0 * len([rid for rid in targeted if rid in learned]) / max(1, len(targeted))
         for li, line in enumerate(gd.LINES):
             f[f"line_{line}"] = sum(1 for y, rid in found if c - step <= y < c and cat.rows[cat.index[rid]]["line"] == line)

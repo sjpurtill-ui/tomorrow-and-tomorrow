@@ -311,8 +311,8 @@ static func entries()->Array:
     "production_contract": "Suitable mineral feed, mixing, water and curing evidence. Alter durability and strength development without requiring one particular volcanic source. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners."
   },
   {
-    "id": "portland_cement_clinker",
-    "name": "Portland-Cement Clinker",
+    "id": "clinker_cement",
+    "name": "Clinker Cement",
     "direction": "Infrastructure",
     "day": 0,
     "chance": 0.002,
@@ -341,11 +341,7 @@ static func entries()->Array:
     ],
     "observation": "Produce and qualify a clinker-based hydraulic binder through controlled mineral processing",
     "effects": {},
-    "production_items": [
-      "cement_clinker",
-      "ground_cement",
-      "cement_gypsum"
-    ],
+    "production_items": ["cement_clinker", "ground_cement"],
     "production_contract": "Suitable mineral feed, kiln, grinding, energy and emissions management. Supply a repeatable binder at substantial heat and process-emission cost. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners."
   },
   {
@@ -710,7 +706,7 @@ static func entries()->Array:
       [
         "hydraulic_lime_binders",
         "pozzolanic_binder_blends",
-        "portland_cement_clinker"
+        "clinker_cement"
       ]
     ],
     "learning_routes": [
@@ -730,7 +726,7 @@ static func entries()->Array:
     "production_items": [
       "hydraulic_concrete",
       "pozzolanic_concrete",
-      "portland_concrete"
+      "clinker_cement_concrete"
     ],
     "production_contract": "Characterized materials, controlled mixing, curing and test evidence. Produce supported concrete properties rather than assuming every mixture is equivalent. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners."
   },

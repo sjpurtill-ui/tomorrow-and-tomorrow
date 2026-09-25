@@ -40,6 +40,16 @@ def read_game_file(path: str) -> str:
     return (ROOT / path).read_text(encoding="utf-8")
 
 
+@lru_cache(maxsize=None)
+def game_file_exists(path: str) -> bool:
+    """Whether ``path`` exists in the game revision being read (or the tree)."""
+    rev = game_rev()
+    if rev:
+        import subprocess
+        return subprocess.run(["git", "-C", str(ROOT), "cat-file", "-e", f"{rev}:{path}"], capture_output=True).returncode == 0
+    return (ROOT / path).exists()
+
+
 def source(path: str) -> str:
     return read_game_file(path)
 

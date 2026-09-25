@@ -31,6 +31,7 @@ const DIVINE:=preload("res://scripts/divine_regard.gd")
 const CV:=preload("res://scripts/character_voice.gd")
 const ScoutSurvival:=preload("res://scripts/scout_survival.gd")
 const CustomDirective:=preload("res://scripts/custom_directive.gd")
+const Sovereign:=preload("res://scripts/sovereign_weapons.gd")
 
 const ACTS:=["question","statement","command","threat","blessing"]
 const VERBS:=["kill","maim","exile","detain","penance","terrify","bless","boon","raise","demote","appoint","give","take","send","order"]
@@ -389,6 +390,8 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	var audience:=Hall.find(id)
 	var clean:=text.strip_edges().replace("\n"," ").substr(0,400)
 	if audience.is_empty() or String(audience.get("status",""))!="waiting" or clean.is_empty(): return {"handled":false,"act":"statement"}
+	var decree:=_sovereign_decree(id,clean,context)
+	if not decree.is_empty(): return decree
 	var list:=roster(audience)
 	var cls:=classify(clean)
 	var live:Dictionary=context.get("live",{}) if context.get("live") is Dictionary else {}
@@ -452,6 +455,29 @@ static func live_verb_allowed(verb:String,text:String)->bool:
 		"give": return _resource_in(text.to_lower())!="" or _re("(?i)\\b(gift|gifts|goods|reward|bundle)\\b").search(text)!=null
 		"send": return _re(String(VERB_PATTERNS[VERB_PATTERNS.size()-1][1])).search(text)!=null or _re("(?i)\\b(scouts?|scouting|explore|expedition|party|envoys?|messengers?|embassy)\\b").search(text)!=null
 	return true
+
+static func _sovereign_decree(id:String,text:String,context:Dictionary)->Dictionary:
+	## Weapons of mass destruction are loosed, or forbidden again, only by the
+	## god's own words here (sovereign_weapons.gd); the decision is recorded and
+	## remembered. Weapons the realm does not know yet are ordinary speech.
+	var decree:=Sovereign.parse_decree(text)
+	if decree.is_empty(): return {}
+	var means:Array=[]
+	for m:String in decree.means:
+		if m in WorldSimulation.state.known_discoveries: means.append(m)
+	if means.is_empty(): return {}
+	if not bool(context.get("echoed",false)):
+		Hall.append_line(id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":Hall._day(),"aside":false})
+	var names:Array[String]=[]
+	for m:String in means:
+		if String(decree.decree)=="authorize": WorldSimulation.military.record_sovereign_decision(m,{"source":"court","spoken":text,"day":Hall._day(),"audience":id})
+		else: WorldSimulation.military.revoke_sovereign_decision(m)
+		names.append(Sovereign.label(m))
+	var r:=_result("sovereign",{},{},text,false)
+	r.stage="sovereign_decree"
+	r["sovereign"]={"decree":String(decree.decree),"means":means}
+	r.outcome=("Your word is recorded: the generals may now use %s. The realm and its neighbours will remember that the decision was yours." if String(decree.decree)=="authorize" else "Your word is recorded: no general may use %s.") % ", ".join(names)
+	return r
 
 static func _parties(text:String,cls:Dictionary,audience:Dictionary,list:Array[Dictionary],live:Dictionary)->Dictionary:
 	## Who must act and on whom.

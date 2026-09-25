@@ -5,7 +5,7 @@
   "watch_rotation": {
    "effects": {
     "fatigue": -0.005,
-    "labor_demand": 0.0114,
+    "labor_demand": 0.0042,
     "security_efficiency": 0.0452,
     "warfare_readiness": 0.0125
    },
@@ -131,8 +131,8 @@
     "craft_output": 0.0022,
     "warfare_readiness": 0.0062
    },
-   "name": "Clay Sling Bullets",
-   "observation": "Fired clay bullets of one weight fly truer than river stones and can be made by the basketful.",
+   "name": "Fired Clay Sling Shot",
+   "observation": "Fired clay shot of one weight fly truer than river stones and can be made by the basketful.",
    "art": "res://assets/ui/research/security-v1.png"
   },
   "raid_scouting": {
@@ -178,7 +178,7 @@
   },
   "defensive_ditch_siting": {
    "effects": {
-    "labor_demand": 0.0057,
+    "labor_demand": 0.0005,
     "labor_efficiency": 0.0019,
     "security_efficiency": 0.0061,
     "warfare_readiness": 0.004
@@ -205,7 +205,7 @@
   },
   "ditch_palisades": {
    "effects": {
-    "labor_demand": 0.0057,
+    "labor_demand": 0.0005,
     "security_efficiency": 0.0049,
     "timber_pressure": 0.01
    },
@@ -239,7 +239,7 @@
   "hilltop_refuges": {
    "effects": {
     "disaster_resilience": 0.0047,
-    "labor_demand": 0.0057,
+    "labor_demand": 0.0003,
     "security_efficiency": 0.0037
    },
    "name": "Hilltop Refuges",
@@ -262,7 +262,7 @@
   },
   "paired_veteran_mentoring": {
    "effects": {
-    "labor_demand": 0.0057,
+    "labor_demand": 0.0003,
     "warfare_readiness": 0.0036
    },
    "art": "res://assets/ui/research/paper/first300-cards/skirmish_pair_drill.tres"
@@ -353,7 +353,7 @@
   },
   "gate_watchtowers": {
    "effects": {
-    "labor_demand": 0.004,
+    "labor_demand": 0.0004,
     "security_efficiency": 0.0083
    },
    "name": "Gate Watchtowers",
@@ -411,7 +411,7 @@
   },
   "household_muster": {
    "effects": {
-    "labor_demand": 0.0057,
+    "labor_demand": 0.0003,
     "state_capacity": 0.0017,
     "warfare_readiness": 0.0043
    },
@@ -422,7 +422,7 @@
   "formation_drill": {
    "effects": {
     "injury_risk": 0.01,
-    "labor_demand": 0.0114,
+    "labor_demand": 0.0007,
     "security_efficiency": 0.0102,
     "task_coordination": 0.0038,
     "warfare_readiness": 0.0119
@@ -432,7 +432,7 @@
   "field_fortifications": {
    "effects": {
     "construction_rate": 0.0043,
-    "labor_demand": 0.0143,
+    "labor_demand": 0.0007,
     "security_efficiency": 0.0036,
     "warfare_readiness": 0.0129
    },
@@ -442,7 +442,7 @@
    "effects": {
     "disaster_resilience": 0.0085,
     "food_storage": 0.0039,
-    "labor_demand": 0.0114,
+    "labor_demand": 0.0006,
     "security_efficiency": 0.0048,
     "state_capacity": 0.0049
    },
@@ -470,7 +470,7 @@
   },
   "flanked_gate_complex": {
    "effects": {
-    "labor_demand": 0.0057,
+    "labor_demand": 0.0003,
     "legitimacy": 0.0021,
     "security_efficiency": 0.003
    },
@@ -489,7 +489,7 @@
   },
   "layered_defense_coordination": {
    "effects": {
-    "institutional_rigidity": 0.01,
+    "institutional_rigidity": 0.0033,
     "security_efficiency": 0.0081,
     "warfare_readiness": 0.0012
    },
@@ -509,7 +509,7 @@
   },
   "massed_formation_training": {
    "effects": {
-    "labor_demand": 0.0057,
+    "labor_demand": 0.0003,
     "security_efficiency": 0.0041,
     "warfare_readiness": 0.0025
    },
@@ -517,7 +517,7 @@
   },
   "battle_wagons": {
    "effects": {
-    "labor_demand": 0.0057,
+    "labor_demand": 0.0003,
     "warfare_readiness": 0.0031
    },
    "name": "Battle Wagons",
@@ -528,7 +528,7 @@
    "effects": {
     "disaster_risk": -0.0018,
     "food_storage": 0.005,
-    "institutional_rigidity": 0.01,
+    "institutional_rigidity": 0.0033,
     "state_capacity": 0.0024
    },
    "art": "res://assets/ui/research/paper/public_stores.png"
@@ -536,7 +536,7 @@
   "bronze_weaponry": {
    "effects": {
     "craft_output": 0.0065,
-    "labor_demand": 0.0143,
+    "labor_demand": 0.0007,
     "standardization": 0.0072,
     "warfare_readiness": 0.011
    },
@@ -553,7 +553,7 @@
   },
   "deep_phalanx": {
    "effects": {
-    "labor_demand": 0.0057,
+    "labor_demand": 0.0003,
     "security_efficiency": 0.0026,
     "task_coordination": 0.0042,
     "warfare_readiness": 0.0051
@@ -572,7 +572,7 @@
   },
   "standing_paid_company": {
    "effects": {
-    "labor_demand": 0.0114,
+    "labor_demand": 0.0006,
     "legitimacy": -0.005,
     "security_efficiency": 0.0065,
     "state_capacity": 0.0029,
@@ -615,7 +615,7 @@
   },
   "siege_ramps_mining": {
    "effects": {
-    "labor_demand": 0.0057,
+    "labor_demand": 0.0003,
     "warfare_readiness": 0.0054
    },
    "name": "Siege Ramps and Mining",
@@ -624,7 +624,7 @@
   },
   "war_chariots": {
    "effects": {
-    "labor_demand": 0.0057,
+    "labor_demand": 0.0003,
     "legitimacy": 0.0019,
     "task_coordination": 0.0106,
     "travel_speed": 0.02,
@@ -645,7 +645,7 @@
   },
   "border_fortress_chains": {
    "effects": {
-    "labor_demand": 0.0086,
+    "labor_demand": 0.0004,
     "security_efficiency": 0.0135,
     "state_capacity": 0.0028
    },
@@ -728,17 +728,11 @@
   },
   "field_armorer_teams": {
    "effects": {
-    "logistics_endurance": 0.0057,
-    "repair_capacity": 0.0264,
+    "logistics_endurance": 0.0051,
+    "repair_capacity": 0.0249,
     "warfare_readiness": 0.0019
    },
    "art": "res://assets/ui/research/paper/first300-cards/field_armorer_teams.tres"
-  },
-  "ocean_sailing": {
-   "effects": {
-    "task_coordination": 0.0049,
-    "warfare_readiness": 0.008
-   }
   }
  },
  "art_proposals": {
@@ -841,10 +835,6 @@
     "task_coordination": 0.015,
     "travel_speed": 0.02,
     "warfare_readiness": 0.0363
-   },
-   "ocean_sailing": {
-    "task_coordination": 0.015,
-    "warfare_readiness": 0.035
    },
    "field_armorer_teams": {
     "logistics_endurance": 0.01,
@@ -1169,6 +1159,132 @@
    },
    "bronze_rapiers": {
     "warfare_readiness": 0.0121
+   }
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "watch_rotation": {
+    "fatigue": -0.005,
+    "labor_demand": 0.0114,
+    "security_efficiency": 0.0452,
+    "warfare_readiness": 0.0125
+   },
+   "defensive_ditch_siting": {
+    "labor_demand": 0.0057,
+    "labor_efficiency": 0.0019,
+    "security_efficiency": 0.0061,
+    "warfare_readiness": 0.004
+   },
+   "ditch_palisades": {
+    "labor_demand": 0.0057,
+    "security_efficiency": 0.0049,
+    "timber_pressure": 0.01
+   },
+   "hilltop_refuges": {
+    "disaster_resilience": 0.0047,
+    "labor_demand": 0.0057,
+    "security_efficiency": 0.0037
+   },
+   "paired_veteran_mentoring": {
+    "labor_demand": 0.0057,
+    "warfare_readiness": 0.0036
+   },
+   "gate_watchtowers": {
+    "labor_demand": 0.004,
+    "security_efficiency": 0.0083
+   },
+   "household_muster": {
+    "labor_demand": 0.0057,
+    "state_capacity": 0.0017,
+    "warfare_readiness": 0.0043
+   },
+   "formation_drill": {
+    "injury_risk": 0.01,
+    "labor_demand": 0.0114,
+    "security_efficiency": 0.0102,
+    "task_coordination": 0.0038,
+    "warfare_readiness": 0.0119
+   },
+   "field_fortifications": {
+    "construction_rate": 0.0043,
+    "labor_demand": 0.0143,
+    "security_efficiency": 0.0036,
+    "warfare_readiness": 0.0129
+   },
+   "fortified_stores": {
+    "disaster_resilience": 0.0085,
+    "food_storage": 0.0039,
+    "labor_demand": 0.0114,
+    "security_efficiency": 0.0048,
+    "state_capacity": 0.0049
+   },
+   "flanked_gate_complex": {
+    "labor_demand": 0.0057,
+    "legitimacy": 0.0021,
+    "security_efficiency": 0.003
+   },
+   "layered_defense_coordination": {
+    "institutional_rigidity": 0.01,
+    "security_efficiency": 0.0081,
+    "warfare_readiness": 0.0012
+   },
+   "massed_formation_training": {
+    "labor_demand": 0.0057,
+    "security_efficiency": 0.0041,
+    "warfare_readiness": 0.0025
+   },
+   "battle_wagons": {
+    "labor_demand": 0.0057,
+    "warfare_readiness": 0.0031
+   },
+   "standing_relief_stores": {
+    "disaster_risk": -0.0018,
+    "food_storage": 0.005,
+    "institutional_rigidity": 0.01,
+    "state_capacity": 0.0024
+   },
+   "bronze_weaponry": {
+    "craft_output": 0.0065,
+    "labor_demand": 0.0143,
+    "standardization": 0.0072,
+    "warfare_readiness": 0.011
+   },
+   "deep_phalanx": {
+    "labor_demand": 0.0057,
+    "security_efficiency": 0.0026,
+    "task_coordination": 0.0042,
+    "warfare_readiness": 0.0051
+   },
+   "standing_paid_company": {
+    "labor_demand": 0.0114,
+    "legitimacy": -0.005,
+    "security_efficiency": 0.0065,
+    "state_capacity": 0.0029,
+    "warfare_readiness": 0.0068
+   },
+   "siege_ramps_mining": {
+    "labor_demand": 0.0057,
+    "warfare_readiness": 0.0054
+   },
+   "war_chariots": {
+    "labor_demand": 0.0057,
+    "legitimacy": 0.0019,
+    "task_coordination": 0.0106,
+    "travel_speed": 0.02,
+    "warfare_readiness": 0.0104
+   },
+   "border_fortress_chains": {
+    "labor_demand": 0.0086,
+    "security_efficiency": 0.0135,
+    "state_capacity": 0.0028
+   },
+   "field_armorer_teams": {
+    "logistics_endurance": 0.0057,
+    "repair_capacity": 0.0264,
+    "warfare_readiness": 0.0019
    }
   }
  }

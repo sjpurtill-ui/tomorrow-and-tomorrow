@@ -9,11 +9,24 @@ const DECLARATIONS:=[
 ]
 static func pending(catalog:Array)->Array:
 	var index:Dictionary={}
-	for entry:Dictionary in catalog:index[String(entry.get("id",""))]=true
+	for entry:Dictionary in catalog:index[String(entry.get("id",""))]=entry
 	var result:Array=[]
 	for declaration:Dictionary in DECLARATIONS:
-		if index.has(declaration.child) and not index.has(declaration.parent):result.append(declaration.duplicate(true))
+		if not index.has(declaration.child) or index.has(declaration.parent):continue
+		# A research design block may replace the child's authored predicates
+		# (e.g. the 1800-2400 design owns plant_transpiration_measurement); a
+		# dormant edge the live entry no longer carries has nothing to audit.
+		if not _references(index[declaration.child],String(declaration.parent)):continue
+		result.append(declaration.duplicate(true))
 	return result
+
+static func _references(entry:Dictionary,parent:String)->bool:
+	var groups:Array=(entry.get("requires_any",[]) as Array).duplicate()
+	for route:Variant in entry.get("learning_routes",[]):
+		if route is Dictionary:groups.append_array((route as Dictionary).get("requires_any",[]))
+	for group:Variant in groups:
+		if group is Array and parent in group:return true
+	return false
 
 static func verify(index:Dictionary,declarations:Array)->Dictionary:
 	if declarations.is_empty():return {"approved":[],"errors":[]}

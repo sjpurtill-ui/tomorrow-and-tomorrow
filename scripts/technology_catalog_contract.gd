@@ -18,7 +18,10 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 	for entry:Dictionary in additions:
 		var id:=String(entry.get("id",""))
 		if int(ids.get(id,0))!=1:errors.append(id+": production identity must occur exactly once")
-		if int(names.get(String(entry.get("name","")).strip_edges().to_lower(),0))!=1:errors.append(id+": duplicate or missing display identity")
+		# The live entry's name is its display identity: a design block may retitle a
+		# module identity (Research600.apply), and the retitled name must be unique.
+		var shown:=String((by_id.get(id,entry) as Dictionary).get("name",entry.get("name",""))).strip_edges().to_lower()
+		if shown.is_empty() or int(names.get(shown,0))!=1:errors.append(id+": duplicate or missing display identity")
 		for field:String in ["name","observation","production_contract"]:
 			if not entry.get(field) is String or String(entry[field]).strip_edges().is_empty():errors.append(id+": missing "+field)
 		if not entry.get("day") is int or int(entry.day)<0:errors.append(id+": invalid legacy ordering day")

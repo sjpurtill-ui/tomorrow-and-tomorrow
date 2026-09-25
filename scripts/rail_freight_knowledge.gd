@@ -30,9 +30,7 @@ static func entries()->Array:
     ],
     "observation": "Build a load-spreading granular foundation matched to ground conditions.",
     "effects": {},
-    "production_items": [
-      "track_ballast"
-    ],
+    "production_items": ["graded_road_aggregate"],
     "production_contract": "Manufactures paid Track Ballast. Installed wagonways require a surveyed owned route, compatible wagons and brakes, actual construction work and continuing supplies. Capacity and crews remain committed through the return journey; worn or occupied routes cannot dispatch. The current haulage is human-worked; engines and animals are not supplied by this discovery.",
     "rail_service_method": "aggregate_road_foundations"
   },
@@ -65,11 +63,7 @@ static func entries()->Array:
     ],
     "observation": "Specify compatible track spacing and wheel relationships for a railway.",
     "effects": {},
-    "production_items": [
-      "rail_gauge_templates",
-      "rail_wheelsets_900",
-      "rail_wheelsets_1435"
-    ],
+    "production_items": ["rail_gauge_templates", "rail_wheelsets_900", "rail_wheelsets_1435", "rail_wagons_900", "rail_wagons_1435"],
     "production_contract": "Manufactures paid Rail Gauge Templates, 900 mm Rail Wheelsets, 1435 mm Rail Wheelsets. Installed wagonways require a surveyed owned route, compatible wagons and brakes, actual construction work and continuing supplies. Capacity and crews remain committed through the return journey; worn or occupied routes cannot dispatch. The current haulage is human-worked; engines and animals are not supplied by this discovery.",
     "rail_service_method": "rail_gauge_standards"
   },
@@ -102,9 +96,7 @@ static func entries()->Array:
     ],
     "observation": "Support and align rails over a maintained load-spreading foundation.",
     "effects": {},
-    "production_items": [
-      "timber_rail_panels"
-    ],
+    "production_items": ["timber_rail_panels", "track_ballast"],
     "production_contract": "Manufactures paid Timber Rail Panels. Installed wagonways require a surveyed owned route, compatible wagons and brakes, actual construction work and continuing supplies. Capacity and crews remain committed through the return journey; worn or occupied routes cannot dispatch. The current haulage is human-worked; engines and animals are not supplied by this discovery.",
     "rail_service_method": "rail_track_foundations"
   },
@@ -137,10 +129,7 @@ static func entries()->Array:
     ],
     "observation": "Use guided wagons to reduce resistance on a prepared route.",
     "effects": {},
-    "production_items": [
-      "rail_wagons_900",
-      "rail_wagons_1435"
-    ],
+    "production_items": ["wooden_wagonway_tubs"],
     "production_contract": "Manufactures paid 900 mm Rail Wagons, 1435 mm Rail Wagons. Installed wagonways require a surveyed owned route, compatible wagons and brakes, actual construction work and continuing supplies. Capacity and crews remain committed through the return journey; worn or occupied routes cannot dispatch. The current haulage is human-worked; engines and animals are not supplied by this discovery.",
     "rail_service_method": "wagonway_haulage"
   },

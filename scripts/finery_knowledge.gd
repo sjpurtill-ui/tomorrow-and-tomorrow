@@ -35,6 +35,6 @@ static func entries()->Array[Dictionary]:
       "finery_iron",
       "charcoal_finery_iron"
     ],
-    "production_contract": "Consumes pig iron, wood-derived fuel and assigned workshop labor to supply wrought iron. Bloomery production remains available; discovery grants no metal or global yield bonus."
+    "production_contract": "Consumes pig iron, wood-derived fuel and assigned workshop labor to supply wrought iron. Bloomery production remains available; discovery grants no metal; its society-wide effect is a small era-scaled contribution, not a direct yield bonus."
   }
 ]

@@ -113,10 +113,10 @@ func test_new_world_applies_rules_at_once()->void:
 	assert_float(state.early_care_blend).is_equal(1.0)
 
 func test_natural_deaths_follow_the_care_adjusted_life_table()->void:
-	var legacy_rate:float=state.current_natural_mortality_rate()
-	state.early_care={}
+	# fun-pop: an empty profile is now computed on demand (the founders' true
+	# odds), so the bare life table is a present but neutral profile.
+	state.early_care={"blend":0.0}
 	var baseline_rate:float=state.current_natural_mortality_rate()
-	assert_float(legacy_rate).is_equal_approx(baseline_rate,0.0001)
 	_profile()
 	assert_float(state.current_natural_mortality_rate()).is_greater(baseline_rate*1.3)
 	var weights:Dictionary=state._mortality_weights_for("Natural causes")

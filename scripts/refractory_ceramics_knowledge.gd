@@ -34,7 +34,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "prepared_clay"
     ],
-    "production_contract": "Finite workshop production consumes real materials, tooling and assigned Crafting labor. Prepared refractory components feed a glassmaking alternative; existing glassmaking remains available. No free materials or global production bonuses."
+    "production_contract": "Finite workshop production consumes real materials, tooling and assigned Crafting labor. Prepared refractory components feed a glassmaking alternative; existing glassmaking remains available. No free materials; the society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "grog_preparation",
@@ -68,7 +68,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "ceramic_grog"
     ],
-    "production_contract": "Finite workshop production consumes real materials, tooling and assigned Crafting labor. Prepared refractory components feed a glassmaking alternative; existing glassmaking remains available. No free materials or global production bonuses."
+    "production_contract": "Finite workshop production consumes real materials, tooling and assigned Crafting labor. Prepared refractory components feed a glassmaking alternative; existing glassmaking remains available. No free materials; the society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "refractory_body_trials",
@@ -104,7 +104,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "refractory_clay"
     ],
-    "production_contract": "Finite workshop production consumes real materials, tooling and assigned Crafting labor. Prepared refractory components feed a glassmaking alternative; existing glassmaking remains available. No free materials or global production bonuses."
+    "production_contract": "Finite workshop production consumes real materials, tooling and assigned Crafting labor. Prepared refractory components feed a glassmaking alternative; existing glassmaking remains available. No free materials; the society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "refractory_brick_firing",
@@ -138,7 +138,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "refractory_brick"
     ],
-    "production_contract": "Finite workshop production consumes real materials, tooling and assigned Crafting labor. Prepared refractory components feed a glassmaking alternative; existing glassmaking remains available. No free materials or global production bonuses."
+    "production_contract": "Finite workshop production consumes real materials, tooling and assigned Crafting labor. Prepared refractory components feed a glassmaking alternative; existing glassmaking remains available. No free materials; the society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "ceramic_crucibles",
@@ -172,7 +172,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "ceramic_crucible"
     ],
-    "production_contract": "Finite workshop production consumes real materials, tooling and assigned Crafting labor. Prepared refractory components feed a glassmaking alternative; existing glassmaking remains available. No free materials or global production bonuses."
+    "production_contract": "Finite workshop production consumes real materials, tooling and assigned Crafting labor. Prepared refractory components feed a glassmaking alternative; existing glassmaking remains available. No free materials; the society-wide effect is a small era-scaled contribution, not a direct production bonus."
   },
   {
     "id": "crucible_glass_melting",
@@ -208,6 +208,6 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "crucible_glass"
     ],
-    "production_contract": "Finite workshop production consumes real materials, tooling and assigned Crafting labor. Prepared refractory components feed a glassmaking alternative; existing glassmaking remains available. No free materials or global production bonuses."
+    "production_contract": "Finite workshop production consumes real materials, tooling and assigned Crafting labor. Prepared refractory components feed a glassmaking alternative; existing glassmaking remains available. No free materials; the society-wide effect is a small era-scaled contribution, not a direct production bonus."
   }
 ]

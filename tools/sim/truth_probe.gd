@@ -6,6 +6,10 @@ extends Node
 ## study progress. Never launches or touches the player's game.
 ## Usage:
 ##   Godot --headless --path <worktree> res://tools/sim/truth_probe.tscn -- --scenario=sensible --seed=74119 --years=100 --out=<file.json>
+## Later-era spot check (research_3000): --start_year=Y --start_pop=P --seed_file=<json> starts
+## the society at game year Y with P people and the known discoveries, adoption
+## and scholarship in the seed file ({"known":[ids],"adoption":{id:level},
+## "scholarship":S}, written by tools/sim/spot_check.py), then runs --years.
 const Day=preload("res://scripts/civilization_day.gd")
 const Indicators=preload("res://scripts/civilization_indicators.gd")
 const DOMAINS:Array[String]=["demography","nutrition","health","labor","knowledge","production","infrastructure","logistics","ecology","institutions","security","culture"]
@@ -53,7 +57,12 @@ func _ready()->void:
 	var seed_value:=int(_arg("seed","74119"))
 	var years:=int(_arg("years","50"))
 	var out:=_arg("out","user://sim_truth_%s_%d.json" % [scenario_name,seed_value])
-	var result:=await _run(scenario_name,_scenarios()[scenario_name],seed_value,years)
+	var scenario:Dictionary=_scenarios()[scenario_name]
+	if float(_arg("start_year","0"))>0.0:
+		scenario["start_year"]=float(_arg("start_year","0"))
+		scenario["population"]=int(_arg("start_pop","120"))
+		scenario["seed_file"]=_arg("seed_file","")
+	var result:=await _run(scenario_name,scenario,seed_value,years)
 	var file:=FileAccess.open(out,FileAccess.WRITE)
 	file.store_string(JSON.stringify(result))
 	file.close()
@@ -82,6 +91,9 @@ func _run(scenario_name:String,scenario:Dictionary,seed_value:int,years:int)->Di
 	if scenario.has("scouting"):WorldSimulation.submit("ec",{"kind":"scouting_policy","share":float(scenario.scouting),"focus":"exploration"})
 	if scenario.has("study_weight"):
 		WorldSimulation.scoped("ec",func()->void:preload("res://scripts/artifact_collection.gd").set_study_weight(int(scenario.study_weight)))
+	var start_days:=int(round(float(scenario.get("start_year",0.0))*365.0))
+	var debug_days:=int(_arg("debug_days","0")) # rows for each of the first N days (diagnostics)
+	if start_days>0:WorldSimulation.scoped("ec",func()->void:_seed_era(scenario,start_days))
 	var rows:Array=[]
 	var discoveries:Array=[]
 	var holder:Dictionary={"starting":[]}
@@ -95,7 +107,7 @@ func _run(scenario_name:String,scenario:Dictionary,seed_value:int,years:int)->Di
 	for day in range(1,years*365+1):
 		WorldSimulation.scoped("ec",func()->void:
 			var state:=WorldSimulation.state
-			state.elapsed_days=day
+			state.elapsed_days=start_days+day
 			if day%30==1:
 				for index in state.player_settlements.size():state.player_settlements[index]["environment_profile"]=_site_profile(Vector2.ZERO,site)
 			if String(scenario.focus)!="" and day%30==2:
@@ -105,7 +117,7 @@ func _run(scenario_name:String,scenario:Dictionary,seed_value:int,years:int)->Di
 				if day%120==3:WorldSimulation.consequences.apply_policy(policy_id,0.18,120.0,"probe")
 			if bool(scenario.get("ai",false)):preload("res://scripts/civilization_controller.gd").choose_orders("ec")
 			if int(scenario.get("seed_finds",-1))==day:_seed_finds(day)
-			Day.advance(day,Day.context(Vector2.ZERO))
+			Day.advance(start_days+day,Day.context(Vector2.ZERO))
 			var known:Array=state.known_discoveries
 			while int(tally.seen)<known.size():
 				var id:=String(known[int(tally.seen)])
@@ -114,11 +126,41 @@ func _run(scenario_name:String,scenario:Dictionary,seed_value:int,years:int)->Di
 			var metrics:Dictionary=state.simulation_metrics
 			if float(metrics.get("food_intake_ratio",1.0))<0.95:tally.shortage_days=int(tally.shortage_days)+1
 			if float((metrics.get("mortality_components",{}) as Dictionary).get("Hunger",0.0))>0.004:tally.hunger_days=int(tally.hunger_days)+1
-			if day%365==0:rows.append(_row(int(day/365.0),tally,start))
+			if day%365==0 or day<=debug_days:
+				var row:=_row(int(day/365.0),tally,start)
+				row["day"]=day
+				rows.append(row)
 		)
 		if day%60==0:await get_tree().process_frame
-	return {"schema":"sim_truth/1","scenario":scenario_name,"seed":seed_value,"years":years,"scenario_config":scenario,
+	return {"schema":"sim_truth/1","scenario":scenario_name,"seed":seed_value,"years":years,"scenario_config":scenario,"start_year":float(scenario.get("start_year",0.0)),
 		"starting_known":holder.starting,"rows":rows,"discoveries":discoveries,"seconds":(Time.get_ticks_msec()-start)/1000.0}
+
+## research_3000 spot check: the society at game year start_days/365 with the
+## seed file's knowledge, its people, housed and with two months of stores.
+func _seed_era(scenario:Dictionary,start_days:int)->void:
+	var seeded:Variant=JSON.parse_string(FileAccess.get_file_as_string(String(scenario.get("seed_file",""))))
+	if not seeded is Dictionary:
+		push_error("truth_probe: cannot read seed file")
+		return
+	var state:=WorldSimulation.state
+	state.elapsed_days=start_days
+	var known:Array[String]=[]
+	for id:Variant in (seeded as Dictionary).get("known",[]):
+		if not WorldSimulation.discovery.discovery_definition(String(id)).is_empty():known.append(String(id))
+	state.known_discoveries=known
+	var adoption:Dictionary={}
+	var levels:Dictionary=(seeded as Dictionary).get("adoption",{})
+	for id:String in known:adoption[id]=float(levels.get(id,0.8))
+	state.discovery_adoption=adoption
+	state.scholarship_level=float((seeded as Dictionary).get("scholarship",float(start_days)/365.0))
+	var people:=int(scenario.get("population",120))
+	state.ensure_population_total(people)
+	state.housing_capacity=int(float(people)*1.1)
+	for work:String in ["Hearth Circle","Lean-to Shelters","Storage Pits","Open Work Area","Gathering Yard","Public Stores"]:
+		if work not in state.settlement_completed:state.settlement_completed.append(work)
+	state.food_stocks["Stored food"]=float(people)*60.0
+	state.early_care_blend=1.0
+	WorldSimulation.discovery.society_model._rebuild_effect_totals(WorldSimulation.discovery.catalog)
 
 ## Places a legendary set and two ordinary site pieces in the collection, as if
 ## a party had just returned (claimed, so no rival can take them).
@@ -200,6 +242,8 @@ func _row(year:int,tally:Dictionary,start:int)->Dictionary:
 		"cohesion":snappedf(float(metrics.get("cohesion",0.0)),0.001),"housing_ratio":snappedf(float(metrics.get("housing_ratio",0.0)),0.001),
 		"ecology":snappedf(float(metrics.get("ecology",0.0)),0.001),"labor_efficiency":snappedf(float(metrics.get("labor_efficiency",0.0)),0.001),
 		"capacities":capacities,"channels":channels,"channel_capacity":snappedf(channel_capacity,0.0001),
+		"mortality_components":metrics.get("mortality_components",{}),"water":{"intake":float(state.water_metrics.get("intake_ratio",1.0)),"days":float(state.water_metrics.get("days",0.0))},
+		"ceiling_era":snappedf(float(WorldSimulation.discovery.society_model.ceiling_era),0.1),
 		"known":state.known_discoveries.size(),"per_line":per_line,"effects":effects,
 		"harvest":harvest,"need":snappedf(float(metrics.get("food_consumption",0)),0.1),"source_health":source_health,
 		"settlements":state.player_settlements.size(),"completed":state.settlement_completed.size(),

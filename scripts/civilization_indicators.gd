@@ -20,7 +20,7 @@ static func infant_mortality_per_1000(state:Node=GameState,discovery:Node=Discov
 	# year. Both carry the early-care factors the daily simulation uses.
 	var care:Dictionary=state.care_profile() if state.has_method("care_profile") else state.early_care
 	var risk:float=state._pregnancy_risk_multiplier(context)*clampf(float(care.get("pregnancy_risk",1.0)),0.5,2.5)
-	var neonatal:=clampf((0.018+(risk-1.0)*0.025)*(1.0-clampf(float(context.neonatal_survival),0.0,0.60))*clampf(preload("res://scripts/early_life_conditions.gd").neonatal_factor(care),0.5,4.0),0.004,0.18)
+	var neonatal:=clampf((0.018+(risk-1.0)*0.025)*(1.0-clampf(float(context.neonatal_survival),0.0,0.60))*clampf(preload("res://scripts/early_life_conditions.gd").neonatal_factor(care),0.1,4.0),0.0008,0.18)
 	var conditions:float=state._mortality_condition_factor()
 	var later:=clampf(state._baseline_mortality_hazard_at_age(0)*conditions*preload("res://scripts/early_life_conditions.gd").age_multiplier(care,0,conditions),0.0,0.9)
 	return (neonatal+(1.0-neonatal)*later)*1000.0
@@ -44,6 +44,25 @@ static func education_index(state:Node=GameState)->float:
 	var preservation:=float(knowledge.get("Preserved knowledge",state.combined_intelligence))
 	var communication:=float(knowledge.get("Communication",state.combined_intelligence))
 	return clampf(preservation*0.58+communication*0.42,0.01,1.0)
+
+## research_3000: share of adults who read (0..1): the era-capped literacy total
+## of known, adopted scripts, printing and schooling (SocietyModel "literacy").
+static func literacy(discovery:Node=DiscoverySystem)->float:
+	return clampf(discovery.effect("literacy"),0.0,1.0)
+
+## research_3000: share of people living in towns and cities (0..0.95). Towns
+## hold the households that do not work the land, so the share rises steeply as
+## food labor falls (the benchmark curve: about 12% with half the labor on food,
+## 70% with a twelfth); a band of a few hundred has no town at all.
+const URBAN_SCALE:=0.91
+const URBAN_POWER:=3.2
+const URBAN_MIN_POPULATION:=300.0
+const URBAN_FULL_POPULATION_SPAN:=1.5
+static func urban_share(state:Node=GameState)->float:
+	var food:=clampf(float(state.population_allocation_percentages.get("Food",50.0))/100.0,0.0,1.0)
+	var population:=maxf(1.0,float(state.population_exact))
+	var size:=clampf(log(population/URBAN_MIN_POPULATION)/log(10.0)/URBAN_FULL_POPULATION_SPAN,0.0,1.0)
+	return clampf(URBAN_SCALE*pow(1.0-food,URBAN_POWER)*size,0.0,0.95)
 
 static func science(state:Node=GameState)->Dictionary:
 	var minds:=maxf(0.0,state.effective_workers("Knowledge"))

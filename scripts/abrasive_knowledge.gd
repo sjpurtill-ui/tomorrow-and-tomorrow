@@ -107,11 +107,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "A rotating supported part is ground to a cylindrical surface.",
     "effects": {},
-    "production_items": [
-      "cylindrical_grinding_fixtures",
-      "cylindrical_ground_shaft_candidates",
-      "checked_cylindrical_shafts"
-    ],
+    "production_items": ["cylindrical_grinding_fixtures", "cylindrical_ground_shaft_candidates", "checked_cylindrical_shafts", "textile_finishing_rolls", "calendered_plant_cloth"],
     "production_contract": "Paid selected-shape abrasive tooling and inspected component production. Raw abrasive, unfinished wheels and unchecked components cannot substitute for qualified inputs; work, power, cooling and consumable wear remain physical costs."
   },
   {

@@ -68,7 +68,15 @@ const EFFECT_LIMITS:Dictionary={
 	"state_capacity":Vector2(-0.45,0.90),"legitimacy":Vector2(-0.45,0.55),"cohesion":Vector2(-0.45,0.55),"institutional_rigidity":Vector2(-0.20,0.55),
 	"warfare_readiness":Vector2(-0.40,1.00),"security_efficiency":Vector2(-0.40,0.80),"naval_capacity":Vector2(-0.30,0.90),
 	"ecology_recovery":Vector2(-0.50,0.65),"ecological_pressure":Vector2(-0.45,0.80),"timber_pressure":Vector2(-0.45,0.80),"pollution":Vector2(-0.15,0.80),"water_pollution":Vector2(-0.15,0.70),
-	"fuel_demand":Vector2(-0.35,0.70),"disaster_risk":Vector2(-0.20,0.65),"chemical_control":Vector2(-0.20,0.80),"sanitation":Vector2(-0.45,0.65)
+	"fuel_demand":Vector2(-0.35,0.70),"disaster_risk":Vector2(-0.20,0.65),"chemical_control":Vector2(-0.20,0.80),"sanitation":Vector2(-0.45,0.65),
+	# research_3000 modern transition (EarlyLifeConditions, CivilizationIndicators):
+	# share of the baseline life table's hazard that modern medicine and public
+	# health remove, the share of births a society chooses not to have, and the
+	# share of adults who read.
+	"modern_survival":Vector2(-0.10,0.85),"fertility_transition":Vector2(-0.10,0.65),"literacy":Vector2(-0.10,0.99),
+	# Extra output per farm worker from machines, fertilizer and bred seed
+	# (FoodSystem cultivated staples): 3.0 is four times the pre-industrial output.
+	"farm_mechanization":Vector2(-0.10,3.0)
 }
 
 const BASE_EFFECTS:Dictionary={
@@ -533,8 +541,9 @@ func _visit_catalog_dependency(discovery_id:String,definitions:Dictionary,visit_
 ## people actively use reaches ~90% of households in about three years; one
 ## nobody works with drifts over decades), not within a season.
 const ADOPTION_PACE:=0.12
-## Game year of the modern limits (TechnologyEras: 2800 is 1950 CE).
-const MODERN_ERA:=2800.0
+## Game year of the modern limits (TechnologyEras: 3000 is 2030 CE). research_3000:
+## the ceilings keep rising through the whole game instead of stopping at 1950 CE.
+const MODERN_ERA:=3000.0
 ## Beneficial-side magnitude of each total at game year 600 (1500 BCE): what the
 ## best-documented Late Bronze Age societies achieved relative to having nothing.
 ## Keys not listed use half of their modern limit.
@@ -551,7 +560,8 @@ const ERA_CEILING_600:Dictionary={
 	"dry_storage":0.45,"container_capacity":0.55,"logistics_endurance":0.35,"trade_capacity":0.45,
 	"state_capacity":0.45,"legitimacy":0.40,"cohesion":0.40,"warfare_readiness":0.45,"security_efficiency":0.40,
 	"naval_capacity":0.35,"ecology_recovery":0.35,"ecological_pressure":0.25,"timber_pressure":0.25,
-	"pollution":0.08,"water_pollution":0.08,"fuel_demand":0.15,"disaster_risk":0.12,"sanitation":0.22
+	"pollution":0.08,"water_pollution":0.08,"fuel_demand":0.15,"disaster_risk":0.12,"sanitation":0.22,
+	"modern_survival":0.0,"fertility_transition":0.0,"literacy":0.01,"farm_mechanization":0.0
 }
 ## Keys whose beneficial direction is negative (a lower total is better).
 const LOWER_IS_BETTER:Array[String]=["disease_exposure","injury_risk","health_risk","labor_demand","fatigue","food_spoilage","storage_loss",
@@ -568,8 +578,31 @@ const TECH_RISE:Array=[[0.0,0.25],[50.0,0.30],[100.0,0.36],[200.0,0.47],[300.0,0
 ## Forager knowledge, kinship and shelter-on-the-move were mature long before 5000 BCE.
 const EARLY_MATURE:Array[String]=["foraging_yield","hunting_yield","mobile_shelter","conception_support"]
 const EARLY_MATURE_RISE:Array=[[0.0,0.85],[600.0,1.0]]
-## Beyond 600 the ceiling closes on the modern limit (share of the remaining gap).
-const LATER_RISE:Array=[[600.0,0.0],[1500.0,0.40],[2400.0,0.75],[2800.0,1.0]]
+## --- research_3000 era ceilings (0-3000) ---
+## Beyond 600 the ceiling closes on the modern limit, as a share of the gap
+## between the year-600 anchor and EFFECT_LIMITS, along one curve per kind of
+## capacity. Anchors: 1200 is about 400 CE, 1800 about 1360 CE, 2400 about
+## 1800 CE, 2800 1950 CE, 3000 2030 CE (TechnologyEras). Pre-industrial ages
+## close little of the gap; industry and modern science close most of it.
+## Every block's full-knowledge total follows these curves
+## (tools/research/rebalance_effects_3000.py), so each era's research still
+## moves outcomes inside its own band instead of saturating a flat clamp.
+const LATER_RISE:Array=[[600.0,0.0],[1200.0,0.10],[1800.0,0.20],[2400.0,0.33],[2500.0,0.40],[2600.0,0.48],[2700.0,0.58],[2800.0,0.70],[2900.0,0.85],[3000.0,1.0]]
+## Technical and organizational keys (TECH_KEYS) take off with industry.
+const TECH_LATER_RISE:Array=[[600.0,0.0],[1200.0,0.12],[1800.0,0.24],[2400.0,0.40],[2500.0,0.48],[2600.0,0.57],[2700.0,0.67],[2800.0,0.78],[2900.0,0.90],[3000.0,1.0]]
+## Keys that follow their own historical curve after 600 (share of the gap):
+## mass literacy (a few percent until printing and schooling, near universal by
+## 1950 CE), and the modern mortality and fertility transitions, which barely
+## exist before 1800 CE and follow the benchmark rows century by century.
+const OWN_LATER_RISE:Dictionary={
+	"literacy":[[600.0,0.0],[700.0,0.0],[800.0,0.036],[900.0,0.063],[1000.0,0.082],[1200.0,0.082],[1300.0,0.064],[1400.0,0.064],[1500.0,0.082],[1600.0,0.10],[1700.0,0.128],[1800.0,0.174],[2100.0,0.27],[2400.0,0.50],[2500.0,0.68],[2600.0,0.85],[2700.0,0.95],[2800.0,0.98],[3000.0,1.0]],
+	"modern_survival":[[600.0,0.0],[2400.0,0.02],[2500.0,0.06],[2600.0,0.14],[2700.0,0.30],[2800.0,0.55],[2900.0,0.80],[3000.0,1.0]],
+	"farm_mechanization":[[600.0,0.0],[2200.0,0.01],[2400.0,0.04],[2500.0,0.09],[2600.0,0.16],[2700.0,0.30],[2800.0,0.55],[2900.0,0.82],[3000.0,1.0]],
+	"fertility_transition":[[600.0,0.0],[2400.0,0.0],[2500.0,0.12],[2600.0,0.38],[2700.0,0.58],[2800.0,0.74],[2900.0,0.88],[3000.0,1.0]],
+}
+## research_3000: keys whose share of the year-600 anchor follows its own curve
+## before 600 (nobody reads before writing, about game year 250).
+const OWN_EARLY_RISE:Dictionary={"literacy":[[0.0,0.0],[150.0,0.0],[300.0,0.5],[600.0,1.0]]}
 ## Share of the known discoveries' eras that defines the knowledge frontier.
 const FRONTIER_PERCENTILE:=0.95
 
@@ -592,10 +625,13 @@ static func era_ceiling_for(effect_id:String,era:float)->Vector2:
 	var modern:=absf(limit.x) if lower else limit.y
 	var anchor:=minf(modern,float(ERA_CEILING_600.get(effect_id,modern*0.5)))
 	var curve:Array=ERA_RISE
-	if effect_id in EARLY_MATURE: curve=EARLY_MATURE_RISE
+	if OWN_EARLY_RISE.has(effect_id): curve=OWN_EARLY_RISE[effect_id]
+	elif effect_id in EARLY_MATURE: curve=EARLY_MATURE_RISE
 	elif effect_id in TECH_KEYS: curve=TECH_RISE
 	var bound:=anchor*_rise(curve,era)
-	if era>600.0: bound=anchor+(modern-anchor)*_rise(LATER_RISE,era)
+	if era>600.0:
+		var later:Array=OWN_LATER_RISE.get(effect_id,TECH_LATER_RISE if effect_id in TECH_KEYS else LATER_RISE)
+		bound=anchor+(modern-anchor)*_rise(later,era)
 	return Vector2(-bound,limit.y) if lower else Vector2(limit.x,bound)
 
 ## Allowed range of `effect_id` for this society as of its latest effect totals,
@@ -620,7 +656,7 @@ func era_ceiling(effect_id:String)->Vector2:
 const SPECIALIZATION_HEADROOM:=0.35
 ## Share of their benefit the neglected lines lose when another line has full focus.
 const SPECIALIZATION_NEGLECT:=0.35
-const EFFECT_LINE:Dictionary={"adoption_rate":"knowledge","chemical_control":"production","clay_yield":"production","cohesion":"culture","conception_support":"demography","construction_rate":"infrastructure","container_capacity":"production","craft_output":"production","cultivation_yield":"nutrition","disaster_resilience":"infrastructure","disaster_risk":"infrastructure","disease_exposure":"health","dry_storage":"infrastructure","ecological_pressure":"ecology","ecology_recovery":"ecology","extraction_yield":"production","fatigue":"labor","fiber_yield":"production","food_output":"nutrition","food_spoilage":"nutrition","food_storage":"nutrition","foraging_yield":"ecology","fuel_demand":"ecology","fuel_efficiency":"production","haul_capacity":"logistics","health_protection":"health","health_risk":"labor","housing_output":"infrastructure","hunting_yield":"nutrition","injury_risk":"health","institutional_rigidity":"culture","knowledge_preservation":"knowledge","knowledge_rate":"knowledge","labor_demand":"labor","labor_efficiency":"labor","legitimacy":"institutions","logistics_endurance":"logistics","maternal_safety":"demography","metal_yield":"production","mine_safety":"infrastructure","mobile_shelter":"production","naval_capacity":"logistics","neonatal_survival":"demography","nutrition_quality":"nutrition","observation_rate":"knowledge","pollution":"ecology","repair_capacity":"infrastructure","route_speed":"logistics","sanitation":"health","security_efficiency":"security","soil_productivity":"ecology","standardization":"production","state_capacity":"institutions","stone_yield":"infrastructure","storage_loss":"nutrition","survey_speed":"knowledge","task_coordination":"labor","timber_pressure":"ecology","timber_yield":"ecology","tool_quality":"production","trade_capacity":"logistics","travel_speed":"logistics","warfare_readiness":"security","water_access":"infrastructure","water_pollution":"ecology","water_safety":"health"}
+const EFFECT_LINE:Dictionary={"adoption_rate":"knowledge","chemical_control":"production","clay_yield":"production","cohesion":"culture","conception_support":"demography","construction_rate":"infrastructure","container_capacity":"production","craft_output":"production","cultivation_yield":"nutrition","disaster_resilience":"infrastructure","disaster_risk":"infrastructure","disease_exposure":"health","dry_storage":"infrastructure","ecological_pressure":"ecology","ecology_recovery":"ecology","extraction_yield":"production","fatigue":"labor","fiber_yield":"production","food_output":"nutrition","food_spoilage":"nutrition","food_storage":"nutrition","foraging_yield":"ecology","fuel_demand":"ecology","fuel_efficiency":"production","haul_capacity":"logistics","health_protection":"health","health_risk":"labor","housing_output":"infrastructure","hunting_yield":"nutrition","injury_risk":"health","institutional_rigidity":"culture","knowledge_preservation":"knowledge","knowledge_rate":"knowledge","labor_demand":"labor","labor_efficiency":"labor","legitimacy":"institutions","logistics_endurance":"logistics","maternal_safety":"demography","metal_yield":"production","mine_safety":"infrastructure","mobile_shelter":"production","naval_capacity":"logistics","neonatal_survival":"demography","nutrition_quality":"nutrition","observation_rate":"knowledge","pollution":"ecology","repair_capacity":"infrastructure","route_speed":"logistics","sanitation":"health","security_efficiency":"security","soil_productivity":"ecology","standardization":"production","state_capacity":"institutions","stone_yield":"infrastructure","storage_loss":"nutrition","survey_speed":"knowledge","task_coordination":"labor","timber_pressure":"ecology","timber_yield":"ecology","tool_quality":"production","trade_capacity":"logistics","travel_speed":"logistics","warfare_readiness":"security","water_access":"infrastructure","water_pollution":"ecology","water_safety":"health","modern_survival":"health","fertility_transition":"demography","literacy":"knowledge","farm_mechanization":"nutrition"}
 ## Emphasis focus per line, 0 (even spread or less) to 1 (all emphasis).
 var line_focus:Dictionary={}
 
@@ -661,7 +697,7 @@ func society_era()->float:
 ## share adds labor demand and fatigue, draws on the stores, costs cohesion and
 ## lowers births (temple and scribal households married late or not at all),
 ## whatever the research buys (docs/research/BENCHMARKS_600.md, "Allowed lead").
-const SUSTAINABLE_SPECIALISTS:Array=[[0.0,0.04],[300.0,0.07],[600.0,0.10],[2800.0,0.25]]
+const SUSTAINABLE_SPECIALISTS:Array=[[0.0,0.04],[300.0,0.07],[600.0,0.10],[2400.0,0.16],[2800.0,0.25],[3000.0,0.30]]
 const SPECIALIST_UPKEEP:={"labor_demand":1.4,"fatigue":0.6,"cohesion":-1.0,"conception_support":-1.0,"food_storage":-0.6}
 ## Latest excess specialist share (0 when research staffing is sustainable).
 var specialist_excess:=0.0

@@ -113,7 +113,7 @@
    "effects": {
     "cohesion": 0.0053,
     "construction_rate": 0.0009,
-    "labor_demand": 0.005,
+    "labor_demand": 0.0018,
     "labor_efficiency": 0.0022,
     "task_coordination": 0.0093
    },
@@ -177,7 +177,7 @@
   "cross_training_circuits": {
    "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png",
    "effects": {
-    "labor_demand": 0.01,
+    "labor_demand": 0.0009,
     "labor_efficiency": 0.0013,
     "task_coordination": 0.0012
    }
@@ -211,7 +211,7 @@
     "cohesion": 0.0017,
     "construction_rate": 0.0022,
     "disaster_resilience": 0.0023,
-    "labor_demand": 0.025,
+    "labor_demand": 0.0013,
     "labor_efficiency": 0.0003,
     "task_coordination": 0.0037
    },
@@ -222,14 +222,14 @@
    "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png",
    "effects": {
     "fatigue": -0.0009,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "labor_efficiency": 0.0012
    }
   },
   "seasonal_labor_pooling": {
    "art": "res://assets/ui/research/subjects/labor_rotations-v2.png",
    "effects": {
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "labor_efficiency": 0.0012,
     "task_coordination": 0.0009
    }
@@ -258,7 +258,7 @@
   "runner_relays_between_work_sites": {
    "art": "res://assets/ui/research/subjects/route_memory-v1.png",
    "effects": {
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "task_coordination": 0.0015
    }
   },
@@ -266,7 +266,7 @@
    "effects": {
     "craft_output": 0.0039,
     "institutional_rigidity": 0.01,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "labor_efficiency": 0.0007,
     "tool_quality": 0.0011
    },
@@ -286,7 +286,7 @@
    "effects": {
     "cohesion": -0.0025,
     "construction_rate": 0.0014,
-    "labor_demand": 0.02,
+    "labor_demand": 0.001,
     "legitimacy": 0.005,
     "state_capacity": 0.0048,
     "task_coordination": 0.0037
@@ -409,7 +409,7 @@
   "gangs_of_ten": {
    "effects": {
     "injury_risk": -0.0011,
-    "institutional_rigidity": 0.01,
+    "institutional_rigidity": 0.0033,
     "labor_efficiency": 0.0007,
     "task_coordination": 0.0031
    },
@@ -457,7 +457,7 @@
   "shift_overlap_briefings": {
    "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png",
    "effects": {
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "labor_efficiency": 0.0018,
     "task_coordination": 0.0035
    }
@@ -519,7 +519,7 @@
   },
   "man_day_accounts": {
    "effects": {
-    "institutional_rigidity": 0.01,
+    "institutional_rigidity": 0.0018,
     "knowledge_preservation": 0.0023,
     "labor_efficiency": 0.0005,
     "state_capacity": 0.0034,
@@ -567,7 +567,7 @@
   "levy_exemptions": {
    "effects": {
     "craft_output": 0.0014,
-    "institutional_rigidity": 0.015,
+    "institutional_rigidity": 0.0026,
     "labor_efficiency": 0.0012,
     "legitimacy": -0.006
    },
@@ -585,7 +585,7 @@
    "effects": {
     "cohesion": 0.0014,
     "craft_output": 0.001,
-    "institutional_rigidity": 0.01,
+    "institutional_rigidity": 0.0017,
     "legitimacy": 0.0011,
     "task_coordination": 0.0024
    },
@@ -595,17 +595,17 @@
    "effects": {
     "adoption_rate": 0.0015,
     "craft_output": 0.0014,
-    "institutional_rigidity": 0.01,
+    "institutional_rigidity": 0.0017,
     "standardization": 0.0042
    },
    "observation": "A master may take only so many apprentices, and each must be taught to the standard of the trade."
   },
   "crew_loans_between_cities": {
    "effects": {
-    "adoption_rate": 0.0022,
-    "construction_rate": 0.0024,
-    "labor_efficiency": 0.0012,
-    "task_coordination": 0.0024
+    "adoption_rate": 0.0018,
+    "construction_rate": 0.0015,
+    "labor_efficiency": 0.0005,
+    "task_coordination": 0.0012
    },
    "observation": "A city famed for its masons sends a crew to raise an allied ruler's temple, and they bring their methods home."
   }
@@ -993,6 +993,104 @@
     "construction_rate": 0.003,
     "labor_efficiency": 0.0018,
     "task_coordination": 0.0075
+   }
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "work_party_feasts": {
+    "cohesion": 0.0053,
+    "construction_rate": 0.0009,
+    "labor_demand": 0.005,
+    "labor_efficiency": 0.0022,
+    "task_coordination": 0.0093
+   },
+   "cross_training_circuits": {
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0013,
+    "task_coordination": 0.0012
+   },
+   "great_work_parties": {
+    "cohesion": 0.0017,
+    "construction_rate": 0.0022,
+    "disaster_resilience": 0.0023,
+    "labor_demand": 0.025,
+    "labor_efficiency": 0.0003,
+    "task_coordination": 0.0037
+   },
+   "mentored_task_learning": {
+    "fatigue": -0.0009,
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0012
+   },
+   "seasonal_labor_pooling": {
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0012,
+    "task_coordination": 0.0009
+   },
+   "runner_relays_between_work_sites": {
+    "labor_demand": 0.01,
+    "task_coordination": 0.0015
+   },
+   "full_time_specialists": {
+    "craft_output": 0.0039,
+    "institutional_rigidity": 0.01,
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0007,
+    "tool_quality": 0.0011
+   },
+   "shrine_work_obligations": {
+    "cohesion": -0.0025,
+    "construction_rate": 0.0014,
+    "labor_demand": 0.02,
+    "legitimacy": 0.005,
+    "state_capacity": 0.0048,
+    "task_coordination": 0.0037
+   },
+   "gangs_of_ten": {
+    "injury_risk": -0.0011,
+    "institutional_rigidity": 0.01,
+    "labor_efficiency": 0.0007,
+    "task_coordination": 0.0031
+   },
+   "shift_overlap_briefings": {
+    "labor_demand": 0.01,
+    "labor_efficiency": 0.0018,
+    "task_coordination": 0.0035
+   },
+   "man_day_accounts": {
+    "institutional_rigidity": 0.01,
+    "knowledge_preservation": 0.0023,
+    "labor_efficiency": 0.0005,
+    "state_capacity": 0.0034,
+    "task_coordination": 0.0101
+   },
+   "levy_exemptions": {
+    "craft_output": 0.0014,
+    "institutional_rigidity": 0.015,
+    "labor_efficiency": 0.0012,
+    "legitimacy": -0.006
+   },
+   "trade_elders": {
+    "cohesion": 0.0014,
+    "craft_output": 0.001,
+    "institutional_rigidity": 0.01,
+    "legitimacy": 0.0011,
+    "task_coordination": 0.0024
+   },
+   "apprentice_quotas": {
+    "adoption_rate": 0.0015,
+    "craft_output": 0.0014,
+    "institutional_rigidity": 0.01,
+    "standardization": 0.0042
+   },
+   "crew_loans_between_cities": {
+    "adoption_rate": 0.0022,
+    "construction_rate": 0.0024,
+    "labor_efficiency": 0.0012,
+    "task_coordination": 0.0024
    }
   }
  }

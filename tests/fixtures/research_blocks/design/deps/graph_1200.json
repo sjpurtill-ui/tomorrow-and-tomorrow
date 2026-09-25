@@ -1,0 +1,13 @@
+{
+ "meta": {"description": "Synthetic 600-1200 graph for tests (same schema as docs/research/deps/graph.json)."},
+ "nodes": [
+  {"id": "fx_bloom_hearths", "line": "production", "name": "Bloom hearths: iron won from ore in a clay hearth", "target_year": 660, "proposed_year": 660, "band_low": 640, "band_high": 700, "research_years": 4.0, "key_threshold": true,
+   "requires_all": ["copper_smelting"], "requires_any": [], "precedents": ["kiln_control"], "conditions": {"resources_known": [], "environment": [], "contact_required": false}},
+  {"id": "bloomery_smelting", "line": "production", "name": "Bloomery smelting", "target_year": 680, "proposed_year": 680, "band_low": 665, "band_high": 720, "research_years": 5.0, "key_threshold": false,
+   "requires_all": ["fx_bloom_hearths"], "requires_any": [], "precedents": [], "conditions": {}},
+  {"id": "fx_iron_edge_tools", "line": "production", "name": "Iron-edged tools", "target_year": 700, "proposed_year": 700, "band_low": 680, "band_high": 740, "research_years": 3.0, "key_threshold": false,
+   "requires_all": ["bloomery_smelting"], "requires_any": [], "precedents": [], "conditions": {}},
+  {"id": "fx_district_courts", "line": "institutions", "name": "District courts hear appeals from village elders", "target_year": 900, "proposed_year": 900, "band_low": 850, "band_high": 960, "research_years": 6.0, "key_threshold": false,
+   "requires_all": [], "requires_any": [["place_value", "fx_iron_edge_tools"]], "precedents": ["customary_law"], "conditions": {"min_population": 500, "resources_known": [], "environment": [], "contact_required": false}}
+ ]
+}

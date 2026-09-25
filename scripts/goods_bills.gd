@@ -20,7 +20,7 @@ const EXTRACTED:={"Refractory Clay":true}
 ## Materials that are gathered, extracted or collected rather than made: the
 ## deposit catalog plus hunting byproducts and money. Anything else a recipe
 ## names that no recipe makes is a workshop byproduct and counts as goods.
-const RAW:={"Timber":true,"Freshwater":true,"Stone":true,"Fertile Soil":true,"Game":true,"Fiber Plants":true,"Clay":true,"Flint":true,"Salt":true,"Medicinal Plants":true,"Peat":true,"Limestone":true,"Copper Ore":true,"Tin Ore":true,"Lead Ore":true,"Bitumen":true,"Fine Sand":true,"Iron Ore":true,"Coal":true,"Sulfur":true,"Nitrates":true,"Deep Aquifer":true,"Refractory Clay":true,"Phosphate Rock":true,"Uranium Ore":true,"Graphite":true,"Silver Ore":true,"Gold Ore":true,"Crude Oil":true,"Nickel Ore":true,"Bauxite":true,"Rutile Ore":true,"Ochre Earth":true,
+const RAW:={"Timber":true,"Freshwater":true,"Stone":true,"Fertile Soil":true,"Game":true,"Fiber Plants":true,"Clay":true,"Flint":true,"Salt":true,"Medicinal Plants":true,"Peat":true,"Limestone":true,"Copper Ore":true,"Tin Ore":true,"Lead Ore":true,"Bitumen":true,"Fine Sand":true,"Iron Ore":true,"Coal":true,"Sulfur":true,"Nitrates":true,"Deep Aquifer":true,"Refractory Clay":true,"Phosphate Rock":true,"Uranium Ore":true,"Graphite":true,"Silver Ore":true,"Gold Ore":true,"Crude Oil":true,"Nickel Ore":true,"Bauxite":true,"Rutile Ore":true,"Ochre Earth":true,"Zinc Ore":true,"Kaolin":true,
 	"Raw Hides":true,"Recovered Animal Fat":true,"Recovered Bone":true,"Pancreatic Tissue":true,"Food":true,"Coin":true,"Civilian Goods":true}
 
 static var _by_output:Dictionary={}

@@ -1,0 +1,1766 @@
+{
+ "line": "security",
+ "schema": "research_600_effects/1",
+ "items": {
+  "fire_lance_tubes": {
+   "effects": {
+    "disaster_risk": 0.002,
+    "injury_risk": 0.002,
+    "warfare_readiness": 0.0004
+   },
+   "name": "Fire Lances",
+   "observation": "A powder tube lashed below the spearhead spits flame and shot for a few breaths, and then the man fights on with the spear.",
+   "art": "res://assets/ui/research/subjects/black_powder-v1.png"
+  },
+  "pot_bolt_guns": {
+   "effects": {
+    "disaster_risk": 0.002,
+    "fuel_demand": 0.0002,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0007,
+    "warfare_readiness": 0.0005
+   },
+   "name": "Pot Guns",
+   "observation": "A bulging iron pot on a trestle throws a heavy bolt at a gate; the noise frightens the defenders more than the bolt harms them.",
+   "art": "res://assets/ui/research/subjects/powder_artillery-v1.png"
+  },
+  "captain_service_contracts": {
+   "effects": {
+    "cohesion": -0.0002,
+    "labor_demand": -0.0004,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0002,
+    "warfare_readiness": 0.0005
+   },
+   "name": "Captains' Contracts",
+   "observation": "A captain signs to bring so many men for so many months at a written rate, and the paymaster can hold him to it.",
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_contracts.png"
+  },
+  "keyhole_gunports": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0018
+   },
+   "name": "Keyhole Gunports",
+   "observation": "Round holes with sighting slits above them are cut low in the towers and gatehouses for small guns.",
+   "art": "res://assets/ui/research/subjects/curtain_wall_systems-v1.png"
+  },
+  "hand_gun_tubes": {
+   "effects": {
+    "disaster_risk": 0.002,
+    "fuel_demand": 0.0004,
+    "injury_risk": 0.003,
+    "warfare_readiness": 0.0013
+   },
+   "name": "Hand-Gun Tubes",
+   "observation": "A short iron tube on a pole is fired by a match at the touch-hole; it is slow and wild, but the flash and roar break a charge.",
+   "ability_reason": "A general can arm companies of hand gunners. The tubes are slow and inaccurate, but at close range they break a charge and pierce mail.",
+   "art": "res://assets/ui/research/subjects/black_powder-v1.png"
+  },
+  "parish_constables": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0018,
+    "state_capacity": 0.0001
+   },
+   "name": "Parish Constables",
+   "observation": "Each year the parish chooses a constable to keep the peace, raise the hue and cry and bring offenders before the justices.",
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "pavise_crossbowmen": {
+   "effects": {
+    "injury_risk": -0.0007,
+    "timber_pressure": 0.001,
+    "warfare_readiness": 0.0005
+   },
+   "name": "Pavise Crossbowmen",
+   "observation": "Each crossbowman shoots and winds from behind a tall painted shield that his pavise-bearer holds or props in the ground.",
+   "art": "res://assets/ui/research/subjects/crossbow_mechanism-v1.png"
+  },
+  "dismounted_stake_line": {
+   "effects": {
+    "injury_risk": -0.0004,
+    "task_coordination": 0.0009,
+    "warfare_readiness": 0.0006
+   },
+   "name": "Stake Line",
+   "observation": "The men-at-arms dismount and stand with the archers behind a hedge of sharpened stakes that horses will not face.",
+   "art": "res://assets/ui/research/paper/field_fortifications.png"
+  },
+  "ward_fire_buckets": {
+   "effects": {
+    "cohesion": 0.0001,
+    "disaster_resilience": 0.0015,
+    "disaster_risk": -0.0003,
+    "labor_demand": 0.0001
+   },
+   "name": "Ward Fire Companies",
+   "observation": "Each ward keeps leather buckets, ladders and hooks, and the neighbours turn out in a chain when the fire bell rings.",
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "ordnance_office": {
+   "effects": {
+    "disaster_risk": -0.0001,
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0001,
+    "standardization": 0.0007,
+    "state_capacity": 0.0003,
+    "warfare_readiness": 0.0005
+   },
+   "name": "Ordnance Office",
+   "observation": "A master of ordnance keeps the guns, powder and gunners in the arsenal and signs for every barrel that leaves it.",
+   "art": "res://assets/ui/research/subjects/naval_arsenals-v1.png"
+  },
+  "powder_artillery": {
+   "effects": {
+    "disaster_risk": 0.003,
+    "fuel_demand": 0.0006,
+    "labor_demand": 0.0002,
+    "pollution": 0.002,
+    "security_efficiency": -0.0029,
+    "warfare_readiness": 0.002
+   },
+   "observation": "Great bombards of hooped iron and cast bronze throw stone balls that bring down a curtain wall in days.",
+   "ability_reason": "A general with great bombards can breach a stone curtain wall in days rather than months, so old castles no longer hold out a whole season.",
+   "art": "res://assets/ui/research/subjects/powder_artillery-v1.png"
+  },
+  "war_wagon_laager": {
+   "effects": {
+    "food_output": -0.002,
+    "haul_capacity": 0.0007,
+    "security_efficiency": 0.0007,
+    "task_coordination": 0.0002,
+    "warfare_readiness": 0.0007
+   },
+   "name": "War-Wagon Laager",
+   "observation": "The wagons are chained into a fort each evening, with hand guns and light cannon firing through the boards.",
+   "art": "res://assets/ui/research/paper/first300-cards/cart_bed_framing.tres"
+  },
+  "articulated_plate_armor": {
+   "effects": {
+    "fuel_demand": 0.0007,
+    "injury_risk": -0.0009,
+    "labor_demand": 0.0001,
+    "repair_capacity": 0.002
+   },
+   "observation": "Articulated steel plates cover a man-at-arms from head to foot, and a fitted harness weighs no more than a pack.",
+   "ability_reason": "Armourers can make a full harness for the men-at-arms a general is issued. The protection comes only from harness actually made and issued, not from the knowledge alone.",
+   "art": "res://assets/ui/research/paper/articulated_plate_armor.png"
+  },
+  "parish_free_archers": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0002,
+    "warfare_readiness": 0.0006
+   },
+   "name": "Free Archers",
+   "observation": "Each parish keeps one man, paid and freed from tax, who trains on holidays as a crown archer or gunner.",
+   "art": "res://assets/ui/research/paper/first300-cards/public_levies.tres"
+  },
+  "standing_horse_companies": {
+   "effects": {
+    "food_output": -0.003,
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0002,
+    "legitimacy": -0.002,
+    "security_efficiency": 0.0009,
+    "state_capacity": 0.0003,
+    "warfare_readiness": 0.0017
+   },
+   "name": "Standing Horse Companies",
+   "observation": "Companies of paid heavy horse are kept under crown captains in peace as well as war and inspected every quarter.",
+   "ability_reason": "A general has paid heavy horse under crown captains all year, ready at the first report instead of waiting for the lords' retinues.",
+   "social_consequence": "Taxes are now collected every year for the companies, and the nobles' own retinues lose their purpose.",
+   "art": "res://assets/ui/research/subjects/armored_riding-v1.png"
+  },
+  "artillery_gun_towers": {
+   "effects": {
+    "labor_demand": 0.0002,
+    "security_efficiency": 0.0012,
+    "warfare_readiness": 0.0002
+   },
+   "name": "Gun Towers",
+   "observation": "Squat round towers with walls as thick as they are tall are packed with cannon at every level.",
+   "art": "res://assets/ui/research/subjects/curtain_wall_systems-v1.png"
+  },
+  "pike_drill": {
+   "effects": {
+    "cohesion": 0.0001,
+    "labor_demand": 0.0001,
+    "task_coordination": 0.0006,
+    "warfare_readiness": 0.0017
+   },
+   "observation": "Drilled pike squares advance, halt and wheel to the drum, and a hedge of points faces every side.",
+   "ability_reason": "A general can field drilled pike squares that stand against a cavalry charge in open ground and advance or wheel together to the drum.",
+   "art": "res://assets/ui/research/subjects/pike_drill-v1.png"
+  },
+  "earthen_gun_bulwarks": {
+   "effects": {
+    "labor_demand": 0.0002,
+    "security_efficiency": 0.0011,
+    "warfare_readiness": 0.0002
+   },
+   "name": "Earth Bulwarks",
+   "observation": "Earth banks thrown up in front of the old walls carry guns and soak up the enemy's shot.",
+   "art": "res://assets/ui/research/paper/field_fortifications.png"
+  },
+  "wheeled_siege_train": {
+   "effects": {
+    "food_output": -0.004,
+    "fuel_demand": 0.0007,
+    "labor_demand": 0.0002,
+    "task_coordination": 0.0002,
+    "warfare_readiness": 0.0014
+   },
+   "name": "Wheeled Siege Train",
+   "observation": "Bronze guns on wheeled carriages with trunnions are drawn by horse teams and brought into battery the day they arrive.",
+   "ability_reason": "A general can march a siege train with the army and breach a town's walls on arrival, so campaigns end in weeks instead of seasons.",
+   "art": "res://assets/ui/research/subjects/siege_engineering-v1.png"
+  },
+  "patented_mercenary_regiments": {
+   "effects": {
+    "cohesion": -0.0001,
+    "labor_demand": -0.0004,
+    "legitimacy": -0.002,
+    "state_capacity": 0.0001,
+    "warfare_readiness": 0.0005
+   },
+   "name": "Patented Regiments",
+   "observation": "A colonel raises a regiment under a crown patent and is paid by the head for the men he keeps on the muster.",
+   "social_consequence": "Unpaid regiments plunder the country they were hired to defend.",
+   "art": "res://assets/ui/research/paper/first300-cards/professional_corps.tres"
+  },
+  "bow_gun_galleys": {
+   "effects": {
+    "naval_capacity": 0.0006,
+    "timber_pressure": 0.002,
+    "warfare_readiness": 0.0003
+   },
+   "name": "Bow-Gun Galleys",
+   "observation": "A heavy gun in the bow of the war galley fires over the spur as the rowers drive in.",
+   "art": "res://assets/ui/research/paper/galley_navigation.png"
+  },
+  "matchlock_drill": {
+   "effects": {
+    "fuel_demand": 0.0007,
+    "injury_risk": 0.002,
+    "labor_demand": 0.0001,
+    "task_coordination": 0.0004,
+    "warfare_readiness": 0.0014
+   },
+   "observation": "Companies of arquebusiers load, blow on their match and fire together at the word of command.",
+   "ability_reason": "A general can field arquebus companies that load and fire together, so shot can hold a line and pierce armour at ranges the hand gunners never reached.",
+   "art": "res://assets/ui/research/subjects/matchlock_drill-v1.png"
+  },
+  "gun_line_security": {
+   "effects": {
+    "security_efficiency": 0.0005,
+    "task_coordination": 0.0003
+   },
+   "observation": "Infantry screens and field works are set out before the gun line, and the gunners rehearse falling back behind them.",
+   "art": "res://assets/ui/research/paper/field_fortifications.png"
+  },
+  "wheel_lock_firearms": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "security_efficiency": -0.0014,
+    "warfare_readiness": 0.0005
+   },
+   "name": "Wheel-Lock",
+   "observation": "A spring-driven steel wheel spins against pyrite and fires the gun without a burning match.",
+   "social_consequence": "A pistol can now be hidden under a cloak, and robbers carry them as well as horsemen.",
+   "art": "res://assets/ui/research/paper/percussion_fire_ignition.png"
+  },
+  "naval_gunnery": {
+   "effects": {
+    "fuel_demand": 0.0007,
+    "naval_capacity": 0.0008,
+    "timber_pressure": 0.003,
+    "warfare_readiness": 0.0005
+   },
+   "observation": "Gunports with lids are cut low in the hull, and heavy guns fire broadsides from the lower deck.",
+   "art": "res://assets/ui/research/subjects/naval_gunnery-v1.png"
+  },
+  "angled_bastion_trace": {
+   "effects": {
+    "housing_output": -0.002,
+    "labor_demand": 0.0003,
+    "security_efficiency": 0.0031,
+    "state_capacity": 0.0002,
+    "warfare_readiness": 0.0004
+   },
+   "name": "Angled Bastion Trace",
+   "observation": "Low, thick walls with arrowhead bastions sweep every face of the rampart with flanking fire.",
+   "ability_reason": "A defending general behind a bastioned trace can hold a town against many times his numbers, because bombards no longer breach the walls in days.",
+   "social_consequence": "The seat's old tall keep is useless now, and whole suburbs are pulled down to clear the fields of fire.",
+   "art": "res://assets/ui/research/subjects/field_fortifications-v1.png"
+  },
+  "pike_and_shot_regiment": {
+   "effects": {
+    "cohesion": 0.0001,
+    "labor_demand": 0.0001,
+    "task_coordination": 0.0005,
+    "warfare_readiness": 0.0014
+   },
+   "name": "Pike and Shot",
+   "observation": "A block of pikes stands in the centre, with sleeves of shot at its corners that shelter under the pikes when horse come on.",
+   "ability_reason": "A general can combine pikes and shot in one regiment, so the musketeers fire from the corners while the pikes keep horsemen off them.",
+   "art": "res://assets/ui/research/paper/pike_drill.png"
+  },
+  "travel_passports": {
+   "effects": {
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0011,
+    "state_capacity": 0.0004,
+    "trade_capacity": -0.002
+   },
+   "name": "Passports",
+   "observation": "Travellers on the ruler's roads carry a written pass naming them, their business and where they are going.",
+   "social_consequence": "Travellers without papers are turned back at the town gates or taken up as vagrants.",
+   "art": "res://assets/ui/research/discovery-600/stamp_seals.png"
+  },
+  "coastal_gun_forts": {
+   "effects": {
+    "labor_demand": 0.0002,
+    "naval_capacity": 0.0003,
+    "security_efficiency": 0.0012
+   },
+   "name": "Coastal Gun Forts",
+   "observation": "Low gun forts on the headlands cross their fire over the harbor mouth.",
+   "art": "res://assets/ui/research/subjects/fortified_stores-v1.png"
+  },
+  "gun_detachment_school": {
+   "effects": {
+    "knowledge_preservation": 0.0002,
+    "labor_demand": 0.0001,
+    "task_coordination": 0.0005,
+    "warfare_readiness": 0.0006
+   },
+   "observation": "Gun crews learn to load, lay and fire at a range under master gunners, and are examined before they join a battery.",
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "fixed_gun_calibres": {
+   "effects": {
+    "repair_capacity": 0.002,
+    "standardization": 0.0004,
+    "warfare_readiness": 0.0004
+   },
+   "name": "Fixed Calibres",
+   "observation": "The ordinance allows only a few calibres of gun, and any ball of the right size fits any gun of that class.",
+   "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png"
+  },
+  "navy_board": {
+   "effects": {
+    "institutional_rigidity": 0.0002,
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.0007,
+    "repair_capacity": 0.003,
+    "state_capacity": 0.0004
+   },
+   "name": "Navy Board",
+   "observation": "A board of commissioners runs the dockyards, buys the stores and pays the seamen, and keeps accounts for all three.",
+   "art": "res://assets/ui/research/subjects/naval_arsenals-v2.png"
+  },
+  "rest_musket": {
+   "effects": {
+    "fatigue": 0.002,
+    "injury_risk": 0.001,
+    "warfare_readiness": 0.0006
+   },
+   "name": "Rest Musket",
+   "observation": "A heavy musket laid on a forked rest fires a ball that goes through a breastplate at a hundred paces.",
+   "art": "res://assets/ui/research/subjects/matchlock_drill-v1.png"
+  },
+  "saltpetre_commissioners": {
+   "effects": {
+    "chemical_control": 0.004,
+    "cohesion": -0.0002,
+    "legitimacy": -0.004,
+    "state_capacity": 0.0003,
+    "warfare_readiness": 0.0003
+   },
+   "name": "Saltpetre Commissioners",
+   "observation": "By royal right the saltpetre men dig up the floors of cellars, stables and dovecotes to take the nitre earth.",
+   "social_consequence": "The saltpetre men dig up the floors of houses and barns, and no one may refuse them.",
+   "art": "res://assets/ui/research/subjects/nitrate_cultivation-v1.png"
+  },
+  "mounted_firearms": {
+   "effects": {
+    "food_output": -0.002,
+    "labor_demand": 0.0001,
+    "task_coordination": 0.0005,
+    "warfare_readiness": 0.0013
+   },
+   "observation": "Horsemen with wheel-lock pistols ride up in files, fire by ranks and wheel away to reload.",
+   "ability_reason": "A general can send pistol-armed horsemen who ride up in files and fire by ranks, wearing down pike and shot without charging home.",
+   "art": "res://assets/ui/research/subjects/mounted_firearms-v2.png"
+  },
+  "snaphance_lock": {
+   "effects": {
+    "injury_risk": -0.0001,
+    "warfare_readiness": 0.0004
+   },
+   "name": "Snaphance Lock",
+   "observation": "A flint in the cock strikes a steel over the pan, and the lock is cheaper and sturdier than the wheel.",
+   "art": "res://assets/ui/research/paper/percussion_fire_ignition.png"
+  },
+  "trained_town_bands": {
+   "effects": {
+    "cohesion": 0.0001,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0012,
+    "warfare_readiness": 0.0004
+   },
+   "name": "Trained Bands",
+   "observation": "Householders are drilled in the town trained bands on set days and keep their own arms at home.",
+   "art": "res://assets/ui/research/paper/first300-cards/public_levies.tres"
+  },
+  "race_built_warship": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.0007,
+    "timber_pressure": 0.0029,
+    "warfare_readiness": 0.0004
+   },
+   "name": "Race-Built Warship",
+   "observation": "The high castles are cut away, and the long, low hull sails fast and carries more guns.",
+   "art": "res://assets/ui/research/subjects/naval_arsenals-v1.png"
+  },
+  "shot_proof_cuirass": {
+   "effects": {
+    "fuel_demand": 0.0009,
+    "injury_risk": -0.0002,
+    "warfare_readiness": 0.0002
+   },
+   "name": "Shot-Proof Cuirass",
+   "observation": "Each breastplate is fired at with a pistol, and the dent of the proof shot is left in it as a mark.",
+   "art": "res://assets/ui/research/paper/articulated_plate_armor.png"
+  },
+  "fireship_attacks": {
+   "effects": {
+    "disaster_risk": 0.002,
+    "naval_capacity": 0.0003,
+    "warfare_readiness": 0.0002
+   },
+   "name": "Fireships",
+   "observation": "Old hulls packed with pitch and powder are set alight and sent downwind into an anchored fleet.",
+   "art": "res://assets/ui/research/paper/galley_navigation.png"
+  },
+  "zigzag_siege_approaches": {
+   "effects": {
+    "injury_risk": -0.0002,
+    "labor_demand": 0.0002,
+    "warfare_readiness": 0.0006
+   },
+   "name": "Zig-Zag Approaches",
+   "observation": "Trenches creep toward the bastion in zig-zags that the defenders' guns cannot fire along.",
+   "art": "res://assets/ui/research/subjects/siege_engineering-v2.png"
+  },
+  "district_muster_lieutenants": {
+   "effects": {
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0012,
+    "state_capacity": 0.0004,
+    "warfare_readiness": 0.0002
+   },
+   "name": "Muster Lieutenants",
+   "observation": "A lieutenant in each district musters and arms the trained bands and reports their numbers to the council.",
+   "art": "res://assets/ui/research/paper/first300-cards/public_levies.tres"
+  },
+  "countermarch_volley_fire": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "task_coordination": 0.0007,
+    "warfare_readiness": 0.0021
+   },
+   "name": "Countermarch Volley",
+   "observation": "The front rank fires and files to the rear to reload, and the next rank steps up, so the fire never stops.",
+   "ability_reason": "A general can keep up continuous fire from the same companies, so shot can stop a charge without pikes in front of it.",
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "muster_commissaries": {
+   "effects": {
+    "institutional_rigidity": 0.0003,
+    "labor_demand": -0.0002,
+    "state_capacity": 0.0006,
+    "warfare_readiness": 0.0004
+   },
+   "name": "Muster Commissaries",
+   "observation": "Commissaries count every company man by man before pay day, and captains can no longer draw pay for dead men.",
+   "art": "res://assets/ui/research/paper/tallies.png"
+  },
+  "printed_drill_manual": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "knowledge_preservation": 0.0009,
+    "standardization": 0.0009,
+    "task_coordination": 0.0009,
+    "warfare_readiness": 0.0013
+   },
+   "name": "Printed Drill Book",
+   "observation": "A printed book shows each posture of musket and pike in numbered pictures, and every captain drills by the same book.",
+   "ability_reason": "Every captain drills by the same numbered postures, so a general can form, move and fire regiments he has never seen before.",
+   "art": "res://assets/ui/research/subjects/formation_drill-v1.png"
+  },
+  "printed_fortification_treatises": {
+   "effects": {
+    "knowledge_preservation": 0.0007,
+    "security_efficiency": 0.0028,
+    "warfare_readiness": 0.0003
+   },
+   "name": "Fortification Treatises",
+   "observation": "Printed treatises lay out bastions, angles and siege works with ruled plans, and engineers everywhere read them.",
+   "art": "res://assets/ui/research/subjects/siege_engineering-v1.png"
+  },
+  "flintlock_ignition": {
+   "effects": {
+    "fuel_demand": 0.0005,
+    "injury_risk": -0.0008,
+    "task_coordination": 0.0003,
+    "warfare_readiness": 0.0021
+   },
+   "name": "Flintlock",
+   "observation": "A flint strikes a hinged steel that also covers the pan, and the gun fires in wind and rain without a burning match.",
+   "ability_reason": "A general's musketeers can load and fire faster, in rain and wind, and stand closer together without burning match.",
+   "art": "res://assets/ui/research/paper/percussion_fire_ignition.png"
+  },
+  "letters_of_marque": {
+   "effects": {
+    "legitimacy": -0.001,
+    "naval_capacity": 0.0014,
+    "security_efficiency": -0.0029,
+    "trade_capacity": -0.003,
+    "warfare_readiness": 0.0003
+   },
+   "name": "Letters of Marque",
+   "observation": "A letter under the seal licenses a private ship to take enemy merchantmen in war and bring them in as prizes.",
+   "social_consequence": "Privateers bring prizes home, and at the peace some of them turn pirate.",
+   "art": "res://assets/ui/research/paper/coastal_watercraft.png"
+  },
+  "articles_of_war": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0003,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0017,
+    "task_coordination": 0.0004
+   },
+   "name": "Articles of War",
+   "observation": "The articles of war are read aloud to every regiment and set out the crimes and punishments of soldiers.",
+   "art": "res://assets/ui/research/paper/customary_law.png"
+  },
+  "paper_cartridges": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "standardization": 0.0006,
+    "task_coordination": 0.0002,
+    "warfare_readiness": 0.0008
+   },
+   "name": "Paper Cartridges",
+   "observation": "A twist of paper holds a measured charge and ball; the musketeer bites it open, primes, and rams the rest.",
+   "art": "res://assets/ui/research/paper/fiber_pulp_beating.png"
+  },
+  "ravelin_outworks": {
+   "effects": {
+    "labor_demand": 0.0002,
+    "security_efficiency": 0.0026,
+    "warfare_readiness": 0.0003
+   },
+   "name": "Ravelins and Outworks",
+   "observation": "Ravelins, hornworks and a covered way beyond the ditch keep the besieger's guns further from the main wall.",
+   "art": "res://assets/ui/research/paper/field_fortifications.png"
+  },
+  "regimental_light_guns": {
+   "effects": {
+    "food_output": -0.002,
+    "fuel_demand": 0.0017,
+    "labor_demand": 0.0001,
+    "task_coordination": 0.0007,
+    "warfare_readiness": 0.0027
+   },
+   "name": "Regimental Guns",
+   "observation": "Light guns drawn by one or two horses march with each regiment and fire from its line.",
+   "ability_reason": "A general can give each regiment its own light guns that march and fight in the line, so artillery supports the battle where it happens.",
+   "art": "res://assets/ui/research/subjects/powder_artillery-v1.png"
+  },
+  "shallow_line_brigades": {
+   "effects": {
+    "injury_risk": 0.001,
+    "task_coordination": 0.0007,
+    "warfare_readiness": 0.0014
+   },
+   "name": "Shallow Line Brigades",
+   "observation": "The brigades form only six ranks deep, and every musket in them can fire.",
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "plug_bayonet": {
+   "effects": {
+    "injury_risk": 0.001,
+    "warfare_readiness": 0.0009
+   },
+   "name": "Plug Bayonet",
+   "observation": "After the last volley the musketeer pushes a dagger into the muzzle and meets horsemen with a short pike.",
+   "art": "res://assets/ui/research/paper/hafted_weapons.png"
+  },
+  "air_vessel_fire_engine": {
+   "effects": {
+    "disaster_resilience": 0.0034,
+    "disaster_risk": -0.0026,
+    "labor_demand": 0.0001
+   },
+   "name": "Air-Vessel Fire Engine",
+   "observation": "An air vessel on the wheeled pump turns the pumpers' strokes into a steady jet that reaches the upper windows.",
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png"
+  },
+  "sail_battle_fleet": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.0024,
+    "timber_pressure": 0.004,
+    "warfare_readiness": 0.0007
+   },
+   "name": "Sailing Battle Fleet",
+   "observation": "The rowing galleys are laid up, and the battle fleet is made of sailing warships with guns along both sides.",
+   "art": "res://assets/ui/research/subjects/naval_gunnery-v1.png"
+  },
+  "crown_standing_army": {
+   "effects": {
+    "cohesion": 0.0001,
+    "institutional_rigidity": 0.0004,
+    "labor_demand": 0.0003,
+    "legitimacy": -0.0005,
+    "security_efficiency": 0.0015,
+    "state_capacity": 0.0005,
+    "warfare_readiness": 0.0023
+   },
+   "name": "Crown Standing Army",
+   "observation": "The crown keeps regiments of foot, horse and guns paid all year from the taxes, in peace as well as war.",
+   "ability_reason": "A general commands paid regiments that serve year-round, drilled and ready, so the realm can take the field in any season without first raising an army.",
+   "social_consequence": "Taxes rise every year to pay the regiments, and colonels and a war treasurer take their places at court.",
+   "art": "res://assets/ui/research/subjects/professional_corps-v1.png"
+  },
+  "regimental_uniforms": {
+   "effects": {
+    "cohesion": 0.0003,
+    "labor_demand": 0.0001,
+    "task_coordination": 0.0002
+   },
+   "name": "Regimental Coats",
+   "observation": "Every regiment wears coats of one colour with facings of its own, and men know friend from foe in the smoke.",
+   "art": "res://assets/ui/research/paper/garment_pattern_cutting.png"
+  },
+  "line_ahead_fleet_tactics": {
+   "effects": {
+    "naval_capacity": 0.0036,
+    "task_coordination": 0.0003,
+    "warfare_readiness": 0.0007
+   },
+   "name": "Line of Battle",
+   "observation": "The warships follow one another in a single line under written fighting instructions, so every broadside bears.",
+   "ability_reason": "An admiral can fight his whole fleet in one line, so every broadside bears, and hold it together under written fighting instructions.",
+   "art": "res://assets/ui/research/subjects/naval_gunnery-v1.png"
+  },
+  "rated_warships": {
+   "effects": {
+    "naval_capacity": 0.0013,
+    "standardization": 0.0006,
+    "state_capacity": 0.0001
+   },
+   "name": "Rated Warships",
+   "observation": "Each warship is rated by the guns she carries, and her crew, stores and captain's rank follow from her rate.",
+   "art": "res://assets/ui/research/subjects/naval_arsenals-v1.png"
+  },
+  "sea_soldier_regiments": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.0009,
+    "warfare_readiness": 0.0006
+   },
+   "name": "Sea Regiments",
+   "observation": "Standing regiments of sea soldiers serve aboard the fleet, fight from the tops and land to take a shore battery.",
+   "art": "res://assets/ui/research/subjects/amphibious_operations-v1.png"
+  },
+  "capital_police_lieutenant": {
+   "effects": {
+    "cohesion": -0.0002,
+    "disaster_resilience": 0.0018,
+    "labor_demand": 0.0001,
+    "legitimacy": -0.0008,
+    "sanitation": 0.002,
+    "security_efficiency": 0.0035,
+    "state_capacity": 0.0004
+   },
+   "name": "Police Lieutenant",
+   "observation": "One lieutenant of police answers for the capital's watch, street lamps, markets and paid informers.",
+   "ability_reason": "The capital has one officer answering for its watch, lamps, markets and informers, so riots, fires and crime are met quickly, and the ruler hears what the streets say.",
+   "social_consequence": "Paid informers sit in every tavern, and the capital's people learn to guard their words.",
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "grenadier_companies": {
+   "effects": {
+    "disaster_risk": 0.001,
+    "injury_risk": 0.002,
+    "warfare_readiness": 0.0007
+   },
+   "name": "Grenadiers",
+   "observation": "Picked tall men in each regiment light the fuse of an iron grenade and throw it into the enemy's works.",
+   "art": "res://assets/ui/research/subjects/black_powder-v1.png"
+  },
+  "army_supply_magazines": {
+   "effects": {
+    "food_storage": 0.003,
+    "labor_demand": 0.0002,
+    "logistics_endurance": 0.0025,
+    "state_capacity": 0.0002,
+    "warfare_readiness": 0.0005
+   },
+   "name": "Army Magazines",
+   "observation": "Bread ovens and stores are laid down at fixed marches ahead of the army along its road.",
+   "art": "res://assets/ui/research/subjects/fortified_stores-v1.png"
+  },
+  "siege_by_parallels": {
+   "effects": {
+    "injury_risk": -0.0023,
+    "labor_demand": 0.0002,
+    "task_coordination": 0.0003,
+    "warfare_readiness": 0.0016
+   },
+   "name": "Siege by Parallels",
+   "observation": "Trenches parallel to the fortress are dug one after another, each closer, until the guns reach breaching range.",
+   "ability_reason": "A besieging general can bring his guns to breaching range behind set trenches in weeks, with far fewer men lost, so bastioned towns fall on a timetable.",
+   "art": "res://assets/ui/research/subjects/siege_engineering-v2.png"
+  },
+  "leather_fire_hose": {
+   "effects": {
+    "disaster_resilience": 0.0017,
+    "disaster_risk": -0.0003
+   },
+   "name": "Fire Hose",
+   "observation": "Leather hose and a suction pump carry the jet up the stairs and draw water from the river without a bucket chain.",
+   "art": "res://assets/ui/research/paper/leather_goods_patterning.png"
+  },
+  "fortress_frontier_belt": {
+   "effects": {
+    "institutional_rigidity": 0.0005,
+    "labor_demand": 0.0004,
+    "security_efficiency": 0.0035,
+    "state_capacity": 0.0004,
+    "trade_capacity": -0.002,
+    "warfare_readiness": 0.0007
+   },
+   "name": "Fortress Belt",
+   "observation": "An engineer-general plans a belt of bastioned fortresses along the frontier, each within a march of the next.",
+   "ability_reason": "A defending general can fall back from fortress to fortress along a planned belt, each covering the next, so an invader must besiege town after town.",
+   "social_consequence": "The frontier provinces pay for the fortresses and lodge their garrisons for generations.",
+   "art": "res://assets/ui/research/subjects/curtain_wall_systems-v1.png"
+  },
+  "allotted_soldier_crofts": {
+   "effects": {
+    "cohesion": 0.0002,
+    "food_output": 0.001,
+    "labor_demand": -0.0013,
+    "state_capacity": 0.0002,
+    "warfare_readiness": 0.0011
+   },
+   "name": "Soldier Crofts",
+   "observation": "Each group of farms keeps one soldier on a croft, and he drills with his company every summer.",
+   "art": "res://assets/ui/research/paper/first300-cards/public_levies.tres"
+  },
+  "press_gang_impressment": {
+   "effects": {
+    "cohesion": -0.0006,
+    "labor_demand": 0.0002,
+    "legitimacy": -0.0008,
+    "naval_capacity": 0.0017,
+    "trade_capacity": -0.002
+   },
+   "name": "Press Gangs",
+   "observation": "In wartime press gangs seize seamen from the taverns and merchant ships and carry them to the fleet.",
+   "social_consequence": "Seamen hide ashore in wartime, and port towns riot against the gangs.",
+   "art": "res://assets/ui/research/paper/rope_laying.png"
+  },
+  "soldier_barracks": {
+   "effects": {
+    "cohesion": 0.0002,
+    "disease_exposure": 0.002,
+    "housing_output": -0.003,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0002,
+    "security_efficiency": 0.0005
+   },
+   "name": "Barracks",
+   "observation": "Soldiers are lodged in barracks instead of billeted on the townsfolk, who no longer have to feed them.",
+   "art": "res://assets/ui/research/paper/timber_post_beam_connections.png"
+  },
+  "ricochet_fire": {
+   "effects": {
+    "fuel_demand": 0.0002,
+    "warfare_readiness": 0.0011
+   },
+   "name": "Ricochet Fire",
+   "observation": "Guns with small charges skip their shot along the length of the defenders' rampart and dismount the guns there.",
+   "art": "res://assets/ui/research/subjects/powder_artillery-v1.png"
+  },
+  "socket_bayonet": {
+   "effects": {
+    "labor_demand": -0.0009,
+    "task_coordination": 0.0018,
+    "warfare_readiness": 0.0029
+   },
+   "name": "Socket Bayonet",
+   "observation": "A bayonet on a socket fits beside the muzzle, and the musketeer can still load and fire with it fixed.",
+   "ability_reason": "Every musketeer can hold off horse with a fixed bayonet and still fire, so a general no longer needs pike blocks in his line.",
+   "art": "res://assets/ui/research/paper/hafted_weapons.png"
+  },
+  "engineer_officer_corps": {
+   "effects": {
+    "construction_rate": 0.003,
+    "security_efficiency": 0.0013,
+    "state_capacity": 0.0002,
+    "survey_speed": 0.0007,
+    "warfare_readiness": 0.0007
+   },
+   "name": "Engineer Corps",
+   "observation": "Military engineers hold commissions in their own corps and plan the fortresses, sieges and river crossings.",
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png"
+  },
+  "insured_fire_brigades": {
+   "effects": {
+    "disaster_resilience": 0.002,
+    "disaster_risk": -0.0004,
+    "trade_capacity": 0.0001
+   },
+   "name": "Insured Fire Brigades",
+   "observation": "The fire office keeps its own brigade and engine for houses that carry its badge.",
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png"
+  },
+  "platoon_fire_battalions": {
+   "effects": {
+    "cohesion": 0.0001,
+    "task_coordination": 0.001,
+    "warfare_readiness": 0.0033
+   },
+   "name": "Platoon Fire",
+   "observation": "The battalion fires by platoons in turn along its length, and a rolling fire runs up and down the line.",
+   "ability_reason": "A general's battalions can keep up a rolling fire by platoons, every man in the line carries a musket, and the pike is given up.",
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "iron_ramrods": {
+   "effects": {
+    "fuel_demand": 0.0002,
+    "repair_capacity": 0.001,
+    "warfare_readiness": 0.0009
+   },
+   "name": "Iron Ramrods",
+   "observation": "Iron ramrods do not snap like wooden ones, and a drilled man loads faster with them.",
+   "art": "res://assets/ui/research/subjects/forge_welding-v1.png"
+  },
+  "solid_bored_cannon": {
+   "effects": {
+    "fuel_demand": 0.0004,
+    "standardization": 0.0008,
+    "warfare_readiness": 0.0011
+   },
+   "name": "Bored Cannon",
+   "observation": "The cannon is cast solid and bored out on a turning mill, so every bore is true and every ball fits closely.",
+   "art": "res://assets/ui/research/subjects/powder_artillery-v1.png"
+  },
+  "officer_cadet_schools": {
+   "effects": {
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0009,
+    "labor_demand": 0.0001,
+    "task_coordination": 0.0007,
+    "warfare_readiness": 0.0007
+   },
+   "name": "Cadet Schools",
+   "observation": "Young officers learn drill, mathematics and fortification at a cadet school before they join a regiment.",
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png"
+  },
+  "mounted_highway_constabulary": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0031,
+    "trade_capacity": 0.0007,
+    "travel_speed": 0.001
+   },
+   "name": "Highway Constabulary",
+   "observation": "Mounted constables patrol the trunk roads, and highway robbers are hunted from county to county.",
+   "art": "res://assets/ui/research/paper/first300-cards/mounted_scouts.tres"
+  },
+  "artillery_academy": {
+   "effects": {
+    "knowledge_rate": 0.0009,
+    "task_coordination": 0.0004,
+    "warfare_readiness": 0.0014
+   },
+   "name": "Artillery Academy",
+   "observation": "Gunner officers learn geometry, the flight of shot and the strength of powder at an artillery academy.",
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png"
+  },
+  "customs_frontier_patrols": {
+   "effects": {
+    "legitimacy": -0.0005,
+    "security_efficiency": 0.0019,
+    "state_capacity": 0.0006,
+    "trade_capacity": -0.002
+   },
+   "name": "Customs Riders",
+   "observation": "Armed customs riders patrol the frontier roads and fords against smugglers.",
+   "art": "res://assets/ui/research/paper/first300-cards/mounted_scouts.tres"
+  },
+  "canton_regimental_rolls": {
+   "effects": {
+    "cohesion": 0.0002,
+    "legitimacy": -0.0005,
+    "state_capacity": 0.0006,
+    "warfare_readiness": 0.0018
+   },
+   "name": "Canton Rolls",
+   "observation": "Each regiment draws its recruits from its own district's roll, and the young men of a canton serve together.",
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png"
+  },
+  "cadenced_marching": {
+   "effects": {
+    "fatigue": -0.002,
+    "task_coordination": 0.0008,
+    "travel_speed": 0.001,
+    "warfare_readiness": 0.0009
+   },
+   "name": "Cadenced Step",
+   "observation": "The whole line steps in time to the drum, and it stays closed and dressed on the march.",
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "light_troop_screens": {
+   "effects": {
+    "security_efficiency": 0.0007,
+    "task_coordination": 0.0003,
+    "warfare_readiness": 0.0018
+   },
+   "name": "Light Troops",
+   "observation": "Light troops screen the army's march and raid the enemy's convoys.",
+   "art": "res://assets/ui/research/paper/first300-cards/skirmish_pair_drill.tres"
+  },
+  "rifled_barrels": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "warfare_readiness": 0.0014
+   },
+   "observation": "Picked forest marksmen carry rifled guns that hit a man at three hundred paces but load slowly.",
+   "art": "res://assets/ui/research/paper/first300-cards/skirmish_pair_drill.tres"
+  },
+  "magistrates_runners": {
+   "effects": {
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0019,
+    "state_capacity": 0.0002
+   },
+   "name": "Magistrate's Runners",
+   "observation": "The magistrate's paid runners track thieves across the capital and bring them before him.",
+   "art": "res://assets/ui/research/paper/petition_registers.png"
+  },
+  "isolated_powder_magazines": {
+   "effects": {
+    "disaster_resilience": 0.0008,
+    "disaster_risk": -0.0003,
+    "injury_risk": -0.0003,
+    "labor_demand": 0.0001
+   },
+   "name": "Isolated Magazines",
+   "observation": "Powder magazines stand apart behind blast walls, with lightning rods above them.",
+   "art": "res://assets/ui/research/subjects/fortified_stores-v1.png"
+  },
+  "troops_in_disaster_relief": {
+   "effects": {
+    "cohesion": 0.0002,
+    "disaster_resilience": 0.0017,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0003
+   },
+   "name": "Troops in Relief",
+   "observation": "After a great fire, flood or earthquake the troops clear the ruins, guard the stores and bury the dead.",
+   "art": "res://assets/ui/research/paper/first300-cards/evacuation_relays.tres"
+  },
+  "oblique_order_attack": {
+   "effects": {
+    "task_coordination": 0.0004,
+    "warfare_readiness": 0.0012
+   },
+   "name": "Oblique Order",
+   "observation": "The line advances in echelon, one wing forward and one held back, and strikes a single flank with its full weight.",
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "military_staffs": {
+   "effects": {
+    "institutional_rigidity": 0.0005,
+    "labor_demand": 0.0001,
+    "logistics_endurance": 0.0017,
+    "state_capacity": 0.0006,
+    "task_coordination": 0.0015,
+    "warfare_readiness": 0.0018
+   },
+   "observation": "A quartermaster-general's staff works out marches, camps and supply before the army moves.",
+   "ability_reason": "A general can move larger forces farther without outrunning his bread, because his staff plans marches, camps and supply in advance.",
+   "art": "res://assets/ui/research/subjects/military_staffs-v1.png"
+  },
+  "galloping_horse_artillery": {
+   "effects": {
+    "food_output": -0.003,
+    "task_coordination": 0.0002,
+    "warfare_readiness": 0.0012
+   },
+   "name": "Horse Artillery",
+   "observation": "Light guns with every gunner mounted gallop forward with the cavalry and unlimber within a few breaths.",
+   "art": "res://assets/ui/research/paper/first300-cards/mounted_scouts.tres"
+  },
+  "standardized_artillery_system": {
+   "effects": {
+    "fuel_demand": 0.0006,
+    "repair_capacity": 0.004,
+    "standardization": 0.0011,
+    "task_coordination": 0.0004,
+    "warfare_readiness": 0.0024
+   },
+   "name": "Artillery System",
+   "observation": "Light pieces with interchangeable parts, limbers and elevating screws are built to one system throughout the realm.",
+   "ability_reason": "A general's guns are light, interchangeable and quickly laid, so batteries can be massed where the battle is decided and repaired from common parts.",
+   "art": "res://assets/ui/research/subjects/powder_artillery-v1.png"
+  },
+  "military_survey_maps": {
+   "effects": {
+    "survey_speed": 0.0016,
+    "task_coordination": 0.0007,
+    "warfare_readiness": 0.0006
+   },
+   "name": "Military Survey Maps",
+   "observation": "Officers survey and draw the country for campaign planning: roads, fords, woods and heights.",
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png"
+  },
+  "printed_wanted_notices": {
+   "effects": {
+    "knowledge_preservation": 0.0002,
+    "security_efficiency": 0.005
+   },
+   "name": "Wanted Notices",
+   "observation": "Printed notices describing wanted men are sent from the capital to every town's magistrate and inn.",
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png"
+  },
+  "carronades": {
+   "effects": {
+    "naval_capacity": 0.0012,
+    "warfare_readiness": 0.0004
+   },
+   "name": "Carronades",
+   "observation": "Short, light guns throw heavy shot at close range and need only a small crew.",
+   "art": "res://assets/ui/research/subjects/naval_gunnery-v1.png"
+  },
+  "all_arms_divisions": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "logistics_endurance": 0.0009,
+    "task_coordination": 0.0007,
+    "warfare_readiness": 0.0016
+   },
+   "name": "All-Arms Divisions",
+   "observation": "Permanent divisions of foot, horse and guns march on separate roads and join for battle.",
+   "ability_reason": "A general can split his army into divisions that march on separate roads and join for battle, so large armies move fast and feed from a wider country.",
+   "art": "res://assets/ui/research/subjects/military_staffs-v1.png"
+  },
+  "numbered_signal_flags": {
+   "effects": {
+    "naval_capacity": 0.0012,
+    "task_coordination": 0.0003
+   },
+   "name": "Numbered Signal Flags",
+   "observation": "Ten flags stand for the ten figures, and an admiral spells out numbered orders from the signal book.",
+   "art": "res://assets/ui/research/discovery-600/agreed_signal_codes.png"
+  },
+  "officer_war_games": {
+   "effects": {
+    "knowledge_rate": 0.0006,
+    "task_coordination": 0.0004,
+    "warfare_readiness": 0.0003
+   },
+   "name": "Officer War Games",
+   "observation": "Officers play out campaigns on maps with blocks and dice, and an umpire judges each move.",
+   "art": "res://assets/ui/research/subjects/civic_games-v1.png"
+  },
+  "iron_cased_war_rockets": {
+   "effects": {
+    "disaster_risk": 0.003,
+    "injury_risk": 0.002,
+    "warfare_readiness": 0.0004
+   },
+   "name": "War Rockets",
+   "observation": "Iron-cased rockets on long sticks fly far and wild, and they terrify horses.",
+   "art": "res://assets/ui/research/subjects/black_powder-v1.png"
+  },
+  "nation_in_arms_levy": {
+   "effects": {
+    "cohesion": 0.0002,
+    "food_output": -0.004,
+    "labor_demand": 0.0005,
+    "security_efficiency": 0.0015,
+    "state_capacity": 0.0002,
+    "warfare_readiness": 0.0017
+   },
+   "name": "Nation in Arms",
+   "observation": "Every fit citizen owes service by law, and whole classes of young men are called up at once.",
+   "ability_reason": "Service is now lawful and expected of every fit citizen, so a general can raise and replace armies faster and with less resistance, though fields and workshops lose their men.",
+   "social_consequence": "Every family has a son under arms, and the war becomes the whole people's business.",
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png"
+  },
+  "aerostat_observation": {
+   "effects": {
+    "observation_rate": 0.0004,
+    "survey_speed": 0.0013,
+    "warfare_readiness": 0.0004
+   },
+   "observation": "A balloon tethered by ropes lifts an observer above the smoke to watch the enemy's lines.",
+   "art": "res://assets/ui/research/subjects/aerostat_observation-v1.png"
+  },
+  "columns_behind_skirmishers": {
+   "effects": {
+    "injury_risk": 0.002,
+    "task_coordination": 0.0002,
+    "warfare_readiness": 0.0007
+   },
+   "name": "Columns and Skirmishers",
+   "observation": "A swarm of skirmishers goes forward to harass the line, and the attack columns follow close behind them.",
+   "art": "res://assets/ui/research/paper/first300-cards/skirmish_pair_drill.tres"
+  },
+  "military_telegraph_lines": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0002,
+    "task_coordination": 0.0006,
+    "warfare_readiness": 0.0004
+   },
+   "name": "Military Telegraph",
+   "observation": "Shutter-telegraph towers pass army and fleet orders between the capital and the frontier within hours.",
+   "art": "res://assets/ui/research/discovery-600/prearranged_beacon_chains.png"
+  },
+  "river_dock_police": {
+   "effects": {
+    "security_efficiency": 0.002,
+    "storage_loss": -0.002,
+    "trade_capacity": 0.0006
+   },
+   "name": "River Police",
+   "observation": "River police in rowing boats guard the docks and the cargoes lying in the stream.",
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "fire_lance_tubes": {
+    "disaster_risk": 0.002,
+    "injury_risk": 0.002,
+    "warfare_readiness": 0.002
+   },
+   "pot_bolt_guns": {
+    "disaster_risk": 0.002,
+    "fuel_demand": 0.001,
+    "labor_demand": 0.001,
+    "security_efficiency": 0.0029,
+    "warfare_readiness": 0.0027
+   },
+   "captain_service_contracts": {
+    "cohesion": -0.001,
+    "labor_demand": -0.002,
+    "legitimacy": -0.001,
+    "state_capacity": 0.001,
+    "warfare_readiness": 0.0027
+   },
+   "keyhole_gunports": {
+    "labor_demand": 0.002,
+    "security_efficiency": 0.0072
+   },
+   "hand_gun_tubes": {
+    "disaster_risk": 0.002,
+    "fuel_demand": 0.002,
+    "injury_risk": 0.003,
+    "warfare_readiness": 0.0067
+   },
+   "parish_constables": {
+    "labor_demand": 0.001,
+    "legitimacy": 0.002,
+    "security_efficiency": 0.0072,
+    "state_capacity": 0.0005
+   },
+   "pavise_crossbowmen": {
+    "injury_risk": -0.002,
+    "timber_pressure": 0.001,
+    "warfare_readiness": 0.0027
+   },
+   "dismounted_stake_line": {
+    "injury_risk": -0.001,
+    "task_coordination": 0.0009,
+    "warfare_readiness": 0.0034
+   },
+   "ward_fire_buckets": {
+    "cohesion": 0.001,
+    "disaster_resilience": 0.005,
+    "disaster_risk": -0.003,
+    "labor_demand": 0.002
+   },
+   "ordnance_office": {
+    "disaster_risk": -0.001,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.001,
+    "standardization": 0.0012,
+    "state_capacity": 0.0015,
+    "warfare_readiness": 0.0027
+   },
+   "powder_artillery": {
+    "disaster_risk": 0.003,
+    "fuel_demand": 0.003,
+    "labor_demand": 0.003,
+    "pollution": 0.002,
+    "security_efficiency": -0.0029,
+    "warfare_readiness": 0.0107
+   },
+   "war_wagon_laager": {
+    "food_output": -0.002,
+    "haul_capacity": 0.002,
+    "security_efficiency": 0.0043,
+    "task_coordination": 0.0009,
+    "warfare_readiness": 0.004
+   },
+   "articulated_plate_armor": {
+    "fuel_demand": 0.003,
+    "injury_risk": -0.003,
+    "labor_demand": 0.002,
+    "repair_capacity": 0.002
+   },
+   "parish_free_archers": {
+    "labor_demand": 0.001,
+    "legitimacy": -0.001,
+    "state_capacity": 0.001,
+    "warfare_readiness": 0.0034
+   },
+   "standing_horse_companies": {
+    "food_output": -0.003,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.004,
+    "legitimacy": -0.002,
+    "security_efficiency": 0.0058,
+    "state_capacity": 0.0015,
+    "warfare_readiness": 0.0094
+   },
+   "artillery_gun_towers": {
+    "labor_demand": 0.003,
+    "security_efficiency": 0.008,
+    "warfare_readiness": 0.0013
+   },
+   "pike_drill": {
+    "cohesion": 0.002,
+    "labor_demand": 0.002,
+    "task_coordination": 0.0027,
+    "warfare_readiness": 0.0094
+   },
+   "earthen_gun_bulwarks": {
+    "labor_demand": 0.004,
+    "security_efficiency": 0.0072,
+    "warfare_readiness": 0.0013
+   },
+   "wheeled_siege_train": {
+    "food_output": -0.004,
+    "fuel_demand": 0.002,
+    "labor_demand": 0.003,
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.0107
+   },
+   "patented_mercenary_regiments": {
+    "cohesion": -0.002,
+    "labor_demand": -0.003,
+    "legitimacy": -0.002,
+    "state_capacity": 0.0005,
+    "warfare_readiness": 0.004
+   },
+   "bow_gun_galleys": {
+    "naval_capacity": 0.0036,
+    "timber_pressure": 0.002,
+    "warfare_readiness": 0.002
+   },
+   "matchlock_drill": {
+    "fuel_demand": 0.002,
+    "injury_risk": 0.002,
+    "labor_demand": 0.002,
+    "task_coordination": 0.0027,
+    "warfare_readiness": 0.0107
+   },
+   "gun_line_security": {
+    "security_efficiency": 0.0029,
+    "task_coordination": 0.0018
+   },
+   "wheel_lock_firearms": {
+    "labor_demand": 0.001,
+    "security_efficiency": -0.0014,
+    "warfare_readiness": 0.0034
+   },
+   "naval_gunnery": {
+    "fuel_demand": 0.002,
+    "naval_capacity": 0.0048,
+    "timber_pressure": 0.003,
+    "warfare_readiness": 0.004
+   },
+   "angled_bastion_trace": {
+    "housing_output": -0.002,
+    "labor_demand": 0.006,
+    "security_efficiency": 0.02,
+    "state_capacity": 0.001,
+    "warfare_readiness": 0.0027
+   },
+   "pike_and_shot_regiment": {
+    "cohesion": 0.001,
+    "labor_demand": 0.002,
+    "task_coordination": 0.0036,
+    "warfare_readiness": 0.0107
+   },
+   "travel_passports": {
+    "legitimacy": -0.001,
+    "security_efficiency": 0.0072,
+    "state_capacity": 0.0015,
+    "trade_capacity": -0.002
+   },
+   "coastal_gun_forts": {
+    "labor_demand": 0.003,
+    "naval_capacity": 0.0018,
+    "security_efficiency": 0.008
+   },
+   "gun_detachment_school": {
+    "knowledge_preservation": 0.001,
+    "labor_demand": 0.001,
+    "task_coordination": 0.0018,
+    "warfare_readiness": 0.004
+   },
+   "fixed_gun_calibres": {
+    "repair_capacity": 0.002,
+    "standardization": 0.0024,
+    "warfare_readiness": 0.0027
+   },
+   "navy_board": {
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.002,
+    "naval_capacity": 0.0048,
+    "repair_capacity": 0.003,
+    "state_capacity": 0.0015
+   },
+   "rest_musket": {
+    "fatigue": 0.002,
+    "injury_risk": 0.001,
+    "warfare_readiness": 0.004
+   },
+   "saltpetre_commissioners": {
+    "chemical_control": 0.004,
+    "cohesion": -0.002,
+    "legitimacy": -0.004,
+    "state_capacity": 0.001,
+    "warfare_readiness": 0.002
+   },
+   "mounted_firearms": {
+    "food_output": -0.002,
+    "labor_demand": 0.001,
+    "task_coordination": 0.0018,
+    "warfare_readiness": 0.008
+   },
+   "snaphance_lock": {
+    "injury_risk": -0.001,
+    "warfare_readiness": 0.0027
+   },
+   "trained_town_bands": {
+    "cohesion": 0.002,
+    "labor_demand": 0.002,
+    "security_efficiency": 0.008,
+    "warfare_readiness": 0.0027
+   },
+   "race_built_warship": {
+    "labor_demand": 0.001,
+    "naval_capacity": 0.0048,
+    "timber_pressure": 0.003,
+    "warfare_readiness": 0.0027
+   },
+   "shot_proof_cuirass": {
+    "fuel_demand": 0.002,
+    "injury_risk": -0.003,
+    "warfare_readiness": 0.0013
+   },
+   "fireship_attacks": {
+    "disaster_risk": 0.002,
+    "naval_capacity": 0.0024,
+    "warfare_readiness": 0.0013
+   },
+   "zigzag_siege_approaches": {
+    "injury_risk": -0.002,
+    "labor_demand": 0.003,
+    "warfare_readiness": 0.004
+   },
+   "district_muster_lieutenants": {
+    "legitimacy": -0.001,
+    "security_efficiency": 0.008,
+    "state_capacity": 0.0015,
+    "warfare_readiness": 0.0013
+   },
+   "countermarch_volley_fire": {
+    "labor_demand": 0.002,
+    "task_coordination": 0.0036,
+    "warfare_readiness": 0.0107
+   },
+   "muster_commissaries": {
+    "institutional_rigidity": 0.002,
+    "labor_demand": -0.002,
+    "state_capacity": 0.002,
+    "warfare_readiness": 0.002
+   },
+   "printed_drill_manual": {
+    "adoption_rate": 0.002,
+    "knowledge_preservation": 0.004,
+    "standardization": 0.0018,
+    "task_coordination": 0.0045,
+    "warfare_readiness": 0.0067
+   },
+   "printed_fortification_treatises": {
+    "knowledge_preservation": 0.003,
+    "security_efficiency": 0.0072,
+    "warfare_readiness": 0.0013
+   },
+   "flintlock_ignition": {
+    "fuel_demand": 0.001,
+    "injury_risk": -0.002,
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.0107
+   },
+   "letters_of_marque": {
+    "legitimacy": -0.001,
+    "naval_capacity": 0.0036,
+    "security_efficiency": -0.0029,
+    "trade_capacity": -0.003,
+    "warfare_readiness": 0.0013
+   },
+   "articles_of_war": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.002,
+    "legitimacy": 0.002,
+    "security_efficiency": 0.0043,
+    "task_coordination": 0.0018
+   },
+   "paper_cartridges": {
+    "labor_demand": 0.001,
+    "standardization": 0.0012,
+    "task_coordination": 0.0009,
+    "warfare_readiness": 0.004
+   },
+   "ravelin_outworks": {
+    "labor_demand": 0.004,
+    "security_efficiency": 0.008,
+    "warfare_readiness": 0.0013
+   },
+   "regimental_light_guns": {
+    "food_output": -0.002,
+    "fuel_demand": 0.002,
+    "labor_demand": 0.002,
+    "task_coordination": 0.0018,
+    "warfare_readiness": 0.0107
+   },
+   "shallow_line_brigades": {
+    "injury_risk": 0.001,
+    "task_coordination": 0.0018,
+    "warfare_readiness": 0.0054
+   },
+   "plug_bayonet": {
+    "injury_risk": 0.001,
+    "warfare_readiness": 0.0034
+   },
+   "air_vessel_fire_engine": {
+    "disaster_resilience": 0.007,
+    "disaster_risk": -0.004,
+    "labor_demand": 0.001
+   },
+   "sail_battle_fleet": {
+    "labor_demand": 0.002,
+    "naval_capacity": 0.0048,
+    "timber_pressure": 0.004,
+    "warfare_readiness": 0.0027
+   },
+   "crown_standing_army": {
+    "cohesion": 0.001,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.006,
+    "legitimacy": -0.002,
+    "security_efficiency": 0.0087,
+    "state_capacity": 0.0025,
+    "warfare_readiness": 0.0134
+   },
+   "regimental_uniforms": {
+    "cohesion": 0.003,
+    "labor_demand": 0.002,
+    "task_coordination": 0.0014
+   },
+   "line_ahead_fleet_tactics": {
+    "naval_capacity": 0.0096,
+    "task_coordination": 0.0018,
+    "warfare_readiness": 0.004
+   },
+   "rated_warships": {
+    "naval_capacity": 0.0036,
+    "standardization": 0.0018,
+    "state_capacity": 0.0005
+   },
+   "sea_soldier_regiments": {
+    "labor_demand": 0.002,
+    "naval_capacity": 0.0024,
+    "warfare_readiness": 0.0034
+   },
+   "capital_police_lieutenant": {
+    "cohesion": -0.002,
+    "disaster_resilience": 0.002,
+    "labor_demand": 0.002,
+    "legitimacy": -0.003,
+    "sanitation": 0.002,
+    "security_efficiency": 0.02,
+    "state_capacity": 0.002
+   },
+   "grenadier_companies": {
+    "disaster_risk": 0.001,
+    "injury_risk": 0.002,
+    "warfare_readiness": 0.004
+   },
+   "army_supply_magazines": {
+    "food_storage": 0.003,
+    "labor_demand": 0.003,
+    "logistics_endurance": 0.008,
+    "state_capacity": 0.001,
+    "warfare_readiness": 0.0027
+   },
+   "siege_by_parallels": {
+    "injury_risk": -0.004,
+    "labor_demand": 0.004,
+    "task_coordination": 0.0018,
+    "warfare_readiness": 0.0094
+   },
+   "leather_fire_hose": {
+    "disaster_resilience": 0.005,
+    "disaster_risk": -0.003
+   },
+   "fortress_frontier_belt": {
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.008,
+    "security_efficiency": 0.02,
+    "state_capacity": 0.0015,
+    "trade_capacity": -0.002,
+    "warfare_readiness": 0.0027
+   },
+   "allotted_soldier_crofts": {
+    "cohesion": 0.002,
+    "food_output": 0.001,
+    "labor_demand": -0.003,
+    "state_capacity": 0.001,
+    "warfare_readiness": 0.004
+   },
+   "press_gang_impressment": {
+    "cohesion": -0.004,
+    "labor_demand": 0.003,
+    "legitimacy": -0.005,
+    "naval_capacity": 0.0048,
+    "trade_capacity": -0.002
+   },
+   "soldier_barracks": {
+    "cohesion": 0.003,
+    "disease_exposure": 0.002,
+    "housing_output": -0.003,
+    "labor_demand": 0.002,
+    "legitimacy": 0.002,
+    "security_efficiency": 0.0029
+   },
+   "ricochet_fire": {
+    "fuel_demand": 0.001,
+    "warfare_readiness": 0.004
+   },
+   "socket_bayonet": {
+    "labor_demand": -0.002,
+    "task_coordination": 0.0023,
+    "warfare_readiness": 0.0107
+   },
+   "engineer_officer_corps": {
+    "construction_rate": 0.003,
+    "security_efficiency": 0.0072,
+    "state_capacity": 0.001,
+    "survey_speed": 0.002,
+    "warfare_readiness": 0.0027
+   },
+   "insured_fire_brigades": {
+    "disaster_resilience": 0.006,
+    "disaster_risk": -0.004,
+    "trade_capacity": 0.001
+   },
+   "platoon_fire_battalions": {
+    "cohesion": 0.001,
+    "task_coordination": 0.0036,
+    "warfare_readiness": 0.0121
+   },
+   "iron_ramrods": {
+    "fuel_demand": 0.001,
+    "repair_capacity": 0.001,
+    "warfare_readiness": 0.0034
+   },
+   "solid_bored_cannon": {
+    "fuel_demand": 0.002,
+    "standardization": 0.0024,
+    "warfare_readiness": 0.004
+   },
+   "officer_cadet_schools": {
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.002,
+    "labor_demand": 0.001,
+    "task_coordination": 0.0027,
+    "warfare_readiness": 0.0027
+   },
+   "mounted_highway_constabulary": {
+    "labor_demand": 0.002,
+    "security_efficiency": 0.008,
+    "trade_capacity": 0.003,
+    "travel_speed": 0.001
+   },
+   "artillery_academy": {
+    "knowledge_rate": 0.003,
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.004
+   },
+   "customs_frontier_patrols": {
+    "legitimacy": -0.002,
+    "security_efficiency": 0.008,
+    "state_capacity": 0.0015,
+    "trade_capacity": -0.002
+   },
+   "canton_regimental_rolls": {
+    "cohesion": 0.002,
+    "legitimacy": -0.002,
+    "state_capacity": 0.0015,
+    "warfare_readiness": 0.0054
+   },
+   "cadenced_marching": {
+    "fatigue": -0.002,
+    "task_coordination": 0.0027,
+    "travel_speed": 0.002,
+    "warfare_readiness": 0.0027
+   },
+   "light_troop_screens": {
+    "security_efficiency": 0.0029,
+    "task_coordination": 0.0009,
+    "warfare_readiness": 0.0054
+   },
+   "rifled_barrels": {
+    "labor_demand": 0.001,
+    "warfare_readiness": 0.004
+   },
+   "magistrates_runners": {
+    "legitimacy": 0.001,
+    "security_efficiency": 0.008,
+    "state_capacity": 0.0005
+   },
+   "isolated_powder_magazines": {
+    "disaster_resilience": 0.004,
+    "disaster_risk": -0.006,
+    "injury_risk": -0.002,
+    "labor_demand": 0.001
+   },
+   "troops_in_disaster_relief": {
+    "cohesion": 0.002,
+    "disaster_resilience": 0.008,
+    "labor_demand": 0.002,
+    "legitimacy": 0.003
+   },
+   "oblique_order_attack": {
+    "task_coordination": 0.0018,
+    "warfare_readiness": 0.0054
+   },
+   "military_staffs": {
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.002,
+    "logistics_endurance": 0.008,
+    "state_capacity": 0.0015,
+    "task_coordination": 0.0063,
+    "warfare_readiness": 0.008
+   },
+   "galloping_horse_artillery": {
+    "food_output": -0.003,
+    "task_coordination": 0.0009,
+    "warfare_readiness": 0.0054
+   },
+   "standardized_artillery_system": {
+    "fuel_demand": 0.002,
+    "repair_capacity": 0.004,
+    "standardization": 0.0036,
+    "task_coordination": 0.0018,
+    "warfare_readiness": 0.0107
+   },
+   "military_survey_maps": {
+    "survey_speed": 0.004,
+    "task_coordination": 0.0027,
+    "warfare_readiness": 0.0027
+   },
+   "printed_wanted_notices": {
+    "knowledge_preservation": 0.001,
+    "security_efficiency": 0.0072
+   },
+   "carronades": {
+    "naval_capacity": 0.0036,
+    "warfare_readiness": 0.0027
+   },
+   "all_arms_divisions": {
+    "labor_demand": 0.002,
+    "logistics_endurance": 0.004,
+    "task_coordination": 0.0045,
+    "warfare_readiness": 0.0121
+   },
+   "numbered_signal_flags": {
+    "naval_capacity": 0.0036,
+    "task_coordination": 0.0018
+   },
+   "officer_war_games": {
+    "knowledge_rate": 0.002,
+    "task_coordination": 0.0023,
+    "warfare_readiness": 0.002
+   },
+   "iron_cased_war_rockets": {
+    "disaster_risk": 0.003,
+    "injury_risk": 0.002,
+    "warfare_readiness": 0.0034
+   },
+   "nation_in_arms_levy": {
+    "cohesion": 0.004,
+    "food_output": -0.004,
+    "labor_demand": 0.01,
+    "security_efficiency": 0.0058,
+    "state_capacity": 0.002,
+    "warfare_readiness": 0.0134
+   },
+   "aerostat_observation": {
+    "observation_rate": 0.002,
+    "survey_speed": 0.003,
+    "warfare_readiness": 0.0027
+   },
+   "columns_behind_skirmishers": {
+    "injury_risk": 0.002,
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.0054
+   },
+   "military_telegraph_lines": {
+    "labor_demand": 0.002,
+    "state_capacity": 0.002,
+    "task_coordination": 0.0036,
+    "warfare_readiness": 0.0027
+   },
+   "river_dock_police": {
+    "security_efficiency": 0.008,
+    "storage_loss": -0.002,
+    "trade_capacity": 0.003
+   }
+  }
+ }
+}

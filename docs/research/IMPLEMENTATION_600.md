@@ -296,3 +296,86 @@ The Phase 1 result: by year 100, 469 live entries can open. That is all 456 regi
 - **Graph depth.** Chain depth rises past the old tree-test bound of 30, which main already failed at 30–32. The design's long early chains, such as 17 links to scale armor, push the deepest later entries to 39 (`store_forward_archives`), so the bound is now 48.
 - **Behavior at game start.** At year 0 only the 51 starting-knowledge items are open. A research channel with no open question gives its observers to open channels in the same domain. The existing redistribution does this, and the observers do not return on their own when the channel opens later. Three existing tests assumed day-0 availability and now set the calendar or staff the channel: `test_discovery_projects` (two tests) and `test_artifact_collection`. Phase 3 could return waiting observers when a channel's first question opens.
 - **Flags left for review.** `YEAR_ADJUSTMENTS.md` leaves some flagged items for review: `dream_interpretation` at 470, the aliasing of `burial_ground_separation` / cemeteries, and `seasonal_crisis_leader`.
+
+## Multiple blocks
+
+The research layer loads one or more **design blocks**. Each block is one approved design window, such as years 0–600 or 600–1200. The blocks are listed in order in `data/research/blocks.json`:
+
+```json
+{"schema": "research_blocks/1", "blocks": [
+ {"id": "y0_600", "data": "res://data/research/research_600.json", "effects_dir": "res://data/research/effects",
+  "art": "res://data/research/art_600.json", "window_start": 0.0, "window_end": 600.0}
+]}
+```
+
+| Per block | y0_600 (unchanged paths) | y600_1200 |
+|---|---|---|
+| Design data | `data/research/research_600.json` | `data/research/blocks/y600_1200.json` |
+| Effect files (Phase 2 schema above) | `data/research/effects/<line>.json` | `data/research/effects_y600_1200/<line>.json` |
+| Art manifest (`art_600.json` schema) | `data/research/art_600.json` | `data/research/art_y600_1200.json` (optional until paintings exist) |
+
+The loader (`scripts/research_600_catalog.gd`) works as follows:
+
+- It merges blocks in manifest order.
+- A later block may use earlier-block ids as `requires_all`, `requires_any` and `precedents`.
+- If an id appears in more than one block, the first block wins. The build tool rejects duplicates.
+- A block's effect files only author that block's own ids.
+- Art manifests merge in order. An earlier block's painting wins.
+- `redates` merge, and a later block's value wins. A designed item always beats a redate. This means that when the 600–1200 block designs `bloomery_smelting`, its band replaces the Phase 3 redate of 660.
+- `Research600.meta()` is still the first block's meta. Use `blocks()`, `block_ids(block)`, `block_meta(block)`, `block_of(id)`, `art_manifests()` and `window_end_year()` for the others.
+
+Era gating for catalog entries outside every block:
+
+- **Dated:** `max(0.9 × era, the end of every loaded window that ends before the era)`. With only y0_600 loaded, this is the same as the old rule. With y600_1200 loaded, an entry dated 700 that the new block does not list still waits until year 630 (`0.9 × 700`), and never opens before 600.
+- **Undated:** `max(window_end_year(), 0.9 × era)`. That is 600 today, and 1200 once the second block is present.
+- A game without `blocks.json` falls back to the single 0–600 block.
+
+### Build tool
+
+`tools/research/build_research_block.py` builds one block. It takes a registry and a graph as local paths or as `<git ref>:<path>`. It reuses `build_research_600.py` for names, channels, signals, band shifts and amendments. It exits 1 without writing anything if it finds any of these problems:
+
+- an unknown id, checked across this block and every earlier block
+- an id already defined by an earlier block
+- a cycle in the combined graph
+- a prerequisite with a later proposed year than its dependent (`requires_all`, and the earliest member of each `requires_any` group)
+
+Year adjustments come from `--adjustments`, or else from a sibling of the graph named `YEAR_ADJUSTMENTS<suffix>.md` or `year_adjustments<suffix>.json`. The suffix comes from `graph<suffix>.json`. Each move sets `proposed_year`, and the band shifts with it. The tool also creates the empty effect stubs for the block. When run with `--register`, it adds or updates the block's row in `blocks.json`.
+
+`python tools/research/build_research_block.py --block y0_600` regenerates `data/research/research_600.json` byte for byte. It reads `origin/codex/research-plausibility` and re-applies `YEAR_ADJUSTMENTS.md`, which is idempotent.
+
+### Adding the 600–1200 block (one command)
+
+Once `docs/research/y600/registry_1200.json` and `docs/research/y600/deps/graph_1200.json` exist in `C:/Users/sjpur/tt-research-plausibility`, run this from the worktree root:
+
+```
+python tools/research/build_research_block.py --block y600_1200 --registry ../tt-research-plausibility/docs/research/y600/registry_1200.json --graph ../tt-research-plausibility/docs/research/y600/deps/graph_1200.json --register
+```
+
+If the files have been pushed to the design branch instead, use `--registry origin/codex/research-plausibility:docs/research/y600/registry_1200.json --graph origin/codex/research-plausibility:docs/research/y600/deps/graph_1200.json`. Git-read sources record the design commit.
+
+The command does the following:
+
+- It takes the window 600–1200 from the block id.
+- It writes `data/research/blocks/y600_1200.json`.
+- It creates the stubs in `data/research/effects_y600_1200/`.
+- It registers `art_y600_1200.json`.
+- If `deps/YEAR_ADJUSTMENTS_1200.md` or `year_adjustments_1200.json` exists, it applies it.
+
+It prints a warning for each item proposed outside the window. Commit the manifest, the block JSON and the stubs.
+
+Then verify:
+
+```
+<godot> --headless --path <worktree> -s res://addons/gdUnit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a res://tests/test_research_600.gd -a res://tests/test_research_blocks.gd
+```
+
+What to expect from the tests:
+
+- `test_research_600.gd` counts only `block_ids("y0_600")`, so it keeps passing.
+- `test_research_blocks.gd > test_the_game_manifest_lists_only_the_first_block` asserts the manifest as it is today. Update it to expect `["y0_600","y600_1200"]` and a window end of 1200.
+- The rest of `test_research_blocks.gd` uses its own fixture, which is `tests/fixtures/research_blocks`: a synthetic block with 4 items, rebuilt with the same tool.
+
+Expect to adjust these as follow-ups:
+
+- The tools in `tools/sim/` and `tools/research/benchmark_report.py` still read only `research_600.json`.
+- The probe `run_research_600_probe.gd` measures the 0–600 window.

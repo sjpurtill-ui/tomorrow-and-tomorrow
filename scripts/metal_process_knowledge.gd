@@ -68,9 +68,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Enrich a suitable metal surface with carbon through a qualified thermal process. Compatible metal, controlled carbon source, thermal equipment and case assessment.",
     "effects": {},
-    "production_items": [
-      "case_hardened_gears"
-    ],
+    "production_items": ["case_hardened_edges"],
     "production_contract": "Paid workshop processes consume metal, fuel, water, tooling and finite work. Annealed wire, case-hardened gears, cast/brazed vessel parts and welded panels feed existing motors, generators and carts. Continuous casting prepares steel for subsequent rolling; it does not refine ore. Arc and spot welding require real shared electricity, and their panels have different qualified uses. Compatible imported parts can be used without manufacture mastery; quantities are game balances, not industrial certification."
   },
   {

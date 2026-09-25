@@ -248,3 +248,26 @@ No research knob fixes this. `tune.py --optimize` gets the objective from 28.5 t
 - With shocks on, the matrix and the sweep write to `docs/research/epochal/LINE_MAX_MATRIX_SHOCKS.*` and `STRATEGY_SWEEP_SHOCKS.*`.
 - `tools/sim/shock_report.py` runs 27 strategies × 8 seeds, each with shocks on and off. It writes `docs/research/epochal/SHOCKS_IN_SURROGATE.md`: frequencies per century, losses, recovery, resilience correlations, and dominance with shocks on vs off. `--render` rebuilds the .md from the .json.
 - Cost: about 4.4 s per 600-year run on an idle machine, with or without shocks.
+
+## 0–3000 (research_3000)
+
+The surrogate now runs the whole game, 0–3000, and mirrors the research_3000 engine changes (`docs/research/PHASE4_REBALANCE_3000.md`). A 3000-year run takes about 60 s.
+
+**What changed in the model**
+
+| Surrogate part | Mirrors (engine source) |
+|---|---|
+| All five design blocks (`data/research/blocks.json` → `gamedata.manifest_blocks`); first block wins an id, a block's effect files author only its own ids, later redates win | `Research600._load_block` |
+| Era ceilings to 3000: `TECH_RISE` before 600 (previously missing), `LATER_RISE` / `TECH_LATER_RISE` / `OWN_LATER_RISE` / `OWN_EARLY_RISE` | `SocietyModel.era_ceiling_for` |
+| Modern mortality (burden lift and life-table depth), the fertility transition (effect + urban share + literacy), lower newborn and maternal floors, work accidents falling with modern care | `EarlyLifeConditions.modern_factors` / `modern_burden_lift` / `fertility_transition`, `GameState.process_reproduction_day`, `ConsequenceEngine` |
+| Literacy and urban share | `CivilizationIndicators.literacy` / `urban_share` |
+| Parallel research capacity; superseded practice (relevance horizon, staleness, abandonment, dead-end penalty, foundations first); a seeded half of dead ends per world | `Research600.parallel_capacity` / `stale_factor` / `pursued` / `deferred` / `dead_end_offered`, `DiscoverySystem` |
+| Food: technique levers and agronomy yield (engine features the 0–600 surrogate had left out), farm mechanization, the surplus release and the food labor floor to 3000 | `FoodSystem._produce`, `AgronomyKnowledge.factors`, `GovernmentPeopleSystem` |
+
+**Two worlds.** Calibration runs mirror the headless truth probe (`headless_world`: no Freshwater deposit past "recognized", one site's environment, one settlement). Every other run models a mapped river site: Freshwater opens, later deposits are known by era (`resource_known_year`), a realm's daughter settlements reach the coast and dry country (`expansion_environment`), and a crowded realm founds a daughter settlement at most every 150 years from year 600 (`found_*`). The throughput drift fitted on the 100-year truth is held after year 100 (`throughput_growth_until`) instead of being extrapolated.
+
+**Benchmarks.** `facets.benchmarks()` merges the five base files by year (a join year keeps the earlier row). `per_50` counts the block's registry items known by the block's end (items learned early count). `era_report.py` prints each era's life expectancy, infant mortality, fertility, population, urban share, literacy and discoveries known against the benchmark and judges every scenario with `focus_bench`.
+
+**Shocks.** `shock_bench.py` maps the shock engine's player episodes onto the benchmark hazard keys (collapse, pandemic ≥ 1 / 5 / 25 %, famine ≥ 2 %, economic crisis, depression, general war, total war, upheaval, invasion/migration), reports their rate per game century per window, and judges with the benchmark's `shock_widening` (a shock in any seed widens the bands of the checkpoints its window and recovery overlap). `era_report.py`, `matrix.py` and `sweep_strategies.py` use it with `--shocks`.
+
+**Later-era spot checks.** `spot_check.py --start Y --years N --pop P --run` seeds the real engine (`truth_probe.tscn --start_year/--start_pop/--seed_file`) and the surrogate (`Surrogate.seed_state`) with the surrogate's own balanced society at year Y (known discoveries, adoption, scholarship) and a population one headless territory can carry, runs both for N years and compares them. Truth goes to `ground_truth/spot/`, outside the calibration set.

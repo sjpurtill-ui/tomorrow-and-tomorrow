@@ -46,6 +46,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "research"))
 import facets  # noqa: E402
 import focus_bench  # noqa: E402  (tools/research/focus_bench.py: per-focus benchmark profiles)
+import shock_bench  # noqa: E402  (shock keys and widened bands, research_3000)
 import gamedata as gd  # noqa: E402
 import simlib  # noqa: E402
 
@@ -57,7 +58,18 @@ SENSIBLE = {"demography": 2, "nutrition": 3, "health": 3, "labor": 2, "knowledge
             "logistics": 1, "ecology": 1, "institutions": 1, "security": 1, "culture": 1}
 
 
-def strategies(n_random: int, rng: np.random.Generator) -> list[dict]:
+class WidenedBench(focus_bench.FocusBench):
+    """FocusBench judging against the shock-widened bands of ``episodes`` (shock_bench.py)."""
+
+    def __init__(self, episodes):
+        super().__init__()
+        self.episodes = episodes
+
+    def judge(self, focus, metric, year, value):
+        return shock_bench.judge(super(), focus, metric, year, value, self.episodes)
+
+
+def strategies(n_random: int, rng: np.random.Generator, years: int = 600) -> list[dict]:
     out = [{"name": "balanced", "research": dict.fromkeys(gd.LINES, 2), "knowledge_share": -1, "kind": "baseline"},
            {"name": "sensible", "research": SENSIBLE, "knowledge_share": -1, "kind": "baseline"}]
     for i in range(n_random):
@@ -74,7 +86,7 @@ def strategies(n_random: int, rng: np.random.Generator) -> list[dict]:
         out.append({"name": f"triple:{a}+{b}+{c}", "research": {l: (4 if l in (a, b, c) else 0) for l in gd.LINES}, "knowledge_share": -1, "kind": "triple"})
     heavy = {**dict.fromkeys(gd.LINES, 0), "knowledge": 8, "production": 4, "institutions": 4, "infrastructure": 3, "logistics": 3}
     care = {**dict.fromkeys(gd.LINES, 0), "nutrition": 6, "health": 6, "demography": 5, "labor": 3, "ecology": 2}
-    for switch in (100, 200, 300):
+    for switch in [s for s in (100, 200, 300, 1200, 2400) if s < years]:
         out.append({"name": f"research-first->care@{switch}", "kind": "timing",
                     "phases": [{"from": 0, "research": heavy, "knowledge_share": 20.0}, {"from": switch, "research": care, "knowledge_share": 5.2}]})
         out.append({"name": f"care-first->research@{switch}", "kind": "timing",
@@ -87,10 +99,17 @@ def strategies(n_random: int, rng: np.random.Generator) -> list[dict]:
     # every line focus and archetype, judged against its own profile.
     fs = focus_bench.FocusBench()
     for fname in fs.focus_names():
-        spec = (fs.window(0.0).focuses.get(fname, {}).get("strategy") or {}).get("surrogate_spec")
-        if spec:
-            out.append({"name": f"focus:{fname}", "research": spec.get("research", {}), "knowledge_share": float(spec.get("knowledge_share", -1)),
-                        "labor": spec.get("labor"), "policies": spec.get("policies", []), "focus_id": fname, "kind": "focus"})
+        # research_3000: every window's focuses and archetypes; the spec of the latest
+        # window that defines it, judged from the first window that knows it.
+        wins = [w for w in fs.windows if fname in w.focuses and w.start < years]
+        specs = [(w.focuses[fname].get("strategy") or {}).get("surrogate_spec") for w in wins]
+        specs = [s for s in specs if s]
+        if not specs:
+            continue
+        spec = specs[-1]
+        out.append({"name": f"focus:{fname}", "research": spec.get("research", {}), "knowledge_share": float(spec.get("knowledge_share", -1)),
+                    "labor": spec.get("labor"), "policies": spec.get("policies", []), "focus_id": fname, "kind": "focus",
+                    "judge_from": wins[0].start})
     for share in (0.03, 0.06):
         out.append({"name": f"scouting-heavy@{share:.0%}", "research": dict.fromkeys(gd.LINES, 2), "knowledge_share": -1,
                     "scouting": share, "study_weight": 2, "kind": "extreme"})
@@ -106,11 +125,19 @@ def _run(args):
                 "scouting": float(strat.get("scouting", 0.0)), "study_weight": int(strat.get("study_weight", 0))}
     result = simlib.run("sensible", seed, years, simlib.params(), scenario_override=override, shocks=shocks)
     constants, cat = simlib.data()
-    return strat["name"], facets.century_facets(result, cat, years, step=100), simlib.milestone_years(result, milestone_ids())
+    era = {int(round(r["year"])): r.get("ceiling_era", r["year"]) for r in result["rows"]}
+    episodes = shock_bench.player_episodes(result["shocks"], era) if shocks else []
+    return strat["name"], facets.century_facets(result, cat, years, step=100), simlib.milestone_years(result, milestone_ids()), episodes
 
 
 def milestone_ids():
-    return facets.benchmarks().get("milestones", {}).get("ids") or []
+    """Milestone ids of every benchmark window (research_3000: all five files)."""
+    ids = []
+    for path in sorted((ROOT / "docs/research").glob("benchmarks_[0-9]*.json"), key=lambda p: int(p.stem.split("_")[1])):
+        for rid in (json.loads(path.read_text(encoding="utf-8")).get("milestones") or {}).get("ids") or []:
+            if rid not in ids:
+                ids.append(rid)
+    return ids
 
 
 def margins(bench: dict) -> tuple[float, float, str]:
@@ -144,16 +171,17 @@ def main() -> int:
         OUT = ROOT / "docs/research/epochal" / (OUT.name + "_SHOCKS")
     t0 = time.time()
     rng = np.random.default_rng(600)
-    strats = strategies(args.random, rng)
+    strats = strategies(args.random, rng, args.years)
     constants, cat = simlib.data()
     bench = facets.benchmarks()
     lead_frac, out_margin, margin_src = margins(bench)
     with ProcessPoolExecutor(max_workers=args.jobs) as pool:
         outs = list(pool.map(_run, [(s, 1 + k, args.years, args.shocks) for s in strats for k in range(args.seeds)], chunksize=2))
-    fac, mil = {}, {}
-    for name, f, m in outs:
+    fac, mil, eps = {}, {}, {}
+    for name, f, m, e in outs:
         fac.setdefault(name, []).append(f)
         mil.setdefault(name, []).append(m)
+        eps.setdefault(name, []).append(e)
     mean = {n: facets.mean_facets(v) for n, v in fac.items()}
     centuries = list(range(100, args.years + 1, 100))
     kinds = {s["name"]: s.get("kind", "") for s in strats}
@@ -212,24 +240,31 @@ def main() -> int:
     judged = {}
     for n in mean:
         verdicts = {}
+        # With shocks, every shock recorded in any seed widens the bands it overlaps.
+        jfs = WidenedBench([x for run in eps.get(n, []) for x in run]) if args.shocks else fs
         for c in centuries:
             if c not in mean[n] or c not in mean.get("balanced", {}):
                 continue
+            if c <= float(by_name[n].get("judge_from", 0.0)):
+                continue   # an archetype is judged only once its window defines it
             focus = fs.classify(by_name[n], c)
-            chk = fs.check_run(focus, {c: mean[n][c]}, balanced={c: mean["balanced"][c]})
+            chk = jfs.check_run(focus, {c: mean[n][c]}, balanced={c: mean["balanced"][c]})
             above = [f for f in chk["flags"] if f["flag"] in ("ABOVE FOCUS HIGH", "OUT OF BOUNDS")]
             unpaid = [f for f, v in chk["costs"].get(float(c), {}).items() if v["status"] == "UNPAID"]
             free = [f for f, v in chk["relative"].get(float(c), {}).items() if v["status"] == "FREE LUNCH" and n != "balanced"]
             verdicts[c] = {"focus": focus, "above": above, "unpaid": unpaid, "free_lunch": free, "ok": not above and not unpaid and not free}
         judged[n] = verdicts
     report["focus_judgement"] = judged
+    if args.shocks:
+        report["shock_rates"] = shock_bench.player_rates([run for runs in eps.values() for run in runs], args.years)
+        report["shock_hazards"] = shock_bench.benchmark_hazards()
     # tradeoff table: what each focused line buys/costs at 300 and 600 vs balanced
     tradeoffs = {}
     for n in mean:
         if kinds.get(n) in ("pair", "baseline"):
             continue
         row = {}
-        for c in (300, args.years):
+        for c in sorted({300, 1200, 2400, args.years}):
             if c not in mean[n] or c not in mean["balanced"]:
                 continue
             row[c] = {f: mean[n][c][f] - mean["balanced"][c][f] for f in OUTCOMES}
@@ -259,7 +294,7 @@ def write_md(report, mean, kinds, centuries, seconds, args) -> None:
         md.append(f"| {c} | {r['front_size']} of {len(mean)} | {fl} ({len(r['free_lunch_vs_balanced'])}) | {', '.join(r['strictly_dominant']) or 'none'} | {len(r['benchmark_exceedances'])} |")
     last = report["centuries"].get(centuries[-1], {})
     fj = report.get("focus_judgement", {})
-    md += ["", "## Focus judgement (docs/research/benchmarks_focus_600.json via tools/research/focus_bench.py)", "",
+    md += ["", "## Focus judgement (docs/research/benchmarks_focus_*.json via tools/research/focus_bench.py)", "",
            "Every run is classified per century (`FocusBench.classify`) and judged against its own focus profile, its required costs and the same-seed balanced run (`check_run`). "
            "A run fails with ABOVE FOCUS HIGH / OUT OF BOUNDS (past its focus band or plausibility), UNPAID (a required cost not paid) or FREE LUNCH (boosted with no cost vs balanced).", "",
            "| century | runs judged | ABOVE FOCUS HIGH / OUT | UNPAID cost | FREE LUNCH | all pass |", "|---:|---:|---:|---:|---:|---:|"]
@@ -267,6 +302,20 @@ def write_md(report, mean, kinds, centuries, seconds, args) -> None:
         rows = [v[c] for v in fj.values() if c in v]
         if rows:
             md.append(f"| {c} | {len(rows)} | {sum(1 for r in rows if r['above'])} | {sum(1 for r in rows if r['unpaid'])} | {sum(1 for r in rows if r['free_lunch'])} | {sum(1 for r in rows if r['ok'])} |")
+    md += ["", "Pass rate by window (share of judged strategy-centuries with no failure; `unpaid known only` counts the runs whose only failure is "
+           "the balanced blend's discoveries_known cost):", "", "| window | judged | pass | pass rate | unpaid known only |", "|---|---:|---:|---:|---:|"]
+    for lo, hi in ((0, 600), (600, 1200), (1200, 1800), (1800, 2400), (2400, 3000)):
+        rows = [v[c] for v in fj.values() for c in v if lo < c <= hi]
+        if rows:
+            only = sum(1 for r in rows if not r["ok"] and not r["above"] and not r["free_lunch"] and r["unpaid"] == ["balanced"])
+            md.append(f"| {lo}-{hi} | {len(rows)} | {sum(1 for r in rows if r['ok'])} | {sum(1 for r in rows if r['ok']) / len(rows):.0%} | {only} |")
+    if report.get("shock_rates"):
+        keys = shock_bench.KEYS
+        md += ["", "Shock episodes per game century (all runs) vs the window's benchmark hazard range:", "",
+               "| window | " + " | ".join(keys) + " |", "|---|" + "---|" * len(keys)]
+        for w, r in report["shock_rates"].items():
+            hz = report["shock_hazards"].get(w, {})
+            md.append(f"| {w} | " + " | ".join(f"{r[k]:.2f}" + (f" ({hz[k][0]}-{hz[k][1]})" if k in hz else "") for k in keys) + " |")
     fails = [(n, c, v) for n, vs in fj.items() for c, v in vs.items() if not v["ok"]]
     if fails:
         md += ["", "| strategy | century | focus | problem |", "|---|---:|---|---|"]
@@ -275,7 +324,7 @@ def write_md(report, mean, kinds, centuries, seconds, args) -> None:
             md.append(f"| {n} | {c} | {', '.join(f'{k} {w:.2f}' for k, w in v['focus'].items())} | {prob} |")
     focus_rows = [n for n in fj if kinds.get(n) in ("focus",) or n.startswith("scouting")]
     if focus_rows:
-        md += ["", "### Canonical focus strategies and scouting (Δ vs balanced at 300 / 600)", "",
+        md += ["", "### Canonical focus strategies and scouting (Δ vs balanced at 300 / final year)", "",
                "| strategy | " + " | ".join(facets.FACETS[f][0] for f in OUTCOMES) + " |", "|---|" + "---:|" * len(OUTCOMES)]
         for n in focus_rows:
             row = report["tradeoffs"].get(n, {})

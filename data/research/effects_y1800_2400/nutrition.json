@@ -1,0 +1,1602 @@
+{
+ "line": "nutrition",
+ "schema": "research_600_effects/1",
+ "items": {
+  "post_mortality_meat_diet": {
+   "effects": {
+    "cultivation_yield": -0.002,
+    "ecological_pressure": 0.002,
+    "food_output": 0.0006,
+    "nutrition_quality": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
+   "name": "Labourers' Meat Diet",
+   "observation": "With fewer mouths and dearer hands, labourers eat meat, cheese and wheaten bread that their grandparents saw only at feasts.",
+   "social_consequence": "Lords grumble that ploughmen eat like yeomen, and new dress and diet laws try to keep servants to coarse bread and pottage."
+  },
+  "estate_fishpond_chains": {
+   "effects": {
+    "ecological_pressure": 0.001,
+    "food_output": 0.0006,
+    "food_storage": 0.0007,
+    "labor_demand": 0.0001,
+    "nutrition_quality": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
+   "name": "Carp Pond Chains",
+   "observation": "A chain of carp ponds on the estate is drained one by one; the fish go to market and the pond bed is sown for a year before it is flooded again."
+  },
+  "rice_wheat_double_crop": {
+   "effects": {
+    "cultivation_yield": 0.0026,
+    "fatigue": 0.002,
+    "food_output": 0.0015,
+    "labor_demand": 0.0002,
+    "soil_productivity": -0.003
+   },
+   "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
+   "name": "Rice and Wheat Double Crop",
+   "observation": "Wheat follows rice on the same field in the same year, and the valley feeds twice the people it did, at the cost of never resting."
+  },
+  "town_hopped_brewhouses": {
+   "effects": {
+    "food_spoilage": -0.0011,
+    "food_storage": 0.0022,
+    "fuel_demand": 0.0004,
+    "health_risk": 0.001,
+    "trade_capacity": 0.0005,
+    "water_safety": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
+   "name": "Town Brewhouses",
+   "observation": "Big town brewhouses make hopped beer that keeps for weeks, and it becomes the common drink at every table and workbench."
+  },
+  "herring_buss_fleets": {
+   "effects": {
+    "ecological_pressure": 0.002,
+    "food_output": 0.0012,
+    "food_spoilage": -0.0017,
+    "food_storage": 0.003,
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.0009,
+    "trade_capacity": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/salt_working-v1.png",
+   "name": "Herring Buss Fleets",
+   "observation": "Decked ships stay out on the herring grounds for weeks, gutting and salting the catch on board as the drift nets come in.",
+   "social_consequence": "The fishing towns grow rich on the herring; its seasons decide when sailors marry and when the town can pay its taxes."
+  },
+  "famine_food_herbal": {
+   "effects": {
+    "disaster_resilience": 0.0006,
+    "food_output": 0.0003,
+    "health_risk": -0.0006,
+    "knowledge_preservation": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Famine Herbal",
+   "observation": "A herbal draws and describes the wild roots, leaves and seeds that are safe to eat when the harvest fails, and warns of those that kill."
+  },
+  "sworn_cask_gaugers": {
+   "effects": {
+    "institutional_rigidity": 0.0001,
+    "labor_demand": 0.0001,
+    "standardization": 0.0006,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png",
+   "name": "Sworn Cask Gaugers",
+   "observation": "Sworn gaugers measure every cask of wine and beer with a marked rod, and the town's duty is charged on their count."
+  },
+  "grain_magistracy": {
+   "effects": {
+    "disaster_resilience": 0.0042,
+    "food_storage": 0.0062,
+    "institutional_rigidity": 0.0004,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0002,
+    "state_capacity": 0.0005,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/regional_granaries-v1.png",
+   "name": "Grain Magistracy",
+   "observation": "The town's grain magistrates buy grain from distant ports in good years, keep it in the public stores and sell it at a fair price in dearth.",
+   "ability_reason": "The town no longer waits on its own harvest: its officers buy grain from distant markets and sell it at a fair price when bread runs short.",
+   "social_consequence": "The grain masters become the most watched men in town, and a rumour that they hoard can raise a mob at their doors."
+  },
+  "marsh_fattened_cattle": {
+   "effects": {
+    "ecological_pressure": 0.002,
+    "food_output": 0.0011,
+    "nutrition_quality": 0.0009,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
+   "name": "Marsh-Fattened Oxen",
+   "observation": "Lean oxen driven from the hills are fattened for a summer on rich marsh grass and sold to the town butchers."
+  },
+  "island_cane_plantations": {
+   "effects": {
+    "cohesion": -0.0003,
+    "disease_exposure": 0.002,
+    "ecological_pressure": 0.005,
+    "food_output": 0.0015,
+    "fuel_demand": 0.001,
+    "labor_demand": 0.0003,
+    "nutrition_quality": 0.0006,
+    "trade_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/water_mills-v1.png",
+   "name": "Island Cane Plantations",
+   "observation": "Cane is planted across newly settled ocean islands, crushed between rollers and boiled down, and sugar arrives by the shipload.",
+   "ability_reason": "Sugar leaves the apothecary's jar: roller mills on island plantations crush cane by the shipload, and sweetness becomes a trade good.",
+   "social_consequence": "The island estates are worked by bound and bought labour; their sugar sweetens the town while their fields become places of dread."
+  },
+  "cheese_weigh_houses": {
+   "effects": {
+    "food_storage": 0.0006,
+    "standardization": 0.0004,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png",
+   "name": "Cheese Weigh-House",
+   "observation": "Every cheese and cask of butter for sale passes over the town's great scale, and the weigh-master's mark settles the price."
+  },
+  "sworn_fish_packers": {
+   "effects": {
+    "food_spoilage": -0.0038,
+    "health_risk": -0.0006,
+    "institutional_rigidity": 0.0001,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/salt_working-v1.png",
+   "name": "Sworn Fish Packers",
+   "observation": "Sworn packers open each barrel of salt fish, repack the bad and burn the town's brand into the good."
+  },
+  "printed_cookery_books": {
+   "effects": {
+    "adoption_rate": 0.0003,
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0002,
+    "nutrition_quality": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png",
+   "name": "Printed Cookery Books",
+   "observation": "Cookery books are printed and sold to merchants' wives and innkeepers, and court dishes reach town kitchens."
+  },
+  "printed_farm_manuals": {
+   "effects": {
+    "adoption_rate": 0.0015,
+    "cultivation_yield": 0.001,
+    "knowledge_preservation": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png",
+   "name": "Printed Farm Manuals",
+   "observation": "Cheap farm manuals in the common tongue teach sowing, grafting and stock-keeping to any farmer who can read or knows someone who can."
+  },
+  "maize_garden_trials": {
+   "effects": {
+    "adoption_rate": 0.0004,
+    "cultivation_yield": 0.001,
+    "food_output": 0.0003,
+    "nutrition_quality": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
+   "name": "Maize Garden Trials",
+   "observation": "Seed brought across the ocean grows in herb gardens into tall grain with ears as long as a hand, and gardeners watch what it needs.",
+   "ability_reason": "Seed from the far shore of the ocean grows at home, and gardeners learn how tall, thirsty and generous the new grain is."
+  },
+  "hop_drying_kilns": {
+   "effects": {
+    "food_spoilage": -0.0008,
+    "food_storage": 0.001,
+    "fuel_demand": 0.0007,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/kiln_control-v1.png",
+   "name": "Hop Kilns",
+   "observation": "Hops are dried on slatted floors over a slow fire in kilns built for the purpose, and keep their bite for a year."
+  },
+  "distant_bank_salt_cod": {
+   "effects": {
+    "ecological_pressure": 0.003,
+    "food_output": 0.0006,
+    "food_spoilage": -0.0015,
+    "food_storage": 0.0039,
+    "labor_demand": 0.0002,
+    "logistics_endurance": 0.0008,
+    "naval_capacity": 0.0004,
+    "trade_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/salt_working-v1.png",
+   "name": "Distant-Bank Salt Cod",
+   "observation": "Fleets sail to far fishing banks each summer, split the cod on shore stages and dry it hard with salt and wind.",
+   "ability_reason": "Cod dried hard on distant shores keeps for years, feeding fleets, armies and fast days far inland.",
+   "social_consequence": "Whole coastal parishes empty of men each summer; widows' benches in the shrines fill when a fleet does not return."
+  },
+  "chili_pepper_spread": {
+   "effects": {
+    "cohesion": 0.0001,
+    "food_spoilage": -0.0004,
+    "nutrition_quality": 0.0005
+   },
+   "art": "res://assets/ui/research/paper/earth_oven_cooking.png",
+   "name": "Chili Peppers",
+   "observation": "A red pod from across the ocean grows in any warm garden, and soon no cook's pot is without its heat."
+  },
+  "sugar_fruit_pastes": {
+   "effects": {
+    "food_spoilage": -0.0008,
+    "food_storage": 0.001,
+    "health_risk": 0.001,
+    "nutrition_quality": 0.0002
+   },
+   "art": "res://assets/ui/research/paper/fruit_pulp_screening.png",
+   "name": "Sugared Fruit Pastes",
+   "observation": "Quinces and other fruit are boiled with sugar until the paste sets firm enough to cut and keep through the winter."
+  },
+  "farmyard_turkeys": {
+   "effects": {
+    "food_output": 0.0002,
+    "nutrition_quality": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
+   "name": "Farmyard Turkeys",
+   "observation": "A large fowl brought across the ocean fattens in farmyards on scraps and is driven to town for feast days."
+  },
+  "new_land_beans_squash": {
+   "effects": {
+    "cultivation_yield": 0.0005,
+    "food_output": 0.0003,
+    "nutrition_quality": 0.0005,
+    "soil_productivity": 0.0009
+   },
+   "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
+   "name": "New-Land Beans and Squash",
+   "observation": "Beans, squash and gourds from across the ocean crowd the kitchen gardens, cropping heavily where the old beans failed."
+  },
+  "coffee_houses": {
+   "effects": {
+    "cohesion": 0.0001,
+    "fatigue": -0.002,
+    "health_risk": 0.001,
+    "knowledge_rate": 0.0003,
+    "legitimacy": -0.001,
+    "trade_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/paper/hearth_roasting_control.png",
+   "name": "Coffee Houses",
+   "observation": "Roasted beans are ground and brewed into a bitter black drink, and small houses serve it to men who sit for hours over news and bargains.",
+   "ability_reason": "A new bitter drink keeps men awake and talking; the coffee house becomes a place to trade news, cargoes and opinions.",
+   "social_consequence": "Rulers eye the coffee houses warily as nests of rumour, and more than one tries to close them and fails."
+  },
+  "mulberry_dike_fishponds": {
+   "effects": {
+    "ecology_recovery": 0.0005,
+    "fiber_yield": 0.002,
+    "food_output": 0.0004,
+    "labor_demand": 0.0002,
+    "soil_productivity": 0.0009
+   },
+   "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
+   "name": "Mulberry-Dyke Fishponds",
+   "observation": "Mulberry trees on the pond dykes feed silkworms, the worms' droppings feed the fish, and pond mud feeds the mulberries."
+  },
+  "maize_field_crop": {
+   "effects": {
+    "cultivation_yield": 0.0015,
+    "food_output": 0.0012,
+    "labor_demand": 0.0001,
+    "nutrition_quality": -0.002,
+    "soil_productivity": -0.003
+   },
+   "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
+   "name": "Maize Field Crop",
+   "observation": "Maize is sown across whole fields in the warm lowlands and eaten as porridge and flat bread by the poor.",
+   "ability_reason": "Maize returns more grain per seed than any old crop in warm lowlands, and porridge fills bowls where wheat failed.",
+   "social_consequence": "Where the poor eat almost nothing but maize, a rough, peeling skin sickness follows the new crop."
+  },
+  "potato_garden_curiosity": {
+   "effects": {
+    "adoption_rate": 0.0006,
+    "cultivation_yield": 0.0001,
+    "food_output": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
+   "name": "Potato Curiosity",
+   "observation": "A knobbly root from across the ocean is grown in botanists' gardens and boiled for guests as a curiosity."
+  },
+  "hill_sweet_potato_maize": {
+   "effects": {
+    "cultivation_yield": 0.0006,
+    "disaster_resilience": 0.0014,
+    "disaster_risk": 0.002,
+    "ecological_pressure": 0.004,
+    "food_output": 0.0007,
+    "soil_productivity": -0.004
+   },
+   "art": "res://assets/ui/research/paper/managed_fallow.png",
+   "name": "Hill Sweet Potato and Maize",
+   "observation": "Migrants clear the hills and plant sweet potato and maize where no rice would grow, and the slopes feed new villages.",
+   "social_consequence": "The cleared hills wash down into the valleys in heavy rain, and the lowland farmers blame the hill settlers."
+  },
+  "cassava_cultivation": {
+   "effects": {
+    "cultivation_yield": 0.0005,
+    "disaster_resilience": 0.0021,
+    "food_output": 0.0006,
+    "health_risk": 0.002,
+    "labor_demand": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/root_grating_dewatering.png",
+   "name": "Cassava",
+   "observation": "Cassava roots are grated, soaked and pressed before cooking; they grow in poor soil and keep in the ground until needed."
+  },
+  "convertible_husbandry": {
+   "effects": {
+    "cultivation_yield": 0.0017,
+    "food_output": 0.0007,
+    "labor_demand": 0.0002,
+    "nutrition_quality": 0.0013,
+    "soil_productivity": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/crop_rotation-v1.png",
+   "name": "Convertible Husbandry",
+   "observation": "Fields are laid down to grass for several years and grazed, then ploughed up for grain, which comes up thick on the rested ground.",
+   "ability_reason": "Fields rested under grass for years return to grain rich again, and the grass years carry twice the stock.",
+   "social_consequence": "Farmers who rest land in grass need hedges and fences, and their open-field neighbours resent the enclosing."
+  },
+  "bean_cake_fertilizer": {
+   "effects": {
+    "cultivation_yield": 0.0004,
+    "labor_demand": 0.0001,
+    "soil_productivity": 0.0015,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/seed_oil_pressing.png",
+   "name": "Bean-Cake Fertilizer",
+   "observation": "The cakes left after pressing oil from beans and seeds are broken up and spread on the fields, and are shipped by the boatload."
+  },
+  "hotbed_forcing": {
+   "effects": {
+    "food_output": 0.0001,
+    "fuel_demand": 0.0004,
+    "labor_demand": 0.0001,
+    "nutrition_quality": 0.0009
+   },
+   "art": "res://assets/ui/research/paper/glass_blowing.png",
+   "name": "Hotbeds and Glass Bells",
+   "observation": "Rotting dung under the beds and glass bells over the plants bring lettuce and melons to town weeks before their season."
+  },
+  "groundnut_oil_crop": {
+   "effects": {
+    "food_output": 0.0009,
+    "nutrition_quality": 0.0004,
+    "soil_productivity": 0.0026,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/seed_oil_pressing.png",
+   "name": "Groundnut Oil",
+   "observation": "Groundnuts from across the ocean grow on sandy land that grows little else, and are pressed for cooking oil."
+  },
+  "court_chocolate_drink": {
+   "effects": {
+    "cohesion": -0.0001,
+    "legitimacy": 0.0001,
+    "nutrition_quality": 0.0002,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/nut_kernel_shelling.png",
+   "name": "Court Chocolate",
+   "observation": "Cacao is ground, sweetened and whipped into a hot drink served to courtiers in the morning.",
+   "social_consequence": "Chocolate becomes a mark of rank at court, and those not served it know where they stand."
+  },
+  "lowland_export_dairying": {
+   "effects": {
+    "ecological_pressure": 0.002,
+    "food_output": 0.0011,
+    "food_storage": 0.0057,
+    "labor_demand": 0.0002,
+    "nutrition_quality": 0.0009,
+    "trade_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
+   "name": "Lowland Export Dairying",
+   "observation": "Dairy farms on drained lowland grass send cheese and butter by the ship to other countries."
+  },
+  "shipped_tea_trade": {
+   "effects": {
+    "cohesion": 0.0001,
+    "trade_capacity": 0.0003,
+    "water_safety": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
+   "name": "Shipped Tea",
+   "observation": "Tea leaves come by ship from the far east in lined chests and are sold by weight to those who can afford them."
+  },
+  "printed_grain_prices": {
+   "effects": {
+    "disaster_resilience": 0.0014,
+    "food_storage": 0.0019,
+    "knowledge_preservation": 0.0002,
+    "trade_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png",
+   "name": "Printed Grain Prices",
+   "observation": "Each week the market prices of wheat, rye and barley are printed and posted, and dealers far away read them."
+  },
+  "town_luxury_vegetables": {
+   "effects": {
+    "food_output": 0.0003,
+    "labor_demand": 0.0001,
+    "nutrition_quality": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+   "name": "Town Luxury Vegetables",
+   "observation": "Market gardeners outside the walls grow cauliflower, artichokes and asparagus on heavily dunged beds for town tables."
+  },
+  "cottage_potato_patches": {
+   "effects": {
+    "conception_support": 0.001,
+    "cultivation_yield": 0.0009,
+    "disaster_resilience": 0.0007,
+    "food_output": 0.0011,
+    "nutrition_quality": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
+   "name": "Cottage Potato Patches",
+   "observation": "Upland cottagers plant potatoes in lazy-beds by the door, and a small patch feeds a family through the winter."
+  },
+  "bottled_strong_cider": {
+   "effects": {
+    "food_spoilage": -0.005,
+    "food_storage": 0.0015,
+    "health_risk": 0.0005,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/glass_blowing.png",
+   "name": "Bottled Strong Cider",
+   "observation": "Cider is bottled in thick dark glass and corked, and it matures sparkling and strong for a year or more."
+  },
+  "clover_ley_fodder": {
+   "effects": {
+    "cultivation_yield": 0.0011,
+    "food_output": 0.0006,
+    "nutrition_quality": 0.0006,
+    "soil_productivity": 0.0027
+   },
+   "art": "res://assets/ui/research/subjects/crop_rotation-v1.png",
+   "name": "Clover Leys",
+   "observation": "Clover sown into the fallow feeds the stock, and the next grain crop on that ground stands thicker and greener."
+  },
+  "seedsmen_named_varieties": {
+   "effects": {
+    "adoption_rate": 0.002,
+    "cultivation_yield": 0.0005,
+    "standardization": 0.0009,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
+   "name": "Named Seed Varieties",
+   "observation": "Seedsmen sell garden seed by the name of each kind, and a buyer knows what will come up."
+  },
+  "field_turnips": {
+   "effects": {
+    "cultivation_yield": 0.0009,
+    "food_output": 0.0011,
+    "food_storage": 0.0046,
+    "labor_demand": 0.0002,
+    "nutrition_quality": 0.0009,
+    "soil_productivity": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/crop_rotation-v1.png",
+   "name": "Field Turnips",
+   "observation": "Turnips sown in the open fields are hoed through summer and fed to cattle and sheep over the winter.",
+   "ability_reason": "Turnips in the open field carry cattle through the winter, so fewer beasts are killed in autumn and the land gets their dung."
+  },
+  "molasses_rum": {
+   "effects": {
+    "cohesion": -0.0001,
+    "food_storage": 0.0019,
+    "fuel_demand": 0.001,
+    "health_risk": 0.0004,
+    "injury_risk": 0.001,
+    "trade_capacity": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
+   "name": "Molasses Rum",
+   "observation": "The black molasses left from sugar boiling is fermented and distilled into a strong spirit for sailors and traders."
+  },
+  "estate_ice_houses": {
+   "effects": {
+    "food_spoilage": -0.0046,
+    "food_storage": 0.0019,
+    "labor_demand": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/fortified_stores-v1.png",
+   "name": "Ice Houses",
+   "observation": "Ice cut from winter ponds is packed in straw in deep brick pits, and the great kitchens have ice all summer."
+  },
+  "sainfoin_lucerne_hay": {
+   "effects": {
+    "cultivation_yield": 0.003,
+    "food_output": 0.0013,
+    "soil_productivity": 0.0033
+   },
+   "art": "res://assets/ui/research/paper/managed_fallow.png",
+   "name": "Sainfoin and Lucerne",
+   "observation": "Sainfoin and lucerne sown on dry chalk and lime give heavy hay for years from land that once gave thin sheep grazing."
+  },
+  "brewers_yeast_bread": {
+   "effects": {
+    "food_output": 0.0004,
+    "food_spoilage": -0.0015,
+    "nutrition_quality": 0.0009
+   },
+   "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
+   "name": "Brewers' Yeast Bread",
+   "observation": "Bakers buy the froth from the brewhouse vats, and their bread rises lighter and more evenly than with old sour dough."
+  },
+  "juniper_grain_spirit": {
+   "effects": {
+    "cohesion": -0.0003,
+    "food_storage": -0.002,
+    "health_risk": 0.0008,
+    "injury_risk": 0.002,
+    "labor_efficiency": -0.002,
+    "trade_capacity": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
+   "name": "Cheap Juniper Spirit",
+   "observation": "Grain spirit flavoured with juniper is distilled so cheap that a labourer can be drunk for a copper.",
+   "social_consequence": "Cheap spirit is sold in every cellar; mothers drink it, children are neglected, and preachers call it a plague."
+  },
+  "stall_winter_fattening": {
+   "effects": {
+    "food_output": 0.0018,
+    "labor_demand": 0.0002,
+    "nutrition_quality": 0.0013,
+    "soil_productivity": 0.002
+   },
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
+   "name": "Stall Fattening",
+   "observation": "Cattle are kept in stalls through the winter on roots and hay and come out fat, and their dung is carted to the fields."
+  },
+  "steam_bone_digester": {
+   "effects": {
+    "food_output": 0.001,
+    "fuel_demand": 0.0002,
+    "knowledge_rate": 0.0001,
+    "nutrition_quality": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
+   "name": "Bone Digester",
+   "observation": "A sealed iron pot heated hard softens bones into jelly and broth, and nothing of the carcass is wasted."
+  },
+  "grain_export_bounties": {
+   "effects": {
+    "cultivation_yield": 0.0023,
+    "food_storage": -0.002,
+    "institutional_rigidity": 0.0005,
+    "legitimacy": -0.0002,
+    "state_capacity": 0.0003,
+    "trade_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Grain Export Bounties",
+   "observation": "The treasury pays a bounty on every measure of grain shipped abroad when home prices fall below a set level.",
+   "ability_reason": "Paying farmers to export in cheap years keeps land under the plough, so there is more grain at home in dear years.",
+   "social_consequence": "Townspeople see grain loaded for abroad while bread is dear and riot at the quays."
+  },
+  "fortified_voyage_wines": {
+   "effects": {
+    "food_spoilage": -0.0038,
+    "food_storage": 0.0036,
+    "logistics_endurance": 0.0006,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
+   "name": "Fortified Wines",
+   "observation": "Wine laced with spirit keeps through a long voyage in a hot hold, and some say it comes back better than it left."
+  },
+  "tomato_sauce_cookery": {
+   "effects": {
+    "food_storage": 0.0018,
+    "nutrition_quality": 0.0009
+   },
+   "art": "res://assets/ui/research/paper/earth_oven_cooking.png",
+   "name": "Tomato Sauces",
+   "observation": "The red fruit from across the ocean, long thought dangerous, is cooked down into sauces and kept in jars."
+  },
+  "sown_ryegrass_leys": {
+   "effects": {
+    "cultivation_yield": 0.0009,
+    "food_output": 0.0019,
+    "soil_productivity": 0.0017
+   },
+   "art": "res://assets/ui/research/paper/managed_fallow.png",
+   "name": "Ryegrass Leys",
+   "observation": "Ryegrass seed is sown for short leys of one or two years, and the grass comes up evenly instead of as hay-loft sweepings."
+  },
+  "bottle_sparkling_wine": {
+   "effects": {
+    "food_storage": 0.0018,
+    "fuel_demand": 0.0002,
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/paper/glass_blowing.png",
+   "name": "Sparkling Wine",
+   "observation": "Wine sealed in strong bottles ferments a second time and foams when opened, and courts pay dearly for it."
+  },
+  "coke_dried_pale_malt": {
+   "effects": {
+    "food_storage": 0.0014,
+    "fuel_efficiency": 0.002,
+    "pollution": 0.002,
+    "timber_pressure": -0.0001
+   },
+   "art": "res://assets/ui/research/subjects/coke_firing-v1.png",
+   "name": "Coke-Dried Pale Malt",
+   "observation": "Malt dried over coked coal comes out pale and clean-tasting, and the maltsters no longer burn straw and wood."
+  },
+  "coffee_plantations": {
+   "effects": {
+    "cohesion": -0.0004,
+    "ecological_pressure": 0.004,
+    "labor_demand": 0.0002,
+    "trade_capacity": 0.0007
+   },
+   "art": "res://assets/ui/research/paper/hearth_roasting_control.png",
+   "name": "Coffee Plantations",
+   "observation": "Coffee is planted in rows on warm colonial hill estates, and the berries are dried and shipped home by the ton.",
+   "social_consequence": "The estates are cleared from forest and worked by bound labour; the drink grows cheap at home and bitter abroad."
+  },
+  "row_spacing_trials": {
+   "effects": {
+    "adoption_rate": 0.0006,
+    "cultivation_yield": 0.0012,
+    "knowledge_rate": 0.0005
+   },
+   "art": "res://assets/ui/research/paper/germination_trials.png",
+   "name": "Row Spacing Trials",
+   "observation": "Parallel strips sown at different spacings show how crowding, weeding and harvest trade against each other."
+  },
+  "field_potato_crop": {
+   "effects": {
+    "conception_support": 0.0011,
+    "cultivation_yield": 0.003,
+    "disaster_resilience": 0.0025,
+    "food_output": 0.0049,
+    "labor_demand": 0.0001,
+    "nutrition_quality": 0.0022
+   },
+   "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
+   "name": "Field Potatoes",
+   "observation": "Potatoes are planted by the acre in the open fields, and the poor live on them for much of the year.",
+   "ability_reason": "An acre of potatoes feeds a family where an acre of grain fed only a few, and the poor can live on a patch.",
+   "social_consequence": "Whole districts come to live on the one root, and a blighted year would leave them nothing else."
+  },
+  "porter_vat_brewing": {
+   "effects": {
+    "food_storage": 0.0028,
+    "fuel_demand": 0.0004,
+    "timber_pressure": 0.001,
+    "trade_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
+   "name": "Porter",
+   "observation": "Dark porter is aged for months in wooden vats as tall as houses, and the big brewers supply the whole town."
+  },
+  "seed_drill": {
+   "effects": {
+    "cultivation_yield": 0.0016,
+    "farm_mechanization": 0.0234,
+    "food_output": 0.0026,
+    "labor_demand": -0.0002,
+    "labor_efficiency": 0.0016,
+    "tool_quality": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+   "name": "Seed Drill",
+   "observation": "A horse-drawn drill drops seed in straight rows at an even depth and covers it behind.",
+   "ability_reason": "Seed goes in at an even depth in straight rows, so less seed is wasted and the rows can be hoed."
+  },
+  "light_swing_plough": {
+   "effects": {
+    "cultivation_yield": 0.0008,
+    "farm_mechanization": 0.0234,
+    "fatigue": -0.002,
+    "labor_efficiency": 0.0016,
+    "tool_quality": 0.0013
+   },
+   "art": "res://assets/ui/research/discovery-600/ox_drawn_ard.png",
+   "name": "Light Swing Plough",
+   "observation": "A light plough with an iron share and a curved board is drawn by two horses and a single ploughman, not a team of oxen and boys."
+  },
+  "horse_hoe_tillage": {
+   "effects": {
+    "cultivation_yield": 0.0006,
+    "farm_mechanization": 0.0141,
+    "labor_demand": -0.0002,
+    "labor_efficiency": 0.0012
+   },
+   "art": "res://assets/ui/research/discovery-600/ox_drawn_ard.png",
+   "name": "Horse Hoe",
+   "observation": "A horse hoe runs between the drilled rows, cutting weeds and loosening the soil in a day's work that took a gang a week."
+  },
+  "household_sugared_tea": {
+   "effects": {
+    "cohesion": 0.0002,
+    "food_output": 0.0006,
+    "health_risk": 0.0002,
+    "nutrition_quality": -0.002,
+    "trade_capacity": 0.0016,
+    "water_safety": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
+   "name": "Daily Sugared Tea",
+   "observation": "Labouring households drink sweet tea with every meal, and the kettle is always on the hob.",
+   "social_consequence": "Labouring families spend on tea and sugar what once went on milk and ale, and moralists complain."
+  },
+  "agricultural_improvement_societies": {
+   "effects": {
+    "adoption_rate": 0.0029,
+    "cultivation_yield": 0.001,
+    "knowledge_preservation": 0.0006,
+    "knowledge_rate": 0.0004,
+    "legitimacy": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
+   "name": "Agricultural Societies",
+   "observation": "Landowners' societies award prizes for the best crops and stock and print the trials of their members for all to read.",
+   "ability_reason": "Improving farmers compare their trials in print, and the best practice of one county becomes the practice of many."
+  },
+  "sowing_depth_trials": {
+   "effects": {
+    "adoption_rate": 0.0004,
+    "cultivation_yield": 0.0005,
+    "farm_mechanization": 0.0141
+   },
+   "art": "res://assets/ui/research/paper/germination_trials.png",
+   "name": "Sowing Depth Trials",
+   "observation": "Seed is sown at measured depths to find where it rises best in the local soil."
+  },
+  "beet_sugar_discovery": {
+   "effects": {
+    "food_output": 0.0006,
+    "knowledge_rate": 0.0003
+   },
+   "art": "res://assets/ui/research/paper/fruit_pulp_screening.png",
+   "name": "Beet Sugar Found",
+   "observation": "A chemist boils down the juice of white beet and finds the same sugar that comes from cane."
+  },
+  "field_carrot_cabbage_fodder": {
+   "effects": {
+    "food_output": 0.0003,
+    "food_storage": 0.002,
+    "labor_demand": 0.0001,
+    "nutrition_quality": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+   "name": "Field Carrots and Cabbages",
+   "observation": "Carrots and big cabbages are grown in the fields as cattle food and keep the milk flowing into winter."
+  },
+  "tidal_rice_fields": {
+   "effects": {
+    "cultivation_yield": 0.0006,
+    "disease_exposure": 0.003,
+    "ecological_pressure": 0.002,
+    "food_output": 0.0006,
+    "labor_demand": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
+   "name": "Tidal Rice Fields",
+   "observation": "Sluice gates let fresh river water flood the rice fields on the rising tide and drain them on the falling.",
+   "social_consequence": "The tidal fields are fever country, and those who work them sicken and die young."
+  },
+  "grain_bellows_ventilation": {
+   "effects": {
+    "food_spoilage": -0.01,
+    "food_storage": 0.005,
+    "labor_demand": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/regional_granaries-v1.png",
+   "name": "Ventilated Granaries",
+   "observation": "Bellows blow air up through the stored grain, and it stays dry and sound for years instead of heating and souring."
+  },
+  "spirit_licensing_duties": {
+   "effects": {
+    "health_risk": -0.0006,
+    "injury_risk": -0.0002,
+    "institutional_rigidity": 0.0004,
+    "legitimacy": -0.0001,
+    "state_capacity": 0.0007,
+    "trade_capacity": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Spirit Licences",
+   "observation": "Cheap spirits are taxed heavily and only licensed sellers may sell them."
+  },
+  "potato_planting_edict": {
+   "effects": {
+    "cohesion": -0.0001,
+    "disaster_resilience": 0.0006,
+    "food_output": 0.0007,
+    "legitimacy": -0.0002,
+    "state_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/seed_reserves-v1.png",
+   "name": "Potato Planting Edict",
+   "observation": "Every district is ordered to plant potatoes against dearth, and officials hand out seed tubers.",
+   "social_consequence": "Peasants refuse a root they call pig food, and officials plant it under guard to make it seem worth stealing."
+  },
+  "seedbed_firming": {
+   "effects": {
+    "cultivation_yield": 0.0003,
+    "farm_mechanization": 0.0112,
+    "soil_productivity": 0.0006
+   },
+   "art": "res://assets/ui/research/paper/germination_trials.png",
+   "name": "Seedbed Firming",
+   "observation": "Seedbeds pressed firm with rollers after sowing hold the seed in the soil, and more of it comes up."
+  },
+  "four_course_rotation": {
+   "effects": {
+    "cultivation_yield": 0.0017,
+    "food_output": 0.0009,
+    "food_storage": 0.004,
+    "labor_demand": 0.0002,
+    "nutrition_quality": 0.0005,
+    "soil_productivity": 0.0068
+   },
+   "art": "res://assets/ui/research/subjects/crop_rotation-v1.png",
+   "name": "Four-Course Rotation",
+   "observation": "Wheat, turnips, barley and clover follow one another on each field, and no field lies bare in any year.",
+   "ability_reason": "No field lies bare: wheat, turnips, barley and clover follow each other, feeding both people and stock and building the soil."
+  },
+  "pedigree_stock_breeding": {
+   "effects": {
+    "farm_mechanization": 0.0112,
+    "fiber_yield": 0.004,
+    "food_output": 0.0007,
+    "institutional_rigidity": 0.0002,
+    "nutrition_quality": 0.0008,
+    "trade_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/animal_taming-v1.png",
+   "name": "Pedigree Breeding",
+   "observation": "Breeders pair the best rams and bulls with their own close kin and keep books of the lines, fixing meat, wool and milk.",
+   "ability_reason": "Stock bred by recorded lines grows heavier and more uniform, and a good sire's worth is known in advance."
+  },
+  "voyage_keeping_foods": {
+   "effects": {
+    "food_storage": 0.003,
+    "health_protection": 0.0002,
+    "logistics_endurance": 0.0008,
+    "naval_capacity": 0.0004,
+    "nutrition_quality": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
+   "name": "Voyage Keeping Foods",
+   "observation": "Casks of pickled cabbage and cakes of dried soup are stowed for long voyages, and sailors eat better far from land."
+  },
+  "printed_farm_journals": {
+   "effects": {
+    "adoption_rate": 0.0009,
+    "cultivation_yield": 0.0002,
+    "knowledge_preservation": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png",
+   "name": "Farm Journals",
+   "observation": "Monthly journals print farmers' letters, trials and prices, and a new method is read about across the realm within a season."
+  },
+  "free_grain_trade_edict": {
+   "effects": {
+    "cohesion": -0.0001,
+    "cultivation_yield": 0.0003,
+    "disaster_resilience": -0.002,
+    "institutional_rigidity": -0.0001,
+    "legitimacy": -0.0003,
+    "trade_capacity": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "name": "Free Grain Trade Edict",
+   "observation": "The old limits on moving and selling grain are lifted, and grain goes wherever the price draws it.",
+   "social_consequence": "Prices float free; in a short year the poor riot for the old fixed price and pull grain carts from the road."
+  },
+  "fodder_cutting_machines": {
+   "effects": {
+    "food_storage": 0.0016,
+    "injury_risk": 0.001,
+    "labor_demand": -0.0001,
+    "labor_efficiency": 0.0002
+   },
+   "art": "res://assets/ui/research/paper/threshing_frames.png",
+   "name": "Chaff Cutters",
+   "observation": "Hand-cranked machines chop straw into chaff and slice roots for the winter stalls."
+  },
+  "brewing_thermometer": {
+   "effects": {
+    "food_spoilage": -0.0017,
+    "food_storage": 0.0008,
+    "fuel_efficiency": 0.001,
+    "standardization": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
+   "name": "Brewing Thermometer",
+   "observation": "Brewers read the heat of the mash and the cooling wort on a glass thermometer, and fewer brews go sour."
+  },
+  "yellow_turnip_mangold_roots": {
+   "effects": {
+    "disaster_resilience": 0.0003,
+    "food_output": 0.0012,
+    "food_storage": 0.0031
+   },
+   "art": "res://assets/ui/research/subjects/crop_rotation-v1.png",
+   "name": "Mangolds and Yellow Turnips",
+   "observation": "Yellow turnips and mangolds stand the hard frosts that rot the white turnip, and keep in clamps until spring."
+  },
+  "crushed_bone_manure": {
+   "effects": {
+    "cultivation_yield": 0.0008,
+    "labor_demand": 0.0001,
+    "pollution": 0.001,
+    "soil_productivity": 0.0026
+   },
+   "art": "res://assets/ui/research/paper/managed_fallow.png",
+   "name": "Bone Manure",
+   "observation": "Bones from the town butchers are crushed in mills and spread on the fields, and turnips thrive on them."
+  },
+  "brewers_saccharometer": {
+   "effects": {
+    "food_spoilage": -0.0008,
+    "knowledge_rate": 0.0001,
+    "standardization": 0.0004,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
+   "name": "Saccharometer",
+   "observation": "A floating glass gauge measures how much sugar the wort holds, and brewers know their strength before they ferment."
+  },
+  "threshing_machine": {
+   "effects": {
+    "cohesion": -0.0002,
+    "farm_mechanization": 0.015,
+    "food_spoilage": -0.0017,
+    "food_storage": 0.0016,
+    "injury_risk": 0.002,
+    "labor_demand": -0.0003,
+    "labor_efficiency": 0.0009
+   },
+   "art": "res://assets/ui/research/paper/threshing_frames.png",
+   "name": "Threshing Machine",
+   "observation": "A drum driven by horses walking a ring or by a water wheel beats the grain from the straw.",
+   "ability_reason": "Grain is beaten out by horse or water power in days, not the whole winter; hands are freed and the crop is stored sooner.",
+   "social_consequence": "Winter threshing was the labourer's only paid work, and men burn the machines at night."
+  },
+  "cast_iron_plough_parts": {
+   "effects": {
+    "cultivation_yield": 0.0008,
+    "farm_mechanization": 0.0075,
+    "repair_capacity": 0.003,
+    "standardization": 0.0003,
+    "tool_quality": 0.0009
+   },
+   "art": "res://assets/ui/research/discovery-600/ox_drawn_ard.png",
+   "name": "Cast-Iron Plough Parts",
+   "observation": "Shares and mouldboards are cast in iron to a pattern, and a broken one is replaced from the ironmonger's stock."
+  },
+  "public_soup_kitchens": {
+   "effects": {
+    "cohesion": 0.0001,
+    "disaster_resilience": 0.0005,
+    "food_storage": -0.001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "nutrition_quality": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "name": "Soup Kitchens",
+   "observation": "In dear years soup kitchens ladle out cheap bone and barley soup to the poor by ticket."
+  },
+  "agriculture_board_surveys": {
+   "effects": {
+    "adoption_rate": 0.0011,
+    "cultivation_yield": 0.0008,
+    "knowledge_preservation": 0.0007,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
+   "name": "Board of Agriculture Surveys",
+   "observation": "A board of agriculture sends reporters to every district, and their printed surveys describe each county's farming.",
+   "ability_reason": "Every district's farming is written down, so good practice can be found, compared and spread."
+  },
+  "closed_cooking_range": {
+   "effects": {
+    "fuel_demand": -0.003,
+    "fuel_efficiency": 0.004,
+    "health_protection": 0.0001,
+    "timber_pressure": -0.0003
+   },
+   "art": "res://assets/ui/research/paper/hearth_heat_retention.png",
+   "name": "Closed Cooking Range",
+   "observation": "An iron range with an oven and a boiler encloses the kitchen fire, and cooks with half the fuel and less smoke."
+  },
+  "sugar_beet_selection": {
+   "effects": {
+    "cultivation_yield": 0.0004,
+    "food_output": 0.0008,
+    "knowledge_rate": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/seed_selection-v1.png",
+   "name": "Sugar Beet Selection",
+   "observation": "Growers select white beet with the sweetest roots, year after year, to make sugar without the cane."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "post_mortality_meat_diet": {
+    "cultivation_yield": -0.002,
+    "ecological_pressure": 0.002,
+    "food_output": 0.002,
+    "nutrition_quality": 0.006
+   },
+   "estate_fishpond_chains": {
+    "ecological_pressure": 0.001,
+    "food_output": 0.002,
+    "food_storage": 0.0019,
+    "labor_demand": 0.002,
+    "nutrition_quality": 0.003
+   },
+   "rice_wheat_double_crop": {
+    "cultivation_yield": 0.008,
+    "fatigue": 0.002,
+    "food_output": 0.005,
+    "labor_demand": 0.004,
+    "soil_productivity": -0.003
+   },
+   "town_hopped_brewhouses": {
+    "food_spoilage": -0.005,
+    "food_storage": 0.0057,
+    "fuel_demand": 0.002,
+    "health_risk": 0.001,
+    "trade_capacity": 0.0013,
+    "water_safety": 0.0015
+   },
+   "herring_buss_fleets": {
+    "ecological_pressure": 0.002,
+    "food_output": 0.004,
+    "food_spoilage": -0.0075,
+    "food_storage": 0.0076,
+    "labor_demand": 0.002,
+    "naval_capacity": 0.0014,
+    "trade_capacity": 0.002
+   },
+   "famine_food_herbal": {
+    "disaster_resilience": 0.0021,
+    "food_output": 0.001,
+    "health_risk": -0.001,
+    "knowledge_preservation": 0.0017
+   },
+   "sworn_cask_gaugers": {
+    "institutional_rigidity": 0.001,
+    "labor_demand": 0.001,
+    "standardization": 0.003,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.002
+   },
+   "grain_magistracy": {
+    "disaster_resilience": 0.0042,
+    "food_storage": 0.019,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.003,
+    "legitimacy": 0.003,
+    "state_capacity": 0.0024,
+    "trade_capacity": 0.0013
+   },
+   "marsh_fattened_cattle": {
+    "ecological_pressure": 0.002,
+    "food_output": 0.003,
+    "nutrition_quality": 0.003,
+    "trade_capacity": 0.0013
+   },
+   "island_cane_plantations": {
+    "cohesion": -0.004,
+    "disease_exposure": 0.002,
+    "ecological_pressure": 0.005,
+    "food_output": 0.004,
+    "fuel_demand": 0.004,
+    "labor_demand": 0.006,
+    "nutrition_quality": 0.002,
+    "trade_capacity": 0.0052
+   },
+   "cheese_weigh_houses": {
+    "food_storage": 0.0019,
+    "standardization": 0.002,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.002
+   },
+   "sworn_fish_packers": {
+    "food_spoilage": -0.0075,
+    "health_risk": -0.001,
+    "institutional_rigidity": 0.001,
+    "trade_capacity": 0.0013
+   },
+   "printed_cookery_books": {
+    "adoption_rate": 0.002,
+    "cohesion": 0.001,
+    "knowledge_preservation": 0.0017,
+    "nutrition_quality": 0.002
+   },
+   "printed_farm_manuals": {
+    "adoption_rate": 0.004,
+    "cultivation_yield": 0.004,
+    "knowledge_preservation": 0.0017
+   },
+   "maize_garden_trials": {
+    "adoption_rate": 0.001,
+    "cultivation_yield": 0.004,
+    "food_output": 0.003,
+    "nutrition_quality": 0.001
+   },
+   "hop_drying_kilns": {
+    "food_spoilage": -0.005,
+    "food_storage": 0.0038,
+    "fuel_demand": 0.002,
+    "trade_capacity": 0.0007
+   },
+   "distant_bank_salt_cod": {
+    "ecological_pressure": 0.003,
+    "food_output": 0.005,
+    "food_spoilage": -0.01,
+    "food_storage": 0.0152,
+    "labor_demand": 0.003,
+    "logistics_endurance": 0.003,
+    "naval_capacity": 0.0021,
+    "trade_capacity": 0.0026
+   },
+   "chili_pepper_spread": {
+    "cohesion": 0.001,
+    "food_spoilage": -0.0025,
+    "nutrition_quality": 0.003
+   },
+   "sugar_fruit_pastes": {
+    "food_spoilage": -0.005,
+    "food_storage": 0.0038,
+    "health_risk": 0.001,
+    "nutrition_quality": 0.001
+   },
+   "farmyard_turkeys": {
+    "food_output": 0.002,
+    "nutrition_quality": 0.002
+   },
+   "new_land_beans_squash": {
+    "cultivation_yield": 0.002,
+    "food_output": 0.003,
+    "nutrition_quality": 0.003,
+    "soil_productivity": 0.0013
+   },
+   "coffee_houses": {
+    "cohesion": 0.002,
+    "fatigue": -0.002,
+    "health_risk": 0.001,
+    "knowledge_rate": 0.001,
+    "legitimacy": -0.001,
+    "trade_capacity": 0.0026
+   },
+   "mulberry_dike_fishponds": {
+    "ecology_recovery": 0.002,
+    "fiber_yield": 0.002,
+    "food_output": 0.003,
+    "labor_demand": 0.003,
+    "soil_productivity": 0.0039
+   },
+   "maize_field_crop": {
+    "cultivation_yield": 0.012,
+    "food_output": 0.01,
+    "labor_demand": 0.002,
+    "nutrition_quality": -0.002,
+    "soil_productivity": -0.003
+   },
+   "potato_garden_curiosity": {
+    "adoption_rate": 0.001,
+    "cultivation_yield": 0.001,
+    "food_output": 0.001
+   },
+   "hill_sweet_potato_maize": {
+    "cultivation_yield": 0.005,
+    "disaster_resilience": 0.0014,
+    "disaster_risk": 0.002,
+    "ecological_pressure": 0.004,
+    "food_output": 0.006,
+    "soil_productivity": -0.004
+   },
+   "cassava_cultivation": {
+    "cultivation_yield": 0.004,
+    "disaster_resilience": 0.0021,
+    "food_output": 0.005,
+    "health_risk": 0.002,
+    "labor_demand": 0.002
+   },
+   "convertible_husbandry": {
+    "cultivation_yield": 0.014,
+    "food_output": 0.006,
+    "labor_demand": 0.003,
+    "nutrition_quality": 0.003,
+    "soil_productivity": 0.013
+   },
+   "bean_cake_fertilizer": {
+    "cultivation_yield": 0.003,
+    "labor_demand": 0.001,
+    "soil_productivity": 0.0065,
+    "trade_capacity": 0.0007
+   },
+   "hotbed_forcing": {
+    "food_output": 0.001,
+    "fuel_demand": 0.001,
+    "labor_demand": 0.002,
+    "nutrition_quality": 0.002
+   },
+   "groundnut_oil_crop": {
+    "food_output": 0.003,
+    "nutrition_quality": 0.002,
+    "soil_productivity": 0.0026,
+    "trade_capacity": 0.0007
+   },
+   "court_chocolate_drink": {
+    "cohesion": -0.001,
+    "legitimacy": 0.002,
+    "nutrition_quality": 0.001,
+    "trade_capacity": 0.0007
+   },
+   "lowland_export_dairying": {
+    "ecological_pressure": 0.002,
+    "food_output": 0.004,
+    "food_storage": 0.0057,
+    "labor_demand": 0.003,
+    "nutrition_quality": 0.004,
+    "trade_capacity": 0.0026
+   },
+   "shipped_tea_trade": {
+    "cohesion": 0.001,
+    "trade_capacity": 0.002,
+    "water_safety": 0.003
+   },
+   "printed_grain_prices": {
+    "disaster_resilience": 0.0014,
+    "food_storage": 0.0019,
+    "knowledge_preservation": 0.0008,
+    "trade_capacity": 0.002
+   },
+   "town_luxury_vegetables": {
+    "food_output": 0.001,
+    "labor_demand": 0.002,
+    "nutrition_quality": 0.003
+   },
+   "cottage_potato_patches": {
+    "conception_support": 0.001,
+    "cultivation_yield": 0.005,
+    "disaster_resilience": 0.0014,
+    "food_output": 0.006,
+    "nutrition_quality": 0.002
+   },
+   "bottled_strong_cider": {
+    "food_spoilage": -0.005,
+    "food_storage": 0.0038,
+    "health_risk": 0.001,
+    "trade_capacity": 0.0007
+   },
+   "clover_ley_fodder": {
+    "cultivation_yield": 0.006,
+    "food_output": 0.003,
+    "nutrition_quality": 0.002,
+    "soil_productivity": 0.0104
+   },
+   "seedsmen_named_varieties": {
+    "adoption_rate": 0.002,
+    "cultivation_yield": 0.003,
+    "standardization": 0.001,
+    "trade_capacity": 0.0013
+   },
+   "field_turnips": {
+    "cultivation_yield": 0.005,
+    "food_output": 0.006,
+    "food_storage": 0.0114,
+    "labor_demand": 0.004,
+    "nutrition_quality": 0.003,
+    "soil_productivity": 0.0052
+   },
+   "molasses_rum": {
+    "cohesion": -0.001,
+    "food_storage": 0.0019,
+    "fuel_demand": 0.002,
+    "health_risk": 0.003,
+    "injury_risk": 0.001,
+    "trade_capacity": 0.002
+   },
+   "estate_ice_houses": {
+    "food_spoilage": -0.0075,
+    "food_storage": 0.0019,
+    "labor_demand": 0.002
+   },
+   "sainfoin_lucerne_hay": {
+    "cultivation_yield": 0.003,
+    "food_output": 0.003,
+    "soil_productivity": 0.0065
+   },
+   "brewers_yeast_bread": {
+    "food_output": 0.001,
+    "food_spoilage": -0.0025,
+    "nutrition_quality": 0.002
+   },
+   "juniper_grain_spirit": {
+    "cohesion": -0.003,
+    "food_storage": -0.002,
+    "health_risk": 0.006,
+    "injury_risk": 0.002,
+    "labor_efficiency": -0.002,
+    "trade_capacity": 0.0013
+   },
+   "stall_winter_fattening": {
+    "food_output": 0.004,
+    "labor_demand": 0.003,
+    "nutrition_quality": 0.003,
+    "soil_productivity": 0.0039
+   },
+   "steam_bone_digester": {
+    "food_output": 0.001,
+    "fuel_demand": 0.001,
+    "knowledge_rate": 0.0005,
+    "nutrition_quality": 0.002
+   },
+   "grain_export_bounties": {
+    "cultivation_yield": 0.005,
+    "food_storage": -0.002,
+    "institutional_rigidity": 0.002,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0012,
+    "trade_capacity": 0.0039
+   },
+   "fortified_voyage_wines": {
+    "food_spoilage": -0.005,
+    "food_storage": 0.0038,
+    "logistics_endurance": 0.001,
+    "trade_capacity": 0.0013
+   },
+   "tomato_sauce_cookery": {
+    "food_storage": 0.0019,
+    "nutrition_quality": 0.003
+   },
+   "sown_ryegrass_leys": {
+    "cultivation_yield": 0.002,
+    "food_output": 0.002,
+    "soil_productivity": 0.0039
+   },
+   "bottle_sparkling_wine": {
+    "food_storage": 0.0019,
+    "fuel_demand": 0.001,
+    "legitimacy": 0.001,
+    "trade_capacity": 0.0013
+   },
+   "coke_dried_pale_malt": {
+    "food_storage": 0.0019,
+    "fuel_efficiency": 0.002,
+    "pollution": 0.002,
+    "timber_pressure": -0.002
+   },
+   "coffee_plantations": {
+    "cohesion": -0.003,
+    "ecological_pressure": 0.004,
+    "labor_demand": 0.004,
+    "trade_capacity": 0.0033
+   },
+   "row_spacing_trials": {
+    "adoption_rate": 0.001,
+    "cultivation_yield": 0.004,
+    "knowledge_rate": 0.0005
+   },
+   "field_potato_crop": {
+    "conception_support": 0.002,
+    "cultivation_yield": 0.01,
+    "disaster_resilience": 0.0028,
+    "food_output": 0.014,
+    "labor_demand": 0.002,
+    "nutrition_quality": 0.004
+   },
+   "porter_vat_brewing": {
+    "food_storage": 0.0038,
+    "fuel_demand": 0.002,
+    "timber_pressure": 0.001,
+    "trade_capacity": 0.0013
+   },
+   "seed_drill": {
+    "cultivation_yield": 0.01,
+    "food_output": 0.004,
+    "labor_demand": -0.002,
+    "labor_efficiency": 0.004,
+    "tool_quality": 0.002
+   },
+   "light_swing_plough": {
+    "cultivation_yield": 0.005,
+    "fatigue": -0.002,
+    "labor_efficiency": 0.004,
+    "tool_quality": 0.002
+   },
+   "horse_hoe_tillage": {
+    "cultivation_yield": 0.004,
+    "labor_demand": -0.002,
+    "labor_efficiency": 0.003
+   },
+   "household_sugared_tea": {
+    "cohesion": 0.002,
+    "food_output": 0.001,
+    "health_risk": 0.001,
+    "nutrition_quality": -0.002,
+    "trade_capacity": 0.002,
+    "water_safety": 0.003
+   },
+   "agricultural_improvement_societies": {
+    "adoption_rate": 0.008,
+    "cultivation_yield": 0.006,
+    "knowledge_preservation": 0.0026,
+    "knowledge_rate": 0.0015,
+    "legitimacy": 0.001
+   },
+   "sowing_depth_trials": {
+    "adoption_rate": 0.001,
+    "cultivation_yield": 0.003
+   },
+   "beet_sugar_discovery": {
+    "food_output": 0.001,
+    "knowledge_rate": 0.001
+   },
+   "field_carrot_cabbage_fodder": {
+    "food_output": 0.003,
+    "food_storage": 0.0038,
+    "labor_demand": 0.002,
+    "nutrition_quality": 0.002
+   },
+   "tidal_rice_fields": {
+    "cultivation_yield": 0.006,
+    "disease_exposure": 0.003,
+    "ecological_pressure": 0.002,
+    "food_output": 0.005,
+    "labor_demand": 0.005
+   },
+   "grain_bellows_ventilation": {
+    "food_spoilage": -0.01,
+    "food_storage": 0.0095,
+    "labor_demand": 0.001
+   },
+   "spirit_licensing_duties": {
+    "health_risk": -0.004,
+    "injury_risk": -0.0013,
+    "institutional_rigidity": 0.002,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0018,
+    "trade_capacity": -0.002
+   },
+   "potato_planting_edict": {
+    "cohesion": -0.001,
+    "disaster_resilience": 0.0028,
+    "food_output": 0.006,
+    "legitimacy": -0.002,
+    "state_capacity": 0.0012
+   },
+   "seedbed_firming": {
+    "cultivation_yield": 0.003,
+    "soil_productivity": 0.0013
+   },
+   "four_course_rotation": {
+    "cultivation_yield": 0.016,
+    "food_output": 0.008,
+    "food_storage": 0.0076,
+    "labor_demand": 0.004,
+    "nutrition_quality": 0.003,
+    "soil_productivity": 0.0156
+   },
+   "pedigree_stock_breeding": {
+    "fiber_yield": 0.004,
+    "food_output": 0.006,
+    "institutional_rigidity": 0.001,
+    "nutrition_quality": 0.005,
+    "trade_capacity": 0.0013
+   },
+   "voyage_keeping_foods": {
+    "food_storage": 0.0057,
+    "health_protection": 0.001,
+    "logistics_endurance": 0.004,
+    "naval_capacity": 0.0014,
+    "nutrition_quality": 0.002
+   },
+   "printed_farm_journals": {
+    "adoption_rate": 0.004,
+    "cultivation_yield": 0.002,
+    "knowledge_preservation": 0.0017
+   },
+   "free_grain_trade_edict": {
+    "cohesion": -0.002,
+    "cultivation_yield": 0.003,
+    "disaster_resilience": -0.002,
+    "institutional_rigidity": -0.002,
+    "legitimacy": -0.003,
+    "trade_capacity": 0.0039
+   },
+   "fodder_cutting_machines": {
+    "food_storage": 0.0038,
+    "injury_risk": 0.001,
+    "labor_demand": -0.001,
+    "labor_efficiency": 0.002
+   },
+   "brewing_thermometer": {
+    "food_spoilage": -0.005,
+    "food_storage": 0.0019,
+    "fuel_efficiency": 0.001,
+    "standardization": 0.002
+   },
+   "yellow_turnip_mangold_roots": {
+    "disaster_resilience": 0.0014,
+    "food_output": 0.003,
+    "food_storage": 0.0076
+   },
+   "crushed_bone_manure": {
+    "cultivation_yield": 0.004,
+    "labor_demand": 0.001,
+    "pollution": 0.001,
+    "soil_productivity": 0.0078
+   },
+   "brewers_saccharometer": {
+    "food_spoilage": -0.0025,
+    "knowledge_rate": 0.0005,
+    "standardization": 0.003,
+    "trade_capacity": 0.0007
+   },
+   "threshing_machine": {
+    "cohesion": -0.003,
+    "food_spoilage": -0.005,
+    "food_storage": 0.0038,
+    "injury_risk": 0.002,
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.008
+   },
+   "cast_iron_plough_parts": {
+    "cultivation_yield": 0.004,
+    "repair_capacity": 0.003,
+    "standardization": 0.002,
+    "tool_quality": 0.002
+   },
+   "public_soup_kitchens": {
+    "cohesion": 0.002,
+    "disaster_resilience": 0.0021,
+    "food_storage": -0.001,
+    "labor_demand": 0.002,
+    "legitimacy": 0.002,
+    "nutrition_quality": 0.002
+   },
+   "agriculture_board_surveys": {
+    "adoption_rate": 0.006,
+    "cultivation_yield": 0.004,
+    "knowledge_preservation": 0.0026,
+    "labor_demand": 0.002,
+    "state_capacity": 0.0024
+   },
+   "closed_cooking_range": {
+    "fuel_demand": -0.003,
+    "fuel_efficiency": 0.004,
+    "health_protection": 0.001,
+    "timber_pressure": -0.002
+   },
+   "sugar_beet_selection": {
+    "cultivation_yield": 0.002,
+    "food_output": 0.002,
+    "knowledge_rate": 0.0005
+   }
+  }
+ }
+}

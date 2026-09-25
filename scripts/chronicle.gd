@@ -108,7 +108,7 @@ static func record(moment:Dictionary)->Dictionary:
 	var downgraded:=false
 	if tier=="moment" and not bool(moment.get("priority",false)) and not _moment_room(c,day):
 		tier="notice";downgraded=true
-	var entry:Dictionary={"key":key,"day":day,"tier":tier,"kind":String(moment.get("kind","story")),"title":title,"text":String(moment.get("text","")).strip_edges()}
+	var entry:Dictionary={"key":key,"day":day,"tier":tier,"kind":String(moment.get("kind","story")),"title":plain(title),"text":plain(String(moment.get("text","")).strip_edges())}
 	if downgraded:entry["crowded"]=true
 	for optional in ["art","action","domain","source","first","learned"]:
 		if moment.has(optional):entry[optional]=moment[optional].duplicate(true) if moment[optional] is Dictionary or moment[optional] is Array else moment[optional]
@@ -123,6 +123,14 @@ static func record(moment:Dictionary)->Dictionary:
 	if tier!="whisper" and bool(moment.get("ledger",true)):_to_ledger(entry)
 	_trim(c)
 	return entry
+
+
+## The people's own words: a cart, saddle or gun they cannot name yet is told
+## as the nearest thing they know (character_voice.gd ERA_STANDINS), and an
+## ore by what it looks like until they know its metal (resource_names.gd).
+static func plain(text:String)->String:
+	if text.is_empty():return text
+	return preload("res://scripts/resource_names.gd").plain(preload("res://scripts/character_voice.gd").era_plain_for(text,"player"))
 
 
 static func record_first(first_key:String,moment:Dictionary)->Dictionary:
@@ -146,7 +154,7 @@ static func amend(key:String,fields:Dictionary)->Dictionary:
 		var entry:Dictionary=e
 		if String(entry.get("key",""))!=key:continue
 		for field in ["title","text","kind","art","action","domain"]:
-			if fields.has(field):entry[field]=fields[field].duplicate(true) if fields[field] is Dictionary else fields[field]
+			if fields.has(field):entry[field]=fields[field].duplicate(true) if fields[field] is Dictionary else (plain(String(fields[field])) if field in ["title","text"] else fields[field])
 		var shown:=false
 		for card in pending_cards:
 			if String(card.get("key",""))==key:

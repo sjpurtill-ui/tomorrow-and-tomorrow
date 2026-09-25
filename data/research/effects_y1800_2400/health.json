@@ -1,0 +1,1543 @@
+{
+ "line": "health",
+ "schema": "research_600_effects/1",
+ "items": {
+  "council_plague_treatises": {
+   "effects": {
+    "disease_exposure": -0.0001,
+    "health_protection": 0.0012,
+    "knowledge_preservation": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Council Plague Treatises",
+   "observation": "The town's physicians write the council a treatise on what to do when the plague comes: whom to shut up, what to burn and whom to pay."
+  },
+  "forty_day_quarantine": {
+   "effects": {
+    "cohesion": -0.0002,
+    "disease_exposure": -0.0013,
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0004,
+    "trade_capacity": -0.008,
+    "travel_speed": -0.004
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Forty-Day Quarantine",
+   "observation": "Ships and travellers from a sick place must wait forty days apart before they may land or enter.",
+   "ability_reason": "Forty days outlasts nearly every carrier; pestilence reaches the town less often, and ports that keep the rule are trusted.",
+   "social_consequence": "Merchants rage at the lost weeks, and smuggling around the quarantine becomes a trade of its own."
+  },
+  "health_passes": {
+   "effects": {
+    "disease_exposure": -0.0004,
+    "institutional_rigidity": 0.0002,
+    "state_capacity": 0.0003,
+    "trade_capacity": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Health Passes",
+   "observation": "Travellers carry a sealed pass naming the plague-free town they came from, and gate guards turn back those without one."
+  },
+  "quarantine_island_station": {
+   "effects": {
+    "cohesion": -0.0003,
+    "disease_exposure": -0.0011,
+    "health_protection": 0.0018,
+    "labor_demand": 0.0002,
+    "state_capacity": 0.0003,
+    "trade_capacity": -0.003
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Quarantine Island",
+   "observation": "A pest house on an island keeps the sick apart from the suspect, and ships' goods are aired in its sheds before they come ashore.",
+   "ability_reason": "The sick and the suspect are held on an island away from the town, so a landed pestilence can be caught before it spreads.",
+   "social_consequence": "Those sent to the island often do not return, and families hide their sick rather than let them go."
+  },
+  "leper_house_conversion": {
+   "effects": {
+    "cohesion": -0.0001,
+    "disease_exposure": -0.001,
+    "health_protection": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Plague Houses from Leper Houses",
+   "observation": "The leper houses outside the walls stand nearly empty, and the town turns them into houses for the plague-stricken."
+  },
+  "pestilence_market_seals": {
+   "effects": {
+    "disease_exposure": -0.001,
+    "health_risk": -0.0006,
+    "legitimacy": -0.001,
+    "trade_capacity": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Pestilence Market Seals",
+   "observation": "In plague years market officers burn rotten food and hang a seal on the door of any shop where the sickness has been."
+  },
+  "concave_spectacles": {
+   "effects": {
+    "craft_output": 0.0005,
+    "knowledge_rate": 0.0004,
+    "labor_efficiency": 0.0012
+   },
+   "art": "res://assets/ui/research/paper/glass_blowing.png",
+   "name": "Spectacles for the Short-Sighted",
+   "observation": "Lenses ground hollow let the short-sighted see across a room, and a scholar can recognise his friends in the street."
+  },
+  "incurables_hospital": {
+   "effects": {
+    "disease_exposure": 0.001,
+    "health_protection": 0.0012,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Hospital for Incurables",
+   "observation": "A hospital takes in the incurable sick whom the other hospitals turn away, and nurses them until they die."
+  },
+  "printed_plague_regimens": {
+   "effects": {
+    "adoption_rate": 0.0003,
+    "disease_exposure": -0.0007,
+    "health_protection": 0.0006,
+    "health_risk": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png",
+   "name": "Printed Plague Regimens",
+   "observation": "Cheap printed sheets tell householders how to air rooms, what to eat and which remedies to buy when plague comes."
+  },
+  "printed_dissection_manual": {
+   "effects": {
+    "health_protection": 0.0003,
+    "injury_risk": -0.0008,
+    "knowledge_preservation": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Printed Dissection Manual",
+   "observation": "A printed manual guides the anatomy lesson step by step, so each dissection teaches the same parts in the same order."
+  },
+  "sweating_fever_record": {
+   "effects": {
+    "health_protection": 0.0002,
+    "knowledge_preservation": 0.0003,
+    "observation_rate": 0.0015
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Sweating Fever Recorded",
+   "observation": "Physicians write down a new sweating fever that kills within a day, noting the season, the course and who falls sick."
+  },
+  "standing_health_magistracy": {
+   "effects": {
+    "disease_exposure": -0.0017,
+    "health_protection": 0.0007,
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0002,
+    "legitimacy": -0.001,
+    "sanitation": 0.0093,
+    "state_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
+   "name": "Standing Health Magistracy",
+   "observation": "The health magistrates meet every week in plague-free years too, watching the ports, the drains, the markets and the burials.",
+   "ability_reason": "The health office no longer rises only when plague arrives; it watches ports, drains, markets and burials every year.",
+   "social_consequence": "The magistrates can close markets, burn goods and shut houses, and many townsfolk fear them more than the sickness."
+  },
+  "field_surgery_handbook": {
+   "effects": {
+    "injury_risk": -0.0005,
+    "knowledge_preservation": 0.0001,
+    "warfare_readiness": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
+   "name": "Field Surgery Handbook",
+   "observation": "A wound surgery handbook in the common tongue goes into every army surgeon's pack."
+  },
+  "great_pox_recognition": {
+   "effects": {
+    "cohesion": -0.0001,
+    "disease_exposure": -0.0007,
+    "health_protection": 0.0005,
+    "health_risk": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/curing_regimens-v1.png",
+   "name": "The New Pox Recognized",
+   "observation": "Physicians see that the new pox passes between bedfellows, and treat its sores with quicksilver salves and sweating.",
+   "ability_reason": "The new pox is known as a disease of the bed; it can be named, avoided and treated, though quicksilver poisons as it cures.",
+   "social_consequence": "Shame follows the pox; it is blamed on foreigners, and each people names it after its neighbours."
+  },
+  "ship_bills_of_health": {
+   "effects": {
+    "disease_exposure": -0.0007,
+    "state_capacity": 0.0002,
+    "trade_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/cargo_seals-v1.png",
+   "name": "Ship Bills of Health",
+   "observation": "Every ship carries a sealed bill from its last port declaring whether sickness was there, and the harbour master reads it before anyone lands."
+  },
+  "bathhouse_closures": {
+   "effects": {
+    "cohesion": -0.0001,
+    "disease_exposure": -0.0005,
+    "health_protection": -0.001,
+    "sanitation": -0.003
+   },
+   "art": "res://assets/ui/research/subjects/public_baths-v1.png",
+   "name": "Bathhouses Shut",
+   "observation": "The town shuts its bathhouses and stews against the new pox, and the steam rooms stand cold.",
+   "social_consequence": "Townsfolk lose their baths along with the brothels, and for generations the poor go unwashed."
+  },
+  "college_of_physicians": {
+   "effects": {
+    "health_protection": 0.001,
+    "health_risk": -0.0005,
+    "institutional_rigidity": 0.0003,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/professional_corps-v1.png",
+   "name": "College of Physicians",
+   "observation": "A college of physicians examines and licenses every healer in the capital and fines those who practise without its letter.",
+   "ability_reason": "No one may practise physic in the capital without the college's examination, and the worst quacks are driven out.",
+   "social_consequence": "Unlicensed healers, many of them women and cunning folk, are fined and driven out, and the poor lose their cheapest help."
+  },
+  "guaiac_pox_remedy": {
+   "effects": {
+    "health_protection": 0.0002,
+    "health_risk": -0.0002,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Guaiac Wood Remedy",
+   "observation": "Shavings of a hard wood from across the ocean are boiled into a drink against the pox, gentler than quicksilver if less sure."
+  },
+  "from_life_printed_herbals": {
+   "effects": {
+    "health_protection": 0.0002,
+    "health_risk": -0.0003,
+    "knowledge_preservation": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Herbals Drawn from Life",
+   "observation": "New herbals are printed from drawings made of living plants, and an apothecary can tell the true herb from its lookalike."
+  },
+  "gentle_gunshot_dressing": {
+   "effects": {
+    "health_protection": 0.0005,
+    "health_risk": -0.0003,
+    "injury_risk": -0.0009,
+    "warfare_readiness": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Mild Gunshot Dressing",
+   "observation": "A surgeon who ran out of boiling oil dressed gunshot wounds with a mild salve, and those men healed better than the scalded.",
+   "ability_reason": "Wounded men dressed with a mild salve live more often and heal cleaner than those scalded with oil, and generals keep more veterans."
+  },
+  "dissection_anatomy_atlas": {
+   "effects": {
+    "health_risk": -0.0002,
+    "injury_risk": -0.0004,
+    "knowledge_preservation": 0.0009,
+    "knowledge_rate": 0.0006,
+    "legitimacy": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Anatomy Atlas",
+   "observation": "A great atlas drawn from dissected bodies shows muscles, vessels and organs as they are, and corrects the old authorities in hundreds of places.",
+   "ability_reason": "Anatomy is taught from the body itself; surgeons cut with a true map, and the old authorities can be corrected.",
+   "social_consequence": "Anatomists need bodies, and the gallows and the paupers' graveyard supply them, to the townsfolk's horror."
+  },
+  "faculty_physic_garden": {
+   "effects": {
+    "ecology_recovery": 0.0003,
+    "health_protection": 0.0004,
+    "health_risk": -0.0002,
+    "knowledge_preservation": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Physic Garden",
+   "observation": "The medical faculty keeps a walled garden where students learn the healing plants growing in labelled beds."
+  },
+  "contagion_seeds_treatise": {
+   "effects": {
+    "disease_exposure": -0.002,
+    "health_protection": 0.0008,
+    "knowledge_rate": 0.0005,
+    "sanitation": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+   "name": "Seeds of Contagion",
+   "observation": "A physician argues that disease passes in unseen seeds, by touch, by clothes and goods, and through the air over distance.",
+   "ability_reason": "Disease is understood to travel by touch, goods and air, which gives reasons for burning bedding, airing houses and keeping the sick apart."
+  },
+  "spotted_fever_distinction": {
+   "effects": {
+    "disease_exposure": -0.0003,
+    "health_protection": 0.0008,
+    "observation_rate": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Spotted Fever Named",
+   "observation": "Physicians tell the spotted fever of camps and jails from other fevers by its rash and its course."
+  },
+  "printed_city_pharmacopoeia": {
+   "effects": {
+    "health_risk": -0.0005,
+    "institutional_rigidity": 0.0001,
+    "standardization": 0.0003,
+    "state_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "City Pharmacopoeia",
+   "observation": "The city prints one book of remedies by law, and every apothecary must compound to its recipes."
+  },
+  "chemical_medicine_school": {
+   "effects": {
+    "chemical_control": 0.002,
+    "health_protection": 0.0008,
+    "health_risk": 0.004,
+    "knowledge_rate": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
+   "name": "Chemical Medicine",
+   "observation": "Chemical doctors prepare drugs from metals and salts by fire, and dose antimony, mercury and iron where the old school gave herbs.",
+   "social_consequence": "Old physicians and chemical doctors quarrel in print, and patients are dosed with antimony by one and bled by the other."
+  },
+  "amputation_ligature": {
+   "effects": {
+    "health_risk": -0.0002,
+    "injury_risk": -0.0005,
+    "warfare_readiness": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Tied Arteries",
+   "observation": "Surgeons tie off the arteries with thread when they take off a limb, instead of searing the stump with hot irons."
+  },
+  "jointed_artificial_limbs": {
+   "effects": {
+    "cohesion": 0.0001,
+    "injury_risk": -0.0001,
+    "labor_efficiency": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png",
+   "name": "Jointed Iron Limbs",
+   "observation": "Armourers make iron hands with jointed fingers for maimed soldiers, and a man can hold a rein or a cup again."
+  },
+  "army_field_hospitals": {
+   "effects": {
+    "disease_exposure": 0.002,
+    "injury_risk": -0.0005,
+    "labor_demand": 0.0002,
+    "logistics_endurance": 0.0004,
+    "warfare_readiness": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
+   "name": "Army Field Hospitals",
+   "observation": "Tents, wagons, surgeons and nurses march with the army, and the wounded are treated a day's march behind the line."
+  },
+  "corpse_searchers": {
+   "effects": {
+    "disease_exposure": -0.001,
+    "knowledge_preservation": 0.0001,
+    "labor_demand": 0.0001,
+    "state_capacity": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "name": "Corpse Searchers",
+   "observation": "Sworn women view every corpse in the parish and report to the clerk what they judge the person died of."
+  },
+  "tiered_anatomy_theatre": {
+   "effects": {
+    "injury_risk": -0.0002,
+    "knowledge_preservation": 0.0003,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Anatomy Theatre",
+   "observation": "A round theatre of steep wooden benches lets two hundred students see the dissector's hands at once."
+  },
+  "arm_flap_nose_repair": {
+   "effects": {
+    "cohesion": 0.0001,
+    "health_protection": 0.0004,
+    "injury_risk": -0.0002
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Nose Repair from the Arm",
+   "observation": "A surgeon raises a flap of skin on the arm, binds the arm to the face for weeks, and shapes a new nose from it."
+  },
+  "folk_variolation": {
+   "effects": {
+    "cohesion": 0.0001,
+    "disease_exposure": -0.0019,
+    "health_risk": 0.004,
+    "neonatal_survival": 0.0046
+   },
+   "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
+   "name": "Folk Variolation",
+   "observation": "Mothers and healers scratch smallpox matter into a child's skin, or blow dried scabs into the nose, to give a mild case in a good season.",
+   "ability_reason": "A mild case given on purpose spares a child the killing smallpox, though some so treated still die of it."
+  },
+  "lemon_juice_scurvy": {
+   "effects": {
+    "health_protection": 0.0018,
+    "logistics_endurance": 0.0019,
+    "naval_capacity": 0.0005,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/fruit_pulp_screening.png",
+   "name": "Lemon Juice Against Scurvy",
+   "observation": "A ship's captain gives each man a spoonful of lemon juice daily, and his crew reaches port while others are dying of scurvy."
+  },
+  "shut_up_plague_houses": {
+   "effects": {
+    "cohesion": -0.0006,
+    "disease_exposure": -0.0009,
+    "health_risk": 0.002,
+    "labor_demand": 0.0001,
+    "legitimacy": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png",
+   "name": "Shut-Up Plague Houses",
+   "observation": "Any house with the plague is shut up with its whole household, marked with a cross, and a watchman stands at the door.",
+   "social_consequence": "Whole families are nailed in with the sick; many flee at night, and hatred of the watchmen runs deep."
+  },
+  "sea_surgeons_chest": {
+   "effects": {
+    "health_protection": 0.0012,
+    "injury_risk": -0.0016,
+    "logistics_endurance": 0.0012,
+    "naval_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Sea Surgeon's Chest",
+   "observation": "Every ship and garrison carries a surgeon's chest packed to a list, with a manual telling a mate what to do with each item."
+  },
+  "chartered_apothecary_company": {
+   "effects": {
+    "health_risk": -0.0008,
+    "institutional_rigidity": 0.0003,
+    "standardization": 0.001,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "name": "Apothecaries' Company",
+   "observation": "The apothecaries win a charter of their own apart from the grocers, and their wardens search shops for bad drugs."
+  },
+  "blood_circulation": {
+   "effects": {
+    "health_protection": 0.0004,
+    "health_risk": -0.0004,
+    "knowledge_preservation": 0.0024,
+    "knowledge_rate": 0.0017
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Circulation of the Blood",
+   "observation": "A physician shows by measure and by tying veins that the heart pumps the same blood round the body again and again.",
+   "ability_reason": "The heart is known to drive the same blood round and round, which overturns the old account and opens a new study of the living body.",
+   "social_consequence": "The old professors refuse it for a generation, and young physicians who teach it lose patients."
+  },
+  "charity_nursing_sisters": {
+   "effects": {
+    "cohesion": 0.0001,
+    "health_protection": 0.0009,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0003,
+    "neonatal_survival": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Sisters of Charity",
+   "observation": "Unmarried sisters living under a simple rule nurse the sick poor in their homes and in the town hospitals."
+  },
+  "university_clinical_wards": {
+   "effects": {
+    "health_protection": 0.0007,
+    "health_risk": -0.0009,
+    "knowledge_rate": 0.0008,
+    "labor_demand": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/clinical_observation_rounds.png",
+   "name": "Clinical Wards",
+   "observation": "Students follow the professor from bed to bed in the university hospital, and learn physic at the bedside instead of from the book."
+  },
+  "cinchona_fever_bark": {
+   "effects": {
+    "disease_exposure": -0.0025,
+    "health_protection": 0.0014,
+    "health_risk": 0.0005,
+    "labor_efficiency": 0.002,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Fever Bark",
+   "observation": "A bitter bark from across the ocean, ground and taken in wine, stops the shaking fever of the marshes.",
+   "ability_reason": "A bark from across the ocean stops the shaking fever, and marsh country and hot garrisons become livable."
+  },
+  "general_confinement_hospital": {
+   "effects": {
+    "cohesion": -0.0003,
+    "disease_exposure": 0.003,
+    "health_protection": 0.0014,
+    "institutional_rigidity": 0.0004,
+    "labor_demand": 0.0002,
+    "legitimacy": -0.0003,
+    "state_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "General Hospital",
+   "observation": "A great general hospital takes in the sick, the old and the idle poor, and sets those who can to work.",
+   "ability_reason": "The state gathers the sick, the old and the idle poor under one roof and one rule.",
+   "social_consequence": "The poor dread the general hospital as a prison; beggars are rounded up by archers and families hide their old."
+  },
+  "opium_tincture": {
+   "effects": {
+    "health_protection": 0.0011,
+    "health_risk": 0.0005,
+    "injury_risk": -0.0008
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Opium Tincture",
+   "observation": "Opium dissolved in wine and spices is dosed by the drop against pain, coughs and fluxes.",
+   "social_consequence": "Some patients cannot stop taking the drops, and the physicians do not yet know why."
+  },
+  "capillary_observation": {
+   "effects": {
+    "knowledge_preservation": 0.0002,
+    "knowledge_rate": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
+   "name": "Capillaries Seen",
+   "observation": "Under a strong lens, tiny vessels are seen in a frog's lung, joining the arteries to the veins."
+  },
+  "transfusion_ban": {
+   "effects": {
+    "health_risk": -0.0008,
+    "institutional_rigidity": 0.0001,
+    "knowledge_rate": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Transfusion Forbidden",
+   "observation": "Physicians try pouring lamb's blood into men; after a patient dies the courts forbid it."
+  },
+  "invalid_soldiers_hospital": {
+   "effects": {
+    "cohesion": 0.0002,
+    "health_protection": 0.0004,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0003,
+    "warfare_readiness": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Invalid Soldiers' Hospital",
+   "observation": "A great hospital houses maimed and worn-out soldiers, and others draw a pension in their villages.",
+   "social_consequence": "Veterans no longer beg at the town gate, and recruits sign on more willingly for it."
+  },
+  "epidemic_season_records": {
+   "effects": {
+    "disease_exposure": -0.001,
+    "knowledge_preservation": 0.0004,
+    "observation_rate": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/seasonal_patterns-v1.png",
+   "name": "Epidemic Season Records",
+   "observation": "A physician records each year's fevers beside the weather and the season, and sees which years breed which sickness."
+  },
+  "ergot_cause_identified": {
+   "effects": {
+    "disease_exposure": -0.001,
+    "food_output": -0.001,
+    "health_risk": -0.0005,
+    "nutrition_quality": 0.0006
+   },
+   "art": "res://assets/ui/research/paper/seed_cleaning.png",
+   "name": "Ergot Named",
+   "observation": "Physicians trace the burning sickness to black spurs on rye in wet years, and millers are ordered to sieve them out.",
+   "ability_reason": "The burning sickness is traced to blighted rye; sieving and refusing spurred grain spares whole villages."
+  },
+  "regimental_surgeons": {
+   "effects": {
+    "health_protection": 0.0002,
+    "injury_risk": -0.0025,
+    "labor_demand": 0.0001,
+    "warfare_readiness": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
+   "name": "Regimental Surgeons",
+   "observation": "Every regiment has its own surgeon and mate on the muster roll, paid by the crown."
+  },
+  "state_medical_collegium": {
+   "effects": {
+    "health_protection": 0.001,
+    "health_risk": -0.0005,
+    "institutional_rigidity": 0.0009,
+    "labor_demand": 0.0001,
+    "maternal_safety": 0.0033,
+    "state_capacity": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/professional_corps-v1.png",
+   "name": "State Medical College",
+   "observation": "One state college examines and licenses physicians, surgeons, apothecaries and midwives in every province.",
+   "ability_reason": "Healing across the whole realm answers to one college, which sets standards for every kind of healer, midwives included."
+  },
+  "ipecac_flux_remedy": {
+   "effects": {
+    "health_protection": 0.0007,
+    "health_risk": 0.001,
+    "neonatal_survival": 0.0011,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Flux Root",
+   "observation": "A root from across the ocean, given in small doses, eases the bloody flux that kills children in summer."
+  },
+  "medical_case_journals": {
+   "effects": {
+    "adoption_rate": 0.002,
+    "health_risk": -0.0001,
+    "knowledge_preservation": 0.0007,
+    "knowledge_rate": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Medical Journals",
+   "observation": "Physicians print their cases and remedies in journals, and a good cure is tried in other towns within the year."
+  },
+  "spa_town_physicians": {
+   "effects": {
+    "cohesion": 0.0001,
+    "health_protection": 0.0005,
+    "trade_capacity": 0.0002,
+    "water_safety": 0.0015
+   },
+   "art": "res://assets/ui/research/subjects/public_baths-v1.png",
+   "name": "Spa Towns",
+   "observation": "Towns around mineral springs keep physicians, pump rooms and bathing rules, and the rich come to take the waters."
+  },
+  "trade_diseases_treatise": {
+   "effects": {
+    "health_protection": 0.0013,
+    "injury_risk": -0.001,
+    "labor_efficiency": 0.001,
+    "mine_safety": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v1.png",
+   "name": "Diseases of the Trades",
+   "observation": "A physician describes the sicknesses of each trade, from miners' lungs to gilders' shaking, and how to lessen them."
+  },
+  "pulse_watch": {
+   "effects": {
+    "health_protection": 0.0013,
+    "observation_rate": 0.001
+   },
+   "art": "res://assets/ui/research/paper/clinical_pulse_assessment.png",
+   "name": "Pulse Watch",
+   "observation": "Physicians count the pulse against a small watch with a second hand, and write the number down."
+  },
+  "screw_tourniquet": {
+   "effects": {
+    "injury_risk": -0.0013,
+    "warfare_readiness": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Screw Tourniquet",
+   "observation": "A strap tightened by a screw stops the blood in a limb, so the surgeon can amputate without a flood."
+  },
+  "frontier_sanitary_cordon": {
+   "effects": {
+    "cohesion": -0.0003,
+    "disease_exposure": -0.0027,
+    "labor_demand": 0.0003,
+    "security_efficiency": 0.0008,
+    "state_capacity": 0.0004,
+    "trade_capacity": -0.005,
+    "travel_speed": -0.003
+   },
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png",
+   "name": "Sanitary Cordon",
+   "observation": "A line of garrisoned posts along the frontier holds every traveller and bale in quarantine before they may pass.",
+   "ability_reason": "Plague from the neighbouring lands is stopped at the border by a standing line of guarded quarantine posts.",
+   "social_consequence": "Soldiers shoot those who cross the cordon at night, and border villages live under guard in plague years."
+  },
+  "variolation_trials": {
+   "effects": {
+    "disease_exposure": -0.0016,
+    "health_risk": 0.0007,
+    "knowledge_rate": 0.001,
+    "legitimacy": -0.0002,
+    "neonatal_survival": 0.0046
+   },
+   "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
+   "name": "Variolation Trials",
+   "observation": "Condemned prisoners and orphans given the mild smallpox all survive, and physicians report it to the court.",
+   "ability_reason": "Prisoners and orphans given the mild smallpox survive, and physicians and parents begin to trust the method.",
+   "social_consequence": "Preachers call it tempting fate, and when an inoculated child dies the family is cursed in the street."
+  },
+  "subscription_hospitals": {
+   "effects": {
+    "cohesion": 0.0002,
+    "disease_exposure": 0.002,
+    "health_protection": 0.0008,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0002,
+    "modern_survival": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Subscription Hospitals",
+   "observation": "Subscribers pay a yearly sum to fund a hospital and each may send in a set number of sick poor."
+  },
+  "lateral_lithotomy": {
+   "effects": {
+    "health_protection": 0.0002,
+    "health_risk": -0.0004,
+    "injury_risk": -0.0005,
+    "modern_survival": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Lateral Lithotomy",
+   "observation": "A surgeon cuts into the bladder from the side and takes out the stone in under a minute, and most patients live."
+  },
+  "dental_surgery": {
+   "effects": {
+    "health_protection": 0.0003,
+    "health_risk": 0.0002,
+    "modern_survival": 0.0012,
+    "nutrition_quality": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+   "name": "Dental Surgery",
+   "observation": "Dentists scale teeth, fill holes with lead and gold, and set false teeth on springs."
+  },
+  "anatomical_wax_models": {
+   "effects": {
+    "knowledge_preservation": 0.0006,
+    "knowledge_rate": 0.0001,
+    "maternal_safety": 0.0006,
+    "modern_survival": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Anatomical Wax Models",
+   "observation": "Coloured wax models of the body, the womb and the child within teach students in any season without a corpse."
+  },
+  "maize_skin_sickness": {
+   "effects": {
+    "health_risk": -0.0004,
+    "modern_survival": 0.0012,
+    "nutrition_quality": 0.0011,
+    "observation_rate": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/case_records-v1.png",
+   "name": "Maize Skin Sickness",
+   "observation": "A physician describes the rough red skin, the flux and the madness of the poor who live on maize alone, and advises milk and meat."
+  },
+  "ventilator_bellows": {
+   "effects": {
+    "disease_exposure": -0.0017,
+    "health_protection": 0.0002,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0012,
+    "naval_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/paper/mine_airways.png",
+   "name": "Ventilator Bellows",
+   "observation": "Great bellows worked by hand pump the foul air out of ships' holds and prison cells."
+  },
+  "surgeons_college": {
+   "effects": {
+    "health_risk": -0.0004,
+    "injury_risk": -0.0009,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.0004,
+    "modern_survival": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/professional_corps-v1.png",
+   "name": "Surgeons' College",
+   "observation": "The surgeons leave the barbers' company and form their own college, with examinations in anatomy and operations."
+  },
+  "smallpox_hospital": {
+   "effects": {
+    "disease_exposure": -0.0017,
+    "health_protection": 0.0003,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0012,
+    "neonatal_survival": 0.0021
+   },
+   "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
+   "name": "Smallpox Hospital",
+   "observation": "A hospital outside the town takes in the smallpox sick and inoculates the poor in batches."
+  },
+  "scurvy_controlled_trial": {
+   "effects": {
+    "health_protection": 0.0006,
+    "knowledge_rate": 0.0006,
+    "logistics_endurance": 0.0029,
+    "modern_survival": 0.0012,
+    "naval_capacity": 0.0017,
+    "nutrition_quality": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
+   "name": "Scurvy Trial",
+   "observation": "A ship's surgeon gives six pairs of scurvy-sick sailors six different remedies; the pair given oranges and lemons recovers.",
+   "ability_reason": "The cure for scurvy is proved by comparing remedies side by side, not by authority."
+  },
+  "cataract_extraction": {
+   "effects": {
+    "health_protection": 0.0003,
+    "health_risk": 0.0002,
+    "labor_efficiency": 0.0004,
+    "modern_survival": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Cataract Extraction",
+   "observation": "A surgeon lifts the clouded lens out of the eye through a small cut, and the blind see again with thick spectacles."
+  },
+  "preventive_inoculation": {
+   "effects": {
+    "disease_exposure": -0.0017,
+    "health_risk": 0.0008,
+    "labor_demand": 0.0001,
+    "legitimacy": -0.0002,
+    "modern_survival": 0.0025,
+    "neonatal_survival": 0.0012,
+    "state_capacity": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
+   "name": "Organized Inoculation",
+   "observation": "Towns and households inoculate their children against smallpox in organized rounds, in a healthy season and with rest after.",
+   "ability_reason": "Whole towns are inoculated in season, and smallpox, the great killer of children, loses much of its hold.",
+   "social_consequence": "Inoculated children spread the smallpox to neighbours who refused it, and quarrels over the practice split towns."
+  },
+  "gastric_digestion_experiments": {
+   "effects": {
+    "knowledge_rate": 0.0006,
+    "modern_survival": 0.0008,
+    "nutrition_quality": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
+   "name": "Digestion Experiments",
+   "observation": "Food in perforated tubes swallowed and drawn back up is found dissolved by the stomach's juices, not ground or cooked."
+  },
+  "bedside_thermometer": {
+   "effects": {
+    "health_protection": 0.0004,
+    "modern_survival": 0.0008,
+    "observation_rate": 0.0007,
+    "standardization": 0.0003
+   },
+   "art": "res://assets/ui/research/paper/clinical_pulse_assessment.png",
+   "name": "Bedside Thermometer",
+   "observation": "Physicians read a glass thermometer under the tongue in fevers and record the heat day by day."
+  },
+  "chest_percussion": {
+   "effects": {
+    "health_protection": 0.0007,
+    "modern_survival": 0.0008,
+    "observation_rate": 0.0004
+   },
+   "art": "res://assets/ui/research/paper/clinical_observation_rounds.png",
+   "name": "Chest Percussion",
+   "observation": "A physician taps the chest with his fingers and hears where fluid or hardness lies beneath."
+  },
+  "organ_seat_pathology": {
+   "effects": {
+    "health_protection": 0.0007,
+    "health_risk": -0.0003,
+    "knowledge_preservation": 0.0005,
+    "knowledge_rate": 0.0012,
+    "modern_survival": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+   "name": "Seats of Disease",
+   "observation": "Hundreds of autopsies compared with the patients' symptoms show that each disease has its seat in a particular organ.",
+   "ability_reason": "Diseases are traced to their seat in the organs, and physicians begin to treat the organ, not the humours."
+  },
+  "deaf_sign_school": {
+   "effects": {
+    "cohesion": 0.0002,
+    "knowledge_preservation": 0.0001,
+    "labor_efficiency": 0.0003,
+    "legitimacy": 0.0001,
+    "modern_survival": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "School for the Deaf",
+   "observation": "A school teaches deaf children to sign, read and write, and they can learn a trade and speak for themselves."
+  },
+  "mass_shallow_inoculation": {
+   "effects": {
+    "disease_exposure": -0.0009,
+    "health_risk": -0.0003,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "modern_survival": 0.0008,
+    "neonatal_survival": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
+   "name": "Village Inoculation",
+   "observation": "Inoculators with a quick shallow scratch and no long preparation treat whole villages in a day, rich and poor alike."
+  },
+  "drowning_rescue_societies": {
+   "effects": {
+    "cohesion": 0.0002,
+    "health_protection": 0.0002,
+    "injury_risk": -0.0004,
+    "modern_survival": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/river_craft-v1.png",
+   "name": "Rescue Societies",
+   "observation": "Rescue societies keep kits along the rivers and pay a reward to anyone who revives a drowned person with warmth and breath."
+  },
+  "outpatient_dispensaries": {
+   "effects": {
+    "health_protection": 0.0011,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0002,
+    "modern_survival": 0.0008,
+    "neonatal_survival": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Dispensaries",
+   "observation": "Dispensaries give free drugs and send physicians to the homes of the poor, and many sick children are treated where they lie."
+  },
+  "prison_hygiene_reform": {
+   "effects": {
+    "disease_exposure": -0.0004,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "modern_survival": 0.0008,
+    "sanitation": 0.0019
+   },
+   "art": "res://assets/ui/research/subjects/latrine_siting-v1.png",
+   "name": "Prison Hygiene",
+   "observation": "Prisons are washed, whitewashed and aired, and prisoners bathed, and the jail fever that killed judges and jurors abates."
+  },
+  "medical_police_code": {
+   "effects": {
+    "disease_exposure": -0.0008,
+    "health_protection": 0.0004,
+    "institutional_rigidity": 0.0006,
+    "labor_demand": 0.0002,
+    "legitimacy": -0.0001,
+    "modern_survival": 0.0008,
+    "sanitation": 0.0052,
+    "state_capacity": 0.0003,
+    "water_safety": 0.0045
+   },
+   "art": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
+   "name": "Medical Police",
+   "observation": "A state code of public health rules on burials, markets, wells, midwives, nuisances and the care of the poor.",
+   "ability_reason": "Public health becomes a code of state: burials, markets, water, midwives and nuisances all fall under one law.",
+   "social_consequence": "Officials enter homes and workshops to inspect them, and householders complain of meddling in private life."
+  },
+  "blind_reading_school": {
+   "effects": {
+    "cohesion": 0.0001,
+    "knowledge_preservation": 0.0002,
+    "legitimacy": 0.0001,
+    "modern_survival": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "School for the Blind",
+   "observation": "A school teaches blind children to read letters raised on the page with their fingertips."
+  },
+  "foxglove_dropsy": {
+   "effects": {
+    "health_protection": 0.0004,
+    "health_risk": 0.0002,
+    "knowledge_rate": 0.0001,
+    "modern_survival": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+   "name": "Foxglove for Dropsy",
+   "observation": "A physician doses foxglove leaf for dropsy, raising the dose by trial and stopping when the pulse slows or the patient sickens."
+  },
+  "town_fever_houses": {
+   "effects": {
+    "cohesion": -0.0001,
+    "disease_exposure": -0.0005,
+    "health_protection": 0.0003,
+    "labor_demand": 0.0001,
+    "modern_survival": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Fever Houses",
+   "observation": "Towns open fever houses where those with contagious fevers are taken from crowded lodgings and nursed apart."
+  },
+  "moral_treatment_asylums": {
+   "effects": {
+    "cohesion": 0.0002,
+    "health_protection": 0.0003,
+    "institutional_rigidity": -0.0001,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "modern_survival": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+   "name": "Moral Treatment",
+   "observation": "The keepers strike off the chains of the mad and give them work, air and kind handling.",
+   "ability_reason": "The mad are unchained and given work, air and kindness, and many recover who would have died in chains."
+  },
+  "litter_bearer_drill": {
+   "effects": {
+    "injury_risk": -0.0021,
+    "labor_demand": 0.0001,
+    "warfare_readiness": 0.0004
+   },
+   "art": "res://assets/ui/research/paper/litter_bearer_drill.png",
+   "name": "Litter Bearer Drill",
+   "observation": "Drilled bearers carry the wounded off the field on litters to the surgeons, instead of leaving them where they fell."
+  },
+  "fleet_citrus_ration": {
+   "effects": {
+    "health_protection": 0.0005,
+    "labor_demand": 0.0001,
+    "logistics_endurance": 0.0009,
+    "modern_survival": 0.0008,
+    "naval_capacity": 0.0009,
+    "trade_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/paper/fruit_pulp_screening.png",
+   "name": "Fleet Citrus Ration",
+   "observation": "By order every ship in the fleet issues lemon juice with the daily ration, and scurvy all but vanishes from the lower decks."
+  },
+  "cowpox_vaccination": {
+   "effects": {
+    "cohesion": -0.0001,
+    "disease_exposure": -0.0016,
+    "health_protection": 0.0005,
+    "health_risk": -0.0007,
+    "modern_survival": 0.005,
+    "neonatal_survival": 0.0022
+   },
+   "art": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
+   "name": "Cowpox Vaccination",
+   "observation": "Matter from the cowpox of a milkmaid's hand is scratched into a child's arm, and the child cannot then take the smallpox.",
+   "ability_reason": "A cowpox scratch protects against smallpox without the danger of the smallpox itself, so everyone can be protected safely.",
+   "social_consequence": "Caricaturists draw the vaccinated growing horns, and the old inoculators fight the new method for their trade."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "council_plague_treatises": {
+    "disease_exposure": -0.0005,
+    "health_protection": 0.002,
+    "knowledge_preservation": 0.0017
+   },
+   "forty_day_quarantine": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.006,
+    "institutional_rigidity": 0.002,
+    "labor_demand": 0.002,
+    "state_capacity": 0.0018,
+    "trade_capacity": -0.008,
+    "travel_speed": -0.004
+   },
+   "health_passes": {
+    "disease_exposure": -0.002,
+    "institutional_rigidity": 0.001,
+    "state_capacity": 0.0012,
+    "trade_capacity": -0.002
+   },
+   "quarantine_island_station": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.005,
+    "health_protection": 0.003,
+    "labor_demand": 0.004,
+    "state_capacity": 0.0012,
+    "trade_capacity": -0.003
+   },
+   "leper_house_conversion": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.0015,
+    "health_protection": 0.001
+   },
+   "pestilence_market_seals": {
+    "disease_exposure": -0.0015,
+    "health_risk": -0.001,
+    "legitimacy": -0.001,
+    "trade_capacity": -0.002
+   },
+   "concave_spectacles": {
+    "craft_output": 0.001,
+    "knowledge_rate": 0.0005,
+    "labor_efficiency": 0.002
+   },
+   "incurables_hospital": {
+    "disease_exposure": 0.001,
+    "health_protection": 0.004,
+    "labor_demand": 0.003,
+    "legitimacy": 0.002
+   },
+   "printed_plague_regimens": {
+    "adoption_rate": 0.002,
+    "disease_exposure": -0.001,
+    "health_protection": 0.002,
+    "health_risk": 0.001
+   },
+   "printed_dissection_manual": {
+    "health_protection": 0.001,
+    "injury_risk": -0.0026,
+    "knowledge_preservation": 0.0026
+   },
+   "sweating_fever_record": {
+    "health_protection": 0.001,
+    "knowledge_preservation": 0.0017,
+    "observation_rate": 0.0016
+   },
+   "standing_health_magistracy": {
+    "disease_exposure": -0.005,
+    "health_protection": 0.003,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.003,
+    "legitimacy": -0.001,
+    "sanitation": 0.0108,
+    "state_capacity": 0.003
+   },
+   "field_surgery_handbook": {
+    "injury_risk": -0.0052,
+    "knowledge_preservation": 0.0008,
+    "warfare_readiness": 0.002
+   },
+   "great_pox_recognition": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.002,
+    "health_protection": 0.002,
+    "health_risk": 0.004
+   },
+   "ship_bills_of_health": {
+    "disease_exposure": -0.002,
+    "state_capacity": 0.0012,
+    "trade_capacity": -0.001
+   },
+   "bathhouse_closures": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.0015,
+    "health_protection": -0.001,
+    "sanitation": -0.003
+   },
+   "college_of_physicians": {
+    "health_protection": 0.004,
+    "health_risk": -0.005,
+    "institutional_rigidity": 0.004,
+    "labor_demand": 0.001,
+    "legitimacy": 0.001,
+    "state_capacity": 0.0012
+   },
+   "guaiac_pox_remedy": {
+    "health_protection": 0.001,
+    "health_risk": -0.002,
+    "trade_capacity": 0.0013
+   },
+   "from_life_printed_herbals": {
+    "health_protection": 0.001,
+    "health_risk": -0.003,
+    "knowledge_preservation": 0.0026
+   },
+   "gentle_gunshot_dressing": {
+    "health_protection": 0.002,
+    "health_risk": -0.003,
+    "injury_risk": -0.0104,
+    "warfare_readiness": 0.003
+   },
+   "dissection_anatomy_atlas": {
+    "health_risk": -0.002,
+    "injury_risk": -0.0052,
+    "knowledge_preservation": 0.0051,
+    "knowledge_rate": 0.002,
+    "legitimacy": -0.001
+   },
+   "faculty_physic_garden": {
+    "ecology_recovery": 0.001,
+    "health_protection": 0.001,
+    "health_risk": -0.002,
+    "knowledge_preservation": 0.0017
+   },
+   "contagion_seeds_treatise": {
+    "disease_exposure": -0.003,
+    "health_protection": 0.002,
+    "knowledge_rate": 0.0015,
+    "sanitation": 0.0036
+   },
+   "spotted_fever_distinction": {
+    "disease_exposure": -0.0005,
+    "health_protection": 0.002,
+    "observation_rate": 0.0008
+   },
+   "printed_city_pharmacopoeia": {
+    "health_risk": -0.004,
+    "institutional_rigidity": 0.001,
+    "standardization": 0.002,
+    "state_capacity": 0.0006
+   },
+   "chemical_medicine_school": {
+    "chemical_control": 0.002,
+    "health_protection": 0.002,
+    "health_risk": 0.004,
+    "knowledge_rate": 0.0015
+   },
+   "amputation_ligature": {
+    "health_risk": -0.002,
+    "injury_risk": -0.0065,
+    "warfare_readiness": 0.001
+   },
+   "jointed_artificial_limbs": {
+    "cohesion": 0.001,
+    "injury_risk": -0.0013,
+    "labor_efficiency": 0.001
+   },
+   "army_field_hospitals": {
+    "disease_exposure": 0.002,
+    "injury_risk": -0.0065,
+    "labor_demand": 0.003,
+    "logistics_endurance": 0.002,
+    "warfare_readiness": 0.004
+   },
+   "corpse_searchers": {
+    "disease_exposure": -0.0015,
+    "knowledge_preservation": 0.0008,
+    "labor_demand": 0.001,
+    "state_capacity": 0.0012
+   },
+   "tiered_anatomy_theatre": {
+    "injury_risk": -0.0026,
+    "knowledge_preservation": 0.0017,
+    "knowledge_rate": 0.0015,
+    "legitimacy": -0.001
+   },
+   "arm_flap_nose_repair": {
+    "cohesion": 0.001,
+    "health_protection": 0.001,
+    "injury_risk": -0.0026
+   },
+   "folk_variolation": {
+    "cohesion": 0.001,
+    "disease_exposure": -0.004,
+    "health_risk": 0.004,
+    "neonatal_survival": 0.0046
+   },
+   "lemon_juice_scurvy": {
+    "health_protection": 0.003,
+    "logistics_endurance": 0.003,
+    "naval_capacity": 0.0014,
+    "trade_capacity": 0.0007
+   },
+   "shut_up_plague_houses": {
+    "cohesion": -0.004,
+    "disease_exposure": -0.002,
+    "health_risk": 0.002,
+    "labor_demand": 0.002,
+    "legitimacy": -0.002
+   },
+   "sea_surgeons_chest": {
+    "health_protection": 0.002,
+    "injury_risk": -0.0039,
+    "logistics_endurance": 0.002,
+    "naval_capacity": 0.0014
+   },
+   "chartered_apothecary_company": {
+    "health_risk": -0.003,
+    "institutional_rigidity": 0.002,
+    "standardization": 0.002,
+    "trade_capacity": 0.0007
+   },
+   "blood_circulation": {
+    "health_protection": 0.002,
+    "health_risk": -0.001,
+    "knowledge_preservation": 0.0034,
+    "knowledge_rate": 0.003
+   },
+   "charity_nursing_sisters": {
+    "cohesion": 0.002,
+    "health_protection": 0.005,
+    "labor_demand": 0.003,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.0011
+   },
+   "university_clinical_wards": {
+    "health_protection": 0.004,
+    "health_risk": -0.002,
+    "knowledge_rate": 0.0015,
+    "labor_demand": 0.002
+   },
+   "cinchona_fever_bark": {
+    "disease_exposure": -0.0025,
+    "health_protection": 0.008,
+    "health_risk": 0.001,
+    "labor_efficiency": 0.002,
+    "trade_capacity": 0.0013
+   },
+   "general_confinement_hospital": {
+    "cohesion": -0.003,
+    "disease_exposure": 0.003,
+    "health_protection": 0.004,
+    "institutional_rigidity": 0.003,
+    "labor_demand": 0.004,
+    "legitimacy": -0.001,
+    "state_capacity": 0.0024
+   },
+   "opium_tincture": {
+    "health_protection": 0.003,
+    "health_risk": 0.004,
+    "injury_risk": -0.0013
+   },
+   "capillary_observation": {
+    "knowledge_preservation": 0.0008,
+    "knowledge_rate": 0.0015
+   },
+   "transfusion_ban": {
+    "health_risk": -0.003,
+    "institutional_rigidity": 0.001,
+    "knowledge_rate": -0.001
+   },
+   "invalid_soldiers_hospital": {
+    "cohesion": 0.002,
+    "health_protection": 0.001,
+    "labor_demand": 0.003,
+    "legitimacy": 0.003,
+    "warfare_readiness": 0.003
+   },
+   "epidemic_season_records": {
+    "disease_exposure": -0.001,
+    "knowledge_preservation": 0.0017,
+    "observation_rate": 0.0024
+   },
+   "ergot_cause_identified": {
+    "disease_exposure": -0.001,
+    "food_output": -0.001,
+    "health_risk": -0.006,
+    "nutrition_quality": 0.002
+   },
+   "regimental_surgeons": {
+    "health_protection": 0.001,
+    "injury_risk": -0.0052,
+    "labor_demand": 0.002,
+    "warfare_readiness": 0.003
+   },
+   "state_medical_collegium": {
+    "health_protection": 0.004,
+    "health_risk": -0.006,
+    "institutional_rigidity": 0.004,
+    "labor_demand": 0.002,
+    "maternal_safety": 0.0033,
+    "state_capacity": 0.003
+   },
+   "ipecac_flux_remedy": {
+    "health_protection": 0.003,
+    "health_risk": 0.001,
+    "neonatal_survival": 0.0011,
+    "trade_capacity": 0.0007
+   },
+   "medical_case_journals": {
+    "adoption_rate": 0.003,
+    "health_risk": -0.001,
+    "knowledge_preservation": 0.0017,
+    "knowledge_rate": 0.0015
+   },
+   "spa_town_physicians": {
+    "cohesion": 0.001,
+    "health_protection": 0.002,
+    "trade_capacity": 0.0013,
+    "water_safety": 0.0015
+   },
+   "trade_diseases_treatise": {
+    "health_protection": 0.002,
+    "injury_risk": -0.0039,
+    "labor_efficiency": 0.001,
+    "mine_safety": 0.003
+   },
+   "pulse_watch": {
+    "health_protection": 0.002,
+    "observation_rate": 0.0016
+   },
+   "screw_tourniquet": {
+    "injury_risk": -0.0052,
+    "warfare_readiness": 0.001
+   },
+   "frontier_sanitary_cordon": {
+    "cohesion": -0.002,
+    "disease_exposure": -0.005,
+    "labor_demand": 0.005,
+    "security_efficiency": 0.002,
+    "state_capacity": 0.0018,
+    "trade_capacity": -0.005,
+    "travel_speed": -0.003
+   },
+   "variolation_trials": {
+    "disease_exposure": -0.003,
+    "health_risk": 0.003,
+    "knowledge_rate": 0.001,
+    "legitimacy": -0.001,
+    "neonatal_survival": 0.0046
+   },
+   "subscription_hospitals": {
+    "cohesion": 0.002,
+    "disease_exposure": 0.002,
+    "health_protection": 0.005,
+    "labor_demand": 0.003,
+    "legitimacy": 0.002
+   },
+   "lateral_lithotomy": {
+    "health_protection": 0.001,
+    "health_risk": -0.002,
+    "injury_risk": -0.0026
+   },
+   "dental_surgery": {
+    "health_protection": 0.002,
+    "health_risk": 0.001,
+    "nutrition_quality": 0.001
+   },
+   "anatomical_wax_models": {
+    "knowledge_preservation": 0.0026,
+    "knowledge_rate": 0.0005,
+    "maternal_safety": 0.0016
+   },
+   "maize_skin_sickness": {
+    "health_risk": -0.002,
+    "nutrition_quality": 0.003,
+    "observation_rate": 0.0008
+   },
+   "ventilator_bellows": {
+    "disease_exposure": -0.002,
+    "health_protection": 0.001,
+    "labor_demand": 0.001,
+    "naval_capacity": 0.0007
+   },
+   "surgeons_college": {
+    "health_risk": -0.002,
+    "injury_risk": -0.0052,
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0017
+   },
+   "smallpox_hospital": {
+    "disease_exposure": -0.002,
+    "health_protection": 0.002,
+    "labor_demand": 0.002,
+    "neonatal_survival": 0.0023
+   },
+   "scurvy_controlled_trial": {
+    "health_protection": 0.004,
+    "knowledge_rate": 0.002,
+    "logistics_endurance": 0.004,
+    "naval_capacity": 0.0021,
+    "nutrition_quality": 0.002
+   },
+   "cataract_extraction": {
+    "health_protection": 0.002,
+    "health_risk": 0.001,
+    "labor_efficiency": 0.001
+   },
+   "preventive_inoculation": {
+    "disease_exposure": -0.007,
+    "health_risk": 0.004,
+    "labor_demand": 0.002,
+    "legitimacy": -0.002,
+    "neonatal_survival": 0.0092,
+    "state_capacity": 0.0018
+   },
+   "gastric_digestion_experiments": {
+    "knowledge_rate": 0.0015,
+    "nutrition_quality": 0.001
+   },
+   "bedside_thermometer": {
+    "health_protection": 0.002,
+    "observation_rate": 0.0024,
+    "standardization": 0.001
+   },
+   "chest_percussion": {
+    "health_protection": 0.003,
+    "observation_rate": 0.0016
+   },
+   "organ_seat_pathology": {
+    "health_protection": 0.003,
+    "health_risk": -0.002,
+    "knowledge_preservation": 0.0026,
+    "knowledge_rate": 0.003
+   },
+   "deaf_sign_school": {
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0008,
+    "labor_efficiency": 0.001,
+    "legitimacy": 0.001
+   },
+   "mass_shallow_inoculation": {
+    "disease_exposure": -0.004,
+    "health_risk": -0.002,
+    "labor_demand": 0.002,
+    "legitimacy": 0.001,
+    "neonatal_survival": 0.0057
+   },
+   "drowning_rescue_societies": {
+    "cohesion": 0.002,
+    "health_protection": 0.001,
+    "injury_risk": -0.0026
+   },
+   "outpatient_dispensaries": {
+    "health_protection": 0.005,
+    "labor_demand": 0.003,
+    "legitimacy": 0.002,
+    "neonatal_survival": 0.0023
+   },
+   "prison_hygiene_reform": {
+    "disease_exposure": -0.002,
+    "labor_demand": 0.002,
+    "legitimacy": 0.001,
+    "sanitation": 0.0054
+   },
+   "medical_police_code": {
+    "disease_exposure": -0.004,
+    "health_protection": 0.003,
+    "institutional_rigidity": 0.004,
+    "labor_demand": 0.003,
+    "legitimacy": -0.001,
+    "sanitation": 0.0144,
+    "state_capacity": 0.003,
+    "water_safety": 0.0045
+   },
+   "blind_reading_school": {
+    "cohesion": 0.002,
+    "knowledge_preservation": 0.0008,
+    "legitimacy": 0.001
+   },
+   "foxglove_dropsy": {
+    "health_protection": 0.003,
+    "health_risk": 0.002,
+    "knowledge_rate": 0.0005
+   },
+   "town_fever_houses": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.0025,
+    "health_protection": 0.002,
+    "labor_demand": 0.002
+   },
+   "moral_treatment_asylums": {
+    "cohesion": 0.003,
+    "health_protection": 0.002,
+    "institutional_rigidity": -0.001,
+    "labor_demand": 0.002,
+    "legitimacy": 0.002
+   },
+   "litter_bearer_drill": {
+    "injury_risk": -0.0052,
+    "labor_demand": 0.001,
+    "warfare_readiness": 0.003
+   },
+   "fleet_citrus_ration": {
+    "health_protection": 0.004,
+    "labor_demand": 0.001,
+    "logistics_endurance": 0.004,
+    "naval_capacity": 0.0028,
+    "trade_capacity": -0.001
+   },
+   "cowpox_vaccination": {
+    "cohesion": -0.001,
+    "disease_exposure": -0.008,
+    "health_protection": 0.004,
+    "health_risk": -0.004,
+    "neonatal_survival": 0.0115
+   }
+  }
+ }
+}

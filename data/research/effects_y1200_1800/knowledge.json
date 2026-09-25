@@ -1,0 +1,1522 @@
+{
+ "line": "knowledge",
+ "schema": "research_600_effects/1",
+ "items": {
+  "rounded_book_hand": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "knowledge_preservation": 0.0006,
+    "labor_demand": 0.0001,
+    "literacy": 0.001
+   },
+   "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
+   "name": "Rounded Book Hand",
+   "observation": "Copyists of the god's books write a rounded, upright capital hand that any later reader can still make out."
+  },
+  "devised_script_for_new_tongue": {
+   "effects": {
+    "adoption_rate": 0.0029,
+    "knowledge_preservation": 0.0005,
+    "labor_demand": 0.0001,
+    "trade_capacity": 0.0016
+   },
+   "art": "res://assets/ui/research/discovery-600/consonantal_alphabet.png",
+   "name": "Script for a Neighbour Tongue",
+   "observation": "A missionary scribe fits borrowed letters and a few new signs to a neighbour people's speech, and their prayers are written for the first time."
+  },
+  "itinerary_strip_maps": {
+   "effects": {
+    "logistics_endurance": 0.0005,
+    "route_speed": 0.0029,
+    "security_efficiency": 0.0001,
+    "survey_speed": 0.0045
+   },
+   "art": "res://assets/ui/research/subjects/regional_maps-v1.png",
+   "name": "Strip Road Maps",
+   "observation": "A long strip shows the road as a line of towns, rivers and inns, with the day's stages counted between them."
+  },
+  "seven_arts_manuals": {
+   "effects": {
+    "adoption_rate": 0.0014,
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0005,
+    "knowledge_rate": 0.0025,
+    "labor_demand": 0.0001,
+    "literacy": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "Seven Arts Manuals",
+   "observation": "Short manuals set out grammar, rhetoric, logic, number, geometry, music and the stars for a master with few books."
+  },
+  "moving_feast_reckoning": {
+   "effects": {
+    "legitimacy": 0.0001,
+    "observation_rate": 0.0019,
+    "standardization": 0.0014,
+    "task_coordination": 0.0013
+   },
+   "art": "res://assets/ui/research/discovery-600/intercalated_calendar.png",
+   "name": "Moving Feast Tables",
+   "observation": "Tables tie the moving feasts to the moon and the sun, so every house of the god keeps the great feast on the same day."
+  },
+  "hard_word_glossaries": {
+   "effects": {
+    "adoption_rate": 0.0023,
+    "knowledge_preservation": 0.0002,
+    "knowledge_rate": 0.0007
+   },
+   "art": "res://assets/ui/research/discovery-600/bilingual_sign_lists.png",
+   "name": "Hard-word Glossaries",
+   "observation": "Between the lines of the old books, teachers write the everyday word above each hard learned one."
+  },
+  "nine_digits_and_zero": {
+   "effects": {
+    "knowledge_rate": 0.0059,
+    "standardization": 0.0019,
+    "state_capacity": 0.0012,
+    "task_coordination": 0.0008,
+    "trade_capacity": 0.0016
+   },
+   "art": "res://assets/ui/research/subjects/place_value-v1.png",
+   "name": "Nine Digits and Zero",
+   "observation": "Nine signs and a small ring for nothing write any number by its place, and sums are worked on the page instead of on rods.",
+   "ability_reason": "Nine digits and a zero sign write any number by place; reckoning moves from rods to the page, where every step can be checked.",
+   "social_consequence": "A reckoner who knows the new signs can check a steward's sums that no one else can follow"
+  },
+  "half_chord_sine_tables": {
+   "effects": {
+    "knowledge_rate": 0.0007,
+    "observation_rate": 0.0014,
+    "survey_speed": 0.0045
+   },
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
+   "name": "Half-chord Sine Tables",
+   "observation": "Sky-watchers tabulate the half-chord of each arc and reckon heights and bearings from the table instead of drawing them."
+  },
+  "sacred_epoch_year_count": {
+   "effects": {
+    "knowledge_preservation": 0.0003,
+    "legitimacy": 0.0001,
+    "standardization": 0.0011
+   },
+   "art": "res://assets/ui/research/discovery-600/formal_chronicle_keeping.png",
+   "name": "Years from the Sacred Epoch",
+   "observation": "Chroniclers number the years from one sacred beginning instead of from each ruler's accession."
+  },
+  "retreat_copying_rooms": {
+   "effects": {
+    "adoption_rate": 0.0015,
+    "institutional_rigidity": 0.0003,
+    "knowledge_preservation": 0.0014,
+    "knowledge_rate": 0.0022,
+    "labor_demand": 0.0002,
+    "literacy": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "name": "Retreat Copying Rooms",
+   "observation": "Behind the retreat walls a copying room works through the winter by the window light, and the book room keeps what the towns have lost.",
+   "ability_reason": "When town schools close, devotees in their retreat houses keep copying; the old books survive in their book rooms instead of in the towns.",
+   "social_consequence": "Learning withdraws behind the retreat walls, and the devotees decide what is worth copying"
+  },
+  "school_logic_primers": {
+   "effects": {
+    "adoption_rate": 0.0008,
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0004,
+    "knowledge_rate": 0.0013,
+    "labor_demand": 0.0001,
+    "literacy": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "School Logic Primers",
+   "observation": "A teacher renders the old handbooks of logic into the school tongue, with his own short notes on each term."
+  },
+  "rhyme_sound_dictionary": {
+   "effects": {
+    "adoption_rate": 0.0014,
+    "knowledge_preservation": 0.0006,
+    "standardization": 0.0013
+   },
+   "art": "res://assets/ui/research/discovery-600/standard_sign_lists.png",
+   "name": "Rhyme Dictionary",
+   "observation": "Words are listed by their sound and rhyme, and the dictionary settles how each one should be read aloud."
+  },
+  "zero_negative_rules": {
+   "effects": {
+    "knowledge_rate": 0.0017,
+    "literacy": 0.001,
+    "standardization": 0.0008,
+    "trade_capacity": 0.0016
+   },
+   "art": "res://assets/ui/research/subjects/place_value-v1.png",
+   "name": "Rules for Zero and Debts",
+   "observation": "Written rules say what a debt less a debt makes, and what any number gains or loses from nothing."
+  },
+  "word_origin_encyclopedia": {
+   "effects": {
+    "institutional_rigidity": 0.0001,
+    "knowledge_preservation": 0.0009,
+    "knowledge_rate": 0.0009,
+    "labor_demand": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "name": "Word-origin Encyclopedia",
+   "observation": "One scholar orders all things known, from the stars to the kitchen, under the origins of their names."
+  },
+  "planispheric_astrolabe": {
+   "effects": {
+    "craft_output": 0.0006,
+    "observation_rate": 0.0024,
+    "survey_speed": 0.0045,
+    "travel_speed": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
+   "name": "Planispheric Astrolabe",
+   "observation": "A brass disc with a pierced star net turns over a plate of the sky, and a sighting across it tells the hour by night."
+  },
+  "relief_block_cutting": {
+   "effects": {
+    "adoption_rate": 0.0006,
+    "craft_output": 0.0016,
+    "knowledge_preservation": 0.0005,
+    "labor_demand": 0.0001,
+    "literacy": 0.0013,
+    "standardization": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png",
+   "observation": "Carvers cut the page's letters in reverse on a smoothed block of pear wood, leaving them standing in relief."
+  },
+  "printing_process": {
+   "effects": {
+    "adoption_rate": 0.0025,
+    "institutional_rigidity": -0.002,
+    "knowledge_preservation": 0.0013,
+    "knowledge_rate": 0.0036,
+    "labor_demand": 0.0002,
+    "literacy": 0.005,
+    "standardization": 0.0016,
+    "timber_pressure": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png",
+   "name": "Block Printing",
+   "observation": "The block is inked, a sheet is laid on and rubbed, and the same page comes off a hundred times a day.",
+   "ability_reason": "An inked carved block pulls the same page again and again; charms, prayers and calendars spread faster than copyists can write.",
+   "social_consequence": "Cheap printed sheets reach households that never owned a written page"
+  },
+  "word_spacing": {
+   "effects": {
+    "adoption_rate": 0.0006,
+    "knowledge_preservation": 0.0003,
+    "literacy": 0.0013
+   },
+   "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
+   "name": "Word Spacing",
+   "observation": "Copyists leave a small space between words, and a reader can follow the page silently without sounding it out."
+  },
+  "meridian_shadow_stations": {
+   "effects": {
+    "labor_demand": 0.0002,
+    "observation_rate": 0.0017,
+    "state_capacity": 0.0004,
+    "survey_speed": 0.0036
+   },
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
+   "name": "Meridian Shadow Stations",
+   "observation": "Gnomons of one height are set up along a road running north, and their shadows on the same day measure the length of a degree."
+  },
+  "waterwheel_escapement_globe": {
+   "effects": {
+    "craft_output": 0.0005,
+    "knowledge_rate": 0.0015,
+    "labor_demand": 0.0002,
+    "observation_rate": 0.0017,
+    "task_coordination": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/outflow_water_clock.png",
+   "name": "Escapement Sky Globe",
+   "observation": "Buckets on a water wheel fill and tip one by one, and each tip turns a sky globe a step to follow the stars."
+  },
+  "lunar_tide_reckoning": {
+   "effects": {
+    "disaster_resilience": 0.001,
+    "naval_capacity": 0.0003,
+    "observation_rate": 0.0011,
+    "route_speed": 0.0016
+   },
+   "art": "res://assets/ui/research/subjects/galley_navigation-v1.png",
+   "name": "Moon-age Tide Tables",
+   "observation": "Harbour pilots keep a table of high water for each day of the moon's age."
+  },
+  "small_letter_book_hand": {
+   "effects": {
+    "adoption_rate": 0.0008,
+    "knowledge_preservation": 0.0006,
+    "literacy": 0.001,
+    "standardization": 0.0008
+   },
+   "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
+   "name": "Small-letter Book Hand",
+   "observation": "A clear, even small-letter hand, with capitals kept for headings, fits more text on the skin and is easier to read."
+  },
+  "chemical_distillation": {
+   "effects": {
+    "chemical_control": 0.003,
+    "craft_output": 0.0012,
+    "fuel_demand": 0.003,
+    "health_risk": 0.001,
+    "knowledge_rate": 0.0003,
+    "observation_rate": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/fermentation_control-v1.png",
+   "observation": "A still with a cooled head draws off rose water, oils and strong waters, drop by drop, from what is heated below."
+  },
+  "digit_reckoning_handbook": {
+   "effects": {
+    "adoption_rate": 0.0008,
+    "standardization": 0.0008,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/place_value-v1.png",
+   "name": "Digit Reckoning Handbook",
+   "observation": "A handbook teaches adding, halving, multiplying and dividing with the nine digits, one worked example after another."
+  },
+  "restoration_balancing_algebra": {
+   "effects": {
+    "knowledge_rate": 0.0014,
+    "state_capacity": 0.0004,
+    "survey_speed": 0.0023,
+    "trade_capacity": 0.0007
+   },
+   "art": "res://assets/ui/research/discovery-600/worked_problem_tablets.png",
+   "name": "Algebra by Restoring and Balancing",
+   "observation": "The unknown thing is moved from side to side and the two sides balanced, until inheritances and land shares come out by rule.",
+   "ability_reason": "Unknowns are moved across and set in balance by rule; inheritance shares, land measures and trade sums become problems with sure methods."
+  },
+  "royal_house_of_learning": {
+   "effects": {
+    "adoption_rate": 0.0008,
+    "institutional_rigidity": 0.0003,
+    "knowledge_preservation": 0.0007,
+    "knowledge_rate": 0.0016,
+    "labor_demand": 0.0003,
+    "legitimacy": 0.0001,
+    "literacy": 0.001,
+    "observation_rate": 0.0014
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "name": "Court House of Learning",
+   "observation": "The court pays librarians, translators and sky-watchers to work under one roof beside its great library.",
+   "ability_reason": "The court keeps librarians, translators and sky-watchers under one roof; learning becomes a standing service of the realm instead of a private gift.",
+   "social_consequence": "Scholars take the court's stipend, and learning bends toward the court's questions"
+  },
+  "fixed_instrument_observatory": {
+   "effects": {
+    "construction_rate": 0.0006,
+    "labor_demand": 0.0002,
+    "observation_rate": 0.0014,
+    "standardization": 0.0008,
+    "survey_speed": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
+   "name": "Great-instrument Observatory",
+   "observation": "A great quadrant is built into a wall and a sextant into the hillside, too large to shake and graduated finely enough to catch small errors."
+  },
+  "letter_frequency_codebreaking": {
+   "effects": {
+    "knowledge_rate": 0.0001,
+    "security_efficiency": 0.0004,
+    "state_capacity": 0.0004
+   },
+   "art": "res://assets/ui/research/discovery-600/agreed_signal_codes.png",
+   "name": "Frequency Codebreaking",
+   "observation": "A clerk counts which signs recur most often in an enemy's secret letter and matches them to the commonest letters of the tongue."
+  },
+  "timed_beacon_code": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0004,
+    "task_coordination": 0.0005,
+    "warfare_readiness": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/prearranged_beacon_chains.png",
+   "name": "Clock-keyed Beacon Code",
+   "observation": "Beacon towers light at hours read from matched water clocks, and the hour of the fire says which message is meant."
+  },
+  "block_printed_books": {
+   "effects": {
+    "adoption_rate": 0.0012,
+    "craft_output": 0.0004,
+    "knowledge_preservation": 0.0007,
+    "knowledge_rate": 0.0005,
+    "labor_demand": 0.0001,
+    "literacy": 0.001,
+    "timber_pressure": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/printing_process-v1.png",
+   "name": "Block-printed Books",
+   "observation": "A whole book is printed from carved blocks and bound, and its last leaf gives the day it was made and who paid for it.",
+   "production_items": [
+    "soot_block_ink",
+    "block_printed_leaves"
+   ],
+   "production_contract": "Finite workshop batches make Printing Ink from lampblack, timber and freshwater, using stone and clay; and Printed Sheets from paper and printing ink, using printing forms and timber. Each batch consumes its materials, fuel and finite work; learning grants no stock."
+  },
+  "printed_almanacs": {
+   "effects": {
+    "adoption_rate": 0.001,
+    "cultivation_yield": 0.0002,
+    "literacy": 0.001,
+    "standardization": 0.0004,
+    "task_coordination": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+   "name": "Printed Almanacs",
+   "observation": "Market stalls sell printed calendars with the feasts, the lucky days and the days to sow and reap."
+  },
+  "observed_table_revision": {
+   "effects": {
+    "institutional_rigidity": -0.0003,
+    "knowledge_rate": 0.0008,
+    "observation_rate": 0.0011,
+    "survey_speed": 0.0009
+   },
+   "art": "res://assets/ui/research/discovery-600/star_hour_tables.png",
+   "name": "Sky Tables Revised",
+   "observation": "The sky-watchers find the old tables wrong by some parts of a degree and correct them from their own sightings."
+  },
+  "horary_quadrant": {
+   "effects": {
+    "construction_rate": 0.0035,
+    "observation_rate": 0.0004,
+    "survey_speed": 0.0021
+   },
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
+   "name": "Horary Quadrant",
+   "observation": "A quarter circle marked in degrees, with a plumb line, gives the height of a tower or the hour of the day from one sighting."
+  },
+  "printed_standard_classics": {
+   "effects": {
+    "adoption_rate": 0.0014,
+    "institutional_rigidity": 0.0006,
+    "knowledge_preservation": 0.0009,
+    "literacy": 0.001,
+    "standardization": 0.0015,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "Printed Standard Classics",
+   "observation": "The realm prints one checked edition of the classics, and every school teaches from the same pages.",
+   "social_consequence": "Every school reads the same pages, and any other reading becomes a mistake",
+   "production_items": [
+    "bound_printed_books"
+   ],
+   "production_contract": "Finite workshop batches make Printed Books from printed sheets, spun yarn, timber and tanned leather, using timber and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
+  },
+  "scholarly_question_letters": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "knowledge_rate": 0.0011,
+    "observation_rate": 0.0005,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_letters.png",
+   "name": "Scholars' Letters Between Realms",
+   "observation": "A scholar sends his questions across the border with a merchant, and the answers come back a season later."
+  },
+  "written_decimal_fractions": {
+   "effects": {
+    "knowledge_rate": 0.0008,
+    "literacy": 0.001,
+    "standardization": 0.0009,
+    "survey_speed": 0.0009,
+    "trade_capacity": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/place_value-v1.png",
+   "name": "Decimal Fractions",
+   "observation": "Parts of a unit are written as tenths and hundredths after a mark, and reckoned like whole numbers."
+  },
+  "illustrated_star_atlas": {
+   "effects": {
+    "knowledge_preservation": 0.0007,
+    "literacy": 0.001,
+    "observation_rate": 0.0007,
+    "route_speed": 0.0007
+   },
+   "art": "res://assets/ui/research/discovery-600/named_star_figures.png",
+   "name": "Illustrated Star Atlas",
+   "observation": "Each figure of the sky is drawn twice, as seen on the globe and as seen from the ground, with every star ranked by its brightness."
+  },
+  "digit_column_counting_board": {
+   "effects": {
+    "adoption_rate": 0.0002,
+    "state_capacity": 0.0008,
+    "task_coordination": 0.0007,
+    "trade_capacity": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "name": "Digit-column Counting Board",
+   "observation": "Counters marked with digits are laid in the columns of a board, so a clerk can add a season's accounts quickly."
+  },
+  "great_house_schools": {
+   "effects": {
+    "adoption_rate": 0.0009,
+    "knowledge_preservation": 0.0007,
+    "knowledge_rate": 0.0008,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001,
+    "literacy": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "Great-house Schools",
+   "observation": "Each great house of the god keeps a master who teaches the seven arts to boys meant for its service."
+  },
+  "polynomial_term_algebra": {
+   "effects": {
+    "knowledge_rate": 0.0013,
+    "survey_speed": 0.003
+   },
+   "art": "res://assets/ui/research/discovery-600/worked_problem_tablets.png",
+   "name": "Algebra of Powers",
+   "observation": "Reckoners add, subtract and divide sums of squares, cubes and higher powers term by term, all in words."
+  },
+  "darkened_room_optics": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "institutional_rigidity": -0.0003,
+    "knowledge_rate": 0.0019,
+    "observation_rate": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
+   "name": "Darkened-room Optics",
+   "observation": "Light let through a pinhole into a dark room throws an upside-down picture of the street, and each ray is traced with a thread.",
+   "ability_reason": "Light is passed into a dark room and traced; how sight works becomes a question settled by trial as well as by old authority."
+  },
+  "sky_model_doubts": {
+   "effects": {
+    "institutional_rigidity": -0.0003,
+    "knowledge_rate": 0.0008,
+    "legitimacy": -0.001,
+    "literacy": 0.001,
+    "observation_rate": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/star_hour_tables.png",
+   "name": "Doubts on the Sky Models",
+   "observation": "A sky-watcher lists the places where the accepted model of the heavens does not agree with itself or with the sky."
+  },
+  "movable_type_composition": {
+   "effects": {
+    "adoption_rate": 0.0012,
+    "craft_output": 0.0014,
+    "knowledge_preservation": 0.0004,
+    "labor_demand": 0.0002
+   },
+   "art": "res://assets/ui/research/paper/movable_type_composition.png",
+   "observation": "Each character is pressed in clay, fired hard, and set in an iron frame with wax so that a page can be printed and then broken up.",
+   "production_contract": "Characters pressed in clay and fired hard are set in an iron forme with wax, then inked and proofed into reusable Printing Forms. Cast metal and carved wooden type come with their own later discoveries. Installed forms feed existing printing and study; no text or discovered knowledge is created."
+  },
+  "guest_star_records": {
+   "effects": {
+    "knowledge_preservation": 0.0004,
+    "observation_rate": 0.0009
+   },
+   "art": "res://assets/ui/research/discovery-600/dated_omen_records.png",
+   "name": "Guest-star Records",
+   "observation": "When a new star appears among the fixed stars, the court watchers record the day, its place and how long it stays."
+  },
+  "binomial_coefficient_triangle": {
+   "effects": {
+    "knowledge_rate": 0.0011,
+    "survey_speed": 0.0015
+   },
+   "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
+   "name": "Coefficient Triangle",
+   "observation": "A triangle of numbers, each the sum of the two above it, gives the parts of any power of a sum."
+  },
+  "universal_astrolabe_plate": {
+   "effects": {
+    "observation_rate": 0.0009,
+    "route_speed": 0.004,
+    "survey_speed": 0.0045
+   },
+   "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
+   "name": "Universal Astrolabe Plate",
+   "observation": "One engraved plate serves the astrolabe at any latitude, so a traveller need not carry a plate for every land."
+  },
+  "geometric_cubic_solutions": {
+   "effects": {
+    "construction_rate": 0.0004,
+    "knowledge_rate": 0.0033
+   },
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
+   "name": "Cubics by Conic Sections",
+   "observation": "Problems of the cube are solved where a circle and a curve cut across one another."
+  },
+  "letter_writing_art": {
+   "effects": {
+    "adoption_rate": 0.0009,
+    "knowledge_preservation": 0.0005,
+    "literacy": 0.001,
+    "state_capacity": 0.0007,
+    "task_coordination": 0.0004,
+    "trade_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_letters.png",
+   "name": "Art of Letter-writing",
+   "observation": "Clerks learn the set parts of a letter: greeting, goodwill, statement, request and close, with forms for every rank."
+  },
+  "astronomical_clock_tower": {
+   "effects": {
+    "construction_rate": 0.0004,
+    "craft_output": 0.0008,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0002,
+    "observation_rate": 0.0013,
+    "task_coordination": 0.0007
+   },
+   "art": "res://assets/ui/research/discovery-600/outflow_water_clock.png",
+   "name": "Astronomical Clock Tower",
+   "observation": "A tower several storeys high drives a turning sky globe, puppets and bells with a long chain from its water wheel."
+  },
+  "observation_notebooks": {
+   "effects": {
+    "knowledge_preservation": 0.0005,
+    "knowledge_rate": 0.0025,
+    "observation_rate": 0.0023
+   },
+   "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
+   "name": "Notebooks of Curiosities",
+   "observation": "A scholar fills his notebooks with fossils in the cliffs, lodestones, bent sticks in water and whatever else he sees."
+  },
+  "contrary_authorities_method": {
+   "effects": {
+    "adoption_rate": 0.0003,
+    "institutional_rigidity": -0.0003,
+    "knowledge_rate": 0.0008,
+    "legitimacy": -0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Yes-and-no Method",
+   "observation": "A master sets the authorities that say yes beside those that say no, and leaves his students to reconcile them."
+  },
+  "magnetic_declination_note": {
+   "effects": {
+    "naval_capacity": 0.0007,
+    "route_speed": 0.0014,
+    "survey_speed": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
+   "name": "Needle Drift Recorded",
+   "observation": "Pilots note that the needle does not point exactly to the pole star, and by how much it falls to the east."
+  },
+  "paper_working_copies": {
+   "effects": {
+    "adoption_rate": 0.0006,
+    "knowledge_preservation": 0.0005,
+    "labor_demand": 0.0001,
+    "literacy": 0.001,
+    "state_capacity": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/paper_making-v1.png",
+   "name": "Paper Working Copies",
+   "observation": "Drafts, accounts and students' copies go on cheap paper, and parchment is kept for books and charters meant to last."
+  },
+  "collected_sentences_textbook": {
+   "effects": {
+    "adoption_rate": 0.0004,
+    "institutional_rigidity": 0.0002,
+    "knowledge_rate": 0.0005,
+    "literacy": 0.001,
+    "standardization": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "Book of Sentences",
+   "observation": "One master gathers the sayings of the authorities on every question into four books, and every school lectures on them."
+  },
+  "chartered_university": {
+   "effects": {
+    "adoption_rate": 0.0009,
+    "cohesion": -0.0002,
+    "institutional_rigidity": 0.0003,
+    "knowledge_preservation": 0.001,
+    "knowledge_rate": 0.0018,
+    "labor_demand": 0.0003,
+    "legitimacy": 0.0002,
+    "literacy": 0.0013,
+    "state_capacity": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "Chartered University",
+   "observation": "Masters and students swear themselves into one body with its own seal, rules and courts, and the ruler grants it privileges.",
+   "ability_reason": "Masters and students form a sworn body with its own seal, courts and privileges; teaching outlives any single master and draws students from many realms.",
+   "social_consequence": "Scholars answer to their own masters' court, and town and school quarrel in the streets"
+  },
+  "rival_tongue_translation_school": {
+   "effects": {
+    "adoption_rate": 0.0006,
+    "knowledge_preservation": 0.0011,
+    "knowledge_rate": 0.0015,
+    "labor_demand": 0.0002,
+    "legitimacy": -0.002,
+    "literacy": 0.001,
+    "observation_rate": 0.0027
+   },
+   "art": "res://assets/ui/research/subjects/public_libraries-v1.png",
+   "name": "Translation School",
+   "observation": "In a conquered city, translators work in pairs to render whole libraries from the rival people's learned tongue.",
+   "ability_reason": "Translators render whole libraries from a rival people's learned tongue; lost geometry, medicine and sky-lore return at once.",
+   "social_consequence": "Wisdom from the enemy's books unsettles those who hold that the god's word already says everything"
+  },
+  "teaching_licence_degree": {
+   "effects": {
+    "adoption_rate": 0.0006,
+    "institutional_rigidity": 0.0002,
+    "legitimacy": 0.0001,
+    "literacy": 0.001,
+    "standardization": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "Licence to Teach",
+   "observation": "A student who passes the masters' examination receives the licence to teach anywhere in the realm and beyond."
+  },
+  "scholastic_question_method": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.0002,
+    "knowledge_rate": 0.0024,
+    "legitimacy": 0.0001,
+    "literacy": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/public_debate_custom.png",
+   "name": "Scholastic Method",
+   "observation": "Every lesson is a question: the objections are stated, the answer given, and each objection replied to in turn.",
+   "ability_reason": "Every question is posed, argued against, answered and the objections replied to; disputation becomes a drill that trains every clerk to argue by rule.",
+   "social_consequence": "Clerks can argue any side, but every answer must pass through the old authorities"
+  },
+  "set_text_lectures": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.0003,
+    "literacy": 0.001,
+    "standardization": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "Set-text Lectures",
+   "observation": "The master reads the set text aloud line by line, and students copy his glosses into the margins."
+  },
+  "merchant_digit_reckoning": {
+   "effects": {
+    "adoption_rate": 0.0009,
+    "knowledge_rate": 0.0005,
+    "literacy": 0.001,
+    "standardization": 0.0009,
+    "state_capacity": 0.0006,
+    "trade_capacity": 0.0015
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "name": "Merchants' Reckoning Book",
+   "observation": "A merchants' book teaches the nine digits with worked problems of barter, partnership, interest and exchange.",
+   "ability_reason": "A merchants' book teaches digit reckoning through problems of barter, partnership and exchange; shops leave the counting board for pen reckoning that can be audited.",
+   "social_consequence": "Merchants' sons learn to reckon faster than the lord's stewards"
+  },
+  "automata_machine_book": {
+   "effects": {
+    "craft_output": 0.0012,
+    "knowledge_rate": 0.0005,
+    "literacy": 0.001,
+    "repair_capacity": 0.002,
+    "water_access": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/water_mills-v1.png",
+   "name": "Book of Machines",
+   "observation": "An illustrated book shows water-raising machines, locks, clocks and moving figures, with every part drawn to be copied."
+  },
+  "science_of_weights": {
+   "effects": {
+    "construction_rate": 0.0009,
+    "craft_output": 0.0004,
+    "knowledge_rate": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/balance_beam_weights.png",
+   "name": "Science of Weights",
+   "observation": "Masters show why a weight farther along the arm pulls harder, and prove the steelyard and the bent lever by that rule."
+  },
+  "alphabetical_concordance": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "knowledge_preservation": 0.0004,
+    "knowledge_rate": 0.0005,
+    "literacy": 0.001
+   },
+   "art": "res://assets/ui/research/discovery-600/cross_referenced_archives.png",
+   "name": "Concordances and Indexes",
+   "observation": "Teams of students list every word of the god's books in order of its letters, with each place it appears."
+  },
+  "endowed_student_colleges": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "knowledge_preservation": 0.0002,
+    "knowledge_rate": 0.0007,
+    "labor_demand": 0.0002,
+    "legitimacy": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "Endowed Colleges",
+   "observation": "A benefactor's endowment houses and feeds poor students under a warden, with a small library of chained books."
+  },
+  "district_rain_gauges": {
+   "effects": {
+    "cultivation_yield": 0.001,
+    "disaster_resilience": 0.0006,
+    "labor_demand": 0.0001,
+    "observation_rate": 0.0004,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/seasonal_patterns-v1.png",
+   "name": "District Rain Gauges",
+   "observation": "Every district seat keeps a standard gauge for rain and snow and reports the depth to the capital."
+  },
+  "stepwise_high_root_extraction": {
+   "effects": {
+    "knowledge_rate": 0.0007,
+    "survey_speed": 0.0025
+   },
+   "art": "res://assets/ui/research/discovery-600/square_root_tables.png",
+   "name": "Stepwise Root Extraction",
+   "observation": "A rule worked digit by digit on the counting board finds the root of equations of any power."
+  },
+  "rented_exemplar_copying": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "knowledge_preservation": 0.0005,
+    "labor_demand": 0.0001,
+    "standardization": 0.0003
+   },
+   "art": "res://assets/ui/research/discovery-600/checked_master_copies.png",
+   "name": "Rented Exemplars",
+   "observation": "Stationers rent out checked copies of the set texts in sections, so many students can copy one book at once."
+  },
+  "experimental_science_program": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "institutional_rigidity": -0.0004,
+    "knowledge_rate": 0.0016,
+    "labor_demand": 0.0001,
+    "legitimacy": -0.002,
+    "observation_rate": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
+   "name": "Program of Trials",
+   "observation": "Scholars try what the books claim with lodestones, lenses and burning glasses, and write down what happened.",
+   "ability_reason": "Scholars set experience against the books; claims are tried with lodestones, lenses and burning glasses, and a failed trial can overturn an authority.",
+   "social_consequence": "Testing the authorities by experience draws suspicion from those who guard the god's teaching"
+  },
+  "lodestone_pole_experiments": {
+   "effects": {
+    "knowledge_rate": 0.0005,
+    "observation_rate": 0.0004,
+    "route_speed": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
+   "name": "Lodestone Poles",
+   "observation": "A scholar rounds a lodestone into a ball, traces a needle's lines over it and finds its two poles."
+  },
+  "royal_sky_tables_commission": {
+   "effects": {
+    "labor_demand": 0.0002,
+    "observation_rate": 0.0004,
+    "standardization": 0.0002,
+    "state_capacity": 0.0002,
+    "survey_speed": 0.0037
+   },
+   "art": "res://assets/ui/research/discovery-600/star_hour_tables.png",
+   "name": "Royal Sky Tables",
+   "observation": "The ruler gathers sky-watchers for years to recompute every table of the sun, moon and wandering stars."
+  },
+  "school_perspective_optics": {
+   "effects": {
+    "construction_rate": 0.0013,
+    "craft_output": 0.0002,
+    "knowledge_rate": 0.0004,
+    "literacy": 0.001,
+    "observation_rate": 0.0003
+   },
+   "art": "res://assets/ui/research/discovery-600/palace_wall_painting.png",
+   "name": "Perspective Optics",
+   "observation": "The schools teach how things look smaller with distance and how rays bend, and painters and builders learn from them."
+  },
+  "optical_lenses": {
+   "effects": {
+    "craft_output": 0.0004,
+    "labor_efficiency": 0.0003,
+    "observation_rate": 0.0005,
+    "tool_quality": 0.001
+   },
+   "art": "res://assets/ui/research/knowledge-v1.png",
+   "observation": "Glass ground to a swelling curve makes small letters and fine work look large."
+  },
+  "reckoning_schools": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "labor_demand": 0.0001,
+    "literacy": 0.001,
+    "standardization": 0.0002,
+    "trade_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_schools-v1.png",
+   "name": "Reckoning Schools",
+   "observation": "Masters of reckoning teach merchants' sons digit sums, exchange and bookkeeping for a fee."
+  },
+  "verge_escapement_clock": {
+   "effects": {
+    "craft_output": 0.0007,
+    "fatigue": 0.001,
+    "labor_demand": 0.0002,
+    "observation_rate": 0.0004,
+    "standardization": 0.0005,
+    "task_coordination": 0.0013
+   },
+   "art": "res://assets/ui/research/discovery-600/outflow_water_clock.png",
+   "name": "Verge Escapement Clock",
+   "observation": "A falling weight turns a toothed wheel that a swinging verge checks and releases, tooth by tooth, all day and all night.",
+   "ability_reason": "A falling weight checked by a swinging verge keeps the hours day and night in any weather; time is kept by machine instead of sun, water or candle.",
+   "production_items": [
+    "verge_clock_movements"
+   ],
+   "production_contract": "Finite workshop batches make Clock Movements from wrought iron, refined copper, timber and stone, using wrought iron and stone. Each batch consumes its materials, fuel and finite work; learning grants no stock."
+  },
+  "foliated_running_heads": {
+   "effects": {
+    "adoption_rate": 0.0003,
+    "knowledge_preservation": 0.0004,
+    "literacy": 0.001
+   },
+   "art": "res://assets/ui/research/paper/parchment_record_preparation.png",
+   "name": "Numbered Leaves",
+   "observation": "Each leaf is numbered and each page topped with its book and chapter, so a reader can find his place at once."
+  },
+  "wooden_movable_type": {
+   "effects": {
+    "adoption_rate": 0.0008,
+    "craft_output": 0.0007,
+    "knowledge_preservation": 0.0003,
+    "labor_demand": 0.0001,
+    "timber_pressure": 0.001
+   },
+   "art": "res://assets/ui/research/paper/movable_type_composition.png",
+   "observation": "Thousands of wooden characters stand on two revolving tables, and the compositor turns the table to reach the one he needs."
+  },
+  "mineral_acid_distillation": {
+   "effects": {
+    "chemical_control": 0.005,
+    "craft_output": 0.0011,
+    "health_risk": 0.002,
+    "metal_yield": 0.0015,
+    "observation_rate": 0.0003,
+    "pollution": 0.003,
+    "water_pollution": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
+   "name": "Mineral Acids",
+   "observation": "Vitriol and saltpetre heated together in a glass still give a water strong enough to part silver from gold.",
+   "production_items": [
+    "parting_acid"
+   ],
+   "production_contract": "Finite workshop batches make Parting Acid from saltpetre, sulfur, iron ore and freshwater, using laboratory glassware and clay. Each batch consumes its materials, fuel and finite work; learning grants no stock."
+  },
+  "water_sphere_rainbow_test": {
+   "effects": {
+    "knowledge_rate": 0.0005,
+    "observation_rate": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/experimental_controls-v1.png",
+   "name": "Rainbow in a Glass Globe",
+   "observation": "A glass globe filled with water, held in the sun, throws the colours of the rainbow in the order the sky shows them."
+  },
+  "vernacular_learned_writing": {
+   "effects": {
+    "adoption_rate": 0.0009,
+    "cohesion": 0.0001,
+    "institutional_rigidity": -0.0002,
+    "knowledge_rate": 0.0005,
+    "legitimacy": -0.001,
+    "literacy": 0.0036
+   },
+   "art": "res://assets/ui/research/knowledge-v1.png",
+   "name": "Learning in the Common Tongue",
+   "observation": "A scholar writes on the stars and the soul in the everyday tongue, for readers who have no school learning."
+  },
+  "striking_equal_hour_clock": {
+   "effects": {
+    "fatigue": 0.003,
+    "labor_demand": 0.0001,
+    "labor_efficiency": 0.0005,
+    "legitimacy": 0.0001,
+    "standardization": 0.0008,
+    "task_coordination": 0.0014
+   },
+   "art": "res://assets/ui/research/discovery-600/shadow_clock.png",
+   "name": "Striking Town Clock",
+   "observation": "The town clock strikes each equal hour on its bell, day and night, for the market, the courts and the workshops.",
+   "ability_reason": "The town clock strikes equal hours for markets, courts and work; the day is divided by the town's bell instead of by the sun or the god's house.",
+   "social_consequence": "Work begins and ends at the clock's stroke, and the bell sets the price of an hour's labor"
+  },
+  "mean_speed_rule": {
+   "effects": {
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.0003
+   },
+   "art": "res://assets/ui/research/discovery-600/worked_problem_tablets.png",
+   "name": "Mean-speed Rule",
+   "observation": "Masters prove that a body quickening steadily covers the same ground as one moving always at its middle speed."
+  },
+  "commonplace_books": {
+   "effects": {
+    "adoption_rate": 0.0005,
+    "knowledge_preservation": 0.0005,
+    "knowledge_rate": 0.0003,
+    "literacy": 0.0036
+   },
+   "art": "res://assets/ui/research/paper/laboratory_notebooks.png",
+   "name": "Commonplace Books",
+   "observation": "Townsmen keep cheap paper notebooks of prayers, recipes, accounts and sayings copied from what they read."
+  },
+  "impetus_theory": {
+   "effects": {
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.0003
+   },
+   "art": "res://assets/ui/research/knowledge-v1.png",
+   "name": "Impetus",
+   "observation": "A stone keeps flying because the thrower's push is carried within it and wears away by degrees, say the masters."
+  },
+  "quality_graphs": {
+   "effects": {
+    "knowledge_rate": 0.0006,
+    "observation_rate": 0.0004,
+    "survey_speed": 0.0013
+   },
+   "art": "res://assets/ui/research/discovery-600/reciprocal_tables.png",
+   "name": "Qualities Drawn as Graphs",
+   "observation": "A master draws how heat or speed grows along a line as a figure of rising heights."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "rounded_book_hand": {
+    "adoption_rate": 0.0009,
+    "knowledge_preservation": 0.0038,
+    "labor_demand": 0.001
+   },
+   "devised_script_for_new_tongue": {
+    "adoption_rate": 0.0035,
+    "knowledge_preservation": 0.0029,
+    "labor_demand": 0.001,
+    "trade_capacity": 0.0028
+   },
+   "itinerary_strip_maps": {
+    "logistics_endurance": 0.001,
+    "route_speed": 0.008,
+    "security_efficiency": 0.001,
+    "survey_speed": 0.0052
+   },
+   "seven_arts_manuals": {
+    "adoption_rate": 0.0017,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.0029,
+    "knowledge_rate": 0.0025,
+    "labor_demand": 0.002
+   },
+   "moving_feast_reckoning": {
+    "legitimacy": 0.001,
+    "observation_rate": 0.0019,
+    "standardization": 0.0036,
+    "task_coordination": 0.0024
+   },
+   "hard_word_glossaries": {
+    "adoption_rate": 0.0026,
+    "knowledge_preservation": 0.0019,
+    "knowledge_rate": 0.0008
+   },
+   "nine_digits_and_zero": {
+    "knowledge_rate": 0.0066,
+    "standardization": 0.0061,
+    "state_capacity": 0.0048,
+    "task_coordination": 0.0036,
+    "trade_capacity": 0.0069
+   },
+   "half_chord_sine_tables": {
+    "knowledge_rate": 0.0008,
+    "observation_rate": 0.0019,
+    "survey_speed": 0.008
+   },
+   "sacred_epoch_year_count": {
+    "knowledge_preservation": 0.0029,
+    "legitimacy": 0.002,
+    "standardization": 0.0036
+   },
+   "retreat_copying_rooms": {
+    "adoption_rate": 0.0017,
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0134,
+    "knowledge_rate": 0.0025,
+    "labor_demand": 0.004
+   },
+   "school_logic_primers": {
+    "adoption_rate": 0.0009,
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.0019,
+    "knowledge_rate": 0.0025,
+    "labor_demand": 0.001
+   },
+   "rhyme_sound_dictionary": {
+    "adoption_rate": 0.0017,
+    "knowledge_preservation": 0.0029,
+    "standardization": 0.0036
+   },
+   "zero_negative_rules": {
+    "knowledge_rate": 0.0033,
+    "standardization": 0.0024,
+    "trade_capacity": 0.0055
+   },
+   "word_origin_encyclopedia": {
+    "institutional_rigidity": 0.001,
+    "knowledge_preservation": 0.0048,
+    "knowledge_rate": 0.0017,
+    "labor_demand": 0.001
+   },
+   "planispheric_astrolabe": {
+    "craft_output": 0.0013,
+    "observation_rate": 0.0047,
+    "survey_speed": 0.0069,
+    "travel_speed": 0.002
+   },
+   "relief_block_cutting": {
+    "adoption_rate": 0.0026,
+    "craft_output": 0.004,
+    "knowledge_preservation": 0.0029,
+    "labor_demand": 0.002,
+    "standardization": 0.0024
+   },
+   "printing_process": {
+    "adoption_rate": 0.0104,
+    "institutional_rigidity": -0.002,
+    "knowledge_preservation": 0.0076,
+    "knowledge_rate": 0.0041,
+    "labor_demand": 0.003,
+    "standardization": 0.0048,
+    "timber_pressure": 0.001
+   },
+   "word_spacing": {
+    "adoption_rate": 0.0026,
+    "knowledge_preservation": 0.0019
+   },
+   "meridian_shadow_stations": {
+    "labor_demand": 0.003,
+    "observation_rate": 0.0028,
+    "state_capacity": 0.0016,
+    "survey_speed": 0.008
+   },
+   "waterwheel_escapement_globe": {
+    "craft_output": 0.0013,
+    "knowledge_rate": 0.0017,
+    "labor_demand": 0.003,
+    "observation_rate": 0.0028,
+    "task_coordination": 0.0024
+   },
+   "lunar_tide_reckoning": {
+    "disaster_resilience": 0.001,
+    "naval_capacity": 0.002,
+    "observation_rate": 0.0019,
+    "route_speed": 0.006
+   },
+   "small_letter_book_hand": {
+    "adoption_rate": 0.0035,
+    "knowledge_preservation": 0.0038,
+    "standardization": 0.0024
+   },
+   "chemical_distillation": {
+    "chemical_control": 0.003,
+    "craft_output": 0.004,
+    "fuel_demand": 0.003,
+    "health_risk": 0.001,
+    "knowledge_rate": 0.0017,
+    "observation_rate": 0.0028
+   },
+   "digit_reckoning_handbook": {
+    "adoption_rate": 0.0035,
+    "standardization": 0.0024,
+    "state_capacity": 0.0032,
+    "trade_capacity": 0.0041
+   },
+   "restoration_balancing_algebra": {
+    "knowledge_rate": 0.0075,
+    "state_capacity": 0.0032,
+    "survey_speed": 0.0052,
+    "trade_capacity": 0.0041
+   },
+   "royal_house_of_learning": {
+    "adoption_rate": 0.0035,
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0057,
+    "knowledge_rate": 0.0083,
+    "labor_demand": 0.005,
+    "legitimacy": 0.002,
+    "observation_rate": 0.0057
+   },
+   "fixed_instrument_observatory": {
+    "construction_rate": 0.0018,
+    "labor_demand": 0.003,
+    "observation_rate": 0.0057,
+    "standardization": 0.0024,
+    "survey_speed": 0.0052
+   },
+   "letter_frequency_codebreaking": {
+    "knowledge_rate": 0.0008,
+    "security_efficiency": 0.004,
+    "state_capacity": 0.0032
+   },
+   "timed_beacon_code": {
+    "labor_demand": 0.002,
+    "security_efficiency": 0.004,
+    "task_coordination": 0.0036,
+    "warfare_readiness": 0.002
+   },
+   "block_printed_books": {
+    "adoption_rate": 0.0052,
+    "craft_output": 0.0013,
+    "knowledge_preservation": 0.0057,
+    "knowledge_rate": 0.0025,
+    "labor_demand": 0.002,
+    "timber_pressure": 0.001
+   },
+   "printed_almanacs": {
+    "adoption_rate": 0.0043,
+    "cultivation_yield": 0.002,
+    "standardization": 0.0012,
+    "task_coordination": 0.0024
+   },
+   "observed_table_revision": {
+    "institutional_rigidity": -0.001,
+    "knowledge_rate": 0.0025,
+    "observation_rate": 0.0057,
+    "survey_speed": 0.0035
+   },
+   "horary_quadrant": {
+    "construction_rate": 0.0036,
+    "observation_rate": 0.0019,
+    "survey_speed": 0.008
+   },
+   "printed_standard_classics": {
+    "adoption_rate": 0.0052,
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0038,
+    "standardization": 0.0061,
+    "state_capacity": 0.0032
+   },
+   "scholarly_question_letters": {
+    "adoption_rate": 0.0017,
+    "knowledge_rate": 0.0033,
+    "observation_rate": 0.0028,
+    "trade_capacity": 0.0014
+   },
+   "written_decimal_fractions": {
+    "knowledge_rate": 0.0025,
+    "standardization": 0.0036,
+    "survey_speed": 0.0035,
+    "trade_capacity": 0.0041
+   },
+   "illustrated_star_atlas": {
+    "knowledge_preservation": 0.0029,
+    "observation_rate": 0.0038,
+    "route_speed": 0.002
+   },
+   "digit_column_counting_board": {
+    "adoption_rate": 0.0009,
+    "state_capacity": 0.0048,
+    "task_coordination": 0.0024,
+    "trade_capacity": 0.0041
+   },
+   "great_house_schools": {
+    "adoption_rate": 0.0035,
+    "knowledge_preservation": 0.0029,
+    "knowledge_rate": 0.0025,
+    "labor_demand": 0.003,
+    "legitimacy": 0.002
+   },
+   "polynomial_term_algebra": {
+    "knowledge_rate": 0.0041,
+    "survey_speed": 0.0035
+   },
+   "darkened_room_optics": {
+    "adoption_rate": 0.0017,
+    "institutional_rigidity": -0.002,
+    "knowledge_rate": 0.0058,
+    "observation_rate": 0.0094
+   },
+   "sky_model_doubts": {
+    "institutional_rigidity": -0.002,
+    "knowledge_rate": 0.0025,
+    "legitimacy": -0.001,
+    "observation_rate": 0.0019
+   },
+   "movable_type_composition": {
+    "adoption_rate": 0.0043,
+    "craft_output": 0.004,
+    "knowledge_preservation": 0.0029,
+    "labor_demand": 0.003
+   },
+   "guest_star_records": {
+    "knowledge_preservation": 0.0029,
+    "observation_rate": 0.0038
+   },
+   "binomial_coefficient_triangle": {
+    "knowledge_rate": 0.0033,
+    "survey_speed": 0.0017
+   },
+   "universal_astrolabe_plate": {
+    "observation_rate": 0.0019,
+    "route_speed": 0.004,
+    "survey_speed": 0.0069
+   },
+   "geometric_cubic_solutions": {
+    "construction_rate": 0.0018,
+    "knowledge_rate": 0.0033
+   },
+   "letter_writing_art": {
+    "adoption_rate": 0.0009,
+    "knowledge_preservation": 0.0019,
+    "state_capacity": 0.0064,
+    "task_coordination": 0.0024,
+    "trade_capacity": 0.0041
+   },
+   "astronomical_clock_tower": {
+    "construction_rate": 0.0018,
+    "craft_output": 0.0027,
+    "labor_demand": 0.004,
+    "legitimacy": 0.003,
+    "observation_rate": 0.0028,
+    "task_coordination": 0.0047
+   },
+   "observation_notebooks": {
+    "knowledge_preservation": 0.0019,
+    "knowledge_rate": 0.0025,
+    "observation_rate": 0.0047
+   },
+   "contrary_authorities_method": {
+    "adoption_rate": 0.0017,
+    "institutional_rigidity": -0.002,
+    "knowledge_rate": 0.0041,
+    "legitimacy": -0.001
+   },
+   "magnetic_declination_note": {
+    "naval_capacity": 0.001,
+    "route_speed": 0.006,
+    "survey_speed": 0.0052
+   },
+   "paper_working_copies": {
+    "adoption_rate": 0.0035,
+    "knowledge_preservation": 0.0038,
+    "labor_demand": 0.001,
+    "state_capacity": 0.0032
+   },
+   "collected_sentences_textbook": {
+    "adoption_rate": 0.0026,
+    "institutional_rigidity": 0.002,
+    "knowledge_rate": 0.0025,
+    "standardization": 0.0036
+   },
+   "chartered_university": {
+    "adoption_rate": 0.0052,
+    "cohesion": -0.001,
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0067,
+    "knowledge_rate": 0.0099,
+    "labor_demand": 0.006,
+    "legitimacy": 0.003,
+    "state_capacity": 0.0048
+   },
+   "rival_tongue_translation_school": {
+    "adoption_rate": 0.0035,
+    "knowledge_preservation": 0.0076,
+    "knowledge_rate": 0.0083,
+    "labor_demand": 0.004,
+    "legitimacy": -0.002,
+    "observation_rate": 0.0038
+   },
+   "teaching_licence_degree": {
+    "adoption_rate": 0.0035,
+    "institutional_rigidity": 0.002,
+    "legitimacy": 0.001,
+    "standardization": 0.0036
+   },
+   "scholastic_question_method": {
+    "adoption_rate": 0.0026,
+    "institutional_rigidity": 0.003,
+    "knowledge_preservation": 0.0019,
+    "knowledge_rate": 0.0075,
+    "legitimacy": 0.001
+   },
+   "set_text_lectures": {
+    "adoption_rate": 0.0026,
+    "institutional_rigidity": 0.002,
+    "knowledge_preservation": 0.0038,
+    "standardization": 0.0024
+   },
+   "merchant_digit_reckoning": {
+    "adoption_rate": 0.0035,
+    "knowledge_rate": 0.0017,
+    "standardization": 0.0061,
+    "state_capacity": 0.0048,
+    "trade_capacity": 0.0138
+   },
+   "automata_machine_book": {
+    "craft_output": 0.004,
+    "knowledge_rate": 0.0017,
+    "repair_capacity": 0.002,
+    "water_access": 0.002
+   },
+   "science_of_weights": {
+    "construction_rate": 0.0054,
+    "craft_output": 0.0013,
+    "knowledge_rate": 0.0033
+   },
+   "alphabetical_concordance": {
+    "adoption_rate": 0.0026,
+    "knowledge_preservation": 0.0048,
+    "knowledge_rate": 0.0017
+   },
+   "endowed_student_colleges": {
+    "adoption_rate": 0.0035,
+    "knowledge_preservation": 0.0019,
+    "knowledge_rate": 0.0033,
+    "labor_demand": 0.003,
+    "legitimacy": 0.001
+   },
+   "district_rain_gauges": {
+    "cultivation_yield": 0.002,
+    "disaster_resilience": 0.002,
+    "labor_demand": 0.001,
+    "observation_rate": 0.0038,
+    "state_capacity": 0.0016
+   },
+   "stepwise_high_root_extraction": {
+    "knowledge_rate": 0.0033,
+    "survey_speed": 0.0035
+   },
+   "rented_exemplar_copying": {
+    "adoption_rate": 0.0035,
+    "knowledge_preservation": 0.0048,
+    "labor_demand": 0.001,
+    "standardization": 0.0036
+   },
+   "experimental_science_program": {
+    "adoption_rate": 0.0026,
+    "institutional_rigidity": -0.004,
+    "knowledge_rate": 0.0075,
+    "labor_demand": 0.002,
+    "legitimacy": -0.002,
+    "observation_rate": 0.0113
+   },
+   "lodestone_pole_experiments": {
+    "knowledge_rate": 0.0025,
+    "observation_rate": 0.0038,
+    "route_speed": 0.002
+   },
+   "royal_sky_tables_commission": {
+    "labor_demand": 0.003,
+    "observation_rate": 0.0038,
+    "standardization": 0.0024,
+    "state_capacity": 0.0032,
+    "survey_speed": 0.0052
+   },
+   "school_perspective_optics": {
+    "construction_rate": 0.0036,
+    "craft_output": 0.0013,
+    "knowledge_rate": 0.0017,
+    "observation_rate": 0.0028
+   },
+   "optical_lenses": {
+    "craft_output": 0.0027,
+    "labor_efficiency": 0.002,
+    "observation_rate": 0.0047,
+    "tool_quality": 0.001
+   },
+   "reckoning_schools": {
+    "adoption_rate": 0.0035,
+    "labor_demand": 0.002,
+    "standardization": 0.0024,
+    "trade_capacity": 0.0069
+   },
+   "verge_escapement_clock": {
+    "craft_output": 0.004,
+    "fatigue": 0.001,
+    "labor_demand": 0.003,
+    "observation_rate": 0.0038,
+    "standardization": 0.0061,
+    "task_coordination": 0.0095
+   },
+   "foliated_running_heads": {
+    "adoption_rate": 0.0017,
+    "knowledge_preservation": 0.0038
+   },
+   "wooden_movable_type": {
+    "adoption_rate": 0.0043,
+    "craft_output": 0.004,
+    "knowledge_preservation": 0.0029,
+    "labor_demand": 0.002,
+    "timber_pressure": 0.001
+   },
+   "mineral_acid_distillation": {
+    "chemical_control": 0.005,
+    "craft_output": 0.004,
+    "health_risk": 0.002,
+    "metal_yield": 0.002,
+    "observation_rate": 0.0019,
+    "pollution": 0.003,
+    "water_pollution": 0.001
+   },
+   "water_sphere_rainbow_test": {
+    "knowledge_rate": 0.0025,
+    "observation_rate": 0.0047
+   },
+   "vernacular_learned_writing": {
+    "adoption_rate": 0.0052,
+    "cohesion": 0.002,
+    "institutional_rigidity": -0.002,
+    "knowledge_rate": 0.0025,
+    "legitimacy": -0.001
+   },
+   "striking_equal_hour_clock": {
+    "fatigue": 0.003,
+    "labor_demand": 0.002,
+    "labor_efficiency": 0.004,
+    "legitimacy": 0.002,
+    "standardization": 0.0048,
+    "task_coordination": 0.0118
+   },
+   "mean_speed_rule": {
+    "knowledge_rate": 0.0033,
+    "observation_rate": 0.0019
+   },
+   "commonplace_books": {
+    "adoption_rate": 0.0026,
+    "knowledge_preservation": 0.0038,
+    "knowledge_rate": 0.0017
+   },
+   "impetus_theory": {
+    "knowledge_rate": 0.0033,
+    "observation_rate": 0.0019
+   },
+   "quality_graphs": {
+    "knowledge_rate": 0.0033,
+    "observation_rate": 0.0028,
+    "survey_speed": 0.0017
+   }
+  }
+ }
+}

@@ -85,6 +85,7 @@ var player_territory_balance:=0.0
 var scout_missions:Array[Dictionary]=[]
 const Exchange=preload("res://scripts/society_exchange.gd")
 const ScoutSurvival=preload("res://scripts/scout_survival.gd")
+const CharacterVoiceScript=preload("res://scripts/character_voice.gd")
 var scouting_staff=preload("res://scripts/scouting_staff.gd").new(self)
 var next_scout_mission_id:=1
 var scout_reports:Array[Dictionary]=[]
@@ -2649,6 +2650,13 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	report["actual_days"]=maxi(1,day-int(mission.get("start_day",day-int(mission.duration_days))))
 	report["start_day"]=int(mission.get("start_day",day-int(mission.duration_days)))
 	report["archive_reviewed"]=false
+	# Scouts tell what they saw in their own people's words: a foreign cart is a
+	# sledge, a saddle a pack frame, a bullet a sling stone until those are known.
+	var era_tags:=CharacterVoiceScript.era_tags("player")
+	for item in report.discoveries:
+		if not item is Dictionary: continue
+		for field in ["title","description","consequence"]:
+			if (item as Dictionary).has(field): item[field]=CharacterVoiceScript.era_plain(String(item[field]),era_tags)
 	scout_reports.push_front(report)
 	if scout_reports.size()>SCOUT_REPORT_LIMIT: scout_reports.resize(SCOUT_REPORT_LIMIT)
 	var finding:=String(recruitment_account.get("summary","")) if not recruitment_account.is_empty() else ("They met no other people." if contacts.is_empty() else ("Direct contact was established with %s." % ", ".join(contacts)))
@@ -2662,6 +2670,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	var party_name:="recruitment party" if is_recruitment else "scout party"
 	var message:="The %s returns after %d days and charts roughly %d km of land travel. %s The map now reveals only the physical route contained in its returned report." % [party_name,int(report.actual_days),int(report.distance_km),finding]
 	if String(mission.get("target_kind",""))=="observe_city":message=ScoutArchive.city_account(report)
+	message=CharacterVoiceScript.era_plain(message,era_tags)
 	scouting_staff.city_watch_returned(mission,day,true)
 	last_scout_outcome={"mission_id":int(mission.get("mission_id",0)),"day":day,"status":"returned","personnel":int(report.personnel),"message":message}
 	_record_world_event("City reconnaissance returns" if String(mission.get("target_kind",""))=="observe_city" else "Recruitment party returns" if is_recruitment else "Scout party returns",message,"diplomacy",day)

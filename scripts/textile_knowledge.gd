@@ -65,9 +65,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Repeated combing aligns long fibers and separates short tangled material from a spinnable bundle.",
     "effects": {},
-    "production_items": [
-      "combed_fibers"
-    ],
+    "production_items": ["combed_fibers", "combed_yarn"],
     "production_contract": "Manufactures the authored textile intermediates or supplies using real stocks, workshop tooling and finite work. No products or medical recovery are granted by learning alone."
   },
   {
@@ -99,10 +97,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "A weighted rotating spindle draws and twists fibers into a continuous thread of manageable thickness.",
     "effects": {},
-    "production_items": [
-      "spun_yarn",
-      "combed_yarn"
-    ],
+    "production_items": ["spun_yarn"],
     "production_contract": "Manufactures the authored textile intermediates or supplies using real stocks, workshop tooling and finite work. No products or medical recovery are granted by learning alone."
   },
   {

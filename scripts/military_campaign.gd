@@ -36,6 +36,7 @@ const AMMUNITION_DELIVERY_LOAD:Dictionary={"arrows":0.08,"artillery_rounds":0.65
 # catalog (design bible Â§17â€“18); these constants are parse-time views kept for
 # the many existing call sites.
 const UnitCatalog:=preload("res://scripts/military_unit_catalog.gd")
+const SovereignWeapons:=preload("res://scripts/sovereign_weapons.gd")
 const EQUIPMENT_KNOWLEDGE:Dictionary=UnitCatalog.EQUIPMENT_GATES
 const TRAINING_PROGRAMS:Dictionary={
 	"route_rehearsal":{"label": "ROUTE & SUPPLY PRACTICE", "duration_days": 108.0, "food_per_participant": 0.28, "training_gain": 0.03, "experience_gain": 0.0, "readiness_gain": 0.04, "fatigue_per_day": 0.00045, "wear_rate": 0.00048, "command_gain": {"logistics": 0.04, "resolve": 0.01}, "description": "Practice load distribution, route finding, and resupply. Builds logistics and resolve across unit types.", "scope": "army", "required_discovery": "", "minimum_adoption": 0.0},
@@ -88,6 +89,9 @@ var active_engagement:Dictionary={}
 var active_siege:Dictionary={}
 var siege_history:Array[Dictionary]=[]
 var war_reputation:Dictionary={"mercy":0.0,"fear":0.0,"grievance":0.0}
+## Weapons of mass destruction the ruler has loosed by spoken decision in the Court
+## (means id -> {source:"court", spoken, day, audience}); see sovereign_weapons.gd.
+var sovereign_decisions:Dictionary={}
 var occupation_forces:Array[Dictionary]=[]
 var occupation_transfers=preload("res://scripts/occupation_transfers.gd").new()
 var recovery=preload("res://scripts/siege_recovery.gd").new()
@@ -185,6 +189,7 @@ func reset_for_new_world()->void:
 	threats_resolved=0
 	active_engagement.clear()
 	war_reputation={"mercy":0.0,"fear":0.0,"grievance":0.0}
+	sovereign_decisions.clear()
 	occupation_forces.clear()
 	field_armies.clear()
 	runner_messages.clear()
@@ -1627,7 +1632,10 @@ func military_capabilities()->Dictionary:
 		unit_gate["archetype"]=UnitCatalog.archetype(String(unit))
 		units[unit]=unit_gate
 	var equipment:Dictionary={}
-	for item in EQUIPMENT_KNOWLEDGE: equipment[item]=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE[item]),0.08)
+	for item in EQUIPMENT_KNOWLEDGE:
+		equipment[item]=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE[item]),0.08)
+		var means:=SovereignWeapons.means_of_equipment(String(item))
+		if means!="": equipment[item]["use_authority"]=SovereignWeapons.authority(means)
 	var queued_trainees:=_queued_trainees()
 	return {"development":military_development_snapshot(),"organization":formation_organization_snapshot(),"production_lines":production_lines_snapshot(),"field_armies":field_armies_snapshot(),"fronts":WorldSimulation.world.military_fronts_snapshot() if CivilizationSystem!=null and WorldSimulation.world.has_method("military_fronts_snapshot") else {"fronts":[]},"units":units,"equipment":equipment,"unit_equipment":_unit_equipment_view(),"training_programs":training_program_catalog(),"training_program":training_program_snapshot(),"transport_carts":_knowledge_gate("joinery",0.10),"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"training_injury_multiplier":_training_injury_risk_multiplier(),"production_rate":_production_rate(),"base_production_rate":_base_production_rate(),"workshop_utilization":workshop_utilization(),"civilian_crafting_fraction":civilian_crafting_fraction(),"equipment_backlog_work":_equipment_backlog_work(),"medical_recovery":_adoption("battlefield_medicine"),"medical_support":preload("res://scripts/field_medicine.gd").quote(home_army,float(home_army.get("supply_level",1.0))),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"delivery_load_capacity":_daily_delivery_capacity(),"equipment_delivery_load":EQUIPMENT_DELIVERY_LOAD.duplicate(true),"ammunition_delivery_load":AMMUNITION_DELIVERY_LOAD.duplicate(true),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
 
@@ -1715,15 +1723,64 @@ func military_inquiry_context()->Dictionary:
 	}
 
 
+## Sovereign use of weapons of mass destruction (sovereign_weapons.gd). Only
+## court_commands.gd records a decision, from the ruler's spoken words.
+func record_sovereign_decision(means:String,decision:Dictionary)->Dictionary:
+	if SovereignWeapons.authority(means)=="": return {"error":"%s needs no decision of the ruler." % means}
+	if String(decision.get("source",""))!="court" or String(decision.get("spoken","")).strip_edges()=="":
+		return {"error":"Only the ruler's own word, spoken in the Court, can loose %s." % SovereignWeapons.label(means),"kind":"sovereign"}
+	var record:={"source":"court","spoken":String(decision.spoken).strip_edges().substr(0,400),"day":int(decision.get("day",WorldSimulation.state.elapsed_days)),"audience":String(decision.get("audience",""))}
+	sovereign_decisions[means]=record
+	return {"ok":true,"means":means,"decision":record.duplicate(true)}
+
+
+func revoke_sovereign_decision(means:String)->Dictionary:
+	var had:=sovereign_decisions.has(means)
+	sovereign_decisions.erase(means)
+	return {"ok":true,"revoked":had}
+
+
+## Whether a general may use `means`. context: {target:"city"|"field", signoff:bool}.
+## An order, a general's insistence or an override never counts as the decision.
+func general_use_gate(means:String,context:Dictionary={})->Dictionary:
+	return SovereignWeapons.check_use(means,sovereign_decisions,context)
+
+
+func filter_general_means(requested:Array,context:Dictionary={})->Dictionary:
+	var allowed:Array=[];var withheld:Array=[];var reasons:Array=[]
+	for means:Variant in requested:
+		var gate:=general_use_gate(String(means),context)
+		if gate.has("error"): withheld.append(String(means));reasons.append(String(gate.error))
+		else: allowed.append(String(means))
+	return {"allowed":allowed,"withheld":withheld,"reasons":reasons}
+
+
+## Formations a general holds back from striking a city: their equipment is a
+## restricted means (bombers, strike drones) the ruler has not loosed on cities.
+func formations_held_from_city(force:Dictionary)->Array:
+	var held:Array=[]
+	for formation:Variant in force.get("formations",[]):
+		if not formation is Dictionary: continue
+		var means:=SovereignWeapons.means_of_equipment(String((formation as Dictionary).get("weapon","")))
+		if means!="" and general_use_gate(means,{"target":"city"}).has("error"): held.append(formation)
+	return held
+
+
 func resolve_campaign_battle(enemy_force:Dictionary,options:Dictionary={})->Dictionary:
 	if not active_engagement.is_empty(): return {"error":"Finish the active campaign engagement first."}
 	if home_army.is_empty(): muster_home_army()
 	if int(home_army.get("troops",0))<=0: return {"error":"No deployable home army."}
 	_refresh_readiness()
 	var battle_options:=options.duplicate(true)
+	var withheld:Array=[]
+	if battle_options.has("means"):
+		# A general never uses a gated weapon on his own authority; he fights without it.
+		var screened:=filter_general_means(battle_options.get("means",[]) as Array,{"target":String(battle_options.get("target","field")),"signoff":bool(battle_options.get("signoff",false))})
+		battle_options["means"]=screened.allowed;withheld=screened.withheld
 	battle_options["seed"]=int(battle_options.get("seed",WorldSimulation.state.world_seed^int(WorldSimulation.state.elapsed_days+1.0)*7919))
 	battle_options["terrain_defense"]=float(battle_options.get("terrain_defense",_terrain_defense()))
 	var result:Dictionary=simulator.simulate(home_army,enemy_force,battle_options)
+	if not withheld.is_empty(): result["withheld_means"]=withheld
 	return _commit_campaign_battle(result)
 
 
@@ -2596,6 +2653,7 @@ func export_state()->Dictionary:
 		"active_siege":active_siege.duplicate(true),
 		"siege_history":siege_history.duplicate(true),
 		"war_reputation":war_reputation.duplicate(true),
+		"sovereign_decisions":sovereign_decisions.duplicate(true),
 		"occupation_forces":occupation_forces.duplicate(true),
 		"occupation_transfers":occupation_transfers.data.duplicate(true),
 		"siege_recovery":recovery.data.duplicate(true),
@@ -2966,6 +3024,12 @@ func _apply_imported_state(payload:Dictionary)->void:
 	for force in field_armies: next_field_army_id=maxi(next_field_army_id,int(force.get("army_id",0))+1)
 	settlement_defense=(payload.get("settlement_defense",_default_settlement_defense()) as Dictionary).duplicate(true)
 	_ensure_settlement_defense()
+	sovereign_decisions.clear()
+	var decisions:Variant=payload.get("sovereign_decisions",{})
+	if decisions is Dictionary:
+		for means:Variant in decisions:
+			var decision:Variant=decisions[means]
+			if decision is Dictionary and SovereignWeapons.authority(String(means))!="": sovereign_decisions[String(means)]=(decision as Dictionary).duplicate(true)
 
 
 func _empty_home_army()->Dictionary:

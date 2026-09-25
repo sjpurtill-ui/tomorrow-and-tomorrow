@@ -1,0 +1,1143 @@
+{
+ "line": "labor",
+ "schema": "research_600_effects/1",
+ "items": {
+  "work_group_ration_rolls": {
+   "effects": {
+    "fatigue": -0.0013,
+    "state_capacity": 0.0004,
+    "task_coordination": 0.0022
+   },
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "observation": "The scribe reads out each gang's name and the jars of barley owed it, and no crew goes short while another is fed twice."
+  },
+  "ten_day_work_week": {
+   "effects": {
+    "fatigue": -0.0033,
+    "labor_efficiency": 0.0008,
+    "task_coordination": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png",
+   "observation": "Half the crew rests while the other half works, and every tenth day the halves change places."
+  },
+  "graded_ration_scales": {
+   "effects": {
+    "cohesion": -0.002,
+    "craft_output": 0.0003,
+    "institutional_rigidity": 0.0002,
+    "labor_efficiency": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "observation": "A master smith draws three measures of grain to a carrier's one, and everyone knows a man's rank by his ration."
+  },
+  "absence_reason_registers": {
+   "effects": {
+    "health_risk": -0.003,
+    "state_capacity": 0.0003,
+    "task_coordination": 0.0013
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "observation": "Beside each missing name the scribe writes the cause: fever, a brother's burial, brewing for the feast."
+  },
+  "tool_issue_registers": {
+   "effects": {
+    "labor_efficiency": 0.0008,
+    "repair_capacity": 0.0038,
+    "storage_loss": -0.0013
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "observation": "Chisels go out at dawn against a mark and come back at dusk, and a lost blade is docked from the ration."
+  },
+  "palace_specialist_workshops": {
+   "effects": {
+    "craft_output": 0.0006,
+    "institutional_rigidity": 0.0003,
+    "standardization": 0.0015,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "observation": "Goldsmiths, joiners and perfume-makers work in adjoining rooms under one steward who holds the keys to their metal."
+  },
+  "land_for_service_tenure": {
+   "effects": {
+    "cohesion": 0.0002,
+    "institutional_rigidity": 0.0003,
+    "labor_demand": -0.004,
+    "state_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "observation": "The wheelwright holds a field by the river for as long as his household keeps turning out wheels for the palace."
+  },
+  "ration_work_stoppages": {
+   "effects": {
+    "cohesion": -0.0019,
+    "fatigue": -0.0012,
+    "health_risk": -0.001,
+    "legitimacy": -0.004
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "observation": "When the grain came late for the third month, the tomb crew sat down at the gate and would not lift a tool.",
+   "social_consequence": "Crews now know that stopping work can bring the grain; overseers learn that late rations cost more than they save."
+  },
+  "crew_grievance_hearings": {
+   "effects": {
+    "cohesion": 0.0003,
+    "labor_efficiency": 0.0002,
+    "legitimacy": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/household_councils-v1.png",
+   "observation": "On the first day of each month the overseer sits under the awning and hears what the crews say they are owed."
+  },
+  "forge_crew_roles": {
+   "effects": {
+    "craft_output": 0.0012,
+    "injury_risk": -0.0005,
+    "labor_efficiency": 0.0005,
+    "task_coordination": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/forge_welding-v1.png",
+   "observation": "The master holds the tongs and calls each blow, the striker swings, and the boy keeps the bellows breathing.",
+   "ability_reason": "Iron is worked hot and fast; a smithy runs on a fixed crew of master, striker and bellows hand."
+  },
+  "rower_levies": {
+   "effects": {
+    "cohesion": -0.0009,
+    "labor_demand": 0.0003,
+    "naval_capacity": 0.0012,
+    "task_coordination": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/galley_navigation-v1.png",
+   "observation": "Lots are drawn in each village before the sailing season, and the men drawn walk down to the ships."
+  },
+  "itinerant_craft_hire": {
+   "effects": {
+    "adoption_rate": 0.004,
+    "craft_output": 0.0007,
+    "labor_demand": -0.0005
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "observation": "A bronze-caster from the hill towns works here from spring to harvest, then walks on with his moulds on a donkey."
+  },
+  "public_hiring_grounds": {
+   "effects": {
+    "labor_demand": -0.0008,
+    "labor_efficiency": 0.0002,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+   "observation": "Before sunrise the idle stand by the well in the market square, and whoever needs hands comes to choose them."
+  },
+  "silver_wage_payment": {
+   "effects": {
+    "cohesion": -0.0009,
+    "labor_demand": -0.0013,
+    "labor_efficiency": 0.0004,
+    "trade_capacity": 0.0008
+   },
+   "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png",
+   "observation": "The stone-cutters are paid in weighed silver now, and buy their bread from whoever sells it cheapest.",
+   "ability_reason": "Wages in weighed metal let a worker buy what he needs and let employers hire without a granary behind them.",
+   "social_consequence": "Workers paid in silver are no longer fed from the storehouse; a bad harvest raises bread prices and their hunger with it."
+  },
+  "skill_graded_wages": {
+   "effects": {
+    "craft_output": 0.0007,
+    "institutional_rigidity": 0.0009,
+    "labor_efficiency": 0.0002
+   },
+   "art": "res://assets/ui/research/discovery-600/standard_weight_sets.png",
+   "observation": "A master draws four weights of silver a month, a hand two and a boy one, written down so no one argues it."
+  },
+  "underground_shift_rotation": {
+   "effects": {
+    "fatigue": -0.0012,
+    "injury_risk": -0.0004,
+    "mine_safety": 0.006,
+    "mining_output": 0.005
+   },
+   "art": "res://assets/ui/research/subjects/mine_shoring-v1.png",
+   "observation": "Lamps are counted down the shaft and counted back up; when the oil burns low, the next crew goes below."
+  },
+  "term_limited_debt_labor": {
+   "effects": {
+    "cohesion": 0.0002,
+    "institutional_rigidity": 0.0002,
+    "legitimacy": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "observation": "A debtor may be made to work off what he owes, but in the sixth year he walks free whatever remains."
+  },
+  "household_workshops_with_hands": {
+   "effects": {
+    "adoption_rate": 0.0004,
+    "craft_output": 0.0011,
+    "labor_demand": -0.0013
+   },
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png",
+   "observation": "The potter's family works the wheel with two hired lads who sleep in the yard and eat at his table."
+  },
+  "piece_rate_pay": {
+   "effects": {
+    "craft_output": 0.0011,
+    "fatigue": 0.004,
+    "injury_risk": 0.002,
+    "labor_efficiency": 0.0009
+   },
+   "art": "res://assets/ui/research/subjects/work_motion_studies-v1.png",
+   "observation": "The weaver is paid by the finished bolt, and her lamp burns late whenever the rent is due."
+  },
+  "iron_tool_work_norms": {
+   "effects": {
+    "construction_rate": 0.0006,
+    "labor_efficiency": 0.0009,
+    "task_coordination": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/work_motion_studies-v1.png",
+   "observation": "With iron picks the ditch-diggers' daily stint is raised by half, and the overseers see that it is met."
+  },
+  "porter_gangs": {
+   "effects": {
+    "haul_capacity": 0.006,
+    "injury_risk": 0.002,
+    "task_coordination": 0.0004,
+    "trade_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/woven_carriers-v1.png",
+   "observation": "Each ship's cargo belongs to one gang boss, whose men carry it to the warehouse at a fixed rate a jar."
+  },
+  "measured_length_contracts": {
+   "effects": {
+    "construction_rate": 0.0008,
+    "state_capacity": 0.0001,
+    "task_coordination": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
+   "observation": "The contractor is paid by the rod of wall finished, and the surveyor's cord settles every dispute."
+  },
+  "village_labor_quotas": {
+   "effects": {
+    "cohesion": 0.0002,
+    "labor_demand": 0.0002,
+    "labor_efficiency": 0.0004,
+    "state_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "observation": "The palace lists are gone; each village now owes so many days on the dykes and chooses among itself who goes."
+  },
+  "journeyman_travel_circuits": {
+   "effects": {
+    "adoption_rate": 0.0022,
+    "craft_output": 0.0003,
+    "knowledge_preservation": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png",
+   "observation": "A young smith works a season with each master along the valley and carries every shop's tricks to the next."
+  },
+  "settler_work_allotments": {
+   "effects": {
+    "cohesion": 0.0001,
+    "food_output": 0.002,
+    "labor_demand": 0.0002,
+    "state_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/geometric_survey-v1.png",
+   "observation": "Each settler's lot comes with days owed on the new town's wall and ditch before he may sow his own field."
+  },
+  "surety_backed_work_contracts": {
+   "effects": {
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0001,
+    "task_coordination": 0.0006,
+    "trade_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "observation": "The builder names two neighbours who will pay if he leaves the job unfinished, and all three press their seals."
+  },
+  "public_work_tenders": {
+   "effects": {
+    "construction_rate": 0.001,
+    "labor_demand": -0.0013,
+    "legitimacy": -0.002,
+    "state_capacity": 0.0004,
+    "trade_capacity": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "observation": "The herald cries the temple roof for contract, and the lowest builder who can show sound guarantors wins it.",
+   "ability_reason": "Open bidding brings every builder's price into the open and lets the city pay for work instead of feeding a levy.",
+   "social_consequence": "Contracts go to the cheapest sound bid; a builder who cuts too close ruins himself, and a careless inspector lets a bad wall stand."
+  },
+  "staged_work_acceptance": {
+   "effects": {
+    "construction_rate": 0.0003,
+    "disaster_resilience": 0.0014,
+    "repair_capacity": 0.0023
+   },
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png",
+   "observation": "No payment until the inspector has walked the foundation course, then again at the wall head, and again at the roof."
+  },
+  "uniform_day_rate": {
+   "effects": {
+    "cohesion": 0.0002,
+    "labor_efficiency": 0.0003,
+    "task_coordination": 0.0009,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "observation": "Citizen, stranger or bondman, every hand on the temple site draws the same silver for the same day."
+  },
+  "late_completion_penalties": {
+   "effects": {
+    "construction_rate": 0.0005,
+    "fatigue": 0.003
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "observation": "The contract withholds a tenth for each month the gatehouse stands unroofed after the agreed day."
+  },
+  "public_work_accounts": {
+   "effects": {
+    "knowledge_preservation": 0.0006,
+    "legitimacy": 0.0003,
+    "state_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/material_accounting-v1.png",
+   "observation": "Every payment on the great temple is cut into a stone slab in the square, down to the last load of rope."
+  },
+  "trade_foremen": {
+   "effects": {
+    "construction_rate": 0.0005,
+    "injury_risk": -0.0006,
+    "task_coordination": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png",
+   "observation": "Masons answer to the master mason and carpenters to the master carpenter, and neither gives the other's men orders."
+  },
+  "master_builder_office": {
+   "effects": {
+    "construction_rate": 0.0016,
+    "disaster_resilience": 0.0012,
+    "institutional_rigidity": 0.0004,
+    "state_capacity": 0.0003,
+    "task_coordination": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/framed_construction-v1.png",
+   "observation": "One builder now holds the plan, the accounts and every trade's foreman, and answers to the council for the whole.",
+   "ability_reason": "Great works need one mind over the plan, the money and every trade; the master builder is that office."
+  },
+  "volume_paid_quarrying": {
+   "effects": {
+    "fatigue": 0.003,
+    "injury_risk": 0.002,
+    "labor_efficiency": 0.0002,
+    "stone_yield": 0.008
+   },
+   "art": "res://assets/ui/research/subjects/quarry_reading-v1.png",
+   "observation": "Quarrymen are paid by the cubit of block cut clean, and the waste chips are theirs to burn for lime."
+  },
+  "mine_lease_labor": {
+   "effects": {
+    "extraction_yield": 0.006,
+    "health_risk": 0.004,
+    "mine_safety": -0.004,
+    "mining_output": 0.008
+   },
+   "art": "res://assets/ui/research/subjects/mine_shoring-v1.png",
+   "observation": "The city leases each gallery to a man who hires his own diggers and pays the city a share of the ore.",
+   "social_consequence": "Lessees answer for ore, not for the men who dig it; galleries go deeper and crews are used up faster."
+  },
+  "large_owner_workshops": {
+   "effects": {
+    "cohesion": -0.0004,
+    "craft_output": 0.0007,
+    "standardization": 0.0004,
+    "trade_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "observation": "The shield-maker's shop holds sixty hands, most of them bought, working under three freed overseers."
+  },
+  "workshop_task_division": {
+   "effects": {
+    "cohesion": -0.0003,
+    "craft_output": 0.0009,
+    "fatigue": 0.004,
+    "labor_efficiency": 0.0008,
+    "standardization": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/work_motion_studies-v1.png",
+   "observation": "In the lamp shop one man only throws, another only trims, a third only paints, and the lamps come off twice as fast.",
+   "ability_reason": "Splitting one craft into many small tasks lets a large workshop turn out far more than the same hands working whole pieces.",
+   "social_consequence": "Each worker learns one motion instead of a craft; output rises, but a trimmer cannot set up for himself."
+  },
+  "animal_mill_tending": {
+   "effects": {
+    "food_output": 0.0006,
+    "labor_demand": -0.0013,
+    "labor_efficiency": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/grain_milling-v1.png",
+   "observation": "A blindfolded donkey walks the millstone round all day while one boy feeds grain and sweeps up flour."
+  },
+  "paid_rowing_crews": {
+   "effects": {
+    "cohesion": 0.0002,
+    "labor_demand": 0.0002,
+    "naval_capacity": 0.0025,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/galley_navigation-v1.png",
+   "observation": "Oarsmen draw a day's wage for every day at sea, and the benches fill without the drawing of lots."
+  },
+  "crew_sick_funds": {
+   "effects": {
+    "cohesion": 0.0002,
+    "health_protection": 0.0007,
+    "health_risk": -0.0013
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "observation": "Each man drops a small coin in the crew's jar on payday, and a man down with fever draws from it until he mends."
+  },
+  "craft_mutual_aid_clubs": {
+   "effects": {
+    "cohesion": 0.0003,
+    "health_risk": -0.0008,
+    "legitimacy": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/risk_pools-v1.png",
+   "observation": "The dyers' club dines together each month, and when a member dies it pays for his funeral and his widow's grain."
+  },
+  "estate_bailiffs": {
+   "effects": {
+    "cohesion": -0.0011,
+    "food_output": 0.0007,
+    "labor_efficiency": 0.0003,
+    "task_coordination": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+   "observation": "The owner lives in town; his bailiff wakes the gangs, counts the vines they prune and docks the slow."
+  },
+  "harvest_gang_contracts": {
+   "effects": {
+    "food_output": 0.0006,
+    "labor_demand": -0.0003,
+    "trade_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+   "observation": "A gang boss contracts to bring forty reapers on the first day of harvest, sealed and paid half in advance."
+  },
+  "soldier_work_details": {
+   "effects": {
+    "construction_rate": 0.0005,
+    "labor_demand": -0.0003,
+    "route_speed": 0.0013,
+    "warfare_readiness": -0.002
+   },
+   "art": "res://assets/ui/research/subjects/field_fortifications-v1.png",
+   "observation": "Between campaigns the soldiers dig ditches and lay road stones, and grumble that they enlisted to fight."
+  },
+  "works_contractor_companies": {
+   "effects": {
+    "construction_rate": 0.001,
+    "legitimacy": -0.003,
+    "state_capacity": 0.0001,
+    "trade_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/public_credit-v1.png",
+   "observation": "Partners pool their money and their slaves to bid on the harbor works, and share whatever the contract clears."
+  },
+  "freed_craftsman_obligations": {
+   "effects": {
+    "cohesion": 0.0002,
+    "craft_output": 0.0007,
+    "institutional_rigidity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/apprentice_contracts-v1.png",
+   "observation": "A freed goldsmith still owes his old master twenty days' work a year and a gift at the new-year festival."
+  },
+  "conduit_maintenance_crews": {
+   "effects": {
+    "labor_demand": 0.0002,
+    "repair_capacity": 0.0039,
+    "water_access": 0.0011,
+    "water_safety": 0.004
+   },
+   "art": "res://assets/ui/research/subjects/clean_water-v1.png",
+   "observation": "A standing crew walks the conduit each month, scraping lime crust from the channel and sealing leaking joints."
+  },
+  "decreed_wage_rates": {
+   "effects": {
+    "cohesion": 0.0002,
+    "institutional_rigidity": 0.0002,
+    "legitimacy": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/customary_law-v1.png",
+   "observation": "The council fixes a laborer's day at a set weight of silver and fines any employer who pays less."
+  },
+  "paid_fire_brigades": {
+   "effects": {
+    "disaster_resilience": 0.0013,
+    "disaster_risk": -0.0007,
+    "labor_demand": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/watch_rotation-v1.png",
+   "observation": "Watchmen paid by the city patrol at night with buckets, hooks and wet blankets, and each ward knows its station."
+  },
+  "bakery_mill_workforces": {
+   "effects": {
+    "fatigue": 0.003,
+    "food_output": 0.0007,
+    "labor_demand": -0.0006,
+    "labor_efficiency": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/grain_milling-v1.png",
+   "observation": "Under one roof the donkeys turn the mills, the kneaders work the troughs and the ovens run from midnight."
+  },
+  "sharecropping_tenancy": {
+   "effects": {
+    "cohesion": -0.0008,
+    "cultivation_yield": 0.0014,
+    "food_output": 0.0004,
+    "labor_demand": -0.0006
+   },
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "observation": "The tenant keeps half the crop he raises; the other half goes by cart to the landlord's barn."
+  },
+  "clock_timed_shifts": {
+   "effects": {
+    "fatigue": 0.004,
+    "injury_risk": 0.002,
+    "labor_efficiency": 0.001,
+    "task_coordination": 0.001
+   },
+   "art": "res://assets/ui/research/subjects/work_rest_limits-v2.png",
+   "observation": "When the water clock empties at the mine head, the night crew goes down and the vessel is filled again for them."
+  },
+  "workman_stamp_marks": {
+   "effects": {
+    "craft_output": 0.0005,
+    "repair_capacity": 0.0007,
+    "standardization": 0.0007
+   },
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png",
+   "observation": "Each tile-maker presses his own sign into the wet clay, so a bad batch can be traced to the hand that made it."
+  },
+  "stamped_brickyard_output": {
+   "effects": {
+    "construction_rate": 0.0004,
+    "standardization": 0.0004,
+    "state_capacity": 0.0001
+   },
+   "art": "res://assets/ui/research/discovery-600/mould_made_mudbricks.png",
+   "observation": "Every brick from the yard carries a stamp with the yard's name and the year of the magistrate who ruled it."
+  },
+  "standing_engineer_corps": {
+   "effects": {
+    "construction_rate": 0.0006,
+    "labor_demand": 0.0002,
+    "route_speed": 0.0011,
+    "state_capacity": 0.0001,
+    "warfare_readiness": 0.0008
+   },
+   "art": "res://assets/ui/research/subjects/siege_engineering-v2.png",
+   "observation": "A permanent company of builders marches with the army and in peacetime raises bridges and walls wherever it is sent."
+  },
+  "posted_wage_tables": {
+   "effects": {
+    "cohesion": 0.0002,
+    "legitimacy": 0.0001,
+    "trade_capacity": 0.0003
+   },
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
+   "observation": "Painted boards by the market gate list the day wage for a mason, a carter and a harvest hand."
+  },
+  "putting_out_spinning": {
+   "effects": {
+    "cohesion": -0.0009,
+    "craft_output": 0.0009,
+    "fatigue": 0.004,
+    "labor_demand": -0.0005,
+    "labor_efficiency": 0.0006,
+    "trade_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/paper/drop_spindles.png",
+   "observation": "The cloth merchant leaves carded wool at each farmhouse in autumn and collects the spun yarn in spring, paying by weight.",
+   "ability_reason": "Merchants who supply the fiber and buy the yarn turn every idle winter hearth into spinning capacity.",
+   "social_consequence": "Farm households come to depend on the merchant's wool and his price; when he stops coming, the winter income stops too."
+  },
+  "state_manufactories": {
+   "effects": {
+    "cohesion": -0.0009,
+    "craft_output": 0.001,
+    "institutional_rigidity": 0.0004,
+    "standardization": 0.0005,
+    "state_capacity": 0.0002,
+    "warfare_readiness": 0.0011
+   },
+   "art": "res://assets/ui/research/subjects/workshop_standards-v1.png",
+   "observation": "The realm's arms works at the river town turns out shields and blades to one pattern, worked by bound craftsmen."
+  },
+  "salaried_works_staff": {
+   "effects": {
+    "labor_demand": 0.0002,
+    "repair_capacity": 0.0032,
+    "state_capacity": 0.0003,
+    "water_access": 0.0012
+   },
+   "art": "res://assets/ui/research/subjects/professional_service-v1.png",
+   "observation": "The water board keeps its own surveyors, plumbers and pavers on a yearly salary, whether or not a pipe has burst."
+  },
+  "mill_operator_trade": {
+   "effects": {
+    "food_output": 0.002,
+    "labor_efficiency": 0.0005,
+    "repair_capacity": 0.0021
+   },
+   "art": "res://assets/ui/research/subjects/water_mills-v1.png",
+   "observation": "The miller now knows only his wheel: he dresses the stones, greases the gears and keeps the race clear."
+  },
+  "trade_hall_lodging": {
+   "effects": {
+    "adoption_rate": 0.0007,
+    "cohesion": 0.0002,
+    "travel_speed": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/caravanserais-v1.png",
+   "observation": "A traveling fuller can find a bed and the name of an employer at his trade's hall in any town on the coast road."
+  },
+  "service_retirement_grants": {
+   "effects": {
+    "cohesion": 0.0002,
+    "legitimacy": 0.0003,
+    "state_capacity": -0.001
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "observation": "After twenty years' service a mason or soldier receives a plot on the frontier and a yoke of oxen."
+  },
+  "coin_and_ration_wages": {
+   "effects": {
+    "fatigue": -0.0003,
+    "health_risk": -0.0007,
+    "nutrition_quality": 0.0009,
+    "trade_capacity": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/public_stores-v1.png",
+   "observation": "The works pays half in coin and half in bread and oil, so a man's family eats even when prices climb."
+  },
+  "civic_holiday_calendar": {
+   "effects": {
+    "cohesion": 0.0003,
+    "fatigue": -0.0009,
+    "labor_efficiency": -0.0017
+   },
+   "art": "res://assets/ui/research/subjects/festival_calendar-v1.png",
+   "observation": "The city's calendar marks each feast day on which no mason, weaver or carter may be made to work."
+  },
+  "notarized_work_contracts": {
+   "effects": {
+    "knowledge_preservation": 0.0004,
+    "legitimacy": 0.0002,
+    "state_capacity": 0.0002,
+    "trade_capacity": 0.0005
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "observation": "Hire and apprenticeship contracts are written by a public notary, and a copy is filed at the record office."
+  },
+  "home_farm_tenant_split": {
+   "effects": {
+    "cohesion": -0.0008,
+    "cultivation_yield": 0.0007,
+    "food_output": 0.0005,
+    "institutional_rigidity": 0.0006,
+    "labor_demand": -0.0004
+   },
+   "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+   "observation": "The lord's own fields are worked by his tenants on set days; the rest of the week they till their own plots."
+  },
+  "occupation_census": {
+   "effects": {
+    "institutional_rigidity": 0.0002,
+    "knowledge_preservation": 0.0006,
+    "state_capacity": 0.0006,
+    "task_coordination": 0.0025
+   },
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png",
+   "observation": "Every household's register now names its trade, and the tax office knows how many smiths and bakers each town holds.",
+   "ability_reason": "A register of every household's trade lets the state count, tax and requisition skills as well as heads."
+  },
+  "maximum_wage_edicts": {
+   "effects": {
+    "institutional_rigidity": 0.0002,
+    "labor_efficiency": -0.0026,
+    "legitimacy": -0.004,
+    "state_capacity": 0.0002,
+    "trade_capacity": -0.003
+   },
+   "art": "res://assets/ui/research/subjects/standard_measures-v1.png",
+   "observation": "The edict fixes the highest wage for each trade and the price of each good, and within a month the markets are empty.",
+   "social_consequence": "Fixed prices drive goods off the open market; sellers hide their stock and trade it quietly at the old prices."
+  },
+  "hereditary_trade_obligation": {
+   "effects": {
+    "adoption_rate": -0.006,
+    "cohesion": -0.0004,
+    "institutional_rigidity": 0.0008,
+    "labor_demand": -0.0004,
+    "legitimacy": -0.004,
+    "state_capacity": 0.0004
+   },
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "observation": "A baker's son must be a baker and a shipper's son a shipper, and none may leave the trade that feeds the city.",
+   "ability_reason": "Binding key trades to families guarantees the bread, ships and arms the state cannot do without.",
+   "social_consequence": "Sons inherit their fathers' trades by law; the state is supplied, but talent is trapped and resentment passes down with the trade."
+  },
+  "licensed_guilds": {
+   "effects": {
+    "adoption_rate": -0.003,
+    "cohesion": 0.0002,
+    "institutional_rigidity": 0.0003,
+    "standardization": 0.0016,
+    "state_capacity": 0.0002
+   },
+   "art": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+   "observation": "The city grants each craft's association a charter, and its officers answer for their members' dues and work."
+  },
+  "land_bound_tenancy": {
+   "effects": {
+    "adoption_rate": -0.003,
+    "cohesion": -0.0006,
+    "food_output": 0.0018,
+    "institutional_rigidity": 0.0004,
+    "labor_demand": -0.0004,
+    "legitimacy": -0.006
+   },
+   "art": "res://assets/ui/research/subjects/property_registers-v1.png",
+   "observation": "A tenant may no longer leave the estate where his father was registered; if he runs, he is brought back in chains.",
+   "social_consequence": "Tenants are tied to the land for the tax roll; fields stay worked, but the countryside hardens into masters and bound men."
+  },
+  "labor_dues_commutation": {
+   "effects": {
+    "cohesion": 0.0001,
+    "labor_demand": -0.0004,
+    "legitimacy": 0.0001,
+    "state_capacity": 0.0002,
+    "trade_capacity": 0.0006
+   },
+   "art": "res://assets/ui/research/subjects/public_levies-v1.png",
+   "observation": "Villages may now pay their road dues in coin, and the governor hires paid crews with the money."
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "work_group_ration_rolls": {
+    "fatigue": -0.002,
+    "state_capacity": 0.0015,
+    "task_coordination": 0.0045
+   },
+   "ten_day_work_week": {
+    "fatigue": -0.005,
+    "labor_efficiency": 0.0017,
+    "task_coordination": 0.0027
+   },
+   "graded_ration_scales": {
+    "cohesion": -0.002,
+    "craft_output": 0.0018,
+    "institutional_rigidity": 0.0024,
+    "labor_efficiency": 0.0017
+   },
+   "absence_reason_registers": {
+    "health_risk": -0.003,
+    "state_capacity": 0.001,
+    "task_coordination": 0.0027
+   },
+   "tool_issue_registers": {
+    "labor_efficiency": 0.0017,
+    "repair_capacity": 0.004,
+    "storage_loss": -0.003
+   },
+   "palace_specialist_workshops": {
+    "craft_output": 0.0042,
+    "institutional_rigidity": 0.004,
+    "standardization": 0.004,
+    "state_capacity": 0.002
+   },
+   "land_for_service_tenure": {
+    "cohesion": 0.002,
+    "institutional_rigidity": 0.004,
+    "labor_demand": -0.004,
+    "state_capacity": 0.002
+   },
+   "ration_work_stoppages": {
+    "cohesion": -0.004,
+    "fatigue": -0.003,
+    "health_risk": -0.002,
+    "legitimacy": -0.004
+   },
+   "crew_grievance_hearings": {
+    "cohesion": 0.005,
+    "labor_efficiency": 0.0017,
+    "legitimacy": 0.003
+   },
+   "forge_crew_roles": {
+    "craft_output": 0.003,
+    "injury_risk": -0.004,
+    "labor_efficiency": 0.0051,
+    "task_coordination": 0.0072
+   },
+   "rower_levies": {
+    "cohesion": -0.002,
+    "labor_demand": 0.006,
+    "naval_capacity": 0.006,
+    "task_coordination": 0.0018
+   },
+   "itinerant_craft_hire": {
+    "adoption_rate": 0.004,
+    "craft_output": 0.0018,
+    "labor_demand": -0.003
+   },
+   "public_hiring_grounds": {
+    "labor_demand": -0.005,
+    "labor_efficiency": 0.0017,
+    "trade_capacity": 0.001
+   },
+   "silver_wage_payment": {
+    "cohesion": -0.002,
+    "labor_demand": -0.008,
+    "labor_efficiency": 0.0043,
+    "trade_capacity": 0.005
+   },
+   "skill_graded_wages": {
+    "craft_output": 0.0018,
+    "institutional_rigidity": 0.0024,
+    "labor_efficiency": 0.0026
+   },
+   "underground_shift_rotation": {
+    "fatigue": -0.004,
+    "injury_risk": -0.003,
+    "mine_safety": 0.006,
+    "mining_output": 0.005
+   },
+   "term_limited_debt_labor": {
+    "cohesion": 0.004,
+    "institutional_rigidity": 0.0016,
+    "legitimacy": 0.004
+   },
+   "household_workshops_with_hands": {
+    "adoption_rate": 0.002,
+    "craft_output": 0.0024,
+    "labor_demand": -0.003
+   },
+   "piece_rate_pay": {
+    "craft_output": 0.0024,
+    "fatigue": 0.004,
+    "injury_risk": 0.002,
+    "labor_efficiency": 0.0059
+   },
+   "iron_tool_work_norms": {
+    "construction_rate": 0.0024,
+    "labor_efficiency": 0.0059,
+    "task_coordination": 0.0018
+   },
+   "porter_gangs": {
+    "haul_capacity": 0.006,
+    "injury_risk": 0.002,
+    "task_coordination": 0.0027,
+    "trade_capacity": 0.002
+   },
+   "measured_length_contracts": {
+    "construction_rate": 0.003,
+    "state_capacity": 0.001,
+    "task_coordination": 0.0027
+   },
+   "village_labor_quotas": {
+    "cohesion": 0.003,
+    "labor_demand": 0.004,
+    "labor_efficiency": 0.0026,
+    "state_capacity": 0.0015
+   },
+   "journeyman_travel_circuits": {
+    "adoption_rate": 0.006,
+    "craft_output": 0.0018,
+    "knowledge_preservation": 0.002
+   },
+   "settler_work_allotments": {
+    "cohesion": 0.002,
+    "food_output": 0.003,
+    "labor_demand": 0.003,
+    "state_capacity": 0.002
+   },
+   "surety_backed_work_contracts": {
+    "legitimacy": 0.002,
+    "state_capacity": 0.001,
+    "task_coordination": 0.0027,
+    "trade_capacity": 0.002
+   },
+   "public_work_tenders": {
+    "construction_rate": 0.006,
+    "labor_demand": -0.006,
+    "legitimacy": -0.002,
+    "state_capacity": 0.003,
+    "trade_capacity": 0.003
+   },
+   "staged_work_acceptance": {
+    "construction_rate": 0.0018,
+    "disaster_resilience": 0.004,
+    "repair_capacity": 0.003
+   },
+   "uniform_day_rate": {
+    "cohesion": 0.003,
+    "labor_efficiency": 0.0017,
+    "task_coordination": 0.0036,
+    "trade_capacity": 0.001
+   },
+   "late_completion_penalties": {
+    "construction_rate": 0.003,
+    "fatigue": 0.003
+   },
+   "public_work_accounts": {
+    "knowledge_preservation": 0.003,
+    "legitimacy": 0.006,
+    "state_capacity": 0.002
+   },
+   "trade_foremen": {
+    "construction_rate": 0.0024,
+    "injury_risk": -0.002,
+    "task_coordination": 0.0063
+   },
+   "master_builder_office": {
+    "construction_rate": 0.0072,
+    "disaster_resilience": 0.006,
+    "institutional_rigidity": 0.0024,
+    "state_capacity": 0.002,
+    "task_coordination": 0.009
+   },
+   "volume_paid_quarrying": {
+    "fatigue": 0.003,
+    "injury_risk": 0.002,
+    "labor_efficiency": 0.0026,
+    "stone_yield": 0.008
+   },
+   "large_owner_workshops": {
+    "cohesion": -0.003,
+    "craft_output": 0.0054,
+    "standardization": 0.005,
+    "trade_capacity": 0.002
+   },
+   "workshop_task_division": {
+    "cohesion": -0.002,
+    "craft_output": 0.0066,
+    "fatigue": 0.004,
+    "labor_efficiency": 0.011,
+    "standardization": 0.008
+   },
+   "animal_mill_tending": {
+    "food_output": 0.004,
+    "labor_demand": -0.005,
+    "labor_efficiency": 0.0017
+   },
+   "paid_rowing_crews": {
+    "cohesion": 0.003,
+    "labor_demand": 0.003,
+    "naval_capacity": 0.007,
+    "trade_capacity": 0.001
+   },
+   "crew_sick_funds": {
+    "cohesion": 0.004,
+    "health_protection": 0.003,
+    "health_risk": -0.005
+   },
+   "craft_mutual_aid_clubs": {
+    "cohesion": 0.006,
+    "health_risk": -0.003,
+    "legitimacy": 0.002
+   },
+   "estate_bailiffs": {
+    "cohesion": -0.003,
+    "food_output": 0.005,
+    "labor_efficiency": 0.0017,
+    "task_coordination": 0.0036
+   },
+   "harvest_gang_contracts": {
+    "food_output": 0.004,
+    "labor_demand": -0.004,
+    "trade_capacity": 0.001
+   },
+   "soldier_work_details": {
+    "construction_rate": 0.003,
+    "labor_demand": -0.004,
+    "route_speed": 0.004,
+    "warfare_readiness": -0.002
+   },
+   "works_contractor_companies": {
+    "construction_rate": 0.0048,
+    "legitimacy": -0.003,
+    "state_capacity": 0.0015,
+    "trade_capacity": 0.0025
+   },
+   "freed_craftsman_obligations": {
+    "cohesion": 0.003,
+    "craft_output": 0.0024,
+    "institutional_rigidity": 0.0032
+   },
+   "conduit_maintenance_crews": {
+    "labor_demand": 0.004,
+    "repair_capacity": 0.005,
+    "water_access": 0.006,
+    "water_safety": 0.004
+   },
+   "decreed_wage_rates": {
+    "cohesion": 0.004,
+    "institutional_rigidity": 0.0032,
+    "legitimacy": 0.003
+   },
+   "paid_fire_brigades": {
+    "disaster_resilience": 0.008,
+    "disaster_risk": -0.005,
+    "labor_demand": 0.003
+   },
+   "bakery_mill_workforces": {
+    "fatigue": 0.003,
+    "food_output": 0.005,
+    "labor_demand": -0.004,
+    "labor_efficiency": 0.0034
+   },
+   "sharecropping_tenancy": {
+    "cohesion": -0.003,
+    "cultivation_yield": 0.005,
+    "food_output": 0.003,
+    "labor_demand": -0.004
+   },
+   "clock_timed_shifts": {
+    "fatigue": 0.004,
+    "injury_risk": 0.002,
+    "labor_efficiency": 0.0034,
+    "task_coordination": 0.0036
+   },
+   "workman_stamp_marks": {
+    "craft_output": 0.0018,
+    "repair_capacity": 0.002,
+    "standardization": 0.005
+   },
+   "stamped_brickyard_output": {
+    "construction_rate": 0.0024,
+    "standardization": 0.005,
+    "state_capacity": 0.001
+   },
+   "standing_engineer_corps": {
+    "construction_rate": 0.0036,
+    "labor_demand": 0.004,
+    "route_speed": 0.003,
+    "state_capacity": 0.0015,
+    "warfare_readiness": 0.006
+   },
+   "posted_wage_tables": {
+    "cohesion": 0.003,
+    "legitimacy": 0.002,
+    "trade_capacity": 0.002
+   },
+   "putting_out_spinning": {
+    "cohesion": -0.002,
+    "craft_output": 0.0054,
+    "fatigue": 0.004,
+    "labor_demand": -0.006,
+    "labor_efficiency": 0.0043,
+    "trade_capacity": 0.004
+   },
+   "state_manufactories": {
+    "cohesion": -0.002,
+    "craft_output": 0.006,
+    "institutional_rigidity": 0.0048,
+    "standardization": 0.007,
+    "state_capacity": 0.0025,
+    "warfare_readiness": 0.008
+   },
+   "salaried_works_staff": {
+    "labor_demand": 0.004,
+    "repair_capacity": 0.006,
+    "state_capacity": 0.002,
+    "water_access": 0.003
+   },
+   "mill_operator_trade": {
+    "food_output": 0.004,
+    "labor_efficiency": 0.0026,
+    "repair_capacity": 0.004
+   },
+   "trade_hall_lodging": {
+    "adoption_rate": 0.004,
+    "cohesion": 0.003,
+    "travel_speed": 0.002
+   },
+   "service_retirement_grants": {
+    "cohesion": 0.004,
+    "legitimacy": 0.006,
+    "state_capacity": -0.001
+   },
+   "coin_and_ration_wages": {
+    "fatigue": -0.002,
+    "health_risk": -0.004,
+    "nutrition_quality": 0.004,
+    "trade_capacity": 0.0015
+   },
+   "civic_holiday_calendar": {
+    "cohesion": 0.005,
+    "fatigue": -0.006,
+    "labor_efficiency": -0.0017
+   },
+   "notarized_work_contracts": {
+    "knowledge_preservation": 0.002,
+    "legitimacy": 0.003,
+    "state_capacity": 0.0015,
+    "trade_capacity": 0.002
+   },
+   "home_farm_tenant_split": {
+    "cohesion": -0.003,
+    "cultivation_yield": 0.004,
+    "food_output": 0.003,
+    "institutional_rigidity": 0.0024,
+    "labor_demand": -0.004
+   },
+   "occupation_census": {
+    "institutional_rigidity": 0.0048,
+    "knowledge_preservation": 0.004,
+    "state_capacity": 0.006,
+    "task_coordination": 0.0054
+   },
+   "maximum_wage_edicts": {
+    "institutional_rigidity": 0.0048,
+    "labor_efficiency": -0.0026,
+    "legitimacy": -0.004,
+    "state_capacity": 0.0015,
+    "trade_capacity": -0.003
+   },
+   "hereditary_trade_obligation": {
+    "adoption_rate": -0.006,
+    "cohesion": -0.004,
+    "institutional_rigidity": 0.016,
+    "labor_demand": -0.006,
+    "legitimacy": -0.004,
+    "state_capacity": 0.004
+   },
+   "licensed_guilds": {
+    "adoption_rate": -0.003,
+    "cohesion": 0.003,
+    "institutional_rigidity": 0.0064,
+    "standardization": 0.004,
+    "state_capacity": 0.002
+   },
+   "land_bound_tenancy": {
+    "adoption_rate": -0.003,
+    "cohesion": -0.006,
+    "food_output": 0.004,
+    "institutional_rigidity": 0.008,
+    "labor_demand": -0.006,
+    "legitimacy": -0.006
+   },
+   "labor_dues_commutation": {
+    "cohesion": 0.002,
+    "labor_demand": -0.006,
+    "legitimacy": 0.002,
+    "state_capacity": 0.002,
+    "trade_capacity": 0.0025
+   }
+  }
+ }
+}

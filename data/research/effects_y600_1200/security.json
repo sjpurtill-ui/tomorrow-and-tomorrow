@@ -1,0 +1,1359 @@
+{
+ "line": "security",
+ "schema": "research_600_effects/1",
+ "items": {
+  "bronze_plate_corselet": {
+   "effects": {
+    "injury_risk": -0.0006,
+    "legitimacy": 0.0001,
+    "warfare_readiness": 0.0013
+   },
+   "name": "Bronze Plate Corselet",
+   "observation": "Chariot nobles ride in corselets of bronze plates that turn arrows and spear points.",
+   "art": "res://assets/ui/research/paper/scale_armor_attachment.png"
+  },
+  "chariot_runners": {
+   "effects": {
+    "task_coordination": 0.0007,
+    "warfare_readiness": 0.0013
+   },
+   "name": "Chariot Runners",
+   "observation": "Fast foot soldiers run beside the chariots, screening them and finishing the enemies they break.",
+   "art": "res://assets/ui/research/paper/first300-cards/war_chariots.tres"
+  },
+  "cut_and_thrust_sword": {
+   "effects": {
+    "warfare_readiness": 0.0019,
+    "injury_risk": 0.0012
+   },
+   "name": "Cut-and-thrust Long Sword",
+   "observation": "A long bronze blade with a strong tang both slashes and stabs, and holds together through a hard fight.",
+   "art": "res://assets/ui/research/paper/first300-cards/bronze_alloying.tres"
+  },
+  "sally_ports_cistern_stairs": {
+   "effects": {
+    "disaster_resilience": 0.0003,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0006,
+    "water_access": 0.0017
+   },
+   "name": "Sally Ports and Siege Cisterns",
+   "observation": "Hidden gates let the defenders strike the besiegers' camp, and covered stairs reach a cistern the enemy cannot cut.",
+   "art": "res://assets/ui/research/paper/first300-cards/rainwater_cisterns.tres"
+  },
+  "coastal_raider_watch": {
+   "effects": {
+    "disaster_risk": -0.0007,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0006
+   },
+   "name": "Coastal Raider Watch",
+   "observation": "Lookouts on the headlands pass a signal fire along the coast when strange sails appear.",
+   "art": "res://assets/ui/research/discovery-600/prearranged_beacon_chains.png"
+  },
+  "professional_corps": {
+   "effects": {
+    "labor_demand": 0.0003,
+    "legitimacy": -0.0043,
+    "security_efficiency": 0.0014,
+    "state_capacity": 0.001,
+    "task_coordination": 0.0003,
+    "warfare_readiness": 0.0021
+   },
+   "observation": "Soldiers who serve for years, kept, fed and drilled by the ruler, stand ready in every season.",
+   "ability_reason": "A general now commands men who know their trade, not farmers called away from the harvest.",
+   "social_consequence": "Soldiers who owe everything to the ruler's pay can be turned against the people who feed them.",
+   "art": "res://assets/ui/research/paper/first300-cards/professional_corps.tres"
+  },
+  "galley_navigation": {
+   "effects": {
+    "naval_capacity": 0.0012,
+    "task_coordination": 0.0003,
+    "timber_pressure": 0.0034,
+    "warfare_readiness": 0.0006
+   },
+   "observation": "Oared war galleys keep station together and turn as one fleet at their commander's signal.",
+   "art": "res://assets/ui/research/paper/galley_navigation.png"
+  },
+  "naval_arsenals": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.001,
+    "repair_capacity": 0.0007,
+    "state_capacity": 0.0006,
+    "timber_pressure": 0.0051,
+    "warfare_readiness": 0.0004
+   },
+   "observation": "Walled yards store the galleys, their oars and rigging, and keep shipwrights ready to refit a fleet in weeks.",
+   "art": "res://assets/ui/research/paper/galley_navigation.png"
+  },
+  "amphibious_operations": {
+   "effects": {
+    "naval_capacity": 0.0004,
+    "task_coordination": 0.0003,
+    "warfare_readiness": 0.0006
+   },
+   "observation": "Galleys land troops on a hostile shore, beach for a raid, and take them off again before the enemy gathers.",
+   "art": "res://assets/ui/research/paper/galley_navigation.png"
+  },
+  "iron_sword_issue": {
+   "effects": {
+    "fuel_demand": 0.0026,
+    "injury_risk": 0.0006,
+    "timber_pressure": 0.0017,
+    "warfare_readiness": 0.0008
+   },
+   "name": "Iron Swords for Picked Troops",
+   "observation": "The ruler's smiths forge iron swords for his picked men; the blades are tougher and cheaper than bronze.",
+   "ability_reason": "Iron from common ore arms soldiers without waiting for tin from far away.",
+   "art": "res://assets/ui/research/paper/hafted_weapons.png"
+  },
+  "town_night_curfew": {
+   "effects": {
+    "cohesion": -0.0008,
+    "injury_risk": -0.0001,
+    "security_efficiency": 0.0007,
+    "trade_capacity": -0.0008
+   },
+   "name": "Town Night Curfew",
+   "observation": "After the horn at dusk the quarters are barred, and anyone in the streets must answer to the watch.",
+   "social_consequence": "Honest folk fume at the barred quarters, but thieves go hungry.",
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "textile_armor_layering": {
+   "effects": {
+    "injury_risk": -0.0003,
+    "warfare_readiness": 0.0001
+   },
+   "observation": "Many layers of linen glued and stitched together make a light corselet that stops arrows.",
+   "art": "res://assets/ui/research/paper/textile_armor_layering.png"
+  },
+  "lamellar_armor_assembly": {
+   "effects": {
+    "injury_risk": -0.0003,
+    "repair_capacity": 0.0007,
+    "warfare_readiness": 0.0001
+   },
+   "observation": "Small plates laced in overlapping rows make armor that flexes with the body and can be mended plate by plate.",
+   "art": "res://assets/ui/research/paper/lamellar_armor_assembly.png"
+  },
+  "mounted_scouts": {
+   "effects": {
+    "route_speed": 0.0024,
+    "security_efficiency": 0.0003,
+    "survey_speed": 0.0034,
+    "warfare_readiness": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/mounted_scouts.tres"
+  },
+  "skirmisher_infantry_screens": {
+   "effects": {
+    "injury_risk": -0.0001,
+    "task_coordination": 0.0002,
+    "warfare_readiness": 0.0001
+   },
+   "observation": "Javelin men and slingers screen the formed infantry and fall back through its ranks when the enemy closes.",
+   "art": "res://assets/ui/research/paper/first300-cards/skirmish_pair_drill.tres"
+  },
+  "skirmish_pair_drill": {
+   "effects": {
+    "task_coordination": 0.0002,
+    "warfare_readiness": 0.0001
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/skirmish_pair_drill.tres"
+  },
+  "iron_arrowheads": {
+   "effects": {
+    "fuel_demand": 0.0017,
+    "hunting_yield": 0.0026,
+    "warfare_readiness": 0.0002
+   },
+   "name": "Bulk Iron Arrowheads",
+   "observation": "Smiths turn out iron arrowheads by the basket, and archers no longer hoard every point.",
+   "art": "res://assets/ui/research/paper/bow_craft.png"
+  },
+  "armored_riding": {
+   "effects": {
+    "injury_risk": -0.0002,
+    "labor_demand": 0.0001,
+    "warfare_readiness": 0.0003
+   },
+   "observation": "Riders in scale and lamellar on trained horses can charge into the archers' shot and live through it.",
+   "art": "res://assets/ui/research/paper/first300-cards/armored_riding.tres"
+  },
+  "mounted_archery": {
+   "effects": {
+    "hunting_yield": 0.0034,
+    "task_coordination": 0.0002,
+    "travel_speed": 0.0034,
+    "warfare_readiness": 0.0005
+   },
+   "ability_reason": "Horse archers strike and ride off before foot soldiers can close; a general can harry an army for days.",
+   "art": "res://assets/ui/research/paper/first300-cards/mounted_archery.tres"
+  },
+  "siege_engineering": {
+   "effects": {
+    "construction_rate": 0.0011,
+    "haul_capacity": 0.0026,
+    "labor_demand": 0.0002,
+    "timber_pressure": 0.0068,
+    "warfare_readiness": 0.0006
+   },
+   "observation": "Engineers plan ramps, sheds, mines and rams together, and a walled town is no longer beyond an army's reach.",
+   "ability_reason": "Walls that once ended a war now only slow it; generals can plan a siege, not just a blockade.",
+   "art": "res://assets/ui/research/paper/first300-cards/siege_engineering.tres"
+  },
+  "paired_rider_teams": {
+   "effects": {
+    "injury_risk": -0.0001,
+    "task_coordination": 0.0002,
+    "warfare_readiness": 0.0001
+   },
+   "name": "Paired Riders",
+   "observation": "Horse archers ride in pairs, one shooting while the other guards him and brings arrows.",
+   "art": "res://assets/ui/research/paper/first300-cards/mounted_archery.tres"
+  },
+  "iron_spear_levy": {
+   "effects": {
+    "fuel_demand": 0.0034,
+    "legitimacy": 0.0001,
+    "security_efficiency": 0.0004,
+    "timber_pressure": 0.0026,
+    "warfare_readiness": 0.0005
+   },
+   "name": "Iron Spearheads for the Levy",
+   "observation": "Every man of the levy now carries an iron spearhead, where once only the rich had bronze.",
+   "ability_reason": "Arms are no longer a noble's privilege; the whole levy fights with metal.",
+   "social_consequence": "Farmers armed with iron stand beside nobles in the line, and begin to ask for a say.",
+   "art": "res://assets/ui/research/paper/hafted_weapons.png"
+  },
+  "wheeled_siege_towers": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "timber_pressure": 0.0034,
+    "warfare_readiness": 0.0002
+   },
+   "name": "Wheeled Siege Towers",
+   "observation": "Towers on wheels, hung with wet hides, roll up to the wall with a ram swinging in their base.",
+   "art": "res://assets/ui/research/paper/first300-cards/siege_crew_rehearsals.tres"
+  },
+  "camel_riders": {
+   "effects": {
+    "security_efficiency": 0.0006,
+    "travel_speed": 0.0017,
+    "warfare_readiness": 0.0001
+   },
+   "name": "Camel Riders",
+   "observation": "Camel riders patrol the desert routes and raid across country where horses would die of thirst.",
+   "art": "res://assets/ui/research/paper/pack_animals.png"
+  },
+  "bronze_ram_galleys": {
+   "effects": {
+    "naval_capacity": 0.0007,
+    "timber_pressure": 0.0026,
+    "warfare_readiness": 0.0002
+   },
+   "name": "Bronze-ram Galleys",
+   "observation": "A bronze-sheathed ram on the galley's bow holes an enemy hull below the waterline.",
+   "art": "res://assets/ui/research/paper/galley_navigation.png"
+  },
+  "town_fire_watch": {
+   "effects": {
+    "disaster_resilience": 0.0019,
+    "disaster_risk": -0.0006,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0002
+   },
+   "name": "Town Fire Watch",
+   "observation": "Night watchmen carry buckets and hooks, and pull down a burning house before the whole street goes.",
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "siege_crew_rehearsals": {
+   "effects": {
+    "injury_risk": -0.0001,
+    "task_coordination": 0.0005,
+    "warfare_readiness": 0.0003
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/siege_crew_rehearsals.tres"
+  },
+  "citizen_heavy_infantry": {
+   "effects": {
+    "cohesion": 0.0002,
+    "injury_risk": -0.0002,
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "warfare_readiness": 0.0011
+   },
+   "name": "Citizen Heavy Infantry",
+   "observation": "Farmers who can afford the bronze helmet, cuirass and great round shield fight shoulder to shoulder in the line.",
+   "ability_reason": "The men who own the fields now hold the line, and their shields are the city's army.",
+   "social_consequence": "Those who stand in the line expect a voice in the assembly.",
+   "art": "res://assets/ui/research/paper/shield_wall.png"
+  },
+  "closed_helmet_greaves": {
+   "effects": {
+    "injury_risk": -0.0003,
+    "warfare_readiness": 0.0002
+   },
+   "name": "Closed Helmet and Greaves",
+   "observation": "A helmet beaten from one sheet of bronze covers the whole face, and greaves guard the shins below the shield.",
+   "art": "res://assets/ui/research/paper/scale_armor_attachment.png"
+  },
+  "chariot_to_cavalry_shift": {
+   "effects": {
+    "legitimacy": -0.0017,
+    "travel_speed": 0.0035,
+    "warfare_readiness": 0.0005
+   },
+   "name": "Cavalry Replaces Chariots",
+   "observation": "Riders on horseback now do what the chariot did, and cross broken ground no car could.",
+   "social_consequence": "The old chariot houses lose their pride of place to horsemen of lesser birth.",
+   "art": "res://assets/ui/research/paper/first300-cards/armored_riding.tres"
+  },
+  "unit_rally_standards": {
+   "effects": {
+    "cohesion": 0.0001,
+    "task_coordination": 0.0006,
+    "warfare_readiness": 0.0002
+   },
+   "name": "Rally Standards",
+   "observation": "Each company follows a standard on a pole, and in the confusion of battle the men rally to it.",
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "siege_ration_reckoning": {
+   "effects": {
+    "disaster_resilience": 0.0007,
+    "food_storage": 0.0012,
+    "security_efficiency": 0.0003,
+    "storage_loss": -0.0005
+   },
+   "name": "Siege Ration Reckoning",
+   "observation": "Stores are counted in days of grain per mouth, and the commander knows how long the town can hold.",
+   "art": "res://assets/ui/research/paper/first300-cards/fortified_stores.tres"
+  },
+  "road_bandit_patrols": {
+   "effects": {
+    "injury_risk": -0.0002,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0008,
+    "trade_capacity": 0.0004
+   },
+   "name": "Road Bandit Patrols",
+   "observation": "Mounted patrols ride the trade roads and hang the bandits they catch at the crossroads.",
+   "art": "res://assets/ui/research/paper/first300-cards/mounted_scouts.tres"
+  },
+  "contracted_mercenary_captains": {
+   "effects": {
+    "cohesion": -0.0007,
+    "legitimacy": -0.0026,
+    "warfare_readiness": 0.0005
+   },
+   "name": "Contracted Mercenary Captains",
+   "observation": "Foreign captains bring their companies for a season's pay, and fight for whoever pays the next season.",
+   "social_consequence": "Paid strangers guard the realm; when the silver stops, they may take what they were paid to defend.",
+   "art": "res://assets/ui/research/paper/first300-cards/public_levies.tres"
+  },
+  "three_banked_warships": {
+   "effects": {
+    "labor_demand": 0.0002,
+    "naval_capacity": 0.0035,
+    "timber_pressure": 0.0068,
+    "warfare_readiness": 0.0007
+   },
+   "name": "Three-banked Warships",
+   "observation": "Oarsmen in three banks drive long, narrow warships fast enough to ram before the enemy can turn.",
+   "ability_reason": "Sea power now rests on long warships and their rowers; a fleet needs forests and crews by the thousand.",
+   "art": "res://assets/ui/research/paper/galley_navigation.png"
+  },
+  "wet_moats": {
+   "effects": {
+    "disaster_resilience": 0.0002,
+    "disease_exposure": 0.0026,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0012
+   },
+   "name": "Wet Moats",
+   "observation": "A ditch flooded from the river rings the walls, and rams and mines cannot reach their foot.",
+   "art": "res://assets/ui/research/paper/field_fortifications.png"
+  },
+  "city_port_long_walls": {
+   "effects": {
+    "disaster_resilience": 0.0005,
+    "food_storage": 0.0006,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0013
+   },
+   "name": "Long Walls to the Harbor",
+   "observation": "Two long walls run from the city to its harbor, so it can be fed by sea while an army camps outside.",
+   "art": "res://assets/ui/research/paper/first300-cards/masonry_bond_patterns.tres"
+  },
+  "siege_evacuation_orders": {
+   "effects": {
+    "cohesion": -0.0001,
+    "disaster_resilience": 0.0005,
+    "disaster_risk": -0.0002
+   },
+   "name": "Siege Evacuation Orders",
+   "observation": "Before the siege closes, the children, the old and the herds are sent away to allied towns.",
+   "social_consequence": "Families are split up for a siege, and not all of them come home to the same town.",
+   "art": "res://assets/ui/research/paper/first300-cards/evacuation_relays.tres"
+  },
+  "crossbow_mechanism": {
+   "effects": {
+    "craft_output": 0.0002,
+    "security_efficiency": 0.0007,
+    "warfare_readiness": 0.001
+   },
+   "observation": "A trigger holds the drawn string until the bowman aims, and a weak arm can shoot a powerful bow.",
+   "ability_reason": "A levy archer with a crossbow can be trained in weeks, not years.",
+   "art": "res://assets/ui/research/paper/crossbow_mechanism.png"
+  },
+  "cavalry_infantry_liaison": {
+   "effects": {
+    "task_coordination": 0.0003,
+    "warfare_readiness": 0.0004
+   },
+   "art": "res://assets/ui/research/paper/first300-cards/armored_riding.tres"
+  },
+  "multivallate_hillforts": {
+   "effects": {
+    "disaster_resilience": 0.0004,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0004
+   },
+   "name": "Multiple-rampart Hill Forts",
+   "observation": "Rings of rampart and ditch, one inside another, keep slingers and attackers at a distance from the gate.",
+   "art": "res://assets/ui/research/paper/field_fortifications.png"
+  },
+  "bolt_throwing_frames": {
+   "effects": {
+    "security_efficiency": 0.0002,
+    "warfare_readiness": 0.0002
+   },
+   "name": "Bolt-throwing Frames",
+   "observation": "A great bow on a stand throws a heavy bolt farther than any archer can shoot.",
+   "art": "res://assets/ui/research/paper/crossbow_mechanism.png"
+  },
+  "scythed_chariots": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "legitimacy": 0.0001,
+    "warfare_readiness": 0.0001
+   },
+   "name": "Scythed Chariots",
+   "observation": "Blades fixed to the wheels and pole of a chariot are driven into a packed line of infantry.",
+   "art": "res://assets/ui/research/paper/first300-cards/war_chariots.tres"
+  },
+  "curved_chopping_sword": {
+   "effects": {
+    "injury_risk": 0.0006,
+    "warfare_readiness": 0.0002
+   },
+   "name": "Curved Chopping Sword",
+   "observation": "A forward-curved iron blade falls like a cleaver and bites through shield rims.",
+   "art": "res://assets/ui/research/paper/hafted_weapons.png"
+  },
+  "bowshot_tower_spacing": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0004,
+    "warfare_readiness": 0.0001
+   },
+   "name": "Bowshot Tower Spacing",
+   "observation": "Towers stand a bowshot apart, so archers can sweep every stretch of wall from the side.",
+   "art": "res://assets/ui/research/paper/first300-cards/masonry_bond_patterns.tres"
+  },
+  "traction_stone_throwers": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "timber_pressure": 0.0017,
+    "warfare_readiness": 0.0002
+   },
+   "name": "Traction Stone Throwers",
+   "observation": "A crew hauling on ropes swings a beam that hurls stones over the wall.",
+   "art": "res://assets/ui/research/paper/first300-cards/siege_engineering.tres"
+  },
+  "siege_defense_manual": {
+   "effects": {
+    "disaster_resilience": 0.0003,
+    "knowledge_preservation": 0.0003,
+    "security_efficiency": 0.0004
+   },
+   "name": "Siege Defense Manual",
+   "observation": "A written manual tells a town's defenders how to meet every trick of the besieger, from traitors to tunnels.",
+   "art": "res://assets/ui/research/discovery-600/written_lore_tablets.png"
+  },
+  "torsion_spring_engines": {
+   "effects": {
+    "craft_output": 0.0005,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0003,
+    "warfare_readiness": 0.0006
+   },
+   "name": "Torsion Engines",
+   "observation": "Skeins of twisted sinew drive the arms of engines that throw bolts and stones far beyond bowshot.",
+   "ability_reason": "Engines now outrange every archer; engineers can decide a siege from a distance.",
+   "art": "res://assets/ui/research/paper/first300-cards/siege_engineering.tres"
+  },
+  "long_pike_phalanx": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "task_coordination": 0.0003,
+    "warfare_readiness": 0.0004
+   },
+   "name": "Long-pike Phalanx",
+   "observation": "Close ranks of men with pikes twice their height present a hedge of points five rows deep.",
+   "art": "res://assets/ui/research/paper/pike_drill.png"
+  },
+  "wedge_shock_cavalry": {
+   "effects": {
+    "task_coordination": 0.0002,
+    "warfare_readiness": 0.0004
+   },
+   "name": "Wedge Shock Cavalry",
+   "observation": "Horsemen with thrusting lances charge in a wedge through the gap the infantry opens.",
+   "art": "res://assets/ui/research/paper/first300-cards/armored_riding.tres"
+  },
+  "countermine_listening": {
+   "effects": {
+    "disaster_resilience": 0.0003,
+    "security_efficiency": 0.0003
+   },
+   "name": "Countermines and Listening Jars",
+   "observation": "Bronze jars set in the ground ring when sappers dig nearby, and the defenders tunnel out to meet them.",
+   "art": "res://assets/ui/research/paper/first300-cards/mine_shoring.tres"
+  },
+  "incendiary_missiles": {
+   "effects": {
+    "disaster_risk": 0.0017,
+    "security_efficiency": 0.0003,
+    "warfare_readiness": 0.0001
+   },
+   "name": "Incendiary Missiles",
+   "observation": "Pots of burning pitch and fire arrows set the besiegers' towers and sheds alight.",
+   "art": "res://assets/ui/research/paper/ember_tending.png"
+  },
+  "mail_armor_fabrication": {
+   "effects": {
+    "fuel_demand": 0.0017,
+    "injury_risk": -0.0002,
+    "labor_demand": 0.0001,
+    "warfare_readiness": 0.0004
+   },
+   "observation": "Thousands of small iron rings, each drawn, joined and inspected, make a shirt that turns blades and still flexes.",
+   "ability_reason": "Mail guards the whole body without the weight of plate; well-armored troops become common.",
+   "art": "res://assets/ui/research/paper/mail_armor_fabrication.png"
+  },
+  "manipular_lines": {
+   "effects": {
+    "injury_risk": -0.0001,
+    "task_coordination": 0.0005,
+    "warfare_readiness": 0.0004
+   },
+   "name": "Flexible Company Lines",
+   "observation": "Small blocks of men in three lines, with gaps between, can relieve a tired front and close around the enemy.",
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "standard_trigger_locks": {
+   "effects": {
+    "repair_capacity": 0.0026,
+    "standardization": 0.0007,
+    "warfare_readiness": 0.0013
+   },
+   "name": "Standard Trigger Locks",
+   "observation": "Bronze trigger locks cast to one pattern fit every crossbow, and armorers swap them in the field.",
+   "art": "res://assets/ui/research/paper/crossbow_mechanism.png"
+  },
+  "engine_proof_walls": {
+   "effects": {
+    "disaster_resilience": 0.0003,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0008
+   },
+   "name": "Engine-proof Walls",
+   "observation": "Walls built thick enough to take the stone throwers' blows carry towers with engines of their own.",
+   "art": "res://assets/ui/research/paper/first300-cards/masonry_buttressing.tres"
+  },
+  "boarding_bridges": {
+   "effects": {
+    "naval_capacity": 0.0006,
+    "warfare_readiness": 0.0013
+   },
+   "name": "Boarding Bridges",
+   "observation": "A hinged bridge with an iron spike drops onto the enemy's deck, and soldiers cross as if on land.",
+   "art": "res://assets/ui/research/paper/galley_navigation.png"
+  },
+  "wall_repair_levy": {
+   "effects": {
+    "disaster_resilience": 0.0006,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0003
+   },
+   "name": "Wall Repair Levy",
+   "observation": "After an earthquake or flood every household owes days of labor until the breaches in the wall are closed.",
+   "social_consequence": "The wall tax is paid in sweat, and no family is spared.",
+   "art": "res://assets/ui/research/paper/first300-cards/masonry_bond_patterns.tres"
+  },
+  "frontier_long_walls": {
+   "effects": {
+    "labor_demand": 0.0003,
+    "legitimacy": -0.0026,
+    "security_efficiency": 0.0012,
+    "state_capacity": 0.0003,
+    "timber_pressure": 0.0026,
+    "warfare_readiness": 0.0007
+   },
+   "name": "Frontier Long Walls",
+   "observation": "A wall with forts and watchtowers runs for days along the frontier, and raiders must climb it under watch.",
+   "ability_reason": "A frontier can now be held by a line instead of the whole army; the realm pays for it in labor for generations.",
+   "social_consequence": "Whole villages are marched off to build and man the wall, and many never return.",
+   "art": "res://assets/ui/research/paper/first300-cards/masonry_bond_patterns.tres"
+  },
+  "nightly_marching_camps": {
+   "effects": {
+    "fatigue": 0.0026,
+    "logistics_endurance": 0.0034,
+    "security_efficiency": 0.0005,
+    "timber_pressure": 0.0017
+   },
+   "name": "Fortified Marching Camps",
+   "observation": "Every evening the army digs a ditch and rampart to the same plan, and sleeps safe in enemy country.",
+   "art": "res://assets/ui/research/paper/field_fortifications.png"
+  },
+  "heavy_javelin_volley": {
+   "effects": {
+    "warfare_readiness": 0.0016
+   },
+   "name": "Heavy Javelin Volley",
+   "observation": "Each man throws two heavy javelins that pin the enemy's shields together, then draws his sword and charges.",
+   "art": "res://assets/ui/research/paper/hafted_weapons.png"
+  },
+  "armored_horse_cataphracts": {
+   "effects": {
+    "food_output": -0.0017,
+    "injury_risk": -0.0001,
+    "labor_demand": 0.0001,
+    "warfare_readiness": 0.0007
+   },
+   "name": "Fully Armored Horsemen",
+   "observation": "Horse and rider both go in mail and scale, and ride through arrows that empty lighter saddles.",
+   "ability_reason": "Heavy horsemen can break a line head-on; the general's reserve becomes a hammer.",
+   "art": "res://assets/ui/research/paper/first300-cards/armored_riding.tres"
+  },
+  "portcullis_gates": {
+   "effects": {
+    "disaster_resilience": 0.0002,
+    "security_efficiency": 0.0007
+   },
+   "name": "Portcullis Gates",
+   "observation": "An iron-shod grille drops in its grooves and shuts the gate passage faster than any bar.",
+   "art": "res://assets/ui/research/paper/first300-cards/masonry_bond_patterns.tres"
+  },
+  "rotating_crossbow_ranks": {
+   "effects": {
+    "task_coordination": 0.0005,
+    "warfare_readiness": 0.0004
+   },
+   "name": "Rotating Crossbow Ranks",
+   "observation": "Crossbowmen shoot in ranks, one loading while another aims and a third shoots, so the volleys never pause.",
+   "art": "res://assets/ui/research/paper/crossbow_mechanism.png"
+  },
+  "steel_cavalry_swords": {
+   "effects": {
+    "fuel_demand": 0.0017,
+    "warfare_readiness": 0.0004
+   },
+   "name": "Steel Cavalry Swords",
+   "observation": "Long swords with hardened steel edges give horsemen a blade that holds its edge through a battle.",
+   "art": "res://assets/ui/research/paper/hafted_weapons.png"
+  },
+  "standard_kit_issue": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "logistics_endurance": 0.0034,
+    "standardization": 0.0006,
+    "state_capacity": 0.0004,
+    "warfare_readiness": 0.0005
+   },
+   "name": "Standard Kit Issue",
+   "observation": "Every soldier draws the same armor, weapons, cloak and rations, and is paid on fixed days.",
+   "art": "res://assets/ui/research/paper/first300-cards/field_armorer_teams.tres"
+  },
+  "timber_laced_ramparts": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0007,
+    "timber_pressure": 0.0034
+   },
+   "name": "Timber-laced Ramparts",
+   "observation": "A frame of timber beams inside the stone rampart holds it together against the rams.",
+   "art": "res://assets/ui/research/paper/field_fortifications.png"
+  },
+  "horned_riding_saddle": {
+   "effects": {
+    "injury_risk": -0.0001,
+    "travel_speed": 0.0034,
+    "warfare_readiness": 0.0006
+   },
+   "name": "Horned Riding Saddle",
+   "observation": "A saddle with a horn at each corner locks the rider in place, so he can lean, strike and take a blow.",
+   "ability_reason": "A secure seat lets riders fight with sword and lance at full force.",
+   "art": "res://assets/ui/research/paper/first300-cards/mounted_scouts.tres"
+  },
+  "anti_piracy_squadrons": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "naval_capacity": 0.0004,
+    "security_efficiency": 0.0016,
+    "trade_capacity": 0.0007
+   },
+   "name": "Anti-piracy Squadrons",
+   "observation": "Squadrons of warships sweep the sea lanes and burn the pirates' harbors, and merchant ships sail without escort.",
+   "art": "res://assets/ui/research/paper/galley_navigation.png"
+  },
+  "recruit_drill_schools": {
+   "effects": {
+    "injury_risk": -0.0002,
+    "labor_demand": 0.0001,
+    "task_coordination": 0.0004,
+    "warfare_readiness": 0.0004
+   },
+   "name": "Recruit Drill Schools",
+   "observation": "New recruits march, dig and fight with double-weight weapons for months before they join the line.",
+   "art": "res://assets/ui/research/paper/formation_drill.png"
+  },
+  "army_bridging_engineers": {
+   "effects": {
+    "logistics_endurance": 0.0006,
+    "route_speed": 0.0009,
+    "timber_pressure": 0.0017,
+    "warfare_readiness": 0.0002
+   },
+   "name": "Army Bridging Engineers",
+   "observation": "Army engineers throw a bridge of boats or timber across a river in days, while the enemy watches from the far bank.",
+   "art": "res://assets/ui/research/paper/first300-cards/timber_bridges.tres"
+  },
+  "long_service_enlistment": {
+   "effects": {
+    "labor_demand": 0.0002,
+    "legitimacy": -0.0026,
+    "security_efficiency": 0.0012,
+    "state_capacity": 0.0003,
+    "warfare_readiness": 0.0007
+   },
+   "name": "Long-service Enlistment",
+   "observation": "Men enlist for twenty years and more, and leave with land or money when their term is done.",
+   "ability_reason": "An army of career soldiers lasts a generation; generals command veterans, and the treasury pays for every one.",
+   "social_consequence": "Veterans' land is taken from someone; the discharged soldier and the dispossessed farmer do not love each other.",
+   "art": "res://assets/ui/research/paper/first300-cards/professional_corps.tres"
+  },
+  "banded_plate_cuirass": {
+   "effects": {
+    "fuel_demand": 0.0017,
+    "injury_risk": -0.0004,
+    "warfare_readiness": 0.0003
+   },
+   "name": "Banded Plate Cuirass",
+   "observation": "Iron bands riveted over leather straps guard the chest and shoulders and pack flat on the march.",
+   "art": "res://assets/ui/research/paper/lamellar_armor_assembly.png"
+  },
+  "crossbow_sight_graduation": {
+   "effects": {
+    "hunting_yield": 0.0017,
+    "warfare_readiness": 0.0002
+   },
+   "name": "Graduated Crossbow Sights",
+   "observation": "Marks on the crossbow's sight tell the shooter how high to aim at each distance.",
+   "art": "res://assets/ui/research/paper/crossbow_mechanism.png"
+  },
+  "force_pump_fire_engines": {
+   "effects": {
+    "disaster_resilience": 0.0006,
+    "disaster_risk": -0.0006,
+    "security_efficiency": 0.0003
+   },
+   "name": "Force-pump Fire Engines",
+   "observation": "A pump on a cart throws a jet of water onto the blaze, and the watch fights fires from the street.",
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "permanent_frontier_fortresses": {
+   "effects": {
+    "food_storage": 0.0013,
+    "fuel_demand": 0.0017,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0019,
+    "state_capacity": 0.0004
+   },
+   "name": "Permanent Frontier Fortresses",
+   "observation": "Stone fortresses with barracks, granaries and baths house the frontier troops all year round.",
+   "art": "res://assets/ui/research/paper/first300-cards/fortified_stores.tres"
+  },
+  "lath_stiffened_bow": {
+   "effects": {
+    "hunting_yield": 0.0026,
+    "warfare_readiness": 0.002
+   },
+   "name": "Lath-stiffened Bow",
+   "observation": "Bone laths glued at the tips make stiff levers, and the bow shoots heavier arrows farther.",
+   "art": "res://assets/ui/research/paper/bow_craft.png"
+  },
+  "frontier_spy_service": {
+   "effects": {
+    "security_efficiency": 0.0013,
+    "state_capacity": 0.0003,
+    "warfare_readiness": 0.0008
+   },
+   "name": "Frontier Spy Service",
+   "observation": "Agents beyond the frontier send word by courier of every muster and march across the border.",
+   "art": "res://assets/ui/research/discovery-600/messenger_relay_stations.png"
+  },
+  "guarded_road_posts": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "route_speed": 0.0005,
+    "security_efficiency": 0.0013,
+    "trade_capacity": 0.0009
+   },
+   "name": "Guarded Road Posts",
+   "observation": "Small detachments hold posts along the roads, and travelers move from one guarded stage to the next.",
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  },
+  "treaty_border_levies": {
+   "effects": {
+    "cohesion": -0.0009,
+    "labor_demand": -0.0001,
+    "security_efficiency": 0.0015,
+    "warfare_readiness": 0.0011
+   },
+   "name": "Treaty Border Levies",
+   "observation": "Border peoples settled under treaty send their young men to guard the frontier in companies of their own.",
+   "social_consequence": "Foreign-born companies guard our border under their own chiefs and their own gods.",
+   "art": "res://assets/ui/research/paper/first300-cards/public_levies.tres"
+  },
+  "army_grain_levy": {
+   "effects": {
+    "food_storage": 0.0025,
+    "legitimacy": -0.0017,
+    "logistics_endurance": 0.0024,
+    "state_capacity": 0.0005
+   },
+   "name": "Army Grain Levy",
+   "observation": "The provinces pay part of their tax in grain, delivered by cart and barge to the fort stores.",
+   "social_consequence": "The tax-gatherer takes the grain before the family has eaten, in a bad year as in a good one.",
+   "art": "res://assets/ui/research/paper/first300-cards/regional_granaries.tres"
+  },
+  "two_handed_lancers": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "warfare_readiness": 0.0008
+   },
+   "name": "Two-handed Lancers",
+   "observation": "Mailed riders hold a long lance in both hands and drive it through shield and man.",
+   "art": "res://assets/ui/research/paper/first300-cards/armored_riding.tres"
+  },
+  "contracted_circuit_walls": {
+   "effects": {
+    "cohesion": -0.0001,
+    "disaster_resilience": 0.0004,
+    "housing_output": -0.0017,
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0005
+   },
+   "name": "Contracted Circuit Walls",
+   "observation": "Towns give up their sprawling old walls for a shorter, higher circuit with projecting towers.",
+   "social_consequence": "Quarters left outside the new wall are abandoned, or pulled down for its stones.",
+   "art": "res://assets/ui/research/paper/first300-cards/masonry_buttressing.tres"
+  },
+  "single_mounting_stirrup": {
+   "effects": {
+    "injury_risk": -0.0006,
+    "warfare_readiness": 0.0003
+   },
+   "name": "Mounting Stirrup",
+   "observation": "A single loop hanging from the saddle lets an armored rider climb onto a tall horse.",
+   "art": "res://assets/ui/research/paper/first300-cards/mounted_scouts.tres"
+  },
+  "mobile_field_reserves": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "logistics_endurance": 0.0034,
+    "security_efficiency": 0.0004,
+    "state_capacity": 0.0003,
+    "warfare_readiness": 0.0016
+   },
+   "name": "Mobile Field Reserves",
+   "observation": "A field army of picked horse and foot waits behind the frontier forts and marches wherever the line is broken.",
+   "ability_reason": "Generals no longer try to hold every mile; they hold the line thinly and strike with the reserve.",
+   "art": "res://assets/ui/research/paper/first300-cards/professional_corps.tres"
+  },
+  "river_watch_posts": {
+   "effects": {
+    "labor_demand": 0.0001,
+    "security_efficiency": 0.0003,
+    "trade_capacity": 0.0004
+   },
+   "name": "River Watch Posts",
+   "observation": "Small forts along the river frontier watch the crossings and signal the patrol boats.",
+   "art": "res://assets/ui/research/paper/watch_rotation.png"
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "bronze_plate_corselet": {
+    "injury_risk": -0.0018,
+    "legitimacy": 0.0008,
+    "warfare_readiness": 0.0013
+   },
+   "chariot_runners": {
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.0013
+   },
+   "sally_ports_cistern_stairs": {
+    "disaster_resilience": 0.002,
+    "labor_demand": 0.0009,
+    "security_efficiency": 0.0031,
+    "water_access": 0.0017
+   },
+   "coastal_raider_watch": {
+    "disaster_risk": -0.0017,
+    "labor_demand": 0.0009,
+    "security_efficiency": 0.0031
+   },
+   "professional_corps": {
+    "labor_demand": 0.0052,
+    "legitimacy": -0.0043,
+    "security_efficiency": 0.0078,
+    "state_capacity": 0.0043,
+    "task_coordination": 0.0019,
+    "warfare_readiness": 0.0097
+   },
+   "galley_navigation": {
+    "naval_capacity": 0.0061,
+    "task_coordination": 0.0019,
+    "timber_pressure": 0.0034,
+    "warfare_readiness": 0.0026
+   },
+   "naval_arsenals": {
+    "labor_demand": 0.0026,
+    "naval_capacity": 0.0051,
+    "repair_capacity": 0.0051,
+    "state_capacity": 0.0026,
+    "timber_pressure": 0.0051,
+    "warfare_readiness": 0.0019
+   },
+   "amphibious_operations": {
+    "naval_capacity": 0.002,
+    "task_coordination": 0.0019,
+    "warfare_readiness": 0.0026
+   },
+   "iron_sword_issue": {
+    "fuel_demand": 0.0026,
+    "injury_risk": 0.0006,
+    "timber_pressure": 0.0017,
+    "warfare_readiness": 0.0039
+   },
+   "town_night_curfew": {
+    "cohesion": -0.0017,
+    "injury_risk": -0.0012,
+    "security_efficiency": 0.0041,
+    "trade_capacity": -0.0008
+   },
+   "textile_armor_layering": {
+    "injury_risk": -0.0018,
+    "warfare_readiness": 0.0013
+   },
+   "lamellar_armor_assembly": {
+    "injury_risk": -0.0018,
+    "repair_capacity": 0.0026,
+    "warfare_readiness": 0.0016
+   },
+   "mounted_scouts": {
+    "route_speed": 0.0034,
+    "security_efficiency": 0.0016,
+    "survey_speed": 0.0034,
+    "warfare_readiness": 0.0016
+   },
+   "skirmisher_infantry_screens": {
+    "injury_risk": -0.0006,
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.0016
+   },
+   "skirmish_pair_drill": {
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.001
+   },
+   "iron_arrowheads": {
+    "fuel_demand": 0.0017,
+    "hunting_yield": 0.0026,
+    "warfare_readiness": 0.0023
+   },
+   "armored_riding": {
+    "injury_risk": -0.0012,
+    "labor_demand": 0.0013,
+    "warfare_readiness": 0.0032
+   },
+   "mounted_archery": {
+    "hunting_yield": 0.0034,
+    "task_coordination": 0.0014,
+    "travel_speed": 0.0051,
+    "warfare_readiness": 0.0052
+   },
+   "siege_engineering": {
+    "construction_rate": 0.0043,
+    "haul_capacity": 0.0026,
+    "labor_demand": 0.0035,
+    "timber_pressure": 0.0068,
+    "warfare_readiness": 0.0065
+   },
+   "paired_rider_teams": {
+    "injury_risk": -0.0006,
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.0013
+   },
+   "iron_spear_levy": {
+    "fuel_demand": 0.0034,
+    "legitimacy": 0.0017,
+    "security_efficiency": 0.0021,
+    "timber_pressure": 0.0026,
+    "warfare_readiness": 0.0052
+   },
+   "wheeled_siege_towers": {
+    "labor_demand": 0.0013,
+    "timber_pressure": 0.0034,
+    "warfare_readiness": 0.0023
+   },
+   "camel_riders": {
+    "security_efficiency": 0.0031,
+    "travel_speed": 0.0026,
+    "warfare_readiness": 0.0013
+   },
+   "bronze_ram_galleys": {
+    "naval_capacity": 0.0041,
+    "timber_pressure": 0.0026,
+    "warfare_readiness": 0.0026
+   },
+   "town_fire_watch": {
+    "disaster_resilience": 0.0026,
+    "disaster_risk": -0.0051,
+    "labor_demand": 0.0009,
+    "security_efficiency": 0.001
+   },
+   "siege_crew_rehearsals": {
+    "injury_risk": -0.0006,
+    "task_coordination": 0.0019,
+    "warfare_readiness": 0.0016
+   },
+   "citizen_heavy_infantry": {
+    "cohesion": 0.0034,
+    "injury_risk": -0.0012,
+    "labor_demand": 0.0026,
+    "legitimacy": 0.0026,
+    "warfare_readiness": 0.0065
+   },
+   "closed_helmet_greaves": {
+    "injury_risk": -0.0018,
+    "warfare_readiness": 0.0013
+   },
+   "chariot_to_cavalry_shift": {
+    "legitimacy": -0.0017,
+    "travel_speed": 0.0051,
+    "warfare_readiness": 0.0032
+   },
+   "unit_rally_standards": {
+    "cohesion": 0.0008,
+    "task_coordination": 0.0023,
+    "warfare_readiness": 0.0013
+   },
+   "siege_ration_reckoning": {
+    "disaster_resilience": 0.002,
+    "food_storage": 0.0034,
+    "security_efficiency": 0.0016,
+    "storage_loss": -0.0017
+   },
+   "road_bandit_patrols": {
+    "injury_risk": -0.0012,
+    "labor_demand": 0.0009,
+    "security_efficiency": 0.0041,
+    "trade_capacity": 0.0034
+   },
+   "contracted_mercenary_captains": {
+    "cohesion": -0.0034,
+    "legitimacy": -0.0026,
+    "warfare_readiness": 0.0032
+   },
+   "three_banked_warships": {
+    "labor_demand": 0.0035,
+    "naval_capacity": 0.0102,
+    "timber_pressure": 0.0068,
+    "warfare_readiness": 0.0039
+   },
+   "wet_moats": {
+    "disaster_resilience": 0.001,
+    "disease_exposure": 0.0026,
+    "labor_demand": 0.0013,
+    "security_efficiency": 0.0036
+   },
+   "city_port_long_walls": {
+    "disaster_resilience": 0.0026,
+    "food_storage": 0.0017,
+    "labor_demand": 0.0026,
+    "security_efficiency": 0.0041
+   },
+   "siege_evacuation_orders": {
+    "cohesion": -0.0008,
+    "disaster_resilience": 0.0026,
+    "disaster_risk": -0.0017
+   },
+   "crossbow_mechanism": {
+    "craft_output": 0.0017,
+    "security_efficiency": 0.0021,
+    "warfare_readiness": 0.0045
+   },
+   "cavalry_infantry_liaison": {
+    "task_coordination": 0.0028,
+    "warfare_readiness": 0.0019
+   },
+   "multivallate_hillforts": {
+    "disaster_resilience": 0.0015,
+    "labor_demand": 0.0022,
+    "security_efficiency": 0.0041
+   },
+   "bolt_throwing_frames": {
+    "security_efficiency": 0.0016,
+    "warfare_readiness": 0.0019
+   },
+   "scythed_chariots": {
+    "labor_demand": 0.0009,
+    "legitimacy": 0.0008,
+    "warfare_readiness": 0.001
+   },
+   "curved_chopping_sword": {
+    "injury_risk": 0.0006,
+    "warfare_readiness": 0.0019
+   },
+   "bowshot_tower_spacing": {
+    "labor_demand": 0.0013,
+    "security_efficiency": 0.0041,
+    "warfare_readiness": 0.001
+   },
+   "traction_stone_throwers": {
+    "labor_demand": 0.0009,
+    "timber_pressure": 0.0017,
+    "warfare_readiness": 0.0019
+   },
+   "siege_defense_manual": {
+    "disaster_resilience": 0.001,
+    "knowledge_preservation": 0.0034,
+    "security_efficiency": 0.0036
+   },
+   "torsion_spring_engines": {
+    "craft_output": 0.0017,
+    "labor_demand": 0.0013,
+    "security_efficiency": 0.0026,
+    "warfare_readiness": 0.0052
+   },
+   "long_pike_phalanx": {
+    "labor_demand": 0.0017,
+    "task_coordination": 0.0019,
+    "warfare_readiness": 0.0032
+   },
+   "wedge_shock_cavalry": {
+    "task_coordination": 0.0014,
+    "warfare_readiness": 0.0032
+   },
+   "countermine_listening": {
+    "disaster_resilience": 0.001,
+    "security_efficiency": 0.0031
+   },
+   "incendiary_missiles": {
+    "disaster_risk": 0.0017,
+    "security_efficiency": 0.0026,
+    "warfare_readiness": 0.0013
+   },
+   "mail_armor_fabrication": {
+    "fuel_demand": 0.0017,
+    "injury_risk": -0.0024,
+    "labor_demand": 0.0013,
+    "warfare_readiness": 0.0039
+   },
+   "manipular_lines": {
+    "injury_risk": -0.0006,
+    "task_coordination": 0.0033,
+    "warfare_readiness": 0.0032
+   },
+   "standard_trigger_locks": {
+    "repair_capacity": 0.0034,
+    "standardization": 0.0051,
+    "warfare_readiness": 0.0019
+   },
+   "engine_proof_walls": {
+    "disaster_resilience": 0.0015,
+    "labor_demand": 0.0026,
+    "security_efficiency": 0.0052
+   },
+   "boarding_bridges": {
+    "naval_capacity": 0.002,
+    "warfare_readiness": 0.0019
+   },
+   "wall_repair_levy": {
+    "disaster_resilience": 0.0031,
+    "labor_demand": 0.0017,
+    "security_efficiency": 0.0021
+   },
+   "frontier_long_walls": {
+    "labor_demand": 0.0052,
+    "legitimacy": -0.0026,
+    "security_efficiency": 0.0083,
+    "state_capacity": 0.0034,
+    "timber_pressure": 0.0026,
+    "warfare_readiness": 0.001
+   },
+   "nightly_marching_camps": {
+    "fatigue": 0.0026,
+    "logistics_endurance": 0.0034,
+    "security_efficiency": 0.0031,
+    "timber_pressure": 0.0017
+   },
+   "heavy_javelin_volley": {
+    "warfare_readiness": 0.0023
+   },
+   "armored_horse_cataphracts": {
+    "food_output": -0.0017,
+    "injury_risk": -0.0012,
+    "labor_demand": 0.0022,
+    "warfare_readiness": 0.0048
+   },
+   "portcullis_gates": {
+    "disaster_resilience": 0.001,
+    "security_efficiency": 0.0031
+   },
+   "rotating_crossbow_ranks": {
+    "task_coordination": 0.0019,
+    "warfare_readiness": 0.0029
+   },
+   "steel_cavalry_swords": {
+    "fuel_demand": 0.0017,
+    "warfare_readiness": 0.0026
+   },
+   "standard_kit_issue": {
+    "labor_demand": 0.0017,
+    "logistics_endurance": 0.0034,
+    "standardization": 0.0043,
+    "state_capacity": 0.0034,
+    "warfare_readiness": 0.0032
+   },
+   "timber_laced_ramparts": {
+    "labor_demand": 0.0009,
+    "security_efficiency": 0.0031,
+    "timber_pressure": 0.0034
+   },
+   "horned_riding_saddle": {
+    "injury_risk": -0.0012,
+    "travel_speed": 0.0034,
+    "warfare_readiness": 0.0039
+   },
+   "anti_piracy_squadrons": {
+    "labor_demand": 0.0013,
+    "naval_capacity": 0.002,
+    "security_efficiency": 0.0041,
+    "trade_capacity": 0.0051
+   },
+   "recruit_drill_schools": {
+    "injury_risk": -0.0012,
+    "labor_demand": 0.0013,
+    "task_coordination": 0.0019,
+    "warfare_readiness": 0.0032
+   },
+   "army_bridging_engineers": {
+    "logistics_endurance": 0.0034,
+    "route_speed": 0.0026,
+    "timber_pressure": 0.0017,
+    "warfare_readiness": 0.0016
+   },
+   "long_service_enlistment": {
+    "labor_demand": 0.0043,
+    "legitimacy": -0.0026,
+    "security_efficiency": 0.0031,
+    "state_capacity": 0.0034,
+    "warfare_readiness": 0.0052
+   },
+   "banded_plate_cuirass": {
+    "fuel_demand": 0.0017,
+    "injury_risk": -0.0018,
+    "warfare_readiness": 0.0019
+   },
+   "crossbow_sight_graduation": {
+    "hunting_yield": 0.0017,
+    "warfare_readiness": 0.0016
+   },
+   "force_pump_fire_engines": {
+    "disaster_resilience": 0.0026,
+    "disaster_risk": -0.0051,
+    "security_efficiency": 0.001
+   },
+   "permanent_frontier_fortresses": {
+    "food_storage": 0.0026,
+    "fuel_demand": 0.0017,
+    "labor_demand": 0.0026,
+    "security_efficiency": 0.0062,
+    "state_capacity": 0.0026
+   },
+   "lath_stiffened_bow": {
+    "hunting_yield": 0.0026,
+    "warfare_readiness": 0.0026
+   },
+   "frontier_spy_service": {
+    "security_efficiency": 0.0041,
+    "state_capacity": 0.0017,
+    "warfare_readiness": 0.001
+   },
+   "guarded_road_posts": {
+    "labor_demand": 0.0013,
+    "route_speed": 0.0017,
+    "security_efficiency": 0.0036,
+    "trade_capacity": 0.0034
+   },
+   "treaty_border_levies": {
+    "cohesion": -0.0034,
+    "labor_demand": -0.0009,
+    "security_efficiency": 0.0041,
+    "warfare_readiness": 0.0019
+   },
+   "army_grain_levy": {
+    "food_storage": 0.0034,
+    "legitimacy": -0.0017,
+    "logistics_endurance": 0.0068,
+    "state_capacity": 0.0034
+   },
+   "two_handed_lancers": {
+    "labor_demand": 0.0009,
+    "warfare_readiness": 0.0026
+   },
+   "contracted_circuit_walls": {
+    "cohesion": -0.0008,
+    "disaster_resilience": 0.0015,
+    "housing_output": -0.0017,
+    "labor_demand": 0.0022,
+    "security_efficiency": 0.0052
+   },
+   "single_mounting_stirrup": {
+    "injury_risk": -0.0006,
+    "warfare_readiness": 0.001
+   },
+   "mobile_field_reserves": {
+    "labor_demand": 0.0026,
+    "logistics_endurance": 0.0034,
+    "security_efficiency": 0.0041,
+    "state_capacity": 0.0026,
+    "warfare_readiness": 0.0052
+   },
+   "river_watch_posts": {
+    "labor_demand": 0.0009,
+    "security_efficiency": 0.0031,
+    "trade_capacity": 0.0017
+   }
+  }
+ }
+}

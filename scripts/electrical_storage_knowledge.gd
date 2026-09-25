@@ -67,9 +67,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Rollers produce repeatable lead sheets for electrode assemblies.",
     "effects": {},
-    "production_items": [
-      "lead_electrode_sheets"
-    ],
+    "production_items": ["cast_lead_sheets"],
     "production_contract": "Manufacture consumes actual feedstocks, installed tooling, shared Crafting work and specified electricity. Battery installations begin empty and store only energy supplied by generation; neither discovery nor commissioning grants charge."
   },
   {
@@ -177,9 +175,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Lead electrodes, separators and electrolyte are assembled and formed into rechargeable cells.",
     "effects": {},
-    "production_items": [
-      "lead_acid_cell"
-    ],
+    "production_items": ["lead_acid_cell", "lead_electrode_sheets"],
     "production_contract": "Manufacture consumes actual feedstocks, installed tooling, shared Crafting work and specified electricity. Battery installations begin empty and store only energy supplied by generation; neither discovery nor commissioning grants charge."
   },
   {

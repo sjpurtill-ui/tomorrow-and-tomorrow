@@ -51,6 +51,10 @@ ERA_BURDEN = g.const("scripts/early_life_conditions.gd", "ERA_BURDEN", default={
 EXCESS_WEIGHT = g.const("scripts/early_life_conditions.gd", "EXCESS_WEIGHT", default={}, optional=True)
 RELIEF_CHANNELS = g.const("scripts/early_life_conditions.gd", "RELIEF_CHANNELS", default={}, optional=True)
 RELIEF_POWER = float(g.const("scripts/early_life_conditions.gd", "RELIEF_POWER", default=1.5, optional=True))
+MODERN = {k: float(g.const("scripts/early_life_conditions.gd", k, default=0.0, optional=True))
+          for k in ("MODERN_BURDEN_LIFT", "MODERN_TABLE_ONSET", "MODERN_TABLE_FULL", "MODERN_TABLE_DEPTH", "MODERN_SURVIVAL_LIMIT")}
+SURPLUS_RELEASE = {k: float(g.const("scripts/government_people_system.gd", k, default=0.0, optional=True))
+                   for k in ("SURPLUS_RELEASE_DAYS", "SURPLUS_RELEASE_MARGIN")}
 BURDEN_OVERLAP_FLOOR = float(g.const("scripts/early_life_conditions.gd", "BURDEN_OVERLAP_FLOOR", default=1.0, optional=True))
 PREMODERN_FECUNDITY = float(g.const("scripts/early_life_conditions.gd", "PREMODERN_FECUNDITY", default=1.0, optional=True))
 # Phase 3 (R3) engine mechanics mirrored here; each reads its constants from the GDScript.
@@ -75,6 +79,41 @@ SPECIALIZATION_NEGLECT = float(g.const("scripts/society_model.gd", "SPECIALIZATI
 ADDITIVE_BIRTH_BURDEN = "float(care.get(\"neonatal\",1.0))+float((care.get(\"burden\"" in g.source("scripts/early_life_conditions.gd")
 # Chronic shortfall lowers conception through sqrt(food) (GameState._conception_condition_factor).
 SQRT_FOOD_CONCEPTION = "lerpf(0.10,1.05,sqrt(food))" in g.source("scripts/game_state.gd")
+# research_3000 modern transition (early_life_conditions.gd, game_state.gd, civilization_indicators.gd).
+MODERN_SURVIVAL_WEIGHT = g.const("scripts/early_life_conditions.gd", "MODERN_SURVIVAL_WEIGHT", default={}, optional=True)
+TRANSITION = {k: float(g.const("scripts/early_life_conditions.gd", k, default=0.0, optional=True))
+              for k in ("TRANSITION_URBAN", "URBAN_ONSET", "TRANSITION_SCHOOLING", "LITERACY_ONSET", "TRANSITION_MAX")}
+URBAN = {k: float(g.const("scripts/civilization_indicators.gd", k, default=0.0, optional=True))
+         for k in ("URBAN_SCALE", "URBAN_POWER", "URBAN_MIN_POPULATION", "URBAN_FULL_POPULATION_SPAN")}
+# GameState.process_reproduction_day newborn/maternal clamps: (care low, rate floor).
+MODERN_BIRTH_CLAMPS = "\"neonatal_care\",1.0)),0.1,4.0),0.0008,0.18)" in g.source("scripts/game_state.gd")
+NEONATAL_CLAMP = (0.1, 0.0008) if MODERN_BIRTH_CLAMPS else (0.5, 0.004)
+MATERNAL_CLAMP = (0.02, 0.00002) if MODERN_BIRTH_CLAMPS else (0.5, 0.0008)
+FERTILITY_TRANSITION = "context.get(\"fertility_transition\"" in g.source("scripts/game_state.gd")
+# Research600.parallel_capacity (research_3000).
+DIFFUSION_TEAM = float(g.const("scripts/research_600_catalog.gd", "DIFFUSION_TEAM", default=0.0, optional=True))
+PARALLEL = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True))
+            for k in ("PARALLEL_POPULATION_REF", "PARALLEL_PER_DECADE", "PARALLEL_LITERACY")}
+# Research600.stale_factor (research_3000): superseded registry items.
+STALE = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True)) for k in ("STALE_GRACE", "STALE_DOUBLING", "STALE_ABANDON", "DEAD_END_PENALTY", "DEAD_END_VIABLE")}
+# FoodSystem technique levers and AgronomyKnowledge.factors (engine features the
+# 0-600 surrogate left out; they matter once fertilizer and breeding arrive).
+FOOD_TECHNIQUES = g.const("scripts/food_system.gd", "TECHNIQUES", default={}, optional=True)
+LEVER_LIMITS = g.const("scripts/food_system.gd", "LEVER_LIMITS", default={}, optional=True)
+
+
+def _agronomy_profiles() -> dict:
+    """AgronomyKnowledge entries: id -> (group, rank, gain, protection, weather, labor, land)."""
+    import re
+    try:
+        src = g.source("scripts/agronomy_knowledge.gd")
+    except (FileNotFoundError, OSError):
+        return {}
+    rx = re.compile(r'_e\("(\w+)","[^"]*",\[[^\]]*\],"[^"]*","(\w+)",(\d+),([\d.]+),([\d.]+),([\d.]+),([\d.]+),([\d.]+)\)')
+    return {m[0]: (m[1], float(m[2]), float(m[3]), float(m[4]), float(m[5]), float(m[6]), float(m[7])) for m in rx.findall(src)}
+
+
+AGRONOMY = _agronomy_profiles()
 
 
 def curve(points, x):
@@ -161,6 +200,24 @@ class Surrogate:
         self.tune_burden = float(params.get("tune_burden_scale", 1.0))          # x on (ERA_BURDEN - 1), early_life_conditions.gd
         line_scale = params.get("tune_line_scale") or {}
         self.E = cat.E
+        # research_3000 tuning knobs (tune.py-style what-ifs for the later windows):
+        # tune_pace_by_year replaces Research600.PACE_BY_YEAR, tune_parallel /
+        # tune_stale replace PARALLEL_* / STALE_* (dicts of the same keys).
+        self.chance = cat.chance
+        if params.get("tune_pace_by_year"):
+            new = np.array([gd.rise(params["tune_pace_by_year"], float(y)) if r else 1.0 for y, r in zip(cat.design_year, cat.registry)])
+            old = np.array([gd.research_pace(float(y)) if r else 1.0 for y, r in zip(cat.design_year, cat.registry)])
+            self.chance = cat.chance * new / old
+        self.parallel_k = {**PARALLEL, **(params.get("tune_parallel") or {})}
+        self.stale_k = {**STALE, **(params.get("tune_stale") or {})}
+        self.relevance = np.where(cat.design_year >= 0, cat.design_year, -1.0) if params.get("tune_relevance") == "own" else cat.relevance_year
+        # Research600.dead_end_offered (research_3000): this world's seeded subset of
+        # dead ends (key thresholds and foundations always open).
+        self.offered = np.ones(n, dtype=bool)
+        if self.stale_k.get("DEAD_END_VIABLE"):
+            dead = cat.registry & (cat.relevance_year >= 0) & (cat.relevance_year <= cat.design_year + 0.5) & ~cat.key_threshold
+            draw = np.random.default_rng((seed * 2654435761 + 97) & 0xFFFFFFFF).random(n)
+            self.offered = ~dead | (draw < self.stale_k["DEAD_END_VIABLE"])
         if line_scale:
             scale = np.array([float(line_scale.get(line, 1.0)) for line in gd.LINES])[cat.line]
             self.E = cat.E * scale[:, None]
@@ -257,6 +314,7 @@ class Surrogate:
         self.art_family = np.zeros(len(gd.LINES))
         self.allure = 0.0
         self.day = 0.0
+        self._modern_adult = 1.0
         self._effects_update()
         self._capacities()
 
@@ -330,7 +388,13 @@ class Surrogate:
         settlements = self.settlements
         inst = self.capacities["institutions"]
         contact = year >= float(p["contact_year"])
-        env = self.s.site_profile.get("environment_tags", ["river", "woodland"])
+        env = list(self.s.site_profile.get("environment_tags", ["river", "woodland"]))
+        if not p.get("headless_world"):
+            # A growing realm's daughter settlements reach other country: the coast,
+            # dry steppe (Research600 environment tags of any settlement count).
+            for tag, count in (p.get("expansion_environment") or {}).items():
+                if self.territory_settlements >= int(count) and tag not in env:
+                    env.append(tag)
         rk = p["resource_known_year"]
         lagd = p["resource_stage_lag"]
         ok = (cat.min_population <= pop) & (cat.min_settlements <= settlements) & (cat.institutions_min <= inst + 1e-9)
@@ -352,7 +416,7 @@ class Surrogate:
                     r = q.get("resource", "")
                     stage = q.get("stage", "recognized")
                     ready_year = rk.get(r, 1e9) + lagd.get(stage, 0)
-                    override = (p.get("resource_stage_year_override") or {}).get(r, {})
+                    override = (p.get("resource_stage_year_override") or {}).get(r, {}) if p.get("headless_world") else {}
                     if stage in override:
                         ready_year = float(override[stage])
                     if year < ready_year:
@@ -369,9 +433,27 @@ class Surrogate:
         """Settlements that hold land for EarlyLifeConditions.carrying_capacity.
         Truth probes: the player's delegated society stays in one settlement; the
         rival controller founds daughter settlements (about one per 30 years)."""
+        founded = int(getattr(self, "daughters", 0))
         if self.s.ai:
-            return 1 + int(self.day / YEAR // float(self.p.get("ai_settlement_years", 30.0)))
-        return 1
+            return 1 + founded + int(min(self.day / YEAR, float(self.p.get("ai_settlement_until", 360.0))) // float(self.p.get("ai_settlement_years", 30.0)))
+        # The player's realm founds a daughter settlement when its land runs short
+        # (_found_daughters); the truth probes' delegated player never crowds in 100 years.
+        return 1 + founded
+
+    def _found_daughters(self, year: float) -> None:
+        """Surrogate player model (research_3000): a crowded realm founds a daughter
+        settlement, at most one per found_interval_years (not in headless calibration runs)."""
+        if self.p.get("headless_world") or year < float(self.p.get("found_from_year", 600.0)):
+            return
+        last = getattr(self, "_last_found", -1e9)
+        if getattr(self, "crowding", 0.0) >= float(self.p.get("found_crowding", 0.15)) and year - last >= float(self.p.get("found_interval_years", 25.0)):
+            self.daughters = getattr(self, "daughters", 0) + 1
+            self._last_found = year
+
+    @property
+    def territory_factor(self) -> float:
+        """EarlyLifeConditions.carrying_capacity territory 1 + 1.6 sqrt(n - 1)."""
+        return 1.0 + math.sqrt(max(0, int(self.territory_settlements) - 1)) * 1.6
 
     @property
     def settlements(self) -> int:
@@ -395,7 +477,9 @@ class Surrogate:
                 if focus_by_line.max() > 0:
                     fl = focus_by_line[cat.line]
                     item_mult = np.where(fl > 0, 1.0 + SPECIALIZATION_HEADROOM * fl, 1.0 - SPECIALIZATION_NEGLECT * focus_by_line.max())
-                    benefit = np.where(cat.lower_better[None, :], np.minimum(self.E, 0.0), np.maximum(self.E, 0.0))
+                    benefit = self.__dict__.get("_benefit")
+                    if benefit is None:
+                        benefit = self._benefit = np.where(cat.lower_better[None, :], np.minimum(self.E, 0.0), np.maximum(self.E, 0.0))
                     raw = raw + (weights * (item_mult - 1.0)) @ benefit
         self.effect_raw = raw
         eras = cat.ceiling_era[self.known]
@@ -527,6 +611,13 @@ class Surrogate:
             needed = clamp(prev * demand * buffer / max(0.01, produced), 0.0, 0.85)
             other = sum(v for r, v in w.items() if r != "Food")
             w["Food"] = max(w["Food"], other * needed / max(0.01, 1.0 - needed))
+        if SURPLUS_RELEASE.get("SURPLUS_RELEASE_MARGIN") and demand > 0 and prev > 0 and not food_risk and self.stored_days >= SURPLUS_RELEASE["SURPLUS_RELEASE_DAYS"]:
+            # GovernmentPeopleSystem surplus release (research_3000): planned food
+            # labor comes down to the needed share plus a margin.
+            needed = clamp(prev * demand * 1.02 * float(self.p["food_buffer"]) / 1.10 / max(0.01, produced), 0.0, 0.85)
+            released = clamp(needed * SURPLUS_RELEASE["SURPLUS_RELEASE_MARGIN"], 0.0, 0.85)
+            other = sum(v for r, v in w.items() if r != "Food")
+            w["Food"] = min(w["Food"], other * released / max(0.01, 1.0 - released))
         if FOOD_LABOR_FLOOR:
             # GovernmentPeopleSystem._apply_food_labor_floor (Phase 3 R3).
             floor_share = curve(FOOD_LABOR_FLOOR, self.day / YEAR)
@@ -652,6 +743,7 @@ class Surrogate:
         staples = 0.0
         if cult_w > 0:
             staples = W * cult_w * 5.65 * season["staples"] * eff_f * sh["cult"] * (0.68 + prof.get("fertility", 0.0) * 0.38 + float(p["access_fertile"]) * 0.12) \
+                * self._agronomy_yield() * (1.0 + self._lever("cultivation")) * (1.0 + max(0.0, e("farm_mechanization"))) \
                 * (1.0 + e("soil_productivity") + e("cultivation_yield")) * clamp(weather ** 1.25, 0.46, 1.30)
         # _apply_wild_ceilings + wild_food_capacity
         reach = math.sqrt(pop / 120.0)
@@ -779,6 +871,64 @@ class Surrogate:
         line = gd.LINES[int(self.cat.line[i])]
         return 1.0 if focus.get(line, 0.0) > 0 or fmax <= 0 else 1.0 - SPECIALIZATION_NEGLECT * fmax
 
+    def urban_share(self) -> float:
+        """CivilizationIndicators.urban_share (research_3000)."""
+        u = URBAN
+        if not u.get("URBAN_SCALE"):
+            return 0.0
+        food = clamp(self.alloc_pct["Food"] / 100.0, 0.0, 1.0)
+        size = clamp(math.log10(max(1.0, self.population) / u["URBAN_MIN_POPULATION"]) / u["URBAN_FULL_POPULATION_SPAN"], 0.0, 1.0)
+        return clamp(u["URBAN_SCALE"] * (1.0 - food) ** u["URBAN_POWER"] * size, 0.0, 0.95)
+
+    def parallel_capacity(self) -> float:
+        """Research600.parallel_capacity (research_3000)."""
+        q = self.parallel_k
+        if not q.get("PARALLEL_PER_DECADE"):
+            return 1.0
+        decades = max(0.0, math.log10(max(1.0, self.population) / q["PARALLEL_POPULATION_REF"]))
+        return 1.0 + q["PARALLEL_PER_DECADE"] * decades * lerp(0.6, 1.2, clamp(self.capacities["institutions"], 0.0, 1.0)) \
+            * (1.0 + q["PARALLEL_LITERACY"] * clamp(self.eff("literacy"), 0.0, 1.0))
+
+    def _lever(self, lever: str) -> float:
+        """FoodSystem._technique_levers: adopted techniques x goods coverage (lumped), capped."""
+        if not FOOD_TECHNIQUES:
+            return 0.0
+        key = ("lever", lever, int(self.known.sum()), int(self.day // 30))
+        cache = self.__dict__.setdefault("_lever_cache", {})
+        if key not in cache:
+            total = 0.0
+            for rid, levers in FOOD_TECHNIQUES.items():
+                i = self.cat.index.get(rid)
+                if i is not None and self.known[i] and lever in levers:
+                    total += float(levers[lever]) * clamp(float(self.adoption[i]), 0.0, 1.0)
+            if len(cache) > 64:
+                cache.clear()
+            cache[key] = min(float(LEVER_LIMITS.get(lever, 1.0)), total * float(self.p.get("goods_coverage", 0.8)))
+        return cache[key]
+
+    def _agronomy_yield(self) -> float:
+        """AgronomyKnowledge.factors()["yield"]: the best adopted practice per family."""
+        if not AGRONOMY or "seed_selection" not in self.cat.index or not self.known[self.cat.index["seed_selection"]]:
+            return 1.0
+        key = ("agro", int(self.known.sum()), int(self.day // 30))
+        cache = self.__dict__.setdefault("_agro_cache", {})
+        if key not in cache:
+            best = {}
+            for rid, (group, rank, gain, prot, weather, labor, land) in AGRONOMY.items():
+                i = self.cat.index.get(rid)
+                if i is None or not self.known[i]:
+                    continue
+                a = float(self.adoption[i])
+                if rank * a > best.get(group, (0.0,))[0]:
+                    best[group] = (rank * a, a, gain, labor, land)
+            g_ = sum(b[1] * b[2] for b in best.values())
+            lab = min(0.2, sum(b[1] * b[3] for b in best.values()))
+            lnd = min(0.15, sum(b[1] * b[4] for b in best.values()))
+            if len(cache) > 64:
+                cache.clear()
+            cache[key] = (1.0 + min(0.3, g_)) * (1.0 - lab) * (1.0 - lnd)
+        return cache[key]
+
     def _care(self, overwork: float) -> dict:
         """EarlyLifeConditions.profile (blend 1: new world)."""
         c, e = self.c, self.eff
@@ -819,12 +969,15 @@ class Surrogate:
         if RELIEF_CHANNELS:
             relief = sum(clamp(e(ch) / float(v), 0.0, 1.0) for ch, v in RELIEF_CHANNELS.items()) / len(RELIEF_CHANNELS)
             relief = relief ** RELIEF_POWER
+        if MODERN.get("MODERN_BURDEN_LIFT"):
+            # EarlyLifeConditions.modern_burden_lift (research_3000).
+            relief = 1.0 - (1.0 - relief) * (1.0 - clamp(e("modern_survival") / MODERN["MODERN_BURDEN_LIFT"], 0.0, 1.0))
         scale = self.tune_burden
         # EarlyLifeConditions.carrying_capacity / crowding (Phase 3 R3).
         crowding = 0.0
         if TERRITORY_CAPACITY:
             base = curve(TERRITORY_CAPACITY, self.day / YEAR)
-            territory = 1.0 + math.sqrt(max(0, int(self.territory_settlements) - 1)) * 1.6
+            territory = self.territory_factor
             methods = 1.0 + max(0.0, e("cultivation_yield")) + max(0.0, e("soil_productivity")) * 0.6 + max(0.0, e("food_output")) * 0.5 + max(0.0, e("food_storage")) * 0.25
             grounds = clamp(sum(self.source_health.values()) / max(1, len(self.source_health)), 0.4, 1.0)
             self.carrying_capacity = base * territory * methods * lerp(0.6, 1.0, grounds)
@@ -836,6 +989,19 @@ class Surrogate:
         care["burden"] = {k: (1.0 + (float(v) - 1.0) * scale * (1.0 - relief) * ((1.0 - spare * SPARE_LAND_HEALTH) if k in age_keys else 1.0)) * ((1.0 + crowding * CROWDING_MORTALITY) if k in age_keys else 1.0) for k, v in ERA_BURDEN.items()}
         care["conception"] *= max(0.3, 1.0 - crowding * CROWDING_CONCEPTION) * (1.0 + spare * SPARE_LAND_CONCEPTION)
         care["excess_weight"] = {k: float(v) for k, v in EXCESS_WEIGHT.items()}
+        if MODERN_SURVIVAL_WEIGHT:
+            # EarlyLifeConditions.modern_factors / fertility_transition (research_3000).
+            lim = MODERN.get("MODERN_SURVIVAL_LIMIT") or 0.85
+            ms = clamp(e("modern_survival"), 0.0, lim)
+            full = MODERN.get("MODERN_TABLE_FULL") or lim
+            depth = (clamp((ms - MODERN.get("MODERN_TABLE_ONSET", 0.0)) / max(1e-6, full - MODERN.get("MODERN_TABLE_ONSET", 0.0)), 0.0, 1.0)
+                     * MODERN["MODERN_TABLE_DEPTH"]) if MODERN.get("MODERN_TABLE_DEPTH") else ms
+            care["modern"] = {k: 1.0 - depth * float(w) for k, w in MODERN_SURVIVAL_WEIGHT.items()}
+            self._modern_adult = care["modern"].get("adult", 1.0)
+            t = TRANSITION
+            care["fertility_transition"] = clamp(e("fertility_transition") + t["TRANSITION_URBAN"] * max(0.0, self.urban_share() - t["URBAN_ONSET"])
+                                                 + t["TRANSITION_SCHOOLING"] * max(0.0, clamp(e("literacy"), 0.0, 1.0) - t["LITERACY_ONSET"]), 0.0, t["TRANSITION_MAX"])
+            self._transition = care["fertility_transition"]
         care["coverage"] = cover
         return care
 
@@ -850,7 +1016,8 @@ class Surrogate:
         weight = care.get("excess_weight", {}).get(band, 1.0)
         # Hunger and sickness in the condition factor overlap the burden too.
         era_burden = 1.0 + (burden.get("elder" if age_ge45 else band, 1.0) - 1.0) * max(BURDEN_OVERLAP_FLOOR, overlap)
-        return era_burden * (1.0 + (excess - 1.0) * weight)
+        modern = (care.get("modern") or {}).get("elder" if age_ge45 else band, 1.0)
+        return era_burden * (1.0 + (excess - 1.0) * weight) * modern
 
     _BAND_OF_AGE = np.array([0 if a < 5 else 1 if a < 15 else 2 if a < 45 else 3 for a in range(110)])
 
@@ -906,6 +1073,8 @@ class Surrogate:
         cond *= 1.0 + clamp(self.eff("conception_support"), -0.30, 0.30)
         cond = clamp(cond, 0.0, 1.30)
         annual = baseline * cond * availability * clamp(care["conception"], 0.3, 2.0)
+        if FERTILITY_TRANSITION:
+            annual *= 1.0 - clamp(care.get("fertility_transition", 0.0), 0.0, 0.85)
         risk = 1.0 + max(0.0, 0.72 - self.health) * 3.2 + max(0.0, 0.58 - ctx_food) * 2.6 + max(0.0, 0.55 - housing) * 1.8
         risk *= 1.0 - clamp(self.eff("maternal_safety"), 0.0, 0.60)
         risk = clamp(risk, 0.72, 5.0) * clamp(care["pregnancy_risk"], 0.5, 2.5)
@@ -922,8 +1091,11 @@ class Surrogate:
         else:
             neonatal_care = care["neonatal"] * (care.get("burden") or {}).get("neonatal", 1.0)
             maternal_care = care["maternal"] * (care.get("burden") or {}).get("maternal", 1.0)
-        neonatal_rate = clamp((0.018 + (risk - 1.0) * 0.025) * (1.0 - clamp(self.eff("neonatal_survival") + self.policy("neonatal_survival"), -0.50, 0.60)) * clamp(neonatal_care, 0.5, 4.0), 0.004, 0.18)
-        maternal_rate = clamp((0.0045 + (risk - 1.0) * 0.0065) * (1.0 - clamp(self.eff("maternal_safety"), 0.0, 0.65)) * clamp(maternal_care, 0.5, 4.0), 0.0008, 0.055)
+        modern = care.get("modern") or {}
+        neonatal_care *= modern.get("neonatal", 1.0)
+        maternal_care *= modern.get("maternal", 1.0)
+        neonatal_rate = clamp((0.018 + (risk - 1.0) * 0.025) * (1.0 - clamp(self.eff("neonatal_survival") + self.policy("neonatal_survival"), -0.50, 0.60)) * clamp(neonatal_care, NEONATAL_CLAMP[0], 4.0), NEONATAL_CLAMP[1], 0.18)
+        maternal_rate = clamp((0.0045 + (risk - 1.0) * 0.0065) * (1.0 - clamp(self.eff("maternal_safety"), 0.0, 0.65)) * clamp(maternal_care, MATERNAL_CLAMP[0], 4.0), MATERNAL_CLAMP[1], 0.055)
         self.preg = np.maximum(0.0, np.array([f + annual / YEAR * days - losses[0] - to2, s + to2 - losses[1] - to3, t + to3 - losses[2] - deliveries]))
         self.postpartum = max(0.0, self.postpartum + deliveries - self.postpartum * (1 - math.exp(-days / 365.0)))
         neonatal_deaths = live * neonatal_rate
@@ -1018,7 +1190,10 @@ class Surrogate:
                      "Insecurity": max(0.0, 0.30 - self.security) * 0.025,
                      # Work accidents, dehydration, cold snaps and the other small daily
                      # components the surrogate does not model one by one (fitted).
-                     "Other": float(p["other_mortality"])}
+                     # ConsequenceEngine "Work accidents" scales with max(0.15, 1 +
+                     # disaster_risk - mine_safety); about 1 in the calibration runs.
+                     # research_3000: x the adult modern factor (occupational safety, trauma care).
+                     "Other": float(p["other_mortality"]) * max(0.15, 1.0 + e("disaster_risk") - e("mine_safety")) * self._modern_adult}
         if intake < 0.98 or self.malnutrition > 0.05:
             ramp = clamp((self.shortage_days - 5.0) / 45.0, 0.0, 1.0)
             mortality["Hunger"] = max(0.0, 1.0 - intake) * (0.08 + ramp * 0.90) + self.malnutrition * 0.42
@@ -1034,7 +1209,12 @@ class Surrogate:
         staffing = clamp(min(researchers_total / 6.0, researchers_total / pop / 0.03), 0.0, 1.0)
         rate = (0.45 + 0.55 * staffing) * lerp(0.85, 1.2, self.education) * lerp(0.7, 1.0, self.food_security)
         self.scholarship += rate * days / YEAR
-        open_mask = self.ready & self.cond_ok & (cat.earliest <= year) & cat.channel_staffable[cat.channel]
+        open_mask = self.ready & self.cond_ok & (cat.earliest <= year) & cat.channel_staffable[cat.channel] & self.offered
+        if self.stale_k.get("STALE_ABANDON"):
+            # Research600.pursued (research_3000): superseded practices are abandoned.
+            k = self.stale_k
+            doublings = np.where(self.relevance >= 0, np.maximum(0.0, self.ceiling_era - self.relevance - k["STALE_GRACE"]) / k["STALE_DOUBLING"], 0.0)
+            open_mask &= doublings <= math.log2(k["STALE_ABANDON"])
         has_candidate = np.bincount(cat.channel[open_mask], minlength=len(cat.channel_keys)) > 0
         # Emphasis units per line sit on subcategory channels and stay there
         # (_auto_allocate_domain_attention). A channel with no open question
@@ -1089,10 +1269,24 @@ class Surrogate:
         food_support = lerp(0.62, 1.08, clamp(self.food_security, 0, 1))
         material_support = lerp(0.72, 1.12, clamp(self.material, 0.0, 1.2) / 1.2)
         support = food_support * material_support * lerp(0.78, 1.18, clamp(self.capacities["institutions"], 0, 1)) * lerp(0.55, 1.45, self.education)
-        throughput = float(p["throughput"]) * math.exp(float(p["throughput_growth"]) * year / 100.0)
+        # The fitted drift stands in for officials' skill and communities maturing
+        # over the calibrated horizon (truth runs cover 0-100 years); it is held
+        # there rather than extrapolated exponentially across millennia.
+        parallel = self.parallel_capacity()
+        throughput = float(p["throughput"]) * math.exp(float(p["throughput_growth"]) * min(year, float(p.get("throughput_growth_until", 100.0))) / 100.0)
         known_ext = None
         kr = 1.0 + self.eff("knowledge_rate")
-        for ch in np.where(weights > 0)[0].tolist():
+        # DiscoverySystem diffusion (research_3000): a line with no emphasis works
+        # its first subcategory channel at DIFFUSION_TEAM.
+        diffusion = set()
+        if DIFFUSION_TEAM > 0:
+            for li, line in enumerate(gd.LINES):
+                if int(self.s_research.get(line, 0)) <= 0:
+                    first = (cat.subcategories.get(line) or [None])[0]
+                    ch = cat.channel_index.get((line, first))
+                    if ch is not None:
+                        diffusion.add(ch)
+        for ch in sorted(set(np.where(weights > 0)[0].tolist()) | diffusion):
             item = self.active[ch]
             cand = None
             if item < 0 or not open_mask[item]:
@@ -1111,18 +1305,38 @@ class Surrogate:
             if cand is not None and (item < 0 or not open_mask[item]):
                 era_cost = np.maximum(0.0, cat.era[cand] - self.scholarship - self.tune_window) / self.tune_doubling
                 score = self.affinity[cand] + self.signal_score[cand] + weights[ch] * 8.0 - era_cost * 20.0 + self.targets[cand] * 1e5
+                if self.stale_k.get("STALE_DOUBLING"):
+                    # DiscoverySystem._candidate_score: superseded practices last (research_3000).
+                    rel = self.relevance[cand]
+                    score -= np.where(rel >= 0, np.maximum(0.0, self.ceiling_era - rel) / self.stale_k["STALE_DOUBLING"], 0.0) * 20.0
+                    # Research600.dead_end: questions nothing later builds on come last.
+                    score -= np.where((rel >= 0) & (rel <= cat.design_year[cand] + 0.5), self.stale_k.get("DEAD_END_PENALTY", 0.0), 0.0)
                 item = int(cand[np.argmax(score)])
+                if self.stale_k.get("STALE_DOUBLING") and FOUNDATION_WORK:
+                    # DiscoverySystem: a deferred best question (dead end or leftover past
+                    # STALE_GRACE) yields to foundations of current questions (research_3000).
+                    rel_i = self.relevance[item]
+                    if rel_i >= 0 and (rel_i <= cat.design_year[item] + 0.5 or self.ceiling_era - rel_i > self.stale_k["STALE_GRACE"]):
+                        busy = set(self.active[self.active >= 0].tolist())
+                        found_ids = [i for i in self._foundation_ids(int(cat.channel_line[ch]), year, open_mask) if i not in busy]
+                        if found_ids:
+                            item = found_ids[0]
                 self.active[ch] = item
             researchers = researchers_total * weights[ch] / total_weight
             team = researchers if researchers < 1.0 else 1.0 + math.log10(researchers) * 0.78
-            attention = team * support * (1.0 + (self.art_bonus_for(gd.LINES[cat.channel_line[ch]]) if self.art["tier"] else 0.0))
+            if weights[ch] <= 0 and ch in diffusion:
+                team = DIFFUSION_TEAM
+            attention = team * support * parallel * (1.0 + (self.art_bonus_for(gd.LINES[cat.channel_line[ch]]) if self.art["tier"] else 0.0))
             precedent = 1.0
             if cat.has_precedents[item]:
                 if known_ext is None:
                     known_ext = np.concatenate([self.known, [False, False]])
                 precedent = min(c.precedent_cap, 1.0 + c.precedent_bonus * float(known_ext[cat.precedents[item]].sum()))
             difficulty = self.cost_draw[item] * 2.0 ** min(30.0, max(0.0, cat.era[item] - self.scholarship - self.tune_window) / self.tune_doubling) / precedent
-            prob = cat.chance[item] / difficulty * attention * self.item_activity[item] * self.evidence[item] * throughput * self.tune_pace \
+            if self.stale_k.get("STALE_DOUBLING") and self.relevance[item] >= 0:
+                # Research600.stale_factor (research_3000)
+                difficulty *= 2.0 ** min(20.0, max(0.0, self.ceiling_era - self.relevance[item] - self.stale_k["STALE_GRACE"]) / self.stale_k["STALE_DOUBLING"])
+            prob = self.chance[item] / difficulty * attention * self.item_activity[item] * self.evidence[item] * throughput * self.tune_pace \
                 * kr * 0.12 * 1.0055
             noise = 1.0 + self.rng.normal(0.0, 0.16 / math.sqrt(max(1.0, days)))
             self.progress[item] += prob * days * noise
@@ -1143,7 +1357,12 @@ class Surrogate:
         cat = self.cat
         n = cat.n
         frontier = []
-        pending = np.where((cat.line == line) & ~self.known & (cat.earliest <= year) & self.cond_ok)[0]
+        pending = (cat.line == line) & ~self.known & (cat.earliest <= year) & self.cond_ok
+        if self.stale_k.get("STALE_ABANDON"):
+            # Research600.pursued: only questions still pursued ask for foundations (research_3000).
+            k = self.stale_k
+            pending &= np.where(self.relevance >= 0, np.maximum(0.0, self.ceiling_era - self.relevance - k["STALE_GRACE"]) / k["STALE_DOUBLING"], 0.0) <= math.log2(k["STALE_ABANDON"])
+        pending = np.where(pending)[0]
         for i in pending.tolist():
             frontier.extend(self._missing_parents(i))
         found, visited, depth = {}, set(), 0
@@ -1346,6 +1565,31 @@ class Surrogate:
             cache[period] = w
         return cache[period]
 
+    def seed_state(self, start_year: float, known_ids: list, adoption: dict, population: float, scholarship: float) -> None:
+        """Mirror of truth_probe.gd _seed_era (research_3000 later-era spot check): the
+        society at game year start_year with these discoveries, adoption and
+        scholarship and ``population`` people (founding age structure), housed, with
+        the founding works and public stores built and two months of stores."""
+        cat = self.cat
+        self.day = float(round(start_year * 365.0))
+        self.known = cat.id_mask(known_ids)
+        self.adoption = np.where(self.known, np.array([float(adoption.get(i, 0.8)) for i in cat.ids]), 0.0)
+        self.discovered_day = np.full(cat.n, -1.0)
+        self.scholarship = float(scholarship)
+        self.coh = np.array([0.32, 0.15, 0.14, 0.13, 0.18, 0.08]) * float(population)
+        self._sync()
+        repro = self._reproductive()
+        self.preg = np.array([0.34, 0.33, 0.33]) * repro * 0.045
+        self.postpartum = repro * 0.018
+        self.housing_capacity = float(population) * 1.1
+        self.stored = float(population) * 60.0
+        self.fresh = 0.0
+        self.last.update({"production": float(population) * 0.95, "need": float(population) * 0.95})
+        self.ready[:] = False
+        self._refresh_ready(np.arange(cat.n))
+        self._effects_update()
+        self._capacities()
+
     def run(self, years: int, record_every: float = 1.0) -> dict:
         p = self.p
         self.phase_a = float(abs(self.seed * 31) % 997)
@@ -1353,12 +1597,13 @@ class Surrogate:
         self.births = self.deaths = self.neonatal = self.maternal = 0.0
         self.imr = 0.0
         self.evidence = np.ones(self.cat.n)
-        self.s_research = self.research_policy(0.0)
-        self._conditions(0.0)
+        start = self.day / YEAR   # 0, or the seeded start year (seed_state)
+        self.s_research = self.research_policy(start)
+        self._conditions(start)
         sub = int(p["substeps_per_month"])
         rows = []
         months = int(years * 12)
-        next_record = 0.0
+        next_record = start
         hearth = False
         for m in range(months + 1):
             year = self.day / YEAR
@@ -1369,6 +1614,7 @@ class Surrogate:
                 break
             if m % 12 == 0:
                 self.s_research = dict(self.research_policy(year))
+                self._found_daughters(year)
                 self._conditions(year)
             if not hearth and self.completed >= 1.0:
                 hearth = True
@@ -1438,4 +1684,6 @@ class Surrogate:
                           "museum_draw": 1.0 + self.allure * float(self.c.art["MUSEUM_ALLURE"])},
             "state_capacity": e("state_capacity"), "tool_quality": e("tool_quality"), "craft_output": e("craft_output"),
             "construction_rate": e("construction_rate"), "trade_capacity": e("trade_capacity"), "warfare_readiness": e("warfare_readiness"),
+            "literacy": 100.0 * clamp(e("literacy"), 0.0, 1.0), "urban_share": 100.0 * self.urban_share(),
+            "parallel": self.parallel_capacity(), "modern_survival": e("modern_survival"), "fertility_transition": getattr(self, "_transition", 0.0),
         }

@@ -29,6 +29,7 @@
   },
   "weather_sign_reading": {
    "effects": {
+    "literacy": 0.001,
     "survey_speed": 0.01,
     "task_coordination": 0.001
    },
@@ -46,7 +47,7 @@
   "tallies": {
    "effects": {
     "knowledge_preservation": 0.0275,
-    "labor_demand": 0.012,
+    "labor_demand": 0.0044,
     "state_capacity": 0.016,
     "task_coordination": 0.0174
    },
@@ -145,7 +146,7 @@
   },
   "paced_distance_counting": {
    "effects": {
-    "labor_demand": 0.01,
+    "labor_demand": 0.0009,
     "survey_speed": 0.0035
    },
    "art": "res://assets/ui/research/subjects/geometric_survey-v1.png"
@@ -275,7 +276,7 @@
   },
   "rotating_inspection_duty": {
    "effects": {
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "task_coordination": 0.0006
    },
    "art": "res://assets/ui/research/subjects/crew_handoffs-v2.png"
@@ -328,7 +329,7 @@
     "adoption_rate": 0.013,
     "knowledge_preservation": 0.013,
     "knowledge_rate": 0.021,
-    "labor_demand": 0.01,
+    "labor_demand": 0.001,
     "state_capacity": 0.0049
    },
    "observation": "The envelope becomes a flat tablet with numbers pressed into its face, and the tokens inside are no longer needed.",
@@ -347,7 +348,7 @@
   "rod_and_cord_leveling": {
    "effects": {
     "construction_rate": 0.0041,
-    "labor_demand": 0.01,
+    "labor_demand": 0.001,
     "survey_speed": 0.023
    },
    "name": "Rod-and-cord Levelling",
@@ -366,7 +367,8 @@
     "adoption_rate": 0.019,
     "knowledge_preservation": 0.0061,
     "knowledge_rate": 0.0263,
-    "labor_demand": 0.015,
+    "labor_demand": 0.0009,
+    "literacy": 0.0017,
     "state_capacity": 0.0022,
     "task_coordination": 0.0026
    },
@@ -387,7 +389,7 @@
    "effects": {
     "adoption_rate": 0.011,
     "knowledge_preservation": 0.0033,
-    "labor_demand": 0.008,
+    "labor_demand": 0.0005,
     "state_capacity": 0.001
    },
    "observation": "Recorders press signs into prepared clay, and the tablets worth keeping are dried and stored."
@@ -435,7 +437,7 @@
   },
   "messenger_relay_stations": {
    "effects": {
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "state_capacity": 0.0005,
     "task_coordination": 0.0008
    },
@@ -456,7 +458,7 @@
   "dedicated_apprentice_observation": {
    "effects": {
     "craft_output": 0.006,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "task_coordination": 0.0003
    },
    "name": "Masters Observe Apprentices at Set Hours",
@@ -467,7 +469,7 @@
     "adoption_rate": 0.0395,
     "knowledge_preservation": 0.0144,
     "knowledge_rate": 0.035,
-    "labor_demand": 0.02,
+    "labor_demand": 0.001,
     "state_capacity": 0.0023
    },
    "ability_reason": "Signs now stand for sounds, so names, foreign words and whole sentences can be written, not just counts and things."
@@ -494,7 +496,8 @@
    "effects": {
     "adoption_rate": 0.014,
     "cohesion": 0.0007,
-    "knowledge_preservation": 0.0056
+    "knowledge_preservation": 0.0056,
+    "literacy": 0.001
    },
    "observation": "Recited lore is copied onto tablets, so a telling no longer dies with the last reciter who knew it.",
    "art": "res://assets/ui/research/knowledge-v1.png"
@@ -503,7 +506,8 @@
    "effects": {
     "adoption_rate": 0.0237,
     "craft_output": 0.006,
-    "knowledge_preservation": 0.0028
+    "knowledge_preservation": 0.0028,
+    "literacy": 0.001
    },
    "observation": "A master's working rules are written out for apprentices, who can check a step without waiting for him.",
    "art": "res://assets/ui/research/knowledge-v1.png"
@@ -518,10 +522,10 @@
   },
   "formal_archives": {
    "effects": {
-    "institutional_rigidity": 0.014,
+    "institutional_rigidity": 0.0019,
     "knowledge_preservation": 0.012,
     "knowledge_rate": 0.0033,
-    "labor_demand": 0.025,
+    "labor_demand": 0.0013,
     "state_capacity": 0.0038
    },
    "ability_reason": "Records gain keepers, dates and a place on the shelf; what one generation learns the next can find again."
@@ -529,7 +533,7 @@
   "cross_referenced_archives": {
    "effects": {
     "knowledge_preservation": 0.0014,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "task_coordination": 0.0008
    },
    "name": "Cross-referenced Archives",
@@ -538,7 +542,7 @@
   "formal_chronicle_keeping": {
    "effects": {
     "knowledge_preservation": 0.0014,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "legitimacy": 0.0004
    },
    "name": "Year Names and Event Lists",
@@ -549,7 +553,8 @@
     "adoption_rate": 0.0121,
     "knowledge_preservation": 0.0045,
     "knowledge_rate": 0.0113,
-    "labor_demand": 0.04,
+    "labor_demand": 0.002,
+    "literacy": 0.0025,
     "state_capacity": 0.0019
    },
    "ability_reason": "Tablet houses train scribes in numbers, not one apprentice at a time, and every trained hand spreads new methods faster."
@@ -612,7 +617,7 @@
   "scribal_specialties": {
    "effects": {
     "knowledge_rate": 0.0032,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "state_capacity": 0.0015,
     "survey_speed": 0.0069
    },
@@ -696,7 +701,8 @@
   "worked_problem_tablets": {
    "effects": {
     "adoption_rate": 0.0036,
-    "knowledge_rate": 0.005
+    "knowledge_rate": 0.005,
+    "literacy": 0.001
    },
    "observation": "Teaching tablets set a problem, work it step by step and state the answer, so a method can be learned from clay.",
    "art": "res://assets/ui/research/knowledge-v1.png"
@@ -733,6 +739,7 @@
     "institutional_rigidity": -0.02,
     "knowledge_preservation": 0.0047,
     "knowledge_rate": 0.022,
+    "literacy": 0.0025,
     "trade_capacity": 0.0042
    },
    "observation": "A few dozen signs, one for each consonant, spell any word; a merchant can learn in a season what a scribe learned in years.",
@@ -769,9 +776,9 @@
   },
   "checked_master_copies": {
    "effects": {
-    "adoption_rate": 0.0016,
-    "knowledge_preservation": 0.0043,
-    "standardization": 0.0057
+    "adoption_rate": 0.0013,
+    "knowledge_preservation": 0.0028,
+    "standardization": 0.0022
    },
    "observation": "Key tablets are kept as checked master copies, and every new copy is compared against them sign by sign.",
    "art": "res://assets/ui/research/knowledge-v1.png"
@@ -1230,6 +1237,129 @@
     "adoption_rate": 0.011,
     "knowledge_preservation": 0.019,
     "standardization": 0.0082
+   }
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "weather_sign_reading": {
+    "survey_speed": 0.01,
+    "task_coordination": 0.001
+   },
+   "tallies": {
+    "knowledge_preservation": 0.0275,
+    "labor_demand": 0.012,
+    "state_capacity": 0.016,
+    "task_coordination": 0.0174
+   },
+   "paced_distance_counting": {
+    "labor_demand": 0.01,
+    "survey_speed": 0.0035
+   },
+   "rotating_inspection_duty": {
+    "labor_demand": 0.01,
+    "task_coordination": 0.0006
+   },
+   "impressed_number_tablets": {
+    "adoption_rate": 0.013,
+    "knowledge_preservation": 0.013,
+    "knowledge_rate": 0.021,
+    "labor_demand": 0.01,
+    "state_capacity": 0.0049
+   },
+   "rod_and_cord_leveling": {
+    "construction_rate": 0.0041,
+    "labor_demand": 0.01,
+    "survey_speed": 0.023
+   },
+   "pictographic_records": {
+    "adoption_rate": 0.019,
+    "knowledge_preservation": 0.0061,
+    "knowledge_rate": 0.0263,
+    "labor_demand": 0.015,
+    "state_capacity": 0.0022,
+    "task_coordination": 0.0026
+   },
+   "clay_record_tablets": {
+    "adoption_rate": 0.011,
+    "knowledge_preservation": 0.0033,
+    "labor_demand": 0.008,
+    "state_capacity": 0.001
+   },
+   "messenger_relay_stations": {
+    "labor_demand": 0.01,
+    "state_capacity": 0.0005,
+    "task_coordination": 0.0008
+   },
+   "dedicated_apprentice_observation": {
+    "craft_output": 0.006,
+    "labor_demand": 0.01,
+    "task_coordination": 0.0003
+   },
+   "phonetic_notation": {
+    "adoption_rate": 0.0395,
+    "knowledge_preservation": 0.0144,
+    "knowledge_rate": 0.035,
+    "labor_demand": 0.02,
+    "state_capacity": 0.0023
+   },
+   "written_lore_tablets": {
+    "adoption_rate": 0.014,
+    "cohesion": 0.0007,
+    "knowledge_preservation": 0.0056
+   },
+   "written_apprentice_instructions": {
+    "adoption_rate": 0.0237,
+    "craft_output": 0.006,
+    "knowledge_preservation": 0.0028
+   },
+   "formal_archives": {
+    "institutional_rigidity": 0.014,
+    "knowledge_preservation": 0.012,
+    "knowledge_rate": 0.0033,
+    "labor_demand": 0.025,
+    "state_capacity": 0.0038
+   },
+   "cross_referenced_archives": {
+    "knowledge_preservation": 0.0014,
+    "labor_demand": 0.01,
+    "task_coordination": 0.0008
+   },
+   "formal_chronicle_keeping": {
+    "knowledge_preservation": 0.0014,
+    "labor_demand": 0.01,
+    "legitimacy": 0.0004
+   },
+   "public_schools": {
+    "adoption_rate": 0.0121,
+    "knowledge_preservation": 0.0045,
+    "knowledge_rate": 0.0113,
+    "labor_demand": 0.04,
+    "state_capacity": 0.0019
+   },
+   "scribal_specialties": {
+    "knowledge_rate": 0.0032,
+    "labor_demand": 0.01,
+    "state_capacity": 0.0015,
+    "survey_speed": 0.0069
+   },
+   "worked_problem_tablets": {
+    "adoption_rate": 0.0036,
+    "knowledge_rate": 0.005
+   },
+   "consonantal_alphabet": {
+    "adoption_rate": 0.0094,
+    "institutional_rigidity": -0.02,
+    "knowledge_preservation": 0.0047,
+    "knowledge_rate": 0.022,
+    "trade_capacity": 0.0042
+   },
+   "checked_master_copies": {
+    "adoption_rate": 0.0016,
+    "knowledge_preservation": 0.0043,
+    "standardization": 0.0057
    }
   }
  }

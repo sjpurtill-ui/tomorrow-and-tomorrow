@@ -30,8 +30,8 @@ func test_loader_registers_all_1101_design_discoveries()->void:
 	# The approved design has 1,101 items; Phase 3 adopts the in-window catalog
 	# entries it never listed (tools/research/design_amendments_600.json).
 	assert_int(int(Catalog.meta().get("design_node_count",0))).is_equal(1101)
-	assert_int(Catalog.ids().size()).is_equal(1101+int(Catalog.meta().get("adopted_count",0)))
-	assert_int(int(Catalog.meta().get("node_count",0))).is_equal(Catalog.ids().size())
+	assert_int(Catalog.block_ids("y0_600").size()).is_equal(1101+int(Catalog.meta().get("adopted_count",0)))
+	assert_int(int(Catalog.meta().get("node_count",0))).is_equal(Catalog.block_ids("y0_600").size())
 	var live:Dictionary={}
 	for entry:Dictionary in DiscoverySystem.technology_catalog:live[String(entry.id)]=true
 	var missing:Array[String]=[]
@@ -45,7 +45,7 @@ func test_loader_registers_all_1101_design_discoveries()->void:
 func test_new_design_items_use_the_catalog_format_and_a_valid_channel()->void:
 	var channels:Dictionary=preload("res://scripts/discovery_frontier_catalog.gd").SUBCATEGORIES
 	var count:=0
-	for id:String in Catalog.ids():
+	for id:String in Catalog.block_ids("y0_600"):
 		if String(Catalog.item(id).status)!="new":continue
 		count+=1
 		var entry:=_entry(id)
@@ -101,10 +101,14 @@ func test_place_value_requires_its_whole_recording_chain()->void:
 
 func test_bookbinding_waits_for_its_era_even_with_cordage()->void:
 	var book:=_entry("bookbinding_assemblies")
-	assert_bool(Catalog.has("bookbinding_assemblies")).is_false()
+	# The 600-1200 block designs the codex: its own foundations and band.
+	assert_str(Catalog.block_of("bookbinding_assemblies")).is_equal("y600_1200")
 	GameState.known_discoveries.assign(["cordage","fiber_grading"])
+	assert_bool(P.ready(book,_day(16))).is_false()
+	GameState.known_discoveries.assign(["cordage","fiber_grading","parchment_record_preparation","wax_writing_boards"])
 	assert_bool(P.ready(book,_day(16))).is_true()
 	var opens:=DiscoverySystem.research_600_earliest_year(book)
+	assert_float(opens).is_equal(float(Catalog.item("bookbinding_assemblies").min_year))
 	assert_float(opens).is_greater(1000.0)
 	for year:float in [16.0,75.0,180.0,600.0,opens-1.0]:
 		GameState.elapsed_days=_day(year)
@@ -123,11 +127,12 @@ func test_items_outside_the_registry_hold_to_their_era_or_the_window_end()->void
 			assert_float(earliest).override_failure_message(id).is_equal(Catalog.redate(id))
 		elif preload("res://scripts/technology_eras.gd").HISTORICAL_YEAR.has(id):
 			var expected:=era*Catalog.ERA_BAND_FRACTION
-			# Entries dated after the window never open inside it.
+			# Entries dated after a design window never open inside it.
 			if era>Catalog.WINDOW_END_YEAR:expected=maxf(Catalog.WINDOW_END_YEAR,expected)
+			if era>Catalog.window_end_year():expected=maxf(Catalog.window_end_year(),expected)
 			assert_float(earliest).override_failure_message(id).is_equal_approx(expected,0.001)
 		else:
-			assert_float(earliest).override_failure_message(id).is_greater_equal(Catalog.WINDOW_END_YEAR)
+			assert_float(earliest).override_failure_message(id).is_greater_equal(Catalog.window_end_year())
 	for id:String in ["differential_calculus","integral_calculus","public_libraries"]:
 		assert_float(DiscoverySystem.research_600_earliest_year(_entry(id))).override_failure_message(id).is_greater(500.0)
 	# Iron must not open before about year 660 (1000 BCE).
@@ -196,7 +201,7 @@ func test_design_graph_is_acyclic()->void:
 func test_every_design_item_is_reachable_by_year_600_and_the_live_graph_validates()->void:
 	var first:=Probe.earliest_years(DiscoverySystem,600.0,5.0)
 	var unreachable:Array[String]=[]
-	for id:String in Catalog.ids():
+	for id:String in Catalog.block_ids("y0_600"):
 		if not first.has(id):unreachable.append(id)
 	assert_array(unreachable).is_empty()
 	var graph:Array=[]

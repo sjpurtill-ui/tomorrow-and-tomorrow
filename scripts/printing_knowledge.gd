@@ -99,9 +99,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Fine carbon pigment is worked into a prepared drying-oil vehicle that transfers from a printing surface to paper.",
     "effects": {},
-    "production_items": [
-      "oil_printing_ink"
-    ],
+    "production_items": ["oil_printing_ink", "earth_pigment_ink"],
     "production_contract": "Paid workshop lines manufacture ink ingredients, reusable printing forms and printed sheets from actual stocks. Printed sheets support collection examination through finite consumption; no knowledge, paper, equipment or electricity is created by discovery."
   },
   {
@@ -169,9 +167,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Individually cut wooden characters can be aligned, locked into a form and rearranged for another text.",
     "effects": {},
-    "production_items": [
-      "wood_type_forms"
-    ],
+    "production_items": ["wood_type_forms", "composed_wood_type_forms"],
     "production_contract": "Paid workshop lines manufacture ink ingredients, reusable printing forms and printed sheets from actual stocks. Printed sheets support collection examination through finite consumption; no knowledge, paper, equipment or electricity is created by discovery."
   },
   {
@@ -208,9 +204,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Hand pressure transfers an inked relief onto successive sheets without a powered press.",
     "effects": {},
-    "production_items": [
-      "hand_printed_sheets"
-    ],
+    "production_items": ["hand_printed_sheets", "ochre_relief_sheets"],
     "production_contract": "Paid workshop lines manufacture ink ingredients, reusable printing forms and printed sheets from actual stocks. Printed sheets support collection examination through finite consumption; no knowledge, paper, equipment or electricity is created by discovery."
   },
   {
@@ -280,10 +274,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "A turning pressure cylinder brings paper across an inked form in a controlled rolling impression.",
     "effects": {},
-    "production_items": [
-      "cylinder_printed_sheets",
-      "motor_printed_sheets"
-    ],
+    "production_items": ["cylinder_printed_sheets"],
     "production_contract": "Paid workshop lines manufacture ink ingredients, reusable printing forms and printed sheets from actual stocks. Printed sheets support collection examination through finite consumption; no knowledge, paper, equipment or electricity is created by discovery."
   }
 ]

@@ -135,10 +135,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "A moving spindle carriage combines controlled drawing and twisting with a return stroke for winding the yarn.",
     "effects": {},
-    "production_items": [
-      "hand_mule_yarn",
-      "electric_mule_yarn"
-    ],
+    "production_items": ["hand_mule_yarn"],
     "production_contract": "Enables an authored textile workshop route with its own tooling, material and work costs. Powered routes consume actual electricity; hand manufacture remains available without it. Learning creates no machinery or output."
   },
   {

@@ -11,15 +11,17 @@
   },
   "ember_tending": {
    "ability_reason": "A banked fire means cooked food every day, not only when lightning or luck provides a flame.",
-   "art": "res://assets/ui/research/paper/ember_tending.png"
+   "art": "res://assets/ui/research/paper/ember_tending.png",
+   "effects": {}
   },
   "hearth_heat_retention": {
    "ability_reason": "Hot stones and banked ash keep food warm and soft for the old and the very young.",
-   "art": "res://assets/ui/research/paper/hearth_heat_retention.png"
+   "art": "res://assets/ui/research/paper/hearth_heat_retention.png",
+   "effects": {}
   },
   "food_pounding_mortars": {
    "effects": {
-    "labor_demand": 0.004,
+    "labor_demand": 0.0015,
     "neonatal_survival": 0.0028,
     "nutrition_quality": 0.0044
    },
@@ -38,21 +40,22 @@
    "effects": {
     "food_spoilage": -0.0571,
     "food_storage": 0.042,
-    "labor_demand": 0.01
+    "labor_demand": 0.0037
    }
   },
   "seed_selection": {
    "ability_reason": "Seed from the best plants gives a better harvest every year it is kept up.",
    "effects": {
     "cultivation_yield": 0.0762,
-    "labor_demand": 0.02,
+    "labor_demand": 0.0074,
     "nutrition_quality": 0.011,
     "soil_productivity": 0.0212
    }
   },
   "friction_fire_ignition": {
    "ability_reason": "Fire can be made again wherever dry wood is found, so no camp goes without cooked food.",
-   "art": "res://assets/ui/research/paper/friction_fire_ignition.png"
+   "art": "res://assets/ui/research/paper/friction_fire_ignition.png",
+   "effects": {}
   },
   "hearth_roasting_control": {
    "effects": {
@@ -66,14 +69,15 @@
   "seasonal_protein_sourcing": {
    "effects": {
     "hunting_yield": 0.03,
-    "labor_demand": 0.008,
+    "labor_demand": 0.003,
     "nutrition_quality": 0.0164
    },
    "art": "res://assets/ui/research/paper/pulse_splitting.png"
   },
   "percussion_fire_ignition": {
    "ability_reason": "Struck sparks light tinder in wet weather and on the march.",
-   "art": "res://assets/ui/research/paper/percussion_fire_ignition.png"
+   "art": "res://assets/ui/research/paper/percussion_fire_ignition.png",
+   "effects": {}
   },
   "varied_forage_rotation": {
    "effects": {
@@ -119,7 +123,7 @@
     "disease_exposure": 0.008,
     "ecological_pressure": 0.01,
     "food_output": 0.0241,
-    "labor_demand": 0.01
+    "labor_demand": 0.0037
    },
    "ability_reason": "A penned herd is meat on the hoof: food that does not have to be hunted.",
    "social_consequence": "Families that keep animals gain a store of wealth that can be counted, lent and lost."
@@ -164,7 +168,7 @@
    "effects": {
     "food_output": 0.037,
     "foraging_yield": 0.0137,
-    "labor_demand": 0.006
+    "labor_demand": 0.0022
    },
    "name": "Fish Weirs and Traps",
    "observation": "Stakes and wicker across the shallows hold the run, and baited baskets fill while the hands that set them do other work.",
@@ -181,7 +185,7 @@
    "effects": {
     "disease_exposure": 0.008,
     "food_output": 0.0417,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0037,
     "neonatal_survival": 0.0034,
     "nutrition_quality": 0.0044
    },
@@ -224,7 +228,7 @@
   "saddle_quern_grinding": {
    "effects": {
     "fatigue": 0.012,
-    "labor_demand": 0.008,
+    "labor_demand": 0.003,
     "nutrition_quality": 0.0033
    },
    "name": "Saddle Quern Grinding",
@@ -410,7 +414,7 @@
   "manure_field_spreading": {
    "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
    "effects": {
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "soil_productivity": 0.0055
    }
   },
@@ -467,7 +471,7 @@
    "effects": {
     "cultivation_yield": 0.0117,
     "disease_exposure": 0.015,
-    "labor_demand": 0.03,
+    "labor_demand": 0.0015,
     "soil_productivity": 0.0073,
     "state_capacity": 0.0184
    }
@@ -513,7 +517,7 @@
    "art": "res://assets/ui/research/subjects/managed_fallow-v1.png",
    "effects": {
     "cultivation_yield": 0.0092,
-    "labor_demand": 0.008
+    "labor_demand": 0.0004
    }
   },
   "butter_churning": {
@@ -528,7 +532,7 @@
    "effects": {
     "food_output": 0.0144,
     "food_storage": 0.0022,
-    "labor_demand": 0.015
+    "labor_demand": 0.0008
    },
    "name": "Winter Fodder",
    "observation": "Leaves and grass cut and stacked in summer carry the herd through winter, so fewer beasts are slaughtered at the first frost.",
@@ -571,7 +575,7 @@
     "cohesion": 0.0026,
     "food_storage": 0.0031,
     "health_risk": 0.004,
-    "labor_demand": 0.008,
+    "labor_demand": 0.0008,
     "water_safety": 0.003
    },
    "name": "Barley Beer",
@@ -645,7 +649,7 @@
    "effects": {
     "food_spoilage": -0.0042,
     "health_risk": -0.004,
-    "labor_demand": 0.005,
+    "labor_demand": 0.0003,
     "storage_loss": -0.0091
    },
    "name": "Spoilage Inspection",
@@ -659,7 +663,7 @@
     "cohesion": 0.005,
     "food_spoilage": -0.0127,
     "food_storage": 0.0142,
-    "labor_demand": 0.02,
+    "labor_demand": 0.001,
     "state_capacity": 0.0082
    }
   },
@@ -733,7 +737,7 @@
    "effects": {
     "food_output": 0.0079,
     "food_storage": 0.0048,
-    "labor_demand": 0.008
+    "labor_demand": 0.0004
    },
    "name": "Stocked Fish Ponds",
    "observation": "Young fish netted from the river and set in dug ponds grow there until the table needs them.",
@@ -763,7 +767,7 @@
     "cohesion": 0.003,
     "ecological_pressure": 0.01,
     "food_output": 0.0026,
-    "labor_demand": 0.012
+    "labor_demand": 0.0006
    },
    "name": "Stall-Fattened Cattle",
    "observation": "Oxen kept in stalls and fed on grain and fodder grow heavy for the great feasts.",
@@ -790,7 +794,7 @@
   "graded_rations": {
    "effects": {
     "food_storage": 0.0031,
-    "institutional_rigidity": 0.01,
+    "institutional_rigidity": 0.0018,
     "labor_efficiency": 0.0038,
     "neonatal_survival": 0.0038,
     "state_capacity": 0.0038
@@ -854,7 +858,7 @@
   "famine_reserves": {
    "effects": {
     "food_storage": 0.0126,
-    "labor_demand": 0.01,
+    "labor_demand": 0.0005,
     "legitimacy": 0.0028,
     "neonatal_survival": 0.0029,
     "state_capacity": 0.0056,
@@ -1413,6 +1417,126 @@
     "cultivation_yield": 0.03,
     "food_storage": 0.01,
     "knowledge_preservation": 0.005
+   }
+  }
+ },
+ "balance_3000": {
+  "schema": "research_3000_balance/1",
+  "note": "Pre-balance effects kept by tools/research/rebalance_effects_3000.py; the loader reads only 'items'.",
+  "source": {
+   "ember_tending": {},
+   "hearth_heat_retention": {},
+   "food_pounding_mortars": {
+    "labor_demand": 0.004,
+    "neonatal_survival": 0.0028,
+    "nutrition_quality": 0.0044
+   },
+   "food_drying": {
+    "food_spoilage": -0.0571,
+    "food_storage": 0.042,
+    "labor_demand": 0.01
+   },
+   "seed_selection": {
+    "cultivation_yield": 0.0762,
+    "labor_demand": 0.02,
+    "nutrition_quality": 0.011,
+    "soil_productivity": 0.0212
+   },
+   "friction_fire_ignition": {},
+   "seasonal_protein_sourcing": {
+    "hunting_yield": 0.03,
+    "labor_demand": 0.008,
+    "nutrition_quality": 0.0164
+   },
+   "percussion_fire_ignition": {},
+   "animal_taming": {
+    "disease_exposure": 0.008,
+    "ecological_pressure": 0.01,
+    "food_output": 0.0241,
+    "labor_demand": 0.01
+   },
+   "fish_weirs_and_traps": {
+    "food_output": 0.037,
+    "foraging_yield": 0.0137,
+    "labor_demand": 0.006
+   },
+   "milking": {
+    "disease_exposure": 0.008,
+    "food_output": 0.0417,
+    "labor_demand": 0.01,
+    "neonatal_survival": 0.0034,
+    "nutrition_quality": 0.0044
+   },
+   "saddle_quern_grinding": {
+    "fatigue": 0.012,
+    "labor_demand": 0.008,
+    "nutrition_quality": 0.0033
+   },
+   "manure_field_spreading": {
+    "labor_demand": 0.01,
+    "soil_productivity": 0.0055
+   },
+   "irrigation_schedules": {
+    "cultivation_yield": 0.0117,
+    "disease_exposure": 0.015,
+    "labor_demand": 0.03,
+    "soil_productivity": 0.0073,
+    "state_capacity": 0.0184
+   },
+   "planting_density_adjustment": {
+    "cultivation_yield": 0.0092,
+    "labor_demand": 0.008
+   },
+   "winter_fodder": {
+    "food_output": 0.0144,
+    "food_storage": 0.0022,
+    "labor_demand": 0.015
+   },
+   "barley_beer": {
+    "cohesion": 0.0026,
+    "food_storage": 0.0031,
+    "health_risk": 0.004,
+    "labor_demand": 0.008,
+    "water_safety": 0.003
+   },
+   "spoilage_inspection": {
+    "food_spoilage": -0.0042,
+    "health_risk": -0.004,
+    "labor_demand": 0.005,
+    "storage_loss": -0.0091
+   },
+   "regional_granaries": {
+    "cohesion": 0.005,
+    "food_spoilage": -0.0127,
+    "food_storage": 0.0142,
+    "labor_demand": 0.02,
+    "state_capacity": 0.0082
+   },
+   "stocked_fish_ponds": {
+    "food_output": 0.0079,
+    "food_storage": 0.0048,
+    "labor_demand": 0.008
+   },
+   "stall_fattened_cattle": {
+    "cohesion": 0.003,
+    "ecological_pressure": 0.01,
+    "food_output": 0.0026,
+    "labor_demand": 0.012
+   },
+   "graded_rations": {
+    "food_storage": 0.0031,
+    "institutional_rigidity": 0.01,
+    "labor_efficiency": 0.0038,
+    "neonatal_survival": 0.0038,
+    "state_capacity": 0.0038
+   },
+   "famine_reserves": {
+    "food_storage": 0.0126,
+    "labor_demand": 0.01,
+    "legitimacy": 0.0028,
+    "neonatal_survival": 0.0029,
+    "state_capacity": 0.0056,
+    "storage_loss": -0.0056
    }
   }
  }

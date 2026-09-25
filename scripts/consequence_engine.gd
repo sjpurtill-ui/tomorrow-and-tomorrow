@@ -744,7 +744,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	# Orders that spread or check sickness shift the illness burden directly.
 	mortality_components["Illness"]=maxf(0.0,float(mortality_components["Illness"])+policy_effect("disease_risk")*0.030)
 	mortality_components["Dehydration"]=_dehydration_mortality_rate(water_intake,WorldSimulation.state.consecutive_water_shortage_days)
-	mortality_components["Work accidents"]=(0.002+extraction_pressure*0.025)*industrial_activity*maxf(0.15,1.0+WorldSimulation.discovery.effect("disaster_risk")-WorldSimulation.discovery.effect("mine_safety"))
+	mortality_components["Work accidents"]=(0.002+extraction_pressure*0.025)*industrial_activity*maxf(0.15,1.0+WorldSimulation.discovery.effect("disaster_risk")-WorldSimulation.discovery.effect("mine_safety"))*float((WorldSimulation.state.early_care.get("modern",{}) as Dictionary).get("adult",1.0)) # research_3000: occupational safety and trauma care
 	if intake_ratio<0.98 or malnutrition>0.05:
 		var shortage_ramp:=clampf((WorldSimulation.state.consecutive_food_shortage_days-5.0)/45.0,0.0,1.0)
 		mortality_components["Hunger"]=maxf(0.0,1.0-intake_ratio)*(0.08+shortage_ramp*0.90)+malnutrition*0.42
@@ -775,8 +775,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		"conception_support":WorldSimulation.discovery.effect("conception_support")+policy_effect("conception_support")+WorldSimulation.state.founding_effect("conception_support")+WorldSimulation.progression.effect("conception_support"),
 		"maternal_safety":WorldSimulation.discovery.effect("maternal_safety"),"neonatal_survival":WorldSimulation.discovery.effect("neonatal_survival")+policy_effect("neonatal_survival"),
 		"conception_care":float(care.get("conception",1.0)),"pregnancy_care":float(care.get("pregnancy_risk",1.0)),
-		"neonatal_care":EARLY_CARE.neonatal_factor(care),"maternal_care":EARLY_CARE.maternal_factor(care)
-	} # research_600: neonatal/maternal care factors include the pre-modern burden
+		"neonatal_care":EARLY_CARE.neonatal_factor(care),"maternal_care":EARLY_CARE.maternal_factor(care),
+		"fertility_transition":float(care.get("fertility_transition",0.0))
+	} # research_600: neonatal/maternal care factors include the pre-modern burden; research_3000: the fertility transition
 	var reproduction:=WorldSimulation.state.process_reproduction_day(reproduction_context)
 	# Cohorts and gestation advance one real day at a time within a span.
 	for extra in WorldSimulation.span-1:

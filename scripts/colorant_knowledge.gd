@@ -29,12 +29,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Separate and prepare mineral colorants with observed consistency and compatibility",
     "effects": {},
-    "production_items": [
-      "ochre_levigation",
-      "fine_ochre_pigment",
-      "earth_pigment_ink",
-      "ochre_relief_sheets"
-    ],
+    "production_items": ["ochre_levigation", "fine_ochre_pigment"],
     "production_contract": "Finite selected feed, grinding/extraction equipment, actual water, work and trial material make prepared colorants. Ochre is a nonrenewable observed occurrence; generic clay or iron ore cannot substitute. Qualified pigment and binder feed actual printed sheets; textile tannin feeds compatible dyeing. No imported output grants local mastery or a universal pigment or dye rating."
   },
   {

@@ -1,0 +1,9 @@
+{
+ "description": "Synthetic 600-1200 registry for tests/test_research_blocks.gd (not design data).",
+ "discoveries": [
+  {"id": "fx_bloom_hearths", "line": "production", "name": "Bloom hearths: iron won from ore in a clay hearth", "status": "new", "shared_with": []},
+  {"id": "fx_iron_edge_tools", "line": "production", "name": "Iron-edged tools", "status": "new", "shared_with": []},
+  {"id": "bloomery_smelting", "line": "production", "name": "Bloomery smelting", "status": "catalog", "shared_with": []},
+  {"id": "fx_district_courts", "line": "institutions", "name": "District courts hear appeals from village elders", "status": "new", "shared_with": []}
+ ]
+}

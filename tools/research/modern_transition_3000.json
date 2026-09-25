@@ -1,0 +1,194 @@
+{
+ "schema": "research_3000_transition/1",
+ "note": "Where the research_3000 transition keys come from. rebalance_effects_3000.py adds 'unit' x weight of each key to the listed items (and to the items the 'rules' select), then scales every 50-year block so the full-knowledge total follows the key's era ceiling (SocietyModel.OWN_LATER_RISE): the values that reach the game are small, and nothing arrives before its century. Weights are relative within a block. Negative weights push the other way (pronatalist policies raise births). A key may set its own 'unit'.",
+ "unit": 0.05,
+ "keys": {
+  "literacy": {
+   "why": "Share of adults who can read (CivilizationIndicators.literacy_pct). Scripts, cheap writing surfaces, printing and above all compulsory schooling carry it; it feeds the schooling part of the fertility transition and the research support of DiscoverySystem.",
+   "items": {
+    "pictographic_records": 0.3,
+    "consonantal_alphabet": 1.0,
+    "public_schools": 1.0,
+    "full_vowel_alphabet": 1.0,
+    "abecedary_letter_order": 0.5,
+    "wax_writing_boards": 0.5,
+    "letter_schools_for_citizens": 2.0,
+    "paid_wandering_teachers": 0.5,
+    "salaried_public_teachers": 1.5,
+    "paper_making": 2.0,
+    "written_grammar": 0.5,
+    "reading_marks": 0.5,
+    "word_spacing": 0.5,
+    "printing_process": 2.0,
+    "relief_block_cutting": 0.5,
+    "chartered_university": 0.5,
+    "screw_press_printing": 3.0,
+    "town_printing_houses": 2.0,
+    "printed_broadsides": 1.0,
+    "old_tongue_grammar_schools": 1.0,
+    "printed_alphabet_primers": 2.0,
+    "compulsory_parish_schooling": 3.0,
+    "daily_printed_newspaper": 1.0,
+    "subscription_libraries": 1.0,
+    "reading_circles": 1.0,
+    "cylinder_press_printing": 1.0,
+    "cheap_daily_press": 1.5,
+    "public_instruction_ministry": 2.0,
+    "half_time_schooling": 1.0,
+    "compulsory_elementary_schooling": 5.0,
+    "endowed_town_libraries": 1.0,
+    "million_reader_dailies": 1.0,
+    "childrens_books": 1.0,
+    "universal_secondary_schooling": 3.0,
+    "mass_paperbacks": 0.5,
+    "mass_higher_education": 1.0
+   },
+   "rules": [
+    {
+     "lines": [
+      "knowledge",
+      "culture",
+      "institutions"
+     ],
+     "pattern": "\\b(writ|script|alphabet|school|literac|reading|print|paper|book|scribe|primer|grammar|librar|pamphlet|newspaper|teach|tutor|academ|universit|educat|syllab|copyist|lesson|pupil)",
+     "weight": 0.4
+    }
+   ]
+  },
+  "modern_survival": {
+   "why": "Share of the baseline life table's hazard removed by modern medicine and public health (EarlyLifeConditions.MODERN_SURVIVAL_WEIGHT by age): inoculation and vaccination, clean piped and filtered water and sewers, antisepsis and asepsis, germ theory, antitoxins, antibiotics, maternal and infant clinics, oral rehydration.",
+   "items": {
+    "preventive_inoculation": 1.0,
+    "cowpox_vaccination": 2.0,
+    "public_vaccine_stations": 1.5,
+    "slow_sand_filtration": 1.5,
+    "compulsory_infant_vaccination": 2.0,
+    "intercepting_sewers": 2.0,
+    "chlorine_handwashing": 1.5,
+    "antiseptic_surgery": 1.5,
+    "germ_theory_of_disease": 3.0,
+    "antiseptic_maternity_wards": 2.0,
+    "aseptic_operating_room": 1.0,
+    "diphtheria_antitoxin": 2.0,
+    "water_chlorination": 3.0,
+    "infant_milk_depots": 1.5,
+    "antenatal_clinics": 1.5,
+    "newborn_health_visitors": 1.5,
+    "vitamin_factors": 1.0,
+    "insulin_therapy": 0.5,
+    "sulfa_drugs": 2.0,
+    "mould_broth_antibiotic": 3.0,
+    "consumption_antibiotic": 1.5,
+    "paralysis_virus_vaccine": 1.0,
+    "measles_vaccine": 1.5,
+    "oral_rehydration_salts": 2.0,
+    "expanded_immunisation_program": 2.0,
+    "neonatal_intensive_care": 1.5,
+    "hospital_birth_norm": 1.0,
+    "smallpox_eradication": 1.0,
+    "recombinant_vaccine": 0.5,
+    "messenger_molecule_vaccine": 0.5
+   },
+   "rules": [
+    {
+     "lines": [
+      "health"
+     ],
+     "min_year": 2250,
+     "pattern": ".",
+     "weight": 0.3
+    },
+    {
+     "lines": [
+      "demography",
+      "nutrition",
+      "infrastructure"
+     ],
+     "min_year": 2250,
+     "pattern": "vaccin|inocul|antisep|asepti|steril|antibiot|chlorin|filtrat|sewer|water_closet|pasteur|heat_treatment|immuni|obstetric|maternity|midwi|infant|newborn|neonat|antenatal|children|child_",
+     "weight": 0.5
+    }
+   ]
+  },
+  "fertility_transition": {
+   "why": "Share of births a society chooses not to have (EarlyLifeConditions.fertility_transition). It needs schooling (children cost instead of earn), child-labor law, pensions (old age no longer rests on many children), women's rights and paid work, and contraception. Culture, labor and institutions carry the social part, demography the means; the urban and literacy parts are computed from the indicators.",
+   "items": {
+    "working_mothers_creches": 0.5,
+    "rubber_sheaths": 1.0,
+    "family_limitation": 2.0,
+    "raised_consent_age": 1.0,
+    "birth_control_clinics": 2.0,
+    "oral_contraceptive_pill": 3.0,
+    "family_planning_fieldwork": 2.0,
+    "small_family_campaigns": 2.0,
+    "legal_pregnancy_termination": 1.0,
+    "long_acting_contraception": 2.0,
+    "emergency_contraception": 0.5,
+    "pronatalist_bonuses": -1.0,
+    "universal_family_allowances": -0.5,
+    "low_fertility_family_package": -1.0,
+    "first_factory_act": 1.0,
+    "half_time_schooling": 1.0,
+    "child_labor_prohibition": 2.5,
+    "women_office_clerks": 1.0,
+    "equal_pay_law": 1.0,
+    "public_instruction_ministry": 1.0,
+    "civil_divorce_courts": 0.5,
+    "married_women_property": 1.0,
+    "old_age_pensions": 2.0,
+    "womens_suffrage": 1.0,
+    "widows_orphans_insurance": 0.5,
+    "welfare_state": 1.0,
+    "womens_rights_convention": 1.0,
+    "womens_liberation_movement": 2.0,
+    "national_history_lessons": 0.5,
+    "compulsory_elementary_schooling": 2.0,
+    "universal_secondary_schooling": 2.0,
+    "mass_higher_education": 1.0
+   },
+   "rules": []
+  },
+  "farm_mechanization": {
+   "why": "Extra output per farm worker (FoodSystem cultivated staples) from machines, mineral and synthetic fertilizer and bred seed: seed drills and iron ploughs, threshing and reaping machines, tile drainage, guano and nitrates, the tractor and combine, ammonia synthesis, hybrid and semi-dwarf seed, pumped irrigation. It is what lets food labor fall from about 40% to under 10% (benchmark food_labor_share).",
+   "items": {
+    "seed_drill": 0.5,
+    "light_swing_plough": 0.5,
+    "horse_hoe_tillage": 0.3,
+    "threshing_machine": 1.0,
+    "cast_iron_plough_parts": 0.5,
+    "mechanical_reaper": 2.0,
+    "steel_scouring_plough": 1.0,
+    "seabird_guano_trade": 1.0,
+    "mineral_nitrate_dressing": 1.0,
+    "machine_tile_drainage": 1.0,
+    "steam_threshing_sets": 1.0,
+    "twine_binding_harvester": 1.5,
+    "catalytic_ammonia_synthesis": 3.0,
+    "ammonium_sulfate_fertilizer": 1.0,
+    "farm_tractor": 3.0,
+    "hybrid_maize_seed": 2.0,
+    "hitch_tractor": 1.5,
+    "combine_harvester": 3.0,
+    "synthetic_crop_insecticide": 1.0,
+    "selective_hormone_herbicide": 1.0,
+    "centre_pivot_irrigation": 1.0,
+    "drip_irrigation": 0.5,
+    "semi_dwarf_grain_package": 2.0,
+    "urea_synthesis": 1.0,
+    "transgenic_crops": 0.5,
+    "marker_assisted_breeding": 0.5
+   },
+   "rules": [
+    {
+     "lines": [
+      "nutrition"
+     ],
+     "min_year": 2250,
+     "pattern": "plough|plow|reap|thresh|harvest|fertili|nitrat|guano|tractor|seed|breed|irrigat|drainage|herbic|insectic|pestic|crop",
+     "weight": 0.3
+    }
+   ],
+   "unit": 0.2
+  }
+ }
+}

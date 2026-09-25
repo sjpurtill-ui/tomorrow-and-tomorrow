@@ -177,6 +177,8 @@ static func _glyph(resource_name:String)->Array:
 		"Tin Ore": return _ore_rock(Color("#cfd4d8"))
 		"Lead Ore": return _ore_rock(Color("#5d6b7d"))
 		"Iron Ore": return _ore_rock(Color("#b0503a"))
+		"Zinc Ore": return _ore_rock(Color("#9fb3b8"))
+		"Kaolin": return _pot(Color("#eeeae0"),Color("#f7f4ec"))
 		"Phosphate Rock": return _ore_rock(Color("#cdd08a"))
 		"Bitumen": return _droplet(Color("#1f2224"),Color("#4a5054"))
 		"Fine Sand": return [

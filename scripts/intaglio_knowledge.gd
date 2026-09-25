@@ -167,9 +167,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Engravers adapt controlled cutting to steel plates, providing another metal supply route for recessed printing images.",
     "effects": {},
-    "production_items": [
-      "steel_engraved_plates"
-    ],
+    "production_items": ["steel_engraved_plates", "steel_intaglio_sheets"],
     "production_contract": "Staffed workshop lines consume actual metal, paper, ink and tooling. Plate stocks have method-specific wear and remain distinct from relief forms; completed impressions enter the existing finite Printed Sheets study supply. No automatic research or free materials."
   },
   {
@@ -210,12 +208,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "A rolling press forces damp paper against an inked, wiped plate, drawing ink out of recesses.",
     "effects": {},
-    "production_items": [
-      "intaglio_sheets",
-      "drypoint_sheets",
-      "mezzotint_sheets",
-      "steel_intaglio_sheets"
-    ],
+    "production_items": ["intaglio_sheets", "drypoint_sheets", "mezzotint_sheets"],
     "production_contract": "Staffed workshop lines consume actual metal, paper, ink and tooling. Plate stocks have method-specific wear and remain distinct from relief forms; completed impressions enter the existing finite Printed Sheets study supply. No automatic research or free materials."
   }
 ]

@@ -23,7 +23,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Silica mixtures are heated and cooled into reproducible glass for vessels and optical work.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -32,8 +32,8 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "optical_lenses",
-	      "precision_thermometry"
+	      "crucible_glass_melting",
+	      "ceramic_glaze_formulation"
 	    ]
 	  },
 	  {
@@ -57,7 +57,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Curved transparent surfaces are ground and compared for repeatable magnification and focus.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -66,7 +66,8 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "experimental_optics"
+	      "two_lens_tube_microscope",
+	      "two_lens_telescope"
 	    ]
 	  },
 	  {
@@ -90,7 +91,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Controlled light paths distinguish reflection, refraction and interference effects.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -123,7 +124,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Fitted pumps and seals remove air from experimental chambers.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -156,7 +157,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Pressure is varied systematically while other chamber conditions are recorded.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -165,7 +166,7 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "electron_physics"
+	      "steam_suction_pump"
 	    ]
 	  },
 	  {
@@ -189,7 +190,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Reproducible temperature scales let observers compare heating and cooling experiments.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -199,8 +200,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "foundation_for": [
 	      "calorimetry",
-	      "fractional_distillation",
-	      "spectroscopy"
+	      "fractional_distillation"
 	    ]
 	  },
 	  {
@@ -224,7 +224,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Measured heat exchanges distinguish temperature from the quantity of energy transferred.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -257,7 +257,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Comparisons of compression, heating and expansion relate fuel use to mechanical work.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -266,7 +266,7 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "steam_propulsion",
+	      "steam_turbines",
 	      "internal_combustion",
 	      "jet_propulsion"
 	    ]
@@ -292,7 +292,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Joined vessels are tested against internal pressure before use in engines and experiments.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -301,7 +301,7 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "heat_engine_cycles",
+	      "compressed_air_systems",
 	      "reactor_engineering"
 	    ]
 	  },
@@ -326,7 +326,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Vapors are condensed separately from their heated mixtures to recover different fractions.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -335,8 +335,7 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "fractional_distillation",
-	      "electrochemical_cells"
+	      "fractional_distillation"
 	    ]
 	  },
 	  {
@@ -360,7 +359,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Repeated vapor-liquid contact separates mixtures by measured boiling behavior.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -393,7 +392,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Paired materials and electrolytes produce repeatable electrical currents for experiments.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -426,7 +425,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Current, potential difference and resistance are compared using calibrated instruments.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -435,8 +434,7 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "electromagnetic_induction",
-	      "electron_physics"
+	      "electromagnetic_induction"
 	    ]
 	  },
 	  {
@@ -460,7 +458,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Changing magnetic conditions produce measurable electrical currents in conducting circuits.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -494,7 +492,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Rotating magnetic machinery converts mechanical input into sustained electrical output.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -527,7 +525,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Controlled current and magnetic forces produce repeatable rotary mechanical work.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -536,7 +534,7 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "wind_tunnel_testing"
+	      "electric_street_tramways"
 	    ]
 	  },
 	  {
@@ -560,7 +558,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Separated light patterns are compared to distinguish emitting and absorbing materials.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -569,7 +567,7 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "atomic_physics"
+	      "periodic_element_table"
 	    ]
 	  },
 	  {
@@ -593,7 +591,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Experiments with discharge and charged particles establish reproducible electronic behavior.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -627,7 +625,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Shielded detectors and counted events distinguish radiation exposure from instrumental background.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -660,7 +658,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Measured nuclear fragmentation connects reaction products, released energy and neutron production.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -694,7 +692,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Materials are compared for how they slow and absorb neutrons in a controlled reaction system.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -729,7 +727,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Repeatable loads reveal failure margins and fatigue in structural members.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -738,7 +736,6 @@ static func entries()->Array[Dictionary]:
 	      }
 	    ],
 	    "foundation_for": [
-	      "aerodynamics",
 	      "powered_flight",
 	      "advanced_airframes"
 	    ]
@@ -764,7 +761,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Controlled flow measurements compare lift, drag and stability of candidate surfaces.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
@@ -798,7 +795,7 @@ static func entries()->Array[Dictionary]:
 	    ],
 	    "observation": "Powered test sections compare airframes under repeatable flow and measured loads.",
 	    "effects": {},
-	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant or award a global output bonus.",
+	    "production_contract": "A causal scientific or engineering foundation for the named downstream capabilities. Knowing the principle does not create an operating plant; its society-wide effect is a small era-scaled contribution, not a direct output bonus.",
 	    "learning_routes": [
 	      {
 	        "id": "local",
