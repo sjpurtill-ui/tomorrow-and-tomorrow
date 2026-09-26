@@ -1,0 +1,14 @@
+{
+  "id": "freed_person_status",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b5902c24-a301-47dd-ac45-867974854577.png",
+  "source_file": "exec-b5902c24-a301-47dd-ac45-867974854577.png",
+  "creative_brief": "A freed bond-servant gets a fixed status, free but still bound to serve the former master's house. Paint it as a classical antiquity scene.",
+  "medium": "Chalk pastel and cut-paper",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/freed_person_status-v1.png",
+  "sha256": "7c7776a4aaf5c86e4ef34e860927a3a701a37bbea3adb55253f199de7eb36802",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "windlass_wells",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-53047a1a-bedc-4f4a-a72f-cd528ba9a6c7.png",
+  "source_file": "exec-53047a1a-bedc-4f4a-a72f-cd528ba9a6c7.png",
+  "creative_brief": "A crank-turned drum winds the rope, and a child can raise a full bucket from a well too deep for arms alone. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/windlass_wells-v1.png",
+  "sha256": "17964494416bfb87a1c0c218448d46459aebcd29b57d9f996189e0348612dbf0",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

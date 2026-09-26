@@ -1,0 +1,14 @@
+{
+  "id": "vessel_tinning",
+  "line": "production",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-51eb3788-e8af-4650-915d-a874c3857454.png",
+  "source_file": "exec-51eb3788-e8af-4650-915d-a874c3857454.png",
+  "creative_brief": "Copper cooking pots are wiped inside with molten tin, and the stew no longer tastes of green metal. Paint it as a classical antiquity scene.",
+  "medium": "Palette-knife impasto oil",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/vessel_tinning-v1.png",
+  "sha256": "bf4ccb6d49d42bc3a4ce94de593f62f2a294b495d43ce4475425e04e7de189ab",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

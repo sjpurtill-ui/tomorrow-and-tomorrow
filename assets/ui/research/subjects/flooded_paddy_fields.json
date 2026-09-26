@@ -1,0 +1,14 @@
+{
+  "id": "flooded_paddy_fields",
+  "line": "nutrition",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d1c26a91-8692-472a-b409-bf5f395c7bab.png",
+  "source_file": "exec-d1c26a91-8692-472a-b409-bf5f395c7bab.png",
+  "creative_brief": "Low fields are banked and flooded, and rice seedlings are set out by hand in the standing water. Paint it as a classical antiquity scene.",
+  "medium": "Egg tempera",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/flooded_paddy_fields-v1.png",
+  "sha256": "7dad59556bf4f5407c8bdc1cf70f6bd25edb2cb23df7518ba0f8e25b7fc3e460",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "standard_lot_grid_towns",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-36577bb7-d4e6-4fd9-839c-83371db7ea81.png",
+  "source_file": "exec-36577bb7-d4e6-4fd9-839c-83371db7ea81.png",
+  "creative_brief": "The new town is laid out in equal blocks, each split into equal house lots, and every street runs straight. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/standard_lot_grid_towns-v1.png",
+  "sha256": "583941c15ef386b4e1e8021bd95d2148035e1096f8565a99089f25bd0e5a9c04",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
