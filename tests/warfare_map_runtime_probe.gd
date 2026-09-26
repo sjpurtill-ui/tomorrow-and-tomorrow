@@ -209,8 +209,9 @@ func _ready()->void:
 		for route_node in [army_route,scout_route]:
 			for part in route_node.get_children():
 				if part is GeometryInstance3D and not part is Label3D:
-					var material:StandardMaterial3D=part.material_override
-					_expect(material.transparency==BaseMaterial3D.TRANSPARENCY_ALPHA,"route part can be overdrawn by transparent drapes")
+					var material:Material=part.material_override
+					# Scout chart ink is a blended ShaderMaterial (scout_chart_ink.gdshader).
+					_expect(material is ShaderMaterial or (material as StandardMaterial3D).transparency==BaseMaterial3D.TRANSPARENCY_ALPHA,"route part can be overdrawn by transparent drapes")
 					_expect(material.render_priority>4 and material.render_priority<17,"route escaped its below-counter layer band")
 		_expect(army_route.get_node("MarchChevrons").material_override.render_priority>army_route.get_node("MovementPath").material_override.render_priority,"army line covers its arrowheads")
 		if scout_route.has_node("ScoutDirectionTicks"): _expect(scout_route.get_node("ScoutDirectionTicks").material_override.render_priority>scout_route.get_node("ScoutCorridor").material_override.render_priority,"scout corridor covers its direction ticks")

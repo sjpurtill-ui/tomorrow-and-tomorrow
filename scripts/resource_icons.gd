@@ -405,3 +405,57 @@ static func _chart_glyph(kind:String,c:Color)->Array:
 
 static func _figure_small(x:float,c:Color)->Array:
 	return [_c(x,17,4.2,c),_rr(x,28,4.6,7.2,3,c),_s(x-1.8,35,x-4.5,45,3.0,c),_s(x+1.8,35,x+4.0,45,3.0,c)]
+
+
+# -- Settlement marks on the chart ---------------------------------------------
+
+const SETTLEMENT_GLYPH_PX:=64
+## Glyph cells in `settlement_atlas()`: settlement stages 0-6 (camp to
+## megalopolis), then a stranger's reported town.
+const SETTLEMENT_GLYPH_FOREIGN:=7
+const SETTLEMENT_GLYPH_COUNT:=8
+static var _settlement_atlas:Texture2D
+
+## Chart marks for places, as an engraver sets them: a small ringed dot for a
+## camp, heavier rings as a place grows, a walled ring with towers for a city,
+## outer rings for the great cities, and an open diamond for a stranger's town
+## known only by report. Iron-gall ink on a paper disc, so every mark reads
+## over dark ground and pale vellum alike. One strip, one texture.
+static func settlement_atlas()->Texture2D:
+	if _settlement_atlas!=null: return _settlement_atlas
+	var cell:=SETTLEMENT_GLYPH_PX
+	var strip:=Image.create(cell*SETTLEMENT_GLYPH_COUNT,cell,false,Image.FORMAT_RGBA8)
+	for index in SETTLEMENT_GLYPH_COUNT:
+		var glyph:=_render(_settlement_glyph(index),cell,false)
+		glyph.clear_mipmaps()
+		strip.blit_rect(glyph,Rect2i(0,0,cell,cell),Vector2i(index*cell,0))
+	strip.generate_mipmaps()
+	_settlement_atlas=ImageTexture.create_from_image(strip)
+	return _settlement_atlas
+
+
+static func _settlement_glyph(index:int)->Array:
+	var ink:=Color("#2b2118")
+	var paper:=Color("#f1e7cf")
+	var halo:=Color(0.95,0.91,0.82,0.55)
+	match index:
+		0: return [_c(28,28,14,halo),_c(28,28,11.5,paper),_ring(28,28,10.5,2.6,ink),_c(28,28,3.4,ink)]
+		1: return [_c(28,28,16,halo),_c(28,28,13.5,paper),_ring(28,28,12.5,2.8,ink),_c(28,28,4.4,ink)]
+		2: return [_c(28,28,18,halo),_c(28,28,15.5,paper),_ring(28,28,14.5,3.0,ink),_c(28,28,6.5,ink)]
+		3: return [_c(28,28,20,halo),_c(28,28,17.5,paper),_ring(28,28,16.5,3.2,ink),_ring(28,28,9.8,2.2,ink),_c(28,28,4.2,ink)]
+		SETTLEMENT_GLYPH_FOREIGN:
+			return [_d(28,28,22,halo),_d(28,28,19,paper)]+_ring_diamond(28,28,17,2.8,ink)+[_c(28,28,3.6,ink)]
+	# Cities: a walled ring with towers, then outer rings for greater cities.
+	var parts:Array=[_c(28,28,22,halo),_c(28,28,19,paper)]
+	for tower in 8:
+		var angle:=TAU*float(tower)/8.0
+		parts.append(_rr(28+cos(angle)*18.0,28+sin(angle)*18.0,3.0,3.0,0.7,ink))
+	parts.append_array([_ring(28,28,17,3.2,ink),_c(28,28,8,ink),_c(28,28,3,paper)])
+	if index>=5: parts.append(_ring(28,28,23.5,1.7,ink))
+	if index>=6: parts.append(_ring(28,28,26.4,1.3,ink))
+	return parts
+
+
+static func _ring_diamond(x:float,y:float,r:float,w:float,col:Color)->Array:
+	var top:=Vector2(x,y-r); var right:=Vector2(x+r,y); var bottom:=Vector2(x,y+r); var left:=Vector2(x-r,y)
+	return [_s(top.x,top.y,right.x,right.y,w,col),_s(right.x,right.y,bottom.x,bottom.y,w,col),_s(bottom.x,bottom.y,left.x,left.y,w,col),_s(left.x,left.y,top.x,top.y,w,col)]

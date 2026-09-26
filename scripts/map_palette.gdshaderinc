@@ -63,22 +63,106 @@ vec3 map_unknown(vec2 world_xz, float camera_height) {
 	float scale = exp2(floor(octave));
 	float blend = fract(octave);
 	vec2 p = world_xz/scale;
-	float coarse = mix(map_paper_noise(p), map_paper_noise(p*0.5+vec2(31.0,-17.0)), blend);
-	float fine = mix(map_paper_noise(p*6.0+vec2(-9.0,5.0)), map_paper_noise(p*3.0+vec2(13.0,29.0)), blend);
+	// Each octave's second term is exactly the next octave's first, so the
+	// grain carries on unbroken as the zoom crosses an octave.
+	float coarse = mix(map_paper_noise(p), map_paper_noise(p*0.5), blend);
+	float fine = mix(map_paper_noise(p*6.0+vec2(-9.0,5.0)), map_paper_noise(p*3.0+vec2(-9.0,5.0)), blend);
 	float mottle = (coarse-0.5)*0.10+(fine-0.5)*0.035;
 	return MAP_VELLUM*(1.0+mottle);
 }
 
-// Frontier of the known world, drawn as one fine ink line with a faint sepia
-// shadow on the unknown side. `discovered` is the raw charted-ground mask and
-// `pixels_per_unit` how many screen pixels one unit of that mask spans here.
-// Returns (ink coverage, shadow weight, crisp reveal): the charted land runs
-// right up to the ink instead of dissolving into the paper well inside it.
+// Frontier of the known world, drawn as one fine ink line with, on the
+// unknown side, a faint sepia shade and two finer lines echoing it, as an
+// engraver water-lines a coast. `discovered` is the raw charted-ground mask
+// and `pixels_per_unit` how many screen pixels one unit of that mask spans.
+// Returns (ink coverage, paper-side sepia weight, crisp reveal): the charted
+// land runs right up to the ink instead of dissolving into the paper.
 vec3 map_frontier(float discovered, float pixels_per_unit) {
 	float distance_px = (discovered-0.30)*pixels_per_unit;
 	float ink = 1.0-smoothstep(0.55, 1.35, abs(distance_px));
-	float shadow = (1.0-smoothstep(0.0, 7.0, -distance_px))*step(distance_px, 0.0);
+	float outside = max(-distance_px, 0.0)*step(distance_px, 0.0);
+	float shade = (1.0-smoothstep(0.0, 7.0, outside))*step(distance_px, 0.0);
+	float echo = max(1.0-smoothstep(0.30, 0.95, abs(outside-4.5)),
+		(1.0-smoothstep(0.30, 0.95, abs(outside-9.5)))*0.55)*step(distance_px, 0.0);
 	// Land starts beneath the ink, so no sliver of paper shows between them.
 	float crisp = smoothstep(-0.4, 0.9, distance_px);
-	return vec3(ink, shadow, crisp);
+	return vec3(ink, max(echo, shade*0.35), crisp);
+}
+
+// -- Chart character of the unknown (codex/map-2) ---------------------------
+// The blank vellum is a real sheet: a little fibre and foxing in the paper, a
+// faint graticule of degrees, the rhumb lines of a portolan chart radiating
+// from where the people stand, a soft darkening toward the table edge, and a
+// band of fine hatching just outside the frontier of the known world. All of
+// it is faint sepia ink or paper tone, so the charted world stays the focus.
+const vec3 MAP_SEPIA = vec3(0.30, 0.215, 0.13);
+
+// One octave of `map_unknown`'s camera-held paper scale.
+vec3 map_paper_octave(vec2 p) {
+	// Fibres: long, faint streaks laid mostly one way, as in laid paper.
+	vec2 q = vec2(p.x*0.94+p.y*0.34, -p.x*0.34+p.y*0.94);
+	float fibre = map_paper_noise(q*vec2(2.2, 26.0)+vec2(7.0, -3.0))-0.5;
+	// Foxing: rare small rust spots with a darker rim, one per unlucky cell.
+	vec2 cell = floor(p*0.9);
+	float lucky = map_paper_hash(cell+vec2(17.0, 53.0));
+	float fox = 0.0;
+	if (lucky > 0.955) {
+		vec2 centre = cell+0.25+0.5*vec2(map_paper_hash(cell+vec2(3.0, 1.0)), map_paper_hash(cell+vec2(9.0, 4.0)));
+		float r = length(p*0.9-centre)/(0.05+0.09*map_paper_hash(cell+vec2(5.0, 8.0)));
+		fox = (1.0-smoothstep(0.55, 1.0, r))*0.55+(1.0-smoothstep(0.0, 0.18, abs(r-0.85)))*0.45;
+	}
+	return vec3(fibre, fox, 0.0);
+}
+
+// Distance (screen px) from `world_xz` to the nearest line of a family of
+// parallel lines `spacing_km` apart along `axis`.
+float map_line_px(float coordinate, float spacing_km, float pixel_world) {
+	float offset = abs(fract(coordinate/spacing_km+0.5)-0.5)*spacing_km;
+	return offset/max(pixel_world, 0.000001);
+}
+
+float map_hairline(float distance_px) {
+	return 1.0-smoothstep(0.35, 1.15, distance_px);
+}
+
+// The unknown as chart paper. `chart_origin` is where the people stand (the
+// rhumb lines' centre); `screen_uv` drives the vignette toward the table edge.
+vec3 map_chart_paper(vec2 world_xz, float camera_height, float pixel_world, vec2 chart_origin, vec2 screen_uv) {
+	vec3 paper = map_unknown(world_xz, camera_height);
+	float octave = log2(max(camera_height, 0.001)*0.05);
+	float scale = exp2(floor(octave));
+	float blend = fract(octave);
+	vec3 a = map_paper_octave(world_xz/scale);
+	vec3 b = map_paper_octave(world_xz/(scale*2.0));
+	vec3 grain = mix(a, b, blend);
+	paper *= 1.0+grain.x*0.030;
+	paper = mix(paper, paper*vec3(0.80, 0.70, 0.56), grain.y*0.22);
+	// Graticule: one-degree lines where they fall a comfortable distance apart
+	// on screen, five- and fifteen-degree lines as the view widens.
+	float degree_km = 40075.0/360.0;
+	float graticule = 0.0;
+	for (int level = 0; level < 3; level++) {
+		float spacing = degree_km*(level == 0 ? 1.0 : (level == 1 ? 5.0 : 15.0));
+		float spacing_px = spacing/max(pixel_world, 0.000001);
+		float weight = smoothstep(70.0, 150.0, spacing_px)*(1.0-smoothstep(1400.0, 2600.0, spacing_px));
+		if (weight <= 0.0) { continue; }
+		float line = max(map_hairline(map_line_px(world_xz.x, spacing, pixel_world)),
+			map_hairline(map_line_px(world_xz.y, spacing, pixel_world)));
+		graticule = max(graticule, line*weight*(level == 0 ? 0.75 : 1.0));
+	}
+	paper = mix(paper, MAP_SEPIA, graticule*0.16);
+	// Sixteen rhumb lines from the people's hearth, finer and fainter still.
+	vec2 from_origin = world_xz-chart_origin;
+	float reach = length(from_origin);
+	float sector = 6.2831853/16.0;
+	float angle = atan(from_origin.y, from_origin.x);
+	float off_ray = abs(fract(angle/sector+0.5)-0.5)*sector;
+	float rhumb = map_hairline(reach*sin(off_ray)/max(pixel_world, 0.000001)*1.25);
+	rhumb *= smoothstep(30.0, 90.0, reach/max(pixel_world, 0.000001));
+	paper = mix(paper, MAP_SEPIA, rhumb*0.10);
+	// The sheet darkens a little toward the table edge.
+	vec2 from_centre = (screen_uv-0.5)*vec2(1.25, 1.0);
+	float vignette = smoothstep(0.34, 0.95, length(from_centre));
+	paper *= 1.0-vignette*0.16;
+	return paper;
 }

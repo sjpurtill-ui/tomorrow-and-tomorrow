@@ -4,8 +4,6 @@ render_mode diffuse_burley;
 uniform sampler2D discovery_mask : source_color, filter_linear;
 uniform vec2 fog_world_size = vec2(40075.0, 20004.0);
 uniform vec2 fog_current_origin = vec2(0.0);
-uniform sampler2D terrain_heights : filter_nearest, repeat_disable;
-uniform vec4 terrain_grid = vec4(0.0);
 uniform float sea_level = 0.0;
 uniform float wave_speed = 1.0;
 uniform bool regional_surface = false;
@@ -17,23 +15,7 @@ uniform vec4 wave_phase = vec4(0.0);
 uniform vec2 ripple_phase = vec2(0.0);
 #include "res://scripts/coast_mask.gdshaderinc"
 #include "res://scripts/map_palette.gdshaderinc"
-
-// This is the alternating triangle interpolation of TerrainPatchBuilder, not
-// bilinear interpolation or a second noise field. Heights and distances are km.
-float visible_ground(vec2 point) {
-	vec2 cell = clamp(((point-(terrain_grid.xy-surface_origin))/terrain_grid.z+0.5)*(terrain_grid.w-1.0),
-		vec2(0.0), vec2(terrain_grid.w-1.001));
-	ivec2 base = ivec2(floor(cell));
-	vec2 f = fract(cell);
-	float a = texelFetch(terrain_heights, base, 0).r;
-	float b = texelFetch(terrain_heights, base+ivec2(1,0), 0).r;
-	float c = texelFetch(terrain_heights, base+ivec2(1,1), 0).r;
-	float d = texelFetch(terrain_heights, base+ivec2(0,1), 0).r;
-	if (mod(float(base.x+base.y),2.0)<1.0) {
-		return f.x>=f.y ? a+(b-a)*f.x+(c-b)*f.y : a+(c-d)*f.x+(d-a)*f.y;
-	}
-	return f.x+f.y<=1.0 ? a+(b-a)*f.x+(d-a)*f.y : c+(d-c)*(1.0-f.x)+(b-c)*(1.0-f.y);
-}
+#include "res://scripts/map_coast.gdshaderinc"
 
 float charted_at(vec2 xz) {
 	vec2 uv = clamp(xz/fog_world_size+0.5,vec2(0.0),vec2(1.0));
@@ -65,21 +47,25 @@ void fragment() {
 	// cross sea level. Decide it here rather than by depth test: a low shore
 	// lies within depth precision of the sea plane, and the two fought in
 	// combed stripes along every flat coast.
-	if (regional_surface && terrain_grid.z>0.0 && terrain_grid.w>=2.0
-		&& max(abs(point.x-local_grid.x),abs(point.y-local_grid.y))<terrain_grid.z*0.5
+	// Where cells are large on screen the shore is the smooth contour shared
+	// with the patch's land (map_coast.gdshaderinc), not the triangles' chords.
+	float patch_ground = sea_level;
+	bool over_patch = coast_patch_ready() && coast_patch_contains(point-local_grid);
+	if (over_patch) { patch_ground = coast_patch_ground(point-local_grid, pixel_world, sea_level); }
+	if (regional_surface && over_patch
 		&& !coast_patch_yields(world_position.xz, vec4(terrain_grid.xy, terrain_grid.z, 1.0))
-		&& visible_ground(point) > sea_level) { discard; }
+		&& patch_ground > sea_level) { discard; }
 	float charted = charted_at(world_position.xz);
 	float visible = smoothstep(0.06,0.62,charted);
 	// Uncharted sea is the same blank vellum as uncharted land, and the same
 	// frontier ink runs across the coast without a break.
-	vec3 unknown_surface = map_unknown(world_position.xz,CAMERA_POSITION_WORLD.y);
+	vec3 unknown_surface = map_chart_paper(world_position.xz,CAMERA_POSITION_WORLD.y,pixel_world,fog_current_origin,SCREEN_UV);
 	if (charted>0.02 && charted<0.75) {
 		float step_km = fog_world_size.x/2048.0;
 		vec2 slope_per_km = vec2(charted_at(world_position.xz+vec2(step_km,0.0))-charted,charted_at(world_position.xz+vec2(0.0,step_km))-charted)/step_km;
 		vec3 frontier = map_frontier(charted,1.0/max(length(slope_per_km)*pixel_world,0.00001));
 		float frontier_scale = smoothstep(0.015,0.20,pixel_world);
-		unknown_surface = mix(unknown_surface,unknown_surface*0.82,frontier.y*frontier_scale*0.6);
+		unknown_surface = mix(unknown_surface,MAP_SEPIA,frontier.y*frontier_scale*0.38);
 		unknown_surface = mix(unknown_surface,MAP_INK,frontier.x*frontier_scale*0.85);
 		visible = mix(visible,frontier.z,frontier_scale)*(1.0-frontier.x*frontier_scale*0.85);
 	}
@@ -90,7 +76,7 @@ void fragment() {
 	if (terrain_grid.z>0.0 && terrain_grid.w>=2.0) {
 		float edge = max(abs(point.x-local_grid.x),abs(point.y-local_grid.y))/terrain_grid.z*2.0;
 		if (edge<=1.0) {
-			patch_depth = max(sea_level-visible_ground(point),0.0);
+			patch_depth = max(sea_level-patch_ground,0.0);
 			// The regional patch extends beyond the camera. Fade its *color* at the
 			// outer margin; do not draw an invented shallow rim at a texture edge.
 			patch_weight = 1.0-smoothstep(0.70,0.95,edge);
@@ -170,6 +156,9 @@ void fragment() {
 		water_lines = max(water_lines,(1.0-smoothstep(0.30,1.05,abs(shore_px-at)))*(1.0-float(k)*0.30));
 	}
 	water_lines *= smoothstep(0.003,0.02,pixel_world)*(1.0-smoothstep(0.35,0.95,pixel_world));
+	// Only where the bed actually shelves toward a shore: over a flat shallow
+	// bank every faint undulation would otherwise draw its own ring.
+	water_lines *= smoothstep(0.0015,0.006,fwidth(depth)/max(pixel_world,0.000001));
 	water = mix(water,vec3(0.34,0.37,0.31),water_lines*0.60);
 	float altitude_haze = clamp(log(max(pixel_world,0.004)/0.004)/log(250.0),0.0,1.0)*0.26;
 	float view_slant = length(relative_position.xz)/max(abs(relative_position.y),0.001);

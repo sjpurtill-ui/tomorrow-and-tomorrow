@@ -7,6 +7,29 @@ extends RefCounted
 
 const MAX_POINTS:=420
 
+## An ink stroke's triangles as packed arrays. Each vertex is its anchor on
+## the route plus an offset kept in UV2 as a fraction of the view height it was
+## built for, so scout_chart_ink.gdshader holds the stroke's on-screen width at
+## any zoom: the map no longer rebuilds every route on each small zoom step.
+class Ink:
+	var vertices:=PackedVector3Array()
+	var colors:=PackedColorArray()
+	var offsets:=PackedVector2Array()
+	var view_size:=1.0
+	func _init(built_for_view:float)->void:
+		view_size=maxf(built_for_view,0.000001)
+	func add(anchor:Vector3,offset:Vector2,color:Color)->void:
+		vertices.append(anchor);offsets.append(offset/view_size);colors.append(color)
+	func commit()->ArrayMesh:
+		var mesh:=ArrayMesh.new()
+		if vertices.is_empty():return mesh
+		var arrays:=[];arrays.resize(Mesh.ARRAY_MAX)
+		arrays[Mesh.ARRAY_VERTEX]=vertices;arrays[Mesh.ARRAY_COLOR]=colors;arrays[Mesh.ARRAY_TEX_UV2]=offsets
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+		# Offsets reach past the anchors; keep the stroke from being culled early.
+		mesh.custom_aabb=mesh.get_aabb().grow(view_size*0.05)
+		return mesh
+
 ## Smooth `points` and resample them every `step` world units (the step grows
 ## when a long route would exceed MAX_POINTS). `tolerance` is the simplification
 ## distance in world units (a few screen pixels at the current zoom): jittery
@@ -129,37 +152,34 @@ static func _normal(points:PackedVector2Array,i:int)->Vector2:
 ## nothing and the ink keeps a soft antialiased rim. Width and opacity taper
 ## over `taper` world units at both ends. `dash_on`/`dash_period` count
 ## samples: 0 draws a solid line.
-static func ribbon(surface:SurfaceTool,points:PackedVector2Array,heights:PackedFloat32Array,half_width:float,color:Color,edge_alpha:float,taper:float,dash_on:int=0,dash_period:int=0)->void:
+static func ribbon(ink:Ink,points:PackedVector2Array,heights:PackedFloat32Array,half_width:float,color:Color,edge_alpha:float,taper:float,dash_on:int=0,dash_period:int=0)->void:
 	if points.size()<2: return
 	var arcs:=arc_lengths(points)
 	var total:=arcs[arcs.size()-1]
 	var taper_length:=minf(taper,total*0.35)
-	var left:=PackedVector3Array(); var centre:=PackedVector3Array(); var right:=PackedVector3Array(); var weights:=PackedFloat32Array()
+	var centre:=PackedVector3Array(); var sides:=PackedVector2Array(); var weights:=PackedFloat32Array()
 	for i in points.size():
 		var s:=arcs[i]
 		var t:=1.0 if taper_length<=0.0 else smoothstep(0.0,taper_length,s)*smoothstep(0.0,taper_length,total-s)
 		var w:=lerpf(0.18,1.0,t)
-		var n:=_normal(points,i)*half_width*w
-		var y:=heights[i]
-		left.append(Vector3(points[i].x+n.x,y,points[i].y+n.y))
-		centre.append(Vector3(points[i].x,y,points[i].y))
-		right.append(Vector3(points[i].x-n.x,y,points[i].y-n.y))
+		sides.append(_normal(points,i)*half_width*w)
+		centre.append(Vector3(points[i].x,heights[i],points[i].y))
 		weights.append(lerpf(0.30,1.0,t))
 	for i in points.size()-1:
 		if dash_period>0 and (i%dash_period)>=dash_on: continue
 		var core_a:=Color(color,color.a*weights[i]); var core_b:=Color(color,color.a*weights[i+1])
 		var rim_a:=Color(color,core_a.a*edge_alpha); var rim_b:=Color(color,core_b.a*edge_alpha)
-		for side in [left,right]:
-			_quad(surface,centre[i],centre[i+1],side[i+1],side[i],core_a,core_b,rim_b,rim_a)
+		for side in [1.0,-1.0]:
+			_quad(ink,centre[i],Vector2.ZERO,centre[i+1],Vector2.ZERO,centre[i+1],sides[i+1]*side,centre[i],sides[i]*side,core_a,core_b,rim_b,rim_a)
 
 
-static func _quad(surface:SurfaceTool,a:Vector3,b:Vector3,c:Vector3,d:Vector3,ca:Color,cb:Color,cc:Color,cd:Color)->void:
-	for pair in [[a,ca],[b,cb],[c,cc],[a,ca],[c,cc],[d,cd]]:
-		surface.set_color(pair[1]); surface.add_vertex(pair[0])
+static func _quad(ink:Ink,a:Vector3,a_offset:Vector2,b:Vector3,b_offset:Vector2,c:Vector3,c_offset:Vector2,d:Vector3,d_offset:Vector2,ca:Color,cb:Color,cc:Color,cd:Color)->void:
+	ink.add(a,a_offset,ca); ink.add(b,b_offset,cb); ink.add(c,c_offset,cc)
+	ink.add(a,a_offset,ca); ink.add(c,c_offset,cc); ink.add(d,d_offset,cd)
 
 
 ## Small open chevrons pointing along the route at the given arc fractions.
-static func ticks(surface:SurfaceTool,points:PackedVector2Array,heights:PackedFloat32Array,fractions:Array,length:float,half_width:float,color:Color)->int:
+static func ticks(ink:Ink,points:PackedVector2Array,heights:PackedFloat32Array,fractions:Array,length:float,half_width:float,color:Color)->int:
 	if points.size()<3: return 0
 	var arcs:=arc_lengths(points)
 	var total:=arcs[arcs.size()-1]
@@ -171,14 +191,12 @@ static func ticks(surface:SurfaceTool,points:PackedVector2Array,heights:PackedFl
 		var d:=(points[i]-points[i-1]).normalized()
 		if d==Vector2.ZERO: continue
 		var n:=Vector2(-d.y,d.x)
-		var tip:=points[i]
-		var y:=heights[i]
-		for wing in [tip-d*length+n*length*0.62,tip-d*length-n*length*0.62]:
-			var along:=((wing as Vector2)-tip).normalized()
+		var tip:=Vector3(points[i].x,heights[i],points[i].y)
+		# Every corner hangs off the tip, so the whole chevron scales with the view.
+		for wing in [-d*length+n*length*0.62,-d*length-n*length*0.62]:
+			var along:=(wing as Vector2).normalized()
 			var side:=Vector2(-along.y,along.x)*half_width
-			var a:=Vector3(tip.x+side.x,y,tip.y+side.y); var b:=Vector3(wing.x+side.x,y,wing.y+side.y)
-			var c:=Vector3(wing.x-side.x,y,wing.y-side.y); var e:=Vector3(tip.x-side.x,y,tip.y-side.y)
-			_quad(surface,a,b,c,e,color,color,color,color)
+			_quad(ink,tip,side,tip,wing+side,tip,wing-side,tip,-side,color,color,color,color)
 		count+=1
 	return count
 

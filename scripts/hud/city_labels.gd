@@ -1,7 +1,11 @@
 extends Control
 ## A shared screen-space label layer. World positions and city reports stay authoritative.
-const NAME_SIZE:=16
+## Place names are set in the book serif, as on an engraved chart; figures
+## and status lines stay in the quiet UI face.
+const NAME_SIZE:=17
 const POP_SIZE:=13
+## The inked settlement glyph sits on the anchor; leader lines start clear of it.
+const GLYPH_CLEARANCE:=8.0
 const GAP:=7.0
 const REPORT=preload("res://scripts/hud/city_report_visuals.gd")
 const T=preload("res://scripts/hud/hud_tokens.gd")
@@ -166,7 +170,7 @@ func refresh()->void:
 		var guide:Control=terrain.get("founding_site_guide")
 		if guide.is_visible_in_tree():reserved.append(guide.panel.get_global_rect())
 	var entries:Array[Dictionary]=[]
-	var font:=ThemeDB.fallback_font
+	var font:=T.voice_font()
 	var signature:=str(viewport_size)+str(reserved)
 	for id in sources.keys():
 		var source:Dictionary=sources[id]
@@ -207,7 +211,7 @@ func refresh()->void:
 ## Text, wrapped lines and sizes of one city's card (see refresh's cache key).
 static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliation:String,has_flag:bool,font:Font,bounds:Rect2)->Dictionary:
 	var parts:=label.text.split("  •  ",true,1)
-	var title:=String(parts[0]);var count:=String(parts[1]) if parts.size()>1 else "Population unknown"
+	var title:=chart_name(String(parts[0]));var count:=String(parts[1]) if parts.size()>1 else "Population unknown"
 	if not count.begins_with("est.") and count!="Population unknown":count="Population "+count
 	var status:=String(label.get_meta("map_status",""))
 	var summary:Dictionary={}
@@ -215,14 +219,26 @@ static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliati
 		summary=report_summary(record,int(GameState.elapsed_days))
 		status=summary.status
 	var lines:=wrap_name(title,font,minf(260,bounds.size.x-56))
-	var width:=maxf(font.get_string_size(count,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x,font.get_string_size(affiliation,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x)+20
+	var ui:=T.font("ui")
+	var width:=maxf(ui.get_string_size(count,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x,ui.get_string_size(affiliation,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x)+20
 	for line:String in lines:width=maxf(width,font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE).x+54)
-	width=maxf(width,font.get_string_size(status,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x+20)
+	width=maxf(width,ui.get_string_size(status,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x+20)
 	var name_width:=54.0
 	for line:String in lines:name_width=maxf(name_width,font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE).x+(56 if has_flag else 22))
 	var detail:=Vector2(ceilf(maxf(135,width)),float(lines.size())*20+25+(18 if not affiliation.is_empty() else 0)+(20 if not status.is_empty() else 0))
 	if not summary.is_empty():detail=Vector2(maxf(260,width),float(lines.size())*20+130)
 	return {"title":title,"count":count,"status":status,"summary":summary,"lines":lines,"name_width":ceilf(name_width),"detail":detail}
+
+## A place name as the chart letters it: names kept in capitals elsewhere
+## ("SEANSTONE", "FOUNDING CAMP") are set in title case here.
+static func chart_name(title:String)->String:
+	if title!=title.to_upper() or title==title.to_lower():return title
+	var words:=PackedStringArray()
+	for word:String in title.split(" "):
+		var pieces:=PackedStringArray()
+		for piece:String in word.split("-"):pieces.append(piece.substr(0,1)+piece.substr(1).to_lower())
+		words.append("-".join(pieces))
+	return " ".join(words)
 
 static func wrap_name(title:String,font:Font,width:float)->Array[String]:
 	var lines:Array[String]=[];var line:=""
@@ -315,11 +331,14 @@ func _update_overflow(viewport_size:Vector2)->void:
 
 func _draw()->void:
 	for card:Dictionary in cards:
-		var box:Rect2=card.rect;var anchor:Vector2=card.anchor;var color:Color=card.color
+		var box:Rect2=card.rect;var anchor:Vector2=card.anchor
 		var end:=Vector2(clampf(anchor.x,box.position.x,box.end.x),clampf(anchor.y,box.position.y,box.end.y))
-		draw_line(anchor,end,T.MAP_LABEL_BG,3,true)
-		draw_line(anchor,end,Color(color,.65),1,true)
-		draw_circle(anchor,3,T.MAP_LABEL_BG);draw_circle(anchor,2,color)
+		# A fine ink leader from just outside the place's glyph to its name.
+		var reach:=end-anchor
+		if reach.length()>GLYPH_CLEARANCE+2.0:
+			var start:=anchor+reach.normalized()*GLYPH_CLEARANCE
+			draw_line(start,end,Color(T.PAPER_RAISED,.55),3,true)
+			draw_line(start,end,Color(T.INK,.55),1,true)
 	var open:=expanded_id();var opened:={}
 	for card:Dictionary in cards:
 		if bool(card.get("compact",false)):
@@ -329,28 +348,30 @@ func _draw()->void:
 	# The open card draws last, over its neighbours, on a solid ground.
 	if not opened.is_empty():_draw_card(opened,detail_rect(opened),true)
 
+## A name tag in the chart's paper: raised paper, a hairline rule, and the
+## owner's colour only as a fine rule along the top (never a fill).
 func _draw_frame(card:Dictionary,box:Rect2,solid:bool)->void:
-	var font:=ThemeDB.fallback_font;var color:Color=card.color
-	var key:=str(color)+str(solid)
+	var font:=T.voice_font();var color:Color=card.color
+	var key:=str(solid)+str(T.PAPER_RAISED)
 	if not styles.has(key):
-		var style:=StyleBoxFlat.new();style.bg_color=T.PANEL_BG_SOLID if solid else T.MAP_LABEL_BG;style.border_color=Color(color,.65)
-		style.set_border_width_all(1);style.set_corner_radius_all(4)
-		if solid:style.shadow_color=Color(0,0,0,.25);style.shadow_size=4
+		var style:=StyleBoxFlat.new();style.bg_color=Color(T.PAPER_RAISED,1.0 if solid else .93);style.border_color=T.RULE
+		style.set_border_width_all(1);style.set_corner_radius_all(T.RADIUS_CONTROL)
+		style.shadow_color=Color(0,0,0,.22 if solid else .10);style.shadow_size=4 if solid else 2;style.shadow_offset=Vector2(0,1)
 		styles[key]=style
 	draw_style_box(styles[key],box)
-	draw_rect(Rect2(box.position+Vector2(0,5),Vector2(3,box.size.y-10)),color)
-	var x:=box.position.x+12
+	draw_rect(Rect2(box.position+Vector2(3,0),Vector2(box.size.x-6,2)),Color(color,.85))
+	var x:=box.position.x+11
 	if card.flag!=null:
 		var flag_size:Vector2=card.flag.get_size()
 		flag_size*=minf(30.0/flag_size.x,20.0/flag_size.y)
-		draw_texture_rect(card.flag,Rect2(box.position+Vector2(9,2)+(Vector2(30,20)-flag_size)*.5,flag_size),false)
+		draw_texture_rect(card.flag,Rect2(box.position+Vector2(9,3)+(Vector2(30,20)-flag_size)*.5,flag_size),false)
 		x=box.position.x+46
-	var y:=box.position.y+19
+	var y:=box.position.y+20
 	for line:String in card.lines:
 		draw_string(font,Vector2(x,y),line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE,T.INK);y+=20
 
 func _draw_card(card:Dictionary,box:Rect2,solid:bool=false)->void:
-	var font:=ThemeDB.fallback_font;var color:Color=card.color
+	var font:=T.font("ui");var color:Color=card.color
 	_draw_frame(card,box,solid)
 	var y:=box.position.y+19+float(card.lines.size())*20
 	if card.has("summary"):

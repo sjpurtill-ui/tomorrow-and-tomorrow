@@ -10,9 +10,21 @@ var trace:=preload("res://scripts/performance_trace.gd")
 
 func _ready()->void:
 	AudioServer.set_bus_mute(0,true)
-	GameState.reset_for_new_world(184271)
-	GameState.select_founding_focus("provision")
-	PeopleDirection.choose("makers")
+	# `-- --saved` measures a mature world: the quicksave in this run's user dir
+	# (use a private custom user dir; never point this at the player's saves).
+	var saved:="--saved" in OS.get_cmdline_user_args()
+	if saved:
+		var load_started:=Time.get_ticks_msec()
+		var restored:Dictionary=SaveSystem.load_game()
+		if restored.has("error"):
+			push_error("MAP_PAN_ZOOM: save could not be loaded: "+String(restored.error))
+			get_tree().quit(2)
+			return
+		print("MAP_PAN_ZOOM: loaded save in %d ms; day=%d" % [Time.get_ticks_msec()-load_started,int(GameState.elapsed_days)])
+	else:
+		GameState.reset_for_new_world(184271)
+		GameState.select_founding_focus("provision")
+		PeopleDirection.choose("makers")
 	terrain=load("res://local_terrain.tscn").instantiate()
 	add_child(terrain)
 	terrain.game_speed=0
@@ -23,10 +35,11 @@ func _ready()->void:
 		if "Hearth Circle" not in GameState.settlement_completed:GameState.settlement_completed.append("Hearth Circle")
 		SettlementModel.ensure_founded()
 	terrain.camera_target=GameState.settlement_founded_at
+	var world_counts:={"player_settlements":GameState.player_settlements.size(),"civilizations":CivilizationSystem.civilizations.size(),"day":int(GameState.elapsed_days)}
 	# Warm the terrain jobs so streaming is not counted as a pan hitch.
 	terrain.camera.size=40.0
 	for i in 240:terrain._process(DT)
-	var report:Dictionary={"nodes":_count_nodes(terrain),"label3d":terrain.find_children("*","Label3D",true,false).size()}
+	var report:Dictionary={"world":world_counts,"nodes":_count_nodes(terrain),"label3d":terrain.find_children("*","Label3D",true,false).size()}
 	var lod_times:Array[float]=[]
 	for i in 30:
 		var s:=Time.get_ticks_usec();terrain._update_scale_lod();lod_times.append(float(Time.get_ticks_usec()-s)/1000.0)
@@ -64,6 +77,23 @@ func _ready()->void:
 			var s:=Time.get_ticks_usec();(calls[key] as Callable).call();t.append(float(Time.get_ticks_usec()-s)/1000.0)
 		t.sort();snaps[key]=t[10]
 	report["snapshot_parts_median_ms"]=snaps
+	# What each committed day asks of the map (see _commit_world_day), and the
+	# settlement network rebuild a day's changes force.
+	var day_calls:={"discovered_resource_overlays":func():terrain._refresh_discovered_resource_overlays(),
+		"settlement_footprint":func():terrain.footprint_population=-1;terrain._refresh_settlement_footprint(),
+		"rite_marks":func():preload("res://scripts/rite_marks.gd").refresh(terrain),
+		"living_map":func():preload("res://scripts/living_map.gd").refresh(terrain),
+		"settlement_network_forced":func():terrain._refresh_settlement_network(true),
+		"discovery_mask_forced":func():terrain._refresh_discovery_mask(true),
+		"discovery_mask_new_record":_reveal_one_record,
+		"time_interface":func():terrain._update_time_interface()}
+	var day_parts:={}
+	for key in day_calls:
+		var t:Array[float]=[]
+		for i in 7:
+			var s:=Time.get_ticks_usec();(day_calls[key] as Callable).call();t.append(float(Time.get_ticks_usec()-s)/1000.0)
+		t.sort();day_parts[key]={"median":snappedf(t[3],0.01),"max":snappedf(t[6],0.01)}
+	report["day_map_calls_ms"]=day_parts
 	var failures:=0
 	for size in [4.0,40.0,400.0]:
 		terrain.camera.size=size
@@ -96,6 +126,13 @@ func _ready()->void:
 	terrain.queue_free()
 	await get_tree().process_frame
 	get_tree().quit(1 if failures and "--assert" in OS.get_cmdline_user_args() else 0)
+
+## One newly charted record, as a scout's day adds, then forgotten again.
+func _reveal_one_record()->void:
+	CivilizationSystem._add_revealed_area(Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z),12.0,"probe")
+	terrain._refresh_discovery_mask()
+	CivilizationSystem.revealed_areas.pop_back()
+	CivilizationSystem.fog_revision+=1
 
 func _count_nodes(node:Node)->int:
 	var n:=1

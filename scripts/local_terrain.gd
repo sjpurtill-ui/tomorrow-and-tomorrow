@@ -2064,6 +2064,8 @@ func _install_regional_patch(completed:Dictionary)->void:
 	river_terrain_height_texture=ImageTexture.create_from_image(height_image)
 	river_terrain_grid=Vector4(regional_patch_center.x,regional_patch_center.y,regional_patch_span,float(regional_patch_resolution))
 	for river in river_overlays: _bind_river_terrain(river.material_override)
+	# The patch's land draws its shoreline from the same heights (map_coast).
+	_bind_river_terrain(replacement.material_override)
 	_refresh_coastal_water_patch()
 	if previous:
 		previous.visible=false
@@ -2163,13 +2165,24 @@ func _refresh_discovery_mask(force:bool=false)->void:
 	terrain_fog_materials.update(discovery_mask_texture,origin,force)
 	vegetation_fog_materials.update(discovery_mask_texture,origin,force)
 	if not force and revision==rendered_fog_revision:return
-	var snapshot:Dictionary=CivilizationSystem.fog_snapshot()
 	var width:=1024
 	var height:=512
-	var image:=Image.create(width,height,false,Image.FORMAT_L8)
-	image.fill(Color.BLACK)
-	for area_variant in snapshot.get("areas",[]):
-		var area:Dictionary=area_variant
+	# The charted ground only grows: a new record is appended, or the latest
+	# trail is extended. Paint just those onto the mask already drawn (a mature
+	# world holds hundreds of records, and repainting them all cost ~10 ms each
+	# time a scout's day revealed ground). Anything else repaints from scratch.
+	var areas:Array=CivilizationSystem.revealed_areas
+	var first_new:=0
+	var image:=discovery_mask_image
+	if not force and image!=null and discovery_mask_painted>0 and areas.size()>=discovery_mask_painted \
+			and _discovery_area_key(areas[0])==discovery_mask_first_key \
+			and _discovery_area_key(areas[discovery_mask_painted-1])==discovery_mask_last_key:
+		first_new=discovery_mask_painted-1
+	else:
+		image=Image.create(width,height,false,Image.FORMAT_L8)
+		image.fill(Color.BLACK)
+	for area_index in range(first_new,areas.size()):
+		var area:Dictionary=areas[area_index]
 		var radius:=maxf(1.0,float(area.get("radius",1.0)))
 		var points:Array=area.get("points",[])
 		if String(area.get("kind","circle"))=="trail" and points.size()>=2:
@@ -2178,6 +2191,10 @@ func _refresh_discovery_mask(force:bool=false)->void:
 				_paint_discovery_segment(image,Vector2(float(a.get("x",0.0)),float(a.get("z",0.0))),Vector2(float(b.get("x",0.0)),float(b.get("z",0.0))),radius,width,height)
 		else:
 			_paint_discovery_disc(image,Vector2(float(area.get("x",0.0)),float(area.get("z",0.0))),radius,width,height)
+	discovery_mask_image=image
+	discovery_mask_painted=areas.size()
+	discovery_mask_first_key=_discovery_area_key(areas[0]) if not areas.is_empty() else ""
+	discovery_mask_last_key=_discovery_area_key(areas[-1]) if not areas.is_empty() else ""
 	if discovery_mask_texture==null:
 		discovery_mask_texture=ImageTexture.create_from_image(image)
 	else:
@@ -2186,6 +2203,17 @@ func _refresh_discovery_mask(force:bool=false)->void:
 	terrain_fog_materials.update(discovery_mask_texture,origin)
 	vegetation_fog_materials.update(discovery_mask_texture,origin)
 
+
+## The painted discovery mask and which revealed records it already holds.
+var discovery_mask_image:Image
+var discovery_mask_painted:=0
+var discovery_mask_first_key:=""
+var discovery_mask_last_key:=""
+
+## Identifies a revealed record apart from later extension of its trail.
+func _discovery_area_key(area_variant:Variant)->String:
+	var area:Dictionary=area_variant if area_variant is Dictionary else {}
+	return "%s|%s|%.4f|%.4f|%.3f|%d" % [String(area.get("kind","")),String(area.get("source","")),float(area.get("x",0.0)),float(area.get("z",0.0)),float(area.get("radius",0.0)),int(area.get("day",0))]
 
 func _fog_shader_parameters(material:ShaderMaterial)->void:
 	terrain_fog_materials.register(material,discovery_mask_texture,Vector2(world_width,world_depth),CivilizationSystem.player_world_origin)
@@ -2260,6 +2288,7 @@ float organic_noise(vec2 p) {
 #include "res://scripts/seasonal_surface.gdshaderinc"
 #include "res://scripts/coast_mask.gdshaderinc"
 #include "res://scripts/map_palette.gdshaderinc"
+#include "res://scripts/map_coast.gdshaderinc"
 
 // Charted ground: the discovery mask, plus the ground around the people now.
 float charted_at(vec2 xz) {
@@ -2290,6 +2319,27 @@ void fragment() {
 	float pixel_world = max(length(dFdx(relative_position.xz)), length(dFdy(relative_position.xz)));
 	// Screen-space rate of height, for the inked coastline (also pre-discard).
 	float height_px = fwidth(world_position.y);
+	// Over the regional patch the shore is the smooth contour it shares with
+	// the coastal water (map_coast.gdshaderinc), not its triangles' chords.
+	// It is decided where this pixel's view ray meets sea level, the very
+	// point the water at this pixel tests, so land and water can never both
+	// give way (a hole) in a tilted view. Only ground near sea level takes
+	// part: a coastal hill must not vanish because there is sea behind it.
+	bool coast_smooth = !far_layer && coast_patch_ready() && patch_feather.w>0.5
+		&& abs(patch_feather.z-terrain_grid.z)<terrain_grid.z*0.001
+		&& coast_patch_contains(world_position.xz-terrain_grid.xy)
+		&& coast_patch_cell_px(pixel_world)>=1.0;
+	float coast_height = world_position.y;
+	if (coast_smooth) {
+		float own_spread;
+		coast_patch_triangle(world_position.xz-terrain_grid.xy, own_spread);
+		vec3 view_ray = world_position-CAMERA_POSITION_WORLD;
+		vec2 sea_rel = CAMERA_POSITION_WORLD.xz+view_ray.xz*(CAMERA_POSITION_WORLD.y/max(-view_ray.y,0.000001))-terrain_grid.xy;
+		float own_weight = smoothstep(own_spread*3.0+0.0015, own_spread*4.0+0.002, world_position.y);
+		coast_smooth = own_weight < 1.0 && coast_patch_contains(sea_rel);
+		if (coast_smooth) { coast_height = mix(coast_patch_ground(sea_rel, pixel_world, 0.0), world_position.y, own_weight); }
+	}
+	float coast_height_px = fwidth(coast_height);
 	// A continental patch can straddle the finite planet map. Never extrapolate
 	// procedural land beyond the playable geography. Legacy custom meshes lack UV fields.
 	if (UV.x>=0.999 && (abs(world_position.x)>fog_world_size.x*0.5 || abs(world_position.z)>fog_world_size.y*0.5)) { discard; }
@@ -2297,6 +2347,7 @@ void fragment() {
 	// over the patch's dissolving margin both layers draw, so there is no gap.
 	if (streamed_cutout.w > 0.5 && coast_patch_edge(world_position.xz,streamed_cutout) < COAST_CUTOUT_CORE) { discard; }
 	if (coast_patch_yields(world_position.xz,patch_feather)) { discard; }
+	if (coast_smooth && coast_height < 0.0) { discard; }
 	// ~83 km triangles cannot draw a coastline. Let the raster decide, and let
 	// the ocean plane (which yields over raster land) show through here. The
 	// planet keeps a little of the shelf: it sits behind the ocean there, and
@@ -2312,7 +2363,7 @@ void fragment() {
 	float discovered=charted_at(world_position.xz);
 	// Uncharted ground is blank vellum (map_palette.gdshaderinc), with the
 	// frontier of the known world inked where the chart ends.
-	vec3 unknown_ground=map_unknown(world_position.xz,CAMERA_POSITION_WORLD.y);
+	vec3 unknown_ground=map_chart_paper(world_position.xz,CAMERA_POSITION_WORLD.y,pixel_world,fog_current_origin,SCREEN_UV);
 	float reveal=smoothstep(0.06,0.62,discovered);
 	if (discovered>0.02 && discovered<0.75) {
 		// One mask texel is ~39 km; the mask is linear inside it, so a forward
@@ -2321,7 +2372,7 @@ void fragment() {
 		vec2 slope_per_km=vec2(charted_at(world_position.xz+vec2(step_km,0.0))-discovered,charted_at(world_position.xz+vec2(0.0,step_km))-discovered)/step_km;
 		vec3 frontier=map_frontier(discovered,1.0/max(length(slope_per_km)*pixel_world,0.00001));
 		float frontier_scale=smoothstep(0.015,0.20,pixel_world);
-		unknown_ground=mix(unknown_ground,unknown_ground*0.82,frontier.y*frontier_scale*0.6);
+		unknown_ground=mix(unknown_ground,MAP_SEPIA,frontier.y*frontier_scale*0.38);
 		unknown_ground=mix(unknown_ground,MAP_INK,frontier.x*frontier_scale*0.85);
 		reveal=mix(reveal,frontier.z,frontier_scale)*(1.0-frontier.x*frontier_scale*0.85);
 	}
@@ -2667,12 +2718,13 @@ void fragment() {
 	earth=map_haze(earth,atmospheric_weight);
 	// Unexplored land and water share one unlit veil. Normals must not reveal
 	// unseen mountain ranges or coastlines as geometric detail improves.
-	// The coast is inked, one to two pixels wide, where this surface's own
-	// triangles rise out of the sea (streamed patches only: the planet mesh
+	// The coast is inked, one to two pixels wide, where the ground rises out
+	// of the sea: the smooth shared shoreline over the regional patch, this
+	// surface's own triangles elsewhere (streamed patches only: the planet mesh
 	// takes its shoreline from the macro raster instead).
 	if (!far_layer) {
-		float shore_px=world_position.y/max(height_px,0.0000001);
-		float coast_ink=(1.0-smoothstep(0.9,1.9,shore_px))*step(0.0,world_position.y);
+		float shore_px=coast_height/max(coast_height_px,0.0000001);
+		float coast_ink=(1.0-smoothstep(0.9,1.9,shore_px))*step(0.0,coast_height);
 		earth=mix(earth,MAP_INK*1.4,coast_ink*smoothstep(0.004,0.04,pixel_world)*0.75);
 	}
 	ALBEDO = earth*reveal;
@@ -3075,9 +3127,14 @@ func _add_river_ribbon(surface: SurfaceTool, points: Array[Vector3], width: floa
 		var side_b := Vector3(-tangent_b.y,0.0,tangent_b.x)*width_b
 		var corners: Array[Vector3] = [a-side_a,b-side_b,b+side_b,a-side_a,b+side_b,a+side_a]
 		var reach_tint:=0.97+sin(a.z*0.08+2.4)*0.025
+		# Each corner carries its outward side (NORMAL) and half width (UV.y), so
+		# the shader can find the centre line and hold a chart-scale ink width.
+		var half_widths:=[width_a,width_b,width_b,width_a,width_b,width_a]
+		var outward:=[-side_a,-side_b,side_b,-side_a,side_b,side_a]
 		for corner_index in corners.size():
 			var point:=corners[corner_index]
-			surface.set_uv(Vector2([0.0,0.0,1.0,0.0,1.0,1.0][corner_index],point.z))
+			surface.set_normal((outward[corner_index] as Vector3).normalized())
+			surface.set_uv(Vector2([0.0,0.0,1.0,0.0,1.0,1.0][corner_index],float(half_widths[corner_index])))
 			var endpoint:=i if corner_index in [0,3,5] else i+1
 			var source_opacity:=smoothstep(0.12,0.15,taper[endpoint]) if headwater else 1.0
 			surface.set_uv2(Vector2(bend_a if corner_index in [0,3,5] else bend_b,source_opacity))
@@ -3144,8 +3201,6 @@ func _build_river_network() -> void:
 			var tributary_points:=preload("res://scripts/river_geometry.gd").drape_course(original_course,_height_at)
 			_add_river_ribbon(banks, tributary_points, 0.072, Color(0.14,0.20,0.17,0.58),true)
 			_add_river_ribbon(water_surface, tributary_points, 0.029, Color(0.052,0.155,0.185,0.86),true)
-	banks.generate_normals()
-	water_surface.generate_normals()
 	for entry in [{"mesh": banks.commit(), "name": "RiverBanks", "rough": 1.0}, {"mesh": water_surface.commit(), "name": "RiverWater", "rough": 0.34}]:
 		if entry.mesh == null:
 			continue
@@ -3179,13 +3234,42 @@ float visible_ground(vec2 point) {
 	}
 	return f.x+f.y<=1.0 ? a+(b-a)*f.x+(d-a)*f.y : c+(d-c)*(1.0-f.x)+(b-c)*(1.0-f.y);
 }
+// Chart scale: once a pixel spans tens of metres a river is drawn as an inked
+// line, its width held in screen pixels and set by flow (main river widest,
+// tributaries tapering to their springs), instead of a ribbon that thins to
+// a flickering sub-pixel thread. `chart_half_px` is the main river's half
+// width in pixels; 0 keeps the ribbon (the banks, which fade out instead).
+uniform float chart_half_px=0.0;
+uniform float chart_reference_half=0.105;
 varying vec3 world_position;
+varying float chart_weight;
+varying float chart_coverage;
+varying float chart_width_px;
 void vertex(){
+	float half_width=max(UV.y,0.0);
+	vec3 side=vec3(NORMAL.x,0.0,NORMAL.z);
+	side=dot(side,side)>0.0?normalize(side):vec3(0.0);
+	vec3 centre=VERTEX-side*half_width;
+	vec4 clip=PROJECTION_MATRIX*(MODELVIEW_MATRIX*vec4(centre,1.0));
+	// Design pixels (1/1080 of the view height), the HUD's unit.
+	float km_per_px=2.0*abs(clip.w)/max(abs(PROJECTION_MATRIX[1][1])*1080.0,0.0001);
+	chart_weight=smoothstep(0.010,0.040,km_per_px);
+	float flow=pow(clamp(half_width/chart_reference_half,0.0,1.0),0.35);
+	float ink_half=chart_half_px*flow*km_per_px;
+	// Narrower than this a line only shimmers; thinner flow fades instead.
+	float min_half=0.85*km_per_px;
+	float drawn_half=chart_half_px>0.0?mix(half_width,max(half_width,max(ink_half,min_half)),chart_weight):half_width;
+	chart_coverage=chart_half_px>0.0?clamp(max(ink_half,half_width)/min_half,0.0,1.0):1.0;
+	chart_width_px=2.0*drawn_half/max(km_per_px,0.000001);
+	VERTEX=centre+side*drawn_half;
 	world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
+	// Lift the chart line a pixel or two clear of the terrain it is drawn on.
+	float chart_lift=chart_weight*1.5*km_per_px;
 	if(terrain_grid.z>0.0 && max(abs(world_position.x-terrain_grid.x),abs(world_position.z-terrain_grid.y))<terrain_grid.z*0.49){
 		VERTEX.y=visible_ground(world_position.xz)+(river_water?0.0037:0.0021);
-		world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
 	}
+	VERTEX.y+=chart_lift;
+	world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
 }
 float river_noise(vec2 p){
 	vec2 i=floor(p),f=fract(p);
@@ -3221,16 +3305,28 @@ void fragment(){
 	water=mix(water,vec3(0.38,0.345,0.245)*(0.94+bank_grain*0.12),exposed_bar*0.85);
 	float bank_margin=smoothstep(0.30,0.50,edge)*(1.0-smoothstep(0.68,0.96,edge));
 	vec3 bank=mix(COLOR.rgb,vec3(0.285,0.255,0.17),bank_margin*(0.30+inside_bend*0.46)*bank_detail);
-	ALBEDO=mix(river_water?water:bank,vec3(0.10,0.31,0.34),resource_emphasis*0.35);
+	// Chart ink: a slate line a shade deeper than the sea, soft at its rim.
+	vec3 chart_ink=vec3(0.052,0.094,0.106);
+	vec3 surface=mix(river_water?water:bank,chart_ink,river_water?chart_weight:0.0);
+	ALBEDO=mix(surface,vec3(0.10,0.31,0.34),resource_emphasis*0.35);
 	// UV2.y feathers the spring/source cap; normal reaches remain opaque.
 	float riparian_patch=mix(1.0,0.38+river_noise(world_position.xz*0.42)*0.62,bank_detail);
-	ALPHA=COLOR.a*discovered*coverage*UV2.y*(river_water?1.0:riparian_patch);
+	float ribbon_alpha=COLOR.a*discovered*coverage*UV2.y*(river_water?1.0:riparian_patch);
+	float ink_alpha=0.92*discovered*UV2.y*chart_coverage*smoothstep(0.0,0.85,edge*chart_width_px*0.5);
+	// At chart scale the riparian banks become a pale casing either side of
+	// the ink, so the line reads over dark woodland as well as open ground.
+	vec3 casing=vec3(0.58,0.54,0.40);
+	if(!river_water){ ALBEDO=mix(ALBEDO,casing,chart_weight); }
+	ALPHA=river_water?mix(ribbon_alpha,ink_alpha,chart_weight):mix(ribbon_alpha,0.42*discovered*UV2.y*chart_coverage,chart_weight);
 }
 """
 		var material:=ShaderMaterial.new()
 		material.shader=river_shader
 		_bind_river_terrain(material)
 		material.set_shader_parameter("river_water",entry.name=="RiverWater")
+		# Chart-scale half widths in design pixels: a 3 px ink line in a 5 px casing.
+		material.set_shader_parameter("chart_half_px",1.5 if entry.name=="RiverWater" else 2.5)
+		material.set_shader_parameter("chart_reference_half",0.105 if entry.name=="RiverWater" else 0.22)
 		material.render_priority=-6 if entry.name=="RiverBanks" else -5
 		_fog_shader_parameters(material)
 		material.set_shader_parameter("resource_emphasis",1.0 if resource_view_enabled and entry.name=="RiverWater" else 0.0)
@@ -3355,6 +3451,13 @@ func _refresh_woodland_visuals(force:bool=false)->void:
 		material.set_shader_parameter("woodland_areas",padded)
 	woodland_visual_materials=living
 	_refresh_woodland_harvest_detail(true)
+
+## The ground as the regional patch draws it (cheap: a lookup in its heights),
+## or the planet height beyond it. For draping map ink, not for simulation.
+func _rendered_ground_height_at(point:Vector2)->float:
+	if not rendered_regional_heights.is_empty() and RENDERED_SURFACE.contains(point,river_terrain_grid):
+		return RENDERED_SURFACE.sample(point,river_terrain_grid,func(cell:Vector2i)->float: return rendered_regional_heights[cell.y*int(river_terrain_grid.w)+cell.x])
+	return _height_at(point.x,point.y)
 
 func _harvest_ground_height_at(point:Vector2)->float:
 	var result:=_height_at(point.x,point.y)
@@ -3740,6 +3843,9 @@ func _update_scale_lod() -> void:
 		var blip_profile:=_settlement_expansion_visual_profile({"classification":_settlement_model().classification(),"population":roundi(_settlement_model().primary_population_exact())})
 		settlement_blip.visible = "Hearth Circle" in GameState.settlement_completed and camera.size>_settlement_stage_marker_zoom(blip_profile)
 		settlement_blip.scale = Vector3.ONE * maxf(0.010, camera.size * 0.0048)*float(blip_profile.marker_scale)
+		if int(settlement_blip.get_meta("glyph_stage",-1))!=int(blip_profile.stage):
+			settlement_blip.set_meta("glyph_stage",int(blip_profile.stage))
+			settlement_blip.set_instance_shader_parameter("glyph_index",float(blip_profile.stage))
 	if settlement_map_label:
 		# Google-Earth-like readability requires a name before the physical fabric
 		# becomes a tiny unlabeled fleck. The strategic blip still waits for the wider
@@ -4536,23 +4642,12 @@ func _refresh_settlement_footprint(force := false) -> void:
 	if settlement_blip == null:
 		settlement_blip = MeshInstance3D.new()
 		settlement_blip.name = "PopulationBlip"
-		# A filled civic seal cannot be mistaken for the hollow selection/resource rings
-		# used elsewhere on the map. Six sides stay crisp from town to planetary scale.
-		var blip_mesh := CylinderMesh.new()
-		blip_mesh.top_radius=0.68
-		blip_mesh.bottom_radius=1.0
-		blip_mesh.height=0.16
-		blip_mesh.radial_segments=6
+		# The chart mark for the people's own place: an inked settlement glyph
+		# (resource_icons.settlement_atlas) held at a steady size on screen.
+		var blip_mesh := QuadMesh.new()
 		settlement_blip.mesh = blip_mesh
-		var blip_material := StandardMaterial3D.new()
-		blip_material.albedo_color = Color(0.86,0.73,0.38,0.72)
-		blip_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		blip_material.emission_enabled = true
-		blip_material.emission = Color("#6f5b31")
-		blip_material.emission_energy_multiplier = 0.55
-		blip_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		blip_material.no_depth_test = true
-		settlement_blip.material_override = blip_material
+		settlement_blip.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		settlement_blip.material_override = _map_glyph_material(false)
 		add_child(settlement_blip)
 		settlement_map_label=Label3D.new()
 		settlement_map_label.name="SettlementMapLabel"
@@ -7851,6 +7946,7 @@ func _update_settlement_claim_opacity()->void:
 
 const TERRITORY_WASH:=Color("#A8782A")
 const TERRITORY_BAND:=preload("res://scripts/territory_border_band.gd")
+const RESOURCE_ICONS:=preload("res://scripts/resource_icons.gd")
 const TERRITORY_INK:=Color("#1E150D")
 
 ## One screen pixel in kilometres at the current zoom bucket (the same bucket
@@ -7926,14 +8022,10 @@ func _create_secondary_settlement_markers(settlements:Array[Dictionary])->void:
 	if camera!=null and camera.size>2600.0 and marker_set.size()>64: marker_set.resize(64)
 	var multi:=MultiMesh.new()
 	multi.transform_format=MultiMesh.TRANSFORM_3D
-	multi.use_colors=true
+	# Each place's stage selects its inked chart glyph (map_glyph.gdshader).
+	multi.use_custom_data=true
 	multi.instance_count=marker_set.size()
-	var mesh:=CylinderMesh.new()
-	mesh.top_radius=0.72
-	mesh.bottom_radius=1.0
-	mesh.height=0.18
-	mesh.radial_segments=16
-	multi.mesh=mesh
+	multi.mesh=QuadMesh.new()
 	# Preserve an almost fixed screen-space weight through regional, continental and
 	# planetary zoom. The former 3 km cap reduced every world city below one pixel.
 	var marker_radius:=clampf(camera.size*0.0032,0.055,64.0) if camera!=null else 0.055
@@ -7945,17 +8037,14 @@ func _create_secondary_settlement_markers(settlements:Array[Dictionary])->void:
 		var position_2d:Vector2=position_value if position_value is Vector2 else Vector2.ZERO
 		var origin:=Vector3(position_2d.x,_height_at(position_2d.x,position_2d.y)+0.004,position_2d.y)
 		multi.set_instance_transform(index,Transform3D(Basis().scaled(Vector3.ONE*marker_radius*float(visual_profile.marker_scale)),origin))
-		multi.set_instance_color(index,visual_profile.color)
+		multi.set_instance_custom_data(index,Color(float(visual_profile.stage),0.0,0.0,0.0))
 		marker_profiles.append(visual_profile)
 	var blips:=MultiMeshInstance3D.new()
 	blips.name="SecondarySettlementBlips"
 	blips.multimesh=multi
 	blips.set_meta("marker_profiles",marker_profiles)
-	var material:=StandardMaterial3D.new()
-	material.albedo_color=Color.WHITE
-	material.vertex_color_use_as_albedo=true
-	material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
-	blips.material_override=material
+	blips.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	blips.material_override=_map_glyph_material(true)
 	settlement_network_marker_root.add_child(blips)
 	_update_secondary_settlement_blips()
 	var label_limit:=_secondary_settlement_label_limit()
@@ -8002,6 +8091,23 @@ func _update_secondary_settlement_blips()->void:
 		placement.basis=Basis().scaled(Vector3.ONE*size)
 		blips.multimesh.set_instance_transform(index,placement)
 	blips.visible=any_visible
+
+
+## Shared materials for the inked settlement glyphs (map_glyph.gdshader).
+var map_glyph_materials:Dictionary={}
+func _map_glyph_material(per_instance:bool,fixed_px:float=0.0)->ShaderMaterial:
+	var key:="%s:%s" % [per_instance,fixed_px]
+	if map_glyph_materials.has(key):return map_glyph_materials[key]
+	var material:=ShaderMaterial.new()
+	material.shader=preload("res://scripts/map_glyph.gdshader")
+	material.set_shader_parameter("glyphs",RESOURCE_ICONS.settlement_atlas())
+	material.set_shader_parameter("glyph_count",float(RESOURCE_ICONS.SETTLEMENT_GLYPH_COUNT))
+	material.set_shader_parameter("use_instance_glyph",per_instance)
+	material.set_shader_parameter("fixed_diameter_px",fixed_px)
+	# Above route and border ink (up to 18), below army counters and labels.
+	material.render_priority=19
+	map_glyph_materials[key]=material
+	return material
 
 
 func _secondary_settlement_urban_radius(settlement:Dictionary)->float:
@@ -13651,7 +13757,14 @@ func _refresh_contact_encounter_markers()->void:
 		marker.add_child(label)
 		var pin:=Label3D.new();pin.name="RegionalCityPin";pin.text="◆";pin.font_size=15;pin.outline_size=5
 		pin.billboard=BaseMaterial3D.BILLBOARD_ENABLED;pin.fixed_size=true;pin.no_depth_test=true
-		pin.modulate=Color("d9cba3");pin.position=Vector3(0,_height_at(site.x,site.z)+.015,0);marker.add_child(pin)
+		pin.modulate=Color("d9cba3",0.0);pin.position=Vector3(0,_height_at(site.x,site.z)+.015,0);marker.add_child(pin)
+		# The pin stays the (invisible) anchor and click target; the chart shows
+		# a stranger's town as an open inked diamond.
+		var glyph:=MeshInstance3D.new();glyph.name="RegionalCityGlyph";glyph.mesh=QuadMesh.new()
+		glyph.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		glyph.material_override=_map_glyph_material(false,16.0)
+		glyph.set_instance_shader_parameter("glyph_index",float(RESOURCE_ICONS.SETTLEMENT_GLYPH_FOREIGN))
+		glyph.position=pin.position;marker.add_child(glyph)
 
 		add_child(marker)
 		contact_encounter_markers[String(site.city_id)]=marker
@@ -13683,7 +13796,9 @@ func _update_foreign_city_annotation(marker:Node3D)->void:
 	var pin:=marker.get_node_or_null("RegionalCityPin") as Label3D
 	if pin:
 		pin.visible=camera!=null and camera.size>2.0
-		if label:pin.modulate=label.modulate
+		if label:pin.modulate=Color(label.modulate,0.0)
+		var glyph:=marker.get_node_or_null("RegionalCityGlyph") as Node3D
+		if glyph:glyph.visible=pin.visible
 
 
 func _refresh_foreign_formation_markers()->void:
@@ -14513,14 +14628,16 @@ func _refresh_player_scout_route_markers()->void:
 	# true one. Geometry rebuilds only when a route or the zoom step changes.
 	var visual_zoom:=maxf(0.035,camera.size if camera else 190.0)
 	var band:=WarfareMapPresentation.scale_band(visual_zoom)
-	var zoom_bucket:=floori(log(visual_zoom)/log(1.08))
+	# Stroke widths follow the zoom in the ink shader (scout_chart_ink.gdshader);
+	# a route is resampled only when the view has changed by a whole octave.
+	var zoom_octave:=floori(log(visual_zoom)/log(2.0))
 	var wanted:Array=[]
 	for mission_variant in CivilizationSystem.scout_missions:
 		var mission:Dictionary=mission_variant
 		var mission_id:=str(mission.get("mission_id",""))
 		var route:Array=mission.get("route",[])
 		if mission_id=="" or route.size()<2: continue
-		wanted.append({"key":mission_id,"mission":mission,"route":route,"rank":-1,"signature":"%s:%s:%s:%d:%d:%d:%d" % [mission_id,band,String(mission.get("ordered_heading","")),route.size(),int(mission.get("return_day",0)),int(mission.get("start_day",0)),zoom_bucket]})
+		wanted.append({"key":mission_id,"mission":mission,"route":route,"rank":-1,"content":"%s:%s:%d:%d:%d" % [mission_id,String(mission.get("ordered_heading","")),route.size(),int(mission.get("return_day",0)),int(mission.get("start_day",0))],"scale":"%s:%d" % [band,zoom_octave]})
 	var rank:=0
 	for report_variant in CivilizationSystem.scout_reports:
 		if rank>=SCOUT_CHART_RETURNED_LIMIT: break
@@ -14528,18 +14645,26 @@ func _refresh_player_scout_route_markers()->void:
 		var route:Array=report.get("route",[])
 		if route.size()<2: continue
 		var key:="report:%d" % int(report.get("mission_id",0))
-		wanted.append({"key":key,"mission":report,"route":route,"rank":rank,"signature":"%s:%d:%s:%d:%d:%d" % [key,rank,band,route.size(),int(report.get("day",0)),zoom_bucket]})
+		wanted.append({"key":key,"mission":report,"route":route,"rank":rank,"content":"%s:%d:%d:%d" % [key,rank,route.size(),int(report.get("day",0))],"scale":"%s:%d" % [band,zoom_octave]})
 		rank+=1
 	var active_ids:Dictionary={}
+	# New or changed routes are drawn at once; routes that only need resampling
+	# for a new zoom octave are redrawn one per refresh, so a long zoom never
+	# rebuilds every chart in the same frame.
+	var rescaled:=false
 	for entry_variant in wanted:
 		var entry:Dictionary=entry_variant
 		var key:String=entry.key
 		active_ids[key]=true
 		var marker:Node3D=player_scout_route_markers.get(key,null)
-		if marker==null or not is_instance_valid(marker) or String(marker.get_meta("signature",""))!=String(entry.signature):
+		var stale:=marker==null or not is_instance_valid(marker) or String(marker.get_meta("content",""))!=String(entry.content)
+		var rescale:=not stale and String(marker.get_meta("scale",""))!=String(entry.scale)
+		if stale or (rescale and not rescaled):
+			rescaled=rescaled or rescale
 			if marker and is_instance_valid(marker): marker.queue_free()
 			marker=_create_player_scout_route_marker(entry.mission,entry.route,band,int(entry.rank))
-			marker.set_meta("signature",entry.signature)
+			marker.set_meta("content",entry.content)
+			marker.set_meta("scale",entry.scale)
 			add_child(marker)
 			player_scout_route_markers[key]=marker
 		marker.visible=true
@@ -14557,8 +14682,10 @@ func _scout_route_visual_profile(camera_size:float)->Dictionary:
 	return {"width":zoom*0.0013,"halo":zoom*0.0028,"tick":zoom*0.010,"mark":zoom*0.022,"dot":zoom*0.0075,"clearance":WarfareMapPresentation.marker_ground_clearance(zoom)}
 
 
-func _scout_chart_material(priority:int)->StandardMaterial3D:
-	var material:=StandardMaterial3D.new(); material.vertex_color_use_as_albedo=true; material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; material.no_depth_test=true; material.cull_mode=BaseMaterial3D.CULL_DISABLED; material.render_priority=priority
+## Scout chart ink: holds its on-screen width at any zoom (see ScoutChartStroke.Ink).
+## Priorities sit in the route band above settlement drapes and below counters.
+func _scout_chart_material(priority:int)->ShaderMaterial:
+	var material:=ShaderMaterial.new(); material.shader=preload("res://scripts/scout_chart_ink.gdshader"); material.render_priority=10+priority
 	return material
 
 
@@ -14567,7 +14694,11 @@ func _scout_chart_mark(kind:String,ink:Color,position_2d:Vector2,lift:float,worl
 	mark.texture=preload("res://scripts/resource_icons.gd").chart_texture(kind,Color(ink,1.0))
 	mark.billboard=BaseMaterial3D.BILLBOARD_ENABLED; mark.no_depth_test=true; mark.shaded=false; mark.double_sided=true
 	mark.alpha_cut=SpriteBase3D.ALPHA_CUT_DISABLED; mark.render_priority=18; mark.modulate=Color(1,1,1,clampf(ink.a*1.15,0.3,1.0))
-	mark.pixel_size=world_size/float(mark.texture.get_width())
+	# Held at a constant size on screen (the size `world_size` has at this zoom),
+	# so a zoom needs no rebuild to keep the marks legible and small.
+	var view_height:=maxf(camera.size if camera else 190.0,0.000001)
+	mark.fixed_size=true
+	mark.pixel_size=world_size/view_height*2.0*tan(deg_to_rad(camera.fov if camera else 35.0)*0.5)/float(mark.texture.get_width())
 	mark.position=Vector3(position_2d.x,_close_surface_height_at(position_2d.x,position_2d.y)+lift,position_2d.y)
 	return mark
 
@@ -14596,7 +14727,7 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	var chart:=ScoutChartStroke.smooth(route_points,float(profile.dot),visual_zoom*0.0035)
 	var heights:=PackedFloat32Array()
 	var raw_heights:=PackedFloat32Array()
-	for p in chart: raw_heights.append(_close_surface_height_at(p.x,p.y))
+	for p in chart: raw_heights.append(_rendered_ground_height_at(p))
 	# Drape on a smoothed ground line: raw samples jitter between terrain
 	# patches and would saw the fine ink stroke in a tilted view.
 	for i in raw_heights.size():
@@ -14604,20 +14735,20 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 		for j in range(maxi(0,i-8),mini(raw_heights.size(),i+9)): total+=raw_heights[j]; count+=1
 		heights.append(total/float(count)+clearance)
 	root.set_meta("chart_points",chart.size())
-	var halo_surface:=SurfaceTool.new(); halo_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	ScoutChartStroke.ribbon(halo_surface,chart,heights,float(profile.halo),paper,0.0,float(profile.tick)*2.0)
-	var halo:=MeshInstance3D.new(); halo.name="ScoutCorridorBacking"; halo.mesh=halo_surface.commit(); halo.material_override=_scout_chart_material(3); root.add_child(halo)
-	var ink_surface:=SurfaceTool.new(); ink_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var halo_ink:=ScoutChartStroke.Ink.new(visual_zoom)
+	ScoutChartStroke.ribbon(halo_ink,chart,heights,float(profile.halo),paper,0.0,float(profile.tick)*2.0)
+	var halo:=MeshInstance3D.new(); halo.name="ScoutCorridorBacking"; halo.mesh=halo_ink.commit(); halo.material_override=_scout_chart_material(3); root.add_child(halo)
+	var line_ink:=ScoutChartStroke.Ink.new(visual_zoom)
 	# The party still out is one unbroken stroke; a returned chart is dotted.
-	ScoutChartStroke.ribbon(ink_surface,chart,heights,route_width,ink,0.35,float(profile.tick)*2.2,0 if active else 1,0 if active else 2)
-	var path:=MeshInstance3D.new(); path.name="ScoutCorridor"; path.mesh=ink_surface.commit(); path.material_override=_scout_chart_material(4); root.add_child(path)
+	ScoutChartStroke.ribbon(line_ink,chart,heights,route_width,ink,0.35,float(profile.tick)*2.2,0 if active else 1,0 if active else 2)
+	var path:=MeshInstance3D.new(); path.name="ScoutCorridor"; path.mesh=line_ink.commit(); path.material_override=_scout_chart_material(4); root.add_child(path)
 	# Small, sparse open ticks show direction; only the freshest charts carry them.
 	var tick_fractions:Array=[0.3,0.55,0.8] if active else ([0.45] if rank<2 else [])
-	var tick_surface:=SurfaceTool.new(); tick_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var tick_count:=ScoutChartStroke.ticks(tick_surface,chart,heights,tick_fractions,float(profile.tick),route_width*0.8,ink)
+	var tick_ink:=ScoutChartStroke.Ink.new(visual_zoom)
+	var tick_count:=ScoutChartStroke.ticks(tick_ink,chart,heights,tick_fractions,float(profile.tick),route_width*0.8,ink)
 	root.set_meta("tick_count",tick_count)
 	if tick_count>0:
-		var ticks:=MeshInstance3D.new(); ticks.name="ScoutDirectionTicks"; ticks.mesh=tick_surface.commit(); ticks.material_override=_scout_chart_material(5); root.add_child(ticks)
+		var ticks:=MeshInstance3D.new(); ticks.name="ScoutDirectionTicks"; ticks.mesh=tick_ink.commit(); ticks.material_override=_scout_chart_material(5); root.add_child(ticks)
 	var endpoint:=route_points[route_points.size()-1]
 	var ordered:=String(mission.get("ordered_heading","")).to_upper()
 	var planned:=String(mission.get("planned_heading","")).to_upper()
