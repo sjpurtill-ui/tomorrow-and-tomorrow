@@ -14311,27 +14311,46 @@ func _refresh_player_field_army_path(view:Dictionary)->void:
 func _seed_capture_scout_chart()->void:
 	## Capture scenario: several returned scout charts and one party still out,
 	## wandering around the settlement, so the chart styling can be judged.
+	## Like real land parties, every seeded leg stays on dry ground: a heading
+	## that meets the sea bends along the shore or stops there.
+	# The century direction is already chosen so no screen covers the map.
+	if WorldSimulation.direction.needs_century_choice(): WorldSimulation.direction.choose(String(PeopleDirection.AMBITIONS.keys()[0]))
 	var home:=Vector2(settler_marker.position.x,settler_marker.position.z)
 	var rng:=RandomNumberGenerator.new(); rng.seed=90417
 	var today:=int(GameState.elapsed_days)
 	var reports:Array[Dictionary]=[]
 	for index in 8:
 		var heading:=float(index)*TAU/8.0+rng.randf_range(-0.3,0.3)
-		var reach:=rng.randf_range(34.0,70.0)
-		var route:Array=[{"x":home.x,"z":home.y}]
-		for leg in range(1,6):
-			var bend:=heading+rng.randf_range(-0.55,0.55)
-			var p:=home+Vector2.from_angle(bend)*reach*float(leg)/5.0
-			route.append({"x":p.x,"z":p.y})
+		var route:=_seed_capture_land_walk(home,heading,rng.randf_range(34.0,70.0),rng)
+		if route.size()<2: continue
 		var last:Dictionary=route[route.size()-1]
 		var report:={"mission_id":900+index,"day":today-index*9,"duration_days":24,"route":route,"target_label":"Open exploration","discoveries":[{"kind":"knowledge","title":"A river ford to the %s" % ["north","east","south","west"][index%4]}] if index%2==0 else [],"contact_records":[{"name":"Reed People","position":{"x":lerpf(home.x,float(last.x),0.7),"z":lerpf(home.y,float(last.z),0.7)},"day":today-index*9}] if index==1 else []}
 		reports.append(report)
 	CivilizationSystem.scout_reports.assign(reports)
-	var active_route:Array=[{"x":home.x,"z":home.y}]
-	for leg in range(1,7):
-		var p:=home+Vector2.from_angle(-0.9+sin(float(leg))*0.35)*9.0*float(leg)
-		active_route.append({"x":p.x,"z":p.y})
+	var active_route:=_seed_capture_land_walk(home,-0.9,54.0,rng)
+	if active_route.size()<2: active_route=[{"x":home.x,"z":home.y},{"x":home.x+1.0,"z":home.y}]
 	CivilizationSystem.scout_missions.assign([{"mission_id":990,"start_day":today-8,"return_day":today+22,"duration_days":30,"route":active_route,"ordered_heading":"northeast","planned_heading":"northeast"}])
+
+
+func _seed_capture_land_walk(home:Vector2,heading:float,reach:float,rng:RandomNumberGenerator)->Array:
+	var route:Array=[{"x":home.x,"z":home.y}]
+	var at:=home; var bearing:=heading
+	var leg_length:=reach/6.0
+	for leg in 6:
+		var stepped:=false
+		for attempt in 7:
+			var turn:=float((attempt+1)/2)*0.45*(1.0 if attempt%2==1 else -1.0)
+			var candidate_bearing:=bearing+rng.randf_range(-0.25,0.25)+turn
+			var candidate:=at+Vector2.from_angle(candidate_bearing)*leg_length
+			var dry:=true
+			for k in range(1,9):
+				if not _scout_land_at(at.lerp(candidate,float(k)/8.0)): dry=false; break
+			if dry:
+				at=candidate; bearing=candidate_bearing; stepped=true
+				route.append({"x":at.x,"z":at.y})
+				break
+		if not stepped: break
+	return route
 
 
 const SCOUT_CHART_RETURNED_LIMIT:=6
@@ -14385,7 +14404,7 @@ func _scout_route_visual_profile(camera_size:float)->Dictionary:
 	# Every size is a fixed fraction of the view, so the ink stays the same
 	# number of screen pixels at every zoom (rebuilt per 8% zoom step).
 	var zoom:=maxf(0.035,camera_size)
-	return {"width":zoom*0.0011,"halo":zoom*0.0046,"tick":zoom*0.010,"mark":zoom*0.022,"dot":zoom*0.0075,"clearance":WarfareMapPresentation.marker_ground_clearance(zoom)}
+	return {"width":zoom*0.0013,"halo":zoom*0.0028,"tick":zoom*0.010,"mark":zoom*0.022,"dot":zoom*0.0075,"clearance":WarfareMapPresentation.marker_ground_clearance(zoom)}
 
 
 func _scout_chart_material(priority:int)->StandardMaterial3D:
@@ -14418,11 +14437,13 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	root.set_meta("visual_zoom",visual_zoom)
 	root.set_meta("route_width",route_width)
 	# Ink darkens with recency; older charts fade toward the map.
-	var freshness:=1.0 if active else lerpf(0.80,0.28,float(rank)/float(maxi(1,SCOUT_CHART_RETURNED_LIMIT-1)))
-	var ink:=Color("#24170c").lerp(Color("#6e5a40"),0.0 if active else 1.0-freshness)
-	ink.a=0.95*freshness
-	var paper:=Color("#f2e6c6"); paper.a=0.36*freshness
-	var chart:=ScoutChartStroke.smooth(route_points,float(profile.dot))
+	# Iron-gall ink throughout: the party still out and the freshest charts at
+	# full strength, older charts fading in opacity but never turning grey.
+	var freshness:=1.0 if active else lerpf(1.0,0.42,float(rank)/float(maxi(1,SCOUT_CHART_RETURNED_LIMIT-1)))
+	var ink:=Color("#2b2118"); ink.a=0.88*freshness
+	var paper:=Color("#efe3c2"); paper.a=0.22*freshness
+	# Simplify at ~3 screen pixels before fitting the curve (the view is ~900 px).
+	var chart:=ScoutChartStroke.smooth(route_points,float(profile.dot),visual_zoom*0.0035)
 	var heights:=PackedFloat32Array()
 	var raw_heights:=PackedFloat32Array()
 	for p in chart: raw_heights.append(_close_surface_height_at(p.x,p.y))

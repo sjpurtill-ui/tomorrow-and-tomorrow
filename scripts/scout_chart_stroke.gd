@@ -8,31 +8,93 @@ extends RefCounted
 const MAX_POINTS:=420
 
 ## Smooth `points` and resample them every `step` world units (the step grows
-## when a long route would exceed MAX_POINTS). Sharp corners stay near the
-## original waypoints; the centripetal form never loops or overshoots.
-static func smooth(points:PackedVector2Array,step:float)->PackedVector2Array:
-	var clean:=PackedVector2Array()
-	for p in points:
-		if clean.is_empty() or clean[clean.size()-1].distance_squared_to(p)>0.0000001: clean.append(p)
-	if clean.size()<2: return clean
+## when a long route would exceed MAX_POINTS). `tolerance` is the simplification
+## distance in world units (a few screen pixels at the current zoom): jittery
+## daily positions, zero-length hops and back-and-forth doubling are removed
+## before the curve is fitted, so the spline only ever sees a clean polyline.
+static func smooth(points:PackedVector2Array,step:float,tolerance:float=0.0)->PackedVector2Array:
+	if points.is_empty(): return PackedVector2Array()
+	# Work relative to the first point: world coordinates are hundreds of km and
+	# single-precision spline weights would otherwise cancel into sawtooth noise.
+	var origin:=points[0]
+	var local:=PackedVector2Array()
+	for p in points: local.append(p-origin)
+	var clean:=simplify(local,maxf(tolerance,step*0.5))
+	if clean.size()<2:
+		var single:=PackedVector2Array()
+		for p in clean: single.append(p+origin)
+		return single
 	var dense:=PackedVector2Array([clean[0]])
-	for i in clean.size()-1:
-		var p0:=clean[maxi(0,i-1)]; var p1:=clean[i]; var p2:=clean[i+1]; var p3:=clean[mini(clean.size()-1,i+2)]
+	var last:=clean.size()-1
+	for i in last:
+		var p1:=clean[i]; var p2:=clean[i+1]
+		# Phantom end points continue the end segments straight on, instead of
+		# repeating a point (a zero-length knot interval blows the weights up).
+		var p0:=clean[i-1] if i>0 else p1*2.0-p2
+		var p3:=clean[i+2] if i+2<=last else p2*2.0-p1
 		var samples:=clampi(ceili(p1.distance_to(p2)/maxf(step*0.5,0.000001)),2,64)
 		for s in range(1,samples+1): dense.append(_centripetal(p0,p1,p2,p3,float(s)/float(samples)))
 	var total:=0.0
 	for i in range(1,dense.size()): total+=dense[i-1].distance_to(dense[i])
 	var even_step:=maxf(step,total/float(MAX_POINTS))
-	var out:=PackedVector2Array([dense[0]])
+	var out:=PackedVector2Array([dense[0]+origin])
 	var carried:=0.0
 	for i in range(1,dense.size()):
 		var a:=dense[i-1]; var b:=dense[i]; var length:=a.distance_to(b)
 		var along:=even_step-carried
 		while along<=length:
-			out.append(a.lerp(b,along/maxf(length,0.0000001)))
+			out.append(a.lerp(b,along/maxf(length,0.0000001))+origin)
 			along+=even_step
 		carried=length-(along-even_step)
-	if out[out.size()-1].distance_to(dense[dense.size()-1])>even_step*0.25: out.append(dense[dense.size()-1])
+	var tail:=dense[dense.size()-1]+origin
+	if out[out.size()-1].distance_to(tail)>even_step*0.25: out.append(tail)
+	return out
+
+
+## Clean a raw waypoint list: drop hops shorter than `tolerance`, cut
+## back-tracking spurs (a point that doubles back sharply onto the previous
+## leg), then Ramer-Douglas-Peucker at `tolerance`.
+static func simplify(points:PackedVector2Array,tolerance:float)->PackedVector2Array:
+	var clean:=PackedVector2Array()
+	for p in points:
+		if clean.is_empty() or clean[clean.size()-1].distance_to(p)>tolerance: clean.append(p)
+	if points.size()>1 and clean.size()>1 and clean[clean.size()-1]!=points[points.size()-1]:
+		clean[clean.size()-1]=points[points.size()-1]
+	elif points.size()>1 and clean.size()==1 and points[0].distance_to(points[points.size()-1])>0.0: clean.append(points[points.size()-1])
+	var changed:=true
+	while changed and clean.size()>2:
+		changed=false
+		var kept:=PackedVector2Array([clean[0]])
+		var i:=1
+		while i<clean.size()-1:
+			var a:=kept[kept.size()-1]; var b:=clean[i]; var c:=clean[i+1]
+			var ab:=b-a; var bc:=c-b
+			# A short hop that turns back more than ~150 degrees is a scribble
+			# (jittered daily positions), not a route; a long hairpin stays.
+			if ab.length()>0.0 and bc.length()>0.0 and minf(ab.length(),bc.length())<tolerance*6.0 and ab.normalized().dot(bc.normalized())<-0.86:
+				changed=true
+			else:
+				kept.append(b)
+			i+=1
+		kept.append(clean[clean.size()-1])
+		clean=kept
+	if clean.size()<3: return clean
+	var keep:=PackedByteArray(); keep.resize(clean.size()); keep.fill(0)
+	keep[0]=1; keep[clean.size()-1]=1
+	var stack:=[[0,clean.size()-1]]
+	while not stack.is_empty():
+		var span:Array=stack.pop_back()
+		var first:int=span[0]; var final:int=span[1]
+		var worst:=-1; var worst_distance:=tolerance
+		for k in range(first+1,final):
+			var d:=Geometry2D.get_closest_point_to_segment(clean[k],clean[first],clean[final]).distance_to(clean[k])
+			if d>worst_distance: worst_distance=d; worst=k
+		if worst>=0:
+			keep[worst]=1
+			stack.append([first,worst]); stack.append([worst,final])
+	var out:=PackedVector2Array()
+	for k in clean.size():
+		if keep[k]==1: out.append(clean[k])
 	return out
 
 
