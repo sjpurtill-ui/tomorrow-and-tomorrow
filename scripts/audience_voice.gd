@@ -475,6 +475,7 @@ const ARC_OPEN:={
 	"any":["We spoke {when}, and here I am again.","You'll remember {when}. I certainly do."],
 }
 const PROPOSAL_OPEN:={
+	"artifact_gift":["{leader} sends you {object}, as a gift.","We bring {object}. {leader} wants you to have it.","This is {object}, from {leader}. It is yours if you will take it."],
 	"any":["{leader} offers {gist}.","We've come to propose {gist}.","{leader} wants {gist}. So do I."],
 	"accord_offer":["{leader} would bind our peoples in {gist}."],
 	"protection_pact":["If one of us is attacked, the other comes. We propose {gist}."],
@@ -1742,6 +1743,8 @@ func _tokens(s:Dictionary,member:Dictionary,rival:Dictionary)->Dictionary:
 	tokens.merge(s.get("htok",{}),true)
 	if tokens.has("when"): tokens["whencap"]=String(tokens.when).substr(0,1).to_upper()+String(tokens.when).substr(1)
 	var gist:=String(PROPOSAL_GIST.get(String(s.get("sit_type","")),""))
+	var sit:Dictionary=((s.get("audience",{}) as Dictionary).get("situation",{}) as Dictionary) if s.get("audience") is Dictionary and (s.audience as Dictionary).get("situation") is Dictionary else {}
+	if not String(sit.get("artifact_name","")).is_empty(): tokens["object"]=String(sit.artifact_name)
 	if not gist.is_empty(): tokens["gist"]=gist; tokens["gistcap"]=gist.substr(0,1).to_upper()+gist.substr(1)
 	if tokens.has("matter"): tokens["mattercap"]=String(tokens.matter).substr(0,1).to_upper()+String(tokens.matter).substr(1)
 	if tokens.has("decree"): tokens["decreecap"]=String(tokens.decree).substr(0,1).to_upper()+String(tokens.decree).substr(1)
@@ -2298,6 +2301,8 @@ func _offline_open(s:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
 			var generic:Array=(PROPOSAL_OPEN.get(String(s.sit_type),[]) as Array)+([] if protest else PROPOSAL_OPEN.any as Array)
 			# A protest is not an offer: it keeps its own words.
 			var own_terms:Array=PROPOSAL_OPEN.recruitment_protest if protest else CV.model_bank(envoy.persona,"proposal")
+			# A treasured object is named plainly, not dressed as a pact.
+			if String(s.sit_type)=="artifact_gift": own_terms=PROPOSAL_OPEN.artifact_gift; generic=PROPOSAL_OPEN.artifact_gift
 			_append_if(out,_say(s,envoy,own_terms if not own_terms.is_empty() else generic,rng,first_official,false,generic))
 		"summons":
 			var regard:Dictionary=s.get("regard",{})

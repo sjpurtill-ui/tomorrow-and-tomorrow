@@ -1639,8 +1639,12 @@ static func _ensure_ties(civ_id:String)->void:
 	SOCIETY.connection(civ_id)
 	WorldSimulation.scoped(SOCIETY.owner_id(civ_id),func()->void:SOCIETY.connection("player"))
 
+static func _cap_first(text:String)->String:
+	return text.substr(0,1).to_upper()+text.substr(1)
+
 static func _artifact_label(item:Dictionary)->String:
-	return "%s (%s)" % [String(item.get("name","an object")),String(ARTIFACTS.TIERS[clampi(int(item.get("rarity",0)),0,4)]).to_lower()]
+	## What people would call it: "a carved bone toggle", "a rare clay bird figure".
+	return ARTIFACTS.plain_label(item)
 
 static func _artifact_ids_by_price(holdings:Dictionary,ascending:bool)->Array:
 	var ids:Array=holdings.keys()
@@ -1662,7 +1666,7 @@ static func _artifact_gift_candidate(civ_id:String,name:String,used:Dictionary,s
 		if used.has("artifact_gift:"+String(id)) or ARTIFACTS.exchange_check(civ_id,String(id),"player","gift").has("error"): continue
 		var item:Dictionary=theirs[id]
 		var homecoming:=String(item.get("source_id",""))=="player"
-		situation.ask="artifact_gift:"+String(id); situation.artifact_id=String(id); situation.artifact_name=String(item.get("name","")); situation.value=ARTIFACTS.price(item)
+		situation.ask="artifact_gift:"+String(id); situation.artifact_id=String(id); situation.artifact_name=_artifact_label(item); situation.value=ARTIFACTS.price(item)
 		situation.summary="%s offers %s as a gift%s." % [name,_artifact_label(item)," — a piece made by your own people, coming home" if homecoming else ""]
 		return {"kind":"proposal","situation":situation}
 	return {}
@@ -1681,9 +1685,9 @@ static func _artifact_purchase_candidate(civ_id:String,name:String,used:Dictiona
 			if ARTIFACTS.price(theirs[other_id])<=ARTIFACTS.price(item) and not ARTIFACTS.exchange_check("player",String(id),civ_id,"trade",String(other_id)).has("error"):
 				offered=String(other_id); break
 		if not can_sell and offered=="": continue
-		situation.ask="artifact_buy:"+String(id); situation.artifact_id=String(id); situation.artifact_name=String(item.get("name","")); situation.value=ARTIFACTS.price(item)
+		situation.ask="artifact_buy:"+String(id); situation.artifact_id=String(id); situation.artifact_name=_artifact_label(item); situation.value=ARTIFACTS.price(item)
 		situation.offered_id=offered
-		situation.offered_name=String((theirs.get(offered,{}) as Dictionary).get("name","")) if offered!="" else ""
+		situation.offered_name=_artifact_label(theirs.get(offered,{}) as Dictionary) if offered!="" else ""
 		var terms:="for %.0f in coin" % ARTIFACTS.price(item) if can_sell else ""
 		if offered!="": terms+=(" or " if terms!="" else "")+"in exchange for %s" % _artifact_label(theirs[offered])
 		situation.summary="%s has heard of your %s and asks for it, %s." % [name,_artifact_label(item),terms]
@@ -1709,7 +1713,7 @@ static func _artifact_return_candidate(civ_id:String,name:String,used:Dictionary
 	for looted in _looted_from(civ_id):
 		if used.has("artifact_return:"+String(looted.item_id)): continue
 		var item:Dictionary=ours[String(looted.item_id)]
-		situation.ask="artifact_return:"+String(looted.item_id); situation.artifact_id=String(looted.item_id); situation.artifact_name=String(item.get("name",""))
+		situation.ask="artifact_return:"+String(looted.item_id); situation.artifact_id=String(looted.item_id); situation.artifact_name=_artifact_label(item)
 		situation.mode="looted"; situation.work_id=String(looted.work_id); situation.value=ARTIFACTS.price(item)
 		situation.summary="%s demands the return of %s, carried off by your soldiers from one of its great works on day %d." % [name,_artifact_label(item),int(looted.day)]
 		return {"kind":"proposal","situation":situation}
@@ -1718,7 +1722,7 @@ static func _artifact_return_candidate(civ_id:String,name:String,used:Dictionary
 		var piece:Dictionary=ours[id]
 		if String(piece.get("source_id",""))!=civ_id or used.has("artifact_return:"+String(id)): continue
 		if ARTIFACTS.exchange_check("player",String(id),civ_id,"gift").has("error"): continue
-		situation.ask="artifact_return:"+String(id); situation.artifact_id=String(id); situation.artifact_name=String(piece.get("name",""))
+		situation.ask="artifact_return:"+String(id); situation.artifact_id=String(id); situation.artifact_name=_artifact_label(piece)
 		situation.mode="origin"; situation.value=ARTIFACTS.price(piece)
 		situation.summary="%s asks for %s back: it was made by their people and they want it home." % [name,_artifact_label(piece)]
 		return {"kind":"proposal","situation":situation}
@@ -2357,7 +2361,7 @@ static func _proposal_options(audience:Dictionary)->Array[Dictionary]:
 			result.append(_option("decline","Decline","Thank them for the offer.","neutral"))
 		"artifact_gift":
 			var gift_check:=ARTIFACTS.exchange_check(civ_id,String(situation.get("artifact_id","")),"player","gift")
-			result.append(_option("accept","Accept %s" % String(situation.get("artifact_name","the object")),"It joins your collection; its history goes with it.","warm",not gift_check.has("error"),String(gift_check.get("error",""))))
+			result.append(_option("accept","Accept the gift","%s joins your collection." % _cap_first(String(situation.get("artifact_name","the object"))),"warm",not gift_check.has("error"),String(gift_check.get("error",""))))
 			result.append(_option("decline","Decline it graciously","Let them keep their treasure.","neutral"))
 			result.append(_option("rebuff","Rebuff them","Tell them you have no need of their trinkets.","hostile"))
 		"artifact_purchase":

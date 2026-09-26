@@ -609,7 +609,7 @@ static func _string_for(audience:Dictionary,situation:Dictionary,c:Dictionary,rn
 				"hunting":
 					var place:=String(PLACES[rng.randi_range(0,PLACES.size()-1)])
 					var monthly:=Hall._nice(clampf(amt*(0.06 if res=="Food" else 0.1),2.0,maxf(2.0,Hall._player_population()*0.02)))
-					return {"type":"hunting","text":"In return %s's hunters mean to take game in your %s for two winters, about %d Food a month." % [name,place,roundi(monthly)],"place":place,"monthly":monthly}
+					return {"type":"hunting","text":"In return their hunters want to hunt in your %s for two winters, about %d food a month." % [place,roundi(monthly)],"place":place,"monthly":monthly}
 				"dependent":
 					return {"type":"dependent","text":"%s now counts you as kin in hard times, and will look to you when it goes hungry again." % name}
 		"dread_tribute":
@@ -722,7 +722,7 @@ static func _cost(audience:Dictionary,situation:Dictionary,option_id:String)->St
 				match stype:
 					"debt": return "String: you will owe %d %s within a year%s." % [roundi(float(string.owed)*(0.7 if option_id=="accept_return" else 1.0)),String(string.resource)," (less your courtesy gift)" if option_id=="accept_return" else ""]
 					"marriage": return "String: %s marries into your people; %s's quarrels become yours." % [String(string.inlaw),name]
-					"hunting": return "String: their hunters take about %d Food a month for two winters." % roundi(float(string.monthly))
+					"hunting": return "String: their hunters take about %d food a month for two winters, about %d in all." % [roundi(float(string.monthly)),roundi(float(string.monthly)*24.0)]
 					"dependent": return "String: %s will look to you next hungry winter." % name
 					"emboldens": return ("String: %s will fear it is next." % String(string.third_name)) if String(string.get("third",""))!="" else "String: their young hunters swear to win it back."
 					"feud": return "String: %s counts you its enemy." % String(string.enemy_name)
