@@ -1,0 +1,14 @@
+{
+  "id": "steep_slope_forest_retention",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f45c58fd-3aca-4147-abac-0cd998899a42.png",
+  "source_file": "exec-f45c58fd-3aca-4147-abac-0cd998899a42.png",
+  "creative_brief": "Forests on the steep slopes are left uncut, because the cleared hills have washed their soil into the valleys and the harbors. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/steep_slope_forest_retention-v1.png",
+  "sha256": "36c6f49436ae930c3c6c3fea2dc1f87af5a9bfc02cf2967b4b06625184795b3e",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}

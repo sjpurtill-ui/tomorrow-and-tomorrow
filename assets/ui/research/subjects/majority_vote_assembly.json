@@ -1,0 +1,14 @@
+{
+  "id": "majority_vote_assembly",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c8a0fc0f-6f70-48d8-8dec-66e9e57f3921.png",
+  "source_file": "exec-c8a0fc0f-6f70-48d8-8dec-66e9e57f3921.png",
+  "creative_brief": "The citizens vote by show of hands, and what the majority decides binds the whole town. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/majority_vote_assembly-v1.png",
+  "sha256": "b2cf71562c8b85dcfaf9eddd67f83e34567b473dc66b9dfe4c57737226281272",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}

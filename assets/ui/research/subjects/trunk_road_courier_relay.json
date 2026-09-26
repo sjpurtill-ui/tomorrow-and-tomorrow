@@ -1,0 +1,14 @@
+{
+  "id": "trunk_road_courier_relay",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d5ff06bc-d7f3-45b0-8c2a-626b6811bf71.png",
+  "source_file": "exec-d5ff06bc-d7f3-45b0-8c2a-626b6811bf71.png",
+  "creative_brief": "Riders hand the dispatch bag on at fixed day-stages, and news crosses the realm in days instead of weeks. Paint it as a classical antiquity scene.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/trunk_road_courier_relay-v1.png",
+  "sha256": "bad7dc7bea5a1bd74b8b0555a9cd7b8b1428db845a6e925b6e29e08edefa1e05",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}

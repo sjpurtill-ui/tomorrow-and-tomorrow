@@ -1,0 +1,14 @@
+{
+  "id": "naval_timber_reserves",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b5519752-0492-4ddd-bb18-66ecd3cf0bb9.png",
+  "source_file": "exec-b5519752-0492-4ddd-bb18-66ecd3cf0bb9.png",
+  "creative_brief": "The tallest forests are marked for the ruler's ships, and no one else may cut a mast or a keel there. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/naval_timber_reserves-v1.png",
+  "sha256": "139e3530ab1e8f7cda0af005330d0121b6f3a38a202b05f88ec417a750daf1f0",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}
