@@ -1,0 +1,14 @@
+{
+  "id": "cast_iron_annealing",
+  "line": "production",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-42e0b907-4c54-4533-b945-889c5bd71e76.png",
+  "source_file": "exec-42e0b907-4c54-4533-b945-889c5bd71e76.png",
+  "creative_brief": "Brittle cast plough tips are held red-hot for days in a sealed pit and come out able to take a blow. Paint it as a classical antiquity scene.",
+  "medium": "Palette-knife impasto oil",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/cast_iron_annealing-v1.png",
+  "sha256": "1daf4ae0f2416b2355270cb99b43b5ba0ec5f8ec07dc60172e66c81793215699",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

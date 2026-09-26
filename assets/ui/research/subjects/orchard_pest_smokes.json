@@ -1,0 +1,14 @@
+{
+  "id": "orchard_pest_smokes",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6f2c8695-d611-4d76-87fd-575746170cf2.png",
+  "source_file": "exec-6f2c8695-d611-4d76-87fd-575746170cf2.png",
+  "creative_brief": "Smoky fires of sulfur and bitter herbs drive off the pests, and plant juices are sprinkled on the leaves. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/orchard_pest_smokes-v1.png",
+  "sha256": "8af644d7d720bb2ac0c3921c62e0b8af1bdccd0b95e9f960b6715da6c78ace95",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

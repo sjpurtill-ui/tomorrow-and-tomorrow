@@ -1,0 +1,14 @@
+{
+  "id": "gold_thread_embroidery",
+  "line": "production",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-49ddb62d-5b54-402b-b408-ef2a1059f94f.png",
+  "source_file": "exec-49ddb62d-5b54-402b-b408-ef2a1059f94f.png",
+  "creative_brief": "Gold beaten thin and wound around a thread is couched onto a robe, and the wearer glitters at every step. Paint it as a classical antiquity scene.",
+  "medium": "Palette-knife impasto oil",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/gold_thread_embroidery-v1.png",
+  "sha256": "1770143c03837cb59e9fbd96900d70289a9153fee98b2aaef346e46bddb2442e",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
