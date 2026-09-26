@@ -20,6 +20,7 @@ const Commands:=preload("res://scripts/court_commands.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
 const Lives:=preload("res://scripts/court_lives.gd")
 const Rivals:=preload("res://scripts/rival_rulers.gd")
+const EnvoyRequests:=preload("res://scripts/envoy_requests.gd")
 ## Typed words that are about people (asked, summoned, questioned, accused or
 ## judged) go to the live persons exchange; offline the Court offers choices.
 const PERSONS_WORDS:="(?i)\\b(who|whom|whose|summon|bring|fetch|send for|responsible|blame|fault|lying|liar|lie|lied|truth|swear|ledger|tally|confess|tell me (of|about)|where were you|mercy|pardon|exalt|maim|curse|marry|priest)\\b"
@@ -920,6 +921,19 @@ func _speak()->void:
 			choose(named)
 			_pump()
 			return
+		# An envoy's request answered in the god's own words (online only;
+		# offline the cards are the answers): a clear reading of the words
+		# chooses one of the same answers, else one cheap live reading does.
+		var asked:=Hall.find(audience_id)
+		if _voice_ok() and voice.has_method("is_live") and bool(voice.is_live()) and EnvoyRequests.answerable(asked):
+			var reading:=EnvoyRequests.typed_choice(asked,text)
+			if not reading.is_empty():
+				_answer_request(text,reading)
+				return
+			var id:=audience_id
+			if voice.has_method("read_request_answer") and not voice.busy(audience_id) and bool(voice.read_request_answer(audience_id,text,func(read:Dictionary)->void:_after_request_reading(id,text,read))):
+				_refresh_footer()
+				return
 	# Words about people, with a live voice: one call maps them onto the
 	# persons engine's actions (ask, summon, question, accuse, judge).
 	var typed:=Persons.typed_action(text) if resolved_result.is_empty() and String(Hall.find(audience_id).get("origin",""))=="court" else {}
@@ -1009,6 +1023,25 @@ func _after_command(result:Dictionary)->void:
 	else:
 		_build_options()
 		if not String(result.get("outcome","")).is_empty():_show_toast(String(result.outcome))
+	_pump()
+
+## The god's words named an answer: it is carried out exactly as the card.
+func _answer_request(text:String,reading:Dictionary)->void:
+	var here:=Hall.find(audience_id)
+	if here.is_empty() or not resolved_result.is_empty():return
+	EnvoyRequests.apply_typed(here,reading)
+	Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":int(GameState.elapsed_days),"aside":false})
+	choose(String(reading.get("option","")))
+	_pump()
+
+func _after_request_reading(id:String,text:String,reading:Dictionary)->void:
+	if is_queued_for_deletion() or id!=audience_id or not resolved_result.is_empty():return
+	if not reading.is_empty():
+		_answer_request(text,reading)
+		return
+	# Not an answer after all: the words go on as conversation.
+	if _voice_ok():voice.player_speaks(audience_id,text)
+	else:Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":int(GameState.elapsed_days),"aside":false})
 	_pump()
 
 func choose(option_id:String)->Dictionary:

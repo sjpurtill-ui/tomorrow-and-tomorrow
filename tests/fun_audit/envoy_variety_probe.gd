@@ -4,7 +4,11 @@ extends Node
 ## way both times (hunger, sickness, tension, wars between others, new
 ## rulers) and eras advance; envoys are answered by the same seeded policy.
 ## Prints visit counts and the mix of business, and a sample of requests.
-## Checks the pace stays the same and no business dominates or repeats.
+## Checks the pace stays the same and no business dominates or repeats, that
+## the calmer business is heard, and that returning envoys refer back to how
+## they were answered. Scouts are now and then caught on either side (the
+## capture records captive_scouts reads), and a census counts how often the
+## state backs each request, to tell rare states from starved business.
 ## Days advance STEP at a time, and the hall runs its envoy-only surrogate
 ## (AudienceHall.envoys_only: no court, aims, crises, lives or war loops), to
 ## stay under two minutes.
@@ -42,6 +46,9 @@ func _setup()->Array[String]:
 		# A ledger of their own, so they can pay, trade and give from real stores.
 		WorldSimulation.create_actor(String(civ.id),SEED+index,CivilizationSystem._civilization_world_position(civ))
 	_restock(met,RandomNumberGenerator.new())
+	# Rulers exist from the start, so the backing census below cannot change
+	# when a ruler was born (and so when they die).
+	for id in met: Rivals.character(id)
 	return met
 
 func _restock(met:Array[String],rng:RandomNumberGenerator)->void:
@@ -56,6 +63,8 @@ func _run(wider:bool)->Dictionary:
 	var world:=RandomNumberGenerator.new(); world.seed=SEED
 	var arrivals:Array[Dictionary]=[]
 	var answered:=0
+	var backing:={}
+	var checks:=0
 	for day in range(STEP,YEARS*365,STEP):
 		GameState.elapsed_days=day
 		var year:=day/365
@@ -81,6 +90,18 @@ func _run(wider:bool)->Dictionary:
 					var mirror:=ForeignDiplomacy.civilization(other)
 					if not mirror.is_empty(): (mirror.relations as Dictionary)[String(civ.id)]=rel.duplicate()
 				if world.randf()<0.04: civ.player_relation.recruitment_visits=int(civ.player_relation.get("recruitment_visits",0))+1
+				# Now and then scouts are caught, theirs by you or yours by them
+				# (the real capture records the hall reads).
+				var caught:=world.randf()
+				if caught<0.02: CivilizationSystem.captured_player_scouts[String(civ.id)]={"count":world.randi_range(2,5),"captured_day":day}
+				elif caught<0.035: CivilizationSystem.captured_foreign_scouts[String(civ.id)]={"civ_id":String(civ.id),"count":world.randi_range(2,4),"captured_day":day}
+		if wider and day%90<STEP:
+			# How often the state backs each request, whatever the occasion.
+			for id in met:
+				checks+=1
+				for t in ER.TYPES:
+					var probe_rng:=RandomNumberGenerator.new(); probe_rng.seed=hash("%s:%s:%d" % [id,String(t),day])
+					if not ER.candidate(String(t),id,{"type":"ambient","data":{}},probe_rng,{},day).is_empty(): backing[t]=int(backing.get(t,0))+1
 		var t0:=Time.get_ticks_usec()
 		var came:=Hall.daily(day)
 		daily_us+=Time.get_ticks_usec()-t0
@@ -94,17 +115,33 @@ func _run(wider:bool)->Dictionary:
 			Hall.resolve(String(audience.id),String(options[pick.randi_range(0,options.size()-1)].id))
 			answered+=1
 	var counts:={}
+	var occasions:={}
+	var returning:=0
+	var recalled:=0
+	var answered_by:={}
+	var seen_civ:={}
 	var families:={}
 	var repeats:=0
 	var last:=""
 	for audience in arrivals:
 		var t:=Hall._situation_type(audience)
 		counts[t]=int(counts.get(t,0))+1
+		var occ:=String(((audience.get("situation",{}) as Dictionary).get("occasion",{}) as Dictionary).get("type","?"))
+		occasions[occ]=int(occasions.get(occ,0))+1
 		var f:=String(ER.family(t))
 		families[f]=int(families.get(f,0))+1
 		if t==last: repeats+=1
 		last=t
-	return {"arrivals":arrivals,"counts":counts,"families":families,"repeats":repeats,"answered":answered,"pledges":ER.pledges().size()}
+		var civ_id:=String(audience.get("civ_id",""))
+		if seen_civ.has(civ_id):
+			returning+=1
+			var recall:Variant=(audience.get("situation",{}) as Dictionary).get("recall")
+			if recall is Dictionary and not (recall as Dictionary).is_empty():
+				recalled+=1
+				var rk:=String((recall as Dictionary).get("kind",""))
+				answered_by[rk]=int(answered_by.get(rk,0))+1
+		seen_civ[civ_id]=true
+	return {"arrivals":arrivals,"counts":counts,"families":families,"repeats":repeats,"answered":answered,"pledges":ER.pledges().size(),"occasions":occasions,"backing":backing,"checks":checks,"returning":returning,"recalled":recalled,"recall_kinds":answered_by}
 
 func _sorted(d:Dictionary)->String:
 	var keys:=d.keys()
@@ -126,13 +163,21 @@ func _ready()->void:
 	print("ENVOY_VARIETY wider kinds (%d distinct): %s" % [(wider.counts as Dictionary).size(),_sorted(wider.counts)])
 	print("ENVOY_VARIETY families alone: "+_sorted(alone.families))
 	print("ENVOY_VARIETY families wider: "+_sorted(wider.families))
+	print("ENVOY_VARIETY occasions alone: "+_sorted(alone.occasions))
+	print("ENVOY_VARIETY occasions wider: "+_sorted(wider.occasions))
+	var rates:={}
+	for t in wider.backing: rates[t]=roundi(100.0*float(wider.backing[t])/maxf(1.0,float(wider.checks)))
+	print("ENVOY_VARIETY state backs (%% of %d people-seasons): %s" % [int(wider.checks),_sorted(rates)])
+	print("ENVOY_VARIETY returning envoys that referred back to earlier dealings: alone %d of %d, wider %d of %d (%s)" % [int(alone.recalled),int(alone.returning),int(wider.recalled),int(wider.returning),_sorted(wider.recall_kinds)])
 	print("ENVOY_VARIETY same kind back to back: alone %d, wider %d" % [int(alone.repeats),int(wider.repeats)])
 	var shown:=0
-	for audience in wider.arrivals:
+	var every:=maxi(1,(wider.arrivals as Array).size()/30)
+	for index in (wider.arrivals as Array).size():
+		var audience:Dictionary=wider.arrivals[index]
 		var t:=Hall._situation_type(audience)
-		if not ER.TYPES.has(t) or shown>=24: continue
+		if index%every!=0 or shown>=30: continue
 		shown+=1
-		print("ENVOY_VARIETY   y%-3d %-18s %s — %s | answered: %s" % [int(audience.arrived_day)/365,t,String(audience.situation.get("headline","")),String(audience.situation.get("summary","")).substr(0,170),String(audience.get("outcome","")).substr(0,120)])
+		print("ENVOY_VARIETY   y%-3d %-18s %s — %s | answered: %s" % [int(audience.arrived_day)/365,t,String(audience.situation.get("headline","")),String(audience.situation.get("summary","")).substr(0,260),String(audience.get("outcome","")).substr(0,140)])
 	check(a>=20,"Too few envoys to judge: %d" % a)
 	check(absf(float(w-a))<=maxf(3.0,float(a)*0.12),"Visit pace changed: %d vs %d" % [w,a])
 	check((wider.counts as Dictionary).size()>=(alone.counts as Dictionary).size()+6,"Too little new variety")
@@ -140,6 +185,14 @@ func _ready()->void:
 	for k in wider.counts: top=maxi(top,int(wider.counts[k]))
 	check(float(top)<=float(w)*0.25,"One kind dominates: %d of %d" % [top,w])
 	check(int(wider.families.get("food",0))<int(alone.families.get("food",0)) or int(alone.families.get("food",0))==0,"Food asks not reduced")
+	# Round two: the calmer business is heard in a normal century, and a
+	# returning people says how it was answered before.
+	var calm:=0
+	for k in ["craft_teaching","mediation","marriage_request","succession_backing","war_supplies","sacred_site","blessing_rite","hostage_exchange","rite_keeper","boundary_cairn","safe_passage","joint_hunt","captive_scouts"]: calm+=int(wider.counts.get(k,0))
+	print("ENVOY_VARIETY calmer business: %d of %d visits" % [calm,w])
+	check(float(calm)>=float(w)*0.15,"The calmer business is still rare: %d of %d" % [calm,w])
+	check(float(wider.recalled)>=float(wider.returning)*0.6,"Returning envoys rarely refer back: %d of %d" % [int(wider.recalled),int(wider.returning)])
+	check(int((wider.recall_kinds as Dictionary).get("answer",0))>=int(float(wider.returning)*0.3),"Envoys rarely say how they were answered last time")
 	print("ENVOY_VARIETY took %.1f s" % [float(Time.get_ticks_msec()-started)/1000.0])
 	print("ENVOY_VARIETY "+("PASS" if failures.is_empty() else "FAIL: "+"; ".join(failures)))
 	ER.enabled=true

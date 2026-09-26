@@ -79,6 +79,15 @@ const GAP_DAYS:=MIN_GAP
 ## may come this soon); routine business waits for most of civ_gap().
 const CIV_GAP:=180
 const CIV_CRISIS_GAP:=120
+## A people's stores are "failing" below 22 days of food. The first time in
+## FAMINE_GAP days, or when it becomes a true famine (below
+## FAMINE_SEVERE_DAYS), their envoy comes to plead (their_famine). A people
+## hovering near the line within two years still sends an envoy as before, with
+## the same urgency, but it comes about its other business (lean_season): the
+## pace of visits is unchanged, and "give us food" is no longer every visit.
+const FAMINE_SEVERE_DAYS:=12.0
+const FAMINE_GAP:=730
+const FAMINE_DEEPENS_GAP:=180
 ## Pure goodwill gifts: at most one per people per decade.
 const PURE_GIFTS:=["gift_goods","artifact_gift"]
 const GIFT_GAP_DAYS:=3650
@@ -167,6 +176,11 @@ const SITUATIONS:={
 	"succession_backing":{"kind":"request","headline":"asks you to recognise their new ruler","mechanic":"envoy_requests.gd; leader trust, border concession or grudge"},
 	"hostage_exchange":{"kind":"request","headline":"proposes an exchange of pledges","mechanic":"envoy_requests.gd; hostage bond, border tension"},
 	"sacred_site":{"kind":"request","headline":"asks leave to visit a sacred place","mechanic":"envoy_requests.gd; pilgrimage bond, toll or grudge"},
+	"captive_scouts":{"kind":"request","headline":"comes about scouts held captive","mechanic":"envoy_requests.gd; real captured-scout records, Food ransom or your word, grudge"},
+	"rite_keeper":{"kind":"request","headline":"asks for a keeper of your rites","mechanic":"envoy_requests.gd; a person moves, rites bond, their dread or love"},
+	"boundary_cairn":{"kind":"request","headline":"asks to raise a cairn on the border","mechanic":"envoy_requests.gd; Stone, border tension, cairn bond"},
+	"joint_hunt":{"kind":"request","headline":"asks your hunters to join a great drive","mechanic":"envoy_requests.gd; hunters away, shared meat, a hunter may die"},
+	"safe_passage":{"kind":"request","headline":"asks safe passage for its carriers","mechanic":"envoy_requests.gd; seasonal crossing gifts from their ledger, passage bond"},
 }
 
 ## Which situations an occasion invites, with base weights.
@@ -178,6 +192,7 @@ const OCCASION_MIX:={
 	"war_end":{"gift_goods":0.3,"nonaggression_offer":1.0,"trade_offer":0.6,"accord_offer":0.6,"artifact_return":1.5},
 	"peace_possible":{"peace_feeler":1.0},
 	"their_famine":{"aid_request":1.0},
+	"lean_season":{"aid_request":0.3,"trade_offer":0.5,"news_report":0.4,"rumor_share":0.3},
 	"recruitment_incident":{"recruitment_protest":1.0},
 	"third_war":{"war_support":1.0,"news_report":0.35},
 	"dread_tribute":{"dread_tribute":1.0},
@@ -1070,8 +1085,17 @@ static func _observe(day:int)->void:
 			_add_occasion({"key":"war_end:%s:%d" % [id,day],"type":"war_end","civ_id":id,"day":day,"not_before":day+10,"expires":day+160,"data":{"text":"the war with %s has ended" % name}})
 		if bool(now.p) and not bool(prev.get("p",false)):
 			_add_occasion({"key":"peace:%s:%d" % [id,day],"type":"peace_possible","civ_id":id,"day":day,"expires":day+60,"crisis":true,"data":{"text":"%s has lost its appetite for the war" % name}})
-		if bool(now.h) and not bool(prev.get("h",false)) and not bool(now.w):
-			_add_occasion({"key":"famine:%s:%d" % [id,day],"type":"their_famine","civ_id":id,"day":day,"expires":day+60,"crisis":true,"data":{"text":"%s's granaries are failing" % name,"episode":day}})
+		# Hunger: a plea every two years, or whenever it becomes true famine.
+		now["s"]=bool(now.h) and float(civ.get("food_days",30.0))<FAMINE_SEVERE_DAYS
+		now["f"]=int(prev.get("f",-99999))
+		var failing:=bool(now.h) and not bool(prev.get("h",false))
+		var deepens:=bool(now.s) and not bool(prev.get("s",false)) and not failing and day-int(now.f)>=FAMINE_DEEPENS_GAP
+		if (failing or deepens) and not bool(now.w):
+			if bool(now.s) or day-int(now.f)>=FAMINE_GAP:
+				_add_occasion({"key":"famine:%s:%d" % [id,day],"type":"their_famine","civ_id":id,"day":day,"expires":day+60,"crisis":true,"data":{"text":"%s's %s" % [name,"people are starving" if bool(now.s) else "granaries are failing"],"episode":day,"severe":bool(now.s)}})
+				now["f"]=day
+			else:
+				_add_occasion({"key":"lean:%s:%d" % [id,day],"type":"lean_season","civ_id":id,"day":day,"expires":day+60,"crisis":true,"data":{"text":"%s's stores are running low again" % name,"episode":day,"business":(OCCASION_MIX.lean_season as Dictionary).merged(_business_mix(id,day),true)}})
 		if int(now.r)>int(prev.get("r",-1)) and int(now.r)>=0:
 			_add_occasion({"key":"recruit:%s:%d" % [id,int(now.r)],"type":"recruitment_incident","civ_id":id,"day":day,"expires":day+90,"crisis":true,
 				"data":{"text":"your recruiters invited %s's households away" % name,"incident_day":int(now.r)}})
@@ -1379,7 +1403,7 @@ static func _foreign_candidates(civ_id:String,occasion:Dictionary,rng:RandomNumb
 	var type:=String(occasion.get("type","ambient"))
 	var mix:Dictionary=OCCASION_MIX.get(type,OCCASION_MIX.ambient)
 	var business:Variant=(occasion.get("data",{}) as Dictionary).get("business") if occasion.get("data") is Dictionary else null
-	if type=="ambient" and business is Dictionary and not (business as Dictionary).is_empty(): mix=business
+	if type in ["ambient","lean_season"] and business is Dictionary and not (business as Dictionary).is_empty(): mix=business
 	var branches:Dictionary={}
 	if type=="sequel":
 		var plan:=_sequel_plan(civ_id,occasion)
@@ -1406,7 +1430,7 @@ static func _foreign_candidates(civ_id:String,occasion:Dictionary,rng:RandomNumb
 	# visits is unchanged): wider requests join only business the hall could
 	# already back, drawn with their own dice so the hall's are untouched.
 	if result.is_empty() or not wronged.is_empty(): return result
-	var extra:Dictionary=er.call("extra_mix",type)
+	var extra:Dictionary=er.call("extra_mix",type,occasion)
 	if not extra.is_empty():
 		var wider:=_rng("wider:%s:%s" % [civ_id,String(occasion.get("key",""))],day)
 		for situation_type:String in extra:
@@ -2518,6 +2542,7 @@ static func _after_resolve(audience:Dictionary,option_id:String,reaction:String)
 		if civs.get(civ_id) is Dictionary and not civ.is_empty():
 			civs[civ_id]["o"]=float(civ.player_relation.get("opinion",0.0))
 			civs[civ_id]["t"]=_tension_band(float(civ.player_relation.get("border_tension",0.0)))
+		_requests().call("note_hall_answer",audience,option_id)
 		_add_sequel(audience,option_id,day)
 		return
 	if String(audience.kind)!="petition": return

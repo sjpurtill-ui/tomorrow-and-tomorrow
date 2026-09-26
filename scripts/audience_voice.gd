@@ -603,6 +603,7 @@ const OCCASION_SPEECH:={
 	"war_end":[["The fighting between us is over.","The war has ended, and both sides are counting the cost."],["I've come to see what grows in its place.","Now we find out what peace looks like."]],
 	"peace_possible":[["{leader} has lost the taste for this war.","Our people are tired of burying their own."],["I've come to talk about ending it.","There may be a way out, if you want one."]],
 	"their_famine":[["Our stores are failing.","The hunting failed and our stores are nearly gone.","Our people are going hungry."],["I won't dress it up.","That's why I'm here.","I'm not too proud to say it."]],
+	"lean_season":[["It has been a lean season with us.","Our stores are thinner than we would like this year."],["{leader} sent me all the same.","We are managing, and there is other business between us.","That is not the only reason I came."]],
 	"recruitment_incident":[["Your people have been luring our households away.","Families of ours have been talked into leaving for your fires."],["It has to stop.","{leader} won't let it pass."]],
 	"third_war":[["{occasioncap}.","Have you heard? {occasioncap}."],["Nobody will stay out of it for long.","It will reach your border soon enough."]],
 	"sequel":[["I've come about what came of our last meeting.","Our last meeting left things unfinished."],["It's time to settle it.","Let's finish it properly."]],
@@ -804,13 +805,15 @@ var pick_hook:Callable           ## tests: (audience_id, payload) -> reply body 
 var _picking:Dictionary={}       ## audience_id -> the one live call choosing an envoy's business
 var _open_after_pick:Dictionary={}
 var _used:Dictionary={}
+var answer_hook:Callable         ## tests: (audience_id, payload) -> reply body (empty = failure); replaces HTTP for typed answers
+var _reading:Dictionary={}       ## audience_id -> the one live call reading the god's typed answer
 
 # ---------------------------------------------------------------------------
 # Public API (contract)
 # ---------------------------------------------------------------------------
 
 func busy(audience_id:String)->bool:
-	return _requests.has(audience_id) or _picking.has(audience_id)
+	return _requests.has(audience_id) or _picking.has(audience_id) or _reading.has(audience_id)
 
 func picking(audience_id:String)->bool:
 	return _picking.has(audience_id)
@@ -892,6 +895,61 @@ func _finish_pick(audience_id:String,swapped:bool)->void:
 	if wanted and not busy(audience_id):
 		var h:Variant=_hall()
 		if h!=null and ((h.find(audience_id) as Dictionary).get("lines",[]) as Array).is_empty(): _begin(audience_id,"open",{})
+
+## The god's typed answer to an envoy's request (online): one cheap call reads
+## the words onto the request's own answers. done.call({option, share?,
+## repay_res?}) on a confident reading, done.call({}) otherwise (talk, a
+## failure): the words then go on as conversation. False when there is no
+## connection or nothing to answer (the caller goes on at once).
+func read_request_answer(audience_id:String,text:String,done:Callable)->bool:
+	if _reading.has(audience_id): return true
+	var h:Variant=_hall()
+	if h==null: return false
+	var audience:Dictionary=h.find(audience_id)
+	var config:=_config()
+	if config.is_empty() or not bool((load("res://scripts/envoy_requests.gd") as GDScript).call("answerable",audience)): return false
+	var payload:=RequestAI.answer_payload(audience,text,config)
+	var request:={"stage":"request_answer","attempts":1,"config":config,"started_ms":Time.get_ticks_msec(),"payload":payload,"http":null,"done":done}
+	_reading[audience_id]=request
+	if answer_hook.is_valid():
+		var body:Variant=answer_hook.call(audience_id,payload.duplicate(true))
+		var ok:bool=body is PackedByteArray and not (body as PackedByteArray).is_empty()
+		_on_answer_response(HTTPRequest.RESULT_SUCCESS if ok else HTTPRequest.RESULT_TIMEOUT,200 if ok else 0,PackedStringArray(),body if ok else PackedByteArray(),audience_id)
+		return true
+	var http:=HTTPRequest.new()
+	add_child(http)
+	request.http=http
+	http.timeout=RequestAI.TIMEOUT_SECONDS
+	http.max_redirects=0
+	http.body_size_limit=MAX_RESPONSE_BYTES
+	http.request_completed.connect(_on_answer_response.bind(audience_id))
+	var headers:=PackedStringArray(["Content-Type: application/json","Authorization: Bearer %s" % String(config.get("api_key","")),"X-Client-Request-Id: envoy-answer-%s-%d" % [audience_id,Time.get_ticks_msec()]])
+	if http.request(String(config.endpoint),headers,HTTPClient.METHOD_POST,JSON.stringify(payload))!=OK:
+		request.http=null
+		http.queue_free()
+		_reading.erase(audience_id)
+		done.call_deferred({})
+	return true
+
+func _on_answer_response(result:int,response_code:int,_headers:PackedStringArray,body:PackedByteArray,audience_id:String)->void:
+	if not _reading.has(audience_id): return
+	var request:Dictionary=_reading[audience_id]
+	_reading.erase(audience_id)
+	var http:Variant=request.get("http")
+	if http is HTTPRequest and is_instance_valid(http): (http as HTTPRequest).queue_free()
+	var envelope:=_envelope_facts(body)
+	var receipt:=_receipt_http(audience_id,request,result,response_code,envelope)
+	var reading:={}
+	var reason:=""
+	if result==HTTPRequest.RESULT_SUCCESS and response_code>=200 and response_code<300:
+		var audience:Dictionary=_hall().find(audience_id) if _hall()!=null else {}
+		reading=RequestAI.read_answer(RequestAI.parse(body),audience)
+		if reading.is_empty(): reason="no confident answer in the words"
+	else:
+		reason="could not reach the service (transport %d)" % result if result!=HTTPRequest.RESULT_SUCCESS else _http_words(response_code,String(envelope.get("error","")))
+	_finish_receipt(receipt,reason=="",reason!="",reason)
+	var done:Variant=request.get("done")
+	if done is Callable and (done as Callable).is_valid(): (done as Callable).call(reading)
 
 ## True when a live model is configured (the court may let it read orders).
 func is_live()->bool:

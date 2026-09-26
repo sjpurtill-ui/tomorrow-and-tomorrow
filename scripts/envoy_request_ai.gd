@@ -234,6 +234,61 @@ static func _swap(audience:Dictionary,alt_index:int)->bool:
 	Hall._requests().call("note_arrival",audience)
 	return true
 
+# --------------------------------------------------------------------------
+# The god's typed answer to a request (online): one cheap call reads the words
+# onto the same answers the cards offer, with at most a share and a repayment
+# good; envoy_requests.gd's own reading goes first, and any failure leaves the
+# words as plain conversation.
+# --------------------------------------------------------------------------
+
+const ANSWER_MAX_TOKENS:=200
+const ANSWER_CONFIDENCE:=0.6
+const ANSWER_SYSTEM:="""A god-ruler has answered a foreign envoy's request in their own words. Decide which of the listed ANSWERS those words give.
+- answer: the id of the answer the words clearly choose. If the words ask a question, make conversation, or do not settle the request, answer "talk".
+- share: if the ruler gives only part of the goods named in the answer, the fraction given (0.1 to 1); otherwise 1.
+- repay: if the ruler asks to be repaid in a different good, that good; otherwise "none".
+- confidence: 0 to 1, how sure you are.
+Reply with JSON only: {"answer":"...","share":1,"repay":"none","confidence":0.9}"""
+
+static func answer_ids(audience:Dictionary)->Array:
+	var ids:Array=[]
+	for option in Hall._requests().call("options",audience):
+		if bool((option as Dictionary).get("enabled",true)): ids.append(String(option.id))
+	return ids
+
+static func answer_payload(audience:Dictionary,text:String,config:Dictionary)->Dictionary:
+	var situation:=Hall._situation(audience)
+	var lines:PackedStringArray=PackedStringArray()
+	lines.append("REQUEST from %s (%s): %s" % [String(audience.get("civ_name","")),String(situation.get("headline","")),String(situation.get("summary","")).substr(0,500)])
+	lines.append("ANSWERS:")
+	for option in Hall._requests().call("options",audience):
+		if bool((option as Dictionary).get("enabled",true)): lines.append("- %s: %s. %s" % [String(option.id),String(option.label),String(option.sub)])
+	lines.append("- talk: the words do not settle the request.")
+	lines.append("GOODS: "+", ".join(PackedStringArray(Hall.RESOURCES)))
+	lines.append("THE RULER SAID: <<%s>>" % text.strip_edges().replace("\n"," ").substr(0,400))
+	var ids:=answer_ids(audience)+["talk"]
+	var payload:={"model":String(config.get("model","")),"max_completion_tokens":ANSWER_MAX_TOKENS,"messages":[
+		{"role":"system","content":ANSWER_SYSTEM},{"role":"user","content":"\n".join(lines)}]}
+	if "api.openai.com" in String(config.get("endpoint","")).to_lower(): payload["reasoning_effort"]="low"
+	if bool(config.get("structured_output",false)):
+		payload["response_format"]={"type":"json_schema","json_schema":{"name":"envoy_answer","strict":true,"schema":{"type":"object","additionalProperties":false,"required":["answer","share","repay","confidence"],
+			"properties":{"answer":{"type":"string","enum":ids},"share":{"type":"number"},"repay":{"type":"string","enum":(Hall.RESOURCES as Array)+["none"]},"confidence":{"type":"number"}}}}}
+	return payload
+
+static func read_answer(parsed:Dictionary,audience:Dictionary)->Dictionary:
+	## {option, share?, repay_res?} for a confident, valid reading; {} otherwise.
+	if parsed.is_empty(): return {}
+	var answer:=String(parsed.get("answer","")).strip_edges()
+	if not answer in answer_ids(audience): return {}
+	var confidence:Variant=parsed.get("confidence",0.0)
+	if not (confidence is float or confidence is int) or float(confidence)<ANSWER_CONFIDENCE: return {}
+	var out:={"option":answer}
+	var share:Variant=parsed.get("share",1.0)
+	if (share is float or share is int) and float(share)>0.0 and float(share)<0.99 and answer in ["accept","gift"]: out["share"]=clampf(float(share),0.1,1.0)
+	var repay:=String(parsed.get("repay","none"))
+	if repay in Hall.RESOURCES and Hall._situation_type(audience)=="food_loan" and answer in ["accept","partial"] and repay!="Food": out["repay_res"]=repay
+	return out
+
 static func _refresh_ledger(audience:Dictionary)->void:
 	for entry in Hall.state().ledger:
 		if entry is Dictionary and String(entry.get("audience_id",""))==String(audience.get("id","")):
