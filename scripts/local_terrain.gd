@@ -334,8 +334,6 @@ var map_help_body:Label
 var map_help_dismissed:=true
 var travel_council_notice: Button
 var travel_council_notice_until_msec := 0
-## The map-control hint in the status strip is for the first few real minutes.
-const MAP_HINT_REAL_MSEC:=240000
 var foreign_alert_panel:PanelContainer
 var foreign_alert_title:Label
 var foreign_alert_body:Label
@@ -1882,16 +1880,19 @@ func _build_environment() -> void:
 	settings.background_mode = Environment.BG_COLOR
 	settings.background_color = Color("#0b1417")
 	settings.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	settings.ambient_light_color = Color("#b8b6a9")
-	settings.ambient_light_energy = 0.29 if SEAMLESS_WORLD else 0.36
+	# Low warm key light (docs/ART_DIRECTION.md): a painted landscape in the
+	# first hours of the day. The sky fill is cooler and dimmer than the key so
+	# the shadowed side of every slope and crown reads as form, not flat green.
+	settings.ambient_light_color = Color("#a3a495")
+	settings.ambient_light_energy = 0.30 if SEAMLESS_WORLD else 0.36
 	settings.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment.environment = settings
 	add_child(environment)
 
 	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-48, -38, 0)
-	sun.light_color = Color("#dfd1b5")
-	sun.light_energy = 0.82 if SEAMLESS_WORLD else 0.66
+	sun.rotation_degrees = Vector3(-34, -38, 0)
+	sun.light_color = Color("#eed6ae")
+	sun.light_energy = 1.12 if SEAMLESS_WORLD else 0.88
 	sun.shadow_enabled = bool(display_preferences.shadows) if display_preferences else true
 	# Oblique satellite views amplify one-pixel cascade stair-steps into bright
 	# kilometre-long bands on ridge crests. A modest penumbra preserves the relief
@@ -2257,6 +2258,7 @@ float organic_noise(vec2 p) {
 #include "res://scripts/ground_surface.gdshaderinc"
 #include "res://scripts/seasonal_surface.gdshaderinc"
 #include "res://scripts/coast_mask.gdshaderinc"
+#include "res://scripts/map_palette.gdshaderinc"
 
 void vertex() {
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -2606,7 +2608,9 @@ void fragment() {
 	// lighting alone makes mountains read like broad stains in oblique views. It
 	// remains exactly absent at settlement scale and reaches the existing full
 	// strength only once individual landforms are genuinely unresolved.
-	float map_relief = smoothstep(0.035,0.28,pixel_world);
+	// The regional view (tens of metres per pixel) needs it too: without it
+	// the valley reads as soft green blotches with no landform at all.
+	float map_relief = smoothstep(0.008,0.16,pixel_world);
 	earth *= mix(1.0, hillshade, map_relief * 0.90);
 	// Actual elevation remains meaningful after fine texture has filtered away.
 	// A broad, non-banded upland exposure separates low basins, plateaus and the
@@ -2625,11 +2629,17 @@ void fragment() {
 	// Thin aerial perspective replaces expensive volumetric fog. At country and
 	// continental footprints it gently compresses saturation like a real column
 	// of atmosphere; oblique rays accumulate a little more haze than nadir rays.
-	float altitude_haze=smoothstep(0.65,5.0,pixel_world);
+	// Grade to the map palette first, then haze toward parchment: mild at
+	// valley height, stronger at regional and continental footprints, and a
+	// little more along oblique rays, like the margin of a painted map.
+	earth=map_palette_grade(earth);
+	// Log-scaled with footprint: none at the camp, a veil at 50,000 ft, and
+	// most of the way to parchment by the continental view.
+	float altitude_haze=clamp(log(max(pixel_world,0.004)/0.004)/log(250.0),0.0,1.0)*0.26;
 	float view_slant=length(relative_position.xz)/max(abs(relative_position.y),0.001);
-	float slant_haze=smoothstep(0.15,1.2,view_slant)*smoothstep(0.03,0.35,pixel_world);
-	float atmospheric_weight=clamp(altitude_haze*0.13+slant_haze*0.13,0.0,0.22);
-	earth=mix(earth,vec3(0.31,0.37,0.38),atmospheric_weight);
+	float slant_haze=smoothstep(0.15,1.2,view_slant)*smoothstep(0.002,0.35,pixel_world);
+	float atmospheric_weight=clamp(altitude_haze+slant_haze*0.14,0.0,0.30);
+	earth=map_haze(earth,atmospheric_weight);
 	// Unexplored land and water share one unlit veil. Normals must not reveal
 	// unseen mountain ranges or coastlines as geometric detail improves.
 	ALBEDO = earth*reveal;
@@ -4338,6 +4348,7 @@ uniform int vegetation_kind = 0;
 uniform vec4 fallback_climate=vec4(0.0);
 varying vec4 plant_climate;
 #include "res://scripts/seasonal_surface.gdshaderinc"
+#include "res://scripts/map_palette.gdshaderinc"
 uniform vec4 canopy_tint : source_color = vec4(1.0);
 uniform int atlas_variant = -1;
 uniform float lod_fade = 1.0;
@@ -4406,6 +4417,8 @@ void fragment() {
 	ALPHA*=lod_fade*boundary;
 	if(ALPHA<0.001) discard;
 	base=seasonal_ground(base,plant_climate.r,plant_climate.g,plant_climate.b,world_position.z,vegetation_kind==1?0.0:1.0);
+	// Same map palette as the ground: olive and slate canopy, not neon blobs.
+	base=map_palette_grade(base);
 	ALBEDO=mix(vec3(0.006,0.012,0.014),base,smoothstep(0.06,0.62,revealed));
 	ROUGHNESS=1.0;
 	AO=0.84+crown*0.14;
@@ -4635,15 +4648,25 @@ func _refresh_settlement_network(force:=false)->void:
 		var color:Color=visual_profile.color
 		if not bool(settlement.get("primary",false)): color=color.lerp(Color("#8d9165"),0.28)
 		color.a=float(visual_profile.border_alpha)*(1.0 if bool(settlement.get("primary",false)) else 0.82)
-		var core_width:=clampf(radius*0.009*float(visual_profile.border_scale),0.005,0.095)
-		var ownership_color:Color=color
+		# Territory reads as a hand-coloured map: a soft painted wash that pools
+		# a little darker just inside the edge, and one fine ink hairline. Both
+		# widths follow the zoom bucket (about one and eight screen pixels), so
+		# the edge never becomes a heavy 3D ring; they only change on a rebuild.
+		var ink_pixel:=_territory_ink_pixel_km()
+		var primary:=bool(settlement.get("primary",false))
+		var core_width:=ink_pixel*lerpf(0.55,0.85,clampf(float(visual_profile.border_scale)-0.72,0.0,1.0))
+		var wash_color:Color=TERRITORY_WASH.lerp(color,0.25)
+		var ownership_color:Color=wash_color
 		# Store base opacity in geometry; the camera fade is updated live in material.
-		ownership_color.a=float(visual_profile.fill_alpha)*(1.0 if bool(settlement.get("primary",false)) else 0.72)
+		ownership_color.a=float(visual_profile.fill_alpha)*1.6*(1.0 if primary else 0.72)
 		ownership_triangle_count+=_append_settlement_claim_fill(ownership_surface,boundary,ownership_color,0.0032,samples)
-		var halo_color:=Color("#121817")
-		halo_color.a=0.32 if bool(settlement.get("primary",false)) else 0.24
-		halo_segment_count+=_append_settlement_boundary_ribbon(border_halo_surface,boundary,core_width*2.8,halo_color,0.0045,samples)
-		segment_count+=_append_settlement_boundary_ribbon(border_surface,boundary,core_width,color,0.0065,samples)
+		var edge_wash:=wash_color
+		edge_wash.a=0.15 if primary else 0.10
+		var wash_band:=ink_pixel*2.5
+		halo_segment_count+=_append_settlement_boundary_ribbon(border_halo_surface,_inset_boundary(boundary,wash_band),wash_band,edge_wash,0.0045,samples)
+		var ink:=TERRITORY_INK
+		ink.a=(0.85 if primary else 0.62)*clampf(float(visual_profile.border_alpha)/0.7,0.8,1.2)
+		segment_count+=_append_settlement_boundary_ribbon(border_surface,boundary,core_width,ink,0.0065,samples)
 	var trace=preload("res://scripts/performance_trace.gd")
 	var stamp:int=trace.start()
 	_create_secondary_settlement_markers(visible_secondary_settlements)
@@ -7722,6 +7745,30 @@ func _update_settlement_claim_opacity()->void:
 	var material:=wash.material_override as StandardMaterial3D
 	if material==null: return
 	material.albedo_color=Color(1,1,1,_settlement_claim_fill_alpha(1.0))
+
+const TERRITORY_WASH:=Color("#A8782A")
+const TERRITORY_INK:=Color("#3A2E22")
+
+## One screen pixel in kilometres at the current zoom bucket (the same bucket
+## as the network view key), so ink widths are stable between rebuilds.
+func _territory_ink_pixel_km()->float:
+	if camera==null: return 0.002
+	var zoom_bucket:=roundi(log(maxf(0.10,camera.size))/log(1.8))
+	return pow(1.8,float(zoom_bucket))/900.0
+
+## The boundary pulled toward its centre by a fixed distance: the painted edge
+## band sits inside the territory instead of straddling the border.
+func _inset_boundary(boundary:PackedVector2Array,distance:float)->PackedVector2Array:
+	if boundary.size()<3: return boundary
+	var center:=Vector2.ZERO
+	for point in boundary: center+=point
+	center/=float(boundary.size())
+	var inset:=PackedVector2Array()
+	for point in boundary:
+		var to_center:=center-point
+		var reach:=to_center.length()
+		inset.append(point+to_center/reach*minf(distance,reach*0.5) if reach>0.000001 else point)
+	return inset
 
 func _append_settlement_claim_fill(surface:SurfaceTool,boundary:PackedVector2Array,color:Color,lift:=0.0032,samples:RefCounted=null)->int:
 	if boundary.size()<3: return 0
@@ -19658,10 +19705,9 @@ func _update_time_interface() -> void:
 		# The control hint is for the first month; after it, the ticker keeps
 		# the latest thing worth telling from the Chronicle.
 		var headline:=preload("res://scripts/chronicle.gd").latest_headline() if GameState.settlement_site_committed and GameState.settlement_founded_day>=0 and GameState.elapsed_days-float(GameState.settlement_founded_day)>30.0 else ""
-		# The pan/zoom hint also gives way after the first few real minutes (a
-		# slow first month would otherwise keep it up for an hour).
-		var hint_done:=GameState.settlement_site_committed and Time.get_ticks_msec()>MAP_HINT_REAL_MSEC
-		travel_status_label.text = headline if headline!="" else ("FOUNDING CONVOY READY  •  RIGHT-CLICK VISIBLE OR BLACK LAND TO TRAVEL  •  CAMP TO FORAGE BETWEEN LEGS" if not GameState.settlement_site_committed else ("" if hint_done else "RECOGNIZED RESOURCES %s  •  TWO-FINGER SLIDE TO PAN  •  UP / DOWN TO ZOOM" % ("SHOWN" if resource_view_enabled else "HIDDEN")))
+		# No developer control strip over the map: pan and zoom live in the
+		# help pill's tooltip, and the ticker only carries the Chronicle.
+		travel_status_label.text = headline if headline!="" else ("FOUNDING CONVOY READY  •  RIGHT-CLICK VISIBLE OR BLACK LAND TO TRAVEL  •  CAMP TO FORAGE BETWEEN LEGS" if not GameState.settlement_site_committed else "")
 	if start_settlement_button:
 		# All map commands now live together under ACTIONS. The contextual status
 		# above provides onboarding without a modal-sized permanent map obstruction.

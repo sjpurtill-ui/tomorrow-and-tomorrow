@@ -10,7 +10,7 @@ extends Node3D
 ##   and carry the load home; builders go to plots under construction.
 ## - The hearth. A fire with firelight on the ground and smoke from the homes;
 ##   more smoke as the people grow (bounded).
-## - Marks of the day. A birth lights a small flare over a home; a death sends
+## - Marks of the day. A birth sets a small inked birth mark over a home; a death sends
 ##   a mourners' procession to the burial ground; returning scouts are seen
 ##   walking home. Court rites stay in rite_marks.gd, which borrows these
 ##   figures for its processions and mourners.
@@ -21,7 +21,7 @@ extends Node3D
 ##
 ## Everything is procedural (no image assets) and bounded: at most
 ## MAX_WORKERS + MAX_EVENT_FIGURES figures in two draw calls, MAX_PLUMES smoke
-## columns in one, MAX_FLARES flares, and no scene lights. Nothing moves or
+## columns in one, MAX_FLARES birth marks, and no scene lights. Nothing moves or
 ## costs a frame when the camera is too far away to see it.
 
 const NODE_NAME:="LivingMap"
@@ -52,7 +52,6 @@ static var _figure_mesh:ArrayMesh
 static var _figure_material:ShaderMaterial
 static var _smoke_material:ShaderMaterial
 static var _glow_material:ShaderMaterial
-static var _flare_material:ShaderMaterial
 static var _clock:=0.0
 static var _clock_frame:=-1
 
@@ -129,7 +128,6 @@ static func tick_clock(delta:float)->float:
 		if _figure_material: _figure_material.set_shader_parameter("anim_clock",_clock)
 		if _smoke_material: _smoke_material.set_shader_parameter("anim_clock",_clock)
 		if _glow_material: _glow_material.set_shader_parameter("anim_clock",_clock)
-		if _flare_material: _flare_material.set_shader_parameter("anim_clock",_clock)
 	return _clock
 
 # --------------------------------------------------------------------------
@@ -663,28 +661,35 @@ func _watch_hearth_tally()->void:
 	if new_buried>0: _procession(new_buried)
 
 func _flare(at:Vector2)->void:
-	## A birth: a small warm light over a home, rising and fading.
+	## A birth: a small inked glyph (the chronicle's birth mark) over a home,
+	## rising a little and fading. Drawn like a map annotation, not a light.
 	if flares.size()>=MAX_FLARES:
 		var oldest:Dictionary=flares.pop_front()
 		(oldest.node as Node).queue_free()
-	var quad:=QuadMesh.new(); quad.size=Vector2.ONE
-	var node:=MeshInstance3D.new(); node.name="BirthFlare"; node.mesh=quad
-	node.material_override=flare_material()
+	var node:=Sprite3D.new(); node.name="BirthMark"
+	node.texture=birth_mark_texture()
+	node.billboard=BaseMaterial3D.BILLBOARD_ENABLED
+	node.fixed_size=true; node.no_depth_test=true; node.shaded=false
+	node.pixel_size=0.0003; node.render_priority=6
+	node.alpha_cut=SpriteBase3D.ALPHA_CUT_DISABLED
 	node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	node.position=Vector3(at.x,_local_height(at)+0.004,at.y)
-	node.set_instance_shader_parameter("age",0.0)
+	node.modulate=Color(1,1,1,0)
+	node.position=Vector3(at.x,_local_height(at)+0.010,at.y)
 	add_child(node)
 	flares.append({"node":node,"t":0.0,"dur":6.0})
 
 func _advance_flares(delta:float)->void:
 	for flare in flares.duplicate():
 		flare["t"]=float(flare.t)+delta
-		var node:=flare.node as MeshInstance3D
+		var node:=flare.node as Sprite3D
 		var k:=float(flare.t)/float(flare.dur)
 		if k>=1.0:
 			node.queue_free(); flares.erase(flare); continue
-		node.set_instance_shader_parameter("age",k)
-		node.position.y+=delta*0.0018
+		# Ink in quickly, hold, then fade as it drifts up a few metres.
+		node.modulate.a=smoothstep(0.0,0.10,k)*(1.0-smoothstep(0.60,1.0,k))
+		# A mark over one home means nothing from the regional view.
+		node.visible=hearth_root==null or hearth_root.visible
+		node.position.y+=delta*0.0009
 
 func _procession(dead:int)->void:
 	## A death: mourners carry the dead from a home to the burial ground,
@@ -889,11 +894,9 @@ static func glow_material()->ShaderMaterial:
 	_glow_material=ShaderMaterial.new(); _glow_material.shader=shader
 	return _glow_material
 
-static func flare_material()->ShaderMaterial:
-	if _flare_material: return _flare_material
-	var shader:=Shader.new(); shader.code=FLARE_SHADER
-	_flare_material=ShaderMaterial.new(); _flare_material.shader=shader
-	return _flare_material
+static func birth_mark_texture()->Texture2D:
+	## Gold (the sacred colour: a new soul) on the icon engine's dark disc.
+	return preload("res://scripts/resource_icons.gd").moment_texture("birth",Color("#D4AE5C"),56)
 
 const FIGURE_SHADER:="""
 shader_type spatial;
@@ -1017,24 +1020,3 @@ void fragment() {
 }
 """
 
-const FLARE_SHADER:="""
-shader_type spatial;
-render_mode unshaded, blend_add, depth_draw_never, depth_test_disabled, cull_disabled, shadows_disabled, skip_vertex_transform, fog_disabled;
-uniform float anim_clock = 0.0;
-instance uniform float age = 0.0;
-varying float v_fade;
-void vertex() {
-	float size = 0.004 + 0.010 * sqrt(age);
-	vec4 center = MODELVIEW_MATRIX * vec4(0.0, 0.0, 0.0, 1.0);
-	VERTEX = center.xyz + vec3(VERTEX.xy * size, 0.0);
-	v_fade = smoothstep(0.0, 0.08, age) * (1.0 - smoothstep(0.5, 1.0, age));
-}
-void fragment() {
-	vec2 p = (UV - vec2(0.5)) * 2.0;
-	float d = length(p);
-	float core = pow(clamp(1.0 - d, 0.0, 1.0), 3.0);
-	float rays = pow(clamp(1.0 - abs(p.x * p.y) * 18.0, 0.0, 1.0), 4.0) * clamp(1.0 - d, 0.0, 1.0);
-	float twinkle = 0.85 + 0.15 * sin(anim_clock * 6.0);
-	ALBEDO = vec3(1.0, 0.86, 0.55) * (core + rays * 0.6) * v_fade * twinkle * 1.6;
-}
-"""
