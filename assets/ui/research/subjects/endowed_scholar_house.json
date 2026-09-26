@@ -1,0 +1,14 @@
+{
+  "id": "endowed_scholar_house",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-142d8b5d-d8b2-48e1-b87f-968068f8a9ab.png",
+  "source_file": "exec-142d8b5d-d8b2-48e1-b87f-968068f8a9ab.png",
+  "creative_brief": "Salaried readers live, study and teach at the ruler's expense beside a great collection of books. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/endowed_scholar_house-v1.png",
+  "sha256": "9e1c010741e317446d1d251d7ff2a73dbd45bf81c8e8c3305aa8556504ce446d",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

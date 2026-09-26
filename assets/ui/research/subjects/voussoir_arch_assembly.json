@@ -1,0 +1,14 @@
+{
+  "id": "voussoir_arch_assembly",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4b9298ef-9630-4377-99b2-8c5062e941d7.png",
+  "source_file": "exec-4b9298ef-9630-4377-99b2-8c5062e941d7.png",
+  "creative_brief": "Wedge-shaped stones set over a timber frame press on one another so hard that the arch stands when the frame is struck. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/voussoir_arch_assembly-v1.png",
+  "sha256": "f281e460425680711d0a53c8229f10996d7ce3c9585ce50f7bef0a0b5c3f2e13",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}

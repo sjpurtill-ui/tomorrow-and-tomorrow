@@ -709,6 +709,8 @@ static func annotate_options(audience:Dictionary,options:Array)->void:
 			if not v.is_empty() and String(v.option)==id: option[side]="%s (%s): “%s”" % [String(v.name),String(v.office),String(v.text)]
 
 static func _cost(audience:Dictionary,situation:Dictionary,option_id:String)->String:
+	# Wider envoy business states its own costs (envoy_requests.gd).
+	if bool(Hall._requests().call("handles",String(situation.get("type","")))): return ""
 	var civ_id:=String(audience.civ_id)
 	var name:=String(audience.get("civ_name",Hall._civ_name(civ_id)))
 	var who:=given(civ_id)

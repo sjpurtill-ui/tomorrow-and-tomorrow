@@ -265,7 +265,9 @@ func _finish_audience(id:String,audience:Dictionary)->void:
 		_show_outcome({"ok":true,"outcome":String(audience.get("outcome","")),"reaction":"neutral"})
 	else:
 		_build_options()
-	if (audience.get("lines",[]) as Array).is_empty() and _voice_ok() and not voice.busy(id):
+	# A live model may first settle which (state-backed) business the envoy brings.
+	if _voice_ok() and voice.has_method("pick_request") and String(audience.get("status",""))=="waiting":voice.pick_request(id)
+	if (audience.get("lines",[]) as Array).is_empty() and _voice_ok() and (not voice.busy(id) or (voice.has_method("picking") and voice.picking(id))):
 		voice.open_scene(id)
 	_connect_voice()
 	_refresh_footer()
@@ -883,6 +885,11 @@ func _connect_voice()->void:
 	if voice.has_signal("divine_intent") and not voice.divine_intent.is_connected(_on_divine_intent):voice.divine_intent.connect(_on_divine_intent)
 	if "command_router" in voice:voice.command_router=_route_live_command
 	if voice.has_signal("persons_done") and not voice.persons_done.is_connected(_on_persons_done):voice.persons_done.connect(_on_persons_done)
+	if voice.has_signal("request_revised") and not voice.request_revised.is_connected(_on_request_revised):voice.request_revised.connect(_on_request_revised)
+
+func _on_request_revised(id:String)->void:
+	## The envoy's business was settled differently before they spoke: show it.
+	if id==audience_id and resolved_result.is_empty() and is_inside_tree():show_audience(id)
 
 func _on_lines_ready(id:String)->void:
 	if id==audience_id:_pump()

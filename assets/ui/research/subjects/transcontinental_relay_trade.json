@@ -1,0 +1,14 @@
+{
+  "id": "transcontinental_relay_trade",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a953844a-0b5b-4070-93fd-87f98b891189.png",
+  "source_file": "exec-a953844a-0b5b-4070-93fd-87f98b891189.png",
+  "creative_brief": "Goods pass from people to people along one great road, and cloth woven beyond the farthest mountains reaches our markets. Paint it as a classical antiquity scene.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/transcontinental_relay_trade-v1.png",
+  "sha256": "de212ccaf315ce3248208269c387ccb28ffd65c8458d2e50b4feca3b519057a0",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

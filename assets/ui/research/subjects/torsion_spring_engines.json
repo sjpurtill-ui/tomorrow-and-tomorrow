@@ -1,0 +1,14 @@
+{
+  "id": "torsion_spring_engines",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-aae40e73-9dab-4b4e-9082-ef7422930cc9.png",
+  "source_file": "exec-aae40e73-9dab-4b4e-9082-ef7422930cc9.png",
+  "creative_brief": "Skeins of twisted sinew drive the arms of engines that throw bolts and stones far beyond bowshot. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/torsion_spring_engines-v1.png",
+  "sha256": "c03e59bd792116619b43fe08689cdeae4b31c4455b342bff13507abc605e520c",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "axiomatic_geometry_compendium",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3e62b6a2-a958-4268-80e8-248fb9e23b5a.png",
+  "source_file": "exec-3e62b6a2-a958-4268-80e8-248fb9e23b5a.png",
+  "creative_brief": "One book sets out definitions and agreed first principles, and derives every figure from them in order. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/axiomatic_geometry_compendium-v1.png",
+  "sha256": "ce5fc8619582c403f7c8a9f69bfb9201bdbdc6cf15727b880b19b54a416e4342",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

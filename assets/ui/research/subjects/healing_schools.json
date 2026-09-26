@@ -1,0 +1,14 @@
+{
+  "id": "healing_schools",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8e771e52-86c9-48dd-a1a6-63fa6692fe13.png",
+  "source_file": "exec-8e771e52-86c9-48dd-a1a6-63fa6692fe13.png",
+  "creative_brief": "Healers gather around famous masters, and pupils learn from books of cases handed down the lineage. Paint it as a classical antiquity scene.",
+  "medium": "Watercolor and ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/healing_schools-v1.png",
+  "sha256": "ec0a7f4935c9b0c849cd98b1a3f42475e3edbadea208d306d792d47fc19421fc",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}

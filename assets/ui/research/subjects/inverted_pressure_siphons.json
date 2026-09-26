@@ -1,0 +1,14 @@
+{
+  "id": "inverted_pressure_siphons",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0b320a25-b230-4e66-97a3-a392692077fc.png",
+  "source_file": "exec-0b320a25-b230-4e66-97a3-a392692077fc.png",
+  "creative_brief": "Lead pipes carry the water down one side of the valley and push it up the other, rising nearly to where it began. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/inverted_pressure_siphons-v1.png",
+  "sha256": "1b0a02afcad57f91e26c100a22d3b7da98e300f10b6ee36ad9ee538945ebda17",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

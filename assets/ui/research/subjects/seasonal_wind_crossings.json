@@ -1,0 +1,14 @@
+{
+  "id": "seasonal_wind_crossings",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0abe5669-56ae-487d-8f1a-76ae15ec443c.png",
+  "source_file": "exec-0abe5669-56ae-487d-8f1a-76ae15ec443c.png",
+  "creative_brief": "Pilots who know the winds that turn with the seasons sail straight across open ocean and back within the year. Paint it as a classical antiquity scene.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/seasonal_wind_crossings-v1.png",
+  "sha256": "bbe2132c1eb6b9205437a0e327de9a1db76591a346351fd8715ce38d518a2dae",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

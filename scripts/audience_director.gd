@@ -64,6 +64,9 @@ func _process(delta:float)->void:
 		last_day=day
 		for step_day in range(maxi(start,day-30),day+1):
 			var arrivals:Array=Hall.daily(step_day)
+			# With a live model, the envoy's business is settled before they are shown in.
+			for arrival in arrivals:
+				if String((arrival as Dictionary).get("origin",""))=="foreign" and voice.has_method("pick_request"): voice.pick_request(String((arrival as Dictionary).get("id","")))
 			# The Opening Arc marks the first years' real turning points as beats.
 			OpeningArc.daily(step_day,terrain)
 			if not arrivals.is_empty() and pending_summon.is_empty():pending_summon=String((arrivals[0] as Dictionary).get("id",""))
@@ -76,7 +79,7 @@ func _process(delta:float)->void:
 	if not pending_summon.is_empty():
 		var waiting:=Hall.find(pending_summon)
 		if waiting.is_empty() or String(waiting.get("status",""))!="waiting" or not bool(Hall.state().get("summon_immediately",true)):pending_summon=""
-		elif can_open():
+		elif can_open() and not (voice.has_method("picking") and voice.picking(pending_summon)):
 			var id:=pending_summon;pending_summon=""
 			open_audience(id)
 	_ceremony_clock-=delta

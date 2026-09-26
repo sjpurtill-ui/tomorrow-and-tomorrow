@@ -1,0 +1,14 @@
+{
+  "id": "mixed_constitution_checks",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-442f43a3-b112-4974-8534-e35410a7f263.png",
+  "source_file": "exec-442f43a3-b112-4974-8534-e35410a7f263.png",
+  "creative_brief": "Magistrates, a council of elders and the assemblies each hold part of the power, and each can check the others. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/mixed_constitution_checks-v1.png",
+  "sha256": "c89dddb279e393312a93bd2e20bf9b43a13b72bbf71692530cab9f1eef261b9e",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

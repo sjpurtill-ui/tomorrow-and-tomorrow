@@ -1,0 +1,14 @@
+{
+  "id": "plant_habitat_treatise",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4bc33012-71f0-4715-bb56-f852830e6b86.png",
+  "source_file": "exec-4bc33012-71f0-4715-bb56-f852830e6b86.png",
+  "creative_brief": "A scholar sets down which plants grow on which soil, slope and water, and how each fares when moved. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/plant_habitat_treatise-v1.png",
+  "sha256": "5babe2d8a257230a842bc71c52a46cdd3d77466e3b200d6400e41e8a0ac93c3d",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}

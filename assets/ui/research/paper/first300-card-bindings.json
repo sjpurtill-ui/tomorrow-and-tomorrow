@@ -96,7 +96,6 @@
   "wooden_log_conduits": "res://assets/ui/research/paper/first300-cards/wooden_log_conduits.tres",
   "gravity_conduit_grade_control": "res://assets/ui/research/paper/first300-cards/gravity_conduit_grade_control.tres",
   "masonry_arch_centering": "res://assets/ui/research/paper/first300-cards/masonry_arch_centering.tres",
-  "voussoir_arch_assembly": "res://assets/ui/research/paper/first300-cards/voussoir_arch_assembly.tres",
   "siege_engineering": "res://assets/ui/research/paper/first300-cards/siege_engineering.tres",
   "siege_crew_rehearsals": "res://assets/ui/research/paper/first300-cards/siege_crew_rehearsals.tres",
   "range_estimation_drill": "res://assets/ui/research/paper/first300-cards/range_estimation_drill.tres",
