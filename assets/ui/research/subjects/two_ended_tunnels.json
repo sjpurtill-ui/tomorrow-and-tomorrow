@@ -1,0 +1,14 @@
+{
+  "id": "two_ended_tunnels",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e47f587a-19b9-45d8-96b8-4d35ce68316e.png",
+  "source_file": "exec-e47f587a-19b9-45d8-96b8-4d35ce68316e.png",
+  "creative_brief": "Two crews dig from opposite mountain faces to meet at center.",
+  "medium": "Matte architectural casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/two_ended_tunnels-v1.png",
+  "sha256": "f7c221a93c9381d6572cb2de284a6b8069462a16b84c873b922168e8ba245f1c",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; repetitive, anachronistic, and pseudo-script variants rejected."
+}

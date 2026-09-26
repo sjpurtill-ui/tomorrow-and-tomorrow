@@ -1,0 +1,14 @@
+{
+  "id": "iron_spear_levy",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b5272f04-fe8a-4776-bcd9-3eea3dfbd483.png",
+  "source_file": "exec-b5272f04-fe8a-4776-bcd9-3eea3dfbd483.png",
+  "creative_brief": "Village smith mounts iron spearheads for citizen farmers.",
+  "medium": "Layered hand-cut woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/iron_spear_levy-v1.png",
+  "sha256": "a20403aeaf7f68110bb035b0088c3f41e39c3296ead6ede86b697f12a1cb17eb",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; repetitive, anachronistic, and pseudo-script variants rejected."
+}

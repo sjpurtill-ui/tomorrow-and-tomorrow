@@ -1,0 +1,14 @@
+{
+  "id": "shrine_festival_games",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8d7c957c-0c53-4d8b-a79e-ba8158c237be.png",
+  "source_file": "exec-8d7c957c-0c53-4d8b-a79e-ba8158c237be.png",
+  "creative_brief": "Towns gather in truce for shared shrine athletics.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/shrine_festival_games-v1.png",
+  "sha256": "b6b194cadd43dda103ea00c92e756aaba8bf21b15ec09e81c1728f72ccd98e14",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; repetitive, anachronistic, and pseudo-script variants rejected."
+}

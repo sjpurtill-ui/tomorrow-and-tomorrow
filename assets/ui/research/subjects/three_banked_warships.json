@@ -1,0 +1,14 @@
+{
+  "id": "three_banked_warships",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a33b0bfe-558d-44ce-9512-a16fd1f2b6e8.png",
+  "source_file": "exec-a33b0bfe-558d-44ce-9512-a16fd1f2b6e8.png",
+  "creative_brief": "Three tiers of oarsmen propel a ram-equipped galley.",
+  "medium": "Layered hand-cut woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/three_banked_warships-v1.png",
+  "sha256": "e3a67baadc9003d7739ae698ab0c166254d237c449fe082a05e069f28da608e3",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; repetitive, anachronistic, and pseudo-script variants rejected."
+}

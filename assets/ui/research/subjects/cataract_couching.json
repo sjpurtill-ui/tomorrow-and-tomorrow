@@ -1,0 +1,14 @@
+{
+  "id": "cataract_couching",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a9cb7503-b784-4306-8da4-ad1fb4801220.png",
+  "source_file": "exec-a9cb7503-b784-4306-8da4-ad1fb4801220.png",
+  "creative_brief": "Healer carefully couches a cataract in an adult patient's eye.",
+  "medium": "Transparent watercolor with restrained ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/cataract_couching-v1.png",
+  "sha256": "d8295169624ffc0db947b8475c40e8f4035932ea93a94998a9da06ffabf713da",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; repetitive, anachronistic, and pseudo-script variants rejected."
+}

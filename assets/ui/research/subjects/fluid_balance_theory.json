@@ -1,0 +1,14 @@
+{
+  "id": "fluid_balance_theory",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5be2e778-1919-4bc7-a468-923c41200cc7.png",
+  "source_file": "exec-5be2e778-1919-4bc7-a468-923c41200cc7.png",
+  "creative_brief": "Healers compare four remedies when discussing bodily balance.",
+  "medium": "Transparent watercolor with restrained ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/fluid_balance_theory-v1.png",
+  "sha256": "71fdbcfba719d25d3235746708787e6f541c43be323710c39ef6e83e2f3c717d",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; repetitive, anachronistic, and pseudo-script variants rejected."
+}
