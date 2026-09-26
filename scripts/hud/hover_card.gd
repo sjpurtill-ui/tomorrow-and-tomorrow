@@ -128,7 +128,13 @@ func _rebuild()->void:
 		card.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
 		card.size=Vector2(WIDTH,card.get_combined_minimum_size().y)
 	card.position=place(anchor.get_global_rect(),card.size,get_viewport().get_visible_rect().size)
+	var opening:=not card.visible
 	card.visible=true
+	# First appearance: a FAST fade with a 4 px drop into place. Live refreshes
+	# of an open card do not replay it.
+	if opening:
+		var motion_script:=preload("res://scripts/hud/motion.gd")
+		motion_script.rise_in(card,0.12,-4.0)
 
 ## Under the anchor, left edges aligned; flipped to right-align near the right
 ## edge, above the anchor when there is no room below, then clamped on screen.

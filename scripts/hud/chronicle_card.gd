@@ -18,7 +18,11 @@ const Art:=preload("res://scripts/hud/research_visuals.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const UI_FONT:=preload("res://assets/fonts/battle/Barlow-Medium.ttf")
 const HOLD_SECONDS:=9.0
-const FADE_SECONDS:=0.45
+const Motion:=preload("res://scripts/hud/motion.gd")
+## Notices ease in over BASE (200 ms), sliding from the right; the gold kicker
+## follows FAST (120 ms) later. They ease out over the same BASE.
+const FADE_SECONDS:=Motion.BASE
+const SLIDE:=24.0
 const CARD_WIDTH:=430.0
 const TOP:=70.0
 const ACCENTS:={"discovery":Color("9db9d7"),"birth":Color("e0b88a"),"death":Color("b9ada0"),"contact":Color("d8a56a"),"settlement":Color("c7b27a"),"founding":Color("f0b25a"),"ceremony":Color("e8c35a"),"milestone":Color("f0c96a"),"war":Color("d0735f"),"omen":Color("a9b7e0"),"court":Color("e1b765")}
@@ -35,6 +39,8 @@ var caption:Label
 var action_button:Button
 var hold:=0.0
 var fade:=0.0
+## 0 hidden .. 1 fully shown; eased into alpha and slide.
+var appear:=0.0
 var showing:=false
 var player:AudioStreamPlayer
 ## True while an open dock sheet leaves no room: the card is held back.
@@ -145,13 +151,26 @@ func _process(delta:float)->void:
 		return
 	panel.visible=true
 	var hovered:=panel.get_global_rect().has_point(panel.get_global_mouse_position())
+	var step:=delta/Motion.duration(FADE_SECONDS)
 	if fade>=0.0:
-		panel.modulate.a=minf(1.0,panel.modulate.a+delta/FADE_SECONDS)
+		appear=minf(1.0+Motion.FAST/FADE_SECONDS,appear+step)
 		if not hovered:hold-=delta
 		if hold<=0.0:fade=-1.0
 	else:
-		panel.modulate.a=maxf(0.0,panel.modulate.a-delta/FADE_SECONDS)
-		if panel.modulate.a<=0.0:_next()
+		appear=minf(appear,1.0)
+		appear=maxf(0.0,appear-step)
+	_apply_appear()
+	if fade<0.0 and appear<=0.0:_next()
+
+
+func _apply_appear()->void:
+	# Cubic ease-out on the way in, ease-in on the way out.
+	var t:=clampf(appear,0.0,1.0)
+	var eased:=1.0-pow(1.0-t,3.0) if fade>=0.0 else t*t*t
+	panel.modulate.a=eased
+	panel.position.x+=roundf((1.0-eased)*SLIDE)
+	var kicker:=clampf(appear-Motion.FAST/FADE_SECONDS,0.0,1.0) if fade>=0.0 else t
+	eyebrow.modulate.a=1.0-pow(1.0-kicker,3.0)
 
 
 func _next()->void:
@@ -159,8 +178,8 @@ func _next()->void:
 		showing=false;current={};panel.visible=false;return
 	current=queue.pop_front()
 	_render(current)
-	showing=true;hold=HOLD_SECONDS;fade=1.0
-	panel.modulate.a=0.0;panel.visible=true
+	showing=true;hold=HOLD_SECONDS;fade=1.0;appear=0.0
+	panel.modulate.a=0.0;eyebrow.modulate.a=0.0;panel.visible=true
 	call_deferred("layout")
 	_sting()
 

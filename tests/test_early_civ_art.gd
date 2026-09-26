@@ -73,10 +73,12 @@ func test_all_scene_crops_stay_within_source_and_keep_aspect()->void:
 			assert_bool(image.region.position.x>=0 and image.region.position.y>=0).is_true()
 			assert_bool(image.region.end.x<=image.atlas.get_width() and image.region.end.y<=image.atlas.get_height()).is_true()
 			assert_float(image.region.size.x/image.region.size.y).is_equal_approx(float(image.atlas.get_width())/cols/(float(image.atlas.get_height())/rows),.001)
-func test_character_widget_contains_action_instead_of_stretching()->void:
+func test_character_widget_fills_its_frame_instead_of_stretching()->void:
+	# The painting keeps its aspect and fills the frame (cover): no stretching,
+	# and no blank band above or below it (ART_DIRECTION problem 7).
 	var saved:=GameState.elapsed_days;GameState.elapsed_days=365
 	var image:=Person.picture({"person_id":3,"name":"Known steward"},150,150)
-	assert_int(image.stretch_mode).is_equal(TextureRect.STRETCH_KEEP_ASPECT_CENTERED)
+	assert_int(image.stretch_mode).is_equal(TextureRect.STRETCH_KEEP_ASPECT_COVERED)
 	assert_int(int(image.get_meta("person_id"))).is_equal(3)
 	image.free();GameState.elapsed_days=saved
 
@@ -181,3 +183,18 @@ func test_saved_family_name_prevents_recasting_when_seed_or_library_order_change
 	assert_int(Art.profile(person)).is_equal(Art.PROFILES.find("windseam"))
 	var restored:Dictionary=JSON.parse_string(JSON.stringify(person));restored.appearance_world_seed=999
 	assert_int(Art.profile(restored)).is_equal(Art.profile(person))
+func test_people_shown_together_never_share_a_painting()->void:
+	# Six faces that would all draw the same cell get six different paintings,
+	# and the same person keeps the same slot within one screen.
+	var saved:=GameState.elapsed_days;GameState.elapsed_days=365
+	var people:Array=[]
+	for i in 6:people.append({"name":"Face %d" % i,"person_id":0,"portrait_index":0})
+	var slots:=Person.distinct_slots(people)
+	var seen:Dictionary={}
+	for slot:Array in slots:seen[str(slot)]=true
+	assert_int(seen.size()).is_equal(6)
+	var registry:Dictionary={}
+	var first:=Person.claim(registry,people[0])
+	assert_array(Person.claim(registry,people[1])).is_not_equal(first)
+	assert_array(Person.claim(registry,people[0])).is_equal(first)
+	GameState.elapsed_days=saved
