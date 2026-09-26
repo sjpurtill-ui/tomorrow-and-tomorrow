@@ -33,6 +33,40 @@ const WINDOW_END_YEAR:=600.0
 ## Dated entries outside the registry open at this fraction of their era year,
 ## the same relative margin the design bands allow (roughly -10%).
 const ERA_BAND_FRACTION:=0.9
+## A question's age is a soft gate, not a wall. Each world shifts every
+## question's opening year by up to OPEN_JITTER of it (at most OPEN_JITTER_MAX
+## years), so questions dated to the same round year open over several years
+## instead of in one batch. A society ahead of the calendar may start a
+## question up to EARLY_LEAD of its opening year early (at least EARLY_LEAD_MIN
+## years); its cost doubles EARLY_DOUBLINGS times across that lead, so early
+## work is slow and pacing still centres on the design year. Without the lead,
+## a people that answered every question of its age sat idle until the next
+## round year, then took up a dozen at once.
+const OPEN_JITTER:=0.10
+const OPEN_JITTER_MAX:=5.0
+const EARLY_LEAD:=0.15
+const EARLY_LEAD_MIN:=2.0
+## The lead never exceeds this many game years: later game years are compressed
+## history, so a fractional lead would open late-era questions centuries early.
+const EARLY_LEAD_MAX:=8.0
+const EARLY_DOUBLINGS:=2.0
+
+## This world's opening year for a question authored at `earliest` (`draw` is
+## the world's stable 0..1 draw for it).
+static func open_year(earliest:float,draw:float)->float:
+	if earliest<=0.0: return 0.0
+	return maxf(0.0,earliest+(draw*2.0-1.0)*minf(OPEN_JITTER_MAX,earliest*OPEN_JITTER))
+
+## Years before its opening year that a question may be started.
+static func early_lead(open:float)->float:
+	return 0.0 if open<=0.0 else clampf(open*EARLY_LEAD,EARLY_LEAD_MIN,EARLY_LEAD_MAX)
+
+## Cost multiplier for starting a question `open - year` years early (1 on time).
+static func early_factor(open:float,year:float)->float:
+	var ahead:=open-year
+	if ahead<=0.0: return 1.0
+	return pow(2.0,EARLY_DOUBLINGS*minf(1.0,ahead/early_lead(open)))
+
 ## Rivals see materials as landscape potential; the same floor their research
 ## already uses for resource requirements.
 const RIVAL_RESOURCE_FLOOR:=0.16

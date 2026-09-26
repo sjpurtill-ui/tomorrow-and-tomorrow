@@ -110,11 +110,15 @@ func test_bookbinding_waits_for_its_era_even_with_cordage()->void:
 	var opens:=DiscoverySystem.research_600_earliest_year(book)
 	assert_float(opens).is_equal(float(Catalog.item("bookbinding_assemblies").min_year))
 	assert_float(opens).is_greater(1000.0)
-	for year:float in [16.0,75.0,180.0,600.0,opens-1.0]:
+	# A soft gate: startable (slowly) a little before this world's opening year.
+	var start:=DiscoverySystem.research_start_year(book)
+	assert_float(start).is_less(DiscoverySystem.research_open_year(book))
+	assert_float(start).is_greater(opens*0.75)
+	for year:float in [16.0,75.0,180.0,600.0,start-1.0]:
 		GameState.elapsed_days=_day(year)
 		assert_bool(DiscoverySystem._discovery_is_eligible(book,_day(year))).override_failure_message("year %d" % int(year)).is_false()
-	GameState.elapsed_days=_day(opens)
-	assert_bool(DiscoverySystem._discovery_is_eligible(book,_day(opens))).is_true()
+	GameState.elapsed_days=_day(start)
+	assert_bool(DiscoverySystem._discovery_is_eligible(book,_day(start))).is_true()
 
 func test_items_outside_the_registry_hold_to_their_era_or_the_window_end()->void:
 	for entry:Dictionary in DiscoverySystem.technology_catalog:
@@ -218,15 +222,35 @@ func test_every_design_item_is_reachable_by_year_600_and_the_live_graph_validate
 	graph=dormant.factor_common(graph,DiscoverySystem.technology_catalog)
 	assert_array(R.validate(graph,dormant.pending(graph))).is_empty()
 
+func test_ages_open_over_several_years_and_early_work_costs_more()->void:
+	# Questions authored for the same round year open over several years in a world.
+	var fifty:Array[float]=[]
+	for id:String in Catalog.ids():
+		if is_equal_approx(float(Catalog.item(id).min_year),50.0):fifty.append(DiscoverySystem.research_open_year(_entry(id)))
+	assert_int(fifty.size()).is_greater(5)
+	fifty.sort()
+	assert_float(fifty[-1]-fifty[0]).is_greater(3.0)
+	for year:float in fifty:assert_float(year).is_between(45.0,55.0)
+	# Stable for the world: a reload never rerolls it.
+	var id:=String(Catalog.ids()[0]);var first:=DiscoverySystem.research_open_year(_entry(id))
+	DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
+	assert_float(DiscoverySystem.research_open_year(_entry(id))).is_equal(first)
+	# Cost doubles EARLY_DOUBLINGS times across the lead and is normal once the age has come.
+	assert_float(Catalog.early_factor(50.0,50.0)).is_equal(1.0)
+	assert_float(Catalog.early_factor(50.0,60.0)).is_equal(1.0)
+	assert_float(Catalog.early_factor(50.0,50.0-Catalog.early_lead(50.0))).is_equal_approx(pow(2.0,Catalog.EARLY_DOUBLINGS),0.0001)
+	assert_float(Catalog.early_factor(50.0,48.0)).is_between(1.01,pow(2.0,Catalog.EARLY_DOUBLINGS))
+
 func test_first_century_probe_opens_nothing_before_its_band()->void:
 	var step:=0.5
 	var first:=Probe.earliest_years(DiscoverySystem,100.0,step)
 	var early:Array[String]=[]
 	for id:String in first:
 		var year:=float(first[id])
-		var gate:=DiscoverySystem.research_600_earliest_year(_entry(id))
+		var gate:=DiscoverySystem.research_start_year(_entry(id))
 		if year<gate-0.000001:early.append("%s@%.1f<gate %.1f" % [id,year,gate])
-		if Catalog.has(id) and year+step<float(Catalog.item(id).band_low):early.append("%s@%.1f<band %.1f" % [id,year,float(Catalog.item(id).band_low)])
+		# Started early only within the soft lead (jitter plus early start, at most about a quarter).
+		if Catalog.has(id) and year+step<float(Catalog.item(id).band_low)*0.75-Catalog.EARLY_LEAD_MIN:early.append("%s@%.1f<band %.1f" % [id,year,float(Catalog.item(id).band_low)])
 	assert_array(early).is_empty()
 	# The gate does not starve the early game: every design item whose band
 	# opens in the first century is reachable within it.

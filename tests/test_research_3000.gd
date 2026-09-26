@@ -57,13 +57,15 @@ func test_stored_program_computer_is_locked_before_its_window()->void:
 	var item:=Catalog.item("stored_program_computer")
 	assert_array(item.requires_all).contains(["triode_valves","binary_adders","relay_registers","computability_theory"])
 	var opens:=DiscoverySystem.research_600_earliest_year(computer)
+	# Soft gate: this world's start year, a few years around the authored band.
+	var start:=DiscoverySystem.research_start_year(computer)
 	assert_float(opens).is_equal(float(item.band_low))
 	assert_float(opens).is_greater(2750.0)
 	GameState.known_discoveries.assign(item.requires_all)
-	for year:float in [1200.0,2400.0,2700.0,opens-1.0]:
+	for year:float in [1200.0,2400.0,2700.0,start-1.0]:
 		assert_bool(DiscoverySystem.research_600_open(computer,_society(year))).override_failure_message("year %d" % int(year)).is_false()
 		assert_bool(_eligible_at(computer,year)).override_failure_message("year %d" % int(year)).is_false()
-	assert_bool(DiscoverySystem.research_600_open(computer,_society(opens))).is_true()
+	assert_bool(DiscoverySystem.research_600_open(computer,_society(start))).is_true()
 	# Weather forecasting on electronic machines needs the computer itself.
 	assert_array(Catalog.item("numerical_weather_prediction").requires_all).contains(["stored_program_computer"])
 	assert_array(Catalog.item("numerical_weather_prediction").requires_all).not_contains(["binary_adders"])

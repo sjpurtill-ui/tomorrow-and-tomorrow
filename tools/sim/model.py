@@ -96,6 +96,8 @@ PARALLEL = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, 
             for k in ("PARALLEL_POPULATION_REF", "PARALLEL_PER_DECADE", "PARALLEL_LITERACY")}
 # Research600.stale_factor (research_3000): superseded registry items.
 STALE = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True)) for k in ("STALE_GRACE", "STALE_DOUBLING", "STALE_ABANDON", "DEAD_END_PENALTY", "DEAD_END_VIABLE")}
+# Research600 soft era gate: per-world opening years and early start at a cost.
+EARLY = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True)) for k in ("OPEN_JITTER", "OPEN_JITTER_MAX", "EARLY_LEAD", "EARLY_LEAD_MIN", "EARLY_LEAD_MAX", "EARLY_DOUBLINGS")}
 # FoodSystem technique levers and AgronomyKnowledge.factors (engine features the
 # 0-600 surrogate left out; they matter once fertilizer and breeding arrive).
 FOOD_TECHNIQUES = g.const("scripts/food_system.gd", "TECHNIQUES", default={}, optional=True)
@@ -218,6 +220,13 @@ class Surrogate:
             dead = cat.registry & (cat.relevance_year >= 0) & (cat.relevance_year <= cat.design_year + 0.5) & ~cat.key_threshold
             draw = np.random.default_rng((seed * 2654435761 + 97) & 0xFFFFFFFF).random(n)
             self.offered = ~dead | (draw < self.stale_k["DEAD_END_VIABLE"])
+        # Research600.open_year / early_lead: this world's opening years and the
+        # earliest start (a seeded draw per question, as dead ends use).
+        earliest = cat.earliest
+        open_draw = np.random.default_rng((seed * 2654435761 + 131) & 0xFFFFFFFF).random(n)
+        self.open_year = np.where(earliest > 0, np.maximum(0.0, earliest + (open_draw * 2.0 - 1.0) * np.minimum(EARLY["OPEN_JITTER_MAX"], earliest * EARLY["OPEN_JITTER"])), 0.0)
+        self.early_lead = np.where(self.open_year > 0, np.clip(self.open_year * EARLY["EARLY_LEAD"], EARLY["EARLY_LEAD_MIN"], EARLY["EARLY_LEAD_MAX"]), 0.0)
+        self.start_year = self.open_year - self.early_lead
         if line_scale:
             scale = np.array([float(line_scale.get(line, 1.0)) for line in gd.LINES])[cat.line]
             self.E = cat.E * scale[:, None]
@@ -1209,7 +1218,7 @@ class Surrogate:
         staffing = clamp(min(researchers_total / 6.0, researchers_total / pop / 0.03), 0.0, 1.0)
         rate = (0.45 + 0.55 * staffing) * lerp(0.85, 1.2, self.education) * lerp(0.7, 1.0, self.food_security)
         self.scholarship += rate * days / YEAR
-        open_mask = self.ready & self.cond_ok & (cat.earliest <= year) & cat.channel_staffable[cat.channel] & self.offered
+        open_mask = self.ready & self.cond_ok & (self.start_year <= year) & cat.channel_staffable[cat.channel] & self.offered
         if self.stale_k.get("STALE_ABANDON"):
             # Research600.pursued (research_3000): superseded practices are abandoned.
             k = self.stale_k
@@ -1304,7 +1313,7 @@ class Surrogate:
                     continue
             if cand is not None and (item < 0 or not open_mask[item]):
                 era_cost = np.maximum(0.0, cat.era[cand] - self.scholarship - self.tune_window) / self.tune_doubling
-                score = self.affinity[cand] + self.signal_score[cand] + weights[ch] * 8.0 - era_cost * 20.0 + self.targets[cand] * 1e5
+                score = self.affinity[cand] + self.signal_score[cand] + weights[ch] * 8.0 - (era_cost + self._early_doublings(cand, year)) * 20.0 + self.targets[cand] * 1e5
                 if self.stale_k.get("STALE_DOUBLING"):
                     # DiscoverySystem._candidate_score: superseded practices last (research_3000).
                     rel = self.relevance[cand]
@@ -1332,7 +1341,7 @@ class Surrogate:
                 if known_ext is None:
                     known_ext = np.concatenate([self.known, [False, False]])
                 precedent = min(c.precedent_cap, 1.0 + c.precedent_bonus * float(known_ext[cat.precedents[item]].sum()))
-            difficulty = self.cost_draw[item] * 2.0 ** min(30.0, max(0.0, cat.era[item] - self.scholarship - self.tune_window) / self.tune_doubling) / precedent
+            difficulty = self.cost_draw[item] * 2.0 ** (min(30.0, max(0.0, cat.era[item] - self.scholarship - self.tune_window) / self.tune_doubling) + float(self._early_doublings(item, year))) / precedent
             if self.stale_k.get("STALE_DOUBLING") and self.relevance[item] >= 0:
                 # Research600.stale_factor (research_3000)
                 difficulty *= 2.0 ** min(20.0, max(0.0, self.ceiling_era - self.relevance[item] - self.stale_k["STALE_GRACE"]) / self.stale_k["STALE_DOUBLING"])
@@ -1347,6 +1356,11 @@ class Surrogate:
             self._learn(item)
         return found
 
+    def _early_doublings(self, idx, year: float):
+        """Research600.early_factor as doublings: 0 once a question's age has come."""
+        lead = np.maximum(self.early_lead[idx], 1e-9)
+        return EARLY["EARLY_DOUBLINGS"] * np.clip((self.open_year[idx] - year) / lead, 0.0, 1.0)
+
     def _foundation_ids(self, line: int, year: float, open_mask: np.ndarray) -> list:
         """Open prerequisites (down to researchable ones, depth <= 8) of the line's
         era-open unknown questions, earliest design day first."""
@@ -1357,7 +1371,7 @@ class Surrogate:
         cat = self.cat
         n = cat.n
         frontier = []
-        pending = (cat.line == line) & ~self.known & (cat.earliest <= year) & self.cond_ok
+        pending = (cat.line == line) & ~self.known & (self.start_year <= year) & self.cond_ok
         if self.stale_k.get("STALE_ABANDON"):
             # Research600.pursued: only questions still pursued ask for foundations (research_3000).
             k = self.stale_k
@@ -1372,7 +1386,7 @@ class Surrogate:
                 if j in visited or j >= n or self.known[j]:
                     continue
                 visited.add(j)
-                if not (cat.earliest[j] <= year and self.cond_ok[j]):
+                if not (self.start_year[j] <= year and self.cond_ok[j]):
                     continue
                 if open_mask[j]:
                     found[j] = cat.era[j]

@@ -49,6 +49,7 @@ func reset_for_new_world()->void:
 	catalog_by_id.clear()
 	catalog_by_channel.clear()
 	era_by_id.clear()
+	_open_year_cache.clear()
 	_candidate_index=preload("res://scripts/research_candidate_index.gd").new()
 	latest_context.clear()
 	established_threads_cache.clear()
@@ -105,6 +106,7 @@ func initialize() -> void:
 	catalog_by_id.clear()
 	catalog_by_channel.clear()
 	era_by_id.clear()
+	_open_year_cache.clear()
 	_candidate_index=preload("res://scripts/research_candidate_index.gd").new()
 	rng.seed = WorldSimulation.state.world_seed ^ 0x6c8e9cf5
 	catalog.append_array(ResourceKnowledgeCatalog.entries())
@@ -399,7 +401,7 @@ func _investigation_bottleneck(discovery:Dictionary,allocation:int,leader_factor
 	var research_workforce:=float(research_capacity.get("researchers",0.0))
 	if research_workforce<1.0: return "RESEARCH WORKFORCE — this emphasis receives less than one full-time-equivalent researcher"
 	if material_evidence<0.78: return "MATERIAL BASIS — survey or work the required resource"
-	if era_cost_multiplier(discovery)>=2.0: return "AHEAD OF ITS AGE — broader scholarship must mature before this question can be answered quickly"
+	if era_cost_multiplier(discovery)*research_early_factor(discovery)>=2.0: return "AHEAD OF ITS AGE — broader scholarship must mature before this question can be answered quickly"
 	if leader_factor<0.72: return "LEADERSHIP — the responsible office is weak or vacant"
 	if float(research_capacity.get("support_multiplier",1.0))<0.82: return "RESEARCH SUPPORT — food, tools, records, or administration are constraining the program"
 	if progress<0.25: return "EARLY EVIDENCE — more repeated cases are required"
@@ -596,7 +598,7 @@ func _candidate_score(discovery:Dictionary)->float:
 	# a modest continuity advantage, but other routes can still overtake it.
 	score+=float(discovery.get("stage_index",0))*3.5
 	# Work far beyond current scholarship is slow; lines prefer questions of their age.
-	score-=log(era_cost_multiplier(discovery))/log(2.0)*20.0
+	score-=log(era_cost_multiplier(discovery)*research_early_factor(discovery))/log(2.0)*20.0
 	# research_3000: and they take up the current frontier before older leftovers.
 	score-=Research600.staleness(id,society_model.ceiling_era)*20.0
 	if Research600.dead_end(id): score-=Research600.DEAD_END_PENALTY
@@ -1134,7 +1136,7 @@ func research_difficulty(discovery:Dictionary,civilization_seed:int,level:float=
 	# research_3000: the society's own superseded practices are slower to take up.
 	var stale:=Research600.stale_factor(String(discovery.get("id","")),society_model.ceiling_era) if known==null else 1.0
 	if known==null: known=WorldSimulation.state.known_discoveries
-	return (0.85+_research_draw(String(discovery.id),civilization_seed,"cost")*0.30)*era_cost_multiplier(discovery,level)/Research600.precedent_factor(String(discovery.id),known)*stale
+	return (0.85+_research_draw(String(discovery.id),civilization_seed,"cost")*0.30)*era_cost_multiplier(discovery,level)/Research600.precedent_factor(String(discovery.id),known)*stale*research_early_factor(discovery)
 
 
 ## Game-year equivalent of a discovery's historical period (TechnologyEras).
@@ -1395,12 +1397,36 @@ func research_600_earliest_year(discovery:Dictionary)->float:
 	return float(discovery.get("earliest_year",0.0))
 
 
+## This world's opening year for `discovery` (its authored age, shifted per world).
+func research_open_year(discovery:Dictionary)->float:
+	var id:=String(discovery.get("id",""))
+	var seed_value:=int(WorldSimulation.state.world_seed)
+	if _open_year_seed!=seed_value: _open_year_cache.clear();_open_year_seed=seed_value
+	if not _open_year_cache.has(id): _open_year_cache[id]=Research600.open_year(float(discovery.get("earliest_year",0.0)),_research_draw(id,seed_value,"open_year"))
+	return float(_open_year_cache[id])
+
+var _open_year_cache:Dictionary={}
+var _open_year_seed:=0
+
+
+## Earliest game year at which `discovery` may be started (ahead of its age, slowly).
+func research_start_year(discovery:Dictionary)->float:
+	var open:=research_open_year(discovery)
+	return open-Research600.early_lead(open)
+
+
+## Cost multiplier for working on `discovery` before its age (1 once it has come).
+func research_early_factor(discovery:Dictionary,year:float=NAN)->float:
+	if is_nan(year): year=float(WorldSimulation.state.elapsed_days)/365.0
+	return Research600.early_factor(research_open_year(discovery),year)
+
+
 ## True when the calendar has reached the entry's age and its design conditions
 ## hold for `society` (default: the acting player-side society). `day` (>=0)
 ## evaluates the calendar at that simulated day instead of today.
 func research_600_open(discovery:Dictionary,society:Dictionary={},day:int=-1)->bool:
 	var year:=float(day)/365.0 if day>=0 else float(society.get("year",float(WorldSimulation.state.elapsed_days)/365.0))
-	if year<float(discovery.get("earliest_year",0.0)): return false
+	if year<research_start_year(discovery): return false
 	if (discovery.get("conditions",{}) as Dictionary).is_empty(): return true
 	return Research600.conditions_met(String(discovery.get("id","")),society if not society.is_empty() else research_600_player_society())
 
@@ -1409,7 +1435,7 @@ func research_600_open(discovery:Dictionary,society:Dictionary={},day:int=-1)->b
 func research_600_missing(discovery:Dictionary,society:Dictionary={})->Array[String]:
 	var reasons:Array[String]=[]
 	var year:=float(society.get("year",float(WorldSimulation.state.elapsed_days)/365.0))
-	var earliest:=float(discovery.get("earliest_year",0.0))
+	var earliest:=research_start_year(discovery)
 	if year<earliest: reasons.append("Its age has not come: not before year %d" % int(ceil(earliest)))
 	if not (discovery.get("conditions",{}) as Dictionary).is_empty():
 		reasons.append_array(Research600.unmet_conditions(String(discovery.get("id","")),society if not society.is_empty() else research_600_player_society()))

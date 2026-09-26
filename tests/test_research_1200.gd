@@ -37,16 +37,18 @@ func test_glass_blowing_cannot_unlock_before_its_era_window()->void:
 	assert_str(Catalog.block_of("glass_blowing")).is_equal("y600_1200")
 	assert_array(glass.requires_all).is_equal(["mandrel_wound_beads","decolorized_clear_glass"])
 	var opens:=DiscoverySystem.research_600_earliest_year(glass)
+	# Soft gate: this world's start year, a few years around the authored band.
+	var start:=DiscoverySystem.research_start_year(glass)
 	assert_float(opens).is_equal(float(Catalog.item("glass_blowing").band_low))
 	assert_float(opens).is_greater(900.0)
 	# Every foundation known still does not open it early.
 	GameState.known_discoveries.assign(["mandrel_wound_beads","decolorized_clear_glass"])
 	assert_bool(P.ready(glass,_day(700))).is_true()
-	for year:float in [100.0,600.0,700.0,opens-1.0]:
+	for year:float in [100.0,600.0,700.0,start-1.0]:
 		assert_bool(DiscoverySystem.research_600_open(glass,_society(year))).override_failure_message("year %d" % int(year)).is_false()
 		assert_bool(_eligible_at(glass,year)).override_failure_message("year %d" % int(year)).is_false()
-	assert_bool(DiscoverySystem.research_600_open(glass,_society(opens))).is_true()
-	assert_bool(_eligible_at(glass,opens)).is_true()
+	assert_bool(DiscoverySystem.research_600_open(glass,_society(start))).is_true()
+	assert_bool(_eligible_at(glass,start)).is_true()
 
 func test_bloomery_smelting_is_not_available_at_year_100()->void:
 	var bloomery:=_entry("bloomery_smelting")
