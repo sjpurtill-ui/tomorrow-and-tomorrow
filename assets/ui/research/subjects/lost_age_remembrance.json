@@ -1,0 +1,14 @@
+{
+  "id": "lost_age_remembrance",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d24c8136-0b26-4975-a65f-43fdd12e1bbb.png",
+  "source_file": "exec-d24c8136-0b26-4975-a65f-43fdd12e1bbb.png",
+  "creative_brief": "Singer recounts fallen palaces and past heroes before a listening community.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/lost_age_remembrance-v1.png",
+  "sha256": "f79631f7ddbb669f41b8d26f4f9cf0aa6d999b5992782217d7ea6ee81da0aa98",
+  "mode": "built-in image_gen / new image or directed edit",
+  "review": "Selected after wide-banner crop review on 2026-09-26; rejected more realistic and anachronistic variants."
+}

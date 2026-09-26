@@ -1,0 +1,14 @@
+{
+  "id": "forge_crew_roles",
+  "line": "labor",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d365c27e-fa47-45a3-bb9d-941dea2cdf7a.png",
+  "source_file": "exec-d365c27e-fa47-45a3-bb9d-941dea2cdf7a.png",
+  "creative_brief": "Master holds tongs, striker hammers, apprentice works bellows.",
+  "medium": "Charcoal over ochre wash",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/forge_crew_roles-v1.png",
+  "sha256": "eab002e3a9e9e330502410172682eecd1b92490132e0fa3a18edc168523aa7a6",
+  "mode": "built-in image_gen / new image or directed edit",
+  "review": "Selected after wide-banner crop review on 2026-09-26; rejected more realistic and anachronistic variants."
+}

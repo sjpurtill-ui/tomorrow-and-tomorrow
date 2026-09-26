@@ -1,0 +1,14 @@
+{
+  "id": "incubation_shrines",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-00ac72a3-837e-4397-a466-1b892430710f.png",
+  "source_file": "exec-00ac72a3-837e-4397-a466-1b892430710f.png",
+  "creative_brief": "Sick adult rests at shrine while attendants offer spring water and care.",
+  "medium": "Transparent watercolor with restrained ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/incubation_shrines-v1.png",
+  "sha256": "ccf3fd5619ff50826f1e1b86c1192575065bad8cd0daaf7e2f907e51b422039b",
+  "mode": "built-in image_gen / new image or directed edit",
+  "review": "Selected after wide-banner crop review on 2026-09-26; rejected more realistic and anachronistic variants."
+}
