@@ -1,3 +1,11 @@
+## September 26 — Classical priority art, batch 2: INTEGRATED
+
+Worker `961d343e31678e619a288e3069e126c29fe7db04`, branch `codex/research-art-classical-02`, base `3a98923a`. Adds 22 subject paintings, sidecars and manifest entries, with selected sources/review sheets in `art_source/research-classical-02/README.md`. Midwifery Manuals uses its registry direction's Demography medium. No earlier assignment masks these subjects; no lookup changes were needed. All previously approved deliveries remain included.
+
+Combined Godot 4.7.2 import completed without logged errors. Private-desktop GPU `tests/stylized_research_art_probe.tscn -- --classical-02` passes 22 actual catalogue IDs, manifest precedence, distinct loaded textures/provenance hashes, hidden-discovery gating and crop bounds. Reviewed the real shared-renderer capture at 1440x1720. Evidence in `C:/Users/sjpur/tt-integrate-stylized-art/artifacts/classical02-runtime.log` and `classical-02-research-in-game-crops.png`.
+
+No simulation/save changes or generated import churn committed; unrelated historical suites and full campaign play were not repeated for this asset delivery. No active canonical player was found during validation, and no player/editor was stopped or restarted. This is the second 22-painting Classical batch, not the complete research catalogue.
+
 ## September 26 — Classical priority art, batch 1: INTEGRATED
 
 Worker `5fd38e6067eb0ac705665a8b15aef3182bc90915`, branch `codex/research-art-classical-01`, base `5732aa0f`, merged without conflicts with current main `c3d85a83` as `301ffdb7`. Adds 22 distinct subject paintings and provenance/manifest entries. Selected source and crop sheets: `art_source/research-classical-01/README.md`. Earlier approved batches remain included; rejected realistic variants were not installed.
