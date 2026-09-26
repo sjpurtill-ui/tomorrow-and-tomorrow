@@ -69,6 +69,9 @@ func _fill()->void:
 			year=entry_year
 			var heading:=T.make_label("YEAR %d" % year,11,T.GOLD,0.12);list.add_child(heading)
 			var rule:=ColorRect.new();rule.color=T.BORDER_SOFT;rule.custom_minimum_size=Vector2(0,1);list.add_child(rule)
+		if String(entry.get("kind",""))=="annal":
+			_annal(entry)
+			continue
 		match String(entry.get("tier","notice")):
 			"moment":_moment(entry,voice)
 			"whisper":_whisper(entry)
@@ -111,6 +114,16 @@ func _notice(entry:Dictionary)->void:
 	head.add_child(T.make_label(Chronicle.date_label(int(entry.get("day",0))).get_slice(" · ",1),10,T.MUTED))
 	if String(entry.get("text",""))!="":
 		var text:=T.make_label(String(entry.text),12,T.TEXT_SOFT);text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;copy.add_child(text)
+
+
+## The year's own entry (chronicle_annals.gd): the name the people give the
+## year, then what changed. It heads its year, set apart by a gold rule.
+func _annal(entry:Dictionary)->void:
+	var row:=HBoxContainer.new();row.name="Annal";row.add_theme_constant_override("separation",12);list.add_child(row)
+	var rule:=ColorRect.new();rule.color=T.GOLD;rule.custom_minimum_size=Vector2(2,0);row.add_child(rule)
+	var copy:=VBoxContainer.new();copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;copy.add_theme_constant_override("separation",3);row.add_child(copy)
+	copy.add_child(_serif(String(entry.get("title","")),17,T.GOLD))
+	if String(entry.get("text",""))!="":copy.add_child(_serif(String(entry.text),13,T.BODY))
 
 
 func _whisper(entry:Dictionary)->void:
