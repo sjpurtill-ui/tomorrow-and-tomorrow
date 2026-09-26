@@ -174,11 +174,11 @@ const SITUATIONS:={
 	"blessing_rite":{"kind":"request","headline":"asks the god's blessing","mechanic":"envoy_requests.gd; offering from their ledger, reverence or dread"},
 	"war_supplies":{"kind":"request","headline":"asks for supplies for their war","mechanic":"envoy_requests.gd; goods to a belligerent, the enemy's grudge"},
 	"succession_backing":{"kind":"request","headline":"asks you to recognise their new ruler","mechanic":"envoy_requests.gd; leader trust, border concession or grudge"},
-	"hostage_exchange":{"kind":"request","headline":"proposes an exchange of pledges","mechanic":"envoy_requests.gd; hostage bond, border tension"},
+	"hostage_exchange":{"kind":"request","headline":"proposes an exchange of pledges","mechanic":"envoy_requests.gd; a hostage bond and border tension"},
 	"sacred_site":{"kind":"request","headline":"asks leave to visit a sacred place","mechanic":"envoy_requests.gd; pilgrimage bond, toll or grudge"},
 	"captive_scouts":{"kind":"request","headline":"comes about scouts held captive","mechanic":"envoy_requests.gd; real captured-scout records, Food ransom or your word, grudge"},
 	"rite_keeper":{"kind":"request","headline":"asks for a keeper of your rites","mechanic":"envoy_requests.gd; a person moves, rites bond, their dread or love"},
-	"boundary_cairn":{"kind":"request","headline":"asks to raise a cairn on the border","mechanic":"envoy_requests.gd; Stone, border tension, cairn bond"},
+	"boundary_cairn":{"kind":"request","headline":"asks to raise a cairn on the border","mechanic":"envoy_requests.gd; Stone spent, border tension and a cairn bond"},
 	"joint_hunt":{"kind":"request","headline":"asks your hunters to join a great drive","mechanic":"envoy_requests.gd; hunters away, shared meat, a hunter may die"},
 	"safe_passage":{"kind":"request","headline":"asks safe passage for its carriers","mechanic":"envoy_requests.gd; seasonal crossing gifts from their ledger, passage bond"},
 }
