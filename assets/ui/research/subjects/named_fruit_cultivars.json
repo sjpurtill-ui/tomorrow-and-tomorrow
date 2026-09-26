@@ -1,0 +1,14 @@
+{
+  "id": "named_fruit_cultivars",
+  "line": "nutrition",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2a5308a6-e049-4279-a00c-bd6b9788cf0d.png",
+  "source_file": "exec-2a5308a6-e049-4279-a00c-bd6b9788cf0d.png",
+  "creative_brief": "Grafted pears, apples and figs carry the names of the growers who bred them and fetch better prices at market. Paint it as a classical antiquity scene.",
+  "medium": "Egg tempera",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/named_fruit_cultivars-v1.png",
+  "sha256": "fb0816f1ab01968defd2d1972f96dae980652f3b65e24be77c884b6328a9fbd6",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

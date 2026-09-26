@@ -1,0 +1,14 @@
+{
+  "id": "traction_stone_throwers",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-08bf4f3f-a473-40a4-a26f-dfce7f0fae5b.png",
+  "source_file": "exec-08bf4f3f-a473-40a4-a26f-dfce7f0fae5b.png",
+  "creative_brief": "A crew hauling on ropes swings a beam that hurls stones over the wall. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/traction_stone_throwers-v1.png",
+  "sha256": "29807f65b902d6b0430848d2bd99ec7522808a892e405ee0a5beba1ea889e5b0",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

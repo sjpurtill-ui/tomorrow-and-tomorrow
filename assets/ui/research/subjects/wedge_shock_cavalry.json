@@ -1,0 +1,14 @@
+{
+  "id": "wedge_shock_cavalry",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-11413373-126f-4c97-a31a-65b59d70acac.png",
+  "source_file": "exec-11413373-126f-4c97-a31a-65b59d70acac.png",
+  "creative_brief": "Horsemen with thrusting lances charge in a wedge through the gap the infantry opens. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/wedge_shock_cavalry-v1.png",
+  "sha256": "c8178a224a26f0bdba9f3b7748395533b1110355c256d290e5ed90fad7e8d42a",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

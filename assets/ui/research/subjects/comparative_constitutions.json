@@ -1,0 +1,14 @@
+{
+  "id": "comparative_constitutions",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-57f24a92-e85f-49c1-88c7-dc861e8bac22.png",
+  "source_file": "exec-57f24a92-e85f-49c1-88c7-dc861e8bac22.png",
+  "creative_brief": "Scholars gather the constitutions of many towns and compare how each one rules itself. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/comparative_constitutions-v1.png",
+  "sha256": "d443771cff98b6a9159ec171475aeecd90de2a2841bdf740bc90a9efb9da3ceb",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

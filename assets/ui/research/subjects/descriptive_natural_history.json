@@ -1,0 +1,14 @@
+{
+  "id": "descriptive_natural_history",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-aca69784-bbaa-4409-b6af-9e21435a15ba.png",
+  "source_file": "exec-aca69784-bbaa-4409-b6af-9e21435a15ba.png",
+  "creative_brief": "Plants and animals are described by their parts, habits and uses, and sorted into kinds and families. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/descriptive_natural_history-v1.png",
+  "sha256": "7e7033f05022f04dfdf28d94889efef0b810ca207525bad33958c86a52714f99",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
